@@ -95,7 +95,7 @@ func (mv *MapViewInline) ConfigParts() {
 	}
 	config.Add(gi.KiT_Action, "add-action")
 	config.Add(gi.KiT_Action, "edit-action")
-	mods, updt := mv.Parts.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt := mv.Parts.ConfigChildren(config)
 	if !mods {
 		updt = mv.Parts.UpdateStart()
 	}

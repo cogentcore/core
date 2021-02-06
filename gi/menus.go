@@ -167,7 +167,7 @@ func (m *Menu) SetShortcuts(win *Window) {
 		return
 	}
 	for _, mi := range *m {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			win.AddShortcut(ac.Shortcut, ac)
 		}
@@ -180,7 +180,7 @@ func (m *Menu) DeleteShortcuts(win *Window) {
 		return
 	}
 	for _, mi := range *m {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			win.DeleteShortcut(ac.Shortcut, ac)
 		}
@@ -191,7 +191,7 @@ func (m *Menu) DeleteShortcuts(win *Window) {
 // of their sub-actions
 func (m *Menu) UpdateActions() {
 	for _, mi := range *m {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			ac.UpdateActions()
 		}
@@ -204,7 +204,7 @@ func (m *Menu) UpdateActions() {
 // is empty)) -- returns false if not found
 func (m *Menu) FindActionByName(name string) (*Action, bool) {
 	for _, mi := range *m {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			if ac.Name() == name {
 				return ac, true
@@ -604,7 +604,7 @@ func (mb *MenuButton) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := mb.ConfigPartsIconLabel(&config, string(mb.Icon), mb.Text)
 	indIdx := mb.ConfigPartsAddIndicator(&config, true) // default on
-	mods, updt := mb.Parts.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt := mb.Parts.ConfigChildren(config)
 	mb.ConfigPartsSetIconLabel(string(mb.Icon), mb.Text, icIdx, lbIdx)
 	mb.ConfigPartsIndicator(indIdx)
 	if mods {

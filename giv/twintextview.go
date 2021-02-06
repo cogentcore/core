@@ -59,7 +59,7 @@ func (tv *TwinTextViews) ConfigTexts() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Layout, "text-a-lay")
 	config.Add(gi.KiT_Layout, "text-b-lay")
-	mods, updt := tv.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := tv.ConfigChildren(config)
 	al, bl := tv.TextViewLays()
 	if !mods {
 		updt = tv.UpdateStart()

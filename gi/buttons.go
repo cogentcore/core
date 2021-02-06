@@ -49,7 +49,7 @@ var ButtonBaseProps = ki.Props{
 func (bb *ButtonBase) CopyFieldsFrom(frm interface{}) {
 	fr, ok := frm.(*ButtonBase)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", bb.Type().Name())
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", ki.Type(bb).Name())
 		ki.GenCopyFieldsFrom(bb.This(), frm)
 		return
 	}
@@ -292,7 +292,7 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 		bb.SetFullReRenderIconLabel() // needs full rerender
 		return true
 	}
-	// fmt.Printf("but style updt: %v to %v\n", bb.PathUnique(), bb.State)
+	// fmt.Printf("but style updt: %v to %v\n", bb.Path(), bb.State)
 	return false
 }
 
@@ -492,7 +492,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 		}
 		kt := d.(*key.ChordEvent)
 		if KeyEventTrace {
-			fmt.Printf("Button KeyChordEvent: %v\n", bbb.PathUnique())
+			fmt.Printf("Button KeyChordEvent: %v\n", bbb.Path())
 		}
 		kf := KeyFun(kt.Chord())
 		if kf == KeyFunEnter || kt.Rune == ' ' {
@@ -591,7 +591,7 @@ func (bb *ButtonBase) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, string(bb.Icon), bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
-	mods, updt := bb.Parts.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt := bb.Parts.ConfigChildren(config)
 	bb.ConfigPartsSetIconLabel(string(bb.Icon), bb.Text, icIdx, lbIdx)
 	bb.ConfigPartsIndicator(indIdx)
 	if mods {
@@ -955,7 +955,7 @@ func (cb *CheckBox) ConfigParts() {
 		lbIdx = len(config)
 		config.Add(KiT_Label, "label")
 	}
-	mods, updt := cb.Parts.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt := cb.Parts.ConfigChildren(config)
 	ist := cb.Parts.Child(icIdx).(*Layout)
 	if mods || gist.RebuildDefaultStyles {
 		ist.Lay = LayoutStacked
@@ -995,7 +995,7 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 	ist := cb.Parts.Child(icIdx).(*Layout)
 	if cb.Icon.IsValid() {
 		icon := ist.Child(0).(*Icon)
-		if !icon.HasChildren() || icon.UniqueNm != string(cb.Icon) || cb.NeedsFullReRender() {
+		if !icon.HasChildren() || icon.Nm != string(cb.Icon) || cb.NeedsFullReRender() {
 			if set, _ := cb.Icon.SetIcon(icon); set {
 				cb.StylePart(Node2D(icon))
 			}
@@ -1003,7 +1003,7 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 	}
 	if cb.IconOff.IsValid() {
 		icoff := ist.Child(1).(*Icon)
-		if !icoff.HasChildren() || icoff.UniqueNm != string(cb.IconOff) || cb.NeedsFullReRender() {
+		if !icoff.HasChildren() || icoff.Nm != string(cb.IconOff) || cb.NeedsFullReRender() {
 			if set, _ := cb.IconOff.SetIcon(icoff); set {
 				cb.StylePart(Node2D(icoff))
 			}

@@ -507,7 +507,7 @@ func (w *Window) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
 		return w.MasterVLay.AddNewChild(typ, name)
 	}
 	cmw := w.MasterVLay.Child(1)
-	if cmw.Type() != typ {
+	if ki.Type(cmw) != typ {
 		w.MasterVLay.DeleteChildAtIndex(1, ki.DestroyKids)
 		return w.MasterVLay.InsertNewChild(typ, 1, name)
 	}
@@ -548,20 +548,21 @@ func (w *Window) SetMainLayout() *Layout {
 
 // SetName sets name of this window and also the OSWin, and applies any window
 // geometry settings associated with the new name if it is different from before
-func (w *Window) SetName(name string) bool {
+func (w *Window) SetName(name string) {
 	curnm := w.Name()
-	rval := w.NodeBase.SetName(name)
+	isdif := curnm != name
+	w.NodeBase.SetName(name)
 	if w.OSWin != nil {
 		w.OSWin.SetName(name)
 	}
-	if rval {
+	if isdif {
 		for i, fw := range FocusWindows { // rename focus windows so we get focus later..
 			if fw == curnm {
 				FocusWindows[i] = name
 			}
 		}
 	}
-	if rval && w.OSWin != nil {
+	if isdif && w.OSWin != nil {
 		wgp := WinGeomPrefs.Pref(name, nil)
 		if wgp != nil {
 			if w.OSWin.Size() != wgp.Size() || w.OSWin.Position() != wgp.Pos() {
@@ -570,7 +571,6 @@ func (w *Window) SetName(name string) bool {
 			}
 		}
 	}
-	return rval
 }
 
 // SetTitle sets title of this window and also the OSWin
@@ -965,7 +965,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadVpRegion")
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.OSWin.WinTex().Bounds())
+		fmt.Printf("Win: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.Path(), vp.Path(), vpBBox, w.OSWin.WinTex().Bounds())
 	}
 	err := w.OSWin.SetWinTexSubImage(winBBox.Min, vp.Pixels, vpBBox)
 	if err != nil {
@@ -991,7 +991,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	updt := w.UpdateStart()
 	// pr := prof.Start("win.UploadVp")
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.Pixels.Bounds(), w.OSWin.WinTex().Bounds())
+		fmt.Printf("Win: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), vp.Pixels.Bounds(), w.OSWin.WinTex().Bounds())
 	}
 	w.OSWin.SetWinTexSubImage(offset, vp.Pixels, vp.Pixels.Bounds())
 	// pr.End()
@@ -1047,7 +1047,7 @@ func (w *Window) UploadAllViewports() {
 	// pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.PathUnique(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
+		fmt.Printf("Win: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.Path(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
 	}
 	w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
 	// next any direct uploaders
@@ -1062,7 +1062,7 @@ func (w *Window) UploadAllViewports() {
 				vp := gii.AsViewport2D()
 				r := vp.Geom.Bounds()
 				if Render2DTrace {
-					fmt.Printf("Win: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.Pixels.Bounds())
+					fmt.Printf("Win: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
 				}
 				w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
 			}
@@ -1074,7 +1074,7 @@ func (w *Window) UploadAllViewports() {
 			vp := gii.AsViewport2D()
 			r := vp.Geom.Bounds()
 			if Render2DTrace || WinEventTrace {
-				fmt.Printf("Win: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.Pixels.Bounds())
+				fmt.Printf("Win: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
 			}
 			w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
 		}
@@ -1157,7 +1157,7 @@ func (w *Window) Publish() {
 func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win := winki.Embed(KiT_Window).(*Window)
 	if WinEventTrace || Render2DTrace {
-		fmt.Printf("Win: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
+		fmt.Printf("Win: %v publishing image due to signal: %v from node: %v\n", win.Path(), ki.NodeSignals(sig), node.Path())
 	}
 	if !win.IsVisible() || win.IsWinUpdating() { // win.IsResizing() ||
 		if WinEventTrace || Render2DTrace {
@@ -2069,7 +2069,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
 	}
-	pop.SetParent(w.This()) // popup has parent as window -- draws directly in to assoc vp
+	ki.SetParent(pop, w.This()) // popup has parent as window -- draws directly in to assoc vp
 	w.PopupStack = append(w.PopupStack, w.Popup)
 	w.Popup = pop
 	_, ni := KiToNode2D(pop)
@@ -2089,7 +2089,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 // DisconnectPopup disconnects given popup -- typically the current one.
 func (w *Window) DisconnectPopup(pop ki.Ki) {
 	w.EventMgr.DisconnectAllEvents(pop, AllPris)
-	pop.SetParent(nil) // don't redraw the popup anymore
+	ki.SetParent(pop, nil) // don't redraw the popup anymore
 }
 
 // ClosePopup close given popup -- must be the current one -- returns false if not.
@@ -2151,7 +2151,7 @@ func (w *Window) PopPopup(pop ki.Ki) bool {
 func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 	delPop := false
 	if KeyEventTrace {
-		fmt.Printf("Window HiPri KeyInput: %v event: %v\n", w.PathUnique(), e.String())
+		fmt.Printf("Window HiPri KeyInput: %v event: %v\n", w.Path(), e.String())
 	}
 	if e.IsProcessed() {
 		return false

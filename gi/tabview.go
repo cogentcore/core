@@ -231,7 +231,7 @@ func (tv *TabView) TabByNameTry(label string) (Node2D, error) {
 	tb := tv.Tabs()
 	idx, ok := tb.Children().IndexByName(label, 0)
 	if !ok {
-		return nil, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, tv.PathUnique())
+		return nil, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, tv.Path())
 	}
 	fr := tv.Frame()
 	widg := fr.Child(idx).(Node2D)
@@ -246,7 +246,7 @@ func (tv *TabView) TabIndexByName(label string) (int, error) {
 	tb := tv.Tabs()
 	idx, ok := tb.Children().IndexByName(label, 0)
 	if !ok {
-		return -1, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, tv.PathUnique())
+		return -1, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, tv.Path())
 	}
 	return idx, nil
 }
@@ -621,7 +621,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 	config.Add(KiT_Action, "close")
 	config.Add(KiT_Stretch, "close-stretch")
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, string(tb.Icon), tb.Text)
-	mods, updt := tb.Parts.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt := tb.Parts.ConfigChildren(config)
 	tb.ConfigPartsSetIconLabel(string(tb.Icon), tb.Text, icIdx, lbIdx)
 	if mods {
 		cls := tb.Parts.Child(clsIdx).(*Action)

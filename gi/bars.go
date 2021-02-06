@@ -105,7 +105,7 @@ func (mb *MenuBar) UpdateActions() {
 		return
 	}
 	for _, mi := range mb.Kids {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			ac.UpdateActions()
 		}
@@ -120,7 +120,7 @@ func (mb *MenuBar) SetShortcuts() {
 		return
 	}
 	for _, k := range mb.Kids {
-		if k.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(k, KiT_Action) {
 			ac := k.Embed(KiT_Action).(*Action)
 			win.AddShortcut(ac.Shortcut, ac)
 		}
@@ -139,7 +139,7 @@ func (mb *MenuBar) DeleteShortcuts() {
 		return
 	}
 	for _, k := range mb.Kids {
-		if k.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(k, KiT_Action) {
 			ac := k.Embed(KiT_Action).(*Action)
 			win.DeleteShortcut(ac.Shortcut, ac)
 		}
@@ -155,7 +155,7 @@ func (m *MenuBar) FindActionByName(name string) (*Action, bool) {
 		return nil, false
 	}
 	for _, mi := range m.Kids {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			if ac.Name() == name {
 				return ac, true
@@ -186,10 +186,10 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 	}
 	tnl[sz].Type = KiT_Stretch
 	tnl[sz].Name = "menstr"
-	_, updt := mb.ConfigChildren(tnl, ki.NonUniqueNames)
+	_, updt := mb.ConfigChildren(tnl)
 	for i, m := range menus {
 		mi := mb.Kids[i]
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			ac.SetText(m)
 			ac.SetAsMenu()
@@ -233,7 +233,7 @@ func (mb *MenuBar) UpdateMainMenu(win *Window) {
 	osmm.Reset(mm)
 	mb.OSMainMenus = make(map[string]*Action, 100)
 	for _, mi := range mb.Kids {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			subm := osmm.AddSubMenu(mm, ac.Text)
 			mb.SetMainMenuSub(osmm, subm, ac)
@@ -263,7 +263,7 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 // SetMainMenuSub iterates over sub-menus, adding items to overall main menu.
 func (mb *MenuBar) SetMainMenuSub(osmm oswin.MainMenu, subm oswin.Menu, am *Action) {
 	for i, mi := range am.Menu {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			if len(ac.Menu) > 0 {
 				ssubm := osmm.AddSubMenu(subm, ac.Text)
@@ -425,7 +425,7 @@ func (tb *ToolBar) SetShortcuts() {
 		return
 	}
 	for _, k := range tb.Kids {
-		if k.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(k, KiT_Action) {
 			ac := k.Embed(KiT_Action).(*Action)
 			win.AddShortcut(ac.Shortcut, ac)
 		}
@@ -444,7 +444,7 @@ func (tb *ToolBar) DeleteShortcuts() {
 		return
 	}
 	for _, k := range tb.Kids {
-		if k.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(k, KiT_Action) {
 			ac := k.Embed(KiT_Action).(*Action)
 			win.DeleteShortcut(ac.Shortcut, ac)
 		}
@@ -462,7 +462,7 @@ func (tb *ToolBar) UpdateActions() {
 		defer tb.TopUpdateEnd(wupdt)
 	}
 	for _, mi := range tb.Kids {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			ac.UpdateActions()
 		}
@@ -475,7 +475,7 @@ func (tb *ToolBar) UpdateActions() {
 // is empty)) -- returns false if not found
 func (tb *ToolBar) FindActionByName(name string) (*Action, bool) {
 	for _, mi := range tb.Kids {
-		if mi.TypeEmbeds(KiT_Action) {
+		if ki.TypeEmbeds(mi, KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
 			if ac.Name() == name {
 				return ac, true

@@ -26,13 +26,14 @@ import (
 // in UpdateStart / End loop.
 type SVG struct {
 	gi.Viewport2D
-	ViewBox ViewBox    `desc:"viewbox defines the coordinate system for the drawing"`
-	Norm    bool       `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
-	InvertY bool       `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
-	Pnt     girl.Paint `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
-	Defs    Group      `desc:"all defs defined elements go here (gradients, symbols, etc)"`
-	Title   string     `xml:"title" desc:"the title of the svg"`
-	Desc    string     `xml:"desc" desc:"the description of the svg"`
+	ViewBox   ViewBox             `desc:"viewbox defines the coordinate system for the drawing"`
+	Norm      bool                `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
+	InvertY   bool                `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
+	Pnt       girl.Paint          `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
+	Defs      Group               `desc:"all defs defined elements go here (gradients, symbols, etc)"`
+	Title     string              `xml:"title" desc:"the title of the svg"`
+	Desc      string              `xml:"desc" desc:"the description of the svg"`
+	UniqNames map[string]struct{} `json:"-" xml:"-" desc:"map of unique names for all elements -- used for allocating new unique names -- see NewUniqName, RenameAll"`
 }
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, SVGProps)
@@ -216,4 +217,8 @@ func (svg *SVG) FindNamedElement(name string) gi.Node2D {
 	}
 	log.Printf("gi.SVG FindNamedElement: could not find name: %v\n", name)
 	return nil
+}
+
+func (svg *SVG) NewUniqName() string {
+	return ""
 }

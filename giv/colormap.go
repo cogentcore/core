@@ -233,9 +233,9 @@ func (cv *ColorMapView) Render2D() {
 
 // ValueView registers ColorMapValueView as the viewer of ColorMapName
 func (mn ColorMapName) ValueView() ValueView {
-	vv := ColorMapValueView{}
-	vv.Init(&vv)
-	return &vv
+	vv := &ColorMapValueView{}
+	ki.InitNode(vv)
+	return vv
 }
 
 // ColorMapValueView presents an action for displaying a ColorMapName and selecting

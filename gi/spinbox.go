@@ -180,7 +180,7 @@ func (sb *SpinBox) ConfigParts() {
 		config.Add(KiT_Space, "space")
 		config.Add(KiT_Layout, "buttons")
 	}
-	mods, updt := sb.Parts.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt := sb.Parts.ConfigChildren(config)
 	if mods || gist.RebuildDefaultStyles {
 		if !sb.IsInactive() {
 			buts := sb.Parts.ChildByName("buttons", 1).(*Layout)

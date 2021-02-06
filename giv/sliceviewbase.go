@@ -258,7 +258,7 @@ func (sv *SliceViewBase) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Layout, "grid-lay")
-	mods, updt := sv.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := sv.ConfigChildren(config)
 
 	gl := sv.GridLayout()
 	gl.Lay = gi.LayoutHoriz
@@ -266,7 +266,7 @@ func (sv *SliceViewBase) Config() {
 	gconfig := kit.TypeAndNameList{}
 	gconfig.Add(gi.KiT_Frame, "grid")
 	gconfig.Add(gi.KiT_ScrollBar, "scrollbar")
-	gl.ConfigChildren(gconfig, ki.UniqueNames) // covered by above
+	gl.ConfigChildren(gconfig) // covered by above
 
 	sv.ConfigSliceGrid()
 	sv.ConfigToolbar()
@@ -1975,7 +1975,7 @@ func (sv *SliceViewBase) KeyInputNav(kt *key.ChordEvent) {
 
 func (sv *SliceViewBase) KeyInputActive(kt *key.ChordEvent) {
 	if gi.KeyEventTrace {
-		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.PathUnique())
+		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.Path())
 	}
 	sv.KeyInputNav(kt)
 	if kt.IsProcessed() {
@@ -2024,7 +2024,7 @@ func (sv *SliceViewBase) KeyInputActive(kt *key.ChordEvent) {
 
 func (sv *SliceViewBase) KeyInputInactive(kt *key.ChordEvent) {
 	if gi.KeyEventTrace {
-		fmt.Printf("SliceViewBase Inactive KeyInput: %v\n", sv.PathUnique())
+		fmt.Printf("SliceViewBase Inactive KeyInput: %v\n", sv.Path())
 	}
 	if sv.InactMultiSel {
 		sv.KeyInputNav(kt)

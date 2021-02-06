@@ -188,7 +188,7 @@ func (tv *TableView) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "frame")
-	mods, updt := tv.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := tv.ConfigChildren(config)
 	tv.ConfigSliceGrid()
 	tv.ConfigToolbar()
 	if mods {
@@ -285,7 +285,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgcfg := kit.TypeAndNameList{}
 	sgcfg.Add(gi.KiT_ToolBar, "header")
 	sgcfg.Add(gi.KiT_Layout, "grid-lay")
-	sg.ConfigChildren(sgcfg, ki.UniqueNames)
+	sg.ConfigChildren(sgcfg)
 
 	sgh := tv.SliceHeader()
 	sgh.Lay = gi.LayoutHoriz
@@ -299,7 +299,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	gconfig := kit.TypeAndNameList{}
 	gconfig.Add(gi.KiT_Frame, "grid")
 	gconfig.Add(gi.KiT_ScrollBar, "scrollbar")
-	gl.ConfigChildren(gconfig, ki.UniqueNames) // covered by above
+	gl.ConfigChildren(gconfig) // covered by above
 
 	sgf := tv.SliceGrid()
 	sgf.Lay = gi.LayoutGrid
@@ -325,7 +325,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		hcfg.Add(gi.KiT_Label, "head-add")
 		hcfg.Add(gi.KiT_Label, "head-del")
 	}
-	sgh.ConfigChildren(hcfg, ki.NonUniqueNames) // headers SHOULD be unique, but with labels..
+	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 
 	// at this point, we make one dummy row to get size of widgets
 

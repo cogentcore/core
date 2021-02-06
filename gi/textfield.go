@@ -1126,7 +1126,7 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	if KeyEventTrace {
-		fmt.Printf("TextField KeyInput: %v\n", tf.PathUnique())
+		fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 	}
 	kf := KeyFun(kt.Chord())
 	win := tf.ParentWindow()
@@ -1355,7 +1355,7 @@ func (tf *TextField) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_Stretch, "clr-str")
 	config.Add(KiT_Action, "clear")
-	mods, updt := tf.Parts.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt := tf.Parts.ConfigChildren(config)
 	if mods || gist.RebuildDefaultStyles {
 		clr := tf.Parts.Child(1).(*Action)
 		tf.StylePart(Node2D(clr))

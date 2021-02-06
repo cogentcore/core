@@ -768,7 +768,19 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			}
 		}
 	}
+
+	ki.UniquifyNamesAll(svg)
+
+	svg.DerefGradients()
+
 	return nil
+}
+
+// DerefGradients de-references gradients that are only used for
+// a single element -- these have already been compiled into
+// the
+func (svg *SVG) DerefGradients() {
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -938,7 +950,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 	case *Filter:
 		return "" // not yet supported
 	default:
-		nm = itm.Type().String()
+		nm = ki.Type(itm).String()
 	}
 	se.Name.Local = nm
 	if setName != "" {

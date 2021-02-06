@@ -377,7 +377,7 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		if gis == nil {
 			continue
 		}
-		if gis.TypeEmbeds(KiT_Frame) {
+		if ki.TypeEmbeds(gis, KiT_Frame) {
 			gis.SetReRenderAnchor()
 		}
 		isz := sp * avail
@@ -584,7 +584,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 
 	if sr.IsDragging() {
 		win := sr.ParentWindow()
-		spnm := "gi.Splitter:" + sr.UniqueName()
+		spnm := "gi.Splitter:" + sr.Name()
 		spr, ok := win.SpriteByName(spnm)
 		if ok {
 			spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + ispc}
@@ -685,7 +685,7 @@ func (sr *Splitter) ConnectEvents2D() {
 func (sr *Splitter) Render2D() {
 	win := sr.ParentWindow()
 	sr.This().(Node2D).ConnectEvents2D()
-	spnm := "gi.Splitter:" + sr.UniqueName()
+	spnm := "gi.Splitter:" + sr.Name()
 	if sr.IsDragging() {
 		ick := sr.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
 		if ick == nil {

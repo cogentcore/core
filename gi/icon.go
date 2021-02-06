@@ -15,7 +15,7 @@ import (
 
 // SetIcon sets the icon by name into given Icon wrapper, returning error
 // message if not found etc, and returning true if a new icon was actually set
-// -- does nothing if UniqueNm is already == icon name and has children, and deletes
+// -- does nothing if IconNm is already == icon name and has children, and deletes
 // children if name is nil / none (both cases return false for new icon)
 func (inm IconName) SetIcon(ic *Icon) (bool, error) {
 	return ic.SetIcon(string(inm))
@@ -40,6 +40,7 @@ func (inm IconName) IsValid() bool {
 // an original source icon and then can be customized from there.
 type Icon struct {
 	WidgetBase
+	IconNm   string `desc:"icon name that has been set -- optimizes to prevent reloading of icon"`
 	Filename string `desc:"file name for the loaded icon, if loaded"`
 }
 
@@ -65,21 +66,21 @@ var IconProps = ki.Props{
 
 // SetIcon sets the icon by name into given Icon wrapper, returning error
 // message if not found etc, and returning true if a new icon was actually set
-// -- does nothing if UniqueNm is already == icon name and has children, and deletes
+// -- does nothing if IconNm is already == icon name and has children, and deletes
 // children if name is nil / none (both cases return false for new icon)
 func (ic *Icon) SetIcon(name string) (bool, error) {
 	if IconName(name).IsNil() {
 		ic.DeleteChildren(ki.DestroyKids)
 		return false, nil
 	}
-	if ic.HasChildren() && ic.UniqueNm == name {
+	if ic.HasChildren() && ic.IconNm == name {
 		return false, nil
 	}
 	// pr := prof.Start("IconSetIcon")
 	// pr.End()
 	err := TheIconMgr.SetIcon(ic, name)
 	if err == nil {
-		ic.UniqueNm = string(name)
+		ic.IconNm = string(name)
 		return true, nil
 	}
 	return false, err

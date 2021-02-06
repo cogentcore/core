@@ -182,7 +182,7 @@ func GrabRenderFrom(nii Node2D) *image.RGBA {
 	}
 	nivp = ni.Viewport
 	if nivp == nil || nivp.Pixels == nil {
-		log.Printf("gi.GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", ni.PathUnique())
+		log.Printf("gi.GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", ni.Path())
 		return nil
 	}
 	if ni.VpBBox.Empty() {

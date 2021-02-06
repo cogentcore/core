@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"sync"
 
 	"github.com/goki/gi/gi"
@@ -188,6 +189,10 @@ func (nb *Node3DBase) CopyFieldsFrom(frm interface{}) {
 // interface methods.
 func (nb *Node3DBase) AsNode3D() *Node3DBase {
 	return nb
+}
+
+func (nb *Node3DBase) BaseIface() reflect.Type {
+	return reflect.TypeOf((*Node3DBase)(nil)).Elem()
 }
 
 func (nb *Node3DBase) IsSolid() bool {
@@ -441,7 +446,7 @@ func (nb *Node3DBase) TrackLight(sc *Scene, lightName string) error {
 	defer nb.PoseMu.Unlock()
 	lt, ok := sc.Lights[lightName]
 	if !ok {
-		return fmt.Errorf("gi3d Node: %v TrackLight named: %v not found", nb.PathUnique(), lightName)
+		return fmt.Errorf("gi3d Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}
 	switch l := lt.(type) {
 	case *DirLight:

@@ -59,7 +59,7 @@ func (g *Path) SetData(data string) error {
 	if err != nil {
 		return err
 	}
-	err = PathDataValidate(&g.Pnt, &g.Data, g.PathUnique())
+	err = PathDataValidate(&g.Pnt, &g.Data, g.Path())
 	return err
 }
 

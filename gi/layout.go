@@ -162,7 +162,7 @@ func AddNewLayout(parent ki.Ki, name string, layout Layouts) *Layout {
 func (ly *Layout) CopyFieldsFrom(frm interface{}) {
 	fr, ok := frm.(*Layout)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Layout one\n", ly.Type().Name())
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Layout one\n", ki.Type(ly).Name())
 		ki.GenCopyFieldsFrom(ly.This(), frm)
 		return
 	}
@@ -284,7 +284,7 @@ func (ly *Layout) GatherSizesSumMax() (sumPref, sumNeed, maxPref, maxNeed mat32.
 		maxPref = maxPref.Max(ni.LayState.Size.Pref)
 
 		if Layout2DTrace {
-			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, ni.LayState.Size.Need.Dim(ly.SummedDim()), ni.LayState.Size.Pref.Dim(ly.SummedDim()))
+			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, ni.LayState.Size.Need.Dim(ly.SummedDim()), ni.LayState.Size.Pref.Dim(ly.SummedDim()))
 		}
 	}
 	return
@@ -317,7 +317,7 @@ func (ly *Layout) GatherSizes() {
 			}
 		} else { // use target size from style
 			if Layout2DTrace {
-				fmt.Printf("Size:   %v pref nonzero, setting as need: %v\n", ly.PathUnique(), pref)
+				fmt.Printf("Size:   %v pref nonzero, setting as need: %v\n", ly.Path(), pref)
 			}
 			ly.LayState.Size.Need.SetDim(d, pref)
 		}
@@ -342,7 +342,7 @@ func (ly *Layout) GatherSizes() {
 
 	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.PathUnique(), ly.LayState.Size.Need, ly.LayState.Size.Pref, elspc)
+		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.Path(), ly.LayState.Size.Need, ly.LayState.Size.Pref, elspc)
 	}
 }
 
@@ -375,7 +375,7 @@ func (ly *Layout) GatherSizesFlow(iter int) {
 		ly.LayState.Alloc.Size = prv
 		ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 		if Layout2DTrace {
-			fmt.Printf("Size:   %v iter 1 fix size: %v\n", ly.PathUnique(), prv)
+			fmt.Printf("Size:   %v iter 1 fix size: %v\n", ly.Path(), prv)
 		}
 		return
 	}
@@ -398,7 +398,7 @@ func (ly *Layout) GatherSizesFlow(iter int) {
 	}
 
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v flow pref start: %v\n", ly.PathUnique(), pref)
+		fmt.Printf("Size:   %v flow pref start: %v\n", ly.Path(), pref)
 	}
 
 	sNeed := sumNeed.Dim(sdim)
@@ -449,7 +449,7 @@ func (ly *Layout) GatherSizesFlow(iter int) {
 
 	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.PathUnique(), ly.LayState.Size.Need, ly.LayState.Size.Pref, elspc)
+		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.Path(), ly.LayState.Size.Need, ly.LayState.Size.Pref, elspc)
 	}
 }
 
@@ -643,7 +643,7 @@ func (ly *Layout) GatherSizesGrid() {
 
 	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v gather sizes grid need: %v, pref: %v\n", ly.PathUnique(), ly.LayState.Size.Need, ly.LayState.Size.Pref)
+		fmt.Printf("Size:   %v gather sizes grid need: %v, pref: %v\n", ly.Path(), ly.LayState.Size.Need, ly.LayState.Size.Pref)
 	}
 }
 
@@ -656,7 +656,7 @@ func (ly *Layout) AllocFromParent() {
 	}
 	if ly.Par != mvp.This() {
 		// note: zero alloc size happens all the time with non-visible tabs!
-		// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.PathUnique(), ly.LayState)
+		// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.Path(), ly.LayState)
 		return
 	}
 	pni, _ := KiToNode2D(ly.Par)
@@ -674,7 +674,7 @@ func (ly *Layout) AllocFromParent() {
 			if !pg.LayState.Alloc.Size.IsNil() {
 				ly.LayState.Alloc.Size = pg.LayState.Alloc.Size
 				if Layout2DTrace {
-					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.PathUnique(), ly.LayState.Alloc.Size, pg.PathUnique())
+					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.Path(), ly.LayState.Alloc.Size, pg.Path())
 				}
 				return false
 			}
@@ -845,7 +845,7 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 	}
 
 	if Layout2DTrace {
-		fmt.Printf("Layout: %v Along dim %v, avail: %v elspc: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.PathUnique(), dim, avail, elspc, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
+		fmt.Printf("Layout: %v Along dim %v, avail: %v elspc: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Path(), dim, avail, elspc, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
 	}
 
 	for i, c := range ly.Kids {
@@ -877,7 +877,7 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 		ni.LayState.Alloc.Size.SetDim(dim, size)
 		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
+			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
 		pos += size + ly.Spacing.Dots
 	}
@@ -916,7 +916,7 @@ func (ly *Layout) LayoutFlow(dim mat32.Dims, iter int) bool {
 		ni.LayState.Alloc.Size.SetDim(dim, size)
 		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
+			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
 		pos += size + ly.Spacing.Dots
 	}
@@ -958,7 +958,7 @@ func (ly *Layout) LayoutFlow(dim mat32.Dims, iter int) bool {
 	ly.LayState.Size.Need = nsz
 	ly.LayState.Size.Pref = nsz
 	if Layout2DTrace {
-		fmt.Printf("Layout: %v Flow final size: %v\n", ly.PathUnique(), nsz)
+		fmt.Printf("Layout: %v Flow final size: %v\n", ly.Path(), nsz)
 	}
 	// if nrows == 1 {
 	// 	return false
@@ -1036,7 +1036,7 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim mat32.Dims) {
 	}
 
 	if Layout2DTrace {
-		fmt.Printf("Layout Grid Dim: %v All on dim %v, avail: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.PathUnique(), dim, avail, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
+		fmt.Printf("Layout Grid Dim: %v All on dim %v, avail: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Path(), dim, avail, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
 	}
 
 	for i := range gds {
@@ -1133,7 +1133,7 @@ func (ly *Layout) LayoutGrid() {
 		}
 
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.PathUnique(), col, row, ni.LayState.Alloc.PosRel, ni.LayState.Alloc.Size)
+			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.Path(), col, row, ni.LayState.Alloc.PosRel, ni.LayState.Alloc.Size)
 		}
 
 		col++
@@ -1176,7 +1176,7 @@ func (ly *Layout) AvailSize() mat32.Vec2 {
 		if vp != nil {
 			if vp.ViewportSafe() == nil {
 				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc)
-				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.PathUnique(), vp.PathUnique(), avail)
+				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.Path(), vp.Path(), avail)
 			}
 		}
 	}
@@ -1232,7 +1232,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		ly.Scrolls[d] = &ScrollBar{}
 		sc := ly.Scrolls[d]
 		sc.InitName(sc, fmt.Sprintf("Scroll%v", d))
-		sc.SetParent(ly.This())
+		ki.SetParent(sc, ly.This())
 		sc.Dim = d
 		sc.Init2D()
 		sc.Defaults()
@@ -1256,7 +1256,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 	sc.ThumbVal = avail.Dim(d) - spc
 	sc.TrackThr = sc.Step
 	sc.Value = mat32.Min(sc.Value, sc.Max-sc.ThumbVal) // keep in range
-	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.PathUnique(), sc.Max, sc.Value)
+	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
 	sc.SliderSig.ConnectOnly(ly.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
 			return
@@ -1264,7 +1264,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		li, _ := KiToNode2D(recv)
 		ls := li.AsLayout2D()
 		// if ls.IsUpdating() {
-		// 	fmt.Printf("Layout: %v scroll signal while still in update\n", ly.PathUnique())
+		// 	fmt.Printf("Layout: %v scroll signal while still in update\n", ly.Path())
 		// }
 		wupdt := ls.TopUpdateStart()
 		ls.Move2DTree()
@@ -1343,7 +1343,7 @@ func (ly *Layout) ReRenderScrolls() {
 func (ly *Layout) SetScrollsOff() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
-			// fmt.Printf("turning scroll off for :%v dim: %v\n", ly.PathUnique(), d)
+			// fmt.Printf("turning scroll off for :%v dim: %v\n", ly.Path(), d)
 			ly.ScrollsOff = true
 			ly.HasScroll[d] = false
 			if ly.Scrolls[d] != nil {
@@ -1782,7 +1782,7 @@ var LayoutPageSteps = 10
 // LayoutKeys is key processing for layouts -- focus name and arrow keys
 func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 	if KeyEventTrace {
-		fmt.Printf("Layout KeyInput: %v\n", ly.PathUnique())
+		fmt.Printf("Layout KeyInput: %v\n", ly.Path())
 	}
 	kf := KeyFun(kt.Chord())
 	if ly.Lay == LayoutHoriz || ly.Lay == LayoutGrid || ly.Lay == LayoutHorizFlow {
@@ -1848,7 +1848,7 @@ func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 // FocusOnName processes key events to look for an element starting with given name
 func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
 	if KeyEventTrace {
-		fmt.Printf("Layout FocusOnName: %v\n", ly.PathUnique())
+		fmt.Printf("Layout FocusOnName: %v\n", ly.Path())
 	}
 	kf := KeyFun(kt.Chord())
 	delayMs := int(kt.Time().Sub(ly.FocusNameTime) / time.Millisecond)
@@ -2034,8 +2034,8 @@ func (ly *Layout) StyleLayout() {
 	if !hasTempl || saveTempl {
 		ly.Style2DWidget()
 	}
-	ly.StyleFromProps(ly.Props, ly.Viewport)         // does "lay" and "spacing", in layoutstyles.go
-	tprops := *kit.Types.Properties(ly.Type(), true) // true = makeNew
+	ly.StyleFromProps(ly.Props, ly.Viewport)           // does "lay" and "spacing", in layoutstyles.go
+	tprops := *kit.Types.Properties(ki.Type(ly), true) // true = makeNew
 	if len(tprops) > 0 {
 		kit.TypesMu.RLock()
 		ly.StyleFromProps(tprops, ly.Viewport)
@@ -2069,7 +2069,7 @@ func (ly *Layout) Size2D(iter int) {
 func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	//if iter > 0 {
 	//	if Layout2DTrace {
-	//		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.PathUnique(), iter, ly.NeedsRedo)
+	//		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.NeedsRedo)
 	//	}
 	//}
 	ly.AllocFromParent()                 // in case we didn't get anything

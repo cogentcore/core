@@ -57,7 +57,7 @@ func (mt *Material) ApplyCSS(node Node3D, css ki.Props, key, selector string, vp
 // type, .class, and #name selectors, along with optional sub-selector
 // (:hover, :active etc)
 func (mt *Material) StyleCSS(node Node3D, css ki.Props, selector string, vp *gi.Viewport2D) {
-	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	tyn := strings.ToLower(ki.Type(node).Name()) // type is most general, first
 	mt.ApplyCSS(node, css, tyn, selector, vp)
 	classes := strings.Split(strings.ToLower(node.AsNode3D().Class), " ")
 	for _, cl := range classes {

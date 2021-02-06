@@ -142,7 +142,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		if KeyEventTrace {
-			fmt.Printf("gi.Dialog LowPri KeyInput: %v\n", ddlg.PathUnique())
+			fmt.Printf("gi.Dialog LowPri KeyInput: %v\n", ddlg.Path())
 		}
 		kf := KeyFun(kt.Chord())
 		switch kf {
@@ -155,7 +155,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		if KeyEventTrace {
-			fmt.Printf("gi.Dialog LowPriRaw KeyInput: %v\n", ddlg.PathUnique())
+			fmt.Printf("gi.Dialog LowPriRaw KeyInput: %v\n", ddlg.Path())
 		}
 		kf := KeyFun(kt.Chord())
 		switch kf {
@@ -429,7 +429,7 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	if ok || cancel {
 		bb := dlg.AddButtonBox(frame)
 		bbc := dlg.StdButtonConfig(false, ok, cancel) // no stretch -- left better
-		mods, updt := bb.ConfigChildren(bbc, ki.NonUniqueNames)
+		mods, updt := bb.ConfigChildren(bbc)
 		dlg.StdButtonConnect(ok, cancel, bb)
 		if mods {
 			bb.UpdateEnd(updt)

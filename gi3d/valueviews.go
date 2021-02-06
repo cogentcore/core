@@ -21,9 +21,9 @@ import (
 
 // ValueView registers MeshValueView as the viewer of MeshName
 func (mn MeshName) ValueView() giv.ValueView {
-	vv := MeshValueView{}
-	vv.Init(&vv)
-	return &vv
+	vv := &MeshValueView{}
+	ki.InitNode(vv)
+	return vv
 }
 
 // MeshValueView presents an action for displaying a MeshName and selecting

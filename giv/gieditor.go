@@ -113,7 +113,7 @@ func (ge *GiEditor) Config() {
 	config.Add(gi.KiT_Label, "title")
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_SplitView, "splitview")
-	mods, updt := ge.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := ge.ConfigChildren(config)
 	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
 	ge.ConfigSplitView()
 	ge.ConfigToolbar()

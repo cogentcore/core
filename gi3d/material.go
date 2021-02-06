@@ -84,7 +84,7 @@ func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 	}
 	tx, ok := sc.Textures[texName]
 	if !ok {
-		err := fmt.Errorf("gi3d.Material in Scene: %s SetTexture name: %s not found in scene", sc.PathUnique(), texName)
+		err := fmt.Errorf("gi3d.Material in Scene: %s SetTexture name: %s not found in scene", sc.Path(), texName)
 		log.Println(err)
 		return err
 	}

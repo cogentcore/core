@@ -24,47 +24,47 @@ func init() {
 	gi.TheViewIFace = &ViewIFace{}
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.IconName(""))), func() ValueView {
 		vv := &IconValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.FontName(""))), func() ValueView {
 		vv := &FontValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() ValueView {
 		vv := &FileValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.KeyMapName(""))), func() ValueView {
 		vv := &KeyMapValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() ValueView {
 		vv := &ColorNameValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(key.Chord(""))), func() ValueView {
 		vv := &KeyChordValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.HiStyleName(""))), func() ValueView {
 		vv := &HiStyleValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(time.Time{})), func() ValueView {
 		vv := &TimeValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(FileTime{})), func() ValueView {
 		vv := &TimeValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	})
 }
@@ -97,9 +97,9 @@ type ValueViewer interface {
 // non-local types, so all the basic types are handled separately:
 //
 // func (s string) ValueView() ValueView {
-// 	vv := ValueViewBase{}
-// 	vv.Init(&vv)
-// 	return &vv
+// 	vv := &ValueViewBase{}
+// 	ki.InitNode(vv)
+// 	return vv
 // }
 
 // FieldValueViewer interface supplies the appropriate type of ValueView for a
@@ -157,9 +157,9 @@ func StructTagVal(key, tags string) string {
 // gopy:interface=handle
 func ToValueView(it interface{}, tags string) ValueView {
 	if it == nil {
-		vv := ValueViewBase{}
-		vv.Init(&vv)
-		return &vv
+		vv := &ValueViewBase{}
+		ki.InitNode(vv)
+		return vv
 	}
 	if vv, ok := it.(ValueViewer); ok {
 		vvo := vv.ValueView()
@@ -216,45 +216,45 @@ func ToValueView(it interface{}, tags string) ValueView {
 		if kit.Enums.TypeRegistered(nptyp) {
 			if kit.Enums.IsBitFlag(nptyp) {
 				vv := &BitFlagView{}
-				vv.Init(vv)
+				ki.InitNode(vv)
 				return vv
 			} else {
 				vv := &EnumValueView{}
-				vv.Init(vv)
+				ki.InitNode(vv)
 				return vv
 			}
 		} else if _, ok := it.(fmt.Stringer); ok { // use stringer
 			vv := &ValueViewBase{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		} else {
 			vv := &IntValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 	case vk == reflect.Bool:
 		vv := &BoolValueView{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
 		vv := &FloatValueView{} // handles step, min / max etc
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
 		// todo: special edit with 2 fields..
 		vv := &ValueViewBase{}
-		vv.Init(vv)
+		ki.InitNode(vv)
 		return vv
 	case vk == reflect.Ptr:
 		if ki.IsKi(nptyp) {
 			vv := &KiPtrValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 		if kit.IfaceIsNil(it) {
-			vv := NilValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &NilValueView{}
+			ki.InitNode(vv)
+			return vv
 		}
 		v := reflect.ValueOf(it)
 		if !kit.ValueIsZero(v) {
@@ -263,9 +263,9 @@ func ToValueView(it interface{}, tags string) ValueView {
 			return ToValueView(v.Elem().Interface(), tags)
 		}
 	case nptyp == ki.KiT_Signal:
-		vv := NilValueView{}
-		vv.Init(&vv)
-		return &vv
+		vv := &NilValueView{}
+		ki.InitNode(vv)
+		return vv
 	case vk == reflect.Array:
 		fallthrough
 	case vk == reflect.Slice:
@@ -274,22 +274,22 @@ func ToValueView(it interface{}, tags string) ValueView {
 		eltyp := kit.SliceElType(it)
 		if _, ok := it.([]byte); ok {
 			vv := &ByteSliceValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 		if _, ok := it.([]rune); ok {
 			vv := &RuneSliceValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 		isstru := (kit.NonPtrType(eltyp).Kind() == reflect.Struct)
 		if !forceNoInline && (forceInline || (!isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp))) {
 			vv := &SliceInlineValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		} else {
 			vv := &SliceValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 	case vk == reflect.Map:
@@ -298,28 +298,28 @@ func ToValueView(it interface{}, tags string) ValueView {
 		sz = kit.MapStructElsN(it)
 		if !forceNoInline && (forceInline || sz <= MapInlineLen) {
 			vv := &MapInlineValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		} else {
 			vv := &MapValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 	case vk == reflect.Struct:
 		// note: we need to handle these here b/c cannot define new methods for gi types
 		if nptyp == gist.KiT_Color {
 			vv := &ColorValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 		nfld := kit.AllFieldsN(nptyp)
 		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
 			vv := &StructInlineValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		} else {
 			vv := &StructValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 	case vk == reflect.Interface:
@@ -329,13 +329,13 @@ func ToValueView(it interface{}, tags string) ValueView {
 		switch {
 		case nptyp == reflect.TypeOf((*reflect.Type)(nil)).Elem():
 			vv := &TypeValueView{}
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 	}
 	// fallback.
 	vv := &ValueViewBase{}
-	vv.Init(vv)
+	ki.InitNode(vv)
 	return vv
 }
 
@@ -369,12 +369,12 @@ func FieldToValueView(it interface{}, field string, fval interface{}) ValueView 
 		if kit.Enums.IsBitFlag(et) {
 			vv := &BitFlagView{}
 			vv.AltType = et
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		} else {
 			vv := &EnumValueView{}
 			vv.AltType = et
-			vv.Init(vv)
+			ki.InitNode(vv)
 			return vv
 		}
 	}
@@ -1045,9 +1045,9 @@ func VersCtrlNameProper(vc string) VersCtrlName {
 
 // ValueView registers VersCtrlValueView as the viewer of VersCtrlName
 func (kn VersCtrlName) ValueView() ValueView {
-	vv := VersCtrlValueView{}
-	vv.Init(&vv)
-	return &vv
+	vv := &VersCtrlValueView{}
+	ki.InitNode(vv)
+	return vv
 }
 
 // VersCtrlValueView presents an action for displaying an VersCtrlName and selecting

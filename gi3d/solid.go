@@ -73,7 +73,7 @@ func (sld *Solid) SetMeshName(sc *Scene, meshName string) error {
 	}
 	ms, ok := sc.Meshes[meshName]
 	if !ok {
-		err := fmt.Errorf("gi3d.Solid: %s SetMesh name: %s not found in scene", sld.PathUnique(), meshName)
+		err := fmt.Errorf("gi3d.Solid: %s SetMesh name: %s not found in scene", sld.Path(), meshName)
 		log.Println(err)
 		return err
 	}
@@ -130,7 +130,7 @@ func (sld *Solid) Style3D(sc *Scene) {
 // Validate checks that solid has valid mesh and texture settings, etc
 func (sld *Solid) Validate(sc *Scene) error {
 	if sld.Mesh == "" {
-		err := fmt.Errorf("gi3d.Solid: %s Mesh name is empty", sld.PathUnique())
+		err := fmt.Errorf("gi3d.Solid: %s Mesh name is empty", sld.Path())
 		log.Println(err)
 		return err
 	}

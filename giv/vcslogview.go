@@ -35,7 +35,7 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(KiT_TableView, "log")
-	mods, updt := lv.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := lv.ConfigChildren(config)
 	tv := lv.TableView()
 	if mods {
 		lv.RevA = "HEAD"

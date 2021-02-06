@@ -460,7 +460,7 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 	}
 	parw := tv.ParentLayout()
 	if parw == nil {
-		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", tv.Par.Type(), tv.PathUnique())
+		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", ki.Type(tv.Par), tv.Path())
 		return mat32.Vec2Zero
 	}
 	parw.SetReRenderAnchor()
@@ -3123,7 +3123,7 @@ func (tv *TextView) StartCursor() {
 	if win != nil && !win.IsResizing() {
 		tv.RenderCursor(true)
 	}
-	//	fmt.Printf("set blink tv: %v\n", tv.PathUnique())
+	//	fmt.Printf("set blink tv: %v\n", tv.Path())
 	BlinkingTextView = tv
 	TextViewBlinkMu.Unlock()
 }
@@ -4017,7 +4017,7 @@ func (tv *TextView) ShiftSelectExtend(kt *key.ChordEvent) {
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	if gi.KeyEventTrace {
-		fmt.Printf("TextView KeyInput: %v\n", tv.PathUnique())
+		fmt.Printf("TextView KeyInput: %v\n", tv.Path())
 	}
 	kf := gi.KeyFun(kt.Chord())
 	win := tv.ParentWindow()

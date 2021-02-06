@@ -374,7 +374,7 @@ func (ft *FileTree) UpdateExtFiles(efn *FileNode) {
 	for _, f := range ft.ExtFiles {
 		config.Add(typ, DirAndFile(f))
 	}
-	mods, updt := efn.ConfigChildren(config, ki.NonUniqueNames) // NOT unique names
+	mods, updt := efn.ConfigChildren(config) // NOT unique names
 	if mods {
 		// fmt.Printf("got mods: %v\n", path)
 	}
@@ -568,7 +568,7 @@ func (fn *FileNode) DetectVcsRepo(updateFiles bool) bool {
 func (fn *FileNode) UpdateDir() {
 	fn.DetectVcsRepo(true) // update files
 	path := string(fn.FPath)
-	// fmt.Printf("path: %v  node: %v\n", path, fn.PathUnique())
+	// fmt.Printf("path: %v  node: %v\n", path, fn.Path())
 	repo, rnode := fn.Repo()
 	fn.SetOpen()
 	fn.FRoot.SetDirOpen(fn.FPath)
@@ -580,7 +580,7 @@ func (fn *FileNode) UpdateDir() {
 			hasExtFiles = true
 		}
 	}
-	mods, updt := fn.ConfigChildren(config, ki.NonUniqueNames) // NOT unique names
+	mods, updt := fn.ConfigChildren(config) // NOT unique names
 	if mods {
 		// fmt.Printf("got mods: %v\n", path)
 	}
@@ -1800,7 +1800,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 
 func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 	if gi.KeyEventTrace {
-		fmt.Printf("TreeView KeyInput: %v\n", ftv.PathUnique())
+		fmt.Printf("TreeView KeyInput: %v\n", ftv.Path())
 	}
 	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
@@ -2182,13 +2182,13 @@ func (ftv *FileTreeView) RemoveFromExterns() {
 ///////////////////////////////////////////////////////////////////////////////
 //   Clipboard
 
-// MimeData adds mimedata for this node: a text/plain of the PathUnique,
+// MimeData adds mimedata for this node: a text/plain of the Path,
 // text/plain of filename, and text/
 func (ftv *FileTreeView) MimeData(md *mimedata.Mimes) {
 	sroot := ftv.RootView.SrcNode
 	fn := ftv.SrcNode.Embed(KiT_FileNode).(*FileNode)
 	path := string(fn.FPath)
-	punq := fn.PathFromUnique(sroot)
+	punq := fn.PathFrom(sroot)
 	*md = append(*md, mimedata.NewTextData(punq))
 	*md = append(*md, mimedata.NewTextData(path))
 	if int(fn.Info.Size) < gi.Prefs.Params.BigFileSize {
@@ -2261,7 +2261,7 @@ func (ftv *FileTreeView) PasteCheckExisting(tfn *FileNode, md mimedata.Mimes) ([
 		if intl {
 			d = md[i*3+1]
 			npath := string(md[i*3].Data)
-			sfni, err := sroot.FindPathUniqueTry(npath)
+			sfni, err := sroot.FindPathTry(npath)
 			if err == nil {
 				sfn = sfni.Embed(KiT_FileNode).(*FileNode)
 			}
@@ -2300,7 +2300,7 @@ func (ftv *FileTreeView) PasteCopyFiles(tdir *FileNode, md mimedata.Mimes) {
 		if intl {
 			d = md[i*3+1]
 			npath := string(md[i*3].Data)
-			sfni, err := sroot.FindPathUniqueTry(npath)
+			sfni, err := sroot.FindPathTry(npath)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -2450,7 +2450,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 // elements that were moved
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Dragged(de *dnd.Event) {
-	// fmt.Printf("ftv dragged: %v\n", ftv.PathUnique())
+	// fmt.Printf("ftv dragged: %v\n", ftv.Path())
 	if de.Mod != dnd.DropMove {
 		return
 	}
@@ -2463,7 +2463,7 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 	nf := len(md) / 3 // always internal
 	for i := 0; i < nf; i++ {
 		npath := string(md[i*3].Data)
-		sfni, err := sroot.FindPathUniqueTry(npath)
+		sfni, err := sroot.FindPathTry(npath)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -2472,7 +2472,7 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 		if sfn == nil {
 			continue
 		}
-		// fmt.Printf("dnd deleting: %v  path: %v\n", sfn.PathUnique(), sfn.FPath)
+		// fmt.Printf("dnd deleting: %v  path: %v\n", sfn.Path(), sfn.FPath)
 		sfn.DeleteFile()
 	}
 }

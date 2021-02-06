@@ -263,12 +263,12 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 				return ki.Continue
 			}
 			if EventTrace && recv == em.CurFocus() {
-				fmt.Printf("Event: cur focus: %v\n", recv.PathUnique())
+				fmt.Printf("Event: cur focus: %v\n", recv.Path())
 			}
 			if !em.Master.IsFocusActive() { // reactivate on keyboard input
 				em.Master.SetFocusActiveState(true)
 				if EventTrace {
-					fmt.Printf("Event: set focus active, was not: %v\n", ni.PathUnique())
+					fmt.Printf("Event: set focus active, was not: %v\n", ni.Path())
 				}
 				nii.FocusChanged2D(FocusActive)
 			}
@@ -285,7 +285,7 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 			if em.Dragging != nil {
 				if em.Dragging == gn.This() {
 					if EventTrace {
-						fmt.Printf("Event: dragging top pri: %v\n", recv.PathUnique())
+						fmt.Printf("Event: dragging top pri: %v\n", recv.Path())
 					}
 					rvs.Add(recv, fun, 10000)
 					return ki.Break
@@ -303,7 +303,7 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 			if em.Scrolling != nil {
 				if em.Scrolling == gn.This() {
 					if EventTrace {
-						fmt.Printf("Event: scrolling top pri: %v\n", recv.PathUnique())
+						fmt.Printf("Event: scrolling top pri: %v\n", recv.Path())
 					}
 					rvs.Add(recv, fun, 10000)
 				} else {
@@ -319,7 +319,7 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 		default:
 			if em.Dragging == gn.This() { // dragger always gets it
 				if EventTrace {
-					fmt.Printf("Event: dragging, non drag top pri: %v\n", recv.PathUnique())
+					fmt.Printf("Event: dragging, non drag top pri: %v\n", recv.Path())
 				}
 				rvs.Add(recv, fun, 10000) // top priority -- can't steal!
 				return ki.Break
@@ -677,7 +677,7 @@ func (em *EventMgr) DNDStart(src ki.Ki, data mimedata.Mimes) {
 	em.DNDSource = src
 	em.DNDData = data
 	if DNDTrace {
-		fmt.Printf("DNDStarted on: %v\n", src.PathUnique())
+		fmt.Printf("DNDStarted on: %v\n", src.Path())
 	}
 }
 
@@ -873,7 +873,7 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 		nii, ni := KiToNode2D(cfoc)
 		if ni != nil && ni.This() != nil {
 			ni.SetFocusState(false)
-			// fmt.Printf("clear foc: %v\n", ni.PathUnique())
+			// fmt.Printf("clear foc: %v\n", ni.Path())
 			nii.FocusChanged2D(FocusLost)
 		}
 	}
@@ -888,7 +888,7 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	}
 	ni.SetFocusState(true)
 	em.Master.SetFocusActiveState(true)
-	// fmt.Printf("set foc: %v\n", ni.PathUnique())
+	// fmt.Printf("set foc: %v\n", ni.Path())
 	em.ClearNonFocus(k) // shouldn't need this but actually sometimes do
 	nii.FocusChanged2D(FocusGot)
 	return true
@@ -1055,7 +1055,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 		}
 		if ni.HasFocus() {
 			if EventTrace {
-				fmt.Printf("ClearNonFocus: had focus: %v\n", ni.PathUnique())
+				fmt.Printf("ClearNonFocus: had focus: %v\n", ni.Path())
 			}
 			if !updated {
 				updated = true

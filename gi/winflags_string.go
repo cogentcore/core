@@ -13,20 +13,20 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[WinFlagHasGeomPrefs-29]
-	_ = x[WinFlagUpdating-30]
-	_ = x[WinFlagIsClosing-31]
-	_ = x[WinFlagIsResizing-32]
-	_ = x[WinFlagOverTexActive-33]
-	_ = x[WinFlagGotPaint-34]
-	_ = x[WinFlagGotFocus-35]
-	_ = x[WinFlagSentShow-36]
-	_ = x[WinFlagGoLoop-37]
-	_ = x[WinFlagStopEventLoop-38]
-	_ = x[WinFlagDoFullRender-39]
-	_ = x[WinFlagPublishFullReRender-40]
-	_ = x[WinFlagFocusActive-41]
-	_ = x[WinFlagsN-42]
+	_ = x[WinFlagHasGeomPrefs-25]
+	_ = x[WinFlagUpdating-26]
+	_ = x[WinFlagIsClosing-27]
+	_ = x[WinFlagIsResizing-28]
+	_ = x[WinFlagOverTexActive-29]
+	_ = x[WinFlagGotPaint-30]
+	_ = x[WinFlagGotFocus-31]
+	_ = x[WinFlagSentShow-32]
+	_ = x[WinFlagGoLoop-33]
+	_ = x[WinFlagStopEventLoop-34]
+	_ = x[WinFlagDoFullRender-35]
+	_ = x[WinFlagPublishFullReRender-36]
+	_ = x[WinFlagFocusActive-37]
+	_ = x[WinFlagsN-38]
 }
 
 const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFlagIsResizingWinFlagOverTexActiveWinFlagGotPaintWinFlagGotFocusWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagPublishFullReRenderWinFlagFocusActiveWinFlagsN"
@@ -34,9 +34,9 @@ const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFla
 var _WinFlags_index = [...]uint8{0, 19, 34, 50, 67, 87, 102, 117, 132, 145, 165, 184, 210, 228, 237}
 
 func (i WinFlags) String() string {
-	i -= 29
+	i -= 25
 	if i < 0 || i >= WinFlags(len(_WinFlags_index)-1) {
-		return "WinFlags(" + strconv.FormatInt(int64(i+29), 10) + ")"
+		return "WinFlags(" + strconv.FormatInt(int64(i+25), 10) + ")"
 	}
 	return _WinFlags_name[_WinFlags_index[i]:_WinFlags_index[i+1]]
 }
@@ -44,7 +44,7 @@ func (i WinFlags) String() string {
 func StringToWinFlags(s string) (WinFlags, error) {
 	for i := 0; i < len(_WinFlags_index)-1; i++ {
 		if s == _WinFlags_name[_WinFlags_index[i]:_WinFlags_index[i+1]] {
-			return WinFlags(i + 29), nil
+			return WinFlags(i + 25), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: WinFlags")

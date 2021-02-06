@@ -551,7 +551,7 @@ func (dv *DiffView) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Layout, "diff-lay")
-	mods, updt := dv.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := dv.ConfigChildren(config)
 	if !mods {
 		updt = dv.UpdateStart()
 		dv.SetTextNames()
@@ -708,7 +708,7 @@ func (dv *DiffView) ConfigTexts() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Layout, "text-a-lay")
 	config.Add(gi.KiT_Layout, "text-b-lay")
-	mods, updt := lay.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := lay.ConfigChildren(config)
 	al, bl := dv.TextViewLays()
 	if !mods {
 		updt = lay.UpdateStart()

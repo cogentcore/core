@@ -49,7 +49,7 @@ var WidgetBaseProps = ki.Props{
 func (wb *WidgetBase) CopyFieldsFrom(frm interface{}) {
 	fr, ok := frm.(*WidgetBase)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier WidgetBase one\n", wb.Type().Name())
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier WidgetBase one\n", ki.Type(wb).Name())
 		ki.GenCopyFieldsFrom(wb.This(), frm)
 		return
 	}
@@ -123,16 +123,16 @@ var WidgetDefPropsKey = "__DefProps"
 // "__DefProps"+selector type property of the props used for styling here, for
 // accessing properties that are not compiled into standard Style object.
 func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *gist.Style {
-	tprops := *kit.Types.Properties(wb.Type(), true) // true = makeNew
+	tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
 	styprops := tprops
 	if selector != "" {
 		sp, ok := kit.TypeProp(tprops, selector)
 		if !ok {
-			// log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, wb.Type().Name())
+			// log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, ki.Type(wb).Name())
 		} else {
 			spm, ok := sp.(ki.Props)
 			if !ok {
-				log.Printf("gi.DefaultStyle2DWidget: looking for a ki.Props for style selector: %v, instead got type: %T, for node type: %v\n", selector, spm, wb.Type().Name())
+				log.Printf("gi.DefaultStyle2DWidget: looking for a ki.Props for style selector: %v, instead got type: %T, for node type: %v\n", selector, spm, ki.Type(wb).Name())
 			} else {
 				styprops = spm
 			}
@@ -198,7 +198,7 @@ func (wb *WidgetBase) Style2DWidget() {
 
 	// look for class-specific style sheets among defaults -- have to do these
 	// dynamically now -- cannot compile into default which is type-general
-	tprops := *kit.Types.Properties(wb.Type(), true) // true = makeNew
+	tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
 	kit.TypesMu.RLock()
 	classes := strings.Split(strings.ToLower(wb.Class), " ")
 	for _, cl := range classes {
@@ -255,7 +255,7 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 
 	if ics := pk.Embed(KiT_Icon); ics != nil {
 		ic := ics.(*Icon)
-		styprops := kit.Types.Properties(wb.Type(), true)
+		styprops := kit.Types.Properties(ki.Type(wb), true)
 		if sp, ok := ki.SubProps(*styprops, stynm); ok {
 			if fill, ok := sp["fill"]; ok {
 				ic.SetProp("fill", fill)
@@ -301,7 +301,7 @@ func ApplyCSS(node Node2D, vp *Viewport2D, st *gist.Style, css ki.Props, key, se
 // type, .class, and #name selectors, along with optional sub-selector
 // (:hover, :active etc)
 func StyleCSS(node Node2D, vp *Viewport2D, st *gist.Style, css ki.Props, selector string) {
-	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	tyn := strings.ToLower(ki.Type(node).Name()) // type is most general, first
 	ApplyCSS(node, vp, st, css, tyn, selector)
 	classes := strings.Split(strings.ToLower(node.AsNode2D().Class), " ")
 	for _, cl := range classes {
@@ -398,7 +398,7 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 			nii.Init2D()
 			nii.Style2D()
 			nii.Size2D(0)
-			// fmt.Printf("node not init in Layout2DBase: %v\n", wb.PathUnique())
+			// fmt.Printf("node not init in Layout2DBase: %v\n", wb.Path())
 		}
 	}
 	psize := wb.AddParentPos()
@@ -411,7 +411,7 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 	// note: if other styles are maintained, they also need to be updated!
 	nii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
 	if Layout2DTrace {
-		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.PathUnique(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.VpBBox, wb.WinBBox)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.VpBBox, wb.WinBBox)
 	}
 	// typically Layout2DChildren must be called after this!
 }
@@ -444,7 +444,7 @@ func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 	mvp := wb.ViewportSafe()
 	if wb.This().(Node2D).IsVisible() && wb.NeedsFullReRender() && !mvp.IsDoingFullRender() {
 		if Render2DTrace {
-			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.PathUnique(), wb.VpBBox)
+			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.Path(), wb.VpBBox)
 		}
 		wb.ClearFullReRender()
 		wb.ReRender2DTree()
@@ -473,7 +473,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	rs.PushBounds(wb.VpBBox)
 	wb.ConnectToViewport()
 	if Render2DTrace {
-		fmt.Printf("Render: %v at %v\n", wb.PathUnique(), wb.VpBBox)
+		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.VpBBox)
 	}
 	return true
 }
@@ -874,7 +874,7 @@ func (wb *PartsWidgetBase) SizeFromParts(iter int) {
 	wb.LayState.Alloc.Size = wb.Parts.LayState.Size.Pref // get from parts
 	wb.Size2DAddSpace()
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v size from parts: %v, parts pref: %v\n", wb.PathUnique(), wb.LayState.Alloc.Size, wb.Parts.LayState.Size.Pref)
+		fmt.Printf("Size:   %v size from parts: %v, parts pref: %v\n", wb.Path(), wb.LayState.Alloc.Size, wb.Parts.LayState.Size.Pref)
 	}
 }
 
@@ -980,7 +980,7 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) boo
 			return true
 		}
 		ic := ick.(*Icon)
-		if !ic.HasChildren() || ic.UniqueNm != icnm || wb.NeedsFullReRender() {
+		if !ic.HasChildren() || ic.Nm != icnm || wb.NeedsFullReRender() {
 			return true
 		}
 	} else {

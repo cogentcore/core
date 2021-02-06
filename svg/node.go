@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"strings"
 
 	"github.com/goki/gi/gi"
@@ -75,6 +76,10 @@ func (g *NodeBase) AsSVGNode() *NodeBase {
 	return g
 }
 
+func (n *NodeBase) BaseIface() reflect.Type {
+	return reflect.TypeOf((*NodeBase)(nil)).Elem()
+}
+
 // Paint satisfies the painter interface
 func (g *NodeBase) Paint() *gist.Paint {
 	return &g.Pnt.Paint
@@ -88,7 +93,7 @@ func (g *NodeBase) MyXForm() mat32.Mat2 {
 		if nb.Par == nil {
 			break
 		}
-		if nb.Par.TypeEmbeds(KiT_SVG) {
+		if ki.TypeEmbeds(nb.Par, KiT_SVG) {
 			top := nb.Par.Embed(KiT_SVG).(*SVG)
 			xf = top.Pnt.XForm
 			break
@@ -256,7 +261,7 @@ func ApplyCSSSVG(node gi.Node2D, key string, css ki.Props) bool {
 // StyleCSS applies css style properties to given SVG node, parsing
 // out type, .class, and #name selectors
 func StyleCSS(node gi.Node2D, css ki.Props) {
-	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	tyn := strings.ToLower(ki.Type(node).Name()) // type is most general, first
 	ApplyCSSSVG(node, tyn, css)
 	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
 	ApplyCSSSVG(node, cln, css)
@@ -315,7 +320,7 @@ func (g *NodeBase) ComputeBBoxSVG() {
 	g.SetWinBBox()
 
 	if gi.Render2DTrace {
-		fmt.Printf("Render: %v at %v\n", g.PathUnique(), g.VpBBox)
+		fmt.Printf("Render: %v at %v\n", g.Path(), g.VpBBox)
 	}
 }
 
@@ -345,7 +350,7 @@ func (g *NodeBase) FindSVGURL(url string) gi.Node2D {
 	url = strings.TrimSuffix(url, ")")
 	rv := g.FindNamedElement(url)
 	if rv == nil {
-		log.Printf("gi.svg FindSVGURL could not find element named: %v in parents of svg el: %v\n", url, g.PathUnique())
+		log.Printf("gi.svg FindSVGURL could not find element named: %v in parents of svg el: %v\n", url, g.Path())
 	}
 	return rv
 }

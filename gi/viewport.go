@@ -140,7 +140,7 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 	vp.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
 	vp.Render.Init(nwsz.X, nwsz.Y, vp.Pixels)
 	vp.Geom.Size = nwsz // make sure
-	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.Pixels.Bounds())
+	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }
 
 // VpFlags extend NodeBase NodeFlags to hold viewport state
@@ -354,13 +354,13 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		nr := r.Intersect(pni.ChildrenBBox2D())
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
-			fmt.Printf("aberrant sp: %v\n", sp)
+			// fmt.Printf("aberrant sp: %v\n", sp)
 			return
 		}
 		r = nr
 	}
 	if Render2DTrace {
-		fmt.Printf("Render: vp DrawIntoParent: %v parVp: %v rect: %v sp: %v\n", vp.PathUnique(), parVp.PathUnique(), r, sp)
+		fmt.Printf("Render: vp DrawIntoParent: %v parVp: %v rect: %v sp: %v\n", vp.Path(), parVp.Path(), r, sp)
 	}
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Over)
 }
@@ -375,7 +375,7 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	}
 	gn := gni.AsNode2D()
 	if Render2DTrace {
-		fmt.Printf("Render: vp re-render: %v node: %v\n", vp.PathUnique(), gn.PathUnique())
+		fmt.Printf("Render: vp re-render: %v node: %v\n", vp.Path(), gn.Path())
 	}
 	// pr := prof.Start("vp.ReRender2DNode")
 	gn.Render2DTree()
@@ -400,7 +400,7 @@ func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 		return
 	}
 	if Render2DTrace {
-		fmt.Printf("Render: vp anchor re-render: %v node: %v\n", vp.PathUnique(), pw.PathUnique())
+		fmt.Printf("Render: vp anchor re-render: %v node: %v\n", vp.Path(), pw.Path())
 	}
 	// pr := prof.Start("vp.ReRender2DNode")
 	pw.ReRender2DTree()
@@ -515,7 +515,7 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 		vp.WinBBox = vp.WinBBox.Add(vp.Geom.Pos)
 		vp.BBoxMu.Unlock()
 	}
-	// fmt.Printf("Viewport: %v bbox: %v vpBBox: %v winBBox: %v\n", vp.PathUnique(), vp.BBox, vp.VpBBox, vp.WinBBox)
+	// fmt.Printf("Viewport: %v bbox: %v vpBBox: %v winBBox: %v\n", vp.Path(), vp.BBox, vp.VpBBox, vp.WinBBox)
 }
 
 func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
@@ -535,17 +535,17 @@ func (vp *Viewport2D) RenderViewport2D() {
 	if vp.IsPopup() { // popup has a parent that is the window
 		vp.SetCurWin()
 		if Render2DTrace {
-			fmt.Printf("Render: %v at Popup VpUploadVp\n", vp.PathUnique())
+			fmt.Printf("Render: %v at Popup VpUploadVp\n", vp.Path())
 		}
 		vp.This().(Viewport).VpUploadVp()
 	} else if vp.Viewport != nil { // sub-vp
 		if Render2DTrace {
-			fmt.Printf("Render: %v at %v DrawIntoParent\n", vp.PathUnique(), vp.VpBBox)
+			fmt.Printf("Render: %v at %v DrawIntoParent\n", vp.Path(), vp.VpBBox)
 		}
 		vp.DrawIntoParent(vp.Viewport)
 	} else { // we are the main vp
 		if Render2DTrace {
-			fmt.Printf("Render: %v at %v VpUploadAll\n", vp.PathUnique(), vp.VpBBox)
+			fmt.Printf("Render: %v at %v VpUploadAll\n", vp.Path(), vp.VpBBox)
 		}
 		vp.This().(Viewport).VpUploadAll()
 	}
@@ -561,7 +561,7 @@ func (vp *Viewport2D) FullRender2DTree() {
 	}
 	vp.SetFlag(int(VpFlagDoingFullRender))
 	if Render2DTrace {
-		fmt.Printf("Render: %v doing full render\n", vp.PathUnique())
+		fmt.Printf("Render: %v doing full render\n", vp.Path())
 	}
 	vp.WidgetBase.FullRender2DTree()
 	vp.ClearFlag(int(VpFlagDoingFullRender))
@@ -591,7 +591,7 @@ func (vp *Viewport2D) PushBounds() bool {
 	bb := vp.Pixels.Bounds() // our bounds.. not vp.VpBBox)
 	rs.PushBounds(bb)
 	if Render2DTrace {
-		fmt.Printf("Render: %v at %v\n", vp.PathUnique(), bb)
+		fmt.Printf("Render: %v at %v\n", vp.Path(), bb)
 	}
 	return true
 }
@@ -626,7 +626,7 @@ func (vp *Viewport2D) FullReRenderIfNeeded() bool {
 	}
 	if vp.This().(Node2D).IsVisible() && vp.NeedsFullReRender() && !vpDoing {
 		if Render2DTrace {
-			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", vp.PathUnique(), vp.VpBBox)
+			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", vp.Path(), vp.VpBBox)
 		}
 		vp.ClearFullReRender()
 		vp.ReRender2DTree()
@@ -694,13 +694,13 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 	}
 	if ni.IsUpdating() {
 		if Update2DTrace { // this can happen during concurrent update situations
-			log.Printf("Update: SignalViewport2D updating node %v with Updating flag set\n", ni.PathUnique())
+			log.Printf("Update: SignalViewport2D updating node %v with Updating flag set\n", ni.Path())
 		}
 		return
 	}
 
 	if Update2DTrace {
-		fmt.Printf("Update: Viewport2D: %v NodeUpdated due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), send.PathUnique())
+		fmt.Printf("Update: Viewport2D: %v NodeUpdated due to signal: %v from node: %v\n", vp.Path(), ki.NodeSignals(sig), send.Path())
 	}
 
 	vp.NodeUpdated(nii, sig, data)
@@ -779,7 +779,7 @@ func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data interface{}) (anch
 	if full {
 		ni.ClearFullReRender()
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes) for node: %v\n", vp.PathUnique(), nii.PathUnique())
+			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes) for node: %v\n", vp.Path(), nii.Path())
 		}
 		anchor = ni.ParentReRenderAnchor()
 		return anchor, full
@@ -872,11 +872,11 @@ func (vp *Viewport2D) UpdateNodes() {
 func (vp *Viewport2D) UpdateNode(nii Node2D) {
 	if nii.DirectWinUpload() {
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v DirectWinUpload on %v\n", vp.PathUnique(), nii.PathUnique())
+			fmt.Printf("Update: Viewport2D: %v DirectWinUpload on %v\n", vp.Path(), nii.Path())
 		}
 	} else {
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), nii.PathUnique())
+			fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.Path(), nii.Path())
 		}
 		vp.ReRender2DNode(nii)
 	}

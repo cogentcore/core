@@ -94,7 +94,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		config.Add(gi.KiT_Action, "add-action")
 	}
 	config.Add(gi.KiT_Action, "edit-action")
-	mods, updt := sv.Parts.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := sv.Parts.ConfigChildren(config)
 	if !mods {
 		updt = sv.Parts.UpdateStart()
 	}

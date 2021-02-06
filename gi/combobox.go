@@ -238,7 +238,7 @@ func (cb *ComboBox) ConfigParts() {
 		icIdx, lbIdx = cb.ConfigPartsIconLabel(&config, string(cb.Icon), cb.Text)
 		indIdx = cb.ConfigPartsAddIndicator(&config, true) // default on
 	}
-	mods, updt := cb.Parts.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt := cb.Parts.ConfigChildren(config)
 	cb.ConfigPartsSetIconLabel(string(cb.Icon), cb.Text, icIdx, lbIdx)
 	cb.ConfigPartsIndicator(indIdx)
 	if txIdx >= 0 {
@@ -445,7 +445,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 			ac = cb.ItemsMenu[i].(*Action)
 		} else {
 			ac = &Action{}
-			ac.Init(ac)
+			ki.InitNode(ac)
 			cb.ItemsMenu = append(cb.ItemsMenu, ac.This().(Node2D))
 		}
 		txt := ToLabel(it)

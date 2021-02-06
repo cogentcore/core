@@ -371,7 +371,7 @@ func (sc *Scene) Validate() error {
 		return ki.Continue
 	})
 	if hasError {
-		return fmt.Errorf("gi3d.Scene: %v Validate found at least one error (see log)", sc.PathUnique())
+		return fmt.Errorf("gi3d.Scene: %v Validate found at least one error (see log)", sc.Path())
 	}
 	return nil
 }
@@ -454,7 +454,7 @@ func (sc *Scene) Resize(nwsz image.Point) {
 		})
 	}
 	sc.Geom.Size = nwsz // make sure
-	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.Pixels.Bounds())
+	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }
 
 func (sc *Scene) Init2D() {
@@ -533,7 +533,7 @@ func (sc *Scene) PushBounds() bool {
 	// rs := &sc.Render
 	// rs.PushBounds(bb)
 	if gi.Render2DTrace {
-		fmt.Printf("Render: %v at %v\n", sc.PathUnique(), bb)
+		fmt.Printf("Render: %v at %v\n", sc.Path(), bb)
 	}
 	return true
 }
@@ -558,7 +558,7 @@ func (sc *Scene) Render2D() {
 	if sc.PushBounds() {
 		sc.NavEvents()
 		if gi.Render2DTrace {
-			fmt.Printf("3D Render2D: %v\n", sc.PathUnique())
+			fmt.Printf("3D Render2D: %v\n", sc.Path())
 		}
 		sc.Render()
 		sc.PopBounds()
@@ -778,7 +778,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	case "t":
 		kt.SetProcessed()
 		obj := sc.Child(0).(*Solid)
-		fmt.Printf("updated obj: %v\n", obj.PathUnique())
+		fmt.Printf("updated obj: %v\n", obj.Path())
 		obj.UpdateSig()
 		return
 	}
@@ -805,7 +805,7 @@ func (sc *Scene) ActivateWin() bool {
 // returns false if not possible
 func (sc *Scene) ActivateFrame() bool {
 	if !sc.ActivateWin() {
-		log.Printf("gi3d.Scene: %s not able to activate window\n", sc.PathUnique())
+		log.Printf("gi3d.Scene: %s not able to activate window\n", sc.Path())
 		return false
 	}
 	oswin.TheApp.RunOnMain(func() {

@@ -360,7 +360,7 @@ func (sb *SliderBase) UpdateThumbValSize() {
 
 func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
 	if KeyEventTrace {
-		fmt.Printf("SliderBase KeyInput: %v\n", sb.PathUnique())
+		fmt.Printf("SliderBase KeyInput: %v\n", sb.Path())
 	}
 	kf := KeyFun(kt.Chord())
 	switch kf {
@@ -511,7 +511,7 @@ func (sb *SliderBase) ConfigParts() {
 	sb.Parts.Lay = LayoutNil
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, string(sb.Icon), "")
-	mods, updt := sb.Parts.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt := sb.Parts.ConfigChildren(config)
 	sb.ConfigPartsSetIconLabel(string(sb.Icon), "", icIdx, lbIdx)
 	if mods {
 		sb.UpdateEnd(updt)
@@ -622,8 +622,8 @@ func (sr *SliderBase) StyleSlider() {
 		sr.StateStyles[i].SetStyleProps(pst, sr.StyleProps(SliderSelectors[i]), sr.Viewport)
 		sr.StateStyles[i].CopyUnitContext(&sr.Sty.UnContext)
 	}
-	sr.StyleFromProps(sr.Props, sr.Viewport)         // does all the min / max / step etc
-	tprops := *kit.Types.Properties(sr.Type(), true) // true = makeNew
+	sr.StyleFromProps(sr.Props, sr.Viewport)           // does all the min / max / step etc
+	tprops := *kit.Types.Properties(ki.Type(sr), true) // true = makeNew
 	if len(tprops) > 0 {
 		kit.TypesMu.RLock()
 		sr.StyleFromProps(tprops, sr.Viewport)

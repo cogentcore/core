@@ -216,7 +216,7 @@ func (fv *FileView) Config() {
 	config.Add(gi.KiT_ToolBar, "path-tbar")
 	config.Add(gi.KiT_Layout, "files-row")
 	config.Add(gi.KiT_Layout, "sel-row")
-	mods, updt := fv.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := fv.ConfigChildren(config)
 	if mods {
 		fv.ConfigPathBar()
 		fv.ConfigFilesRow()
@@ -309,7 +309,7 @@ func (fv *FileView) ConfigFilesRow() {
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TableView, "favs-view")
 	config.Add(KiT_TableView, "files-view")
-	fr.ConfigChildren(config, ki.UniqueNames) // already covered by parent update
+	fr.ConfigChildren(config) // already covered by parent update
 
 	sv := fv.FavsView()
 	sv.CSS = ki.Props{
@@ -377,7 +377,7 @@ func (fv *FileView) ConfigSelRow() {
 	config.Add(gi.KiT_TextField, "sel")
 	config.Add(gi.KiT_Label, "ext-lbl")
 	config.Add(gi.KiT_TextField, "ext")
-	sr.ConfigChildren(config, ki.UniqueNames) // already covered by parent update
+	sr.ConfigChildren(config) // already covered by parent update
 
 	sl := sr.ChildByName("sel-lbl", 0).(*gi.Label)
 	sl.Text = "File:"
@@ -786,7 +786,7 @@ func (fv *FileView) FileViewEvents() {
 
 func (fv *FileView) KeyInput(kt *key.ChordEvent) {
 	if gi.KeyEventTrace {
-		fmt.Printf("FileView KeyInput: %v\n", fv.PathUnique())
+		fmt.Printf("FileView KeyInput: %v\n", fv.Path())
 	}
 	kf := gi.KeyFun(kt.Chord())
 	switch kf {

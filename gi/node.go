@@ -338,7 +338,7 @@ func (nb *NodeBase) StyleProps(selector string) ki.Props {
 	if ok {
 		return spm
 	}
-	log.Printf("gist.StyleProps: looking for a ki.Props for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, nb.PathUnique())
+	log.Printf("gist.StyleProps: looking for a ki.Props for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, nb.Path())
 	return nil
 }
 
