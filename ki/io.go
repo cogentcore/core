@@ -112,7 +112,7 @@ func (n *Node) ReadJSON(reader io.Reader) error {
 	if err == nil {
 		n.UnmarshalPost()
 	}
-	n.SetFlag(int(ChildAdded)) // this might not be set..
+	n.SetChildAdded() // this might not be set..
 	n.UpdateEnd(updt)
 	return err
 }
@@ -154,7 +154,7 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 		if err == nil {
 			root.UnmarshalPost()
 		}
-		root.SetFlag(int(ChildAdded)) // this might not be set..
+		root.SetChildAdded() // this might not be set..
 		root.UpdateEnd(updt)
 		return root, nil
 	}
@@ -217,7 +217,7 @@ func (n *Node) ReadXML(reader io.Reader) error {
 	if err == nil {
 		n.UnmarshalPost()
 	}
-	n.SetFlag(int(ChildAdded)) // this might not be set..
+	n.SetChildAdded() // this might not be set..
 	n.UpdateEnd(updt)
 	return nil
 }

@@ -612,17 +612,17 @@ func TestNodeUpdate(t *testing.T) {
 	})
 	// child1 :=
 	updt := parent.UpdateStart()
-	parent.SetFlag(int(ChildAdded))
+	parent.SetChildAdded()
 	parent.AddNewChild(typ, "child1")
 	child2 := parent.AddNewChild(typ, "child1")
 	// child3 :=
 	parent.UpdateEnd(updt)
 	updt = parent.UpdateStart()
-	parent.SetFlag(int(ChildAdded))
+	parent.SetChildAdded()
 	parent.AddNewChild(typ, "child1")
 	parent.UpdateEnd(updt)
 	schild2 := child2.AddNewChild(typ, "subchild1")
-	child2.SetFlag(int(ChildAdded))
+	child2.SetChildAdded()
 	parent.UpdateEnd(updt)
 
 	for ri := range res {
@@ -778,7 +778,7 @@ func TestTreeMod(t *testing.T) {
 
 	// fmt.Printf("Trees before:\n%v%v", tree1, tree2)
 	updt := tree2.UpdateStart()
-	tree2.SetFlag(int(ChildAdded))
+	tree2.SetChildAdded()
 	MoveToParent(child12.This(), tree2.This())
 	tree2.UpdateEnd(updt)
 

@@ -369,7 +369,7 @@ func (sl *Slice) Config(n Ki, config kit.TypeAndNameList) (mods, updt bool) {
 			sl.Insert(nkid, i)
 			if n != nil {
 				SetParent(nkid, n)
-				n.SetFlag(int(ChildAdded))
+				n.SetChildAdded()
 			}
 			nkid.SetName(tn.Name)
 		} else {

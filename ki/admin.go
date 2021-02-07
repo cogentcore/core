@@ -100,6 +100,18 @@ func Root(k Ki) Ki {
 	return Root(k.Parent())
 }
 
+// Depth returns the current depth of the node.
+// This is only valid in a given context, not a stable
+// property of the node (e.g., used in FuncDownBreadthFirst).
+func Depth(kn Ki) int {
+	return kn.AsNode().depth
+}
+
+// SetDepth sets the current depth of the node to given value.
+func SetDepth(kn Ki, depth int) {
+	kn.AsNode().depth = depth
+}
+
 //////////////////////////////////////////////////////////////////
 // Fields
 
@@ -278,7 +290,7 @@ func UniqueNameCheckAll(kn Ki) bool {
 // UniquifyIndexAbove is the number of children above which UniquifyNamesAddIndex
 // is called -- that is much faster for large numbers of children.
 // Must be < 1000
-var UniquifyIndexAbove = 100
+var UniquifyIndexAbove = 1000
 
 // UniquifyNamesAddIndex makes sure that the names are unique by automatically
 // adding a suffix with index number, separated by underbar.

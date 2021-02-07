@@ -385,9 +385,9 @@ type Ki interface {
 	// its children.
 	OnlySelfUpdate() bool
 
-	// SetOnlySelfUpdate sets the OnlySelfUpdate flag -- see OnlySelfUpdate
-	// method and flag.
-	SetOnlySelfUpdate()
+	// SetChildAdded sets the ChildAdded flag -- set when notification is needed
+	// for Add, Insert methods
+	SetChildAdded()
 
 	// IsDeleted checks if this node has just been deleted (within last update
 	// cycle), indicated by the NodeDeleted flag which is set when the node is
@@ -468,14 +468,6 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Tree walking and Paths
 	//   note: always put function args last -- looks better for inline functions
-
-	// Depth returns the current depth of the node.
-	// This is only valid in a given context, not a stable
-	// property of the node (e.g., used in FuncDownBreadthFirst).
-	Depth() int
-
-	// SetDepth sets the current depth of the node to given value.
-	SetDepth(depth int)
 
 	// FuncFields calls function on all Ki fields within this node.
 	FuncFields(level int, data interface{}, fun Func)

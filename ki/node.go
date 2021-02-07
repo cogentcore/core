@@ -470,7 +470,7 @@ func (n *Node) AddChild(kid Ki) error {
 // add at end of children list.
 // The name should be unique among children.
 // No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+// Can also call SetChildAdded() if notification is needed.
 func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
 	if err := ThisCheck(n); err != nil {
 		return nil
@@ -488,7 +488,7 @@ func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
 // (or InitName) on the child, and SetParent.
 // Names should be unique among children.
 // No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+// Can also call SetChildAdded() if notification is needed.
 func (n *Node) SetChild(kid Ki, idx int, name string) error {
 	if err := n.Kids.IsValidIndex(idx); err != nil {
 		return err
@@ -507,7 +507,7 @@ func (n *Node) SetChild(kid Ki, idx int, name string) error {
 // The kid node is assumed to not be on another tree (see MoveToParent)
 // and the existing name should be unique among children.
 // No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+// Can also call SetChildAdded() if notification is needed.
 func (n *Node) InsertChild(kid Ki, at int) error {
 	if err := ThisCheck(n); err != nil {
 		return err
@@ -522,7 +522,7 @@ func (n *Node) InsertChild(kid Ki, at int) error {
 // add at position in children list.
 // The name should be unique among children.
 // No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+// Can also call SetChildAdded() if notification is needed.
 func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
 	if err := ThisCheck(n); err != nil {
 		return nil
@@ -795,6 +795,12 @@ func (n *Node) SetOnlySelfUpdate() {
 	n.SetFlag(int(OnlySelfUpdate))
 }
 
+// SetChildAdded sets the ChildAdded flag -- set when notification is needed
+// for Add, Insert methods
+func (n *Node) SetChildAdded() {
+	n.SetFlag(int(ChildAdded))
+}
+
 // IsDeleted checks if this node has just been deleted (within last update
 // cycle), indicated by the NodeDeleted flag which is set when the node is
 // deleted, and is cleared at next UpdateStart call.
@@ -1000,18 +1006,6 @@ func (n *Node) PropTag() string {
 
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
-
-// Depth returns the current depth of the node.
-// This is only valid in a given context, not a stable
-// property of the node (e.g., used in FuncDownBreadthFirst).
-func (n *Node) Depth() int {
-	return n.depth
-}
-
-// SetDepth sets the current depth of the node to given value.
-func (n *Node) SetDepth(depth int) {
-	n.depth = depth
-}
 
 // FlatFieldsValueFunc is the Node version of this function from kit/embeds.go
 // it is very slow and should be avoided at all costs!
@@ -1324,7 +1318,7 @@ outer:
 func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 	start := n.This()
 
-	start.SetDepth(level)
+	SetDepth(start, level)
 	queue := make([]Ki, 1)
 	queue[0] = start
 
@@ -1333,20 +1327,20 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 			break
 		}
 		cur := queue[0]
-		depth := cur.Depth()
+		depth := Depth(cur)
 		queue = queue[1:]
 
 		if cur.This() != nil && fun(cur, depth, data) { // false return means don't proceed
 			if KiHasKiFields(cur.AsNode()) {
 				cur.FuncFields(depth+1, data, func(k Ki, level int, d interface{}) bool {
-					k.SetDepth(level)
+					SetDepth(k, level)
 					queue = append(queue, k)
 					return true
 				})
 			}
 			for _, k := range *cur.Children() {
 				if k != nil && k.This() != nil {
-					k.SetDepth(depth + 1)
+					SetDepth(k, depth+1)
 					queue = append(queue, k)
 				}
 			}
