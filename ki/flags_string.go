@@ -23,14 +23,13 @@ func _() {
 	_ = x[ChildAdded-7]
 	_ = x[ChildDeleted-8]
 	_ = x[ChildrenDeleted-9]
-	_ = x[FieldUpdated-10]
-	_ = x[PropUpdated-11]
-	_ = x[FlagsN-12]
+	_ = x[ValUpdated-10]
+	_ = x[FlagsN-11]
 }
 
-const _Flags_name = "IsFieldHasKiFieldsHasNoKiFieldsUpdatingOnlySelfUpdateNodeDeletedNodeDestroyedChildAddedChildDeletedChildrenDeletedFieldUpdatedPropUpdatedFlagsN"
+const _Flags_name = "IsFieldHasKiFieldsHasNoKiFieldsUpdatingOnlySelfUpdateNodeDeletedNodeDestroyedChildAddedChildDeletedChildrenDeletedValUpdatedFlagsN"
 
-var _Flags_index = [...]uint8{0, 7, 18, 31, 39, 53, 64, 77, 87, 99, 114, 126, 137, 143}
+var _Flags_index = [...]uint8{0, 7, 18, 31, 39, 53, 64, 77, 87, 99, 114, 124, 130}
 
 func (i Flags) String() string {
 	if i < 0 || i >= Flags(len(_Flags_index)-1) {

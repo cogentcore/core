@@ -112,6 +112,20 @@ func SetDepth(kn Ki, depth int) {
 	kn.AsNode().depth = depth
 }
 
+// UpdateReset resets Updating flag for this node and all children -- in
+// case they are out-of-sync due to more complex tree maninpulations --
+// only call at a known point of non-updating.
+func UpdateReset(kn Ki) {
+	if kn.OnlySelfUpdate() {
+		kn.ClearFlag(int(Updating))
+	} else {
+		kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+			k.ClearFlag(int(Updating))
+			return true
+		})
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 // Fields
 
@@ -244,6 +258,27 @@ func KiFieldsInit(n *Node) (foff []uintptr, fnm []string) {
 	n.fieldOffs = foff
 	kit.SetTypeProp(tprops, "__FieldNames", fnm)
 	return
+}
+
+// FieldByName returns field value by name (can be any type of field --
+// see KiFieldByName for Ki fields) -- returns nil if not found.
+func FieldByName(kn Ki, field string) interface{} {
+	return kit.FlatFieldInterfaceByName(kn.This(), field)
+}
+
+// FieldByNameTry returns field value by name (can be any type of field --
+// see KiFieldByName for Ki fields) -- returns error if not found.
+func FieldByNameTry(kn Ki, field string) (interface{}, error) {
+	fld := FieldByName(kn, field)
+	if fld != nil {
+		return fld, nil
+	}
+	return nil, fmt.Errorf("ki %v: field named: %v not found", kn.Path(), field)
+}
+
+// FieldTag returns given field tag for that field, or empty string if not set.
+func FieldTag(kn Ki, field, tag string) string {
+	return kit.FlatFieldTag(Type(kn.This()), field, tag)
 }
 
 //////////////////////////////////////////////////

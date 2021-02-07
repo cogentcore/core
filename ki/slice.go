@@ -405,7 +405,7 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 	SetParent(kid, nil)
 	DelMgr.Add(kid)
 	sl.DeleteAtIndex(i)
-	kid.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
+	UpdateReset(kid) // it won't get the UpdateEnd from us anymore -- init fresh in any case
 }
 
 // CopyFrom another Slice.  It is efficient by using the Config method

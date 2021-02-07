@@ -57,11 +57,8 @@ const (
 	// ChildrenDeleted means all children were deleted.
 	ChildrenDeleted
 
-	// FieldUpdated means a field was updated.
-	FieldUpdated
-
-	// PropUpdated means a property was set.
-	PropUpdated
+	// ValUpdated means a value was updated (Field, Prop, any kind of value)
+	ValUpdated
 
 	// FlagsN is total number of flags used by base Ki Node -- can extend from
 	// here up to 64 bits.
@@ -74,7 +71,7 @@ const (
 	StruUpdateFlagsMask = ChildUpdateFlagsMask | (1 << uint32(NodeDeleted))
 
 	// ValUpdateFlagsMask is a mask for all non-structural, value-only changes update flags.
-	ValUpdateFlagsMask = (1 << uint32(FieldUpdated)) | (1 << uint32(PropUpdated))
+	ValUpdateFlagsMask = (1 << uint32(ValUpdated))
 
 	// UpdateFlagsMask is a Mask for all the update flags -- destroyed is
 	// excluded b/c otherwise it would get cleared.

@@ -30,13 +30,13 @@ const (
 	// should NOT be destroyed, so they can be re-used somewhere else.
 	NoDestroyKids = false
 
-	// Update is used for SetProps to indicate updating should occur
-	// after setting properties.
-	Update = true
+	// ShallowCopy is used for Props CopyFrom functions to indicate a shallow copy of
+	// Props or PropSlice within Props (points to source props)
+	ShallowCopy = true
 
-	// NoUpdate is used for SetProps to indicate updating should NOT occur
-	// after setting properties.
-	NoUpdate = false
+	// DeepCopy is used for Props CopyFrom functions to indicate a deep copy of
+	// Props or PropSlice within Props
+	DeepCopy = true
 
 	// Inherit is used for PropInherit to indicate that inherited properties
 	// from parent objects should be checked as well.  Otherwise not.
@@ -53,14 +53,6 @@ const (
 	// NoTypeProps is used for PropInherit to indicate that properties
 	// set on the type should NOT be checked.
 	NoTypeProps = false
-
-	// DeepCopy is used for CopyPropsFrom to indicate that a deep copy should
-	// be performed.
-	DeepCopy = true
-
-	// NoDeepCopy is used for CopyPropsFrom to indicate that a deep copy should
-	// NOT be performed.
-	NoDeepCopy = false
 
 	// Indent is used for Write methods to indicate that indenting should be done.
 	Indent = true

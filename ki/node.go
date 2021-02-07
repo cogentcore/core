@@ -617,7 +617,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
 	if destroy {
 		DelMgr.Add(child)
 	}
-	child.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
+	UpdateReset(child) // it won't get the UpdateEnd from us anymore -- init fresh in any case
 	n.UpdateEnd(updt)
 	return nil
 }
@@ -662,7 +662,7 @@ func (n *Node) DeleteChildren(destroy bool) {
 		child.SetFlag(int(NodeDeleted))
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		SetParent(child, nil)
-		child.UpdateReset()
+		UpdateReset(child)
 	}
 	if destroy {
 		DelMgr.Add(n.Kids...)
@@ -722,18 +722,6 @@ func (n *Node) Flags() int64 {
 // using atomic, safe for concurrent access
 func (n *Node) HasFlag(flag int) bool {
 	return bitflag.HasAtomic(&n.Flag, flag)
-}
-
-// HasAnyFlag checks if *any* of a set of flags is set (logical OR)
-// using atomic, safe for concurrent access
-func (n *Node) HasAnyFlag(flag ...int) bool {
-	return bitflag.HasAnyAtomic(&n.Flag, flag...)
-}
-
-// HasAllFlags checks if *all* of a set of flags is set (logical AND)
-// using atomic, safe for concurrent access
-func (n *Node) HasAllFlags(flag ...int) bool {
-	return bitflag.HasAllAtomic(&n.Flag, flag...)
 }
 
 // SetFlag sets the given flag(s)
@@ -801,6 +789,12 @@ func (n *Node) SetChildAdded() {
 	n.SetFlag(int(ChildAdded))
 }
 
+// SetValUpdated sets the ValUpdated flag -- set when notification is needed
+// for modifying a value (field, prop, etc)
+func (n *Node) SetValUpdated() {
+	n.SetFlag(int(ValUpdated))
+}
+
 // IsDeleted checks if this node has just been deleted (within last update
 // cycle), indicated by the NodeDeleted flag which is set when the node is
 // deleted, and is cleared at next UpdateStart call.
@@ -861,35 +855,13 @@ func (n *Node) SetSubProps(key string, val Props) {
 	n.SetProp(key, val)
 }
 
-// SetProps sets a whole set of properties, and optionally sets the
-// updated flag and triggers an UpdateSig.
-func (n *Node) SetProps(props Props, update bool) {
+// SetProps sets a whole set of properties
+func (n *Node) SetProps(props Props) {
 	if n.Props == nil {
-		n.Props = make(Props)
+		n.Props = make(Props, len(props))
 	}
 	for key, val := range props {
 		n.Props[key] = val
-	}
-	if update {
-		n.SetFlag(int(PropUpdated))
-		n.UpdateSig()
-	}
-}
-
-// SetPropUpdate sets given property key to value val, with update
-// notification (sets PropUpdated and emits UpdateSig) so other nodes
-// receiving update signals from this node can update to reflect these
-// changes.
-func (n *Node) SetPropUpdate(key string, val interface{}) {
-	n.SetFlag(int(PropUpdated))
-	n.SetProp(key, val)
-	n.UpdateSig()
-}
-
-// SetPropChildren sets given property key to value val for all Children.
-func (n *Node) SetPropChildren(key string, val interface{}) {
-	for _, k := range n.Kids {
-		k.SetProp(key, val)
 	}
 }
 
@@ -940,20 +912,6 @@ func (n *Node) DeleteProp(key string) {
 		return
 	}
 	delete(n.Props, key)
-}
-
-// DeleteAllProps deletes all properties on this node -- just makes a new
-// Props map -- can specify the capacity of the new map (0 means set to
-// nil instead of making a new one -- most efficient if potentially no
-// properties will be set).
-func (n *Node) DeleteAllProps(cap int) {
-	if n.Props != nil {
-		if cap == 0 {
-			n.Props = nil
-		} else {
-			n.Props = make(Props, cap)
-		}
-	}
 }
 
 func init() {
@@ -1408,7 +1366,7 @@ func (n *Node) UpdateEnd(updt bool) {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
-	if n.HasAnyFlag(int(ChildDeleted), int(ChildrenDeleted)) {
+	if bitflag.HasAnyAtomic(&n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
 		DelMgr.DestroyDeleted()
 	}
 	if n.OnlySelfUpdate() {
@@ -1435,7 +1393,7 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
-	if n.HasAnyFlag(int(ChildDeleted), int(ChildrenDeleted)) {
+	if bitflag.HasAnyAtomic(&n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
 		DelMgr.DestroyDeleted()
 	}
 	if n.OnlySelfUpdate() {
@@ -1463,20 +1421,6 @@ func (n *Node) UpdateSig() bool {
 	return true
 }
 
-// UpdateReset resets Updating flag for this node and all children -- in
-// case they are out-of-sync due to more complex tree maninpulations --
-// only call at a known point of non-updating.
-func (n *Node) UpdateReset() {
-	if n.OnlySelfUpdate() {
-		n.ClearFlag(int(Updating))
-	} else {
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.ClearFlag(int(Updating))
-			return true
-		})
-	}
-}
-
 // Disconnect disconnects this node, by calling DisconnectAll() on
 // any Signal fields.  Any Node that adds a Signal must define an
 // updated version of this method that calls its embedded parent's
@@ -1499,7 +1443,7 @@ func (n *Node) DisconnectAll() {
 // SetField sets given field name to given value, using very robust
 // conversion routines to e.g., convert from strings to numbers, and
 // vice-versa, automatically.  Returns error if not successfully set.
-// wrapped in UpdateStart / End and sets the FieldUpdated flag.
+// wrapped in UpdateStart / End and sets the ValUpdated flag.
 func (n *Node) SetField(field string, val interface{}) error {
 	fv := kit.FlatFieldValueByName(n.This(), field)
 	if !fv.IsValid() {
@@ -1509,60 +1453,16 @@ func (n *Node) SetField(field string, val interface{}) error {
 	var err error
 	if field == "Nm" {
 		n.SetName(kit.ToString(val))
-		n.SetFlag(int(FieldUpdated))
+		n.SetValUpdated()
 	} else {
 		if kit.SetRobust(kit.PtrValue(fv).Interface(), val) {
-			n.SetFlag(int(FieldUpdated))
+			n.SetValUpdated()
 		} else {
 			err = fmt.Errorf("ki.SetField, SetRobust failed to set field %v on node %v to value: %v", field, n.Nm, val)
 		}
 	}
 	n.UpdateEnd(updt)
 	return err
-}
-
-// SetFieldDown sets given field name to given value, all the way down the
-// tree from me -- wrapped in UpdateStart / End.
-func (n *Node) SetFieldDown(field string, val interface{}) {
-	updt := n.UpdateStart()
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-		k.SetField(field, val)
-		return true
-	})
-	n.UpdateEnd(updt)
-}
-
-// SetFieldUp sets given field name to given value, all the way up the
-// tree from me -- wrapped in UpdateStart / End.
-func (n *Node) SetFieldUp(field string, val interface{}) {
-	updt := n.UpdateStart()
-	n.FuncUp(0, nil, func(k Ki, level int, d interface{}) bool {
-		k.SetField(field, val)
-		return true
-	})
-	n.UpdateEnd(updt)
-}
-
-// FieldByName returns field value by name (can be any type of field --
-// see KiFieldByName for Ki fields) -- returns nil if not found.
-func (n *Node) FieldByName(field string) interface{} {
-	return kit.FlatFieldInterfaceByName(n.This(), field)
-}
-
-// FieldByNameTry returns field value by name (can be any type of field --
-// see KiFieldByName for Ki fields) -- returns error if not found.
-func (n *Node) FieldByNameTry(field string) (interface{}, error) {
-	fld := n.FieldByName(field)
-	if fld != nil {
-		return fld, nil
-	}
-	return nil, fmt.Errorf("ki %v: field named: %v not found", n.Nm, field)
-}
-
-// FieldTag returns given field tag for that field, or empty string if not
-// set.
-func (n *Node) FieldTag(field, tag string) string {
-	return kit.FlatFieldTag(Type(n.This()), field, tag)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1573,7 +1473,7 @@ func (n *Node) FieldTag(field, tag string) string {
 
 // CopyFrom another Ki node.  It is essential that source has Unique names!
 // The Ki copy function recreates the entire tree in the copy, duplicating
-// children etc.  It is very efficient by
+// children etc, copying Props too.  It is very efficient by
 // using the ConfigChildren method which attempts to preserve any existing
 // nodes in the destination if they have the same name and type -- so a
 // copy from a source to a target that only differ minimally will be
@@ -1594,7 +1494,7 @@ func (n *Node) CopyFrom(frm Ki) error {
 	}
 	updt := n.UpdateStart()
 	defer n.UpdateEnd(updt)
-	err := n.CopyFromRaw(frm)
+	err := CopyFromRaw(n.This(), frm)
 	return err
 }
 
@@ -1610,14 +1510,17 @@ func (n *Node) Clone() Ki {
 
 // CopyFromRaw performs a raw copy that just does the deep copy of the
 // bits and doesn't do anything with pointers.
-func (n *Node) CopyFromRaw(frm Ki) error {
-	n.Kids.ConfigCopy(n.This(), *frm.Children())
-	n.DeleteAllProps(len(*frm.Properties())) // start off fresh, allocated to size of from
-	n.CopyPropsFrom(frm, NoDeepCopy)         // use shallow props copy by default
-	n.This().CopyFieldsFrom(frm)
-	for i, kid := range n.Kids {
-		fmk := (*(frm.Children()))[i]
-		kid.CopyFromRaw(fmk)
+func CopyFromRaw(kn, frm Ki) error {
+	kn.Children().ConfigCopy(kn.This(), *frm.Children())
+	n := kn.AsNode()
+	fmp := *frm.Properties()
+	n.Props = make(Props, len(fmp))
+	n.Props.CopyFrom(fmp, DeepCopy)
+
+	kn.This().CopyFieldsFrom(frm)
+	for i, kid := range *kn.Children() {
+		fmk := frm.Child(i)
+		CopyFromRaw(kid, fmk)
 	}
 	return nil
 }

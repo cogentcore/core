@@ -340,14 +340,6 @@ type Ki interface {
 	// using atomic, safe for concurrent access
 	HasFlag(flag int) bool
 
-	// HasAnyFlag checks if *any* of a set of flags is set (logical OR)
-	// using atomic, safe for concurrent access
-	HasAnyFlag(flag ...int) bool
-
-	// HasAllFlags checks if *all* of a set of flags is set (logical AND)
-	// using atomic, safe for concurrent access
-	HasAllFlags(flag ...int) bool
-
 	// SetFlag sets the given flag(s)
 	// using atomic, safe for concurrent access
 	SetFlag(flag ...int)
@@ -389,6 +381,10 @@ type Ki interface {
 	// for Add, Insert methods
 	SetChildAdded()
 
+	// SetValUpdated sets the ValUpdated flag -- set when notification is needed
+	// for modifying a value (field, prop, etc)
+	SetValUpdated()
+
 	// IsDeleted checks if this node has just been deleted (within last update
 	// cycle), indicated by the NodeDeleted flag which is set when the node is
 	// deleted, and is cleared at next UpdateStart call.
@@ -414,19 +410,6 @@ type Ki interface {
 	// map if nil.
 	SetProp(key string, val interface{})
 
-	// SetProps sets a whole set of properties, and optionally sets the
-	// updated flag and triggers an UpdateSig.
-	SetProps(props Props, update bool)
-
-	// SetPropUpdate sets given property key to value val, with update
-	// notification (sets PropUpdated and emits UpdateSig) so other nodes
-	// receiving update signals from this node can update to reflect these
-	// changes.
-	SetPropUpdate(key string, val interface{})
-
-	// SetPropChildren sets given property key to value val for all Children.
-	SetPropChildren(key string, val interface{})
-
 	// Prop returns property value for key that is known to exist.
 	// Returns nil if it actually doesn't -- this version allows
 	// direct conversion of return.  See PropTry for version with
@@ -445,19 +428,6 @@ type Ki interface {
 
 	// DeleteProp deletes property key on this node.
 	DeleteProp(key string)
-
-	// DeleteAllProps deletes all properties on this node -- just makes a new
-	// Props map -- can specify the capacity of the new map (0 means set to
-	// nil instead of making a new one -- most efficient if potentially no
-	// properties will be set).
-	DeleteAllProps(cap int)
-
-	// CopyPropsFrom copies our properties from another node -- if deep then
-	// does a deep copy -- otherwise copied map just points to same values in
-	// the original map (and we don't reset our map first -- call
-	// DeleteAllProps to do that -- deep copy uses gob encode / decode --
-	// usually not needed).
-	CopyPropsFrom(frm Ki, deep bool) error
 
 	// PropTag returns the name to look for in type properties, for types
 	// that are valid options for values that can be set in Props.  For example
@@ -562,11 +532,6 @@ type Ki interface {
 	// UpdateEnd's.  Returns true if an update signal was sent.
 	UpdateSig() bool
 
-	// UpdateReset resets Updating flag for this node and all children -- in
-	// case they are out-of-sync due to more complex tree maninpulations --
-	// only call at a known point of non-updating.
-	UpdateReset()
-
 	// Disconnect disconnects this node, by calling DisconnectAll() on
 	// any Signal fields.  Any Node that adds a Signal must define an
 	// updated version of this method that calls its embedded parent's
@@ -582,33 +547,15 @@ type Ki interface {
 	// SetField sets given field name to given value, using very robust
 	// conversion routines to e.g., convert from strings to numbers, and
 	// vice-versa, automatically.  Returns error if not successfully set.
-	// wrapped in UpdateStart / End and sets the FieldUpdated flag.
+	// wrapped in UpdateStart / End and sets the ValUpdated flag.
 	SetField(field string, val interface{}) error
-
-	// SetFieldDown sets given field name to given value, all the way down the
-	// tree from me -- wrapped in UpdateStart / End.
-	SetFieldDown(field string, val interface{})
-
-	// SetFieldUp sets given field name to given value, all the way up the
-	// tree from me -- wrapped in UpdateStart / End.
-	SetFieldUp(field string, val interface{})
-
-	// FieldByName returns field value by name (can be any type of field --
-	// see KiFieldByName for Ki fields) -- returns nil if not found.
-	FieldByName(field string) interface{}
-
-	// FieldByNameTry returns field value by name (can be any type of field --
-	// see KiFieldByName for Ki fields) -- returns error if not found.
-	FieldByNameTry(field string) (interface{}, error)
-
-	// FieldTag returns given field tag for that field, or empty string if not set.
-	FieldTag(field, tag string) string
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deep Copy of Trees
 
-	// CopyFrom another Ki node.  The Ki copy function recreates the entire
-	// tree in the copy, duplicating children etc.  It is very efficient by
+	// CopyFrom another Ki node.  It is essential that source has Unique names!
+	// The Ki copy function recreates the entire tree in the copy, duplicating
+	// children etc, copying Props too.  It is very efficient by
 	// using the ConfigChildren method which attempts to preserve any existing
 	// nodes in the destination if they have the same name and type -- so a
 	// copy from a source to a target that only differ minimally will be
@@ -622,11 +569,6 @@ type Ki interface {
 	// Any pointers within the cloned tree will correctly point within the new
 	// cloned tree (see Copy info).
 	Clone() Ki
-
-	// CopyFromRaw performs a raw copy that just does the deep copy of the
-	// bits and doesn't do UpdateStart / End or set NodeCopied flag,
-	// which are done in top-level CopyFrom.
-	CopyFromRaw(frm Ki) error
 
 	// CopyFieldsFrom is the base-level copy method that any copy-intensive
 	// nodes should implement directly to explicitly copy relevant fields

@@ -939,7 +939,7 @@ func TestNodeFieldSet(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fs := kit.NonPtrInterface(child2.FieldByName("Mbr1"))
+	fs := kit.NonPtrInterface(FieldByName(child2.This(), "Mbr1"))
 	if fs != ts {
 		t.Errorf("Set field error: %+v != %+v\n", fs, ts)
 	}
@@ -949,7 +949,7 @@ func TestNodeFieldSet(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fs = kit.NonPtrInterface(child2.FieldByName("Mbr1"))
+	fs = kit.NonPtrInterface(FieldByName(child2.This(), "Mbr1"))
 	if fs != ts {
 		t.Errorf("Set field error: %+v != %+v\n", fs, ts)
 	}

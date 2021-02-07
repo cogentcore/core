@@ -119,28 +119,28 @@ func SliceTypeProps(pr map[string]interface{}, key string) (PropSlice, bool) {
 	return nil, false
 }
 
-// CopyProps copies properties from source to destination map.  If copySubProps
+// CopyProps copies properties from source to destination map.  If deepCopy
 // is true, then any values that are Props or PropSlice are copied too
 // *dest can be nil, in which case it is created.
-func CopyProps(dest *map[string]interface{}, src map[string]interface{}, copySubProps bool) {
+func CopyProps(dest *map[string]interface{}, src map[string]interface{}, deepCopy bool) {
 	if *dest == nil {
 		*dest = make(Props, len(src))
 	}
 	for key, val := range src {
-		if copySubProps {
+		if deepCopy {
 			if pv, ok := val.(map[string]interface{}); ok {
 				var nval Props
-				nval.CopyFrom(pv, copySubProps)
+				nval.CopyFrom(pv, deepCopy)
 				(*dest)[key] = nval
 				continue
 			} else if pv, ok := val.(Props); ok {
 				var nval Props
-				nval.CopyFrom(pv, copySubProps)
+				nval.CopyFrom(pv, deepCopy)
 				(*dest)[key] = nval
 				continue
 			} else if pv, ok := val.(PropSlice); ok {
 				var nval PropSlice
-				nval.CopyFrom(pv, copySubProps)
+				nval.CopyFrom(pv, deepCopy)
 				(*dest)[key] = nval
 				continue
 			}
@@ -149,35 +149,35 @@ func CopyProps(dest *map[string]interface{}, src map[string]interface{}, copySub
 	}
 }
 
-// CopyFrom copies properties from source to receiver destination map.  If copySubProps
+// CopyFrom copies properties from source to receiver destination map.  If deepCopy
 // is true, then any values that are Props or PropSlice are copied too
 // *dest can be nil, in which case it is created.
-func (dest *Props) CopyFrom(src map[string]interface{}, copySubProps bool) {
-	CopyProps((*map[string]interface{})(dest), src, copySubProps)
+func (dest *Props) CopyFrom(src map[string]interface{}, deepCopy bool) {
+	CopyProps((*map[string]interface{})(dest), src, deepCopy)
 }
 
-// CopyFrom copies properties from source to destination propslice.  If copySubProps
+// CopyFrom copies properties from source to destination propslice.  If deepCopy
 // is true, then any values that are Props or PropSlice are copied too
 // *dest can be nil, in which case it is created.
-func (dest *PropSlice) CopyFrom(src PropSlice, copySubProps bool) {
+func (dest *PropSlice) CopyFrom(src PropSlice, deepCopy bool) {
 	if *dest == nil {
 		*dest = make(PropSlice, len(src))
 	}
 	for i, val := range src {
-		if copySubProps {
+		if deepCopy {
 			if pv, ok := val.Value.(map[string]interface{}); ok {
 				var nval Props
-				CopyProps((*map[string]interface{})(&nval), pv, copySubProps)
+				CopyProps((*map[string]interface{})(&nval), pv, deepCopy)
 				(*dest)[i] = PropStruct{Name: val.Name, Value: nval}
 				continue
 			} else if pv, ok := val.Value.(Props); ok {
 				var nval Props
-				CopyProps((*map[string]interface{})(&nval), pv, copySubProps)
+				CopyProps((*map[string]interface{})(&nval), pv, deepCopy)
 				(*dest)[i] = PropStruct{Name: val.Name, Value: nval}
 				continue
 			} else if pv, ok := val.Value.(PropSlice); ok {
 				var nval PropSlice
-				nval.CopyFrom(pv, copySubProps)
+				nval.CopyFrom(pv, deepCopy)
 				(*dest)[i] = PropStruct{Name: val.Name, Value: nval}
 				continue
 			}
