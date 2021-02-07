@@ -980,7 +980,7 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) boo
 			return true
 		}
 		ic := ick.(*Icon)
-		if !ic.HasChildren() || ic.Nm != icnm || wb.NeedsFullReRender() {
+		if !ic.HasChildren() || ic.IconNm != icnm || wb.NeedsFullReRender() {
 			return true
 		}
 	} else {

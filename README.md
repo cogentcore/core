@@ -81,4 +81,27 @@ All of the main "front end" code just deals with `image.RGBA` through the [girl]
 
 * 3/2019: `python` wrapper is now available!  you can do most of GoGi from python now.  See [README.md](https://github.com/goki/gi/tree/master/python/README.md) file there for more details.
 
+#################
+
+Issues: 
+
+Node2D methods to hide:
+
+* ChildByLabelStartsCanFocus
+
+* SetStdXMLAttr
+
+* ParentCSSAgg
+
+* DisconnectViewport
+
+* ki -- SetDepth not really needed
+
+* AllocFromParent
+
+* BoxSpace, RenderStdBox -- all can be in Widget as just funcs
+
+* Many of the layout methods can be separate funcs
+
+* BBoxReport, ComputeBBox2DBase -- lots of basic non-overridden, non-interface methods..
 

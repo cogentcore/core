@@ -101,6 +101,7 @@ func (tv *TabView) AddTab(widg Node2D, label string) int {
 // for internal use.
 func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 	tb := tv.Tabs()
+	tb.SetChildAdded()
 	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
 	tab.Tooltip = label
@@ -127,6 +128,7 @@ func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
 	fr := tv.Frame()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
+	fr.SetChildAdded()
 	fr.InsertChild(widg, idx)
 	tv.InsertTabOnlyAt(widg, label, idx)
 	tv.Mu.Unlock()
@@ -158,6 +160,7 @@ func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) Node2D 
 	fr := tv.Frame()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
+	fr.SetChildAdded()
 	widg := fr.InsertNewChild(typ, idx, label).(Node2D)
 	tv.InsertTabOnlyAt(widg, label, idx)
 	tv.UpdateEnd(updt)

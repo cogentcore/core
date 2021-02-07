@@ -764,6 +764,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 							dlg, _ := send.(*gi.Dialog)
 							n, typ := gi.NewKiDialogValues(dlg)
 							updt := ownki.UpdateStart()
+							ownki.SetChildAdded()
 							for i := 0; i < n; i++ {
 								nm := fmt.Sprintf("New%v%v", typ.Name(), idx+1+i)
 								ownki.InsertNewChild(typ, idx+1+i, nm)

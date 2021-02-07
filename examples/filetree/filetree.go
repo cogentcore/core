@@ -234,7 +234,7 @@ func (fb *FileBrowse) StdConfig() (mods, updt bool) {
 	fb.Lay = gi.LayoutVert
 	fb.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := fb.StdFrameConfig()
-	mods, updt = fb.ConfigChildren(config, ki.NonUniqueNames)
+	mods, updt = fb.ConfigChildren(config)
 	return
 }
 
@@ -275,7 +275,7 @@ func (fb *FileBrowse) TextViewByIndex(idx int) *giv.TextView {
 	stidx := 1 // 0 = file browser -- could be collapsed but always there.
 	if split != nil {
 		svk := split.Child(stidx + idx).Child(0)
-		if !svk.TypeEmbeds(giv.KiT_TextView) {
+		if !ki.TypeEmbeds(svk, giv.KiT_TextView) {
 			log.Printf("FileBrowse: text view not at index: %v\n", idx)
 			return nil
 		}
@@ -328,7 +328,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 	split.SetProp("font-family", "Go Mono")
 
 	config := fb.SplitViewConfig()
-	mods, updt := split.ConfigChildren(config, ki.UniqueNames)
+	mods, updt := split.ConfigChildren(config)
 	if mods {
 		ftfr := split.Child(0).(*gi.Frame)
 		ft := giv.AddNewFileTreeView(ftfr, "filetree")

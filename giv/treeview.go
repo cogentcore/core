@@ -176,6 +176,9 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 		idx++
 	}
 	for _, skid := range *sk.Children() {
+		if len(tv.Kids) <= idx {
+			break
+		}
 		vk := tv.Kids[idx].Embed(KiT_TreeView).(*TreeView)
 		vk.SetSrcNode(skid, tvIdx, init, depth+1)
 		if mods {
@@ -1018,6 +1021,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 				var ski ki.Ki
 				for i := 0; i < n; i++ {
 					nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+rel+i)
+					par.SetChildAdded()
 					nki := par.InsertNewChild(typ, myidx+i, nm)
 					if i == n-1 {
 						ski = nki
@@ -1053,6 +1057,7 @@ func (tv *TreeView) SrcAddChild() {
 				dlg, _ := send.(*gi.Dialog)
 				n, typ := gi.NewKiDialogValues(dlg)
 				updt := sk.UpdateStart()
+				sk.SetChildAdded()
 				var ski ki.Ki
 				for i := 0; i < n; i++ {
 					nm := fmt.Sprintf("New%v%v", typ.Name(), i)
@@ -1118,10 +1123,13 @@ func (tv *TreeView) SrcDuplicate() {
 	if !ok {
 		return
 	}
+	updt := par.UpdateStart()
 	nm := fmt.Sprintf("%v_Copy", sk.Name())
 	nwkid := sk.Clone()
 	nwkid.SetName(nm)
+	par.SetChildAdded()
 	par.InsertChild(nwkid, myidx+1)
+	par.UpdateEnd(updt)
 	tvpar.SetChanged()
 	if tvk := tvpar.ChildByName("tv_"+nm, 0); tvk != nil {
 		stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
@@ -1332,6 +1340,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 				ns.SetName(ns.Name() + "_Copy")
 			}
 		}
+		par.SetChildAdded()
 		par.InsertChild(ns, myidx+i)
 		if i == sz-1 {
 			ski = ns
@@ -1358,6 +1367,7 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 		return
 	}
 	updt := sk.UpdateStart()
+	sk.SetChildAdded()
 	for _, ns := range sl {
 		sk.AddChild(ns)
 	}

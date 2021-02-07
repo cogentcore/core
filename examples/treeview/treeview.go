@@ -56,12 +56,12 @@ func mainrun() {
 	srctree := TestNodeB{}
 	srctree.InitName(&srctree, "par1")
 	// child1 :=
-	srctree.AddNewChild(nil, "child1")
-	child2 := srctree.AddNewChild(nil, "child2")
+	srctree.AddNewChild(KiT_TestNodeB, "child1")
+	child2 := srctree.AddNewChild(KiT_TestNodeB, "child2")
 	// child3 :=
-	srctree.AddNewChild(nil, "child3")
+	srctree.AddNewChild(KiT_TestNodeB, "child3")
 	// schild2 :=
-	child2.AddNewChild(nil, "subchild1")
+	child2.AddNewChild(KiT_TestNodeB, "subchild1")
 
 	srctree.SetProp("test1", "string val")
 	srctree.SetProp("test2", 3.14)
