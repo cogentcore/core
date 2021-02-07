@@ -363,7 +363,8 @@ func (nb *NodeBase) ParentCSSAgg() *ki.Props {
 
 // SetStdXMLAttr sets standard attributes of node given XML-style name /
 // attribute values (e.g., from parsing XML / SVG files) -- returns true if handled
-func (nb *NodeBase) SetStdXMLAttr(name, val string) bool {
+func SetStdXMLAttr(ni Node, name, val string) bool {
+	nb := ni.AsGiNode()
 	switch name {
 	case "id":
 		nb.SetName(val)

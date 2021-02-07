@@ -87,10 +87,6 @@ Issues:
 
 Node2D methods to hide:
 
-* ChildByLabelStartsCanFocus
-
-* SetStdXMLAttr
-
 * ParentCSSAgg
 
 * DisconnectViewport

@@ -1103,6 +1103,7 @@ func (sc *Scene) Render() bool {
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
 	}
+	sc.SetFlag(int(Rendering))
 	sc.Camera.UpdateMatrix()
 	sc.TrackCamera()
 	sc.UpdateNodes3D()
@@ -1118,12 +1119,14 @@ func (sc *Scene) Render() bool {
 		sc.Tex = sc.Frame.Texture()
 		sc.Tex.SetBotZero(true) // this has Y=0 at bottom!
 	})
+	sc.ClearFlag(int(Rendering))
 	return true
 }
 
 // RenderOffFrame renders the scene to currently-activated offscreen framebuffer
 // must call ActivateOffFrame first and call Frame.Rendered() after!
 func (sc *Scene) RenderOffFrame() bool {
+	sc.SetFlag(int(Rendering))
 	sc.Camera.UpdateMatrix()
 	sc.TrackCamera()
 	sc.UpdateWorldMatrix()
@@ -1134,11 +1137,16 @@ func (sc *Scene) RenderOffFrame() bool {
 		sc.Render3D(true) //  yes offscreen
 		gpu.Draw.Flush()
 	})
+	sc.ClearFlag(int(Rendering))
 	return true
 }
 
 func (sc *Scene) IsDirectWinUpload() bool {
 	return true
+}
+
+func (sc *Scene) IsRendering() bool {
+	return sc.HasFlag(int(Rendering))
 }
 
 func (sc *Scene) DirectWinUpload() bool {
@@ -1315,10 +1323,24 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node3D {
 
 // SceneProps define the ToolBar and MenuBar for StructView
 var SceneProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": KiT_SceneFlags,
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
 			"icon": "update",
 		}},
 	},
 }
+
+// SceneFlags extend gi.SceneFlags to hold 3D node state
+type SceneFlags int
+
+//go:generate stringer -type=SceneFlags
+
+var KiT_SceneFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, SceneFlagsN, kit.BitFlag, nil)
+
+const (
+	// Rendering means that the scene is currently rendering
+	Rendering SceneFlags = SceneFlags(gi.NodeFlagsN) + iota
+
+	SceneFlagsN
+)

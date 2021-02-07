@@ -2616,8 +2616,8 @@ var FileTreeViewProps = ki.Props{
 		"stroke":  &gi.Prefs.Colors.Font,
 	},
 	"#branch": ki.Props{
-		"icon":             "wedge-down",
-		"icon-off":         "wedge-right",
+		"icon":             "folder-open",
+		"icon-off":         "folder",
 		"margin":           units.NewPx(0),
 		"padding":          units.NewPx(0),
 		"background-color": color.Transparent,
@@ -2758,10 +2758,7 @@ var FileTreeViewProps = ki.Props{
 	},
 }
 
-var fnFolderProps = ki.Props{
-	"icon":     "folder-open",
-	"icon-off": "folder",
-}
+var fnFolderProps = ki.Props{}
 
 func (ft *FileTreeView) Style2D() {
 	fn := ft.FileNode()
@@ -2773,7 +2770,6 @@ func (ft *FileTreeView) Style2D() {
 			} else {
 				ft.Icon = gi.IconName("folder")
 			}
-			ft.SetProp("#branch", fnFolderProps)
 			ft.AddClass("folder")
 		} else {
 			ft.Icon = fn.Info.Ic

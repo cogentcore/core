@@ -1781,42 +1781,44 @@ func (tv *TreeView) ConfigParts() {
 	}
 	config.Add(gi.KiT_Label, "label")
 	mods, updt := tv.Parts.ConfigChildren(config)
-	// if mods {
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
-			wb.SetProp("#icon0", TVBranchProps)
-			wb.SetProp("#icon1", TVBranchProps)
-			wb.SetProp("no-focus", true) // note: cannot be in compiled props
-			wb.Sty.Template = "giv.TreeView.Branch"
-			tv.StylePart(gi.Node2D(wb))
-			// unfortunately StylePart only handles default Style obj -- not
-			// these special styles.. todo: fix this somehow
-			if bprpi, err := tv.PropTry("#branch"); err == nil {
-				switch pr := bprpi.(type) {
-				case map[string]interface{}:
-					wb.SetIconProps(ki.Props(pr))
-				case ki.Props:
-					wb.SetIconProps(pr)
-				}
-			} else {
-				tprops := *kit.Types.Properties(ki.Type(tv), true) // true = makeNew
-				if bprpi, ok := kit.TypeProp(tprops, gi.WidgetDefPropsKey+"#branch"); ok {
+			if wb.Sty.Template != "giv.TreeView.Branch" {
+				wb.SetProp("#icon0", TVBranchProps)
+				wb.SetProp("#icon1", TVBranchProps)
+				wb.SetProp("no-focus", true) // note: cannot be in compiled props
+				wb.Sty.Template = "giv.TreeView.Branch"
+				// unfortunately StylePart only handles default Style obj -- not
+				// these special styles.. todo: fix this somehow
+				if bprpi, err := tv.PropTry("#branch"); err == nil {
 					switch pr := bprpi.(type) {
 					case map[string]interface{}:
 						wb.SetIconProps(ki.Props(pr))
 					case ki.Props:
 						wb.SetIconProps(pr)
 					}
+				} else {
+					tprops := *kit.Types.Properties(ki.Type(tv), true) // true = makeNew
+					if bprpi, ok := kit.TypeProp(tprops, gi.WidgetDefPropsKey+"#branch"); ok {
+						switch pr := bprpi.(type) {
+						case map[string]interface{}:
+							wb.SetIconProps(ki.Props(pr))
+						case ki.Props:
+							wb.SetIconProps(pr)
+						}
+					}
 				}
+				tv.StylePart(gi.Node2D(wb))
+				wb.Style2D() // this is key for getting styling to take effect on first try
 			}
 		}
 	}
-	// }
 	if tv.Icon.IsValid() {
 		if ic, ok := tv.IconPart(); ok {
 			// this only works after a second redraw..
 			// ic.Sty.Template = "giv.TreeView.Icon"
-			if set, _ := ic.SetIcon(string(tv.Icon)); set || tv.NeedsFullReRender() || mods {
+			set, _ := ic.SetIcon(string(tv.Icon))
+			if set || tv.NeedsFullReRender() || tv.RootView.NeedsFullReRender() || mods {
 				tv.StylePart(gi.Node2D(ic))
 			}
 		}

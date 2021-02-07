@@ -248,7 +248,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 	em.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
-		if !ssc.IsVisible() {
+		if !ssc.IsVisible() || ssc.IsRendering() {
 			return
 		}
 		cpop := ssc.Win.CurPopup()
@@ -280,7 +280,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
-		if !ssc.IsVisible() {
+		if !ssc.IsVisible() || ssc.IsRendering() {
 			return
 		}
 		cpop := ssc.Win.CurPopup()
@@ -306,7 +306,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 	em.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
-		if !ssc.IsVisible() {
+		if !ssc.IsVisible() || ssc.IsRendering() {
 			return
 		}
 		cpop := ssc.Win.CurPopup()
@@ -332,7 +332,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		// note: registering HiPri -- we are outside 2D focus system, and get *all* keyboard events
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
-		if !ssc.IsVisible() || !ssc.HasFocus2D() {
+		if !ssc.IsVisible() || !ssc.HasFocus2D() || ssc.IsRendering() {
 			return
 		}
 		cpop := ssc.Win.CurPopup()

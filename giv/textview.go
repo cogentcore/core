@@ -615,7 +615,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 	ly := tv.ParentLayout()
 	if ly != nil {
 		tv.SetFlag(int(TextViewInReLayout))
-		ly.GatherSizes() // can't call Size2D b/c that resets layout
+		gi.GatherSizes(ly) // can't call Size2D b/c that resets layout
 		ly.Layout2DTree()
 		tv.SetFlag(int(TextViewRenderScrolls))
 		tv.ClearFlag(int(TextViewInReLayout))

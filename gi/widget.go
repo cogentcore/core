@@ -122,7 +122,7 @@ var WidgetDefPropsKey = "__DefProps"
 // the default style starting point when creating a new style.  Also stores a
 // "__DefProps"+selector type property of the props used for styling here, for
 // accessing properties that are not compiled into standard Style object.
-func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *gist.Style {
+func DefaultStyle2DWidget(wb *WidgetBase, selector string, part *WidgetBase) *gist.Style {
 	tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
 	styprops := tprops
 	if selector != "" {
@@ -151,9 +151,9 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *g
 		if selector != "" {
 			var baseStyle *gist.Style
 			if part != nil {
-				baseStyle = part.DefaultStyle2DWidget("", nil)
+				baseStyle = DefaultStyle2DWidget(part, "", nil)
 			} else {
-				baseStyle = wb.DefaultStyle2DWidget("", nil)
+				baseStyle = DefaultStyle2DWidget(wb, "", nil)
 			}
 			*dsty = *baseStyle
 		}
@@ -184,7 +184,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
 		wb.Sty.CopyFrom(wb.DefStyle)
 	} else {
-		wb.Sty.CopyFrom(wb.DefaultStyle2DWidget("", nil))
+		wb.Sty.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
 	}
 	wb.Sty.IsSet = false    // this is always first call, restart
 	if wb.Viewport == nil { // robust
@@ -250,7 +250,7 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 	// default style within our type properties..  that's good -- HOWEVER we
 	// cannot put any sub-selector properties within these part styles -- must
 	// all be in the base-level.. hopefully that works..
-	pdst := wb.DefaultStyle2DWidget(stynm, pg)
+	pdst := DefaultStyle2DWidget(wb, stynm, pg)
 	pg.DefStyle = pdst // will use this as starting point for all styles now..
 
 	if ics := pk.Embed(KiT_Icon); ics != nil {
