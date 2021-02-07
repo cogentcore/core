@@ -13,14 +13,14 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[TextViewNeedsRefresh-25]
-	_ = x[TextViewInReLayout-26]
-	_ = x[TextViewRenderScrolls-27]
-	_ = x[TextViewFocusActive-28]
-	_ = x[TextViewHasLineNos-29]
-	_ = x[TextViewLastWasTabAI-30]
-	_ = x[TextViewLastWasUndo-31]
-	_ = x[TextViewFlagsN-32]
+	_ = x[TextViewNeedsRefresh-24]
+	_ = x[TextViewInReLayout-25]
+	_ = x[TextViewRenderScrolls-26]
+	_ = x[TextViewFocusActive-27]
+	_ = x[TextViewHasLineNos-28]
+	_ = x[TextViewLastWasTabAI-29]
+	_ = x[TextViewLastWasUndo-30]
+	_ = x[TextViewFlagsN-31]
 }
 
 const _TextViewFlags_name = "TextViewNeedsRefreshTextViewInReLayoutTextViewRenderScrollsTextViewFocusActiveTextViewHasLineNosTextViewLastWasTabAITextViewLastWasUndoTextViewFlagsN"
@@ -28,9 +28,9 @@ const _TextViewFlags_name = "TextViewNeedsRefreshTextViewInReLayoutTextViewRende
 var _TextViewFlags_index = [...]uint8{0, 20, 38, 59, 78, 96, 116, 135, 149}
 
 func (i TextViewFlags) String() string {
-	i -= 25
+	i -= 24
 	if i < 0 || i >= TextViewFlags(len(_TextViewFlags_index)-1) {
-		return "TextViewFlags(" + strconv.FormatInt(int64(i+25), 10) + ")"
+		return "TextViewFlags(" + strconv.FormatInt(int64(i+24), 10) + ")"
 	}
 	return _TextViewFlags_name[_TextViewFlags_index[i]:_TextViewFlags_index[i+1]]
 }
@@ -38,7 +38,7 @@ func (i TextViewFlags) String() string {
 func StringToTextViewFlags(s string) (TextViewFlags, error) {
 	for i := 0; i < len(_TextViewFlags_index)-1; i++ {
 		if s == _TextViewFlags_name[_TextViewFlags_index[i]:_TextViewFlags_index[i+1]] {
-			return TextViewFlags(i + 25), nil
+			return TextViewFlags(i + 24), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: TextViewFlags")

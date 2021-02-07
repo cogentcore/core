@@ -144,7 +144,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	sk.FuncFields(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		flds = append(flds, k)
 		tnl.Add(typ, "tv_"+k.Name())
-		ft := sk.FieldTag(k.Name(), vcprop)
+		ft := ki.FieldTag(sk.This(), k.Name(), vcprop)
 		cls := false
 		if vc, ok := kit.ToBool(ft); ok && vc {
 			cls = true

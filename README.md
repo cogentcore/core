@@ -95,8 +95,6 @@ Node2D methods to hide:
 
 * DisconnectViewport
 
-* ki -- SetDepth not really needed
-
 * AllocFromParent
 
 * BoxSpace, RenderStdBox -- all can be in Widget as just funcs

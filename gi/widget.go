@@ -616,7 +616,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.SetFlag(int(VpFlagPopupDestroyAll)) // nuke it all
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutVert
-	frame.SetProps(TooltipFrameProps, ki.NoUpdate)
+	frame.Properties().CopyFrom(TooltipFrameProps, ki.DeepCopy)
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
 	lbl.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
