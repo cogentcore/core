@@ -319,19 +319,6 @@ func (sl *Slice) TypeAndNames() kit.TypeAndNameList {
 	return tn
 }
 
-// NameToIndexMap returns a Name to Index map for faster lookup when needing to
-// do a lot of name lookups on same fixed slice.
-func (sl *Slice) NameToIndexMap() map[string]int {
-	if len(*sl) == 0 {
-		return nil
-	}
-	nim := make(map[string]int, len(*sl))
-	for i, kid := range *sl {
-		nim[kid.Name()] = i
-	}
-	return nim
-}
-
 ///////////////////////////////////////////////////////////////////////////
 // Config
 
