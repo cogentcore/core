@@ -226,15 +226,9 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 
 // AddAst adds a child Ast node to given parent Ast node
 func (ps *State) AddAst(parAst *Ast, rule string, reg lex.Reg) *Ast {
-	var chAst *Ast
-	if !GuiActive {
-		chAst = &Ast{}
-		chAst.InitName(chAst, rule)
-		chAst.UniqueNm = rule
-		parAst.AddChildFast(chAst)
-	} else {
-		chAst = parAst.AddNewChild(KiT_Ast, rule).(*Ast)
-	}
+	chAst := &Ast{}
+	chAst.InitName(chAst, rule)
+	parAst.AddChild(chAst)
 	chAst.SetTokReg(reg, ps.Src)
 	return chAst
 }

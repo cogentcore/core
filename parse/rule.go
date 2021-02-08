@@ -28,7 +28,7 @@ import (
 // Set GuiActive to true if the gui (piview) is active -- ensures that the
 // Ast tree is updated when nodes are swapped in reverse mode, and maybe
 // other things
-var GuiActive = true // false
+var GuiActive = false
 
 // DepthLimit is the infinite recursion prevention cutoff
 var DepthLimit = 10000
@@ -216,7 +216,7 @@ func (pr *Rule) SetRuleMap(ps *State) {
 	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d interface{}) bool {
 		pri := k.(*Rule)
 		if epr, has := RuleMap[pri.Nm]; has {
-			ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.PathUnique(), epr.PathUnique()), pri)
+			ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.Path(), epr.Path()), pri)
 		} else {
 			RuleMap[pri.Nm] = pri
 		}
@@ -534,7 +534,7 @@ func (pr *Rule) Validate(ps *State) bool {
 		pr.CompileTokMap(ps)
 	}
 
-	if len(pr.Rules) == 0 && !pr.HasChildren() && !pr.IsRoot() {
+	if len(pr.Rules) == 0 && !pr.HasChildren() && !ki.IsRoot(pr) {
 		ps.Error(lex.PosZero, "Validate: rule has no rules and no children", pr)
 		valid = false
 	}
@@ -1242,11 +1242,11 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 		// prf.End()
 		trcAst = ourAst
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, Run, scope.St, scope, trcAst, fmt.Sprintf("running with new ast: %v", trcAst.PathUnique()))
+			ps.Trace.Out(ps, pr, Run, scope.St, scope, trcAst, fmt.Sprintf("running with new ast: %v", trcAst.Path()))
 		}
 	} else {
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, Run, scope.St, scope, trcAst, fmt.Sprintf("running with par ast: %v", trcAst.PathUnique()))
+			ps.Trace.Out(ps, pr, Run, scope.St, scope, trcAst, fmt.Sprintf("running with par ast: %v", trcAst.Path()))
 		}
 	}
 
@@ -1429,16 +1429,16 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 	}
 	// our AST is now backwards -- need to swap them
 	if len(ourAst.Kids) == 2 {
-		ourAst.SwapChildren(0, 1)
-		if GuiActive {
-			// we have a very strange situation here: the tree view of the Ast will typically
-			// have two children, named identically (e.g., Expr, Expr) and it will not update
-			// after our swap.  If we could use UniqNames then it would be ok, but that doesn't
-			// work for treeview names.. really need an option that supports uniqname AND reg names
-			// https://github.com/goki/ki/issues/2
-			ourAst.AddNewChild(KiT_Ast, "Dummy")
-			ourAst.DeleteChildAtIndex(2, true)
-		}
+		ourAst.Kids.Swap(0, 1)
+		// if GuiActive {
+		// we have a very strange situation here: the tree view of the Ast will typically
+		// have two children, named identically (e.g., Expr, Expr) and it will not update
+		// after our swap.  If we could use UniqNames then it would be ok, but that doesn't
+		// work for treeview names.. really need an option that supports uniqname AND reg names
+		// https://github.com/goki/ki/issues/2
+		// ourAst.AddNewChild(KiT_Ast, "Dummy")
+		// ourAst.DeleteChildAtIndex(2, true)
+		// }
 	}
 
 	ps.Pos = epos
@@ -1479,7 +1479,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	if useAst == nil {
 		useAst = parAst
 	}
-	apath := useAst.PathUnique()
+	apath := useAst.Path()
 	var node ki.Ki
 	var adnl []ki.Ki // additional nodes
 	var err error
@@ -1495,9 +1495,9 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			}
 			var nd ki.Ki
 			if p[:3] == "../" {
-				nd, err = parAst.FindPathUniqueTry(p[3:])
+				nd, err = parAst.FindPathTry(p[3:])
 			} else {
-				nd, err = useAst.FindPathUniqueTry(p)
+				nd, err = useAst.FindPathTry(p)
 			}
 			if err == nil {
 				if node == nil {
@@ -1524,9 +1524,9 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 				p = strings.TrimSuffix(p, "...")
 			}
 			if p[:3] == "../" {
-				node, err = parAst.FindPathUniqueTry(p[3:])
+				node, err = parAst.FindPathTry(p[3:])
 			} else {
-				node, err = useAst.FindPathUniqueTry(p)
+				node, err = useAst.FindPathTry(p)
 			}
 			if err == nil {
 				if findAll {
@@ -1721,7 +1721,7 @@ func (pr *Rule) Find(find string) []*Rule {
 // WriteGrammar outputs the parser rules as a formatted grammar in a BNF-like format
 // it is called recursively
 func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
-	if pr.IsRoot() {
+	if ki.IsRoot(pr) {
 		for _, k := range pr.Kids {
 			pri := k.(*Rule)
 			pri.WriteGrammar(writer, depth)

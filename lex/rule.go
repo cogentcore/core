@@ -136,7 +136,7 @@ func (lr *Rule) CompileNameMap(ls *State) bool {
 // returns true if valid (no err) and false if invalid (errs)
 func (lr *Rule) Validate(ls *State) bool {
 	valid := true
-	if !lr.IsRoot() {
+	if !ki.IsRoot(lr) {
 		switch lr.Match {
 		case StrName:
 			fallthrough
@@ -475,7 +475,7 @@ func (lr *Rule) Find(find string) []*Rule {
 // WriteGrammar outputs the lexer rules as a formatted grammar in a BNF-like format
 // it is called recursively
 func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
-	if lr.IsRoot() {
+	if ki.IsRoot(lr) {
 		for _, k := range lr.Kids {
 			lri := k.(*Rule)
 			lri.WriteGrammar(writer, depth)

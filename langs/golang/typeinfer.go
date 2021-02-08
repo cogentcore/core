@@ -85,7 +85,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 					} else {
 						sy.Type = TypeErr // actively mark as err so not re-processed
 						if TraceTypes {
-							fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
+							fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ast: %v\n", sy.Name, astyp.Path())
 							astyp.WriteTree(os.Stdout, 0)
 						}
 					}
@@ -117,7 +117,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 					} else {
 						sy.Type = TypeErr
 						if TraceTypes {
-							fmt.Printf("InferSymbolType: NameConstant: %v NOT resolved from ast: %v\n", sy.Name, ffc.PathUnique())
+							fmt.Printf("InferSymbolType: NameConstant: %v NOT resolved from ast: %v\n", sy.Name, ffc.Path())
 							ffc.WriteTree(os.Stdout, 1)
 						}
 					}
@@ -150,7 +150,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 					} else {
 						sy.Type = TypeErr // actively mark as err so not re-processed
 						if TraceTypes {
-							fmt.Printf("InferSymbolType: NameType: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
+							fmt.Printf("InferSymbolType: NameType: %v NOT resolved from ast: %v\n", sy.Name, astyp.Path())
 							ast.WriteTree(os.Stdout, 1)
 						}
 					}
@@ -205,7 +205,7 @@ func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg
 	if !ok {
 		sy.Type = TypeErr // actively mark as err so not re-processed
 		if TraceTypes {
-			fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ForRange ast: %v\n", sy.Name, astyp.PathUnique())
+			fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ForRange ast: %v\n", sy.Name, astyp.Path())
 			astyp.WriteTree(os.Stdout, 0)
 		}
 		return

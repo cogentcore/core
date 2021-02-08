@@ -12,6 +12,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/goki/ki/ki"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
@@ -274,8 +275,8 @@ func (pr *Parser) ParseString(str string, fname string, sup filecat.Supported) *
 func (pr *Parser) ReadJSON(b []byte) error {
 	err := json.Unmarshal(b, pr)
 	if err == nil {
-		pr.Lexer.UnmarshalPost()
-		pr.Parser.UnmarshalPost()
+		ki.UnmarshalPost(pr.Lexer.This())
+		ki.UnmarshalPost(pr.Parser.This())
 	}
 	return err
 }

@@ -117,7 +117,7 @@ func (pt *TraceOpts) Out(ps *State, pr *Rule, step Steps, pos lex.Pos, scope lex
 	for i := 0; i < plev; i++ {
 		ind += "\t"
 	}
-	fmt.Fprintf(pt.OutWrite, "%v%v:\t %v\t %v\t tok: %v\t scope: %v\t ast: %v\n", ind, pr.Name(), step, msg, tokSrc, scope, ast.PathUnique())
+	fmt.Fprintf(pt.OutWrite, "%v%v:\t %v\t %v\t tok: %v\t scope: %v\t ast: %v\n", ind, pr.Name(), step, msg, tokSrc, scope, ast.Path())
 	if pt.ScopeSrc {
 		scopeSrc := ps.Src.TokenRegSrc(scope)
 		fmt.Fprintf(pt.OutWrite, "%v\t%v\n", ind, scopeSrc)
