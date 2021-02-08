@@ -110,7 +110,7 @@ func (n *Node) ReadJSON(reader io.Reader) error {
 	// todo: use json.NewDecoder, Decode instead -- need to deal with TypePrefix etc above
 	err = json.Unmarshal(b[stidx:], n.This()) // key use of this!
 	if err == nil {
-		n.UnmarshalPost()
+		UnmarshalPost(n.This())
 	}
 	n.SetChildAdded() // this might not be set..
 	n.UpdateEnd(updt)
@@ -152,7 +152,7 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 		updt := root.UpdateStart()
 		err = json.Unmarshal(b[bodyidx:], root)
 		if err == nil {
-			root.UnmarshalPost()
+			UnmarshalPost(root)
 		}
 		root.SetChildAdded() // this might not be set..
 		root.UpdateEnd(updt)
@@ -215,7 +215,7 @@ func (n *Node) ReadXML(reader io.Reader) error {
 	updt := n.UpdateStart()
 	err = xml.Unmarshal(b, n.This()) // key use of this!
 	if err == nil {
-		n.UnmarshalPost()
+		UnmarshalPost(n.This())
 	}
 	n.SetChildAdded() // this might not be set..
 	n.UpdateEnd(updt)
@@ -224,19 +224,19 @@ func (n *Node) ReadXML(reader io.Reader) error {
 
 // ParentAllChildren walks the tree down from current node and call
 // SetParent on all children -- needed after an Unmarshal.
-func (n *Node) ParentAllChildren() {
-	for _, child := range *n.Children() {
+func ParentAllChildren(kn Ki) {
+	for _, child := range *kn.Children() {
 		if child != nil {
-			child.AsNode().Par = n.This()
-			child.ParentAllChildren()
+			child.AsNode().Par = kn
+			ParentAllChildren(child)
 		}
 	}
 }
 
 // UnmarshalPost must be called after an Unmarshal -- calls
 // ParentAllChildren.
-func (n *Node) UnmarshalPost() {
-	n.ParentAllChildren()
+func UnmarshalPost(kn Ki) {
+	ParentAllChildren(kn)
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -615,13 +615,6 @@ type Ki interface {
 	// ReadXML reads the tree from an XML-encoded byte string over io.Reader, calls
 	// UnmarshalPost to recover pointers from paths.
 	ReadXML(reader io.Reader) error
-
-	// ParentAllChildren walks the tree down from current node and call
-	// SetParent on all children -- needed after an Unmarshal.
-	ParentAllChildren()
-
-	// UnmarshalPost must be called after an Unmarshal -- calls ParentAllChildren.
-	UnmarshalPost()
 }
 
 // see node.go for struct implementing this interface
