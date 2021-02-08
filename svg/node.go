@@ -204,6 +204,11 @@ func StyleSVG(gii gi.Node2D) {
 
 	// todo: do StyleMu for SVG nodes, then can access viewport directly
 	mvp = g.ViewportSafe()
+	ctxt := mvp.This().(gist.Context)
+	psvg := ParentSVG(g)
+	if psvg != nil {
+		ctxt = psvg.This().(gist.Context)
+	}
 
 	mvp.SetCurStyleNode(gii)
 	defer mvp.SetCurStyleNode(nil)
@@ -213,9 +218,9 @@ func StyleSVG(gii gi.Node2D) {
 	pp := g.ParentPaint()
 	if pp != nil {
 		pc.CopyStyleFrom(pp)
-		pc.SetStyleProps(pp, *gii.Properties(), g.Viewport)
+		pc.SetStyleProps(pp, *gii.Properties(), ctxt)
 	} else {
-		pc.SetStyleProps(nil, *gii.Properties(), g.Viewport)
+		pc.SetStyleProps(nil, *gii.Properties(), ctxt)
 	}
 	// pc.SetUnitContext(g.Viewport, mat32.Vec2Zero)
 	pc.ToDotsImpl(&pc.UnContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
@@ -281,7 +286,7 @@ func (g *NodeBase) Style2D() {
 }
 
 // ParentSVG returns the parent SVG viewport
-func (g *NodeBase) ParentSVG() *SVG {
+func ParentSVG(g *gi.Node2DBase) *SVG {
 	pvp := g.ParentViewport()
 	for pvp != nil {
 		if pvp.IsSVG() {
@@ -355,7 +360,13 @@ func (g *NodeBase) FindSVGURL(url string) gi.Node2D {
 	}
 	url = strings.TrimPrefix(url, "url(")
 	url = strings.TrimSuffix(url, ")")
-	rv := g.FindNamedElement(url)
+	psvg := ParentSVG(g.AsNode2D())
+	var rv gi.Node2D
+	if psvg != nil {
+		rv = psvg.FindNamedElement(url)
+	} else {
+		rv = g.FindNamedElement(url)
+	}
 	if rv == nil {
 		log.Printf("gi.svg FindSVGURL could not find element named: %v in parents of svg el: %v\n", url, g.Path())
 	}

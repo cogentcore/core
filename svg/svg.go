@@ -37,6 +37,7 @@ type SVG struct {
 	Defs      Group            `desc:"all defs defined elements go here (gradients, symbols, etc)"`
 	Title     string           `xml:"title" desc:"the title of the svg"`
 	Desc      string           `xml:"desc" desc:"the description of the svg"`
+	DefIdxs   map[string]int   `json:"-" xml:"-" desc:"map of def names to index -- uses starting index to find element -- always updated after each search"`
 	UniqueIds map[int]struct{} `json:"-" xml:"-" desc:"map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds"`
 }
 
@@ -143,6 +144,34 @@ func SetUnitContext(pc *gist.Paint, vp *gi.Viewport2D, el mat32.Vec2) {
 	pc.ToDots()
 }
 
+// ContextColorSpecByURL finds a Node by an element name (URL-like path), and
+// attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
+// Used for colorspec styling based on url() value.
+func (sv *SVG) ContextColorSpecByURL(url string) *gist.ColorSpec {
+	if sv == nil {
+		return nil
+	}
+	sv.StyleMu.RLock()
+	defer sv.StyleMu.RUnlock()
+
+	val := url[4:]
+	val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
+	def := sv.FindDefByName(val)
+	if def != nil {
+		if grad, ok := def.(*gi.Gradient); ok {
+			return &grad.Grad
+		}
+	}
+	if sv.CurStyleNode == nil {
+		return nil
+	}
+	ne := sv.CurStyleNode.FindNamedElement(val)
+	if grad, ok := ne.(*gi.Gradient); ok {
+		return &grad.Grad
+	}
+	return nil
+}
+
 func (sv *SVG) StyleSVG() {
 	sv.StyMu.Lock()
 
@@ -197,6 +226,25 @@ func (sv *SVG) Render2D() {
 	}
 }
 
+// FindDefByName finds Defs item by name, using cached indexes for speed
+func (sv *SVG) FindDefByName(grnm string) gi.Node2D {
+	if sv.DefIdxs == nil {
+		sv.DefIdxs = make(map[string]int)
+	}
+	idx, has := sv.DefIdxs[grnm]
+	if !has {
+		idx = len(sv.Defs.Kids) / 2
+	}
+	idx, has = sv.Defs.Kids.IndexByName(grnm, idx)
+	if has {
+		sv.DefIdxs[grnm] = idx
+		return sv.Defs.Kids[idx].(gi.Node2D)
+	} else {
+		delete(sv.DefIdxs, grnm)
+	}
+	return nil
+}
+
 func (sv *SVG) FindNamedElement(name string) gi.Node2D {
 	name = strings.TrimPrefix(name, "#")
 	if name == "" {
@@ -207,7 +255,7 @@ func (sv *SVG) FindNamedElement(name string) gi.Node2D {
 		return sv.This().(gi.Node2D)
 	}
 
-	def := sv.Defs.ChildByName(name, 0)
+	def := sv.FindDefByName(name)
 	if def != nil {
 		return def.(gi.Node2D)
 	}
