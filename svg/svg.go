@@ -5,10 +5,14 @@
 package svg
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"log"
+	"math/rand"
+	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
@@ -26,14 +30,14 @@ import (
 // in UpdateStart / End loop.
 type SVG struct {
 	gi.Viewport2D
-	ViewBox   ViewBox             `desc:"viewbox defines the coordinate system for the drawing"`
-	Norm      bool                `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
-	InvertY   bool                `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
-	Pnt       girl.Paint          `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
-	Defs      Group               `desc:"all defs defined elements go here (gradients, symbols, etc)"`
-	Title     string              `xml:"title" desc:"the title of the svg"`
-	Desc      string              `xml:"desc" desc:"the description of the svg"`
-	UniqNames map[string]struct{} `json:"-" xml:"-" desc:"map of unique names for all elements -- used for allocating new unique names -- see NewUniqName, RenameAll"`
+	ViewBox   ViewBox          `desc:"viewbox defines the coordinate system for the drawing"`
+	Norm      bool             `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
+	InvertY   bool             `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
+	Pnt       girl.Paint       `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
+	Defs      Group            `desc:"all defs defined elements go here (gradients, symbols, etc)"`
+	Title     string           `xml:"title" desc:"the title of the svg"`
+	Desc      string           `xml:"desc" desc:"the description of the svg"`
+	UniqueIds map[int]struct{} `json:"-" xml:"-" desc:"map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds"`
 }
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, SVGProps)
@@ -47,74 +51,75 @@ func AddNewSVG(parent ki.Ki, name string) *SVG {
 	return parent.AddNewChild(KiT_SVG, name).(*SVG)
 }
 
-func (svg *SVG) CopyFieldsFrom(frm interface{}) {
+func (sv *SVG) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*SVG)
-	svg.Viewport2D.CopyFieldsFrom(&fr.Viewport2D)
-	svg.ViewBox = fr.ViewBox
-	svg.Norm = fr.Norm
-	svg.InvertY = fr.InvertY
-	svg.Pnt = fr.Pnt
-	svg.Defs.CopyFrom(&fr.Defs)
-	svg.Title = fr.Title
-	svg.Desc = fr.Desc
+	sv.Viewport2D.CopyFieldsFrom(&fr.Viewport2D)
+	sv.ViewBox = fr.ViewBox
+	sv.Norm = fr.Norm
+	sv.InvertY = fr.InvertY
+	sv.Pnt = fr.Pnt
+	sv.Defs.CopyFrom(&fr.Defs)
+	sv.Title = fr.Title
+	sv.Desc = fr.Desc
+	sv.UniqueIds = nil
 }
 
 // Paint satisfies the painter interface
-func (svg *SVG) Paint() *gist.Paint {
-	return &svg.Pnt.Paint
+func (sv *SVG) Paint() *gist.Paint {
+	return &sv.Pnt.Paint
 }
 
 // DeleteAll deletes any existing elements in this svg
-func (svg *SVG) DeleteAll() {
-	updt := svg.UpdateStart()
-	svg.DeleteChildren(ki.DestroyKids)
-	svg.ViewBox.Defaults()
-	svg.Pnt.Defaults()
-	svg.Defs.DeleteChildren(ki.DestroyKids)
-	svg.Title = ""
-	svg.Desc = ""
-	svg.UpdateEnd(updt)
+func (sv *SVG) DeleteAll() {
+	updt := sv.UpdateStart()
+	sv.DeleteChildren(ki.DestroyKids)
+	sv.ViewBox.Defaults()
+	sv.Pnt.Defaults()
+	sv.Defs.DeleteChildren(ki.DestroyKids)
+	sv.Title = ""
+	sv.Desc = ""
+	sv.UpdateEnd(updt)
 }
 
 // SetNormXForm sets a scaling transform to make the entire viewbox to fit the viewport
-func (svg *SVG) SetNormXForm() {
-	pc := &svg.Pnt
+func (sv *SVG) SetNormXForm() {
+	pc := &sv.Pnt
 	pc.XForm = mat32.Identity2D()
-	if svg.ViewBox.Size != mat32.Vec2Zero {
+	if sv.ViewBox.Size != mat32.Vec2Zero {
 		// todo: deal with all the other options!
-		vpsX := float32(svg.Geom.Size.X) / svg.ViewBox.Size.X
-		vpsY := float32(svg.Geom.Size.Y) / svg.ViewBox.Size.Y
-		if svg.InvertY {
+		vpsX := float32(sv.Geom.Size.X) / sv.ViewBox.Size.X
+		vpsY := float32(sv.Geom.Size.Y) / sv.ViewBox.Size.Y
+		if sv.InvertY {
 			vpsY *= -1
 		}
-		svg.Pnt.XForm = svg.Pnt.XForm.Scale(vpsX, vpsY).Translate(-svg.ViewBox.Min.X, -svg.ViewBox.Min.Y)
-		if svg.InvertY {
-			svg.Pnt.XForm.Y0 = -svg.Pnt.XForm.Y0
+		sv.Pnt.XForm = sv.Pnt.XForm.Scale(vpsX, vpsY).Translate(-sv.ViewBox.Min.X, -sv.ViewBox.Min.Y)
+		if sv.InvertY {
+			sv.Pnt.XForm.Y0 = -sv.Pnt.XForm.Y0
 		}
 	}
 }
 
 // SetDPIXForm sets a scaling transform to compensate for the dpi -- svg
 // rendering is done within a 96 DPI context
-func (svg *SVG) SetDPIXForm() {
-	pc := &svg.Pnt
-	dpisc := svg.ParentWindow().LogicalDPI() / 96.0
+func (sv *SVG) SetDPIXForm() {
+	pc := &sv.Pnt
+	dpisc := sv.ParentWindow().LogicalDPI() / 96.0
 	pc.XForm = mat32.Scale2D(dpisc, dpisc)
 }
 
-func (svg *SVG) Init2D() {
-	svg.Viewport2D.Init2D()
-	svg.SetFlag(int(gi.VpFlagSVG)) // we are an svg type
-	svg.Pnt.Defaults()
-	svg.Pnt.FontStyle.BgColor.SetColor(color.White)
+func (sv *SVG) Init2D() {
+	sv.Viewport2D.Init2D()
+	sv.SetFlag(int(gi.VpFlagSVG)) // we are an svg type
+	sv.Pnt.Defaults()
+	sv.Pnt.FontStyle.BgColor.SetColor(color.White)
 }
 
-func (svg *SVG) Size2D(iter int) {
-	svg.InitLayout2D()
-	if svg.ViewBox.Size != mat32.Vec2Zero {
-		svg.LayState.Alloc.Size = svg.ViewBox.Size
+func (sv *SVG) Size2D(iter int) {
+	sv.InitLayout2D()
+	if sv.ViewBox.Size != mat32.Vec2Zero {
+		sv.LayState.Alloc.Size = sv.ViewBox.Size
 	}
-	svg.Size2DAddSpace()
+	sv.Size2DAddSpace()
 }
 
 // SetUnitContext sets the unit context based on size of viewport and parent
@@ -138,80 +143,80 @@ func SetUnitContext(pc *gist.Paint, vp *gi.Viewport2D, el mat32.Vec2) {
 	pc.ToDots()
 }
 
-func (svg *SVG) StyleSVG() {
-	svg.StyMu.Lock()
+func (sv *SVG) StyleSVG() {
+	sv.StyMu.Lock()
 
-	hasTempl, saveTempl := svg.Sty.FromTemplate()
+	hasTempl, saveTempl := sv.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
-		svg.Style2DWidget()
+		sv.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		svg.Sty.SaveTemplate()
+		sv.Sty.SaveTemplate()
 	}
-	svg.Pnt.Defaults()
-	svg.StyMu.Unlock()
-	StyleSVG(svg.This().(gi.Node2D))
-	SetUnitContext(&svg.Pnt.Paint, svg.AsViewport2D(), svg.ViewBox.Size) // context is viewbox
+	sv.Pnt.Defaults()
+	sv.StyMu.Unlock()
+	StyleSVG(sv.This().(gi.Node2D))
+	SetUnitContext(&sv.Pnt.Paint, sv.AsViewport2D(), sv.ViewBox.Size) // context is viewbox
 }
 
-func (svg *SVG) Style2D() {
-	svg.StyleSVG()
-	svg.StyMu.Lock()
-	svg.LayState.SetFromStyle(&svg.Sty.Layout) // also does reset
-	svg.StyMu.Unlock()
-	if nv, err := svg.PropTry("norm"); err == nil {
-		svg.Norm, _ = kit.ToBool(nv)
+func (sv *SVG) Style2D() {
+	sv.StyleSVG()
+	sv.StyMu.Lock()
+	sv.LayState.SetFromStyle(&sv.Sty.Layout) // also does reset
+	sv.StyMu.Unlock()
+	if nv, err := sv.PropTry("norm"); err == nil {
+		sv.Norm, _ = kit.ToBool(nv)
 	}
-	if iv, err := svg.PropTry("invert-y"); err == nil {
-		svg.InvertY, _ = kit.ToBool(iv)
+	if iv, err := sv.PropTry("invert-y"); err == nil {
+		sv.InvertY, _ = kit.ToBool(iv)
 	}
 }
 
-func (svg *SVG) Layout2D(parBBox image.Rectangle, iter int) bool {
-	svg.Layout2DBase(parBBox, true, iter)
+func (sv *SVG) Layout2D(parBBox image.Rectangle, iter int) bool {
+	sv.Layout2DBase(parBBox, true, iter)
 	// do not call layout on children -- they don't do it
 	// this is too late to affect anything
 	// svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size)
 	return false
 }
 
-func (svg *SVG) Render2D() {
-	if svg.PushBounds() {
-		rs := &svg.Render
-		if svg.Fill {
-			svg.FillViewport()
+func (sv *SVG) Render2D() {
+	if sv.PushBounds() {
+		rs := &sv.Render
+		if sv.Fill {
+			sv.FillViewport()
 		}
-		if svg.Norm {
-			svg.SetNormXForm()
+		if sv.Norm {
+			sv.SetNormXForm()
 		}
-		rs.PushXForm(svg.Pnt.XForm)
-		svg.Render2DChildren() // we must do children first, then us!
-		svg.PopBounds()
+		rs.PushXForm(sv.Pnt.XForm)
+		sv.Render2DChildren() // we must do children first, then us!
+		sv.PopBounds()
 		rs.PopXForm()
-		svg.RenderViewport2D() // update our parent image
+		sv.RenderViewport2D() // update our parent image
 	}
 }
 
-func (svg *SVG) FindNamedElement(name string) gi.Node2D {
+func (sv *SVG) FindNamedElement(name string) gi.Node2D {
 	name = strings.TrimPrefix(name, "#")
 	if name == "" {
 		log.Printf("gi.SVG FindNamedElement: name is empty\n")
 		return nil
 	}
-	if svg.Nm == name {
-		return svg.This().(gi.Node2D)
+	if sv.Nm == name {
+		return sv.This().(gi.Node2D)
 	}
 
-	def := svg.Defs.ChildByName(name, 0)
+	def := sv.Defs.ChildByName(name, 0)
 	if def != nil {
 		return def.(gi.Node2D)
 	}
 
-	if svg.Par == nil {
+	if sv.Par == nil {
 		log.Printf("gi.SVG FindNamedElement: could not find name: %v\n", name)
 		return nil
 	}
-	pgi, _ := gi.KiToNode2D(svg.Par)
+	pgi, _ := gi.KiToNode2D(sv.Par)
 	if pgi != nil {
 		return pgi.FindNamedElement(name)
 	}
@@ -219,6 +224,64 @@ func (svg *SVG) FindNamedElement(name string) gi.Node2D {
 	return nil
 }
 
-func (svg *SVG) NewUniqName() string {
-	return ""
+/////////////////////////////////////////////////////////////////////////////
+//   Naming elements with unique id's
+
+// SplitNameId splits name at any portion starting with a digit character,
+// returning name part prior to that, and numerical part thereafter.
+// if numerical id part is 0, then it wasn't there, or didn't parse.
+// SVG object names are type names + numerical id
+func SplitNameId(nm string) (string, int) {
+	for i, r := range nm {
+		if unicode.IsDigit(r) {
+			id, _ := strconv.Atoi(nm[i:])
+			return nm[:i], id
+		}
+	}
+	return nm, 0
+}
+
+// NameId returns the name with given unique id
+func NameId(nm string, id int) string {
+	return fmt.Sprintf("%s%d", nm, id)
+}
+
+// GatherIds gathers all the numeric id suffixes currently in use.
+// It automatically renames any that are not unique or empty.
+func (sv *SVG) GatherIds() {
+	sv.UniqueIds = make(map[int]struct{})
+	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		nm, id := SplitNameId(k.Name())
+		_, has := sv.UniqueIds[id]
+		if id <= 0 || has {
+			id = sv.NewUniqueId() // automatically registers it
+			k.SetName(NameId(nm, id))
+		}
+		return ki.Continue
+	})
+}
+
+// NewUniqueId returns a new unique numerical id number, for naming an object
+func (sv *SVG) NewUniqueId() int {
+	if sv.UniqueIds == nil {
+		sv.GatherIds()
+	}
+	sz := len(sv.UniqueIds)
+	var nid int
+	for {
+		switch {
+		case sz >= 10000:
+			nid = rand.Intn(sz * 100)
+		case sz >= 1000:
+			nid = rand.Intn(10000)
+		default:
+			nid = rand.Intn(1000)
+		}
+		if _, has := sv.UniqueIds[nid]; has {
+			continue
+		}
+		break
+	}
+	sv.UniqueIds[nid] = struct{}{}
+	return nid
 }

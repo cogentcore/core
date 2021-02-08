@@ -28,6 +28,8 @@ func AddNewCircle(parent ki.Ki, name string, x, y, radius float32) *Circle {
 	return g
 }
 
+func (g *Circle) SVGName() string { return "circle" }
+
 func (g *Circle) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Circle)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

@@ -27,6 +27,8 @@ func AddNewPolygon(parent ki.Ki, name string, points []mat32.Vec2) *Polygon {
 	return g
 }
 
+func (g *Polygon) SVGName() string { return "polygon" }
+
 func (g *Polygon) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Polygon)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

@@ -18,7 +18,7 @@ import (
 )
 
 // Text renders SVG text-- it handles both text and tspan elements (a tspan is
-// just nested under a parent text)
+// just nested under a parent text, text has empty Text string)
 type Text struct {
 	NodeBase
 	Pos          mat32.Vec2 `xml:"{x,y}" desc:"position of the left, baseline of the text"`
@@ -42,6 +42,13 @@ func AddNewText(parent ki.Ki, name string, x, y float32, text string) *Text {
 	g.Pos.Set(x, y)
 	g.Text = text
 	return g
+}
+
+func (g *Text) SVGName() string {
+	if len(g.Text) == 0 {
+		return "text"
+	}
+	return "tspan"
 }
 
 func (g *Text) CopyFieldsFrom(frm interface{}) {
@@ -142,6 +149,8 @@ func (g *Text) Render2D() {
 		// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
 		g.TextRender.Render(rs, pos)
 		g.ComputeBBoxSVG()
+	} else {
+
 	}
 	g.Render2DChildren()
 	rs.PopXForm()

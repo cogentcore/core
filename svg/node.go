@@ -50,6 +50,9 @@ type NodeSVG interface {
 	// ReadGeom reads the geometry of the node from a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
 	ReadGeom(dat []float32)
+
+	// SVGName returns the SVG element name (e.g., "rect", "path" etc)
+	SVGName() string
 }
 
 // svg.NodeBase is an element within the SVG sub-scenegraph -- does not use
@@ -74,6 +77,10 @@ func (g *NodeBase) CopyFieldsFrom(frm interface{}) {
 
 func (g *NodeBase) AsSVGNode() *NodeBase {
 	return g
+}
+
+func (g *NodeBase) SVGName() string {
+	return "base"
 }
 
 func (n *NodeBase) BaseIface() reflect.Type {

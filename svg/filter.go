@@ -23,6 +23,8 @@ func AddNewFilter(parent ki.Ki, name string) *Filter {
 	return parent.AddNewChild(KiT_Filter, name).(*Filter)
 }
 
+func (g *Filter) SVGName() string { return "filter" }
+
 func (g *Filter) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Filter)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

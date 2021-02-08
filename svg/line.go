@@ -29,6 +29,8 @@ func AddNewLine(parent ki.Ki, name string, sx, sy, ex, ey float32) *Line {
 	return g
 }
 
+func (g *Line) SVGName() string { return "line" }
+
 func (g *Line) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Line)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

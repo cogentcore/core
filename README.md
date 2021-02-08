@@ -69,7 +69,7 @@ The `oswin` and `gpu` packages provide interface abstractions for hardware-level
 
 All of the main "front end" code just deals with `image.RGBA` through the [girl](https://github.com/goki/gi/tree/master/girl) rendering library, using `girl.Paint` methods, which was adapted from https://github.com/fogleman/gg, and we use https://github.com/srwiley/rasterx for CPU-based rasterization to the image, which is fast and SVG performant.   The `Viewport2D` image is uploaded to a GPU-backed `oswin.Texture` and composited with sprite overlays up to the window.
 
-# Status
+# Status / News
 
 * Version 1.1 released Nov, 2020, has the styling parameters and code broken out in the [gist](https://github.com/goki/gi/tree/master/gist) style package, and basic rendering code, including a complete text layout and rendering system, in the [girl](https://github.com/goki/gi/tree/master/girl) render library.
 
@@ -81,21 +81,4 @@ All of the main "front end" code just deals with `image.RGBA` through the [girl]
 
 * 3/2019: `python` wrapper is now available!  you can do most of GoGi from python now.  See [README.md](https://github.com/goki/gi/tree/master/python/README.md) file there for more details.
 
-#################
-
-Issues: 
-
-Node2D methods to hide:
-
-* ParentCSSAgg
-
-* DisconnectViewport
-
-* AllocFromParent
-
-* BoxSpace, RenderStdBox -- all can be in Widget as just funcs
-
-* Many of the layout methods can be separate funcs
-
-* BBoxReport, ComputeBBox2DBase -- lots of basic non-overridden, non-interface methods..
 

@@ -43,7 +43,7 @@ var (
 )
 
 // OpenXML Opens XML-formatted SVG input from given file
-func (svg *SVG) OpenXML(filename string) error {
+func (sv *SVG) OpenXML(filename string) error {
 	fi, err := os.Stat(filename)
 	if err != nil {
 		log.Println(err)
@@ -60,7 +60,7 @@ func (svg *SVG) OpenXML(filename string) error {
 		log.Println(err)
 		return err
 	}
-	return svg.ReadXML(bufio.NewReader(fp))
+	return sv.ReadXML(bufio.NewReader(fp))
 }
 
 // ReadXML reads XML-formatted SVG input from io.Reader, and uses
@@ -69,7 +69,9 @@ func (svg *SVG) OpenXML(filename string) error {
 // bytes.NewReader([]byte(str)) -- all errors are logged and also returned.
 // If this is being read into a live scenegraph, then you MUST call
 // 	svg.FullInit2DTree() after to initialize it for rendering.
-func (svg *SVG) ReadXML(reader io.Reader) error {
+func (sv *SVG) ReadXML(reader io.Reader) error {
+	updt := sv.UpdateStart()
+	sv.SetFullReRender()
 	decoder := xml.NewDecoder(reader)
 	decoder.Strict = false
 	decoder.AutoClose = xml.HTMLAutoClose
@@ -88,11 +90,12 @@ func (svg *SVG) ReadXML(reader io.Reader) error {
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
-			err = svg.UnmarshalXML(decoder, se)
+			err = sv.UnmarshalXML(decoder, se)
 			break
 			// todo: ignore rest?
 		}
 	}
+	sv.UpdateEnd(updt)
 	if err == io.EOF {
 		return nil
 	}
@@ -100,16 +103,16 @@ func (svg *SVG) ReadXML(reader io.Reader) error {
 }
 
 // UnmarshalXML unmarshals the svg using xml.Decoder
-func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
-	updt := svg.UpdateStart()
-	defer svg.UpdateEnd(updt)
+func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
+	updt := sv.UpdateStart()
+	defer sv.UpdateEnd(updt)
 
 	start := &se
 
-	svg.DeleteAll()
+	sv.DeleteAll()
 
-	curPar := svg.This().(gi.Node2D) // current parent node into which elements are created
-	curSvg := svg
+	curPar := sv.This().(gi.Node2D) // current parent node into which elements are created
+	curSvg := sv
 	inTitle := false
 	inDesc := false
 	inDef := false
@@ -142,7 +145,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			nm := se.Name.Local
 			switch {
 			case nm == "svg":
-				if curPar != svg.This() {
+				if curPar != sv.This() {
 					curPar = curPar.AddNewChild(KiT_SVG, "svg").(gi.Node2D)
 				}
 				csvg := curPar.Embed(KiT_SVG).(*SVG)
@@ -726,14 +729,14 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case "linearGradient":
 			case "radialGradient":
 			default:
-				if curPar == svg.This() {
+				if curPar == sv.This() {
 					break
 				}
 				if curPar.Parent() == nil {
 					break
 				}
 				curPar = curPar.Parent().(gi.Node2D)
-				if curPar == svg.This() {
+				if curPar == sv.This() {
 					break
 				}
 				curSvgk := curPar.ParentByType(KiT_SVG, ki.Embeds)
@@ -768,35 +771,21 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			}
 		}
 	}
-
-	ki.UniquifyNamesAll(svg)
-
-	svg.DerefGradients()
-
 	return nil
-}
-
-// DerefGradients de-references gradients that are only used for
-// a single element -- these have already been compiled into
-// the
-func (svg *SVG) DerefGradients() {
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 //   Writing
 
-////////////////////////////////////////////////
-
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
-func (svg *SVG) SaveXML(filename string) error {
+func (sv *SVG) SaveXML(filename string) error {
 	fp, err := os.Create(filename)
 	defer fp.Close()
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	err = svg.WriteXML(bufio.NewWriter(fp), true)
+	err = sv.WriteXML(bufio.NewWriter(fp), true)
 	if err != nil {
 		log.Println(err)
 	}
@@ -805,12 +794,12 @@ func (svg *SVG) SaveXML(filename string) error {
 
 // WriteXML writes XML-formatted SVG output to io.Writer, and uses
 // XMLEncoder
-func (svg *SVG) WriteXML(wr io.Writer, indent bool) error {
+func (sv *SVG) WriteXML(wr io.Writer, indent bool) error {
 	enc := NewXMLEncoder(wr)
 	if indent {
 		enc.Indent("", "  ")
 	}
-	svg.MarshalXMLx(enc, xml.StartElement{})
+	sv.MarshalXMLx(enc, xml.StartElement{})
 	enc.Flush()
 	return nil
 }
@@ -1034,35 +1023,202 @@ func SVGNodeXMLGrad(nd *gi.Gradient, name string, enc *XMLEncoder) {
 	enc.WriteEnd(me.Name.Local)
 }
 
-// SVGNodeTreeMarshalXML encodes item and any children to XML
-func SVGNodeTreeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) error {
+// SVGNodeTreeMarshalXML encodes item and any children to XML.
+// returns any error, and name of element that enc.WriteEnd() should be
+// called with -- allows for extra elements to be added at end of list.
+func SVGNodeTreeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) (string, error) {
 	_, g := gi.KiToNode2D(itm)
 	name := SVGNodeMarshalXML(itm, enc, setName)
 	if name == "" {
-		return nil
+		return "", nil
 	}
 	for _, k := range g.Kids {
-		SVGNodeTreeMarshalXML(k, enc, "")
+		knm, err := SVGNodeTreeMarshalXML(k, enc, "")
+		if knm != "" {
+			enc.WriteEnd(knm)
+		}
+		if err != nil {
+			return name, err
+		}
 	}
-	enc.WriteEnd(name)
-	return nil
+	return name, nil
 }
 
 // MarshalXMLx marshals the svg using XMLEncoder
-func (svg *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
+func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	me := xml.StartElement{}
 	me.Name.Local = "svg"
 	// todo: look for props about units?
-	XMLAddAttr(&me.Attr, "width", fmt.Sprintf("%gmm", svg.ViewBox.Size.X))
-	XMLAddAttr(&me.Attr, "height", fmt.Sprintf("%gmm", svg.ViewBox.Size.Y))
-	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", svg.ViewBox.Min.X, svg.ViewBox.Min.Y, svg.ViewBox.Size.X, svg.ViewBox.Size.Y))
+	XMLAddAttr(&me.Attr, "width", fmt.Sprintf("%gmm", sv.ViewBox.Size.X))
+	XMLAddAttr(&me.Attr, "height", fmt.Sprintf("%gmm", sv.ViewBox.Size.Y))
+	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.ViewBox.Min.X, sv.ViewBox.Min.Y, sv.ViewBox.Size.X, sv.ViewBox.Size.Y))
 	enc.EncodeToken(me)
-	SVGNodeTreeMarshalXML(&svg.Defs, enc, "defs")
-	for _, k := range svg.Kids {
-		SVGNodeTreeMarshalXML(k, enc, "")
+
+	grlist := MakeUniqueGradients(sv)
+
+	dnm, err := SVGNodeTreeMarshalXML(&sv.Defs, enc, "defs")
+
+	for _, gr := range grlist {
+		SVGNodeMarshalXML(gr, enc, "")
 	}
+
+	enc.WriteEnd(dnm)
+
+	for _, k := range sv.Kids {
+		var knm string
+		knm, err = SVGNodeTreeMarshalXML(k, enc, "")
+		if knm != "" {
+			enc.WriteEnd(knm)
+		}
+		if err != nil {
+			break
+		}
+	}
+
 	ed := xml.EndElement{}
 	ed.Name = me.Name
 	enc.EncodeToken(ed)
-	return nil
+	return err
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+//   Gradient reference management
+
+// SVG files typically have "master" gradients that define the stops
+// and then unique gradients for each element.  Given that we store
+// gradients directly on Paint in each element, use DeleteUniqueGradients
+// to remove these per-element unique gradients after loading.
+// The XML saving routine will automatically create temporary gradients
+// for any elements that use gradients, but don't have a gradient element for them.
+
+// HasGradientUrl returns a url(#gradient) gradient reference from given prop key
+// or empty string if none
+func HasGradientUrl(kn ki.Ki, prop string) string {
+	fp, err := kn.PropTry(prop)
+	if err != nil {
+		return ""
+	}
+	fs, iss := fp.(string)
+	if !iss || len(fs) < 7 {
+		return ""
+	}
+	if fs[:5] != "url(#" {
+		return ""
+	}
+	ref := fs[5:]
+	sz := len(ref)
+	if ref[sz-1] == ')' {
+		ref = ref[:sz-1]
+	}
+	return ref
+}
+
+// DeleteUniqueGradients deletes gradients that are only used for
+// a single element -- these have already been compiled into
+// the ColorSpec on Pnt.Fill, Stroke.
+// Also sets "fill-stops-name" or "stroke-stops-name" properties to
+// name of gradient named in StopsName in their gradient.
+func DeleteUniqueGradients(sv *SVG) {
+	grs := make(map[string]*gi.Gradient)
+	for _, d := range sv.Defs.Kids {
+		if gr, isgr := d.(*gi.Gradient); isgr {
+			gr.RefCount = 0
+			grs[gr.Nm] = gr
+		}
+	}
+	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		if el, isel := k.(NodeSVG); isel {
+			grnm := HasGradientUrl(el, "fill")
+			if grnm != "" {
+				gr, has := grs[grnm]
+				if has {
+					gr.RefCount++
+					if gr.StopsName != "" {
+						sgr, has := grs[gr.StopsName]
+						if has {
+							sgr.RefCount += 10 // any ref is worth keeping
+							el.SetProp("fill-stops-name", gr.StopsName)
+						}
+					}
+				}
+				el.DeleteProp("fill")
+			}
+			grnm = HasGradientUrl(el, "stroke")
+			if grnm != "" {
+				gr, has := grs[grnm]
+				if has {
+					gr.RefCount++
+					if gr.StopsName != "" {
+						sgr, has := grs[gr.StopsName]
+						if has {
+							sgr.RefCount += 10 // any ref is worth keeping
+							el.SetProp("stroke-stops-name", gr.StopsName)
+						}
+					}
+				}
+				el.DeleteProp("stroke")
+			}
+		}
+		return ki.Continue
+	})
+	for _, gr := range grs {
+		if gr.RefCount <= 1 {
+			sv.Defs.DeleteChild(gr, true)
+		}
+	}
+}
+
+// MakeUniqueGradients returns unique gradients that are only used for
+// a single element, based on the ColorSpec on Pnt.Fill, Stroke.
+// Also uses "fill-stops-name" or "stroke-stops-name" properties to
+// name of gradient named in StopsName in their gradient.
+func MakeUniqueGradients(sv *SVG) []*gi.Gradient {
+	grs := make(map[string]*gi.Gradient)
+	for _, d := range sv.Defs.Kids {
+		if gr, isgr := d.(*gi.Gradient); isgr {
+			grs[gr.Nm] = gr
+		}
+	}
+	grlist := make([]*gi.Gradient, 0)
+	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		if el, isel := k.(NodeSVG); isel {
+			esv := el.AsSVGNode()
+			if esv.Pnt.FillStyle.Color.Gradient != nil {
+				gr := &gi.Gradient{}
+				gr.Grad.CopyFrom(&esv.Pnt.FillStyle.Color)
+				snmi, err := el.PropTry("fill-stops-name")
+				if err == nil {
+					snm := kit.ToString(snmi)
+					if _, has := grs[snm]; has {
+						gr.StopsName = snm
+					}
+				}
+				gr.SetName(NameId(gr.GradientType(), sv.NewUniqueId()))
+				grlist = append(grlist, gr)
+			}
+			if esv.Pnt.StrokeStyle.Color.Gradient != nil {
+				gr := &gi.Gradient{}
+				gr.Grad.CopyFrom(&esv.Pnt.StrokeStyle.Color)
+				snmi, err := el.PropTry("stroke-stops-name")
+				if err == nil {
+					snm := kit.ToString(snmi)
+					if _, has := grs[snm]; has {
+						gr.StopsName = snm
+					}
+				}
+				gr.SetName(NameId(gr.GradientType(), sv.NewUniqueId()))
+				grlist = append(grlist, gr)
+			}
+		}
+		return ki.Continue
+	})
+	// now have to remove all the new unique id's associated with these guys
+	// as they are just temporary and not part of the name space
+	for _, gr := range grlist {
+		_, id := SplitNameId(gr.Nm)
+		if id > 0 {
+			delete(sv.UniqueIds, id)
+		}
+	}
+	return grlist
 }

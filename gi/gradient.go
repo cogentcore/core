@@ -47,3 +47,11 @@ func (gr *Gradient) UpdateStops() {
 		gr.Grad.CopyStopsFrom(&grad.Grad)
 	}
 }
+
+// GradientType returns the SVG-style type name of gradient: linearGradient or radialGradient
+func (gr *Gradient) GradientType() string {
+	if gr.Grad.Gradient.IsRadial {
+		return "radialGradient"
+	}
+	return "linearGradient"
+}

@@ -28,6 +28,8 @@ func AddNewEllipse(parent ki.Ki, name string, x, y, rx, ry float32) *Ellipse {
 	return g
 }
 
+func (g *Ellipse) SVGName() string { return "ellipse" }
+
 func (g *Ellipse) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Ellipse)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

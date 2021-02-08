@@ -23,6 +23,8 @@ func AddNewFlow(parent ki.Ki, name string) *Flow {
 	return parent.AddNewChild(KiT_Flow, name).(*Flow)
 }
 
+func (g *Flow) SVGName() string { return "flow" }
+
 func (g *Flow) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Flow)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

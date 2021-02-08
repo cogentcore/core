@@ -35,6 +35,8 @@ func AddNewImage(parent ki.Ki, name string, x, y float32) *Image {
 	return g
 }
 
+func (g *Image) SVGName() string { return "image" }
+
 func (g *Image) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Image)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

@@ -27,6 +27,8 @@ func AddNewPolyline(parent ki.Ki, name string, points []mat32.Vec2) *Polyline {
 	return g
 }
 
+func (g *Polyline) SVGName() string { return "polyline" }
+
 func (g *Polyline) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Polyline)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

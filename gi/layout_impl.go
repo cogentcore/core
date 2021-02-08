@@ -17,17 +17,17 @@ import (
 // This file contains all the hairy implementation logic of layout
 // Done as separate functions because not really needed in derived types
 
-// SumDim returns whether we sum up elements along given dimension?  else use
+// LaySumDim returns whether we sum up elements along given dimension?  else use
 // max for shared dimension.
-func SumDim(ly Layouts, d mat32.Dims) bool {
+func LaySumDim(ly Layouts, d mat32.Dims) bool {
 	if (d == mat32.X && (ly == LayoutHoriz || ly == LayoutHorizFlow)) || (d == mat32.Y && (ly == LayoutVert || ly == LayoutVertFlow)) {
 		return true
 	}
 	return false
 }
 
-// SummedDim returns the dimension along which layout is summing.
-func SummedDim(ly Layouts) mat32.Dims {
+// LaySummedDim returns the dimension along which layout is summing.
+func LaySummedDim(ly Layouts) mat32.Dims {
 	if ly == LayoutHoriz || ly == LayoutHorizFlow {
 		return mat32.X
 	}
@@ -65,7 +65,7 @@ func GatherSizesSumMax(ly *Layout) (sumPref, sumNeed, maxPref, maxNeed mat32.Vec
 		maxPref = maxPref.Max(ni.LayState.Size.Pref)
 
 		if Layout2DTrace {
-			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, ni.LayState.Size.Need.Dim(SummedDim(ly.Lay)), ni.LayState.Size.Pref.Dim(SummedDim(ly.Lay)))
+			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, ni.LayState.Size.Need.Dim(LaySummedDim(ly.Lay)), ni.LayState.Size.Pref.Dim(LaySummedDim(ly.Lay)))
 		}
 	}
 	return
@@ -89,7 +89,7 @@ func GatherSizes(ly *Layout) {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		pref := ly.LayState.Size.Pref.Dim(d)
 		if prefSizing || pref == 0 {
-			if SumDim(ly.Lay, d) { // our layout now updated to sum
+			if LaySumDim(ly.Lay, d) { // our layout now updated to sum
 				ly.LayState.Size.Need.SetMaxDim(d, sumNeed.Dim(d))
 				ly.LayState.Size.Pref.SetMaxDim(d, sumPref.Dim(d))
 			} else { // use max for other dir
@@ -112,11 +112,11 @@ func GatherSizes(ly *Layout) {
 	if sz >= 2 {
 		elspc = float32(sz-1) * ly.Spacing.Dots
 	}
-	if SumDim(ly.Lay, mat32.X) {
+	if LaySumDim(ly.Lay, mat32.X) {
 		ly.LayState.Size.Need.X += elspc
 		ly.LayState.Size.Pref.X += elspc
 	}
-	if SumDim(ly.Lay, mat32.Y) {
+	if LaySumDim(ly.Lay, mat32.Y) {
 		ly.LayState.Size.Need.Y += elspc
 		ly.LayState.Size.Pref.Y += elspc
 	}
@@ -166,7 +166,7 @@ func GatherSizesFlow(ly *Layout, iter int) {
 	// for flow, the need is always *maxNeed* (i.e., a single item)
 	// and the pref is based on styled pref estimate
 
-	sdim := SummedDim(ly.Lay)
+	sdim := LaySummedDim(ly.Lay)
 	odim := mat32.OtherDim(sdim)
 	pref := ly.LayState.Size.Pref.Dim(sdim)
 	// opref := ly.LayState.Size.Pref.Dim(odim) // not using
@@ -219,11 +219,11 @@ func GatherSizesFlow(ly *Layout, iter int) {
 	if sz >= 2 {
 		elspc = float32(sz-1) * ly.Spacing.Dots
 	}
-	if SumDim(ly.Lay, mat32.X) {
+	if LaySumDim(ly.Lay, mat32.X) {
 		ly.LayState.Size.Need.X += elspc
 		ly.LayState.Size.Pref.X += elspc
 	}
-	if SumDim(ly.Lay, mat32.Y) {
+	if LaySumDim(ly.Lay, mat32.Y) {
 		ly.LayState.Size.Need.Y += elspc
 		ly.LayState.Size.Pref.Y += elspc
 	}
