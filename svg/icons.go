@@ -283,6 +283,7 @@ func (iset *IconSet) OpenIconsFromAssetDir(path string, dirFunc func(path string
 		if err == nil {
 			err = ic.ReadXML(bytes.NewBuffer(b))
 			if err == nil || err == io.EOF {
+				ki.UniquifyNamesAll(ic.This())
 				(*iset)[nm] = &ic
 			} else {
 				lasterr = err
