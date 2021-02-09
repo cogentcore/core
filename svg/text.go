@@ -10,6 +10,7 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -101,11 +102,11 @@ func (g *Text) RenderText() {
 	// todo: align styling only affects multi-line text and is about how tspan is arranged within
 	// the overall text block.
 
-	// if gist.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorMiddle {
-	// 	pos.X -= g.TextRender.Size.X * .5
-	// } else if gist.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorEnd {
-	// 	pos.X -= g.TextRender.Size.X
-	// }
+	if gist.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorMiddle {
+		pos.X -= g.TextRender.Size.X * .5
+	} else if gist.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorEnd {
+		pos.X -= g.TextRender.Size.X
+	}
 	for i := range sr.Render {
 		sr.Render[i].RelPos = rs.XForm.MulVec2AsVec(sr.Render[i].RelPos)
 		sr.Render[i].Size.Y *= scy
