@@ -149,7 +149,7 @@ func (n *Node) IndexInParent() (int, bool) {
 		return -1, false
 	}
 	idx, ok := n.Par.Children().IndexOf(n.This(), n.index) // very fast if index is close..
-	if idx >= 0 {
+	if ok {
 		n.index = idx
 	}
 	return idx, ok

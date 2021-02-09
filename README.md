@@ -73,5 +73,32 @@ The [GoPi](https://github.com/goki/pi) interactive parsing framework also levera
 
 * April, 2020: version 1.0.0 release -- all stable and well tested.
 
+# Trick for fast finding in a slice
 
+GoKi takes an extra starting index arg for all methods that lookup a value in a slice, such as ChildByName.  The search for the item starts at that index, and goes up and down from there.  Thus, if you have any idea where the item might be in the list, it can save (considerable for large lists) time finding it.
 
+Furthermore, it enables a robust optimized lookup map that remembers these indexes for each item, but then always searches from the index, so it is always correct under list modifications, but if the list is unchanged, then it is very efficient, and does not require saving pointers, which minimizes any impact on the GC, prevents stale pointers, etc.
+
+The `IndexInParent()` method uses this trick, using the cached `Node.index` value.
+
+Here's example code for a separate Find method where the indexes are stored in a map:
+
+```Go
+// FindByName finds item by name, using cached indexes for speed
+func (ob *Obj) FindByName(nm string) *Obj {
+	if sv.FindIdxs == nil {
+		ob.FindIdxs = make(map[string]int) // field on object
+	}
+	idx, has := ob.FindIdxs[nm]
+	if !has {
+		idx = len(ob.Kids) / 2 // start in middle first time
+	}
+	idx, has = ob.Kids.IndexByName(nm, idx)
+	if has {
+		ob.FindIdxs[nm] = idx
+		return ob.Kids[idx].(*Obj)
+  	}
+	delete(ob.FindIdxs, nm) // must have been deleted
+	return nil
+}
+```
