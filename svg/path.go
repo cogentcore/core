@@ -84,16 +84,16 @@ func (g *Path) Render2D() {
 
 	g.ComputeBBoxSVG()
 
-	if mrk := g.Marker("marker-start"); mrk != nil {
+	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		// todo: could look for close-path at end and find angle from there..
 		stv, ang := PathDataStart(g.Data)
 		mrk.RenderMarker(stv, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
-	if mrk := g.Marker("marker-end"); mrk != nil {
+	if mrk := MarkerByName(g, "marker-end"); mrk != nil {
 		env, ang := PathDataEnd(g.Data)
 		mrk.RenderMarker(env, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
-	if mrk := g.Marker("marker-mid"); mrk != nil {
+	if mrk := MarkerByName(g, "marker-mid"); mrk != nil {
 		var ptm2, ptm1, pt mat32.Vec2
 		gotidx := 0
 		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
@@ -878,6 +878,7 @@ func PathDataString(data []PathData) string {
 // each node must define this for itself
 func (g *Path) ApplyXForm(xf mat32.Mat2) {
 	g.ApplyXFormImpl(xf, mat32.Vec2{0, 0})
+	g.GradientApplyXForm(xf)
 }
 
 // PathDataXFormAbs does the transform of next two data points as absolute coords
@@ -907,6 +908,7 @@ func PathDataXFormRel(data []PathData, i *int, xf mat32.Mat2, cp mat32.Vec2) mat
 func (g *Path) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
 	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
 	g.ApplyXFormImpl(xf, lpt)
+	g.GradientApplyXFormPt(xf, lpt)
 }
 
 func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
@@ -1067,6 +1069,7 @@ func (g *Path) WriteGeom(dat *[]float32) {
 	for i := range g.Data {
 		(*dat)[i] = float32(g.Data[i])
 	}
+	g.GradientWritePts(dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
@@ -1075,4 +1078,5 @@ func (g *Path) ReadGeom(dat []float32) {
 	for i := range g.Data {
 		g.Data[i] = PathData(dat[i])
 	}
+	g.GradientReadPts(dat)
 }

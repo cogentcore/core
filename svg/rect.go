@@ -63,6 +63,7 @@ func (g *Rect) Render2D() {
 func (g *Rect) ApplyXForm(xf mat32.Mat2) {
 	g.Pos = xf.MulVec2AsPt(g.Pos)
 	g.Size = xf.MulVec2AsVec(g.Size)
+	g.GradientApplyXForm(xf)
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
@@ -74,6 +75,7 @@ func (g *Rect) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, 
 	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
 	g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
 	g.Size = xf.MulVec2AsVec(g.Size)
+	g.GradientApplyXFormPt(xf, lpt)
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
@@ -87,6 +89,7 @@ func (g *Rect) WriteGeom(dat *[]float32) {
 	(*dat)[3] = g.Size.Y
 	(*dat)[4] = g.Radius.X
 	(*dat)[5] = g.Radius.Y
+	g.GradientWritePts(dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
@@ -98,4 +101,5 @@ func (g *Rect) ReadGeom(dat []float32) {
 	g.Size.Y = dat[3]
 	g.Radius.X = dat[4]
 	g.Radius.Y = dat[5]
+	g.GradientReadPts(dat)
 }

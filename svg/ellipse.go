@@ -60,6 +60,7 @@ func (g *Ellipse) Render2D() {
 func (g *Ellipse) ApplyXForm(xf mat32.Mat2) {
 	g.Pos = xf.MulVec2AsPt(g.Pos)
 	g.Radii = xf.MulVec2AsVec(g.Radii)
+	g.GradientApplyXForm(xf)
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
@@ -71,6 +72,7 @@ func (g *Ellipse) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float3
 	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
 	g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
 	g.Radii = xf.MulVec2AsVec(g.Radii)
+	g.GradientApplyXFormPt(xf, lpt)
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
@@ -82,6 +84,7 @@ func (g *Ellipse) WriteGeom(dat *[]float32) {
 	(*dat)[1] = g.Pos.Y
 	(*dat)[2] = g.Radii.X
 	(*dat)[3] = g.Radii.Y
+	g.GradientWritePts(dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
@@ -91,4 +94,5 @@ func (g *Ellipse) ReadGeom(dat []float32) {
 	g.Pos.Y = dat[1]
 	g.Radii.X = dat[2]
 	g.Radii.Y = dat[3]
+	g.GradientReadPts(dat)
 }

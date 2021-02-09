@@ -7,7 +7,6 @@ package svg
 import (
 	"fmt"
 	"image"
-	"log"
 	"reflect"
 	"strings"
 
@@ -350,56 +349,4 @@ func (g *NodeBase) Render2D() {
 }
 
 func (g *NodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {
-}
-
-// FindSVGURL finds a url element in the parent SVG -- returns nil if not
-// found -- can pass full 'url(#Name)' string
-func (g *NodeBase) FindSVGURL(url string) gi.Node2D {
-	if url == "none" {
-		return nil
-	}
-	url = strings.TrimPrefix(url, "url(")
-	url = strings.TrimSuffix(url, ")")
-	psvg := ParentSVG(g.AsNode2D())
-	var rv gi.Node2D
-	if psvg != nil {
-		rv = psvg.FindNamedElement(url)
-	} else {
-		rv = g.FindNamedElement(url)
-	}
-	if rv == nil {
-		log.Printf("gi.svg FindSVGURL could not find element named: %v in parents of svg el: %v\n", url, g.Path())
-	}
-	return rv
-}
-
-// Marker checks for a marker property of given name, or generic "marker"
-// type, and if set, attempts to find that marker and return it
-func (g *NodeBase) Marker(marker string) *Marker {
-	ms, ok := g.Props[marker]
-	if !ok {
-		ms, ok = g.Props["marker"]
-		if !ok {
-			return nil
-		}
-	}
-	mnm, ok := ms.(string)
-	if !ok {
-		mrk, ok := ms.(*Marker)
-		if !ok {
-			log.Printf("gi.svg Marker property should be a string url or pointer to Marker element, instead is: %T\n", ms)
-			return nil
-		}
-		return mrk
-	}
-	mrkn := g.FindSVGURL(mnm)
-	if mrkn != nil {
-		mrk, ok := mrkn.(*Marker)
-		if !ok {
-			log.Printf("gi.svg Found element named: %v but isn't a Marker type, instead is: %T", mnm, mrkn)
-			return nil
-		}
-		return mrk
-	}
-	return nil
 }

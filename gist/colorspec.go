@@ -152,6 +152,10 @@ func MatToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
 	return rasterx.Matrix2D{float64(mat.XX), float64(mat.YX), float64(mat.XY), float64(mat.YY), float64(mat.X0), float64(mat.Y0)}
 }
 
+func RasterxToMat(mat *rasterx.Matrix2D) mat32.Mat2 {
+	return mat32.Mat2{float32(mat.A), float32(mat.B), float32(mat.C), float32(mat.D), float32(mat.E), float32(mat.F)}
+}
+
 // RenderColor gets the color for rendering, applying opacity and bounds for
 // gradients
 func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) interface{} {
@@ -182,4 +186,57 @@ func (c *ColorSpec) SetIFace(val interface{}, ctxt Context, key string) error {
 		c.SetColor(valv)
 	}
 	return nil
+}
+
+// ApplyXForm transforms the points for a UserSpaceOnUse gradient
+func (c *ColorSpec) ApplyXForm(xf mat32.Mat2) {
+	if c.Gradient == nil {
+		return
+	}
+	if c.Gradient.Units == rasterx.ObjectBoundingBox {
+		return
+	}
+	if c.Gradient.IsRadial { // radial uses transform instead of points
+		mat := RasterxToMat(&c.Gradient.Matrix)
+		mat = xf.Mul(mat)
+		c.Gradient.Matrix = MatToRasterx(&mat)
+	} else {
+		p1 := mat32.Vec2{float32(c.Gradient.Points[0]), float32(c.Gradient.Points[1])}
+		p1 = xf.MulVec2AsPt(p1)
+		p2 := mat32.Vec2{float32(c.Gradient.Points[2]), float32(c.Gradient.Points[3])}
+		p2 = xf.MulVec2AsPt(p2)
+		c.Gradient.Points[0] = float64(p1.X)
+		c.Gradient.Points[1] = float64(p1.Y)
+		c.Gradient.Points[2] = float64(p2.X)
+		c.Gradient.Points[3] = float64(p2.Y)
+	}
+}
+
+// ApplyXFormPt transforms the points for a UserSpaceOnUse gradient
+// relative to a given center point
+func (c *ColorSpec) ApplyXFormPt(xf mat32.Mat2, pt mat32.Vec2) {
+	if c.Gradient == nil {
+		return
+	}
+	if c.Gradient.Units == rasterx.ObjectBoundingBox {
+		return
+	}
+	if c.Gradient.IsRadial { // radial uses transform instead of points
+		mat := RasterxToMat(&c.Gradient.Matrix)
+		mat.X0 -= pt.X
+		mat.Y0 -= pt.Y
+		mat = mat.Mul(xf)
+		mat.X0 += pt.X
+		mat.Y0 += pt.Y
+		c.Gradient.Matrix = MatToRasterx(&mat)
+	} else {
+		p1 := mat32.Vec2{float32(c.Gradient.Points[0]), float32(c.Gradient.Points[1])}
+		p1 = xf.MulVec2AsPtCtr(p1, pt)
+		p2 := mat32.Vec2{float32(c.Gradient.Points[2]), float32(c.Gradient.Points[3])}
+		p2 = xf.MulVec2AsPtCtr(p2, pt)
+		c.Gradient.Points[0] = float64(p1.X)
+		c.Gradient.Points[1] = float64(p1.Y)
+		c.Gradient.Points[2] = float64(p2.X)
+		c.Gradient.Points[3] = float64(p2.Y)
+	}
 }

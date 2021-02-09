@@ -997,8 +997,8 @@ func SVGNodeXMLGrad(nd *gi.Gradient, name string, enc *XMLEncoder) {
 		XMLAddAttr(&me.Attr, "spreadMethod", "repeat")
 	}
 
-	nilxf := gr.Matrix.A == 1 && gr.Matrix.D == 1 && gr.Matrix.B == 0 && gr.Matrix.C == 0 && gr.Matrix.E == 0 && gr.Matrix.F == 0
-	if !nilxf {
+	idxf := gr.Matrix == rasterx.Identity
+	if !idxf {
 		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gr.Matrix.A, gr.Matrix.B, gr.Matrix.C, gr.Matrix.D, gr.Matrix.E, gr.Matrix.F))
 	}
 

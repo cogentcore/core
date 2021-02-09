@@ -61,6 +61,7 @@ func (g *Circle) ApplyXForm(xf mat32.Mat2) {
 	g.Pos = xf.MulVec2AsPt(g.Pos)
 	scx, scy := xf.ExtractScale()
 	g.Radius *= 0.5 * (scx + scy)
+	g.GradientApplyXForm(xf)
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
@@ -73,6 +74,7 @@ func (g *Circle) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32
 	g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
 	scx, scy := xf.ExtractScale()
 	g.Radius *= 0.5 * (scx + scy)
+	g.GradientApplyXFormPt(xf, lpt)
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
@@ -83,6 +85,7 @@ func (g *Circle) WriteGeom(dat *[]float32) {
 	(*dat)[0] = g.Pos.X
 	(*dat)[1] = g.Pos.Y
 	(*dat)[2] = g.Radius
+	g.GradientWritePts(dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
@@ -91,4 +94,5 @@ func (g *Circle) ReadGeom(dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Radius = dat[2]
+	g.GradientReadPts(dat)
 }

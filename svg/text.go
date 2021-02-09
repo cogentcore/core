@@ -7,9 +7,9 @@ package svg
 import (
 	"image"
 
+	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
-	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -32,6 +32,8 @@ type Text struct {
 	CharRots     []float32  `desc:"character rotations, if specified"`
 	TextLength   float32    `desc:"author's computed text length, if specified -- we attempt to match"`
 	AdjustGlyphs bool       `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
+	LastPos      mat32.Vec2 `xml:"-" json:"-" desc:"last text render position -- lower-left baseline of start"`
+	LastBBox     mat32.Box2 `xml:"-" json:"-" desc:"last actual bounding box in display units (dots)"`
 }
 
 var KiT_Text = kit.Types.AddType(&Text{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
@@ -67,9 +69,103 @@ func (g *Text) CopyFieldsFrom(frm interface{}) {
 }
 
 func (g *Text) BBox2D() image.Rectangle {
-	rs := &g.Viewport.Render
-	// todo: could be much more accurate..
-	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.TextRender.Size.X, g.Pos.Y+g.TextRender.Size.Y)
+	if g.Text == "" {
+		return BBoxFromChildren(g)
+	} else {
+		return image.Rectangle{Min: g.LastBBox.Min.ToPointFloor(), Max: g.LastBBox.Max.ToPointCeil()}
+	}
+}
+
+func (g *Text) RenderText() {
+	pc := &g.Pnt
+	rs := g.Render()
+	orgsz := pc.FontStyle.Size
+	pos := rs.XForm.MulVec2AsPt(mat32.Vec2{g.Pos.X, g.Pos.Y})
+	rot := rs.XForm.ExtractRot()
+	scx, scy := rs.XForm.ExtractScale()
+	scalex := scx / scy
+	if scalex == 1 {
+		scalex = 0
+	}
+	girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
+	if !pc.FillStyle.Color.IsNil() {
+		pc.FontStyle.Color = pc.FillStyle.Color.Color
+	}
+	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
+	pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
+	girl.OpenFont(&pc.FontStyle, &pc.UnContext)
+	sr := &(g.TextRender.Spans[0])
+	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
+	g.TextRender.Size = g.TextRender.Size.Mul(mat32.Vec2{scx, scy})
+
+	// todo: align styling only affects multi-line text and is about how tspan is arranged within
+	// the overall text block.
+
+	// if gist.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorMiddle {
+	// 	pos.X -= g.TextRender.Size.X * .5
+	// } else if gist.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorEnd {
+	// 	pos.X -= g.TextRender.Size.X
+	// }
+	for i := range sr.Render {
+		sr.Render[i].RelPos = rs.XForm.MulVec2AsVec(sr.Render[i].RelPos)
+		sr.Render[i].Size.Y *= scy
+		sr.Render[i].Size.X *= scx
+	}
+	pc.FontStyle.Size = orgsz
+	if len(g.CharPosX) > 0 {
+		mx := ints.MinInt(len(g.CharPosX), len(sr.Render))
+		for i := 0; i < mx; i++ {
+			// todo: this may not be fully correct, given relativity constraints
+			cpx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosX[i], 0})
+			sr.Render[i].RelPos.X = cpx.X
+		}
+	}
+	if len(g.CharPosY) > 0 {
+		mx := ints.MinInt(len(g.CharPosY), len(sr.Render))
+		for i := 0; i < mx; i++ {
+			cpy := rs.XForm.MulVec2AsPt(mat32.Vec2{g.CharPosY[i], 0})
+			sr.Render[i].RelPos.Y = cpy.Y
+		}
+	}
+	if len(g.CharPosDX) > 0 {
+		mx := ints.MinInt(len(g.CharPosDX), len(sr.Render))
+		for i := 0; i < mx; i++ {
+			dx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDX[i], 0})
+			if i > 0 {
+				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx.X
+			} else {
+				sr.Render[i].RelPos.X = dx.X // todo: not sure this is right
+			}
+		}
+	}
+	if len(g.CharPosDY) > 0 {
+		mx := ints.MinInt(len(g.CharPosDY), len(sr.Render))
+		for i := 0; i < mx; i++ {
+			dy := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDY[i], 0})
+			if i > 0 {
+				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy.Y
+			} else {
+				sr.Render[i].RelPos.Y = dy.Y // todo: not sure this is right
+			}
+		}
+	}
+	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
+
+	// accumulate final bbox
+	sz := mat32.Vec2{}
+	maxh := float32(0)
+	for i := range sr.Render {
+		mxp := sr.Render[i].RelPos.Add(sr.Render[i].Size)
+		sz.SetMax(mxp)
+		maxh = math32.Max(maxh, sr.Render[i].Size.Y)
+	}
+	g.TextRender.Size = sz
+	g.LastPos = pos
+	g.LastBBox.Min = pos
+	g.LastBBox.Min.Y -= maxh * .8 // baseline adjust
+	g.LastBBox.Max = g.LastBBox.Min.Add(g.TextRender.Size)
+	g.TextRender.Render(rs, pos)
+	g.ComputeBBoxSVG()
 }
 
 func (g *Text) Render2D() {
@@ -80,79 +176,12 @@ func (g *Text) Render2D() {
 	rs := g.Render()
 	rs.PushXForm(pc.XForm)
 	if len(g.Text) > 0 {
-		orgsz := pc.FontStyle.Size
-		pos := rs.XForm.MulVec2AsPt(mat32.Vec2{g.Pos.X, g.Pos.Y})
-		rot := rs.XForm.ExtractRot()
-		scx, scy := rs.XForm.ExtractScale()
-		scalex := scx / scy
-		if scalex == 1 {
-			scalex = 0
-		}
-		girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
-		if !pc.FillStyle.Color.IsNil() {
-			pc.FontStyle.Color = pc.FillStyle.Color.Color
-		}
-		g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
-		g.TextRender.Size = g.TextRender.Size.Mul(mat32.Vec2{scx, scy})
-		if gist.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorMiddle {
-			pos.X -= g.TextRender.Size.X * .5
-		} else if gist.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorEnd {
-			pos.X -= g.TextRender.Size.X
-		}
-		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
-		girl.OpenFont(&pc.FontStyle, &pc.UnContext)
-		sr := &(g.TextRender.Spans[0])
-		sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
-		for i := range sr.Render {
-			sr.Render[i].RelPos = rs.XForm.MulVec2AsVec(sr.Render[i].RelPos)
-			sr.Render[i].Size.Y *= scy
-			sr.Render[i].Size.X *= scx
-		}
-		pc.FontStyle.Size = orgsz
-		if len(g.CharPosX) > 0 {
-			mx := ints.MinInt(len(g.CharPosX), len(sr.Render))
-			for i := 0; i < mx; i++ {
-				// todo: this may not be fully correct, given relativity constraints
-				cpx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosX[i], 0})
-				sr.Render[i].RelPos.X = cpx.X
-			}
-		}
-		if len(g.CharPosY) > 0 {
-			mx := ints.MinInt(len(g.CharPosY), len(sr.Render))
-			for i := 0; i < mx; i++ {
-				cpy := rs.XForm.MulVec2AsPt(mat32.Vec2{g.CharPosY[i], 0})
-				sr.Render[i].RelPos.Y = cpy.Y
-			}
-		}
-		if len(g.CharPosDX) > 0 {
-			mx := ints.MinInt(len(g.CharPosDX), len(sr.Render))
-			for i := 0; i < mx; i++ {
-				dx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDX[i], 0})
-				if i > 0 {
-					sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx.X
-				} else {
-					sr.Render[i].RelPos.X = dx.X // todo: not sure this is right
-				}
-			}
-		}
-		if len(g.CharPosDY) > 0 {
-			mx := ints.MinInt(len(g.CharPosDY), len(sr.Render))
-			for i := 0; i < mx; i++ {
-				dy := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDY[i], 0})
-				if i > 0 {
-					sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy.Y
-				} else {
-					sr.Render[i].RelPos.Y = dy.Y // todo: not sure this is right
-				}
-			}
-		}
-		// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
-		g.TextRender.Render(rs, pos)
-		g.ComputeBBoxSVG()
-	} else {
-
+		g.RenderText()
 	}
 	g.Render2DChildren()
+	if g.Text == "" {
+		g.ComputeBBoxSVG() // after kids have rendered
+	}
 	rs.PopXForm()
 }
 

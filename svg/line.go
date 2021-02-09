@@ -50,11 +50,11 @@ func (g *Line) Render2D() {
 	pc.Stroke(rs)
 	g.ComputeBBoxSVG()
 
-	if mrk := g.Marker("marker-start"); mrk != nil {
+	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(g.Start, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
-	if mrk := g.Marker("marker-end"); mrk != nil {
+	if mrk := MarkerByName(g, "marker-end"); mrk != nil {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(g.End, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
@@ -69,6 +69,7 @@ func (g *Line) Render2D() {
 func (g *Line) ApplyXForm(xf mat32.Mat2) {
 	g.Start = xf.MulVec2AsPt(g.Start)
 	g.End = xf.MulVec2AsPt(g.End)
+	g.GradientApplyXForm(xf)
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
@@ -80,6 +81,7 @@ func (g *Line) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, 
 	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
 	g.Start = xf.MulVec2AsPtCtr(g.Start, lpt)
 	g.End = xf.MulVec2AsPtCtr(g.End, lpt)
+	g.GradientApplyXFormPt(xf, lpt)
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
@@ -91,6 +93,7 @@ func (g *Line) WriteGeom(dat *[]float32) {
 	(*dat)[1] = g.Start.Y
 	(*dat)[2] = g.End.X
 	(*dat)[3] = g.End.Y
+	g.GradientWritePts(dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
@@ -100,4 +103,5 @@ func (g *Line) ReadGeom(dat []float32) {
 	g.Start.Y = dat[1]
 	g.End.X = dat[2]
 	g.End.Y = dat[3]
+	g.GradientReadPts(dat)
 }

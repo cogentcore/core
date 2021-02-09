@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -224,52 +223,6 @@ func (sv *SVG) Render2D() {
 		rs.PopXForm()
 		sv.RenderViewport2D() // update our parent image
 	}
-}
-
-// FindDefByName finds Defs item by name, using cached indexes for speed
-func (sv *SVG) FindDefByName(grnm string) gi.Node2D {
-	if sv.DefIdxs == nil {
-		sv.DefIdxs = make(map[string]int)
-	}
-	idx, has := sv.DefIdxs[grnm]
-	if !has {
-		idx = len(sv.Defs.Kids) / 2
-	}
-	idx, has = sv.Defs.Kids.IndexByName(grnm, idx)
-	if has {
-		sv.DefIdxs[grnm] = idx
-		return sv.Defs.Kids[idx].(gi.Node2D)
-	} else {
-		delete(sv.DefIdxs, grnm)
-	}
-	return nil
-}
-
-func (sv *SVG) FindNamedElement(name string) gi.Node2D {
-	name = strings.TrimPrefix(name, "#")
-	if name == "" {
-		log.Printf("gi.SVG FindNamedElement: name is empty\n")
-		return nil
-	}
-	if sv.Nm == name {
-		return sv.This().(gi.Node2D)
-	}
-
-	def := sv.FindDefByName(name)
-	if def != nil {
-		return def.(gi.Node2D)
-	}
-
-	if sv.Par == nil {
-		log.Printf("gi.SVG FindNamedElement: could not find name: %v\n", name)
-		return nil
-	}
-	pgi, _ := gi.KiToNode2D(sv.Par)
-	if pgi != nil {
-		return pgi.FindNamedElement(name)
-	}
-	log.Printf("gi.SVG FindNamedElement: could not find name: %v\n", name)
-	return nil
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -33,9 +33,9 @@ func (g *Group) CopyFieldsFrom(frm interface{}) {
 }
 
 // BBoxFromChildren sets the Group BBox from children
-func (g *Group) BBoxFromChildren() image.Rectangle {
+func BBoxFromChildren(gii gi.Node2D) image.Rectangle {
 	bb := image.ZR
-	for i, kid := range g.Kids {
+	for i, kid := range *gii.Children() {
 		_, gi := gi.KiToNode2D(kid)
 		if gi != nil {
 			if i == 0 {
@@ -49,7 +49,7 @@ func (g *Group) BBoxFromChildren() image.Rectangle {
 }
 
 func (g *Group) BBox2D() image.Rectangle {
-	bb := g.BBoxFromChildren()
+	bb := BBoxFromChildren(g)
 	return bb
 }
 
@@ -62,7 +62,7 @@ func (g *Group) Render2D() {
 	rs.PushXFormLock(pc.XForm)
 
 	g.Render2DChildren()
-	g.ComputeBBoxSVG()
+	g.ComputeBBoxSVG() // must come after render
 
 	rs.PopXFormLock()
 }

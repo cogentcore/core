@@ -36,18 +36,6 @@ func (gr *Gradient) CopyFieldsFrom(frm interface{}) {
 	gr.StopsName = fr.StopsName
 }
 
-// UpdateStops copies stops from StopsName gradient if it is set
-func (gr *Gradient) UpdateStops() {
-	if gr.StopsName == "" {
-		return
-	}
-	vp := gr.ViewportSafe()
-	csn := vp.FindNamedElement(gr.StopsName)
-	if grad, ok := csn.(*Gradient); ok {
-		gr.Grad.CopyStopsFrom(&grad.Grad)
-	}
-}
-
 // GradientType returns the SVG-style type name of gradient: linearGradient or radialGradient
 func (gr *Gradient) GradientType() string {
 	if gr.Grad.Gradient.IsRadial {

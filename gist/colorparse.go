@@ -506,7 +506,7 @@ func (cs *ColorSpec) ReadGradAttr(attr xml.Attr) (err error) {
 	case "gradientTransform":
 		tx := mat32.Identity2D()
 		tx.SetString(attr.Value)
-		cs.Gradient.Matrix = MatToRasterx(&tx) // todo: not working
+		cs.Gradient.Matrix = MatToRasterx(&tx)
 	case "gradientUnits":
 		switch strings.TrimSpace(attr.Value) {
 		case "userSpaceOnUse":

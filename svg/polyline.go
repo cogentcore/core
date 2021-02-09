@@ -51,19 +51,19 @@ func (g *Polyline) Render2D() {
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
 
-	if mrk := g.Marker("marker-start"); mrk != nil {
+	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
 		ptn := g.Points[1]
 		ang := math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
 		mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
-	if mrk := g.Marker("marker-end"); mrk != nil {
+	if mrk := MarkerByName(g, "marker-end"); mrk != nil {
 		pt := g.Points[sz-1]
 		ptp := g.Points[sz-2]
 		ang := math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X)
 		mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
-	if mrk := g.Marker("marker-mid"); mrk != nil {
+	if mrk := MarkerByName(g, "marker-mid"); mrk != nil {
 		for i := 1; i < sz-1; i++ {
 			pt := g.Points[i]
 			ptp := g.Points[i-1]
@@ -84,6 +84,7 @@ func (g *Polyline) ApplyXForm(xf mat32.Mat2) {
 		p = xf.MulVec2AsPt(p)
 		g.Points[i] = p
 	}
+	g.GradientApplyXForm(xf)
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
@@ -97,6 +98,7 @@ func (g *Polyline) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float
 		p = xf.MulVec2AsPtCtr(p, lpt)
 		g.Points[i] = p
 	}
+	g.GradientApplyXFormPt(xf, lpt)
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
@@ -108,6 +110,7 @@ func (g *Polyline) WriteGeom(dat *[]float32) {
 		(*dat)[i*2] = p.X
 		(*dat)[i*2+1] = p.Y
 	}
+	g.GradientWritePts(dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
@@ -118,4 +121,5 @@ func (g *Polyline) ReadGeom(dat []float32) {
 		p.Y = dat[i*2+1]
 		g.Points[i] = p
 	}
+	g.GradientReadPts(dat)
 }
