@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"sync"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gist"
@@ -14,6 +15,7 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -986,4 +988,121 @@ func (sb *ScrollBar) FocusChanged2D(change FocusChanges) {
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  ProgressBar
+
+// ProgressBar is a progress bar that fills up bar as progress continues.
+// Call Start with a maximum value to work toward, and ProgStep each time
+// a progress step has been accomplished -- increments the ProgCur by one
+// and display is updated every ProgInc such steps.
+type ProgressBar struct {
+	ScrollBar
+	ProgMax int        `desc:"maximum amount of progress to be achieved"`
+	ProgInc int        `desc:"progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten"`
+	ProgCur int        `desc:"current progress level"`
+	ProgMu  sync.Mutex `desc:"mutex for updating progress"`
+}
+
+var KiT_ProgressBar = kit.Types.AddType(&ProgressBar{}, ProgressBarProps)
+
+// AddNewProgressBar adds a new progress bar to given parent node, with given name.
+func AddNewProgressBar(parent ki.Ki, name string) *ProgressBar {
+	pb := parent.AddNewChild(KiT_ProgressBar, name).(*ProgressBar)
+	pb.Defaults()
+	return pb
+}
+
+func (pb *ProgressBar) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*ProgressBar)
+	pb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
+}
+
+func ProgressDefaultInc(max int) int {
+	switch {
+	case max > 50000:
+		return 1000
+	case max > 5000:
+		return 100
+	case max > 500:
+		return 10
+	}
+	return 1
+}
+
+func (pb *ProgressBar) Start(max int) {
+	pb.ProgMax = max - 1
+	pb.ProgMax = ints.MaxInt(1, pb.ProgMax)
+	pb.ProgInc = ProgressDefaultInc(max)
+	pb.ProgCur = 0
+	pb.UpdtBar()
+}
+
+func (pb *ProgressBar) UpdtBar() {
+	updt := pb.UpdateStart()
+	pb.SetThumbValue(float32(pb.ProgCur) / float32(pb.ProgMax))
+	pb.UpdateEnd(updt)
+}
+
+// ProgStep is called every time there is an increment of progress.
+// This is threadsafe to call from different routines.
+func (pb *ProgressBar) ProgStep() {
+	pb.ProgMu.Lock()
+	pb.ProgCur++
+	if pb.ProgCur%pb.ProgInc == 0 {
+		pb.UpdtBar()
+	}
+	pb.ProgMu.Unlock()
+}
+
+var ProgressBarProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
+	"border-width":     units.NewPx(1),
+	"border-radius":    units.NewPx(4),
+	"border-color":     &Prefs.Colors.Border,
+	"padding":          units.NewPx(0),
+	"margin":           units.NewPx(2),
+	"background-color": &Prefs.Colors.Control,
+	"color":            &Prefs.Colors.Font,
+	SliderSelectors[SliderActive]: ki.Props{
+		"background-color": "lighter-0",
+	},
+	SliderSelectors[SliderInactive]: ki.Props{
+		"border-color": "highlight-50",
+		"color":        "highlight-50",
+	},
+	SliderSelectors[SliderHover]: ki.Props{
+		"background-color": "highlight-10",
+	},
+	SliderSelectors[SliderFocus]: ki.Props{
+		"border-width":     units.NewPx(2),
+		"background-color": "samelight-50",
+	},
+	SliderSelectors[SliderDown]: ki.Props{
+		"background-color": "highlight-20",
+	},
+	SliderSelectors[SliderValue]: ki.Props{
+		"border-color":     &Prefs.Colors.Icon,
+		"background-color": &Prefs.Colors.Icon,
+	},
+	SliderSelectors[SliderBox]: ki.Props{
+		"border-color":     &Prefs.Colors.Background,
+		"background-color": &Prefs.Colors.Background,
+	},
+}
+
+func (pb *ProgressBar) Defaults() {
+	pb.Dim = mat32.X
+	pb.ValThumb = true
+	pb.ThumbVal = 1
+	pb.Value = 0
+	pb.ThumbSize = units.NewEx(1)
+	pb.Step = 0.1
+	pb.PageStep = 0.2
+	pb.Max = 1.0
+	pb.Prec = 9
+	pb.SetInactive()
+	pb.SetMinPrefWidth(units.NewEm(20))
+	pb.SetMinPrefHeight(units.NewEm(1))
 }

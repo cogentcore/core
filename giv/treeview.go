@@ -10,6 +10,7 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"strings"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
@@ -1176,8 +1177,11 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 }
 
 // NodesFromMimeData creates a slice of Ki node(s) from given mime data
-func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ki.Slice {
-	sl := make(ki.Slice, 0, len(md)/2)
+// and also a corresponding slice of original paths
+func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
+	ni := len(md) / 2
+	sl := make(ki.Slice, 0, ni)
+	pl := make([]string, 0, ni)
 	for _, d := range md {
 		if d.Type == filecat.DataJson {
 			nki, err := ki.ReadNewJSON(bytes.NewReader(d.Data))
@@ -1186,9 +1190,11 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ki.Slice {
 			} else {
 				log.Printf("TreeView NodesFromMimeData: JSON load error: %v\n", err)
 			}
+		} else if d.Type == filecat.TextPlain { // paths
+			pl = append(pl, string(d.Data))
 		}
 	}
-	return sl
+	return sl, pl
 }
 
 // Copy copies to clip.Board, optionally resetting the selection
@@ -1279,7 +1285,7 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 
 // PasteAssign assigns mime data (only the first one!) to this node
 func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
-	sl := tv.NodesFromMimeData(md)
+	sl, _ := tv.NodesFromMimeData(md)
 	if len(sl) == 0 {
 		return
 	}
@@ -1306,11 +1312,14 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
 	tv.PasteAt(md, mod, 1, "Paste After")
 }
 
+// This is a kind of hack to prevent moved items from being deleted, using DND
+const TreeViewTempMovedTag = `_\&MOVED\&`
+
 // PasteAt inserts object(s) from mime data at rel position to this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
 func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm string) {
-	sl := tv.NodesFromMimeData(md)
+	sl, pl := tv.NodesFromMimeData(md)
 
 	if tv.Par == nil {
 		return
@@ -1331,10 +1340,12 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 		return
 	}
 	myidx += rel
+	sroot := tv.RootView.SrcNode
 	updt := par.UpdateStart()
 	sz := len(sl)
 	var ski ki.Ki
 	for i, ns := range sl {
+		orgpath := pl[i]
 		if mod != dnd.DropMove {
 			if cn := par.ChildByName(ns.Name(), 0); cn != nil {
 				ns.SetName(ns.Name() + "_Copy")
@@ -1342,6 +1353,10 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 		}
 		par.SetChildAdded()
 		par.InsertChild(ns, myidx+i)
+		npath := ns.PathFrom(sroot)
+		if mod == dnd.DropMove && npath == orgpath { // we will be nuked immediately after drag
+			ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)
+		}
 		if i == sz-1 {
 			ski = ns
 		}
@@ -1359,7 +1374,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 // PasteChildren inserts object(s) from mime data at end of children of this
 // node
 func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
-	sl := tv.NodesFromMimeData(md)
+	sl, _ := tv.NodesFromMimeData(md)
 
 	sk := tv.SrcNode
 	if sk == nil {
@@ -1455,6 +1470,13 @@ func (tv *TreeView) Dragged(de *dnd.Event) {
 			sn := sroot.FindPath(path)
 			if sn != nil {
 				sn.Delete(true)
+			}
+			sn = sroot.FindPath(path + TreeViewTempMovedTag)
+			if sn != nil {
+				psplt := strings.Split(path, "/")
+				orgnm := psplt[len(psplt)-1]
+				sn.SetName(orgnm)
+				sn.UpdateSig()
 			}
 		}
 	}
