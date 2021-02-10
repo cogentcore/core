@@ -169,6 +169,7 @@ func (im *IconMgr) IconByName(name string) (*Icon, error) {
 	}
 	if ic.Filename != "" && !ic.HasChildren() && IconAutoOpen && ic.Filename != "blank.svg" {
 		ic.OpenXML(ic.Filename)
+		ki.UniquifyNamesAll(ic.This())
 	}
 	return ic, nil
 }

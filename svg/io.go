@@ -785,7 +785,13 @@ func (sv *SVG) SaveXML(filename string) error {
 		log.Println(err)
 		return err
 	}
-	err = sv.WriteXML(bufio.NewWriter(fp), true)
+	bw := bufio.NewWriter(fp)
+	err = sv.WriteXML(bw, true)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = bw.Flush()
 	if err != nil {
 		log.Println(err)
 	}
