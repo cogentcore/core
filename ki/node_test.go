@@ -379,7 +379,7 @@ func TestNodeConfig(t *testing.T) {
 //////////////////////////////////////////
 //  JSON I/O
 
-func TestNodeJSonSave(t *testing.T) {
+func TestNodeJSONSave(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
 	typ := reflect.TypeOf(parent)
@@ -862,7 +862,7 @@ func TestNodeFieldFunc(t *testing.T) {
 	res = res[:0]
 }
 
-func TestNodeFieldJSonSave(t *testing.T) {
+func TestNodeFieldJSONSave(t *testing.T) {
 	parent := NodeField2{}
 	parent.InitName(&parent, "par1")
 	typ := reflect.TypeOf(parent)
