@@ -3,8 +3,8 @@
 package ki
 
 const (
-	Version     = "v1.1.0"
-	GitCommit   = "261984b" // the commit JUST BEFORE the release
-	VersionDate = "2021-02-09 13:18" // UTC
+	Version     = "v1.1.1"
+	GitCommit   = "e26cb61" // the commit JUST BEFORE the release
+	VersionDate = "2021-02-10 14:03" // UTC
 )
 
