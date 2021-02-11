@@ -108,10 +108,11 @@ func (ev *LabelStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJ
 var LabelSelectors = []string{":active", ":inactive", ":selected"}
 
 // SetText sets the text and updates the rendered version.
-// Note: if there is already a label set, and no other larger updates are taking place,
-// the new label may just illegibly overlay on top of the old one -- set Redrawable = true
-// to fix this issue (it will redraw the background -- sampling from actual if none
-// is set).
+// Note: if there is already a label set, and no other
+// larger updates are taking place, the new label may just
+// illegibly overlay on top of the old one.
+// Set Redrawable = true to fix this issue (it will redraw
+// the background -- sampling from actual if none is set).
 func (lb *Label) SetText(txt string) {
 	updt := lb.UpdateStart()
 	// if lb.Text != "" { // not good to automate this -- better to use docs -- bg can be bad
@@ -356,7 +357,7 @@ func (lb *Label) Size2D(iter int) {
 		return // already updated in previous iter, don't redo!
 	} else {
 		lb.InitLayout2D()
-		sz := lb.LayState.SizePrefOrMax()
+		sz := lb.LayState.Size.Pref // SizePrefOrMax()
 		sz = sz.Max(lb.Render.Size)
 		lb.Size2DFromWH(sz.X, sz.Y)
 	}

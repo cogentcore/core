@@ -43,7 +43,7 @@ type SVG struct {
 var KiT_SVG = kit.Types.AddType(&SVG{}, SVGProps)
 
 var SVGProps = ki.Props{
-	"EnumType:Flag": gi.KiT_VpFlags,
+	"EnumType:Flag": KiT_SVGFlags,
 }
 
 // AddNewSVG adds a new svg viewport to given parent node, with given name.
@@ -208,8 +208,19 @@ func (sv *SVG) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return false
 }
 
+func (sv *SVG) ConnectEvents2D() {
+	// nothing here by default, but subtypes can do things here
+}
+
+// IsRendering returns true if the SVG is currently rendering
+func (sv *SVG) IsRendering() bool {
+	return sv.HasFlag(int(Rendering))
+}
+
 func (sv *SVG) Render2D() {
 	if sv.PushBounds() {
+		sv.SetFlag(int(Rendering))
+		sv.This().(gi.Node2D).ConnectEvents2D()
 		rs := &sv.Render
 		if sv.Fill {
 			sv.FillViewport()
@@ -222,6 +233,7 @@ func (sv *SVG) Render2D() {
 		sv.PopBounds()
 		rs.PopXForm()
 		sv.RenderViewport2D() // update our parent image
+		sv.ClearFlag(int(Rendering))
 	}
 }
 
@@ -286,3 +298,19 @@ func (sv *SVG) NewUniqueId() int {
 	sv.UniqueIds[nid] = struct{}{}
 	return nid
 }
+
+// SVGFlags extend gi.VpFlags to hold SVG node state
+type SVGFlags int
+
+//go:generate stringer -type=SVGFlags
+
+var KiT_SVGFlags = kit.Enums.AddEnumExt(gi.KiT_VpFlags, SVGFlagsN, kit.BitFlag, nil)
+
+const (
+	// Rendering means that the SVG is currently redrawing
+	// Can be useful to check for animations etc to decide whether to
+	// drive another update
+	Rendering SVGFlags = SVGFlags(gi.VpFlagsN) + iota
+
+	SVGFlagsN
+)

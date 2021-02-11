@@ -623,7 +623,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	mwdots := parVp.Sty.UnContext.ToDots(40, units.Em)
 	mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 
-	lbl.SetProp("max-width", units.NewValue(mwdots, units.Dot))
+	lbl.SetProp("max-width", units.NewDot(mwdots))
 	lbl.Text = tooltip
 	frame.Init2DTree()
 	frame.Style2DTree()                                    // sufficient to get sizes
@@ -631,6 +631,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	frame.Size2DTree(0)                                    // collect sizes
 	pvp.Win = nil
 	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size).ToPoint()
+
 	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
 	y = ints.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)

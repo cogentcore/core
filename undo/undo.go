@@ -124,7 +124,7 @@ func (um *Mgr) IsRedoAvail() bool {
 }
 
 // Undo returns the action, action data, and state at the current index
-// and decrements the index to point to the previous record.
+// and decrements the index to the previous record.
 // If already at the start (Idx = -1) then returns empty everything
 func (um *Mgr) Undo() (action, data string, state []string) {
 	um.Mu.Lock()
@@ -137,6 +137,24 @@ func (um *Mgr) Undo() (action, data string, state []string) {
 	data = rec.Data
 	state = um.RecState(um.Idx)
 	um.Idx--
+	um.Mu.Unlock()
+	return
+}
+
+// UndoTo returns the action, action data, and state at the given index
+// and decrements the index to the previous record.
+// If idx is out of range then returns empty everything
+func (um *Mgr) UndoTo(idx int) (action, data string, state []string) {
+	um.Mu.Lock()
+	if idx < 0 || idx >= len(um.Recs) {
+		um.Mu.Unlock()
+		return
+	}
+	rec := um.Recs[idx]
+	action = rec.Action
+	data = rec.Data
+	state = um.RecState(idx)
+	um.Idx = idx - 1
 	um.Mu.Unlock()
 	return
 }
@@ -156,4 +174,53 @@ func (um *Mgr) Redo() (action, data string, state []string) {
 	state = um.RecState(um.Idx)
 	um.Mu.Unlock()
 	return
+}
+
+// RedoTo returns the action, action data, and state at the given index,
+// returning nil if already at end of saved records.
+func (um *Mgr) RedoTo(idx int) (action, data string, state []string) {
+	um.Mu.Lock()
+	if idx >= len(um.Recs) || idx < 0 {
+		um.Mu.Unlock()
+		return
+	}
+	um.Idx = idx
+	rec := um.Recs[idx]
+	action = rec.Action
+	data = rec.Data
+	state = um.RecState(idx)
+	um.Mu.Unlock()
+	return
+}
+
+// Reset resets the undo state
+func (um *Mgr) Reset() {
+	um.Mu.Lock()
+	um.Recs = nil
+	um.Idx = 0
+	um.Mu.Unlock()
+}
+
+// UndoList returns the list actions in order from the most recent back in time
+// suitable for a menu of actions to undo.
+func (um *Mgr) UndoList() []string {
+	al := make([]string, um.Idx)
+	for i := um.Idx; i >= 0; i-- {
+		al[um.Idx-i] = um.Recs[i].Action
+	}
+	return al
+}
+
+// RedoList returns the list actions in order from the current forward to end
+// suitable for a menu of actions to redo
+func (um *Mgr) RedoList() []string {
+	nl := len(um.Recs)
+	if um.Idx == nl-1 {
+		return nil
+	}
+	al := make([]string, (nl+1)-um.Idx)
+	for i := um.Idx + 1; i < nl; i++ {
+		al[i-(um.Idx+1)] = um.Recs[i].Action
+	}
+	return al
 }

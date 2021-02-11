@@ -12,6 +12,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gist"
+	"github.com/goki/ki/sliceclone"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
 	"golang.org/x/image/draw"
@@ -246,7 +247,7 @@ func (pc *Paint) stroke(rs *State) {
 	rs.RasterMu.Lock()
 	defer rs.RasterMu.Unlock()
 
-	dash := pc.StrokeStyle.Dashes
+	dash := sliceclone.Float64(pc.StrokeStyle.Dashes)
 	if dash != nil {
 		scx, scy := rs.XForm.ExtractScale()
 		sc := 0.5 * (math.Abs(float64(scx)) + math.Abs(float64(scy)))

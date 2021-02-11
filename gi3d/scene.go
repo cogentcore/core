@@ -1331,7 +1331,7 @@ var SceneProps = ki.Props{
 	},
 }
 
-// SceneFlags extend gi.SceneFlags to hold 3D node state
+// SceneFlags extend gi.NodeFlags to hold 3D node state
 type SceneFlags int
 
 //go:generate stringer -type=SceneFlags
