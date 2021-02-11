@@ -231,13 +231,16 @@ func (md *Model) Save(filename string) error {
 	}
 	defer f.Close()
 	fb := bufio.NewWriter(f) // this makes a HUGE difference in write performance!
-	defer fb.Flush()
 	err = md.WriteTo(fb)
 	if err != nil {
 		log.Println("Fuzzy model:", err)
 		return err
 	}
-	return nil
+	err = fb.Flush()
+	if err != nil {
+		log.Println("Fuzzy model:", err)
+	}
+	return err
 }
 
 // Save a spelling model to disk, but discard all
