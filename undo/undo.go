@@ -2,6 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+/*
+Package undo supports generic undo / redo functionality, using an efficient
+diff of string-valued state representation of a 'document' being edited
+which can be JSON or XML or actual text -- whatever.
+
+A new record must be saved of the state just *before* an action takes place
+and the nature of the action taken.
+
+Thus, undoing the action restores the state to that prior state.
+
+Redoing the action means restoring the state *after* the action.
+
+This means that the first Undo action must save the current state
+before doing the undo.
+
+The Idx is always on the last state saved, which will then be the one
+that would be undone for an undo action.
+*/
 package undo
 
 import (
@@ -17,11 +35,14 @@ import (
 var DefaultRawInterval = 50
 
 // Rec is one undo record, associated with one action that changed state from one to next.
+// The state saved in this record is the state *before* the action took place.
+// The state is either saved as a Raw value or as a diff Patch to the previous state.
 type Rec struct {
-	Action string        `desc:"description of this action, for user to see"`
-	Data   string        `desc:"action data, encoded however you want -- some undo records can just be about this action data that can be interpeted to Undo / Redo a non-state-changing action"`
-	Raw    []string      `desc:"if present, then direct save of full state -- do this at intervals to speed up computing prior states"`
-	Patch  textbuf.Patch `desc:"patch to get from previous record to this one"`
+	Action   string        `desc:"description of this action, for user to see"`
+	Data     string        `desc:"action data, encoded however you want -- some undo records can just be about this action data that can be interpeted to Undo / Redo a non-state-changing action"`
+	Raw      []string      `desc:"if present, then direct save of full state -- do this at intervals to speed up computing prior states"`
+	Patch    textbuf.Patch `desc:"patch to get from previous record to this one"`
+	UndoSave bool          `desc:"this record is an UndoSave, when Undo first called from end of stack"`
 }
 
 // Mgr is the undo manager, managing the undo / redo process
@@ -90,12 +111,30 @@ func (um *Mgr) Save(action, data string, state []string) {
 	nr.Data = data
 	nr.Patch = nil // could be re-using record
 	nr.Raw = nil
+	nr.UndoSave = false
 	if state == nil {
 		um.Mu.Unlock()
 		return
 	}
 	go um.SaveState(nr, um.Idx, state) // fork off save -- it will unlock when done
 	// now we return straight away, with lock still held
+}
+
+// MustSaveUndoStart returns true if the current state must be saved as the start of
+// the first Undo action when at the end of the stack.  If this returns true, then
+// call SaveUndoStart.  It sets a special flag on the record.
+func (um *Mgr) MustSaveUndoStart() bool {
+	return um.Idx == len(um.Recs)-1
+}
+
+// SaveUndoStart saves the current state -- call if MustSaveUndoStart is true.
+// Sets a special flag for this record, and action, data are empty.
+// Does NOT increment the index, so next undo is still as expected.
+func (um *Mgr) SaveUndoStart(state []string) {
+	um.Mu.Lock()
+	nr := &Rec{UndoSave: true}
+	um.Recs = append(um.Recs, nr)
+	um.SaveState(nr, um.Idx+1, state) // do it now because we need to immediately do Undo, does unlock
 }
 
 // SaveState saves given record of state at given index
@@ -111,21 +150,26 @@ func (um *Mgr) SaveState(nr *Rec, idx int, state []string) {
 	um.Mu.Unlock()
 }
 
-// IsUndoAvail returns true if there is at least one undo record available.
-// This does NOT get the lock -- may rarely be inaccurate
-func (um *Mgr) IsUndoAvail() bool {
+// HasUndoAvail returns true if there is at least one undo record available.
+// This does NOT get the lock -- may rarely be inaccurate but is used for
+// gui enabling so not such a big deal.
+func (um *Mgr) HasUndoAvail() bool {
 	return um.Idx >= 0
 }
 
-// IsRedoAvail returns true if there is at least one redo record available.
-// This does NOT get the lock -- may rarely be inaccurate.
-func (um *Mgr) IsRedoAvail() bool {
-	return um.Idx < len(um.Recs)-1
+// HasRedoAvail returns true if there is at least one redo record available.
+// This does NOT get the lock -- may rarely be inaccurate but is used for
+// gui enabling so not such a big deal.
+func (um *Mgr) HasRedoAvail() bool {
+	return um.Idx < len(um.Recs)-2
 }
 
 // Undo returns the action, action data, and state at the current index
 // and decrements the index to the previous record.
+// This state is the state just prior to the action.
 // If already at the start (Idx = -1) then returns empty everything
+// Before calling, first check MustSaveUndoStart() -- if false, then you need
+// to call SaveUndoStart() so that the state just before Undoing can be redone!
 func (um *Mgr) Undo() (action, data string, state []string) {
 	um.Mu.Lock()
 	if um.Idx < 0 {
@@ -159,19 +203,20 @@ func (um *Mgr) UndoTo(idx int) (action, data string, state []string) {
 	return
 }
 
-// Redo returns the action, action data, and state at the next index,
+// Redo returns the action, data at the *next* index, and the state at the
+// index *after that*.
 // returning nil if already at end of saved records.
 func (um *Mgr) Redo() (action, data string, state []string) {
 	um.Mu.Lock()
-	if um.Idx >= len(um.Recs)-1 {
+	if um.Idx >= len(um.Recs)-2 {
 		um.Mu.Unlock()
 		return
 	}
 	um.Idx++
-	rec := um.Recs[um.Idx]
+	rec := um.Recs[um.Idx] // action being redone is this one
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(um.Idx)
+	state = um.RecState(um.Idx + 1) // state is the one *after* it
 	um.Mu.Unlock()
 	return
 }
@@ -180,7 +225,7 @@ func (um *Mgr) Redo() (action, data string, state []string) {
 // returning nil if already at end of saved records.
 func (um *Mgr) RedoTo(idx int) (action, data string, state []string) {
 	um.Mu.Lock()
-	if idx >= len(um.Recs) || idx < 0 {
+	if idx >= len(um.Recs)-1 || idx <= 0 {
 		um.Mu.Unlock()
 		return
 	}
@@ -188,7 +233,7 @@ func (um *Mgr) RedoTo(idx int) (action, data string, state []string) {
 	rec := um.Recs[idx]
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(idx)
+	state = um.RecState(idx + 1)
 	um.Mu.Unlock()
 	return
 }
@@ -215,12 +260,14 @@ func (um *Mgr) UndoList() []string {
 // suitable for a menu of actions to redo
 func (um *Mgr) RedoList() []string {
 	nl := len(um.Recs)
-	if um.Idx == nl-1 {
+	if um.Idx >= nl-2 {
 		return nil
 	}
-	al := make([]string, (nl+1)-um.Idx)
-	for i := um.Idx + 1; i < nl; i++ {
-		al[i-(um.Idx+1)] = um.Recs[i].Action
+	st := um.Idx + 1
+	n := (nl - 1) - st
+	al := make([]string, n)
+	for i := st; i < nl-1; i++ {
+		al[i-st] = um.Recs[i].Action
 	}
 	return al
 }
