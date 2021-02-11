@@ -7,7 +7,6 @@ package svg
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -111,7 +110,7 @@ func (sv *SVG) Init2D() {
 	sv.Viewport2D.Init2D()
 	sv.SetFlag(int(gi.VpFlagSVG)) // we are an svg type
 	sv.Pnt.Defaults()
-	sv.Pnt.FontStyle.BgColor.SetColor(color.White)
+	sv.Pnt.FontStyle.BgColor.SetColor(gist.White)
 }
 
 func (sv *SVG) Size2D(iter int) {

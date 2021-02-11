@@ -25,7 +25,7 @@ import (
 // }
 
 // func (b *Background) Defaults() {
-// 	b.Color.SetColor(color.White)
+// 	b.Color.SetColor(White)
 // }
 
 // BoxSides specifies sides of a box -- some properties can be specified per

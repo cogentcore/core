@@ -61,7 +61,12 @@ func (c Color) RGBA() (r, g, b, a uint32) {
 	return
 }
 
-var NilColor Color
+var (
+	NilColor    Color
+	White       = Color{255, 255, 255, 255}
+	Black       = Color{0, 0, 0, 255}
+	Transparent = Color{255, 255, 255, 0}
+)
 
 // IsNil checks if color is the nil initial default color -- a = 0 means fully
 // transparent black
@@ -300,6 +305,7 @@ func cvtPctStringErr(gotpct bool, pctstr string) {
 // SetString sets color value from string, including # hex specs, standard
 // color names, "none" or "off", or the following transformations (which
 // use a non-nil base color as the starting point, if it is provided):
+// inverse = inverse of base color
 //
 // * lighter-PCT or darker-PCT: PCT is amount to lighten or darken (using HSL), e.g., 10=10%
 // * saturate-PCT or pastel-PCT: manipulates the saturation level in HSL by PCT
@@ -312,19 +318,19 @@ func (c *Color) SetString(str string, base color.Color) error {
 	}
 	// pr := prof.Start("Color.SetString")
 	// defer pr.End()
-	low := strings.ToLower(str)
+	lstr := strings.ToLower(str)
 	switch {
-	case low[0] == '#':
+	case lstr[0] == '#':
 		return c.ParseHex(str)
-	case strings.HasPrefix(low, "hsl("):
-		val := low[4:]
+	case strings.HasPrefix(lstr, "hsl("):
+		val := lstr[4:]
 		val = strings.TrimRight(val, ")")
 		format := "%d,%d,%d"
 		var h, s, l int
 		fmt.Sscanf(val, format, &h, &s, &l)
 		c.SetHSL(float32(h), float32(s)/100.0, float32(l)/100.0)
-	case strings.HasPrefix(low, "rgb("):
-		val := low[4:]
+	case strings.HasPrefix(lstr, "rgb("):
+		val := lstr[4:]
 		val = strings.TrimRight(val, ")")
 		val = strings.Trim(val, "%")
 		var r, g, b, a int
@@ -337,25 +343,25 @@ func (c *Color) SetString(str string, base color.Color) error {
 			fmt.Sscanf(val, format, &r, &g, &b)
 		}
 		c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
-	case strings.HasPrefix(low, "rgba("):
-		val := low[5:]
+	case strings.HasPrefix(lstr, "rgba("):
+		val := lstr[5:]
 		val = strings.TrimRight(val, ")")
 		val = strings.Trim(val, "%")
 		var r, g, b, a int
 		format := "%d,%d,%d,%d"
 		fmt.Sscanf(val, format, &r, &g, &b, &a)
 		c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
-	case strings.HasPrefix(low, "pref("):
-		val := low[5:]
+	case strings.HasPrefix(lstr, "pref("):
+		val := lstr[5:]
 		val = strings.TrimRight(val, ")")
 		clr := ThePrefs.PrefColor(val)
 		if clr != nil {
 			*c = *clr
 		}
 	default:
-		if hidx := strings.Index(low, "-"); hidx > 0 {
-			cmd := low[:hidx]
-			pctstr := low[hidx+1:]
+		if hidx := strings.Index(lstr, "-"); hidx > 0 {
+			cmd := lstr[:hidx]
+			pctstr := lstr[hidx+1:]
 			pct, gotpct := kit.ToFloat32(pctstr)
 			switch cmd {
 			case "lighter":
@@ -420,27 +426,33 @@ func (c *Color) SetString(str string, base color.Color) error {
 				}
 				clridx := strings.Index(pctstr, "-")
 				if clridx < 0 {
-					err := fmt.Errorf("gi.Color.SetString -- blend color spec not found -- format is: blend-PCT-color, got: %v -- PCT-color is: %v", low, pctstr)
+					err := fmt.Errorf("gi.Color.SetString -- blend color spec not found -- format is: blend-PCT-color, got: %v -- PCT-color is: %v", lstr, pctstr)
 					return err
 				}
-				pctstr = low[hidx+1 : clridx]
+				pctstr = lstr[hidx+1 : clridx]
 				pct, gotpct = kit.ToFloat32(pctstr)
 				cvtPctStringErr(gotpct, pctstr)
-				clrstr := low[clridx+1:]
+				clrstr := lstr[clridx+1:]
 				othc, err := ColorFromString(clrstr, base)
 				c.SetColor(c.Blend(pct, &othc))
 				return err
 			}
 		}
-		switch low {
+		switch lstr {
 		case "none", "off":
 			c.SetToNil()
 			return nil
 		case "transparent":
 			c.SetUInt8(0xFF, 0xFF, 0xFF, 0)
 			return nil
+		case "inverse":
+			if base != nil {
+				c.SetColor(base)
+			}
+			c.SetColor(c.Inverse())
+			return nil
 		default:
-			return c.SetName(low)
+			return c.SetName(lstr)
 		}
 	}
 	return nil
@@ -467,8 +479,8 @@ func (c *Color) SetStringStyle(str string, base color.Color, ctxt Context) error
 		c.SetToNil()
 		return nil
 	}
-	low := strings.ToLower(str)
-	switch low {
+	lstr := strings.ToLower(str)
+	switch lstr {
 	case "currentcolor":
 		if ctxt != nil {
 			*c = ctxt.ContextColor() // current style.Color value
@@ -618,6 +630,12 @@ func (c *Color) Blend(pct float32, clr color.Color) Color {
 	f32.B = me*f32.B + oth*othc.B
 	f32.A = me*f32.A + oth*othc.A
 	return ColorModel.Convert(f32).(Color)
+}
+
+// Inverse returns inverse current color (255 - each component)
+// does not change the alpha channel.
+func (c *Color) Inverse() Color {
+	return Color{255 - c.R, 255 - c.G, 255 - c.B, c.A}
 }
 
 // SetIFace sets the color from given interface value, e.g., for ki.Props

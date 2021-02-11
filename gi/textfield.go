@@ -928,8 +928,13 @@ func (tf *TextField) CursorSprite() *Sprite {
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
+		bbsz.X += 2 // inverse border
 		sp = win.AddNewSprite(spnm, bbsz, image.ZP)
-		draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{sty.Font.Color}, image.ZP, draw.Src)
+		ibox := sp.Pixels.Bounds()
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color.Inverse()}, image.ZP, draw.Src)
+		ibox.Min.X++ // 1 pixel boundary
+		ibox.Max.X--
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color}, image.ZP, draw.Src)
 	}
 	return sp
 }

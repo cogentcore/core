@@ -20,7 +20,6 @@ type Sprite struct {
 	Name   string                         `desc:"unique name of sprite"`
 	Geom   Geom2DInt                      `desc:"position and size of the image within the overlay window texture"`
 	Pixels *image.RGBA                    `desc:"pixels to render -- should be same size as Geom.Size"`
-	Bg     *image.RGBA                    `desc:"optional background image which is rendered first before Pixels"`
 	Events map[oswin.EventType]*ki.Signal `desc:"optional event signals for given event type"`
 }
 
@@ -37,9 +36,6 @@ func (sp *Sprite) Resize(nwsz image.Point) {
 		return
 	}
 	sp.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	if sp.Bg != nil && sp.Bg.Bounds().Size() != nwsz {
-		sp.Bg = image.NewRGBA(image.Rectangle{Max: nwsz})
-	}
 }
 
 // SetBottomPos sets the sprite's bottom position to given point

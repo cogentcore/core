@@ -7,7 +7,6 @@ package gi
 import (
 	"encoding/json"
 	"fmt"
-	"image/color"
 	"io/ioutil"
 	"log"
 	"os/user"
@@ -477,9 +476,9 @@ var KiT_ColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
 
 func (pf *ColorPrefs) Defaults() {
 	pf.HiStyle = "emacs"
-	pf.Font.SetColor(color.Black)
+	pf.Font.SetColor(gist.Black)
 	pf.Border.SetString("#666", nil)
-	pf.Background.SetColor(color.White)
+	pf.Background.SetColor(gist.White)
 	pf.Shadow.SetString("darker-10", &pf.Background)
 	pf.Control.SetString("#F8F8F8", nil)
 	pf.Icon.SetString("highlight-30", pf.Control)
