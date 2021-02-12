@@ -23,9 +23,12 @@ that would be undone for an undo action.
 package undo
 
 import (
+	"fmt"
 	"log"
+	"strings"
 	"sync"
 
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/giv/textbuf"
 )
 
@@ -43,6 +46,15 @@ type Rec struct {
 	Raw      []string      `desc:"if present, then direct save of full state -- do this at intervals to speed up computing prior states"`
 	Patch    textbuf.Patch `desc:"patch to get from previous record to this one"`
 	UndoSave bool          `desc:"this record is an UndoSave, when Undo first called from end of stack"`
+}
+
+// Init sets the action and data in a record -- overwriting any prior values
+func (rc *Rec) Init(action, data string) {
+	rc.Action = action
+	rc.Data = data
+	rc.Patch = nil
+	rc.Raw = nil
+	rc.UndoSave = false
 }
 
 // Mgr is the undo manager, managing the undo / redo process
@@ -107,11 +119,7 @@ func (um *Mgr) Save(action, data string, state []string) {
 		nr = &Rec{}
 		um.Recs = append(um.Recs, nr)
 	}
-	nr.Action = action
-	nr.Data = data
-	nr.Patch = nil // could be re-using record
-	nr.Raw = nil
-	nr.UndoSave = false
+	nr.Init(action, data)
 	if state == nil {
 		um.Mu.Unlock()
 		return
@@ -135,6 +143,18 @@ func (um *Mgr) SaveUndoStart(state []string) {
 	nr := &Rec{UndoSave: true}
 	um.Recs = append(um.Recs, nr)
 	um.SaveState(nr, um.Idx+1, state) // do it now because we need to immediately do Undo, does unlock
+}
+
+// SaveReplace replaces the current Undo record with new state,
+// instead of creating a new record.  This is useful for when
+// you have a stream of the same type of manipulations
+// and just want to save the last (it is better to handle that case
+// up front as saving the state can be relatively expensive, but
+// in some cases it is not possible).
+func (um *Mgr) SaveReplace(action, data string, state []string) {
+	um.Mu.Lock()
+	nr := um.Recs[um.Idx]
+	go um.SaveState(nr, um.Idx, state)
 }
 
 // SaveState saves given record of state at given index
@@ -270,4 +290,37 @@ func (um *Mgr) RedoList() []string {
 		al[i-st] = um.Recs[i].Action
 	}
 	return al
+}
+
+// MemUsed reports the amount of memory used for record
+func (rc *Rec) MemUsed() int {
+	mem := 0
+	if rc.Raw != nil {
+		for _, s := range rc.Raw {
+			mem += len(s)
+		}
+	} else {
+		for _, pr := range rc.Patch {
+			for _, s := range pr.Blines {
+				mem += len(s)
+			}
+		}
+	}
+	return mem
+}
+
+// MemStats reports the memory usage statistics.
+// if details is true, each record is reported.
+func (um *Mgr) MemStats(details bool) string {
+	sb := strings.Builder{}
+	sum := 0
+	for i, r := range um.Recs {
+		mem := r.MemUsed()
+		sum += mem
+		if details {
+			sb.WriteString(fmt.Sprintf("%d\t%s\tmem:%s\n", i, r.Action, giv.FileSize(mem).String()))
+		}
+	}
+	sb.WriteString(fmt.Sprintf("Total: %s\n", giv.FileSize(sum).String()))
+	return sb.String()
 }

@@ -10,7 +10,6 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
@@ -239,18 +238,19 @@ func (sv *SVG) Render2D() {
 /////////////////////////////////////////////////////////////////////////////
 //   Naming elements with unique id's
 
-// SplitNameId splits name at any portion starting with a digit character,
-// returning name part prior to that, and numerical part thereafter.
-// if numerical id part is 0, then it wasn't there, or didn't parse.
-// SVG object names are type names + numerical id
-func SplitNameId(nm string) (string, int) {
-	for i, r := range nm {
-		if unicode.IsDigit(r) {
-			id, _ := strconv.Atoi(nm[i:])
-			return nm[:i], id
-		}
+// SplitNameId splits name after the element name (e.g., 'rect')
+// returning true if it starts with element name,
+// and numerical id part after that element.
+// if numerical id part is 0, then it didn't parse.
+// SVG object names are element names + numerical id
+func SplitNameId(elnm, nm string) (bool, int) {
+	if !strings.HasPrefix(nm, elnm) {
+		fmt.Printf("not elnm: %s  %s\n", nm, elnm)
+		return false, 0
 	}
-	return nm, 0
+	idstr := nm[len(elnm):]
+	id, _ := strconv.Atoi(idstr)
+	return true, id
 }
 
 // NameId returns the name with given unique id
@@ -263,11 +263,25 @@ func NameId(nm string, id int) string {
 func (sv *SVG) GatherIds() {
 	sv.UniqueIds = make(map[int]struct{})
 	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		nm, id := SplitNameId(k.Name())
+		elnm := ""
+		if svi, ok := k.(NodeSVG); ok {
+			elnm = svi.SVGName()
+		} else if gr, ok := k.(*gi.Gradient); ok {
+			elnm = gr.GradientType()
+		}
+		if elnm == "" {
+			return ki.Continue
+		}
+		elpfx, id := SplitNameId(elnm, k.Name())
+		if !elpfx {
+			return ki.Continue
+		}
 		_, has := sv.UniqueIds[id]
 		if id <= 0 || has {
 			id = sv.NewUniqueId() // automatically registers it
-			k.SetName(NameId(nm, id))
+			k.SetName(NameId(elnm, id))
+		} else {
+			sv.UniqueIds[id] = struct{}{}
 		}
 		return ki.Continue
 	})

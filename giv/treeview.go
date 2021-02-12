@@ -882,9 +882,11 @@ func (tv *TreeView) Open() {
 		if tv.HasChildren() {
 			tv.SetClosedState(false)
 		}
-		// send signal in any case -- dynamic trees can open a node here!
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewOpened), tv.This())
 		tv.UpdateEnd(updt)
+	} else if !tv.HasChildren() {
+		// non-children nodes get double-click open for example
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewOpened), tv.This())
 	}
 }
 

@@ -28,6 +28,7 @@ require (
 	github.com/ianbruene/go-difflib v1.2.0
 	github.com/iancoleman/strcase v0.1.3
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/shuLhan/go-bindata v4.0.0+incompatible // indirect
 	github.com/srwiley/oksvg v0.0.0-20210209000435-a757b9cbd472 // indirect
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/srwiley/scanFT v0.0.0-20190309001647-3267585b8d6d // indirect

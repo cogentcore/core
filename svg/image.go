@@ -23,7 +23,7 @@ type Image struct {
 	Size                mat32.Vec2  `xml:"{width,height}" desc:"rendered size of the image (imposes a scaling on image when it is rendered)"`
 	PreserveAspectRatio bool        `xml:"preserveAspectRatio" desc:"directs resize operations to preserve aspect ratio"`
 	Filename            gi.FileName `desc:"file name of image loaded -- set by OpenImage"`
-	Pixels              *image.RGBA `view:"-" desc:"the image pixels"`
+	Pixels              *image.RGBA `copy:"-" xml:"-" json:"-" view:"-" desc:"the image pixels"`
 }
 
 var KiT_Image = kit.Types.AddType(&Image{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})

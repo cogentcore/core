@@ -29,6 +29,7 @@ type ColorView struct {
 	NumView  ValueView  `desc:"inline struct view of the numbers"`
 	TmpSave  ValueView  `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig  ki.Signal  `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ManipSig ki.Signal  `json:"-" xml:"-" desc:"manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value"`
 	ViewPath string     `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
@@ -42,6 +43,7 @@ func AddNewColorView(parent ki.Ki, name string) *ColorView {
 func (cv *ColorView) Disconnect() {
 	cv.Frame.Disconnect()
 	cv.ViewSig.DisconnectAll()
+	cv.ManipSig.DisconnectAll()
 }
 
 var ColorViewProps = ki.Props{
@@ -182,12 +184,17 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.SetMinPrefWidth(units.NewCh(20))
 	sl.SetMinPrefHeight(units.NewEm(2))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.SliderValueChanged) {
-			cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
-			slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
+		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
+		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
+		if sig == int64(gi.SliderReleased) {
 			updt := cvv.UpdateStart()
 			cvv.SetRGBValue(slv.Value, rgb)
 			cvv.ViewSig.Emit(cvv.This(), 0, nil)
+			cvv.UpdateEnd(updt)
+		} else if sig == int64(gi.SliderValueChanged) {
+			updt := cvv.UpdateStart()
+			cvv.SetRGBValue(slv.Value, rgb)
+			cvv.ManipSig.Emit(cvv.This(), 0, nil)
 			cvv.UpdateEnd(updt)
 		}
 	})
@@ -234,12 +241,17 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.SetMinPrefWidth(units.NewCh(20))
 	sl.SetMinPrefHeight(units.NewEm(2))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.SliderValueChanged) {
-			cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
-			slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
+		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
+		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
+		if sig == int64(gi.SliderReleased) {
 			updt := cvv.UpdateStart()
 			cvv.SetHSLValue(slv.Value, hsl)
 			cvv.ViewSig.Emit(cvv.This(), 0, nil)
+			cvv.UpdateEnd(updt)
+		} else if sig == int64(gi.SliderValueChanged) {
+			updt := cvv.UpdateStart()
+			cvv.SetHSLValue(slv.Value, hsl)
+			cvv.ManipSig.Emit(cvv.This(), 0, nil)
 			cvv.UpdateEnd(updt)
 		}
 	})
