@@ -36,6 +36,14 @@ func (g *Polyline) CopyFieldsFrom(frm interface{}) {
 	copy(g.Points, fr.Points)
 }
 
+func (g *Polyline) SetPos(pos mat32.Vec2) {
+	// todo: set offset relative to bbox
+}
+
+func (g *Polyline) SetSize(sz mat32.Vec2) {
+	// todo: scale bbox
+}
+
 func (g *Polyline) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

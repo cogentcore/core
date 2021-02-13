@@ -52,6 +52,14 @@ func (g *Path) CopyFieldsFrom(frm interface{}) {
 	g.MaxCoord = fr.MaxCoord
 }
 
+func (g *Path) SetPos(pos mat32.Vec2) {
+	// todo: set first point
+}
+
+func (g *Path) SetSize(sz mat32.Vec2) {
+	// todo: scale bbox
+}
+
 // SetData sets the path data to given string, parsing it into an optimized
 // form used for rendering
 func (g *Path) SetData(data string) error {

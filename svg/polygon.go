@@ -36,6 +36,14 @@ func (g *Polygon) CopyFieldsFrom(frm interface{}) {
 	copy(g.Points, fr.Points)
 }
 
+func (g *Polygon) SetPos(pos mat32.Vec2) {
+	// todo: set offset relative to bbox
+}
+
+func (g *Polygon) SetSize(sz mat32.Vec2) {
+	// todo: scale bbox
+}
+
 func (g *Polygon) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

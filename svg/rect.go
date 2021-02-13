@@ -39,6 +39,14 @@ func (g *Rect) CopyFieldsFrom(frm interface{}) {
 	g.Radius = fr.Radius
 }
 
+func (g *Rect) SetPos(pos mat32.Vec2) {
+	g.Pos = pos
+}
+
+func (g *Rect) SetSize(sz mat32.Vec2) {
+	g.Size = sz
+}
+
 func (g *Rect) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

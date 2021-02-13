@@ -37,6 +37,14 @@ func (g *Circle) CopyFieldsFrom(frm interface{}) {
 	g.Radius = fr.Radius
 }
 
+func (g *Circle) SetPos(pos mat32.Vec2) {
+	g.Pos = pos.SubScalar(g.Radius)
+}
+
+func (g *Circle) SetSize(sz mat32.Vec2) {
+	g.Radius = 0.25 * (sz.X + sz.Y)
+}
+
 func (g *Circle) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

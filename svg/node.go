@@ -27,6 +27,12 @@ type NodeSVG interface {
 	// interface methods.
 	AsSVGNode() *NodeBase
 
+	// SetPos sets the *upper left* position of this element, in local dimensions
+	SetPos(pos mat32.Vec2)
+
+	// SetSize sets the overall size of this element, in local dimensions
+	SetSize(sz mat32.Vec2)
+
 	// MyXForm returns the 2D transform matrix for this node, compounded through parents
 	MyXForm() mat32.Mat2
 
@@ -80,6 +86,12 @@ func (g *NodeBase) AsSVGNode() *NodeBase {
 
 func (g *NodeBase) SVGName() string {
 	return "base"
+}
+
+func (g *NodeBase) SetPos(pos mat32.Vec2) {
+}
+
+func (g *NodeBase) SetSize(sz mat32.Vec2) {
 }
 
 func (n *NodeBase) BaseIface() reflect.Type {
@@ -203,6 +215,9 @@ func StyleSVG(gii gi.Node2D) {
 
 	// todo: do StyleMu for SVG nodes, then can access viewport directly
 	mvp = g.ViewportSafe()
+	if mvp == nil {
+		return
+	}
 	ctxt := mvp.This().(gist.Context)
 	psvg := ParentSVG(g)
 	if psvg != nil {

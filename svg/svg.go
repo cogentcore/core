@@ -245,7 +245,7 @@ func (sv *SVG) Render2D() {
 // SVG object names are element names + numerical id
 func SplitNameId(elnm, nm string) (bool, int) {
 	if !strings.HasPrefix(nm, elnm) {
-		fmt.Printf("not elnm: %s  %s\n", nm, elnm)
+		// fmt.Printf("not elnm: %s  %s\n", nm, elnm)
 		return false, 0
 	}
 	idstr := nm[len(elnm):]

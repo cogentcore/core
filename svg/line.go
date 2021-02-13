@@ -38,6 +38,14 @@ func (g *Line) CopyFieldsFrom(frm interface{}) {
 	g.End = fr.End
 }
 
+func (g *Line) SetPos(pos mat32.Vec2) {
+	g.Start = pos
+}
+
+func (g *Line) SetSize(sz mat32.Vec2) {
+	g.End = g.Start.Add(sz)
+}
+
 func (g *Line) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

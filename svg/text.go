@@ -69,6 +69,14 @@ func (g *Text) CopyFieldsFrom(frm interface{}) {
 	g.AdjustGlyphs = fr.AdjustGlyphs
 }
 
+func (g *Text) SetPos(pos mat32.Vec2) {
+	g.Pos = pos
+}
+
+func (g *Text) SetSize(sz mat32.Vec2) {
+	g.Width = sz.X
+}
+
 func (g *Text) BBox2D() image.Rectangle {
 	if g.Text == "" {
 		return BBoxFromChildren(g)

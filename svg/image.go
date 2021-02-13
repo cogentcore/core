@@ -47,10 +47,18 @@ func (g *Image) CopyFieldsFrom(frm interface{}) {
 	g.Pixels = fr.Pixels
 }
 
-// SetSize sets size of the bitmap image.
+func (g *Image) SetPos(pos mat32.Vec2) {
+	g.Pos = pos
+}
+
+func (g *Image) SetSize(sz mat32.Vec2) {
+	g.Size = sz
+}
+
+// SetImageSize sets size of the bitmap image.
 // This does not resize any existing image, just makes a new image
 // if the size is different
-func (g *Image) SetSize(nwsz image.Point) {
+func (g *Image) SetImageSize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
@@ -80,7 +88,7 @@ func (g *Image) OpenImage(filename gi.FileName, width, height float32) error {
 func (g *Image) SetImage(img image.Image, width, height float32) {
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
-		g.SetSize(sz)
+		g.SetImageSize(sz)
 		draw.Draw(g.Pixels, g.Pixels.Bounds(), img, image.ZP, draw.Src)
 		if g.Size.X == 0 && g.Size.Y == 0 {
 			g.Size = mat32.NewVec2FmPoint(sz)
@@ -98,7 +106,7 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 			scy = height / float32(sz.Y)
 			tsz.Y = int(height)
 		}
-		g.SetSize(tsz)
+		g.SetImageSize(tsz)
 		m := mat32.Scale2D(scx, scy)
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		transformer.Transform(g.Pixels, s2d, img, img.Bounds(), draw.Over, nil)

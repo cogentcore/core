@@ -37,6 +37,14 @@ func (g *Ellipse) CopyFieldsFrom(frm interface{}) {
 	g.Radii = fr.Radii
 }
 
+func (g *Ellipse) SetPos(pos mat32.Vec2) {
+	g.Pos = pos.Sub(g.Radii)
+}
+
+func (g *Ellipse) SetSize(sz mat32.Vec2) {
+	g.Radii = sz.MulScalar(0.5)
+}
+
 func (g *Ellipse) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()
