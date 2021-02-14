@@ -69,7 +69,7 @@ func (cs *ColorSpec) SetString(clrstr string, ctxt Context) bool {
 		fmt.Printf("gi.Color Warning: Not able to find url: %v\n", clrstr)
 		cs.Gradient = nil
 		cs.Source = SolidColor
-		cs.Color.SetColor(color.Black)
+		cs.Color = Black
 		return false
 	}
 	clrstr = strings.ToLower(clrstr)

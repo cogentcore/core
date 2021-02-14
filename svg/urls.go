@@ -276,6 +276,9 @@ func (g *NodeBase) GradientReadPts(dat []float32) {
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//  Gradient management utilities for creating element-specific grads
+
 // UpdateGradientStops copies stops from StopsName gradient if it is set
 func UpdateGradientStops(gr *gi.Gradient) {
 	if gr.StopsName == "" {
@@ -285,4 +288,78 @@ func UpdateGradientStops(gr *gi.Gradient) {
 	if sgr != nil {
 		gr.Grad.CopyStopsFrom(&sgr.Grad)
 	}
+}
+
+// DeleteNodeGradient deletes the node-specific gradient on given node.
+// Returns true if deleted.
+func DeleteNodeGradient(gii gi.Node2D, grnm string) bool {
+	gr := GradientByName(gii, grnm)
+	if gr == nil || gr.StopsName == "" {
+		return false
+	}
+	psvg := ParentSVG(gii.AsNode2D())
+	if psvg == nil {
+		return false
+	}
+	unm := URLName(grnm)
+	psvg.Defs.DeleteChildByName(unm, true)
+	return true
+}
+
+// AddNewNodeGradient adds a new gradient specific to given node
+// that points to given stops name.  returns the new gradient
+// and the url that points to it (nil if parent svg cannot be found).
+// Initializes gradient to use bounding box of object, but using userSpaceOnUse setting
+func AddNewNodeGradient(gii gi.Node2D, radial bool, stops string) (*gi.Gradient, string) {
+	psvg := ParentSVG(gii.AsNode2D())
+	if psvg == nil {
+		return nil, ""
+	}
+	gnm := ""
+	if radial {
+		gnm = "radialGradient"
+	} else {
+		gnm = "linearGradient"
+	}
+	id := psvg.NewUniqueId()
+	gnm = NameId(gnm, id)
+	gr := psvg.Defs.AddNewChild(gi.KiT_Gradient, gnm).(*gi.Gradient)
+	gr.StopsName = stops
+	bbox := gii.(NodeSVG).SVGLocalBBox()
+	if radial {
+		gr.Grad.NewRadialGradient(bbox)
+	} else {
+		gr.Grad.NewLinearGradient(bbox)
+	}
+	gr.Grad.Gradient.Units = rasterx.UserSpaceOnUse
+	url := "url(#" + gnm + ")"
+	return gr, url
+}
+
+// UpdateNodeGradientProp ensures that node has a gradient property of given type
+func UpdateNodeGradientProp(gii gi.Node2D, prop string, radial bool, stops string) (*gi.Gradient, string) {
+	ps := gii.Prop(prop)
+	if ps == nil {
+		gr, url := AddNewNodeGradient(gii, radial, stops)
+		gii.SetProp(prop, url)
+		return gr, url
+	}
+	pstr := ps.(string)
+	trgst := ""
+	if radial {
+		trgst = "url(#radialGradient"
+	} else {
+		trgst = "url(#linearGradient"
+	}
+	url := "url(#" + trgst
+	if strings.HasPrefix(pstr, url) {
+		gr := GradientByName(gii, pstr)
+		return gr, "url(#" + gr.Nm + ")"
+	}
+	if strings.HasPrefix(pstr, "url(#") { // wrong kind
+		DeleteNodeGradient(gii, pstr)
+	}
+	gr, url := AddNewNodeGradient(gii, radial, stops)
+	gii.SetProp(prop, url)
+	return gr, url
 }

@@ -5,7 +5,6 @@
 package gist
 
 import (
-	"image/color"
 	"log"
 
 	"github.com/goki/gi/units"
@@ -470,7 +469,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = par.(*Font).Color
 			} else if init {
-				fs.Color.SetColor(color.Black)
+				fs.Color = Black
 			}
 			return
 		}
@@ -1009,7 +1008,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Color = par.(*Border).Color
 			} else if init {
-				bs.Color.SetColor(color.Black)
+				bs.Color = Black
 			}
 			return
 		}
@@ -1075,7 +1074,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Color = par.(*Border).Color
 			} else if init {
-				bs.Color.SetColor(color.Black)
+				bs.Color = Black
 			}
 			return
 		}
@@ -1142,7 +1141,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 			if inh {
 				ss.Color = par.(*Shadow).Color
 			} else if init {
-				ss.Color.SetColor(color.Black)
+				ss.Color = Black
 			}
 			return
 		}

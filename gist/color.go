@@ -6,6 +6,7 @@ package gist
 
 import (
 	"fmt"
+	"sort"
 
 	"image/color"
 	"log"
@@ -14,6 +15,7 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/ki/sliceclone"
 	"github.com/goki/mat32"
 	"golang.org/x/image/colornames"
 )
@@ -46,6 +48,13 @@ func ColorFromName(name string) (Color, error) {
 	var c Color
 	err := c.SetName(name)
 	return c, err
+}
+
+// ColorFromColor returns a new gist.Color from image/color.Color
+func ColorFromColor(clr color.Color) Color {
+	var c Color
+	c.SetColor(clr)
+	return c
 }
 
 // implements color.Color interface -- returns values in range 0x0000 - 0xffff
@@ -864,4 +873,44 @@ func hslaf32Model(c color.Color) color.Color {
 	h, s, l := RGBtoHSLf32(fr, fg, fb)
 
 	return HSLA{h, s, l, fa}
+}
+
+var hslSortedColorNames []string
+
+// HSLSortedColorNames returns color names sorted first by
+// overall lightness and saturation, then hue within that.
+// This is cached after first call, so it will be fast to
+// call after that point.
+func HSLSortedColorNames() []string {
+	if hslSortedColorNames != nil {
+		return hslSortedColorNames
+	}
+
+	sc := sliceclone.String(colornames.Names)
+	sort.Slice(sc, func(i, j int) bool {
+		ci := ColorFromColor(colornames.Map[sc[i]])
+		cj := ColorFromColor(colornames.Map[sc[j]])
+		hi, si, li, _ := ci.ToHSLA()
+		hj, sj, lj, _ := cj.ToHSLA()
+		// first sort all greys at start
+		if ci.R == ci.G && ci.R == ci.B {
+			if cj.R == cj.G && cj.R == cj.B {
+				return li > lj
+			} else {
+				return true
+			}
+		} else if cj.R == cj.G && cj.R == cj.B {
+			return false
+		}
+		lsi := li + si
+		lsj := lj + sj
+		lri := int(lsi * 3)
+		lrj := int(lsj * 3)
+		if lri == lrj {
+			return hi < hj
+		}
+		return lsi > lsj
+	})
+	hslSortedColorNames = sc
+	return hslSortedColorNames
 }

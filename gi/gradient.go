@@ -19,7 +19,7 @@ type Gradient struct {
 	Node2DBase
 	Grad      gist.ColorSpec `desc:"the color gradient"`
 	StopsName string         `desc:"name of another gradient to get stops from"`
-	RefCount  int            `view:"-" desc:"number of objects referring to this gradient"`
+	RefCount  int            `json:"-" xml:"-" copy:"-" view:"-" desc:"number of objects referring to this gradient"`
 }
 
 var KiT_Gradient = kit.Types.AddType(&Gradient{}, nil)

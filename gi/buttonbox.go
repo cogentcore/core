@@ -59,8 +59,8 @@ var ButtonBoxProps = ki.Props{
 	"color":            &Prefs.Colors.Font,
 }
 
-// SelectItem activates a given item and emits the ButtonSig signal.
-// This is mainly for Mutex use.
+// SelectItem activates a given item but does NOT emit the ButtonSig signal.
+// See SelectItemAction for signal emitting version.
 // returns error if index is out of range.
 func (bb *ButtonBox) SelectItem(idx int) error {
 	if idx >= bb.Parts.NumChildren() || idx < 0 {
@@ -68,13 +68,24 @@ func (bb *ButtonBox) SelectItem(idx int) error {
 	}
 	updt := bb.UpdateStart()
 	if bb.Mutex {
-		bb.UnCheckAll()
+		bb.UnCheckAllBut(idx)
 	}
-	cbi := bb.Parts.Child(idx)
-	cb := cbi.(*CheckBox)
+	cb := bb.Parts.Child(idx).(*CheckBox)
 	cb.SetChecked(true)
-	bb.ButtonSig.Emit(bb.This(), int64(idx), cb.Text)
 	bb.UpdateEnd(updt)
+	return nil
+}
+
+// SelectItemAction activates a given item and emits the ButtonSig signal.
+// This is mainly for Mutex use.
+// returns error if index is out of range.
+func (bb *ButtonBox) SelectItemAction(idx int) error {
+	err := bb.SelectItem(idx)
+	if err != nil {
+		return err
+	}
+	cb := bb.Parts.Child(idx).(*CheckBox)
+	bb.ButtonSig.Emit(bb.This(), int64(idx), cb.Text)
 	return nil
 }
 
@@ -82,6 +93,19 @@ func (bb *ButtonBox) SelectItem(idx int) error {
 func (bb *ButtonBox) UnCheckAll() {
 	updt := bb.UpdateStart()
 	for _, cbi := range *bb.Parts.Children() {
+		cb := cbi.(*CheckBox)
+		cb.SetChecked(false)
+	}
+	bb.UpdateEnd(updt)
+}
+
+// UnCheckAllBut unchecks all buttons except given one
+func (bb *ButtonBox) UnCheckAllBut(idx int) {
+	updt := bb.UpdateStart()
+	for i, cbi := range *bb.Parts.Children() {
+		if i == idx {
+			continue
+		}
 		cb := cbi.(*CheckBox)
 		cb.SetChecked(false)
 	}
@@ -163,7 +187,7 @@ func (bb *ButtonBox) ConfigItems() {
 			idx := cbb.Prop("index").(int)
 			ischk := cbb.IsChecked()
 			if bbb.Mutex && ischk {
-				bbb.UnCheckAll()
+				bbb.UnCheckAllBut(idx)
 			}
 			bbb.ButtonSig.Emit(bbb.This(), int64(idx), cbb.Text)
 		})

@@ -5,7 +5,6 @@
 package gist
 
 import (
-	"image/color"
 	"strings"
 
 	"github.com/goki/gi/units"
@@ -38,7 +37,7 @@ type Font struct {
 }
 
 func (fs *Font) Defaults() {
-	fs.Color.SetColor(color.Black)
+	fs.Color = Black
 	fs.Opacity = 1.0
 	fs.Size = units.NewPt(12)
 }

@@ -45,6 +45,13 @@ func (g *Ellipse) SetSize(sz mat32.Vec2) {
 	g.Radii = sz.MulScalar(0.5)
 }
 
+func (g *Ellipse) SVGLocalBBox() mat32.Box2 {
+	bb := mat32.Box2{}
+	bb.Min = g.Pos.Sub(g.Radii)
+	bb.Max = g.Pos.Add(g.Radii)
+	return bb
+}
+
 func (g *Ellipse) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

@@ -47,6 +47,13 @@ func (g *Rect) SetSize(sz mat32.Vec2) {
 	g.Size = sz
 }
 
+func (g *Rect) SVGLocalBBox() mat32.Box2 {
+	bb := mat32.Box2{}
+	bb.Min = g.Pos
+	bb.Max = g.Pos.Add(g.Size)
+	return bb
+}
+
 func (g *Rect) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

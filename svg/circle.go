@@ -45,6 +45,13 @@ func (g *Circle) SetSize(sz mat32.Vec2) {
 	g.Radius = 0.25 * (sz.X + sz.Y)
 }
 
+func (g *Circle) SVGLocalBBox() mat32.Box2 {
+	bb := mat32.Box2{}
+	bb.Min = g.Pos.SubScalar(g.Radius)
+	bb.Max = g.Pos.AddScalar(g.Radius)
+	return bb
+}
+
 func (g *Circle) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

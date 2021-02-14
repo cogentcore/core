@@ -116,14 +116,21 @@ var LayoutFocusNameTimeoutMSec = 500
 // event to allow tab to focus on next element with same name.
 var LayoutFocusNameTabMSec = 2000
 
-// Layout is the primary node type responsible for organizing the sizes and
-// positions of child widgets -- all arbitrary collections of widgets should
-// generally be contained within a layout -- otherwise the parent widget must
-// take over responsibility for positioning.  The alignment is NOT inherited
-// by default so must be specified per child, except that the parent alignment
-// is used within the relevant dimension (e.g., horizontal-align for a LayoutHoriz
-// layout, to determine left, right, center, justified).  Layouts
-// can automatically add scrollbars depending on the Overflow layout style.
+// Layout is the primary node type responsible for organizing the sizes
+// and positions of child widgets.
+// All arbitrary collections of widgets should generally be contained
+// within a layout -- otherwise the parent widget must take over
+// responsibility for positioning.
+// The alignment is NOT inherited by default so must be specified per
+// child, except that the parent alignment is used within the relevant
+// dimension (e.g., horizontal-align for a LayoutHoriz layout,
+// to determine left, right, center, justified).
+// Layouts can automatically add scrollbars depending on the Overflow
+// layout style.
+// For a Grid layout, the 'columns' property should generally be set
+// to the desired number of columns, from which the number of rows
+// is computed -- otherwise it uses the square root of number of
+// elements.
 type Layout struct {
 	WidgetBase
 	Lay           Layouts             `xml:"lay" desc:"type of layout to use"`

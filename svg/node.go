@@ -33,6 +33,9 @@ type NodeSVG interface {
 	// SetSize sets the overall size of this element, in local dimensions
 	SetSize(sz mat32.Vec2)
 
+	// SVGLocalBBox returns the bounding box of node in local dimensions
+	SVGLocalBBox() mat32.Box2
+
 	// MyXForm returns the 2D transform matrix for this node, compounded through parents
 	MyXForm() mat32.Mat2
 
@@ -92,6 +95,11 @@ func (g *NodeBase) SetPos(pos mat32.Vec2) {
 }
 
 func (g *NodeBase) SetSize(sz mat32.Vec2) {
+}
+
+func (g *NodeBase) SVGLocalBBox() mat32.Box2 {
+	bb := mat32.Box2{}
+	return bb
 }
 
 func (n *NodeBase) BaseIface() reflect.Type {

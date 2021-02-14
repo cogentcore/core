@@ -118,6 +118,22 @@ func (cs *ColorSpec) CopyStopsFrom(cp *ColorSpec) {
 	copy(cs.Gradient.Stops, cp.Gradient.Stops)
 }
 
+// NewLinearGradient creates a new Linear gradient in spec, sets Source
+// to LinearGradient. Initializes points based on given bbox.
+func (cs *ColorSpec) NewLinearGradient(bbox mat32.Box2) {
+	cs.Source = LinearGradient
+	cs.Gradient = &rasterx.Gradient{Points: [5]float64{float64(bbox.Min.X), float64(bbox.Min.Y), float64(bbox.Max.X), float64(bbox.Max.Y), 0}, IsRadial: false, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
+}
+
+// NewRadialGradient creates a new Radial gradient in spec, sets Source
+// to RadialGradient. Initializes points based on given bbox.
+func (cs *ColorSpec) NewRadialGradient(bbox mat32.Box2) {
+	cs.Source = RadialGradient
+	ctr := bbox.Min.Add(bbox.Max).MulScalar(.5)
+	rad := bbox.Max.X - bbox.Min.X
+	cs.Gradient = &rasterx.Gradient{Points: [5]float64{float64(ctr.X), float64(ctr.Y), float64(ctr.X), float64(ctr.Y), float64(rad)}, IsRadial: true, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
+}
+
 // SetShadowGradient sets a linear gradient starting at given color and going
 // down to transparent based on given color and direction spec (defaults to
 // "to down")

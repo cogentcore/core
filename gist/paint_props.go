@@ -5,7 +5,6 @@
 package gist
 
 import (
-	"image/color"
 	"log"
 	"strconv"
 	"strings"
@@ -79,7 +78,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = par.(*Stroke).Color
 			} else if init {
-				fs.Color.SetColor(color.Black)
+				fs.SetColor(Black)
 			}
 			return
 		}
@@ -215,7 +214,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = par.(*Fill).Color
 			} else if init {
-				fs.Color.SetColor(color.Black)
+				fs.SetColor(Black)
 			}
 			return
 		}

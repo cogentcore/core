@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 	"reflect"
@@ -22,7 +23,7 @@ import (
 /////////////////////////////////////////////////////////////////////////////
 //  ColorView
 
-// ColorView shows a color, using sliders to set values,
+// ColorView shows a color, using sliders or numbers to set values.
 type ColorView struct {
 	gi.Frame
 	Color    gist.Color `desc:"the color that we view"`
@@ -122,6 +123,8 @@ func (cv *ColorView) Config() {
 	cv.ConfigHSLSlider(ss, 1)
 	cv.ConfigHSLSlider(ls, 2)
 
+	cv.ConfigPalette()
+
 	cv.UpdateEnd(updt)
 }
 
@@ -182,7 +185,7 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Tracking = true
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewCh(20))
-	sl.SetMinPrefHeight(units.NewEm(2))
+	sl.SetMinPrefHeight(units.NewEm(1))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
@@ -239,7 +242,7 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Tracking = true
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewCh(20))
-	sl.SetMinPrefHeight(units.NewEm(2))
+	sl.SetMinPrefHeight(units.NewEm(1))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
@@ -282,13 +285,49 @@ func (cv *ColorView) UpdateSliderGrid() {
 	sg.UpdateEnd(updt)
 }
 
+func (cv *ColorView) ConfigPalette() {
+	pg := gi.AddNewLayout(cv, "palette", gi.LayoutGrid)
+
+	nms := gist.HSLSortedColorNames()
+
+	ncn := len(nms)
+	fmt.Printf("nc: %d\n", ncn)
+	pg.SetProp("columns", 25)
+
+	for _, cn := range nms {
+		c := colornames.Map[cn]
+		cbt := gi.AddNewButton(pg, cn)
+		cbt.SetProp("background-color", c)
+		cbt.SetProp("max-height", units.NewEm(1.3))
+		cbt.SetProp("max-width", units.NewEm(1.3))
+		cbt.SetProp("margin", units.NewPx(0))
+		cbt.Tooltip = cn
+		cbt.SetText("  ")
+		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
+			if sig == int64(gi.ButtonPressed) {
+				but := send.Embed(gi.KiT_Button).(*gi.Button)
+				cvv.Color.SetName(but.Nm)
+				cvv.ViewSig.Emit(cvv.This(), 0, nil)
+				cvv.Update()
+			}
+		})
+	}
+}
+
 func (cv *ColorView) Update() {
 	updt := cv.UpdateStart()
+	cv.UpdateImpl()
+	cv.UpdateEnd(updt)
+}
+
+// UpdateImpl does the raw updates based on current value,
+// without UpdateStart / End wrapper
+func (cv *ColorView) UpdateImpl() {
 	cv.UpdateSliderGrid()
 	cv.NumView.UpdateWidget()
 	v := cv.Value()
 	v.Sty.Font.BgColor.Color = cv.Color // direct copy
-	cv.UpdateEnd(updt)
 }
 
 func (cv *ColorView) Render2D() {
@@ -297,7 +336,7 @@ func (cv *ColorView) Render2D() {
 	}
 	if cv.PushBounds() {
 		updt := cv.UpdateStart()
-		cv.Update()
+		cv.UpdateImpl()
 		cv.UpdateEndNoSig(updt)
 		cv.PopBounds()
 	}

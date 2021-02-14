@@ -286,7 +286,7 @@ type Stroke struct {
 // Defaults initializes default values for paint stroke
 func (ps *Stroke) Defaults() {
 	ps.On = false // svg says default is off
-	ps.SetColor(color.Black)
+	ps.SetColor(Black)
 	ps.Width.Set(1.0, units.Px)
 	ps.MinWidth.Set(.5, units.Dot)
 	ps.Cap = LineCapButt

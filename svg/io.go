@@ -1017,8 +1017,7 @@ func SVGNodeXMLGrad(nd *gi.Gradient, name string, enc *XMLEncoder) {
 		for _, gs := range gr.Stops {
 			se := xml.StartElement{}
 			se.Name.Local = "stop"
-			clr := gist.Color{}
-			clr.SetColor(gs.StopColor)
+			clr := gist.ColorFromColor(gs.StopColor)
 			hs := clr.HexString()[:7]
 			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, gs.Opacity))
 			XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Offset))
