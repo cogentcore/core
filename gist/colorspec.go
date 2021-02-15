@@ -10,6 +10,7 @@ import (
 
 	"image/color"
 
+	"github.com/chewxy/math32"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
@@ -119,19 +120,36 @@ func (cs *ColorSpec) CopyStopsFrom(cp *ColorSpec) {
 }
 
 // NewLinearGradient creates a new Linear gradient in spec, sets Source
-// to LinearGradient. Initializes points based on given bbox.
-func (cs *ColorSpec) NewLinearGradient(bbox mat32.Box2) {
+// to LinearGradient.
+func (cs *ColorSpec) NewLinearGradient() {
 	cs.Source = LinearGradient
-	cs.Gradient = &rasterx.Gradient{Points: [5]float64{float64(bbox.Min.X), float64(bbox.Min.Y), float64(bbox.Max.X), float64(bbox.Max.Y), 0}, IsRadial: false, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
+	cs.Gradient = &rasterx.Gradient{IsRadial: false, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
+	cs.Gradient.Bounds.W = 1
+	cs.Gradient.Bounds.H = 1
 }
 
 // NewRadialGradient creates a new Radial gradient in spec, sets Source
-// to RadialGradient. Initializes points based on given bbox.
-func (cs *ColorSpec) NewRadialGradient(bbox mat32.Box2) {
+// to RadialGradient.
+func (cs *ColorSpec) NewRadialGradient() {
 	cs.Source = RadialGradient
-	ctr := bbox.Min.Add(bbox.Max).MulScalar(.5)
-	rad := bbox.Max.X - bbox.Min.X
-	cs.Gradient = &rasterx.Gradient{Points: [5]float64{float64(ctr.X), float64(ctr.Y), float64(ctr.X), float64(ctr.Y), float64(rad)}, IsRadial: true, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
+	cs.Gradient = &rasterx.Gradient{IsRadial: true, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
+	cs.Gradient.Bounds.W = 1
+	cs.Gradient.Bounds.H = 1
+}
+
+// SetGradientPoints sets UserSpaceOnUse points for gradient based on given bounding box
+func (cs *ColorSpec) SetGradientPoints(bbox mat32.Box2) {
+	if cs.Gradient == nil {
+		return
+	}
+	cs.Gradient.Units = rasterx.UserSpaceOnUse
+	if cs.Gradient.IsRadial {
+		ctr := bbox.Min.Add(bbox.Max).MulScalar(.5)
+		rad := 0.5 * math32.Max(bbox.Max.X-bbox.Min.X, bbox.Max.Y-bbox.Min.Y)
+		cs.Gradient.Points = [5]float64{float64(ctr.X), float64(ctr.Y), float64(ctr.X), float64(ctr.Y), float64(rad)}
+	} else {
+		cs.Gradient.Points = [5]float64{float64(bbox.Min.X), float64(bbox.Min.Y), float64(bbox.Max.X), float64(bbox.Min.Y), 0} // linear R-L
+	}
 }
 
 // SetShadowGradient sets a linear gradient starting at given color and going

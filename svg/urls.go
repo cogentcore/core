@@ -315,24 +315,35 @@ func AddNewNodeGradient(gii gi.Node2D, radial bool, stops string) (*gi.Gradient,
 	if psvg == nil {
 		return nil, ""
 	}
+	gr, url := psvg.AddNewGradient(radial)
+	gr.StopsName = stops
+	bbox := gii.(NodeSVG).SVGLocalBBox()
+	gr.Grad.SetGradientPoints(bbox)
+	UpdateGradientStops(gr)
+	return gr, url
+}
+
+// AddNewGradient adds a new gradient, either linear or radial,
+// with a new unique id
+func (sv *SVG) AddNewGradient(radial bool) (*gi.Gradient, string) {
 	gnm := ""
 	if radial {
 		gnm = "radialGradient"
 	} else {
 		gnm = "linearGradient"
 	}
-	id := psvg.NewUniqueId()
+	updt := sv.UpdateStart()
+	id := sv.NewUniqueId()
 	gnm = NameId(gnm, id)
-	gr := psvg.Defs.AddNewChild(gi.KiT_Gradient, gnm).(*gi.Gradient)
-	gr.StopsName = stops
-	bbox := gii.(NodeSVG).SVGLocalBBox()
-	if radial {
-		gr.Grad.NewRadialGradient(bbox)
-	} else {
-		gr.Grad.NewLinearGradient(bbox)
-	}
-	gr.Grad.Gradient.Units = rasterx.UserSpaceOnUse
+	sv.SetChildAdded()
+	gr := sv.Defs.AddNewChild(gi.KiT_Gradient, gnm).(*gi.Gradient)
 	url := "url(#" + gnm + ")"
+	if radial {
+		gr.Grad.NewRadialGradient()
+	} else {
+		gr.Grad.NewLinearGradient()
+	}
+	sv.UpdateEnd(updt)
 	return gr, url
 }
 
@@ -347,13 +358,15 @@ func UpdateNodeGradientProp(gii gi.Node2D, prop string, radial bool, stops strin
 	pstr := ps.(string)
 	trgst := ""
 	if radial {
-		trgst = "url(#radialGradient"
+		trgst = "radialGradient"
 	} else {
-		trgst = "url(#linearGradient"
+		trgst = "linearGradient"
 	}
 	url := "url(#" + trgst
 	if strings.HasPrefix(pstr, url) {
 		gr := GradientByName(gii, pstr)
+		gr.StopsName = stops
+		UpdateGradientStops(gr)
 		return gr, "url(#" + gr.Nm + ")"
 	}
 	if strings.HasPrefix(pstr, "url(#") { // wrong kind
@@ -362,4 +375,23 @@ func UpdateNodeGradientProp(gii gi.Node2D, prop string, radial bool, stops strin
 	gr, url := AddNewNodeGradient(gii, radial, stops)
 	gii.SetProp(prop, url)
 	return gr, url
+}
+
+// UpdateNodeGradientPoints updates the points for node based on current bbox
+func UpdateNodeGradientPoints(gii gi.Node2D, prop string) {
+	ps := gii.Prop(prop)
+	if ps == nil {
+		return
+	}
+	pstr := ps.(string)
+	url := "url(#"
+	if !strings.HasPrefix(pstr, url) {
+		return
+	}
+	gr := GradientByName(gii, pstr)
+	if gr == nil {
+		return
+	}
+	bbox := gii.(NodeSVG).SVGLocalBBox()
+	gr.Grad.SetGradientPoints(bbox)
 }

@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"reflect"
@@ -290,8 +289,6 @@ func (cv *ColorView) ConfigPalette() {
 
 	nms := gist.HSLSortedColorNames()
 
-	ncn := len(nms)
-	fmt.Printf("nc: %d\n", ncn)
 	pg.SetProp("columns", 25)
 
 	for _, cn := range nms {

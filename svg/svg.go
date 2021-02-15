@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
@@ -237,6 +238,21 @@ func (sv *SVG) Render2D() {
 
 /////////////////////////////////////////////////////////////////////////////
 //   Naming elements with unique id's
+
+// SplitNameIdDig splits name into numerical end part and preceding name,
+// based on location of first digit in name.
+// If Id == 0 then it was not specified or didn't parse.
+// SVG object names are element names + numerical id
+func SplitNameIdDig(nm string) (string, int) {
+	for i, c := range nm {
+		if unicode.IsDigit(c) {
+			n := nm[:i]
+			id, _ := strconv.Atoi(nm[i:])
+			return n, id
+		}
+	}
+	return nm, 0
+}
 
 // SplitNameId splits name after the element name (e.g., 'rect')
 // returning true if it starts with element name,

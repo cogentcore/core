@@ -26,7 +26,7 @@ import (
 // FileInfo represents the information about a given file / directory,
 // including icon, mimetype, etc
 type FileInfo struct {
-	Ic      gi.IconName       `tableview:"no-header" desc:"icon for file"` // tableview:"no-header"
+	Ic      gi.IconName       `tableview:"no-header" desc:"icon for file"`
 	Name    string            `width:"40" desc:"name of the file, without any path"`
 	Size    FileSize          `desc:"size of the file in bytes"`
 	Kind    string            `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`

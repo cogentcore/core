@@ -182,6 +182,9 @@ func (bb *ButtonBox) ConfigItems() {
 		cb.SetText(lbl)
 		cb.SetProp("index", i)
 		cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig != int64(ButtonToggled) {
+				return
+			}
 			bbb, _ := recv.Embed(KiT_ButtonBox).(*ButtonBox)
 			cbb := send.(*CheckBox)
 			idx := cbb.Prop("index").(int)

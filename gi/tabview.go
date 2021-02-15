@@ -403,8 +403,8 @@ const (
 
 //go:generate stringer -type=TabViewSignals
 
-// InitTabView initializes the tab widget children if it hasn't been done yet
-func (tv *TabView) InitTabView() {
+// Config initializes the tab widget children if it hasn't been done yet
+func (tv *TabView) Config() {
 	if len(tv.Kids) != 0 {
 		return
 	}
@@ -444,13 +444,13 @@ func (tv *TabView) InitTabView() {
 
 // Tabs returns the layout containing the tabs -- the first element within us
 func (tv *TabView) Tabs() *Frame {
-	tv.InitTabView()
+	tv.Config()
 	return tv.Child(0).(*Frame)
 }
 
 // Frame returns the stacked frame layout -- the second element
 func (tv *TabView) Frame() *Frame {
-	tv.InitTabView()
+	tv.Config()
 	return tv.Child(1).(*Frame)
 }
 
@@ -480,7 +480,7 @@ func (tv *TabView) RenumberTabs() {
 }
 
 func (tv *TabView) Style2D() {
-	tv.InitTabView()
+	tv.Config()
 	tv.Layout.Style2D()
 }
 
