@@ -279,28 +279,45 @@ func NameId(nm string, id int) string {
 func (sv *SVG) GatherIds() {
 	sv.UniqueIds = make(map[int]struct{})
 	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		elnm := ""
-		if svi, ok := k.(NodeSVG); ok {
-			elnm = svi.SVGName()
-		} else if gr, ok := k.(*gi.Gradient); ok {
-			elnm = gr.GradientType()
-		}
-		if elnm == "" {
-			return ki.Continue
-		}
-		elpfx, id := SplitNameId(elnm, k.Name())
-		if !elpfx {
-			return ki.Continue
-		}
-		_, has := sv.UniqueIds[id]
-		if id <= 0 || has {
-			id = sv.NewUniqueId() // automatically registers it
-			k.SetName(NameId(elnm, id))
-		} else {
-			sv.UniqueIds[id] = struct{}{}
-		}
+		sv.NodeEnsureUniqueId(k)
 		return ki.Continue
 	})
+}
+
+// NodeEnsureUniqueId ensures that the given node has a unique Id
+// Call this on any newly-created nodes.
+func (sv *SVG) NodeEnsureUniqueId(kn ki.Ki) {
+	elnm := ""
+	svi, issvi := kn.(NodeSVG)
+	if issvi {
+		elnm = svi.SVGName()
+	} else if gr, ok := kn.(*gi.Gradient); ok {
+		elnm = gr.GradientType()
+	}
+	if elnm == "" {
+		return
+	}
+	elpfx, id := SplitNameId(elnm, kn.Name())
+	if !elpfx {
+		if issvi {
+			if !svi.EnforceSVGName() {
+				return
+			}
+		}
+		_, id = SplitNameIdDig(kn.Name())
+		if id >= 0 {
+			kn.SetName(NameId(elnm, id))
+			kn.UpdateSig()
+		}
+	}
+	_, has := sv.UniqueIds[id]
+	if id <= 0 || has {
+		id = sv.NewUniqueId() // automatically registers it
+		kn.SetName(NameId(elnm, id))
+		kn.UpdateSig()
+	} else {
+		sv.UniqueIds[id] = struct{}{}
+	}
 }
 
 // NewUniqueId returns a new unique numerical id number, for naming an object

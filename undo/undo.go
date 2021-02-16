@@ -192,7 +192,7 @@ func (um *Mgr) HasRedoAvail() bool {
 // to call SaveUndoStart() so that the state just before Undoing can be redone!
 func (um *Mgr) Undo() (action, data string, state []string) {
 	um.Mu.Lock()
-	if um.Idx < 0 {
+	if um.Idx < 0 || um.Idx >= len(um.Recs) {
 		um.Mu.Unlock()
 		return
 	}

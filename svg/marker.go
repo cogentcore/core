@@ -36,6 +36,8 @@ func AddNewMarker(parent ki.Ki, name string) *Marker {
 
 func (g *Marker) SVGName() string { return "marker" }
 
+func (g *Marker) EnforceSVGName() bool { return false }
+
 func (g *Marker) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Marker)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

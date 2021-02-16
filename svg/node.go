@@ -61,6 +61,11 @@ type NodeSVG interface {
 
 	// SVGName returns the SVG element name (e.g., "rect", "path" etc)
 	SVGName() string
+
+	// EnforceSVGName returns true if in general this element should
+	// be named with its SVGName plus a unique id.
+	// Groups and Markers are false.
+	EnforceSVGName() bool
 }
 
 // svg.NodeBase is an element within the SVG sub-scenegraph -- does not use
@@ -89,6 +94,10 @@ func (g *NodeBase) AsSVGNode() *NodeBase {
 
 func (g *NodeBase) SVGName() string {
 	return "base"
+}
+
+func (g *NodeBase) EnforceSVGName() bool {
+	return true
 }
 
 func (g *NodeBase) SetPos(pos mat32.Vec2) {

@@ -27,6 +27,8 @@ func AddNewGroup(parent ki.Ki, name string) *Group {
 
 func (g *Group) SVGName() string { return "g" }
 
+func (g *Group) EnforceSVGName() bool { return false }
+
 func (g *Group) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Group)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)

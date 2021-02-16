@@ -200,6 +200,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 // SrcNodeSignalFunc is the function for receiving node signals from our SrcNode
 func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data interface{}) {
 	tv := tvki.Embed(KiT_TreeView).(*TreeView)
+	// always keep name updated in case that changed
 	if data != nil {
 		dflags := data.(int64)
 		if gi.Update2DTrace {
@@ -940,6 +941,23 @@ func (tv *TreeView) CloseAll() {
 	tv.TopUpdateEnd(wupdt)
 }
 
+// FindSrcNode finds TreeView node for given source node, or nil if not found
+func (tv *TreeView) FindSrcNode(kn ki.Ki) *TreeView {
+	var ttv *TreeView
+	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
+		tvki := k.Embed(KiT_TreeView)
+		if tvki != nil {
+			tvk := tvki.(*TreeView)
+			if tvk.SrcNode == kn {
+				ttv = tvk
+				return ki.Break
+			}
+		}
+		return ki.Continue
+	})
+	return ttv
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //    Modifying Source Tree
 
@@ -1399,6 +1417,7 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 	sk.SetChildAdded()
 	for _, ns := range sl {
 		sk.AddChild(ns)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewInserted), ns.This())
 	}
 	sk.UpdateEnd(updt)
 	tv.SetChanged()
