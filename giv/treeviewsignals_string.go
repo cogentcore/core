@@ -20,12 +20,14 @@ func _() {
 	_ = x[TreeViewOpened-4]
 	_ = x[TreeViewClosed-5]
 	_ = x[TreeViewChanged-6]
-	_ = x[TreeViewSignalsN-7]
+	_ = x[TreeViewInserted-7]
+	_ = x[TreeViewDeleted-8]
+	_ = x[TreeViewSignalsN-9]
 }
 
-const _TreeViewSignals_name = "TreeViewSelectedTreeViewUnselectedTreeViewAllSelectedTreeViewAllUnselectedTreeViewOpenedTreeViewClosedTreeViewChangedTreeViewSignalsN"
+const _TreeViewSignals_name = "TreeViewSelectedTreeViewUnselectedTreeViewAllSelectedTreeViewAllUnselectedTreeViewOpenedTreeViewClosedTreeViewChangedTreeViewInsertedTreeViewDeletedTreeViewSignalsN"
 
-var _TreeViewSignals_index = [...]uint8{0, 16, 34, 53, 74, 88, 102, 117, 133}
+var _TreeViewSignals_index = [...]uint8{0, 16, 34, 53, 74, 88, 102, 117, 133, 148, 164}
 
 func (i TreeViewSignals) String() string {
 	if i < 0 || i >= TreeViewSignals(len(_TreeViewSignals_index)-1) {

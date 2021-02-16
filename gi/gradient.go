@@ -38,7 +38,7 @@ func (gr *Gradient) CopyFieldsFrom(frm interface{}) {
 
 // GradientType returns the SVG-style type name of gradient: linearGradient or radialGradient
 func (gr *Gradient) GradientType() string {
-	if gr.Grad.Gradient.IsRadial {
+	if gr.Grad.Gradient != nil && gr.Grad.Gradient.IsRadial {
 		return "radialGradient"
 	}
 	return "linearGradient"

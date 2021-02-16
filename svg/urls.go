@@ -134,6 +134,9 @@ func MarkerByName(gii gi.Node2D, marker string) *Marker {
 	return mrk
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//  Gradient management utilities for updating geometry
+
 // GradientByName returns the gradient of given name, stored on SVG node
 func GradientByName(gii gi.Node2D, grnm string) *gi.Gradient {
 	gri := NodeFindURL(gii, grnm)
@@ -290,7 +293,8 @@ func UpdateGradientStops(gr *gi.Gradient) {
 	}
 }
 
-// DeleteNodeGradient deletes the node-specific gradient on given node.
+// DeleteNodeGradient deletes the node-specific gradient on given node
+// of given name, which can be a full url(# name or just the bare name.
 // Returns true if deleted.
 func DeleteNodeGradient(gii gi.Node2D, grnm string) bool {
 	gr := GradientByName(gii, grnm)
@@ -394,4 +398,45 @@ func UpdateNodeGradientPoints(gii gi.Node2D, prop string) {
 	}
 	bbox := gii.(NodeSVG).SVGLocalBBox()
 	gr.Grad.SetGradientPoints(bbox)
+	gr.Grad.Gradient.Matrix = rasterx.Identity
+}
+
+// CloneNodeGradientProp creates a new clone of the existing gradient for node
+// if set for given property key ("fill" or "stroke").
+// returns new gradient.
+func CloneNodeGradientProp(gii gi.Node2D, prop string) *gi.Gradient {
+	ps := gii.Prop(prop)
+	if ps == nil {
+		return nil
+	}
+	pstr := ps.(string)
+	radial := false
+	if strings.HasPrefix(pstr, "url(#radialGradient") {
+		radial = true
+	} else if !strings.HasPrefix(pstr, "url(#linearGradient") {
+		return nil
+	}
+	gr := GradientByName(gii, pstr)
+	if gr == nil {
+		return nil
+	}
+	ngr, url := AddNewNodeGradient(gii, radial, gr.StopsName)
+	gii.SetProp(prop, url)
+	ngr.Grad.CopyFrom(&gr.Grad)
+	return gr
+}
+
+// DeleteNodeGradientProp deletes any existing gradient for node
+// if set for given property key ("fill" or "stroke").
+// Returns true if deleted.
+func DeleteNodeGradientProp(gii gi.Node2D, prop string) bool {
+	ps := gii.Prop(prop)
+	if ps == nil {
+		return false
+	}
+	pstr := ps.(string)
+	if !strings.HasPrefix(pstr, "url(#radialGradient") && !strings.HasPrefix(pstr, "url(#linearGradient") {
+		return false
+	}
+	return DeleteNodeGradient(gii, pstr)
 }

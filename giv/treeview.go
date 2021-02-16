@@ -345,10 +345,17 @@ const (
 	// open TreeView was closed -- children not visible
 	TreeViewClosed
 
-	// TreeViewChanged means that some kind of edit operation has taken place
+	// means that some kind of edit operation has taken place
 	// by the user via the gui -- we don't track the details, just that
 	// changes have happened
 	TreeViewChanged
+
+	// a node was inserted into the tree (Paste, DND)
+	// in this case, the data is the *source node* that was inserted
+	TreeViewInserted
+
+	// a node was deleted from the tree (Cut, DND Move)
+	TreeViewDeleted
 
 	TreeViewSignalsN
 )
@@ -1029,6 +1036,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 					if i == n-1 {
 						ski = nki
 					}
+					tv.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewInserted), nki.This())
 				}
 				tvv.SetChanged()
 				par.UpdateEnd(updt)
@@ -1068,6 +1076,7 @@ func (tv *TreeView) SrcAddChild() {
 					if i == n-1 {
 						ski = nki
 					}
+					tv.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewInserted), nki.This())
 				}
 				tvv.SetChanged()
 				sk.UpdateEnd(updt)
@@ -1097,6 +1106,7 @@ func (tv *TreeView) SrcDelete() {
 		return
 	}
 	sk.Delete(true)
+	tv.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewDeleted), sk.This())
 	tv.SetChanged()
 }
 
@@ -1132,6 +1142,7 @@ func (tv *TreeView) SrcDuplicate() {
 	nwkid.SetName(nm)
 	par.SetChildAdded()
 	par.InsertChild(nwkid, myidx+1)
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewInserted), nwkid.This())
 	par.UpdateEnd(updt)
 	tvpar.SetChanged()
 	if tvk := tvpar.ChildByName("tv_"+nm, 0); tvk != nil {
@@ -1362,6 +1373,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 		if i == sz-1 {
 			ski = ns
 		}
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewInserted), ns.This())
 	}
 	par.UpdateEnd(updt)
 	tvpar.SetChanged()
@@ -1472,6 +1484,7 @@ func (tv *TreeView) Dragged(de *dnd.Event) {
 			sn := sroot.FindPath(path)
 			if sn != nil {
 				sn.Delete(true)
+				tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewDeleted), sn.This())
 			}
 			sn = sroot.FindPath(path + TreeViewTempMovedTag)
 			if sn != nil {
