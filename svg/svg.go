@@ -240,14 +240,20 @@ func (sv *SVG) Render2D() {
 //   Naming elements with unique id's
 
 // SplitNameIdDig splits name into numerical end part and preceding name,
-// based on location of first digit in name.
+// based on string of digits from end of name.
 // If Id == 0 then it was not specified or didn't parse.
 // SVG object names are element names + numerical id
 func SplitNameIdDig(nm string) (string, int) {
-	for i, c := range nm {
-		if unicode.IsDigit(c) {
-			n := nm[:i]
-			id, _ := strconv.Atoi(nm[i:])
+	sz := len(nm)
+
+	for i := sz - 1; i >= 0; i-- {
+		c := rune(nm[i])
+		if !unicode.IsDigit(c) {
+			if i == sz-1 {
+				return nm, 0
+			}
+			n := nm[:i+1]
+			id, _ := strconv.Atoi(nm[i+1:])
 			return n, id
 		}
 	}
@@ -269,8 +275,12 @@ func SplitNameId(elnm, nm string) (bool, int) {
 	return true, id
 }
 
-// NameId returns the name with given unique id
+// NameId returns the name with given unique id.
+// returns plain name if id == 0
 func NameId(nm string, id int) string {
+	if id == 0 {
+		return nm
+	}
 	return fmt.Sprintf("%s%d", nm, id)
 }
 
@@ -300,18 +310,22 @@ func (sv *SVG) NodeEnsureUniqueId(kn ki.Ki) {
 	elpfx, id := SplitNameId(elnm, kn.Name())
 	if !elpfx {
 		if issvi {
-			if !svi.EnforceSVGName() {
+			if !svi.EnforceSVGName() { // if we end in a number, just register it anyway
+				_, id = SplitNameIdDig(kn.Name())
+				if id > 0 {
+					sv.UniqueIds[id] = struct{}{}
+				}
 				return
 			}
 		}
 		_, id = SplitNameIdDig(kn.Name())
-		if id >= 0 {
+		if id > 0 {
 			kn.SetName(NameId(elnm, id))
 			kn.UpdateSig()
 		}
 	}
-	_, has := sv.UniqueIds[id]
-	if id <= 0 || has {
+	_, exists := sv.UniqueIds[id]
+	if id <= 0 || exists {
 		id = sv.NewUniqueId() // automatically registers it
 		kn.SetName(NameId(elnm, id))
 		kn.UpdateSig()

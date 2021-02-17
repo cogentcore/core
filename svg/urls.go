@@ -5,12 +5,14 @@
 package svg
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
 )
@@ -52,9 +54,9 @@ func (sv *SVG) FindNamedElement(name string) gi.Node2D {
 	return nil
 }
 
-// URLName returns just the name referred to in a url(#name)
+// NameFromURL returns just the name referred to in a url(#name)
 // if it is not a url(#) format then returns empty string.
-func URLName(url string) string {
+func NameFromURL(url string) string {
 	if len(url) < 7 {
 		return ""
 	}
@@ -69,6 +71,11 @@ func URLName(url string) string {
 	return ref
 }
 
+// NameToURL returns url as: url(#name)
+func NameToURL(nm string) string {
+	return "url(#" + nm + ")"
+}
+
 // NodeFindURL finds a url element in the parent SVG of given node.
 // Returns nil if not found.
 // Works with full 'url(#Name)' string or plain name or "none"
@@ -77,7 +84,7 @@ func NodeFindURL(gii gi.Node2D, url string) gi.Node2D {
 		return nil
 	}
 	g := gii.AsNode2D()
-	ref := URLName(url)
+	ref := NameFromURL(url)
 	if ref == "" {
 		ref = url
 	}
@@ -109,7 +116,7 @@ func NodePropURL(kn ki.Ki, prop string) string {
 	if !iss {
 		return ""
 	}
-	return URLName(fs)
+	return NameFromURL(fs)
 }
 
 // MarkerByName finds marker property of given name, or generic "marker"
@@ -305,8 +312,8 @@ func DeleteNodeGradient(gii gi.Node2D, grnm string) bool {
 	if psvg == nil {
 		return false
 	}
-	unm := URLName(grnm)
-	psvg.Defs.DeleteChildByName(unm, true)
+	unm := NameFromURL(grnm)
+	psvg.Defs.DeleteChildByName(unm, ki.DestroyKids)
 	return true
 }
 
@@ -341,7 +348,7 @@ func (sv *SVG) AddNewGradient(radial bool) (*gi.Gradient, string) {
 	gnm = NameId(gnm, id)
 	sv.SetChildAdded()
 	gr := sv.Defs.AddNewChild(gi.KiT_Gradient, gnm).(*gi.Gradient)
-	url := "url(#" + gnm + ")"
+	url := NameToURL(gnm)
 	if radial {
 		gr.Grad.NewRadialGradient()
 	} else {
@@ -371,7 +378,7 @@ func UpdateNodeGradientProp(gii gi.Node2D, prop string, radial bool, stops strin
 		gr := GradientByName(gii, pstr)
 		gr.StopsName = stops
 		UpdateGradientStops(gr)
-		return gr, "url(#" + gr.Nm + ")"
+		return gr, NameToURL(gr.Nm)
 	}
 	if strings.HasPrefix(pstr, "url(#") { // wrong kind
 		DeleteNodeGradient(gii, pstr)
@@ -439,4 +446,57 @@ func DeleteNodeGradientProp(gii gi.Node2D, prop string) bool {
 		return false
 	}
 	return DeleteNodeGradient(gii, pstr)
+}
+
+// RemoveOrphanedDefs removes any items from Defs that are not actually referred to
+// by anything in the current SVG tree.  Returns true if items were removed.
+func (sv *SVG) RemoveOrphanedDefs() bool {
+	updt := sv.UpdateStart()
+	sv.SetFullReRender()
+	refkey := "SVGRefCount"
+	for _, k := range sv.Defs.Kids {
+		k.SetProp(refkey, 0)
+	}
+	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		pr := k.Properties()
+		for _, v := range *pr {
+			ps := kit.ToString(v)
+			if !strings.HasPrefix(ps, "url(#") {
+				continue
+			}
+			nm := NameFromURL(ps)
+			el := sv.FindDefByName(nm)
+			if el != nil {
+				rc := el.Prop(refkey).(int)
+				rc++
+				el.SetProp(refkey, rc)
+			}
+		}
+		if gr, isgr := k.(*gi.Gradient); isgr {
+			if gr.StopsName != "" {
+				el := sv.FindDefByName(gr.StopsName)
+				if el != nil {
+					rc := el.Prop(refkey).(int)
+					rc++
+					el.SetProp(refkey, rc)
+				}
+			}
+		}
+		return ki.Continue
+	})
+	sz := len(sv.Defs.Kids)
+	del := false
+	for i := sz - 1; i >= 0; i-- {
+		k := sv.Defs.Kids[i]
+		rc := k.Prop(refkey).(int)
+		if rc == 0 {
+			fmt.Printf("Deleting unused item: %s\n", k.Name())
+			sv.Defs.Kids.DeleteAtIndex(i)
+			del = true
+		} else {
+			k.DeleteProp(refkey)
+		}
+	}
+	sv.UpdateEnd(updt)
+	return del
 }
