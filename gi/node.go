@@ -302,18 +302,28 @@ func (nb *NodeBase) SetReRenderAnchor() {
 	nb.SetFlag(int(ReRenderAnchor))
 }
 
-// PointToRelPos translates a point in global pixel coords into relative position within node
+// PointToRelPos translates a point in global pixel coords
+// into relative position within node
 func (nb *NodeBase) PointToRelPos(pt image.Point) image.Point {
 	nb.BBoxMu.RLock()
 	defer nb.BBoxMu.RUnlock()
 	return pt.Sub(nb.WinBBox.Min)
 }
 
-// PosInWinBBox returns true if given position is within this node's win bbox (under read lock)
+// PosInWinBBox returns true if given position is within
+// this node's win bbox (under read lock)
 func (nb *NodeBase) PosInWinBBox(pos image.Point) bool {
 	nb.BBoxMu.RLock()
 	defer nb.BBoxMu.RUnlock()
 	return pos.In(nb.WinBBox)
+}
+
+// WinBBoxInBBox returns true if our BBox is contained within
+// given BBox (under read lock)
+func (nb *NodeBase) WinBBoxInBBox(bbox image.Rectangle) bool {
+	nb.BBoxMu.RLock()
+	defer nb.BBoxMu.RUnlock()
+	return nb.WinBBox.In(bbox)
 }
 
 // AddClass adds a CSS class name -- does proper space separation
@@ -399,6 +409,31 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 		if ni.PosInWinBBox(pt) {
 			rval = ni.This()
 			return ki.Break
+		}
+		return ki.Continue
+	})
+	return rval
+}
+
+// AllWithinBBox returns a list of all nodes whose WinBBox is fully contained
+// within the given BBox. If leavesOnly is set then only nodes that have no
+// nodes (leaves, terminal nodes) will be considered.
+func (nb *NodeBase) AllWithinBBox(bbox image.Rectangle, leavesOnly bool) ki.Slice {
+	var rval ki.Slice
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+		if k == nb.This() {
+			return ki.Continue
+		}
+		if leavesOnly && k.HasChildren() {
+			return ki.Continue
+		}
+		_, ni := KiToNode2D(k)
+		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
+			// 3D?
+			return ki.Break
+		}
+		if ni.WinBBoxInBBox(bbox) {
+			rval = append(rval, ni.This())
 		}
 		return ki.Continue
 	})

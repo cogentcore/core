@@ -26,16 +26,18 @@ type Sprite struct {
 // Sprites is a map of named Sprite elements
 type Sprites map[string]*Sprite
 
-// Resize resizes sprite to given size
-func (sp *Sprite) Resize(nwsz image.Point) {
+// SetSize sets sprite image to given size -- makes a new image (does not resize)
+// returns true if a new image was set
+func (sp *Sprite) SetSize(nwsz image.Point) bool {
 	if nwsz.X == 0 || nwsz.Y == 0 {
-		return
+		return false
 	}
 	sp.Geom.Size = nwsz // always make sure
 	if sp.Pixels != nil && sp.Pixels.Bounds().Size() == nwsz {
-		return
+		return false
 	}
 	sp.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
+	return true
 }
 
 // SetBottomPos sets the sprite's bottom position to given point
@@ -54,7 +56,7 @@ func (sp *Sprite) GrabRenderFrom(nii Node2D) {
 		sp.Pixels = img
 		sp.Geom.Size = sp.Pixels.Bounds().Size()
 	} else {
-		sp.Resize(image.Point{10, 10}) // just a blank something..
+		sp.SetSize(image.Point{10, 10}) // just a blank something..
 	}
 }
 

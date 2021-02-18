@@ -448,12 +448,22 @@ func DeleteNodeGradientProp(gii gi.Node2D, prop string) bool {
 	return DeleteNodeGradient(gii, pstr)
 }
 
+const SVGRefCountKey = "SVGRefCount"
+
+func IncRefCount(k ki.Ki) {
+	rc := k.Prop(SVGRefCountKey).(int)
+	rc++
+	k.SetProp(SVGRefCountKey, rc)
+}
+
 // RemoveOrphanedDefs removes any items from Defs that are not actually referred to
 // by anything in the current SVG tree.  Returns true if items were removed.
+// Does not remove gradients with StopsName = "" with extant stops -- these
+// should be removed manually, as they are not automatically generated.
 func (sv *SVG) RemoveOrphanedDefs() bool {
 	updt := sv.UpdateStart()
 	sv.SetFullReRender()
-	refkey := "SVGRefCount"
+	refkey := SVGRefCountKey
 	for _, k := range sv.Defs.Kids {
 		k.SetProp(refkey, 0)
 	}
@@ -467,18 +477,18 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 			nm := NameFromURL(ps)
 			el := sv.FindDefByName(nm)
 			if el != nil {
-				rc := el.Prop(refkey).(int)
-				rc++
-				el.SetProp(refkey, rc)
+				IncRefCount(el)
 			}
 		}
 		if gr, isgr := k.(*gi.Gradient); isgr {
 			if gr.StopsName != "" {
 				el := sv.FindDefByName(gr.StopsName)
 				if el != nil {
-					rc := el.Prop(refkey).(int)
-					rc++
-					el.SetProp(refkey, rc)
+					IncRefCount(el)
+				}
+			} else {
+				if gr.Grad.Gradient != nil && len(gr.Grad.Gradient.Stops) > 0 {
+					IncRefCount(k) // keep us around
 				}
 			}
 		}

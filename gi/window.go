@@ -1270,7 +1270,7 @@ func (w *Window) AddNewSprite(nm string, sz image.Point, pos image.Point) *Sprit
 		return exsp
 	}
 	sp := &Sprite{Name: nm}
-	sp.Resize(sz)
+	sp.SetSize(sz)
 	sp.Geom.Pos = pos
 	w.Sprites[nm] = sp
 	return sp
