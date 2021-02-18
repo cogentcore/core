@@ -17,9 +17,11 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-// ComboBox for selecting items from a list
-
+// ComboBox is for selecting items from a dropdown list, with an optional
+// edit TextField for typing directly.
+// The items can be of any type, including enum values -- they are converted
+// to strings for the display.  If the items are IconName type, then they
+// are displayed using icons instead.
 type ComboBox struct {
 	ButtonBase
 	Editable  bool          `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
@@ -342,6 +344,27 @@ func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) 
 	}
 }
 
+// ItemsFromIconList sets the Items list from a list of IconName values -- if
+// setFirst then set current item to the first item in the list, and maxLen if
+// > 0 auto-sets the width of the button to the contents, with the given upper
+// limit
+func (cb *ComboBox) ItemsFromIconList(el []IconName, setFirst bool, maxLen int) {
+	sz := len(el)
+	if sz == 0 {
+		return
+	}
+	cb.Items = make([]interface{}, sz)
+	for i, str := range el {
+		cb.Items[i] = str
+	}
+	if maxLen > 0 {
+		cb.SetToMaxLength(maxLen)
+	}
+	if setFirst {
+		cb.SetCurIndex(0)
+	}
+}
+
 // ItemsFromEnumList sets the Items list from a list of enum values (see
 // kit.EnumRegistry) -- if setFirst then set current item to the first item in
 // the list, and maxLen if > 0 auto-sets the width of the button to the
@@ -397,7 +420,7 @@ func (cb *ComboBox) SetCurVal(it interface{}) int {
 		cb.CurIndex = len(cb.Items)
 		cb.Items = append(cb.Items, it)
 	}
-	cb.SetText(ToLabel(it))
+	cb.ShowCurVal()
 	return cb.CurIndex
 }
 
@@ -412,21 +435,39 @@ func (cb *ComboBox) SetCurIndex(idx int) interface{} {
 		cb.SetText(fmt.Sprintf("idx %v > len", idx))
 	} else {
 		cb.CurVal = cb.Items[idx]
-		cb.SetText(ToLabel(cb.CurVal))
+		cb.ShowCurVal()
 	}
 	return cb.CurVal
 }
 
-// SelectItem selects a given item and emits the index as the ComboSig signal
-// and the selected item as the data
+// ShowCurVal updates the display to present the
+// currently-selected value (CurVal)
+func (cb *ComboBox) ShowCurVal() {
+	if icnm, isic := cb.CurVal.(IconName); isic {
+		cb.SetIcon(string(icnm))
+	} else {
+		cb.SetText(ToLabel(cb.CurVal))
+	}
+}
+
+// SelectItem selects a given item and updates the display to it
 func (cb *ComboBox) SelectItem(idx int) {
 	if cb.This() == nil {
 		return
 	}
 	updt := cb.UpdateStart()
 	cb.SetCurIndex(idx)
-	cb.ComboSig.Emit(cb.This(), int64(cb.CurIndex), cb.CurVal)
 	cb.UpdateEnd(updt)
+}
+
+// SelectItemAction selects a given item and emits the index as the ComboSig signal
+// and the selected item as the data.
+func (cb *ComboBox) SelectItemAction(idx int) {
+	if cb.This() == nil {
+		return
+	}
+	cb.SelectItem(idx)
+	cb.ComboSig.Emit(cb.This(), int64(cb.CurIndex), cb.CurVal)
 }
 
 // MakeItemsMenu makes menu of all the items
@@ -439,6 +480,10 @@ func (cb *ComboBox) MakeItemsMenu() {
 	if nitm < sz {
 		cb.ItemsMenu = cb.ItemsMenu[0:nitm]
 	}
+	if nitm == 0 {
+		return
+	}
+	_, icons := cb.Items[0].(IconName) // if true, we render as icons
 	for i, it := range cb.Items {
 		var ac *Action
 		if sz > i {
@@ -448,17 +493,21 @@ func (cb *ComboBox) MakeItemsMenu() {
 			ki.InitNode(ac)
 			cb.ItemsMenu = append(cb.ItemsMenu, ac.This().(Node2D))
 		}
-		txt := ToLabel(it)
 		nm := fmt.Sprintf("Item_%v", i)
 		ac.SetName(nm)
-		ac.Text = txt
+		if icons {
+			ac.Icon = it.(IconName)
+			ac.Tooltip = string(ac.Icon)
+		} else {
+			ac.Text = ToLabel(it)
+		}
 		ac.Data = i // index is the data
 		ac.SetSelectedState(i == cb.CurIndex)
 		ac.SetAsMenu()
 		ac.ActionSig.ConnectOnly(cb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			idx := data.(int)
 			cb := recv.(*ComboBox)
-			cb.SelectItem(idx)
+			cb.SelectItemAction(idx)
 		})
 	}
 }

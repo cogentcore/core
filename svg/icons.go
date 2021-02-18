@@ -27,7 +27,10 @@ func init() {
 	gi.TheIconMgr = &IconMgr{}
 	DefaultIconSet = MakeDefaultIcons()
 	DefaultIconSet.OpenDefaultIcons()
-	CurIconSet = DefaultIconSet
+	CurIconSet = make(IconSet, len(DefaultIconSet))
+	for k, v := range DefaultIconSet {
+		CurIconSet[k] = v
+	}
 	gi.CurIconList = gi.TheIconMgr.IconList(true)
 }
 
@@ -143,10 +146,10 @@ func (im *IconMgr) IsValid(iconName string) bool {
 	if gi.IconName(iconName).IsNil() {
 		return false
 	}
-	if _, ok := (*CurIconSet)[iconName]; ok {
+	if _, ok := CurIconSet[iconName]; ok {
 		return true
 	}
-	if _, ok := (*DefaultIconSet)[iconName]; ok {
+	if _, ok := DefaultIconSet[iconName]; ok {
 		return true
 	}
 	return false
@@ -163,9 +166,9 @@ func (im *IconMgr) IconByName(name string) (*Icon, error) {
 		err := fmt.Errorf("svg.IconMgr.IconByName -- icon name not found in CurIconSet or DefaultIconSet: %v\n", name)
 		return nil, err
 	}
-	ic, ok := (*CurIconSet)[name]
+	ic, ok := CurIconSet[name]
 	if !ok {
-		ic = (*DefaultIconSet)[name]
+		ic = DefaultIconSet[name] // guaranteed above to exist
 	}
 	if ic.Filename != "" && !ic.HasChildren() && IconAutoOpen && ic.Filename != "blank.svg" {
 		ic.OpenXML(ic.Filename)
@@ -174,6 +177,9 @@ func (im *IconMgr) IconByName(name string) (*Icon, error) {
 	return ic, nil
 }
 
+// SetIcon sets the icon by name into given Icon wrapper, returning error
+// message if not found etc.  This is how gi.Icon is initialized from
+// underlying svg.Icon items.
 func (im *IconMgr) SetIcon(ic *gi.Icon, iconName string) error {
 	sic, err := im.IconByName(iconName)
 	if err != nil {
@@ -183,9 +189,19 @@ func (im *IconMgr) SetIcon(ic *gi.Icon, iconName string) error {
 	nic := ic.Child(0).(*Icon)
 	nic.CopyFromIcon(sic)
 	ic.Filename = sic.Filename
+	wd := sic.Prop("width")
+	if wd != nil {
+		ic.SetProp("width", wd)
+	}
+	ht := sic.Prop("height")
+	if ht != nil {
+		ic.SetProp("height", ht)
+	}
 	return nil
 }
 
+// IconList returns the current list of all available icons,
+// optionally sorted in alphabetical order.
 func (im *IconMgr) IconList(alphaSort bool) []gi.IconName {
 	return CurIconSet.IconList(alphaSort)
 }
@@ -197,11 +213,11 @@ func (im *IconMgr) IconList(alphaSort bool) []gi.IconName {
 type IconSet map[string]*Icon
 
 // DefaultIconSet is the default icon set, initialized by default
-var DefaultIconSet *IconSet
+var DefaultIconSet IconSet
 
 // CurIconSet is the current icon set -- defaults to default but can be
 // changed to whatever you want
-var CurIconSet *IconSet
+var CurIconSet IconSet
 
 // OpenIconsFromPath scans for .svg icon files in given path, adding them to
 // the given IconSet, just storing the filename for later lazy loading
@@ -315,7 +331,7 @@ func (iset *IconSet) IconList(alphaSort bool) []gi.IconName {
 	return il
 }
 
-func MakeDefaultIcons() *IconSet {
+func MakeDefaultIcons() IconSet {
 	iset := make(IconSet, 100)
 	if true {
 		{
@@ -427,5 +443,5 @@ func MakeDefaultIcons() *IconSet {
 			iset[ic.Nm] = ic
 		}
 	}
-	return &iset
+	return iset
 }

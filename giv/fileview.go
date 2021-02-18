@@ -654,13 +654,13 @@ func (fv *FileView) DirPathUp() {
 // PathFieldHistPrev goes to the previous path in history
 func (fv *FileView) PathFieldHistPrev() {
 	pf := fv.PathField()
-	pf.SelectItem(1) // todo: this doesn't quite work more than once, as history will update.
+	pf.SelectItemAction(1) // todo: this doesn't quite work more than once, as history will update.
 }
 
 // PathFieldHistNext goes to the next path in history
 func (fv *FileView) PathFieldHistNext() {
 	pf := fv.PathField()
-	pf.SelectItem(1) // todo: this doesn't work at all..
+	pf.SelectItemAction(1) // todo: this doesn't work at all..
 }
 
 // NewFolder creates a new folder in current directory

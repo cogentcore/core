@@ -162,7 +162,8 @@ type IconMgr interface {
 	IsValid(iconName string) bool
 
 	// SetIcon sets the icon by name into given Icon wrapper, returning error
-	// message if not found etc
+	// message if not found etc.  This is how gi.Icon is initialized from
+	// underlying svg.Icon items.
 	SetIcon(ic *Icon, iconName string) error
 
 	// IconList returns the list of available icon names, optionally sorted
