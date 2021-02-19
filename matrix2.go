@@ -135,6 +135,17 @@ func (a Mat2) MulVec2AsPtCtr(v, ctr Vec2) Vec2 {
 	return Vec2{tx, ty}
 }
 
+// MulCtr multiplies the Mat2, first subtracting given translation center point
+// from the translation components, and then adding it back in.
+func (a Mat2) MulCtr(b Mat2, ctr Vec2) Mat2 {
+	a.X0 -= ctr.X
+	a.Y0 -= ctr.Y
+	rv := a.Mul(b)
+	rv.X0 += ctr.X
+	rv.Y0 += ctr.Y
+	return rv
+}
+
 func (a Mat2) Translate(x, y float32) Mat2 {
 	return Translate2D(x, y).Mul(a)
 }
@@ -285,6 +296,7 @@ func (a *Mat2) SetString(str string) error {
 	str = strings.ToLower(strings.TrimSpace(str))
 	*a = Identity2D()
 	if str == "none" {
+		*a = Identity2D()
 		return nil
 	}
 	// could have multiple transforms
@@ -390,4 +402,26 @@ func (a *Mat2) SetString(str string) error {
 		str = nxt
 	}
 	return nil
+}
+
+// String returns the XML-based string representation of the transform
+func (a *Mat2) String() string {
+	if a.IsIdentity() {
+		return "none"
+	}
+	if a.YX == 0 && a.XY == 0 { // no rotation, emit scale and translate
+		str := ""
+		if a.XX != 1 || a.YY != 1 {
+			str = fmt.Sprintf("scale(%g,%g)", a.XX, a.YY)
+		}
+		if a.X0 != 0 || a.Y0 != 0 {
+			if str != "" {
+				str += " "
+			}
+			str += fmt.Sprintf("translate(%g,%g)", a.X0, a.Y0)
+		}
+		return str
+	}
+	// just report the whole matrix
+	return fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", a.XX, a.YX, a.XY, a.YY, a.X0, a.Y0)
 }
