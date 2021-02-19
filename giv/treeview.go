@@ -933,11 +933,30 @@ func (tv *TreeView) CloseAll() {
 		tvki := k.Embed(KiT_TreeView)
 		if tvki != nil {
 			tvki.(*TreeView).SetClosedState(true)
+			return ki.Continue
 		}
-		return ki.Continue
+		return ki.Break
 	})
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewClosed), tv.This())
 	tv.UpdateEnd(updt)
+	tv.TopUpdateEnd(wupdt)
+}
+
+// OpenParents opens all the parents of this node, so that it will be visible
+func (tv *TreeView) OpenParents() {
+	wupdt := tv.TopUpdateStart()
+	updt := tv.RootView.UpdateStart()
+	tv.RootView.SetFullReRender()
+	tv.FuncUpParent(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
+		tvki := k.Embed(KiT_TreeView)
+		if tvki != nil {
+			tvki.(*TreeView).SetClosedState(false)
+			return ki.Continue
+		}
+		return ki.Break
+	})
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewOpened), tv.This())
+	tv.RootView.UpdateEnd(updt)
 	tv.TopUpdateEnd(wupdt)
 }
 

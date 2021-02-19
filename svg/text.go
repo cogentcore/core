@@ -18,8 +18,9 @@ import (
 	"github.com/goki/mat32"
 )
 
-// Text renders SVG text-- it handles both text and tspan elements (a tspan is
-// just nested under a parent text, text has empty Text string)
+// Text renders SVG text, handling both text and tspan elements.
+// tspan is nested under a parent text -- text has empty Text string.
+//
 type Text struct {
 	NodeBase
 	Pos          mat32.Vec2 `xml:"{x,y}" desc:"position of the left, baseline of the text"`
@@ -208,20 +209,39 @@ func (g *Text) ApplyXForm(xf mat32.Mat2) {
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
 func (g *Text) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
+	par := g.Text == ""
+	xf, lpt := g.DeltaXForm(trans, scale, rot, pt, !par) // include self when not a parent
 	g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
 	scx, _ := xf.ExtractScale()
 	g.Width *= scx
+	if par {
+		mat := g.Pnt.XForm.MulCtr(xf, lpt)
+		g.Pnt.XForm = mat
+		g.SetProp("transform", g.Pnt.XForm.String())
+	}
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
 func (g *Text) WriteGeom(dat *[]float32) {
-	SetFloat32SliceLen(dat, 3)
+	par := g.Text == ""
+	if par {
+		SetFloat32SliceLen(dat, 9)
+	} else {
+		SetFloat32SliceLen(dat, 3)
+	}
 	(*dat)[0] = g.Pos.X
 	(*dat)[1] = g.Pos.Y
 	(*dat)[2] = g.Width
+	if par {
+		(*dat)[3] = g.Pnt.XForm.XX
+		(*dat)[4] = g.Pnt.XForm.YX
+		(*dat)[5] = g.Pnt.XForm.XY
+		(*dat)[6] = g.Pnt.XForm.YY
+		(*dat)[7] = g.Pnt.XForm.X0
+		(*dat)[8] = g.Pnt.XForm.Y0
+	}
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
@@ -230,4 +250,13 @@ func (g *Text) ReadGeom(dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Width = dat[2]
+	par := g.Text == ""
+	if par {
+		g.Pnt.XForm.XX = dat[3]
+		g.Pnt.XForm.YX = dat[4]
+		g.Pnt.XForm.XY = dat[5]
+		g.Pnt.XForm.YY = dat[6]
+		g.Pnt.XForm.X0 = dat[7]
+		g.Pnt.XForm.Y0 = dat[8]
+	}
 }

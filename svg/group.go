@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Group groups together SVG elements -- doesn't do much but provide a
@@ -67,4 +68,47 @@ func (g *Group) Render2D() {
 	g.ComputeBBoxSVG() // must come after render
 
 	rs.PopXFormLock()
+}
+
+// ApplyXForm applies the given 2D transform to the geometry of this node
+// each node must define this for itself
+func (g *Group) ApplyXForm(xf mat32.Mat2) {
+	g.Pnt.XForm = xf.Mul(g.Pnt.XForm)
+	g.SetProp("transform", g.Pnt.XForm.String())
+}
+
+// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// relative to given point.  Trans translation and point are in top-level coordinates,
+// so must be transformed into local coords first.
+// Point is upper left corner of selection box that anchors the translation and scaling,
+// and for rotation it is the center point around which to rotate
+func (g *Group) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // group does NOT include self
+	mat := g.Pnt.XForm.MulCtr(xf, lpt)
+	g.Pnt.XForm = mat
+	g.SetProp("transform", g.Pnt.XForm.String())
+}
+
+// WriteGeom writes the geometry of the node to a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+// Slice must be passed and will be resized if not the correct length.
+func (g *Group) WriteGeom(dat *[]float32) {
+	SetFloat32SliceLen(dat, 6)
+	(*dat)[0] = g.Pnt.XForm.XX
+	(*dat)[1] = g.Pnt.XForm.YX
+	(*dat)[2] = g.Pnt.XForm.XY
+	(*dat)[3] = g.Pnt.XForm.YY
+	(*dat)[4] = g.Pnt.XForm.X0
+	(*dat)[5] = g.Pnt.XForm.Y0
+}
+
+// ReadGeom reads the geometry of the node from a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+func (g *Group) ReadGeom(dat []float32) {
+	g.Pnt.XForm.XX = dat[0]
+	g.Pnt.XForm.YX = dat[1]
+	g.Pnt.XForm.XY = dat[2]
+	g.Pnt.XForm.YY = dat[3]
+	g.Pnt.XForm.X0 = dat[4]
+	g.Pnt.XForm.Y0 = dat[5]
 }

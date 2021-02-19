@@ -36,9 +36,6 @@ type NodeSVG interface {
 	// SVGLocalBBox returns the bounding box of node in local dimensions
 	SVGLocalBBox() mat32.Box2
 
-	// MyXForm returns the 2D transform matrix for this node, compounded through parents
-	MyXForm() mat32.Mat2
-
 	// ApplyXForm applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
 	ApplyXForm(xf mat32.Mat2)
@@ -120,7 +117,9 @@ func (g *NodeBase) Paint() *gist.Paint {
 	return &g.Pnt.Paint
 }
 
-func (g *NodeBase) MyXForm() mat32.Mat2 {
+// ParXForm returns the full compounded 2D transform matrix for all
+// of the parents of this node
+func (g *NodeBase) ParXForm() mat32.Mat2 {
 	pars := []NodeSVG{}
 	xf := mat32.Identity2D()
 	nb := g
@@ -151,9 +150,15 @@ func (g *NodeBase) ApplyXForm(xf mat32.Mat2) {
 }
 
 // DeltaXForm computes the net transform matrix for given delta xform parameters
-// and the transformed version of the reference point.
-func (g *NodeBase) DeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) (mat32.Mat2, mat32.Vec2) {
-	mxi := g.MyXForm().Inverse()
+// and the transformed version of the reference point.  If self is true, then
+// include the current node self transform, otherwise don't.  Groups do not
+// but regular rendering nodes do.
+func (g *NodeBase) DeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2, self bool) (mat32.Mat2, mat32.Vec2) {
+	mxi := g.ParXForm()
+	if self {
+		mxi = g.Pnt.XForm.Mul(mxi)
+	}
+	mxi = mxi.Inverse()
 	lpt := mxi.MulVec2AsPt(pt)
 	ldel := mxi.MulVec2AsVec(trans)
 	xf := mat32.Scale2D(scale.X, scale.Y).Rotate(rot)

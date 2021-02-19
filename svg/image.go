@@ -161,7 +161,7 @@ func (g *Image) ApplyXForm(xf mat32.Mat2) {
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
 func (g *Image) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
+	xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
 	g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
 	g.Size = xf.MulVec2AsVec(g.Size)
 }

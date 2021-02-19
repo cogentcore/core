@@ -257,11 +257,7 @@ func (c *ColorSpec) ApplyXFormPt(xf mat32.Mat2, pt mat32.Vec2) {
 	}
 	if c.Gradient.IsRadial { // radial uses transform instead of points
 		mat := RasterxToMat(&c.Gradient.Matrix)
-		mat.X0 -= pt.X
-		mat.Y0 -= pt.Y
-		mat = mat.Mul(xf)
-		mat.X0 += pt.X
-		mat.Y0 += pt.Y
+		mat = mat.MulCtr(xf, pt)
 		c.Gradient.Matrix = MatToRasterx(&mat)
 	} else {
 		p1 := mat32.Vec2{float32(c.Gradient.Points[0]), float32(c.Gradient.Points[1])}

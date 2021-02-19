@@ -914,7 +914,7 @@ func PathDataXFormRel(data []PathData, i *int, xf mat32.Mat2, cp mat32.Vec2) mat
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
 func (g *Path) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
+	xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
 	g.ApplyXFormImpl(xf, lpt)
 	g.GradientApplyXFormPt(xf, lpt)
 }
