@@ -242,6 +242,7 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		updt := ssc.UpdateStart()
 		scDel := float32(.01)
 		panDel := float32(.01)
+		// todo: use SVG ApplyDeltaXForm logic
 		switch {
 		case key.HasAllModifierBits(me.Modifiers, key.Control): // scale
 			dsc := dd.Mul(dm).MulScalar(scDel)

@@ -209,15 +209,30 @@ func (g *Text) ApplyXForm(xf mat32.Mat2) {
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
 func (g *Text) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	par := g.Text == ""
-	xf, lpt := g.DeltaXForm(trans, scale, rot, pt, !par) // include self when not a parent
-	g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
-	scx, _ := xf.ExtractScale()
-	g.Width *= scx
-	if par {
+	if g.Text == "" {
+		// translation transform
+		xft, lptt := g.DeltaXForm(trans, scale, rot, pt, true) // include self when not a parent
+		// transform transform
+		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false)
+		xf.X0 = 0 // negate translation effects
+		xf.Y0 = 0
 		mat := g.Pnt.XForm.MulCtr(xf, lpt)
 		g.Pnt.XForm = mat
 		g.SetProp("transform", g.Pnt.XForm.String())
+
+		g.Pos = xft.MulVec2AsPtCtr(g.Pos, lptt)
+		scx, _ := xft.ExtractScale()
+		g.Width *= scx
+		for _, kii := range g.Kids {
+			kt := kii.(*Text)
+			kt.Pos = xft.MulVec2AsPtCtr(kt.Pos, lptt)
+			kt.Width *= scx
+		}
+	} else {
+		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self when not a parent
+		g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
+		scx, _ := xf.ExtractScale()
+		g.Width *= scx
 	}
 }
 
@@ -225,22 +240,30 @@ func (g *Text) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, 
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
 func (g *Text) WriteGeom(dat *[]float32) {
-	par := g.Text == ""
-	if par {
-		SetFloat32SliceLen(dat, 9)
-	} else {
-		SetFloat32SliceLen(dat, 3)
-	}
-	(*dat)[0] = g.Pos.X
-	(*dat)[1] = g.Pos.Y
-	(*dat)[2] = g.Width
-	if par {
+	if g.Text == "" {
+		npt := 9 + g.NumChildren()*3
+		SetFloat32SliceLen(dat, npt)
+		(*dat)[0] = g.Pos.X
+		(*dat)[1] = g.Pos.Y
+		(*dat)[2] = g.Width
 		(*dat)[3] = g.Pnt.XForm.XX
 		(*dat)[4] = g.Pnt.XForm.YX
 		(*dat)[5] = g.Pnt.XForm.XY
 		(*dat)[6] = g.Pnt.XForm.YY
 		(*dat)[7] = g.Pnt.XForm.X0
 		(*dat)[8] = g.Pnt.XForm.Y0
+		for i, kii := range g.Kids {
+			kt := kii.(*Text)
+			off := 9 + i*3
+			(*dat)[off+0] = kt.Pos.X
+			(*dat)[off+1] = kt.Pos.Y
+			(*dat)[off+2] = kt.Width
+		}
+	} else {
+		SetFloat32SliceLen(dat, 3)
+		(*dat)[0] = g.Pos.X
+		(*dat)[1] = g.Pos.Y
+		(*dat)[2] = g.Width
 	}
 }
 
@@ -250,13 +273,19 @@ func (g *Text) ReadGeom(dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Width = dat[2]
-	par := g.Text == ""
-	if par {
+	if g.Text == "" {
 		g.Pnt.XForm.XX = dat[3]
 		g.Pnt.XForm.YX = dat[4]
 		g.Pnt.XForm.XY = dat[5]
 		g.Pnt.XForm.YY = dat[6]
 		g.Pnt.XForm.X0 = dat[7]
 		g.Pnt.XForm.Y0 = dat[8]
+		for i, kii := range g.Kids {
+			kt := kii.(*Text)
+			off := 9 + i*3
+			kt.Pos.X = dat[off+0]
+			kt.Pos.Y = dat[off+1]
+			kt.Width = dat[off+2]
+		}
 	}
 }
