@@ -94,21 +94,11 @@ func (g *Group) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32,
 // Slice must be passed and will be resized if not the correct length.
 func (g *Group) WriteGeom(dat *[]float32) {
 	SetFloat32SliceLen(dat, 6)
-	(*dat)[0] = g.Pnt.XForm.XX
-	(*dat)[1] = g.Pnt.XForm.YX
-	(*dat)[2] = g.Pnt.XForm.XY
-	(*dat)[3] = g.Pnt.XForm.YY
-	(*dat)[4] = g.Pnt.XForm.X0
-	(*dat)[5] = g.Pnt.XForm.Y0
+	g.WriteXForm(*dat, 0)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 func (g *Group) ReadGeom(dat []float32) {
-	g.Pnt.XForm.XX = dat[0]
-	g.Pnt.XForm.YX = dat[1]
-	g.Pnt.XForm.XY = dat[2]
-	g.Pnt.XForm.YY = dat[3]
-	g.Pnt.XForm.X0 = dat[4]
-	g.Pnt.XForm.Y0 = dat[5]
+	g.ReadXForm(dat, 0)
 }

@@ -101,33 +101,44 @@ func (g *Polyline) ApplyXForm(xf mat32.Mat2) {
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
 func (g *Polyline) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
-	for i, p := range g.Points {
-		p = xf.MulVec2AsPtCtr(p, lpt)
-		g.Points[i] = p
+	if rot != 0 {
+		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
+		mat := g.Pnt.XForm.MulCtr(xf, lpt)
+		g.Pnt.XForm = mat
+		g.SetProp("transform", g.Pnt.XForm.String())
+	} else {
+		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
+		for i, p := range g.Points {
+			p = xf.MulVec2AsPtCtr(p, lpt)
+			g.Points[i] = p
+		}
+		g.GradientApplyXFormPt(xf, lpt)
 	}
-	g.GradientApplyXFormPt(xf, lpt)
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
 func (g *Polyline) WriteGeom(dat *[]float32) {
-	SetFloat32SliceLen(dat, len(g.Points)*2)
+	sz := len(g.Points) * 2
+	SetFloat32SliceLen(dat, sz)
 	for i, p := range g.Points {
 		(*dat)[i*2] = p.X
 		(*dat)[i*2+1] = p.Y
 	}
+	g.WriteXForm(*dat, sz)
 	g.GradientWritePts(dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 func (g *Polyline) ReadGeom(dat []float32) {
+	sz := len(g.Points) * 2
 	for i, p := range g.Points {
 		p.X = dat[i*2]
 		p.Y = dat[i*2+1]
 		g.Points[i] = p
 	}
+	g.ReadXForm(dat, sz)
 	g.GradientReadPts(dat)
 }

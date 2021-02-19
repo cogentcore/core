@@ -85,21 +85,29 @@ func (g *Circle) ApplyXForm(xf mat32.Mat2) {
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
 func (g *Circle) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
-	g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
-	scx, scy := xf.ExtractScale()
-	g.Radius *= 0.5 * (scx + scy)
-	g.GradientApplyXFormPt(xf, lpt)
+	if rot != 0 {
+		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
+		mat := g.Pnt.XForm.MulCtr(xf, lpt)
+		g.Pnt.XForm = mat
+		g.SetProp("transform", g.Pnt.XForm.String())
+	} else {
+		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
+		g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
+		scx, scy := xf.ExtractScale()
+		g.Radius *= 0.5 * (scx + scy)
+		g.GradientApplyXFormPt(xf, lpt)
+	}
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
 func (g *Circle) WriteGeom(dat *[]float32) {
-	SetFloat32SliceLen(dat, 3)
+	SetFloat32SliceLen(dat, 3+6)
 	(*dat)[0] = g.Pos.X
 	(*dat)[1] = g.Pos.Y
 	(*dat)[2] = g.Radius
+	g.WriteXForm(*dat, 3)
 	g.GradientWritePts(dat)
 }
 
@@ -109,5 +117,6 @@ func (g *Circle) ReadGeom(dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Radius = dat[2]
+	g.ReadXForm(dat, 3)
 	g.GradientReadPts(dat)
 }

@@ -192,17 +192,39 @@ func SetFloat32SliceLen(dat *[]float32, sz int) {
 	}
 }
 
+// WriteXForm writes the node transform to slice at starting index.
+// slice must already be allocated sufficiently.
+func (g *NodeBase) WriteXForm(dat []float32, idx int) {
+	dat[idx+0] = g.Pnt.XForm.XX
+	dat[idx+1] = g.Pnt.XForm.YX
+	dat[idx+2] = g.Pnt.XForm.XY
+	dat[idx+3] = g.Pnt.XForm.YY
+	dat[idx+4] = g.Pnt.XForm.X0
+	dat[idx+5] = g.Pnt.XForm.Y0
+}
+
+// ReadXForm reads the node transform from slice at starting index.
+func (g *NodeBase) ReadXForm(dat []float32, idx int) {
+	g.Pnt.XForm.XX = dat[idx+0]
+	g.Pnt.XForm.YX = dat[idx+1]
+	g.Pnt.XForm.XY = dat[idx+2]
+	g.Pnt.XForm.YY = dat[idx+3]
+	g.Pnt.XForm.X0 = dat[idx+4]
+	g.Pnt.XForm.Y0 = dat[idx+5]
+}
+
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
 func (g *NodeBase) WriteGeom(dat *[]float32) {
-
+	SetFloat32SliceLen(dat, 6)
+	g.WriteXForm(*dat, 0)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 func (g *NodeBase) ReadGeom(dat []float32) {
-
+	g.ReadXForm(dat, 0)
 }
 
 // Init2DBase handles basic node initialization -- Init2D can then do special things
