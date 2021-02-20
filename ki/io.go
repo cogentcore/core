@@ -114,9 +114,7 @@ func (n *Node) ReadJSON(reader io.Reader) error {
 	}
 	// todo: use json.NewDecoder, Decode instead -- need to deal with TypePrefix etc above
 	err = json.Unmarshal(b[stidx:], n.This()) // key use of this!
-	if err == nil {
-		UnmarshalPost(n.This())
-	}
+	UnmarshalPost(n.This())
 	n.SetChildAdded() // this might not be set..
 	n.UpdateEnd(updt)
 	return err
@@ -156,9 +154,7 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 
 		updt := root.UpdateStart()
 		err = json.Unmarshal(b[bodyidx:], root)
-		if err == nil {
-			UnmarshalPost(root)
-		}
+		UnmarshalPost(root)
 		root.SetChildAdded() // this might not be set..
 		root.UpdateEnd(updt)
 		return root, nil
@@ -219,9 +215,7 @@ func (n *Node) ReadXML(reader io.Reader) error {
 	}
 	updt := n.UpdateStart()
 	err = xml.Unmarshal(b, n.This()) // key use of this!
-	if err == nil {
-		UnmarshalPost(n.This())
-	}
+	UnmarshalPost(n.This())
 	n.SetChildAdded() // this might not be set..
 	n.UpdateEnd(updt)
 	return nil
