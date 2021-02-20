@@ -446,20 +446,20 @@ func LayAllocFromParent(ly *Layout) {
 		ly.FuncUpParent(0, ly.This(), func(k ki.Ki, level int, d interface{}) bool {
 			pni, _ := KiToNode2D(k)
 			if pni == nil {
-				return false
+				return ki.Break
 			}
 			pg := pni.AsWidget()
 			if pg == nil {
-				return false
+				return ki.Break
 			}
 			if !pg.LayState.Alloc.Size.IsNil() {
 				ly.LayState.Alloc.Size = pg.LayState.Alloc.Size
 				if Layout2DTrace {
 					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.Path(), ly.LayState.Alloc.Size, pg.Path())
 				}
-				return false
+				return ki.Break
 			}
-			return true
+			return ki.Continue
 		})
 	}
 }

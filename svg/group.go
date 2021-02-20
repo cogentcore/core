@@ -62,6 +62,9 @@ func (g *Group) Render2D() {
 	}
 	pc := &g.Pnt
 	rs := g.Render()
+	if rs == nil {
+		return
+	}
 	rs.PushXFormLock(pc.XForm)
 
 	g.Render2DChildren()

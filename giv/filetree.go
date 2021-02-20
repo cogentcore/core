@@ -441,7 +441,7 @@ func (fn *FileNode) IsExternal() bool {
 			isExt = true
 			return ki.Break
 		}
-		return true
+		return ki.Continue
 	})
 	return isExt
 }
@@ -459,7 +459,7 @@ func (fn *FileNode) HasClosedParent() bool {
 			hasClosed = true
 			return ki.Break
 		}
-		return true
+		return ki.Continue
 	})
 	return hasClosed
 }

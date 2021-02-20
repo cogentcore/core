@@ -314,7 +314,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	eabut := gi.AddNewCheckBox(evlay, "anim-but")
 	eabut.SetText("Animate")
 	eabut.Tooltip = "toggle animation on and off"
-	eabut.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			anim.On = !eabut.IsChecked()
 		}

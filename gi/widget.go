@@ -563,14 +563,14 @@ func (wb *WidgetBase) ParentLayout() *Layout {
 	wb.FuncUpParent(0, wb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ok := k.(Node2D)
 		if !ok {
-			return false // don't keep going up
+			return ki.Break // don't keep going up
 		}
 		ly := nii.AsLayout2D()
 		if ly != nil {
 			parLy = ly
-			return false // done
+			return ki.Break // done
 		}
-		return true
+		return ki.Continue
 	})
 	return parLy
 }

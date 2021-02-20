@@ -26,6 +26,9 @@ func mainrun() {
 	gi.SetAppName("icons")
 	gi.SetAppAbout(`This is a demo of the icons in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
+	// note: can add a path to view other icon sets
+	// svg.CurIconSet.OpenIconsFromPath("/Users/oreilly/github/inkscape/share/icons/multicolor/symbolic/actions")
+
 	win := gi.NewMainWindow("gogi-icons-demo", "GoGi Icons", width, height)
 
 	vp := win.WinViewport2D()

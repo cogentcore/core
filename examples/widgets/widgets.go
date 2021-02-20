@@ -153,6 +153,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	checkbox := gi.AddNewCheckBox(brow, "checkbox")
 	checkbox.Text = "Toggle"
+	checkbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			fmt.Printf("Checkbox toggled: %v\n", checkbox.IsChecked())
+		}
+	})
 
 	// note: receiver for menu items with shortcuts must be a Node2D or Window
 	mb1 := gi.AddNewMenuButton(brow, "menubutton1")

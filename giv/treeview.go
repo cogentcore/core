@@ -268,16 +268,16 @@ func (tv *TreeView) HasClosedParent() bool {
 	tv.FuncUpParent(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := gi.KiToNode2D(k)
 		if pg == nil {
-			return false
+			return ki.Break
 		}
 		if ki.TypeEmbeds(pg, KiT_TreeView) {
 			// nw := pg.Embed(KiT_TreeView).(*TreeView)
 			if pg.HasFlag(int(TreeViewFlagClosed)) {
 				pcol = true
-				return false
+				return ki.Break
 			}
 		}
-		return true
+		return ki.Continue
 	})
 	return pcol
 }

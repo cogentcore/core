@@ -494,6 +494,9 @@ func (nb *Node2DBase) ViewportSafe() *Viewport2D {
 // Render returns the girl.State from this node's Viewport, using safe lock access
 func (nb *Node2DBase) Render() *girl.State {
 	mvp := nb.ViewportSafe()
+	if mvp == nil {
+		return nil
+	}
 	return &mvp.Render
 }
 
@@ -606,14 +609,14 @@ func (nb *Node2DBase) ParentViewport() *Viewport2D {
 	nb.FuncUpParent(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ok := k.(Node2D)
 		if !ok {
-			return false // don't keep going up
+			return ki.Break // don't keep going up
 		}
 		vp := nii.AsViewport2D()
 		if vp != nil {
 			parVp = vp
-			return false // done
+			return ki.Break // done
 		}
-		return true
+		return ki.Continue
 	})
 	return parVp
 }

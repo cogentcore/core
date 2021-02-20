@@ -19,7 +19,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20201108214237-06ea97f0c265
 	github.com/go-gl/mathgl v1.0.0
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/goki/ki v1.1.1
+	github.com/goki/ki v1.1.2
 	github.com/goki/mat32 v1.0.4
 	github.com/goki/pi v1.0.13
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b

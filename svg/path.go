@@ -84,6 +84,9 @@ func (g *Path) Render2D() {
 
 	pc := &g.Pnt
 	rs := g.Render()
+	if rs == nil {
+		return
+	}
 	rs.Lock()
 	rs.PushXForm(pc.XForm)
 	PathDataRender(g.Data, pc, rs)

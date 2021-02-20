@@ -30,6 +30,16 @@ func AddNewStyleSheet(parent ki.Ki, name string) *StyleSheet {
 	return parent.AddNewChild(KiT_StyleSheet, name).(*StyleSheet)
 }
 
+func (ss *StyleSheet) CopyFieldsFrom(frm interface{}) {
+	fr, ok := frm.(*StyleSheet)
+	if !ok {
+		ki.GenCopyFieldsFrom(ss.This(), frm)
+		return
+	}
+	ss.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
+	// probably don't copy Sheet pointer..
+}
+
 // ParseString parses the string into a StyleSheet of rules, which can then be
 // used for extracting properties
 func (ss *StyleSheet) ParseString(str string) error {
