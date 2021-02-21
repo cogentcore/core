@@ -25,6 +25,24 @@ var PropsProps = Props{
 	"basic-type": true, // registers props as a basic type avail for type selection in creating property values -- many cases call for nested properties
 }
 
+// Set sets props value -- safely creates map
+func (pr *Props) Set(key string, val interface{}) {
+	if *pr == nil {
+		*pr = make(Props)
+	}
+	(*pr)[key] = val
+}
+
+// Prop returns property of given key
+func (pr Props) Prop(key string) interface{} {
+	return pr[key]
+}
+
+// Delete deletes props value at given key
+func (pr Props) Delete(key string) {
+	delete(pr, key)
+}
+
 // SubProps returns a value that contains another props, or nil and false if
 // it doesn't exist or isn't a Props
 func SubProps(pr map[string]interface{}, key string) (Props, bool) {
