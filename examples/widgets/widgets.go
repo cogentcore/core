@@ -154,7 +154,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	checkbox := gi.AddNewCheckBox(brow, "checkbox")
 	checkbox.Text = "Toggle"
 	checkbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
+		if sig == int64(gi.ButtonToggled) {
 			fmt.Printf("Checkbox toggled: %v\n", checkbox.IsChecked())
 		}
 	})

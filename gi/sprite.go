@@ -18,6 +18,7 @@ import (
 type Sprite struct {
 	On     bool                           `desc:"whether this sprite is active now or not"`
 	Name   string                         `desc:"unique name of sprite"`
+	Props  ki.Props                       `desc:"properties for sprite -- allows user-extensible data"`
 	Geom   Geom2DInt                      `desc:"position and size of the image within the overlay window texture"`
 	Pixels *image.RGBA                    `desc:"pixels to render -- should be same size as Geom.Size"`
 	Events map[oswin.EventType]*ki.Signal `desc:"optional event signals for given event type"`

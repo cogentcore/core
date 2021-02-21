@@ -1355,7 +1355,9 @@ func (w *Window) DeleteSprite(nm string) bool {
 func (w *Window) RenderSprite(sp *Sprite) {
 	oswin.TheApp.RunOnMain(func() {
 		if w.OSWin.Activate() {
-			w.OverTex.SetSubImage(sp.Geom.Pos, sp.Pixels, sp.Pixels.Bounds())
+			if sp.Pixels != nil {
+				w.OverTex.SetSubImage(sp.Geom.Pos, sp.Pixels, sp.Pixels.Bounds())
+			}
 		}
 	})
 }
