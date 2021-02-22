@@ -43,7 +43,8 @@ var (
 )
 
 // OpenXML Opens XML-formatted SVG input from given file
-func (sv *SVG) OpenXML(filename string) error {
+func (sv *SVG) OpenXML(fname gi.FileName) error {
+	filename := string(fname)
 	fi, err := os.Stat(filename)
 	if err != nil {
 		log.Println(err)
@@ -778,7 +779,8 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 //   Writing
 
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
-func (sv *SVG) SaveXML(filename string) error {
+func (sv *SVG) SaveXML(fname gi.FileName) error {
+	filename := string(fname)
 	fp, err := os.Create(filename)
 	defer fp.Close()
 	if err != nil {

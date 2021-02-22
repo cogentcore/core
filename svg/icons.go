@@ -171,7 +171,7 @@ func (im *IconMgr) IconByName(name string) (*Icon, error) {
 		ic = DefaultIconSet[name] // guaranteed above to exist
 	}
 	if ic.Filename != "" && !ic.HasChildren() && IconAutoOpen && ic.Filename != "blank.svg" {
-		ic.OpenXML(ic.Filename)
+		ic.OpenXML(gi.FileName(ic.Filename))
 		ki.UniquifyNamesAll(ic.This())
 	}
 	return ic, nil

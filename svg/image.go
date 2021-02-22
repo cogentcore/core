@@ -26,7 +26,7 @@ type Image struct {
 	Pixels              *image.RGBA `copy:"-" xml:"-" json:"-" view:"-" desc:"the image pixels"`
 }
 
-var KiT_Image = kit.Types.AddType(&Image{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
+var KiT_Image = kit.Types.AddType(&Image{}, ImageProps)
 
 // AddNewImage adds a new image to given parent node, with given name and pos
 func AddNewImage(parent ki.Ki, name string, x, y float32) *Image {
@@ -80,6 +80,11 @@ func (g *Image) OpenImage(filename gi.FileName, width, height float32) error {
 	g.Filename = filename
 	g.SetImage(img, width, height)
 	return nil
+}
+
+// SaveImage saves current image to a file
+func (g *Image) SaveImage(filename gi.FileName) error {
+	return gi.SaveImage(string(filename), g.Pixels)
 }
 
 // SetImage sets an image for the bitmap , and resizes to the size of the image
@@ -193,4 +198,33 @@ func (g *Image) ReadGeom(dat []float32) {
 	g.Size.X = dat[2]
 	g.Size.Y = dat[3]
 	g.ReadXForm(dat, 4)
+}
+
+// ImageProps define the ToolBar for images
+var ImageProps = ki.Props{
+	"EnumType:Flag": gi.KiT_NodeFlags,
+	"ToolBar": ki.PropSlice{
+		{"OpenImage", ki.Props{
+			"desc": "Open image file for this image node, rescaling to given size -- use 0, 0 to use native image size.",
+			"icon": "file-open",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"default-field": "Filename",
+					"ext":           ".png,.jpg,.jpeg",
+				}},
+				{"Width", ki.Props{}},
+				{"Height", ki.Props{}},
+			},
+		}},
+		{"SaveImage", ki.Props{
+			"desc": "Save image to a file.",
+			"icon": "file-save",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"default-field": "Filename",
+					"ext":           ".png,.jpg,.jpeg",
+				}},
+			},
+		}},
+	},
 }

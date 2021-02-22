@@ -41,10 +41,6 @@ type SVG struct {
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, SVGProps)
 
-var SVGProps = ki.Props{
-	"EnumType:Flag": KiT_SVGFlags,
-}
-
 // AddNewSVG adds a new svg viewport to given parent node, with given name.
 func AddNewSVG(parent ki.Ki, name string) *SVG {
 	return parent.AddNewChild(KiT_SVG, name).(*SVG)
@@ -374,3 +370,29 @@ const (
 
 	SVGFlagsN
 )
+
+var SVGProps = ki.Props{
+	"EnumType:Flag": KiT_SVGFlags,
+	"ToolBar": ki.PropSlice{
+		{"OpenXML", ki.Props{
+			"label": "Open...",
+			"desc":  "Open SVG XML-formatted file",
+			"icon":  "file-open",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"ext": ".svg",
+				}},
+			},
+		}},
+		{"SaveXML", ki.Props{
+			"label": "SaveAs...",
+			"desc":  "Save SVG content to an XML-formatted file.",
+			"icon":  "file-save",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"ext": ".svg",
+				}},
+			},
+		}},
+	},
+}

@@ -227,6 +227,26 @@ func (g *NodeBase) ReadGeom(dat []float32) {
 	g.ReadXForm(dat, 0)
 }
 
+// FirstNonGroupNode returns the first item that is not a group
+// recursing into groups until a non-group item is found.
+func FirstNonGroupNode(kn ki.Ki) ki.Ki {
+	var ngn ki.Ki
+	kn.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		if k == nil || k.This() == nil || k.IsDeleted() || k.IsDestroyed() {
+			return ki.Break
+		}
+		if _, isgp := k.(*Group); isgp {
+			return ki.Continue
+		}
+		ngn = k
+		return ki.Break
+	})
+	return ngn
+}
+
+//////////////////////////////////////////////////////////////////
+// Standard Node infrastructure
+
 // Init2DBase handles basic node initialization -- Init2D can then do special things
 func (g *NodeBase) Init2DBase() {
 	g.BBoxMu.Lock()
