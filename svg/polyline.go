@@ -121,7 +121,7 @@ func (g *Polyline) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float
 // Slice must be passed and will be resized if not the correct length.
 func (g *Polyline) WriteGeom(dat *[]float32) {
 	sz := len(g.Points) * 2
-	SetFloat32SliceLen(dat, sz)
+	SetFloat32SliceLen(dat, sz+6)
 	for i, p := range g.Points {
 		(*dat)[i*2] = p.X
 		(*dat)[i*2+1] = p.Y

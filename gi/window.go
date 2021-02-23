@@ -1363,7 +1363,7 @@ func (w *Window) RenderSprite(sp *Sprite) {
 }
 
 // SpriteEvent processes given event for any active sprites
-func (w *Window) SpriteEvent(evi oswin.Event) {
+func (w *Window) SelSpriteEvent(evi oswin.Event) {
 	// w.UpMu.Lock()
 	// defer w.UpMu.Unlock()
 
@@ -1767,7 +1767,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 		if w.EventMgr.DNDStage == DNDStarted {
 			w.DNDMoveEvent(e)
 		} else {
-			w.SpriteEvent(evi)
+			w.SelSpriteEvent(evi)
 			if !w.EventMgr.dragStarted {
 				e.SetProcessed() // ignore
 			}
@@ -1777,7 +1777,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.DNDDropEvent(e)
 		}
 		w.FocusActiveClick(e)
-		w.SpriteEvent(evi)
+		w.SelSpriteEvent(evi)
 	case *mouse.MoveEvent:
 		if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
 			if w.HasFlag(int(WinFlagDoFullRender)) {

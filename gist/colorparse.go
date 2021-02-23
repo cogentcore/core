@@ -346,6 +346,8 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 				if cs.Gradient == nil {
 					cs.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 1, 0, 0},
 						IsRadial: false, Matrix: rasterx.Identity}
+				} else {
+					cs.Gradient.IsRadial = false
 				}
 				cs.Source = LinearGradient
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
@@ -373,6 +375,8 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 				if cs.Gradient == nil {
 					cs.Gradient = &rasterx.Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5},
 						IsRadial: true, Matrix: rasterx.Identity}
+				} else {
+					cs.Gradient.IsRadial = true
 				}
 				cs.Source = RadialGradient
 				var setFx, setFy bool

@@ -946,6 +946,8 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "orient", nd.Orient)
 	case *Filter:
 		return "" // not yet supported
+	case *gi.StyleSheet:
+		nm = "style"
 	default:
 		nm = ki.Type(itm).String()
 	}

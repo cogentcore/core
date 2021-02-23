@@ -297,8 +297,8 @@ func (sv *SVG) NodeEnsureUniqueId(kn ki.Ki) {
 	svi, issvi := kn.(NodeSVG)
 	if issvi {
 		elnm = svi.SVGName()
-	} else if gr, ok := kn.(*gi.Gradient); ok {
-		elnm = gr.GradientType()
+		// } else if gr, ok := kn.(*gi.Gradient); ok { // don't need gradients to be unique
+		// 	elnm = gr.GradientType()
 	}
 	if elnm == "" {
 		return

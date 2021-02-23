@@ -222,6 +222,17 @@ func PathDataNextVec(data []PathData, i *int) mat32.Vec2 {
 	return v
 }
 
+// PathDataNextRel gets the next 2 path data points as a relative vector
+// and returns that relative vector added to current point
+func PathDataNextRel(data []PathData, i *int, cp mat32.Vec2) mat32.Vec2 {
+	v := mat32.Vec2{}
+	v.X = float32(data[*i])
+	(*i)++
+	v.Y = float32(data[*i])
+	(*i)++
+	return v.Add(cp)
+}
+
 // PathDataNextCmd gets the next path data command, incrementing the index -- ++
 // not an expression so its clunky
 func PathDataNextCmd(data []PathData, i *int) (PathCmds, int) {
@@ -242,7 +253,7 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 		return
 	}
 	lastCmd := PcErr
-	var st, rp, cp, xp, ctrl mat32.Vec2
+	var st, cp, xp, ctrl mat32.Vec2
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		rel := false
@@ -256,13 +267,11 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 				pc.LineTo(rs, cp.X, cp.Y)
 			}
 		case Pcm:
-			rp = PathDataNextVec(data, &i)
-			cp.SetAdd(rp)
+			cp = PathDataNextRel(data, &i, cp)
 			pc.MoveTo(rs, cp.X, cp.Y)
 			st = cp
 			for np := 1; np < n/2; np++ {
-				rp = PathDataNextVec(data, &i)
-				cp.SetAdd(rp)
+				cp = PathDataNextRel(data, &i, cp)
 				pc.LineTo(rs, cp.X, cp.Y)
 			}
 		case PcL:
@@ -272,8 +281,7 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
-				rp = PathDataNextVec(data, &i)
-				cp.SetAdd(rp)
+				cp = PathDataNextRel(data, &i, cp)
 				pc.LineTo(rs, cp.X, cp.Y)
 			}
 		case PcH:
@@ -305,12 +313,9 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
-				xp = PathDataNextVec(data, &i)
-				xp.SetAdd(cp)
-				ctrl = PathDataNextVec(data, &i)
-				ctrl.SetAdd(cp)
-				rp = PathDataNextVec(data, &i)
-				cp.SetAdd(rp)
+				xp = PathDataNextRel(data, &i, cp)
+				ctrl = PathDataNextRel(data, &i, cp)
+				cp = PathDataNextRel(data, &i, cp)
 				pc.CubicTo(rs, xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pcs:
@@ -325,10 +330,8 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 					ctrl = cp
 				}
 				if rel {
-					xp = PathDataNextVec(data, &i)
-					xp.SetAdd(cp)
-					rp = PathDataNextVec(data, &i)
-					cp.SetAdd(rp)
+					xp = PathDataNextRel(data, &i, cp)
+					cp = PathDataNextRel(data, &i, cp)
 				} else {
 					xp = PathDataNextVec(data, &i)
 					cp = PathDataNextVec(data, &i)
@@ -345,10 +348,8 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
-				ctrl = PathDataNextVec(data, &i)
-				ctrl.SetAdd(cp)
-				rp = PathDataNextVec(data, &i)
-				cp.SetAdd(rp)
+				ctrl = PathDataNextRel(data, &i, cp)
+				cp = PathDataNextRel(data, &i, cp)
 				pc.QuadraticTo(rs, ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pct:
@@ -363,8 +364,7 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 					ctrl = cp
 				}
 				if rel {
-					rp = PathDataNextVec(data, &i)
-					cp.SetAdd(rp)
+					cp = PathDataNextRel(data, &i, cp)
 				} else {
 					cp = PathDataNextVec(data, &i)
 				}
@@ -382,8 +382,7 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 				sweep := (PathDataNext(data, &i) != 0)
 				prv := cp
 				if rel {
-					rp = PathDataNextVec(data, &i)
-					cp.SetAdd(rp)
+					cp = PathDataNextRel(data, &i, cp)
 				} else {
 					cp = PathDataNextVec(data, &i)
 				}
@@ -400,6 +399,8 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 	}
 }
 
+// todo: also pass control points
+
 // PathDataIterFunc traverses the path data and calls given function on each
 // coordinate point, passing overall starting index of coords in data stream,
 // command, index of the points within that command, and coord values
@@ -410,7 +411,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 	if sz == 0 {
 		return
 	}
-	var cp, rp, xp mat32.Vec2
+	var cp, xp mat32.Vec2
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		rel := false
@@ -427,14 +428,12 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 				}
 			}
 		case Pcm:
-			rp = PathDataNextVec(data, &i)
-			cp.SetAdd(rp)
-			if !fun(i, cmd, 0, cp.X, cp.Y) {
+			cp = PathDataNextRel(data, &i, cp)
+			if !fun(i-2, cmd, 0, cp.X, cp.Y) {
 				return
 			}
 			for np := 1; np < n/2; np++ {
-				rp = PathDataNextVec(data, &i)
-				cp.SetAdd(rp)
+				cp = PathDataNextRel(data, &i, cp)
 				if !fun(i-2, cmd, np, cp.X, cp.Y) {
 					return
 				}
@@ -448,8 +447,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
-				rp = PathDataNextVec(data, &i)
-				cp.SetAdd(rp)
+				cp = PathDataNextRel(data, &i, cp)
 				if !fun(i-2, cmd, np, cp.X, cp.Y) {
 					return
 				}
@@ -488,15 +486,13 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 		case PcC:
 			for np := 0; np < n/6; np++ {
 				if rel {
-					xp = PathDataNextVec(data, &i)
+					xp = PathDataNextRel(data, &i, cp)
 				} else {
 					xp = PathDataNextVec(data, &i)
-					xp.SetAdd(cp)
 				}
 				PathDataNextVec(data, &i)
 				if rel {
-					rp = PathDataNextVec(data, &i)
-					cp.SetAdd(rp)
+					cp = PathDataNextRel(data, &i, cp)
 				} else {
 					cp = PathDataNextVec(data, &i)
 				}
@@ -515,10 +511,8 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 			}
 		case Pcs:
 			for np := 0; np < n/4; np++ {
-				xp = PathDataNextVec(data, &i)
-				xp.SetAdd(cp)
-				rp = PathDataNextVec(data, &i)
-				cp.SetAdd(rp)
+				xp = PathDataNextRel(data, &i, cp)
+				cp = PathDataNextRel(data, &i, cp)
 				if !fun(i-2, cmd, np, cp.X, cp.Y) {
 					return
 				}
@@ -534,8 +528,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 		case Pcq:
 			for np := 0; np < n/4; np++ {
 				PathDataNextVec(data, &i)
-				rp = PathDataNextVec(data, &i)
-				cp.SetAdd(rp)
+				cp = PathDataNextRel(data, &i, cp)
 				if !fun(i-2, cmd, np, cp.X, cp.Y) {
 					return
 				}
@@ -549,8 +542,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 			}
 		case Pct:
 			for np := 0; np < n/2; np++ {
-				rp = PathDataNextVec(data, &i)
-				cp.SetAdd(rp)
+				cp = PathDataNextRel(data, &i, cp)
 				if !fun(i-2, cmd, np, cp.X, cp.Y) {
 					return
 				}
@@ -565,8 +557,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 				PathDataNext(data, &i)    // large-arc-flag
 				PathDataNext(data, &i)    // sweep-flag
 				if rel {
-					rp = PathDataNextVec(data, &i)
-					cp.SetAdd(rp)
+					cp = PathDataNextRel(data, &i, cp)
 				} else {
 					cp = PathDataNextVec(data, &i)
 				}
@@ -592,7 +583,7 @@ func PathDataMinMax(data []PathData) (min, max mat32.Vec2) {
 			min.SetMin(c)
 			max.SetMax(c)
 		}
-		return true
+		return ki.Continue
 	})
 	return
 }
@@ -604,11 +595,11 @@ func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
 		c := mat32.Vec2{cx, cy}
 		if gotSt {
 			ang = math32.Atan2(c.Y-vec.Y, c.X-vec.X)
-			return false // stop
+			return ki.Break
 		}
 		vec = c
 		gotSt = true
-		return true
+		return ki.Continue
 	})
 	return
 }
@@ -623,7 +614,7 @@ func PathDataEnd(data []PathData) (vec mat32.Vec2, ang float32) {
 		}
 		vec = c
 		gotSome = true
-		return true
+		return ki.Continue
 	})
 	return
 }
@@ -650,6 +641,11 @@ var PathCmdNMap = map[PathCmds]int{
 	Pca: 7,
 	PcZ: 0,
 	Pcz: 0,
+}
+
+// PathCmdIsRel returns true if the path command is relative, false for absolute
+func PathCmdIsRel(pc PathCmds) bool {
+	return pc%2 == 1 // odd ones are relative
 }
 
 // PathDataValidate validates the path data and emits error messages on log
@@ -885,6 +881,9 @@ func PathDataString(data []PathData) string {
 	return sb.String()
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+//  Transforms
+
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Path) ApplyXForm(xf mat32.Mat2) {
@@ -929,11 +928,13 @@ func (g *Path) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, 
 	}
 }
 
+// ApplyXFormImpl does the implementation of applying a transform to all points
 func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 	sz := len(g.Data)
 	data := g.Data
 	lastCmd := PcErr
-	var st, cp, xp, ctrl, rp mat32.Vec2
+	var cp, st mat32.Vec2
+	var xp, ctrl, rp mat32.Vec2
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		rel := false
@@ -972,9 +973,9 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 			for np := 0; np < n; np++ {
 				rp.X = PathDataNext(data, &i)
 				rp.Y = 0
-				tc := xf.MulVec2AsVec(rp)
-				data[i-1] = PathData(tc.X)
-				cp.SetAdd(tc) // new abs
+				rp = xf.MulVec2AsVec(rp)
+				data[i-1] = PathData(rp.X)
+				cp.SetAdd(rp) // new abs
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
@@ -986,9 +987,9 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 			for np := 0; np < n; np++ {
 				rp.Y = PathDataNext(data, &i)
 				rp.X = 0
-				tc := xf.MulVec2AsVec(rp)
-				data[i-1] = PathData(tc.Y)
-				cp.SetAdd(tc) // new abs
+				rp = xf.MulVec2AsVec(rp)
+				data[i-1] = PathData(rp.Y)
+				cp.SetAdd(rp) // new abs
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
@@ -1077,6 +1078,7 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 		}
 		lastCmd = cmd
 	}
+
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers

@@ -72,10 +72,19 @@ func (g *Text) CopyFieldsFrom(frm interface{}) {
 
 func (g *Text) SetPos(pos mat32.Vec2) {
 	g.Pos = pos
+	for _, kii := range g.Kids {
+		kt := kii.(*Text)
+		kt.Pos = g.Pnt.XForm.MulVec2AsPt(pos)
+	}
 }
 
 func (g *Text) SetSize(sz mat32.Vec2) {
 	g.Width = sz.X
+	scx, _ := g.Pnt.XForm.ExtractScale()
+	for _, kii := range g.Kids {
+		kt := kii.(*Text)
+		kt.Width = g.Width * scx
+	}
 }
 
 func (g *Text) BBox2D() image.Rectangle {
