@@ -107,10 +107,10 @@ func (g *Path) Render2D() {
 	if mrk := MarkerByName(g, "marker-mid"); mrk != nil {
 		var ptm2, ptm1, pt mat32.Vec2
 		gotidx := 0
-		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
+		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 			ptm2 = ptm1
 			ptm1 = pt
-			pt = mat32.Vec2{cx, cy}
+			pt = cp
 			if gotidx < 2 {
 				gotidx++
 				return true
@@ -399,189 +399,214 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 	}
 }
 
-// todo: also pass control points
-
 // PathDataIterFunc traverses the path data and calls given function on each
 // coordinate point, passing overall starting index of coords in data stream,
 // command, index of the points within that command, and coord values
-// (absolute, not relative, regardless of the command type) -- if function
-// returns false, then traversal is aborted
-func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool) {
+// (absolute, not relative, regardless of the command type), including
+// special control points for path commands that have them (else nil).
+// If function returns false (use ki.Break vs. ki.Continue) then
+// traversal is aborted.
+// For Control points, order is in same order as in standard path stream
+// when multiple, e.g., C,S.
+// For A: order is: nc, prv, rad, mat32.Vec2{X: ang}, mat32.Vec2{laf, sf}}
+func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool) {
 	sz := len(data)
 	if sz == 0 {
 		return
 	}
-	var cp, xp mat32.Vec2
+	lastCmd := PcErr
+	var st, cp, xp, ctrl, nc mat32.Vec2
 	for i := 0; i < sz; {
 		cmd, n := PathDataNextCmd(data, &i)
 		rel := false
 		switch cmd {
 		case PcM:
 			cp = PathDataNextVec(data, &i)
-			if !fun(i-2, cmd, 0, cp.X, cp.Y) {
+			if !fun(i-2, cmd, 0, cp, nil) {
 				return
 			}
+			st = cp
 			for np := 1; np < n/2; np++ {
 				cp = PathDataNextVec(data, &i)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				if !fun(i-2, cmd, np, cp, nil) {
 					return
 				}
 			}
 		case Pcm:
 			cp = PathDataNextRel(data, &i, cp)
-			if !fun(i-2, cmd, 0, cp.X, cp.Y) {
+			if !fun(i-2, cmd, 0, cp, nil) {
 				return
 			}
+			st = cp
 			for np := 1; np < n/2; np++ {
 				cp = PathDataNextRel(data, &i, cp)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				if !fun(i-2, cmd, np, cp, nil) {
 					return
 				}
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
 				cp = PathDataNextVec(data, &i)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				if !fun(i-2, cmd, np, cp, nil) {
 					return
 				}
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
 				cp = PathDataNextRel(data, &i, cp)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				if !fun(i-2, cmd, np, cp, nil) {
 					return
 				}
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
 				cp.X = PathDataNext(data, &i)
-				if !fun(i-1, cmd, np, cp.X, cp.Y) {
+				if !fun(i-1, cmd, np, cp, nil) {
 					return
 				}
 			}
 		case Pch:
 			for np := 0; np < n; np++ {
 				cp.X += PathDataNext(data, &i)
-				if !fun(i-1, cmd, np, cp.X, cp.Y) {
+				if !fun(i-1, cmd, np, cp, nil) {
 					return
 				}
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
 				cp.Y = PathDataNext(data, &i)
-				if !fun(i-1, cmd, np, cp.X, cp.Y) {
+				if !fun(i-1, cmd, np, cp, nil) {
 					return
 				}
 			}
 		case Pcv:
 			for np := 0; np < n; np++ {
 				cp.Y += PathDataNext(data, &i)
-				if !fun(i-1, cmd, np, cp.X, cp.Y) {
+				if !fun(i-1, cmd, np, cp, nil) {
+					return
+				}
+			}
+		case PcC:
+			for np := 0; np < n/6; np++ {
+				xp = PathDataNextVec(data, &i)
+				ctrl = PathDataNextVec(data, &i)
+				cp = PathDataNextVec(data, &i)
+				if !fun(i-2, cmd, np, cp, []mat32.Vec2{xp, ctrl}) {
 					return
 				}
 			}
 		case Pcc:
-			rel = true
-			fallthrough
-		case PcC:
 			for np := 0; np < n/6; np++ {
-				if rel {
-					xp = PathDataNextRel(data, &i, cp)
-				} else {
-					xp = PathDataNextVec(data, &i)
-				}
-				PathDataNextVec(data, &i)
-				if rel {
-					cp = PathDataNextRel(data, &i, cp)
-				} else {
-					cp = PathDataNextVec(data, &i)
-				}
-				_ = xp
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
-					return
-				}
-			}
-		case PcS:
-			for np := 0; np < n/4; np++ {
-				PathDataNextVec(data, &i)
-				cp = PathDataNextVec(data, &i)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				xp = PathDataNextRel(data, &i, cp)
+				ctrl = PathDataNextRel(data, &i, cp)
+				cp = PathDataNextRel(data, &i, cp)
+				if !fun(i-2, cmd, np, cp, []mat32.Vec2{xp, ctrl}) {
 					return
 				}
 			}
 		case Pcs:
+			rel = true
+			fallthrough
+		case PcS:
 			for np := 0; np < n/4; np++ {
-				xp = PathDataNextRel(data, &i, cp)
-				cp = PathDataNextRel(data, &i, cp)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				switch lastCmd {
+				case Pcc, PcC, Pcs, PcS:
+					ctrl = reflectPt(cp, ctrl)
+				default:
+					ctrl = cp
+				}
+				if rel {
+					xp = PathDataNextRel(data, &i, cp)
+					cp = PathDataNextRel(data, &i, cp)
+				} else {
+					xp = PathDataNextVec(data, &i)
+					cp = PathDataNextVec(data, &i)
+				}
+				if !fun(i-2, cmd, np, cp, []mat32.Vec2{xp, ctrl}) {
 					return
 				}
+				lastCmd = cmd
+				ctrl = xp
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
-				PathDataNextVec(data, &i)
+				ctrl = PathDataNextVec(data, &i)
 				cp = PathDataNextVec(data, &i)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				if !fun(i-2, cmd, np, cp, []mat32.Vec2{ctrl}) {
 					return
 				}
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
-				PathDataNextVec(data, &i)
+				ctrl = PathDataNextRel(data, &i, cp)
 				cp = PathDataNextRel(data, &i, cp)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
-					return
-				}
-			}
-		case PcT:
-			for np := 0; np < n/2; np++ {
-				cp = PathDataNextVec(data, &i)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				if !fun(i-2, cmd, np, cp, []mat32.Vec2{ctrl}) {
 					return
 				}
 			}
 		case Pct:
+			rel = true
+			fallthrough
+		case PcT:
 			for np := 0; np < n/2; np++ {
-				cp = PathDataNextRel(data, &i, cp)
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				switch lastCmd {
+				case Pcq, PcQ, PcT, Pct:
+					ctrl = reflectPt(cp, ctrl)
+				default:
+					ctrl = cp
+				}
+				if rel {
+					cp = PathDataNextRel(data, &i, cp)
+				} else {
+					cp = PathDataNextVec(data, &i)
+				}
+				if !fun(i-2, cmd, np, cp, []mat32.Vec2{ctrl}) {
 					return
 				}
+				lastCmd = cmd
 			}
 		case Pca:
 			rel = true
 			fallthrough
 		case PcA:
 			for np := 0; np < n/7; np++ {
-				PathDataNextVec(data, &i) // rad
-				PathDataNext(data, &i)    // ang
-				PathDataNext(data, &i)    // large-arc-flag
-				PathDataNext(data, &i)    // sweep-flag
+				rad := PathDataNextVec(data, &i)
+				ang := PathDataNext(data, &i)
+				laf := PathDataNext(data, &i)
+				largeArc := (laf != 0)
+				sf := PathDataNext(data, &i)
+				sweep := (sf != 0)
+
+				prv := cp
 				if rel {
 					cp = PathDataNextRel(data, &i, cp)
 				} else {
 					cp = PathDataNextVec(data, &i)
 				}
-				if !fun(i-2, cmd, np, cp.X, cp.Y) {
+				nc.X, nc.Y = girl.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
+				if !fun(i-2, cmd, np, cp, []mat32.Vec2{nc, prv, rad, mat32.Vec2{X: ang}, mat32.Vec2{laf, sf}}) {
 					return
 				}
 			}
 		case PcZ:
+			fallthrough
 		case Pcz:
+			cp = st
 		}
+		lastCmd = cmd
 	}
 	return
 }
 
 // PathDataMinMax traverses the path data and extracts the min and max point coords
 func PathDataMinMax(data []PathData) (min, max mat32.Vec2) {
-	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
-		c := mat32.Vec2{cx, cy}
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		if min == mat32.Vec2Zero && max == mat32.Vec2Zero {
-			min = c
-			max = c
+			min = cp
+			max = cp
 		} else {
-			min.SetMin(c)
-			max.SetMax(c)
+			min.SetMin(cp)
+			max.SetMax(cp)
 		}
 		return ki.Continue
 	})
@@ -591,13 +616,12 @@ func PathDataMinMax(data []PathData) (min, max mat32.Vec2) {
 // PathDataStart gets the starting coords and angle from the path
 func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
 	gotSt := false
-	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
-		c := mat32.Vec2{cx, cy}
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		if gotSt {
-			ang = math32.Atan2(c.Y-vec.Y, c.X-vec.X)
+			ang = math32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
 			return ki.Break
 		}
-		vec = c
+		vec = cp
 		gotSt = true
 		return ki.Continue
 	})
@@ -607,12 +631,11 @@ func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
 // PathDataEnd gets the ending coords and angle from the path
 func PathDataEnd(data []PathData) (vec mat32.Vec2, ang float32) {
 	gotSome := false
-	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
-		c := mat32.Vec2{cx, cy}
+	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		if gotSome {
-			ang = math32.Atan2(c.Y-vec.Y, c.X-vec.X)
+			ang = math32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
 		}
-		vec = c
+		vec = cp
 		gotSome = true
 		return ki.Continue
 	})
