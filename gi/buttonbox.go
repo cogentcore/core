@@ -80,6 +80,9 @@ func (bb *ButtonBox) SelectItem(idx int) error {
 // This is mainly for Mutex use.
 // returns error if index is out of range.
 func (bb *ButtonBox) SelectItemAction(idx int) error {
+	updt := bb.UpdateStart()
+	defer bb.UpdateEnd(updt)
+
 	err := bb.SelectItem(idx)
 	if err != nil {
 		return err

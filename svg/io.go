@@ -22,7 +22,6 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -166,15 +165,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						csvg.ViewBox.Size.X = pts[2]
 						csvg.ViewBox.Size.Y = pts[3]
 					case "width":
-						wd := units.Value{}
-						wd.SetString(attr.Value)
-						wd.ToDots(&csvg.Pnt.UnContext)
-						csvg.ViewBox.Size.X = wd.Dots
+						csvg.PhysWidth.SetString(attr.Value)
+						csvg.PhysWidth.ToDots(&csvg.Pnt.UnContext)
 					case "height":
-						ht := units.Value{}
-						ht.SetString(attr.Value)
-						ht.ToDots(&csvg.Pnt.UnContext)
-						csvg.ViewBox.Size.Y = ht.Dots
+						csvg.PhysHeight.SetString(attr.Value)
+						csvg.PhysHeight.ToDots(&csvg.Pnt.UnContext)
 					default:
 						curPar.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -1058,8 +1053,8 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	me := xml.StartElement{}
 	me.Name.Local = "svg"
 	// todo: look for props about units?
-	XMLAddAttr(&me.Attr, "width", fmt.Sprintf("%gmm", sv.ViewBox.Size.X))
-	XMLAddAttr(&me.Attr, "height", fmt.Sprintf("%gmm", sv.ViewBox.Size.Y))
+	XMLAddAttr(&me.Attr, "width", sv.PhysWidth.String())
+	XMLAddAttr(&me.Attr, "height", sv.PhysHeight.String())
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.ViewBox.Min.X, sv.ViewBox.Min.Y, sv.ViewBox.Size.X, sv.ViewBox.Size.Y))
 	enc.EncodeToken(me)
 

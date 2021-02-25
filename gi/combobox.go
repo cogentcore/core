@@ -466,8 +466,10 @@ func (cb *ComboBox) SelectItemAction(idx int) {
 	if cb.This() == nil {
 		return
 	}
+	updt := cb.UpdateStart()
 	cb.SelectItem(idx)
 	cb.ComboSig.Emit(cb.This(), int64(cb.CurIndex), cb.CurVal)
+	cb.UpdateEnd(updt)
 }
 
 // MakeItemsMenu makes menu of all the items
@@ -506,8 +508,8 @@ func (cb *ComboBox) MakeItemsMenu() {
 		ac.SetAsMenu()
 		ac.ActionSig.ConnectOnly(cb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			idx := data.(int)
-			cb := recv.(*ComboBox)
-			cb.SelectItemAction(idx)
+			cbb := recv.(*ComboBox)
+			cbb.SelectItemAction(idx)
 		})
 	}
 }
