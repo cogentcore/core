@@ -10,6 +10,8 @@
 
 package mat32
 
+import "image"
+
 // Box2 represents a 2D bounding box defined by two points:
 // the point with minimum coordinates and the point with maximum coordinates.
 type Box2 struct {
@@ -62,6 +64,21 @@ func (b *Box2) SetFromPoints(points []Vec2) {
 	for i := 0; i < len(points); i++ {
 		b.ExpandByPoint(points[i])
 	}
+}
+
+// SetFromRect set this bounding box from an image.Rectangle
+func (b *Box2) SetFromRect(rect image.Rectangle) {
+	b.Min = NewVec2FmPoint(rect.Min)
+	b.Max = NewVec2FmPoint(rect.Max)
+}
+
+// ToRect returns image.Rectangle version of this bbox, using floor for min
+// and Ceil for max.
+func (b *Box2) ToRect() image.Rectangle {
+	rect := image.Rectangle{}
+	rect.Min = b.Min.ToPointFloor()
+	rect.Max = b.Max.ToPointCeil()
+	return rect
 }
 
 // ExpandByPoint may expand this bounding box to include the specified point.
