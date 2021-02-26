@@ -689,6 +689,9 @@ func (em *EventMgr) DNDIsInternalSrc() bool {
 
 // SendDNDHoverEvent sends DND hover event, based on last mouse move event
 func (em *EventMgr) SendDNDHoverEvent(e *mouse.DragEvent) {
+	if e == nil {
+		return
+	}
 	he := dnd.FocusEvent{Event: dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}}
 	he.ClearProcessed()
 	he.Action = dnd.Hover

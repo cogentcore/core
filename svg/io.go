@@ -930,7 +930,11 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		ib, fmt := gi.ImageToBase64PNG(nd.Pixels)
 		XMLAddAttr(&se.Attr, "xlink:href", "data:"+fmt+";base64,"+string(gi.Base64SplitLines(ib)))
 	case *gi.MetaData2D:
-		return "" // not useful
+		if strings.HasPrefix(nd.Nm, "namedview") {
+			nm = "sodipodi:namedview"
+		} else if strings.HasPrefix(nd.Nm, "grid") {
+			nm = "inkscape:grid"
+		}
 	case *gi.Gradient:
 		SVGNodeXMLGrad(nd, nd.Nm, enc)
 		return "" // exclude -- already written
