@@ -718,8 +718,8 @@ func (pc *Paint) DrawImageScaled(rs *State, fmIm image.Image, x, y, w, h float32
 	isc := mat32.Vec2{w, h}.Div(isz)
 
 	transformer := draw.BiLinear
-	m := rs.XForm.Translate(x, y)
-	s2d := f64.Aff3{float64(m.XX * isc.X), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY * isc.Y), float64(m.Y0)}
+	m := rs.XForm.Translate(x, y).Scale(isc.X, isc.Y)
+	s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 	if rs.Mask == nil {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
 	} else {

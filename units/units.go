@@ -404,7 +404,7 @@ func (v *Value) Convert(to Units, ctxt *Context) Value {
 
 // String implements the fmt.Stringer interface.
 func (v *Value) String() string {
-	return fmt.Sprintf("%f%s", v.Val, UnitNames[v.Un])
+	return fmt.Sprintf("%g%s", v.Val, UnitNames[v.Un])
 }
 
 // SetString sets value from a string

@@ -117,6 +117,19 @@ func (g *NodeBase) Paint() *gist.Paint {
 	return &g.Pnt.Paint
 }
 
+// SetColorProps sets color property from a string representation.
+// It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
+func (g *NodeBase) SetColorProps(prop, color string) {
+	if color[0] == '#' && len(color) == 9 {
+		g.SetProp(prop, color[:7]) // exclude alpha
+		alphai := 0
+		fmt.Sscanf(color[7:], "%02x", &alphai)
+		g.SetProp(prop+"-opacity", fmt.Sprintf("%g", float32(alphai)/255))
+	} else {
+		g.SetProp(prop, color)
+	}
+}
+
 // ParXForm returns the full compounded 2D transform matrix for all
 // of the parents of this node
 func (g *NodeBase) ParXForm() mat32.Mat2 {

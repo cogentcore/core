@@ -1060,6 +1060,10 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	XMLAddAttr(&me.Attr, "width", sv.PhysWidth.String())
 	XMLAddAttr(&me.Attr, "height", sv.PhysHeight.String())
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.ViewBox.Min.X, sv.ViewBox.Min.Y, sv.ViewBox.Size.X, sv.ViewBox.Size.Y))
+	XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
+	XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")
+	XMLAddAttr(&me.Attr, "xmlns:xlink", "http://www.w3.org/1999/xlink")
+	XMLAddAttr(&me.Attr, "xmlns", "http://www.w3.org/2000/svg")
 	enc.EncodeToken(me)
 
 	dnm, err := SVGNodeTreeMarshalXML(&sv.Defs, enc, "defs")

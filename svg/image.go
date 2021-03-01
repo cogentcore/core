@@ -137,7 +137,7 @@ func (g *Image) BBox2D() image.Rectangle {
 	max := rs.XForm.MulVec2AsPt(g.Pos.Add(g.Size))
 	posi := pos.ToPointCeil()
 	maxi := max.ToPointCeil()
-	return image.Rectangle{posi, maxi}
+	return image.Rectangle{posi, maxi}.Canon()
 }
 
 func (g *Image) Render2D() {

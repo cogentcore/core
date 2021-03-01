@@ -1258,7 +1258,7 @@ func (w *Window) SpriteByName(nm string) (*Sprite, bool) {
 // AddNewSprite adds a new sprite with given name, which must remain
 // invariant and unique among all sprites in use, and is used for all access
 // -- prefix with package and type name to ensure uniqueness.  Starts out in
-// inactive state -- must call ActivateSprite.
+// inactive state -- must call ActivateSprite.  If size is 0, no image is made.
 func (w *Window) AddNewSprite(nm string, sz image.Point, pos image.Point) *Sprite {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
