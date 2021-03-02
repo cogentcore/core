@@ -52,6 +52,10 @@ func (ev *Event) Pos() image.Point {
 	return image.ZP
 }
 
+func (ev *Event) OnWinFocus() bool { // os events generally not focus-specific
+	return false
+}
+
 func (ev *Event) OnFocus() bool {
 	return false
 }

@@ -418,6 +418,7 @@ func macOpenFile(fname *C.char, flen C.int) {
 		osev := &osevent.OpenFilesEvent{
 			Files: []string{ofn},
 		}
+		osev.Init()
 		osev.Action = osevent.OpenFiles
 		win.Send(osev)
 	}
