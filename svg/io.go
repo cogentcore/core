@@ -824,8 +824,14 @@ var InkscapeProps = map[string]bool{
 // returns name of node, for end tag -- if empty, then children will not be
 // output.
 func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
+	if itm == nil || itm.This() == nil {
+		return ""
+	}
 	se := xml.StartElement{}
-	props := *itm.Properties()
+	var props ki.Props
+	if itm.Properties() != nil {
+		props = *itm.Properties()
+	}
 	if itm.Name() != "" {
 		XMLAddAttr(&se.Attr, "id", itm.Name())
 	}
