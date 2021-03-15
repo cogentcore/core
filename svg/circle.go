@@ -47,22 +47,20 @@ func (g *Circle) SetSize(sz mat32.Vec2) {
 
 func (g *Circle) SVGLocalBBox() mat32.Box2 {
 	bb := mat32.Box2{}
-	bb.Min = g.Pos.SubScalar(g.Radius)
-	bb.Max = g.Pos.AddScalar(g.Radius)
+	hlw := 0.5 * g.LocalLineWidth()
+	bb.Min = g.Pos.SubScalar(g.Radius + hlw)
+	bb.Max = g.Pos.AddScalar(g.Radius + hlw)
 	return bb
 }
 
 func (g *Circle) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
+	vis, rs := g.PushXForm()
+	if !vis {
+		return
 	}
 	pc := &g.Pnt
-	rs := g.Render()
-	rs.Lock()
-	rs.PushXForm(pc.XForm)
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 	pc.FillStrokeClear(rs)
-	rs.Unlock()
 
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()

@@ -23,10 +23,8 @@ import (
 // Path renders SVG data sequences that can render just about anything
 type Path struct {
 	NodeBase
-	Data     []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
-	DataStr  string     `xml:"d" desc:"string version of the path data"`
-	MinCoord mat32.Vec2 `desc:"minimum coord in path -- computed in BBox2D"`
-	MaxCoord mat32.Vec2 `desc:"maximum coord in path -- computed in BBox2D"`
+	Data    []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
+	DataStr string     `xml:"d" desc:"string version of the path data"`
 }
 
 var KiT_Path = kit.Types.AddType(&Path{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
@@ -48,8 +46,6 @@ func (g *Path) CopyFieldsFrom(frm interface{}) {
 	g.Data = make([]PathData, len(fr.Data))
 	copy(g.Data, fr.Data)
 	g.DataStr = fr.DataStr
-	g.MinCoord = fr.MinCoord
-	g.MaxCoord = fr.MaxCoord
 }
 
 func (g *Path) SetPos(pos mat32.Vec2) {
@@ -73,25 +69,26 @@ func (g *Path) SetData(data string) error {
 	return err
 }
 
+func (g *Path) SVGLocalBBox() mat32.Box2 {
+	bb := PathDataBBox(g.Data)
+	hlw := 0.5 * g.LocalLineWidth()
+	bb.Min.SetSubScalar(hlw)
+	bb.Max.SetAddScalar(hlw)
+	return bb
+}
+
 func (g *Path) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
-	}
 	sz := len(g.Data)
 	if sz < 2 {
 		return
 	}
-
-	pc := &g.Pnt
-	rs := g.Render()
-	if rs == nil {
+	vis, rs := g.PushXForm()
+	if !vis {
 		return
 	}
-	rs.Lock()
-	rs.PushXForm(pc.XForm)
+	pc := &g.Pnt
 	PathDataRender(g.Data, pc, rs)
 	pc.FillStrokeClear(rs)
-	rs.Unlock()
 
 	g.ComputeBBoxSVG()
 
@@ -598,19 +595,14 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 	return
 }
 
-// PathDataMinMax traverses the path data and extracts the min and max point coords
-func PathDataMinMax(data []PathData) (min, max mat32.Vec2) {
+// PathDataBBox traverses the path data and extracts the local bounding box
+func PathDataBBox(data []PathData) mat32.Box2 {
+	bb := mat32.NewEmptyBox2()
 	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
-		if min == mat32.Vec2Zero && max == mat32.Vec2Zero {
-			min = cp
-			max = cp
-		} else {
-			min.SetMin(cp)
-			max.SetMax(cp)
-		}
+		bb.ExpandByPoint(cp)
 		return ki.Continue
 	})
-	return
+	return bb
 }
 
 // PathDataStart gets the starting coords and angle from the path

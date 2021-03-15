@@ -46,14 +46,22 @@ func (g *Line) SetSize(sz mat32.Vec2) {
 	g.End = g.Start.Add(sz)
 }
 
+func (g *Line) SVGLocalBBox() mat32.Box2 {
+	bb := mat32.NewEmptyBox2()
+	bb.ExpandByPoint(g.Start)
+	bb.ExpandByPoint(g.End)
+	hlw := 0.5 * g.LocalLineWidth()
+	bb.Min.SetSubScalar(hlw)
+	bb.Max.SetAddScalar(hlw)
+	return bb
+}
+
 func (g *Line) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
+	vis, rs := g.PushXForm()
+	if !vis {
+		return
 	}
 	pc := &g.Pnt
-	rs := g.Render()
-	rs.Lock()
-	rs.PushXForm(pc.XForm)
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Stroke(rs)
 	g.ComputeBBoxSVG()

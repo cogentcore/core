@@ -96,3 +96,20 @@ func (mrk *Marker) RenderMarker(vertexPos mat32.Vec2, vertexAng, strokeWidth flo
 
 	mrk.Render2D()
 }
+
+func (g *Marker) Render2D() {
+	if g.Viewport == nil {
+		g.This().(gi.Node2D).Init2D()
+	}
+	pc := &g.Pnt
+	rs := g.Render()
+	if rs == nil {
+		return
+	}
+	rs.PushXFormLock(pc.XForm)
+
+	g.Render2DChildren()
+	g.ComputeBBoxSVG() // must come after render
+
+	rs.PopXFormLock()
+}

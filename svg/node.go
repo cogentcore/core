@@ -407,6 +407,23 @@ func (g *NodeBase) ChildrenBBox2D() image.Rectangle {
 	return g.VpBBox
 }
 
+// LocalLineWidth returns the line width in local coordinates
+func (g *NodeBase) LocalLineWidth() float32 {
+	pc := &g.Pnt
+	if !pc.StrokeStyle.On {
+		return 0
+	}
+	return pc.StrokeStyle.Width.Dots
+}
+
+// LocalBBoxToWin converts a local bounding box to Window coordinates
+func (g *NodeBase) LocalBBoxToWin(bb mat32.Box2) image.Rectangle {
+	mxi := g.Pnt.XForm.Mul(g.ParXForm()) // must include self
+	bb.Min = mxi.MulVec2AsPt(bb.Min)
+	bb.Max = mxi.MulVec2AsPt(bb.Max)
+	return bb.ToRect().Canon()
+}
+
 // ComputeBBoxSVG is called by default in render to compute bounding boxes for
 // gui interaction -- can only be done in rendering because that is when all
 // the proper xforms are all in place -- VpBBox is intersected with parent SVG
@@ -415,8 +432,8 @@ func (g *NodeBase) ComputeBBoxSVG() {
 		return
 	}
 	g.BBoxMu.Lock()
-	g.BBox = g.This().(gi.Node2D).BBox2D()
-	g.ObjBBox = g.BBox // no diff
+	ni := g.This().(NodeSVG)
+	g.ObjBBox = ni.BBox2D()
 	pbbox := g.Viewport.This().(gi.Node2D).ChildrenBBox2D()
 	g.VpBBox = pbbox.Intersect(g.ObjBBox)
 	g.BBoxMu.Unlock()
@@ -427,13 +444,59 @@ func (g *NodeBase) ComputeBBoxSVG() {
 	}
 }
 
-func (g *NodeBase) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
+// PushXForm checks our bounding box and visibility, returning false if
+// out of bounds.  If visible, pushes our xform.
+// Must be called as first step in Render2D.
+func (g *NodeBase) PushXForm() (bool, *girl.State) {
+	g.BBoxMu.Lock()
+	defer g.BBoxMu.Unlock()
+
+	g.WinBBox = image.ZR
+	g.VpBBox = image.ZR
+	g.ObjBBox = image.ZR
+	if g == nil || g.This() == nil {
+		return false, nil
 	}
+	ni := g.This().(NodeSVG)
+	if g.Viewport == nil {
+		g.BBoxMu.Unlock()
+		ni.Init2D()
+		g.BBoxMu.Lock()
+	}
+	if g.IsInvisible() {
+		return false, nil
+	}
+	mvp := g.Viewport
+	if mvp == nil {
+		return false, nil
+	}
+	lbb := ni.SVGLocalBBox()
+	g.BBox = g.LocalBBoxToWin(lbb)
+	tvp := g.BBox.Add(mvp.VpBBox.Min)
+	g.VpBBox = mvp.VpBBox.Intersect(tvp)
+	nvis := g.VpBBox == image.ZR
+	// g.SetInvisibleState(nvis) // don't set
+
+	if nvis {
+		fmt.Printf("invis: %s  bb: %v  tvp: %v  vpbb: %v  winbb: %v\n", g.Nm, g.BBox, tvp, mvp.VpBBox, g.WinBBox)
+		return false, nil
+	}
+
+	g.WinBBox = g.VpBBox.Add(mvp.WinBBox.Min)
+
+	rs := &mvp.Render
 	pc := &g.Pnt
-	rs := g.Render()
 	rs.PushXFormLock(pc.XForm)
+
+	return true, rs
+}
+
+func (g *NodeBase) Render2D() {
+	vis, rs := g.PushXForm()
+	if !vis {
+		return
+	}
+	// pc := &g.Pnt
 	// render path elements, then compute bbox, then fill / stroke
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()

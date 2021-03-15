@@ -49,18 +49,18 @@ func (g *Rect) SetSize(sz mat32.Vec2) {
 
 func (g *Rect) SVGLocalBBox() mat32.Box2 {
 	bb := mat32.Box2{}
-	bb.Min = g.Pos
-	bb.Max = g.Pos.Add(g.Size)
+	hlw := 0.5 * g.LocalLineWidth()
+	bb.Min = g.Pos.SubScalar(hlw)
+	bb.Max = g.Pos.Add(g.Size).AddScalar(hlw)
 	return bb
 }
 
 func (g *Rect) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
+	vis, rs := g.PushXForm()
+	if !vis {
+		return
 	}
 	pc := &g.Pnt
-	rs := g.Render()
-	rs.PushXForm(pc.XForm)
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
@@ -70,7 +70,7 @@ func (g *Rect) Render2D() {
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
-	rs.PopXForm()
+	rs.PopXFormLock()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node

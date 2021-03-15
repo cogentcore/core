@@ -6,7 +6,6 @@ package svg
 
 import (
 	"github.com/chewxy/math32"
-	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -44,17 +43,27 @@ func (g *Polyline) SetSize(sz mat32.Vec2) {
 	// todo: scale bbox
 }
 
-func (g *Polyline) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
+func (g *Polyline) SVGLocalBBox() mat32.Box2 {
+	bb := mat32.NewEmptyBox2()
+	for _, pt := range g.Points {
+		bb.ExpandByPoint(pt)
 	}
+	hlw := 0.5 * g.LocalLineWidth()
+	bb.Min.SetSubScalar(hlw)
+	bb.Max.SetAddScalar(hlw)
+	return bb
+}
+
+func (g *Polyline) Render2D() {
 	sz := len(g.Points)
 	if sz < 2 {
 		return
 	}
+	vis, rs := g.PushXForm()
+	if !vis {
+		return
+	}
 	pc := &g.Pnt
-	rs := g.Render()
-	rs.PushXForm(pc.XForm)
 	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
@@ -82,7 +91,7 @@ func (g *Polyline) Render2D() {
 	}
 
 	g.Render2DChildren()
-	rs.PopXForm()
+	rs.PopXFormLock()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node

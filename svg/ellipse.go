@@ -47,22 +47,20 @@ func (g *Ellipse) SetSize(sz mat32.Vec2) {
 
 func (g *Ellipse) SVGLocalBBox() mat32.Box2 {
 	bb := mat32.Box2{}
-	bb.Min = g.Pos.Sub(g.Radii)
-	bb.Max = g.Pos.Add(g.Radii)
+	hlw := 0.5 * g.LocalLineWidth()
+	bb.Min = g.Pos.Sub(g.Radii.AddScalar(hlw))
+	bb.Max = g.Pos.Add(g.Radii.AddScalar(hlw))
 	return bb
 }
 
 func (g *Ellipse) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
+	vis, rs := g.PushXForm()
+	if !vis {
+		return
 	}
 	pc := &g.Pnt
-	rs := g.Render()
-	rs.Lock()
-	rs.PushXForm(pc.XForm)
 	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 	pc.FillStrokeClear(rs)
-	rs.Unlock()
 
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()

@@ -14,8 +14,7 @@ import (
 
 // Polygon is a SVG polygon
 type Polygon struct {
-	NodeBase
-	Points []mat32.Vec2 `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
+	Polyline
 }
 
 var KiT_Polygon = kit.Types.AddType(&Polygon{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
@@ -29,32 +28,16 @@ func AddNewPolygon(parent ki.Ki, name string, points []mat32.Vec2) *Polygon {
 
 func (g *Polygon) SVGName() string { return "polygon" }
 
-func (g *Polygon) CopyFieldsFrom(frm interface{}) {
-	fr := frm.(*Polygon)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Points = make([]mat32.Vec2, len(fr.Points))
-	copy(g.Points, fr.Points)
-}
-
-func (g *Polygon) SetPos(pos mat32.Vec2) {
-	// todo: set offset relative to bbox
-}
-
-func (g *Polygon) SetSize(sz mat32.Vec2) {
-	// todo: scale bbox
-}
-
 func (g *Polygon) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
-	}
 	sz := len(g.Points)
 	if sz < 2 {
 		return
 	}
+	vis, rs := g.PushXForm()
+	if !vis {
+		return
+	}
 	pc := &g.Pnt
-	rs := g.Render()
-	rs.PushXForm(pc.XForm)
 	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	g.ComputeBBoxSVG()
@@ -82,63 +65,5 @@ func (g *Polygon) Render2D() {
 	}
 
 	g.Render2DChildren()
-	rs.PopXForm()
-}
-
-// ApplyXForm applies the given 2D transform to the geometry of this node
-// each node must define this for itself
-func (g *Polygon) ApplyXForm(xf mat32.Mat2) {
-	for i, p := range g.Points {
-		p = xf.MulVec2AsPt(p)
-		g.Points[i] = p
-	}
-	g.GradientApplyXForm(xf)
-}
-
-// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *Polygon) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	if rot != 0 {
-		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		mat := g.Pnt.XForm.MulCtr(xf, lpt)
-		g.Pnt.XForm = mat
-		g.SetProp("transform", g.Pnt.XForm.String())
-	} else {
-		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
-		for i, p := range g.Points {
-			p = xf.MulVec2AsPtCtr(p, lpt)
-			g.Points[i] = p
-		}
-		g.GradientApplyXFormPt(xf, lpt)
-	}
-}
-
-// WriteGeom writes the geometry of the node to a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-// Slice must be passed and will be resized if not the correct length.
-func (g *Polygon) WriteGeom(dat *[]float32) {
-	sz := len(g.Points) * 2
-	SetFloat32SliceLen(dat, sz+6)
-	for i, p := range g.Points {
-		(*dat)[i*2] = p.X
-		(*dat)[i*2+1] = p.Y
-	}
-	g.WriteXForm(*dat, sz)
-	g.GradientWritePts(dat)
-}
-
-// ReadGeom reads the geometry of the node from a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-func (g *Polygon) ReadGeom(dat []float32) {
-	sz := len(g.Points) * 2
-	for i, p := range g.Points {
-		p.X = dat[i*2]
-		p.Y = dat[i*2+1]
-		g.Points[i] = p
-	}
-	g.ReadXForm(dat, sz)
-	g.GradientReadPts(dat)
+	rs.PopXFormLock()
 }

@@ -20,7 +20,6 @@ import (
 
 // Text renders SVG text, handling both text and tspan elements.
 // tspan is nested under a parent text -- text has empty Text string.
-//
 type Text struct {
 	NodeBase
 	Pos          mat32.Vec2 `xml:"{x,y}" desc:"position of the left, baseline of the text"`
@@ -70,6 +69,13 @@ func (g *Text) CopyFieldsFrom(frm interface{}) {
 	g.AdjustGlyphs = fr.AdjustGlyphs
 }
 
+// IsParText returns true if this element serves as a parent text element
+// to tspan elements within it.  This is true if NumChildren() > 0 and
+// Text == ""
+func (g *Text) IsParText() bool {
+	return g.NumChildren() > 0 && g.Text == ""
+}
+
 func (g *Text) SetPos(pos mat32.Vec2) {
 	g.Pos = pos
 	for _, kii := range g.Kids {
@@ -88,12 +94,14 @@ func (g *Text) SetSize(sz mat32.Vec2) {
 }
 
 func (g *Text) BBox2D() image.Rectangle {
-	if g.Text == "" {
+	if g.IsParText() {
 		return BBoxFromChildren(g)
 	} else {
 		return image.Rectangle{Min: g.LastBBox.Min.ToPointFloor(), Max: g.LastBBox.Max.ToPointCeil()}
 	}
 }
+
+// todo: write a BBox routine based on following, use for pre-bbox computation
 
 func (g *Text) RenderText() {
 	pc := &g.Pnt
@@ -198,7 +206,7 @@ func (g *Text) Render2D() {
 		g.RenderText()
 	}
 	g.Render2DChildren()
-	if g.Text == "" {
+	if g.IsParText() {
 		g.ComputeBBoxSVG() // after kids have rendered
 	}
 	rs.PopXForm()
@@ -224,7 +232,7 @@ func (g *Text) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, 
 		g.Pnt.XForm = mat
 		g.SetProp("transform", g.Pnt.XForm.String())
 	} else {
-		if g.Text == "" {
+		if g.IsParText() {
 			// translation transform
 			xft, lptt := g.DeltaXForm(trans, scale, rot, pt, true) // include self when not a parent
 			// transform transform
@@ -256,7 +264,7 @@ func (g *Text) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, 
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
 func (g *Text) WriteGeom(dat *[]float32) {
-	if g.Text == "" {
+	if g.IsParText() {
 		npt := 9 + g.NumChildren()*3
 		SetFloat32SliceLen(dat, npt)
 		(*dat)[0] = g.Pos.X
@@ -286,7 +294,7 @@ func (g *Text) ReadGeom(dat []float32) {
 	g.Pos.Y = dat[1]
 	g.Width = dat[2]
 	g.ReadXForm(dat, 3)
-	if g.Text == "" {
+	if g.IsParText() {
 		for i, kii := range g.Kids {
 			kt := kii.(*Text)
 			off := 9 + i*3

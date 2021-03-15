@@ -140,17 +140,22 @@ func (g *Image) BBox2D() image.Rectangle {
 	return image.Rectangle{posi, maxi}.Canon()
 }
 
+func (g *Image) SVGLocalBBox() mat32.Box2 {
+	bb := mat32.Box2{}
+	bb.Min = g.Pos
+	bb.Max = g.Pos.Add(g.Size)
+	return bb
+}
+
 func (g *Image) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
+	vis, rs := g.PushXForm()
+	if !vis {
+		return
 	}
-	pc := &g.Pnt
-	rs := g.Render()
-	rs.PushXForm(pc.XForm)
 	g.DrawImage()
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
-	rs.PopXForm()
+	rs.PopXFormLock()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
