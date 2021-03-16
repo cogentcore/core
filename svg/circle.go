@@ -71,10 +71,17 @@ func (g *Circle) Render2D() {
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Circle) ApplyXForm(xf mat32.Mat2) {
-	g.Pos = xf.MulVec2AsPt(g.Pos)
-	scx, scy := xf.ExtractScale()
-	g.Radius *= 0.5 * (scx + scy)
-	g.GradientApplyXForm(xf)
+	rot := xf.ExtractRot()
+	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
+		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
+		g.SetProp("transform", g.Pnt.XForm.String())
+		g.GradientApplyXForm(xf)
+	} else {
+		g.Pos = xf.MulVec2AsPt(g.Pos)
+		scx, scy := xf.ExtractScale()
+		g.Radius *= 0.5 * (scx + scy)
+		g.GradientApplyXForm(xf)
+	}
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node

@@ -83,9 +83,16 @@ func (g *Line) Render2D() {
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Line) ApplyXForm(xf mat32.Mat2) {
-	g.Start = xf.MulVec2AsPt(g.Start)
-	g.End = xf.MulVec2AsPt(g.End)
-	g.GradientApplyXForm(xf)
+	rot := xf.ExtractRot()
+	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
+		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
+		g.SetProp("transform", g.Pnt.XForm.String())
+		g.GradientApplyXForm(xf)
+	} else {
+		g.Start = xf.MulVec2AsPt(g.Start)
+		g.End = xf.MulVec2AsPt(g.End)
+		g.GradientApplyXForm(xf)
+	}
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node

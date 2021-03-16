@@ -161,8 +161,14 @@ func (g *Image) Render2D() {
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Image) ApplyXForm(xf mat32.Mat2) {
-	g.Pos = xf.MulVec2AsPt(g.Pos)
-	g.Size = xf.MulVec2AsVec(g.Size)
+	rot := xf.ExtractRot()
+	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
+		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
+		g.SetProp("transform", g.Pnt.XForm.String())
+	} else {
+		g.Pos = xf.MulVec2AsPt(g.Pos)
+		g.Size = xf.MulVec2AsVec(g.Size)
+	}
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node

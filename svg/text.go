@@ -300,9 +300,16 @@ func (g *Text) Render2D() {
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Text) ApplyXForm(xf mat32.Mat2) {
-	g.Pos = xf.MulVec2AsPt(g.Pos)
-	scx, _ := xf.ExtractScale()
-	g.Width *= scx
+	rot := xf.ExtractRot()
+	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
+		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
+		g.SetProp("transform", g.Pnt.XForm.String())
+		g.GradientApplyXForm(xf)
+	} else {
+		g.Pos = xf.MulVec2AsPt(g.Pos)
+		scx, _ := xf.ExtractScale()
+		g.Width *= scx
+	}
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
