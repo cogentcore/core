@@ -902,7 +902,9 @@ func PathDataString(data []PathData) string {
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Path) ApplyXForm(xf mat32.Mat2) {
-	g.ApplyXFormImpl(xf, mat32.Vec2{0, 0})
+	// path may have horiz, vert elements -- only gen soln is to transform
+	g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
+	g.SetProp("transform", g.Pnt.XForm.String())
 	g.GradientApplyXForm(xf)
 }
 
@@ -933,8 +935,7 @@ func PathDataXFormRel(data []PathData, i *int, xf mat32.Mat2, cp mat32.Vec2) mat
 func (g *Path) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
 	if rot != 0 {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		mat := g.Pnt.XForm.MulCtr(xf, lpt)
-		g.Pnt.XForm = mat
+		g.Pnt.XForm = g.Pnt.XForm.MulCtr(xf, lpt)
 		g.SetProp("transform", g.Pnt.XForm.String())
 	} else {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self

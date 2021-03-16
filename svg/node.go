@@ -131,8 +131,9 @@ func (g *NodeBase) SetColorProps(prop, color string) {
 }
 
 // ParXForm returns the full compounded 2D transform matrix for all
-// of the parents of this node
-func (g *NodeBase) ParXForm() mat32.Mat2 {
+// of the parents of this node.  If self is true, then include our
+// own xform too.
+func (g *NodeBase) ParXForm(self bool) mat32.Mat2 {
 	pars := []NodeSVG{}
 	xf := mat32.Identity2D()
 	nb := g
@@ -154,6 +155,9 @@ func (g *NodeBase) ParXForm() mat32.Mat2 {
 		n := pars[i]
 		xf = n.AsSVGNode().Pnt.XForm.Mul(xf)
 	}
+	if self {
+		xf = g.Pnt.XForm.Mul(xf)
+	}
 	return xf
 }
 
@@ -167,10 +171,7 @@ func (g *NodeBase) ApplyXForm(xf mat32.Mat2) {
 // include the current node self transform, otherwise don't.  Groups do not
 // but regular rendering nodes do.
 func (g *NodeBase) DeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2, self bool) (mat32.Mat2, mat32.Vec2) {
-	mxi := g.ParXForm()
-	if self {
-		mxi = g.Pnt.XForm.Mul(mxi)
-	}
+	mxi := g.ParXForm(self)
 	mxi = mxi.Inverse()
 	lpt := mxi.MulVec2AsPt(pt)
 	ldel := mxi.MulVec2AsVec(trans)
@@ -418,10 +419,8 @@ func (g *NodeBase) LocalLineWidth() float32 {
 
 // LocalBBoxToWin converts a local bounding box to Window coordinates
 func (g *NodeBase) LocalBBoxToWin(bb mat32.Box2) image.Rectangle {
-	mxi := g.Pnt.XForm.Mul(g.ParXForm()) // must include self
-	bb.Min = mxi.MulVec2AsPt(bb.Min)
-	bb.Max = mxi.MulVec2AsPt(bb.Max)
-	return bb.ToRect().Canon()
+	mxi := g.ParXForm(true) // include self
+	return bb.MulMat2(mxi).ToRect()
 }
 
 // ComputeBBoxSVG is called by default in render to compute bounding boxes for
@@ -434,6 +433,7 @@ func (g *NodeBase) ComputeBBoxSVG() {
 	g.BBoxMu.Lock()
 	ni := g.This().(NodeSVG)
 	g.ObjBBox = ni.BBox2D()
+	g.ObjBBox.Canon()
 	pbbox := g.Viewport.This().(gi.Node2D).ChildrenBBox2D()
 	g.VpBBox = pbbox.Intersect(g.ObjBBox)
 	g.BBoxMu.Unlock()
@@ -478,7 +478,7 @@ func (g *NodeBase) PushXForm() (bool, *girl.State) {
 	// g.SetInvisibleState(nvis) // don't set
 
 	if nvis {
-		fmt.Printf("invis: %s  bb: %v  tvp: %v  vpbb: %v  winbb: %v\n", g.Nm, g.BBox, tvp, mvp.VpBBox, g.WinBBox)
+		// fmt.Printf("invis: %s  bb: %v  tvp: %v  vpbb: %v  winbb: %v\n", g.Nm, g.BBox, tvp, mvp.VpBBox, g.WinBBox)
 		return false, nil
 	}
 

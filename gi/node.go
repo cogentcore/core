@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Node is the interface for all GoGi nodes (2D and 3D), for accessing as NodeBase
@@ -323,7 +324,7 @@ func (nb *NodeBase) PosInWinBBox(pos image.Point) bool {
 func (nb *NodeBase) WinBBoxInBBox(bbox image.Rectangle) bool {
 	nb.BBoxMu.RLock()
 	defer nb.BBoxMu.RUnlock()
-	return nb.WinBBox.In(bbox)
+	return mat32.RectInNotEmpty(nb.WinBBox, bbox)
 }
 
 // AddClass adds a CSS class name -- does proper space separation

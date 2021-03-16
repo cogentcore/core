@@ -101,8 +101,74 @@ func (g *Text) BBox2D() image.Rectangle {
 	}
 }
 
-// todo: write a BBox routine based on following, use for pre-bbox computation
+// TextBBox returns the bounding box in local coordinates
+func (g *Text) TextBBox() mat32.Box2 {
+	if g.Text == "" {
+		return mat32.Box2{}
+	}
+	pc := &g.Pnt
+	girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
+	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, 0, 1)
+	sr := &(g.TextRender.Spans[0])
+	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 
+	pos := g.Pos
+
+	if gist.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorMiddle {
+		pos.X -= g.TextRender.Size.X * .5
+	} else if gist.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorEnd {
+		pos.X -= g.TextRender.Size.X
+	}
+	if len(g.CharPosX) > 0 {
+		mx := ints.MinInt(len(g.CharPosX), len(sr.Render))
+		for i := 0; i < mx; i++ {
+			sr.Render[i].RelPos.X = g.CharPosX[i]
+		}
+	}
+	if len(g.CharPosY) > 0 {
+		mx := ints.MinInt(len(g.CharPosY), len(sr.Render))
+		for i := 0; i < mx; i++ {
+			sr.Render[i].RelPos.Y = g.CharPosY[i]
+		}
+	}
+	if len(g.CharPosDX) > 0 {
+		mx := ints.MinInt(len(g.CharPosDX), len(sr.Render))
+		for i := 0; i < mx; i++ {
+			if i > 0 {
+				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + g.CharPosDX[i]
+			} else {
+				sr.Render[i].RelPos.X = g.CharPosDX[i] // todo: not sure this is right
+			}
+		}
+	}
+	if len(g.CharPosDY) > 0 {
+		mx := ints.MinInt(len(g.CharPosDY), len(sr.Render))
+		for i := 0; i < mx; i++ {
+			if i > 0 {
+				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + g.CharPosDY[i]
+			} else {
+				sr.Render[i].RelPos.Y = g.CharPosDY[i] // todo: not sure this is right
+			}
+		}
+	}
+	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
+
+	// accumulate final bbox
+	sz := mat32.Vec2{}
+	maxh := float32(0)
+	for i := range sr.Render {
+		mxp := sr.Render[i].RelPos.Add(sr.Render[i].Size)
+		sz.SetMax(mxp)
+		maxh = math32.Max(maxh, sr.Render[i].Size.Y)
+	}
+	bb := mat32.Box2{}
+	bb.Min = pos
+	bb.Min.Y -= maxh * .8 // baseline adjust
+	bb.Max = bb.Min.Add(g.TextRender.Size)
+	return bb
+}
+
+// RenderText renders the text in full coords
 func (g *Text) RenderText() {
 	pc := &g.Pnt
 	rs := g.Render()
@@ -195,21 +261,40 @@ func (g *Text) RenderText() {
 	g.ComputeBBoxSVG()
 }
 
+func (g *Text) SVGLocalBBox() mat32.Box2 {
+	return g.TextBBox()
+}
+
 func (g *Text) Render2D() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
-	}
-	pc := &g.Pnt
-	rs := g.Render()
-	rs.PushXForm(pc.XForm)
-	if len(g.Text) > 0 {
-		g.RenderText()
-	}
-	g.Render2DChildren()
 	if g.IsParText() {
-		g.ComputeBBoxSVG() // after kids have rendered
+		if g.Viewport == nil {
+			g.This().(gi.Node2D).Init2D()
+		}
+		pc := &g.Pnt
+		rs := g.Render()
+		if rs == nil {
+			return
+		}
+		rs.PushXFormLock(pc.XForm)
+
+		g.Render2DChildren()
+		g.ComputeBBoxSVG() // must come after render
+
+		rs.PopXFormLock()
+	} else {
+		vis, rs := g.PushXForm()
+		if !vis {
+			return
+		}
+		if len(g.Text) > 0 {
+			g.RenderText()
+		}
+		g.Render2DChildren()
+		if g.IsParText() {
+			g.ComputeBBoxSVG() // after kids have rendered
+		}
+		rs.PopXFormLock()
 	}
-	rs.PopXForm()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node

@@ -42,9 +42,9 @@ func BBoxFromChildren(gii gi.Node2D) image.Rectangle {
 		_, gi := gi.KiToNode2D(kid)
 		if gi != nil {
 			if i == 0 {
-				bb = gi.BBox
+				bb = gi.ObjBBox
 			} else {
-				bb = bb.Union(gi.BBox)
+				bb = bb.Union(gi.ObjBBox)
 			}
 		}
 	}
