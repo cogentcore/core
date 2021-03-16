@@ -81,6 +81,17 @@ func (b Box2) ToRect() image.Rectangle {
 	return rect
 }
 
+// RectInNotEmpty returns true if rect r is contained within b box
+// and r is not empty.
+// The existing image.Rectangle.In method returns true if r is empty,
+// but we typically expect that case to be false (out of range box)
+func RectInNotEmpty(r, b image.Rectangle) bool {
+	if r.Empty() {
+		return false
+	}
+	return r.In(b)
+}
+
 // Canon returns the canonical version of the box.
 // The returned rectangle has minimum and maximum coordinates swapped
 // if necessary so that it is well-formed.
