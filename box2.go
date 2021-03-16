@@ -74,11 +74,24 @@ func (b *Box2) SetFromRect(rect image.Rectangle) {
 
 // ToRect returns image.Rectangle version of this bbox, using floor for min
 // and Ceil for max.
-func (b *Box2) ToRect() image.Rectangle {
+func (b Box2) ToRect() image.Rectangle {
 	rect := image.Rectangle{}
 	rect.Min = b.Min.ToPointFloor()
 	rect.Max = b.Max.ToPointCeil()
 	return rect
+}
+
+// Canon returns the canonical version of the box.
+// The returned rectangle has minimum and maximum coordinates swapped
+// if necessary so that it is well-formed.
+func (b Box2) Canon() Box2 {
+	if b.Max.X < b.Min.X {
+		b.Min.X, b.Max.X = b.Max.X, b.Min.X
+	}
+	if b.Max.Y < b.Min.Y {
+		b.Min.Y, b.Max.Y = b.Max.Y, b.Min.Y
+	}
+	return b
 }
 
 // ExpandByPoint may expand this bounding box to include the specified point.
@@ -103,6 +116,22 @@ func (b *Box2) ExpandByScalar(scalar float32) {
 func (b *Box2) ExpandByBox(box Box2) {
 	b.ExpandByPoint(box.Min)
 	b.ExpandByPoint(box.Max)
+}
+
+// MulMat2 multiplies the specified matrix to the vertices of this bounding box
+// and computes the resulting spanning Box2 of the transformed points
+func (b Box2) MulMat2(m Mat2) Box2 {
+	var cs [4]Vec2
+	cs[0] = m.MulVec2AsPt(Vec2{b.Min.X, b.Min.Y})
+	cs[1] = m.MulVec2AsPt(Vec2{b.Min.X, b.Max.Y})
+	cs[2] = m.MulVec2AsPt(Vec2{b.Max.X, b.Min.Y})
+	cs[3] = m.MulVec2AsPt(Vec2{b.Max.X, b.Max.Y})
+
+	nb := NewEmptyBox2()
+	for i := 0; i < 4; i++ {
+		nb.ExpandByPoint(cs[i])
+	}
+	return nb
 }
 
 // SetFromCenterAndSize set this bounding box from a center point and size.
