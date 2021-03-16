@@ -3,8 +3,8 @@
 package mat32
 
 const (
-	Version = "v1.0.5"
-	GitCommit = "cafc5d7" // the commit JUST BEFORE the release
-	VersionDate = "2021-02-26 13:39" // UTC
+	Version = "v1.0.6"
+	GitCommit = "b4580e3" // the commit JUST BEFORE the release
+	VersionDate = "2021-03-16 06:08" // UTC
 )
 
