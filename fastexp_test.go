@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"math"
 	"testing"
-
-	"github.com/chewxy/math32"
 )
 
 func TestFastExp(t *testing.T) {
@@ -34,8 +32,10 @@ func BenchmarkExpStd64(b *testing.B) {
 	}
 }
 
+/*
 func BenchmarkExp32(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		math32.Exp(float32(n%40 - 20))
 	}
 }
+*/
