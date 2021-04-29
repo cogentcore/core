@@ -43,13 +43,13 @@ func FastExp3(x float32) float32 {
 	// special cases
 	// switch {
 	// these "sanity check" cases cost about 1 ns
-	// case math32.IsNaN(x) || math32.IsInf(x, 1): /
+	// case IsNaN(x) || IsInf(x, 1): /
 	// 	return x
-	// case math32.IsInf(x, -1):
+	// case IsInf(x, -1):
 	// 	return 0
 	// these cases cost about 4+ ns
 	// case x >= Overflow:
-	// 	return math32.Inf(1)
+	// 	return Inf(1)
 	// case x <= Underflow:
 	// 	return 0
 	// case -NearZero < x && x < NearZero:
