@@ -17,9 +17,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/ints"
+	"github.com/goki/mat32"
 )
 
 var WinGeomTrace = false
@@ -345,7 +345,7 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 			}
 			return &wp
 		}
-		dpid := math32.Abs(wdpi - trgdpi)
+		dpid := mat32.Abs(wdpi - trgdpi)
 		if dpid < minDPId {
 			minDPId = dpid
 			closest = &wp

@@ -13,7 +13,6 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
@@ -508,7 +507,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	if sv.Sty.Font.Face == nil {
 		girl.OpenFont(&sv.Sty.Font, &sv.Sty.UnContext)
 	}
-	sv.RowHeight = math32.Max(sv.RowHeight, sv.Sty.Font.Face.Metrics.Height)
+	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Sty.Font.Face.Metrics.Height)
 
 	mvp := sv.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
@@ -520,7 +519,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		if sgHt == 0 {
 			return false
 		}
-		sv.VisRows = int(math32.Floor(sgHt / sv.RowHeight))
+		sv.VisRows = int(mat32.Floor(sgHt / sv.RowHeight))
 	}
 	sv.DispRows = ints.MinInt(sv.SliceSize, sv.VisRows)
 

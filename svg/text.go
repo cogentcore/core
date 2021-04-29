@@ -7,7 +7,6 @@ package svg
 import (
 	"image"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
@@ -159,7 +158,7 @@ func (g *Text) TextBBox() mat32.Box2 {
 	for i := range sr.Render {
 		mxp := sr.Render[i].RelPos.Add(sr.Render[i].Size)
 		sz.SetMax(mxp)
-		maxh = math32.Max(maxh, sr.Render[i].Size.Y)
+		maxh = mat32.Max(maxh, sr.Render[i].Size.Y)
 	}
 	bb := mat32.Box2{}
 	bb.Min = pos
@@ -250,7 +249,7 @@ func (g *Text) RenderText() {
 	for i := range sr.Render {
 		mxp := sr.Render[i].RelPos.Add(sr.Render[i].Size)
 		sz.SetMax(mxp)
-		maxh = math32.Max(maxh, sr.Render[i].Size.Y)
+		maxh = mat32.Max(maxh, sr.Render[i].Size.Y)
 	}
 	g.TextRender.Size = sz
 	g.LastPos = pos

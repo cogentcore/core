@@ -11,7 +11,6 @@
 package gi3d
 
 import (
-	"github.com/chewxy/math32"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 )
@@ -190,9 +189,9 @@ func (ms *MeshBase) AddCylinderSector(height, topRad, botRad float32, radialSegs
 			pos.GetVec3(3*vtxs[1][x+1], &nb)
 		}
 
-		na.Y = math32.Sqrt(na.X*na.X+na.Z*na.Z) * tanTheta
+		na.Y = mat32.Sqrt(na.X*na.X+na.Z*na.Z) * tanTheta
 		na.Normalize()
-		nb.Y = math32.Sqrt(nb.X*nb.X+nb.Z*nb.Z) * tanTheta
+		nb.Y = mat32.Sqrt(nb.X*nb.X+nb.Z*nb.Z) * tanTheta
 		nb.Normalize()
 
 		for y := 0; y < heightSegs; y++ {

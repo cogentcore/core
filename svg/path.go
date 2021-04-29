@@ -12,7 +12,6 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/ki/ki"
@@ -115,7 +114,7 @@ func (g *Path) Render2D() {
 			if idx >= sz-3 { // todo: this is approximate...
 				return false
 			}
-			ang := 0.5 * (math32.Atan2(pt.Y-ptm1.Y, pt.X-ptm1.X) + math32.Atan2(ptm1.Y-ptm2.Y, ptm1.X-ptm2.X))
+			ang := 0.5 * (mat32.Atan2(pt.Y-ptm1.Y, pt.X-ptm1.X) + mat32.Atan2(ptm1.Y-ptm2.Y, ptm1.X-ptm2.X))
 			mrk.RenderMarker(ptm1, ang, g.Pnt.StrokeStyle.Width.Dots)
 			gotidx++
 			return true
@@ -610,7 +609,7 @@ func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
 	gotSt := false
 	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		if gotSt {
-			ang = math32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
+			ang = mat32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
 			return ki.Break
 		}
 		vec = cp
@@ -625,7 +624,7 @@ func PathDataEnd(data []PathData) (vec mat32.Vec2, ang float32) {
 	gotSome := false
 	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		if gotSome {
-			ang = math32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
+			ang = mat32.Atan2(cp.Y-vec.Y, cp.X-vec.X)
 		}
 		vec = cp
 		gotSome = true

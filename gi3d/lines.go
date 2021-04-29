@@ -9,7 +9,6 @@ import (
 	"log"
 	"math"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -253,7 +252,7 @@ func MiterPts(ax, ay, bx, by, cx, cy, w2 float32) mat32.Vec2 {
 
 	dp := ppu.Dot(epv)
 	jang := mat32.Acos(dp)
-	wfact := w2 / math32.Sin(jang)
+	wfact := w2 / mat32.Sin(jang)
 
 	uv := ppu.MulScalar(-wfact)
 	vv := epv.MulScalar(-wfact)
@@ -305,8 +304,8 @@ func (ms *MeshBase) AddLines(points []mat32.Vec3, width mat32.Vec2, closed bool,
 
 		v := ep.Sub(sp)
 		vn := v.Normal()
-		xyang := math32.Atan2(vn.Y, vn.X)
-		xy := mat32.Vec2{wdy * math32.Cos(xyang+pi2), wdy * math32.Sin(xyang+pi2)}
+		xyang := mat32.Atan2(vn.Y, vn.X)
+		xy := mat32.Vec2{wdy * mat32.Cos(xyang+pi2), wdy * mat32.Sin(xyang+pi2)}
 
 		//   sypzm --- eypzm
 		//   / |        / |

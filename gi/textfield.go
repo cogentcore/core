@@ -13,7 +13,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
@@ -907,7 +906,7 @@ func (tf *TextField) ScrollLayoutToCursor() bool {
 		return false
 	}
 	cpos := tf.CharStartPos(tf.CursorPos, false).ToPointFloor()
-	bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.FontHeight))}
+	bbsz := image.Point{int(mat32.Ceil(tf.CursorWidth.Dots)), int(mat32.Ceil(tf.FontHeight))}
 	bbox := image.Rectangle{Min: cpos, Max: cpos.Add(bbsz)}
 	return ly.ScrollToBox(bbox)
 }
@@ -924,7 +923,7 @@ func (tf *TextField) CursorSprite() *Sprite {
 	spnm := fmt.Sprintf("%v-%v", TextFieldSpriteName, tf.FontHeight)
 	sp, ok := win.SpriteByName(spnm)
 	if !ok {
-		bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.FontHeight))}
+		bbsz := image.Point{int(mat32.Ceil(tf.CursorWidth.Dots)), int(mat32.Ceil(tf.FontHeight))}
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
@@ -992,7 +991,7 @@ func (tf *TextField) AutoScroll() {
 	}
 	tf.CursorPos = mat32.ClampInt(tf.CursorPos, 0, sz)
 
-	inc := int(math32.Ceil(.1 * float32(tf.CharWidth)))
+	inc := int(mat32.Ceil(.1 * float32(tf.CharWidth)))
 	inc = ints.MaxInt(4, inc)
 
 	// keep cursor in view with buffer

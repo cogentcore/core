@@ -16,7 +16,6 @@ import (
 	"math/rand"
 
 	"github.com/Knetic/govaluate"
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/svg"
 	"github.com/goki/ki/ki"
@@ -441,10 +440,10 @@ func UpdateMarbles() {
 				yr := ln.Eval(xi + .01) // point to the right of x
 
 				//slp := (yr - yl) / .02
-				angLn := math32.Atan2(yr-yl, 0.02)
+				angLn := mat32.Atan2(yr-yl, 0.02)
 				angN := angLn + math.Pi/2 // + 90 deg
 
-				angI := math32.Atan2(m.Vel.Y, m.Vel.X)
+				angI := mat32.Atan2(m.Vel.Y, m.Vel.X)
 				angII := angI + math.Pi
 
 				angNII := angN - angII
@@ -453,8 +452,8 @@ func UpdateMarbles() {
 				// fmt.Printf("angLn: %v  angN: %v  angI: %v  angII: %v  angNII: %v  angR: %v\n",
 				// 	RadToDeg(angLn), RadToDeg(angN), RadToDeg(angI), RadToDeg(angII), RadToDeg(angNII), RadToDeg(angR))
 
-				nvx := ln.Bounce * (m.Vel.X*math32.Cos(angR) - m.Vel.Y*math32.Sin(angR))
-				nvy := ln.Bounce * (m.Vel.X*math32.Sin(angR) + m.Vel.Y*math32.Cos(angR))
+				nvx := ln.Bounce * (m.Vel.X*mat32.Cos(angR) - m.Vel.Y*mat32.Sin(angR))
+				nvy := ln.Bounce * (m.Vel.X*mat32.Sin(angR) + m.Vel.Y*mat32.Cos(angR))
 
 				m.Vel = mat32.Vec2{nvx, nvy}
 

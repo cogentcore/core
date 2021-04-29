@@ -11,7 +11,6 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
@@ -308,7 +307,7 @@ func (sr *Span) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize int) 
 		rr.Size = mat32.Vec2{a32, fht}
 
 		if r == '\t' {
-			col := int(math32.Ceil(fpos / chsz))
+			col := int(mat32.Ceil(fpos / chsz))
 			curtab := col / tabSize
 			curtab++
 			col = curtab * tabSize
@@ -421,7 +420,7 @@ func (sr *Span) SetRunePosTBRot(letterSpace, wordSpace, chsz float32, tabSize in
 	col := 0 // current column position -- todo: does NOT deal with indent
 	for i, r := range sr.Text {
 		rr := &(sr.Render[i])
-		rr.RotRad = math32.Pi / 2
+		rr.RotRad = mat32.Pi / 2
 		curFace = rr.CurFace(curFace)
 
 		fht := mat32.FromFixed(curFace.Metrics().Height)
@@ -668,8 +667,8 @@ func (sr *Span) RenderBg(rs *State, tpos mat32.Vec2) {
 		tx := mat32.Scale2D(scx, 1).Rotate(rr.RotRad)
 		ll := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, dsc32}))
 		ur := ll.Add(tx.MulVec2AsVec(mat32.Vec2{rr.Size.X, -rr.Size.Y}))
-		if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
-			int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
+		if int(mat32.Floor(ll.X)) > rs.Bounds.Max.X || int(mat32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
+			int(mat32.Ceil(ur.X)) < rs.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
 			if didLast {
 				pc.Fill(rs)
 			}
@@ -721,8 +720,8 @@ func (sr *Span) RenderUnderline(rs *State, tpos mat32.Vec2) {
 		tx := mat32.Scale2D(scx, 1).Rotate(rr.RotRad)
 		ll := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, dsc32}))
 		ur := ll.Add(tx.MulVec2AsVec(mat32.Vec2{rr.Size.X, -rr.Size.Y}))
-		if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
-			int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
+		if int(mat32.Floor(ll.X)) > rs.Bounds.Max.X || int(mat32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
+			int(mat32.Ceil(ur.X)) < rs.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
 			if didLast {
 				pc.Stroke(rs)
 			}
@@ -784,8 +783,8 @@ func (sr *Span) RenderLine(rs *State, tpos mat32.Vec2, deco gist.TextDecorations
 		tx := mat32.Scale2D(scx, 1).Rotate(rr.RotRad)
 		ll := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, dsc32}))
 		ur := ll.Add(tx.MulVec2AsVec(mat32.Vec2{rr.Size.X, -rr.Size.Y}))
-		if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
-			int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
+		if int(mat32.Floor(ll.X)) > rs.Bounds.Max.X || int(mat32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
+			int(mat32.Ceil(ur.X)) < rs.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
 			if didLast {
 				pc.Stroke(rs)
 			}

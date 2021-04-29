@@ -10,7 +10,6 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/sliceclone"
 	"github.com/goki/mat32"
@@ -232,7 +231,7 @@ func (pc *Paint) StrokeWidth(rs *State) float32 {
 		return dw
 	}
 	scx, scy := rs.XForm.ExtractScale()
-	sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
+	sc := 0.5 * (mat32.Abs(scx) + mat32.Abs(scy))
 	lw := mat32.Max(sc*dw, pc.StrokeStyle.MinWidth.Dots)
 	return lw
 }
@@ -504,12 +503,12 @@ func (pc *Paint) DrawEllipticalArc(rs *State, cx, cy, rx, ry, angle1, angle2 flo
 		p2 := float32(i+1) / n
 		a1 := angle1 + (angle2-angle1)*p1
 		a2 := angle1 + (angle2-angle1)*p2
-		x0 := cx + rx*math32.Cos(a1)
-		y0 := cy + ry*math32.Sin(a1)
-		x1 := cx + rx*math32.Cos((a1+a2)/2)
-		y1 := cy + ry*math32.Sin((a1+a2)/2)
-		x2 := cx + rx*math32.Cos(a2)
-		y2 := cy + ry*math32.Sin(a2)
+		x0 := cx + rx*mat32.Cos(a1)
+		y0 := cy + ry*mat32.Sin(a1)
+		x1 := cx + rx*mat32.Cos((a1+a2)/2)
+		y1 := cy + ry*mat32.Sin((a1+a2)/2)
+		x2 := cx + rx*mat32.Cos(a2)
+		y2 := cy + ry*mat32.Sin(a2)
 		ncx := 2*x1 - x0/2 - x2/2
 		ncy := 2*y1 - y0/2 - y2/2
 		if i == 0 && !rs.HasCurrent {
@@ -528,8 +527,8 @@ const MaxDx float32 = math.Pi / 8
 // ellipsePrime gives tangent vectors for parameterized ellipse; a, b, radii,
 // eta parameter, center cx, cy
 func ellipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
-	bCosEta := b * math32.Cos(eta)
-	aSinEta := a * math32.Sin(eta)
+	bCosEta := b * mat32.Cos(eta)
+	aSinEta := a * mat32.Sin(eta)
 	px = -aSinEta*cosTheta - bCosEta*sinTheta
 	py = -aSinEta*sinTheta + bCosEta*cosTheta
 	return
@@ -538,8 +537,8 @@ func ellipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32
 // ellipsePointAt gives points for parameterized ellipse; a, b, radii, eta
 // parameter, center cx, cy
 func ellipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
-	aCosEta := a * math32.Cos(eta)
-	bSinEta := b * math32.Sin(eta)
+	aCosEta := a * mat32.Cos(eta)
+	bSinEta := b * mat32.Sin(eta)
 	px = cx + aCosEta*cosTheta - bSinEta*sinTheta
 	py = cy + aCosEta*sinTheta + bSinEta*cosTheta
 	return
@@ -554,7 +553,7 @@ func ellipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float
 // arbitrary point. The center of the circle is then transformed back to the
 // original coordinates and returned.
 func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32, sweep, largeArc bool) (cx, cy float32) {
-	cos, sin := math32.Cos(rotX), math32.Sin(rotX)
+	cos, sin := mat32.Cos(rotX), mat32.Sin(rotX)
 
 	// Move origin to start point
 	nx, ny := endX-startX, endY-startY
@@ -571,7 +570,7 @@ func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32
 	if *ry**ry < midlenSq {
 		// Requested ellipse does not exist; scale rx, ry to fit. Length of
 		// span is greater than max width of ellipse, must scale *rx, *ry
-		nry := math32.Sqrt(midlenSq)
+		nry := mat32.Sqrt(midlenSq)
 		if *rx == *ry {
 			*rx = nry // prevents roundoff
 		} else {
@@ -579,7 +578,7 @@ func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32
 		}
 		*ry = nry
 	} else {
-		hr = math32.Sqrt(*ry**ry-midlenSq) / math32.Sqrt(midlenSq)
+		hr = mat32.Sqrt(*ry**ry-midlenSq) / mat32.Sqrt(midlenSq)
 	}
 	// Notice that if hr is zero, both answers are the same.
 	if (!sweep && !largeArc) || (sweep && largeArc) {
@@ -602,14 +601,14 @@ func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32
 // for the path drawer
 func (pc *Paint) DrawEllipticalArcPath(rs *State, cx, cy, ocx, ocy, pcx, pcy, rx, ry, angle float32, largeArc, sweep bool) (lx, ly float32) {
 	rotX := angle * math.Pi / 180 // Convert degrees to radians
-	startAngle := math32.Atan2(pcy-cy, pcx-cx) - rotX
-	endAngle := math32.Atan2(ocy-cy, ocx-cx) - rotX
+	startAngle := mat32.Atan2(pcy-cy, pcx-cx) - rotX
+	endAngle := mat32.Atan2(ocy-cy, ocx-cx) - rotX
 	deltaTheta := endAngle - startAngle
-	arcBig := math32.Abs(deltaTheta) > math.Pi
+	arcBig := mat32.Abs(deltaTheta) > math.Pi
 
 	// Approximate ellipse using cubic bezier splines
-	etaStart := math32.Atan2(math32.Sin(startAngle)/ry, math32.Cos(startAngle)/rx)
-	etaEnd := math32.Atan2(math32.Sin(endAngle)/ry, math32.Cos(endAngle)/rx)
+	etaStart := mat32.Atan2(mat32.Sin(startAngle)/ry, mat32.Cos(startAngle)/rx)
+	etaEnd := mat32.Atan2(mat32.Sin(endAngle)/ry, mat32.Cos(endAngle)/rx)
 	deltaEta := etaEnd - etaStart
 	if (arcBig && !largeArc) || (!arcBig && largeArc) { // Go has no boolean XOR
 		if deltaEta < 0 {
@@ -627,16 +626,16 @@ func (pc *Paint) DrawEllipticalArcPath(rs *State, cx, cy, ocx, ocy, pcx, pcy, rx
 	}
 
 	// Round up to determine number of cubic splines to approximate bezier curve
-	segs := int(math32.Abs(deltaEta)/MaxDx) + 1
+	segs := int(mat32.Abs(deltaEta)/MaxDx) + 1
 	dEta := deltaEta / float32(segs) // span of each segment
 	// Approximate the ellipse using a set of cubic bezier curves by the method of
 	// L. Maisonobe, "Drawing an elliptical arc using polylines, quadratic
 	// or cubic Bezier curves", 2003
 	// https://www.spaceroots.org/documents/ellipse/elliptical-arc.pdf
-	tde := math32.Tan(dEta / 2)
-	alpha := math32.Sin(dEta) * (math32.Sqrt(4+3*tde*tde) - 1) / 3 // Math is fun!
+	tde := mat32.Tan(dEta / 2)
+	alpha := mat32.Sin(dEta) * (mat32.Sqrt(4+3*tde*tde) - 1) / 3 // Math is fun!
 	lx, ly = pcx, pcy
-	sinTheta, cosTheta := math32.Sin(rotX), math32.Cos(rotX)
+	sinTheta, cosTheta := mat32.Sin(rotX), mat32.Cos(rotX)
 	ldx, ldy := ellipsePrime(rx, ry, sinTheta, cosTheta, etaStart, cx, cy)
 
 	for i := 1; i <= segs; i++ {
@@ -656,7 +655,7 @@ func (pc *Paint) DrawEllipticalArcPath(rs *State, cx, cy, ocx, ocy, pcx, pcy, rx
 
 func (pc *Paint) DrawEllipse(rs *State, x, y, rx, ry float32) {
 	pc.NewSubPath(rs)
-	pc.DrawEllipticalArc(rs, x, y, rx, ry, 0, 2*math32.Pi)
+	pc.DrawEllipticalArc(rs, x, y, rx, ry, 0, 2*mat32.Pi)
 	pc.ClosePath(rs)
 }
 
@@ -666,20 +665,20 @@ func (pc *Paint) DrawArc(rs *State, x, y, r, angle1, angle2 float32) {
 
 func (pc *Paint) DrawCircle(rs *State, x, y, r float32) {
 	pc.NewSubPath(rs)
-	pc.DrawEllipticalArc(rs, x, y, r, r, 0, 2*math32.Pi)
+	pc.DrawEllipticalArc(rs, x, y, r, r, 0, 2*mat32.Pi)
 	pc.ClosePath(rs)
 }
 
 func (pc *Paint) DrawRegularPolygon(rs *State, n int, x, y, r, rotation float32) {
-	angle := 2 * math32.Pi / float32(n)
-	rotation -= math32.Pi / 2
+	angle := 2 * mat32.Pi / float32(n)
+	rotation -= mat32.Pi / 2
 	if n%2 == 0 {
 		rotation += angle / 2
 	}
 	pc.NewSubPath(rs)
 	for i := 0; i < n; i++ {
 		a := rotation + angle*float32(i)
-		pc.LineTo(rs, x+r*math32.Cos(a), y+r*math32.Sin(a))
+		pc.LineTo(rs, x+r*mat32.Cos(a), y+r*mat32.Sin(a))
 	}
 	pc.ClosePath(rs)
 }

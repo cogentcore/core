@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
+	"github.com/goki/mat32"
 )
 
 //go:generate stringer -type=EventPris
@@ -404,7 +404,7 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 			} else {
 				delayMs := int(now.Sub(em.startDrag.Time()) / time.Millisecond)
 				if delayMs >= DragStartMSec {
-					dst := int(math32.Hypot(float32(em.startDrag.Where.X-me.Pos().X), float32(em.startDrag.Where.Y-me.Pos().Y)))
+					dst := int(mat32.Hypot(float32(em.startDrag.Where.X-me.Pos().X), float32(em.startDrag.Where.Y-me.Pos().Y)))
 					if dst >= DragStartPix {
 						em.dragStarted = true
 						em.startDrag = nil
@@ -419,7 +419,7 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 		} else {
 			delayMs := int(now.Sub(em.startDND.Time()) / time.Millisecond)
 			if delayMs >= DNDStartMSec {
-				dst := int(math32.Hypot(float32(em.startDND.Where.X-me.Pos().X), float32(em.startDND.Where.Y-me.Pos().Y)))
+				dst := int(mat32.Hypot(float32(em.startDND.Where.X-me.Pos().X), float32(em.startDND.Where.Y-me.Pos().Y)))
 				if dst >= DNDStartPix {
 					em.dndStarted = true
 					em.DNDStartEvent(em.startDND)
@@ -444,7 +444,7 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 				em.SendDNDHoverEvent(hoe)
 			})
 		} else {
-			dst := int(math32.Hypot(float32(em.startDNDHover.Where.X-me.Pos().X), float32(em.startDNDHover.Where.Y-me.Pos().Y)))
+			dst := int(mat32.Hypot(float32(em.startDNDHover.Where.X-me.Pos().X), float32(em.startDNDHover.Where.Y-me.Pos().Y)))
 			if dst > HoverMaxPix {
 				em.dndHoverTimer.Stop()
 				em.dndHoverStarted = false
@@ -501,7 +501,7 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 			}
 		})
 	} else {
-		dst := int(math32.Hypot(float32(em.startHover.Where.X-me.Pos().X), float32(em.startHover.Where.Y-me.Pos().Y)))
+		dst := int(mat32.Hypot(float32(em.startHover.Where.X-me.Pos().X), float32(em.startHover.Where.Y-me.Pos().Y)))
 		if dst > HoverMaxPix {
 			em.hoverTimer.Stop()
 			em.hoverStarted = false

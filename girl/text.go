@@ -16,7 +16,6 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
@@ -126,8 +125,8 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 			tx := mat32.Scale2D(scx, 1).Rotate(rr.RotRad)
 			ll := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, dsc32}))
 			ur := ll.Add(tx.MulVec2AsVec(mat32.Vec2{rr.Size.X, -rr.Size.Y}))
-			if int(math32.Floor(ll.X)) > rs.Bounds.Max.X || int(math32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
-				int(math32.Ceil(ur.X)) < rs.Bounds.Min.X || int(math32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
+			if int(mat32.Floor(ll.X)) > rs.Bounds.Max.X || int(mat32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
+				int(mat32.Ceil(ur.X)) < rs.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
 				continue
 			}
 			d.Face = curFace
@@ -218,7 +217,7 @@ func (tr *Text) SetStringRot90(str string, fontSty *gist.Font, ctxt *units.Conte
 	}
 	tr.Links = nil
 	sr := &(tr.Spans[0])
-	rot := math32.Pi / 2
+	rot := float32(mat32.Pi / 2)
 	sr.SetString(str, fontSty, ctxt, noBG, rot, scalex)
 	sr.SetRunePosTBRot(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()

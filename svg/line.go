@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -67,11 +66,11 @@ func (g *Line) Render2D() {
 	g.ComputeBBoxSVG()
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
-		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
+		ang := mat32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(g.Start, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
 	if mrk := MarkerByName(g, "marker-end"); mrk != nil {
-		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
+		ang := mat32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(g.End, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
 	rs.Unlock()

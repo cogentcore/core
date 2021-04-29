@@ -12,7 +12,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
@@ -2157,7 +2156,7 @@ func (tv *TreeView) Size2D(iter int) {
 	}
 	tv.SizeFromParts(iter) // get our size from parts
 	tv.WidgetSize = tv.LayState.Alloc.Size
-	h := math32.Ceil(tv.WidgetSize.Y)
+	h := mat32.Ceil(tv.WidgetSize.Y)
 	w := tv.WidgetSize.X
 
 	if !tv.IsClosed() {
@@ -2167,7 +2166,7 @@ func (tv *TreeView) Size2D(iter int) {
 			if gis == nil || gis.This() == nil {
 				continue
 			}
-			h += math32.Ceil(gis.LayState.Alloc.Size.Y)
+			h += mat32.Ceil(gis.LayState.Alloc.Size.Y)
 			w = mat32.Max(w, tv.Indent.Dots+gis.LayState.Alloc.Size.X)
 		}
 	}
@@ -2210,7 +2209,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 
 	tv.Layout2DParts(parBBox, iter) // use OUR version
-	h := math32.Ceil(tv.WidgetSize.Y)
+	h := mat32.Ceil(tv.WidgetSize.Y)
 	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
 			if kid == nil || kid.This() == nil {
@@ -2222,7 +2221,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 			}
 			ni.LayState.Alloc.PosRel.Y = h
 			ni.LayState.Alloc.PosRel.X = tv.Indent.Dots
-			h += math32.Ceil(ni.LayState.Alloc.Size.Y)
+			h += mat32.Ceil(ni.LayState.Alloc.Size.Y)
 		}
 	}
 	return tv.Layout2DChildren(iter)

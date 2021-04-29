@@ -7,7 +7,6 @@ package gi3d
 import (
 	"math"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 )
@@ -81,9 +80,9 @@ func (ms *MeshBase) AddSphereSector(radius float32, widthSegs, heightSegs int, a
 		v := float32(y) / float32(heightSegs)
 		for x := 0; x <= widthSegs; x++ {
 			u := float32(x) / float32(widthSegs)
-			px := -radius * math32.Cos(angStRad+u*angLenRad) * math32.Sin(elevStRad+v*elevLenRad)
-			py := radius * math32.Cos(elevStRad+v*elevLenRad)
-			pz := radius * math32.Sin(angStRad+u*angLenRad) * math32.Sin(elevStRad+v*elevLenRad)
+			px := -radius * mat32.Cos(angStRad+u*angLenRad) * mat32.Sin(elevStRad+v*elevLenRad)
+			py := radius * mat32.Cos(elevStRad+v*elevLenRad)
+			pz := radius * mat32.Sin(angStRad+u*angLenRad) * mat32.Sin(elevStRad+v*elevLenRad)
 			pt.Set(px, py, pz)
 			pt.SetAdd(offset)
 			norm.Set(px, py, pz)

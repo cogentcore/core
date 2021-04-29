@@ -5,7 +5,6 @@
 package gist
 
 import (
-	"github.com/chewxy/math32"
 	"github.com/goki/mat32"
 	"golang.org/x/image/font"
 )
@@ -41,7 +40,7 @@ type FontMetrics struct {
 func (fs *FontFace) ComputeMetrics() {
 	// apd := fs.Face.Metrics().Ascent + fs.Face.Metrics().Descent
 	fmet := fs.Face.Metrics()
-	fs.Metrics.Height = math32.Ceil(mat32.FromFixed(fmet.Height))
+	fs.Metrics.Height = mat32.Ceil(mat32.FromFixed(fmet.Height))
 	fs.Metrics.Em = float32(fs.Size) // conventional definition
 	xb, _, ok := fs.Face.GlyphBounds('x')
 	if ok {

@@ -12,7 +12,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/sliceclone"
@@ -767,8 +766,8 @@ func hueToRGBf32(p, q, t float32) float32 {
 
 // RGBtoHSLf32 converts RGB 0..1 values (non alpha-premultiplied) to HSL -- based on https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion, https://www.w3.org/TR/css-color-3/ and github.com/lucasb-eyer/go-colorful
 func RGBtoHSLf32(r, g, b float32) (h, s, l float32) {
-	min := math32.Min(math32.Min(r, g), b)
-	max := math32.Max(math32.Max(r, g), b)
+	min := mat32.Min(mat32.Min(r, g), b)
+	max := mat32.Max(mat32.Max(r, g), b)
 
 	l = (max + min) / 2.0
 

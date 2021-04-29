@@ -7,7 +7,6 @@ package gi3d
 import (
 	"math"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 )
@@ -69,13 +68,13 @@ func (ms *MeshBase) AddTorusSector(radius, tubeRadius float32, radialSegs, tubeS
 			u := angStRad + float32(i)/float32(tubeSegs)*angLenRad
 			v := float32(j) / float32(radialSegs) * math.Pi * 2
 
-			center.X = radius * math32.Cos(u)
-			center.Y = radius * math32.Sin(u)
+			center.X = radius * mat32.Cos(u)
+			center.Y = radius * mat32.Sin(u)
 
 			var pt mat32.Vec3
-			pt.X = (radius + tubeRadius*math32.Cos(v)) * math32.Cos(u)
-			pt.Y = (radius + tubeRadius*math32.Cos(v)) * math32.Sin(u)
-			pt.Z = tubeRadius * math32.Sin(v)
+			pt.X = (radius + tubeRadius*mat32.Cos(v)) * mat32.Cos(u)
+			pt.Y = (radius + tubeRadius*mat32.Cos(v)) * mat32.Sin(u)
+			pt.Z = tubeRadius * mat32.Sin(v)
 			pt.SetAdd(offset)
 			pos.AppendVec3(pt)
 			bb.ExpandByPoint(pt)

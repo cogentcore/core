@@ -10,7 +10,6 @@ import (
 
 	"image/color"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
@@ -145,7 +144,7 @@ func (cs *ColorSpec) SetGradientPoints(bbox mat32.Box2) {
 	cs.Gradient.Units = rasterx.UserSpaceOnUse
 	if cs.Gradient.IsRadial {
 		ctr := bbox.Min.Add(bbox.Max).MulScalar(.5)
-		rad := 0.5 * math32.Max(bbox.Max.X-bbox.Min.X, bbox.Max.Y-bbox.Min.Y)
+		rad := 0.5 * mat32.Max(bbox.Max.X-bbox.Min.X, bbox.Max.Y-bbox.Min.Y)
 		cs.Gradient.Points = [5]float64{float64(ctr.X), float64(ctr.Y), float64(ctr.X), float64(ctr.Y), float64(rad)}
 	} else {
 		cs.Gradient.Points = [5]float64{float64(bbox.Min.X), float64(bbox.Min.Y), float64(bbox.Max.X), float64(bbox.Min.Y), 0} // linear R-L

@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -268,7 +267,7 @@ func GatherSizesGrid(ly *Layout) {
 	}
 
 	if cols == 0 {
-		cols = int(math32.Sqrt(float32(sz))) // whatever -- not well defined
+		cols = int(mat32.Sqrt(float32(sz))) // whatever -- not well defined
 	}
 	if rows == 0 {
 		rows = sz / cols

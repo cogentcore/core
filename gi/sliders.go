@@ -9,7 +9,6 @@ import (
 	"image"
 	"sync"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
@@ -284,7 +283,7 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 		sb.SnapValue()
 		sb.UpdatePosFromValue()
 	}
-	if sb.Tracking && math32.Abs(sb.Value-sb.EmitValue) > sb.TrackThr {
+	if sb.Tracking && mat32.Abs(sb.Value-sb.EmitValue) > sb.TrackThr {
 		sb.EmitNewValue()
 	}
 	sb.UpdateEnd(updt)

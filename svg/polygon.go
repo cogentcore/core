@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -45,13 +44,13 @@ func (g *Polygon) Render2D() {
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
 		ptn := g.Points[1]
-		ang := math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
+		ang := mat32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
 		mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
 	if mrk := MarkerByName(g, "marker-end"); mrk != nil {
 		pt := g.Points[sz-1]
 		ptp := g.Points[sz-2]
-		ang := math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X)
+		ang := mat32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X)
 		mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
 	if mrk := MarkerByName(g, "marker-mid"); mrk != nil {
@@ -59,7 +58,7 @@ func (g *Polygon) Render2D() {
 			pt := g.Points[i]
 			ptp := g.Points[i-1]
 			ptn := g.Points[i+1]
-			ang := 0.5 * (math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X) + math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X))
+			ang := 0.5 * (mat32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X) + mat32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X))
 			mrk.RenderMarker(pt, ang, g.Pnt.StrokeStyle.Width.Dots)
 		}
 	}

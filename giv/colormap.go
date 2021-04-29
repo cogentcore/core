@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
@@ -216,7 +215,7 @@ func (cv *ColorMapView) RenderColorMap() {
 
 	if cv.Map.Indexed {
 		nc := len(cv.Map.Colors)
-		inc := math32.Ceil(lsz / float32(nc))
+		inc := mat32.Ceil(lsz / float32(nc))
 		sr.SetDim(cv.Orient, inc)
 		for i := 0; i < nc; i++ {
 			clr := cv.Map.MapIndex(i)
@@ -225,7 +224,7 @@ func (cv *ColorMapView) RenderColorMap() {
 			pc.FillBoxColor(rs, pr, sr, clr)
 		}
 	} else {
-		inc := math32.Ceil(lsz / 100)
+		inc := mat32.Ceil(lsz / 100)
 		if inc < 2 {
 			inc = 2
 		}
