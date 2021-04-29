@@ -17,7 +17,6 @@ import (
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/cursor"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
@@ -3022,7 +3021,7 @@ func (tv *TextView) CursorSprite() *gi.Sprite {
 	spnm := fmt.Sprintf("%v-%v", TextViewSpriteName, tv.FontHeight)
 	sp, ok := win.SpriteByName(spnm)
 	if !ok {
-		bbsz := image.Point{int(math32.Ceil(tv.CursorWidth.Dots)), int(math32.Ceil(tv.FontHeight))}
+		bbsz := image.Point{int(mat32.Ceil(tv.CursorWidth.Dots)), int(mat32.Ceil(tv.FontHeight))}
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
@@ -3076,11 +3075,11 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	lstdp := 0
 	for ln := stln; ln <= edln; ln++ {
 		lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
-		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+		led := lst + mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+		if int(mat32.Ceil(led)) < tv.VpBBox.Min.Y {
 			continue
 		}
-		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+		if int(mat32.Floor(lst)) > tv.VpBBox.Max.Y {
 			continue
 		}
 		if ln >= len(tv.Buf.HiTags) { // may be out of sync
@@ -3193,7 +3192,7 @@ func (tv *TextView) RenderRegionBoxSty(reg TextRegion, sty *gi.Style, bgclr *gi.
 	spos := tv.CharStartPos(st)
 	epos := tv.CharStartPos(ed)
 	epos.Y += tv.LineHeight
-	if int(math32.Ceil(epos.Y)) < tv.VpBBox.Min.Y || int(math32.Floor(spos.Y)) > tv.VpBBox.Max.Y {
+	if int(mat32.Ceil(epos.Y)) < tv.VpBBox.Min.Y || int(mat32.Floor(spos.Y)) > tv.VpBBox.Max.Y {
 		return
 	}
 
@@ -3238,7 +3237,7 @@ func (tv *TextView) RenderRegionToEnd(st TextPos, sty *gi.Style, bgclr *gi.Color
 	epos := spos
 	epos.Y += tv.LineHeight
 	epos.X = float32(tv.VpBBox.Max.X)
-	if int(math32.Ceil(epos.Y)) < tv.VpBBox.Min.Y || int(math32.Floor(spos.Y)) > tv.VpBBox.Max.Y {
+	if int(mat32.Ceil(epos.Y)) < tv.VpBBox.Min.Y || int(mat32.Floor(spos.Y)) > tv.VpBBox.Max.Y {
 		return
 	}
 
@@ -3271,10 +3270,10 @@ func (tv *TextView) VisSizes() {
 		tv.VisSize.Y = 40
 		tv.VisSize.X = 80
 	} else {
-		tv.VisSize.Y = int(math32.Floor(float32(sz.Y) / tv.LineHeight))
-		tv.VisSize.X = int(math32.Floor(float32(sz.X) / sty.Font.Face.Metrics.Ch))
+		tv.VisSize.Y = int(mat32.Floor(float32(sz.Y) / tv.LineHeight))
+		tv.VisSize.X = int(mat32.Floor(float32(sz.X) / sty.Font.Face.Metrics.Ch))
 	}
-	tv.LineNoDigs = ints.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
+	tv.LineNoDigs = ints.MaxInt(1+int(mat32.Log10(float32(tv.NLines))), 3)
 	if tv.Buf != nil && tv.Buf.Opts.LineNos {
 		tv.SetFlag(int(TextViewHasLineNos))
 		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc // space for icon
@@ -3321,11 +3320,11 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	edln := -1
 	for ln := 0; ln < tv.NLines; ln++ {
 		lst := pos.Y + tv.Offs[ln]
-		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+		led := lst + mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+		if int(mat32.Ceil(led)) < tv.VpBBox.Min.Y {
 			continue
 		}
-		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+		if int(mat32.Floor(lst)) > tv.VpBBox.Max.Y {
 			continue
 		}
 		if stln < 0 {
@@ -3473,11 +3472,11 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	visEd := -1
 	for ln := st; ln <= ed; ln++ {
 		lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
-		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+		led := lst + mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+		if int(mat32.Ceil(led)) < tv.VpBBox.Min.Y {
 			continue
 		}
-		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+		if int(mat32.Floor(lst)) > tv.VpBBox.Max.Y {
 			continue
 		}
 		lp := pos
@@ -3552,7 +3551,7 @@ func (tv *TextView) FirstVisibleLine(stln int) int {
 		}
 		for ln := stln; ln < tv.NLines; ln++ {
 			cpos := tv.CharStartPos(TextPos{Ln: ln})
-			if int(math32.Floor(cpos.Y)) >= tv.VpBBox.Min.Y { // top definitely on screen
+			if int(mat32.Floor(cpos.Y)) >= tv.VpBBox.Min.Y { // top definitely on screen
 				stln = ln
 				break
 			}
@@ -3561,7 +3560,7 @@ func (tv *TextView) FirstVisibleLine(stln int) int {
 	lastln := stln
 	for ln := stln - 1; ln >= 0; ln-- {
 		cpos := tv.CharStartPos(TextPos{Ln: ln})
-		if int(math32.Ceil(cpos.Y)) < tv.VpBBox.Min.Y { // top just offscreen
+		if int(mat32.Ceil(cpos.Y)) < tv.VpBBox.Min.Y { // top just offscreen
 			break
 		}
 		lastln = ln
@@ -3576,7 +3575,7 @@ func (tv *TextView) LastVisibleLine(stln int) int {
 	for ln := stln + 1; ln < tv.NLines; ln++ {
 		pos := TextPos{Ln: ln}
 		cpos := tv.CharStartPos(pos)
-		if int(math32.Floor(cpos.Y)) > tv.VpBBox.Max.Y { // just offscreen
+		if int(mat32.Floor(cpos.Y)) > tv.VpBBox.Max.Y { // just offscreen
 			break
 		}
 		lastln = ln
@@ -3596,7 +3595,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	stln := tv.FirstVisibleLine(0)
 	cln := stln
 	fls := tv.CharStartPos(TextPos{Ln: stln}).Y - yoff
-	if pt.Y < int(math32.Floor(fls)) {
+	if pt.Y < int(mat32.Floor(fls)) {
 		cln = stln
 	} else if pt.Y > tv.WinBBox.Max.Y {
 		cln = tv.NLines - 1
@@ -3605,8 +3604,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 		for ln := stln; ln < tv.NLines; ln++ {
 			ls := tv.CharStartPos(TextPos{Ln: ln}).Y - yoff
 			es := ls
-			es += math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-			if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
+			es += mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+			if pt.Y >= int(mat32.Floor(ls)) && pt.Y < int(mat32.Ceil(es)) {
 				got = true
 				cln = ln
 				break
@@ -3651,8 +3650,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	// fmt.Printf("sc: %v  rsz: %v\n", sc, rsz)
 
 	c, _ := tv.Renders[cln].SpanPosToRuneIdx(si, rsz-1) // end
-	rsp := math32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
-	rep := math32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+	rsp := mat32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+	rep := mat32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
 	if int(rep) < pt.X { // end of line
 		if si == nspan-1 {
 			c++
@@ -3665,8 +3664,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	if ri < rsz {
 		for rii := ri; rii < rsz; rii++ {
 			c, _ := tv.Renders[cln].SpanPosToRuneIdx(si, rii)
-			rsp = math32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
-			rep = math32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+			rsp = mat32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+			rep = mat32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
 			// fmt.Printf("trying c: %v for pt: %v xoff: %v rsp: %v, rep: %v\n", c, pt, xoff, rsp, rep)
 			if pt.X >= int(rsp) && pt.X < int(rep) {
 				cch = c
@@ -3687,8 +3686,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 		// fmt.Printf("too big: %v\n", ri)
 		for rii := ri; rii >= 0; rii-- {
 			c, _ := tv.Renders[cln].SpanPosToRuneIdx(si, rii)
-			rsp := math32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
-			rep := math32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+			rsp := mat32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+			rep := mat32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
 			// fmt.Printf("too big: trying c: %v for pt: %v rsp: %v, rep: %v\n", c, pt, rsp, rep)
 			if pt.X >= int(rsp) && pt.X < int(rep) {
 				got = true
