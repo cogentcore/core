@@ -446,6 +446,9 @@ func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 		if Render2DTrace {
 			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.Path(), wb.VpBBox)
 		}
+		// if ki.TypeEmbeds(wb.This(), KiT_Frame) || strings.Contains(ki.Type(wb.This()).String(), "TextView") {
+		// 	fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.Path(), wb.VpBBox)
+		// }
 		wb.ClearFullReRender()
 		wb.ReRender2DTree()
 		return true

@@ -144,6 +144,28 @@ func (tv *TabView) AddNewTab(typ reflect.Type, label string) Node2D {
 	return widg
 }
 
+// AddNewTabLayout adds a new widget as a new tab of given widget type,
+// with given tab label, and returns the new widget.
+// A Layout is added first and the widget is added to that layout.
+// The Layout has "-lay" suffix added to name.
+func (tv *TabView) AddNewTabLayout(typ reflect.Type, label string) (Node2D, *Layout) {
+	ly := tv.AddNewTab(KiT_Layout, label).(*Layout)
+	ly.SetName(label + "-lay")
+	widg := ly.AddNewChild(typ, label).(Node2D)
+	return widg, ly
+}
+
+// AddNewTabFrame adds a new widget as a new tab of given widget type,
+// with given tab label, and returns the new widget.
+// A Frame is added first and the widget is added to that Frame.
+// The Frame has "-frame" suffix added to name.
+func (tv *TabView) AddNewTabFrame(typ reflect.Type, label string) (Node2D, *Frame) {
+	fr := tv.AddNewTab(KiT_Frame, label).(*Frame)
+	fr.SetName(label + "-frame")
+	widg := fr.AddNewChild(typ, label).(Node2D)
+	return widg, fr
+}
+
 // AddNewTabAction adds a new widget as a new tab of given widget type, with given
 // tab label, and returns the new widget -- emits TabAdded signal
 func (tv *TabView) AddNewTabAction(typ reflect.Type, label string) Node2D {

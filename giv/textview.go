@@ -90,6 +90,16 @@ func AddNewTextView(parent ki.Ki, name string) *TextView {
 	return parent.AddNewChild(KiT_TextView, name).(*TextView)
 }
 
+// AddNewTextViewLayout adds a new layout with textview
+// to given parent node, with given name.  Layout adds "-lay" suffix.
+// Textview should always have a parent Layout to manage
+// the scrollbars.
+func AddNewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
+	ly := parent.AddNewChild(gi.KiT_Layout, name+"-lay").(*gi.Layout)
+	tv := AddNewTextView(ly, name)
+	return tv, ly
+}
+
 func (tv *TextView) Disconnect() {
 	tv.WidgetBase.Disconnect()
 	tv.TextViewSig.DisconnectAll()
@@ -388,17 +398,15 @@ func (tv *TextView) LinesDeleted(tbe *textbuf.Edit) {
 // TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
 func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data interface{}) {
 	tv := rvwki.Embed(KiT_TextView).(*TextView)
-	if !tv.This().(gi.Node2D).IsVisible() {
-		return
-	}
 	switch TextBufSignals(sig) {
 	case TextBufDone:
 	case TextBufNew:
 		tv.ResetState()
+		tv.SetNeedsRefresh() // in case not visible
 		tv.Refresh()
 		tv.SetCursorShow(tv.CursorPos)
 	case TextBufInsert:
-		if tv.Renders == nil { // not init yet
+		if tv.Renders == nil || !tv.This().(gi.Node2D).IsVisible() {
 			return
 		}
 		tbe := data.(*textbuf.Edit)
@@ -417,7 +425,7 @@ func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data interface{}) 
 			}
 		}
 	case TextBufDelete:
-		if tv.Renders == nil { // not init yet
+		if tv.Renders == nil || !tv.This().(gi.Node2D).IsVisible() {
 			return
 		}
 		tbe := data.(*textbuf.Edit)
@@ -4758,7 +4766,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 	tv.Layout2DChildren(iter)
 	if tv.ParentWindow() != nil &&
-		(tv.LinesSize == image.ZP || gist.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() ||
+		(tv.LinesSize == image.ZP || gist.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() || tv.NeedsRefresh() ||
 			tv.NLines != tv.Buf.NumLines()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo
@@ -4770,12 +4778,18 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 // Render2D does some preliminary work and then calls render on children
 func (tv *TextView) Render2D() {
 	// fmt.Printf("tv render: %v\n", tv.Nm)
+	if tv.NeedsFullReRender() {
+		tv.SetNeedsRefresh()
+	}
 	if tv.FullReRenderIfNeeded() {
 		return
 	}
 
-	if tv.Buf != nil && tv.NLines != tv.Buf.NumLines() {
+	if tv.Buf != nil && (tv.NLines != tv.Buf.NumLines() || tv.NeedsRefresh()) {
 		tv.LayoutAllLines(false)
+		if tv.NeedsRefresh() {
+			tv.ClearNeedsRefresh()
+		}
 	}
 
 	tv.VisSizes()

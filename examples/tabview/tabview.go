@@ -8,6 +8,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/giv"
 )
 
 func main() {
@@ -37,6 +38,14 @@ func mainrun() {
 	lbl2 := tv.AddNewTab(gi.KiT_Label, "And this Label2").(*gi.Label)
 	lbl2.SetText("this is the contents of the second tab")
 	lbl2.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
+
+	tv1i, tv1ly := tv.AddNewTabLayout(giv.KiT_TextView, "TextView1")
+	tv1ly.SetStretchMax()
+	tv1 := tv1i.(*giv.TextView)
+	tb1 := &giv.TextBuf{}
+	tb1.InitName(tb1, "tb1")
+	tv1.SetBuf(tb1)
+	tb1.SetText([]byte("TextView1 text"))
 
 	tv.SelectTabIndex(0)
 
