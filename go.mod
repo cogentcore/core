@@ -28,10 +28,10 @@ require (
 	github.com/jinzhu/copier v0.3.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/srwiley/oksvg v0.0.0-20210209000435-a757b9cbd472 // indirect
-	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
+	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
 	github.com/srwiley/scanFT v0.0.0-20190309001647-3267585b8d6d // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
-	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
+	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
 	golang.org/x/sys v0.0.0-20210426230700-d19ff857e887 // indirect
