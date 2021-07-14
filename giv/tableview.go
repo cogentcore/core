@@ -257,6 +257,15 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 // ConfigSliceGrid configures the SliceGrid for the current slice
 // this is only called by global Config and updates are guarded by that
 func (tv *TableView) ConfigSliceGrid() {
+	sg := tv.SliceFrame()
+	updt := sg.UpdateStart()
+	defer sg.UpdateEnd(updt)
+
+	sgf := tv.This().(SliceViewer).SliceGrid()
+	if sgf != nil {
+		sgf.DeleteChildren(ki.DestroyKids)
+	}
+
 	if kit.IfaceIsNil(tv.Slice) {
 		return
 	}
@@ -269,10 +278,6 @@ func (tv *TableView) ConfigSliceGrid() {
 	}
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
-
-	sg := tv.SliceFrame()
-	updt := sg.UpdateStart()
-	defer sg.UpdateEnd(updt)
 
 	sg.Lay = gi.LayoutVert
 	sg.SetMinPrefWidth(units.NewCh(20))
@@ -301,7 +306,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	gconfig.Add(gi.KiT_ScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
 
-	sgf := tv.SliceGrid()
+	sgf = tv.This().(SliceViewer).SliceGrid()
 	sgf.Lay = gi.LayoutGrid
 	sgf.Stripes = gi.RowStripes
 	sgf.SetMinPrefHeight(units.NewEm(6))
@@ -329,7 +334,6 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	// at this point, we make one dummy row to get size of widgets
 
-	sgf.DeleteChildren(ki.DestroyKids)
 	sgf.Kids = make(ki.Slice, nWidgPerRow)
 
 	itxt := fmt.Sprintf("%05d", 0)
@@ -417,16 +421,22 @@ func (tv *TableView) ConfigSliceGrid() {
 // LayoutSliceGrid does the proper layout of slice grid depending on allocated size
 // returns true if UpdateSliceGrid should be called after this
 func (tv *TableView) LayoutSliceGrid() bool {
-	sg := tv.SliceGrid()
-	if kit.IfaceIsNil(tv.Slice) {
-		if sg != nil {
-			sg.DeleteChildren(ki.DestroyKids)
-		}
-		return false
-	}
+	sg := tv.This().(SliceViewer).SliceGrid()
 	if sg == nil {
 		return false
 	}
+
+	updt := sg.UpdateStart()
+	defer sg.UpdateEnd(updt)
+
+	if kit.IfaceIsNil(tv.Slice) {
+		sg.DeleteChildren(ki.DestroyKids)
+		return false
+	}
+
+	tv.ViewMuLock()
+	defer tv.ViewMuUnlock()
+
 	sz := tv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
 		sg.DeleteChildren(ki.DestroyKids)
@@ -458,8 +468,6 @@ func (tv *TableView) LayoutSliceGrid() bool {
 
 	nWidg := nWidgPerRow * tv.DispRows
 
-	updt := sg.UpdateStart()
-	defer sg.UpdateEnd(updt)
 	if tv.Values == nil || sg.NumChildren() != nWidg {
 		sg.DeleteChildren(ki.DestroyKids)
 
@@ -508,18 +516,10 @@ func (tv *TableView) LayoutHeader() {
 
 // UpdateSliceGrid updates grid display -- robust to any time calling
 func (tv *TableView) UpdateSliceGrid() {
-	if kit.IfaceIsNil(tv.Slice) {
+	sg := tv.This().(SliceViewer).SliceGrid()
+	if sg == nil {
 		return
 	}
-	sz := tv.This().(SliceViewer).UpdtSliceSize()
-	if sz == 0 {
-		return
-	}
-	sg := tv.SliceGrid()
-	tv.DispRows = ints.MinInt(tv.SliceSize, tv.VisRows)
-
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	nWidg := nWidgPerRow * tv.DispRows
 
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
@@ -527,23 +527,35 @@ func (tv *TableView) UpdateSliceGrid() {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
+	if kit.IfaceIsNil(tv.Slice) {
+		sg.DeleteChildren(ki.DestroyKids)
+		return
+	}
+
+	tv.ViewMuLock()
+	defer tv.ViewMuUnlock()
+
+	sz := tv.This().(SliceViewer).UpdtSliceSize()
+	if sz == 0 {
+		sg.DeleteChildren(ki.DestroyKids)
+		return
+	}
+	tv.DispRows = ints.MinInt(tv.SliceSize, tv.VisRows)
+
+	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	nWidg := nWidgPerRow * tv.DispRows
+
 	if tv.Values == nil || sg.NumChildren() != nWidg { // shouldn't happen..
+		tv.ViewMuUnlock()
 		tv.LayoutSliceGrid()
+		tv.ViewMuLock()
 		nWidg = nWidgPerRow * tv.DispRows
 	}
 	if sg.NumChildren() != nWidg || sg.NumChildren() == 0 {
 		return
 	}
 
-	if sz > tv.DispRows {
-		sb := tv.ScrollBar()
-		tv.StartIdx = int(sb.Value)
-		lastSt := sz - tv.DispRows
-		tv.StartIdx = ints.MinInt(lastSt, tv.StartIdx)
-		tv.StartIdx = ints.MaxInt(0, tv.StartIdx)
-	} else {
-		tv.StartIdx = 0
-	}
+	tv.UpdateStartIdx()
 
 	for i := 0; i < tv.DispRows; i++ {
 		ridx := i * nWidgPerRow

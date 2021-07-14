@@ -64,6 +64,11 @@ type SliceViewer interface {
 	// UpdateSliceGrid updates grid display -- robust to any time calling
 	UpdateSliceGrid()
 
+	// SliceGridNeedsUpdate returns true when slice grid needs to be updated.
+	// this should be true if the underlying size has changed, or other
+	// indication that the data might have changed.
+	SliceGridNeedsUpdate() bool
+
 	// StyleRow calls a custom style function on given row (and field)
 	StyleRow(svnp reflect.Value, widg gi.Node2D, idx, fidx int, vv ValueView)
 
@@ -210,6 +215,9 @@ func (sv *SliceViewBase) SetSlice(sl interface{}) {
 
 // Update is the high-level update display call -- robust to any changes
 func (sv *SliceViewBase) Update() {
+	if !sv.This().(gi.Node2D).IsVisible() {
+		return
+	}
 	wupdt := sv.TopUpdateStart()
 	defer sv.TopUpdateEnd(wupdt)
 
@@ -334,6 +342,15 @@ func (sv *SliceViewBase) UpdtSliceSize() int {
 	return sz
 }
 
+// SliceGridNeedsUpdate returns true when slice grid needs to be updated.
+// this should be true if the underlying size has changed, or other
+// indication that the data might have changed.
+func (sv *SliceViewBase) SliceGridNeedsUpdate() bool {
+	csz := sv.SliceSize
+	nsz := sv.This().(SliceViewer).UpdtSliceSize()
+	return csz != nsz
+}
+
 // ViewMuLock locks the ViewMu if non-nil
 func (sv *SliceViewBase) ViewMuLock() {
 	if sv.ViewMu == nil {
@@ -445,10 +462,23 @@ func (sv *SliceViewBase) ConfigScroll() {
 		}
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 		wupdt := sv.TopUpdateStart()
+		svv.StartIdx = int(sb.Value)
 		svv.This().(SliceViewer).UpdateSliceGrid()
 		svv.ViewportSafe().ReRender2DNode(svv.This().(gi.Node2D))
 		svv.TopUpdateEnd(wupdt)
 	})
+}
+
+// UpdateStartIdx updates StartIdx to fit current view
+func (sv *SliceViewBase) UpdateStartIdx() {
+	sz := sv.This().(SliceViewer).UpdtSliceSize()
+	if sz > sv.DispRows {
+		lastSt := sz - sv.DispRows
+		sv.StartIdx = ints.MinInt(lastSt, sv.StartIdx)
+		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
+	} else {
+		sv.StartIdx = 0
+	}
 }
 
 // UpdateScroll updates grid scrollbar based on display
@@ -486,14 +516,22 @@ func (sv *SliceViewBase) AvailHeight() float32 {
 // LayoutSliceGrid does the proper layout of slice grid depending on allocated size
 // returns true if UpdateSliceGrid should be called after this
 func (sv *SliceViewBase) LayoutSliceGrid() bool {
-	sv.ViewMuLock()
-	defer sv.ViewMuUnlock()
-
 	sg := sv.This().(SliceViewer).SliceGrid()
+	if sg == nil {
+		return false
+	}
+
+	updt := sg.UpdateStart()
+	defer sg.UpdateEnd(updt)
+
 	if kit.IfaceIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
 		return false
 	}
+
+	sv.ViewMuLock()
+	defer sv.ViewMuUnlock()
+
 	sz := sv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
 		sg.DeleteChildren(ki.DestroyKids)
@@ -525,8 +563,6 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 
 	nWidg := nWidgPerRow * sv.DispRows
 
-	updt := sg.UpdateStart()
-	defer sg.UpdateEnd(updt)
 	if sv.Values == nil || sg.NumChildren() != nWidg {
 		sg.DeleteChildren(ki.DestroyKids)
 
@@ -547,27 +583,33 @@ func (sv *SliceViewBase) SliceGridNeedsLayout() bool {
 
 // UpdateSliceGrid updates grid display -- robust to any time calling
 func (sv *SliceViewBase) UpdateSliceGrid() {
-	if kit.IfaceIsNil(sv.Slice) {
-		return
-	}
-	sv.ViewMuLock()
-	defer sv.ViewMuUnlock()
-
-	sz := sv.This().(SliceViewer).UpdtSliceSize()
-	if sz == 0 {
-		return
-	}
 	sg := sv.This().(SliceViewer).SliceGrid()
-	sv.DispRows = ints.MinInt(sv.SliceSize, sv.VisRows)
-
-	nWidgPerRow, idxOff := sv.RowWidgetNs()
-	nWidg := nWidgPerRow * sv.DispRows
-
+	if sg == nil {
+		return
+	}
 	wupdt := sv.TopUpdateStart()
 	defer sv.TopUpdateEnd(wupdt)
 
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
+
+	if kit.IfaceIsNil(sv.Slice) {
+		sg.DeleteChildren(ki.DestroyKids)
+		return
+	}
+
+	sv.ViewMuLock()
+	defer sv.ViewMuUnlock()
+
+	sz := sv.This().(SliceViewer).UpdtSliceSize()
+	if sz == 0 {
+		sg.DeleteChildren(ki.DestroyKids)
+		return
+	}
+	sv.DispRows = ints.MinInt(sv.SliceSize, sv.VisRows)
+
+	nWidgPerRow, idxOff := sv.RowWidgetNs()
+	nWidg := nWidgPerRow * sv.DispRows
 
 	if sv.Values == nil || sg.NumChildren() != nWidg { // shouldn't happen..
 		sv.ViewMuUnlock()
@@ -576,15 +618,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		nWidg = nWidgPerRow * sv.DispRows
 	}
 
-	if sz > sv.DispRows {
-		sb := sv.This().(SliceViewer).ScrollBar()
-		sv.StartIdx = int(sb.Value)
-		lastSt := sz - sv.DispRows
-		sv.StartIdx = ints.MinInt(lastSt, sv.StartIdx)
-		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
-	} else {
-		sv.StartIdx = 0
-	}
+	sv.UpdateStartIdx()
 
 	for i := 0; i < sv.DispRows; i++ {
 		ridx := i * nWidgPerRow
@@ -909,7 +943,8 @@ func (sv *SliceViewBase) Style2D() {
 		return
 	}
 	mvp := sv.ViewportSafe()
-	if mvp != nil && (mvp.IsDoingFullRender() || mvp.HasFlag(int(gi.VpFlagPrefSizing))) {
+	if mvp != nil && sv.This().(gi.Node2D).IsVisible() &&
+		(mvp.IsDoingFullRender() || mvp.HasFlag(int(gi.VpFlagPrefSizing))) {
 		if sv.This().(SliceViewer).LayoutSliceGrid() {
 			sv.This().(SliceViewer).UpdateSliceGrid()
 		}
@@ -954,8 +989,10 @@ func (sv *SliceViewBase) Render2D() {
 			sv.InFullRebuild = false
 			sv.PopBounds()
 			return
+		} else if sv.This().(SliceViewer).SliceGridNeedsUpdate() {
+			sv.This().(SliceViewer).UpdateSliceGrid()
 		}
-		sv.FrameStdRender()
+		sv.FrameStdRender() // this just renders widgets that have already been created
 		sv.This().(gi.Node2D).ConnectEvents2D()
 		sv.RenderScrolls()
 		sv.Render2DChildren()
