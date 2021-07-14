@@ -73,7 +73,6 @@ func (g *Line) Render2D() {
 		ang := mat32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(g.End, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
-	rs.Unlock()
 
 	g.Render2DChildren()
 	rs.PopXFormLock()
