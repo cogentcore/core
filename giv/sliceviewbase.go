@@ -966,12 +966,13 @@ func (sv *SliceViewBase) Render2D() {
 		return
 	}
 	sv.ToolBar().UpdateActions()
-	// if sv.NeedsFullReRender() {
-	// 	fmt.Printf("needs full: %s\n", sv.Path())
-	// }
-	if !sv.SliceGridNeedsLayout() && sv.FullReRenderIfNeeded() {
-		// fmt.Printf("did full: %s\n", sv.Path())
-		return
+	if !sv.SliceGridNeedsLayout() {
+		if sv.NeedsFullReRender() && sv.This().(gi.Node2D).IsVisible() {
+			sv.This().(SliceViewer).UpdateSliceGrid()
+			if sv.FullReRenderIfNeeded() {
+				return
+			}
+		}
 	}
 	if sv.PushBounds() {
 		if !sv.InFullRebuild && sv.SliceGridNeedsLayout() {
