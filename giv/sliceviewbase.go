@@ -992,6 +992,7 @@ func (sv *SliceViewBase) Render2D() {
 			return
 		} else if sv.This().(SliceViewer).SliceGridNeedsUpdate() {
 			sv.This().(SliceViewer).UpdateSliceGrid()
+			sv.ReRender2DTree() // key for rendering updated widgets
 		}
 		sv.FrameStdRender() // this just renders widgets that have already been created
 		sv.This().(gi.Node2D).ConnectEvents2D()
