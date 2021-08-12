@@ -118,11 +118,15 @@ type MoveEvent struct {
 
 /////////////////////////////////////////////////////////////////
 
-// mouse.DragEvent is for mouse movement, with button down -- action is Drag
-// -- many receivers will be interested in Drag events but not Move events,
-// which is why these are separate
+// mouse.DragEvent is for mouse movement, with button down, Action is Drag.
+// Many receivers will be interested in Drag events but not Move events,
+// which is why these are separate.
 type DragEvent struct {
 	MoveEvent
+
+	// Start is the initial location where the button was pressed
+	// at the start of the Drag
+	Start image.Point
 }
 
 // Delta returns the amount of mouse movement (Where - From)

@@ -688,7 +688,8 @@ func (fn *FileNode) SetNodePath(path string) error {
 func (fn *FileNode) InitFileInfo() error {
 	effpath, err := filepath.EvalSymlinks(string(fn.FPath))
 	if err != nil {
-		log.Printf("giv.FileNode Path: %v could not be opened -- error: %v\n", effpath, err)
+		// this happens too often for links -- skip
+		// log.Printf("giv.FileNode Path: %v could not be opened -- error: %v\n", fn.FPath, err)
 		return err
 	}
 	fn.FPath = gi.FileName(effpath)

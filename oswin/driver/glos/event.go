@@ -16,12 +16,15 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 )
 
-var lastMouseClickTime time.Time
-var lastMousePos image.Point
-var lastMouseButton mouse.Buttons
-var lastMouseAction mouse.Actions
-var lastMods int32
-var lastKey key.Codes
+var (
+	lastMouseClickTime time.Time
+	lastMousePos       image.Point
+	lastMouseButton    mouse.Buttons
+	lastMouseButtonPos image.Point
+	lastMouseAction    mouse.Actions
+	lastMods           int32
+	lastKey            key.Codes
+)
 
 func glfwMods(mod glfw.ModifierKey) int32 {
 	m := int32(0)
@@ -148,6 +151,9 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 	lastMouseButton = but
 	lastMouseAction = act
 	where := w.curMousePosPoint(gw)
+	if act == mouse.Press {
+		lastMouseButtonPos = where
+	}
 	event := &mouse.Event{
 		Where:     where,
 		Button:    but,
@@ -228,6 +234,7 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 				},
 				From: from,
 			},
+			Start: lastMouseButtonPos,
 		}
 		event.Init()
 		w.Send(event)
