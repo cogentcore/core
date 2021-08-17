@@ -729,12 +729,12 @@ func (tv *TableView) SliceNewAt(idx int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
+	tv.SliceNewAtSel(idx)
 	kit.SliceNewAt(tv.Slice, idx)
 	if idx < 0 {
 		idx = tv.SliceSize
 	}
 
-	tv.SliceNewAtSel(idx)
 	tv.This().(SliceViewer).UpdtSliceSize()
 
 	if tv.TmpSave != nil {

@@ -776,6 +776,8 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
+	sv.SliceNewAtSel(idx)
+
 	sltyp := kit.SliceElType(sv.Slice) // has pointer if it is there
 	iski := ki.IsKi(sltyp)
 	slptr := sltyp.Kind() == reflect.Ptr
@@ -826,7 +828,6 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
-	sv.SliceNewAtSel(idx)
 	sv.This().(SliceViewer).UpdtSliceSize()
 
 	if sv.TmpSave != nil {
@@ -854,12 +855,13 @@ func (sv *SliceViewBase) SliceDeleteAtRow(row int, updt bool) {
 // inserting new element at given index.
 // must be called with successful SliceNewAt
 func (sv *SliceViewBase) SliceNewAtSel(idx int) {
-	for ix := range sv.SelectedIdxs {
+	sl := sv.SelectedIdxsList(false) // ascending
+	sv.ResetSelectedIdxs()
+	for _, ix := range sl {
 		if ix >= idx {
-			delete(sv.SelectedIdxs, ix)
 			ix++
-			sv.SelectedIdxs[ix] = struct{}{}
 		}
+		sv.SelectedIdxs[ix] = struct{}{}
 	}
 }
 
@@ -867,15 +869,16 @@ func (sv *SliceViewBase) SliceNewAtSel(idx int) {
 // deleting element at given index
 // must be called with successful SliceDeleteAt
 func (sv *SliceViewBase) SliceDeleteAtSel(idx int) {
-	for ix := range sv.SelectedIdxs {
+	sl := sv.SelectedIdxsList(true) // desscending
+	sv.ResetSelectedIdxs()
+	for _, ix := range sl {
 		switch {
 		case ix == idx:
-			delete(sv.SelectedIdxs, ix)
+			continue
 		case ix > idx:
-			delete(sv.SelectedIdxs, ix)
 			ix--
-			sv.SelectedIdxs[ix] = struct{}{}
 		}
+		sv.SelectedIdxs[ix] = struct{}{}
 	}
 }
 
@@ -1392,7 +1395,8 @@ func (sv *SliceViewBase) ResetSelectedIdxs() {
 	sv.SelectedIdxs = make(map[int]struct{})
 }
 
-// SelectedIdxsList returns list of selected indexes, sorted either ascending or descending
+// SelectedIdxsList returns list of selected indexes,
+// sorted either ascending or descending
 func (sv *SliceViewBase) SelectedIdxsList(descendingSort bool) []int {
 	rws := make([]int, len(sv.SelectedIdxs))
 	i := 0
