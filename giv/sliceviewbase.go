@@ -826,6 +826,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
+	sv.SliceNewAtSel(idx)
 	sv.This().(SliceViewer).UpdtSliceSize()
 
 	if sv.TmpSave != nil {
@@ -849,6 +850,35 @@ func (sv *SliceViewBase) SliceDeleteAtRow(row int, updt bool) {
 	sv.This().(SliceViewer).SliceDeleteAt(sv.StartIdx+row, updt)
 }
 
+// SliceNewAtSel updates selected rows based on
+// inserting new element at given index.
+// must be called with successful SliceNewAt
+func (sv *SliceViewBase) SliceNewAtSel(idx int) {
+	for ix := range sv.SelectedIdxs {
+		if ix >= idx {
+			delete(sv.SelectedIdxs, ix)
+			ix++
+			sv.SelectedIdxs[ix] = struct{}{}
+		}
+	}
+}
+
+// SliceDeleteAtSel updates selected rows based on
+// deleting element at given index
+// must be called with successful SliceDeleteAt
+func (sv *SliceViewBase) SliceDeleteAtSel(idx int) {
+	for ix := range sv.SelectedIdxs {
+		switch {
+		case ix == idx:
+			delete(sv.SelectedIdxs, ix)
+		case ix > idx:
+			delete(sv.SelectedIdxs, ix)
+			ix--
+			sv.SelectedIdxs[ix] = struct{}{}
+		}
+	}
+}
+
 // SliceDeleteAt deletes element at given index from slice
 // if updt is true, then update the grid after
 func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
@@ -865,7 +895,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
-	delete(sv.SelectedIdxs, idx)
+	sv.SliceDeleteAtSel(idx)
 
 	kit.SliceDeleteAt(sv.Slice, idx)
 

@@ -734,6 +734,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 		idx = tv.SliceSize
 	}
 
+	tv.SliceNewAtSel(idx)
 	tv.This().(SliceViewer).UpdtSliceSize()
 
 	if tv.TmpSave != nil {
@@ -760,7 +761,7 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
-	delete(tv.SelectedIdxs, idx)
+	tv.SliceDeleteAtSel(idx)
 
 	kit.SliceDeleteAt(tv.Slice, idx)
 
