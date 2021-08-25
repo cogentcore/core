@@ -216,7 +216,7 @@ func (ft *FileTree) WatchUpdt(path string) {
 	}
 	fn, err := ft.FindDirNode(rp)
 	if err != nil {
-		log.Println(err)
+		// log.Println(err)
 		return
 	}
 	ft.LastWatchUpdt = rp
@@ -231,6 +231,7 @@ func (ft *FileTree) WatchUpdt(path string) {
 
 // WatchPath adds given path to those watched
 func (ft *FileTree) WatchPath(path gi.FileName) error {
+	return nil // disable for all platforms for now -- getting some issues
 	if oswin.TheApp.Platform() == oswin.MacOS {
 		return nil // mac is not supported in a high-capacity fashion at this point
 	}
