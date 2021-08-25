@@ -60,6 +60,12 @@ func (wg *WindowGeom) SetPos(ps image.Point) {
 }
 
 func (wg *WindowGeom) ScalePos(fact float32) {
+	if wg.PX == -32000 { // windows badness
+		wg.PX = 100
+	}
+	if wg.PY == -32000 {
+		wg.PY = 100
+	}
 	wg.PX = int(float32(wg.PX) * fact)
 	wg.PY = int(float32(wg.PY) * fact)
 }
@@ -239,6 +245,13 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 		}
 		return
 	}
+	pos := win.OSWin.Position()
+	if pos.X == -32000 || pos.Y == -32000 { // windows badness
+		if WinGeomTrace {
+			fmt.Printf("WindowGeomPrefs: NOT storing very negative pos: %v for win: %v\n", pos, win.Nm)
+		}
+		return
+	}
 	WinGeomPrefsMu.Lock()
 	if wg == nil {
 		*wg = make(WindowGeomPrefs, 100)
@@ -251,7 +264,7 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 	}
 	sc := win.OSWin.Screen()
 	wgr := WindowGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio}
-	wgr.SetPos(win.OSWin.Position())
+	wgr.SetPos(pos)
 	wgr.SetSize(wsz)
 
 	wg.LockFile() // not going to change our behavior if we can't lock!
