@@ -1586,19 +1586,25 @@ const (
 // DirFlagMap is a map for encoding directories that are open in the file
 // tree.  The strings are typically relative paths.  The bool value is used to
 // mark active paths and inactive (unmarked) ones can be removed.
-type DirFlagMap map[string]DirFlags
+// Map access is protected by Mutex.
+type DirFlagMap struct {
+	Map map[string]DirFlags
+	Mu  sync.Mutex
+}
 
-// Init initializes the map
+// Init initializes the map, and sets the Mutex lock -- must unlock manually
 func (dm *DirFlagMap) Init() {
-	if *dm == nil {
-		*dm = make(DirFlagMap, 1000)
+	dm.Mu.Lock()
+	if dm.Map == nil {
+		dm.Map = make(map[string]DirFlags)
 	}
 }
 
 // IsOpen returns true if path has IsOpen bit flag set
 func (dm *DirFlagMap) IsOpen(path string) bool {
 	dm.Init()
-	if df, ok := (*dm)[path]; ok {
+	defer dm.Mu.Unlock()
+	if df, ok := dm.Map[path]; ok {
 		return bitflag.Has32(int32(df), int(DirIsOpen))
 	}
 	return false
@@ -1607,15 +1613,17 @@ func (dm *DirFlagMap) IsOpen(path string) bool {
 // SetOpenState sets the given directory's open flag
 func (dm *DirFlagMap) SetOpen(path string, open bool) {
 	dm.Init()
-	df, _ := (*dm)[path] // 2nd arg makes it ok to fail
+	defer dm.Mu.Unlock()
+	df, _ := dm.Map[path] // 2nd arg makes it ok to fail
 	bitflag.SetState32((*int32)(&df), open, int(DirIsOpen))
-	(*dm)[path] = df
+	dm.Map[path] = df
 }
 
 // SortByName returns true if path is sorted by name (default if not in map)
 func (dm *DirFlagMap) SortByName(path string) bool {
 	dm.Init()
-	if df, ok := (*dm)[path]; ok {
+	defer dm.Mu.Unlock()
+	if df, ok := dm.Map[path]; ok {
 		return bitflag.Has32(int32(df), int(DirSortByName))
 	}
 	return true
@@ -1624,7 +1632,8 @@ func (dm *DirFlagMap) SortByName(path string) bool {
 // SortByModTime returns true if path is sorted by mod time
 func (dm *DirFlagMap) SortByModTime(path string) bool {
 	dm.Init()
-	if df, ok := (*dm)[path]; ok {
+	defer dm.Mu.Unlock()
+	if df, ok := dm.Map[path]; ok {
 		return bitflag.Has32(int32(df), int(DirSortByModTime))
 	}
 	return false
@@ -1633,7 +1642,8 @@ func (dm *DirFlagMap) SortByModTime(path string) bool {
 // SetSortBy sets the given directory's sort by option
 func (dm *DirFlagMap) SetSortBy(path string, modTime bool) {
 	dm.Init()
-	df, _ := (*dm)[path] // 2nd arg makes it ok to fail
+	defer dm.Mu.Unlock()
+	df, _ := dm.Map[path] // 2nd arg makes it ok to fail
 	mask := bitflag.Mask32(int(DirSortByName), int(DirSortByModTime))
 	bitflag.ClearMask32((*int32)(&df), mask)
 	if modTime {
@@ -1641,24 +1651,26 @@ func (dm *DirFlagMap) SetSortBy(path string, modTime bool) {
 	} else {
 		bitflag.Set32((*int32)(&df), int(DirSortByName))
 	}
-	(*dm)[path] = df
+	dm.Map[path] = df
 }
 
 // SetMark sets the mark flag indicating we visited file
 func (dm *DirFlagMap) SetMark(path string) {
 	dm.Init()
-	df, _ := (*dm)[path] // 2nd arg makes it ok to fail
+	defer dm.Mu.Unlock()
+	df, _ := dm.Map[path] // 2nd arg makes it ok to fail
 	bitflag.Set32((*int32)(&df), int(DirMark))
-	(*dm)[path] = df
+	dm.Map[path] = df
 }
 
 // ClearMarks clears all the marks -- do this prior to traversing
 // full set of active paths -- can then call DeleteStale to get rid of unused paths.
 func (dm *DirFlagMap) ClearMarks() {
 	dm.Init()
-	for key, df := range *dm {
+	defer dm.Mu.Unlock()
+	for key, df := range dm.Map {
 		bitflag.Clear32((*int32)(&df), int(DirMark))
-		(*dm)[key] = df
+		dm.Map[key] = df
 	}
 }
 
@@ -1666,9 +1678,10 @@ func (dm *DirFlagMap) ClearMarks() {
 // they have not been accessed since ClearFlags was called.
 func (dm *DirFlagMap) DeleteStale() {
 	dm.Init()
-	for key, df := range *dm {
+	defer dm.Mu.Unlock()
+	for key, df := range dm.Map {
 		if !bitflag.Has32(int32(df), int(DirMark)) {
-			delete(*dm, key)
+			delete(dm.Map, key)
 		}
 	}
 }
