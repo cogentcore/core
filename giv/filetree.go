@@ -1589,8 +1589,8 @@ const (
 // mark active paths and inactive (unmarked) ones can be removed.
 // Map access is protected by Mutex.
 type DirFlagMap struct {
-	Map map[string]DirFlags
-	Mu  sync.Mutex
+	Map map[string]DirFlags `desc:"map of paths and associated flags"`
+	Mu  sync.Mutex          `view:"-" json:"-" xml:"-" desc:"mutex for accessing map"`
 }
 
 // Init initializes the map, and sets the Mutex lock -- must unlock manually

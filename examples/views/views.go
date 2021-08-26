@@ -16,6 +16,11 @@ import (
 	"github.com/goki/mat32"
 )
 
+var (
+	Ticker *time.Ticker
+	Frame  *gi.Frame
+)
+
 func main() {
 	gimain.Main(func() {
 		mainrun()
@@ -67,6 +72,7 @@ func mainrun() {
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
+	Frame = mfr
 
 	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetProp("horizontal-align", "center")
@@ -143,5 +149,21 @@ func mainrun() {
 
 	win.MainMenuUpdated()
 	vp.UpdateEndNoSig(updt)
+
+	Ticker = time.NewTicker(1 * time.Second)
+	go Animate()
+
 	win.StartEventLoop()
+}
+
+// Animate
+func Animate() {
+	for {
+		<-Ticker.C // wait for tick
+
+		updt := Frame.UpdateStart()
+		// fmt.Printf("updt\n")
+		Frame.UpdateEnd(updt)
+	}
+
 }

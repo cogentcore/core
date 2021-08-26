@@ -316,7 +316,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	eabut.Tooltip = "toggle animation on and off"
 	eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonToggled) {
-			anim.On = !eabut.IsChecked()
+			anim.On = eabut.IsChecked()
 		}
 	})
 

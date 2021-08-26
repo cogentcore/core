@@ -1796,9 +1796,9 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				w.MainMenuUpdateWindows()
 				w.MainMenuSet()
 			}
-			if w.EventMgr.Focus == nil { // not using lock-protected b/c can conflict with popup
-				w.EventMgr.ActivateStartFocus()
-			}
+			// if w.EventMgr.Focus == nil { // not using lock-protected b/c can conflict with popup
+			w.EventMgr.ActivateStartFocus()
+			// }
 		}
 	case *dnd.Event:
 		if e.Action == dnd.External {
