@@ -40,8 +40,8 @@ jobs:
  
     - name: Install dep libs
       run: |
-        sudo apt-get install libgl1-mesa-dev xorg-dev
-		
+        sudo apt-get -y install libgl1-mesa-dev xorg-dev
+
     - name: Checkout code
       uses: actions/checkout@v2
 
