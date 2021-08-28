@@ -7,8 +7,9 @@ The `pi` package supports a simple and robust form of lexing and parsing based o
 We call it `Pi` (or `GoPi`) because Ip is not as easy to pronounce, and also because it makes parsing as easy as pi!  You can think of it as a French acronym, which are typically the reverse of English ones -- "parseur interactif".  Also, it matches GoKi and GoGi. 
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/goki/pi)](https://goreportcard.com/report/github.com/goki/pi)
-[![GoDoc](https://godoc.org/github.com/goki/pi?status.svg)](https://godoc.org/github.com/goki/pi)
-[![Travis](https://travis-ci.com/goki/pi.svg?branch=master)](https://travis-ci.com/goki/pi)
+[![Go Reference](https://pkg.go.dev/badge/github.com/goki/pi.svg)](https://pkg.go.dev/github.com/goki/pi)
+[![CI](https://github.com/goki/pi/actions/workflows/ci.yml/badge.svg)](https://github.com/goki/pi/actions/workflows/ci.yml)
+[![Codecov](https://codecov.io/gh/goki/pi/branch/master/graph/badge.svg?token=Hw5cInAxY3)](https://codecov.io/gh/goki/pi)
 
 See the [Wiki](https://github.com/goki/pi/wiki) for more detailed docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
