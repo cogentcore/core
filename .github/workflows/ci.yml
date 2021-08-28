@@ -47,6 +47,7 @@ jobs:
     - name: Build No Modules
       env:
         GO111MODULE: off
+        GOPATH: ${{ github.workspace }}
       run: |
         go get -d -v ./...
         make build
