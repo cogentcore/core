@@ -3,8 +3,8 @@
 Go language (golang) tree structure (ki = 木 = tree in Japanese)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/goki/ki)](https://goreportcard.com/report/github.com/goki/ki)
-[![GoDoc](https://godoc.org/github.com/goki/ki?status.svg)](https://godoc.org/github.com/goki/ki)
-[![Travis](https://travis-ci.com/goki/ki.svg?branch=master)](https://travis-ci.com/goki/ki)
+[![Go Reference](https://pkg.go.dev/badge/github.com/goki/ki.svg)](https://pkg.go.dev/github.com/goki/ki)
+[![CI](https://github.com/goki/ki/actions/workflows/ci.yml/badge.svg)](https://github.com/goki/ki/actions/workflows/ci.yml)
 
 # Overview
 
