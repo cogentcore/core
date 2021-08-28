@@ -7,18 +7,30 @@ Package gi is the top-level repository for the GoGi GUI framework.
 
 All of the code is in the sub-packages within this repository:
 
-* gi: contains the main 2D GUI code
+* examples: example main programs for learning how to use GoGi -- see
+            widgets and its README file for a basic introduction.  marbles is fun!
 
-* giv: are more complex Views of Go data structures, built out of gi widgets, supporting
-the Model-View paradigm.
+* gist: css-based styling settings, including Color
 
-* svg is something: provides a full SVG rendering framework, used for Icons, and in its own right.
+* girl: rendering library, can be used standalone, SVG compliant
 
-* oswin: is the OS-specific framework, originally based on Shiny, that provides all the
-gory guts for dealing with different OS's.
+* gi: the main 2D GUI Node, Widgets, and Window
 
-* examples: contains a number of useful examples for learning how to use GoGi -- see
-widgets and its README file for a basic introduction.  marbles is really fun!
+* giv: more complex Views of Go data structures, supporting Model-View paradigm.
+
+* svg: full SVG rendering framework, used for Icons in gi.
+
+* gi3d: 3D rendering of a Scene within 2D windows -- full interactive 3D scenegraph.
+
+* histyle: text syntax-based highlighting styles -- used in giv.TextView
+
+* oswin: OS-specific framework for low-level rendering, event interface,
+         including GPU abstraction (OpenGL for now, ultimately Vulcan)
+
+* python: access all of GoGi from within Python using GoPy system.
+
+* undo: generic undo / redo functionality using text blobs of state
+        compressed using diff, or commands.
 
 */
 package gi
