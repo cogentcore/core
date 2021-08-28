@@ -5,8 +5,8 @@ GoGi is part of the [GoKi](https://GoKi.dev) Go language (golang) full strength 
 `package gi` is a scenegraph-based 2D and 3D GUI / graphics interface (Gi) in Go, that functions similar to HTML / CSS / SVG  and Qt.
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/goki/gi)](https://goreportcard.com/report/github.com/goki/gi)
-[![GoDoc](https://godoc.org/github.com/goki/gi?status.svg)](https://godoc.org/github.com/goki/gi)
-[![Travis](https://travis-ci.com/goki/gi.svg?branch=master)](https://travis-ci.com/goki/gi)
+[![GoDoc](https://pkg.go.dev/github.com/goki/gi?status.svg)](https://pkg.go.dev/github.com/goki/gi)
+[![CI](https://github.com/goki/gi/actions/workflows/ci.yml/badge.svg)](https://github.com/goki/gi/actions/workflows/ci.yml)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/goki/gi)](https://www.tickgit.com/browse?repo=github.com/goki/gi)
 
 NOTE: Requires Go version `1.13+` due to use of `math.Round`, `os.UserCacheDir`, and `reflect.Value.IsZero()`.
