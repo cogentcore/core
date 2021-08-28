@@ -38,18 +38,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Build Modules
-      env:
-        GO111MODULE: on
+    - name: Build
       run: |
-        make build
-
-    - name: Build No Modules
-      env:
-        GO111MODULE: off
-        GOPATH: ${{ github.workspace }}
-      run: |
-        go get -d -v ./...
         make build
 
     - name: Test
