@@ -12,8 +12,8 @@ jobs:
     name: Build
     strategy:
       matrix:
-        go-version: [1.17.x, 1.16.x, 1.15.x]
-        platform: [ubuntu-latest, macos-latest]
+        go-version: [1.17.x, 1.16.x]
+        platform: [ubuntu-latest]  # not macos-latest
         env:
           - GO111MODULE=off
           - GO111MODULE=on
@@ -38,6 +38,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
  
+    - name: Install dep libs
+      run: |
+        sudo apt-get install libgl1-mesa-dev xorg-dev
+		
     - name: Checkout code
       uses: actions/checkout@v2
 
