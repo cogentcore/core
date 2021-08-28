@@ -17,13 +17,6 @@ jobs:
           - GO111MODULE=on
 
     runs-on: ${{ matrix.platform }}
-    env:
-        GO111MODULE: on
-        GOPATH: ${{ github.workspace }}
-    defaults:
-        run:
-            working-directory: ${{ env.GOPATH }}/src/gonum.org/v1/gonum
-
     steps:
     - name: Install Go
       uses: actions/setup-go@v2
@@ -45,8 +38,6 @@ jobs:
  
     - name: Checkout code
       uses: actions/checkout@v2
-      with:
-          path: ${{ env.GOPATH }}/src/gonum.org/v1/gonum
 
     - name: Test
       run: |
