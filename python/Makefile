@@ -42,5 +42,11 @@ install-exe:
 	# install executable into /usr/local/bin
 	cp gi/pygi /usr/local/bin/
 
+install-win:
+	# windows version: install executable into gopath too, add .exe
+	- mkdir -p /usr/local/bin
+	- cp gi/pygi $(GOPATH)/bin/pygi.exe
+	- cp gi/pygi C:/usr/local/bin/pygi.exe
+	
 clean:
 	rm -rf gi dist build */*.egg-info *.egg-info

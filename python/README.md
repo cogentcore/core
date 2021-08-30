@@ -1,14 +1,12 @@
 # Python wrapping of GoGi
 
-You can now run most of GoGi via Python, using a newly-updated version of the [gopy](https://github.com/go-python/gopy) tool that automatically creates Python bindings for Go packages.  Until the pull-request is merged into go-python, there is an updated README at the [goki fork](https://github.com/goki/gopy) (note: you can no longer build directly from this goki fork -- see instructions below for merging into go-python).
+You can now run most of GoGi via Python, using a newly-updated version of the [gopy](https://github.com/go-python/gopy) tool that automatically creates Python bindings for Go packages.
 
 Go incorporates many features found in Python, and provides a really natural "backend" language for computationally-intensive functionality such as a GUI.  Python provides a nice interactive "scripting" level interface for dynamically building GUI's, and can bring Go code to a much wider audience.  Thus, this represents an ideal combination of the two languages.  And you can build the entire stack, from the raw Go code in GoGi to the Python bindings (which unfortunately are a bit slow because they rely on a C compiler..), in a tiny fraction of the time it takes to build something like Qt and the PySide or PyQt bindings.
 
 # Installation
 
-*Note: Windows is completely untested and very unlikely to work* -- there is nothing in principle preventing it from working, but it just requires a bunch of special stuff and we haven't had a chance to get to it.
-
-Python version 3 (3.6, 3.8 have been well tested) is recommended, and the instructions assume that version (you can probably get version 2 to work but it has not been tested).  Also pip must be installed, as is typical.  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
+Python version 3 (3.6-3.9 have been well tested) is recommended, and the instructions assume that version (you can probably get version 2 to work but it has not been tested).  Also pip must be installed, as is typical.  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
 
 On linux, you must ensure that the linker `ld` will look in the current directory for library files -- add this to your `.bashrc` file (and `source` that file after editing, or enter command locally):
 
@@ -40,6 +38,22 @@ dyld: Library not loaded: @rpath/libpython3.6m.dylib
 then you need to make sure that this lib is on your LD_LIBRARY_PATH -- on mac you can do `otool -L /usr/local/bin/pygi` and on linux it is `ldd /usr/local/bin/pygi` -- that should show you where it is trying to find that library.
 
 If `pkg-config` or some other misc command is not found, you can use `brew install` to install it using homebrew on mac, or your package manager on linux.
+
+## Windows
+
+As usual, Microsoft Windows is different -- here's some tips for configuring the client to work on windows.
+
+* First, strongly recommend using the `PowerShell`-- search for that in the  `Microsoft Store` app -- type `store` in the windows taskbar search prompt -- this provides a much better command-line interface than the standard Command Prompt.
+
+* If you haven't already, install `git` from here: https://git-scm.com/download/win
+
+* Install Python from the main Python distribution: https://www.python.org/downloads/windows/ -- *do not under any circumstances install from the Microsoft Store app!* while that is very convenient, it creates symbolic links to access the python executables, which is incompatible with go exec.Command, preventing use of `gopy`.
+
+    The standard python install does not create a `python3.exe` which grunt looks for -- follow instructions here:
+https://stackoverflow.com/questions/39910730/python3-is-not-recognized-as-an-internal-or-external-command-operable-program/41492852
+(just make a copy of python.exe to python3.exe in the relevant installed location).
+
+* Use `make install-win` to install the executable -- it adds the `.exe` which is otherwise not added, and also installs the exe to `~/go/bin` which is typically on the path, while `/usr/local/bin` is not standard for windows -- it is copied there anyway.
 
 # How it works
 
