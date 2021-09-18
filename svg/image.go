@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"errors"
 	"image"
 	"log"
 
@@ -84,6 +85,9 @@ func (g *Image) OpenImage(filename gi.FileName, width, height float32) error {
 
 // SaveImage saves current image to a file
 func (g *Image) SaveImage(filename gi.FileName) error {
+	if g.Pixels == nil {
+		return errors.New("svg.Images Pixels is nil")
+	}
 	return gi.SaveImage(string(filename), g.Pixels)
 }
 

@@ -927,6 +927,9 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
 		text = nd.Text
 	case *Image:
+		if nd.Pixels == nil {
+			return ""
+		}
 		nm = "image"
 		XMLAddAttr(&se.Attr, "x", fmt.Sprintf("%g", nd.Pos.X))
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
