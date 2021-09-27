@@ -491,23 +491,23 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 		em.hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
 			em.TimerMu.Lock()
 			hoe := em.curHover
+			if hoe != nil {
+				em.SendHoverEvent(hoe)
+			}
 			em.hoverStarted = false
 			em.startHover = nil
 			em.curHover = nil
 			em.hoverTimer = nil
 			em.TimerMu.Unlock()
-			if hoe != nil {
-				em.SendHoverEvent(hoe)
-			}
 		})
 	} else {
 		dst := int(mat32.Hypot(float32(em.startHover.Where.X-me.Pos().X), float32(em.startHover.Where.Y-me.Pos().Y)))
 		if dst > HoverMaxPix {
 			em.hoverTimer.Stop()
+			em.Master.DeleteTooltip()
 			em.hoverStarted = false
 			em.startHover = nil
 			em.hoverTimer = nil
-			em.Master.DeleteTooltip()
 		} else {
 			em.curHover = &mouse.HoverEvent{Event: me.Event}
 		}
