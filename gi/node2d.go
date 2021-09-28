@@ -859,10 +859,6 @@ func (nb *Node2DBase) Layout2DTree() {
 	pr.End()
 }
 
-// todo: this is a recursive stack that will be relatively slow compared to
-// FuncDownMeFirst -- reconsider using that with appropriate API to support
-// needed flexibility
-
 // Render2DTree just calls on parent node and it takes full responsibility for
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering
@@ -893,7 +889,7 @@ func (nb *Node2DBase) Layout2DChildren(iter int) bool {
 	return redo
 }
 
-// Move2dChildren moves all of node's children, giving them the ChildrenBBox2D
+// Move2DChildren moves all of node's children, giving them the ChildrenBBox2D
 // -- default call at end of Move2D
 func (nb *Node2DBase) Move2DChildren(delta image.Point) {
 	cbb := nb.This().(Node2D).ChildrenBBox2D()

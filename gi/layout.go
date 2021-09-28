@@ -507,6 +507,27 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	}
 }
 
+func (ly *Layout) Layout2DChildren(iter int) bool {
+	cbb := ly.This().(Node2D).ChildrenBBox2D()
+	if ly.Lay == LayoutStacked {
+		sn, err := ly.ChildTry(ly.StackTop)
+		if err != nil {
+			return false
+		}
+		nii, _ := KiToNode2D(sn)
+		return nii.Layout2D(cbb, iter)
+	} else {
+		redo := false
+		for _, kid := range ly.Kids {
+			nii, _ := KiToNode2D(kid)
+			if nii.Layout2D(cbb, iter) {
+				redo = true
+			}
+		}
+		return redo
+	}
+}
+
 // render the children
 func (ly *Layout) Render2DChildren() {
 	if ly.Lay == LayoutStacked {

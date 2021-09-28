@@ -109,8 +109,8 @@ func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport2D, pt image.
 	}
 	c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
 		func() {
-			c.ShowNow(text, posLn, posCh, vp, pt, force)
 			c.DelayMu.Lock()
+			c.ShowNow(text, posLn, posCh, vp, pt, force)
 			c.DelayTimer = nil
 			c.DelayMu.Unlock()
 		})

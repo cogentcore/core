@@ -436,20 +436,20 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 			em.dndHoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
 				em.TimerMu.Lock()
 				hoe := em.curDNDHover
-				em.dndHoverStarted = false
+				em.SendDNDHoverEvent(hoe)
 				em.startDNDHover = nil
 				em.curDNDHover = nil
 				em.dndHoverTimer = nil
+				em.dndHoverStarted = false
 				em.TimerMu.Unlock()
-				em.SendDNDHoverEvent(hoe)
 			})
 		} else {
 			dst := int(mat32.Hypot(float32(em.startDNDHover.Where.X-me.Pos().X), float32(em.startDNDHover.Where.Y-me.Pos().Y)))
 			if dst > HoverMaxPix {
 				em.dndHoverTimer.Stop()
-				em.dndHoverStarted = false
 				em.startDNDHover = nil
 				em.dndHoverTimer = nil
+				em.dndHoverStarted = false
 			} else {
 				em.curDNDHover = me
 			}
@@ -494,10 +494,10 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 			if hoe != nil {
 				em.SendHoverEvent(hoe)
 			}
-			em.hoverStarted = false
 			em.startHover = nil
 			em.curHover = nil
 			em.hoverTimer = nil
+			em.hoverStarted = false
 			em.TimerMu.Unlock()
 		})
 	} else {
@@ -505,9 +505,9 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 		if dst > HoverMaxPix {
 			em.hoverTimer.Stop()
 			em.Master.DeleteTooltip()
-			em.hoverStarted = false
 			em.startHover = nil
 			em.hoverTimer = nil
+			em.hoverStarted = false
 		} else {
 			em.curHover = &mouse.HoverEvent{Event: me.Event}
 		}
