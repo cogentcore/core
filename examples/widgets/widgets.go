@@ -123,20 +123,17 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	button1.Tooltip = "press this <i>button</i> to pop up a dialog box"
 
 	button1.SetIcon(icnm)
-	button1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-		if sig == int64(gi.ButtonClicked) { // note: 3 diff ButtonSig sig's possible -- important to check
-			// vp.Win.Quit()
-			gi.StringPromptDialog(vp, "", "Enter value here..",
-				gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
-				rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					dlg := send.(*gi.Dialog)
-					if sig == int64(gi.DialogAccepted) {
-						val := gi.StringPromptDialogValue(dlg)
-						fmt.Printf("got string value: %v\n", val)
-					}
-				})
-		}
+	button1.OnClicked(func() {
+		fmt.Printf("Button %s clicked\n", button1.Name())
+		gi.StringPromptDialog(vp, "", "Enter value here..",
+			gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
+			rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				dlg := send.(*gi.Dialog)
+				if sig == int64(gi.DialogAccepted) {
+					val := gi.StringPromptDialogValue(dlg)
+					fmt.Printf("got string value: %v\n", val)
+				}
+			})
 	})
 
 	button2 := gi.AddNewButton(brow, "button2")
@@ -144,6 +141,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	button2.SetText("Open GoGiEditor")
 	// button2.SetProp("background-color", "#EDF")
 	button2.Tooltip = "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things"
+	// this is the "full strength" general purpose signaling framework
 	button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) {

@@ -325,7 +325,7 @@ func StyleSVG(gii gi.Node2D) {
 	}
 	gi.AggCSS(&g.CSSAgg, g.CSS)
 	StyleCSS(gii, g.CSSAgg)
-	if pc.HasNoStrokeOrFill() {
+	if !pc.Display || pc.HasNoStrokeOrFill() {
 		pc.Off = true
 	} else {
 		pc.Off = false
@@ -454,7 +454,7 @@ func (g *NodeBase) PushXForm() (bool, *girl.State) {
 	g.WinBBox = image.ZR
 	g.VpBBox = image.ZR
 	g.ObjBBox = image.ZR
-	if g == nil || g.This() == nil {
+	if g.Pnt.Off || g == nil || g.This() == nil {
 		return false, nil
 	}
 	ni := g.This().(NodeSVG)

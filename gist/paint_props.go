@@ -28,6 +28,26 @@ func (pc *Paint) StyleFromProps(par *Paint, props ki.Props, ctxt Context) {
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
+		if key == "display" {
+			if inh, init := StyleInhInit(val, par); inh || init {
+				if inh {
+					pc.Display = par.Display
+				} else if init {
+					pc.Display = true
+				}
+				return
+			}
+			sval := kit.ToString(val)
+			switch sval {
+			case "none":
+				pc.Display = false
+			case "inline":
+				pc.Display = true
+			default:
+				pc.Display = true
+			}
+			continue
+		}
 		if sfunc, ok := StyleStrokeFuncs[key]; ok {
 			if par != nil {
 				sfunc(&pc.StrokeStyle, key, val, &par.StrokeStyle, ctxt)

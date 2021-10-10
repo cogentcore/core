@@ -879,7 +879,15 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 				XMLAddAttr(&se.Attr, k, sv)
 			case "groupmode":
 				XMLAddAttr(&se.Attr, "inkscape:groupmode", sv)
-				XMLAddAttr(&se.Attr, "style", "display:inline") // todo: not sure what this means
+				if st, has := props["style"]; has {
+					XMLAddAttr(&se.Attr, "style", kit.ToString(st))
+				} else {
+					XMLAddAttr(&se.Attr, "style", "display:inline")
+				}
+			case "insensitive":
+				if sv == "true" {
+					XMLAddAttr(&se.Attr, "sodipodi:"+k, sv)
+				}
 			}
 		}
 	case *Rect:

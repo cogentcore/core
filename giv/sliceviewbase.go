@@ -985,8 +985,8 @@ func (sv *SliceViewBase) Style2D() {
 	if sv.IsInactive() {
 		sv.SetCanFocus()
 	}
-	sg := sv.This().(SliceViewer).SliceGrid()
-	sg.StartFocus() // need to call this when window is actually active
+	// sg := sv.This().(SliceViewer).SliceGrid()
+	// sg.StartFocus() // need to call this when window is actually active
 }
 
 func (sv *SliceViewBase) Render2D() {

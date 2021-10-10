@@ -296,6 +296,16 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 	return false
 }
 
+// OnClicked calls the given function when the button is clicked,
+// which is the default / standard way of activating the button
+func (bb *ButtonBase) OnClicked(fun func()) {
+	bb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(ButtonClicked) {
+			fun()
+		}
+	})
+}
+
 // ButtonPress sets the button in the down state -- mouse clicked down but
 // not yet up -- emits ButtonPressed signal AND WidgetSig Selected signal --
 // ButtonClicked is down and up
@@ -897,6 +907,16 @@ var CheckBoxProps = ki.Props{
 
 func (cb *CheckBox) AsButtonBase() *ButtonBase {
 	return &(cb.ButtonBase)
+}
+
+// OnClicked calls the given function when the button is clicked,
+// which is the default / standard way of activating the button
+func (cb *CheckBox) OnClicked(fun func()) {
+	cb.ButtonSig.Connect(cb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(ButtonToggled) {
+			fun()
+		}
+	})
 }
 
 func (cb *CheckBox) ButtonRelease() {

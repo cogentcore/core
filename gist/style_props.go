@@ -118,8 +118,12 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		if bv, ok := kit.ToBool(val); ok {
-			s.Display = bv
+		if kit.ToString(val) == "none" {
+			s.Display = false
+		} else {
+			if bv, ok := kit.ToBool(val); ok {
+				s.Display = bv
+			}
 		}
 	},
 	"visible": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {

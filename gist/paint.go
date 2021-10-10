@@ -21,7 +21,8 @@ type Painter interface {
 
 // Paint provides the styling parameters for rendering
 type Paint struct {
-	Off         bool          `desc:"node and everything below it are off, non-rendering"`
+	Off         bool          `desc:"prop: display:none -- node and everything below it are off, non-rendering"`
+	Display     bool          `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
 	StrokeStyle Stroke        `desc:"stroke (line drawing) parameters"`
 	FillStyle   Fill          `desc:"fill (region filling) parameters"`
 	FontStyle   Font          `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
@@ -37,6 +38,7 @@ type Paint struct {
 
 func (pc *Paint) Defaults() {
 	pc.Off = false
+	pc.Display = true
 	pc.StyleSet = false
 	pc.StrokeStyle.Defaults()
 	pc.FillStyle.Defaults()
@@ -48,6 +50,7 @@ func (pc *Paint) Defaults() {
 // CopyStyleFrom copies styles from another paint
 func (pc *Paint) CopyStyleFrom(cp *Paint) {
 	pc.Off = cp.Off
+	pc.Display = cp.Display
 	pc.UnContext = cp.UnContext
 	pc.StrokeStyle = cp.StrokeStyle
 	pc.FillStyle = cp.FillStyle
