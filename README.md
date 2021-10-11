@@ -24,7 +24,7 @@ In addition, GoKi provides functions that traverse the tree in the usual relevan
 ```go
 func (n *MyNode) DoSomethingOnMyTree() {
 	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-		mn := KiToMyNode(k)
+		mn := KiToMyNode(k) // function converts a Ki to relevant node type -- you must write
 		mn.DoSomething()
 		...
 		return ki.Continue // return value determines whether tree traversal continues or not
