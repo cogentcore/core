@@ -546,7 +546,7 @@ func TestNodeCallFun(t *testing.T) {
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[child1, fun_down_me_last, lev 1]", "[subchild1, fun_down_me_last, lev 2]", "[child1_001, fun_down_me_last, lev 1]", "[child1_002, fun_down_me_last, lev 1]", "[par1, fun_down_me_last, lev 0]"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDownDepthFirst error -- results:\n%v\n!= target:\n%v\n", res, trg)
+		t.Errorf("NodeField FuncDownMeLast error -- results:\n%v\n!= target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 
@@ -567,7 +567,7 @@ func TestNodeCallFun(t *testing.T) {
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[child1, fun_down_me_last, lev 1]", "[child1_002, fun_down_me_last, lev 1]", "[par1, fun_down_me_last, lev 0]"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDownDepthFirst error -- results:\n%v\n!= target:\n%v\n", res, trg)
+		t.Errorf("NodeField FuncDownMeLast error -- results:\n%v\n!= target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 
@@ -857,7 +857,7 @@ func TestNodeFieldFunc(t *testing.T) {
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[Field1, fun_down_me_last, lev 1]", "[Field2, fun_down_me_last, lev 1]", "[par2, fun_down_me_last, lev 0]"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDownDepthFirst error -- results:\n%v\n!= target:\n%v\n", res, trg)
+		t.Errorf("NodeField FuncDownMeLast error -- results:\n%v\n!= target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 }

@@ -74,6 +74,25 @@ The [GoPi](https://github.com/goki/pi) interactive parsing framework also levera
 
 * April, 2020: version 1.0.0 release -- all stable and well tested.
 
+# Simple Example 
+
+See `ki/node_test.go` for lots of simple usage examples.  Here's some code from there that makes a tree with a parent and 2 children.
+
+```go
+parent := NodeEmbed{}
+parent.InitName(&parent, "par1") // root must be initialized -- this also names it.
+typ := reflect.TypeOf(parent)
+parent.AddNewChild(typ, "child1") // Add etc methods auto-initialize children
+parent.AddNewChild(typ, "child2")
+
+// traverse the tree calling the parent node first and then its children, recursively
+// "natural" order
+parent.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	fmt.Printf("level: %d  node: %s\n", level, k.Path())
+	return ki.Continue
+})
+```
+
 # Trick for fast finding in a slice
 
 GoKi takes an extra starting index arg for all methods that lookup a value in a slice, such as ChildByName.  The search for the item starts at that index, and goes up and down from there.  Thus, if you have any idea where the item might be in the list, it can save (considerable for large lists) time finding it.
