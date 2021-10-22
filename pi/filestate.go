@@ -38,6 +38,7 @@ type FileState struct {
 	SymsMu     sync.RWMutex   `view:"-" json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
 	WaitGp     sync.WaitGroup `view:"-" json:"-" xml:"-" desc:"waitgroup for coordinating processing of other items"`
 	AnonCtr    int            `view:"-" json:"-" xml:"-" desc:"anonymous counter -- counts up "`
+	PathMap    sync.Map       `view:"-" json:"-" xml:"-" desc:"path mapping cache -- for other files referred to by this file, this stores the full path associated with a logical path (e.g., in go, the logical import path -> local path with actual files) -- protected for access from any thread"`
 }
 
 // Init initializes the file state
@@ -253,4 +254,20 @@ func (fs *FileState) NextAnonName(ctxt string) string {
 		fn = strings.TrimSuffix(fn, ext)
 	}
 	return fmt.Sprintf("anon_%s_%d", ctxt, fs.AnonCtr)
+}
+
+// PathMapLoad does a mutex-protected load of PathMap for given string,
+// returning value and true if found
+func (fs *FileState) PathMapLoad(path string) (string, bool) {
+	fabs, ok := fs.PathMap.Load(path)
+	fs.PathMap.Load(path)
+	if ok {
+		return fabs.(string), ok
+	}
+	return "", ok
+}
+
+// PathMapStore does a mutex-protected store of abs path for given path key
+func (fs *FileState) PathMapStore(path, abs string) {
+	fs.PathMap.Store(path, abs)
 }

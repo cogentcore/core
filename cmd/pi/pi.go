@@ -60,7 +60,8 @@ func DoGoPath(path string) {
 	lp, _ := pi.LangSupport.Props(filecat.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
-	pkgsym := lp.Lang.ParseDir(path, pi.LangDirOpts{Rebuild: true})
+	fs := pi.NewFileState()
+	pkgsym := lp.Lang.ParseDir(fs, path, pi.LangDirOpts{Rebuild: true})
 	if pkgsym != nil {
 		syms.SaveSymDoc(pkgsym, filecat.Go, path)
 	}

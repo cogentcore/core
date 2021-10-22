@@ -90,7 +90,7 @@ type Lang interface {
 	// have a more recent modification date than the cache file.  This returns the
 	// language-appropriate set of symbols for the directory(s), which could then provide
 	// the symbols for a given package, library, or module at that path.
-	ParseDir(path string, opts LangDirOpts) *syms.Symbol
+	ParseDir(fs *FileState, path string, opts LangDirOpts) *syms.Symbol
 
 	// LexLine is a lower-level call (mostly used internally to the language) that
 	// does just the lexing of a given line of the file, using existing context

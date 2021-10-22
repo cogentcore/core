@@ -24,7 +24,7 @@ import (
 
 // ParseDirLock provides a lock protecting parsing of a package directory
 type ParseDirLock struct {
-	Path string
+	Path string     `desc:"logical import path"`
 	Mu   sync.Mutex `json:"-" xml:"-" desc:"mutex protecting processing of this path"`
 }
 
@@ -45,7 +45,7 @@ var TheParseDirs ParseDirLocks
 // used when integrating any external symbols back into another filestate.
 // As long as all the symbol resolution etc is all happening outside of the
 // external syms linking, then it does not need to be protected.
-func (pd *ParseDirLocks) ParseDir(gl *GoLang, path string, opts pi.LangDirOpts) *syms.Symbol {
+func (pd *ParseDirLocks) ParseDir(gl *GoLang, fs *pi.FileState, path string, opts pi.LangDirOpts) *syms.Symbol {
 	pfld := strings.Fields(path)
 	if len(pfld) > 1 { // remove first alias
 		path = pfld[1]
@@ -61,7 +61,7 @@ func (pd *ParseDirLocks) ParseDir(gl *GoLang, path string, opts pi.LangDirOpts) 
 	}
 	pd.Mu.Unlock()
 	ds.Mu.Lock()
-	rsym := gl.ParseDirImpl(path, opts)
+	rsym := gl.ParseDirImpl(fs, path, opts)
 	ds.Mu.Unlock()
 	return rsym
 }
@@ -81,21 +81,71 @@ var ParseDirExcludes = []string{
 }
 
 // ParseDir is the interface call for parsing a directory
-func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
+func (gl *GoLang) ParseDir(fs *pi.FileState, path string, opts pi.LangDirOpts) *syms.Symbol {
 	if path == "" || path == "C" || path[0] == '_' {
 		return nil
 	}
-	return TheParseDirs.ParseDir(gl, path, opts)
+	return TheParseDirs.ParseDir(gl, fs, path, opts)
 }
 
 // ParseDirImpl does the actual work of parsing a directory.
 // Path is assumed to be a package import path or a local file name
-func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
+func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpts) *syms.Symbol {
 	var files []string
 	var pkgPathAbs string
 	gm := os.Getenv("GO111MODULE")
 	if filepath.IsAbs(path) {
 		pkgPathAbs = path
+	} else {
+		pkgPathAbs = path
+		if gm == "off" { // note: using GOPATH manual mechanism as packages.Load is very slow
+			// fmt.Printf("nomod\n")
+			_, err := os.Stat(pkgPathAbs)
+			if os.IsNotExist(err) {
+				pkgPathAbs, err = dirs.GoSrcDir(pkgPathAbs)
+				if err != nil {
+					if TraceTypes {
+						log.Println(err)
+					}
+					return nil
+				}
+			} else if err != nil {
+				log.Println(err.Error())
+				return nil
+			}
+			pkgPathAbs, _ = filepath.Abs(path)
+		} else { // modules mode
+			fabs, has := fs.PathMapLoad(path) // only use cache for modules mode -- GOPATH is fast
+			if has && !opts.Rebuild {         // rebuild always re-paths
+				pkgPathAbs = fabs
+				// fmt.Printf("using cached path: %s to: %s\n", path, pkgPathAbs)
+			} else {
+				// fmt.Printf("mod: loading package: %s\n", path)
+				// packages automatically deals with GOPATH vs. modules, etc.
+				pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, path)
+				if err != nil {
+					log.Println(err)
+					return nil
+				}
+				if len(pkgs) != 1 {
+					fmt.Printf("More than one package for path: %v\n", path)
+					return nil
+				}
+				pkg := pkgs[0]
+
+				if len(pkg.GoFiles) == 0 {
+					// fmt.Printf("No Go files found in package: %v\n", path)
+					return nil
+				}
+				// files = pkg.GoFiles
+				fgo := pkg.GoFiles[0]
+				pkgPathAbs, _ = filepath.Abs(filepath.Dir(fgo))
+				// fmt.Printf("mod: %v  package: %v PkgPath: %s\n", gm, path, pkgPathAbs)
+			}
+			fs.PathMapStore(path, pkgPathAbs) // cache for later
+		}
+		// fmt.Printf("Parsing, loading path: %v\n", path)
+
 		files = dirs.ExtFileNames(pkgPathAbs, []string{".go"})
 		if len(files) == 0 {
 			// fmt.Printf("No go files, bailing\n")
@@ -104,54 +154,6 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 		for i, pt := range files {
 			files[i] = filepath.Join(pkgPathAbs, pt)
 		}
-	} else if gm == "off" { // note: using GOPATH manual mechanism as packages.Load is somehow very slow
-		// fmt.Printf("nomod\n")
-		_, err := os.Stat(path)
-		if os.IsNotExist(err) {
-			path, err = dirs.GoSrcDir(path)
-			if err != nil {
-				if TraceTypes {
-					log.Println(err)
-				}
-				return nil
-			}
-		} else if err != nil {
-			log.Println(err.Error())
-			return nil
-		}
-		pkgPathAbs, _ = filepath.Abs(path)
-		// fmt.Printf("Parsing, loading path: %v\n", path)
-
-		files = dirs.ExtFileNames(path, []string{".go"})
-		if len(files) == 0 {
-			// fmt.Printf("No go files, bailing\n")
-			return nil
-		}
-		for i, pt := range files {
-			files[i] = filepath.Join(pkgPathAbs, pt)
-		}
-	} else {
-		// fmt.Printf("mod\n")
-		// packages automatically deals with GOPATH vs. modules, etc.
-		pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, path)
-		if err != nil {
-			log.Println(err)
-			return nil
-		}
-		if len(pkgs) != 1 {
-			fmt.Printf("More than one package for path: %v\n", path)
-			return nil
-		}
-		pkg := pkgs[0]
-
-		if len(pkg.GoFiles) == 0 {
-			// fmt.Printf("No Go files found in package: %v\n", path)
-			return nil
-		}
-		files = pkg.GoFiles
-		fgo := files[0]
-		pkgPathAbs = filepath.Dir(fgo)
-		// fmt.Printf("GO111MODULE: %v  package: %v PkgPath: %s\n", gm, path, pkgPathAbs)
 	}
 
 	if !opts.Rebuild {
@@ -352,7 +354,7 @@ func (gl *GoLang) AddImportsToExts(fss *pi.FileStates, pfs *pi.FileState, pkg *s
 // assumed to be called as a separate goroutine
 func (gl *GoLang) AddImportToExts(fs *pi.FileState, im string, lock bool) {
 	im, _, pkg := gl.ImportPathPkg(im)
-	psym := gl.ParseDir(im, pi.LangDirOpts{})
+	psym := gl.ParseDir(fs, im, pi.LangDirOpts{})
 	if psym != nil {
 		psym.Name = pkg
 		if lock {
@@ -371,7 +373,7 @@ func (gl *GoLang) AddImportToExts(fs *pi.FileState, im string, lock bool) {
 // AddPathToSyms adds given path into pi.FileState.Syms list
 // Is called as a separate goroutine in ParseFile with WaitGp
 func (gl *GoLang) AddPathToSyms(fs *pi.FileState, path string) {
-	psym := gl.ParseDir(path, pi.LangDirOpts{})
+	psym := gl.ParseDir(fs, path, pi.LangDirOpts{})
 	if psym != nil {
 		gl.AddPkgToSyms(fs, psym)
 	}
@@ -401,7 +403,7 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 // AddPathToExts adds given path into pi.FileState.ExtSyms list
 // assumed to be called as a separate goroutine
 func (gl *GoLang) AddPathToExts(fs *pi.FileState, path string) {
-	psym := gl.ParseDir(path, pi.LangDirOpts{})
+	psym := gl.ParseDir(fs, path, pi.LangDirOpts{})
 	if psym != nil {
 		gl.AddPkgToExts(fs, psym)
 	}

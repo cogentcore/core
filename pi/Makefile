@@ -35,6 +35,7 @@ release:
 	@echo "	VersionDate = \"$(VERS_DATE)\" // UTC" >> $(VERS_FILE)
 	@echo ")" >> $(VERS_FILE)
 	@echo "" >> $(VERS_FILE)
+	goimports -w $(VERS_FILE)
 	/bin/cat $(VERS_FILE)
 	git commit -am "$(VERS) release -- $(VERS_FILE) updated"
 	git tag -a $(VERS) -m "$(VERS) release"
