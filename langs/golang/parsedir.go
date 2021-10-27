@@ -113,7 +113,7 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 				log.Println(err.Error())
 				return nil
 			}
-			pkgPathAbs, _ = filepath.Abs(path)
+			pkgPathAbs, _ = filepath.Abs(pkgPathAbs)
 		} else { // modules mode
 			fabs, has := fs.PathMapLoad(path) // only use cache for modules mode -- GOPATH is fast
 			if has && !opts.Rebuild {         // rebuild always re-paths
