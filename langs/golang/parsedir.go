@@ -145,15 +145,15 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 			fs.PathMapStore(path, pkgPathAbs) // cache for later
 		}
 		// fmt.Printf("Parsing, loading path: %v\n", path)
+	}
 
-		files = dirs.ExtFileNames(pkgPathAbs, []string{".go"})
-		if len(files) == 0 {
-			// fmt.Printf("No go files, bailing\n")
-			return nil
-		}
-		for i, pt := range files {
-			files[i] = filepath.Join(pkgPathAbs, pt)
-		}
+	files = dirs.ExtFileNames(pkgPathAbs, []string{".go"})
+	if len(files) == 0 {
+		// fmt.Printf("No go files, bailing\n")
+		return nil
+	}
+	for i, pt := range files {
+		files[i] = filepath.Join(pkgPathAbs, pt)
 	}
 
 	if !opts.Rebuild {
