@@ -18,7 +18,7 @@ import (
 )
 
 // SaveAfterLearnIntervalSecs is number of seconds since file has been opened / saved
-// above which model is saved after learning.  learnring
+// above which model is saved after learning.
 const SaveAfterLearnIntervalSecs = 20
 
 var (
@@ -58,6 +58,8 @@ func Open(path string) error {
 	var err error
 	openTime, err = ModTime(path)
 	if err != nil {
+		openFPath = path // save for later, so it will save when learning
+		openTime = time.Now()
 		return err
 	}
 	model, err = Load(path)
