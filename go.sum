@@ -47,8 +47,9 @@ github.com/go-gl/mathgl v1.0.0/go.mod h1:yhpkQzEiH9yPyxDUGzkmgScbaBVlhC06qodikEM
 github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff h1:W71vTCKoxtdXgnm1ECDFkfQnpdqAO00zzGXLA5yaEX8=
 github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff/go.mod h1:wfqRWLHRBsRgkp5dmbG56SA0DmVtwrF5N3oPdI8t+Aw=
 github.com/goki/ki v1.0.0/go.mod h1:X+gmVeAym3JDSbbiA7iF1qkgAlTVWl1JV9sRsGDzxOA=
-github.com/goki/ki v1.1.4 h1:sSxwdDCLS5rH3p2624+w/SOQa4l6Kj45V6jsYZjVzpg=
 github.com/goki/ki v1.1.4/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
+github.com/goki/ki v1.1.5 h1:rna/vojrgCkpXt71bL6x9j8g4VtQEyTPwFwmWREPo2k=
+github.com/goki/ki v1.1.5/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
 github.com/goki/mat32 v1.0.9 h1:Xx805FVRn9+vtY9nEY5MBVziKS4CA7Z2/Eo0Y4zifxU=
 github.com/goki/mat32 v1.0.9/go.mod h1:hCV5RDI64Gg16Dc0smHZyLjlJB7oB3LbEmweaWcTiII=
 github.com/goki/pi v1.0.17 h1:eYrCI0HluQfK6YynOUkA++2L6BXNuD7vFWS9Vz1rYp8=
