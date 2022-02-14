@@ -20,6 +20,33 @@ func String(sl []string) []string {
 	return cp
 }
 
+// StringExclude returns a cloned copy of the given string slice
+// while excluding the list of specific items
+func StringExclude(sl, exclude []string) []string {
+	sz := len(sl)
+	if sz == 0 {
+		return nil
+	}
+	if len(exclude) == 0 {
+		return String(sl)
+	}
+	var cp []string
+	for _, s := range sl {
+		ex := false
+		for _, e := range exclude {
+			if e == s {
+				ex = true
+				break
+			}
+		}
+		if ex {
+			continue
+		}
+		cp = append(cp, s)
+	}
+	return cp
+}
+
 // Byte returns a cloned copy of the given byte slice -- returns nil
 // if slice has zero length
 func Byte(sl []byte) []byte {
