@@ -347,6 +347,11 @@ func (vp *Viewport2D) SetCurWin() {
 // DrawIntoParent draws our viewport image into parent's image -- this is the
 // typical way that a sub-viewport renders (e.g., svg boxes, icons, etc -- not popups)
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
+	if parVp.Pixels == nil || vp.Pixels == nil {
+		if Render2DTrace {
+			fmt.Printf("Render: vp DrawIntoParent nil Pixels - no render!: %v parVp: %v\n", vp.Path(), parVp.Path())
+		}
+	}
 	r := vp.Geom.Bounds()
 	sp := image.ZP
 	if vp.Par != nil { // use parents children bbox to determine where we can draw
