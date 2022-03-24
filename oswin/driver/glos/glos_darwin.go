@@ -61,9 +61,14 @@ import (
 /////////////////////////////////////////////////////////////////
 // OS-specific methods
 
-func SetThreadPri(p float64) {
+func SetThreadPri(p float64) error {
 	rv := C.setThreadPri(C.double(p))
-	fmt.Printf("rv: %v\n", rv)
+	if rv != 0 {
+		err := fmt.Errorf("SetThreadPri failed: %v\n", rv)
+		fmt.Println(err)
+		return err
+	}
+	return nil
 }
 
 func (app *appImpl) Platform() oswin.Platforms {
