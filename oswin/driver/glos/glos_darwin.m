@@ -18,7 +18,16 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #import <objc/runtime.h>
+#import <sys/qos.h>
+#import <pthread/qos.h>
 //#import <IOKit/graphics/IOGraphicsLib.h>
+
+int setThreadPri(double p) {
+	return pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE,0);
+// setpriority(PRIO_PROCESS, 0, -20);
+// [NSThread setThreadPriority:p];
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 //   Clipboard / Pasteboard / drag-n-drop

@@ -7,6 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build darwin
 // +build darwin
 
 package glos
@@ -15,6 +16,7 @@ package glos
 #cgo CFLAGS: -x objective-c -Wno-deprecated-declarations
 #cgo LDFLAGS: -framework Cocoa
 #import <Cocoa/Cocoa.h>
+int setThreadPri(double p);
 void clipClear();
 bool clipIsEmpty();
 void clipReadText();
@@ -58,6 +60,11 @@ import (
 
 /////////////////////////////////////////////////////////////////
 // OS-specific methods
+
+func SetThreadPri(p float64) {
+	rv := C.setThreadPri(C.double(p))
+	fmt.Printf("rv: %v\n", rv)
+}
 
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.MacOS

@@ -10,13 +10,11 @@
 package glos
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"log"
 	"sync"
-	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/gi/oswin"
@@ -183,13 +181,14 @@ outer:
 					if !w.Activate() {
 						return
 					}
-					st := time.Now()
+					// note: variably slow on mac m1
+					// st := time.Now()
 					glfw.SwapInterval(0)
 					w.glw.SwapBuffers() // note: implicitly does a flush
 					// note: generally don't need this:
 					// gpu.Draw.Clear(true, true)
-					ed := time.Now()
-					fmt.Printf("d %v\n", ed.Sub(st))
+					// ed := time.Now()
+					// fmt.Printf("d %v\n", ed.Sub(st))
 				})
 				w.publishDone <- struct{}{}
 			}

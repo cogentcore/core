@@ -158,6 +158,7 @@ func (app *appImpl) PollEvents() {
 func (app *appImpl) mainLoop() {
 	app.mainQueue = make(chan funcRun)
 	app.mainDone = make(chan struct{})
+	// SetThreadPri(1)
 	// hasStarted := false
 	for {
 		select {
