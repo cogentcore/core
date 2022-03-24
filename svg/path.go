@@ -85,9 +85,11 @@ func (g *Path) Render2D() {
 	if !vis {
 		return
 	}
+	rs.Lock()
 	pc := &g.Pnt
 	PathDataRender(g.Data, pc, rs)
 	pc.FillStrokeClear(rs)
+	rs.Unlock()
 
 	g.ComputeBBoxSVG()
 
