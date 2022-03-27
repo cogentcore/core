@@ -411,14 +411,14 @@ func (a *Mat2) String() string {
 	}
 	if a.YX == 0 && a.XY == 0 { // no rotation, emit scale and translate
 		str := ""
-		if a.XX != 1 || a.YY != 1 {
-			str = fmt.Sprintf("scale(%g,%g)", a.XX, a.YY)
-		}
 		if a.X0 != 0 || a.Y0 != 0 {
+			str += fmt.Sprintf("translate(%g,%g)", a.X0, a.Y0)
+		}
+		if a.XX != 1 || a.YY != 1 {
 			if str != "" {
 				str += " "
 			}
-			str += fmt.Sprintf("translate(%g,%g)", a.X0, a.Y0)
+			str += fmt.Sprintf("scale(%g,%g)", a.XX, a.YY)
 		}
 		return str
 	}
