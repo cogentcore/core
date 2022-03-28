@@ -389,6 +389,30 @@ func ParentSVG(g *gi.Node2DBase) *SVG {
 	return nil
 }
 
+// IsDefs returns true if is in the Defs of parent SVG viewport
+func IsDefs(g *gi.Node2DBase) bool {
+	sv := ParentSVG(g)
+	if sv == nil {
+		return false
+	}
+	rv := false
+	g.FuncUpParent(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		if k == nil || k.This() == nil || k.IsDeleted() || k.IsDestroyed() {
+			return ki.Break
+		}
+		if k.Parent() == sv.This() {
+			return ki.Break
+		}
+		if k.Parent() == sv.Defs.This() {
+			rv = true
+			return ki.Break
+		}
+		return ki.Continue
+
+	})
+	return rv
+}
+
 func (g *NodeBase) Size2D(iter int) {
 }
 
@@ -477,7 +501,7 @@ func (g *NodeBase) PushXForm() (bool, *girl.State) {
 	nvis := g.VpBBox == image.ZR
 	// g.SetInvisibleState(nvis) // don't set
 
-	if nvis {
+	if nvis && !IsDefs(g.AsNode2D()) {
 		// fmt.Printf("invis: %s  bb: %v  tvp: %v  vpbb: %v  winbb: %v\n", g.Nm, g.BBox, tvp, mvp.VpBBox, g.WinBBox)
 		return false, nil
 	}

@@ -305,9 +305,17 @@ func (g *Text) ApplyXForm(xf mat32.Mat2) {
 		g.SetProp("transform", g.Pnt.XForm.String())
 		g.GradientApplyXForm(xf)
 	} else {
-		g.Pos = xf.MulVec2AsPt(g.Pos)
-		scx, _ := xf.ExtractScale()
-		g.Width *= scx
+		if g.IsParText() {
+			for _, kii := range g.Kids {
+				kt := kii.(*Text)
+				kt.ApplyXForm(xf)
+			}
+		} else {
+			g.Pos = xf.MulVec2AsPt(g.Pos)
+			scx, _ := xf.ExtractScale()
+			g.Width *= scx
+
+		}
 	}
 }
 

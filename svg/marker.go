@@ -5,6 +5,8 @@
 package svg
 
 import (
+	"fmt"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
@@ -112,4 +114,22 @@ func (g *Marker) Render2D() {
 	g.ComputeBBoxSVG() // must come after render
 
 	rs.PopXFormLock()
+}
+
+func (g *Marker) ComputeBBoxSVG() {
+	if g.This() == nil {
+		return
+	}
+	g.BBoxMu.Lock()
+	ni := g.This().(NodeSVG)
+	g.ObjBBox = ni.BBox2D()
+	g.ObjBBox.Canon()
+	pbbox := g.Viewport.This().(gi.Node2D).ChildrenBBox2D()
+	g.VpBBox = pbbox.Intersect(g.ObjBBox)
+	g.BBoxMu.Unlock()
+	g.SetWinBBox()
+
+	if gi.Render2DTrace {
+		fmt.Printf("Render: %v at %v\n", g.Path(), g.VpBBox)
+	}
 }
