@@ -89,7 +89,8 @@ func (g *Circle) ApplyXForm(xf mat32.Mat2) {
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
 func (g *Circle) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	if rot != 0 {
+	crot := g.Pnt.XForm.ExtractRot()
+	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
 		mat := g.Pnt.XForm.MulCtr(xf, lpt)
 		g.Pnt.XForm = mat
