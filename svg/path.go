@@ -906,7 +906,6 @@ func (g *Path) ApplyXForm(xf mat32.Mat2) {
 	// path may have horiz, vert elements -- only gen soln is to transform
 	g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
 	g.SetProp("transform", g.Pnt.XForm.String())
-	g.GradientApplyXForm(xf)
 }
 
 // PathDataXFormAbs does the transform of next two data points as absolute coords

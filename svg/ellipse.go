@@ -75,7 +75,6 @@ func (g *Ellipse) ApplyXForm(xf mat32.Mat2) {
 	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
 		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
 		g.SetProp("transform", g.Pnt.XForm.String())
-		g.GradientApplyXForm(xf)
 	} else {
 		g.Pos = xf.MulVec2AsPt(g.Pos)
 		g.Radii = xf.MulVec2AsVec(g.Radii)

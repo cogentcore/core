@@ -85,7 +85,6 @@ func (g *Line) ApplyXForm(xf mat32.Mat2) {
 	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
 		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
 		g.SetProp("transform", g.Pnt.XForm.String())
-		g.GradientApplyXForm(xf)
 	} else {
 		g.Start = xf.MulVec2AsPt(g.Start)
 		g.End = xf.MulVec2AsPt(g.End)

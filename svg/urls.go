@@ -208,14 +208,13 @@ func GradientWritePts(gr *gist.ColorSpec, dat *[]float32) {
 	if gr.Gradient.Units == rasterx.ObjectBoundingBox {
 		return
 	}
-	if gr.Gradient.IsRadial {
-		*dat = append(*dat, float32(gr.Gradient.Matrix.A))
-		*dat = append(*dat, float32(gr.Gradient.Matrix.B))
-		*dat = append(*dat, float32(gr.Gradient.Matrix.C))
-		*dat = append(*dat, float32(gr.Gradient.Matrix.D))
-		*dat = append(*dat, float32(gr.Gradient.Matrix.E))
-		*dat = append(*dat, float32(gr.Gradient.Matrix.F))
-	} else {
+	*dat = append(*dat, float32(gr.Gradient.Matrix.A))
+	*dat = append(*dat, float32(gr.Gradient.Matrix.B))
+	*dat = append(*dat, float32(gr.Gradient.Matrix.C))
+	*dat = append(*dat, float32(gr.Gradient.Matrix.D))
+	*dat = append(*dat, float32(gr.Gradient.Matrix.E))
+	*dat = append(*dat, float32(gr.Gradient.Matrix.F))
+	if !gr.Gradient.IsRadial {
 		for i := 0; i < 4; i++ {
 			*dat = append(*dat, float32(gr.Gradient.Points[i]))
 		}
@@ -251,20 +250,19 @@ func GradientReadPts(gr *gist.ColorSpec, dat []float32) {
 		return
 	}
 	sz := len(dat)
-	if gr.Gradient.IsRadial { // radial uses transform matrix
-		n := 6
-		gr.Gradient.Matrix.A = float64(dat[(sz-n)+0])
-		gr.Gradient.Matrix.B = float64(dat[(sz-n)+1])
-		gr.Gradient.Matrix.C = float64(dat[(sz-n)+2])
-		gr.Gradient.Matrix.D = float64(dat[(sz-n)+3])
-		gr.Gradient.Matrix.E = float64(dat[(sz-n)+4])
-		gr.Gradient.Matrix.F = float64(dat[(sz-n)+5])
-	} else {
-		n := 4
-		for i := 0; i < n; i++ {
-			gr.Gradient.Points[i] = float64(dat[(sz-n)+i])
+	n := 6
+	if !gr.Gradient.IsRadial {
+		n = 10
+		for i := 0; i < 4; i++ {
+			gr.Gradient.Points[i] = float64(dat[(sz-4)+i])
 		}
 	}
+	gr.Gradient.Matrix.A = float64(dat[(sz-n)+0])
+	gr.Gradient.Matrix.B = float64(dat[(sz-n)+1])
+	gr.Gradient.Matrix.C = float64(dat[(sz-n)+2])
+	gr.Gradient.Matrix.D = float64(dat[(sz-n)+3])
+	gr.Gradient.Matrix.E = float64(dat[(sz-n)+4])
+	gr.Gradient.Matrix.F = float64(dat[(sz-n)+5])
 }
 
 // GradientReadPts reads the geometry of the gradients for this node

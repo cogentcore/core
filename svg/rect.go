@@ -80,7 +80,6 @@ func (g *Rect) ApplyXForm(xf mat32.Mat2) {
 	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
 		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
 		g.SetProp("transform", g.Pnt.XForm.String())
-		g.GradientApplyXForm(xf)
 	} else {
 		g.Pos = xf.MulVec2AsPt(g.Pos)
 		g.Size = xf.MulVec2AsVec(g.Size)
@@ -98,7 +97,6 @@ func (g *Rect) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, 
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
 		g.Pnt.XForm = g.Pnt.XForm.MulCtr(xf, lpt)
 		g.SetProp("transform", g.Pnt.XForm.String())
-		g.GradientApplyXFormPt(xf, lpt)
 	} else {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
 		g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)

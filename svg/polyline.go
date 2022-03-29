@@ -100,7 +100,6 @@ func (g *Polyline) ApplyXForm(xf mat32.Mat2) {
 	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
 		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
 		g.SetProp("transform", g.Pnt.XForm.String())
-		g.GradientApplyXForm(xf)
 	} else {
 		for i, p := range g.Points {
 			p = xf.MulVec2AsPt(p)
