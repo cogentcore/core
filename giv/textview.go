@@ -59,6 +59,7 @@ type TextView struct {
 	CursorPos              lex.Pos                     `json:"-" xml:"-" desc:"current cursor position"`
 	CursorCol              int                         `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
 	ScrollToCursorOnRender bool                        `json:"-" xml:"-" desc:"if true, scroll screen to cursor on next render"`
+	ScrollToCursorPos      lex.Pos                     `json:"-" xml:"-" desc:"cursor position to scroll to"`
 	PosHistIdx             int                         `json:"-" xml:"-" desc:"current index within PosHistory"`
 	SelectStart            lex.Pos                     `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
 	SelectReg              textbuf.Region              `json:"-" xml:"-" desc:"current selection region"`
@@ -4817,12 +4818,13 @@ func (tv *TextView) Render2D() {
 		} else {
 			tv.Sty = tv.StateStyles[TextViewActive]
 		}
-		if tv.ScrollToCursorOnRender {
-			tv.ScrollToCursorOnRender = false
-			tv.ScrollCursorToTop()
-		}
 
 		tv.RenderAllLinesInBounds()
+		if tv.ScrollToCursorOnRender {
+			tv.ScrollToCursorOnRender = false
+			tv.CursorPos = tv.ScrollToCursorPos
+			tv.ScrollCursorToTop()
+		}
 		if tv.HasFocus() && tv.IsFocusActive() {
 			// fmt.Printf("tv render: %v  start cursor\n", tv.Nm)
 			tv.StartCursor()
