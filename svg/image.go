@@ -156,7 +156,9 @@ func (g *Image) Render2D() {
 	if !vis {
 		return
 	}
+	rs.Lock()
 	g.DrawImage()
+	rs.Unlock()
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXFormLock()

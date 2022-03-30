@@ -61,8 +61,10 @@ func (g *Line) Render2D() {
 		return
 	}
 	pc := &g.Pnt
+	rs.Lock()
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Stroke(rs)
+	rs.Unlock()
 	g.ComputeBBoxSVG()
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {

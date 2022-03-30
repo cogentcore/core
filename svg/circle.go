@@ -59,8 +59,10 @@ func (g *Circle) Render2D() {
 		return
 	}
 	pc := &g.Pnt
+	rs.Lock()
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 	pc.FillStrokeClear(rs)
+	rs.Unlock()
 
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()

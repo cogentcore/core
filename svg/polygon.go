@@ -37,8 +37,10 @@ func (g *Polygon) Render2D() {
 		return
 	}
 	pc := &g.Pnt
+	rs.Lock()
 	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)
+	rs.Unlock()
 	g.ComputeBBoxSVG()
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {

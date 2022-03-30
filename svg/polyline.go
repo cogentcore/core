@@ -63,8 +63,10 @@ func (g *Polyline) Render2D() {
 		return
 	}
 	pc := &g.Pnt
+	rs.Lock()
 	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)
+	rs.Unlock()
 	g.ComputeBBoxSVG()
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {

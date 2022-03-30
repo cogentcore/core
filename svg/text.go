@@ -286,7 +286,9 @@ func (g *Text) Render2D() {
 			return
 		}
 		if len(g.Text) > 0 {
+			rs.Lock()
 			g.RenderText()
+			rs.Unlock()
 		}
 		g.Render2DChildren()
 		if g.IsParText() {

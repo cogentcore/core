@@ -61,6 +61,7 @@ func (g *Rect) Render2D() {
 		return
 	}
 	pc := &g.Pnt
+	rs.Lock()
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
@@ -68,6 +69,7 @@ func (g *Rect) Render2D() {
 		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
 	}
 	pc.FillStrokeClear(rs)
+	rs.Unlock()
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
 	rs.PopXFormLock()

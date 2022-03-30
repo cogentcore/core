@@ -49,6 +49,23 @@ func GatherSizesSumMax(ly *Layout) (sumPref, sumNeed, maxPref, maxNeed mat32.Vec
 	if sz == 0 {
 		return
 	}
+
+	if ly.Lay == LayoutStacked && ly.StackTopOnly {
+		sn, err := ly.ChildTry(ly.StackTop)
+		if err != nil {
+			return
+		}
+		ni := sn.(Node2D).AsWidget()
+		if ni == nil {
+			return
+		}
+		sumNeed = sumNeed.Add(ni.LayState.Size.Need)
+		sumPref = sumPref.Add(ni.LayState.Size.Pref)
+		maxNeed = maxNeed.Max(ni.LayState.Size.Need)
+		maxPref = maxPref.Max(ni.LayState.Size.Pref)
+		return
+	}
+
 	for _, c := range ly.Kids {
 		if c == nil {
 			continue
