@@ -446,6 +446,19 @@ func DeleteNodeGradientProp(gii gi.Node2D, prop string) bool {
 	return DeleteNodeGradient(gii, pstr)
 }
 
+// UpdateAllGradientStops removes any items from Defs that are not actually referred to
+// by anything in the current SVG tree.  Returns true if items were removed.
+// Does not remove gradients with StopsName = "" with extant stops -- these
+// should be removed manually, as they are not automatically generated.
+func (sv *SVG) UpdateAllGradientStops() {
+	for _, k := range sv.Defs.Kids {
+		gr, ok := k.(*gi.Gradient)
+		if ok {
+			UpdateGradientStops(gr)
+		}
+	}
+}
+
 const SVGRefCountKey = "SVGRefCount"
 
 func IncRefCount(k ki.Ki) {

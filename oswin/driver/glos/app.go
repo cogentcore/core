@@ -159,7 +159,7 @@ func (app *appImpl) mainLoop() {
 	app.mainQueue = make(chan funcRun)
 	app.mainDone = make(chan struct{})
 	// SetThreadPri(1)
-	// hasStarted := false
+	// time.Sleep(100 * time.Millisecond)
 	for {
 		select {
 		case <-app.mainDone:
@@ -171,13 +171,7 @@ func (app *appImpl) mainLoop() {
 				f.done <- true
 			}
 		default:
-			// if !hasStarted && len(app.windows) == 0 { // starting up
-			// 	time.Sleep(100 * time.Millisecond) // 50 msec is too fast -- still get crash on mac..
-			// } else {
-			// glfw.WaitEvents()
-			// hasStarted = true
 			glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
-			// }
 		}
 	}
 }

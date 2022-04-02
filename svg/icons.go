@@ -72,6 +72,7 @@ func (ic *Icon) CopyFromIcon(cp *Icon) {
 		return
 	}
 	ic.CopyFrom(cp)
+	ic.ViewBox = cp.ViewBox
 	// ic.FullInit2DTree()
 	ic.Rendered = false
 }
@@ -156,9 +157,9 @@ func (im *IconMgr) IsValid(iconName string) bool {
 }
 
 // IconByName is main function to get icon by name -- looks in CurIconSet and
-// falls back to DefaultIconSet if not found there -- returns error and logs a
-// message if not found
-func (im *IconMgr) IconByName(name string) (*Icon, error) {
+// falls back to DefaultIconSet if not found there -- returns error
+// message if not found.  cast result to *svg.Icon
+func (im *IconMgr) IconByName(name string) (ki.Ki, error) {
 	if gi.IconName(name).IsNil() {
 		return nil, nil
 	}
@@ -174,17 +175,18 @@ func (im *IconMgr) IconByName(name string) (*Icon, error) {
 		ic.OpenXML(gi.FileName(ic.Filename))
 		ki.UniquifyNamesAll(ic.This())
 	}
-	return ic, nil
+	return ic.This(), nil
 }
 
 // SetIcon sets the icon by name into given Icon wrapper, returning error
 // message if not found etc.  This is how gi.Icon is initialized from
 // underlying svg.Icon items.
 func (im *IconMgr) SetIcon(ic *gi.Icon, iconName string) error {
-	sic, err := im.IconByName(iconName)
+	sici, err := im.IconByName(iconName)
 	if err != nil {
 		return err
 	}
+	sic := sici.(*Icon)
 	ic.SetNChildren(1, KiT_Icon, "icon")
 	nic := ic.Child(0).(*Icon)
 	nic.CopyFromIcon(sic)

@@ -166,6 +166,11 @@ type IconMgr interface {
 	// underlying svg.Icon items.
 	SetIcon(ic *Icon, iconName string) error
 
+	// IconByName is main function to get icon by name -- looks in CurIconSet and
+	// falls back to DefaultIconSet if not found there -- returns error
+	// message if not found.  cast result to *svg.Icon
+	IconByName(name string) (ki.Ki, error)
+
 	// IconList returns the list of available icon names, optionally sorted
 	// alphabetically (otherwise in map-random order)
 	IconList(alphaSort bool) []IconName
