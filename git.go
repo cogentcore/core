@@ -132,10 +132,15 @@ func (gr *GitRepo) Add(fname string) error {
 
 // Move moves updates the repo with the rename
 func (gr *GitRepo) Move(oldpath, newpath string) error {
-	out, err := gr.RunFromDir("git", "mv", oldpath, newpath)
+	out, err := gr.RunFromDir("git", "mv", RelPath(gr, oldpath), RelPath(gr, newpath))
+	// if err != nil {
+	// 	log.Println(string(out))
+	// 	fmt.Printf("%s\n", out)
+	// 	return err
+	// }
+	out, err = gr.RunFromDir("git", "add", RelPath(gr, newpath))
 	if err != nil {
 		log.Println(string(out))
-		fmt.Printf("%s\n", out)
 		return err
 	}
 	return nil
