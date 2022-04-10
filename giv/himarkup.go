@@ -7,6 +7,7 @@ package giv
 import (
 	stdhtml "html"
 	"log"
+	"math"
 	"strings"
 
 	"github.com/alecthomas/chroma"
@@ -200,9 +201,12 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 	if sz == 0 {
 		return nil
 	}
+	if sz > math.MaxInt32 { // avoid potential overflow
+		sz = math.MaxInt32
+	}
 	ttags := lex.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	nt := len(ttags)
-	if nt == 0 {
+	if nt == 0 || nt > math.MaxInt32 {
 		return HTMLEscapeRunes(txt)
 	}
 	sps := []byte(`<span class="`)
@@ -210,7 +214,7 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 	spe := []byte(`</span>`)
 	taglen := len(sps) + len(sps2) + len(spe) + 2
 
-	musz := sz + len(ttags)*taglen
+	musz := sz + nt*taglen
 	mu := make([]byte, 0, musz)
 
 	cp := 0

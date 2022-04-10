@@ -303,7 +303,7 @@ func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
 	}
 	kns := kc[len(mod):]
 
-	knc, err := strconv.ParseInt(kns, 10, 64)
+	knc, err := strconv.Atoi(kns)
 	if err != nil {
 		return
 	}
