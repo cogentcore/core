@@ -7,7 +7,6 @@ package giv
 import (
 	stdhtml "html"
 	"log"
-	"math"
 	"strings"
 
 	"github.com/alecthomas/chroma"
@@ -193,6 +192,12 @@ func (hm *HiMarkup) ChromaTagsLine(txt []rune) (lex.Line, error) {
 	return tags, nil
 }
 
+// MaxLineLen prevents overflow in allocating line length
+const (
+	MaxLineLen = 64 * 1024 * 1024
+	MaxNTags   = 1024
+)
+
 // MarkupLine returns the line with html class tags added for each tag
 // takes both the hi tags and extra tags.  Only fully nested tags are supported --
 // any dangling ends are truncated.
@@ -201,12 +206,12 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 	if sz == 0 {
 		return nil
 	}
-	if sz > math.MaxInt/2 { // avoid potential overflow
-		sz = math.MaxInt / 2
+	if sz > MaxLineLen { // avoid potential overflow
+		sz = MaxLineLen
 	}
 	ttags := lex.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	nt := len(ttags)
-	if nt == 0 || nt > math.MaxInt/2 {
+	if nt == 0 || nt > MaxNTags {
 		return HTMLEscapeRunes(txt)
 	}
 	sps := []byte(`<span class="`)
