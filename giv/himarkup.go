@@ -201,12 +201,12 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 	if sz == 0 {
 		return nil
 	}
-	if sz > math.MaxInt32 { // avoid potential overflow
-		sz = math.MaxInt32
+	if sz > math.MaxInt/2 { // avoid potential overflow
+		sz = math.MaxInt / 2
 	}
 	ttags := lex.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	nt := len(ttags)
-	if nt == 0 || nt > math.MaxInt32 {
+	if nt == 0 || nt > math.MaxInt/2 {
 		return HTMLEscapeRunes(txt)
 	}
 	sps := []byte(`<span class="`)
