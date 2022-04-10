@@ -8,7 +8,7 @@ require (
 	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc // indirect
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
 	github.com/Knetic/govaluate v3.0.0+incompatible
-	github.com/Masterminds/vcs v1.13.1
+	github.com/Masterminds/vcs v1.13.3
 	github.com/alecthomas/chroma v0.9.4
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/aymerick/douceur v0.2.0
@@ -23,16 +23,16 @@ require (
 	github.com/goki/mat32 v1.0.10
 	github.com/goki/pi v1.0.17
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
-	github.com/goki/vci v1.0.0
+	github.com/goki/vci v1.0.1
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/ianbruene/go-difflib v1.2.0
 	github.com/iancoleman/strcase v0.2.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/srwiley/oksvg v0.0.0-20210209000435-a757b9cbd472 // indirect
+	github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44 // indirect
 	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
-	github.com/srwiley/scanFT v0.0.0-20190309001647-3267585b8d6d // indirect
+	github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
-	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
-	golang.org/x/net v0.0.0-20211020060615-d418f374d309
+	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
+	golang.org/x/net v0.0.0-20211118161319-6a13c67c3ce4
 	golang.org/x/text v0.3.7 // indirect
 )
