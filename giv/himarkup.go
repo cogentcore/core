@@ -220,6 +220,9 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 	taglen := len(sps) + len(sps2) + len(spe) + 2
 
 	musz := sz + nt*taglen
+	if musz > MaxLineLen {
+		musz = MaxLineLen
+	}
 	mu := make([]byte, 0, musz)
 
 	cp := 0

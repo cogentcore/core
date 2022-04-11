@@ -1,6 +1,6 @@
 module github.com/goki/gi
 
-go 1.17
+go 1.15
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
@@ -34,17 +34,8 @@ require (
 	github.com/BurntSushi/graphics-go v0.0.0-20160129215708-b43f31a4a966 // indirect
 	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc // indirect
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
-	github.com/akutz/sortfold v0.2.1 // indirect
-	github.com/dlclark/regexp2 v1.4.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/h2non/filetype v1.1.1 // indirect
-	github.com/jinzhu/copier v0.3.2 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44 // indirect
 	github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f // indirect
-	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/sys v0.0.0-20211020174200-9d6173849985 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.7 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )
