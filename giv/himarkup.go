@@ -202,12 +202,12 @@ const (
 // takes both the hi tags and extra tags.  Only fully nested tags are supported --
 // any dangling ends are truncated.
 func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
+	if len(txt) > MaxLineLen { // avoid overflow
+		return nil
+	}
 	sz := len(txt)
 	if sz == 0 {
 		return nil
-	}
-	if sz > MaxLineLen { // avoid potential overflow
-		sz = MaxLineLen
 	}
 	ttags := lex.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	nt := len(ttags)
@@ -220,9 +220,6 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 	taglen := len(sps) + len(sps2) + len(spe) + 2
 
 	musz := sz + nt*taglen
-	if musz > MaxLineLen {
-		musz = MaxLineLen
-	}
 	mu := make([]byte, 0, musz)
 
 	cp := 0
