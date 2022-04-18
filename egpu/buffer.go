@@ -14,55 +14,13 @@ import (
 	vk "github.com/vulkan-go/vulkan"
 )
 
-// InstanceExts gets a list of instance extensions available on the platform.
-func InstanceExts() (names []string, err error) {
-	defer CheckErr(&err)
-
-	var count uint32
-	ret := vk.EnumerateInstanceExtensionProperties("", &count, nil)
-	IfPanic(NewError(ret))
-	list := make([]vk.ExtensionProperties, count)
-	ret = vk.EnumerateInstanceExtensionProperties("", &count, list)
-	IfPanic(NewError(ret))
-	for _, ext := range list {
-		ext.Deref()
-		names = append(names, vk.ToString(ext.ExtensionName[:]))
-	}
-	return names, err
-}
-
-// DeviceExts gets a list of instance extensions available on the provided physical device.
-func DeviceExts(gpu vk.PhysicalDevice) (names []string, err error) {
-	defer CheckErr(&err)
-
-	var count uint32
-	ret := vk.EnumerateDeviceExtensionProperties(gpu, "", &count, nil)
-	IfPanic(NewError(ret))
-	list := make([]vk.ExtensionProperties, count)
-	ret = vk.EnumerateDeviceExtensionProperties(gpu, "", &count, list)
-	IfPanic(NewError(ret))
-	for _, ext := range list {
-		ext.Deref()
-		names = append(names, vk.ToString(ext.ExtensionName[:]))
-	}
-	return names, err
-}
-
-// ValidationLayers gets a list of validation layers available on the platform.
-func ValidationLayers() (names []string, err error) {
-	defer CheckErr(&err)
-
-	var count uint32
-	ret := vk.EnumerateInstanceLayerProperties(&count, nil)
-	IfPanic(NewError(ret))
-	list := make([]vk.LayerProperties, count)
-	ret = vk.EnumerateInstanceLayerProperties(&count, list)
-	IfPanic(NewError(ret))
-	for _, layer := range list {
-		layer.Deref()
-		names = append(names, vk.ToString(layer.LayerName[:]))
-	}
-	return names, err
+type Buffer struct {
+	// device for destroy purposes.
+	device vk.Device
+	// Buffer is the buffer object.
+	Buffer vk.Buffer
+	// Memory is the device memory backing buffer object.
+	Memory vk.DeviceMemory
 }
 
 func FindRequiredMemoryType(props vk.PhysicalDeviceMemoryProperties,
@@ -97,15 +55,6 @@ func FindRequiredMemoryTypeFallback(props vk.PhysicalDeviceMemoryProperties,
 		return FindRequiredMemoryType(props, deviceRequirements, 0)
 	}
 	return 0, false
-}
-
-type Buffer struct {
-	// device for destroy purposes.
-	device vk.Device
-	// Buffer is the buffer object.
-	Buffer vk.Buffer
-	// Memory is the device memory backing buffer object.
-	Memory vk.DeviceMemory
 }
 
 func (b *Buffer) Destroy() {
@@ -168,15 +117,4 @@ func CreateBuffer(device vk.Device, memProps vk.PhysicalDeviceMemoryProperties,
 		vk.UnmapMemory(device, memory)
 	}
 	return b
-}
-
-func sliceUint32(data []byte) []uint32 {
-	const m = 0x7fffffff
-	return (*[m / 4]uint32)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&data)).Data))[:len(data)/4]
-}
-
-type sliceHeader struct {
-	Data uintptr
-	Len  int
-	Cap  int
 }
