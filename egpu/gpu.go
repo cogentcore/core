@@ -17,14 +17,17 @@ import (
 
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/
 
+// TheGPU is a global for the GPU
+var TheGPU *GPU
+
 // GPU represents the GPU hardware
 type GPU struct {
 	Instance vk.Instance
-	Gpu      vk.PhysicalDevice
-	Device   vk.Device `desc:"generic graphics device, for framebuffer rendering etc"`
+	GPU      vk.PhysicalDevice
 
-	QueueIndex uint32   `desc:"queue index for generic graphics device"`
-	Queue      vk.Queue `desc:"queue for generic graphics device"`
+	Device     vk.Device `desc:"generic graphics device, for framebuffer rendering etc"`
+	QueueIndex uint32    `desc:"queue index for generic graphics device"`
+	Queue      vk.Queue  `desc:"queue for generic graphics device"`
 
 	GpuProps    vk.PhysicalDeviceProperties
 	MemoryProps vk.PhysicalDeviceMemoryProperties
@@ -47,6 +50,7 @@ func (gp *GPU) Defaults() {
 
 func (gp *GPU) Init(name string, debug bool) error {
 	gp.Name = name
+	TheGPU = gp
 
 	// Select instance extensions
 	requiredInstanceExts := SafeStrings(gp.InstanceExts)
@@ -112,15 +116,15 @@ func (gp *GPU) Init(name string, debug bool) error {
 	ret = vk.EnumeratePhysicalDevices(gp.Instance, &gpuCount, gpus)
 	IfPanic(NewError(ret))
 	// get the first one, multiple GPUs not supported yet
-	gp.Gpu = gpus[0]
-	vk.GetPhysicalDeviceProperties(gp.Gpu, &gp.GpuProps)
+	gp.GPU = gpus[0]
+	vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GpuProps)
 	gp.GpuProps.Deref()
-	vk.GetPhysicalDeviceMemoryProperties(gp.Gpu, &gp.MemoryProps)
+	vk.GetPhysicalDeviceMemoryProperties(gp.GPU, &gp.MemoryProps)
 	gp.MemoryProps.Deref()
 
 	// Select device extensions
 	requiredDeviceExts := SafeStrings(gp.DeviceExts)
-	actualDeviceExts, err := DeviceExts(gp.Gpu)
+	actualDeviceExts, err := DeviceExts(gp.GPU)
 	IfPanic(err)
 	deviceExts, missing := CheckExisting(actualDeviceExts, requiredDeviceExts)
 	if missing > 0 {
@@ -134,17 +138,16 @@ func (gp *GPU) Init(name string, debug bool) error {
 func (gp *GPU) InitGraphicsDevice() error {
 	// Get queue family properties
 	var queueCount uint32
-	vk.GetPhysicalDeviceQueueFamilyProperties(gp.Gpu, &queueCount, nil)
+	vk.GetPhysicalDeviceQueueFamilyProperties(gp.GPU, &queueCount, nil)
 	queueProperties := make([]vk.QueueFamilyProperties, queueCount)
-	vk.GetPhysicalDeviceQueueFamilyProperties(gp.Gpu, &queueCount, queueProperties)
+	vk.GetPhysicalDeviceQueueFamilyProperties(gp.GPU, &queueCount, queueProperties)
 	if queueCount == 0 { // probably should try another GPU
 		return errors.New("vulkan error: no queue families found on GPU 0")
 	}
 
 	// Find a suitable queue family for the target Vulkan mode
 	found := false
-	var required vk.QueueFlags
-	required |= vk.QueueFlags(vk.QueueGraphicsBit)
+	required := vk.QueueFlags(vk.QueueGraphicsBit)
 	for i := uint32(0); i < queueCount; i++ {
 		queueProperties[i].Deref()
 		if queueProperties[i].QueueFlags&required != 0 {
@@ -166,7 +169,7 @@ func (gp *GPU) InitGraphicsDevice() error {
 	}}
 
 	var device vk.Device
-	ret := vk.CreateDevice(gp.Gpu, &vk.DeviceCreateInfo{
+	ret := vk.CreateDevice(gp.GPU, &vk.DeviceCreateInfo{
 		SType:                   vk.StructureTypeDeviceCreateInfo,
 		QueueCreateInfoCount:    uint32(len(queueInfos)),
 		PQueueCreateInfos:       queueInfos,

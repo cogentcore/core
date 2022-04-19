@@ -15,12 +15,69 @@ import (
 
 // SwapchainDims describes the size and format of the swapchain.
 type SwapchainDims struct {
-	// Width of the swapchain.
-	Width uint32
-	// Height of the swapchain.
-	Height uint32
-	// Format is the pixel format of the swapchain.
-	Format vk.Format
+	Width  uint32    `desc:"Width of the swapchain -- should be window width"`
+	Height uint32    `desc:"Height of the swapchain  -- should be window height"`
+	Format vk.Format `desc:"Format is the pixel format of the swapchain."`
+}
+
+func (sd *SwapchainDims) Set(w, h uint32, ft vk.Format) {
+	sd.Width = w
+	sd.Height = h
+	sd.Format = ft
+}
+
+type ImageResources struct {
+	Image vk.Image
+	View  vk.ImageView
+	// CmdBuff              vk.CommandBuffer
+	GraphicsToPresentCmd vk.CommandBuffer
+	// Framebuffer   vk.Framebuffer
+	// DescriptorSet vk.DescriptorSet
+	//
+	// UniformBuffer vk.Buffer
+	// UniformMemory vk.DeviceMemory
+}
+
+func (s *ImageResources) Destroy(dev vk.Device, CmdPool ...vk.CommandPool) {
+	// vk.DestroyFramebuffer(dev, s.Framebuffer, nil)
+	// vk.DestroyImageView(dev, s.View, nil)
+	// if len(CmdPool) > 0 {
+	// 	vk.FreeCommandBuffers(dev, CmdPool[0], 1, []vk.CommandBuffer{
+	// 		s.CmdBuff,
+	// 	})
+	// }
+	// vk.DestroyBuffer(dev, s.UniformBuffer, nil)
+	// vk.FreeMemory(dev, s.UniformMemory, nil)
+}
+
+func (s *ImageResources) SetImageOwnership(graphicsQueueIndex, presentQueueIndex uint32) {
+	ret := vk.BeginCommandBuffer(s.GraphicsToPresentCmd, &vk.CommandBufferBeginInfo{
+		SType: vk.StructureTypeCommandBufferBeginInfo,
+		Flags: vk.CommandBufferUsageFlags(vk.CommandBufferUsageSimultaneousUseBit),
+	})
+	IfPanic(NewError(ret))
+
+	vk.CmdPipelineBarrier(s.GraphicsToPresentCmd,
+		vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
+		vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
+		0, 0, nil, 0, nil, 1, []vk.ImageMemoryBarrier{{
+			SType:               vk.StructureTypeImageMemoryBarrier,
+			DstAccessMask:       vk.AccessFlags(vk.AccessColorAttachmentWriteBit),
+			OldLayout:           vk.ImageLayoutPresentSrc,
+			NewLayout:           vk.ImageLayoutPresentSrc,
+			SrcQueueFamilyIndex: graphicsQueueIndex,
+			DstQueueFamilyIndex: presentQueueIndex,
+			Image:               s.Image,
+
+			SubresourceRange: vk.ImageSubresourceRange{
+				AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
+				LevelCount: 1,
+				LayerCount: 1,
+			},
+		}})
+
+	ret = vk.EndCommandBuffer(s.GraphicsToPresentCmd)
+	IfPanic(NewError(ret))
 }
 
 // Surface manages the swapchain for presenting images to a window surface
@@ -48,21 +105,12 @@ type Surface struct {
 	// image resource buffers.
 	OnInvalidate func(imageIdx int) error
 
-	PresentQueueIndex uint32
-	PresentQueue      vk.Queue
-
-	GraphicsQueueIndex uint32 // todo: unclear if we need this
-	GraphicsQueue      vk.Queue
-
-	CmdBuff vk.CommandBuffer
-
-	CmdPool        vk.CommandPool
-	PresentCmdPool vk.CommandPool
-
-	Swapchain vk.Swapchain
-
-	// SwapchainDims has the current swapchain dimensions, including pixel format.
-	SwapchainDims *SwapchainDims
+	QueueIndex uint32
+	Queue      vk.Queue
+	CmdPool    vk.CommandPool
+	CmdBuff    vk.CommandBuffer
+	Swapchain  vk.Swapchain
+	Dims       SwapchainDims `desc:"has the current swapchain dimensions, including pixel format."`
 
 	// ImageResources exposes the swapchain initialized image resources.
 	ImageResources []*ImageResources
@@ -77,310 +125,79 @@ type Surface struct {
 }
 
 func (sf *Surface) Defaults() {
-	sf.FrameLag = 3
+	sf.FrameLag = 2
+	sf.Dims.Set(1024, 768, vk.FormatB8g8r8a8Unorm) // todo: get from window
 }
 
 // Init initializes the device for the surface
-func (sf *Surface) Init(gp *GPU) {
+func (sf *Surface) Init(gp *GPU) error {
 	sf.GPU = gp
 	// Get queue family properties
 	var queueCount uint32
-	vk.GetPhysicalDeviceQueueFamilyProperties(sf.GPU.Gpu, &queueCount, nil)
+	vk.GetPhysicalDeviceQueueFamilyProperties(sf.GPU.GPU, &queueCount, nil)
 	queueProperties := make([]vk.QueueFamilyProperties, queueCount)
-	vk.GetPhysicalDeviceQueueFamilyProperties(sf.GPU.Gpu, &queueCount, queueProperties)
+	vk.GetPhysicalDeviceQueueFamilyProperties(sf.GPU.GPU, &queueCount, queueProperties)
 	if queueCount == 0 { // probably should try another GPU
-		return nil, errors.New("vulkan error: no queue families found on GPU 0")
+		return errors.New("vulkan error: no queue families found on GPU 0")
 	}
 
 	// Find a suitable queue family for the target Vulkan mode
 	found := false
 	for i := uint32(0); i < queueCount; i++ {
 		var supportsPresent vk.Bool32
-		vk.GetPhysicalDeviceSurfaceSupport(sf.Gpu, i, sf.Surface, &supportsPresent)
+		vk.GetPhysicalDeviceSurfaceSupport(sf.GPU.GPU, i, sf.Surface, &supportsPresent)
 		if supportsPresent.B() {
-			sf.PresentQueueIndex = i
+			sf.QueueIndex = i
 			found = true
 			break
 		}
-		// if mode.Has(Compute) {
-		// 	required |= vk.QueueFlags(vk.QueueComputeBit)
-		// }
-		// if mode.Has(Graphics) {
-		// 	required |= vk.QueueFlags(vk.QueueGraphicsBit)
-		// }
-		vk.GetPhysicalDeviceSurfaceSupport(sf.Gpu, i, sf.Surface, &supportsPresent)
-		if supportsPresent.B() {
-			sf.PresentQueueIndex = i
-			break
-		}
-		// queueProperties[i].Deref()
-		// if queueProperties[i].QueueFlags&required != 0 {
-		// 	if !needsPresent || (needsPresent && supportsPresent.B()) {
-		// 		sf.GraphicsQueueIndex = i
-		// 		graphicsFound = true
-		// 		break
-		// 	} else if needsPresent {
-		// 		sf.GraphicsQueueIndex = i
-		// 		graphicsFound = true
-		// 		// need present, but this one doesn't support
-		// 		// continue lookup
-		// 	}
-		// }
 	}
 	if !found {
 		err := errors.New("Surface vulkan error: could not found queue with present capabilities")
-		return nil, err
+		return err
 	}
 
-	queueInfos = append(queueInfos, vk.DeviceQueueCreateInfo{
+	queueInfos := []vk.DeviceQueueCreateInfo{{
 		SType:            vk.StructureTypeDeviceQueueCreateInfo,
-		QueueFamilyIndex: sf.PresentQueueIndex,
+		QueueFamilyIndex: sf.QueueIndex,
 		QueueCount:       1,
 		PQueuePriorities: []float32{1.0},
-	})
+	}}
 
 	var device vk.Device
-	ret = vk.CreateDevice(sf.Gpu.Gpu, &vk.DeviceCreateInfo{
+	ret := vk.CreateDevice(sf.GPU.GPU, &vk.DeviceCreateInfo{
 		SType:                   vk.StructureTypeDeviceCreateInfo,
 		QueueCreateInfoCount:    uint32(len(queueInfos)),
 		PQueueCreateInfos:       queueInfos,
-		EnabledExtensionCount:   uint32(len(deviceExts)),
-		PpEnabledExtensionNames: deviceExts,
-		EnabledLayerCount:       uint32(len(validationLayers)),
-		PpEnabledLayerNames:     validationLayers,
+		EnabledExtensionCount:   uint32(len(sf.GPU.DeviceExts)),
+		PpEnabledExtensionNames: sf.GPU.DeviceExts,
+		EnabledLayerCount:       uint32(len(sf.GPU.ValidationLayers)),
+		PpEnabledLayerNames:     sf.GPU.ValidationLayers,
 	}, nil, &device)
 	IfPanic(NewError(ret))
 	sf.Device = device
 
 	var queue vk.Queue
-	vk.GetDeviceQueue(sf.Device, sf.PresentQueueIndex, 0, &queue)
-	sf.PresentQueue = queue
+	vk.GetDeviceQueue(sf.Device, sf.QueueIndex, 0, &queue)
+	sf.Queue = queue
 
-	return sf, nil
+	sf.PrepareSwapchain()
+
+	return nil
 }
 
-func (sf *Surface) PreparePresent() {
-	// Create semaphores to synchronize acquiring presentable buffers before
-	// rendering and waiting for drawing to be complete before presenting
-	semaphoreCreateInfo := &vk.SemaphoreCreateInfo{
-		SType: vk.StructureTypeSemaphoreCreateInfo,
-	}
-	sf.ImageAcquiredSemaphores = make([]vk.Semaphore, sf.FrameLag)
-	sf.DrawCompleteSemaphores = make([]vk.Semaphore, sf.FrameLag)
-	sf.ImageOwnershipSemaphores = make([]vk.Semaphore, sf.FrameLag)
-	for i := 0; i < sf.FrameLag; i++ {
-		ret := vk.CreateSemaphore(sf.Device, semaphoreCreateInfo, nil, &sf.ImageAcquiredSemaphores[i])
-		IfPanic(NewError(ret))
-		ret = vk.CreateSemaphore(sf.Device, semaphoreCreateInfo, nil, &sf.DrawCompleteSemaphores[i])
-		IfPanic(NewError(ret))
-		if sf.GPU.HasSeparatePresentQueue() {
-			ret = vk.CreateSemaphore(sf.Device, semaphoreCreateInfo, nil, &sf.ImageOwnershipSemaphores[i])
-			IfPanic(NewError(ret))
-		}
-	}
-}
-
-func (sf *Surface) Destroy() {
-	func() (err error) {
-		CheckErr(&err)
-		if sf.OnCleanup != nil {
-			err = sf.OnCleanup()
-		}
-		return
-	}()
-
-	for i := 0; i < sf.FrameLag; i++ {
-		vk.DestroySemaphore(sf.Device, sf.ImageAcquiredSemaphores[i], nil)
-		vk.DestroySemaphore(sf.Device, sf.DrawCompleteSemaphores[i], nil)
-		if sf.GPU.HasSeparatePresentQueue() {
-			vk.DestroySemaphore(sf.Device, sf.ImageOwnershipSemaphores[i], nil)
-		}
-	}
-	for i := 0; i < len(sf.ImageResources); i++ {
-		sf.ImageResources[i].Destroy(sf.Device, sf.CmdPool)
-	}
-	sf.ImageResources = nil
-	if sf.Swapchain != vk.NullSwapchain {
-		vk.DestroySwapchain(sf.Device, sf.Swapchain, nil)
-		sf.Swapchain = vk.NullSwapchain
-	}
-	vk.DestroyCommandPool(sf.Device, sf.CmdPool, nil)
-	if sf.GPU.HasSeparatePresentQueue() {
-		vk.DestroyCommandPool(sf.Device, sf.PresentCmdPool, nil)
-	}
-	if sf.Surface != vk.NullSurface {
-		vk.DestroySurface(sf.GPU.Instance, sf.Surface, nil)
-		sf.Surface = vk.NullSurface
-	}
-	if sf.Device != nil {
-		vk.DeviceWaitIdle(sf.Device)
-		vk.DestroyDevice(sf.Device, nil)
-		sf.Device = nil
-	}
-	sf.GPU = nil
-}
-
-func (sf *Surface) Prepare(needCleanup bool) {
-	vk.DeviceWaitIdle(sf.Device)
-
-	if needCleanup {
-		if sf.OnCleanup != nil {
-			IfPanic(sf.OnCleanup())
-		}
-
-		vk.DestroyCommandPool(sf.Device, sf.CmdPool, nil)
-		if sf.GPU.HasSeparatePresentQueue() {
-			vk.DestroyCommandPool(sf.Device, sf.PresentCmdPool, nil)
-		}
-	}
-
-	if sf.GPU.HasSeparatePresentQueue() {
-		var presentQueue vk.Queue
-		vk.GetDeviceQueue(sf.Device, sf.PresentQueueIndex, 0, &presentQueue)
-		sf.PresQueue = presentQueue
-	}
-
-	var CmdPool vk.CommandPool
-	ret := vk.CreateCommandPool(sf.Device, &vk.CommandPoolCreateInfo{
-		SType:            vk.StructureTypeCommandPoolCreateInfo,
-		QueueFamilyIndex: sf.GPU.GraphicsQueueIndex,
-	}, nil, &CmdPool)
-	IfPanic(NewError(ret))
-	sf.CmdPool = CmdPool
-
-	var CmdBuff = make([]vk.CommandBuffer, 1)
-	ret = vk.AllocateCommandBuffers(sf.Device, &vk.CommandBufferAllocateInfo{
-		SType:              vk.StructureTypeCommandBufferAllocateInfo,
-		CommandPool:        sf.CmdPool,
-		Level:              vk.CommandBufferLevelPrimary,
-		CommandBufferCount: 1,
-	}, CmdBuff)
-	IfPanic(NewError(ret))
-	sf.CmdBuff = CmdBuff[0]
-
-	ret = vk.BeginCommandBuffer(sf.CmdBuff, &vk.CommandBufferBeginInfo{
-		SType: vk.StructureTypeCommandBufferBeginInfo,
-	})
-	IfPanic(NewError(ret))
-
-	for i := 0; i < len(sf.ImageResources); i++ {
-		var CmdBuff = make([]vk.CommandBuffer, 1)
-		vk.AllocateCommandBuffers(sf.Device, &vk.CommandBufferAllocateInfo{
-			SType:              vk.StructureTypeCommandBufferAllocateInfo,
-			CommandPool:        sf.CmdPool,
-			Level:              vk.CommandBufferLevelPrimary,
-			CommandBufferCount: 1,
-		}, CmdBuff)
-		IfPanic(NewError(ret))
-		sf.ImageResources[i].CmdBuff = CmdBuff[0]
-	}
-
-	if sf.GPU.HasSeparatePresentQueue() {
-		var CmdPool vk.CommandPool
-		ret = vk.CreateCommandPool(sf.Device, &vk.CommandPoolCreateInfo{
-			SType:            vk.StructureTypeCommandPoolCreateInfo,
-			QueueFamilyIndex: sf.GPU.PresentQueueIndex,
-		}, nil, &CmdPool)
-		IfPanic(NewError(ret))
-		sf.PresentCmdPool = CmdPool
-
-		for i := 0; i < len(sf.ImageResources); i++ {
-			var CmdBuff = make([]vk.CommandBuffer, 1)
-			ret = vk.AllocateCommandBuffers(sf.Device, &vk.CommandBufferAllocateInfo{
-				SType:              vk.StructureTypeCommandBufferAllocateInfo,
-				CommandPool:        sf.PresentCmdPool,
-				Level:              vk.CommandBufferLevelPrimary,
-				CommandBufferCount: 1,
-			}, CmdBuff)
-			IfPanic(NewError(ret))
-			sf.ImageResources[i].GraphicsToPresentCmd = CmdBuff[0]
-
-			sf.ImageResources[i].SetImageOwnership(
-				sf.GPU.GraphicsQueueIndex, sf.GPU.PresentQueueIndex)
-		}
-	}
-
-	for i := 0; i < len(sf.ImageResources); i++ {
-		var view vk.ImageView
-		ret = vk.CreateImageView(sf.Device, &vk.ImageViewCreateInfo{
-			SType:  vk.StructureTypeImageViewCreateInfo,
-			Format: sf.SwapchainDims.Format,
-			Components: vk.ComponentMapping{
-				R: vk.ComponentSwizzleR,
-				G: vk.ComponentSwizzleG,
-				B: vk.ComponentSwizzleB,
-				A: vk.ComponentSwizzleA,
-			},
-			SubresourceRange: vk.ImageSubresourceRange{
-				AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
-				LevelCount: 1,
-				LayerCount: 1,
-			},
-			ViewType: vk.ImageViewType2d,
-			Image:    sf.ImageResources[i].Image,
-		}, nil, &view)
-		IfPanic(NewError(ret))
-		sf.ImageResources[i].View = view
-	}
-
-	if sf.OnPrepare != nil {
-		IfPanic(sf.OnPrepare())
-	}
-	sf.FlushInitCmd()
-
-	dims := &SwapchainDims{
-		// some default preferences here
-		Width: 640, Height: 480,
-		Format: vk.FormatB8g8r8a8Unorm,
-	}
-	// if iface, ok := app.(AppSwapchainDims); ok {
-	// 	dimensions = iface.SwapchainDims()
-	// }
-	sf.PrepareSwapchain(sf.Gpu, sf.Surface, dims)
-}
-
-func (sf *Surface) FlushInitCmd() {
-	if sf.CmdBuff == nil {
-		return
-	}
-	ret := vk.EndCommandBuffer(sf.CmdBuff)
-	IfPanic(NewError(ret))
-
-	var fence vk.Fence
-	ret = vk.CreateFence(sf.Device, &vk.FenceCreateInfo{
-		SType: vk.StructureTypeFenceCreateInfo,
-	}, nil, &fence)
-	IfPanic(NewError(ret))
-
-	cmdBufs := []vk.CommandBuffer{sf.CmdBuff}
-	ret = vk.QueueSubmit(sf.GPU.GraphicsQueue, 1, []vk.SubmitInfo{{
-		SType:              vk.StructureTypeSubmitInfo,
-		CommandBufferCount: 1,
-		PCommandBuffers:    cmdBufs,
-	}}, fence)
-	IfPanic(NewError(ret))
-
-	ret = vk.WaitForFences(sf.Device, 1, []vk.Fence{fence}, vk.True, vk.MaxUint64)
-	IfPanic(NewError(ret))
-
-	vk.FreeCommandBuffers(sf.Device, sf.CmdPool, 1, cmdBufs)
-	vk.DestroyFence(sf.Device, fence, nil)
-	sf.CmdBuff = nil
-}
-
-func (sf *Surface) PrepareSwapchain(gpu vk.PhysicalDevice, surface vk.Surface, dims *SwapchainDims) {
-
-	// Read surface capabilities
+func (sf *Surface) PrepareSwapchain() {
+	// Read sf.Surface capabilities
 	var surfaceCapabilities vk.SurfaceCapabilities
-	ret := vk.GetPhysicalDeviceSurfaceCapabilities(gpu, surface, &surfaceCapabilities)
+	ret := vk.GetPhysicalDeviceSurfaceCapabilities(sf.GPU.GPU, sf.Surface, &surfaceCapabilities)
 	IfPanic(NewError(ret))
 	surfaceCapabilities.Deref()
 
 	// Get available surface pixel formats
 	var formatCount uint32
-	vk.GetPhysicalDeviceSurfaceFormats(gpu, surface, &formatCount, nil)
+	vk.GetPhysicalDeviceSurfaceFormats(sf.GPU.GPU, sf.Surface, &formatCount, nil)
 	formats := make([]vk.SurfaceFormat, formatCount)
-	vk.GetPhysicalDeviceSurfaceFormats(gpu, surface, &formatCount, formats)
+	vk.GetPhysicalDeviceSurfaceFormats(sf.GPU.GPU, sf.Surface, &formatCount, formats)
 
 	// Select a proper surface format
 	var format vk.SurfaceFormat
@@ -388,7 +205,7 @@ func (sf *Surface) PrepareSwapchain(gpu vk.PhysicalDevice, surface vk.Surface, d
 		formats[0].Deref()
 		if formats[0].Format == vk.FormatUndefined {
 			format = formats[0]
-			format.Format = dims.Format
+			format.Format = sf.Dims.Format
 		} else {
 			format = formats[0]
 		}
@@ -404,11 +221,12 @@ func (sf *Surface) PrepareSwapchain(gpu vk.PhysicalDevice, surface vk.Surface, d
 	var swapchainSize vk.Extent2D
 	surfaceCapabilities.CurrentExtent.Deref()
 	if surfaceCapabilities.CurrentExtent.Width == vk.MaxUint32 {
-		swapchainSize.Width = dims.Width
-		swapchainSize.Height = dims.Height
+		swapchainSize.Width = sf.Dims.Width
+		swapchainSize.Height = sf.Dims.Height
 	} else {
 		swapchainSize = surfaceCapabilities.CurrentExtent
 	}
+
 	// The FIFO present mode is guaranteed by the spec to be supported
 	// and to have no tearing.  It's a great default present mode to use.
 	swapchainPresentMode := vk.PresentModeFifo
@@ -454,7 +272,7 @@ func (sf *Surface) PrepareSwapchain(gpu vk.PhysicalDevice, surface vk.Surface, d
 	oldSwapchain := sf.Swapchain
 	ret = vk.CreateSwapchain(sf.Device, &vk.SwapchainCreateInfo{
 		SType:           vk.StructureTypeSwapchainCreateInfo,
-		Surface:         surface,
+		Surface:         sf.Surface,
 		MinImageCount:   desiredSwapchainImages, // 1 - 3?
 		ImageFormat:     format.Format,
 		ImageColorSpace: format.ColorSpace,
@@ -476,12 +294,7 @@ func (sf *Surface) PrepareSwapchain(gpu vk.PhysicalDevice, surface vk.Surface, d
 		vk.DestroySwapchain(sf.Device, oldSwapchain, nil)
 	}
 	sf.Swapchain = swapchain
-
-	sf.SwapchainDims = &SwapchainDims{
-		Width:  swapchainSize.Width,
-		Height: swapchainSize.Height,
-		Format: format.Format,
-	}
+	sf.Dims.Set(swapchainSize.Width, swapchainSize.Width, format.Format)
 
 	var imageCount uint32
 	ret = vk.GetSwapchainImages(sf.Device, sf.Swapchain, &imageCount, nil)
@@ -498,6 +311,153 @@ func (sf *Surface) PrepareSwapchain(gpu vk.PhysicalDevice, surface vk.Surface, d
 			Image: swapchainImages[i],
 		})
 	}
+
+	sf.Prepare(false)
+}
+
+func (sf *Surface) PreparePresent() {
+	// Create semaphores to synchronize acquiring presentable buffers before
+	// rendering and waiting for drawing to be complete before presenting
+	semaphoreCreateInfo := &vk.SemaphoreCreateInfo{
+		SType: vk.StructureTypeSemaphoreCreateInfo,
+	}
+	sf.ImageAcquiredSemaphores = make([]vk.Semaphore, sf.FrameLag)
+	sf.DrawCompleteSemaphores = make([]vk.Semaphore, sf.FrameLag)
+	sf.ImageOwnershipSemaphores = make([]vk.Semaphore, sf.FrameLag)
+	for i := 0; i < sf.FrameLag; i++ {
+		ret := vk.CreateSemaphore(sf.Device, semaphoreCreateInfo, nil, &sf.ImageAcquiredSemaphores[i])
+		IfPanic(NewError(ret))
+		ret = vk.CreateSemaphore(sf.Device, semaphoreCreateInfo, nil, &sf.DrawCompleteSemaphores[i])
+		IfPanic(NewError(ret))
+		ret = vk.CreateSemaphore(sf.Device, semaphoreCreateInfo, nil, &sf.ImageOwnershipSemaphores[i])
+		IfPanic(NewError(ret))
+	}
+}
+
+func (sf *Surface) Destroy() {
+	func() (err error) {
+		CheckErr(&err)
+		if sf.OnCleanup != nil {
+			err = sf.OnCleanup()
+		}
+		return
+	}()
+
+	for i := 0; i < sf.FrameLag; i++ {
+		vk.DestroySemaphore(sf.Device, sf.ImageAcquiredSemaphores[i], nil)
+		vk.DestroySemaphore(sf.Device, sf.DrawCompleteSemaphores[i], nil)
+		vk.DestroySemaphore(sf.Device, sf.ImageOwnershipSemaphores[i], nil)
+	}
+	for i := 0; i < len(sf.ImageResources); i++ {
+		sf.ImageResources[i].Destroy(sf.Device, sf.CmdPool)
+	}
+	sf.ImageResources = nil
+	if sf.Swapchain != vk.NullSwapchain {
+		vk.DestroySwapchain(sf.Device, sf.Swapchain, nil)
+		sf.Swapchain = vk.NullSwapchain
+	}
+	vk.DestroyCommandPool(sf.Device, sf.CmdPool, nil)
+	if sf.Surface != vk.NullSurface {
+		vk.DestroySurface(sf.GPU.Instance, sf.Surface, nil)
+		sf.Surface = vk.NullSurface
+	}
+	if sf.Device != nil {
+		vk.DeviceWaitIdle(sf.Device)
+		vk.DestroyDevice(sf.Device, nil)
+		sf.Device = nil
+	}
+	sf.GPU = nil
+}
+
+func (sf *Surface) Prepare(needCleanup bool) {
+	vk.DeviceWaitIdle(sf.Device)
+
+	if needCleanup {
+		if sf.OnCleanup != nil {
+			IfPanic(sf.OnCleanup())
+		}
+		vk.DestroyCommandPool(sf.Device, sf.CmdPool, nil)
+		var presentQueue vk.Queue
+		vk.GetDeviceQueue(sf.Device, sf.QueueIndex, 0, &presentQueue)
+		sf.Queue = presentQueue
+	}
+
+	var CmdPool vk.CommandPool
+	ret := vk.CreateCommandPool(sf.Device, &vk.CommandPoolCreateInfo{
+		SType:            vk.StructureTypeCommandPoolCreateInfo,
+		QueueFamilyIndex: sf.GPU.QueueIndex,
+	}, nil, &CmdPool)
+	IfPanic(NewError(ret))
+	sf.CmdPool = CmdPool
+
+	for i := 0; i < len(sf.ImageResources); i++ {
+		var CmdBuff = make([]vk.CommandBuffer, 1)
+		ret = vk.AllocateCommandBuffers(sf.Device, &vk.CommandBufferAllocateInfo{
+			SType:              vk.StructureTypeCommandBufferAllocateInfo,
+			CommandPool:        sf.CmdPool,
+			Level:              vk.CommandBufferLevelPrimary,
+			CommandBufferCount: 1,
+		}, CmdBuff)
+		IfPanic(NewError(ret))
+		sf.ImageResources[i].GraphicsToPresentCmd = CmdBuff[0]
+
+		sf.ImageResources[i].SetImageOwnership( // this does the transfer?
+			sf.GPU.QueueIndex, sf.QueueIndex)
+	}
+
+	for i := 0; i < len(sf.ImageResources); i++ {
+		var view vk.ImageView
+		ret = vk.CreateImageView(sf.Device, &vk.ImageViewCreateInfo{
+			SType:  vk.StructureTypeImageViewCreateInfo,
+			Format: sf.Dims.Format,
+			Components: vk.ComponentMapping{
+				R: vk.ComponentSwizzleR,
+				G: vk.ComponentSwizzleG,
+				B: vk.ComponentSwizzleB,
+				A: vk.ComponentSwizzleA,
+			},
+			SubresourceRange: vk.ImageSubresourceRange{
+				AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
+				LevelCount: 1,
+				LayerCount: 1,
+			},
+			ViewType: vk.ImageViewType2d,
+			Image:    sf.ImageResources[i].Image,
+		}, nil, &view)
+		IfPanic(NewError(ret))
+		sf.ImageResources[i].View = view
+	}
+
+	// sf.FlushInitCmd()
+}
+
+func (sf *Surface) FlushInitCmd() {
+	if sf.CmdBuff == nil {
+		return
+	}
+	ret := vk.EndCommandBuffer(sf.CmdBuff)
+	IfPanic(NewError(ret))
+
+	var fence vk.Fence
+	ret = vk.CreateFence(sf.Device, &vk.FenceCreateInfo{
+		SType: vk.StructureTypeFenceCreateInfo,
+	}, nil, &fence)
+	IfPanic(NewError(ret))
+
+	cmdBufs := []vk.CommandBuffer{sf.CmdBuff}
+	ret = vk.QueueSubmit(sf.GPU.Queue, 1, []vk.SubmitInfo{{
+		SType:              vk.StructureTypeSubmitInfo,
+		CommandBufferCount: 1,
+		PCommandBuffers:    cmdBufs,
+	}}, fence)
+	IfPanic(NewError(ret))
+
+	ret = vk.WaitForFences(sf.Device, 1, []vk.Fence{fence}, vk.True, vk.MaxUint64)
+	IfPanic(NewError(ret))
+
+	vk.FreeCommandBuffers(sf.Device, sf.CmdPool, 1, cmdBufs)
+	vk.DestroyFence(sf.Device, fence, nil)
+	sf.CmdBuff = nil
 }
 
 func (sf *Surface) AcquireNextImage() (imageIndex int, outdated bool, err error) {
@@ -515,7 +475,7 @@ func (sf *Surface) AcquireNextImage() (imageIndex int, outdated bool, err error)
 	case vk.ErrorOutOfDate:
 		sf.FrameIndex++
 		sf.FrameIndex = sf.FrameIndex % sf.FrameLag
-		sf.PrepareSwapchain(sf.GPU.Gpu, sf.GPU.Surface, sf.SwapchainDims)
+		sf.PrepareSwapchain()
 		sf.Prepare(true)
 		outdated = true
 		return
@@ -524,12 +484,13 @@ func (sf *Surface) AcquireNextImage() (imageIndex int, outdated bool, err error)
 		IfPanic(NewError(ret))
 	}
 
-	graphicsQueue := sf.GPU.GraphicsQueue
+	presentQueue := sf.GPU.Queue
+
 	var nullFence vk.Fence
-	ret = vk.QueueSubmit(graphicsQueue, 1, []vk.SubmitInfo{{
+	ret = vk.QueueSubmit(presentQueue, 1, []vk.SubmitInfo{{
 		SType: vk.StructureTypeSubmitInfo,
-		PWaitDstStageMask: []vk.SurfaceStageFlags{
-			vk.SurfaceStageFlags(vk.SurfaceStageColorAttachmentOutputBit),
+		PWaitDstStageMask: []vk.PipelineStageFlags{
+			vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
 		},
 		WaitSemaphoreCount: 1,
 		PWaitSemaphores: []vk.Semaphore{
@@ -537,39 +498,14 @@ func (sf *Surface) AcquireNextImage() (imageIndex int, outdated bool, err error)
 		},
 		CommandBufferCount: 1,
 		PCommandBuffers: []vk.CommandBuffer{
-			sf.ImageResources[idx].CmdBuff,
+			sf.ImageResources[idx].GraphicsToPresentCmd,
 		},
 		SignalSemaphoreCount: 1,
 		PSignalSemaphores: []vk.Semaphore{
-			sf.DrawCompleteSemaphores[sf.FrameIndex],
+			sf.ImageOwnershipSemaphores[sf.FrameIndex],
 		},
 	}}, nullFence)
 	IfPanic(NewError(ret))
-
-	if sf.GPU.HasSeparatePresentQueue() {
-		presentQueue := sf.GPU.PresentQueue()
-
-		var nullFence vk.Fence
-		ret = vk.QueueSubmit(presentQueue, 1, []vk.SubmitInfo{{
-			SType: vk.StructureTypeSubmitInfo,
-			PWaitDstStageMask: []vk.SurfaceStageFlags{
-				vk.SurfaceStageFlags(vk.SurfaceStageColorAttachmentOutputBit),
-			},
-			WaitSemaphoreCount: 1,
-			PWaitSemaphores: []vk.Semaphore{
-				sf.ImageAcquiredSemaphores[sf.FrameIndex],
-			},
-			CommandBufferCount: 1,
-			PCommandBuffers: []vk.CommandBuffer{
-				sf.ImageResources[idx].GraphicsToPresentCmd,
-			},
-			SignalSemaphoreCount: 1,
-			PSignalSemaphores: []vk.Semaphore{
-				sf.ImageOwnershipSemaphores[sf.FrameIndex],
-			},
-		}}, nullFence)
-		IfPanic(NewError(ret))
-	}
 	return
 }
 
@@ -577,12 +513,9 @@ func (sf *Surface) PresentImage(imageIdx int) (outdated bool, err error) {
 	// If we are using separate queues we have to wait for image ownership,
 	// otherwise wait for draw complete.
 	var semaphore vk.Semaphore
-	if sf.GPU.HasSeparatePresentQueue() {
-		semaphore = sf.ImageOwnershipSemaphores[sf.FrameIndex]
-	} else {
-		semaphore = sf.DrawCompleteSemaphores[sf.FrameIndex]
-	}
-	presentQueue := sf.GPU.PresentQueue()
+	semaphore = sf.ImageOwnershipSemaphores[sf.FrameIndex]
+
+	presentQueue := sf.Queue
 	ret := vk.QueuePresent(presentQueue, &vk.PresentInfo{
 		SType:              vk.StructureTypePresentInfo,
 		WaitSemaphoreCount: 1,

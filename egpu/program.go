@@ -20,7 +20,6 @@ import (
 // All uniforms must be added before compiling program.
 type Program struct {
 	init        bool
-	handle      uint32
 	name        string
 	shaders     map[string]*Shader
 	unis        map[string]*Uniform
@@ -40,26 +39,26 @@ func (pr *Program) SetName(name string) {
 	pr.name = name
 }
 
-// AddShader adds shader of given type, unique name and source code.
+// AddShader adds shader of given unique name and source code.
 // Any array Uniform's will add their #define NAME_LEN's to the top
 // of the source code automatically, so the source can assume those exist
 // when compiled.
-func (pr *Program) AddShader(name string, src string) (*Shader, error) {
+func (pr *Program) AddShader(typ gpu.ShaderTypes, name string, src string) (gpu.Shader, error) {
 	if pr.shaders == nil {
 		pr.shaders = make(map[string]*Shader)
 	}
-	if _, has := pr.shaders[typ]; has {
-		err := fmt.Errorf("glgpu gpu.AddShader: shader of that type: %s already added!", typ)
+	if _, has := pr.shaders[name]; has {
+		err := fmt.Errorf("glgpu gpu.AddShader: shader of that name: %s already added!", name)
 		log.Println(err)
 		return nil, err
 	}
-	sh := &Shader{name: name, typ: typ, orgSrc: src}
-	pr.shaders[typ] = sh
+	sh := &Shader{name: name, orgSrc: src}
+	pr.shaders[name] = sh
 	return sh, nil
 }
 
 // ShaderByName returns shader by its unique name
-func (pr *Program) ShaderByName(name string) *Shader {
+func (pr *Program) ShaderByName(name string) gpu.Shader {
 	sh, ok := pr.shaders[name]
 	if ok {
 		return sh
@@ -239,7 +238,6 @@ func (pr *Program) OutputByRole(role gpu.VectorRoles) gpu.Vectors {
 	return nil
 }
 
-/*
 // Compile compiles all the shaders and links the Program, binds the Uniforms
 // and input / output vector variables, etc.
 // This must be called after setting the lengths of any array Uniforms (e.g.,
@@ -247,106 +245,102 @@ func (pr *Program) OutputByRole(role gpu.VectorRoles) gpu.Vectors {
 // showSrc arg prints out the final compiled source, including automatic
 // defines etc at the top, even if there are no errors, which can be useful for debugging.
 func (pr *Program) Compile(showSrc bool) error {
-	defs := "#version 330\n" // we have to append this as it must appear at the top of the program
-	for _, u := range pr.unis {
-		defs += u.LenDefine()
-	}
-	for _, u := range pr.ubos {
-		defs += u.LenDefines()
-	}
-
-	handle := gl.CreateProgram()
-	for _, sh := range pr.shaders {
-		src := defs + sh.orgSrc
-		err := sh.Compile(src)
-		if err != nil {
-			return err
+	/*
+		defs := "#version 330\n" // we have to append this as it must appear at the top of the program
+		for _, u := range pr.unis {
+			defs += u.LenDefine()
 		}
-		gl.AttachShader(handle, sh.handle)
-	}
-	gl.LinkProgram(handle)
-	gl.ValidateProgram(handle)
-
-	// handle is needed for other steps, set now!
-	pr.handle = handle
-	pr.init = true
-
-	for _, sh := range pr.shaders {
-		if showSrc {
-			fmt.Printf("\n#################################\nglgpu Shader: %v Source:\n%s\n", sh.name, sh.Source())
+		for _, u := range pr.ubos {
+			defs += u.LenDefines()
 		}
-		gl.DetachShader(handle, sh.handle)
-		sh.Delete()
-	}
 
-	var status int32
-	gl.GetProgramiv(handle, gl.LINK_STATUS, &status)
-	if status == gl.FALSE {
-		var lgLength int32
-		gl.GetProgramiv(handle, gl.INFO_LOG_LENGTH, &lgLength)
+		handle := gl.CreateProgram()
+		for _, sh := range pr.shaders {
+			src := defs + sh.orgSrc
+			err := sh.Compile(src)
+			if err != nil {
+				return err
+			}
+			gl.AttachShader(handle, sh.handle)
+		}
+		gl.LinkProgram(handle)
+		gl.ValidateProgram(handle)
 
-		lg := strings.Repeat("\x00", int(lgLength+1))
-		gl.GetProgramInfoLog(handle, lgLength, nil, gl.Str(lg))
+		// handle is needed for other steps, set now!
+		pr.handle = handle
+		pr.init = true
 
-		err := fmt.Errorf("glgpu Program: %s Compile: failed to link Program: %v", pr.name, lg)
-		log.Println(err)
-		return err
-	}
+		for _, sh := range pr.shaders {
+			if showSrc {
+				fmt.Printf("\n#################################\nglgpu Shader: %v Source:\n%s\n", sh.name, sh.Source())
+			}
+			gl.DetachShader(handle, sh.handle)
+			sh.Delete()
+		}
 
-	// bind Uniforms
-	for _, u := range pr.unis {
-		u.handle = gl.GetUniformLocation(handle, gl.Str(gpu.CString(u.name)))
-		if u.handle < 0 {
-			err := fmt.Errorf("glgpu Program: %s Compile: Uniform named: %s not found", pr.name, u.name)
+		var status int32
+		gl.GetProgramiv(handle, gl.LINK_STATUS, &status)
+		if status == gl.FALSE {
+			var lgLength int32
+			gl.GetProgramiv(handle, gl.INFO_LOG_LENGTH, &lgLength)
+
+			lg := strings.Repeat("\x00", int(lgLength+1))
+			gl.GetProgramInfoLog(handle, lgLength, nil, gl.Str(lg))
+
+			err := fmt.Errorf("glgpu Program: %s Compile: failed to link Program: %v", pr.name, lg)
 			log.Println(err)
 			return err
 		}
-		u.init = true
-	}
-	// bind ubos
-	for _, u := range pr.ubos {
-		err := u.Activate()
-		if err != nil {
-			log.Println(err)
-			return err
+
+		// bind Uniforms
+		for _, u := range pr.unis {
+			u.handle = gl.GetUniformLocation(handle, gl.Str(gpu.CString(u.name)))
+			if u.handle < 0 {
+				err := fmt.Errorf("glgpu Program: %s Compile: Uniform named: %s not found", pr.name, u.name)
+				log.Println(err)
+				return err
+			}
+			u.init = true
 		}
-		err = u.Bind(pr)
-		if err != nil {
-			log.Println(err)
-			return err
+		// bind ubos
+		for _, u := range pr.ubos {
+			err := u.Activate()
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+			err = u.Bind(pr)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
 		}
-	}
-	// bind inputs
-	for _, v := range pr.ins {
-		v.handle = uint32(gl.GetAttribLocation(handle, gl.Str(gpu.CString(v.name))))
-		if v.handle < 0 {
-			err := fmt.Errorf("glgpu Program: %s Compile: input Vectors named: %s not found", pr.name, v.name)
-			log.Println(err)
-			return err
+		// bind inputs
+		for _, v := range pr.ins {
+			v.handle = uint32(gl.GetAttribLocation(handle, gl.Str(gpu.CString(v.name))))
+			if v.handle < 0 {
+				err := fmt.Errorf("glgpu Program: %s Compile: input Vectors named: %s not found", pr.name, v.name)
+				log.Println(err)
+				return err
+			}
+			v.init = true
 		}
-		v.init = true
-	}
-	// bind outputs
-	for _, v := range pr.outs {
-		v.handle = uint32(gl.GetAttribLocation(handle, gl.Str(gpu.CString(v.name))))
-		if v.handle < 0 {
-			err := fmt.Errorf("glgpu Program: %s Compile: output Vectors named: %s not found", pr.name, v.name)
-			log.Println(err)
-			return err
+		// bind outputs
+		for _, v := range pr.outs {
+			v.handle = uint32(gl.GetAttribLocation(handle, gl.Str(gpu.CString(v.name))))
+			if v.handle < 0 {
+				err := fmt.Errorf("glgpu Program: %s Compile: output Vectors named: %s not found", pr.name, v.name)
+				log.Println(err)
+				return err
+			}
+			v.init = true
 		}
-		v.init = true
-	}
-	if pr.fragDataVar != "" {
-		gl.BindFragDataLocation(handle, 0, gl.Str(gpu.CString(pr.fragDataVar)))
-	}
+		if pr.fragDataVar != "" {
+			gl.BindFragDataLocation(handle, 0, gl.Str(gpu.CString(pr.fragDataVar)))
+		}
+	*/
 
 	return nil
-}
-*/
-
-// Handle returns the handle for the Program -- only valid after a Compile call
-func (pr *Program) Handle() uint32 {
-	return pr.handle
 }
 
 // Activate activates this as the active Program -- must have been Compiled first.
@@ -366,6 +360,6 @@ func (pr *Program) Delete() {
 		return
 	}
 	// gl.DeleteProgram(pr.handle)
-	pr.handle = 0
+	// pr.handle = 0
 	pr.init = false
 }
