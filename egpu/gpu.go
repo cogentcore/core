@@ -24,10 +24,7 @@ var TheGPU *GPU
 type GPU struct {
 	Instance vk.Instance
 	GPU      vk.PhysicalDevice
-
-	Device     vk.Device `desc:"generic graphics device, for framebuffer rendering etc"`
-	QueueIndex uint32    `desc:"queue index for generic graphics device"`
-	Queue      vk.Queue  `desc:"queue for generic graphics device"`
+	Device   Device `desc:"generic graphics device, for framebuffer rendering etc"`
 
 	GpuProps    vk.PhysicalDeviceProperties
 	MemoryProps vk.PhysicalDeviceMemoryProperties
@@ -136,66 +133,14 @@ func (gp *GPU) Init(name string, debug bool) error {
 
 // InitGraphicsDevice initializes the generic graphics device
 func (gp *GPU) InitGraphicsDevice() error {
-	// Get queue family properties
-	var queueCount uint32
-	vk.GetPhysicalDeviceQueueFamilyProperties(gp.GPU, &queueCount, nil)
-	queueProperties := make([]vk.QueueFamilyProperties, queueCount)
-	vk.GetPhysicalDeviceQueueFamilyProperties(gp.GPU, &queueCount, queueProperties)
-	if queueCount == 0 { // probably should try another GPU
-		return errors.New("vulkan error: no queue families found on GPU 0")
-	}
-
-	// Find a suitable queue family for the target Vulkan mode
-	found := false
-	required := vk.QueueFlags(vk.QueueGraphicsBit)
-	for i := uint32(0); i < queueCount; i++ {
-		queueProperties[i].Deref()
-		if queueProperties[i].QueueFlags&required != 0 {
-			gp.QueueIndex = i
-			found = true
-			break
-		}
-	}
-	if !found {
-		err := errors.New("GPU vulkan error: could not found queue with graphics capabilities")
-		return err
-	}
-
-	queueInfos := []vk.DeviceQueueCreateInfo{{
-		SType:            vk.StructureTypeDeviceQueueCreateInfo,
-		QueueFamilyIndex: gp.QueueIndex,
-		QueueCount:       1,
-		PQueuePriorities: []float32{1.0},
-	}}
-
-	var device vk.Device
-	ret := vk.CreateDevice(gp.GPU, &vk.DeviceCreateInfo{
-		SType:                   vk.StructureTypeDeviceCreateInfo,
-		QueueCreateInfoCount:    uint32(len(queueInfos)),
-		PQueueCreateInfos:       queueInfos,
-		EnabledExtensionCount:   uint32(len(gp.DeviceExts)),
-		PpEnabledExtensionNames: gp.DeviceExts,
-		EnabledLayerCount:       uint32(len(gp.ValidationLayers)),
-		PpEnabledLayerNames:     gp.ValidationLayers,
-	}, nil, &device)
-	IfPanic(NewError(ret))
-	gp.Device = device
-
-	var queue vk.Queue
-	vk.GetDeviceQueue(gp.Device, gp.QueueIndex, 0, &queue)
-	gp.Queue = queue
-	return nil
+	return gp.Device.Init(gp, vk.QueueGraphicsBit)
 }
 
 func (gp *GPU) Destroy() {
 	if gp.DebugCallback != vk.NullDebugReportCallback {
 		vk.DestroyDebugReportCallback(gp.Instance, gp.DebugCallback, nil)
 	}
-	if gp.Device != nil {
-		vk.DeviceWaitIdle(gp.Device)
-		vk.DestroyDevice(gp.Device, nil)
-		gp.Device = nil
-	}
+	gp.Device.Destroy()
 	if gp.Instance != nil {
 		vk.DestroyInstance(gp.Instance, nil)
 		gp.Instance = nil

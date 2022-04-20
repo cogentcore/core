@@ -9,19 +9,19 @@ package egpu
 
 import (
 	"fmt"
+	"unsafe"
 
 	"github.com/goki/mat32"
-	vk "github.com/vulkan-go/vulkan"
 )
 
 // IndexesBuffer manages a buffer of indexes for index-based rendering
 // (i.e., GL_ELEMENT_ARRAY_BUFFER for glDrawElements calls in OpenGL).
 type IndexesBuffer struct {
-	init   bool
-	handle uint32
-	ln     int
-	idxs   mat32.ArrayU32
-	Buffer vk.BufferView
+	init      bool
+	handle    uint32
+	ln        int
+	idxs      mat32.ArrayU32
+	BuffAlloc BuffAlloc `desc:"buffer allocation in terms of vulkan device-side GPU buffer, for vk.CmdBindIndexBuffers"`
 }
 
 // SetLen sets the number of indexes in buffer
@@ -70,31 +70,21 @@ func (ib *IndexesBuffer) Alloc(mm *Memory, offset int) int {
 	}
 
 	sz := ib.MemSize()
-
-	// BufferUsageVertexBufferBit -- no way to set usage for this sub-buffer
-	// might need separate for indexes
-
-	var buffer vk.BufferView
-	ret := vk.CreateBufferView(mm.Device, &vk.BufferViewCreateInfo{
-		SType:  vk.StructureTypeBufferViewCreateInfo,
-		Buffer: mm.Buffer,
-		Format: vk.FormatR32Uint,
-		Offset: vk.DeviceSize(offset),
-		Range:  vk.DeviceSize(sz),
-	}, nil, &buffer)
-	IfPanic(NewError(ret))
-
-	ib.Buffer = buffer
+	ib.BuffAlloc.Set(mm, offset, sz)
 	ib.init = true
 	return sz
 }
 
-// Free frees the BufferView
-func (ib *IndexesBuffer) Free(mm *Memory) {
-	if ib.init {
-		vk.DestroyBufferView(mm.Device, ib.Buffer, nil)
-	}
+// Free nulls the Allocation
+func (ib *IndexesBuffer) Free() {
+	ib.BuffAlloc.Free()
 	ib.init = false
+}
+
+// CopyBuffToStaging copies all of the buffer source data into the CPU side staging buffer.
+// this does not check for changes -- use for initial configuration.
+func (ib *IndexesBuffer) CopyBuffToStaging(bufPtr unsafe.Pointer) {
+	BuffMemCopy(&ib.BuffAlloc, bufPtr, unsafe.Pointer(&(ib.idxs[0])))
 }
 
 // Activate binds buffer as active one

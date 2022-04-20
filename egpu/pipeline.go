@@ -9,8 +9,6 @@ package egpu
 
 import (
 	"log"
-
-	vk "github.com/vulkan-go/vulkan"
 )
 
 // Pipeline manages a sequence of Programs that can be activated in an
@@ -19,14 +17,12 @@ import (
 // It corresponds to a vulkan pipeline and can be associated with
 // a graphics device on the GPU or a compute device
 type Pipeline struct {
-	GPU        *GPU
-	Device     vk.Device `desc:"device for this pipeline -- could be GPU or Compute"`
-	QueueIndex uint32    `desc:"queue index for device"`
-	name       string
-	progs      map[string]*Program
-
-	CmdPool vk.CommandPool
-	CmdBuff vk.CommandBuffer
+	GPU     *GPU
+	Device  Device `desc:"device for this pipeline -- could be GPU or Compute"`
+	name    string
+	progs   map[string]*Program
+	Memory  Memory `desc:"memory managed by this pipeline"`
+	CmdPool CmdPool
 }
 
 // Name returns name of this pipeline
@@ -69,35 +65,21 @@ func (pl *Pipeline) Delete() {
 	for _, pr := range pl.progs {
 		pr.Delete()
 	}
-	vk.DestroyCommandPool(pl.Device, pl.CmdPool, nil)
+	pl.CmdPool.Destroy(&pl.Device)
 }
 
-func (pl *Pipeline) Init(gp *GPU) {
-	pl.GPU = gp
+// InitCompute initializes for compute pipeline
+func (pl *Pipeline) InitCompute(cp *Compute) {
+	pl.GPU = cp.GPU
+	pl.Device = cp.Device
+	pl.InitPipeline()
+}
 
-	var CmdPool vk.CommandPool
-	ret := vk.CreateCommandPool(pl.Device, &vk.CommandPoolCreateInfo{
-		SType:            vk.StructureTypeCommandPoolCreateInfo,
-		QueueFamilyIndex: pl.QueueIndex,
-	}, nil, &CmdPool)
-	IfPanic(NewError(ret))
-	pl.CmdPool = CmdPool
+func (pl *Pipeline) InitPipeline() {
+	pl.Memory.Init(pl.GPU, &pl.Device)
 
-	var CmdBuff = make([]vk.CommandBuffer, 1)
-	ret = vk.AllocateCommandBuffers(pl.Device, &vk.CommandBufferAllocateInfo{
-		SType:              vk.StructureTypeCommandBufferAllocateInfo,
-		CommandPool:        pl.CmdPool,
-		Level:              vk.CommandBufferLevelPrimary,
-		CommandBufferCount: 1,
-	}, CmdBuff)
-	IfPanic(NewError(ret))
-	pl.CmdBuff = CmdBuff[0]
-
-	ret = vk.BeginCommandBuffer(pl.CmdBuff, &vk.CommandBufferBeginInfo{
-		SType: vk.StructureTypeCommandBufferBeginInfo,
-	})
-	IfPanic(NewError(ret))
-
+	pl.CmdPool.Init(&pl.Device, 0)
+	pl.CmdPool.Buff = pl.CmdPool.MakeBuff(&pl.Device)
 }
 
 /*

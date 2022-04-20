@@ -8,13 +8,16 @@
 package egpu
 
 import (
+	"unsafe"
+
 	"github.com/goki/gi/oswin/gpu"
 )
 
-// BufferMgr maintains VectorsBuffer and IndexesBuffer and also the critical
-// VAO (Vertex Array Object) for OpenGL which holds these active buffer pointers.
+// BufferMgr maintains related VectorsBuffer and IndexesBuffer
+// and corresponds to the VAO (Vertex Array Object) for OpenGL
+// which holds these active buffer pointers.
 // A typical Shape / Object / Geom will just have this.
-// TheGPU.NewBufferMgr() returns a new buffer manager.
+// All management, transfer, freeing takes place at level of Memory object!
 type BufferMgr struct {
 	init bool
 	vecs *VectorsBuffer
@@ -55,7 +58,7 @@ func (bm *BufferMgr) MemSize() int {
 	return sz
 }
 
-// Alloc allocates BufferView to each sub-buffer
+// Alloc allocates subset of Memory Buffer to each sub-buffer
 func (bm *BufferMgr) Alloc(mm *Memory, offset int) int {
 	sz := 0
 	if bm.idxs != nil {
@@ -68,73 +71,36 @@ func (bm *BufferMgr) Alloc(mm *Memory, offset int) int {
 	return sz
 }
 
-// Free frees the BufferViews in sub elements
-func (bm *BufferMgr) Free(mm *Memory) {
+// Free nils buffer allocations
+func (bm *BufferMgr) Free() {
 	if bm.idxs != nil {
-		bm.idxs.Free(mm)
+		bm.idxs.Free()
 	}
 	if bm.vecs != nil {
-		bm.vecs.Free(mm)
+		bm.vecs.Free()
 	}
 }
 
-// note: activate must happen at higher level of entire memory chunk
-
-// Activate binds buffers as active and configures as needed
-func (bm *BufferMgr) Activate() {
-	// if !bm.init {
-	// 	gl.GenVertexArrays(1, &bm.handle)
-	// 	bm.init = true
-	// }
-	// gl.BindVertexArray(bm.handle)
-	// if bm.idxs != nil {
-	// 	bm.idxs.Activate()
-	// }
-	// if bm.vecs != nil {
-	// 	bm.vecs.Activate()
-	// }
-}
-
-// TransferAll transfers all buffer data to GPU (e.g., for initial upload).
-// Activate must have been called with no other such buffers activated in between.
-func (bm *BufferMgr) TransferAll() {
+// CopyBuffsToStaging copies all of the buffer source data into the CPU side staging buffer.
+// this does not check for changes -- use for initial configuration.
+func (bm *BufferMgr) CopyBuffsToStaging(bufPtr unsafe.Pointer) {
 	if bm.idxs != nil {
-		bm.idxs.Transfer()
+		bm.idxs.CopyBuffToStaging(bufPtr)
 	}
 	if bm.vecs != nil {
-		bm.vecs.Transfer()
+		bm.vecs.CopyBuffToStaging(bufPtr)
 	}
 }
 
-// TransferVectors transfers vectors buffer data to GPU -- if vector data has changed.
-// Activate must have been called with no other such buffers activated in between.
-func (bm *BufferMgr) TransferVectors() {
-	if bm.vecs != nil {
-		bm.vecs.Transfer()
+// SyncBuffsToStaging copies all of the buffer source data into the CPU side staging buffer.
+// only for *vector* data marked as changed.  index data is assumed to be static.
+// returns true if any was copied.
+func (bm *BufferMgr) SyncBuffsToStaging(bufPtr unsafe.Pointer) *BuffAlloc {
+	if bm.vecs == nil {
+		return nil
 	}
-}
-
-// TransferIndexes transfers indexes buffer data to GPU -- if indexes data has changed.
-// Activate must have been called with no other such buffers activated in between.
-func (bm *BufferMgr) TransferIndexes() {
-	if bm.idxs != nil {
-		bm.idxs.Transfer()
+	if bm.vecs.SyncBuffToStaging(bufPtr) {
+		return &bm.vecs.BuffAlloc
 	}
-}
-
-// Delete deletes the GPU resources associated with this buffer
-// (requires Activate to re-establish a new one).
-// Should be called prior to Go object being deleted
-// (ref counting can be done externally).
-func (bm *BufferMgr) Delete() {
-	if bm.init {
-		// gl.DeleteVertexArrays(1, &bm.handle)
-	}
-	if bm.idxs != nil {
-		bm.idxs.Delete()
-	}
-	if bm.vecs != nil {
-		bm.vecs.Delete()
-	}
-	bm.init = false
+	return nil
 }

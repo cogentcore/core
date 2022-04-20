@@ -42,7 +42,7 @@ func (sh *Shader) Type() gpu.ShaderTypes {
 func (sh *Shader) Compile(src string) error {
 	data := []byte(src)
 	var module vk.ShaderModule
-	ret := vk.CreateShaderModule(TheGPU.Device, &vk.ShaderModuleCreateInfo{
+	ret := vk.CreateShaderModule(TheGPU.Device.Device, &vk.ShaderModuleCreateInfo{
 		SType:    vk.StructureTypeShaderModuleCreateInfo,
 		CodeSize: uint(len(data)),
 		PCode:    SliceUint32(data),
@@ -74,7 +74,7 @@ func (sh *Shader) Delete() {
 	if !sh.init {
 		return
 	}
-	vk.DestroyShaderModule(TheGPU.Device, sh.Shader, nil)
+	vk.DestroyShaderModule(TheGPU.Device.Device, sh.Shader, nil)
 	sh.Shader = nil
 	sh.init = false
 }

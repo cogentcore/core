@@ -7,11 +7,10 @@ package egpu
 import (
 	"fmt"
 	"log"
+	"unsafe"
 
-	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/mat32"
-	vk "github.com/vulkan-go/vulkan"
 )
 
 // Vectors manages arrays of vectors that are processed as inputs to a shader program
@@ -68,20 +67,21 @@ func (ve *Vectors) Set(name string, handle uint32, typ gpu.VectorType, role gpu.
 // The buffer maintains its own internal memory storage (mat32.ArrayF32)
 // which can be operated upon or set from external sources.
 // Note: all arrangement data is in *float* units, not *byte* units -- multiply * 4 to get bytes.
+// All transfer to GPU and memory management is handled at the Memory level!
 type VectorsBuffer struct {
-	init   bool
-	trans  bool // was buffer already transferred up to device yet?
-	mod    bool // were vector params modified at all?
-	handle uint32
-	usage  gpu.VectorUsages
-	vecs   []*Vectors
-	stride int   // number of float elements stride for interleaved (*not in bytes*)
-	offs   []int // float offsets per vector in floats  (*not in bytes*)
-	nInter int   // number of interleaved
-	ln     int   // number of elements per vector
-	totLn  int   // total length of buffer in floats (*not in bytes*)
-	buff   mat32.ArrayF32
-	Buffer vk.BufferView
+	init      bool
+	trans     bool // was buffer already transferred up to device yet?
+	mod       bool // were vector params modified at all?
+	handle    uint32
+	usage     gpu.VectorUsages
+	vecs      []*Vectors
+	stride    int            // number of float elements stride for interleaved (*not in bytes*)
+	offs      []int          // float offsets per vector in floats  (*not in bytes*)
+	nInter    int            // number of interleaved
+	ln        int            // number of elements per vector
+	totLn     int            // total length of buffer in floats (*not in bytes*)
+	buff      mat32.ArrayF32 `desc:"local buffer that has full data as written by user code"`
+	BuffAlloc BuffAlloc      `desc:"buffer allocation in terms of vulkan device-side GPU buffer, for vk.CmdBindVertexBuffers"`
 }
 
 // Usage returns whether this is dynamic or static etc
@@ -355,32 +355,35 @@ func (vb *VectorsBuffer) Alloc(mm *Memory, offset int) int {
 	vb.updtVecs() // make sure
 
 	sz := vb.MemSize()
-
-	// BufferUsageVertexBufferBit -- no way to set usage for this sub-buffer
-	// might need separate for indexes
-
-	var buffer vk.BufferView
-	ret := vk.CreateBufferView(mm.Device, &vk.BufferViewCreateInfo{
-		SType:  vk.StructureTypeBufferViewCreateInfo,
-		Buffer: mm.Buffer,
-		Format: vk.FormatR32Sfloat,
-		Offset: vk.DeviceSize(offset),
-		Range:  vk.DeviceSize(sz),
-	}, nil, &buffer)
-	IfPanic(NewError(ret))
-
-	vb.Buffer = buffer
+	vb.BuffAlloc.Set(mm, offset, sz)
 	vb.init = true
 	return sz
 }
 
-// Free frees the BufferView
-func (vb *VectorsBuffer) Free(mm *Memory) {
-	if vb.init {
-		vk.DestroyBufferView(mm.Device, vb.Buffer, nil)
-	}
+// Free nulls the Allocation
+func (vb *VectorsBuffer) Free() {
 	vb.init = false
+	vb.BuffAlloc.Free()
 }
+
+// CopyBuffToStaging copies all of the buffer source data into the CPU side staging buffer.
+// this does not check for changes -- use for initial configuration.
+func (vb *VectorsBuffer) CopyBuffToStaging(bufPtr unsafe.Pointer) {
+	BuffMemCopy(&vb.BuffAlloc, bufPtr, unsafe.Pointer(&(vb.buff[0])))
+}
+
+// SyncBuffToStaging copies all of the buffer source data into the CPU side staging buffer.
+// only if data has changed as indicated by the mod flag.  resets flag.
+func (vb *VectorsBuffer) SyncBuffToStaging(bufPtr unsafe.Pointer) bool {
+	if !vb.mod {
+		return false
+	}
+	BuffMemCopy(&vb.BuffAlloc, bufPtr, unsafe.Pointer(&(vb.buff[0])))
+	vb.mod = false
+	return true
+}
+
+// todo: this happens at higher level?
 
 // Activate binds buffer as active one, and configures it per all existing settings
 func (vb *VectorsBuffer) Activate() {
@@ -388,9 +391,10 @@ func (vb *VectorsBuffer) Activate() {
 		fmt.Printf("attempting to activate non-initialized buffer!\n") // todo: shouldn't happen..
 		return
 	}
-	if !vb.mod {
+	if !vb.mod { // todo: make debuggable
 		return
 	}
+
 	// todo: do we need to do this piecemeal or is it done all up front?
 	// for i, v := range vb.vecs {
 	// str := 0
@@ -412,48 +416,10 @@ func (vb *VectorsBuffer) IsActive() bool {
 	return vb.init
 }
 
-// Transfer transfers data to GPU -- Activate must have been called with no other
-// such buffers activated in between.  Automatically uses re-specification
-// strategy per: https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
-// so it is safe if buffer was still being used from prior GL rendering call.
-func (vb *VectorsBuffer) Transfer() {
-	// if vb.trans { // re-specification strategy: invalidate existing prior to changing
-	// 	gl.BufferData(gl.ARRAY_BUFFER, vb.buff.Bytes(), gl.Ptr(nil), vb.GPUUsage(vb.usage))
-	// }
-	// gl.BufferData(gl.ARRAY_BUFFER, vb.buff.Bytes(), gl.Ptr(vb.buff), vb.GPUUsage(vb.usage))
-	// vb.trans = true
-}
-
-// TransferVec transfers only data for given vector to GPU -- only valid
-// if Activate() and Transfer() have been called already, and only for
-// non-interleaved Vectors.
-func (vb *VectorsBuffer) TransferVec(vec gpu.Vectors) {
-	/*
-		i, v := vb.vec(vec)
-		if i < vb.nInter {
-			return
-		}
-		off := vb.offs[i]
-		offb := off * 4
-		els := v.typ.Vec
-		sz := els * vb.ln
-		bf := vb.buff[off : off+sz]
-		// gl.BufferSubData(gl.ARRAY_BUFFER, offb, vb.ln, gl.Ptr(bf))
-	*/
-}
-
 // Delete deletes the GPU resources associated with this buffer
-// (requires Activate to re-establish a new one).
-// Should be called prior to Go object being deleted
-// (ref counting can be done externally).
+// just nils pointers -- not a big deal
 func (vb *VectorsBuffer) Delete() {
-	if !vb.init {
-		return
-	}
-	// gl.DeleteBuffers(1, &vb.handle)
-	// vb.handle = 0
-	// vb.Free() // done at higher level
-	vb.init = false
+	vb.Free()
 }
 
 // DeleteAllVectors deletes all Vectors defined for this buffer (calls Delete first)
@@ -491,18 +457,26 @@ func (vb *VectorsBuffer) DeleteVectorsByRole(role gpu.VectorRoles) {
 	log.Printf("glos.VectorsBuffer DeleteVectorsByRole: role %v not found\n", role)
 }
 
-var glUsages = map[gpu.VectorUsages]uint32{
-	gpu.StreamDraw:  gl.STREAM_DRAW,
-	gpu.StreamRead:  gl.STREAM_READ,
-	gpu.StreamCopy:  gl.STREAM_COPY,
-	gpu.StaticDraw:  gl.STATIC_DRAW,
-	gpu.StaticRead:  gl.STATIC_READ,
-	gpu.StaticCopy:  gl.STATIC_COPY,
-	gpu.DynamicDraw: gl.DYNAMIC_DRAW,
-	gpu.DynamicRead: gl.DYNAMIC_READ,
-	gpu.DynamicCopy: gl.DYNAMIC_COPY,
+// todo: remove from interface
+
+func (vb *VectorsBuffer) Transfer() {
 }
 
+func (vb *VectorsBuffer) TransferVec(vec gpu.Vectors) {
+}
+
+// var glUsages = map[gpu.VectorUsages]uint32{
+// 	gpu.StreamDraw:  gl.STREAM_DRAW,
+// 	gpu.StreamRead:  gl.STREAM_READ,
+// 	gpu.StreamCopy:  gl.STREAM_COPY,
+// 	gpu.StaticDraw:  gl.STATIC_DRAW,
+// 	gpu.StaticRead:  gl.STATIC_READ,
+// 	gpu.StaticCopy:  gl.STATIC_COPY,
+// 	gpu.DynamicDraw: gl.DYNAMIC_DRAW,
+// 	gpu.DynamicRead: gl.DYNAMIC_READ,
+// 	gpu.DynamicCopy: gl.DYNAMIC_COPY,
+// }
+
 func (vb *VectorsBuffer) GPUUsage(usg gpu.VectorUsages) uint32 {
-	return glUsages[usg]
+	return 0
 }
