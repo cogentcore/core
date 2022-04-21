@@ -10,4 +10,7 @@ For compute engine use, we are following this tutorial and associated linked one
 
 https://bakedbits.dev/posts/vulkan-compute-example/
 
+# Links
 
+* https://asawicki.info/news_1740_vulkan_memory_types_on_pc_and_how_to_use_them
+* https://github.com/Glavnokoman/vuh

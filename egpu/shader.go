@@ -8,11 +8,26 @@
 package egpu
 
 import (
+	"io/ioutil"
 	"unsafe"
 
 	"github.com/goki/gi/oswin/gpu"
 	vk "github.com/vulkan-go/vulkan"
 )
+
+// LoadShader compiles given SPIR-V ".spv" code and returns a shader -- not typically saved!
+func LoadShader(src []byte) (vk.ShaderModule, error) {
+	var module vk.ShaderModule
+	ret := vk.CreateShaderModule(TheGPU.Device.Device, &vk.ShaderModuleCreateInfo{
+		SType:    vk.StructureTypeShaderModuleCreateInfo,
+		CodeSize: uint(len(src)),
+		PCode:    SliceUint32(src),
+	}, nil, &module)
+	if IsError(ret) {
+		return nil, NewError(ret)
+	}
+	return module, nil
+}
 
 // Shader manages a single Shader program
 type Shader struct {
@@ -34,24 +49,29 @@ func (sh *Shader) Type() gpu.ShaderTypes {
 	return sh.typ
 }
 
-// Compile compiles given source code for the Shader, of given type and unique name.
-// Currently, source must be GLSL version 410, which is the supported version of OpenGL.
-// The source does not need to be null terminated (with \x00 code) but that will be more
-// efficient, skipping the extra step of adding the null terminator.
-// Context must be set.
+// OpenFile returns bytes from file
+func OpenFile(fname string) ([]byte, error) {
+	return ioutil.ReadFile(fname)
+}
+
+// Compile compiles given src as string (gl version -- not relevant)
 func (sh *Shader) Compile(src string) error {
-	data := []byte(src)
+	return sh.CompileSPV([]byte(src))
+}
+
+// CompileSPV compiles given SPIR-V ".spv" code for the Shader, of given type and unique name.
+func (sh *Shader) CompileSPV(src []byte) error {
 	var module vk.ShaderModule
 	ret := vk.CreateShaderModule(TheGPU.Device.Device, &vk.ShaderModuleCreateInfo{
 		SType:    vk.StructureTypeShaderModuleCreateInfo,
-		CodeSize: uint(len(data)),
-		PCode:    SliceUint32(data),
+		CodeSize: uint(len(src)),
+		PCode:    SliceUint32(src),
 	}, nil, &module)
 	if IsError(ret) {
 		return NewError(ret)
 	}
 	sh.Shader = module
-	sh.src = src
+	sh.src = string(src)
 	sh.init = true
 	return nil
 }

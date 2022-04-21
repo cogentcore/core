@@ -21,7 +21,6 @@ type Pipeline struct {
 	Device  Device `desc:"device for this pipeline -- could be GPU or Compute"`
 	name    string
 	progs   map[string]*Program
-	Memory  Memory `desc:"memory managed by this pipeline"`
 	CmdPool CmdPool
 }
 
@@ -76,8 +75,6 @@ func (pl *Pipeline) InitCompute(cp *Compute) {
 }
 
 func (pl *Pipeline) InitPipeline() {
-	pl.Memory.Init(pl.GPU, &pl.Device)
-
 	pl.CmdPool.Init(&pl.Device, 0)
 	pl.CmdPool.Buff = pl.CmdPool.MakeBuff(&pl.Device)
 }

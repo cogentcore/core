@@ -370,6 +370,7 @@ func (vb *VectorsBuffer) Free() {
 // this does not check for changes -- use for initial configuration.
 func (vb *VectorsBuffer) CopyBuffToStaging(bufPtr unsafe.Pointer) {
 	BuffMemCopy(&vb.BuffAlloc, bufPtr, unsafe.Pointer(&(vb.buff[0])))
+	vb.mod = false
 }
 
 // SyncBuffToStaging copies all of the buffer source data into the CPU side staging buffer.
@@ -383,31 +384,8 @@ func (vb *VectorsBuffer) SyncBuffToStaging(bufPtr unsafe.Pointer) bool {
 	return true
 }
 
-// todo: this happens at higher level?
-
-// Activate binds buffer as active one, and configures it per all existing settings
+// Activate: remove
 func (vb *VectorsBuffer) Activate() {
-	if !vb.init {
-		fmt.Printf("attempting to activate non-initialized buffer!\n") // todo: shouldn't happen..
-		return
-	}
-	if !vb.mod { // todo: make debuggable
-		return
-	}
-
-	// todo: do we need to do this piecemeal or is it done all up front?
-	// for i, v := range vb.vecs {
-	// str := 0
-	// if i < vb.nInter {
-	// 	str = vb.stride
-	// }
-	// off := vb.offs[i]
-	// gl.EnableVertexAttribArray(uint32(v.handle))
-	// //			gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str*4), gl.PtrOffset(off*4))
-	// gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str*4), unsafe.Pointer(uintptr(off*4)))
-	// // fmt.Printf("vec: %v str: %v off: %v\n", v.name, str*4, off*4)
-	// }
-	vb.mod = false
 }
 
 // IsActive returns true if buffer has already been Activate'd
