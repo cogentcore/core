@@ -43,7 +43,7 @@ func main() {
 	mem := &egpu.Memory{}
 	mem.Init(gp, &cp.Device)
 
-	bm := &egpu.BufferMgr{}
+	bm := &egpu.VecIdxs{}
 	vb := bm.VectorsBuffer()
 
 	pl := &egpu.Pipeline{}

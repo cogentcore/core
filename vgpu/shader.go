@@ -5,13 +5,14 @@
 // This is initially adapted from https://github.com/vulkan-go/asche
 // Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
 
-package egpu
+package vgpu
 
 import (
 	"io/ioutil"
 	"unsafe"
 
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/ki/kit"
 	vk "github.com/vulkan-go/vulkan"
 )
 
@@ -112,3 +113,20 @@ type sliceHeader struct {
 	Len  int
 	Cap  int
 }
+
+// ShaderTypes is a list of GPU shader types
+type ShaderTypes int32
+
+const (
+	VertexShader ShaderTypes = iota
+	FragmentShader
+	ComputeShader
+	GeometryShader
+	TessCtrlShader
+	TessEvalShader
+	ShaderTypesN
+)
+
+//go:generate stringer -type=ShaderTypes
+
+var KiT_ShaderTypes = kit.Enums.AddEnum(ShaderTypesN, kit.NotBitFlag, nil)

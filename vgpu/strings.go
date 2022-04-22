@@ -5,7 +5,7 @@
 // This is initially adapted from https://github.com/vulkan-go/asche
 // Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
 
-package egpu
+package vgpu
 
 func CheckExisting(actual, required []string) (existing []string, missing int) {
 	existing = make([]string, 0, len(required))

@@ -2,53 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package egpu
+package vgpu
 
 import (
 	"fmt"
 	"log"
 	"unsafe"
 
-	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/mat32"
 )
-
-// Vectors manages arrays of vectors that are processed as inputs to a shader program
-// and received as outputs from compute shaders.  i.e., a Vertex Buffer Object in OpenGL.
-// It is created by Program.AddInputs, .AddOutputs, and stores the Handle into that program's
-// variable.  This handle is then bound to a buffer in VectorsBuffer.
-type Vectors struct {
-	init   bool
-	handle uint32
-	name   string
-	typ    gpu.VectorType
-	role   gpu.VectorRoles
-}
-
-// Name returns the name of the Vectors (i.e., as it is referred to in the shader program)
-func (ve *Vectors) Name() string {
-	return ve.name
-}
-
-// Type returns the vector data type
-func (ve *Vectors) Type() gpu.VectorType {
-	return ve.typ
-}
-
-// Role returns the functional role of these Vectors
-func (ve *Vectors) Role() gpu.VectorRoles {
-	return ve.role
-}
-
-// Set sets all the parameters of the Vectors, and flags it as init -- when
-// created for predefined locations.
-func (ve *Vectors) Set(name string, handle uint32, typ gpu.VectorType, role gpu.VectorRoles) {
-	ve.name = name
-	ve.handle = handle
-	ve.typ = typ
-	ve.role = role
-	ve.init = true
-}
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
 // https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Buffer_Object
@@ -63,7 +25,7 @@ func (ve *Vectors) Set(name string, handle uint32, typ gpu.VectorType, role gpu.
 // VectorsBuffer represents a buffer with multiple Vectors elements, which
 // can be either interleaved (contiguous from the start only) or appended seqeuentially.
 // All elements must be Float32, not Float64!  Need a different buffer type that handles 64bit.
-// It is created in BufferMgr.AddVectorsBuffer -- the Mgr is essential for managing buffers.
+// It is created in VecIdxs.AddVectorsBuffer -- the Mgr is essential for managing buffers.
 // The buffer maintains its own internal memory storage (mat32.ArrayF32)
 // which can be operated upon or set from external sources.
 // Note: all arrangement data is in *float* units, not *byte* units -- multiply * 4 to get bytes.
@@ -73,8 +35,8 @@ type VectorsBuffer struct {
 	trans     bool // was buffer already transferred up to device yet?
 	mod       bool // were vector params modified at all?
 	handle    uint32
-	usage     gpu.VectorUsages
-	vecs      []*Vectors
+	usage     VectorUsages
+	vecs      []*Var
 	stride    int            // number of float elements stride for interleaved (*not in bytes*)
 	offs      []int          // float offsets per vector in floats  (*not in bytes*)
 	nInter    int            // number of interleaved
@@ -84,27 +46,17 @@ type VectorsBuffer struct {
 	BuffAlloc BuffAlloc      `desc:"buffer allocation in terms of vulkan device-side GPU buffer, for vk.CmdBindVertexBuffers"`
 }
 
-// Usage returns whether this is dynamic or static etc
-func (vb *VectorsBuffer) Usage() gpu.VectorUsages {
-	return vb.usage
-}
-
-// SetUsage sets the usage of the buffer
-func (vb *VectorsBuffer) SetUsage(usg gpu.VectorUsages) {
-	vb.usage = usg
-}
-
 // AddVectors adds a Vectors to this buffer, all interleaved Vectors
 // must be added first, before any non-interleaved (error will be logged if not).
 // Vectors are created in a Program, and connected to this buffer here.
 // All Vectors in a given Program must be stored in a SINGLE buffer.
 // Add all Vectors before setting the length, which then computes offset and strides
 // for each vector.
-func (vb *VectorsBuffer) AddVectors(vec gpu.Vectors, interleave bool) {
+func (vb *VectorsBuffer) AddVectors(vec *Var, interleave bool) {
 	vb.trans = false
 	vb.mod = true
-	v := vec.(*Vectors)
-	if v.typ.Type == gpu.Float64 {
+	v := vec.(*Var)
+	if v.typ.Type == Float64 {
 		log.Printf("glos.VectorsBuffer AddVectors: Float64 not supported for this buffer type\n")
 		return
 	}
@@ -126,8 +78,8 @@ func (vb *VectorsBuffer) NumVectors() int {
 }
 
 // Vectors returns a list (slice) of all the Vectors in the buffer, in order.
-func (vb *VectorsBuffer) Vectors() []gpu.Vectors {
-	vecs := make([]gpu.Vectors, len(vb.vecs))
+func (vb *VectorsBuffer) Var() []*Var {
+	vecs := make([]*Var, len(vb.vecs))
 	for i := range vb.vecs {
 		vecs[i] = vb.vecs[i]
 	}
@@ -136,7 +88,7 @@ func (vb *VectorsBuffer) Vectors() []gpu.Vectors {
 
 // VectorsByName returns given Vectors by name.
 // Returns nil if not found (error auto logged)
-func (vb *VectorsBuffer) VectorsByName(name string) gpu.Vectors {
+func (vb *VectorsBuffer) VectorsByName(name string) *Var {
 	for _, v := range vb.vecs {
 		if v.name == name {
 			return v
@@ -148,7 +100,7 @@ func (vb *VectorsBuffer) VectorsByName(name string) gpu.Vectors {
 
 // VectorsByRole returns given Vectors by role.
 // Returns nil if not found (error auto logged)
-func (vb *VectorsBuffer) VectorsByRole(role gpu.VectorRoles) gpu.Vectors {
+func (vb *VectorsBuffer) VectorsByRole(role VectorRoles) *Var {
 	for _, v := range vb.vecs {
 		if v.role == role {
 			return v
@@ -214,7 +166,7 @@ func (vb *VectorsBuffer) MemSize() int {
 	return vb.totLn * 4
 }
 
-func (vb *VectorsBuffer) vec(vec gpu.Vectors) (int, *Vectors) {
+func (vb *VectorsBuffer) vec(vec *Var) (int, *Var) {
 	for i, v := range vb.vecs {
 		if v == vec {
 			return i, v
@@ -225,7 +177,7 @@ func (vb *VectorsBuffer) vec(vec gpu.Vectors) (int, *Vectors) {
 }
 
 // ByteOffset returns the starting offset of given Vectors in buffer
-func (vb *VectorsBuffer) ByteOffset(vec gpu.Vectors) int {
+func (vb *VectorsBuffer) ByteOffset(vec *Var) int {
 	i, _ := vb.vec(vec)
 	if i >= 0 {
 		return vb.offs[i] * 4
@@ -234,12 +186,12 @@ func (vb *VectorsBuffer) ByteOffset(vec gpu.Vectors) int {
 }
 
 // Offset returns the float element wise starting offset of given Vectors in buffer
-func (vb *VectorsBuffer) Offset(vec gpu.Vectors) int {
+func (vb *VectorsBuffer) Offset(vec *Var) int {
 	return vb.Offset(vec)
 }
 
 // Stride returns the float-element-wise stride of given Vectors
-func (vb *VectorsBuffer) Stride(vec gpu.Vectors) int {
+func (vb *VectorsBuffer) Stride(vec *Var) int {
 	i, _ := vb.vec(vec)
 	if i >= 0 {
 		if i < vb.nInter {
@@ -251,7 +203,7 @@ func (vb *VectorsBuffer) Stride(vec gpu.Vectors) int {
 }
 
 // ByteStride returns the byte-wise stride of given Vectors
-func (vb *VectorsBuffer) ByteStride(vec gpu.Vectors) int {
+func (vb *VectorsBuffer) ByteStride(vec *Var) int {
 	return vb.Stride(vec) * 4
 }
 
@@ -267,7 +219,7 @@ func (vb *VectorsBuffer) AllData() mat32.ArrayF32 {
 }
 
 // SetVecData sets data for given Vectors -- handles interleaving etc
-func (vb *VectorsBuffer) SetVecData(vec gpu.Vectors, data mat32.ArrayF32) {
+func (vb *VectorsBuffer) SetVecData(vec *Var, data mat32.ArrayF32) {
 	i, v := vb.vec(vec)
 	if i < 0 {
 		return
@@ -292,7 +244,7 @@ func (vb *VectorsBuffer) SetVecData(vec gpu.Vectors, data mat32.ArrayF32) {
 
 // VecData returns data for given Vectors -- this is a copy for interleaved data
 // and a direct sub-slice for non-interleaved.
-func (vb *VectorsBuffer) VecData(vec gpu.Vectors) mat32.ArrayF32 {
+func (vb *VectorsBuffer) VecData(vec *Var) mat32.ArrayF32 {
 	i, v := vb.vec(vec)
 	if i < 0 {
 		return nil
@@ -319,7 +271,7 @@ func (vb *VectorsBuffer) VecData(vec gpu.Vectors) mat32.ArrayF32 {
 // and calls the specified callback function with a pointer to each item as a Vec3.
 // Modifications to vec will be applied to the buffer at each iteration.
 // The callback function returns false to break or true to continue.
-func (vb *VectorsBuffer) Vec3Func(vec gpu.Vectors, fun func(vec *mat32.Vec3) bool) {
+func (vb *VectorsBuffer) Vec3Func(vec *Var, fun func(vec *mat32.Vec3) bool) {
 	i, v := vb.vec(vec)
 	if i < 0 {
 		return
@@ -424,7 +376,7 @@ func (vb *VectorsBuffer) DeleteVectorsByName(name string) {
 }
 
 // DeleteVectorsByRole deletes Vectors of given role (calls Delete first)
-func (vb *VectorsBuffer) DeleteVectorsByRole(role gpu.VectorRoles) {
+func (vb *VectorsBuffer) DeleteVectorsByRole(role VectorRoles) {
 	vb.Delete()
 	for i, v := range vb.vecs {
 		if v.role == role {
@@ -433,14 +385,6 @@ func (vb *VectorsBuffer) DeleteVectorsByRole(role gpu.VectorRoles) {
 		}
 	}
 	log.Printf("glos.VectorsBuffer DeleteVectorsByRole: role %v not found\n", role)
-}
-
-// todo: remove from interface
-
-func (vb *VectorsBuffer) Transfer() {
-}
-
-func (vb *VectorsBuffer) TransferVec(vec gpu.Vectors) {
 }
 
 // var glUsages = map[gpu.VectorUsages]uint32{
@@ -454,7 +398,3 @@ func (vb *VectorsBuffer) TransferVec(vec gpu.Vectors) {
 // 	gpu.DynamicRead: gl.DYNAMIC_READ,
 // 	gpu.DynamicCopy: gl.DYNAMIC_COPY,
 // }
-
-func (vb *VectorsBuffer) GPUUsage(usg gpu.VectorUsages) uint32 {
-	return 0
-}

@@ -5,33 +5,22 @@
 // This is initially adapted from https://github.com/vulkan-go/asche
 // Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
 
-package egpu
+package vgpu
 
 import (
 	"log"
 )
 
-// Pipeline manages a sequence of Programs that can be activated in an
-// appropriate order to achieve some overall step of rendering.
-// A new Pipeline can be created in TheGPU.NewPipeline().
-// It corresponds to a vulkan pipeline and can be associated with
-// a graphics device on the GPU or a compute device
+// Pipeline manages a sequence of compute steps, which are fixed once configured.
+// Each has an associated set of Vars, which could be maintained collectively for
+// multiple different such piplines.
 type Pipeline struct {
+	Name    string
 	GPU     *GPU
 	Device  Device `desc:"device for this pipeline -- could be GPU or Compute"`
-	name    string
-	progs   map[string]*Program
 	CmdPool CmdPool
-}
-
-// Name returns name of this pipeline
-func (pl *Pipeline) Name() string {
-	return pl.name
-}
-
-// SetName sets name of this pipeline
-func (pl *Pipeline) SetName(name string) {
-	pl.name = name
+	Vars    *Vars              `desc:"variables associated with this pipeline"`
+	Shaders map[string]*Shader `desc:"shaders loaded for this pipeline"`
 }
 
 // AddProgram adds program with given name to the pipeline

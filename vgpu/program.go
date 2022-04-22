@@ -5,7 +5,7 @@
 // This is initially adapted from https://github.com/vulkan-go/asche
 // Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
 
-package egpu
+package vgpu
 
 import (
 	"fmt"
@@ -13,6 +13,8 @@ import (
 
 	"github.com/goki/gi/oswin/gpu"
 )
+
+// todo: Program no longer relevant -- everything at Pipeline level
 
 // Program manages a set of shaders and associated variables and uniforms.
 // Multiple programs can be assembled into a Pipeline, which can create

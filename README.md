@@ -1,2 +1,3 @@
-# egpu
-Emergent GPU support for compute
+# VGPU: Vulkan GPU Framework for Graphics and Compute, in Go
+
+

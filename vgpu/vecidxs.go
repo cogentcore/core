@@ -5,7 +5,7 @@
 // This is initially adapted from https://github.com/vulkan-go/asche
 // Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
 
-package egpu
+package vgpu
 
 import (
 	"unsafe"
@@ -13,41 +13,43 @@ import (
 	"github.com/goki/gi/oswin/gpu"
 )
 
-// BufferMgr maintains related VectorsBuffer and IndexesBuffer
+// todo: rename VectorsBuffer -> Vectors, Indexes
+
+// VecIdxs maintains related VectorsBuffer and IndexesBuffer
 // and corresponds to the VAO (Vertex Array Object) for OpenGL
 // which holds these active buffer pointers.
 // A typical Shape / Object / Geom will just have this.
 // All management, transfer, freeing takes place at level of Memory object!
-type BufferMgr struct {
+type VecIdxs struct {
 	init bool
 	vecs *VectorsBuffer
 	idxs *IndexesBuffer
 }
 
 // AddVectorsBuffer makes a new VectorsBuffer to contain Vectors.
-func (bm *BufferMgr) AddVectorsBuffer(usg gpu.VectorUsages) gpu.VectorsBuffer {
+func (bm *VecIdxs) AddVectorsBuffer(usg gpu.VectorUsages) gpu.VectorsBuffer {
 	bm.vecs = &VectorsBuffer{usage: usg}
 	return bm.vecs
 }
 
 // VectorsBuffer returns the VectorsBuffer for this mgr
-func (bm *BufferMgr) VectorsBuffer() gpu.VectorsBuffer {
+func (bm *VecIdxs) VectorsBuffer() gpu.VectorsBuffer {
 	return bm.vecs
 }
 
 // AddIndexesBuffer makes a new IndexesBuffer to contain Indexes.
-func (bm *BufferMgr) AddIndexesBuffer(usg gpu.VectorUsages) gpu.IndexesBuffer {
+func (bm *VecIdxs) AddIndexesBuffer(usg gpu.VectorUsages) gpu.IndexesBuffer {
 	bm.idxs = &IndexesBuffer{}
 	return bm.idxs
 }
 
 // IndexesBuffer returns the IndexesBuffer for this mgr
-func (bm *BufferMgr) IndexesBuffer() gpu.IndexesBuffer {
+func (bm *VecIdxs) IndexesBuffer() gpu.IndexesBuffer {
 	return bm.idxs
 }
 
 // MemSize returns size in bytes of total memory required
-func (bm *BufferMgr) MemSize() int {
+func (bm *VecIdxs) MemSize() int {
 	sz := 0
 	if bm.idxs != nil {
 		sz += bm.idxs.MemSize()
@@ -59,7 +61,7 @@ func (bm *BufferMgr) MemSize() int {
 }
 
 // Alloc allocates subset of Memory Buffer to each sub-buffer
-func (bm *BufferMgr) Alloc(mm *Memory, offset int) int {
+func (bm *VecIdxs) Alloc(mm *Memory, offset int) int {
 	sz := 0
 	if bm.idxs != nil {
 		sz += bm.idxs.Alloc(mm, offset)
@@ -72,7 +74,7 @@ func (bm *BufferMgr) Alloc(mm *Memory, offset int) int {
 }
 
 // Free nils buffer allocations
-func (bm *BufferMgr) Free() {
+func (bm *VecIdxs) Free() {
 	if bm.idxs != nil {
 		bm.idxs.Free()
 	}
@@ -83,7 +85,7 @@ func (bm *BufferMgr) Free() {
 
 // CopyBuffsToStaging copies all of the buffer source data into the CPU side staging buffer.
 // this does not check for changes -- use for initial configuration.
-func (bm *BufferMgr) CopyBuffsToStaging(bufPtr unsafe.Pointer) {
+func (bm *VecIdxs) CopyBuffsToStaging(bufPtr unsafe.Pointer) {
 	if bm.idxs != nil {
 		bm.idxs.CopyBuffToStaging(bufPtr)
 	}
@@ -95,7 +97,7 @@ func (bm *BufferMgr) CopyBuffsToStaging(bufPtr unsafe.Pointer) {
 // SyncBuffsToStaging copies all of the buffer source data into the CPU side staging buffer.
 // only for *vector* data marked as changed.  index data is assumed to be static.
 // returns true if any was copied.
-func (bm *BufferMgr) SyncBuffsToStaging(bufPtr unsafe.Pointer) *BuffAlloc {
+func (bm *VecIdxs) SyncBuffsToStaging(bufPtr unsafe.Pointer) *BuffAlloc {
 	if bm.vecs == nil {
 		return nil
 	}

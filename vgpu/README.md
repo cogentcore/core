@@ -14,3 +14,9 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 
 * https://asawicki.info/news_1740_vulkan_memory_types_on_pc_and_how_to_use_them
 * https://github.com/Glavnokoman/vuh
+* https://arm-software.github.io/vulkan-sdk/basic_compute.html
+* https://vkguide.dev/docs/chapter-4/storage_buffers/
+
+* https://stackoverflow.com/questions/67831583/vanilla-vulkan-compute-shader-not-writing-to-output-buffer -- how to write to output buffer in compute shader.
+
+

@@ -5,7 +5,7 @@
 // This is initially adapted from https://github.com/vulkan-go/asche
 // Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
 
-package egpu
+package vgpu
 
 import (
 	"fmt"
@@ -14,6 +14,11 @@ import (
 
 	vk "github.com/vulkan-go/vulkan"
 )
+
+// todo: Mem has []*VarsMem with each having a []*Vars and map[name]*MemAlloc
+// where name is name of *instance* of a given var, not name of var!
+// MemAlloc needs to have *Var pointer
+// ImagesMem also has same thing
 
 // BuffAlloc is one memory allocation into a Vulkan Buffer.
 // Used to generate vk.CmdBindVertexBuffers calls for Vectors,
@@ -37,21 +42,21 @@ func (ba *BuffAlloc) Free() {
 // BuffMgrAlloc is one memory allocation for a given buffer manager.
 // This is the level at which the Memory object manages buffer memory.
 type BuffMgrAlloc struct {
-	Buff   *BufferMgr
+	Buff   *VecIdxs
 	Offset int `desc:"starting offset"`
 	Size   int `desc:"size"`
 }
 
-// Memory manages the memory for the GPU, in terms of BufferMgr allocations.
-// You configure all the BufferMgrs and then allocate them here.
+// Memory manages the memory for the GPU, in terms of VecIdxs allocations.
+// You configure all the VecIdxss and then allocate them here.
 type Memory struct {
 	GPU     *GPU
 	Device  Device  `desc:"logical device that this memory is managed for: a Surface or GPU itself"`
 	CmdPool CmdPool `desc:"command pool for memory transfers"`
 
-	BuffAllocs   []*BuffMgrAlloc              `desc:"allocations for buffermgrs, in order added"`
-	BuffAllocMap map[*BufferMgr]*BuffMgrAlloc `desc:"allocations for buffermgrs, as map"`
-	BuffSize     int                          `desc:"total size in bytes allocated"`
+	BuffAllocs   []*BuffMgrAlloc            `desc:"allocations for buffermgrs, in order added"`
+	BuffAllocMap map[*VecIdxs]*BuffMgrAlloc `desc:"allocations for buffermgrs, as map"`
+	BuffSize     int                        `desc:"total size in bytes allocated"`
 
 	BuffHost    vk.Buffer       `desc:"logical descriptor for host CPU-visible memory, for staging"`
 	BuffHostMem vk.DeviceMemory `desc:"host CPU-visible memory, for staging"`
@@ -68,10 +73,10 @@ func (mm *Memory) Init(gp *GPU, device *Device) {
 	mm.CmdPool.Init(device, vk.CommandPoolCreateTransientBit)
 }
 
-// AddBuff adds BufferMgr to be managed by this memory manager
-func (mm *Memory) AddBuff(buff *BufferMgr) {
+// AddBuff adds VecIdxs to be managed by this memory manager
+func (mm *Memory) AddBuff(buff *VecIdxs) {
 	if mm.BuffAllocMap == nil {
-		mm.BuffAllocMap = make(map[*BufferMgr]*BuffMgrAlloc)
+		mm.BuffAllocMap = make(map[*VecIdxs]*BuffMgrAlloc)
 	}
 	ba := &BuffMgrAlloc{Buff: buff}
 	mm.BuffAllocMap[buff] = ba
