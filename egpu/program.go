@@ -16,8 +16,7 @@ import (
 
 // Program manages a set of shaders and associated variables and uniforms.
 // Multiple programs can be assembled into a Pipeline, which can create
-// new Programs.  GPU.NewProgram() can also create standalone Programs.
-// All uniforms must be added before compiling program.
+// new Programs.
 type Program struct {
 	init        bool
 	name        string
