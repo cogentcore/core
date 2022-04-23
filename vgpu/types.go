@@ -5,8 +5,6 @@
 package vgpu
 
 import (
-	"fmt"
-
 	"github.com/goki/ki/kit"
 
 	vk "github.com/vulkan-go/vulkan"
@@ -19,14 +17,14 @@ type Types int32
 
 const (
 	UndefType = Types(vk.FormatUndefined)
-	Bool32
+	Bool32    = Types(vk.FormatR32Uint) // not officially supported -- just an "annotation"
 
 	Int32     = Types(vk.FormatR32Sint)
 	Int32Vec2 = Types(vk.FormatR32g32Sint)
 	Int32Vec3 = Types(vk.FormatR32g32b32Sint)
 	Int32Vec4 = Types(vk.FormatR32g32b32a32Sint)
 
-	UInt32     = Types(vk.FormatR32Uint)
+	Uint32     = Types(vk.FormatR32Uint)
 	Uint32Vec2 = Types(vk.FormatR32g32Uint)
 	Uint32Vec3 = Types(vk.FormatR32g32b32Uint)
 	Uint32Vec4 = Types(vk.FormatR32g32b32a32Uint)
@@ -52,15 +50,14 @@ var KiT_Types = kit.Enums.AddEnum(TypesN, kit.NotBitFlag, nil)
 // TypeSizes gives size of each type in bytes
 var TypeSizes = map[Types]int{
 	UndefType:   0,
-	Bool32:      4,
 	Int32:       4,
 	Int32Vec2:   8,
 	Int32Vec3:   12,
 	Int32Vec4:   16,
-	UInt32:      4,
-	UInt32Vec2:  8,
-	UInt32Vec3:  12,
-	UInt32Vec4:  16,
+	Uint32:      4,
+	Uint32Vec2:  8,
+	Uint32Vec3:  12,
+	Uint32Vec4:  16,
 	Float32:     4,
 	Float32Vec2: 8,
 	Float32Vec3: 12,
@@ -103,10 +100,10 @@ type UniType struct {
 var FUniType = UniType{Type: Float32}
 
 // IUniType is a single int32
-var IUniType = UniType{Type: Int}
+var IUniType = UniType{Type: Int32}
 
 // BUniType is a single bool
-var BUniType = UniType{Type: Bool}
+var BUniType = UniType{Type: Bool32}
 
 // Vec2fUniType is a 2-vector of float32
 var Vec2fUniType = UniType{Type: Float32, Vec: 2}
@@ -125,18 +122,19 @@ var Mat4fUniType = UniType{Type: Float32, Mat: 4}
 
 // Name returns the full GLSL type name for the type
 func (ty *UniType) Name() string {
-	if ty.Vec == 0 && ty.Mat == 0 {
-		return TypeNames[ty.Type]
-	}
-	pfx := TypeNames[ty.Type][0:1]
-	if ty.Type == Float32 {
-		pfx = ""
-	}
-	if ty.Vec > 0 {
-		return fmt.Sprintf("%svec%d", pfx, ty.Vec)
-	} else {
-		return fmt.Sprintf("%smat%d", pfx, ty.Mat)
-	}
+	// if ty.Vec == 0 && ty.Mat == 0 {
+	// 	return TypeNames[ty.Type]
+	// }
+	// pfx := TypeNames[ty.Type][0:1]
+	// if ty.Type == Float32 {
+	// 	pfx = ""
+	// }
+	// if ty.Vec > 0 {
+	// 	return fmt.Sprintf("%svec%d", pfx, ty.Vec)
+	// } else {
+	// 	return fmt.Sprintf("%smat%d", pfx, ty.Mat)
+	// }
+	return ""
 }
 
 // Bytes returns actual size of this element in bytes

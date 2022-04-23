@@ -19,4 +19,5 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 
 * https://stackoverflow.com/questions/67831583/vanilla-vulkan-compute-shader-not-writing-to-output-buffer -- how to write to output buffer in compute shader.
 
+* https://www.reddit.com/r/vulkan/comments/rtpdvu/interleaved_vs_separate_vertex_buffers/ -- separate is actually better for most cases, and is *vastly* simpler.
 

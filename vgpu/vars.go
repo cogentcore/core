@@ -1,9 +1,6 @@
-// Copyright (c) 2022, The Emergent Authors. All rights reserved.
+// Copyright (c) 2022, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-// This is initially adapted from https://github.com/vulkan-go/asche
-// Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
 
 package vgpu
 
@@ -15,7 +12,11 @@ type SetLoc struct {
 	Loc int `desc:"location within set"`
 }
 
-// Var specifies a variable used in a pipeline, but does not manage actual values / storage
+// Var specifies a variable used in a pipeline, but does not manage
+// actual values / storage -- see Val for that.
+// A Var represents a type of input or output into the GPU program,
+// including things like Vertex arrays, transformation matricies (Uniforms),
+// Images (Textures), and arbitrary Structs for Compute shaders.
 type Var struct {
 	Name   string   `desc:"variable name"`
 	Type   Types    `desc:"type"`
@@ -45,8 +46,8 @@ type Vars struct {
 
 // AddVar adds a new variable
 func (vs *Vars) AddVar(vr *Var) {
-	if vr.VarMap == nil {
-		vr.VarMap = make(map[string]*Var)
+	if vs.VarMap == nil {
+		vs.VarMap = make(map[string]*Var)
 	}
 	vs.Vars = append(vs.Vars, vr)
 	vs.VarMap[vr.Name] = vr
@@ -63,7 +64,7 @@ func (vs *Vars) Add(name string, typ Types, role VarRoles, set int) {
 func (vs *Vars) AddStruct(name string, size int, role VarRoles, set int) {
 	vr := &Var{}
 	vr.Set(name, Struct, role, set)
-	fr.SizeOf = size
+	vr.SizeOf = size
 	vs.AddVar(vr)
 }
 
@@ -85,6 +86,7 @@ const (
 	UndefVarRole VarRoles = iota
 	VertexInput
 	VertexOutput // is this needed?
+	Indexes
 	UniformVar
 	StorageVar
 	ImageVar

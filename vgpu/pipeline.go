@@ -1,4 +1,4 @@
-// Copyright (c) 2022, The Emergent Authors. All rights reserved.
+// Copyright (c) 2022, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -15,43 +15,40 @@ import (
 // Each has an associated set of Vars, which could be maintained collectively for
 // multiple different such piplines.
 type Pipeline struct {
-	Name    string
-	GPU     *GPU
-	Device  Device `desc:"device for this pipeline -- could be GPU or Compute"`
-	CmdPool CmdPool
-	Vars    *Vars              `desc:"variables associated with this pipeline"`
-	Shaders map[string]*Shader `desc:"shaders loaded for this pipeline"`
+	Name      string
+	GPU       *GPU
+	Device    Device `desc:"device for this pipeline -- could be GPU or Compute"`
+	CmdPool   CmdPool
+	Vars      *Vars              `desc:"variables associated with this pipeline"`
+	Shaders   []*Shader          `desc:"shaders in order added -- should be execution order"`
+	ShaderMap map[string]*Shader `desc:"shaders loaded for this pipeline"`
 }
 
-// AddProgram adds program with given name to the pipeline
-func (pl *Pipeline) AddProgram(name string) *Program {
-	if pl.progs == nil {
-		pl.progs = make(map[string]*Program)
+// AddShader adds program with given name to the pipeline
+func (pl *Pipeline) AddShader(name string) *Shader {
+	if pl.ShaderMap == nil {
+		pl.ShaderMap = make(map[string]*Shader)
 	}
-	pr := &Program{name: name}
-	pl.progs[name] = pr
-	return pr
+	sh := &Shader{name: name}
+	pl.Shaders = append(pl.Shaders, sh)
+	pl.ShaderMap[name] = sh
+	return sh
 }
 
-// ProgramByName returns Program by name.
+// ShaderByName returns Shader by name.
 // Returns nil if not found (error auto logged).
-func (pl *Pipeline) ProgramByName(name string) *Program {
-	pr, ok := pl.progs[name]
+func (pl *Pipeline) ShaderByName(name string) *Shader {
+	sh, ok := pl.ShaderMap[name]
 	if !ok {
-		log.Printf("glgpu Pipeline ProgramByName: Program: %s not found in pipeline: %s\n", name, pl.name)
+		log.Printf("vgpu.Pipeline ShaderByName: Shader: %s not found in pipeline: %s\n", name, pl.Name)
 		return nil
 	}
-	return pr
-}
-
-// Programs returns list (slice) of Programs in pipeline
-func (pl *Pipeline) Programs() []*Program {
-	return nil
+	return sh
 }
 
 func (pl *Pipeline) Delete() {
-	for _, pr := range pl.progs {
-		pr.Delete()
+	for _, sh := range pl.ShaderMap {
+		sh.Delete()
 	}
 	pl.CmdPool.Destroy(&pl.Device)
 }

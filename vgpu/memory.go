@@ -1,4 +1,4 @@
-// Copyright (c) 2022, The Emergent Authors. All rights reserved.
+// Copyright (c) 2022, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -8,56 +8,29 @@
 package vgpu
 
 import (
-	"fmt"
 	"log"
 	"unsafe"
 
 	vk "github.com/vulkan-go/vulkan"
 )
 
-// todo: Mem has []*VarsMem with each having a []*Vars and map[name]*MemAlloc
-// where name is name of *instance* of a given var, not name of var!
-// MemAlloc needs to have *Var pointer
-// ImagesMem also has same thing
-
-// BuffAlloc is one memory allocation into a Vulkan Buffer.
-// Used to generate vk.CmdBindVertexBuffers calls for Vectors,
-// vkCmdBindIndexBuffer for Indexes
-type BuffAlloc struct {
-	Mem    *Memory `desc:"memory controller with "`
-	Offset int     `desc:"starting offset"`
-	Size   int     `desc:"size"`
+// MemReg is a region of memory
+type MemReg struct {
+	Offset int
+	Size   int
 }
 
-func (ba *BuffAlloc) Set(mem *Memory, off, size int) {
-	ba.Mem = mem
-	ba.Offset = off
-	ba.Size = size
-}
-
-func (ba *BuffAlloc) Free() {
-	ba.Set(nil, 0, 0)
-}
-
-// BuffMgrAlloc is one memory allocation for a given buffer manager.
-// This is the level at which the Memory object manages buffer memory.
-type BuffMgrAlloc struct {
-	Buff   *VecIdxs
-	Offset int `desc:"starting offset"`
-	Size   int `desc:"size"`
-}
-
-// Memory manages the memory for the GPU, in terms of VecIdxs allocations.
-// You configure all the VecIdxss and then allocate them here.
+// Memory manages memory for the GPU, using separate buffers for
+// Images (Textures) vs. other values.
 type Memory struct {
 	GPU     *GPU
 	Device  Device  `desc:"logical device that this memory is managed for: a Surface or GPU itself"`
 	CmdPool CmdPool `desc:"command pool for memory transfers"`
 
-	BuffAllocs   []*BuffMgrAlloc            `desc:"allocations for buffermgrs, in order added"`
-	BuffAllocMap map[*VecIdxs]*BuffMgrAlloc `desc:"allocations for buffermgrs, as map"`
-	BuffSize     int                        `desc:"total size in bytes allocated"`
+	Vals   Vals `desc:"values encoded in this Memory -- no Images here!"`
+	Images Vals `desc:"Image-type values"`
 
+	BuffSize    int             `desc:"allocated buffer size"`
 	BuffHost    vk.Buffer       `desc:"logical descriptor for host CPU-visible memory, for staging"`
 	BuffHostMem vk.DeviceMemory `desc:"host CPU-visible memory, for staging"`
 	BuffDev     vk.Buffer       `desc:"logical descriptor for device GPU-local memory, for computation"`
@@ -73,63 +46,38 @@ func (mm *Memory) Init(gp *GPU, device *Device) {
 	mm.CmdPool.Init(device, vk.CommandPoolCreateTransientBit)
 }
 
-// AddBuff adds VecIdxs to be managed by this memory manager
-func (mm *Memory) AddBuff(buff *VecIdxs) {
-	if mm.BuffAllocMap == nil {
-		mm.BuffAllocMap = make(map[*VecIdxs]*BuffMgrAlloc)
-	}
-	ba := &BuffMgrAlloc{Buff: buff}
-	mm.BuffAllocMap[buff] = ba
-	mm.BuffAllocs = append(mm.BuffAllocs, ba)
-}
-
-// BuffMemSize returns the total size needs in bytes for buffers
-func (mm *Memory) BuffMemSize() int {
-	sz := 0
-	for _, ba := range mm.BuffAllocs {
-		sz += ba.Buff.MemSize()
-	}
-	return sz
-}
-
 func (mm *Memory) Destroy() {
 	mm.Free()
 	mm.GPU = nil
 }
 
-// Config should be called after all memory elements have been configured
+// Config should be called after all Vals have been configured
 // and are ready to go with their initial data.
 // Does: Alloc(), AllocDev(), CopyToStaging(), TransferAllToGPU()
-func (mm *Memory) Config() {
-	mm.Alloc()
-	mm.AllocDev()
-	mm.CopyBuffsToStaging()
-	mm.TransferBuffAllToGPU()
-	mm.Active = true
-}
+// func (mm *Memory) Config() {
+// 	mm.Alloc()
+// 	mm.AllocDev()
+// 	mm.CopyBuffsToStaging()
+// 	mm.TransferBuffAllToGPU()
+// 	mm.Active = true
+// }
 
-// Alloc allocates memory for all buffs (if size changed)
+// Alloc allocates memory for all Vars and Images
 func (mm *Memory) Alloc() {
-	nsz := mm.BuffMemSize()
-	if nsz != mm.BuffSize {
-		mm.Free()
-
-		mm.BuffSize = nsz
-		if mm.BuffSize == 0 {
-			return
-		}
-
+	bsz := mm.Vals.MemSize()
+	if bsz != mm.BuffSize {
 		mm.BuffHost = mm.MakeBuffer(mm.BuffSize, vk.BufferUsageTransferSrcBit)
 		mm.BuffDev = mm.MakeBuffer(mm.BuffSize, vk.BufferUsageTransferDstBit|vk.BufferUsageVertexBufferBit|vk.BufferUsageIndexBufferBit)
 		mm.BuffHostMem = mm.AllocMem(mm.BuffHost, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
+		mm.BuffSize = bsz
 	}
-
-	// now allocate views into main buffer memory
-	off := 0
-	for _, ba := range mm.BuffAllocs {
-		sz := ba.Buff.Alloc(mm, off)
-		off += sz
+	var buffPtr unsafe.Pointer
+	ret := vk.MapMemory(mm.Device.Device, mm.BuffHostMem, 0, vk.DeviceSize(mm.BuffSize), 0, &buffPtr)
+	if IsError(ret) {
+		log.Printf("vulkan Memory:CopyBuffs warning: failed to map device memory for data (len=%d)", mm.BuffSize)
+		return
 	}
+	mm.Vals.Alloc(buffPtr, 0)
 }
 
 // AllocDev allocates memory on the device
@@ -188,9 +136,8 @@ func (mm *Memory) Free() bool {
 	if mm.BuffSize == 0 {
 		return false
 	}
-	for _, ba := range mm.BuffAllocs {
-		ba.Buff.Free()
-	}
+	vk.UnmapMemory(mm.Device.Device, mm.BuffHostMem)
+	mm.Vals.Free()
 	mm.FreeBuffMem(&mm.BuffDevMem)
 	vk.DestroyBuffer(mm.Device.Device, mm.BuffDev, nil)
 	mm.FreeBuffMem(&mm.BuffHostMem)
@@ -198,6 +145,7 @@ func (mm *Memory) Free() bool {
 	mm.BuffSize = 0
 	mm.BuffHost = nil
 	mm.BuffDev = nil
+	mm.Active = false
 	return true
 }
 
@@ -221,71 +169,13 @@ func (mm *Memory) Activate() {
 	mm.Active = true
 }
 
-// BuffMemCopy copies source data into destination buffer represented by
-// a dst unsafe.Pointer to start of buffer.
-// call with unsafe.Pointer(&buff[0]) to first element in source buffer.
-func BuffMemCopy(ba *BuffAlloc, dst unsafe.Pointer, src unsafe.Pointer) error {
-	if ba.Size == 0 {
-		return nil
-	}
-	const m = 0x7fffffff
-	dstView := (*[m]byte)(unsafe.Pointer(uintptr(dst) + uintptr(ba.Offset)))
-	srcView := (*[m]byte)(src)
-	n := copy(dstView[:ba.Size], srcView[:ba.Size])
-	if n != ba.Size {
-		err := fmt.Errorf("vulkan BuffMemCopy warning: failed to copy data, %d != %d", n, ba.Size)
-		log.Println(err)
-		return err
-	}
-	return nil
-}
-
-// CopyBuffsToStaging copies all of the buffer source data into the CPU side staging buffer.
-// this does not check for changes -- use for initial configuration.
-// See SyncBuffsToStaging for a only updates.
-func (mm *Memory) CopyBuffsToStaging() {
-	if mm.BuffSize == 0 || mm.BuffHostMem == nil {
-		return
-	}
-	var bufPtr unsafe.Pointer
-	ret := vk.MapMemory(mm.Device.Device, mm.BuffHostMem, 0, vk.DeviceSize(mm.BuffSize), 0, &bufPtr)
-	if IsError(ret) {
-		log.Printf("vulkan Memory:CopyBuffs warning: failed to map device memory for data (len=%d)", mm.BuffSize)
-		return
-	}
-	for _, ba := range mm.BuffAllocs {
-		ba.Buff.CopyBuffsToStaging(bufPtr)
-	}
-	vk.UnmapMemory(mm.Device.Device, mm.BuffHostMem)
-}
-
-// SyncBuffsToStaging copies only changed buffer source data to CPU side staging buffer.
-// returns a list of allocs that were updated
-func (mm *Memory) SyncBuffsToStaging() []*BuffAlloc {
-	if mm.BuffSize == 0 || mm.BuffDevMem == nil {
-		return nil
-	}
-	var bufPtr unsafe.Pointer
-	ret := vk.MapMemory(mm.Device.Device, mm.BuffHostMem, 0, vk.DeviceSize(mm.BuffSize), 0, &bufPtr)
-	if IsError(ret) {
-		log.Printf("vulkan Memory:CopyBuffs warning: failed to map device memory for data (len=%d)", mm.BuffSize)
-		return nil
-	}
-	var as []*BuffAlloc
-	for _, ba := range mm.BuffAllocs {
-		aa := ba.Buff.SyncBuffsToStaging(bufPtr)
-		if aa != nil {
-			as = append(as, aa)
-		}
-	}
-	vk.UnmapMemory(mm.Device.Device, mm.BuffHostMem)
-	return as
-}
-
 // SyncAllToGPU syncs everything to GPU
 func (mm *Memory) SyncAllToGPU() {
-	as := mm.SyncBuffsToStaging()
-	mm.TransferBuffToGPU(as)
+	mods := mm.Vals.ModRegs()
+	if len(mods) == 0 {
+		return
+	}
+	mm.TransferBuffToGPU(mods)
 }
 
 // TransferAllToGPU transfers all staging to GPU
@@ -298,11 +188,11 @@ func (mm *Memory) TransferBuffAllToGPU() {
 	if mm.BuffSize == 0 || mm.BuffDevMem == nil {
 		return
 	}
-	mm.TransferBuffToGPU([]*BuffAlloc{&BuffAlloc{Offset: 0, Size: mm.BuffSize}})
+	mm.TransferBuffToGPU([]MemReg{{Offset: 0, Size: mm.BuffSize}})
 }
 
-// TransferBuffToGPU transfers buff memory from CPU to GPU for given allocs
-func (mm *Memory) TransferBuffToGPU(allocs []*BuffAlloc) {
+// TransferBuffToGPU transfers buff memory from CPU to GPU for given regs
+func (mm *Memory) TransferBuffToGPU(regs []MemReg) {
 	if mm.BuffSize == 0 || mm.BuffDevMem == nil {
 		return
 	}
@@ -315,12 +205,12 @@ func (mm *Memory) TransferBuffToGPU(allocs []*BuffAlloc) {
 	})
 	IfPanic(NewError(ret))
 
-	regs := make([]vk.BufferCopy, len(allocs))
-	for i, ba := range allocs {
-		regs[i] = vk.BufferCopy{SrcOffset: vk.DeviceSize(ba.Offset), DstOffset: vk.DeviceSize(ba.Offset), Size: vk.DeviceSize(ba.Size)}
+	rg := make([]vk.BufferCopy, len(regs))
+	for i, mr := range regs {
+		rg[i] = vk.BufferCopy{SrcOffset: vk.DeviceSize(mr.Offset), DstOffset: vk.DeviceSize(mr.Offset), Size: vk.DeviceSize(mr.Size)}
 	}
 
-	vk.CmdCopyBuffer(cmdBuff, mm.BuffHost, mm.BuffDev, uint32(len(regs)), regs)
+	vk.CmdCopyBuffer(cmdBuff, mm.BuffHost, mm.BuffDev, uint32(len(rg)), rg)
 	vk.EndCommandBuffer(cmdBuff)
 
 	cmdBu := []vk.CommandBuffer{cmdBuff}
