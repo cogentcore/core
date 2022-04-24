@@ -9,95 +9,64 @@ package vgpu
 
 import (
 	"io/ioutil"
+	"log"
 	"unsafe"
 
-	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/kit"
 	vk "github.com/vulkan-go/vulkan"
 )
 
-// LoadShader compiles given SPIR-V ".spv" code and returns a shader -- not typically saved!
-func LoadShader(src []byte) (vk.ShaderModule, error) {
-	var module vk.ShaderModule
-	ret := vk.CreateShaderModule(TheGPU.Device.Device, &vk.ShaderModuleCreateInfo{
-		SType:    vk.StructureTypeShaderModuleCreateInfo,
-		CodeSize: uint(len(src)),
-		PCode:    SliceUint32(src),
-	}, nil, &module)
-	if IsError(ret) {
-		return nil, NewError(ret)
-	}
-	return module, nil
-}
-
 // Shader manages a single Shader program
 type Shader struct {
-	init   bool
-	Shader vk.ShaderModule
-	name   string
-	typ    gpu.ShaderTypes
-	src    string
-	orgSrc string // original source as provided by user -- program adds extra source..
+	Name     string
+	Type     ShaderTypes
+	VkModule vk.ShaderModule
 }
 
-// Name returns the unique name of this Shader
-func (sh *Shader) Name() string {
-	return sh.name
+// Init initializes the shader
+func (sh *Shader) Init(name string, typ ShaderTypes) {
+	sh.Name = name
+	sh.Type = typ
 }
 
-// Type returns the type of the Shader
-func (sh *Shader) Type() gpu.ShaderTypes {
-	return sh.typ
+// OpenFile loads given SPIR-V ".spv" code from file for the Shader.
+func (sh *Shader) OpenFile(fname string) error {
+	b, err := ioutil.ReadFile(fname)
+	if err != nil {
+		log.Printf("vgpu.Shader OpenFile: %s\n", err)
+		return err
+	}
+	return sh.OpenCode(b)
 }
 
-// OpenFile returns bytes from file
-func OpenFile(fname string) ([]byte, error) {
-	return ioutil.ReadFile(fname)
-}
-
-// Compile compiles given src as string (gl version -- not relevant)
-func (sh *Shader) Compile(src string) error {
-	return sh.CompileSPV([]byte(src))
-}
-
-// CompileSPV compiles given SPIR-V ".spv" code for the Shader, of given type and unique name.
-func (sh *Shader) CompileSPV(src []byte) error {
+// OpenCode loads given SPIR-V ".spv" code for the Shader.
+func (sh *Shader) OpenCode(code []byte) error {
 	var module vk.ShaderModule
 	ret := vk.CreateShaderModule(TheGPU.Device.Device, &vk.ShaderModuleCreateInfo{
 		SType:    vk.StructureTypeShaderModuleCreateInfo,
-		CodeSize: uint(len(src)),
-		PCode:    SliceUint32(src),
+		CodeSize: uint(len(code)),
+		PCode:    SliceUint32(code),
 	}, nil, &module)
 	if IsError(ret) {
 		return NewError(ret)
 	}
-	sh.Shader = module
-	sh.src = string(src)
-	sh.init = true
+	sh.VkModule = module
 	return nil
 }
 
-// Source returns the actual final source code for the Shader
-// excluding the null terminator (for display purposes).
-// This includes extra auto-generated code from the Program.
-func (sh *Shader) Source() string {
-	return sh.src
-}
-
-// OrigSource returns the original user-supplied source code
-// excluding the null terminator (for display purposes)
-func (sh *Shader) OrigSource() string {
-	return sh.orgSrc
+// Free deletes the shader module, which can be done after the pipeline
+// is created.
+func (sh *Shader) Free() {
+	if sh.VkModule == nil {
+		return
+	}
+	vk.DestroyShaderModule(TheGPU.Device.Device, sh.VkModule, nil)
+	sh.VkModule = nil
 }
 
 // Delete deletes the Shader
 func (sh *Shader) Delete() {
-	if !sh.init {
-		return
-	}
-	vk.DestroyShaderModule(TheGPU.Device.Device, sh.Shader, nil)
-	sh.Shader = nil
-	sh.init = false
+	sh.Free()
 }
 
 // todo: use 1.17 unsafe.Slice function
@@ -105,26 +74,20 @@ func (sh *Shader) Delete() {
 
 func SliceUint32(data []byte) []uint32 {
 	const m = 0x7fffffff
-	return (*[m / 4]uint32)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&data)).Data))[:len(data)/4]
-}
-
-type sliceHeader struct {
-	Data uintptr
-	Len  int
-	Cap  int
+	return (*[m / 4]uint32)(unsafe.Pointer(unsafe.Pointer(&(data[0]))))[:len(data)/4]
 }
 
 // ShaderTypes is a list of GPU shader types
 type ShaderTypes int32
 
 const (
-	VertexShader ShaderTypes = iota
-	FragmentShader
-	ComputeShader
-	GeometryShader
-	TessCtrlShader
-	TessEvalShader
-	ShaderTypesN
+	VertexShader   = ShaderTypes(vk.PipelineStageVertexShaderBit)
+	TessCtrlShader = ShaderTypes(vk.PipelineStageTessellationControlShaderBit)
+	TessEvalShader = ShaderTypes(vk.PipelineStageTessellationEvaluationShaderBit)
+	GeometryShader = ShaderTypes(vk.PipelineStageGeometryShaderBit)
+	FragmentShader = ShaderTypes(vk.PipelineStageFragmentShaderBit)
+	ComputeShader  = ShaderTypes(vk.PipelineStageComputeShaderBit)
+	ShaderTypesN   = ShaderTypes(6)
 )
 
 //go:generate stringer -type=ShaderTypes

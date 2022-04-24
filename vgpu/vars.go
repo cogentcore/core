@@ -4,7 +4,12 @@
 
 package vgpu
 
-import "github.com/goki/ki/kit"
+import (
+	"github.com/goki/ki/ints"
+	"github.com/goki/ki/kit"
+
+	vk "github.com/vulkan-go/vulkan"
+)
 
 // SetLoc is the descriptor set and location indexes for a variable
 type SetLoc struct {
@@ -25,8 +30,8 @@ type Var struct {
 	SizeOf int      `desc:"size in bytes of one element (not array size)"`
 }
 
-// Set sets the main values
-func (vr *Var) Set(name string, typ Types, role VarRoles, set int) {
+// Init initializes the main values
+func (vr *Var) Init(name string, typ Types, role VarRoles, set int) {
 	vr.Name = name
 	vr.Type = typ
 	vr.Role = role
@@ -56,25 +61,74 @@ func (vs *Vars) AddVar(vr *Var) {
 // Add adds a new variable
 func (vs *Vars) Add(name string, typ Types, role VarRoles, set int) {
 	vr := &Var{}
-	vr.Set(name, typ, role, set)
+	vr.Init(name, typ, role, set)
 	vs.AddVar(vr)
 }
 
 // AddStruct adds a new struct variable
 func (vs *Vars) AddStruct(name string, size int, role VarRoles, set int) {
 	vr := &Var{}
-	vr.Set(name, Struct, role, set)
+	vr.Init(name, Struct, role, set)
 	vr.SizeOf = size
 	vs.AddVar(vr)
 }
 
-// AllocSets allocates variables to sets
+// AllocSets allocates variables to sets.  Call once all vars added.
 func (vs *Vars) AllocSets() {
+	nsets := 0
+	for _, vr := range vs.Vars {
+		nsets = ints.MaxInt(nsets, vr.Loc.Set)
+	}
+	nsets++
+	vs.Sets = make([][]*Var, nsets)
+	for _, vr := range vs.Vars {
+		s := vs.Sets[vr.Loc.Set]
+		vr.Loc.Loc = len(s)
+		s = append(s, vr)
+		vs.Sets[vr.Loc.Set] = s
+	}
 }
 
 // Sets the descriptor layout info for all the variables
-func (vs *Vars) DescriptoLayout() {
+func (vs *Vars) DescriptorLayout() {
 	vs.AllocSets()
+}
+
+///////////////////////////////////////////////////////////////////
+// VertexInput Info
+
+// VkVertexConfig fills in the relevant info into given vulkan config struct
+// looking for all vars in order marked as VertexInput.
+// Note: there is no support for interleaved arrays so each binding and location
+// is assigned the same serial number, and per vertex is only supported mode.
+func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
+	cfg := &vk.PipelineVertexInputStateCreateInfo{}
+	cfg.SType = vk.StructureTypePipelineVertexInputStateCreateInfo
+	var bind []vk.VertexInputBindingDescription
+	var attr []vk.VertexInputAttributeDescription
+	vi := 0
+	for _, vr := range vs.Vars {
+		if vr.Role != VertexInput {
+			continue
+		}
+		bind = append(bind, vk.VertexInputBindingDescription{
+			Binding:   uint32(vi), // todo: should this be vr.Loc.Loc?
+			Stride:    uint32(vr.SizeOf),
+			InputRate: vk.VertexInputRateVertex,
+		})
+		attr = append(attr, vk.VertexInputAttributeDescription{
+			Location: uint32(vi), // todo: should this be vr.Loc.Loc?
+			Binding:  uint32(vi),
+			Format:   vk.Format(vr.Type),
+			Offset:   0,
+		})
+		vi++
+	}
+	cfg.VertexBindingDescriptionCount = uint32(vi)
+	cfg.PVertexBindingDescriptions = bind
+	cfg.VertexAttributeDescriptionCount = uint32(vi)
+	cfg.PVertexAttributeDescriptions = attr
+	return cfg
 }
 
 //////////////////////////////////////////////////////////////////
