@@ -88,7 +88,7 @@ type Vals struct {
 	TotSize int             `desc:"total size across all Vals -- computed during Alloc"`
 }
 
-// AddVal adds a new value
+// AddVal adds given value
 func (vs *Vals) AddVal(vr *Val) {
 	if vs.ValMap == nil {
 		vs.ValMap = make(map[string]*Val)
@@ -97,11 +97,13 @@ func (vs *Vals) AddVal(vr *Val) {
 	vs.ValMap[vr.Name] = vr
 }
 
-// Add adds a new value
-func (vs *Vals) Add(name string, vr *Var, n int) {
+// Add adds a new value for given variable, with given number of array elements
+// 0 = no array
+func (vs *Vals) Add(name string, vr *Var, n int) *Val {
 	vl := &Val{}
 	vl.Init(name, vr, n)
 	vs.AddVal(vl)
+	return vl
 }
 
 // MemSize returns size across all Vals
