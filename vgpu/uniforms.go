@@ -5,6 +5,9 @@
 // This is initially adapted from https://github.com/vulkan-go/asche
 // Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
 
+//go:build ignore
+// +build ignore
+
 package vgpu
 
 import (

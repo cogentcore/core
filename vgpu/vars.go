@@ -18,9 +18,9 @@ import (
 type Var struct {
 	Name    string   `desc:"variable name"`
 	Type    Types    `desc:"type of data in variable"`
-	Role    VarRoles `desc:"role of variable: VertexInput is configured in the pipeline VkConfig structure, and "`
+	Role    VarRoles `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and "`
 	Set     int      `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
-	BindLoc int      `desc:"binding or location number for variable -- VertexInputs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
+	BindLoc int      `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
 	SizeOf  int      `desc:"size in bytes of one element (not array size)"`
 }
 
@@ -82,7 +82,7 @@ func (vs *Vars) Config() {
 		rl = append(rl, vr)
 		vs.RoleMap[vr.Role] = rl
 
-		if vr.Role < UniformVar {
+		if vr.Role < Uniform {
 			vr.BindLoc = len(rl) - 1
 			continue
 		}
@@ -99,10 +99,10 @@ func (vs *Vars) Config() {
 }
 
 ///////////////////////////////////////////////////////////////////
-// VertexInput Info
+// Vertex Info
 
 // VkVertexConfig fills in the relevant info into given vulkan config struct
-// looking for all vars in order marked as VertexInput.
+// looking for all vars in order marked as Vertex.
 // Note: there is no support for interleaved arrays so each binding and location
 // is assigned the same sequential number, recorded in var BindLoc
 func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
@@ -110,7 +110,7 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 	cfg.SType = vk.StructureTypePipelineVertexInputStateCreateInfo
 	var bind []vk.VertexInputBindingDescription
 	var attr []vk.VertexInputAttributeDescription
-	vtx := vs.RoleMap[VertexInput]
+	vtx := vs.RoleMap[Vertex]
 	for _, vr := range vtx {
 		bind = append(bind, vk.VertexInputBindingDescription{
 			Binding:   uint32(vr.BindLoc),
@@ -134,26 +134,65 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 ///////////////////////////////////////////////////////////////////
 // Descriptors for Uniforms etc
 
-// DescSets returns the DescriptorSets for Uniform* vars
-// func (vs *Vars) DescSets() []vk.DescriptorPoolSize {
-// }
+// DescLayout returns the PipelineLayout of DescriptorSetLayout
+// info for all of the non-Vertex vars
+func (vs *Vars) DescLayout(dev vk.Device) vk.PipelineLayout {
+	dsets := make([]vk.DescriptorSetLayout, len(vs.SetMap))
+	for si, set := range vs.SetMap {
+		var descLayout vk.DescriptorSetLayout
+		var binds []vk.DescriptorSetLayoutBinding
+		bi := 0
+		for ri := Uniform; ri < VarRolesN; ri++ {
+			rl, has := set[ri]
+			if !has || len(rl) == 0 {
+				continue
+			}
+			bd := vk.DescriptorSetLayoutBinding{
+				Binding:         uint32(bi),
+				DescriptorType:  RoleDescriptors[ri],
+				DescriptorCount: uint32(len(rl)),
+				StageFlags:      vk.ShaderStageFlags(vk.ShaderStageVertexBit),
+			}
+			binds = append(binds, bd)
+		}
+		ret := vk.CreateDescriptorSetLayout(dev, &vk.DescriptorSetLayoutCreateInfo{
+			SType:        vk.StructureTypeDescriptorSetLayoutCreateInfo,
+			BindingCount: uint32(len(binds)),
+			PBindings:    binds,
+		}, nil, &descLayout)
+		IfPanic(NewError(ret))
+		dsets[si] = descLayout
+	}
+
+	var pipelineLayout vk.PipelineLayout
+	ret := vk.CreatePipelineLayout(dev, &vk.PipelineLayoutCreateInfo{
+		SType:          vk.StructureTypePipelineLayoutCreateInfo,
+		SetLayoutCount: uint32(len(dsets)),
+		PSetLayouts:    dsets,
+	}, nil, &pipelineLayout)
+	IfPanic(NewError(ret))
+	return pipelineLayout
+}
 
 // DescPools returns the collection of each Role of variable
 func (vs *Vars) DescPools() []vk.DescriptorPoolSize {
 	var pools []vk.DescriptorPoolSize
-	for rl := UniformVar; rl < VarRolesN; rl++ {
+	for rl := Uniform; rl < VarRolesN; rl++ {
 		vl := vs.RoleMap[rl]
 		if len(vl) == 0 {
 			continue
 		}
-		pl := vk.DescriptorPoolSize{DescriptorCount: uint32(len(vl))}
-		switch rl {
-		case UniformVar:
-			pl.Type = vk.DescriptorTypeUniformBufferDynamic
-		case StorageVar:
-			pl.Type = vk.DescriptorTypeStorageBufferDynamic
-			// todo: images!
+		pl := vk.DescriptorPoolSize{
+			DescriptorCount: uint32(len(vl)),
+			Type:            RoleDescriptors[rl],
 		}
+		// switch rl {
+		// case UniformVar:
+		// 	pl.Type = vk.DescriptorTypeUniformBufferDynamic
+		// case StorageVar:
+		// 	pl.Type = vk.DescriptorTypeStorageBufferDynamic
+		// 	// todo: images!
+		// }
 		pools = append(pools, pl)
 	}
 	return pools
@@ -161,20 +200,39 @@ func (vs *Vars) DescPools() []vk.DescriptorPoolSize {
 
 //////////////////////////////////////////////////////////////////
 
-// VarRoles are the functional roles of variables.
+// VarRoles are the functional roles of variables, corresponding
+// to Vertex input vectors and all the different "uniform" types
+// as enumerated in vk.DescriptorType.  This does NOT map directly
+// to DescriptorType because we combine vertex and uniform data
+// and require a different ordering.
 type VarRoles int32
 
 const (
-	UndefVarRole VarRoles = iota
-	VertexInput
-	VertexOutput // is this needed?
-	Indexes
-	UniformVar // in UniformBuffer Descriptor Pool
-	StorageVar // in StorageBuffer Descriptor Pool
-	ImageVar   // todo: need more options: SampledImage, StorageImage, etc
+	UndefVarRole  VarRoles = iota
+	Vertex                 // vertex shader input data: mesh geometry points, normals, etc
+	Index                  // for indexed access to Vertex data
+	Uniform                // read-only general purpose data, uses UniformBufferDynamic with offset specified at binding time, not during initial configuration
+	Storage                // read-write general purpose data, in StorageBufferDynamic (offset set at binding)
+	UniformTexel           // read-only image-formatted data, which cannot be accessed via ImageView or Sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful.  No Dynamic mode is available, so this can only be used for a fixed Val.
+	StorageTexel           // read-write image-formatted data, which cannot be accessed via ImageView or Sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful. No Dynamic mode is available, so this can only be used for a fixed Val.
+	StorageImage           // read-write access through an ImageView (but not a Sampler) of an Image
+	SamplerVar             // this does not have a corresponding Val data, but rather specifies the unique name of a Sampler on the System -- it is here as a variable so Vars can fully specify the descriptor layout.
+	SampledImage           // a read-only Image Val that can be fed to the Sampler in a shader -- must be presented via an ImageView?
+	CombinedImage          // a combination of a Sampler and a specific Image, which appears as a single entity in the shader.  The Var specifies the name of the Sampler, but the corresponding Val that points to this Var holds the image.  This is the simplest way to specify a texture for texture mapping.
 	VarRolesN
 )
 
 //go:generate stringer -type=VarRoles
 
 var KiT_VarRoles = kit.Enums.AddEnum(VarRolesN, kit.NotBitFlag, nil)
+
+var RoleDescriptors = map[VarRoles]vk.DescriptorType{
+	Uniform:       vk.DescriptorTypeUniformBufferDynamic,
+	Storage:       vk.DescriptorTypeStorageBufferDynamic,
+	UniformTexel:  vk.DescriptorTypeUniformTexelBuffer,
+	StorageTexel:  vk.DescriptorTypeStorageTexelBuffer,
+	StorageImage:  vk.DescriptorTypeStorageImage,
+	SamplerVar:    vk.DescriptorTypeSampler,
+	SampledImage:  vk.DescriptorTypeSampledImage,
+	CombinedImage: vk.DescriptorTypeCombinedImageSampler,
+}

@@ -164,27 +164,3 @@ func (ty *UniType) StdBytes() int {
 	}
 	return ty.Mat * 4 * n
 }
-
-// VectorType represents a fully-specified GPU vector type, e.g., for inputs / outputs
-// to shader programs
-type VectorType struct {
-	Type Types `desc:"data type"`
-	Vec  int   `desc:"length of vector (valid values are 2,3,4)"`
-}
-
-// commonly-used vector types:
-
-// Vec2fVecType is a 2-vector of float32
-var Vec2fVecType = VectorType{Type: Float32, Vec: 2}
-
-// Vec3fVecType is a 3-vector of float32
-var Vec3fVecType = VectorType{Type: Float32, Vec: 3}
-
-// Vec4fVecType is a 4-vector of float32
-var Vec4fVecType = VectorType{Type: Float32, Vec: 4}
-
-// Bytes returns number of bytes per Vector element (len * 4 basically)
-func (ty *VectorType) Bytes() int {
-	n := TypeBytes(ty.Type)
-	return n * ty.Vec
-}

@@ -17,10 +17,10 @@ import (
 // Each has an associated set of Vars, which could be maintained collectively for
 // multiple different such piplines.
 type Pipeline struct {
-	Name      string
-	GPU       *GPU
-	Device    Device `desc:"device for this pipeline -- could be GPU or Compute"`
-	CmdPool   CmdPool
+	Name      string             `desc:"unique name of this pipeline"`
+	GPU       *GPU               `desc:"gpu hardware"`
+	Device    Device             `desc:"device for this pipeline -- could be GPU or Compute"`
+	CmdPool   CmdPool            `desc:"cmd pool specific to this pipeline"`
 	Vars      *Vars              `desc:"variables associated with this pipeline"`
 	Shaders   []*Shader          `desc:"shaders in order added -- should be execution order"`
 	ShaderMap map[string]*Shader `desc:"shaders loaded for this pipeline"`
@@ -81,7 +81,7 @@ func (pl *Pipeline) FreeShaders() {
 	}
 }
 
-func (pl *Pipeline) Delete() {
+func (pl *Pipeline) Destroy() {
 	pl.FreeShaders()
 	pl.CmdPool.Destroy(&pl.Device)
 }
