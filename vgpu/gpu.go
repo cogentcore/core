@@ -147,6 +147,14 @@ func (gp *GPU) Destroy() {
 	}
 }
 
+// NewSystem returns a new system initialized for this GPU
+// compute = make a compute device instead of a Graphics device.
+func (gp *GPU) NewSystem(name string, compute bool) *System {
+	sy := &System{}
+	sy.Init(gp, name, compute)
+	return sy
+}
+
 func dbgCallbackFunc(flags vk.DebugReportFlags, objectType vk.DebugReportObjectType,
 	object uint64, location uint, messageCode int32, pLayerPrefix string,
 	pMessage string, pUserData unsafe.Pointer) vk.Bool32 {

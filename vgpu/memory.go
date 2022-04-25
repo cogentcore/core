@@ -62,20 +62,22 @@ func (mm *Memory) Destroy() {
 // Config should be called after all Vals have been configured
 // and are ready to go with their initial data.
 // Does: Alloc(), AllocDev(), CopyToStaging(), TransferAllToGPU()
-// func (mm *Memory) Config() {
-// 	mm.Alloc()
-// 	mm.AllocDev()
-// 	mm.CopyBuffsToStaging()
-// 	mm.TransferBuffAllToGPU()
-// 	mm.Active = true
-// }
+func (mm *Memory) Config() {
+	mm.Alloc()
+	mm.AllocDev()
+	mm.TransferAllToGPU()
+	mm.Active = true
+}
 
 // Alloc allocates memory for all Vars and Images
 func (mm *Memory) Alloc() {
 	bsz := mm.Vals.MemSize()
 	if bsz != mm.BuffSize {
+
+		usage := vk.BufferUsageVertexBufferBit | vk.BufferUsageIndexBufferBit | vk.BufferUsageUniformBufferBit | vk.BufferUsageStorageBufferBit | vk.BufferUsageUniformTexelBufferBit | vk.BufferUsageStorageTexelBufferBit
+
 		mm.BuffHost = mm.MakeBuffer(mm.BuffSize, vk.BufferUsageTransferSrcBit)
-		mm.BuffDev = mm.MakeBuffer(mm.BuffSize, vk.BufferUsageTransferDstBit|vk.BufferUsageVertexBufferBit|vk.BufferUsageIndexBufferBit)
+		mm.BuffDev = mm.MakeBuffer(mm.BuffSize, vk.BufferUsageTransferDstBit|usage)
 		mm.BuffHostMem = mm.AllocMem(mm.BuffHost, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
 		mm.BuffSize = bsz
 	}

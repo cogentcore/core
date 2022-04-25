@@ -65,7 +65,9 @@ func (vl *Val) Free() {
 }
 
 // Bytes returns byte array of the Val data, including any additional
-// alignment  -- can be written to directly
+// alignment  -- can be written to directly.
+// Be mindful of potential padding and alignment issues relative to
+// go-based storage.
 // Set Mod flag when changes have been made.
 func (vl *Val) Bytes() []byte {
 	const m = 0x7fffffff
@@ -73,6 +75,8 @@ func (vl *Val) Bytes() []byte {
 }
 
 // Floats32 returns mat32.ArrayF32 of the Val data -- can be written to directly.
+// Only recommended for Vertex data.  Otherwise, be mindful of potential padding
+// and alignment issues relative to go-based storage.
 // Set Mod flag when changes have been made.
 func (vl *Val) Floats32() mat32.ArrayF32 {
 	nf := vl.MemSize / 4
@@ -81,6 +85,8 @@ func (vl *Val) Floats32() mat32.ArrayF32 {
 }
 
 // UInts32 returns mat32.ArrayU32 of the Val data -- can be written to directly.
+// Only recommended for Vertex data.  Otherwise, be mindful of potential padding
+// and alignment issues relative to go-based storage.
 // Set Mod flag when changes have been made.
 func (vl *Val) UInts32() mat32.ArrayU32 {
 	nf := vl.MemSize / 4
@@ -137,6 +143,16 @@ func (vs *Vals) Add(name string, vr *Var, n int) *Val {
 	vl.Init(name, vr, n)
 	vs.AddVal(vl)
 	return vl
+}
+
+// ValByNameTry returns value by name, returning error if not found
+func (vs *Vals) ValByNameTry(name string) (*Val, error) {
+	vl, ok := vs.ValMap[name]
+	if !ok {
+		err := fmt.Errorf("Value named %s not found", name)
+		return nil, err
+	}
+	return vl, nil
 }
 
 // MemSize returns size across all Vals

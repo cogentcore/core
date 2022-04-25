@@ -43,7 +43,7 @@ func (sh *Shader) OpenCode(code []byte) error {
 	var module vk.ShaderModule
 	ret := vk.CreateShaderModule(TheGPU.Device.Device, &vk.ShaderModuleCreateInfo{
 		SType:    vk.StructureTypeShaderModuleCreateInfo,
-		CodeSize: uint(len(code)),
+		CodeSize: uint(len(code) / 4),
 		PCode:    SliceUint32(code),
 	}, nil, &module)
 	if IsError(ret) {

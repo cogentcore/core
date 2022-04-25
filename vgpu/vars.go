@@ -5,6 +5,10 @@
 package vgpu
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/goki/ki/indent"
 	"github.com/goki/ki/kit"
 
 	vk "github.com/vulkan-go/vulkan"
@@ -38,16 +42,32 @@ func (vr *Var) Init(name string, typ Types, role VarRoles, set int, shaders ...S
 	}
 }
 
+func (vr *Var) String() string {
+	s := fmt.Sprintf("%d:  %s  %s  (size: %d)", vr.BindLoc, vr.Name, vr.Type.String(), vr.SizeOf)
+	return s
+}
+
 //////////////////////////////////////////////////////////////////
+
+// SetDesc contains descriptor information for each set
+type SetDesc struct {
+	Set     int                    `desc:"set number"`
+	Vars    []*Var                 `desc:"variables in order by role, descriptor"`
+	Layout  vk.DescriptorSetLayout `desc:"layout info"`
+	DescSet vk.DescriptorSet       `desc:"set allocation info"`
+}
 
 // Vars are all the variables that are used by a pipeline.
 // Vars are allocated to bindings / locations sequentially in the
 // order added!
 type Vars struct {
-	Vars    []*Var                      `desc:"all variables"`
-	VarMap  map[string]*Var             `desc:"map of all vars -- names must be unique"`
-	RoleMap map[VarRoles][]*Var         `desc:"map of vars by different roles -- updated in Config(), after all vars added"`
-	SetMap  map[int]map[VarRoles][]*Var `desc:"map of vars by set by different roles -- updated in Config(), after all vars added"`
+	Vars         []*Var                      `desc:"all variables"`
+	VarMap       map[string]*Var             `desc:"map of all vars -- names must be unique"`
+	RoleMap      map[VarRoles][]*Var         `desc:"map of vars by different roles -- updated in Config(), after all vars added"`
+	SetMap       map[int]map[VarRoles][]*Var `desc:"map of vars by set by different roles -- updated in Config(), after all vars added"`
+	SetDesc      []*SetDesc                  `desc:"descriptor information for each set"`
+	VkDescLayout vk.PipelineLayout           `desc:"vulkan descriptor layout based on vars"`
+	VkDescPool   vk.DescriptorPool           `desc:"vulkan descriptor pool"`
 }
 
 // AddVar adds given variable
@@ -97,10 +117,31 @@ func (vs *Vars) Config() {
 		}
 		sl := sm[vr.Role]
 		vr.BindLoc = len(sl)
-		rl = append(rl, vr)
-		sm[vr.Role] = rl
+		sl = append(sl, vr)
+		sm[vr.Role] = sl
 		vs.SetMap[vr.Set] = sm
 	}
+}
+
+func (vs *Vars) StringDoc() string {
+	ispc := 4
+	var sb strings.Builder
+	ns := len(vs.SetMap)
+	for si := 0; si < ns; si++ {
+		sb.WriteString(fmt.Sprintf("Set: %d\n", si))
+		set := vs.SetMap[si]
+		for ri := Uniform; ri < VarRolesN; ri++ {
+			rl, has := set[ri]
+			if !has || len(rl) == 0 {
+				continue
+			}
+			sb.WriteString(fmt.Sprintf("%sRole: %s\n", indent.Spaces(1, ispc), ri.String()))
+			for _, vr := range rl {
+				sb.WriteString(fmt.Sprintf("%sVar: %s\n", indent.Spaces(2, ispc), vr.String()))
+			}
+		}
+	}
+	return sb.String()
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -115,7 +156,10 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 	cfg.SType = vk.StructureTypePipelineVertexInputStateCreateInfo
 	var bind []vk.VertexInputBindingDescription
 	var attr []vk.VertexInputAttributeDescription
-	vtx := vs.RoleMap[Vertex]
+	vtx, has := vs.RoleMap[Vertex]
+	if !has {
+		return cfg
+	}
 	for _, vr := range vtx {
 		bind = append(bind, vk.VertexInputBindingDescription{
 			Binding:   uint32(vr.BindLoc),
@@ -148,26 +192,39 @@ func ShaderSet(vl []*Var) ShaderTypes {
 	return sh
 }
 
+// key info on descriptorCount -- very confusing.
+// https://stackoverflow.com/questions/51715944/descriptor-set-count-ambiguity-in-vulkan
+
 // DescLayout returns the PipelineLayout of DescriptorSetLayout
 // info for all of the non-Vertex vars
-func (vs *Vars) DescLayout(dev vk.Device) vk.PipelineLayout {
-	dsets := make([]vk.DescriptorSetLayout, len(vs.SetMap))
-	for si, set := range vs.SetMap {
+func (vs *Vars) DescLayout(dev vk.Device) {
+	nset := len(vs.SetMap)
+	vs.SetDesc = make([]*SetDesc, nset)
+	dsets := make([]vk.DescriptorSetLayout, nset)
+	for si := range vs.SetDesc {
+		set := vs.SetMap[si]
+		sd := &SetDesc{}
+		vs.SetDesc[si] = sd
 		var descLayout vk.DescriptorSetLayout
 		var binds []vk.DescriptorSetLayoutBinding
+		var vars []*Var
 		bi := 0
 		for ri := Uniform; ri < VarRolesN; ri++ {
 			rl, has := set[ri]
 			if !has || len(rl) == 0 {
 				continue
 			}
-			bd := vk.DescriptorSetLayoutBinding{
-				Binding:         uint32(bi),
-				DescriptorType:  RoleDescriptors[ri],
-				DescriptorCount: uint32(len(rl)),
-				StageFlags:      vk.ShaderStageFlags(ShaderSet(rl)),
+			for _, vr := range rl {
+				bd := vk.DescriptorSetLayoutBinding{
+					Binding:         uint32(bi),
+					DescriptorType:  RoleDescriptors[ri],
+					DescriptorCount: 1, // note: only if need an array of *descriptors* -- very rare?
+					StageFlags:      vk.ShaderStageFlags(vr.Shaders),
+				}
+				binds = append(binds, bd)
+				bi++
+				vars = append(vars, vr)
 			}
-			binds = append(binds, bd)
 		}
 		ret := vk.CreateDescriptorSetLayout(dev, &vk.DescriptorSetLayoutCreateInfo{
 			SType:        vk.StructureTypeDescriptorSetLayoutCreateInfo,
@@ -176,6 +233,9 @@ func (vs *Vars) DescLayout(dev vk.Device) vk.PipelineLayout {
 		}, nil, &descLayout)
 		IfPanic(NewError(ret))
 		dsets[si] = descLayout
+		sd.Layout = descLayout
+		sd.Set = si
+		sd.Vars = vars
 	}
 
 	var pipelineLayout vk.PipelineLayout
@@ -185,11 +245,8 @@ func (vs *Vars) DescLayout(dev vk.Device) vk.PipelineLayout {
 		PSetLayouts:    dsets,
 	}, nil, &pipelineLayout)
 	IfPanic(NewError(ret))
-	return pipelineLayout
-}
+	vs.VkDescLayout = pipelineLayout
 
-// DescPools returns the collection of each Role of variable
-func (vs *Vars) DescPools() []vk.DescriptorPoolSize {
 	var pools []vk.DescriptorPoolSize
 	for rl := Uniform; rl < VarRolesN; rl++ {
 		vl := vs.RoleMap[rl]
@@ -200,16 +257,30 @@ func (vs *Vars) DescPools() []vk.DescriptorPoolSize {
 			DescriptorCount: uint32(len(vl)),
 			Type:            RoleDescriptors[rl],
 		}
-		// switch rl {
-		// case UniformVar:
-		// 	pl.Type = vk.DescriptorTypeUniformBufferDynamic
-		// case StorageVar:
-		// 	pl.Type = vk.DescriptorTypeStorageBufferDynamic
-		// 	// todo: images!
-		// }
 		pools = append(pools, pl)
 	}
-	return pools
+	var descPool vk.DescriptorPool
+	ret = vk.CreateDescriptorPool(dev, &vk.DescriptorPoolCreateInfo{
+		SType:         vk.StructureTypeDescriptorPoolCreateInfo,
+		MaxSets:       uint32(nset),
+		PoolSizeCount: uint32(len(pools)),
+		PPoolSizes:    pools,
+	}, nil, &descPool)
+	IfPanic(NewError(ret))
+
+	vs.VkDescPool = descPool
+
+	for _, sd := range vs.SetDesc {
+		var set vk.DescriptorSet
+		ret := vk.AllocateDescriptorSets(dev, &vk.DescriptorSetAllocateInfo{
+			SType:              vk.StructureTypeDescriptorSetAllocateInfo,
+			DescriptorPool:     vs.VkDescPool,
+			DescriptorSetCount: 1,
+			PSetLayouts:        []vk.DescriptorSetLayout{sd.Layout},
+		}, &set)
+		IfPanic(NewError(ret))
+		sd.DescSet = set
+	}
 }
 
 //////////////////////////////////////////////////////////////////

@@ -4,7 +4,13 @@
 
 package vgpu
 
-import vk "github.com/vulkan-go/vulkan"
+import (
+	"fmt"
+	"log"
+
+	"github.com/goki/ki/ints"
+	vk "github.com/vulkan-go/vulkan"
+)
 
 // System manages a system of Pipelines that all share
 // a common collection of Vars, Vals, and a Memory manager.
@@ -23,8 +29,6 @@ type System struct {
 	Mem         Memory                `desc:"manages all the memory for all the Vals"`
 	Views       map[string]*ImageView `desc:"uniquely-named image views"`
 	Samplers    map[string]*Sampler   `desc:"uniquely-named image samplers -- referred to by name in Vars of type Sampler or CombinedImage"`
-
-	VkDescPool vk.DescriptorPool `desc:"vulkan descriptor pool"`
 }
 
 // Init initializes the System: creates logical device, which is
@@ -34,9 +38,12 @@ func (sy *System) Init(gp *GPU, name string, compute bool) error {
 	sy.Name = name
 	sy.Compute = compute
 	if compute {
-		return sy.Device.Init(gp, vk.QueueComputeBit)
+		sy.Device.Init(gp, vk.QueueComputeBit)
+	} else {
+		sy.Device.Init(gp, vk.QueueGraphicsBit)
 	}
-	return sy.Device.Init(gp, vk.QueueGraphicsBit)
+	sy.Mem.Init(gp, &sy.Device)
+	return nil
 }
 
 func (sy *System) Destroy() {
@@ -65,12 +72,59 @@ func (sy *System) AddPipeline(pl *Pipeline) {
 	}
 	sy.Pipelines = append(sy.Pipelines, pl)
 	sy.PipelineMap[pl.Name] = pl
-
 }
 
 // AddNewPipeline adds a new pipeline
 func (sy *System) AddNewPipeline(name string) *Pipeline {
 	pl := &Pipeline{Name: name}
+	pl.Init(sy)
 	sy.AddPipeline(pl)
 	return pl
+}
+
+// Config configures the entire system, after everything has been
+// setup (Pipelines, Vars, etc).  Memory / Vals do not yet need to
+// be configured and are not Config'd by this call.
+func (sy *System) Config() {
+	sy.Vars.Config()
+	fmt.Printf("%s\n", sy.Vars.StringDoc())
+	sy.Vars.DescLayout(sy.Device.Device)
+	for _, pl := range sy.Pipelines {
+		pl.Config()
+	}
+}
+
+// SetVals sets the Vals for given Set of Vars, by name, in order
+// that they appear in the Set list of roles and vars
+func (sy *System) SetVals(set int, vals ...string) {
+	nv := len(vals)
+	ws := make([]vk.WriteDescriptorSet, nv)
+	sd := sy.Vars.SetDesc[set]
+	nv = ints.MinInt(nv, len(sd.Vars))
+	for i := 0; i < nv; i++ {
+		vnm := vals[i]
+		vl, err := sy.Mem.Vals.ValByNameTry(vnm)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		wd := vk.WriteDescriptorSet{
+			SType:           vk.StructureTypeWriteDescriptorSet,
+			DstSet:          sd.DescSet,
+			DescriptorCount: 1,
+			DescriptorType:  RoleDescriptors[vl.Var.Role],
+		}
+		if vl.Var.Role < StorageImage {
+			wd.PBufferInfo = []vk.DescriptorBufferInfo{{
+				Offset: vk.DeviceSize(vl.Offset),
+				Range:  vk.DeviceSize(vl.MemSize),
+				Buffer: sy.Mem.BuffDev,
+			}}
+		} else {
+			// wd.DescriptorCount = uint32(len(texEnabled))
+			// wd.PImageInfo =      texInfos
+		}
+		ws[i] = wd
+	}
+	vk.UpdateDescriptorSets(sy.Device.Device, 2, ws, 0, nil)
 }

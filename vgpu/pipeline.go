@@ -18,10 +18,9 @@ import (
 // multiple different such piplines.
 type Pipeline struct {
 	Name      string             `desc:"unique name of this pipeline"`
-	GPU       *GPU               `desc:"gpu hardware"`
+	Sys       *System            `desc:"system that we belong to"`
 	Device    Device             `desc:"device for this pipeline -- could be GPU or Compute"`
 	CmdPool   CmdPool            `desc:"cmd pool specific to this pipeline"`
-	Vars      *Vars              `desc:"variables associated with this pipeline"`
 	Shaders   []*Shader          `desc:"shaders in order added -- should be execution order"`
 	ShaderMap map[string]*Shader `desc:"shaders loaded for this pipeline"`
 
@@ -83,36 +82,37 @@ func (pl *Pipeline) FreeShaders() {
 
 func (pl *Pipeline) Destroy() {
 	pl.FreeShaders()
-	pl.CmdPool.Destroy(&pl.Device)
+	pl.CmdPool.Destroy(&pl.Sys.Device)
 }
 
-// InitCompute initializes for compute pipeline
-func (pl *Pipeline) InitCompute(cp *Compute) {
-	pl.GPU = cp.GPU
-	pl.Device = cp.Device
+// Init initializes pipeline as part of given System
+func (pl *Pipeline) Init(sy *System) {
+	pl.Sys = sy
 	pl.InitPipeline()
 }
 
 func (pl *Pipeline) InitPipeline() {
-	pl.CmdPool.Init(&pl.Device, 0)
-	pl.CmdPool.Buff = pl.CmdPool.MakeBuff(&pl.Device)
+	pl.CmdPool.Init(&pl.Sys.Device, 0)
+	pl.CmdPool.Buff = pl.CmdPool.MakeBuff(&pl.Sys.Device)
 }
 
 // Config is called once all the VkConfig options have been set
 // using Set* methods, and the shaders have been loaded.
+// The parent System has already done what it can for its config
 func (pl *Pipeline) Config() {
 	pl.ConfigStages()
-	pl.VkConfig.PVertexInputState = pl.Vars.VkVertexConfig()
+	pl.VkConfig.PVertexInputState = pl.Sys.Vars.VkVertexConfig()
+	pl.VkConfig.Layout = pl.Sys.Vars.VkDescLayout
 
 	var pipelineCache vk.PipelineCache
-	ret := vk.CreatePipelineCache(pl.Device.Device, &vk.PipelineCacheCreateInfo{
+	ret := vk.CreatePipelineCache(pl.Sys.Device.Device, &vk.PipelineCacheCreateInfo{
 		SType: vk.StructureTypePipelineCacheCreateInfo,
 	}, nil, &pipelineCache)
 	IfPanic(NewError(ret))
 	pl.VkCache = pipelineCache
 
 	pipeline := make([]vk.Pipeline, 1)
-	ret = vk.CreateGraphicsPipelines(pl.Device.Device, pl.VkCache, 1, []vk.GraphicsPipelineCreateInfo{pl.VkConfig}, nil, pipeline)
+	ret = vk.CreateGraphicsPipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.GraphicsPipelineCreateInfo{pl.VkConfig}, nil, pipeline)
 	IfPanic(NewError(ret))
 	pl.VkPipeline = pipeline[0]
 
@@ -159,7 +159,7 @@ func (pl *Pipeline) SetRenderPass() {
 	// vk.LayoutPresentSrc to be ready to present.  This is all done as part of
 	// the renderpass, no barriers are necessary.
 	var renderPass vk.RenderPass
-	ret := vk.CreateRenderPass(pl.Device.Device, &vk.RenderPassCreateInfo{
+	ret := vk.CreateRenderPass(pl.Sys.Device.Device, &vk.RenderPassCreateInfo{
 		SType:           vk.StructureTypeRenderPassCreateInfo,
 		AttachmentCount: 2,
 		PAttachments: []vk.AttachmentDescription{{
