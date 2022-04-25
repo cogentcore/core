@@ -12,7 +12,6 @@ import (
 	"log"
 	"unsafe"
 
-	"github.com/goki/ki/kit"
 	vk "github.com/vulkan-go/vulkan"
 )
 
@@ -87,9 +86,4 @@ const (
 	GeometryShader = ShaderTypes(vk.PipelineStageGeometryShaderBit)
 	FragmentShader = ShaderTypes(vk.PipelineStageFragmentShaderBit)
 	ComputeShader  = ShaderTypes(vk.PipelineStageComputeShaderBit)
-	ShaderTypesN   = ShaderTypes(6)
 )
-
-//go:generate stringer -type=ShaderTypes
-
-var KiT_ShaderTypes = kit.Enums.AddEnum(ShaderTypesN, kit.NotBitFlag, nil)

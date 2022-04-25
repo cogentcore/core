@@ -20,7 +20,6 @@ type System struct {
 	Pipelines   []*Pipeline           `desc:"all pipelines"`
 	PipelineMap map[string]*Pipeline  `desc:"map of all pipelines -- names must be unique"`
 	Vars        Vars                  `desc:"the common set of variables used by all Piplines"`
-	Vals        Vals                  `desc:"values of Vars, each with a unique name -- can be any number of different values per same Var (e.g., different meshes with vertex data) -- up to user code to bind each Var prior to pipeline execution.  Each of these Vals is mapped into GPU memory via a Memory manager object."`
 	Mem         Memory                `desc:"manages all the memory for all the Vals"`
 	Views       map[string]*ImageView `desc:"uniquely-named image views"`
 	Samplers    map[string]*Sampler   `desc:"uniquely-named image samplers -- referred to by name in Vars of type Sampler or CombinedImage"`
@@ -41,7 +40,6 @@ func (sy *System) Init(gp *GPU, name string, compute bool) error {
 }
 
 func (sy *System) Destroy() {
-	sy.Vals.Free()
 	sy.Mem.Destroy()
 	for _, pl := range sy.Pipelines {
 		pl.Destroy()

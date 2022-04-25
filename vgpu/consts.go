@@ -10,7 +10,7 @@ import (
 	vk "github.com/vulkan-go/vulkan"
 )
 
-// Topologies are the different vertex topologies
+// Topologies are the different vertex topology
 type Topologies int32
 
 const (

@@ -5,6 +5,8 @@
 package vgpu
 
 import (
+	"fmt"
+	"log"
 	"unsafe"
 
 	"github.com/goki/mat32"
@@ -16,9 +18,11 @@ type Val struct {
 	Var     *Var           `desc:"variable that we are representing the value of"`
 	N       int            `desc:"number of elements in an array -- 0 or 1 means scalar / singular value"`
 	Offset  int            `desc:"offset in bytes from start of memory buffer"`
-	MemPtr  unsafe.Pointer `desc:"pointer to the start of the staging memory for this value"`
-	Mod     bool           `desc:"modified -- set when values are set"`
 	Indexes string         `desc:"name of another Val to use for Indexes when accessing this vector data (e.g., as vertexes)"`
+	ElSize  int            `desc:"if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy."`
+	MemSize int            `desc:"total memory size of this value, including array alignment but not any additional buffer-required alignment padding"`
+	Mod     bool           `inactive:"+" desc:"modified -- set when values are set"`
+	MemPtr  unsafe.Pointer `view:"-" desc:"pointer to the start of the staging memory for this value"`
 }
 
 func (vl *Val) Init(name string, vr *Var, n int) {
@@ -27,17 +31,31 @@ func (vl *Val) Init(name string, vr *Var, n int) {
 	vl.N = n
 }
 
-// MemSize returns total number of bytes of memory needed
-func (vl *Val) MemSize() int {
-	return vl.Var.SizeOf * vl.N
+// AllocSize updates the memory allocation size -- called in Alloc
+// returns MemSize.
+func (vl *Val) AllocSize() int {
+	if vl.N == 0 {
+		vl.N = 1
+	}
+	if vl.N == 1 || vl.Var.Role < Uniform {
+		vl.ElSize = vl.Var.SizeOf
+		vl.MemSize = vl.ElSize * vl.N
+		return vl.MemSize
+	}
+	vl.ElSize = MemSizeAlign(vl.Var.SizeOf, 16)
+	vl.MemSize = vl.ElSize * vl.N
+	return vl.MemSize
 }
 
 // Alloc allocates this value at given offset in owning Memory buffer.
 // Computes the MemPtr for this item, and returns MemSize() of this
 // value, so memory can increment to next item.
+// offsets are guaranteed to be properly aligned per minUniformBufferOffsetAlignment.
 func (vl *Val) Alloc(buffPtr unsafe.Pointer, offset int) int {
+	mem := vl.AllocSize()
 	vl.MemPtr = unsafe.Pointer(uintptr(buffPtr) + uintptr(offset))
-	return vl.MemSize()
+	vl.Offset = offset
+	return mem
 }
 
 // Free resets the MemPtr for this value
@@ -46,17 +64,18 @@ func (vl *Val) Free() {
 	vl.MemPtr = nil
 }
 
-// Bytes returns byte array of the Val data -- can be written to directly
+// Bytes returns byte array of the Val data, including any additional
+// alignment  -- can be written to directly
 // Set Mod flag when changes have been made.
 func (vl *Val) Bytes() []byte {
 	const m = 0x7fffffff
-	return (*[m]byte)(vl.MemPtr)[:vl.MemSize()]
+	return (*[m]byte)(vl.MemPtr)[:vl.MemSize]
 }
 
 // Floats32 returns mat32.ArrayF32 of the Val data -- can be written to directly.
 // Set Mod flag when changes have been made.
 func (vl *Val) Floats32() mat32.ArrayF32 {
-	nf := vl.MemSize() / 4
+	nf := vl.MemSize / 4
 	const m = 0x7fffffff
 	return mat32.ArrayF32((*[m]float32)(vl.MemPtr)[:nf])
 }
@@ -64,17 +83,31 @@ func (vl *Val) Floats32() mat32.ArrayF32 {
 // UInts32 returns mat32.ArrayU32 of the Val data -- can be written to directly.
 // Set Mod flag when changes have been made.
 func (vl *Val) UInts32() mat32.ArrayU32 {
-	nf := vl.MemSize() / 4
+	nf := vl.MemSize / 4
 	const m = 0x7fffffff
 	return mat32.ArrayU32((*[m]uint32)(vl.MemPtr)[:nf])
+}
+
+// PaddedArrayCheck checks if this is an array with padding on the elements
+// due to alignment issues.  If this is the case, then direct copying is not
+// possible.
+func (vl *Val) PaddedArrayCheck() error {
+	if vl.N > 1 && vl.Var.SizeOf != vl.ElSize {
+		return fmt.Errorf("vgpu.Val PaddedArrayCheck: this array value has padding around elements not present in Go version -- cannot copy directly: %s", vl.Name)
+	}
+	return nil
 }
 
 // CopyBytes copies bytes from given source pointer into memory,
 // and sets Mod flag.
 func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
+	if err := vl.PaddedArrayCheck(); err != nil {
+		log.Println(err)
+		return
+	}
 	dst := vl.Bytes()
 	const m = 0x7fffffff
-	src := (*[m]byte)(srcPtr)[:vl.MemSize()]
+	src := (*[m]byte)(srcPtr)[:vl.MemSize]
 	copy(dst, src)
 	vl.Mod = true
 }
@@ -85,7 +118,7 @@ func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
 type Vals struct {
 	Vals    []*Val          `desc:"values in order added"`
 	ValMap  map[string]*Val `desc:"map of all vals -- names must be unique"`
-	TotSize int             `desc:"total size across all Vals -- computed during Alloc"`
+	TotSize int             `desc:"total size across all Vals, including padding and alignment issues -- computed during Alloc"`
 }
 
 // AddVal adds given value
@@ -110,20 +143,23 @@ func (vs *Vals) Add(name string, vr *Var, n int) *Val {
 func (vs *Vals) MemSize() int {
 	tsz := 0
 	for _, vl := range vs.Vals {
-		tsz += vl.MemSize()
+		tsz += vl.AllocSize()
 	}
 	return tsz
 }
 
 // Alloc allocates values at given offset in owning Memory buffer.
-// Computes the MemPtr for this item, and returns TotSize
-// across all vals.
-func (vs *Vals) Alloc(buffPtr unsafe.Pointer, offset int) int {
+// Computes the MemPtr for each item, and returns TotSize
+// across all vals.  The effective offset increment (based on size) is
+// aligned at the given align byte level, which should be
+// MinUniformBufferOffsetAlignment from gpu.
+func (vs *Vals) Alloc(buffPtr unsafe.Pointer, offset, align int) int {
 	tsz := 0
 	for _, vl := range vs.Vals {
 		sz := vl.Alloc(buffPtr, offset)
-		offset += sz
-		tsz += sz
+		esz := MemSizeAlign(sz, align)
+		offset += esz
+		tsz += esz
 	}
 	vs.TotSize = tsz
 	return tsz
@@ -142,7 +178,7 @@ func (vs *Vals) ModRegs() []MemReg {
 	var mods []MemReg
 	for _, vl := range vs.Vals {
 		if vl.Mod {
-			mods = append(mods, MemReg{Offset: vl.Offset, Size: vl.MemSize()})
+			mods = append(mods, MemReg{Offset: vl.Offset, Size: vl.MemSize})
 		}
 	}
 	return mods

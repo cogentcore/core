@@ -14,6 +14,16 @@ import (
 	vk "github.com/vulkan-go/vulkan"
 )
 
+// MemSizeAlign returns the size aligned according to align byte increments
+// e.g., if align = 16 and size = 12, it returns 16
+func MemSizeAlign(size, align int) int {
+	if size%align == 0 {
+		return size
+	}
+	nb := size / align
+	return (nb + 1) * align
+}
+
 // MemReg is a region of memory
 type MemReg struct {
 	Offset int
@@ -23,20 +33,18 @@ type MemReg struct {
 // Memory manages memory for the GPU, using separate buffers for
 // Images (Textures) vs. other values.
 type Memory struct {
-	GPU     *GPU
-	Device  Device  `desc:"logical device that this memory is managed for: a Surface or GPU itself"`
-	CmdPool CmdPool `desc:"command pool for memory transfers"`
-
-	Vals   Vals `desc:"values encoded in this Memory -- no Images here!"`
-	Images Vals `desc:"Image-type values"`
-
+	GPU         *GPU
+	Device      Device          `desc:"logical device that this memory is managed for: a Surface or GPU itself"`
+	CmdPool     CmdPool         `desc:"command pool for memory transfers"`
+	Vals        Vals            `desc:"values of Vars, each with a unique name -- can be any number of different values per same Var (e.g., different meshes with vertex data) -- up to user code to bind each Var prior to pipeline execution.  Each of these Vals is mapped into GPU memory  This is only for non-Image objects."`
+	Images      Vals            `desc:"Image-type values"`
 	BuffSize    int             `desc:"allocated buffer size"`
-	BuffHost    vk.Buffer       `desc:"logical descriptor for host CPU-visible memory, for staging"`
-	BuffHostMem vk.DeviceMemory `desc:"host CPU-visible memory, for staging"`
-	BuffDev     vk.Buffer       `desc:"logical descriptor for device GPU-local memory, for computation"`
-	BuffDevMem  vk.DeviceMemory `desc:"device GPU-local memory, for computation"`
+	BuffHost    vk.Buffer       `view:"-" desc:"logical descriptor for host CPU-visible memory, for staging"`
+	BuffHostMem vk.DeviceMemory `view:"-" desc:"host CPU-visible memory, for staging"`
+	BuffDev     vk.Buffer       `view:"-" desc:"logical descriptor for device GPU-local memory, for computation"`
+	BuffDevMem  vk.DeviceMemory `view:"-" desc:"device GPU-local memory, for computation"`
 
-	Active bool `desc:"device memory is allocated and tranferred -- ready for use"`
+	Active bool `inactive:"+" desc:"device memory is allocated and tranferred -- ready for use"`
 }
 
 // Init configures the Memory for use with given gpu, device, and associated queueindex
@@ -77,7 +85,8 @@ func (mm *Memory) Alloc() {
 		log.Printf("vulkan Memory:CopyBuffs warning: failed to map device memory for data (len=%d)", mm.BuffSize)
 		return
 	}
-	mm.Vals.Alloc(buffPtr, 0)
+	align := int(mm.GPU.GpuProps.Limits.MinUniformBufferOffsetAlignment)
+	mm.Vals.Alloc(buffPtr, 0, align)
 }
 
 // AllocDev allocates memory on the device

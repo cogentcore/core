@@ -12,34 +12,45 @@ import (
 
 // See: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)
 
-// Types is a list of GPU data types
+// Types is a list of supported GPU data types, which can be stored
+// properly aligned in device memory, and used by the shader code.
+// Note that a Vec3 or arrays of single scalar values such as Float32
+// are not well supported outside of Vertex due to the std410 convention:
+// http://www.opengl.org/registry/doc/glspec45.core.pdf#page=159
+// The Struct type is particularly challenging as each member
+// must be aligned in general on a 16 byte boundary (i.e., vec4)
+// (unless all elements are exactly 4 bytes, which might work?).
+// Go automatically aligns members to 8 bytes on 64 bit machines,
+// but that doesn't quite cut it.
 type Types int32
 
 const (
-	UndefType = Types(vk.FormatUndefined)
-	Bool32    = Types(vk.FormatR32Uint) // not officially supported -- just an "annotation"
+	UndefType Types = iota
+	Bool32
 
-	Int32     = Types(vk.FormatR32Sint)
-	Int32Vec2 = Types(vk.FormatR32g32Sint)
-	Int32Vec3 = Types(vk.FormatR32g32b32Sint)
-	Int32Vec4 = Types(vk.FormatR32g32b32a32Sint)
+	Int32
+	Int32Vec2
+	Int32Vec4
 
-	Uint32     = Types(vk.FormatR32Uint)
-	Uint32Vec2 = Types(vk.FormatR32g32Uint)
-	Uint32Vec3 = Types(vk.FormatR32g32b32Uint)
-	Uint32Vec4 = Types(vk.FormatR32g32b32a32Uint)
+	Uint32
+	Uint32Vec2
+	Uint32Vec4
 
-	Float32     = Types(vk.FormatR32Sfloat)
-	Float32Vec2 = Types(vk.FormatR32g32Sfloat)
-	Float32Vec3 = Types(vk.FormatR32g32b32Sfloat)
-	Float32Vec4 = Types(vk.FormatR32g32b32a32Sfloat)
+	Float32
+	Float32Vec2
+	Float32Vec3 // note: only use for vertex data -- not properly aligned for uniforms
+	Float32Vec4
 
-	Float64     = Types(vk.FormatR64Sfloat)
-	Float64Vec2 = Types(vk.FormatR64g64Sfloat)
-	Float64Vec3 = Types(vk.FormatR64g64b64Sfloat)
-	Float64Vec4 = Types(vk.FormatR64g64b64a64Sfloat)
+	Float64
+	Float64Vec2
+	Float64Vec3
+	Float64Vec4
 
-	Struct = Types(vk.FormatEndRange + 1)
+	Float32Mat4 // std xform matrix: mat32.Mat4 works directly
+
+	ImageRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
+
+	Struct
 	TypesN
 )
 
@@ -52,11 +63,9 @@ var TypeSizes = map[Types]int{
 	UndefType:   0,
 	Int32:       4,
 	Int32Vec2:   8,
-	Int32Vec3:   12,
 	Int32Vec4:   16,
 	Uint32:      4,
 	Uint32Vec2:  8,
-	Uint32Vec3:  12,
 	Uint32Vec4:  16,
 	Float32:     4,
 	Float32Vec2: 8,
@@ -66,7 +75,28 @@ var TypeSizes = map[Types]int{
 	Float64Vec2: 16,
 	Float64Vec3: 24,
 	Float64Vec4: 32,
+	Float32Mat4: 64,
+	ImageRGBA32: 32,
 	Struct:      0,
+}
+
+var VulkanTypes = map[Types]vk.Format{
+	Bool32:      vk.FormatR32Uint,
+	Int32:       vk.FormatR32Sint,
+	Int32Vec2:   vk.FormatR32g32Sint,
+	Int32Vec4:   vk.FormatR32g32b32a32Sint,
+	Uint32:      vk.FormatR32Uint,
+	Uint32Vec2:  vk.FormatR32g32Uint,
+	Uint32Vec4:  vk.FormatR32g32b32a32Uint,
+	Float32:     vk.FormatR32Sfloat,
+	Float32Vec2: vk.FormatR32g32Sfloat,
+	Float32Vec3: vk.FormatR32g32b32Sfloat,
+	Float32Vec4: vk.FormatR32g32b32a32Sfloat,
+	Float64:     vk.FormatR64Sfloat,
+	Float64Vec2: vk.FormatR64g64Sfloat,
+	Float64Vec3: vk.FormatR64g64b64Sfloat,
+	Float64Vec4: vk.FormatR64g64b64a64Sfloat,
+	ImageRGBA32: vk.FormatR8g8b8a8Srgb,
 }
 
 // // GLSL type names
@@ -85,82 +115,4 @@ func TypeBytes(tp Types) int {
 		return 8
 	}
 	return 4
-}
-
-// UniType represents a fully-specified GPU uniform type, including vectors and matricies
-type UniType struct {
-	Type Types `desc:"data type"`
-	Vec  int   `desc:"if a vector, this is the length of the vector, 0 for scalar (valid values are 2,3,4)"`
-	Mat  int   `desc:"square matrix dimensions, if a matrix (valid values are 3,4)"`
-}
-
-// Commonly-used types:
-
-// FUniType is a single float32
-var FUniType = UniType{Type: Float32}
-
-// IUniType is a single int32
-var IUniType = UniType{Type: Int32}
-
-// BUniType is a single bool
-var BUniType = UniType{Type: Bool32}
-
-// Vec2fUniType is a 2-vector of float32
-var Vec2fUniType = UniType{Type: Float32, Vec: 2}
-
-// Vec3fUniType is a 3-vector of float32
-var Vec3fUniType = UniType{Type: Float32, Vec: 3}
-
-// Vec4fUniType is a 4-vector of float32
-var Vec4fUniType = UniType{Type: Float32, Vec: 4}
-
-// Mat3fUniType is a 3x3 matrix of float32
-var Mat3fUniType = UniType{Type: Float32, Mat: 3}
-
-// Mat4fUniType is a 4x4 matrix of float32
-var Mat4fUniType = UniType{Type: Float32, Mat: 4}
-
-// Name returns the full GLSL type name for the type
-func (ty *UniType) Name() string {
-	// if ty.Vec == 0 && ty.Mat == 0 {
-	// 	return TypeNames[ty.Type]
-	// }
-	// pfx := TypeNames[ty.Type][0:1]
-	// if ty.Type == Float32 {
-	// 	pfx = ""
-	// }
-	// if ty.Vec > 0 {
-	// 	return fmt.Sprintf("%svec%d", pfx, ty.Vec)
-	// } else {
-	// 	return fmt.Sprintf("%smat%d", pfx, ty.Mat)
-	// }
-	return ""
-}
-
-// Bytes returns actual size of this element in bytes
-func (ty *UniType) Bytes() int {
-	n := TypeBytes(ty.Type)
-	if ty.Vec == 0 && ty.Mat == 0 {
-		return n
-	}
-	if ty.Vec > 0 {
-		return ty.Vec * n
-	}
-	return ty.Mat * ty.Mat * n
-}
-
-// StdBytes returns number of bytes taken up by this element, in std140 format (including padding)
-// https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL
-func (ty *UniType) StdBytes() int {
-	n := TypeBytes(ty.Type)
-	if ty.Vec == 0 && ty.Mat == 0 {
-		return n
-	}
-	if ty.Vec > 0 {
-		if ty.Vec <= 2 {
-			return 2 * n
-		}
-		return 4 * n
-	}
-	return ty.Mat * 4 * n
 }

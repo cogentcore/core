@@ -16,21 +16,26 @@ import (
 // including things like Vertex arrays, transformation matricies (Uniforms),
 // Images (Textures), and arbitrary Structs for Compute shaders.
 type Var struct {
-	Name    string   `desc:"variable name"`
-	Type    Types    `desc:"type of data in variable"`
-	Role    VarRoles `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and "`
-	Set     int      `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
-	BindLoc int      `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
-	SizeOf  int      `desc:"size in bytes of one element (not array size)"`
+	Name    string      `desc:"variable name"`
+	Type    Types       `desc:"type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  For images, "`
+	Role    VarRoles    `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet, etc. "`
+	Shaders ShaderTypes `desc:"bit flags for set of shaders that this variable is used in"`
+	Set     int         `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
+	BindLoc int         `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
+	SizeOf  int         `desc:"size in bytes of one element (not array size).  Note that arrays require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint."`
 }
 
 // Init initializes the main values
-func (vr *Var) Init(name string, typ Types, role VarRoles, set int) {
+func (vr *Var) Init(name string, typ Types, role VarRoles, set int, shaders ...ShaderTypes) {
 	vr.Name = name
 	vr.Type = typ
 	vr.Role = role
 	vr.SizeOf = TypeSizes[typ]
 	vr.Set = set
+	vr.Shaders = 0
+	for _, sh := range shaders {
+		vr.Shaders |= sh
+	}
 }
 
 //////////////////////////////////////////////////////////////////
@@ -54,19 +59,19 @@ func (vs *Vars) AddVar(vr *Var) {
 	vs.VarMap[vr.Name] = vr
 }
 
-// Add adds a new variable of given type, role, and set
-func (vs *Vars) Add(name string, typ Types, role VarRoles, set int) *Var {
+// Add adds a new variable of given type, role, set, and shaders where used
+func (vs *Vars) Add(name string, typ Types, role VarRoles, set int, shaders ...ShaderTypes) *Var {
 	vr := &Var{}
-	vr.Init(name, typ, role, set)
+	vr.Init(name, typ, role, set, shaders...)
 	vs.AddVar(vr)
 	return vr
 }
 
 // AddStruct adds a new struct variable of given total number of bytes in size,
-// type, role, and set
-func (vs *Vars) AddStruct(name string, size int, role VarRoles, set int) *Var {
+// type, role, set, and shaders where used
+func (vs *Vars) AddStruct(name string, size int, role VarRoles, set int, shaders ...ShaderTypes) *Var {
 	vr := &Var{}
-	vr.Init(name, Struct, role, set)
+	vr.Init(name, Struct, role, set, shaders...)
 	vr.SizeOf = size
 	vs.AddVar(vr)
 	return vr
@@ -134,6 +139,15 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 ///////////////////////////////////////////////////////////////////
 // Descriptors for Uniforms etc
 
+// ShaderSet returns the bit flags of all shaders used in variables in given list
+func ShaderSet(vl []*Var) ShaderTypes {
+	var sh ShaderTypes
+	for _, vr := range vl {
+		sh |= vr.Shaders
+	}
+	return sh
+}
+
 // DescLayout returns the PipelineLayout of DescriptorSetLayout
 // info for all of the non-Vertex vars
 func (vs *Vars) DescLayout(dev vk.Device) vk.PipelineLayout {
@@ -151,7 +165,7 @@ func (vs *Vars) DescLayout(dev vk.Device) vk.PipelineLayout {
 				Binding:         uint32(bi),
 				DescriptorType:  RoleDescriptors[ri],
 				DescriptorCount: uint32(len(rl)),
-				StageFlags:      vk.ShaderStageFlags(vk.ShaderStageVertexBit),
+				StageFlags:      vk.ShaderStageFlags(ShaderSet(rl)),
 			}
 			binds = append(binds, bd)
 		}

@@ -6,5 +6,3 @@
 // Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
 
 package vgpu
-
-// note: this all corresponds to a Program or Pipeline..
