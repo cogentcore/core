@@ -8,6 +8,7 @@
 package vgpu
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"unsafe"
@@ -29,22 +30,24 @@ func (sh *Shader) Init(name string, typ ShaderTypes) {
 }
 
 // OpenFile loads given SPIR-V ".spv" code from file for the Shader.
-func (sh *Shader) OpenFile(fname string) error {
+func (sh *Shader) OpenFile(dev vk.Device, fname string) error {
 	b, err := ioutil.ReadFile(fname)
 	if err != nil {
 		log.Printf("vgpu.Shader OpenFile: %s\n", err)
 		return err
 	}
-	return sh.OpenCode(b)
+	return sh.OpenCode(dev, b)
 }
 
 // OpenCode loads given SPIR-V ".spv" code for the Shader.
-func (sh *Shader) OpenCode(code []byte) error {
+func (sh *Shader) OpenCode(dev vk.Device, code []byte) error {
+	uicode := SliceUint32(code)
+	fmt.Printf("code: %v\nuicd: %v\n", len(code), len(uicode))
 	var module vk.ShaderModule
-	ret := vk.CreateShaderModule(TheGPU.Device.Device, &vk.ShaderModuleCreateInfo{
+	ret := vk.CreateShaderModule(dev, &vk.ShaderModuleCreateInfo{
 		SType:    vk.StructureTypeShaderModuleCreateInfo,
-		CodeSize: uint(len(code) / 4),
-		PCode:    SliceUint32(code),
+		CodeSize: uint(len(code)),
+		PCode:    uicode,
 	}, nil, &module)
 	if IsError(ret) {
 		return NewError(ret)

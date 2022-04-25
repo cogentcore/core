@@ -77,6 +77,7 @@ func (dv *Device) MakeDevice(gp *GPU) {
 		PpEnabledLayerNames:     gp.ValidationLayers,
 	}, nil, &device)
 	IfPanic(NewError(ret))
+	// _ = ret
 	dv.Device = device
 
 	var queue vk.Queue

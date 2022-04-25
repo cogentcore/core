@@ -8,6 +8,7 @@
 package vgpu
 
 import (
+	"fmt"
 	"log"
 
 	vk "github.com/vulkan-go/vulkan"
@@ -49,7 +50,7 @@ func (pl *Pipeline) AddShader(name string, typ ShaderTypes) *Shader {
 // Opening SPV code from given filename
 func (pl *Pipeline) AddShaderFile(name string, typ ShaderTypes, fname string) *Shader {
 	sh := pl.AddShader(name, typ)
-	sh.OpenFile(fname)
+	sh.OpenFile(pl.Sys.Device.Device, fname)
 	return sh
 }
 
@@ -57,7 +58,7 @@ func (pl *Pipeline) AddShaderFile(name string, typ ShaderTypes, fname string) *S
 // Loading SPV code from given bytes
 func (pl *Pipeline) AddShaderCode(name string, typ ShaderTypes, code []byte) *Shader {
 	sh := pl.AddShader(name, typ)
-	sh.OpenCode(code)
+	sh.OpenCode(pl.Sys.Device.Device, code)
 	return sh
 }
 
@@ -101,6 +102,7 @@ func (pl *Pipeline) InitPipeline() {
 // The parent System has already done what it can for its config
 func (pl *Pipeline) Config() {
 	pl.ConfigStages()
+	pl.VkConfig.SType = vk.StructureTypeGraphicsPipelineCreateInfo
 	pl.VkConfig.PVertexInputState = pl.Sys.Vars.VkVertexConfig()
 	pl.VkConfig.Layout = pl.Sys.Vars.VkDescLayout
 
@@ -112,7 +114,17 @@ func (pl *Pipeline) Config() {
 	pl.VkCache = pipelineCache
 
 	pipeline := make([]vk.Pipeline, 1)
-	ret = vk.CreateGraphicsPipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.GraphicsPipelineCreateInfo{pl.VkConfig}, nil, pipeline)
+	if pl.Sys.Compute {
+		cfg := vk.ComputePipelineCreateInfo{
+			SType:  vk.StructureTypeComputePipelineCreateInfo,
+			Layout: pl.Sys.Vars.VkDescLayout,
+			Stage:  pl.VkConfig.PStages[0], // note: only one allowefd
+		}
+		ret = vk.CreateComputePipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.ComputePipelineCreateInfo{cfg}, nil, pipeline)
+	} else {
+		ret = vk.CreateGraphicsPipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.GraphicsPipelineCreateInfo{pl.VkConfig}, nil, pipeline)
+
+	}
 	IfPanic(NewError(ret))
 	pl.VkPipeline = pipeline[0]
 
@@ -130,6 +142,7 @@ func (pl *Pipeline) ConfigStages() {
 			Module: sh.VkModule,
 			PName:  "main\x00",
 		}
+		fmt.Printf("sh type: %v\n", sh.Type)
 	}
 	pl.VkConfig.PStages = stgs
 }

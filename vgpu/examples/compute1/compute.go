@@ -32,12 +32,15 @@ func main() {
 	vk.Init()
 
 	gp := &vgpu.GPU{}
+	gp.ValidationLayers = []string{"VK_LAYER_KHRONOS_validation"}
+	// gp.DeviceExts = []string{"VK_KHR_get_physical_device_properties2", "VK_KHR_portability_subset"}
+	// gp.InstanceExts =
 	gp.Init("compute1", true)
 	TheGPU = gp
 
 	sy := gp.NewSystem("compute1", true)
 	pl := sy.AddNewPipeline("compute1")
-	// pl.AddShaderFile("sqvecel", vgpu.ComputeShader, "sqvecel.spv")
+	pl.AddShaderFile("sqvecel", vgpu.ComputeShader, "sqvecel.spv")
 	_ = pl
 
 	inv := sy.Vars.Add("In", vgpu.Float32Vec4, vgpu.Storage, 0, vgpu.ComputeShader)
