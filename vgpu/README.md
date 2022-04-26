@@ -11,6 +11,14 @@ Key docs for all major Vulkan types: https://gpuopen.com/learn/understanding-vul
 For compute engine use, we are following this tutorial and associated linked ones:
 https://bakedbits.dev/posts/vulkan-compute-example/
 
+# TODO
+
+* Memory has separate buffs for: Uniforms, Vertex & Index, Storage, and Images -- each have diff constraints potentially and it makes more sense to have separate buffers for each.
+
+* all the Image and Surface stuff.
+
+* Full Phong package -- shouldn't have to write that separately.
+
 # Links
 
 * https://asawicki.info/news_1740_vulkan_memory_types_on_pc_and_how_to_use_them
