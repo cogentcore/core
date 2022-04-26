@@ -8,7 +8,6 @@
 package vgpu
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"unsafe"
@@ -42,7 +41,6 @@ func (sh *Shader) OpenFile(dev vk.Device, fname string) error {
 // OpenCode loads given SPIR-V ".spv" code for the Shader.
 func (sh *Shader) OpenCode(dev vk.Device, code []byte) error {
 	uicode := SliceUint32(code)
-	fmt.Printf("code: %v\nuicd: %v\n", len(code), len(uicode))
 	var module vk.ShaderModule
 	ret := vk.CreateShaderModule(dev, &vk.ShaderModuleCreateInfo{
 		SType:    vk.StructureTypeShaderModuleCreateInfo,
@@ -58,17 +56,12 @@ func (sh *Shader) OpenCode(dev vk.Device, code []byte) error {
 
 // Free deletes the shader module, which can be done after the pipeline
 // is created.
-func (sh *Shader) Free() {
+func (sh *Shader) Free(dev vk.Device) {
 	if sh.VkModule == nil {
 		return
 	}
-	vk.DestroyShaderModule(TheGPU.Device.Device, sh.VkModule, nil)
+	vk.DestroyShaderModule(dev, sh.VkModule, nil)
 	sh.VkModule = nil
-}
-
-// Delete deletes the Shader
-func (sh *Shader) Delete() {
-	sh.Free()
 }
 
 // todo: use 1.17 unsafe.Slice function
@@ -83,10 +76,28 @@ func SliceUint32(data []byte) []uint32 {
 type ShaderTypes int32
 
 const (
-	VertexShader   = ShaderTypes(vk.PipelineStageVertexShaderBit)
-	TessCtrlShader = ShaderTypes(vk.PipelineStageTessellationControlShaderBit)
-	TessEvalShader = ShaderTypes(vk.PipelineStageTessellationEvaluationShaderBit)
-	GeometryShader = ShaderTypes(vk.PipelineStageGeometryShaderBit)
-	FragmentShader = ShaderTypes(vk.PipelineStageFragmentShaderBit)
-	ComputeShader  = ShaderTypes(vk.PipelineStageComputeShaderBit)
+	VertexShader ShaderTypes = iota
+	TessCtrlShader
+	TessEvalShader
+	GeometryShader
+	FragmentShader
+	ComputeShader
 )
+
+var ShaderStageFlags = map[ShaderTypes]vk.ShaderStageFlagBits{
+	VertexShader:   vk.ShaderStageVertexBit,
+	TessCtrlShader: vk.ShaderStageTessellationControlBit,
+	TessEvalShader: vk.ShaderStageTessellationEvaluationBit,
+	GeometryShader: vk.ShaderStageGeometryBit,
+	FragmentShader: vk.ShaderStageFragmentBit,
+	ComputeShader:  vk.ShaderStageComputeBit,
+}
+
+var ShaderPipelineFlags = map[ShaderTypes]vk.PipelineStageFlagBits{
+	VertexShader:   vk.PipelineStageVertexShaderBit,
+	TessCtrlShader: vk.PipelineStageTessellationControlShaderBit,
+	TessEvalShader: vk.PipelineStageTessellationEvaluationShaderBit,
+	GeometryShader: vk.PipelineStageGeometryShaderBit,
+	FragmentShader: vk.PipelineStageFragmentShaderBit,
+	ComputeShader:  vk.PipelineStageComputeShaderBit,
+}

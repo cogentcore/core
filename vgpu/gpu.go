@@ -9,9 +9,12 @@ package vgpu
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"strings"
 	"unsafe"
 
+	"github.com/goki/ki/kit"
 	vk "github.com/vulkan-go/vulkan"
 )
 
@@ -31,9 +34,9 @@ type GPU struct {
 
 	DebugCallback vk.DebugReportCallback
 
+	AppName          string `desc:"name of application -- used in init of GPU"`
 	APIVersion       vk.Version
 	AppVersion       vk.Version
-	Name             string
 	InstanceExts     []string `desc:"set to required instance exts prior to calling Init"`
 	DeviceExts       []string `desc:"set to required device exts prior to calling Init"`
 	ValidationLayers []string `desc:"set to required validation layers prior to calling Init"`
@@ -43,11 +46,70 @@ type GPU struct {
 func (gp *GPU) Defaults() {
 	gp.APIVersion = vk.Version(vk.MakeVersion(1, 1, 0))
 	gp.AppVersion = vk.Version(vk.MakeVersion(1, 0, 0))
+	gp.DeviceExts = []string{"VK_KHR_portability_subset"}
+	gp.InstanceExts = []string{"VK_KHR_get_physical_device_properties2"}
+}
+
+// NewGPU returns a new GPU struct with Defaults set
+// configure any additional defaults before calling Init
+func NewGPU() *GPU {
+	gp := &GPU{}
+	gp.Defaults()
+	return gp
+}
+
+// FindString returns index of string if in list, else -1
+func FindString(str string, strs []string) int {
+	for i, s := range strs {
+		if str == s {
+			return i
+		}
+	}
+	return -1
+}
+
+// AddInstanceExt adds given extension, only if not already set
+// returns true if added.
+func (gp *GPU) AddInstanceExt(ext string) bool {
+	i := FindString(ext, gp.InstanceExts)
+	if i >= 0 {
+		return false
+	}
+	gp.InstanceExts = append(gp.InstanceExts, ext)
+	return true
+}
+
+// AddDeviceExt adds given extension, only if not already set
+// returns true if added.
+func (gp *GPU) AddDeviceExt(ext string) bool {
+	i := FindString(ext, gp.DeviceExts)
+	if i >= 0 {
+		return false
+	}
+	gp.DeviceExts = append(gp.DeviceExts, ext)
+	return true
+}
+
+// AddValidationLayer adds given validation layer, only if not already set
+// returns true if added.
+func (gp *GPU) AddValidationLayer(ext string) bool {
+	i := FindString(ext, gp.ValidationLayers)
+	if i >= 0 {
+		return false
+	}
+	gp.ValidationLayers = append(gp.ValidationLayers, ext)
+	return true
 }
 
 func (gp *GPU) Init(name string, debug bool) error {
-	gp.Name = name
 	TheGPU = gp
+
+	gp.AppName = name
+	gp.Debug = debug
+	if debug {
+		gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
+		gp.AddInstanceExt("VK_EXT_debug_report")
+	}
 
 	// Select instance extensions
 	requiredInstanceExts := SafeStrings(gp.InstanceExts)
@@ -79,7 +141,7 @@ func (gp *GPU) Init(name string, debug bool) error {
 			SType:              vk.StructureTypeApplicationInfo,
 			ApiVersion:         uint32(gp.APIVersion),
 			ApplicationVersion: uint32(gp.AppVersion),
-			PApplicationName:   SafeString(gp.Name),
+			PApplicationName:   SafeString(gp.AppName),
 			PEngineName:        "egpu\x00",
 		},
 		EnabledExtensionCount:   uint32(len(instanceExts)),
@@ -89,18 +151,8 @@ func (gp *GPU) Init(name string, debug bool) error {
 	}, nil, &instance)
 	IfPanic(NewError(ret))
 	gp.Instance = instance
-	vk.InitInstance(instance)
 
-	if gp.Debug {
-		// Register a debug callback
-		ret := vk.CreateDebugReportCallback(instance, &vk.DebugReportCallbackCreateInfo{
-			SType:       vk.StructureTypeDebugReportCallbackCreateInfo,
-			Flags:       vk.DebugReportFlags(vk.DebugReportErrorBit | vk.DebugReportWarningBit),
-			PfnCallback: dbgCallbackFunc,
-		}, nil, &gp.DebugCallback)
-		IfPanic(NewError(ret))
-		log.Println("vulkan: DebugReportCallback enabled by application")
-	}
+	vk.InitInstance(instance)
 
 	// Find a suitable GPU
 	var gpuCount uint32
@@ -116,6 +168,7 @@ func (gp *GPU) Init(name string, debug bool) error {
 	gp.GPU = gpus[0]
 	vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GpuProps)
 	gp.GpuProps.Deref()
+	gp.GpuProps.Limits.Deref()
 	vk.GetPhysicalDeviceMemoryProperties(gp.GPU, &gp.MemoryProps)
 	gp.MemoryProps.Deref()
 
@@ -128,6 +181,20 @@ func (gp *GPU) Init(name string, debug bool) error {
 		log.Println("vulkan warning: missing", missing, "required device extensions during init")
 	}
 	log.Printf("vulkan: enabling %d device extensions", len(deviceExts))
+
+	if gp.Debug {
+		var debugCallback vk.DebugReportCallback
+		// Register a debug callback
+		ret := vk.CreateDebugReportCallback(gp.Instance, &vk.DebugReportCallbackCreateInfo{
+			SType:       vk.StructureTypeDebugReportCallbackCreateInfo,
+			Flags:       vk.DebugReportFlags(vk.DebugReportErrorBit | vk.DebugReportWarningBit),
+			PfnCallback: dbgCallbackFunc,
+		}, nil, &debugCallback)
+		IfPanic(NewError(ret))
+		log.Println("vulkan: DebugReportCallback enabled by application")
+		gp.DebugCallback = debugCallback
+	}
+
 	return nil
 }
 
@@ -153,6 +220,22 @@ func (gp *GPU) NewSystem(name string, compute bool) *System {
 	sy := &System{}
 	sy.Init(gp, name, compute)
 	return sy
+}
+
+func (gp *GPU) PropsString(print bool) string {
+	ps := "\n\n######## GPU Props\n"
+	prs := kit.StringJSON(&gp.GpuProps)
+	devnm := `  "DeviceName": `
+	ps += prs[:strings.Index(prs, devnm)]
+	ps += devnm + string(gp.GpuProps.DeviceName[:]) + "\n"
+	ps += prs[strings.Index(prs, `  "Limits":`):]
+	// ps += "\n\n######## GPU Memory Props\n" // not really useful
+	// ps += kit.StringJSON(&gp.MemoryProps)
+	ps += "\n"
+	if print {
+		fmt.Println(ps)
+	}
+	return ps
 }
 
 func dbgCallbackFunc(flags vk.DebugReportFlags, objectType vk.DebugReportObjectType,

@@ -43,11 +43,12 @@ func (sy *System) Init(gp *GPU, name string, compute bool) error {
 		sy.Device.Init(gp, vk.QueueGraphicsBit)
 	}
 	sy.Mem.Init(gp, &sy.Device)
+
 	return nil
 }
 
 func (sy *System) Destroy() {
-	sy.Mem.Destroy()
+	sy.Mem.Destroy(sy.Device.Device)
 	for _, pl := range sy.Pipelines {
 		pl.Destroy()
 	}
@@ -61,6 +62,7 @@ func (sy *System) Destroy() {
 			sm.Destroy(sy.Device.Device)
 		}
 	}
+	sy.Vars.Destroy(sy.Device.Device)
 	sy.Device.Destroy()
 	sy.GPU = nil
 }
@@ -111,20 +113,28 @@ func (sy *System) SetVals(set int, vals ...string) {
 		wd := vk.WriteDescriptorSet{
 			SType:           vk.StructureTypeWriteDescriptorSet,
 			DstSet:          sd.DescSet,
+			DstBinding:      uint32(vl.Var.BindLoc),
 			DescriptorCount: 1,
 			DescriptorType:  RoleDescriptors[vl.Var.Role],
 		}
 		if vl.Var.Role < StorageImage {
+			off := vk.DeviceSize(vl.Offset)
+			if IsDynamicRole(vl.Var.Role) {
+				off = 0 // off must be 0 for dynamic
+			}
 			wd.PBufferInfo = []vk.DescriptorBufferInfo{{
-				Offset: vk.DeviceSize(vl.Offset),
+				Offset: off,
 				Range:  vk.DeviceSize(vl.MemSize),
 				Buffer: sy.Mem.BuffDev,
 			}}
+			if IsDynamicRole(vl.Var.Role) {
+				sy.Vars.DynOffs[vl.Var.DynOffIdx] = uint32(vl.Offset)
+			}
 		} else {
 			// wd.DescriptorCount = uint32(len(texEnabled))
 			// wd.PImageInfo =      texInfos
 		}
 		ws[i] = wd
 	}
-	vk.UpdateDescriptorSets(sy.Device.Device, 2, ws, 0, nil)
+	vk.UpdateDescriptorSets(sy.Device.Device, uint32(nv), ws, 0, nil)
 }

@@ -20,13 +20,14 @@ import (
 // including things like Vertex arrays, transformation matricies (Uniforms),
 // Images (Textures), and arbitrary Structs for Compute shaders.
 type Var struct {
-	Name    string      `desc:"variable name"`
-	Type    Types       `desc:"type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  For images, "`
-	Role    VarRoles    `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet, etc. "`
-	Shaders ShaderTypes `desc:"bit flags for set of shaders that this variable is used in"`
-	Set     int         `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
-	BindLoc int         `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
-	SizeOf  int         `desc:"size in bytes of one element (not array size).  Note that arrays require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint."`
+	Name      string                 `desc:"variable name"`
+	Type      Types                  `desc:"type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  For images, "`
+	Role      VarRoles               `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet, etc. "`
+	Shaders   vk.ShaderStageFlagBits `desc:"bit flags for set of shaders that this variable is used in"`
+	Set       int                    `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
+	BindLoc   int                    `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
+	SizeOf    int                    `desc:"size in bytes of one element (not array size).  Note that arrays require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint."`
+	DynOffIdx int                    `desc:"index into the dynamic offset list, where dynamic offsets of vals need to be set"`
 }
 
 // Init initializes the main values
@@ -38,12 +39,12 @@ func (vr *Var) Init(name string, typ Types, role VarRoles, set int, shaders ...S
 	vr.Set = set
 	vr.Shaders = 0
 	for _, sh := range shaders {
-		vr.Shaders |= sh
+		vr.Shaders |= ShaderStageFlags[sh]
 	}
 }
 
 func (vr *Var) String() string {
-	s := fmt.Sprintf("%d:  %s  %s  (size: %d)", vr.BindLoc, vr.Name, vr.Type.String(), vr.SizeOf)
+	s := fmt.Sprintf("%d:\t%s\t%s\t(size: %d)", vr.BindLoc, vr.Name, vr.Type.String(), vr.SizeOf)
 	return s
 }
 
@@ -68,6 +69,16 @@ type Vars struct {
 	SetDesc      []*SetDesc                  `desc:"descriptor information for each set"`
 	VkDescLayout vk.PipelineLayout           `desc:"vulkan descriptor layout based on vars"`
 	VkDescPool   vk.DescriptorPool           `desc:"vulkan descriptor pool"`
+	VkDescSets   []vk.DescriptorSet          `desc:"vulkan descriptor sets"`
+	DynOffs      []uint32                    `desc:"dynamic offsets for Uniform and Storage variables, indexed as DynOffIdx on Var -- offsets are set when Val is bound"`
+}
+
+func (vs *Vars) Destroy(dev vk.Device) {
+	vk.DestroyPipelineLayout(dev, vs.VkDescLayout, nil)
+	vk.DestroyDescriptorPool(dev, vs.VkDescPool, nil)
+	for _, sd := range vs.SetDesc {
+		vk.DestroyDescriptorSetLayout(dev, sd.Layout, nil)
+	}
 }
 
 // AddVar adds given variable
@@ -184,8 +195,8 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 // Descriptors for Uniforms etc
 
 // ShaderSet returns the bit flags of all shaders used in variables in given list
-func ShaderSet(vl []*Var) ShaderTypes {
-	var sh ShaderTypes
+func ShaderSet(vl []*Var) vk.ShaderStageFlagBits {
+	var sh vk.ShaderStageFlagBits
 	for _, vr := range vl {
 		sh |= vr.Shaders
 	}
@@ -201,6 +212,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 	nset := len(vs.SetMap)
 	vs.SetDesc = make([]*SetDesc, nset)
 	dsets := make([]vk.DescriptorSetLayout, nset)
+	dyno := 0
 	for si := range vs.SetDesc {
 		set := vs.SetMap[si]
 		sd := &SetDesc{}
@@ -224,6 +236,10 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 				binds = append(binds, bd)
 				bi++
 				vars = append(vars, vr)
+				if vr.Role == Uniform || vr.Role == Storage {
+					vr.DynOffIdx = dyno
+					dyno++
+				}
 			}
 		}
 		ret := vk.CreateDescriptorSetLayout(dev, &vk.DescriptorSetLayoutCreateInfo{
@@ -246,6 +262,8 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 	}, nil, &pipelineLayout)
 	IfPanic(NewError(ret))
 	vs.VkDescLayout = pipelineLayout
+
+	vs.DynOffs = make([]uint32, dyno)
 
 	var pools []vk.DescriptorPoolSize
 	for rl := Uniform; rl < VarRolesN; rl++ {
@@ -270,7 +288,8 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 
 	vs.VkDescPool = descPool
 
-	for _, sd := range vs.SetDesc {
+	vs.VkDescSets = make([]vk.DescriptorSet, len(vs.SetDesc))
+	for i, sd := range vs.SetDesc {
 		var set vk.DescriptorSet
 		ret := vk.AllocateDescriptorSets(dev, &vk.DescriptorSetAllocateInfo{
 			SType:              vk.StructureTypeDescriptorSetAllocateInfo,
@@ -280,6 +299,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 		}, &set)
 		IfPanic(NewError(ret))
 		sd.DescSet = set
+		vs.VkDescSets[i] = set
 	}
 }
 
@@ -320,4 +340,9 @@ var RoleDescriptors = map[VarRoles]vk.DescriptorType{
 	SamplerVar:    vk.DescriptorTypeSampler,
 	SampledImage:  vk.DescriptorTypeSampledImage,
 	CombinedImage: vk.DescriptorTypeCombinedImageSampler,
+}
+
+// IsDynamicRole returns true if role has dynamic offset binding
+func IsDynamicRole(vr VarRoles) bool {
+	return vr == Uniform || vr == Storage
 }

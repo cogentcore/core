@@ -38,19 +38,68 @@ func (cp *CmdPool) MakeBuff(dv *Device) vk.CommandBuffer {
 	}, cmdBuff)
 	IfPanic(NewError(ret))
 	cBuff := cmdBuff[0]
-
-	ret = vk.BeginCommandBuffer(cBuff, &vk.CommandBufferBeginInfo{
-		SType: vk.StructureTypeCommandBufferBeginInfo,
-	})
-	IfPanic(NewError(ret))
+	cp.Buff = cBuff
 	return cBuff
 }
 
+// BeginCmd does BeginCommandBuffer on buffer
+func (cp *CmdPool) BeginCmd() {
+	ret := vk.BeginCommandBuffer(cp.Buff, &vk.CommandBufferBeginInfo{
+		SType: vk.StructureTypeCommandBufferBeginInfo,
+	})
+	IfPanic(NewError(ret))
+}
+
+// BeginCmdOneTime does BeginCommandBuffer with OneTimeSubmit set on buffer
+func (cp *CmdPool) BeginCmdOneTime() {
+	ret := vk.BeginCommandBuffer(cp.Buff, &vk.CommandBufferBeginInfo{
+		SType: vk.StructureTypeCommandBufferBeginInfo,
+		Flags: vk.CommandBufferUsageFlags(vk.CommandBufferUsageOneTimeSubmitBit),
+	})
+	IfPanic(NewError(ret))
+}
+
+// SubmitWait does End, Submit, WaitIdle on Buffer
+func (cp *CmdPool) SubmitWait(dev *Device) {
+	cp.EndCmd()
+	cp.Submit(dev)
+	vk.QueueWaitIdle(dev.Queue)
+}
+
+// SubmitWaitFree does End, Submit, WaitIdle, Free on Buffer
+func (cp *CmdPool) SubmitWaitFree(dev *Device) {
+	cp.SubmitWait(dev)
+	cp.FreeBuffer(dev)
+}
+
+// EndCmd does EndCommandBuffer on buffer
+func (cp *CmdPool) EndCmd() {
+	vk.EndCommandBuffer(cp.Buff)
+}
+
+// Submit submits commands in buffer to given device queue
+func (cp *CmdPool) Submit(dev *Device) {
+	cmdBu := []vk.CommandBuffer{cp.Buff}
+	ret := vk.QueueSubmit(dev.Queue, 1, []vk.SubmitInfo{{
+		SType:              vk.StructureTypeSubmitInfo,
+		CommandBufferCount: 1,
+		PCommandBuffers:    cmdBu,
+	}}, vk.NullFence)
+	IfPanic(NewError(ret))
+}
+
+// FreeBuffer frees the current Buff buffer
+func (cp *CmdPool) FreeBuffer(dev *Device) {
+	cmdBu := []vk.CommandBuffer{cp.Buff}
+	vk.FreeCommandBuffers(dev.Device, cp.Pool, 1, cmdBu)
+	cp.Buff = nil
+}
+
 // Destroy
-func (cp *CmdPool) Destroy(dv *Device) {
+func (cp *CmdPool) Destroy(dev vk.Device) {
 	if cp.Pool == nil {
 		return
 	}
-	vk.DestroyCommandPool(dv.Device, cp.Pool, nil)
+	vk.DestroyCommandPool(dev, cp.Pool, nil)
 	cp.Pool = nil
 }

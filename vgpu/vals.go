@@ -118,6 +118,11 @@ func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
 	vl.Mod = true
 }
 
+// MemReg returns the memory region for this value
+func (vl *Val) MemReg() MemReg {
+	return MemReg{Offset: vl.Offset, Size: vl.MemSize}
+}
+
 //////////////////////////////////////////////////////////////////
 
 // Vals is a container of Val values
@@ -194,7 +199,7 @@ func (vs *Vals) ModRegs() []MemReg {
 	var mods []MemReg
 	for _, vl := range vs.Vals {
 		if vl.Mod {
-			mods = append(mods, MemReg{Offset: vl.Offset, Size: vl.MemSize})
+			mods = append(mods, vl.MemReg())
 		}
 	}
 	return mods

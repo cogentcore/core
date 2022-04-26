@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"runtime"
 
@@ -31,12 +32,11 @@ func main() {
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
 	vk.Init()
 
-	gp := &vgpu.GPU{}
-	gp.ValidationLayers = []string{"VK_LAYER_KHRONOS_validation"}
-	// gp.DeviceExts = []string{"VK_KHR_get_physical_device_properties2", "VK_KHR_portability_subset"}
-	// gp.InstanceExts =
+	gp := vgpu.NewGPU()
 	gp.Init("compute1", true)
 	TheGPU = gp
+
+	// gp.PropsString(true) // print
 
 	sy := gp.NewSystem("compute1", true)
 	pl := sy.AddNewPipeline("compute1")
@@ -67,4 +67,17 @@ func main() {
 
 	sy.SetVals(0, "In", "Out")
 
+	pl.RunCompute(n, 1, 1)
+
+	sy.Mem.SyncVarsFmGPU("Out")
+
+	odat := ovl.Floats32()
+	for i := 0; i < n; i++ {
+		fmt.Printf("In:  %d\tr: %g\tg: %g\tb: %g\ta: %g\n", i, idat[i*4+0], idat[i*4+1], idat[i*4+2], idat[i*4+3])
+		fmt.Printf("Out: %d\tr: %g\tg: %g\tb: %g\ta: %g\n", i, odat[i*4+0], odat[i*4+1], odat[i*4+2], odat[i*4+3])
+	}
+	fmt.Printf("\n")
+
+	sy.Destroy()
+	gp.Destroy()
 }

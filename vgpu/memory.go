@@ -54,8 +54,9 @@ func (mm *Memory) Init(gp *GPU, device *Device) {
 	mm.CmdPool.Init(device, vk.CommandPoolCreateTransientBit)
 }
 
-func (mm *Memory) Destroy() {
+func (mm *Memory) Destroy(dev vk.Device) {
 	mm.Free()
+	mm.CmdPool.Destroy(dev)
 	mm.GPU = nil
 }
 
@@ -76,8 +77,10 @@ func (mm *Memory) Alloc() {
 
 		usage := vk.BufferUsageVertexBufferBit | vk.BufferUsageIndexBufferBit | vk.BufferUsageUniformBufferBit | vk.BufferUsageStorageBufferBit | vk.BufferUsageUniformTexelBufferBit | vk.BufferUsageStorageTexelBufferBit
 
-		mm.BuffHost = mm.MakeBuffer(mm.BuffSize, vk.BufferUsageTransferSrcBit)
-		mm.BuffDev = mm.MakeBuffer(mm.BuffSize, vk.BufferUsageTransferDstBit|usage)
+		xfer := vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
+
+		mm.BuffHost = mm.MakeBuffer(bsz, xfer)
+		mm.BuffDev = mm.MakeBuffer(bsz, xfer|usage)
 		mm.BuffHostMem = mm.AllocMem(mm.BuffHost, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
 		mm.BuffSize = bsz
 	}
@@ -180,13 +183,28 @@ func (mm *Memory) Activate() {
 	mm.Active = true
 }
 
-// SyncAllToGPU syncs everything to GPU
+// SyncAllToGPU syncs all modified Val regions from CPU to GPU device memory
 func (mm *Memory) SyncAllToGPU() {
 	mods := mm.Vals.ModRegs()
 	if len(mods) == 0 {
 		return
 	}
 	mm.TransferBuffToGPU(mods)
+}
+
+// SyncVarsFmGPU syncs given variables from GPU device memory to CPU
+func (mm *Memory) SyncVarsFmGPU(vals ...string) {
+	nv := len(vals)
+	mods := make([]MemReg, nv)
+	for i, vnm := range vals {
+		vl, err := mm.Vals.ValByNameTry(vnm)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		mods[i] = vl.MemReg()
+	}
+	mm.TransferBuffFmGPU(mods)
 }
 
 // TransferAllToGPU transfers all staging to GPU
@@ -209,12 +227,7 @@ func (mm *Memory) TransferBuffToGPU(regs []MemReg) {
 	}
 
 	cmdBuff := mm.CmdPool.MakeBuff(&mm.Device)
-
-	ret := vk.BeginCommandBuffer(cmdBuff, &vk.CommandBufferBeginInfo{
-		SType: vk.StructureTypeCommandBufferBeginInfo,
-		Flags: vk.CommandBufferUsageFlags(vk.CommandBufferUsageOneTimeSubmitBit),
-	})
-	IfPanic(NewError(ret))
+	mm.CmdPool.BeginCmdOneTime()
 
 	rg := make([]vk.BufferCopy, len(regs))
 	for i, mr := range regs {
@@ -222,19 +235,27 @@ func (mm *Memory) TransferBuffToGPU(regs []MemReg) {
 	}
 
 	vk.CmdCopyBuffer(cmdBuff, mm.BuffHost, mm.BuffDev, uint32(len(rg)), rg)
-	vk.EndCommandBuffer(cmdBuff)
 
-	cmdBu := []vk.CommandBuffer{cmdBuff}
+	mm.CmdPool.SubmitWaitFree(&mm.Device)
+}
 
-	ret = vk.QueueSubmit(mm.Device.Queue, 1, []vk.SubmitInfo{{
-		SType:              vk.StructureTypeSubmitInfo,
-		CommandBufferCount: 1,
-		PCommandBuffers:    cmdBu,
-	}}, vk.NullFence)
-	IfPanic(NewError(ret))
+// TransferBuffFmGPU transfers buff memory from GPU to CPU for given regs
+func (mm *Memory) TransferBuffFmGPU(regs []MemReg) {
+	if mm.BuffSize == 0 || mm.BuffDevMem == nil {
+		return
+	}
 
-	vk.QueueWaitIdle(mm.Device.Queue)
-	vk.FreeCommandBuffers(mm.Device.Device, mm.CmdPool.Pool, 1, cmdBu)
+	cmdBuff := mm.CmdPool.MakeBuff(&mm.Device)
+	mm.CmdPool.BeginCmdOneTime()
+
+	rg := make([]vk.BufferCopy, len(regs))
+	for i, mr := range regs {
+		rg[i] = vk.BufferCopy{SrcOffset: vk.DeviceSize(mr.Offset), DstOffset: vk.DeviceSize(mr.Offset), Size: vk.DeviceSize(mr.Size)}
+	}
+
+	vk.CmdCopyBuffer(cmdBuff, mm.BuffDev, mm.BuffHost, uint32(len(rg)), rg)
+
+	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }
 
 func FindRequiredMemoryType(props vk.PhysicalDeviceMemoryProperties,

@@ -349,7 +349,7 @@ func (sf *Surface) Prepare(needCleanup bool) {
 		if sf.OnCleanup != nil {
 			IfPanic(sf.OnCleanup())
 		}
-		sf.CmdPool.Destroy(&sf.Device)
+		sf.CmdPool.Destroy(sf.Device.Device)
 		var presentQueue vk.Queue
 		vk.GetDeviceQueue(sf.Device.Device, sf.Device.QueueIndex, 0, &presentQueue)
 		sf.Device.Queue = presentQueue

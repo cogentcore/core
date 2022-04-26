@@ -8,7 +8,6 @@
 package vgpu
 
 import (
-	"fmt"
 	"log"
 
 	vk "github.com/vulkan-go/vulkan"
@@ -77,13 +76,19 @@ func (pl *Pipeline) ShaderByName(name string) *Shader {
 // as they are no longer needed
 func (pl *Pipeline) FreeShaders() {
 	for _, sh := range pl.Shaders {
-		sh.Free()
+		sh.Free(pl.Sys.Device.Device)
 	}
 }
 
 func (pl *Pipeline) Destroy() {
 	pl.FreeShaders()
-	pl.CmdPool.Destroy(&pl.Sys.Device)
+
+	vk.DestroyPipelineCache(pl.Sys.Device.Device, pl.VkCache, nil)
+	if pl.VkRenderPass != nil {
+		vk.DestroyRenderPass(pl.Sys.Device.Device, pl.VkRenderPass, nil)
+	}
+	vk.DestroyPipeline(pl.Sys.Device.Device, pl.VkPipeline, nil)
+	pl.CmdPool.Destroy(pl.Sys.Device.Device)
 }
 
 // Init initializes pipeline as part of given System
@@ -94,7 +99,7 @@ func (pl *Pipeline) Init(sy *System) {
 
 func (pl *Pipeline) InitPipeline() {
 	pl.CmdPool.Init(&pl.Sys.Device, 0)
-	pl.CmdPool.Buff = pl.CmdPool.MakeBuff(&pl.Sys.Device)
+	pl.CmdPool.MakeBuff(&pl.Sys.Device)
 }
 
 // Config is called once all the VkConfig options have been set
@@ -118,7 +123,7 @@ func (pl *Pipeline) Config() {
 		cfg := vk.ComputePipelineCreateInfo{
 			SType:  vk.StructureTypeComputePipelineCreateInfo,
 			Layout: pl.Sys.Vars.VkDescLayout,
-			Stage:  pl.VkConfig.PStages[0], // note: only one allowefd
+			Stage:  pl.VkConfig.PStages[0], // note: only one allowed
 		}
 		ret = vk.CreateComputePipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.ComputePipelineCreateInfo{cfg}, nil, pipeline)
 	} else {
@@ -128,7 +133,7 @@ func (pl *Pipeline) Config() {
 	IfPanic(NewError(ret))
 	pl.VkPipeline = pipeline[0]
 
-	pl.FreeShaders()
+	pl.FreeShaders() // not needed once built
 }
 
 func (pl *Pipeline) ConfigStages() {
@@ -138,11 +143,10 @@ func (pl *Pipeline) ConfigStages() {
 	for i, sh := range pl.Shaders {
 		stgs[i] = vk.PipelineShaderStageCreateInfo{
 			SType:  vk.StructureTypePipelineShaderStageCreateInfo,
-			Stage:  vk.ShaderStageFlagBits(sh.Type),
+			Stage:  ShaderStageFlags[sh.Type],
 			Module: sh.VkModule,
 			PName:  "main\x00",
 		}
-		fmt.Printf("sh type: %v\n", sh.Type)
 	}
 	pl.VkConfig.PStages = stgs
 }
@@ -393,6 +397,107 @@ func (pl *Pipeline) SetMultisample(nsamp int) {
 		SType:                vk.StructureTypePipelineMultisampleStateCreateInfo,
 		RasterizationSamples: ns,
 	}
+}
+
+func (pl *Pipeline) RunGraphics() {
+	// pl.CmdPool.MakeBuff(&pl.Sys.Device)
+
+	pl.CmdPool.BeginCmdOneTime()
+	vk.CmdBindPipeline(pl.CmdPool.Buff, vk.PipelineBindPointGraphics, pl.VkPipeline)
+
+	/*
+		clearValues := make([]vk.ClearValue, 2)
+		clearValues[1].SetDepthStencil(1, 0)
+		clearValues[0].SetColor([]float32{
+			0.2, 0.2, 0.2, 0.2,
+		})
+		vk.CmdBeginRenderPass(cmd, &vk.RenderPassBeginInfo{
+			SType:       vk.StructureTypeRenderPassBeginInfo,
+			RenderPass:  s.renderPass,
+			Framebuffer: res.Framebuffer(),
+			RenderArea: vk.Rect2D{
+				Offset: vk.Offset2D{
+					X: 0, Y: 0,
+				},
+				Extent: vk.Extent2D{
+					Width:  s.width,
+					Height: s.height,
+				},
+			},
+			ClearValueCount: 2,
+			PClearValues:    clearValues,
+		}, vk.SubpassContentsInline)
+
+		vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, s.pipeline)
+		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, s.pipelineLayout,
+			0, 1, []vk.DescriptorSet{res.DescriptorSet()}, 0, nil)
+		vk.CmdSetViewport(cmd, 0, 1, []vk.Viewport{{
+			Width:    float32(s.width),
+			Height:   float32(s.height),
+			MinDepth: 0.0,
+			MaxDepth: 1.0,
+		}})
+		vk.CmdSetScissor(cmd, 0, 1, []vk.Rect2D{{
+			Offset: vk.Offset2D{
+				X: 0, Y: 0,
+			},
+			Extent: vk.Extent2D{
+				Width:  s.width,
+				Height: s.height,
+			},
+		}})
+
+		vk.CmdDraw(cmd, 12*3, 1, 0, 0)
+		// Note that ending the renderpass changes the image's layout from
+		// vk.ImageLayoutColorAttachmentOptimal to vk.ImageLayoutPresentSrc
+		vk.CmdEndRenderPass(cmd)
+
+		graphicsQueueIndex := s.Context().Platform().GraphicsQueueFamilyIndex()
+		presentQueueIndex := s.Context().Platform().PresentQueueFamilyIndex()
+		if graphicsQueueIndex != presentQueueIndex {
+			// Separate Present Queue Case
+			//
+			// We have to transfer ownership from the graphics queue family to the
+			// present queue family to be able to present.  Note that we don't have
+			// to transfer from present queue family back to graphics queue family at
+			// the start of the next frame because we don't care about the image's
+			// contents at that point.
+			vk.CmdPipelineBarrier(cmd,
+				vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
+				vk.PipelineStageFlags(vk.PipelineStageBottomOfPipeBit),
+				0, 0, nil, 0, nil, 1, []vk.ImageMemoryBarrier{{
+					SType:               vk.StructureTypeImageMemoryBarrier,
+					SrcAccessMask:       0,
+					DstAccessMask:       vk.AccessFlags(vk.AccessColorAttachmentWriteBit),
+					OldLayout:           vk.ImageLayoutPresentSrc,
+					NewLayout:           vk.ImageLayoutPresentSrc,
+					SrcQueueFamilyIndex: graphicsQueueIndex,
+					DstQueueFamilyIndex: presentQueueIndex,
+					SubresourceRange: vk.ImageSubresourceRange{
+						AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
+						LayerCount: 1,
+						LevelCount: 1,
+					},
+					Image: res.Image(),
+				}})
+		}
+		ret = vk.EndCommandBuffer(cmd)
+		IfPanic(as.NewError(ret))
+	*/
+}
+
+// RunCompute runs the compute shader for given of computational elements
+// along 3 dimensions, which are passed as indexes into the shader.
+// The values have to be bound to the vars prior to calling this.
+func (pl *Pipeline) RunCompute(nx, ny, nz int) {
+	pl.CmdPool.BeginCmdOneTime()
+	vk.CmdBindPipeline(pl.CmdPool.Buff, vk.PipelineBindPointCompute, pl.VkPipeline)
+
+	vk.CmdBindDescriptorSets(pl.CmdPool.Buff, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,
+		0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
+
+	vk.CmdDispatch(pl.CmdPool.Buff, uint32(nx), uint32(ny), uint32(nz))
+	pl.CmdPool.SubmitWait(&pl.Sys.Device)
 }
 
 /*
