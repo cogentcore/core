@@ -25,10 +25,6 @@ type BufferMgr interface {
 	// Activate binds buffers as active and configures as needed
 	Activate()
 
-	// Handle returns the unique handle for this buffer manager -- only valid after Activate()
-	// this is the VAO
-	Handle() uint32
-
 	// Transfer transfers all buffer data to GPU (e.g., for initial upload).
 	// Activate must have been called with no other such buffers activated in between.
 	TransferAll()

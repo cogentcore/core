@@ -1,5 +1,7 @@
 # Gi3D
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/goki/gi/gi3d/gi3d.svg)](https://pkg.go.dev/github.com/goki/gi/gi3d)
+
 `gi3d` is the package for the 3D scenegraph in GoGi.
 
 The scenegraph is rooted at a `gi3d.Scene` node which is like `gi.Viewport2D`, where the scene is rendered, similar to the `svg.SVG` node for SVG drawings.

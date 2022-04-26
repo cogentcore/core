@@ -25,9 +25,6 @@ type Program interface {
 	// ShaderByName returns shader by its unique name
 	ShaderByName(name string) Shader
 
-	// ShaderByType returns shader by its type
-	ShaderByType(typ ShaderTypes) Shader
-
 	// SetFragDataVar sets the variable name to use for the fragment shader's output
 	SetFragDataVar(name string)
 
@@ -92,9 +89,6 @@ type Program interface {
 	// showSrc arg prints out the final compiled source, including automatic
 	// defines etc at the top, even if there are no errors, which can be useful for debugging.
 	Compile(showSrc bool) error
-
-	// Handle returns the handle for the program -- only valid after a Compile call
-	Handle() uint32
 
 	// Activate activates this as the active program -- must have been Compiled first.
 	Activate()

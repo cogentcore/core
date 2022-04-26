@@ -83,10 +83,6 @@ type Framebuffer interface {
 	// (texture, depth buffer)
 	Rendered()
 
-	// Handle returns the GPU handle for the framebuffer -- only
-	// valid after Activate.
-	Handle() uint32
-
 	// Delete deletes the GPU resources associated with this framebuffer
 	// (requires Activate to re-establish a new one).
 	// Should be called prior to Go object being deleted

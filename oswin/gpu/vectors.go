@@ -23,13 +23,9 @@ type Vectors interface {
 	// Role returns the functional role of these vectors
 	Role() VectorRoles
 
-	// Handle returns the unique handle for these vectors within the program where it is used
-	// Can also be specified using layout(location = X) specifier.
-	Handle() uint32
-
 	// Set sets all the parameters of the Vectors, and flags it as init -- when
 	// created for predefined locations.
-	Set(name string, handle uint32, typ VectorType, role VectorRoles)
+	// Set(name string, handle uint32, typ VectorType, role VectorRoles)
 }
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
@@ -125,9 +121,6 @@ type VectorsBuffer interface {
 	// IsActive returns true if buffer has already been Activate'd
 	// and thus exists on the GPU
 	IsActive() bool
-
-	// Handle returns the unique handle for this buffer -- only valid after Activate()
-	Handle() uint32
 
 	// Transfer transfers data to GPU -- Activate must have been called with no other
 	// such buffers activated in between.  Automatically uses re-specification

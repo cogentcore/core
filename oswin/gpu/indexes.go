@@ -24,9 +24,6 @@ type IndexesBuffer interface {
 	// Activate binds buffer as active one
 	Activate()
 
-	// Handle returns the unique handle for this buffer -- only valid after Activate()
-	Handle() uint32
-
 	// Transfer transfers data to GPU -- Activate must have been called with no other
 	// such buffers activated in between.  Automatically uses re-specification
 	// strategy per: https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming

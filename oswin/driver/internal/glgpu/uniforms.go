@@ -90,12 +90,6 @@ func (un *Uniform) StdSize() int {
 	return un.stdSize
 }
 
-// Handle() returns the unique id for this Uniform.
-// if in a UBO, then this is the index of the item within the list of UBO's
-func (un *Uniform) Handle() int32 {
-	return un.handle
-}
-
 // SetValue sets the value of the Uniform to given value, which must be of the corresponding
 // elemental or mat32.Vector or mat32.Matrix type.  Proper context must be bound, etc.
 func (un *Uniform) SetValue(val interface{}) error {
@@ -578,11 +572,6 @@ func (un *Uniforms) Bind(prog gpu.Program) error {
 	gl.UniformBlockBinding(pr.handle, ubidx, un.bindPt)
 	gpu.TheGPU.ErrCheck("uniforms bind to program")
 	return nil
-}
-
-// Handle returns the handle for the Program -- only valid after a Compile call
-func (un *Uniforms) Handle() uint32 {
-	return un.handle
 }
 
 // BindingPoint returns the unique binding point for this set of Uniforms --

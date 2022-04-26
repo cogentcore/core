@@ -22,9 +22,6 @@ type Shader interface {
 	// Context must be set.
 	Compile(src string) error
 
-	// Handle returns the GPU handle for this shader
-	Handle() uint32
-
 	// Source returns the actual final source code for the shader
 	// excluding the null terminator (for display purposes).
 	// This includes extra auto-generated code from the Program.
@@ -36,9 +33,6 @@ type Shader interface {
 
 	// Delete deletes the GPU resources for shader -- should be deleted after linked into a program.
 	Delete()
-
-	// GPUType returns the GPU type id for given shader type
-	GPUType(typ ShaderTypes) uint32
 }
 
 // ShaderTypes is a list of GPU shader types

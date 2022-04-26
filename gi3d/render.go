@@ -622,6 +622,9 @@ layout (std140) uniform Camera
 };
 `
 
+// note: the _LEN terms here are added dynamically in the src -- not possible with
+// SPIR-V precompiled code -- need another strat!
+
 var RenderUniLights = `
 layout (std140) uniform Lights
 {

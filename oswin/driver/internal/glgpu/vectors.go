@@ -40,11 +40,6 @@ func (ve *Vectors) Role() gpu.VectorRoles {
 	return ve.role
 }
 
-// Handle returns the unique handle for these Vectors within the program where it is used
-func (ve *Vectors) Handle() uint32 {
-	return ve.handle
-}
-
 // Set sets all the parameters of the Vectors, and flags it as init -- when
 // created for predefined locations.
 func (ve *Vectors) Set(name string, handle uint32, typ gpu.VectorType, role gpu.VectorRoles) {
@@ -370,11 +365,6 @@ func (vb *VectorsBuffer) Activate() {
 // and thus exists on the GPU
 func (vb *VectorsBuffer) IsActive() bool {
 	return vb.init
-}
-
-// Handle returns the unique handle for this buffer -- only valid after Activate()
-func (vb *VectorsBuffer) Handle() uint32 {
-	return vb.handle
 }
 
 // Transfer transfers data to GPU -- Activate must have been called with no other

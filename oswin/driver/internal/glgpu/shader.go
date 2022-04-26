@@ -68,11 +68,6 @@ func (sh *Shader) Compile(src string) error {
 	return nil
 }
 
-// Handle returns the GPU handle for this Shader
-func (sh *Shader) Handle() uint32 {
-	return sh.handle
-}
-
 // Source returns the actual final source code for the Shader
 // excluding the null terminator (for display purposes).
 // This includes extra auto-generated code from the Program.

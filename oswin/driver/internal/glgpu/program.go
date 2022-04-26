@@ -342,11 +342,6 @@ func (pr *Program) Compile(showSrc bool) error {
 	return nil
 }
 
-// Handle returns the handle for the Program -- only valid after a Compile call
-func (pr *Program) Handle() uint32 {
-	return pr.handle
-}
-
 // Activate activates this as the active Program -- must have been Compiled first.
 func (pr *Program) Activate() {
 	if !pr.init {

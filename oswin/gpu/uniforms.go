@@ -41,10 +41,6 @@ type Uniform interface {
 	// on the GPU -- e.g., as determined by the std140 standard opengl layout
 	StdSize() int
 
-	// Handle() returns the unique id for this uniform.
-	// if in a UBO, then this is the index of the item within the list of UBO's
-	Handle() int32
-
 	// SetValue sets the value of the uniform to given value, which must be of the corresponding
 	// elemental or mat32.Vector or mat32.Matrix type.  Proper context must be bound, etc.
 	SetValue(val interface{}) error
@@ -81,9 +77,6 @@ type Uniforms interface {
 
 	// Bind binds the Uniform Buffer Object structure to given program
 	Bind(prog Program) error
-
-	// Handle returns the handle for the program -- only valid after a Compile call
-	Handle() uint32
 
 	// BindingPoint returns the unique binding point for this set of Uniforms --
 	// needed for connecting to programs
