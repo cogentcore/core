@@ -6,6 +6,7 @@ package kit
 
 import (
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"reflect"
@@ -135,4 +136,11 @@ func StructTags(tags reflect.StructTag) map[string]string {
 		smap[fld[:cli]] = vl
 	}
 	return smap
+}
+
+// StringJSON returns a JSON representation of item, as a string
+// e.g., for printing / debugging etc.
+func StringJSON(it interface{}) string {
+	b, _ := json.MarshalIndent(it, "", "  ")
+	return string(b)
 }

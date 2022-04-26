@@ -82,6 +82,17 @@ func AbsInt(a int) int {
 	return a
 }
 
+// ClipInt clips int within min, max range (max exclusive, min inclusive)
+func ClipInt(a, min, max int) int {
+	if a >= max {
+		return max - 1
+	}
+	if a < min {
+		return min
+	}
+	return a
+}
+
 ////////////////////////////////////
 //   int64
 
