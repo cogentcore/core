@@ -119,15 +119,16 @@ func (sy *System) SetVals(set int, vals ...string) {
 		}
 		if vl.Var.Role < StorageImage {
 			off := vk.DeviceSize(vl.Offset)
-			if IsDynamicRole(vl.Var.Role) {
+			if vl.Var.Role.IsDynamic() {
 				off = 0 // off must be 0 for dynamic
 			}
+			buff := sy.Mem.Buffs[vl.BuffType()]
 			wd.PBufferInfo = []vk.DescriptorBufferInfo{{
 				Offset: off,
 				Range:  vk.DeviceSize(vl.MemSize),
-				Buffer: sy.Mem.BuffDev,
+				Buffer: buff.Dev,
 			}}
-			if IsDynamicRole(vl.Var.Role) {
+			if vl.Var.Role.IsDynamic() {
 				sy.Vars.DynOffs[vl.Var.DynOffIdx] = uint32(vl.Offset)
 			}
 		} else {

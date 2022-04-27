@@ -63,7 +63,7 @@ func main() {
 		ivl.Mod = true
 	}
 
-	sy.Mem.SyncAllToGPU()
+	sy.Mem.SyncToGPU()
 
 	sy.SetVals(0, "In", "Out")
 

@@ -48,6 +48,11 @@ func (vr *Var) String() string {
 	return s
 }
 
+// BuffType returns the memory buffer type for this variable, based on Var.Role
+func (vr *Var) BuffType() BuffTypes {
+	return vr.Role.BuffType()
+}
+
 //////////////////////////////////////////////////////////////////
 
 // SetDesc contains descriptor information for each set
@@ -331,6 +336,16 @@ const (
 
 var KiT_VarRoles = kit.Enums.AddEnum(VarRolesN, kit.NotBitFlag, nil)
 
+// IsDynamic returns true if role has dynamic offset binding
+func (vr VarRoles) IsDynamic() bool {
+	return vr == Uniform || vr == Storage
+}
+
+// BuffType returns type of memory buffer for this role
+func (vr VarRoles) BuffType() BuffTypes {
+	return RoleBuffers[vr]
+}
+
 var RoleDescriptors = map[VarRoles]vk.DescriptorType{
 	Uniform:       vk.DescriptorTypeUniformBufferDynamic,
 	Storage:       vk.DescriptorTypeStorageBufferDynamic,
@@ -342,7 +357,17 @@ var RoleDescriptors = map[VarRoles]vk.DescriptorType{
 	CombinedImage: vk.DescriptorTypeCombinedImageSampler,
 }
 
-// IsDynamicRole returns true if role has dynamic offset binding
-func IsDynamicRole(vr VarRoles) bool {
-	return vr == Uniform || vr == Storage
+// RoleBuffers maps VarRoles onto type of memory buffer
+var RoleBuffers = map[VarRoles]BuffTypes{
+	UndefVarRole:  StorageBuff,
+	Vertex:        VtxIdxBuff,
+	Index:         VtxIdxBuff,
+	Uniform:       UniformBuff,
+	Storage:       StorageBuff,
+	UniformTexel:  UniformBuff,
+	StorageTexel:  StorageBuff,
+	StorageImage:  StorageBuff,
+	SamplerVar:    ImageBuff,
+	SampledImage:  ImageBuff,
+	CombinedImage: ImageBuff,
 }

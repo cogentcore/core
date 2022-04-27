@@ -31,6 +31,11 @@ func (vl *Val) Init(name string, vr *Var, n int) {
 	vl.N = n
 }
 
+// BuffType returns the memory buffer type for this variable, based on Var.Role
+func (vl *Val) BuffType() BuffTypes {
+	return vl.Var.BuffType()
+}
+
 // AllocSize updates the memory allocation size -- called in Alloc
 // returns MemSize.
 func (vl *Val) AllocSize() int {
@@ -48,7 +53,7 @@ func (vl *Val) AllocSize() int {
 }
 
 // Alloc allocates this value at given offset in owning Memory buffer.
-// Computes the MemPtr for this item, and returns MemSize() of this
+// Computes the MemPtr for this item, and returns AllocSize() of this
 // value, so memory can increment to next item.
 // offsets are guaranteed to be properly aligned per minUniformBufferOffsetAlignment.
 func (vl *Val) Alloc(buffPtr unsafe.Pointer, offset int) int {
@@ -127,9 +132,8 @@ func (vl *Val) MemReg() MemReg {
 
 // Vals is a container of Val values
 type Vals struct {
-	Vals    []*Val          `desc:"values in order added"`
-	ValMap  map[string]*Val `desc:"map of all vals -- names must be unique"`
-	TotSize int             `desc:"total size across all Vals, including padding and alignment issues -- computed during Alloc"`
+	Vals   []*Val          `desc:"values in order added"`
+	ValMap map[string]*Val `desc:"map of all vals -- names must be unique"`
 }
 
 // AddVal adds given value
@@ -161,37 +165,43 @@ func (vs *Vals) ValByNameTry(name string) (*Val, error) {
 }
 
 // MemSize returns size across all Vals
-func (vs *Vals) MemSize() int {
+func (vs *Vals) MemSize(bt BuffTypes) int {
 	tsz := 0
 	for _, vl := range vs.Vals {
-		tsz += vl.AllocSize()
+		if vl.BuffType() == bt {
+			tsz += vl.AllocSize()
+		}
 	}
 	return tsz
 }
 
-// Alloc allocates values at given offset in owning Memory buffer.
+// Alloc allocates values at given offset in given Memory buffer.
 // Computes the MemPtr for each item, and returns TotSize
 // across all vals.  The effective offset increment (based on size) is
 // aligned at the given align byte level, which should be
 // MinUniformBufferOffsetAlignment from gpu.
-func (vs *Vals) Alloc(buffPtr unsafe.Pointer, offset, align int) int {
+func (vs *Vals) Alloc(buff *MemBuff, offset int) int {
 	tsz := 0
 	for _, vl := range vs.Vals {
-		sz := vl.Alloc(buffPtr, offset)
-		esz := MemSizeAlign(sz, align)
+		if vl.BuffType() != buff.Type {
+			continue
+		}
+		sz := vl.Alloc(buff.HostPtr, offset)
+		esz := MemSizeAlign(sz, buff.AlignBytes)
 		offset += esz
 		tsz += esz
 	}
-	vs.TotSize = tsz
 	return tsz
 }
 
 // Free resets the MemPtr for values
-func (vs *Vals) Free() {
+func (vs *Vals) Free(buff *MemBuff) {
 	for _, vl := range vs.Vals {
+		if vl.BuffType() != buff.Type {
+			continue
+		}
 		vl.Free()
 	}
-	vs.TotSize = 0
 }
 
 // ModRegs returns the regions of Vals that have been modified

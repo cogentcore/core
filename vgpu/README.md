@@ -13,7 +13,7 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 
 # TODO
 
-* Memory has separate buffs for: Uniforms, Vertex & Index, Storage, and Images -- each have diff constraints potentially and it makes more sense to have separate buffers for each.
+* Figure out when you need to call the Update* binding vs. just the dynamic binding - in principle for pure Uniform / Storage updates, don't need the Update guy.
 
 * all the Image and Surface stuff.
 
