@@ -68,25 +68,29 @@ func FindString(str string, strs []string) int {
 	return -1
 }
 
-// AddInstanceExt adds given extension, only if not already set
+// AddInstanceExt adds given extension(s), only if not already set
 // returns true if added.
-func (gp *GPU) AddInstanceExt(ext string) bool {
-	i := FindString(ext, gp.InstanceExts)
-	if i >= 0 {
-		return false
+func (gp *GPU) AddInstanceExt(ext ...string) bool {
+	for _, ex := range ext {
+		i := FindString(ex, gp.InstanceExts)
+		if i >= 0 {
+			continue
+		}
+		gp.InstanceExts = append(gp.InstanceExts, ex)
 	}
-	gp.InstanceExts = append(gp.InstanceExts, ext)
 	return true
 }
 
-// AddDeviceExt adds given extension, only if not already set
+// AddDeviceExt adds given extension(s), only if not already set
 // returns true if added.
-func (gp *GPU) AddDeviceExt(ext string) bool {
-	i := FindString(ext, gp.DeviceExts)
-	if i >= 0 {
-		return false
+func (gp *GPU) AddDeviceExt(ext ...string) bool {
+	for _, ex := range ext {
+		i := FindString(ex, gp.DeviceExts)
+		if i >= 0 {
+			continue
+		}
+		gp.DeviceExts = append(gp.DeviceExts, ex)
 	}
-	gp.DeviceExts = append(gp.DeviceExts, ext)
 	return true
 }
 

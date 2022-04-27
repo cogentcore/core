@@ -9,7 +9,9 @@ package vgpu
 
 import (
 	"errors"
+	"fmt"
 
+	"github.com/goki/ki/kit"
 	vk "github.com/vulkan-go/vulkan"
 )
 
@@ -127,8 +129,9 @@ func (sf *Surface) Defaults() {
 }
 
 // Init initializes the device for the surface
-func (sf *Surface) Init(gp *GPU) error {
+func (sf *Surface) Init(gp *GPU, vs vk.Surface) error {
 	sf.GPU = gp
+	sf.Surface = vs
 	// Get queue family properties
 	var queueCount uint32
 	vk.GetPhysicalDeviceQueueFamilyProperties(sf.GPU.GPU, &queueCount, nil)
@@ -199,6 +202,7 @@ func (sf *Surface) PrepareSwapchain() {
 	} else {
 		swapchainSize = surfaceCapabilities.CurrentExtent
 	}
+	fmt.Printf("swapchain size: %#v\n", swapchainSize)
 
 	// The FIFO present mode is guaranteed by the spec to be supported
 	// and to have no tearing.  It's a great default present mode to use.
@@ -243,7 +247,7 @@ func (sf *Surface) PrepareSwapchain() {
 	// Create a swapchain
 	var swapchain vk.Swapchain
 	oldSwapchain := sf.Swapchain
-	ret = vk.CreateSwapchain(sf.Device.Device, &vk.SwapchainCreateInfo{
+	swci := &vk.SwapchainCreateInfo{
 		SType:           vk.StructureTypeSwapchainCreateInfo,
 		Surface:         sf.Surface,
 		MinImageCount:   desiredSwapchainImages, // 1 - 3?
@@ -261,7 +265,9 @@ func (sf *Surface) PrepareSwapchain() {
 		PresentMode:      swapchainPresentMode,
 		OldSwapchain:     oldSwapchain,
 		Clipped:          vk.True,
-	}, nil, &swapchain)
+	}
+	fmt.Println(kit.StringJSON(swci))
+	ret = vk.CreateSwapchain(sf.Device.Device, swci, nil, &swapchain)
 	IfPanic(NewError(ret))
 	if oldSwapchain != vk.NullSwapchain {
 		vk.DestroySwapchain(sf.Device.Device, oldSwapchain, nil)
