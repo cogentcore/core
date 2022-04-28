@@ -43,18 +43,24 @@ type GPU struct {
 	Debug            bool
 }
 
-func (gp *GPU) Defaults() {
+// Defaults sets up default parameters, with the graphics flag
+// determining whether graphics-relevant items are added.
+func (gp *GPU) Defaults(graphics bool) {
 	gp.APIVersion = vk.Version(vk.MakeVersion(1, 1, 0))
 	gp.AppVersion = vk.Version(vk.MakeVersion(1, 0, 0))
 	gp.DeviceExts = []string{"VK_KHR_portability_subset"}
 	gp.InstanceExts = []string{"VK_KHR_get_physical_device_properties2"}
+	if graphics {
+		gp.DeviceExts = append(gp.DeviceExts, []string{"VK_KHR_surface", "VK_KHR_swapchain"}...)
+	}
 }
 
 // NewGPU returns a new GPU struct with Defaults set
+// with the graphics flag determining whether graphics-relevant items are added.
 // configure any additional defaults before calling Init
-func NewGPU() *GPU {
+func NewGPU(graphics bool) *GPU {
 	gp := &GPU{}
-	gp.Defaults()
+	gp.Defaults(graphics)
 	return gp
 }
 

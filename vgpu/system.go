@@ -29,6 +29,8 @@ type System struct {
 	Mem         Memory                `desc:"manages all the memory for all the Vals"`
 	Views       map[string]*ImageView `desc:"uniquely-named image views"`
 	Samplers    map[string]*Sampler   `desc:"uniquely-named image samplers -- referred to by name in Vars of type Sampler or CombinedImage"`
+	RenderPass  RenderPass            `desc:"renderpass with depth buffer for this system"`
+	Framebuffer Framebuffer           `desc:"shared framebuffer to render into, if not rendering into Surface"`
 }
 
 // Init initializes the System: creates logical device, which is
@@ -82,6 +84,13 @@ func (sy *System) AddNewPipeline(name string) *Pipeline {
 	pl.Init(sy)
 	sy.AddPipeline(pl)
 	return pl
+}
+
+// ConfigRenderPass configures the renderpass, including the image
+// format that we're rendering to (from the Surface or Framebuffer)
+// and the depth buffer format (FormatUnknown = no depth buffer)
+func (sy *System) SetRenderPass(imgFmt, depthFmt vk.Format) {
+	sy.RenderPass.Init(sy.Device.Device, imgFmt, depthFmt)
 }
 
 // Config configures the entire system, after everything has been

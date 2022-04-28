@@ -7,7 +7,6 @@ package vgpu
 import (
 	"fmt"
 	"log"
-	"unsafe"
 
 	vk "github.com/vulkan-go/vulkan"
 )
@@ -74,31 +73,7 @@ func (mm *Memory) Alloc() {
 func (mm *Memory) AllocBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
 	bsz := mm.Vals.MemSize(bt)
-	if bsz != buff.Size {
-		usage := BuffUsages[buff.Type]
-		hostUse := usage
-		devUse := usage
-		if bt.IsReadOnly() {
-			hostUse |= vk.BufferUsageTransferSrcBit
-			devUse |= vk.BufferUsageTransferDstBit
-		} else {
-			hostUse |= vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
-			devUse |= vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
-		}
-		buff.Host = mm.MakeBuffer(bsz, hostUse)
-		buff.Dev = mm.MakeBuffer(bsz, devUse)
-		buff.HostMem = mm.AllocMem(buff.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
-		buff.Size = bsz
-
-		var buffPtr unsafe.Pointer
-		ret := vk.MapMemory(mm.Device.Device, buff.HostMem, 0, vk.DeviceSize(buff.Size), 0, &buffPtr)
-		if IsError(ret) {
-			log.Printf("vulkan Memory:CopyBuffs warning: failed to map device memory for data (len=%d)", buff.Size)
-			return
-		}
-		buff.HostPtr = buffPtr
-		buff.AlignBytes = buff.Type.AlignBytes(mm.GPU)
-	}
+	buff.Alloc(mm.Device.Device, bsz)
 	mm.Vals.Alloc(buff, 0)
 }
 
@@ -115,53 +90,22 @@ func (mm *Memory) AllocDevBuff(bt BuffTypes) {
 	if buff.Size == 0 {
 		return
 	}
-	buff.DevMem = mm.AllocMem(buff.Dev, vk.MemoryPropertyDeviceLocalBit)
+	buff.AllocDev(mm.Device.Device)
 }
 
 // MakeBuffer makes a buffer of given size, usage
 func (mm *Memory) MakeBuffer(size int, usage vk.BufferUsageFlagBits) vk.Buffer {
-	var buffer vk.Buffer
-	ret := vk.CreateBuffer(mm.Device.Device, &vk.BufferCreateInfo{
-		SType: vk.StructureTypeBufferCreateInfo,
-		Usage: vk.BufferUsageFlags(usage),
-		Size:  vk.DeviceSize(size),
-	}, nil, &buffer)
-	IfPanic(NewError(ret))
-	return buffer
+	return MakeBuffer(mm.Device.Device, size, usage)
 }
 
 // AllocMem allocates memory for given buffer, with given properties
 func (mm *Memory) AllocMem(buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
-	// Ask device about its memory requirements.
-	var memReqs vk.MemoryRequirements
-	vk.GetBufferMemoryRequirements(mm.Device.Device, buffer, &memReqs)
-	memReqs.Deref()
-
-	memProps := mm.GPU.MemoryProps
-	memType, ok := FindRequiredMemoryType(memProps, vk.MemoryPropertyFlagBits(memReqs.MemoryTypeBits), props)
-	if !ok {
-		log.Println("vulkan warning: failed to find required memory type")
-	}
-
-	var memory vk.DeviceMemory
-	// Allocate device memory and bind to the buffer.
-	ret := vk.AllocateMemory(mm.Device.Device, &vk.MemoryAllocateInfo{
-		SType:           vk.StructureTypeMemoryAllocateInfo,
-		AllocationSize:  memReqs.Size,
-		MemoryTypeIndex: memType,
-	}, nil, &memory)
-	IfPanic(NewError(ret))
-	vk.BindBufferMemory(mm.Device.Device, buffer, memory, 0)
-	return memory
+	return AllocMem(mm.Device.Device, buffer, props)
 }
 
 // FreeBuffMem frees given device memory to nil
 func (mm *Memory) FreeBuffMem(memory *vk.DeviceMemory) {
-	if *memory == nil {
-		return
-	}
-	vk.FreeMemory(mm.Device.Device, *memory, nil)
-	*memory = nil
+	FreeBuffMem(mm.Device.Device, memory)
 }
 
 // Free frees memory for all buffers -- returns true if any freed
@@ -182,16 +126,8 @@ func (mm *Memory) FreeBuff(bt BuffTypes) bool {
 	if buff.Size == 0 {
 		return false
 	}
-	vk.UnmapMemory(mm.Device.Device, buff.HostMem)
 	mm.Vals.Free(buff)
-	mm.FreeBuffMem(&buff.DevMem)
-	vk.DestroyBuffer(mm.Device.Device, buff.Dev, nil)
-	mm.FreeBuffMem(&buff.HostMem)
-	vk.DestroyBuffer(mm.Device.Device, buff.Host, nil)
-	buff.Size = 0
-	buff.Host = nil
-	buff.Dev = nil
-	buff.Active = false
+	buff.Free(mm.Device.Device)
 	return true
 }
 
@@ -327,38 +263,4 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 	vk.CmdCopyBuffer(cmdBuff, buff.Dev, buff.Host, uint32(len(rg)), rg)
 
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
-}
-
-func FindRequiredMemoryType(props vk.PhysicalDeviceMemoryProperties,
-	deviceRequirements, hostRequirements vk.MemoryPropertyFlagBits) (uint32, bool) {
-
-	for i := uint32(0); i < vk.MaxMemoryTypes; i++ {
-		if deviceRequirements&(vk.MemoryPropertyFlagBits(1)<<i) != 0 {
-			props.MemoryTypes[i].Deref()
-			flags := props.MemoryTypes[i].PropertyFlags
-			if flags&vk.MemoryPropertyFlags(hostRequirements) != 0 {
-				return i, true
-			}
-		}
-	}
-	return 0, false
-}
-
-func FindRequiredMemoryTypeFallback(props vk.PhysicalDeviceMemoryProperties,
-	deviceRequirements, hostRequirements vk.MemoryPropertyFlagBits) (uint32, bool) {
-
-	for i := uint32(0); i < vk.MaxMemoryTypes; i++ {
-		if deviceRequirements&(vk.MemoryPropertyFlagBits(1)<<i) != 0 {
-			props.MemoryTypes[i].Deref()
-			flags := props.MemoryTypes[i].PropertyFlags
-			if flags&vk.MemoryPropertyFlags(hostRequirements) != 0 {
-				return i, true
-			}
-		}
-	}
-	// Fallback to the first one available.
-	if hostRequirements != 0 {
-		return FindRequiredMemoryType(props, deviceRequirements, 0)
-	}
-	return 0, false
 }

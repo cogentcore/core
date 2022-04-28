@@ -17,17 +17,17 @@ import (
 // Each has an associated set of Vars, which could be maintained collectively for
 // multiple different such piplines.
 type Pipeline struct {
-	Name      string             `desc:"unique name of this pipeline"`
-	Sys       *System            `desc:"system that we belong to"`
-	Device    Device             `desc:"device for this pipeline -- could be GPU or Compute"`
-	CmdPool   CmdPool            `desc:"cmd pool specific to this pipeline"`
-	Shaders   []*Shader          `desc:"shaders in order added -- should be execution order"`
-	ShaderMap map[string]*Shader `desc:"shaders loaded for this pipeline"`
+	Name       string             `desc:"unique name of this pipeline"`
+	Sys        *System            `desc:"system that we belong to"`
+	Device     Device             `desc:"device for this pipeline -- could be GPU or Compute"`
+	CmdPool    CmdPool            `desc:"cmd pool specific to this pipeline"`
+	Shaders    []*Shader          `desc:"shaders in order added -- should be execution order"`
+	ShaderMap  map[string]*Shader `desc:"shaders loaded for this pipeline"`
+	RenderPass RenderPass         `desc:"rendering info and depth buffer for this pipeline"`
 
-	VkConfig     vk.GraphicsPipelineCreateInfo `desc:"vulkan pipeline configuration options"`
-	VkPipeline   vk.Pipeline                   `desc:"the created vulkan pipeline"`
-	VkCache      vk.PipelineCache              `desc:"cache"`
-	VkRenderPass vk.RenderPass                 `desc:"render pass config"`
+	VkConfig   vk.GraphicsPipelineCreateInfo `desc:"vulkan pipeline configuration options"`
+	VkPipeline vk.Pipeline                   `desc:"the created vulkan pipeline"`
+	VkCache    vk.PipelineCache              `desc:"cache"`
 }
 
 // AddShader adds Shader with given name and type to the pipeline
@@ -84,9 +84,7 @@ func (pl *Pipeline) Destroy() {
 	pl.FreeShaders()
 
 	vk.DestroyPipelineCache(pl.Sys.Device.Device, pl.VkCache, nil)
-	if pl.VkRenderPass != nil {
-		vk.DestroyRenderPass(pl.Sys.Device.Device, pl.VkRenderPass, nil)
-	}
+	pl.RenderPass.Destroy()
 	vk.DestroyPipeline(pl.Sys.Device.Device, pl.VkPipeline, nil)
 	pl.CmdPool.Destroy(pl.Sys.Device.Device)
 }
@@ -110,6 +108,7 @@ func (pl *Pipeline) Config() {
 	pl.VkConfig.SType = vk.StructureTypeGraphicsPipelineCreateInfo
 	pl.VkConfig.PVertexInputState = pl.Sys.Vars.VkVertexConfig()
 	pl.VkConfig.Layout = pl.Sys.Vars.VkDescLayout
+	pl.VkConfig.RenderPass = pl.Sys.RenderPass.RenderPass
 
 	var pipelineCache vk.PipelineCache
 	ret := vk.CreatePipelineCache(pl.Sys.Device.Device, &vk.PipelineCacheCreateInfo{
@@ -157,7 +156,6 @@ func (pl *Pipeline) ConfigStages() {
 // SetGraphicsDefaults configures all the default settings for a
 // graphics rendering pipeline (not for a compute pipeline)
 func (pl *Pipeline) SetGraphicsDefaults() {
-	pl.SetRenderPass()
 	pl.SetDynamicState()
 	pl.SetTopology(TriangleList, false)
 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
@@ -165,60 +163,8 @@ func (pl *Pipeline) SetGraphicsDefaults() {
 	pl.SetMultisample(4)
 }
 
-// SetRenderPass todo: what is it, what are opts?
-func (pl *Pipeline) SetRenderPass() {
-	// The initial layout for the color and depth attachments will be vk.LayoutUndefined
-	// because at the start of the renderpass, we don't care about their contents.
-	// At the start of the subpass, the color attachment's layout will be transitioned
-	// to vk.LayoutColorAttachmentOptimal and the depth stencil attachment's layout
-	// will be transitioned to vk.LayoutDepthStencilAttachmentOptimal.  At the end of
-	// the renderpass, the color attachment's layout will be transitioned to
-	// vk.LayoutPresentSrc to be ready to present.  This is all done as part of
-	// the renderpass, no barriers are necessary.
-	var renderPass vk.RenderPass
-	ret := vk.CreateRenderPass(pl.Sys.Device.Device, &vk.RenderPassCreateInfo{
-		SType:           vk.StructureTypeRenderPassCreateInfo,
-		AttachmentCount: 2,
-		PAttachments: []vk.AttachmentDescription{{
-			// Format:         s.Context().SwapchainDimensions().Format, // todo!
-			Samples:        vk.SampleCount1Bit,
-			LoadOp:         vk.AttachmentLoadOpClear,
-			StoreOp:        vk.AttachmentStoreOpStore,
-			StencilLoadOp:  vk.AttachmentLoadOpDontCare,
-			StencilStoreOp: vk.AttachmentStoreOpDontCare,
-			InitialLayout:  vk.ImageLayoutUndefined,
-			FinalLayout:    vk.ImageLayoutPresentSrc,
-		}, {
-			// Format:         s.depth.format, // todo!
-			Samples:        vk.SampleCount1Bit,
-			LoadOp:         vk.AttachmentLoadOpClear,
-			StoreOp:        vk.AttachmentStoreOpDontCare,
-			StencilLoadOp:  vk.AttachmentLoadOpDontCare,
-			StencilStoreOp: vk.AttachmentStoreOpDontCare,
-			InitialLayout:  vk.ImageLayoutUndefined,
-			FinalLayout:    vk.ImageLayoutDepthStencilAttachmentOptimal,
-		}},
-		SubpassCount: 1,
-		PSubpasses: []vk.SubpassDescription{{
-			PipelineBindPoint:    vk.PipelineBindPointGraphics,
-			ColorAttachmentCount: 1,
-			PColorAttachments: []vk.AttachmentReference{{
-				Attachment: 0,
-				Layout:     vk.ImageLayoutColorAttachmentOptimal,
-			}},
-			PDepthStencilAttachment: &vk.AttachmentReference{
-				Attachment: 1,
-				Layout:     vk.ImageLayoutDepthStencilAttachmentOptimal,
-			},
-		}},
-	}, nil, &renderPass)
-	IfPanic(NewError(ret))
-	pl.VkRenderPass = renderPass
-	pl.VkConfig.RenderPass = pl.VkRenderPass
-}
-
 /* todo: this is needed for rendering to something
-func (s *SpinningCube) drawBuildCommandBuffer(res *as.SwapchainImageResources, cmd vk.CommandBuffer) {
+func (s *SpinningCube) drawBuildCommandBuffer(res *as.SwapchainSurfaceFrames, cmd vk.CommandBuffer) {
 	ret := vk.BeginCommandBuffer(cmd, &vk.CommandBufferBeginInfo{
 		SType: vk.StructureTypeCommandBufferBeginInfo,
 		Flags: vk.CommandBufferUsageFlags(vk.CommandBufferUsageSimultaneousUseBit),
@@ -515,7 +461,7 @@ func (pl *Pipeline) Run() {
 		},
 		CommandBufferCount: 1,
 		PCommandBuffers: []vk.CommandBuffer{
-			sf.ImageResources[idx].CmdBuff,
+			sf.SurfaceFrames[idx].CmdBuff,
 		},
 		SignalSemaphoreCount: 1,
 		PSignalSemaphores: []vk.Semaphore{

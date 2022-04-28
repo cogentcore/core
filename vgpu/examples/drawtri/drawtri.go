@@ -57,6 +57,7 @@ func main() {
 	vks := vk.SurfaceFromPointer(surfPtr)
 
 	sf := &vgpu.Surface{}
+	sf.Defaults()
 	sf.Init(gp, vks)
 
 	// some sync logic

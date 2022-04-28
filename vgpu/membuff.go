@@ -5,6 +5,7 @@
 package vgpu
 
 import (
+	"log"
 	"unsafe"
 
 	"github.com/goki/ki/kit"
@@ -24,6 +25,64 @@ type MemBuff struct {
 	AlignBytes int             `desc:"alignment of offsets into this buffer"`
 	Active     bool            `inactive:"+" desc:"true if memory has been allocated, copied, transfered"`
 }
+
+// Alloc allocates memory for this buffer of given size in bytes,
+// freeing any existing memory allocated first.
+// Host and Dev buffers are made, and host memory is allocated and mapped
+// for staging purposes.  Call AllocDev to allocate device memory.
+// Returns true if new memory was allocated.
+func (mb *MemBuff) Alloc(dev vk.Device, bsz int) bool {
+	if bsz == mb.Size {
+		return false
+	}
+	mb.Free(dev)
+	usage := BuffUsages[mb.Type]
+	hostUse := usage
+	devUse := usage
+	if mb.Type.IsReadOnly() {
+		hostUse |= vk.BufferUsageTransferSrcBit
+		devUse |= vk.BufferUsageTransferDstBit
+	} else {
+		hostUse |= vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
+		devUse |= vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
+	}
+	mb.Host = MakeBuffer(dev, bsz, hostUse)
+	mb.Dev = MakeBuffer(dev, bsz, devUse)
+	mb.HostMem = AllocMem(dev, mb.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
+	mb.Size = bsz
+
+	var buffPtr unsafe.Pointer
+	ret := vk.MapMemory(dev, mb.HostMem, 0, vk.DeviceSize(mb.Size), 0, &buffPtr)
+	if IsError(ret) {
+		log.Printf("vulkan Memory:CopyBuffs warning: failed to map device memory for data (len=%d)", mb.Size)
+		return false
+	}
+	mb.HostPtr = buffPtr
+	mb.AlignBytes = mb.Type.AlignBytes(TheGPU)
+	return true
+}
+
+// AllocDev allocates device local memory for this buffer.
+func (mb *MemBuff) AllocDev(dev vk.Device) {
+	mb.DevMem = AllocMem(dev, mb.Dev, vk.MemoryPropertyDeviceLocalBit)
+}
+
+// Free frees all memory for this buffer, including destroying
+// buffers which have size associated with them.
+func (mb *MemBuff) Free(dev vk.Device) {
+	if mb.Size == 0 {
+		return
+	}
+	vk.UnmapMemory(dev, mb.HostMem)
+	FreeBuffMem(dev, &mb.DevMem)
+	vk.DestroyBuffer(dev, mb.Dev, nil)
+	FreeBuffMem(dev, &mb.HostMem)
+	vk.DestroyBuffer(dev, mb.Host, nil)
+	mb.Size = 0
+	mb.Active = false
+}
+
+////////////////////////////////////////////////////////////////
 
 // BuffTypes are memory buffer types managed by the Memory object
 type BuffTypes int32
@@ -77,4 +136,96 @@ var BuffUsages = map[BuffTypes]vk.BufferUsageFlagBits{
 	UniformBuff: vk.BufferUsageUniformBufferBit | vk.BufferUsageUniformTexelBufferBit,
 	StorageBuff: vk.BufferUsageStorageBufferBit | vk.BufferUsageStorageTexelBufferBit,
 	ImageBuff:   0,
+}
+
+/////////////////////////////////////////////////////////////////////
+// Basic memory functions
+
+// MakeBuffer makes a buffer of given size, usage
+func MakeBuffer(dev vk.Device, size int, usage vk.BufferUsageFlagBits) vk.Buffer {
+	var buffer vk.Buffer
+	ret := vk.CreateBuffer(dev, &vk.BufferCreateInfo{
+		SType: vk.StructureTypeBufferCreateInfo,
+		Usage: vk.BufferUsageFlags(usage),
+		Size:  vk.DeviceSize(size),
+	}, nil, &buffer)
+	IfPanic(NewError(ret))
+	return buffer
+}
+
+// AllocMem allocates memory for given buffer, with given properties
+func AllocMem(dev vk.Device, buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
+	// Ask device about its memory requirements.
+	var memReqs vk.MemoryRequirements
+	vk.GetBufferMemoryRequirements(dev, buffer, &memReqs)
+	memReqs.Deref()
+
+	memProps := TheGPU.MemoryProps
+	memType, ok := FindRequiredMemoryType(memProps, vk.MemoryPropertyFlagBits(memReqs.MemoryTypeBits), props)
+	if !ok {
+		log.Println("vulkan warning: failed to find required memory type")
+	}
+
+	var memory vk.DeviceMemory
+	// Allocate device memory and bind to the buffer.
+	ret := vk.AllocateMemory(dev, &vk.MemoryAllocateInfo{
+		SType:           vk.StructureTypeMemoryAllocateInfo,
+		AllocationSize:  memReqs.Size,
+		MemoryTypeIndex: memType,
+	}, nil, &memory)
+	IfPanic(NewError(ret))
+	vk.BindBufferMemory(dev, buffer, memory, 0)
+	return memory
+}
+
+// FreeBuffMem frees given device memory to nil
+func FreeBuffMem(dev vk.Device, memory *vk.DeviceMemory) {
+	if *memory == nil {
+		return
+	}
+	vk.FreeMemory(dev, *memory, nil)
+	*memory = nil
+}
+
+// DestroyBuffer destroys given buffer and nils the pointer
+func DestroyBuffer(dev vk.Device, buff *vk.Buffer) {
+	if *buff == nil {
+		return
+	}
+	vk.DestroyBuffer(dev, *buff, nil)
+	*buff = nil
+}
+
+func FindRequiredMemoryType(props vk.PhysicalDeviceMemoryProperties,
+	deviceRequirements, hostRequirements vk.MemoryPropertyFlagBits) (uint32, bool) {
+
+	for i := uint32(0); i < vk.MaxMemoryTypes; i++ {
+		if deviceRequirements&(vk.MemoryPropertyFlagBits(1)<<i) != 0 {
+			props.MemoryTypes[i].Deref()
+			flags := props.MemoryTypes[i].PropertyFlags
+			if flags&vk.MemoryPropertyFlags(hostRequirements) != 0 {
+				return i, true
+			}
+		}
+	}
+	return 0, false
+}
+
+func FindRequiredMemoryTypeFallback(props vk.PhysicalDeviceMemoryProperties,
+	deviceRequirements, hostRequirements vk.MemoryPropertyFlagBits) (uint32, bool) {
+
+	for i := uint32(0); i < vk.MaxMemoryTypes; i++ {
+		if deviceRequirements&(vk.MemoryPropertyFlagBits(1)<<i) != 0 {
+			props.MemoryTypes[i].Deref()
+			flags := props.MemoryTypes[i].PropertyFlags
+			if flags&vk.MemoryPropertyFlags(hostRequirements) != 0 {
+				return i, true
+			}
+		}
+	}
+	// Fallback to the first one available.
+	if hostRequirements != 0 {
+		return FindRequiredMemoryType(props, deviceRequirements, 0)
+	}
+	return 0, false
 }
