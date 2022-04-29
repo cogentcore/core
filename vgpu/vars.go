@@ -35,7 +35,7 @@ func (vr *Var) Init(name string, typ Types, role VarRoles, set int, shaders ...S
 	vr.Name = name
 	vr.Type = typ
 	vr.Role = role
-	vr.SizeOf = TypeSizes[typ]
+	vr.SizeOf = typ.Bytes()
 	vr.Set = set
 	vr.Shaders = 0
 	for _, sh := range shaders {

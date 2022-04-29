@@ -42,9 +42,9 @@ func main() {
 	// note: for graphics, require these instance extensions before init gpu!
 	winext := window.GetRequiredInstanceExtensions()
 	fmt.Println(winext)
-	gp := vgpu.NewGPU()
+	gp := vgpu.NewGPU(true) // graphics
 	gp.AddInstanceExt(winext...)
-	gp.Init("drawtri", true)
+	gp.Init("drawtri", true) // debug
 	TheGPU = gp
 
 	// gp.PropsString(true) // print

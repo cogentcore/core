@@ -51,7 +51,7 @@ func (gp *GPU) Defaults(graphics bool) {
 	gp.DeviceExts = []string{"VK_KHR_portability_subset"}
 	gp.InstanceExts = []string{"VK_KHR_get_physical_device_properties2"}
 	if graphics {
-		gp.DeviceExts = append(gp.DeviceExts, []string{"VK_KHR_surface", "VK_KHR_swapchain"}...)
+		gp.DeviceExts = append(gp.DeviceExts, []string{"VK_KHR_swapchain"}...)
 	}
 }
 

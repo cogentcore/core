@@ -21,8 +21,10 @@ type Framebuffer struct {
 // and image.  Does not yet make the Framebuffer because it
 // still needs the RenderPass (see Init for all)
 func (fb *Framebuffer) InitImage(dev vk.Device, fmt ImageFormat, img vk.Image) {
+	fb.Image.Format.Defaults()
 	fb.Image.Format = fmt
-	fb.Image.SetImage(dev, img) // makes view
+	fb.Image.SetVkImage(dev, img) // makes view
+	fb.Image.SetFlag(int(FramebufferImage))
 }
 
 // Init initializes settings for given existing image format
@@ -40,14 +42,24 @@ func (fb *Framebuffer) InitRenderPass(rp *RenderPass) {
 	fb.Make()
 }
 
+// InitNewImage initializes a new image for a standalone framebuffer
+// not associated with an existing surface, to be used as a rendering target.
+// In general it is recommended to use vk.SampleCount4Bit to avoid aliasing.
+// Does not yet make the Framebuffer because it still needs the RenderPass
+// (see InitRenderPass)
+func (fb *Framebuffer) InitNewImage(dev vk.Device, fmt ImageFormat, size image.Point, samples vk.SampleCountFlagBits) {
+	fb.Image.Format.Defaults()
+	fb.Image.Format = fmt
+	fb.Image.Format.Size = size
+	fb.Image.Format.Samples = samples
+	fb.Image.SetFlag(int(FramebufferImage))
+	fb.Image.AllocImage()
+}
+
 // Destroy destroys everything
 func (fb *Framebuffer) Destroy() {
 	fb.DestroyFrame()
-	if fb.Image.Buff.Size > 0 { // we own the image
-		fb.Image.Destroy()
-	} else {
-		fb.Image.SetNil()
-	}
+	fb.Image.Destroy()
 	fb.RenderPass = nil
 }
 
@@ -64,7 +76,7 @@ func (fb *Framebuffer) DestroyFrame() {
 func (fb *Framebuffer) Make() {
 	fb.DestroyFrame()
 	ivs := []vk.ImageView{fb.Image.View}
-	if fb.RenderPass.Depth.HasView() {
+	if fb.RenderPass.Depth.IsActive() {
 		ivs = append(ivs, fb.RenderPass.Depth.View)
 	}
 	w, h := fb.Image.Format.Size32()
@@ -82,9 +94,15 @@ func (fb *Framebuffer) Make() {
 	fb.Framebuffer = frameBuff
 }
 
-// SetSize allocates an Image of given size, in its own buffer,
-// as the image for this framebuffer.  This should not be used
-// for Surface framebuffers which get their Image from the Swapchain.
+// SetSize re-allocates an backing framebuffer Image of given size.
+// This should be used for standalone framebuffers, not Surface framebuffers
+// that get their Image from the Swapchain.
+// If the RenderPass is set, then it re-sizes any corresponding Depth buffer
+// and re-makes the framebuffer.
 func (fb *Framebuffer) SetSize(size image.Point) {
 	fb.Image.SetSize(size)
+	if fb.RenderPass.Depth.IsActive() {
+		fb.RenderPass.Depth.SetSize(size)
+	}
+	fb.Make()
 }

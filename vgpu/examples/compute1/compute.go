@@ -32,8 +32,8 @@ func main() {
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
 	vk.Init()
 
-	gp := vgpu.NewGPU()
-	gp.Init("compute1", true)
+	gp := vgpu.NewGPU(false)  // compute only
+	gp.Init("compute1", true) // debug
 	TheGPU = gp
 
 	// gp.PropsString(true) // print
@@ -41,7 +41,6 @@ func main() {
 	sy := gp.NewSystem("compute1", true)
 	pl := sy.AddNewPipeline("compute1")
 	pl.AddShaderFile("sqvecel", vgpu.ComputeShader, "sqvecel.spv")
-	_ = pl
 
 	inv := sy.Vars.Add("In", vgpu.Float32Vec4, vgpu.Storage, 0, vgpu.ComputeShader)
 	outv := sy.Vars.Add("Out", vgpu.Float32Vec4, vgpu.Storage, 0, vgpu.ComputeShader)
@@ -49,7 +48,6 @@ func main() {
 	n := 20
 	ivl := sy.Mem.Vals.Add("In", inv, n)
 	ovl := sy.Mem.Vals.Add("Out", outv, n)
-	_ = ovl
 
 	sy.Config()
 	sy.Mem.Config()

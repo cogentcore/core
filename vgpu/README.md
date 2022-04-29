@@ -15,7 +15,8 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 
 * Figure out when you need to call the Update* binding vs. just the dynamic binding - in principle for pure Uniform / Storage updates, don't need the Update guy.
 
-* all the Image and Surface stuff.
+* transfer image from host -> dev
+* surface get image, do render in drawtri
 
 * Full Phong package -- shouldn't have to write that separately.
 

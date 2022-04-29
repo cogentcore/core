@@ -14,25 +14,6 @@ import (
 	vk "github.com/vulkan-go/vulkan"
 )
 
-// SurfaceFrame holds everything about a given frame (layer) in
-// the swapchain of images to present to the surface.
-type SurfaceFrame struct {
-	Idx         int         `desc:"index of our frame in the swapchain"`
-	Framebuffer Framebuffer `desc:"framebuffer actually used for rendering to this surface image"`
-}
-
-func (fr *SurfaceFrame) SetImage(dev vk.Device, ifmt ImageFormat, img vk.Image) {
-	fr.Framebuffer.InitImage(dev, ifmt, img)
-}
-
-func (fr *SurfaceFrame) SetRenderPass(rp *RenderPass) {
-	fr.Framebuffer.InitRenderPass(rp)
-}
-
-func (fr *SurfaceFrame) Destroy() {
-	fr.Framebuffer.Destroy()
-}
-
 /*
 func (s *SurfaceFrame) SetImageOwnership(graphicsQueueIndex, presentQueueIndex uint32) {
 	ret := vk.BeginCommandBuffer(s.GraphicsToPresentCmd, &vk.CommandBufferBeginInfo{
@@ -72,10 +53,10 @@ type Surface struct {
 	Device                   Device      `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
 	RenderPass               *RenderPass `desc:"the RenderPass for this Surface, typically from a System"`
 	CmdPool                  CmdPool
-	Format                   ImageFormat     `desc:"has the current swapchain image format and dimensions"`
-	NFrames                  int             `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
-	Frames                   []*SurfaceFrame `desc:"data for each visible image owned by the Surface -- we iterate through these in rendering subsequent frames"`
-	FrameIndex               int             `desc:"index for current frame"`
+	Format                   ImageFormat    `desc:"has the current swapchain image format and dimensions"`
+	NFrames                  int            `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
+	Frames                   []*Framebuffer `desc:"data for each visible image owned by the Surface -- we iterate through these in rendering subsequent frames"`
+	FrameIndex               int            `desc:"index for current frame"`
 	ImageAcquiredSemaphores  []vk.Semaphore
 	DrawCompleteSemaphores   []vk.Semaphore
 	ImageOwnershipSemaphores []vk.Semaphore
@@ -252,10 +233,10 @@ func (sf *Surface) InitSwapchain() {
 	for i := 0; i < len(sf.Frames); i++ {
 		sf.Frames[i].Destroy()
 	}
-	sf.Frames = make([]*SurfaceFrame, sf.NFrames)
+	sf.Frames = make([]*Framebuffer, sf.NFrames)
 	for i := 0; i < len(swapchainImages); i++ {
-		fr := &SurfaceFrame{Idx: i}
-		fr.SetImage(sf.Device.Device, sf.Format, swapchainImages[i])
+		fr := &Framebuffer{}
+		fr.InitImage(sf.Device.Device, sf.Format, swapchainImages[i])
 		sf.Frames[i] = fr
 	}
 }
@@ -291,7 +272,7 @@ func (sf *Surface) ReInitSwapchain() {
 func (sf *Surface) SetRenderPass(rp *RenderPass) {
 	sf.RenderPass = rp
 	for _, fr := range sf.Frames {
-		fr.SetRenderPass(rp)
+		fr.InitRenderPass(rp)
 	}
 }
 
@@ -299,7 +280,7 @@ func (sf *Surface) SetRenderPass(rp *RenderPass) {
 // using exiting settings.  Assumes InitSwapchain has been called.
 func (sf *Surface) ReInitFrames() {
 	for _, fr := range sf.Frames {
-		fr.SetRenderPass(sf.RenderPass)
+		fr.InitRenderPass(sf.RenderPass)
 	}
 }
 

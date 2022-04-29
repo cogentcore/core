@@ -48,23 +48,17 @@ func (mb *MemBuff) Alloc(dev vk.Device, bsz int) bool {
 	}
 	mb.Host = MakeBuffer(dev, bsz, hostUse)
 	mb.Dev = MakeBuffer(dev, bsz, devUse)
-	mb.HostMem = AllocMem(dev, mb.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
+	mb.HostMem = AllocBuffMem(dev, mb.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
 	mb.Size = bsz
 
-	var buffPtr unsafe.Pointer
-	ret := vk.MapMemory(dev, mb.HostMem, 0, vk.DeviceSize(mb.Size), 0, &buffPtr)
-	if IsError(ret) {
-		log.Printf("vulkan Memory:CopyBuffs warning: failed to map device memory for data (len=%d)", mb.Size)
-		return false
-	}
-	mb.HostPtr = buffPtr
+	mb.HostPtr = MapMemory(dev, mb.HostMem, mb.Size)
 	mb.AlignBytes = mb.Type.AlignBytes(TheGPU)
 	return true
 }
 
 // AllocDev allocates device local memory for this buffer.
 func (mb *MemBuff) AllocDev(dev vk.Device) {
-	mb.DevMem = AllocMem(dev, mb.Dev, vk.MemoryPropertyDeviceLocalBit)
+	mb.DevMem = AllocBuffMem(dev, mb.Dev, vk.MemoryPropertyDeviceLocalBit)
 }
 
 // Free frees all memory for this buffer, including destroying
@@ -79,6 +73,7 @@ func (mb *MemBuff) Free(dev vk.Device) {
 	FreeBuffMem(dev, &mb.HostMem)
 	vk.DestroyBuffer(dev, mb.Host, nil)
 	mb.Size = 0
+	mb.HostPtr = nil
 	mb.Active = false
 }
 
@@ -153,8 +148,8 @@ func MakeBuffer(dev vk.Device, size int, usage vk.BufferUsageFlagBits) vk.Buffer
 	return buffer
 }
 
-// AllocMem allocates memory for given buffer, with given properties
-func AllocMem(dev vk.Device, buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
+// AllocBuffMem allocates memory for given buffer, with given properties
+func AllocBuffMem(dev vk.Device, buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
 	// Ask device about its memory requirements.
 	var memReqs vk.MemoryRequirements
 	vk.GetBufferMemoryRequirements(dev, buffer, &memReqs)
@@ -176,6 +171,17 @@ func AllocMem(dev vk.Device, buffer vk.Buffer, props vk.MemoryPropertyFlagBits) 
 	IfPanic(NewError(ret))
 	vk.BindBufferMemory(dev, buffer, memory, 0)
 	return memory
+}
+
+// MapMemory maps the buffer memory, returning a pointer into start of buffer memory
+func MapMemory(dev vk.Device, mem vk.DeviceMemory, size int) unsafe.Pointer {
+	var buffPtr unsafe.Pointer
+	ret := vk.MapMemory(dev, mem, 0, vk.DeviceSize(size), 0, &buffPtr)
+	if IsError(ret) {
+		log.Printf("vulkan MapMemory warning: failed to map device memory for data (len=%d)", size)
+		return nil
+	}
+	return buffPtr
 }
 
 // FreeBuffMem frees given device memory to nil

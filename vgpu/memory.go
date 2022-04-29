@@ -28,7 +28,7 @@ type MemReg struct {
 }
 
 // Memory manages memory for the GPU, using separate buffers for
-// Images (Textures) vs. other values.
+// different roles, defined in the BuffTypes and managed by a MemBuff.
 type Memory struct {
 	GPU     *GPU
 	Device  Device               `desc:"logical device that this memory is managed for: a Surface or GPU itself"`
@@ -98,9 +98,9 @@ func (mm *Memory) MakeBuffer(size int, usage vk.BufferUsageFlagBits) vk.Buffer {
 	return MakeBuffer(mm.Device.Device, size, usage)
 }
 
-// AllocMem allocates memory for given buffer, with given properties
-func (mm *Memory) AllocMem(buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
-	return AllocMem(mm.Device.Device, buffer, props)
+// AllocBuffMem allocates memory for given buffer, with given properties
+func (mm *Memory) AllocBuffMem(buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
+	return AllocBuffMem(mm.Device.Device, buffer, props)
 }
 
 // FreeBuffMem frees given device memory to nil

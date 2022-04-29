@@ -50,6 +50,9 @@ const (
 
 	ImageRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
 
+	Depth32      // standard float32 depth buffer
+	Depth24Sten8 // standard 24 bit float with 8 bit stencil
+
 	Struct
 	TypesN
 )
@@ -58,61 +61,58 @@ const (
 
 var KiT_Types = kit.Enums.AddEnum(TypesN, kit.NotBitFlag, nil)
 
-// TypeSizes gives size of each type in bytes
-var TypeSizes = map[Types]int{
-	UndefType:   0,
-	Int32:       4,
-	Int32Vec2:   8,
-	Int32Vec4:   16,
-	Uint32:      4,
-	Uint32Vec2:  8,
-	Uint32Vec4:  16,
-	Float32:     4,
-	Float32Vec2: 8,
-	Float32Vec3: 12,
-	Float32Vec4: 16,
-	Float64:     8,
-	Float64Vec2: 16,
-	Float64Vec3: 24,
-	Float64Vec4: 32,
-	Float32Mat4: 64,
-	ImageRGBA32: 32,
-	Struct:      0,
-}
-
-var VulkanTypes = map[Types]vk.Format{
-	Bool32:      vk.FormatR32Uint,
-	Int32:       vk.FormatR32Sint,
-	Int32Vec2:   vk.FormatR32g32Sint,
-	Int32Vec4:   vk.FormatR32g32b32a32Sint,
-	Uint32:      vk.FormatR32Uint,
-	Uint32Vec2:  vk.FormatR32g32Uint,
-	Uint32Vec4:  vk.FormatR32g32b32a32Uint,
-	Float32:     vk.FormatR32Sfloat,
-	Float32Vec2: vk.FormatR32g32Sfloat,
-	Float32Vec3: vk.FormatR32g32b32Sfloat,
-	Float32Vec4: vk.FormatR32g32b32a32Sfloat,
-	Float64:     vk.FormatR64Sfloat,
-	Float64Vec2: vk.FormatR64g64Sfloat,
-	Float64Vec3: vk.FormatR64g64b64Sfloat,
-	Float64Vec4: vk.FormatR64g64b64a64Sfloat,
-	ImageRGBA32: vk.FormatR8g8b8a8Srgb,
-}
-
-// // GLSL type names
-// var TypeNames = map[Types]string{
-// 	UndefType: "none",
-// 	Bool:      "bool",
-// 	Int:       "int",
-// 	UInt:      "uint",
-// 	Float32:   "float",
-// 	Float64:   "double",
-// }
-
-// TypeBytes returns number of bytes for given type -- 4 except Float64 = 8
-func TypeBytes(tp Types) int {
-	if tp >= Float64 {
-		return 8
+// Bytes returns number of bytes for this type
+func (tp Types) Bytes() int {
+	if tp == Float32Mat4 {
+		return 64
 	}
-	return 4
+	if vf, has := VulkanTypes[tp]; has {
+		return FormatSizes[vf]
+	}
+	return 0
+}
+
+// FormatSizes gives size of known vulkan formats in bytes
+var FormatSizes = map[vk.Format]int{
+	vk.FormatUndefined:          0,
+	vk.FormatR32Sint:            4,
+	vk.FormatR32g32Sint:         8,
+	vk.FormatR32g32b32a32Sint:   16,
+	vk.FormatR32Uint:            4,
+	vk.FormatR32g32Uint:         8,
+	vk.FormatR32g32b32a32Uint:   16,
+	vk.FormatR32Sfloat:          4,
+	vk.FormatR32g32Sfloat:       8,
+	vk.FormatR32g32b32Sfloat:    12,
+	vk.FormatR32g32b32a32Sfloat: 16,
+	vk.FormatR64Sfloat:          8,
+	vk.FormatR64g64Sfloat:       16,
+	vk.FormatR64g64b64Sfloat:    24,
+	vk.FormatR64g64b64a64Sfloat: 32,
+	vk.FormatR8g8b8a8Srgb:       32,
+	vk.FormatD32Sfloat:          32,
+	vk.FormatD24UnormS8Uint:     32,
+}
+
+// VulkanTypes maps vgpu.Types to vulkan types
+var VulkanTypes = map[Types]vk.Format{
+	UndefType:    vk.FormatUndefined,
+	Bool32:       vk.FormatR32Uint,
+	Int32:        vk.FormatR32Sint,
+	Int32Vec2:    vk.FormatR32g32Sint,
+	Int32Vec4:    vk.FormatR32g32b32a32Sint,
+	Uint32:       vk.FormatR32Uint,
+	Uint32Vec2:   vk.FormatR32g32Uint,
+	Uint32Vec4:   vk.FormatR32g32b32a32Uint,
+	Float32:      vk.FormatR32Sfloat,
+	Float32Vec2:  vk.FormatR32g32Sfloat,
+	Float32Vec3:  vk.FormatR32g32b32Sfloat,
+	Float32Vec4:  vk.FormatR32g32b32a32Sfloat,
+	Float64:      vk.FormatR64Sfloat,
+	Float64Vec2:  vk.FormatR64g64Sfloat,
+	Float64Vec3:  vk.FormatR64g64b64Sfloat,
+	Float64Vec4:  vk.FormatR64g64b64a64Sfloat,
+	ImageRGBA32:  vk.FormatR8g8b8a8Srgb,
+	Depth32:      vk.FormatD32Sfloat,
+	Depth24Sten8: vk.FormatD24UnormS8Uint,
 }
