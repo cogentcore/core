@@ -18,8 +18,7 @@ import (
 // multiple different such piplines.
 type Pipeline struct {
 	Name       string             `desc:"unique name of this pipeline"`
-	Sys        *System            `desc:"system that we belong to"`
-	Device     Device             `desc:"device for this pipeline -- could be GPU or Compute"`
+	Sys        *System            `desc:"system that we belong to -- use for device, vars, etc"`
 	CmdPool    CmdPool            `desc:"cmd pool specific to this pipeline"`
 	Shaders    []*Shader          `desc:"shaders in order added -- should be execution order"`
 	ShaderMap  map[string]*Shader `desc:"shaders loaded for this pipeline"`
@@ -105,6 +104,11 @@ func (pl *Pipeline) InitPipeline() {
 // The parent System has already done what it can for its config
 func (pl *Pipeline) Config() {
 	pl.ConfigStages()
+	if pl.Sys.Compute {
+		pl.ConfigCompute()
+		return
+	}
+
 	pl.VkConfig.SType = vk.StructureTypeGraphicsPipelineCreateInfo
 	pl.VkConfig.PVertexInputState = pl.Sys.Vars.VkVertexConfig()
 	pl.VkConfig.Layout = pl.Sys.Vars.VkDescLayout
@@ -127,23 +131,37 @@ func (pl *Pipeline) Config() {
 	pl.VkCache = pipelineCache
 
 	pipeline := make([]vk.Pipeline, 1)
-	if pl.Sys.Compute {
-		cfg := vk.ComputePipelineCreateInfo{
-			SType:  vk.StructureTypeComputePipelineCreateInfo,
-			Layout: pl.Sys.Vars.VkDescLayout,
-			Stage:  pl.VkConfig.PStages[0], // note: only one allowed
-		}
-		ret = vk.CreateComputePipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.ComputePipelineCreateInfo{cfg}, nil, pipeline)
-	} else {
-		ret = vk.CreateGraphicsPipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.GraphicsPipelineCreateInfo{pl.VkConfig}, nil, pipeline)
+	ret = vk.CreateGraphicsPipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.GraphicsPipelineCreateInfo{pl.VkConfig}, nil, pipeline)
 
-	}
 	IfPanic(NewError(ret))
 	pl.VkPipeline = pipeline[0]
 
 	pl.FreeShaders() // not needed once built
 }
 
+// ConfigCompute does the configuration for a Compute pipeline
+func (pl *Pipeline) ConfigCompute() {
+	var pipelineCache vk.PipelineCache
+	ret := vk.CreatePipelineCache(pl.Sys.Device.Device, &vk.PipelineCacheCreateInfo{
+		SType: vk.StructureTypePipelineCacheCreateInfo,
+	}, nil, &pipelineCache)
+	IfPanic(NewError(ret))
+	pl.VkCache = pipelineCache
+
+	pipeline := make([]vk.Pipeline, 1)
+	cfg := vk.ComputePipelineCreateInfo{
+		SType:  vk.StructureTypeComputePipelineCreateInfo,
+		Layout: pl.Sys.Vars.VkDescLayout,
+		Stage:  pl.VkConfig.PStages[0], // note: only one allowed
+	}
+	ret = vk.CreateComputePipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.ComputePipelineCreateInfo{cfg}, nil, pipeline)
+	IfPanic(NewError(ret))
+	pl.VkPipeline = pipeline[0]
+
+	pl.FreeShaders() // not needed once built
+}
+
+// ConfigStages configures the shader stages
 func (pl *Pipeline) ConfigStages() {
 	ns := len(pl.Shaders)
 	pl.VkConfig.StageCount = uint32(ns)
@@ -329,13 +347,16 @@ func (pl *Pipeline) SetColorBlend(alphaBlend bool) {
 	}
 }
 
-func (pl *Pipeline) RunGraphics(fr *Framebuffer, queueIndex uint32) {
+// GraphicsCommand returns the command  buffer for rendering on this pipeline,
+// to given framebuffer.
+// The returned command is just pl.CmdPool.Buff
+func (pl *Pipeline) GraphicsCommand(fr *Framebuffer) vk.CommandBuffer {
 	cmd := pl.CmdPool.BeginCmdOneTime()
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
 	clearValues := make([]vk.ClearValue, 2)
 	clearValues[1].SetDepthStencil(1, 0)
 	clearValues[0].SetColor([]float32{
-		0.2, 0.2, 0.2, 0.2,
+		0.2, 0.2, 1.0, 0.2,
 	})
 
 	w, h := fr.Image.Format.Size32()
@@ -354,10 +375,8 @@ func (pl *Pipeline) RunGraphics(fr *Framebuffer, queueIndex uint32) {
 
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
 
-	if len(pl.Sys.Vars.Vars) > 0 {
-		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,
-			0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
-	}
+	vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,
+		0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
 
 	vk.CmdSetViewport(cmd, 0, 1, []vk.Viewport{{
 		Width:    float32(w),
@@ -377,53 +396,9 @@ func (pl *Pipeline) RunGraphics(fr *Framebuffer, queueIndex uint32) {
 	// vk.ImageLayoutColorAttachmentOptimal to vk.ImageLayoutPresentSrc
 	vk.CmdEndRenderPass(cmd)
 
-	/*
-		// Separate Present Queue Case
-		//
-		// We have to transfer ownership from the graphics queue family to the
-		// present queue family to be able to present.  Note that we don't have
-		// to transfer from present queue family back to graphics queue family at
-		// the start of the next frame because we don't care about the image's
-		// contents at that point.
-		vk.CmdPipelineBarrier(cmd,
-			vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
-			vk.PipelineStageFlags(vk.PipelineStageBottomOfPipeBit),
-			0, 0, nil, 0, nil, 1, []vk.ImageMemoryBarrier{{
-				SType:               vk.StructureTypeImageMemoryBarrier,
-				SrcAccessMask:       0,
-				DstAccessMask:       vk.AccessFlags(vk.AccessColorAttachmentWriteBit),
-				OldLayout:           vk.ImageLayoutPresentSrc,
-				NewLayout:           vk.ImageLayoutPresentSrc,
-				SrcQueueFamilyIndex: pl.Sys.Device.QueueIndex,
-				DstQueueFamilyIndex: uint32(queueIndex),
-				SubresourceRange: vk.ImageSubresourceRange{
-					AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
-					LayerCount: 1,
-					LevelCount: 1,
-				},
-				Image: fr.Image.Image,
-			}})
-	*/
 	ret := vk.EndCommandBuffer(cmd)
 	IfPanic(NewError(ret))
-
-	var fence vk.Fence
-	ret = vk.CreateFence(pl.Sys.Device.Device, &vk.FenceCreateInfo{
-		SType: vk.StructureTypeFenceCreateInfo,
-	}, nil, &fence)
-	IfPanic(NewError(ret))
-
-	cmdBufs := []vk.CommandBuffer{cmd}
-	ret = vk.QueueSubmit(pl.Sys.Device.Queue, 1, []vk.SubmitInfo{{
-		SType:              vk.StructureTypeSubmitInfo,
-		CommandBufferCount: 1,
-		PCommandBuffers:    cmdBufs,
-	}}, fence)
-	IfPanic(NewError(ret))
-
-	ret = vk.WaitForFences(pl.Sys.Device.Device, 1, []vk.Fence{fence}, vk.True, vk.MaxUint64)
-	IfPanic(NewError(ret))
-	vk.DestroyFence(pl.Sys.Device.Device, fence, nil)
+	return cmd
 }
 
 // RunCompute runs the compute shader for given of computational elements
@@ -439,29 +414,3 @@ func (pl *Pipeline) RunCompute(nx, ny, nz int) {
 	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
 	pl.CmdPool.SubmitWait(&pl.Sys.Device)
 }
-
-/*
-func (pl *Pipeline) Run() {
-	graphicsQueue := sf.GPU.GraphicsQueue
-	var nullFence vk.Fence
-	ret = vk.QueueSubmit(graphicsQueue, 1, []vk.SubmitInfo{{
-		SType: vk.StructureTypeSubmitInfo,
-		PWaitDstStageMask: []vk.SurfaceStageFlags{
-			vk.SurfaceStageFlags(vk.SurfaceStageColorAttachmentOutputBit),
-		},
-		WaitSemaphoreCount: 1,
-		PWaitSemaphores: []vk.Semaphore{
-			sf.ImageAcquiredSemaphores[sf.FrameIndex],
-		},
-		CommandBufferCount: 1,
-		PCommandBuffers: []vk.CommandBuffer{
-			sf.SurfaceFrames[idx].CmdBuff,
-		},
-		SignalSemaphoreCount: 1,
-		PSignalSemaphores: []vk.Semaphore{
-			sf.DrawCompleteSemaphores[sf.FrameIndex],
-		},
-	}}, nullFence)
-	IfPanic(NewError(ret))
-}
-*/

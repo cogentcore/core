@@ -38,7 +38,7 @@ func main() {
 
 	// gp.PropsString(true) // print
 
-	sy := gp.NewSystem("compute1", true)
+	sy := gp.NewComputeSystem("compute1")
 	pl := sy.AddNewPipeline("compute1")
 	pl.AddShaderFile("sqvecel", vgpu.ComputeShader, "sqvecel.spv")
 

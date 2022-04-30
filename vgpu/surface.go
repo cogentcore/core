@@ -9,16 +9,15 @@ package vgpu
 
 import (
 	"errors"
+	"fmt"
 
 	vk "github.com/vulkan-go/vulkan"
 )
 
-// FrameState holds misc state data about each frame
+// FrameState holds all the relevant state for each frame in swapchain
 type FrameState struct {
-	Image          Framebuffer      `desc:"Image for this frame (as a Framebuffer)"`
-	CmdBuff        vk.CommandBuffer `desc:"command buffer for sync commands on this frame"`
-	ImageAcquired  vk.Semaphore     `desc:"semaphore used internally for waiting on acquisition of next frame"`
-	ImageOwnership vk.Semaphore     `desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
+	FrameBuff Framebuffer      `desc:"Framebuffer for this frame"`
+	CmdBuff   vk.CommandBuffer `desc:"command buffer for sync commands on this frame"`
 }
 
 /*
@@ -56,16 +55,18 @@ func (s *SurfaceFrame) SetImageOwnership(graphicsQueueIndex, presentQueueIndex u
 // Surface manages the physical device for the visible image
 // of a window surface, and the swapchain for presenting images.
 type Surface struct {
-	GPU        *GPU          `desc:"pointer to gpu device, for convenience"`
-	Device     Device        `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
-	RenderPass *RenderPass   `desc:"the RenderPass for this Surface, typically from a System"`
-	CmdPool    CmdPool       `desc:"command pool for surface commands -- sync waiting"`
-	Format     ImageFormat   `desc:"has the current swapchain image format and dimensions"`
-	NFrames    int           `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
-	Frames     []*FrameState `desc:"state associated with each rendering Frame, including Image representing  the visible image owned by the Surface -- we iterate through these in rendering subsequent frames"`
-	FrameIndex int           `desc:"index for next frame to be allocated"`
-	Surface    vk.Surface    `desc:"vulkan handle for surface"`
-	Swapchain  vk.Swapchain  `desc:"vulkan handle for swapchain"`
+	GPU            *GPU          `desc:"pointer to gpu device, for convenience"`
+	Device         Device        `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
+	RenderPass     *RenderPass   `desc:"the RenderPass for this Surface, typically from a System"`
+	CmdPool        CmdPool       `desc:"command pool for surface commands -- sync waiting"`
+	Format         ImageFormat   `desc:"has the current swapchain image format and dimensions"`
+	NFrames        int           `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
+	Frames         []*FrameState `desc:"state associated with each rendering Frame, including Image representing  the visible image owned by the Surface -- we iterate through these in rendering subsequent frames"`
+	FrameIndex     int           `desc:"index for next frame to be allocated"`
+	Surface        vk.Surface    `view:"-" desc:"vulkan handle for surface"`
+	Swapchain      vk.Swapchain  `view:"-" desc:"vulkan handle for swapchain"`
+	ImageAcquired  vk.Semaphore  `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
+	ImageOwnership vk.Semaphore  `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
 }
 
 func (sf *Surface) Defaults() {
@@ -240,14 +241,18 @@ func (sf *Surface) InitSwapchain() {
 	semaphoreCreateInfo := &vk.SemaphoreCreateInfo{
 		SType: vk.StructureTypeSemaphoreCreateInfo,
 	}
+	var sem vk.Semaphore
+	ret = vk.CreateSemaphore(sf.Device.Device, semaphoreCreateInfo, nil, &sem)
+	IfPanic(NewError(ret))
+	sf.ImageAcquired = sem
+	ret = vk.CreateSemaphore(sf.Device.Device, semaphoreCreateInfo, nil, &sem)
+	IfPanic(NewError(ret))
+	sf.ImageOwnership = sem
+
 	sf.Frames = make([]*FrameState, sf.NFrames)
 	for i := 0; i < sf.NFrames; i++ {
 		fs := &FrameState{}
-		fs.Image.InitImage(sf.Device.Device, sf.Format, swapchainImages[i])
-		ret := vk.CreateSemaphore(sf.Device.Device, semaphoreCreateInfo, nil, &fs.ImageAcquired)
-		IfPanic(NewError(ret))
-		ret = vk.CreateSemaphore(sf.Device.Device, semaphoreCreateInfo, nil, &fs.ImageOwnership)
-		IfPanic(NewError(ret))
+		fs.FrameBuff.InitImage(sf.Device.Device, sf.Format, swapchainImages[i])
 		fs.CmdBuff = sf.CmdPool.MakeBuff(&sf.Device)
 		sf.CmdPool.Buff = nil // only ours
 		sf.Frames[i] = fs
@@ -258,11 +263,11 @@ func (sf *Surface) InitSwapchain() {
 func (sf *Surface) FreeSwapchain() {
 	sf.FrameIndex = 0
 	vk.DeviceWaitIdle(sf.Device.Device)
+	vk.DestroySemaphore(sf.Device.Device, sf.ImageAcquired, nil)
+	// vk.DestroySemaphore(sf.Device.Device, sf.DrawCompleteSemaphores[i], nil)
+	vk.DestroySemaphore(sf.Device.Device, sf.ImageOwnership, nil)
 	for _, fs := range sf.Frames {
-		vk.DestroySemaphore(sf.Device.Device, fs.ImageAcquired, nil)
-		// vk.DestroySemaphore(sf.Device.Device, sf.DrawCompleteSemaphores[i], nil)
-		vk.DestroySemaphore(sf.Device.Device, fs.ImageOwnership, nil)
-		fs.Image.Destroy()
+		fs.FrameBuff.Destroy()
 	}
 	sf.Frames = nil
 	if sf.Swapchain != vk.NullSwapchain {
@@ -284,7 +289,7 @@ func (sf *Surface) ReInitSwapchain() {
 func (sf *Surface) SetRenderPass(rp *RenderPass) {
 	sf.RenderPass = rp
 	for _, fs := range sf.Frames {
-		fs.Image.InitRenderPass(rp)
+		fs.FrameBuff.InitRenderPass(rp)
 	}
 }
 
@@ -292,7 +297,7 @@ func (sf *Surface) SetRenderPass(rp *RenderPass) {
 // using exiting settings.  Assumes InitSwapchain has been called.
 func (sf *Surface) ReInitFrames() {
 	for _, fs := range sf.Frames {
-		fs.Image.InitRenderPass(sf.RenderPass)
+		fs.FrameBuff.InitRenderPass(sf.RenderPass)
 	}
 }
 
@@ -338,65 +343,62 @@ func (sf *Surface) FlushInitCmd() {
 	*/
 }
 
-// AcquireNextImage gets the next image index to render to
-func (sf *Surface) AcquireNextImage() (imageIndex int, outdated bool, err error) {
+// AcquireNextImage gets the next frame index to render to.
+// It automatically handles any issues with out-of-date swapchain.
+func (sf *Surface) AcquireNextImage() uint32 {
 	// Get the index of the next available swapchain image
 	var idx uint32
-	fs := sf.Frames[sf.FrameIndex]
-	ret := vk.AcquireNextImage(sf.Device.Device, sf.Swapchain, vk.MaxUint64, fs.ImageAcquired, vk.NullFence, &idx)
-	imageIndex = int(idx)
+	ret := vk.AcquireNextImage(sf.Device.Device, sf.Swapchain, vk.MaxUint64, sf.ImageAcquired, vk.NullFence, &idx)
 	switch ret {
 	case vk.ErrorOutOfDate:
 		sf.ReInitSwapchain()
-		outdated = true
-		return
+		return sf.AcquireNextImage() // try again
 	case vk.Suboptimal, vk.Success:
 	default:
 		IfPanic(NewError(ret))
 	}
-	/*
-		var nullFence vk.Fence
-		ret = vk.QueueSubmit(sf.Device.Queue, 1, []vk.SubmitInfo{{
-			SType: vk.StructureTypeSubmitInfo,
-			PWaitDstStageMask: []vk.PipelineStageFlags{
-				vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
-			},
-			WaitSemaphoreCount:   1,
-			PWaitSemaphores:      []vk.Semaphore{fs.ImageAcquired},
-			CommandBufferCount:   1,
-			PCommandBuffers:      []vk.CommandBuffer{fs.CmdBuff},
-			SignalSemaphoreCount: 1,
-			PSignalSemaphores:    []vk.Semaphore{fs.ImageOwnership},
-		}}, nullFence)
-		IfPanic(NewError(ret))
-	*/
-	return
+	return idx
 }
 
-func (sf *Surface) PresentImage(imageIdx int) (outdated bool, err error) {
-	// If we are using separate queues we have to wait for image ownership,
-	// otherwise wait for draw complete.
-	semaphore := sf.Frames[sf.FrameIndex].ImageOwnership
+// SubmitRender submits the rendering command with proper waiting for the
+// image to be acquired before the command is run.
+func (sf *Surface) SubmitRender(cmd vk.CommandBuffer) {
 
+	var nullFence vk.Fence
+	ret := vk.QueueSubmit(sf.Device.Queue, 1, []vk.SubmitInfo{{
+		SType: vk.StructureTypeSubmitInfo,
+		PWaitDstStageMask: []vk.PipelineStageFlags{
+			vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
+		},
+		WaitSemaphoreCount:   1,
+		PWaitSemaphores:      []vk.Semaphore{sf.ImageAcquired},
+		CommandBufferCount:   1,
+		PCommandBuffers:      []vk.CommandBuffer{cmd},
+		SignalSemaphoreCount: 1,
+		PSignalSemaphores:    []vk.Semaphore{sf.ImageOwnership},
+	}}, nullFence)
+	IfPanic(NewError(ret))
+}
+
+func (sf *Surface) PresentImage(frameIdx uint32) error {
 	ret := vk.QueuePresent(sf.Device.Queue, &vk.PresentInfo{
 		SType:              vk.StructureTypePresentInfo,
 		WaitSemaphoreCount: 1,
-		PWaitSemaphores:    []vk.Semaphore{semaphore},
+		PWaitSemaphores:    []vk.Semaphore{sf.ImageOwnership},
 		SwapchainCount:     1,
 		PSwapchains:        []vk.Swapchain{sf.Swapchain},
-		PImageIndices:      []uint32{uint32(imageIdx)},
+		PImageIndices:      []uint32{frameIdx},
 	})
 	sf.FrameIndex++
 	sf.FrameIndex = sf.FrameIndex % sf.NFrames
 
 	switch ret {
 	case vk.ErrorOutOfDate:
-		outdated = true
-		return
+		sf.ReInitSwapchain()
+		return fmt.Errorf("vgpu.Surface:PresentImage: swapchain was out of date, reinitialized -- not rendered")
 	case vk.Suboptimal, vk.Success:
-		return
+		return nil
 	default:
-		err = NewError(ret)
-		return
+		return NewError(ret)
 	}
 }

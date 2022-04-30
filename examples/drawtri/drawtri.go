@@ -76,14 +76,9 @@ func main() {
 	sy.Config()
 	sy.Mem.Config()
 
-	idx, outdated, err := sf.AcquireNextImage()
-	fr := sf.Frames[idx]
-	if outdated {
-		fmt.Printf("outdated!\n")
-	}
-
-	pl.RunGraphics(&fr.Image, sf.Device.QueueIndex)
-
+	idx := sf.AcquireNextImage()
+	cmd := pl.GraphicsCommand(&sf.Frames[idx].FrameBuff)
+	sf.SubmitRender(cmd)
 	sf.PresentImage(idx)
 
 	// some sync logic
