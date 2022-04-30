@@ -41,7 +41,6 @@ func main() {
 
 	// note: for graphics, require these instance extensions before init gpu!
 	winext := window.GetRequiredInstanceExtensions()
-	fmt.Println(winext)
 	gp := vgpu.NewGPU(true) // graphics
 	gp.AddInstanceExt(winext...)
 	gp.Init("drawtri", true) // debug
@@ -59,6 +58,33 @@ func main() {
 	sf := &vgpu.Surface{}
 	sf.Defaults()
 	sf.Init(gp, vks)
+
+	fmt.Printf("format: %#v\n", sf.Format)
+
+	sy := gp.NewGraphicsSystem("drawtri", &sf.Device)
+	pl := sy.AddNewPipeline("drawtri")
+	sy.SetRenderPass(&sf.Format, vk.FormatUndefined)
+	sf.SetRenderPass(&sy.RenderPass)
+	pl.SetGraphicsDefaults()
+
+	pl.AddShaderFile("trianglelit", vgpu.VertexShader, "trianglelit.spv")
+	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
+
+	inv := sy.Vars.Add("Vtx", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.VertexShader)
+	_ = inv
+
+	sy.Config()
+	sy.Mem.Config()
+
+	idx, outdated, err := sf.AcquireNextImage()
+	fr := sf.Frames[idx]
+	if outdated {
+		fmt.Printf("outdated!\n")
+	}
+
+	pl.RunGraphics(&fr.Image, sf.Device.QueueIndex)
+
+	sf.PresentImage(idx)
 
 	// some sync logic
 	doneC := make(chan struct{}, 2)

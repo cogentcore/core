@@ -14,13 +14,14 @@ import (
 )
 
 // RenderPass contains a vulkan RenderPass object,
-// which specifies parameters for rendering to an image.
+// which specifies parameters for rendering to a Framebuffer.
 // It can hold the Depth buffer if one is used.
 // In general, there should be one RenderPass object for
 // each Pipeline, and any associated Framebuffers
 // include the RenderPass info. and its Depth buffer.
 type RenderPass struct {
-	Dev        vk.Device     `desc:"the device we're associated with"`
+	Dev        vk.Device     `desc:"the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface"`
+	Format     ImageFormat   `desc:"image format information for the framebuffer we render to"`
 	RenderPass vk.RenderPass `desc:"the vulkan renderpass handle"`
 	Depth      Image         `desc:"the associated depth buffer, if set"`
 }
@@ -38,7 +39,7 @@ func (rp *RenderPass) Destroy() {
 // Using standard parameters for graphics rendering,
 // based on the given image format and depth image format
 // (pass FormatUnknown for no depth buffer).
-func (rp *RenderPass) Init(dev vk.Device, imgFmt, depthFmt vk.Format) {
+func (rp *RenderPass) Init(dev vk.Device, imgFmt *ImageFormat, depthFmt vk.Format) {
 	// The initial layout for the color and depth attachments will be vk.LayoutUndefined
 	// because at the start of the renderpass, we don't care about their contents.
 	// At the start of the subpass, the color attachment's layout will be transitioned
@@ -48,6 +49,7 @@ func (rp *RenderPass) Init(dev vk.Device, imgFmt, depthFmt vk.Format) {
 	// vk.LayoutPresentSrc to be ready to present.  This is all done as part of
 	// the renderpass, no barriers are necessary.
 	rp.Dev = dev
+	rp.Format = *imgFmt
 	rp.Depth.Format.Format = depthFmt
 	var renderPass vk.RenderPass
 	if rp.Depth.Format.Format != vk.FormatUndefined {
@@ -55,8 +57,8 @@ func (rp *RenderPass) Init(dev vk.Device, imgFmt, depthFmt vk.Format) {
 			SType:           vk.StructureTypeRenderPassCreateInfo,
 			AttachmentCount: 2,
 			PAttachments: []vk.AttachmentDescription{{
-				Format:         imgFmt,
-				Samples:        vk.SampleCount1Bit,
+				Format:         rp.Format.Format,
+				Samples:        rp.Format.Samples,
 				LoadOp:         vk.AttachmentLoadOpClear,
 				StoreOp:        vk.AttachmentStoreOpStore,
 				StencilLoadOp:  vk.AttachmentLoadOpDontCare,
@@ -65,7 +67,7 @@ func (rp *RenderPass) Init(dev vk.Device, imgFmt, depthFmt vk.Format) {
 				FinalLayout:    vk.ImageLayoutPresentSrc,
 			}, {
 				Format:         rp.Depth.Format.Format,
-				Samples:        vk.SampleCount1Bit,
+				Samples:        rp.Format.Samples,
 				LoadOp:         vk.AttachmentLoadOpClear,
 				StoreOp:        vk.AttachmentStoreOpDontCare,
 				StencilLoadOp:  vk.AttachmentLoadOpDontCare,
@@ -93,8 +95,8 @@ func (rp *RenderPass) Init(dev vk.Device, imgFmt, depthFmt vk.Format) {
 			SType:           vk.StructureTypeRenderPassCreateInfo,
 			AttachmentCount: 1,
 			PAttachments: []vk.AttachmentDescription{{
-				// Format:         s.Context().SwapchainDimensions().Format, // todo!
-				Samples:        vk.SampleCount1Bit,
+				Format:         rp.Format.Format,
+				Samples:        rp.Format.Samples,
 				LoadOp:         vk.AttachmentLoadOpClear,
 				StoreOp:        vk.AttachmentStoreOpStore,
 				StencilLoadOp:  vk.AttachmentLoadOpDontCare,
@@ -110,10 +112,6 @@ func (rp *RenderPass) Init(dev vk.Device, imgFmt, depthFmt vk.Format) {
 					Attachment: 0,
 					Layout:     vk.ImageLayoutColorAttachmentOptimal,
 				}},
-				PDepthStencilAttachment: &vk.AttachmentReference{
-					Attachment: 1,
-					Layout:     vk.ImageLayoutDepthStencilAttachmentOptimal,
-				},
 			}},
 		}, nil, &renderPass)
 		IfPanic(NewError(ret))

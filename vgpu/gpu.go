@@ -224,11 +224,19 @@ func (gp *GPU) Destroy() {
 	}
 }
 
-// NewSystem returns a new system initialized for this GPU
-// compute = make a compute device instead of a Graphics device.
-func (gp *GPU) NewSystem(name string, compute bool) *System {
+// NewComputeSystem returns a new system initialized for this GPU,
+// for Compute, not graphics functionality;.
+func (gp *GPU) NewComputeSystem(name string) *System {
 	sy := &System{}
-	sy.Init(gp, name, compute)
+	sy.InitCompute(gp, name)
+	return sy
+}
+
+// NewGraphicsSystem returns a new system initialized for this GPU,
+// for graphics functionality, using Device from the Surface.
+func (gp *GPU) NewGraphicsSystem(name string, dev *Device) *System {
+	sy := &System{}
+	sy.InitGraphics(gp, name, dev)
 	return sy
 }
 

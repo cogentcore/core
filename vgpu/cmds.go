@@ -43,20 +43,22 @@ func (cp *CmdPool) MakeBuff(dv *Device) vk.CommandBuffer {
 }
 
 // BeginCmd does BeginCommandBuffer on buffer
-func (cp *CmdPool) BeginCmd() {
+func (cp *CmdPool) BeginCmd() vk.CommandBuffer {
 	ret := vk.BeginCommandBuffer(cp.Buff, &vk.CommandBufferBeginInfo{
 		SType: vk.StructureTypeCommandBufferBeginInfo,
 	})
 	IfPanic(NewError(ret))
+	return cp.Buff
 }
 
 // BeginCmdOneTime does BeginCommandBuffer with OneTimeSubmit set on buffer
-func (cp *CmdPool) BeginCmdOneTime() {
+func (cp *CmdPool) BeginCmdOneTime() vk.CommandBuffer {
 	ret := vk.BeginCommandBuffer(cp.Buff, &vk.CommandBufferBeginInfo{
 		SType: vk.StructureTypeCommandBufferBeginInfo,
 		Flags: vk.CommandBufferUsageFlags(vk.CommandBufferUsageOneTimeSubmitBit),
 	})
 	IfPanic(NewError(ret))
+	return cp.Buff
 }
 
 // SubmitWait does End, Submit, WaitIdle on Buffer

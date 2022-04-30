@@ -21,6 +21,7 @@ type Val struct {
 	Indexes string         `desc:"name of another Val to use for Indexes when accessing this vector data (e.g., as vertexes)"`
 	ElSize  int            `desc:"if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy."`
 	MemSize int            `desc:"total memory size of this value, including array alignment but not any additional buffer-required alignment padding"`
+	Image   *Image         `desc:"for Image Var roles, this is the Image"`
 	Mod     bool           `inactive:"+" desc:"modified -- set when values are set"`
 	MemPtr  unsafe.Pointer `view:"-" desc:"pointer to the start of the staging memory for this value"`
 }

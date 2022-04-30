@@ -33,19 +33,27 @@ type System struct {
 	Framebuffer Framebuffer           `desc:"shared framebuffer to render into, if not rendering into Surface"`
 }
 
-// Init initializes the System: creates logical device, which is
-// either a Compute device or Graphics one.
-func (sy *System) Init(gp *GPU, name string, compute bool) error {
+// InitGraphics initializes the System for graphics use, using
+// the graphics device from the Surface associated with this system
+// or another device can be initialized by calling
+// sy.Device.Init(gp, vk.QueueGraphicsBit)
+func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {
 	sy.GPU = gp
 	sy.Name = name
-	sy.Compute = compute
-	if compute {
-		sy.Device.Init(gp, vk.QueueComputeBit)
-	} else {
-		sy.Device.Init(gp, vk.QueueGraphicsBit)
-	}
+	sy.Compute = false
+	sy.Device = *dev
 	sy.Mem.Init(gp, &sy.Device)
+	return nil
+}
 
+// InitCompute initializes the System for compute functionality,
+// which creates its own Compute device.
+func (sy *System) InitCompute(gp *GPU, name string) error {
+	sy.GPU = gp
+	sy.Name = name
+	sy.Compute = true
+	sy.Device.Init(gp, vk.QueueComputeBit)
+	sy.Mem.Init(gp, &sy.Device)
 	return nil
 }
 
@@ -88,8 +96,8 @@ func (sy *System) AddNewPipeline(name string) *Pipeline {
 
 // ConfigRenderPass configures the renderpass, including the image
 // format that we're rendering to (from the Surface or Framebuffer)
-// and the depth buffer format (FormatUnknown = no depth buffer)
-func (sy *System) SetRenderPass(imgFmt, depthFmt vk.Format) {
+// and the depth buffer format (vk.FormatUnknown = no depth buffer)
+func (sy *System) SetRenderPass(imgFmt *ImageFormat, depthFmt vk.Format) {
 	sy.RenderPass.Init(sy.Device.Device, imgFmt, depthFmt)
 }
 

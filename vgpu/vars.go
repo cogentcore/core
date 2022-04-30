@@ -215,6 +215,12 @@ func ShaderSet(vl []*Var) vk.ShaderStageFlagBits {
 // info for all of the non-Vertex vars
 func (vs *Vars) DescLayout(dev vk.Device) {
 	nset := len(vs.SetMap)
+	if nset == 0 {
+		vs.VkDescLayout = nil
+		vs.VkDescPool = nil
+		vs.VkDescSets = nil
+		return
+	}
 	vs.SetDesc = make([]*SetDesc, nset)
 	dsets := make([]vk.DescriptorSetLayout, nset)
 	dyno := 0

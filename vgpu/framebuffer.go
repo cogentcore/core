@@ -39,6 +39,9 @@ func (fb *Framebuffer) Init(dev vk.Device, fmt ImageFormat, img vk.Image, rp *Re
 // and Makes the Framebuffer based on that.
 func (fb *Framebuffer) InitRenderPass(rp *RenderPass) {
 	fb.RenderPass = rp
+	if fb.Image.Dev != rp.Dev { // device must be same as renderpass
+		panic("vgpu.Framebuffer:InitRenderPass -- image and renderpass have different devices -- this will not work -- e.g., must set Surface to use System's device or vice-versa")
+	}
 	fb.Make()
 }
 
