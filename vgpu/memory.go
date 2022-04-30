@@ -264,3 +264,29 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }
+
+// TransferImagesToGPU transfers image memory from CPU to GPU for given images.
+// The image Host.Offset *must* be accurate for the given buffer, whether its own
+// individual buffer or the shared memory-managed buffer.
+func (mm *Memory) TransferImagesToGPU(buff vk.Buffer, imgs ...*Image) {
+	cmdBuff := mm.CmdPool.MakeBuff(&mm.Device)
+	mm.CmdPool.BeginCmdOneTime()
+
+	for _, im := range imgs {
+		vk.CmdCopyBufferToImage(cmdBuff, buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
+	}
+	mm.CmdPool.SubmitWaitFree(&mm.Device)
+}
+
+// TransferImagesFmGPU transfers image memory from GPU to CPU for given images.
+// the image Host.Offset *must* be accurate for the given buffer, whether its own
+// individual buffer or the shared memory-managed buffer.
+func (mm *Memory) TransferImagesFmGPU(buff vk.Buffer, imgs ...*Image) {
+	cmdBuff := mm.CmdPool.MakeBuff(&mm.Device)
+	mm.CmdPool.BeginCmdOneTime()
+
+	for _, im := range imgs {
+		vk.CmdCopyImageToBuffer(cmdBuff, im.Image, vk.ImageLayoutTransferDstOptimal, buff, 1, []vk.BufferImageCopy{im.CopyRec()})
+	}
+	mm.CmdPool.SubmitWaitFree(&mm.Device)
+}

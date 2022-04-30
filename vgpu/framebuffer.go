@@ -53,6 +53,7 @@ func (fb *Framebuffer) InitNewImage(dev vk.Device, fmt ImageFormat, size image.P
 	fb.Image.Format.Size = size
 	fb.Image.Format.Samples = samples
 	fb.Image.SetFlag(int(FramebufferImage))
+	fb.Image.Dev = dev
 	fb.Image.AllocImage()
 }
 
