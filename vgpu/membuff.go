@@ -46,8 +46,8 @@ func (mb *MemBuff) Alloc(dev vk.Device, bsz int) bool {
 		hostUse |= vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
 		devUse |= vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
 	}
-	mb.Host = MakeBuffer(dev, bsz, hostUse)
-	mb.Dev = MakeBuffer(dev, bsz, devUse)
+	mb.Host = NewBuffer(dev, bsz, hostUse)
+	mb.Dev = NewBuffer(dev, bsz, devUse)
 	mb.HostMem = AllocBuffMem(dev, mb.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
 	mb.Size = bsz
 
@@ -116,13 +116,13 @@ func (bt BuffTypes) IsReadOnly() bool {
 func (bt BuffTypes) AlignBytes(gp *GPU) int {
 	switch bt {
 	case StorageBuff:
-		return int(gp.GpuProps.Limits.MinStorageBufferOffsetAlignment)
+		return int(gp.GPUProps.Limits.MinStorageBufferOffsetAlignment)
 	case UniformBuff, VtxIdxBuff:
-		return int(gp.GpuProps.Limits.MinUniformBufferOffsetAlignment)
+		return int(gp.GPUProps.Limits.MinUniformBufferOffsetAlignment)
 	case ImageBuff:
-		return int(gp.GpuProps.Limits.MinTexelBufferOffsetAlignment)
+		return int(gp.GPUProps.Limits.MinTexelBufferOffsetAlignment)
 	}
-	return int(gp.GpuProps.Limits.MinUniformBufferOffsetAlignment)
+	return int(gp.GPUProps.Limits.MinUniformBufferOffsetAlignment)
 }
 
 // BuffUsages maps BuffTypes into buffer usage flags
@@ -136,8 +136,8 @@ var BuffUsages = map[BuffTypes]vk.BufferUsageFlagBits{
 /////////////////////////////////////////////////////////////////////
 // Basic memory functions
 
-// MakeBuffer makes a buffer of given size, usage
-func MakeBuffer(dev vk.Device, size int, usage vk.BufferUsageFlagBits) vk.Buffer {
+// NewBuffer makes a buffer of given size, usage
+func NewBuffer(dev vk.Device, size int, usage vk.BufferUsageFlagBits) vk.Buffer {
 	var buffer vk.Buffer
 	ret := vk.CreateBuffer(dev, &vk.BufferCreateInfo{
 		SType: vk.StructureTypeBufferCreateInfo,

@@ -25,22 +25,19 @@ var TheGPU *GPU
 
 // GPU represents the GPU hardware
 type GPU struct {
-	Instance vk.Instance
-	GPU      vk.PhysicalDevice
-	Device   Device `desc:"generic graphics device, for framebuffer rendering etc"`
+	Instance         vk.Instance            `desc:"handle for the vulkan driver instance"`
+	GPU              vk.PhysicalDevice      `desc:"handle for the vulkan physical GPU hardware"`
+	AppName          string                 `desc:"name of application -- set during Config and used in init of GPU"`
+	APIVersion       vk.Version             `desc:"version of vulkan API to target"`
+	AppVersion       vk.Version             `desc:"version of application -- optional"`
+	InstanceExts     []string               `desc:"use Add method to add required instance extentions prior to calling Config"`
+	DeviceExts       []string               `desc:"use Add method to add required device extentions prior to calling Config"`
+	ValidationLayers []string               `desc:"set Add method to add required validation layers prior to calling Config"`
+	Debug            bool                   `desc:"set to true prior to calling Config to enable debug mode"`
+	DebugCallback    vk.DebugReportCallback `desc:"our custom debug callback"`
 
-	GpuProps    vk.PhysicalDeviceProperties
-	MemoryProps vk.PhysicalDeviceMemoryProperties
-
-	DebugCallback vk.DebugReportCallback
-
-	AppName          string `desc:"name of application -- used in init of GPU"`
-	APIVersion       vk.Version
-	AppVersion       vk.Version
-	InstanceExts     []string `desc:"set to required instance exts prior to calling Init"`
-	DeviceExts       []string `desc:"set to required device exts prior to calling Init"`
-	ValidationLayers []string `desc:"set to required validation layers prior to calling Init"`
-	Debug            bool
+	GPUProps    vk.PhysicalDeviceProperties       `desc:"properties of physical hardware -- populated after Config"`
+	MemoryProps vk.PhysicalDeviceMemoryProperties `desc:"properties of device memory -- populated after Config"`
 }
 
 // Defaults sets up default parameters, with the graphics flag
@@ -55,12 +52,21 @@ func (gp *GPU) Defaults(graphics bool) {
 	}
 }
 
-// NewGPU returns a new GPU struct with Defaults set
-// with the graphics flag determining whether graphics-relevant items are added.
-// configure any additional defaults before calling Init
-func NewGPU(graphics bool) *GPU {
+// NewGPU returns a new GPU struct with Graphics Defaults set
+// configure any additional defaults before calling Config.
+// Use NewComputeGPU for a compute-only GPU that doesn't load graphics extensions.
+func NewGPU() *GPU {
 	gp := &GPU{}
-	gp.Defaults(graphics)
+	gp.Defaults(true)
+	return gp
+}
+
+// NewComputeGPU returns a new GPU struct with Compute Defaults set
+// configure any additional defaults before calling Config.
+// Use NewGPU for a graphics enabled GPU.
+func NewComputeGPU() *GPU {
+	gp := &GPU{}
+	gp.Defaults(false)
 	return gp
 }
 
@@ -111,12 +117,12 @@ func (gp *GPU) AddValidationLayer(ext string) bool {
 	return true
 }
 
-func (gp *GPU) Init(name string, debug bool) error {
+// Config
+func (gp *GPU) Config(name string) error {
 	TheGPU = gp
 
 	gp.AppName = name
-	gp.Debug = debug
-	if debug {
+	if gp.Debug {
 		gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
 		gp.AddInstanceExt("VK_EXT_debug_report")
 	}
@@ -127,7 +133,7 @@ func (gp *GPU) Init(name string, debug bool) error {
 	IfPanic(err)
 	instanceExts, missing := CheckExisting(actualInstanceExts, requiredInstanceExts)
 	if missing > 0 {
-		log.Println("vulkan warning: missing", missing, "required instance extensions during init")
+		log.Println("vulkan warning: missing", missing, "required instance extensions during Config")
 	}
 	log.Printf("vulkan: enabling %d instance extensions", len(instanceExts))
 
@@ -139,7 +145,7 @@ func (gp *GPU) Init(name string, debug bool) error {
 		IfPanic(err)
 		validationLayers, missing = CheckExisting(actualValidationLayers, requiredValidationLayers)
 		if missing > 0 {
-			log.Println("vulkan warning: missing", missing, "required validation layers during init")
+			log.Println("vulkan warning: missing", missing, "required validation layers during Config")
 		}
 	}
 
@@ -176,9 +182,9 @@ func (gp *GPU) Init(name string, debug bool) error {
 	IfPanic(NewError(ret))
 	// get the first one, multiple GPUs not supported yet
 	gp.GPU = gpus[0]
-	vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GpuProps)
-	gp.GpuProps.Deref()
-	gp.GpuProps.Limits.Deref()
+	vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GPUProps)
+	gp.GPUProps.Deref()
+	gp.GPUProps.Limits.Deref()
 	vk.GetPhysicalDeviceMemoryProperties(gp.GPU, &gp.MemoryProps)
 	gp.MemoryProps.Deref()
 
@@ -188,7 +194,7 @@ func (gp *GPU) Init(name string, debug bool) error {
 	IfPanic(err)
 	deviceExts, missing := CheckExisting(actualDeviceExts, requiredDeviceExts)
 	if missing > 0 {
-		log.Println("vulkan warning: missing", missing, "required device extensions during init")
+		log.Println("vulkan warning: missing", missing, "required device extensions during Config")
 	}
 	log.Printf("vulkan: enabling %d device extensions", len(deviceExts))
 
@@ -208,16 +214,11 @@ func (gp *GPU) Init(name string, debug bool) error {
 	return nil
 }
 
-// InitGraphicsDevice initializes the generic graphics device
-func (gp *GPU) InitGraphicsDevice() error {
-	return gp.Device.Init(gp, vk.QueueGraphicsBit)
-}
-
+// Destroy destroys GPU resources -- call after everything else has been destroyed
 func (gp *GPU) Destroy() {
 	if gp.DebugCallback != vk.NullDebugReportCallback {
 		vk.DestroyDebugReportCallback(gp.Instance, gp.DebugCallback, nil)
 	}
-	gp.Device.Destroy()
 	if gp.Instance != nil {
 		vk.DestroyInstance(gp.Instance, nil)
 		gp.Instance = nil
@@ -225,7 +226,7 @@ func (gp *GPU) Destroy() {
 }
 
 // NewComputeSystem returns a new system initialized for this GPU,
-// for Compute, not graphics functionality;.
+// for Compute, not graphics functionality.
 func (gp *GPU) NewComputeSystem(name string) *System {
 	sy := &System{}
 	sy.InitCompute(gp, name)
@@ -233,19 +234,21 @@ func (gp *GPU) NewComputeSystem(name string) *System {
 }
 
 // NewGraphicsSystem returns a new system initialized for this GPU,
-// for graphics functionality, using Device from the Surface.
+// for graphics functionality, using Device from the Surface or
+// RenderFrame depending on the target of rendering.
 func (gp *GPU) NewGraphicsSystem(name string, dev *Device) *System {
 	sy := &System{}
 	sy.InitGraphics(gp, name, dev)
 	return sy
 }
 
+// PropsString returns a human-readable summary of the GPU properties.
 func (gp *GPU) PropsString(print bool) string {
 	ps := "\n\n######## GPU Props\n"
-	prs := kit.StringJSON(&gp.GpuProps)
+	prs := kit.StringJSON(&gp.GPUProps)
 	devnm := `  "DeviceName": `
 	ps += prs[:strings.Index(prs, devnm)]
-	ps += devnm + string(gp.GpuProps.DeviceName[:]) + "\n"
+	ps += devnm + string(gp.GPUProps.DeviceName[:]) + "\n"
 	ps += prs[strings.Index(prs, `  "Limits":`):]
 	// ps += "\n\n######## GPU Memory Props\n" // not really useful
 	// ps += kit.StringJSON(&gp.MemoryProps)

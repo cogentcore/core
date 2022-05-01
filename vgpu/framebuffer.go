@@ -17,40 +17,40 @@ type Framebuffer struct {
 	Framebuffer vk.Framebuffer `desc:"vulkan framebuffer"`
 }
 
-// InitImage initializes settings for given existing image format
+// ConfigImage configures settings for given existing image format
 // and image.  Does not yet make the Framebuffer because it
-// still needs the RenderPass (see Init for all)
-func (fb *Framebuffer) InitImage(dev vk.Device, fmt ImageFormat, img vk.Image) {
+// still needs the RenderPass (see ConfigAll for all)
+func (fb *Framebuffer) ConfigImage(dev vk.Device, fmt ImageFormat, img vk.Image) {
 	fb.Image.Format.Defaults()
 	fb.Image.Format = fmt
 	fb.Image.SetVkImage(dev, img) // makes view
 	fb.Image.SetFlag(int(FramebufferImage))
 }
 
-// Init initializes settings for given existing image format
+// ConfigAll configures settings for given existing image format
 // image, and RenderPass, and Makes the Framebuffer based on that.
-func (fb *Framebuffer) Init(dev vk.Device, fmt ImageFormat, img vk.Image, rp *RenderPass) {
-	fb.InitImage(dev, fmt, img)
+func (fb *Framebuffer) ConfigAll(dev vk.Device, fmt ImageFormat, img vk.Image, rp *RenderPass) {
+	fb.ConfigImage(dev, fmt, img)
 	fb.RenderPass = rp
-	fb.Make()
+	fb.Config()
 }
 
-// InitRenderPass initializes for RenderPass, assuming image is already set
-// and Makes the Framebuffer based on that.
-func (fb *Framebuffer) InitRenderPass(rp *RenderPass) {
+// ConfigRenderPass configures for RenderPass, assuming image is already set
+// and Configs the Framebuffer based on that.
+func (fb *Framebuffer) ConfigRenderPass(rp *RenderPass) {
 	fb.RenderPass = rp
 	if fb.Image.Dev != rp.Dev { // device must be same as renderpass
-		panic("vgpu.Framebuffer:InitRenderPass -- image and renderpass have different devices -- this will not work -- e.g., must set Surface to use System's device or vice-versa")
+		panic("vgpu.Framebuffer:ConfigRenderPass -- image and renderpass have different devices -- this will not work -- e.g., must set Surface to use System's device or vice-versa")
 	}
-	fb.Make()
+	fb.Config()
 }
 
-// InitNewImage initializes a new image for a standalone framebuffer
+// ConfigNewImage configures a new image for a standalone framebuffer
 // not associated with an existing surface, to be used as a rendering target.
 // In general it is recommended to use vk.SampleCount4Bit to avoid aliasing.
 // Does not yet make the Framebuffer because it still needs the RenderPass
-// (see InitRenderPass)
-func (fb *Framebuffer) InitNewImage(dev vk.Device, fmt ImageFormat, size image.Point, samples vk.SampleCountFlagBits) {
+// (see ConfigRenderPass)
+func (fb *Framebuffer) ConfigNewImage(dev vk.Device, fmt ImageFormat, size image.Point, samples vk.SampleCountFlagBits) {
 	fb.Image.Format.Defaults()
 	fb.Image.Format = fmt
 	fb.Image.Format.Size = size
@@ -76,8 +76,9 @@ func (fb *Framebuffer) DestroyFrame() {
 	fb.Framebuffer = nil
 }
 
-// Make makes a new framebuffer with current settings, destroying any existing
-func (fb *Framebuffer) Make() {
+// Config configures a new vulkan framebuffer object with current settings,
+// destroying any existing
+func (fb *Framebuffer) Config() {
 	fb.DestroyFrame()
 	ivs := []vk.ImageView{fb.Image.View}
 	if fb.RenderPass.Depth.IsActive() {
@@ -108,5 +109,5 @@ func (fb *Framebuffer) SetSize(size image.Point) {
 	if fb.RenderPass.Depth.IsActive() {
 		fb.RenderPass.Depth.SetSize(size)
 	}
-	fb.Make()
+	fb.Config()
 }

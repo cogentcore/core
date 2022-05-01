@@ -118,7 +118,7 @@ type Image struct {
 	View   vk.ImageView    `view:"-" desc:"vulkan image view"`
 	Mem    vk.DeviceMemory `view:"-" desc:"memory for image when we allocate it"`
 	Dev    vk.Device       `view:"-" desc:"keep track of device for destroying view"`
-	Host   HostImage       `desc:"host representation of the image"`
+	Host   HostImage       `desc:"host memory buffer representation of the image"`
 }
 
 // HasFlag checks if flag is set
@@ -212,18 +212,18 @@ func (im *Image) SetGoImage(img *image.RGBA) error {
 	return nil
 }
 
-// SetVkImage sets a Vk Image and generates a default 2D view
+// SetVkImage sets a Vk Image and configures a default 2D view
 // based on existing format information (which must be set properly).
 // Any exiting view is destroyed first.  Must pass the relevant device.
 func (im *Image) SetVkImage(dev vk.Device, img vk.Image) {
 	im.Image = img
 	im.Dev = dev
-	im.MakeStdView()
+	im.ConfigStdView()
 }
 
-// MakeStdView makes a standard 2D image view, for current image,
+// ConfigStdView configures a standard 2D image view, for current image,
 // format, and device.
-func (im *Image) MakeStdView() {
+func (im *Image) ConfigStdView() {
 	im.DestroyView()
 	var view vk.ImageView
 	ret := vk.CreateImageView(im.Dev, &vk.ImageViewCreateInfo{
@@ -253,42 +253,43 @@ func (im *Image) DestroyView() {
 	if im.View == nil {
 		return
 	}
+	im.ClearFlag(int(ImageActive))
 	vk.DestroyImageView(im.Dev, im.View, nil)
 	im.View = nil
-	im.ClearFlag(int(ImageActive))
 }
 
-// DestroyImage destroys image that we own
-func (im *Image) DestroyImage() {
+// FreeImage frees device memory version of image that we own
+func (im *Image) FreeImage() {
 	im.DestroyView()
 	if im.Image == nil || !im.IsImageOwner() {
 		return
 	}
+	im.ClearFlag(int(ImageOwnsImage))
 	vk.FreeMemory(im.Dev, im.Mem, nil)
 	vk.DestroyImage(im.Dev, im.Image, nil)
 	im.Mem = nil
 	im.Image = nil
-	im.ClearFlag(int(ImageOwnsImage))
 }
 
-// DestroyHost destroys host buffer
-func (im *Image) DestroyHost() {
+// FreeHost frees memory in host buffer representation of image
+// Only if we own the host buffer.
+func (im *Image) FreeHost() {
 	if im.Host.Size == 0 || !im.IsHostOwner() {
 		return
 	}
+	im.ClearFlag(int(ImageOwnsHost))
 	vk.UnmapMemory(im.Dev, im.Host.Mem)
 	FreeBuffMem(im.Dev, &im.Host.Mem)
 	DestroyBuffer(im.Dev, &im.Host.Buff)
 	im.Host.Size = 0
 	im.Host.Ptr = nil
-	im.ClearFlag(int(ImageOwnsHost))
 }
 
 // Destroy destroys any existing view, nils fields
 func (im *Image) Destroy() {
+	im.FreeImage()
+	im.FreeHost()
 	im.DestroyView()
-	im.DestroyImage()
-	im.DestroyHost()
 	im.Image = nil
 	im.Dev = nil
 }
@@ -321,7 +322,7 @@ func (im *Image) SetSize(size image.Point) bool {
 // AllocImage allocates the VkImage on the device (must set first),
 // based on the current Format info, and other flags.
 func (im *Image) AllocImage() {
-	im.DestroyImage()
+	im.FreeImage()
 	var usage vk.ImageUsageFlagBits
 	switch {
 	case im.HasFlag(DepthImage):
@@ -392,9 +393,9 @@ func (im *Image) AllocHost() {
 		return
 	}
 	if im.Host.Size > 0 {
-		im.DestroyHost()
+		im.FreeHost()
 	}
-	im.Host.Buff = MakeBuffer(im.Dev, imsz, vk.BufferUsageTransferSrcBit|vk.BufferUsageTransferDstBit)
+	im.Host.Buff = NewBuffer(im.Dev, imsz, vk.BufferUsageTransferSrcBit|vk.BufferUsageTransferDstBit)
 	im.Host.Mem = AllocBuffMem(im.Dev, im.Host.Buff, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
 	im.Host.Size = imsz
 	im.Host.Ptr = MapMemory(im.Dev, im.Host.Mem, im.Host.Size)

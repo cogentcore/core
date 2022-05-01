@@ -41,9 +41,10 @@ func main() {
 
 	// note: for graphics, require these instance extensions before init gpu!
 	winext := window.GetRequiredInstanceExtensions()
-	gp := vgpu.NewGPU(true) // graphics
+	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
-	gp.Init("drawtri", true) // debug
+	gp.Debug = true
+	gp.Config("drawtri")
 	TheGPU = gp
 
 	// gp.PropsString(true) // print
@@ -53,16 +54,12 @@ func main() {
 		log.Println(err)
 		return
 	}
-	vks := vk.SurfaceFromPointer(surfPtr)
-
-	sf := &vgpu.Surface{}
-	sf.Defaults()
-	sf.Init(gp, vks)
+	sf := vgpu.NewSurface(gp, vk.SurfaceFromPointer(surfPtr))
 
 	fmt.Printf("format: %#v\n", sf.Format)
 
 	sy := gp.NewGraphicsSystem("drawtri", &sf.Device)
-	pl := sy.AddNewPipeline("drawtri")
+	pl := sy.NewPipeline("drawtri")
 	sy.SetRenderPass(&sf.Format, vk.FormatUndefined)
 	sf.SetRenderPass(&sy.RenderPass)
 	pl.SetGraphicsDefaults()
@@ -76,30 +73,34 @@ func main() {
 	sy.Config()
 	sy.Mem.Config()
 
-	idx := sf.AcquireNextImage()
-	cmd := pl.GraphicsCommand(&sf.Frames[idx].FrameBuff)
-	sf.SubmitRender(cmd)
-	sf.PresentImage(idx)
+	destroy := func() {
+		sy.Destroy()
+		sf.Destroy()
+		gp.Destroy()
+		window.Destroy()
+		glfw.Terminate()
+	}
 
-	// some sync logic
-	doneC := make(chan struct{}, 2)
+	frameCount := 0
+
+	renderFrame := func() {
+		fmt.Printf("frame: %d\n", frameCount)
+		idx := sf.AcquireNextImage()
+		cmd := pl.GraphicsCommand(sf.Frames[idx])
+		sf.SubmitRender(cmd)
+		sf.PresentImage(idx)
+		frameCount++
+	}
+
 	exitC := make(chan struct{}, 2)
-	defer closer.Bind(func() {
-		exitC <- struct{}{}
-		<-doneC
-		log.Println("Bye!")
-	})
 
-	fpsDelay := time.Second / 60
+	fpsDelay := time.Second // / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {
 		case <-exitC:
-			gp.Destroy()
-			window.Destroy()
-			glfw.Terminate()
 			fpsTicker.Stop()
-			doneC <- struct{}{}
+			destroy()
 			return
 		case <-fpsTicker.C:
 			if window.ShouldClose() {
@@ -107,19 +108,7 @@ func main() {
 				continue
 			}
 			glfw.PollEvents()
-			// app.NextFrame()
-
-			/*
-				imageIdx, outdated, err := app.Context().AcquireNextImage()
-				orPanic(err)
-				if outdated {
-					imageIdx, _, err = app.Context().AcquireNextImage()
-					orPanic(err)
-				}
-				_, err = app.Context().PresentImage(imageIdx)
-				orPanic(err)
-			*/
+			renderFrame()
 		}
 	}
-
 }

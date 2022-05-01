@@ -96,7 +96,7 @@ func (pl *Pipeline) Init(sy *System) {
 
 func (pl *Pipeline) InitPipeline() {
 	pl.CmdPool.Init(&pl.Sys.Device, 0)
-	pl.CmdPool.MakeBuff(&pl.Sys.Device)
+	pl.CmdPool.NewBuffer(&pl.Sys.Device)
 }
 
 // Config is called once all the VkConfig options have been set
@@ -178,7 +178,7 @@ func (pl *Pipeline) ConfigStages() {
 }
 
 //////////////////////////////////////////////////////////////
-// Set options
+// Set graphics options
 
 // SetGraphicsDefaults configures all the default settings for a
 // graphics rendering pipeline (not for a compute pipeline)
@@ -188,94 +188,6 @@ func (pl *Pipeline) SetGraphicsDefaults() {
 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 	pl.SetColorBlend(true) // alpha blending
 }
-
-/* todo: this is needed for rendering to something
-func (s *SpinningCube) drawBuildCommandBuffer(res *as.SwapchainSurfaceFrames, cmd vk.CommandBuffer) {
-	ret := vk.BeginCommandBuffer(cmd, &vk.CommandBufferBeginInfo{
-		SType: vk.StructureTypeCommandBufferBeginInfo,
-		Flags: vk.CommandBufferUsageFlags(vk.CommandBufferUsageSimultaneousUseBit),
-	})
-	orPanic(as.NewError(ret))
-
-	clearValues := make([]vk.ClearValue, 2)
-	clearValues[1].SetDepthStencil(1, 0)
-	clearValues[0].SetColor([]float32{
-		0.2, 0.2, 0.2, 0.2,
-	})
-	vk.CmdBeginRenderPass(cmd, &vk.RenderPassBeginInfo{
-		SType:       vk.StructureTypeRenderPassBeginInfo,
-		RenderPass:  s.renderPass,
-		Framebuffer: res.Framebuffer(),
-		RenderArea: vk.Rect2D{
-			Offset: vk.Offset2D{
-				X: 0, Y: 0,
-			},
-			Extent: vk.Extent2D{
-				Width:  s.width,
-				Height: s.height,
-			},
-		},
-		ClearValueCount: 2,
-		PClearValues:    clearValues,
-	}, vk.SubpassContentsInline)
-
-	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, s.pipeline)
-	vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, s.pipelineLayout,
-		0, 1, []vk.DescriptorSet{res.DescriptorSet()}, 0, nil)
-	vk.CmdSetViewport(cmd, 0, 1, []vk.Viewport{{
-		Width:    float32(s.width),
-		Height:   float32(s.height),
-		MinDepth: 0.0,
-		MaxDepth: 1.0,
-	}})
-	vk.CmdSetScissor(cmd, 0, 1, []vk.Rect2D{{
-		Offset: vk.Offset2D{
-			X: 0, Y: 0,
-		},
-		Extent: vk.Extent2D{
-			Width:  s.width,
-			Height: s.height,
-		},
-	}})
-
-	vk.CmdDraw(cmd, 12*3, 1, 0, 0)
-	// Note that ending the renderpass changes the image's layout from
-	// vk.ImageLayoutColorAttachmentOptimal to vk.ImageLayoutPresentSrc
-	vk.CmdEndRenderPass(cmd)
-
-	graphicsQueueIndex := s.Context().Platform().GraphicsQueueFamilyIndex()
-	presentQueueIndex := s.Context().Platform().PresentQueueFamilyIndex()
-	if graphicsQueueIndex != presentQueueIndex {
-		// Separate Present Queue Case
-		//
-		// We have to transfer ownership from the graphics queue family to the
-		// present queue family to be able to present.  Note that we don't have
-		// to transfer from present queue family back to graphics queue family at
-		// the start of the next frame because we don't care about the image's
-		// contents at that point.
-		vk.CmdPipelineBarrier(cmd,
-			vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
-			vk.PipelineStageFlags(vk.PipelineStageBottomOfPipeBit),
-			0, 0, nil, 0, nil, 1, []vk.ImageMemoryBarrier{{
-				SType:               vk.StructureTypeImageMemoryBarrier,
-				SrcAccessMask:       0,
-				DstAccessMask:       vk.AccessFlags(vk.AccessColorAttachmentWriteBit),
-				OldLayout:           vk.ImageLayoutPresentSrc,
-				NewLayout:           vk.ImageLayoutPresentSrc,
-				SrcQueueFamilyIndex: graphicsQueueIndex,
-				DstQueueFamilyIndex: presentQueueIndex,
-				SubresourceRange: vk.ImageSubresourceRange{
-					AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
-					LayerCount: 1,
-					LevelCount: 1,
-				},
-				Image: res.Image(),
-			}})
-	}
-	ret = vk.EndCommandBuffer(cmd)
-	orPanic(as.NewError(ret))
-}
-*/
 
 /////////////////////////////////////////////////////////////////
 

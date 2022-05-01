@@ -93,9 +93,9 @@ func (mm *Memory) AllocDevBuff(bt BuffTypes) {
 	buff.AllocDev(mm.Device.Device)
 }
 
-// MakeBuffer makes a buffer of given size, usage
-func (mm *Memory) MakeBuffer(size int, usage vk.BufferUsageFlagBits) vk.Buffer {
-	return MakeBuffer(mm.Device.Device, size, usage)
+// NewBuffer makes a buffer of given size, usage
+func (mm *Memory) NewBuffer(size int, usage vk.BufferUsageFlagBits) vk.Buffer {
+	return NewBuffer(mm.Device.Device, size, usage)
 }
 
 // AllocBuffMem allocates memory for given buffer, with given properties
@@ -233,7 +233,7 @@ func (mm *Memory) TransferRegsToGPU(buff *MemBuff, regs []MemReg) {
 		return
 	}
 
-	cmdBuff := mm.CmdPool.MakeBuff(&mm.Device)
+	cmdBuff := mm.CmdPool.NewBuffer(&mm.Device)
 	mm.CmdPool.BeginCmdOneTime()
 
 	rg := make([]vk.BufferCopy, len(regs))
@@ -252,7 +252,7 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 		return
 	}
 
-	cmdBuff := mm.CmdPool.MakeBuff(&mm.Device)
+	cmdBuff := mm.CmdPool.NewBuffer(&mm.Device)
 	mm.CmdPool.BeginCmdOneTime()
 
 	rg := make([]vk.BufferCopy, len(regs))
@@ -269,7 +269,7 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 // The image Host.Offset *must* be accurate for the given buffer, whether its own
 // individual buffer or the shared memory-managed buffer.
 func (mm *Memory) TransferImagesToGPU(buff vk.Buffer, imgs ...*Image) {
-	cmdBuff := mm.CmdPool.MakeBuff(&mm.Device)
+	cmdBuff := mm.CmdPool.NewBuffer(&mm.Device)
 	mm.CmdPool.BeginCmdOneTime()
 
 	for _, im := range imgs {
@@ -282,7 +282,7 @@ func (mm *Memory) TransferImagesToGPU(buff vk.Buffer, imgs ...*Image) {
 // the image Host.Offset *must* be accurate for the given buffer, whether its own
 // individual buffer or the shared memory-managed buffer.
 func (mm *Memory) TransferImagesFmGPU(buff vk.Buffer, imgs ...*Image) {
-	cmdBuff := mm.CmdPool.MakeBuff(&mm.Device)
+	cmdBuff := mm.CmdPool.NewBuffer(&mm.Device)
 	mm.CmdPool.BeginCmdOneTime()
 
 	for _, im := range imgs {

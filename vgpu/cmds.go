@@ -27,8 +27,8 @@ func (cp *CmdPool) Init(dv *Device, flags vk.CommandPoolCreateFlagBits) {
 	cp.Pool = cmdPool
 }
 
-// MakeBuff makes a buffer in pool
-func (cp *CmdPool) MakeBuff(dv *Device) vk.CommandBuffer {
+// NewBuffer makes a buffer in pool
+func (cp *CmdPool) NewBuffer(dv *Device) vk.CommandBuffer {
 	var cmdBuff = make([]vk.CommandBuffer, 1)
 	ret := vk.AllocateCommandBuffers(dv.Device, &vk.CommandBufferAllocateInfo{
 		SType:              vk.StructureTypeCommandBufferAllocateInfo,
@@ -104,4 +104,25 @@ func (cp *CmdPool) Destroy(dev vk.Device) {
 	}
 	vk.DestroyCommandPool(dev, cp.Pool, nil)
 	cp.Pool = nil
+}
+
+////////////////////////////////////////////////////
+// Semaphors & Fences
+
+func NewSemaphore(dev vk.Device) vk.Semaphore {
+	var sem vk.Semaphore
+	ret := vk.CreateSemaphore(dev, &vk.SemaphoreCreateInfo{
+		SType: vk.StructureTypeSemaphoreCreateInfo,
+	}, nil, &sem)
+	IfPanic(NewError(ret))
+	return sem
+}
+
+func NewFence(dev vk.Device) vk.Fence {
+	var fence vk.Fence
+	ret := vk.CreateFence(dev, &vk.FenceCreateInfo{
+		SType: vk.StructureTypeFenceCreateInfo,
+	}, nil, &fence)
+	IfPanic(NewError(ret))
+	return fence
 }

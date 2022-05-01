@@ -86,8 +86,9 @@ func (sy *System) AddPipeline(pl *Pipeline) {
 	sy.PipelineMap[pl.Name] = pl
 }
 
-// AddNewPipeline adds a new pipeline
-func (sy *System) AddNewPipeline(name string) *Pipeline {
+// NewPipeline returns a new pipeline added to this System,
+// initialized for use in this system.
+func (sy *System) NewPipeline(name string) *Pipeline {
 	pl := &Pipeline{Name: name}
 	pl.Init(sy)
 	sy.AddPipeline(pl)
