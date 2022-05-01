@@ -23,6 +23,7 @@ type Pipeline struct {
 	Shaders    []*Shader          `desc:"shaders in order added -- should be execution order"`
 	ShaderMap  map[string]*Shader `desc:"shaders loaded for this pipeline"`
 	RenderPass RenderPass         `desc:"rendering info and depth buffer for this pipeline"`
+	ClearVals  []vk.ClearValue    `desc:"values for clearing image when starting render pass"`
 
 	VkConfig   vk.GraphicsPipelineCreateInfo `desc:"vulkan pipeline configuration options"`
 	VkPipeline vk.Pipeline                   `desc:"the created vulkan pipeline"`
@@ -187,9 +188,9 @@ func (pl *Pipeline) SetGraphicsDefaults() {
 	pl.SetTopology(TriangleList, false)
 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 	pl.SetColorBlend(true) // alpha blending
+	pl.SetClearColor(0, 0, 0, 1)
+	pl.SetClearDepthStencil(1, 0)
 }
-
-/////////////////////////////////////////////////////////////////
 
 // SetDynamicState sets dynamic state (Scissor, Viewport, what else?)
 func (pl *Pipeline) SetDynamicState() {
@@ -231,9 +232,9 @@ func (pl *Pipeline) SetRasterization(polygonMode vk.PolygonMode, cullMode vk.Cul
 	}
 }
 
-// SetColorBlend determines the color blending function: either 1-source alpha (alphaBlend)
-// or no blending: new color overwrites old.
-// Default is alphaBlend = true
+// SetColorBlend determines the color blending function:
+// either 1-source alpha (alphaBlend) or no blending:
+// new color overwrites old.  Default is alphaBlend = true
 func (pl *Pipeline) SetColorBlend(alphaBlend bool) {
 	var cb vk.PipelineColorBlendAttachmentState
 	cb.ColorWriteMask = 0xF
@@ -259,19 +260,30 @@ func (pl *Pipeline) SetColorBlend(alphaBlend bool) {
 	}
 }
 
-// GraphicsCommand adds commands to the given command buffer to render this pipeline.
-// You must use the command buffer associated with the Surface or RenderFrame
-// which uses a fence to determine when rendering command has been submitted.
-func (pl *Pipeline) GraphicsCommand(cmd vk.CommandBuffer, fr *Framebuffer) {
-	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
-	clearValues := make([]vk.ClearValue, 2)
-	clearValues[1].SetDepthStencil(1, 0)
-	clearValues[0].SetColor([]float32{
-		0.2, 0.2, 1.0, 0.2,
-	})
+// SetClearColor sets the RGBA colors to set when starting new render
+func (pl *Pipeline) SetClearColor(r, g, b, a float32) {
+	if len(pl.ClearVals) == 0 {
+		pl.ClearVals = make([]vk.ClearValue, 2)
+	}
+	pl.ClearVals[0].SetColor([]float32{r, g, b, a})
+}
 
+// SetClearDepthStencil sets the depth and stencil values when starting new render
+func (pl *Pipeline) SetClearDepthStencil(depth float32, stencil uint32) {
+	if len(pl.ClearVals) == 0 {
+		pl.ClearVals = make([]vk.ClearValue, 2)
+	}
+	pl.ClearVals[1].SetDepthStencil(depth, stencil)
+}
+
+////////////////////////////////////////////////////////
+// Graphics render
+
+// BeginRenderPass adds commands to the given command buffer
+// to start the render pass on given framebuffer.
+// Clears the frame according to the ClearVals.
+func (pl *Pipeline) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer) {
 	w, h := fr.Image.Format.Size32()
-
 	vk.CmdBeginRenderPass(cmd, &vk.RenderPassBeginInfo{
 		SType:       vk.StructureTypeRenderPassBeginInfo,
 		RenderPass:  pl.Sys.RenderPass.RenderPass,
@@ -280,14 +292,9 @@ func (pl *Pipeline) GraphicsCommand(cmd vk.CommandBuffer, fr *Framebuffer) {
 			Offset: vk.Offset2D{X: 0, Y: 0},
 			Extent: vk.Extent2D{Width: w, Height: h},
 		},
-		ClearValueCount: 2,
-		PClearValues:    clearValues,
+		ClearValueCount: uint32(len(pl.ClearVals)),
+		PClearValues:    pl.ClearVals,
 	}, vk.SubpassContentsInline)
-
-	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
-
-	vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,
-		0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
 
 	vk.CmdSetViewport(cmd, 0, 1, []vk.Viewport{{
 		Width:    float32(w),
@@ -300,6 +307,17 @@ func (pl *Pipeline) GraphicsCommand(cmd vk.CommandBuffer, fr *Framebuffer) {
 		Offset: vk.Offset2D{X: 0, Y: 0},
 		Extent: vk.Extent2D{Width: w, Height: h},
 	}})
+}
+
+// GraphicsCommand adds commands to the given command buffer to render this pipeline.
+// BeginRenderPass must have been called at some point before this
+func (pl *Pipeline) GraphicsCommand(cmd vk.CommandBuffer) {
+	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
+
+	if len(pl.Sys.Vars.SetMap) > 0 {
+		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,
+			0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
+	}
 
 	vk.CmdDraw(cmd, 3, 1, 0, 0) // todo: need to have this all info from input!
 
@@ -311,10 +329,11 @@ func (pl *Pipeline) GraphicsCommand(cmd vk.CommandBuffer, fr *Framebuffer) {
 	IfPanic(NewError(ret))
 }
 
-// RunCompute runs the compute shader for given of computational elements
-// along 3 dimensions, which are passed as indexes into the shader.
+// ComputeCommand adds commands to run the compute shader for given
+// number of computational elements along 3 dimensions,
+// which are passed as indexes into the shader.
 // The values have to be bound to the vars prior to calling this.
-func (pl *Pipeline) RunCompute(cmd vk.CommandBuffer, nx, ny, nz int) {
+func (pl *Pipeline) ComputeCommand(cmd vk.CommandBuffer, nx, ny, nz int) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointCompute, pl.VkPipeline)
 
 	vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,

@@ -65,6 +65,9 @@ func main() {
 	pl.AddShaderFile("trianglelit", vgpu.VertexShader, "trianglelit.spv")
 	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
 
+	inv := sy.Vars.Add("Vtx", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.VertexShader)
+	_ = inv
+
 	sy.Config()
 	sy.Mem.Config()
 
@@ -83,19 +86,13 @@ func main() {
 
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
-		// rt := time.Now()
 		idx := sf.AcquireNextImage()
-		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
 		pl.CmdPool.Reset()
 		pl.CmdPool.BeginCmd()
 		pl.BeginRenderPass(pl.CmdPool.Buff, sf.Frames[idx])
-		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
 		pl.GraphicsCommand(pl.CmdPool.Buff)
-		// fmt.Printf("cmd %v\n", time.Now().Sub(rt))
-		sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
-		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
+		sf.SubmitRender(pl.CmdPool.Buff)
 		sf.PresentImage(idx)
-		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
@@ -109,7 +106,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 600
+	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

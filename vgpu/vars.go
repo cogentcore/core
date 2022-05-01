@@ -215,12 +215,6 @@ func ShaderSet(vl []*Var) vk.ShaderStageFlagBits {
 // info for all of the non-Vertex vars
 func (vs *Vars) DescLayout(dev vk.Device) {
 	nset := len(vs.SetMap)
-	if nset == 0 {
-		vs.VkDescLayout = nil
-		vs.VkDescPool = nil
-		vs.VkDescSets = nil
-		return
-	}
 	vs.SetDesc = make([]*SetDesc, nset)
 	dsets := make([]vk.DescriptorSetLayout, nset)
 	dyno := 0
@@ -276,41 +270,46 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 
 	vs.DynOffs = make([]uint32, dyno)
 
-	var pools []vk.DescriptorPoolSize
-	for rl := Uniform; rl < VarRolesN; rl++ {
-		vl := vs.RoleMap[rl]
-		if len(vl) == 0 {
-			continue
+	if nset == 0 {
+		vs.VkDescPool = nil
+		vs.VkDescSets = nil
+	} else {
+		var pools []vk.DescriptorPoolSize
+		for rl := Uniform; rl < VarRolesN; rl++ {
+			vl := vs.RoleMap[rl]
+			if len(vl) == 0 {
+				continue
+			}
+			pl := vk.DescriptorPoolSize{
+				DescriptorCount: uint32(len(vl)),
+				Type:            RoleDescriptors[rl],
+			}
+			pools = append(pools, pl)
 		}
-		pl := vk.DescriptorPoolSize{
-			DescriptorCount: uint32(len(vl)),
-			Type:            RoleDescriptors[rl],
-		}
-		pools = append(pools, pl)
-	}
-	var descPool vk.DescriptorPool
-	ret = vk.CreateDescriptorPool(dev, &vk.DescriptorPoolCreateInfo{
-		SType:         vk.StructureTypeDescriptorPoolCreateInfo,
-		MaxSets:       uint32(nset),
-		PoolSizeCount: uint32(len(pools)),
-		PPoolSizes:    pools,
-	}, nil, &descPool)
-	IfPanic(NewError(ret))
-
-	vs.VkDescPool = descPool
-
-	vs.VkDescSets = make([]vk.DescriptorSet, len(vs.SetDesc))
-	for i, sd := range vs.SetDesc {
-		var set vk.DescriptorSet
-		ret := vk.AllocateDescriptorSets(dev, &vk.DescriptorSetAllocateInfo{
-			SType:              vk.StructureTypeDescriptorSetAllocateInfo,
-			DescriptorPool:     vs.VkDescPool,
-			DescriptorSetCount: 1,
-			PSetLayouts:        []vk.DescriptorSetLayout{sd.Layout},
-		}, &set)
+		var descPool vk.DescriptorPool
+		ret = vk.CreateDescriptorPool(dev, &vk.DescriptorPoolCreateInfo{
+			SType:         vk.StructureTypeDescriptorPoolCreateInfo,
+			MaxSets:       uint32(nset),
+			PoolSizeCount: uint32(len(pools)),
+			PPoolSizes:    pools,
+		}, nil, &descPool)
 		IfPanic(NewError(ret))
-		sd.DescSet = set
-		vs.VkDescSets[i] = set
+
+		vs.VkDescPool = descPool
+
+		vs.VkDescSets = make([]vk.DescriptorSet, len(vs.SetDesc))
+		for i, sd := range vs.SetDesc {
+			var set vk.DescriptorSet
+			ret := vk.AllocateDescriptorSets(dev, &vk.DescriptorSetAllocateInfo{
+				SType:              vk.StructureTypeDescriptorSetAllocateInfo,
+				DescriptorPool:     vs.VkDescPool,
+				DescriptorSetCount: 1,
+				PSetLayouts:        []vk.DescriptorSetLayout{sd.Layout},
+			}, &set)
+			IfPanic(NewError(ret))
+			sd.DescSet = set
+			vs.VkDescSets[i] = set
+		}
 	}
 }
 

@@ -161,3 +161,52 @@ func (sy *System) SetVals(set int, vals ...string) {
 	}
 	vk.UpdateDescriptorSets(sy.Device.Device, uint32(nv), ws, 0, nil)
 }
+
+//////////////////////////////////////////////////////////////
+// Set graphics options
+
+// SetTopology sets the topology of vertex position data.
+// TriangleList is the default.
+// Also for Strip modes, restartEnable allows restarting a new
+// strip by inserting a ??
+// For all pipelines, to keep graphics settings consistent.
+func (sy *System) SetTopology(topo Topologies, restartEnable bool) {
+	for _, pl := range sy.Pipelines {
+		pl.SetTopology(topo, restartEnable)
+	}
+}
+
+// SetRasterization sets various options for how to rasterize shapes:
+// Defaults are: vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0
+// For all pipelines, to keep graphics settings consistent.
+func (sy *System) SetRasterization(polygonMode vk.PolygonMode, cullMode vk.CullModeFlagBits, frontFace vk.FrontFace, lineWidth float32) {
+	for _, pl := range sy.Pipelines {
+		pl.SetRasterization(polygonMode, cullMode, frontFace, lineWidth)
+	}
+}
+
+// SetColorBlend determines the color blending function:
+// either 1-source alpha (alphaBlend) or no blending:
+// new color overwrites old.  Default is alphaBlend = true
+// For all pipelines, to keep graphics settings consistent.
+func (sy *System) SetColorBlend(alphaBlend bool) {
+	for _, pl := range sy.Pipelines {
+		pl.SetColorBlend(alphaBlend)
+	}
+}
+
+// SetClearColor sets the RGBA colors to set when starting new render
+// For all pipelines, to keep graphics settings consistent.
+func (sy *System) SetClearColor(r, g, b, a float32) {
+	for _, pl := range sy.Pipelines {
+		pl.SetClearColor(r, g, b, a)
+	}
+}
+
+// SetClearDepthStencil sets the depth and stencil values when starting new render
+// For all pipelines, to keep graphics settings consistent.
+func (sy *System) SetClearDepthStencil(depth float32, stencil uint32) {
+	for _, pl := range sy.Pipelines {
+		pl.SetClearDepthStencil(depth, stencil)
+	}
+}

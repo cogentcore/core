@@ -305,7 +305,7 @@ func (sf *Surface) AcquireNextImage() uint32 {
 // to the sf.CmdPool.Buff buffer.  This buffer triggers the associated
 // Fence logic to control the sequencing of render commands over time.
 // The ImageAcquired semaphore efore the command is run.
-func (sf *Surface) SubmitRender() {
+func (sf *Surface) SubmitRender(cmd vk.CommandBuffer) {
 	ret := vk.QueueSubmit(sf.Device.Queue, 1, []vk.SubmitInfo{{
 		SType: vk.StructureTypeSubmitInfo,
 		PWaitDstStageMask: []vk.PipelineStageFlags{
@@ -314,7 +314,7 @@ func (sf *Surface) SubmitRender() {
 		WaitSemaphoreCount:   1,
 		PWaitSemaphores:      []vk.Semaphore{sf.ImageAcquired},
 		CommandBufferCount:   1,
-		PCommandBuffers:      []vk.CommandBuffer{sf.CmdPool.Buff},
+		PCommandBuffers:      []vk.CommandBuffer{cmd},
 		SignalSemaphoreCount: 1,
 		PSignalSemaphores:    []vk.Semaphore{sf.RenderDone},
 	}}, sf.RenderFence)
