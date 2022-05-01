@@ -95,7 +95,7 @@ func (pl *Pipeline) Init(sy *System) {
 }
 
 func (pl *Pipeline) InitPipeline() {
-	pl.CmdPool.Init(&pl.Sys.Device, 0)
+	pl.CmdPool.ConfigResettable(&pl.Sys.Device)
 	pl.CmdPool.NewBuffer(&pl.Sys.Device)
 }
 
@@ -259,11 +259,10 @@ func (pl *Pipeline) SetColorBlend(alphaBlend bool) {
 	}
 }
 
-// GraphicsCommand returns the command  buffer for rendering on this pipeline,
-// to given framebuffer.
-// The returned command is just pl.CmdPool.Buff
-func (pl *Pipeline) GraphicsCommand(fr *Framebuffer) vk.CommandBuffer {
-	cmd := pl.CmdPool.BeginCmdOneTime()
+// GraphicsCommand adds commands to the given command buffer to render this pipeline.
+// You must use the command buffer associated with the Surface or RenderFrame
+// which uses a fence to determine when rendering command has been submitted.
+func (pl *Pipeline) GraphicsCommand(cmd vk.CommandBuffer, fr *Framebuffer) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
 	clearValues := make([]vk.ClearValue, 2)
 	clearValues[1].SetDepthStencil(1, 0)
@@ -310,19 +309,16 @@ func (pl *Pipeline) GraphicsCommand(fr *Framebuffer) vk.CommandBuffer {
 
 	ret := vk.EndCommandBuffer(cmd)
 	IfPanic(NewError(ret))
-	return cmd
 }
 
 // RunCompute runs the compute shader for given of computational elements
 // along 3 dimensions, which are passed as indexes into the shader.
 // The values have to be bound to the vars prior to calling this.
-func (pl *Pipeline) RunCompute(nx, ny, nz int) {
-	cmd := pl.CmdPool.BeginCmdOneTime()
+func (pl *Pipeline) RunCompute(cmd vk.CommandBuffer, nx, ny, nz int) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointCompute, pl.VkPipeline)
 
 	vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,
 		0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
 
 	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
-	pl.CmdPool.SubmitWait(&pl.Sys.Device)
 }

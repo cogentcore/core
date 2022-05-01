@@ -60,7 +60,7 @@ func main() {
 
 	sy := gp.NewGraphicsSystem("drawtri", &sf.Device)
 	pl := sy.NewPipeline("drawtri")
-	sy.SetRenderPass(&sf.Format, vk.FormatUndefined)
+	sy.ConfigRenderPass(&sf.Format, vk.FormatUndefined)
 	sf.SetRenderPass(&sy.RenderPass)
 	pl.SetGraphicsDefaults()
 
@@ -74,6 +74,8 @@ func main() {
 	sy.Mem.Config()
 
 	destroy := func() {
+		vk.DeviceWaitIdle(sf.Device.Device)
+		vk.DeviceWaitIdle(sy.Device.Device)
 		sy.Destroy()
 		sf.Destroy()
 		gp.Destroy()
@@ -82,19 +84,30 @@ func main() {
 	}
 
 	frameCount := 0
+	stTime := time.Now()
 
 	renderFrame := func() {
-		fmt.Printf("frame: %d\n", frameCount)
+		// fmt.Printf("frame: %d\n", frameCount)
 		idx := sf.AcquireNextImage()
-		cmd := pl.GraphicsCommand(sf.Frames[idx])
-		sf.SubmitRender(cmd)
+		sf.CmdPool.Reset()
+		sf.CmdPool.BeginCmd()
+		pl.GraphicsCommand(sf.CmdPool.Buff, sf.Frames[idx])
+		sf.SubmitRender()
 		sf.PresentImage(idx)
 		frameCount++
+		eTime := time.Now()
+		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
+		if dur > 10 {
+			fps := float64(frameCount) / dur
+			fmt.Printf("fps: %.0f\n", fps)
+			frameCount = 0
+			stTime = eTime
+		}
 	}
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second // / 60
+	fpsDelay := time.Second / 120
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

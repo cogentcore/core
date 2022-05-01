@@ -73,7 +73,11 @@ func (sy *System) Destroy() {
 		}
 	}
 	sy.Vars.Destroy(sy.Device.Device)
-	sy.Device.Destroy()
+	if sy.Compute {
+		sy.Device.Destroy()
+	} else {
+		sy.RenderPass.Destroy()
+	}
 	sy.GPU = nil
 }
 
@@ -98,8 +102,8 @@ func (sy *System) NewPipeline(name string) *Pipeline {
 // ConfigRenderPass configures the renderpass, including the image
 // format that we're rendering to (from the Surface or Framebuffer)
 // and the depth buffer format (vk.FormatUnknown = no depth buffer)
-func (sy *System) SetRenderPass(imgFmt *ImageFormat, depthFmt vk.Format) {
-	sy.RenderPass.Init(sy.Device.Device, imgFmt, depthFmt)
+func (sy *System) ConfigRenderPass(imgFmt *ImageFormat, depthFmt vk.Format) {
+	sy.RenderPass.Config(sy.Device.Device, imgFmt, depthFmt)
 }
 
 // Config configures the entire system, after everything has been

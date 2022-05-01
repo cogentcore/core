@@ -20,7 +20,7 @@ type Surface struct {
 	GPU           *GPU           `desc:"pointer to gpu device, for convenience"`
 	Device        Device         `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
 	RenderPass    *RenderPass    `desc:"the RenderPass for this Surface, typically from a System"`
-	CmdPool       CmdPool        `desc:"command pool for surface commands -- sync waiting"`
+	CmdPool       CmdPool        `desc:"command pool which must be used for all surface rendering commands, to enable the sync logic to work properly.  It is created in Init and can be Reset() between uses."`
 	Format        ImageFormat    `desc:"has the current swapchain image format and dimensions"`
 	NFrames       int            `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
 	Frames        []*Framebuffer `desc:"Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames"`
@@ -80,7 +80,8 @@ func (sf *Surface) Init(gp *GPU, vs vk.Surface) error {
 	}
 
 	sf.Device.MakeDevice(gp)
-	sf.CmdPool.Init(&sf.Device, 0) // todo: not clear what we need this for
+	sf.CmdPool.ConfigResettable(&sf.Device)
+	sf.CmdPool.NewBuffer(&sf.Device)
 	sf.ConfigSwapchain()
 	return nil
 }
@@ -212,7 +213,6 @@ func (sf *Surface) ConfigSwapchain() {
 	sf.ImageAcquired = NewSemaphore(dev)
 	sf.RenderDone = NewSemaphore(dev)
 	sf.RenderFence = NewFence(dev)
-	vk.ResetFences(dev, 1, []vk.Fence{sf.RenderFence})
 
 	sf.Frames = make([]*Framebuffer, sf.NFrames)
 	for i := 0; i < sf.NFrames; i++ {
@@ -276,39 +276,6 @@ func (sf *Surface) Destroy() {
 	sf.GPU = nil
 }
 
-/*
-
-func (sf *Surface) FlushInitCmd() {
-	dev := sf.Device.Device
-		if sf.CmdBuff == nil {
-			return
-		}
-		ret := vk.EndCommandBuffer(sf.CmdBuff)
-		IfPanic(NewError(ret))
-
-		var fence vk.Fence
-		ret = vk.CreateFence(dev, &vk.FenceCreateInfo{
-			SType: vk.StructureTypeFenceCreateInfo,
-		}, nil, &fence)
-		IfPanic(NewError(ret))
-
-		cmdBufs := []vk.CommandBuffer{sf.CmdBuff}
-		ret = vk.QueueSubmit(sf.GPU.Queue, 1, []vk.SubmitInfo{{
-			SType:              vk.StructureTypeSubmitInfo,
-			CommandBufferCount: 1,
-			PCommandBuffers:    cmdBufs,
-		}}, fence)
-		IfPanic(NewError(ret))
-
-		ret = vk.WaitForFences(dev, 1, []vk.Fence{fence}, vk.True, vk.MaxUint64)
-		IfPanic(NewError(ret))
-
-		vk.FreeCommandBuffers(dev, sf.CmdPool.Pool, 1, cmdBufs)
-		vk.DestroyFence(dev, fence, nil)
-		sf.CmdBuff = nil
-}
-*/
-
 // AcquireNextImage gets the next frame index to render to.
 // It automatically handles any issues with out-of-date swapchain.
 // It triggers the ImageAcquired semaphore when image actually acquired.
@@ -316,24 +283,29 @@ func (sf *Surface) FlushInitCmd() {
 // on that semaphore.
 func (sf *Surface) AcquireNextImage() uint32 {
 	dev := sf.Device.Device
-	// vk.WaitForFences(dev, 1, []vk.Fence{sf.RenderFence}, vk.True, vk.MaxUint64)
-	// vk.ResetFences(dev, 1, []vk.Fence{sf.RenderFence})
+	vk.WaitForFences(dev, 1, []vk.Fence{sf.RenderFence}, vk.True, vk.MaxUint64)
+	vk.ResetFences(dev, 1, []vk.Fence{sf.RenderFence})
 	var idx uint32
 	ret := vk.AcquireNextImage(dev, sf.Swapchain, vk.MaxUint64, sf.ImageAcquired, vk.NullFence, &idx)
 	switch ret {
-	case vk.ErrorOutOfDate:
+	case vk.ErrorOutOfDate, vk.Suboptimal:
 		sf.ReConfigSwapchain()
+		if sf.GPU.Debug {
+			fmt.Printf("vgpu.Surface:AcquireNextImage, new format: %#v\n", sf.Format)
+		}
 		return sf.AcquireNextImage() // try again
-	case vk.Suboptimal, vk.Success:
+	case vk.Success:
 	default:
 		IfPanic(NewError(ret))
 	}
 	return idx
 }
 
-// SubmitRender submits the rendering command with proper waiting for the
-// ImageAcquired semaphore before the command is run.
-func (sf *Surface) SubmitRender(cmd vk.CommandBuffer) {
+// SubmitRender submits a rendering command that must have been added
+// to the sf.CmdPool.Buff buffer.  This buffer triggers the associated
+// Fence logic to control the sequencing of render commands over time.
+// The ImageAcquired semaphore efore the command is run.
+func (sf *Surface) SubmitRender() {
 	ret := vk.QueueSubmit(sf.Device.Queue, 1, []vk.SubmitInfo{{
 		SType: vk.StructureTypeSubmitInfo,
 		PWaitDstStageMask: []vk.PipelineStageFlags{
@@ -342,13 +314,16 @@ func (sf *Surface) SubmitRender(cmd vk.CommandBuffer) {
 		WaitSemaphoreCount:   1,
 		PWaitSemaphores:      []vk.Semaphore{sf.ImageAcquired},
 		CommandBufferCount:   1,
-		PCommandBuffers:      []vk.CommandBuffer{cmd},
+		PCommandBuffers:      []vk.CommandBuffer{sf.CmdPool.Buff},
 		SignalSemaphoreCount: 1,
 		PSignalSemaphores:    []vk.Semaphore{sf.RenderDone},
 	}}, sf.RenderFence)
 	IfPanic(NewError(ret))
 }
 
+// PresentImage waits on the RenderDone semaphore to present the
+// rendered image to the surface, for the given frame index,
+// as returned by AcquireNextImage.
 func (sf *Surface) PresentImage(frameIdx uint32) error {
 	ret := vk.QueuePresent(sf.Device.Queue, &vk.PresentInfo{
 		SType:              vk.StructureTypePresentInfo,
@@ -360,10 +335,13 @@ func (sf *Surface) PresentImage(frameIdx uint32) error {
 	})
 
 	switch ret {
-	case vk.ErrorOutOfDate:
+	case vk.ErrorOutOfDate, vk.Suboptimal:
 		sf.ReConfigSwapchain()
+		if sf.GPU.Debug {
+			fmt.Printf("vgpu.Surface:PresentImage, new format: %#v\n", sf.Format)
+		}
 		return fmt.Errorf("vgpu.Surface:PresentImage: swapchain was out of date, reinitialized -- not rendered")
-	case vk.Suboptimal, vk.Success:
+	case vk.Success:
 		return nil
 	default:
 		return NewError(ret)

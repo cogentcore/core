@@ -15,19 +15,35 @@ type CmdPool struct {
 	Buff vk.CommandBuffer
 }
 
-// Init initializes the pool
-func (cp *CmdPool) Init(dv *Device, flags vk.CommandPoolCreateFlagBits) {
+// ConfigTransient configures the pool for transient command buffers,
+// which are best used for random functions, such as memory copying.
+// Use SubmitWaitFree logic.
+func (cp *CmdPool) ConfigTransient(dv *Device) {
 	var cmdPool vk.CommandPool
 	ret := vk.CreateCommandPool(dv.Device, &vk.CommandPoolCreateInfo{
 		SType:            vk.StructureTypeCommandPoolCreateInfo,
 		QueueFamilyIndex: dv.QueueIndex,
-		Flags:            vk.CommandPoolCreateFlags(flags),
+		Flags:            vk.CommandPoolCreateFlags(vk.CommandPoolCreateTransientBit),
 	}, nil, &cmdPool)
 	IfPanic(NewError(ret))
 	cp.Pool = cmdPool
 }
 
-// NewBuffer makes a buffer in pool
+// ConfigResettable configures the pool for persistent,
+// resettable command buffers, used for rendering commands.
+func (cp *CmdPool) ConfigResettable(dv *Device) {
+	var cmdPool vk.CommandPool
+	ret := vk.CreateCommandPool(dv.Device, &vk.CommandPoolCreateInfo{
+		SType:            vk.StructureTypeCommandPoolCreateInfo,
+		QueueFamilyIndex: dv.QueueIndex,
+		Flags:            vk.CommandPoolCreateFlags(vk.CommandPoolCreateResetCommandBufferBit),
+	}, nil, &cmdPool)
+	IfPanic(NewError(ret))
+	cp.Pool = cmdPool
+}
+
+// NewBuffer makes a buffer in pool, setting Buff to point to it
+// and also returning the buffer.
 func (cp *CmdPool) NewBuffer(dv *Device) vk.CommandBuffer {
 	var cmdBuff = make([]vk.CommandBuffer, 1)
 	ret := vk.AllocateCommandBuffers(dv.Device, &vk.CommandBufferAllocateInfo{
@@ -79,15 +95,20 @@ func (cp *CmdPool) EndCmd() {
 	vk.EndCommandBuffer(cp.Buff)
 }
 
-// Submit submits commands in buffer to given device queue
+// Submit submits commands in buffer to given device queue, without
+// any semaphore logic -- suitable for a WaitIdle logic.
 func (cp *CmdPool) Submit(dev *Device) {
-	cmdBu := []vk.CommandBuffer{cp.Buff}
 	ret := vk.QueueSubmit(dev.Queue, 1, []vk.SubmitInfo{{
 		SType:              vk.StructureTypeSubmitInfo,
 		CommandBufferCount: 1,
-		PCommandBuffers:    cmdBu,
+		PCommandBuffers:    []vk.CommandBuffer{cp.Buff},
 	}}, vk.NullFence)
 	IfPanic(NewError(ret))
+}
+
+// Reset resets the command buffer so it is ready for recording new commands.
+func (cp *CmdPool) Reset() {
+	vk.ResetCommandBuffer(cp.Buff, 0)
 }
 
 // FreeBuffer frees the current Buff buffer
@@ -122,6 +143,7 @@ func NewFence(dev vk.Device) vk.Fence {
 	var fence vk.Fence
 	ret := vk.CreateFence(dev, &vk.FenceCreateInfo{
 		SType: vk.StructureTypeFenceCreateInfo,
+		Flags: vk.FenceCreateFlags(vk.FenceCreateSignaledBit),
 	}, nil, &fence)
 	IfPanic(NewError(ret))
 	return fence

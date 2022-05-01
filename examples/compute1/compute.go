@@ -66,7 +66,10 @@ func main() {
 
 	sy.SetVals(0, "In", "Out")
 
-	pl.RunCompute(n, 1, 1)
+	pl.CmdPool.Reset()
+	pl.CmdPool.BeginCmd()
+	pl.RunCompute(pl.CmdPool.Buff, n, 1, 1)
+	pl.CmdPool.SubmitWait(&pl.Sys.Device)
 
 	sy.Mem.SyncVarsFmGPU("Out")
 

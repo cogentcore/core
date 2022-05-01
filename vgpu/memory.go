@@ -41,7 +41,7 @@ type Memory struct {
 func (mm *Memory) Init(gp *GPU, device *Device) {
 	mm.GPU = gp
 	mm.Device = *device
-	mm.CmdPool.Init(device, vk.CommandPoolCreateTransientBit)
+	mm.CmdPool.ConfigTransient(device)
 	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
 		mm.Buffs[bt] = &MemBuff{Type: bt}
 	}

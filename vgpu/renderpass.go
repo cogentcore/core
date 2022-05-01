@@ -35,11 +35,11 @@ func (rp *RenderPass) Destroy() {
 	rp.Depth.Destroy()
 }
 
-// Init initializes the render pass for given device,
+// Config configures the render pass for given device,
 // Using standard parameters for graphics rendering,
 // based on the given image format and depth image format
 // (pass FormatUnknown for no depth buffer).
-func (rp *RenderPass) Init(dev vk.Device, imgFmt *ImageFormat, depthFmt vk.Format) {
+func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt vk.Format) {
 	// The initial layout for the color and depth attachments will be vk.LayoutUndefined
 	// because at the start of the renderpass, we don't care about their contents.
 	// At the start of the subpass, the color attachment's layout will be transitioned
