@@ -383,7 +383,7 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer) {
 	vk.CmdBindVertexBuffers(cmd, 0, uint32(len(offs)), vtxbuf, offs)
 	if idxVal != nil {
 		vktyp := idxVal.Var.Type.VkIndexType()
-		vk.CmdBindIndexBuffer(cmd, mbuf, 0, vktyp)
+		vk.CmdBindIndexBuffer(cmd, mbuf, vk.DeviceSize(idxVal.Offset), vktyp)
 		vk.CmdDrawIndexed(cmd, uint32(idxVal.N), 1, 0, 0, 0)
 	} else {
 		vk.CmdDraw(cmd, uint32(vtxn), 1, 0, 0)

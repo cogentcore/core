@@ -88,7 +88,7 @@ func main() {
 	triClr := sy.Mem.Vals.Add("TriClr", clrv, nPts)
 	triIdx := sy.Mem.Vals.Add("TriIdx", idxv, nPts)
 	// todo: not working for some reason! :(
-	// triPos.Indexes = "TriIdx" // only need to set indexes for one vertex val
+	triPos.Indexes = "TriIdx" // only need to set indexes for one vertex val
 	cam := sy.Mem.Vals.Add("Camera", camv, 1)
 
 	// note: add all values per above before doing Config
