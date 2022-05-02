@@ -10,6 +10,7 @@ package vgpu
 import (
 	"log"
 
+	"github.com/goki/ki/ints"
 	vk "github.com/vulkan-go/vulkan"
 )
 
@@ -309,25 +310,100 @@ func (pl *Pipeline) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer) {
 	}})
 }
 
-// GraphicsCommand adds commands to the given command buffer to render this pipeline.
-// BeginRenderPass must have been called at some point before this
-func (pl *Pipeline) GraphicsCommand(cmd vk.CommandBuffer) {
+// BindPipeline adds commands to the given command buffer to render this pipeline.
+// BeginRenderPass must have been called at some point before this.
+func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
 
 	if len(pl.Sys.Vars.SetMap) > 0 {
 		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,
 			0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
 	}
+}
 
-	vk.CmdDraw(cmd, 3, 1, 0, 0) // todo: need to have this all info from input!
+// Draw adds CmdDraw command to the given command buffer
+// BindPipeline must have been called before this.
+// SeeDrawVertex for more typical case using Vertex (and Index) variables.
+func (pl *Pipeline) Draw(cmd vk.CommandBuffer, vtxCount, instanceCount, firstVtx, firstInstance int) {
+	vk.CmdDraw(cmd, uint32(vtxCount), uint32(instanceCount), uint32(firstVtx), uint32(firstInstance))
+}
 
+// DrawVertex adds commands to the given command buffer
+// to bind vertex / index values and Draw
+// based on current vals for any Vertex (and associated Index) Vars
+func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer) {
+	var offs []vk.DeviceSize
+	var vtxVal *Val
+	vtxn := 0
+	for _, vr := range pl.Sys.Vars.Vars {
+		vl := vr.CurVal
+		if vl == nil || vr.Role != Vertex {
+			continue
+		}
+		offs = append(offs, vk.DeviceSize(vl.Offset))
+		if vtxn == 0 {
+			vtxn = vl.N
+		} else {
+			vtxn = ints.MinInt(vtxn, vl.N)
+		}
+		if vl.Indexes != "" {
+			iv, err := pl.Sys.Mem.Vals.ValByNameTry(vl.Indexes)
+			if err != nil {
+				log.Println(err)
+			} else {
+				vtxVal = iv
+			}
+		}
+	}
+	mbuf := pl.Sys.Mem.Buffs[VtxIdxBuff].Dev
+	vtxbuf := make([]vk.Buffer, len(offs))
+	for i := range vtxbuf {
+		vtxbuf[i] = mbuf
+	}
+	vk.CmdBindVertexBuffers(cmd, 0, uint32(len(offs)), vtxbuf, offs)
+	if vtxVal != nil {
+		vk.CmdBindIndexBuffer(cmd, mbuf, 0, vtxVal.Var.Type.VkIndexType())
+		vk.CmdDrawIndexed(cmd, uint32(vtxVal.N), 1, 0, 0, 0)
+	} else {
+		vk.CmdDraw(cmd, uint32(vtxn), 1, 0, 0)
+	}
+}
+
+// BindDrawVertex adds commands to the given command buffer
+// to bind this pipeline, and then bind vertex / index values and Draw
+// based on current vals for any Vertex (and associated Index) Vars.
+// This is the standard unit of drawing between Begin and End.
+func (pl *Pipeline) BindDrawVertex(cmd vk.CommandBuffer) {
+	pl.BindPipeline(cmd)
+	pl.DrawVertex(cmd)
+}
+
+// EndRenderPass adds commands to the given command buffer
+// to end the render pass.  It does not call EndCommandBuffer,
+// in case any further commands are to be added.
+func (pl *Pipeline) EndRenderPass(cmd vk.CommandBuffer) {
 	// Note that ending the renderpass changes the image's layout from
 	// vk.ImageLayoutColorAttachmentOptimal to vk.ImageLayoutPresentSrc
 	vk.CmdEndRenderPass(cmd)
-
-	ret := vk.EndCommandBuffer(cmd)
-	IfPanic(NewError(ret))
 }
+
+// FullStdRender adds commands to the given command buffer
+// to perform a full standard render using Vertex input vars:
+// CmdReset, CmdBegin, BeginRenderPass, BindPipeline,
+// DrawVertex, EndRenderPass, EndCmd.
+// This is mainly for demo / informational purposes as usually multiple
+// pipeline draws are performed between Begin and End.
+func (pl *Pipeline) FullStdRender(cmd vk.CommandBuffer, fr *Framebuffer) {
+	CmdReset(cmd)
+	CmdBegin(cmd)
+	pl.BeginRenderPass(cmd, fr)
+	pl.BindDrawVertex(cmd)
+	pl.EndRenderPass(cmd)
+	CmdEnd(cmd)
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+//  Compute
 
 // ComputeCommand adds commands to run the compute shader for given
 // number of computational elements along 3 dimensions,
@@ -340,4 +416,17 @@ func (pl *Pipeline) ComputeCommand(cmd vk.CommandBuffer, nx, ny, nz int) {
 		0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
 
 	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
+}
+
+// RunComputeWait runs the compute shader for given
+// number of computational elements along 3 dimensions,
+// which are passed as indexes into the shader.
+// The values have to be bound to the vars prior to calling this.
+// Submits the run command and waits for the queue to finish so the
+// results will be available immediately after this.
+func (pl *Pipeline) RunComputeWait(cmd vk.CommandBuffer, nx, ny, nz int) {
+	CmdReset(cmd)
+	CmdBegin(cmd)
+	pl.ComputeCommand(cmd, nx, ny, nz)
+	CmdSubmitWait(cmd, &pl.Sys.Device)
 }

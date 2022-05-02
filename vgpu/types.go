@@ -28,6 +28,9 @@ const (
 	UndefType Types = iota
 	Bool32
 
+	Int16
+	Uint16
+
 	Int32
 	Int32Vec2
 	Int32Vec4
@@ -61,6 +64,20 @@ const (
 
 var KiT_Types = kit.Enums.AddEnum(TypesN, kit.NotBitFlag, nil)
 
+// VkType returns the Vulkan VkFormat for given type
+func (tp Types) VkType() vk.Format {
+	return VulkanTypes[tp]
+}
+
+// VkIndexType returns the Vulkan vk.IndexType for var
+// must be either Uint16 or Uint32
+func (tp Types) VkIndexType() vk.IndexType {
+	if tp == Uint16 {
+		return vk.IndexTypeUint16
+	}
+	return vk.IndexTypeUint32
+}
+
 // Bytes returns number of bytes for this type
 func (tp Types) Bytes() int {
 	if tp == Float32Mat4 {
@@ -75,6 +92,8 @@ func (tp Types) Bytes() int {
 // FormatSizes gives size of known vulkan formats in bytes
 var FormatSizes = map[vk.Format]int{
 	vk.FormatUndefined:          0,
+	vk.FormatR16Sint:            2,
+	vk.FormatR16Uint:            2,
 	vk.FormatR32Sint:            4,
 	vk.FormatR32g32Sint:         8,
 	vk.FormatR32g32b32a32Sint:   16,
@@ -98,6 +117,8 @@ var FormatSizes = map[vk.Format]int{
 var VulkanTypes = map[Types]vk.Format{
 	UndefType:    vk.FormatUndefined,
 	Bool32:       vk.FormatR32Uint,
+	Int16:        vk.FormatR16Sint,
+	Uint16:       vk.FormatR16Uint,
 	Int32:        vk.FormatR32Sint,
 	Int32Vec2:    vk.FormatR32g32Sint,
 	Int32Vec4:    vk.FormatR32g32b32a32Sint,

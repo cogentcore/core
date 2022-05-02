@@ -28,6 +28,7 @@ type Var struct {
 	BindLoc   int                    `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
 	SizeOf    int                    `desc:"size in bytes of one element (not array size).  Note that arrays require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint."`
 	DynOffIdx int                    `desc:"index into the dynamic offset list, where dynamic offsets of vals need to be set"`
+	CurVal    *Val                   `desc:"last (current) value set for this variable -- set by System SetVals"`
 }
 
 // Init initializes the main values

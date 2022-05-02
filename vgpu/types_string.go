@@ -15,31 +15,33 @@ func _() {
 	var x [1]struct{}
 	_ = x[UndefType-0]
 	_ = x[Bool32-1]
-	_ = x[Int32-2]
-	_ = x[Int32Vec2-3]
-	_ = x[Int32Vec4-4]
-	_ = x[Uint32-5]
-	_ = x[Uint32Vec2-6]
-	_ = x[Uint32Vec4-7]
-	_ = x[Float32-8]
-	_ = x[Float32Vec2-9]
-	_ = x[Float32Vec3-10]
-	_ = x[Float32Vec4-11]
-	_ = x[Float64-12]
-	_ = x[Float64Vec2-13]
-	_ = x[Float64Vec3-14]
-	_ = x[Float64Vec4-15]
-	_ = x[Float32Mat4-16]
-	_ = x[ImageRGBA32-17]
-	_ = x[Depth32-18]
-	_ = x[Depth24Sten8-19]
-	_ = x[Struct-20]
-	_ = x[TypesN-21]
+	_ = x[Int16-2]
+	_ = x[Uint16-3]
+	_ = x[Int32-4]
+	_ = x[Int32Vec2-5]
+	_ = x[Int32Vec4-6]
+	_ = x[Uint32-7]
+	_ = x[Uint32Vec2-8]
+	_ = x[Uint32Vec4-9]
+	_ = x[Float32-10]
+	_ = x[Float32Vec2-11]
+	_ = x[Float32Vec3-12]
+	_ = x[Float32Vec4-13]
+	_ = x[Float64-14]
+	_ = x[Float64Vec2-15]
+	_ = x[Float64Vec3-16]
+	_ = x[Float64Vec4-17]
+	_ = x[Float32Mat4-18]
+	_ = x[ImageRGBA32-19]
+	_ = x[Depth32-20]
+	_ = x[Depth24Sten8-21]
+	_ = x[Struct-22]
+	_ = x[TypesN-23]
 }
 
-const _Types_name = "UndefTypeBool32Int32Int32Vec2Int32Vec4Uint32Uint32Vec2Uint32Vec4Float32Float32Vec2Float32Vec3Float32Vec4Float64Float64Vec2Float64Vec3Float64Vec4Float32Mat4ImageRGBA32Depth32Depth24Sten8StructTypesN"
+const _Types_name = "UndefTypeBool32Int16Uint16Int32Int32Vec2Int32Vec4Uint32Uint32Vec2Uint32Vec4Float32Float32Vec2Float32Vec3Float32Vec4Float64Float64Vec2Float64Vec3Float64Vec4Float32Mat4ImageRGBA32Depth32Depth24Sten8StructTypesN"
 
-var _Types_index = [...]uint8{0, 9, 15, 20, 29, 38, 44, 54, 64, 71, 82, 93, 104, 111, 122, 133, 144, 155, 166, 173, 185, 191, 197}
+var _Types_index = [...]uint8{0, 9, 15, 20, 26, 31, 40, 49, 55, 65, 75, 82, 93, 104, 115, 122, 133, 144, 155, 166, 177, 184, 196, 202, 208}
 
 func (i Types) String() string {
 	if i < 0 || i >= Types(len(_Types_index)-1) {

@@ -60,28 +60,19 @@ func (cp *CmdPool) NewBuffer(dv *Device) vk.CommandBuffer {
 
 // BeginCmd does BeginCommandBuffer on buffer
 func (cp *CmdPool) BeginCmd() vk.CommandBuffer {
-	ret := vk.BeginCommandBuffer(cp.Buff, &vk.CommandBufferBeginInfo{
-		SType: vk.StructureTypeCommandBufferBeginInfo,
-	})
-	IfPanic(NewError(ret))
+	CmdBegin(cp.Buff)
 	return cp.Buff
 }
 
 // BeginCmdOneTime does BeginCommandBuffer with OneTimeSubmit set on buffer
 func (cp *CmdPool) BeginCmdOneTime() vk.CommandBuffer {
-	ret := vk.BeginCommandBuffer(cp.Buff, &vk.CommandBufferBeginInfo{
-		SType: vk.StructureTypeCommandBufferBeginInfo,
-		Flags: vk.CommandBufferUsageFlags(vk.CommandBufferUsageOneTimeSubmitBit),
-	})
-	IfPanic(NewError(ret))
+	CmdBeginOneTime(cp.Buff)
 	return cp.Buff
 }
 
 // SubmitWait does End, Submit, WaitIdle on Buffer
 func (cp *CmdPool) SubmitWait(dev *Device) {
-	cp.EndCmd()
-	cp.Submit(dev)
-	vk.QueueWaitIdle(dev.Queue)
+	CmdSubmitWait(cp.Buff, dev)
 }
 
 // SubmitWaitFree does End, Submit, WaitIdle, Free on Buffer
@@ -92,23 +83,18 @@ func (cp *CmdPool) SubmitWaitFree(dev *Device) {
 
 // EndCmd does EndCommandBuffer on buffer
 func (cp *CmdPool) EndCmd() {
-	vk.EndCommandBuffer(cp.Buff)
+	CmdEnd(cp.Buff)
 }
 
 // Submit submits commands in buffer to given device queue, without
 // any semaphore logic -- suitable for a WaitIdle logic.
 func (cp *CmdPool) Submit(dev *Device) {
-	ret := vk.QueueSubmit(dev.Queue, 1, []vk.SubmitInfo{{
-		SType:              vk.StructureTypeSubmitInfo,
-		CommandBufferCount: 1,
-		PCommandBuffers:    []vk.CommandBuffer{cp.Buff},
-	}}, vk.NullFence)
-	IfPanic(NewError(ret))
+	CmdSubmit(cp.Buff, dev)
 }
 
 // Reset resets the command buffer so it is ready for recording new commands.
 func (cp *CmdPool) Reset() {
-	vk.ResetCommandBuffer(cp.Buff, 0)
+	CmdReset(cp.Buff)
 }
 
 // FreeBuffer frees the current Buff buffer
@@ -127,7 +113,56 @@ func (cp *CmdPool) Destroy(dev vk.Device) {
 	cp.Pool = nil
 }
 
-////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+// Command Buffer functions
+
+// CmdBegin does BeginCommandBuffer on buffer
+func CmdBegin(cmd vk.CommandBuffer) {
+	ret := vk.BeginCommandBuffer(cmd, &vk.CommandBufferBeginInfo{
+		SType: vk.StructureTypeCommandBufferBeginInfo,
+	})
+	IfPanic(NewError(ret))
+}
+
+// CmdBeginOneTime does BeginCommandBuffer with OneTimeSubmit set on buffer
+func CmdBeginOneTime(cmd vk.CommandBuffer) {
+	ret := vk.BeginCommandBuffer(cmd, &vk.CommandBufferBeginInfo{
+		SType: vk.StructureTypeCommandBufferBeginInfo,
+		Flags: vk.CommandBufferUsageFlags(vk.CommandBufferUsageOneTimeSubmitBit),
+	})
+	IfPanic(NewError(ret))
+}
+
+// CmdSubmit submits commands in buffer to given device queue, without
+// any semaphore logic -- suitable for a WaitIdle logic.
+func CmdSubmit(cmd vk.CommandBuffer, dev *Device) {
+	ret := vk.QueueSubmit(dev.Queue, 1, []vk.SubmitInfo{{
+		SType:              vk.StructureTypeSubmitInfo,
+		CommandBufferCount: 1,
+		PCommandBuffers:    []vk.CommandBuffer{cmd},
+	}}, vk.NullFence)
+	IfPanic(NewError(ret))
+}
+
+// CmdSubmitWait does End, Submit, WaitIdle on command Buffer
+func CmdSubmitWait(cmd vk.CommandBuffer, dev *Device) {
+	CmdEnd(cmd)
+	CmdSubmit(cmd, dev)
+	vk.QueueWaitIdle(dev.Queue)
+}
+
+// CmdEnd does EndCommandBuffer on buffer
+func CmdEnd(cmd vk.CommandBuffer) {
+	ret := vk.EndCommandBuffer(cmd)
+	IfPanic(NewError(ret))
+}
+
+// CmdReset resets the command buffer so it is ready for recording new commands.
+func CmdReset(cmd vk.CommandBuffer) {
+	vk.ResetCommandBuffer(cmd, 0)
+}
+
+//////////////////////////////////////////////////////////////
 // Semaphors & Fences
 
 func NewSemaphore(dev vk.Device) vk.Semaphore {

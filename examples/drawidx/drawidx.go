@@ -13,10 +13,12 @@ import (
 	"log"
 	"runtime"
 	"time"
+	"unsafe"
 
 	vk "github.com/vulkan-go/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
 )
 
@@ -27,6 +29,12 @@ func init() {
 }
 
 var TheGPU *vgpu.GPU
+
+type CamView struct {
+	Model mat32.Mat4
+	View  mat32.Mat4
+	Prjn  mat32.Mat4
+}
 
 func main() {
 	glfw.Init()
@@ -42,7 +50,7 @@ func main() {
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
 	gp.Debug = true
-	gp.Config("drawtri")
+	gp.Config("drawidx")
 	TheGPU = gp
 
 	// gp.PropsString(true) // print
@@ -56,20 +64,51 @@ func main() {
 
 	fmt.Printf("format: %#v\n", sf.Format)
 
-	sy := gp.NewGraphicsSystem("drawtri", &sf.Device)
-	pl := sy.NewPipeline("drawtri")
+	sy := gp.NewGraphicsSystem("drawidx", &sf.Device)
+	pl := sy.NewPipeline("drawidx")
 	sy.ConfigRenderPass(&sf.Format, vk.FormatUndefined)
 	sf.SetRenderPass(&sy.RenderPass)
 	pl.SetGraphicsDefaults()
 
-	pl.AddShaderFile("trianglelit", vgpu.VertexShader, "trianglelit.spv")
+	pl.AddShaderFile("indexed", vgpu.VertexShader, "indexed.spv")
 	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
 
-	inv := sy.Vars.Add("Vtx", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.VertexShader)
-	_ = inv
+	posv := sy.Vars.Add("Pos", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
+	clrv := sy.Vars.Add("Color", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
+
+	camv := sy.Vars.Add("Camera", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
+	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
+
+	nPts := 3
+
+	triPos := sy.Mem.Vals.Add("TriPos", posv, nPts)
+	triClr := sy.Mem.Vals.Add("TriClr", clrv, nPts)
+	cam := sy.Mem.Vals.Add("Camera", camv, 1)
 
 	sy.Config()
 	sy.Mem.Config()
+
+	triPosA := triPos.Floats32()
+	triPosA.Set(0,
+		-0.5, 0.5, 0.0,
+		0.5, 0.5, 0.0,
+		0.0, -0.5, 0.0)
+
+	triClrA := triClr.Floats32()
+	triClrA.Set(0,
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0)
+
+	var camo CamView
+	camo.Model.SetIdentity()
+	camo.View.SetIdentity()
+	camo.Prjn.SetPerspective(30, 1.5, 0.01, 1000)
+
+	cam.CopyBytes(unsafe.Pointer(&camo))
+
+	sy.Mem.SyncToGPU()
+	sy.SetVals(0, "TriPos", "TriClr", "Camera")
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
@@ -86,13 +125,15 @@ func main() {
 
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
+		// rt := time.Now()
 		idx := sf.AcquireNextImage()
-		pl.CmdPool.Reset()
-		pl.CmdPool.BeginCmd()
-		pl.BeginRenderPass(pl.CmdPool.Buff, sf.Frames[idx])
-		pl.GraphicsCommand(pl.CmdPool.Buff)
-		sf.SubmitRender(pl.CmdPool.Buff)
+		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
+		pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx])
+		// fmt.Printf("cmd %v\n", time.Now().Sub(rt))
+		sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
+		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
 		sf.PresentImage(idx)
+		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
@@ -106,7 +147,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 60
+	fpsDelay := time.Second / 600
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

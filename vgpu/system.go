@@ -132,6 +132,7 @@ func (sy *System) SetVals(set int, vals ...string) {
 			log.Println(err)
 			continue
 		}
+		vl.Var.CurVal = vl
 		wd := vk.WriteDescriptorSet{
 			SType:           vk.StructureTypeWriteDescriptorSet,
 			DstSet:          sd.DescSet,

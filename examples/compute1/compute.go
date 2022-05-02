@@ -66,11 +66,8 @@ func main() {
 
 	sy.SetVals(0, "In", "Out")
 
-	pl.CmdPool.Reset()
-	pl.CmdPool.BeginCmd()
-	pl.ComputeCommand(pl.CmdPool.Buff, n, 1, 1)
+	pl.RunComputeWait(pl.CmdPool.Buff, n, 1, 1)
 	// note: could use semaphore here instead of waiting on the compute
-	pl.CmdPool.SubmitWait(&pl.Sys.Device)
 
 	sy.Mem.SyncVarsFmGPU("Out")
 
