@@ -140,9 +140,20 @@ func (vs *Vars) Config() {
 	}
 }
 
+// StringDoc returns info on variables
 func (vs *Vars) StringDoc() string {
 	ispc := 4
 	var sb strings.Builder
+	for ri := Vertex; ri < Uniform; ri++ {
+		vrs, ok := vs.RoleMap[ri]
+		if !ok || len(vrs) == 0 {
+			continue
+		}
+		sb.WriteString(fmt.Sprintf("%sRole: %s\n", indent.Spaces(0, ispc), ri.String()))
+		for _, vr := range vrs {
+			sb.WriteString(fmt.Sprintf("%sVar: %s\n", indent.Spaces(1, ispc), vr.String()))
+		}
+	}
 	ns := len(vs.SetMap)
 	for si := 0; si < ns; si++ {
 		sb.WriteString(fmt.Sprintf("Set: %d\n", si))
@@ -186,7 +197,7 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 		attr = append(attr, vk.VertexInputAttributeDescription{
 			Location: uint32(vr.BindLoc),
 			Binding:  uint32(vr.BindLoc),
-			Format:   vk.Format(vr.Type),
+			Format:   vr.Type.VkType(),
 			Offset:   0,
 		})
 	}

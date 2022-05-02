@@ -59,8 +59,8 @@ func main() {
 		idat[i*4+1] = rand.Float32()
 		idat[i*4+2] = rand.Float32()
 		idat[i*4+3] = rand.Float32()
-		ivl.Mod = true
 	}
+	ivl.Mod = true
 
 	sy.Mem.SyncToGPU()
 

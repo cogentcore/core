@@ -111,7 +111,9 @@ func (sy *System) ConfigRenderPass(imgFmt *ImageFormat, depthFmt vk.Format) {
 // be configured and are not Config'd by this call.
 func (sy *System) Config() {
 	sy.Vars.Config()
-	fmt.Printf("%s\n", sy.Vars.StringDoc())
+	if sy.GPU.Debug {
+		fmt.Printf("%s\n", sy.Vars.StringDoc())
+	}
 	sy.Vars.DescLayout(sy.Device.Device)
 	for _, pl := range sy.Pipelines {
 		pl.Config()
@@ -122,17 +124,19 @@ func (sy *System) Config() {
 // that they appear in the Set list of roles and vars
 func (sy *System) SetVals(set int, vals ...string) {
 	nv := len(vals)
-	ws := make([]vk.WriteDescriptorSet, nv)
+	var ws []vk.WriteDescriptorSet
 	sd := sy.Vars.SetDesc[set]
 	nv = ints.MinInt(nv, len(sd.Vars))
-	for i := 0; i < nv; i++ {
-		vnm := vals[i]
+	for _, vnm := range vals {
 		vl, err := sy.Mem.Vals.ValByNameTry(vnm)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		vl.Var.CurVal = vl
+		if vl.Var.Role < Uniform {
+			continue
+		}
 		wd := vk.WriteDescriptorSet{
 			SType:           vk.StructureTypeWriteDescriptorSet,
 			DstSet:          sd.DescSet,
@@ -158,9 +162,11 @@ func (sy *System) SetVals(set int, vals ...string) {
 			// wd.DescriptorCount = uint32(len(texEnabled))
 			// wd.PImageInfo =      texInfos
 		}
-		ws[i] = wd
+		ws = append(ws, wd)
 	}
-	vk.UpdateDescriptorSets(sy.Device.Device, uint32(nv), ws, 0, nil)
+	if len(ws) > 0 {
+		vk.UpdateDescriptorSets(sy.Device.Device, uint32(len(ws)), ws, 0, nil)
+	}
 }
 
 //////////////////////////////////////////////////////////////

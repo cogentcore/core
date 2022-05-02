@@ -69,6 +69,8 @@ func main() {
 	sy.ConfigRenderPass(&sf.Format, vk.FormatUndefined)
 	sf.SetRenderPass(&sy.RenderPass)
 	pl.SetGraphicsDefaults()
+	pl.SetClearColor(0.2, 0.2, 0.2, 1)
+	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 
 	pl.AddShaderFile("indexed", vgpu.VertexShader, "indexed.spv")
 	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
@@ -93,21 +95,32 @@ func main() {
 		-0.5, 0.5, 0.0,
 		0.5, 0.5, 0.0,
 		0.0, -0.5, 0.0)
+	triPos.Mod = true
 
 	triClrA := triClr.Floats32()
 	triClrA.Set(0,
 		1.0, 0.0, 0.0,
 		0.0, 1.0, 0.0,
 		0.0, 0.0, 1.0)
+	triClr.Mod = true
 
 	var camo CamView
 	camo.Model.SetIdentity()
+	camo.Model.SetRotationY(.5)
+	camo.View.LookAt(mat32.Vec3{2, 2, 2}, mat32.Vec3{0, 0, 0}, mat32.Vec3{0, 0, 1})
+	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
 	camo.View.SetIdentity()
-	camo.Prjn.SetPerspective(30, 1.5, 0.01, 1000)
+	fmt.Printf("aspect: %g\n", aspect)
+	camo.Prjn.SetPerspective(90, aspect, 0.1, 10)
+	camo.Prjn.SetIdentity()
+	// camo.Prjn[5] *= -1
 
-	cam.CopyBytes(unsafe.Pointer(&camo))
+	cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+	// camf := cam.Floats32()
+	// fmt.Printf("cam: %v\n", camf)
 
 	sy.Mem.SyncToGPU()
+
 	sy.SetVals(0, "TriPos", "TriClr", "Camera")
 
 	destroy := func() {
@@ -126,6 +139,10 @@ func main() {
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
+		camo.Model.SetRotationY(.05 * float32(frameCount))
+		cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+		sy.Mem.SyncToGPU()
+
 		idx := sf.AcquireNextImage()
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
 		pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx])
@@ -147,7 +164,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 600
+	fpsDelay := time.Second / 10
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

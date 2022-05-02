@@ -14,7 +14,8 @@ layout(location = 0) out vec3 FragColor;
 // layout(location = 1) out vec2 FragTexCoord;
 
 void main() {
-    gl_Position = Camera.Proj * Camera.View * Camera.Model * vec4(Pos, 1.0);
+   vec4 pos = vec4(Pos, 1.0);
+   gl_Position = Camera.Proj * Camera.View * Camera.Model * pos;
     FragColor = Color;
    // FragTexCoord = TexCoord;
 }

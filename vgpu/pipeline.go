@@ -316,7 +316,7 @@ func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
 
 	if len(pl.Sys.Vars.SetMap) > 0 {
-		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,
+		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, pl.Sys.Vars.VkDescLayout,
 			0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
 	}
 }

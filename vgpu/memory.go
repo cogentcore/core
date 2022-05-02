@@ -72,7 +72,8 @@ func (mm *Memory) Alloc() {
 // AllocBuff allocates memory for given buffer
 func (mm *Memory) AllocBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
-	bsz := mm.Vals.MemSize(bt)
+	buff.AlignBytes = buff.Type.AlignBytes(mm.GPU)
+	bsz := mm.Vals.MemSize(buff)
 	buff.Alloc(mm.Device.Device, bsz)
 	mm.Vals.Alloc(buff, 0)
 }
@@ -177,7 +178,7 @@ func (mm *Memory) SyncToGPU() {
 // SyncToGPUBuff syncs all modified Val regions from CPU to GPU device memory, for given buff
 func (mm *Memory) SyncToGPUBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
-	mods := mm.Vals.ModRegs()
+	mods := mm.Vals.ModRegs(bt)
 	if len(mods) == 0 {
 		return
 	}

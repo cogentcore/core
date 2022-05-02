@@ -166,12 +166,17 @@ func (vs *Vals) ValByNameTry(name string) (*Val, error) {
 }
 
 // MemSize returns size across all Vals
-func (vs *Vals) MemSize(bt BuffTypes) int {
+func (vs *Vals) MemSize(buff *MemBuff) int {
+	offset := 0
 	tsz := 0
 	for _, vl := range vs.Vals {
-		if vl.BuffType() == bt {
-			tsz += vl.AllocSize()
+		if vl.BuffType() != buff.Type {
+			continue
 		}
+		sz := vl.AllocSize()
+		esz := MemSizeAlign(sz, buff.AlignBytes)
+		offset += esz
+		tsz += esz
 	}
 	return tsz
 }
@@ -205,11 +210,12 @@ func (vs *Vals) Free(buff *MemBuff) {
 	}
 }
 
-// ModRegs returns the regions of Vals that have been modified
-func (vs *Vals) ModRegs() []MemReg {
+// ModRegs returns the regions of Vals that have been modified in given
+// type of buffer
+func (vs *Vals) ModRegs(bt BuffTypes) []MemReg {
 	var mods []MemReg
 	for _, vl := range vs.Vals {
-		if vl.Mod {
+		if vl.Mod && vl.BuffType() == bt {
 			mods = append(mods, vl.MemReg())
 		}
 	}

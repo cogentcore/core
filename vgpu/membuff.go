@@ -52,7 +52,6 @@ func (mb *MemBuff) Alloc(dev vk.Device, bsz int) bool {
 	mb.Size = bsz
 
 	mb.HostPtr = MapMemory(dev, mb.HostMem, mb.Size)
-	mb.AlignBytes = mb.Type.AlignBytes(TheGPU)
 	return true
 }
 
