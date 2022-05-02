@@ -122,4 +122,5 @@ func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types)
 // SetDepthSize sets size of the Depth buffer, allocating a new one as needed
 func (rp *RenderPass) SetDepthSize(size image.Point) {
 	rp.Depth.SetSize(size)
+	rp.Depth.ConfigDepthView()
 }

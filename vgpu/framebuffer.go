@@ -81,7 +81,7 @@ func (fb *Framebuffer) DestroyFrame() {
 func (fb *Framebuffer) Config() {
 	fb.DestroyFrame()
 	ivs := []vk.ImageView{fb.Image.View}
-	if fb.RenderPass.Depth.IsActive() {
+	if fb.RenderPass.HasDepth {
 		ivs = append(ivs, fb.RenderPass.Depth.View)
 	}
 	w, h := fb.Image.Format.Size32()

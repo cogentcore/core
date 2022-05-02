@@ -78,7 +78,7 @@ func main() {
 	posv := sy.Vars.Add("Pos", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
 	clrv := sy.Vars.Add("Color", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
 	// note: always put indexes last so there isn't a gap in the location indexes!
-	idxv := sy.Vars.Add("Index", vgpu.Uint32, vgpu.Index, 0, vgpu.VertexShader)
+	idxv := sy.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
 
 	camv := sy.Vars.Add("Camera", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
 	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
@@ -109,7 +109,7 @@ func main() {
 		0.0, 0.0, 1.0)
 	triClr.Mod = true
 
-	idxs := []uint32{0, 1, 2}
+	idxs := []uint16{0, 1, 2}
 	triIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
 
 	// This is the standard camera view projection computation

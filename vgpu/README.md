@@ -13,6 +13,9 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 
 # TODO
 
+* indexing inexplicably not working..
+* multisampling
+
 * Figure out when you need to call the Update* binding vs. just the dynamic binding - in principle for pure Uniform / Storage updates, don't need the Update guy.
 
 * Full Phong package -- shouldn't have to write that separately.
