@@ -650,6 +650,7 @@ func NewLookAt(eye, target, up Vec3) *Mat4 {
 
 // SetFrustum sets this matrix to a projection frustum matrix bounded by the specified planes.
 func (m *Mat4) SetFrustum(left, right, bottom, top, near, far float32) {
+	fmn := far - near
 	m[0] = 2 * near / (right - left)
 	m[1] = 0
 	m[2] = 0
@@ -660,11 +661,11 @@ func (m *Mat4) SetFrustum(left, right, bottom, top, near, far float32) {
 	m[7] = 0
 	m[8] = (right + left) / (right - left)
 	m[9] = (top + bottom) / (top - bottom)
-	m[10] = -(far + near) / (far - near)
+	m[10] = -(far + near) / fmn
 	m[11] = -1
 	m[12] = 0
 	m[13] = 0
-	m[14] = -(2 * far * near) / (far - near)
+	m[14] = -(2 * far * near) / fmn
 	m[15] = 0
 }
 
@@ -700,4 +701,46 @@ func (m *Mat4) SetOrthographic(width, height, near, far float32) {
 	m[7] = 0
 	m[11] = 0
 	m[15] = 1
+}
+
+// SetVkFrustum sets this matrix to a projection frustum matrix bounded by the specified planes.
+// This version is for use with Vulkan, and does the equivalent of GLM_DEPTH_ZERO_ONE in glm
+// and also multiplies the Y axis by -1, preserving the original OpenGL Y-up system.
+// OpenGL provides a "natural" coordinate system for the physical world
+// so it is useful to retain that for the world system and just convert
+// on the way out to the render using this projection matrix.
+func (m *Mat4) SetVkFrustum(left, right, bottom, top, near, far float32) {
+	fmn := far - near
+	m[0] = 2 * near / (right - left)
+	m[1] = 0
+	m[2] = 0
+	m[3] = 0
+	m[4] = 0
+	m[5] = -2 * near / (top - bottom)
+	m[6] = 0
+	m[7] = 0
+	m[8] = (right + left) / (right - left)
+	m[9] = (top + bottom) / (top - bottom)
+	m[10] = -far / fmn
+	m[11] = -1
+	m[12] = 0
+	m[13] = 0
+	m[14] = -(far * near) / fmn
+	m[15] = 0
+}
+
+// SetVkPerspective sets this matrix to a vulkan appropriate perspective
+// projection matrix, assuming the use of the OpenGL Y-up
+// coordinate system for the geometry points.
+// OpenGL provides a "natural" coordinate system for the physical world
+// so it is useful to retain that for the world system and just convert
+// on the way out to the render using this projection matrix.
+// The specified field of view is in degrees,
+// aspect ratio (width/height) and near and far planes.
+func (m *Mat4) SetVkPerspective(fov, aspect, near, far float32) {
+	ymax := near * Tan(DegToRad(fov*0.5))
+	ymin := -ymax
+	xmin := ymin * aspect
+	xmax := ymax * aspect
+	m.SetVkFrustum(xmin, xmax, ymin, ymax, near, far)
 }
