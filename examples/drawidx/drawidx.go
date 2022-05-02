@@ -66,7 +66,7 @@ func main() {
 
 	sy := gp.NewGraphicsSystem("drawidx", &sf.Device)
 	pl := sy.NewPipeline("drawidx")
-	sy.ConfigRenderPass(&sf.Format, vk.FormatUndefined)
+	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
 	sf.SetRenderPass(&sy.RenderPass)
 	pl.SetGraphicsDefaults()
 	pl.SetClearColor(0.2, 0.2, 0.2, 1)
@@ -77,16 +77,21 @@ func main() {
 
 	posv := sy.Vars.Add("Pos", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
 	clrv := sy.Vars.Add("Color", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
+	// note: always put indexes last so there isn't a gap in the location indexes!
+	idxv := sy.Vars.Add("Index", vgpu.Uint32, vgpu.Index, 0, vgpu.VertexShader)
 
 	camv := sy.Vars.Add("Camera", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
 	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
 
 	nPts := 3
-
 	triPos := sy.Mem.Vals.Add("TriPos", posv, nPts)
 	triClr := sy.Mem.Vals.Add("TriClr", clrv, nPts)
+	triIdx := sy.Mem.Vals.Add("TriIdx", idxv, nPts)
+	// todo: not working for some reason! :(
+	// triPos.Indexes = "TriIdx" // only need to set indexes for one vertex val
 	cam := sy.Mem.Vals.Add("Camera", camv, 1)
 
+	// note: add all values per above before doing Config
 	sy.Config()
 	sy.Mem.Config()
 
@@ -94,7 +99,7 @@ func main() {
 	triPosA.Set(0,
 		-0.5, 0.5, 0.0,
 		0.5, 0.5, 0.0,
-		0.0, -0.5, 0.0)
+		0.0, -0.5, 0.0) // negative point is UP in native Vulkan
 	triPos.Mod = true
 
 	triClrA := triClr.Floats32()
@@ -104,20 +109,30 @@ func main() {
 		0.0, 0.0, 1.0)
 	triClr.Mod = true
 
+	idxs := []uint32{0, 1, 2}
+	triIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+
+	// This is the standard camera view projection computation
+	campos := mat32.Vec3{0, 0, 2}
+	target := mat32.Vec3{0, 0, 0}
+	var lookq mat32.Quat
+	lookq.SetFromRotationMatrix(mat32.NewLookAt(campos, target, mat32.Vec3Y))
+	scale := mat32.Vec3{1, 1, 1}
+	var cview mat32.Mat4
+	cview.SetTransform(campos, lookq, scale)
+	view, _ := cview.Inverse()
+
 	var camo CamView
 	camo.Model.SetIdentity()
-	camo.Model.SetRotationY(.5)
-	camo.View.LookAt(mat32.Vec3{2, 2, 2}, mat32.Vec3{0, 0, 0}, mat32.Vec3{0, 0, 1})
+	camo.View.CopyFrom(view)
 	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
-	camo.View.SetIdentity()
 	fmt.Printf("aspect: %g\n", aspect)
-	camo.Prjn.SetPerspective(90, aspect, 0.1, 10)
-	camo.Prjn.SetIdentity()
-	// camo.Prjn[5] *= -1
+	// VkPerspective version automatically flips Y axis and shifts depth
+	// into a 0..1 range instead of -1..1, so original GL based geometry
+	// will render identically here.
+	camo.Prjn.SetVkPerspective(45, aspect, 0.01, 100)
 
 	cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
-	// camf := cam.Floats32()
-	// fmt.Printf("cam: %v\n", camf)
 
 	sy.Mem.SyncToGPU()
 
@@ -139,7 +154,7 @@ func main() {
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
-		camo.Model.SetRotationY(.05 * float32(frameCount))
+		camo.Model.SetRotationY(.1 * float32(frameCount))
 		cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 
@@ -164,7 +179,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 10
+	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

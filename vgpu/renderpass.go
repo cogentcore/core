@@ -24,6 +24,7 @@ type RenderPass struct {
 	Format     ImageFormat   `desc:"image format information for the framebuffer we render to"`
 	RenderPass vk.RenderPass `desc:"the vulkan renderpass handle"`
 	Depth      Image         `desc:"the associated depth buffer, if set"`
+	HasDepth   bool          `desc:"set to true if configured with depth buffer"`
 }
 
 func (rp *RenderPass) Destroy() {
@@ -38,8 +39,8 @@ func (rp *RenderPass) Destroy() {
 // Config configures the render pass for given device,
 // Using standard parameters for graphics rendering,
 // based on the given image format and depth image format
-// (pass FormatUnknown for no depth buffer).
-func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt vk.Format) {
+// (pass UndefType for no depth buffer).
+func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types) {
 	// The initial layout for the color and depth attachments will be vk.LayoutUndefined
 	// because at the start of the renderpass, we don't care about their contents.
 	// At the start of the subpass, the color attachment's layout will be transitioned
@@ -50,72 +51,71 @@ func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt vk.For
 	// the renderpass, no barriers are necessary.
 	rp.Dev = dev
 	rp.Format = *imgFmt
-	rp.Depth.Format.Format = depthFmt
-	var renderPass vk.RenderPass
-	if rp.Depth.Format.Format != vk.FormatUndefined {
-		ret := vk.CreateRenderPass(dev, &vk.RenderPassCreateInfo{
-			SType:           vk.StructureTypeRenderPassCreateInfo,
-			AttachmentCount: 2,
-			PAttachments: []vk.AttachmentDescription{{
-				Format:         rp.Format.Format,
-				Samples:        rp.Format.Samples,
-				LoadOp:         vk.AttachmentLoadOpClear,
-				StoreOp:        vk.AttachmentStoreOpStore,
-				StencilLoadOp:  vk.AttachmentLoadOpDontCare,
-				StencilStoreOp: vk.AttachmentStoreOpDontCare,
-				InitialLayout:  vk.ImageLayoutUndefined,
-				FinalLayout:    vk.ImageLayoutPresentSrc,
-			}, {
-				Format:         rp.Depth.Format.Format,
-				Samples:        rp.Format.Samples,
-				LoadOp:         vk.AttachmentLoadOpClear,
-				StoreOp:        vk.AttachmentStoreOpDontCare,
-				StencilLoadOp:  vk.AttachmentLoadOpDontCare,
-				StencilStoreOp: vk.AttachmentStoreOpDontCare,
-				InitialLayout:  vk.ImageLayoutUndefined,
-				FinalLayout:    vk.ImageLayoutDepthStencilAttachmentOptimal,
-			}},
-			SubpassCount: 1,
-			PSubpasses: []vk.SubpassDescription{{
-				PipelineBindPoint:    vk.PipelineBindPointGraphics,
-				ColorAttachmentCount: 1,
-				PColorAttachments: []vk.AttachmentReference{{
-					Attachment: 0,
-					Layout:     vk.ImageLayoutColorAttachmentOptimal,
-				}},
-				PDepthStencilAttachment: &vk.AttachmentReference{
-					Attachment: 1,
-					Layout:     vk.ImageLayoutDepthStencilAttachmentOptimal,
-				},
-			}},
-		}, nil, &renderPass)
-		IfPanic(NewError(ret))
-	} else {
-		ret := vk.CreateRenderPass(dev, &vk.RenderPassCreateInfo{
-			SType:           vk.StructureTypeRenderPassCreateInfo,
-			AttachmentCount: 1,
-			PAttachments: []vk.AttachmentDescription{{
-				Format:         rp.Format.Format,
-				Samples:        rp.Format.Samples,
-				LoadOp:         vk.AttachmentLoadOpClear,
-				StoreOp:        vk.AttachmentStoreOpStore,
-				StencilLoadOp:  vk.AttachmentLoadOpDontCare,
-				StencilStoreOp: vk.AttachmentStoreOpDontCare,
-				InitialLayout:  vk.ImageLayoutUndefined,
-				FinalLayout:    vk.ImageLayoutPresentSrc,
-			}},
-			SubpassCount: 1,
-			PSubpasses: []vk.SubpassDescription{{
-				PipelineBindPoint:    vk.PipelineBindPointGraphics,
-				ColorAttachmentCount: 1,
-				PColorAttachments: []vk.AttachmentReference{{
-					Attachment: 0,
-					Layout:     vk.ImageLayoutColorAttachmentOptimal,
-				}},
-			}},
-		}, nil, &renderPass)
-		IfPanic(NewError(ret))
+	rp.HasDepth = false
+
+	colorAttach := vk.AttachmentDescription{
+		Format:         rp.Format.Format,
+		Samples:        rp.Format.Samples,
+		LoadOp:         vk.AttachmentLoadOpClear,
+		StoreOp:        vk.AttachmentStoreOpStore,
+		StencilLoadOp:  vk.AttachmentLoadOpDontCare,
+		StencilStoreOp: vk.AttachmentStoreOpDontCare,
+		InitialLayout:  vk.ImageLayoutUndefined,
+		FinalLayout:    vk.ImageLayoutPresentSrc,
 	}
+
+	atta := []vk.AttachmentDescription{colorAttach}
+
+	if depthFmt != UndefType {
+		rp.HasDepth = true
+		rp.Depth.ConfigDepthImage(dev, depthFmt, imgFmt)
+		depthAttach := vk.AttachmentDescription{
+			Format:         rp.Depth.Format.Format,
+			Samples:        rp.Depth.Format.Samples,
+			LoadOp:         vk.AttachmentLoadOpClear,
+			StoreOp:        vk.AttachmentStoreOpDontCare,
+			StencilLoadOp:  vk.AttachmentLoadOpDontCare,
+			StencilStoreOp: vk.AttachmentStoreOpDontCare,
+			InitialLayout:  vk.ImageLayoutUndefined,
+			FinalLayout:    vk.ImageLayoutDepthStencilAttachmentOptimal,
+		}
+		atta = append(atta, depthAttach)
+	}
+
+	var renderPass vk.RenderPass
+	rpcreate := &vk.RenderPassCreateInfo{
+		SType:           vk.StructureTypeRenderPassCreateInfo,
+		AttachmentCount: uint32(len(atta)),
+		PAttachments:    atta,
+		SubpassCount:    1,
+		PSubpasses: []vk.SubpassDescription{{
+			PipelineBindPoint:    vk.PipelineBindPointGraphics,
+			ColorAttachmentCount: 1,
+			PColorAttachments: []vk.AttachmentReference{{
+				Attachment: 0,
+				Layout:     vk.ImageLayoutColorAttachmentOptimal,
+			}},
+		}},
+	}
+	if rp.HasDepth {
+		rpcreate.PSubpasses[0].PDepthStencilAttachment = &vk.AttachmentReference{
+			Attachment: 1,
+			Layout:     vk.ImageLayoutDepthStencilAttachmentOptimal,
+		}
+		dep := vk.SubpassDependency{
+			SrcSubpass:    vk.SubpassExternal,
+			DstSubpass:    0,
+			SrcStageMask:  vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit | vk.PipelineStageEarlyFragmentTestsBit),
+			SrcAccessMask: 0,
+			DstStageMask:  vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit | vk.PipelineStageEarlyFragmentTestsBit),
+			DstAccessMask: vk.AccessFlags(vk.AccessColorAttachmentWriteBit | vk.AccessDepthStencilAttachmentWriteBit),
+		}
+		rpcreate.DependencyCount = 1
+		rpcreate.PDependencies = []vk.SubpassDependency{dep}
+	}
+
+	ret := vk.CreateRenderPass(dev, rpcreate, nil, &renderPass)
+	IfPanic(NewError(ret))
 	rp.RenderPass = renderPass
 }
 

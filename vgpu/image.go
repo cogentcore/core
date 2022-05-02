@@ -221,6 +221,18 @@ func (im *Image) SetVkImage(dev vk.Device, img vk.Image) {
 	im.ConfigStdView()
 }
 
+// ConfigDepthImage configures this image as a depth image
+// using given depth image format, and other on format information
+// from the render image format.
+func (im *Image) ConfigDepthImage(dev vk.Device, depthType Types, imgFmt *ImageFormat) {
+	im.Dev = dev
+	im.Format.Format = depthType.VkType()
+	im.Format.Samples = imgFmt.Samples
+	im.SetFlag(int(DepthImage))
+	im.SetSize(imgFmt.Size)
+	im.ConfigDepthView()
+}
+
 // ConfigStdView configures a standard 2D image view, for current image,
 // format, and device.
 func (im *Image) ConfigStdView() {
@@ -237,6 +249,32 @@ func (im *Image) ConfigStdView() {
 		},
 		SubresourceRange: vk.ImageSubresourceRange{
 			AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
+			LevelCount: 1,
+			LayerCount: 1,
+		},
+		ViewType: vk.ImageViewType2d,
+		Image:    im.Image,
+	}, nil, &view)
+	IfPanic(NewError(ret))
+	im.View = view
+	im.SetFlag(int(ImageActive))
+}
+
+// ConfigDepthView configures a depth view image
+func (im *Image) ConfigDepthView() {
+	im.DestroyView()
+	var view vk.ImageView
+	ret := vk.CreateImageView(im.Dev, &vk.ImageViewCreateInfo{
+		SType:  vk.StructureTypeImageViewCreateInfo,
+		Format: im.Format.Format,
+		Components: vk.ComponentMapping{ // this is the default anyway
+			R: vk.ComponentSwizzleIdentity,
+			G: vk.ComponentSwizzleIdentity,
+			B: vk.ComponentSwizzleIdentity,
+			A: vk.ComponentSwizzleIdentity,
+		},
+		SubresourceRange: vk.ImageSubresourceRange{
+			AspectMask: vk.ImageAspectFlags(vk.ImageAspectDepthBit),
 			LevelCount: 1,
 			LayerCount: 1,
 		},
@@ -313,7 +351,7 @@ func (im *Image) SetSize(size image.Point) bool {
 	if im.IsHostOwner() {
 		im.AllocHost()
 	}
-	if im.IsImageOwner() {
+	if im.IsImageOwner() || im.HasFlag(DepthImage) {
 		im.AllocImage()
 	}
 	return true

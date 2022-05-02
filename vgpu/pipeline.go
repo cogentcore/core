@@ -124,6 +124,26 @@ func (pl *Pipeline) Config() {
 		ScissorCount:  1,
 		ViewportCount: 1,
 	}
+	if pl.Sys.RenderPass.HasDepth {
+		pl.VkConfig.PDepthStencilState = &vk.PipelineDepthStencilStateCreateInfo{
+			SType:                 vk.StructureTypePipelineDepthStencilStateCreateInfo,
+			DepthTestEnable:       vk.True,
+			DepthWriteEnable:      vk.True,
+			DepthCompareOp:        vk.CompareOpLessOrEqual,
+			DepthBoundsTestEnable: vk.False,
+			Back: vk.StencilOpState{
+				FailOp:    vk.StencilOpKeep,
+				PassOp:    vk.StencilOpKeep,
+				CompareOp: vk.CompareOpAlways,
+			},
+			StencilTestEnable: vk.False,
+			Front: vk.StencilOpState{
+				FailOp:    vk.StencilOpKeep,
+				PassOp:    vk.StencilOpKeep,
+				CompareOp: vk.CompareOpAlways,
+			},
+		}
+	}
 
 	var pipelineCache vk.PipelineCache
 	ret := vk.CreatePipelineCache(pl.Sys.Device.Device, &vk.PipelineCacheCreateInfo{
@@ -333,7 +353,7 @@ func (pl *Pipeline) Draw(cmd vk.CommandBuffer, vtxCount, instanceCount, firstVtx
 // based on current vals for any Vertex (and associated Index) Vars
 func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer) {
 	var offs []vk.DeviceSize
-	var vtxVal *Val
+	var idxVal *Val
 	vtxn := 0
 	for _, vr := range pl.Sys.Vars.Vars {
 		vl := vr.CurVal
@@ -351,7 +371,7 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer) {
 			if err != nil {
 				log.Println(err)
 			} else {
-				vtxVal = iv
+				idxVal = iv
 			}
 		}
 	}
@@ -361,9 +381,10 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer) {
 		vtxbuf[i] = mbuf
 	}
 	vk.CmdBindVertexBuffers(cmd, 0, uint32(len(offs)), vtxbuf, offs)
-	if vtxVal != nil {
-		vk.CmdBindIndexBuffer(cmd, mbuf, 0, vtxVal.Var.Type.VkIndexType())
-		vk.CmdDrawIndexed(cmd, uint32(vtxVal.N), 1, 0, 0, 0)
+	if idxVal != nil {
+		vktyp := idxVal.Var.Type.VkIndexType()
+		vk.CmdBindIndexBuffer(cmd, mbuf, 0, vktyp)
+		vk.CmdDrawIndexed(cmd, uint32(idxVal.N), 1, 0, 0, 0)
 	} else {
 		vk.CmdDraw(cmd, uint32(vtxn), 1, 0, 0)
 	}
