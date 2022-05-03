@@ -1,5 +1,8 @@
 # vGPU: emergent GPU hardware support
 
+[![GoDocs for vGPU](https://pkg.go.dev/badge/github.com/goki/vgpu.svg)](https://pkg.go.dev/github.com/goki/vgpu/vgpu)
+
+
 Note: this is the sub-readme docs for the vgpu library itself, whereas overall repo project README can provide higher-level intro -- this is more for the "tech nitty-gritty".
 
 This is a work in progress exploring using Vulkan to access the GPU.  Ultimately, it should replace the opengl implementation of the `oswin/gpu` interfaces in `GoGi`, to provide a more future-proof graphics backend.  As such, the code is being organized around that structure.

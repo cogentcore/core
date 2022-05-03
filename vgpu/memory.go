@@ -69,7 +69,7 @@ func (mm *Memory) Alloc() {
 	}
 }
 
-// AllocBuff allocates memory for given buffer
+// AllocBuff allocates host memory for given buffer
 func (mm *Memory) AllocBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
 	buff.AlignBytes = buff.Type.AlignBytes(mm.GPU)
@@ -91,7 +91,11 @@ func (mm *Memory) AllocDevBuff(bt BuffTypes) {
 	if buff.Size == 0 {
 		return
 	}
-	buff.AllocDev(mm.Device.Device)
+	if bt == ImageBuff {
+		mm.Vals.AllocImages()
+	} else {
+		buff.AllocDev(mm.Device.Device)
+	}
 }
 
 // NewBuffer makes a buffer of given size, usage
@@ -161,9 +165,14 @@ func (mm *Memory) ActivateBuff(bt BuffTypes) {
 	if buff.Active {
 		return
 	}
-	if buff.DevMem == nil {
-		mm.AllocDevBuff(bt)
-		mm.TransferToGPUBuff(bt)
+	if bt == ImageBuff {
+		mm.Vals.AllocImages()
+		mm.TransferAllValsImages(buff)
+	} else {
+		if buff.DevMem == nil {
+			mm.AllocDevBuff(bt)
+			mm.TransferToGPUBuff(bt)
+		}
 	}
 	buff.Active = true
 }
@@ -178,6 +187,10 @@ func (mm *Memory) SyncToGPU() {
 // SyncToGPUBuff syncs all modified Val regions from CPU to GPU device memory, for given buff
 func (mm *Memory) SyncToGPUBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
+	if bt == ImageBuff {
+		mm.SyncValsImages(buff)
+		return
+	}
 	mods := mm.Vals.ModRegs(bt)
 	if len(mods) == 0 {
 		return
@@ -222,6 +235,10 @@ func (mm *Memory) TransferToGPU() {
 // TransferToGPUBuff transfers entire staging to GPU for given buffer
 func (mm *Memory) TransferToGPUBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
+	if bt == ImageBuff {
+		mm.TransferAllValsImages(buff)
+		return
+	}
 	if buff.Size == 0 || buff.DevMem == nil {
 		return
 	}
@@ -266,6 +283,9 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }
 
+////////////////////////////////////////////////////////////////////////////
+// Image functions
+
 // TransferImagesToGPU transfers image memory from CPU to GPU for given images.
 // The image Host.Offset *must* be accurate for the given buffer, whether its own
 // individual buffer or the shared memory-managed buffer.
@@ -290,4 +310,30 @@ func (mm *Memory) TransferImagesFmGPU(buff vk.Buffer, imgs ...*Image) {
 		vk.CmdCopyImageToBuffer(cmdBuff, im.Image, vk.ImageLayoutTransferDstOptimal, buff, 1, []vk.BufferImageCopy{im.CopyRec()})
 	}
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
+}
+
+// TransferAllValsImages copies all vals images from host buffer to device memory
+func (mm *Memory) TransferAllValsImages(buff *MemBuff) {
+	var imgs []*Image
+	for _, vl := range mm.Vals.Vals {
+		if vl.BuffType() != ImageBuff || vl.Image == nil {
+			continue
+		}
+		imgs = append(imgs, vl.Image)
+	}
+	mm.TransferImagesToGPU(buff.Host, imgs...)
+}
+
+// SyncValsImages syncs all changed vals images from host buffer to device memory
+func (mm *Memory) SyncValsImages(buff *MemBuff) {
+	var imgs []*Image
+	for _, vl := range mm.Vals.Vals {
+		if vl.BuffType() != ImageBuff || vl.Image == nil || !vl.Mod {
+			continue
+		}
+		imgs = append(imgs, vl.Image)
+	}
+	if len(imgs) > 0 {
+		mm.TransferImagesToGPU(buff.Host, imgs...)
+	}
 }

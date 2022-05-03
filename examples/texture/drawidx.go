@@ -53,7 +53,7 @@ func main() {
 	gp.Config("drawidx")
 	TheGPU = gp
 
-	gp.PropsString(true) // print
+	// gp.PropsString(true) // print
 
 	surfPtr, err := window.CreateWindowSurface(gp.Instance, nil)
 	if err != nil {

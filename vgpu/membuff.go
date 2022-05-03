@@ -47,11 +47,14 @@ func (mb *MemBuff) Alloc(dev vk.Device, bsz int) bool {
 		devUse |= vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
 	}
 	mb.Host = NewBuffer(dev, bsz, hostUse)
-	mb.Dev = NewBuffer(dev, bsz, devUse)
 	mb.HostMem = AllocBuffMem(dev, mb.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
 	mb.Size = bsz
-
 	mb.HostPtr = MapMemory(dev, mb.HostMem, mb.Size)
+
+	if mb.Type != ImageBuff {
+		mb.Dev = NewBuffer(dev, bsz, devUse)
+	}
+
 	return true
 }
 
@@ -66,9 +69,11 @@ func (mb *MemBuff) Free(dev vk.Device) {
 	if mb.Size == 0 {
 		return
 	}
+	if mb.Type != ImageBuff {
+		FreeBuffMem(dev, &mb.DevMem)
+		vk.DestroyBuffer(dev, mb.Dev, nil)
+	}
 	vk.UnmapMemory(dev, mb.HostMem)
-	FreeBuffMem(dev, &mb.DevMem)
-	vk.DestroyBuffer(dev, mb.Dev, nil)
 	FreeBuffMem(dev, &mb.HostMem)
 	vk.DestroyBuffer(dev, mb.Host, nil)
 	mb.Size = 0

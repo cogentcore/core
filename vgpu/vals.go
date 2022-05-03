@@ -30,6 +30,9 @@ func (vl *Val) Init(name string, vr *Var, n int) {
 	vl.Name = name
 	vl.Var = vr
 	vl.N = n
+	if vr.Role >= SampledImage {
+		vl.Image = &Image{Name: name}
+	}
 }
 
 // BuffType returns the memory buffer type for this variable, based on Var.Role
@@ -42,6 +45,10 @@ func (vl *Val) BuffType() BuffTypes {
 func (vl *Val) AllocSize() int {
 	if vl.N == 0 {
 		vl.N = 1
+	}
+	if vl.Var.Role >= SampledImage {
+		vl.MemSize = vl.Image.Format.ByteSize()
+		return vl.MemSize
 	}
 	if vl.N == 1 || vl.Var.Role < Uniform {
 		vl.ElSize = vl.Var.SizeOf
@@ -57,10 +64,13 @@ func (vl *Val) AllocSize() int {
 // Computes the MemPtr for this item, and returns AllocSize() of this
 // value, so memory can increment to next item.
 // offsets are guaranteed to be properly aligned per minUniformBufferOffsetAlignment.
-func (vl *Val) Alloc(buffPtr unsafe.Pointer, offset int) int {
+func (vl *Val) Alloc(buff *MemBuff, buffPtr unsafe.Pointer, offset int) int {
 	mem := vl.AllocSize()
 	vl.MemPtr = unsafe.Pointer(uintptr(buffPtr) + uintptr(offset))
 	vl.Offset = offset
+	if vl.Image != nil {
+		vl.Image.ConfigValHost(buff, buffPtr, offset)
+	}
 	return mem
 }
 
@@ -68,6 +78,9 @@ func (vl *Val) Alloc(buffPtr unsafe.Pointer, offset int) int {
 func (vl *Val) Free() {
 	vl.Offset = 0
 	vl.MemPtr = nil
+	if vl.Image != nil {
+		vl.Image.FreeImage()
+	}
 }
 
 // Bytes returns byte array of the Val data, including any additional
@@ -192,7 +205,7 @@ func (vs *Vals) Alloc(buff *MemBuff, offset int) int {
 		if vl.BuffType() != buff.Type {
 			continue
 		}
-		sz := vl.Alloc(buff.HostPtr, offset)
+		sz := vl.Alloc(buff, buff.HostPtr, offset)
 		esz := MemSizeAlign(sz, buff.AlignBytes)
 		offset += esz
 		tsz += esz
@@ -220,4 +233,17 @@ func (vs *Vals) ModRegs(bt BuffTypes) []MemReg {
 		}
 	}
 	return mods
+}
+
+////////////////////////////////////////////////////////////////
+// Image val functions
+
+// AllocImages allocates images on device memory
+func (vs *Vals) AllocImages() {
+	for _, vl := range vs.Vals {
+		if vl.BuffType() != ImageBuff || vl.Image == nil {
+			continue
+		}
+		vl.Image.AllocImage()
+	}
 }

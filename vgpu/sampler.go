@@ -4,26 +4,40 @@
 
 package vgpu
 
-import vk "github.com/vulkan-go/vulkan"
-
-// ImageView represents a vulkan image view
-type ImageView struct {
-	Name   string       `desc:"view must be uniquely named"`
-	VkView vk.ImageView `desc:"the vulkan view"`
-}
-
-func (iv *ImageView) Destroy(dev vk.Device) {
-	if iv.VkView != nil {
-		vk.DestroyImageView(dev, iv.VkView, nil)
-		iv.VkView = nil
-	}
-}
+import (
+	"github.com/goki/ki/kit"
+	vk "github.com/vulkan-go/vulkan"
+)
 
 // Sampler represents a vulkan image sampler
 type Sampler struct {
 	Name      string
-	View      string     `desc:"name of the image view used for this sampler"`
-	VkSampler vk.Sampler `desc:"the vulkan sampler"`
+	UMode     SamplerModes `desc:"for U (horizontal) axis -- what to do when going off the edge"`
+	VMode     SamplerModes `desc:"for V (vertical) axis -- what to do when going off the edge"`
+	WMode     SamplerModes `desc:"for W (horizontal) axis -- what to do when going off the edge"`
+	Border    BorderColors `desc:"border color for Clamp modes"`
+	View      string       `desc:"name of the image view used for this sampler"`
+	VkSampler vk.Sampler   `desc:"the vulkan sampler"`
+}
+
+func (sm *Sampler) Config(dev vk.Device) {
+	var samp vk.Sampler
+	ret := vk.CreateSampler(dev, &vk.SamplerCreateInfo{
+		SType:                   vk.StructureTypeSamplerCreateInfo,
+		MagFilter:               vk.FilterLinear,
+		MinFilter:               vk.FilterLinear,
+		AddressModeU:            sm.UMode.VkMode(),
+		AddressModeV:            sm.VMode.VkMode(),
+		AddressModeW:            sm.WMode.VkMode(),
+		AnisotropyEnable:        vk.True,
+		MaxAnisotropy:           TheGPU.GPUProps.Limits.MaxSamplerAnisotropy,
+		BorderColor:             sm.Border.VkColor(),
+		UnnormalizedCoordinates: vk.False,
+		CompareEnable:           vk.False,
+		MipmapMode:              vk.SamplerMipmapModeLinear,
+	}, nil, &samp)
+	IfPanic(NewError(ret))
+	sm.VkSampler = samp
 }
 
 func (sm *Sampler) Destroy(dev vk.Device) {
@@ -31,4 +45,70 @@ func (sm *Sampler) Destroy(dev vk.Device) {
 		vk.DestroySampler(dev, sm.VkSampler, nil)
 		sm.VkSampler = nil
 	}
+}
+
+// Texture image sampler modes
+type SamplerModes int32
+
+const (
+	// Repeat the texture when going beyond the image dimensions.
+	Repeat SamplerModes = iota
+
+	// Like repeat, but inverts the coordinates to mirror the image when going beyond the dimensions.
+	MirroredRepeat
+
+	// Take the color of the edge closest to the coordinate beyond the image dimensions.
+	ClampToEdge
+
+	// Return a solid color when sampling beyond the dimensions of the image.
+	ClampToBorder
+
+	// Like clamp to edge, but instead uses the edge opposite to the closest edge.
+	MirrorClampToEdge
+
+	SamplerModesN
+)
+
+//go:generate stringer -type=SamplerModes
+
+var KiT_SamplerModes = kit.Enums.AddEnum(SamplerModesN, kit.NotBitFlag, nil)
+
+func (sm SamplerModes) VkMode() vk.SamplerAddressMode {
+	return VulkanSamplerModes[sm]
+}
+
+var VulkanSamplerModes = map[SamplerModes]vk.SamplerAddressMode{
+	Repeat:            vk.SamplerAddressModeRepeat,
+	MirroredRepeat:    vk.SamplerAddressModeMirroredRepeat,
+	ClampToEdge:       vk.SamplerAddressModeClampToEdge,
+	ClampToBorder:     vk.SamplerAddressModeClampToBorder,
+	MirrorClampToEdge: vk.SamplerAddressModeMirrorClampToEdge,
+}
+
+//////////////////////////////////////////////////////
+
+// Texture image sampler modes
+type BorderColors int32
+
+const (
+	// Repeat the texture when going beyond the image dimensions.
+	BorderTrans BorderColors = iota
+	BorderBlack
+	BorderWhite
+
+	BorderColorsN
+)
+
+//go:generate stringer -type=BorderColors
+
+var KiT_BorderColors = kit.Enums.AddEnum(BorderColorsN, kit.NotBitFlag, nil)
+
+func (bc BorderColors) VkColor() vk.BorderColor {
+	return VulkanBorderColors[bc]
+}
+
+var VulkanBorderColors = map[BorderColors]vk.BorderColor{
+	BorderTrans: vk.BorderColorIntTransparentBlack,
+	BorderBlack: vk.BorderColorIntOpaqueBlack,
+	BorderWhite: vk.BorderColorIntOpaqueWhite,
 }

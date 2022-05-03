@@ -106,6 +106,9 @@ func (im *ImageFormat) Stride() int {
 	return im.BytesPerPixel() * im.Size.X
 }
 
+/////////////////////////////////////////////////////////////////////
+// Image
+
 // Image represents a vulkan image with an associated ImageView.
 // The vulkan Image is in device memory, in an optimized format.
 // There can also be an optional host-visible, plain pixel buffer
@@ -180,10 +183,20 @@ func (im *Image) GoImage() (*image.RGBA, error) {
 	return rgba, nil
 }
 
+// ConfigGoImage configures the image for storing the given GoImage.
+// Does not call SetGoImage -- this is for configuring a Val for
+// an image prior to allocating memory. Once memory is allocated
+// then SetGoImage can be called.
+func (im *Image) ConfigGoImage(img *image.RGBA) {
+	im.Format.Defaults()
+	im.Format.Size = img.Rect.Size()
+}
+
 // SetGoImage sets staging image data from an *image.RGBA standard Go image,
 // Only works if IsHostActive and Format is default vk.FormatR8g8b8a8Srgb,
 // Uses very efficient direct copy of bytes -- most efficiently if the
 // size and stride is the same, but also works row-by-row if not.
+// Must still call AllocImage to have image allocated on the host.
 func (im *Image) SetGoImage(img *image.RGBA) error {
 	if !im.IsHostActive() {
 		return fmt.Errorf("vgpu.Image: Go image not available because Host not active: %s", im.Name)
@@ -319,8 +332,7 @@ func (im *Image) FreeHost() {
 	vk.UnmapMemory(im.Dev, im.Host.Mem)
 	FreeBuffMem(im.Dev, &im.Host.Mem)
 	DestroyBuffer(im.Dev, &im.Host.Buff)
-	im.Host.Size = 0
-	im.Host.Ptr = nil
+	im.Host.SetNil()
 }
 
 // Destroy destroys any existing view, nils fields
@@ -337,7 +349,8 @@ func (im *Image) SetNil() {
 	im.View = nil
 	im.Image = nil
 	im.Dev = nil
-	im.ClearFlag(int(ImageActive))
+	im.Host.SetNil()
+	im.Flags = 0
 }
 
 // SetSize sets the size. If the size is not the same as current,
@@ -437,7 +450,19 @@ func (im *Image) AllocHost() {
 	im.Host.Mem = AllocBuffMem(im.Dev, im.Host.Buff, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
 	im.Host.Size = imsz
 	im.Host.Ptr = MapMemory(im.Dev, im.Host.Mem, im.Host.Size)
-	im.SetFlag(int(ImageOwnsHost))
+	im.Host.Offset = 0
+	im.SetFlag(int(ImageOwnsHost), int(ImageHostActive))
+}
+
+// ConfigValHost configures host staging buffer from memory buffer for val-owned image
+func (im *Image) ConfigValHost(buff *MemBuff, buffPtr unsafe.Pointer, offset int) {
+	imsz := im.Format.ByteSize()
+	im.Host.Buff = buff.Host
+	im.Host.Mem = nil
+	im.Host.Size = imsz
+	im.Host.Ptr = buffPtr
+	im.Host.Offset = offset
+	im.SetFlag(int(ImageIsVal), int(ImageHostActive))
 }
 
 // CopyRec returns info for this Image for the BufferImageCopy operations
@@ -511,6 +536,14 @@ type HostImage struct {
 	Offset int             `desc:"offset into host buffer, when Buff is Memory managed"`
 	Mem    vk.DeviceMemory `view:"-" desc:"host CPU-visible memory, for staging, when we manage our own memory"`
 	Ptr    unsafe.Pointer  `view:"-" desc:"memory mapped pointer into host memory -- remains mapped"`
+}
+
+func (hi *HostImage) SetNil() {
+	hi.Size = 0
+	hi.Buff = nil
+	hi.Offset = 0
+	hi.Mem = nil
+	hi.Ptr = nil
 }
 
 // Pixels returns the byte slice of the pixels for host image
