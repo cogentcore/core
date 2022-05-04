@@ -1,6 +1,6 @@
-# Makefile for glslc compiling of HLSL files for compute
+# Makefile for glslc compiling of gsl HLSL files for compute
 
-all: indexed.spv vtxcolor.spv
+all: texture_vert.spv texture_frag.spv
 
 %.spv : %.hlsl
 	glslc -fshader-stage=compute -o $@ $<

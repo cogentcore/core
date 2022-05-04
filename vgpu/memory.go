@@ -92,7 +92,7 @@ func (mm *Memory) AllocDevBuff(bt BuffTypes) {
 		return
 	}
 	if bt == ImageBuff {
-		mm.Vals.AllocImages()
+		mm.Vals.AllocTextures(mm)
 	} else {
 		buff.AllocDev(mm.Device.Device)
 	}
@@ -166,8 +166,8 @@ func (mm *Memory) ActivateBuff(bt BuffTypes) {
 		return
 	}
 	if bt == ImageBuff {
-		mm.Vals.AllocImages()
-		mm.TransferAllValsImages(buff)
+		mm.Vals.AllocTextures(mm)
+		mm.TransferAllValsTextures(buff)
 	} else {
 		if buff.DevMem == nil {
 			mm.AllocDevBuff(bt)
@@ -188,7 +188,7 @@ func (mm *Memory) SyncToGPU() {
 func (mm *Memory) SyncToGPUBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
 	if bt == ImageBuff {
-		mm.SyncValsImages(buff)
+		mm.SyncValsTextures(buff)
 		return
 	}
 	mods := mm.Vals.ModRegs(bt)
@@ -236,7 +236,7 @@ func (mm *Memory) TransferToGPU() {
 func (mm *Memory) TransferToGPUBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
 	if bt == ImageBuff {
-		mm.TransferAllValsImages(buff)
+		mm.TransferAllValsTextures(buff)
 		return
 	}
 	if buff.Size == 0 || buff.DevMem == nil {
@@ -284,7 +284,7 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// Image functions
+// Texture functions
 
 // TransferImagesToGPU transfers image memory from CPU to GPU for given images.
 // The image Host.Offset *must* be accurate for the given buffer, whether its own
@@ -294,7 +294,11 @@ func (mm *Memory) TransferImagesToGPU(buff vk.Buffer, imgs ...*Image) {
 	mm.CmdPool.BeginCmdOneTime()
 
 	for _, im := range imgs {
+		im.TransitionForDst(cmdBuff)
 		vk.CmdCopyBufferToImage(cmdBuff, buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
+		if im.IsVal() {
+			im.TransitionDstToShader(cmdBuff)
+		}
 	}
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }
@@ -312,26 +316,26 @@ func (mm *Memory) TransferImagesFmGPU(buff vk.Buffer, imgs ...*Image) {
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }
 
-// TransferAllValsImages copies all vals images from host buffer to device memory
-func (mm *Memory) TransferAllValsImages(buff *MemBuff) {
+// TransferAllValsTextures copies all vals images from host buffer to device memory
+func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 	var imgs []*Image
 	for _, vl := range mm.Vals.Vals {
-		if vl.BuffType() != ImageBuff || vl.Image == nil {
+		if vl.BuffType() != ImageBuff || vl.Texture == nil {
 			continue
 		}
-		imgs = append(imgs, vl.Image)
+		imgs = append(imgs, &vl.Texture.Image)
 	}
 	mm.TransferImagesToGPU(buff.Host, imgs...)
 }
 
-// SyncValsImages syncs all changed vals images from host buffer to device memory
-func (mm *Memory) SyncValsImages(buff *MemBuff) {
+// SyncValsTextures syncs all changed vals images from host buffer to device memory
+func (mm *Memory) SyncValsTextures(buff *MemBuff) {
 	var imgs []*Image
 	for _, vl := range mm.Vals.Vals {
-		if vl.BuffType() != ImageBuff || vl.Image == nil || !vl.Mod {
+		if vl.BuffType() != ImageBuff || vl.Texture == nil || !vl.Mod {
 			continue
 		}
-		imgs = append(imgs, vl.Image)
+		imgs = append(imgs, &vl.Texture.Image)
 	}
 	if len(imgs) > 0 {
 		mm.TransferImagesToGPU(buff.Host, imgs...)

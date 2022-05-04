@@ -10,11 +10,16 @@ package main
 
 import (
 	"fmt"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"log"
+	"os"
 	"runtime"
 	"time"
 	"unsafe"
 
+	"github.com/anthonynsimon/bild/clone"
 	vk "github.com/vulkan-go/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -42,7 +47,7 @@ func main() {
 	vk.Init()
 
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
-	window, err := glfw.CreateWindow(1024, 768, "Draw Triangle", nil, nil)
+	window, err := glfw.CreateWindow(1024, 768, "Draw Texture", nil, nil)
 	vgpu.IfPanic(err)
 
 	// note: for graphics, require these instance extensions before init gpu!
@@ -50,7 +55,7 @@ func main() {
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
 	gp.Debug = true
-	gp.Config("drawidx")
+	gp.Config("texture")
 	TheGPU = gp
 
 	// gp.PropsString(true) // print
@@ -64,53 +69,96 @@ func main() {
 
 	fmt.Printf("format: %#v\n", sf.Format)
 
-	sy := gp.NewGraphicsSystem("drawidx", &sf.Device)
-	pl := sy.NewPipeline("drawidx")
+	sy := gp.NewGraphicsSystem("texture", &sf.Device)
+	pl := sy.NewPipeline("texture")
+
+	destroy := func() {
+		vk.DeviceWaitIdle(sf.Device.Device)
+		sy.Destroy()
+		sf.Destroy()
+		gp.Destroy()
+		window.Destroy()
+		glfw.Terminate()
+	}
+
 	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
 	sf.SetRenderPass(&sy.RenderPass)
 	pl.SetGraphicsDefaults()
 	pl.SetClearColor(0.2, 0.2, 0.2, 1)
 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 
-	pl.AddShaderFile("indexed", vgpu.VertexShader, "indexed.spv")
-	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
+	pl.AddShaderFile("texture_vert", vgpu.VertexShader, "texture_vert.spv")
+	pl.AddShaderFile("texture_frag", vgpu.FragmentShader, "texture_frag.spv")
 
 	posv := sy.Vars.Add("Pos", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
 	clrv := sy.Vars.Add("Color", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
+	txcv := sy.Vars.Add("TexCoord", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
 	// note: always put indexes last so there isn't a gap in the location indexes!
 	idxv := sy.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
 
 	camv := sy.Vars.Add("Camera", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
 	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
 
-	nPts := 3
-	triPos := sy.Mem.Vals.Add("TriPos", posv, nPts)
-	triClr := sy.Mem.Vals.Add("TriClr", clrv, nPts)
-	triIdx := sy.Mem.Vals.Add("TriIdx", idxv, nPts)
-	// todo: not working for some reason! :(
-	triPos.Indexes = "TriIdx" // only need to set indexes for one vertex val
+	tximgv := sy.Vars.Add("TexSampler", vgpu.ImageRGBA32, vgpu.TextureRole, 0, vgpu.FragmentShader)
+
+	nPts := 4
+	nIdxs := 6
+	sqrPos := sy.Mem.Vals.Add("SqrPos", posv, nPts)
+	sqrClr := sy.Mem.Vals.Add("SqrClr", clrv, nPts)
+	sqrTex := sy.Mem.Vals.Add("SqrTex", txcv, nPts)
+	sqrIdx := sy.Mem.Vals.Add("SqrIdx", idxv, nIdxs)
+	sqrPos.Indexes = "SqrIdx" // only need to set indexes for one vertex val
 	cam := sy.Mem.Vals.Add("Camera", camv, 1)
+
+	img := sy.Mem.Vals.Add("TexImage", tximgv, nPts)
+	file, err := os.Open("teximg.jpg")
+	if err != nil {
+		fmt.Printf("image: %s\n", err)
+	}
+	gimgi, _, err := image.Decode(file)
+	file.Close()
+	gimg, ok := gimgi.(*image.RGBA)
+	if !ok {
+		gimg = clone.AsRGBA(gimgi)
+	}
+	img.Texture.ConfigGoImage(gimg)
+	// img.Texture.Sampler.Border = vgpu.BorderBlack
+	// img.Texture.Sampler.UMode = vgpu.ClampToBorder
+	// img.Texture.Sampler.VMode = vgpu.ClampToBorder
 
 	// note: add all values per above before doing Config
 	sy.Config()
 	sy.Mem.Config()
 
-	triPosA := triPos.Floats32()
-	triPosA.Set(0,
-		-0.5, 0.5, 0.0,
+	// note: first val in set is offset
+	sqrPosA := sqrPos.Floats32()
+	sqrPosA.Set(0,
+		-0.5, -0.5, 0.0,
+		0.5, -0.5, 0.0,
 		0.5, 0.5, 0.0,
-		0.0, -0.5, 0.0) // negative point is UP in native Vulkan
-	triPos.Mod = true
+		-0.5, 0.5, 0.0)
+	sqrPos.Mod = true
 
-	triClrA := triClr.Floats32()
-	triClrA.Set(0,
+	sqrClrA := sqrClr.Floats32()
+	sqrClrA.Set(0,
 		1.0, 0.0, 0.0,
 		0.0, 1.0, 0.0,
-		0.0, 0.0, 1.0)
-	triClr.Mod = true
+		0.0, 0.0, 1.0,
+		1.0, 1.0, 0.0)
+	sqrClr.Mod = true
 
-	idxs := []uint16{0, 1, 2}
-	triIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+	sqrTexA := sqrTex.Floats32()
+	sqrTexA.Set(0,
+		1.0, 0.0,
+		0.0, 0.0,
+		0.0, 1.0,
+		1.0, 1.0)
+	sqrTex.Mod = true
+
+	idxs := []uint16{0, 1, 2, 0, 2, 3}
+	sqrIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+
+	img.SetGoImage(gimg)
 
 	// This is the standard camera view projection computation
 	campos := mat32.Vec3{0, 0, 2}
@@ -126,7 +174,7 @@ func main() {
 	camo.Model.SetIdentity()
 	camo.View.CopyFrom(view)
 	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
-	fmt.Printf("aspect: %g\n", aspect)
+	// fmt.Printf("aspect: %g\n", aspect)
 	// VkPerspective version automatically flips Y axis and shifts depth
 	// into a 0..1 range instead of -1..1, so original GL based geometry
 	// will render identically here.
@@ -136,16 +184,11 @@ func main() {
 
 	sy.Mem.SyncToGPU()
 
-	sy.SetVals(0, "TriPos", "TriClr", "Camera")
+	sy.SetVals(0, "SqrPos", "SqrClr", "SqrTex", "Camera", "TexImage")
 
-	destroy := func() {
-		vk.DeviceWaitIdle(sf.Device.Device)
-		vk.DeviceWaitIdle(sy.Device.Device)
-		sy.Destroy()
-		sf.Destroy()
-		gp.Destroy()
-		window.Destroy()
-		glfw.Terminate()
+	if sy.Vars.Validate() != nil {
+		destroy()
+		return
 	}
 
 	frameCount := 0

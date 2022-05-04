@@ -16,7 +16,10 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 
 # TODO
 
-* indexing inexplicably not working..
+* texture image is upside down and srgb colorspace is not set properly -- format is not valid.
+
+* ReComp
+
 * multisampling
 
 * Figure out when you need to call the Update* binding vs. just the dynamic binding - in principle for pure Uniform / Storage updates, don't need the Update guy.

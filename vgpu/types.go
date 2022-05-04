@@ -108,9 +108,9 @@ var FormatSizes = map[vk.Format]int{
 	vk.FormatR64g64Sfloat:       16,
 	vk.FormatR64g64b64Sfloat:    24,
 	vk.FormatR64g64b64a64Sfloat: 32,
-	vk.FormatR8g8b8a8Srgb:       32,
-	vk.FormatD32Sfloat:          32,
-	vk.FormatD24UnormS8Uint:     32,
+	vk.FormatR8g8b8a8Srgb:       4,
+	vk.FormatD32Sfloat:          4,
+	vk.FormatD24UnormS8Uint:     4,
 }
 
 // VulkanTypes maps vgpu.Types to vulkan types

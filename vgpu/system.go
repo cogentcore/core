@@ -142,9 +142,9 @@ func (sy *System) SetVals(set int, vals ...string) {
 			DstSet:          sd.DescSet,
 			DstBinding:      uint32(vl.Var.BindLoc),
 			DescriptorCount: 1,
-			DescriptorType:  RoleDescriptors[vl.Var.Role],
+			DescriptorType:  vl.Var.Role.VkDescriptor(),
 		}
-		if vl.Var.Role < StorageImage {
+		if vl.Var.Role < TextureRole {
 			off := vk.DeviceSize(vl.Offset)
 			if vl.Var.Role.IsDynamic() {
 				off = 0 // off must be 0 for dynamic
@@ -159,8 +159,11 @@ func (sy *System) SetVals(set int, vals ...string) {
 				sy.Vars.DynOffs[vl.Var.DynOffIdx] = uint32(vl.Offset)
 			}
 		} else {
-			// wd.DescriptorCount = uint32(len(texEnabled))
-			// wd.PImageInfo =      texInfos
+			wd.PImageInfo = []vk.DescriptorImageInfo{{
+				ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
+				ImageView:   vl.Texture.View,
+				Sampler:     vl.Texture.VkSampler,
+			}}
 		}
 		ws = append(ws, wd)
 	}

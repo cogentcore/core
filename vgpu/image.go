@@ -212,6 +212,7 @@ func (im *Image) SetGoImage(img *image.RGBA) error {
 	if img.Stride == str {
 		mx := ints.MinInt(len(spix), len(dpix))
 		copy(dpix[:mx], spix[:mx])
+		return nil
 	}
 	rows := ints.MinInt(sz.Y, im.Format.Size.Y)
 	rsz := ints.MinInt(img.Stride, str)
@@ -384,8 +385,9 @@ func (im *Image) AllocImage() {
 		usage |= vk.ImageUsageSampledBit // default is sampled texture
 	}
 	if im.IsHostActive() {
-		usage |= vk.ImageUsageTransferSrcBit | vk.ImageUsageTransferDstBit
+		usage |= vk.ImageUsageTransferDstBit
 	}
+	// vk.ImageUsageTransferSrcBit |
 
 	var image vk.Image
 	w, h := im.Format.Size32()
@@ -477,53 +479,78 @@ func (im *Image) CopyRec() vk.BufferImageCopy {
 	reg.ImageSubresource.LayerCount = 1
 	reg.ImageExtent.Width = w
 	reg.ImageExtent.Height = h
+	reg.ImageExtent.Depth = 1
 	return reg
 }
 
 /////////////////////////////////////////////////////////////////////
 // Transition
 
-// Transition transitions image to new layout
-func (im *Image) Transition(cmd *CmdPool, aspectMask vk.ImageAspectFlagBits,
-	oldImageLayout, newImageLayout vk.ImageLayout,
-	srcAccessMask vk.AccessFlagBits,
-	srcStages, dstStages vk.PipelineStageFlagBits) {
+// TransitionForDst transitions to TransferDstOptimal
+func (im *Image) TransitionForDst(cmd vk.CommandBuffer) {
+	im.Transition(cmd, im.Format.Format, vk.ImageLayoutUndefined, vk.ImageLayoutTransferDstOptimal)
+}
 
-	imageMemoryBarrier := vk.ImageMemoryBarrier{
-		SType:         vk.StructureTypeImageMemoryBarrier,
-		SrcAccessMask: vk.AccessFlags(srcAccessMask),
-		DstAccessMask: 0,
-		OldLayout:     oldImageLayout,
-		NewLayout:     newImageLayout,
+// TransitionDstToShader transitions from TransferDstOptimal to TransferShaderReadOnly
+func (im *Image) TransitionDstToShader(cmd vk.CommandBuffer) {
+	im.Transition(cmd, im.Format.Format, vk.ImageLayoutTransferDstOptimal, vk.ImageLayoutShaderReadOnlyOptimal)
+}
+
+// Transition transitions image to new layout
+func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, newLayout vk.ImageLayout) {
+
+	imgMemBar := vk.ImageMemoryBarrier{
+		SType:               vk.StructureTypeImageMemoryBarrier,
+		SrcQueueFamilyIndex: vk.QueueFamilyIgnored,
+		DstQueueFamilyIndex: vk.QueueFamilyIgnored,
+		OldLayout:           oldLayout,
+		NewLayout:           newLayout,
+		Image:               im.Image,
 		SubresourceRange: vk.ImageSubresourceRange{
-			AspectMask: vk.ImageAspectFlags(aspectMask),
+			AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
 			LayerCount: 1,
 			LevelCount: 1,
 		},
-		Image: im.Image,
-	}
-	switch newImageLayout {
-	case vk.ImageLayoutTransferDstOptimal:
-		// make sure anything that was copying from this image has completed
-		imageMemoryBarrier.DstAccessMask = vk.AccessFlags(vk.AccessTransferWriteBit)
-	case vk.ImageLayoutColorAttachmentOptimal:
-		imageMemoryBarrier.DstAccessMask = vk.AccessFlags(vk.AccessColorAttachmentWriteBit)
-	case vk.ImageLayoutDepthStencilAttachmentOptimal:
-		imageMemoryBarrier.DstAccessMask = vk.AccessFlags(vk.AccessDepthStencilAttachmentWriteBit)
-	case vk.ImageLayoutShaderReadOnlyOptimal:
-		imageMemoryBarrier.DstAccessMask =
-			vk.AccessFlags(vk.AccessShaderReadBit) | vk.AccessFlags(vk.AccessInputAttachmentReadBit)
-	case vk.ImageLayoutTransferSrcOptimal:
-		imageMemoryBarrier.DstAccessMask = vk.AccessFlags(vk.AccessTransferReadBit)
-	case vk.ImageLayoutPresentSrc:
-		imageMemoryBarrier.DstAccessMask = vk.AccessFlags(vk.AccessMemoryReadBit)
-	default:
-		imageMemoryBarrier.DstAccessMask = 0
 	}
 
-	vk.CmdPipelineBarrier(cmd.Buff,
-		vk.PipelineStageFlags(srcStages), vk.PipelineStageFlags(dstStages),
-		0, 0, nil, 0, nil, 1, []vk.ImageMemoryBarrier{imageMemoryBarrier})
+	var srcStage, dstStage vk.PipelineStageFlags
+
+	switch newLayout {
+	case vk.ImageLayoutTransferDstOptimal:
+		// make sure anything that was copying from this image has completed
+		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessTransferWriteBit)
+		dstStage = vk.PipelineStageFlags(vk.PipelineStageTransferBit)
+		if oldLayout == vk.ImageLayoutUndefined {
+			srcStage = vk.PipelineStageFlags(vk.PipelineStageTopOfPipeBit)
+		}
+
+	case vk.ImageLayoutColorAttachmentOptimal:
+		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessColorAttachmentWriteBit)
+
+	case vk.ImageLayoutDepthStencilAttachmentOptimal:
+		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessDepthStencilAttachmentWriteBit)
+
+	case vk.ImageLayoutShaderReadOnlyOptimal:
+		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessShaderReadBit)
+		//  | vk.AccessFlags(vk.AccessInputAttachmentReadBit)
+		if oldLayout == vk.ImageLayoutTransferDstOptimal {
+			imgMemBar.SrcAccessMask = vk.AccessFlags(vk.AccessTransferWriteBit)
+			srcStage = vk.PipelineStageFlags(vk.PipelineStageTransferBit)
+			dstStage = vk.PipelineStageFlags(vk.PipelineStageFragmentShaderBit)
+		}
+
+	case vk.ImageLayoutTransferSrcOptimal:
+		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessTransferReadBit)
+
+	case vk.ImageLayoutPresentSrc:
+		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessMemoryReadBit)
+
+	default:
+		imgMemBar.DstAccessMask = 0
+	}
+
+	vk.CmdPipelineBarrier(cmd, srcStage, dstStage,
+		0, 0, nil, 0, nil, 1, []vk.ImageMemoryBarrier{imgMemBar})
 }
 
 /////////////////////////////////////////////////////////////////////

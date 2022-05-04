@@ -2,96 +2,138 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// This is initially adapted from https://github.com/vulkan-go/asche
-// Copyright © 2017 Maxim Kupriianov <max@kc.vc>, under the MIT License
-
-//go:build ignore
-// +build ignore
-
 package vgpu
 
 import (
+	"github.com/goki/ki/kit"
 	vk "github.com/vulkan-go/vulkan"
 )
 
+// Texture supplies an Image and a Sampler
 type Texture struct {
-	sampler vk.Sampler
-
-	image       vk.Image
-	imageLayout vk.ImageLayout
-
-	memAlloc *vk.MemoryAllocateInfo
-	mem      vk.DeviceMemory
-	view     vk.ImageView
-
-	texWidth  int32
-	texHeight int32
+	Image
+	Sampler `desc:"sampler for image"`
 }
 
-func (t *Texture) Destroy(dev vk.Device) {
-	vk.DestroyImageView(dev, t.view, nil)
-	vk.FreeMemory(dev, t.mem, nil)
-	vk.DestroyImage(dev, t.image, nil)
-	vk.DestroySampler(dev, t.sampler, nil)
+func (tx *Texture) Defaults() {
+	tx.Image.Format.Defaults()
+	tx.Sampler.Defaults()
 }
 
-func (t *Texture) DestroyImage(dev vk.Device) {
-	vk.FreeMemory(dev, t.mem, nil)
-	vk.DestroyImage(dev, t.image, nil)
+func (tx *Texture) Destroy() {
+	tx.Sampler.Destroy(tx.Image.Dev)
+	tx.Image.Destroy()
 }
 
-type Depth struct {
-	format   vk.Format
-	image    vk.Image
-	memAlloc *vk.MemoryAllocateInfo
-	mem      vk.DeviceMemory
-	view     vk.ImageView
+///////////////////////////////////////////////////
+
+// Sampler represents a vulkan image sampler
+type Sampler struct {
+	Name      string
+	UMode     SamplerModes `desc:"for U (horizontal) axis -- what to do when going off the edge"`
+	VMode     SamplerModes `desc:"for V (vertical) axis -- what to do when going off the edge"`
+	WMode     SamplerModes `desc:"for W (horizontal) axis -- what to do when going off the edge"`
+	Border    BorderColors `desc:"border color for Clamp modes"`
+	VkSampler vk.Sampler   `desc:"the vulkan sampler"`
 }
 
-func (d *Depth) Destroy(dev vk.Device) {
-	vk.DestroyImageView(dev, d.view, nil)
-	vk.DestroyImage(dev, d.image, nil)
-	vk.FreeMemory(dev, d.mem, nil)
+func (sm *Sampler) Defaults() {
+	sm.UMode = Repeat
+	sm.VMode = Repeat
+	sm.WMode = Repeat
+	sm.Border = BorderTrans
 }
 
-// func loadTextureSize(name string) (w int, h int, err error) {
-// 	data := MustAsset(name)
-// 	r := bytes.NewReader(data)
-// 	ppmCfg, err := ppm.DecodeConfig(r)
-// 	if err != nil {
-// 		return 0, 0, err
-// 	}
-// 	return ppmCfg.Width, ppmCfg.Height, nil
-// }
+// Config configures sampler on device
+func (sm *Sampler) Config(dev vk.Device) {
+	var samp vk.Sampler
+	ret := vk.CreateSampler(dev, &vk.SamplerCreateInfo{
+		SType:                   vk.StructureTypeSamplerCreateInfo,
+		MagFilter:               vk.FilterLinear,
+		MinFilter:               vk.FilterLinear,
+		AddressModeU:            sm.UMode.VkMode(),
+		AddressModeV:            sm.VMode.VkMode(),
+		AddressModeW:            sm.WMode.VkMode(),
+		AnisotropyEnable:        vk.False,
+		MaxAnisotropy:           TheGPU.GPUProps.Limits.MaxSamplerAnisotropy,
+		BorderColor:             sm.Border.VkColor(),
+		UnnormalizedCoordinates: vk.False,
+		CompareEnable:           vk.False,
+		MipmapMode:              vk.SamplerMipmapModeLinear,
+	}, nil, &samp)
+	IfPanic(NewError(ret))
+	sm.VkSampler = samp
+}
 
-// func loadTextureData(name string, layout vk.SubresourceLayout) ([]byte, error) {
-// 	data := MustAsset(name)
-// 	r := bytes.NewReader(data)
-// 	img, err := ppm.Decode(r)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	newImg := image.NewRGBA(img.Bounds())
-// 	newImg.Stride = int(layout.RowPitch)
-// 	draw.Draw(newImg, newImg.Bounds(), img, image.ZP, draw.Src)
-// 	return []byte(newImg.Pix), nil
-// }
-
-/*
-func loadTextureData(name string, rowPitch int) ([]byte, int, int, error) {
-	// data := MustAsset(name)
-	img, err := png.Decode(bytes.NewReader(data))
-	if err != nil {
-		return nil, 0, 0, err
+func (sm *Sampler) Destroy(dev vk.Device) {
+	if sm.VkSampler != nil {
+		vk.DestroySampler(dev, sm.VkSampler, nil)
+		sm.VkSampler = nil
 	}
-	newImg := image.NewRGBA(img.Bounds())
-	if rowPitch <= 4*img.Bounds().Dy() {
-		// apply the proposed row pitch only if supported,
-		// as we're using only optimal textures.
-		newImg.Stride = rowPitch
-	}
-	draw.Draw(newImg, newImg.Bounds(), img, image.ZP, draw.Src)
-	size := newImg.Bounds().Size()
-	return []byte(newImg.Pix), size.X, size.Y, nil
 }
-*/
+
+// Texture image sampler modes
+type SamplerModes int32
+
+const (
+	// Repeat the texture when going beyond the image dimensions.
+	Repeat SamplerModes = iota
+
+	// Like repeat, but inverts the coordinates to mirror the image when going beyond the dimensions.
+	MirroredRepeat
+
+	// Take the color of the edge closest to the coordinate beyond the image dimensions.
+	ClampToEdge
+
+	// Return a solid color when sampling beyond the dimensions of the image.
+	ClampToBorder
+
+	// Like clamp to edge, but instead uses the edge opposite to the closest edge.
+	MirrorClampToEdge
+
+	SamplerModesN
+)
+
+//go:generate stringer -type=SamplerModes
+
+var KiT_SamplerModes = kit.Enums.AddEnum(SamplerModesN, kit.NotBitFlag, nil)
+
+func (sm SamplerModes) VkMode() vk.SamplerAddressMode {
+	return VulkanSamplerModes[sm]
+}
+
+var VulkanSamplerModes = map[SamplerModes]vk.SamplerAddressMode{
+	Repeat:            vk.SamplerAddressModeRepeat,
+	MirroredRepeat:    vk.SamplerAddressModeMirroredRepeat,
+	ClampToEdge:       vk.SamplerAddressModeClampToEdge,
+	ClampToBorder:     vk.SamplerAddressModeClampToBorder,
+	MirrorClampToEdge: vk.SamplerAddressModeMirrorClampToEdge,
+}
+
+//////////////////////////////////////////////////////
+
+// Texture image sampler modes
+type BorderColors int32
+
+const (
+	// Repeat the texture when going beyond the image dimensions.
+	BorderTrans BorderColors = iota
+	BorderBlack
+	BorderWhite
+
+	BorderColorsN
+)
+
+//go:generate stringer -type=BorderColors
+
+var KiT_BorderColors = kit.Enums.AddEnum(BorderColorsN, kit.NotBitFlag, nil)
+
+func (bc BorderColors) VkColor() vk.BorderColor {
+	return VulkanBorderColors[bc]
+}
+
+var VulkanBorderColors = map[BorderColors]vk.BorderColor{
+	BorderTrans: vk.BorderColorIntTransparentBlack,
+	BorderBlack: vk.BorderColorIntOpaqueBlack,
+	BorderWhite: vk.BorderColorIntOpaqueWhite,
+}

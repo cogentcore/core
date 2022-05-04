@@ -53,7 +53,7 @@ func main() {
 	gp.Config("drawidx")
 	TheGPU = gp
 
-	gp.PropsString(true) // print
+	// gp.PropsString(true) // print
 
 	surfPtr, err := window.CreateWindowSurface(gp.Instance, nil)
 	if err != nil {
@@ -65,6 +65,16 @@ func main() {
 	fmt.Printf("format: %#v\n", sf.Format)
 
 	sy := gp.NewGraphicsSystem("drawidx", &sf.Device)
+
+	destroy := func() {
+		vk.DeviceWaitIdle(sf.Device.Device)
+		sy.Destroy()
+		sf.Destroy()
+		gp.Destroy()
+		window.Destroy()
+		glfw.Terminate()
+	}
+
 	pl := sy.NewPipeline("drawidx")
 	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
 	sf.SetRenderPass(&sy.RenderPass)
@@ -87,7 +97,6 @@ func main() {
 	triPos := sy.Mem.Vals.Add("TriPos", posv, nPts)
 	triClr := sy.Mem.Vals.Add("TriClr", clrv, nPts)
 	triIdx := sy.Mem.Vals.Add("TriIdx", idxv, nPts)
-	// todo: not working for some reason! :(
 	triPos.Indexes = "TriIdx" // only need to set indexes for one vertex val
 	cam := sy.Mem.Vals.Add("Camera", camv, 1)
 
@@ -137,16 +146,6 @@ func main() {
 	sy.Mem.SyncToGPU()
 
 	sy.SetVals(0, "TriPos", "TriClr", "Camera")
-
-	destroy := func() {
-		vk.DeviceWaitIdle(sf.Device.Device)
-		vk.DeviceWaitIdle(sy.Device.Device)
-		sy.Destroy()
-		sf.Destroy()
-		gp.Destroy()
-		window.Destroy()
-		glfw.Terminate()
-	}
 
 	frameCount := 0
 	stTime := time.Now()

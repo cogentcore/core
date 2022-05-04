@@ -6,6 +6,7 @@ package vgpu
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"unsafe"
 
@@ -21,7 +22,7 @@ type Val struct {
 	Indexes string         `desc:"name of another Val to use for Indexes when accessing this vector data (e.g., as vertexes)"`
 	ElSize  int            `desc:"if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy."`
 	MemSize int            `desc:"total memory size of this value, including array alignment but not any additional buffer-required alignment padding"`
-	Image   *Image         `desc:"for Image Var roles, this is the Image"`
+	Texture *Texture       `desc:"for Texture Var roles, this is the Texture"`
 	Mod     bool           `inactive:"+" desc:"modified -- set when values are set"`
 	MemPtr  unsafe.Pointer `view:"-" desc:"pointer to the start of the staging memory for this value"`
 }
@@ -30,8 +31,10 @@ func (vl *Val) Init(name string, vr *Var, n int) {
 	vl.Name = name
 	vl.Var = vr
 	vl.N = n
-	if vr.Role >= SampledImage {
-		vl.Image = &Image{Name: name}
+	if vr.Role >= TextureRole {
+		vl.Texture = &Texture{}
+		vl.Name = name
+		vl.Texture.Defaults()
 	}
 }
 
@@ -46,8 +49,8 @@ func (vl *Val) AllocSize() int {
 	if vl.N == 0 {
 		vl.N = 1
 	}
-	if vl.Var.Role >= SampledImage {
-		vl.MemSize = vl.Image.Format.ByteSize()
+	if vl.Var.Role >= TextureRole {
+		vl.MemSize = vl.Texture.Format.ByteSize()
 		return vl.MemSize
 	}
 	if vl.N == 1 || vl.Var.Role < Uniform {
@@ -68,8 +71,8 @@ func (vl *Val) Alloc(buff *MemBuff, buffPtr unsafe.Pointer, offset int) int {
 	mem := vl.AllocSize()
 	vl.MemPtr = unsafe.Pointer(uintptr(buffPtr) + uintptr(offset))
 	vl.Offset = offset
-	if vl.Image != nil {
-		vl.Image.ConfigValHost(buff, buffPtr, offset)
+	if vl.Texture != nil {
+		vl.Texture.ConfigValHost(buff, buffPtr, offset)
 	}
 	return mem
 }
@@ -78,8 +81,8 @@ func (vl *Val) Alloc(buff *MemBuff, buffPtr unsafe.Pointer, offset int) int {
 func (vl *Val) Free() {
 	vl.Offset = 0
 	vl.MemPtr = nil
-	if vl.Image != nil {
-		vl.Image.FreeImage()
+	if vl.Texture != nil {
+		vl.Texture.Destroy()
 	}
 }
 
@@ -135,6 +138,18 @@ func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
 	src := (*[m]byte)(srcPtr)[:vl.MemSize]
 	copy(dst, src)
 	vl.Mod = true
+}
+
+// SetGoImage sets Texture image data from an *image.RGBA standard Go image,
+// and sets the Mod flag, so it will be sync'd up when memory is sync'd.
+func (vl *Val) SetGoImage(img *image.RGBA) error {
+	err := vl.Texture.SetGoImage(img)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		vl.Mod = true
+	}
+	return err
 }
 
 // MemReg returns the memory region for this value
@@ -236,14 +251,17 @@ func (vs *Vals) ModRegs(bt BuffTypes) []MemReg {
 }
 
 ////////////////////////////////////////////////////////////////
-// Image val functions
+// Texture val functions
 
-// AllocImages allocates images on device memory
-func (vs *Vals) AllocImages() {
+// AllocTextures allocates images on device memory
+func (vs *Vals) AllocTextures(mm *Memory) {
 	for _, vl := range vs.Vals {
-		if vl.BuffType() != ImageBuff || vl.Image == nil {
+		if vl.BuffType() != ImageBuff || vl.Texture == nil {
 			continue
 		}
-		vl.Image.AllocImage()
+		vl.Texture.Dev = mm.Device.Device
+		vl.Texture.AllocImage()
+		vl.Texture.Sampler.Config(vl.Texture.Dev)
+		vl.Texture.ConfigStdView()
 	}
 }
