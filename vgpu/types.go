@@ -50,6 +50,7 @@ const (
 	Float64Vec4
 
 	Float32Mat4 // std xform matrix: mat32.Mat4 works directly
+	Float32Mat3 // std xform matrix: mat32.Mat3 works directly
 
 	ImageRGBA32 // 32 bits with 8 bits per component of R,G,B,A -- std image format
 
@@ -80,8 +81,11 @@ func (tp Types) VkIndexType() vk.IndexType {
 
 // Bytes returns number of bytes for this type
 func (tp Types) Bytes() int {
-	if tp == Float32Mat4 {
+	switch tp {
+	case Float32Mat4:
 		return 64
+	case Float32Mat3:
+		return 36
 	}
 	if vf, has := VulkanTypes[tp]; has {
 		return FormatSizes[vf]

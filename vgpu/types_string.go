@@ -32,16 +32,17 @@ func _() {
 	_ = x[Float64Vec3-16]
 	_ = x[Float64Vec4-17]
 	_ = x[Float32Mat4-18]
-	_ = x[ImageRGBA32-19]
-	_ = x[Depth32-20]
-	_ = x[Depth24Sten8-21]
-	_ = x[Struct-22]
-	_ = x[TypesN-23]
+	_ = x[Float32Mat3-19]
+	_ = x[ImageRGBA32-20]
+	_ = x[Depth32-21]
+	_ = x[Depth24Sten8-22]
+	_ = x[Struct-23]
+	_ = x[TypesN-24]
 }
 
-const _Types_name = "UndefTypeBool32Int16Uint16Int32Int32Vec2Int32Vec4Uint32Uint32Vec2Uint32Vec4Float32Float32Vec2Float32Vec3Float32Vec4Float64Float64Vec2Float64Vec3Float64Vec4Float32Mat4ImageRGBA32Depth32Depth24Sten8StructTypesN"
+const _Types_name = "UndefTypeBool32Int16Uint16Int32Int32Vec2Int32Vec4Uint32Uint32Vec2Uint32Vec4Float32Float32Vec2Float32Vec3Float32Vec4Float64Float64Vec2Float64Vec3Float64Vec4Float32Mat4Float32Mat3ImageRGBA32Depth32Depth24Sten8StructTypesN"
 
-var _Types_index = [...]uint8{0, 9, 15, 20, 26, 31, 40, 49, 55, 65, 75, 82, 93, 104, 115, 122, 133, 144, 155, 166, 177, 184, 196, 202, 208}
+var _Types_index = [...]uint8{0, 9, 15, 20, 26, 31, 40, 49, 55, 65, 75, 82, 93, 104, 115, 122, 133, 144, 155, 166, 177, 188, 195, 207, 213, 219}
 
 func (i Types) String() string {
 	if i < 0 || i >= Types(len(_Types_index)-1) {

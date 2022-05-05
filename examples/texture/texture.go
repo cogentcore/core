@@ -109,7 +109,7 @@ func main() {
 	sqrPos.Indexes = "SqrIdx" // only need to set indexes for one vertex val
 	cam := sy.Mem.Vals.Add("Camera", camv, 1)
 
-	img := sy.Mem.Vals.Add("TexImage", tximgv, nPts)
+	img := sy.Mem.Vals.Add("TexImage", tximgv, 1)
 	file, err := os.Open("teximg.jpg")
 	if err != nil {
 		fmt.Printf("image: %s\n", err)

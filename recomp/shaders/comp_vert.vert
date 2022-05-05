@@ -1,7 +1,9 @@
 #version 450
 
-layout(binding = 0) uniform mat3 mvp;
-layout(binding = 0) uniform mat3 uvp;
+layout(binding = 0) uniform Mats {
+	mat3 mvp;
+	mat3 uvp;
+};
 
 layout(location = 0) in vec2 pos;
 layout(location = 0) out vec2 uv;

@@ -7,157 +7,127 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package glos
+package recomp
 
 import (
+	"embed"
 	"image"
 	"image/color"
 	"image/draw"
 	"log"
+	"unsafe"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/mat32"
+	"github.com/goki/vgpu/vgpu"
 )
 
-func (app *appImpl) initDrawProgs() error {
-	if app.progInit {
-		return nil
-	}
-	p := theGPU.NewProgram("draw")
-	_, err := p.AddShader(gpu.VertexShader, "draw-vert",
-		`
-uniform mat3 mvp;
-uniform mat3 uvp;
-in vec2 pos;
-out vec2 uv;
-void main() {
-	vec3 p = vec3(pos, 1);
-	gl_Position = vec4(mvp * p, 1);
-	uv = (uvp * vec3(pos, 1)).xy;
-}
-`+"\x00")
-	if err != nil {
-		return err
-	}
-	_, err = p.AddShader(gpu.FragmentShader, "draw-frag",
-		`
-precision mediump float;
-uniform sampler2D tex;
-in vec2 uv;
-out vec4 outputColor;
-void main() {
-	outputColor = texture(tex, uv);
-}
-`+"\x00")
-	if err != nil {
-		return err
-	}
-	p.AddUniform("mvp", gpu.Mat3fUniType, false, 0)
-	p.AddUniform("uvp", gpu.Mat3fUniType, false, 0)
-	p.AddUniform("tex", gpu.IUniType, false, 0)
+//go:embed shaders/*.spv
+var content embed.FS
 
-	p.AddInput("pos", gpu.Vec2fVecType, gpu.VertexPosition)
-
-	p.SetFragDataVar("outputColor")
-
-	err = p.Compile(false) // showSrc debugging
-	if err != nil {
-		return err
-	}
-	app.drawProg = p
-
-	p = theGPU.NewProgram("fill")
-	_, err = p.AddShader(gpu.VertexShader, "fill-vert",
-		`
-uniform mat3 mvp;
-in vec2 pos;
-void main() {
-	vec3 p = vec3(pos, 1);
-	gl_Position = vec4(mvp * p, 1);
-}
-`+"\x00")
-	if err != nil {
-		return err
-	}
-	_, err = p.AddShader(gpu.FragmentShader, "fill-frag",
-		`
-precision mediump float;
-uniform vec4 color;
-out vec4 outputColor;
-void main() {
-	outputColor = color;
-}
-`+"\x00")
-	if err != nil {
-		return err
-	}
-	p.AddUniform("mvp", gpu.Mat3fUniType, false, 0)
-	p.AddUniform("color", gpu.Vec4fUniType, false, 0)
-
-	p.AddInput("pos", gpu.Vec2fVecType, gpu.VertexPosition)
-
-	p.SetFragDataVar("outputColor")
-
-	err = p.Compile(false) // showSrc debugging
-	if err != nil {
-		return err
-	}
-	app.fillProg = p
-	if err != nil {
-		return err
-	}
-	app.progInit = true
-	return nil
+// Mats are the projection matricies
+type Mats struct {
+	MVP    mat32.Mat3
+	Align1 mat32.Vec3
+	Align2 mat32.Vec4
+	UVP    mat32.Mat3
 }
 
-// drawQuadsBuff returns a gpu.BufferMgr for the quads verticies for drawing on window
-func (app *appImpl) drawQuadsBuff() gpu.BufferMgr {
-	pv := app.drawProg.InputByName("pos")
-	b := theGPU.NewBufferMgr()
-	vb := b.AddVectorsBuffer(gpu.StaticDraw)
-	vb.AddVectors(pv, false)
-	vb.SetLen(4)
-	vb.SetAllData(quadCoords)
-	b.Activate()
-	b.TransferAll()
-	return b
-}
+// Config configures the rect composition System with a
+// comp and fill pipeline.
+func Config(sy *vgpu.System) {
+	cpl := sy.NewPipeline("comp")
+	cb, err := content.ReadFile("shaders/comp_vert.spv")
+	cpl.AddShaderCode("comp_vert", vgpu.VertexShader, cb)
+	cb, err = content.ReadFile("shaders/comp_frag.spv")
+	cpl.AddShaderCode("comp_frag", vgpu.FragmentShader, cb)
 
-// fillQuadsBuff returns a gpu.BufferMgr for the quads verticies for filling window
-func (app *appImpl) fillQuadsBuff() gpu.BufferMgr {
-	pv := app.fillProg.InputByName("pos")
-	b := theGPU.NewBufferMgr()
-	vb := b.AddVectorsBuffer(gpu.StaticDraw)
-	vb.AddVectors(pv, false)
-	vb.SetLen(4)
-	vb.SetAllData(quadCoords)
-	b.Activate()
-	b.TransferAll()
-	return b
+	fpl := sy.NewPipeline("fill")
+	cb, err := content.ReadFile("shaders/fill_vert.spv")
+	fpl.AddShaderCode("fill_vert", vgpu.VertexShader, cb)
+	cb, err = content.ReadFile("shaders/comp_frag.spv")
+	fpl.AddShaderCode("fill_frag", vgpu.FragmentShader, cb)
+
+	posv := sy.Vars.Add("Pos", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
+	// txcv := sy.Vars.Add("TexCoord", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
+	idxv := sy.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
+
+	matv := sy.Vars.Add("Mats", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
+	matv.SizeOf = vgpu.Float32Mat4.Bytes() * 2 // no padding for these
+
+	tximgv := sy.Vars.Add("Tex", vgpu.ImageRGBA32, vgpu.TextureRole, 0, vgpu.FragmentShader)
+	clrv := sy.Vars.Add("Color", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.FragmentShader)
+
+	nPts := 4
+	nIdxs := 6
+	sqrPos := sy.Mem.Vals.Add("SqrPos", posv, nPts)
+	sqrIdx := sy.Mem.Vals.Add("SqrIdx", idxv, nIdxs)
+	sqrPos.Indexes = "SqrIdx" // only need to set indexes for one vertex val
+
+	mat := sy.Mem.Vals.Add("Mats", matv, 1)
+
+	img := sy.Mem.Vals.Add("Tex", tximgv, 1)
+	clr := sy.Mem.Vals.Add("FillColor", clrv, 1)
+
+	// note: add all values per above before doing Config
+	sy.Config()
+	sy.Mem.Config()
+
+	// note: first val in set is offset
+	sqrPosA := sqrPos.Floats32()
+	sqrPosA.Set(0,
+		0.0, 0.0,
+		1.0, 0.0,
+		1.0, 1.0,
+		0.0, 1.0)
+	sqrPos.Mod = true
+
+	idxs := []uint16{0, 1, 2, 0, 2, 3}
+	sqrIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+
+	// cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+
+	sy.Mem.SyncToGPU()
+
+	sy.SetVals(0, "SqrPos", "Camera", "TexImage")
+
+	if sy.Vars.Validate() != nil {
+		destroy()
+		return
+	}
+
+	// cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+	// sy.Mem.SyncToGPU()
+
+	idx := sf.AcquireNextImage()
+	pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx])
+	sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
+	sf.PresentImage(idx)
+
 }
 
 // draw draws to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
 // dstBotZero is true if destination has Y=0 at bottom
-func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr, dstBotZero bool) {
-	tx := src.(*textureImpl)
+func Composite(dstSz image.Point, src2dst mat32.Mat3, tx image.Image, sr image.Rectangle) {
+	// tx := src.(*textureImpl)
 	sr = sr.Intersect(tx.Bounds())
 	if sr.Empty() {
 		return
 	}
 
-	srcBotZero := src.BotZero()
-	if opts != nil && opts.FlipY {
-		srcBotZero = !srcBotZero
-	}
+	// srcBotZero := src.BotZero()
+	// if opts != nil && opts.FlipY {
+	// 	srcBotZero = !srcBotZero
+	// }
 
-	gpu.Draw.Op(op)
-	gpu.Draw.DepthTest(false)
-	gpu.Draw.CullFace(false, true, dstBotZero) // cull back face -- dstBotZero = CCW, !dstBotZero = CW
-	gpu.Draw.StencilTest(false)
-	gpu.Draw.Multisample(false)
-	app.drawProg.Activate()
+	// gpu.Draw.Op(op)
+	// gpu.Draw.DepthTest(false)
+	// gpu.Draw.CullFace(false, true, dstBotZero) // cull back face -- dstBotZero = CCW, !dstBotZero = CW
+	// gpu.Draw.StencilTest(false)
+	// gpu.Draw.Multisample(false)
+	// app.drawProg.Activate()
 
 	// Start with src-space left, top, right and bottom.
 	srcL := float32(sr.Min.X)
@@ -177,10 +147,11 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 	)
 	// fmt.Printf("trgTex: %v  matMVP: %v\n", trgTex, matMVP)
 
-	err := app.drawProg.UniformByName("mvp").SetValue(matMVP)
-	if err != nil {
-		return
-	}
+	var tmat Mats
+
+	mat := sy.Mem.Vals["Mats"]
+	mat.CopyBytes(unsafe.Pointer(&matMVP)) // sets mod
+
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
 	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
 	//

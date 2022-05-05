@@ -2,6 +2,8 @@
 
 [![GoDocs for vGPU](https://pkg.go.dev/badge/github.com/goki/vgpu.svg)](https://pkg.go.dev/github.com/goki/vgpu)
 
+How to install: https://vulkan.lunarg.com/sdk/home -- download the Vulkan SDK installer for your platform.  Unfortunately there does not appear to be a package for homebrew.
+
 vGPU is a Vulkan-based framework for both Graphics and Compute Engine use of GPU hardware, in the Go langauge.  It uses the basic cgo-based Go bindings to Vulkan in: https://github.com/vulkan-go/vulkan and was developed starting with the associated example code surrounding that project.  Vulkan is a relatively new, essentially universally-supported interface to GPU hardware across all types of systems from mobile phones to massive GPU-based compute hardware, and it provides high-performance "bare metal" access to the hardware, for both graphics and computational uses.
 
 [Vulkan](https://www.vulkan.org) is very low-level and demands a higher-level framework to manage the complexity and verbosity.  While there are many helpful tutorials covering the basic API, many of the tutorials don't provide much of a pathway for how to organize everything at a higher level of abstraction.  vGPU represents one attempt that enforces some reasonable choices that enable a significantly simpler programming model, while still providing considerable flexibility and high levels of performance.  Everything is a tradeoff, and simplicity definitely was prioritized over performance in a few cases, but in practical use-cases, the performance differences should be minimal.
