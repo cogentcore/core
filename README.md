@@ -2,16 +2,16 @@
 
 [![GoDocs for vGPU](https://pkg.go.dev/badge/github.com/goki/vgpu.svg)](https://pkg.go.dev/github.com/goki/vgpu)
 
-vGPU is a Vulkan-based framework for both Graphics and Compute Engine use of GPU hardware, in the Go langauge.  It uses the basic cgo-based Go bindings to Vulkan in: https://github.com/vulkan-go/vulkan and the associated example code surrounding that project.  Vulkan is a relatively new, essentially universally-supported interface to GPU hardware across all types of systems from mobile phones to massive GPU-based compute hardware, and it provides high-performance "bare metal" access to the hardware, for both graphics and computational uses.
+vGPU is a Vulkan-based framework for both Graphics and Compute Engine use of GPU hardware, in the Go langauge.  It uses the basic cgo-based Go bindings to Vulkan in: https://github.com/vulkan-go/vulkan and was developed starting with the associated example code surrounding that project.  Vulkan is a relatively new, essentially universally-supported interface to GPU hardware across all types of systems from mobile phones to massive GPU-based compute hardware, and it provides high-performance "bare metal" access to the hardware, for both graphics and computational uses.
 
-Vulkan is very low-level and demands a higher-level framework to manage the complexity and verbosity.  While there are many helpful tutorials covering the basic API, many of the tutorials don't provide much of a pathway for how to organize everything at a higher level of abstraction.  vGPU represents one attempt that enforces some reasonable choices that enable a significantly simpler programming model, while still providing considerable flexibility and high levels of performance.  Everything is a tradeoff, and simplicity definitely was prioritized over performance in a few cases, but in practical use-cases, the performance differences should be minimal.
+[Vulkan](https://www.vulkan.org) is very low-level and demands a higher-level framework to manage the complexity and verbosity.  While there are many helpful tutorials covering the basic API, many of the tutorials don't provide much of a pathway for how to organize everything at a higher level of abstraction.  vGPU represents one attempt that enforces some reasonable choices that enable a significantly simpler programming model, while still providing considerable flexibility and high levels of performance.  Everything is a tradeoff, and simplicity definitely was prioritized over performance in a few cases, but in practical use-cases, the performance differences should be minimal.
 
 Most GPU coding is done for gaming, but vGPU is designed for more scientific "desktop" applications based on the [GoGi](https://github.com/goki/gi) GUI framework, which it will soon power, such as visualization of complex 3D spaces and displays (particularly neural networks), and for GPU Compute acceleration.  The design choices also reflect these priorities, as noted below.
 
 # Basic Elements and Organization
 
 * `GPU` represents the hardware `Device` and maintains global settings, info about the hardware.
-    +  `Device` is a *logical* device and associated Queue info -- each such device can function in parallel.
+    + `Device` is a *logical* device and associated Queue info -- each such device can function in parallel.
     + `CmdPool` manages a command pool and buffer, associated with a specific logical device, for submitting commands to the GPU.
 
 * `System` manages multiple vulkan `Pipeline`s and associated variables, data values, and memory, to accomplish a complete overall rendering / computational job.  The Vars, Vals and Memory are shared across all pipelines within a System.
@@ -26,8 +26,9 @@ Most GPU coding is done for gaming, but vGPU is designed for more scientific "de
     + `Memory` manages the memory for all the `Vals`.  It has 4 different `MemBuff` buffers, one for Image data (textures), which have different constraints, and another for everything else.  It is assumed that the *sizes* of all the Vals do not change frequently, so everything is Alloc'd afresh if any size changes.  This avoids the need for complex de-fragmentation algorithms, and is maximally efficient, but is not good if sizes change (which is rare in most rendering cases).
         + Memory maintains a host-visible, mapped staging buffer, and a corresponding device-local memory buffer that the GPU uses to compute on (the latter of which is optional for unified memory architectures).  Each `Val` records when it is modified, and a global Sync step efficiently transfers only what has changed.
 
-* `Image` manages a vulkan Image and associated `ImageView`        
-* `Framebuffer` manages an `Image` along with a `RenderPass` configuration that enables rendering.
+* `Image` manages a vulkan Image and associated `ImageView`, including potential host staging buffer (shared as in a Val or owned).
+* `Texture` extends the `Image` with a `Sampler` that defines how pixels are accessed in a shader.
+* `Framebuffer` manages an `Image` along with a `RenderPass` configuration that enables rendering into an offscreen image.
 
 * A `Surface` represents the full hardware-managed `Image` associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
 
@@ -66,9 +67,11 @@ for each view {
 }
 ```
 
-There is also a common practice of using different DescriptorSets for each level in the swapchain, for maintaining high FPS rates by rendering the next frame while the current one is still cooking along itself.  However, this is not really the mode supported by vGPU, and furthermore, if this is desired, you can do it using different Vars for each frame.
+There is also a common practice of using different DescriptorSets for each level in the swapchain, for maintaining high FPS rates by rendering the next frame while the current one is still cooking along itself.  However, this is not the default mode supported by vGPU -- if this is desired, you can do it using different Vars for each frame.
 
-Because everything is all packed into one big buffer in Memory, we *exclusively* use the Dynamic mode for Uniform and Storage binding, where the offset into the buffer is specified at the time of the binding call, not in advance in the descriptor set itself.  This has only very minor performance implications and makes everything much more flexible and simple: just bind whatever variables you want and that data will be used.
+Because everything is all packed into big buffers organized by different broad categories, in `Memory`, we *exclusively* use the Dynamic mode for Uniform and Storage binding, where the offset into the buffer is specified at the time of the binding call, not in advance in the descriptor set itself.  This has only very minor performance implications and makes everything much more flexible and simple: just bind whatever variables you want and that data will be used.
+
+The examples and provided `vPhong` package retain the Y-is-up coordinate system from OpenGL, which is more "natural" for the physical world, where the Y axis is the height dimension, and up is up, after all.  Some of the defaults reflect this choice, but it is easy to use the native Vulkan Y-is-down coordinate system too.
 
 # GPU Accelerated Compute Engine
 

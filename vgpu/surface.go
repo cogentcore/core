@@ -17,18 +17,19 @@ import (
 // Surface manages the physical device for the visible image
 // of a window surface, and the swapchain for presenting images.
 type Surface struct {
-	GPU           *GPU           `desc:"pointer to gpu device, for convenience"`
-	Device        Device         `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
-	RenderPass    *RenderPass    `desc:"the RenderPass for this Surface, typically from a System"`
-	CmdPool       CmdPool        `desc:"command pool which must be used for all surface rendering commands, to enable the sync logic to work properly.  It is created in Init and can be Reset() between uses."`
-	Format        ImageFormat    `desc:"has the current swapchain image format and dimensions"`
-	NFrames       int            `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
-	Frames        []*Framebuffer `desc:"Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames"`
-	Surface       vk.Surface     `view:"-" desc:"vulkan handle for surface"`
-	Swapchain     vk.Swapchain   `view:"-" desc:"vulkan handle for swapchain"`
-	ImageAcquired vk.Semaphore   `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
-	RenderDone    vk.Semaphore   `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
-	RenderFence   vk.Fence       `view:"-" desc:"fence for rendering command running"`
+	GPU            *GPU           `desc:"pointer to gpu device, for convenience"`
+	Device         Device         `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
+	RenderPass     *RenderPass    `desc:"the RenderPass for this Surface, typically from a System"`
+	CmdPool        CmdPool        `desc:"command pool which must be used for all surface rendering commands, to enable the sync logic to work properly.  It is created in Init and can be Reset() between uses."`
+	Format         ImageFormat    `desc:"has the current swapchain image format and dimensions"`
+	DesiredFormats []vk.Format    `desc:"ordered list of surface formats to select"`
+	NFrames        int            `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
+	Frames         []*Framebuffer `desc:"Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames"`
+	Surface        vk.Surface     `view:"-" desc:"vulkan handle for surface"`
+	Swapchain      vk.Swapchain   `view:"-" desc:"vulkan handle for swapchain"`
+	ImageAcquired  vk.Semaphore   `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
+	RenderDone     vk.Semaphore   `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
+	RenderFence    vk.Fence       `view:"-" desc:"fence for rendering command running"`
 }
 
 // NewSurface returns a new surface initialized for given GPU and vulkan
@@ -43,7 +44,11 @@ func NewSurface(gp *GPU, vsurf vk.Surface) *Surface {
 func (sf *Surface) Defaults() {
 	sf.NFrames = 2 // requested, will be updated with actual
 	sf.Format.Defaults()
-	sf.Format.Set(1024, 768, vk.FormatR8g8b8a8Srgb) // requested, will be updated with actual
+	sf.Format.Set(1024, 768, vk.FormatR8g8b8a8Srgb)
+	sf.DesiredFormats = []vk.Format{
+		vk.FormatR8g8b8a8Srgb,
+		vk.FormatB8g8r8a8Srgb,
+	}
 }
 
 // Init initializes the device and all other resources for the surface
@@ -116,9 +121,31 @@ func (sf *Surface) ConfigSwapchain() {
 	} else if formatCount == 0 {
 		IfPanic(errors.New("vulkan error: surface has no pixel formats"))
 	} else {
-		formats[0].Deref()
-		// select the first one available
-		format = formats[0]
+		got := false
+		for _, df := range sf.DesiredFormats {
+			for _, ft := range formats {
+				ft.Deref()
+				if ft.Format == df {
+					format = ft
+					got = true
+					break
+				}
+			}
+			if got {
+				break
+			}
+		}
+		if !got {
+			formats[0].Deref()
+			format = formats[0]
+			if sf.GPU.Debug {
+				dfs := make([]string, len(sf.DesiredFormats))
+				for i, df := range sf.DesiredFormats {
+					dfs[i] = ImageFormatNames[df]
+				}
+				fmt.Printf("vgpu.Surface:Init unable to find desired format: %v, using first one: %s\n", dfs, ImageFormatNames[format.Format])
+			}
+		}
 	}
 
 	// Setup swapchain parameters

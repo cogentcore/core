@@ -142,8 +142,14 @@ func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
 
 // SetGoImage sets Texture image data from an *image.RGBA standard Go image,
 // and sets the Mod flag, so it will be sync'd up when memory is sync'd.
-func (vl *Val) SetGoImage(img *image.RGBA) error {
-	err := vl.Texture.SetGoImage(img)
+// This is most efficiently done using an image.RGBA, but other
+// formats will be converted as necessary.
+// If flipY is true (default) then the Image Y axis is flipped
+// when copying into the image data, so that images will appear
+// upright in the standard OpenGL Y-is-Up coordinate system.
+// If using the Y-is-down Vulkan coordinate system, don't flip.
+func (vl *Val) SetGoImage(img image.Image, flipY bool) error {
+	err := vl.Texture.SetGoImage(img, flipY)
 	if err != nil {
 		fmt.Println(err)
 	} else {

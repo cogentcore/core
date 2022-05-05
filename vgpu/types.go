@@ -64,8 +64,8 @@ const (
 
 var KiT_Types = kit.Enums.AddEnum(TypesN, kit.NotBitFlag, nil)
 
-// VkType returns the Vulkan VkFormat for given type
-func (tp Types) VkType() vk.Format {
+// VkFormat returns the Vulkan VkFormat for given type
+func (tp Types) VkFormat() vk.Format {
 	return VulkanTypes[tp]
 }
 
@@ -136,4 +136,19 @@ var VulkanTypes = map[Types]vk.Format{
 	ImageRGBA32:  vk.FormatR8g8b8a8Srgb,
 	Depth32:      vk.FormatD32Sfloat,
 	Depth24Sten8: vk.FormatD24UnormS8Uint,
+}
+
+// most commonly available formats: https://vulkan.gpuinfo.org/listsurfaceformats.php
+
+// ImageFormatNames translates image format into human-readable string
+// for most commonly-available formats
+var ImageFormatNames = map[vk.Format]string{
+	vk.FormatR8g8b8a8Srgb:           "RGBA 8bit sRGB colorspace",
+	vk.FormatR8g8b8a8Unorm:          "RGBA 8bit unsigned linear colorspace",
+	vk.FormatR5g6b5UnormPack16:      "RGB 5bit (pack 16bit total) unsigned linear colorspace",
+	vk.FormatA2b10g10r10UnormPack32: "ABGR 10bit, 2bit alpha (pack 32bit total), unsigned linear colorspace",
+	vk.FormatB8g8r8a8Srgb:           "BGRA 8bit sRGB colorspace",
+	vk.FormatB8g8r8a8Unorm:          "BGRA 8bit unsigned linear colorspace",
+	vk.FormatR16g16b16a16Sfloat:     "RGBA 16bit signed floating point linear colorspace",
+	vk.FormatA2r10g10b10UnormPack32: "ARGB 10bit, 2bit alpha (pack 32bit total), unsigned linear colorspace",
 }

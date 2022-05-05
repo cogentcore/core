@@ -54,7 +54,7 @@ func main() {
 	}
 	sf := vgpu.NewSurface(gp, vk.SurfaceFromPointer(surfPtr))
 
-	fmt.Printf("format: %#v\n", sf.Format)
+	fmt.Printf("format: %s\n", sf.Format.String())
 
 	sy := gp.NewGraphicsSystem("drawtri", &sf.Device)
 	pl := sy.NewPipeline("drawtri")

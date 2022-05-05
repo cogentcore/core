@@ -27,10 +27,8 @@ type System struct {
 	PipelineMap map[string]*Pipeline `desc:"map of all pipelines -- names must be unique"`
 	Vars        Vars                 `desc:"the common set of variables used by all Piplines"`
 	Mem         Memory               `desc:"manages all the memory for all the Vals"`
-	// Views       map[string]*ImageView `desc:"uniquely-named image views"`
-	Samplers    map[string]*Sampler `desc:"uniquely-named image samplers -- referred to by name in Vars of type Sampler or CombinedImage"`
-	RenderPass  RenderPass          `desc:"renderpass with depth buffer for this system"`
-	Framebuffer Framebuffer         `desc:"shared framebuffer to render into, if not rendering into Surface"`
+	RenderPass  RenderPass           `desc:"renderpass with depth buffer for this system"`
+	Framebuffer Framebuffer          `desc:"shared framebuffer to render into, if not rendering into Surface"`
 }
 
 // InitGraphics initializes the System for graphics use, using
@@ -61,16 +59,6 @@ func (sy *System) Destroy() {
 	sy.Mem.Destroy(sy.Device.Device)
 	for _, pl := range sy.Pipelines {
 		pl.Destroy()
-	}
-	// if sy.Views != nil {
-	// 	for _, iv := range sy.Views {
-	// 		iv.Destroy(sy.Device.Device)
-	// 	}
-	// }
-	if sy.Samplers != nil {
-		for _, sm := range sy.Samplers {
-			sm.Destroy(sy.Device.Device)
-		}
 	}
 	sy.Vars.Destroy(sy.Device.Device)
 	if sy.Compute {

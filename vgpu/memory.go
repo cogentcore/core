@@ -59,7 +59,7 @@ func (mm *Memory) Destroy(dev vk.Device) {
 func (mm *Memory) Config() {
 	mm.Alloc()
 	mm.AllocDev()
-	mm.TransferToGPU()
+	// mm.TransferToGPU()
 }
 
 // Alloc allocates memory for all bufers

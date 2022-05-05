@@ -13,6 +13,7 @@ import (
 	"log"
 	"unsafe"
 
+	"github.com/anthonynsimon/bild/clone"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
@@ -29,6 +30,11 @@ type ImageFormat struct {
 func (im *ImageFormat) Defaults() {
 	im.Format = vk.FormatR8g8b8a8Srgb
 	im.Samples = vk.SampleCount1Bit
+}
+
+// String returns human-readable version of format
+func (im *ImageFormat) String() string {
+	return fmt.Sprintf("Size: %v  Format: %s  MultiSample: %d", im.Size, ImageFormatNames[im.Format], im.Samples)
 }
 
 // IsStdRGBA returns true if image format is the standard vk.FormatR8g8b8a8Srgb format
@@ -187,41 +193,67 @@ func (im *Image) GoImage() (*image.RGBA, error) {
 // Does not call SetGoImage -- this is for configuring a Val for
 // an image prior to allocating memory. Once memory is allocated
 // then SetGoImage can be called.
-func (im *Image) ConfigGoImage(img *image.RGBA) {
+func (im *Image) ConfigGoImage(img image.Image) {
 	im.Format.Defaults()
-	im.Format.Size = img.Rect.Size()
+	im.Format.Size = img.Bounds().Size()
 }
 
-// SetGoImage sets staging image data from an *image.RGBA standard Go image,
-// Only works if IsHostActive and Format is default vk.FormatR8g8b8a8Srgb,
-// Uses very efficient direct copy of bytes -- most efficiently if the
-// size and stride is the same, but also works row-by-row if not.
-// Must still call AllocImage to have image allocated on the host.
-func (im *Image) SetGoImage(img *image.RGBA) error {
+const (
+	// FlipY used as named arg for flipping the Y axis of images, etc
+	FlipY = true
+
+	// NoFlipY uased as named arg for not flipping the Y axis of images
+	NoFlipY = false
+)
+
+// SetGoImage sets staging image data from a standard Go image.
+// This is most efficiently done using an image.RGBA, but other
+// formats will be converted as necessary.
+// If flipY is true (default) then the Image Y axis is flipped
+// when copying into the image data, so that images will appear
+// upright in the standard OpenGL Y-is-up coordinate system.
+// If using the Y-is-down Vulkan coordinate system, don't flip.
+// Only works if IsHostActive and Image Format is default vk.FormatR8g8b8a8Srgb,
+// Must still call AllocImage to have image allocated on the device,
+// and copy from this host staging data to the device.
+func (im *Image) SetGoImage(img image.Image, flipY bool) error {
 	if !im.IsHostActive() {
 		return fmt.Errorf("vgpu.Image: Go image not available because Host not active: %s", im.Name)
 	}
 	if !im.Format.IsStdRGBA() {
-		return fmt.Errorf("vgpu.Image: Go image not standard RGBA format: %s", im.Name)
+		return fmt.Errorf("vgpu.Image: Format is not standard RGBA format: %s", im.Name)
 	}
-	sz := img.Rect.Size()
+	rimg, ok := img.(*image.RGBA)
+	if !ok {
+		rimg = clone.AsRGBA(img)
+	}
+	sz := rimg.Rect.Size()
 	dpix := im.Host.Pixels()
-	sti := img.Rect.Min.Y*img.Stride + img.Rect.Min.X*4
-	spix := img.Pix[sti:]
+	sti := rimg.Rect.Min.Y*rimg.Stride + rimg.Rect.Min.X*4
+	spix := rimg.Pix[sti:]
 	str := im.Format.Stride()
-	if img.Stride == str {
+	if rimg.Stride == str && !flipY {
 		mx := ints.MinInt(len(spix), len(dpix))
 		copy(dpix[:mx], spix[:mx])
 		return nil
 	}
 	rows := ints.MinInt(sz.Y, im.Format.Size.Y)
-	rsz := ints.MinInt(img.Stride, str)
+	rsz := ints.MinInt(rimg.Stride, str)
 	sidx := 0
-	didx := 0
-	for rw := 0; rw < rows; rw++ {
-		copy(dpix[didx:didx+rsz], spix[sidx:sidx+rsz])
-		didx += str
-		sidx += img.Stride
+	if flipY {
+		didx := (rows - 1) * str
+		for rw := 0; rw < rows; rw++ {
+			copy(dpix[didx:didx+rsz], spix[sidx:sidx+rsz])
+			sidx += rimg.Stride
+			didx -= str
+		}
+	} else {
+		didx := 0
+		for rw := 0; rw < rows; rw++ {
+			copy(dpix[didx:didx+rsz], spix[sidx:sidx+rsz])
+			sidx += rimg.Stride
+			didx += str
+		}
 	}
 	return nil
 }
@@ -240,7 +272,7 @@ func (im *Image) SetVkImage(dev vk.Device, img vk.Image) {
 // from the render image format.
 func (im *Image) ConfigDepthImage(dev vk.Device, depthType Types, imgFmt *ImageFormat) {
 	im.Dev = dev
-	im.Format.Format = depthType.VkType()
+	im.Format.Format = depthType.VkFormat()
 	im.Format.Samples = imgFmt.Samples
 	im.SetFlag(int(DepthImage))
 	im.SetSize(imgFmt.Size)

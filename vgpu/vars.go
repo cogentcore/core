@@ -218,7 +218,7 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 		attr = append(attr, vk.VertexInputAttributeDescription{
 			Location: uint32(vr.BindLoc),
 			Binding:  uint32(vr.BindLoc),
-			Format:   vr.Type.VkType(),
+			Format:   vr.Type.VkFormat(),
 			Offset:   0,
 		})
 	}

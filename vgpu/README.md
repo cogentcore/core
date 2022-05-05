@@ -16,7 +16,7 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 
 # TODO
 
-* texture image is upside down and srgb colorspace is not set properly -- format is not valid.
+* texture image is upside down.
 
 * ReComp
 

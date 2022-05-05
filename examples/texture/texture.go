@@ -19,7 +19,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/anthonynsimon/bild/clone"
 	vk "github.com/vulkan-go/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -67,7 +66,7 @@ func main() {
 	}
 	sf := vgpu.NewSurface(gp, vk.SurfaceFromPointer(surfPtr))
 
-	fmt.Printf("format: %#v\n", sf.Format)
+	fmt.Printf("format: %s\n", sf.Format.String())
 
 	sy := gp.NewGraphicsSystem("texture", &sf.Device)
 	pl := sy.NewPipeline("texture")
@@ -85,7 +84,7 @@ func main() {
 	sf.SetRenderPass(&sy.RenderPass)
 	pl.SetGraphicsDefaults()
 	pl.SetClearColor(0.2, 0.2, 0.2, 1)
-	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 
 	pl.AddShaderFile("texture_vert", vgpu.VertexShader, "texture_vert.spv")
 	pl.AddShaderFile("texture_frag", vgpu.FragmentShader, "texture_frag.spv")
@@ -115,12 +114,8 @@ func main() {
 	if err != nil {
 		fmt.Printf("image: %s\n", err)
 	}
-	gimgi, _, err := image.Decode(file)
+	gimg, _, err := image.Decode(file)
 	file.Close()
-	gimg, ok := gimgi.(*image.RGBA)
-	if !ok {
-		gimg = clone.AsRGBA(gimgi)
-	}
 	img.Texture.ConfigGoImage(gimg)
 	// img.Texture.Sampler.Border = vgpu.BorderBlack
 	// img.Texture.Sampler.UMode = vgpu.ClampToBorder
@@ -158,7 +153,7 @@ func main() {
 	idxs := []uint16{0, 1, 2, 0, 2, 3}
 	sqrIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
 
-	img.SetGoImage(gimg)
+	img.SetGoImage(gimg, vgpu.FlipY)
 
 	// This is the standard camera view projection computation
 	campos := mat32.Vec3{0, 0, 2}
@@ -197,7 +192,7 @@ func main() {
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
-		camo.Model.SetRotationY(.1 * float32(frameCount))
+		camo.Model.SetRotationY(.002 * float32(frameCount))
 		cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 
