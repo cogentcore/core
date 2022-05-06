@@ -1,26 +1,20 @@
-// Copyright 2019 The GoKi Authors. All rights reserved.
+// Copyright 2022 The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// based on golang.org/x/exp/shiny:
-// Copyright 2015 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-package recomp
+package vdraw
 
 import (
 	"embed"
+	"fmt"
 	"image"
-	"image/color"
 	"image/draw"
-	"log"
 	"unsafe"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
+
+	vk "github.com/vulkan-go/vulkan"
 )
 
 //go:embed shaders/*.spv
@@ -28,106 +22,170 @@ var content embed.FS
 
 // Mats are the projection matricies
 type Mats struct {
-	MVP    mat32.Mat3
-	Align1 mat32.Vec3
-	Align2 mat32.Vec4
+	MVP    mat32.Mat3 // 9 * 4 = 36 bytes
+	align1 mat32.Vec3 // 3 * 4 = 12 bytes
+	align2 mat32.Vec4 // 4 * 4 = 16 bytes = 64 byte alignment
 	UVP    mat32.Mat3
 }
 
-// Config configures the rect composition System with a
-// comp and fill pipeline.
-func Config(sy *vgpu.System) {
-	cpl := sy.NewPipeline("comp")
-	cb, err := content.ReadFile("shaders/comp_vert.spv")
-	cpl.AddShaderCode("comp_vert", vgpu.VertexShader, cb)
-	cb, err = content.ReadFile("shaders/comp_frag.spv")
-	cpl.AddShaderCode("comp_frag", vgpu.FragmentShader, cb)
-
-	fpl := sy.NewPipeline("fill")
-	cb, err := content.ReadFile("shaders/fill_vert.spv")
-	fpl.AddShaderCode("fill_vert", vgpu.VertexShader, cb)
-	cb, err = content.ReadFile("shaders/comp_frag.spv")
-	fpl.AddShaderCode("fill_frag", vgpu.FragmentShader, cb)
-
-	posv := sy.Vars.Add("Pos", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
-	// txcv := sy.Vars.Add("TexCoord", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
-	idxv := sy.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
-
-	matv := sy.Vars.Add("Mats", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
-	matv.SizeOf = vgpu.Float32Mat4.Bytes() * 2 // no padding for these
-
-	tximgv := sy.Vars.Add("Tex", vgpu.ImageRGBA32, vgpu.TextureRole, 0, vgpu.FragmentShader)
-	clrv := sy.Vars.Add("Color", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.FragmentShader)
-
-	nPts := 4
-	nIdxs := 6
-	sqrPos := sy.Mem.Vals.Add("SqrPos", posv, nPts)
-	sqrIdx := sy.Mem.Vals.Add("SqrIdx", idxv, nIdxs)
-	sqrPos.Indexes = "SqrIdx" // only need to set indexes for one vertex val
-
-	mat := sy.Mem.Vals.Add("Mats", matv, 1)
-
-	img := sy.Mem.Vals.Add("Tex", tximgv, 1)
-	clr := sy.Mem.Vals.Add("FillColor", clrv, 1)
-
-	// note: add all values per above before doing Config
-	sy.Config()
-	sy.Mem.Config()
-
-	// note: first val in set is offset
-	sqrPosA := sqrPos.Floats32()
-	sqrPosA.Set(0,
-		0.0, 0.0,
-		1.0, 0.0,
-		1.0, 1.0,
-		0.0, 1.0)
-	sqrPos.Mod = true
-
-	idxs := []uint16{0, 1, 2, 0, 2, 3}
-	sqrIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
-
-	// cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
-
-	sy.Mem.SyncToGPU()
-
-	sy.SetVals(0, "SqrPos", "Camera", "TexImage")
-
-	if sy.Vars.Validate() != nil {
-		destroy()
-		return
-	}
-
-	// cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
-	// sy.Mem.SyncToGPU()
-
-	idx := sf.AcquireNextImage()
-	pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx])
-	sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
-	sf.PresentImage(idx)
-
+// Drawer is the vDraw implementation, which can be configured for
+// different render targets (Surface, Framebuffer).  It manages
+// an associated System.
+type Drawer struct {
+	Sys  vgpu.System   `desc:"drawing system"`
+	Surf *vgpu.Surface `desc:"surface if render target"`
 }
 
-// draw draws to current render target (could be window or framebuffer / texture)
-// proper context must have already been established outside this call!
-// dstBotZero is true if destination has Y=0 at bottom
-func Composite(dstSz image.Point, src2dst mat32.Mat3, tx image.Image, sr image.Rectangle) {
-	// tx := src.(*textureImpl)
-	sr = sr.Intersect(tx.Bounds())
-	if sr.Empty() {
-		return
+// CopyImage copies given Go image to configured render target, using draw parameters:
+// If flipY is true (default) then the Image Y axis is flipped
+// when copying into the image data, so that images will appear
+// upright in the standard OpenGL Y-is-up coordinate system.
+// dp is the destination point, sr is the source region (set to tex.Format.Bounds() for all)
+// op is the drawing operation: Src = copy source directly (blit), Over = alpha blend with existing
+func (dr *Drawer) CopyImage(img image.Image, flipY bool, dp image.Point, sr image.Rectangle, op draw.Op) error {
+	mat := mat32.Mat3{
+		1, 0, 0,
+		0, 1, 0,
+		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y), 1,
 	}
+	return dr.DrawImage(img, flipY, mat, sr, op)
+}
 
-	// srcBotZero := src.BotZero()
-	// if opts != nil && opts.FlipY {
-	// 	srcBotZero = !srcBotZero
-	// }
+// DrawImage draws given Go image to configured render target, using draw parameters:
+// src2dst is the transform mapping source to destination
+// coordinates (translation, scaling), txsz is the size of the texture to draw,
+// sr is the source region (set to tex.Format.Bounds() for all)
+// op is the drawing operation: Src = copy source directly (blit), Over = alpha blend with existing
+func (dr *Drawer) DrawImage(img image.Image, flipY bool, src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
+	tx := dr.Sys.Mem.Vals.ValMap["Tex"]
+	tx.SetGoImage(img, flipY)
 
+	dr.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op)
+	dr.Sys.Mem.SyncToGPU()
+
+	dr.Sys.SetVals(0, "RectPos", "Mats", "Tex", "FillColor")
+	if err := dr.Sys.Vars.Validate(); err != nil {
+		return err
+	}
+	dpl := dr.Sys.PipelineMap["draw"]
+
+	if dr.Surf != nil {
+		idx := dr.Surf.AcquireNextImage()
+		dpl.FullStdRender(dpl.CmdPool.Buff, dr.Surf.Frames[idx])
+		dr.Surf.SubmitRender(dpl.CmdPool.Buff) // this is where it waits for the 16 msec
+		dr.Surf.PresentImage(idx)
+	}
+	return nil
+}
+
+// ConfigSurface configures the Drawer to use given surface as a render target
+func (dr *Drawer) ConfigSurface(sf *vgpu.Surface) {
+	dr.Surf = sf
+	dr.Sys.InitGraphics(sf.GPU, "vdraw.Drawer", &sf.Device)
+	dr.Sys.ConfigRenderPass(&dr.Surf.Format, vgpu.UndefType)
+	sf.SetRenderPass(&dr.Sys.RenderPass)
+
+	dr.ConfigSys()
+}
+
+func (dr *Drawer) Destroy() {
+	dr.Sys.Destroy()
+}
+
+// DestSize returns the size of the render destination
+func (dr *Drawer) DestSize() image.Point {
+	if dr.Surf != nil {
+		return dr.Surf.Format.Size
+	}
+	return image.Point{10, 10}
+}
+
+// ConfigPipeline configures graphics settings on the pipeline
+func (dr *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 	// gpu.Draw.Op(op)
 	// gpu.Draw.DepthTest(false)
 	// gpu.Draw.CullFace(false, true, dstBotZero) // cull back face -- dstBotZero = CCW, !dstBotZero = CW
 	// gpu.Draw.StencilTest(false)
 	// gpu.Draw.Multisample(false)
 	// app.drawProg.Activate()
+
+	pl.SetGraphicsDefaults()
+	pl.SetClearColor(0.2, 0.2, 0.2, 1)
+	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+}
+
+// ConfigSys configures the vDraw System and pipelines.
+func (dr *Drawer) ConfigSys() {
+	dpl := dr.Sys.NewPipeline("draw")
+	dr.ConfigPipeline(dpl)
+
+	cb, _ := content.ReadFile("shaders/draw_vert.spv")
+	dpl.AddShaderCode("draw_vert", vgpu.VertexShader, cb)
+	cb, _ = content.ReadFile("shaders/draw_frag.spv")
+	dpl.AddShaderCode("draw_frag", vgpu.FragmentShader, cb)
+
+	fpl := dr.Sys.NewPipeline("fill")
+	dr.ConfigPipeline(fpl)
+
+	cb, _ = content.ReadFile("shaders/fill_vert.spv")
+	fpl.AddShaderCode("fill_vert", vgpu.VertexShader, cb)
+	cb, _ = content.ReadFile("shaders/fill_frag.spv")
+	fpl.AddShaderCode("fill_frag", vgpu.FragmentShader, cb)
+
+	posv := dr.Sys.Vars.Add("Pos", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
+	// txcv := sy.Vars.Add("TexCoord", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
+	idxv := dr.Sys.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
+
+	matv := dr.Sys.Vars.Add("Mats", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
+	matv.SizeOf = vgpu.Float32Mat4.Bytes() * 2 // no padding for these
+	clrv := dr.Sys.Vars.Add("Color", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.FragmentShader)
+	tximgv := dr.Sys.Vars.Add("Tex", vgpu.ImageRGBA32, vgpu.TextureRole, 0, vgpu.FragmentShader)
+	tximgv.TextureOwns = true
+
+	nPts := 4
+	nIdxs := 6
+	rectPos := dr.Sys.Mem.Vals.Add("RectPos", posv, nPts)
+	rectIdx := dr.Sys.Mem.Vals.Add("RectIdx", idxv, nIdxs)
+	rectPos.Indexes = "RectIdx" // only need to set indexes for one vertex val
+
+	// std vals
+	dr.Sys.Mem.Vals.Add("Mats", matv, 1)
+	dr.Sys.Mem.Vals.Add("FillColor", clrv, 1)
+	tx := dr.Sys.Mem.Vals.Add("Tex", tximgv, 1)
+	tx.Texture.Dev = dr.Sys.Device.Device // key for self-owning
+
+	// note: add all values per above before doing Config
+	dr.Sys.Config()
+	dr.Sys.Mem.Config()
+
+	// note: first val in set is offset
+	rectPosA := rectPos.Floats32()
+	rectPosA.Set(0,
+		0.0, 0.0,
+		1.0, 0.0,
+		1.0, 1.0,
+		0.0, 1.0)
+	rectPos.Mod = true
+
+	idxs := []uint16{0, 1, 2, 0, 2, 3}
+	rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+}
+
+// ConfigMats configures the draw matrix for given draw parameters:
+// src2dst is the transform mapping source to destination
+// coordinates (translation, scaling), txsz is the size of the texture to draw,
+// sr is the source region (set to tex.Format.Bounds() for all)
+// op is the drawing operation: Src = copy source directly (blit), Over = alpha blend with existing
+func (dr *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rectangle, op draw.Op) {
+	sr = sr.Intersect(image.Rectangle{Max: txsz})
+	if sr.Empty() {
+		return
+	}
+
+	destSz := dr.DestSize()
+
+	dstBotZero := true
+	srcBotZero := true
 
 	// Start with src-space left, top, right and bottom.
 	srcL := float32(sr.Min.X)
@@ -136,7 +194,7 @@ func Composite(dstSz image.Point, src2dst mat32.Mat3, tx image.Image, sr image.R
 	srcB := float32(sr.Max.Y)
 
 	// Transform to dst-space via the src2dst matrix, then to a MVP matrix.
-	matMVP := calcMVP(dstSz.X, dstSz.Y,
+	matMVP := calcMVP(destSz.X, destSz.Y,
 		src2dst[0]*srcL+src2dst[3]*srcT+src2dst[6],
 		src2dst[1]*srcL+src2dst[4]*srcT+src2dst[7],
 		src2dst[0]*srcR+src2dst[3]*srcT+src2dst[6],
@@ -145,12 +203,8 @@ func Composite(dstSz image.Point, src2dst mat32.Mat3, tx image.Image, sr image.R
 		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
 		dstBotZero,
 	)
-	// fmt.Printf("trgTex: %v  matMVP: %v\n", trgTex, matMVP)
-
 	var tmat Mats
-
-	mat := sy.Mem.Vals["Mats"]
-	mat.CopyBytes(unsafe.Pointer(&matMVP)) // sets mod
+	tmat.MVP = matMVP // todo render direct
 
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
 	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
@@ -167,8 +221,8 @@ func Composite(dstSz image.Point, src2dst mat32.Mat3, tx image.Image, sr image.R
 	//
 	// The PQRS quad is always axis-aligned. First of all, convert
 	// from pixel space to texture space.
-	tw := float32(tx.size.X)
-	th := float32(tx.size.Y)
+	tw := float32(txsz.X)
+	th := float32(txsz.Y)
 	px := float32(sr.Min.X-0) / tw
 	py := float32(sr.Min.Y-0) / th
 	qx := float32(sr.Max.X-0) / tw
@@ -183,35 +237,28 @@ func Composite(dstSz image.Point, src2dst mat32.Mat3, tx image.Image, sr image.R
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
 
-	var matUVP mat32.Mat3
 	if srcBotZero {
-		matUVP = mat32.Mat3{
+		tmat.UVP = mat32.Mat3{
 			qx - px, 0, 0,
 			0, py - sy, 0, // py - sy
 			px, sy, 1}
 	} else {
-		matUVP = mat32.Mat3{
+		tmat.UVP = mat32.Mat3{
 			qx - px, 0, 0,
 			0, sy - py, 0, // sy - py
 			px, py, 1,
 		}
 	}
-	err = app.drawProg.UniformByName("uvp").SetValue(matUVP)
-	if err != nil {
-		return
-	}
-	// fmt.Printf("matUVP: %v\n", matUVP)
 
-	tx.Activate(0)
-	err = app.drawProg.UniformByName("tex").SetValue(int32(0))
-	if err != nil {
-		log.Println(err)
-	}
+	fmt.Printf("matUVP: %v  matMVP: %v\n", tmat.UVP, matMVP)
 
-	qbuff.Activate()
-	gpu.Draw.TriangleStrips(0, 4)
+	// coords := []mat32.Vec3{}
+
+	mat := dr.Sys.Mem.Vals.ValMap["Mats"]
+	mat.CopyBytes(unsafe.Pointer(&tmat)) // sets mod
 }
 
+/*
 // fill fills to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
 // dstBotZero is true if flipping Y axis
@@ -276,6 +323,7 @@ func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Mat3, src color
 	)
 	app.fill(mvp, src, op, qbuff, dstBotZero)
 }
+*/
 
 // calcMVP returns the Model View Projection matrix that maps the quadCoords
 // unit square, (0, 0) to (1, 1), to a quad QV, such that QV in vertex shader
@@ -321,13 +369,4 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, dstBot
 		blx - tlx, bly - tly, 0,
 		tlx, tly, 1,
 	}
-}
-
-// Note: arranged in CCW order for dstBotZero = true
-// if !dstBotZero then need to reverse culling!
-var quadCoords = mat32.ArrayF32{
-	0, 0, // top left
-	0, 1, // bottom left
-	1, 0, // top right
-	1, 1, // bottom right
 }

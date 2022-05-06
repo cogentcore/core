@@ -87,6 +87,11 @@ func (im *ImageFormat) Size32() (width, height uint32) {
 	return
 }
 
+// Bounds returns the rectangle defining this image: 0,0,w,h
+func (im *ImageFormat) Bounds() image.Rectangle {
+	return image.Rectangle{Max: im.Size}
+}
+
 // BytesPerPixel returns number of bytes required to represent
 // one Pixel (in Host memory at least).  TODO only works
 // for known formats -- need to add more as needed.
@@ -490,6 +495,9 @@ func (im *Image) AllocHost() {
 
 // ConfigValHost configures host staging buffer from memory buffer for val-owned image
 func (im *Image) ConfigValHost(buff *MemBuff, buffPtr unsafe.Pointer, offset int) {
+	if im.IsHostOwner() {
+		return
+	}
 	imsz := im.Format.ByteSize()
 	im.Host.Buff = buff.Host
 	im.Host.Mem = nil

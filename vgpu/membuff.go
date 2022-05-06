@@ -36,6 +36,10 @@ func (mb *MemBuff) Alloc(dev vk.Device, bsz int) bool {
 		return false
 	}
 	mb.Free(dev)
+	if bsz == 0 {
+		mb.Size = 0
+		return false
+	}
 	usage := BuffUsages[mb.Type]
 	hostUse := usage
 	devUse := usage
@@ -73,6 +77,7 @@ func (mb *MemBuff) Free(dev vk.Device) {
 		FreeBuffMem(dev, &mb.DevMem)
 		vk.DestroyBuffer(dev, mb.Dev, nil)
 	}
+
 	vk.UnmapMemory(dev, mb.HostMem)
 	FreeBuffMem(dev, &mb.HostMem)
 	vk.DestroyBuffer(dev, mb.Host, nil)
@@ -142,6 +147,9 @@ var BuffUsages = map[BuffTypes]vk.BufferUsageFlagBits{
 
 // NewBuffer makes a buffer of given size, usage
 func NewBuffer(dev vk.Device, size int, usage vk.BufferUsageFlagBits) vk.Buffer {
+	if size == 0 {
+		return nil
+	}
 	var buffer vk.Buffer
 	ret := vk.CreateBuffer(dev, &vk.BufferCreateInfo{
 		SType: vk.StructureTypeBufferCreateInfo,

@@ -20,15 +20,16 @@ import (
 // including things like Vertex arrays, transformation matricies (Uniforms),
 // Images (Textures), and arbitrary Structs for Compute shaders.
 type Var struct {
-	Name      string                 `desc:"variable name"`
-	Type      Types                  `desc:"type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  For images, "`
-	Role      VarRoles               `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet, etc. "`
-	Shaders   vk.ShaderStageFlagBits `desc:"bit flags for set of shaders that this variable is used in"`
-	Set       int                    `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
-	BindLoc   int                    `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
-	SizeOf    int                    `desc:"size in bytes of one element (not array size).  Note that arrays require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint."`
-	DynOffIdx int                    `desc:"index into the dynamic offset list, where dynamic offsets of vals need to be set"`
-	CurVal    *Val                   `desc:"last (current) value set for this variable -- set by System SetVals"`
+	Name        string                 `desc:"variable name"`
+	Type        Types                  `desc:"type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  For images, "`
+	Role        VarRoles               `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet, etc. "`
+	Shaders     vk.ShaderStageFlagBits `desc:"bit flags for set of shaders that this variable is used in"`
+	Set         int                    `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
+	BindLoc     int                    `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
+	SizeOf      int                    `desc:"size in bytes of one element (not array size).  Note that arrays require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint."`
+	TextureOwns bool                   `desc:"texture manages its own memory allocation -- set this for texture objects that change size dynamically -- otherwise image host staging memory is allocated in a common buffer"`
+	DynOffIdx   int                    `desc:"index into the dynamic offset list, where dynamic offsets of vals need to be set"`
+	CurVal      *Val                   `desc:"last (current) value set for this variable -- set by System SetVals"`
 }
 
 // Init initializes the main values
@@ -266,7 +267,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 			}
 			for _, vr := range rl {
 				bd := vk.DescriptorSetLayoutBinding{
-					Binding:         uint32(bi),
+					Binding:         uint32(vr.BindLoc),
 					DescriptorType:  RoleDescriptors[ri],
 					DescriptorCount: 1, // note: only if need an array of *descriptors* -- very rare?
 					StageFlags:      vk.ShaderStageFlags(vr.Shaders),

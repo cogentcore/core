@@ -6,13 +6,20 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/draw"
+	_ "image/jpeg"
+	_ "image/png"
 	"log"
+	"os"
 	"runtime"
 	"time"
 
 	vk "github.com/vulkan-go/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/goki/mat32"
+	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 )
 
@@ -24,13 +31,19 @@ func init() {
 
 var TheGPU *vgpu.GPU
 
+type CamView struct {
+	Model mat32.Mat4
+	View  mat32.Mat4
+	Prjn  mat32.Mat4
+}
+
 func main() {
 	glfw.Init()
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
 	vk.Init()
 
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
-	window, err := glfw.CreateWindow(1024, 768, "Draw Triangle", nil, nil)
+	window, err := glfw.CreateWindow(1024, 768, "vDraw Test", nil, nil)
 	vgpu.IfPanic(err)
 
 	// note: for graphics, require these instance extensions before init gpu!
@@ -38,7 +51,7 @@ func main() {
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
 	gp.Debug = true
-	gp.Config("drawtri")
+	gp.Config("texture")
 	TheGPU = gp
 
 	// gp.PropsString(true) // print
@@ -52,48 +65,31 @@ func main() {
 
 	fmt.Printf("format: %s\n", sf.Format.String())
 
-	sy := gp.NewGraphicsSystem("drawtri", &sf.Device)
-	pl := sy.NewPipeline("drawtri")
-	sy.ConfigRenderPass(&sf.Format, vgpu.UndefType)
-	sf.SetRenderPass(&sy.RenderPass)
-	pl.SetGraphicsDefaults()
-
-	pl.AddShaderFile("trianglelit", vgpu.VertexShader, "trianglelit.spv")
-	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
-
-	sy.Config()
-	sy.Mem.Config()
+	drw := &vdraw.Drawer{}
+	drw.ConfigSurface(sf)
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
-		vk.DeviceWaitIdle(sy.Device.Device)
-		sy.Destroy()
+		drw.Destroy()
 		sf.Destroy()
 		gp.Destroy()
 		window.Destroy()
 		glfw.Terminate()
 	}
 
+	file, err := os.Open("teximg.jpg")
+	if err != nil {
+		fmt.Printf("image: %s\n", err)
+	}
+	gimg, _, err := image.Decode(file)
+	file.Close()
+
+	drw.CopyImage(gimg, vgpu.FlipY, image.Point{}, gimg.Bounds(), draw.Src)
+
 	frameCount := 0
 	stTime := time.Now()
 
 	renderFrame := func() {
-		// fmt.Printf("frame: %d\n", frameCount)
-		// rt := time.Now()
-		idx := sf.AcquireNextImage()
-		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		pl.CmdPool.Reset()
-		pl.CmdPool.BeginCmd()
-		pl.BeginRenderPass(pl.CmdPool.Buff, sf.Frames[idx])
-		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
-		pl.BindPipeline(pl.CmdPool.Buff)
-		pl.Draw(pl.CmdPool.Buff, 3, 1, 0, 0)
-		pl.EndRenderPass(pl.CmdPool.Buff)
-		pl.CmdPool.EndCmd()
-		sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
-		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
-		sf.PresentImage(idx)
-		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
@@ -107,7 +103,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 600
+	fpsDelay := time.Second / 6
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

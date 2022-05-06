@@ -50,7 +50,11 @@ func (vl *Val) AllocSize() int {
 		vl.N = 1
 	}
 	if vl.Var.Role >= TextureRole {
-		vl.MemSize = vl.Texture.Format.ByteSize()
+		if vl.Var.TextureOwns {
+			vl.MemSize = 0
+		} else {
+			vl.MemSize = vl.Texture.Format.ByteSize()
+		}
 		return vl.MemSize
 	}
 	if vl.N == 1 || vl.Var.Role < Uniform {
@@ -69,6 +73,9 @@ func (vl *Val) AllocSize() int {
 // offsets are guaranteed to be properly aligned per minUniformBufferOffsetAlignment.
 func (vl *Val) Alloc(buff *MemBuff, buffPtr unsafe.Pointer, offset int) int {
 	mem := vl.AllocSize()
+	if mem == 0 {
+		return 0
+	}
 	vl.MemPtr = unsafe.Pointer(uintptr(buffPtr) + uintptr(offset))
 	vl.Offset = offset
 	if vl.Texture != nil {
@@ -141,7 +148,8 @@ func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
 }
 
 // SetGoImage sets Texture image data from an *image.RGBA standard Go image,
-// and sets the Mod flag, so it will be sync'd up when memory is sync'd.
+// and sets the Mod flag, so it will be sync'd up when memory is sync'd,
+// or if TextureOwns is set for the var, it allocates Host memory.
 // This is most efficiently done using an image.RGBA, but other
 // formats will be converted as necessary.
 // If flipY is true (default) then the Image Y axis is flipped
@@ -149,11 +157,18 @@ func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
 // upright in the standard OpenGL Y-is-Up coordinate system.
 // If using the Y-is-down Vulkan coordinate system, don't flip.
 func (vl *Val) SetGoImage(img image.Image, flipY bool) error {
+	if vl.Var.TextureOwns {
+		vl.Texture.ConfigGoImage(img)
+		vl.Texture.AllocHost()
+	}
 	err := vl.Texture.SetGoImage(img, flipY)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		vl.Mod = true
+	}
+	if vl.Var.TextureOwns {
+		vl.Texture.AllocTexture()
 	}
 	return err
 }
@@ -208,6 +223,9 @@ func (vs *Vals) MemSize(buff *MemBuff) int {
 			continue
 		}
 		sz := vl.AllocSize()
+		if sz == 0 {
+			continue
+		}
 		esz := MemSizeAlign(sz, buff.AlignBytes)
 		offset += esz
 		tsz += esz
@@ -227,6 +245,9 @@ func (vs *Vals) Alloc(buff *MemBuff, offset int) int {
 			continue
 		}
 		sz := vl.Alloc(buff, buff.HostPtr, offset)
+		if sz == 0 {
+			continue
+		}
 		esz := MemSizeAlign(sz, buff.AlignBytes)
 		offset += esz
 		tsz += esz
@@ -266,8 +287,6 @@ func (vs *Vals) AllocTextures(mm *Memory) {
 			continue
 		}
 		vl.Texture.Dev = mm.Device.Device
-		vl.Texture.AllocImage()
-		vl.Texture.Sampler.Config(vl.Texture.Dev)
-		vl.Texture.ConfigStdView()
+		vl.Texture.AllocTexture()
 	}
 }

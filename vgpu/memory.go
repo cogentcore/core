@@ -128,10 +128,10 @@ func (mm *Memory) Free() bool {
 // FreeBuff frees any allocated memory in buffer -- returns true if freed
 func (mm *Memory) FreeBuff(bt BuffTypes) bool {
 	buff := mm.Buffs[bt]
+	mm.Vals.Free(buff)
 	if buff.Size == 0 {
 		return false
 	}
-	mm.Vals.Free(buff)
 	buff.Free(mm.Device.Device)
 	return true
 }
@@ -295,10 +295,14 @@ func (mm *Memory) TransferImagesToGPU(buff vk.Buffer, imgs ...*Image) {
 
 	for _, im := range imgs {
 		im.TransitionForDst(cmdBuff)
-		vk.CmdCopyBufferToImage(cmdBuff, buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
-		if im.IsVal() {
-			im.TransitionDstToShader(cmdBuff)
+		if im.IsHostOwner() {
+			vk.CmdCopyBufferToImage(cmdBuff, im.Host.Buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
+		} else {
+			vk.CmdCopyBufferToImage(cmdBuff, buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
 		}
+		// if im.IsVal() {
+		im.TransitionDstToShader(cmdBuff)
+		// }
 	}
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }

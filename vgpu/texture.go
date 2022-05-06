@@ -25,6 +25,13 @@ func (tx *Texture) Destroy() {
 	tx.Image.Destroy()
 }
 
+// AllocTexture allocates texture device image, stdview, and sampler
+func (tx *Texture) AllocTexture() {
+	tx.AllocImage()
+	tx.Sampler.Config(tx.Dev)
+	tx.ConfigStdView()
+}
+
 ///////////////////////////////////////////////////
 
 // Sampler represents a vulkan image sampler
