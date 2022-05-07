@@ -51,7 +51,7 @@ func main() {
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
 	gp.Debug = true
-	gp.Config("texture")
+	gp.Config("vDraw test")
 	TheGPU = gp
 
 	// gp.PropsString(true) // print
@@ -81,21 +81,49 @@ func main() {
 	if err != nil {
 		fmt.Printf("image: %s\n", err)
 	}
-	gimg, _, err := image.Decode(file)
+	tximg, _, err := image.Decode(file)
 	file.Close()
 
-	drw.SetImage(gimg, vgpu.NoFlipY)
-	drw.Copy(image.Point{40, 20}, gimg.Bounds(), draw.Src)
+	file, err = os.Open("ground.png")
+	if err != nil {
+		fmt.Printf("image: %s\n", err)
+	}
+	grimg, _, err := image.Decode(file)
+	file.Close()
+
+	file, err = os.Open("wood.png")
+	if err != nil {
+		fmt.Printf("image: %s\n", err)
+	}
+	wdimg, _, err := image.Decode(file)
+	file.Close()
+
+	imgsz := tximg.Bounds()
+
+	drw.SetImage(tximg, vgpu.NoFlipY)
+	drw.Copy(image.Point{40, 20}, imgsz, draw.Src)
 
 	frameCount := 0
 	stTime := time.Now()
 
 	renderFrame := func() {
 		frameCount++
+		mod := frameCount % 24
+		switch mod {
+		case 0:
+			drw.SetImage(grimg, vgpu.NoFlipY)
+			imgsz = grimg.Bounds()
+		case 8:
+			drw.SetImage(wdimg, vgpu.NoFlipY)
+			imgsz = wdimg.Bounds()
+		case 16:
+			drw.SetImage(tximg, vgpu.NoFlipY)
+			imgsz = tximg.Bounds()
+		}
 		if frameCount%2 == 0 {
-			drw.Copy(image.Point{40, 20}, gimg.Bounds(), draw.Src)
+			drw.Copy(image.Point{40, 20}, imgsz, draw.Src)
 		} else {
-			drw.Scale(sf.Format.Bounds(), gimg.Bounds(), draw.Src)
+			drw.Scale(sf.Format.Bounds(), imgsz, draw.Src)
 		}
 
 		eTime := time.Now()
@@ -110,7 +138,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 1
+	fpsDelay := time.Second / 10
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

@@ -56,7 +56,6 @@ func (sy *System) InitCompute(gp *GPU, name string) error {
 }
 
 func (sy *System) Destroy() {
-	sy.Mem.Destroy(sy.Device.Device)
 	for _, pl := range sy.Pipelines {
 		pl.Destroy()
 	}
@@ -66,6 +65,7 @@ func (sy *System) Destroy() {
 	} else {
 		sy.RenderPass.Destroy()
 	}
+	sy.Mem.Destroy(sy.Device.Device)
 	sy.GPU = nil
 }
 

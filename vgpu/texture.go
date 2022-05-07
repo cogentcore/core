@@ -28,7 +28,9 @@ func (tx *Texture) Destroy() {
 // AllocTexture allocates texture device image, stdview, and sampler
 func (tx *Texture) AllocTexture() {
 	tx.AllocImage()
-	tx.Sampler.Config(tx.Dev)
+	if tx.Sampler.VkSampler == nil {
+		tx.Sampler.Config(tx.Dev)
+	}
 	tx.ConfigStdView()
 }
 
@@ -53,6 +55,7 @@ func (sm *Sampler) Defaults() {
 
 // Config configures sampler on device
 func (sm *Sampler) Config(dev vk.Device) {
+	sm.Destroy(dev)
 	var samp vk.Sampler
 	ret := vk.CreateSampler(dev, &vk.SamplerCreateInfo{
 		SType:                   vk.StructureTypeSamplerCreateInfo,

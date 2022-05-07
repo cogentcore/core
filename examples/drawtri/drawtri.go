@@ -66,7 +66,6 @@ func main() {
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
-		vk.DeviceWaitIdle(sy.Device.Device)
 		sy.Destroy()
 		sf.Destroy()
 		gp.Destroy()

@@ -349,6 +349,10 @@ func (im *Image) DestroyView() {
 
 // FreeImage frees device memory version of image that we own
 func (im *Image) FreeImage() {
+	if im.Dev == nil {
+		return
+	}
+	vk.DeviceWaitIdle(im.Dev)
 	im.DestroyView()
 	if im.Image == nil || !im.IsImageOwner() {
 		return
