@@ -75,6 +75,14 @@ Because everything is all packed into big buffers organized by different broad c
 
 The examples and provided `vPhong` package retain the Y-is-up coordinate system from OpenGL, which is more "natural" for the physical world, where the Y axis is the height dimension, and up is up, after all.  Some of the defaults reflect this choice, but it is easy to use the native Vulkan Y-is-down coordinate system too.
 
+## Combining many pipeline renders per RenderPass
+
+The tutorials all seem to focus on just a single simple render pass, but any realistic scene needs different settings for each object!  Need to allocate those..
+
+https://stackoverflow.com/questions/54103399/how-to-repeatedly-update-a-uniform-data-for-number-of-objects-inside-a-single-vu
+http://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html
+https://github.com/nvpro-samples/gl_vk_threaded_cadscene/blob/master/doc/vulkan_uniforms.md
+
 # GPU Accelerated Compute Engine
 
 # Mac Platform

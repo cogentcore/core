@@ -7,6 +7,7 @@ package vdraw
 import (
 	"embed"
 	"image"
+	"image/color"
 	"image/draw"
 	"unsafe"
 
@@ -33,6 +34,7 @@ type Drawer struct {
 	Surf    *vgpu.Surface `desc:"surface if render target"`
 	YIsDown bool          `desc:"render so the Y axis points down, with 0,0 at the upper left, which is the Vulkan standard.  default is Y is up, with 0,0 at bottom left, which is OpenGL default.  this must be set prior to configuring, the surface, as it determines the rendering parameters."`
 	FlipY   bool          `desc:"flip the Y axis of the image when drawing"`
+	SurfIdx uint32        `desc:"surface index for current render process"`
 }
 
 // SetImage sets given Go image as the drawing source.
@@ -44,6 +46,8 @@ func (dw *Drawer) SetImage(img image.Image, flipY bool) {
 	tx := dw.Sys.Mem.Vals.ValMap["Tex"]
 	tx.SetGoImage(img, false) // use fast non-flipping
 	dw.FlipY = flipY
+	dw.Sys.Mem.SyncToGPU()
+	dw.Sys.SetVals(0, "Tex")
 }
 
 // Copy copies currently-set texture to render target.
@@ -79,30 +83,46 @@ func (dw *Drawer) Scale(dr image.Rectangle, sr image.Rectangle, op draw.Op) erro
 	return dw.Draw(mat, sr, op)
 }
 
+// Start starts rendering process on render target
+func (dw *Drawer) Start() {
+	dpl := dw.Sys.PipelineMap["draw"]
+	if dw.Surf != nil {
+		dw.SurfIdx = dw.Surf.AcquireNextImage()
+		cmd := dpl.CmdPool.Buff
+		vgpu.CmdReset(cmd)
+		vgpu.CmdBegin(cmd)
+		dpl.BeginRenderPass(cmd, dw.Surf.Frames[dw.SurfIdx])
+		dpl.BindPipeline(cmd)
+	}
+}
+
+// End ends rendering process on render target
+func (dw *Drawer) End() {
+	dpl := dw.Sys.PipelineMap["draw"]
+	cmd := dpl.CmdPool.Buff
+	if dw.Surf != nil {
+		dpl.EndRenderPass(cmd)
+		vgpu.CmdEnd(cmd)
+		dw.Surf.SubmitRender(cmd) // this is where it waits for the 16 msec
+		dw.Surf.PresentImage(dw.SurfIdx)
+	}
+}
+
 // Draw draws currently-set texture to render target.
+// Must have called StartDraw first.
 // src2dst is the transform mapping source to destination
 // coordinates (translation, scaling),
-// txsz is the size of the texture to draw,
 // sr is the source region (set to tex.Format.Bounds() for all)
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 func (dw *Drawer) Draw(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
 	tx := dw.Sys.Mem.Vals.ValMap["Tex"]
 	dw.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op, dw.FlipY)
-	dw.Sys.Mem.SyncToGPU()
-
-	dw.Sys.SetVals(0, "Mats", "Tex")
 	if err := dw.Sys.Vars.Validate(); err != nil {
 		return err
 	}
 	dpl := dw.Sys.PipelineMap["draw"]
-
-	if dw.Surf != nil {
-		idx := dw.Surf.AcquireNextImage()
-		dpl.FullStdRender(dpl.CmdPool.Buff, dw.Surf.Frames[idx])
-		dw.Surf.SubmitRender(dpl.CmdPool.Buff) // this is where it waits for the 16 msec
-		dw.Surf.PresentImage(idx)
-	}
+	dpl.DrawVertex(dpl.CmdPool.Buff)
 	return nil
 }
 
@@ -133,7 +153,6 @@ func (dw *Drawer) DestSize() image.Point {
 func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 	// gpu.Draw.Op(op)
 	// gpu.Draw.DepthTest(false)
-	// gpu.Draw.CullFace(false, true, dstBotZero) // cull back face -- dstBotZero = CCW, !dstBotZero = CW
 	// gpu.Draw.StencilTest(false)
 	// gpu.Draw.Multisample(false)
 	// app.drawProg.Activate()
@@ -202,7 +221,6 @@ func (dw *Drawer) ConfigSys() {
 
 	idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
 	rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
-
 	dw.Sys.SetVals(0, "RectPos", "Mats", "FillColor")
 }
 
@@ -297,74 +315,51 @@ func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 
 	mat := dw.Sys.Mem.Vals.ValMap["Mats"]
 	mat.CopyBytes(unsafe.Pointer(&tmat)) // sets mod
+	dw.Sys.Mem.SyncToGPU()
+	// dw.Sys.SetVals(0, "Mats")
 }
 
-/*
-// fill fills to current render target (could be window or framebuffer / texture)
-// proper context must have already been established outside this call!
-// dstBotZero is true if flipping Y axis
-func (app *appImpl) fill(mvp mat32.Mat3, src color.Color, op draw.Op, qbuff gpu.BufferMgr, dstBotZero bool) {
-	gpu.Draw.Op(op)
-	gpu.Draw.CullFace(false, true, dstBotZero) // dstBotZero = CCW, else CW
-	gpu.Draw.DepthTest(false)
-	gpu.Draw.StencilTest(false)
-	gpu.Draw.Multisample(false)
-	app.fillProg.Activate()
+// FillRect fills color to render target, to given region.
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+func (dw *Drawer) FillRect(src color.Color, reg image.Rectangle, op draw.Op) error {
+	mat := mat32.Mat3{
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1,
+	}
+	return dw.Fill(src, mat, reg, op)
+}
 
-	app.fillProg.UniformByName("mvp").SetValue(mvp)
-
+// Fill fills color to render target.
+// src2dst is the transform mapping source to destination
+// coordinates (translation, scaling),
+// reg is the region to fill
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+func (dw *Drawer) Fill(src color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error {
 	r, g, b, a := src.RGBA()
-
-	clvec4 := mat32.NewVec4(
+	fc := dw.Sys.Mem.Vals.ValMap["FillColor"]
+	fcv := fc.Floats32()
+	fcv.Set(0,
 		float32(r)/65535,
 		float32(g)/65535,
 		float32(b)/65535,
-		float32(a)/65535,
-	)
+		float32(a)/65535)
+	fc.Mod = true
 
-	app.fillProg.UniformByName("color").SetValue(clvec4)
+	dw.ConfigMats(src2dst, reg.Max, reg, op, false)
+	dw.Sys.Mem.SyncToGPU()
 
-	qbuff.Activate()
-	gpu.Draw.TriangleStrips(0, 4)
+	dw.Sys.SetVals(0, "Mats", "FillColor")
+	if err := dw.Sys.Vars.Validate(); err != nil {
+		return err
+	}
+	fpl := dw.Sys.PipelineMap["fill"]
+	dpl := dw.Sys.PipelineMap["draw"]
+	fpl.BindDrawVertex(dpl.CmdPool.Buff)
+	return nil
 }
-
-// fillRect fills given rectangle, where dstSz is overall size of the destination (e.g., window)
-// dstBotZero is true if destination has Y=0 at bottom
-func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Color, op draw.Op, qbuff gpu.BufferMgr, dstBotZero bool) {
-	minX := float32(dr.Min.X)
-	minY := float32(dr.Min.Y)
-	maxX := float32(dr.Max.X)
-	maxY := float32(dr.Max.Y)
-
-	mvp := calcMVP(dstSz.X, dstSz.Y,
-		minX, minY,
-		maxX, minY,
-		minX, maxY, dstBotZero,
-	)
-	app.fill(mvp, src, op, qbuff, dstBotZero)
-}
-
-// drawUniform does a fill-like uniform color fill but with an arbitrary src2dst transform
-// dstBotZero is true if destination has Y=0 at bottom
-func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr, dstBotZero bool) {
-	minX := float32(sr.Min.X)
-	minY := float32(sr.Min.Y)
-	maxX := float32(sr.Max.X)
-	maxY := float32(sr.Max.Y)
-
-	// Transform to dst-space via the src2dst matrix, then to a MVP matrix.
-	mvp := calcMVP(dstSz.X, dstSz.Y,
-		src2dst[0]*minX+src2dst[3]*minY+src2dst[6],
-		src2dst[1]*minX+src2dst[4]*minY+src2dst[7],
-		src2dst[0]*maxX+src2dst[3]*minY+src2dst[6],
-		src2dst[1]*maxX+src2dst[4]*minY+src2dst[7],
-		src2dst[0]*minX+src2dst[3]*maxY+src2dst[6],
-		src2dst[1]*minX+src2dst[4]*maxY+src2dst[7],
-		dstBotZero,
-	)
-	app.fill(mvp, src, op, qbuff, dstBotZero)
-}
-*/
 
 // calcMVP returns the Model View Projection matrix that maps the quadCoords
 // unit square, (0, 0) to (1, 1), to a quad QV, such that QV in vertex shader

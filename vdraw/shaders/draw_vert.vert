@@ -11,9 +11,7 @@ layout(location = 0) out vec2 uv;
 
 void main() {
 	vec4 p = vec4(pos, 1, 1);
-	vec4 pp = mvp * p;
-	pp.w = 1;
-	gl_Position = pp;
+	gl_Position = mvp * p;
 	uv = (uvp * p).xy;
 }
 

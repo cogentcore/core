@@ -98,34 +98,32 @@ func main() {
 	wdimg, _, err := image.Decode(file)
 	file.Close()
 
-	imgsz := tximg.Bounds()
+	_ = wdimg
+	_ = tximg
 
-	drw.SetImage(tximg, vgpu.NoFlipY)
-	drw.Copy(image.Point{40, 20}, imgsz, draw.Src)
+	// multiple image array to avoid invalidating the descriptor set binding..
+	// http://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html
+
+	drw.Start()
+	drw.SetImage(grimg, vgpu.NoFlipY)
+	drw.Scale(sf.Format.Bounds(), grimg.Bounds(), draw.Src)
+
+	// drw.SetImage(tximg, vgpu.NoFlipY)
+	drw.Copy(image.Point{40, 20}, grimg.Bounds(), draw.Src)
+
+	// drw.SetImage(wdimg, vgpu.NoFlipY)
+	drw.Copy(image.Point{600, 500}, grimg.Bounds(), draw.Src)
+
+	// drw.FillRect(color.White, image.Rectangle{Min: image.Point{100, 80}, Max: image.Point{400, 200}}, draw.Src)
+	// drw.FillRect(color.Black, image.Rectangle{Min: image.Point{500, 480}, Max: image.Point{400, 200}}, draw.Src)
+
+	drw.End()
 
 	frameCount := 0
 	stTime := time.Now()
 
 	renderFrame := func() {
 		frameCount++
-		mod := frameCount % 24
-		switch mod {
-		case 0:
-			drw.SetImage(grimg, vgpu.NoFlipY)
-			imgsz = grimg.Bounds()
-		case 8:
-			drw.SetImage(wdimg, vgpu.NoFlipY)
-			imgsz = wdimg.Bounds()
-		case 16:
-			drw.SetImage(tximg, vgpu.NoFlipY)
-			imgsz = tximg.Bounds()
-		}
-		if frameCount%2 == 0 {
-			drw.Copy(image.Point{40, 20}, imgsz, draw.Src)
-		} else {
-			drw.Scale(sf.Format.Bounds(), imgsz, draw.Src)
-		}
-
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
 		if dur > 10 {
@@ -138,7 +136,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 10
+	fpsDelay := time.Second / 2
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {
