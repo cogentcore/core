@@ -75,6 +75,9 @@ func (dv *Device) MakeDevice(gp *GPU) {
 		PpEnabledExtensionNames: gp.DeviceExts,
 		EnabledLayerCount:       uint32(len(gp.ValidationLayers)),
 		PpEnabledLayerNames:     gp.ValidationLayers,
+		PEnabledFeatures: []vk.PhysicalDeviceFeatures{{
+			SamplerAnisotropy: vk.True,
+		}},
 	}, nil, &device)
 	IfPanic(NewError(ret))
 	// _ = ret

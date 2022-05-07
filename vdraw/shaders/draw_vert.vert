@@ -1,18 +1,19 @@
 #version 450
 
+// note: must use mat4 -- mat3 alignment issues are horrible
 layout(binding = 0) uniform Mats {
-	mat3 mvp;
-	mat3 uvp;
+	mat4 mvp;
+	mat4 uvp;
 };
 
 layout(location = 0) in vec2 pos;
 layout(location = 0) out vec2 uv;
 
 void main() {
-	vec3 p = vec3(pos, 0);
-	// gl_Position = vec4(mvp * p, 1);
-	gl_Position = vec4(p, 1);
-	// uv = (uvp * vec3(pos, 1)).xy;
-	uv = (vec3(pos, 1)).xy;
+	vec4 p = vec4(pos, 1, 1);
+	vec4 pp = mvp * p;
+	pp.w = 1;
+	gl_Position = pp;
+	uv = (uvp * p).xy;
 }
 

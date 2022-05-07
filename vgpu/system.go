@@ -183,6 +183,29 @@ func (sy *System) SetRasterization(polygonMode vk.PolygonMode, cullMode vk.CullM
 	}
 }
 
+// SetCullFace sets the face culling mode: true = back, false = front
+// use CullBack, CullFront constants
+func (sy *System) SetCullFace(back bool) {
+	for _, pl := range sy.Pipelines {
+		pl.SetCullFace(back)
+	}
+}
+
+// SetFrontFace sets the winding order for what counts as a front face
+// true = CCW, false = CW
+func (sy *System) SetFrontFace(ccw bool) {
+	for _, pl := range sy.Pipelines {
+		pl.SetFrontFace(ccw)
+	}
+}
+
+// SetLineWidth sets the rendering line width -- 1 is default.
+func (sy *System) SetLineWidth(lineWidth float32) {
+	for _, pl := range sy.Pipelines {
+		pl.SetLineWidth(lineWidth)
+	}
+}
+
 // SetColorBlend determines the color blending function:
 // either 1-source alpha (alphaBlend) or no blending:
 // new color overwrites old.  Default is alphaBlend = true
@@ -190,6 +213,14 @@ func (sy *System) SetRasterization(polygonMode vk.PolygonMode, cullMode vk.CullM
 func (sy *System) SetColorBlend(alphaBlend bool) {
 	for _, pl := range sy.Pipelines {
 		pl.SetColorBlend(alphaBlend)
+	}
+}
+
+// SetClearOff turns off clearing at start of rendering.
+// call SetClearColor to turn back on.
+func (sy *System) SetClearOff() {
+	for _, pl := range sy.Pipelines {
+		pl.SetClearOff()
 	}
 }
 

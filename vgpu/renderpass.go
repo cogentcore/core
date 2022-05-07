@@ -25,6 +25,7 @@ type RenderPass struct {
 	RenderPass vk.RenderPass `desc:"the vulkan renderpass handle"`
 	Depth      Image         `desc:"the associated depth buffer, if set"`
 	HasDepth   bool          `desc:"set to true if configured with depth buffer"`
+	NoClear    bool          `desc:"set this to true if the rendering should not clear the pixels at the start of a render pass -- must be set prior to calling Config method."`
 }
 
 func (rp *RenderPass) Destroy() {
@@ -53,10 +54,15 @@ func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types)
 	rp.Format = *imgFmt
 	rp.HasDepth = false
 
+	loadOp := vk.AttachmentLoadOpClear
+	if rp.NoClear {
+		loadOp = vk.AttachmentLoadOpDontCare
+	}
+
 	colorAttach := vk.AttachmentDescription{
 		Format:         rp.Format.Format,
 		Samples:        rp.Format.Samples,
-		LoadOp:         vk.AttachmentLoadOpClear,
+		LoadOp:         loadOp,
 		StoreOp:        vk.AttachmentStoreOpStore,
 		StencilLoadOp:  vk.AttachmentLoadOpDontCare,
 		StencilStoreOp: vk.AttachmentStoreOpDontCare,

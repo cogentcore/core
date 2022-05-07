@@ -243,6 +243,7 @@ func (pl *Pipeline) SetTopology(topo Topologies, restartEnable bool) {
 
 // SetRasterization sets various options for how to rasterize shapes:
 // Defaults are: vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0
+// There are also separate methods for CullFace, FrontFace, and LineWidth
 func (pl *Pipeline) SetRasterization(polygonMode vk.PolygonMode, cullMode vk.CullModeFlagBits, frontFace vk.FrontFace, lineWidth float32) {
 	pl.VkConfig.PRasterizationState = &vk.PipelineRasterizationStateCreateInfo{
 		SType:       vk.StructureTypePipelineRasterizationStateCreateInfo,
@@ -251,6 +252,45 @@ func (pl *Pipeline) SetRasterization(polygonMode vk.PolygonMode, cullMode vk.Cul
 		FrontFace:   frontFace,
 		LineWidth:   lineWidth,
 	}
+}
+
+const (
+	// CullBack is for SetCullFace function
+	CullBack = true
+
+	// CullFront is for SetCullFace function
+	CullFront = false
+
+	// CCW is for SetFrontFace function
+	CCW = true
+
+	// CW is for SetFrontFace function
+	CW = false
+)
+
+// SetCullFace sets the face culling mode: true = back, false = front
+// use CullBack, CullFront constants
+func (pl *Pipeline) SetCullFace(back bool) {
+	cm := vk.CullModeFrontBit
+	if back {
+		cm = vk.CullModeBackBit
+	}
+	pl.VkConfig.PRasterizationState.CullMode = vk.CullModeFlags(cm)
+}
+
+// SetFrontFace sets the winding order for what counts as a front face
+// true = CCW, false = CW
+func (pl *Pipeline) SetFrontFace(ccw bool) {
+	cm := vk.FrontFaceClockwise
+	if ccw {
+		cm = vk.FrontFaceCounterClockwise
+	}
+	pl.VkConfig.PRasterizationState.FrontFace = cm
+}
+
+// SetLineWidth sets the rendering line width -- 1 is default.
+func (pl *Pipeline) SetLineWidth(lineWidth float32) {
+	pl.VkConfig.PRasterizationState.LineWidth = lineWidth
 }
 
 // SetColorBlend determines the color blending function:
@@ -279,6 +319,12 @@ func (pl *Pipeline) SetColorBlend(alphaBlend bool) {
 		AttachmentCount: 1,
 		PAttachments:    []vk.PipelineColorBlendAttachmentState{cb},
 	}
+}
+
+// SetClearOff turns off clearing at start of rendering.
+// call SetClearColor to turn back on.
+func (pl *Pipeline) SetClearOff() {
+	pl.ClearVals = nil
 }
 
 // SetClearColor sets the RGBA colors to set when starting new render

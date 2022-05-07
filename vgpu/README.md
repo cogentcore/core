@@ -16,9 +16,7 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 
 # TODO
 
-* texture image is upside down.
-
-* ReComp
+* verify that Mem.Config works when called repeatedly.
 
 * multisampling
 

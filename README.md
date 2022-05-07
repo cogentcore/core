@@ -77,4 +77,15 @@ The examples and provided `vPhong` package retain the Y-is-up coordinate system 
 
 # GPU Accelerated Compute Engine
 
+# Mac Platform
+
+To have the mac use the `libMoltenVK.dylib` installed by `brew install molten-vk`, you need to change the LDFLAGS here:
+
+`github.com/go-vulkan/vulkan/vulkan_darwin.go`
+
+```
+#cgo darwin LDFLAGS: -L/opt/homebrew/lib -Wl,-rpath,/opt/homebrew/lib -F/Library/Frameworks -framework Cocoa -framework IOKit -framework IOSurface -framework QuartzCore -framework Metal -lMoltenVK -lc++
+```
+
+However it does not find the `libvulkan` which is not included in molten-vk.
 

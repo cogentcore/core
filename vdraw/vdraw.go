@@ -6,7 +6,6 @@ package vdraw
 
 import (
 	"embed"
-	"fmt"
 	"image"
 	"image/draw"
 	"unsafe"
@@ -22,86 +21,116 @@ var content embed.FS
 
 // Mats are the projection matricies
 type Mats struct {
-	MVP    mat32.Mat3 // 9 * 4 = 36 bytes
-	align1 mat32.Vec3 // 3 * 4 = 12 bytes
-	align2 mat32.Vec4 // 4 * 4 = 16 bytes = 64 byte alignment
-	UVP    mat32.Mat3
+	MVP mat32.Mat4
+	UVP mat32.Mat4
 }
 
 // Drawer is the vDraw implementation, which can be configured for
 // different render targets (Surface, Framebuffer).  It manages
 // an associated System.
 type Drawer struct {
-	Sys  vgpu.System   `desc:"drawing system"`
-	Surf *vgpu.Surface `desc:"surface if render target"`
+	Sys     vgpu.System   `desc:"drawing system"`
+	Surf    *vgpu.Surface `desc:"surface if render target"`
+	YIsDown bool          `desc:"render so the Y axis points down, with 0,0 at the upper left, which is the Vulkan standard.  default is Y is up, with 0,0 at bottom left, which is OpenGL default.  this must be set prior to configuring, the surface, as it determines the rendering parameters."`
+	FlipY   bool          `desc:"flip the Y axis of the image when drawing"`
 }
 
-// CopyImage copies given Go image to configured render target, using draw parameters:
-// If flipY is true (default) then the Image Y axis is flipped
-// when copying into the image data, so that images will appear
-// upright in the standard OpenGL Y-is-up coordinate system.
-// dp is the destination point, sr is the source region (set to tex.Format.Bounds() for all)
-// op is the drawing operation: Src = copy source directly (blit), Over = alpha blend with existing
-func (dr *Drawer) CopyImage(img image.Image, flipY bool, dp image.Point, sr image.Rectangle, op draw.Op) error {
+// SetImage sets given Go image as the drawing source.
+// A standard Go image is rendered upright on a standard
+// Vulkan surface. If flipY is true then the Image Y axis is
+// efficiently flipped when rendering.
+// A subsequent Copy, Scale or Draw call will render this image.
+func (dw *Drawer) SetImage(img image.Image, flipY bool) {
+	tx := dw.Sys.Mem.Vals.ValMap["Tex"]
+	tx.SetGoImage(img, false) // use fast non-flipping
+	dw.FlipY = flipY
+}
+
+// Copy copies currently-set texture to render target.
+// dp is the destination point,
+// sr is the source region (set to tex.Format.Bounds() for all),
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+func (dw *Drawer) Copy(dp image.Point, sr image.Rectangle, op draw.Op) error {
 	mat := mat32.Mat3{
 		1, 0, 0,
 		0, 1, 0,
 		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y), 1,
 	}
-	return dr.DrawImage(img, flipY, mat, sr, op)
+	return dw.Draw(mat, sr, op)
 }
 
-// DrawImage draws given Go image to configured render target, using draw parameters:
+// Scale copies currently-set texture to render target,
+// scaling the region defined by src and sr to the destination
+// such that sr in src-space is mapped to dr in dst-space.
+// dr is the destination rectangle
+// sr is the source region (set to tex.Format.Bounds() for all),
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+func (dw *Drawer) Scale(dr image.Rectangle, sr image.Rectangle, op draw.Op) error {
+	rx := float32(dr.Dx()) / float32(sr.Dx())
+	ry := float32(dr.Dy()) / float32(sr.Dy())
+	mat := mat32.Mat3{
+		rx, 0, 0,
+		0, ry, 0,
+		float32(dr.Min.X) - rx*float32(sr.Min.X),
+		float32(dr.Min.Y) - ry*float32(sr.Min.Y), 1,
+	}
+	return dw.Draw(mat, sr, op)
+}
+
+// Draw draws currently-set texture to render target.
 // src2dst is the transform mapping source to destination
-// coordinates (translation, scaling), txsz is the size of the texture to draw,
+// coordinates (translation, scaling),
+// txsz is the size of the texture to draw,
 // sr is the source region (set to tex.Format.Bounds() for all)
-// op is the drawing operation: Src = copy source directly (blit), Over = alpha blend with existing
-func (dr *Drawer) DrawImage(img image.Image, flipY bool, src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
-	tx := dr.Sys.Mem.Vals.ValMap["Tex"]
-	tx.SetGoImage(img, flipY)
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+func (dw *Drawer) Draw(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
+	tx := dw.Sys.Mem.Vals.ValMap["Tex"]
+	dw.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op, dw.FlipY)
+	dw.Sys.Mem.SyncToGPU()
 
-	dr.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op)
-	dr.Sys.Mem.SyncToGPU()
-
-	dr.Sys.SetVals(0, "RectPos", "Mats", "Tex", "FillColor")
-	if err := dr.Sys.Vars.Validate(); err != nil {
+	dw.Sys.SetVals(0, "Mats", "Tex")
+	if err := dw.Sys.Vars.Validate(); err != nil {
 		return err
 	}
-	dpl := dr.Sys.PipelineMap["draw"]
+	dpl := dw.Sys.PipelineMap["draw"]
 
-	if dr.Surf != nil {
-		idx := dr.Surf.AcquireNextImage()
-		dpl.FullStdRender(dpl.CmdPool.Buff, dr.Surf.Frames[idx])
-		dr.Surf.SubmitRender(dpl.CmdPool.Buff) // this is where it waits for the 16 msec
-		dr.Surf.PresentImage(idx)
+	if dw.Surf != nil {
+		idx := dw.Surf.AcquireNextImage()
+		dpl.FullStdRender(dpl.CmdPool.Buff, dw.Surf.Frames[idx])
+		dw.Surf.SubmitRender(dpl.CmdPool.Buff) // this is where it waits for the 16 msec
+		dw.Surf.PresentImage(idx)
 	}
 	return nil
 }
 
 // ConfigSurface configures the Drawer to use given surface as a render target
-func (dr *Drawer) ConfigSurface(sf *vgpu.Surface) {
-	dr.Surf = sf
-	dr.Sys.InitGraphics(sf.GPU, "vdraw.Drawer", &sf.Device)
-	dr.Sys.ConfigRenderPass(&dr.Surf.Format, vgpu.UndefType)
-	sf.SetRenderPass(&dr.Sys.RenderPass)
+func (dw *Drawer) ConfigSurface(sf *vgpu.Surface) {
+	dw.Surf = sf
+	dw.Sys.InitGraphics(sf.GPU, "vdraw.Drawer", &sf.Device)
+	dw.Sys.RenderPass.NoClear = true
+	dw.Sys.ConfigRenderPass(&dw.Surf.Format, vgpu.UndefType)
+	sf.SetRenderPass(&dw.Sys.RenderPass)
 
-	dr.ConfigSys()
+	dw.ConfigSys()
 }
 
-func (dr *Drawer) Destroy() {
-	dr.Sys.Destroy()
+func (dw *Drawer) Destroy() {
+	dw.Sys.Destroy()
 }
 
 // DestSize returns the size of the render destination
-func (dr *Drawer) DestSize() image.Point {
-	if dr.Surf != nil {
-		return dr.Surf.Format.Size
+func (dw *Drawer) DestSize() image.Point {
+	if dw.Surf != nil {
+		return dw.Surf.Format.Size
 	}
 	return image.Point{10, 10}
 }
 
 // ConfigPipeline configures graphics settings on the pipeline
-func (dr *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
+func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 	// gpu.Draw.Op(op)
 	// gpu.Draw.DepthTest(false)
 	// gpu.Draw.CullFace(false, true, dstBotZero) // cull back face -- dstBotZero = CCW, !dstBotZero = CW
@@ -110,82 +139,87 @@ func (dr *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 	// app.drawProg.Activate()
 
 	pl.SetGraphicsDefaults()
-	pl.SetClearColor(0.2, 0.2, 0.2, 1)
-	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+	pl.SetClearOff()
+	if dw.YIsDown {
+		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+	} else {
+		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceClockwise, 1.0)
+	}
 }
 
 // ConfigSys configures the vDraw System and pipelines.
-func (dr *Drawer) ConfigSys() {
-	dpl := dr.Sys.NewPipeline("draw")
-	dr.ConfigPipeline(dpl)
+func (dw *Drawer) ConfigSys() {
+	dpl := dw.Sys.NewPipeline("draw")
+	dw.ConfigPipeline(dpl)
 
 	cb, _ := content.ReadFile("shaders/draw_vert.spv")
 	dpl.AddShaderCode("draw_vert", vgpu.VertexShader, cb)
 	cb, _ = content.ReadFile("shaders/draw_frag.spv")
 	dpl.AddShaderCode("draw_frag", vgpu.FragmentShader, cb)
 
-	fpl := dr.Sys.NewPipeline("fill")
-	dr.ConfigPipeline(fpl)
+	fpl := dw.Sys.NewPipeline("fill")
+	dw.ConfigPipeline(fpl)
 
 	cb, _ = content.ReadFile("shaders/fill_vert.spv")
 	fpl.AddShaderCode("fill_vert", vgpu.VertexShader, cb)
 	cb, _ = content.ReadFile("shaders/fill_frag.spv")
 	fpl.AddShaderCode("fill_frag", vgpu.FragmentShader, cb)
 
-	posv := dr.Sys.Vars.Add("Pos", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
+	posv := dw.Sys.Vars.Add("Pos", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
 	// txcv := sy.Vars.Add("TexCoord", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
-	idxv := dr.Sys.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
+	idxv := dw.Sys.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
 
-	matv := dr.Sys.Vars.Add("Mats", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
-	matv.SizeOf = vgpu.Float32Mat4.Bytes() * 2 // no padding for these
-	clrv := dr.Sys.Vars.Add("Color", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.FragmentShader)
-	tximgv := dr.Sys.Vars.Add("Tex", vgpu.ImageRGBA32, vgpu.TextureRole, 0, vgpu.FragmentShader)
+	matv := dw.Sys.Vars.Add("Mats", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
+	matv.SizeOf = vgpu.Float32Mat4.Bytes() * 2
+	clrv := dw.Sys.Vars.Add("Color", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.FragmentShader)
+	tximgv := dw.Sys.Vars.Add("Tex", vgpu.ImageRGBA32, vgpu.TextureRole, 0, vgpu.FragmentShader)
 	tximgv.TextureOwns = true
 
 	nPts := 4
 	nIdxs := 6
-	rectPos := dr.Sys.Mem.Vals.Add("RectPos", posv, nPts)
-	rectIdx := dr.Sys.Mem.Vals.Add("RectIdx", idxv, nIdxs)
+	rectPos := dw.Sys.Mem.Vals.Add("RectPos", posv, nPts)
+	rectIdx := dw.Sys.Mem.Vals.Add("RectIdx", idxv, nIdxs)
 	rectPos.Indexes = "RectIdx" // only need to set indexes for one vertex val
 
 	// std vals
-	dr.Sys.Mem.Vals.Add("Mats", matv, 1)
-	dr.Sys.Mem.Vals.Add("FillColor", clrv, 1)
-	tx := dr.Sys.Mem.Vals.Add("Tex", tximgv, 1)
-	tx.Texture.Dev = dr.Sys.Device.Device // key for self-owning
+	dw.Sys.Mem.Vals.Add("Mats", matv, 1)
+	dw.Sys.Mem.Vals.Add("FillColor", clrv, 1)
+	tx := dw.Sys.Mem.Vals.Add("Tex", tximgv, 1)
+	tx.Texture.Dev = dw.Sys.Device.Device // key for self-owning
 
 	// note: add all values per above before doing Config
-	dr.Sys.Config()
-	dr.Sys.Mem.Config()
+	dw.Sys.Config()
+	dw.Sys.Mem.Config()
 
 	// note: first val in set is offset
 	rectPosA := rectPos.Floats32()
 	rectPosA.Set(0,
 		0.0, 0.0,
+		0.0, 1.0,
 		1.0, 0.0,
-		1.0, 1.0,
-		0.0, 1.0)
+		1.0, 1.0)
 	rectPos.Mod = true
 
-	idxs := []uint16{0, 1, 2, 0, 2, 3}
+	idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
 	rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+
+	dw.Sys.SetVals(0, "RectPos", "Mats", "FillColor")
 }
 
 // ConfigMats configures the draw matrix for given draw parameters:
 // src2dst is the transform mapping source to destination
 // coordinates (translation, scaling), txsz is the size of the texture to draw,
 // sr is the source region (set to tex.Format.Bounds() for all)
-// op is the drawing operation: Src = copy source directly (blit), Over = alpha blend with existing
-func (dr *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rectangle, op draw.Op) {
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+// flipY inverts the Y axis of the source image.
+func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) {
 	sr = sr.Intersect(image.Rectangle{Max: txsz})
 	if sr.Empty() {
 		return
 	}
 
-	destSz := dr.DestSize()
-
-	dstBotZero := true
-	srcBotZero := true
+	destSz := dw.DestSize()
 
 	// Start with src-space left, top, right and bottom.
 	srcL := float32(sr.Min.X)
@@ -201,10 +235,10 @@ func (dr *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 		src2dst[1]*srcR+src2dst[4]*srcT+src2dst[7],
 		src2dst[0]*srcL+src2dst[3]*srcB+src2dst[6],
 		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
-		dstBotZero,
+		dw.YIsDown,
 	)
 	var tmat Mats
-	tmat.MVP = matMVP // todo render direct
+	tmat.MVP.SetFromMat3(&matMVP) // todo render direct
 
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
 	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
@@ -237,24 +271,31 @@ func (dr *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
 
-	if srcBotZero {
-		tmat.UVP = mat32.Mat3{
-			qx - px, 0, 0,
-			0, py - sy, 0, // py - sy
-			px, sy, 1}
-	} else {
-		tmat.UVP = mat32.Mat3{
+	if flipY { // note: reversed from openGL for vulkan
+		tmat.UVP.SetFromMat3(&mat32.Mat3{
 			qx - px, 0, 0,
 			0, sy - py, 0, // sy - py
-			px, py, 1,
-		}
+			px, py, 1})
+	} else {
+		tmat.UVP.SetFromMat3(&mat32.Mat3{
+			qx - px, 0, 0,
+			0, py - sy, 0, // py - sy
+			px, sy, 1})
 	}
 
-	fmt.Printf("matUVP: %v  matMVP: %v\n", tmat.UVP, matMVP)
+	// fmt.Printf("MVP: %v   UVP: %v  \n", tmat.MVP, tmat.UVP)
+	// z := float32(1)
+	// coords := []mat32.Vec4{
+	// 	{0.0, 0.0, z, 1},
+	// 	{0.0, 1.0, z, 1},
+	// 	{1.0, 0.0, z, 1},
+	// 	{1.0, 1.0, z, 1}}
+	// for _, v := range coords {
+	// 	tv := v.MulMat4(&tmat.MVP)
+	// 	fmt.Printf("v: %v   tv: %v\n", v, tv)
+	// }
 
-	// coords := []mat32.Vec3{}
-
-	mat := dr.Sys.Mem.Vals.ValMap["Mats"]
+	mat := dw.Sys.Mem.Vals.ValMap["Mats"]
 	mat.CopyBytes(unsafe.Pointer(&tmat)) // sets mod
 }
 
@@ -338,26 +379,26 @@ func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Mat3, src color
 // In vertex shader space, the window ranges from (-1, +1) to (+1, -1), which
 // is a 2-unit by 2-unit square. The Y-axis points upwards.
 //
-// if dstBotZero is true, then the y=0 is at bottom in dest, else top
+// if yisdown is true, then the y=0 is at top in dest, else bottom
 //
-func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, dstBotZero bool) mat32.Mat3 {
+func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, yisdown bool) mat32.Mat3 {
 	// Convert from pixel coords to vertex shader coords.
 	invHalfWidth := 2 / float32(widthPx)
 	invHalfHeight := 2 / float32(heightPx)
-	if dstBotZero {
-		tlx = tlx*invHalfWidth - 1
-		tly = 1 - tly*invHalfHeight // 1 - min
-		trx = trx*invHalfWidth - 1
-		try = 1 - try*invHalfHeight // 1 - min
-		blx = blx*invHalfWidth - 1
-		bly = 1 - bly*invHalfHeight // 1 - (min + max)
-	} else {
+	if yisdown {
 		tlx = tlx*invHalfWidth - 1
 		tly = tly*invHalfHeight - 1
 		trx = trx*invHalfWidth - 1
 		try = try*invHalfHeight - 1
 		blx = blx*invHalfWidth - 1
 		bly = bly*invHalfHeight - 1
+	} else {
+		tlx = tlx*invHalfWidth - 1
+		tly = 1 - tly*invHalfHeight // 1 - min
+		trx = trx*invHalfWidth - 1
+		try = 1 - try*invHalfHeight // 1 - min
+		blx = blx*invHalfWidth - 1
+		bly = 1 - bly*invHalfHeight // 1 - (min + max)
 	}
 
 	// The resultant affine matrix:

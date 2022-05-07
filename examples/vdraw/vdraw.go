@@ -84,13 +84,20 @@ func main() {
 	gimg, _, err := image.Decode(file)
 	file.Close()
 
-	drw.CopyImage(gimg, vgpu.FlipY, image.Point{}, gimg.Bounds(), draw.Src)
+	drw.SetImage(gimg, vgpu.NoFlipY)
+	drw.Copy(image.Point{40, 20}, gimg.Bounds(), draw.Src)
 
 	frameCount := 0
 	stTime := time.Now()
 
 	renderFrame := func() {
 		frameCount++
+		if frameCount%2 == 0 {
+			drw.Copy(image.Point{40, 20}, gimg.Bounds(), draw.Src)
+		} else {
+			drw.Scale(sf.Format.Bounds(), gimg.Bounds(), draw.Src)
+		}
+
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
 		if dur > 10 {
@@ -103,7 +110,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 6
+	fpsDelay := time.Second / 1
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

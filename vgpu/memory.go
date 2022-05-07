@@ -55,11 +55,10 @@ func (mm *Memory) Destroy(dev vk.Device) {
 
 // Config should be called after all Vals have been configured
 // and are ready to go with their initial data.
-// Does: Alloc(), AllocDev(), CopyToStaging(), TransferAllToGPU()
+// Does: Alloc(), AllocDev()
 func (mm *Memory) Config() {
 	mm.Alloc()
 	mm.AllocDev()
-	// mm.TransferToGPU()
 }
 
 // Alloc allocates memory for all bufers

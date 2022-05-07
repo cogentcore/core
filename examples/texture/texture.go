@@ -23,7 +23,7 @@ import (
 )
 
 func init() {
-	// must lock main thread for gpu!  this also means that vulkan must be used
+	// a must lock main thread for gpu!  this also means that vulkan must be used
 	// for gogi/oswin eventually if we want gui and compute
 	runtime.LockOSThread()
 }
