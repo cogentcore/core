@@ -15,32 +15,27 @@ import (
 
 // Val represents a specific value of a Var variable.
 type Val struct {
-	Name    string         `desc:"name of this value (not the name of the variable)"`
-	Var     *Var           `desc:"variable that we are representing the value of"`
-	N       int            `desc:"number of elements in an array -- 0 or 1 means scalar / singular value"`
+	Name    string         `desc:"name of this value, named by default as the variable name_idx"`
+	N       int            `desc:"actual number of elements in an array -- 1 means scalar / singular value.  If 0, this is a dynamically sized item and the size must be set."`
 	Offset  int            `desc:"offset in bytes from start of memory buffer"`
 	Indexes string         `desc:"name of another Val to use for Indexes when accessing this vector data (e.g., as vertexes)"`
 	ElSize  int            `desc:"if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy."`
 	MemSize int            `desc:"total memory size of this value, including array alignment but not any additional buffer-required alignment padding"`
 	Texture *Texture       `desc:"for Texture Var roles, this is the Texture"`
 	Mod     bool           `inactive:"+" desc:"modified -- set when values are set"`
+	Buff    *MemBuff       `desc:"memory buffer that manages our memory"`
 	MemPtr  unsafe.Pointer `view:"-" desc:"pointer to the start of the staging memory for this value"`
 }
 
-func (vl *Val) Init(name string, vr *Var, n int) {
-	vl.Name = name
-	vl.Var = vr
-	vl.N = n
+// Init initializes value based on variable and index within list of vals for this var
+func (vl *Val) Init(vr *Var, idx int) {
+	vl.Name = fmt.Sprintf("%s_%d", vr.Name, idx)
+	vl.N = vr.ArrayN
 	if vr.Role >= TextureRole {
 		vl.Texture = &Texture{}
 		vl.Name = name
 		vl.Texture.Defaults()
 	}
-}
-
-// BuffType returns the memory buffer type for this variable, based on Var.Role
-func (vl *Val) BuffType() BuffTypes {
-	return vl.Var.BuffType()
 }
 
 // AllocSize updates the memory allocation size -- called in Alloc
@@ -179,40 +174,73 @@ func (vl *Val) MemReg() MemReg {
 }
 
 //////////////////////////////////////////////////////////////////
+// ValList
 
-// Vals is a container of Val values
-type Vals struct {
-	Vals   []*Val          `desc:"values in order added"`
-	ValMap map[string]*Val `desc:"map of all vals -- names must be unique"`
+// ValList is a list container of Val values, accessed by index or name
+type ValList struct {
+	Vals   []*Val          `desc:"values in indexed order"`
+	ValMap map[string]*Val `desc:"map of vals by name -- only for specifically named vals vs. generically allocated ones -- names must be unique"`
 }
 
-// AddVal adds given value
-func (vs *Vals) AddVal(vr *Val) {
-	if vs.ValMap == nil {
-		vs.ValMap = make(map[string]*Val)
+// ConfigVals configures given number of values in the list for given variable.
+// Any existing vals will be deleted -- must free all associated memory prior!
+func (vs *ValList) ConfigVals(vr *Val, nvals int) {
+	vs.ValMap = make(map[string]*Val, nvals)
+	vs.Vals = make([]*Val, nvals)
+	for i := 0; i < nvals; i++ {
+		vl := &Val{}
+		vl.Init(vr, i)
+		vs.Vals[i] = vl
 	}
-	vs.Vals = append(vs.Vals, vr)
-	vs.ValMap[vr.Name] = vr
 }
 
-// Add adds a new value for given variable, with given number of array elements
-// 0 = no array
-func (vs *Vals) Add(name string, vr *Var, n int) *Val {
-	vl := &Val{}
-	vl.Init(name, vr, n)
-	vs.AddVal(vl)
-	return vl
+// ValByIdxTry returns Val at given index with range checking error message.
+func (vs *ValList) ValByIdxTry(idx int) (*Val, error) {
+	if idx >= len(vs.Vals) || idx < 0 {
+		err := fmt.Errorf("vgpu.ValList:ValByIdxTry index %d out of range", idx)
+		if TheGPU.Debug {
+			log.Println(err)
+		}
+		return nil, err
+	}
+	return vs.Vals[idx], nil
+}
+
+// SetName sets name of given Val, by index, adds name to map, checking
+// that it is not already there yet.  Returns val.
+func (vs *ValList) SetName(idx int, name string) (*Val, error) {
+	vl, err := vs.ValByIdxTry(idx)
+	if err != nil {
+		return nil, err
+	}
+	nm, has := vs.ValMap[name]
+	if has {
+		err := fmt.Errorf("vgpu.ValList:SetName name %s exists", name)
+		if TheGPU.Debug {
+			log.Println(err)
+		}
+		return nil, err
+	}
+	vl.Name = name
+	vl.ValMap[name] = vl
+	return vl, nil
 }
 
 // ValByNameTry returns value by name, returning error if not found
-func (vs *Vals) ValByNameTry(name string) (*Val, error) {
+func (vs *ValList) ValByNameTry(name string) (*Val, error) {
 	vl, ok := vs.ValMap[name]
 	if !ok {
-		err := fmt.Errorf("Value named %s not found", name)
+		err := fmt.Errorf("vgpu.ValList:ValByNameTry name %s not found", name)
+		if TheGPU.Debug {
+			log.Println(err)
+		}
 		return nil, err
 	}
 	return vl, nil
 }
+
+//////////////////////////////////////////////////////////////////
+// ValList
 
 // MemSize returns size across all Vals
 func (vs *Vals) MemSize(buff *MemBuff) int {

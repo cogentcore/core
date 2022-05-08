@@ -188,8 +188,7 @@ func (dw *Drawer) ConfigSys() {
 	// txcv := sy.Vars.Add("TexCoord", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
 	idxv := dw.Sys.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
 
-	matv := dw.Sys.Vars.Add("Mats", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
-	matv.SizeOf = vgpu.Float32Mat4.Bytes() * 2
+	matv := dw.Sys.Vars.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, vgpu.Uniform, 0, vgpu.VertexShader)
 	clrv := dw.Sys.Vars.Add("Color", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.FragmentShader)
 	tximgv := dw.Sys.Vars.Add("Tex", vgpu.ImageRGBA32, vgpu.TextureRole, 0, vgpu.FragmentShader)
 	tximgv.TextureOwns = true

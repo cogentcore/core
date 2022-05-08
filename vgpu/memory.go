@@ -33,8 +33,8 @@ type Memory struct {
 	GPU     *GPU
 	Device  Device               `desc:"logical device that this memory is managed for: a Surface or GPU itself"`
 	CmdPool CmdPool              `desc:"command pool for memory transfers"`
-	Vals    Vals                 `desc:"values of Vars, each with a unique name -- can be any number of different values per same Var (e.g., different meshes with vertex data) -- up to user code to bind each Var prior to pipeline execution.  Each of these Vals is mapped into GPU memory."`
-	Buffs   [BuffTypesN]*MemBuff `desc:"memory buffers"`
+	Vars    Vars                 `desc:"Vars variables used in shaders, which manage associated Vals containing specific value instances of each var"`
+	Buffs   [BuffTypesN]*MemBuff `desc:"memory buffers, organized by different Roles of vars"`
 }
 
 // Init configures the Memory for use with given gpu, device, and associated queueindex
@@ -148,6 +148,8 @@ func (mm *Memory) DeactivateBuff(bt BuffTypes) {
 	mm.FreeBuffMem(&buff.DevMem)
 	buff.Active = false
 }
+
+// todo: activate construct is to vague -- just use Dev and Host terminology.
 
 // Activate activates device memory for all buffs
 func (mm *Memory) Activate() {
