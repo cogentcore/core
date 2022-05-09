@@ -31,6 +31,11 @@ type Pipeline struct {
 	VkCache    vk.PipelineCache              `desc:"cache"`
 }
 
+// Vars returns a pointer to the vars for this pipeline, which has vals within it
+func (pl *Pipeline) Vars() *Vars {
+	return pl.Sys.Vars()
+}
+
 // AddShader adds Shader with given name and type to the pipeline
 func (pl *Pipeline) AddShader(name string, typ ShaderTypes) *Shader {
 	if pl.ShaderMap == nil {
@@ -112,8 +117,8 @@ func (pl *Pipeline) Config() {
 	}
 
 	pl.VkConfig.SType = vk.StructureTypeGraphicsPipelineCreateInfo
-	pl.VkConfig.PVertexInputState = pl.Sys.Vars.VkVertexConfig()
-	pl.VkConfig.Layout = pl.Sys.Vars.VkDescLayout
+	pl.VkConfig.PVertexInputState = pl.Vars().VkVertexConfig()
+	pl.VkConfig.Layout = pl.Vars().VkDescLayout
 	pl.VkConfig.RenderPass = pl.Sys.RenderPass.RenderPass
 	pl.VkConfig.PMultisampleState = &vk.PipelineMultisampleStateCreateInfo{
 		SType:                vk.StructureTypePipelineMultisampleStateCreateInfo,
@@ -173,7 +178,7 @@ func (pl *Pipeline) ConfigCompute() {
 	pipeline := make([]vk.Pipeline, 1)
 	cfg := vk.ComputePipelineCreateInfo{
 		SType:  vk.StructureTypeComputePipelineCreateInfo,
-		Layout: pl.Sys.Vars.VkDescLayout,
+		Layout: pl.Vars().VkDescLayout,
 		Stage:  pl.VkConfig.PStages[0], // note: only one allowed
 	}
 	ret = vk.CreateComputePipelines(pl.Sys.Device.Device, pl.VkCache, 1, []vk.ComputePipelineCreateInfo{cfg}, nil, pipeline)
@@ -376,14 +381,18 @@ func (pl *Pipeline) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer) {
 	}})
 }
 
-// BindPipeline adds commands to the given command buffer to render this pipeline.
+// BindPipeline adds commands to the given command buffer to bind
+// this pipeline to command buffer and bind descriptor sets for variable
+// values to use, as determined by the descIdx index (see Vars NDescs for info).
 // BeginRenderPass must have been called at some point before this.
-func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer) {
+func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer, descIdx int) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
-
-	if len(pl.Sys.Vars.SetMap) > 0 {
-		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, pl.Sys.Vars.VkDescLayout,
-			0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
+	vs := pl.Vars()
+	if len(vs.SetMap) > 0 {
+		dset := vs.VkDescSets[descIdx]
+		doff := vs.DynOffs[descIdx]
+		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, vs.VkDescLayout,
+			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
 	}
 }
 
@@ -395,15 +404,22 @@ func (pl *Pipeline) Draw(cmd vk.CommandBuffer, vtxCount, instanceCount, firstVtx
 }
 
 // DrawVertex adds commands to the given command buffer
-// to bind vertex / index values and Draw
-// based on current vals for any Vertex (and associated Index) Vars
-func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer) {
+// to bind vertex / index values and Draw based on current BindVertexVal
+// setting for any Vertex (and associated Index) Vars,
+// for given descIdx set of descriptors (see Vars NDescs for info).
+func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIdx int) {
+	vs := pl.Vars()
+	if !vs.HasVertex {
+		return
+	}
+	st := vs.SetMap[VertexSet]
 	var offs []vk.DeviceSize
+	var idxVar *Var
 	var idxVal *Val
 	vtxn := 0
-	for _, vr := range pl.Sys.Vars.Vars {
-		vl := vr.CurVal
-		if vl == nil || vr.Role != Vertex {
+	for _, vr := range st.Vars {
+		vl, err := vr.BindVal(descIdx)
+		if err != nil || vr.Role != Vertex {
 			continue
 		}
 		offs = append(offs, vk.DeviceSize(vl.Offset))
@@ -413,11 +429,14 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer) {
 			vtxn = ints.MinInt(vtxn, vl.N)
 		}
 		if vl.Indexes != "" {
-			iv, err := pl.Sys.Mem.Vals.ValByNameTry(vl.Indexes)
+			iv, err := st.VarByNameTry(vl.Indexes)
 			if err != nil {
-				log.Println(err)
+				if TheGPU.Debug {
+					log.Println(err)
+				}
 			} else {
-				idxVal = iv
+				idxVar = iv
+				idxVal, _ = idxVar.BindVal(descIdx)
 			}
 		}
 	}
@@ -428,7 +447,7 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer) {
 	}
 	vk.CmdBindVertexBuffers(cmd, 0, uint32(len(offs)), vtxbuf, offs)
 	if idxVal != nil {
-		vktyp := idxVal.Var.Type.VkIndexType()
+		vktyp := idxVar.Type.VkIndexType()
 		vk.CmdBindIndexBuffer(cmd, mbuf, vk.DeviceSize(idxVal.Offset), vktyp)
 		vk.CmdDrawIndexed(cmd, uint32(idxVal.N), 1, 0, 0, 0)
 	} else {
@@ -439,10 +458,11 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer) {
 // BindDrawVertex adds commands to the given command buffer
 // to bind this pipeline, and then bind vertex / index values and Draw
 // based on current vals for any Vertex (and associated Index) Vars.
+// for given descIdx set of descriptors (see Vars NDescs for info).
 // This is the standard unit of drawing between Begin and End.
-func (pl *Pipeline) BindDrawVertex(cmd vk.CommandBuffer) {
-	pl.BindPipeline(cmd)
-	pl.DrawVertex(cmd)
+func (pl *Pipeline) BindDrawVertex(cmd vk.CommandBuffer, descIdx int) {
+	pl.BindPipeline(cmd, descIdx)
+	pl.DrawVertex(cmd, descIdx)
 }
 
 // EndRenderPass adds commands to the given command buffer
@@ -458,13 +478,14 @@ func (pl *Pipeline) EndRenderPass(cmd vk.CommandBuffer) {
 // to perform a full standard render using Vertex input vars:
 // CmdReset, CmdBegin, BeginRenderPass, BindPipeline,
 // DrawVertex, EndRenderPass, EndCmd.
+// for given descIdx set of descriptors (see Vars NDescs for info).
 // This is mainly for demo / informational purposes as usually multiple
 // pipeline draws are performed between Begin and End.
-func (pl *Pipeline) FullStdRender(cmd vk.CommandBuffer, fr *Framebuffer) {
+func (pl *Pipeline) FullStdRender(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
 	CmdReset(cmd)
 	CmdBegin(cmd)
 	pl.BeginRenderPass(cmd, fr)
-	pl.BindDrawVertex(cmd)
+	pl.BindDrawVertex(cmd, descIdx)
 	pl.EndRenderPass(cmd)
 	CmdEnd(cmd)
 }
@@ -476,11 +497,18 @@ func (pl *Pipeline) FullStdRender(cmd vk.CommandBuffer, fr *Framebuffer) {
 // number of computational elements along 3 dimensions,
 // which are passed as indexes into the shader.
 // The values have to be bound to the vars prior to calling this.
-func (pl *Pipeline) ComputeCommand(cmd vk.CommandBuffer, nx, ny, nz int) {
+// descIdx index determines which group of var val bindings to use
+// (see Vars NDescs for info).
+func (pl *Pipeline) ComputeCommand(cmd vk.CommandBuffer, descIdx int, nx, ny, nz int) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointCompute, pl.VkPipeline)
 
-	vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, pl.Sys.Vars.VkDescLayout,
-		0, uint32(len(pl.Sys.Vars.VkDescSets)), pl.Sys.Vars.VkDescSets, uint32(len(pl.Sys.Vars.DynOffs)), pl.Sys.Vars.DynOffs)
+	vs := pl.Vars()
+	if len(vs.SetMap) > 0 {
+		dset := vs.VkDescSets[descIdx]
+		doff := vs.DynOffs[descIdx]
+		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, vs.VkDescLayout,
+			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
+	}
 
 	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
 }
@@ -488,12 +516,13 @@ func (pl *Pipeline) ComputeCommand(cmd vk.CommandBuffer, nx, ny, nz int) {
 // RunComputeWait runs the compute shader for given
 // number of computational elements along 3 dimensions,
 // which are passed as indexes into the shader.
+// for given descIdx set of descriptors (see Vars NDescs for info).
 // The values have to be bound to the vars prior to calling this.
 // Submits the run command and waits for the queue to finish so the
 // results will be available immediately after this.
-func (pl *Pipeline) RunComputeWait(cmd vk.CommandBuffer, nx, ny, nz int) {
+func (pl *Pipeline) RunComputeWait(cmd vk.CommandBuffer, descIdx int, nx, ny, nz int) {
 	CmdReset(cmd)
 	CmdBegin(cmd)
-	pl.ComputeCommand(cmd, nx, ny, nz)
+	pl.ComputeCommand(cmd, descIdx, nx, ny, nz)
 	CmdSubmitWait(cmd, &pl.Sys.Device)
 }

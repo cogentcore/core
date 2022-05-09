@@ -26,12 +26,12 @@ type MemBuff struct {
 	Active     bool            `inactive:"+" desc:"true if memory has been allocated, copied, transfered"`
 }
 
-// Alloc allocates memory for this buffer of given size in bytes,
+// AllocHost allocates memory for this buffer of given size in bytes,
 // freeing any existing memory allocated first.
 // Host and Dev buffers are made, and host memory is allocated and mapped
 // for staging purposes.  Call AllocDev to allocate device memory.
 // Returns true if new memory was allocated.
-func (mb *MemBuff) Alloc(dev vk.Device, bsz int) bool {
+func (mb *MemBuff) AllocHost(dev vk.Device, bsz int) bool {
 	if bsz == mb.Size {
 		return false
 	}

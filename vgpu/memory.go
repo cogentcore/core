@@ -29,6 +29,7 @@ type MemReg struct {
 
 // Memory manages memory for the GPU, using separate buffers for
 // different roles, defined in the BuffTypes and managed by a MemBuff.
+// Memory is organized by Vars with associated Vals.
 type Memory struct {
 	GPU     *GPU
 	Device  Device               `desc:"logical device that this memory is managed for: a Surface or GPU itself"`
@@ -45,36 +46,40 @@ func (mm *Memory) Init(gp *GPU, device *Device) {
 	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
 		mm.Buffs[bt] = &MemBuff{Type: bt}
 	}
+	mm.Vars.Mem = mm
 }
 
+// Destroy destroys all vulkan allocations, using given dev
 func (mm *Memory) Destroy(dev vk.Device) {
 	mm.Free()
+	mm.Vars.Destroy(dev)
 	mm.CmdPool.Destroy(dev)
 	mm.GPU = nil
 }
 
 // Config should be called after all Vals have been configured
 // and are ready to go with their initial data.
-// Does: Alloc(), AllocDev()
-func (mm *Memory) Config() {
-	mm.Alloc()
+// Does: AllocHost(), AllocDev()
+func (mm *Memory) Config(dev vk.Device) {
+	mm.Vars.Config(dev)
+	mm.AllocHost()
 	mm.AllocDev()
 }
 
-// Alloc allocates memory for all bufers
-func (mm *Memory) Alloc() {
+// AllocHost allocates memory for all buffers
+func (mm *Memory) AllocHost() {
 	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
-		mm.AllocBuff(bt)
+		mm.AllocHostBuff(bt)
 	}
 }
 
-// AllocBuff allocates host memory for given buffer
-func (mm *Memory) AllocBuff(bt BuffTypes) {
+// AllocHostBuff allocates host memory for given buffer
+func (mm *Memory) AllocHostBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
 	buff.AlignBytes = buff.Type.AlignBytes(mm.GPU)
-	bsz := mm.Vals.MemSize(buff)
-	buff.Alloc(mm.Device.Device, bsz)
-	mm.Vals.Alloc(buff, 0)
+	bsz := mm.Vars.MemSize(buff)
+	buff.AllocHost(mm.Device.Device, bsz)
+	mm.Vars.AllocHost(buff, 0)
 }
 
 // AllocDev allocates device memory for all bufers
@@ -91,7 +96,7 @@ func (mm *Memory) AllocDevBuff(bt BuffTypes) {
 		return
 	}
 	if bt == ImageBuff {
-		mm.Vals.AllocTextures(mm)
+		mm.Vars.AllocTextures(mm)
 	} else {
 		buff.AllocDev(mm.Device.Device)
 	}
@@ -127,7 +132,7 @@ func (mm *Memory) Free() bool {
 // FreeBuff frees any allocated memory in buffer -- returns true if freed
 func (mm *Memory) FreeBuff(bt BuffTypes) bool {
 	buff := mm.Buffs[bt]
-	mm.Vals.Free(buff)
+	mm.Vars.Free(buff)
 	if buff.Size == 0 {
 		return false
 	}
@@ -151,32 +156,32 @@ func (mm *Memory) DeactivateBuff(bt BuffTypes) {
 
 // todo: activate construct is to vague -- just use Dev and Host terminology.
 
-// Activate activates device memory for all buffs
-func (mm *Memory) Activate() {
-	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
-		mm.ActivateBuff(bt)
-	}
-}
-
-// ActivateBuff ensures device memory is ready to use
-// assumes the staging memory is configured.
-// Call Sync after this if needed.
-func (mm *Memory) ActivateBuff(bt BuffTypes) {
-	buff := mm.Buffs[bt]
-	if buff.Active {
-		return
-	}
-	if bt == ImageBuff {
-		mm.Vals.AllocTextures(mm)
-		mm.TransferAllValsTextures(buff)
-	} else {
-		if buff.DevMem == nil {
-			mm.AllocDevBuff(bt)
-			mm.TransferToGPUBuff(bt)
-		}
-	}
-	buff.Active = true
-}
+// // Activate activates device memory for all buffs
+// func (mm *Memory) Activate() {
+// 	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
+// 		mm.ActivateBuff(bt)
+// 	}
+// }
+//
+// // ActivateBuff ensures device memory is ready to use
+// // assumes the staging memory is configured.
+// // Call Sync after this if needed.
+// func (mm *Memory) ActivateBuff(bt BuffTypes) {
+// 	buff := mm.Buffs[bt]
+// 	if buff.Active {
+// 		return
+// 	}
+// 	if bt == ImageBuff {
+// 		mm.Vars.AllocTextures(mm)
+// 		mm.TransferAllValsTextures(buff)
+// 	} else {
+// 		if buff.DevMem == nil {
+// 			mm.AllocDevBuff(bt)
+// 			mm.TransferToGPUBuff(bt)
+// 		}
+// 	}
+// 	buff.Active = true
+// }
 
 // SyncToGPU syncs all modified Val regions from CPU to GPU device memory, for all buffs
 func (mm *Memory) SyncToGPU() {
@@ -192,38 +197,56 @@ func (mm *Memory) SyncToGPUBuff(bt BuffTypes) {
 		mm.SyncValsTextures(buff)
 		return
 	}
-	mods := mm.Vals.ModRegs(bt)
+	mods := mm.Vars.ModRegs(bt)
 	if len(mods) == 0 {
 		return
 	}
 	mm.TransferRegsToGPU(buff, mods)
 }
 
-// SyncVarsFmGPU syncs given variables from GPU device memory
-// to CPU host memory.
-// These variables can only only be Storage memory -- otherwise
-// an error will be printed and returned.
-func (mm *Memory) SyncVarsFmGPU(vals ...string) error {
-	nv := len(vals)
-	mods := make([]MemReg, nv)
-	var rerr error
-	for i, vnm := range vals {
-		vl, err := mm.Vals.ValByNameTry(vnm)
-		if err != nil {
-			log.Println(err)
-			rerr = err
-			continue
-		}
-		if vl.BuffType() != StorageBuff {
-			err = fmt.Errorf("SyncVarsFmGPU: Variable must be in Storage buffer, not: %s", vl.BuffType)
-			log.Println(err)
-			rerr = err
-			continue
-		}
-		mods[i] = vl.MemReg()
+// SyncValNameFmGPU syncs given value from GPU device memory to CPU host memory,
+// specifying value by name for given named variable in given set.
+// Variable can only only be Storage memory -- otherwise an error is returned.
+func (mm *Memory) SyncValNameFmGPU(set int, varNm, valNm string) error {
+	vr, vl, err := mm.Vars.ValByNameTry(set, varNm, valNm)
+	if err != nil {
+		return err
 	}
-	mm.TransferRegsFmGPU(mm.Buffs[StorageBuff], mods)
-	return rerr
+	if vr.BuffType() != StorageBuff {
+		err = fmt.Errorf("SyncValFmGPU: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
+		if mm.GPU.Debug {
+			log.Println(err)
+			return err
+		}
+	}
+	mm.SyncValFmGPU(vl)
+	return nil
+}
+
+// SyncValIdxFmGPU syncs given value from GPU device memory to CPU host memory,
+// specifying value by index for given named variable, in given set.
+// Variable can only only be Storage memory -- otherwise an error is returned.
+func (mm *Memory) SyncValIdxFmGPU(set int, varNm string, valIdx int) error {
+	vr, vl, err := mm.Vars.ValByIdxTry(set, varNm, valIdx)
+	if err != nil {
+		return err
+	}
+	if vr.BuffType() != StorageBuff {
+		err = fmt.Errorf("SyncValFmGPU: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
+		if mm.GPU.Debug {
+			log.Println(err)
+			return err
+		}
+	}
+	mm.SyncValFmGPU(vl)
+	return nil
+}
+
+// SyncValFmGPU syncs given value from GPU device memory to CPU host memory.
+// Must be in Storage memory -- otherwise an error will be printed and returned.
+func (mm *Memory) SyncValFmGPU(vl *Val) {
+	mods := vl.MemReg()
+	mm.TransferRegsFmGPU(mm.Buffs[StorageBuff], []MemReg{mods})
 }
 
 // TransferToGPU transfers entire staging to GPU for all buffs
@@ -324,11 +347,21 @@ func (mm *Memory) TransferImagesFmGPU(buff vk.Buffer, imgs ...*Image) {
 // TransferAllValsTextures copies all vals images from host buffer to device memory
 func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 	var imgs []*Image
-	for _, vl := range mm.Vals.Vals {
-		if vl.BuffType() != ImageBuff || vl.Texture == nil {
-			continue
+	vs := &mm.Vars
+	ns := vs.NSets()
+	for si := vs.StartSet(); si < ns; si++ {
+		st := vs.SetMap[si]
+		for _, vr := range st.Vars {
+			if vr.Role != TextureRole {
+				continue
+			}
+			for _, vl := range vr.Vals.Vals {
+				if vl.Texture == nil {
+					continue
+				}
+				imgs = append(imgs, &vl.Texture.Image)
+			}
 		}
-		imgs = append(imgs, &vl.Texture.Image)
 	}
 	mm.TransferImagesToGPU(buff.Host, imgs...)
 }
@@ -336,13 +369,22 @@ func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 // SyncValsTextures syncs all changed vals images from host buffer to device memory
 func (mm *Memory) SyncValsTextures(buff *MemBuff) {
 	var imgs []*Image
-	for _, vl := range mm.Vals.Vals {
-		if vl.BuffType() != ImageBuff || vl.Texture == nil || !vl.Mod {
-			continue
+	vs := &mm.Vars
+	ns := vs.NSets()
+	for si := vs.StartSet(); si < ns; si++ {
+		st := vs.SetMap[si]
+		for _, vr := range st.Vars {
+			if vr.Role != TextureRole {
+				continue
+			}
+			for _, vl := range vr.Vals.Vals {
+				if vl.Texture == nil || !vl.IsMod() {
+					continue
+				}
+				imgs = append(imgs, &vl.Texture.Image)
+				vl.ClearMod()
+			}
 		}
-		imgs = append(imgs, &vl.Texture.Image)
 	}
-	if len(imgs) > 0 {
-		mm.TransferImagesToGPU(buff.Host, imgs...)
-	}
+	mm.TransferImagesToGPU(buff.Host, imgs...)
 }

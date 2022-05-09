@@ -39,16 +39,19 @@ func main() {
 	pl := sy.NewPipeline("compute1")
 	pl.AddShaderFile("sqvecel", vgpu.ComputeShader, "sqvecel.spv")
 
-	inv := sy.Vars.Add("In", vgpu.Float32Vec4, vgpu.Storage, 0, vgpu.ComputeShader)
-	outv := sy.Vars.Add("Out", vgpu.Float32Vec4, vgpu.Storage, 0, vgpu.ComputeShader)
+	vars := sy.Vars()
+	set := vars.AddSet()
 
-	n := 20
-	ivl := sy.Mem.Vals.Add("In", inv, n)
-	ovl := sy.Mem.Vals.Add("Out", outv, n)
+	n := 20 // note: not necc to spec up-front, but easier if so
+	inv := set.Add("In", vgpu.Float32Vec4, n, vgpu.Storage, vgpu.ComputeShader)
+	outv := set.Add("Out", vgpu.Float32Vec4, n, vgpu.Storage, vgpu.ComputeShader)
+	_ = outv
 
-	sy.Config()
-	sy.Mem.Config()
+	set.ConfigVals(1) // one val per var
 
+	sy.Config() // configures vars, allocates vals, configs pipelines..
+
+	ivl, _ := inv.Vals.ValByIdxTry(0)
 	idat := ivl.Floats32()
 	for i := 0; i < n; i++ {
 		idat[i*4+0] = rand.Float32()
@@ -56,16 +59,20 @@ func main() {
 		idat[i*4+2] = rand.Float32()
 		idat[i*4+3] = rand.Float32()
 	}
-	ivl.Mod = true
+	ivl.SetMod()
 
 	sy.Mem.SyncToGPU()
 
-	sy.SetVals(0, "In", "Out")
+	vars.BindValsStart(0) // only one set of bindings
+	vars.BindDynValIdx(0, "In", 0)
+	vars.BindDynValIdx(0, "Out", 0)
+	vars.BindValsEnd(sy.Device.Device)
 
-	pl.RunComputeWait(pl.CmdPool.Buff, n, 1, 1)
+	pl.RunComputeWait(pl.CmdPool.Buff, 0, n, 1, 1)
 	// note: could use semaphore here instead of waiting on the compute
 
-	sy.Mem.SyncVarsFmGPU("Out")
+	sy.Mem.SyncValIdxFmGPU(0, "Out", 0)
+	_, ovl, _ := vars.ValByIdxTry(0, "Out", 0)
 
 	odat := ovl.Floats32()
 	for i := 0; i < n; i++ {

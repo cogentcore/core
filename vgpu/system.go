@@ -6,9 +6,7 @@ package vgpu
 
 import (
 	"fmt"
-	"log"
 
-	"github.com/goki/ki/ints"
 	vk "github.com/vulkan-go/vulkan"
 )
 
@@ -25,7 +23,6 @@ type System struct {
 	Compute     bool                 `desc:"if true, this is a compute system -- otherwise is graphics"`
 	Pipelines   []*Pipeline          `desc:"all pipelines"`
 	PipelineMap map[string]*Pipeline `desc:"map of all pipelines -- names must be unique"`
-	Vars        Vars                 `desc:"the common set of variables used by all Piplines"`
 	Mem         Memory               `desc:"manages all the memory for all the Vals"`
 	RenderPass  RenderPass           `desc:"renderpass with depth buffer for this system"`
 	Framebuffer Framebuffer          `desc:"shared framebuffer to render into, if not rendering into Surface"`
@@ -55,17 +52,21 @@ func (sy *System) InitCompute(gp *GPU, name string) error {
 	return nil
 }
 
+// Vars returns a pointer to the vars for this pipeline, which has vals within it
+func (sy *System) Vars() *Vars {
+	return &sy.Mem.Vars
+}
+
 func (sy *System) Destroy() {
 	for _, pl := range sy.Pipelines {
 		pl.Destroy()
 	}
-	sy.Vars.Destroy(sy.Device.Device)
+	sy.Mem.Destroy(sy.Device.Device)
 	if sy.Compute {
 		sy.Device.Destroy()
 	} else {
 		sy.RenderPass.Destroy()
 	}
-	sy.Mem.Destroy(sy.Device.Device)
 	sy.GPU = nil
 }
 
@@ -98,65 +99,12 @@ func (sy *System) ConfigRenderPass(imgFmt *ImageFormat, depthFmt Types) {
 // setup (Pipelines, Vars, etc).  Memory / Vals do not yet need to
 // be configured and are not Config'd by this call.
 func (sy *System) Config() {
-	sy.Vars.Config()
+	sy.Mem.Config(sy.Device.Device)
 	if sy.GPU.Debug {
-		fmt.Printf("%s\n", sy.Vars.StringDoc())
+		fmt.Printf("%s\n", sy.Vars().StringDoc())
 	}
-	sy.Vars.DescLayout(sy.Device.Device)
 	for _, pl := range sy.Pipelines {
 		pl.Config()
-	}
-}
-
-// SetVals sets the Vals for given Set of Vars, by name, in order
-// that they appear in the Set list of roles and vars
-func (sy *System) SetVals(set int, vals ...string) {
-	nv := len(vals)
-	var ws []vk.WriteDescriptorSet
-	sd := sy.Vars.SetDesc[set]
-	nv = ints.MinInt(nv, len(sd.Vars))
-	for _, vnm := range vals {
-		vl, err := sy.Mem.Vals.ValByNameTry(vnm)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		vl.Var.CurVal = vl
-		if vl.Var.Role < Uniform {
-			continue
-		}
-		wd := vk.WriteDescriptorSet{
-			SType:           vk.StructureTypeWriteDescriptorSet,
-			DstSet:          sd.DescSet,
-			DstBinding:      uint32(vl.Var.BindLoc),
-			DescriptorCount: 1,
-			DescriptorType:  vl.Var.Role.VkDescriptor(),
-		}
-		if vl.Var.Role < TextureRole {
-			off := vk.DeviceSize(vl.Offset)
-			if vl.Var.Role.IsDynamic() {
-				off = 0 // off must be 0 for dynamic
-			}
-			buff := sy.Mem.Buffs[vl.BuffType()]
-			wd.PBufferInfo = []vk.DescriptorBufferInfo{{
-				Offset: off,
-				Range:  vk.DeviceSize(vl.MemSize),
-				Buffer: buff.Dev,
-			}}
-			if vl.Var.Role.IsDynamic() {
-				sy.Vars.DynOffs[vl.Var.DynOffIdx] = uint32(vl.Offset)
-			}
-		} else {
-			wd.PImageInfo = []vk.DescriptorImageInfo{{
-				ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
-				ImageView:   vl.Texture.View,
-				Sampler:     vl.Texture.VkSampler,
-			}}
-		}
-		ws = append(ws, wd)
-	}
-	if len(ws) > 0 {
-		vk.UpdateDescriptorSets(sy.Device.Device, uint32(len(ws)), ws, 0, nil)
 	}
 }
 
