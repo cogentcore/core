@@ -22,7 +22,6 @@ type Val struct {
 	N         int            `desc:"actual number of elements in an array -- 1 means scalar / singular value.  If 0, this is a dynamically sized item and the size must be set."`
 	Offset    int            `desc:"offset in bytes from start of memory buffer"`
 	Flags     int32          `desc:"val state flags"`
-	Indexes   string         `desc:"name of another Val to use for Indexes when accessing this vector data (e.g., as vertexes)"`
 	ElSize    int            `desc:"if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy."`
 	AllocSize int            `desc:"total memory size of this value in bytes, as allocated, including array alignment but not any additional buffer-required alignment padding"`
 	Texture   *Texture       `desc:"for Texture Var roles, this is the Texture"`

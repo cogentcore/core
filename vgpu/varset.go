@@ -62,16 +62,30 @@ func (st *VarSet) Config() error {
 	bloc := 0
 	for _, vr := range st.Vars {
 		if st.Set == VertexSet && vr.Role > Index {
-			err := fmt.Errorf("vgpu.Set:Config VertexSet cannot contain variables of role: %s  var: %s", vr.Role.String(), vr.Name)
+			err := fmt.Errorf("vgpu.VarSet:Config VertexSet cannot contain variables of role: %s  var: %s", vr.Role.String(), vr.Name)
 			cerr = err
 			if TheGPU.Debug {
 				log.Println(err)
 			}
 			continue
 		}
+		if st.Set >= 0 && vr.Role <= Index {
+			err := fmt.Errorf("vgpu.VarSet:Config Vertex or Index Vars must be located in a VertexSet!  Use AddVertexSet() method instead of AddSet()")
+			cerr = err
+			if TheGPU.Debug {
+				log.Println(err)
+			}
+		}
 		rl := st.RoleMap[vr.Role]
 		rl = append(rl, vr)
 		st.RoleMap[vr.Role] = rl
+		if vr.Role == Index && len(rl) > 1 {
+			err := fmt.Errorf("vgpu.VarSet:Config VertexSet should not contain multiple Index variables: %v", rl)
+			cerr = err
+			if TheGPU.Debug {
+				log.Println(err)
+			}
+		}
 		vr.BindLoc = bloc
 		bloc++
 	}
@@ -106,12 +120,6 @@ func (st *VarSet) DestroyLayout(dev vk.Device) {
 // Only for non-VertexSet sets.
 // Must have set NValsPer for any TextureRole vars, which require separate descriptors per.
 func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
-	if st.Set == VertexSet {
-		for _, vr := range st.Vars {
-			vr.BindValIdx = make([]int, vs.NDescs)
-		}
-		return
-	}
 	st.DestroyLayout(dev)
 	var descLayout vk.DescriptorSetLayout
 	var binds []vk.DescriptorSetLayoutBinding

@@ -81,43 +81,47 @@ func main() {
 	pl.AddShaderFile("indexed", vgpu.VertexShader, "indexed.spv")
 	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
 
-	posv := sy.Vars.Add("Pos", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
-	clrv := sy.Vars.Add("Color", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
-	// note: always put indexes last so there isn't a gap in the location indexes!
-	idxv := sy.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
-
-	camv := sy.Vars.Add("Camera", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
-	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
+	vars := sy.Vars()
+	vset := vars.AddVertexSet()
+	set := vars.AddSet()
 
 	nPts := 3
-	triPos := sy.Mem.Vals.Add("TriPos", posv, nPts)
-	triClr := sy.Mem.Vals.Add("TriClr", clrv, nPts)
-	triIdx := sy.Mem.Vals.Add("TriIdx", idxv, nPts)
-	triPos.Indexes = "TriIdx" // only need to set indexes for one vertex val
-	cam := sy.Mem.Vals.Add("Camera", camv, 1)
 
-	// note: add all values per above before doing Config
+	posv := vset.Add("Pos", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	clrv := vset.Add("Color", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	// note: always put indexes last so there isn't a gap in the location indexes!
+	// just the fact of adding one (and only one) Index type triggers indexed render
+	idxv := vset.Add("Index", vgpu.Uint16, nPts, vgpu.Index, vgpu.VertexShader)
+
+	camv := set.Add("Camera", vgpu.Struct, 1, vgpu.Uniform, vgpu.VertexShader)
+	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
+
+	vset.ConfigVals(1) // one val per var
+	set.ConfigVals(1)  // one val per var
 	sy.Config()
-	sy.Mem.Config()
 
+	triPos, _ := posv.Vals.ValByIdxTry(0)
 	triPosA := triPos.Floats32()
 	triPosA.Set(0,
 		-0.5, 0.5, 0.0,
 		0.5, 0.5, 0.0,
 		0.0, -0.5, 0.0) // negative point is UP in native Vulkan
-	triPos.Mod = true
+	triPos.SetMod()
 
+	triClr, _ := clrv.Vals.ValByIdxTry(0)
 	triClrA := triClr.Floats32()
 	triClrA.Set(0,
 		1.0, 0.0, 0.0,
 		0.0, 1.0, 0.0,
 		0.0, 0.0, 1.0)
-	triClr.Mod = true
+	triClr.SetMod()
 
+	triIdx, _ := idxv.Vals.ValByIdxTry(0)
 	idxs := []uint16{0, 1, 2}
 	triIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
 
 	// This is the standard camera view projection computation
+	cam, _ := camv.Vals.ValByIdxTry(0)
 	campos := mat32.Vec3{0, 0, 2}
 	target := mat32.Vec3{0, 0, 0}
 	var lookq mat32.Quat
@@ -141,7 +145,12 @@ func main() {
 
 	sy.Mem.SyncToGPU()
 
-	sy.SetVals(0, "TriPos", "TriClr", "Camera")
+	vars.BindValsStart(0) // only one set of bindings
+	vars.BindVertexValIdx("Pos", 0)
+	vars.BindVertexValIdx("Color", 0)
+	vars.BindVertexValIdx("Index", 0)
+	vars.BindDynVal(0, camv, cam)
+	vars.BindValsEnd()
 
 	frameCount := 0
 	stTime := time.Now()
@@ -155,7 +164,7 @@ func main() {
 
 		idx := sf.AcquireNextImage()
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx])
+		pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx], 0)
 		// fmt.Printf("cmd %v\n", time.Now().Sub(rt))
 		sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))

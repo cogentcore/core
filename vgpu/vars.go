@@ -213,6 +213,13 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 		dlays[si] = st.VkLayout
 	}
 
+	if vs.HasVertex {
+		vset := vs.SetMap[VertexSet]
+		for _, vr := range vset.Vars {
+			vr.BindValIdx = make([]int, vs.NDescs)
+		}
+	}
+
 	dsets := make([][]vk.DescriptorSet, vs.NDescs)
 	for i := 0; i < vs.NDescs; i++ {
 		dsets[i] = make([]vk.DescriptorSet, nset)
@@ -240,6 +247,28 @@ func (vs *Vars) AddDynOff() {
 	}
 }
 
+// BindValsStart starts a new step of binding specific vals for vars,
+// using given descIdx description set index (among the NDescs allocated).
+// BoundVals determine what value the shader programs see,
+// in subsequent calls to Pipeline commands.
+// Subsequent calls of BindVal* methods will add to a list, which
+// will be executed when BindValsEnd is called.
+// This creates a set of entries in a list of WriteDescriptorSet's
+func (vs *Vars) BindValsStart(descIdx int) {
+	vs.VkWriteVals = []vk.WriteDescriptorSet{}
+	vs.BindDescIdx = descIdx
+}
+
+// BindValsEnd finishes a new step of binding started by BindValsStart.
+// Actually executes the binding updates, based on prior BindVal calls.
+func (vs *Vars) BindValsEnd() {
+	dev := vs.Mem.Device.Device
+	if len(vs.VkWriteVals) > 0 {
+		vk.UpdateDescriptorSets(dev, uint32(len(vs.VkWriteVals)), vs.VkWriteVals, 0, nil)
+	}
+	vs.VkWriteVals = nil
+}
+
 // BindVertexValName dynamically binds given VertexSet value
 // by name for given variable name.
 // using given descIdx description set index (among the NDescs allocated).
@@ -249,7 +278,7 @@ func (vs *Vars) AddDynOff() {
 // This dynamically updates the offset to point to the specified val.
 // Must have called BindValsStart prior to this.
 // returns error if not found.
-func (vs *Vars) BindVertexValName(descIdx int, varNm, valNm string) error {
+func (vs *Vars) BindVertexValName(varNm, valNm string) error {
 	st := vs.SetMap[VertexSet]
 	vr, vl, err := st.ValByNameTry(varNm, valNm)
 	if err != nil {
@@ -268,7 +297,7 @@ func (vs *Vars) BindVertexValName(descIdx int, varNm, valNm string) error {
 // This only dynamically updates the offset to point to the specified val.
 // Must have called BindValsStart prior to this.
 // returns error if not found.
-func (vs *Vars) BindVertexValIdx(descIdx int, varNm string, valIdx int) error {
+func (vs *Vars) BindVertexValIdx(varNm string, valIdx int) error {
 	st := vs.SetMap[VertexSet]
 	vr, vl, err := st.ValByIdxTry(varNm, valIdx)
 	if err != nil {
@@ -276,27 +305,6 @@ func (vs *Vars) BindVertexValIdx(descIdx int, varNm string, valIdx int) error {
 	}
 	vr.BindValIdx[vs.BindDescIdx] = vl.Idx // this is then consumed by draw command
 	return nil
-}
-
-// BindValsStart starts a new step of binding specific vals for vars,
-// using given descIdx description set index (among the NDescs allocated).
-// BoundVals determine what value the shader programs see,
-// in subsequent calls to Pipeline commands.
-// Subsequent calls of BindVal* methods will add to a list, which
-// will be executed when BindValsEnd is called.
-// This creates a set of entries in a list of WriteDescriptorSet's
-func (vs *Vars) BindValsStart(descIdx int) {
-	vs.VkWriteVals = []vk.WriteDescriptorSet{}
-	vs.BindDescIdx = descIdx
-}
-
-// BindValsEnd finishes a new step of binding started by BindValsStart.
-// Actually executes the binding updates, based on prior BindVal calls.
-func (vs *Vars) BindValsEnd(dev vk.Device) {
-	if len(vs.VkWriteVals) > 0 {
-		vk.UpdateDescriptorSets(dev, uint32(len(vs.VkWriteVals)), vs.VkWriteVals, 0, nil)
-	}
-	vs.VkWriteVals = nil
 }
 
 // BindDynValName dynamically binds given uniform or storage value
@@ -323,6 +331,19 @@ func (vs *Vars) BindDynValName(set int, varNm, valNm string) error {
 func (vs *Vars) BindDynValIdx(set int, varNm string, valIdx int) error {
 	st := vs.SetMap[set]
 	return st.BindDynValIdx(vs, varNm, valIdx)
+}
+
+// BindDynVal dynamically binds given uniform or storage value
+// for given variable in given set.
+// Value must have already been updated into device memory prior to this,
+// ideally through a batch update prior to starting rendering, so that
+// all the values are ready to be used during the render pass.
+// This only dynamically updates the offset to point to the specified val.
+// Must have called BindValsStart prior to this.
+// returns error if not found.
+func (vs *Vars) BindDynVal(set int, vr *Var, vl *Val) error {
+	st := vs.SetMap[set]
+	return st.BindDynVal(vs, vr, vl)
 }
 
 // todo: need an option to allow a single val to be used in a static way, selecting from among multiple,

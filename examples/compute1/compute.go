@@ -48,8 +48,7 @@ func main() {
 	_ = outv
 
 	set.ConfigVals(1) // one val per var
-
-	sy.Config() // configures vars, allocates vals, configs pipelines..
+	sy.Config()       // configures vars, allocates vals, configs pipelines..
 
 	ivl, _ := inv.Vals.ValByIdxTry(0)
 	idat := ivl.Floats32()
@@ -66,7 +65,7 @@ func main() {
 	vars.BindValsStart(0) // only one set of bindings
 	vars.BindDynValIdx(0, "In", 0)
 	vars.BindDynValIdx(0, "Out", 0)
-	vars.BindValsEnd(sy.Device.Device)
+	vars.BindValsEnd()
 
 	pl.RunComputeWait(pl.CmdPool.Buff, 0, n, 1, 1)
 	// note: could use semaphore here instead of waiting on the compute

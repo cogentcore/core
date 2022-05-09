@@ -416,6 +416,10 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIdx int) {
 	var offs []vk.DeviceSize
 	var idxVar *Var
 	var idxVal *Val
+	if len(st.RoleMap[Index]) == 1 {
+		idxVar = st.RoleMap[Index][0]
+		idxVal, _ = idxVar.BindVal(descIdx)
+	}
 	vtxn := 0
 	for _, vr := range st.Vars {
 		vl, err := vr.BindVal(descIdx)
@@ -427,17 +431,6 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIdx int) {
 			vtxn = vl.N
 		} else {
 			vtxn = ints.MinInt(vtxn, vl.N)
-		}
-		if vl.Indexes != "" {
-			iv, err := st.VarByNameTry(vl.Indexes)
-			if err != nil {
-				if TheGPU.Debug {
-					log.Println(err)
-				}
-			} else {
-				idxVar = iv
-				idxVal, _ = idxVar.BindVal(descIdx)
-			}
 		}
 	}
 	mbuf := pl.Sys.Mem.Buffs[VtxIdxBuff].Dev

@@ -62,7 +62,6 @@ func main() {
 	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
 
 	sy.Config()
-	sy.Mem.Config()
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
@@ -85,7 +84,7 @@ func main() {
 		pl.CmdPool.BeginCmd()
 		pl.BeginRenderPass(pl.CmdPool.Buff, sf.Frames[idx])
 		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
-		pl.BindPipeline(pl.CmdPool.Buff)
+		pl.BindPipeline(pl.CmdPool.Buff, 0)
 		pl.Draw(pl.CmdPool.Buff, 3, 1, 0, 0)
 		pl.EndRenderPass(pl.CmdPool.Buff)
 		pl.CmdPool.EndCmd()

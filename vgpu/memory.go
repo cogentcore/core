@@ -32,7 +32,7 @@ type MemReg struct {
 // Memory is organized by Vars with associated Vals.
 type Memory struct {
 	GPU     *GPU
-	Device  Device               `desc:"logical device that this memory is managed for: a Surface or GPU itself"`
+	Device  Device               `desc:"logical device that this memory is managed for -- set from System"`
 	CmdPool CmdPool              `desc:"command pool for memory transfers"`
 	Vars    Vars                 `desc:"Vars variables used in shaders, which manage associated Vals containing specific value instances of each var"`
 	Buffs   [BuffTypesN]*MemBuff `desc:"memory buffers, organized by different Roles of vars"`
