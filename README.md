@@ -30,7 +30,7 @@ Most GPU coding is done for gaming, but vGPU is designed for more scientific "de
 
 ## Memory organization
 
-`Memory` maintains a host-visible, mapped staging buffer, and a corresponding device-local memory buffer that the GPU uses to compute on (the latter of which is optional for unified memory architectures).  Each `Val` records when it is modified, and a global Sync step efficiently transfers only what has changed.
+`Memory` maintains a host-visible, mapped staging buffer, and a corresponding device-local memory buffer that the GPU uses to compute on (the latter of which is optional for unified memory architectures).  Each `Val` records when it is modified, and a global Sync step efficiently transfers only what has changed.  *You must allocate and sync update a unique Val for each different value you will need for the entire render pass* -- although you can dynamically select *which Val* to use for each draw command, you cannot in general update the actual data associated with these values during the course of a single rendering pass.
 
 * `Vars` variables define the `Type` and `Role` of data used in the shaders.  There are 3 major categories of Var roles:
     + `Vertex` and `Index` represent mesh points etc that provide input to Vertex shader -- these are handled very differently from the other two, and must be located in a `VertexSet` which has a set index of -1.  These are updated *dynamically* for each render Draw command, so you can Bind different Vertex Vals as you iterate through objects within a single render pass.
@@ -88,7 +88,7 @@ The various introductory tutorials all seem to focus on just a single simple ren
 
 Here's some info on the logical issues:
 
-* [Stack Overflow](https://stackoverflow.com/questions/54103399/how-to-repeatedly-update-a-uniform-data-for-number-of-objects-inside-a-single-vu)
+* [Stack Overflow](https://stackoverflow.com/questions/54103399/how-to-repeatedly-update-a-uniform-data-for-number-of-objects-inside-a-single-vu) discussion of the issues.
 
 * [NVIDIA github](https://github.com/nvpro-samples/gl_vk_threaded_cadscene/blob/master/doc/vulkan_uniforms.md) has explicit code and benchmarks of different strategies.
 
