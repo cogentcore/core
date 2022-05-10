@@ -7,6 +7,6 @@ layout(set = 1, binding = 0) uniform ColorIn {
 layout(location = 0) out vec4 outputColor;
 
 void main() {
-	outputColor = color;
+	outputColor = vec4(0.5, 0.5, 0.5, 1); // color;
 }
 

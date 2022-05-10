@@ -161,7 +161,7 @@ func (dw *Drawer) Draw(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error
 func (dw *Drawer) ConfigSurface(sf *vgpu.Surface) {
 	dw.Surf = sf
 	dw.Sys.InitGraphics(sf.GPU, "vdraw.Drawer", &sf.Device)
-	dw.Sys.RenderPass.NoClear = true
+	// dw.Sys.RenderPass.NoClear = true
 	dw.Sys.ConfigRenderPass(&dw.Surf.Format, vgpu.UndefType)
 	sf.SetRenderPass(&dw.Sys.RenderPass)
 
@@ -241,7 +241,7 @@ func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 	// app.drawProg.Activate()
 
 	pl.SetGraphicsDefaults()
-	pl.SetClearOff()
+	// pl.SetClearOff()
 	if dw.YIsDown {
 		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 	} else {

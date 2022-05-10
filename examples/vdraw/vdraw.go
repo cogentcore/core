@@ -104,7 +104,7 @@ func main() {
 	*/
 
 	drw.StartFill()
-	drw.SetImage(imgs[0], vgpu.NoFlipY)
+	// drw.SetImage(imgs[0], vgpu.NoFlipY)
 	drw.FillRect(color.White, image.Rectangle{Min: image.Point{100, 80}, Max: image.Point{400, 200}}, draw.Src)
 	drw.EndFill()
 
