@@ -154,35 +154,6 @@ func (mm *Memory) DeactivateBuff(bt BuffTypes) {
 	buff.Active = false
 }
 
-// todo: activate construct is to vague -- just use Dev and Host terminology.
-
-// // Activate activates device memory for all buffs
-// func (mm *Memory) Activate() {
-// 	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
-// 		mm.ActivateBuff(bt)
-// 	}
-// }
-//
-// // ActivateBuff ensures device memory is ready to use
-// // assumes the staging memory is configured.
-// // Call Sync after this if needed.
-// func (mm *Memory) ActivateBuff(bt BuffTypes) {
-// 	buff := mm.Buffs[bt]
-// 	if buff.Active {
-// 		return
-// 	}
-// 	if bt == ImageBuff {
-// 		mm.Vars.AllocTextures(mm)
-// 		mm.TransferAllValsTextures(buff)
-// 	} else {
-// 		if buff.DevMem == nil {
-// 			mm.AllocDevBuff(bt)
-// 			mm.TransferToGPUBuff(bt)
-// 		}
-// 	}
-// 	buff.Active = true
-// }
-
 // SyncToGPU syncs all modified Val regions from CPU to GPU device memory, for all buffs
 func (mm *Memory) SyncToGPU() {
 	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
@@ -271,7 +242,7 @@ func (mm *Memory) TransferToGPUBuff(bt BuffTypes) {
 
 // TransferRegsToGPU transfers memory from CPU to GPU for given regions
 func (mm *Memory) TransferRegsToGPU(buff *MemBuff, regs []MemReg) {
-	if buff.Size == 0 || buff.DevMem == nil {
+	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
 		return
 	}
 
@@ -290,7 +261,7 @@ func (mm *Memory) TransferRegsToGPU(buff *MemBuff, regs []MemReg) {
 
 // TransferRegsFmGPU transfers memory from GPU to CPU for given regions
 func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
-	if buff.Size == 0 || buff.DevMem == nil {
+	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
 		return
 	}
 
@@ -314,6 +285,9 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 // The image Host.Offset *must* be accurate for the given buffer, whether its own
 // individual buffer or the shared memory-managed buffer.
 func (mm *Memory) TransferImagesToGPU(buff vk.Buffer, imgs ...*Image) {
+	if len(imgs) == 0 {
+		return
+	}
 	cmdBuff := mm.CmdPool.NewBuffer(&mm.Device)
 	mm.CmdPool.BeginCmdOneTime()
 
@@ -363,7 +337,9 @@ func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 			}
 		}
 	}
-	mm.TransferImagesToGPU(buff.Host, imgs...)
+	if len(imgs) > 0 {
+		mm.TransferImagesToGPU(buff.Host, imgs...)
+	}
 }
 
 // SyncValsTextures syncs all changed vals images from host buffer to device memory
@@ -386,5 +362,7 @@ func (mm *Memory) SyncValsTextures(buff *MemBuff) {
 			}
 		}
 	}
-	mm.TransferImagesToGPU(buff.Host, imgs...)
+	if len(imgs) > 0 {
+		mm.TransferImagesToGPU(buff.Host, imgs...)
+	}
 }

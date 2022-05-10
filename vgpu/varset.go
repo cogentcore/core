@@ -56,7 +56,7 @@ func (st *VarSet) AddStruct(name string, size int, arrayN int, role VarRoles, sh
 // Config must be called after all variables have been added.
 // configures binding / location for all vars based on sequential order.
 // also does validation and returns error message.
-func (st *VarSet) Config() error {
+func (st *VarSet) Config(dev vk.Device) error {
 	st.RoleMap = make(map[VarRoles][]*Var)
 	var cerr error
 	bloc := 0
@@ -86,7 +86,17 @@ func (st *VarSet) Config() error {
 				log.Println(err)
 			}
 		}
+		if vr.Role > Storage && (len(st.RoleMap[Uniform]) > 0 || len(st.RoleMap[Storage]) > 0) {
+			err := fmt.Errorf("vgpu.VarSet:Config Set with dynamic Uniform or Storage variables should not contain static variables (e.g., textures): %s", vr.Role.String())
+			cerr = err
+			if TheGPU.Debug {
+				log.Println(err)
+			}
+		}
 		vr.BindLoc = bloc
+		if vr.Role == TextureRole {
+			vr.SetTextureDev(dev)
+		}
 		bloc++
 	}
 	return cerr
@@ -246,7 +256,7 @@ func (st *VarSet) BindDynVal(vs *Vars, vr *Var, vl *Val) error {
 // and it is not possible to update anything during a render pass.
 func (st *VarSet) BindStatVars(vs *Vars) {
 	for _, vr := range st.Vars {
-		if vr.Role < Storage {
+		if vr.Role <= Storage {
 			continue
 		}
 		st.BindStatVar(vs, vr)

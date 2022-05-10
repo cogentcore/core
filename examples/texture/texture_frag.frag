@@ -1,6 +1,11 @@
-#version 450
+#version 450 core
+#extension GL_ARB_separate_shader_objects : enable
 
-layout(binding = 1) uniform sampler2D TexSampler;
+layout(set = 1, binding = 0) uniform TexIdxUni {
+    int TexIdx;
+};
+
+layout(set = 2, binding = 0) uniform sampler2D TexSampler[3];
 
 layout(location = 0) in vec3 FragColor;
 layout(location = 1) in vec2 FragTexCoord;
@@ -8,7 +13,7 @@ layout(location = 1) in vec2 FragTexCoord;
 layout(location = 0) out vec4 OutColor;
 
 void main() {
-    OutColor = texture(TexSampler, FragTexCoord);
+    OutColor = texture(TexSampler[TexIdx], FragTexCoord);
     // OutColor = vec4(FragColor, 1.0);
 }
 

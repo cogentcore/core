@@ -93,7 +93,7 @@ func (vs *Vars) Config(dev vk.Device) error {
 	vs.RoleMap = make(map[VarRoles][]*Var)
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
-		err := st.Config()
+		err := st.Config(dev)
 		if err != nil {
 			cerr = err
 		}
@@ -111,6 +111,8 @@ func (vs *Vars) StringDoc() string {
 	var sb strings.Builder
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
+		sb.WriteString(fmt.Sprintf("Set: %d\n", si))
+
 		st := vs.SetMap[si]
 		for ri := Vertex; ri < VarRolesN; ri++ {
 			rl, has := st.RoleMap[ri]
@@ -188,8 +190,15 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 		if len(vl) == 0 {
 			continue
 		}
+		dcount := vs.NDescs * len(vl)
+		if ri > Storage {
+			dcount = 0
+			for _, vr := range vl {
+				dcount += vs.NDescs * len(vr.Vals.Vals)
+			}
+		}
 		pl := vk.DescriptorPoolSize{
-			DescriptorCount: uint32(vs.NDescs * len(vl)),
+			DescriptorCount: uint32(dcount),
 			Type:            RoleDescriptors[ri],
 		}
 		pools = append(pools, pl)

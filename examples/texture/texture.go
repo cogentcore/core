@@ -36,6 +36,19 @@ type CamView struct {
 	Prjn  mat32.Mat4
 }
 
+func OpenImage(fname string) image.Image {
+	file, err := os.Open(fname)
+	defer file.Close()
+	if err != nil {
+		fmt.Printf("image: %s\n", err)
+	}
+	gimg, _, err := image.Decode(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return gimg
+}
+
 func main() {
 	glfw.Init()
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
@@ -65,7 +78,6 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	sy := gp.NewGraphicsSystem("texture", &sf.Device)
-	pl := sy.NewPipeline("texture")
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
@@ -76,82 +88,97 @@ func main() {
 		glfw.Terminate()
 	}
 
+	pl := sy.NewPipeline("texture")
 	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
 	sf.SetRenderPass(&sy.RenderPass)
 	pl.SetGraphicsDefaults()
 	pl.SetClearColor(0.2, 0.2, 0.2, 1)
-	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceClockwise, 1.0)
 
 	pl.AddShaderFile("texture_vert", vgpu.VertexShader, "texture_vert.spv")
 	pl.AddShaderFile("texture_frag", vgpu.FragmentShader, "texture_frag.spv")
 
-	posv := sy.Vars.Add("Pos", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
-	clrv := sy.Vars.Add("Color", vgpu.Float32Vec3, vgpu.Vertex, 0, vgpu.VertexShader)
-	txcv := sy.Vars.Add("TexCoord", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
-	// note: always put indexes last so there isn't a gap in the location indexes!
-	idxv := sy.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
-
-	camv := sy.Vars.Add("Camera", vgpu.Struct, vgpu.Uniform, 0, vgpu.VertexShader)
-	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
-
-	tximgv := sy.Vars.Add("TexSampler", vgpu.ImageRGBA32, vgpu.TextureRole, 0, vgpu.FragmentShader)
+	vars := sy.Vars()
+	vset := vars.AddVertexSet()
+	uset := vars.AddSet()
+	txiset := vars.AddSet()
+	txset := vars.AddSet()
 
 	nPts := 4
 	nIdxs := 6
-	sqrPos := sy.Mem.Vals.Add("SqrPos", posv, nPts)
-	sqrClr := sy.Mem.Vals.Add("SqrClr", clrv, nPts)
-	sqrTex := sy.Mem.Vals.Add("SqrTex", txcv, nPts)
-	sqrIdx := sy.Mem.Vals.Add("SqrIdx", idxv, nIdxs)
-	sqrPos.Indexes = "SqrIdx" // only need to set indexes for one vertex val
-	cam := sy.Mem.Vals.Add("Camera", camv, 1)
 
-	img := sy.Mem.Vals.Add("TexImage", tximgv, 1)
-	file, err := os.Open("teximg.jpg")
-	if err != nil {
-		fmt.Printf("image: %s\n", err)
+	posv := vset.Add("Pos", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	clrv := vset.Add("Color", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	txcv := vset.Add("TexCoord", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
+	// note: always put indexes last so there isn't a gap in the location indexes!
+	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
+
+	camv := uset.Add("Camera", vgpu.Struct, 1, vgpu.Uniform, vgpu.VertexShader)
+	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
+
+	txidxv := txiset.Add("TexIdx", vgpu.Int32, 1, vgpu.Uniform, vgpu.FragmentShader)
+	tximgv := txset.Add("TexSampler", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
+
+	vset.ConfigVals(1) // val per var
+	uset.ConfigVals(1)
+	txiset.ConfigVals(3)
+	txset.ConfigVals(3)
+
+	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
+	imgs := make([]image.Image, len(imgFiles))
+	for i, fnm := range imgFiles {
+		imgs[i] = OpenImage(fnm)
+		img, _ := tximgv.Vals.ValByIdxTry(i)
+		img.Texture.ConfigGoImage(imgs[i])
+		// img.Texture.Sampler.Border = vgpu.BorderBlack
+		// img.Texture.Sampler.UMode = vgpu.ClampToBorder
+		// img.Texture.Sampler.VMode = vgpu.ClampToBorder
 	}
-	gimg, _, err := image.Decode(file)
-	file.Close()
-	img.Texture.ConfigGoImage(gimg)
-	// img.Texture.Sampler.Border = vgpu.BorderBlack
-	// img.Texture.Sampler.UMode = vgpu.ClampToBorder
-	// img.Texture.Sampler.VMode = vgpu.ClampToBorder
 
-	// note: add all values per above before doing Config
-	sy.Config()
-	sy.Mem.Config()
+	sy.Config() // allocates everything etc
 
 	// note: first val in set is offset
-	sqrPosA := sqrPos.Floats32()
-	sqrPosA.Set(0,
+	rectPos, _ := posv.Vals.ValByIdxTry(0)
+	rectPosA := rectPos.Floats32()
+	rectPosA.Set(0,
 		-0.5, -0.5, 0.0,
 		0.5, -0.5, 0.0,
 		0.5, 0.5, 0.0,
 		-0.5, 0.5, 0.0)
-	sqrPos.Mod = true
+	rectPos.SetMod()
 
-	sqrClrA := sqrClr.Floats32()
-	sqrClrA.Set(0,
+	rectClr, _ := clrv.Vals.ValByIdxTry(0)
+	rectClrA := rectClr.Floats32()
+	rectClrA.Set(0,
 		1.0, 0.0, 0.0,
 		0.0, 1.0, 0.0,
 		0.0, 0.0, 1.0,
 		1.0, 1.0, 0.0)
-	sqrClr.Mod = true
+	rectClr.SetMod()
 
-	sqrTexA := sqrTex.Floats32()
-	sqrTexA.Set(0,
+	rectTex, _ := txcv.Vals.ValByIdxTry(0)
+	rectTexA := rectTex.Floats32()
+	rectTexA.Set(0,
 		1.0, 0.0,
 		0.0, 0.0,
 		0.0, 1.0,
 		1.0, 1.0)
-	sqrTex.Mod = true
+	rectTex.SetMod()
 
+	rectIdx, _ := idxv.Vals.ValByIdxTry(0)
 	idxs := []uint16{0, 1, 2, 0, 2, 3}
-	sqrIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+	rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
 
-	img.SetGoImage(gimg, vgpu.FlipY)
+	for i, gimg := range imgs {
+		img, _ := tximgv.Vals.ValByIdxTry(i)
+		img.SetGoImage(gimg, vgpu.FlipY)
+		idx, _ := txidxv.Vals.ValByIdxTry(i)
+		i32 := int32(i)
+		idx.CopyBytes(unsafe.Pointer(&i32))
+	}
 
 	// This is the standard camera view projection computation
+	cam, _ := camv.Vals.ValByIdxTry(0)
 	campos := mat32.Vec3{0, 0, 2}
 	target := mat32.Vec3{0, 0, 0}
 	var lookq mat32.Quat
@@ -175,12 +202,15 @@ func main() {
 
 	sy.Mem.SyncToGPU()
 
-	sy.SetVals(0, "SqrPos", "SqrClr", "SqrTex", "Camera", "TexImage")
-
-	if sy.Vars.Validate() != nil {
-		destroy()
-		return
-	}
+	vars.BindValsStart(0) // only one set of bindings
+	vars.BindVertexValIdx("Pos", 0)
+	vars.BindVertexValIdx("Color", 0)
+	vars.BindVertexValIdx("TexCoord", 0)
+	vars.BindVertexValIdx("Index", 0)
+	vars.BindDynVal(0, camv, cam)
+	vars.BindDynValIdx(1, "TexIdx", 1)
+	vars.BindStatVars(2) // gets images
+	vars.BindValsEnd()
 
 	frameCount := 0
 	stTime := time.Now()
@@ -192,9 +222,11 @@ func main() {
 		cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 
+		vars.BindDynValIdx(1, "TexIdx", frameCount%len(imgs))
+
 		idx := sf.AcquireNextImage()
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx])
+		pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx], 0)
 		// fmt.Printf("cmd %v\n", time.Now().Sub(rt))
 		sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
@@ -213,7 +245,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 60
+	fpsDelay := time.Second / 1
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

@@ -139,7 +139,7 @@ var BuffUsages = map[BuffTypes]vk.BufferUsageFlagBits{
 	VtxIdxBuff:  vk.BufferUsageVertexBufferBit | vk.BufferUsageIndexBufferBit,
 	UniformBuff: vk.BufferUsageUniformBufferBit | vk.BufferUsageUniformTexelBufferBit,
 	StorageBuff: vk.BufferUsageStorageBufferBit | vk.BufferUsageStorageTexelBufferBit,
-	ImageBuff:   0,
+	ImageBuff:   vk.BufferUsageStorageTexelBufferBit,
 }
 
 /////////////////////////////////////////////////////////////////////

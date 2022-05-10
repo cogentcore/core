@@ -506,7 +506,7 @@ func (im *Image) ConfigValHost(buff *MemBuff, buffPtr unsafe.Pointer, offset int
 	im.Host.Buff = buff.Host
 	im.Host.Mem = nil
 	im.Host.Size = imsz
-	im.Host.Ptr = buffPtr
+	im.Host.Ptr = unsafe.Pointer(uintptr(buffPtr) + uintptr(offset))
 	im.Host.Offset = offset
 	im.SetFlag(int(ImageIsVal), int(ImageHostActive))
 }

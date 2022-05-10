@@ -94,6 +94,17 @@ func (vr *Var) ModRegs() []MemReg {
 	return vr.Vals.ModRegs()
 }
 
+// SetTextureDev sets Device for textures
+// only called on Role = TextureRole
+func (vr *Var) SetTextureDev(dev vk.Device) {
+	for _, vl := range vr.Vals.Vals {
+		if vl.Texture == nil {
+			continue
+		}
+		vl.Texture.Dev = dev
+	}
+}
+
 // AllocTextures allocates images on device memory
 // only called on Role = TextureRole
 func (vr *Var) AllocTextures(mm *Memory) {
