@@ -87,7 +87,7 @@ func (dw *Drawer) Scale(dr image.Rectangle, sr image.Rectangle, op draw.Op) erro
 }
 
 // StartDraw starts image drawing rendering process on render target
-func (dw *Drawer) StartImage() {
+func (dw *Drawer) StartDraw() {
 	dpl := dw.Sys.PipelineMap["draw"]
 	if dw.Surf != nil {
 		dw.SurfIdx = dw.Surf.AcquireNextImage()
@@ -144,11 +144,11 @@ func (dw *Drawer) EndFill() {
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 func (dw *Drawer) Draw(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
-	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
+	vars := dw.Sys.Vars()
+	_, tx, _ := vars.ValByIdxTry(0, "Tex", 0)
 	tmat := dw.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op, dw.FlipY)
 
-	matv, _ := dw.Sys.Vars().VarByNameTry(vgpu.PushConstSet, "Mats")
-
+	matv, _ := vars.VarByNameTry(vgpu.PushConstSet, "Mats")
 	dpl := dw.Sys.PipelineMap["draw"]
 
 	cmd := dpl.CmdPool.Buff
@@ -161,7 +161,7 @@ func (dw *Drawer) Draw(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error
 func (dw *Drawer) ConfigSurface(sf *vgpu.Surface) {
 	dw.Surf = sf
 	dw.Sys.InitGraphics(sf.GPU, "vdraw.Drawer", &sf.Device)
-	// dw.Sys.RenderPass.NoClear = true
+	dw.Sys.RenderPass.NoClear = true
 	dw.Sys.ConfigRenderPass(&dw.Surf.Format, vgpu.UndefType)
 	sf.SetRenderPass(&dw.Sys.RenderPass)
 
@@ -211,14 +211,16 @@ func (dw *Drawer) Fill(src color.Color, src2dst mat32.Mat3, reg image.Rectangle,
 		float32(a)/65535)
 	fc.SetMod()
 
+	dw.Sys.Mem.SyncToGPU()
+
 	tmat := dw.ConfigMats(src2dst, reg.Max, reg, op, false)
 
 	matv, _ := vars.VarByNameTry(vgpu.PushConstSet, "Mats")
 
 	vars.BindValsStart(0)
 	vars.BindDynVal(1, clrv, fc)
-	vars.BindVertexValIdx("Pos", 0)
-	vars.BindVertexValIdx("Index", 0)
+	// vars.BindVertexValIdx("Pos", 0)
+	// vars.BindVertexValIdx("Index", 0)
 	vars.BindValsEnd()
 
 	fpl := dw.Sys.PipelineMap["fill"]
@@ -241,11 +243,11 @@ func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 	// app.drawProg.Activate()
 
 	pl.SetGraphicsDefaults()
-	// pl.SetClearOff()
+	pl.SetClearOff()
 	if dw.YIsDown {
-		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 	} else {
-		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceClockwise, 1.0)
+		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceClockwise, 1.0)
 	}
 }
 
@@ -270,16 +272,18 @@ func (dw *Drawer) ConfigSys() {
 	vars := dw.Sys.Vars()
 	vset := vars.AddVertexSet()
 	pcset := vars.AddPushConstSet()
+	// uset := vars.AddSet()
 	txset := vars.AddSet()
 	cset := vars.AddSet()
 
 	nPts := 4
 	nIdxs := 6
 
-	posv := vset.Add("Pos", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	posv := vset.Add("Pos", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
 
 	pcset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.PushConst, vgpu.VertexShader)
+	// uset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Uniform, vgpu.VertexShader)
 
 	tximgv := txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 	tximgv.TextureOwns = true
@@ -406,6 +410,11 @@ func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 	// 	tv := v.MulMat4(&tmat.MVP)
 	// 	fmt.Printf("v: %v   tv: %v\n", v, tv)
 	// }
+
+	// vars := dw.Sys.Vars()
+	// _, mat, _ := vars.ValByIdxTry(0, "Mats", 0)
+	// mat.CopyBytes(unsafe.Pointer(&tmat))
+	// dw.Sys.Mem.SyncToGPU()
 
 	return &tmat
 }

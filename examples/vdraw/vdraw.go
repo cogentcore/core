@@ -93,20 +93,19 @@ func main() {
 	/*
 		drw.StartDraw()
 		drw.SetImage(imgs[0], vgpu.NoFlipY)
-		// drw.Scale(sf.Format.Bounds(), imgs[0].Bounds(), draw.Src)
+		drw.Scale(sf.Format.Bounds(), imgs[0].Bounds(), draw.Src)
 		// drw.Copy(image.Point{40, 20}, imgs[0].Bounds(), draw.Src)
 		// drw.Copy(image.Point{600, 500}, imgs[0].Bounds(), draw.Src)
-
-		drw.FillRect(color.White, image.Rectangle{Min: image.Point{100, 80}, Max: image.Point{400, 200}}, draw.Src)
-		// drw.FillRect(color.Black, image.Rectangle{Min: image.Point{500, 480}, Max: image.Point{400, 200}}, draw.Src)
-
 		drw.EndDraw()
 	*/
 
 	drw.StartFill()
-	// drw.SetImage(imgs[0], vgpu.NoFlipY)
 	drw.FillRect(color.White, image.Rectangle{Min: image.Point{100, 80}, Max: image.Point{400, 200}}, draw.Src)
 	drw.EndFill()
+
+	// drw.StartFill()
+	// drw.FillRect(color.Black, image.Rectangle{Min: image.Point{500, 480}, Max: image.Point{400, 200}}, draw.Src)
+	// drw.EndFill()
 
 	frameCount := 0
 	stTime := time.Now()

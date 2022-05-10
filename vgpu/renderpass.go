@@ -57,7 +57,9 @@ func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types)
 	loadOp := vk.AttachmentLoadOpClear
 	initLay := vk.ImageLayoutUndefined
 	if rp.NoClear {
-		loadOp = vk.AttachmentLoadOpDontCare
+		// loadOp vk.AttachmentLoadOpDontCare
+		loadOp = vk.AttachmentLoadOpLoad
+		initLay = vk.ImageLayoutColorAttachmentOptimal
 	}
 
 	colorAttach := vk.AttachmentDescription{
