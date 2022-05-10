@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	_ "image/jpeg"
 	_ "image/png"
@@ -18,7 +19,6 @@ import (
 	vk "github.com/vulkan-go/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 )
@@ -31,10 +31,17 @@ func init() {
 
 var TheGPU *vgpu.GPU
 
-type CamView struct {
-	Model mat32.Mat4
-	View  mat32.Mat4
-	Prjn  mat32.Mat4
+func OpenImage(fname string) image.Image {
+	file, err := os.Open(fname)
+	defer file.Close()
+	if err != nil {
+		fmt.Printf("image: %s\n", err)
+	}
+	gimg, _, err := image.Decode(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return gimg
 }
 
 func main() {
@@ -77,47 +84,29 @@ func main() {
 		glfw.Terminate()
 	}
 
-	file, err := os.Open("teximg.jpg")
-	if err != nil {
-		fmt.Printf("image: %s\n", err)
+	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
+	imgs := make([]image.Image, len(imgFiles))
+	for i, fnm := range imgFiles {
+		imgs[i] = OpenImage(fnm)
 	}
-	tximg, _, err := image.Decode(file)
-	file.Close()
 
-	file, err = os.Open("ground.png")
-	if err != nil {
-		fmt.Printf("image: %s\n", err)
-	}
-	grimg, _, err := image.Decode(file)
-	file.Close()
+	/*
+		drw.StartDraw()
+		drw.SetImage(imgs[0], vgpu.NoFlipY)
+		// drw.Scale(sf.Format.Bounds(), imgs[0].Bounds(), draw.Src)
+		// drw.Copy(image.Point{40, 20}, imgs[0].Bounds(), draw.Src)
+		// drw.Copy(image.Point{600, 500}, imgs[0].Bounds(), draw.Src)
 
-	file, err = os.Open("wood.png")
-	if err != nil {
-		fmt.Printf("image: %s\n", err)
-	}
-	wdimg, _, err := image.Decode(file)
-	file.Close()
+		drw.FillRect(color.White, image.Rectangle{Min: image.Point{100, 80}, Max: image.Point{400, 200}}, draw.Src)
+		// drw.FillRect(color.Black, image.Rectangle{Min: image.Point{500, 480}, Max: image.Point{400, 200}}, draw.Src)
 
-	_ = wdimg
-	_ = tximg
+		drw.EndDraw()
+	*/
 
-	// multiple image array to avoid invalidating the descriptor set binding..
-	// http://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html
-
-	drw.Start()
-	drw.SetImage(grimg, vgpu.NoFlipY)
-	drw.Scale(sf.Format.Bounds(), grimg.Bounds(), draw.Src)
-
-	// drw.SetImage(tximg, vgpu.NoFlipY)
-	drw.Copy(image.Point{40, 20}, grimg.Bounds(), draw.Src)
-
-	// drw.SetImage(wdimg, vgpu.NoFlipY)
-	drw.Copy(image.Point{600, 500}, grimg.Bounds(), draw.Src)
-
-	// drw.FillRect(color.White, image.Rectangle{Min: image.Point{100, 80}, Max: image.Point{400, 200}}, draw.Src)
-	// drw.FillRect(color.Black, image.Rectangle{Min: image.Point{500, 480}, Max: image.Point{400, 200}}, draw.Src)
-
-	drw.End()
+	drw.StartFill()
+	drw.SetImage(imgs[0], vgpu.NoFlipY)
+	drw.FillRect(color.White, image.Rectangle{Min: image.Point{100, 80}, Max: image.Point{400, 200}}, draw.Src)
+	drw.EndFill()
 
 	frameCount := 0
 	stTime := time.Now()

@@ -55,6 +55,7 @@ func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types)
 	rp.HasDepth = false
 
 	loadOp := vk.AttachmentLoadOpClear
+	initLay := vk.ImageLayoutUndefined
 	if rp.NoClear {
 		loadOp = vk.AttachmentLoadOpDontCare
 	}
@@ -66,7 +67,7 @@ func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types)
 		StoreOp:        vk.AttachmentStoreOpStore,
 		StencilLoadOp:  vk.AttachmentLoadOpDontCare,
 		StencilStoreOp: vk.AttachmentStoreOpDontCare,
-		InitialLayout:  vk.ImageLayoutUndefined,
+		InitialLayout:  initLay,
 		FinalLayout:    vk.ImageLayoutPresentSrc,
 	}
 

@@ -6,6 +6,7 @@ package vdraw
 
 import (
 	"embed"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -43,11 +44,13 @@ type Drawer struct {
 // efficiently flipped when rendering.
 // A subsequent Copy, Scale or Draw call will render this image.
 func (dw *Drawer) SetImage(img image.Image, flipY bool) {
-	tx := dw.Sys.Mem.Vals.ValMap["Tex"]
+	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
 	tx.SetGoImage(img, false) // use fast non-flipping
 	dw.FlipY = flipY
-	dw.Sys.Mem.SyncToGPU()
-	dw.Sys.SetVals(0, "Tex")
+	vars := dw.Sys.Vars()
+	vars.BindValsStart(0)
+	vars.BindStatVars(0) // gets images
+	vars.BindValsEnd()
 }
 
 // Copy copies currently-set texture to render target.
@@ -83,8 +86,8 @@ func (dw *Drawer) Scale(dr image.Rectangle, sr image.Rectangle, op draw.Op) erro
 	return dw.Draw(mat, sr, op)
 }
 
-// Start starts rendering process on render target
-func (dw *Drawer) Start() {
+// StartDraw starts image drawing rendering process on render target
+func (dw *Drawer) StartImage() {
 	dpl := dw.Sys.PipelineMap["draw"]
 	if dw.Surf != nil {
 		dw.SurfIdx = dw.Surf.AcquireNextImage()
@@ -92,16 +95,41 @@ func (dw *Drawer) Start() {
 		vgpu.CmdReset(cmd)
 		vgpu.CmdBegin(cmd)
 		dpl.BeginRenderPass(cmd, dw.Surf.Frames[dw.SurfIdx])
-		dpl.BindPipeline(cmd)
+		dpl.BindPipeline(cmd, 0)
 	}
 }
 
-// End ends rendering process on render target
-func (dw *Drawer) End() {
+// EndDraw ends image drawing rendering process on render target
+func (dw *Drawer) EndDraw() {
 	dpl := dw.Sys.PipelineMap["draw"]
 	cmd := dpl.CmdPool.Buff
 	if dw.Surf != nil {
 		dpl.EndRenderPass(cmd)
+		vgpu.CmdEnd(cmd)
+		dw.Surf.SubmitRender(cmd) // this is where it waits for the 16 msec
+		dw.Surf.PresentImage(dw.SurfIdx)
+	}
+}
+
+// StartFill starts color fill drawing rendering process on render target
+func (dw *Drawer) StartFill() {
+	fpl := dw.Sys.PipelineMap["fill"]
+	if dw.Surf != nil {
+		dw.SurfIdx = dw.Surf.AcquireNextImage()
+		cmd := fpl.CmdPool.Buff
+		vgpu.CmdReset(cmd)
+		vgpu.CmdBegin(cmd)
+		fpl.BeginRenderPass(cmd, dw.Surf.Frames[dw.SurfIdx])
+		fpl.BindPipeline(cmd, 0)
+	}
+}
+
+// EndFill ends color filling rendering process on render target
+func (dw *Drawer) EndFill() {
+	fpl := dw.Sys.PipelineMap["fill"]
+	cmd := fpl.CmdPool.Buff
+	if dw.Surf != nil {
+		fpl.EndRenderPass(cmd)
 		vgpu.CmdEnd(cmd)
 		dw.Surf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		dw.Surf.PresentImage(dw.SurfIdx)
@@ -116,13 +144,16 @@ func (dw *Drawer) End() {
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 func (dw *Drawer) Draw(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
-	tx := dw.Sys.Mem.Vals.ValMap["Tex"]
-	dw.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op, dw.FlipY)
-	if err := dw.Sys.Vars.Validate(); err != nil {
-		return err
-	}
+	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
+	tmat := dw.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op, dw.FlipY)
+
+	matv, _ := dw.Sys.Vars().VarByNameTry(vgpu.PushConstSet, "Mats")
+
 	dpl := dw.Sys.PipelineMap["draw"]
-	dpl.DrawVertex(dpl.CmdPool.Buff)
+
+	cmd := dpl.CmdPool.Buff
+	dpl.PushConstant(cmd, matv, vk.ShaderStageVertexBit, unsafe.Pointer(tmat))
+	dpl.DrawVertex(cmd, 0)
 	return nil
 }
 
@@ -149,6 +180,58 @@ func (dw *Drawer) DestSize() image.Point {
 	return image.Point{10, 10}
 }
 
+// FillRect fills color to render target, to given region.
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+func (dw *Drawer) FillRect(src color.Color, reg image.Rectangle, op draw.Op) error {
+	mat := mat32.Mat3{
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1,
+	}
+	return dw.Fill(src, mat, reg, op)
+}
+
+// Fill fills color to render target.
+// src2dst is the transform mapping source to destination
+// coordinates (translation, scaling),
+// reg is the region to fill
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+func (dw *Drawer) Fill(src color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error {
+	vars := dw.Sys.Vars()
+
+	r, g, b, a := src.RGBA()
+	clrv, fc, _ := vars.ValByIdxTry(1, "Color", 0)
+	fcv := fc.Floats32()
+	fcv.Set(0,
+		float32(r)/65535,
+		float32(g)/65535,
+		float32(b)/65535,
+		float32(a)/65535)
+	fc.SetMod()
+
+	tmat := dw.ConfigMats(src2dst, reg.Max, reg, op, false)
+
+	matv, _ := vars.VarByNameTry(vgpu.PushConstSet, "Mats")
+
+	vars.BindValsStart(0)
+	vars.BindDynVal(1, clrv, fc)
+	vars.BindVertexValIdx("Pos", 0)
+	vars.BindVertexValIdx("Index", 0)
+	vars.BindValsEnd()
+
+	fpl := dw.Sys.PipelineMap["fill"]
+	cmd := fpl.CmdPool.Buff
+	fpl.PushConstant(cmd, matv, vk.ShaderStageVertexBit, unsafe.Pointer(tmat))
+	fpl.BindDrawVertex(cmd, 0)
+
+	return nil
+}
+
+///////////////////////////////////////////////////////////////////////
+// Config
+
 // ConfigPipeline configures graphics settings on the pipeline
 func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 	// gpu.Draw.Op(op)
@@ -160,9 +243,9 @@ func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 	pl.SetGraphicsDefaults()
 	pl.SetClearOff()
 	if dw.YIsDown {
-		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 	} else {
-		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceClockwise, 1.0)
+		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceClockwise, 1.0)
 	}
 }
 
@@ -184,43 +267,52 @@ func (dw *Drawer) ConfigSys() {
 	cb, _ = content.ReadFile("shaders/fill_frag.spv")
 	fpl.AddShaderCode("fill_frag", vgpu.FragmentShader, cb)
 
-	posv := dw.Sys.Vars.Add("Pos", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
-	// txcv := sy.Vars.Add("TexCoord", vgpu.Float32Vec2, vgpu.Vertex, 0, vgpu.VertexShader)
-	idxv := dw.Sys.Vars.Add("Index", vgpu.Uint16, vgpu.Index, 0, vgpu.VertexShader)
-
-	matv := dw.Sys.Vars.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, vgpu.Uniform, 0, vgpu.VertexShader)
-	clrv := dw.Sys.Vars.Add("Color", vgpu.Float32Vec4, vgpu.Uniform, 0, vgpu.FragmentShader)
-	tximgv := dw.Sys.Vars.Add("Tex", vgpu.ImageRGBA32, vgpu.TextureRole, 0, vgpu.FragmentShader)
-	tximgv.TextureOwns = true
+	vars := dw.Sys.Vars()
+	vset := vars.AddVertexSet()
+	pcset := vars.AddPushConstSet()
+	txset := vars.AddSet()
+	cset := vars.AddSet()
 
 	nPts := 4
 	nIdxs := 6
-	rectPos := dw.Sys.Mem.Vals.Add("RectPos", posv, nPts)
-	rectIdx := dw.Sys.Mem.Vals.Add("RectIdx", idxv, nIdxs)
-	rectPos.Indexes = "RectIdx" // only need to set indexes for one vertex val
 
-	// std vals
-	dw.Sys.Mem.Vals.Add("Mats", matv, 1)
-	dw.Sys.Mem.Vals.Add("FillColor", clrv, 1)
-	tx := dw.Sys.Mem.Vals.Add("Tex", tximgv, 1)
-	tx.Texture.Dev = dw.Sys.Device.Device // key for self-owning
+	posv := vset.Add("Pos", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
+
+	pcset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.PushConst, vgpu.VertexShader)
+
+	tximgv := txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
+	tximgv.TextureOwns = true
+
+	cset.Add("Color", vgpu.Float32Vec4, 1, vgpu.Uniform, vgpu.FragmentShader)
+
+	vset.ConfigVals(1)
+	txset.ConfigVals(1)
+	cset.ConfigVals(1)
 
 	// note: add all values per above before doing Config
 	dw.Sys.Config()
-	dw.Sys.Mem.Config()
 
 	// note: first val in set is offset
+	rectPos, _ := posv.Vals.ValByIdxTry(0)
 	rectPosA := rectPos.Floats32()
 	rectPosA.Set(0,
 		0.0, 0.0,
 		0.0, 1.0,
 		1.0, 0.0,
 		1.0, 1.0)
-	rectPos.Mod = true
+	rectPos.SetMod()
 
+	rectIdx, _ := idxv.Vals.ValByIdxTry(0)
 	idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
 	rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
-	dw.Sys.SetVals(0, "RectPos", "Mats", "FillColor")
+
+	dw.Sys.Mem.SyncToGPU()
+
+	vars.BindValsStart(0) // only one set of bindings
+	vars.BindVertexValIdx("Pos", 0)
+	vars.BindVertexValIdx("Index", 0)
+	vars.BindValsEnd()
 }
 
 // ConfigMats configures the draw matrix for given draw parameters:
@@ -230,10 +322,14 @@ func (dw *Drawer) ConfigSys() {
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY inverts the Y axis of the source image.
-func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) {
+func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) *Mats {
+	var tmat Mats
+
 	sr = sr.Intersect(image.Rectangle{Max: txsz})
 	if sr.Empty() {
-		return
+		tmat.MVP.SetIdentity()
+		tmat.UVP.SetIdentity()
+		return &tmat
 	}
 
 	destSz := dw.DestSize()
@@ -254,7 +350,6 @@ func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
 		dw.YIsDown,
 	)
-	var tmat Mats
 	tmat.MVP.SetFromMat3(&matMVP) // todo render direct
 
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
@@ -300,7 +395,7 @@ func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 			px, sy, 1})
 	}
 
-	// fmt.Printf("MVP: %v   UVP: %v  \n", tmat.MVP, tmat.UVP)
+	fmt.Printf("MVP: %v   UVP: %v  \n", tmat.MVP, tmat.UVP)
 	// z := float32(1)
 	// coords := []mat32.Vec4{
 	// 	{0.0, 0.0, z, 1},
@@ -312,52 +407,7 @@ func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 	// 	fmt.Printf("v: %v   tv: %v\n", v, tv)
 	// }
 
-	mat := dw.Sys.Mem.Vals.ValMap["Mats"]
-	mat.CopyBytes(unsafe.Pointer(&tmat)) // sets mod
-	dw.Sys.Mem.SyncToGPU()
-	// dw.Sys.SetVals(0, "Mats")
-}
-
-// FillRect fills color to render target, to given region.
-// op is the drawing operation: Src = copy source directly (blit),
-// Over = alpha blend with existing
-func (dw *Drawer) FillRect(src color.Color, reg image.Rectangle, op draw.Op) error {
-	mat := mat32.Mat3{
-		1, 0, 0,
-		0, 1, 0,
-		0, 0, 1,
-	}
-	return dw.Fill(src, mat, reg, op)
-}
-
-// Fill fills color to render target.
-// src2dst is the transform mapping source to destination
-// coordinates (translation, scaling),
-// reg is the region to fill
-// op is the drawing operation: Src = copy source directly (blit),
-// Over = alpha blend with existing
-func (dw *Drawer) Fill(src color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error {
-	r, g, b, a := src.RGBA()
-	fc := dw.Sys.Mem.Vals.ValMap["FillColor"]
-	fcv := fc.Floats32()
-	fcv.Set(0,
-		float32(r)/65535,
-		float32(g)/65535,
-		float32(b)/65535,
-		float32(a)/65535)
-	fc.Mod = true
-
-	dw.ConfigMats(src2dst, reg.Max, reg, op, false)
-	dw.Sys.Mem.SyncToGPU()
-
-	dw.Sys.SetVals(0, "Mats", "FillColor")
-	if err := dw.Sys.Vars.Validate(); err != nil {
-		return err
-	}
-	fpl := dw.Sys.PipelineMap["fill"]
-	dpl := dw.Sys.PipelineMap["draw"]
-	fpl.BindDrawVertex(dpl.CmdPool.Buff)
-	return nil
+	return &tmat
 }
 
 // calcMVP returns the Model View Projection matrix that maps the quadCoords

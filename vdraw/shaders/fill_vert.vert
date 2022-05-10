@@ -1,7 +1,7 @@
 #version 450
 
 // note: must use mat4 -- mat3 alignment issues are horrible
-layout(binding = 0) uniform Mats {
+layout(push_constant) uniform Mats {
 	mat4 mvp;
 	mat4 uvp;
 };

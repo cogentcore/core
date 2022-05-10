@@ -93,7 +93,7 @@ func main() {
 	sf.SetRenderPass(&sy.RenderPass)
 	pl.SetGraphicsDefaults()
 	pl.SetClearColor(0.2, 0.2, 0.2, 1)
-	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceClockwise, 1.0)
+	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 
 	pl.AddShaderFile("texture_vert", vgpu.VertexShader, "texture_vert.spv")
 	pl.AddShaderFile("texture_frag", vgpu.FragmentShader, "texture_frag.spv")
@@ -113,8 +113,7 @@ func main() {
 	// note: always put indexes last so there isn't a gap in the location indexes!
 	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
 
-	camv := uset.Add("Camera", vgpu.Struct, 1, vgpu.Uniform, vgpu.VertexShader)
-	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
+	camv := uset.AddStruct("Camera", vgpu.Float32Mat4.Bytes()*3, vgpu.Uniform, vgpu.VertexShader)
 
 	txidxv := pcset.Add("TexIdx", vgpu.Int32, 1, vgpu.PushConst, vgpu.FragmentShader)
 	tximgv := txset.Add("TexSampler", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)

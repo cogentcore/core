@@ -1,6 +1,6 @@
 #version 450
 
-layout(binding = 1) uniform ColorIn {
+layout(set = 1, binding = 0) uniform ColorIn {
 	vec4 color;
 };
 
