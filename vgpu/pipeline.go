@@ -9,6 +9,7 @@ package vgpu
 
 import (
 	"log"
+	"unsafe"
 
 	"github.com/goki/ki/ints"
 	vk "github.com/vulkan-go/vulkan"
@@ -116,9 +117,11 @@ func (pl *Pipeline) Config() {
 		return
 	}
 
+	vars := pl.Vars()
+
 	pl.VkConfig.SType = vk.StructureTypeGraphicsPipelineCreateInfo
-	pl.VkConfig.PVertexInputState = pl.Vars().VkVertexConfig()
-	pl.VkConfig.Layout = pl.Vars().VkDescLayout
+	pl.VkConfig.PVertexInputState = vars.VkVertexConfig()
+	pl.VkConfig.Layout = vars.VkDescLayout
 	pl.VkConfig.RenderPass = pl.Sys.RenderPass.RenderPass
 	pl.VkConfig.PMultisampleState = &vk.PipelineMultisampleStateCreateInfo{
 		SType:                vk.StructureTypePipelineMultisampleStateCreateInfo,
@@ -394,6 +397,14 @@ func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer, descIdx int) {
 		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, vs.VkDescLayout,
 			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
 	}
+}
+
+// PushConstant pushes given value as a push constant for given
+// registered push constant variable.
+// BindPipeline must have been called before this.
+func (pl *Pipeline) PushConstant(cmd vk.CommandBuffer, vr *Var, shader vk.ShaderStageFlagBits, val unsafe.Pointer) {
+	vs := pl.Vars()
+	vk.CmdPushConstants(cmd, vs.VkDescLayout, vk.ShaderStageFlags(shader), uint32(vr.Offset), uint32(vr.SizeOf), val)
 }
 
 // Draw adds CmdDraw command to the given command buffer

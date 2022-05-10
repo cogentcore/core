@@ -325,6 +325,9 @@ func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
+		if st == nil || st.Set == PushConstSet {
+			continue
+		}
 		for _, vr := range st.Vars {
 			if vr.Role != TextureRole {
 				continue
@@ -349,6 +352,9 @@ func (mm *Memory) SyncValsTextures(buff *MemBuff) {
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
+		if st == nil || st.Set == PushConstSet {
+			continue
+		}
 		for _, vr := range st.Vars {
 			if vr.Role != TextureRole {
 				continue

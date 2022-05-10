@@ -30,11 +30,12 @@ type Var struct {
 	Shaders     vk.ShaderStageFlagBits `desc:"bit flags for set of shaders that this variable is used in"`
 	Set         int                    `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
 	BindLoc     int                    `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
-	SizeOf      int                    `desc:"size in bytes of one element (not array size).  Note that arrays require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint."`
+	SizeOf      int                    `desc:"size in bytes of one element (not array size).  Note that arrays require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint.  For PushConst role, SizeOf must be set exactly -- no vals are created."`
 	TextureOwns bool                   `desc:"texture manages its own memory allocation -- set this for texture objects that change size dynamically -- otherwise image host staging memory is allocated in a common buffer"`
 	DynOffIdx   int                    `desc:"index into the dynamic offset list, where dynamic offsets of vals need to be set -- for Uniform and Storage roles -- set during Set:DescLayout"`
 	Vals        Vals                   `desc:"the array of values allocated for this variable.  The size of this array is determined by the Set membership of this Var, and the current index is updated at the set level.  For Texture Roles, there is a separate descriptor for each value (image) -- otherwise dynamic offset binding is used."`
 	BindValIdx  []int                  `desc:"for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIdx out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism."`
+	Offset      int                    `desc:"offset -- only for push constants"`
 }
 
 // Init initializes the main values
@@ -52,7 +53,11 @@ func (vr *Var) Init(name string, typ Types, arrayN int, role VarRoles, set int, 
 }
 
 func (vr *Var) String() string {
-	s := fmt.Sprintf("%d:\t%s\t%s\t(size: %d)", vr.BindLoc, vr.Name, vr.Type.String(), vr.SizeOf)
+	typ := vr.Type.String()
+	if vr.ArrayN > 1 {
+		typ = fmt.Sprintf("%s[%d]", typ, vr.ArrayN)
+	}
+	s := fmt.Sprintf("%d:\t%s\t%s\t(size: %d)\tVals: %d", vr.BindLoc, vr.Name, typ, vr.SizeOf, len(vr.Vals.Vals))
 	return s
 }
 

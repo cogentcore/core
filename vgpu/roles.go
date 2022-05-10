@@ -18,8 +18,9 @@ type VarRoles int32
 
 const (
 	UndefVarRole VarRoles = iota
-	Vertex                // vertex shader input data: mesh geometry points, normals, etc.  These are automatically located in a separate Set, VertexSet (-1), and managed separately.
-	Index                 // for indexed access to Vertex data, also located in VertexSet (-1) -- only one such Var per VarSet should be present -- will automatically be used if a dynamically bound val is set
+	Vertex                // vertex shader input data: mesh geometry points, normals, etc.  These are automatically located in a separate Set, VertexSet (-2), and managed separately.
+	Index                 // for indexed access to Vertex data, also located in VertexSet (-2) -- only one such Var per VarSet should be present -- will automatically be used if a dynamically bound val is set
+	PushConst             // for push constants, which have a minimum of 128 bytes and are stored directly in the command buffer -- they do not require any host-device synchronization or buffering, and are fully dynamic.  They are ideal for transformation matricies or indexes for accessing data.  They are stored in a special PushConstSet (-1) and managed separately.
 	Uniform               // read-only general purpose data, uses UniformBufferDynamic with offset specified at binding time, not during initial configuration -- compared to Storage, Uniform items can be put in local cache for each shader and thus can be much faster to access -- use for a smaller number of parameters such as transformation matricies
 	Storage               // read-write general purpose data, in StorageBufferDynamic (offset set at binding) -- this is a larger but slower pool of memory, with more flexible alignment constraints, used primarily for compute data
 	UniformTexel          // read-only image-formatted data, which cannot be accessed via ImageView or Sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful.  No Dynamic mode is available, so this can only be used for a fixed Val.

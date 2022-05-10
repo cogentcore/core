@@ -100,8 +100,8 @@ func main() {
 
 	vars := sy.Vars()
 	vset := vars.AddVertexSet()
+	pcset := vars.AddPushConstSet()
 	uset := vars.AddSet()
-	txiset := vars.AddSet()
 	txset := vars.AddSet()
 
 	nPts := 4
@@ -116,12 +116,11 @@ func main() {
 	camv := uset.Add("Camera", vgpu.Struct, 1, vgpu.Uniform, vgpu.VertexShader)
 	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
 
-	txidxv := txiset.Add("TexIdx", vgpu.Int32, 1, vgpu.Uniform, vgpu.FragmentShader)
+	txidxv := pcset.Add("TexIdx", vgpu.Int32, 1, vgpu.PushConst, vgpu.FragmentShader)
 	tximgv := txset.Add("TexSampler", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 
 	vset.ConfigVals(1) // val per var
 	uset.ConfigVals(1)
-	txiset.ConfigVals(3)
 	txset.ConfigVals(3)
 
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
@@ -172,9 +171,6 @@ func main() {
 	for i, gimg := range imgs {
 		img, _ := tximgv.Vals.ValByIdxTry(i)
 		img.SetGoImage(gimg, vgpu.FlipY)
-		idx, _ := txidxv.Vals.ValByIdxTry(i)
-		i32 := int32(i)
-		idx.CopyBytes(unsafe.Pointer(&i32))
 	}
 
 	// This is the standard camera view projection computation
@@ -208,8 +204,7 @@ func main() {
 	vars.BindVertexValIdx("TexCoord", 0)
 	vars.BindVertexValIdx("Index", 0)
 	vars.BindDynVal(0, camv, cam)
-	vars.BindDynValIdx(1, "TexIdx", 1)
-	vars.BindStatVars(2) // gets images
+	vars.BindStatVars(1) // gets images
 	vars.BindValsEnd()
 
 	frameCount := 0
@@ -222,16 +217,23 @@ func main() {
 		cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 
-		vars.BindDynValIdx(1, "TexIdx", frameCount%len(imgs))
+		imgIdx := int32(frameCount % len(imgs))
 
 		idx := sf.AcquireNextImage()
-		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx], 0)
-		// fmt.Printf("cmd %v\n", time.Now().Sub(rt))
-		sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
-		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
+
+		cmd := pl.CmdPool.Buff
+
+		// pl.FullStdRender(cmd, sf.Frames[idx], 0)
+		vgpu.CmdReset(cmd)
+		vgpu.CmdBegin(cmd)
+		pl.BeginRenderPass(cmd, sf.Frames[idx])
+		pl.PushConstant(cmd, txidxv, vk.ShaderStageFragmentBit, unsafe.Pointer(&imgIdx))
+		pl.BindDrawVertex(cmd, 0)
+		pl.EndRenderPass(cmd)
+		vgpu.CmdEnd(cmd)
+
+		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		sf.PresentImage(idx)
-		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
@@ -245,7 +247,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 1
+	fpsDelay := time.Second / 10
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

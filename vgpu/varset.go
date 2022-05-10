@@ -11,7 +11,10 @@ import (
 	vk "github.com/vulkan-go/vulkan"
 )
 
-const VertexSet = -1
+const (
+	VertexSet    = -2
+	PushConstSet = -1
+)
 
 // VarSet contains a set of Var variables that are all updated at the same time
 // and have the same number of distinct Vals values per Var per render pass.
@@ -348,4 +351,31 @@ func (st *VarSet) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 	cfg.VertexAttributeDescriptionCount = uint32(len(attr))
 	cfg.PVertexAttributeDescriptions = attr
 	return cfg
+}
+
+// VkPushConstConfig returns vulkan push constant ranges
+func (vs *VarSet) VkPushConstConfig() []vk.PushConstantRange {
+	alignBytes := 8 // unclear what alignment is
+	var ranges []vk.PushConstantRange
+	offset := 0
+	tsz := 0
+	for _, vr := range vs.Vars {
+		vr.Offset = offset
+		sz := vr.SizeOf
+		rg := vk.PushConstantRange{
+			Offset:     uint32(offset),
+			Size:       uint32(sz),
+			StageFlags: vk.ShaderStageFlags(vr.Shaders),
+		}
+		esz := MemSizeAlign(sz, alignBytes)
+		offset += esz
+		tsz += esz
+		ranges = append(ranges, rg)
+	}
+	if tsz > 128 {
+		if TheGPU.Debug {
+			fmt.Printf("vgpu.VarSet:VkPushConstConfig total push constant memory exceeds nominal minimum size of 128 bytes: %d\n", tsz)
+		}
+	}
+	return ranges
 }

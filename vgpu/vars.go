@@ -14,15 +14,17 @@ import (
 )
 
 // Vars are all the variables that are used by a pipeline,
-// organized into Sets (optionally including the special VertexSet).
+// organized into Sets (optionally including the special VertexSet
+// or PushConstSet).
 // Vars are allocated to bindings / locations sequentially in the
 // order added!
 type Vars struct {
-	SetMap    map[int]*VarSet     `desc:"map of sets, by set number -- VertexSet is -1, rest are added incrementally"`
-	RoleMap   map[VarRoles][]*Var `desc:"map of vars by different roles across all sets -- updated in Config(), after all vars added.  This is needed for VkDescPool allocation."`
-	HasVertex bool                `desc:"set to true if a VertexSet has been added"`
-	NDescs    int                 `desc:"number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased."`
-	Mem       *Memory             `view:"-" desc:"our parent memory manager"`
+	SetMap       map[int]*VarSet     `desc:"map of sets, by set number -- VertexSet is -2, PushConstSet is -1, rest are added incrementally"`
+	RoleMap      map[VarRoles][]*Var `desc:"map of vars by different roles across all sets -- updated in Config(), after all vars added.  This is needed for VkDescPool allocation."`
+	HasVertex    bool                `inactive:"+" desc:"true if a VertexSet has been added"`
+	HasPushConst bool                `inactive:"+" desc:"true if PushConstSet has been added"`
+	NDescs       int                 `desc:"number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased."`
+	Mem          *Memory             `view:"-" desc:"our parent memory manager"`
 
 	VkDescLayout vk.PipelineLayout       `view:"-" desc:"vulkan descriptor layout based on vars"`
 	VkDescPool   vk.DescriptorPool       `view:"-" desc:"vulkan descriptor pool, allocated for NDescs and the different descriptor pools"`
@@ -48,6 +50,18 @@ func (vs *Vars) AddVertexSet() *VarSet {
 	st := &VarSet{Set: VertexSet}
 	vs.SetMap[VertexSet] = st
 	vs.HasVertex = true
+	return st
+}
+
+// AddPushConstSet adds a new push constant Set -- this is a special Set holding
+// values sent directly in the command buffer.
+func (vs *Vars) AddPushConstSet() *VarSet {
+	if vs.SetMap == nil {
+		vs.SetMap = make(map[int]*VarSet)
+	}
+	st := &VarSet{Set: PushConstSet}
+	vs.SetMap[PushConstSet] = st
+	vs.HasPushConst = true
 	return st
 }
 
@@ -93,6 +107,9 @@ func (vs *Vars) Config(dev vk.Device) error {
 	vs.RoleMap = make(map[VarRoles][]*Var)
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
+		if st == nil {
+			continue
+		}
 		err := st.Config(dev)
 		if err != nil {
 			cerr = err
@@ -111,9 +128,12 @@ func (vs *Vars) StringDoc() string {
 	var sb strings.Builder
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
-		sb.WriteString(fmt.Sprintf("Set: %d\n", si))
-
 		st := vs.SetMap[si]
+		if st == nil {
+			continue
+		}
+		sb.WriteString(fmt.Sprintf("Set: %d\n", st.Set))
+
 		for ri := Vertex; ri < VarRolesN; ri++ {
 			rl, has := st.RoleMap[ri]
 			if !has || len(rl) == 0 {
@@ -130,22 +150,29 @@ func (vs *Vars) StringDoc() string {
 
 // NSets returns the number of regular non-VertexSet sets
 func (vs *Vars) NSets() int {
+	ex := 0
 	if vs.HasVertex {
-		return len(vs.SetMap) - 1
+		ex++
 	}
-	return len(vs.SetMap)
+	if vs.HasPushConst {
+		ex++
+	}
+	return len(vs.SetMap) - ex
 }
 
 // StartSet returns the starting set to use for iterating sets
 func (vs *Vars) StartSet() int {
-	if vs.HasVertex {
+	switch {
+	case vs.HasVertex:
 		return VertexSet
+	case vs.HasPushConst:
+		return PushConstSet
+	default:
+		return 0
 	}
-	return 0
 }
 
-// VkVertexConfig fills in the relevant info into given vulkan config struct.
-// for VertexSet only!
+// VkVertexConfig returns vulkan vertex config struct, for VertexSet only!
 // Note: there is no support for interleaved arrays so each binding and location
 // is assigned the same sequential number, recorded in var BindLoc
 func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
@@ -155,6 +182,14 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 	cfg := &vk.PipelineVertexInputStateCreateInfo{}
 	cfg.SType = vk.StructureTypePipelineVertexInputStateCreateInfo
 	return cfg
+}
+
+// VkPushConstConfig returns vulkan push constant ranges, only if PushConstSet used.
+func (vs *Vars) VkPushConstConfig() []vk.PushConstantRange {
+	if vs.HasPushConst {
+		return vs.SetMap[PushConstSet].VkPushConstConfig()
+	}
+	return nil
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -218,6 +253,9 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 	dlays := make([]vk.DescriptorSetLayout, nset)
 	for si := 0; si < nset; si++ {
 		st := vs.SetMap[si]
+		if st == nil {
+			continue
+		}
 		st.DescLayout(dev, vs)
 		dlays[si] = st.VkLayout
 	}
@@ -234,16 +272,23 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 		dsets[i] = make([]vk.DescriptorSet, nset)
 		for si := 0; si < nset; si++ {
 			st := vs.SetMap[si]
+			if st == nil {
+				continue
+			}
 			dsets[i][si] = st.VkDescSets[i]
 		}
 	}
 	vs.VkDescSets = dsets // for pipeline binding
 
+	pushc := vs.VkPushConstConfig()
+
 	var pipelineLayout vk.PipelineLayout
 	ret = vk.CreatePipelineLayout(dev, &vk.PipelineLayoutCreateInfo{
-		SType:          vk.StructureTypePipelineLayoutCreateInfo,
-		SetLayoutCount: uint32(len(dlays)),
-		PSetLayouts:    dlays,
+		SType:                  vk.StructureTypePipelineLayoutCreateInfo,
+		SetLayoutCount:         uint32(len(dlays)),
+		PSetLayouts:            dlays,
+		PPushConstantRanges:    pushc,
+		PushConstantRangeCount: uint32(len(pushc)),
 	}, nil, &pipelineLayout)
 	IfPanic(NewError(ret))
 	vs.VkDescLayout = pipelineLayout
@@ -390,6 +435,9 @@ func (vs *Vars) MemSize(buff *MemBuff) int {
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
+		if st == nil {
+			continue
+		}
 		for _, vr := range st.Vars {
 			if vr.Role.BuffType() != buff.Type {
 				continue
@@ -405,6 +453,9 @@ func (vs *Vars) AllocHost(buff *MemBuff, offset int) int {
 	tsz := 0
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
+		if st == nil || st.Set == PushConstSet {
+			continue
+		}
 		for _, vr := range st.Vars {
 			if vr.Role.BuffType() != buff.Type {
 				continue
@@ -422,6 +473,9 @@ func (vs *Vars) Free(buff *MemBuff) {
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
+		if st == nil || st.Set == PushConstSet {
+			continue
+		}
 		for _, vr := range st.Vars {
 			if vr.Role.BuffType() != buff.Type {
 				continue
@@ -437,6 +491,9 @@ func (vs *Vars) ModRegs(bt BuffTypes) []MemReg {
 	var mods []MemReg
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
+		if st == nil || st.Set == PushConstSet {
+			continue
+		}
 		for _, vr := range st.Vars {
 			if vr.Role.BuffType() != bt {
 				continue
@@ -453,6 +510,9 @@ func (vs *Vars) AllocTextures(mm *Memory) {
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
+		if st == nil || st.Set == PushConstSet {
+			continue
+		}
 		for _, vr := range st.Vars {
 			if vr.Role != TextureRole {
 				continue
