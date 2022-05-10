@@ -47,6 +47,8 @@ func (dw *Drawer) SetImage(img image.Image, flipY bool) {
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
 	tx.SetGoImage(img, false) // use fast non-flipping
 	dw.FlipY = flipY
+	dw.Sys.Mem.SyncToGPU()
+
 	vars := dw.Sys.Vars()
 	vars.BindValsStart(0)
 	vars.BindStatVars(0) // gets images
