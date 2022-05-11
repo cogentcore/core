@@ -6,6 +6,7 @@ package vgpu
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/goki/ki/indent"
@@ -80,21 +81,30 @@ func (vs *Vars) AddSet() *VarSet {
 // VarByNameTry returns Var by name in given set number,
 // returning error if not found
 func (vs *Vars) VarByNameTry(set int, name string) (*Var, error) {
-	st := vs.SetMap[set]
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return nil, err
+	}
 	return st.VarByNameTry(name)
 }
 
 // ValByNameTry returns value by first looking up variable name, then value name,
 // within given set number, returning error if not found
 func (vs *Vars) ValByNameTry(set int, varName, valName string) (*Var, *Val, error) {
-	st := vs.SetMap[set]
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return nil, nil, err
+	}
 	return st.ValByNameTry(varName, valName)
 }
 
 // ValByIdxTry returns value by first looking up variable name, then value index,
 // returning error if not found
 func (vs *Vars) ValByIdxTry(set int, varName string, valIdx int) (*Var, *Val, error) {
-	st := vs.SetMap[set]
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return nil, nil, err
+	}
 	return st.ValByIdxTry(varName, valIdx)
 }
 
@@ -170,6 +180,19 @@ func (vs *Vars) StartSet() int {
 	default:
 		return 0
 	}
+}
+
+// SetTry returns set by index, returning nil and error if not found
+func (vs *Vars) SetTry(set int) (*VarSet, error) {
+	st, has := vs.SetMap[set]
+	if !has {
+		err := fmt.Errorf("vgpu.Vars:SetTry set number %d not found", set)
+		if TheGPU.Debug {
+			log.Println(err)
+		}
+		return nil, err
+	}
+	return st, nil
 }
 
 // VkVertexConfig returns vulkan vertex config struct, for VertexSet only!
@@ -301,21 +324,32 @@ func (vs *Vars) AddDynOff() {
 	}
 }
 
-// BindValsStart starts a new step of binding specific vals for vars,
+/////////////////////////////////////////////////////////////////////////
+// Bind Vars -- call prior to render pass only!!
+
+// BindVarsStart starts a new step of binding vars to descriptor sets,
 // using given descIdx description set index (among the NDescs allocated).
-// BoundVals determine what value the shader programs see,
+// Bound vars determine what the shader programs see,
 // in subsequent calls to Pipeline commands.
-// Subsequent calls of BindVal* methods will add to a list, which
+//
+// This must be called *prior* to a render pass, never within it.
+// Only BindDyn* and BindVertex* calls can be called within render.
+//
+// Do NOT use this around BindDynVal or BindVertexVal calls
+// only for BindVar* methods.
+//
+// Subsequent calls of BindVar* methods will add to a list, which
 // will be executed when BindValsEnd is called.
+//
 // This creates a set of entries in a list of WriteDescriptorSet's
-func (vs *Vars) BindValsStart(descIdx int) {
+func (vs *Vars) BindVarsStart(descIdx int) {
 	vs.VkWriteVals = []vk.WriteDescriptorSet{}
 	vs.BindDescIdx = descIdx
 }
 
-// BindValsEnd finishes a new step of binding started by BindValsStart.
-// Actually executes the binding updates, based on prior BindVal calls.
-func (vs *Vars) BindValsEnd() {
+// BindVarsEnd finishes a new step of binding started by BindVarsStart.
+// Actually executes the binding updates, based on prior BindVar* calls.
+func (vs *Vars) BindVarsEnd() {
 	dev := vs.Mem.Device.Device
 	if len(vs.VkWriteVals) > 0 {
 		vk.UpdateDescriptorSets(dev, uint32(len(vs.VkWriteVals)), vs.VkWriteVals, 0, nil)
@@ -323,14 +357,106 @@ func (vs *Vars) BindValsEnd() {
 	vs.VkWriteVals = nil
 }
 
+// BindDynVars binds all dynamic vars in given set, to be able to
+// use dynamic vars, in subsequent BindDynVal* calls during the
+// render pass, which update the offsets.
+// For Uniform & Storage variables, which use dynamic binding.
+//
+// This is automatically called during Config on the System,
+// and usually does not need to be called again.
+//
+// All vals must be uploaded to Device memory prior to this,
+// and it is not possible to update actual values during a render pass.
+// The memory buffer is essentially what is bound here.
+//
+// Must have called BindVarsStart prior to this.
+func (vs *Vars) BindDynVars(set int) error {
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return err
+	}
+	st.BindDynVars(vs)
+	return nil
+}
+
+// BindDynVarsAll binds all dynamic vars across all sets.
+// Called during system config.
+func (vs *Vars) BindDynVarsAll() {
+	nset := vs.NSets()
+	for i := 0; i < vs.NDescs; i++ {
+		vs.BindVarsStart(i)
+		for si := 0; si < nset; si++ {
+			vs.BindDynVars(si)
+		}
+		vs.BindVarsEnd()
+	}
+}
+
+// BindDynVarName binds dynamic variable for given var
+// looked up by name, for Uniform, Storage variables.
+//
+// All vals must be uploaded to Device memory prior to this,
+// and it is not possible to update actual values during a render pass.
+// The memory buffer is essentially what is bound here.
+//
+// Must have called BindVarsStart prior to this.
+func (vs *Vars) BindDynVarName(set int, varNm string) error {
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return err
+	}
+	return st.BindDynVarName(vs, varNm)
+}
+
+// BindStatVars binds all static vars to their current values,
+// for given set, for non-Uniform, Storage, variables (e.g., Textures).
+// Each Val for a given Var is given a descriptor binding
+// and the shader sees an array of values of corresponding length.
+//
+// All vals must be uploaded to Device memory prior to this,
+// and it is not possible to update anything during a render pass.
+//
+// Must have called BindVarsStart prior to this.
+func (vs *Vars) BindStatVars(set int) error {
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return err
+	}
+	st.BindStatVars(vs)
+	return nil
+}
+
+// BindStatVarName does static variable binding for given var
+// looked up by name, for non-Uniform, Storage, variables (e.g., Textures).
+// Each Val for a given Var is given a descriptor binding
+// and the shader sees an array of values of corresponding length.
+//
+// All vals must be uploaded to Device memory prior to this,
+// and it is not possible to update anything during a render pass.
+//
+// Must have called BindVarsStart prior to this.
+func (vs *Vars) BindStatVarName(set int, varNm string) error {
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return err
+	}
+	return st.BindStatVarName(vs, varNm)
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Dynamic Binding
+
 // BindVertexValName dynamically binds given VertexSet value
 // by name for given variable name.
 // using given descIdx description set index (among the NDescs allocated).
+//
 // Value must have already been updated into device memory prior to this,
 // ideally through a batch update prior to starting rendering, so that
 // all the values are ready to be used during the render pass.
 // This dynamically updates the offset to point to the specified val.
-// Must have called BindValsStart prior to this.
+//
+// Do NOT call BindValsStart / End around this.
+//
 // returns error if not found.
 func (vs *Vars) BindVertexValName(varNm, valNm string) error {
 	st := vs.SetMap[VertexSet]
@@ -345,11 +471,14 @@ func (vs *Vars) BindVertexValName(varNm, valNm string) error {
 // BindVertexValIdx dynamically binds given VertexSet value
 // by index for given variable name.
 // using given descIdx description set index (among the NDescs allocated).
+//
 // Value must have already been updated into device memory prior to this,
 // ideally through a batch update prior to starting rendering, so that
 // all the values are ready to be used during the render pass.
 // This only dynamically updates the offset to point to the specified val.
-// Must have called BindValsStart prior to this.
+//
+// Do NOT call BindValsStart / End around this.
+//
 // returns error if not found.
 func (vs *Vars) BindVertexValIdx(varNm string, valIdx int) error {
 	st := vs.SetMap[VertexSet]
@@ -363,68 +492,53 @@ func (vs *Vars) BindVertexValIdx(varNm string, valIdx int) error {
 
 // BindDynValName dynamically binds given uniform or storage value
 // by name for given variable name, in given set.
-// Value must have already been updated into device memory prior to this,
-// ideally through a batch update prior to starting rendering, so that
-// all the values are ready to be used during the render pass.
+// Must have called BindDynVars for this variable first, prior to render.
+//
 // This only dynamically updates the offset to point to the specified val.
-// Must have called BindValsStart prior to this.
+//
+// Do NOT call BindValsStart / End around this.
+//
 // returns error if not found.
 func (vs *Vars) BindDynValName(set int, varNm, valNm string) error {
-	st := vs.SetMap[set]
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return err
+	}
 	return st.BindDynValName(vs, varNm, valNm)
 }
 
 // BindDynValIdx dynamically binds given uniform or storage value
 // by index for given variable name, in given set.
-// Value must have already been updated into device memory prior to this,
-// ideally through a batch update prior to starting rendering, so that
-// all the values are ready to be used during the render pass.
+// Must have called BindDynVars for this variable first, prior to render.
+//
 // This only dynamically updates the offset to point to the specified val.
-// Must have called BindValsStart prior to this.
+//
+// Do NOT call BindValsStart / End around this.
+//
 // returns error if not found.
 func (vs *Vars) BindDynValIdx(set int, varNm string, valIdx int) error {
-	st := vs.SetMap[set]
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return err
+	}
 	return st.BindDynValIdx(vs, varNm, valIdx)
 }
 
 // BindDynVal dynamically binds given uniform or storage value
 // for given variable in given set.
-// Value must have already been updated into device memory prior to this,
-// ideally through a batch update prior to starting rendering, so that
-// all the values are ready to be used during the render pass.
+// Must have called BindDynVars for this variable first, prior to render.
+//
 // This only dynamically updates the offset to point to the specified val.
-// Must have called BindValsStart prior to this.
+//
+// Do NOT call BindValsStart / End around this.
+//
 // returns error if not found.
 func (vs *Vars) BindDynVal(set int, vr *Var, vl *Val) error {
-	st := vs.SetMap[set]
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return err
+	}
 	return st.BindDynVal(vs, vr, vl)
-}
-
-// todo: need an option to allow a single val to be used in a static way, selecting from among multiple,
-// instead of always assuming an array used.
-
-// BindStatVars binds all static vars to their current values,
-// for given set, for non-Uniform, Storage, variables (e.g., Textures).
-// Each Val for a given Var is given a descriptor binding
-// and the shader sees an array of values of corresponding length.
-// All vals must be uploaded to Device memory prior to this,
-// and it is not possible to update anything during a render pass.
-// Must have called BindValsStart prior to this.
-func (vs *Vars) BindStatVars(set int) {
-	st := vs.SetMap[set]
-	st.BindStatVars(vs)
-}
-
-// BindStatVarName does static variable binding for given var
-// looked up by name, for non-Uniform, Storage, variables (e.g., Textures).
-// Each Val for a given Var is given a descriptor binding
-// and the shader sees an array of values of corresponding length.
-// All vals must be uploaded to Device memory prior to this,
-// and it is not possible to update anything during a render pass.
-// Must have called BindValsStart prior to this.
-func (vs *Vars) BindStatVarName(set int, varNm string) error {
-	st := vs.SetMap[set]
-	return st.BindStatVarName(vs, varNm)
 }
 
 ///////////////////////////////////////////////////////////
@@ -442,7 +556,7 @@ func (vs *Vars) MemSize(buff *MemBuff) int {
 			if vr.Role.BuffType() != buff.Type {
 				continue
 			}
-			tsz += vr.MemSize(buff.AlignBytes)
+			tsz += vr.ValsMemSize(buff.AlignBytes)
 		}
 	}
 	return tsz

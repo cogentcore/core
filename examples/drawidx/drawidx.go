@@ -145,12 +145,7 @@ func main() {
 
 	sy.Mem.SyncToGPU()
 
-	vars.BindValsStart(0) // only one set of bindings
-	vars.BindVertexValIdx("Pos", 0)
-	vars.BindVertexValIdx("Color", 0)
-	vars.BindVertexValIdx("Index", 0)
 	vars.BindDynVal(0, camv, cam)
-	vars.BindValsEnd()
 
 	frameCount := 0
 	stTime := time.Now()

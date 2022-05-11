@@ -73,10 +73,27 @@ func (vr *Var) BindVal(descIdx int) (*Val, error) {
 	return vr.Vals.ValByIdxTry(idx)
 }
 
-// MemSize returns the memory allocation size
+// ValsMemSize returns the memory allocation size
 // for all values for this Var, in bytes
-func (vr *Var) MemSize(alignBytes int) int {
+func (vr *Var) ValsMemSize(alignBytes int) int {
 	return vr.Vals.MemSize(vr, alignBytes)
+}
+
+// MemSize returns the memory allocation size for this value, in bytes
+func (vr *Var) MemSize() int {
+	n := vr.ArrayN
+	if n == 0 {
+		n = 1
+	}
+	switch {
+	case vr.Role >= TextureRole:
+		return 0
+	case n == 1 || vr.Role < Uniform:
+		return vr.SizeOf * n
+	default:
+		sz := MemSizeAlign(vr.SizeOf, 16) // todo: test this!
+		return sz * n
+	}
 }
 
 // AllocHost allocates values at given offset in given Memory buffer.

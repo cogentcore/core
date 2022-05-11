@@ -62,10 +62,8 @@ func main() {
 
 	sy.Mem.SyncToGPU()
 
-	vars.BindValsStart(0) // only one set of bindings
 	vars.BindDynValIdx(0, "In", 0)
 	vars.BindDynValIdx(0, "Out", 0)
-	vars.BindValsEnd()
 
 	pl.RunComputeWait(pl.CmdPool.Buff, 0, n, 1, 1)
 	// note: could use semaphore here instead of waiting on the compute

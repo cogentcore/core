@@ -64,6 +64,7 @@ func (mm *Memory) Config(dev vk.Device) {
 	mm.Vars.Config(dev)
 	mm.AllocHost()
 	mm.AllocDev()
+	mm.Vars.BindDynVarsAll()
 }
 
 // AllocHost allocates memory for all buffers

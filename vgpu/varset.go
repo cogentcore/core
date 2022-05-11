@@ -177,58 +177,58 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 	}
 }
 
-// BindDynValName dynamically binds given uniform or storage value
-// by name for given variable name.
-// Value must have already been updated into device memory prior to this,
-// ideally through a batch update prior to starting rendering, so that
-// all the values are ready to be used during the render pass.
-// This only dynamically updates the offset to point to the specified val.
-// Must have called BindValsStart prior to this.
-// returns error if not found.
-func (st *VarSet) BindDynValName(vs *Vars, varNm, valNm string) error {
-	vr, vl, err := st.ValByNameTry(varNm, valNm)
+// BindDynVars binds all dynamic vars in set, to be able to
+// use dynamic vars, in subsequent BindDynVal* calls during the
+// render pass, which update the offsets.
+// For Uniform & Storage variables, which use dynamic binding.
+//
+// All vals must be uploaded to Device memory prior to this,
+// and it is not possible to update actual values during a render pass.
+// The memory buffer is essentially what is bound here.
+//
+// Must have called BindVarsStart prior to this.
+func (st *VarSet) BindDynVars(vs *Vars) {
+	for _, vr := range st.Vars {
+		if vr.Role < Uniform || vr.Role > Storage {
+			continue
+		}
+		st.BindDynVar(vs, vr)
+	}
+}
+
+// BindDynVarName binds dynamic variable for given var
+// looked up by name, for Uniform, Storage variables.
+//
+// All vals must be uploaded to Device memory prior to this,
+// and it is not possible to update actual values during a render pass.
+// The memory buffer is essentially what is bound here.
+//
+// Must have called BindVarsStart prior to this.
+func (st *VarSet) BindDynVarName(vs *Vars, varNm string) error {
+	vr, err := st.VarByNameTry(varNm)
 	if err != nil {
 		return err
 	}
-	st.BindDynVal(vs, vr, vl)
+	st.BindDynVar(vs, vr)
 	return nil
 }
 
-// BindDynValIdx dynamically binds given uniform or storage value
-// by index for given variable name.
-// Value must have already been updated into device memory prior to this,
-// ideally through a batch update prior to starting rendering, so that
-// all the values are ready to be used during the render pass.
-// This only dynamically updates the offset to point to the specified val.
-// Must have called BindValsStart prior to this.
-// returns error if not found.
-func (st *VarSet) BindDynValIdx(vs *Vars, varNm string, valIdx int) error {
-	vr, vl, err := st.ValByIdxTry(varNm, valIdx)
-	if err != nil {
-		return err
-	}
-	return st.BindDynVal(vs, vr, vl)
-}
-
-// BindDynVal dynamically binds given uniform or storage value
-// for given variable name.
-// Value must have already been updated into device memory prior to this,
-// ideally through a batch update prior to starting rendering, so that
-// all the values are ready to be used during the render pass.
-// This only dynamically updates the offset to point to the specified val.
-// Must have called BindValsStart prior to this.
-// returns error if not found.
-func (st *VarSet) BindDynVal(vs *Vars, vr *Var, vl *Val) error {
+// BindDynVar binds dynamic variable for given var
+// for Uniform, Storage variables.
+//
+// All vals must be uploaded to Device memory prior to this,
+// and it is not possible to update actual values during a render pass.
+// The memory buffer is essentially what is bound here.
+//
+// Must have called BindVarsStart prior to this.
+func (st *VarSet) BindDynVar(vs *Vars, vr *Var) error {
 	if vr.Role < Uniform || vr.Role > Storage {
-		err := fmt.Errorf("vgpu.Set:BindDynVal dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
+		err := fmt.Errorf("vgpu.Set:BindDynVar dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
 		if TheGPU.Debug {
 			log.Println(err)
 		}
 		return err
 	}
-	vr.BindValIdx[vs.BindDescIdx] = vl.Idx // note: not used but potentially informative
-	// todo: we probably do not need to create this for dyn binding, but we DO need to do
-	// it at least at the start -- should create a separate pathway for that.
 	wd := vk.WriteDescriptorSet{
 		SType:           vk.StructureTypeWriteDescriptorSet,
 		DstSet:          st.VkDescSets[vs.BindDescIdx],
@@ -239,10 +239,9 @@ func (st *VarSet) BindDynVal(vs *Vars, vr *Var, vl *Val) error {
 	buff := vs.Mem.Buffs[vr.BuffType()]
 	wd.PBufferInfo = []vk.DescriptorBufferInfo{{
 		Offset: 0, // dynamic
-		Range:  vk.DeviceSize(vl.AllocSize),
+		Range:  vk.DeviceSize(vr.MemSize()),
 		Buffer: buff.Dev,
 	}}
-	vs.DynOffs[vs.BindDescIdx][vr.DynOffIdx] = uint32(vl.Offset)
 	vs.VkWriteVals = append(vs.VkWriteVals, wd)
 	return nil
 }
@@ -290,11 +289,10 @@ func (st *VarSet) BindStatVarName(vs *Vars, varNm string) error {
 func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 	nvals := len(vr.Vals.Vals)
 	wd := vk.WriteDescriptorSet{
-		SType:           vk.StructureTypeWriteDescriptorSet,
-		DstSet:          st.VkDescSets[vs.BindDescIdx],
-		DstBinding:      uint32(vr.BindLoc),
-		DescriptorCount: uint32(nvals),
-		DescriptorType:  vr.Role.VkDescriptor(),
+		SType:          vk.StructureTypeWriteDescriptorSet,
+		DstSet:         st.VkDescSets[vs.BindDescIdx],
+		DstBinding:     uint32(vr.BindLoc),
+		DescriptorType: vr.Role.VkDescriptor(),
 	}
 	buff := vs.Mem.Buffs[vr.BuffType()]
 	if vr.Role < TextureRole {
@@ -307,16 +305,21 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 			}
 		}
 		wd.PBufferInfo = bis
+		wd.DescriptorCount = uint32(nvals)
 	} else {
-		imgs := make([]vk.DescriptorImageInfo, nvals)
-		for i, vl := range vr.Vals.Vals {
-			imgs[i] = vk.DescriptorImageInfo{
-				ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
-				ImageView:   vl.Texture.View,
-				Sampler:     vl.Texture.VkSampler,
+		imgs := []vk.DescriptorImageInfo{}
+		for _, vl := range vr.Vals.Vals {
+			if vl.Texture.IsActive() {
+				di := vk.DescriptorImageInfo{
+					ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
+					ImageView:   vl.Texture.View,
+					Sampler:     vl.Texture.VkSampler,
+				}
+				imgs = append(imgs, di)
 			}
 		}
 		wd.PImageInfo = imgs
+		wd.DescriptorCount = uint32(len(imgs))
 	}
 	vs.VkWriteVals = append(vs.VkWriteVals, wd)
 }
@@ -378,4 +381,64 @@ func (vs *VarSet) VkPushConstConfig() []vk.PushConstantRange {
 		}
 	}
 	return ranges
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Dynamic Binding
+
+// BindDynValName dynamically binds given uniform or storage value
+// by name for given variable name, in given set.
+// Must have called BindDynVars for this variable first, prior to render.
+//
+// This only dynamically updates the offset to point to the specified val.
+//
+// Do NOT call BindValsStart / End around this.
+//
+// returns error if not found.
+func (st *VarSet) BindDynValName(vs *Vars, varNm, valNm string) error {
+	vr, vl, err := st.ValByNameTry(varNm, valNm)
+	if err != nil {
+		return err
+	}
+	st.BindDynVal(vs, vr, vl)
+	return nil
+}
+
+// BindDynValIdx dynamically binds given uniform or storage value
+// by index for given variable name, in given set.
+// Must have called BindDynVars for this variable first, prior to render.
+//
+// This only dynamically updates the offset to point to the specified val.
+//
+// Do NOT call BindValsStart / End around this.
+//
+// returns error if not found.
+func (st *VarSet) BindDynValIdx(vs *Vars, varNm string, valIdx int) error {
+	vr, vl, err := st.ValByIdxTry(varNm, valIdx)
+	if err != nil {
+		return err
+	}
+	return st.BindDynVal(vs, vr, vl)
+}
+
+// BindDynVal dynamically binds given uniform or storage value
+// for given variable in given set.
+// Must have called BindDynVars for this variable first, prior to render.
+//
+// This only dynamically updates the offset to point to the specified val.
+//
+// Do NOT call BindValsStart / End around this.
+//
+// returns error if not found.
+func (st *VarSet) BindDynVal(vs *Vars, vr *Var, vl *Val) error {
+	if vr.Role < Uniform || vr.Role > Storage {
+		err := fmt.Errorf("vgpu.Set:BindDynVal dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
+		if TheGPU.Debug {
+			log.Println(err)
+		}
+		return err
+	}
+	vr.BindValIdx[vs.BindDescIdx] = vl.Idx // note: not used but potentially informative
+	vs.DynOffs[vs.BindDescIdx][vr.DynOffIdx] = uint32(vl.Offset)
+	return nil
 }

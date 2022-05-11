@@ -7,10 +7,12 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
+	"math/rand"
 	"os"
 	"runtime"
 	"time"
@@ -72,7 +74,7 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	drw := &vdraw.Drawer{}
-	drw.ConfigSurface(sf)
+	drw.ConfigSurface(sf, 10) // max number of colors or images to choose for rendering
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
@@ -89,29 +91,56 @@ func main() {
 		imgs[i] = OpenImage(fnm)
 	}
 
-	drw.SetImage(imgs[0], vgpu.NoFlipY)
-	drw.StartDraw()
-	drw.Scale(sf.Format.Bounds(), imgs[0].Bounds(), draw.Src)
-	// drw.Copy(image.Point{40, 20}, imgs[0].Bounds(), draw.Src)
-	// drw.Copy(image.Point{600, 500}, imgs[0].Bounds(), draw.Src)
-	drw.EndDraw()
+	scaleImg := func(idx int) {
+		drw.SetImage(imgs[idx], vgpu.NoFlipY)
+		drw.Scale(sf.Format.Bounds(), imgs[idx].Bounds(), draw.Src)
+	}
+	copyImg := func(idx int) {
+		drw.SetImage(imgs[idx], vgpu.NoFlipY)
+		drw.Copy(image.Point{rand.Intn(500), rand.Intn(500)}, imgs[idx].Bounds(), draw.Src)
+	}
 
-	// drw.StartFill()
-	// drw.FillRect(color.White, image.Rectangle{Min: image.Point{100, 80}, Max: image.Point{400, 200}}, draw.Src)
-	// drw.EndFill()
+	_ = scaleImg
+	_ = copyImg
 
-	// drw.StartFill()
-	// drw.FillRect(color.Black, image.Rectangle{Min: image.Point{500, 480}, Max: image.Point{400, 200}}, draw.Src)
-	// drw.EndFill()
+	pal := vdraw.Palette{}
+	pal.Add("white", color.White)
+	pal.Add("black", color.Black)
+	pal.Add("red", color.RGBA{255, 0, 0, 255})
+	pal.Add("green", color.RGBA{0, 255, 0, 255})
+	pal.Add("blue", color.RGBA{0, 0, 255, 255})
+
+	drw.SetPalette(pal)
+
+	fillRnd := func() {
+		drw.StartFill()
+		for i := 0; i < 5; i++ {
+			sp := image.Point{rand.Intn(500), rand.Intn(500)}
+			sz := image.Point{rand.Intn(500), rand.Intn(500)}
+			drw.FillRect(rand.Intn(len(pal)), image.Rectangle{Min: sp, Max: sp.Add(sz)}, draw.Src)
+		}
+		drw.EndFill()
+	}
 
 	frameCount := 0
 	stTime := time.Now()
 
 	renderFrame := func() {
+		fcr := frameCount % 10
+		_ = fcr
+		switch {
+		case fcr < 3:
+			scaleImg(fcr)
+		case fcr < 6:
+			copyImg(fcr - 3)
+		default:
+			fillRnd()
+		}
 		frameCount++
+
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
-		if dur > 10 {
+		if dur > 100 {
 			fps := float64(frameCount) / dur
 			fmt.Printf("fps: %.0f\n", fps)
 			frameCount = 0
@@ -121,7 +150,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 2
+	fpsDelay := 2 * time.Second
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

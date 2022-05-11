@@ -54,26 +54,23 @@ func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types)
 	rp.Format = *imgFmt
 	rp.HasDepth = false
 
-	loadOp := vk.AttachmentLoadOpClear
-	initLay := vk.ImageLayoutUndefined
-	if rp.NoClear {
-		// loadOp vk.AttachmentLoadOpDontCare
-		loadOp = vk.AttachmentLoadOpLoad
-		initLay = vk.ImageLayoutColorAttachmentOptimal
-	}
-
-	colorAttach := vk.AttachmentDescription{
+	ca := vk.AttachmentDescription{
 		Format:         rp.Format.Format,
 		Samples:        rp.Format.Samples,
-		LoadOp:         loadOp,
+		LoadOp:         vk.AttachmentLoadOpClear,
 		StoreOp:        vk.AttachmentStoreOpStore,
 		StencilLoadOp:  vk.AttachmentLoadOpDontCare,
 		StencilStoreOp: vk.AttachmentStoreOpDontCare,
-		InitialLayout:  initLay,
+		InitialLayout:  vk.ImageLayoutUndefined,
 		FinalLayout:    vk.ImageLayoutPresentSrc,
 	}
 
-	atta := []vk.AttachmentDescription{colorAttach}
+	if rp.NoClear {
+		ca.LoadOp = vk.AttachmentLoadOpLoad
+		ca.InitialLayout = vk.ImageLayoutPresentSrc
+	}
+
+	atta := []vk.AttachmentDescription{ca}
 
 	if depthFmt != UndefType {
 		rp.HasDepth = true

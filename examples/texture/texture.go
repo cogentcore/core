@@ -113,7 +113,7 @@ func main() {
 	// note: always put indexes last so there isn't a gap in the location indexes!
 	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
 
-	camv := uset.AddStruct("Camera", vgpu.Float32Mat4.Bytes()*3, vgpu.Uniform, vgpu.VertexShader)
+	camv := uset.AddStruct("Camera", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
 
 	txidxv := pcset.Add("TexIdx", vgpu.Int32, 1, vgpu.PushConst, vgpu.FragmentShader)
 	tximgv := txset.Add("TexSampler", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
@@ -197,14 +197,11 @@ func main() {
 
 	sy.Mem.SyncToGPU()
 
-	vars.BindValsStart(0) // only one set of bindings
-	vars.BindVertexValIdx("Pos", 0)
-	vars.BindVertexValIdx("Color", 0)
-	vars.BindVertexValIdx("TexCoord", 0)
-	vars.BindVertexValIdx("Index", 0)
+	vars.BindVarsStart(0) // only one set of bindings
+	vars.BindStatVars(1)  // gets images
+	vars.BindVarsEnd()
+
 	vars.BindDynVal(0, camv, cam)
-	vars.BindStatVars(1) // gets images
-	vars.BindValsEnd()
 
 	frameCount := 0
 	stTime := time.Now()
