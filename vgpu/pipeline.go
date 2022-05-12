@@ -12,7 +12,7 @@ import (
 	"unsafe"
 
 	"github.com/goki/ki/ints"
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // Pipeline manages a sequence of compute steps, which are fixed once configured.

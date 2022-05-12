@@ -5,7 +5,7 @@
 /*
 Package vgpu implements a convenient interface to the Vulkan GPU-based
 graphics and compute framework, in Go, using the
-https://github.com/vulkan-go/vulkan Go bindings.
+https://github.com/goki/vulkan Go bindings.
 
 The GoGi GUI framework runs on top if this, replacing the previous
 OpenGL-based framework, and the compute engine is used for the

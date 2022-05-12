@@ -12,7 +12,7 @@ import (
 
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 //go:embed shaders/*.spv

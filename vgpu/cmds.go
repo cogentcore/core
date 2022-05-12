@@ -7,7 +7,7 @@
 
 package vgpu
 
-import vk "github.com/vulkan-go/vulkan"
+import vk "github.com/goki/vulkan"
 
 // CmdPool is a command pool and buffer
 type CmdPool struct {

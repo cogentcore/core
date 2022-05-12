@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // Var specifies a variable used in a pipeline, accessed in shader programs.

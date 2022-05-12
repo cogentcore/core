@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 const (
@@ -137,6 +137,7 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 	var descLayout vk.DescriptorSetLayout
 	var binds []vk.DescriptorSetLayoutBinding
 	dyno := len(vs.DynOffs[0])
+	var flags vk.DescriptorSetLayoutCreateFlags
 	for _, vr := range st.Vars {
 		bd := vk.DescriptorSetLayoutBinding{
 			Binding:         uint32(vr.BindLoc),
@@ -146,6 +147,8 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 		}
 		if vr.Role > Storage {
 			bd.DescriptorCount = uint32(st.NValsPer)
+			flags = vk.DescriptorSetLayoutCreateFlags(vk.DescriptorSetLayoutCreateUpdateAfterBindPoolBit |
+				vk.DescriptorSetLayoutCreatePushDescriptorBit)
 		}
 		binds = append(binds, bd)
 		if vr.Role == Uniform || vr.Role == Storage {
@@ -155,10 +158,12 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 			dyno++
 		}
 	}
+
 	ret := vk.CreateDescriptorSetLayout(dev, &vk.DescriptorSetLayoutCreateInfo{
 		SType:        vk.StructureTypeDescriptorSetLayoutCreateInfo,
 		BindingCount: uint32(len(binds)),
 		PBindings:    binds,
+		Flags:        flags,
 	}, nil, &descLayout)
 	IfPanic(NewError(ret))
 	st.VkLayout = descLayout

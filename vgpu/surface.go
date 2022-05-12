@@ -11,7 +11,7 @@ import (
 	"errors"
 	"fmt"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // Surface manages the physical device for the visible image

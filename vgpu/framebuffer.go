@@ -7,7 +7,7 @@ package vgpu
 import (
 	"image"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // Framebuffer combines an Image and RenderPass info (which has a depth buffer)

@@ -7,7 +7,7 @@ Note: this is the sub-readme docs for the vgpu library itself, whereas overall r
 
 This is a work in progress exploring using Vulkan to access the GPU.  Ultimately, it should replace the opengl implementation of the `oswin/gpu` interfaces in `GoGi`, to provide a more future-proof graphics backend.  As such, the code is being organized around that structure.
 
-The Go vulkan bindings are from here: https://github.com/vulkan-go/vulkan, and the initial boilerplate code for various things is from https://github.com/vulkan-go/asche and https://github.com/vulkan-go/demos
+The Go vulkan bindings are from here: https://github.com/goki/vulkan, and the initial boilerplate code for various things is from https://github.com/vulkan-go/asche and https://github.com/vulkan-go/demos
 
 Key docs for all major Vulkan types: https://gpuopen.com/learn/understanding-vulkan-objects/
 
@@ -19,8 +19,6 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 * verify that Mem.Config works when called repeatedly.
 
 * multisampling
-
-* Figure out when you need to call the Update* binding vs. just the dynamic binding - in principle for pure Uniform / Storage updates, don't need the Update guy.
 
 * Full Phong package -- shouldn't have to write that separately.
 

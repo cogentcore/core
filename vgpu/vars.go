@@ -11,7 +11,7 @@ import (
 
 	"github.com/goki/ki/indent"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // Vars are all the variables that are used by a pipeline,
@@ -262,12 +262,16 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 		pools = append(pools, pl)
 	}
 
+	var flags vk.DescriptorPoolCreateFlagBits
+	flags |= vk.DescriptorPoolCreateUpdateAfterBindBit
+
 	var descPool vk.DescriptorPool
 	ret := vk.CreateDescriptorPool(dev, &vk.DescriptorPoolCreateInfo{
 		SType:         vk.StructureTypeDescriptorPoolCreateInfo,
 		MaxSets:       uint32(vs.NDescs * nset),
 		PoolSizeCount: uint32(len(pools)),
 		PPoolSizes:    pools,
+		Flags:         vk.DescriptorPoolCreateFlags(flags),
 	}, nil, &descPool)
 	IfPanic(NewError(ret))
 	vs.VkDescPool = descPool

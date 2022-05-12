@@ -6,7 +6,7 @@ package vgpu
 
 import (
 	"github.com/goki/ki/kit"
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // Texture supplies an Image and a Sampler

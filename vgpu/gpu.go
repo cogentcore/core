@@ -15,7 +15,7 @@ import (
 	"unsafe"
 
 	"github.com/goki/ki/kit"
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/
@@ -45,7 +45,7 @@ type GPU struct {
 func (gp *GPU) Defaults(graphics bool) {
 	gp.APIVersion = vk.Version(vk.MakeVersion(1, 1, 0))
 	gp.AppVersion = vk.Version(vk.MakeVersion(1, 0, 0))
-	gp.DeviceExts = []string{"VK_KHR_portability_subset"}
+	gp.DeviceExts = []string{"VK_KHR_portability_subset", "VK_EXT_descriptor_indexing"}
 	gp.InstanceExts = []string{"VK_KHR_get_physical_device_properties2"}
 	if graphics {
 		gp.DeviceExts = append(gp.DeviceExts, []string{"VK_KHR_swapchain"}...)
@@ -158,7 +158,7 @@ func (gp *GPU) Config(name string) error {
 			ApiVersion:         uint32(gp.APIVersion),
 			ApplicationVersion: uint32(gp.AppVersion),
 			PApplicationName:   SafeString(gp.AppName),
-			PEngineName:        "egpu\x00",
+			PEngineName:        "vgpu\x00",
 		},
 		EnabledExtensionCount:   uint32(len(instanceExts)),
 		PpEnabledExtensionNames: instanceExts,
@@ -260,7 +260,7 @@ func (gp *GPU) PropsString(print bool) string {
 }
 
 func dbgCallbackFunc(flags vk.DebugReportFlags, objectType vk.DebugReportObjectType,
-	object uint64, location uint, messageCode int32, pLayerPrefix string,
+	object uint64, location uint64, messageCode int32, pLayerPrefix string,
 	pMessage string, pUserData unsafe.Pointer) vk.Bool32 {
 
 	switch {

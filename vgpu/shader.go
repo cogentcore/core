@@ -12,7 +12,7 @@ import (
 	"log"
 	"unsafe"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // Shader manages a single Shader program
@@ -44,7 +44,7 @@ func (sh *Shader) OpenCode(dev vk.Device, code []byte) error {
 	var module vk.ShaderModule
 	ret := vk.CreateShaderModule(dev, &vk.ShaderModuleCreateInfo{
 		SType:    vk.StructureTypeShaderModuleCreateInfo,
-		CodeSize: uint(len(code)),
+		CodeSize: uint64(len(code)),
 		PCode:    uicode,
 	}, nil, &module)
 	if IsError(ret) {

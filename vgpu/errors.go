@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"runtime"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 func IsError(ret vk.Result) bool {

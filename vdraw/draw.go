@@ -11,7 +11,7 @@ import (
 
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // SetImage sets Go image as a drawing source,

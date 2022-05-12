@@ -7,7 +7,7 @@ package vgpu
 import (
 	"github.com/goki/ki/kit"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // See: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)

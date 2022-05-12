@@ -7,7 +7,7 @@ package vgpu
 import (
 	"fmt"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // System manages a system of Pipelines that all share

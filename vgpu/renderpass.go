@@ -10,7 +10,7 @@ package vgpu
 import (
 	"image"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // RenderPass contains a vulkan RenderPass object,

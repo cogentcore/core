@@ -7,7 +7,7 @@ package vgpu
 import (
 	"errors"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // Device holds Device and associated Queue info

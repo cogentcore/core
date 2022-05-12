@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 )
 
 // MemSizeAlign returns the size aligned according to align byte increments

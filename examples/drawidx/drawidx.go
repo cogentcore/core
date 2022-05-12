@@ -11,7 +11,7 @@ import (
 	"time"
 	"unsafe"
 
-	vk "github.com/vulkan-go/vulkan"
+	vk "github.com/goki/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/mat32"
