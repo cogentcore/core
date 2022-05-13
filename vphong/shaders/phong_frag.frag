@@ -4,29 +4,29 @@
 
 #define MAX_LIGHTS 8
 
-layout(set = 1, binding = 0) uniform NLightsU {
+layout(set = 2, binding = 0) uniform NLightsU {
 	int NAmbient;
 	int NDir;
 	int NPoint;
 	int NSpot;
 };
 
-layout(set = 1, binding = 1) uniform AmbLightsU {
+layout(set = 3, binding = 0) uniform AmbLightsU {
 	vec3 Pos;
 } AmbLights[MAX_LIGHTS];
 
-layout(set = 1, binding = 2) uniform DirLightsU {
+layout(set = 3, binding = 1) uniform DirLightsU {
 	vec3 Color;
 	vec3 Dir;
 } DirLights[MAX_LIGHTS];
 
-layout(set = 1, binding = 3) uniform PointLightsU {
+layout(set = 3, binding = 2) uniform PointLightsU {
 	vec3 Color;
 	vec3 Pos;
 	vec3 Decay; // x = Lin, y = Quad
 } PointLights[MAX_LIGHTS];
 
-layout(set = 1, binding = 4) uniform SpotLightsU {
+layout(set = 3, binding = 3) uniform SpotLightsU {
 	vec3 Color;
 	vec3 Pos;
 	vec3 Dir;

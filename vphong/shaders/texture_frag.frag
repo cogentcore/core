@@ -1,6 +1,9 @@
 #version 450
+#extension GL_EXT_nonuniform_qualifier : require
 
-layout(set = 2, binding = 0) uniform MatsU {
+layout(set = 1, binding = 0) uniform ColorU {
+	vec3 Color;
+	vec3 Emissive;
 	vec3 Specular;
 	vec3 ShinyBright; // x = Shiny, y = Bright
 };
@@ -28,9 +31,9 @@ layout(location = 0) out vec4 outputColor;
 #include "phong_frag.frag"
 			
 void main() {
-	vec4 Color = texture(TexSampler[TexIdx], TexCoord); //  * TexRepeat + TexOff);
-	float opacity = Color.a;
-	vec3 clr = Color.rgb;	
+	vec4 TColor = texture(TexSampler[TexIdx], TexCoord); //  * TexRepeat + TexOff);
+	float opacity = TColor.a;
+	vec3 clr = TColor.rgb;	
 	
 	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
 	float Shiny = ShinyBright.x;
