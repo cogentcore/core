@@ -6,6 +6,7 @@ package vgpu
 
 import (
 	"errors"
+	"unsafe"
 
 	vk "github.com/goki/vulkan"
 )
@@ -76,8 +77,18 @@ func (dv *Device) MakeDevice(gp *GPU) {
 		EnabledLayerCount:       uint32(len(gp.ValidationLayers)),
 		PpEnabledLayerNames:     gp.ValidationLayers,
 		PEnabledFeatures: []vk.PhysicalDeviceFeatures{{
-			SamplerAnisotropy: vk.True,
+			SamplerAnisotropy:                      vk.True,
+			ShaderSampledImageArrayDynamicIndexing: vk.True,
 		}},
+		PNext: unsafe.Pointer(&vk.PhysicalDeviceVulkan12Features{
+			SType:                                    vk.StructureTypePhysicalDeviceVulkan12Features,
+			DescriptorIndexing:                       vk.True,
+			DescriptorBindingVariableDescriptorCount: vk.True,
+			DescriptorBindingSampledImageUpdateAfterBind: vk.True,
+			DescriptorBindingUpdateUnusedWhilePending:    vk.True,
+			DescriptorBindingPartiallyBound:              vk.True,
+			RuntimeDescriptorArray:                       vk.True,
+		}),
 	}, nil, &device)
 	IfPanic(NewError(ret))
 	// _ = ret

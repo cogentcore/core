@@ -43,7 +43,7 @@ type GPU struct {
 // Defaults sets up default parameters, with the graphics flag
 // determining whether graphics-relevant items are added.
 func (gp *GPU) Defaults(graphics bool) {
-	gp.APIVersion = vk.Version(vk.MakeVersion(1, 1, 0))
+	gp.APIVersion = vk.Version(vk.MakeVersion(1, 2, 0))
 	gp.AppVersion = vk.Version(vk.MakeVersion(1, 0, 0))
 	gp.DeviceExts = []string{"VK_KHR_portability_subset", "VK_EXT_descriptor_indexing"}
 	gp.InstanceExts = []string{"VK_KHR_get_physical_device_properties2"}
@@ -135,7 +135,9 @@ func (gp *GPU) Config(name string) error {
 	if missing > 0 {
 		log.Println("vulkan warning: missing", missing, "required instance extensions during Config")
 	}
-	log.Printf("vulkan: enabling %d instance extensions", len(instanceExts))
+	if gp.Debug {
+		log.Printf("vulkan: enabling %d instance extensions", len(instanceExts))
+	}
 
 	// Select instance layers
 	var validationLayers []string
@@ -164,6 +166,7 @@ func (gp *GPU) Config(name string) error {
 		PpEnabledExtensionNames: instanceExts,
 		EnabledLayerCount:       uint32(len(validationLayers)),
 		PpEnabledLayerNames:     validationLayers,
+		Flags:                   vk.InstanceCreateFlags(vk.InstanceCreateEnumeratePortabilityBit),
 	}, nil, &instance)
 	IfPanic(NewError(ret))
 	gp.Instance = instance
@@ -196,7 +199,9 @@ func (gp *GPU) Config(name string) error {
 	if missing > 0 {
 		log.Println("vulkan warning: missing", missing, "required device extensions during Config")
 	}
-	log.Printf("vulkan: enabling %d device extensions", len(deviceExts))
+	if gp.Debug {
+		log.Printf("vulkan: enabling %d device extensions", len(deviceExts))
+	}
 
 	if gp.Debug {
 		var debugCallback vk.DebugReportCallback

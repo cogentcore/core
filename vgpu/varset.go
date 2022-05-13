@@ -7,6 +7,7 @@ package vgpu
 import (
 	"fmt"
 	"log"
+	"unsafe"
 
 	vk "github.com/goki/vulkan"
 )
@@ -138,7 +139,10 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 	var binds []vk.DescriptorSetLayoutBinding
 	dyno := len(vs.DynOffs[0])
 	var flags vk.DescriptorSetLayoutCreateFlags
-	for _, vr := range st.Vars {
+	var dbf []vk.DescriptorBindingFlags
+	nvar := len(st.Vars)
+	nVarDesc := 0
+	for vi, vr := range st.Vars {
 		bd := vk.DescriptorSetLayoutBinding{
 			Binding:         uint32(vr.BindLoc),
 			DescriptorType:  RoleDescriptors[vr.Role],
@@ -146,9 +150,15 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 			StageFlags:      vk.ShaderStageFlags(vr.Shaders),
 		}
 		if vr.Role > Storage {
-			bd.DescriptorCount = uint32(st.NValsPer)
-			flags = vk.DescriptorSetLayoutCreateFlags(vk.DescriptorSetLayoutCreateUpdateAfterBindPoolBit |
-				vk.DescriptorSetLayoutCreatePushDescriptorBit)
+			bd.DescriptorCount = uint32(st.NValsPer) // max of 16!
+			nVarDesc = st.NValsPer
+			dbfFlags := vk.DescriptorBindingPartiallyBoundBit
+			//  | vk.DescriptorBindingUpdateAfterBindBit | vk.DescriptorBindingUpdateUnusedWhilePendingBit
+			if vi == nvar-1 {
+				dbfFlags |= vk.DescriptorBindingVariableDescriptorCountBit // can only be for last one
+			}
+			dbf = append(dbf, vk.DescriptorBindingFlags(dbfFlags))
+			flags = vk.DescriptorSetLayoutCreateFlags(vk.DescriptorSetLayoutCreateUpdateAfterBindPoolBit)
 		}
 		binds = append(binds, bd)
 		if vr.Role == Uniform || vr.Role == Storage {
@@ -159,24 +169,43 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 		}
 	}
 
-	ret := vk.CreateDescriptorSetLayout(dev, &vk.DescriptorSetLayoutCreateInfo{
+	// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorSetLayoutBindingFlagsCreateInfo.html
+
+	// PNext of following contains
+	dslci := &vk.DescriptorSetLayoutCreateInfo{
 		SType:        vk.StructureTypeDescriptorSetLayoutCreateInfo,
 		BindingCount: uint32(len(binds)),
 		PBindings:    binds,
 		Flags:        flags,
-	}, nil, &descLayout)
+	}
+	if len(dbf) > 0 {
+		dslci.PNext = unsafe.Pointer(&vk.DescriptorSetLayoutBindingFlagsCreateInfo{
+			SType:         vk.StructureTypeDescriptorSetLayoutBindingFlagsCreateInfo,
+			PBindingFlags: dbf,
+			BindingCount:  uint32(len(dbf)),
+		})
+	}
+	ret := vk.CreateDescriptorSetLayout(dev, dslci, nil, &descLayout)
 	IfPanic(NewError(ret))
 	st.VkLayout = descLayout
 
 	st.VkDescSets = make([]vk.DescriptorSet, vs.NDescs)
 	for i := 0; i < vs.NDescs; i++ {
-		var dset vk.DescriptorSet
-		ret := vk.AllocateDescriptorSets(dev, &vk.DescriptorSetAllocateInfo{
+		dalloc := &vk.DescriptorSetAllocateInfo{
 			SType:              vk.StructureTypeDescriptorSetAllocateInfo,
 			DescriptorPool:     vs.VkDescPool,
 			DescriptorSetCount: 1,
 			PSetLayouts:        []vk.DescriptorSetLayout{st.VkLayout},
-		}, &dset)
+		}
+		if nVarDesc > 0 {
+			dalloc.PNext = unsafe.Pointer(&vk.DescriptorSetVariableDescriptorCountAllocateInfo{
+				SType:              vk.StructureTypeDescriptorSetVariableDescriptorCountAllocateInfo,
+				DescriptorSetCount: 1,
+				PDescriptorCounts:  []uint32{uint32(nVarDesc)},
+			})
+		}
+		var dset vk.DescriptorSet
+		ret := vk.AllocateDescriptorSets(dev, dalloc, &dset)
 		IfPanic(NewError(ret))
 		st.VkDescSets[i] = dset
 	}
