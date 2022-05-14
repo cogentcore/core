@@ -12,7 +12,7 @@ layout(set = 2, binding = 0) uniform NLightsU {
 };
 
 layout(set = 3, binding = 0) uniform AmbLightsU {
-	vec3 Pos;
+	vec3 Color;
 } AmbLights[MAX_LIGHTS];
 
 layout(set = 3, binding = 1) uniform DirLightsU {
@@ -58,7 +58,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 	// }
 
 	for (int i = 0; i < NAmbient; i++) {
-		ambientTotal += AmbLights[i].Pos * matAmbient;
+		ambientTotal += AmbLights[i].Color * matAmbient;
 	}
 
 	for (int i = 0; i < NDir; i++) {

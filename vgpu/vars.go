@@ -54,6 +54,11 @@ func (vs *Vars) AddVertexSet() *VarSet {
 	return st
 }
 
+// VertexSet returns the Vertex Set -- a special Set holding Vertex, Index vars
+func (vs *Vars) VertexSet() *VarSet {
+	return vs.SetMap[VertexSet]
+}
+
 // AddPushConstSet adds a new push constant Set -- this is a special Set holding
 // values sent directly in the command buffer.
 func (vs *Vars) AddPushConstSet() *VarSet {
@@ -64,6 +69,11 @@ func (vs *Vars) AddPushConstSet() *VarSet {
 	vs.SetMap[PushConstSet] = st
 	vs.HasPushConst = true
 	return st
+}
+
+// PushConstSet returns the PushConst Set -- a special Set holding push constants
+func (vs *Vars) PushConstSet() *VarSet {
+	return vs.SetMap[PushConstSet]
 }
 
 // AddSet adds a new non-Vertex Set for holding Uniforms, Storage, etc

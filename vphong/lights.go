@@ -20,8 +20,8 @@ type NLights struct {
 
 // AmbientLight provides diffuse uniform lighting -- typically only one of these
 type AmbientLight struct {
-	Pos  mat32.Vec3 `desc:"position of light in world coordinates"`
-	pad0 float32
+	Color mat32.Vec3 `desc:"color of light -- multiplies ambient color of materials"`
+	pad0  float32
 }
 
 // DirLight is directional light, which is assumed to project light toward
@@ -29,7 +29,7 @@ type AmbientLight struct {
 // For rendering, the position is negated and normalized to get the direction
 // vector (i.e., absolute distance doesn't matter)
 type DirLight struct {
-	Color mat32.Vec3 `desc:"color of light a full intensity"`
+	Color mat32.Vec3 `desc:"color of light at full intensity"`
 	pad0  float32
 	Dir   mat32.Vec3 `desc:"direction of light vectdor"`
 	pad1  float32
@@ -91,8 +91,8 @@ func (ph *Phong) ConfigLights() {
 }
 
 // AddAmbientLight adds Ambient light at given position
-func (ph *Phong) AddAmbientLight(pos mat32.Vec3) {
-	ph.Ambient[ph.NLights.Ambient].Pos = pos
+func (ph *Phong) AddAmbientLight(color mat32.Vec3) {
+	ph.Ambient[ph.NLights.Ambient].Color = color
 	ph.NLights.Ambient++
 }
 

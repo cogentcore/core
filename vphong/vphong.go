@@ -1,4 +1,4 @@
-// Copyright (c) 2022, The Emergent Authors. All rights reserved.
+// Copyright (c) 2022, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -7,6 +7,7 @@ package vphong
 import (
 	"image"
 
+	"github.com/goki/kigen/ordmap"
 	"github.com/goki/vgpu/vgpu"
 )
 
@@ -22,7 +23,8 @@ type Phong struct {
 	Point   [MaxLights]PointLight   `desc:"point lights"`
 	Spot    [MaxLights]SpotLight    `desc:"spot lights"`
 
-	TexImages []image.Image `desc:"texture images"`
+	Textures ordmap.Map[string, image.Image] `desc:"texture images"`
+	Meshes   ordmap.Map[string, *Mesh]       `desc:"meshes"`
 
 	Sys  vgpu.System   `desc:"rendering system"`
 	Surf *vgpu.Surface `desc:"surface if render target"`
