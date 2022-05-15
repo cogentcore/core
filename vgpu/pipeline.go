@@ -335,6 +335,8 @@ func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer) {
 
 // Push pushes given value as a push constant for given
 // registered push constant variable.
+// Note: it is *essential* to use a local, stack variable for the push value
+// as cgo will likely complain if it is inside some other structure.
 // BindPipeline must have been called before this.
 func (pl *Pipeline) Push(cmd vk.CommandBuffer, vr *Var, shader ShaderTypes, val unsafe.Pointer) {
 	vs := pl.Vars()

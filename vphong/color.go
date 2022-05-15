@@ -36,9 +36,9 @@ func NewGoColor(clr color.Color) mat32.Vec3 {
 // SetGoColor sets a mat32.Vec3 from Go standard color.Color
 func SetGoColor(v3 *mat32.Vec3, clr color.Color) {
 	r, g, b, _ := clr.RGBA()
-	v3.X = float32(r) / 255
-	v3.Y = float32(g) / 255
-	v3.Z = float32(b) / 255
+	v3.X = float32(r) / 0xffff
+	v3.Y = float32(g) / 0xffff
+	v3.Z = float32(b) / 0xffff
 }
 
 // NewGoColor sets the colors from standard Go colors

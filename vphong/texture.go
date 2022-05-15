@@ -45,14 +45,19 @@ func (ph *Phong) AllocTextures() {
 	txset := vars.SetMap[int(TexSet)]
 	txset.ConfigVals(ph.Textures.Len())
 	for i, kv := range ph.Textures.Order {
-		_, img, _ := vars.ValByIdxTry(int(TexSet), "Tex", i)
-		img.SetGoImage(kv.Val.Image, vgpu.FlipY)
+		_, img, _ := txset.ValByIdxTry("Tex", i)
+		img.Texture.ConfigGoImage(kv.Val.Image)
 	}
 }
 
 // ConfigTextures configures the rendering for the textures that have been added.
 func (ph *Phong) ConfigTextures() {
 	vars := ph.Sys.Vars()
+	txset := vars.SetMap[int(TexSet)]
+	for i, kv := range ph.Textures.Order {
+		_, img, _ := txset.ValByIdxTry("Tex", i)
+		img.SetGoImage(kv.Val.Image, vgpu.FlipY)
+	}
 	vars.BindVarsStart(0)          // only one set of bindings
 	vars.BindStatVars(int(TexSet)) // gets images
 	vars.BindVarsEnd()
@@ -87,6 +92,7 @@ type TexPush struct {
 	Repeat mat32.Vec2 `desc:"how often to repeat the texture in each direction"`
 	Off    mat32.Vec2 `desc:"offset for when to start the texure in each direction"`
 	Idx    int32      `desc:"index"`
+	pad0   float32
 }
 
 func (tp *TexPush) Set(idx int, rpt, off mat32.Vec2) {
@@ -103,7 +109,8 @@ func (ph *Phong) RenderTexture() {
 	tpvar, _ := vars.VarByNameTry(int(vgpu.PushSet), "TexPush")
 	pl := sy.PipelineMap["texture"]
 	tex := ph.Textures.ValByIdx(ph.Cur.TexIdx)
-	ph.Cur.TexPush.Set(ph.Cur.TexIdx, tex.Repeat, tex.Off)
-	pl.Push(cmd, tpvar, vgpu.FragmentShader, unsafe.Pointer(&ph.Cur.TexPush))
+	tpush := &TexPush{}
+	tpush.Set(ph.Cur.TexIdx, tex.Repeat, tex.Off)
+	pl.Push(cmd, tpvar, vgpu.FragmentShader, unsafe.Pointer(tpush))
 	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
 }

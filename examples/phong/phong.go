@@ -50,7 +50,7 @@ func main() {
 	vk.Init()
 
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
-	window, err := glfw.CreateWindow(1024, 768, "vDraw Test", nil, nil)
+	window, err := glfw.CreateWindow(1024, 768, "vPhong Test", nil, nil)
 	vgpu.IfPanic(err)
 
 	// note: for graphics, require these instance extensions before init gpu!
@@ -58,7 +58,7 @@ func main() {
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
 	gp.Debug = true
-	gp.Config("vDraw test")
+	gp.Config("vPhong test")
 	TheGPU = gp
 
 	// gp.PropsString(true) // print
@@ -88,7 +88,15 @@ func main() {
 		glfw.Terminate()
 	}
 
-	ph.AddAmbientLight(vphong.NewGoColor(color.White))
+	/////////////////////////////
+	// Lights
+
+	dark := color.RGBA{50, 50, 50, 50}
+	ph.AddAmbientLight(vphong.NewGoColor(dark))
+	ph.AddDirLight(vphong.NewGoColor(color.White), mat32.Vec3{0, 0, -1})
+
+	/////////////////////////////
+	// Meshes
 
 	ph.AddMesh("rect", 4, 6, false)
 
@@ -99,7 +107,14 @@ func main() {
 		ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{1, 1}, mat32.Vec2{0, 0}))
 	}
 
-	ph.AddColor("color1", vphong.NewColors(color.White, color.Black, color.White, 30, 1))
+	/////////////////////////////
+	// Colors
+
+	blue := color.RGBA{0, 0, 255, 255}
+	ph.AddColor("blue", vphong.NewColors(blue, color.Black, color.White, 30, 1))
+
+	/////////////////////////////
+	// Camera / Mtxs
 
 	// This is the standard camera view projection computation
 	campos := mat32.Vec3{0, 0, 2}
@@ -113,6 +128,7 @@ func main() {
 
 	var model mat32.Mat4
 	model.SetIdentity()
+	model.SetRotationY(.3)
 
 	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
 	// fmt.Printf("aspect: %g\n", aspect)
@@ -125,7 +141,13 @@ func main() {
 
 	ph.AddMtxs("mtx1", vphong.NewMtxs(&model, view, &prjn))
 
+	/////////////////////////////
+	//  Config!
+
 	ph.Config()
+
+	/////////////////////////////
+	//  Set Mesh values
 
 	pos, norm, tex, _, idx := ph.MeshFloatsByName("rect")
 	pos.Set(0,
@@ -153,26 +175,27 @@ func main() {
 	ph.Sync()
 
 	render1 := func() {
-		ph.UseColorName("color1")
+		ph.UseColorName("blue")
 		ph.UseMtxsName("mtx1")
 		ph.UseMeshName("rect")
-		ph.UseTextureName("wood.png")
+		ph.UseTextureName("teximg.jpg")
+		ph.Render()
 	}
 
 	frameCount := 0
 	stTime := time.Now()
 
 	renderFrame := func() {
-
 		idx := sf.AcquireNextImage()
-
 		cmd := sy.CmdPool.Buff
 		descIdx := 0 // if running multiple frames in parallel, need diff sets
 		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)
 
 		fcr := frameCount % 10
 		_ = fcr
+
 		render1()
+
 		// switch {
 		// case fcr < 3:
 		// 	scaleImg(fcr)
@@ -198,11 +221,13 @@ func main() {
 		}
 	}
 
+	glfw.PollEvents()
 	renderFrame()
+	glfw.PollEvents()
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := 2 * time.Second
+	fpsDelay := time.Second / 5
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

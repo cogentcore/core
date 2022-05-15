@@ -149,7 +149,9 @@ func main() {
 		}
 	}
 
+	glfw.PollEvents()
 	renderFrame()
+	glfw.PollEvents()
 
 	exitC := make(chan struct{}, 2)
 

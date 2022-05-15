@@ -61,7 +61,7 @@ func (ph *Phong) ConfigSys() {
 	tpl.AddShaderCode("texture_frag", vgpu.FragmentShader, cb)
 
 	vars := ph.Sys.Vars()
-	pcset := vars.AddPushSet() // TexIdx
+	pcset := vars.AddPushSet() // TexPush
 	vset := vars.AddVertexSet()
 	mtxset := vars.AddSet()   // set = 0
 	clrset := vars.AddSet()   // set = 1
@@ -71,53 +71,27 @@ func (ph *Phong) ConfigSys() {
 
 	vec4sz := vgpu.Float32Vec4.Bytes()
 
-	vset.Add("Pos", vgpu.Float32Vec4, 0, vgpu.Vertex, vgpu.VertexShader)
+	vset.Add("Pos", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Norm", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Tex", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Color", vgpu.Float32Vec2, 0, vgpu.Vertex, vgpu.VertexShader)
-	vset.Add("Index", vgpu.Uint16, 0, vgpu.Index, vgpu.VertexShader)
+	vset.Add("Index", vgpu.Uint32, 0, vgpu.Index, vgpu.VertexShader)
 
 	mtxset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
 
-	pcset.AddStruct("TexPush", int(unsafe.Sizeof(ph.Cur.TexPush)), 1, vgpu.Push, vgpu.FragmentShader)
+	pcset.AddStruct("TexPush", int(unsafe.Sizeof(TexPush{})), 1, vgpu.Push, vgpu.FragmentShader)
 	clrset.AddStruct("Color", vec4sz*4, 1, vgpu.Uniform, vgpu.FragmentShader)
 
 	nliteset.AddStruct("NLights", 4*4, 1, vgpu.Uniform, vgpu.FragmentShader)
-	liteset.AddStruct("AmbLights", vec4sz*1, 1, vgpu.Uniform, vgpu.FragmentShader)
-	liteset.AddStruct("DirLights", vec4sz*2, 1, vgpu.Uniform, vgpu.FragmentShader)
-	liteset.AddStruct("PointLights", vec4sz*3, 1, vgpu.Uniform, vgpu.FragmentShader)
-	liteset.AddStruct("SpotLights", vec4sz*4, 1, vgpu.Uniform, vgpu.FragmentShader)
+	liteset.AddStruct("AmbLights", vec4sz*1, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
+	liteset.AddStruct("DirLights", vec4sz*2, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
+	liteset.AddStruct("PointLights", vec4sz*3, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
+	liteset.AddStruct("SpotLights", vec4sz*4, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
 
 	txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 	// tximgv.TextureOwns = true
 
-	liteset.ConfigVals(MaxLights)
-
-	// vset.ConfigVals(1)
-	// txset.ConfigVals(1)
-	// cset.ConfigVals(ph.Impl.MaxColors)
-
-	// note: add all values per above before doing Config
-	// ph.Sys.Config()
-
-	/*
-		// note: first val in set is offset
-		rectPos, _ := posv.Vals.ValByIdxTry(0)
-		rectPosA := rectPos.Floats32()
-		rectPosA.Set(0,
-			0.0, 0.0,
-			0.0, 1.0,
-			1.0, 0.0,
-			1.0, 1.0)
-		rectPos.SetMod()
-
-		rectIdx, _ := idxv.Vals.ValByIdxTry(0)
-		idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
-		rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
-
-		ph.Sys.Mem.SyncToGPU()
-
-		vars.BindVertexValIdx("Pos", 0)
-		vars.BindVertexValIdx("Index", 0)
-	*/
+	nliteset.ConfigVals(1)
+	liteset.ConfigVals(1)
+	pcset.ConfigVals(1)
 }

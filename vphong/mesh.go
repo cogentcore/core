@@ -27,12 +27,6 @@ func (ph *Phong) AllocMeshes() {
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
 	vset.ConfigVals(nm)
-}
-
-// ConfigMeshes configures the rendering for the meshes
-func (ph *Phong) ConfigMeshes() {
-	vars := ph.Sys.Vars()
-	vset := vars.VertexSet()
 	for i, mesh := range ph.Meshes.Order {
 		mv := mesh.Val
 		_, vp, _ := vset.ValByIdxTry("Pos", i)
@@ -43,11 +37,19 @@ func (ph *Phong) ConfigMeshes() {
 		vt.N = mv.NVtx
 		_, vi, _ := vset.ValByIdxTry("Index", i)
 		vi.N = mv.NIdx
+		_, vc, _ := vset.ValByIdxTry("Color", i)
 		if mv.HasColor {
-			_, vc, _ := vset.ValByIdxTry("Color", i)
 			vc.N = mesh.Val.NVtx
+		} else {
+			vc.N = 1 // todo: should be 0
 		}
 	}
+}
+
+// ConfigMeshes configures the rendering for the meshes
+func (ph *Phong) ConfigMeshes() {
+	// vars := ph.Sys.Vars()
+	// vset := vars.VertexSet()
 }
 
 // AddMesh adds a Mesh with name and given number of verticies, indexes,

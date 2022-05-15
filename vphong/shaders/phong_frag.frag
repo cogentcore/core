@@ -11,27 +11,43 @@ layout(set = 2, binding = 0) uniform NLightsU {
 	int NSpot;
 };
 
-layout(set = 3, binding = 0) uniform AmbLightsU {
+struct Ambient {
 	vec3 Color;
-} AmbLights[MAX_LIGHTS];
+};
 
-layout(set = 3, binding = 1) uniform DirLightsU {
+layout(set = 3, binding = 0) uniform AmbLightsU {
+	Ambient AmbLights[MAX_LIGHTS];
+};
+
+struct Dir {
 	vec3 Color;
 	vec3 Dir;
-} DirLights[MAX_LIGHTS];
+};
 
-layout(set = 3, binding = 2) uniform PointLightsU {
+layout(set = 3, binding = 1) uniform DirLightsU {
+	Dir DirLights[MAX_LIGHTS];
+};
+
+struct Point {
 	vec3 Color;
 	vec3 Pos;
 	vec3 Decay; // x = Lin, y = Quad
-} PointLights[MAX_LIGHTS];
+};
 
-layout(set = 3, binding = 3) uniform SpotLightsU {
+layout(set = 3, binding = 2) uniform PointLightsU {
+	Point PointLights[MAX_LIGHTS];
+};
+
+struct Spot {
 	vec3 Color;
 	vec3 Pos;
 	vec3 Dir;
 	vec4 Decay; // x = Ang, y = CutAngle, z = Lin, w = Quad
-} SpotLights[MAX_LIGHTS];
+};
+
+layout(set = 3, binding = 3) uniform SpotLightsU {
+	Spot SpotLights[MAX_LIGHTS];
+};
 
 // debugVec3 renders vector to color for debugging values
 // void debugVec3(vec3 val, out vec4 clr) {

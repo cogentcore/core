@@ -8,16 +8,13 @@ layout(set = 1, binding = 0) uniform ColorU {
 	vec3 ShinyBright; // x = Shiny, y = Bright
 };
 
-layout(set = 3, binding = 0) uniform sampler2D TexSampler[];
+layout(set = 4, binding = 0) uniform sampler2D TexSampler[];
 
 layout(push_constant) uniform TexIdxU {
 	vec2 TexRepeat;
 	vec2 TexOff;
 	int TexIdx;
 };
-
-// uniform vec2 TexRepeat;
-// uniform vec2 TexOff;
 
 layout(location = 0) in vec4 Pos;
 layout(location = 1) in vec3 Norm;
@@ -41,5 +38,6 @@ void main() {
 
 	// Final fragment color -- premultiplied alpha
 	outputColor = min(vec4((Bright * Ambdiff + Spec) * opacity, opacity), vec4(1.0));
+	// outputColor = vec4(clr, 1);
 }
 
