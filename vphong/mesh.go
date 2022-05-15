@@ -31,7 +31,6 @@ func (ph *Phong) AllocMeshes() {
 
 // ConfigMeshes configures the rendering for the meshes
 func (ph *Phong) ConfigMeshes() {
-	nm := ph.Meshes.Len()
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
 	for i, mesh := range ph.Meshes.Order {
@@ -91,6 +90,7 @@ func (ph *Phong) UseMeshIdx(idx int) error {
 
 // MeshFloatsByName returns the mat32.ArrayF32's and mat32.ArrayU32 for given mesh
 // for assigning values to the mesh.
+// Must call ModMeshByName after setting these values to mark as modified.
 func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr mat32.ArrayF32, idx mat32.ArrayU32) {
 	i, ok := ph.Meshes.IdxByKey(name)
 	if !ok {
@@ -104,6 +104,7 @@ func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr mat32.ArrayF
 
 // MeshFloatsByIdx returns the mat32.ArrayF32's and mat32.ArrayU32 for given mesh
 // for assigning values to the mesh.
+// Must call ModMeshByIdx after setting these values to mark as modified.
 func (ph *Phong) MeshFloatsByIdx(i int) (pos, norm, tex, clr mat32.ArrayF32, idx mat32.ArrayU32) {
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
@@ -113,4 +114,29 @@ func (ph *Phong) MeshFloatsByIdx(i int) (pos, norm, tex, clr mat32.ArrayF32, idx
 	_, vi, _ := vset.ValByIdxTry("Index", i)
 	_, vc, _ := vset.ValByIdxTry("Color", i)
 	return vp.Floats32(), vn.Floats32(), vt.Floats32(), vc.Floats32(), vi.UInts32()
+}
+
+// ModMeshByName marks given mesh by name as modified.
+// Must call after modifying mesh values, to mark for syncing
+func (ph *Phong) ModMeshByName(name string) {
+	i, ok := ph.Meshes.IdxByKey(name)
+	if !ok {
+		err := fmt.Errorf("vphong:UseMeshName -- name not found: %s", name)
+		if vgpu.TheGPU.Debug {
+			log.Println(err)
+		}
+	}
+	ph.ModMeshByIdx(i)
+}
+
+// ModMeshByIdx marks given mesh by index as modified.
+// Must call after modifying mesh values, to mark for syncing
+func (ph *Phong) ModMeshByIdx(i int) {
+	vars := ph.Sys.Vars()
+	vset := vars.VertexSet()
+	nms := []string{"Pos", "Norm", "Tex", "Index", "Color"}
+	for _, nm := range nms {
+		_, vl, _ := vset.ValByIdxTry(nm, i)
+		vl.SetMod()
+	}
 }

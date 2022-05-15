@@ -14,7 +14,6 @@ import (
 
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
-	vk "github.com/goki/vulkan"
 )
 
 type ColorIdx struct {
@@ -106,12 +105,12 @@ func (dw *Drawer) Fill(idx int, src2dst mat32.Mat3, reg image.Rectangle, op draw
 	cmd := sy.CmdPool.Buff
 	vars := sy.Vars()
 	vars.BindDynValIdx(1, "Color", idx)
-	sy.BindVars(cmd, 0) // redo
+	sy.CmdBindVars(cmd, 0) // required to get offsets!
 
 	tmat := dw.ConfigMats(src2dst, reg.Max, reg, op, false)
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mats")
 	fpl := sy.PipelineMap["fill"]
-	fpl.Push(cmd, matv, vk.ShaderStageVertexBit, unsafe.Pointer(tmat))
+	fpl.Push(cmd, matv, vgpu.VertexShader, unsafe.Pointer(tmat))
 	fpl.BindDrawVertex(cmd, 0)
 
 	return nil

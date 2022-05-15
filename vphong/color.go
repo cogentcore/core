@@ -6,6 +6,7 @@ package vphong
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"unsafe"
 
@@ -23,6 +24,37 @@ type Color struct {
 	pad2        float32
 	ShinyBright mat32.Vec3 `desc:"x = Shiny, y = Bright"`
 	pad3        float32
+}
+
+// NewGoColor returns a mat32.Vec3 from Go standard color.Color
+func NewGoColor(clr color.Color) mat32.Vec3 {
+	v3 := mat32.Vec3{}
+	SetGoColor(&v3, clr)
+	return v3
+}
+
+// SetGoColor sets a mat32.Vec3 from Go standard color.Color
+func SetGoColor(v3 *mat32.Vec3, clr color.Color) {
+	r, g, b, _ := clr.RGBA()
+	v3.X = float32(r) / 255
+	v3.Y = float32(g) / 255
+	v3.Z = float32(b) / 255
+}
+
+// NewGoColor sets the colors from standard Go colors
+func NewColors(clr, emis, spec color.Color, shiny, bright float32) *Color {
+	cl := &Color{}
+	cl.SetColors(clr, emis, spec, shiny, bright)
+	return cl
+}
+
+// SetColors sets the colors from standard Go colors
+func (cl *Color) SetColors(clr, emis, spec color.Color, shiny, bright float32) {
+	SetGoColor(&cl.Color, clr)
+	SetGoColor(&cl.Emissive, emis)
+	SetGoColor(&cl.Specular, spec)
+	cl.ShinyBright.X = shiny
+	cl.ShinyBright.Y = bright
 }
 
 // AddColor adds to list of colors
@@ -43,17 +75,16 @@ func (ph *Phong) ConfigColors() {
 	clrset := vars.SetMap[int(ColorSet)]
 	for i, kv := range ph.Colors.Order {
 		_, clr, _ := clrset.ValByIdxTry("Color", i)
-		clr.CopyBytes(unsafe.Pointer(&kv.Val))
+		clr.CopyBytes(unsafe.Pointer(kv.Val))
 	}
 }
 
 // UseColorIdx selects color by index for current render step
 func (ph *Phong) UseColorIdx(idx int) error {
-	tex := ph.Colors.ValByIdx(idx)
 	vars := ph.Sys.Vars()
-	vars.BindDynValByIdx(int(ColorSet), "Color", idx)
+	vars.BindDynValIdx(int(ColorSet), "Color", idx)
 	ph.Cur.ColorIdx = idx // todo: range check
-	ph.Cur.UseColor = true
+	return nil
 }
 
 // UseColorName selects color by name for current render step

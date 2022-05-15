@@ -1,9 +1,9 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform MatsU {
-    mat4 MVMat;
-    mat4 MVPMat;
-    mat4 NormMat;
+layout(set = 0, binding = 0) uniform MtxsU {
+    mat4 MVMtx;
+    mat4 MVPMtx;
+    mat4 NormMtx;
 };
 
 layout(location = 0) in vec3 VtxPos;
@@ -20,14 +20,14 @@ layout(location = 3) out vec2 TexCoord;
 void main() {
 	vec4 vPos = vec4(VtxPos, 1.0);
 	vec4 vNorm = vec4(VtxNorm, 1.0);
-	Pos = MVMat * vPos;
-	Norm = normalize(NormMat * vNorm).xyz;
+	Pos = MVMtx * vPos;
+	Norm = normalize(NormMtx * vNorm).xyz;
 	CamDir = normalize(-Pos.xyz);
 	TexCoord = VtxTex;
 // 	if(FlipY) {
 // 		TexCoord.y = 1 - TexCoord.y;
 // 	}
 	
-	gl_Position = MVPMat * vPos;
+	gl_Position = MVPMtx * vPos;
 }
 

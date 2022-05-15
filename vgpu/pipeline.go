@@ -336,9 +336,9 @@ func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer) {
 // Push pushes given value as a push constant for given
 // registered push constant variable.
 // BindPipeline must have been called before this.
-func (pl *Pipeline) Push(cmd vk.CommandBuffer, vr *Var, shader vk.ShaderStageFlagBits, val unsafe.Pointer) {
+func (pl *Pipeline) Push(cmd vk.CommandBuffer, vr *Var, shader ShaderTypes, val unsafe.Pointer) {
 	vs := pl.Vars()
-	vk.CmdPushConstants(cmd, vs.VkDescLayout, vk.ShaderStageFlags(shader), uint32(vr.Offset), uint32(vr.SizeOf), val)
+	vk.CmdPushConstants(cmd, vs.VkDescLayout, vk.ShaderStageFlags(ShaderStageFlags[shader]), uint32(vr.Offset), uint32(vr.SizeOf), val)
 }
 
 // Draw adds CmdDraw command to the given command buffer

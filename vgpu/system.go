@@ -205,10 +205,10 @@ func (sy *System) SetClearDepthStencil(depth float32, stencil uint32) {
 //////////////////////////////////////////////////////////////////////////
 // Rendering
 
-// BindVars adds command to the given command buffer
+// CmdBindVars adds command to the given command buffer
 // to bind the Vars descriptors, for given collection of descriptors descIdx
 // (see Vars NDescs for info).
-func (sy *System) BindVars(cmd vk.CommandBuffer, descIdx int) {
+func (sy *System) CmdBindVars(cmd vk.CommandBuffer, descIdx int) {
 	vars := sy.Vars()
 	if len(vars.SetMap) == 0 {
 		return
@@ -226,12 +226,12 @@ func (sy *System) BindVars(cmd vk.CommandBuffer, descIdx int) {
 
 }
 
-// ResetBindVars adds command to the given command buffer
+// CmdResetBindVars adds command to the given command buffer
 // to bind the Vars descriptors, for given collection of descriptors descIdx
 // (see Vars NDescs for info).
-func (sy *System) ResetBindVars(cmd vk.CommandBuffer, descIdx int) {
+func (sy *System) CmdResetBindVars(cmd vk.CommandBuffer, descIdx int) {
 	CmdResetBegin(cmd)
-	sy.BindVars(cmd, descIdx)
+	sy.CmdBindVars(cmd, descIdx)
 }
 
 // BeginRenderPass adds commands to the given command buffer
@@ -240,8 +240,8 @@ func (sy *System) ResetBindVars(cmd vk.CommandBuffer, descIdx int) {
 // Also Binds descriptor sets to command buffer for given collection
 // of descriptors descIdx (see Vars NDescs for info).
 func (sy *System) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
+	sy.CmdBindVars(cmd, descIdx)
 	sy.RenderPass.BeginRenderPass(cmd, fr)
-	sy.BindVars(cmd, descIdx)
 }
 
 // ResetBeginRenderPass adds commands to the given command buffer

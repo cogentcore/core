@@ -10,7 +10,7 @@ import "github.com/goki/ki/kit"
 type Sets int
 
 const (
-	MatsSet Sets = iota
+	MtxsSet Sets = iota
 	ColorSet
 	NLightSet
 	LightSet

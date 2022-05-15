@@ -11,6 +11,8 @@ layout(set = 1, binding = 0) uniform ColorU {
 layout(set = 3, binding = 0) uniform sampler2D TexSampler[];
 
 layout(push_constant) uniform TexIdxU {
+	vec2 TexRepeat;
+	vec2 TexOff;
 	int TexIdx;
 };
 
@@ -27,7 +29,7 @@ layout(location = 0) out vec4 outputColor;
 #include "phong_frag.frag"
 			
 void main() {
-	vec4 TColor = texture(TexSampler[TexIdx], TexCoord); //  * TexRepeat + TexOff);
+	vec4 TColor = texture(TexSampler[TexIdx], TexCoord * TexRepeat + TexOff);
 	float opacity = TColor.a;
 	vec3 clr = TColor.rgb;	
 	

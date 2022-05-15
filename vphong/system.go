@@ -6,6 +6,7 @@ package vphong
 
 import (
 	"embed"
+	"unsafe"
 
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
@@ -42,7 +43,6 @@ func (ph *Phong) ConfigPipeline(pl *vgpu.Pipeline) {
 	// app.drawProg.Activate()
 
 	pl.SetGraphicsDefaults()
-	pl.SetClearOff()
 	// if ph.YIsDown {
 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 	// } else {
@@ -63,7 +63,7 @@ func (ph *Phong) ConfigSys() {
 	vars := ph.Sys.Vars()
 	pcset := vars.AddPushSet() // TexIdx
 	vset := vars.AddVertexSet()
-	matset := vars.AddSet()   // set = 0
+	mtxset := vars.AddSet()   // set = 0
 	clrset := vars.AddSet()   // set = 1
 	nliteset := vars.AddSet() // set = 2
 	liteset := vars.AddSet()  // set = 3
@@ -75,11 +75,11 @@ func (ph *Phong) ConfigSys() {
 	vset.Add("Norm", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Tex", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Color", vgpu.Float32Vec2, 0, vgpu.Vertex, vgpu.VertexShader)
-	vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
+	vset.Add("Index", vgpu.Uint16, 0, vgpu.Index, vgpu.VertexShader)
 
-	matset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
+	mtxset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
 
-	pcset.AddStruct("TexIdx", 4, 1, vgpu.Push, vgpu.FragmentShader)
+	pcset.AddStruct("TexPush", int(unsafe.Sizeof(ph.Cur.TexPush)), 1, vgpu.Push, vgpu.FragmentShader)
 	clrset.AddStruct("Color", vec4sz*4, 1, vgpu.Uniform, vgpu.FragmentShader)
 
 	nliteset.AddStruct("NLights", 4*4, 1, vgpu.Uniform, vgpu.FragmentShader)

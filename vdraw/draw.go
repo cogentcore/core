@@ -11,7 +11,6 @@ import (
 
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
-	vk "github.com/goki/vulkan"
 )
 
 // SetImage sets Go image as a drawing source,
@@ -86,7 +85,7 @@ func (dw *Drawer) DrawImpl(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) e
 	dpl := dw.Sys.PipelineMap["draw"]
 
 	cmd := dw.Sys.CmdPool.Buff
-	dpl.Push(cmd, matv, vk.ShaderStageVertexBit, unsafe.Pointer(tmat))
+	dpl.Push(cmd, matv, vgpu.VertexShader, unsafe.Pointer(tmat))
 	dpl.DrawVertex(cmd, 0)
 	return nil
 }
@@ -114,8 +113,9 @@ func (dw *Drawer) EndDraw() {
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
+		sidx := dw.Impl.SurfIdx
 		sy.EndRenderPass(cmd)
 		dw.Surf.SubmitRender(cmd) // this is where it waits for the 16 msec
-		dw.Surf.PresentImage(dw.Impl.SurfIdx)
+		dw.Surf.PresentImage(sidx)
 	}
 }
