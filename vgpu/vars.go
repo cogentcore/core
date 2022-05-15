@@ -16,16 +16,16 @@ import (
 
 // Vars are all the variables that are used by a pipeline,
 // organized into Sets (optionally including the special VertexSet
-// or PushConstSet).
+// or PushSet).
 // Vars are allocated to bindings / locations sequentially in the
 // order added!
 type Vars struct {
-	SetMap       map[int]*VarSet     `desc:"map of sets, by set number -- VertexSet is -2, PushConstSet is -1, rest are added incrementally"`
-	RoleMap      map[VarRoles][]*Var `desc:"map of vars by different roles across all sets -- updated in Config(), after all vars added.  This is needed for VkDescPool allocation."`
-	HasVertex    bool                `inactive:"+" desc:"true if a VertexSet has been added"`
-	HasPushConst bool                `inactive:"+" desc:"true if PushConstSet has been added"`
-	NDescs       int                 `desc:"number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased."`
-	Mem          *Memory             `view:"-" desc:"our parent memory manager"`
+	SetMap    map[int]*VarSet     `desc:"map of sets, by set number -- VertexSet is -2, PushSet is -1, rest are added incrementally"`
+	RoleMap   map[VarRoles][]*Var `desc:"map of vars by different roles across all sets -- updated in Config(), after all vars added.  This is needed for VkDescPool allocation."`
+	HasVertex bool                `inactive:"+" desc:"true if a VertexSet has been added"`
+	HasPush   bool                `inactive:"+" desc:"true if PushSet has been added"`
+	NDescs    int                 `desc:"number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased."`
+	Mem       *Memory             `view:"-" desc:"our parent memory manager"`
 
 	VkDescLayout vk.PipelineLayout       `view:"-" desc:"vulkan descriptor layout based on vars"`
 	VkDescPool   vk.DescriptorPool       `view:"-" desc:"vulkan descriptor pool, allocated for NDescs and the different descriptor pools"`
@@ -59,21 +59,21 @@ func (vs *Vars) VertexSet() *VarSet {
 	return vs.SetMap[VertexSet]
 }
 
-// AddPushConstSet adds a new push constant Set -- this is a special Set holding
+// AddPushSet adds a new push constant Set -- this is a special Set holding
 // values sent directly in the command buffer.
-func (vs *Vars) AddPushConstSet() *VarSet {
+func (vs *Vars) AddPushSet() *VarSet {
 	if vs.SetMap == nil {
 		vs.SetMap = make(map[int]*VarSet)
 	}
-	st := &VarSet{Set: PushConstSet}
-	vs.SetMap[PushConstSet] = st
-	vs.HasPushConst = true
+	st := &VarSet{Set: PushSet}
+	vs.SetMap[PushSet] = st
+	vs.HasPush = true
 	return st
 }
 
-// PushConstSet returns the PushConst Set -- a special Set holding push constants
-func (vs *Vars) PushConstSet() *VarSet {
-	return vs.SetMap[PushConstSet]
+// PushSet returns the Push Set -- a special Set holding push constants
+func (vs *Vars) PushSet() *VarSet {
+	return vs.SetMap[PushSet]
 }
 
 // AddSet adds a new non-Vertex Set for holding Uniforms, Storage, etc
@@ -174,7 +174,7 @@ func (vs *Vars) NSets() int {
 	if vs.HasVertex {
 		ex++
 	}
-	if vs.HasPushConst {
+	if vs.HasPush {
 		ex++
 	}
 	return len(vs.SetMap) - ex
@@ -185,8 +185,8 @@ func (vs *Vars) StartSet() int {
 	switch {
 	case vs.HasVertex:
 		return VertexSet
-	case vs.HasPushConst:
-		return PushConstSet
+	case vs.HasPush:
+		return PushSet
 	default:
 		return 0
 	}
@@ -217,10 +217,10 @@ func (vs *Vars) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 	return cfg
 }
 
-// VkPushConstConfig returns vulkan push constant ranges, only if PushConstSet used.
-func (vs *Vars) VkPushConstConfig() []vk.PushConstantRange {
-	if vs.HasPushConst {
-		return vs.SetMap[PushConstSet].VkPushConstConfig()
+// VkPushConfig returns vulkan push constant ranges, only if PushSet used.
+func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
+	if vs.HasPush {
+		return vs.SetMap[PushSet].VkPushConfig()
 	}
 	return nil
 }
@@ -317,7 +317,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 	}
 	vs.VkDescSets = dsets // for pipeline binding
 
-	pushc := vs.VkPushConstConfig()
+	pushc := vs.VkPushConfig()
 
 	var pipelineLayout vk.PipelineLayout
 	ret = vk.CreatePipelineLayout(dev, &vk.PipelineLayoutCreateInfo{
@@ -506,9 +506,11 @@ func (vs *Vars) BindVertexValIdx(varNm string, valIdx int) error {
 
 // BindDynValName dynamically binds given uniform or storage value
 // by name for given variable name, in given set.
-// Must have called BindDynVars for this variable first, prior to render.
 //
 // This only dynamically updates the offset to point to the specified val.
+// MUST call System.BindVars prior to any subsequent draw calls for this
+// new offset to be bound at the proper point in the command buffer prior
+// (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValsStart / End around this.
 //
@@ -523,9 +525,11 @@ func (vs *Vars) BindDynValName(set int, varNm, valNm string) error {
 
 // BindDynValIdx dynamically binds given uniform or storage value
 // by index for given variable name, in given set.
-// Must have called BindDynVars for this variable first, prior to render.
 //
 // This only dynamically updates the offset to point to the specified val.
+// MUST call System.BindVars prior to any subsequent draw calls for this
+// new offset to be bound at the proper point in the command buffer prior
+// (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValsStart / End around this.
 //
@@ -540,9 +544,11 @@ func (vs *Vars) BindDynValIdx(set int, varNm string, valIdx int) error {
 
 // BindDynVal dynamically binds given uniform or storage value
 // for given variable in given set.
-// Must have called BindDynVars for this variable first, prior to render.
 //
 // This only dynamically updates the offset to point to the specified val.
+// MUST call System.BindVars prior to any subsequent draw calls for this
+// new offset to be bound at the proper point in the command buffer prior
+// (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValsStart / End around this.
 //
@@ -581,7 +587,7 @@ func (vs *Vars) AllocHost(buff *MemBuff, offset int) int {
 	tsz := 0
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
-		if st == nil || st.Set == PushConstSet {
+		if st == nil || st.Set == PushSet {
 			continue
 		}
 		for _, vr := range st.Vars {
@@ -601,7 +607,7 @@ func (vs *Vars) Free(buff *MemBuff) {
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
-		if st == nil || st.Set == PushConstSet {
+		if st == nil || st.Set == PushSet {
 			continue
 		}
 		for _, vr := range st.Vars {
@@ -619,7 +625,7 @@ func (vs *Vars) ModRegs(bt BuffTypes) []MemReg {
 	var mods []MemReg
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
-		if st == nil || st.Set == PushConstSet {
+		if st == nil || st.Set == PushSet {
 			continue
 		}
 		for _, vr := range st.Vars {
@@ -638,7 +644,7 @@ func (vs *Vars) AllocTextures(mm *Memory) {
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
-		if st == nil || st.Set == PushConstSet {
+		if st == nil || st.Set == PushSet {
 			continue
 		}
 		for _, vr := range st.Vars {

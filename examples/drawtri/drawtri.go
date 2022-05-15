@@ -56,7 +56,6 @@ func main() {
 	pl := sy.NewPipeline("drawtri")
 	sy.ConfigRenderPass(&sf.Format, vgpu.UndefType)
 	sf.SetRenderPass(&sy.RenderPass)
-	pl.SetGraphicsDefaults()
 
 	pl.AddShaderFile("trianglelit", vgpu.VertexShader, "trianglelit.spv")
 	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
@@ -80,15 +79,14 @@ func main() {
 		// rt := time.Now()
 		idx := sf.AcquireNextImage()
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		pl.CmdPool.Reset()
-		pl.CmdPool.BeginCmd()
-		pl.BeginRenderPass(pl.CmdPool.Buff, sf.Frames[idx])
+		descIdx := 0 // if running multiple frames in parallel, need diff sets
+		cmd := sy.CmdPool.Buff
+		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)
 		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
-		pl.BindPipeline(pl.CmdPool.Buff, 0)
-		pl.Draw(pl.CmdPool.Buff, 3, 1, 0, 0)
-		pl.EndRenderPass(pl.CmdPool.Buff)
-		pl.CmdPool.EndCmd()
-		sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
+		pl.BindPipeline(cmd)
+		pl.Draw(cmd, 3, 1, 0, 0)
+		sy.EndRenderPass(cmd)
+		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
 		sf.PresentImage(idx)
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))

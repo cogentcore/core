@@ -20,6 +20,7 @@ type System struct {
 	Name        string               `desc:"optional name of this System"`
 	GPU         *GPU                 `desc:"gpu device"`
 	Device      Device               `desc:"logical device for this System -- has its own queues"`
+	CmdPool     CmdPool              `desc:"cmd pool specific to this system"`
 	Compute     bool                 `desc:"if true, this is a compute system -- otherwise is graphics"`
 	Pipelines   []*Pipeline          `desc:"all pipelines"`
 	PipelineMap map[string]*Pipeline `desc:"map of all pipelines -- names must be unique"`
@@ -37,6 +38,7 @@ func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {
 	sy.Name = name
 	sy.Compute = false
 	sy.Device = *dev
+	sy.InitCmd()
 	sy.Mem.Init(gp, &sy.Device)
 	return nil
 }
@@ -48,8 +50,15 @@ func (sy *System) InitCompute(gp *GPU, name string) error {
 	sy.Name = name
 	sy.Compute = true
 	sy.Device.Init(gp, vk.QueueComputeBit)
+	sy.InitCmd()
 	sy.Mem.Init(gp, &sy.Device)
 	return nil
+}
+
+// InitCmd initializes the command pool and buffer
+func (sy *System) InitCmd() {
+	sy.CmdPool.ConfigResettable(&sy.Device)
+	sy.CmdPool.NewBuffer(&sy.Device)
 }
 
 // Vars returns a pointer to the vars for this pipeline, which has vals within it
@@ -61,6 +70,7 @@ func (sy *System) Destroy() {
 	for _, pl := range sy.Pipelines {
 		pl.Destroy()
 	}
+	sy.CmdPool.Destroy(sy.Device.Device)
 	sy.Mem.Destroy(sy.Device.Device)
 	if sy.Compute {
 		sy.Device.Destroy()
@@ -110,6 +120,16 @@ func (sy *System) Config() {
 
 //////////////////////////////////////////////////////////////
 // Set graphics options
+
+// SetGraphicsDefaults configures all the default settings for all
+// graphics rendering pipelines (not for a compute pipeline)
+func (sy *System) SetGraphicsDefaults() {
+	for _, pl := range sy.Pipelines {
+		pl.SetGraphicsDefaults()
+	}
+	sy.SetClearColor(0, 0, 0, 1)
+	sy.SetClearDepthStencil(1, 0)
+}
 
 // SetTopology sets the topology of vertex position data.
 // TriangleList is the default.
@@ -167,23 +187,79 @@ func (sy *System) SetColorBlend(alphaBlend bool) {
 // SetClearOff turns off clearing at start of rendering.
 // call SetClearColor to turn back on.
 func (sy *System) SetClearOff() {
-	for _, pl := range sy.Pipelines {
-		pl.SetClearOff()
-	}
+	sy.RenderPass.SetClearOff()
 }
 
 // SetClearColor sets the RGBA colors to set when starting new render
 // For all pipelines, to keep graphics settings consistent.
 func (sy *System) SetClearColor(r, g, b, a float32) {
-	for _, pl := range sy.Pipelines {
-		pl.SetClearColor(r, g, b, a)
-	}
+	sy.RenderPass.SetClearColor(r, g, b, a)
 }
 
 // SetClearDepthStencil sets the depth and stencil values when starting new render
 // For all pipelines, to keep graphics settings consistent.
 func (sy *System) SetClearDepthStencil(depth float32, stencil uint32) {
-	for _, pl := range sy.Pipelines {
-		pl.SetClearDepthStencil(depth, stencil)
+	sy.RenderPass.SetClearDepthStencil(depth, stencil)
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Rendering
+
+// BindVars adds command to the given command buffer
+// to bind the Vars descriptors, for given collection of descriptors descIdx
+// (see Vars NDescs for info).
+func (sy *System) BindVars(cmd vk.CommandBuffer, descIdx int) {
+	vars := sy.Vars()
+	if len(vars.SetMap) == 0 {
+		return
 	}
+	dset := vars.VkDescSets[descIdx]
+	doff := vars.DynOffs[descIdx]
+
+	if sy.Compute {
+		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, vars.VkDescLayout,
+			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
+	} else {
+		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, vars.VkDescLayout,
+			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
+	}
+
+}
+
+// ResetBindVars adds command to the given command buffer
+// to bind the Vars descriptors, for given collection of descriptors descIdx
+// (see Vars NDescs for info).
+func (sy *System) ResetBindVars(cmd vk.CommandBuffer, descIdx int) {
+	CmdResetBegin(cmd)
+	sy.BindVars(cmd, descIdx)
+}
+
+// BeginRenderPass adds commands to the given command buffer
+// to start the render pass on given framebuffer.
+// Optionally clears the frame according to the current ClearVals.
+// Also Binds descriptor sets to command buffer for given collection
+// of descriptors descIdx (see Vars NDescs for info).
+func (sy *System) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
+	sy.RenderPass.BeginRenderPass(cmd, fr)
+	sy.BindVars(cmd, descIdx)
+}
+
+// ResetBeginRenderPass adds commands to the given command buffer
+// to reset command buffer and call begin on it, then starts
+// the render pass on given framebuffer (BeginRenderPass)
+// Optionally clears the frame according to the current ClearVals.
+// Also Binds descriptor sets to command buffer for given collection
+// of descriptors descIdx (see Vars NDescs for info).
+func (sy *System) ResetBeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
+	CmdResetBegin(cmd)
+	sy.BeginRenderPass(cmd, fr, descIdx)
+}
+
+// EndRenderPass adds commands to the given command buffer
+// to end the render pass.  It does not call EndCommandBuffer,
+// in case any further commands are to be added.
+func (sy *System) EndRenderPass(cmd vk.CommandBuffer) {
+	// Note that ending the renderpass changes the image's layout from
+	// vk.ImageLayoutColorAttachmentOptimal to vk.ImageLayoutPresentSrc
+	vk.CmdEndRenderPass(cmd)
 }

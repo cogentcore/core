@@ -6,7 +6,6 @@ package vphong
 
 import (
 	"embed"
-	"unsafe"
 
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
@@ -62,7 +61,7 @@ func (ph *Phong) ConfigSys() {
 	tpl.AddShaderCode("texture_frag", vgpu.FragmentShader, cb)
 
 	vars := ph.Sys.Vars()
-	pcset := vars.AddPushConstSet() // TexIdx
+	pcset := vars.AddPushSet() // TexIdx
 	vset := vars.AddVertexSet()
 	matset := vars.AddSet()   // set = 0
 	clrset := vars.AddSet()   // set = 1
@@ -80,7 +79,7 @@ func (ph *Phong) ConfigSys() {
 
 	matset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
 
-	pcset.AddStruct("TexIdx", 4, 1, vgpu.PushConst, vgpu.FragmentShader)
+	pcset.AddStruct("TexIdx", 4, 1, vgpu.Push, vgpu.FragmentShader)
 	clrset.AddStruct("Color", vec4sz*4, 1, vgpu.Uniform, vgpu.FragmentShader)
 
 	nliteset.AddStruct("NLights", 4*4, 1, vgpu.Uniform, vgpu.FragmentShader)
@@ -99,24 +98,26 @@ func (ph *Phong) ConfigSys() {
 	// cset.ConfigVals(ph.Impl.MaxColors)
 
 	// note: add all values per above before doing Config
-	ph.Sys.Config()
+	// ph.Sys.Config()
 
-	// note: first val in set is offset
-	rectPos, _ := posv.Vals.ValByIdxTry(0)
-	rectPosA := rectPos.Floats32()
-	rectPosA.Set(0,
-		0.0, 0.0,
-		0.0, 1.0,
-		1.0, 0.0,
-		1.0, 1.0)
-	rectPos.SetMod()
+	/*
+		// note: first val in set is offset
+		rectPos, _ := posv.Vals.ValByIdxTry(0)
+		rectPosA := rectPos.Floats32()
+		rectPosA.Set(0,
+			0.0, 0.0,
+			0.0, 1.0,
+			1.0, 0.0,
+			1.0, 1.0)
+		rectPos.SetMod()
 
-	rectIdx, _ := idxv.Vals.ValByIdxTry(0)
-	idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
-	rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+		rectIdx, _ := idxv.Vals.ValByIdxTry(0)
+		idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
+		rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
 
-	ph.Sys.Mem.SyncToGPU()
+		ph.Sys.Mem.SyncToGPU()
 
-	vars.BindVertexValIdx("Pos", 0)
-	vars.BindVertexValIdx("Index", 0)
+		vars.BindVertexValIdx("Pos", 0)
+		vars.BindVertexValIdx("Index", 0)
+	*/
 }

@@ -82,11 +82,11 @@ func (dw *Drawer) DrawImpl(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) e
 	_, tx, _ := vars.ValByIdxTry(0, "Tex", 0)
 	tmat := dw.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op, false)
 
-	matv, _ := vars.VarByNameTry(vgpu.PushConstSet, "Mats")
+	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mats")
 	dpl := dw.Sys.PipelineMap["draw"]
 
-	cmd := dpl.CmdPool.Buff
-	dpl.PushConstant(cmd, matv, vk.ShaderStageVertexBit, unsafe.Pointer(tmat))
+	cmd := dw.Sys.CmdPool.Buff
+	dpl.Push(cmd, matv, vk.ShaderStageVertexBit, unsafe.Pointer(tmat))
 	dpl.DrawVertex(cmd, 0)
 	return nil
 }
@@ -94,29 +94,27 @@ func (dw *Drawer) DrawImpl(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) e
 // StartDraw starts image drawing rendering process on render target
 // No images can be added or set after this point.
 func (dw *Drawer) StartDraw() {
-	dw.Sys.Mem.SyncToGPU()
-	vars := dw.Sys.Vars()
+	sy := &dw.Sys
+	sy.Mem.SyncToGPU()
+	vars := sy.Vars()
 	vars.BindVarsStart(0)
 	vars.BindStatVars(0) // binds images
 	vars.BindVarsEnd()
-	dpl := dw.Sys.PipelineMap["draw"]
+	dpl := sy.PipelineMap["draw"]
 	if dw.Surf != nil {
 		dw.Impl.SurfIdx = dw.Surf.AcquireNextImage()
-		cmd := dpl.CmdPool.Buff
-		vgpu.CmdReset(cmd)
-		vgpu.CmdBegin(cmd)
-		dpl.BeginRenderPass(cmd, dw.Surf.Frames[dw.Impl.SurfIdx])
-		dpl.BindPipeline(cmd, 0)
+		cmd := sy.CmdPool.Buff
+		sy.ResetBeginRenderPass(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
+		dpl.BindPipeline(cmd)
 	}
 }
 
 // EndDraw ends image drawing rendering process on render target
 func (dw *Drawer) EndDraw() {
-	dpl := dw.Sys.PipelineMap["draw"]
-	cmd := dpl.CmdPool.Buff
+	sy := &dw.Sys
+	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
-		dpl.EndRenderPass(cmd)
-		vgpu.CmdEnd(cmd)
+		sy.EndRenderPass(cmd)
 		dw.Surf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		dw.Surf.PresentImage(dw.Impl.SurfIdx)
 	}

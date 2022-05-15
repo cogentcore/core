@@ -15,17 +15,16 @@ import (
 	vk "github.com/goki/vulkan"
 )
 
-// Pipeline manages a sequence of compute steps, which are fixed once configured.
-// Each has an associated set of Vars, which could be maintained collectively for
-// multiple different such piplines.
+// Pipeline manages Shader program(s) that accomplish a specific
+// type of rendering or compute function, using Vars / Vals
+// defined by the overall System.
+// In the graphics context, each pipeline could handle a different
+// class of materials (textures, Phong lighting, etc).
 type Pipeline struct {
-	Name       string             `desc:"unique name of this pipeline"`
-	Sys        *System            `desc:"system that we belong to -- use for device, vars, etc"`
-	CmdPool    CmdPool            `desc:"cmd pool specific to this pipeline"`
-	Shaders    []*Shader          `desc:"shaders in order added -- should be execution order"`
-	ShaderMap  map[string]*Shader `desc:"shaders loaded for this pipeline"`
-	RenderPass RenderPass         `desc:"rendering info and depth buffer for this pipeline"`
-	ClearVals  []vk.ClearValue    `desc:"values for clearing image when starting render pass"`
+	Name      string             `desc:"unique name of this pipeline"`
+	Sys       *System            `desc:"system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc"`
+	Shaders   []*Shader          `desc:"shaders in order added -- should be execution order"`
+	ShaderMap map[string]*Shader `desc:"shaders loaded for this pipeline"`
 
 	VkConfig   vk.GraphicsPipelineCreateInfo `desc:"vulkan pipeline configuration options"`
 	VkPipeline vk.Pipeline                   `desc:"the created vulkan pipeline"`
@@ -91,9 +90,7 @@ func (pl *Pipeline) Destroy() {
 	pl.FreeShaders()
 
 	vk.DestroyPipelineCache(pl.Sys.Device.Device, pl.VkCache, nil)
-	pl.RenderPass.Destroy()
 	vk.DestroyPipeline(pl.Sys.Device.Device, pl.VkPipeline, nil)
-	pl.CmdPool.Destroy(pl.Sys.Device.Device)
 }
 
 // Init initializes pipeline as part of given System
@@ -103,8 +100,7 @@ func (pl *Pipeline) Init(sy *System) {
 }
 
 func (pl *Pipeline) InitPipeline() {
-	pl.CmdPool.ConfigResettable(&pl.Sys.Device)
-	pl.CmdPool.NewBuffer(&pl.Sys.Device)
+	pl.SetGraphicsDefaults()
 }
 
 // Config is called once all the VkConfig options have been set
@@ -122,7 +118,7 @@ func (pl *Pipeline) Config() {
 	pl.VkConfig.SType = vk.StructureTypeGraphicsPipelineCreateInfo
 	pl.VkConfig.PVertexInputState = vars.VkVertexConfig()
 	pl.VkConfig.Layout = vars.VkDescLayout
-	pl.VkConfig.RenderPass = pl.Sys.RenderPass.RenderPass
+	pl.VkConfig.RenderPass = pl.Sys.RenderPass.VkClearPass
 	pl.VkConfig.PMultisampleState = &vk.PipelineMultisampleStateCreateInfo{
 		SType:                vk.StructureTypePipelineMultisampleStateCreateInfo,
 		RasterizationSamples: pl.Sys.RenderPass.Format.Samples,
@@ -217,8 +213,6 @@ func (pl *Pipeline) SetGraphicsDefaults() {
 	pl.SetTopology(TriangleList, false)
 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 	pl.SetColorBlend(true) // alpha blending
-	pl.SetClearColor(0, 0, 0, 1)
-	pl.SetClearDepthStencil(1, 0)
 }
 
 // SetDynamicState sets dynamic state (Scissor, Viewport, what else?)
@@ -329,80 +323,20 @@ func (pl *Pipeline) SetColorBlend(alphaBlend bool) {
 	}
 }
 
-// SetClearOff turns off clearing at start of rendering.
-// call SetClearColor to turn back on.
-func (pl *Pipeline) SetClearOff() {
-	pl.ClearVals = nil
-}
-
-// SetClearColor sets the RGBA colors to set when starting new render
-func (pl *Pipeline) SetClearColor(r, g, b, a float32) {
-	if len(pl.ClearVals) == 0 {
-		pl.ClearVals = make([]vk.ClearValue, 2)
-	}
-	pl.ClearVals[0].SetColor([]float32{r, g, b, a})
-}
-
-// SetClearDepthStencil sets the depth and stencil values when starting new render
-func (pl *Pipeline) SetClearDepthStencil(depth float32, stencil uint32) {
-	if len(pl.ClearVals) == 0 {
-		pl.ClearVals = make([]vk.ClearValue, 2)
-	}
-	pl.ClearVals[1].SetDepthStencil(depth, stencil)
-}
-
 ////////////////////////////////////////////////////////
 // Graphics render
 
-// BeginRenderPass adds commands to the given command buffer
-// to start the render pass on given framebuffer.
-// Clears the frame according to the ClearVals.
-func (pl *Pipeline) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer) {
-	w, h := fr.Image.Format.Size32()
-	vk.CmdBeginRenderPass(cmd, &vk.RenderPassBeginInfo{
-		SType:       vk.StructureTypeRenderPassBeginInfo,
-		RenderPass:  pl.Sys.RenderPass.RenderPass,
-		Framebuffer: fr.Framebuffer,
-		RenderArea: vk.Rect2D{
-			Offset: vk.Offset2D{X: 0, Y: 0},
-			Extent: vk.Extent2D{Width: w, Height: h},
-		},
-		ClearValueCount: uint32(len(pl.ClearVals)),
-		PClearValues:    pl.ClearVals,
-	}, vk.SubpassContentsInline)
-
-	vk.CmdSetViewport(cmd, 0, 1, []vk.Viewport{{
-		Width:    float32(w),
-		Height:   float32(h),
-		MinDepth: 0.0,
-		MaxDepth: 1.0,
-	}})
-
-	vk.CmdSetScissor(cmd, 0, 1, []vk.Rect2D{{
-		Offset: vk.Offset2D{X: 0, Y: 0},
-		Extent: vk.Extent2D{Width: w, Height: h},
-	}})
-}
-
 // BindPipeline adds commands to the given command buffer to bind
-// this pipeline to command buffer and bind descriptor sets for variable
-// values to use, as determined by the descIdx index (see Vars NDescs for info).
-// BeginRenderPass must have been called at some point before this.
-func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer, descIdx int) {
+// this pipeline to command buffer.
+// System BeginRenderPass must have been called at some point before this.
+func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointGraphics, pl.VkPipeline)
-	vs := pl.Vars()
-	if len(vs.SetMap) > 0 {
-		dset := vs.VkDescSets[descIdx]
-		doff := vs.DynOffs[descIdx]
-		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, vs.VkDescLayout,
-			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
-	}
 }
 
-// PushConstant pushes given value as a push constant for given
+// Push pushes given value as a push constant for given
 // registered push constant variable.
 // BindPipeline must have been called before this.
-func (pl *Pipeline) PushConstant(cmd vk.CommandBuffer, vr *Var, shader vk.ShaderStageFlagBits, val unsafe.Pointer) {
+func (pl *Pipeline) Push(cmd vk.CommandBuffer, vr *Var, shader vk.ShaderStageFlagBits, val unsafe.Pointer) {
 	vs := pl.Vars()
 	vk.CmdPushConstants(cmd, vs.VkDescLayout, vk.ShaderStageFlags(shader), uint32(vr.Offset), uint32(vr.SizeOf), val)
 }
@@ -465,33 +399,8 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIdx int) {
 // for given descIdx set of descriptors (see Vars NDescs for info).
 // This is the standard unit of drawing between Begin and End.
 func (pl *Pipeline) BindDrawVertex(cmd vk.CommandBuffer, descIdx int) {
-	pl.BindPipeline(cmd, descIdx)
+	pl.BindPipeline(cmd)
 	pl.DrawVertex(cmd, descIdx)
-}
-
-// EndRenderPass adds commands to the given command buffer
-// to end the render pass.  It does not call EndCommandBuffer,
-// in case any further commands are to be added.
-func (pl *Pipeline) EndRenderPass(cmd vk.CommandBuffer) {
-	// Note that ending the renderpass changes the image's layout from
-	// vk.ImageLayoutColorAttachmentOptimal to vk.ImageLayoutPresentSrc
-	vk.CmdEndRenderPass(cmd)
-}
-
-// FullStdRender adds commands to the given command buffer
-// to perform a full standard render using Vertex input vars:
-// CmdReset, CmdBegin, BeginRenderPass, BindPipeline,
-// DrawVertex, EndRenderPass, EndCmd.
-// for given descIdx set of descriptors (see Vars NDescs for info).
-// This is mainly for demo / informational purposes as usually multiple
-// pipeline draws are performed between Begin and End.
-func (pl *Pipeline) FullStdRender(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
-	CmdReset(cmd)
-	CmdBegin(cmd)
-	pl.BeginRenderPass(cmd, fr)
-	pl.BindDrawVertex(cmd, descIdx)
-	pl.EndRenderPass(cmd)
-	CmdEnd(cmd)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -500,33 +409,17 @@ func (pl *Pipeline) FullStdRender(cmd vk.CommandBuffer, fr *Framebuffer, descIdx
 // ComputeCommand adds commands to run the compute shader for given
 // number of computational elements along 3 dimensions,
 // which are passed as indexes into the shader.
-// The values have to be bound to the vars prior to calling this.
-// descIdx index determines which group of var val bindings to use
-// (see Vars NDescs for info).
-func (pl *Pipeline) ComputeCommand(cmd vk.CommandBuffer, descIdx int, nx, ny, nz int) {
+func (pl *Pipeline) ComputeCommand(cmd vk.CommandBuffer, nx, ny, nz int) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointCompute, pl.VkPipeline)
-
-	vs := pl.Vars()
-	if len(vs.SetMap) > 0 {
-		dset := vs.VkDescSets[descIdx]
-		doff := vs.DynOffs[descIdx]
-		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, vs.VkDescLayout,
-			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
-	}
-
 	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
 }
 
 // RunComputeWait runs the compute shader for given
 // number of computational elements along 3 dimensions,
 // which are passed as indexes into the shader.
-// for given descIdx set of descriptors (see Vars NDescs for info).
-// The values have to be bound to the vars prior to calling this.
 // Submits the run command and waits for the queue to finish so the
 // results will be available immediately after this.
-func (pl *Pipeline) RunComputeWait(cmd vk.CommandBuffer, descIdx int, nx, ny, nz int) {
-	CmdReset(cmd)
-	CmdBegin(cmd)
-	pl.ComputeCommand(cmd, descIdx, nx, ny, nz)
+func (pl *Pipeline) RunComputeWait(cmd vk.CommandBuffer, nx, ny, nz int) {
+	pl.ComputeCommand(cmd, nx, ny, nz)
 	CmdSubmitWait(cmd, &pl.Sys.Device)
 }

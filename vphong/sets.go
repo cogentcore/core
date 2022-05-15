@@ -6,14 +6,14 @@ package vphong
 
 import "github.com/goki/ki/kit"
 
-// Sets are variable set numbers
+// Sets are variable set numbers - must coordinate with System sets!
 type Sets int
 
 const (
 	MatsSet Sets = iota
-	ColorsSet
-	NLightsSet
-	LightsSet
+	ColorSet
+	NLightSet
+	LightSet
 	TexSet
 	SetsN
 )

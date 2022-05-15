@@ -162,6 +162,13 @@ func CmdReset(cmd vk.CommandBuffer) {
 	vk.ResetCommandBuffer(cmd, 0)
 }
 
+// CmdResetBegin resets the command buffer so it is ready for recording new commands.
+// and then calls CmdBegin to begin recording
+func CmdResetBegin(cmd vk.CommandBuffer) {
+	CmdReset(cmd)
+	CmdBegin(cmd)
+}
+
 //////////////////////////////////////////////////////////////
 // Semaphors & Fences
 

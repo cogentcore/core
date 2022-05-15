@@ -55,7 +55,7 @@ func (mb *MemBuff) AllocHost(dev vk.Device, bsz int) bool {
 	mb.Size = bsz
 	mb.HostPtr = MapMemory(dev, mb.HostMem, mb.Size)
 
-	if mb.Type != ImageBuff {
+	if mb.Type != TextureBuff {
 		mb.Dev = NewBuffer(dev, bsz, devUse)
 	}
 
@@ -73,7 +73,7 @@ func (mb *MemBuff) Free(dev vk.Device) {
 	if mb.Size == 0 {
 		return
 	}
-	if mb.Type != ImageBuff {
+	if mb.Type != TextureBuff {
 		FreeBuffMem(dev, &mb.DevMem)
 		vk.DestroyBuffer(dev, mb.Dev, nil)
 	}
@@ -102,9 +102,9 @@ const (
 	// mostly for compute shaders
 	StorageBuff
 
-	// ImageBuff holds Images / Textures -- hardware optimizes allocation
+	// TextureBuff holds Images / Textures -- hardware optimizes allocation
 	// on device side, and staging-side is general
-	ImageBuff
+	TextureBuff
 
 	BuffTypesN
 )
@@ -128,7 +128,7 @@ func (bt BuffTypes) AlignBytes(gp *GPU) int {
 		return int(gp.GPUProps.Limits.MinStorageBufferOffsetAlignment)
 	case UniformBuff, VtxIdxBuff:
 		return int(gp.GPUProps.Limits.MinUniformBufferOffsetAlignment)
-	case ImageBuff:
+	case TextureBuff:
 		return int(gp.GPUProps.Limits.MinTexelBufferOffsetAlignment)
 	}
 	return int(gp.GPUProps.Limits.MinUniformBufferOffsetAlignment)
@@ -139,7 +139,7 @@ var BuffUsages = map[BuffTypes]vk.BufferUsageFlagBits{
 	VtxIdxBuff:  vk.BufferUsageVertexBufferBit | vk.BufferUsageIndexBufferBit,
 	UniformBuff: vk.BufferUsageUniformBufferBit | vk.BufferUsageUniformTexelBufferBit,
 	StorageBuff: vk.BufferUsageStorageBufferBit | vk.BufferUsageStorageTexelBufferBit,
-	ImageBuff:   vk.BufferUsageStorageTexelBufferBit,
+	TextureBuff: vk.BufferUsageStorageTexelBufferBit,
 }
 
 /////////////////////////////////////////////////////////////////////

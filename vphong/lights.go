@@ -65,26 +65,26 @@ type SpotLight struct {
 // ConfigLights configures the rendering for the lights that have been added.
 func (ph *Phong) ConfigLights() {
 	vars := ph.Sys.Vars()
-	_, nl, _ := vars.ValByIdxTry(int(NLightsSet), "NLights", 0)
+	_, nl, _ := vars.ValByIdxTry(int(NLightSet), "NLights", 0)
 	nl.CopyBytes(unsafe.Pointer(&ph.NLights))
 
 	for i := 0; i < int(ph.NLights.Ambient); i++ {
-		_, al, _ := vars.ValByIdxTry(int(LightsSet), "AmbLights", i)
+		_, al, _ := vars.ValByIdxTry(int(LightSet), "AmbLights", i)
 		al.CopyBytes(unsafe.Pointer(&ph.Ambient[i]))
 	}
 
 	for i := 0; i < int(ph.NLights.Dir); i++ {
-		_, dl, _ := vars.ValByIdxTry(int(LightsSet), "DirLights", i)
+		_, dl, _ := vars.ValByIdxTry(int(LightSet), "DirLights", i)
 		dl.CopyBytes(unsafe.Pointer(&ph.Dir[i]))
 	}
 
 	for i := 0; i < int(ph.NLights.Point); i++ {
-		_, pl, _ := vars.ValByIdxTry(int(LightsSet), "PointLights", i)
+		_, pl, _ := vars.ValByIdxTry(int(LightSet), "PointLights", i)
 		pl.CopyBytes(unsafe.Pointer(&ph.Point[i]))
 	}
 
 	for i := 0; i < int(ph.NLights.Spot); i++ {
-		_, sl, _ := vars.ValByIdxTry(int(LightsSet), "SpotLights", i)
+		_, sl, _ := vars.ValByIdxTry(int(LightSet), "SpotLights", i)
 		sl.CopyBytes(unsafe.Pointer(&ph.Spot[i]))
 	}
 	ph.Sys.Mem.SyncToGPU()

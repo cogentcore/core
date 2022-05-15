@@ -91,16 +91,15 @@ func main() {
 	pl := sy.NewPipeline("texture")
 	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
 	sf.SetRenderPass(&sy.RenderPass)
-	pl.SetGraphicsDefaults()
-	pl.SetClearColor(0.2, 0.2, 0.2, 1)
-	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+	sy.SetClearColor(0.2, 0.2, 0.2, 1)
+	sy.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 
 	pl.AddShaderFile("texture_vert", vgpu.VertexShader, "texture_vert.spv")
 	pl.AddShaderFile("texture_frag", vgpu.FragmentShader, "texture_frag.spv")
 
 	vars := sy.Vars()
 	vset := vars.AddVertexSet()
-	pcset := vars.AddPushConstSet()
+	pcset := vars.AddPushSet()
 	uset := vars.AddSet()
 	txset := vars.AddSet()
 
@@ -115,7 +114,7 @@ func main() {
 
 	camv := uset.AddStruct("Camera", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
 
-	txidxv := pcset.Add("TexIdx", vgpu.Int32, 1, vgpu.PushConst, vgpu.FragmentShader)
+	txidxv := pcset.Add("TexIdx", vgpu.Int32, 1, vgpu.Push, vgpu.FragmentShader)
 	tximgv := txset.Add("TexSampler", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 
 	vset.ConfigVals(1) // val per var
@@ -217,16 +216,13 @@ func main() {
 
 		idx := sf.AcquireNextImage()
 
-		cmd := pl.CmdPool.Buff
+		cmd := sy.CmdPool.Buff
+		descIdx := 0 // if running multiple frames in parallel, need diff sets
 
-		// pl.FullStdRender(cmd, sf.Frames[idx], 0)
-		vgpu.CmdReset(cmd)
-		vgpu.CmdBegin(cmd)
-		pl.BeginRenderPass(cmd, sf.Frames[idx])
-		pl.PushConstant(cmd, txidxv, vk.ShaderStageFragmentBit, unsafe.Pointer(&imgIdx))
-		pl.BindDrawVertex(cmd, 0)
-		pl.EndRenderPass(cmd)
-		vgpu.CmdEnd(cmd)
+		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)
+		pl.Push(cmd, txidxv, vk.ShaderStageFragmentBit, unsafe.Pointer(&imgIdx))
+		pl.BindDrawVertex(cmd, descIdx)
+		sy.EndRenderPass(cmd)
 
 		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		sf.PresentImage(idx)

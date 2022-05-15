@@ -20,7 +20,6 @@ type Surface struct {
 	GPU            *GPU           `desc:"pointer to gpu device, for convenience"`
 	Device         Device         `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
 	RenderPass     *RenderPass    `desc:"the RenderPass for this Surface, typically from a System"`
-	CmdPool        CmdPool        `desc:"command pool which must be used for all surface rendering commands, to enable the sync logic to work properly.  It is created in Init and can be Reset() between uses."`
 	Format         ImageFormat    `desc:"has the current swapchain image format and dimensions"`
 	DesiredFormats []vk.Format    `desc:"ordered list of surface formats to select"`
 	NFrames        int            `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
@@ -85,8 +84,6 @@ func (sf *Surface) Init(gp *GPU, vs vk.Surface) error {
 	}
 
 	sf.Device.MakeDevice(gp)
-	sf.CmdPool.ConfigResettable(&sf.Device)
-	sf.CmdPool.NewBuffer(&sf.Device)
 	sf.ConfigSwapchain()
 	return nil
 }
@@ -292,13 +289,11 @@ func (sf *Surface) ReConfigFrames() {
 }
 
 func (sf *Surface) Destroy() {
-	dev := sf.Device.Device
 	sf.FreeSwapchain()
 	if sf.Surface != vk.NullSurface {
 		vk.DestroySurface(sf.GPU.Instance, sf.Surface, nil)
 		sf.Surface = vk.NullSurface
 	}
-	sf.CmdPool.Destroy(dev)
 	sf.Device.Destroy()
 	sf.GPU = nil
 }
@@ -329,10 +324,12 @@ func (sf *Surface) AcquireNextImage() uint32 {
 }
 
 // SubmitRender submits a rendering command that must have been added
-// to the sf.CmdPool.Buff buffer.  This buffer triggers the associated
-// Fence logic to control the sequencing of render commands over time.
+// to the given command buffer, calling CmdEnd on the buffer first.
+// This buffer triggers the associated Fence logic to control the
+// sequencing of render commands over time.
 // The ImageAcquired semaphore efore the command is run.
 func (sf *Surface) SubmitRender(cmd vk.CommandBuffer) {
+	CmdEnd(cmd)
 	ret := vk.QueueSubmit(sf.Device.Queue, 1, []vk.SubmitInfo{{
 		SType: vk.StructureTypeSubmitInfo,
 		PWaitDstStageMask: []vk.PipelineStageFlags{

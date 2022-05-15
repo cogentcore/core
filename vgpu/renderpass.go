@@ -20,20 +20,25 @@ import (
 // each Pipeline, and any associated Framebuffers
 // include the RenderPass info. and its Depth buffer.
 type RenderPass struct {
-	Dev        vk.Device     `desc:"the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface"`
-	Format     ImageFormat   `desc:"image format information for the framebuffer we render to"`
-	RenderPass vk.RenderPass `desc:"the vulkan renderpass handle"`
-	Depth      Image         `desc:"the associated depth buffer, if set"`
-	HasDepth   bool          `desc:"set to true if configured with depth buffer"`
-	NoClear    bool          `desc:"set this to true if the rendering should not clear the pixels at the start of a render pass -- must be set prior to calling Config method."`
+	Dev       vk.Device       `desc:"the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface"`
+	Format    ImageFormat     `desc:"image format information for the framebuffer we render to"`
+	Depth     Image           `desc:"the associated depth buffer, if set"`
+	HasDepth  bool            `desc:"set to true if configured with depth buffer"`
+	NoClear   bool            `desc:"set this to true if the rendering should not clear the pixels at the start of a render pass -- must be set prior to calling Config method."`
+	ClearVals []vk.ClearValue `desc:"values for clearing image when starting render pass"`
+
+	VkClearPass vk.RenderPass `desc:"the vulkan renderpass config that clears target first"`
+	VkLoadPass  vk.RenderPass `desc:"the vulkan renderpass config that does not clear target first (loads previous)"`
 }
 
 func (rp *RenderPass) Destroy() {
-	if rp.RenderPass == nil {
+	if rp.VkClearPass == nil {
 		return
 	}
-	vk.DestroyRenderPass(rp.Dev, rp.RenderPass, nil)
-	rp.RenderPass = nil
+	vk.DestroyRenderPass(rp.Dev, rp.VkClearPass, nil)
+	vk.DestroyRenderPass(rp.Dev, rp.VkLoadPass, nil)
+	rp.VkClearPass = nil
+	rp.VkLoadPass = nil
 	rp.Depth.Destroy()
 }
 
@@ -42,6 +47,13 @@ func (rp *RenderPass) Destroy() {
 // based on the given image format and depth image format
 // (pass UndefType for no depth buffer).
 func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types) {
+	rp.SetClearColor(0, 0, 0, 1)
+	rp.SetClearDepthStencil(1, 0)
+	rp.VkClearPass = rp.ConfigImpl(dev, imgFmt, depthFmt, true)
+	rp.VkLoadPass = rp.ConfigImpl(dev, imgFmt, depthFmt, false)
+}
+
+func (rp *RenderPass) ConfigImpl(dev vk.Device, imgFmt *ImageFormat, depthFmt Types, clear bool) vk.RenderPass {
 	// The initial layout for the color and depth attachments will be vk.LayoutUndefined
 	// because at the start of the renderpass, we don't care about their contents.
 	// At the start of the subpass, the color attachment's layout will be transitioned
@@ -65,7 +77,7 @@ func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types)
 		FinalLayout:    vk.ImageLayoutPresentSrc,
 	}
 
-	if rp.NoClear {
+	if !clear {
 		ca.LoadOp = vk.AttachmentLoadOpLoad
 		ca.InitialLayout = vk.ImageLayoutPresentSrc
 	}
@@ -122,11 +134,70 @@ func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types)
 
 	ret := vk.CreateRenderPass(dev, rpcreate, nil, &renderPass)
 	IfPanic(NewError(ret))
-	rp.RenderPass = renderPass
+	return renderPass
 }
 
 // SetDepthSize sets size of the Depth buffer, allocating a new one as needed
 func (rp *RenderPass) SetDepthSize(size image.Point) {
 	rp.Depth.SetSize(size)
 	rp.Depth.ConfigDepthView()
+}
+
+// SetClearOff turns off clearing at start of rendering.
+// call SetClearColor to turn back on.
+func (rp *RenderPass) SetClearOff() {
+	rp.NoClear = true
+}
+
+// SetClearColor sets the RGBA colors to set when starting new render
+func (rp *RenderPass) SetClearColor(r, g, b, a float32) {
+	if len(rp.ClearVals) == 0 {
+		rp.ClearVals = make([]vk.ClearValue, 2)
+	}
+	rp.ClearVals[0].SetColor([]float32{r, g, b, a})
+}
+
+// SetClearDepthStencil sets the depth and stencil values when starting new render
+func (rp *RenderPass) SetClearDepthStencil(depth float32, stencil uint32) {
+	if len(rp.ClearVals) == 0 {
+		rp.ClearVals = make([]vk.ClearValue, 2)
+	}
+	rp.ClearVals[1].SetDepthStencil(depth, stencil)
+}
+
+// BeginRenderPass adds commands to the given command buffer
+// to start the render pass on given framebuffer.
+// Clears the frame according to the ClearVals.
+func (rp *RenderPass) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer) {
+	w, h := fr.Image.Format.Size32()
+	clearVals := rp.ClearVals
+	vrp := rp.VkClearPass
+	if rp.NoClear && fr.HasCleared {
+		clearVals = nil
+		vrp = rp.VkLoadPass
+	}
+	fr.HasCleared = true
+	vk.CmdBeginRenderPass(cmd, &vk.RenderPassBeginInfo{
+		SType:       vk.StructureTypeRenderPassBeginInfo,
+		RenderPass:  vrp,
+		Framebuffer: fr.Framebuffer,
+		RenderArea: vk.Rect2D{
+			Offset: vk.Offset2D{X: 0, Y: 0},
+			Extent: vk.Extent2D{Width: w, Height: h},
+		},
+		ClearValueCount: uint32(len(clearVals)),
+		PClearValues:    clearVals,
+	}, vk.SubpassContentsInline)
+
+	vk.CmdSetViewport(cmd, 0, 1, []vk.Viewport{{
+		Width:    float32(w),
+		Height:   float32(h),
+		MinDepth: 0.0,
+		MaxDepth: 1.0,
+	}})
+
+	vk.CmdSetScissor(cmd, 0, 1, []vk.Rect2D{{
+		Offset: vk.Offset2D{X: 0, Y: 0},
+		Extent: vk.Extent2D{Width: w, Height: h},
+	}})
 }

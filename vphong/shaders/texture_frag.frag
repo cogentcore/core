@@ -8,10 +8,6 @@ layout(set = 1, binding = 0) uniform ColorU {
 	vec3 ShinyBright; // x = Shiny, y = Bright
 };
 
-// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VK_EXT_descriptor_indexing.html
-// this is a key set of extensions that would allow textures to be fully dynamic
-// for now, we use a fixed set of textures
-// 1.2: https://github.com/goki/vulkan/issues/43
 layout(set = 3, binding = 0) uniform sampler2D TexSampler[];
 
 layout(push_constant) uniform TexIdxU {

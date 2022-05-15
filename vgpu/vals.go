@@ -219,8 +219,14 @@ type Vals struct {
 }
 
 // ConfigVals configures given number of values in the list for given variable.
-// Any existing vals will be deleted -- must free all associated memory prior!
-func (vs *Vals) ConfigVals(vr *Var, nvals int) {
+// If the same number of vals is given, nothing is done, so it is safe to call
+// repeatedly.  Otherwise, any existing vals will be deleted -- the Memory system
+// must free all associated memory prior!
+// Returns true if new config made, else false if same size.
+func (vs *Vals) ConfigVals(vr *Var, nvals int) bool {
+	if len(vs.Vals) == nvals {
+		return false
+	}
 	vs.NameMap = make(map[string]*Val, nvals)
 	vs.Vals = make([]*Val, nvals)
 	for i := 0; i < nvals; i++ {
@@ -231,6 +237,7 @@ func (vs *Vals) ConfigVals(vr *Var, nvals int) {
 			vl.SetFlag(int(ValTextureOwns))
 		}
 	}
+	return true
 }
 
 // ValByIdxTry returns Val at given index with range checking error message.
@@ -321,6 +328,14 @@ func (vs *Vals) Free() {
 	for _, vl := range vs.Vals {
 		vl.Free()
 	}
+}
+
+// Destroy frees all existing values and resets the list of Vals so subsequent
+// Config will start fresh (e.g., if Var type changes).
+func (vs *Vals) Destroy() {
+	vs.Free()
+	vs.Vals = nil
+	vs.NameMap = nil
 }
 
 // ModRegs returns the regions of Vals that have been modified

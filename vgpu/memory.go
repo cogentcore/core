@@ -96,7 +96,7 @@ func (mm *Memory) AllocDevBuff(bt BuffTypes) {
 	if buff.Size == 0 {
 		return
 	}
-	if bt == ImageBuff {
+	if bt == TextureBuff {
 		mm.Vars.AllocTextures(mm)
 	} else {
 		buff.AllocDev(mm.Device.Device)
@@ -165,7 +165,7 @@ func (mm *Memory) SyncToGPU() {
 // SyncToGPUBuff syncs all modified Val regions from CPU to GPU device memory, for given buff
 func (mm *Memory) SyncToGPUBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
-	if bt == ImageBuff {
+	if bt == TextureBuff {
 		mm.SyncValsTextures(buff)
 		return
 	}
@@ -231,7 +231,7 @@ func (mm *Memory) TransferToGPU() {
 // TransferToGPUBuff transfers entire staging to GPU for given buffer
 func (mm *Memory) TransferToGPUBuff(bt BuffTypes) {
 	buff := mm.Buffs[bt]
-	if bt == ImageBuff {
+	if bt == TextureBuff {
 		mm.TransferAllValsTextures(buff)
 		return
 	}
@@ -326,7 +326,7 @@ func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
-		if st == nil || st.Set == PushConstSet {
+		if st == nil || st.Set == PushSet {
 			continue
 		}
 		for _, vr := range st.Vars {
@@ -353,7 +353,7 @@ func (mm *Memory) SyncValsTextures(buff *MemBuff) {
 	ns := vs.NSets()
 	for si := vs.StartSet(); si < ns; si++ {
 		st := vs.SetMap[si]
-		if st == nil || st.Set == PushConstSet {
+		if st == nil || st.Set == PushSet {
 			continue
 		}
 		for _, vr := range st.Vars {

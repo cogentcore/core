@@ -21,13 +21,19 @@ type Mesh struct {
 	HasColor bool `desc:"has per-vertex colors, as mat32.Vec4 per vertex"`
 }
 
+// AllocMeshes allocates vals for meshes
+func (ph *Phong) AllocMeshes() {
+	nm := ph.Meshes.Len()
+	vars := ph.Sys.Vars()
+	vset := vars.VertexSet()
+	vset.ConfigVals(nm)
+}
+
 // ConfigMeshes configures the rendering for the meshes
 func (ph *Phong) ConfigMeshes() {
 	nm := ph.Meshes.Len()
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
-	vset.ConfigVals(nm)
-
 	for i, mesh := range ph.Meshes.Order {
 		mv := mesh.Val
 		_, vp, _ := vset.ValByIdxTry("Pos", i)
@@ -52,6 +58,8 @@ func (ph *Phong) AddMesh(name string, nVtx, nIdx int, hasColor bool) {
 }
 
 // UseMeshName selects mesh by name for current render step
+// If mesh has per-vertex colors, these are selected for rendering,
+// and texture is turned off.  UseTexture* after this to override.
 func (ph *Phong) UseMeshName(name string) error {
 	idx, ok := ph.Meshes.IdxByKey(name)
 	if !ok {
@@ -63,7 +71,9 @@ func (ph *Phong) UseMeshName(name string) error {
 	return ph.UseMeshIdx(idx)
 }
 
-// UseMeshIdx selects mesh by index for current render step
+// UseMeshIdx selects mesh by index for current render step.
+// If mesh has per-vertex colors, these are selected for rendering,
+// and texture is turned off.  UseTexture* after this to override.
 func (ph *Phong) UseMeshIdx(idx int) error {
 	mesh := ph.Meshes.ValByIdx(idx)
 	vars := ph.Sys.Vars()
@@ -73,6 +83,8 @@ func (ph *Phong) UseMeshIdx(idx int) error {
 	vars.BindVertexValIdx("Index", idx)
 	if mesh.HasColor {
 		vars.BindVertexValIdx("Color", idx)
+		ph.Cur.UseVtxColor = true
+		ph.Cur.UseTexture = false
 	}
 	return nil
 }

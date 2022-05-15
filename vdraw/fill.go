@@ -102,14 +102,16 @@ func (dw *Drawer) FillRect(idx int, reg image.Rectangle, op draw.Op) error {
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 func (dw *Drawer) Fill(idx int, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error {
-	vars := dw.Sys.Vars()
+	sy := &dw.Sys
+	cmd := sy.CmdPool.Buff
+	vars := sy.Vars()
 	vars.BindDynValIdx(1, "Color", idx)
+	sy.BindVars(cmd, 0) // redo
 
 	tmat := dw.ConfigMats(src2dst, reg.Max, reg, op, false)
-	matv, _ := vars.VarByNameTry(vgpu.PushConstSet, "Mats")
-	fpl := dw.Sys.PipelineMap["fill"]
-	cmd := fpl.CmdPool.Buff
-	fpl.PushConstant(cmd, matv, vk.ShaderStageVertexBit, unsafe.Pointer(tmat))
+	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mats")
+	fpl := sy.PipelineMap["fill"]
+	fpl.Push(cmd, matv, vk.ShaderStageVertexBit, unsafe.Pointer(tmat))
 	fpl.BindDrawVertex(cmd, 0)
 
 	return nil
@@ -117,24 +119,22 @@ func (dw *Drawer) Fill(idx int, src2dst mat32.Mat3, reg image.Rectangle, op draw
 
 // StartFill starts color fill drawing rendering process on render target
 func (dw *Drawer) StartFill() {
-	fpl := dw.Sys.PipelineMap["fill"]
+	sy := &dw.Sys
+	fpl := sy.PipelineMap["fill"]
 	if dw.Surf != nil {
 		dw.Impl.SurfIdx = dw.Surf.AcquireNextImage()
-		cmd := fpl.CmdPool.Buff
-		vgpu.CmdReset(cmd)
-		vgpu.CmdBegin(cmd)
-		fpl.BeginRenderPass(cmd, dw.Surf.Frames[dw.Impl.SurfIdx])
-		fpl.BindPipeline(cmd, 0)
+		cmd := sy.CmdPool.Buff
+		sy.ResetBeginRenderPass(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
+		fpl.BindPipeline(cmd)
 	}
 }
 
 // EndFill ends color filling rendering process on render target
 func (dw *Drawer) EndFill() {
-	fpl := dw.Sys.PipelineMap["fill"]
-	cmd := fpl.CmdPool.Buff
+	sy := &dw.Sys
+	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
-		fpl.EndRenderPass(cmd)
-		vgpu.CmdEnd(cmd)
+		sy.EndRenderPass(cmd)
 		dw.Surf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		dw.Surf.PresentImage(dw.Impl.SurfIdx)
 	}

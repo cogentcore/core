@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	VertexSet    = -2
-	PushConstSet = -1
+	VertexSet = -2
+	PushSet   = -1
 )
 
 // VarSet contains a set of Var variables that are all updated at the same time
@@ -390,8 +390,8 @@ func (st *VarSet) VkVertexConfig() *vk.PipelineVertexInputStateCreateInfo {
 	return cfg
 }
 
-// VkPushConstConfig returns vulkan push constant ranges
-func (vs *VarSet) VkPushConstConfig() []vk.PushConstantRange {
+// VkPushConfig returns vulkan push constant ranges
+func (vs *VarSet) VkPushConfig() []vk.PushConstantRange {
 	alignBytes := 8 // unclear what alignment is
 	var ranges []vk.PushConstantRange
 	offset := 0
@@ -411,7 +411,7 @@ func (vs *VarSet) VkPushConstConfig() []vk.PushConstantRange {
 	}
 	if tsz > 128 {
 		if TheGPU.Debug {
-			fmt.Printf("vgpu.VarSet:VkPushConstConfig total push constant memory exceeds nominal minimum size of 128 bytes: %d\n", tsz)
+			fmt.Printf("vgpu.VarSet:VkPushConfig total push constant memory exceeds nominal minimum size of 128 bytes: %d\n", tsz)
 		}
 	}
 	return ranges
@@ -422,9 +422,11 @@ func (vs *VarSet) VkPushConstConfig() []vk.PushConstantRange {
 
 // BindDynValName dynamically binds given uniform or storage value
 // by name for given variable name, in given set.
-// Must have called BindDynVars for this variable first, prior to render.
 //
 // This only dynamically updates the offset to point to the specified val.
+// MUST call System.BindVars prior to any subsequent draw calls for this
+// new offset to be bound at the proper point in the command buffer prior
+// (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValsStart / End around this.
 //
@@ -440,9 +442,11 @@ func (st *VarSet) BindDynValName(vs *Vars, varNm, valNm string) error {
 
 // BindDynValIdx dynamically binds given uniform or storage value
 // by index for given variable name, in given set.
-// Must have called BindDynVars for this variable first, prior to render.
 //
 // This only dynamically updates the offset to point to the specified val.
+// MUST call System.BindVars prior to any subsequent draw calls for this
+// new offset to be bound at the proper point in the command buffer prior
+// (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValsStart / End around this.
 //
@@ -457,9 +461,11 @@ func (st *VarSet) BindDynValIdx(vs *Vars, varNm string, valIdx int) error {
 
 // BindDynVal dynamically binds given uniform or storage value
 // for given variable in given set.
-// Must have called BindDynVars for this variable first, prior to render.
 //
 // This only dynamically updates the offset to point to the specified val.
+// MUST call System.BindVars prior to any subsequent draw calls for this
+// new offset to be bound at the proper point in the command buffer prior
+// (call after all such dynamic bindings are updated.)
 //
 // Do NOT call BindValsStart / End around this.
 //

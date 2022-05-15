@@ -16,7 +16,7 @@ func _() {
 	_ = x[UndefVarRole-0]
 	_ = x[Vertex-1]
 	_ = x[Index-2]
-	_ = x[PushConst-3]
+	_ = x[Push-3]
 	_ = x[Uniform-4]
 	_ = x[Storage-5]
 	_ = x[UniformTexel-6]
@@ -26,9 +26,9 @@ func _() {
 	_ = x[VarRolesN-10]
 }
 
-const _VarRoles_name = "UndefVarRoleVertexIndexPushConstUniformStorageUniformTexelStorageTexelStorageImageTextureRoleVarRolesN"
+const _VarRoles_name = "UndefVarRoleVertexIndexPushUniformStorageUniformTexelStorageTexelStorageImageTextureRoleVarRolesN"
 
-var _VarRoles_index = [...]uint8{0, 12, 18, 23, 32, 39, 46, 58, 70, 82, 93, 102}
+var _VarRoles_index = [...]uint8{0, 12, 18, 23, 27, 34, 41, 53, 65, 77, 88, 97}
 
 func (i VarRoles) String() string {
 	if i < 0 || i >= VarRoles(len(_VarRoles_index)-1) {

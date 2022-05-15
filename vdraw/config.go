@@ -40,7 +40,6 @@ func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 	// app.drawProg.Activate()
 
 	pl.SetGraphicsDefaults()
-	pl.SetClearOff()
 	if dw.YIsDown {
 		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 	} else {
@@ -50,6 +49,8 @@ func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 
 // ConfigSys configures the vDraw System and pipelines.
 func (dw *Drawer) ConfigSys() {
+	dw.Sys.RenderPass.SetClearOff()
+
 	dpl := dw.Sys.NewPipeline("draw")
 	dw.ConfigPipeline(dpl)
 
@@ -68,10 +69,10 @@ func (dw *Drawer) ConfigSys() {
 
 	vars := dw.Sys.Vars()
 	vset := vars.AddVertexSet()
-	pcset := vars.AddPushConstSet()
+	pcset := vars.AddPushSet()
 	// uset := vars.AddSet()
-	txset := vars.AddSet()
-	cset := vars.AddSet()
+	txset := vars.AddSet() // 0
+	cset := vars.AddSet()  // 1
 
 	nPts := 4
 	nIdxs := 6
@@ -79,7 +80,7 @@ func (dw *Drawer) ConfigSys() {
 	posv := vset.Add("Pos", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
 
-	pcset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.PushConst, vgpu.VertexShader)
+	pcset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader)
 	// uset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Uniform, vgpu.VertexShader)
 
 	tximgv := txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)

@@ -16,13 +16,13 @@ func _() {
 	_ = x[VtxIdxBuff-0]
 	_ = x[UniformBuff-1]
 	_ = x[StorageBuff-2]
-	_ = x[ImageBuff-3]
+	_ = x[TextureBuff-3]
 	_ = x[BuffTypesN-4]
 }
 
-const _BuffTypes_name = "VtxIdxBuffUniformBuffStorageBuffImageBuffBuffTypesN"
+const _BuffTypes_name = "VtxIdxBuffUniformBuffStorageBuffTextureBuffBuffTypesN"
 
-var _BuffTypes_index = [...]uint8{0, 10, 21, 32, 41, 51}
+var _BuffTypes_index = [...]uint8{0, 10, 21, 32, 43, 53}
 
 func (i BuffTypes) String() string {
 	if i < 0 || i >= BuffTypes(len(_BuffTypes_index)-1) {

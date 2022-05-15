@@ -74,7 +74,7 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	drw := &vdraw.Drawer{}
-	drw.ConfigSurface(sf, 10) // max number of colors or images to choose for rendering
+	drw.ConfigSurface(sf, 10) // 10 = max number of colors or images to choose for rendering
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
@@ -113,11 +113,12 @@ func main() {
 	drw.SetPalette(pal)
 
 	fillRnd := func() {
+		nclr := len(pal)
 		drw.StartFill()
 		for i := 0; i < 5; i++ {
 			sp := image.Point{rand.Intn(500), rand.Intn(500)}
 			sz := image.Point{rand.Intn(500), rand.Intn(500)}
-			drw.FillRect(rand.Intn(len(pal)), image.Rectangle{Min: sp, Max: sp.Add(sz)}, draw.Src)
+			drw.FillRect(i%nclr, image.Rectangle{Min: sp, Max: sp.Add(sz)}, draw.Src)
 		}
 		drw.EndFill()
 	}
@@ -147,6 +148,8 @@ func main() {
 			stTime = eTime
 		}
 	}
+
+	renderFrame()
 
 	exitC := make(chan struct{}, 2)
 

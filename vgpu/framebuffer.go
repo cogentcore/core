@@ -15,6 +15,7 @@ type Framebuffer struct {
 	Image       Image          `desc:"the image behind the framebuffer, includes the format"`
 	RenderPass  *RenderPass    `desc:"pointer to the associated renderpass and depth buffer"`
 	Framebuffer vk.Framebuffer `desc:"vulkan framebuffer"`
+	HasCleared  bool           `desc:"has this framebuffer been cleared yet?  if not, must be prior to use as a non-clearing Load case"`
 }
 
 // ConfigImage configures settings for given existing image format
@@ -88,7 +89,7 @@ func (fb *Framebuffer) Config() {
 	var frameBuff vk.Framebuffer
 	ret := vk.CreateFramebuffer(fb.RenderPass.Dev, &vk.FramebufferCreateInfo{
 		SType:           vk.StructureTypeFramebufferCreateInfo,
-		RenderPass:      fb.RenderPass.RenderPass,
+		RenderPass:      fb.RenderPass.VkClearPass,
 		AttachmentCount: uint32(len(ivs)),
 		PAttachments:    ivs,
 		Width:           w,
@@ -97,6 +98,7 @@ func (fb *Framebuffer) Config() {
 	}, nil, &frameBuff)
 	IfPanic(NewError(ret))
 	fb.Framebuffer = frameBuff
+	fb.HasCleared = false
 }
 
 // SetSize re-allocates an backing framebuffer Image of given size.

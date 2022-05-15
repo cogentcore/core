@@ -74,9 +74,8 @@ func main() {
 	pl := sy.NewPipeline("drawidx")
 	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
 	sf.SetRenderPass(&sy.RenderPass)
-	pl.SetGraphicsDefaults()
-	pl.SetClearColor(0.2, 0.2, 0.2, 1)
-	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+	sy.SetClearColor(0.2, 0.2, 0.2, 1)
+	sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 
 	pl.AddShaderFile("indexed", vgpu.VertexShader, "indexed.spv")
 	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
@@ -159,9 +158,13 @@ func main() {
 
 		idx := sf.AcquireNextImage()
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		pl.FullStdRender(pl.CmdPool.Buff, sf.Frames[idx], 0)
+		descIdx := 0 // if running multiple frames in parallel, need diff sets
+		cmd := sy.CmdPool.Buff
+		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)
+		pl.BindDrawVertex(cmd, descIdx)
+		sy.EndRenderPass(cmd)
 		// fmt.Printf("cmd %v\n", time.Now().Sub(rt))
-		sf.SubmitRender(pl.CmdPool.Buff) // this is where it waits for the 16 msec
+		sf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
 		sf.PresentImage(idx)
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
