@@ -56,6 +56,8 @@ func (ph *Phong) ConfigSys() {
 	ph.ConfigPipeline(tpl)
 	opl := ph.Sys.NewPipeline("onecolor")
 	ph.ConfigPipeline(opl)
+	vpl := ph.Sys.NewPipeline("pervertex")
+	ph.ConfigPipeline(vpl)
 
 	cb, _ := content.ReadFile("shaders/texture_vert.spv")
 	tpl.AddShaderCode("texture_vert", vgpu.VertexShader, cb)
@@ -66,6 +68,11 @@ func (ph *Phong) ConfigSys() {
 	opl.AddShaderCode("onecolor_vert", vgpu.VertexShader, cb)
 	cb, _ = content.ReadFile("shaders/onecolor_frag.spv")
 	opl.AddShaderCode("onecolor_frag", vgpu.FragmentShader, cb)
+
+	cb, _ = content.ReadFile("shaders/pervertex_vert.spv")
+	vpl.AddShaderCode("pervertex_vert", vgpu.VertexShader, cb)
+	cb, _ = content.ReadFile("shaders/pervertex_frag.spv")
+	vpl.AddShaderCode("pervertex_frag", vgpu.FragmentShader, cb)
 
 	vars := ph.Sys.Vars()
 	pcset := vars.AddPushSet() // TexPush

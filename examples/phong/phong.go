@@ -128,7 +128,7 @@ func main() {
 	// Colors
 
 	blue := color.RGBA{0, 0, 255, 255}
-	blueTr := color.RGBA{0, 0, 128, 128}
+	blueTr := color.RGBA{0, 0, 200, 200}
 	red := color.RGBA{255, 0, 0, 255}
 	redTr := color.RGBA{128, 0, 0, 128}
 	ph.AddColor("blue", vphong.NewColors(blue, color.Black, color.White, 100, 1))
@@ -195,19 +195,19 @@ func main() {
 		ph.UseTextureName("ground.png")
 		ph.Render()
 
-		ph.UseColorName("blue")
-		ph.UseMtxsName("mtx1")
-		ph.UseMeshName("cube")
-		// ph.UseTextureName("teximg.jpg")
-		ph.UseNoTexture()
-		ph.Render()
-
 		ph.UseColorName("redTr")
 		ph.UseMtxsName("mtx2")
 		ph.UseMeshName("cube")
 		ph.UseTextureName("teximg.jpg")
 		// ph.UseNoTexture()
 		ph.Render()
+
+		ph.UseColorName("blueTr")
+		ph.UseMtxsName("mtx1")
+		ph.UseMeshName("cube")
+		ph.UseNoTexture()
+		ph.Render()
+
 	}
 
 	frameCount := 0
