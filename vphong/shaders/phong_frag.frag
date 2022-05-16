@@ -108,7 +108,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 			diffuseTotal += attenColor * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
 			vec3 ref = reflect(-lightDir, norm);
-			specularTotal += attenColor * matSpecular *	pow(max(dot(ref, camDir), 0.0), shiny);
+			specularTotal += attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 		}
 	}
 

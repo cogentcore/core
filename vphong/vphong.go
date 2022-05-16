@@ -111,5 +111,7 @@ func (ph *Phong) Render() {
 	switch {
 	case ph.Cur.UseTexture:
 		ph.RenderTexture()
+	default:
+		ph.RenderOnecolor()
 	}
 }

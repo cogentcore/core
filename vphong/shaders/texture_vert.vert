@@ -11,7 +11,6 @@ layout(location = 1) in vec3 VtxNorm;
 layout(location = 2) in vec2 VtxTex;
 // layout(location = 3) in vec4 VtxColor;
 
-// uniform bool FlipY;
 layout(location = 0) out vec4 Pos;
 layout(location = 1) out vec3 Norm;
 layout(location = 2) out vec3 CamDir;
@@ -24,10 +23,6 @@ void main() {
 	Norm = normalize(NormMtx * vNorm).xyz;
 	CamDir = normalize(-Pos.xyz);
 	TexCoord = VtxTex;
-// 	if(FlipY) {
-// 		TexCoord.y = 1 - TexCoord.y;
-// 	}
-	
 	gl_Position = MVPMtx * vPos;
 }
 

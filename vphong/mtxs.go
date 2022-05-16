@@ -36,8 +36,8 @@ func NewMtxs(model, view, prjn *mat32.Mat4) *Mtxs {
 }
 
 // AddMtxs adds to list of mtxs
-func (ph *Phong) AddMtxs(name string, mtx *Mtxs) {
-	ph.Mtxs.Add(name, mtx)
+func (ph *Phong) AddMtxs(name string, model, view, prjn *mat32.Mat4) {
+	ph.Mtxs.Add(name, NewMtxs(model, view, prjn))
 }
 
 // AllocMtxs allocates vals for mtxs
@@ -61,8 +61,7 @@ func (ph *Phong) ConfigMtxs() {
 func (ph *Phong) SetMtxsIdx(idx int, model, view, prjn *mat32.Mat4) error {
 	vars := ph.Sys.Vars()
 	_, vl, _ := vars.ValByIdxTry(int(MtxsSet), "Mtxs", idx)
-	mtx := &Mtxs{}
-	mtx.SetMtxs(model, view, prjn)
+	mtx := NewMtxs(model, view, prjn)
 	ph.Mtxs.Order[idx].Val = mtx
 	vl.CopyBytes(unsafe.Pointer(mtx))
 	return nil
@@ -77,7 +76,7 @@ func (ph *Phong) SetMtxsName(name string, model, view, prjn *mat32.Mat4) error {
 			log.Println(err)
 		}
 	}
-	return ph.UseMtxsIdx(idx)
+	return ph.SetMtxsIdx(idx, model, view, prjn)
 }
 
 // UseMtxsIdx selects mtxs by index for current render step

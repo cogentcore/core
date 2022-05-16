@@ -54,11 +54,18 @@ func (ph *Phong) ConfigPipeline(pl *vgpu.Pipeline) {
 func (ph *Phong) ConfigSys() {
 	tpl := ph.Sys.NewPipeline("texture")
 	ph.ConfigPipeline(tpl)
+	opl := ph.Sys.NewPipeline("onecolor")
+	ph.ConfigPipeline(opl)
 
 	cb, _ := content.ReadFile("shaders/texture_vert.spv")
 	tpl.AddShaderCode("texture_vert", vgpu.VertexShader, cb)
 	cb, _ = content.ReadFile("shaders/texture_frag.spv")
 	tpl.AddShaderCode("texture_frag", vgpu.FragmentShader, cb)
+
+	cb, _ = content.ReadFile("shaders/onecolor_vert.spv")
+	opl.AddShaderCode("onecolor_vert", vgpu.VertexShader, cb)
+	cb, _ = content.ReadFile("shaders/onecolor_frag.spv")
+	opl.AddShaderCode("onecolor_frag", vgpu.FragmentShader, cb)
 
 	vars := ph.Sys.Vars()
 	pcset := vars.AddPushSet() // TexPush
@@ -73,8 +80,8 @@ func (ph *Phong) ConfigSys() {
 
 	vset.Add("Pos", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Norm", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
-	vset.Add("Tex", vgpu.Float32Vec3, 0, vgpu.Vertex, vgpu.VertexShader)
-	vset.Add("Color", vgpu.Float32Vec2, 0, vgpu.Vertex, vgpu.VertexShader)
+	vset.Add("Tex", vgpu.Float32Vec2, 0, vgpu.Vertex, vgpu.VertexShader)
+	vset.Add("Color", vgpu.Float32Vec4, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Index", vgpu.Uint32, 0, vgpu.Index, vgpu.VertexShader)
 
 	mtxset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)

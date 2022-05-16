@@ -2,7 +2,7 @@
 #extension GL_EXT_nonuniform_qualifier : require
 
 layout(set = 1, binding = 0) uniform ColorU {
-	vec3 Color;
+	vec4 Color;
 	vec3 Emissive;
 	vec3 Specular;
 	vec3 ShinyBright; // x = Shiny, y = Bright
@@ -38,6 +38,5 @@ void main() {
 
 	// Final fragment color -- premultiplied alpha
 	outputColor = min(vec4((Bright * Ambdiff + Spec) * opacity, opacity), vec4(1.0));
-	// outputColor = vec4(clr, 1);
 }
 

@@ -16,8 +16,7 @@ import (
 
 // Color describes the surface colors for Phong lighting model
 type Color struct {
-	Color       mat32.Vec3 `desc:"main reflective color: reflected from lights"`
-	pad0        float32
+	Color       mat32.Vec4 `desc:"main reflective color: reflected from lights"`
 	Emissive    mat32.Vec3 `desc:"color that surface emits"`
 	pad1        float32
 	Specular    mat32.Vec3 `desc:"shiny reflection color"`
@@ -26,19 +25,35 @@ type Color struct {
 	pad3        float32
 }
 
-// NewGoColor returns a mat32.Vec3 from Go standard color.Color
-func NewGoColor(clr color.Color) mat32.Vec3 {
+// NewGoColor3 returns a mat32.Vec3 from Go standard color.Color
+func NewGoColor3(clr color.Color) mat32.Vec3 {
 	v3 := mat32.Vec3{}
-	SetGoColor(&v3, clr)
+	SetGoColor3(&v3, clr)
 	return v3
 }
 
-// SetGoColor sets a mat32.Vec3 from Go standard color.Color
-func SetGoColor(v3 *mat32.Vec3, clr color.Color) {
+// SetGoColor3 sets a mat32.Vec3 from Go standard color.Color
+func SetGoColor3(v3 *mat32.Vec3, clr color.Color) {
 	r, g, b, _ := clr.RGBA()
 	v3.X = float32(r) / 0xffff
 	v3.Y = float32(g) / 0xffff
 	v3.Z = float32(b) / 0xffff
+}
+
+// NewGoColor4 returns a mat32.Vec4 from Go standard color.Color
+func NewGoColor4(clr color.Color) mat32.Vec4 {
+	v4 := mat32.Vec4{}
+	SetGoColor4(&v4, clr)
+	return v4
+}
+
+// SetGoColor4 sets a mat32.Vec4 from Go standard color.Color
+func SetGoColor4(v4 *mat32.Vec4, clr color.Color) {
+	r, g, b, a := clr.RGBA()
+	v4.X = float32(r) / 0xffff
+	v4.Y = float32(g) / 0xffff
+	v4.Z = float32(b) / 0xffff
+	v4.W = float32(a) / 0xffff
 }
 
 // NewGoColor sets the colors from standard Go colors
@@ -50,9 +65,9 @@ func NewColors(clr, emis, spec color.Color, shiny, bright float32) *Color {
 
 // SetColors sets the colors from standard Go colors
 func (cl *Color) SetColors(clr, emis, spec color.Color, shiny, bright float32) {
-	SetGoColor(&cl.Color, clr)
-	SetGoColor(&cl.Emissive, emis)
-	SetGoColor(&cl.Specular, spec)
+	SetGoColor4(&cl.Color, clr)
+	SetGoColor3(&cl.Emissive, emis)
+	SetGoColor3(&cl.Specular, spec)
 	cl.ShinyBright.X = shiny
 	cl.ShinyBright.Y = bright
 }
@@ -97,4 +112,12 @@ func (ph *Phong) UseColorName(name string) error {
 		}
 	}
 	return ph.UseColorIdx(idx)
+}
+
+// RenderOnecolor renders current settings to onecolor pipeline
+func (ph *Phong) RenderOnecolor() {
+	sy := &ph.Sys
+	cmd := sy.CmdPool.Buff
+	pl := sy.PipelineMap["onecolor"]
+	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
 }

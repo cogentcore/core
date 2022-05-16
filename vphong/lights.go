@@ -101,7 +101,8 @@ func (ph *Phong) AddDirLight(color, dir mat32.Vec3) {
 	ph.NLights.Dir++
 }
 
-// AddPointLight adds point light
+// AddPointLight adds point light.
+// Defaults: linDecay=.1, quadDecay=.01
 func (ph *Phong) AddPointLight(color, pos mat32.Vec3, linDecay, quadDecay float32) {
 	ph.Point[ph.NLights.Point].Color = color
 	ph.Point[ph.NLights.Point].Pos = pos
@@ -109,7 +110,8 @@ func (ph *Phong) AddPointLight(color, pos mat32.Vec3, linDecay, quadDecay float3
 	ph.NLights.Point++
 }
 
-// AddSpotLight adds point light
+// AddSpotLight adds spot light
+// Defaults: angDecay=15, cutAngle=45 (max 90), linDecay=1, quadDecay=1
 func (ph *Phong) AddSpotLight(color, pos, dir mat32.Vec3, angDecay, cutAngle, linDecay, quadDecay float32) {
 	ph.Spot[ph.NLights.Spot].Color = color
 	ph.Spot[ph.NLights.Spot].Pos = pos

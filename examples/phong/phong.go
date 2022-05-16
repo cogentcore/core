@@ -21,6 +21,7 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/vgpu/vgpu"
 	"github.com/goki/vgpu/vphong"
+	"github.com/goki/vgpu/vshape"
 )
 
 func init() {
@@ -50,7 +51,7 @@ func main() {
 	vk.Init()
 
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
-	window, err := glfw.CreateWindow(1024, 768, "vPhong Test", nil, nil)
+	window, err := glfw.CreateWindow(1280, 960, "vPhong Test", nil, nil)
 	vgpu.IfPanic(err)
 
 	// note: for graphics, require these instance extensions before init gpu!
@@ -78,6 +79,7 @@ func main() {
 	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
 	sf.SetRenderPass(&sy.RenderPass)
 	ph.ConfigSys()
+	sy.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
@@ -92,54 +94,72 @@ func main() {
 	// Lights
 
 	dark := color.RGBA{50, 50, 50, 50}
-	ph.AddAmbientLight(vphong.NewGoColor(dark))
-	ph.AddDirLight(vphong.NewGoColor(color.White), mat32.Vec3{0, 0, -1})
+	ph.AddAmbientLight(vphong.NewGoColor3(dark))
+	ph.AddDirLight(vphong.NewGoColor3(color.White), mat32.Vec3{0, 0, -1})
+	// ph.AddPointLight(vphong.NewGoColor3(color.White), mat32.Vec3{-3, 3, -6}, .001, .001)
+	// ph.AddSpotLight(vphong.NewGoColor3(color.White), mat32.Vec3{0, 5, 0}, mat32.Vec3{0, -1, 0}, 15, 45, .01, .01)
 
 	/////////////////////////////
 	// Meshes
 
-	ph.AddMesh("rect", 4, 6, false)
+	floor := vshape.NewPlane(mat32.Y, 20, 20)
+	nVtx, nIdx := floor.N()
+	ph.AddMesh("floor", nVtx, nIdx, false)
+
+	cube := vshape.NewBox(1, 1, 1)
+	nVtx, nIdx = cube.N()
+	ph.AddMesh("cube", nVtx, nIdx, false)
+
+	/////////////////////////////
+	// Textures
 
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
 		imgs[i] = OpenImage(fnm)
-		ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{1, 1}, mat32.Vec2{0, 0}))
+		if i == 0 {
+			ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{20, 20}, mat32.Vec2{0, 0}))
+		} else {
+			ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{1, 1}, mat32.Vec2{0, 0}))
+		}
 	}
 
 	/////////////////////////////
 	// Colors
 
 	blue := color.RGBA{0, 0, 255, 255}
-	ph.AddColor("blue", vphong.NewColors(blue, color.Black, color.White, 30, 1))
+	blueTr := color.RGBA{0, 0, 128, 128}
+	red := color.RGBA{255, 0, 0, 255}
+	redTr := color.RGBA{128, 0, 0, 128}
+	ph.AddColor("blue", vphong.NewColors(blue, color.Black, color.White, 100, 1))
+	ph.AddColor("blueTr", vphong.NewColors(blueTr, color.Black, color.White, 30, 1))
+	ph.AddColor("red", vphong.NewColors(red, color.Black, color.White, 30, 1))
+	ph.AddColor("redTr", vphong.NewColors(redTr, color.Black, color.White, 30, 1))
 
 	/////////////////////////////
 	// Camera / Mtxs
 
 	// This is the standard camera view projection computation
-	campos := mat32.Vec3{0, 0, 2}
-	target := mat32.Vec3{0, 0, 0}
-	var lookq mat32.Quat
-	lookq.SetFromRotationMatrix(mat32.NewLookAt(campos, target, mat32.Vec3Y))
-	scale := mat32.Vec3{1, 1, 1}
-	var cview mat32.Mat4
-	cview.SetTransform(campos, lookq, scale)
-	view, _ := cview.Inverse()
-
-	var model mat32.Mat4
-	model.SetIdentity()
-	model.SetRotationY(.3)
+	campos := mat32.Vec3{0, 1, 5}
+	view := vphong.CameraViewMat(campos, mat32.Vec3{0, 0, 0}, mat32.Vec3Y)
 
 	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
-	// fmt.Printf("aspect: %g\n", aspect)
-	// VkPerspective version automatically flips Y axis and shifts depth
-	// into a 0..1 range instead of -1..1, so original GL based geometry
-	// will render identically here.
-
 	var prjn mat32.Mat4
 	prjn.SetVkPerspective(45, aspect, 0.01, 100)
 
-	ph.AddMtxs("mtx1", vphong.NewMtxs(&model, view, &prjn))
+	var model1 mat32.Mat4
+	model1.SetIdentity()
+	model1.SetRotationY(0.5)
+	ph.AddMtxs("mtx1", &model1, view, &prjn)
+
+	var model2 mat32.Mat4
+	model2.SetIdentity()
+	model2.SetTranslation(-2, 0, 0)
+	ph.AddMtxs("mtx2", &model2, view, &prjn)
+
+	var floortx mat32.Mat4
+	floortx.SetTranslation(0, -2, -2)
+	ph.AddMtxs("floortx", &floortx, view, &prjn)
 
 	/////////////////////////////
 	//  Config!
@@ -149,36 +169,44 @@ func main() {
 	/////////////////////////////
 	//  Set Mesh values
 
-	pos, norm, tex, _, idx := ph.MeshFloatsByName("rect")
-	pos.Set(0,
-		-0.5, -0.5, 0.0,
-		0.5, -0.5, 0.0,
-		0.5, 0.5, 0.0,
-		-0.5, 0.5, 0.0)
+	vtxAry, normAry, texAry, _, idxAry := ph.MeshFloatsByName("floor")
+	floor.Set(vtxAry, normAry, texAry, idxAry)
+	ph.ModMeshByName("floor")
 
-	norm.Set(0,
-		0.0, 0.0, 1.0,
-		0.0, 0.0, 1.0,
-		0.0, 0.0, 1.0,
-		0.0, 0.0, 1.0)
-
-	tex.Set(0,
-		1.0, 0.0,
-		0.0, 0.0,
-		0.0, 1.0,
-		1.0, 1.0)
-
-	idx.Set(0, 0, 1, 2, 0, 2, 3)
-
-	ph.ModMeshByName("rect")
+	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("cube")
+	cube.Set(vtxAry, normAry, texAry, idxAry)
+	ph.ModMeshByName("cube")
 
 	ph.Sync()
 
+	updateMats := func() {
+		view = vphong.CameraViewMat(campos, mat32.Vec3{0, 0, 0}, mat32.Vec3Y)
+		ph.SetMtxsName("mtx1", &model1, view, &prjn)
+		ph.SetMtxsName("mtx2", &model2, view, &prjn)
+		ph.SetMtxsName("floortx", &floortx, view, &prjn)
+		ph.Sync()
+	}
+
 	render1 := func() {
 		ph.UseColorName("blue")
+		ph.UseMtxsName("floortx")
+		ph.UseMeshName("floor")
+		// ph.UseNoTexture()
+		ph.UseTextureName("ground.png")
+		ph.Render()
+
+		ph.UseColorName("blue")
 		ph.UseMtxsName("mtx1")
-		ph.UseMeshName("rect")
+		ph.UseMeshName("cube")
+		// ph.UseTextureName("teximg.jpg")
+		ph.UseNoTexture()
+		ph.Render()
+
+		ph.UseColorName("redTr")
+		ph.UseMtxsName("mtx2")
+		ph.UseMeshName("cube")
 		ph.UseTextureName("teximg.jpg")
+		// ph.UseNoTexture()
 		ph.Render()
 	}
 
@@ -194,6 +222,9 @@ func main() {
 		fcr := frameCount % 10
 		_ = fcr
 
+		campos.X = float32(frameCount) * 0.01
+		campos.Z = 5 - float32(frameCount)*0.03
+		updateMats()
 		render1()
 
 		// switch {
@@ -213,7 +244,7 @@ func main() {
 
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
-		if dur > 100 {
+		if dur > 10 {
 			fps := float64(frameCount) / dur
 			fmt.Printf("fps: %.0f\n", fps)
 			frameCount = 0
@@ -227,7 +258,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second / 5
+	fpsDelay := time.Second / 50
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {
