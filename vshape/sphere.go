@@ -10,7 +10,7 @@ import (
 	"github.com/goki/mat32"
 )
 
-// Sphere is a sphere shape (can be a partial shape too)
+// Sphere is a sphere shape (can be a partial sphere too)
 type Sphere struct {
 	ShapeBase
 	Radius     float32 `desc:"radius of the sphere"`
@@ -145,7 +145,6 @@ func SetSphereSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU
 			}
 		}
 	}
-
 	return bb
 }
 

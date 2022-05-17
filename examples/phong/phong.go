@@ -119,6 +119,19 @@ func main() {
 	nVtx, nIdx = sphere.N()
 	ph.AddMesh("sphere", nVtx, nIdx, false)
 
+	cylinder := vshape.NewCylinder(1, .5, 64, 64, true, true)
+	nVtx, nIdx = cylinder.N()
+	ph.AddMesh("cylinder", nVtx, nIdx, false)
+
+	cone := vshape.NewCone(1, .5, 64, 64, true)
+	nVtx, nIdx = cone.N()
+	ph.AddMesh("cone", nVtx, nIdx, false)
+
+	capsule := vshape.NewCapsule(1, .5, 64, 64)
+	// capsule.BotRad = 0
+	nVtx, nIdx = capsule.N()
+	ph.AddMesh("capsule", nVtx, nIdx, false)
+
 	/////////////////////////////
 	// Textures
 
@@ -140,10 +153,12 @@ func main() {
 	blueTr := color.RGBA{0, 0, 200, 200}
 	red := color.RGBA{255, 0, 0, 255}
 	redTr := color.RGBA{200, 0, 0, 200}
+	green := color.RGBA{0, 255, 0, 255}
 	ph.AddColor("blue", vphong.NewColors(blue, color.Black, color.White, 30, 1))
 	ph.AddColor("blueTr", vphong.NewColors(blueTr, color.Black, color.White, 30, 1))
 	ph.AddColor("red", vphong.NewColors(red, color.Black, color.White, 30, 1))
 	ph.AddColor("redTr", vphong.NewColors(redTr, color.Black, color.White, 30, 1))
+	ph.AddColor("green", vphong.NewColors(green, color.Black, color.White, 30, 1))
 
 	/////////////////////////////
 	// Camera / Mtxs
@@ -157,14 +172,24 @@ func main() {
 	prjn.SetVkPerspective(45, aspect, 0.01, 100)
 
 	var model1 mat32.Mat4
-	model1.SetIdentity()
 	model1.SetRotationY(0.5)
 	ph.AddMtxs("mtx1", &model1, view, &prjn)
 
 	var model2 mat32.Mat4
-	model2.SetIdentity()
 	model2.SetTranslation(-2, 0, 0)
 	ph.AddMtxs("mtx2", &model2, view, &prjn)
+
+	var model3 mat32.Mat4
+	model3.SetTranslation(0, 0, -2)
+	ph.AddMtxs("mtx3", &model3, view, &prjn)
+
+	var model4 mat32.Mat4
+	model4.SetTranslation(-1, 0, -2)
+	ph.AddMtxs("mtx4", &model4, view, &prjn)
+
+	var model5 mat32.Mat4
+	model5.SetTranslation(1, 0, -1)
+	ph.AddMtxs("mtx5", &model5, view, &prjn)
 
 	var floortx mat32.Mat4
 	floortx.SetTranslation(0, -2, -2)
@@ -190,12 +215,27 @@ func main() {
 	sphere.Set(vtxAry, normAry, texAry, idxAry)
 	ph.ModMeshByName("sphere")
 
+	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("cylinder")
+	cylinder.Set(vtxAry, normAry, texAry, idxAry)
+	ph.ModMeshByName("cylinder")
+
+	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("cone")
+	cone.Set(vtxAry, normAry, texAry, idxAry)
+	ph.ModMeshByName("cone")
+
+	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("capsule")
+	capsule.Set(vtxAry, normAry, texAry, idxAry)
+	ph.ModMeshByName("capsule")
+
 	ph.Sync()
 
 	updateMats := func() {
 		view = vphong.CameraViewMat(campos, mat32.Vec3{0, 0, 0}, mat32.Vec3Y)
 		ph.SetMtxsName("mtx1", &model1, view, &prjn)
 		ph.SetMtxsName("mtx2", &model2, view, &prjn)
+		ph.SetMtxsName("mtx3", &model3, view, &prjn)
+		ph.SetMtxsName("mtx4", &model4, view, &prjn)
+		ph.SetMtxsName("mtx5", &model5, view, &prjn)
 		ph.SetMtxsName("floortx", &floortx, view, &prjn)
 		ph.Sync()
 	}
@@ -215,9 +255,29 @@ func main() {
 		// ph.UseNoTexture()
 		ph.Render()
 
+		ph.UseColorName("blue")
+		ph.UseMtxsName("mtx3")
+		ph.UseMeshName("cylinder")
+		ph.UseTextureName("wood.png")
+		// ph.UseNoTexture()
+		ph.Render()
+
+		ph.UseColorName("green")
+		ph.UseMtxsName("mtx4")
+		ph.UseMeshName("cone")
+		// ph.UseTextureName("teximg.jpg")
+		ph.UseNoTexture()
+		ph.Render()
+
 		ph.UseColorName("redTr")
 		ph.UseMtxsName("mtx1")
 		ph.UseMeshName("sphere")
+		ph.UseNoTexture()
+		ph.Render()
+
+		ph.UseColorName("blueTr")
+		ph.UseMtxsName("mtx5")
+		ph.UseMeshName("capsule")
 		ph.UseNoTexture()
 		ph.Render()
 

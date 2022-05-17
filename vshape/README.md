@@ -4,4 +4,12 @@
 
 Basic building blocks (e.g., Plane, SphereSector) have standalone methods, in addition to Shape elements.
 
+Here are the shapes:
+
+* Plane
+* Box
+* Sphere (including various partial segments thereof)
+* Cylinder, Cone (including different size top and bottom radii, e.g., Cones)
+* Capsule: a cylinder with half-sphere caps -- good for simple body segments
+
 
