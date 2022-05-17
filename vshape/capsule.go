@@ -66,28 +66,26 @@ func (cp *Capsule) N() (nVtx, nIdx int) {
 
 // SetCapsuleSector sets points in given allocated arrays
 func (cp *Capsule) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	cp.CBBox.SetEmpty()
 	voff := cp.VtxOff
 	ioff := cp.IdxOff
-	if cp.BotRad > 0 {
-		ps := cp.Pos
-		ps.Y -= cp.Height / 2
-		cp.CBBox = SetSphereSector(vtxAry, normAry, texAry, idxAry, voff, ioff, cp.BotRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 90, 90, ps)
-		nv, ni := SphereSectorN(cp.CapSegs, cp.HeightSegs, 90, 90)
-		voff += nv
-		ioff += ni
-	}
-
-	cbb := SetCylinderSector(vtxAry, normAry, texAry, idxAry, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, cp.Pos)
-
-	cp.CBBox.ExpandByBox(cbb)
+	cp.CBBox = SetCylinderSector(vtxAry, normAry, texAry, idxAry, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, cp.Pos)
 	nv, ni := CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
 	voff += nv
 	ioff += ni
+
+	if cp.BotRad > 0 {
+		ps := cp.Pos
+		ps.Y -= cp.Height / 2
+		cbb := SetSphereSector(vtxAry, normAry, texAry, idxAry, voff, ioff, cp.BotRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 90, 90, ps)
+		cp.CBBox.ExpandByBox(cbb)
+		nv, ni = SphereSectorN(cp.RadialSegs, cp.CapSegs, 90, 90)
+		voff += nv
+		ioff += ni
+	}
 	if cp.TopRad > 0 {
 		ps := cp.Pos
 		ps.Y += cp.Height / 2
-		cbb = SetSphereSector(vtxAry, normAry, texAry, idxAry, voff, ioff, cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, 90, ps)
+		cbb := SetSphereSector(vtxAry, normAry, texAry, idxAry, voff, ioff, cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, 90, ps)
 		cp.CBBox.ExpandByBox(cbb)
 	}
 }

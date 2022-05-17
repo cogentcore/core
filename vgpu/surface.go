@@ -41,7 +41,7 @@ func NewSurface(gp *GPU, vsurf vk.Surface) *Surface {
 }
 
 func (sf *Surface) Defaults() {
-	sf.NFrames = 2 // requested, will be updated with actual
+	sf.NFrames = 3 // requested, will be updated with actual
 	sf.Format.Defaults()
 	sf.Format.Set(1024, 768, vk.FormatR8g8b8a8Srgb)
 	sf.DesiredFormats = []vk.Format{
