@@ -38,6 +38,7 @@ func NewMtxs(model, view, prjn *mat32.Mat4) *Mtxs {
 // AddMtxs adds to list of mtxs
 func (ph *Phong) AddMtxs(name string, model, view, prjn *mat32.Mat4) {
 	ph.Mtxs.Add(name, NewMtxs(model, view, prjn))
+	ph.Cur.ViewMtx.CopyFrom(view)
 }
 
 // AllocMtxs allocates vals for mtxs
@@ -47,8 +48,17 @@ func (ph *Phong) AllocMtxs() {
 	mtxset.ConfigVals(ph.Mtxs.Len())
 }
 
+// ConfigViewMtx configures the ViewMtx based on current
+func (ph *Phong) ConfigViewMtx() {
+	vars := ph.Sys.Vars()
+	_, mtx, _ := vars.ValByIdxTry(int(ViewMtxSet), "ViewMtx", 0)
+	mtx.CopyBytes(unsafe.Pointer(&ph.Cur.ViewMtx))
+	vars.BindDynValIdx(int(ViewMtxSet), "ViewMtx", 0)
+}
+
 // ConfigMtxs configures the rendering for the mtxs that have been added.
 func (ph *Phong) ConfigMtxs() {
+	ph.ConfigViewMtx()
 	vars := ph.Sys.Vars()
 	mtxset := vars.SetMap[int(MtxsSet)]
 	for i, kv := range ph.Mtxs.Order {
@@ -59,6 +69,8 @@ func (ph *Phong) ConfigMtxs() {
 
 // SetMtxsIdx sets updated mtxs by index (sets Mod, will update with Sync)
 func (ph *Phong) SetMtxsIdx(idx int, model, view, prjn *mat32.Mat4) error {
+	ph.Cur.ViewMtx.CopyFrom(view)
+	ph.ConfigViewMtx()
 	vars := ph.Sys.Vars()
 	_, vl, _ := vars.ValByIdxTry(int(MtxsSet), "Mtxs", idx)
 	mtx := NewMtxs(model, view, prjn)
@@ -69,6 +81,8 @@ func (ph *Phong) SetMtxsIdx(idx int, model, view, prjn *mat32.Mat4) error {
 
 // SetMtxsName sets updated mtxs by name (sets Mod, will update with Sync)
 func (ph *Phong) SetMtxsName(name string, model, view, prjn *mat32.Mat4) error {
+	ph.Cur.ViewMtx.CopyFrom(view)
+	ph.ConfigViewMtx()
 	idx, ok := ph.Mtxs.IdxByKey(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseMtxsName -- name not found: %s", name)

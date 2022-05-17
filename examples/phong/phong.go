@@ -93,22 +93,31 @@ func main() {
 	/////////////////////////////
 	// Lights
 
-	dark := color.RGBA{50, 50, 50, 50}
+	dark := color.RGBA{20, 20, 20, 255}
 	ph.AddAmbientLight(vphong.NewGoColor3(dark))
-	ph.AddDirLight(vphong.NewGoColor3(color.White), mat32.Vec3{0, 0, -1})
-	// ph.AddPointLight(vphong.NewGoColor3(color.White), mat32.Vec3{-3, 3, -6}, .001, .001)
-	// ph.AddSpotLight(vphong.NewGoColor3(color.White), mat32.Vec3{0, 5, 0}, mat32.Vec3{0, -1, 0}, 15, 45, .01, .01)
+
+	ph.AddDirLight(vphong.NewGoColor3(color.White), mat32.Vec3{0, 1, 1})
+
+	ph.AddPointLight(vphong.NewGoColor3(color.White), mat32.Vec3{0, 2, 5}, .1, .01)
+
+	ph.AddSpotLight(vphong.NewGoColor3(color.White), mat32.Vec3{-2, 5, -2}, mat32.Vec3{0, -1, 0}, 10, 45, .01, .001)
 
 	/////////////////////////////
 	// Meshes
 
-	floor := vshape.NewPlane(mat32.Y, 20, 20)
+	floor := vshape.NewPlane(mat32.Y, 100, 100)
+	floor.Segs.Set(100, 100) // won't show lighting without
 	nVtx, nIdx := floor.N()
 	ph.AddMesh("floor", nVtx, nIdx, false)
 
 	cube := vshape.NewBox(1, 1, 1)
+	cube.Segs.Set(100, 100, 100) // key for showing lights
 	nVtx, nIdx = cube.N()
 	ph.AddMesh("cube", nVtx, nIdx, false)
+
+	sphere := vshape.NewSphere(.5, 64)
+	nVtx, nIdx = sphere.N()
+	ph.AddMesh("sphere", nVtx, nIdx, false)
 
 	/////////////////////////////
 	// Textures
@@ -117,8 +126,8 @@ func main() {
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
 		imgs[i] = OpenImage(fnm)
-		if i == 0 {
-			ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{20, 20}, mat32.Vec2{0, 0}))
+		if i == 0 { // repeat ground more
+			ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{50, 50}, mat32.Vec2{0, 0}))
 		} else {
 			ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{1, 1}, mat32.Vec2{0, 0}))
 		}
@@ -130,8 +139,8 @@ func main() {
 	blue := color.RGBA{0, 0, 255, 255}
 	blueTr := color.RGBA{0, 0, 200, 200}
 	red := color.RGBA{255, 0, 0, 255}
-	redTr := color.RGBA{128, 0, 0, 128}
-	ph.AddColor("blue", vphong.NewColors(blue, color.Black, color.White, 100, 1))
+	redTr := color.RGBA{200, 0, 0, 200}
+	ph.AddColor("blue", vphong.NewColors(blue, color.Black, color.White, 30, 1))
 	ph.AddColor("blueTr", vphong.NewColors(blueTr, color.Black, color.White, 30, 1))
 	ph.AddColor("red", vphong.NewColors(red, color.Black, color.White, 30, 1))
 	ph.AddColor("redTr", vphong.NewColors(redTr, color.Black, color.White, 30, 1))
@@ -140,7 +149,7 @@ func main() {
 	// Camera / Mtxs
 
 	// This is the standard camera view projection computation
-	campos := mat32.Vec3{0, 1, 5}
+	campos := mat32.Vec3{0, 2, 10}
 	view := vphong.CameraViewMat(campos, mat32.Vec3{0, 0, 0}, mat32.Vec3Y)
 
 	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
@@ -177,6 +186,10 @@ func main() {
 	cube.Set(vtxAry, normAry, texAry, idxAry)
 	ph.ModMeshByName("cube")
 
+	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("sphere")
+	sphere.Set(vtxAry, normAry, texAry, idxAry)
+	ph.ModMeshByName("sphere")
+
 	ph.Sync()
 
 	updateMats := func() {
@@ -195,16 +208,16 @@ func main() {
 		ph.UseTextureName("ground.png")
 		ph.Render()
 
-		ph.UseColorName("redTr")
+		ph.UseColorName("red")
 		ph.UseMtxsName("mtx2")
 		ph.UseMeshName("cube")
 		ph.UseTextureName("teximg.jpg")
 		// ph.UseNoTexture()
 		ph.Render()
 
-		ph.UseColorName("blueTr")
+		ph.UseColorName("redTr")
 		ph.UseMtxsName("mtx1")
-		ph.UseMeshName("cube")
+		ph.UseMeshName("sphere")
 		ph.UseNoTexture()
 		ph.Render()
 
@@ -223,7 +236,7 @@ func main() {
 		_ = fcr
 
 		campos.X = float32(frameCount) * 0.01
-		campos.Z = 5 - float32(frameCount)*0.03
+		campos.Z = 10 - float32(frameCount)*0.03
 		updateMats()
 		render1()
 

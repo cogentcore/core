@@ -20,7 +20,7 @@ void main() {
 	vec4 vPos = vec4(VtxPos, 1.0);
 	vec4 vNorm = vec4(VtxNorm, 1.0);
 	Pos = MVMtx * vPos;
-	Norm = normalize(NormMtx * vNorm).xyz;
+	Norm = normalize((NormMtx * vNorm).xyz);
 	CamDir = normalize(-Pos.xyz);
 	TexCoord = VtxTex;
 	gl_Position = MVPMtx * vPos;

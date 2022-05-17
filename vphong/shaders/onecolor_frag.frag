@@ -8,6 +8,10 @@ layout(set = 1, binding = 0) uniform ColorU {
 	vec3 ShinyBright; // x = Shiny, y = Bright
 };
 
+layout(set = 2, binding = 0) uniform ViewMtxU {
+    mat4 ViewMtx;
+};
+
 layout(location = 0) in vec4 Pos;
 layout(location = 1) in vec3 Norm;
 layout(location = 2) in vec3 CamDir;

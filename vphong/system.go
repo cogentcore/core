@@ -79,9 +79,10 @@ func (ph *Phong) ConfigSys() {
 	vset := vars.AddVertexSet()
 	mtxset := vars.AddSet()   // set = 0
 	clrset := vars.AddSet()   // set = 1
-	nliteset := vars.AddSet() // set = 2
-	liteset := vars.AddSet()  // set = 3
-	txset := vars.AddSet()    // set = 4
+	vmatset := vars.AddSet()  // set = 3
+	nliteset := vars.AddSet() // set = 4
+	liteset := vars.AddSet()  // set = 5
+	txset := vars.AddSet()    // set = 6
 
 	vec4sz := vgpu.Float32Vec4.Bytes()
 
@@ -96,6 +97,7 @@ func (ph *Phong) ConfigSys() {
 	pcset.AddStruct("TexPush", int(unsafe.Sizeof(TexPush{})), 1, vgpu.Push, vgpu.FragmentShader)
 	clrset.AddStruct("Color", vec4sz*4, 1, vgpu.Uniform, vgpu.FragmentShader)
 
+	vmatset.AddStruct("ViewMtx", vgpu.Float32Mat4.Bytes(), 1, vgpu.Uniform, vgpu.FragmentShader)
 	nliteset.AddStruct("NLights", 4*4, 1, vgpu.Uniform, vgpu.FragmentShader)
 	liteset.AddStruct("AmbLights", vec4sz*1, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
 	liteset.AddStruct("DirLights", vec4sz*2, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
@@ -105,6 +107,7 @@ func (ph *Phong) ConfigSys() {
 	txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 	// tximgv.TextureOwns = true
 
+	vmatset.ConfigVals(1)
 	nliteset.ConfigVals(1)
 	liteset.ConfigVals(1)
 	pcset.ConfigVals(1)

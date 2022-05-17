@@ -39,23 +39,25 @@ func (pl *Plane) Defaults() {
 
 // N returns number of vertex, index points in this shape element
 func (pl *Plane) N() (nVtx, nIdx int) {
-	nVtx, nIdx = PlaneSize(int(pl.Segs.X), int(pl.Segs.Y))
+	nVtx, nIdx = PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
 	return
 }
 
 // Set sets points in given allocated arrays
 func (pl *Plane) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	sz := SetPlaneAxisSize(vtxAry, normAry, texAry, idxAry, pl.VtxOff, pl.IdxOff, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset)
-	mn := sz.Negate()
-	pl.CBBox.Set(&mn, &sz)
+	sz := SetPlaneAxisSize(vtxAry, normAry, texAry, idxAry, pl.VtxOff, pl.IdxOff, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
+	mn := pl.Pos.Sub(sz)
+	mx := pl.Pos.Add(sz)
+	pl.CBBox.Set(&mn, &mx)
 }
 
-// PlaneSize returns the size of a single plane's worth of vertex and index data
-// with given number of segments.
-// Note: In *vertex* units, not float units (i.e., x3 to get actual float offset in Vtx array).
+// PlaneN returns the N's for a single plane's worth of
+// vertex and index data with given number of segments.
+// Note: In *vertex* units, not float units (i.e., x3 to get
+// actual float offset in Vtx array).
 // nVtx = (wsegs + 1) * (hsegs + 1)
 // nIdx = wsegs * hsegs * 6
-func PlaneSize(wsegs, hsegs int) (nVtx, nIdx int) {
+func PlaneN(wsegs, hsegs int) (nVtx, nIdx int) {
 	wsegs = ints.MaxInt(wsegs, 1)
 	hsegs = ints.MaxInt(hsegs, 1)
 	nVtx = (wsegs + 1) * (hsegs + 1)
@@ -63,14 +65,16 @@ func PlaneSize(wsegs, hsegs int) (nVtx, nIdx int) {
 	return
 }
 
-// SetPlaneAxisSize sets plane vertex, norm, tex, index data at given starting *vertex* index
-// (i.e., multiply this *3 to get actual float offset in Vtx array), and starting Idx index.
+// SetPlaneAxisSize sets plane vertex, norm, tex, index data at
+// given starting *vertex* index (i.e., multiply this *3 to get
+// actual float offset in Vtx array), and starting Idx index.
 // using Norm Axis, offset, and size params.
 // wsegs, hsegs = number of segments to create in each dimension --
 // more finely subdividing a plane allows for higher-quality lighting
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
-func SetPlaneAxisSize(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, normAxis mat32.Dims, normNeg bool, size mat32.Vec2, segs mat32.Vec2i, offset float32) mat32.Vec3 {
+// pos is a 3D position offset. returns 3D size of plane.
+func SetPlaneAxisSize(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, normAxis mat32.Dims, normNeg bool, size mat32.Vec2, segs mat32.Vec2i, offset float32, pos mat32.Vec3) mat32.Vec3 {
 	hSz := size.DivScalar(2)
 	thin := float32(.0000001)
 	sz := mat32.Vec3{}
@@ -78,23 +82,23 @@ func SetPlaneAxisSize(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Array
 	case mat32.X:
 		sz.Set(thin, hSz.Y, hSz.X)
 		if normNeg {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.Z, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y)) // nx
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.Z, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nx
 		} else {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.Z, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y)) // px
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.Z, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // px
 		}
 	case mat32.Y:
 		sz.Set(hSz.X, thin, hSz.Y)
 		if normNeg {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y)) // ny
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
 		} else {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y)) // py
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
 		}
 	case mat32.Z:
 		sz.Set(hSz.X, hSz.Y, thin)
 		if normNeg {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y)) // nz
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nz
 		} else {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y)) // pz
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // pz
 		}
 	}
 	return sz
@@ -108,7 +112,8 @@ func SetPlaneAxisSize(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Array
 // more finely subdividing a plane allows for higher-quality lighting
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
-func SetPlane(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int) {
+// pos is a 3D position offset.
+func SetPlane(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, pos mat32.Vec3) {
 	w := mat32.Z
 	if (waxis == mat32.X && haxis == mat32.Y) || (waxis == mat32.Y && haxis == mat32.X) {
 		w = mat32.Z
@@ -151,6 +156,7 @@ func SetPlane(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtx
 			vtx.SetDim(waxis, (float32(ix)*segWidth)*fwdir+woff)
 			vtx.SetDim(haxis, (float32(iy)*segHeight)*fhdir+hoff)
 			vtx.SetDim(w, zoff)
+			vtx.Add(pos)
 			vtx.ToArray(vtxAry, vidx)
 			norm.ToArray(normAry, vidx)
 			tex.Set(float32(ix)/float32(wsegs), float32(1)-(float32(iy)/float32(hsegs)))

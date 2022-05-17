@@ -32,6 +32,7 @@ type ShapeBase struct {
 	VtxOff int        `desc:"vertex offset, in points"`
 	IdxOff int        `desc:"index offset, in points"`
 	CBBox  mat32.Box3 `desc:"cubic bounding box in local coords"`
+	Pos    mat32.Vec3 `desc:"all shapes take a 3D position offset to enable composition"`
 }
 
 // Offs returns starting offset for verticies, indexes in full shape array,

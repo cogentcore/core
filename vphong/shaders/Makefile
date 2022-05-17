@@ -2,6 +2,12 @@
 
 all: texture_vert.spv texture_frag.spv onecolor_vert.spv onecolor_frag.spv pervertex_vert.spv pervertex_frag.spv
 
+texture_frag.spv : phong_frag.frag
+
+onecolor_frag.spv : phong_frag.frag
+
+pervertex_frag.spv : phong_frag.frag
+
 %.spv : %.hlsl
 	glslc -fshader-stage=compute -o $@ $<
 

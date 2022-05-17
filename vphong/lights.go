@@ -31,7 +31,7 @@ type AmbientLight struct {
 type DirLight struct {
 	Color mat32.Vec3 `desc:"color of light at full intensity"`
 	pad0  float32
-	Dir   mat32.Vec3 `desc:"direction of light vectdor"`
+	Pos   mat32.Vec3 `desc:"position of light vector -- think of it shining down from this position toward the origin, i.e., the negation of this position is the vector."`
 	pad1  float32
 }
 
@@ -95,15 +95,17 @@ func (ph *Phong) AddAmbientLight(color mat32.Vec3) {
 }
 
 // AddDirLight adds directional light
-func (ph *Phong) AddDirLight(color, dir mat32.Vec3) {
+func (ph *Phong) AddDirLight(color, pos mat32.Vec3) {
+	// dir.Y = -dir.Y // flipy
 	ph.Dir[ph.NLights.Dir].Color = color
-	ph.Dir[ph.NLights.Dir].Dir = dir
+	ph.Dir[ph.NLights.Dir].Pos = pos
 	ph.NLights.Dir++
 }
 
 // AddPointLight adds point light.
 // Defaults: linDecay=.1, quadDecay=.01
 func (ph *Phong) AddPointLight(color, pos mat32.Vec3, linDecay, quadDecay float32) {
+	// pos.Y = -pos.Y // flipy
 	ph.Point[ph.NLights.Point].Color = color
 	ph.Point[ph.NLights.Point].Pos = pos
 	ph.Point[ph.NLights.Point].Decay = mat32.Vec3{X: linDecay, Y: quadDecay}
@@ -111,8 +113,10 @@ func (ph *Phong) AddPointLight(color, pos mat32.Vec3, linDecay, quadDecay float3
 }
 
 // AddSpotLight adds spot light
-// Defaults: angDecay=15, cutAngle=45 (max 90), linDecay=1, quadDecay=1
+// Defaults: angDecay=15, cutAngle=45 (max 90), linDecay=.01, quadDecay=0.001
 func (ph *Phong) AddSpotLight(color, pos, dir mat32.Vec3, angDecay, cutAngle, linDecay, quadDecay float32) {
+	// pos.Y = -pos.Y // flipy
+	// dir.Y = -dir.Y // flipy
 	ph.Spot[ph.NLights.Spot].Color = color
 	ph.Spot[ph.NLights.Spot].Pos = pos
 	ph.Spot[ph.NLights.Spot].Dir = dir

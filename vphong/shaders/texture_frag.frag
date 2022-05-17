@@ -8,7 +8,11 @@ layout(set = 1, binding = 0) uniform ColorU {
 	vec3 ShinyBright; // x = Shiny, y = Bright
 };
 
-layout(set = 4, binding = 0) uniform sampler2D TexSampler[];
+layout(set = 2, binding = 0) uniform ViewMtxU {
+    mat4 ViewMtx;
+};
+
+layout(set = 5, binding = 0) uniform sampler2D TexSampler[];
 
 layout(push_constant) uniform TexIdxU {
 	vec2 TexRepeat;
