@@ -182,19 +182,23 @@ func (sf *Surface) ConfigSwapchain() {
 	// Find a supported composite alpha mode - one of these is guaranteed to be set
 	compositeAlpha := vk.CompositeAlphaOpaqueBit
 	compositeAlphaFlags := []vk.CompositeAlphaFlagBits{
-		vk.CompositeAlphaOpaqueBit, // this only affects blending with other windows in OS
 		vk.CompositeAlphaPreMultipliedBit,
+		vk.CompositeAlphaOpaqueBit, // this only affects blending with other windows in OS
 		vk.CompositeAlphaPostMultipliedBit,
 		vk.CompositeAlphaInheritBit,
 	}
+	goti := -1
 	for i := 0; i < len(compositeAlphaFlags); i++ {
 		alphaFlags := vk.CompositeAlphaFlags(compositeAlphaFlags[i])
 		flagSupported := surfaceCapabilities.SupportedCompositeAlpha&alphaFlags != 0
 		if flagSupported {
+			goti = i
 			compositeAlpha = compositeAlphaFlags[i]
 			break
 		}
 	}
+
+	fmt.Printf("Got alpha: %d\n", goti)
 
 	// Create a swapchain
 	var swapchain vk.Swapchain
@@ -241,7 +245,7 @@ func (sf *Surface) ConfigSwapchain() {
 	sf.Frames = make([]*Framebuffer, sf.NFrames)
 	for i := 0; i < sf.NFrames; i++ {
 		fr := &Framebuffer{}
-		fr.ConfigImage(dev, sf.Format, swapchainImages[i])
+		fr.ConfigSurfaceImage(dev, sf.Format, swapchainImages[i])
 		sf.Frames[i] = fr
 	}
 }

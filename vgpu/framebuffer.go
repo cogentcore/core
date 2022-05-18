@@ -16,24 +16,49 @@ type Framebuffer struct {
 	RenderPass  *RenderPass    `desc:"pointer to the associated renderpass and depth buffer"`
 	Framebuffer vk.Framebuffer `desc:"vulkan framebuffer"`
 	HasCleared  bool           `desc:"has this framebuffer been cleared yet?  if not, must be prior to use as a non-clearing Load case"`
+	ImageGrab   Image          `desc:"for a RenderFrame, this is the image that is used to transfer back from the render color attachment to host memory -- requires a different format than color attachment, and is ImageOnHostOnly flagged."`
 }
 
-// ConfigImage configures settings for given existing image format
-// and image.  Does not yet make the Framebuffer because it
+// ConfigSurfaceImage configures settings for given existing surface image
+// and format.  Does not yet make the Framebuffer because it
 // still needs the RenderPass (see ConfigAll for all)
-func (fb *Framebuffer) ConfigImage(dev vk.Device, fmt ImageFormat, img vk.Image) {
+func (fb *Framebuffer) ConfigSurfaceImage(dev vk.Device, fmt ImageFormat, img vk.Image) {
 	fb.Image.Format.Defaults()
 	fb.Image.Format = fmt
 	fb.Image.SetVkImage(dev, img) // makes view
 	fb.Image.SetFlag(int(FramebufferImage))
 }
 
-// ConfigAll configures settings for given existing image format
-// image, and RenderPass, and Makes the Framebuffer based on that.
-func (fb *Framebuffer) ConfigAll(dev vk.Device, fmt ImageFormat, img vk.Image, rp *RenderPass) {
-	fb.ConfigImage(dev, fmt, img)
-	fb.RenderPass = rp
-	fb.Config()
+// ConfigRenderImage configures a new image for a standalone framebuffer
+// not associated with an existing surface, for RenderFrame target.
+// In general it is recommended to use vk.SampleCount4Bit to avoid aliasing.
+// Does not yet make the Framebuffer because it still needs the RenderPass
+// (see ConfigRenderPass)
+func (fb *Framebuffer) ConfigRenderImage(dev vk.Device, fmt ImageFormat) {
+	fb.Image.Format.Defaults()
+	fb.Image.Format = fmt
+	fb.Image.SetFlag(int(FramebufferImage))
+	fb.Image.Dev = dev
+	fb.Image.AllocImage()
+	fb.Image.ConfigStdView()
+	fb.ConfigImageGrab(dev)
+}
+
+// ConfigImageGrab configures the ImageGrab for copying rendered image
+// back to host memory.  Uses format of current Image.
+func (fb *Framebuffer) ConfigImageGrab(dev vk.Device) {
+	if fb.ImageGrab.IsActive() {
+		if fb.ImageGrab.Format.Size == fb.Image.Format.Size {
+			return
+		}
+		fb.ImageGrab.SetSize(fb.Image.Format.Size)
+		return
+	}
+	fb.ImageGrab.Format.Defaults()
+	fb.ImageGrab.Format = fb.Image.Format
+	fb.ImageGrab.SetFlag(int(ImageOnHostOnly))
+	fb.ImageGrab.Dev = dev
+	fb.ImageGrab.AllocImage()
 }
 
 // ConfigRenderPass configures for RenderPass, assuming image is already set
@@ -44,21 +69,6 @@ func (fb *Framebuffer) ConfigRenderPass(rp *RenderPass) {
 		panic("vgpu.Framebuffer:ConfigRenderPass -- image and renderpass have different devices -- this will not work -- e.g., must set Surface to use System's device or vice-versa")
 	}
 	fb.Config()
-}
-
-// ConfigNewImage configures a new image for a standalone framebuffer
-// not associated with an existing surface, to be used as a rendering target.
-// In general it is recommended to use vk.SampleCount4Bit to avoid aliasing.
-// Does not yet make the Framebuffer because it still needs the RenderPass
-// (see ConfigRenderPass)
-func (fb *Framebuffer) ConfigNewImage(dev vk.Device, fmt ImageFormat, size image.Point, samples vk.SampleCountFlagBits) {
-	fb.Image.Format.Defaults()
-	fb.Image.Format = fmt
-	fb.Image.Format.Size = size
-	fb.Image.Format.Samples = samples
-	fb.Image.SetFlag(int(FramebufferImage))
-	fb.Image.Dev = dev
-	fb.Image.AllocImage()
 }
 
 // Destroy destroys everything
@@ -108,8 +118,27 @@ func (fb *Framebuffer) Config() {
 // and re-makes the framebuffer.
 func (fb *Framebuffer) SetSize(size image.Point) {
 	fb.Image.SetSize(size)
+	fb.ImageGrab.SetSize(size)
 	if fb.RenderPass.Depth.IsActive() {
 		fb.RenderPass.Depth.SetSize(size)
 	}
 	fb.Config()
+}
+
+/////////////////////////////////////////////////////////////////
+// RenderFrame functionality
+
+// https://stackoverflow.com/questions/51477954/vulkan-off-screen-rendering-tiling-optimal-or-linear
+
+// https://github.com/SaschaWillems/Vulkan/tree/b9f0ac91d2adccc3055a904d3a8f6553b10ff6cd/examples/renderheadless/renderheadless.cpp
+
+// GrabImage grabs the current framebuffer image, using given command buffer
+// which must have the cmdBegin called already.
+func (fb *Framebuffer) GrabImage(dev vk.Device, cmd vk.CommandBuffer) {
+	fb.ConfigImageGrab(dev) // ensure image grab setup
+	// first, prepare ImageGrab to receive copy from render image.
+	// apparently, the color attachment, with src flag already set, does not need this.
+	fb.ImageGrab.TransitionForDst(cmd, vk.PipelineStageTransferBit) // no idea why, but SaschaWillems does
+	vk.CmdCopyImage(cmd, fb.Image.Image, vk.ImageLayoutTransferSrcOptimal, fb.ImageGrab.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.ImageCopy{fb.ImageGrab.CopyImageRec()})
+	fb.ImageGrab.TransitionDstToGeneral(cmd)
 }

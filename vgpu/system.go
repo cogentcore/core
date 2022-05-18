@@ -99,10 +99,17 @@ func (sy *System) NewPipeline(name string) *Pipeline {
 }
 
 // ConfigRenderPass configures the renderpass, including the image
-// format that we're rendering to (from the Surface or Framebuffer)
+// format that we're rendering to, for a surface render target,
 // and the depth buffer format (pass UndefType for no depth buffer).
 func (sy *System) ConfigRenderPass(imgFmt *ImageFormat, depthFmt Types) {
-	sy.RenderPass.Config(sy.Device.Device, imgFmt, depthFmt)
+	sy.RenderPass.Config(sy.Device.Device, imgFmt, depthFmt, false)
+}
+
+// ConfigRenderPassNonSurface configures the renderpass, including the image
+// format that we're rendering to, for a RenderFrame non-surface target,
+// and the depth buffer format (pass UndefType for no depth buffer).
+func (sy *System) ConfigRenderPassNonSurface(imgFmt *ImageFormat, depthFmt Types) {
+	sy.RenderPass.Config(sy.Device.Device, imgFmt, depthFmt, true)
 }
 
 // Config configures the entire system, after everything has been

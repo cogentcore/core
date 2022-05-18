@@ -194,6 +194,27 @@ func (im *Image) GoImage() (*image.RGBA, error) {
 	return rgba, nil
 }
 
+// DevGoImage returns an *image.RGBA standard Go image, of the Device
+// memory representation.  Only works if IsHostActive and Format
+// is default vk.FormatR8g8b8a8Srgb (strongly recommended in any case)
+func (im *Image) DevGoImage() (*image.RGBA, error) {
+	if !im.IsActive() {
+		return nil, fmt.Errorf("vgpu.Image: Go image not available because device Image is not active: %s", im.Name)
+	}
+	if !im.Format.IsStdRGBA() {
+		return nil, fmt.Errorf("vgpu.Image: Go image not standard RGBA format: %s", im.Name)
+	}
+	size := im.Format.ByteSize()
+	rgba := &image.RGBA{}
+	ptr := MapMemory(im.Dev, im.Mem, size)
+	const m = 0x7fffffff
+	pix := (*[m]byte)(ptr)[:size]
+	rgba.Pix = pix
+	rgba.Stride = im.Format.Stride()
+	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
+	return rgba, nil
+}
+
 // ConfigGoImage configures the image for storing the given GoImage.
 // Does not call SetGoImage -- this is for configuring a Val for
 // an image prior to allocating memory. Once memory is allocated
@@ -422,13 +443,16 @@ func (im *Image) AllocImage() {
 		usage |= vk.ImageUsageDepthStencilAttachmentBit
 	case im.HasFlag(FramebufferImage):
 		usage |= vk.ImageUsageColorAttachmentBit
+		usage |= vk.ImageUsageTransferSrcBit // todo: extra bit to qualify
 	default:
 		usage |= vk.ImageUsageSampledBit // default is sampled texture
 	}
-	if im.IsHostActive() {
+	if im.IsHostActive() && !im.HasFlag(FramebufferImage) {
 		usage |= vk.ImageUsageTransferDstBit
 	}
-	// vk.ImageUsageTransferSrcBit |
+	if im.HasFlag(ImageOnHostOnly) {
+		usage |= vk.ImageUsageTransferDstBit
+	}
 
 	var image vk.Image
 	w, h := im.Format.Size32()
@@ -453,6 +477,9 @@ func (im *Image) AllocImage() {
 	im.Image = image
 
 	props := vk.MemoryPropertyDeviceLocalBit
+	if im.HasFlag(ImageOnHostOnly) {
+		props = vk.MemoryPropertyHostVisibleBit | vk.MemoryPropertyHostCoherentBit
+	}
 
 	var memReqs vk.MemoryRequirements
 	vk.GetImageMemoryRequirements(im.Dev, im.Image, &memReqs)
@@ -527,21 +554,43 @@ func (im *Image) CopyRec() vk.BufferImageCopy {
 	return reg
 }
 
-/////////////////////////////////////////////////////////////////////
-// Transition
+// CopyImageRec returns info for this Image for the ImageCopy operations
+func (im *Image) CopyImageRec() vk.ImageCopy {
+	w, h := im.Format.Size32()
+	reg := vk.ImageCopy{}
+	reg.SrcSubresource.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
+	reg.SrcSubresource.LayerCount = 1
+	reg.DstSubresource.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
+	reg.DstSubresource.LayerCount = 1
+	reg.Extent.Width = w
+	reg.Extent.Height = h
+	reg.Extent.Depth = 1
+	return reg
+}
 
-// TransitionForDst transitions to TransferDstOptimal
-func (im *Image) TransitionForDst(cmd vk.CommandBuffer) {
-	im.Transition(cmd, im.Format.Format, vk.ImageLayoutUndefined, vk.ImageLayoutTransferDstOptimal)
+/////////////////////////////////////////////////////////////////////
+// Transition -- prepare device images for different roles
+
+// https://gpuopen.com/learn/vulkan-barriers-explained/
+
+// TransitionForDst transitions to TransferDstOptimal to prepare
+// device image to be copied to.  source stage is as specified.
+func (im *Image) TransitionForDst(cmd vk.CommandBuffer, srcStage vk.PipelineStageFlagBits) {
+	im.Transition(cmd, im.Format.Format, vk.ImageLayoutUndefined, vk.ImageLayoutTransferDstOptimal, srcStage, vk.PipelineStageTransferBit)
 }
 
 // TransitionDstToShader transitions from TransferDstOptimal to TransferShaderReadOnly
 func (im *Image) TransitionDstToShader(cmd vk.CommandBuffer) {
-	im.Transition(cmd, im.Format.Format, vk.ImageLayoutTransferDstOptimal, vk.ImageLayoutShaderReadOnlyOptimal)
+	im.Transition(cmd, im.Format.Format, vk.ImageLayoutTransferDstOptimal, vk.ImageLayoutShaderReadOnlyOptimal, vk.PipelineStageTransferBit, vk.PipelineStageFragmentShaderBit)
+}
+
+// TransitionDstToGeneral transitions from Dst to General, in prep for copy from dev to host
+func (im *Image) TransitionDstToGeneral(cmd vk.CommandBuffer) {
+	im.Transition(cmd, im.Format.Format, vk.ImageLayoutTransferDstOptimal, vk.ImageLayoutGeneral, vk.PipelineStageTransferBit, vk.PipelineStageTransferBit)
 }
 
 // Transition transitions image to new layout
-func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, newLayout vk.ImageLayout) {
+func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, newLayout vk.ImageLayout, srcStage, dstStage vk.PipelineStageFlagBits) {
 
 	imgMemBar := vk.ImageMemoryBarrier{
 		SType:               vk.StructureTypeImageMemoryBarrier,
@@ -557,16 +606,10 @@ func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, n
 		},
 	}
 
-	var srcStage, dstStage vk.PipelineStageFlags
-
 	switch newLayout {
 	case vk.ImageLayoutTransferDstOptimal:
 		// make sure anything that was copying from this image has completed
 		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessTransferWriteBit)
-		dstStage = vk.PipelineStageFlags(vk.PipelineStageTransferBit)
-		if oldLayout == vk.ImageLayoutUndefined {
-			srcStage = vk.PipelineStageFlags(vk.PipelineStageTopOfPipeBit)
-		}
 
 	case vk.ImageLayoutColorAttachmentOptimal:
 		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessColorAttachmentWriteBit)
@@ -579,8 +622,6 @@ func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, n
 		//  | vk.AccessFlags(vk.AccessInputAttachmentReadBit)
 		if oldLayout == vk.ImageLayoutTransferDstOptimal {
 			imgMemBar.SrcAccessMask = vk.AccessFlags(vk.AccessTransferWriteBit)
-			srcStage = vk.PipelineStageFlags(vk.PipelineStageTransferBit)
-			dstStage = vk.PipelineStageFlags(vk.PipelineStageFragmentShaderBit)
 		}
 
 	case vk.ImageLayoutTransferSrcOptimal:
@@ -589,11 +630,17 @@ func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, n
 	case vk.ImageLayoutPresentSrc:
 		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessMemoryReadBit)
 
+	case vk.ImageLayoutGeneral:
+		if oldLayout == vk.ImageLayoutTransferDstOptimal {
+			imgMemBar.SrcAccessMask = vk.AccessFlags(vk.AccessTransferWriteBit)
+		}
+		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessMemoryReadBit)
+
 	default:
 		imgMemBar.DstAccessMask = 0
 	}
 
-	vk.CmdPipelineBarrier(cmd, srcStage, dstStage,
+	vk.CmdPipelineBarrier(cmd, vk.PipelineStageFlags(srcStage), vk.PipelineStageFlags(dstStage),
 		0, 0, nil, 0, nil, 1, []vk.ImageMemoryBarrier{imgMemBar})
 }
 
@@ -653,6 +700,11 @@ const (
 
 	// FramebufferImage indicates that this is a Framebuffer image
 	FramebufferImage
+
+	// ImageOnHostOnly causes the image to be created only on host visible
+	// memory, not on device memory -- no additional host buffer should be created.
+	// this is for an ImageGrab image.
+	ImageOnHostOnly
 
 	ImageFlagsN
 )

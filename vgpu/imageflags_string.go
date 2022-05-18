@@ -20,12 +20,13 @@ func _() {
 	_ = x[ImageIsVal-4]
 	_ = x[DepthImage-5]
 	_ = x[FramebufferImage-6]
-	_ = x[ImageFlagsN-7]
+	_ = x[ImageOnHostOnly-7]
+	_ = x[ImageFlagsN-8]
 }
 
-const _ImageFlags_name = "ImageActiveImageHostActiveImageOwnsImageImageOwnsHostImageIsValDepthImageFramebufferImageImageFlagsN"
+const _ImageFlags_name = "ImageActiveImageHostActiveImageOwnsImageImageOwnsHostImageIsValDepthImageFramebufferImageImageOnHostOnlyImageFlagsN"
 
-var _ImageFlags_index = [...]uint8{0, 11, 26, 40, 53, 63, 73, 89, 100}
+var _ImageFlags_index = [...]uint8{0, 11, 26, 40, 53, 63, 73, 89, 104, 115}
 
 func (i ImageFlags) String() string {
 	if i < 0 || i >= ImageFlags(len(_ImageFlags_index)-1) {

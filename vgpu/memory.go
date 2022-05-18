@@ -247,7 +247,7 @@ func (mm *Memory) TransferRegsToGPU(buff *MemBuff, regs []MemReg) {
 		return
 	}
 
-	cmdBuff := mm.CmdPool.NewBuffer(&mm.Device)
+	cmd := mm.CmdPool.NewBuffer(&mm.Device)
 	mm.CmdPool.BeginCmdOneTime()
 
 	rg := make([]vk.BufferCopy, len(regs))
@@ -255,7 +255,7 @@ func (mm *Memory) TransferRegsToGPU(buff *MemBuff, regs []MemReg) {
 		rg[i] = vk.BufferCopy{SrcOffset: vk.DeviceSize(mr.Offset), DstOffset: vk.DeviceSize(mr.Offset), Size: vk.DeviceSize(mr.Size)}
 	}
 
-	vk.CmdCopyBuffer(cmdBuff, buff.Host, buff.Dev, uint32(len(rg)), rg)
+	vk.CmdCopyBuffer(cmd, buff.Host, buff.Dev, uint32(len(rg)), rg)
 
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }
@@ -266,15 +266,15 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 		return
 	}
 
-	cmdBuff := mm.CmdPool.NewBuffer(&mm.Device)
-	mm.CmdPool.BeginCmdOneTime()
+	cmd := mm.CmdPool.NewBuffer(&mm.Device)
+	CmdBeginOneTime(cmd)
 
 	rg := make([]vk.BufferCopy, len(regs))
 	for i, mr := range regs {
 		rg[i] = vk.BufferCopy{SrcOffset: vk.DeviceSize(mr.Offset), DstOffset: vk.DeviceSize(mr.Offset), Size: vk.DeviceSize(mr.Size)}
 	}
 
-	vk.CmdCopyBuffer(cmdBuff, buff.Dev, buff.Host, uint32(len(rg)), rg)
+	vk.CmdCopyBuffer(cmd, buff.Dev, buff.Host, uint32(len(rg)), rg)
 
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }
@@ -282,26 +282,26 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 ////////////////////////////////////////////////////////////////////////////
 // Texture functions
 
-// TransferImagesToGPU transfers image memory from CPU to GPU for given images.
+// TransferTexturesToGPU transfers texture image memory from CPU to GPU
+// for given images.  Transitions device image as destination, then to Shader
+// read only source, for use in fragment shader texture sampling.
 // The image Host.Offset *must* be accurate for the given buffer, whether its own
 // individual buffer or the shared memory-managed buffer.
-func (mm *Memory) TransferImagesToGPU(buff vk.Buffer, imgs ...*Image) {
+func (mm *Memory) TransferTexturesToGPU(buff vk.Buffer, imgs ...*Image) {
 	if len(imgs) == 0 {
 		return
 	}
-	cmdBuff := mm.CmdPool.NewBuffer(&mm.Device)
-	mm.CmdPool.BeginCmdOneTime()
+	cmd := mm.CmdPool.NewBuffer(&mm.Device)
+	CmdBeginOneTime(cmd)
 
 	for _, im := range imgs {
-		im.TransitionForDst(cmdBuff)
+		im.TransitionForDst(cmd, vk.PipelineStageTopOfPipeBit)
 		if im.IsHostOwner() {
-			vk.CmdCopyBufferToImage(cmdBuff, im.Host.Buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
+			vk.CmdCopyBufferToImage(cmd, im.Host.Buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
 		} else {
-			vk.CmdCopyBufferToImage(cmdBuff, buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
+			vk.CmdCopyBufferToImage(cmd, buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
 		}
-		// if im.IsVal() {
-		im.TransitionDstToShader(cmdBuff)
-		// }
+		im.TransitionDstToShader(cmd)
 	}
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }
@@ -310,11 +310,11 @@ func (mm *Memory) TransferImagesToGPU(buff vk.Buffer, imgs ...*Image) {
 // the image Host.Offset *must* be accurate for the given buffer, whether its own
 // individual buffer or the shared memory-managed buffer.
 func (mm *Memory) TransferImagesFmGPU(buff vk.Buffer, imgs ...*Image) {
-	cmdBuff := mm.CmdPool.NewBuffer(&mm.Device)
-	mm.CmdPool.BeginCmdOneTime()
+	cmd := mm.CmdPool.NewBuffer(&mm.Device)
+	CmdBeginOneTime(cmd)
 
 	for _, im := range imgs {
-		vk.CmdCopyImageToBuffer(cmdBuff, im.Image, vk.ImageLayoutTransferDstOptimal, buff, 1, []vk.BufferImageCopy{im.CopyRec()})
+		vk.CmdCopyImageToBuffer(cmd, im.Image, vk.ImageLayoutTransferDstOptimal, buff, 1, []vk.BufferImageCopy{im.CopyRec()})
 	}
 	mm.CmdPool.SubmitWaitFree(&mm.Device)
 }
@@ -342,7 +342,7 @@ func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 		}
 	}
 	if len(imgs) > 0 {
-		mm.TransferImagesToGPU(buff.Host, imgs...)
+		mm.TransferTexturesToGPU(buff.Host, imgs...)
 	}
 }
 
@@ -370,6 +370,6 @@ func (mm *Memory) SyncValsTextures(buff *MemBuff) {
 		}
 	}
 	if len(imgs) > 0 {
-		mm.TransferImagesToGPU(buff.Host, imgs...)
+		mm.TransferTexturesToGPU(buff.Host, imgs...)
 	}
 }

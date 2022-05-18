@@ -20,12 +20,13 @@ import (
 // each Pipeline, and any associated Framebuffers
 // include the RenderPass info. and its Depth buffer.
 type RenderPass struct {
-	Dev       vk.Device       `desc:"the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface"`
-	Format    ImageFormat     `desc:"image format information for the framebuffer we render to"`
-	Depth     Image           `desc:"the associated depth buffer, if set"`
-	HasDepth  bool            `desc:"set to true if configured with depth buffer"`
-	NoClear   bool            `desc:"set this to true if the rendering should not clear the pixels at the start of a render pass -- must be set prior to calling Config method."`
-	ClearVals []vk.ClearValue `desc:"values for clearing image when starting render pass"`
+	Dev        vk.Device       `desc:"the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface"`
+	Format     ImageFormat     `desc:"image format information for the framebuffer we render to"`
+	Depth      Image           `desc:"the associated depth buffer, if set"`
+	HasDepth   bool            `desc:"set to true if configured with depth buffer"`
+	NoClear    bool            `desc:"set this to true if the rendering should not clear the pixels at the start of a render pass -- must be set prior to calling Config method."`
+	NotSurface bool            `desc:"set this to true if it is not a surface render target"`
+	ClearVals  []vk.ClearValue `desc:"values for clearing image when starting render pass"`
 
 	VkClearPass vk.RenderPass `desc:"the vulkan renderpass config that clears target first"`
 	VkLoadPass  vk.RenderPass `desc:"the vulkan renderpass config that does not clear target first (loads previous)"`
@@ -46,7 +47,8 @@ func (rp *RenderPass) Destroy() {
 // Using standard parameters for graphics rendering,
 // based on the given image format and depth image format
 // (pass UndefType for no depth buffer).
-func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types) {
+func (rp *RenderPass) Config(dev vk.Device, imgFmt *ImageFormat, depthFmt Types, notSurface bool) {
+	rp.NotSurface = notSurface
 	rp.SetClearColor(0, 0, 0, 1)
 	rp.SetClearDepthStencil(1, 0)
 	rp.VkClearPass = rp.ConfigImpl(dev, imgFmt, depthFmt, true)
@@ -80,6 +82,10 @@ func (rp *RenderPass) ConfigImpl(dev vk.Device, imgFmt *ImageFormat, depthFmt Ty
 	if !clear {
 		ca.LoadOp = vk.AttachmentLoadOpLoad
 		ca.InitialLayout = vk.ImageLayoutPresentSrc
+	}
+
+	if rp.NotSurface {
+		ca.FinalLayout = vk.ImageLayoutTransferSrcOptimal
 	}
 
 	atta := []vk.AttachmentDescription{ca}

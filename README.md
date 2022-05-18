@@ -8,7 +8,11 @@ vGPU is a Vulkan-based framework for both Graphics and Compute Engine use of GPU
 
 [Vulkan](https://www.vulkan.org) is very low-level and demands a higher-level framework to manage the complexity and verbosity.  While there are many helpful tutorials covering the basic API, many of the tutorials don't provide much of a pathway for how to organize everything at a higher level of abstraction.  vGPU represents one attempt that enforces some reasonable choices that enable a significantly simpler programming model, while still providing considerable flexibility and high levels of performance.  Everything is a tradeoff, and simplicity definitely was prioritized over performance in a few cases, but in practical use-cases, the performance differences should be minimal.
 
-Most GPU coding is done for gaming, but vGPU is designed for more scientific "desktop" applications based on the [GoGi](https://github.com/goki/gi) GUI framework, which it will soon power, such as visualization of complex 3D spaces and displays (particularly neural networks), and for GPU Compute acceleration.  The design choices also reflect these priorities, as noted below.
+# vPhong and vShape
+
+The [vPhong](https://github.com/goki/vgpu/tree/main/vphong) package provides a complete rendering implementation with different pipelines for different materials, and support for 4 different types of light sources based on the classic Blinn-Phong lighting model.  See the `examples/phong` example for how to use it.  It does not assume any kind of organization of the rendering elements, and just provides name and index-based access to all the resources needed to render a scene.
+
+[vShape](https://github.com/goki/vgpu/tree/main/vshape) generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by vgpu.  It only has a dependency on the [mat32](https://github.com/goki/mat32) package and could be used for anything.
 
 # Basic Elements and Organization
 
@@ -20,13 +24,14 @@ Most GPU coding is done for gaming, but vGPU is designed for more scientific "de
     + `Pipeline` performs a specific chain of operations, using `Shader` program(s).  In a graphics context, each pipeline typically handles a different type of material or other variation in rendering (textured vs. not, transparent vs. solid, etc).
     + `Memory` manages the memory, organized by `Vars` variables that are referenced in the shader programs, with each Var having any number of associated values in `Vals`.  Vars are organized into `Set`s that manage their bindings distinctly, and can be updated at different time scales. It has 4 different `MemBuff` buffers for different types of memory.  It is assumed that the *sizes* of all the Vals do not change frequently, so everything is Alloc'd afresh if any size changes.  This avoids the need for complex de-fragmentation algorithms, and is maximally efficient, but is not good if sizes change (which is rare in most rendering cases).
   
-* `Image` manages a vulkan Image and associated `ImageView`, including potential host staging buffer (shared as in a Val or owned).
+* `Image` manages a vulkan Image and associated `ImageView`, including potential host staging buffer (shared as in a Val or owned separately).
 * `Texture` extends the `Image` with a `Sampler` that defines how pixels are accessed in a shader.
-* `Framebuffer` manages an `Image` along with a `RenderPass` configuration that enables rendering into an offscreen image.
+* `Framebuffer` manages an `Image` along with a `RenderPass` configuration for managing a render target (shared for rendering onto a window `Surface` or an offscreen `RenderFrame`)
 
-* A `Surface` represents the full hardware-managed `Image` associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
+* `Surface` represents the full hardware-managed `Image`s associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
+* `RenderFrame` is an offscreen render target with Framebuffers and a logical device.
 
-* Unlike most game-oriented GPU setups, vGPU is designed to be used in an event-driven manner where render updates arise from user input or other events, instead of having a constant render loop taking place at all times.  This is vastly more energy efficient and suits the use-cases of GoGi and efficient inter-operation with the Compute engine.
+* Unlike most game-oriented GPU setups, vGPU is designed to be used in an event-driven manner where render updates arise from user input or other events, instead of requiring a constant render loop taking place at all times (which can optionally be established too).  The event-driven model is vastly more energy efficient for non-game applications.
 
 ## Memory organization
 
