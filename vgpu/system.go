@@ -25,7 +25,7 @@ type System struct {
 	Pipelines   []*Pipeline          `desc:"all pipelines"`
 	PipelineMap map[string]*Pipeline `desc:"map of all pipelines -- names must be unique"`
 	Mem         Memory               `desc:"manages all the memory for all the Vals"`
-	RenderPass  RenderPass           `desc:"renderpass with depth buffer for this system"`
+	Render      Render               `desc:"renderpass with depth buffer for this system"`
 	Framebuffer Framebuffer          `desc:"shared framebuffer to render into, if not rendering into Surface"`
 }
 
@@ -75,7 +75,7 @@ func (sy *System) Destroy() {
 	if sy.Compute {
 		sy.Device.Destroy()
 	} else {
-		sy.RenderPass.Destroy()
+		sy.Render.Destroy()
 	}
 	sy.GPU = nil
 }
@@ -98,18 +98,18 @@ func (sy *System) NewPipeline(name string) *Pipeline {
 	return pl
 }
 
-// ConfigRenderPass configures the renderpass, including the image
+// ConfigRender configures the renderpass, including the image
 // format that we're rendering to, for a surface render target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRenderPass(imgFmt *ImageFormat, depthFmt Types) {
-	sy.RenderPass.Config(sy.Device.Device, imgFmt, depthFmt, false)
+func (sy *System) ConfigRender(imgFmt *ImageFormat, depthFmt Types) {
+	sy.Render.Config(sy.Device.Device, imgFmt, depthFmt, false)
 }
 
-// ConfigRenderPassNonSurface configures the renderpass, including the image
+// ConfigRenderNonSurface configures the renderpass, including the image
 // format that we're rendering to, for a RenderFrame non-surface target,
 // and the depth buffer format (pass UndefType for no depth buffer).
-func (sy *System) ConfigRenderPassNonSurface(imgFmt *ImageFormat, depthFmt Types) {
-	sy.RenderPass.Config(sy.Device.Device, imgFmt, depthFmt, true)
+func (sy *System) ConfigRenderNonSurface(imgFmt *ImageFormat, depthFmt Types) {
+	sy.Render.Config(sy.Device.Device, imgFmt, depthFmt, true)
 }
 
 // Config configures the entire system, after everything has been
@@ -191,22 +191,16 @@ func (sy *System) SetColorBlend(alphaBlend bool) {
 	}
 }
 
-// SetClearOff turns off clearing at start of rendering.
-// call SetClearColor to turn back on.
-func (sy *System) SetClearOff() {
-	sy.RenderPass.SetClearOff()
-}
-
 // SetClearColor sets the RGBA colors to set when starting new render
 // For all pipelines, to keep graphics settings consistent.
 func (sy *System) SetClearColor(r, g, b, a float32) {
-	sy.RenderPass.SetClearColor(r, g, b, a)
+	sy.Render.SetClearColor(r, g, b, a)
 }
 
 // SetClearDepthStencil sets the depth and stencil values when starting new render
 // For all pipelines, to keep graphics settings consistent.
 func (sy *System) SetClearDepthStencil(depth float32, stencil uint32) {
-	sy.RenderPass.SetClearDepthStencil(depth, stencil)
+	sy.Render.SetClearDepthStencil(depth, stencil)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -243,23 +237,44 @@ func (sy *System) CmdResetBindVars(cmd vk.CommandBuffer, descIdx int) {
 
 // BeginRenderPass adds commands to the given command buffer
 // to start the render pass on given framebuffer.
-// Optionally clears the frame according to the current ClearVals.
+// Clears the frame first, according to the ClearVals.
 // Also Binds descriptor sets to command buffer for given collection
 // of descriptors descIdx (see Vars NDescs for info).
 func (sy *System) BeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
 	sy.CmdBindVars(cmd, descIdx)
-	sy.RenderPass.BeginRenderPass(cmd, fr)
+	sy.Render.BeginRenderPass(cmd, fr)
 }
 
 // ResetBeginRenderPass adds commands to the given command buffer
 // to reset command buffer and call begin on it, then starts
 // the render pass on given framebuffer (BeginRenderPass)
-// Optionally clears the frame according to the current ClearVals.
+// Clears the frame first, according to the ClearVals.
 // Also Binds descriptor sets to command buffer for given collection
 // of descriptors descIdx (see Vars NDescs for info).
 func (sy *System) ResetBeginRenderPass(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
 	CmdResetBegin(cmd)
 	sy.BeginRenderPass(cmd, fr, descIdx)
+}
+
+// BeginRenderPassNoClear adds commands to the given command buffer
+// to start the render pass on given framebuffer.
+// does NOT clear the frame first -- loads prior state.
+// Also Binds descriptor sets to command buffer for given collection
+// of descriptors descIdx (see Vars NDescs for info).
+func (sy *System) BeginRenderPassNoClear(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
+	sy.CmdBindVars(cmd, descIdx)
+	sy.Render.BeginRenderPassNoClear(cmd, fr)
+}
+
+// ResetBeginRenderPassNoClear adds commands to the given command buffer
+// to reset command buffer and call begin on it, then starts
+// the render pass on given framebuffer (BeginRenderPass)
+// does NOT clear the frame first -- loads prior state.
+// Also Binds descriptor sets to command buffer for given collection
+// of descriptors descIdx (see Vars NDescs for info).
+func (sy *System) ResetBeginRenderPassNoClear(cmd vk.CommandBuffer, fr *Framebuffer, descIdx int) {
+	CmdResetBegin(cmd)
+	sy.BeginRenderPassNoClear(cmd, fr, descIdx)
 }
 
 // EndRenderPass adds commands to the given command buffer

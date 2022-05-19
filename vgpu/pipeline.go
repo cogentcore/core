@@ -118,17 +118,17 @@ func (pl *Pipeline) Config() {
 	pl.VkConfig.SType = vk.StructureTypeGraphicsPipelineCreateInfo
 	pl.VkConfig.PVertexInputState = vars.VkVertexConfig()
 	pl.VkConfig.Layout = vars.VkDescLayout
-	pl.VkConfig.RenderPass = pl.Sys.RenderPass.VkClearPass
+	pl.VkConfig.RenderPass = pl.Sys.Render.VkClearPass
 	pl.VkConfig.PMultisampleState = &vk.PipelineMultisampleStateCreateInfo{
 		SType:                vk.StructureTypePipelineMultisampleStateCreateInfo,
-		RasterizationSamples: pl.Sys.RenderPass.Format.Samples,
+		RasterizationSamples: pl.Sys.Render.Format.Samples,
 	}
 	pl.VkConfig.PViewportState = &vk.PipelineViewportStateCreateInfo{
 		SType:         vk.StructureTypePipelineViewportStateCreateInfo,
 		ScissorCount:  1,
 		ViewportCount: 1,
 	}
-	if pl.Sys.RenderPass.HasDepth {
+	if pl.Sys.Render.HasDepth {
 		pl.VkConfig.PDepthStencilState = &vk.PipelineDepthStencilStateCreateInfo{
 			SType:                 vk.StructureTypePipelineDepthStencilStateCreateInfo,
 			DepthTestEnable:       vk.True,

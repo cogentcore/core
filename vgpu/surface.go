@@ -19,7 +19,7 @@ import (
 type Surface struct {
 	GPU            *GPU           `desc:"pointer to gpu device, for convenience"`
 	Device         Device         `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
-	RenderPass     *RenderPass    `desc:"the RenderPass for this Surface, typically from a System"`
+	Render         *Render        `desc:"the Render for this Surface, typically from a System"`
 	Format         ImageFormat    `desc:"has the current swapchain image format and dimensions"`
 	DesiredFormats []vk.Format    `desc:"ordered list of surface formats to select"`
 	NFrames        int            `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
@@ -44,6 +44,7 @@ func (sf *Surface) Defaults() {
 	sf.NFrames = 3 // requested, will be updated with actual
 	sf.Format.Defaults()
 	sf.Format.Set(1024, 768, vk.FormatR8g8b8a8Srgb)
+	sf.Format.SetMultisample(4) // good default
 	sf.DesiredFormats = []vk.Format{
 		vk.FormatR8g8b8a8Srgb,
 		vk.FormatB8g8r8a8Srgb,
@@ -272,15 +273,15 @@ func (sf *Surface) FreeSwapchain() {
 func (sf *Surface) ReConfigSwapchain() {
 	sf.FreeSwapchain()
 	sf.ConfigSwapchain()
-	sf.RenderPass.SetDepthSize(sf.Format.Size)
+	sf.Render.SetSize(sf.Format.Size)
 	sf.ReConfigFrames()
 }
 
-// SetRenderPass sets the RenderPass and updates frames accordingly
-func (sf *Surface) SetRenderPass(rp *RenderPass) {
-	sf.RenderPass = rp
+// SetRender sets the Render and updates frames accordingly
+func (sf *Surface) SetRender(rp *Render) {
+	sf.Render = rp
 	for _, fr := range sf.Frames {
-		fr.ConfigRenderPass(rp)
+		fr.ConfigRender(rp)
 	}
 }
 
@@ -288,7 +289,7 @@ func (sf *Surface) SetRenderPass(rp *RenderPass) {
 // using exiting settings.  Assumes ConfigSwapchain has been called.
 func (sf *Surface) ReConfigFrames() {
 	for _, fr := range sf.Frames {
-		fr.ConfigRenderPass(sf.RenderPass)
+		fr.ConfigRender(sf.Render)
 	}
 }
 

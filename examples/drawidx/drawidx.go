@@ -72,8 +72,9 @@ func main() {
 	}
 
 	pl := sy.NewPipeline("drawidx")
-	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
-	sf.SetRenderPass(&sy.RenderPass)
+	// sf.Format.SetMultisample(1)
+	sy.ConfigRender(&sf.Format, vgpu.Depth32)
+	sf.SetRender(&sy.Render)
 	sy.SetClearColor(0.2, 0.2, 0.2, 1)
 	sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 

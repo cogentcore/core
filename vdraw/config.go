@@ -49,8 +49,6 @@ func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 
 // ConfigSys configures the vDraw System and pipelines.
 func (dw *Drawer) ConfigSys() {
-	dw.Sys.RenderPass.SetClearOff()
-
 	dpl := dw.Sys.NewPipeline("draw")
 	dw.ConfigPipeline(dpl)
 

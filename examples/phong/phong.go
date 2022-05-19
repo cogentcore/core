@@ -76,8 +76,8 @@ func main() {
 	ph := &vphong.Phong{}
 	sy := &ph.Sys
 	sy.InitGraphics(sf.GPU, "vphong.Phong", &sf.Device)
-	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
-	sf.SetRenderPass(&sy.RenderPass)
+	sy.ConfigRender(&sf.Format, vgpu.Depth32)
+	sf.SetRender(&sy.Render)
 	ph.ConfigSys()
 	sy.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 
@@ -167,7 +167,7 @@ func main() {
 	campos := mat32.Vec3{0, 2, 10}
 	view := vphong.CameraViewMat(campos, mat32.Vec3{0, 0, 0}, mat32.Vec3Y)
 
-	aspect := float32(sf.Format.Size.X) / float32(sf.Format.Size.Y)
+	aspect := sf.Format.Aspect()
 	var prjn mat32.Mat4
 	prjn.SetVkPerspective(45, aspect, 0.01, 100)
 
@@ -230,6 +230,9 @@ func main() {
 	ph.Sync()
 
 	updateMats := func() {
+		aspect := sf.Format.Aspect()
+		prjn.SetVkPerspective(45, aspect, 0.01, 100)
+
 		view = vphong.CameraViewMat(campos, mat32.Vec3{0, 0, 0}, mat32.Vec3Y)
 		ph.SetMtxsName("mtx1", &model1, view, &prjn)
 		ph.SetMtxsName("mtx2", &model2, view, &prjn)
@@ -300,14 +303,6 @@ func main() {
 		updateMats()
 		render1()
 
-		// switch {
-		// case fcr < 3:
-		// 	scaleImg(fcr)
-		// case fcr < 6:
-		// 	copyImg(fcr - 3)
-		// default:
-		// 	fillRnd()
-		// }
 		frameCount++
 
 		sy.EndRenderPass(cmd)

@@ -5,6 +5,7 @@
 package vdraw
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	"unsafe"
@@ -27,6 +28,7 @@ func (dw *Drawer) SetGoImage(img image.Image, flipY bool) {
 func (dw *Drawer) ConfigImage(fmt *vgpu.ImageFormat) {
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
 	tx.Texture.Format = *fmt
+	tx.Texture.Format.SetMultisample(1) // can't be multi
 	tx.Texture.AllocTexture()
 }
 
@@ -34,6 +36,9 @@ func (dw *Drawer) ConfigImage(fmt *vgpu.ImageFormat) {
 // used in subsequent Draw methods.
 func (dw *Drawer) SetFrameImage(fb *vgpu.Framebuffer, flipY bool) {
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
+	if fb.Format.Size != tx.Texture.Format.Size {
+		fmt.Printf("size mismatch\n")
+	}
 	cmd := dw.Sys.MemCmdStart()
 	fb.CopyToImage(&tx.Texture.Image, dw.Sys.Device.Device, cmd)
 	dw.Sys.MemCmdSubmitWaitFree()
@@ -120,7 +125,7 @@ func (dw *Drawer) StartDraw() {
 	if dw.Surf != nil {
 		dw.Impl.SurfIdx = dw.Surf.AcquireNextImage()
 		cmd := sy.CmdPool.Buff
-		sy.ResetBeginRenderPass(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
+		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
 		dpl.BindPipeline(cmd)
 	}
 }

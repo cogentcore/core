@@ -28,9 +28,8 @@ func (dw *Drawer) ConfigSurface(sf *vgpu.Surface, maxColors int) {
 	dw.Impl.MaxColors = maxColors
 	dw.Surf = sf
 	dw.Sys.InitGraphics(sf.GPU, "vdraw.Drawer", &sf.Device)
-	dw.Sys.RenderPass.NoClear = true
-	dw.Sys.ConfigRenderPass(&dw.Surf.Format, vgpu.UndefType)
-	sf.SetRenderPass(&dw.Sys.RenderPass)
+	dw.Sys.ConfigRender(&dw.Surf.Format, vgpu.UndefType)
+	sf.SetRender(&dw.Sys.Render)
 
 	dw.ConfigSys()
 }

@@ -89,8 +89,8 @@ func main() {
 	}
 
 	pl := sy.NewPipeline("texture")
-	sy.ConfigRenderPass(&sf.Format, vgpu.Depth32)
-	sf.SetRenderPass(&sy.RenderPass)
+	sy.ConfigRender(&sf.Format, vgpu.Depth32)
+	sf.SetRender(&sy.Render)
 	sy.SetClearColor(0.2, 0.2, 0.2, 1)
 	sy.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
 

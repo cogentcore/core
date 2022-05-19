@@ -87,6 +87,14 @@ func (im *ImageFormat) Size32() (width, height uint32) {
 	return
 }
 
+// Aspect returns the aspect ratio X / Y
+func (im *ImageFormat) Aspect() float32 {
+	if im.Size.Y > 0 {
+		return float32(im.Size.X) / float32(im.Size.Y)
+	}
+	return 1.3
+}
+
 // Bounds returns the rectangle defining this image: 0,0,w,h
 func (im *ImageFormat) Bounds() image.Rectangle {
 	return image.Rectangle{Max: im.Size}
@@ -302,16 +310,42 @@ func (im *Image) SetVkImage(dev vk.Device, img vk.Image) {
 	im.ConfigStdView()
 }
 
-// ConfigDepthImage configures this image as a depth image
+// ConfigFramebuffer configures this image as a framebuffer image
+// using format.  Sets multisampling to 1.
+// Only makes a device image -- no host rep.
+func (im *Image) ConfigFramebuffer(dev vk.Device, imgFmt *ImageFormat) {
+	im.Dev = dev
+	im.Format.Format = imgFmt.Format
+	im.Format.SetMultisample(1)
+	im.SetFlag(int(ImageOwnsImage), int(FramebufferImage))
+	if im.SetSize(imgFmt.Size) {
+		im.ConfigStdView()
+	}
+}
+
+// ConfigDepth configures this image as a depth image
 // using given depth image format, and other on format information
 // from the render image format.
-func (im *Image) ConfigDepthImage(dev vk.Device, depthType Types, imgFmt *ImageFormat) {
+func (im *Image) ConfigDepth(dev vk.Device, depthType Types, imgFmt *ImageFormat) {
 	im.Dev = dev
 	im.Format.Format = depthType.VkFormat()
 	im.Format.Samples = imgFmt.Samples
 	im.SetFlag(int(DepthImage))
-	im.SetSize(imgFmt.Size)
-	im.ConfigDepthView()
+	if im.SetSize(imgFmt.Size) {
+		im.ConfigDepthView()
+	}
+}
+
+// ConfigMulti configures this image as a mutisampling image
+// using format.  Only makes a device image -- no host rep.
+func (im *Image) ConfigMulti(dev vk.Device, imgFmt *ImageFormat) {
+	im.Dev = dev
+	im.Format.Format = imgFmt.Format
+	im.Format.Samples = imgFmt.Samples
+	im.SetFlag(int(ImageOwnsImage), int(FramebufferImage))
+	if im.SetSize(imgFmt.Size) {
+		im.ConfigStdView()
+	}
 }
 
 // ConfigStdView configures a standard 2D image view, for current image,

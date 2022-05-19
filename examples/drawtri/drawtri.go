@@ -54,8 +54,8 @@ func main() {
 
 	sy := gp.NewGraphicsSystem("drawtri", &sf.Device)
 	pl := sy.NewPipeline("drawtri")
-	sy.ConfigRenderPass(&sf.Format, vgpu.UndefType)
-	sf.SetRenderPass(&sy.RenderPass)
+	sy.ConfigRender(&sf.Format, vgpu.UndefType)
+	sf.SetRender(&sy.Render)
 
 	pl.AddShaderFile("trianglelit", vgpu.VertexShader, "trianglelit.spv")
 	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")

@@ -65,8 +65,8 @@ type Phong struct {
 func (ph *Phong) ConfigSurface(sf *vgpu.Surface) {
 	ph.Surf = sf
 	ph.Sys.InitGraphics(sf.GPU, "vphong.Phong", &sf.Device)
-	ph.Sys.ConfigRenderPass(&ph.Surf.Format, vgpu.UndefType)
-	sf.SetRenderPass(&ph.Sys.RenderPass)
+	ph.Sys.ConfigRender(&ph.Surf.Format, vgpu.UndefType)
+	sf.SetRender(&ph.Sys.Render)
 	ph.ConfigSys()
 }
 

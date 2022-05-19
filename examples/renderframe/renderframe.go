@@ -81,6 +81,7 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	drw := &vdraw.Drawer{}
+	sf.Format.SetMultisample(1)
 	drw.ConfigSurface(sf, 10) // 10 = max number of colors or images to choose for rendering
 
 	rf := vgpu.NewRenderFrame(gp, &sf.Device)
@@ -101,8 +102,8 @@ func main() {
 	// RenderFrame
 
 	pl := sy.NewPipeline("drawidx")
-	sy.ConfigRenderPassNonSurface(&rf.Format, vgpu.Depth32) // not surface = renderframe
-	rf.SetRenderPass(&sy.RenderPass)
+	sy.ConfigRenderNonSurface(&rf.Format, vgpu.Depth32) // not surface = renderframe
+	rf.SetRender(&sy.Render)
 	sy.SetClearColor(0.2, 0.2, 0.2, 1)
 	sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 
@@ -162,16 +163,16 @@ func main() {
 	var camo CamView
 	camo.Model.SetIdentity()
 	camo.View.CopyFrom(view)
-	aspect := float32(rf.Format.Size.X) / float32(rf.Format.Size.Y)
-	fmt.Printf("aspect: %g\n", aspect)
-	// VkPerspective version automatically flips Y axis and shifts depth
-	// into a 0..1 range instead of -1..1, so original GL based geometry
-	// will render identically here.
-	camo.Prjn.SetVkPerspective(45, aspect, 0.01, 100)
 
-	cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+	updateAspect := func() {
+		aspect := rf.Format.Aspect()
+		fmt.Printf("aspect: %g\n", aspect)
+		camo.Prjn.SetVkPerspective(45, aspect, 0.01, 100)
+		cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+		sy.Mem.SyncToGPU()
+	}
 
-	sy.Mem.SyncToGPU()
+	updateAspect()
 
 	vars.BindDynVal(0, camv, cam)
 
@@ -199,15 +200,16 @@ func main() {
 		rf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		rf.WaitForRender()
 
-		tcmd := sy.MemCmdStart()
-		rf.GrabImage(tcmd, 0)
-		sy.MemCmdSubmitWaitFree()
-
-		gimg, err := fr.ImageGrab.DevGoImage()
-		if err == nil {
-			gi.SaveImage("render.png", gimg)
-		} else {
-			fmt.Printf("image grab err: %s\n", err)
+		if false { // grab
+			tcmd := sy.MemCmdStart()
+			rf.GrabImage(tcmd, 0)
+			sy.MemCmdSubmitWaitFree()
+			gimg, err := fr.Render.Grab.DevGoImage()
+			if err == nil {
+				gi.SaveImage("render.png", gimg)
+			} else {
+				fmt.Printf("image grab err: %s\n", err)
+			}
 		}
 
 		drw.SetFrameImage(fr, vgpu.NoFlipY)
@@ -217,9 +219,14 @@ func main() {
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
-		if dur > 10 {
+		if dur > 0 {
 			fps := float64(frameCount) / dur
 			fmt.Printf("fps: %.0f\n", fps)
+			sz := rf.Format.Size
+			sz.X -= 10
+			rf.SetSize(sz)
+			drw.ConfigImage(&rf.Format)
+			updateAspect()
 			frameCount = 0
 			stTime = eTime
 		}
@@ -231,7 +238,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := 1 * time.Second
+	fpsDelay := time.Second // 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

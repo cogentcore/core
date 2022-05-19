@@ -5,6 +5,8 @@
 package vgpu
 
 import (
+	"image"
+
 	vk "github.com/goki/vulkan"
 )
 
@@ -13,7 +15,7 @@ import (
 type RenderFrame struct {
 	GPU           *GPU           `desc:"pointer to gpu device, for convenience"`
 	Device        Device         `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
-	RenderPass    *RenderPass    `desc:"the RenderPass for this RenderFrame, typically from a System"`
+	Render        *Render        `desc:"the Render for this RenderFrame, typically from a System"`
 	Format        ImageFormat    `desc:"has the current image format and dimensions"`
 	NFrames       int            `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
 	Frames        []*Framebuffer `desc:"Framebuffers representing the Image owned by the RenderFrame -- we iterate through these in rendering subsequent frames"`
@@ -47,6 +49,7 @@ func (rf *RenderFrame) Defaults() {
 	rf.NFrames = 1
 	rf.Format.Defaults()
 	rf.Format.Set(1024, 768, vk.FormatR8g8b8a8Srgb)
+	rf.Format.SetMultisample(4)
 }
 
 // Init initializes the device and all other resources for the renderframe.
@@ -90,21 +93,24 @@ func (rf *RenderFrame) Free() {
 	rf.Frames = nil
 }
 
-// ReConfig does a re-initialize, freeing existing.
-// This must be called when the window is resized.
-func (rf *RenderFrame) ReConfig() {
-	rf.Free()
-	rf.Config()
-	rf.RenderPass.SetDepthSize(rf.Format.Size)
-	rf.ReConfigFrames()
+// SetRender sets the Render and updates frames accordingly
+func (rf *RenderFrame) SetRender(rp *Render) {
+	rf.Render = rp
+	for _, fr := range rf.Frames {
+		fr.ConfigRender(rp)
+	}
 }
 
-// SetRenderPass sets the RenderPass and updates frames accordingly
-func (rf *RenderFrame) SetRenderPass(rp *RenderPass) {
-	rf.RenderPass = rp
-	for _, fr := range rf.Frames {
-		fr.ConfigRenderPass(rp)
-	}
+// SetSize sets the size for the render frame
+func (rf *RenderFrame) SetSize(size image.Point) {
+	rf.Format.Size = size
+	rf.ReConfig()
+}
+
+// ReConfig reconfigures rendering
+func (rf *RenderFrame) ReConfig() {
+	rf.Render.SetSize(rf.Format.Size)
+	rf.ReConfigFrames()
 }
 
 // ReConfigFrames re-configures the Famebuffers
@@ -112,7 +118,8 @@ func (rf *RenderFrame) SetRenderPass(rp *RenderPass) {
 // Assumes Config has been called.
 func (rf *RenderFrame) ReConfigFrames() {
 	for _, fr := range rf.Frames {
-		fr.ConfigRenderPass(rf.RenderPass)
+		fr.ConfigRenderImage(rf.Device.Device, rf.Format)
+		fr.ConfigRender(rf.Render)
 	}
 }
 

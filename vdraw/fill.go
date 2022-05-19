@@ -123,7 +123,7 @@ func (dw *Drawer) StartFill() {
 	if dw.Surf != nil {
 		dw.Impl.SurfIdx = dw.Surf.AcquireNextImage()
 		cmd := sy.CmdPool.Buff
-		sy.ResetBeginRenderPass(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
+		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
 		fpl.BindPipeline(cmd)
 	}
 }
