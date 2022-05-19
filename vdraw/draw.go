@@ -5,7 +5,6 @@
 package vdraw
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 	"unsafe"
@@ -37,7 +36,7 @@ func (dw *Drawer) ConfigImage(fmt *vgpu.ImageFormat) {
 func (dw *Drawer) SetFrameImage(fb *vgpu.Framebuffer, flipY bool) {
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
 	if fb.Format.Size != tx.Texture.Format.Size {
-		fmt.Printf("size mismatch\n")
+		dw.ConfigImage(&fb.Format)
 	}
 	cmd := dw.Sys.MemCmdStart()
 	fb.CopyToImage(&tx.Texture.Image, dw.Sys.Device.Device, cmd)

@@ -213,19 +213,18 @@ func main() {
 		}
 
 		drw.SetFrameImage(fr, vgpu.NoFlipY)
-		drw.Scale(rf.Format.Bounds(), fr.Image.Format.Bounds(), draw.Src)
+		drw.Scale(sf.Format.Bounds(), fr.Image.Format.Bounds(), draw.Src)
 
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
-		if dur > 0 {
+		if dur > 10 {
 			fps := float64(frameCount) / dur
 			fmt.Printf("fps: %.0f\n", fps)
 			sz := rf.Format.Size
 			sz.X -= 10
 			rf.SetSize(sz)
-			drw.ConfigImage(&rf.Format)
 			updateAspect()
 			frameCount = 0
 			stTime = eTime
@@ -238,7 +237,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := time.Second // 60
+	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

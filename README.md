@@ -26,10 +26,10 @@ The [vPhong](https://github.com/goki/vgpu/tree/main/vphong) package provides a c
   
 * `Image` manages a vulkan Image and associated `ImageView`, including potential host staging buffer (shared as in a Val or owned separately).
 * `Texture` extends the `Image` with a `Sampler` that defines how pixels are accessed in a shader.
-* `Framebuffer` manages an `Image` along with a `RenderPass` configuration for managing a render target (shared for rendering onto a window `Surface` or an offscreen `RenderFrame`)
+* `Framebuffer` manages an `Image` along with a `RenderPass` configuration for managing a `Render` target (shared for rendering onto a window `Surface` or an offscreen `RenderFrame`)
 
 * `Surface` represents the full hardware-managed `Image`s associated with an actual on-screen Window.  One can associate a System with a Surface to manage the Swapchain updating for effective double or triple buffering.
-* `RenderFrame` is an offscreen render target with Framebuffers and a logical device.
+* `RenderFrame` is an offscreen render target with Framebuffers and a logical device if being used without any Surface -- otherwise it should use the Surface device so images can be copied across them.
 
 * Unlike most game-oriented GPU setups, vGPU is designed to be used in an event-driven manner where render updates arise from user input or other events, instead of requiring a constant render loop taking place at all times (which can optionally be established too).  The event-driven model is vastly more energy efficient for non-game applications.
 
