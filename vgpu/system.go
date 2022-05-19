@@ -19,7 +19,7 @@ import (
 type System struct {
 	Name        string               `desc:"optional name of this System"`
 	GPU         *GPU                 `desc:"gpu device"`
-	Device      Device               `desc:"logical device for this System -- has its own queues"`
+	Device      Device               `desc:"logical device for this System, which is a non-owned copy of either Surface or RenderFrame device"`
 	CmdPool     CmdPool              `desc:"cmd pool specific to this system"`
 	Compute     bool                 `desc:"if true, this is a compute system -- otherwise is graphics"`
 	Pipelines   []*Pipeline          `desc:"all pipelines"`
@@ -269,4 +269,23 @@ func (sy *System) EndRenderPass(cmd vk.CommandBuffer) {
 	// Note that ending the renderpass changes the image's layout from
 	// vk.ImageLayoutColorAttachmentOptimal to vk.ImageLayoutPresentSrc
 	vk.CmdEndRenderPass(cmd)
+}
+
+/////////////////////////////////////////////
+// Memory utils
+
+// MemCmdStart starts a one-time memory command using the
+// Memory CmdPool and Device associated with this System
+// Use this for other random memory transfer commands.
+func (sy *System) MemCmdStart() vk.CommandBuffer {
+	cmd := sy.Mem.CmdPool.NewBuffer(&sy.Device)
+	CmdBeginOneTime(cmd)
+	return cmd
+}
+
+// MemCmdSubmitWaitFree submits current one-time memory command
+// using the Memory CmdPool and Device associated with this System
+// Use this for other random memory transfer commands.
+func (sy *System) MemCmdSubmitWaitFree() {
+	sy.Mem.CmdPool.SubmitWaitFree(&sy.Device)
 }

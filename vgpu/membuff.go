@@ -196,6 +196,18 @@ func MapMemory(dev vk.Device, mem vk.DeviceMemory, size int) unsafe.Pointer {
 	return buffPtr
 }
 
+// MapMemoryAll maps the WholeSize of buffer memory,
+// returning a pointer into start of buffer memory
+func MapMemoryAll(dev vk.Device, mem vk.DeviceMemory) unsafe.Pointer {
+	var buffPtr unsafe.Pointer
+	ret := vk.MapMemory(dev, mem, 0, vk.DeviceSize(vk.WholeSize), 0, &buffPtr)
+	if IsError(ret) {
+		log.Printf("vulkan MapMemory warning: failed to map device memory for data")
+		return nil
+	}
+	return buffPtr
+}
+
 // FreeBuffMem frees given device memory to nil
 func FreeBuffMem(dev vk.Device, memory *vk.DeviceMemory) {
 	if *memory == nil {

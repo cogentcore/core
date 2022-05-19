@@ -83,14 +83,14 @@ func main() {
 	drw := &vdraw.Drawer{}
 	drw.ConfigSurface(sf, 10) // 10 = max number of colors or images to choose for rendering
 
-	rf := vgpu.NewRenderFrame(gp)
+	rf := vgpu.NewRenderFrame(gp, &sf.Device)
 	sy := gp.NewGraphicsSystem("drawidx", &rf.Device)
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
-		drw.Destroy()
 		sy.Destroy()
 		rf.Destroy()
+		drw.Destroy()
 		sf.Destroy()
 		gp.Destroy()
 		window.Destroy()
@@ -175,6 +175,8 @@ func main() {
 
 	vars.BindDynVal(0, camv, cam)
 
+	drw.ConfigImage(&rf.Format)
+
 	frameCount := 0
 	stTime := time.Now()
 
@@ -188,23 +190,28 @@ func main() {
 		idx := 0 // sf.AcquireNextImage()
 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
 		descIdx := 0 // if running multiple frames in parallel, need diff sets
+
+		fr := rf.Frames[idx]
 		cmd := sy.CmdPool.Buff
-		sy.ResetBeginRenderPass(cmd, rf.Frames[idx], descIdx)
+		sy.ResetBeginRenderPass(cmd, fr, descIdx)
 		pl.BindDrawVertex(cmd, descIdx)
 		sy.EndRenderPass(cmd)
-		// fmt.Printf("cmd %v\n", time.Now().Sub(rt))
 		rf.SubmitRender(cmd) // this is where it waits for the 16 msec
-		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
 		rf.WaitForRender()
 
-		tcmd := sy.Mem.CmdPool.NewBuffer(&rf.Device)
-		vgpu.CmdBeginOneTime(tcmd)
+		tcmd := sy.MemCmdStart()
 		rf.GrabImage(tcmd, 0)
-		gimg, _ := rf.Frames[0].ImageGrab.DevGoImage()
-		gi.SaveImage("render.png", gimg)
+		sy.MemCmdSubmitWaitFree()
 
-		drw.SetImage(gimg, vgpu.NoFlipY)
-		drw.Scale(rf.Format.Bounds(), gimg.Bounds(), draw.Src)
+		gimg, err := fr.ImageGrab.DevGoImage()
+		if err == nil {
+			gi.SaveImage("render.png", gimg)
+		} else {
+			fmt.Printf("image grab err: %s\n", err)
+		}
+
+		drw.SetFrameImage(fr, vgpu.NoFlipY)
+		drw.Scale(rf.Format.Bounds(), fr.Image.Format.Bounds(), draw.Src)
 
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++

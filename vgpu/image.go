@@ -195,21 +195,30 @@ func (im *Image) GoImage() (*image.RGBA, error) {
 }
 
 // DevGoImage returns an *image.RGBA standard Go image, of the Device
-// memory representation.  Only works if IsHostActive and Format
+// memory representation.  Only works if ImageOnHostOnly and Format
 // is default vk.FormatR8g8b8a8Srgb (strongly recommended in any case)
 func (im *Image) DevGoImage() (*image.RGBA, error) {
-	if !im.IsActive() {
-		return nil, fmt.Errorf("vgpu.Image: Go image not available because device Image is not active: %s", im.Name)
+	if !im.HasFlag(ImageOnHostOnly) || im.Mem == nil {
+		return nil, fmt.Errorf("vgpu.Image: Go image not available because device Image is not HostOnly, or Mem is nil: %s", im.Name)
 	}
 	if !im.Format.IsStdRGBA() {
 		return nil, fmt.Errorf("vgpu.Image: Go image not standard RGBA format: %s", im.Name)
 	}
 	size := im.Format.ByteSize()
 	rgba := &image.RGBA{}
-	ptr := MapMemory(im.Dev, im.Mem, size)
+
+	subrec := vk.ImageSubresource{}
+	subrec.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
+	sublay := vk.SubresourceLayout{}
+	vk.GetImageSubresourceLayout(im.Dev, im.Image, &subrec, &sublay)
+	offset := int(sublay.Offset)
+
+	ptr := MapMemoryAll(im.Dev, im.Mem)
 	const m = 0x7fffffff
-	pix := (*[m]byte)(ptr)[:size]
-	rgba.Pix = pix
+	pix := (*[m]byte)(ptr)[offset : size+offset]
+	rgba.Pix = make([]byte, size)
+	copy(rgba.Pix, pix)
+	vk.UnmapMemory(im.Dev, im.Mem)
 	rgba.Stride = im.Format.Stride()
 	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
 	return rgba, nil
@@ -446,6 +455,7 @@ func (im *Image) AllocImage() {
 		usage |= vk.ImageUsageTransferSrcBit // todo: extra bit to qualify
 	default:
 		usage |= vk.ImageUsageSampledBit // default is sampled texture
+		usage |= vk.ImageUsageTransferDstBit
 	}
 	if im.IsHostActive() && !im.HasFlag(FramebufferImage) {
 		usage |= vk.ImageUsageTransferDstBit
@@ -456,7 +466,7 @@ func (im *Image) AllocImage() {
 
 	var image vk.Image
 	w, h := im.Format.Size32()
-	ret := vk.CreateImage(im.Dev, &vk.ImageCreateInfo{
+	imgcfg := &vk.ImageCreateInfo{
 		SType:     vk.StructureTypeImageCreateInfo,
 		ImageType: vk.ImageType2d,
 		Format:    im.Format.Format,
@@ -472,14 +482,17 @@ func (im *Image) AllocImage() {
 		Usage:         vk.ImageUsageFlags(usage),
 		InitialLayout: vk.ImageLayoutUndefined,
 		SharingMode:   vk.SharingModeExclusive,
-	}, nil, &image)
-	IfPanic(NewError(ret))
-	im.Image = image
+	}
 
 	props := vk.MemoryPropertyDeviceLocalBit
 	if im.HasFlag(ImageOnHostOnly) {
 		props = vk.MemoryPropertyHostVisibleBit | vk.MemoryPropertyHostCoherentBit
+		imgcfg.Tiling = vk.ImageTilingLinear // essential for grabbing
 	}
+
+	ret := vk.CreateImage(im.Dev, imgcfg, nil, &image)
+	IfPanic(NewError(ret))
+	im.Image = image
 
 	var memReqs vk.MemoryRequirements
 	vk.GetImageMemoryRequirements(im.Dev, im.Image, &memReqs)
@@ -703,7 +716,7 @@ const (
 
 	// ImageOnHostOnly causes the image to be created only on host visible
 	// memory, not on device memory -- no additional host buffer should be created.
-	// this is for an ImageGrab image.
+	// this is for an ImageGrab image.  layout is LINEAR
 	ImageOnHostOnly
 
 	ImageFlagsN

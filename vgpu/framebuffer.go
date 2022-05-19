@@ -75,6 +75,9 @@ func (fb *Framebuffer) ConfigRenderPass(rp *RenderPass) {
 func (fb *Framebuffer) Destroy() {
 	fb.DestroyFrame()
 	fb.Image.Destroy()
+	if fb.ImageGrab.Image != nil {
+		fb.ImageGrab.Destroy()
+	}
 	fb.RenderPass = nil
 }
 
@@ -138,7 +141,17 @@ func (fb *Framebuffer) GrabImage(dev vk.Device, cmd vk.CommandBuffer) {
 	fb.ConfigImageGrab(dev) // ensure image grab setup
 	// first, prepare ImageGrab to receive copy from render image.
 	// apparently, the color attachment, with src flag already set, does not need this.
+
+	// todo: for Surface frame, transition src image
+
 	fb.ImageGrab.TransitionForDst(cmd, vk.PipelineStageTransferBit) // no idea why, but SaschaWillems does
 	vk.CmdCopyImage(cmd, fb.Image.Image, vk.ImageLayoutTransferSrcOptimal, fb.ImageGrab.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.ImageCopy{fb.ImageGrab.CopyImageRec()})
 	fb.ImageGrab.TransitionDstToGeneral(cmd)
+}
+
+// CopyToImage copies the current framebuffer image to given image dest
+// using given command buffer which must have the cmdBegin called already.
+func (fb *Framebuffer) CopyToImage(toImg *Image, dev vk.Device, cmd vk.CommandBuffer) {
+	toImg.TransitionForDst(cmd, vk.PipelineStageTransferBit) // no idea why, but SaschaWillems does
+	vk.CmdCopyImage(cmd, fb.Image.Image, vk.ImageLayoutTransferSrcOptimal, toImg.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.ImageCopy{toImg.CopyImageRec()})
 }

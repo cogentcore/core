@@ -20,14 +20,26 @@ type RenderFrame struct {
 	ImageAcquired vk.Semaphore   `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
 	RenderDone    vk.Semaphore   `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
 	RenderFence   vk.Fence       `view:"-" desc:"fence for rendering command running"`
+	OwnDevice     bool           `desc:"do we own the device?"`
 }
 
-// NewRenderFrame returns a new renderframe initialized for given GPU.
-// Creates a new device.
-func NewRenderFrame(gp *GPU) *RenderFrame {
+// NewRenderFrameOwnDevice returns a new renderframe initialized for given GPU.
+// This version creates a new Graphics device -- for purely offscreen usage.
+func NewRenderFrameOwnDevice(gp *GPU) *RenderFrame {
 	rf := &RenderFrame{}
 	rf.Defaults()
-	rf.Init(gp)
+	rf.Init(gp, true) // make own device
+	return rf
+}
+
+// NewRenderFrame returns a new renderframe initialized for given GPU,
+// using given device, e.g., from a Surface -- to transition images
+// from renderframe to surface, they must use the same device.
+func NewRenderFrame(gp *GPU, dev *Device) *RenderFrame {
+	rf := &RenderFrame{}
+	rf.Defaults()
+	rf.Device = *dev
+	rf.Init(gp, false)
 	return rf
 }
 
@@ -38,9 +50,14 @@ func (rf *RenderFrame) Defaults() {
 }
 
 // Init initializes the device and all other resources for the renderframe.
-func (rf *RenderFrame) Init(gp *GPU) error {
+func (rf *RenderFrame) Init(gp *GPU, makeDevice bool) error {
 	rf.GPU = gp
-	rf.Device.Init(gp, vk.QueueGraphicsBit)
+	if makeDevice {
+		rf.OwnDevice = true
+		rf.Device.Init(gp, vk.QueueGraphicsBit)
+	} else {
+		rf.OwnDevice = false
+	}
 	rf.Config()
 	return nil
 }
@@ -101,7 +118,9 @@ func (rf *RenderFrame) ReConfigFrames() {
 
 func (rf *RenderFrame) Destroy() {
 	rf.Free()
-	rf.Device.Destroy()
+	if rf.OwnDevice {
+		rf.Device.Destroy()
+	}
 	rf.GPU = nil
 }
 
@@ -141,5 +160,4 @@ func (rf *RenderFrame) WaitForRender() {
 func (rf *RenderFrame) GrabImage(cmd vk.CommandBuffer, idx int) {
 	dev := rf.Device.Device
 	rf.Frames[idx].GrabImage(dev, cmd)
-	CmdSubmitWait(cmd, &rf.Device)
 }

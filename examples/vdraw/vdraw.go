@@ -92,11 +92,11 @@ func main() {
 	}
 
 	scaleImg := func(idx int) {
-		drw.SetImage(imgs[idx], vgpu.NoFlipY)
+		drw.SetGoImage(imgs[idx], vgpu.NoFlipY)
 		drw.Scale(sf.Format.Bounds(), imgs[idx].Bounds(), draw.Src)
 	}
 	copyImg := func(idx int) {
-		drw.SetImage(imgs[idx], vgpu.NoFlipY)
+		drw.SetGoImage(imgs[idx], vgpu.NoFlipY)
 		drw.Copy(image.Point{rand.Intn(500), rand.Intn(500)}, imgs[idx].Bounds(), draw.Src)
 	}
 

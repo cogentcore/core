@@ -13,13 +13,30 @@ import (
 	"github.com/goki/vgpu/vgpu"
 )
 
-// SetImage sets Go image as a drawing source,
+// SetGoImage sets given Go image as a drawing source,
 // used in subsequent Draw methods.
 // A standard Go image is rendered upright on a standard
 // Vulkan surface. Set flipY to true to flip.
-func (dw *Drawer) SetImage(img image.Image, flipY bool) {
+func (dw *Drawer) SetGoImage(img image.Image, flipY bool) {
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
 	tx.SetGoImage(img, false)
+	dw.Impl.FlipY = flipY
+}
+
+// ConfigImage configures the draw image to fit the given image format as a drawing source.
+func (dw *Drawer) ConfigImage(fmt *vgpu.ImageFormat) {
+	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
+	tx.Texture.Format = *fmt
+	tx.Texture.AllocTexture()
+}
+
+// SetFrameImage sets given Framebuffer image as a drawing source,
+// used in subsequent Draw methods.
+func (dw *Drawer) SetFrameImage(fb *vgpu.Framebuffer, flipY bool) {
+	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", 0)
+	cmd := dw.Sys.MemCmdStart()
+	fb.CopyToImage(&tx.Texture.Image, dw.Sys.Device.Device, cmd)
+	dw.Sys.MemCmdSubmitWaitFree()
 	dw.Impl.FlipY = flipY
 }
 
@@ -79,8 +96,8 @@ func (dw *Drawer) Draw(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error
 func (dw *Drawer) DrawImpl(src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
 	vars := dw.Sys.Vars()
 	_, tx, _ := vars.ValByIdxTry(0, "Tex", 0)
-	tmat := dw.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op, false)
 
+	tmat := dw.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op, false)
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mats")
 	dpl := dw.Sys.PipelineMap["draw"]
 
