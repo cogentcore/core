@@ -75,7 +75,7 @@ type GPU interface {
 	// NewTexture2D returns a new Texture2D with given name (optional).
 	// These Texture2D's must be Activate()'d and Delete()'d and otherwise managed
 	// (no further tracking is done by the gpu framework)
-	NewTexture2D(name string) Texture2D
+	// NewTexture2D(name string) Texture2D
 
 	// NewFramebuffer returns a new Framebuffer for rendering directly
 	// onto a texture instead of onto the Window (i.e., for offscreen rendering).

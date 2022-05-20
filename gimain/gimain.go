@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 
 	"github.com/goki/gi/gi"
-	_ "github.com/goki/gi/gi3d/io/obj"
+	// _ "github.com/goki/gi/gi3d/io/obj"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver"

@@ -7,15 +7,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build glos
-
 package driver
 
 import (
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/glos"
+	"github.com/goki/gi/oswin/driver/vkos"
 )
 
 func driverMain(f func(oswin.App)) {
-	glos.Main(f)
+	vkos.Main(f)
 }

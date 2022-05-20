@@ -15,30 +15,41 @@ import (
 
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
+	"github.com/goki/vgpu/vdraw"
+)
+
+// Note: 96 texture images is a common lower limit: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxDescriptorSetSampledImages&platform=all
+
+const (
+	// MaxDrawImages is the maximum number of general-purpose images
+	// that can be drawn to the window in a single render pass.
+	// Typically the 0 index is the base image for entire window, and
+	// then direct upload windows comprise the remainder.
+	MaxDrawImages = 16
+
+	// MaxSprites is the maximum number of images beyond the first
+	// MaxDrawImages reserved for numerically-indexed sprites that are
+	// typically updated in image content less frequently, but positioned
+	// more dynamically.
+	MaxSprites = 64
+
+	MaxWinImages = MaxDrawImages + MaxSprites
+
+	// MaxColors is maximum number of colors avail for Drawer fill actions
+	MaxColors = 80
 )
 
 // Window is a double-buffered OS-specific hardware window.
 //
 // It provides basic GPU support functions, and is currently implemented
-// via OpenGL on top of glfw cross-platform window mgmt toolkit (see driver/glos).
-// A Vulkan-based implementation is also planned.
+// via Vulkan on top of glfw cross-platform window mgmt toolkit (see driver/vkos).
+// using the vgpu framework.
 //
-// The Window maintains a Texture of the same dimensions, as WinTex(),
-// which is used for updating the window contents.  Call SetSubImage
-// or the various Draw methods on the WinTex() to update the window contents, and
-// PublishTex() to update the window display with the current Texture.
-//
-// The Drawer interface methods can also be called to render textures directly into
-// the window backbuffer, and Publish() called to swap buffers.
-// Direct rendering to the window can also be accomplished via the oswin/gpu
-// interfaces -- call Activate() on the window to make it the current context and
-// render target (equivalent to MakeCurrentContext OpenGL call).
-//
-// Each window has a separate goroutine where Publish() is actually
-// executed.
-//
-// IMPORTANT: ALL GPU (e.g., OPENGL) CALLS MUST USE oswin.TheApp.RunOnMain()
-// to execute on the main thread!!
+// The Window maintains its own vdraw.Drawer drawing system for rendering
+// bitmap images and filled regions onto the window surface.
+// The base full-window image should be Scale'd up first, followed by any
+// overlay images such as sprites or direct upload images already on the
+// GPU (e.g., from 3D render frames)
 //
 type Window interface {
 
@@ -192,59 +203,10 @@ type Window interface {
 	// and returns immediately.
 	GoRunOnWin(f func())
 
-	//////////////////////////////////
-	// 		Rendering / Updating
-
-	// Activate() sets this window as the current render target for gpu rendering
-	// functions, and the current context for gpu state (equivalent to
-	// MakeCurrentContext on OpenGL).
-	// If it returns false, then window is not visible / valid and
-	// nothing further should happen.
-	// Must call this on app main thread using oswin.TheApp.RunOnMain
-	//
-	// oswin.TheApp.RunOnMain(func() {
-	//    if !win.Activate() {
-	//        return
-	//    }
-	//    // do GPU calls here
-	// })
-	//
-	Activate() bool
-
-	// DeActivate() clears the current render target and gpu rendering context.
-	// Generally more efficient to NOT call this and just be sure to call
-	// Activate where relevant, so that if the window is already current context
-	// no switching is required.
-	// Must call this on app main thread using oswin.TheApp.RunOnMain
-	DeActivate()
-
-	// Publish does the equivalent of SwapBuffers on OpenGL: pushes the
-	// current rendered back-buffer to the front (and ensures that any
-	// ongoing rendering has completed) (see also PublishTex)
-	Publish()
-
-	// PublishTex draws the current WinTex texture to the window and then
-	// calls Publish() -- this is the typical update call.
-	PublishTex()
-
 	// SendEmptyEvent sends an empty, blank event to this window, which just has
 	// the effect of pushing the system along during cases when the window
 	// event loop needs to be "pinged" to get things moving along..
 	SendEmptyEvent()
-
-	// WinTex() returns the current Texture of the same size as the window that
-	// is typically used to update the window contents.
-	// Use the various Drawer and SetSubImage methods to update this Texture, and
-	// then call PublishTex() to update the window.
-	// This Texture is automatically resized when the window is resized, and
-	// when that occurs, existing contents are lost -- a full update of the
-	// Texture at the current size is required at that point.
-	WinTex() Texture
-
-	// SetWinTexSubImage calls SetSubImage on WinTex with given parameters.
-	// convenience routine that activates the window context and runs on the
-	// window's thread.
-	SetWinTexSubImage(dp image.Point, src image.Image, sr image.Rectangle) error
 
 	// Handle returns the driver-specific handle for this window.
 	// Currently, for all platforms, this is *glfw.Window, but that
@@ -265,9 +227,13 @@ type Window interface {
 	// which can provide better control in a game environment (not avail on Mac).
 	SetCursorEnabled(enabled, raw bool)
 
-	EventDeque
+	// Drawer returns the drawing system attached to this window surface.
+	// The first MaxDrawImages images are used for arbitrary images
+	// while the remaining MaxSprites are managed as overlay sprites
+	// that are updated less frequently but can move dynamically.
+	Drawer() *vdraw.Drawer
 
-	Drawer
+	EventDeque
 }
 
 // WindowBase provides a base-level implementation of the generic data aspects

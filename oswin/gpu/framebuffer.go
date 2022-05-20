@@ -49,7 +49,7 @@ type Framebuffer interface {
 	// the Texture() method just directly returns the texture set here.
 	// If we have a non-zero size, then the texture is automatically resized
 	// to the size of the framebuffer, otherwise the fb inherits size of texture.
-	SetTexture(tex Texture2D)
+	//	SetTexture(tex Texture2D)
 
 	// Texture returns the current contents of the framebuffer as a Texture2D.
 	// For Samples() > 0 this reduces the optimized internal render buffer to a
@@ -57,7 +57,7 @@ type Framebuffer interface {
 	// framebuffer, and re-used every time Texture() is called.
 	// If SetTexture was called, then it just returns that texture
 	// which was directly rendered to.
-	Texture() Texture2D
+	// Texture() Texture2D
 
 	// DepthAt returns the depth-buffer value at given x,y coordinate in
 	// framebuffer coordinates (i.e., Y = 0 is at bottom).

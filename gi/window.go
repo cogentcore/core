@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"image/draw"
 	"log"
 	"os"
@@ -30,6 +29,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
+	"github.com/goki/vgpu/vgpu"
 )
 
 // EventSkipLagMSec is the number of milliseconds of lag between the time the
@@ -120,14 +120,9 @@ var WindowOpenTimer time.Time
 // what you're doing (and it might change over time too..)
 //
 // Rendering logic:
-// * oswin.Texture is a GPU Texture that can be uploaded very quickly to window
-//   or to another texture.  Viewport2D has image.RGBA Pixels that 2D draws onto,
-//   and this can be efficiently uploaded to Texture.
-//   (at some point, could consider GPU accelerated rendering but not necc and
-//    adds a lot of complexity and dependency -- very nice and simple to use basic
-///   CPU-based bitmap rendering)
-// * OSWin has a WinTex that is blitted up to actual window using GPU code (Draw).
-// * Master Viewport is uploaded to WinTex first as the "base layer"
+// * vdraw.Drawer manages all rendering to the window surface, provided via
+//   the OSWin window.
+// * start by uploading base Viewport2D, then direct uploads and sprites.
 // * Then DirectUps (e.g., gi3d.Scene) directly upload their own texture to WinTex
 //   (note: cannot upload directly to window as this prevents popups and overlays)
 // * Then any Popups (which have their own Viewports) upload to WinTex.
@@ -143,7 +138,6 @@ type Window struct {
 	Viewport          *Viewport2D       `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
 	MasterVLay        *Layout           `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
 	MainMenu          *MenuBar          `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
-	OverTex           oswin.Texture     `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated from Sprites"`
 	Sprites           Sprites           `json:"-" xml:"-" desc:"sprites are named images that are rendered into the overtex."`
 	ActiveSprites     int               `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
 	SpriteDragging    string            `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
@@ -189,9 +183,6 @@ const (
 
 	// WinFlagIsResizing is atomic flag indicating window is resizing
 	WinFlagIsResizing
-
-	// WinFlagOverTexActive is the overlay texture active and should be uploaded to window?
-	WinFlagOverTexActive
 
 	// WinFlagGotPaint have we received our first paint event yet?
 	// ignore other window events before this point
@@ -681,13 +672,6 @@ func (w *Window) Resized(sz image.Point) {
 	if curSz == image.ZP { // first open
 		StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 	}
-	if w.OverTex != nil {
-		oswin.TheApp.RunOnMain(func() {
-			w.OverTex.Delete()
-		})
-	}
-	w.OverTex = nil // dynamically allocated when needed
-	w.ClearFlag(int(WinFlagOverTexActive))
 	w.Viewport.Resize(sz)
 	WinGeomPrefs.RecordPref(w)
 	w.UpMu.Unlock()
@@ -766,15 +750,6 @@ func (w *Window) Closed() {
 		WindowGlobalMu.Unlock()
 	}
 	// these are managed by the window itself
-	if w.OverTex != nil {
-		oswin.TheApp.RunOnMain(func() {
-			w.OverTex.Delete()
-			for _, du := range w.DirectUps {
-				du.This().Disconnect() // does delete
-			}
-		})
-	}
-	w.OverTex = nil
 	w.Sprites = nil
 	w.UpMu.Unlock()
 }
@@ -965,12 +940,12 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadVpRegion")
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.Path(), vp.Path(), vpBBox, w.OSWin.WinTex().Bounds())
+		fmt.Printf("Win: %v uploading region Vp %v, vpbbox: %v\n", w.Path(), vp.Path())
 	}
-	err := w.OSWin.SetWinTexSubImage(winBBox.Min, vp.Pixels, vpBBox)
-	if err != nil {
-		log.Println(err)
-	}
+	// err := w.OSWin.SetWinTexSubImage(winBBox.Min, vp.Pixels, vpBBox)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 	// pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
@@ -991,9 +966,10 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	updt := w.UpdateStart()
 	// pr := prof.Start("win.UploadVp")
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), vp.Pixels.Bounds(), w.OSWin.WinTex().Bounds())
+		fmt.Printf("Win: %v uploading Vp %v, image bound: %v\n", w.Path(), vp.Path(), vp.Pixels.Bounds())
 	}
-	w.OSWin.SetWinTexSubImage(offset, vp.Pixels, vp.Pixels.Bounds())
+	// todo: upload image to drawer -- but need an index or name to track..
+	// w.OSWin.SetWinTexSubImage(offset, vp.Pixels, vp.Pixels.Bounds())
 	// pr.End()
 	w.ClearWinUpdating()
 	w.ClearFlag(int(WinFlagPublishFullReRender))
@@ -1047,14 +1023,17 @@ func (w *Window) UploadAllViewports() {
 	// pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.Path(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
+		// fmt.Printf("Win: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.Path(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
 	}
-	w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
+	drw := w.OSWin.Drawer()
+	drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
+	// w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
 	// next any direct uploaders
 	w.DirectUploads()
 	// then all the current popups
 	w.PopMu.RLock()
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
+	widx := 1
 	if w.PopupStack != nil {
 		for _, pop := range w.PopupStack {
 			gii, _ := KiToNode2D(pop)
@@ -1064,7 +1043,9 @@ func (w *Window) UploadAllViewports() {
 				if Render2DTrace {
 					fmt.Printf("Win: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
 				}
-				w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
+				// w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
+				drw.SetGoImage(widx, vp.Pixels, vgpu.NoFlipY)
+				widx++
 			}
 		}
 	}
@@ -1076,10 +1057,15 @@ func (w *Window) UploadAllViewports() {
 			if Render2DTrace || WinEventTrace {
 				fmt.Printf("Win: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
 			}
-			w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
+			// w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
+			drw.SetGoImage(widx, vp.Pixels, vgpu.NoFlipY)
 		}
 	}
 	w.PopMu.RUnlock()
+
+	// todo: sprites!
+	drw.SyncImages()
+
 	// fmt.Printf("upload all views pop unlocked: %v\n", w.Nm)
 	// pr.End()
 	w.ClearWinUpdating()
@@ -1136,18 +1122,53 @@ func (w *Window) Publish() {
 		w.DirectUploads()
 	}
 	// pr := prof.Start("win.Publish")
-	wt := w.OSWin.WinTex()
-	if wt != nil {
-		w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
-		if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
-			w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
-		}
-		w.OSWin.Publish()
-		if Render2DTrace {
-			fmt.Printf("Win %v did publish\n", w.Nm)
+	// wt := w.OSWin.WinTex()
+	// if wt != nil {
+	// 	w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
+	// 	if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
+	// 		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
+	// 	}
+	// 	w.OSWin.Publish()
+	// 	if Render2DTrace {
+	// 		fmt.Printf("Win %v did publish\n", w.Nm)
+	// 	}
+	// }
+	// pr.End()
+
+	drw := w.OSWin.Drawer()
+	drw.StartDraw()
+	drw.Scale(0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
+	widx := 1
+	if w.PopupStack != nil {
+		for _, pop := range w.PopupStack {
+			gii, _ := KiToNode2D(pop)
+			if gii != nil {
+				vp := gii.AsViewport2D()
+				r := vp.Geom.Bounds()
+				if Render2DTrace {
+					fmt.Printf("Win: %v drawing popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
+				}
+				// w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
+				drw.Copy(widx, r.Min, image.ZR, draw.Src)
+				widx++
+			}
 		}
 	}
-	// pr.End()
+	if w.Popup != nil {
+		gii, _ := KiToNode2D(w.Popup)
+		if gii != nil {
+			vp := gii.AsViewport2D()
+			r := vp.Geom.Bounds()
+			if Render2DTrace || WinEventTrace {
+				fmt.Printf("Win: %v drawing top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
+			}
+			// w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
+			drw.Copy(widx, r.Min, image.ZR, draw.Src)
+			widx++
+		}
+	}
+	drw.EndDraw()
+
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
 }
@@ -1193,29 +1214,12 @@ func (w *Window) DeleteDirectUploader(node Node2D) {
 /////////////////////////////////////////////////////////////////////////////
 //                   Overlays and Sprites
 
-// MakeOverTex makes the OverTex overlay texture if not already there and correct size
-// returns true if needed to make it.  must be called under UpMu.Lock()
-func (w *Window) MakeOverTex() bool {
-	wsz := w.OSWin.WinTex().Size()
-	if w.OverTex == nil || w.OverTex.Size() != wsz {
-		if w.OverTex != nil {
-			oswin.TheApp.RunOnMain(func() {
-				w.OverTex.Delete()
-			})
-		}
-		w.OverTex = oswin.TheApp.NewTexture(w.OSWin, wsz)
-		return true
-	}
-	return false
-}
-
 // RenderOverlays renders sprites -- clears OverTex, uploads sprites to it
 func (w *Window) RenderOverlays() {
 	if !w.IsVisible() {
 		return
 	}
 	if w.ActiveSprites == 0 || len(w.Sprites) == 0 {
-		w.ClearFlag(int(WinFlagOverTexActive))
 		return
 	}
 	w.UpMu.Lock()
@@ -1223,14 +1227,12 @@ func (w *Window) RenderOverlays() {
 		w.UpMu.Unlock()
 		return
 	}
-	w.SetFlag(int(WinFlagOverTexActive))
 	updt := w.UpdateStart()
-	w.MakeOverTex()                 // ensures correct size
-	oswin.TheApp.RunOnMain(func() { // clear the texture
-		if w.OSWin.Activate() {
-			w.OverTex.Fill(w.OverTex.Bounds(), color.Transparent, draw.Src)
-		}
-	})
+	// oswin.TheApp.RunOnMain(func() { // clear the texture
+	// 	if w.OSWin.Activate() {
+	// 		w.OverTex.Fill(w.OverTex.Bounds(), color.Transparent, draw.Src)
+	// 	}
+	// })
 	for _, sp := range w.Sprites {
 		if !sp.On {
 			continue
@@ -1353,13 +1355,13 @@ func (w *Window) DeleteSprite(nm string) bool {
 
 // RenderSprite renders the sprite onto OverTex -- must be called within UpMu mutex lock
 func (w *Window) RenderSprite(sp *Sprite) {
-	oswin.TheApp.RunOnMain(func() {
-		if w.OSWin.Activate() {
-			if sp.Pixels != nil {
-				w.OverTex.SetSubImage(sp.Geom.Pos, sp.Pixels, sp.Pixels.Bounds())
-			}
-		}
-	})
+	// oswin.TheApp.RunOnMain(func() {
+	// 	if w.OSWin.Activate() {
+	// 		if sp.Pixels != nil {
+	// 			w.OverTex.SetSubImage(sp.Geom.Pos, sp.Pixels, sp.Pixels.Bounds())
+	// 		}
+	// 	}
+	// })
 }
 
 // SpriteEvent processes given event for any active sprites

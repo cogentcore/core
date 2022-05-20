@@ -1,8 +1,8 @@
 # gpu
 
-Package gpu provides an abstract interface to a graphical processing unit (GPU).
+Package gpu provides an abstract interface to a graphical processing unit (GPU), supporting OpenGL (version 3.3).
 
-Currently it is only supporting OpenGL (version 3.3), but the design should be sufficiently general to accommodate Vulkan with not too many changes.  Those are the primary cross-platform GPU systems.
+Instead of trying to fit Vulkan into this existing framework, the `vgpu` package implements a new framework that better fits the features of Vulkan, and is now used instead of this OpenGL framework.
 
 The gpu interfaces provide a chain of construction, starting with the GPU which can create a Program or a Pipeline (collection of programs), which is the core of the system, defining different Shader programs that run on the GPU.
 

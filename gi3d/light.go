@@ -104,7 +104,7 @@ type PointLight struct {
 	LightBase
 	Pos       mat32.Vec3 `desc:"position of light in world coordinates"`
 	LinDecay  float32    `desc:"Distance linear decay factor -- defaults to .1"`
-	QuadDecay float32    `desc:"Distance quadratic decay factor -- defaults to .01 -- this is "`
+	QuadDecay float32    `desc:"Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"`
 }
 
 var KiT_PointLight = kit.Types.AddType(&PointLight{}, nil)
@@ -137,8 +137,8 @@ type SpotLight struct {
 	Pose        Pose    // position and orientation
 	AngDecay    float32 `desc:"Angular decay factor -- defaults to 15"`
 	CutoffAngle float32 `max:"90" min:"1" desc:"Cut off angle (in degrees) -- defaults to 45 -- max of 90"`
-	LinDecay    float32 `desc:"Distance linear decay factor -- defaults to 1"`
-	QuadDecay   float32 `desc:"Distance quadratic decay factor -- defaults to 1"`
+	LinDecay    float32 `desc:"Distance linear decay factor -- defaults to .01"`
+	QuadDecay   float32 `desc:"Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances"`
 }
 
 var KiT_SpotLight = kit.Types.AddType(&SpotLight{}, nil)

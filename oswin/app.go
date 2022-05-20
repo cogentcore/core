@@ -10,8 +10,6 @@
 package oswin
 
 import (
-	"image"
-
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/ki/kit"
@@ -74,11 +72,6 @@ type App interface {
 	// NewWindow returns a new Window for this screen. A nil opts is valid and
 	// means to use the default option values.
 	NewWindow(opts *NewWindowOptions) (Window, error)
-
-	// NewTexture returns a new oswin-level GPU Texture for the given window.
-	// This Texture will automatically be Activate()'d.
-	// See also gpu.TheGPU.NewTexture2D for creating textures for GPU 3D-specific uses.
-	NewTexture(win Window, size image.Point) Texture
 
 	// ClipBoard returns the clip.Board handler for the system, in context of given window.
 	ClipBoard(win Window) clip.Board

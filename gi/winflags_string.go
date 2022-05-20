@@ -17,21 +17,20 @@ func _() {
 	_ = x[WinFlagUpdating-25]
 	_ = x[WinFlagIsClosing-26]
 	_ = x[WinFlagIsResizing-27]
-	_ = x[WinFlagOverTexActive-28]
-	_ = x[WinFlagGotPaint-29]
-	_ = x[WinFlagGotFocus-30]
-	_ = x[WinFlagSentShow-31]
-	_ = x[WinFlagGoLoop-32]
-	_ = x[WinFlagStopEventLoop-33]
-	_ = x[WinFlagDoFullRender-34]
-	_ = x[WinFlagPublishFullReRender-35]
-	_ = x[WinFlagFocusActive-36]
-	_ = x[WinFlagsN-37]
+	_ = x[WinFlagGotPaint-28]
+	_ = x[WinFlagGotFocus-29]
+	_ = x[WinFlagSentShow-30]
+	_ = x[WinFlagGoLoop-31]
+	_ = x[WinFlagStopEventLoop-32]
+	_ = x[WinFlagDoFullRender-33]
+	_ = x[WinFlagPublishFullReRender-34]
+	_ = x[WinFlagFocusActive-35]
+	_ = x[WinFlagsN-36]
 }
 
-const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFlagIsResizingWinFlagOverTexActiveWinFlagGotPaintWinFlagGotFocusWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagPublishFullReRenderWinFlagFocusActiveWinFlagsN"
+const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFlagIsResizingWinFlagGotPaintWinFlagGotFocusWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagPublishFullReRenderWinFlagFocusActiveWinFlagsN"
 
-var _WinFlags_index = [...]uint8{0, 19, 34, 50, 67, 87, 102, 117, 132, 145, 165, 184, 210, 228, 237}
+var _WinFlags_index = [...]uint8{0, 19, 34, 50, 67, 82, 97, 112, 125, 145, 164, 190, 208, 217}
 
 func (i WinFlags) String() string {
 	i -= 24

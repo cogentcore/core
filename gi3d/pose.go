@@ -21,7 +21,7 @@ type Pose struct {
 	WorldMatrix mat32.Mat4 `view:"-" desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"`
 	MVMatrix    mat32.Mat4 `view:"-" desc:"model * view matrix -- tranforms into camera-centered coords"`
 	MVPMatrix   mat32.Mat4 `view:"-" desc:"model * view * projection matrix -- full final render matrix"`
-	NormMatrix  mat32.Mat3 `view:"-" desc:"normal matrix based on MVMatrix"`
+	NormMatrix  mat32.Mat3 `view:"-" desc:"normal matrix has no offsets, for normal vector rotation only, based on MVMatrix"`
 }
 
 var KiT_Pose = kit.Types.AddType(&Pose{}, PoseProps)

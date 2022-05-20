@@ -1144,7 +1144,11 @@ func (tb *TextBuf) DeleteTextRectImpl(st, ed lex.Pos) *textbuf.Edit {
 	for ln := st.Ln; ln <= ed.Ln; ln++ {
 		ls := tb.Lines[ln]
 		if len(ls) > st.Ch {
-			tb.Lines[ln] = append(ls[:st.Ch], ls[ed.Ch:]...) // should be ok even if shorter?
+			if ed.Ch < len(ls)-1 {
+				tb.Lines[ln] = append(ls[:st.Ch], ls[ed.Ch:]...)
+			} else {
+				tb.Lines[ln] = ls[:st.Ch]
+			}
 		}
 	}
 	tb.LinesEdited(tbe)
@@ -1409,7 +1413,8 @@ func (tb *TextBuf) RegionRectImpl(st, ed lex.Pos) *textbuf.Edit {
 		if ll > st.Ch {
 			sz := ints.MinInt(ll-st.Ch, nch)
 			txt = make([]rune, sz, nch)
-			copy(txt, lr[st.Ch:ed.Ch])
+			edl := ints.MinInt(ed.Ch, ll)
+			copy(txt, lr[st.Ch:edl])
 		}
 		if len(txt) < nch { // rect
 			txt = append(txt, runes.Repeat([]rune(" "), nch-len(txt))...)
