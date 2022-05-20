@@ -188,18 +188,18 @@ func (sf *Surface) ConfigSwapchain() {
 		vk.CompositeAlphaPostMultipliedBit,
 		vk.CompositeAlphaInheritBit,
 	}
-	goti := -1
+	// goti := -1
 	for i := 0; i < len(compositeAlphaFlags); i++ {
 		alphaFlags := vk.CompositeAlphaFlags(compositeAlphaFlags[i])
 		flagSupported := surfaceCapabilities.SupportedCompositeAlpha&alphaFlags != 0
 		if flagSupported {
-			goti = i
+			// goti = i
 			compositeAlpha = compositeAlphaFlags[i]
 			break
 		}
 	}
 
-	fmt.Printf("Got alpha: %d\n", goti)
+	//	fmt.Printf("Got alpha: %d\n", goti)
 
 	// Create a swapchain
 	var swapchain vk.Swapchain

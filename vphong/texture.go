@@ -111,6 +111,6 @@ func (ph *Phong) RenderTexture() {
 	tex := ph.Textures.ValByIdx(ph.Cur.TexIdx)
 	tpush := &TexPush{}
 	tpush.Set(ph.Cur.TexIdx, tex.Repeat, tex.Off)
-	pl.Push(cmd, tpvar, vgpu.FragmentShader, unsafe.Pointer(tpush))
+	pl.Push(cmd, tpvar, unsafe.Pointer(tpush))
 	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
 }

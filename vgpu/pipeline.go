@@ -338,9 +338,9 @@ func (pl *Pipeline) BindPipeline(cmd vk.CommandBuffer) {
 // Note: it is *essential* to use a local, stack variable for the push value
 // as cgo will likely complain if it is inside some other structure.
 // BindPipeline must have been called before this.
-func (pl *Pipeline) Push(cmd vk.CommandBuffer, vr *Var, shader ShaderTypes, val unsafe.Pointer) {
+func (pl *Pipeline) Push(cmd vk.CommandBuffer, vr *Var, val unsafe.Pointer) {
 	vs := pl.Vars()
-	vk.CmdPushConstants(cmd, vs.VkDescLayout, vk.ShaderStageFlags(ShaderStageFlags[shader]), uint32(vr.Offset), uint32(vr.SizeOf), val)
+	vk.CmdPushConstants(cmd, vs.VkDescLayout, vk.ShaderStageFlags(vr.Shaders), uint32(vr.Offset), uint32(vr.SizeOf), val)
 }
 
 // Draw adds CmdDraw command to the given command buffer

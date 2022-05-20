@@ -53,7 +53,7 @@ func (dw *Drawer) SetPalette(pal Palette) error {
 			break
 		}
 	}
-	dw.ColorsUpdated()
+	dw.SyncColors()
 	return cerr
 }
 
@@ -77,8 +77,9 @@ func (dw *Drawer) SetColor(idx int, src color.Color) error {
 	return nil
 }
 
-// ColorsUpdated must be called after all the colors have been updated
-func (dw *Drawer) ColorsUpdated() {
+// SyncColors must be called after any colors have been updated, to sync
+// memory up to the GPU
+func (dw *Drawer) SyncColors() {
 	dw.Sys.Mem.SyncToGPU()
 }
 
@@ -110,7 +111,7 @@ func (dw *Drawer) Fill(idx int, src2dst mat32.Mat3, reg image.Rectangle, op draw
 	tmat := dw.ConfigMats(src2dst, reg.Max, reg, op, false)
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mats")
 	fpl := sy.PipelineMap["fill"]
-	fpl.Push(cmd, matv, vgpu.VertexShader, unsafe.Pointer(tmat))
+	fpl.Push(cmd, matv, unsafe.Pointer(tmat))
 	fpl.BindDrawVertex(cmd, 0)
 
 	return nil
@@ -120,21 +121,26 @@ func (dw *Drawer) Fill(idx int, src2dst mat32.Mat3, reg image.Rectangle, op draw
 func (dw *Drawer) StartFill() {
 	sy := &dw.Sys
 	fpl := sy.PipelineMap["fill"]
+	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
 		dw.Impl.SurfIdx = dw.Surf.AcquireNextImage()
-		cmd := sy.CmdPool.Buff
 		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
-		fpl.BindPipeline(cmd)
+	} else {
+		sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], 0)
 	}
+	fpl.BindPipeline(cmd)
 }
 
 // EndFill ends color filling rendering process on render target
 func (dw *Drawer) EndFill() {
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
+	sy.EndRenderPass(cmd)
 	if dw.Surf != nil {
-		sy.EndRenderPass(cmd)
 		dw.Surf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		dw.Surf.PresentImage(dw.Impl.SurfIdx)
+	} else {
+		dw.Frame.SubmitRender(cmd)
+		dw.Frame.WaitForRender()
 	}
 }

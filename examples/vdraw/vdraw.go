@@ -74,7 +74,7 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	drw := &vdraw.Drawer{}
-	drw.ConfigSurface(sf, 10) // 10 = max number of colors or images to choose for rendering
+	drw.ConfigSurface(sf, 10, 10) // 10 = max number of images, colors to choose for rendering
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
@@ -89,19 +89,20 @@ func main() {
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
 		imgs[i] = OpenImage(fnm)
+		drw.SetGoImage(i, imgs[i], vgpu.NoFlipY)
+	}
+	drw.SyncImages()
+
+	rendImgs := func(idx int) {
+		drw.StartDraw()
+		drw.Scale(idx, sf.Format.Bounds(), image.ZR, draw.Src)
+		for i := range imgFiles {
+			drw.Copy(i, image.Point{rand.Intn(500), rand.Intn(500)}, image.ZR, draw.Src)
+		}
+		drw.EndDraw()
 	}
 
-	scaleImg := func(idx int) {
-		drw.SetGoImage(imgs[idx], vgpu.NoFlipY)
-		drw.Scale(sf.Format.Bounds(), imgs[idx].Bounds(), draw.Src)
-	}
-	copyImg := func(idx int) {
-		drw.SetGoImage(imgs[idx], vgpu.NoFlipY)
-		drw.Copy(image.Point{rand.Intn(500), rand.Intn(500)}, imgs[idx].Bounds(), draw.Src)
-	}
-
-	_ = scaleImg
-	_ = copyImg
+	_ = rendImgs
 
 	pal := vdraw.Palette{}
 	pal.Add("white", color.White)
@@ -127,13 +128,11 @@ func main() {
 	stTime := time.Now()
 
 	renderFrame := func() {
-		fcr := frameCount % 10
+		fcr := frameCount % 4
 		_ = fcr
 		switch {
 		case fcr < 3:
-			scaleImg(fcr)
-		case fcr < 6:
-			copyImg(fcr - 3)
+			rendImgs(fcr)
 		default:
 			fillRnd()
 		}
@@ -155,7 +154,7 @@ func main() {
 
 	exitC := make(chan struct{}, 2)
 
-	fpsDelay := 2 * time.Second
+	fpsDelay := time.Second / 1
 	fpsTicker := time.NewTicker(fpsDelay)
 	for {
 		select {

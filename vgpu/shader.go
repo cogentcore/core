@@ -82,6 +82,7 @@ const (
 	GeometryShader
 	FragmentShader
 	ComputeShader
+	AllShaders
 )
 
 var ShaderStageFlags = map[ShaderTypes]vk.ShaderStageFlagBits{
@@ -91,6 +92,7 @@ var ShaderStageFlags = map[ShaderTypes]vk.ShaderStageFlagBits{
 	GeometryShader: vk.ShaderStageGeometryBit,
 	FragmentShader: vk.ShaderStageFragmentBit,
 	ComputeShader:  vk.ShaderStageComputeBit,
+	AllShaders:     vk.ShaderStageAll,
 }
 
 var ShaderPipelineFlags = map[ShaderTypes]vk.PipelineStageFlagBits{

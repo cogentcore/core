@@ -28,6 +28,7 @@ type Mats struct {
 type DrawerImpl struct {
 	SurfIdx   uint32 `desc:"surface index for current render process"`
 	MaxColors int    `desc:"maximum number of fill colors per pass -- set by user at config"`
+	MaxImages int    `desc:"maximum number of images per pass -- set by user at config"`
 	FlipY     bool   `desc:"whether to render image with flipped Y"`
 }
 
@@ -68,7 +69,6 @@ func (dw *Drawer) ConfigSys() {
 	vars := dw.Sys.Vars()
 	vset := vars.AddVertexSet()
 	pcset := vars.AddPushSet()
-	// uset := vars.AddSet()
 	txset := vars.AddSet() // 0
 	cset := vars.AddSet()  // 1
 
@@ -78,8 +78,8 @@ func (dw *Drawer) ConfigSys() {
 	posv := vset.Add("Pos", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
 
-	pcset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader)
-	// uset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Uniform, vgpu.VertexShader)
+	pcset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
+	// note: packing texidx into mvp[0][3] to fit within 128 byte limit
 
 	tximgv := txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 	tximgv.TextureOwns = true
@@ -87,7 +87,7 @@ func (dw *Drawer) ConfigSys() {
 	cset.Add("Color", vgpu.Float32Vec4, 1, vgpu.Uniform, vgpu.FragmentShader)
 
 	vset.ConfigVals(1)
-	txset.ConfigVals(1)
+	txset.ConfigVals(dw.Impl.MaxImages)
 	cset.ConfigVals(dw.Impl.MaxColors)
 
 	// note: add all values per above before doing Config

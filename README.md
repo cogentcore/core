@@ -114,3 +114,15 @@ To have the mac use the `libMoltenVK.dylib` installed by `brew install molten-vk
 
 However it does not find the `libvulkan` which is not included in molten-vk.
 
+# Platform properties
+
+These are useful for deciding what kinds of limits are likely to work in practice:
+
+* 96 texture images is a common lower limit: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxDescriptorSetSampledImages&platform=all
+
+* 8 dynamic uniform descriptors: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxDescriptorSetUniformBuffersDynamic&platform=all
+
+* 128 push constant bytes actually quite prevalent: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxPushConstantsSize&platform=all
+
+* image formats: https://vulkan.gpuinfo.org/listsurfaceformats.php
+

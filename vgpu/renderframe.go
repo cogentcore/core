@@ -25,23 +25,32 @@ type RenderFrame struct {
 	OwnDevice     bool           `desc:"do we own the device?"`
 }
 
-// NewRenderFrameOwnDevice returns a new renderframe initialized for given GPU.
+// NewRenderFrameOwnDevice returns a new renderframe initialized for given GPU,
+// of given size.
 // This version creates a new Graphics device -- for purely offscreen usage.
-func NewRenderFrameOwnDevice(gp *GPU) *RenderFrame {
+func NewRenderFrameOwnDevice(gp *GPU, size image.Point) *RenderFrame {
 	rf := &RenderFrame{}
 	rf.Defaults()
+	rf.Format.Size = size
 	rf.Init(gp, true) // make own device
 	return rf
 }
 
 // NewRenderFrame returns a new renderframe initialized for given GPU,
+// of given size.
 // using given device, e.g., from a Surface -- to transition images
 // from renderframe to surface, they must use the same device.
-func NewRenderFrame(gp *GPU, dev *Device) *RenderFrame {
+// if device is nil, own device is created.
+func NewRenderFrame(gp *GPU, dev *Device, size image.Point) *RenderFrame {
 	rf := &RenderFrame{}
 	rf.Defaults()
-	rf.Device = *dev
-	rf.Init(gp, false)
+	rf.Format.Size = size
+	if dev != nil {
+		rf.Device = *dev
+		rf.Init(gp, false)
+	} else {
+		rf.Init(gp, true) // make dev
+	}
 	return rf
 }
 

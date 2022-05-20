@@ -9,3 +9,22 @@ The GoGi GUI, and probably other 2D-based GUI frameworks, uses a strategy of ren
 This package supports these rectangular image region composition operations, via a simple render pipeline that just renders a rectangular shape with a texture.  There is also a simple fill pipeline that renders a single color into a rectangle.
 
 
+# Implementation: Var map
+
+```
+Set: -2
+    Role: Vertex
+        Var: 0:	Pos	Float32Vec2[4]	(size: 8)	Vals: 1
+    Role: Index
+        Var: 1:	Index	Uint16[6]	(size: 2)	Vals: 1
+Set: -1
+    Role: Push
+        Var: 0:	Mats	Struct	(size: 128)	Vals: 0
+Set: 0
+    Role: TextureRole
+        Var: 0:	Tex	ImageRGBA32	(size: 4)	Vals: 1
+Set: 1
+    Role: Uniform
+        Var: 0:	Color	Float32Vec4	(size: 16)	Vals: 10
+```
+

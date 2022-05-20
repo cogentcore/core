@@ -220,7 +220,7 @@ func main() {
 		descIdx := 0 // if running multiple frames in parallel, need diff sets
 
 		sy.ResetBeginRenderPass(cmd, sf.Frames[idx], descIdx)
-		pl.Push(cmd, txidxv, vgpu.FragmentShader, unsafe.Pointer(&imgIdx))
+		pl.Push(cmd, txidxv, unsafe.Pointer(&imgIdx))
 		pl.BindDrawVertex(cmd, descIdx)
 		sy.EndRenderPass(cmd)
 

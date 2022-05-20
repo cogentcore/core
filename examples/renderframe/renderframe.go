@@ -16,7 +16,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/goki/gi/gi"
 	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
 
@@ -82,9 +81,9 @@ func main() {
 
 	drw := &vdraw.Drawer{}
 	sf.Format.SetMultisample(1)
-	drw.ConfigSurface(sf, 10) // 10 = max number of colors or images to choose for rendering
+	drw.ConfigSurface(sf, 10, 10) // 10 = max number of images, colors to choose for rendering
 
-	rf := vgpu.NewRenderFrame(gp, &sf.Device)
+	rf := vgpu.NewRenderFrame(gp, &sf.Device, image.Point{1024, 768})
 	sy := gp.NewGraphicsSystem("drawidx", &rf.Device)
 
 	destroy := func() {
@@ -176,7 +175,7 @@ func main() {
 
 	vars.BindDynVal(0, camv, cam)
 
-	drw.ConfigImage(&rf.Format)
+	drw.ConfigImage(0, &rf.Format)
 
 	frameCount := 0
 	stTime := time.Now()
@@ -201,19 +200,22 @@ func main() {
 		rf.WaitForRender()
 
 		if false { // grab
-			tcmd := sy.MemCmdStart()
-			rf.GrabImage(tcmd, 0)
-			sy.MemCmdSubmitWaitFree()
-			gimg, err := fr.Render.Grab.DevGoImage()
-			if err == nil {
-				gi.SaveImage("render.png", gimg)
-			} else {
-				fmt.Printf("image grab err: %s\n", err)
-			}
+			// tcmd := sy.MemCmdStart()
+			// rf.GrabImage(tcmd, 0)
+			// sy.MemCmdSubmitWaitFree()
+			// gimg, err := fr.Render.Grab.DevGoImage()
+			// if err == nil {
+			// 	gi.SaveImage("render.png", gimg)
+			// } else {
+			// 	fmt.Printf("image grab err: %s\n", err)
+			// }
 		}
 
-		drw.SetFrameImage(fr, vgpu.NoFlipY)
-		drw.Scale(sf.Format.Bounds(), fr.Image.Format.Bounds(), draw.Src)
+		drw.SetFrameImage(0, fr)
+		drw.SyncImages()
+		drw.StartDraw()
+		drw.Scale(0, sf.Format.Bounds(), image.ZR, draw.Src)
+		drw.EndDraw()
 
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
 		frameCount++
