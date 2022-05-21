@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"unsafe"
 
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
@@ -87,16 +86,13 @@ func (ph *Phong) UseTextureName(name string) error {
 	return ph.UseTextureIdx(idx)
 }
 
-// TexPush holds vals for texture push constants
-type TexPush struct {
+// TexPars holds texture parameters for push constants -- idx is coded in shiny bright
+type TexPars struct {
 	Repeat mat32.Vec2 `desc:"how often to repeat the texture in each direction"`
 	Off    mat32.Vec2 `desc:"offset for when to start the texure in each direction"`
-	Idx    int32      `desc:"index"`
-	pad0   float32
 }
 
-func (tp *TexPush) Set(idx int, rpt, off mat32.Vec2) {
-	tp.Idx = int32(idx)
+func (tp *TexPars) Set(rpt, off mat32.Vec2) {
 	tp.Repeat = rpt
 	tp.Off = off
 }
@@ -105,12 +101,11 @@ func (tp *TexPush) Set(idx int, rpt, off mat32.Vec2) {
 func (ph *Phong) RenderTexture() {
 	sy := &ph.Sys
 	cmd := sy.CmdPool.Buff
-	vars := sy.Vars()
-	tpvar, _ := vars.VarByNameTry(int(vgpu.PushSet), "TexPush")
 	pl := sy.PipelineMap["texture"]
 	tex := ph.Textures.ValByIdx(ph.Cur.TexIdx)
-	tpush := &TexPush{}
-	tpush.Set(ph.Cur.TexIdx, tex.Repeat, tex.Off)
-	pl.Push(cmd, tpvar, unsafe.Pointer(tpush))
+	push := ph.Cur.NewPush()
+	push.Tex.Set(tex.Repeat, tex.Off)
+	push.Color.ShinyBright.W = float32(ph.Cur.TexIdx)
+	ph.Push(pl, push)
 	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
 }

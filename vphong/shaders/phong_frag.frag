@@ -4,7 +4,7 @@
 
 #define MAX_LIGHTS 8
 
-layout(set = 3, binding = 0) uniform NLightsU {
+layout(set = 1, binding = 0) uniform NLightsU {
 	int NAmbient;
 	int NDir;
 	int NPoint;
@@ -15,7 +15,7 @@ struct Ambient {
 	vec3 Color;
 };
 
-layout(set = 4, binding = 0) uniform AmbLightsU {
+layout(set = 2, binding = 0) uniform AmbLightsU {
 	Ambient AmbLights[MAX_LIGHTS];
 };
 
@@ -24,7 +24,7 @@ struct Dir {
 	vec3 Pos;
 };
 
-layout(set = 4, binding = 1) uniform DirLightsU {
+layout(set = 2, binding = 1) uniform DirLightsU {
 	Dir DirLights[MAX_LIGHTS];
 };
 
@@ -34,7 +34,7 @@ struct Point {
 	vec3 Decay; // x = Lin, y = Quad
 };
 
-layout(set = 4, binding = 2) uniform PointLightsU {
+layout(set = 2, binding = 2) uniform PointLightsU {
 	Point PointLights[MAX_LIGHTS];
 };
 
@@ -45,7 +45,7 @@ struct Spot {
 	vec4 Decay; // x = Ang, y = CutAngle, z = Lin, w = Quad
 };
 
-layout(set = 4, binding = 3) uniform SpotLightsU {
+layout(set = 2, binding = 3) uniform SpotLightsU {
 	Spot SpotLights[MAX_LIGHTS];
 };
 
@@ -54,7 +54,7 @@ layout(set = 4, binding = 3) uniform SpotLightsU {
 // 	clr = vec4(0.5 + 0.5 * val, 1.0);
 // }
 
-void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, vec3 matSpecular, float shiny, out vec3 ambdiff, out vec3 spec) {
+void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, vec3 matSpecular, float shiny, float reflct, out vec3 ambdiff, out vec3 spec) {
 
 	vec3 ambientTotal  = vec3(0.0);
 	vec3 diffuseTotal  = vec3(0.0);
@@ -89,7 +89,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 			diffuseTotal += DirLights[i].Color * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
 			vec3 ref = reflect(-lightDir, norm);
-			specularTotal += DirLights[i].Color * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
+			specularTotal += reflct * DirLights[i].Color * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 		}
 	}
 
@@ -113,7 +113,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 			diffuseTotal += attenColor * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
 			vec3 ref = reflect(-lightDir, norm);
-			specularTotal += attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
+			specularTotal += reflct * attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 		}
 	}
 
@@ -150,7 +150,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 				diffuseTotal += attenColor * matDiffuse * dotNormal;
 				// Specular reflection
 				vec3 ref = reflect(-lightDir, norm);
-				specularTotal += attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
+				specularTotal += reflct * attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 			}
 		}
 	}

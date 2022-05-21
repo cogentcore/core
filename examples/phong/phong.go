@@ -94,13 +94,13 @@ func main() {
 	// Lights
 
 	dark := color.RGBA{20, 20, 20, 255}
-	ph.AddAmbientLight(vphong.NewGoColor3(dark))
+	ph.AddAmbientLight(mat32.NewVec3Color(dark))
 
-	ph.AddDirLight(vphong.NewGoColor3(color.White), mat32.Vec3{0, 1, 1})
+	ph.AddDirLight(mat32.NewVec3Color(color.White), mat32.Vec3{0, 1, 1})
 
-	ph.AddPointLight(vphong.NewGoColor3(color.White), mat32.Vec3{0, 2, 5}, .1, .01)
+	ph.AddPointLight(mat32.NewVec3Color(color.White), mat32.Vec3{0, 2, 5}, .1, .01)
 
-	ph.AddSpotLight(vphong.NewGoColor3(color.White), mat32.Vec3{-2, 5, -2}, mat32.Vec3{0, -1, 0}, 10, 45, .01, .001)
+	ph.AddSpotLight(mat32.NewVec3Color(color.White), mat32.Vec3{-2, 5, -2}, mat32.Vec3{0, -1, 0}, 10, 45, .01, .001)
 
 	/////////////////////////////
 	// Meshes
@@ -154,11 +154,11 @@ func main() {
 	red := color.RGBA{255, 0, 0, 255}
 	redTr := color.RGBA{200, 0, 0, 200}
 	green := color.RGBA{0, 255, 0, 255}
-	ph.AddColor("blue", vphong.NewColors(blue, color.Black, color.White, 30, 1))
-	ph.AddColor("blueTr", vphong.NewColors(blueTr, color.Black, color.White, 30, 1))
-	ph.AddColor("red", vphong.NewColors(red, color.Black, color.White, 30, 1))
-	ph.AddColor("redTr", vphong.NewColors(redTr, color.Black, color.White, 30, 1))
-	ph.AddColor("green", vphong.NewColors(green, color.Black, color.White, 30, 1))
+	ph.AddColor("blue", vphong.NewColors(blue, color.Black, 30, 1, 1))
+	ph.AddColor("blueTr", vphong.NewColors(blueTr, color.Black, 30, 1, 1))
+	ph.AddColor("red", vphong.NewColors(red, color.Black, 30, 1, 1))
+	ph.AddColor("redTr", vphong.NewColors(redTr, color.Black, 30, 1, 1))
+	ph.AddColor("green", vphong.NewColors(dark, green, 30, .1, 1))
 
 	/////////////////////////////
 	// Camera / Mtxs
@@ -173,32 +173,28 @@ func main() {
 
 	var model1 mat32.Mat4
 	model1.SetRotationY(0.5)
-	ph.AddMtxs("mtx1", &model1, view, &prjn)
 
 	var model2 mat32.Mat4
 	model2.SetTranslation(-2, 0, 0)
-	ph.AddMtxs("mtx2", &model2, view, &prjn)
 
 	var model3 mat32.Mat4
 	model3.SetTranslation(0, 0, -2)
-	ph.AddMtxs("mtx3", &model3, view, &prjn)
 
 	var model4 mat32.Mat4
 	model4.SetTranslation(-1, 0, -2)
-	ph.AddMtxs("mtx4", &model4, view, &prjn)
 
 	var model5 mat32.Mat4
 	model5.SetTranslation(1, 0, -1)
-	ph.AddMtxs("mtx5", &model5, view, &prjn)
 
 	var floortx mat32.Mat4
 	floortx.SetTranslation(0, -2, -2)
-	ph.AddMtxs("floortx", &floortx, view, &prjn)
 
 	/////////////////////////////
 	//  Config!
 
 	ph.Config()
+
+	ph.SetViewPrjn(view, &prjn)
 
 	/////////////////////////////
 	//  Set Mesh values
@@ -231,55 +227,48 @@ func main() {
 
 	updateMats := func() {
 		aspect := sf.Format.Aspect()
-		prjn.SetVkPerspective(45, aspect, 0.01, 100)
-
 		view = vphong.CameraViewMat(campos, mat32.Vec3{0, 0, 0}, mat32.Vec3Y)
-		ph.SetMtxsName("mtx1", &model1, view, &prjn)
-		ph.SetMtxsName("mtx2", &model2, view, &prjn)
-		ph.SetMtxsName("mtx3", &model3, view, &prjn)
-		ph.SetMtxsName("mtx4", &model4, view, &prjn)
-		ph.SetMtxsName("mtx5", &model5, view, &prjn)
-		ph.SetMtxsName("floortx", &floortx, view, &prjn)
-		ph.Sync()
+		prjn.SetVkPerspective(45, aspect, 0.01, 100)
+		ph.SetViewPrjn(view, &prjn)
 	}
 
 	render1 := func() {
 		ph.UseColorName("blue")
-		ph.UseMtxsName("floortx")
+		ph.SetModelMtx(&floortx)
 		ph.UseMeshName("floor")
 		// ph.UseNoTexture()
 		ph.UseTextureName("ground.png")
 		ph.Render()
 
 		ph.UseColorName("red")
-		ph.UseMtxsName("mtx2")
+		ph.SetModelMtx(&model2)
 		ph.UseMeshName("cube")
 		ph.UseTextureName("teximg.jpg")
 		// ph.UseNoTexture()
 		ph.Render()
 
 		ph.UseColorName("blue")
-		ph.UseMtxsName("mtx3")
+		ph.SetModelMtx(&model3)
 		ph.UseMeshName("cylinder")
 		ph.UseTextureName("wood.png")
 		// ph.UseNoTexture()
 		ph.Render()
 
 		ph.UseColorName("green")
-		ph.UseMtxsName("mtx4")
+		ph.SetModelMtx(&model4)
 		ph.UseMeshName("cone")
 		// ph.UseTextureName("teximg.jpg")
 		ph.UseNoTexture()
 		ph.Render()
 
 		ph.UseColorName("redTr")
-		ph.UseMtxsName("mtx1")
+		ph.SetModelMtx(&model1)
 		ph.UseMeshName("sphere")
 		ph.UseNoTexture()
 		ph.Render()
 
 		ph.UseColorName("blueTr")
-		ph.UseMtxsName("mtx5")
+		ph.SetModelMtx(&model5)
 		ph.UseMeshName("capsule")
 		ph.UseNoTexture()
 		ph.Render()

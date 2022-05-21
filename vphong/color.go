@@ -8,97 +8,47 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-	"unsafe"
 
 	"github.com/goki/mat32"
-	"github.com/goki/vgpu/vgpu"
 )
 
-// Color describes the surface colors for Phong lighting model
-type Color struct {
-	Color       mat32.Vec4 `desc:"main reflective color: reflected from lights"`
-	Emissive    mat32.Vec3 `desc:"color that surface emits"`
-	pad1        float32
-	Specular    mat32.Vec3 `desc:"shiny reflection color"`
-	pad2        float32
-	ShinyBright mat32.Vec3 `desc:"x = Shiny, y = Bright"`
-	pad3        float32
-}
-
-// NewGoColor3 returns a mat32.Vec3 from Go standard color.Color
-func NewGoColor3(clr color.Color) mat32.Vec3 {
-	v3 := mat32.Vec3{}
-	SetGoColor3(&v3, clr)
-	return v3
-}
-
-// SetGoColor3 sets a mat32.Vec3 from Go standard color.Color
-func SetGoColor3(v3 *mat32.Vec3, clr color.Color) {
-	r, g, b, _ := clr.RGBA()
-	v3.X = float32(r) / 0xffff
-	v3.Y = float32(g) / 0xffff
-	v3.Z = float32(b) / 0xffff
-}
-
-// NewGoColor4 returns a mat32.Vec4 from Go standard color.Color
-func NewGoColor4(clr color.Color) mat32.Vec4 {
-	v4 := mat32.Vec4{}
-	SetGoColor4(&v4, clr)
-	return v4
-}
-
-// SetGoColor4 sets a mat32.Vec4 from Go standard color.Color
-func SetGoColor4(v4 *mat32.Vec4, clr color.Color) {
-	r, g, b, a := clr.RGBA()
-	v4.X = float32(r) / 0xffff
-	v4.Y = float32(g) / 0xffff
-	v4.Z = float32(b) / 0xffff
-	v4.W = float32(a) / 0xffff
+// Colors are the material colors with padding for direct uploading to shader
+type Colors struct {
+	Color       mat32.Vec4 `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
+	ShinyBright mat32.Vec4 `desc:"X = shininess spread factor, Y = shine reflection factor, Z = brightness factor:  shiny = specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128) having a smaller more focal specular reflection.  Shine reflect = 1 for full shine white reflection (specular) color, 0 = no shine reflection.  bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters.  W is used for Tex idx."`
+	Emissive    mat32.Vec3 `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
+	pad0        float32
 }
 
 // NewGoColor sets the colors from standard Go colors
-func NewColors(clr, emis, spec color.Color, shiny, bright float32) *Color {
-	cl := &Color{}
-	cl.SetColors(clr, emis, spec, shiny, bright)
+func NewColors(clr, emis color.Color, shiny, reflect, bright float32) *Colors {
+	cl := &Colors{}
+	cl.SetColors(clr, emis, shiny, reflect, bright)
 	return cl
 }
 
 // SetColors sets the colors from standard Go colors
-func (cl *Color) SetColors(clr, emis, spec color.Color, shiny, bright float32) {
-	SetGoColor4(&cl.Color, clr)
-	SetGoColor3(&cl.Emissive, emis)
-	SetGoColor3(&cl.Specular, spec)
+func (cl *Colors) SetColors(clr, emis color.Color, shiny, reflect, bright float32) {
+	cl.Color.SetColor(clr)
+	cl.Emissive.SetColor(emis)
 	cl.ShinyBright.X = shiny
-	cl.ShinyBright.Y = bright
+	cl.ShinyBright.Y = reflect
+	cl.ShinyBright.Z = bright
 }
 
-// AddColor adds to list of colors
-func (ph *Phong) AddColor(name string, clr *Color) {
+// AddColor adds to list of colors, which can be use for a materials library
+func (ph *Phong) AddColor(name string, clr *Colors) {
 	ph.Colors.Add(name, clr)
-}
-
-// AllocColors allocates vals for colors
-func (ph *Phong) AllocColors() {
-	vars := ph.Sys.Vars()
-	clrset := vars.SetMap[int(ColorSet)]
-	clrset.ConfigVals(ph.Colors.Len())
-}
-
-// ConfigColors configures the rendering for the colors that have been added.
-func (ph *Phong) ConfigColors() {
-	vars := ph.Sys.Vars()
-	clrset := vars.SetMap[int(ColorSet)]
-	for i, kv := range ph.Colors.Order {
-		_, clr, _ := clrset.ValByIdxTry("Color", i)
-		clr.CopyBytes(unsafe.Pointer(kv.Val))
-	}
 }
 
 // UseColorIdx selects color by index for current render step
 func (ph *Phong) UseColorIdx(idx int) error {
-	vars := ph.Sys.Vars()
-	vars.BindDynValIdx(int(ColorSet), "Color", idx)
-	ph.Cur.ColorIdx = idx // todo: range check
+	if err := ph.Colors.IdxIsValid(idx); err != nil {
+		log.Println(err)
+		return err
+	}
+	clr := ph.Colors.ValByIdx(idx)
+	ph.Cur.Color = *clr
 	return nil
 }
 
@@ -107,11 +57,12 @@ func (ph *Phong) UseColorName(name string) error {
 	idx, ok := ph.Colors.IdxByKey(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseColorName -- name not found: %s", name)
-		if vgpu.TheGPU.Debug {
-			log.Println(err)
-		}
+		log.Println(err)
+		return err
 	}
-	return ph.UseColorIdx(idx)
+	clr := ph.Colors.ValByIdx(idx)
+	ph.Cur.Color = *clr
+	return nil
 }
 
 // RenderOnecolor renders current settings to onecolor pipeline
@@ -119,5 +70,7 @@ func (ph *Phong) RenderOnecolor() {
 	sy := &ph.Sys
 	cmd := sy.CmdPool.Buff
 	pl := sy.PipelineMap["onecolor"]
+	push := ph.Cur.NewPush()
+	ph.Push(pl, push)
 	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
 }

@@ -6,25 +6,11 @@ package vphong
 
 import (
 	"github.com/goki/kigen/ordmap"
-	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
 )
 
 // MaxLights is upper limit on number of any given type of light
 const MaxLights = 8
-
-// CurRender holds info about the current render as updated by
-// Use* methods -- determines which pipeline is used.
-// Default is single color.
-type CurRender struct {
-	DescIdx     int        `desc:"descriptor index"`
-	UseTexture  bool       `desc:"a texture was selected -- if true, overrides other options"`
-	UseVtxColor bool       `desc:"a per-vertex color was selected"`
-	MtxsIdx     int        `desc:"index of currently selected matrix (dynamically bound)"`
-	ColorIdx    int        `desc:"index of currently-selected color (dynamically bound)"`
-	TexIdx      int        `desc:"index of currently-selected texture"`
-	ViewMtx     mat32.Mat4 `desc:"camera view matrix -- for light updating"`
-}
 
 // Phong implements standard Blinn-Phong rendering pipelines in a vgpu System.
 // Must Add all Lights, Meshes, Colors, Textures first, and call
@@ -51,23 +37,11 @@ type Phong struct {
 	Spot    [MaxLights]SpotLight    `desc:"spot lights"`
 
 	Cur      CurRender                    `desc:"state for current rendering"`
-	Mtxs     ordmap.Map[string, *Mtxs]    `desc:"model-view-projection matrixes per object"`
-	Meshes   ordmap.Map[string, *Mesh]    `desc:"meshes"`
-	Colors   ordmap.Map[string, *Color]   `desc:"colors"`
-	Textures ordmap.Map[string, *Texture] `desc:"textures"`
+	Meshes   ordmap.Map[string, *Mesh]    `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`
+	Textures ordmap.Map[string, *Texture] `desc:"textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"`
+	Colors   ordmap.Map[string, *Colors]  `desc:"colors, optionally available for looking up by name -- not used directly in rendering"`
 
-	Sys  vgpu.System   `desc:"rendering system"`
-	Surf *vgpu.Surface `desc:"surface if render target"`
-}
-
-// ConfigSurface configures the Phong to use given surface as a render target
-// maxColors is maximum number of fill colors in palette
-func (ph *Phong) ConfigSurface(sf *vgpu.Surface) {
-	ph.Surf = sf
-	ph.Sys.InitGraphics(sf.GPU, "vphong.Phong", &sf.Device)
-	ph.Sys.ConfigRender(&ph.Surf.Format, vgpu.UndefType)
-	sf.SetRender(&ph.Sys.Render)
-	ph.ConfigSys()
+	Sys vgpu.System `desc:"rendering system"`
 }
 
 func (ph *Phong) Destroy() {
@@ -81,8 +55,6 @@ func (ph *Phong) Config() {
 
 	ph.ConfigMeshes()
 	ph.ConfigLights()
-	ph.ConfigMtxs()
-	ph.ConfigColors()
 	ph.ConfigTextures()
 	ph.Sys.Mem.SyncToGPU()
 }
@@ -91,8 +63,6 @@ func (ph *Phong) Config() {
 // Mesh, Color, Texture
 func (ph *Phong) Alloc() {
 	ph.AllocMeshes()
-	ph.AllocMtxs()
-	ph.AllocColors()
 	ph.AllocTextures()
 }
 

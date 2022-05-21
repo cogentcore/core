@@ -14,17 +14,15 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[MtxsSet-0]
-	_ = x[ColorSet-1]
-	_ = x[ViewMtxSet-2]
-	_ = x[NLightSet-3]
-	_ = x[LightSet-4]
-	_ = x[TexSet-5]
-	_ = x[SetsN-6]
+	_ = x[NLightSet-1]
+	_ = x[LightSet-2]
+	_ = x[TexSet-3]
+	_ = x[SetsN-4]
 }
 
-const _Sets_name = "MtxsSetColorSetViewMtxSetNLightSetLightSetTexSetSetsN"
+const _Sets_name = "MtxsSetNLightSetLightSetTexSetSetsN"
 
-var _Sets_index = [...]uint8{0, 7, 15, 25, 34, 42, 48, 53}
+var _Sets_index = [...]uint8{0, 7, 16, 24, 30, 35}
 
 func (i Sets) String() string {
 	if i < 0 || i >= Sets(len(_Sets_index)-1) {

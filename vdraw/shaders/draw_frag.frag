@@ -1,10 +1,11 @@
 #version 450
 #extension GL_EXT_nonuniform_qualifier : require
 
-// note: must use mat4 -- mat3 alignment issues are horrible
-// this takes 128 bytes, so we need to pack the tex index
-// into [0][3] of mvp (only using 3x3 anyway)
-layout(push_constant) uniform Mats {
+// must use mat4 -- mat3 alignment issues are horrible.
+// each mat4 = 64 bytes, so full 128 byte total, but only using mat3.
+// pack the tex index into [0][3] of mvp,
+// and the fill color into [3][0-3] of uvp
+layout(push_constant) uniform Mtxs {
 	mat4 mvp;
 	mat4 uvp;
 };

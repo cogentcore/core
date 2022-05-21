@@ -1,9 +1,17 @@
 #version 450
 
+// must be <= 128 bytes -- contains all per-object data
+layout(push_constant) uniform PushU {
+	mat4 ModelMtx; // 64 bytes
+	vec4 Color; // 16
+	vec4 ShinyBright; // 16 x = Shiny, y = Reflect, z = Bright, w = TexIdx
+	vec3 Emissive; // 16 w pad
+	vec4 TexRepeatOff; // 16 xy = Repeat, zw = Offset
+};
+
 layout(set = 0, binding = 0) uniform MtxsU {
-    mat4 MVMtx;
-    mat4 MVPMtx;
-    mat4 NormMtx;
+    mat4 ViewMtx;
+    mat4 PrjnMtx;
 };
 
 layout(location = 0) in vec3 VtxPos;
@@ -19,10 +27,12 @@ layout(location = 3) out vec2 TexCoord;
 void main() {
 	vec4 vPos = vec4(VtxPos, 1.0);
 	vec4 vNorm = vec4(VtxNorm, 1.0);
+	mat4 MVMtx = ViewMtx * ModelMtx;
 	Pos = MVMtx * vPos;
-	Norm = normalize((NormMtx * vNorm).xyz);
+	mat3 NormMtx = transpose(inverse(mat3(MVMtx)));
+	Norm = normalize(NormMtx * VtxNorm).xyz;
 	CamDir = normalize(-Pos.xyz);
 	TexCoord = VtxTex;
-	gl_Position = MVPMtx * vPos;
+	gl_Position = PrjnMtx * MVMtx * vPos;
 }
 

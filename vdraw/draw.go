@@ -165,9 +165,9 @@ func (dw *Drawer) Draw(idx int, src2dst mat32.Mat3, sr image.Rectangle, op draw.
 		sr = tx.Texture.Format.Bounds()
 	}
 
-	tmat := dw.ConfigMats(src2dst, tx.Texture.Format.Size, sr, op, false)
+	tmat := dw.ConfigMtxs(src2dst, tx.Texture.Format.Size, sr, op, false)
 	tmat.MVP[3] = float32(idx) // pack it!
-	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mats")
+	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mtxs")
 	dpl := dw.Sys.PipelineMap["draw"]
 
 	cmd := dw.Sys.CmdPool.Buff

@@ -24,7 +24,7 @@ import (
 // prior to using in a render (although this comes at a performance cost).
 type Var struct {
 	Name        string                 `desc:"variable name"`
-	Type        Types                  `desc:"type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  Images are allocated by default in , "`
+	Type        Types                  `desc:"type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  Texture Images do not have such alignment constraints, and can be allocated in a big host buffer or in separate buffers depending on how frequently they are updated with different sizes."`
 	ArrayN      int                    `desc:"number of elements if this is a fixed array -- use 1 if singular element, and 0 if a variable-sized array, where each Val can have its own specific size."`
 	Role        VarRoles               `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet.  For TextureRole items, the last such Var in a set will automatically be flagged as variable sized, so the shader can specify: #extension GL_EXT_nonuniform_qualifier : require and the list of textures can be specified as a [] array."`
 	Shaders     vk.ShaderStageFlagBits `desc:"bit flags for set of shaders that this variable is used in"`

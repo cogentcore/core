@@ -116,11 +116,17 @@ However it does not find the `libvulkan` which is not included in molten-vk.
 
 # Platform properties
 
+See MACOS.md file for full report of properties on Mac.
+
 These are useful for deciding what kinds of limits are likely to work in practice:
 
-* 96 texture images is a common lower limit: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxDescriptorSetSampledImages&platform=all
+* 4 max bound descriptor sets: keep below this in general. https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxBoundDescriptorSets&platform=all
 
-* 8 dynamic uniform descriptors: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxDescriptorSetUniformBuffersDynamic&platform=all
+* maxPerStageDescriptorSamplers is only 16 on mac -- this is the relevant limit on textures!  also SampledImages is basically the same:
+https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSamplers&platform=all
+https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSampledImages&platform=all
+
+* 8 dynamic uniform descriptors (mac has 155) https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxDescriptorSetUniformBuffersDynamic&platform=all
 
 * 128 push constant bytes actually quite prevalent: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxPushConstantsSize&platform=all
 

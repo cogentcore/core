@@ -11,8 +11,6 @@ type Sets int
 
 const (
 	MtxsSet Sets = iota
-	ColorSet
-	ViewMtxSet
 	NLightSet
 	LightSet
 	TexSet

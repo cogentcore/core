@@ -74,7 +74,7 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	drw := &vdraw.Drawer{}
-	drw.ConfigSurface(sf, 10, 10) // 10 = max number of images, colors to choose for rendering
+	drw.ConfigSurface(sf, 10) // 10 = max number of images, 16 max
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
@@ -104,22 +104,19 @@ func main() {
 
 	_ = rendImgs
 
-	pal := vdraw.Palette{}
-	pal.Add("white", color.White)
-	pal.Add("black", color.Black)
-	pal.Add("red", color.RGBA{255, 0, 0, 255})
-	pal.Add("green", color.RGBA{0, 255, 0, 255})
-	pal.Add("blue", color.RGBA{0, 0, 255, 255})
+	red := color.RGBA{255, 0, 0, 255}
+	green := color.RGBA{0, 255, 0, 255}
+	blue := color.RGBA{0, 0, 255, 255}
 
-	drw.SetPalette(pal)
+	colors := []color.Color{color.White, color.Black, red, green, blue}
 
 	fillRnd := func() {
-		nclr := len(pal)
+		nclr := len(colors)
 		drw.StartFill()
 		for i := 0; i < 5; i++ {
 			sp := image.Point{rand.Intn(500), rand.Intn(500)}
 			sz := image.Point{rand.Intn(500), rand.Intn(500)}
-			drw.FillRect(i%nclr, image.Rectangle{Min: sp, Max: sp.Add(sz)}, draw.Src)
+			drw.FillRect(colors[i%nclr], image.Rectangle{Min: sp, Max: sp.Add(sz)}, draw.Src)
 		}
 		drw.EndFill()
 	}

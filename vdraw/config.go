@@ -18,8 +18,8 @@ import (
 //go:embed shaders/*.spv
 var content embed.FS
 
-// Mats are the projection matricies
-type Mats struct {
+// Mtxs are the projection matricies
+type Mtxs struct {
 	MVP mat32.Mat4
 	UVP mat32.Mat4
 }
@@ -27,7 +27,6 @@ type Mats struct {
 // DrawerImpl contains implementation state -- ignore..
 type DrawerImpl struct {
 	SurfIdx   uint32 `desc:"surface index for current render process"`
-	MaxColors int    `desc:"maximum number of fill colors per pass -- set by user at config"`
 	MaxImages int    `desc:"maximum number of images per pass -- set by user at config"`
 	FlipY     bool   `desc:"whether to render image with flipped Y"`
 }
@@ -70,7 +69,6 @@ func (dw *Drawer) ConfigSys() {
 	vset := vars.AddVertexSet()
 	pcset := vars.AddPushSet()
 	txset := vars.AddSet() // 0
-	cset := vars.AddSet()  // 1
 
 	nPts := 4
 	nIdxs := 6
@@ -78,17 +76,14 @@ func (dw *Drawer) ConfigSys() {
 	posv := vset.Add("Pos", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	idxv := vset.Add("Index", vgpu.Uint16, nIdxs, vgpu.Index, vgpu.VertexShader)
 
-	pcset.AddStruct("Mats", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
+	pcset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
 	// note: packing texidx into mvp[0][3] to fit within 128 byte limit
 
 	tximgv := txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 	tximgv.TextureOwns = true
 
-	cset.Add("Color", vgpu.Float32Vec4, 1, vgpu.Uniform, vgpu.FragmentShader)
-
 	vset.ConfigVals(1)
 	txset.ConfigVals(dw.Impl.MaxImages)
-	cset.ConfigVals(dw.Impl.MaxColors)
 
 	// note: add all values per above before doing Config
 	dw.Sys.Config()
@@ -113,15 +108,15 @@ func (dw *Drawer) ConfigSys() {
 	vars.BindVertexValIdx("Index", 0)
 }
 
-// ConfigMats configures the draw matrix for given draw parameters:
+// ConfigMtxs configures the draw matrix for given draw parameters:
 // src2dst is the transform mapping source to destination
 // coordinates (translation, scaling), txsz is the size of the texture to draw,
 // sr is the source region (set to tex.Format.Bounds() for all)
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY inverts the Y axis of the source image.
-func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) *Mats {
-	var tmat Mats
+func (dw *Drawer) ConfigMtxs(src2dst mat32.Mat3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) *Mtxs {
+	var tmat Mtxs
 
 	sr = sr.Intersect(image.Rectangle{Max: txsz})
 	if sr.Empty() {
@@ -206,7 +201,7 @@ func (dw *Drawer) ConfigMats(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 	// }
 
 	// vars := dw.Sys.Vars()
-	// _, mat, _ := vars.ValByIdxTry(0, "Mats", 0)
+	// _, mat, _ := vars.ValByIdxTry(0, "Mtxs", 0)
 	// mat.CopyBytes(unsafe.Pointer(&tmat))
 	// dw.Sys.Mem.SyncToGPU()
 

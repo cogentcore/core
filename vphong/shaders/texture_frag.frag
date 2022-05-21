@@ -1,24 +1,21 @@
 #version 450
 #extension GL_EXT_nonuniform_qualifier : require
 
-layout(set = 1, binding = 0) uniform ColorU {
-	vec4 Color;
-	vec3 Emissive;
-	vec3 Specular;
-	vec3 ShinyBright; // x = Shiny, y = Bright
+// must be <= 128 bytes -- contains all per-object data
+layout(push_constant) uniform PushU {
+	mat4 ModelMtx; // 64 bytes
+	vec4 Color; // 16
+	vec4 ShinyBright; // 16 x = Shiny, y = Reflect, z = Bright, w = TexIdx
+	vec3 Emissive; // 16 w pad
+	vec4 TexRepeatOff; // 16 xy = Repeat, zw = Offset
 };
 
-layout(set = 2, binding = 0) uniform ViewMtxU {
+layout(set = 0, binding = 0) uniform MtxsU {
     mat4 ViewMtx;
+    mat4 PrjnMtx;
 };
 
-layout(set = 5, binding = 0) uniform sampler2D TexSampler[];
-
-layout(push_constant) uniform TexIdxU {
-	vec2 TexRepeat;
-	vec2 TexOff;
-	int TexIdx;
-};
+layout(set = 3, binding = 0) uniform sampler2D TexSampler[];
 
 layout(location = 0) in vec4 Pos;
 layout(location = 1) in vec3 Norm;
@@ -30,15 +27,18 @@ layout(location = 0) out vec4 outputColor;
 #include "phong_frag.frag"
 			
 void main() {
-	vec4 TColor = texture(TexSampler[TexIdx], TexCoord * TexRepeat + TexOff);
+	int TexIdx = int(ShinyBright.w);
+	vec4 TColor = texture(TexSampler[TexIdx], TexCoord * TexRepeatOff.xy + TexRepeatOff.zw);
 	float opacity = TColor.a;
 	vec3 clr = TColor.rgb;	
 	
 	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
 	float Shiny = ShinyBright.x;
-	float Bright = ShinyBright.y;
+	float Reflect = ShinyBright.y;
+	float Bright = ShinyBright.z;
+	vec3 Specular = vec3(1,1,1);
 	vec3 Ambdiff, Spec;
-	PhongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
+	PhongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Reflect, Ambdiff, Spec);
 
 	// Final fragment color -- premultiplied alpha
 	outputColor = min(vec4((Bright * Ambdiff + Spec) * opacity, opacity), vec4(1.0));

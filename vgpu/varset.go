@@ -158,7 +158,7 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 				dbfFlags |= vk.DescriptorBindingVariableDescriptorCountBit // can only be for last one
 			}
 			dbf = append(dbf, vk.DescriptorBindingFlags(dbfFlags))
-			flags = vk.DescriptorSetLayoutCreateFlags(vk.DescriptorSetLayoutCreateUpdateAfterBindPoolBit)
+			// flags = vk.DescriptorSetLayoutCreateFlags(vk.DescriptorSetLayoutCreateUpdateAfterBindPoolBit)
 		}
 		binds = append(binds, bd)
 		if vr.Role == Uniform || vr.Role == Storage {

@@ -16,22 +16,36 @@ import (
 //go:embed shaders/*.spv
 var content embed.FS
 
-// Mats contains the projection matricies
-type Mats struct {
-	MVMat   mat32.Mat4 `desc:"Model * View Matrix: transforms into camera-centered, 3D coordinates"`
-	MVPMat  mat32.Mat4 `desc:"Model * View * Projection Matrix: transforms into 2D render coordinates"`
-	NormMat mat32.Mat4 `desc:"Normal Matrix: normal matrix has no offsets, for normal vector rotation only, based on MVMatrix"`
+// CurRender holds info about the current render as updated by
+// Use* methods -- determines which pipeline is used.
+// Default is single color.
+type CurRender struct {
+	DescIdx     int        `desc:"index of descriptor collection to use -- for threaded / parallel rendering -- see vgup.Vars NDescs for more info"`
+	UseTexture  bool       `desc:"a texture was selected -- if true, overrides other options"`
+	UseVtxColor bool       `desc:"a per-vertex color was selected"`
+	ModelMtx    mat32.Mat4 `desc:"current model pose matrix"`
+	VPMtx       Mtxs       `desc:"camera view and projection matrixes"`
+	Color       Colors     `desc:"current color surface properties"`
+	TexIdx      int        `desc:"index of currently-selected texture"`
 }
 
-// Colors are the material colors with padding for direct uploading to shader
-type Colors struct {
-	Color       mat32.Vec3 `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
-	pad0        float32
-	Emissive    mat32.Vec3 `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
-	pad1        float32
-	Specular    mat32.Vec3 `desc:"shiny reflective color of surface -- set to white for shiny objects and to Color for non-shiny objects"`
-	pad2        float32
-	ShinyBright mat32.Vec3 `desc:"X = shininess factor, Y = brightness factor:  shiny = specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Specular color to affect overall shininess effect; bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"`
+// PushU is the push constants structure, holding everything that
+// updates per object -- avoids any limitations on capacity.
+type PushU struct {
+	ModelMtx mat32.Mat4 `desc:"Model Matrix: poses object in world coordinates"`
+	Color    Colors     `desc:"surface colors"`
+	Tex      TexPars    `desc:"texture parameters"`
+}
+
+// NewPush generates a new Push object based on current render settings
+// unsafe.Pointer does not work having this be inside the CurRender obj itself
+// so we create one afresh.
+func (cr *CurRender) NewPush() *PushU {
+	pu := &PushU{}
+	pu.ModelMtx = cr.ModelMtx
+	pu.Color = cr.Color
+	// tex set specifically in tex
+	return pu
 }
 
 // ConfigPipeline configures graphics settings on the pipeline
@@ -44,7 +58,7 @@ func (ph *Phong) ConfigPipeline(pl *vgpu.Pipeline) {
 
 	pl.SetGraphicsDefaults()
 	// if ph.YIsDown {
-	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 	// } else {
 	// 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceClockwise, 1.0)
 	// }
@@ -78,11 +92,9 @@ func (ph *Phong) ConfigSys() {
 	pcset := vars.AddPushSet() // TexPush
 	vset := vars.AddVertexSet()
 	mtxset := vars.AddSet()   // set = 0
-	clrset := vars.AddSet()   // set = 1
-	vmatset := vars.AddSet()  // set = 3
-	nliteset := vars.AddSet() // set = 4
-	liteset := vars.AddSet()  // set = 5
-	txset := vars.AddSet()    // set = 6
+	nliteset := vars.AddSet() // set = 1
+	liteset := vars.AddSet()  // set = 2
+	txset := vars.AddSet()    // set = 3
 
 	vec4sz := vgpu.Float32Vec4.Bytes()
 
@@ -92,12 +104,10 @@ func (ph *Phong) ConfigSys() {
 	vset.Add("Color", vgpu.Float32Vec4, 0, vgpu.Vertex, vgpu.VertexShader)
 	vset.Add("Index", vgpu.Uint32, 0, vgpu.Index, vgpu.VertexShader)
 
-	mtxset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
+	pcset.AddStruct("PushU", int(unsafe.Sizeof(PushU{})), 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
 
-	pcset.AddStruct("TexPush", int(unsafe.Sizeof(TexPush{})), 1, vgpu.Push, vgpu.FragmentShader)
-	clrset.AddStruct("Color", vec4sz*4, 1, vgpu.Uniform, vgpu.FragmentShader)
+	mtxset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Uniform, vgpu.VertexShader, vgpu.FragmentShader)
 
-	vmatset.AddStruct("ViewMtx", vgpu.Float32Mat4.Bytes(), 1, vgpu.Uniform, vgpu.FragmentShader)
 	nliteset.AddStruct("NLights", 4*4, 1, vgpu.Uniform, vgpu.FragmentShader)
 	liteset.AddStruct("AmbLights", vec4sz*1, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
 	liteset.AddStruct("DirLights", vec4sz*2, MaxLights, vgpu.Uniform, vgpu.FragmentShader)
@@ -107,8 +117,17 @@ func (ph *Phong) ConfigSys() {
 	txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
 	// tximgv.TextureOwns = true
 
-	vmatset.ConfigVals(1)
+	pcset.ConfigVals(1)
+	mtxset.ConfigVals(1)
 	nliteset.ConfigVals(1)
 	liteset.ConfigVals(1)
-	pcset.ConfigVals(1)
+}
+
+// Push pushes given push constant data
+func (ph *Phong) Push(pl *vgpu.Pipeline, push *PushU) {
+	sy := &ph.Sys
+	cmd := sy.CmdPool.Buff
+	vars := sy.Vars()
+	pvar, _ := vars.VarByNameTry(int(vgpu.PushSet), "PushU")
+	pl.Push(cmd, pvar, unsafe.Pointer(push))
 }
