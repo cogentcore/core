@@ -9,8 +9,37 @@ import (
 	"log"
 	"unsafe"
 
+	"github.com/goki/ki/ints"
 	vk "github.com/goki/vulkan"
 )
+
+// maxPerStageDescriptorSamplers is only 16 on mac -- this is the relevant limit on textures!
+// also maxPerStageDescriptorSampledImages is basically the same:
+// https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSamplers&platform=all
+// https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSampledImages&platform=all
+
+const (
+	// MaxTexturesPerSet is the maximum number of image variables that can be used
+	// in one descriptor set.  This value is a lowest common denominator across
+	// platforms.  To overcome this limitation, when more Texture vals are allocated,
+	// multiple NDescs are used, setting the and switch
+	// across those -- each such Desc set can hold this many textures.
+	// NValsPer on a Texture var can be set higher and only this many will be
+	// allocated in the descriptor set, with bindings of values wrapping
+	// around across as many such sets as are vals, with a warning if insufficient
+	// numbers are present.
+	MaxTexturesPerSet = 16
+)
+
+// NDescForTextures returns number of descriptors (NDesc) required for
+// given number of texture values.
+func NDescForTextures(nvals int) int {
+	nDescSetsReq := nvals / MaxTexturesPerSet
+	if nvals%MaxTexturesPerSet > 0 {
+		nDescSetsReq++
+	}
+	return nDescSetsReq
+}
 
 const (
 	VertexSet = -2
@@ -22,9 +51,10 @@ const (
 // The first set at index -1 contains Vertex and Index data, handed separately.
 type VarSet struct {
 	VarList
-	Set      int                 `desc:"set number"`
-	NValsPer int                 `desc:"number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible"`
-	RoleMap  map[VarRoles][]*Var `desc:"map of vars by different roles, within this set -- updated in Config(), after all vars added"`
+	Set           int                 `desc:"set number"`
+	NValsPer      int                 `desc:"number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible.  For Texture vars, each of the NDesc sets can have a maximum of MaxTexturesPerSet (16) -- if NValsPer > MaxTexturesPerSet, then vals are wrapped across sets, and accessing them requires using the appropriate DescIdx, as in System.CmdBindTextureVarIdx."`
+	NTextureDescs int                 `desc:"for texture vars, this is the number of descriptor sets required to represent all of the different Texture image Vals that have been allocated.  Use Vars.BindAllTextureVals to bind all such vals, and System.CmdBindTextureVarIdx to automatically bind the correct set."`
+	RoleMap       map[VarRoles][]*Var `desc:"map of vars by different roles, within this set -- updated in Config(), after all vars added"`
 
 	VkLayout   vk.DescriptorSetLayout `desc:"set layout info -- static description of each var type, role, binding, stages"`
 	VkDescSets []vk.DescriptorSet     `desc:"allocated descriptor set -- one of these per Vars.NDescs -- can have multiple sets that can be independently updated, e.g., for parallel rendering passes.  If only rendering one at a time, only need one."`
@@ -142,6 +172,7 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 	var dbf []vk.DescriptorBindingFlags
 	nvar := len(st.Vars)
 	nVarDesc := 0
+	st.NTextureDescs = 1
 	for vi, vr := range st.Vars {
 		bd := vk.DescriptorSetLayoutBinding{
 			Binding:         uint32(vr.BindLoc),
@@ -150,8 +181,15 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 			StageFlags:      vk.ShaderStageFlags(vr.Shaders),
 		}
 		if vr.Role > Storage {
-			bd.DescriptorCount = uint32(st.NValsPer) // max of 16!
-			nVarDesc = st.NValsPer
+			nVarDesc = ints.MinInt(st.NValsPer, MaxTexturesPerSet) // per desc
+
+			if st.NValsPer > MaxTexturesPerSet {
+				st.NTextureDescs = NDescForTextures(st.NValsPer)
+				if st.NTextureDescs > vs.NDescs {
+					fmt.Printf("vgpu.VarSet: Texture %s NValsPer: %d requires NDescs = %d, but it is only: %d -- this probably won't end well, but can't be fixed here\n", vr.Name, st.NValsPer, st.NTextureDescs, vs.NDescs)
+				}
+			}
+			bd.DescriptorCount = uint32(nVarDesc)
 			dbfFlags := vk.DescriptorBindingPartiallyBoundBit
 			//  | vk.DescriptorBindingUpdateAfterBindBit | vk.DescriptorBindingUpdateUnusedWhilePendingBit
 			if vi == nvar-1 {
@@ -342,14 +380,35 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 		wd.DescriptorCount = uint32(nvals)
 	} else {
 		imgs := []vk.DescriptorImageInfo{}
-		for _, vl := range vr.Vals.Vals {
-			if vl.Texture != nil && vl.Texture.IsActive() {
-				di := vk.DescriptorImageInfo{
-					ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
-					ImageView:   vl.Texture.View,
-					Sampler:     vl.Texture.VkSampler,
+		nvals := len(vr.Vals.Vals)
+		if nvals > MaxTexturesPerSet {
+			sti := vs.BindDescIdx * MaxTexturesPerSet
+			if sti > nvals-MaxTexturesPerSet {
+				sti = nvals - MaxTexturesPerSet
+			}
+			mx := sti + MaxTexturesPerSet
+			for vi := sti; vi < mx; vi++ {
+				vl := vr.Vals.Vals[vi]
+				if vl.Texture != nil && vl.Texture.IsActive() {
+					di := vk.DescriptorImageInfo{
+						ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
+						ImageView:   vl.Texture.View,
+						Sampler:     vl.Texture.VkSampler,
+					}
+					imgs = append(imgs, di)
 				}
-				imgs = append(imgs, di)
+			}
+
+		} else {
+			for _, vl := range vr.Vals.Vals {
+				if vl.Texture != nil && vl.Texture.IsActive() {
+					di := vk.DescriptorImageInfo{
+						ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
+						ImageView:   vl.Texture.View,
+						Sampler:     vl.Texture.VkSampler,
+					}
+					imgs = append(imgs, di)
+				}
 			}
 		}
 		wd.PImageInfo = imgs

@@ -103,9 +103,13 @@ func (ph *Phong) RenderTexture() {
 	cmd := sy.CmdPool.Buff
 	pl := sy.PipelineMap["texture"]
 	tex := ph.Textures.ValByIdx(ph.Cur.TexIdx)
+	txIdx, _, _, err := sy.CmdBindTextureVarIdx(cmd, int(TexSet), "Tex", ph.Cur.TexIdx)
+	if err != nil {
+		return
+	}
 	push := ph.Cur.NewPush()
 	push.Tex.Set(tex.Repeat, tex.Off)
-	push.Color.ShinyBright.W = float32(ph.Cur.TexIdx)
+	push.Color.ShinyBright.W = float32(txIdx)
 	ph.Push(pl, push)
 	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
 }

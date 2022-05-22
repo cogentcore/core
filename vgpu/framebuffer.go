@@ -25,8 +25,8 @@ func (fb *Framebuffer) ConfigSurfaceImage(dev vk.Device, fmt ImageFormat, img vk
 	fb.Image.Format.Defaults()
 	fb.Image.Format = fmt
 	fb.Image.Format.SetMultisample(1) // cannot multisample main image
-	fb.Image.SetVkImage(dev, img)     // makes view
 	fb.Image.SetFlag(int(FramebufferImage))
+	fb.Image.SetVkImage(dev, img) // makes view
 }
 
 // ConfigRenderImage configures a new image for a standalone framebuffer

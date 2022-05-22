@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/goki/ki/ints"
 	vk "github.com/goki/vulkan"
 )
 
@@ -134,13 +135,15 @@ func (vr *Var) AllocTextures(mm *Memory) {
 }
 
 // TextureValidIdx returns the index of the given texture value at our
-// index in list of vals, skipping over any inactive textures which
-// do not show up when accessed in the shader.  You must use this
-// value when passing a texture index to the shader!
+// index in list of vals, starting at given index, skipping over any
+// inactive textures which do not show up when accessed in the shader.
+// You must use this value when passing a texture index to the shader!
 // returns -1 if idx is not valid
-func (vr *Var) TextureValidIdx(idx int) int {
+func (vr *Var) TextureValidIdx(stIdx, idx int) int {
 	vidx := 0
-	for i, vl := range vr.Vals.Vals {
+	mx := ints.MinInt(stIdx+MaxTexturesPerSet, len(vr.Vals.Vals))
+	for i := stIdx; i < mx; i++ {
+		vl := vr.Vals.Vals[i]
 		if i == idx {
 			return vidx
 		}

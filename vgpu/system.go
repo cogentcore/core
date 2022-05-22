@@ -6,6 +6,7 @@ package vgpu
 
 import (
 	"fmt"
+	"log"
 
 	vk "github.com/goki/vulkan"
 )
@@ -225,6 +226,35 @@ func (sy *System) CmdBindVars(cmd vk.CommandBuffer, descIdx int) {
 			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
 	}
 
+}
+
+// CmdBindTextureVarIdx returns the txIdx needed to select the given Texture value
+// at valIdx in given variable in given set index, for use in a shader (i.e., pass
+// txIdx as a push constant to the shader to select this texture).  If there are
+// more than MaxTexturesPerSet textures, then it may need to select a different
+// descIdx where that val has been allocated -- the descIdx is returned, and
+// switched is true if it had to issue a CmdBindVars to given command buffer
+// to bind to that desc set, updating BindDescIdx.  Typically other vars are
+// bound to the same vals across sets, so this should not affect them, but
+// that is not necessarily the case, so other steps might need to be taken.
+// If the texture is not valid, a -1 is returned for txIdx, and an error is logged.
+func (sy *System) CmdBindTextureVarIdx(cmd vk.CommandBuffer, setIdx int, varNm string, valIdx int) (txIdx, descIdx int, switched bool, err error) {
+	vars := sy.Vars()
+	txv, _, _ := vars.ValByIdxTry(setIdx, varNm, valIdx)
+
+	descIdx = valIdx / MaxTexturesPerSet
+	if descIdx != vars.BindDescIdx {
+		vars.BindDescIdx = descIdx
+		sy.CmdBindVars(cmd, descIdx)
+		switched = true
+	}
+	stIdx := descIdx * MaxTexturesPerSet
+	txIdx = txv.TextureValidIdx(stIdx, valIdx)
+	if txIdx < 0 {
+		err = fmt.Errorf("vgpu.CmdBindTextureVarIdx: Texture var %s image val at index %d (starting at idx: %d) is not valid", varNm, valIdx, stIdx)
+		log.Println(err) // this is always bad
+	}
+	return
 }
 
 // CmdResetBindVars adds command to the given command buffer

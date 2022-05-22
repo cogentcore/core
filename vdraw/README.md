@@ -8,7 +8,7 @@ The GoGi GUI, and probably other 2D-based GUI frameworks, uses a strategy of ren
 
 This package supports these rectangular image region composition operations, via a simple render pipeline that just renders a rectangular shape with a texture.  There is also a simple fill pipeline that renders a single color into a rectangle.
 
-The max number of images that can be pre-loaded and used per render pass is only 16 -- see MaxImages.
+The max number of images that can be pre-loaded and used per set, per render pass is only 16 -- see MaxImages.  Therefore, we use 4 sets of 16.  The last set is configured for 3D images with 128 layers to be used as sprites.
 
 The fill color is uploaded as a push constant and thus is not subject to any limitations.
 

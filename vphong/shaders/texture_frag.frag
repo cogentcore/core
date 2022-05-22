@@ -15,7 +15,7 @@ layout(set = 0, binding = 0) uniform MtxsU {
     mat4 PrjnMtx;
 };
 
-layout(set = 3, binding = 0) uniform sampler2D TexSampler[];
+layout(set = 3, binding = 0) uniform sampler2DArray TexSampler[];
 
 layout(location = 0) in vec4 Pos;
 layout(location = 1) in vec3 Norm;
@@ -28,7 +28,7 @@ layout(location = 0) out vec4 outputColor;
 			
 void main() {
 	int TexIdx = int(ShinyBright.w);
-	vec4 TColor = texture(TexSampler[TexIdx], TexCoord * TexRepeatOff.xy + TexRepeatOff.zw);
+	vec4 TColor = texture(TexSampler[TexIdx], vec3(TexCoord * TexRepeatOff.xy + TexRepeatOff.zw, 0));
 	float opacity = TColor.a;
 	vec3 clr = TColor.rgb;	
 	

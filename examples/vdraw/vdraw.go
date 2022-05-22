@@ -75,7 +75,7 @@ func main() {
 
 	drw := &vdraw.Drawer{}
 	drw.YIsDown = true
-	drw.ConfigSurface(sf, 10) // 10 = max number of images, 16 max
+	drw.ConfigSurface(sf, 32) // requires 2 NDesc
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)
@@ -88,19 +88,22 @@ func main() {
 
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
 	imgs := make([]image.Image, len(imgFiles))
+
+	stoff := 15 // causes images to wrap around
+
 	for i, fnm := range imgFiles {
 		imgs[i] = OpenImage(fnm)
-		drw.SetGoImage(i+5, imgs[i], vgpu.NoFlipY)
+		drw.SetGoImage(i+stoff, imgs[i], vgpu.NoFlipY)
 	}
 	drw.SyncImages()
 
 	rendImgs := func(idx int) {
 		drw.StartDraw()
-		drw.Scale(idx+5, sf.Format.Bounds(), image.ZR, draw.Src)
+		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, draw.Src)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}
-			drw.Copy(i+5, dp, image.ZR, draw.Src)
+			drw.Copy(i+stoff, 0, dp, image.ZR, draw.Src)
 		}
 		drw.EndDraw()
 	}

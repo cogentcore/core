@@ -353,6 +353,10 @@ func (im *Image) ConfigMulti(dev vk.Device, imgFmt *ImageFormat) {
 func (im *Image) ConfigStdView() {
 	im.DestroyView()
 	var view vk.ImageView
+	viewtyp := vk.ImageViewType2d
+	if !im.HasFlag(DepthImage) && !im.HasFlag(FramebufferImage) {
+		viewtyp = vk.ImageViewType2dArray
+	}
 	ret := vk.CreateImageView(im.Dev, &vk.ImageViewCreateInfo{
 		SType:  vk.StructureTypeImageViewCreateInfo,
 		Format: im.Format.Format,
@@ -367,7 +371,7 @@ func (im *Image) ConfigStdView() {
 			LevelCount: 1,
 			LayerCount: 1,
 		},
-		ViewType: vk.ImageViewType2d,
+		ViewType: viewtyp,
 		Image:    im.Image,
 	}, nil, &view)
 	IfPanic(NewError(ret))
@@ -481,6 +485,8 @@ func (im *Image) SetSize(size image.Point) bool {
 func (im *Image) AllocImage() {
 	im.FreeImage()
 	var usage vk.ImageUsageFlagBits
+	// var imgFlags vk.ImageCreateFlags
+	imgType := vk.ImageType2d
 	switch {
 	case im.HasFlag(DepthImage):
 		usage |= vk.ImageUsageDepthStencilAttachmentBit
@@ -490,6 +496,7 @@ func (im *Image) AllocImage() {
 	default:
 		usage |= vk.ImageUsageSampledBit // default is sampled texture
 		usage |= vk.ImageUsageTransferDstBit
+		// imgType = vk.ImageType3d
 	}
 	if im.IsHostActive() && !im.HasFlag(FramebufferImage) {
 		usage |= vk.ImageUsageTransferDstBit
@@ -501,8 +508,9 @@ func (im *Image) AllocImage() {
 	var image vk.Image
 	w, h := im.Format.Size32()
 	imgcfg := &vk.ImageCreateInfo{
-		SType:     vk.StructureTypeImageCreateInfo,
-		ImageType: vk.ImageType2d,
+		SType: vk.StructureTypeImageCreateInfo,
+		// Flags:     imgFlags,
+		ImageType: imgType,
 		Format:    im.Format.Format,
 		Extent: vk.Extent3D{
 			Width:  w,

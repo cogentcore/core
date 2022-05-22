@@ -42,12 +42,38 @@ The [vPhong](https://github.com/goki/vgpu/tree/main/vphong) package provides a c
     + `PushConst` are push constants that can only be 128 bytes total that can be directly copied from CPU ram to the GPU via a command -- it is the most high-performance way to update dynamically changing content, such as view matricies or indexes into other data structures.  Must be located in `PushConstSet` set (index -1).
     + `Uniform` (read-only "constants") and `Storage` (read-write) data that contain misc other data, e.g., transformation matricies.  These are also updated *dynamically* using dynamic offsets, so you can also call `BindDynVal` methods to select different such vals as you iterate through objects.  The original binding is done automatically in the Memory Config (via BindDynVarsAll) and usually does not need to be redone.
     + `Texture` vars that provide the raw `Image` data, the `ImageView` through which that is accessed, and a `Sampler` that parameterizes how the pixels are mapped onto coordinates in the Fragment shader.  Each texture object is managed as a distinct item in device memory, and they cannot be accessed through a dynamic offset.  Thus, a unique descriptor is provided for each texture Val, and your shader should describe them as an array.  All such textures must be in place at the start of the render pass, and cannot be updated on the fly during rendering!  Thus, you must dynamically bind a uniform variable or push constant to select which texture item from the array to use on a given step of rendering.
+        + There is a low maximum number of Texture descriptors (vals) available within one descriptor set on many platforms, including the Mac, only 16, which is enforced via the `MaxTexturesPerSet` const.  If you need more than this many textures (by allocating more than 16 texture Vals), then multiple entire collections of these descriptors will be allocated, as indicated by the `NTextureDescs` on `VarSet` and `Vars` (see that for more info, and the `vdraw` `Draw` method for an example).  You can use `Vars.BindAllTextureVals` to bind all texture vals (iterating over NTextureDescs), and `System.CmdBindTextureVarIdx` to automatically bind the correct set.
+        + Each individual Texture is automatically presented through a 2d Array view (in addition to all the separate texture vals being in an Array -- arrays of arrays), so you need to access through `sampler2DArray` in `glsl` shader code, e.g., here's the `vdraw` `draw_frag.frag` fragment shader code:
+        
+```
+#version 450
+#extension GL_EXT_nonuniform_qualifier : require
+
+// must use mat4 -- mat3 alignment issues are horrible.
+// each mat4 = 64 bytes, so full 128 byte total, but only using mat3.
+// pack the tex index into [0][3] of mvp,
+// and the fill color into [3][0-3] of uvp
+layout(push_constant) uniform Mtxs {
+	mat4 mvp;
+	mat4 uvp;
+};
+
+layout(set = 0, binding = 0) uniform sampler2DArray Tex[]; //
+layout(location = 0) in vec2 uv;
+layout(location = 0) out vec4 outputColor;
+
+void main() {
+	int idx = int(mvp[3][0]);   // packing into unused part of mat4 matrix push constant
+	int layer = int(mvp[3][1]);
+	outputColor = texture(Tex[idx], vec3(uv,layer)); // layer selection as 3rd dim here
+}
+```
     
 * `Var`s are accessed at a given `location` or `binding` number by the shader code, and these bindings can be organized into logical sets called DescriptorSets (see Graphics Rendering example below).  In [HLSL](https://www.lei.chat/posts/hlsl-for-vulkan-resources/), these are specified like this: `[[vk::binding(5, 1)]] Texture2D MyTexture2;` for descriptor 5 in set 1 (set 0 is the first set).
     + You manage these sets explicitly by calling `AddSet` or `AddVertexSet` / `AddPushConstSet` to create new `VarSet`s, and then add `Var`s directly to each set.
     + `Vals` represent the values of Vars, with each `Val` representing a distinct value of a corresponding `Var`. The `ConfigVals` call on a given `VarSet` specifies how many Vals to create per each Var within a Set -- this is a shared property of the Set, and should be a consideration in organizing the sets.  For example, Sets that are per object should contain one Val per object, etc, while others that are per material would have one Val per material.
     + There is no support for interleaved arrays -- if you want to achieve such a thing, you need to use an array of structs, but the main use-case is for VertexInput, which actually works faster with non-interleaved simple arrays of vec4 points in most cases (e.g., for the points and their normals).
-    + You can allocate multiple bindings of all the variables, with each binding being used for a different parallel threaded rendering pass.  However, there is only one shared set of Vals, so your logic will have to take that into account (e.g., allocating 2x Vals per object to allow 2 separate threads to each update and bind their own unique subset of these Vals for their own render pass).  The number of such DescriptorSets is configured in `Memory.Vars.NDescs` (defaults to 1). Note that these are orthogonal to the number of `VarSet`s -- the terminology is confusing.  Various methods take a `descIdx` to determine which such descriptor set to use -- typically in a threaded swapchain logic you would use the acquired frame index as the descIdx to determine what binding to use.
+    + You can allocate multiple bindings of all the variables, with each binding being used for a different parallel threaded rendering pass.  However, there is only one shared set of Vals, so your logic will have to take that into account (e.g., allocating 2x Vals per object to allow 2 separate threads to each update and bind their own unique subset of these Vals for their own render pass).  See discussion under `Texture` about how this is done in that case.  The number of such DescriptorSets is configured in `Memory.Vars.NDescs` (defaults to 1). Note that these are orthogonal to the number of `VarSet`s -- the terminology is confusing.  Various methods take a `descIdx` to determine which such descriptor set to use -- typically in a threaded swapchain logic you would use the acquired frame index as the descIdx to determine what binding to use.
 
 ## Naming conventions
 

@@ -5,7 +5,6 @@
 package vdraw
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 	"log"
@@ -107,36 +106,34 @@ func (dw *Drawer) SyncImages() {
 	sy.Mem.SyncToGPU()
 	vars := sy.Vars()
 	vk.DeviceWaitIdle(sy.Device.Device)
-	vars.BindVarsStart(0)
-	vars.BindStatVars(0) // binds images
-	vars.BindVarsEnd()
+	vars.BindAllTextureVars(0) // set = 0, iterates over multiple desc sets
 }
 
 /////////////////////////////////////////////////////////////////////
 // Drawing
 
-// Copy copies texture at given index to render target.
+// Copy copies texture at given index and layer to render target.
 // dp is the destination point,
 // sr is the source region (set to image.ZR zero rect for all),
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Copy(idx int, dp image.Point, sr image.Rectangle, op draw.Op) error {
+func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op) error {
 	mat := mat32.Mat3{
 		1, 0, 0,
 		0, 1, 0,
 		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y), 1,
 	}
-	return dw.Draw(idx, mat, sr, op)
+	return dw.Draw(idx, layer, mat, sr, op)
 }
 
-// Scale copies texture at given index to render target,
+// Scale copies texture at given index and layer to render target,
 // scaling the region defined by src and sr to the destination
 // such that sr in src-space is mapped to dr in dst-space.
 // dr is the destination rectangle
 // sr is the source region (set to image.ZR zero rect for all),
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Scale(idx int, dr image.Rectangle, sr image.Rectangle, op draw.Op) error {
+func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op) error {
 	if sr == image.ZR {
 		_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
 		sr = tx.Texture.Format.Bounds()
@@ -149,38 +146,36 @@ func (dw *Drawer) Scale(idx int, dr image.Rectangle, sr image.Rectangle, op draw
 		float32(dr.Min.X) - rx*float32(sr.Min.X),
 		float32(dr.Min.Y) - ry*float32(sr.Min.Y), 1,
 	}
-	return dw.Draw(idx, mat, sr, op)
+	return dw.Draw(idx, layer, mat, sr, op)
 }
 
-// Draw draws texture at index to render target.
+// Draw draws texture at index and layer to render target.
 // Must have called StartDraw first.
 // src2dst is the transform mapping source to destination
 // coordinates (translation, scaling),
 // sr is the source region (set to image.ZR for all)
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Draw(idx int, src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
-	vars := dw.Sys.Vars()
-	txv, tx, _ := vars.ValByIdxTry(0, "Tex", idx)
+func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
+	sy := &dw.Sys
+	dpl := sy.PipelineMap["draw"]
+	vars := sy.Vars()
+	cmd := sy.CmdPool.Buff
 
+	txIdx, _, _, err := sy.CmdBindTextureVarIdx(cmd, 0, "Tex", idx)
+	if err != nil {
+		return err
+	}
+	_, tx, _ := vars.ValByIdxTry(0, "Tex", idx)
 	if sr == image.ZR {
 		sr = tx.Texture.Format.Bounds()
 	}
 
 	tmat := dw.ConfigMtxs(src2dst, tx.Texture.Format.Size, sr, op, false)
 	// fmt.Printf("idx: %d sr: %v  sz: %v  omat: %v  tmat: %v \n", idx, sr, tx.Texture.Format.Size, src2dst, tmat)
-	// key: index for vulkan only includes *valid* indexes!
-	vidx := txv.TextureValidIdx(idx)
-	if vidx < 0 {
-		err := fmt.Errorf("vdraw.Drawer: Texture image at index %d is not valid", idx)
-		log.Println(err) // this is always bad
-		return err
-	}
-	tmat.MVP[3] = float32(vidx) // pack it!
+	tmat.MVP[3*4] = float32(txIdx) // pack in unused 4th column
+	tmat.MVP[3*4+1] = float32(layer)
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mtxs")
-	dpl := dw.Sys.PipelineMap["draw"]
-
-	cmd := dw.Sys.CmdPool.Buff
 	dpl.Push(cmd, matv, unsafe.Pointer(tmat))
 	dpl.DrawVertex(cmd, 0)
 	return nil

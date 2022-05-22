@@ -457,6 +457,29 @@ func (vs *Vars) BindStatVarName(set int, varNm string) error {
 	return st.BindStatVarName(vs, varNm)
 }
 
+// BindAllTextureVars binds all Texture vars in given set to their current values,
+// iterating over NTextureDescs in case there are multiple Desc sets
+// required to represent more than MaxTexturesPerSet.
+// Each Val for a given Var is given a descriptor binding
+// and the shader sees an array of values of corresponding length.
+// All vals must be uploaded to Device memory prior to this,
+// and it is not possible to update anything during a render pass.
+// This calls BindStart / Bind
+func (vs *Vars) BindAllTextureVars(set int) error {
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return err
+	}
+	cbi := vs.BindDescIdx
+	for i := 0; i < st.NTextureDescs; i++ {
+		vs.BindVarsStart(i)
+		st.BindStatVars(vs)
+		vs.BindVarsEnd()
+	}
+	vs.BindDescIdx = cbi
+	return nil
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Dynamic Binding
 

@@ -26,9 +26,9 @@ type Mtxs struct {
 
 // DrawerImpl contains implementation state -- ignore..
 type DrawerImpl struct {
-	SurfIdx   uint32 `desc:"surface index for current render process"`
-	MaxImages int    `desc:"maximum number of images per pass -- set by user at config"`
-	FlipY     bool   `desc:"whether to render image with flipped Y"`
+	SurfIdx     uint32 `desc:"surface index for current render process"`
+	MaxTextures int    `desc:"maximum number of images per pass -- set by user at config"`
+	FlipY       bool   `desc:"whether to render image with flipped Y"`
 }
 
 // ConfigPipeline configures graphics settings on the pipeline
@@ -66,6 +66,7 @@ func (dw *Drawer) ConfigSys() {
 	fpl.AddShaderCode("fill_frag", vgpu.FragmentShader, cb)
 
 	vars := dw.Sys.Vars()
+	vars.NDescs = vgpu.NDescForTextures(dw.Impl.MaxTextures)
 	vset := vars.AddVertexSet()
 	pcset := vars.AddPushSet()
 	txset := vars.AddSet() // 0
@@ -83,7 +84,7 @@ func (dw *Drawer) ConfigSys() {
 	tximgv.TextureOwns = true
 
 	vset.ConfigVals(1)
-	txset.ConfigVals(dw.Impl.MaxImages)
+	txset.ConfigVals(dw.Impl.MaxTextures)
 
 	// note: add all values per above before doing Config
 	dw.Sys.Config()
