@@ -21,20 +21,33 @@ import (
 )
 
 // ImageFormat describes the size and vulkan format of an Image
+// If Layers > 1, all must be the same size.
 type ImageFormat struct {
 	Size    image.Point            `desc:"Size of image"`
 	Format  vk.Format              `desc:"Image format -- FormatR8g8b8a8Srgb is a standard default"`
 	Samples vk.SampleCountFlagBits `desc:"number of samples -- set higher for Framebuffer rendering but otherwise default of SampleCount1Bit"`
+	Layers  int                    `desc:"number of layers for texture arrays"`
+}
+
+// NewImageFormat returns a new ImageFormat with default format and given size
+// and number of layers
+func NewImageFormat(width, height, layers int) *ImageFormat {
+	im := &ImageFormat{}
+	im.Defaults()
+	im.Size = image.Point{width, height}
+	im.Layers = layers
+	return im
 }
 
 func (im *ImageFormat) Defaults() {
 	im.Format = vk.FormatR8g8b8a8Srgb
 	im.Samples = vk.SampleCount1Bit
+	im.Layers = 1
 }
 
 // String returns human-readable version of format
 func (im *ImageFormat) String() string {
-	return fmt.Sprintf("Size: %v  Format: %s  MultiSample: %d", im.Size, ImageFormatNames[im.Format], im.Samples)
+	return fmt.Sprintf("Size: %v  Format: %s  MultiSample: %d  Layers: %d", im.Size, ImageFormatNames[im.Format], im.Samples, im.Layers)
 }
 
 // IsStdRGBA returns true if image format is the standard vk.FormatR8g8b8a8Srgb format
@@ -112,11 +125,18 @@ func (im *ImageFormat) BytesPerPixel() int {
 	return 0
 }
 
-// ByteSize returns number of bytes required to represent
+// LayerByteSize returns number of bytes required to represent one layer of
 // image in Host memory.  TODO only works
 // for known formats -- need to add more as needed.
-func (im *ImageFormat) ByteSize() int {
+func (im *ImageFormat) LayerByteSize() int {
 	return im.BytesPerPixel() * im.Size.X * im.Size.Y
+}
+
+// TotalByteSize returns total number of bytes required to represent all layers of
+// images in Host memory.  TODO only works
+// for known formats -- need to add more as needed.
+func (im *ImageFormat) TotalByteSize() int {
+	return im.LayerByteSize() * im.Layers
 }
 
 // Stride returns number of bytes per image row.  TODO only works
@@ -185,10 +205,18 @@ func (im *Image) IsVal() bool {
 	return im.HasFlag(ImageIsVal)
 }
 
+// HostPixels returns host staging pixels at given layer
+func (im *Image) HostPixels(layer int) []byte {
+	lsz := im.Format.LayerByteSize()
+	lstart := lsz * layer
+	return im.Host.Pixels()[lstart : lstart+lsz]
+}
+
 // GoImage returns an *image.RGBA standard Go image, of the Host
-// memory representation.  Only works if IsHostActive and Format
-// is default vk.FormatR8g8b8a8Srgb (strongly recommended in any case)
-func (im *Image) GoImage() (*image.RGBA, error) {
+// memory representation at given layer.
+// Only works if IsHostActive and Format is default vk.FormatR8g8b8a8Srgb
+// (strongly recommended in any case)
+func (im *Image) GoImage(layer int) (*image.RGBA, error) {
 	if !im.IsHostActive() {
 		return nil, fmt.Errorf("vgpu.Image: Go image not available because Host not active: %s", im.Name)
 	}
@@ -196,7 +224,7 @@ func (im *Image) GoImage() (*image.RGBA, error) {
 		return nil, fmt.Errorf("vgpu.Image: Go image not standard RGBA format: %s", im.Name)
 	}
 	rgba := &image.RGBA{}
-	rgba.Pix = im.Host.Pixels()
+	rgba.Pix = im.HostPixels(layer)
 	rgba.Stride = im.Format.Stride()
 	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
 	return rgba, nil
@@ -212,7 +240,7 @@ func (im *Image) DevGoImage() (*image.RGBA, error) {
 	if !im.Format.IsStdRGBA() {
 		return nil, fmt.Errorf("vgpu.Image: Go image not standard RGBA format: %s", im.Name)
 	}
-	size := im.Format.ByteSize()
+	size := im.Format.LayerByteSize()
 	rgba := &image.RGBA{}
 
 	subrec := vk.ImageSubresource{}
@@ -237,7 +265,9 @@ func (im *Image) DevGoImage() (*image.RGBA, error) {
 // an image prior to allocating memory. Once memory is allocated
 // then SetGoImage can be called.
 func (im *Image) ConfigGoImage(img image.Image) {
-	im.Format.Defaults()
+	if im.Format.Format != vk.FormatR8g8b8a8Srgb {
+		im.Format.Defaults()
+	}
 	im.Format.Size = img.Bounds().Size()
 }
 
@@ -249,7 +279,7 @@ const (
 	NoFlipY = false
 )
 
-// SetGoImage sets staging image data from a standard Go image.
+// SetGoImage sets staging image data from a standard Go image at given layer.
 // This is most efficiently done using an image.RGBA, but other
 // formats will be converted as necessary.
 // If flipY is true (default) then the Image Y axis is flipped
@@ -259,7 +289,7 @@ const (
 // Only works if IsHostActive and Image Format is default vk.FormatR8g8b8a8Srgb,
 // Must still call AllocImage to have image allocated on the device,
 // and copy from this host staging data to the device.
-func (im *Image) SetGoImage(img image.Image, flipY bool) error {
+func (im *Image) SetGoImage(img image.Image, layer int, flipY bool) error {
 	if !im.IsHostActive() {
 		return fmt.Errorf("vgpu.Image: Go image not available because Host not active: %s", im.Name)
 	}
@@ -271,7 +301,7 @@ func (im *Image) SetGoImage(img image.Image, flipY bool) error {
 		rimg = clone.AsRGBA(img)
 	}
 	sz := rimg.Rect.Size()
-	dpix := im.Host.Pixels()
+	dpix := im.HostPixels(layer)
 	sti := rimg.Rect.Min.Y*rimg.Stride + rimg.Rect.Min.X*4
 	spix := rimg.Pix[sti:]
 	str := im.Format.Stride()
@@ -311,12 +341,13 @@ func (im *Image) SetVkImage(dev vk.Device, img vk.Image) {
 }
 
 // ConfigFramebuffer configures this image as a framebuffer image
-// using format.  Sets multisampling to 1.
+// using format.  Sets multisampling to 1, layers to 1.
 // Only makes a device image -- no host rep.
 func (im *Image) ConfigFramebuffer(dev vk.Device, imgFmt *ImageFormat) {
 	im.Dev = dev
 	im.Format.Format = imgFmt.Format
 	im.Format.SetMultisample(1)
+	im.Format.Layers = 1
 	im.SetFlag(int(ImageOwnsImage), int(FramebufferImage))
 	if im.SetSize(imgFmt.Size) {
 		im.ConfigStdView()
@@ -330,6 +361,7 @@ func (im *Image) ConfigDepth(dev vk.Device, depthType Types, imgFmt *ImageFormat
 	im.Dev = dev
 	im.Format.Format = depthType.VkFormat()
 	im.Format.Samples = imgFmt.Samples
+	im.Format.Layers = 1
 	im.SetFlag(int(DepthImage))
 	if im.SetSize(imgFmt.Size) {
 		im.ConfigDepthView()
@@ -342,6 +374,7 @@ func (im *Image) ConfigMulti(dev vk.Device, imgFmt *ImageFormat) {
 	im.Dev = dev
 	im.Format.Format = imgFmt.Format
 	im.Format.Samples = imgFmt.Samples
+	im.Format.Layers = 1
 	im.SetFlag(int(ImageOwnsImage), int(FramebufferImage))
 	if im.SetSize(imgFmt.Size) {
 		im.ConfigStdView()
@@ -369,7 +402,7 @@ func (im *Image) ConfigStdView() {
 		SubresourceRange: vk.ImageSubresourceRange{
 			AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
 			LevelCount: 1,
-			LayerCount: 1,
+			LayerCount: uint32(im.Format.Layers),
 		},
 		ViewType: viewtyp,
 		Image:    im.Image,
@@ -496,7 +529,6 @@ func (im *Image) AllocImage() {
 	default:
 		usage |= vk.ImageUsageSampledBit // default is sampled texture
 		usage |= vk.ImageUsageTransferDstBit
-		// imgType = vk.ImageType3d
 	}
 	if im.IsHostActive() && !im.HasFlag(FramebufferImage) {
 		usage |= vk.ImageUsageTransferDstBit
@@ -518,7 +550,7 @@ func (im *Image) AllocImage() {
 			Depth:  1,
 		},
 		MipLevels:     1,
-		ArrayLayers:   1,
+		ArrayLayers:   uint32(im.Format.Layers),
 		Samples:       im.Format.Samples,
 		Tiling:        vk.ImageTilingOptimal,
 		Usage:         vk.ImageUsageFlags(usage),
@@ -564,7 +596,7 @@ func (im *Image) AllocImage() {
 // and other flags.  If the existing host buffer is sufficient to hold
 // the image, then nothing happens.
 func (im *Image) AllocHost() {
-	imsz := im.Format.ByteSize()
+	imsz := im.Format.TotalByteSize()
 	if im.Host.Size >= imsz {
 		return
 	}
@@ -584,7 +616,7 @@ func (im *Image) ConfigValHost(buff *MemBuff, buffPtr unsafe.Pointer, offset int
 	if im.IsHostOwner() {
 		return
 	}
-	imsz := im.Format.ByteSize()
+	imsz := im.Format.TotalByteSize()
 	im.Host.Buff = buff.Host
 	im.Host.Mem = nil
 	im.Host.Size = imsz
@@ -602,7 +634,7 @@ func (im *Image) CopyRec() vk.BufferImageCopy {
 		BufferImageHeight: 0,
 	}
 	reg.ImageSubresource.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
-	reg.ImageSubresource.LayerCount = 1
+	reg.ImageSubresource.LayerCount = uint32(im.Format.Layers)
 	reg.ImageExtent.Width = w
 	reg.ImageExtent.Height = h
 	reg.ImageExtent.Depth = 1
@@ -614,9 +646,9 @@ func (im *Image) CopyImageRec() vk.ImageCopy {
 	w, h := im.Format.Size32()
 	reg := vk.ImageCopy{}
 	reg.SrcSubresource.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
-	reg.SrcSubresource.LayerCount = 1
+	reg.SrcSubresource.LayerCount = uint32(im.Format.Layers)
 	reg.DstSubresource.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
-	reg.DstSubresource.LayerCount = 1
+	reg.DstSubresource.LayerCount = uint32(im.Format.Layers)
 	reg.Extent.Width = w
 	reg.Extent.Height = h
 	reg.Extent.Depth = 1
@@ -656,7 +688,7 @@ func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, n
 		Image:               im.Image,
 		SubresourceRange: vk.ImageSubresourceRange{
 			AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
-			LayerCount: 1,
+			LayerCount: uint32(im.Format.Layers),
 			LevelCount: 1,
 		},
 	}

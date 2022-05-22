@@ -55,7 +55,7 @@ func (ph *Phong) ConfigTextures() {
 	txset := vars.SetMap[int(TexSet)]
 	for i, kv := range ph.Textures.Order {
 		_, img, _ := txset.ValByIdxTry("Tex", i)
-		img.SetGoImage(kv.Val.Image, vgpu.FlipY)
+		img.SetGoImage(kv.Val.Image, 0, vgpu.FlipY)
 	}
 	vars.BindVarsStart(0)          // only one set of bindings
 	vars.BindStatVars(int(TexSet)) // gets images

@@ -11,6 +11,7 @@ import (
 	_ "image/png"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 	"unsafe"
@@ -124,7 +125,8 @@ func main() {
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
-		imgs[i] = OpenImage(fnm)
+		pnm := filepath.Join("../images", fnm)
+		imgs[i] = OpenImage(pnm)
 		img, _ := tximgv.Vals.ValByIdxTry(i)
 		img.Texture.ConfigGoImage(imgs[i])
 		// img.Texture.Sampler.Border = vgpu.BorderBlack
@@ -168,7 +170,7 @@ func main() {
 
 	for i, gimg := range imgs {
 		img, _ := tximgv.Vals.ValByIdxTry(i)
-		img.SetGoImage(gimg, vgpu.FlipY)
+		img.SetGoImage(gimg, 0, vgpu.FlipY)
 	}
 
 	// This is the standard camera view projection computation

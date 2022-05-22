@@ -12,6 +12,7 @@ import (
 	_ "image/png"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -138,7 +139,8 @@ func main() {
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
-		imgs[i] = OpenImage(fnm)
+		pnm := filepath.Join("../images", fnm)
+		imgs[i] = OpenImage(pnm)
 		if i == 0 { // repeat ground more
 			ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{50, 50}, mat32.Vec2{0, 0}))
 		} else {

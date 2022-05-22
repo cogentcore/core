@@ -14,6 +14,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -92,9 +93,23 @@ func main() {
 	stoff := 15 // causes images to wrap around sets, so this tests that..
 
 	for i, fnm := range imgFiles {
-		imgs[i] = OpenImage(fnm)
-		drw.SetGoImage(i+stoff, imgs[i], vgpu.NoFlipY)
+		pnm := filepath.Join("../images", fnm)
+		imgs[i] = OpenImage(pnm)
+		drw.SetGoImage(i+stoff, 0, imgs[i], vgpu.NoFlipY)
 	}
+
+	// icons loaded into a texture array
+	iconFiles := []string{"sound1.png", "text.png", "up.png", "world1.png"}
+	iconImgs := make([]image.Image, len(iconFiles))
+	iconIdx := 0
+	iconFmt := vgpu.NewImageFormat(20, 22, len(iconFiles))
+	drw.ConfigImage(iconIdx, iconFmt)
+	for i, fnm := range iconFiles {
+		pnm := filepath.Join("../images", fnm)
+		iconImgs[i] = OpenImage(pnm)
+		drw.SetGoImage(iconIdx, i, iconImgs[i], vgpu.NoFlipY)
+	}
+
 	drw.SyncImages()
 
 	rendImgs := func(idx int) {
@@ -108,6 +123,10 @@ func main() {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}
 			drw.Copy(i+stoff, 0, dp, image.ZR, draw.Src)
+		}
+		for i := range iconFiles {
+			dp := image.Point{rand.Intn(500), rand.Intn(500)}
+			drw.Copy(iconIdx, i, dp, image.ZR, draw.Src)
 		}
 		drw.EndDraw()
 	}

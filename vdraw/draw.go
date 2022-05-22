@@ -23,12 +23,12 @@ const (
 )
 
 // SetGoImage sets given Go image as a drawing source to given image index,
-// used in subsequent Draw methods.
-// A standard Go image is rendered upright on a standard
-// Vulkan surface. Set flipY to true to flip.
-func (dw *Drawer) SetGoImage(idx int, img image.Image, flipY bool) {
+// and layer, used in subsequent Draw methods.
+// A standard Go image is rendered upright on a standard Vulkan surface.
+// Set flipY to true to flip.
+func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
-	tx.SetGoImage(img, flipY)
+	tx.SetGoImage(img, layer, flipY)
 }
 
 // ConfigImage configures the draw image at given index
@@ -76,13 +76,12 @@ func (dw *Drawer) ImageIdxByName(name string) int {
 }
 
 // SetGoImageName sets given Go image as a drawing source to given image name,
-// used in subsequent Draw methods. (use SetImageName to set names)
-// A standard Go image is rendered upright on a standard
-// Vulkan surface. Set flipY to true to flip.
-// This can be used directly without pre-configuring.
-func (dw *Drawer) SetGoImageName(name string, img image.Image, flipY bool) {
+// and layer, used in subsequent Draw methods. (use SetImageName to set names)
+// A standard Go image is rendered upright on a standard Vulkan surface.
+// Set flipY to true to flip. This can be used directly without pre-configuring.
+func (dw *Drawer) SetGoImageName(name string, layer int, img image.Image, flipY bool) {
 	idx := dw.ImageIdxByName(name)
-	dw.SetGoImage(idx, img, flipY)
+	dw.SetGoImage(idx, layer, img, flipY)
 }
 
 // ConfigImageName configures the draw image at given name

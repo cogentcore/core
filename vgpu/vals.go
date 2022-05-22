@@ -85,7 +85,7 @@ func (vl *Val) MemSize(vr *Var) int {
 		if vr.TextureOwns {
 			return 0
 		} else {
-			return vl.Texture.Format.ByteSize()
+			return vl.Texture.Format.TotalByteSize()
 		}
 	case vl.N == 1 || vr.Role < Uniform:
 		vl.ElSize = vr.SizeOf
@@ -202,20 +202,19 @@ func SaveImage(path string, im image.Image) error {
 }
 
 // SetGoImage sets Texture image data from an *image.RGBA standard Go image,
-// and sets the Mod flag, so it will be sync'd up when memory is sync'd,
+// at given layer, and sets the Mod flag, so it will be sync'd by Memory
 // or if TextureOwns is set for the var, it allocates Host memory.
 // This is most efficiently done using an image.RGBA, but other
 // formats will be converted as necessary.
-// If flipY is true (default) then the Image Y axis is flipped
-// when copying into the image data, so that images will appear
-// upright in the standard OpenGL Y-is-Up coordinate system.
-// If using the Y-is-down Vulkan coordinate system, don't flip.
-func (vl *Val) SetGoImage(img image.Image, flipY bool) error {
+// If flipY is true then the Image Y axis is flipped when copying into
+// the image data (requires row-by-row copy) -- can avoid this
+// by configuring texture coordinates to compensate.
+func (vl *Val) SetGoImage(img image.Image, layer int, flipY bool) error {
 	if vl.HasFlag(ValTextureOwns) {
 		vl.Texture.ConfigGoImage(img)
 		vl.Texture.AllocHost()
 	}
-	err := vl.Texture.SetGoImage(img, flipY)
+	err := vl.Texture.SetGoImage(img, layer, flipY)
 	if err != nil {
 		fmt.Println(err)
 	} else {
