@@ -65,7 +65,7 @@ func main() {
 	vars.BindDynValIdx(0, "In", 0)
 	vars.BindDynValIdx(0, "Out", 0)
 
-	sy.ResetBindVars(sy.CmdPool.Buff, 0)
+	sy.CmdResetBindVars(sy.CmdPool.Buff, 0)
 	pl.RunComputeWait(sy.CmdPool.Buff, n, 1, 1)
 	// note: could use semaphore here instead of waiting on the compute
 
