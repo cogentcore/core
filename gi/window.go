@@ -29,80 +29,102 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
+	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 )
 
-// EventSkipLagMSec is the number of milliseconds of lag between the time the
-// event was sent to the time it is being processed, above which a repeated
-// event type (scroll, drag, resize) is skipped
-var EventSkipLagMSec = 50
+var (
+	// EventSkipLagMSec is the number of milliseconds of lag between the time the
+	// event was sent to the time it is being processed, above which a repeated
+	// event type (scroll, drag, resize) is skipped
+	EventSkipLagMSec = 50
 
-// FilterLaggyKeyEvents -- set to true to apply laggy filter to KeyEvents
-// (normally excluded)
-var FilterLaggyKeyEvents = false
+	// FilterLaggyKeyEvents -- set to true to apply laggy filter to KeyEvents
+	// (normally excluded)
+	FilterLaggyKeyEvents = false
 
-// DragStartMSec is the number of milliseconds to wait before initiating a
-// regular mouse drag event (as opposed to a basic mouse.Press)
-var DragStartMSec = 50
+	// DragStartMSec is the number of milliseconds to wait before initiating a
+	// regular mouse drag event (as opposed to a basic mouse.Press)
+	DragStartMSec = 50
 
-// DragStartPix is the number of pixels that must be moved before
-// initiating a regular mouse drag event (as opposed to a basic mouse.Press)
-var DragStartPix = 4
+	// DragStartPix is the number of pixels that must be moved before
+	// initiating a regular mouse drag event (as opposed to a basic mouse.Press)
+	DragStartPix = 4
 
-// DNDStartMSec is the number of milliseconds to wait before initiating a
-// drag-n-drop event -- gotta drag it like you mean it
-var DNDStartMSec = 200
+	// DNDStartMSec is the number of milliseconds to wait before initiating a
+	// drag-n-drop event -- gotta drag it like you mean it
+	DNDStartMSec = 200
 
-// DNDStartPix is the number of pixels that must be moved before
-// initiating a drag-n-drop event -- gotta drag it like you mean it
-var DNDStartPix = 20
+	// DNDStartPix is the number of pixels that must be moved before
+	// initiating a drag-n-drop event -- gotta drag it like you mean it
+	DNDStartPix = 20
 
-// HoverStartMSec is the number of milliseconds to wait before initiating a
-// hover event (e.g., for opening a tooltip)
-var HoverStartMSec = 1000
+	// HoverStartMSec is the number of milliseconds to wait before initiating a
+	// hover event (e.g., for opening a tooltip)
+	HoverStartMSec = 1000
 
-// HoverMaxPix is the maximum number of pixels that mouse can move and still
-// register a Hover event
-var HoverMaxPix = 5
+	// HoverMaxPix is the maximum number of pixels that mouse can move and still
+	// register a Hover event
+	HoverMaxPix = 5
 
-// LocalMainMenu controls whether the main menu is displayed locally at top of
-// each window, in addition to the global menu at the top of the screen.  Mac
-// native apps do not do this, but OTOH it makes things more consistent with
-// other platforms, and with larger screens, it can be convenient to have
-// access to all the menu items right there.  Controlled by Prefs.Params
-// variable.
-var LocalMainMenu = false
+	// LocalMainMenu controls whether the main menu is displayed locally at top of
+	// each window, in addition to the global menu at the top of the screen.  Mac
+	// native apps do not do this, but OTOH it makes things more consistent with
+	// other platforms, and with larger screens, it can be convenient to have
+	// access to all the menu items right there.  Controlled by Prefs.Params
+	// variable.
+	LocalMainMenu = false
 
-// WinEventTrace reports a trace of window events to stdout
-// can be set in PrefsDebug from prefs gui
-// excludes mouse move events
-var WinEventTrace = false
+	// WinEventTrace reports a trace of window events to stdout
+	// can be set in PrefsDebug from prefs gui
+	// excludes mouse move events
+	WinEventTrace = false
 
-// WinPublishTrace reports the stack trace leading up to win publish events
-// which are expensive -- wrap multiple updates in UpdateStart / End
-// to prevent
-// can be set in PrefsDebug from prefs gui
-var WinPublishTrace = false
+	// WinPublishTrace reports the stack trace leading up to win publish events
+	// which are expensive -- wrap multiple updates in UpdateStart / End
+	// to prevent
+	// can be set in PrefsDebug from prefs gui
+	WinPublishTrace = false
 
-// KeyEventTrace reports a trace of keyboard events to stdout
-// can be set in PrefsDebug from prefs gui
-var KeyEventTrace = false
+	// KeyEventTrace reports a trace of keyboard events to stdout
+	// can be set in PrefsDebug from prefs gui
+	KeyEventTrace = false
 
-// EventTrace reports a trace of event handing to stdout.
-// can be set in PrefsDebug from prefs gui
-var EventTrace = false
+	// EventTrace reports a trace of event handing to stdout.
+	// can be set in PrefsDebug from prefs gui
+	EventTrace = false
 
-// WinNewCloseTime records last time a new window was opened or another
-// closed -- used to trigger updating of Window menus on each window.
-var WinNewCloseTime time.Time
+	// WinNewCloseTime records last time a new window was opened or another
+	// closed -- used to trigger updating of Window menus on each window.
+	WinNewCloseTime time.Time
 
-// WindowGlobalMu is a mutex for any global state associated with windows
-var WindowGlobalMu sync.Mutex
+	// WindowGlobalMu is a mutex for any global state associated with windows
+	WindowGlobalMu sync.Mutex
 
-// WindowOpenTimer is used for profiling the open time of windows
-// if doing profiling, it will report the time elapsed in msec
-// to point of establishing initial focus in the window.
-var WindowOpenTimer time.Time
+	// WindowOpenTimer is used for profiling the open time of windows
+	// if doing profiling, it will report the time elapsed in msec
+	// to point of establishing initial focus in the window.
+	WindowOpenTimer time.Time
+)
+
+// These constants define use of limited space of Texture images in vdraw.Drawer
+// for updating the window efficiently, avoiding having to copy up the entire frame
+// at every update.
+const (
+	// MaxDirectUploads are direct GPU texture transfer sources
+	MaxDirectUploads = 3
+
+	// MaxPopups is the maximum number of viewport regions
+	// updated directly from popups
+	MaxPopups = 4
+
+	// Sprites are stored as arrays of same-sized textures,
+	// so many can be packed into one
+	MaxSpriteArrays = 2
+
+	// Number of misc window regions we can update prior to refreshing entire display.
+	MaxRegionUpdates = vdraw.MaxImages - MaxSpriteArrays - MaxPopups - MaxDirectUploads
+)
 
 // Window provides an OS-specific window and all the associated event
 // handling.  Widgets connect to event signals to receive relevant GUI events.
@@ -121,40 +143,41 @@ var WindowOpenTimer time.Time
 //
 // Rendering logic:
 // * vdraw.Drawer manages all rendering to the window surface, provided via
-//   the OSWin window.
-// * start by uploading base Viewport2D, then direct uploads and sprites.
-// * Then DirectUps (e.g., gi3d.Scene) directly upload their own texture to WinTex
+//   the OSWin window, using vulkan stored images (16 max)
+// * Order is: Base Viewport2D (image 0), then direct uploads, popups, and sprites.
+// * DirectUps (e.g., gi3d.Scene) directly upload their own texture to a Draw image
 //   (note: cannot upload directly to window as this prevents popups and overlays)
-// * Then any Popups (which have their own Viewports) upload to WinTex.
-// * Finally if there are any overlays (sprites), then we need a separate
-//   transparent texture, OverTex, which critically allows WinTex to remain
-//   intact while overlays are updated.
+// * Popups (which have their own Viewports) upload to WinTex.
+// * Sprites are managed as layered textures of the same size, to enable
+//   unlimited number packed into a few descriptors for standard sizes.
 type Window struct {
 	NodeBase
-	Title             string            `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	Data              interface{}       `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
-	OSWin             oswin.Window      `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
-	EventMgr          EventMgr          `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
-	Viewport          *Viewport2D       `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
-	MasterVLay        *Layout           `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
-	MainMenu          *MenuBar          `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
-	Sprites           Sprites           `json:"-" xml:"-" desc:"sprites are named images that are rendered into the overtex."`
-	ActiveSprites     int               `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
-	SpriteDragging    string            `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
-	DirectUps         map[Node2D]Node2D `json:"-" xml:"-" view:"-" desc:"list of objects that do direct upload rendering to window (e.g., gi3d.Scene)"`
-	UpMu              sync.Mutex        `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
-	Shortcuts         Shortcuts         `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
-	Popup             ki.Ki             `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack        []ki.Ki           `json:"-" xml:"-" desc:"stack of popups"`
-	NextPopup         ki.Ki             `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`
-	PopupFocus        ki.Ki             `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`
-	DelPopup          ki.Ki             `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
-	PopMu             sync.RWMutex      `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
+	Title             string       `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	Data              interface{}  `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
+	OSWin             oswin.Window `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	EventMgr          EventMgr     `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
+	Viewport          *Viewport2D  `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+	MasterVLay        *Layout      `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
+	MainMenu          *MenuBar     `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	Sprites           Sprites      `json:"-" xml:"-" desc:"sprites are named images that are rendered into the overtex."`
+	ActiveSprites     int          `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	SpriteDragging    string       `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
+	UpMu              sync.Mutex   `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
+	Shortcuts         Shortcuts    `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
+	Popup             ki.Ki        `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack        []ki.Ki      `json:"-" xml:"-" desc:"stack of popups"`
+	NextPopup         ki.Ki        `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`
+	PopupFocus        ki.Ki        `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`
+	DelPopup          ki.Ki        `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
+	PopMu             sync.RWMutex `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
 	lastWinMenuUpdate time.Time
 	// below are internal vars used during the event loop
 	delPop        bool
 	skippedResize *window.Event
 	lastEt        oswin.EventType
+	dirDraws      WindowDrawers // direct upload regions
+	popDraws      WindowDrawers // popup regions
+	updtRegs      WindowUpdates // misc vp update regions
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, WindowProps)
@@ -312,6 +335,9 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	win.OSWin.SetName(title)
 	win.OSWin.SetParent(win.This())
 	win.NodeSig.Connect(win.This(), SignalWindowPublish)
+	win.dirDraws.SetIdxRange(1, MaxDirectUploads)
+	win.popDraws.SetIdxRange(win.dirDraws.MaxIdx, MaxPopups)
+	win.updtRegs.SetIdxRange(win.popDraws.MaxIdx, MaxRegionUpdates)
 	return win
 }
 
@@ -939,13 +965,23 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	}
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadVpRegion")
-	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading region Vp %v, vpbbox: %v\n", w.Path(), vp.Path())
+	drw := w.OSWin.Drawer()
+	idx, over := w.updtRegs.Add(winBBox)
+	if over {
+		w.updtRegs.Reset()
+		drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
+		if true || Render2DTrace || WinEventTrace {
+			fmt.Printf("Win: %v region Vp %v, winbbox: %v reset updates\n", w.Path(), vp.Path(), winBBox)
+		}
+	} else {
+		tmpbb := vp.Pixels.Rect
+		vp.Pixels.Rect = vpBBox
+		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+		vp.Pixels.Rect = tmpbb
+		if true || Render2DTrace || WinEventTrace {
+			fmt.Printf("Win: %v uploaded region Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
+		}
 	}
-	// err := w.OSWin.SetWinTexSubImage(winBBox.Min, vp.Pixels, vpBBox)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
 	// pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
@@ -964,47 +1000,25 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	}
 	w.SetWinUpdating()
 	updt := w.UpdateStart()
-	// pr := prof.Start("win.UploadVp")
-	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading Vp %v, image bound: %v\n", w.Path(), vp.Path(), vp.Pixels.Bounds())
+	idx := 0
+	drw := w.OSWin.Drawer()
+	vpr := vp.Pixels.Bounds()
+	winBBox := vpr.Add(offset)
+	if vp == w.Viewport {
+		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+	} else {
+		// pr := prof.Start("win.UploadVp")
+		gii, _ := KiToNode2D(vp.This())
+		idx, _ = w.popDraws.Add(gii, winBBox)
+		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
 	}
-	// todo: upload image to drawer -- but need an index or name to track..
-	// w.OSWin.SetWinTexSubImage(offset, vp.Pixels, vp.Pixels.Bounds())
-	// pr.End()
+	if true || Render2DTrace || WinEventTrace {
+		fmt.Printf("Win: %v uploaded entire Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
+	}
 	w.ClearWinUpdating()
 	w.ClearFlag(int(WinFlagPublishFullReRender))
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives publish
-}
-
-// DirectUploads tells directuploaders to upload to WinTex
-func (w *Window) DirectUploads() {
-	for _, du := range w.DirectUps {
-		if du.IsDestroyed() {
-			delete(w.DirectUps, du)
-			continue
-		}
-		du.DirectWinUpload() // upload directly to WinTex
-	}
-}
-
-// DirectUpdate is called when a DirectUpload node wants to update
-// on its own initiative (not as a result of larger update)
-// if there aren't any popups, it can just render, otherwise
-// needs to do UploadAllViewports
-func (w *Window) DirectUpdate(du Node2D) {
-	w.UpMu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.UpMu.Unlock()
-		return
-	}
-	if len(w.PopupStack) == 0 && w.Popup == nil {
-		du.DirectWinUpload() // upload directly to WinTex
-		w.UpMu.Unlock()
-		return
-	}
-	w.UpMu.Unlock()
-	w.UploadAllViewports()
 }
 
 // UploadAllViewports does a complete upload of all active viewports, in the
@@ -1022,30 +1036,29 @@ func (w *Window) UploadAllViewports() {
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
-	if Render2DTrace || WinEventTrace {
-		// fmt.Printf("Win: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.Path(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
+	if true || Render2DTrace || WinEventTrace {
+		fmt.Printf("Win: %v uploading full Vp, image bound: %v, updt: %v\n", w.Path(), w.Viewport.Pixels.Bounds(), updt)
 	}
+	w.updtRegs.Reset()
+	w.popDraws.Reset()
 	drw := w.OSWin.Drawer()
 	drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
-	// w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
 	// next any direct uploaders
-	w.DirectUploads()
+	// w.DirectUploads()
 	// then all the current popups
 	w.PopMu.RLock()
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
-	widx := 1
 	if w.PopupStack != nil {
 		for _, pop := range w.PopupStack {
 			gii, _ := KiToNode2D(pop)
 			if gii != nil {
 				vp := gii.AsViewport2D()
 				r := vp.Geom.Bounds()
-				if Render2DTrace {
-					fmt.Printf("Win: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
+				idx, _ := w.popDraws.Add(gii, vp.WinBBox)
+				drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+				if true || Render2DTrace {
+					fmt.Printf("Win: %v uploading popup stack Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
 				}
-				// w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
-				drw.SetGoImage(widx, vp.Pixels, vgpu.NoFlipY)
-				widx++
 			}
 		}
 	}
@@ -1054,17 +1067,17 @@ func (w *Window) UploadAllViewports() {
 		if gii != nil {
 			vp := gii.AsViewport2D()
 			r := vp.Geom.Bounds()
-			if Render2DTrace || WinEventTrace {
-				fmt.Printf("Win: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
+			idx, _ := w.popDraws.Add(gii, vp.WinBBox)
+			drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+			if true || Render2DTrace || WinEventTrace {
+				fmt.Printf("Win: %v uploading top popup Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
 			}
-			// w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
-			drw.SetGoImage(widx, vp.Pixels, vgpu.NoFlipY)
 		}
 	}
 	w.PopMu.RUnlock()
 
 	// todo: sprites!
-	drw.SyncImages()
+	// drw.SyncImages()
 
 	// fmt.Printf("upload all views pop unlocked: %v\n", w.Nm)
 	// pr.End()
@@ -1116,58 +1129,30 @@ func (w *Window) Publish() {
 	if Update2DTrace || WinEventTrace {
 		fmt.Printf("Win %v doing publish\n", w.Nm)
 	}
-	if w.HasFlag(int(WinFlagPublishFullReRender)) {
-		// fmt.Printf("Win %v doing full re-render direct upload\n", w.Nm)
-		w.ClearFlag(int(WinFlagPublishFullReRender))
-		w.DirectUploads()
-	}
 	// pr := prof.Start("win.Publish")
-	// wt := w.OSWin.WinTex()
-	// if wt != nil {
-	// 	w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
-	// 	if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
-	// 		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
-	// 	}
-	// 	w.OSWin.Publish()
+	// if w.HasFlag(int(WinFlagPublishFullReRender)) {
+	// 	// fmt.Printf("Win %v doing full re-render direct upload\n", w.Nm)
+	// 	w.ClearFlag(int(WinFlagPublishFullReRender))
+	// 	w.DirectUploads() // todo: do this separately
+	// }
+
+	drw := w.OSWin.Drawer()
+	drw.SyncImages()
+	drw.StartDraw()
+	drw.Scale(0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
+
+	w.dirDraws.DrawImages(drw)
+	w.popDraws.DrawImages(drw)
+	w.updtRegs.DrawImages(drw)
+
+	// todo sprites
+
+	drw.EndDraw()
+
 	// 	if Render2DTrace {
 	// 		fmt.Printf("Win %v did publish\n", w.Nm)
 	// 	}
-	// }
 	// pr.End()
-
-	drw := w.OSWin.Drawer()
-	drw.StartDraw()
-	drw.Scale(0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
-	widx := 1
-	if w.PopupStack != nil {
-		for _, pop := range w.PopupStack {
-			gii, _ := KiToNode2D(pop)
-			if gii != nil {
-				vp := gii.AsViewport2D()
-				r := vp.Geom.Bounds()
-				if Render2DTrace {
-					fmt.Printf("Win: %v drawing popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
-				}
-				// w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
-				drw.Copy(widx, r.Min, image.ZR, draw.Src)
-				widx++
-			}
-		}
-	}
-	if w.Popup != nil {
-		gii, _ := KiToNode2D(w.Popup)
-		if gii != nil {
-			vp := gii.AsViewport2D()
-			r := vp.Geom.Bounds()
-			if Render2DTrace || WinEventTrace {
-				fmt.Printf("Win: %v drawing top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds())
-			}
-			// w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
-			drw.Copy(widx, r.Min, image.ZR, draw.Src)
-			widx++
-		}
-	}
-	drw.EndDraw()
 
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
@@ -1189,6 +1174,9 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win.Publish()
 }
 
+// todo: replace with saving direct upload image
+
+/*
 // AddDirectUploader adds given node to those that have a DirectWinUpload method
 // and directly render to the WinTex via their own method, without going via a
 // Viewport2D as is the case for 2D popups.  This is for gi3d.Scene for example.
@@ -1210,6 +1198,7 @@ func (w *Window) DeleteDirectUploader(node Node2D) {
 	delete(w.DirectUps, node)
 	w.UpMu.Unlock()
 }
+*/
 
 /////////////////////////////////////////////////////////////////////////////
 //                   Overlays and Sprites
@@ -2063,9 +2052,14 @@ func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	return true
 }
 
+// todo: add reset method, and also update after scroll..
+
 // PushPopup pushes current popup onto stack and set new popup.
 func (w *Window) PushPopup(pop ki.Ki) {
 	w.PopMu.Lock()
+	w.updtRegs.Reset()
+	drw := w.OSWin.Drawer()
+	drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
 	w.NextPopup = nil
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
@@ -2089,6 +2083,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 
 // DisconnectPopup disconnects given popup -- typically the current one.
 func (w *Window) DisconnectPopup(pop ki.Ki) {
+	w.popDraws.Delete(pop.(Node))
 	w.EventMgr.DisconnectAllEvents(pop, AllPris)
 	ki.SetParent(pop, nil) // don't redraw the popup anymore
 }
@@ -2518,159 +2513,3 @@ func (w *Window) BenchmarkReRender() {
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
 	EndTargProfile()
 }
-
-//////////////////////////////////////////////////////////////////////////////////
-//  WindowLists
-
-// WindowList is a list of windows.
-type WindowList []*Window
-
-// Add adds a window to the list.
-func (wl *WindowList) Add(w *Window) {
-	WindowGlobalMu.Lock()
-	*wl = append(*wl, w)
-	WindowGlobalMu.Unlock()
-}
-
-// Delete removes a window from the list -- returns true if deleted.
-func (wl *WindowList) Delete(w *Window) bool {
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
-	sz := len(*wl)
-	got := false
-	for i := sz - 1; i >= 0; i-- {
-		wi := (*wl)[i]
-		if wi == w {
-			copy((*wl)[i:], (*wl)[i+1:])
-			(*wl)[sz-1] = nil
-			(*wl) = (*wl)[:sz-1]
-			sz = len(*wl)
-			got = true
-		}
-	}
-	return got
-}
-
-// FindName finds window with given name on list (case sensitive) -- returns
-// window and true if found, nil, false otherwise.
-func (wl *WindowList) FindName(name string) (*Window, bool) {
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
-	for _, wi := range *wl {
-		if wi.Nm == name {
-			return wi, true
-		}
-	}
-	return nil, false
-}
-
-// FindData finds window with given Data on list -- returns
-// window and true if found, nil, false otherwise.
-// data of type string works fine -- does equality comparison on string contents.
-func (wl *WindowList) FindData(data interface{}) (*Window, bool) {
-	if kit.IfaceIsNil(data) {
-		return nil, false
-	}
-	typ := reflect.TypeOf(data)
-	if !typ.Comparable() {
-		return nil, false
-	}
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
-	for _, wi := range *wl {
-		if wi.Data == data {
-			return wi, true
-		}
-	}
-	return nil, false
-}
-
-// FindOSWin finds window with given oswin.Window on list -- returns
-// window and true if found, nil, false otherwise.
-func (wl *WindowList) FindOSWin(osw oswin.Window) (*Window, bool) {
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
-	for _, wi := range *wl {
-		if wi.OSWin == osw {
-			return wi, true
-		}
-	}
-	return nil, false
-}
-
-// Len returns the length of the list, concurrent-safe
-func (wl *WindowList) Len() int {
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
-	return len(*wl)
-}
-
-// Win gets window at given index, concurrent-safe
-func (wl *WindowList) Win(idx int) *Window {
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
-	if idx >= len(*wl) || idx < 0 {
-		return nil
-	}
-	return (*wl)[idx]
-}
-
-// Focused returns the (first) window in this list that has the WinFlagGotFocus flag set
-// and the index in the list (nil, -1 if not present)
-func (wl *WindowList) Focused() (*Window, int) {
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
-
-	for i, fw := range *wl {
-		if fw.HasFlag(int(WinFlagGotFocus)) {
-			return fw, i
-		}
-	}
-	return nil, -1
-}
-
-// FocusNext focuses on the next window in the list, after the current Focused() one
-// skips minimized windows
-func (wl *WindowList) FocusNext() (*Window, int) {
-	fw, i := wl.Focused()
-	if fw == nil {
-		return nil, -1
-	}
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
-	sz := len(*wl)
-	if sz == 1 {
-		return nil, -1
-	}
-
-	for j := 0; j < sz-1; j++ {
-		if i == sz-1 {
-			i = 0
-		} else {
-			i++
-		}
-		fw = (*wl)[i]
-		if !fw.OSWin.IsMinimized() {
-			fw.OSWin.Raise()
-			break
-		}
-	}
-	return fw, i
-}
-
-// AllWindows is the list of all windows that have been created (dialogs, main
-// windows, etc).
-var AllWindows WindowList
-
-// DialogWindows is the list of only dialog windows that have been created.
-var DialogWindows WindowList
-
-// MainWindows is the list of main windows (non-dialogs) that have been
-// created.
-var MainWindows WindowList
-
-// FocusWindows is a "recents" stack of window names that have focus
-// when a window gets focus, it pops to the top of this list
-// when a window is closed, it is removed from the list, and the top item
-// on the list gets focused.
-var FocusWindows []string

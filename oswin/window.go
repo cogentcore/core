@@ -18,27 +18,6 @@ import (
 	"github.com/goki/vgpu/vdraw"
 )
 
-// Note: 96 texture images is a common lower limit: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxDescriptorSetSampledImages&platform=all
-
-const (
-	// MaxDrawImages is the maximum number of general-purpose images
-	// that can be drawn to the window in a single render pass.
-	// Typically the 0 index is the base image for entire window, and
-	// then direct upload windows comprise the remainder.
-	MaxDrawImages = 16
-
-	// MaxSprites is the maximum number of images beyond the first
-	// MaxDrawImages reserved for numerically-indexed sprites that are
-	// typically updated in image content less frequently, but positioned
-	// more dynamically.
-	MaxSprites = 64
-
-	MaxWinImages = MaxDrawImages + MaxSprites
-
-	// MaxColors is maximum number of colors avail for Drawer fill actions
-	MaxColors = 80
-)
-
 // Window is a double-buffered OS-specific hardware window.
 //
 // It provides basic GPU support functions, and is currently implemented
@@ -47,9 +26,14 @@ const (
 //
 // The Window maintains its own vdraw.Drawer drawing system for rendering
 // bitmap images and filled regions onto the window surface.
+//
 // The base full-window image should be Scale'd up first, followed by any
 // overlay images such as sprites or direct upload images already on the
 // GPU (e.g., from 3D render frames)
+//
+// vdraw.MaxImages = 16 to work cross-platform, meaning that a maximum of 16
+// images can be uploaded and be ready to use in one render pass -- if more are
+// needed, multiple passes can be performed.
 //
 type Window interface {
 
@@ -228,9 +212,7 @@ type Window interface {
 	SetCursorEnabled(enabled, raw bool)
 
 	// Drawer returns the drawing system attached to this window surface.
-	// The first MaxDrawImages images are used for arbitrary images
-	// while the remaining MaxSprites are managed as overlay sprites
-	// that are updated less frequently but can move dynamically.
+	// This is typically used for high-performance rendering to the surface.
 	Drawer() *vdraw.Drawer
 
 	EventDeque

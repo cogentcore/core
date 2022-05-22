@@ -1,6 +1,6 @@
 module github.com/goki/gi
 
-go 1.15
+go 1.18
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
