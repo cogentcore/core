@@ -213,7 +213,7 @@ func main() {
 
 		drw.SetFrameImage(0, fr)
 		drw.SyncImages()
-		drw.StartDraw()
+		drw.StartDraw(0)
 		drw.Scale(0, 0, sf.Format.Bounds(), image.ZR, draw.Src)
 		drw.EndDraw()
 
