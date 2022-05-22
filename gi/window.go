@@ -955,9 +955,24 @@ func (w *Window) InitialFocus() {
 // window -- called after re-rendering specific nodes to update only the
 // relevant part of the overall viewport image
 func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+	cbb := winBBox.Canon()
+	if cbb != winBBox {
+		fmt.Printf("non-canon bbox!\n")
+		winBBox = cbb
+	}
+	if winBBox.Empty() {
+		fmt.Printf("empty bbox!\n")
+		return
+	}
 	if !w.IsVisible() {
 		return
 	}
+	tmpbb := vp.Pixels.Rect
+	inBB := vpBBox.Intersect(tmpbb)
+	if inBB.Empty() {
+		return
+	}
+	vpBBox = inBB
 	w.UpMu.Lock()
 	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
@@ -968,13 +983,11 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	drw := w.OSWin.Drawer()
 	idx, over := w.updtRegs.Add(winBBox)
 	if over {
-		w.updtRegs.Reset()
-		drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
+		w.ResetUpdateRegionsImpl()
 		if Render2DTrace || WinEventTrace {
 			fmt.Printf("Win: %v region Vp %v, winbbox: %v reset updates\n", w.Path(), vp.Path(), winBBox)
 		}
 	} else {
-		tmpbb := vp.Pixels.Rect
 		vp.Pixels.Rect = vpBBox
 		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
 		vp.Pixels.Rect = tmpbb
@@ -990,6 +1003,17 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 // UploadVp uploads entire viewport image for given viewport -- e.g., for
 // popups etc updating separately
 func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
+	vpr := vp.Pixels.Bounds()
+	winBBox := vpr.Add(offset)
+	cbb := winBBox.Canon()
+	if cbb != winBBox {
+		fmt.Printf("non-canon bbox!\n")
+		winBBox = cbb
+	}
+	if winBBox.Empty() {
+		fmt.Printf("empty bbox!\n")
+		return
+	}
 	if !w.IsVisible() {
 		return
 	}
@@ -1002,8 +1026,6 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	updt := w.UpdateStart()
 	idx := 0
 	drw := w.OSWin.Drawer()
-	vpr := vp.Pixels.Bounds()
-	winBBox := vpr.Add(offset)
 	if vp == w.Viewport {
 		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
 	} else {
@@ -1039,45 +1061,7 @@ func (w *Window) UploadAllViewports() {
 	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Win: %v uploading full Vp, image bound: %v, updt: %v\n", w.Path(), w.Viewport.Pixels.Bounds(), updt)
 	}
-	w.updtRegs.Reset()
-	w.popDraws.Reset()
-	drw := w.OSWin.Drawer()
-	drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
-	// next any direct uploaders
-	// w.DirectUploads()
-	// then all the current popups
-	w.PopMu.RLock()
-	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
-	if w.PopupStack != nil {
-		for _, pop := range w.PopupStack {
-			gii, _ := KiToNode2D(pop)
-			if gii != nil {
-				vp := gii.AsViewport2D()
-				r := vp.Geom.Bounds()
-				idx, _ := w.popDraws.Add(gii, vp.WinBBox)
-				drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
-				if Render2DTrace {
-					fmt.Printf("Win: %v uploading popup stack Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
-				}
-			}
-		}
-	}
-	if w.Popup != nil {
-		gii, _ := KiToNode2D(w.Popup)
-		if gii != nil {
-			vp := gii.AsViewport2D()
-			r := vp.Geom.Bounds()
-			idx, _ := w.popDraws.Add(gii, vp.WinBBox)
-			drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
-			if Render2DTrace || WinEventTrace {
-				fmt.Printf("Win: %v uploading top popup Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
-			}
-		}
-	}
-	w.PopMu.RUnlock()
-
-	// todo: sprites!
-	// drw.SyncImages()
+	w.ResetUpdateRegionsImpl()
 
 	// fmt.Printf("upload all views pop unlocked: %v\n", w.Nm)
 	// pr.End()
@@ -1108,10 +1092,47 @@ func (w *Window) ClearWinUpdating() {
 // when a window is scrolling and positions are then invalid.
 func (w *Window) ResetUpdateRegions() {
 	w.UpMu.Lock() // block all updates while we publish
+	w.ResetUpdateRegionsImpl()
+	w.UpMu.Unlock()
+}
+
+// ResetUpdateRegionsImpl resets any existing window update regions and
+// grabs the current state of the window and popup viewports for subsequent rendering.
+func (w *Window) ResetUpdateRegionsImpl() {
 	w.updtRegs.Reset()
+	w.popDraws.Reset()
 	drw := w.OSWin.Drawer()
 	drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
-	w.UpMu.Unlock()
+	// next any direct uploaders
+	// w.DirectUploads()
+	// then all the current popups
+	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
+	if w.PopupStack != nil {
+		for _, pop := range w.PopupStack {
+			gii, _ := KiToNode2D(pop)
+			if gii != nil {
+				vp := gii.AsViewport2D()
+				r := vp.Geom.Bounds()
+				idx, _ := w.popDraws.Add(gii, vp.WinBBox)
+				drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+				if Render2DTrace {
+					fmt.Printf("Win: %v uploading popup stack Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
+				}
+			}
+		}
+	}
+	if w.Popup != nil {
+		gii, _ := KiToNode2D(w.Popup)
+		if gii != nil {
+			vp := gii.AsViewport2D()
+			r := vp.Geom.Bounds()
+			idx, _ := w.popDraws.Add(gii, vp.WinBBox)
+			drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+			if Render2DTrace || WinEventTrace {
+				fmt.Printf("Win: %v uploading top popup Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
+			}
+		}
+	}
 }
 
 // Publish does the final step of updating of the window based on the current

@@ -332,7 +332,11 @@ func (vp *Viewport2D) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
 	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
-	vp.Win.UploadVpRegion(vp, vpBBox, winBBox)
+	vpin := vpBBox.Intersect(vp.Pixels.Bounds())
+	if vpin.Empty() {
+		return
+	}
+	vp.Win.UploadVpRegion(vp, vpin, winBBox)
 }
 
 // set our window pointer to point to the current window we are under
