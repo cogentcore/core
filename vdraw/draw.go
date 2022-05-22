@@ -5,6 +5,7 @@
 package vdraw
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	"log"
@@ -79,6 +80,7 @@ func (dw *Drawer) ImageIdxByName(name string) int {
 // used in subsequent Draw methods. (use SetImageName to set names)
 // A standard Go image is rendered upright on a standard
 // Vulkan surface. Set flipY to true to flip.
+// This can be used directly without pre-configuring.
 func (dw *Drawer) SetGoImageName(name string, img image.Image, flipY bool) {
 	idx := dw.ImageIdxByName(name)
 	dw.SetGoImage(idx, img, flipY)
@@ -159,14 +161,22 @@ func (dw *Drawer) Scale(idx int, dr image.Rectangle, sr image.Rectangle, op draw
 // Over = alpha blend with existing
 func (dw *Drawer) Draw(idx int, src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
 	vars := dw.Sys.Vars()
-	_, tx, _ := vars.ValByIdxTry(0, "Tex", idx)
+	txv, tx, _ := vars.ValByIdxTry(0, "Tex", idx)
 
 	if sr == image.ZR {
 		sr = tx.Texture.Format.Bounds()
 	}
 
 	tmat := dw.ConfigMtxs(src2dst, tx.Texture.Format.Size, sr, op, false)
-	tmat.MVP[3] = float32(idx) // pack it!
+	// fmt.Printf("idx: %d sr: %v  sz: %v  omat: %v  tmat: %v \n", idx, sr, tx.Texture.Format.Size, src2dst, tmat)
+	// key: index for vulkan only includes *valid* indexes!
+	vidx := txv.TextureValidIdx(idx)
+	if vidx < 0 {
+		err := fmt.Errorf("vdraw.Drawer: Texture image at index %d is not valid", idx)
+		log.Println(err) // this is always bad
+		return err
+	}
+	tmat.MVP[3] = float32(vidx) // pack it!
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mtxs")
 	dpl := dw.Sys.PipelineMap["draw"]
 

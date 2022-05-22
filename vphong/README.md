@@ -1,10 +1,14 @@
 # vPhong is a Blinn-Phong rendering system in vGPU
 
-Supports 4 different types of lights:
-* Ambient: light emitted from everywhere
-* Directional: 
-* Point
-* Spot
+Supports 4 different types of lights, with a max of 8 instances of each light type:
+
+* Ambient: light emitted from everywhere -- provides a background of diffuse light bouncing around in all directions.
+
+* Directional: light directed along a given vector (specified as a position of a light shining toward the origin), with no attenuation.  This is like the sun.
+
+* Point: an omnidirectional light with a position and associated decay factors, which divide the light intensity as a function of linear and quadratic distance.  The quadratic factor dominates at longer distances.light radiating out in all directdions from a specific point, 
+
+* Spot: a light with a position and direction and associated decay factors and angles, which divide the light intensity as a function of linear and quadratic distance. The quadratic factor dominates at longer distances.
 
 Meshes are indexed triangles.
 
@@ -14,7 +18,7 @@ There are 3 rendering pipelines:
 * PerVertex: color is provided per vertex by the mesh.
 
 The color model has the following factors:
-* `Color` = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering.
+* `Color` = main color of surface arising from one of the 3 sources listed above, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering, to sort objects as a function of depth.
 * `Emissive` = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object.
 * `Shiny` = specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128) having a smaller more focal specular reflection. Default is 30.
 * `Reflect` = reflectiveness of the surface in the region where specular reflected light is emitted -- 1 for full shiny white reflection (specular) color, 0 = no shine reflection.  The specular color is always set to white, which will reflect the light color accurately.

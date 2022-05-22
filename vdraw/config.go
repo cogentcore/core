@@ -118,6 +118,10 @@ func (dw *Drawer) ConfigSys() {
 func (dw *Drawer) ConfigMtxs(src2dst mat32.Mat3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) *Mtxs {
 	var tmat Mtxs
 
+	if dw.YIsDown {
+		flipY = !flipY
+	}
+
 	sr = sr.Intersect(image.Rectangle{Max: txsz})
 	if sr.Empty() {
 		tmat.MVP.SetIdentity()

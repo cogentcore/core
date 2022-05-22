@@ -126,7 +126,11 @@ These are useful for deciding what kinds of limits are likely to work in practic
 https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSamplers&platform=all
 https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxPerStageDescriptorSampledImages&platform=all
 
+This is a significant constraint!  need to work around it.
+
 * 8 dynamic uniform descriptors (mac has 155) https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxDescriptorSetUniformBuffersDynamic&platform=all
+
+Note that this constraint is largely irrelevant because each dynamic descriptor can have an unlimited number of offset values used for it. 
 
 * 128 push constant bytes actually quite prevalent: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxPushConstantsSize&platform=all
 

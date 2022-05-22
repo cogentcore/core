@@ -37,7 +37,8 @@ func (dw *Drawer) Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectangle,
 	cmd := sy.CmdPool.Buff
 	vars := sy.Vars()
 
-	tmat := dw.ConfigMtxs(src2dst, reg.Max, reg, op, false)
+	dsz := dw.DestSize()
+	tmat := dw.ConfigMtxs(src2dst, dsz, reg, op, false)
 	clr4 := mat32.NewVec4Color(clr)
 	clr4.ToArray(tmat.UVP[:], 12) // last column holds color
 

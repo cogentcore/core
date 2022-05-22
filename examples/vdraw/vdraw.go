@@ -74,6 +74,7 @@ func main() {
 	fmt.Printf("format: %s\n", sf.Format.String())
 
 	drw := &vdraw.Drawer{}
+	drw.YIsDown = true
 	drw.ConfigSurface(sf, 10) // 10 = max number of images, 16 max
 
 	destroy := func() {
@@ -89,15 +90,17 @@ func main() {
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
 		imgs[i] = OpenImage(fnm)
-		drw.SetGoImage(i, imgs[i], vgpu.NoFlipY)
+		drw.SetGoImage(i+5, imgs[i], vgpu.NoFlipY)
 	}
 	drw.SyncImages()
 
 	rendImgs := func(idx int) {
 		drw.StartDraw()
-		drw.Scale(idx, sf.Format.Bounds(), image.ZR, draw.Src)
+		drw.Scale(idx+5, sf.Format.Bounds(), image.ZR, draw.Src)
 		for i := range imgFiles {
-			drw.Copy(i, image.Point{rand.Intn(500), rand.Intn(500)}, image.ZR, draw.Src)
+			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
+			dp := image.Point{i * 50, i * 50}
+			drw.Copy(i+5, dp, image.ZR, draw.Src)
 		}
 		drw.EndDraw()
 	}

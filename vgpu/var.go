@@ -133,6 +133,28 @@ func (vr *Var) AllocTextures(mm *Memory) {
 	vr.Vals.AllocTextures(mm)
 }
 
+// TextureValidIdx returns the index of the given texture value at our
+// index in list of vals, skipping over any inactive textures which
+// do not show up when accessed in the shader.  You must use this
+// value when passing a texture index to the shader!
+// returns -1 if idx is not valid
+func (vr *Var) TextureValidIdx(idx int) int {
+	vidx := 0
+	for i, vl := range vr.Vals.Vals {
+		if i == idx {
+			return vidx
+		}
+		if vl.Texture == nil || !vl.Texture.IsActive() {
+			if i == idx {
+				return -1
+			}
+			continue
+		}
+		vidx++
+	}
+	return -1
+}
+
 //////////////////////////////////////////////////////////////////
 // VarList
 

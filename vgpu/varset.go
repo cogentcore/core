@@ -343,7 +343,7 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 	} else {
 		imgs := []vk.DescriptorImageInfo{}
 		for _, vl := range vr.Vals.Vals {
-			if vl.Texture.IsActive() {
+			if vl.Texture != nil && vl.Texture.IsActive() {
 				di := vk.DescriptorImageInfo{
 					ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
 					ImageView:   vl.Texture.View,

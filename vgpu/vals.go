@@ -7,7 +7,12 @@ package vgpu
 import (
 	"fmt"
 	"image"
+	"image/jpeg"
+	"image/png"
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"unsafe"
 
 	"github.com/goki/ki/bitflag"
@@ -178,6 +183,24 @@ func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
 	vl.SetMod()
 }
 
+// SaveImage saves image to file, with format inferred from filename -- JPEG and PNG
+// supported by default.
+func SaveImage(path string, im image.Image) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext == ".png" {
+		return png.Encode(file, im)
+	} else if ext == ".jpg" || ext == ".jpeg" {
+		return jpeg.Encode(file, im, &jpeg.Options{Quality: 90})
+	} else {
+		return fmt.Errorf("gi.SaveImage: extension: %s not recognized -- only .png and .jpg / jpeg supported", ext)
+	}
+}
+
 // SetGoImage sets Texture image data from an *image.RGBA standard Go image,
 // and sets the Mod flag, so it will be sync'd up when memory is sync'd,
 // or if TextureOwns is set for the var, it allocates Host memory.
@@ -200,6 +223,8 @@ func (vl *Val) SetGoImage(img image.Image, flipY bool) error {
 	}
 	if vl.HasFlag(ValTextureOwns) {
 		vl.Texture.AllocTexture()
+		// svimg, _ := vl.Texture.GoImage()
+		// SaveImage(fmt.Sprintf("dimg_%d.png", vl.Idx), svimg)
 	}
 	return err
 }
