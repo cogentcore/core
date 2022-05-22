@@ -29,7 +29,6 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
-	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 )
 
@@ -107,6 +106,8 @@ var (
 	WindowOpenTimer time.Time
 )
 
+// todo: use different sets for each!
+
 // These constants define use of limited space of Texture images in vdraw.Drawer
 // for updating the window efficiently, avoiding having to copy up the entire frame
 // at every update.
@@ -123,7 +124,7 @@ const (
 	MaxSpriteArrays = 2
 
 	// Number of misc window regions we can update prior to refreshing entire display.
-	MaxRegionUpdates = vdraw.MaxImages - MaxSpriteArrays - MaxPopups - MaxDirectUploads
+	MaxRegionUpdates = vgpu.MaxTexturesPerSet - MaxSpriteArrays - MaxPopups - MaxDirectUploads
 )
 
 // Window provides an OS-specific window and all the associated event
@@ -1172,7 +1173,7 @@ func (w *Window) Publish() {
 	drw := w.OSWin.Drawer()
 	drw.SyncImages()
 	drw.StartDraw()
-	drw.Scale(0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
+	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
 
 	w.dirDraws.DrawImages(drw)
 	w.popDraws.DrawImages(drw)

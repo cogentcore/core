@@ -231,7 +231,7 @@ func (wu *WindowUpdates) DrawImages(drw *vdraw.Drawer) {
 	for i, kv := range wu.Updates.Order {
 		winBBox := kv.Key
 		idx := wu.Idx(i)
-		drw.Copy(idx, winBBox.Min, image.ZR, draw.Src)
+		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src)
 	}
 }
 
@@ -304,6 +304,6 @@ func (wu *WindowDrawers) DrawImages(drw *vdraw.Drawer) {
 	for i, kv := range wu.Nodes.Order {
 		winBBox := kv.Val
 		idx := wu.Idx(i)
-		drw.Copy(idx, winBBox.Min, image.ZR, draw.Src)
+		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src)
 	}
 }

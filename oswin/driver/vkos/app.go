@@ -24,7 +24,6 @@ import (
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
-	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 
 	vk "github.com/goki/vulkan"
@@ -252,7 +251,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		}
 		w.surface = vgpu.NewSurface(vgpu.TheGPU, vk.SurfaceFromPointer(surfPtr))
 		w.drawer.YIsDown = true
-		w.drawer.ConfigSurface(w.surface, vdraw.MaxImages)
+		w.drawer.ConfigSurface(w.surface, vgpu.MaxTexturesPerSet) // todo: can expand
 	})
 
 	bitflag.SetAtomic(&w.Flag, int(oswin.Focus)) // starts out focused
