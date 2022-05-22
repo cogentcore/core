@@ -181,17 +181,27 @@ func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, o
 	return nil
 }
 
+// UseTextureSet selects the descriptor set to use -- choose this based on the bank of 16
+// texture values if number of textures > MaxTexturesPerSet.
+func (dw *Drawer) UseTextureSet(descIdx int) {
+	sy := &dw.Sys
+	cmd := sy.CmdPool.Buff
+	sy.CmdBindVars(cmd, descIdx)
+}
+
 // StartDraw starts image drawing rendering process on render target
 // No images can be added or set after this point.
-func (dw *Drawer) StartDraw() {
+// descIdx is the descriptor set to use -- choose this based on the bank of 16
+// texture values if number of textures > MaxTexturesPerSet.
+func (dw *Drawer) StartDraw(descIdx int) {
 	sy := &dw.Sys
 	dpl := sy.PipelineMap["draw"]
 	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
 		dw.Impl.SurfIdx = dw.Surf.AcquireNextImage()
-		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], 0)
+		sy.ResetBeginRenderPassNoClear(cmd, dw.Surf.Frames[dw.Impl.SurfIdx], descIdx)
 	} else {
-		sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], 0)
+		sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], descIdx)
 	}
 	dpl.BindPipeline(cmd)
 }

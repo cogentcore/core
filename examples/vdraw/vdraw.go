@@ -89,7 +89,7 @@ func main() {
 	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
 	imgs := make([]image.Image, len(imgFiles))
 
-	stoff := 15 // causes images to wrap around
+	stoff := 15 // causes images to wrap around sets, so this tests that..
 
 	for i, fnm := range imgFiles {
 		imgs[i] = OpenImage(fnm)
@@ -98,7 +98,11 @@ func main() {
 	drw.SyncImages()
 
 	rendImgs := func(idx int) {
-		drw.StartDraw()
+		descIdx := 0
+		if idx+stoff >= vgpu.MaxTexturesPerSet {
+			descIdx = 1
+		}
+		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
 		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, draw.Src)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}

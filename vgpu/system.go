@@ -244,8 +244,8 @@ func (sy *System) CmdBindTextureVarIdx(cmd vk.CommandBuffer, setIdx int, varNm s
 
 	descIdx = valIdx / MaxTexturesPerSet
 	if descIdx != vars.BindDescIdx {
-		vars.BindDescIdx = descIdx
 		sy.CmdBindVars(cmd, descIdx)
+		vars.BindDescIdx = descIdx
 		switched = true
 	}
 	stIdx := descIdx * MaxTexturesPerSet
