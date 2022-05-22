@@ -1172,7 +1172,7 @@ func (w *Window) Publish() {
 
 	drw := w.OSWin.Drawer()
 	drw.SyncImages()
-	drw.StartDraw()
+	drw.StartDraw(0)
 	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
 
 	w.dirDraws.DrawImages(drw)
