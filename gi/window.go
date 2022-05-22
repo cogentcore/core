@@ -970,7 +970,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	if over {
 		w.updtRegs.Reset()
 		drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
-		if true || Render2DTrace || WinEventTrace {
+		if Render2DTrace || WinEventTrace {
 			fmt.Printf("Win: %v region Vp %v, winbbox: %v reset updates\n", w.Path(), vp.Path(), winBBox)
 		}
 	} else {
@@ -978,7 +978,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 		vp.Pixels.Rect = vpBBox
 		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
 		vp.Pixels.Rect = tmpbb
-		if true || Render2DTrace || WinEventTrace {
+		if Render2DTrace || WinEventTrace {
 			fmt.Printf("Win: %v uploaded region Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
 		}
 	}
@@ -1012,7 +1012,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 		idx, _ = w.popDraws.Add(gii, winBBox)
 		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
 	}
-	if true || Render2DTrace || WinEventTrace {
+	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Win: %v uploaded entire Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
 	}
 	w.ClearWinUpdating()
@@ -1036,7 +1036,7 @@ func (w *Window) UploadAllViewports() {
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
-	if true || Render2DTrace || WinEventTrace {
+	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Win: %v uploading full Vp, image bound: %v, updt: %v\n", w.Path(), w.Viewport.Pixels.Bounds(), updt)
 	}
 	w.updtRegs.Reset()
@@ -1056,7 +1056,7 @@ func (w *Window) UploadAllViewports() {
 				r := vp.Geom.Bounds()
 				idx, _ := w.popDraws.Add(gii, vp.WinBBox)
 				drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
-				if true || Render2DTrace {
+				if Render2DTrace {
 					fmt.Printf("Win: %v uploading popup stack Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
 				}
 			}
@@ -1069,7 +1069,7 @@ func (w *Window) UploadAllViewports() {
 			r := vp.Geom.Bounds()
 			idx, _ := w.popDraws.Add(gii, vp.WinBBox)
 			drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
-			if true || Render2DTrace || WinEventTrace {
+			if Render2DTrace || WinEventTrace {
 				fmt.Printf("Win: %v uploading top popup Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
 			}
 		}
@@ -1100,6 +1100,18 @@ func (w *Window) SetWinUpdating() {
 // ClearWinUpdating sets the window updating state to false if not already updating
 func (w *Window) ClearWinUpdating() {
 	w.ClearFlag(int(WinFlagUpdating))
+}
+
+// ResetUpdateRegions resets any existing window update regions and
+// grabs the current state of the window viewport for subsequent rendering.
+// This is protected by update mutex and suitable for random calls eg.,
+// when a window is scrolling and positions are then invalid.
+func (w *Window) ResetUpdateRegions() {
+	w.UpMu.Lock() // block all updates while we publish
+	w.updtRegs.Reset()
+	drw := w.OSWin.Drawer()
+	drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
+	w.UpMu.Unlock()
 }
 
 // Publish does the final step of updating of the window based on the current
@@ -2057,9 +2069,10 @@ func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 // PushPopup pushes current popup onto stack and set new popup.
 func (w *Window) PushPopup(pop ki.Ki) {
 	w.PopMu.Lock()
-	w.updtRegs.Reset()
-	drw := w.OSWin.Drawer()
-	drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
+	w.ResetUpdateRegions()
+	// w.updtRegs.Reset()
+	// drw := w.OSWin.Drawer()
+	// drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
 	w.NextPopup = nil
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
@@ -2094,6 +2107,7 @@ func (w *Window) ClosePopup(pop ki.Ki) bool {
 		return false
 	}
 	w.PopMu.Lock()
+	w.ResetUpdateRegions()
 	if w.Popup == w.DelPopup {
 		w.DelPopup = nil
 	}

@@ -345,6 +345,8 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		// 	fmt.Printf("Layout: %v scroll signal while still in update\n", ly.Path())
 		// }
 		wupdt := ls.TopUpdateStart()
+		win := ls.ParentWindow()
+		win.ResetUpdateRegions()
 		ls.Move2DTree()
 		ls.ViewportSafe().ReRender2DNode(li)
 		ls.TopUpdateEnd(wupdt)
