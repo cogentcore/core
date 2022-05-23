@@ -81,8 +81,6 @@ type Scene struct {
 	SavedCams     map[string]Camera  `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
 	Win           *gi.Window         `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 	Renders       Renderers          `view:"-" desc:"rendering programs"`
-	Frame         gpu.Framebuffer    `view:"-" desc:"direct render target for scene"`
-	Tex           gpu.Texture2D      `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
 	SetDragCursor bool               `view:"-" desc:"has dragging cursor been set yet?"`
 	SelMode       SelModes           `desc:"how to deal with selection / manipulation events"`
 	CurSel        Node3D             `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected node"`

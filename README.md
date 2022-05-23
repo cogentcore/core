@@ -9,11 +9,11 @@ GoGi is part of the [GoKi](https://GoKi.dev) Go language (golang) full strength 
 [![CI](https://github.com/goki/gi/actions/workflows/ci.yml/badge.svg)](https://github.com/goki/gi/actions/workflows/ci.yml)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/goki/gi)](https://www.tickgit.com/browse?repo=github.com/goki/gi)
 
-NOTE: Requires Go version `1.13+` due to use of `math.Round`, `os.UserCacheDir`, and `reflect.Value.IsZero()`.
+NOTE: Requires Go version `1.18+` -- now using the new generics.
 
 See the [Wiki](https://github.com/goki/gi/wiki) for more docs (increasingly extensive), [Install](https://github.com/goki/gi/wiki/Install) instructions (mostly basic `go build` procedure, but does now depend on `cgo` on all platforms due to `glfw`, so see details for each platform), and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) email list, and the new github [Discussions](https://github.com/goki/gi/discussions) tool.
 
-GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a scenegraph-based GUI framework in full native idiomatic Go, with minimal OS-specific backend interfaces based originally on the [Shiny](https://github.com/golang/exp/tree/master/shiny) drivers, now using [go-gl/glfw](https://github.com/go-gl/glfw), and supporting MacOS, Linux, and Windows.
+GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a scenegraph-based GUI framework in full native idiomatic Go, with minimal OS-specific backend interfaces based originally on the [Shiny](https://github.com/golang/exp/tree/master/shiny) drivers, now using [go-gl/glfw](https://github.com/go-gl/glfw) and vulkan-based [vgpu](https://github.com/goki/vgpu), and supporting MacOS, Linux, and Windows.
 
 The overall design integrates existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  The core `Layout` object automates most of the complexity associated with GUI construction (including scrolling), so the programmer mainly just needs to add the elements, and set their style properties -- similar to HTML.  The main 2D framework also integrates with a 3D scenegraph, supporting interesting combinations of these frameworks (see `gi3d` package and [examples/gi3d](https://github.com/goki/gi/tree/master/examples/gi3d)).  Currently GoGi is focused on desktop systems, but nothing should prevent adaptation to mobile. 
 
@@ -27,7 +27,7 @@ See [Gide](https://github.com/goki/gide) for a complete, complex application wri
 
 * CSS-based styling allows customization of everything -- native style properties are HTML compatible (with all standard `em`, `px`, `pct` etc units), including HTML "rich text" styling for all text rendering (e.g., in `Label` widget) -- can decorate any text with inline tags (`<strong>`, `<em>` etc), and even include links.  Styling is now separated out into `gist` package, for easier navigation.
 
-* Compiles in seconds, compared to many minutes to hours for comparable alternatives such as Qt, and with minimal cgo dependency.  As of April 2019 we now depend on the [glfw](https://github.com/go-gl/glfw) cross-platform GUI infrastructure system, and the [go-gl/gl](https://github.com/go-gl/gl) OpenGL bindings, to support the 3D (`gi3d`) aspect of the framework.
+* Compiles in seconds, compared to many minutes to hours for comparable alternatives such as Qt, and with minimal cgo dependency.  As of April 2019 we now depend on the [glfw](https://github.com/go-gl/glfw) cross-platform GUI infrastructure system, and as of May 2022 vulkan provides all the rendering (2D via vdraw, 3D via vphong):  [vgpu](https://github.com/goki/vgpu).
 
 * Fully self-contained -- does *not* use OS-specific native widgets -- results in simpler, consistent code across platforms, and is `HiDPI` capable and scalable using standard `Ctrl/Cmd+Plus or Minus` key, and in `Preferences`.  This also allows a complete 2D GUI to be embedded into a 3D scene, for example.
 
@@ -65,11 +65,15 @@ The best way to see how the system works are in the `examples` directory, and by
 
 # Backend
 
-The `oswin` and `gpu` packages provide interface abstractions for hardware-level implementations.  Currently the gpu implementation is OpenGL, but Vulkan is planned, hopefully with not too many changes to the `gpu` interface.  The basic platform-specific details are handled by [glfw](https://github.com/go-gl/glfw) (version 3.3), along with a few other bits of platform-specific code.
+The `oswin` and `oswin/driver/vkos` packages provide interface abstractions for hardware-level implementations, now using [vgpu](https://github.com/goki/vgpu) and [glfw](https://github.com/go-gl/glfw) (version 3.3) provides the basic platform-specific details along with a few other bits of platform-specific code.
 
-All of the main "front end" code just deals with `image.RGBA` through the [girl](https://github.com/goki/gi/tree/master/girl) rendering library, using `girl.Paint` methods, which was adapted from https://github.com/fogleman/gg, and we use https://github.com/srwiley/rasterx for CPU-based rasterization to the image, which is fast and SVG performant.   The `Viewport2D` image is uploaded to a GPU-backed `oswin.Texture` and composited with sprite overlays up to the window.
+All of the main "front end" code just deals with `image.RGBA` through the [girl](https://github.com/goki/gi/tree/master/girl) rendering library, using `girl.Paint` methods, which was adapted from [fogleman/gg](https://github.com/fogleman/gg), and we use [srwiley/rasterx](https://github.com/srwiley/rasterx) for CPU-based rasterization to the image, which is fast and SVG performant.   The [vgpu/vdraw](https://github.com/goki/vgpu/vdraw) package performs optimized GPU texture-based compositing to assemble the final display in a way that minimizes the copying of image data up to the GPU, and supports overlays such as popups and sprites.  Any 3D scene elements are accessed directly within the GPU.
 
 # Status / News
+
+* Version 1.3 released May, 2022, uses the new vulkan based  [vgpu](https://github.com/goki/vgpu) rendering framework.
+
+* Version 1.2 released Feb, 2021, had lots of bug fixes.
 
 * Version 1.1 released Nov, 2020, has the styling parameters and code broken out in the [gist](https://github.com/goki/gi/tree/master/gist) style package, and basic rendering code, including a complete text layout and rendering system, in the [girl](https://github.com/goki/gi/tree/master/girl) render library.
 
