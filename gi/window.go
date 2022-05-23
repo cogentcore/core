@@ -170,8 +170,7 @@ type Window struct {
 	Viewport          *Viewport2D  `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
 	MasterVLay        *Layout      `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
 	MainMenu          *MenuBar     `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
-	Sprites           Sprites      `json:"-" xml:"-" desc:"sprites are named images that are rendered into the overtex."`
-	ActiveSprites     int          `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	Sprites           Sprites      `json:"-" xml:"-" desc:"sprites are named images that are rendered last overlaying everything else."`
 	SpriteDragging    string       `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
 	UpMu              sync.Mutex   `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
 	Shortcuts         Shortcuts    `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
@@ -790,7 +789,7 @@ func (w *Window) Closed() {
 		WindowGlobalMu.Unlock()
 	}
 	// these are managed by the window itself
-	w.Sprites = nil
+	w.Sprites.Reset()
 	w.UpMu.Unlock()
 }
 
@@ -969,6 +968,13 @@ func (w *Window) InitialFocus() {
 // window -- called after re-rendering specific nodes to update only the
 // relevant part of the overall viewport image
 func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+	// fmt.Printf("win upload vpbox: %v  winbox: %v\n", vpBBox, winBBox)
+	winrel := winBBox.Min.Sub(vpBBox.Min)
+	nwinBBox := vpBBox.Add(winrel) // make sure that win BBox is same size as vpBBox!
+	if nwinBBox != winBBox {
+		fmt.Printf("win bbox orig wrong!\n")
+	}
+	winBBox = nwinBBox
 	cbb := winBBox.Canon()
 	if cbb != winBBox {
 		fmt.Printf("non-canon bbox!\n")
@@ -981,12 +987,13 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	if !w.IsVisible() {
 		return
 	}
-	tmpbb := vp.Pixels.Rect
-	inBB := vpBBox.Intersect(tmpbb)
+	vpPixBB := vp.Pixels.Rect
+	inBB := vpBBox.Intersect(vpPixBB)
 	if inBB.Empty() {
 		return
 	}
 	vpBBox = inBB
+	winBBox = vpBBox.Add(winrel) // fix again
 	w.UpMu.Lock()
 	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
@@ -994,17 +1001,29 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	}
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadVpRegion")
-	drw := w.OSWin.Drawer()
-	idx, over := w.updtRegs.Add(winBBox)
-	if over {
+
+	bsz := winBBox.Size()
+	if bsz.X*bsz.Y > 1000*1000 {
 		w.ResetUpdateRegionsImpl()
 		if Render2DTrace || WinEventTrace {
+			fmt.Printf("Win: %v region Vp %v, winbbox: %v reset updates due to huge region\n", w.Path(), vp.Path(), winBBox)
+		}
+		w.ClearWinUpdating()
+		w.UpMu.Unlock()
+		return
+	}
+
+	idx, over := w.updtRegs.Add(winBBox, vp)
+	if over {
+		w.ResetUpdateRegionsImpl()
+		if true || Render2DTrace || WinEventTrace {
 			fmt.Printf("Win: %v region Vp %v, winbbox: %v reset updates\n", w.Path(), vp.Path(), winBBox)
 		}
 	} else {
+		drw := w.OSWin.Drawer()
 		vp.Pixels.Rect = vpBBox
 		drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
-		vp.Pixels.Rect = tmpbb
+		vp.Pixels.Rect = vpPixBB
 		if Render2DTrace || WinEventTrace {
 			fmt.Printf("Win: %v uploaded region Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
 		}
@@ -1184,6 +1203,7 @@ func (w *Window) Publish() {
 	// }
 
 	drw := w.OSWin.Drawer()
+
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
@@ -1193,7 +1213,16 @@ func (w *Window) Publish() {
 	drw.UseTextureSet(1)
 	w.updtRegs.DrawImages(drw)
 
-	// todo sprites
+	drw.UseTextureSet(2)
+	for imgIdx, smkv := range w.Sprites.Sizes.Order {
+		for layIdx, spkv := range smkv.Val.Order {
+			sp := spkv.Val
+			if !sp.On {
+				continue
+			}
+			drw.Copy(imgIdx+SpriteStart, layIdx, sp.Geom.Pos, image.ZR, draw.Over)
+		}
+	}
 
 	drw.EndDraw()
 
@@ -1249,113 +1278,65 @@ func (w *Window) DeleteDirectUploader(node Node2D) {
 */
 
 /////////////////////////////////////////////////////////////////////////////
-//                   Overlays and Sprites
-
-// RenderOverlays renders sprites -- clears OverTex, uploads sprites to it
-func (w *Window) RenderOverlays() {
-	if !w.IsVisible() {
-		return
-	}
-	if w.ActiveSprites == 0 || len(w.Sprites) == 0 {
-		return
-	}
-	w.UpMu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.UpMu.Unlock()
-		return
-	}
-	updt := w.UpdateStart()
-	// oswin.TheApp.RunOnMain(func() { // clear the texture
-	// 	if w.OSWin.Activate() {
-	// 		w.OverTex.Fill(w.OverTex.Bounds(), color.Transparent, draw.Src)
-	// 	}
-	// })
-	for _, sp := range w.Sprites {
-		if !sp.On {
-			continue
-		}
-		w.RenderSprite(sp)
-	}
-	w.ClearFlag(int(WinFlagPublishFullReRender))
-	w.UpMu.Unlock()
-	w.UpdateEnd(updt) // drives the publish
-}
+//                   Sprites
 
 // SpriteByName returns a sprite by name -- false if not created yet
 func (w *Window) SpriteByName(nm string) (*Sprite, bool) {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
-	if w.Sprites == nil {
-		return nil, false
-	}
-	if exsp, has := w.Sprites[nm]; has {
-		return exsp, true
-	}
-	return nil, false
-}
-
-// AddNewSprite adds a new sprite with given name, which must remain
-// invariant and unique among all sprites in use, and is used for all access
-// -- prefix with package and type name to ensure uniqueness.  Starts out in
-// inactive state -- must call ActivateSprite.  If size is 0, no image is made.
-func (w *Window) AddNewSprite(nm string, sz image.Point, pos image.Point) *Sprite {
-	w.UpMu.Lock()
-	defer w.UpMu.Unlock()
-
-	if w.Sprites == nil {
-		w.Sprites = make(Sprites)
-	}
-	if exsp, has := w.Sprites[nm]; has {
-		return exsp
-	}
-	sp := &Sprite{Name: nm}
-	sp.SetSize(sz)
-	sp.Geom.Pos = pos
-	w.Sprites[nm] = sp
-	return sp
+	return w.Sprites.SpriteByName(nm)
 }
 
 // AddSprite adds an existing sprite to list of sprites, using the sprite.Name
 // as the unique name key.
 func (w *Window) AddSprite(sp *Sprite) {
-	if w.Sprites == nil {
-		w.Sprites = make(Sprites)
+	if w.Sprites.NSizes() >= vgpu.MaxTexturesPerSet-1 {
+		log.Println("gi.Window:AddSprite error: ran out of sprite room!")
+		return
 	}
-	w.Sprites[sp.Name] = sp
+	imgIdx, layIdx := w.Sprites.Add(sp)
 	if sp.On {
-		w.ActiveSprites++
+		w.Sprites.Active++
 	}
+	imgIdx += SpriteStart
+	drw := w.OSWin.Drawer()
+	if layIdx == 0 {
+		// allocate 128 images for sprites
+		drw.ConfigImage(imgIdx, vgpu.NewImageFormat(sp.Geom.Size.X, sp.Geom.Size.Y, MaxSpritesPerTexture))
+	}
+	drw.SetGoImage(imgIdx, layIdx, sp.Pixels, vgpu.NoFlipY)
 }
 
-// ActivateSprite clears the Inactive flag on the sprite, and increments
-// ActiveSprites, so that it will actually be rendered
+// ActivateSprite flags the sprite as active, and increments
+// number of Active Sprites, so that it will actually be rendered.
+// it is assumed that the image has not changed.
 func (w *Window) ActivateSprite(nm string) {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 
-	sp, ok := w.Sprites[nm]
+	sp, ok := w.Sprites.SpriteByName(nm)
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
 	if !sp.On {
 		sp.On = true
-		w.ActiveSprites++
+		w.Sprites.Active++
 	}
 }
 
-// InactivateSprite sets the Inactive flag on the sprite, and decrements
-// ActiveSprites, so that it will not be rendered
+// InactivateSprite flags the sprite as inactive, and decrements
+// number of Active Sprites, so that it will not be rendered.
 func (w *Window) InactivateSprite(nm string) {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 
-	sp, ok := w.Sprites[nm]
+	sp, ok := w.Sprites.SpriteByName(nm)
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
 	if sp.On {
 		sp.On = false
-		w.ActiveSprites--
+		w.Sprites.Active--
 	}
 }
 
@@ -1364,41 +1345,33 @@ func (w *Window) InactivateAllSprites() {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 
-	for _, sp := range w.Sprites {
-		if sp.On {
-			sp.On = false
-			w.ActiveSprites--
+	for _, sp := range w.Sprites.Names.Order {
+		if sp.Val.On {
+			sp.Val.On = false
+			w.Sprites.Active--
 		}
 	}
 }
 
-// DeleteSprite deletes given sprite, returns true if actually deleted
-// User should re-render overlay if returns true.
+// DeleteSprite deletes given sprite, returns true if actually deleted.
+// requires updating other sprites of same size -- use Inactivate if any chance of re-use.
 func (w *Window) DeleteSprite(nm string) bool {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
-	if w.Sprites == nil {
+
+	sp, ok := w.Sprites.SpriteByName(nm)
+	if !ok {
 		return false
 	}
-	if exsp, has := w.Sprites[nm]; has {
-		if exsp.On {
-			w.ActiveSprites--
-		}
-		delete(w.Sprites, nm)
-		return true
-	}
-	return false
-}
+	imgIdx, _ := w.Sprites.Delete(sp)
 
-// RenderSprite renders the sprite onto OverTex -- must be called within UpMu mutex lock
-func (w *Window) RenderSprite(sp *Sprite) {
-	// oswin.TheApp.RunOnMain(func() {
-	// 	if w.OSWin.Activate() {
-	// 		if sp.Pixels != nil {
-	// 			w.OverTex.SetSubImage(sp.Geom.Pos, sp.Pixels, sp.Pixels.Bounds())
-	// 		}
-	// 	}
-	// })
+	drw := w.OSWin.Drawer()
+	sm, _ := w.Sprites.Sizes.ValByKey(sp.Geom.Size)
+	imgIdx += SpriteStart
+	for i, kv := range sm.Order {
+		drw.SetGoImage(imgIdx, i, kv.Val.Pixels, vgpu.NoFlipY)
+	}
+	return true
 }
 
 // SpriteEvent processes given event for any active sprites
@@ -1408,7 +1381,8 @@ func (w *Window) SelSpriteEvent(evi oswin.Event) {
 
 	et := evi.Type()
 
-	for _, sp := range w.Sprites {
+	for _, spkv := range w.Sprites.Names.Order {
+		sp := spkv.Val
 		if !sp.On {
 			continue
 		}
@@ -2366,7 +2340,7 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	sp.On = true
 	w.AddSprite(sp)
 	w.DNDSetCursor(dnd.DefaultModBits(w.EventMgr.LastModBits))
-	w.RenderOverlays()
+	w.UpdateSig()
 }
 
 // DNDMoveEvent handles drag-n-drop move events.
@@ -2377,7 +2351,7 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	}
 	de := w.EventMgr.SendDNDMoveEvent(e)
 	w.DNDUpdateCursor(de.Mod)
-	w.RenderOverlays()
+	w.UpdateSig()
 	e.SetProcessed()
 }
 
@@ -2416,7 +2390,7 @@ func (w *Window) ClearDragNDrop() {
 	w.EventMgr.ClearDND()
 	w.DeleteSprite(DNDSpriteName)
 	w.DNDClearCursor()
-	w.RenderOverlays()
+	w.UpdateSig()
 }
 
 // DNDModCursor gets the appropriate cursor based on the DND event mod.

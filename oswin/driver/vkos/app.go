@@ -33,7 +33,7 @@ func init() {
 	runtime.LockOSThread()
 }
 
-var VkOsDebug = true
+var VkOsDebug = false
 
 var theApp = &appImpl{
 	windows:      make(map[*glfw.Window]*windowImpl),

@@ -698,15 +698,16 @@ func (sr *Splitter) Render2D() {
 		}
 		spr, ok := win.SpriteByName(spnm)
 		if !ok {
-			spr = win.AddNewSprite(spnm, image.ZP, sr.VpBBox.Min)
+			spr = NewSprite(spnm, image.ZP, sr.VpBBox.Min)
 			spr.GrabRenderFrom(icvp.(Node2D))
+			win.AddSprite(spr)
 			win.ActivateSprite(spnm)
 		}
 		sr.UpdateSplitterPos()
-		win.RenderOverlays()
+		win.UpdateSig()
 	} else {
 		if win.DeleteSprite(spnm) {
-			win.RenderOverlays()
+			win.UpdateSig()
 		}
 		sr.UpdateSplitterPos()
 		if sr.FullReRenderIfNeeded() {

@@ -895,8 +895,7 @@ func (tf *TextField) RenderCursor(on bool) {
 		win.InactivateSprite(sp.Name)
 	}
 	sp.Geom.Pos = tf.CharStartPos(tf.CursorPos, true).ToPointFloor()
-	win.RenderOverlays() // needs an explicit call!
-	win.UpdateSig()      // publish
+	win.UpdateSig()
 }
 
 // ScrollLayoutToCursor scrolls any scrolling layout above us so that the cursor is in view
@@ -928,12 +927,13 @@ func (tf *TextField) CursorSprite() *Sprite {
 			bbsz.X = 2
 		}
 		bbsz.X += 2 // inverse border
-		sp = win.AddNewSprite(spnm, bbsz, image.ZP)
+		sp = NewSprite(spnm, bbsz, image.ZP)
 		ibox := sp.Pixels.Bounds()
 		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color.Inverse()}, image.ZP, draw.Src)
 		ibox.Min.X++ // 1 pixel boundary
 		ibox.Max.X--
 		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color}, image.ZP, draw.Src)
+		win.AddSprite(sp)
 	}
 	return sp
 }

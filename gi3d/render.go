@@ -4,6 +4,8 @@
 
 package gi3d
 
+// ok the plan is basically to rip this part out from here
+
 import (
 	"errors"
 	"log"

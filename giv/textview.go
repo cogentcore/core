@@ -3184,8 +3184,7 @@ func (tv *TextView) RenderCursor(on bool) {
 		win.InactivateSprite(sp.Name)
 	}
 	sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
-	win.RenderOverlays() // needs an explicit call!
-	win.UpdateSig()      // publish
+	win.UpdateSig()
 }
 
 // CursorSpriteName returns the name of the cursor sprite
@@ -3211,12 +3210,13 @@ func (tv *TextView) CursorSprite() *gi.Sprite {
 			bbsz.X = 2
 		}
 		bbsz.X += 2 // inverse border
-		sp = win.AddNewSprite(spnm, bbsz, image.ZP)
+		sp = gi.NewSprite(spnm, bbsz, image.ZP)
 		ibox := sp.Pixels.Bounds()
 		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color.Inverse()}, image.ZP, draw.Src)
 		ibox.Min.X++ // 1 pixel boundary
 		ibox.Max.X--
 		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color}, image.ZP, draw.Src)
+		win.AddSprite(sp)
 	}
 	return sp
 }
@@ -3671,8 +3671,8 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// }
 	if vpUpload {
 		tBBox := image.Rectangle{sbox.ToPointFloor(), ebox.ToPointCeil()}
-		vprel := tBBox.Min.Sub(tv.VpBBox.Min)
-		tWinBBox := tv.WinBBox.Add(vprel)
+		winoff := tv.WinBBox.Min.Sub(tv.VpBBox.Min)
+		tWinBBox := tBBox.Add(winoff)
 		vp.This().(gi.Viewport).VpUploadRegion(tBBox, tWinBBox)
 	}
 }
@@ -3772,10 +3772,10 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		}
 
 		tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
-		vprel := tBBox.Min.Sub(tv.VpBBox.Min)
-		tWinBBox := tv.WinBBox.Add(vprel)
+		winoff := tv.WinBBox.Min.Sub(tv.VpBBox.Min)
+		tWinBBox := tBBox.Add(winoff)
+		// fmt.Printf("Render lines upload: tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
 		vp.This().(gi.Viewport).VpUploadRegion(tBBox, tWinBBox)
-		// fmt.Printf("tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
 	}
 	tv.PopBounds()
 	tv.RenderScrolls()
