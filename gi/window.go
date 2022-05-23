@@ -106,25 +106,35 @@ var (
 	WindowOpenTimer time.Time
 )
 
-// todo: use different sets for each!
-
-// These constants define use of limited space of Texture images in vdraw.Drawer
-// for updating the window efficiently, avoiding having to copy up the entire frame
-// at every update.
+// These constants define use of Texture images in vdraw.Drawer
+// for updating the window efficiently.  They are allocated in
+// sets of 16:
+// Set 0: 0 = main viewport, DirectUploads, Popups
+// Set 1: 16 region update images
+// Set 2: 16 sprite arrays with 128 allocated per size
 const (
 	// MaxDirectUploads are direct GPU texture transfer sources
-	MaxDirectUploads = 3
+	MaxDirectUploads = 7
 
 	// MaxPopups is the maximum number of viewport regions
 	// updated directly from popups
-	MaxPopups = 4
+	MaxPopups = 8
+
+	// Where region updates start (start of Set 1) -- 16
+	RegionUpdateStart = 1 + MaxDirectUploads + MaxPopups
+
+	// Full set of region updates in set = 1
+	MaxRegionUpdates = 16
 
 	// Sprites are stored as arrays of same-sized textures,
-	// so many can be packed into one
-	MaxSpriteArrays = 2
+	// allocated by size in Set 2, starting at 32
+	SpriteStart = RegionUpdateStart + MaxRegionUpdates
 
-	// Number of misc window regions we can update prior to refreshing entire display.
-	MaxRegionUpdates = vgpu.MaxTexturesPerSet - MaxSpriteArrays - MaxPopups - MaxDirectUploads
+	// Full set of sprite textures in set = 2
+	MaxSpriteTextures = 16
+
+	// Allocate 128 layers within each sprite size
+	MaxSpritesPerTexture = 128
 )
 
 // Window provides an OS-specific window and all the associated event
@@ -148,7 +158,7 @@ const (
 // * Order is: Base Viewport2D (image 0), then direct uploads, popups, and sprites.
 // * DirectUps (e.g., gi3d.Scene) directly upload their own texture to a Draw image
 //   (note: cannot upload directly to window as this prevents popups and overlays)
-// * Popups (which have their own Viewports) upload to WinTex.
+// * Popups (which have their own Viewports)
 // * Sprites are managed as layered textures of the same size, to enable
 //   unlimited number packed into a few descriptors for standard sizes.
 type Window struct {
@@ -336,9 +346,12 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	win.OSWin.SetName(title)
 	win.OSWin.SetParent(win.This())
 	win.NodeSig.Connect(win.This(), SignalWindowPublish)
+	drw := win.OSWin.Drawer()
+	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
+
 	win.dirDraws.SetIdxRange(1, MaxDirectUploads)
 	win.popDraws.SetIdxRange(win.dirDraws.MaxIdx, MaxPopups)
-	win.updtRegs.SetIdxRange(win.popDraws.MaxIdx, MaxRegionUpdates)
+	win.updtRegs.SetIdxRange(RegionUpdateStart, MaxRegionUpdates)
 	return win
 }
 
@@ -990,7 +1003,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 		}
 	} else {
 		vp.Pixels.Rect = vpBBox
-		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+		drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
 		vp.Pixels.Rect = tmpbb
 		if Render2DTrace || WinEventTrace {
 			fmt.Printf("Win: %v uploaded region Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
@@ -1028,12 +1041,12 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	idx := 0
 	drw := w.OSWin.Drawer()
 	if vp == w.Viewport {
-		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+		drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
 	} else {
 		// pr := prof.Start("win.UploadVp")
 		gii, _ := KiToNode2D(vp.This())
 		idx, _ = w.popDraws.Add(gii, winBBox)
-		drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+		drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
 	}
 	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Win: %v uploaded entire Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
@@ -1103,7 +1116,7 @@ func (w *Window) ResetUpdateRegionsImpl() {
 	w.updtRegs.Reset()
 	w.popDraws.Reset()
 	drw := w.OSWin.Drawer()
-	drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
+	drw.SetGoImage(0, 0, w.Viewport.Pixels, vgpu.NoFlipY)
 	// next any direct uploaders
 	// w.DirectUploads()
 	// then all the current popups
@@ -1115,7 +1128,7 @@ func (w *Window) ResetUpdateRegionsImpl() {
 				vp := gii.AsViewport2D()
 				r := vp.Geom.Bounds()
 				idx, _ := w.popDraws.Add(gii, vp.WinBBox)
-				drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+				drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
 				if Render2DTrace {
 					fmt.Printf("Win: %v uploading popup stack Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
 				}
@@ -1128,7 +1141,7 @@ func (w *Window) ResetUpdateRegionsImpl() {
 			vp := gii.AsViewport2D()
 			r := vp.Geom.Bounds()
 			idx, _ := w.popDraws.Add(gii, vp.WinBBox)
-			drw.SetGoImage(idx, vp.Pixels, vgpu.NoFlipY)
+			drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
 			if Render2DTrace || WinEventTrace {
 				fmt.Printf("Win: %v uploading top popup Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
 			}
@@ -1174,9 +1187,10 @@ func (w *Window) Publish() {
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
-
 	w.dirDraws.DrawImages(drw)
 	w.popDraws.DrawImages(drw)
+
+	drw.UseTextureSet(1)
 	w.updtRegs.DrawImages(drw)
 
 	// todo sprites
