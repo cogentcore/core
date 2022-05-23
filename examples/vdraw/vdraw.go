@@ -128,7 +128,7 @@ func main() {
 		}
 		for i := range iconFiles {
 			dp := image.Point{rand.Intn(500), rand.Intn(500)}
-			drw.Copy(iconIdx, i, dp, image.ZR, draw.Src)
+			drw.Copy(iconIdx, i, dp, image.ZR, draw.Over)
 		}
 		drw.EndDraw()
 	}
