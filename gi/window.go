@@ -970,20 +970,6 @@ func (w *Window) InitialFocus() {
 func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
 	// fmt.Printf("win upload vpbox: %v  winbox: %v\n", vpBBox, winBBox)
 	winrel := winBBox.Min.Sub(vpBBox.Min)
-	nwinBBox := vpBBox.Add(winrel) // make sure that win BBox is same size as vpBBox!
-	if nwinBBox != winBBox {
-		fmt.Printf("win bbox orig wrong!\n")
-	}
-	winBBox = nwinBBox
-	cbb := winBBox.Canon()
-	if cbb != winBBox {
-		fmt.Printf("non-canon bbox!\n")
-		winBBox = cbb
-	}
-	if winBBox.Empty() {
-		fmt.Printf("empty bbox!\n")
-		return
-	}
 	if !w.IsVisible() {
 		return
 	}
@@ -1016,7 +1002,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	idx, over := w.updtRegs.Add(winBBox, vp)
 	if over {
 		w.ResetUpdateRegionsImpl()
-		if true || Render2DTrace || WinEventTrace {
+		if Render2DTrace || WinEventTrace {
 			fmt.Printf("Win: %v region Vp %v, winbbox: %v reset updates\n", w.Path(), vp.Path(), winBBox)
 		}
 	} else {
@@ -1038,15 +1024,6 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	vpr := vp.Pixels.Bounds()
 	winBBox := vpr.Add(offset)
-	cbb := winBBox.Canon()
-	if cbb != winBBox {
-		fmt.Printf("non-canon bbox!\n")
-		winBBox = cbb
-	}
-	if winBBox.Empty() {
-		fmt.Printf("empty bbox!\n")
-		return
-	}
 	if !w.IsVisible() {
 		return
 	}
