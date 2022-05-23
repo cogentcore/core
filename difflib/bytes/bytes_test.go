@@ -6,10 +6,11 @@ import (
 	"math"
 	"reflect"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
-	"sort"
-	"../tester"
+
+	"github.com/goki/go-difflib/difflib/tester"
 )
 
 func assertAlmostEqual(t *testing.T, a, b float64, places int) {
@@ -35,7 +36,7 @@ func splitChars(s string) [][]byte {
 
 func stringsToBytes(in ...string) (out [][]byte) {
 	out = make([][]byte, len(in))
-	for i, s := range(in) {
+	for i, s := range in {
 		out[i] = []byte(s)
 	}
 	return
@@ -43,7 +44,7 @@ func stringsToBytes(in ...string) (out [][]byte) {
 
 func bytesToStrings(in ...[]byte) (out []string) {
 	out = make([]string, len(in))
-	for i, s := range(in) {
+	for i, s := range in {
 		out[i] = string(s)
 	}
 	return
@@ -332,7 +333,7 @@ func TestOutputFormatRangeFormatUnified(t *testing.T) {
 	// If a range is empty, its beginning line number shall be the number of
 	// the line just before the range, or 0 if the empty range starts the file.
 	fmt := formatRangeUnified
-	fm := func (a, b int) string { return string(fmt(a,b)) }
+	fm := func(a, b int) string { return string(fmt(a, b)) }
 	assertEqual(t, fm(3, 3), "3,0")
 	assertEqual(t, fm(3, 4), "4")
 	assertEqual(t, fm(3, 5), "4,2")
@@ -357,7 +358,7 @@ func TestOutputFormatRangeFormatContext(t *testing.T) {
 	// and the following format otherwise:
 	//     "--- %d ----\n", <ending line number>
 	fmt := formatRangeContext
-	fm := func (a, b int) string { return string(fmt(a,b)) }
+	fm := func(a, b int) string { return string(fmt(a, b)) }
 	assertEqual(t, fm(3, 3), "3")
 	assertEqual(t, fm(3, 4), "4")
 	assertEqual(t, fm(3, 5), "4,5")
@@ -476,7 +477,7 @@ func BenchmarkSplitLines10000(b *testing.B) {
 
 func prepareFilesToDiff(count, seed int) (As, Bs [][][]byte) {
 	defer runtime.GC()
-	aux := func () { // to ensure temp variables go out of scope
+	aux := func() { // to ensure temp variables go out of scope
 		stringsA, stringsB := tester.PrepareStringsToDiff(count, seed)
 		As = make([][][]byte, len(stringsA))
 		Bs = make([][][]byte, len(stringsB))
@@ -547,7 +548,7 @@ func TestDifferStructuredDump(t *testing.T) {
 		stringsToBytes("foo", "bar", "baz", "quux", "qwerty"),
 		1, 3)
 	expected := []DiffLine{DiffLine{'+', []byte("bar")},
-							DiffLine{'+', []byte("baz")}}
+		DiffLine{'+', []byte("baz")}}
 	if !reflect.DeepEqual(out, expected) {
 		t.Fatal("Differ StructuredDump failure:", out)
 	}
@@ -661,7 +662,7 @@ func TestGetUnifiedDiffString(t *testing.T) {
 	// Build diff
 	diff := UnifiedDiff{A: SplitLines(A),
 		FromFile: "file", FromDate: "then",
-		B: SplitLines(B),
+		B:      SplitLines(B),
 		ToFile: "tile", ToDate: "now", Eol: []byte{}, Context: 1}
 	// Run test
 	diffStr, err := GetUnifiedDiffString(diff)
