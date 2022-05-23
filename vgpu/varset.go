@@ -55,6 +55,7 @@ type VarSet struct {
 	NValsPer      int                 `desc:"number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible.  For Texture vars, each of the NDesc sets can have a maximum of MaxTexturesPerSet (16) -- if NValsPer > MaxTexturesPerSet, then vals are wrapped across sets, and accessing them requires using the appropriate DescIdx, as in System.CmdBindTextureVarIdx."`
 	NTextureDescs int                 `desc:"for texture vars, this is the number of descriptor sets required to represent all of the different Texture image Vals that have been allocated.  Use Vars.BindAllTextureVals to bind all such vals, and System.CmdBindTextureVarIdx to automatically bind the correct set."`
 	RoleMap       map[VarRoles][]*Var `desc:"map of vars by different roles, within this set -- updated in Config(), after all vars added"`
+	ParentVars    *Vars               `desc:"the parent vars we belong to"`
 
 	VkLayout   vk.DescriptorSetLayout `desc:"set layout info -- static description of each var type, role, binding, stages"`
 	VkDescSets []vk.DescriptorSet     `desc:"allocated descriptor set -- one of these per Vars.NDescs -- can have multiple sets that can be independently updated, e.g., for parallel rendering passes.  If only rendering one at a time, only need one."`
@@ -142,9 +143,10 @@ func (st *VarSet) Config(dev vk.Device) error {
 // same set have the same number of vals.
 // Any existing vals will be deleted -- must free all associated memory prior!
 func (st *VarSet) ConfigVals(nvals int) {
+	dev := st.ParentVars.Mem.Device.Device
 	st.NValsPer = nvals
 	for _, vr := range st.Vars {
-		vr.Vals.ConfigVals(vr, nvals)
+		vr.Vals.ConfigVals(dev, vr, nvals)
 	}
 }
 
@@ -410,6 +412,9 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 					imgs = append(imgs, di)
 				}
 			}
+		}
+		if len(imgs) == 0 {
+			return // don't add
 		}
 		wd.PImageInfo = imgs
 		wd.DescriptorCount = uint32(len(imgs))

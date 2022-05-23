@@ -61,7 +61,7 @@ func (mm *Memory) Destroy(dev vk.Device) {
 // and are ready to go with their initial data.
 // Does: AllocHost(), AllocDev()
 func (mm *Memory) Config(dev vk.Device) {
-	mm.Vars.Config(dev)
+	mm.Vars.Config()
 	mm.AllocHost()
 	mm.AllocDev()
 	mm.Vars.BindDynVarsAll()

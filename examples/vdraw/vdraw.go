@@ -76,7 +76,9 @@ func main() {
 
 	drw := &vdraw.Drawer{}
 	drw.YIsDown = true
-	drw.ConfigSurface(sf, 32) // requires 2 NDesc
+	drw.ConfigSurface(sf, 16) // requires 2 NDesc
+
+	drw.SetMaxTextures(32) // test resizing
 
 	destroy := func() {
 		vk.DeviceWaitIdle(sf.Device.Device)

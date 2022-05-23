@@ -18,6 +18,7 @@ import (
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	vk "github.com/goki/vulkan"
 )
 
 // Val represents a specific value of a Var variable.
@@ -247,7 +248,7 @@ type Vals struct {
 // repeatedly.  Otherwise, any existing vals will be deleted -- the Memory system
 // must free all associated memory prior!
 // Returns true if new config made, else false if same size.
-func (vs *Vals) ConfigVals(vr *Var, nvals int) bool {
+func (vs *Vals) ConfigVals(dev vk.Device, vr *Var, nvals int) bool {
 	if len(vs.Vals) == nvals {
 		return false
 	}
@@ -259,6 +260,9 @@ func (vs *Vals) ConfigVals(vr *Var, nvals int) bool {
 		vs.Vals[i] = vl
 		if vr.TextureOwns {
 			vl.SetFlag(int(ValTextureOwns))
+		}
+		if vl.Texture != nil {
+			vl.Texture.Dev = dev
 		}
 	}
 	return true

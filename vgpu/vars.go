@@ -48,7 +48,7 @@ func (vs *Vars) AddVertexSet() *VarSet {
 	if vs.SetMap == nil {
 		vs.SetMap = make(map[int]*VarSet)
 	}
-	st := &VarSet{Set: VertexSet}
+	st := &VarSet{Set: VertexSet, ParentVars: vs}
 	vs.SetMap[VertexSet] = st
 	vs.HasVertex = true
 	return st
@@ -65,7 +65,7 @@ func (vs *Vars) AddPushSet() *VarSet {
 	if vs.SetMap == nil {
 		vs.SetMap = make(map[int]*VarSet)
 	}
-	st := &VarSet{Set: PushSet}
+	st := &VarSet{Set: PushSet, ParentVars: vs}
 	vs.SetMap[PushSet] = st
 	vs.HasPush = true
 	return st
@@ -83,7 +83,7 @@ func (vs *Vars) AddSet() *VarSet {
 		vs.SetMap = make(map[int]*VarSet)
 	}
 	idx := vs.NSets()
-	st := &VarSet{Set: idx}
+	st := &VarSet{Set: idx, ParentVars: vs}
 	vs.SetMap[idx] = st
 	return st
 }
@@ -121,7 +121,8 @@ func (vs *Vars) ValByIdxTry(set int, varName string, valIdx int) (*Var, *Val, er
 // Config must be called after all variables have been added.
 // Configures all Sets and also does validation, returning error
 // does DescLayout too, so all ready for Pipeline config.
-func (vs *Vars) Config(dev vk.Device) error {
+func (vs *Vars) Config() error {
+	dev := vs.Mem.Device.Device
 	ns := vs.NSets()
 	var cerr error
 	vs.RoleMap = make(map[VarRoles][]*Var)
@@ -234,6 +235,12 @@ func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 // DescLayout configures the PipelineLayout of DescriptorSetLayout
 // info for all of the non-Vertex vars
 func (vs *Vars) DescLayout(dev vk.Device) {
+	if vs.VkDescLayout != nil {
+		vk.DestroyPipelineLayout(dev, vs.VkDescLayout, nil)
+	}
+	if vs.VkDescPool != nil {
+		vk.DestroyDescriptorPool(dev, vs.VkDescPool, nil)
+	}
 	if vs.NDescs < 1 {
 		vs.NDescs = 1
 	}
@@ -264,6 +271,9 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 			for _, vr := range vl {
 				dcount += vs.NDescs * len(vr.Vals.Vals)
 			}
+		}
+		if dcount == 0 {
+			continue
 		}
 		pl := vk.DescriptorPoolSize{
 			DescriptorCount: uint32(dcount),

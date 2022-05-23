@@ -53,6 +53,18 @@ func (dw *Drawer) ConfigFrame(dev *vgpu.Device, size image.Point, maxTextures in
 	dw.ConfigSys()
 }
 
+// SetMaxTextures updates the max number of textures for drawing
+// Must call this prior to doing any allocation of images.
+func (dw *Drawer) SetMaxTextures(maxTextures int) {
+	sy := &dw.Sys
+	vars := sy.Vars()
+	txset := vars.SetMap[0]
+	txset.ConfigVals(maxTextures)
+	dw.Impl.MaxTextures = maxTextures
+	vars.NDescs = vgpu.NDescForTextures(dw.Impl.MaxTextures)
+	vars.Config() // update after config changes
+}
+
 func (dw *Drawer) Destroy() {
 	dw.Sys.Destroy()
 	if dw.Frame != nil {

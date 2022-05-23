@@ -49,7 +49,9 @@ func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 
 // ConfigSys configures the vDraw System and pipelines.
 func (dw *Drawer) ConfigSys() {
-	dpl := dw.Sys.NewPipeline("draw")
+	sy := &dw.Sys
+
+	dpl := sy.NewPipeline("draw")
 	dw.ConfigPipeline(dpl)
 
 	cb, _ := content.ReadFile("shaders/draw_vert.spv")
@@ -57,7 +59,7 @@ func (dw *Drawer) ConfigSys() {
 	cb, _ = content.ReadFile("shaders/draw_frag.spv")
 	dpl.AddShaderCode("draw_frag", vgpu.FragmentShader, cb)
 
-	fpl := dw.Sys.NewPipeline("fill")
+	fpl := sy.NewPipeline("fill")
 	dw.ConfigPipeline(fpl)
 
 	cb, _ = content.ReadFile("shaders/fill_vert.spv")
@@ -65,7 +67,7 @@ func (dw *Drawer) ConfigSys() {
 	cb, _ = content.ReadFile("shaders/fill_frag.spv")
 	fpl.AddShaderCode("fill_frag", vgpu.FragmentShader, cb)
 
-	vars := dw.Sys.Vars()
+	vars := sy.Vars()
 	vars.NDescs = vgpu.NDescForTextures(dw.Impl.MaxTextures)
 	vset := vars.AddVertexSet()
 	pcset := vars.AddPushSet()
@@ -87,7 +89,7 @@ func (dw *Drawer) ConfigSys() {
 	txset.ConfigVals(dw.Impl.MaxTextures)
 
 	// note: add all values per above before doing Config
-	dw.Sys.Config()
+	sy.Config()
 
 	// note: first val in set is offset
 	rectPos, _ := posv.Vals.ValByIdxTry(0)
@@ -103,7 +105,7 @@ func (dw *Drawer) ConfigSys() {
 	idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
 	rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
 
-	dw.Sys.Mem.SyncToGPU()
+	sy.Mem.SyncToGPU()
 
 	vars.BindVertexValIdx("Pos", 0)
 	vars.BindVertexValIdx("Index", 0)
@@ -192,23 +194,6 @@ func (dw *Drawer) ConfigMtxs(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 			0, py - sy, 0, // py - sy
 			px, sy, 1})
 	}
-
-	// fmt.Printf("MVP: %v   UVP: %v  \n", tmat.MVP, tmat.UVP)
-	// z := float32(1)
-	// coords := []mat32.Vec4{
-	// 	{0.0, 0.0, z, 1},
-	// 	{0.0, 1.0, z, 1},
-	// 	{1.0, 0.0, z, 1},
-	// 	{1.0, 1.0, z, 1}}
-	// for _, v := range coords {
-	// 	tv := v.MulMat4(&tmat.MVP)
-	// 	fmt.Printf("v: %v   tv: %v\n", v, tv)
-	// }
-
-	// vars := dw.Sys.Vars()
-	// _, mat, _ := vars.ValByIdxTry(0, "Mtxs", 0)
-	// mat.CopyBytes(unsafe.Pointer(&tmat))
-	// dw.Sys.Mem.SyncToGPU()
 
 	return &tmat
 }
