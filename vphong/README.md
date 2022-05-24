@@ -1,5 +1,8 @@
 # vPhong is a Blinn-Phong rendering system in vGPU
 
+Blinn-Phong is a standard lighting model that used to be built into OpenGL, and is widely used in 3D graphics: [wikipedia Blinn-Phong](https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model),  [learnopengl.com](https://learnopengl.com/Lighting/Basic-Lighting).
+
+
 Supports 4 different types of lights, with a max of 8 instances of each light type:
 
 * Ambient: light emitted from everywhere -- provides a background of diffuse light bouncing around in all directions.

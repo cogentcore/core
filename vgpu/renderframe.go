@@ -110,10 +110,15 @@ func (rf *RenderFrame) SetRender(rp *Render) {
 	}
 }
 
-// SetSize sets the size for the render frame
-func (rf *RenderFrame) SetSize(size image.Point) {
+// SetSize sets the size for the render frame,
+// doesn't do anything if already that size (returns fale)
+func (rf *RenderFrame) SetSize(size image.Point) bool {
+	if rf.Format.Size == size {
+		return false
+	}
 	rf.Format.Size = size
 	rf.ReConfig()
+	return true
 }
 
 // ReConfig reconfigures rendering

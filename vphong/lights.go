@@ -18,6 +18,13 @@ type NLights struct {
 	Spot    int32
 }
 
+func (nl *NLights) Reset() {
+	nl.Ambient = 0
+	nl.Dir = 0
+	nl.Point = 0
+	nl.Spot = 0
+}
+
 // AmbientLight provides diffuse uniform lighting -- typically only one of these
 type AmbientLight struct {
 	Color mat32.Vec3 `desc:"color of light -- multiplies ambient color of materials"`
@@ -88,38 +95,61 @@ func (ph *Phong) ConfigLights() {
 	vs.BindDynVal(vars, slv, sl)
 }
 
+// ResetNLights resets number of lights to 0 -- for reconfig
+func (ph *Phong) ResetNLights() {
+	ph.NLights.Reset()
+}
+
 // AddAmbientLight adds Ambient light at given position
 func (ph *Phong) AddAmbientLight(color mat32.Vec3) {
-	ph.Ambient[ph.NLights.Ambient].Color = color
+	ph.SetAmbientLight(int(ph.NLights.Ambient), color)
 	ph.NLights.Ambient++
+}
+
+// SetAmbientLight sets Ambient light at index to given position
+func (ph *Phong) SetAmbientLight(idx int, color mat32.Vec3) {
+	ph.Ambient[idx].Color = color
 }
 
 // AddDirLight adds directional light
 func (ph *Phong) AddDirLight(color, pos mat32.Vec3) {
-	// dir.Y = -dir.Y // flipy
-	ph.Dir[ph.NLights.Dir].Color = color
-	ph.Dir[ph.NLights.Dir].Pos = pos
+	ph.SetDirLight(int(ph.NLights.Dir), color, pos)
 	ph.NLights.Dir++
+}
+
+// SetDirLight sets directional light at given index
+func (ph *Phong) SetDirLight(idx int, color, pos mat32.Vec3) {
+	ph.Dir[idx].Color = color
+	ph.Dir[idx].Pos = pos
 }
 
 // AddPointLight adds point light.
 // Defaults: linDecay=.1, quadDecay=.01
 func (ph *Phong) AddPointLight(color, pos mat32.Vec3, linDecay, quadDecay float32) {
-	// pos.Y = -pos.Y // flipy
-	ph.Point[ph.NLights.Point].Color = color
-	ph.Point[ph.NLights.Point].Pos = pos
-	ph.Point[ph.NLights.Point].Decay = mat32.Vec3{X: linDecay, Y: quadDecay}
+	ph.SetPointLight(int(ph.NLights.Point), color, pos, linDecay, quadDecay)
 	ph.NLights.Point++
+}
+
+// SetPointLight sets point light at given index.
+// Defaults: linDecay=.1, quadDecay=.01
+func (ph *Phong) SetPointLight(idx int, color, pos mat32.Vec3, linDecay, quadDecay float32) {
+	ph.Point[idx].Color = color
+	ph.Point[idx].Pos = pos
+	ph.Point[idx].Decay = mat32.Vec3{X: linDecay, Y: quadDecay}
 }
 
 // AddSpotLight adds spot light
 // Defaults: angDecay=15, cutAngle=45 (max 90), linDecay=.01, quadDecay=0.001
 func (ph *Phong) AddSpotLight(color, pos, dir mat32.Vec3, angDecay, cutAngle, linDecay, quadDecay float32) {
-	// pos.Y = -pos.Y // flipy
-	// dir.Y = -dir.Y // flipy
-	ph.Spot[ph.NLights.Spot].Color = color
-	ph.Spot[ph.NLights.Spot].Pos = pos
-	ph.Spot[ph.NLights.Spot].Dir = dir
-	ph.Spot[ph.NLights.Spot].Decay = mat32.Vec4{X: angDecay, Y: cutAngle, Z: linDecay, W: quadDecay}
+	ph.SetSpotLight(int(ph.NLights.Spot), color, pos, dir, angDecay, cutAngle, linDecay, quadDecay)
 	ph.NLights.Spot++
+}
+
+// SetSpotLight sets spot light at given index
+// Defaults: angDecay=15, cutAngle=45 (max 90), linDecay=.01, quadDecay=0.001
+func (ph *Phong) SetSpotLight(idx int, color, pos, dir mat32.Vec3, angDecay, cutAngle, linDecay, quadDecay float32) {
+	ph.Spot[idx].Color = color
+	ph.Spot[idx].Pos = pos
+	ph.Spot[idx].Dir = dir
+	ph.Spot[idx].Decay = mat32.Vec4{X: angDecay, Y: cutAngle, Z: linDecay, W: quadDecay}
 }

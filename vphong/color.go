@@ -65,6 +65,11 @@ func (ph *Phong) UseColorName(name string) error {
 	return nil
 }
 
+// UseColors sets the color values for current render step
+func (ph *Phong) UseColor(clr, emis color.Color, shiny, reflect, bright float32) {
+	ph.Cur.Color.SetColors(clr, emis, shiny, reflect, bright)
+}
+
 // RenderOnecolor renders current settings to onecolor pipeline
 func (ph *Phong) RenderOnecolor() {
 	sy := &ph.Sys

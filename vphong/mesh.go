@@ -46,6 +46,11 @@ func (ph *Phong) AllocMeshes() {
 	}
 }
 
+// ResetMeshes resets the meshes for reconfiguring
+func (ph *Phong) ResetMeshes() {
+	ph.Meshes.Reset()
+}
+
 // ConfigMeshes configures the rendering for the meshes
 func (ph *Phong) ConfigMeshes() {
 	// vars := ph.Sys.Vars()
@@ -56,6 +61,11 @@ func (ph *Phong) ConfigMeshes() {
 // and optional per-vertex color
 func (ph *Phong) AddMesh(name string, nVtx, nIdx int, hasColor bool) {
 	ph.Meshes.Add(name, &Mesh{NVtx: nVtx, NIdx: nIdx, HasColor: hasColor})
+}
+
+// DeleteMesh deletes Mesh with name
+func (ph *Phong) DeleteMesh(name string) {
+	ph.Meshes.DeleteKey(name)
 }
 
 // UseMeshName selects mesh by name for current render step

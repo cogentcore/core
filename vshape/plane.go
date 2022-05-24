@@ -83,22 +83,28 @@ func SetPlaneAxisSize(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Array
 		sz.Set(thin, hSz.Y, hSz.X)
 		if normNeg {
 			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.Z, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nx
+			sz.X += -offset
 		} else {
 			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.Z, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // px
+			sz.X += offset
 		}
 	case mat32.Y:
 		sz.Set(hSz.X, thin, hSz.Y)
 		if normNeg {
 			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
+			sz.Y += -offset
 		} else {
 			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
+			sz.Y += offset
 		}
 	case mat32.Z:
 		sz.Set(hSz.X, hSz.Y, thin)
 		if normNeg {
 			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nz
+			sz.Z += -offset
 		} else {
 			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // pz
+			sz.Z += offset
 		}
 	}
 	return sz

@@ -38,6 +38,11 @@ func (ph *Phong) AddTexture(name string, tex *Texture) {
 	ph.Textures.Add(name, tex)
 }
 
+// DeleteTexture deletes texture with name
+func (ph *Phong) DeleteTexture(name string) {
+	ph.Textures.DeleteKey(name)
+}
+
 // AllocTextures allocates vals for textures
 func (ph *Phong) AllocTextures() {
 	vars := ph.Sys.Vars()
@@ -57,9 +62,15 @@ func (ph *Phong) ConfigTextures() {
 		_, img, _ := txset.ValByIdxTry("Tex", i)
 		img.SetGoImage(kv.Val.Image, 0, vgpu.FlipY)
 	}
-	vars.BindVarsStart(0)          // only one set of bindings
-	vars.BindStatVars(int(TexSet)) // gets images
-	vars.BindVarsEnd()
+	vars.BindAllTextureVars(int(TexSet)) // gets images
+}
+
+// ResetTextures resets all textures
+func (ph *Phong) ResetTextures() {
+	vars := ph.Sys.Vars()
+	txset := vars.SetMap[int(TexSet)]
+	txset.Destroy(ph.Sys.Device.Device)
+	ph.Textures.Reset()
 }
 
 // UseNoTexture turns off texture rendering
