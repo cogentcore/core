@@ -11,7 +11,7 @@ import (
 )
 
 // Light represents a light that illuminates a scene
-// these are stored on the overall scene and not within the graph
+// these are stored on the Scene object and not within the graph
 type Light interface {
 	// Name returns name of the light -- lights are accessed by name
 	Name() string
@@ -164,18 +164,13 @@ func AddNewSpotLight(sc *Scene, name string, lumens float32, color LightColors) 
 	return lt
 }
 
-// ViewPos gets the position of the light, pre-computing the view transform
-func (sl *SpotLight) ViewPos(viewMat *mat32.Mat4) mat32.Vec3 {
-	return sl.Pose.Pos.MulMat4AsVec4(viewMat, 1) // note: 1 and no Normal
-}
-
 // ViewDir gets the direction normal vector, pre-computing the view transform
-func (sl *SpotLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
+func (sl *SpotLight) ViewDir() mat32.Vec3 {
 	idmat := mat32.NewMat4()
 	sl.Pose.UpdateMatrix()
 	sl.Pose.UpdateWorldMatrix(idmat)
-	sl.Pose.UpdateMVPMatrix(viewMat, idmat)
-	vd := mat32.Vec3{0, 0, -1}.MulMat4AsVec4(&sl.Pose.MVMatrix, 0).Normal()
+	// sl.Pose.UpdateMVPMatrix(viewMat, idmat)
+	vd := mat32.Vec3{0, 0, -1}.MulMat4AsVec4(&sl.Pose.WorldMatrix, 0).Normal()
 	return vd
 }
 
@@ -189,65 +184,31 @@ func (sl *SpotLight) LookAtOrigin() {
 	sl.LookAt(mat32.Vec3Zero, mat32.Vec3Y)
 }
 
-/////////////////////////////////////////////////////////////////////////\
-//  Set Lights to Renderers
+/////////////////////////////////////////////////////////////////////////
+//  Scene code
 
-// SetLightsUnis sets the lights and recompiles the programs accordingly
-// Must be called with proper context activated, on main thread
-func (rn *Renderers) SetLightsUnis(sc *Scene) {
-	lu, ok := rn.Unis["Lights"]
-	if !ok {
-		return
-	}
-	var ambs []mat32.Vec3
-	var dirs []mat32.Vec3
-	var points []mat32.Vec3
-	var spots []mat32.Vec3
-	sc.Camera.CamMu.RLock()
-	for _, lt := range sc.Lights {
-		clr := ColorToVec3f(lt.Color()).MulScalar(lt.Lumens())
+// AddLight adds given light to lights
+// see AddNewX for convenience methods to add specific lights
+func (sc *Scene) AddLight(lt Light) {
+	sc.Lights.Add(lt.Name(), lt)
+}
+
+// ConfigLights configures 3D rendering for current lights
+func (sc *Scene) ConfigLights() {
+	sc.Phong.ResetNLights()
+	for _, ltkv := range sc.Lights.Order {
+		lt := ltkv.Val
+		clr := mat32.NewVec3Color(lt.Color()).MulScalar(lt.Lumens())
 		switch l := lt.(type) {
 		case *AmbientLight:
-			ambs = append(ambs, clr)
+			sc.Phong.AddAmbientLight(clr)
 		case *DirLight:
-			dirs = append(dirs, clr)
-			dirs = append(dirs, l.ViewDir(&sc.Camera.ViewMatrix))
+			sc.Phong.AddDirLight(clr, l.Pos)
 		case *PointLight:
-			points = append(points, clr)
-			points = append(points, l.ViewPos(&sc.Camera.ViewMatrix))
-			points = append(points, mat32.Vec3{l.LinDecay, l.QuadDecay, 0})
+			sc.Phong.AddPointLight(clr, l.Pos, l.LinDecay, l.QuadDecay)
 		case *SpotLight:
-			spots = append(spots, clr)
-			spots = append(spots, l.ViewPos(&sc.Camera.ViewMatrix))
-			spots = append(spots, l.ViewDir(&sc.Camera.ViewMatrix))
-			spots = append(spots, mat32.Vec3{l.AngDecay, l.CutoffAngle, l.LinDecay})
-			spots = append(spots, mat32.Vec3{l.QuadDecay, 0, 0})
+			sc.Phong.AddSpotLight(clr, l.Pose.Pos, l.ViewDir(), l.AngDecay, l.CutoffAngle, l.LinDecay, l.QuadDecay)
 		}
-	}
-	sc.Camera.CamMu.RUnlock()
-	// set new lengths first
-	ambu := lu.UniformByName("AmbLights")
-	ambu.SetLen(len(ambs))
-	diru := lu.UniformByName("DirLights")
-	diru.SetLen(len(dirs))
-	ptu := lu.UniformByName("PointLights")
-	ptu.SetLen(len(points))
-	spu := lu.UniformByName("SpotLights")
-	spu.SetLen(len(spots))
-
-	lu.Resize()
-
-	if len(ambs) > 0 {
-		ambu.SetValue(ambs)
-	}
-	if len(dirs) > 0 {
-		diru.SetValue(dirs)
-	}
-	if len(points) > 0 {
-		ptu.SetValue(points)
-	}
-	if len(spots) > 0 {
-		spu.SetValue(spots)
 	}
 }
 

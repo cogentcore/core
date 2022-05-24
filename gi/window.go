@@ -185,7 +185,7 @@ type Window struct {
 	delPop        bool
 	skippedResize *window.Event
 	lastEt        oswin.EventType
-	dirDraws      WindowDrawers // direct upload regions
+	DirDraws      WindowDrawers // direct upload regions
 	popDraws      WindowDrawers // popup regions
 	updtRegs      WindowUpdates // misc vp update regions
 }
@@ -348,8 +348,8 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	drw := win.OSWin.Drawer()
 	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
 
-	win.dirDraws.SetIdxRange(1, MaxDirectUploads)
-	win.popDraws.SetIdxRange(win.dirDraws.MaxIdx, MaxPopups)
+	win.DirDraws.SetIdxRange(1, MaxDirectUploads)
+	win.popDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
 	win.updtRegs.SetIdxRange(RegionUpdateStart, MaxRegionUpdates)
 	return win
 }
@@ -788,6 +788,9 @@ func (w *Window) Closed() {
 	} else {
 		WindowGlobalMu.Unlock()
 	}
+	for _, dukv := range w.DirDraws.Nodes.Order {
+		dukv.Key.This().Disconnect() // does delete
+	}
 	// these are managed by the window itself
 	w.Sprites.Reset()
 	w.UpMu.Unlock()
@@ -1184,7 +1187,7 @@ func (w *Window) Publish() {
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
-	w.dirDraws.DrawImages(drw)
+	w.DirDraws.DrawImages(drw)
 	w.popDraws.DrawImages(drw)
 
 	drw.UseTextureSet(1)
@@ -1228,31 +1231,53 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win.Publish()
 }
 
-// todo: replace with saving direct upload image
-
-/*
-// AddDirectUploader adds given node to those that have a DirectWinUpload method
-// and directly render to the WinTex via their own method, without going via a
-// Viewport2D as is the case for 2D popups.  This is for gi3d.Scene for example.
-func (w *Window) AddDirectUploader(node Node2D) {
-	w.UpMu.Lock()
-	if w.DirectUps == nil {
-		w.DirectUps = make(map[Node2D]Node2D)
+// DirectUploads tells directuploaders to upload to WinTex
+func (w *Window) DirectUploads() {
+	for i, dukv := range w.DirDraws.Nodes.Order {
+		du := dukv.Key
+		if du.IsDestroyed() {
+			w.DirDraws.Nodes.DeleteIdx(i, i+1)
+			continue
+		}
+		// du.DirectWinUpload() // upload directly to WinTex
 	}
-	w.DirectUps[node] = node
+}
+
+// DirectUpdate is called when a DirectUpload node wants to update
+// on its own initiative (not as a result of larger update)
+// if there aren't any popups, it can just render, otherwise
+// needs to do UploadAllViewports
+func (w *Window) DirectUpdate(du Node2D) {
+	w.UpMu.Lock()
+	if !w.IsVisible() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
+	if len(w.PopupStack) == 0 && w.Popup == nil {
+		du.DirectWinUpload() // upload directly to WinTex
+		w.UpMu.Unlock()
+		return
+	}
 	w.UpMu.Unlock()
+	w.UploadAllViewports()
+}
+
+// AddDirectUploader adds given node to those that have a DirectWinUpload method
+// and directly render to the Drawer Texture via their own method.
+// This is for gi3d.Scene for example.  Returns the index of the image to upload to.
+func (w *Window) AddDirectUploader(node Node2D) int {
+	w.UpMu.Lock()
+	idx, _ := w.DirDraws.Add(node, image.ZR)
+	w.UpMu.Unlock()
+	return idx
 }
 
 // DeleteDirectUploader removes given node to those that have a DirectWinUpload method.
 func (w *Window) DeleteDirectUploader(node Node2D) {
-	if w.DirectUps == nil {
-		return
-	}
 	w.UpMu.Lock()
-	delete(w.DirectUps, node)
+	w.DirDraws.Nodes.DeleteKey(node.AsGiNode())
 	w.UpMu.Unlock()
 }
-*/
 
 /////////////////////////////////////////////////////////////////////////////
 //                   Sprites

@@ -5,18 +5,12 @@
 package main
 
 import (
-	"log"
-	"math"
-	"time"
-
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
-	"github.com/goki/mat32"
 )
 
 func main() {
@@ -25,6 +19,7 @@ func main() {
 	})
 }
 
+/*
 // Anim has control for animating
 type Anim struct {
 	On            bool         `desc:"run the animation"`
@@ -110,6 +105,7 @@ func (an *Anim) Animate() {
 		an.Ang += an.Speed
 	}
 }
+*/
 
 func mainrun() {
 	width := 1024
@@ -202,173 +198,175 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2
 	bcb.Mat.Color.SetName("blue")
-	bcb.Mat.Shiny = 10 // note: this will be overridden by the css sheet
-
-	bcb.Mat.Specular.SetName("blue") // how you get rid of specular highlights
+	bcb.Mat.Shiny = 10       // note: this will be overridden by the css sheet
+	bcb.Mat.Reflective = 0.2 // not very shiny
 
 	gcb := gi3d.AddNewSolid(sc, sc, "green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 	gcb.Class = "cube"
 
-	lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
-	lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())
-	lns.Pose.Pos.Set(0, 0, 1)
-	lns.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
-	// sc.Wireframe = true                      // debugging
+	/*
+		lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
+		lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())
+		lns.Pose.Pos.Set(0, 0, 1)
+		lns.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
+		// sc.Wireframe = true                      // debugging
 
-	// this line should go from lower left front of red cube to upper vertex of above hi-line
-	cyan := gist.Color{}
-	cyan.SetUInt8(0, 255, 255, 255)
-	gi3d.AddNewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
+		// this line should go from lower left front of red cube to upper vertex of above hi-line
+		cyan := gist.Color{}
+		cyan.SetUInt8(0, 255, 255, 255)
+		gi3d.AddNewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
 
-	// bbclr := gist.Color{}
-	// bbclr.SetUInt8(255, 255, 0, 255)
-	// gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, gi3d.Active)
+		// bbclr := gist.Color{}
+		// bbclr.SetUInt8(255, 255, 0, 255)
+		// gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, gi3d.Active)
 
-	cylm := gi3d.AddNewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
-	cyl := gi3d.AddNewSolid(sc, sc, "cylinder", cylm.Name())
-	cyl.Pose.Pos.Set(-2.25, 0, 0)
+		cylm := gi3d.AddNewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
+		cyl := gi3d.AddNewSolid(sc, sc, "cylinder", cylm.Name())
+		cyl.Pose.Pos.Set(-2.25, 0, 0)
 
-	capm := gi3d.AddNewCapsule(sc, "capsule", 1.5, .5, 32, 1)
-	caps := gi3d.AddNewSolid(sc, sc, "capsule", capm.Name())
-	caps.Pose.Pos.Set(3.25, 0, 0)
-	caps.Mat.Color.SetName("tan")
+		capm := gi3d.AddNewCapsule(sc, "capsule", 1.5, .5, 32, 1)
+		caps := gi3d.AddNewSolid(sc, sc, "capsule", capm.Name())
+		caps.Pose.Pos.Set(3.25, 0, 0)
+		caps.Mat.Color.SetName("tan")
 
-	sphm := gi3d.AddNewSphere(sc, "sphere", .75, 32)
-	sph := gi3d.AddNewSolid(sc, sc, "sphere", sphm.Name())
-	sph.Pose.Pos.Set(0, -2, 0)
-	sph.Mat.Color.SetName("orange")
-	sph.Mat.Color.A = 200
+		sphm := gi3d.AddNewSphere(sc, "sphere", .75, 32)
+		sph := gi3d.AddNewSolid(sc, sc, "sphere", sphm.Name())
+		sph.Pose.Pos.Set(0, -2, 0)
+		sph.Mat.Color.SetName("orange")
+		sph.Mat.Color.A = 200
 
-	// Good strategy for objects if used in multiple places is to load
-	// into library, then add from there.
-	lgo, err := sc.OpenToLibrary("gopher.obj", "")
-	if err != nil {
-		log.Println(err)
-	}
-	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
-
-	gogp := gi3d.AddNewGroup(sc, sc, "go-group")
-
-	bgo, _ := sc.AddFmLibrary("gopher", gogp)
-	bgo.Pose.Scale.Set(.5, .5, .5)
-	bgo.Pose.Pos.Set(1.4, -2.5, 0)
-	bgo.Pose.SetAxisRotation(0, 1, 0, -160)
-
-	sgo, _ := sc.AddFmLibrary("gopher", gogp)
-	sgo.Pose.Pos.Set(-1.5, -2, 0)
-	sgo.Pose.Scale.Set(.2, .2, .2)
-
-	trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
-	trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
-	trs.Pose.Pos.Set(-1.6, -1.6, -.2)
-	trs.Pose.SetAxisRotation(1, 0, 0, 90)
-	trs.Mat.Color.SetName("white")
-	trs.Mat.Color.A = 200
-
-	grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
-	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
-
-	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
-	floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
-	floor.Pose.Pos.Set(0, -5, 0)
-	floor.Mat.Color.SetName("tan")
-	// // floor.Mat.Emissive.SetName("brown")
-	// floor.Mat.Bright = 2 // .5 for wood / brown
-	floor.Mat.SetTexture(sc, grtx)
-	floor.Mat.Tiling.Repeat.Set(40, 40)
-	floor.SetInactive() // not selectable
-
-	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
-	// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
-	// txt.SetProp("background-color", "white")
-	txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
-	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
-	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
-	txt.SetProp("text-align", gist.AlignLeft) // gi.AlignCenter)
-	txt.Pose.Scale.SetScalar(0.2)
-	txt.Pose.Pos.Set(0, 2.2, 0)
-
-	tcg := gi3d.AddNewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
-	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
-	fpgun.Pose.Scale.Set(.1, .1, 1)
-	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
-	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
-
-	sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
-
-	///////////////////////////////////////////////////
-	//  Animation & Embedded controls
-
-	anim := &Anim{}
-	anim.Start(sc, false) // start without animation running
-
-	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
-	emb.Pose.Pos.Set(-2, 2, 0)
-	// emb.Zoom = 1.5   // this is how to rescale overall size
-	evlay := gi.AddNewFrame(emb.Viewport, "vlay", gi.LayoutVert)
-	evlay.SetProp("margin", units.NewEx(1))
-
-	eabut := gi.AddNewCheckBox(evlay, "anim-but")
-	eabut.SetText("Animate")
-	eabut.Tooltip = "toggle animation on and off"
-	eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonToggled) {
-			anim.On = eabut.IsChecked()
+		// Good strategy for objects if used in multiple places is to load
+		// into library, then add from there.
+		lgo, err := sc.OpenToLibrary("gopher.obj", "")
+		if err != nil {
+			log.Println(err)
 		}
-	})
+		lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
-	cmb := gi.AddNewMenuButton(evlay, "anim-ctrl")
-	cmb.SetText("Anim Ctrl")
-	cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
-	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			anim.DoTorus = !anim.DoTorus
+		gogp := gi3d.AddNewGroup(sc, sc, "go-group")
+
+		bgo, _ := sc.AddFmLibrary("gopher", gogp)
+		bgo.Pose.Scale.Set(.5, .5, .5)
+		bgo.Pose.Pos.Set(1.4, -2.5, 0)
+		bgo.Pose.SetAxisRotation(0, 1, 0, -160)
+
+		sgo, _ := sc.AddFmLibrary("gopher", gogp)
+		sgo.Pose.Pos.Set(-1.5, -2, 0)
+		sgo.Pose.Scale.Set(.2, .2, .2)
+
+		trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
+		trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
+		trs.Pose.Pos.Set(-1.6, -1.6, -.2)
+		trs.Pose.SetAxisRotation(1, 0, 0, 90)
+		trs.Mat.Color.SetName("white")
+		trs.Mat.Color.A = 200
+
+		grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
+		// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
+
+		floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
+		floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
+		floor.Pose.Pos.Set(0, -5, 0)
+		floor.Mat.Color.SetName("tan")
+		// // floor.Mat.Emissive.SetName("brown")
+		// floor.Mat.Bright = 2 // .5 for wood / brown
+		floor.Mat.SetTexture(sc, grtx)
+		floor.Mat.Tiling.Repeat.Set(40, 40)
+		floor.SetInactive() // not selectable
+
+		txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+		// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
+		// txt.SetProp("background-color", "white")
+		txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
+		// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
+		// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
+		txt.SetProp("text-align", gist.AlignLeft) // gi.AlignCenter)
+		txt.Pose.Scale.SetScalar(0.2)
+		txt.Pose.Pos.Set(0, 2.2, 0)
+
+		tcg := gi3d.AddNewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
+		fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
+		fpgun.Pose.Scale.Set(.1, .1, 1)
+		fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
+		fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
+
+		sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
+		sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
+
+		///////////////////////////////////////////////////
+		//  Animation & Embedded controls
+
+		anim := &Anim{}
+		anim.Start(sc, false) // start without animation running
+
+		emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
+		emb.Pose.Pos.Set(-2, 2, 0)
+		// emb.Zoom = 1.5   // this is how to rescale overall size
+		evlay := gi.AddNewFrame(emb.Viewport, "vlay", gi.LayoutVert)
+		evlay.SetProp("margin", units.NewEx(1))
+
+		eabut := gi.AddNewCheckBox(evlay, "anim-but")
+		eabut.SetText("Animate")
+		eabut.Tooltip = "toggle animation on and off"
+		eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.ButtonToggled) {
+				anim.On = eabut.IsChecked()
+			}
 		})
-	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Gopher"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			anim.DoGopher = !anim.DoGopher
-		})
-	cmb.Menu.AddAction(gi.ActOpts{Label: "Edit Anim"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
-		})
 
-	sprw := gi.AddNewLayout(evlay, "speed-lay", gi.LayoutHoriz)
-	gi.AddNewLabel(sprw, "speed-lbl", "Speed: ")
-	sb := gi.AddNewSpinBox(sprw, "anim-speed")
-	sb.Defaults()
-	sb.HasMin = true
-	sb.Min = 0.01
-	sb.Step = 0.01
-	sb.SetValue(anim.Speed)
-	sb.Tooltip = "determines the speed of rotation (step size)"
+		cmb := gi.AddNewMenuButton(evlay, "anim-ctrl")
+		cmb.SetText("Anim Ctrl")
+		cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
+		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
+			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				anim.DoTorus = !anim.DoTorus
+			})
+		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Gopher"},
+			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				anim.DoGopher = !anim.DoGopher
+			})
+		cmb.Menu.AddAction(gi.ActOpts{Label: "Edit Anim"},
+			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
+			})
 
-	spsld := gi.AddNewSlider(evlay, "speed-slider")
-	spsld.Dim = mat32.X
-	spsld.Defaults()
-	spsld.Min = 0.01
-	spsld.Max = 1
-	spsld.Step = 0.01
-	spsld.PageStep = 0.1
-	spsld.SetMinPrefWidth(units.NewEm(20))
-	spsld.SetMinPrefHeight(units.NewEm(2))
-	spsld.SetValue(anim.Speed)
-	// spsld.Tracking = true
-	spsld.Icon = gi.IconName("circlebutton-on")
+		sprw := gi.AddNewLayout(evlay, "speed-lay", gi.LayoutHoriz)
+		gi.AddNewLabel(sprw, "speed-lbl", "Speed: ")
+		sb := gi.AddNewSpinBox(sprw, "anim-speed")
+		sb.Defaults()
+		sb.HasMin = true
+		sb.Min = 0.01
+		sb.Step = 0.01
+		sb.SetValue(anim.Speed)
+		sb.Tooltip = "determines the speed of rotation (step size)"
 
-	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		anim.Speed = sb.Value
+		spsld := gi.AddNewSlider(evlay, "speed-slider")
+		spsld.Dim = mat32.X
+		spsld.Defaults()
+		spsld.Min = 0.01
+		spsld.Max = 1
+		spsld.Step = 0.01
+		spsld.PageStep = 0.1
+		spsld.SetMinPrefWidth(units.NewEm(20))
+		spsld.SetMinPrefHeight(units.NewEm(2))
 		spsld.SetValue(anim.Speed)
-	})
-	spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if gi.SliderSignals(sig) == gi.SliderValueChanged {
-			anim.Speed = data.(float32)
-			sb.SetValue(anim.Speed)
-		}
-	})
+		// spsld.Tracking = true
+		spsld.Icon = gi.IconName("circlebutton-on")
+
+		sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			anim.Speed = sb.Value
+			spsld.SetValue(anim.Speed)
+		})
+		spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if gi.SliderSignals(sig) == gi.SliderValueChanged {
+				anim.Speed = data.(float32)
+				sb.SetValue(anim.Speed)
+			}
+		})
+
+	*/
 
 	//	menu config etc
 

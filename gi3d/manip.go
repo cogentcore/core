@@ -97,12 +97,14 @@ func (sc *Scene) SelectBox() {
 	updt := sc.UpdateStart()
 	defer sc.UpdateEnd(updt)
 
+	/* todo
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
 	clr, _ := gist.ColorFromName(string(sc.SelParams.Color))
 	AddNewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sc.SelParams.Width, clr, Inactive)
 	sc.InitMesh(SelBoxName + "-front")
 	sc.InitMesh(SelBoxName + "-side")
+	*/
 }
 
 // ManipBox draws a manipulation box around selected node
@@ -113,6 +115,8 @@ func (sc *Scene) ManipBox() {
 	}
 	updt := sc.UpdateStart()
 	defer sc.UpdateEnd(updt)
+
+	/* todo
 	nm := ManipBoxName
 
 	nb := sc.CurSel.AsNode3D()
@@ -138,6 +142,7 @@ func (sc *Scene) ManipBox() {
 	sc.InitMesh(nm + "-front")
 	sc.InitMesh(nm + "-side")
 	sc.InitMesh(nm + "-pt")
+	*/
 }
 
 // SetManipPt sets the CurManipPt

@@ -94,18 +94,6 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 		}
 		mt.Emissive.SetIFace(val, ctxt, key)
 	},
-	"specular": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
-		mt := obj.(*Material)
-		if inh, init := gist.StyleInhInit(val, par); inh || init {
-			if inh {
-				mt.Specular = par.(*Material).Specular
-			} else if init {
-				mt.Specular.SetUInt8(255, 255, 255, 255)
-			}
-			return
-		}
-		mt.Specular.SetIFace(val, ctxt, key)
-	},
 	"shiny": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
 		mt := obj.(*Material)
 		if inh, init := gist.StyleInhInit(val, par); inh || init {
@@ -118,6 +106,20 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 		}
 		if iv, ok := kit.ToFloat32(val); ok {
 			mt.Shiny = iv
+		}
+	},
+	"reflective": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
+		mt := obj.(*Material)
+		if inh, init := gist.StyleInhInit(val, par); inh || init {
+			if inh {
+				mt.Reflective = par.(*Material).Reflective
+			} else if init {
+				mt.Reflective = 1
+			}
+			return
+		}
+		if iv, ok := kit.ToFloat32(val); ok {
+			mt.Reflective = iv
 		}
 	},
 	"bright": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {

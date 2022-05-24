@@ -101,7 +101,7 @@ type Node3D interface {
 
 	// Render3D is called by Scene Render3D on main thread,
 	// everything ready to go..
-	Render3D(sc *Scene, rc RenderClasses, rnd Render)
+	Render3D(sc *Scene)
 
 	// ConnectEvents3D: setup connections to window events -- called in
 	// Render3D if in bounds.  It can be useful to create modular methods for
@@ -352,7 +352,7 @@ func (nb *Node3DBase) Style3D(sc *Scene) {
 func (nb *Node3DBase) UpdateNode3D(sc *Scene) {
 }
 
-func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
+func (nb *Node3DBase) Render3D(sc *Scene) {
 	// nop
 }
 
@@ -444,7 +444,7 @@ func (nb *Node3DBase) TrackCamera(sc *Scene) {
 func (nb *Node3DBase) TrackLight(sc *Scene, lightName string) error {
 	nb.PoseMu.Lock()
 	defer nb.PoseMu.Unlock()
-	lt, ok := sc.Lights[lightName]
+	lt, ok := sc.Lights.ValByKey(lightName)
 	if !ok {
 		return fmt.Errorf("gi3d Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}

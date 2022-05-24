@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -71,9 +70,8 @@ func (sld *Solid) SetMeshName(sc *Scene, meshName string) error {
 	if meshName == "" {
 		return nil
 	}
-	ms, ok := sc.Meshes[meshName]
-	if !ok {
-		err := fmt.Errorf("gi3d.Solid: %s SetMesh name: %s not found in scene", sld.Path(), meshName)
+	ms, err := sc.MeshByNameTry(meshName)
+	if err != nil {
 		log.Println(err)
 		return err
 	}
@@ -196,23 +194,13 @@ func (sld *Solid) RenderClass() RenderClasses {
 }
 
 // Render3D activates this solid for rendering
-func (sld *Solid) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
-	switch rc {
-	case RClassOpaqueUniform, RClassTransUniform:
-		rndu := rnd.(*RenderUniformColor)
-		rndu.SetMat(&sld.Mat, sc)
-	case RClassOpaqueVertex, RClassTransVertex:
-		rndv := rnd.(*RenderVertexColor)
-		rndv.SetMat(&sld.Mat, sc)
-	case RClassOpaqueTexture, RClassTransTexture:
-		rndt := rnd.(*RenderTexture)
-		rndt.SetMat(&sld.Mat, sc)
-	}
+func (sld *Solid) Render3D(sc *Scene) {
+	sc.Phong.UseMeshName(string(sld.Mesh))
 	sld.PoseMu.RLock()
-	sc.Renders.SetMatrix(&sld.Pose)
+	sc.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
 	sld.PoseMu.RUnlock()
-	sld.MeshPtr.Render3D(sc)
-	gpu.TheGPU.ErrCheck("sld render")
+	sld.Mat.Render3D(sc)
+	sc.Phong.Render()
 }
 
 var SolidProps = ki.Props{

@@ -5,9 +5,9 @@
 package gi3d
 
 import (
-	"github.com/goki/gi/gist"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"github.com/goki/vgpu/vshape"
 )
 
 // shapes define different standard mesh shapes
@@ -44,41 +44,19 @@ func AddNewPlane(sc *Scene, name string, width, height float32) *Plane {
 	return pl
 }
 
-func (pl *Plane) Make(sc *Scene) {
-	pl.Reset()
+func (pl *Plane) Sizes() (nVtx, nIdx int, hasColor bool) {
+	pl.NVtx, pl.NIdx = vshape.PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
+	pl.Color = false
+	return pl.NVtx, pl.NIdx, pl.Color
+}
 
-	hSz := pl.Size.DivScalar(2)
-
-	clr := gist.Color{}
-
-	thin := float32(.0000001)
-	sz := mat32.Vec3{}
-
-	switch pl.NormAxis {
-	case mat32.X:
-		sz.Set(thin, hSz.Y, hSz.X)
-		if pl.NormNeg {
-			pl.AddPlane(mat32.Z, mat32.Y, 1, -1, pl.Size.X, pl.Size.Y, -hSz.X, -hSz.Y, -pl.Offset, int(pl.Segs.X), int(pl.Segs.Y), clr) // nx
-		} else {
-			pl.AddPlane(mat32.Z, mat32.Y, -1, -1, pl.Size.X, pl.Size.Y, -hSz.X, -hSz.Y, pl.Offset, int(pl.Segs.X), int(pl.Segs.Y), clr) // px
-		}
-	case mat32.Y:
-		sz.Set(hSz.X, thin, hSz.Y)
-		if pl.NormNeg {
-			pl.AddPlane(mat32.X, mat32.Z, 1, -1, pl.Size.X, pl.Size.Y, -hSz.X, -hSz.Y, -pl.Offset, int(pl.Segs.X), int(pl.Segs.Y), clr) // ny
-		} else {
-			pl.AddPlane(mat32.X, mat32.Z, 1, 1, pl.Size.X, pl.Size.Y, -hSz.X, -hSz.Y, pl.Offset, int(pl.Segs.X), int(pl.Segs.Y), clr) // py
-		}
-	case mat32.Z:
-		sz.Set(hSz.X, hSz.Y, thin)
-		if pl.NormNeg {
-			pl.AddPlane(mat32.X, mat32.Y, -1, -1, pl.Size.X, pl.Size.Y, -hSz.X, -hSz.Y, -pl.Offset, int(pl.Segs.X), int(pl.Segs.Y), clr) // nz
-		} else {
-			pl.AddPlane(mat32.X, mat32.Y, 1, -1, pl.Size.X, pl.Size.Y, -hSz.X, -hSz.Y, pl.Offset, int(pl.Segs.X), int(pl.Segs.Y), clr) // pz
-		}
-	}
-
-	pl.BBox.SetBounds(sz.Negate(), sz)
+// Set sets points in given allocated arrays
+func (pl *Plane) Set(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+	pos := mat32.Vec3{}
+	sz := vshape.SetPlaneAxisSize(vtxAry, normAry, texAry, idxAry, 0, 0, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pos)
+	mn := pos.Sub(sz)
+	mx := pos.Add(sz)
+	pl.BBox.SetBounds(mn, mx)
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -103,20 +81,17 @@ func AddNewBox(sc *Scene, name string, width, height, depth float32) *Box {
 	return bx
 }
 
-func (bx *Box) Make(sc *Scene) {
-	bx.Reset()
+func (bx *Box) Sizes() (nVtx, nIdx int, hasColor bool) {
+	bx.NVtx, bx.NIdx = vshape.BoxN(bx.Segs)
+	bx.Color = false
+	return bx.NVtx, bx.NIdx, bx.Color
+}
 
-	hSz := bx.Size.DivScalar(2)
-
-	clr := gist.Color{}
-
-	// start with neg z as typically back
-	bx.AddPlane(mat32.X, mat32.Y, -1, -1, bx.Size.X, bx.Size.Y, -hSz.X, -hSz.Y, -hSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr) // nz
-	bx.AddPlane(mat32.X, mat32.Z, 1, -1, bx.Size.X, bx.Size.Z, -hSz.X, -hSz.Z, -hSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)  // ny
-	bx.AddPlane(mat32.Z, mat32.Y, -1, -1, bx.Size.Z, bx.Size.Y, -hSz.Z, -hSz.Y, hSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // px
-	bx.AddPlane(mat32.Z, mat32.Y, 1, -1, bx.Size.Z, bx.Size.Y, -hSz.Z, -hSz.Y, -hSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // nx
-	bx.AddPlane(mat32.X, mat32.Z, 1, 1, bx.Size.X, bx.Size.Z, -hSz.X, -hSz.Z, hSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)    // py
-	bx.AddPlane(mat32.X, mat32.Y, 1, -1, bx.Size.X, bx.Size.Y, -hSz.X, -hSz.Y, hSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr)   // pz
-
-	bx.BBox.SetBounds(hSz.Negate(), hSz)
+// SetBox sets points in given allocated arrays
+func (bx *Box) Set(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+	pos := mat32.Vec3{}
+	hSz := vshape.SetBox(vtxAry, normAry, texAry, idxAry, 0, 0, bx.Size, bx.Segs, pos)
+	mn := pos.Sub(hSz)
+	mx := pos.Add(hSz)
+	bx.BBox.SetBounds(mn, mx)
 }

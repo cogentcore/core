@@ -11,7 +11,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -33,12 +32,12 @@ import (
 // but can be set to any color.
 type Text2D struct {
 	Solid
-	Text        string       `desc:"the text string to display"`
-	Sty         gist.Style   `json:"-" xml:"-" desc:"styling settings for the text"`
-	TxtPos      mat32.Vec2   `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
-	TxtRender   girl.Text    `view:"-" xml:"-" json:"-" desc:"render data for text label"`
-	TxtTex      *TextureBase `view:"-" xml:"-" json:"-" desc:"texture object for the text -- this is used directly instead of pointing to the Scene Texture resources"`
-	RenderState girl.State   `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
+	Text      string     `desc:"the text string to display"`
+	Sty       gist.Style `json:"-" xml:"-" desc:"styling settings for the text"`
+	TxtPos    mat32.Vec2 `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
+	TxtRender girl.Text  `view:"-" xml:"-" json:"-" desc:"render data for text label"`
+	//	TxtTex      *TextureBase `view:"-" xml:"-" json:"-" desc:"texture object for the text -- this is used directly instead of pointing to the Scene Texture resources"`
+	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
 }
 
 var KiT_Text2D = kit.Types.AddType(&Text2D{}, Text2DProps)
@@ -64,18 +63,20 @@ func (txt *Text2D) Defaults(sc *Scene) {
 }
 
 func (txt *Text2D) Disconnect() {
-	if txt.TxtTex != nil && txt.TxtTex.Tex.IsActive() {
-		scc, err := txt.ParentByTypeTry(KiT_Scene, ki.Embeds)
-		if err == nil {
-			sc := scc.Embed(KiT_Scene).(*Scene)
-			if sc.Win != nil && sc.Win.IsVisible() {
-				oswin.TheApp.RunOnMain(func() {
-					sc.Win.OSWin.Activate()
-					txt.TxtTex.Tex.Delete()
-				})
+	/*
+		if txt.TxtTex != nil && txt.TxtTex.Tex.IsActive() {
+			scc, err := txt.ParentByTypeTry(KiT_Scene, ki.Embeds)
+			if err == nil {
+				sc := scc.Embed(KiT_Scene).(*Scene)
+				if sc.Win != nil && sc.Win.IsVisible() {
+					oswin.TheApp.RunOnMain(func() {
+						sc.Win.OSWin.Activate()
+						txt.TxtTex.Tex.Delete()
+					})
+				}
 			}
 		}
-	}
+	*/
 	txt.Solid.Disconnect()
 }
 
@@ -90,10 +91,11 @@ func (txt *Text2D) SetText(sc *Scene, str string) {
 func (txt *Text2D) TextSize() (mat32.Vec2, bool) {
 	txt.Pose.Defaults() // only if nil
 	sz := mat32.Vec2{}
-	if txt.TxtTex == nil {
-		return sz, false
-	}
-	tsz := txt.TxtTex.Tex.Size()
+	// if txt.TxtTex == nil {
+	// 	return sz, false
+	// }
+	// tsz := txt.TxtTex.Tex.Size()
+	tsz := image.Point{30, 30} // todo!
 	fsz := float32(txt.Sty.Font.Size.Dots)
 	if fsz == 0 {
 		fsz = 36
@@ -148,30 +150,32 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	}
 	bounds := image.Rectangle{Max: szpt}
 	var img *image.RGBA
-	setImg := false
-	if txt.TxtTex == nil {
-		txt.TxtTex = &TextureBase{Nm: txt.Nm}
-		tx := txt.TxtTex.NewTex()
-		img = image.NewRGBA(bounds)
-		tx.SetImage(img) // safe here
-	} else {
-		im := txt.TxtTex.Tex.Image()
-		if im == nil {
+	// setImg := false
+	/*
+		if txt.TxtTex == nil {
+			txt.TxtTex = &TextureBase{Nm: txt.Nm}
+			tx := txt.TxtTex.NewTex()
 			img = image.NewRGBA(bounds)
-			setImg = true // needs to be set on main
+			tx.SetImage(img) // safe here
 		} else {
-			img = im.(*image.RGBA)
-			if img == nil {
+			im := txt.TxtTex.Tex.Image()
+			if im == nil {
 				img = image.NewRGBA(bounds)
-				setImg = true
+				setImg = true // needs to be set on main
 			} else {
-				if img.Bounds() != bounds {
+				img = im.(*image.RGBA)
+				if img == nil {
 					img = image.NewRGBA(bounds)
 					setImg = true
+				} else {
+					if img.Bounds() != bounds {
+						img = image.NewRGBA(bounds)
+						setImg = true
+					}
 				}
 			}
 		}
-	}
+	*/
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
 		rs.Init(szpt.X, szpt.Y, img)
@@ -181,16 +185,18 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
 	if sc.Win != nil {
-		oswin.TheApp.RunOnMain(func() {
-			sc.Win.OSWin.Activate()
-			if setImg {
-				txt.TxtTex.Tex.SetImage(img) // does transfer if active
-			} else {
-				txt.TxtTex.Tex.Transfer(0) // update
-			}
-		})
+		/*
+			oswin.TheApp.RunOnMain(func() {
+				sc.Win.OSWin.Activate()
+				if setImg {
+					txt.TxtTex.Tex.SetImage(img) // does transfer if active
+				} else {
+					txt.TxtTex.Tex.Transfer(0) // update
+				}
+			})
+		*/
 	}
-	txt.Mat.SetTexture(sc, txt.TxtTex)
+	// txt.Mat.SetTexture(sc, txt.TxtTex)
 	// gi.SavePNG("text-test.png", img)
 }
 

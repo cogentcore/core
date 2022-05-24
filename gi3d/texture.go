@@ -6,11 +6,13 @@ package gi3d
 
 import (
 	"fmt"
+	"image"
 	"log"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
+	"github.com/goki/vgpu/vphong"
 )
 
 // TexName provides a GUI interface for choosing textures
@@ -20,28 +22,6 @@ type Texture interface {
 	// Name returns name of the texture
 	Name() string
 
-	// Init initializes the texture and uploads it to the GPU, so it is ready to use
-	// Must be called in context on main thread
-	Init(sc *Scene) error
-
-	// Activate activates this texture on the GPU, at given texture number.
-	// in preparation for rendering
-	// Must be called in context on main thread
-	Activate(sc *Scene, texNo int)
-
-	// Delete deletes the texture GPU resources -- must be called in context on main thread
-	Delete(sc *Scene)
-
-	// BotZero returns true if this texture has the Y=0 pixels at the bottom
-	// of the image.  Otherwise, Y=0 is at the top, which is the default
-	// for most images loaded from files.
-	BotZero() bool
-
-	// SetBotZero sets whether this texture has the Y=0 pixels at the bottom
-	// of the image.  Otherwise, Y=0 is at the top, which is the default
-	// for most images loaded from files.
-	SetBotZero(botzero bool)
-
 	// IsTransparent returns true if there is any transparency present in the texture
 	// This is not auto-detected but rather must be set manually.
 	// It affects the rendering order -- transparent items are rendered last.
@@ -49,6 +29,9 @@ type Texture interface {
 
 	// SetTransparent sets the transparency flag for this texture.
 	SetTransparent(trans bool)
+
+	// Image returns image for the texture
+	Image() image.Image
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -56,27 +39,14 @@ type Texture interface {
 
 // TextureBase is the base texture implementation
 type TextureBase struct {
-	Nm    string        `desc:"name of the texture -- textures are connected to material by name"`
-	Bot0  bool          `desc:"set to true if this texture has Y=0 at the bottom -- otherwise default is Y=0 is at top as is the case in most images loaded from files etc"`
-	Trans bool          `desc:"set to true if texture has transparency"`
-	Tex   gpu.Texture2D `view:"-" desc:"gpu texture object"`
+	Nm    string `desc:"name of the texture -- textures are connected to material by name"`
+	Trans bool   `desc:"set to true if texture has transparency"`
 }
 
 var KiT_TextureBase = kit.Types.AddType(&TextureBase{}, nil)
 
 func (tx *TextureBase) Name() string {
 	return tx.Nm
-}
-
-func (tx *TextureBase) BotZero() bool {
-	return tx.Bot0
-}
-
-func (tx *TextureBase) SetBotZero(botzero bool) {
-	tx.Bot0 = botzero
-	if tx.Tex != nil {
-		tx.Tex.SetBotZero(tx.Bot0)
-	}
 }
 
 func (tx *TextureBase) IsTransparent() bool {
@@ -87,44 +57,6 @@ func (tx *TextureBase) SetTransparent(trans bool) {
 	tx.Trans = trans
 }
 
-// makes a new gpu.Texture2D if Tex field is nil, and returns it in any case
-func (tx *TextureBase) NewTex() gpu.Texture2D {
-	if tx.Tex != nil {
-		return tx.Tex
-	}
-	tx.Tex = gpu.TheGPU.NewTexture2D(tx.Nm)
-	tx.Tex.SetBotZero(tx.Bot0)
-	return tx.Tex
-}
-
-// Init initializes the texture and activates it -- for base case it must be set externally
-// prior to this call.
-// Must be called in context on main thread
-func (tx *TextureBase) Init(sc *Scene) error {
-	if tx.Tex != nil {
-		tx.Tex.SetBotZero(tx.Bot0)
-		tx.Tex.Activate(0)
-	}
-	return nil
-}
-
-// Activate activates this texture on the GPU, in preparation for rendering
-// Must be called in context on main thread
-func (tx *TextureBase) Activate(sc *Scene, texNo int) {
-	if tx.Tex != nil {
-		tx.Tex.SetBotZero(tx.Bot0)
-		tx.Tex.Activate(texNo)
-	}
-}
-
-// Delete deletes the texture GPU resources -- must be called in context on main thread
-func (tx *TextureBase) Delete(sc *Scene) {
-	if tx.Tex != nil {
-		tx.Tex.Delete()
-	}
-	tx.Tex = nil
-}
-
 //////////////////////////////////////////////////////////////////////////////////////
 // TextureFile
 
@@ -132,6 +64,7 @@ func (tx *TextureBase) Delete(sc *Scene) {
 type TextureFile struct {
 	TextureBase
 	File gi.FileName `desc:"filename for the texture"`
+	Img  image.Image `desc:"cached image"`
 }
 
 var KiT_TextureFile = kit.Types.AddType(&TextureFile{}, nil)
@@ -145,38 +78,21 @@ func AddNewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	return tx
 }
 
-// Init initializes the texture, opens the file, and uploads it to the GPU
-// Must be called in context on main thread
-func (tx *TextureFile) Init(sc *Scene) error {
-	if tx.Tex != nil {
-		tx.Tex.SetBotZero(tx.Bot0)
-		tx.Tex.Activate(0)
-		return nil
+func (tx *TextureFile) Image() image.Image {
+	if tx.Img == nil {
+		if tx.File == "" {
+			err := fmt.Errorf("gi3d.Texture: %v File must be set to a filename to load texture from", tx.Nm)
+			log.Println(err)
+			return nil
+		}
+		var err error
+		tx.Img, err = gi.OpenImage(string(tx.File))
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
 	}
-	if tx.File == "" {
-		err := fmt.Errorf("gi3d.Texture: %v File must be set to a filename to load texture from", tx.Nm)
-		log.Println(err)
-		return err
-	}
-	tx.Tex = gpu.TheGPU.NewTexture2D(tx.Nm)
-	tx.Tex.SetBotZero(tx.Bot0)
-	err := tx.Tex.Open(string(tx.File))
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	tx.Tex.Activate(0)
-	return nil
-}
-
-// Activate activates this texture on the GPU, in preparation for rendering
-// Must be called in context on main thread
-func (tx *TextureFile) Activate(sc *Scene, texNo int) {
-	if tx.Tex == nil {
-		tx.Init(sc)
-	}
-	tx.Tex.SetBotZero(tx.Bot0)
-	tx.Tex.Activate(texNo)
+	return tx.Img
 }
 
 // TextureGi2D is a dynamic texture material driven by a gi.Viewport2D viewport
@@ -185,4 +101,60 @@ func (tx *TextureFile) Activate(sc *Scene, texNo int) {
 type TextureGi2D struct {
 	TextureBase
 	Viewport *gi.Viewport2D
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Scene code
+
+// AddTexture adds given texture to texture collection
+// see AddNewTextureFile to add a texture that loads from file
+func (sc *Scene) AddTexture(tx Texture) {
+	sc.Textures.Add(tx.Name(), tx)
+}
+
+// TextureByName looks for texture by name -- returns nil if not found
+func (sc *Scene) TextureByName(nm string) Texture {
+	tx, ok := sc.Textures.ValByKey(nm)
+	if ok {
+		return tx
+	}
+	return nil
+}
+
+// TextureByNameTry looks for texture by name -- returns error if not found
+func (sc *Scene) TextureByNameTry(nm string) (Texture, error) {
+	tx, ok := sc.Textures.ValByKey(nm)
+	if ok {
+		return tx, nil
+	}
+	return nil, fmt.Errorf("Texture named: %v not found in Scene: %v", nm, sc.Nm)
+}
+
+// TextureList returns a list of available textures (e.g., for chooser)
+func (sc *Scene) TextureList() []string {
+	return sc.Textures.Keys()
+}
+
+// DeleteTexture deletes texture of given name -- returns error if not found
+// must call ConfigTextures or Init3D to reset after deleting
+func (sc *Scene) DeleteTexture(nm string) {
+	sc.Textures.DeleteKey(nm)
+}
+
+// DeleteTextures removes all textures
+// must call ConfigTextures or Init3D to reset after deleting
+func (sc *Scene) DeleteTextures() {
+	sc.Textures.Reset()
+}
+
+// must be called after adding or deleting any meshes or altering
+// the number of verticies.
+func (sc *Scene) ConfigTextures() {
+	ph := &sc.Phong
+	ph.ResetTextures()
+	for _, kv := range sc.Textures.Order {
+		tx := kv.Val
+		// todo: remove repeat from texture, move to color.
+		ph.AddTexture(kv.Key, vphong.NewTexture(tx.Image(), mat32.Vec2{1, 1}, mat32.Vec2{}))
+	}
 }

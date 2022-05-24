@@ -879,9 +879,9 @@ func (vp *Viewport2D) UpdateNodes() {
 
 // UpdateNode is called under UpdtMu lock and does the actual steps to update a given node
 func (vp *Viewport2D) UpdateNode(nii Node2D) {
-	if nii.DirectWinUpload() {
+	if nii.IsDirectWinUpload() {
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v DirectWinUpload on %v\n", vp.Path(), nii.Path())
+			fmt.Printf("Update: Viewport2D: %v Skipped IsDirectWinUpload on %v\n", vp.Path(), nii.Path())
 		}
 	} else {
 		if Update2DTrace {

@@ -23,12 +23,12 @@ import (
 // 2D elements can be embedded.
 type Embed2D struct {
 	Solid
-	Viewport   *EmbedViewport `desc:"the embedded viewport to display"`
-	Zoom       float32        `desc:"overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view"`
-	Tex        *TextureBase   `view:"-" xml:"-" json:"-" desc:"texture object -- this is used directly instead of pointing to the Scene Texture resources"`
-	FitContent bool           `desc:"if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport"`
-	StdSize    image.Point    `desc:"original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent"`
-	DPISize    image.Point    `desc:"original size scaled according to logical dpi"`
+	Viewport *EmbedViewport `desc:"the embedded viewport to display"`
+	Zoom     float32        `desc:"overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view"`
+	// Tex        *TextureBase   `view:"-" xml:"-" json:"-" desc:"texture object -- this is used directly instead of pointing to the Scene Texture resources"`
+	FitContent bool        `desc:"if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport"`
+	StdSize    image.Point `desc:"original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent"`
+	DPISize    image.Point `desc:"original size scaled according to logical dpi"`
 }
 
 var KiT_Embed2D = kit.Types.AddType(&Embed2D{}, Embed2DProps)
@@ -67,6 +67,7 @@ func (em *Embed2D) Defaults(sc *Scene) {
 }
 
 func (em *Embed2D) Disconnect() {
+	/* todo
 	if em.Tex != nil && em.Tex.Tex.IsActive() {
 		scc, err := em.ParentByTypeTry(KiT_Scene, ki.Embeds)
 		if err == nil {
@@ -79,6 +80,7 @@ func (em *Embed2D) Disconnect() {
 			}
 		}
 	}
+	*/
 	em.Solid.Disconnect()
 }
 
@@ -135,7 +137,9 @@ func (em *Embed2D) Init3D(sc *Scene) {
 		em.Viewport.FullRender2DTree()
 		em.UploadViewTex(sc)
 	}
+	/* todo
 	em.Mat.SetTexture(sc, em.Tex)
+	*/
 	err := em.Validate(sc)
 	if err != nil {
 		em.SetInvisible()
@@ -145,17 +149,21 @@ func (em *Embed2D) Init3D(sc *Scene) {
 
 // UploadViewTex uploads the viewport image to the texture
 func (em *Embed2D) UploadViewTex(sc *Scene) {
-	img := em.Viewport.Pixels
-	if em.Tex == nil {
-		em.Tex = &TextureBase{Nm: em.Nm}
-		tx := em.Tex.NewTex()
-		tx.SetImage(img) // safe here
-	}
+	/*
+		img := em.Viewport.Pixels
+			if em.Tex == nil {
+				em.Tex = &TextureBase{Nm: em.Nm}
+				tx := em.Tex.NewTex()
+				tx.SetImage(img) // safe here
+			}
+	*/
 	if sc.Win != nil {
+		/* todo
 		oswin.TheApp.RunOnMain(func() {
 			sc.Win.OSWin.Activate()
 			em.Tex.Tex.SetImage(img) // does transfer if active
 		})
+		*/
 	}
 	// gi.SavePNG("emb-test.png", img)
 }
