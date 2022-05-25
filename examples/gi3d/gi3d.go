@@ -9,14 +9,14 @@ import (
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
+	"github.com/goki/mat32"
 )
 
 func main() {
 
-	vkos.VkOsDebug = true
+	// vkos.VkOsDebug = true
 
 	gimain.Main(func() {
 		mainrun()
@@ -210,36 +210,37 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 	gcb.Class = "cube"
 
+	lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
+	lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())
+	lns.Pose.Pos.Set(0, 0, 1)
+	lns.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
+	// sc.Wireframe = true                      // debugging
+
+	// this line should go from lower left front of red cube to upper vertex of above hi-line
+	cyan := gist.Color{}
+	cyan.SetUInt8(0, 255, 255, 255)
+	gi3d.AddNewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
+
+	// bbclr := gist.Color{}
+	// bbclr.SetUInt8(255, 255, 0, 255)
+	// gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, gi3d.Active)
+
+	cylm := gi3d.AddNewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
+	cyl := gi3d.AddNewSolid(sc, sc, "cylinder", cylm.Name())
+	cyl.Pose.Pos.Set(-2.25, 0, 0)
+
+	capm := gi3d.AddNewCapsule(sc, "capsule", 1.5, .5, 32, 1)
+	caps := gi3d.AddNewSolid(sc, sc, "capsule", capm.Name())
+	caps.Pose.Pos.Set(3.25, 0, 0)
+	caps.Mat.Color.SetName("tan")
+
+	sphm := gi3d.AddNewSphere(sc, "sphere", .75, 32)
+	sph := gi3d.AddNewSolid(sc, sc, "sphere", sphm.Name())
+	sph.Pose.Pos.Set(0, -2, 0)
+	sph.Mat.Color.SetName("orange")
+	sph.Mat.Color.A = 200
+
 	/*
-		lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
-		lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())
-		lns.Pose.Pos.Set(0, 0, 1)
-		lns.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
-		// sc.Wireframe = true                      // debugging
-
-		// this line should go from lower left front of red cube to upper vertex of above hi-line
-		cyan := gist.Color{}
-		cyan.SetUInt8(0, 255, 255, 255)
-		gi3d.AddNewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
-
-		// bbclr := gist.Color{}
-		// bbclr.SetUInt8(255, 255, 0, 255)
-		// gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, gi3d.Active)
-
-		cylm := gi3d.AddNewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
-		cyl := gi3d.AddNewSolid(sc, sc, "cylinder", cylm.Name())
-		cyl.Pose.Pos.Set(-2.25, 0, 0)
-
-		capm := gi3d.AddNewCapsule(sc, "capsule", 1.5, .5, 32, 1)
-		caps := gi3d.AddNewSolid(sc, sc, "capsule", capm.Name())
-		caps.Pose.Pos.Set(3.25, 0, 0)
-		caps.Mat.Color.SetName("tan")
-
-		sphm := gi3d.AddNewSphere(sc, "sphere", .75, 32)
-		sph := gi3d.AddNewSolid(sc, sc, "sphere", sphm.Name())
-		sph.Pose.Pos.Set(0, -2, 0)
-		sph.Mat.Color.SetName("orange")
-		sph.Mat.Color.A = 200
 
 		// Good strategy for objects if used in multiple places is to load
 		// into library, then add from there.
@@ -292,16 +293,18 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 		txt.SetProp("text-align", gist.AlignLeft) // gi.AlignCenter)
 		txt.Pose.Scale.SetScalar(0.2)
 		txt.Pose.Pos.Set(0, 2.2, 0)
+	*/
 
-		tcg := gi3d.AddNewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
-		fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
-		fpgun.Pose.Scale.Set(.1, .1, 1)
-		fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
-		fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
+	tcg := gi3d.AddNewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
+	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
+	fpgun.Pose.Scale.Set(.1, .1, 1)
+	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
+	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
 
-		sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-		sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
+	sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
+	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
+	/*
 		///////////////////////////////////////////////////
 		//  Animation & Embedded controls
 

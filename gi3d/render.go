@@ -70,9 +70,8 @@ func (sc *Scene) ConfigFrame() bool {
 // This is called during Disconnect and before the window is closed.
 func (sc *Scene) DeleteResources() {
 	oswin.TheApp.RunOnMain(func() {
-		vk.DeviceWaitIdle(sc.Frame.Device.Device)
-		sc.Frame.Destroy()
 		sc.Phong.Destroy()
+		sc.Frame.Destroy()
 	})
 }
 
@@ -160,8 +159,10 @@ func (sc *Scene) UpdateMVPMatrix() {
 // ConfigRender configures all the rendering elements: Phong system and frame
 func (sc *Scene) ConfigRender() {
 	sc.ConfigFrame()
-	sc.ConfigLights()
-	sc.ConfigMeshesTextures()
+	oswin.TheApp.RunOnMain(func() {
+		sc.ConfigLights()
+		sc.ConfigMeshesTextures()
+	})
 }
 
 // ConfigMeshesTextures configures the meshes and the textures to the Phong
@@ -270,7 +271,7 @@ func (sc *Scene) DirectWinUpload() {
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) Render3D(offscreen bool) {
 
-	sc.Phong.SetViewPrjn(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
+	sc.Phong.SetViewPrjn(&sc.Camera.ViewMatrix, &sc.Camera.VkPrjnMatrix)
 
 	var rcs [RenderClassesN][]Node3D
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {

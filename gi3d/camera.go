@@ -25,6 +25,7 @@ type Camera struct {
 	Far           float32        `desc:"far plane z coordinate"`
 	ViewMatrix    mat32.Mat4     `view:"-" desc:"view matrix (inverse of the Pose.Matrix)"`
 	PrjnMatrix    mat32.Mat4     `view:"-" desc:"projection matrix, defining the camera perspective / ortho transform"`
+	VkPrjnMatrix  mat32.Mat4     `view:"-" desc:"vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math"`
 	InvPrjnMatrix mat32.Mat4     `view:"-" desc:"inverse of the projection matrix"`
 	Frustum       *mat32.Frustum `view:"-" desc:"frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"`
 }
@@ -64,7 +65,8 @@ func (cm *Camera) UpdateMatrix() {
 		width := cm.Aspect * height
 		cm.PrjnMatrix.SetOrthographic(width, height, cm.Near, cm.Far)
 	} else {
-		cm.PrjnMatrix.SetVkPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far) // Vk
+		cm.PrjnMatrix.SetPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far)     // use for everything
+		cm.VkPrjnMatrix.SetVkPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far) // Vk use for render
 	}
 	cm.InvPrjnMatrix.SetInverse(&cm.PrjnMatrix)
 	var proj mat32.Mat4
