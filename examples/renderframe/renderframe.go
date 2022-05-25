@@ -199,7 +199,7 @@ func main() {
 		rf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		rf.WaitForRender()
 
-		if false { // grab
+		if false { // grab  a
 			// tcmd := sy.MemCmdStart()
 			// rf.GrabImage(tcmd, 0)
 			// sy.MemCmdSubmitWaitFree()
@@ -214,7 +214,7 @@ func main() {
 		drw.SetFrameImage(0, fr)
 		drw.SyncImages()
 		drw.StartDraw(0)
-		drw.Scale(0, 0, sf.Format.Bounds(), image.ZR, draw.Src)
+		drw.Scale(0, 0, sf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
 		drw.EndDraw()
 
 		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))

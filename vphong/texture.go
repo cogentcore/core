@@ -15,22 +15,18 @@ import (
 
 // Texture has texture values: image, tiling
 type Texture struct {
-	Image  image.Image
-	Repeat mat32.Vec2 `desc:"how often to repeat the texture in each direction"`
-	Off    mat32.Vec2 `desc:"offset for when to start the texure in each direction"`
+	Image image.Image
 }
 
-func NewTexture(img image.Image, repeat mat32.Vec2, off mat32.Vec2) *Texture {
+func NewTexture(img image.Image) *Texture {
 	tx := &Texture{}
-	tx.Set(img, repeat, off)
+	tx.Set(img)
 	return tx
 }
 
 // Set sets values
-func (tx *Texture) Set(img image.Image, repeat mat32.Vec2, off mat32.Vec2) {
+func (tx *Texture) Set(img image.Image) {
 	tx.Image = img
-	tx.Repeat = repeat
-	tx.Off = off
 }
 
 // AddTexture adds to list of textures
@@ -43,11 +39,36 @@ func (ph *Phong) DeleteTexture(name string) {
 	ph.Textures.DeleteKey(name)
 }
 
-// AllocTextures allocates vals for textures
-func (ph *Phong) AllocTextures() {
+// allocDummyTexture allocates a dummy texture (if none configured)
+func (ph *Phong) allocDummyTexture() {
+	// there must be one texture -- otherwise Mac Molten triggers an error
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
-	txset.ConfigVals(ph.Textures.Len())
+	txset.ConfigVals(1)
+	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
+	_, img, _ := txset.ValByIdxTry("Tex", 0)
+	img.Texture.ConfigGoImage(dimg)
+}
+
+// configDummyTexture configures a dummy texture (if none configured)
+func (ph *Phong) configDummyTexture() {
+	vars := ph.Sys.Vars()
+	txset := vars.SetMap[int(TexSet)]
+	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
+	_, img, _ := txset.ValByIdxTry("Tex", 0)
+	img.Texture.ConfigGoImage(dimg)
+}
+
+// AllocTextures allocates vals for textures
+func (ph *Phong) AllocTextures() {
+	ntx := ph.Textures.Len()
+	if ntx == 0 {
+		ph.allocDummyTexture()
+		return
+	}
+	vars := ph.Sys.Vars()
+	txset := vars.SetMap[int(TexSet)]
+	txset.ConfigVals(ntx)
 	for i, kv := range ph.Textures.Order {
 		_, img, _ := txset.ValByIdxTry("Tex", i)
 		img.Texture.ConfigGoImage(kv.Val.Image)
@@ -57,10 +78,15 @@ func (ph *Phong) AllocTextures() {
 // ConfigTextures configures the rendering for the textures that have been added.
 func (ph *Phong) ConfigTextures() {
 	vars := ph.Sys.Vars()
-	txset := vars.SetMap[int(TexSet)]
-	for i, kv := range ph.Textures.Order {
-		_, img, _ := txset.ValByIdxTry("Tex", i)
-		img.SetGoImage(kv.Val.Image, 0, vgpu.FlipY)
+	ntx := ph.Textures.Len()
+	if ntx == 0 {
+		ph.configDummyTexture()
+	} else {
+		txset := vars.SetMap[int(TexSet)]
+		for i, kv := range ph.Textures.Order {
+			_, img, _ := txset.ValByIdxTry("Tex", i)
+			img.SetGoImage(kv.Val.Image, 0, vgpu.FlipY)
+		}
 	}
 	vars.BindAllTextureVars(int(TexSet)) // gets images
 }
@@ -97,7 +123,19 @@ func (ph *Phong) UseTextureName(name string) error {
 	return ph.UseTextureIdx(idx)
 }
 
-// TexPars holds texture parameters for push constants -- idx is coded in shiny bright
+// UseTexturePars sets the texture parameters for the next render command:
+// how often the texture repeats along each dimension, and the offset
+func (ph *Phong) UseTexturePars(repeat mat32.Vec2, off mat32.Vec2) {
+	ph.Cur.TexPars.Set(repeat, off)
+}
+
+// UseFullTexture sets the texture parameters for the next render command:
+// to render the full texture: repeat = 1,1; off = 0,0
+func (ph *Phong) UseFullTexture() {
+	ph.Cur.TexPars.Set(mat32.Vec2{1, 1}, mat32.Vec2{})
+}
+
+// TexPars holds texture parameters: how often to repeat the texture image and offset
 type TexPars struct {
 	Repeat mat32.Vec2 `desc:"how often to repeat the texture in each direction"`
 	Off    mat32.Vec2 `desc:"offset for when to start the texure in each direction"`
@@ -113,13 +151,12 @@ func (ph *Phong) RenderTexture() {
 	sy := &ph.Sys
 	cmd := sy.CmdPool.Buff
 	pl := sy.PipelineMap["texture"]
-	tex := ph.Textures.ValByIdx(ph.Cur.TexIdx)
 	txIdx, _, _, err := sy.CmdBindTextureVarIdx(cmd, int(TexSet), "Tex", ph.Cur.TexIdx)
 	if err != nil {
 		return
 	}
 	push := ph.Cur.NewPush()
-	push.Tex.Set(tex.Repeat, tex.Off)
+	push.Tex = ph.Cur.TexPars
 	push.Color.ShinyBright.W = float32(txIdx)
 	ph.Push(pl, push)
 	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)

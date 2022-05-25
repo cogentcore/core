@@ -26,6 +26,7 @@ type CurRender struct {
 	ModelMtx    mat32.Mat4 `desc:"current model pose matrix"`
 	VPMtx       Mtxs       `desc:"camera view and projection matrixes"`
 	Color       Colors     `desc:"current color surface properties"`
+	TexPars     TexPars    `desc:"texture parameters -- repeat, offset"`
 	TexIdx      int        `desc:"index of currently-selected texture"`
 }
 
@@ -57,11 +58,7 @@ func (ph *Phong) ConfigPipeline(pl *vgpu.Pipeline) {
 	// app.drawProg.Activate()
 
 	pl.SetGraphicsDefaults()
-	// if ph.YIsDown {
 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
-	// } else {
-	// 	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceClockwise, 1.0)
-	// }
 }
 
 // ConfigSys configures the vDraw System and pipelines.

@@ -27,7 +27,6 @@ type System struct {
 	PipelineMap map[string]*Pipeline `desc:"map of all pipelines -- names must be unique"`
 	Mem         Memory               `desc:"manages all the memory for all the Vals"`
 	Render      Render               `desc:"renderpass with depth buffer for this system"`
-	Framebuffer Framebuffer          `desc:"shared framebuffer to render into, if not rendering into Surface"`
 }
 
 // InitGraphics initializes the System for graphics use, using

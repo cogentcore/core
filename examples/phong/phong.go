@@ -141,11 +141,7 @@ func main() {
 	for i, fnm := range imgFiles {
 		pnm := filepath.Join("../images", fnm)
 		imgs[i] = OpenImage(pnm)
-		if i == 0 { // repeat ground more
-			ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{50, 50}, mat32.Vec2{0, 0}))
-		} else {
-			ph.AddTexture(fnm, vphong.NewTexture(imgs[i], mat32.Vec2{1, 1}, mat32.Vec2{0, 0}))
-		}
+		ph.AddTexture(fnm, vphong.NewTexture(imgs[i]))
 	}
 
 	/////////////////////////////
@@ -239,12 +235,14 @@ func main() {
 		ph.SetModelMtx(&floortx)
 		ph.UseMeshName("floor")
 		// ph.UseNoTexture()
+		ph.UseTexturePars(mat32.Vec2{50, 50}, mat32.Vec2{})
 		ph.UseTextureName("ground.png")
 		ph.Render()
 
 		ph.UseColorName("red")
 		ph.SetModelMtx(&model2)
 		ph.UseMeshName("cube")
+		ph.UseFullTexture()
 		ph.UseTextureName("teximg.jpg")
 		// ph.UseNoTexture()
 		ph.Render()

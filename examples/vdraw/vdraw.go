@@ -120,15 +120,15 @@ func main() {
 			descIdx = 1
 		}
 		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
-		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, draw.Src)
+		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
 		for i := range imgFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}
-			drw.Copy(i+stoff, 0, dp, image.ZR, draw.Src)
+			drw.Copy(i+stoff, 0, dp, image.ZR, vdraw.Src, vgpu.NoFlipY)
 		}
 		for i := range iconFiles {
 			dp := image.Point{rand.Intn(500), rand.Intn(500)}
-			drw.Copy(iconIdx, i, dp, image.ZR, draw.Over)
+			drw.Copy(iconIdx, i, dp, image.ZR, vdraw.Over, vgpu.NoFlipY)
 		}
 		drw.EndDraw()
 	}

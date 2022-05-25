@@ -116,13 +116,14 @@ func (dw *Drawer) SyncImages() {
 // sr is the source region (set to image.ZR zero rect for all),
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op) error {
+// flipY = flipY axis when drawing this image
+func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
 	mat := mat32.Mat3{
 		1, 0, 0,
 		0, 1, 0,
 		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y), 1,
 	}
-	return dw.Draw(idx, layer, mat, sr, op)
+	return dw.Draw(idx, layer, mat, sr, op, flipY)
 }
 
 // Scale copies texture at given index and layer to render target,
@@ -132,7 +133,8 @@ func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op dr
 // sr is the source region (set to image.ZR zero rect for all),
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op) error {
+// flipY = flipY axis when drawing this image
+func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error {
 	if sr == image.ZR {
 		_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
 		sr = tx.Texture.Format.Bounds()
@@ -145,7 +147,7 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 		float32(dr.Min.X) - rx*float32(sr.Min.X),
 		float32(dr.Min.Y) - ry*float32(sr.Min.Y), 1,
 	}
-	return dw.Draw(idx, layer, mat, sr, op)
+	return dw.Draw(idx, layer, mat, sr, op, flipY)
 }
 
 // Draw draws texture at index and layer to render target.
@@ -155,9 +157,9 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 // sr is the source region (set to image.ZR for all)
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
-func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, op draw.Op) error {
+func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, op draw.Op, flipY bool) error {
 	sy := &dw.Sys
-	dpl := sy.PipelineMap["draw"]
+	dpl := dw.SelectPipeline(op)
 	vars := sy.Vars()
 	cmd := sy.CmdPool.Buff
 
@@ -170,7 +172,7 @@ func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, o
 		sr = tx.Texture.Format.Bounds()
 	}
 
-	tmat := dw.ConfigMtxs(src2dst, tx.Texture.Format.Size, sr, op, false)
+	tmat := dw.ConfigMtxs(src2dst, tx.Texture.Format.Size, sr, op, flipY)
 	// fmt.Printf("idx: %d sr: %v  sz: %v  omat: %v  tmat: %v \n", idx, sr, tx.Texture.Format.Size, src2dst, tmat)
 	tmat.MVP[3*4] = float32(txIdx) // pack in unused 4th column
 	tmat.MVP[3*4+1] = float32(layer)
@@ -194,7 +196,6 @@ func (dw *Drawer) UseTextureSet(descIdx int) {
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *Drawer) StartDraw(descIdx int) {
 	sy := &dw.Sys
-	dpl := sy.PipelineMap["draw"]
 	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
 		dw.Impl.SurfIdx = dw.Surf.AcquireNextImage()
@@ -202,7 +203,29 @@ func (dw *Drawer) StartDraw(descIdx int) {
 	} else {
 		sy.ResetBeginRenderPassNoClear(cmd, dw.Frame.Frames[0], descIdx)
 	}
+	dw.Impl.LastOp = draw.Src
+	dpl := sy.PipelineMap["draw_src"]
 	dpl.BindPipeline(cmd)
+}
+
+// SelectPipeline selects the pipeline based on draw op
+// only changes if not last one used.  Default is Src
+func (dw *Drawer) SelectPipeline(op draw.Op) *vgpu.Pipeline {
+	bind := dw.Impl.LastOp != op
+	sy := &dw.Sys
+	cmd := sy.CmdPool.Buff
+	var dpl *vgpu.Pipeline
+	switch op {
+	case draw.Src:
+		dpl = sy.PipelineMap["draw_src"]
+	case draw.Over:
+		dpl = sy.PipelineMap["draw_over"]
+	}
+	if bind {
+		dpl.BindPipeline(cmd)
+	}
+	dw.Impl.LastOp = op
+	return dpl
 }
 
 // EndDraw ends image drawing rendering process on render target

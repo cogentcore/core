@@ -26,19 +26,14 @@ type Mtxs struct {
 
 // DrawerImpl contains implementation state -- ignore..
 type DrawerImpl struct {
-	SurfIdx     uint32 `desc:"surface index for current render process"`
-	MaxTextures int    `desc:"maximum number of images per pass -- set by user at config"`
-	FlipY       bool   `desc:"whether to render image with flipped Y"`
+	SurfIdx     uint32  `desc:"surface index for current render process"`
+	MaxTextures int     `desc:"maximum number of images per pass -- set by user at config"`
+	FlipY       bool    `desc:"whether to render image with flipped Y"`
+	LastOp      draw.Op `desc:"last draw operation used -- used for switching pipeline"`
 }
 
 // ConfigPipeline configures graphics settings on the pipeline
 func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
-	// gpu.Draw.Op(op)
-	// gpu.Draw.DepthTest(false)
-	// gpu.Draw.StencilTest(false)
-	// gpu.Draw.Multisample(false)
-	// app.drawProg.Activate()
-
 	pl.SetGraphicsDefaults()
 	if dw.YIsDown {
 		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
@@ -51,10 +46,21 @@ func (dw *Drawer) ConfigPipeline(pl *vgpu.Pipeline) {
 func (dw *Drawer) ConfigSys() {
 	sy := &dw.Sys
 
-	dpl := sy.NewPipeline("draw")
+	// note: requires different pipelines for src vs. over draw op modes
+	dpl := sy.NewPipeline("draw_src")
 	dw.ConfigPipeline(dpl)
+	dpl.SetColorBlend(false)
 
 	cb, _ := content.ReadFile("shaders/draw_vert.spv")
+	dpl.AddShaderCode("draw_vert", vgpu.VertexShader, cb)
+	cb, _ = content.ReadFile("shaders/draw_frag.spv")
+	dpl.AddShaderCode("draw_frag", vgpu.FragmentShader, cb)
+
+	dpl = sy.NewPipeline("draw_over")
+	dw.ConfigPipeline(dpl)
+	dpl.SetColorBlend(true) // default
+
+	cb, _ = content.ReadFile("shaders/draw_vert.spv")
 	dpl.AddShaderCode("draw_vert", vgpu.VertexShader, cb)
 	cb, _ = content.ReadFile("shaders/draw_frag.spv")
 	dpl.AddShaderCode("draw_frag", vgpu.FragmentShader, cb)

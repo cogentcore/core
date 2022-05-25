@@ -27,6 +27,15 @@ The color model has the following factors:
 * `Reflect` = reflectiveness of the surface in the region where specular reflected light is emitted -- 1 for full shiny white reflection (specular) color, 0 = no shine reflection.  The specular color is always set to white, which will reflect the light color accurately.
 * `Bright` = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters.
 
+# Known Issues
+
+There must be at least one texture image, otherwise the Mac VKMolten system triggers this error.  The system automatically adds a dummy image to deal with this.
+
+```
+[mvk-error] VK_ERROR_INVALID_SHADER_NV: Unable to convert SPIR-V to MSL:
+MSL conversion error: Unsized array of images is not supported in MSL.
+```
+
 # Layout of Vars
 
 ```
