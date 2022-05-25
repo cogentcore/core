@@ -133,6 +133,10 @@ func main() {
 	nVtx, nIdx = capsule.N()
 	ph.AddMesh("capsule", nVtx, nIdx, false)
 
+	lines := vshape.NewLines([]mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, false)
+	nVtx, nIdx = lines.N()
+	ph.AddMesh("lines", nVtx, nIdx, false)
+
 	/////////////////////////////
 	// Textures
 
@@ -152,11 +156,13 @@ func main() {
 	red := color.RGBA{255, 0, 0, 255}
 	redTr := color.RGBA{200, 0, 0, 200}
 	green := color.RGBA{0, 255, 0, 255}
+	orange := color.RGBA{180, 130, 0, 255}
 	ph.AddColor("blue", vphong.NewColors(blue, color.Black, 30, 1, 1))
 	ph.AddColor("blueTr", vphong.NewColors(blueTr, color.Black, 30, 1, 1))
 	ph.AddColor("red", vphong.NewColors(red, color.Black, 30, 1, 1))
 	ph.AddColor("redTr", vphong.NewColors(redTr, color.Black, 30, 1, 1))
 	ph.AddColor("green", vphong.NewColors(dark, green, 30, .1, 1))
+	ph.AddColor("orange", vphong.NewColors(orange, color.Black, 30, 1, 1))
 
 	/////////////////////////////
 	// Camera / Mtxs
@@ -221,6 +227,10 @@ func main() {
 	capsule.Set(vtxAry, normAry, texAry, idxAry)
 	ph.ModMeshByName("capsule")
 
+	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("lines")
+	lines.Set(vtxAry, normAry, texAry, idxAry)
+	ph.ModMeshByName("lines")
+
 	ph.Sync()
 
 	updateMats := func() {
@@ -260,6 +270,14 @@ func main() {
 		// ph.UseTextureName("teximg.jpg")
 		ph.UseNoTexture()
 		ph.Render()
+
+		ph.UseColorName("orange")
+		ph.SetModelMtx(&model5)
+		ph.UseMeshName("lines")
+		ph.UseNoTexture()
+		ph.Render()
+
+		// trans at end
 
 		ph.UseColorName("redTr")
 		ph.SetModelMtx(&model1)

@@ -74,6 +74,7 @@ func PlaneN(wsegs, hsegs int) (nVtx, nIdx int) {
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset. returns 3D size of plane.
+// returns bounding box.
 func SetPlaneAxisSize(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, normAxis mat32.Dims, normNeg bool, size mat32.Vec2, segs mat32.Vec2i, offset float32, pos mat32.Vec3) mat32.Vec3 {
 	hSz := size.DivScalar(2)
 	thin := float32(.0000001)

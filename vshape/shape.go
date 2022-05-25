@@ -52,3 +52,23 @@ func (sb *ShapeBase) SetOffs(vtxOff, idxOff int) {
 func (sb *ShapeBase) BBox() mat32.Box3 {
 	return sb.CBBox
 }
+
+// SetColor sets color for given range of vertex indexes
+func SetColor(clrAry mat32.ArrayF32, vtxOff int, nvtxs int, clr mat32.Vec4) {
+	cidx := vtxOff * 4
+	for vi := 0; vi < nvtxs; vi++ {
+		clr.ToArray(clrAry, cidx+vi*4)
+	}
+}
+
+// BBoxFromVtxs returns the bounding box updated from the range of vertex points
+func BBoxFromVtxs(vtxAry mat32.ArrayF32, vtxOff int, nvtxs int) mat32.Box3 {
+	bb := mat32.NewEmptyBox3()
+	vidx := vtxOff * 3
+	var vtx mat32.Vec3
+	for vi := 0; vi < nvtxs; vi++ {
+		vtx.FromArray(vtxAry, vidx+vi*3)
+		bb.ExpandByVector(vtx)
+	}
+	return bb
+}

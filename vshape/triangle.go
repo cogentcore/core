@@ -2,147 +2,87 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build notyet
-
 package vshape
 
 import (
-	"github.com/goki/gi/gist"
 	"github.com/goki/mat32"
 )
 
 ////////////////////////////////////////////////////////////////
 //   Triangle
 
-// AddTriangle adds one triangle of vertex data (optionally texUV, color) to mesh.
-// norm is auto-computed, and bounds expanded.  Must have 3 texs if not nil.
-func (ms *MeshBase) AddTriangle(a, b, c mat32.Vec3, texs []mat32.Vec2, clr gist.Color) {
-	stVtxIdx := ms.Vtx.Len() / 3 // starting index based on what's there already
-	stIdxIdx := ms.Idx.Len()     // starting index based on what's there already
-	ms.SetTriangle(stVtxIdx, stIdxIdx, true, a, b, c, texs, clr)
+// TriangleN returns 3, 3
+func TriangleN() (nVtx, nIdx int) {
+	return 3, 3
 }
 
-// SetTriangle sets one triangle of vertex data (optionally texUV, color,
-// and indexes) at given starting *vertex* index (i.e., multiply this *3
+// SetTriangle sets one triangle of vertex data indexes, and optionally
+// texUV coords, at given starting *vertex* index (i.e., multiply this *3
 // to get actual float offset in Vtx array), and starting Idx index.
 // Norm is auto-computed, and bounds expanded.
-func (ms *MeshBase) SetTriangle(stVtxIdx, stIdxIdx int, setIdx bool, a, b, c mat32.Vec3, texs []mat32.Vec2, clr gist.Color) {
+// pos is a 3D position offset. returns 3D size of plane.
+// returns bounding box.
+func SetTriangle(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, a, b, c mat32.Vec3, texs []mat32.Vec2, pos mat32.Vec3) mat32.Box3 {
 	hasTex := texs != nil
-	hasColor := !clr.IsNil()
-	sz := len(ms.Vtx) / 3
-	vtxSz, idxSz := 3, 3
-	if stVtxIdx+vtxSz > sz {
-		dif := (stVtxIdx + vtxSz) - sz
-		ms.Vtx.Extend(dif * 3)
-		ms.Norm.Extend(dif * 3) // assuming same
-		if hasTex {
-			ms.Tex.Extend(dif * 2) // assuming same
-		}
-		if hasColor {
-			ms.Color.Extend(dif * 4)
-		}
-	}
+	vidx := vtxOff * 3
+	tidx := vtxOff * 2
 
 	norm := mat32.Normal(a, b, c)
 
-	clrv := ColorToVec4f(clr)
-	vidx := stVtxIdx * 3
-	tidx := stVtxIdx * 2
-	cidx := stVtxIdx * 4
-	a.ToArray(ms.Vtx, vidx)
-	norm.ToArray(ms.Norm, vidx)
-	b.ToArray(ms.Vtx, vidx+3)
-	norm.ToArray(ms.Norm, vidx+3)
-	c.ToArray(ms.Vtx, vidx+6)
-	norm.ToArray(ms.Norm, vidx+6)
+	a.Add(pos).ToArray(vtxAry, vidx)
+	norm.ToArray(normAry, vidx)
+	b.Add(pos).ToArray(vtxAry, vidx+3)
+	norm.ToArray(normAry, vidx+3)
+	c.Add(pos).ToArray(vtxAry, vidx+6)
+	norm.ToArray(normAry, vidx+6)
 	if hasTex {
-		texs[0].ToArray(ms.Tex, tidx)
-		texs[1].ToArray(ms.Tex, tidx+2)
-		texs[2].ToArray(ms.Tex, tidx+4)
-	}
-	if hasColor {
-		clrv.ToArray(ms.Color, cidx)
-		clrv.ToArray(ms.Color, cidx+4)
-		clrv.ToArray(ms.Color, cidx+8)
+		texs[0].ToArray(texAry, tidx)
+		texs[1].ToArray(texAry, tidx+2)
+		texs[2].ToArray(texAry, tidx+4)
 	}
 
-	if setIdx {
-		lidx := len(ms.Idx)
-		if stIdxIdx+idxSz > lidx {
-			ms.Idx.Extend((stIdxIdx + idxSz) - lidx)
-		}
-		sidx := stIdxIdx
-		ms.Idx.Set(sidx, uint32(stVtxIdx), uint32(stVtxIdx+1), uint32(stVtxIdx+2))
-	}
+	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2))
 
-	ms.BBoxMu.Lock()
-	ms.BBox.BBox.ExpandByPoints([]mat32.Vec3{a, b, c})
-	ms.BBoxMu.Unlock()
+	bb := mat32.NewEmptyBox3()
+	bb.ExpandByPoints([]mat32.Vec3{a, b, c})
+	return bb
 }
 
 ////////////////////////////////////////////////////////////////
 //   Quad
 
-// AddQuad adds quad vertex data (optionally texUV, color) to mesh.
-// Must have 4 vtxs, 4 texs if !nil.
-// Norm is auto-computed, and bbox expanded by points.
-func (ms *MeshBase) AddQuad(vtxs []mat32.Vec3, texs []mat32.Vec2, clr gist.Color) {
-	stVtxIdx := ms.Vtx.Len() / 3 // starting index based on what's there already
-	stIdxIdx := ms.Idx.Len()     // starting index based on what's there already
-	ms.SetQuad(stVtxIdx, stIdxIdx, true, vtxs, texs, clr)
+// QuadN returns 4, 6
+func QuadN() (nVtx, nIdx int) {
+	return 4, 6
 }
 
 // SetQuad sets quad vertex data (optionally texUV, color, and indexes)
 // at given starting *vertex* index (i.e., multiply this *3 to get actual float
 // offset in Vtx array), and starting Idx index.
 // Norm is auto-computed, and bbox expanded by points.
-func (ms *MeshBase) SetQuad(stVtxIdx, stIdxIdx int, setIdx bool, vtxs []mat32.Vec3, texs []mat32.Vec2, clr gist.Color) {
+// pos is a 3D position offset. returns 3D size of plane.
+// returns bounding box.
+func SetQuad(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, vtxs []mat32.Vec3, texs []mat32.Vec2, pos mat32.Vec3) mat32.Box3 {
 	hasTex := texs != nil
-	hasColor := !clr.IsNil()
-	sz := len(ms.Vtx) / 3
-	vtxSz, idxSz := 4, 6
-	if stVtxIdx+vtxSz > sz {
-		dif := (stVtxIdx + vtxSz) - sz
-		ms.Vtx.Extend(dif * 3)
-		ms.Norm.Extend(dif * 3) // assuming same
-		if hasTex {
-			ms.Tex.Extend(dif * 2) // assuming same
-		}
-		if hasColor {
-			ms.Color.Extend(dif * 4)
-		}
-	}
+	vidx := vtxOff * 3
+	tidx := vtxOff * 2
 
 	norm := mat32.Normal(vtxs[0], vtxs[1], vtxs[2])
 
-	clrv := ColorToVec4f(clr)
-	vidx := stVtxIdx * 3
-	tidx := stVtxIdx * 2
-	cidx := stVtxIdx * 4
 	for vi := range vtxs {
-		vtxs[vi].ToArray(ms.Vtx, vidx)
-		norm.ToArray(ms.Norm, vidx)
+		vtxs[vi].Add(pos).ToArray(vtxAry, vidx)
+		norm.ToArray(normAry, vidx)
 		vidx += 3
 		if hasTex {
-			texs[vi].ToArray(ms.Tex, tidx)
+			texs[vi].ToArray(texAry, tidx)
 			tidx += 2
-		}
-		if hasColor {
-			clrv.ToArray(ms.Color, cidx)
-			cidx += 4
 		}
 	}
 
-	if setIdx {
-		lidx := len(ms.Idx)
-		if stIdxIdx+idxSz > lidx {
-			ms.Idx.Extend((stIdxIdx + idxSz) - lidx)
-		}
-		sidx := stIdxIdx
-		ms.Idx.Set(sidx, uint32(stVtxIdx), uint32(stVtxIdx+1), uint32(stVtxIdx+2),
-			uint32(stVtxIdx), uint32(stVtxIdx+2), uint32(stVtxIdx+3))
-	}
-	ms.BBoxMu.Lock()
-	ms.BBox.BBox.ExpandByPoints(vtxs)
-	ms.BBoxMu.Unlock()
+	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2),
+		uint32(vtxOff), uint32(vtxOff+2), uint32(vtxOff+3))
+
+	bb := mat32.NewEmptyBox3()
+	bb.ExpandByPoints(vtxs)
+	return bb
 }
