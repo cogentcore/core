@@ -53,8 +53,9 @@ const (
 var Update3DTrace = false
 
 // Scene is the overall scenegraph containing nodes as children.
-// It renders to its own Framebuffer, the Texture of which is then drawn
-// directly onto the window WinTex using the DirectWinUpload protocol.
+// It renders to its own vgpu.RenderFrame, the Image of which is then copied
+// into the window vgpu.Drawer images for subsequent compositing into the
+// window directly, as a DurectWinUpload element.
 //
 // There is default navigation event processing (disabled by setting NoNav)
 // where mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)
@@ -106,9 +107,7 @@ func (sc *Scene) Defaults() {
 }
 
 func (sc *Scene) Disconnect() {
-	if sc.Win != nil && sc.Win.IsVisible() {
-		sc.DeleteResources()
-	}
+	sc.DeleteResources()
 	sc.WidgetBase.Disconnect()
 }
 

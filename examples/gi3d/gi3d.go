@@ -9,11 +9,15 @@ import (
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
 
 func main() {
+
+	vkos.VkOsDebug = true
+
 	gimain.Main(func() {
 		mainrun()
 	})
@@ -262,19 +266,22 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 		trs.Pose.SetAxisRotation(1, 0, 0, 90)
 		trs.Mat.Color.SetName("white")
 		trs.Mat.Color.A = 200
+	*/
 
-		grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
-		// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
+	grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
+	_ = grtx
+	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
 
-		floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
-		floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
-		floor.Pose.Pos.Set(0, -5, 0)
-		floor.Mat.Color.SetName("tan")
-		// // floor.Mat.Emissive.SetName("brown")
-		// floor.Mat.Bright = 2 // .5 for wood / brown
-		floor.Mat.SetTexture(sc, grtx)
-		floor.Mat.Tiling.Repeat.Set(40, 40)
-		floor.SetInactive() // not selectable
+	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
+	floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
+	floor.Pose.Pos.Set(0, -5, 0)
+	floor.Mat.Color.SetName("tan")
+	// // floor.Mat.Emissive.SetName("brown")
+	// floor.Mat.Bright = 2 // .5 for wood / brown
+	floor.Mat.SetTexture(sc, grtx)
+	floor.Mat.Tiling.Repeat.Set(40, 40)
+	floor.SetInactive() // not selectable
+	/*
 
 		txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 		// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default

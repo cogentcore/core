@@ -13,6 +13,7 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/kigen/ordmap"
 	"github.com/goki/vgpu/vdraw"
+	"github.com/goki/vgpu/vgpu"
 	"golang.org/x/image/draw"
 )
 
@@ -237,7 +238,7 @@ func (wu *WindowUpdates) DrawImages(drw *vdraw.Drawer) {
 	for i, kv := range wu.Updates.Order {
 		winBBox := kv.Key
 		idx := wu.Idx(i)
-		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src)
+		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src, vgpu.NoFlipY)
 	}
 }
 
@@ -248,8 +249,9 @@ func (wu *WindowUpdates) DrawImages(drw *vdraw.Drawer) {
 // directly to the window.  This list manages the index for
 // the vdraw image index holding this image.
 type WindowDrawers struct {
-	StartIdx int `desc:"starting index for this set of Nodes"`
-	MaxIdx   int `desc:"max index (exclusive) for this set of Nodes"`
+	StartIdx int  `desc:"starting index for this set of Nodes"`
+	MaxIdx   int  `desc:"max index (exclusive) for this set of Nodes"`
+	FlipY    bool `desc:"set to true to flip Y axis in drawing these images"`
 
 	Nodes *ordmap.Map[*NodeBase, image.Rectangle] `desc:"ordered map of nodes with window bounding box"`
 }
@@ -310,6 +312,6 @@ func (wu *WindowDrawers) DrawImages(drw *vdraw.Drawer) {
 	for i, kv := range wu.Nodes.Order {
 		winBBox := kv.Val
 		idx := wu.Idx(i)
-		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src)
+		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src, wu.FlipY)
 	}
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver"
 	"github.com/goki/gi/svg"
+	_ "github.com/goki/vgpu/vphong"
 )
 
 // these dummy variables force inclusion of relevant packages

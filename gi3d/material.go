@@ -121,6 +121,7 @@ func (mt *Material) Validate(sc *Scene) error {
 
 func (mt *Material) Render3D(sc *Scene) {
 	sc.Phong.UseColor(mt.Color, mt.Emissive, mt.Shiny, mt.Reflective, mt.Bright)
+	sc.Phong.UseTexturePars(mt.Tiling.Repeat, mt.Tiling.Off)
 	if mt.Texture != "" {
 		sc.Phong.UseTextureName(string(mt.Texture))
 	} else {

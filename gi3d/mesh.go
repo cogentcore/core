@@ -193,3 +193,13 @@ func (sc *Scene) SetMeshes() {
 	}
 	ph.Sync()
 }
+
+// ReconfigMeshes reconfigures meshes on the Phong renderer
+// if there has been any change to the mesh structure.
+// Init3D does a full configure of everything -- this is optimized
+// just for mesh changes.
+func (sc *Scene) ReconfigMeshes() {
+	sc.ConfigMeshes()
+	sc.Phong.Config()
+	sc.SetMeshes()
+}

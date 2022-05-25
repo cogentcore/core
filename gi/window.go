@@ -185,7 +185,7 @@ type Window struct {
 	delPop        bool
 	skippedResize *window.Event
 	lastEt        oswin.EventType
-	DirDraws      WindowDrawers // direct upload regions
+	DirDraws      WindowDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
 	popDraws      WindowDrawers // popup regions
 	updtRegs      WindowUpdates // misc vp update regions
 }
@@ -349,6 +349,7 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
 
 	win.DirDraws.SetIdxRange(1, MaxDirectUploads)
+	// win.DirDraws.FlipY = true // drawing is flipped in general here.
 	win.popDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
 	win.updtRegs.SetIdxRange(RegionUpdateStart, MaxRegionUpdates)
 	return win
@@ -788,8 +789,10 @@ func (w *Window) Closed() {
 	} else {
 		WindowGlobalMu.Unlock()
 	}
-	for _, dukv := range w.DirDraws.Nodes.Order {
-		dukv.Key.This().Disconnect() // does delete
+	if w.DirDraws.Nodes != nil {
+		for _, dukv := range w.DirDraws.Nodes.Order {
+			dukv.Key.This().Disconnect() // does delete
+		}
 	}
 	// these are managed by the window itself
 	w.Sprites.Reset()
@@ -1186,7 +1189,7 @@ func (w *Window) Publish() {
 
 	drw.SyncImages()
 	drw.StartDraw(0)
-	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src)
+	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
 	w.DirDraws.DrawImages(drw)
 	w.popDraws.DrawImages(drw)
 
@@ -1200,7 +1203,7 @@ func (w *Window) Publish() {
 			if !sp.On {
 				continue
 			}
-			drw.Copy(imgIdx+SpriteStart, layIdx, sp.Geom.Pos, image.ZR, draw.Over)
+			drw.Copy(imgIdx+SpriteStart, layIdx, sp.Geom.Pos, image.ZR, draw.Over, vgpu.NoFlipY)
 		}
 	}
 

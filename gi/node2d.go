@@ -238,11 +238,13 @@ type Node2D interface {
 	// e.g., for gi3d.Scene which renders directly to the window texture for maximum efficiency
 	IsDirectWinUpload() bool
 
-	// DirectWinUpload does a direct upload of contents to the window
-	// Called at the appropriate point during the overall window publish update process
-	// For e.g., gi3d.Scene which renders directly to the window texture for maximum efficiency
-	// Returns true if this is a type of node that does this (even if it didn't do it)
-	DirectWinUpload() bool
+	// DirectWinUpload does a direct upload of contents to a window
+	// Drawer compositing image, which will then be used for drawing
+	// the window during a Publish() event (triggered by the window Update
+	// event).  This is called by the viewport in its Update signal processing
+	// routine on nodes that respond true to IsDirectWinUpload().
+	// The node is also free to update itself of its own accord at any point.
+	DirectWinUpload()
 }
 
 // FocusChanges are the kinds of changes that can be reported via
@@ -466,8 +468,7 @@ func (nb *Node2DBase) IsDirectWinUpload() bool {
 	return false
 }
 
-func (nb *Node2DBase) DirectWinUpload() bool {
-	return false
+func (nb *Node2DBase) DirectWinUpload() {
 }
 
 // WinFullReRender tells the window to do a full re-render of everything on

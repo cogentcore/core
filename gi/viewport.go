@@ -881,8 +881,9 @@ func (vp *Viewport2D) UpdateNodes() {
 func (vp *Viewport2D) UpdateNode(nii Node2D) {
 	if nii.IsDirectWinUpload() {
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v Skipped IsDirectWinUpload on %v\n", vp.Path(), nii.Path())
+			fmt.Printf("Update: Viewport2D: %v calling DirectWinUpload on %v\n", vp.Path(), nii.Path())
 		}
+		nii.DirectWinUpload()
 	} else {
 		if Update2DTrace {
 			fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.Path(), nii.Path())

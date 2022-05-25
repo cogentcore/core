@@ -10,6 +10,7 @@ import (
 	"sort"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
@@ -38,15 +39,21 @@ const (
 // returns false if not possible
 func (sc *Scene) ConfigFrame() bool {
 	if sc.Frame == nil {
-		drw := sc.Win.OSWin.Drawer()
-		sf := drw.Surf
-		sc.Frame = vgpu.NewRenderFrame(sf.GPU, &sf.Device, sc.Geom.Size)
-		sy := &sc.Phong.Sys
-		sy.InitGraphics(sf.GPU, "vphong.Phong", &sf.Device)
-		sy.ConfigRender(&sc.Frame.Format, vgpu.Depth32)
-		sc.Frame.SetRender(&sy.Render)
-		sc.Phong.ConfigSys()
-		sy.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+		oswin.TheApp.RunOnMain(func() {
+			drw := sc.Win.OSWin.Drawer()
+			sf := drw.Surf
+			sz := sc.Geom.Size
+			if sz == image.ZP {
+				sz = image.Point{480, 320}
+			}
+			sc.Frame = vgpu.NewRenderFrame(sf.GPU, &sf.Device, sz)
+			sy := &sc.Phong.Sys
+			sy.InitGraphics(sf.GPU, "vphong.Phong", &sf.Device)
+			sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
+			sc.Frame.SetRender(&sy.Render)
+			sc.Phong.ConfigSys()
+			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+		})
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 	}
@@ -59,40 +66,14 @@ func (sc *Scene) ConfigFrame() bool {
 	return true
 }
 
-// UpdateMeshes calls Update on all the meshes in context on main thread.
-func (sc *Scene) UpdateMeshesInCtxt() bool {
-	// for _, ms := range sc.Meshes {
-	// 	ms.Update(sc)
-	// }
-	// sc.UpdateMeshesInCtxt()
-	return true
-}
-
 // DeleteResources deletes all GPU resources -- sets context and runs on main.
 // This is called during Disconnect and before the window is closed.
 func (sc *Scene) DeleteResources() {
-	if sc.Win == nil {
-		return
-	}
-	sc.Frame.Destroy()
-	sc.Phong.Destroy()
-	/*
-		oswin.TheApp.RunOnMain(func() {
-			// sc.Win.OSWin.Activate()
-			for _, tx := range sc.Textures {
-				tx.Delete(sc)
-			}
-			for _, ms := range sc.Meshes {
-				ms.Delete(sc)
-			}
-			if sc.Tex != nil {
-				sc.Tex.Delete()
-			}
-			if sc.Frame != nil {
-				sc.Frame.Delete()
-			}
-		})
-	*/
+	oswin.TheApp.RunOnMain(func() {
+		vk.DeviceWaitIdle(sc.Frame.Device.Device)
+		sc.Frame.Destroy()
+		sc.Phong.Destroy()
+	})
 }
 
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
@@ -176,9 +157,18 @@ func (sc *Scene) UpdateMVPMatrix() {
 	})
 }
 
+// ConfigRender configures all the rendering elements: Phong system and frame
 func (sc *Scene) ConfigRender() {
 	sc.ConfigFrame()
 	sc.ConfigLights()
+	sc.ConfigMeshesTextures()
+}
+
+// ConfigMeshesTextures configures the meshes and the textures to the Phong
+// rendering system.  Called by ConfigRender -- can be called
+// separately if just these elements are updated -- see also ReconfigMeshes
+// and ReconfigTextures
+func (sc *Scene) ConfigMeshesTextures() {
 	sc.ConfigMeshes()
 	sc.ConfigTextures()
 	sc.Phong.Config()
@@ -186,10 +176,10 @@ func (sc *Scene) ConfigRender() {
 }
 
 func (sc *Scene) Init3D() {
+	sc.ConfigRender()
 	if sc.Camera.FOV == 0 {
 		sc.Defaults()
 	}
-	sc.ConfigRender()
 	sc.UpdateWorldMatrix()
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
@@ -252,7 +242,7 @@ func (sc *Scene) Render() bool {
 
 	drw := sc.Win.OSWin.Drawer()
 	drw.SetFrameImage(sc.DirUpIdx, sc.Frame.Frames[0])
-	sc.Win.DirDraws.Nodes.Order[sc.DirUpIdx].Val = sc.WinBBox
+	sc.Win.DirDraws.Nodes.Order[sc.DirUpIdx-sc.Win.DirDraws.StartIdx].Val = sc.WinBBox
 	drw.SyncImages()
 	sc.ClearFlag(int(Rendering))
 	return true
@@ -266,37 +256,14 @@ func (sc *Scene) IsRendering() bool {
 	return sc.HasFlag(int(Rendering))
 }
 
-func (sc *Scene) DirectWinUpload() bool {
+func (sc *Scene) DirectWinUpload() {
 	if !sc.IsVisible() {
-		return true
+		return
 	}
 	if Update3DTrace {
 		fmt.Printf("3D Update: Window %s from Scene: %s at: %v\n", sc.Win.Nm, sc.Nm, sc.WinBBox.Min)
 	}
-
 	sc.Render()
-
-	// limit upload to vpbbox region
-	rvp := sc.VpBBox
-	tvp := rvp
-	sz := rvp.Size() // todo: sc.Tex.Size()
-	tvp.Max = tvp.Min.Add(sz)
-	tvp = rvp.Intersect(tvp)
-	// mvoff is amount left edge of scene has been clipped by VpBbox and is no longer
-	// visible -- thus how much the texture blit must move over accordingly.
-	mvoff := sc.VpBBox.Min.Sub(sc.ObjBBox.Min)
-	tb := image.Rectangle{Min: mvoff, Max: mvoff.Add(tvp.Size())}
-	fb := tb
-	fb.Min.Y = sz.Y - tb.Max.Y // flip Y
-	fb.Max.Y = sz.Y - tb.Min.Y
-	sc.BBoxMu.RLock()
-	// wt.Copy(sc.WinBBox.Min, sc.Tex, fb, draw.Src, nil)
-	sc.BBoxMu.RUnlock()
-
-	if !sc.Win.IsUpdating() {
-		sc.Win.UpdateSig() // trigger publish
-	}
-	return true
 }
 
 // Render3D renders the scene to the framebuffer

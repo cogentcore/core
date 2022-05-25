@@ -64,7 +64,7 @@ func (cm *Camera) UpdateMatrix() {
 		width := cm.Aspect * height
 		cm.PrjnMatrix.SetOrthographic(width, height, cm.Near, cm.Far)
 	} else {
-		cm.PrjnMatrix.SetPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far)
+		cm.PrjnMatrix.SetVkPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far) // Vk
 	}
 	cm.InvPrjnMatrix.SetInverse(&cm.PrjnMatrix)
 	var proj mat32.Mat4
