@@ -177,7 +177,6 @@ func (sc *Scene) ConfigMeshesTextures() {
 }
 
 func (sc *Scene) Init3D() {
-	sc.ConfigRender()
 	if sc.Camera.FOV == 0 {
 		sc.Defaults()
 	}
@@ -194,6 +193,7 @@ func (sc *Scene) Init3D() {
 		return ki.Continue
 	})
 	sc.Style3D()
+	sc.ConfigRender()
 }
 
 func (sc *Scene) Style3D() {

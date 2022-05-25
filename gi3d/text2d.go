@@ -5,8 +5,8 @@
 package gi3d
 
 import (
+	"fmt"
 	"image"
-	"image/draw"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
@@ -32,11 +32,10 @@ import (
 // but can be set to any color.
 type Text2D struct {
 	Solid
-	Text      string     `desc:"the text string to display"`
-	Sty       gist.Style `json:"-" xml:"-" desc:"styling settings for the text"`
-	TxtPos    mat32.Vec2 `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
-	TxtRender girl.Text  `view:"-" xml:"-" json:"-" desc:"render data for text label"`
-	//	TxtTex      *TextureBase `view:"-" xml:"-" json:"-" desc:"texture object for the text -- this is used directly instead of pointing to the Scene Texture resources"`
+	Text        string     `desc:"the text string to display"`
+	Sty         gist.Style `json:"-" xml:"-" desc:"styling settings for the text"`
+	TxtPos      mat32.Vec2 `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
+	TxtRender   girl.Text  `view:"-" xml:"-" json:"-" desc:"render data for text label"`
 	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
 }
 
@@ -62,24 +61,6 @@ func (txt *Text2D) Defaults(sc *Scene) {
 	txt.Mat.Bright = 5 // this is key for making e.g., a white background show up as white..
 }
 
-func (txt *Text2D) Disconnect() {
-	/*
-		if txt.TxtTex != nil && txt.TxtTex.Tex.IsActive() {
-			scc, err := txt.ParentByTypeTry(KiT_Scene, ki.Embeds)
-			if err == nil {
-				sc := scc.Embed(KiT_Scene).(*Scene)
-				if sc.Win != nil && sc.Win.IsVisible() {
-					oswin.TheApp.RunOnMain(func() {
-						sc.Win.OSWin.Activate()
-						txt.TxtTex.Tex.Delete()
-					})
-				}
-			}
-		}
-	*/
-	txt.Solid.Disconnect()
-}
-
 // SetText sets the text and renders it to the texture image
 func (txt *Text2D) SetText(sc *Scene, str string) {
 	txt.Text = str
@@ -91,11 +72,11 @@ func (txt *Text2D) SetText(sc *Scene, str string) {
 func (txt *Text2D) TextSize() (mat32.Vec2, bool) {
 	txt.Pose.Defaults() // only if nil
 	sz := mat32.Vec2{}
-	// if txt.TxtTex == nil {
-	// 	return sz, false
-	// }
-	// tsz := txt.TxtTex.Tex.Size()
-	tsz := image.Point{30, 30} // todo!
+	tx := txt.Mat.TexPtr
+	if tx == nil {
+		return sz, false
+	}
+	tsz := tx.Image().Bounds().Size()
 	fsz := float32(txt.Sty.Font.Size.Dots)
 	if fsz == 0 {
 		fsz = 36
@@ -150,54 +131,44 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	}
 	bounds := image.Rectangle{Max: szpt}
 	var img *image.RGBA
-	// setImg := false
-	/*
-		if txt.TxtTex == nil {
-			txt.TxtTex = &TextureBase{Nm: txt.Nm}
-			tx := txt.TxtTex.NewTex()
+	setImg := false
+	var tx Texture
+	var err error
+	if txt.Mat.TexPtr == nil {
+		txname := "__Text2D: " + txt.Nm
+		tx, err = sc.TextureByNameTry(txname)
+		if err != nil {
+			tx = &TextureBase{Nm: txname}
+			sc.AddTexture(tx)
 			img = image.NewRGBA(bounds)
-			tx.SetImage(img) // safe here
+			tx.SetImage(img)
+			setImg = true
+			txt.Mat.SetTexture(sc, tx)
 		} else {
-			im := txt.TxtTex.Tex.Image()
-			if im == nil {
-				img = image.NewRGBA(bounds)
-				setImg = true // needs to be set on main
-			} else {
-				img = im.(*image.RGBA)
-				if img == nil {
-					img = image.NewRGBA(bounds)
-					setImg = true
-				} else {
-					if img.Bounds() != bounds {
-						img = image.NewRGBA(bounds)
-						setImg = true
-					}
-				}
-			}
+			fmt.Printf("gi3d.Text2D: error: texture name conflict: %s\n", txname)
+			txt.Mat.SetTexture(sc, tx)
+			img = tx.Image().(*image.RGBA)
 		}
-	*/
+	} else {
+		tx = txt.Mat.TexPtr
+		img = tx.Image().(*image.RGBA)
+		if img.Bounds() != bounds {
+			img = image.NewRGBA(bounds)
+			tx.SetImage(img)
+			setImg = true
+		}
+	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
 		rs.Init(szpt.X, szpt.Y, img)
 	}
 	rs.PushBounds(bounds)
-	draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
+	// draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
-	if sc.Win != nil {
-		/*
-			oswin.TheApp.RunOnMain(func() {
-				sc.Win.OSWin.Activate()
-				if setImg {
-					txt.TxtTex.Tex.SetImage(img) // does transfer if active
-				} else {
-					txt.TxtTex.Tex.Transfer(0) // update
-				}
-			})
-		*/
-	}
-	// txt.Mat.SetTexture(sc, txt.TxtTex)
-	// gi.SavePNG("text-test.png", img)
+
+	// todo: setImg
+	_ = setImg
 }
 
 // Validate checks that text has valid mesh and texture settings, etc

@@ -31,6 +31,9 @@ type Texture interface {
 
 	// Image returns image for the texture
 	Image() image.Image
+
+	// SetImage sets image for the texture
+	SetImage(img image.Image)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -38,8 +41,9 @@ type Texture interface {
 
 // TextureBase is the base texture implementation
 type TextureBase struct {
-	Nm    string `desc:"name of the texture -- textures are connected to material by name"`
-	Trans bool   `desc:"set to true if texture has transparency"`
+	Nm    string      `desc:"name of the texture -- textures are connected to material by name"`
+	Trans bool        `desc:"set to true if texture has transparency"`
+	Img   image.Image `desc:"cached image"`
 }
 
 var KiT_TextureBase = kit.Types.AddType(&TextureBase{}, nil)
@@ -56,6 +60,14 @@ func (tx *TextureBase) SetTransparent(trans bool) {
 	tx.Trans = trans
 }
 
+func (tx *TextureBase) Image() image.Image {
+	return tx.Img
+}
+
+func (tx *TextureBase) SetImage(img image.Image) {
+	tx.Img = img
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 // TextureFile
 
@@ -63,7 +75,6 @@ func (tx *TextureBase) SetTransparent(trans bool) {
 type TextureFile struct {
 	TextureBase
 	File gi.FileName `desc:"filename for the texture"`
-	Img  image.Image `desc:"cached image"`
 }
 
 var KiT_TextureFile = kit.Types.AddType(&TextureFile{}, nil)

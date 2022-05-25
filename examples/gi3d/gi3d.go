@@ -282,18 +282,16 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floor.Mat.SetTexture(sc, grtx)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 	floor.SetInactive() // not selectable
-	/*
 
-		txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
-		// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
-		// txt.SetProp("background-color", "white")
-		txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
-		// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
-		// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
-		txt.SetProp("text-align", gist.AlignLeft) // gi.AlignCenter)
-		txt.Pose.Scale.SetScalar(0.2)
-		txt.Pose.Pos.Set(0, 2.2, 0)
-	*/
+	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+	// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
+	// txt.SetProp("background-color", "white")
+	txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
+	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
+	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
+	txt.SetProp("text-align", gist.AlignLeft) // gi.AlignCenter)
+	txt.Pose.Scale.SetScalar(0.2)
+	txt.Pose.Pos.Set(0, 2.2, 0)
 
 	tcg := gi3d.AddNewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
 	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
