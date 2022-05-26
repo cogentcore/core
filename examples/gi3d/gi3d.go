@@ -5,11 +5,15 @@
 package main
 
 import (
+	"log"
+	"math"
+	"time"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/oswin/driver/vkos"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
@@ -17,14 +21,13 @@ import (
 
 func main() {
 
-	vkos.VkOsDebug = true
+	// vkos.VkOsDebug = true
 
 	gimain.Main(func() {
 		mainrun()
 	})
 }
 
-/*
 // Anim has control for animating
 type Anim struct {
 	On            bool         `desc:"run the animation"`
@@ -110,7 +113,6 @@ func (an *Anim) Animate() {
 		an.Ang += an.Speed
 	}
 }
-*/
 
 func mainrun() {
 	width := 1024
@@ -241,27 +243,26 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sph.Mat.Color.SetName("orange")
 	sph.Mat.Color.A = 200
 
+	// Good strategy for objects if used in multiple places is to load
+	// into library, then add from there.
+	lgo, err := sc.OpenToLibrary("gopher.obj", "")
+	if err != nil {
+		log.Println(err)
+	}
+	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
+
+	gogp := gi3d.AddNewGroup(sc, sc, "go-group")
+
+	bgo, _ := sc.AddFmLibrary("gopher", gogp)
+	bgo.Pose.Scale.Set(.5, .5, .5)
+	bgo.Pose.Pos.Set(1.4, -2.5, 0)
+	bgo.Pose.SetAxisRotation(0, 1, 0, -160)
+
+	sgo, _ := sc.AddFmLibrary("gopher", gogp)
+	sgo.Pose.Pos.Set(-1.5, -2, 0)
+	sgo.Pose.Scale.Set(.2, .2, .2)
+
 	/*
-
-		// Good strategy for objects if used in multiple places is to load
-		// into library, then add from there.
-		lgo, err := sc.OpenToLibrary("gopher.obj", "")
-		if err != nil {
-			log.Println(err)
-		}
-		lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
-
-		gogp := gi3d.AddNewGroup(sc, sc, "go-group")
-
-		bgo, _ := sc.AddFmLibrary("gopher", gogp)
-		bgo.Pose.Scale.Set(.5, .5, .5)
-		bgo.Pose.Pos.Set(1.4, -2.5, 0)
-		bgo.Pose.SetAxisRotation(0, 1, 0, -160)
-
-		sgo, _ := sc.AddFmLibrary("gopher", gogp)
-		sgo.Pose.Pos.Set(-1.5, -2, 0)
-		sgo.Pose.Scale.Set(.2, .2, .2)
-
 		trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
 		trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
 		trs.Pose.Pos.Set(-1.6, -1.6, -.2)
@@ -303,79 +304,76 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
-	/*
-		///////////////////////////////////////////////////
-		//  Animation & Embedded controls
+	///////////////////////////////////////////////////
+	//  Animation & Embedded controls
 
-		anim := &Anim{}
-		anim.Start(sc, false) // start without animation running
+	anim := &Anim{}
+	anim.Start(sc, false) // start without animation running
 
-		emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
-		emb.Pose.Pos.Set(-2, 2, 0)
-		// emb.Zoom = 1.5   // this is how to rescale overall size
-		evlay := gi.AddNewFrame(emb.Viewport, "vlay", gi.LayoutVert)
-		evlay.SetProp("margin", units.NewEx(1))
+	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
+	emb.Pose.Pos.Set(-2, 2, 0)
+	// emb.Zoom = 1.5   // this is how to rescale overall size
+	evlay := gi.AddNewFrame(emb.Viewport, "vlay", gi.LayoutVert)
+	evlay.SetProp("margin", units.NewEx(1))
 
-		eabut := gi.AddNewCheckBox(evlay, "anim-but")
-		eabut.SetText("Animate")
-		eabut.Tooltip = "toggle animation on and off"
-		eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			if sig == int64(gi.ButtonToggled) {
-				anim.On = eabut.IsChecked()
-			}
+	eabut := gi.AddNewCheckBox(evlay, "anim-but")
+	eabut.SetText("Animate")
+	eabut.Tooltip = "toggle animation on and off"
+	eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonToggled) {
+			anim.On = eabut.IsChecked()
+		}
+	})
+
+	cmb := gi.AddNewMenuButton(evlay, "anim-ctrl")
+	cmb.SetText("Anim Ctrl")
+	cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
+	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			anim.DoTorus = !anim.DoTorus
+		})
+	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Gopher"},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			anim.DoGopher = !anim.DoGopher
+		})
+	cmb.Menu.AddAction(gi.ActOpts{Label: "Edit Anim"},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 		})
 
-		cmb := gi.AddNewMenuButton(evlay, "anim-ctrl")
-		cmb.SetText("Anim Ctrl")
-		cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
-		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				anim.DoTorus = !anim.DoTorus
-			})
-		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Gopher"},
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				anim.DoGopher = !anim.DoGopher
-			})
-		cmb.Menu.AddAction(gi.ActOpts{Label: "Edit Anim"},
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
-			})
+	sprw := gi.AddNewLayout(evlay, "speed-lay", gi.LayoutHoriz)
+	gi.AddNewLabel(sprw, "speed-lbl", "Speed: ")
+	sb := gi.AddNewSpinBox(sprw, "anim-speed")
+	sb.Defaults()
+	sb.HasMin = true
+	sb.Min = 0.01
+	sb.Step = 0.01
+	sb.SetValue(anim.Speed)
+	sb.Tooltip = "determines the speed of rotation (step size)"
 
-		sprw := gi.AddNewLayout(evlay, "speed-lay", gi.LayoutHoriz)
-		gi.AddNewLabel(sprw, "speed-lbl", "Speed: ")
-		sb := gi.AddNewSpinBox(sprw, "anim-speed")
-		sb.Defaults()
-		sb.HasMin = true
-		sb.Min = 0.01
-		sb.Step = 0.01
-		sb.SetValue(anim.Speed)
-		sb.Tooltip = "determines the speed of rotation (step size)"
+	spsld := gi.AddNewSlider(evlay, "speed-slider")
+	spsld.Dim = mat32.X
+	spsld.Defaults()
+	spsld.Min = 0.01
+	spsld.Max = 1
+	spsld.Step = 0.01
+	spsld.PageStep = 0.1
+	spsld.SetMinPrefWidth(units.NewEm(20))
+	spsld.SetMinPrefHeight(units.NewEm(2))
+	spsld.SetValue(anim.Speed)
+	// spsld.Tracking = true
+	spsld.Icon = gi.IconName("circlebutton-on")
 
-		spsld := gi.AddNewSlider(evlay, "speed-slider")
-		spsld.Dim = mat32.X
-		spsld.Defaults()
-		spsld.Min = 0.01
-		spsld.Max = 1
-		spsld.Step = 0.01
-		spsld.PageStep = 0.1
-		spsld.SetMinPrefWidth(units.NewEm(20))
-		spsld.SetMinPrefHeight(units.NewEm(2))
+	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		anim.Speed = sb.Value
 		spsld.SetValue(anim.Speed)
-		// spsld.Tracking = true
-		spsld.Icon = gi.IconName("circlebutton-on")
-
-		sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			anim.Speed = sb.Value
-			spsld.SetValue(anim.Speed)
-		})
-		spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			if gi.SliderSignals(sig) == gi.SliderValueChanged {
-				anim.Speed = data.(float32)
-				sb.SetValue(anim.Speed)
-			}
-		})
-
-	*/
+	})
+	spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if gi.SliderSignals(sig) == gi.SliderValueChanged {
+			anim.Speed = data.(float32)
+			sb.SetValue(anim.Speed)
+		}
+	})
 
 	//	menu config etc
 

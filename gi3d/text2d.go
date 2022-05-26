@@ -59,7 +59,7 @@ func (txt *Text2D) Defaults(sc *Scene) {
 	txt.SetProp("margin", units.NewPx(2))
 	txt.SetProp("color", &gi.Prefs.Colors.Font)
 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0})
-	txt.Mat.Bright = 5 // this is key for making e.g., a white background show up as white..
+	txt.Mat.Bright = 4 // this is key for making e.g., a white background show up as white..
 }
 
 // SetText sets the text and renders it to the texture image
@@ -132,7 +132,6 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	}
 	bounds := image.Rectangle{Max: szpt}
 	var img *image.RGBA
-	setImg := false
 	var tx Texture
 	var err error
 	if txt.Mat.TexPtr == nil {
@@ -143,7 +142,6 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			sc.AddTexture(tx)
 			img = image.NewRGBA(bounds)
 			tx.SetImage(img)
-			setImg = true
 			txt.Mat.SetTexture(sc, tx)
 		} else {
 			fmt.Printf("gi3d.Text2D: error: texture name conflict: %s\n", txname)
@@ -156,7 +154,6 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		if img.Bounds() != bounds {
 			img = image.NewRGBA(bounds)
 			tx.SetImage(img)
-			setImg = true
 		}
 	}
 	rs := &txt.RenderState
@@ -167,9 +164,6 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
-
-	// todo: setImg
-	_ = setImg
 }
 
 // Validate checks that text has valid mesh and texture settings, etc

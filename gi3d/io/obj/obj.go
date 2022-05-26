@@ -318,7 +318,7 @@ func (dec *Decoder) SetMat(sc *gi3d.Scene, sld *gi3d.Solid, matnm string) {
 	if mat.Opacity > 0 {
 		sld.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
 	}
-	sld.Mat.Specular = mat.Specular
+	// sld.Mat.Specular = mat.Specular
 	if mat.Shininess != 0 {
 		sld.Mat.Shiny = mat.Shininess
 	}

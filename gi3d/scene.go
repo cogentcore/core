@@ -212,7 +212,6 @@ func (sc *Scene) AddFmLibrary(nm string, parent ki.Ki) (*Group, error) {
 	updt := sc.UpdateStart()
 	nwgp := gp.Clone().(*Group)
 	parent.AddChild(nwgp)
-	sc.Init3D()
 	sc.UpdateEnd(updt)
 	return nwgp, nil
 }

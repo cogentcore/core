@@ -5,6 +5,7 @@
 package gi3d
 
 import (
+	"fmt"
 	"image"
 
 	"github.com/goki/gi/gi"
@@ -23,12 +24,11 @@ import (
 // 2D elements can be embedded.
 type Embed2D struct {
 	Solid
-	Viewport *EmbedViewport `desc:"the embedded viewport to display"`
-	Zoom     float32        `desc:"overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view"`
-	// Tex        *TextureBase   `view:"-" xml:"-" json:"-" desc:"texture object -- this is used directly instead of pointing to the Scene Texture resources"`
-	FitContent bool        `desc:"if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport"`
-	StdSize    image.Point `desc:"original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent"`
-	DPISize    image.Point `desc:"original size scaled according to logical dpi"`
+	Viewport   *EmbedViewport `desc:"the embedded viewport to display"`
+	Zoom       float32        `desc:"overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view"`
+	FitContent bool           `desc:"if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport"`
+	StdSize    image.Point    `desc:"original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent"`
+	DPISize    image.Point    `desc:"original size scaled according to logical dpi"`
 }
 
 var KiT_Embed2D = kit.Types.AddType(&Embed2D{}, Embed2DProps)
@@ -63,25 +63,7 @@ func (em *Embed2D) Defaults(sc *Scene) {
 	em.SetMesh(sc, tm)
 	em.Solid.Defaults()
 	em.Zoom = 1
-	em.Mat.Bright = 1.4 // this is key for making e.g., a white background show up as white..
-}
-
-func (em *Embed2D) Disconnect() {
-	/* todo
-	if em.Tex != nil && em.Tex.Tex.IsActive() {
-		scc, err := em.ParentByTypeTry(KiT_Scene, ki.Embeds)
-		if err == nil {
-			sc := scc.Embed(KiT_Scene).(*Scene)
-			if sc.Win != nil && sc.Win.IsVisible() {
-				oswin.TheApp.RunOnMain(func() {
-					sc.Win.OSWin.Activate()
-					em.Tex.Tex.Delete()
-				})
-			}
-		}
-	}
-	*/
-	em.Solid.Disconnect()
+	em.Mat.Bright = 2 // this is key for making e.g., a white background show up as white..
 }
 
 // ResizeToFit resizes viewport and texture to fit the content
@@ -137,9 +119,6 @@ func (em *Embed2D) Init3D(sc *Scene) {
 		em.Viewport.FullRender2DTree()
 		em.UploadViewTex(sc)
 	}
-	/* todo
-	em.Mat.SetTexture(sc, em.Tex)
-	*/
 	err := em.Validate(sc)
 	if err != nil {
 		em.SetInvisible()
@@ -149,23 +128,26 @@ func (em *Embed2D) Init3D(sc *Scene) {
 
 // UploadViewTex uploads the viewport image to the texture
 func (em *Embed2D) UploadViewTex(sc *Scene) {
-	/*
-		img := em.Viewport.Pixels
-			if em.Tex == nil {
-				em.Tex = &TextureBase{Nm: em.Nm}
-				tx := em.Tex.NewTex()
-				tx.SetImage(img) // safe here
-			}
-	*/
-	if sc.Win != nil {
-		/* todo
-		oswin.TheApp.RunOnMain(func() {
-			sc.Win.OSWin.Activate()
-			em.Tex.Tex.SetImage(img) // does transfer if active
-		})
-		*/
+	img := em.Viewport.Pixels
+	var tx Texture
+	var err error
+	if em.Mat.TexPtr == nil {
+		txname := "__Embed2D: " + em.Nm
+		tx, err = sc.TextureByNameTry(txname)
+		if err != nil {
+			tx = &TextureBase{Nm: txname}
+			sc.AddTexture(tx)
+			tx.SetImage(img)
+			em.Mat.SetTexture(sc, tx)
+		} else {
+			fmt.Printf("gi3d.Embed2D: error: texture name conflict: %s\n", txname)
+			em.Mat.SetTexture(sc, tx)
+		}
+	} else {
+		tx = em.Mat.TexPtr
+		tx.SetImage(img)
+		sc.Phong.UpdateTextureName(tx.Name())
 	}
-	// gi.SavePNG("emb-test.png", img)
 }
 
 // Validate checks that text has valid mesh and texture settings, etc

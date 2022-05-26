@@ -10,6 +10,7 @@ import (
 
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"github.com/goki/vgpu/vshape"
 )
 
 // MeshName is a mesh name -- provides an automatic gui chooser for meshes.
@@ -115,20 +116,17 @@ func (sc *Scene) AddMesh(ms Mesh) {
 	sc.Meshes.Add(ms.Name(), ms)
 }
 
-/*
 // AddMeshUniqe adds given mesh to mesh collection, ensuring that it has
 // a unique name if one already exists.
 func (sc *Scene) AddMeshUnique(ms Mesh) {
 	nm := ms.Name()
-	sc.MeshesInit()
-	_, has := sc.Meshes[nm]
-	if has {
-		nm += fmt.Sprintf("_%d", len(sc.Meshes))
+	_, err := sc.MeshByNameTry(nm)
+	if err == nil {
+		nm += fmt.Sprintf("_%d", sc.Meshes.Len())
 		ms.SetName(nm)
 	}
-	sc.Meshes[nm] = ms
+	sc.Meshes.Add(ms.Name(), ms)
 }
-*/
 
 // MeshByName looks for mesh by name -- returns nil if not found
 func (sc *Scene) MeshByName(nm string) Mesh {
@@ -224,4 +222,38 @@ func (sc *Scene) ReconfigMeshes() {
 	sc.ConfigMeshes()
 	sc.Phong.Config()
 	sc.SetMeshes()
+}
+
+///////////////////////////////////////////////////////////////
+// GenMesh
+
+// GenMesh is a generic, arbitrary Mesh, storing its values
+type GenMesh struct {
+	MeshBase
+	Vtx  mat32.ArrayF32
+	Norm mat32.ArrayF32
+	Tex  mat32.ArrayF32
+	Clr  mat32.ArrayF32
+	Idx  mat32.ArrayU32
+}
+
+func (ms *GenMesh) Sizes() (nVtx, nIdx int, hasColor bool) {
+	ms.NVtx = len(ms.Vtx) / 3
+	ms.NIdx = len(ms.Idx)
+	ms.Color = len(ms.Clr) > 0
+	return ms.NVtx, ms.NIdx, ms.Color
+}
+
+func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+	copy(vtxAry, ms.Vtx)
+	copy(normAry, ms.Norm)
+	copy(texAry, ms.Tex)
+	if ms.Color {
+		copy(clrAry, ms.Clr)
+	}
+	copy(idxAry, ms.Idx)
+	bb := vshape.BBoxFromVtxs(ms.Vtx, 0, ms.NVtx)
+	ms.BBoxMu.Lock()
+	ms.BBox.SetBounds(bb.Min, bb.Max)
+	ms.BBoxMu.Unlock()
 }
