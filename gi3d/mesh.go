@@ -41,12 +41,18 @@ type Mesh interface {
 
 	// Set sets the mesh points into given arrays, which have been allocated
 	// according to the Sizes() returned by this Mesh.
-	Set(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32)
+	// The mesh is automatically marked with SetMod so that does not need to be done here.
+	Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32)
 
 	// Update updates the mesh points into given arrays, which have previously
 	// been set with SetVerticies -- this can optimize by only updating whatever might
 	// need to be updated for dynamically changing meshes.
-	Update(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32)
+	// You must call SetMod if the mesh was actually updated at this point.
+	Update(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32)
+
+	// SetMod flags that the mesh data has been modified and will be sync'd
+	// at next sync of the Scene.Phong render system.
+	SetMod(sc *Scene)
 
 	// ComputeNorms automatically computes the normals from existing vertex data
 	ComputeNorms(pos, norm mat32.ArrayF32)
@@ -86,8 +92,12 @@ func (ms *MeshBase) IsTransparent() bool {
 	return ms.Trans
 }
 
-func (ms *MeshBase) Update(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (ms *MeshBase) Update(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
 	// nop: default mesh is static, not dynamic
+}
+
+func (ms *MeshBase) SetMod(sc *Scene) {
+	sc.Phong.ModMeshByName(ms.Nm)
 }
 
 // todo!!
@@ -188,8 +198,20 @@ func (sc *Scene) SetMeshes() {
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Val
 		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
-		ms.Set(vtxAry, normAry, texAry, clrAry, idxAry)
+		ms.Set(sc, vtxAry, normAry, texAry, clrAry, idxAry)
 		ph.ModMeshByName(kv.Key)
+	}
+	ph.Sync()
+}
+
+// UpdateMeshes iterates over meshes and calls their Update method
+// each mesh Update method must call SetMod to trigger the update
+func (sc *Scene) UpdateMeshes() {
+	ph := &sc.Phong
+	for _, kv := range sc.Meshes.Order {
+		ms := kv.Val
+		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
+		ms.Update(sc, vtxAry, normAry, texAry, clrAry, idxAry)
 	}
 	ph.Sync()
 }

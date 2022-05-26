@@ -63,11 +63,12 @@ func (ln *Lines) Sizes() (nVtx, nIdx int, hasColor bool) {
 	return ln.NVtx, ln.NIdx, ln.Color
 }
 
-func (ln *Lines) Set(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (ln *Lines) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
 	pos := mat32.Vec3{}
 	bb := vshape.SetLines(vtxAry, normAry, texAry, idxAry, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
 	ln.BBox.SetBounds(bb.Min, bb.Max)
 	// todo: colors!
+	ln.SetMod(sc)
 }
 
 // UnitLineMesh returns the unit-sized line mesh, of name LineMeshName

@@ -50,7 +50,7 @@ func (pl *Plane) Sizes() (nVtx, nIdx int, hasColor bool) {
 	return pl.NVtx, pl.NIdx, pl.Color
 }
 
-func (pl *Plane) Set(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
 	pos := mat32.Vec3{}
 	sz := vshape.SetPlaneAxisSize(vtxAry, normAry, texAry, idxAry, 0, 0, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pos)
 	mn := pos.Sub(sz)
@@ -86,7 +86,7 @@ func (bx *Box) Sizes() (nVtx, nIdx int, hasColor bool) {
 	return bx.NVtx, bx.NIdx, bx.Color
 }
 
-func (bx *Box) Set(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
 	pos := mat32.Vec3{}
 	hSz := vshape.SetBox(vtxAry, normAry, texAry, idxAry, 0, 0, bx.Size, bx.Segs, pos)
 	mn := pos.Sub(hSz)
@@ -143,7 +143,7 @@ func (sp *Sphere) Sizes() (nVtx, nIdx int, hasColor bool) {
 	return sp.NVtx, sp.NIdx, sp.Color
 }
 
-func (sp *Sphere) Set(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
 	pos := mat32.Vec3{}
 	bb := vshape.SetSphereSector(vtxAry, normAry, texAry, idxAry, 0, 0, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, pos)
 	sp.BBox.SetBounds(bb.Min, bb.Max)
@@ -224,7 +224,7 @@ func (cy *Cylinder) Sizes() (nVtx, nIdx int, hasColor bool) {
 	return cy.NVtx, cy.NIdx, cy.Color
 }
 
-func (cy *Cylinder) Set(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
 	pos := mat32.Vec3{}
 	bb := vshape.SetCylinderSector(vtxAry, normAry, texAry, idxAry, 0, 0, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, pos)
 	cy.BBox.SetBounds(bb.Min, bb.Max)
@@ -295,7 +295,7 @@ func (cp *Capsule) Sizes() (nVtx, nIdx int, hasColor bool) {
 	return
 }
 
-func (cp *Capsule) Set(vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (cp *Capsule) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
 	pos := mat32.Vec3{}
 	voff := 0
 	ioff := 0

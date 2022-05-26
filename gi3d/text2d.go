@@ -7,6 +7,7 @@ package gi3d
 import (
 	"fmt"
 	"image"
+	"image/draw"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
@@ -163,7 +164,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		rs.Init(szpt.X, szpt.Y, img)
 	}
 	rs.PushBounds(bounds)
-	// draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
+	draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
 
