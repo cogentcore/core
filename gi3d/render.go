@@ -53,6 +53,8 @@ func (sc *Scene) ConfigFrame() bool {
 			sc.Frame.SetRender(&sy.Render)
 			sc.Phong.ConfigSys()
 			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+			sc.Win.Phongs = append(sc.Win.Phongs, &sc.Phong) // for destroying in sequence
+			sc.Win.Frames = append(sc.Win.Frames, sc.Frame)  // for destroying in sequence
 		})
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
@@ -64,15 +66,6 @@ func (sc *Scene) ConfigFrame() bool {
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	return true
-}
-
-// DeleteResources deletes all GPU resources -- sets context and runs on main.
-// This is called during Disconnect and before the window is closed.
-func (sc *Scene) DeleteResources() {
-	oswin.TheApp.RunOnMain(func() {
-		sc.Phong.Destroy()
-		sc.Frame.Destroy()
-	})
 }
 
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.

@@ -30,6 +30,7 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	"github.com/goki/vgpu/vgpu"
+	"github.com/goki/vgpu/vphong"
 )
 
 var (
@@ -185,9 +186,11 @@ type Window struct {
 	delPop        bool
 	skippedResize *window.Event
 	lastEt        oswin.EventType
-	DirDraws      WindowDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
-	popDraws      WindowDrawers // popup regions
-	updtRegs      WindowUpdates // misc vp update regions
+	DirDraws      WindowDrawers       `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
+	popDraws      WindowDrawers       // popup regions
+	updtRegs      WindowUpdates       // misc vp update regions
+	Phongs        []*vphong.Phong     `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
+	Frames        []*vgpu.RenderFrame `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, WindowProps)
@@ -352,6 +355,15 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	// win.DirDraws.FlipY = true // drawing is flipped in general here.
 	win.popDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
 	win.updtRegs.SetIdxRange(RegionUpdateStart, MaxRegionUpdates)
+
+	win.OSWin.SetDestroyGPUResourcesFunc(func() {
+		for _, ph := range win.Phongs {
+			ph.Destroy()
+		}
+		for _, fr := range win.Frames {
+			fr.Destroy()
+		}
+	})
 	return win
 }
 
@@ -788,11 +800,6 @@ func (w *Window) Closed() {
 		}
 	} else {
 		WindowGlobalMu.Unlock()
-	}
-	if w.DirDraws.Nodes != nil {
-		for _, dukv := range w.DirDraws.Nodes.Order {
-			dukv.Key.This().Disconnect() // does delete
-		}
 	}
 	// these are managed by the window itself
 	w.Sprites.Reset()

@@ -9,6 +9,7 @@ import (
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
@@ -16,7 +17,7 @@ import (
 
 func main() {
 
-	// vkos.VkOsDebug = true
+	vkos.VkOsDebug = true
 
 	gimain.Main(func() {
 		mainrun()

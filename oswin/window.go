@@ -215,6 +215,11 @@ type Window interface {
 	// This is typically used for high-performance rendering to the surface.
 	Drawer() *vdraw.Drawer
 
+	// SetDestroyGPUResourcesFunc sets the given function
+	// that will be called on the main thread just prior
+	// to destroying the drawer and surface.
+	SetDestroyGPUResourcesFunc(f func())
+
 	EventDeque
 }
 
@@ -231,6 +236,11 @@ type WindowBase struct {
 	LogDPI      float32
 	Par         interface{}
 	Flag        int64
+	// set this to a function that will destroy GPU resources
+	// in the main thread prior to destroying the drawer
+	// and the surface -- otherwise it is difficult to
+	// ensure that the proper ordering of destruction applies.
+	DestroyGPUfunc func()
 }
 
 func (w WindowBase) Name() string {
@@ -279,6 +289,10 @@ func (w *WindowBase) IsMinimized() bool {
 
 func (w *WindowBase) IsFocus() bool {
 	return bitflag.HasAtomic(&w.Flag, int(Focus))
+}
+
+func (w *WindowBase) SetDestroyGPUResourcesFunc(f func()) {
+	w.DestroyGPUfunc = f
 }
 
 ////////////////////////////////////////////////////////////////////////////

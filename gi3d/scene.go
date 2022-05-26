@@ -109,7 +109,6 @@ func (sc *Scene) Defaults() {
 }
 
 func (sc *Scene) Disconnect() {
-	sc.DeleteResources()
 	sc.WidgetBase.Disconnect()
 }
 
