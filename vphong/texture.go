@@ -123,6 +123,28 @@ func (ph *Phong) UseTextureName(name string) error {
 	return ph.UseTextureIdx(idx)
 }
 
+// UpdateTextureIdx updates texture by index
+func (ph *Phong) UpdateTextureIdx(idx int) error {
+	vars := ph.Sys.Vars()
+	txset := vars.SetMap[int(TexSet)]
+	tx := ph.Textures.Order[idx].Val
+	_, img, _ := txset.ValByIdxTry("Tex", idx)
+	img.SetGoImage(tx.Image, 0, vgpu.FlipY)
+	return nil
+}
+
+// UpdateTextureName updates texture by name
+func (ph *Phong) UpdateTextureName(name string) error {
+	idx, ok := ph.Textures.IdxByKey(name)
+	if !ok {
+		err := fmt.Errorf("vphong:UpdateTextureName -- name not found: %s", name)
+		if vgpu.TheGPU.Debug {
+			log.Println(err)
+		}
+	}
+	return ph.UpdateTextureIdx(idx)
+}
+
 // UseTexturePars sets the texture parameters for the next render command:
 // how often the texture repeats along each dimension, and the offset
 func (ph *Phong) UseTexturePars(repeat mat32.Vec2, off mat32.Vec2) {
