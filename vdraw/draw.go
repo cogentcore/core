@@ -27,29 +27,37 @@ const (
 // A standard Go image is rendered upright on a standard Vulkan surface.
 // Set flipY to true to flip.
 func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
+	dw.UpdtMu.Lock()
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
 	tx.SetGoImage(img, layer, flipY)
+	dw.UpdtMu.Unlock()
 }
 
 // ConfigImage configures the draw image at given index
 // to fit the given image format and number of layers as a drawing source.
 func (dw *Drawer) ConfigImage(idx int, fmt *vgpu.ImageFormat) {
+	dw.UpdtMu.Lock()
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
 	tx.Texture.Format = *fmt
 	tx.Texture.Format.SetMultisample(1) // can't be multi
 	tx.Texture.AllocTexture()
+	dw.UpdtMu.Unlock()
 }
 
 // SetFrameImage sets given Framebuffer image as a drawing source at index,
 // used in subsequent Draw methods.  Must have already been configured to fit!
 func (dw *Drawer) SetFrameImage(idx int, fb *vgpu.Framebuffer) {
+	dw.UpdtMu.Lock()
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
 	if fb.Format.Size != tx.Texture.Format.Size {
+		dw.UpdtMu.Unlock()
 		dw.ConfigImage(idx, &fb.Format)
+		dw.UpdtMu.Lock()
 	}
 	cmd := dw.Sys.MemCmdStart()
 	fb.CopyToImage(&tx.Texture.Image, dw.Sys.Device.Device, cmd)
 	dw.Sys.MemCmdSubmitWaitFree()
+	dw.UpdtMu.Unlock()
 }
 
 ////////////////////////////////////////////////////////////////
@@ -101,11 +109,13 @@ func (dw *Drawer) SetFrameImageName(name string, fb *vgpu.Framebuffer) {
 // SyncImages must be called after images have been updated, to sync
 // memory up to the GPU.
 func (dw *Drawer) SyncImages() {
+	dw.UpdtMu.Lock()
 	sy := &dw.Sys
 	sy.Mem.SyncToGPU()
 	vars := sy.Vars()
 	vk.DeviceWaitIdle(sy.Device.Device)
 	vars.BindAllTextureVars(0) // set = 0, iterates over multiple desc sets
+	dw.UpdtMu.Unlock()
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -158,6 +168,7 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, op draw.Op, flipY bool) error {
+	dw.UpdtMu.Lock()
 	sy := &dw.Sys
 	dpl := dw.SelectPipeline(op)
 	vars := sy.Vars()
@@ -179,15 +190,19 @@ func (dw *Drawer) Draw(idx, layer int, src2dst mat32.Mat3, sr image.Rectangle, o
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mtxs")
 	dpl.Push(cmd, matv, unsafe.Pointer(tmat))
 	dpl.DrawVertex(cmd, 0)
+	dw.UpdtMu.Unlock()
 	return nil
 }
 
-// UseTextureSet selects the descriptor set to use -- choose this based on the bank of 16
+// UseTextureSet selects the descriptor set to use --
+// choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *Drawer) UseTextureSet(descIdx int) {
+	dw.UpdtMu.Lock()
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	sy.CmdBindVars(cmd, descIdx)
+	dw.UpdtMu.Unlock()
 }
 
 // StartDraw starts image drawing rendering process on render target
@@ -195,6 +210,7 @@ func (dw *Drawer) UseTextureSet(descIdx int) {
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *Drawer) StartDraw(descIdx int) {
+	dw.UpdtMu.Lock()
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	if dw.Surf != nil {
@@ -206,6 +222,7 @@ func (dw *Drawer) StartDraw(descIdx int) {
 	dw.Impl.LastOp = draw.Src
 	dpl := sy.PipelineMap["draw_src"]
 	dpl.BindPipeline(cmd)
+	dw.UpdtMu.Unlock()
 }
 
 // SelectPipeline selects the pipeline based on draw op
@@ -230,6 +247,7 @@ func (dw *Drawer) SelectPipeline(op draw.Op) *vgpu.Pipeline {
 
 // EndDraw ends image drawing rendering process on render target
 func (dw *Drawer) EndDraw() {
+	dw.UpdtMu.Lock()
 	sy := &dw.Sys
 	cmd := sy.CmdPool.Buff
 	sy.EndRenderPass(cmd)
@@ -241,4 +259,5 @@ func (dw *Drawer) EndDraw() {
 		dw.Frame.SubmitRender(cmd)
 		dw.Frame.WaitForRender()
 	}
+	dw.UpdtMu.Unlock()
 }

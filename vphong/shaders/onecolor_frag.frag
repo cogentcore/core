@@ -38,6 +38,5 @@ void main() {
 
 	// Final fragment color -- premultiplied alpha
 	outputColor = min(vec4((Bright * Ambdiff + Spec) * opacity, opacity), vec4(1.0));
-	// outputColor = vec4(1,1,1,1);
 }
 

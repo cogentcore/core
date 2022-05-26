@@ -94,14 +94,15 @@ func main() {
 	/////////////////////////////
 	// Lights
 
-	dark := color.RGBA{20, 20, 20, 255}
-	ph.AddAmbientLight(mat32.NewVec3Color(dark))
+	// amblt := mat32.NewVec3Color(color.White).MulScalar(.1)
+	// ph.AddAmbientLight(amblt)
 
-	ph.AddDirLight(mat32.NewVec3Color(color.White), mat32.Vec3{0, 1, 1})
+	dirlt := mat32.NewVec3Color(color.White).MulScalar(1)
+	ph.AddDirLight(dirlt, mat32.Vec3{0, 1, 1})
 
-	ph.AddPointLight(mat32.NewVec3Color(color.White), mat32.Vec3{0, 2, 5}, .1, .01)
-
-	ph.AddSpotLight(mat32.NewVec3Color(color.White), mat32.Vec3{-2, 5, -2}, mat32.Vec3{0, -1, 0}, 10, 45, .01, .001)
+	// ph.AddPointLight(mat32.NewVec3Color(color.White), mat32.Vec3{0, 2, 5}, .1, .01)
+	//
+	// ph.AddSpotLight(mat32.NewVec3Color(color.White), mat32.Vec3{-2, 5, -2}, mat32.Vec3{0, -1, 0}, 10, 45, .01, .001)
 
 	/////////////////////////////
 	// Meshes
@@ -151,18 +152,21 @@ func main() {
 	/////////////////////////////
 	// Colors
 
+	dark := color.RGBA{20, 20, 20, 255}
 	blue := color.RGBA{0, 0, 255, 255}
 	blueTr := color.RGBA{0, 0, 200, 200}
 	red := color.RGBA{255, 0, 0, 255}
 	redTr := color.RGBA{200, 0, 0, 200}
 	green := color.RGBA{0, 255, 0, 255}
 	orange := color.RGBA{180, 130, 0, 255}
+	tan := color.RGBA{210, 180, 140, 255}
 	ph.AddColor("blue", vphong.NewColors(blue, color.Black, 30, 1, 1))
 	ph.AddColor("blueTr", vphong.NewColors(blueTr, color.Black, 30, 1, 1))
 	ph.AddColor("red", vphong.NewColors(red, color.Black, 30, 1, 1))
 	ph.AddColor("redTr", vphong.NewColors(redTr, color.Black, 30, 1, 1))
 	ph.AddColor("green", vphong.NewColors(dark, green, 30, .1, 1))
 	ph.AddColor("orange", vphong.NewColors(orange, color.Black, 30, 1, 1))
+	ph.AddColor("tan", vphong.NewColors(tan, color.Black, 30, 1, 1))
 
 	/////////////////////////////
 	// Camera / Mtxs
@@ -285,7 +289,8 @@ func main() {
 		ph.UseNoTexture()
 		ph.Render()
 
-		ph.UseColorName("blueTr")
+		// ph.UseColorName("blueTr")
+		ph.UseColorName("tan")
 		ph.SetModelMtx(&model5)
 		ph.UseMeshName("capsule")
 		ph.UseNoTexture()

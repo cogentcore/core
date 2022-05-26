@@ -27,10 +27,10 @@ func NewColors(clr, emis color.Color, shiny, reflect, bright float32) *Colors {
 	return cl
 }
 
-// SetColors sets the colors from standard Go colors
+//  SetColors sets the colors from standard Go colors
 func (cl *Colors) SetColors(clr, emis color.Color, shiny, reflect, bright float32) {
-	cl.Color.SetColor(clr)
-	cl.Emissive.SetColor(emis)
+	cl.Color = mat32.NewVec4Color(clr).SRGBToLinear()
+	cl.Emissive = mat32.NewVec3Color(emis).SRGBToLinear()
 	cl.ShinyBright.X = shiny
 	cl.ShinyBright.Y = reflect
 	cl.ShinyBright.Z = bright

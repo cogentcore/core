@@ -5,6 +5,8 @@
 package vphong
 
 import (
+	"sync"
+
 	"github.com/goki/kigen/ordmap"
 	"github.com/goki/vgpu/vgpu"
 )
@@ -41,7 +43,8 @@ type Phong struct {
 	Textures ordmap.Map[string, *Texture] `desc:"textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"`
 	Colors   ordmap.Map[string, *Colors]  `desc:"colors, optionally available for looking up by name -- not used directly in rendering"`
 
-	Sys vgpu.System `desc:"rendering system"`
+	Sys    vgpu.System `desc:"rendering system"`
+	UpdtMu sync.Mutex  `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on updating"`
 }
 
 func (ph *Phong) Destroy() {
@@ -51,25 +54,31 @@ func (ph *Phong) Destroy() {
 // Config configures everything after everything has been Added
 func (ph *Phong) Config() {
 	ph.Alloc() // allocate all vals
+	ph.UpdtMu.Lock()
 	ph.Sys.Config()
 
 	ph.ConfigMeshes()
 	ph.ConfigLights()
 	ph.ConfigTextures()
 	ph.Sys.Mem.SyncToGPU()
+	ph.UpdtMu.Unlock()
 }
 
 // Alloc allocate all vals based on currently-added
 // Mesh, Color, Texture
 func (ph *Phong) Alloc() {
+	ph.UpdtMu.Lock()
 	ph.AllocMeshes()
 	ph.AllocTextures()
+	ph.UpdtMu.Unlock()
 }
 
 // Sync synchronizes any changes in val data up to GPU device memory.
 // any changes in numbers or sizes of any element requires a Config call.
 func (ph *Phong) Sync() {
+	ph.UpdtMu.Lock()
 	ph.Sys.Mem.SyncToGPU()
+	ph.UpdtMu.Unlock()
 }
 
 ///////////////////////////////////////////////////

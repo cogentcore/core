@@ -27,11 +27,12 @@ layout(location = 0) out vec4 outputColor;
 			
 void main() {
 	float opacity = VtxColor.a;
-	vec3 clr = VtxColor.rgb;	
+	vec3 clr = pow(VtxColor.rgb, vec3(2.2));	// we need to undo gamma on incoming texture colors
+	// vec3 clr = VtxColor.rgb;
 	
 	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
 	float Shiny = ShinyBright.x;
-	float Reflect = ShinyBright.y;
+	float Reflect = 0; // ShinyBright.y;
 	float Bright = ShinyBright.z;
 	vec3 Specular = vec3(1,1,1);
 	vec3 Ambdiff, Spec;

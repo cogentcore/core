@@ -57,7 +57,7 @@ func NewRenderFrame(gp *GPU, dev *Device, size image.Point) *RenderFrame {
 func (rf *RenderFrame) Defaults() {
 	rf.NFrames = 1
 	rf.Format.Defaults()
-	rf.Format.Set(1024, 768, vk.FormatR8g8b8a8Srgb)
+	rf.Format.Set(1024, 768, vk.FormatR8g8b8a8Unorm) // vk.FormatR8g8b8a8Srgb)
 	rf.Format.SetMultisample(4)
 }
 

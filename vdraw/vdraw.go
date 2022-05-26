@@ -6,6 +6,7 @@ package vdraw
 
 import (
 	"image"
+	"sync"
 
 	"github.com/goki/vgpu/vgpu"
 )
@@ -21,6 +22,7 @@ type Drawer struct {
 	Frame   *vgpu.RenderFrame `desc:"render frame if render target"`
 	YIsDown bool              `desc:"render so the Y axis points down, with 0,0 at the upper left, which is the Vulkan standard.  default is Y is up, with 0,0 at bottom left, which is OpenGL default.  this must be set prior to configuring, the surface, as it determines the rendering parameters."`
 	Impl    DrawerImpl        `desc:"implementation state -- ignore"`
+	UpdtMu  sync.Mutex        `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on updating"`
 }
 
 // ConfigSurface configures the Drawer to use given surface as a render target.

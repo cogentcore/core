@@ -48,6 +48,8 @@ func (sf *Surface) Defaults() {
 	sf.DesiredFormats = []vk.Format{
 		vk.FormatR8g8b8a8Srgb,
 		vk.FormatB8g8r8a8Srgb,
+		// vk.FormatR8g8b8a8Unorm, // these def too dark
+		// vk.FormatB8g8r8a8Unorm,
 	}
 }
 

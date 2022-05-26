@@ -312,7 +312,7 @@ func (pl *Pipeline) SetColorBlend(alphaBlend bool) {
 
 	if alphaBlend {
 		cb.BlendEnable = vk.True
-		cb.SrcColorBlendFactor = vk.BlendFactorOne // SrcAlpha
+		cb.SrcColorBlendFactor = vk.BlendFactorOne // vk.BlendFactorSrcAlpha -- that is traditional
 		cb.DstColorBlendFactor = vk.BlendFactorOneMinusSrcAlpha
 		cb.ColorBlendOp = vk.BlendOpAdd
 		cb.SrcAlphaBlendFactor = vk.BlendFactorOne

@@ -60,7 +60,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 	vec3 diffuseTotal  = vec3(0.0);
 	vec3 specularTotal = vec3(0.0);
 
-	matSpecular = vec3(1,1,1);
+	matSpecular =  vec3(reflct,reflct,reflct);
 	
 	const float EPS = 0.00001;
 
@@ -89,7 +89,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 			diffuseTotal += DirLights[i].Color * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
 			vec3 ref = reflect(-lightDir, norm);
-			specularTotal += reflct * DirLights[i].Color * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
+			specularTotal += DirLights[i].Color * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 		}
 	}
 
@@ -113,7 +113,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 			diffuseTotal += attenColor * matDiffuse * dotNormal;
 			// Specular reflection -- calculates the light reflection vector
 			vec3 ref = reflect(-lightDir, norm);
-			specularTotal += reflct * attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
+			specularTotal += attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 		}
 	}
 
@@ -150,7 +150,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 				diffuseTotal += attenColor * matDiffuse * dotNormal;
 				// Specular reflection
 				vec3 ref = reflect(-lightDir, norm);
-				specularTotal += reflct * attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
+				specularTotal += attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 			}
 		}
 	}
