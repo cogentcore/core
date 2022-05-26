@@ -27,8 +27,8 @@ func (ph *Phong) AllocMeshes() {
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
 	vset.ConfigVals(nm)
-	for i, mesh := range ph.Meshes.Order {
-		mv := mesh.Val
+	for i, kv := range ph.Meshes.Order {
+		mv := kv.Val
 		_, vp, _ := vset.ValByIdxTry("Pos", i)
 		vp.N = mv.NVtx
 		_, vn, _ := vset.ValByIdxTry("Norm", i)
@@ -39,7 +39,7 @@ func (ph *Phong) AllocMeshes() {
 		vi.N = mv.NIdx
 		_, vc, _ := vset.ValByIdxTry("Color", i)
 		if mv.HasColor {
-			vc.N = mesh.Val.NVtx
+			vc.N = mv.NVtx
 		} else {
 			vc.N = 1 // todo: should be 0
 		}
@@ -132,11 +132,8 @@ func (ph *Phong) MeshFloatsByIdx(i int) (pos, norm, tex, clr mat32.ArrayF32, idx
 // Must call after modifying mesh values, to mark for syncing
 func (ph *Phong) ModMeshByName(name string) {
 	i, ok := ph.Meshes.IdxByKey(name)
-	if !ok {
-		err := fmt.Errorf("vphong:UseMeshName -- name not found: %s", name)
-		if vgpu.TheGPU.Debug {
-			log.Println(err)
-		}
+	if !ok { // may not have been configed yet
+		return
 	}
 	ph.ModMeshByIdx(i)
 }

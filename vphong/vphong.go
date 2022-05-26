@@ -83,6 +83,8 @@ func (ph *Phong) Render() {
 	switch {
 	case ph.Cur.UseTexture:
 		ph.RenderTexture()
+	case ph.Cur.UseVtxColor:
+		ph.RenderVtxColor()
 	default:
 		ph.RenderOnecolor()
 	}

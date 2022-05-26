@@ -79,3 +79,13 @@ func (ph *Phong) RenderOnecolor() {
 	ph.Push(pl, push)
 	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
 }
+
+// RenderVtxColor renders current settings to vertexcolor pipeline
+func (ph *Phong) RenderVtxColor() {
+	sy := &ph.Sys
+	cmd := sy.CmdPool.Buff
+	pl := sy.PipelineMap["pervertex"]
+	push := ph.Cur.NewPush()
+	ph.Push(pl, push)
+	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
+}
