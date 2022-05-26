@@ -60,7 +60,7 @@ func (sc *Scene) ConfigFrame() bool {
 	sc.Camera.CamMu.Lock()
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.CamMu.Unlock()
-	clr := mat32.NewVec3Color(sc.BgColor)
+	clr := mat32.NewVec3Color(sc.BgColor).SRGBToLinear()
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	return true
@@ -229,6 +229,7 @@ func (sc *Scene) Render() bool {
 	if !sc.ConfigFrame() {
 		return false
 	}
+	sc.RenderMu.Lock()
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
 	}
@@ -246,6 +247,7 @@ func (sc *Scene) Render() bool {
 	sc.Win.DirDraws.Nodes.Order[sc.DirUpIdx-sc.Win.DirDraws.StartIdx].Val = sc.WinBBox
 	drw.SyncImages()
 	sc.ClearFlag(int(Rendering))
+	sc.RenderMu.Unlock()
 	return true
 }
 

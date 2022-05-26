@@ -198,7 +198,7 @@ func (sc *Scene) ConfigLights() {
 	sc.Phong.ResetNLights()
 	for _, ltkv := range sc.Lights.Order {
 		lt := ltkv.Val
-		clr := mat32.NewVec3Color(lt.Color()).MulScalar(lt.Lumens())
+		clr := mat32.NewVec3Color(lt.Color()).MulScalar(lt.Lumens()).SRGBToLinear()
 		switch l := lt.(type) {
 		case *AmbientLight:
 			sc.Phong.AddAmbientLight(clr)

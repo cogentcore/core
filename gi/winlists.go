@@ -310,6 +310,10 @@ func (wu *WindowDrawers) DrawImages(drw *vdraw.Drawer) {
 		return
 	}
 	for i, kv := range wu.Nodes.Order {
+		nb := kv.Key
+		if !nb.This().(Node2D).IsVisible() {
+			continue
+		}
 		winBBox := kv.Val
 		idx := wu.Idx(i)
 		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src, wu.FlipY)

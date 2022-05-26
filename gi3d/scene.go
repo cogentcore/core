@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"strings"
+	"sync"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
@@ -88,6 +89,7 @@ type Scene struct {
 	Phong         vphong.Phong                `desc:"the vphong rendering system"`
 	Frame         *vgpu.RenderFrame           `desc:"the vgpu render frame holding the rendered scene"`
 	DirUpIdx      int                         `desc:"index in list of window direct uploading images"`
+	RenderMu      sync.Mutex                  `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on rendering"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
