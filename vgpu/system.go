@@ -214,6 +214,7 @@ func (sy *System) CmdBindVars(cmd vk.CommandBuffer, descIdx int) {
 	if len(vars.SetMap) == 0 {
 		return
 	}
+	vars.BindDescIdx = descIdx
 	dset := vars.VkDescSets[descIdx]
 	doff := vars.DynOffs[descIdx]
 

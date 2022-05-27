@@ -83,6 +83,9 @@ func (ph *Phong) ConfigTextures() {
 		ph.configDummyTexture()
 	} else {
 		txset := vars.SetMap[int(TexSet)]
+		ivar := txset.VarMap["Tex"]
+		ivar.Vals.ImgAlloc.Alloc(&ivar.Vals)
+
 		for i, kv := range ph.Textures.Order {
 			_, img, _ := txset.ValByIdxTry("Tex", i)
 			img.SetGoImage(kv.Val.Image, 0, vgpu.FlipY)
@@ -108,6 +111,9 @@ func (ph *Phong) UseNoTexture() {
 func (ph *Phong) UseTextureIdx(idx int) error {
 	ph.Cur.TexIdx = idx // todo: range check
 	ph.Cur.UseTexture = true
+	// sy := &ph.Sys
+	// cmd := sy.CmdPool.Buff
+	// sy.CmdBindTextureVarIdx(cmd, int(TexSet), "Tex", ph.Cur.TexIdx)
 	return nil
 }
 
@@ -123,11 +129,18 @@ func (ph *Phong) UseTextureName(name string) error {
 	return ph.UseTextureIdx(idx)
 }
 
-// UpdateTextureIdx updates texture by index
+// UpdateTextureIdx updates texture by index -- call this when
+// the underlying image changes.  Assumes the size remains the same.
+// Must Sync for the changes to take effect.
 func (ph *Phong) UpdateTextureIdx(idx int) error {
+	ph.UpdtMu.Lock()
+	defer ph.UpdtMu.Unlock()
+	if idx >= ph.Textures.Len() {
+		return nil
+	}
+	tx := ph.Textures.Order[idx].Val
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
-	tx := ph.Textures.Order[idx].Val
 	_, img, _ := txset.ValByIdxTry("Tex", idx)
 	img.SetGoImage(tx.Image, 0, vgpu.FlipY)
 	return nil

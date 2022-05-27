@@ -86,6 +86,7 @@ func (ph *Phong) ConfigSys() {
 	vpl.AddShaderCode("pervertex_frag", vgpu.FragmentShader, cb)
 
 	vars := ph.Sys.Vars()
+	vars.NDescs = 1            // > 1 causes mysterious failures..
 	pcset := vars.AddPushSet() // TexPush
 	vset := vars.AddVertexSet()
 	mtxset := vars.AddSet()   // set = 0

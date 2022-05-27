@@ -29,6 +29,9 @@ const (
 	// around across as many such sets as are vals, with a warning if insufficient
 	// numbers are present.
 	MaxTexturesPerSet = 16
+
+	// MaxImageLayers is the maximum number of layers per image
+	MaxImageLayers = 128
 )
 
 // NDescForTextures returns number of descriptors (NDesc) required for

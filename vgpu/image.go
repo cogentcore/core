@@ -282,7 +282,7 @@ const (
 // SetGoImage sets staging image data from a standard Go image at given layer.
 // This is most efficiently done using an image.RGBA, but other
 // formats will be converted as necessary.
-// If flipY is true (default) then the Image Y axis is flipped
+// If flipY is true then the Image Y axis is flipped
 // when copying into the image data, so that images will appear
 // upright in the standard OpenGL Y-is-up coordinate system.
 // If using the Y-is-down Vulkan coordinate system, don't flip.

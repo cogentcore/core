@@ -18,6 +18,7 @@ import (
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"github.com/goki/vgpu/szalloc"
 	vk "github.com/goki/vulkan"
 )
 
@@ -239,8 +240,9 @@ func (vl *Val) MemReg() MemReg {
 
 // Vals is a list container of Val values, accessed by index or name
 type Vals struct {
-	Vals    []*Val          `desc:"values in indexed order"`
-	NameMap map[string]*Val `desc:"map of vals by name -- only for specifically named vals vs. generically allocated ones -- names must be unique"`
+	Vals     []*Val          `desc:"values in indexed order"`
+	NameMap  map[string]*Val `desc:"map of vals by name -- only for specifically named vals vs. generically allocated ones -- names must be unique"`
+	TexAlloc szalloc.SzAlloc `desc:"for texture values, this allocates textures to texture arrays by size"`
 }
 
 // ConfigVals configures given number of values in the list for given variable.
@@ -376,6 +378,17 @@ func (vs *Vals) ModRegs() []MemReg {
 		}
 	}
 	return mods
+}
+
+// AllocTextures allocates textures by size so they fit within the
+// MaxTexturesPerGroup.
+func (vs *Vals) AllocTextures() {
+	szs := make([]image.Point, len(vs.Vals))
+	for i, vl := range vs.Vals {
+		szs[i] = vs.Vals[i].Texture.Format.Size
+	}
+	vs.TexAlloc.SetSizes(MaxTexturesPerSet, szs)
+	vs.TexAlloc.Alloc()
 }
 
 ////////////////////////////////////////////////////////////////
