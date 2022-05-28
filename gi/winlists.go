@@ -303,6 +303,13 @@ func (wu *WindowDrawers) Idx(idx int) int {
 	return wu.StartIdx + idx
 }
 
+// SetWinBBox sets the window BBox for given element, indexed
+// by its allocated index relative to StartIdx
+func (wu *WindowDrawers) SetWinBBox(idx int, bbox image.Rectangle) {
+	ei := idx - wu.StartIdx
+	wu.Nodes.Order[ei].Val = bbox
+}
+
 // DrawImages iterates over regions and calls Copy on given
 // vdraw.Drawer for each region
 func (wu *WindowDrawers) DrawImages(drw *vdraw.Drawer) {

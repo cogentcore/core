@@ -187,7 +187,7 @@ func (sc *Scene) ConfigMeshes() {
 		nVtx, nIdx, hasColor := ms.Sizes()
 		ph.AddMesh(kv.Key, nVtx, nIdx, hasColor)
 	}
-	ph.AllocMeshes()
+	ph.ConfigMeshes()
 }
 
 // SetMeshes sets the meshes after config

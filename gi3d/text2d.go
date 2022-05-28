@@ -153,8 +153,9 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		img = tx.Image().(*image.RGBA)
 		if img.Bounds() != bounds {
 			img = image.NewRGBA(bounds)
-			tx.SetImage(img)
 		}
+		tx.SetImage(img)
+		sc.Phong.UpdateTextureName(tx.Name())
 	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {

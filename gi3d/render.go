@@ -237,7 +237,7 @@ func (sc *Scene) Render() bool {
 
 	drw := sc.Win.OSWin.Drawer()
 	drw.SetFrameImage(sc.DirUpIdx, sc.Frame.Frames[0])
-	sc.Win.DirDraws.Nodes.Order[sc.DirUpIdx-sc.Win.DirDraws.StartIdx].Val = sc.WinBBox
+	sc.Win.DirDraws.SetWinBBox(sc.DirUpIdx, sc.WinBBox)
 	drw.SyncImages()
 	sc.ClearFlag(int(Rendering))
 	sc.RenderMu.Unlock()
@@ -267,6 +267,7 @@ func (sc *Scene) DirectWinUpload() {
 func (sc *Scene) Render3D(offscreen bool) {
 
 	sc.Phong.SetViewPrjn(&sc.Camera.ViewMatrix, &sc.Camera.VkPrjnMatrix)
+	sc.Phong.Sync()
 
 	var rcs [RenderClassesN][]Node3D
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
@@ -310,7 +311,7 @@ func (sc *Scene) Render3D(offscreen bool) {
 		}
 		if rc >= RClassTransTexture { // sort back-to-front for transparent
 			sort.Slice(objs, func(i, j int) bool {
-				return objs[i].NormDCBBox().Max.Z > objs[j].NormDCBBox().Max.Z
+				return objs[i].NormDCBBox().Min.Z > objs[j].NormDCBBox().Min.Z
 			})
 		} else { // sort front-to-back for opaque to allow "early z rejection"
 			sort.Slice(objs, func(i, j int) bool {
