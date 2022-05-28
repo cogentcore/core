@@ -155,7 +155,7 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 		}
 	}
 
-	ambdiff = ambientTotal + Emissive + diffuseTotal;
+	ambdiff = ambientTotal + Emissive.rgb + diffuseTotal;
 	spec = specularTotal;
 }
 

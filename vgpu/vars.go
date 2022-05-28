@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/goki/ki/indent"
+	"github.com/goki/vgpu/szalloc"
 
 	vk "github.com/goki/vulkan"
 )
@@ -269,7 +270,8 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 		if ri > Storage {
 			dcount = 0
 			for _, vr := range vl {
-				dcount += vs.NDescs * len(vr.Vals.Vals)
+				vals := vr.Vals.ActiveVals()
+				dcount += vs.NDescs * len(vals)
 			}
 		}
 		if dcount == 0 {
@@ -592,6 +594,18 @@ func (vs *Vars) BindDynVal(set int, vr *Var, vl *Val) error {
 		return err
 	}
 	return st.BindDynVal(vs, vr, vl)
+}
+
+// TexGpSzIdxs for texture at given index, allocated in groups by size
+// using Vals.AllocTexBySize, returns the indexes for the texture
+// and layer to actually select the texture in the shader, and proportion
+// of the Gp allocated texture size occupied by the texture.
+func (vs *Vars) TexGpSzIdxs(set int, varNm string, valIdx int) *szalloc.Idxs {
+	st, err := vs.SetTry(set)
+	if err != nil {
+		return nil
+	}
+	return st.TexGpSzIdxs(vs, varNm, valIdx)
 }
 
 ///////////////////////////////////////////////////////////

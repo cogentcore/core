@@ -10,6 +10,7 @@ import (
 	"unsafe"
 
 	"github.com/goki/ki/ints"
+	"github.com/goki/vgpu/szalloc"
 	vk "github.com/goki/vulkan"
 )
 
@@ -186,12 +187,14 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 			StageFlags:      vk.ShaderStageFlags(vr.Shaders),
 		}
 		if vr.Role > Storage {
-			nVarDesc = ints.MinInt(st.NValsPer, MaxTexturesPerSet) // per desc
+			vals := vr.Vals.ActiveVals()
+			nvals := len(vals)
+			nVarDesc = ints.MinInt(nvals, MaxTexturesPerSet) // per desc
 
-			if st.NValsPer > MaxTexturesPerSet {
-				st.NTextureDescs = NDescForTextures(st.NValsPer)
+			if nvals > MaxTexturesPerSet {
+				st.NTextureDescs = NDescForTextures(nvals)
 				if st.NTextureDescs > vs.NDescs {
-					fmt.Printf("vgpu.VarSet: Texture %s NValsPer: %d requires NDescs = %d, but it is only: %d -- this probably won't end well, but can't be fixed here\n", vr.Name, st.NValsPer, st.NTextureDescs, vs.NDescs)
+					fmt.Printf("vgpu.VarSet: Texture %s NVals: %d requires NDescs = %d, but it is only: %d -- this probably won't end well, but can't be fixed here\n", vr.Name, nvals, st.NTextureDescs, vs.NDescs)
 				}
 			}
 			bd.DescriptorCount = uint32(nVarDesc)
@@ -364,7 +367,8 @@ func (st *VarSet) BindStatVarName(vs *Vars, varNm string) error {
 // All vals must be uploaded to Device memory prior to this,
 // and it is not possible to update anything during a render pass.
 func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
-	nvals := len(vr.Vals.Vals)
+	vals := vr.Vals.ActiveVals()
+	nvals := len(vals)
 	wd := vk.WriteDescriptorSet{
 		SType:          vk.StructureTypeWriteDescriptorSet,
 		DstSet:         st.VkDescSets[vs.BindDescIdx],
@@ -374,7 +378,7 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 	buff := vs.Mem.Buffs[vr.BuffType()]
 	if vr.Role < TextureRole {
 		bis := make([]vk.DescriptorBufferInfo, nvals)
-		for i, vl := range vr.Vals.Vals {
+		for i, vl := range vals {
 			bis[i] = vk.DescriptorBufferInfo{
 				Offset: vk.DeviceSize(vl.Offset),
 				Range:  vk.DeviceSize(vl.AllocSize),
@@ -385,7 +389,7 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 		wd.DescriptorCount = uint32(nvals)
 	} else {
 		imgs := []vk.DescriptorImageInfo{}
-		nvals := len(vr.Vals.Vals)
+		nvals := len(vals)
 		if nvals > MaxTexturesPerSet {
 			sti := vs.BindDescIdx * MaxTexturesPerSet
 			if sti > nvals-MaxTexturesPerSet {
@@ -393,7 +397,7 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 			}
 			mx := sti + MaxTexturesPerSet
 			for vi := sti; vi < mx; vi++ {
-				vl := vr.Vals.Vals[vi]
+				vl := vals[vi]
 				if vl.Texture != nil && vl.Texture.IsActive() {
 					di := vk.DescriptorImageInfo{
 						ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
@@ -405,7 +409,7 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 			}
 
 		} else {
-			for _, vl := range vr.Vals.Vals {
+			for _, vl := range vals {
 				if vl.Texture != nil && vl.Texture.IsActive() {
 					di := vk.DescriptorImageInfo{
 						ImageLayout: vk.ImageLayoutShaderReadOnlyOptimal,
@@ -548,4 +552,18 @@ func (st *VarSet) BindDynVal(vs *Vars, vr *Var, vl *Val) error {
 	vr.BindValIdx[vs.BindDescIdx] = vl.Idx // note: not used but potentially informative
 	vs.DynOffs[vs.BindDescIdx][vr.DynOffIdx] = uint32(vl.Offset)
 	return nil
+}
+
+// TexGpSzIdxs for texture at given index, allocated in groups by size
+// using Vals.AllocTexBySize, returns the indexes for the texture
+// and layer to actually select the texture in the shader, and proportion
+// of the Gp allocated texture size occupied by the texture.
+func (st *VarSet) TexGpSzIdxs(vs *Vars, varNm string, valIdx int) *szalloc.Idxs {
+	vr, err := st.VarByNameTry(varNm)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	idxs := vr.Vals.TexSzAlloc.ItmIdxs[valIdx]
+	return idxs
 }

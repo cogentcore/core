@@ -53,23 +53,23 @@ func (ph *Phong) Destroy() {
 
 // Config configures everything after everything has been Added
 func (ph *Phong) Config() {
-	ph.Alloc() // allocate all vals
+	ph.ConfigMeshesTextures()
 	ph.UpdtMu.Lock()
 	ph.Sys.Config()
 
-	ph.ConfigMeshes()
 	ph.ConfigLights()
-	ph.ConfigTextures()
+	ph.AllocTextures()
 	ph.Sys.Mem.SyncToGPU()
 	ph.UpdtMu.Unlock()
 }
 
-// Alloc allocate all vals based on currently-added
-// Mesh, Color, Texture
-func (ph *Phong) Alloc() {
+// ConfigMeshesTextures configures the Meshes and Textures based
+// on everything added in the Phong config, prior to Sys.Config()
+// which does host allocation.
+func (ph *Phong) ConfigMeshesTextures() {
 	ph.UpdtMu.Lock()
-	ph.AllocMeshes()
-	ph.AllocTextures()
+	ph.ConfigMeshes()
+	ph.ConfigTextures()
 	ph.UpdtMu.Unlock()
 }
 

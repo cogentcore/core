@@ -39,31 +39,25 @@ func (ph *Phong) DeleteTexture(name string) {
 	ph.Textures.DeleteKey(name)
 }
 
-// allocDummyTexture allocates a dummy texture (if none configured)
-func (ph *Phong) allocDummyTexture() {
+// configDummyTexture configures a dummy texture (if none configured)
+func (ph *Phong) configDummyTexture() {
 	// there must be one texture -- otherwise Mac Molten triggers an error
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
 	txset.ConfigVals(1)
 	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
 	_, img, _ := txset.ValByIdxTry("Tex", 0)
-	img.Texture.ConfigGoImage(dimg)
+	img.Texture.ConfigGoImage(dimg.Bounds().Size(), 0)
 }
 
-// configDummyTexture configures a dummy texture (if none configured)
-func (ph *Phong) configDummyTexture() {
-	vars := ph.Sys.Vars()
-	txset := vars.SetMap[int(TexSet)]
-	dimg := image.NewRGBA(image.Rectangle{Max: image.Point{2, 2}})
-	_, img, _ := txset.ValByIdxTry("Tex", 0)
-	img.Texture.ConfigGoImage(dimg)
-}
-
-// AllocTextures allocates vals for textures
-func (ph *Phong) AllocTextures() {
+// ConfigTextures configures vals for textures -- this is the first
+// of two passes -- call Phong.Sys.Config after everything is config'd.
+// This automatically allocates images by size so everything fits
+// within the MaxTexturesPerStage limit, as texture arrays.
+func (ph *Phong) ConfigTextures() {
 	ntx := ph.Textures.Len()
 	if ntx == 0 {
-		ph.allocDummyTexture()
+		ph.configDummyTexture()
 		return
 	}
 	vars := ph.Sys.Vars()
@@ -71,24 +65,22 @@ func (ph *Phong) AllocTextures() {
 	txset.ConfigVals(ntx)
 	for i, kv := range ph.Textures.Order {
 		_, img, _ := txset.ValByIdxTry("Tex", i)
-		img.Texture.ConfigGoImage(kv.Val.Image)
+		img.Texture.ConfigGoImage(kv.Val.Image.Bounds().Size(), 1)
 	}
+	ivar := txset.VarMap["Tex"]
+	ivar.Vals.AllocTexBySize(ivar) // organize images by size so all fit
 }
 
-// ConfigTextures configures the rendering for the textures that have been added.
-func (ph *Phong) ConfigTextures() {
+// AllocTextures allocates textures that have been previously configured,
+// via ConfigTextures(), after Phong.Sys.Config() has been called.
+func (ph *Phong) AllocTextures() {
 	vars := ph.Sys.Vars()
 	ntx := ph.Textures.Len()
-	if ntx == 0 {
-		ph.configDummyTexture()
-	} else {
+	if ntx > 0 {
 		txset := vars.SetMap[int(TexSet)]
 		ivar := txset.VarMap["Tex"]
-		ivar.Vals.ImgAlloc.Alloc(&ivar.Vals)
-
 		for i, kv := range ph.Textures.Order {
-			_, img, _ := txset.ValByIdxTry("Tex", i)
-			img.SetGoImage(kv.Val.Image, 0, vgpu.FlipY)
+			ivar.Vals.SetGoImage(i, kv.Val.Image, vgpu.FlipY)
 		}
 	}
 	vars.BindAllTextureVars(int(TexSet)) // gets images
@@ -186,13 +178,20 @@ func (ph *Phong) RenderTexture() {
 	sy := &ph.Sys
 	cmd := sy.CmdPool.Buff
 	pl := sy.PipelineMap["texture"]
-	txIdx, _, _, err := sy.CmdBindTextureVarIdx(cmd, int(TexSet), "Tex", ph.Cur.TexIdx)
+
+	vars := ph.Sys.Vars()
+	idxs := vars.TexGpSzIdxs(int(TexSet), "Tex", ph.Cur.TexIdx)
+
+	txIdx, _, _, err := sy.CmdBindTextureVarIdx(cmd, int(TexSet), "Tex", idxs.GpIdx)
 	if err != nil {
 		return
 	}
 	push := ph.Cur.NewPush()
 	push.Tex = ph.Cur.TexPars
-	push.Color.ShinyBright.W = float32(txIdx)
+	push.ModelMtx[15] = idxs.PctSize.X // packing bits..
+	push.Color.Emissive.W = idxs.PctSize.Y
+	txIdxP := txIdx*1024 + idxs.ItmIdx // packing index and layer into one
+	push.Color.ShinyBright.W = float32(txIdxP)
 	ph.Push(pl, push)
 	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
 }

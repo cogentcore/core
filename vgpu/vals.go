@@ -213,7 +213,7 @@ func SaveImage(path string, im image.Image) error {
 // by configuring texture coordinates to compensate.
 func (vl *Val) SetGoImage(img image.Image, layer int, flipY bool) error {
 	if vl.HasFlag(ValTextureOwns) {
-		vl.Texture.ConfigGoImage(img)
+		vl.Texture.ConfigGoImage(img.Bounds().Size(), layer+1)
 		vl.Texture.AllocHost()
 	}
 	err := vl.Texture.SetGoImage(img, layer, flipY)
@@ -240,9 +240,10 @@ func (vl *Val) MemReg() MemReg {
 
 // Vals is a list container of Val values, accessed by index or name
 type Vals struct {
-	Vals     []*Val          `desc:"values in indexed order"`
-	NameMap  map[string]*Val `desc:"map of vals by name -- only for specifically named vals vs. generically allocated ones -- names must be unique"`
-	TexAlloc szalloc.SzAlloc `desc:"for texture values, this allocates textures to texture arrays by size"`
+	Vals       []*Val          `desc:"values in indexed order"`
+	NameMap    map[string]*Val `desc:"map of vals by name -- only for specifically named vals vs. generically allocated ones -- names must be unique"`
+	TexSzAlloc szalloc.SzAlloc `desc:"for texture values, this allocates textures to texture arrays by size -- used if On flag is set -- must call AllocTexBySize to allocate after ConfigGoImage is called on all vals.  Then call SetGoImage method on Vals to set the Go Image for each val -- this automatically redirects to the group allocated images."`
+	GpTexVals  []*Val          `desc:"for texture values, if AllocTexBySize is called, these are the actual allocated image arrays that hold the grouped images (size = TexSzAlloc.GpAllocs."`
 }
 
 // ConfigVals configures given number of values in the list for given variable.
@@ -318,11 +319,21 @@ func (vs *Vals) ValByNameTry(name string) (*Val, error) {
 //////////////////////////////////////////////////////////////////
 // Vals
 
+// ActiveVals returns the Vals to actually use for memory allocation etc
+// this is Vals list except for textures with TexSzAlloc.On active
+func (vs *Vals) ActiveVals() []*Val {
+	if vs.TexSzAlloc.On && vs.GpTexVals != nil {
+		return vs.GpTexVals
+	}
+	return vs.Vals
+}
+
 // MemSize returns size across all Vals in list
 func (vs *Vals) MemSize(vr *Var, alignBytes int) int {
 	offset := 0
 	tsz := 0
-	for _, vl := range vs.Vals {
+	vals := vs.ActiveVals()
+	for _, vl := range vals {
 		sz := vl.MemSize(vr)
 		if sz == 0 {
 			continue
@@ -341,7 +352,8 @@ func (vs *Vals) MemSize(vr *Var, alignBytes int) int {
 // MinUniformBufferOffsetAlignment from gpu.
 func (vs *Vals) AllocHost(vr *Var, buff *MemBuff, offset int) int {
 	tsz := 0
-	for _, vl := range vs.Vals {
+	vals := vs.ActiveVals()
+	for _, vl := range vals {
 		sz := vl.AllocHost(vr, buff, buff.HostPtr, offset)
 		if sz == 0 {
 			continue
@@ -355,7 +367,8 @@ func (vs *Vals) AllocHost(vr *Var, buff *MemBuff, offset int) int {
 
 // Free resets the MemPtr for values, resets any self-owned resources (Textures)
 func (vs *Vals) Free() {
-	for _, vl := range vs.Vals {
+	vals := vs.ActiveVals()
+	for _, vl := range vals {
 		vl.Free()
 	}
 }
@@ -365,13 +378,16 @@ func (vs *Vals) Free() {
 func (vs *Vals) Destroy() {
 	vs.Free()
 	vs.Vals = nil
+	vs.GpTexVals = nil
+	vs.TexSzAlloc.On = false
 	vs.NameMap = nil
 }
 
 // ModRegs returns the regions of Vals that have been modified
 func (vs *Vals) ModRegs() []MemReg {
 	var mods []MemReg
-	for _, vl := range vs.Vals {
+	vals := vs.ActiveVals()
+	for _, vl := range vals {
 		if vl.IsMod() {
 			mods = append(mods, vl.MemReg())
 			vl.ClearMod() // assuming it will clear now..
@@ -380,15 +396,67 @@ func (vs *Vals) ModRegs() []MemReg {
 	return mods
 }
 
-// AllocTextures allocates textures by size so they fit within the
-// MaxTexturesPerGroup.
-func (vs *Vals) AllocTextures() {
-	szs := make([]image.Point, len(vs.Vals))
-	for i, vl := range vs.Vals {
-		szs[i] = vs.Vals[i].Texture.Format.Size
+// AllocTexBySize allocates textures by size so they fit within the
+// MaxTexturesPerGroup.  Must call ConfigGoImage on the original
+// values to set the sizes prior to calling this, and cannot have
+// the TextureOwns flag set.  Also does not support arrays in source vals.
+// Apps can always use szalloc.SzAlloc upstream of this to allocate.
+// This method creates actual image vals in GpTexVals, which
+// are allocated.  Must call SetGoImage on Vals here, which
+// redirects to the proper allocated GpTexVals image and layer.
+func (vs *Vals) AllocTexBySize(vr *Var) {
+	if vr.TextureOwns {
+		log.Println("vgpu.Vals.AllocTexBySize: cannot use TextureOwns flag for this function.")
+		vs.TexSzAlloc.On = false
+		return
 	}
-	vs.TexAlloc.SetSizes(MaxTexturesPerSet, szs)
-	vs.TexAlloc.Alloc()
+	nv := len(vs.Vals)
+	if nv == 0 {
+		vs.Free()
+		vs.TexSzAlloc.On = false
+		vs.GpTexVals = nil
+		return
+	}
+	szs := make([]image.Point, nv)
+	for i, vl := range vs.Vals {
+		szs[i] = vl.Texture.Format.Size
+	}
+	vs.TexSzAlloc.SetSizes(MaxTexturesPerSet, szs)
+	vs.TexSzAlloc.Alloc()
+	ng := len(vs.TexSzAlloc.GpAllocs)
+	vs.GpTexVals = make([]*Val, ng)
+	for i, sz := range vs.TexSzAlloc.GpSizes {
+		nlay := len(vs.TexSzAlloc.GpAllocs[i])
+		vl := &Val{}
+		vl.Init(vr, i)
+		vs.GpTexVals[i] = vl
+		vl.Texture.ConfigGoImage(sz, nlay)
+	}
+}
+
+// SetGoImage calls SetGoImage on the proper Texture value for given index.
+// if TexSzAlloc.On via AllocTexBySize then this is routed to the actual
+// allocated image array, otherwise it goes directly to the standard Val.
+//
+// SetGoImage sets staging image data from a standard Go image at given layer.
+// This is most efficiently done using an image.RGBA, but other
+// formats will be converted as necessary.
+// If flipY is true then the Image Y axis is flipped
+// when copying into the image data, so that images will appear
+// upright in the standard OpenGL Y-is-up coordinate system.
+// If using the Y-is-down Vulkan coordinate system, don't flip.
+// Only works if IsHostActive and Image Format is default vk.FormatR8g8b8a8Srgb,
+// Must still call AllocImage to have image allocated on the device,
+// and copy from this host staging data to the device.
+func (vs *Vals) SetGoImage(idx int, img image.Image, flipy bool) {
+	if !vs.TexSzAlloc.On || vs.GpTexVals == nil {
+		vl := vs.Vals[idx]
+		vl.SetGoImage(img, 0, flipy)
+		return
+	}
+	idxs := vs.TexSzAlloc.ItmIdxs[idx]
+	vl := vs.GpTexVals[idxs.GpIdx]
+	vl.SetGoImage(img, idxs.ItmIdx, flipy)
 }
 
 ////////////////////////////////////////////////////////////////
@@ -397,7 +465,8 @@ func (vs *Vals) AllocTextures() {
 // AllocTextures allocates images on device memory
 // only called on Role = TextureRole
 func (vs *Vals) AllocTextures(mm *Memory) {
-	for _, vl := range vs.Vals {
+	vals := vs.ActiveVals()
+	for _, vl := range vals {
 		if vl.Texture == nil {
 			continue
 		}

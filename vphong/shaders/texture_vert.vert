@@ -2,10 +2,10 @@
 
 // must be <= 128 bytes -- contains all per-object data
 layout(push_constant) uniform PushU {
-	mat4 ModelMtx; // 64 bytes
+	mat4 ModelMtx; // 64 bytes, [3][3] = TexPct.X
 	vec4 Color; // 16
 	vec4 ShinyBright; // 16 x = Shiny, y = Reflect, z = Bright, w = TexIdx
-	vec3 Emissive; // 16 w pad
+	vec4 Emissive; // 16 rgb, a = TexPct.Y
 	vec4 TexRepeatOff; // 16 xy = Repeat, zw = Offset
 };
 
@@ -27,7 +27,9 @@ layout(location = 3) out vec2 TexCoord;
 void main() {
 	vec4 vPos = vec4(VtxPos, 1.0);
 	vec4 vNorm = vec4(VtxNorm, 1.0);
-	mat4 MVMtx = ViewMtx * ModelMtx;
+	mat4 MMtx = ModelMtx;
+	MMtx[3][3] = 1;
+	mat4 MVMtx = ViewMtx * MMtx;
 	Pos = MVMtx * vPos;
 	mat3 NormMtx = transpose(inverse(mat3(MVMtx)));
 	Norm = normalize(NormMtx * VtxNorm).xyz;

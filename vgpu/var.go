@@ -120,7 +120,8 @@ func (vr *Var) ModRegs() []MemReg {
 // SetTextureDev sets Device for textures
 // only called on Role = TextureRole
 func (vr *Var) SetTextureDev(dev vk.Device) {
-	for _, vl := range vr.Vals.Vals {
+	vals := vr.Vals.ActiveVals()
+	for _, vl := range vals {
 		if vl.Texture == nil {
 			continue
 		}
@@ -140,10 +141,11 @@ func (vr *Var) AllocTextures(mm *Memory) {
 // You must use this value when passing a texture index to the shader!
 // returns -1 if idx is not valid
 func (vr *Var) TextureValidIdx(stIdx, idx int) int {
+	vals := vr.Vals.ActiveVals()
 	vidx := 0
-	mx := ints.MinInt(stIdx+MaxTexturesPerSet, len(vr.Vals.Vals))
+	mx := ints.MinInt(stIdx+MaxTexturesPerSet, len(vals))
 	for i := stIdx; i < mx; i++ {
-		vl := vr.Vals.Vals[i]
+		vl := vals[i]
 		if i == idx {
 			return vidx
 		}

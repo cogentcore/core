@@ -9,29 +9,21 @@ import (
 	"image"
 	"sort"
 
-	"github.com/goki/ki/ints"
+	"github.com/goki/mat32"
 )
 
 // SzAlloc manages allocation of sizes to a spec'd maximum number
 // of groups.  Used for allocating texture images to image arrays
 // under the severe constraints of only 16 images.
 type SzAlloc struct {
+	On        bool                `desc:"true if configured and ready to use"`
 	MaxGps    int                 `desc:"maximum number of groups to allocate"`
 	ItmSizes  []image.Point       `desc:"original list of item sizes to be allocated"`
+	UniqSizes []image.Point       `desc:"list of all unique sizes -- operate on this for grouping"`
+	UniqSzMap map[image.Point]int `desc:"map of all unique sizes, with count per"`
 	GpSizes   []image.Point       `desc:"list of allocated group sizes"`
 	GpAllocs  [][]int             `desc:"allocation of image indexes by size"`
 	ItmIdxs   []*Idxs             `desc:"allocation image value indexes to image indexes"`
-	UniqSizes map[image.Point]int `desc:"map of all unique sizes, with count per"`
-}
-
-// PctDiff returns the percent difference vs. max of two vals
-func PctDiff(a, b int) float32 {
-	mx := ints.MaxInt(a, b)
-	if mx == 0 {
-		return 0
-	}
-	d := ints.AbsInt(a - b)
-	return float32(d) / float32(mx)
 }
 
 // SetSizes sets the max number of groups, and item sizes to organize
@@ -40,108 +32,121 @@ func (sa *SzAlloc) SetSizes(gps int, itms []image.Point) {
 	sa.ItmSizes = itms
 }
 
+func Area(sz image.Point) int {
+	return sz.X * sz.Y
+}
+
 // Alloc allocates items as a function of size
 func (sa *SzAlloc) Alloc() {
 	ni := len(sa.ItmSizes)
 	if ni == 0 {
 		return
 	}
-	order := make([]int, ni)
-	for i := range order {
-		order[i] = i
+
+	sa.UniqSz()
+	nu := len(sa.UniqSizes)
+	if ni <= sa.MaxGps { // all fits
+		sa.AllocItms() // directly allocate existing items
+		return
 	}
-	sort.Slice(order, func(i, j int) bool {
-		visz := sa.ItmSizes[order[i]]
-		vjsz := sa.ItmSizes[order[j]]
-		pctdx := PctDiff(visz.X, vjsz.X)
-		pctdy := PctDiff(visz.Y, vjsz.Y)
-		if pctdx < .2 && pctdy < .2 { // if close, sort by X
-			return visz.X < vjsz.X
-		}
-		iarea := visz.X * visz.Y
-		jarea := vjsz.X * vjsz.Y
-		return iarea < jarea
+
+	// separately divide X and Y sorted lists to create groups
+	xorder := make([]int, nu)
+	yorder := make([]int, nu)
+	for i := range xorder {
+		xorder[i] = i
+		yorder[i] = i
+	}
+
+	sort.Slice(xorder, func(i, j int) bool {
+		visz := sa.UniqSizes[xorder[i]]
+		vjsz := sa.UniqSizes[xorder[j]]
+		return visz.X < vjsz.X
+	})
+	sort.Slice(yorder, func(i, j int) bool {
+		visz := sa.UniqSizes[yorder[i]]
+		vjsz := sa.UniqSizes[yorder[j]]
+		return visz.Y < vjsz.Y
 	})
 
-	sa.GpSizes = make([]image.Point, 0, ni)
-	sa.UniqSizes = make(map[image.Point]int, ni)
-	for _, vi := range order {
-		vsz := sa.ItmSizes[vi]
-		n, has := sa.UniqSizes[vsz]
+	nper := float32(nu) / float32(sa.MaxGps)
+	if nper < 1 {
+		nper = 1
+	}
+
+	sa.GpSizes = make([]image.Point, sa.MaxGps)
+	for i := 0; i < sa.MaxGps; i++ {
+		icut := int(mat32.Round(float32(i+1) * nper))
+		if icut >= nu {
+			icut = nu - 1
+		}
+		sa.GpSizes[i] = image.Point{sa.UniqSizes[xorder[icut]].X, sa.UniqSizes[yorder[icut]].Y}
+	}
+	// ensure last one is max
+	sa.GpSizes[sa.MaxGps-1] = image.Point{sa.UniqSizes[xorder[nu-1]].X, sa.UniqSizes[xorder[nu-1]].Y}
+	sa.AllocGps()
+}
+
+// UniqSz computes unique sizes
+func (sa *SzAlloc) UniqSz() {
+	ni := len(sa.ItmSizes)
+	sa.UniqSizes = make([]image.Point, 0, ni)
+	sa.UniqSzMap = make(map[image.Point]int, ni)
+	for _, sz := range sa.ItmSizes {
+		n, has := sa.UniqSzMap[sz]
 		n++
 		if !has {
-			sa.GpSizes = append(sa.GpSizes, vsz)
+			sa.UniqSizes = append(sa.UniqSizes, sz)
 		}
-		sa.UniqSizes[vsz] = n
+		sa.UniqSzMap[sz] = n
 	}
-	fmt.Printf("gpsizes: %v\n", sa.GpSizes)
-	if len(sa.UniqSizes) >= sa.MaxGps {
-		prvalloc := make([]image.Point, len(sa.GpSizes), ni)
-		copy(prvalloc, sa.GpSizes)
-		sa.GpSizes = sa.GpSizes[:0]
-		lstsz := prvalloc[0]
-		mxsz := lstsz
-		// group together by area, progresively until under thr
-		areathr := float32(0.1)
-		itr := 0
-		for {
-			for i, sz := range prvalloc {
-				if i == 0 {
-					continue
-				}
-				mxsz.X = ints.MaxInt(mxsz.X, sz.X)
-				mxsz.Y = ints.MaxInt(mxsz.Y, sz.Y)
-				pd := PctDiff(lstsz.X*lstsz.Y, sz.X*sz.Y)
-				if pd < areathr {
-					continue
-				}
-				lstsz = sz
-				sa.GpSizes = append(sa.GpSizes, mxsz)
-				mxsz = sz
-			}
-			lsz := prvalloc[len(prvalloc)-1]
-			mxsz.X = ints.MaxInt(mxsz.X, lsz.X)
-			mxsz.Y = ints.MaxInt(mxsz.Y, lsz.Y)
-			if sa.GpSizes[len(sa.GpSizes)-1] != mxsz {
-				sa.GpSizes = append(sa.GpSizes, mxsz)
-			}
-			fmt.Printf("itr: %d  gps: %d\n gpsizes: %v\n", itr, len(sa.GpSizes), sa.GpSizes)
-			if len(sa.GpSizes) < sa.MaxGps {
-				fmt.Printf("done!\n")
-				break
-			}
-			prvalloc = prvalloc[0:len(sa.GpSizes)]
-			copy(prvalloc, sa.GpSizes)
-			sa.GpSizes = sa.GpSizes[:0]
-			lstsz = prvalloc[0]
-			areathr += .1
-			itr++
-		}
-	}
+	// fmt.Printf("n uniq sizes: %d\n", len(sa.UniqSizes))
+}
+
+// AllocGps allocates groups based on final groupings
+func (sa *SzAlloc) AllocGps() {
+	ni := len(sa.ItmSizes)
 	ng := len(sa.GpSizes)
-	lsz := sa.ItmSizes[order[len(order)-1]]
-	if sa.GpSizes[len(sa.GpSizes)-1] != lsz {
-		sa.GpSizes = append(sa.GpSizes, lsz)
-		ng++
-	}
-	fmt.Printf("gpsizes: %v\n", sa.GpSizes)
-	gi := 0
+	// fmt.Printf("gpsizes: %v\n", sa.GpSizes)
 	li := 0
+	gi := 0
 	gsz := sa.GpSizes[0]
 	sa.ItmIdxs = make([]*Idxs, ni)
 	sa.GpAllocs = make([][]int, ng)
-	for i, vi := range order {
-		vsz := sa.ItmSizes[vi]
-		if vsz.X <= gsz.X && vsz.Y <= gsz.Y {
-			li = len(sa.GpAllocs[gi])
-			sa.GpAllocs[gi] = append(sa.GpAllocs[gi], vi)
-		} else {
-			li = 0
-			gi++
-			gsz = sa.GpSizes[gi]
-			sa.GpAllocs[gi] = append(sa.GpAllocs[gi], vi)
+	for i, sz := range sa.ItmSizes {
+		var j int
+		for j, gsz = range sa.GpSizes {
+			if sz.X <= gsz.X && sz.Y <= gsz.Y {
+				gi = j
+				break
+			}
 		}
-		sa.ItmIdxs[vi] = NewIdxs(gi, li, vsz, gsz)
-		fmt.Printf("idx: %2d  img: %2d  sz: %v  gsz: %v  gi: %2d  li: %2d\n", i, vi, vsz, gsz, gi, li)
+		li = len(sa.GpAllocs[gi])
+		sa.GpAllocs[gi] = append(sa.GpAllocs[gi], i)
+		sa.ItmIdxs[i] = NewIdxs(gi, li, sz, gsz)
 	}
+	// sa.PrintGps()
+	sa.On = true
+}
+
+// PrintGps prints the group allocations
+func (sa *SzAlloc) PrintGps() {
+	for j, ga := range sa.GpAllocs {
+		fmt.Printf("idx: %2d  gsz: %v  n: %d\n", j, sa.GpSizes[j], len(ga))
+	}
+}
+
+// AllocItms directly allocate items each to their own group -- all fits
+func (sa *SzAlloc) AllocItms() {
+	ni := len(sa.ItmSizes)
+	sa.GpSizes = make([]image.Point, ni)
+	sa.ItmIdxs = make([]*Idxs, ni)
+	sa.GpAllocs = make([][]int, ni)
+	for i, sz := range sa.ItmSizes {
+		sa.GpAllocs[i] = append(sa.GpAllocs[i], i)
+		sa.ItmIdxs[i] = NewIdxs(i, 0, sz, sz)
+		sa.GpSizes[i] = sz
+	}
+	// sa.PrintGps()
+	sa.On = true
 }

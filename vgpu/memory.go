@@ -333,7 +333,8 @@ func (mm *Memory) TransferAllValsTextures(buff *MemBuff) {
 			if vr.Role != TextureRole {
 				continue
 			}
-			for _, vl := range vr.Vals.Vals {
+			vals := vr.Vals.ActiveVals()
+			for _, vl := range vals {
 				if vl.Texture == nil {
 					continue
 				}
@@ -360,7 +361,8 @@ func (mm *Memory) SyncValsTextures(buff *MemBuff) {
 			if vr.Role != TextureRole {
 				continue
 			}
-			for _, vl := range vr.Vals.Vals {
+			vals := vr.Vals.ActiveVals()
+			for _, vl := range vals {
 				if vl.Texture == nil || !vl.IsMod() {
 					continue
 				}

@@ -16,8 +16,7 @@ import (
 type Colors struct {
 	Color       mat32.Vec4 `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
 	ShinyBright mat32.Vec4 `desc:"X = shininess spread factor, Y = shine reflection factor, Z = brightness factor:  shiny = specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128) having a smaller more focal specular reflection.  Shine reflect = 1 for full shine white reflection (specular) color, 0 = no shine reflection.  bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters.  W is used for Tex idx."`
-	Emissive    mat32.Vec3 `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
-	pad0        float32
+	Emissive    mat32.Vec4 `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
 }
 
 // NewGoColor sets the colors from standard Go colors
@@ -30,7 +29,7 @@ func NewColors(clr, emis color.Color, shiny, reflect, bright float32) *Colors {
 //  SetColors sets the colors from standard Go colors
 func (cl *Colors) SetColors(clr, emis color.Color, shiny, reflect, bright float32) {
 	cl.Color = mat32.NewVec4Color(clr).SRGBToLinear()
-	cl.Emissive = mat32.NewVec3Color(emis).SRGBToLinear()
+	cl.Emissive = mat32.NewVec4Color(emis).SRGBToLinear()
 	cl.ShinyBright.X = shiny
 	cl.ShinyBright.Y = reflect
 	cl.ShinyBright.Z = bright

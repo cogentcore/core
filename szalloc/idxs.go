@@ -10,11 +10,11 @@ import (
 	"github.com/goki/mat32"
 )
 
-// Idxs contains the indexes where a given Image value is allocated
+// Idxs contains the indexes where a given size is allocated
 type Idxs struct {
 	PctSize mat32.Vec2 `desc:"percent size of this image relative to max size allocated"`
 	GpIdx   int        `desc:"group index"`
-	ItmIdx  int        `desc:"layer within image (0-127)"`
+	ItmIdx  int        `desc:"item index within group (e.g., Layer)"`
 }
 
 func NewIdxs(gpi, itmi int, sz, mxsz image.Point) *Idxs {

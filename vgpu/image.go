@@ -260,15 +260,22 @@ func (im *Image) DevGoImage() (*image.RGBA, error) {
 	return rgba, nil
 }
 
-// ConfigGoImage configures the image for storing the given GoImage.
-// Does not call SetGoImage -- this is for configuring a Val for
-// an image prior to allocating memory. Once memory is allocated
-// then SetGoImage can be called.
-func (im *Image) ConfigGoImage(img image.Image) {
+// ConfigGoImage configures the image for storing an image
+// of the given size, for images allocated in a shared host buffer.
+// (i.e., not Var.TextureOwns).  Image format will be set to default
+// unless format is already set.  Layers is number of separate images
+// of given size allocated in a texture array.
+// Once memory is allocated then SetGoImage can be called in a
+// second pass.
+func (im *Image) ConfigGoImage(sz image.Point, layers int) {
 	if im.Format.Format != vk.FormatR8g8b8a8Srgb {
 		im.Format.Defaults()
 	}
-	im.Format.Size = img.Bounds().Size()
+	im.Format.Size = sz
+	if layers <= 0 {
+		layers = 1
+	}
+	im.Format.Layers = layers
 }
 
 const (

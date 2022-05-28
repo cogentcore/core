@@ -21,8 +21,10 @@ type Mesh struct {
 	HasColor bool `desc:"has per-vertex colors, as mat32.Vec4 per vertex"`
 }
 
-// AllocMeshes allocates vals for meshes
-func (ph *Phong) AllocMeshes() {
+// ConfigMeshes configures vals for meshes -- this is the first of
+// two passes in configuring and setting mesh values -- Phong.Sys.Config is
+// called after this method (and everythign else is configured).
+func (ph *Phong) ConfigMeshes() {
 	nm := ph.Meshes.Len()
 	vars := ph.Sys.Vars()
 	vset := vars.VertexSet()
@@ -49,12 +51,6 @@ func (ph *Phong) AllocMeshes() {
 // ResetMeshes resets the meshes for reconfiguring
 func (ph *Phong) ResetMeshes() {
 	ph.Meshes.Reset()
-}
-
-// ConfigMeshes configures the rendering for the meshes
-func (ph *Phong) ConfigMeshes() {
-	// vars := ph.Sys.Vars()
-	// vset := vars.VertexSet()
 }
 
 // AddMesh adds a Mesh with name and given number of verticies, indexes,
