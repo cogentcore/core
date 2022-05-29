@@ -18,6 +18,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/goki/gi/colormap"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/dnd"
@@ -1215,6 +1217,24 @@ func (w *Window) Publish() {
 	}
 
 	drw.EndDraw()
+
+	if false { // debugging color overlay
+		var clrs [16]gist.Color
+		cmap := colormap.AvailMaps["ROYGBIV"]
+		for i := 0; i < 16; i++ {
+			clrs[i] = cmap.Map(float64(i) / 16.0)
+			clrs[i].A = 32
+		}
+		wu := &w.updtRegs
+		if wu.Updates != nil {
+			drw.StartFill()
+			for i, kv := range wu.Updates.Order {
+				winBBox := kv.Key
+				drw.FillRect(clrs[i], winBBox, draw.Over)
+			}
+			drw.EndFill()
+		}
+	}
 
 	// 	if Render2DTrace {
 	// 		fmt.Printf("Win %v did publish\n", w.Nm)

@@ -14,6 +14,7 @@ import (
 	"github.com/goki/kigen/ordmap"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
+	"golang.org/x/exp/slices"
 	"golang.org/x/image/draw"
 )
 
@@ -178,10 +179,11 @@ var FocusWindows []string
 // the vdraw image index holding this image.
 // Automatically handles range issues.
 type WindowUpdates struct {
-	StartIdx int `desc:"starting index for this set of regions"`
-	MaxIdx   int `desc:"max index (exclusive) for this set of regions"`
+	StartIdx int   `desc:"starting index for this set of regions"`
+	MaxIdx   int   `desc:"max index (exclusive) for this set of regions"`
+	Order    []int `desc:"order of updates to draw -- when an existing image is updated it goes to the top of the stack."`
 
-	Updates *ordmap.Map[image.Rectangle, *Viewport2D] `desc:"ordered map of updates"`
+	Updates *ordmap.Map[image.Rectangle, *Viewport2D] `desc:"ordered map of updates -- order (indx) is the image"`
 }
 
 // SetIdxRange sets the index range based on starting index and n
@@ -200,6 +202,7 @@ func (wu *WindowUpdates) Init() {
 // Reset resets the ordered map
 func (wu *WindowUpdates) Reset() {
 	wu.Updates = nil
+	wu.Order = nil
 }
 
 func regPixCnt(r image.Rectangle) int {
@@ -214,14 +217,28 @@ func (wu *WindowUpdates) Add(winBBox image.Rectangle, vp *Viewport2D) (int, bool
 	wu.Init()
 	idx, has := wu.Updates.IdxByKey(winBBox)
 	if has {
+		wu.MoveIdxToTop(idx)
 		return wu.Idx(idx), false
 	}
 	wu.Updates.Add(winBBox, vp)
-	idx = wu.Idx(wu.Updates.Len() - 1)
+	idx = wu.Updates.Len() - 1
+	wu.Order = append(wu.Order, idx)
+	idx = wu.Idx(idx)
 	if idx >= wu.MaxIdx {
 		return idx, true
 	}
 	return idx, false
+}
+
+// MoveIdxToTop moves the given index to top of the order
+func (wu *WindowUpdates) MoveIdxToTop(idx int) {
+	for i, ii := range wu.Order {
+		if ii == idx {
+			slices.Delete(wu.Order, i, i+1)
+			break
+		}
+	}
+	wu.Order = append(wu.Order, idx)
 }
 
 // Idx returns the given 0-based index plus StartIdx
@@ -235,7 +252,8 @@ func (wu *WindowUpdates) DrawImages(drw *vdraw.Drawer) {
 	if wu.Updates == nil {
 		return
 	}
-	for i, kv := range wu.Updates.Order {
+	for _, i := range wu.Order {
+		kv := wu.Updates.Order[i]
 		winBBox := kv.Key
 		idx := wu.Idx(i)
 		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src, vgpu.NoFlipY)
