@@ -133,8 +133,8 @@ func (ph *Phong) UpdateTextureIdx(idx int) error {
 	tx := ph.Textures.Order[idx].Val
 	vars := ph.Sys.Vars()
 	txset := vars.SetMap[int(TexSet)]
-	_, img, _ := txset.ValByIdxTry("Tex", idx)
-	img.SetGoImage(tx.Image, 0, vgpu.FlipY)
+	ivar := txset.VarMap["Tex"]
+	ivar.Vals.SetGoImage(idx, tx.Image, vgpu.FlipY)
 	return nil
 }
 

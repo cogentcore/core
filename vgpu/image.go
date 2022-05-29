@@ -298,7 +298,7 @@ const (
 // and copy from this host staging data to the device.
 func (im *Image) SetGoImage(img image.Image, layer int, flipY bool) error {
 	if !im.IsHostActive() {
-		return fmt.Errorf("vgpu.Image: Go image not available because Host not active: %s", im.Name)
+		return fmt.Errorf("vgpu.Image.SetGoImage: image cannot be set because Host not active: %s", im.Name)
 	}
 	if !im.Format.IsStdRGBA() {
 		return fmt.Errorf("vgpu.Image: Format is not standard RGBA format: %s", im.Name)

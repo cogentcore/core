@@ -5,7 +5,6 @@
 package szalloc
 
 import (
-	"fmt"
 	"image"
 	"math/rand"
 	"testing"
@@ -28,7 +27,7 @@ func TestPctWin(t *testing.T) {
 	pct := float32(.7)
 	for u := float32(0); u < 3; u += .1 {
 		pu := mat32.Mod(u*pct, pct)
-
-		fmt.Printf("u: %g   pu: %g\n", u, pu)
+		_ = pu
+		// fmt.Printf("u: %g   pu: %g\n", u, pu)
 	}
 }

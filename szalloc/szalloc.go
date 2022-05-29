@@ -9,6 +9,7 @@ import (
 	"image"
 	"sort"
 
+	"github.com/goki/ki/ints"
 	"github.com/goki/mat32"
 )
 
@@ -125,8 +126,26 @@ func (sa *SzAlloc) AllocGps() {
 		sa.GpAllocs[gi] = append(sa.GpAllocs[gi], i)
 		sa.ItmIdxs[i] = NewIdxs(gi, li, sz, gsz)
 	}
+	sa.UpdateGpMaxSz()
 	// sa.PrintGps()
 	sa.On = true
+}
+
+// UpdateGpMaxSz updates the group sizes based on actual max sizes of items
+func (sa *SzAlloc) UpdateGpMaxSz() {
+	for j, ga := range sa.GpAllocs {
+		na := len(ga)
+		if na == 0 {
+			continue
+		}
+		sz := sa.ItmSizes[ga[0]]
+		for i := 1; i < na; i++ {
+			isz := sa.ItmSizes[ga[i]]
+			sz.X = ints.MaxInt(sz.X, isz.X)
+			sz.Y = ints.MaxInt(sz.Y, isz.Y)
+		}
+		sa.GpSizes[j] = sz
+	}
 }
 
 // PrintGps prints the group allocations

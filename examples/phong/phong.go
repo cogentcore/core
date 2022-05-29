@@ -94,8 +94,8 @@ func main() {
 	/////////////////////////////
 	// Lights
 
-	// amblt := mat32.NewVec3Color(color.White).MulScalar(.1)
-	// ph.AddAmbientLight(amblt)
+	amblt := mat32.NewVec3Color(color.White).MulScalar(.1)
+	ph.AddAmbientLight(amblt)
 
 	dirlt := mat32.NewVec3Color(color.White).MulScalar(1)
 	ph.AddDirLight(dirlt, mat32.Vec3{0, 1, 1})
