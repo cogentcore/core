@@ -263,14 +263,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sgo.Pose.Pos.Set(-1.5, -2, 0)
 	sgo.Pose.Scale.Set(.2, .2, .2)
 
-	/*
-		trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
-		trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
-		trs.Pose.Pos.Set(-1.6, -1.6, -.2)
-		trs.Pose.SetAxisRotation(1, 0, 0, 90)
-		trs.Mat.Color.SetName("white")
-		trs.Mat.Color.A = 200
-	*/
+	trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
+	trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
+	trs.Pose.Pos.Set(-1.6, -1.6, -.2)
+	trs.Pose.SetAxisRotation(1, 0, 0, 90)
+	trs.Mat.Color.SetName("white")
+	trs.Mat.Color.A = 200
 
 	grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
 	_ = grtx

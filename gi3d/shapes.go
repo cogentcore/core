@@ -331,3 +331,58 @@ func (cp *Capsule) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32
 	cp.BBox.SetBounds(bb.Min, bb.Max)
 	cp.BBoxMu.Unlock()
 }
+
+//////////////////////////////////////////////////////////////////////////
+//  Torus
+
+// Torus is a torus mesh, defined by the radius of the solid tube and the
+// larger radius of the ring.
+type Torus struct {
+	MeshBase
+	Radius     float32 `desc:"larger radius of the torus ring"`
+	TubeRadius float32 `desc:"radius of the solid tube"`
+	RadialSegs int     `min:"1" desc:"number of segments around the radius of the torus (32 is reasonable default for full circle)"`
+	TubeSegs   int     `min:"1" desc:"number of segments for the tube itself (32 is reasonable default for full height)"`
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees relative to 1,0,0 starting point"`
+	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
+}
+
+var KiT_Torus = kit.Types.AddType(&Torus{}, nil)
+
+// AddNewTorus creates a sphere mesh with the specified outer ring radius,
+// solid tube radius, and number of segments (resolution).
+func AddNewTorus(sc *Scene, name string, radius, tubeRadius float32, segs int) *Torus {
+	sp := &Torus{}
+	sp.Nm = name
+	sp.Radius = radius
+	sp.TubeRadius = tubeRadius
+	sp.RadialSegs = segs
+	sp.TubeSegs = segs
+	sp.AngStart = 0
+	sp.AngLen = 360
+	sc.AddMesh(sp)
+	return sp
+}
+
+func (tr *Torus) Defaults() {
+	tr.Radius = 1
+	tr.TubeRadius = .1
+	tr.RadialSegs = 32
+	tr.TubeSegs = 32
+	tr.AngStart = 0
+	tr.AngLen = 360
+}
+
+func (tr *Torus) Sizes() (nVtx, nIdx int, hasColor bool) {
+	nVtx, nIdx = vshape.TorusSectorN(tr.RadialSegs, tr.TubeSegs)
+	return
+}
+
+// Set sets points for torus in given allocated arrays
+func (tr *Torus) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+	pos := mat32.Vec3{}
+	bb := vshape.SetTorusSector(vtxAry, normAry, texAry, idxAry, 0, 0, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, pos)
+	tr.BBoxMu.Lock()
+	tr.BBox.SetBounds(bb.Min, bb.Max)
+	tr.BBoxMu.Unlock()
+}
