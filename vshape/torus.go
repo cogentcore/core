@@ -2,21 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build notyet
-
 package vshape
 
 import (
 	"math"
 
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 )
 
 // Torus is a torus mesh, defined by the radius of the solid tube and the
 // larger radius of the ring.
 type Torus struct {
-	MeshBase
+	ShapeBase
 	Radius     float32 `desc:"larger radius of the torus ring"`
 	TubeRadius float32 `desc:"radius of the solid tube"`
 	RadialSegs int     `min:"1" desc:"number of segments around the radius of the torus (32 is reasonable default for full circle)"`
@@ -25,41 +22,61 @@ type Torus struct {
 	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
 }
 
-var KiT_Torus = kit.Types.AddType(&Torus{}, nil)
-
-// AddNewTorus creates a sphere mesh with the specified outer ring radius,
+// NewTorus returns a Torus mesh with the specified outer ring radius,
 // solid tube radius, and number of segments (resolution).
-func AddNewTorus(sc *Scene, name string, radius, tubeRadius float32, segs int) *Torus {
-	sp := &Torus{}
-	sp.Nm = name
-	sp.Radius = radius
-	sp.TubeRadius = tubeRadius
-	sp.RadialSegs = segs
-	sp.TubeSegs = segs
-	sp.AngStart = 0
-	sp.AngLen = 360
-	sc.AddMesh(sp)
-	return sp
+func NewTorus(radius, tubeRadius float32, segs int) *Torus {
+	tr := &Torus{}
+	tr.Defaults()
+	tr.Radius = radius
+	tr.TubeRadius = tubeRadius
+	tr.RadialSegs = segs
+	tr.TubeSegs = segs
+	return tr
 }
 
-func (sp *Torus) Make(sc *Scene) {
-	sp.Reset()
-	sp.AddTorusSector(sp.Radius, sp.TubeRadius, sp.RadialSegs, sp.TubeSegs, sp.AngStart, sp.AngLen, mat32.Vec3{})
-	sp.BBox.UpdateFmBBox()
+func (tr *Torus) Defaults() {
+	tr.Radius = 1
+	tr.TubeRadius = .1
+	tr.RadialSegs = 32
+	tr.TubeSegs = 32
+	tr.AngStart = 0
+	tr.AngLen = 360
 }
 
-// NewTorus creates a torus geometry with the specified revolution radius, tube radius,
+func (tr *Torus) N() (nVtx, nIdx int) {
+	nVtx, nIdx = TorusSectorN(tr.RadialSegs, tr.TubeSegs)
+	return
+}
+
+// Set sets points for torus in given allocated arrays
+func (tr *Torus) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+	tr.CBBox = SetTorusSector(vtxAry, normAry, texAry, idxAry, tr.VtxOff, tr.IdxOff, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, tr.Pos)
+}
+
+// TorusSectorN returns N's for a torus geometry with
 // number of radial segments, number of tubular segments,
 // radial sector start angle and length in degrees (0 - 360)
-func (ms *MeshBase) AddTorusSector(radius, tubeRadius float32, radialSegs, tubeSegs int, angStart, angLen float32, offset mat32.Vec3) {
+func TorusSectorN(radialSegs, tubeSegs int) (nVtx, nIdx int) {
+	nVtx = (radialSegs + 1) * (tubeSegs + 1)
+	nIdx = radialSegs * tubeSegs * 6
+	return
+}
+
+// SetTorusSector sets torus sector vertex, norm, tex, index data
+// at given starting *vertex* index (i.e., multiply this *3 to get
+// actual float offset in Vtx array), and starting Idx index,
+// with the specified revolution radius, tube radius,
+// number of radial segments, number of tubular segments,
+// radial sector start angle and length in degrees (0 - 360)
+// pos is an arbitrary offset (for composing shapes),
+// returns bounding box.
+func SetTorusSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, radius, tubeRadius float32, radialSegs, tubeSegs int, angStart, angLen float32, pos mat32.Vec3) mat32.Box3 {
 	angStRad := mat32.DegToRad(angStart)
 	angLenRad := mat32.DegToRad(angLen)
 
-	pos := mat32.NewArrayF32(0, 0)
-	norms := mat32.NewArrayF32(0, 0)
-	uvs := mat32.NewArrayF32(0, 0)
-	idxs := mat32.NewArrayU32(0, 0)
-	stidx := uint32(ms.Vtx.Len() / 3)
+	idx := 0
+	vidx := vtxOff * 3
+	tidx := vtxOff * 2
 
 	bb := mat32.Box3{}
 	bb.SetEmpty()
@@ -77,29 +94,26 @@ func (ms *MeshBase) AddTorusSector(radius, tubeRadius float32, radialSegs, tubeS
 			pt.X = (radius + tubeRadius*mat32.Cos(v)) * mat32.Cos(u)
 			pt.Y = (radius + tubeRadius*mat32.Cos(v)) * mat32.Sin(u)
 			pt.Z = tubeRadius * mat32.Sin(v)
-			pt.SetAdd(offset)
-			pos.AppendVec3(pt)
+			pt.SetAdd(pos)
+			vtxAry.SetVec3(vidx+idx*3, pt)
+			texAry.Set(tidx+idx*2, float32(i)/float32(tubeSegs), float32(j)/float32(radialSegs))
+			normAry.SetVec3(vidx+idx*3, pt.Sub(center).Normal())
 			bb.ExpandByPoint(pt)
-
-			uvs.Append(float32(i)/float32(tubeSegs), float32(j)/float32(radialSegs))
-			norms.AppendVec3(pt.Sub(center).Normal())
+			idx++
 		}
 	}
 
+	vOff := uint32(vtxOff)
+	ii := idxOff
 	for j := 1; j <= radialSegs; j++ {
 		for i := 1; i <= tubeSegs; i++ {
 			a := (tubeSegs+1)*j + i - 1
 			b := (tubeSegs+1)*(j-1) + i - 1
 			c := (tubeSegs+1)*(j-1) + i
 			d := (tubeSegs+1)*j + i
-			idxs.Append(stidx+uint32(a), stidx+uint32(b), stidx+uint32(d), stidx+uint32(b), stidx+uint32(c), stidx+uint32(d))
+			idxAry.Set(ii, vOff+uint32(a), vOff+uint32(b), vOff+uint32(d), vOff+uint32(b), vOff+uint32(c), vOff+uint32(d))
+			ii += 6
 		}
 	}
-
-	ms.Vtx = append(ms.Vtx, pos...)
-	ms.Idx = append(ms.Idx, idxs...)
-	ms.Norm = append(ms.Norm, norms...)
-	ms.Tex = append(ms.Tex, uvs...)
-
-	ms.BBox.BBox.ExpandByBox(bb)
+	return bb
 }

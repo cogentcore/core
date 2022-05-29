@@ -134,6 +134,10 @@ func main() {
 	nVtx, nIdx = capsule.N()
 	ph.AddMesh("capsule", nVtx, nIdx, false)
 
+	torus := vshape.NewTorus(2, .2, 64)
+	nVtx, nIdx = torus.N()
+	ph.AddMesh("torus", nVtx, nIdx, false)
+
 	lines := vshape.NewLines([]mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, false)
 	nVtx, nIdx = lines.N()
 	ph.AddMesh("lines", nVtx, nIdx, false)
@@ -231,6 +235,10 @@ func main() {
 	capsule.Set(vtxAry, normAry, texAry, idxAry)
 	ph.ModMeshByName("capsule")
 
+	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("torus")
+	torus.Set(vtxAry, normAry, texAry, idxAry)
+	ph.ModMeshByName("torus")
+
 	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("lines")
 	lines.Set(vtxAry, normAry, texAry, idxAry)
 	ph.ModMeshByName("lines")
@@ -281,6 +289,13 @@ func main() {
 		ph.UseNoTexture()
 		ph.Render()
 
+		// ph.UseColorName("blueTr")
+		ph.UseColorName("tan")
+		ph.SetModelMtx(&model5)
+		ph.UseMeshName("capsule")
+		ph.UseNoTexture()
+		ph.Render()
+
 		// trans at end
 
 		ph.UseColorName("redTr")
@@ -289,10 +304,9 @@ func main() {
 		ph.UseNoTexture()
 		ph.Render()
 
-		// ph.UseColorName("blueTr")
-		ph.UseColorName("tan")
+		ph.UseColorName("blueTr")
 		ph.SetModelMtx(&model5)
-		ph.UseMeshName("capsule")
+		ph.UseMeshName("torus")
 		ph.UseNoTexture()
 		ph.Render()
 
