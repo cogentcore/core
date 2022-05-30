@@ -227,7 +227,7 @@ func (n *Node) ParentByTypeTry(t reflect.Type, embeds bool) (Ki, error) {
 
 // HasChildren tests whether this node has children (i.e., non-terminal).
 func (n *Node) HasChildren() bool {
-	return len(n.Kids) > 0
+	return !n.HasFlag(int(ChildDeleted)) && len(n.Kids) > 0
 }
 
 // NumChildren returns the number of children of this node.
@@ -655,7 +655,9 @@ func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, error) {
 func (n *Node) DeleteChildren(destroy bool) {
 	updt := n.UpdateStart()
 	n.SetFlag(int(ChildrenDeleted))
-	for _, child := range n.Kids {
+	kids := n.Kids
+	n.Kids = n.Kids[:0] // preserves capacity of list
+	for _, child := range kids {
 		if child == nil {
 			continue
 		}
@@ -665,9 +667,8 @@ func (n *Node) DeleteChildren(destroy bool) {
 		UpdateReset(child)
 	}
 	if destroy {
-		DelMgr.Add(n.Kids...)
+		DelMgr.Add(kids...)
 	}
-	n.Kids = n.Kids[:0] // preserves capacity of list
 	n.UpdateEnd(updt)
 }
 
@@ -1103,7 +1104,7 @@ func (tm TravMap) Get(k Ki) (curField, curChild int) {
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
 func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) {
-	if n.This() == nil {
+	if n.This() == nil || n.IsDeleted() {
 		return
 	}
 	tm := TravMap{} // not significantly faster to pre-allocate larger size
@@ -1112,7 +1113,7 @@ func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && fun(cur, level, data) { // false return means stop
+		if cur.This() != nil && !cur.IsDeleted() && fun(cur, level, data) { // false return means stop
 			level++ // this is the descent branch
 			if KiHasKiFields(cur.AsNode()) {
 				tm.Set(cur, 0, -1)
@@ -1126,7 +1127,7 @@ outer:
 			if cur.HasChildren() {
 				tm.Set(cur, 0, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil {
+				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue
@@ -1156,7 +1157,7 @@ outer:
 				curChild++
 				tm.Set(cur, curField, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil {
+				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
