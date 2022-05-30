@@ -11,6 +11,8 @@ all: build
 
 build: 
 	$(GOBUILD) -v
+build-race:
+	$(GOBUILD) -race -gcflags=all=-d=checkptr=0
 dbg-build:
 	$(GOBUILD) -v -gcflags=all="-N -l" -tags debug
 test: 

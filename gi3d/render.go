@@ -219,6 +219,9 @@ func (sc *Scene) UpdateNodes3D() {
 
 // Render renders the scene to the Frame framebuffer
 func (sc *Scene) Render() bool {
+	if sc.IsRendering() {
+		return false
+	}
 	if !sc.ConfigFrame() {
 		return false
 	}
@@ -266,7 +269,9 @@ func (sc *Scene) DirectWinUpload() {
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) Render3D(offscreen bool) {
 
+	sc.Phong.UpdtMu.Lock()
 	sc.Phong.SetViewPrjn(&sc.Camera.ViewMatrix, &sc.Camera.VkPrjnMatrix)
+	sc.Phong.UpdtMu.Unlock()
 	sc.Phong.Sync()
 
 	var rcs [RenderClassesN][]Node3D
@@ -299,10 +304,12 @@ func (sc *Scene) Render3D(offscreen bool) {
 		return ki.Continue
 	})
 
+	sc.Phong.UpdtMu.Lock()
 	sy := &sc.Phong.Sys
 	cmd := sy.CmdPool.Buff
 	descIdx := 0
 	sy.ResetBeginRenderPass(cmd, sc.Frame.Frames[0], descIdx)
+	sc.Phong.UpdtMu.Unlock()
 
 	for rci, objs := range rcs {
 		rc := RenderClasses(rci)
@@ -333,8 +340,9 @@ func (sc *Scene) Render3D(offscreen bool) {
 		}
 	}
 
+	sc.Phong.UpdtMu.Lock()
 	sy.EndRenderPass(cmd)
 	sc.Frame.SubmitRender(cmd) // this is where it waits for the 16 msec
 	sc.Frame.WaitForRender()
-
+	sc.Phong.UpdtMu.Unlock()
 }

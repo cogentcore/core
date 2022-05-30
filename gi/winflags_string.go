@@ -23,14 +23,13 @@ func _() {
 	_ = x[WinFlagGoLoop-31]
 	_ = x[WinFlagStopEventLoop-32]
 	_ = x[WinFlagDoFullRender-33]
-	_ = x[WinFlagPublishFullReRender-34]
-	_ = x[WinFlagFocusActive-35]
-	_ = x[WinFlagsN-36]
+	_ = x[WinFlagFocusActive-34]
+	_ = x[WinFlagsN-35]
 }
 
-const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFlagIsResizingWinFlagGotPaintWinFlagGotFocusWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagPublishFullReRenderWinFlagFocusActiveWinFlagsN"
+const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFlagIsResizingWinFlagGotPaintWinFlagGotFocusWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagFocusActiveWinFlagsN"
 
-var _WinFlags_index = [...]uint8{0, 19, 34, 50, 67, 82, 97, 112, 125, 145, 164, 190, 208, 217}
+var _WinFlags_index = [...]uint8{0, 19, 34, 50, 67, 82, 97, 112, 125, 145, 164, 182, 191}
 
 func (i WinFlags) String() string {
 	i -= 24

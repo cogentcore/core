@@ -179,9 +179,10 @@ var FocusWindows []string
 // the vdraw image index holding this image.
 // Automatically handles range issues.
 type WindowUpdates struct {
-	StartIdx int   `desc:"starting index for this set of regions"`
-	MaxIdx   int   `desc:"max index (exclusive) for this set of regions"`
-	Order    []int `desc:"order of updates to draw -- when an existing image is updated it goes to the top of the stack."`
+	StartIdx  int   `desc:"starting index for this set of regions"`
+	MaxIdx    int   `desc:"max index (exclusive) for this set of regions"`
+	Order     []int `desc:"order of updates to draw -- when an existing image is updated it goes to the top of the stack."`
+	BeforeDir []int `desc:"updates that must be drawn before direct uploads because they fully occlude them"`
 
 	Updates *ordmap.Map[image.Rectangle, *Viewport2D] `desc:"ordered map of updates -- order (indx) is the image"`
 }
@@ -203,6 +204,7 @@ func (wu *WindowUpdates) Init() {
 func (wu *WindowUpdates) Reset() {
 	wu.Updates = nil
 	wu.Order = nil
+	wu.BeforeDir = nil
 }
 
 func regPixCnt(r image.Rectangle) int {
@@ -234,11 +236,22 @@ func (wu *WindowUpdates) Add(winBBox image.Rectangle, vp *Viewport2D) (int, bool
 func (wu *WindowUpdates) MoveIdxToTop(idx int) {
 	for i, ii := range wu.Order {
 		if ii == idx {
-			slices.Delete(wu.Order, i, i+1)
+			wu.Order = slices.Delete(wu.Order, i, i+1)
 			break
 		}
 	}
 	wu.Order = append(wu.Order, idx)
+}
+
+// MoveIdxToBeforeDir moves the given index to the BeforeDir list
+func (wu *WindowUpdates) MoveIdxToBeforeDir(idx int) {
+	for i, ii := range wu.Order {
+		if ii == idx {
+			wu.Order = slices.Delete(wu.Order, i, i+1)
+			break
+		}
+	}
+	wu.BeforeDir = append(wu.BeforeDir, idx)
 }
 
 // Idx returns the given 0-based index plus StartIdx
@@ -247,12 +260,17 @@ func (wu *WindowUpdates) Idx(idx int) int {
 }
 
 // DrawImages iterates over regions and calls Copy on given
-// vdraw.Drawer for each region
-func (wu *WindowUpdates) DrawImages(drw *vdraw.Drawer) {
+// vdraw.Drawer for each region.  beforeDir calls items on the
+// BeforeDir list, else regular Order.
+func (wu *WindowUpdates) DrawImages(drw *vdraw.Drawer, beforeDir bool) {
 	if wu.Updates == nil {
 		return
 	}
-	for _, i := range wu.Order {
+	list := wu.Order
+	if beforeDir {
+		list = wu.BeforeDir
+	}
+	for _, i := range list {
 		kv := wu.Updates.Order[i]
 		winBBox := kv.Key
 		idx := wu.Idx(i)
@@ -336,11 +354,16 @@ func (wu *WindowDrawers) DrawImages(drw *vdraw.Drawer) {
 	}
 	for i, kv := range wu.Nodes.Order {
 		nb := kv.Key
+		if nb.This() == nil {
+			continue
+		}
 		if !nb.This().(Node2D).IsVisible() {
 			continue
 		}
 		winBBox := kv.Val
 		idx := wu.Idx(i)
-		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src, wu.FlipY)
+		mvoff := nb.VpBBox.Min.Sub(nb.ObjBBox.Min)
+		ibb := winBBox.Sub(winBBox.Min).Add(mvoff)
+		drw.Copy(idx, 0, winBBox.Min, ibb, draw.Src, wu.FlipY)
 	}
 }

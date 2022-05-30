@@ -181,6 +181,7 @@ func (sc *Scene) PlaneMesh2D() Mesh {
 // the number of verticies.
 func (sc *Scene) ConfigMeshes() {
 	ph := &sc.Phong
+	ph.UpdtMu.Lock()
 	ph.ResetMeshes()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Val
@@ -188,17 +189,20 @@ func (sc *Scene) ConfigMeshes() {
 		ph.AddMesh(kv.Key, nVtx, nIdx, hasColor)
 	}
 	ph.ConfigMeshes()
+	ph.UpdtMu.Unlock()
 }
 
 // SetMeshes sets the meshes after config
 func (sc *Scene) SetMeshes() {
 	ph := &sc.Phong
+	ph.UpdtMu.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Val
 		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
 		ms.Set(sc, vtxAry, normAry, texAry, clrAry, idxAry)
 		ph.ModMeshByName(kv.Key)
 	}
+	ph.UpdtMu.Unlock()
 	ph.Sync()
 }
 
@@ -222,6 +226,7 @@ func (sc *Scene) ReconfigMeshes() {
 	sc.ConfigMeshes()
 	sc.Phong.Config()
 	sc.SetMeshes()
+
 }
 
 ///////////////////////////////////////////////////////////////

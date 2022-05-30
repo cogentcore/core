@@ -171,22 +171,7 @@ outer:
 			if w.glw == nil {
 				break outer
 			}
-			// if !theApp.noScreens {
-			// 	theApp.RunOnMain(func() {
-			// 		if !w.Activate() {
-			// 			return
-			// 		}
-			// 		// note: variably slow on mac m1
-			// 		// st := time.Now()
-			// 		glfw.SwapInterval(0)
-			// 		w.glw.SwapBuffers() // note: implicitly does a flush
-			// 		// note: generally don't need this:
-			// 		// gpu.Draw.Clear(true, true)
-			// 		// ed := time.Now()
-			// 		// fmt.Printf("d %v\n", ed.Sub(st))
-			// 	})
-			// 	w.publishDone <- struct{}{}
-			// }
+			// this is now a nop..
 		}
 	}
 }

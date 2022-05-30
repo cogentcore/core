@@ -297,7 +297,7 @@ func (vp *Viewport2D) VpEventMgr() *EventMgr {
 }
 
 func (vp *Viewport2D) VpIsVisible() bool {
-	if vp.Win == nil {
+	if vp == nil || vp.This() == nil || vp.Win == nil {
 		return false
 	}
 	return vp.Win.IsVisible()
@@ -427,6 +427,7 @@ func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 func (vp *Viewport2D) DeletePopup() {
 	vp.Par = nil // disconnect from window -- it never actually owned us as a child
 	vp.Win = nil
+	vp.This().SetFlag(int(ki.NodeDeleted)) // prevent further access
 	if !vp.HasFlag(int(VpFlagPopupDestroyAll)) {
 		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
 		if len(vp.Kids) == 1 {

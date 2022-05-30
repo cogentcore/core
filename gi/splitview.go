@@ -131,7 +131,6 @@ func (sv *SplitView) SetSplitsList(splits []float32) {
 // child entirely -- does full rebuild at level of viewport
 func (sv *SplitView) SetSplitsAction(splits ...float32) {
 	sv.SetSplits(splits...)
-	// sv.WinFullReRender() // tell window to do a full redraw
 	sv.ViewportSafe().SetNeedsFullRender()
 }
 

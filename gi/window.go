@@ -242,10 +242,6 @@ const (
 	// is properly shown
 	WinFlagDoFullRender
 
-	// WinFlagPublishFullReRender triggers a complete update of window textures
-	// during final publish
-	WinFlagPublishFullReRender
-
 	// WinFlagFocusActive indicates if widget focus is currently in an active state or not
 	WinFlagFocusActive
 
@@ -943,15 +939,6 @@ func (w *Window) SendWinFocusEvent(act window.Actions) {
 	w.EventMgr.SendEventSignal(&se, Popups)
 }
 
-// PublishFullReRender is called by WinFullReRender on Node2DBase
-// Tells window to do a full update during Publish -- especially important
-// for DirectUpload cases which may get overwritten.
-// Call specifically on large container widgets that might contain
-// direct upload widgets (e.g., TabView, SplitView)
-func (w *Window) PublishFullReRender() {
-	w.SetFlag(int(WinFlagPublishFullReRender))
-}
-
 // FullReRender performs a full re-render of the window -- each node renders
 // into its viewport, aggregating into the main window viewport, which will
 // drive an UploadAllViewports call after all the rendering is done, and
@@ -1028,6 +1015,16 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 		if Render2DTrace || WinEventTrace {
 			fmt.Printf("Win: %v uploaded region Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
 		}
+
+		if w.DirDraws.Nodes != nil {
+			for _, dkv := range w.DirDraws.Nodes.Order {
+				dbb := dkv.Val
+				if dbb.In(winBBox) {
+					oridx := idx - w.updtRegs.StartIdx
+					w.updtRegs.MoveIdxToBeforeDir(oridx)
+				}
+			}
+		}
 	}
 	// pr.End()
 	w.ClearWinUpdating()
@@ -1063,7 +1060,6 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 		fmt.Printf("Win: %v uploaded entire Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
 	}
 	w.ClearWinUpdating()
-	w.ClearFlag(int(WinFlagPublishFullReRender))
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives publish
 }
@@ -1086,12 +1082,13 @@ func (w *Window) UploadAllViewports() {
 	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Win: %v uploading full Vp, image bound: %v, updt: %v\n", w.Path(), w.Viewport.Pixels.Bounds(), updt)
 	}
+	w.PopMu.Lock()
 	w.ResetUpdateRegionsImpl()
+	w.PopMu.Unlock()
 
 	// fmt.Printf("upload all views pop unlocked: %v\n", w.Nm)
 	// pr.End()
 	w.ClearWinUpdating()
-	w.ClearFlag(int(WinFlagPublishFullReRender))
 	w.UpMu.Unlock()   // need to unlock before publish
 	w.UpdateEnd(updt) // drives the publish
 }
@@ -1128,8 +1125,6 @@ func (w *Window) ResetUpdateRegionsImpl() {
 	w.popDraws.Reset()
 	drw := w.OSWin.Drawer()
 	drw.SetGoImage(0, 0, w.Viewport.Pixels, vgpu.NoFlipY)
-	// next any direct uploaders
-	// w.DirectUploads()
 	// then all the current popups
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
 	if w.PopupStack != nil {
@@ -1188,22 +1183,22 @@ func (w *Window) Publish() {
 		fmt.Printf("Win %v doing publish\n", w.Nm)
 	}
 	// pr := prof.Start("win.Publish")
-	// if w.HasFlag(int(WinFlagPublishFullReRender)) {
-	// 	// fmt.Printf("Win %v doing full re-render direct upload\n", w.Nm)
-	// 	w.ClearFlag(int(WinFlagPublishFullReRender))
-	// 	w.DirectUploads() // todo: do this separately
-	// }
 
+	// note: vulkan complains about different threads for rendering but should be ok.
+	// can't use RunOnWin method because it locks for main thread windows.
+	// w.OSWin.RunOnWin(func() {})
+	// and using RunOnMain makes the thing hella slow -- like opengl -- that was the issue there!
+	// oswin.TheApp.RunOnMain(func() {
 	drw := w.OSWin.Drawer()
-
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
+	w.updtRegs.DrawImages(drw, true) // before direct
 	w.DirDraws.DrawImages(drw)
 	w.popDraws.DrawImages(drw)
 
 	drw.UseTextureSet(1)
-	w.updtRegs.DrawImages(drw)
+	w.updtRegs.DrawImages(drw, false) // after direct
 
 	drw.UseTextureSet(2)
 	for imgIdx, smkv := range w.Sprites.Sizes.Order {
@@ -1212,6 +1207,7 @@ func (w *Window) Publish() {
 			if !sp.On {
 				continue
 			}
+			// fmt.Printf("spr: %d %d pos: %v\n", imgIdx, layIdx, sp.Geom.Pos)
 			drw.Copy(imgIdx+SpriteStart, layIdx, sp.Geom.Pos, image.ZR, draw.Over, vgpu.NoFlipY)
 		}
 	}
@@ -1235,6 +1231,7 @@ func (w *Window) Publish() {
 			drw.EndFill()
 		}
 	}
+	// })
 
 	// 	if Render2DTrace {
 	// 		fmt.Printf("Win %v did publish\n", w.Nm)
@@ -1259,37 +1256,6 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 		return
 	}
 	win.Publish()
-}
-
-// DirectUploads tells directuploaders to upload to WinTex
-func (w *Window) DirectUploads() {
-	for i, dukv := range w.DirDraws.Nodes.Order {
-		du := dukv.Key
-		if du.IsDestroyed() {
-			w.DirDraws.Nodes.DeleteIdx(i, i+1)
-			continue
-		}
-		// du.DirectWinUpload() // upload directly to WinTex
-	}
-}
-
-// DirectUpdate is called when a DirectUpload node wants to update
-// on its own initiative (not as a result of larger update)
-// if there aren't any popups, it can just render, otherwise
-// needs to do UploadAllViewports
-func (w *Window) DirectUpdate(du Node2D) {
-	w.UpMu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.UpMu.Unlock()
-		return
-	}
-	if len(w.PopupStack) == 0 && w.Popup == nil {
-		du.DirectWinUpload() // upload directly to WinTex
-		w.UpMu.Unlock()
-		return
-	}
-	w.UpMu.Unlock()
-	w.UploadAllViewports()
 }
 
 // AddDirectUploader adds given node to those that have a DirectWinUpload method
@@ -1772,6 +1738,12 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				w.SendShowEvent() // happens AFTER full render
 			}
 			w.Publish()
+			// todo: this can crash here
+			// if w.NeedWinMenuUpdate() {
+			// 	fmt.Printf("win menu updt: %v\n", w.Nm)
+			// 	w.MainMenuUpdateWindows()
+			// 	w.MainMenuSet()
+			// }
 		case window.Move:
 			e.SetProcessed()
 			if w.HasFlag(int(WinFlagGotPaint)) { // moves before paint are not accurate on X11
@@ -1836,15 +1808,11 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				}
 				w.SendShowEvent() // happens AFTER full render
 			}
-			if w.NeedWinMenuUpdate() {
-				// fmt.Printf("win menu updt: %v\n", w.Nm)
-				w.MainMenuUpdateWindows()
-				w.MainMenuSet()
-			}
 			// if w.EventMgr.Focus == nil { // not using lock-protected b/c can conflict with popup
 			w.EventMgr.ActivateStartFocus()
 			// }
 		}
+		// note: used to have MainMenuSet here but causes crash at startup..
 	case *dnd.Event:
 		if e.Action == dnd.External {
 			w.EventMgr.DNDDropMod = e.Mod
@@ -2106,15 +2074,10 @@ func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	return true
 }
 
-// todo: add reset method, and also update after scroll..
-
 // PushPopup pushes current popup onto stack and set new popup.
 func (w *Window) PushPopup(pop ki.Ki) {
 	w.PopMu.Lock()
 	w.ResetUpdateRegions()
-	// w.updtRegs.Reset()
-	// drw := w.OSWin.Drawer()
-	// drw.SetGoImage(0, w.Viewport.Pixels, vgpu.NoFlipY)
 	w.NextPopup = nil
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
@@ -2153,7 +2116,9 @@ func (w *Window) ClosePopup(pop ki.Ki) bool {
 	if w.Popup == w.DelPopup {
 		w.DelPopup = nil
 	}
+	w.UpMu.Lock()
 	w.DisconnectPopup(pop)
+	w.UpMu.Unlock()
 	popped := w.PopPopup(pop)
 	w.PopMu.Unlock()
 	if popped {

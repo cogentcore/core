@@ -335,7 +335,7 @@ func SetUnitContext(st *gist.Style, vp *Viewport2D, el mat32.Vec2) {
 			st.UnContext.DPI = vp.Win.LogicalDPI()
 		}
 		if vp.Render.Image != nil {
-			sz := vp.Render.Image.Bounds().Size()
+			sz := vp.Geom.Size // Render.Image.Bounds().Size()
 			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
@@ -485,7 +485,7 @@ func (wb *WidgetBase) PushBounds() bool {
 // rendering children
 func (wb *WidgetBase) PopBounds() {
 	wb.ClearFullReRender()
-	if wb.This() == nil {
+	if wb.IsDeleted() || wb.IsDestroyed() || wb.This() == nil {
 		return
 	}
 	mvp := wb.ViewportSafe()

@@ -22,7 +22,7 @@ import (
 
 func main() {
 
-	vkos.VkOsDebug = true
+	vkos.VkOsDebug = false
 
 	gimain.Main(func() {
 		mainrun()

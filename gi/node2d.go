@@ -471,16 +471,6 @@ func (nb *Node2DBase) IsDirectWinUpload() bool {
 func (nb *Node2DBase) DirectWinUpload() {
 }
 
-// WinFullReRender tells the window to do a full re-render of everything on
-// next publish -- call this on containers that might contain DirectUpload
-// widgets.
-func (nb *Node2DBase) WinFullReRender() {
-	win := nb.ParentWindow()
-	if win != nil {
-		win.PublishFullReRender()
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 

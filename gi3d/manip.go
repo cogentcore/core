@@ -112,6 +112,7 @@ func (sc *Scene) ManipBox() {
 	if sc.CurSel == nil {
 		return
 	}
+	sc.RenderMu.Lock()
 	updt := sc.UpdateStart()
 	defer sc.UpdateEnd(updt)
 
@@ -137,6 +138,7 @@ func (sc *Scene) ManipBox() {
 	AddNewManipPt(sc, mb, nm+"-uul", mbspm.Name(), clr, mat32.Vec3{bbox.Max.X, bbox.Max.Y, bbox.Min.Z})
 	AddNewManipPt(sc, mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
 
+	sc.RenderMu.Unlock()
 	sc.ReconfigMeshes()
 	sc.Render()
 }

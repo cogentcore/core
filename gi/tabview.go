@@ -225,7 +225,6 @@ func (tv *TabView) SelectTabIndex(idx int) (Node2D, bool) {
 	tab.SetSelectedState(true)
 	fr.StackTop = idx
 	fr.SetFullReRender()
-	tv.WinFullReRender() // tell window to do a full redraw
 	// tv.Viewport.UnblockUpdates()
 	tv.Mu.Unlock()
 	tv.UpdateEnd(updt)

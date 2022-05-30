@@ -347,10 +347,6 @@ func (sc *Scene) Move2D(delta image.Point, parBBox image.Rectangle) {
 		return
 	}
 	sc.Move2DBase(delta, parBBox)
-	// note: children are automatically moved in Node3DBase.UpdateBBox2D
-	// by adding scene's ObjBBox.Min - BBox.Min offset in their own VpBBox computation
-	// publish makes the thing update after scrolling -- doesn't otherwise.
-	sc.Win.PublishFullReRender()
 }
 
 func (sc *Scene) Render2D() {
