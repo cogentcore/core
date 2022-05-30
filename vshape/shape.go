@@ -68,7 +68,7 @@ func BBoxFromVtxs(vtxAry mat32.ArrayF32, vtxOff int, nvtxs int) mat32.Box3 {
 	var vtx mat32.Vec3
 	for vi := 0; vi < nvtxs; vi++ {
 		vtx.FromArray(vtxAry, vidx+vi*3)
-		bb.ExpandByVector(vtx)
+		bb.ExpandByPoint(vtx)
 	}
 	return bb
 }

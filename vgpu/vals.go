@@ -213,7 +213,9 @@ func SaveImage(path string, im image.Image) error {
 // by configuring texture coordinates to compensate.
 func (vl *Val) SetGoImage(img image.Image, layer int, flipY bool) error {
 	if vl.HasFlag(ValTextureOwns) {
-		vl.Texture.ConfigGoImage(img.Bounds().Size(), layer+1)
+		if layer == 0 && vl.Texture.Format.Layers <= 1 {
+			vl.Texture.ConfigGoImage(img.Bounds().Size(), layer+1)
+		}
 		vl.Texture.AllocHost()
 	}
 	err := vl.Texture.SetGoImage(img, layer, flipY)
@@ -421,7 +423,7 @@ func (vs *Vals) AllocTexBySize(vr *Var) {
 	for i, vl := range vs.Vals {
 		szs[i] = vl.Texture.Format.Size
 	}
-	vs.TexSzAlloc.SetSizes(MaxTexturesPerSet, szs)
+	vs.TexSzAlloc.SetSizes(MaxTexturesPerSet, MaxImageLayers, szs)
 	vs.TexSzAlloc.Alloc()
 	ng := len(vs.TexSzAlloc.GpAllocs)
 	vs.GpTexVals = make([]*Val, ng)

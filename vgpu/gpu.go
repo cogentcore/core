@@ -124,7 +124,7 @@ func (gp *GPU) Config(name string) error {
 	gp.AppName = name
 	if gp.Debug {
 		gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
-		gp.AddInstanceExt("VK_EXT_debug_report")
+		gp.AddInstanceExt("VK_EXT_debug_report") // note _utils is not avail yet
 	}
 
 	// Select instance extensions
@@ -208,7 +208,7 @@ func (gp *GPU) Config(name string) error {
 		// Register a debug callback
 		ret := vk.CreateDebugReportCallback(gp.Instance, &vk.DebugReportCallbackCreateInfo{
 			SType:       vk.StructureTypeDebugReportCallbackCreateInfo,
-			Flags:       vk.DebugReportFlags(vk.DebugReportErrorBit | vk.DebugReportWarningBit),
+			Flags:       vk.DebugReportFlags(vk.DebugReportErrorBit | vk.DebugReportWarningBit | vk.DebugReportInformationBit),
 			PfnCallback: dbgCallbackFunc,
 		}, nil, &debugCallback)
 		IfPanic(NewError(ret))

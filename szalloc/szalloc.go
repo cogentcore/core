@@ -17,19 +17,22 @@ import (
 // of groups.  Used for allocating texture images to image arrays
 // under the severe constraints of only 16 images.
 type SzAlloc struct {
-	On        bool                `desc:"true if configured and ready to use"`
-	MaxGps    int                 `desc:"maximum number of groups to allocate"`
-	ItmSizes  []image.Point       `desc:"original list of item sizes to be allocated"`
-	UniqSizes []image.Point       `desc:"list of all unique sizes -- operate on this for grouping"`
-	UniqSzMap map[image.Point]int `desc:"map of all unique sizes, with count per"`
-	GpSizes   []image.Point       `desc:"list of allocated group sizes"`
-	GpAllocs  [][]int             `desc:"allocation of image indexes by size"`
-	ItmIdxs   []*Idxs             `desc:"allocation image value indexes to image indexes"`
+	On           bool                `desc:"true if configured and ready to use"`
+	MaxGps       int                 `desc:"maximum number of groups to allocate"`
+	MaxItmsPerGp int                 `desc:"maximum number of items per group -- constraint is enforced in addition to MaxGps"`
+	ItmSizes     []image.Point       `desc:"original list of item sizes to be allocated"`
+	UniqSizes    []image.Point       `desc:"list of all unique sizes -- operate on this for grouping"`
+	UniqSzMap    map[image.Point]int `desc:"map of all unique sizes, with count per"`
+	GpSizes      []image.Point       `desc:"list of allocated group sizes"`
+	GpAllocs     [][]int             `desc:"allocation of image indexes by size"`
+	ItmIdxs      []*Idxs             `desc:"allocation image value indexes to image indexes"`
 }
 
-// SetSizes sets the max number of groups, and item sizes to organize
-func (sa *SzAlloc) SetSizes(gps int, itms []image.Point) {
+// SetSizes sets the max number of groups, items per group,
+// and item sizes to organize
+func (sa *SzAlloc) SetSizes(gps, itmsPerGp int, itms []image.Point) {
 	sa.MaxGps = gps
+	sa.MaxItmsPerGp = itmsPerGp
 	sa.ItmSizes = itms
 }
 
@@ -126,6 +129,7 @@ func (sa *SzAlloc) AllocGps() {
 		sa.GpAllocs[gi] = append(sa.GpAllocs[gi], i)
 		sa.ItmIdxs[i] = NewIdxs(gi, li, sz, gsz)
 	}
+	// sa.LimitGpNs()
 	sa.UpdateGpMaxSz()
 	// sa.PrintGps()
 	sa.On = true

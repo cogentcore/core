@@ -68,6 +68,7 @@ func (ph *Phong) Config() {
 // which does host allocation.
 func (ph *Phong) ConfigMeshesTextures() {
 	ph.UpdtMu.Lock()
+	ph.Sys.Mem.Free()
 	ph.ConfigMeshes()
 	ph.ConfigTextures()
 	ph.UpdtMu.Unlock()
@@ -86,6 +87,7 @@ func (ph *Phong) Sync() {
 
 // Render does one step of rendering given current Use* settings
 func (ph *Phong) Render() {
+	ph.UpdtMu.Lock()
 	sy := &ph.Sys
 	cmd := sy.CmdPool.Buff
 	sy.CmdBindVars(cmd, 0) // updates all dynamics
@@ -97,4 +99,5 @@ func (ph *Phong) Render() {
 	default:
 		ph.RenderOnecolor()
 	}
+	ph.UpdtMu.Unlock()
 }
