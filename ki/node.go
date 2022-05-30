@@ -1190,7 +1190,7 @@ outer:
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
 func (n *Node) FuncDownMeLast(level int, data interface{}, doChildTestFunc Func, fun Func) {
-	if n.This() == nil {
+	if n.This() == nil || n.IsDeleted() {
 		return
 	}
 	tm := TravMap{} // not significantly faster to pre-allocate larger size
@@ -1199,7 +1199,7 @@ func (n *Node) FuncDownMeLast(level int, data interface{}, doChildTestFunc Func,
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && doChildTestFunc(cur, level, data) { // false return means stop
+		if cur.This() != nil && !cur.IsDeleted() && doChildTestFunc(cur, level, data) { // false return means stop
 			level++ // this is the descent branch
 			if KiHasKiFields(cur.AsNode()) {
 				tm.Set(cur, 0, -1)
@@ -1213,7 +1213,7 @@ outer:
 			if cur.HasChildren() {
 				tm.Set(cur, 0, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil {
+				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
 					cur = nxt.This()
 					tm.Set(cur, -1, -1)
 					continue
@@ -1243,7 +1243,7 @@ outer:
 				curChild++
 				tm.Set(cur, curField, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil {
+				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -1289,7 +1289,7 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 		depth := Depth(cur)
 		queue = queue[1:]
 
-		if cur.This() != nil && fun(cur, depth, data) { // false return means don't proceed
+		if cur.This() != nil && !cur.IsDeleted() && fun(cur, depth, data) { // false return means don't proceed
 			if KiHasKiFields(cur.AsNode()) {
 				cur.FuncFields(depth+1, data, func(k Ki, level int, d interface{}) bool {
 					SetDepth(k, level)
@@ -1298,7 +1298,7 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 				})
 			}
 			for _, k := range *cur.Children() {
-				if k != nil && k.This() != nil {
+				if k != nil && k.This() != nil && !k.IsDeleted() {
 					SetDepth(k, depth+1)
 					queue = append(queue, k)
 				}
