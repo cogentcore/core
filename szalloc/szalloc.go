@@ -7,6 +7,7 @@ package szalloc
 import (
 	"fmt"
 	"image"
+	"math/rand"
 
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/sliceclone"
@@ -205,7 +206,8 @@ func (sa *SzAlloc) LimitGpNs() {
 	yidxs := sliceclone.Int(sa.YGpIdxs)
 	gpallocs, bestmax := sa.AllocGps(xidxs, yidxs)
 
-	low := sa.MaxItmsPerGp / 4
+	avg := len(sa.ItmSizes) / sa.MaxNGps
+	low := (avg * 3) / 4
 
 	bestXidxs := sliceclone.Int(sa.XGpIdxs)
 	bestYidxs := sliceclone.Int(sa.YGpIdxs)
@@ -217,19 +219,25 @@ func (sa *SzAlloc) LimitGpNs() {
 			xi, yi := XYfmGpi(j, nxi)
 			na := len(ga)
 			if na <= low {
-				if xidxs[xi] > 0 {
-					xidxs[xi] = xidxs[xi] - 1
-				}
-				if yidxs[yi] > 0 {
-					yidxs[yi] = yidxs[yi] - 1
+				if rand.Intn(2) == 0 {
+					if xidxs[xi] < len(sa.XSizes)-1 {
+						xidxs[xi] = xidxs[xi] + 1
+					}
+				} else {
+					if yidxs[yi] < len(sa.YSizes)-1 {
+						yidxs[yi] = yidxs[yi] + 1
+					}
 				}
 				chg = true
 			} else if na > sa.MaxItmsPerGp {
-				if xidxs[xi] < len(sa.XSizes)-1 {
-					xidxs[xi] = xidxs[xi] + 1
-				}
-				if yidxs[yi] < len(sa.YSizes)-1 {
-					yidxs[yi] = yidxs[yi] + 1
+				if rand.Intn(2) == 0 {
+					if xidxs[xi] > 0 {
+						xidxs[xi] = xidxs[xi] - 1
+					}
+				} else {
+					if yidxs[yi] > 0 {
+						yidxs[yi] = yidxs[yi] - 1
+					}
 				}
 				chg = true
 			}
