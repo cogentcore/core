@@ -61,10 +61,7 @@ func (mm *Memory) Destroy(dev vk.Device) {
 // and are ready to go with their initial data.
 // Does: AllocHost(), AllocDev()
 func (mm *Memory) Config(dev vk.Device) {
-	freed := mm.Free()
-	if freed {
-		fmt.Printf("freed\n")
-	}
+	mm.Free()
 	mm.Vars.Config()
 	mm.AllocHost()
 	mm.AllocDev()

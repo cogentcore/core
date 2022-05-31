@@ -14,13 +14,14 @@ import (
 
 func TestSzAlloc(t *testing.T) {
 	var sa SzAlloc
-	nsz := 200
+	nsz := 300
 	szs := make([]image.Point, nsz)
 	for i := range szs {
 		szs[i] = image.Point{X: rand.Intn(1024), Y: rand.Intn(1024)}
 	}
-	sa.SetSizes(16, szs)
+	sa.SetSizes(image.Point{4, 4}, 20, szs)
 	sa.Alloc()
+	sa.PrintGps()
 }
 
 func TestPctWin(t *testing.T) {

@@ -7,18 +7,21 @@ package szalloc
 import (
 	"fmt"
 	"image"
-	"sort"
 
 	"github.com/goki/ki/ints"
-	"github.com/goki/mat32"
+	"github.com/goki/ki/sliceclone"
 )
+
+// MaxIters is maximum number of iterations for adapting sizes to fit constraints
+const MaxIters = 100
 
 // SzAlloc manages allocation of sizes to a spec'd maximum number
 // of groups.  Used for allocating texture images to image arrays
 // under the severe constraints of only 16 images.
 type SzAlloc struct {
 	On           bool                `desc:"true if configured and ready to use"`
-	MaxGps       int                 `desc:"maximum number of groups to allocate"`
+	MaxGps       image.Point         `desc:"maximum number of groups in X and Y dimensions"`
+	MaxNGps      int                 `desc:"maximum number of groups = X * Y"`
 	MaxItmsPerGp int                 `desc:"maximum number of items per group -- constraint is enforced in addition to MaxGps"`
 	ItmSizes     []image.Point       `desc:"original list of item sizes to be allocated"`
 	UniqSizes    []image.Point       `desc:"list of all unique sizes -- operate on this for grouping"`
@@ -26,12 +29,19 @@ type SzAlloc struct {
 	GpSizes      []image.Point       `desc:"list of allocated group sizes"`
 	GpAllocs     [][]int             `desc:"allocation of image indexes by size"`
 	ItmIdxs      []*Idxs             `desc:"allocation image value indexes to image indexes"`
+	XSizes       []int               `desc:"sorted list of all unique sizes"`
+	YSizes       []int               `desc:"sorted list of all unique sizes"`
+	GpNs         image.Point         `desc:"number of items in each dimension group (X, Y)"`
+	XGpIdxs      []int               `desc:"list of x group indexes"`
+	YGpIdxs      []int               `desc:"list of y group indexes"`
 }
 
-// SetSizes sets the max number of groups, items per group,
+// SetSizes sets the max number of groups along each dimension (X, Y),
+// so total number of groups is X*Y, and max items per group,
 // and item sizes to organize
-func (sa *SzAlloc) SetSizes(gps, itmsPerGp int, itms []image.Point) {
+func (sa *SzAlloc) SetSizes(gps image.Point, itmsPerGp int, itms []image.Point) {
 	sa.MaxGps = gps
+	sa.MaxNGps = Area(gps)
 	sa.MaxItmsPerGp = itmsPerGp
 	sa.ItmSizes = itms
 }
@@ -49,46 +59,33 @@ func (sa *SzAlloc) Alloc() {
 
 	sa.UniqSz()
 	nu := len(sa.UniqSizes)
-	if ni <= sa.MaxGps { // all fits
-		sa.AllocItms() // directly allocate existing items
+	if ni <= sa.MaxNGps { // all fits
+		sa.AllocItemsNoGps() // directly allocate existing items
 		return
 	}
 
-	// separately divide X and Y sorted lists to create groups
-	xorder := make([]int, nu)
-	yorder := make([]int, nu)
-	for i := range xorder {
-		xorder[i] = i
-		yorder[i] = i
+	sa.XSizes = make([]int, nu)
+	sa.YSizes = make([]int, nu)
+	for i, usz := range sa.UniqSizes {
+		sa.XSizes[i] = usz.X
+		sa.YSizes[i] = usz.Y
 	}
+	sa.XSizes = UniqSortedInts(sa.XSizes)
+	sa.YSizes = UniqSortedInts(sa.YSizes)
+	sa.XGpIdxs = SizeGroups(sa.XSizes, sa.MaxGps.X)
+	sa.YGpIdxs = SizeGroups(sa.YSizes, sa.MaxGps.Y)
 
-	sort.Slice(xorder, func(i, j int) bool {
-		visz := sa.UniqSizes[xorder[i]]
-		vjsz := sa.UniqSizes[xorder[j]]
-		return visz.X < vjsz.X
-	})
-	sort.Slice(yorder, func(i, j int) bool {
-		visz := sa.UniqSizes[yorder[i]]
-		vjsz := sa.UniqSizes[yorder[j]]
-		return visz.Y < vjsz.Y
-	})
-
-	nper := float32(nu) / float32(sa.MaxGps)
-	if nper < 1 {
-		nper = 1
+	maxItms := 0
+	sa.GpAllocs, maxItms = sa.AllocGps(sa.XGpIdxs, sa.YGpIdxs)
+	if maxItms > sa.MaxItmsPerGp {
+		sa.LimitGpNs()
 	}
+	sa.GpSizes = sa.SizesFmIdxs(sa.XGpIdxs, sa.YGpIdxs)
+	sa.GpAllocs, _ = sa.AllocGps(sa.XGpIdxs, sa.YGpIdxs) // final updates
+	sa.AllocGpItems()
+	sa.UpdateGpMaxSz()
 
-	sa.GpSizes = make([]image.Point, sa.MaxGps)
-	for i := 0; i < sa.MaxGps; i++ {
-		icut := int(mat32.Round(float32(i+1) * nper))
-		if icut >= nu {
-			icut = nu - 1
-		}
-		sa.GpSizes[i] = image.Point{sa.UniqSizes[xorder[icut]].X, sa.UniqSizes[yorder[icut]].Y}
-	}
-	// ensure last one is max
-	sa.GpSizes[sa.MaxGps-1] = image.Point{sa.UniqSizes[xorder[nu-1]].X, sa.UniqSizes[xorder[nu-1]].Y}
-	sa.AllocGps()
+	sa.On = true
 }
 
 // UniqSz computes unique sizes
@@ -107,32 +104,77 @@ func (sa *SzAlloc) UniqSz() {
 	// fmt.Printf("n uniq sizes: %d\n", len(sa.UniqSizes))
 }
 
-// AllocGps allocates groups based on final groupings
-func (sa *SzAlloc) AllocGps() {
-	ni := len(sa.ItmSizes)
-	ng := len(sa.GpSizes)
-	// fmt.Printf("gpsizes: %v\n", sa.GpSizes)
-	li := 0
+// XYSizeFmIdx returns X,Y sizes from X,Y indexes in image.Point
+// into XSizes, YSizes
+func (sa *SzAlloc) XYSizeFmIdx(idx image.Point) image.Point {
+	return image.Point{sa.XSizes[idx.X], sa.YSizes[idx.Y]}
+}
+
+// XYFmGpi returns x, y indexes from gp index
+func XYfmGpi(gi, nxi int) (xi, yi int) {
+	xi = gi % nxi
+	yi = gi / nxi
+	return
+}
+
+// SizesFmIdxs returns X,Y sizes from X,Y indexes in image.Point
+// into XSizes, YSizes arrays
+func (sa *SzAlloc) SizesFmIdxs(xgpi, ygpi []int) []image.Point {
+	ng := len(xgpi) * len(ygpi)
+	szs := make([]image.Point, ng)
+	for yi, ygi := range ygpi {
+		ysz := sa.YSizes[ygi]
+		for xi, xgi := range xgpi {
+			xsz := sa.XSizes[xgi]
+			gi := yi*len(xgpi) + xi
+			szs[gi] = image.Point{xsz, ysz}
+		}
+	}
+	return szs
+}
+
+// AllocGps allocates groups based on given indexes into XSizes, YSizes.
+// returns allocs = indexes of items per each group,
+// and max number of items per group
+func (sa *SzAlloc) AllocGps(xgpi, ygpi []int) (allocs [][]int, maxItms int) {
+	ng := len(xgpi) * len(ygpi)
+	maxItms = 0
 	gi := 0
-	gsz := sa.GpSizes[0]
-	sa.ItmIdxs = make([]*Idxs, ni)
-	sa.GpAllocs = make([][]int, ng)
+	allocs = make([][]int, ng)
 	for i, sz := range sa.ItmSizes {
-		var j int
-		for j, gsz = range sa.GpSizes {
-			if sz.X <= gsz.X && sz.Y <= gsz.Y {
-				gi = j
+		for yi, ygi := range ygpi {
+			ysz := sa.YSizes[ygi]
+			if sz.Y > ysz {
+				continue
+			}
+			for xi, xgi := range xgpi {
+				xsz := sa.XSizes[xgi]
+				if sz.X > xsz {
+					continue
+				}
+				gi = yi*len(xgpi) + xi
 				break
 			}
+			break
 		}
-		li = len(sa.GpAllocs[gi])
-		sa.GpAllocs[gi] = append(sa.GpAllocs[gi], i)
-		sa.ItmIdxs[i] = NewIdxs(gi, li, sz, gsz)
+		allocs[gi] = append(allocs[gi], i)
+		nitm := len(allocs[gi])
+		maxItms = ints.MaxInt(nitm, maxItms)
 	}
-	// sa.LimitGpNs()
-	sa.UpdateGpMaxSz()
-	// sa.PrintGps()
-	sa.On = true
+	return
+}
+
+// AllocGpItems allocates items in groups based on final GpAllocs
+func (sa *SzAlloc) AllocGpItems() {
+	ni := len(sa.ItmSizes)
+	sa.ItmIdxs = make([]*Idxs, ni)
+	for gi, ga := range sa.GpAllocs {
+		gsz := sa.GpSizes[gi]
+		for i, li := range ga {
+			sz := sa.ItmSizes[li]
+			sa.ItmIdxs[li] = NewIdxs(gi, i, sz, gsz)
+		}
+	}
 }
 
 // UpdateGpMaxSz updates the group sizes based on actual max sizes of items
@@ -143,13 +185,78 @@ func (sa *SzAlloc) UpdateGpMaxSz() {
 			continue
 		}
 		sz := sa.ItmSizes[ga[0]]
+		// fmt.Printf("j: %2d  sz: %v\n", j, sz)
 		for i := 1; i < na; i++ {
 			isz := sa.ItmSizes[ga[i]]
+			// fmt.Printf("\ti: %2d  itm: %3d  isz: %v\n", i, ga[i], isz)
 			sz.X = ints.MaxInt(sz.X, isz.X)
 			sz.Y = ints.MaxInt(sz.Y, isz.Y)
 		}
 		sa.GpSizes[j] = sz
 	}
+}
+
+// LimitGpNs updates group sizes to ensure that the MaxItmsPerGp limit
+// is not exceeded.
+func (sa *SzAlloc) LimitGpNs() {
+	nxi := len(sa.XGpIdxs)
+
+	xidxs := sliceclone.Int(sa.XGpIdxs)
+	yidxs := sliceclone.Int(sa.YGpIdxs)
+	gpallocs, bestmax := sa.AllocGps(xidxs, yidxs)
+
+	low := sa.MaxItmsPerGp / 4
+
+	bestXidxs := sliceclone.Int(sa.XGpIdxs)
+	bestYidxs := sliceclone.Int(sa.YGpIdxs)
+
+	itr := 0
+	for itr = 0; itr < MaxIters; itr++ {
+		chg := false
+		for j, ga := range gpallocs {
+			xi, yi := XYfmGpi(j, nxi)
+			na := len(ga)
+			if na <= low {
+				if xidxs[xi] > 0 {
+					xidxs[xi] = xidxs[xi] - 1
+				}
+				if yidxs[yi] > 0 {
+					yidxs[yi] = yidxs[yi] - 1
+				}
+				chg = true
+			} else if na > sa.MaxItmsPerGp {
+				if xidxs[xi] < len(sa.XSizes)-1 {
+					xidxs[xi] = xidxs[xi] + 1
+				}
+				if yidxs[yi] < len(sa.YSizes)-1 {
+					yidxs[yi] = yidxs[yi] + 1
+				}
+				chg = true
+			}
+		}
+		if !chg {
+			// fmt.Printf("itr: %d  no change, bailing\n", itr)
+			break
+		}
+		maxItms := 0
+		gpallocs, maxItms = sa.AllocGps(xidxs, yidxs)
+		if maxItms < bestmax {
+			bestmax = maxItms
+			bestXidxs = sliceclone.Int(xidxs)
+			bestYidxs = sliceclone.Int(yidxs)
+		}
+		// gps := sa.SizesFmIdxs(xidxs, yidxs)
+		// fmt.Printf("itr: %d  maxi: %d  gps: %v\n", itr, maxItms, gps)
+		if maxItms <= sa.MaxItmsPerGp {
+			break
+		}
+	}
+	sa.XGpIdxs = bestXidxs
+	sa.YGpIdxs = bestYidxs
+	// _, maxItms := sa.AllocGps(sa.XGpIdxs, sa.YGpIdxs)
+	// fmt.Printf("itrs: %d  maxItms: %d\n", itr, maxItms)
+	// edgps := sa.SizesFmIdxs(sa.XGpIdxs, sa.YGpIdxs)
+	// fmt.Printf("ending gps: %v\n", edgps)
 }
 
 // PrintGps prints the group allocations
@@ -159,8 +266,8 @@ func (sa *SzAlloc) PrintGps() {
 	}
 }
 
-// AllocItms directly allocate items each to their own group -- all fits
-func (sa *SzAlloc) AllocItms() {
+// AllocItemsNoGps directly allocate items each to their own group -- all fits
+func (sa *SzAlloc) AllocItemsNoGps() {
 	ni := len(sa.ItmSizes)
 	sa.GpSizes = make([]image.Point, ni)
 	sa.ItmIdxs = make([]*Idxs, ni)
