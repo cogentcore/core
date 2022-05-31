@@ -423,7 +423,8 @@ func (vs *Vals) AllocTexBySize(vr *Var) {
 	for i, vl := range vs.Vals {
 		szs[i] = vl.Texture.Format.Size
 	}
-	vs.TexSzAlloc.SetSizes(MaxTexturesPerSet, MaxImageLayers, szs)
+	// 4,4 = MaxTexturesPerSet
+	vs.TexSzAlloc.SetSizes(image.Point{4, 4}, MaxImageLayers, szs)
 	vs.TexSzAlloc.Alloc()
 	ng := len(vs.TexSzAlloc.GpAllocs)
 	vs.GpTexVals = make([]*Val, ng)
