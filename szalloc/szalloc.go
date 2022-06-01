@@ -16,9 +16,15 @@ import (
 // MaxIters is maximum number of iterations for adapting sizes to fit constraints
 const MaxIters = 100
 
+// todo: to expand capacity beyond MaxItmsPerGp, reduce # of groups in Y, then X
+// and allocate extra groups to those that need it.. also the initial alloc of
+// uniq sizes might only use a subset of MaxGps and thus it would be "free" to
+// allocate additional items to groups that need it.
+
 // SzAlloc manages allocation of sizes to a spec'd maximum number
 // of groups.  Used for allocating texture images to image arrays
 // under the severe constraints of only 16 images.
+// Only a maximum of MaxItmsPerGp items can be allocated per grouping.
 type SzAlloc struct {
 	On           bool                `desc:"true if configured and ready to use"`
 	MaxGps       image.Point         `desc:"maximum number of groups in X and Y dimensions"`
