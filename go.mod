@@ -5,9 +5,9 @@ go 1.18
 require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220516021902-eb3e265c7661
-	github.com/goki/ki v1.1.6
-	github.com/goki/kigen v0.9.2
-	github.com/goki/mat32 v1.0.11
+	github.com/goki/ki v1.1.7
+	github.com/goki/kigen v1.0.0
+	github.com/goki/mat32 v1.0.12
 	github.com/goki/vulkan v0.0.0-20220512102541-6e89b8ce8542
 )
 

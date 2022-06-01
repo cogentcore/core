@@ -10,12 +10,12 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220516021902-eb3e265c7661 h1:1bpooddSK2996NWM/1TW59cchQOm9MkoV9DkhSJH1BI=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220516021902-eb3e265c7661/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
-github.com/goki/ki v1.1.6 h1:P4vbptgbI/8Y0Re9nzohZhx05zOrPvAl7fs9UXMpr64=
-github.com/goki/ki v1.1.6/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
-github.com/goki/kigen v0.9.2 h1:59O/QowurOak4T1KK4/ToCwxb/caj7a7stD5LCD6/1s=
-github.com/goki/kigen v0.9.2/go.mod h1:w8km7SXtEcXXiAs0HbJyIrLq05THTIc1SdFyce3cNdw=
-github.com/goki/mat32 v1.0.11 h1:w619aRtbhAzqCios+tT6PAuaf+Yl2xtmG4EDfdmOHeM=
-github.com/goki/mat32 v1.0.11/go.mod h1:hCV5RDI64Gg16Dc0smHZyLjlJB7oB3LbEmweaWcTiII=
+github.com/goki/ki v1.1.7 h1:WrLjB3XkQiM428i3WV0q3/l22kg2rI8Y7rUGDOTcpzM=
+github.com/goki/ki v1.1.7/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
+github.com/goki/kigen v1.0.0 h1:bARxFEBOLDoDKQ/UPXbUO1rqkF1ZykLPxGvj2NOPdtk=
+github.com/goki/kigen v1.0.0/go.mod h1:w8km7SXtEcXXiAs0HbJyIrLq05THTIc1SdFyce3cNdw=
+github.com/goki/mat32 v1.0.12 h1:tuSKxqyZUkl1HbygYcDhGoysn3BGvCscXveTps6fdvs=
+github.com/goki/mat32 v1.0.12/go.mod h1:6tOY3oXQLGItoMcA6nhKwbO3EFXZOo8l+4eIotDFG/k=
 github.com/goki/vulkan v0.0.0-20220512102541-6e89b8ce8542 h1:siy8s9EpUyiBnKMfkFqHYWxG20YaxRZhLNFJcmiLSK8=
 github.com/goki/vulkan v0.0.0-20220512102541-6e89b8ce8542/go.mod h1:EQmEmj96usMHFqWqC5M/8i53EE83igRgY8uGfw0snDs=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
@@ -40,7 +40,6 @@ golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnf
 golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf h1:oXVg4h2qJDd9htKxb5SCpFBHLipW6hXmL3qpUixS2jw=
 golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf/go.mod h1:yh0Ynu2b5ZUe3MQfp2nM0ecK7wsgouWTDN0FNeJuIys=
 golang.org/x/image v0.0.0-20190703141733-d6a02ce849c9/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
-golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9 h1:LRtI4W37N+KFebI/qV0OFiLUv4GLOWeEW5hn/KEJvxE=
 golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9/go.mod h1:023OzeP/+EPmXeapQh35lcL3II3LrY8Ic+EFFKVhULM=
 golang.org/x/sys v0.0.0-20181205085412-a5c9d58dba9a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
