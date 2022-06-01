@@ -5,6 +5,7 @@
 package gi3d
 
 import (
+	"image"
 	"sync"
 
 	"github.com/goki/ki/ki"
@@ -204,6 +205,26 @@ func (cm *Camera) Zoom(zoomPct float32) {
 	if zoomPct < 0 && dist < 1 {
 		cm.Target.SetAdd(del)
 	}
+	cm.CamMu.Unlock()
+}
+
+// ZoomTo moves along axis in vector pointing through the given 2D point as
+// into the camera NDC normalized display coordinates.  Point must be
+// 0 normalized, (subtract the Scene ObjBBox.Min) and size of Scene is
+// passed as size argument.
+// ZoomPct is proportion closer (positive) or further (negative) from the target.
+func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
+	cm.CamMu.Lock()
+	fsize := mat32.Vec2{float32(size.X), float32(size.Y)}
+	fpt := mat32.Vec2{float32(pt.X), float32(pt.Y)}
+	ndc := fpt.WindowToNDC(fsize, mat32.Vec2{}, true) // flipY
+	ndc.Z = -1                                        // at closest point
+	cdir := mat32.NewVec4FromVec3(ndc, 1).MulMat4(&cm.InvPrjnMatrix)
+	cdir.Z = -1
+	cdir.W = 0 // vec
+	// get world position / transform of camera: matrix is inverse of ViewMatrix
+	wdir := mat32.NewVec3FromVec4(cdir.MulMat4(&cm.Pose.Matrix))
+	cm.Pose.Pos.SetAdd(wdir.MulScalar(zoomPct))
 	cm.CamMu.Unlock()
 }
 

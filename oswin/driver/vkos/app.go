@@ -286,7 +286,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	go w.winLoop() // start window's own dedicated publish update loop
 
 	w.sendWindowEvent(window.Paint)
-	w.sendWindowEvent(window.Paint)
+	// w.sendWindowEvent(window.Paint)
 
 	return w, nil
 }

@@ -441,14 +441,15 @@ func (sc *Scene) NavEvents() {
 			oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
 			ssc.SetDragCursor = false
 		}
+		pt := me.Where.Sub(sc.ObjBBox.Min)
+		sz := ssc.Geom.Size
 		zoom := float32(me.NonZeroDelta(false))
-		zoomPct := float32(.01)
 		zoomDel := float32(.01)
 		switch {
 		case key.HasAllModifierBits(me.Modifiers, key.Alt):
 			ssc.Camera.PanTarget(0, 0, zoom*zoomDel)
 		default:
-			ssc.Camera.Zoom(zoomPct * zoom)
+			ssc.Camera.ZoomTo(pt, sz, zoom*zoomDel)
 		}
 		ssc.UpdateSig()
 	})

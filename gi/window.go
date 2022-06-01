@@ -88,6 +88,10 @@ var (
 	// can be set in PrefsDebug from prefs gui
 	WinPublishTrace = false
 
+	// WinDrawTrace highlights the window regions that are drawn to update
+	// the window, using filled colored rectangles
+	WinDrawTrace = false
+
 	// KeyEventTrace reports a trace of keyboard events to stdout
 	// can be set in PrefsDebug from prefs gui
 	KeyEventTrace = false
@@ -990,17 +994,6 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadVpRegion")
 
-	bsz := winBBox.Size()
-	if bsz.X*bsz.Y > 1000*1000 {
-		w.ResetUpdateRegionsImpl()
-		if Render2DTrace || WinEventTrace {
-			fmt.Printf("Win: %v region Vp %v, winbbox: %v reset updates due to huge region\n", w.Path(), vp.Path(), winBBox)
-		}
-		w.ClearWinUpdating()
-		w.UpMu.Unlock()
-		return
-	}
-
 	idx, over := w.updtRegs.Add(winBBox, vp)
 	if over {
 		w.ResetUpdateRegionsImpl()
@@ -1189,6 +1182,12 @@ func (w *Window) Publish() {
 	// w.OSWin.RunOnWin(func() {})
 	// and using RunOnMain makes the thing hella slow -- like opengl -- that was the issue there!
 	// oswin.TheApp.RunOnMain(func() {
+
+	if w.Sprites.Modified || w.Sprites.HasSizeChanged() {
+		w.ConfigSprites()
+		w.Sprites.Modified = false
+	}
+
 	drw := w.OSWin.Drawer()
 	drw.SyncImages()
 	drw.StartDraw(0)
@@ -1201,25 +1200,16 @@ func (w *Window) Publish() {
 	w.updtRegs.DrawImages(drw, false) // after direct
 
 	drw.UseTextureSet(2)
-	for imgIdx, smkv := range w.Sprites.Sizes.Order {
-		for layIdx, spkv := range smkv.Val.Order {
-			sp := spkv.Val
-			if !sp.On {
-				continue
-			}
-			// fmt.Printf("spr: %d %d pos: %v\n", imgIdx, layIdx, sp.Geom.Pos)
-			drw.Copy(imgIdx+SpriteStart, layIdx, sp.Geom.Pos, image.ZR, draw.Over, vgpu.NoFlipY)
-		}
-	}
+	w.DrawSprites()
 
 	drw.EndDraw()
 
-	if false { // debugging color overlay
+	if WinDrawTrace { // debugging color overlay
 		var clrs [16]gist.Color
 		cmap := colormap.AvailMaps["ROYGBIV"]
 		for i := 0; i < 16; i++ {
 			clrs[i] = cmap.Map(float64(i) / 16.0)
-			clrs[i].A = 32
+			clrs[i].A = 16
 		}
 		wu := &w.updtRegs
 		if wu.Updates != nil {
@@ -1288,21 +1278,12 @@ func (w *Window) SpriteByName(nm string) (*Sprite, bool) {
 // AddSprite adds an existing sprite to list of sprites, using the sprite.Name
 // as the unique name key.
 func (w *Window) AddSprite(sp *Sprite) {
-	if w.Sprites.NSizes() >= vgpu.MaxTexturesPerSet-1 {
-		log.Println("gi.Window:AddSprite error: ran out of sprite room!")
-		return
-	}
-	imgIdx, layIdx := w.Sprites.Add(sp)
+	w.UpMu.Lock()
+	defer w.UpMu.Unlock()
+	w.Sprites.Add(sp)
 	if sp.On {
 		w.Sprites.Active++
 	}
-	imgIdx += SpriteStart
-	drw := w.OSWin.Drawer()
-	if layIdx == 0 {
-		// allocate 128 images for sprites
-		drw.ConfigImage(imgIdx, vgpu.NewImageFormat(sp.Geom.Size.X, sp.Geom.Size.Y, MaxSpritesPerTexture))
-	}
-	drw.SetGoImage(imgIdx, layIdx, sp.Pixels, vgpu.NoFlipY)
 }
 
 // ActivateSprite flags the sprite as active, and increments
@@ -1361,14 +1342,8 @@ func (w *Window) DeleteSprite(nm string) bool {
 	if !ok {
 		return false
 	}
-	imgIdx, _ := w.Sprites.Delete(sp)
-
-	drw := w.OSWin.Drawer()
-	sm, _ := w.Sprites.Sizes.ValByKey(sp.Geom.Size)
-	imgIdx += SpriteStart
-	for i, kv := range sm.Order {
-		drw.SetGoImage(imgIdx, i, kv.Val.Pixels, vgpu.NoFlipY)
-	}
+	w.Sprites.Delete(sp)
+	w.Sprites.Active--
 	return true
 }
 
@@ -1398,6 +1373,39 @@ func (w *Window) SelSpriteEvent(evi oswin.Event) {
 			}
 		} else if ep.In(sp.Geom.Bounds()) {
 			sig.Emit(w.This(), int64(et), evi)
+		}
+	}
+}
+
+// ConfigSprites updates the Drawer configuration of sprites.
+// Does a new SzAlloc, and sets corresponding images.
+func (w *Window) ConfigSprites() {
+	drw := w.OSWin.Drawer()
+	w.Sprites.AllocSizes()
+	sa := &w.Sprites.SzAlloc
+	for gpi, ga := range sa.GpAllocs {
+		gsz := sa.GpSizes[gpi]
+		imgidx := SpriteStart + gpi
+		drw.ConfigImage(imgidx, vgpu.NewImageFormat(gsz.X, gsz.Y, len(ga)))
+		for ii, spi := range ga {
+			sp := w.Sprites.Names.ValByIdx(spi)
+			drw.SetGoImage(imgidx, ii, sp.Pixels, vgpu.NoFlipY)
+		}
+	}
+}
+
+// DrawSprites draws sprites
+func (w *Window) DrawSprites() {
+	drw := w.OSWin.Drawer()
+	sa := &w.Sprites.SzAlloc
+	for gpi, ga := range sa.GpAllocs {
+		imgidx := SpriteStart + gpi
+		for ii, spi := range ga {
+			sp := w.Sprites.Names.ValByIdx(spi)
+			if !sp.On {
+				continue
+			}
+			drw.Copy(imgidx, ii, sp.Geom.Pos, image.ZR, draw.Over, vgpu.NoFlipY)
 		}
 	}
 }
@@ -1735,15 +1743,18 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 					// probably worth it overall, even if we can fix the initial focus issue
 					// w.InitialFocus()
 				}
-				w.SendShowEvent() // happens AFTER full render
 			}
 			w.Publish()
-			// todo: this can crash here
-			// if w.NeedWinMenuUpdate() {
-			// 	fmt.Printf("win menu updt: %v\n", w.Nm)
-			// 	w.MainMenuUpdateWindows()
-			// 	w.MainMenuSet()
-			// }
+		case window.Show:
+			// note that this is sent delayed by vkos
+			if WinEventTrace {
+				fmt.Printf("Win: %v got show event\n", w.Nm)
+			}
+			if w.NeedWinMenuUpdate() {
+				w.MainMenuUpdateWindows()
+				w.MainMenuSet()
+			}
+			w.SendShowEvent() // happens AFTER full render
 		case window.Move:
 			e.SetProcessed()
 			if w.HasFlag(int(WinFlagGotPaint)) { // moves before paint are not accurate on X11
@@ -1758,14 +1769,18 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				if WinEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.Nm)
 				}
+				// if w.NeedWinMenuUpdate() {
+				// 	w.MainMenuUpdateWindows()
+				// }
+				// w.MainMenuSet()
 			} else {
 				if WinEventTrace {
 					fmt.Printf("Win: %v got extra focus\n", w.Nm)
 				}
-				if w.NeedWinMenuUpdate() {
-					w.MainMenuUpdateWindows()
-				}
-				w.MainMenuSet()
+				// if w.NeedWinMenuUpdate() {
+				// 	w.MainMenuUpdateWindows()
+				// }
+				// w.MainMenuSet()
 			}
 		case window.DeFocus:
 			if WinEventTrace {
@@ -1795,6 +1810,10 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 		}
 		w.FocusActiveClick(e)
 		w.SelSpriteEvent(evi)
+		if w.NeedWinMenuUpdate() {
+			w.MainMenuUpdateWindows()
+		}
+		w.MainMenuSet()
 	case *mouse.MoveEvent:
 		if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
 			if w.HasFlag(int(WinFlagDoFullRender)) {

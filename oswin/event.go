@@ -101,7 +101,8 @@ const (
 	WindowResizeEvent
 
 	// WindowPaintEvent is specifically for window paint events which need
-	// special treatment -- this is an internal event not sent to widgets
+	// special treatment -- this is an internal event not sent to widgets,
+	// triggered right after window is opened for initial painting.
 	WindowPaintEvent
 
 	// WindowShowEvent is a synthetic event sent to widget consumers,

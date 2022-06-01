@@ -1014,6 +1014,8 @@ type PrefsDebug struct {
 
 	WinPublishTrace *bool `desc:"reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent"`
 
+	WinDrawTrace *bool `desc:"WinDrawTrace highlights the window regions that are drawn to update the window, using filled colored rectangles"`
+
 	KeyEventTrace *bool `desc:"reports trace of keyboard events (printfs to stdout)"`
 
 	EventTrace *bool `desc:"reports trace of event handling (printfs to stdout)"`
@@ -1049,6 +1051,7 @@ func (pf *PrefsDebug) Connect() {
 	pf.Layout2DTrace = &Layout2DTrace
 	pf.WinEventTrace = &WinEventTrace
 	pf.WinPublishTrace = &WinPublishTrace
+	pf.WinDrawTrace = &WinDrawTrace
 	pf.KeyEventTrace = &KeyEventTrace
 	pf.EventTrace = &EventTrace
 	pf.DNDTrace = &DNDTrace

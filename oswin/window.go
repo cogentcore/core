@@ -27,13 +27,13 @@ import (
 // The Window maintains its own vdraw.Drawer drawing system for rendering
 // bitmap images and filled regions onto the window surface.
 //
-// The base full-window image should be Scale'd up first, followed by any
-// overlay images such as sprites or direct upload images already on the
-// GPU (e.g., from 3D render frames)
+// The base full-window image should be drawn with a Scale call first,
+// followed by any overlay images such as sprites or direct upload
+// images already on the GPU (e.g., from 3D render frames)
 //
-// vdraw.MaxImages = 16 to work cross-platform, meaning that a maximum of 16
-// images can be uploaded and be ready to use in one render pass -- if more are
-// needed, multiple passes can be performed.
+// vgpu.MaxTexturesPerSet = 16 to work cross-platform, meaning that a maximum of 16
+// images per descriptor set can be uploaded and be ready to use in one render pass.
+// gi.Window uses multiple sets to get around this limitation.
 //
 type Window interface {
 

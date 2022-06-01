@@ -13,6 +13,7 @@ import (
 	"image"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/gi/oswin"
@@ -154,6 +155,7 @@ func (w *windowImpl) NextEvent() oswin.Event {
 
 // winLoop is the window's own locked processing loop.
 func (w *windowImpl) winLoop() {
+	winShow := time.NewTimer(time.Second)
 outer:
 	for {
 		select {
@@ -167,11 +169,11 @@ outer:
 			if f.done != nil {
 				f.done <- true
 			}
-		case <-w.publish:
+		case <-winShow.C:
 			if w.glw == nil {
 				break outer
 			}
-			// this is now a nop..
+			w.sendWindowEvent(window.Show)
 		}
 	}
 }

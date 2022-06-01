@@ -63,9 +63,12 @@ const (
 	DeFocus
 
 	// Paint indicates a request to repaint the window.
+	// This is sent right after the window is opened.
 	Paint
 
-	// Show is for the WindowShow event
+	// Show is for the WindowShow event -- sent by the system 500 msec
+	// after the window has opened, to trigger one-time actions such as
+	// configuring the main menu after the window has opened.
 	Show
 
 	// ScreenUpdate occurs when any of the screen information is updated

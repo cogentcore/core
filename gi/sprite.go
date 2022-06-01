@@ -11,6 +11,8 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/kigen/ordmap"
+	"github.com/goki/vgpu/szalloc"
+	"github.com/goki/vgpu/vgpu"
 )
 
 // A Sprite is just an image (with optional background) that can be drawn onto
@@ -108,87 +110,71 @@ func (sp *Sprite) DisconnectAllEvents() {
 
 // Sprites manages a collection of sprites organized by size and name
 type Sprites struct {
-	Names  ordmap.Map[string, *Sprite]                           `desc:"map of uniquely named sprites"`
-	Sizes  ordmap.Map[image.Point, *ordmap.Map[string, *Sprite]] `desc:"sprite list organized by size -- index gives Texture to use"`
-	Active int                                                   `desc:"number of active sprites"`
+	Names    ordmap.Map[string, *Sprite] `desc:"map of uniquely named sprites"`
+	SzAlloc  szalloc.SzAlloc             `desc:"allocation of sprites by size for rendering"`
+	Modified bool                        `desc:"set to true if sprites have been modified since last config"`
+	Active   int                         `desc:"number of active sprites"`
 }
 
 func (ss *Sprites) Init() {
 	ss.Names.Init()
-	ss.Sizes.Init()
 }
 
-// NSizes returns the number of current sizes allocated
-func (ss *Sprites) NSizes() int {
-	return ss.Sizes.Len()
+// AllocSizes allocates the sprites by size to fixed set of images and layers
+func (ss *Sprites) AllocSizes() {
+	ns := ss.Names.Len()
+	szs := make([]image.Point, ns)
+	idx := 0
+	for _, kv := range ss.Names.Order {
+		sp := kv.Val
+		if sp.Geom.Size == image.ZP {
+			continue
+		}
+		szs[idx] = sp.Geom.Size
+		idx++
+	}
+	if idx != ns {
+		szs = szs[:idx]
+	}
+	ss.SzAlloc.SetSizes(image.Point{4, 4}, vgpu.MaxImageLayers, szs)
+	ss.SzAlloc.Alloc()
 }
-
-// todo: update image method
 
 // Add adds sprite to list, and returns the image index and
 // layer index within that for given sprite.  If name already
 // exists on list, then it is returned, with size allocation
 // updated as needed.
-func (ss *Sprites) Add(sp *Sprite) (imgIdx, layIdx int) {
+func (ss *Sprites) Add(sp *Sprite) {
 	ss.Init()
-	esi, has := ss.Names.IdxByKey(sp.Name)
-	if has {
-		esp := ss.Names.Order[esi].Val
-		ss.Names.ReplaceIdx(esi, sp.Name, sp)
-		if esp.Geom.Size == sp.Geom.Size {
-			return ss.AddSize(sp) // auto replaces
-		}
-		ss.DeleteSize(esp)
-		return ss.AddSize(sp)
-	}
 	ss.Names.Add(sp.Name, sp)
-	return ss.AddSize(sp)
+	ss.Modified = true
 }
 
 // Delete deletes sprite by name, returning indexes where it was located.
 // All sprite images must be updated when this occurs, as indexes may have shifted.
-func (ss *Sprites) Delete(sp *Sprite) (imgIdx, layIdx int) {
-	imgIdx, layIdx = ss.Indexes(sp)
-	if imgIdx < 0 {
-		return
-	}
-	ss.DeleteSize(sp)
+func (ss *Sprites) Delete(sp *Sprite) {
 	ss.Names.DeleteKey(sp.Name)
+	ss.Modified = true
 	return
 }
 
-// AddSize adds sprite to list of sprites organized by size
-func (ss *Sprites) AddSize(sp *Sprite) (imgIdx, layIdx int) {
-	has := false
-	sz := sp.Geom.Size
-	var sm *ordmap.Map[string, *Sprite]
-	imgIdx, has = ss.Sizes.IdxByKey(sz)
-	if !has {
-		sm = &ordmap.Map[string, *Sprite]{}
-		sm.Init()
-		imgIdx = ss.Sizes.Len()
-		ss.Sizes.Add(sz, sm)
-	} else {
-		sm = ss.Sizes.Order[imgIdx].Val
+// HasSizeChanged returns true if a sprite's size has changed relative to
+// its last allocated value, in SzAlloc.  Returns true and sets Modified
+// flag to true if so.
+func (ss *Sprites) HasSizeChanged() bool {
+	if len(ss.SzAlloc.ItmSizes) != ss.Names.Len() {
+		ss.Modified = true
+		return true
 	}
-	layIdx, has = sm.IdxByKey(sp.Name)
-	if !has {
-		layIdx = sm.Len()
-		sm.Add(sp.Name, sp)
-	} else {
-		sm.ReplaceIdx(layIdx, sp.Name, sp)
+	for i, kv := range ss.Names.Order {
+		sp := kv.Val
+		ssz := ss.SzAlloc.ItmSizes[i]
+		if sp.Geom.Size != ssz {
+			ss.Modified = true
+			return true
+		}
 	}
-	return
-}
-
-// DeleteSize removes sprite from Sizes list based on its sizser
-func (ss *Sprites) DeleteSize(sp *Sprite) {
-	sz := sp.Geom.Size
-	sm, has := ss.Sizes.ValByKey(sz)
-	if !has { // error!?
-		return
-	}
-	sm.DeleteKey(sp.Name)
+	return false
 }
 
 // SpriteByName returns the sprite by name
@@ -196,26 +182,8 @@ func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
 	return ss.Names.ValByKey(name)
 }
 
-// Indexes returns the texture image index (size list)
-// and layer index (name list within size) for given sprite
-// returns -1 if not found (assumed to only be called when exists)
-func (ss *Sprites) Indexes(sp *Sprite) (imgIdx, layIdx int) {
-	sz := sp.Geom.Size
-	has := false
-	imgIdx, has = ss.Sizes.IdxByKey(sz)
-	if !has { // error!?
-		return -1, -1
-	}
-	sm := ss.Sizes.Order[imgIdx].Val
-	layIdx, has = sm.IdxByKey(sp.Name)
-	if !has { // error!?
-		return -1, -1
-	}
-	return
-}
-
 // Reset removes all sprites
 func (ss *Sprites) Reset() {
 	ss.Names.Reset()
-	ss.Sizes.Reset()
+	ss.Modified = true
 }
