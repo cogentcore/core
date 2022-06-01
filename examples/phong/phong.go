@@ -59,7 +59,7 @@ func main() {
 	winext := window.GetRequiredInstanceExtensions()
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
-	// gp.Debug = true
+	//	gp.Debug = true
 	gp.Config("vPhong test")
 	TheGPU = gp
 

@@ -45,11 +45,12 @@ type GPU struct {
 func (gp *GPU) Defaults(graphics bool) {
 	gp.APIVersion = vk.Version(vk.MakeVersion(1, 2, 0))
 	gp.AppVersion = vk.Version(vk.MakeVersion(1, 0, 0))
-	gp.DeviceExts = []string{"VK_KHR_portability_subset", "VK_EXT_descriptor_indexing"}
+	gp.DeviceExts = []string{"VK_EXT_descriptor_indexing"}
 	gp.InstanceExts = []string{"VK_KHR_get_physical_device_properties2"}
 	if graphics {
 		gp.DeviceExts = append(gp.DeviceExts, []string{"VK_KHR_swapchain"}...)
 	}
+	PlatformDefaults(gp)
 }
 
 // NewGPU returns a new GPU struct with Graphics Defaults set
