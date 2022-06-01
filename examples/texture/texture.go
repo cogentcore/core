@@ -128,7 +128,7 @@ func main() {
 		pnm := filepath.Join("../images", fnm)
 		imgs[i] = OpenImage(pnm)
 		img, _ := tximgv.Vals.ValByIdxTry(i)
-		img.Texture.ConfigGoImage(imgs[i])
+		img.Texture.ConfigGoImage(imgs[i].Bounds().Size(), 0)
 		// img.Texture.Sampler.Border = vgpu.BorderBlack
 		// img.Texture.Sampler.UMode = vgpu.ClampToBorder
 		// img.Texture.Sampler.VMode = vgpu.ClampToBorder
