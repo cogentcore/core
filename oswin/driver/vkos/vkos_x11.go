@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build (linux && !android) || dragonfly || openbsd
-// +build linux,!android dragonfly openbsd
 
 package vkos
 
