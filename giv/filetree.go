@@ -738,6 +738,7 @@ func (fn *FileNode) UpdateNode() error {
 
 // OpenDir opens given directory node
 func (fn *FileNode) OpenDir() {
+	// fmt.Printf("fn: %s opened\n", fn.FPath)
 	fn.SetOpen()
 	fn.FRoot.SetDirOpen(fn.FPath)
 	fn.UpdateNode()
@@ -745,6 +746,7 @@ func (fn *FileNode) OpenDir() {
 
 // CloseDir closes given directory node -- updates memory state
 func (fn *FileNode) CloseDir() {
+	// fmt.Printf("fn: %s closed\n", fn.FPath)
 	fn.SetClosed()
 	fn.FRoot.SetDirClosed(fn.FPath)
 	// note: not doing anything with open files within directory..
