@@ -1191,8 +1191,13 @@ func (w *Window) Publish() {
 	drw := w.OSWin.Drawer()
 	drw.SyncImages()
 	drw.StartDraw(0)
+	drw.UseTextureSet(0)
 	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
-	w.updtRegs.DrawImages(drw, true) // before direct
+	if len(w.updtRegs.BeforeDir) > 0 {
+		drw.UseTextureSet(1)
+		w.updtRegs.DrawImages(drw, true) // before direct
+		drw.UseTextureSet(0)
+	}
 	w.DirDraws.DrawImages(drw)
 	w.popDraws.DrawImages(drw)
 

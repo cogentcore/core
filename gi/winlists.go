@@ -222,14 +222,13 @@ func (wu *WindowUpdates) Add(winBBox image.Rectangle, vp *Viewport2D) (int, bool
 		wu.MoveIdxToTop(idx)
 		return wu.Idx(idx), false
 	}
-	wu.Updates.Add(winBBox, vp)
-	idx = wu.Updates.Len() - 1
-	wu.Order = append(wu.Order, idx)
-	idx = wu.Idx(idx)
-	if idx >= wu.MaxIdx {
+	idx = wu.Updates.Len()
+	if wu.Idx(idx) >= wu.MaxIdx {
 		return idx, true
 	}
-	return idx, false
+	wu.Updates.Add(winBBox, vp)
+	wu.Order = append(wu.Order, idx)
+	return wu.Idx(idx), false
 }
 
 // MoveIdxToTop moves the given index to top of the order

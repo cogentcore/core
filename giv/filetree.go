@@ -114,7 +114,16 @@ func (ft *FileTree) OpenPath(path string) {
 	if ft.NodeType == nil {
 		ft.NodeType = KiT_FileNode
 	}
-	ft.FPath = gi.FileName(path)
+	effpath, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		effpath = path
+	}
+	abs, err := filepath.Abs(effpath)
+	if err != nil {
+		log.Printf("giv.FileTree:OpenPath: %s\n", err)
+		abs = effpath
+	}
+	ft.FPath = gi.FileName(abs)
 	ft.UpdateAll()
 }
 
@@ -881,6 +890,7 @@ func (fn *FileNode) DirsTo(path string) (*FileNode, error) {
 		if sfn.IsDir() || i == sz-1 {
 			if i < sz-1 && !sfn.IsOpen() {
 				sfn.OpenDir()
+				sfn.UpdateNode()
 			} else {
 				cfn = sfn
 			}
