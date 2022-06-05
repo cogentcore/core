@@ -13,9 +13,9 @@ import (
 	"github.com/goki/vgpu/vgpu"
 )
 
-// Texture has texture values: image, tiling
+// Texture has texture image -- stored as image.RGBA for GPU compatibility
 type Texture struct {
-	Image image.Image
+	Image *image.RGBA
 }
 
 func NewTexture(img image.Image) *Texture {
@@ -26,7 +26,7 @@ func NewTexture(img image.Image) *Texture {
 
 // Set sets values
 func (tx *Texture) Set(img image.Image) {
-	tx.Image = img
+	tx.Image = vgpu.ImageToRGBA(img)
 }
 
 // AddTexture adds to list of textures

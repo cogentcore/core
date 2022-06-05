@@ -20,6 +20,16 @@ import (
 	vk "github.com/goki/vulkan"
 )
 
+// ImageToRGBA returns image.RGBA version of given image
+// either because it already is one, or by converting it.
+func ImageToRGBA(img image.Image) *image.RGBA {
+	rimg, ok := img.(*image.RGBA)
+	if !ok {
+		rimg = clone.AsRGBA(img)
+	}
+	return rimg
+}
+
 // ImageFormat describes the size and vulkan format of an Image
 // If Layers > 1, all must be the same size.
 type ImageFormat struct {
@@ -303,10 +313,7 @@ func (im *Image) SetGoImage(img image.Image, layer int, flipY bool) error {
 	if !im.Format.IsStdRGBA() {
 		return fmt.Errorf("vgpu.Image: Format is not standard RGBA format: %s", im.Name)
 	}
-	rimg, ok := img.(*image.RGBA)
-	if !ok {
-		rimg = clone.AsRGBA(img)
-	}
+	rimg := ImageToRGBA(img)
 	sz := rimg.Rect.Size()
 	dpix := im.HostPixels(layer)
 	sti := rimg.Rect.Min.Y*rimg.Stride + rimg.Rect.Min.X*4
