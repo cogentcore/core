@@ -894,7 +894,10 @@ func (vv *ValueViewBase) UpdateWidget() {
 func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	tf := vv.Widget.(*gi.TextField)
+	tf, ok := vv.Widget.(*gi.TextField)
+	if !ok {
+		return
+	}
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())

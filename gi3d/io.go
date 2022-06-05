@@ -122,7 +122,9 @@ func (sc *Scene) OpenNewObj(fname string, parent ki.Ki) (*Group, error) {
 	_, fn := filepath.Split(fname)
 	gp := AddNewGroup(sc, parent, fn)
 	dec.SetGroup(sc, gp)
-	sc.Init3D() // needed after loading
+	if sc.IsConfiged() { // has already been configed
+		sc.ConfigRender()
+	}
 	sc.UpdateEnd(updt)
 	return gp, nil
 }

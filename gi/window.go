@@ -172,7 +172,7 @@ type Window struct {
 	NodeBase
 	Title             string       `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
 	Data              interface{}  `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
-	OSWin             oswin.Window `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	OSWin             oswin.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 	EventMgr          EventMgr     `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
 	Viewport          *Viewport2D  `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
 	MasterVLay        *Layout      `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
@@ -193,8 +193,8 @@ type Window struct {
 	skippedResize *window.Event
 	lastEt        oswin.EventType
 	DirDraws      WindowDrawers       `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
-	popDraws      WindowDrawers       // popup regions
-	updtRegs      WindowUpdates       // misc vp update regions
+	PopDraws      WindowDrawers       // popup regions
+	UpdtRegs      WindowUpdates       // misc vp update regions
 	Phongs        []*vphong.Phong     `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 	Frames        []*vgpu.RenderFrame `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 }
@@ -355,8 +355,8 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 
 	win.DirDraws.SetIdxRange(1, MaxDirectUploads)
 	// win.DirDraws.FlipY = true // drawing is flipped in general here.
-	win.popDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
-	win.updtRegs.SetIdxRange(RegionUpdateStart, MaxRegionUpdates)
+	win.PopDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
+	win.UpdtRegs.SetIdxRange(RegionUpdateStart, MaxRegionUpdates)
 
 	win.OSWin.SetDestroyGPUResourcesFunc(func() {
 		for _, ph := range win.Phongs {
@@ -994,7 +994,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadVpRegion")
 
-	idx, over := w.updtRegs.Add(winBBox, vp)
+	idx, over := w.UpdtRegs.Add(winBBox, vp)
 	if over {
 		w.ResetUpdateRegionsImpl()
 		if Render2DTrace || WinEventTrace {
@@ -1013,8 +1013,8 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 			for _, dkv := range w.DirDraws.Nodes.Order {
 				dbb := dkv.Val
 				if dbb.In(winBBox) {
-					oridx := idx - w.updtRegs.StartIdx
-					w.updtRegs.MoveIdxToBeforeDir(oridx)
+					oridx := idx - w.UpdtRegs.StartIdx
+					w.UpdtRegs.MoveIdxToBeforeDir(oridx)
 				}
 			}
 		}
@@ -1046,8 +1046,10 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	} else {
 		// pr := prof.Start("win.UploadVp")
 		gii, _ := KiToNode2D(vp.This())
-		idx, _ = w.popDraws.Add(gii, winBBox)
-		drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
+		if gii != nil {
+			idx, _ = w.PopDraws.Add(gii, winBBox)
+			drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
+		}
 	}
 	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Win: %v uploaded entire Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
@@ -1114,8 +1116,8 @@ func (w *Window) ResetUpdateRegions() {
 // ResetUpdateRegionsImpl resets any existing window update regions and
 // grabs the current state of the window and popup viewports for subsequent rendering.
 func (w *Window) ResetUpdateRegionsImpl() {
-	w.updtRegs.Reset()
-	w.popDraws.Reset()
+	w.UpdtRegs.Reset()
+	w.PopDraws.Reset()
 	drw := w.OSWin.Drawer()
 	drw.SetGoImage(0, 0, w.Viewport.Pixels, vgpu.NoFlipY)
 	// then all the current popups
@@ -1126,7 +1128,7 @@ func (w *Window) ResetUpdateRegionsImpl() {
 			if gii != nil {
 				vp := gii.AsViewport2D()
 				r := vp.Geom.Bounds()
-				idx, _ := w.popDraws.Add(gii, vp.WinBBox)
+				idx, _ := w.PopDraws.Add(gii, vp.WinBBox)
 				drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
 				if Render2DTrace {
 					fmt.Printf("Win: %v uploading popup stack Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
@@ -1139,7 +1141,7 @@ func (w *Window) ResetUpdateRegionsImpl() {
 		if gii != nil {
 			vp := gii.AsViewport2D()
 			r := vp.Geom.Bounds()
-			idx, _ := w.popDraws.Add(gii, vp.WinBBox)
+			idx, _ := w.PopDraws.Add(gii, vp.WinBBox)
 			drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
 			if Render2DTrace || WinEventTrace {
 				fmt.Printf("Win: %v uploading top popup Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
@@ -1193,16 +1195,16 @@ func (w *Window) Publish() {
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
 	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
-	if len(w.updtRegs.BeforeDir) > 0 {
+	if len(w.UpdtRegs.BeforeDir) > 0 {
 		drw.UseTextureSet(1)
-		w.updtRegs.DrawImages(drw, true) // before direct
+		w.UpdtRegs.DrawImages(drw, true) // before direct
 		drw.UseTextureSet(0)
 	}
 	w.DirDraws.DrawImages(drw)
-	w.popDraws.DrawImages(drw)
+	w.PopDraws.DrawImages(drw)
 
 	drw.UseTextureSet(1)
-	w.updtRegs.DrawImages(drw, false) // after direct
+	w.UpdtRegs.DrawImages(drw, false) // after direct
 
 	drw.UseTextureSet(2)
 	w.DrawSprites()
@@ -1216,7 +1218,7 @@ func (w *Window) Publish() {
 			clrs[i] = cmap.Map(float64(i) / 16.0)
 			clrs[i].A = 16
 		}
-		wu := &w.updtRegs
+		wu := &w.UpdtRegs
 		if wu.Updates != nil {
 			drw.StartFill()
 			for i, kv := range wu.Updates.Order {
@@ -2125,7 +2127,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 
 // DisconnectPopup disconnects given popup -- typically the current one.
 func (w *Window) DisconnectPopup(pop ki.Ki) {
-	w.popDraws.Delete(pop.(Node))
+	w.PopDraws.Delete(pop.(Node))
 	w.EventMgr.DisconnectAllEvents(pop, AllPris)
 	ki.SetParent(pop, nil) // don't redraw the popup anymore
 }

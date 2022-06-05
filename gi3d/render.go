@@ -35,6 +35,11 @@ const (
 /////////////////////////////////////////////////////////////////////////////////////
 // 		Rendering
 
+// IsConfiged Returns true if the scene has already been configured
+func (sc *Scene) IsConfiged() bool {
+	return sc.Frame != nil
+}
+
 // ConfigFrame configures framebuffer for GPU rendering context
 // returns false if not possible
 func (sc *Scene) ConfigFrame() bool {
@@ -52,7 +57,8 @@ func (sc *Scene) ConfigFrame() bool {
 			sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
 			sc.Frame.SetRender(&sy.Render)
 			sc.Phong.ConfigSys()
-			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0)
+			// note:
+			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 			sc.Win.Phongs = append(sc.Win.Phongs, &sc.Phong) // for destroying in sequence
 			sc.Win.Frames = append(sc.Win.Frames, sc.Frame)  // for destroying in sequence
 		})

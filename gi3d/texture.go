@@ -11,12 +11,14 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/kit"
+	"github.com/goki/vgpu/vgpu"
 	"github.com/goki/vgpu/vphong"
 )
 
 // TexName provides a GUI interface for choosing textures
 type TexName string
 
+// Texture is the interface for all textures
 type Texture interface {
 	// Name returns name of the texture
 	Name() string
@@ -29,8 +31,8 @@ type Texture interface {
 	// SetTransparent sets the transparency flag for this texture.
 	SetTransparent(trans bool)
 
-	// Image returns image for the texture
-	Image() image.Image
+	// Image returns image for the texture, in image.RGBA format used internally
+	Image() *image.RGBA
 
 	// SetImage sets image for the texture
 	SetImage(img image.Image)
@@ -40,10 +42,11 @@ type Texture interface {
 // TextureBase
 
 // TextureBase is the base texture implementation
+// it uses an image.RGBA as underlying image storage to facilitate interface with GPU
 type TextureBase struct {
 	Nm    string      `desc:"name of the texture -- textures are connected to material by name"`
 	Trans bool        `desc:"set to true if texture has transparency"`
-	Img   image.Image `desc:"cached image"`
+	Img   *image.RGBA `desc:"cached image"`
 }
 
 var KiT_TextureBase = kit.Types.AddType(&TextureBase{}, nil)
@@ -60,12 +63,16 @@ func (tx *TextureBase) SetTransparent(trans bool) {
 	tx.Trans = trans
 }
 
-func (tx *TextureBase) Image() image.Image {
+func (tx *TextureBase) Image() *image.RGBA {
 	return tx.Img
 }
 
 func (tx *TextureBase) SetImage(img image.Image) {
-	tx.Img = img
+	if img == nil {
+		tx.Img = nil
+	} else {
+		tx.Img = vgpu.ImageToRGBA(img)
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -88,20 +95,21 @@ func AddNewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	return tx
 }
 
-func (tx *TextureFile) Image() image.Image {
-	if tx.Img == nil {
-		if tx.File == "" {
-			err := fmt.Errorf("gi3d.Texture: %v File must be set to a filename to load texture from", tx.Nm)
-			log.Println(err)
-			return nil
-		}
-		var err error
-		tx.Img, err = gi.OpenImage(string(tx.File))
-		if err != nil {
-			log.Println(err)
-			return nil
-		}
+func (tx *TextureFile) Image() *image.RGBA {
+	if tx.Img != nil {
+		return tx.Img
 	}
+	if tx.File == "" {
+		err := fmt.Errorf("gi3d.Texture: %v File must be set to a filename to load texture from", tx.Nm)
+		log.Println(err)
+		return nil
+	}
+	img, err := gi.OpenImage(string(tx.File))
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	tx.Img = vgpu.ImageToRGBA(img)
 	return tx.Img
 }
 

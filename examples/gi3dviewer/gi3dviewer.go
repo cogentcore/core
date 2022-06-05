@@ -11,12 +11,16 @@ import (
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 )
 
 func main() {
+
+	vkos.VkOsDebug = false
+
 	gimain.Main(func() {
 		mainrun()
 	})
@@ -69,6 +73,11 @@ func mainrun() {
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
 	objgp := gi3d.AddNewGroup(sc, sc, "obj-gp")
+
+	_, err := sc.OpenNewObj("objs/airplane_prop_001.obj", objgp)
+	if err != nil {
+		log.Println(err)
+	}
 
 	curFn := ""
 	exts := ".obj,.dae,.gltf"

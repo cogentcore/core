@@ -249,9 +249,9 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		if err != nil {
 			log.Println(err)
 		}
-		w.surface = vgpu.NewSurface(vgpu.TheGPU, vk.SurfaceFromPointer(surfPtr))
-		w.drawer.YIsDown = true
-		w.drawer.ConfigSurface(w.surface, vgpu.MaxTexturesPerSet) // note: can expand
+		w.Surface = vgpu.NewSurface(vgpu.TheGPU, vk.SurfaceFromPointer(surfPtr))
+		w.Draw.YIsDown = true
+		w.Draw.ConfigSurface(w.Surface, vgpu.MaxTexturesPerSet) // note: can expand
 	})
 
 	bitflag.SetAtomic(&w.Flag, int(oswin.Focus)) // starts out focused

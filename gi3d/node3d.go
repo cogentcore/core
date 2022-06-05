@@ -293,8 +293,8 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 // To convert mouse window-relative coords into scene-relative coords
 // subtract the sc.ObjBBox.Min which includes any scrolling effects
 func (nb *Node3DBase) RayPick(pos image.Point, sc *Scene) mat32.Ray {
-	nb.PoseMu.RLock()
-	sc.Camera.CamMu.RLock()
+	// nb.PoseMu.RLock()
+	// sc.Camera.CamMu.RLock()
 	sz := sc.Geom.Size
 	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
 	fpos := mat32.Vec2{float32(pos.X), float32(pos.Y)}
@@ -307,9 +307,9 @@ func (nb *Node3DBase) RayPick(pos image.Point, sc *Scene) mat32.Ray {
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
 	wdir := cdir.MulMat4(&sc.Camera.Pose.Matrix)
 	wpos := sc.Camera.Pose.Matrix.Pos()
-	sc.Camera.CamMu.RUnlock()
+	// sc.Camera.CamMu.RUnlock()
 	invM, err := nb.Pose.WorldMatrix.Inverse()
-	nb.PoseMu.RUnlock()
+	// nb.PoseMu.RUnlock()
 	if err != nil {
 		log.Println(err)
 	}

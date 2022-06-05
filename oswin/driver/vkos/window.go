@@ -31,8 +31,8 @@ type windowImpl struct {
 	event.Deque
 	app            *appImpl
 	glw            *glfw.Window
-	surface        *vgpu.Surface
-	drawer         vdraw.Drawer
+	Surface        *vgpu.Surface
+	Draw           vdraw.Drawer
 	scrnName       string // last known screen name
 	runQueue       chan funcRun
 	publish        chan struct{}
@@ -56,7 +56,7 @@ func (w *windowImpl) Handle() interface{} {
 }
 
 func (w *windowImpl) Drawer() *vdraw.Drawer {
-	return &w.drawer
+	return &w.Draw
 }
 
 func (w *windowImpl) IsClosed() bool {
@@ -400,10 +400,10 @@ func (w *windowImpl) Close() {
 	w.sendWindowEvent(window.Close)
 	theApp.DeleteWin(w)
 	w.app.RunOnMain(func() {
-		vk.DeviceWaitIdle(w.surface.Device.Device)
+		vk.DeviceWaitIdle(w.Surface.Device.Device)
 		w.DestroyGPUfunc()
-		w.drawer.Destroy()
-		w.surface.Destroy()
+		w.Draw.Destroy()
+		w.Surface.Destroy()
 		w.glw.Destroy()
 		w.glw = nil // marks as closed for all other calls
 	})

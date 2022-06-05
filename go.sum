@@ -50,8 +50,8 @@ github.com/goki/go-difflib v1.2.1 h1:zqSi9rTf0vYFia92PaZeKrTfofGVqku2WYOtfsUYqxU
 github.com/goki/go-difflib v1.2.1/go.mod h1:uZuY072AYTnMjRxCn6IkpZQKRVcTj4SIpHHXOUGOxrg=
 github.com/goki/ki v1.0.0/go.mod h1:X+gmVeAym3JDSbbiA7iF1qkgAlTVWl1JV9sRsGDzxOA=
 github.com/goki/ki v1.1.4/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
-github.com/goki/ki v1.1.7 h1:WrLjB3XkQiM428i3WV0q3/l22kg2rI8Y7rUGDOTcpzM=
-github.com/goki/ki v1.1.7/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
+github.com/goki/ki v1.1.8 h1:CAkUXKuPeyhEuoX7++Wi+S0FM8VwOPd5fxaT+Cbgm7E=
+github.com/goki/ki v1.1.8/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
 github.com/goki/kigen v1.0.0 h1:bARxFEBOLDoDKQ/UPXbUO1rqkF1ZykLPxGvj2NOPdtk=
 github.com/goki/kigen v1.0.0/go.mod h1:w8km7SXtEcXXiAs0HbJyIrLq05THTIc1SdFyce3cNdw=
 github.com/goki/mat32 v1.0.12 h1:tuSKxqyZUkl1HbygYcDhGoysn3BGvCscXveTps6fdvs=
@@ -62,8 +62,8 @@ github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b h1:3zU6niF8uvEaNtRBhOkmg
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b/go.mod h1:pgRizZOb3eUJr+ByZnXnPvt+a0fVOTn0Ujc2TqVZpW4=
 github.com/goki/vci v1.0.1 h1:tHtx4LzSNM1WeAYVf3e7hdinZmCizJMkE0NyYX/eXp0=
 github.com/goki/vci v1.0.1/go.mod h1:uOQl8kDy2Nb7MEY8cyz72ntp2PaTwJkm2GZNKrEKHE0=
-github.com/goki/vgpu v1.0.2 h1:3+N+1DOo6rHdlZjvutEIGhW41HZyitpW3ExeopIBoQw=
-github.com/goki/vgpu v1.0.2/go.mod h1:FrBn4Bsmawsg+IBxJHp6kIa9IU2r3kS+iiEKDjNUg1Y=
+github.com/goki/vgpu v1.0.3 h1:G9sxBtkc/e4pedJws5c4Y0Jh8qoiXPakovnAjzacnt0=
+github.com/goki/vgpu v1.0.3/go.mod h1:pQstHPgSgj9TakWVBakxgm2Hwkmj5IPczbAMNg8divY=
 github.com/goki/vulkan v0.0.0-20220512102541-6e89b8ce8542 h1:siy8s9EpUyiBnKMfkFqHYWxG20YaxRZhLNFJcmiLSK8=
 github.com/goki/vulkan v0.0.0-20220512102541-6e89b8ce8542/go.mod h1:EQmEmj96usMHFqWqC5M/8i53EE83igRgY8uGfw0snDs=
 github.com/gorilla/css v1.0.0 h1:BQqNyPTi50JCFMTw/b67hByjMVXZRwGha6wxVGkeihY=

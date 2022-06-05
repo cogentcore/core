@@ -726,6 +726,7 @@ func (fn *FileNode) UpdateNode() error {
 	if fn.IsDir() {
 		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
+			// fmt.Printf("set open: %s\n", fn.FPath)
 			fn.SetOpen()
 			fn.FRoot.SetDirOpen(fn.FPath)
 			repo, rnode := fn.Repo()
@@ -756,8 +757,8 @@ func (fn *FileNode) OpenDir() {
 // CloseDir closes given directory node -- updates memory state
 func (fn *FileNode) CloseDir() {
 	// fmt.Printf("fn: %s closed\n", fn.FPath)
-	fn.SetClosed()
 	fn.FRoot.SetDirClosed(fn.FPath)
+	fn.SetClosed()
 	// note: not doing anything with open files within directory..
 }
 

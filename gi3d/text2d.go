@@ -146,11 +146,11 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		} else {
 			fmt.Printf("gi3d.Text2D: error: texture name conflict: %s\n", txname)
 			txt.Mat.SetTexture(sc, tx)
-			img = tx.Image().(*image.RGBA)
+			img = tx.Image()
 		}
 	} else {
 		tx = txt.Mat.TexPtr
-		img = tx.Image().(*image.RGBA)
+		img = tx.Image()
 		if img.Bounds() != bounds {
 			img = image.NewRGBA(bounds)
 		}

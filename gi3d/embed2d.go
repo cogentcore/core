@@ -205,7 +205,10 @@ var Embed2DProps = ki.Props{
 
 func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 	var ppt image.Point
-	if em.Viewport == nil || em.Viewport.Pixels == nil || em.IsUpdating() {
+	if em.Viewport == nil || em.Viewport.Pixels == nil {
+		return ppt, false
+	}
+	if em.IsUpdating() {
 		return ppt, false
 	}
 	em.Viewport.BBoxMu.RLock()
@@ -220,7 +223,8 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 	// is in XY plane with norm pointing up in Z axis
 	plane := mat32.Plane{Norm: mat32.Vec3{0, 0, 1}, Off: 0}
 	ispt, ok := ray.IntersectPlane(plane)
-	if !ok || ispt.Z > 0 { // Z > 0 means clicked "in front" of plane
+	if !ok || ispt.Z > 1.0e-5 { // Z > 0 means clicked "in front" of plane -- with tolerance
+		fmt.Printf("in front: ok: %v   ispt: %v\n", ok, ispt)
 		return ppt, false
 	}
 	ppt.X = int((ispt.X + 0.5) * float32(sz.X))
@@ -238,7 +242,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 	em.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
-		if !ssc.IsVisible() || ssc.IsRendering() {
+		if !ssc.IsVisible() {
 			return
 		}
 		cpop := ssc.Win.CurPopup()
@@ -270,7 +274,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
-		if !ssc.IsVisible() || ssc.IsRendering() {
+		if !ssc.IsVisible() {
 			return
 		}
 		cpop := ssc.Win.CurPopup()
@@ -296,7 +300,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 	em.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
-		if !ssc.IsVisible() || ssc.IsRendering() {
+		if !ssc.IsVisible() {
 			return
 		}
 		cpop := ssc.Win.CurPopup()
@@ -322,7 +326,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		// note: registering HiPri -- we are outside 2D focus system, and get *all* keyboard events
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
-		if !ssc.IsVisible() || !ssc.HasFocus2D() || ssc.IsRendering() {
+		if !ssc.IsVisible() || !ssc.HasFocus2D() {
 			return
 		}
 		cpop := ssc.Win.CurPopup()
@@ -419,7 +423,10 @@ func (vp *EmbedViewport) VpUploadAll() {
 	// fmt.Printf("embed vp upload all\n")
 	updt := vp.Scene.UpdateStart()
 	if updt {
-		vp.EmbedPar.UploadViewTex(vp.Scene)
+		ssc := vp.EmbedPar.Viewport.Scene
+		if !ssc.IsRendering() {
+			vp.EmbedPar.UploadViewTex(vp.Scene)
+		}
 	}
 	vp.Scene.UpdateEnd(updt)
 }
