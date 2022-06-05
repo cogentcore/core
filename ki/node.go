@@ -227,7 +227,7 @@ func (n *Node) ParentByTypeTry(t reflect.Type, embeds bool) (Ki, error) {
 
 // HasChildren tests whether this node has children (i.e., non-terminal).
 func (n *Node) HasChildren() bool {
-	return !n.HasFlag(int(ChildDeleted)) && len(n.Kids) > 0
+	return len(n.Kids) > 0
 }
 
 // NumChildren returns the number of children of this node.
