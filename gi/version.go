@@ -3,7 +3,7 @@
 package gi
 
 const (
-	Version     = "v1.3.0"
-	GitCommit   = "038fef64"         // the commit JUST BEFORE the release
-	VersionDate = "2022-06-01 10:45" // UTC
+	Version     = "v1.3.1"
+	GitCommit   = "a5f83fdd"         // the commit JUST BEFORE the release
+	VersionDate = "2022-06-05 11:38" // UTC
 )
