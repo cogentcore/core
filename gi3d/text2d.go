@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -144,7 +145,9 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			tx.SetImage(img)
 			txt.Mat.SetTexture(sc, tx)
 		} else {
-			fmt.Printf("gi3d.Text2D: error: texture name conflict: %s\n", txname)
+			if vkos.VkOsDebug {
+				fmt.Printf("gi3d.Text2D: error: texture name conflict: %s\n", txname)
+			}
 			txt.Mat.SetTexture(sc, tx)
 			img = tx.Image()
 		}

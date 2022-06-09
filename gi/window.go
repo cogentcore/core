@@ -1395,6 +1395,9 @@ func (w *Window) ConfigSprites() {
 		imgidx := SpriteStart + gpi
 		drw.ConfigImage(imgidx, vgpu.NewImageFormat(gsz.X, gsz.Y, len(ga)))
 		for ii, spi := range ga {
+			if w.Sprites.Names.IdxIsValid(spi) != nil {
+				continue
+			}
 			sp := w.Sprites.Names.ValByIdx(spi)
 			drw.SetGoImage(imgidx, ii, sp.Pixels, vgpu.NoFlipY)
 		}
@@ -1408,6 +1411,9 @@ func (w *Window) DrawSprites() {
 	for gpi, ga := range sa.GpAllocs {
 		imgidx := SpriteStart + gpi
 		for ii, spi := range ga {
+			if w.Sprites.Names.IdxIsValid(spi) != nil {
+				continue
+			}
 			sp := w.Sprites.Names.ValByIdx(spi)
 			if !sp.On {
 				continue
