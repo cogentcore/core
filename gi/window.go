@@ -1197,6 +1197,9 @@ func (w *Window) Publish() {
 			if Update2DTrace {
 				fmt.Printf("Win %s didn't have active image, viewport is nil\n", w.Nm)
 			}
+			w.ClearWinUpdating()
+			w.UpMu.Unlock()
+			return
 		} else {
 			if Update2DTrace {
 				fmt.Printf("Win %s didn't have active image, setting to: %v\n", w.Nm, w.Viewport.Pixels.Bounds())
