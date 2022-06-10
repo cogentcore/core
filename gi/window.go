@@ -1191,6 +1191,19 @@ func (w *Window) Publish() {
 	}
 
 	drw := w.OSWin.Drawer()
+	vpv := drw.GetImageVal(0).Texture
+	if !vpv.IsActive() {
+		if w.Viewport.Pixels == nil {
+			if Update2DTrace {
+				fmt.Printf("Win %s didn't have active image, viewport is nil\n", w.Nm)
+			}
+		} else {
+			if Update2DTrace {
+				fmt.Printf("Win %s didn't have active image, setting to: %v\n", w.Nm, w.Viewport.Pixels.Bounds())
+			}
+			drw.SetGoImage(0, 0, w.Viewport.Pixels, vgpu.NoFlipY)
+		}
+	}
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)

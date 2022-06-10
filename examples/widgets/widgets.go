@@ -20,6 +20,7 @@ import (
 )
 
 func main() {
+	// vkos.VkOsDebug = true  // vulkan debugging
 	gimain.Main(func() {
 		mainrun()
 	})
