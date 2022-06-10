@@ -298,9 +298,11 @@ func (mm *Memory) TransferTexturesToGPU(buff vk.Buffer, imgs ...*Image) {
 	for _, im := range imgs {
 		im.TransitionForDst(cmd, vk.PipelineStageTopOfPipeBit)
 		if im.IsHostOwner() {
-			vk.CmdCopyBufferToImage(cmd, im.Host.Buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
+			cr := im.CopyRec()
+			vk.CmdCopyBufferToImage(cmd, im.Host.Buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{cr})
 		} else {
-			vk.CmdCopyBufferToImage(cmd, buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{im.CopyRec()})
+			cr := im.CopyRec()
+			vk.CmdCopyBufferToImage(cmd, buff, im.Image, vk.ImageLayoutTransferDstOptimal, 1, []vk.BufferImageCopy{cr})
 		}
 		im.TransitionDstToShader(cmd)
 	}

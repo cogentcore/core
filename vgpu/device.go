@@ -107,3 +107,10 @@ func (dv *Device) Destroy() {
 	vk.DestroyDevice(dv.Device, nil)
 	dv.Device = nil
 }
+
+// DeviceWaitIdle waits until the device is idle and ready
+// for commands -- maybe useful to call if getting not ready
+// errors in particular situations
+func (dv *Device) DeviceWaitIdle() {
+	vk.DeviceWaitIdle(dv.Device)
+}
