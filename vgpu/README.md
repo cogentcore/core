@@ -36,3 +36,6 @@ https://bakedbits.dev/posts/vulkan-compute-example/
 * https://www.reddit.com/r/vulkan/comments/rtpdvu/interleaved_vs_separate_vertex_buffers/ -- separate is actually better for most cases, and is *vastly* simpler.
 
 * https://www.lei.chat/posts/hlsl-for-vulkan-resources/ -- key for HLSL resource bindings!
+
+* Mac debugging: https://developer.apple.com/videos/play/wwdc2021/10148/
+
