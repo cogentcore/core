@@ -355,6 +355,7 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		if Render2DTrace {
 			fmt.Printf("Render: vp DrawIntoParent nil Pixels - no render!: %v parVp: %v\n", vp.Path(), parVp.Path())
 		}
+		return
 	}
 	r := vp.Geom.Bounds()
 	sp := image.ZP

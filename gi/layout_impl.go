@@ -948,6 +948,19 @@ func LayoutGridLay(ly *Layout) {
 // computing summary size stats
 func (ly *Layout) FinalizeLayout() {
 	ly.ChildSize = mat32.Vec2Zero
+	if ly.Lay == LayoutStacked && ly.StackTopOnly {
+		sn, err := ly.ChildTry(ly.StackTop)
+		if err != nil {
+			return
+		}
+		ni := sn.(Node2D).AsWidget()
+		if ni == nil {
+			return
+		}
+		ly.ChildSize.SetMax(ni.LayState.Alloc.PosRel.Add(ni.LayState.Alloc.Size))
+		ni.LayState.Alloc.SizeOrig = ni.LayState.Alloc.Size
+		return
+	}
 	for _, c := range ly.Kids {
 		if c == nil {
 			continue
