@@ -289,9 +289,9 @@ func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
 type mainMenuImpl struct {
 	win      *windowImpl
 	menID    uintptr // mainmenu id
-	delID    uintptr // deligate id
-	lock     bool
+	delID    uintptr // delegate id
 	callback func(win oswin.Window, title string, tag int)
+	mu       sync.Mutex
 }
 
 func (mm *mainMenuImpl) Window() oswin.Window {
@@ -327,19 +327,22 @@ func (mm *mainMenuImpl) Menu() oswin.Menu {
 }
 
 func (mm *mainMenuImpl) SetMenu() {
+	mm.mu.Lock()
 	vid := uintptr(mm.win.glw.GetCocoaWindow())
 	C.doSetMainMenu(C.uintptr_t(vid), C.uintptr_t(mm.menID))
+	mm.mu.Unlock()
 }
 
 func (mm *mainMenuImpl) StartUpdate() oswin.Menu {
-	mm.lock = true
+	mm.mu.Lock()
 	return oswin.Menu(mm.menID)
 }
 
 func (mm *mainMenuImpl) EndUpdate(men oswin.Menu) {
-	mm.lock = false
+	mm.mu.Unlock()
 }
 
+// Reset must be called within StartUpdate window
 func (mm *mainMenuImpl) Reset(men oswin.Menu) {
 	C.doMenuReset(C.uintptr_t(men))
 }

@@ -297,7 +297,7 @@ func (vp *Viewport2D) VpEventMgr() *EventMgr {
 }
 
 func (vp *Viewport2D) VpIsVisible() bool {
-	if vp == nil || vp.This() == nil || vp.Win == nil {
+	if vp == nil || vp.This() == nil || vp.Win == nil || vp.Pixels == nil {
 		return false
 	}
 	return vp.Win.IsVisible()

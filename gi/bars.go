@@ -229,6 +229,7 @@ func (mb *MenuBar) UpdateMainMenu(win *Window) {
 
 	mb.UpdateActions()
 	osmm.SetFunc(MainMenuFunc)
+
 	mm := osmm.StartUpdate() // locks
 	osmm.Reset(mm)
 	mb.OSMainMenus = make(map[string]*Action, 100)

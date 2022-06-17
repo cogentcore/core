@@ -300,11 +300,11 @@ MenuDelegate* newMainMenu(NSWindow* view) {
 	MenuDelegate* md = [[MenuDelegate alloc] init];
 	[md retain];
 	[mm retain];
-	[md setView: view];
- 	[md setMainMenu: mm];
  	[mm setAutoenablesItems:NO];
 	uintptr_t sm = doAddSubMenu((uintptr_t)mm, "app");
 	doAddMenuItem((uintptr_t)view, sm, (uintptr_t)md, "app", "", false, false, false, false, 0, false);
+ 	[md setMainMenu: mm];
+	[md setView: view];
 	return md;
 }
 
@@ -341,7 +341,7 @@ uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm) {
     
    NSMenuItem* smen = [men addItemWithTitle:title action:nil keyEquivalent: @""];
    NSMenu* ssmen = [[NSMenu alloc] initWithTitle:title];
-   smen.submenu = ssmen;
+   [smen setSubmenu:ssmen];
    [ssmen setAutoenablesItems:NO];
 	[title release];
 	[ssmen release]; // yes really!

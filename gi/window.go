@@ -1457,20 +1457,6 @@ func (w *Window) MainMenuUpdated() {
 	w.UpMu.Unlock()
 }
 
-// MainMenuSet sets the main menu for the window, after window.Focus event
-func (w *Window) MainMenuSet() {
-	if w == nil || w.MainMenu == nil || !w.IsVisible() {
-		return
-	}
-	w.UpMu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.UpMu.Unlock()
-		return
-	}
-	w.MainMenu.SetMainMenu(w) // set main menu call, in bars.go for MenuBar
-	w.UpMu.Unlock()
-}
-
 // MainMenuUpdateActives needs to be called whenever items on the main menu
 // for this window have their IsActive status updated.
 func (w *Window) MainMenuUpdateActives() {
@@ -1781,7 +1767,6 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			}
 			if w.NeedWinMenuUpdate() {
 				w.MainMenuUpdateWindows()
-				w.MainMenuSet()
 			}
 			w.SendShowEvent() // happens AFTER full render
 		case window.Move:
@@ -1798,18 +1783,13 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				if WinEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.Nm)
 				}
-				// if w.NeedWinMenuUpdate() {
-				// 	w.MainMenuUpdateWindows()
-				// }
-				// w.MainMenuSet()
+				if w.NeedWinMenuUpdate() {
+					w.MainMenuUpdateWindows()
+				}
 			} else {
 				if WinEventTrace {
 					fmt.Printf("Win: %v got extra focus\n", w.Nm)
 				}
-				// if w.NeedWinMenuUpdate() {
-				// 	w.MainMenuUpdateWindows()
-				// }
-				// w.MainMenuSet()
 			}
 		case window.DeFocus:
 			if WinEventTrace {
@@ -1842,7 +1822,6 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 		if w.NeedWinMenuUpdate() {
 			w.MainMenuUpdateWindows()
 		}
-		w.MainMenuSet()
 	case *mouse.MoveEvent:
 		if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
 			if w.HasFlag(int(WinFlagDoFullRender)) {
@@ -1860,7 +1839,9 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.EventMgr.ActivateStartFocus()
 			// }
 		}
-		// note: used to have MainMenuSet here but causes crash at startup..
+		if w.NeedWinMenuUpdate() {
+			w.MainMenuUpdateWindows()
+		}
 	case *dnd.Event:
 		if e.Action == dnd.External {
 			w.EventMgr.DNDDropMod = e.Mod
