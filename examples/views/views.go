@@ -150,8 +150,8 @@ func mainrun() {
 	win.MainMenuUpdated()
 	vp.UpdateEndNoSig(updt)
 
-	Ticker = time.NewTicker(1 * time.Second)
-	go Animate()
+	// Ticker = time.NewTicker(1 * time.Second)
+	// go Animate()
 
 	win.StartEventLoop()
 }
