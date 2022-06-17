@@ -295,6 +295,10 @@ void showCursor() {
 
 @end
 
+void menuSetAsMain(NSWindow* view, NSMenu* men) {
+ 	[NSApp setMainMenu: men];
+}
+
 MenuDelegate* newMainMenu(NSWindow* view) {
 	NSMenu* mm = [[NSMenu alloc] init];
 	MenuDelegate* md = [[MenuDelegate alloc] init];
@@ -305,6 +309,7 @@ MenuDelegate* newMainMenu(NSWindow* view) {
 	doAddMenuItem((uintptr_t)view, sm, (uintptr_t)md, "app", "", false, false, false, false, 0, false);
  	[md setMainMenu: mm];
 	[md setView: view];
+	menuSetAsMain(view, mm);
 	return md;
 }
 
@@ -318,10 +323,6 @@ uintptr_t mainMenuFromDelegate(uintptr_t delID) {
 	MenuDelegate* md = (MenuDelegate*)delID;
 	NSMenu* mm = md.mainMenu;
 	return (uintptr_t)mm;
-}
-
-void menuSetAsMain(NSWindow* view, NSMenu* men) {
- 	[NSApp setMainMenu: men];
 }
 
 void doSetMainMenu(uintptr_t viewID, uintptr_t menID) {
