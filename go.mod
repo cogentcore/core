@@ -19,7 +19,7 @@ require (
 	github.com/goki/kigen v1.0.0
 	github.com/goki/mat32 v1.0.12
 	github.com/goki/pi v1.0.18
-	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
+	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
 	github.com/goki/vgpu v1.0.4
 	github.com/goki/vulkan v0.0.0-20220512102541-6e89b8ce8542
