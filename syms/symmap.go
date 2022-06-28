@@ -6,7 +6,6 @@ package syms
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"path/filepath"
@@ -65,11 +64,6 @@ func (sm *SymMap) CopyFrom(src SymMap, srcIsNewer bool) {
 		if !has {
 			(*sm)[nm] = ssy
 			continue
-		}
-		if ssy.Name == "tv" {
-			if _, has := ssy.Scopes[token.NameMethod]; has {
-				fmt.Printf("tv SetSlice: %v\n", ssy.String())
-			}
 		}
 		if srcIsNewer {
 			dsy.CopyFromSrc(ssy)
