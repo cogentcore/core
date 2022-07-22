@@ -81,8 +81,21 @@ func (app *appImpl) GetScreens() {
 		x, y := mon.GetPos()
 		cscx, _ := mon.GetContentScale() // note: requires glfw 3.3
 		if mat32.IsNaN(cscx) {
-			log.Printf("GetContentScale returned nan -- not good..\n")
-			cscx = 1
+			if monitorDebug {
+				log.Printf("GetContentScale on %s returned nan -- trying saved info..\n", mon.GetName())
+			}
+			si, has := app.findScreenInfo(mon.GetName())
+			if has {
+				cscx = si.DevicePixelRatio
+				if monitorDebug {
+					log.Printf("recovered value of: %g for screen: %s\n", cscx, si.Name)
+				}
+			} else {
+				cscx = 1
+				if monitorDebug {
+					log.Printf("using default of 1 -- may not be correct!\n")
+				}
+			}
 		}
 		if cscx < 1 {
 			cscx = 1
@@ -105,6 +118,7 @@ func (app *appImpl) GetScreens() {
 		if monitorDebug {
 			log.Printf("screen %d:\n%s\n", i, kit.StringJSON(sc))
 		}
+		app.saveScreenInfo(sc)
 	}
 	if gotNew && len(app.winlist) > 0 {
 		fw := app.winlist[0]
@@ -119,4 +133,27 @@ func (app *appImpl) GetScreens() {
 		}
 		app.mu.Unlock()
 	}
+}
+
+// saveScreenInfo saves a copy of given screen info to screensAll list if unique
+// based on name.  Returns true if added a new screen.
+func (app *appImpl) saveScreenInfo(sc *oswin.Screen) bool {
+	_, has := app.findScreenInfo(sc.Name)
+	if has {
+		return false
+	}
+	nsc := &oswin.Screen{}
+	*nsc = *sc
+	app.screensAll = append(app.screensAll, nsc)
+	return true
+}
+
+// findScreenInfo finds saved screen info based on name
+func (app *appImpl) findScreenInfo(name string) (*oswin.Screen, bool) {
+	for _, sc := range app.screensAll {
+		if sc.Name == name {
+			return sc, true
+		}
+	}
+	return nil, false
 }

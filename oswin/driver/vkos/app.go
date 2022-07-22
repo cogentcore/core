@@ -53,8 +53,9 @@ type appImpl struct {
 	oswindows     map[uintptr]*windowImpl
 	winlist       []*windowImpl
 	screens       []*oswin.Screen
-	noScreens     bool        // if all screens have been disconnected, don't do anything..
-	ctxtwin       *windowImpl // context window, dynamically set, for e.g., pointer and other methods
+	screensAll    []*oswin.Screen // unique list of all screens ever seen -- get info from here if fails
+	noScreens     bool            // if all screens have been disconnected, don't do anything..
+	ctxtwin       *windowImpl     // context window, dynamically set, for e.g., pointer and other methods
 	name          string
 	about         string
 	openFiles     []string

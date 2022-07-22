@@ -449,7 +449,7 @@ func (w *windowImpl) getScreen() *oswin.Screen {
 	w.mu.Lock()
 	var sc *oswin.Screen
 	mon := w.glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
-	// that is super useless it seems.
+	// that is super useless it seems. only works for fullscreen
 	if mon != nil {
 		if monitorDebug {
 			log.Printf("vkos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
@@ -459,30 +459,32 @@ func (w *windowImpl) getScreen() *oswin.Screen {
 			log.Printf("vkos getScreen: could not find screen of name: %v\n", mon.GetName())
 			sc = theApp.screens[0]
 		}
-	} else {
-		sc = theApp.ScreenByName(w.scrnName)
-		got := false
-		if sc == nil || w.DevPixRatio != sc.DevicePixelRatio {
-			for _, scc := range theApp.screens {
-				if w.DevPixRatio == scc.DevicePixelRatio {
-					sc = scc
-					got = true
-					if monitorDebug {
-						log.Printf("vkos window: %v getScreen(): matched pix ratio %v for screen: %v\n", w.Nm, w.DevPixRatio, sc.Name)
-					}
-					w.LogDPI = sc.LogicalDPI
-					break
-				}
-			}
-			if !got {
-				sc = theApp.screens[0]
-				w.LogDPI = sc.LogicalDPI
-				if monitorDebug {
-					log.Printf("vkos window: %v getScreen(): reverting to first screen %v\n", w.Nm, sc.Name)
-				}
-			}
-		}
+		goto setScreen
 	}
+	sc = w.getScreenOvlp()
+	// sc = theApp.ScreenByName(w.scrnName)
+	// got := false
+	// if sc == nil || w.DevPixRatio != sc.DevicePixelRatio {
+	// 	for _, scc := range theApp.screens {
+	// 		if w.DevPixRatio == scc.DevicePixelRatio {
+	//
+	// 			got = true
+	// 			if monitorDebug {
+	// 				log.Printf("vkos window: %v getScreen(): matched pix ratio %v for screen: %v\n", w.Nm, w.DevPixRatio, sc.Name)
+	// 			}
+	// 			w.LogDPI = sc.LogicalDPI
+	// 			break
+	// 		}
+	// 	}
+	// 	if !got {
+	// 		sc = theApp.screens[0]
+	// 		w.LogDPI = sc.LogicalDPI
+	// 		if monitorDebug {
+	// 			log.Printf("vkos window: %v getScreen(): reverting to first screen %v\n", w.Nm, sc.Name)
+	// 		}
+	// 	}
+	// }
+setScreen:
 	w.scrnName = sc.Name
 	w.PhysDPI = sc.PhysicalDPI
 	w.DevPixRatio = sc.DevicePixelRatio
@@ -491,6 +493,31 @@ func (w *windowImpl) getScreen() *oswin.Screen {
 	}
 	w.mu.Unlock()
 	return sc
+}
+
+// getScreenOvlp gets the monitor for given window
+// based on overlap of geometry, using limited glfw 3.3 api,
+// which does not provide this functionality.
+// See: https://github.com/glfw/glfw/issues/1699
+// This is adapted from slawrence2302's code posted there.
+func (w *windowImpl) getScreenOvlp() *oswin.Screen {
+	var wgeom image.Rectangle
+	wgeom.Min.X, wgeom.Min.Y = w.glw.GetPos()
+	var sz image.Point
+	sz.X, sz.Y = w.glw.GetSize()
+	wgeom.Max = wgeom.Min.Add(sz)
+
+	var csc *oswin.Screen
+	var ovlp int
+	for _, sc := range theApp.screens {
+		isect := sc.Geometry.Intersect(wgeom).Size()
+		ov := isect.X * isect.Y
+		if ov > ovlp || ovlp == 0 {
+			csc = sc
+			ovlp = ov
+		}
+	}
+	return csc
 }
 
 func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
