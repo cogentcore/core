@@ -33,6 +33,9 @@ type App interface {
 	// SetName sets the application name -- defaults to GoGi if not otherwise set
 	SetName(name string)
 
+	// GetScreens gets the current list of screens
+	GetScreens()
+
 	// NScreens returns the number of different logical and/or physical
 	// screens managed under this overall screen hardware
 	NScreens() int

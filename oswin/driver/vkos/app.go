@@ -172,7 +172,7 @@ func (app *appImpl) stopMain() {
 // initVk initializes glfw, vulkan (vgpu), etc
 func (app *appImpl) initVk() {
 	if err := glfw.Init(); err != nil {
-		log.Fatalln("oswin.glos failed to initialize glfw:", err)
+		log.Fatalln("oswin.vkos failed to initialize glfw:", err)
 	}
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
 	vk.Init()
@@ -193,7 +193,7 @@ func (app *appImpl) initVk() {
 	gp.Debug = VkOsDebug
 	gp.Config(app.name)
 
-	app.getScreens()
+	app.GetScreens()
 }
 
 ////////////////////////////////////////////////////////

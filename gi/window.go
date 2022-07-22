@@ -1799,7 +1799,6 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.SendWinFocusEvent(window.DeFocus)
 		case window.ScreenUpdate:
 			if !oswin.TheApp.NoScreens() {
-				Prefs.ApplyDPI()
 				Prefs.UpdateAll()
 			}
 		}
@@ -2255,6 +2254,7 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		e.SetProcessed()
 	case KeyFunRefresh:
 		fmt.Printf("Win: %v display refreshed\n", w.Nm)
+		oswin.TheApp.GetScreens()
 		w.FocusInactivate()
 		w.FullReRender()
 		// w.UploadAllViewports()

@@ -11,6 +11,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // monitorDebug turns on various debugging statements about monitor changes
@@ -27,48 +29,45 @@ func monitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 		} else {
 			enm = "Disconnected"
 		}
-		log.Printf("glos monitorChange: %v event: %v\n", monitor.GetName(), enm)
+		log.Printf("vkos monitorChange: %v event: %v\n", monitor.GetName(), enm)
 	}
-	theApp.getScreens()
+	theApp.GetScreens()
 }
 
-func (app *appImpl) getScreens() {
+func (app *appImpl) GetScreens() {
+	app.mu.Lock()
 	mons := glfw.GetMonitors()
 	sz := len(mons)
 	if sz == 0 {
 		app.noScreens = true
 		if monitorDebug {
-			log.Printf("glos getScreens: no screens found!\n")
+			log.Printf("vkos getScreens: no screens found!\n")
 		}
+		app.mu.Unlock()
 		return
 	}
-	app.mu.Lock()
+	if monitorDebug {
+		pm := glfw.GetPrimaryMonitor()
+		log.Printf("Primary monitor: %s   first monitor: %s\n", pm.GetName(), mons[0].GetName())
+	}
 	app.noScreens = false
-	gotNew := false
+	gotNew := sz != len(app.screens)
+	if gotNew {
+		app.screens = make([]*oswin.Screen, 0, sz)
+	}
 	for i := 0; i < sz; i++ {
 		mon := mons[i]
 		if monitorDebug {
-			log.Printf("glos getScreens: mon number: %v name: %v\n", i, mon.GetName())
+			log.Printf("vkos getScreens: mon number: %v name: %v\n", i, mon.GetName())
 		}
-		var sc *oswin.Screen
-		var sci int
-		for j, scc := range app.screens {
-			if scc != nil && scc.Name == mon.GetName() {
-				sc = scc
-				sci = j
-				break
-			}
+		if len(app.screens) <= i {
+			app.screens = append(app.screens, &oswin.Screen{})
 		}
-		if sc == nil {
-			gotNew = true
-			sc = &oswin.Screen{}
-			sci = len(app.screens)
-			app.screens = append(app.screens, sc)
-		}
+		sc := app.screens[i]
 		vm := mon.GetVideoMode()
 		if vm.Width == 0 || vm.Height == 0 {
 			if monitorDebug {
-				log.Printf("glos getScreens: screen %v has no size -- skipping\n", sc.Name)
+				log.Printf("vkos getScreens: screen %v has no size -- skipping\n", sc.Name)
 			}
 			continue
 		}
@@ -81,11 +80,15 @@ func (app *appImpl) getScreens() {
 		}
 		x, y := mon.GetPos()
 		cscx, _ := mon.GetContentScale() // note: requires glfw 3.3
+		if mat32.IsNaN(cscx) {
+			log.Printf("GetContentScale returned nan -- not good..\n")
+			cscx = 1
+		}
 		if cscx < 1 {
 			cscx = 1
 		}
 		sc.Name = mon.GetName()
-		sc.ScreenNumber = sci
+		sc.ScreenNumber = i
 		sc.Geometry = image.Rectangle{Min: image.Point{x, y}, Max: image.Point{x + vm.Width, y + vm.Height}}
 		sc.DevicePixelRatio = cscx
 		sc.PixSize.X = int(float32(vm.Width) * cscx)
@@ -99,15 +102,21 @@ func (app *appImpl) getScreens() {
 			sc.LogicalDPI = dpi
 		}
 		sc.RefreshRate = float32(vm.RefreshRate)
+		if monitorDebug {
+			log.Printf("screen %d:\n%s\n", i, kit.StringJSON(sc))
+		}
 	}
 	if gotNew && len(app.winlist) > 0 {
 		fw := app.winlist[0]
 		app.mu.Unlock()
 		if monitorDebug {
-			log.Printf("glos getScreens: sending screen update\n")
+			log.Printf("vkos getScreens: sending screen update\n")
 		}
 		fw.sendWindowEvent(window.ScreenUpdate)
 	} else {
+		if monitorDebug {
+			log.Printf("vkos getScreens: no screen changes, NOT sending screen update\n")
+		}
 		app.mu.Unlock()
 	}
 }

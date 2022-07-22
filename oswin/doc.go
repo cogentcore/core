@@ -22,7 +22,7 @@
 // The driver package creates the App, via its Main function, which is
 // designed to be called by the program's main function.  There can
 // be multiple different drivers, but currently OpenGL on top of
-// the glfw cross-platform library (i.e., the glos driver) is
+// the glfw cross-platform library (i.e., the vkos driver) is
 // the only one supported.  See internal/*driver for older
 // shiny-based drivers that are completely OS-specific and do not
 // require cgo for Windows and X11 platforms (but do require it for mac).

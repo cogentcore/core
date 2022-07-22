@@ -452,11 +452,11 @@ func (w *windowImpl) getScreen() *oswin.Screen {
 	// that is super useless it seems.
 	if mon != nil {
 		if monitorDebug {
-			log.Printf("glos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
+			log.Printf("vkos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
 		}
 		sc = theApp.ScreenByName(mon.GetName())
 		if sc == nil {
-			log.Printf("glos getScreen: could not find screen of name: %v\n", mon.GetName())
+			log.Printf("vkos getScreen: could not find screen of name: %v\n", mon.GetName())
 			sc = theApp.screens[0]
 		}
 	} else {
@@ -468,7 +468,7 @@ func (w *windowImpl) getScreen() *oswin.Screen {
 					sc = scc
 					got = true
 					if monitorDebug {
-						log.Printf("glos window: %v getScreen(): matched pix ratio %v for screen: %v\n", w.Nm, w.DevPixRatio, sc.Name)
+						log.Printf("vkos window: %v getScreen(): matched pix ratio %v for screen: %v\n", w.Nm, w.DevPixRatio, sc.Name)
 					}
 					w.LogDPI = sc.LogicalDPI
 					break
@@ -478,7 +478,7 @@ func (w *windowImpl) getScreen() *oswin.Screen {
 				sc = theApp.screens[0]
 				w.LogDPI = sc.LogicalDPI
 				if monitorDebug {
-					log.Printf("glos window: %v getScreen(): reverting to first screen %v\n", w.Nm, sc.Name)
+					log.Printf("vkos window: %v getScreen(): reverting to first screen %v\n", w.Nm, sc.Name)
 				}
 			}
 		}
@@ -507,16 +507,16 @@ func (w *windowImpl) winResized(gw *glfw.Window, width, height int) {
 
 func (w *windowImpl) updtGeom() {
 	w.mu.Lock()
-	cscx, _ := w.glw.GetContentScale()
+	cursc := w.scrnName
+	w.mu.Unlock()
+	sc := w.getScreen() // gets devpixratio etc
+	w.mu.Lock()
+	// cscx, _ := w.glw.GetContentScale()
 	// curDevPixRatio := w.DevPixRatio
-	w.DevPixRatio = cscx
+	// w.DevPixRatio = cscx
 	// if curDevPixRatio != w.DevPixRatio {
 	// 	fmt.Printf("got cont scale: %v\n", cscx)
 	// }
-	cursc := w.scrnName
-	w.mu.Unlock()
-	sc := w.getScreen()
-	w.mu.Lock()
 	var wsz image.Point
 	wsz.X, wsz.Y = w.glw.GetSize()
 	// fmt.Printf("win size: %v\n", wsz)
@@ -539,7 +539,7 @@ func (w *windowImpl) updtGeom() {
 	// }
 	if cursc != w.scrnName {
 		if monitorDebug {
-			log.Printf("glos window: %v updtGeom() -- got new screen: %v (was: %v)\n", w.Nm, w.scrnName, cursc)
+			log.Printf("vkos window: %v updtGeom() -- got new screen: %v (was: %v)\n", w.Nm, w.scrnName, cursc)
 		}
 	}
 	w.sendWindowEvent(window.Resize) // this will not get processed until the end

@@ -313,9 +313,9 @@ func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
 	fw := theApp.WindowInFocus()
 	if win != fw {
 		if fw == nil {
-			fmt.Printf("glos main menu event focus window is nil!  window: %v\n", win.Name())
+			fmt.Printf("vkos main menu event focus window is nil!  window: %v\n", win.Name())
 		} else {
-			fmt.Printf("glos main menu event window: %v != focus window: %v\n", win.Name(), fw.Name())
+			fmt.Printf("vkos main menu event window: %v != focus window: %v\n", win.Name(), fw.Name())
 			// win = fw // this doesn't work because focus window doesn't have menu most of time
 		}
 	}
