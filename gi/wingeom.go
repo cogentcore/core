@@ -238,7 +238,7 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 	if !win.IsVisible() {
 		return
 	}
-	wsz := win.OSWin.WinSize()
+	wsz := win.OSWin.Size()
 	if wsz == image.ZP {
 		if WinGeomTrace {
 			fmt.Printf("WindowGeomPrefs: NOT storing null size for win: %v\n", win.Nm)
@@ -310,7 +310,7 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 			fmt.Printf("WindowGeomPrefs: scrn is nil, using scrn 0: %v\n", scrn.Name)
 		}
 	}
-	scsz := scrn.Geometry.Size()
+	scsz := scrn.PixSize
 
 	wp, ok := wps[scrn.Name]
 	if ok {

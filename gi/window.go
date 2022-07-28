@@ -676,20 +676,20 @@ func (w *Window) WinViewport2D() *Viewport2D {
 	return vp
 }
 
-// SetSize requests that the window be resized to the given size
+// SetWinSize requests that the window be resized to the given size
 // in OS window manager specific coordinates, which may be different
 // from the underlying pixel-level resolution of the window.
 // This will trigger a resize event and be processed
 // that way when it occurs.
-func (w *Window) SetSize(sz image.Point) {
-	w.OSWin.SetSize(sz)
+func (w *Window) SetWinSize(sz image.Point) {
+	w.OSWin.SetWinSize(sz)
 }
 
-// SetPixSize requests that the window be resized to the given size
+// SetSize requests that the window be resized to the given size
 // in underlying pixel coordinates, which means that the requested
 // size is divided by the screen's DevicePixelRatio
-func (w *Window) SetPixSize(sz image.Point) {
-	w.OSWin.SetPixSize(sz)
+func (w *Window) SetSize(sz image.Point) {
+	w.OSWin.SetSize(sz)
 }
 
 // IsResizing means the window is actively being resized by user -- don't try
@@ -2253,12 +2253,13 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		w.ZoomDPI(-1)
 		e.SetProcessed()
 	case KeyFunRefresh:
+		e.SetProcessed()
 		fmt.Printf("Win: %v display refreshed\n", w.Nm)
 		oswin.TheApp.GetScreens()
 		w.FocusInactivate()
 		w.FullReRender()
-		// w.UploadAllViewports()
-		e.SetProcessed()
+		sz := w.OSWin.WinSize()
+		w.SetSize(sz)
 	case KeyFunWinFocusNext:
 		e.SetProcessed()
 		AllWindows.FocusNext()

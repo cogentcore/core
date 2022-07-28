@@ -51,10 +51,7 @@ func (app *appImpl) GetScreens() {
 		log.Printf("Primary monitor: %s   first monitor: %s\n", pm.GetName(), mons[0].GetName())
 	}
 	app.noScreens = false
-	gotNew := sz != len(app.screens)
-	if gotNew {
-		app.screens = make([]*oswin.Screen, 0, sz)
-	}
+	app.screens = make([]*oswin.Screen, 0, sz)
 	for i := 0; i < sz; i++ {
 		mon := mons[i]
 		if monitorDebug {
@@ -67,7 +64,30 @@ func (app *appImpl) GetScreens() {
 		vm := mon.GetVideoMode()
 		if vm.Width == 0 || vm.Height == 0 {
 			if monitorDebug {
-				log.Printf("vkos getScreens: screen %v has no size -- skipping\n", sc.Name)
+				log.Printf("vkos getScreens: screen %v has no size!\n", sc.Name)
+			}
+			if app.Platform() == oswin.MacOS {
+				si, has := app.findScreenInfo("Built-in Retina Display")
+				if has {
+					*sc = *si
+					sc.ScreenNumber = i
+					if monitorDebug {
+						log.Printf("vkos getScreens: MacOS recovered screen info from %v\n", sc.Name)
+					}
+				} else { // use plausible defaults.. sheesh
+					sc.Name = "Built-in Retina Display"
+					sc.Geometry.Max = image.Point{1728, 1117}
+					sc.DevicePixelRatio = 2
+					sc.PixSize = sc.Geometry.Max.Mul(2)
+					sc.PhysicalSize = image.Point{344, 222}
+					sc.PhysicalDPI = 255.1814
+					sc.LogicalDPI = 255.1814
+					sc.Depth = 24
+					sc.RefreshRate = 60
+					if monitorDebug {
+						log.Printf("vkos getScreens: MacOS unknown display set to Built-in Retina Display %d:\n%s\n", i, kit.StringJSON(sc))
+					}
+				}
 			}
 			continue
 		}
@@ -120,7 +140,7 @@ func (app *appImpl) GetScreens() {
 		}
 		app.saveScreenInfo(sc)
 	}
-	if gotNew && len(app.winlist) > 0 {
+	if len(app.winlist) > 0 {
 		fw := app.winlist[0]
 		app.mu.Unlock()
 		if monitorDebug {
@@ -129,7 +149,7 @@ func (app *appImpl) GetScreens() {
 		fw.sendWindowEvent(window.ScreenUpdate)
 	} else {
 		if monitorDebug {
-			log.Printf("vkos getScreens: no screen changes, NOT sending screen update\n")
+			log.Printf("vkos getScreens: no windows, NOT sending screen update\n")
 		}
 		app.mu.Unlock()
 	}

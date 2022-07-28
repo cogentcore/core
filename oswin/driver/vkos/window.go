@@ -269,7 +269,7 @@ func (w *windowImpl) SetTitle(title string) {
 	})
 }
 
-func (w *windowImpl) SetSize(sz image.Point) {
+func (w *windowImpl) SetWinSize(sz image.Point) {
 	if w.IsClosed() {
 		return
 	}
@@ -282,14 +282,14 @@ func (w *windowImpl) SetSize(sz image.Point) {
 	})
 }
 
-func (w *windowImpl) SetPixSize(sz image.Point) {
+func (w *windowImpl) SetSize(sz image.Point) {
 	if w.IsClosed() {
 		return
 	}
 	sc := w.getScreen()
 	sz.X = int(float32(sz.X) / sc.DevicePixelRatio)
 	sz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
-	w.SetSize(sz)
+	w.SetWinSize(sz)
 }
 
 func (w *windowImpl) SetPos(pos image.Point) {
