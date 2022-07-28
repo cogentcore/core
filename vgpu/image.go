@@ -318,14 +318,20 @@ func (im *Image) SetGoImage(img image.Image, layer int, flipY bool) error {
 	dpix := im.HostPixels(layer)
 	sti := rimg.Rect.Min.Y*rimg.Stride + rimg.Rect.Min.X*4
 	spix := rimg.Pix[sti:]
+	ssz := len(spix)
+	dsz := len(dpix)
+	mx := ints.MinInt(ssz, dsz)
 	str := im.Format.Stride()
 	if rimg.Stride == str && !flipY {
-		mx := ints.MinInt(len(spix), len(dpix))
 		copy(dpix[:mx], spix[:mx])
 		return nil
 	}
 	rows := ints.MinInt(sz.Y, im.Format.Size.Y)
 	rsz := ints.MinInt(rimg.Stride, str)
+	dmax := str * rows
+	if dmax > dsz {
+		return fmt.Errorf("vgpu.Image: image named: %s, format size: %d doesn't fit in actual destination size: %d", im.Name, dmax, dsz)
+	}
 	sidx := 0
 	if flipY {
 		didx := (rows - 1) * str
