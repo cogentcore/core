@@ -85,19 +85,22 @@ func (wg *WindowGeom) FitInSize(sz image.Point) {
 // looks up the info automatically for new windows and saves persistently
 type WindowGeomPrefs map[string]map[string]WindowGeom
 
-// WinGeomPrefsFileName is the base name of the preferences file in GoGi prefs directory
-var WinGeomPrefsFileName = "win_geom_prefs"
+var (
+	// WinGeomPrefsFileName is the base name of the preferences file in GoGi prefs directory
+	WinGeomPrefsFileName = "win_geom_prefs"
 
-// WinGeomPrefsLastSave is when prefs were last saved -- if we weren't the last to save
-// then we need to re-open before modifying
-var WinGeomPrefsLastSave time.Time
+	// WinGeomPrefsLastSave is when prefs were last saved -- if we weren't the last to save
+	// then we need to re-open before modifying
+	WinGeomPrefsLastSave time.Time
 
-// WinGeomPrefsMu is read-write mutex that protects updating of WinGeomPrefs
-var WinGeomPrefsMu sync.RWMutex
+	// WinGeomPrefsMu is read-write mutex that protects updating of WinGeomPrefs
+	WinGeomPrefsMu sync.RWMutex
 
-var WinGeomPrefsLockSleep = 100 * time.Millisecond
+	// WinGeomPrefsLockSleep is wait time before trying again
+	WinGeomPrefsLockSleep = 100 * time.Millisecond
 
-var WinGeomNoLockErr = errors.New("WinGeom could not lock lock file")
+	WinGeomNoLockErr = errors.New("WinGeom could not lock lock file")
+)
 
 // LockFile attempts to create the win_geom_prefs lock file
 func (wg *WindowGeomPrefs) LockFile() error {
