@@ -22,6 +22,7 @@ import (
 	"github.com/goki/mat32"
 )
 
+// WinGeomTrace records window geometry saving / loading functions
 var WinGeomTrace = false
 
 var WinGeomPrefs = WindowGeomPrefs{}

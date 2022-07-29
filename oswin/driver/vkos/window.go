@@ -128,7 +128,9 @@ func newVkWindow(opts *oswin.NewWindowOptions, sc *oswin.Screen) (*glfw.Window, 
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	}
 	// todo: glfw.Floating for always-on-top -- could set for modal
-	sz := opts.Size // note: this is already in standard window size units!
+	sz := opts.Size // note: this is in physical device units
+	sz.X = int(float32(sz.X) / sc.DevicePixelRatio)
+	sz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
 	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), nil, nil)
 	if err != nil {
 		return win, err

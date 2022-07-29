@@ -1016,6 +1016,8 @@ type PrefsDebug struct {
 
 	WinDrawTrace *bool `desc:"WinDrawTrace highlights the window regions that are drawn to update the window, using filled colored rectangles"`
 
+	WinGeomTrace *bool `desc:"WinGeomTrace records window geometry saving / loading functions"`
+
 	KeyEventTrace *bool `desc:"reports trace of keyboard events (printfs to stdout)"`
 
 	EventTrace *bool `desc:"reports trace of event handling (printfs to stdout)"`
@@ -1052,6 +1054,7 @@ func (pf *PrefsDebug) Connect() {
 	pf.WinEventTrace = &WinEventTrace
 	pf.WinPublishTrace = &WinPublishTrace
 	pf.WinDrawTrace = &WinDrawTrace
+	pf.WinGeomTrace = &WinGeomTrace
 	pf.KeyEventTrace = &KeyEventTrace
 	pf.EventTrace = &EventTrace
 	pf.DNDTrace = &DNDTrace
