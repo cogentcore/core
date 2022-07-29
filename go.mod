@@ -19,13 +19,13 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210727001814-0db043d8d5be
 	github.com/go-gl/mathgl v1.0.0
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
+	github.com/goki/go-difflib v1.2.1
 	github.com/goki/ki v1.1.5
 	github.com/goki/mat32 v1.0.10
 	github.com/goki/pi v1.0.17
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/goki/vci v1.0.0
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/ianbruene/go-difflib v1.2.0
 	github.com/iancoleman/strcase v0.2.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/srwiley/oksvg v0.0.0-20210209000435-a757b9cbd472 // indirect
