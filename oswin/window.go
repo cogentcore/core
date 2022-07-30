@@ -413,7 +413,7 @@ func sanitizeUTF8(s string, n int) string {
 // window context Specific hardware can fine-tune this as well, in driver code
 func (o *NewWindowOptions) Fixup() {
 	sc := TheApp.Screen(0)
-	scsz := sc.Geometry.Size()
+	scsz := sc.PixSize // using raw pixels now
 
 	dialog, modal, _, _ := WindowFlagsToBool(o.Flags)
 
