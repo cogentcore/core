@@ -16,6 +16,21 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+var (
+	// ZoomFactor is a multiplier on screen LogicalDPI
+	ZoomFactor = float32(1.0)
+
+	// LogicalDPIScale is the default scaling factor for Logical DPI
+	// as a multiplier on Physical DPI.
+	// Smaller numbers produce smaller font sizes etc.
+	LogicalDPIScale = float32(1.0)
+
+	// LogicalDPIScales are per-screen name versions of LogicalDPIScale
+	// these can be set from preferences (as in gi/prefs) on a per-screen
+	// basis.
+	LogicalDPIScales map[string]float32
+)
+
 // note: fields obtained from QScreen in Qt
 
 // Screen contains data about each physical and / or logical screen
@@ -41,9 +56,9 @@ type Screen struct {
 	PhysicalSize image.Point
 
 	// LogicalDPI is the logical dots per inch of the screen,
-	// which is used for all rendering -- subject to zooming
-	// effects etc -- see the gi/units package for translating
-	// into various other units.
+	// which is used for all rendering.  It is set as a function of the
+	// global ZoomFactor and the LogicalDPIScale, either the global
+	// or per-screen name version if it exists.
 	LogicalDPI float32
 
 	// PhysicalDPI is the physical dots per inch of the screen,
@@ -117,6 +132,83 @@ func LogicalFmPhysicalDPI(logScale, pdpi float32) float32 {
 	mdpi := idpi / 6
 	mdpi *= 6
 	return float32(mdpi)
+}
+
+// SetLogicalDPIScale sets the LogicalDPIScale factor for given screen name
+func SetLogicalDPIScale(scrnName string, dpiScale float32) {
+	if LogicalDPIScales == nil {
+		LogicalDPIScales = make(map[string]float32)
+	}
+	LogicalDPIScales[scrnName] = dpiScale
+}
+
+// UpdateLogicalDPI updates the logical DPI of the screen
+// based on ZoomFactor and LogicalDPIScale (per screen if exists)
+func (sc *Screen) UpdateLogicalDPI() {
+	dpisc := LogicalDPIScale
+	if LogicalDPIScales != nil {
+		if dsc, has := LogicalDPIScales[sc.Name]; has {
+			dpisc = dsc
+		}
+	}
+	sc.LogicalDPI = LogicalFmPhysicalDPI(ZoomFactor*dpisc, sc.PhysicalDPI)
+}
+
+// WinSizeToPix returns window manager size units
+// (where DevicePixelRatio is ignored) converted to pixel units --
+// i.e., multiply by DevicePixelRatio
+func (sc *Screen) WinSizeToPix(sz image.Point) image.Point {
+	var psz image.Point
+	psz.X = int(float32(sz.X) * sc.DevicePixelRatio)
+	psz.Y = int(float32(sz.Y) * sc.DevicePixelRatio)
+	return psz
+}
+
+// WinSizeFmPix returns window manager size units
+// (where DevicePixelRatio is ignored) converted from pixel units --
+// i.e., divide by DevicePixelRatio
+func (sc *Screen) WinSizeFmPix(sz image.Point) image.Point {
+	var wsz image.Point
+	wsz.X = int(float32(sz.X) / sc.DevicePixelRatio)
+	wsz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
+	return wsz
+}
+
+// ConstrainWinGeom constrains window geometry to fit in the screen.
+// Size is in pixel units.
+func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) {
+	scsz := sc.Geometry.Size() // in window coords size
+
+	// options size are in pixel sizes, logic below works in window sizes
+	csz = sc.WinSizeFmPix(sz)
+	cpos = pos
+
+	if csz.X > scsz.X {
+		csz.X = scsz.X
+	}
+	if csz.Y > scsz.Y {
+		csz.Y = scsz.Y
+	}
+
+	// these are windows-specific special numbers for minimized windows
+	// can be sent here for WinGeom saved geom.
+	if cpos.X == -32000 {
+		cpos.X = 0
+	}
+	if cpos.Y == -32000 {
+		cpos.Y = 50
+	}
+
+	// don't go off the edge
+	if cpos.X+csz.X > scsz.X {
+		cpos.X = scsz.X - csz.X
+	}
+	if cpos.Y+csz.Y > scsz.Y {
+		cpos.Y = scsz.Y - csz.Y
+	}
+
+	csz = sc.WinSizeToPix(csz)
+	return
 }
 
 // InitScreenLogicalDPIFunc is a function that can be set to initialize the

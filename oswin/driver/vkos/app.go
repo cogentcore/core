@@ -209,13 +209,6 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	}
 
 	sc := app.screens[0]
-	pmon := glfw.GetPrimaryMonitor()
-	if pmon != nil {
-		psc := app.ScreenByName(pmon.GetName())
-		if psc != nil {
-			sc = psc
-		}
-	}
 
 	if opts == nil {
 		opts = &oswin.NewWindowOptions{}

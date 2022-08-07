@@ -81,9 +81,8 @@ type Window interface {
 
 	// SetGeom sets the position and size in one call -- use this if doing
 	// both because sequential calls to SetPos and SetSize might fail on some
-	// platforms.  Uses OS-specific window manager units that may not include
-	// any high DPI factors (DevPixRatio)
-	// (i.e., the same units as returned in WinSize, Pos())
+	// platforms.  Size is in actual pixel units (i.e., same units as returned by Size()),
+	// and Pos is in OS-specific window manager units (i.e., as returned in Pos())
 	SetGeom(pos image.Point, sz image.Point)
 
 	// Raise requests that the window be at the top of the stack of windows,
@@ -413,68 +412,42 @@ func sanitizeUTF8(s string, n int) string {
 // window context Specific hardware can fine-tune this as well, in driver code
 func (o *NewWindowOptions) Fixup() {
 	sc := TheApp.Screen(0)
-	scsz := sc.PixSize // using raw pixels now
-
-	dialog, modal, _, _ := WindowFlagsToBool(o.Flags)
+	scsz := sc.Geometry.Size() // window coords size
 
 	if o.Size.X <= 0 {
 		o.StdPixels = false
-		o.Size.X = int(0.8 * float32(scsz.X))
+		o.Size.X = int(0.8 * float32(scsz.X) * sc.DevicePixelRatio)
 	}
 	if o.Size.Y <= 0 {
 		o.StdPixels = false
-		o.Size.Y = int(0.8 * float32(scsz.Y))
+		o.Size.Y = int(0.8 * float32(scsz.Y) * sc.DevicePixelRatio)
 	}
 
-	// Note: StdPixels IS the default behavior at this point
-	// so we don't need to do any correction factors to deal
-	// with it!
-
-	if o.Size.X > scsz.X {
-		o.Size.X = scsz.X
-	}
-	if o.Size.Y > scsz.Y {
-		o.Size.Y = scsz.Y
-	}
-
-	// these are windows-specific special numbers for minimized windows
-	// can be sent here for WinGeom saved geom.
-	if o.Pos.X == -32000 {
-		o.Pos.X = 0
-	}
-	if o.Pos.Y == -32000 {
-		o.Pos.Y = 50
-	}
-
+	o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos)
 	if o.Pos.X == 0 && o.Pos.Y == 0 {
+		wsz := sc.WinSizeFmPix(o.Size)
+		dialog, modal, _, _ := WindowFlagsToBool(o.Flags)
 		nw := TheApp.NWindows()
 		if nw > 0 {
 			lastw := TheApp.Window(nw - 1)
 			lsz := lastw.WinSize()
 			lp := lastw.Position()
 
-			nwbig := o.Size.X > lsz.X || o.Size.Y > lsz.Y
+			nwbig := wsz.X > lsz.X || wsz.Y > lsz.Y
 
 			if modal || dialog || !nwbig { // place centered on top of current
 				ctrx := lp.X + (lsz.X / 2)
 				ctry := lp.Y + (lsz.Y / 2)
-				o.Pos.X = ctrx - o.Size.X/2
-				o.Pos.Y = ctry - o.Size.Y/2
+				o.Pos.X = ctrx - wsz.X/2
+				o.Pos.Y = ctry - wsz.Y/2
 			} else { // cascade to right
 				o.Pos.X = lp.X + lsz.X // tile to right -- could depend on orientation
 				o.Pos.Y = lp.Y + 72    // and move down a bit
 			}
 		} else { // center in screen
-			o.Pos.X = scsz.X/2 - o.Size.X/2
-			o.Pos.Y = scsz.Y/2 - o.Size.Y/2
+			o.Pos.X = scsz.X/2 - wsz.X/2
+			o.Pos.Y = scsz.Y/2 - wsz.Y/2
 		}
-	}
-
-	// final sanity fixes
-	if o.Pos.X+o.Size.X > scsz.X {
-		o.Pos.X = scsz.X - o.Size.X
-	}
-	if o.Pos.Y+o.Size.Y > scsz.Y {
-		o.Pos.Y = scsz.Y - o.Size.Y
+		o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos) // make sure ok
 	}
 }

@@ -23,11 +23,6 @@ import (
 	"github.com/goki/pi/langs/golang"
 )
 
-// ZoomFactor is a temporary multiplier on LogicalDPI used for per-session
-// display zooming without changing prefs -- see SaveZoom to save prefs
-// with this current factor.
-var ZoomFactor = float32(1.0)
-
 // Preferences are the overall user preferences for GoGi, providing some basic
 // customization -- in addition, most gui settings can be styled using
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
@@ -225,10 +220,9 @@ func (pf *Preferences) ApplyDPI() {
 			continue
 		}
 		if scp, ok := pf.ScreenPrefs[sc.Name]; ok {
-			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(ZoomFactor*scp.LogicalDPIScale, sc.PhysicalDPI)
-		} else {
-			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(ZoomFactor*pf.LogicalDPIScale, sc.PhysicalDPI)
+			oswin.SetLogicalDPIScale(sc.Name, scp.LogicalDPIScale)
 		}
+		sc.UpdateLogicalDPI()
 	}
 	for _, w := range AllWindows {
 		w.OSWin.SetLogicalDPI(w.OSWin.Screen().LogicalDPI)
@@ -238,7 +232,7 @@ func (pf *Preferences) ApplyDPI() {
 // UpdateAll updates all open windows with current preferences -- triggers
 // rebuild of default styles.
 func (pf *Preferences) UpdateAll() {
-	ZoomFactor = 1 // reset so saved dpi is used
+	oswin.ZoomFactor = 1 // reset so saved dpi is used
 	pf.Apply()
 
 	gist.RebuildDefaultStyles = true
@@ -302,7 +296,7 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 // each window, by screen, and clear current in-memory cache.  You shouldn't
 // need to use this but sometimes useful for testing.
 func (pf *Preferences) DeleteSavedWindowGeoms() {
-	WinGeomPrefs.DeleteAll()
+	WinGeomMgr.DeleteAll()
 }
 
 // EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /

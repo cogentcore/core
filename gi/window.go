@@ -378,8 +378,9 @@ func NewMainWindow(name, title string, width, height int) *Window {
 	opts := &oswin.NewWindowOptions{
 		Title: title, Size: image.Point{width, height}, StdPixels: true,
 	}
-	wgp := WinGeomPrefs.Pref(name, nil)
+	wgp := WinGeomMgr.Pref(name, nil)
 	if wgp != nil {
+		WinGeomMgr.SettingStart()
 		opts.Size = wgp.Size()
 		opts.Pos = wgp.Pos()
 		opts.StdPixels = false
@@ -390,6 +391,7 @@ func NewMainWindow(name, title string, width, height int) *Window {
 		}
 	}
 	win := NewWindow(name, title, opts)
+	WinGeomMgr.SettingEnd()
 	if win == nil {
 		return nil
 	}
@@ -442,13 +444,15 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 	if modal {
 		opts.SetModal()
 	}
-	wgp := WinGeomPrefs.Pref(name, nil)
+	wgp := WinGeomMgr.Pref(name, nil)
 	if wgp != nil {
+		WinGeomMgr.SettingStart()
 		opts.Size = wgp.Size()
 		opts.Pos = wgp.Pos()
 		opts.StdPixels = false
 	}
 	win := NewWindow(name, title, opts)
+	WinGeomMgr.SettingEnd()
 	if win == nil {
 		return nil
 	}
@@ -608,12 +612,17 @@ func (w *Window) SetName(name string) {
 		}
 	}
 	if isdif && w.OSWin != nil {
-		wgp := WinGeomPrefs.Pref(name, nil)
+		wgp := WinGeomMgr.Pref(name, w.OSWin.Screen())
 		if wgp != nil {
+			WinGeomMgr.SettingStart()
 			if w.OSWin.Size() != wgp.Size() || w.OSWin.Position() != wgp.Pos() {
-				// fmt.Printf("setting geom to: %v %v\n", wgp.Pos, wgp.Size)
+				if WinGeomTrace {
+					log.Printf("WinGeomPrefs: SetName setting geom for window: %v pos: %v size: %v\n", w.Name(), wgp.Pos(), wgp.Size())
+				}
 				w.OSWin.SetGeom(wgp.Pos(), wgp.Size())
+				oswin.TheApp.SendEmptyEvent()
 			}
+			WinGeomMgr.SettingEnd()
 		}
 	}
 }
@@ -654,14 +663,14 @@ func (w *Window) ZoomDPI(steps int) {
 	pdpi := sc.PhysicalDPI
 	// ldpi = pdpi * zoom * ldpi
 	cldpinet := sc.LogicalDPI
-	cldpi := cldpinet / ZoomFactor
+	cldpi := cldpinet / oswin.ZoomFactor
 	nldpinet := cldpinet + float32(6*steps)
 	if nldpinet < 6 {
 		nldpinet = 6
 	}
-	ZoomFactor = nldpinet / cldpi
+	oswin.ZoomFactor = nldpinet / cldpi
 	Prefs.ApplyDPI()
-	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, ZoomFactor)
+	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, oswin.ZoomFactor)
 	w.FullReRender()
 }
 
@@ -698,6 +707,19 @@ func (w *Window) IsResizing() bool {
 	return w.HasFlag(int(WinFlagIsResizing))
 }
 
+// StackAll returns a formatted stack trace of all goroutines.
+// It calls runtime.Stack with a large enough buffer to capture the entire trace.
+func StackAll() []byte {
+	buf := make([]byte, 1024*10)
+	for {
+		n := runtime.Stack(buf, true)
+		if n < len(buf) {
+			return buf[:n]
+		}
+		buf = make([]byte, 2*len(buf))
+	}
+}
+
 // Resized updates internal buffers after a window has been resized.
 func (w *Window) Resized(sz image.Point) {
 	if !w.IsVisible() {
@@ -727,7 +749,10 @@ func (w *Window) Resized(sz image.Point) {
 		StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 	}
 	w.Viewport.Resize(sz)
-	WinGeomPrefs.RecordPref(w)
+	if WinGeomTrace {
+		log.Printf("WinGeomPrefs: recording from Resize\n")
+	}
+	WinGeomMgr.RecordPref(w)
 	w.UpMu.Unlock()
 	w.FullReRender()
 }
@@ -873,8 +898,8 @@ func Init() {
 		Prefs.Apply()
 		oswin.InitScreenLogicalDPIFunc = Prefs.ApplyDPI // called when screens are initialized
 		TheViewIFace.HiStyleInit()
-		WinGeomPrefs.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
-		WinGeomPrefs.Open()
+		WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
+		WinGeomMgr.Open()
 	}
 }
 
@@ -1773,7 +1798,10 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			e.SetProcessed()
 			if w.HasFlag(int(WinFlagGotPaint)) { // moves before paint are not accurate on X11
 				// fmt.Printf("win move: %v\n", w.OSWin.Position())
-				WinGeomPrefs.RecordPref(w)
+				if WinGeomTrace {
+					log.Printf("WinGeomPrefs: recording from Move\n")
+				}
+				WinGeomMgr.RecordPref(w)
 			}
 		case window.Focus:
 			StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
@@ -1798,8 +1826,10 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.ClearFlag(int(WinFlagGotFocus))
 			w.SendWinFocusEvent(window.DeFocus)
 		case window.ScreenUpdate:
+			WinGeomMgr.AbortSave() // anything just prior to this is sus
 			if !oswin.TheApp.NoScreens() {
 				Prefs.UpdateAll()
+				WinGeomMgr.RestoreAll()
 			}
 		}
 		return false // don't do anything else!
@@ -2256,10 +2286,12 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		e.SetProcessed()
 		fmt.Printf("Win: %v display refreshed\n", w.Nm)
 		oswin.TheApp.GetScreens()
-		w.FocusInactivate()
-		w.FullReRender()
-		sz := w.OSWin.WinSize()
-		w.SetSize(sz)
+		Prefs.UpdateAll()
+		WinGeomMgr.RestoreAll()
+		// w.FocusInactivate()
+		// w.FullReRender()
+		// sz := w.OSWin.Size()
+		// w.SetSize(sz)
 	case KeyFunWinFocusNext:
 		e.SetProcessed()
 		AllWindows.FocusNext()

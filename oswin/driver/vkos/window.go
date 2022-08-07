@@ -128,9 +128,7 @@ func newVkWindow(opts *oswin.NewWindowOptions, sc *oswin.Screen) (*glfw.Window, 
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	}
 	// todo: glfw.Floating for always-on-top -- could set for modal
-	sz := opts.Size // note: this is in physical device units
-	sz.X = int(float32(sz.X) / sc.DevicePixelRatio)
-	sz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
+	sz := sc.WinSizeFmPix(opts.Size) // note: this is in physical device units
 	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), nil, nil)
 	if err != nil {
 		return win, err
@@ -289,8 +287,7 @@ func (w *windowImpl) SetSize(sz image.Point) {
 		return
 	}
 	sc := w.getScreen()
-	sz.X = int(float32(sz.X) / sc.DevicePixelRatio)
-	sz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
+	sz = sc.WinSizeFmPix(sz)
 	w.SetWinSize(sz)
 }
 
@@ -311,6 +308,8 @@ func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
 	if w.IsClosed() {
 		return
 	}
+	sc := w.getScreen()
+	sz = sc.WinSizeFmPix(sz)
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.app.RunOnMain(func() {
 		if w.glw == nil { // by time we got to main, could be diff
@@ -454,37 +453,18 @@ func (w *windowImpl) getScreen() *oswin.Screen {
 	// that is super useless it seems. only works for fullscreen
 	if mon != nil {
 		if monitorDebug {
-			log.Printf("vkos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
+			log.Printf("MonitorDebug: vkos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
 		}
 		sc = theApp.ScreenByName(mon.GetName())
 		if sc == nil {
-			log.Printf("vkos getScreen: could not find screen of name: %v\n", mon.GetName())
+			log.Printf("MonitorDebug: vkos getScreen: could not find screen of name: %v\n", mon.GetName())
 			sc = theApp.screens[0]
 		}
 		goto setScreen
 	}
 	sc = w.getScreenOvlp()
-	// sc = theApp.ScreenByName(w.scrnName)
-	// got := false
-	// if sc == nil || w.DevPixRatio != sc.DevicePixelRatio {
-	// 	for _, scc := range theApp.screens {
-	// 		if w.DevPixRatio == scc.DevicePixelRatio {
-	//
-	// 			got = true
-	// 			if monitorDebug {
-	// 				log.Printf("vkos window: %v getScreen(): matched pix ratio %v for screen: %v\n", w.Nm, w.DevPixRatio, sc.Name)
-	// 			}
-	// 			w.LogDPI = sc.LogicalDPI
-	// 			break
-	// 		}
-	// 	}
-	// 	if !got {
-	// 		sc = theApp.screens[0]
-	// 		w.LogDPI = sc.LogicalDPI
-	// 		if monitorDebug {
-	// 			log.Printf("vkos window: %v getScreen(): reverting to first screen %v\n", w.Nm, sc.Name)
-	// 		}
-	// 	}
+	// if monitorDebug {
+	// 	log.Printf("MonitorDebug: vkos window: %v getScreenOvlp() -- got screen: %v\n", w.Nm, sc.Name)
 	// }
 setScreen:
 	w.scrnName = sc.Name
@@ -526,11 +506,13 @@ func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
 	w.mu.Lock()
 	w.Pos = image.Point{x, y}
 	w.mu.Unlock()
+	// w.app.GetScreens() // this can crash here on win disconnect..
 	w.getScreen()
 	w.sendWindowEvent(window.Move)
 }
 
 func (w *windowImpl) winResized(gw *glfw.Window, width, height int) {
+	// w.app.GetScreens()  // this can crash here on win disconnect..
 	w.updtGeom()
 }
 
@@ -540,23 +522,10 @@ func (w *windowImpl) updtGeom() {
 	w.mu.Unlock()
 	sc := w.getScreen() // gets devpixratio etc
 	w.mu.Lock()
-	// cscx, _ := w.glw.GetContentScale()
-	// curDevPixRatio := w.DevPixRatio
-	// w.DevPixRatio = cscx
-	// if curDevPixRatio != w.DevPixRatio {
-	// 	fmt.Printf("got cont scale: %v\n", cscx)
-	// }
 	var wsz image.Point
 	wsz.X, wsz.Y = w.glw.GetSize()
 	// fmt.Printf("win size: %v\n", wsz)
 	w.WnSize = wsz
-	// todo: this doesn't work on mac -- ignores the size -- uses glw directly probably
-	// if curDevPixRatio != w.DevPixRatio && curDevPixRatio > 0 {
-	// 	rr := w.DevPixRatio / curDevPixRatio
-	// 	w.WnSize.X = int(float32(w.WnSize.X) * rr)
-	// 	w.WnSize.Y = int(float32(w.WnSize.Y) * rr)
-	// 	fmt.Printf("resized based on pix ratio: %v\n", w.WnSize)
-	// }
 	var fbsz image.Point
 	fbsz.X, fbsz.Y = w.glw.GetFramebufferSize()
 	w.PxSize = fbsz
