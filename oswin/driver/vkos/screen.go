@@ -97,11 +97,11 @@ func (app *appImpl) GetScreens() {
 				} else { // use plausible defaults.. sheesh
 					sc.ScreenNumber = scNo
 					sc.Name = macOsBuiltinMonitor
-					sc.Geometry.Max = image.Point{1728, 1117}
+					sc.Geometry.Max = image.Point{2056, 1329}
 					sc.DevicePixelRatio = 2
 					sc.PixSize = sc.Geometry.Max.Mul(2)
 					sc.PhysicalSize = image.Point{344, 222}
-					sc.PhysicalDPI = 255.1814
+					sc.PhysicalDPI = 25.4 * float32(sc.PixSize.X) / float32(sc.PhysicalSize.X)
 					sc.Depth = 24
 					sc.RefreshRate = 60
 					sc.UpdateLogicalDPI()
@@ -169,7 +169,7 @@ func (app *appImpl) GetScreens() {
 		fss := app.screensAll[0]
 		if fss.Name != macOsBuiltinMonitor {
 			if monitorDebug {
-				log.Printf("MonitorDebug: getScreens: MacOs, builtin is currently primary, but was not originally -- restoring primary monitor as:\n", app.screens[1].Name)
+				log.Printf("MonitorDebug: getScreens: MacOs, builtin is currently primary, but was not originally -- restoring primary monitor as: %s\n", app.screens[1].Name)
 			}
 			// assume 2nd one is good..
 			app.screens[0], app.screens[1] = app.screens[1], app.screens[0] // swap
