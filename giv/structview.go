@@ -447,6 +447,9 @@ func StructFieldIsDef(defs string, valPtr interface{}) (bool, string) {
 		}
 	} else {
 		val := kit.ToStringPrec(valPtr, 6)
+		if strings.HasPrefix(val, "&") {
+			val = val[1:]
+		}
 		dtags := strings.Split(defs, ",")
 		for _, dv := range dtags {
 			if dv == strings.TrimSpace(val) {

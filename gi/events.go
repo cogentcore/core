@@ -436,7 +436,11 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 			em.dndHoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
 				em.TimerMu.Lock()
 				hoe := em.curDNDHover
-				em.SendDNDHoverEvent(hoe)
+				if hoe != nil {
+					// em.TimerMu.Unlock()
+					em.SendDNDHoverEvent(hoe)
+					// em.TimerMu.Lock()
+				}
 				em.startDNDHover = nil
 				em.curDNDHover = nil
 				em.dndHoverTimer = nil
@@ -492,7 +496,9 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 			em.TimerMu.Lock()
 			hoe := em.curHover
 			if hoe != nil {
-				em.SendHoverEvent(hoe)
+				// em.TimerMu.Unlock()
+				em.SendHoverEvent(hoe) // this attempts to lock focus
+				// em.TimerMu.Lock()
 			}
 			em.startHover = nil
 			em.curHover = nil
