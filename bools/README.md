@@ -22,3 +22,6 @@ func FromFloat32(v float32) bool {
 
 Other types are: `float64, int, int64, int32` -- you can cast from there as necessary.
 
+`ToString` and `FromString` are also supported to / from "true" and "false"
+
+

@@ -47,6 +47,14 @@ func ToInt64(b bool) int64 {
 	return 0
 }
 
+// ToString converts a bool to "true" or "false" string
+func ToString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
 //////////////////////////////////////////////
 
 // FromFloat32 converts value to a bool, 0 = false, else true
@@ -87,4 +95,12 @@ func FromInt64(v int64) bool {
 		return false
 	}
 	return true
+}
+
+// FromString converts string to a bool, "true" = true, else false
+func FromString(v string) bool {
+	if v == "true" {
+		return true
+	}
+	return false
 }
