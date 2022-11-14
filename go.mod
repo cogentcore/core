@@ -8,7 +8,7 @@ require (
 	github.com/goki/ki v1.1.8
 	github.com/goki/kigen v1.0.0
 	github.com/goki/mat32 v1.0.12
-	github.com/goki/vulkan v0.0.0-20220512102541-6e89b8ce8542
+	github.com/goki/vulkan v0.0.0-20220928215615-c67065a9cfc2
 )
 
 require (
