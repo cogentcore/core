@@ -557,6 +557,10 @@ func (im *Image) AllocImage() {
 		usage |= vk.ImageUsageTransferDstBit
 	}
 
+	if im.Format.Layers == 0 {
+		im.Format.Layers = 1
+	}
+
 	var image vk.Image
 	w, h := im.Format.Size32()
 	imgcfg := &vk.ImageCreateInfo{

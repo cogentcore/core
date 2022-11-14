@@ -20,6 +20,11 @@ import (
 
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/
 
+// Debug is a global flag for turning on debug mode
+// Set to true prior to initialization of VGPU.
+// It is ignored if false (won't turn off Debug if set by other means).
+var Debug = false
+
 // TheGPU is a global for the GPU
 var TheGPU *GPU
 
@@ -43,6 +48,9 @@ type GPU struct {
 // Defaults sets up default parameters, with the graphics flag
 // determining whether graphics-relevant items are added.
 func (gp *GPU) Defaults(graphics bool) {
+	if Debug {
+		gp.Debug = true
+	}
 	gp.APIVersion = vk.Version(vk.MakeVersion(1, 2, 0))
 	gp.AppVersion = vk.Version(vk.MakeVersion(1, 0, 0))
 	gp.DeviceExts = []string{"VK_EXT_descriptor_indexing"}
@@ -121,6 +129,9 @@ func (gp *GPU) AddValidationLayer(ext string) bool {
 // Config
 func (gp *GPU) Config(name string) error {
 	TheGPU = gp
+	if Debug {
+		gp.Debug = true
+	}
 
 	gp.AppName = name
 	if gp.Debug {
