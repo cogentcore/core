@@ -20,22 +20,30 @@ func TestFastExp(t *testing.T) {
 	}
 }
 
+var result32 float32
 func BenchmarkFastExp(b *testing.B) {
+	var x float32
 	for n := 0; n < b.N; n++ {
-		FastExp(float32(n%40 - 20))
+		x = FastExp(float32(n%40 - 20))
 	}
+	result32 = x
 }
 
+var result64 float64
 func BenchmarkExpStd64(b *testing.B) {
+	var x float64
 	for n := 0; n < b.N; n++ {
-		math.Exp(float64(n%40 - 20))
+		x = math.Exp(float64(n%40 - 20))
 	}
+	result64 = x
 }
 
 /*
 func BenchmarkExp32(b *testing.B) {
+	var x float32
 	for n := 0; n < b.N; n++ {
-		math32.Exp(float32(n%40 - 20))
+		x = math32.Exp(float32(n%40 - 20))
 	}
+	result32 = x
 }
 */
