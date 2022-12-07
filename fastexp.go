@@ -67,7 +67,7 @@ func FastExp3(x float32) float32 {
 
 // FastExp is a quartic spline approximation to the Exp function, by N.N. Schraudolph
 // It does not have any of the sanity checking of a standard method -- returns
-// nonsense when arg is out of range.  Runs in 3.48ns vs. 8.8ns for 64bit which is faster
+// nonsense when arg is out of range.  Runs in 2.23ns vs. 6.3ns for 64bit which is faster
 // than math32.Exp actually.
 func FastExp(x float32) float32 {
 	if x <= -88.76731 { // this doesn't add anything and -exp is main use-case anyway
