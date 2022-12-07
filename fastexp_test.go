@@ -21,29 +21,53 @@ func TestFastExp(t *testing.T) {
 }
 
 var result32 float32
+
 func BenchmarkFastExp(b *testing.B) {
+	// pre-convert the input, such that we're not measuring the speed of
+	// the mod and sub operations.
+	input := make([]float32, b.N)
+	for i := range input {
+		input[i] = float32(i%40 - 20)
+	}
+
+	b.ResetTimer()
+
 	var x float32
 	for n := 0; n < b.N; n++ {
-		x = FastExp(float32(n%40 - 20))
+		x += FastExp(input[n])
 	}
 	result32 = x
 }
 
 var result64 float64
+
 func BenchmarkExpStd64(b *testing.B) {
+	input := make([]float64, b.N)
+	for i := range input {
+		input[i] = float64(i%40 - 20)
+	}
+
+	b.ResetTimer()
+
 	var x float64
 	for n := 0; n < b.N; n++ {
-		x = math.Exp(float64(n%40 - 20))
+		x += math.Exp(input[n])
 	}
 	result64 = x
 }
 
-/*
 func BenchmarkExp32(b *testing.B) {
 	var x float32
+
+	input := make([]float32, b.N)
+	for i := range input {
+		input[i] += float32(i%40 - 20)
+	}
+
+	b.ResetTimer()
+
 	for n := 0; n < b.N; n++ {
-		x = math32.Exp(float32(n%40 - 20))
+		x = float32(math.Exp(float64(input[n])))
 	}
 	result32 = x
 }
-*/
