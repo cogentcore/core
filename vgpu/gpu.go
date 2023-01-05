@@ -165,7 +165,7 @@ func (gp *GPU) Config(name string) error {
 
 	gp.AppName = name
 	if gp.Debug {
-		gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
+		// gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
 		gp.AddInstanceExt("VK_EXT_debug_report") // note _utils is not avail yet
 	}
 
@@ -227,7 +227,7 @@ func (gp *GPU) Config(name string) error {
 	ret = vk.EnumeratePhysicalDevices(gp.Instance, &gpuCountU, gpus)
 	IfPanic(NewError(ret))
 
-	gpIdx := gp.SelectGPU(gpuCount)
+	gpIdx := gp.SelectGPU(gpus, gpuCount)
 
 	gp.GPU = gpus[gpIdx]
 	vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GPUProps)
