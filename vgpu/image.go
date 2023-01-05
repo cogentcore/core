@@ -338,6 +338,9 @@ func (im *Image) SetGoImage(img image.Image, layer int, flipY bool) error {
 		didx := (rows - 1) * str
 		for rw := 0; rw < rows; rw++ {
 			copy(dpix[didx:didx+rsz], spix[sidx:sidx+rsz])
+			for ii := didx + rsz; ii < didx+str; ii++ { // zero out = transparent any extra mem
+				dpix[ii] = 0
+			}
 			sidx += rimg.Stride
 			didx -= str
 		}
@@ -345,6 +348,9 @@ func (im *Image) SetGoImage(img image.Image, layer int, flipY bool) error {
 		didx := 0
 		for rw := 0; rw < rows; rw++ {
 			copy(dpix[didx:didx+rsz], spix[sidx:sidx+rsz])
+			for ii := didx + rsz; ii < didx+str; ii++ { // zero out = transparent any extra mem
+				dpix[ii] = 0
+			}
 			sidx += rimg.Stride
 			didx += str
 		}
