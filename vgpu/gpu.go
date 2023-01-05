@@ -14,6 +14,7 @@ import (
 	"strings"
 	"unsafe"
 
+	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/ki/kit"
 	vk "github.com/goki/vulkan"
 )
@@ -43,6 +44,30 @@ type GPU struct {
 
 	GPUProps    vk.PhysicalDeviceProperties       `desc:"properties of physical hardware -- populated after Config"`
 	MemoryProps vk.PhysicalDeviceMemoryProperties `desc:"properties of device memory -- populated after Config"`
+}
+
+// Init initializes vulkan system -- call before doing any vgpu stuff.
+// calls glfw.Init and sets the Vulkan instance proc addr and calls Init.
+// IMPORTANT: must be called on the main initial thread!
+func Init() error {
+	err := glfw.Init()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
+	err = vk.Init()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return err
+}
+
+// Terminate shuts down the vulkan system -- call as last thing before quitting.
+// IMPORTANT: must be called on the main initial thread!
+func Terminate() {
+	glfw.Terminate()
 }
 
 // Defaults sets up default parameters, with the graphics flag

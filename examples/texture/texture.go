@@ -24,8 +24,7 @@ import (
 )
 
 func init() {
-	// a must lock main thread for gpu!  this also means that vulkan must be used
-	// for gogi/oswin eventually if we want gui and compute
+	// a must lock main thread for gpu!
 	runtime.LockOSThread()
 }
 
@@ -51,9 +50,9 @@ func OpenImage(fname string) image.Image {
 }
 
 func main() {
-	glfw.Init()
-	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
-	vk.Init()
+	if vgpu.Init() != nil {
+		return
+	}
 
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
 	window, err := glfw.CreateWindow(1024, 768, "Draw Texture", nil, nil)
@@ -86,7 +85,7 @@ func main() {
 		sf.Destroy()
 		gp.Destroy()
 		window.Destroy()
-		glfw.Terminate()
+		vgpu.Terminate()
 	}
 
 	pl := sy.NewPipeline("texture")
@@ -166,7 +165,7 @@ func main() {
 
 	rectIdx, _ := idxv.Vals.ValByIdxTry(0)
 	idxs := []uint16{0, 1, 2, 0, 2, 3}
-	rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+	rectIdx.CopyFromBytes(unsafe.Pointer(&idxs[0]))
 
 	for i, gimg := range imgs {
 		img, _ := tximgv.Vals.ValByIdxTry(i)
@@ -194,7 +193,7 @@ func main() {
 	// will render identically here.
 	camo.Prjn.SetVkPerspective(45, aspect, 0.01, 100)
 
-	cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+	cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
 
 	sy.Mem.SyncToGPU()
 
@@ -211,7 +210,7 @@ func main() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
 		camo.Model.SetRotationY(.002 * float32(frameCount))
-		cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+		cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 
 		imgIdx := int32(frameCount % len(imgs))

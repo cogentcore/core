@@ -31,8 +31,7 @@ type CamView struct {
 }
 
 func init() {
-	// must lock main thread for gpu!  this also means that vulkan must be used
-	// for gogi/oswin eventually if we want gui and compute
+	// must lock main thread for gpu!
 	runtime.LockOSThread()
 }
 
@@ -52,9 +51,9 @@ func OpenImage(fname string) image.Image {
 }
 
 func main() {
-	glfw.Init()
-	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
-	vk.Init()
+	if vgpu.Init() != nil {
+		return
+	}
 
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
 	window, err := glfw.CreateWindow(1024, 768, "vDraw Test", nil, nil)
@@ -94,7 +93,7 @@ func main() {
 		sf.Destroy()
 		gp.Destroy()
 		window.Destroy()
-		glfw.Terminate()
+		vgpu.Terminate()
 	}
 
 	/////////////////////////////////
@@ -146,7 +145,7 @@ func main() {
 
 	triIdx, _ := idxv.Vals.ValByIdxTry(0)
 	idxs := []uint16{0, 1, 2}
-	triIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+	triIdx.CopyFromBytes(unsafe.Pointer(&idxs[0]))
 
 	// This is the standard camera view projection computation
 	cam, _ := camv.Vals.ValByIdxTry(0)
@@ -167,7 +166,7 @@ func main() {
 		aspect := rf.Format.Aspect()
 		fmt.Printf("aspect: %g\n", aspect)
 		camo.Prjn.SetVkPerspective(45, aspect, 0.01, 100)
-		cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+		cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 	}
 
@@ -184,7 +183,7 @@ func main() {
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
 		camo.Model.SetRotationY(.1 * float32(frameCount))
-		cam.CopyBytes(unsafe.Pointer(&camo)) // sets mod
+		cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 
 		idx := 0 // sf.AcquireNextImage()

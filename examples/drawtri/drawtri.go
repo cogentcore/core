@@ -17,17 +17,16 @@ import (
 )
 
 func init() {
-	// must lock main thread for gpu!  this also means that vulkan must be used
-	// for gogi/oswin eventually if we want gui and compute
+	// must lock main thread for gpu!
 	runtime.LockOSThread()
 }
 
 var TheGPU *vgpu.GPU
 
 func main() {
-	glfw.Init()
-	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
-	vk.Init()
+	if vgpu.Init() != nil {
+		return
+	}
 
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
 	window, err := glfw.CreateWindow(1024, 768, "Draw Triangle", nil, nil)
@@ -68,7 +67,7 @@ func main() {
 		sf.Destroy()
 		gp.Destroy()
 		window.Destroy()
-		glfw.Terminate()
+		vgpu.Terminate()
 	}
 
 	frameCount := 0

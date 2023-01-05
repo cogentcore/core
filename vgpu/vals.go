@@ -171,9 +171,9 @@ func (vl *Val) PaddedArrayCheck() error {
 	return nil
 }
 
-// CopyBytes copies bytes from given source pointer into memory,
-// and sets Mod flag.
-func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
+// CopyFromBytes copies bytes from given source pointer into memory,
+// and sets Mod flag.  Use this for struct data types.
+func (vl *Val) CopyFromBytes(srcPtr unsafe.Pointer) {
 	if err := vl.PaddedArrayCheck(); err != nil {
 		log.Println(err)
 		return
@@ -183,6 +183,19 @@ func (vl *Val) CopyBytes(srcPtr unsafe.Pointer) {
 	src := (*[m]byte)(srcPtr)[:vl.AllocSize]
 	copy(dst, src)
 	vl.SetMod()
+}
+
+// CopyToBytes copies bytes from val to given source pointer into memory.
+// Use this for struct data types to retrieve computed results.
+func (vl *Val) CopyToBytes(srcPtr unsafe.Pointer) {
+	if err := vl.PaddedArrayCheck(); err != nil {
+		log.Println(err)
+		return
+	}
+	dst := vl.Bytes()
+	const m = 0x7fffffff
+	src := (*[m]byte)(srcPtr)[:vl.AllocSize]
+	copy(src, dst)
 }
 
 // SaveImage saves image to file, with format inferred from filename -- JPEG and PNG

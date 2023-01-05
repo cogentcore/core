@@ -9,24 +9,20 @@ import (
 	"math/rand"
 	"runtime"
 
-	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/vgpu/vgpu"
-
-	vk "github.com/goki/vulkan"
 )
 
 func init() {
-	// must lock main thread for gpu!  this also means that vulkan must be used
-	// for gogi/oswin eventually if we want gui and compute
+	// must lock main thread for gpu!
 	runtime.LockOSThread()
 }
 
 var TheGPU *vgpu.GPU
 
 func main() {
-	glfw.Init()
-	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
-	vk.Init()
+	if vgpu.Init() != nil {
+		return
+	}
 
 	gp := vgpu.NewComputeGPU()
 	gp.Debug = true
@@ -81,4 +77,5 @@ func main() {
 
 	sy.Destroy()
 	gp.Destroy()
+	vgpu.Terminate()
 }
