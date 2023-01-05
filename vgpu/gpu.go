@@ -165,7 +165,7 @@ func (gp *GPU) Config(name string) error {
 
 	gp.AppName = name
 	if gp.Debug {
-		// gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
+		gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
 		gp.AddInstanceExt("VK_EXT_debug_report") // note _utils is not avail yet
 	}
 
@@ -175,10 +175,10 @@ func (gp *GPU) Config(name string) error {
 	IfPanic(err)
 	instanceExts, missing := CheckExisting(actualInstanceExts, requiredInstanceExts)
 	if missing > 0 {
-		log.Println("vulkan warning: missing", missing, "required instance extensions during Config")
+		log.Println("vgpu: warning: missing", missing, "required instance extensions during Config")
 	}
 	if gp.Debug {
-		log.Printf("vulkan: enabling %d instance extensions", len(instanceExts))
+		log.Printf("vgpu: enabling %d instance extensions", len(instanceExts))
 	}
 
 	// Select instance layers
@@ -189,7 +189,7 @@ func (gp *GPU) Config(name string) error {
 		IfPanic(err)
 		validationLayers, missing = CheckExisting(actualValidationLayers, requiredValidationLayers)
 		if missing > 0 {
-			log.Println("vulkan warning: missing", missing, "required validation layers during Config")
+			log.Println("vgpu: warning: missing", missing, "required validation layers during Config")
 		}
 	}
 
@@ -220,7 +220,7 @@ func (gp *GPU) Config(name string) error {
 	ret = vk.EnumeratePhysicalDevices(gp.Instance, &gpuCountU, nil)
 	IfPanic(NewError(ret))
 	if gpuCountU == 0 {
-		return errors.New("vulkan error: no GPU devices found")
+		return errors.New("vgpu: error: no GPU devices found")
 	}
 	gpuCount := int(gpuCountU)
 	gpus := make([]vk.PhysicalDevice, gpuCount)
@@ -242,10 +242,10 @@ func (gp *GPU) Config(name string) error {
 	IfPanic(err)
 	deviceExts, missing := CheckExisting(actualDeviceExts, requiredDeviceExts)
 	if missing > 0 {
-		log.Println("vulkan warning: missing", missing, "required device extensions during Config")
+		log.Println("vgpu: warning: missing", missing, "required device extensions during Config")
 	}
 	if gp.Debug {
-		log.Printf("vulkan: enabling %d device extensions", len(deviceExts))
+		log.Printf("vgpu: enabling %d device extensions", len(deviceExts))
 	}
 
 	if gp.Debug {
@@ -257,14 +257,14 @@ func (gp *GPU) Config(name string) error {
 			PfnCallback: dbgCallbackFunc,
 		}, nil, &debugCallback)
 		IfPanic(NewError(ret))
-		log.Println("vulkan: DebugReportCallback enabled by application")
+		log.Println("vgpu: DebugReportCallback enabled by application")
 		gp.DebugCallback = debugCallback
 	}
 
 	return nil
 }
 
-func (gp *GPU) SelectGPU(gpuCount int) int {
+func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 	if gpuCount == 1 {
 		return 0
 	}
@@ -283,11 +283,18 @@ func (gp *GPU) SelectGPU(gpuCount int) int {
 	if devNm != "" {
 		for gi := 0; gi < gpuCount; gi++ {
 			var props vk.PhysicalDeviceProperties
-			vk.GetPhysicalDeviceProperties(gp.GPU, &props)
+			vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 			props.Deref()
 			if bytes.Contains(props.DeviceName[:], []byte(devNm)) {
+				if gp.Debug {
+					devNm = string(props.DeviceName[:])
+					log.Printf("vgpu: selected device named: %s, specified in *_DEVICE_SELECT environment variable, index: %d\n", devNm, gi)
+				}
 				return gi
 			}
+		}
+		if gp.Debug {
+			log.Printf("vgpu: unable to find device named: %s, specified in *_DEVICE_SELECT environment variable\n", devNm)
 		}
 	}
 
@@ -295,24 +302,38 @@ func (gp *GPU) SelectGPU(gpuCount int) int {
 	maxIdx := 0
 	for gi := 0; gi < gpuCount; gi++ {
 		var props vk.PhysicalDeviceProperties
-		vk.GetPhysicalDeviceProperties(gp.GPU, &props)
+		vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 		props.Deref()
+		dnm := string(props.DeviceName[:])
 		if props.DeviceType == vk.PhysicalDeviceTypeDiscreteGpu {
 			var memProps vk.PhysicalDeviceMemoryProperties
-			vk.GetPhysicalDeviceMemoryProperties(gp.GPU, &memProps)
+			vk.GetPhysicalDeviceMemoryProperties(gpus[gi], &memProps)
 			memProps.Deref()
+			if gp.Debug {
+				log.Printf("vgpu: evaluating discrete device named: %s, index: %d\n", dnm, maxIdx)
+			}
 			for mi := uint32(0); mi < memProps.MemoryHeapCount; mi++ {
 				heap := &memProps.MemoryHeaps[mi]
-				if heap.Flags&vk.MemoryHeapFlags(vk.MemoryHeapDeviceLocalBit) != 0 {
-					sz := int(heap.Size)
-					if sz > maxSz {
-						maxSz = sz
-						maxIdx = gi
-					}
+				heap.Deref()
+				// if heap.Flags&vk.MemoryHeapFlags(vk.MemoryHeapDeviceLocalBit) != 0 {
+				sz := int(heap.Size)
+				if sz > maxSz {
+					devNm = string(props.DeviceName[:])
+					maxSz = sz
+					maxIdx = gi
 				}
+				// }
+			}
+		} else {
+			if gp.Debug {
+				log.Printf("vgpu: skipping device named: %s, index: %d -- not discrete\n", dnm, maxIdx)
 			}
 		}
 	}
+	if gp.Debug {
+		log.Printf("vgpu: selected device named: %s, index: %d, memory size: %d\n", devNm, maxIdx, maxSz)
+	}
+
 	return maxIdx
 }
 
