@@ -138,7 +138,7 @@ func (sf *Surface) ConfigSwapchain() {
 		if !got {
 			formats[0].Deref()
 			format = formats[0]
-			if sf.GPU.Debug {
+			if Debug {
 				dfs := make([]string, len(sf.DesiredFormats))
 				for i, df := range sf.DesiredFormats {
 					dfs[i] = ImageFormatNames[df]
@@ -248,7 +248,7 @@ func (sf *Surface) ConfigSwapchain() {
 	sf.Frames = make([]*Framebuffer, sf.NFrames)
 	for i := 0; i < sf.NFrames; i++ {
 		fr := &Framebuffer{}
-		fr.ConfigSurfaceImage(dev, sf.Format, swapchainImages[i])
+		fr.ConfigSurfaceImage(sf.GPU, dev, sf.Format, swapchainImages[i])
 		sf.Frames[i] = fr
 	}
 }
@@ -319,7 +319,7 @@ func (sf *Surface) AcquireNextImage() uint32 {
 	switch ret {
 	case vk.ErrorOutOfDate, vk.Suboptimal:
 		sf.ReConfigSwapchain()
-		if sf.GPU.Debug {
+		if Debug {
 			fmt.Printf("vgpu.Surface:AcquireNextImage, new format: %#v\n", sf.Format)
 		}
 		return sf.AcquireNextImage() // try again
@@ -368,7 +368,7 @@ func (sf *Surface) PresentImage(frameIdx uint32) error {
 	switch ret {
 	case vk.ErrorOutOfDate, vk.Suboptimal:
 		sf.ReConfigSwapchain()
-		if sf.GPU.Debug {
+		if Debug {
 			fmt.Printf("vgpu.Surface:PresentImage, new format: %#v\n", sf.Format)
 		}
 		return fmt.Errorf("vgpu.Surface:PresentImage: swapchain was out of date, reinitialized -- not rendered")

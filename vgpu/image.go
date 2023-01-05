@@ -171,6 +171,7 @@ type Image struct {
 	Mem    vk.DeviceMemory `view:"-" desc:"memory for image when we allocate it"`
 	Dev    vk.Device       `view:"-" desc:"keep track of device for destroying view"`
 	Host   HostImage       `desc:"host memory buffer representation of the image"`
+	GPU    *GPU            `desc:"pointer to our GPU"`
 }
 
 // HasFlag checks if flag is set
@@ -354,7 +355,8 @@ func (im *Image) SetGoImage(img image.Image, layer int, flipY bool) error {
 // SetVkImage sets a Vk Image and configures a default 2D view
 // based on existing format information (which must be set properly).
 // Any exiting view is destroyed first.  Must pass the relevant device.
-func (im *Image) SetVkImage(dev vk.Device, img vk.Image) {
+func (im *Image) SetVkImage(gp *GPU, dev vk.Device, img vk.Image) {
+	im.GPU = gp
 	im.Image = img
 	im.Dev = dev
 	im.ConfigStdView()
@@ -363,7 +365,8 @@ func (im *Image) SetVkImage(dev vk.Device, img vk.Image) {
 // ConfigFramebuffer configures this image as a framebuffer image
 // using format.  Sets multisampling to 1, layers to 1.
 // Only makes a device image -- no host rep.
-func (im *Image) ConfigFramebuffer(dev vk.Device, imgFmt *ImageFormat) {
+func (im *Image) ConfigFramebuffer(gp *GPU, dev vk.Device, imgFmt *ImageFormat) {
+	im.GPU = gp
 	im.Dev = dev
 	im.Format.Format = imgFmt.Format
 	im.Format.SetMultisample(1)
@@ -377,7 +380,8 @@ func (im *Image) ConfigFramebuffer(dev vk.Device, imgFmt *ImageFormat) {
 // ConfigDepth configures this image as a depth image
 // using given depth image format, and other on format information
 // from the render image format.
-func (im *Image) ConfigDepth(dev vk.Device, depthType Types, imgFmt *ImageFormat) {
+func (im *Image) ConfigDepth(gp *GPU, dev vk.Device, depthType Types, imgFmt *ImageFormat) {
+	im.GPU = gp
 	im.Dev = dev
 	im.Format.Format = depthType.VkFormat()
 	im.Format.Samples = imgFmt.Samples
@@ -390,7 +394,8 @@ func (im *Image) ConfigDepth(dev vk.Device, depthType Types, imgFmt *ImageFormat
 
 // ConfigMulti configures this image as a mutisampling image
 // using format.  Only makes a device image -- no host rep.
-func (im *Image) ConfigMulti(dev vk.Device, imgFmt *ImageFormat) {
+func (im *Image) ConfigMulti(gp *GPU, dev vk.Device, imgFmt *ImageFormat) {
+	im.GPU = gp
 	im.Dev = dev
 	im.Format.Format = imgFmt.Format
 	im.Format.Samples = imgFmt.Samples
@@ -596,7 +601,7 @@ func (im *Image) AllocImage() {
 	vk.GetImageMemoryRequirements(im.Dev, im.Image, &memReqs)
 	memReqs.Deref()
 
-	memProps := TheGPU.MemoryProps
+	memProps := im.GPU.MemoryProps
 	memTypeIndex, _ := FindRequiredMemoryTypeFallback(memProps,
 		vk.MemoryPropertyFlagBits(memReqs.MemoryTypeBits), props)
 	ma := &vk.MemoryAllocateInfo{
@@ -628,7 +633,7 @@ func (im *Image) AllocHost() {
 		im.FreeHost()
 	}
 	im.Host.Buff = NewBuffer(im.Dev, imsz, vk.BufferUsageTransferSrcBit|vk.BufferUsageTransferDstBit)
-	im.Host.Mem = AllocBuffMem(im.Dev, im.Host.Buff, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
+	im.Host.Mem = AllocBuffMem(im.GPU, im.Dev, im.Host.Buff, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
 	im.Host.Size = imsz
 	im.Host.Ptr = MapMemory(im.Dev, im.Host.Mem, im.Host.Size)
 	im.Host.Offset = 0

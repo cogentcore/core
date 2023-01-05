@@ -20,13 +20,13 @@ type Framebuffer struct {
 // ConfigSurfaceImage configures settings for given existing surface image
 // and format.  Does not yet make the Framebuffer because it
 // still needs the Render (see ConfigAll for all)
-func (fb *Framebuffer) ConfigSurfaceImage(dev vk.Device, fmt ImageFormat, img vk.Image) {
+func (fb *Framebuffer) ConfigSurfaceImage(gp *GPU, dev vk.Device, fmt ImageFormat, img vk.Image) {
 	fb.Format = fmt
 	fb.Image.Format.Defaults()
 	fb.Image.Format = fmt
 	fb.Image.Format.SetMultisample(1) // cannot multisample main image
 	fb.Image.SetFlag(int(FramebufferImage))
-	fb.Image.SetVkImage(dev, img) // makes view
+	fb.Image.SetVkImage(gp, dev, img) // makes view
 }
 
 // ConfigRenderImage configures a new image for a standalone framebuffer
@@ -36,7 +36,7 @@ func (fb *Framebuffer) ConfigSurfaceImage(dev vk.Device, fmt ImageFormat, img vk
 // (see ConfigRender)
 func (fb *Framebuffer) ConfigRenderImage(dev vk.Device, fmt ImageFormat) {
 	fb.Format = fmt
-	fb.Image.ConfigFramebuffer(dev, &fmt)
+	fb.Image.ConfigFramebuffer(fb.Render.Sys.GPU, dev, &fmt)
 }
 
 // ConfigRender configures for Render, assuming image is already set

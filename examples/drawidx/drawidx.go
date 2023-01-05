@@ -23,8 +23,6 @@ func init() {
 	runtime.LockOSThread()
 }
 
-var TheGPU *vgpu.GPU
-
 type CamView struct {
 	Model mat32.Mat4
 	View  mat32.Mat4
@@ -44,9 +42,8 @@ func main() {
 	winext := window.GetRequiredInstanceExtensions()
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
-	gp.Debug = true
+	vgpu.Debug = true
 	gp.Config("drawidx")
-	TheGPU = gp
 
 	// gp.PropsString(true) // print
 

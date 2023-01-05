@@ -24,12 +24,8 @@ import (
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/
 
 // Debug is a global flag for turning on debug mode
-// Set to true prior to initialization of VGPU.
-// It is ignored if false (won't turn off Debug if set by other means).
+// Set to true prior to GPU.Config to get validation debugging.
 var Debug = false
-
-// TheGPU is a global for the GPU
-var TheGPU *GPU
 
 // GPU represents the GPU hardware
 type GPU struct {
@@ -41,7 +37,6 @@ type GPU struct {
 	InstanceExts     []string               `desc:"use Add method to add required instance extentions prior to calling Config"`
 	DeviceExts       []string               `desc:"use Add method to add required device extentions prior to calling Config"`
 	ValidationLayers []string               `desc:"set Add method to add required validation layers prior to calling Config"`
-	Debug            bool                   `desc:"set to true prior to calling Config to enable debug mode"`
 	Compute          bool                   `desc:"this is used for computing, not graphics"`
 	DebugCallback    vk.DebugReportCallback `desc:"our custom debug callback"`
 
@@ -76,9 +71,6 @@ func Terminate() {
 // Defaults sets up default parameters, with the graphics flag
 // determining whether graphics-relevant items are added.
 func (gp *GPU) Defaults(graphics bool) {
-	if Debug {
-		gp.Debug = true
-	}
 	gp.APIVersion = vk.Version(vk.MakeVersion(1, 2, 0))
 	gp.AppVersion = vk.Version(vk.MakeVersion(1, 0, 0))
 	gp.DeviceExts = []string{"VK_EXT_descriptor_indexing"}
@@ -158,13 +150,8 @@ func (gp *GPU) AddValidationLayer(ext string) bool {
 
 // Config
 func (gp *GPU) Config(name string) error {
-	TheGPU = gp
-	if Debug {
-		gp.Debug = true
-	}
-
 	gp.AppName = name
-	if gp.Debug {
+	if Debug {
 		gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
 		gp.AddInstanceExt("VK_EXT_debug_report") // note _utils is not avail yet
 	}
@@ -177,7 +164,7 @@ func (gp *GPU) Config(name string) error {
 	if missing > 0 {
 		log.Println("vgpu: warning: missing", missing, "required instance extensions during Config")
 	}
-	if gp.Debug {
+	if Debug {
 		log.Printf("vgpu: enabling %d instance extensions", len(instanceExts))
 	}
 
@@ -244,11 +231,11 @@ func (gp *GPU) Config(name string) error {
 	if missing > 0 {
 		log.Println("vgpu: warning: missing", missing, "required device extensions during Config")
 	}
-	if gp.Debug {
+	if Debug {
 		log.Printf("vgpu: enabling %d device extensions", len(deviceExts))
 	}
 
-	if gp.Debug {
+	if Debug {
 		var debugCallback vk.DebugReportCallback
 		// Register a debug callback
 		ret := vk.CreateDebugReportCallback(gp.Instance, &vk.DebugReportCallbackCreateInfo{
@@ -286,14 +273,14 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 			vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 			props.Deref()
 			if bytes.Contains(props.DeviceName[:], []byte(devNm)) {
-				if gp.Debug {
+				if Debug {
 					devNm = string(props.DeviceName[:])
 					log.Printf("vgpu: selected device named: %s, specified in *_DEVICE_SELECT environment variable, index: %d\n", devNm, gi)
 				}
 				return gi
 			}
 		}
-		if gp.Debug {
+		if Debug {
 			log.Printf("vgpu: unable to find device named: %s, specified in *_DEVICE_SELECT environment variable\n", devNm)
 		}
 	}
@@ -309,7 +296,7 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 			var memProps vk.PhysicalDeviceMemoryProperties
 			vk.GetPhysicalDeviceMemoryProperties(gpus[gi], &memProps)
 			memProps.Deref()
-			if gp.Debug {
+			if Debug {
 				log.Printf("vgpu: evaluating discrete device named: %s, index: %d\n", dnm, maxIdx)
 			}
 			for mi := uint32(0); mi < memProps.MemoryHeapCount; mi++ {
@@ -325,12 +312,12 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 				// }
 			}
 		} else {
-			if gp.Debug {
+			if Debug {
 				log.Printf("vgpu: skipping device named: %s, index: %d -- not discrete\n", dnm, maxIdx)
 			}
 		}
 	}
-	if gp.Debug {
+	if Debug {
 		log.Printf("vgpu: selected device named: %s, index: %d, memory size: %d\n", devNm, maxIdx, maxSz)
 	}
 

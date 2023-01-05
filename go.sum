@@ -12,8 +12,8 @@ github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b h1:GgabKamyOY
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/goki/ki v1.1.9 h1:aSGQPFfrTBKEFKvBkNU4JrBpnoxmjvfE9kCrG3T4ojM=
 github.com/goki/ki v1.1.9/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
-github.com/goki/kigen v1.0.1 h1:txBgu8SXsPKDkHoSD8elob85bWjy6TEreVS3TYMz7pU=
-github.com/goki/kigen v1.0.1/go.mod h1:w8km7SXtEcXXiAs0HbJyIrLq05THTIc1SdFyce3cNdw=
+github.com/goki/kigen v1.0.2 h1:I/s/ce84wiP99CYKdju/MVjY6jzvAL3d4XobERsK1JY=
+github.com/goki/kigen v1.0.2/go.mod h1:ib29cR7secYGaGXWv68WDq83y5tfRMh7dOXi4XRsPOM=
 github.com/goki/mat32 v1.0.13 h1:R69m+a2ju/DMt9M4EMts/8UvZDzBQ1xDHRGS4KyTZaU=
 github.com/goki/mat32 v1.0.13/go.mod h1:6tOY3oXQLGItoMcA6nhKwbO3EFXZOo8l+4eIotDFG/k=
 github.com/goki/vulkan v0.0.0-20220928215615-c67065a9cfc2 h1:FGoz5u3HY1/lMcvPSEe7PMbnJPtJIE/W2kgooTITDic=

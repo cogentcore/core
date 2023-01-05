@@ -30,8 +30,6 @@ func init() {
 	runtime.LockOSThread()
 }
 
-var TheGPU *vgpu.GPU
-
 func OpenImage(fname string) image.Image {
 	file, err := os.Open(fname)
 	defer file.Close()
@@ -58,9 +56,8 @@ func main() {
 	winext := window.GetRequiredInstanceExtensions()
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
-	//	gp.Debug = true
+	//	vgpu.Debug = true
 	gp.Config("vPhong test")
-	TheGPU = gp
 
 	// gp.PropsString(true) // print
 

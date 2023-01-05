@@ -21,8 +21,6 @@ func init() {
 	runtime.LockOSThread()
 }
 
-var TheGPU *vgpu.GPU
-
 func main() {
 	if vgpu.Init() != nil {
 		return
@@ -36,9 +34,8 @@ func main() {
 	winext := window.GetRequiredInstanceExtensions()
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
-	gp.Debug = true
+	vgpu.Debug = true
 	gp.Config("drawtri")
-	TheGPU = gp
 
 	// gp.PropsString(true) // print
 

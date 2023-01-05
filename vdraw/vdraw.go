@@ -47,8 +47,8 @@ func (dw *Drawer) ConfigSurface(sf *vgpu.Surface, maxTextures int) {
 // are used to hold more textures.
 func (dw *Drawer) ConfigFrame(dev *vgpu.Device, size image.Point, maxTextures int) {
 	dw.Impl.MaxTextures = maxTextures
-	dw.Frame = vgpu.NewRenderFrame(vgpu.TheGPU, dev, size)
-	dw.Sys.InitGraphics(vgpu.TheGPU, "vdraw.Drawer", &dw.Frame.Device)
+	dw.Frame = vgpu.NewRenderFrame(dw.Sys.GPU, dev, size)
+	dw.Sys.InitGraphics(dw.Sys.GPU, "vdraw.Drawer", &dw.Frame.Device)
 	dw.Sys.ConfigRenderNonSurface(&dw.Frame.Format, vgpu.UndefType)
 	dw.Frame.SetRender(&dw.Sys.Render)
 

@@ -15,6 +15,7 @@ import (
 // MemBuff is a memory buffer holding a particular type of memory
 // with staging Host-based memory and Device memory
 type MemBuff struct {
+	GPU        *GPU
 	Type       BuffTypes       `desc:"type of memory in this buffer"`
 	Size       int             `desc:"allocated buffer size"`
 	Host       vk.Buffer       `view:"-" desc:"logical descriptor for host CPU-visible memory, for staging"`
@@ -51,7 +52,7 @@ func (mb *MemBuff) AllocHost(dev vk.Device, bsz int) bool {
 		devUse |= vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
 	}
 	mb.Host = NewBuffer(dev, bsz, hostUse)
-	mb.HostMem = AllocBuffMem(dev, mb.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
+	mb.HostMem = AllocBuffMem(mb.GPU, dev, mb.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
 	mb.Size = bsz
 	mb.HostPtr = MapMemory(dev, mb.HostMem, mb.Size)
 
@@ -64,7 +65,7 @@ func (mb *MemBuff) AllocHost(dev vk.Device, bsz int) bool {
 
 // AllocDev allocates device local memory for this buffer.
 func (mb *MemBuff) AllocDev(dev vk.Device) {
-	mb.DevMem = AllocBuffMem(dev, mb.Dev, vk.MemoryPropertyDeviceLocalBit)
+	mb.DevMem = AllocBuffMem(mb.GPU, dev, mb.Dev, vk.MemoryPropertyDeviceLocalBit)
 }
 
 // Free frees all memory for this buffer, including destroying
@@ -161,13 +162,13 @@ func NewBuffer(dev vk.Device, size int, usage vk.BufferUsageFlagBits) vk.Buffer 
 }
 
 // AllocBuffMem allocates memory for given buffer, with given properties
-func AllocBuffMem(dev vk.Device, buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
+func AllocBuffMem(gp *GPU, dev vk.Device, buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
 	// Ask device about its memory requirements.
 	var memReqs vk.MemoryRequirements
 	vk.GetBufferMemoryRequirements(dev, buffer, &memReqs)
 	memReqs.Deref()
 
-	memProps := TheGPU.MemoryProps
+	memProps := gp.MemoryProps
 	memType, ok := FindRequiredMemoryType(memProps, vk.MemoryPropertyFlagBits(memReqs.MemoryTypeBits), props)
 	if !ok {
 		log.Println("vulkan warning: failed to find required memory type")

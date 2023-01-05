@@ -103,7 +103,7 @@ func (st *VarSet) Config(dev vk.Device) error {
 		if st.Set == VertexSet && vr.Role > Index {
 			err := fmt.Errorf("vgpu.VarSet:Config VertexSet cannot contain variables of role: %s  var: %s", vr.Role.String(), vr.Name)
 			cerr = err
-			if TheGPU.Debug {
+			if Debug {
 				log.Println(err)
 			}
 			continue
@@ -111,7 +111,7 @@ func (st *VarSet) Config(dev vk.Device) error {
 		if st.Set >= 0 && vr.Role <= Index {
 			err := fmt.Errorf("vgpu.VarSet:Config Vertex or Index Vars must be located in a VertexSet!  Use AddVertexSet() method instead of AddSet()")
 			cerr = err
-			if TheGPU.Debug {
+			if Debug {
 				log.Println(err)
 			}
 		}
@@ -121,14 +121,14 @@ func (st *VarSet) Config(dev vk.Device) error {
 		if vr.Role == Index && len(rl) > 1 {
 			err := fmt.Errorf("vgpu.VarSet:Config VertexSet should not contain multiple Index variables: %v", rl)
 			cerr = err
-			if TheGPU.Debug {
+			if Debug {
 				log.Println(err)
 			}
 		}
 		if vr.Role > Storage && (len(st.RoleMap[Uniform]) > 0 || len(st.RoleMap[Storage]) > 0) {
 			err := fmt.Errorf("vgpu.VarSet:Config Set with dynamic Uniform or Storage variables should not contain static variables (e.g., textures): %s", vr.Role.String())
 			cerr = err
-			if TheGPU.Debug {
+			if Debug {
 				log.Println(err)
 			}
 		}
@@ -148,9 +148,10 @@ func (st *VarSet) Config(dev vk.Device) error {
 // Any existing vals will be deleted -- must free all associated memory prior!
 func (st *VarSet) ConfigVals(nvals int) {
 	dev := st.ParentVars.Mem.Device.Device
+	gp := st.ParentVars.Mem.GPU
 	st.NValsPer = nvals
 	for _, vr := range st.Vars {
-		vr.Vals.ConfigVals(dev, vr, nvals)
+		vr.Vals.ConfigVals(gp, dev, vr, nvals)
 	}
 }
 
@@ -304,7 +305,7 @@ func (st *VarSet) BindDynVarName(vs *Vars, varNm string) error {
 func (st *VarSet) BindDynVar(vs *Vars, vr *Var) error {
 	if vr.Role < Uniform || vr.Role > Storage {
 		err := fmt.Errorf("vgpu.Set:BindDynVar dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
-		if TheGPU.Debug {
+		if Debug {
 			log.Println(err)
 		}
 		return err
@@ -481,7 +482,7 @@ func (vs *VarSet) VkPushConfig() []vk.PushConstantRange {
 		ranges = append(ranges, rg)
 	}
 	if tsz > 128 {
-		if TheGPU.Debug {
+		if Debug {
 			fmt.Printf("vgpu.VarSet:VkPushConfig total push constant memory exceeds nominal minimum size of 128 bytes: %d\n", tsz)
 		}
 	}
@@ -544,7 +545,7 @@ func (st *VarSet) BindDynValIdx(vs *Vars, varNm string, valIdx int) error {
 func (st *VarSet) BindDynVal(vs *Vars, vr *Var, vl *Val) error {
 	if vr.Role < Uniform || vr.Role > Storage {
 		err := fmt.Errorf("vgpu.Set:BindDynVal dynamic binding only valid for Uniform or Storage Vars, not: %s", vr.Role.String())
-		if TheGPU.Debug {
+		if Debug {
 			log.Println(err)
 		}
 		return err

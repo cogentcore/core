@@ -35,6 +35,7 @@ type System struct {
 // sy.Device.Init(gp, vk.QueueGraphicsBit)
 func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {
 	sy.GPU = gp
+	sy.Render.Sys = sy
 	sy.Name = name
 	sy.Compute = false
 	sy.Device = *dev
@@ -47,6 +48,7 @@ func (sy *System) InitGraphics(gp *GPU, name string, dev *Device) error {
 // which creates its own Compute device.
 func (sy *System) InitCompute(gp *GPU, name string) error {
 	sy.GPU = gp
+	sy.Render.Sys = sy
 	sy.Name = name
 	sy.Compute = true
 	sy.Device.Init(gp, vk.QueueComputeBit)
@@ -117,7 +119,7 @@ func (sy *System) ConfigRenderNonSurface(imgFmt *ImageFormat, depthFmt Types) {
 // be configured and are not Config'd by this call.
 func (sy *System) Config() {
 	sy.Mem.Config(sy.Device.Device)
-	if sy.GPU.Debug {
+	if Debug {
 		fmt.Printf("%s\n", sy.Vars().StringDoc())
 	}
 	for _, pl := range sy.Pipelines {

@@ -44,7 +44,7 @@ func (mm *Memory) Init(gp *GPU, device *Device) {
 	mm.Device = *device
 	mm.CmdPool.ConfigTransient(device)
 	for bt := VtxIdxBuff; bt < BuffTypesN; bt++ {
-		mm.Buffs[bt] = &MemBuff{Type: bt}
+		mm.Buffs[bt] = &MemBuff{Type: bt, GPU: mm.GPU}
 	}
 	mm.Vars.Mem = mm
 }
@@ -111,7 +111,7 @@ func (mm *Memory) NewBuffer(size int, usage vk.BufferUsageFlagBits) vk.Buffer {
 
 // AllocBuffMem allocates memory for given buffer, with given properties
 func (mm *Memory) AllocBuffMem(buffer vk.Buffer, props vk.MemoryPropertyFlagBits) vk.DeviceMemory {
-	return AllocBuffMem(mm.Device.Device, buffer, props)
+	return AllocBuffMem(mm.GPU, mm.Device.Device, buffer, props)
 }
 
 // FreeBuffMem frees given device memory to nil
@@ -187,7 +187,7 @@ func (mm *Memory) SyncValNameFmGPU(set int, varNm, valNm string) error {
 	}
 	if vr.BuffType() != StorageBuff {
 		err = fmt.Errorf("SyncValFmGPU: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
-		if mm.GPU.Debug {
+		if Debug {
 			log.Println(err)
 			return err
 		}
@@ -206,7 +206,7 @@ func (mm *Memory) SyncValIdxFmGPU(set int, varNm string, valIdx int) error {
 	}
 	if vr.BuffType() != StorageBuff {
 		err = fmt.Errorf("SyncValFmGPU: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
-		if mm.GPU.Debug {
+		if Debug {
 			log.Println(err)
 			return err
 		}

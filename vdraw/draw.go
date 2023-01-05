@@ -5,6 +5,7 @@
 package vdraw
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	"log"
@@ -29,7 +30,10 @@ const (
 func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 	dw.UpdtMu.Lock()
 	_, tx, _ := dw.Sys.Vars().ValByIdxTry(0, "Tex", idx)
-	tx.SetGoImage(img, layer, flipY)
+	err := tx.SetGoImage(img, layer, flipY)
+	if err != nil && vgpu.Debug {
+		fmt.Println(err)
+	}
 	dw.UpdtMu.Unlock()
 }
 

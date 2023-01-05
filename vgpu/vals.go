@@ -67,12 +67,13 @@ func (vl *Val) ClearMod() {
 }
 
 // Init initializes value based on variable and index within list of vals for this var
-func (vl *Val) Init(vr *Var, idx int) {
+func (vl *Val) Init(gp *GPU, vr *Var, idx int) {
 	vl.Idx = idx
 	vl.Name = fmt.Sprintf("%s_%d", vr.Name, vl.Idx)
 	vl.N = vr.ArrayN
 	if vr.Role >= TextureRole {
 		vl.Texture = &Texture{}
+		vl.Texture.GPU = gp
 		vl.Texture.Defaults()
 	}
 }
@@ -266,7 +267,7 @@ type Vals struct {
 // repeatedly.  Otherwise, any existing vals will be deleted -- the Memory system
 // must free all associated memory prior!
 // Returns true if new config made, else false if same size.
-func (vs *Vals) ConfigVals(dev vk.Device, vr *Var, nvals int) bool {
+func (vs *Vals) ConfigVals(gp *GPU, dev vk.Device, vr *Var, nvals int) bool {
 	if len(vs.Vals) == nvals {
 		return false
 	}
@@ -274,7 +275,7 @@ func (vs *Vals) ConfigVals(dev vk.Device, vr *Var, nvals int) bool {
 	vs.Vals = make([]*Val, nvals)
 	for i := 0; i < nvals; i++ {
 		vl := &Val{}
-		vl.Init(vr, i)
+		vl.Init(gp, vr, i)
 		vs.Vals[i] = vl
 		if vr.TextureOwns {
 			vl.SetFlag(int(ValTextureOwns))
@@ -290,7 +291,7 @@ func (vs *Vals) ConfigVals(dev vk.Device, vr *Var, nvals int) bool {
 func (vs *Vals) ValByIdxTry(idx int) (*Val, error) {
 	if idx >= len(vs.Vals) || idx < 0 {
 		err := fmt.Errorf("vgpu.Vals:ValByIdxTry index %d out of range", idx)
-		if TheGPU.Debug {
+		if Debug {
 			log.Println(err)
 		}
 		return nil, err
@@ -308,7 +309,7 @@ func (vs *Vals) SetName(idx int, name string) (*Val, error) {
 	_, has := vs.NameMap[name]
 	if has {
 		err := fmt.Errorf("vgpu.Vals:SetName name %s exists", name)
-		if TheGPU.Debug {
+		if Debug {
 			log.Println(err)
 		}
 		return nil, err
@@ -323,7 +324,7 @@ func (vs *Vals) ValByNameTry(name string) (*Val, error) {
 	vl, ok := vs.NameMap[name]
 	if !ok {
 		err := fmt.Errorf("vgpu.Vals:ValByNameTry name %s not found", name)
-		if TheGPU.Debug {
+		if Debug {
 			log.Println(err)
 		}
 		return nil, err
@@ -419,7 +420,7 @@ func (vs *Vals) ModRegs() []MemReg {
 // This method creates actual image vals in GpTexVals, which
 // are allocated.  Must call SetGoImage on Vals here, which
 // redirects to the proper allocated GpTexVals image and layer.
-func (vs *Vals) AllocTexBySize(vr *Var) {
+func (vs *Vals) AllocTexBySize(gp *GPU, vr *Var) {
 	if vr.TextureOwns {
 		log.Println("vgpu.Vals.AllocTexBySize: cannot use TextureOwns flag for this function.")
 		vs.TexSzAlloc.On = false
@@ -444,7 +445,7 @@ func (vs *Vals) AllocTexBySize(vr *Var) {
 	for i, sz := range vs.TexSzAlloc.GpSizes {
 		nlay := len(vs.TexSzAlloc.GpAllocs[i])
 		vl := &Val{}
-		vl.Init(vr, i)
+		vl.Init(gp, vr, i)
 		vs.GpTexVals[i] = vl
 		vl.Texture.ConfigGoImage(sz, nlay)
 	}

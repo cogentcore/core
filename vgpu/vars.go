@@ -199,7 +199,7 @@ func (vs *Vars) SetTry(set int) (*VarSet, error) {
 	st, has := vs.SetMap[set]
 	if !has {
 		err := fmt.Errorf("vgpu.Vars:SetTry set number %d not found", set)
-		if TheGPU.Debug {
+		if Debug {
 			log.Println(err)
 		}
 		return nil, err

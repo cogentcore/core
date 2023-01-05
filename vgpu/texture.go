@@ -29,7 +29,7 @@ func (tx *Texture) Destroy() {
 func (tx *Texture) AllocTexture() {
 	tx.AllocImage()
 	if tx.Sampler.VkSampler == nil {
-		tx.Sampler.Config(tx.Dev)
+		tx.Sampler.Config(tx.GPU, tx.Dev)
 	}
 	tx.ConfigStdView()
 }
@@ -54,7 +54,7 @@ func (sm *Sampler) Defaults() {
 }
 
 // Config configures sampler on device
-func (sm *Sampler) Config(dev vk.Device) {
+func (sm *Sampler) Config(gp *GPU, dev vk.Device) {
 	sm.Destroy(dev)
 	var samp vk.Sampler
 	ret := vk.CreateSampler(dev, &vk.SamplerCreateInfo{
@@ -65,7 +65,7 @@ func (sm *Sampler) Config(dev vk.Device) {
 		AddressModeV:            sm.VMode.VkMode(),
 		AddressModeW:            sm.WMode.VkMode(),
 		AnisotropyEnable:        vk.True,
-		MaxAnisotropy:           TheGPU.GPUProps.Limits.MaxSamplerAnisotropy,
+		MaxAnisotropy:           gp.GPUProps.Limits.MaxSamplerAnisotropy,
 		BorderColor:             sm.Border.VkColor(),
 		UnnormalizedCoordinates: vk.False,
 		CompareEnable:           vk.False,

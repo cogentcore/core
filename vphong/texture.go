@@ -68,7 +68,7 @@ func (ph *Phong) ConfigTextures() {
 		img.Texture.ConfigGoImage(kv.Val.Image.Bounds().Size(), 1)
 	}
 	ivar := txset.VarMap["Tex"]
-	ivar.Vals.AllocTexBySize(ivar) // organize images by size so all fit
+	ivar.Vals.AllocTexBySize(ph.Sys.GPU, ivar) // organize images by size so all fit
 }
 
 // AllocTextures allocates textures that have been previously configured,
@@ -114,7 +114,7 @@ func (ph *Phong) UseTextureName(name string) error {
 	idx, ok := ph.Textures.IdxByKey(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseTextureName -- name not found: %s", name)
-		if vgpu.TheGPU.Debug {
+		if vgpu.Debug {
 			log.Println(err)
 		}
 	}
@@ -143,7 +143,7 @@ func (ph *Phong) UpdateTextureName(name string) error {
 	idx, ok := ph.Textures.IdxByKey(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UpdateTextureName -- name not found: %s", name)
-		if vgpu.TheGPU.Debug {
+		if vgpu.Debug {
 			log.Println(err)
 		}
 	}

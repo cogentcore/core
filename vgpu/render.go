@@ -20,6 +20,7 @@ import (
 // The Render object lives on the System, and any associated Surface,
 // RenderFrame, and Framebuffers point to it.
 type Render struct {
+	Sys        *System         `desc:"system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc"`
 	Dev        vk.Device       `desc:"the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface"`
 	Format     ImageFormat     `desc:"image format information for the framebuffer we render to"`
 	Depth      Image           `desc:"the associated depth buffer, if set"`
@@ -92,7 +93,7 @@ func (rp *Render) ConfigImpl(dev vk.Device, imgFmt *ImageFormat, depthFmt Types,
 
 	if depthFmt != UndefType {
 		rp.HasDepth = true
-		rp.Depth.ConfigDepth(dev, depthFmt, imgFmt)
+		rp.Depth.ConfigDepth(rp.Sys.GPU, dev, depthFmt, imgFmt)
 		depthAttach := vk.AttachmentDescription{
 			Format:         rp.Depth.Format.Format,
 			Samples:        rp.Depth.Format.Samples,
@@ -109,7 +110,7 @@ func (rp *Render) ConfigImpl(dev vk.Device, imgFmt *ImageFormat, depthFmt Types,
 	if rp.Format.Samples != vk.SampleCount1Bit {
 		rp.HasMulti = true
 		ca.FinalLayout = vk.ImageLayoutColorAttachmentOptimal
-		rp.Multi.ConfigMulti(dev, &rp.Format)
+		rp.Multi.ConfigMulti(rp.Sys.GPU, dev, &rp.Format)
 		resolveAttach := vk.AttachmentDescription{
 			Format:         rp.Format.Format,
 			Samples:        vk.SampleCount1Bit,

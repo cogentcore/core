@@ -71,7 +71,7 @@ func (ph *Phong) UseMeshName(name string) error {
 	idx, ok := ph.Meshes.IdxByKey(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseMeshName -- name not found: %s", name)
-		if vgpu.TheGPU.Debug {
+		if vgpu.Debug {
 			log.Println(err)
 		}
 	}
@@ -103,7 +103,7 @@ func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr mat32.ArrayF
 	i, ok := ph.Meshes.IdxByKey(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseMeshName -- name not found: %s", name)
-		if vgpu.TheGPU.Debug {
+		if vgpu.Debug {
 			log.Println(err)
 		}
 	}
