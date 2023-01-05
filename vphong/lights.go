@@ -74,24 +74,24 @@ func (ph *Phong) ConfigLights() {
 	vars := ph.Sys.Vars()
 	vs := vars.SetMap[int(NLightSet)]
 	nlv, nl, _ := vs.ValByIdxTry("NLights", 0)
-	nl.CopyBytes(unsafe.Pointer(&ph.NLights))
+	nl.CopyFromBytes(unsafe.Pointer(&ph.NLights))
 	vs.BindDynVal(vars, nlv, nl)
 
 	vs = vars.SetMap[int(LightSet)]
 	alv, al, _ := vs.ValByIdxTry("AmbLights", 0)
-	al.CopyBytes(unsafe.Pointer(&ph.Ambient[0]))
+	al.CopyFromBytes(unsafe.Pointer(&ph.Ambient[0]))
 	vs.BindDynVal(vars, alv, al)
 
 	dlv, dl, _ := vs.ValByIdxTry("DirLights", 0)
-	dl.CopyBytes(unsafe.Pointer(&ph.Dir[0]))
+	dl.CopyFromBytes(unsafe.Pointer(&ph.Dir[0]))
 	vs.BindDynVal(vars, dlv, dl)
 
 	plv, pl, _ := vs.ValByIdxTry("PointLights", 0)
-	pl.CopyBytes(unsafe.Pointer(&ph.Point[0]))
+	pl.CopyFromBytes(unsafe.Pointer(&ph.Point[0]))
 	vs.BindDynVal(vars, plv, pl)
 
 	slv, sl, _ := vs.ValByIdxTry("SpotLights", 0)
-	sl.CopyBytes(unsafe.Pointer(&ph.Spot[0]))
+	sl.CopyFromBytes(unsafe.Pointer(&ph.Spot[0]))
 	vs.BindDynVal(vars, slv, sl)
 }
 

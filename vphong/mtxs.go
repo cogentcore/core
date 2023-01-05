@@ -23,7 +23,7 @@ func (ph *Phong) SetViewPrjn(view, prjn *mat32.Mat4) {
 	ph.Cur.VPMtx.Prjn = *prjn
 	vars := ph.Sys.Vars()
 	_, mtx, _ := vars.ValByIdxTry(int(MtxsSet), "Mtxs", 0)
-	mtx.CopyBytes(unsafe.Pointer(&ph.Cur.VPMtx))
+	mtx.CopyFromBytes(unsafe.Pointer(&ph.Cur.VPMtx))
 	ph.Sys.Mem.SyncToGPU()
 	vars.BindDynValIdx(int(MtxsSet), "Mtxs", 0)
 }

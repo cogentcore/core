@@ -109,7 +109,7 @@ func (dw *Drawer) ConfigSys() {
 
 	rectIdx, _ := idxv.Vals.ValByIdxTry(0)
 	idxs := []uint16{0, 1, 2, 2, 1, 3} // triangle strip order
-	rectIdx.CopyBytes(unsafe.Pointer(&idxs[0]))
+	rectIdx.CopyFromBytes(unsafe.Pointer(&idxs[0]))
 
 	sy.Mem.SyncToGPU()
 
@@ -218,7 +218,6 @@ func (dw *Drawer) ConfigMtxs(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 // is a 2-unit by 2-unit square. The Y-axis points upwards.
 //
 // if yisdown is true, then the y=0 is at top in dest, else bottom
-//
 func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, yisdown bool) mat32.Mat3 {
 	// Convert from pixel coords to vertex shader coords.
 	invHalfWidth := 2 / float32(widthPx)

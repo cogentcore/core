@@ -8,9 +8,11 @@
 package vgpu
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"unsafe"
 
@@ -40,6 +42,7 @@ type GPU struct {
 	DeviceExts       []string               `desc:"use Add method to add required device extentions prior to calling Config"`
 	ValidationLayers []string               `desc:"set Add method to add required validation layers prior to calling Config"`
 	Debug            bool                   `desc:"set to true prior to calling Config to enable debug mode"`
+	Compute          bool                   `desc:"this is used for computing, not graphics"`
 	DebugCallback    vk.DebugReportCallback `desc:"our custom debug callback"`
 
 	GPUProps    vk.PhysicalDeviceProperties       `desc:"properties of physical hardware -- populated after Config"`
@@ -82,6 +85,8 @@ func (gp *GPU) Defaults(graphics bool) {
 	gp.InstanceExts = []string{"VK_KHR_get_physical_device_properties2"}
 	if graphics {
 		gp.DeviceExts = append(gp.DeviceExts, []string{"VK_KHR_swapchain"}...)
+	} else {
+		gp.Compute = true
 	}
 	PlatformDefaults(gp)
 }
@@ -211,17 +216,20 @@ func (gp *GPU) Config(name string) error {
 	vk.InitInstance(instance)
 
 	// Find a suitable GPU
-	var gpuCount uint32
-	ret = vk.EnumeratePhysicalDevices(gp.Instance, &gpuCount, nil)
+	var gpuCountU uint32
+	ret = vk.EnumeratePhysicalDevices(gp.Instance, &gpuCountU, nil)
 	IfPanic(NewError(ret))
-	if gpuCount == 0 {
+	if gpuCountU == 0 {
 		return errors.New("vulkan error: no GPU devices found")
 	}
+	gpuCount := int(gpuCountU)
 	gpus := make([]vk.PhysicalDevice, gpuCount)
-	ret = vk.EnumeratePhysicalDevices(gp.Instance, &gpuCount, gpus)
+	ret = vk.EnumeratePhysicalDevices(gp.Instance, &gpuCountU, gpus)
 	IfPanic(NewError(ret))
-	// get the first one, multiple GPUs not supported yet
-	gp.GPU = gpus[0]
+
+	gpIdx := gp.SelectGPU(gpuCount)
+
+	gp.GPU = gpus[gpIdx]
 	vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GPUProps)
 	gp.GPUProps.Deref()
 	gp.GPUProps.Limits.Deref()
@@ -254,6 +262,58 @@ func (gp *GPU) Config(name string) error {
 	}
 
 	return nil
+}
+
+func (gp *GPU) SelectGPU(gpuCount int) int {
+	if gpuCount == 1 {
+		return 0
+	}
+	devNm := ""
+	if ev := os.Getenv("MESA_VK_DEVICE_SELECT"); ev != "" {
+		devNm = ev
+	} else if ev := os.Getenv("VK_DEVICE_SELECT"); ev != "" {
+		devNm = ev
+	}
+	if gp.Compute {
+		if ev := os.Getenv("VK_COMPUTE_DEVICE_SELECT"); ev != "" {
+			devNm = ev
+		}
+	}
+
+	if devNm != "" {
+		for gi := 0; gi < gpuCount; gi++ {
+			var props vk.PhysicalDeviceProperties
+			vk.GetPhysicalDeviceProperties(gp.GPU, &props)
+			props.Deref()
+			if bytes.Contains(props.DeviceName[:], []byte(devNm)) {
+				return gi
+			}
+		}
+	}
+
+	maxSz := 0
+	maxIdx := 0
+	for gi := 0; gi < gpuCount; gi++ {
+		var props vk.PhysicalDeviceProperties
+		vk.GetPhysicalDeviceProperties(gp.GPU, &props)
+		props.Deref()
+		if props.DeviceType == vk.PhysicalDeviceTypeDiscreteGpu {
+			var memProps vk.PhysicalDeviceMemoryProperties
+			vk.GetPhysicalDeviceMemoryProperties(gp.GPU, &memProps)
+			memProps.Deref()
+			for mi := uint32(0); mi < memProps.MemoryHeapCount; mi++ {
+				heap := &memProps.MemoryHeaps[mi]
+				if heap.Flags&vk.MemoryHeapFlags(vk.MemoryHeapDeviceLocalBit) != 0 {
+					sz := int(heap.Size)
+					if sz > maxSz {
+						maxSz = sz
+						maxIdx = gi
+					}
+				}
+			}
+		}
+	}
+	return maxIdx
 }
 
 // Destroy destroys GPU resources -- call after everything else has been destroyed

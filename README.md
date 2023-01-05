@@ -8,6 +8,19 @@ vGPU is a Vulkan-based framework for both Graphics and Compute Engine use of GPU
 
 [Vulkan](https://www.vulkan.org) is very low-level and demands a higher-level framework to manage the complexity and verbosity.  While there are many helpful tutorials covering the basic API, many of the tutorials don't provide much of a pathway for how to organize everything at a higher level of abstraction.  vGPU represents one attempt that enforces some reasonable choices that enable a significantly simpler programming model, while still providing considerable flexibility and high levels of performance.  Everything is a tradeoff, and simplicity definitely was prioritized over performance in a few cases, but in practical use-cases, the performance differences should be minimal.
 
+# Selecting a GPU Device
+
+For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used.  To see what is available and their properties, use:
+
+```
+$ vulkaninfo --summary
+```
+
+The following environment variables can be set to specifically select a particular device by name (`deviceName`): 
+
+* `MESA_VK_DEVICE_SELECT` (standard for mesa-based drivers) or `VK_DEVICE_SELECT` -- for graphics or compute usage.
+* `VK_COMPUTE_DEVICE_SELECT` -- only used for compute, if present -- will override above, so you can use different GPUs for graphics vs compute.
+
 # vPhong and vShape
 
 The [vPhong](https://github.com/goki/vgpu/tree/main/vphong) package provides a complete rendering implementation with different pipelines for different materials, and support for 4 different types of light sources based on the classic Blinn-Phong lighting model.  See the `examples/phong` example for how to use it.  It does not assume any kind of organization of the rendering elements, and just provides name and index-based access to all the resources needed to render a scene.
@@ -129,6 +142,10 @@ Here's some info on the logical issues:
 This [blog](http://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html) has a particularly clear discussion of the need for Texture arrays for managing textures within a render pass.  This is automatically how Texture vars are managed .
 
 # GPU Accelerated Compute Engine
+
+See `examples/compute1` for a very simple compute shader.
+
+See the [gosl](https://github.com/goki/gosl) repository for a tool that converts Go code into HLSL shader code, so you can effectively run Go on the GPU.
 
 # Mac Platform
 
