@@ -162,13 +162,13 @@ func (ss *Sprites) Delete(sp *Sprite) {
 // its last allocated value, in SzAlloc.  Returns true and sets Modified
 // flag to true if so.
 func (ss *Sprites) HasSizeChanged() bool {
-	if len(ss.SzAlloc.ItmSizes) != ss.Names.Len() {
+	if len(ss.SzAlloc.ItemSizes) != ss.Names.Len() {
 		ss.Modified = true
 		return true
 	}
 	for i, kv := range ss.Names.Order {
 		sp := kv.Val
-		ssz := ss.SzAlloc.ItmSizes[i]
+		ssz := ss.SzAlloc.ItemSizes[i]
 		if sp.Geom.Size != ssz {
 			ss.Modified = true
 			return true

@@ -8,28 +8,28 @@ require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/aymerick/douceur v0.2.0
-	github.com/c2h5oh/datasize v0.0.0-20200825124411-48ed595a09d2
+	github.com/c2h5oh/datasize v0.0.0-20220606134207-859f65c6625b
 	github.com/fatih/camelcase v1.0.0
-	github.com/fsnotify/fsnotify v1.5.4
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220516021902-eb3e265c7661
+	github.com/fsnotify/fsnotify v1.6.0
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-gl/mathgl v1.0.0
 	github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c
 	github.com/goki/go-difflib v1.2.1
-	github.com/goki/ki v1.1.8
-	github.com/goki/kigen v1.0.0
-	github.com/goki/mat32 v1.0.12
-	github.com/goki/pi v1.0.20
+	github.com/goki/ki v1.1.9
+	github.com/goki/kigen v1.0.2
+	github.com/goki/mat32 v1.0.13
+	github.com/goki/pi v1.0.21
 	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
-	github.com/goki/vgpu v1.0.5
-	github.com/goki/vulkan v0.0.0-20220512102541-6e89b8ce8542
+	github.com/goki/vgpu v1.0.7
+	github.com/goki/vulkan v0.0.0-20220928215615-c67065a9cfc2
 	github.com/iancoleman/strcase v0.2.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/srwiley/rasterx v0.0.0-20220128185129-2efea2b9ea41
+	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
-	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf
-	golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9
-	golang.org/x/net v0.0.0-20220531201128-c960675eff93
+	golang.org/x/exp v0.0.0-20230105202349-8879d0199aa3
+	golang.org/x/image v0.3.0
+	golang.org/x/net v0.5.0
 )
 
 require (
@@ -38,15 +38,15 @@ require (
 	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc // indirect
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
 	github.com/akutz/sortfold v0.2.1 // indirect
-	github.com/dlclark/regexp2 v1.4.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.0 // indirect
+	github.com/dlclark/regexp2 v1.7.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.1 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44 // indirect
 	github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
-	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.11 // indirect
+	golang.org/x/mod v0.7.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/tools v0.5.0 // indirect
 )

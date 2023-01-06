@@ -160,14 +160,14 @@ const (
 // what you're doing (and it might change over time too..)
 //
 // Rendering logic:
-// * vdraw.Drawer manages all rendering to the window surface, provided via
-//   the OSWin window, using vulkan stored images (16 max)
-// * Order is: Base Viewport2D (image 0), then direct uploads, popups, and sprites.
-// * DirectUps (e.g., gi3d.Scene) directly upload their own texture to a Draw image
-//   (note: cannot upload directly to window as this prevents popups and overlays)
-// * Popups (which have their own Viewports)
-// * Sprites are managed as layered textures of the same size, to enable
-//   unlimited number packed into a few descriptors for standard sizes.
+//   - vdraw.Drawer manages all rendering to the window surface, provided via
+//     the OSWin window, using vulkan stored images (16 max)
+//   - Order is: Base Viewport2D (image 0), then direct uploads, popups, and sprites.
+//   - DirectUps (e.g., gi3d.Scene) directly upload their own texture to a Draw image
+//     (note: cannot upload directly to window as this prevents popups and overlays)
+//   - Popups (which have their own Viewports)
+//   - Sprites are managed as layered textures of the same size, to enable
+//     unlimited number packed into a few descriptors for standard sizes.
 type Window struct {
 	NodeBase
 	Title             string       `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
@@ -1436,7 +1436,8 @@ func (w *Window) ConfigSprites() {
 		imgidx := SpriteStart + gpi
 		drw.ConfigImage(imgidx, vgpu.NewImageFormat(gsz.X, gsz.Y, len(ga)))
 		for ii, spi := range ga {
-			if w.Sprites.Names.IdxIsValid(spi) != nil {
+			if err := w.Sprites.Names.IdxIsValid(spi); err != nil {
+				fmt.Println(err)
 				continue
 			}
 			sp := w.Sprites.Names.ValByIdx(spi)

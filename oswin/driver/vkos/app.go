@@ -48,6 +48,7 @@ type appImpl struct {
 	mu            sync.Mutex
 	mainQueue     chan funcRun
 	mainDone      chan struct{}
+	gpu           *vgpu.GPU
 	shareWin      *glfw.Window // a non-visible, always-present window that all windows share gl context with
 	windows       map[*glfw.Window]*windowImpl
 	oswindows     map[uintptr]*windowImpl
@@ -189,10 +190,10 @@ func (app *appImpl) initVk() {
 	}
 
 	winext := app.shareWin.GetRequiredInstanceExtensions()
-	gp := vgpu.NewGPU()
-	gp.AddInstanceExt(winext...)
-	gp.Debug = VkOsDebug
-	gp.Config(app.name)
+	app.gpu = vgpu.NewGPU()
+	app.gpu.AddInstanceExt(winext...)
+	vgpu.Debug = VkOsDebug
+	app.gpu.Config(app.name)
 
 	app.GetScreens()
 }
@@ -239,11 +240,11 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	}
 
 	app.RunOnMain(func() {
-		surfPtr, err := glw.CreateWindowSurface(vgpu.TheGPU.Instance, nil)
+		surfPtr, err := glw.CreateWindowSurface(app.gpu.Instance, nil)
 		if err != nil {
 			log.Println(err)
 		}
-		w.Surface = vgpu.NewSurface(vgpu.TheGPU, vk.SurfaceFromPointer(surfPtr))
+		w.Surface = vgpu.NewSurface(app.gpu, vk.SurfaceFromPointer(surfPtr))
 		w.Draw.YIsDown = true
 		w.Draw.ConfigSurface(w.Surface, vgpu.MaxTexturesPerSet) // note: can expand
 	})
