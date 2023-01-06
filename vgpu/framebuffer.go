@@ -34,9 +34,9 @@ func (fb *Framebuffer) ConfigSurfaceImage(gp *GPU, dev vk.Device, fmt ImageForma
 // In general it is recommended to use vk.SampleCount4Bit to avoid aliasing.
 // Does not yet make the Framebuffer because it still needs the Render
 // (see ConfigRender)
-func (fb *Framebuffer) ConfigRenderImage(dev vk.Device, fmt ImageFormat) {
+func (fb *Framebuffer) ConfigRenderImage(gp *GPU, dev vk.Device, fmt ImageFormat) {
 	fb.Format = fmt
-	fb.Image.ConfigFramebuffer(fb.Render.Sys.GPU, dev, &fmt)
+	fb.Image.ConfigFramebuffer(gp, dev, &fmt)
 }
 
 // ConfigRender configures for Render, assuming image is already set

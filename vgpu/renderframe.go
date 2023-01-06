@@ -84,7 +84,7 @@ func (rf *RenderFrame) Config() {
 	rf.Frames = make([]*Framebuffer, rf.NFrames)
 	for i := 0; i < rf.NFrames; i++ {
 		fr := &Framebuffer{}
-		fr.ConfigRenderImage(dev, rf.Format)
+		fr.ConfigRenderImage(rf.GPU, dev, rf.Format)
 		rf.Frames[i] = fr
 	}
 }
@@ -132,7 +132,7 @@ func (rf *RenderFrame) ReConfig() {
 // Assumes Config has been called.
 func (rf *RenderFrame) ReConfigFrames() {
 	for _, fr := range rf.Frames {
-		fr.ConfigRenderImage(rf.Device.Device, rf.Format)
+		fr.ConfigRenderImage(rf.GPU, rf.Device.Device, rf.Format)
 		fr.ConfigRender(rf.Render)
 	}
 }

@@ -565,6 +565,6 @@ func (st *VarSet) TexGpSzIdxs(vs *Vars, varNm string, valIdx int) *szalloc.Idxs 
 		log.Println(err)
 		return nil
 	}
-	idxs := vr.Vals.TexSzAlloc.ItmIdxs[valIdx]
+	idxs := vr.Vals.TexSzAlloc.ItemIdxs[valIdx]
 	return idxs
 }

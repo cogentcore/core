@@ -190,7 +190,7 @@ func (ph *Phong) RenderTexture() {
 	push.Tex = ph.Cur.TexPars
 	push.ModelMtx[15] = idxs.PctSize.X // packing bits..
 	push.Color.Emissive.W = idxs.PctSize.Y
-	txIdxP := txIdx*1024 + idxs.ItmIdx // packing index and layer into one
+	txIdxP := txIdx*1024 + idxs.ItemIdx // packing index and layer into one
 	push.Color.ShinyBright.W = float32(txIdxP)
 	ph.Push(pl, push)
 	pl.BindDrawVertex(cmd, ph.Cur.DescIdx)
