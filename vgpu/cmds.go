@@ -144,10 +144,14 @@ func CmdSubmit(cmd vk.CommandBuffer, dev *Device) {
 	IfPanic(NewError(ret))
 }
 
-// CmdSubmitWait does End, Submit, WaitIdle on command Buffer
+// CmdSubmitWait does Submit, WaitIdle on command Buffer
 func CmdSubmitWait(cmd vk.CommandBuffer, dev *Device) {
-	CmdEnd(cmd)
 	CmdSubmit(cmd, dev)
+	vk.QueueWaitIdle(dev.Queue)
+}
+
+// CmdWait does WaitIdle on given device
+func CmdWait(dev *Device) {
 	vk.QueueWaitIdle(dev.Queue)
 }
 

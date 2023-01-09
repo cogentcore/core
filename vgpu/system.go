@@ -336,3 +336,11 @@ func (sy *System) MemCmdStart() vk.CommandBuffer {
 func (sy *System) MemCmdSubmitWaitFree() {
 	sy.Mem.CmdPool.SubmitWaitFree(&sy.Device)
 }
+
+/////////////////////////////////////////////
+// Compute utils
+
+// CmdSubmitWait does SubmitWait on CmdPool
+func (sy *System) CmdSubmitWait() {
+	sy.CmdPool.SubmitWait(&sy.Device)
+}

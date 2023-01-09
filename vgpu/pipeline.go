@@ -412,24 +412,3 @@ func (pl *Pipeline) BindDrawVertex(cmd vk.CommandBuffer, descIdx int) {
 	pl.BindPipeline(cmd)
 	pl.DrawVertex(cmd, descIdx)
 }
-
-///////////////////////////////////////////////////////////////////////////////////////
-//  Compute
-
-// ComputeCommand adds commands to run the compute shader for given
-// number of computational elements along 3 dimensions,
-// which are passed as indexes into the shader.
-func (pl *Pipeline) ComputeCommand(cmd vk.CommandBuffer, nx, ny, nz int) {
-	vk.CmdBindPipeline(cmd, vk.PipelineBindPointCompute, pl.VkPipeline)
-	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
-}
-
-// RunComputeWait runs the compute shader for given
-// number of computational elements along 3 dimensions,
-// which are passed as indexes into the shader.
-// Submits the run command and waits for the queue to finish so the
-// results will be available immediately after this.
-func (pl *Pipeline) RunComputeWait(cmd vk.CommandBuffer, nx, ny, nz int) {
-	pl.ComputeCommand(cmd, nx, ny, nz)
-	CmdSubmitWait(cmd, &pl.Sys.Device)
-}
