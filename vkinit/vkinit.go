@@ -4,6 +4,10 @@
 
 //go:build (linux && cgo) || (darwin && cgo) || (freebsd && cgo)
 
+/*
+package vkinit handles loading and initialization of Vulkan without
+any dependency upon glfw
+*/
 package vkinit
 
 // #cgo LDFLAGS: -ldl
@@ -17,6 +21,8 @@ import (
 	vk "github.com/goki/vulkan"
 )
 
+// LoadVulkan loads and initializes the vulkan library, using default lib names
+// for each different platform.
 func LoadVulkan() error {
 	clibnm := C.CString(DlName)
 	defer C.free(unsafe.Pointer(clibnm))

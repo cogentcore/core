@@ -45,8 +45,9 @@ type GPU struct {
 	MemoryProps vk.PhysicalDeviceMemoryProperties `desc:"properties of device memory -- populated after Config"`
 }
 
-// Init initializes vulkan system -- call before doing any vgpu stuff.
-// calls glfw.Init and sets the Vulkan instance proc addr and calls Init.
+// Init initializes vulkan system for Display-enabled use, using glfw.
+// Must call before doing any vgpu stuff.
+// Calls glfw.Init and sets the Vulkan instance proc addr and calls Init.
 // IMPORTANT: must be called on the main initial thread!
 func Init() error {
 	err := glfw.Init()
@@ -66,7 +67,7 @@ func Init() error {
 // InitNoDisplay initializes vulkan system for a purely compute-based
 // or headless operation, without any display (i.e., without using glfw).
 // Call before doing any vgpu stuff.
-// calls glfw.Init and sets the Vulkan instance proc addr and calls Init.
+// Loads the vulkan library and sets the Vulkan instance proc addr and calls Init.
 // IMPORTANT: must be called on the main initial thread!
 func InitNoDisplay() error {
 	err := vkinit.LoadVulkan()
