@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/ki/kit"
+	"github.com/goki/vgpu/vkinit"
 	vk "github.com/goki/vulkan"
 )
 
@@ -60,6 +61,20 @@ func Init() error {
 		return err
 	}
 	return err
+}
+
+// InitNoDisplay initializes vulkan system for a purely compute-based
+// or headless operation, without any display (i.e., without using glfw).
+// Call before doing any vgpu stuff.
+// calls glfw.Init and sets the Vulkan instance proc addr and calls Init.
+// IMPORTANT: must be called on the main initial thread!
+func InitNoDisplay() error {
+	err := vkinit.LoadVulkan()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
 
 // Terminate shuts down the vulkan system -- call as last thing before quitting.

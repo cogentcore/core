@@ -6,6 +6,11 @@ package vgpu
 
 import vk "github.com/goki/vulkan"
 
+// todo: more work needed to figure out how to actually run
+// more efficiently -- Submit is the biggie time-wise.
+
+// https://www.reddit.com/r/vulkan/comments/us9p72/multiple_command_buffers_vs_multiple_batches_of/
+
 // ComputeBindVars adds command to the default system CmdPool
 // command buffer, to bind the Vars descriptors,
 // for given collection of descriptors descIdx
