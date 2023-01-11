@@ -258,7 +258,7 @@ func (mm *Memory) TransferRegsToGPU(buff *MemBuff, regs []MemReg) {
 
 	vk.CmdCopyBuffer(cmd, buff.Host, buff.Dev, uint32(len(rg)), rg)
 
-	mm.CmdPool.SubmitWaitFree(&mm.Device)
+	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
 // TransferRegsFmGPU transfers memory from GPU to CPU for given regions
@@ -277,7 +277,7 @@ func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 
 	vk.CmdCopyBuffer(cmd, buff.Dev, buff.Host, uint32(len(rg)), rg)
 
-	mm.CmdPool.SubmitWaitFree(&mm.Device)
+	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -306,7 +306,7 @@ func (mm *Memory) TransferTexturesToGPU(buff vk.Buffer, imgs ...*Image) {
 		}
 		im.TransitionDstToShader(cmd)
 	}
-	mm.CmdPool.SubmitWaitFree(&mm.Device)
+	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
 // TransferImagesFmGPU transfers image memory from GPU to CPU for given images.
@@ -319,7 +319,7 @@ func (mm *Memory) TransferImagesFmGPU(buff vk.Buffer, imgs ...*Image) {
 	for _, im := range imgs {
 		vk.CmdCopyImageToBuffer(cmd, im.Image, vk.ImageLayoutTransferDstOptimal, buff, 1, []vk.BufferImageCopy{im.CopyRec()})
 	}
-	mm.CmdPool.SubmitWaitFree(&mm.Device)
+	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
 // TransferAllValsTextures copies all vals images from host buffer to device memory

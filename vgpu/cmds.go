@@ -17,7 +17,7 @@ type CmdPool struct {
 
 // ConfigTransient configures the pool for transient command buffers,
 // which are best used for random functions, such as memory copying.
-// Use SubmitWaitFree logic.
+// Use EndSubmitWaitFree logic.
 func (cp *CmdPool) ConfigTransient(dv *Device) {
 	var cmdPool vk.CommandPool
 	ret := vk.CreateCommandPool(dv.Device, &vk.CommandPoolCreateInfo{
@@ -70,14 +70,19 @@ func (cp *CmdPool) BeginCmdOneTime() vk.CommandBuffer {
 	return cp.Buff
 }
 
-// SubmitWait does End, Submit, WaitIdle on Buffer
+// SubmitWait does Submit, WaitIdle on Buffer
 func (cp *CmdPool) SubmitWait(dev *Device) {
 	CmdSubmitWait(cp.Buff, dev)
 }
 
-// SubmitWaitFree does End, Submit, WaitIdle, Free on Buffer
-func (cp *CmdPool) SubmitWaitFree(dev *Device) {
-	cp.SubmitWait(dev)
+// EndSubmitWait does End, Submit, WaitIdle on Buffer
+func (cp *CmdPool) EndSubmitWait(dev *Device) {
+	CmdEndSubmitWait(cp.Buff, dev)
+}
+
+// EndSubmitWaitFree does End, Submit, WaitIdle, Free on Buffer
+func (cp *CmdPool) EndSubmitWaitFree(dev *Device) {
+	cp.EndSubmitWait(dev)
 	cp.FreeBuffer(dev)
 }
 
@@ -146,6 +151,13 @@ func CmdSubmit(cmd vk.CommandBuffer, dev *Device) {
 
 // CmdSubmitWait does Submit, WaitIdle on command Buffer
 func CmdSubmitWait(cmd vk.CommandBuffer, dev *Device) {
+	CmdSubmit(cmd, dev)
+	vk.QueueWaitIdle(dev.Queue)
+}
+
+// CmdEndSubmitWait does End, Submit, WaitIdle on command Buffer
+func CmdEndSubmitWait(cmd vk.CommandBuffer, dev *Device) {
+	CmdEnd(cmd)
 	CmdSubmit(cmd, dev)
 	vk.QueueWaitIdle(dev.Queue)
 }

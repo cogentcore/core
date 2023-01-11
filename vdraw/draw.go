@@ -66,7 +66,7 @@ func (dw *Drawer) SetFrameImage(idx int, fb *vgpu.Framebuffer) {
 	}
 	cmd := dw.Sys.MemCmdStart()
 	fb.CopyToImage(&tx.Texture.Image, dw.Sys.Device.Device, cmd)
-	dw.Sys.MemCmdSubmitWaitFree()
+	dw.Sys.MemCmdEndSubmitWaitFree()
 	dw.UpdtMu.Unlock()
 }
 

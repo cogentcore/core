@@ -330,11 +330,11 @@ func (sy *System) MemCmdStart() vk.CommandBuffer {
 	return cmd
 }
 
-// MemCmdSubmitWaitFree submits current one-time memory command
+// MemCmdEndSubmitWaitFree submits current one-time memory command
 // using the Memory CmdPool and Device associated with this System
 // Use this for other random memory transfer commands.
-func (sy *System) MemCmdSubmitWaitFree() {
-	sy.Mem.CmdPool.SubmitWaitFree(&sy.Device)
+func (sy *System) MemCmdEndSubmitWaitFree() {
+	sy.Mem.CmdPool.EndSubmitWaitFree(&sy.Device)
 }
 
 /////////////////////////////////////////////

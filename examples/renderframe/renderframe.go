@@ -198,7 +198,7 @@ func main() {
 		if false { // grab  a
 			// tcmd := sy.MemCmdStart()
 			// rf.GrabImage(tcmd, 0)
-			// sy.MemCmdSubmitWaitFree()
+			// sy.MemCmdEndSubmitWaitFree()
 			// gimg, err := fr.Render.Grab.DevGoImage()
 			// if err == nil {
 			// 	gi.SaveImage("render.png", gimg)
