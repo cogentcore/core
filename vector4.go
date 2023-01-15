@@ -67,6 +67,14 @@ func (v *Vec4) SetFromVec3(other Vec3, w float32) {
 	v.W = w
 }
 
+// SetFromVec2 sets this vector from a Vec2 with 0,1 for Z,W
+func (v *Vec4) SetFromVec2(other Vec2) {
+	v.X = other.X
+	v.Y = other.Y
+	v.Z = 0
+	v.W = 1
+}
+
 // SetDim sets this vector component value by dimension index.
 func (v *Vec4) SetDim(dim Dims, value float32) {
 	switch dim {
