@@ -279,7 +279,7 @@ var StdMimes = []MimeType{
 	{"text/x-sh", []string{".bash", ".sh"}, Code, Bash},
 	{"application/x-sh", nil, Code, Bash},
 
-	{"text/x-c", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh"}, Code, C},
+	{"text/x-c", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh", ".hlsl", ".gsl", ".frag", ".vert"}, Code, C},
 	{"text/x-csrc", nil, Code, C},
 	{"text/x-chdr", nil, Code, C},
 	{"text/x-c++hdr", nil, Code, C},
