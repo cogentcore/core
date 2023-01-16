@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"runtime"
 
+	"github.com/goki/ki/ints"
 	"github.com/goki/vgpu/vgpu"
 )
 
@@ -36,6 +37,13 @@ func main() {
 	set := vars.AddSet()
 
 	n := 20 // note: not necc to spec up-front, but easier if so
+
+	threads := 64
+	nInt := ints.IntMultiple(n, threads)
+	n = nInt               // enforce optimal n's -- otherwise requires range checking
+	nGps := nInt / threads // dispatch n
+	fmt.Printf("n: %d\n", n)
+
 	inv := set.Add("In", vgpu.Float32Vec4, n, vgpu.Storage, vgpu.ComputeShader)
 	outv := set.Add("Out", vgpu.Float32Vec4, n, vgpu.Storage, vgpu.ComputeShader)
 	_ = outv
@@ -59,7 +67,7 @@ func main() {
 	vars.BindDynValIdx(0, "Out", 0)
 
 	sy.ComputeBindVars(0)
-	pl.ComputeCommand(n, 1, 1)
+	pl.ComputeCommand(nGps, 1, 1)
 	sy.ComputeSubmitWait() // if no wait, faster, but validation complains
 	fmt.Printf("submit 0\n")
 	for cy := 1; cy < 10; cy++ {
