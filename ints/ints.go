@@ -15,6 +15,8 @@ It also includes Max, Min, Abs for builtin int64, int32 types.
 */
 package ints
 
+import "math"
+
 // Inter converts a type from an int64, used in kit.ToInt and in sorting
 // comparisons.  See also Floater in floats package.
 type Inter interface {
@@ -145,4 +147,10 @@ func Abs32(a int32) int32 {
 		return -a
 	}
 	return a
+}
+
+// IntMultiple returns the interger multiple of mod that is always >= given value:
+// int(Ceil(val / mod)) * mod
+func IntMultiple(val, mod int) int {
+	return int(math.Ceil(float64(val/mod))) * mod
 }
