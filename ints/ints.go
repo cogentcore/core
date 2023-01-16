@@ -152,5 +152,5 @@ func Abs32(a int32) int32 {
 // IntMultiple returns the interger multiple of mod that is always >= given value:
 // int(Ceil(val / mod)) * mod
 func IntMultiple(val, mod int) int {
-	return int(math.Ceil(float64(val/mod))) * mod
+	return int(math.Ceil(float64(val)/float64(mod))) * mod
 }
