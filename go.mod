@@ -15,13 +15,13 @@ require (
 	github.com/go-gl/mathgl v1.0.0
 	github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c
 	github.com/goki/go-difflib v1.2.1
-	github.com/goki/ki v1.1.9
+	github.com/goki/ki v1.1.10
 	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.13
 	github.com/goki/pi v1.0.21
 	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
-	github.com/goki/vgpu v1.0.7
+	github.com/goki/vgpu v1.0.10
 	github.com/goki/vulkan v0.0.0-20220928215615-c67065a9cfc2
 	github.com/iancoleman/strcase v0.2.0
 	github.com/mitchellh/go-homedir v1.1.0
