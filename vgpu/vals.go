@@ -93,8 +93,12 @@ func (vl *Val) MemSize(vr *Var) int {
 	case vl.N == 1 || vr.Role < Uniform:
 		vl.ElSize = vr.SizeOf
 		return vl.ElSize * vl.N
-	default:
+	case vr.Role == Uniform:
 		vl.ElSize = MemSizeAlign(vr.SizeOf, 16) // todo: test this!
+		return vl.ElSize * vl.N
+	default: // storage is ok with anything?
+		// vl.ElSize = MemSizeAlign(vr.SizeOf, 16) // todo: test this!
+		vl.ElSize = vr.SizeOf
 		return vl.ElSize * vl.N
 	}
 }
@@ -177,7 +181,7 @@ func (vl *Val) PaddedArrayCheck() error {
 func (vl *Val) CopyFromBytes(srcPtr unsafe.Pointer) {
 	if err := vl.PaddedArrayCheck(); err != nil {
 		log.Println(err)
-		return
+		// return
 	}
 	dst := vl.Bytes()
 	const m = 0x7fffffff

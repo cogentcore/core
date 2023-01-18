@@ -7,6 +7,7 @@ package vkinit
 import (
 	"fmt"
 	"syscall"
+	"unsafe"
 
 	vk "github.com/goki/vulkan"
 )
@@ -14,14 +15,14 @@ import (
 var DlName = "vulkan-1.dll"
 
 func LoadVulkan() error {
-	handle := syscall.LoadLibrary(DlName)
-	if handle == nil {
+	handle, err := syscall.LoadLibrary(DlName)
+	if err != nil {
 		return fmt.Errorf("Vulkan library named: %s not found!\n", DlName)
 	}
-	pAddr := syscall.GetProcAddress("vkGetInstanceProcAddr")
-	if pAddr == nil {
+	pAddr, err := syscall.GetProcAddress(handle, "vkGetInstanceProcAddr")
+	if err != nil {
 		return fmt.Errorf("Vulkan instance proc addr not found!\n")
 	}
-	vk.SetGetInstanceProcAddr(pAddr)
+	vk.SetGetInstanceProcAddr(unsafe.Pointer(pAddr))
 	return vk.Init()
 }
