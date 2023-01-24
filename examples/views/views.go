@@ -12,6 +12,8 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
+	"github.com/goki/gosl/slbool"
+	_ "github.com/goki/gosl/slboolview"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 )
@@ -35,6 +37,27 @@ type TableStruct struct {
 	File       gi.FileName `desc:"a file"`
 }
 
+type ILStruct struct {
+	On     slbool.Bool `desc:"click to show next"`
+	ShowMe string      `viewif:"On" desc:"can u see me?"`
+	Cond   int         `viewif:"On" desc:"a conditional"`
+	Cond1  string      `viewif:"On&&Cond==0" desc:"On and Cond=0 -- note that slbool as bool cannot be used directly.."`
+	Cond2  TableStruct `viewif:"On&&Cond<=1" desc:"if Cond=0"`
+	Val    float32     `desc:"a value"`
+}
+
+type Struct struct {
+	Stripes  gi.Stripes  `desc:"an enum"`
+	Name     string      `viewif:"!(Stripes==[RowStripes,ColStripes])" desc:"a string"`
+	ShowNext slbool.Bool `desc:"click to show next"`
+	ShowMe   string      `viewif:"ShowNext" desc:"can u see me?"`
+	Inline   ILStruct    `view:"inline" desc:"how about that"`
+	Cond     int         `desc:"a conditional"`
+	Cond1    string      `viewif:"Cond==0" desc:"if Cond=0"`
+	Cond2    TableStruct `viewif:"Cond>=0" desc:"if Cond=0"`
+	Val      float32     `desc:"a value"`
+}
+
 func mainrun() {
 
 	tstslice := make([]string, 40)
@@ -55,6 +78,8 @@ func mainrun() {
 		ts := &TableStruct{Icon: "go", IntField: i, FloatField: float32(i) / 10.0}
 		tsttable[i] = ts
 	}
+
+	var stru Struct
 
 	// turn this on to see a trace of the rendering
 	// gi.WinEventTrace = true
@@ -111,6 +136,10 @@ func mainrun() {
 	split := gi.AddNewSplitView(mfr, "split")
 	split.Dim = mat32.X
 
+	strv := giv.AddNewStructView(split, "strv")
+	strv.SetStruct(&stru)
+	strv.SetStretchMax()
+
 	mv := giv.AddNewMapView(split, "mv")
 	mv.SetMap(&tstmap)
 	mv.SetStretchMaxWidth()
@@ -128,7 +157,7 @@ func mainrun() {
 	tv.SetStretchMaxWidth()
 	tv.SetStretchMaxHeight()
 
-	split.SetSplits(.2, .2, .6)
+	split.SetSplits(.3, .2, .2, .3)
 
 	// main menu
 	appnm := gi.AppName()

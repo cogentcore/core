@@ -23,6 +23,8 @@ import (
 	"github.com/goki/mat32"
 )
 
+// todo: investigate "github.com/antonmedv/expr" instead of govaluate -- much better supported!
+
 var colors = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}
 
 // Graph represents the overall graph parameters -- lines and params

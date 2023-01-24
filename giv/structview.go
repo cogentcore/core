@@ -7,12 +7,16 @@ package giv
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/antonmedv/expr"
+	"github.com/antonmedv/expr/ast"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
+	"github.com/goki/gosl/slbool"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -33,8 +37,9 @@ type StructView struct {
 	ViewSig       ki.Signal         `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	ViewPath      string            `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	ToolbarStru   interface{}       `desc:"the struct that we successfully set a toolbar for"`
-	HasDefs       bool              `json:"-" xml:"-" view:"inactive" desc:"if true, some fields have default values -- update labels when values change"`
-	TypeFieldTags map[string]string `json:"-" xml:"-" view:"inactive" desc:"extra tags by field name -- from type properties"`
+	HasDefs       bool              `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have default values -- update labels when values change"`
+	HasViewIfs    bool              `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have viewif conditional view tags -- update after.."`
+	TypeFieldTags map[string]string `json:"-" xml:"-" inactive:"+" desc:"extra tags by field name -- from type properties"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
@@ -241,12 +246,26 @@ func (sv *StructView) ConfigStructGrid() {
 		if vwtag == "-" {
 			return true
 		}
+		viewif := field.Tag.Get("viewif")
+		if viewif != "" {
+			sv.HasViewIfs = true
+			if !StructViewIf(viewif, field, sv.Struct) {
+				return true
+			}
+		}
 		if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
 			fvalp := fieldVal.Addr().Interface()
 			kit.FlatFieldsValueFunc(fvalp, func(sfval interface{}, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
 				svwtag := sfield.Tag.Get("view")
 				if svwtag == "-" {
 					return true
+				}
+				viewif := sfield.Tag.Get("viewif")
+				if viewif != "" {
+					sv.HasViewIfs = true
+					if !StructViewIf(viewif, sfield, fvalp) {
+						return true
+					}
 				}
 				svv := FieldToValueView(fvalp, sfield.Name, sfval)
 				if svv == nil { // shouldn't happen
@@ -305,7 +324,7 @@ func (sv *StructView) ConfigStructGrid() {
 		if !sv.IsInactive() && !inactTag {
 			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv := recv.Embed(KiT_StructView).(*StructView)
-				svv.UpdateDefaults()
+				svv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
 				svv.Changed = true
 				if svv.ChangeFlag != nil {
@@ -339,17 +358,21 @@ func (sv *StructView) Style2D() {
 	sv.Frame.Style2D()
 }
 
-func (sv *StructView) UpdateDefaults() {
-	if !sv.HasDefs || !sv.IsConfiged() {
+func (sv *StructView) UpdateFieldAction() {
+	if !sv.IsConfiged() {
 		return
 	}
-	sg := sv.StructGrid()
-	updt := sg.UpdateStart()
-	for i, vv := range sv.FieldViews {
-		lbl := sg.Child(i * 2).(*gi.Label)
-		StructViewFieldDefTag(vv, lbl)
+	if sv.HasViewIfs {
+		sv.Config()
+	} else if sv.HasDefs {
+		sg := sv.StructGrid()
+		updt := sg.UpdateStart()
+		for i, vv := range sv.FieldViews {
+			lbl := sg.Child(i * 2).(*gi.Label)
+			StructViewFieldDefTag(vv, lbl)
+		}
+		sg.UpdateEnd(updt)
 	}
-	sg.UpdateEnd(updt)
 }
 
 func (sv *StructView) Render2D() {
@@ -448,6 +471,7 @@ func StructFieldIsDef(defs string, valPtr interface{}) (bool, string) {
 	} else {
 		val := kit.ToStringPrec(valPtr, 6)
 		if strings.HasPrefix(val, "&") {
+			fmt.Printf("amp val: %s\n", val)
 			val = val[1:]
 		}
 		dtags := strings.Split(defs, ",")
@@ -459,6 +483,117 @@ func StructFieldIsDef(defs string, valPtr interface{}) (bool, string) {
 		}
 	}
 	return def, defStr
+}
+
+type viewifPatcher struct{}
+
+var (
+	replaceEqualsRegexp = regexp.MustCompile(`([^\!\=\<\>])(=)([^\!\=\<\>])`)
+	stringer            = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+	slboolv             = reflect.TypeOf((*slbool.Bool)(nil)).Elem()
+)
+
+func (p *viewifPatcher) Visit(node *ast.Node) {
+	switch x := (*node).(type) {
+	case *ast.IdentifierNode:
+		lt := x.Type()
+		if lt == nil {
+			return
+		}
+		switch {
+		case lt == slboolv:
+			ast.Patch(node, &ast.CallNode{
+				Callee: &ast.MemberNode{
+					Node:     *node,
+					Property: &ast.StringNode{Value: "IsTrue"},
+				},
+			})
+		}
+	case *ast.BinaryNode:
+		lid, lok := x.Left.(*ast.IdentifierNode)
+		rid, rok := x.Right.(*ast.IdentifierNode)
+		rars, rrok := x.Right.(*ast.ArrayNode)
+		switch {
+		case lok && rok && (x.Operator == "==" || x.Operator == "!="):
+			lt := lid.Type()
+			if lt == nil {
+				return
+			}
+			switch {
+			case lt.Implements(stringer):
+				ast.Patch(node, &ast.BinaryNode{
+					Operator: x.Operator,
+					Left: &ast.CallNode{
+						Callee: &ast.MemberNode{
+							Node:     x.Left,
+							Property: &ast.StringNode{Value: "String"},
+						},
+					},
+					Right: &ast.StringNode{
+						Value: rid.Value,
+					},
+				})
+			}
+		case lok && rrok && (x.Operator == "=="):
+			var strs []ast.Node
+			for _, on := range rars.Nodes {
+				strs = append(strs, &ast.StringNode{Value: on.(*ast.IdentifierNode).Value})
+			}
+			ast.Patch(node, &ast.BinaryNode{
+				Operator: "in",
+				Left: &ast.CallNode{
+					Callee: &ast.MemberNode{
+						Node:     x.Left,
+						Property: &ast.StringNode{Value: "String"},
+					},
+				},
+				Right: &ast.ArrayNode{
+					Nodes: strs,
+				},
+			})
+		}
+	}
+}
+
+// StructViewIf parses given `viewif:"expr"` expression and returns
+// true if should be visible, false if not.
+// Prints an error if the expression is not parsed properly
+// or does not evaluate to a boolean.
+func StructViewIf(viewif string, field reflect.StructField, stru interface{}) bool {
+	// replace = -> == without screwing up existing ==, !=, >=, <=
+	viewif = replaceEqualsRegexp.ReplaceAllString(viewif, "$1==$3")
+
+	program, err := expr.Compile(viewif, expr.Env(stru), expr.Patch(&viewifPatcher{}), expr.AllowUndefinedVariables())
+	if err != nil {
+		if gi.StructViewIfDebug {
+			fmt.Printf("giv.StructView viewif tag on field %s: syntax error: `%s`: %s\n", field.Name, viewif, err)
+		}
+		return true
+	}
+	val, err := expr.Run(program, stru)
+	if err != nil {
+		if gi.StructViewIfDebug {
+			fmt.Printf("giv.StructView viewif tag on field %s: run error: `%s`: %s\n", field.Name, viewif, err)
+		}
+		return true
+	}
+	if err != nil {
+		if gi.StructViewIfDebug {
+			fmt.Printf("giv.StructView viewif tag on field %s: syntax error: `%s`: %s\n", field.Name, viewif, err)
+		}
+		return true // visible by default
+	}
+	// fmt.Printf("fld: %s  viewif: %s  val: %t  %+v\n", field.Name, viewif, val, val)
+	switch x := val.(type) {
+	case bool:
+		return x
+	case *bool:
+		return *x
+	}
+	if gi.StructViewIfDebug {
+		fmt.Printf("giv.StructView viewif tag on field %s: didn't evaluate to a boolean: `%s`: type: %t val: %+v\n", field.Name, viewif, val, val)
+	}
+	return true
 }
 
 // StructFieldVals represents field values in a struct, at multiple

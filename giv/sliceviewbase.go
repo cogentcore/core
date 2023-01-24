@@ -146,11 +146,11 @@ type SliceViewBase struct {
 	TmpSave          ValueView        `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ToolbarSlice     interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`
 
-	SliceSize     int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"size of slice"`
-	DispRows      int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"actual number of rows displayed = min(VisRows, SliceSize)"`
-	StartIdx      int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"starting slice index of visible rows"`
-	RowHeight     float32 `view:"inactive" copy:"-" json:"-" xml:"-" desc:"height of a single row"`
-	VisRows       int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"total number of rows visible in allocated display size"`
+	SliceSize     int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"size of slice"`
+	DispRows      int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"actual number of rows displayed = min(VisRows, SliceSize)"`
+	StartIdx      int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"starting slice index of visible rows"`
+	RowHeight     float32 `inactive:"+" copy:"-" json:"-" xml:"-" desc:"height of a single row"`
+	VisRows       int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"total number of rows visible in allocated display size"`
 	LayoutHeight  float32 `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"`
 	RenderedRows  int     `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`
 	InFocusGrab   bool    `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive focus grabbing"`

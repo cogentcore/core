@@ -28,6 +28,7 @@ type StructViewInline struct {
 	ViewSig       ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	ViewPath      string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	HasDefs       bool        `json:"-" xml:"-" view:"inactive" desc:"if true, some fields have default values -- update labels when values change"`
+	HasViewIfs    bool        `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have viewif conditional view tags -- update after.."`
 }
 
 var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
@@ -76,6 +77,13 @@ func (sv *StructViewInline) ConfigParts() {
 		if vwtag == "-" {
 			return true
 		}
+		viewif := field.Tag.Get("viewif")
+		if viewif != "" {
+			sv.HasViewIfs = true
+			if !StructViewIf(viewif, field, sv.Struct) {
+				return true
+			}
+		}
 		vv := FieldToValueView(sv.Struct, field.Name, fval)
 		if vv == nil { // shouldn't happen
 			return true
@@ -114,7 +122,7 @@ func (sv *StructViewInline) ConfigParts() {
 		if !sv.IsInactive() && !inactTag {
 			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
-				svv.UpdateDefaults()
+				svv.UpdateFieldAction()
 				// note: updating here is redundant
 				svv.ViewSig.Emit(svv.This(), 0, nil)
 			})
@@ -131,17 +139,18 @@ func (sv *StructViewInline) UpdateFields() {
 	sv.UpdateEnd(updt)
 }
 
-func (sv *StructViewInline) UpdateDefaults() {
-	if !sv.HasDefs {
-		return
+func (sv *StructViewInline) UpdateFieldAction() {
+	if sv.HasViewIfs {
+		sv.ConfigParts()
+	} else if sv.HasDefs {
+		updt := sv.UpdateStart()
+		sv.SetFullReRender() // key to regen
+		for i, vv := range sv.FieldViews {
+			lbl := sv.Parts.Child(i * 2).(*gi.Label)
+			StructViewFieldDefTag(vv, lbl)
+		}
+		sv.UpdateEnd(updt)
 	}
-	updt := sv.UpdateStart()
-	sv.SetFullReRender() // key to regen
-	for i, vv := range sv.FieldViews {
-		lbl := sv.Parts.Child(i * 2).(*gi.Label)
-		StructViewFieldDefTag(vv, lbl)
-	}
-	sv.UpdateEnd(updt)
 }
 
 func (sv *StructViewInline) Render2D() {

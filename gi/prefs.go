@@ -996,6 +996,10 @@ var PrefsDetailedProps = ki.Props{
 //////////////////////////////////////////////////////////////////
 //  PrefsDebug
 
+// StrucdtViewIfDebug is a debug flag for getting error messages on
+// viewif struct tag directives in the giv.StructView.
+var StructViewIfDebug = false
+
 // PrefsDebug are debugging params
 type PrefsDebug struct {
 	Update2DTrace *bool `desc:"reports trace of updates that trigger re-rendering (printfs to stdout)"`
@@ -1021,6 +1025,8 @@ type PrefsDebug struct {
 	GoCompleteTrace *bool `desc:"reports trace of Go language completion & lookup process"`
 
 	GoTypeTrace *bool `desc:"reports trace of Go language type parsing and inference process"`
+
+	StructViewIfDebug *bool `desc:"reports errors for viewif directives in struct field tags, for giv.StructView"`
 
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
@@ -1054,6 +1060,7 @@ func (pf *PrefsDebug) Connect() {
 	pf.DNDTrace = &DNDTrace
 	pf.GoCompleteTrace = &golang.CompleteTrace
 	pf.GoTypeTrace = &golang.TraceTypes
+	pf.StructViewIfDebug = &StructViewIfDebug
 }
 
 // Profile toggles profiling on / off

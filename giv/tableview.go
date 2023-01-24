@@ -137,6 +137,9 @@ func (tv *TableView) CacheVisFields() {
 	styp := tv.StructType()
 	tv.VisFields = make([]reflect.StructField, 0, 20)
 	kit.FlatFieldsTypeFunc(styp, func(typ reflect.Type, fld reflect.StructField) bool {
+		if !fld.IsExported() {
+			return true
+		}
 		tvtag := fld.Tag.Get("tableview")
 		add := true
 		if tvtag != "" {
@@ -1038,6 +1041,9 @@ func StructSliceIdxByValue(struSlice interface{}, fldName string, fldVal interfa
 	for idx := 0; idx < sz; idx++ {
 		rval := kit.OnePtrUnderlyingValue(svnp.Index(idx))
 		fval := rval.Elem().FieldByIndex(fldIdx)
+		if !fval.IsValid() {
+			continue
+		}
 		if fval.Interface() == fldVal {
 			return idx, nil
 		}
