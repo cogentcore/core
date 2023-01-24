@@ -7,6 +7,7 @@ require (
 	github.com/Masterminds/vcs v1.13.3
 	github.com/alecthomas/chroma v0.10.0
 	github.com/anthonynsimon/bild v0.13.0
+	github.com/antonmedv/expr v1.10.4
 	github.com/aymerick/douceur v0.2.0
 	github.com/c2h5oh/datasize v0.0.0-20220606134207-859f65c6625b
 	github.com/fatih/camelcase v1.0.0
@@ -15,13 +16,14 @@ require (
 	github.com/go-gl/mathgl v1.0.0
 	github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c
 	github.com/goki/go-difflib v1.2.1
+	github.com/goki/gosl v1.0.6
 	github.com/goki/ki v1.1.11
 	github.com/goki/kigen v1.0.2
-	github.com/goki/mat32 v1.0.13
-	github.com/goki/pi v1.0.21
+	github.com/goki/mat32 v1.0.14
+	github.com/goki/pi v1.0.22
 	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
-	github.com/goki/vgpu v1.0.10
+	github.com/goki/vgpu v1.0.11
 	github.com/goki/vulkan v0.0.0-20220928215615-c67065a9cfc2
 	github.com/iancoleman/strcase v0.2.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -38,7 +40,7 @@ require (
 	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc // indirect
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
 	github.com/akutz/sortfold v0.2.1 // indirect
-	github.com/dlclark/regexp2 v1.7.0 // indirect
+	github.com/dlclark/regexp2 v1.8.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.1 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
