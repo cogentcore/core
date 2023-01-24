@@ -124,7 +124,8 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 				// packages automatically deals with GOPATH vs. modules, etc.
 				pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, path)
 				if err != nil {
-					log.Println(err)
+					// this is too many errors!
+					// log.Println(err)
 					return nil
 				}
 				if len(pkgs) != 1 {
