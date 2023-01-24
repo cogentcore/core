@@ -471,7 +471,6 @@ func StructFieldIsDef(defs string, valPtr interface{}) (bool, string) {
 	} else {
 		val := kit.ToStringPrec(valPtr, 6)
 		if strings.HasPrefix(val, "&") {
-			fmt.Printf("amp val: %s\n", val)
 			val = val[1:]
 		}
 		dtags := strings.Split(defs, ",")
