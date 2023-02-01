@@ -70,20 +70,14 @@ func (ph *Phong) ConfigSys() {
 	vpl := ph.Sys.NewPipeline("pervertex")
 	ph.ConfigPipeline(vpl)
 
-	cb, _ := content.ReadFile("shaders/texture_vert.spv")
-	tpl.AddShaderCode("texture_vert", vgpu.VertexShader, cb)
-	cb, _ = content.ReadFile("shaders/texture_frag.spv")
-	tpl.AddShaderCode("texture_frag", vgpu.FragmentShader, cb)
+	tpl.AddShaderEmbed("texture_vert", vgpu.VertexShader, content, "shaders/texture_vert.spv")
+	tpl.AddShaderEmbed("texture_frag", vgpu.FragmentShader, content, "shaders/texture_frag.spv")
 
-	cb, _ = content.ReadFile("shaders/onecolor_vert.spv")
-	opl.AddShaderCode("onecolor_vert", vgpu.VertexShader, cb)
-	cb, _ = content.ReadFile("shaders/onecolor_frag.spv")
-	opl.AddShaderCode("onecolor_frag", vgpu.FragmentShader, cb)
+	opl.AddShaderEmbed("onecolor_vert", vgpu.VertexShader, content, "shaders/onecolor_vert.spv")
+	opl.AddShaderEmbed("onecolor_frag", vgpu.FragmentShader, content, "shaders/onecolor_frag.spv")
 
-	cb, _ = content.ReadFile("shaders/pervertex_vert.spv")
-	vpl.AddShaderCode("pervertex_vert", vgpu.VertexShader, cb)
-	cb, _ = content.ReadFile("shaders/pervertex_frag.spv")
-	vpl.AddShaderCode("pervertex_frag", vgpu.FragmentShader, cb)
+	vpl.AddShaderEmbed("pervertex_vert", vgpu.VertexShader, content, "shaders/pervertex_vert.spv")
+	vpl.AddShaderEmbed("pervertex_frag", vgpu.FragmentShader, content, "shaders/pervertex_frag.spv")
 
 	vars := ph.Sys.Vars()
 	vars.NDescs = 1            // > 1 causes mysterious failures..

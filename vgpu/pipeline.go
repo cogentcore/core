@@ -8,6 +8,7 @@
 package vgpu
 
 import (
+	"embed"
 	"log"
 	"unsafe"
 
@@ -65,6 +66,17 @@ func (pl *Pipeline) AddShaderCode(name string, typ ShaderTypes, code []byte) *Sh
 	sh := pl.AddShader(name, typ)
 	sh.OpenCode(pl.Sys.Device.Device, code)
 	return sh
+}
+
+// AddShaderEmbed adds Shader with given name and type to the pipeline,
+// Loading SPV code from given file name in embed.FS filesystem.
+func (pl *Pipeline) AddShaderEmbed(name string, typ ShaderTypes, efs embed.FS, fname string) *Shader {
+	cb, err := efs.ReadFile(fname)
+	if err != nil {
+		log.Printf("vgpu.Pipeline: %s cannot read file named %s from embed.FS filesystem\n", pl.Name, fname)
+		return nil
+	}
+	return pl.AddShaderCode(name, typ, cb)
 }
 
 // ShaderByName returns Shader by name.
