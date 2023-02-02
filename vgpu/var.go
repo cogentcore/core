@@ -91,9 +91,11 @@ func (vr *Var) MemSize() int {
 		return 0
 	case n == 1 || vr.Role < Uniform:
 		return vr.SizeOf * n
-	default:
+	case vr.Role == Uniform:
 		sz := MemSizeAlign(vr.SizeOf, 16) // todo: test this!
 		return sz * n
+	default:
+		return vr.SizeOf * n
 	}
 }
 
