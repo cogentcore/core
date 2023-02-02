@@ -9,11 +9,14 @@ onecolor_frag.spv : phong_frag.frag
 pervertex_frag.spv : phong_frag.frag
 
 %.spv : %.hlsl
-	glslc -fshader-stage=compute -o $@ $<
+	glslc -fshader-stage=compute --target-env=vulkan1.2 -O -o $@ $<
 
 %.spv : %.vert
-	glslc -fshader-stage=vertex -o $@ $<
+	glslc -fshader-stage=vertex --target-env=vulkan1.2 -O -o $@ $<
 
 %.spv : %.frag
-	glslc -fshader-stage=fragment -o $@ $<
-	
+	glslc -fshader-stage=fragment --target-env=vulkan1.2 -O -o $@ $<
+
+rebuild:
+	rm *.spv
+
