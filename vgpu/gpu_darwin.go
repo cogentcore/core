@@ -9,7 +9,8 @@ package vgpu
 import vk "github.com/goki/vulkan"
 
 func PlatformDefaults(gp *GPU) {
-	gp.DeviceExts = append(gp.DeviceExts, "VK_KHR_portability_subset")
+	gp.DeviceExts = append(gp.DeviceExts, []string{"VK_KHR_portability_subset", "VK_EXT_shader_atomic_float"}...)
+	gp.DeviceExts = append(gp.DeviceExts)
 	gp.InstanceExts = append(gp.InstanceExts, vk.KhrGetPhysicalDeviceProperties2ExtensionName)
 	gp.InstanceExts = append(gp.InstanceExts, vk.KhrPortabilityEnumerationExtensionName)
 }
