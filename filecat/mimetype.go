@@ -279,7 +279,7 @@ var StdMimes = []MimeType{
 	{"text/x-sh", []string{".bash", ".sh"}, Code, Bash},
 	{"application/x-sh", nil, Code, Bash},
 
-	{"text/x-c", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh", ".hlsl", ".gsl", ".frag", ".vert"}, Code, C},
+	{"text/x-c", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh", ".hlsl", ".gsl", ".frag", ".vert", ".mm"}, Code, C},
 	{"text/x-csrc", nil, Code, C},
 	{"text/x-chdr", nil, Code, C},
 	{"text/x-c++hdr", nil, Code, C},
@@ -321,7 +321,7 @@ var StdMimes = []MimeType{
 
 	{"application/mathematica", []string{".nb", ".nbp"}, Code, Mathematica},
 
-	{"text/x-matlab", nil, Code, Matlab}, // ext conflict: []string{".m"} with objcsrc
+	{"text/x-matlab", []string{".m"}, Code, Matlab},
 	{"text/matlab", nil, Code, Matlab},
 	{"text/octave", nil, Code, Matlab},
 	{"text/scilab", []string{".sci", ".sce", ".tst"}, Code, NoSupport},
@@ -329,7 +329,7 @@ var StdMimes = []MimeType{
 	{"text/x-modelica", []string{".mo"}, Code, NoSupport},
 	{"text/x-nemerle", []string{".n"}, Code, NoSupport},
 
-	{"text/x-objcsrc", nil, Code, ObjC}, // ext conflict: []string{".m"} with matlab
+	{"text/x-objcsrc", nil, Code, ObjC}, // doesn't have chroma support -- use C instead
 	{"text/x-objective-j", nil, Code, NoSupport},
 
 	{"text/x-ocaml", []string{".ml", ".mli", ".mll", ".mly"}, Code, OCaml},
