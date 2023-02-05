@@ -15,21 +15,20 @@ There are a lot of hoops to jump through, thanks to lots of Apple security thing
 $ ./fetchDependencies --macos --spirv-cross-root /Users/oreilly/github/SPIRV-Cross
 ````
 
-* `make macos` builds `.dylib` in: `Package/Release/MoltenVK/dylib/macOS/libMoltenVK.dylib`
+* `make macos MVK_CONFIG_LOG_LEVEL=1` builds `.dylib` in: `Package/Release/MoltenVK/dylib/macOS/libMoltenVK.dylib`  -- if you don't specify the log level, you'll get all the info messages.
 
-* Ultimately, want to copy to `/usr/local/lib`, where the SDK puts its library:
+* Critically you need to *remove* the existing file before copying over the new one to `/usr/local/lib`, where the SDK puts its library:
 
 ```bash
+$ sudo rm /usr/local/lib/libMoltenVK.dylib 
 $ sudo cp Package/Release/MoltenVK/dylib/macOS/libMoltenVK.dylib /usr/local/lib
 ```
 
-* Also, there is this mysterious `.icd` file that needs to refer to the .dylib -- it won't load the library properly if you don't get this one right:
+* If you don't do this,  the program will die immediately with `Killed: 9` -- all the other unsuccessful stuff below was failed attempts to fix this.
 
-```bash
-$ sudo cp Package/Release/MoltenVK/dylib/macOS/MoltenVK_icd.json /usr/local/share/vulkan/icd.d/MoltenVK_icd.json
-```
+* Also, there is this mysterious `.icd` file that needs to refer to the .dylib -- it won't load the library properly if you don't get this one right.  The one that is installed by Vulkan SDK is good and the one in the package is **NOT** -- it specifies a path in the same dir.
 
-Then edit that file so the `library_path` points to the full correct path:
+The default has a `library_path` that is relative -- can also have it point to the full correct path:
 
 ```json
 {
@@ -41,15 +40,6 @@ Then edit that file so the `library_path` points to the full correct path:
     }
 }
 ```
-
-* But if you just try to use it directly (`go build`, run), you get the `Killed: 9` error!
-
-* Need to disable gatekeeper or else you'll have to reboot constantly:
-
-```bash
-$ sudo /usr/sbin/spctl --master-disable
-```
-
 
 * Metal library location is: `/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/31001.667/include/metal`
 
@@ -71,9 +61,15 @@ I've got it working finally  -- it took me way too long to figure out that I jus
 #endif
 
 
-# XCode developer certificates
+# XCode developer certificates, gatekeeper
 
-Might be useful but definitely didn't help with rebooting -- disabling gatekeeper was the thing.
+* To disable gatekeeper -- didn't help with rebooth issue:
+
+```bash
+$ sudo /usr/sbin/spctl --master-disable
+```
+
+Here's info on code signing --might be useful someday but definitely didn't help with rebooting.
 
 * Or sign the thing somehow: https://ioscodesigning.com -- in XCode, can sign in with apple id and get a certificate.
     + Xcode, Preferences, Accounts, + to add 

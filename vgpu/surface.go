@@ -334,7 +334,7 @@ func (sf *Surface) AcquireNextImage() uint32 {
 // to the given command buffer, calling CmdEnd on the buffer first.
 // This buffer triggers the associated Fence logic to control the
 // sequencing of render commands over time.
-// The ImageAcquired semaphore efore the command is run.
+// The ImageAcquired semaphore before the command is run.
 func (sf *Surface) SubmitRender(cmd vk.CommandBuffer) {
 	CmdEnd(cmd)
 	ret := vk.QueueSubmit(sf.Device.Queue, 1, []vk.SubmitInfo{{

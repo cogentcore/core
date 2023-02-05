@@ -106,3 +106,64 @@ func (sy *System) ComputeSubmitWait() {
 func (sy *System) ComputeWait() {
 	CmdWait(&sy.Device)
 }
+
+// ComputeSubmitWaitSignal submits command in buffer to system device queue
+// with given wait semaphore and given signal semaphore (by name) when done,
+// and with given fence (use empty string for none).
+// This will cause the GPU to wait until the wait semphaphore is
+// signaled by a previous command with that semaphore as its signal.
+// The optional fence is used typically at the end of a block of
+// such commands, whenever the CPU needs to be sure the submitted GPU
+// commands have completed.
+func (sy *System) ComputeSubmitWaitSignal(wait, signal, fence string) error {
+	ws, err := sy.SemaphoreByNameTry(wait)
+	if err != nil {
+		return err
+	}
+	ss, err := sy.SemaphoreByNameTry(signal)
+	if err != nil {
+		return err
+	}
+	fc := vk.NullFence
+	if fence != "" {
+		fc, err = sy.FenceByNameTry(fence)
+		if err != nil {
+			return err
+		}
+	}
+	CmdSubmitWaitSignal(sy.CmdPool.Buff, &sy.Device, ws, ss, fc)
+	return nil
+}
+
+// ComputeSubmitSignal submits command in buffer to system device queue
+// with given signal semaphore (by name) when done,
+// and with given fence (use empty string for none).
+// The optional fence is used typically at the end of a block of
+// such commands, whenever the CPU needs to be sure the submitted GPU
+// commands have completed.
+func (sy *System) ComputeSubmitSignal(signal, fence string) error {
+	ss, err := sy.SemaphoreByNameTry(signal)
+	if err != nil {
+		return err
+	}
+	fc := vk.NullFence
+	if fence != "" {
+		fc, err = sy.FenceByNameTry(fence)
+		if err != nil {
+			return err
+		}
+	}
+	CmdSubmitSignal(sy.CmdPool.Buff, &sy.Device, ss, fc)
+	return nil
+}
+
+// ComputeWaitFence waits for given fence (by name), and resets the fence
+func (sy *System) ComputeWaitFence(fence string) error {
+	fc, err := sy.FenceByNameTry(fence)
+	if err != nil {
+		return err
+	}
+	vk.WaitForFences(sy.Device.Device, 1, []vk.Fence{fc}, vk.True, vk.MaxUint64)
+	vk.ResetFences(sy.Device.Device, 1, []vk.Fence{fc})
+	return nil
+}

@@ -149,6 +149,44 @@ func CmdSubmit(cmd vk.CommandBuffer, dev *Device) {
 	IfPanic(NewError(ret))
 }
 
+// CmdSubmitWaitSignal submits command in buffer to given device queue
+// with given wait semaphore and given signal semaphore when done,
+// and with given fence (use vk.NullFence for none).
+// This will cause the GPU to wait until the wait semphaphore is
+// signaled by a previous command with that semaphore as its signal.
+// The optional fence is used typically at the end of a block of
+// such commands, whenever the CPU needs to be sure the submitted GPU
+// commands have completed.
+func CmdSubmitWaitSignal(cmd vk.CommandBuffer, dev *Device, wait, signal vk.Semaphore, fence vk.Fence) {
+	ret := vk.QueueSubmit(dev.Queue, 1, []vk.SubmitInfo{{
+		SType:                vk.StructureTypeSubmitInfo,
+		WaitSemaphoreCount:   1,
+		PWaitSemaphores:      []vk.Semaphore{wait},
+		CommandBufferCount:   1,
+		PCommandBuffers:      []vk.CommandBuffer{cmd},
+		SignalSemaphoreCount: 1,
+		PSignalSemaphores:    []vk.Semaphore{signal},
+	}}, fence)
+	IfPanic(NewError(ret))
+}
+
+// CmdSubmitSignal submits command in buffer to given device queue
+// with given signal semaphore when done,
+// and with given fence (use vk.NullFence for none).
+// The optional fence is used typically at the end of a block of
+// such commands, whenever the CPU needs to be sure the submitted GPU
+// commands have completed.
+func CmdSubmitSignal(cmd vk.CommandBuffer, dev *Device, signal vk.Semaphore, fence vk.Fence) {
+	ret := vk.QueueSubmit(dev.Queue, 1, []vk.SubmitInfo{{
+		SType:                vk.StructureTypeSubmitInfo,
+		CommandBufferCount:   1,
+		PCommandBuffers:      []vk.CommandBuffer{cmd},
+		SignalSemaphoreCount: 1,
+		PSignalSemaphores:    []vk.Semaphore{signal},
+	}}, fence)
+	IfPanic(NewError(ret))
+}
+
 // CmdSubmitWait does Submit, WaitIdle on command Buffer
 func CmdSubmitWait(cmd vk.CommandBuffer, dev *Device) {
 	CmdSubmit(cmd, dev)

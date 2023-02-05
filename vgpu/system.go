@@ -18,15 +18,17 @@ import (
 // compute operations performed on a common set of data.
 // It maintains its own logical device and associated queue.
 type System struct {
-	Name        string               `desc:"optional name of this System"`
-	GPU         *GPU                 `desc:"gpu device"`
-	Device      Device               `desc:"logical device for this System, which is a non-owned copy of either Surface or RenderFrame device"`
-	CmdPool     CmdPool              `desc:"cmd pool specific to this system"`
-	Compute     bool                 `desc:"if true, this is a compute system -- otherwise is graphics"`
-	Pipelines   []*Pipeline          `desc:"all pipelines"`
-	PipelineMap map[string]*Pipeline `desc:"map of all pipelines -- names must be unique"`
-	Mem         Memory               `desc:"manages all the memory for all the Vals"`
-	Render      Render               `desc:"renderpass with depth buffer for this system"`
+	Name        string                  `desc:"optional name of this System"`
+	GPU         *GPU                    `desc:"gpu device"`
+	Device      Device                  `desc:"logical device for this System, which is a non-owned copy of either Surface or RenderFrame device"`
+	CmdPool     CmdPool                 `desc:"cmd pool specific to this system"`
+	Compute     bool                    `desc:"if true, this is a compute system -- otherwise is graphics"`
+	Pipelines   []*Pipeline             `desc:"all pipelines"`
+	PipelineMap map[string]*Pipeline    `desc:"map of all pipelines -- names must be unique"`
+	Semaphores  map[string]vk.Semaphore `desc:"map semaphores for GPU-side sync -- names must be unique"`
+	Fences      map[string]vk.Fence     `desc:"map of fences for CPU-GPU sync -- names must be unique"`
+	Mem         Memory                  `desc:"manages all the memory for all the Vals"`
+	Render      Render                  `desc:"renderpass with depth buffer for this system"`
 }
 
 // InitGraphics initializes the System for graphics use, using
@@ -69,6 +71,12 @@ func (sy *System) Vars() *Vars {
 }
 
 func (sy *System) Destroy() {
+	for _, sp := range sy.Semaphores {
+		vk.DestroySemaphore(sy.Device.Device, sp, nil)
+	}
+	for _, fc := range sy.Fences {
+		vk.DestroyFence(sy.Device.Device, fc, nil)
+	}
 	for _, pl := range sy.Pipelines {
 		pl.Destroy()
 	}
@@ -98,6 +106,59 @@ func (sy *System) NewPipeline(name string) *Pipeline {
 	pl.Init(sy)
 	sy.AddPipeline(pl)
 	return pl
+}
+
+// PipelineByNameTry returns pipeline by name with error for not found
+func (sy *System) PipelineByNameTry(name string) (*Pipeline, error) {
+	pl, ok := sy.PipelineMap[name]
+	if !ok {
+		err := fmt.Errorf("Pipeline named: %s not found", name)
+		log.Println(err)
+		return nil, err
+	}
+	return pl, nil
+}
+
+// NewSemaphore returns a new semaphor using system device
+func (sy *System) NewSemaphore(name string) vk.Semaphore {
+	sp := NewSemaphore(sy.Device.Device)
+	if sy.Semaphores == nil {
+		sy.Semaphores = make(map[string]vk.Semaphore)
+	}
+	sy.Semaphores[name] = sp
+	return sp
+}
+
+// SemaphoreByNameTry returns semaphor by name with error for not found
+func (sy *System) SemaphoreByNameTry(name string) (vk.Semaphore, error) {
+	sp, ok := sy.Semaphores[name]
+	if !ok {
+		err := fmt.Errorf("Semaphore named: %s not found", name)
+		log.Println(err)
+		return nil, err
+	}
+	return sp, nil
+}
+
+// NewFence returns a new semaphor using system device
+func (sy *System) NewFence(name string) vk.Fence {
+	sp := NewFence(sy.Device.Device)
+	if sy.Fences == nil {
+		sy.Fences = make(map[string]vk.Fence)
+	}
+	sy.Fences[name] = sp
+	return sp
+}
+
+// FenceByNameTry returns semaphor by name with error for not found
+func (sy *System) FenceByNameTry(name string) (vk.Fence, error) {
+	sp, ok := sy.Fences[name]
+	if !ok {
+		err := fmt.Errorf("Fence named: %s not found", name)
+		log.Println(err)
+		return nil, err
+	}
+	return sp, nil
 }
 
 // ConfigRender configures the renderpass, including the image
