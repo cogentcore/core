@@ -7,5 +7,4 @@
 package vgpu
 
 func PlatformDefaults(gp *GPU) {
-	gp.DeviceExts = append(gp.DeviceExts, "VK_EXT_shader_atomic_float")
 }
