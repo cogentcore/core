@@ -177,22 +177,55 @@ func (mm *Memory) SyncToGPUBuff(bt BuffTypes) {
 	mm.TransferRegsToGPU(buff, mods)
 }
 
+// SyncRegionValName returns memory region for syncing given value
+// from GPU device memory to CPU host memory,
+// specifying value by name for given named variable in given set.
+// Variable can only only be Storage memory -- otherwise an error is returned.
+// Multiple regions can be combined into one transfer call for greater efficiency.
+func (mm *Memory) SyncRegionValName(set int, varNm, valNm string) (MemReg, error) {
+	vr, vl, err := mm.Vars.ValByNameTry(set, varNm, valNm)
+	if err != nil {
+		return MemReg{}, err
+	}
+	if vr.BuffType() != StorageBuff {
+		err = fmt.Errorf("SyncRegionValName: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
+		if Debug {
+			log.Println(err)
+			return MemReg{}, err
+		}
+	}
+	return vl.MemReg(), nil
+}
+
+// SyncRegionValIdx returns memory region for syncing given value
+// from GPU device memory to CPU host memory,
+// specifying value by index for given named variable, in given set.
+// Variable can only only be Storage memory -- otherwise an error is returned.
+// Multiple regions can be combined into one transfer call for greater efficiency.
+func (mm *Memory) SyncRegionValIdx(set int, varNm string, valIdx int) (MemReg, error) {
+	vr, vl, err := mm.Vars.ValByIdxTry(set, varNm, valIdx)
+	if err != nil {
+		return MemReg{}, err
+	}
+	if vr.BuffType() != StorageBuff {
+		err = fmt.Errorf("SyncRegionValIdx: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
+		if Debug {
+			log.Println(err)
+			return MemReg{}, err
+		}
+	}
+	return vl.MemReg(), nil
+}
+
 // SyncValNameFmGPU syncs given value from GPU device memory to CPU host memory,
 // specifying value by name for given named variable in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
 func (mm *Memory) SyncValNameFmGPU(set int, varNm, valNm string) error {
-	vr, vl, err := mm.Vars.ValByNameTry(set, varNm, valNm)
+	mr, err := mm.SyncRegionValName(set, varNm, valNm)
 	if err != nil {
 		return err
 	}
-	if vr.BuffType() != StorageBuff {
-		err = fmt.Errorf("SyncValFmGPU: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
-		if Debug {
-			log.Println(err)
-			return err
-		}
-	}
-	mm.SyncValFmGPU(vl)
+	mm.TransferRegsFmGPU(mm.Buffs[StorageBuff], []MemReg{mr})
 	return nil
 }
 
@@ -200,19 +233,18 @@ func (mm *Memory) SyncValNameFmGPU(set int, varNm, valNm string) error {
 // specifying value by index for given named variable, in given set.
 // Variable can only only be Storage memory -- otherwise an error is returned.
 func (mm *Memory) SyncValIdxFmGPU(set int, varNm string, valIdx int) error {
-	vr, vl, err := mm.Vars.ValByIdxTry(set, varNm, valIdx)
+	mr, err := mm.SyncRegionValIdx(set, varNm, valIdx)
 	if err != nil {
 		return err
 	}
-	if vr.BuffType() != StorageBuff {
-		err = fmt.Errorf("SyncValFmGPU: Variable must be in Storage buffer, not: %s", vr.BuffType().String())
-		if Debug {
-			log.Println(err)
-			return err
-		}
-	}
-	mm.SyncValFmGPU(vl)
+	mm.TransferRegsFmGPU(mm.Buffs[StorageBuff], []MemReg{mr})
 	return nil
+}
+
+// SyncStorageRegionsFmGPU syncs given regions from the Storage buffer memory
+// from GPU to CPU, in one call.   Use SyncRegValIdxFmCPU to get the regions.
+func (mm *Memory) SyncStorageRegionsFmGPU(regs ...MemReg) {
+	mm.TransferRegsFmGPU(mm.Buffs[StorageBuff], regs)
 }
 
 // SyncValFmGPU syncs given value from GPU device memory to CPU host memory.
