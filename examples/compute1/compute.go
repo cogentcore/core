@@ -66,7 +66,7 @@ func main() {
 	vars.BindDynValIdx(0, "In", 0)
 	vars.BindDynValIdx(0, "Out", 0)
 
-	sy.ComputeBindVars(0)
+	sy.ComputeResetBindVars(0)
 	pl.ComputeCommand(nGps, 1, 1)
 	sy.ComputeSubmitWait() // if no wait, faster, but validation complains
 	fmt.Printf("submit 0\n")

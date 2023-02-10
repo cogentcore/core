@@ -43,6 +43,8 @@ type GPU struct {
 
 	GPUProps    vk.PhysicalDeviceProperties       `desc:"properties of physical hardware -- populated after Config"`
 	MemoryProps vk.PhysicalDeviceMemoryProperties `desc:"properties of device memory -- populated after Config"`
+
+	PlatformDeviceNext unsafe.Pointer `view:"-" desc:"platform-specific PNext for CreateDevice call"`
 }
 
 // Init initializes vulkan system for Display-enabled use, using glfw.

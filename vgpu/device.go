@@ -88,13 +88,18 @@ func (dv *Device) MakeDevice(gp *GPU) {
 			DescriptorBindingUpdateUnusedWhilePending:    vk.True,
 			DescriptorBindingPartiallyBound:              vk.True,
 			RuntimeDescriptorArray:                       vk.True,
-			PNext: unsafe.Pointer(&vk.PhysicalDeviceShaderAtomicFloatFeatures{
-				SType:                        vk.StructureTypePhysicalDeviceShaderAtomicFloatFeatures,
-				ShaderBufferFloat32AtomicAdd: vk.True,
-			}),
+			PNext:                                        gp.PlatformDeviceNext,
 		}),
 	}, nil, &device)
 	IfPanic(NewError(ret))
+
+	/* note: not using this for PNext:
+	   unsafe.Pointer(&vk.PhysicalDeviceShaderAtomicFloatFeatures{
+	   				SType:                        vk.StructureTypePhysicalDeviceShaderAtomicFloatFeatures,
+	   				ShaderBufferFloat32AtomicAdd: vk.True,
+	   			}),
+	*/
+
 	// _ = ret
 	dv.Device = device
 

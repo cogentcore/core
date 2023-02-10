@@ -11,9 +11,6 @@ import (
 	vk "github.com/goki/vulkan"
 )
 
-// todo: more work needed to figure out how to actually run
-// more efficiently -- Submit is the biggie time-wise.
-
 // https://www.reddit.com/r/vulkan/comments/us9p72/multiple_command_buffers_vs_multiple_batches_of/
 
 // NewComputePipelineEmbed returns a new pipeline added to this System,
@@ -24,13 +21,13 @@ func (sy *System) NewComputePipelineEmbed(name string, efs embed.FS, fname strin
 	return pl
 }
 
-// ComputeBindVars adds command to the default system CmdPool
+// ComputeResetBindVars adds command to the default system CmdPool
 // command buffer, to bind the Vars descriptors,
 // for given collection of descriptors descIdx
 // (see Vars NDescs for info).
 // Required whenever variables have changed their mappings,
 // before running a command.
-func (sy *System) ComputeBindVars(descIdx int) {
+func (sy *System) ComputeResetBindVars(descIdx int) {
 	sy.CmdResetBindVars(sy.CmdPool.Buff, descIdx)
 }
 
@@ -68,7 +65,6 @@ func (pl *Pipeline) ComputeCommand(nx, ny, nz int) {
 	cmd := pl.Sys.CmdPool.Buff
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointCompute, pl.VkPipeline)
 	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
-	CmdEnd(cmd)
 }
 
 // ComputeCommand1D adds commands to run the compute shader for given
@@ -81,30 +77,46 @@ func (pl *Pipeline) ComputeCommand1D(n, threads int) {
 	pl.ComputeCommand(Warps(n, threads), 1, 1)
 }
 
-// ComputeSubmit submits the current set of commands in
-// the default system CmdPool, typically from ComputeCommand.
-// does NOT wait for the commands to finish before returning
-// control to the CPU.  Can call this multiple times to
-// run the same command iteratively, followed by a final wait,
-// for example.
-func (sy *System) ComputeSubmit() {
-	CmdSubmit(sy.CmdPool.Buff, &sy.Device)
+// ComputeSetEvent sets an event to be signalled when everything up to this point
+// in the command buffer has completed.
+// This is the best way to coordinate processing within a sequence of
+// compute shader calls within a single command buffer.
+// Returns an error if the named event was not found.
+func (sy *System) ComputeSetEvent(event string) error {
+	ev, err := sy.EventByNameTry(event)
+	if err != nil {
+		return err
+	}
+	vk.CmdSetEvent(sy.CmdPool.Buff, ev, vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit))
+	return nil
 }
 
-// ComputeSubmitWait submits the current set of commands in
-// the default system CmdPool, typically from ComputeCommand.
-// and then waits for the commands to finish before returning
+// ComputeWaitEvents waits until previous ComputeSetEvent event(s) have signalled.
+// This is the best way to coordinate processing within a sequence of
+// compute shader calls within a single command buffer.
+// Returns an error if the named event was not found.
+func (sy *System) ComputeWaitEvents(event ...string) error {
+	evts := make([]vk.Event, len(event))
+	for i, enm := range event {
+		ev, err := sy.EventByNameTry(enm)
+		if err != nil {
+			return err
+		}
+		evts[i] = ev
+	}
+	flg := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
+	vk.CmdWaitEvents(sy.CmdPool.Buff, uint32(len(evts)), evts, flg, flg, 0, nil, 0, nil, 0, nil)
+	return nil
+}
+
+// ComputeSubmitWait adds and End command and
+// submits the current set of commands in the default system CmdPool,
+// typically from ComputeCommand.
+// Then waits for the commands to finish before returning
 // control to the CPU.  Results will be available immediately
 // thereafter for retrieving back fro the GPU.
 func (sy *System) ComputeSubmitWait() {
-	CmdSubmitWait(sy.CmdPool.Buff, &sy.Device)
-}
-
-// ComputeWait waits for previously-submitted commands to finish.
-// Results will be available immediately thereafter for
-// retrieving back fro the GPU.
-func (sy *System) ComputeWait() {
-	CmdWait(&sy.Device)
+	CmdEndSubmitWait(sy.CmdPool.Buff, &sy.Device)
 }
 
 // ComputeSubmitWaitSignal submits command in buffer to system device queue
@@ -116,6 +128,7 @@ func (sy *System) ComputeWait() {
 // such commands, whenever the CPU needs to be sure the submitted GPU
 // commands have completed.
 func (sy *System) ComputeSubmitWaitSignal(wait, signal, fence string) error {
+	CmdEnd(sy.CmdPool.Buff)
 	ws, err := sy.SemaphoreByNameTry(wait)
 	if err != nil {
 		return err
@@ -142,6 +155,7 @@ func (sy *System) ComputeSubmitWaitSignal(wait, signal, fence string) error {
 // such commands, whenever the CPU needs to be sure the submitted GPU
 // commands have completed.
 func (sy *System) ComputeSubmitSignal(signal, fence string) error {
+	CmdEnd(sy.CmdPool.Buff)
 	ss, err := sy.SemaphoreByNameTry(signal)
 	if err != nil {
 		return err

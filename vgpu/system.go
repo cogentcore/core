@@ -25,8 +25,9 @@ type System struct {
 	Compute     bool                    `desc:"if true, this is a compute system -- otherwise is graphics"`
 	Pipelines   []*Pipeline             `desc:"all pipelines"`
 	PipelineMap map[string]*Pipeline    `desc:"map of all pipelines -- names must be unique"`
-	Semaphores  map[string]vk.Semaphore `desc:"map semaphores for GPU-side sync -- names must be unique"`
-	Fences      map[string]vk.Fence     `desc:"map of fences for CPU-GPU sync -- names must be unique"`
+	Events      map[string]vk.Event     `desc:"map of events for synchronizing processing within a single command stream -- this is the best method for compute shaders to coordinate within a given sequence of shader runs in a single command stream"`
+	Semaphores  map[string]vk.Semaphore `desc:"map of semaphores for GPU-side sync between different submitted commands -- names must be unique -- note: better to use Events within one command if possible."`
+	Fences      map[string]vk.Fence     `desc:"map of fences for CPU-GPU sync -- names must be unique.  WaitIdle implictly uses a fence so it is not essential to use this for simple wait case"`
 	Mem         Memory                  `desc:"manages all the memory for all the Vals"`
 	Render      Render                  `desc:"renderpass with depth buffer for this system"`
 }
@@ -71,15 +72,22 @@ func (sy *System) Vars() *Vars {
 }
 
 func (sy *System) Destroy() {
+	for _, ev := range sy.Events {
+		vk.DestroyEvent(sy.Device.Device, ev, nil)
+	}
+	sy.Events = nil
 	for _, sp := range sy.Semaphores {
 		vk.DestroySemaphore(sy.Device.Device, sp, nil)
 	}
+	sy.Semaphores = nil
 	for _, fc := range sy.Fences {
 		vk.DestroyFence(sy.Device.Device, fc, nil)
 	}
+	sy.Fences = nil
 	for _, pl := range sy.Pipelines {
 		pl.Destroy()
 	}
+	sy.Pipelines = nil
 	sy.CmdPool.Destroy(sy.Device.Device)
 	sy.Mem.Destroy(sy.Device.Device)
 	if sy.Compute {
@@ -119,7 +127,7 @@ func (sy *System) PipelineByNameTry(name string) (*Pipeline, error) {
 	return pl, nil
 }
 
-// NewSemaphore returns a new semaphor using system device
+// NewSemaphore returns a new semaphore using system device
 func (sy *System) NewSemaphore(name string) vk.Semaphore {
 	sp := NewSemaphore(sy.Device.Device)
 	if sy.Semaphores == nil {
@@ -129,7 +137,7 @@ func (sy *System) NewSemaphore(name string) vk.Semaphore {
 	return sp
 }
 
-// SemaphoreByNameTry returns semaphor by name with error for not found
+// SemaphoreByNameTry returns semaphore by name with error for not found
 func (sy *System) SemaphoreByNameTry(name string) (vk.Semaphore, error) {
 	sp, ok := sy.Semaphores[name]
 	if !ok {
@@ -140,7 +148,28 @@ func (sy *System) SemaphoreByNameTry(name string) (vk.Semaphore, error) {
 	return sp, nil
 }
 
-// NewFence returns a new semaphor using system device
+// NewEvent returns a new event using system device
+func (sy *System) NewEvent(name string) vk.Event {
+	sp := NewEvent(sy.Device.Device)
+	if sy.Events == nil {
+		sy.Events = make(map[string]vk.Event)
+	}
+	sy.Events[name] = sp
+	return sp
+}
+
+// EventByNameTry returns event by name with error for not found
+func (sy *System) EventByNameTry(name string) (vk.Event, error) {
+	sp, ok := sy.Events[name]
+	if !ok {
+		err := fmt.Errorf("Event named: %s not found", name)
+		log.Println(err)
+		return nil, err
+	}
+	return sp, nil
+}
+
+// NewFence returns a new fence using system device
 func (sy *System) NewFence(name string) vk.Fence {
 	sp := NewFence(sy.Device.Device)
 	if sy.Fences == nil {
@@ -150,7 +179,7 @@ func (sy *System) NewFence(name string) vk.Fence {
 	return sp
 }
 
-// FenceByNameTry returns semaphor by name with error for not found
+// FenceByNameTry returns fence by name with error for not found
 func (sy *System) FenceByNameTry(name string) (vk.Fence, error) {
 	sp, ok := sy.Fences[name]
 	if !ok {

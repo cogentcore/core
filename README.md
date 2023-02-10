@@ -143,9 +143,21 @@ This [blog](http://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Array
 
 # GPU Accelerated Compute Engine
 
-See `examples/compute1` for a very simple compute shader.
+See `examples/compute1` for a very simple compute shader, and [compute.go](vgpu/compute.go) for `Compute*` methods specifically useful for this case.
 
 See the [gosl](https://github.com/goki/gosl) repository for a tool that converts Go code into HLSL shader code, so you can effectively run Go on the GPU.
+
+Here's how it works:
+
+* Each Vulkan `Pipeline` holds **1** compute `shader` program, which is equivalent to a `kernel` in CUDA -- this is the basic unit of computation, accomplishing one parallel sweep of processing across some number of identical data structures.
+
+* You must organize at the outset your `Vars` and `Vals` in the `System` `Memory` to hold the data structures your shaders operate on.  In general, you want to have a single static set of Vars that cover everything you'll need, and different shaders can operate on different subsets of these.  You want to minimize the amount of memory transfer.
+
+* Because the `vkQueueSubmit` call is by far the most expensive call in Vulkan, you want to minimize those.  This means you want to combine as much of your computation into one big Command sequence, with calls to various different `Pipeline` shaders (which can all be put in one command buffer) that gets submitted *once*, rather than submitting separate commands for each shader.  Ideally this also involves combining memory transfers to / from the GPU in the same command buffer as well.
+
+* Although rarely used in graphics, the most important tool for synchronizing commands _within a single command stream_ is the [vkEvent](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkEvent.html), which is described a bit in the [Khronos Blog](https://www.khronos.org/blog/understanding-vulkan-synchronization).  Much of vulkan discussion centers instead around `Semaphores`, but these are only used for synchronization _between different commands_ --- each of which requires a different `vkQueueSubmit` (and is therefore suboptimal).
+
+* Thus, you should create named events in your compute `System`, and inject calls to set and wait on those events in your command stream.
 
 # Mac Platform
 

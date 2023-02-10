@@ -224,7 +224,20 @@ func CmdResetBegin(cmd vk.CommandBuffer) {
 }
 
 //////////////////////////////////////////////////////////////
-// Semaphors & Fences
+// Events, Semaphores & Fences
+
+// New Event creates a new Event, setting the DeviceOnly bit flag
+// because we typically only use events for within-device communication.
+// and presumably this is faster if so-scoped.
+func NewEvent(dev vk.Device) vk.Event {
+	var sem vk.Event
+	ret := vk.CreateEvent(dev, &vk.EventCreateInfo{
+		SType: vk.StructureTypeEventCreateInfo,
+		Flags: vk.EventCreateFlags(vk.EventCreateDeviceOnlyBit),
+	}, nil, &sem)
+	IfPanic(NewError(ret))
+	return sem
+}
 
 func NewSemaphore(dev vk.Device) vk.Semaphore {
 	var sem vk.Semaphore
