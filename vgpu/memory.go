@@ -274,42 +274,54 @@ func (mm *Memory) TransferToGPUBuff(bt BuffTypes) {
 	mm.TransferRegsToGPU(buff, []MemReg{{Offset: 0, Size: buff.Size}})
 }
 
-// TransferRegsToGPU transfers memory from CPU to GPU for given regions
+// TransferRegsToGPU transfers memory from CPU to GPU for given regions,
+// using a one-time memory command buffer.
 func (mm *Memory) TransferRegsToGPU(buff *MemBuff, regs []MemReg) {
 	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
 		return
 	}
-
 	cmd := mm.CmdPool.NewBuffer(&mm.Device)
 	mm.CmdPool.BeginCmdOneTime()
-
-	rg := make([]vk.BufferCopy, len(regs))
-	for i, mr := range regs {
-		rg[i] = vk.BufferCopy{SrcOffset: vk.DeviceSize(mr.Offset), DstOffset: vk.DeviceSize(mr.Offset), Size: vk.DeviceSize(mr.Size)}
-	}
-
-	vk.CmdCopyBuffer(cmd, buff.Host, buff.Dev, uint32(len(rg)), rg)
-
+	mm.CmdTransferRegsToGPU(cmd, buff, regs)
 	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
-// TransferRegsFmGPU transfers memory from GPU to CPU for given regions
+// TransferRegsFmGPU transfers memory from GPU to CPU for given regions,
+// using a one-time memory command buffer.
 func (mm *Memory) TransferRegsFmGPU(buff *MemBuff, regs []MemReg) {
 	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
 		return
 	}
-
 	cmd := mm.CmdPool.NewBuffer(&mm.Device)
 	CmdBeginOneTime(cmd)
+	mm.CmdTransferRegsFmGPU(cmd, buff, regs)
+	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
+}
 
+// CmdTransferRegsToGPU transfers memory from CPU to GPU for given regions
+// by recording command to given buffer.
+func (mm *Memory) CmdTransferRegsToGPU(cmd vk.CommandBuffer, buff *MemBuff, regs []MemReg) {
+	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
+		return
+	}
 	rg := make([]vk.BufferCopy, len(regs))
 	for i, mr := range regs {
 		rg[i] = vk.BufferCopy{SrcOffset: vk.DeviceSize(mr.Offset), DstOffset: vk.DeviceSize(mr.Offset), Size: vk.DeviceSize(mr.Size)}
 	}
+	vk.CmdCopyBuffer(cmd, buff.Host, buff.Dev, uint32(len(rg)), rg)
+}
 
+// CmdTransferRegsFmGPU transfers memory from GPU to CPU for given regions
+// by recording command to given buffer.
+func (mm *Memory) CmdTransferRegsFmGPU(cmd vk.CommandBuffer, buff *MemBuff, regs []MemReg) {
+	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
+		return
+	}
+	rg := make([]vk.BufferCopy, len(regs))
+	for i, mr := range regs {
+		rg[i] = vk.BufferCopy{SrcOffset: vk.DeviceSize(mr.Offset), DstOffset: vk.DeviceSize(mr.Offset), Size: vk.DeviceSize(mr.Size)}
+	}
 	vk.CmdCopyBuffer(cmd, buff.Dev, buff.Host, uint32(len(rg)), rg)
-
-	mm.CmdPool.EndSubmitWaitFree(&mm.Device)
 }
 
 ////////////////////////////////////////////////////////////////////////////

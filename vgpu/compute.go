@@ -109,6 +109,33 @@ func (sy *System) ComputeWaitEvents(event ...string) error {
 	return nil
 }
 
+// ComputeCmdCopyToGPU records command to copy given regions
+// in the Storage buffer memory from CPU to GPU, in one call.
+// Use SyncRegValIdxFmCPU to get the regions.
+func (sy *System) ComputeCmdCopyToGPU(regs ...MemReg) {
+	sy.Mem.CmdTransferRegsToGPU(sy.CmdPool.Buff, sy.Mem.Buffs[StorageBuff], regs)
+}
+
+// ComputeCmdCopyFmGPU records command to copy given regions
+// in the Storage buffer memory from GPU to CPU, in one call.
+// Use SyncRegValIdxFmCPU to get the regions.
+func (sy *System) ComputeCmdCopyFmGPU(regs ...MemReg) {
+	sy.Mem.CmdTransferRegsFmGPU(sy.CmdPool.Buff, sy.Mem.Buffs[StorageBuff], regs)
+}
+
+/*
+// ComputeCmdWaitMemory records command to wait for memory transfer to finish.
+// use this after a ComputeCmdCopyToGPU, or FmGPU
+func (sy *System) ComputeCmdWaitMemory() {
+	vk.CmdPipelineBarrier(sy.CmdPool.Buff, []vk.MemoryBarrier{{
+		SType: vk.StructureTypeMemoryBarrier,
+		SrcAccessMask: ,
+		DstAccessMask: ,
+	}}
+	sy.Mem.CmdTransferRegsToGPU(, sy.Mem.Buffs[StorageBuff], regs)
+}
+*/
+
 // ComputeSubmitWait adds and End command and
 // submits the current set of commands in the default system CmdPool,
 // typically from ComputeCommand.
