@@ -149,6 +149,17 @@ func CmdSubmit(cmd vk.CommandBuffer, dev *Device) {
 	IfPanic(NewError(ret))
 }
 
+// CmdSubmitFence submits commands in buffer to given device queue
+// using given fence.
+func CmdSubmitFence(cmd vk.CommandBuffer, dev *Device, fence vk.Fence) {
+	ret := vk.QueueSubmit(dev.Queue, 1, []vk.SubmitInfo{{
+		SType:              vk.StructureTypeSubmitInfo,
+		CommandBufferCount: 1,
+		PCommandBuffers:    []vk.CommandBuffer{cmd},
+	}}, fence)
+	IfPanic(NewError(ret))
+}
+
 // CmdSubmitWaitSignal submits command in buffer to given device queue
 // with given wait semaphore and given signal semaphore when done,
 // and with given fence (use vk.NullFence for none).

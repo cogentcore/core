@@ -57,6 +57,7 @@ func (sy *System) InitCompute(gp *GPU, name string) error {
 	sy.Device.Init(gp, vk.QueueComputeBit)
 	sy.InitCmd()
 	sy.Mem.Init(gp, &sy.Device)
+	sy.NewFence("ComputeWait") // always have this named fence avail for wait
 	return nil
 }
 

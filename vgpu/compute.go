@@ -142,8 +142,12 @@ func (sy *System) ComputeCmdWaitMemory() {
 // Then waits for the commands to finish before returning
 // control to the CPU.  Results will be available immediately
 // thereafter for retrieving back fro the GPU.
+// Uses ComputeFence to wait.
 func (sy *System) ComputeSubmitWait() {
-	CmdEndSubmitWait(sy.CmdPool.Buff, &sy.Device)
+	fc, _ := sy.FenceByNameTry("ComputeWait") // always created
+	CmdEnd(sy.CmdPool.Buff)
+	CmdSubmitFence(sy.CmdPool.Buff, &sy.Device, fc)
+	sy.ComputeWait()
 }
 
 // ComputeSubmitWaitSignal submits command in buffer to system device queue
@@ -153,7 +157,8 @@ func (sy *System) ComputeSubmitWait() {
 // signaled by a previous command with that semaphore as its signal.
 // The optional fence is used typically at the end of a block of
 // such commands, whenever the CPU needs to be sure the submitted GPU
-// commands have completed.
+// commands have completed.  Must use "ComputeWait" if using std
+// ComputeWait function.
 func (sy *System) ComputeSubmitWaitSignal(wait, signal, fence string) error {
 	CmdEnd(sy.CmdPool.Buff)
 	ws, err := sy.SemaphoreByNameTry(wait)
@@ -180,7 +185,8 @@ func (sy *System) ComputeSubmitWaitSignal(wait, signal, fence string) error {
 // and with given fence (use empty string for none).
 // The optional fence is used typically at the end of a block of
 // such commands, whenever the CPU needs to be sure the submitted GPU
-// commands have completed.
+// commands have completed.  Must use "ComputeWait" if using std
+// ComputeWait function.
 func (sy *System) ComputeSubmitSignal(signal, fence string) error {
 	CmdEnd(sy.CmdPool.Buff)
 	ss, err := sy.SemaphoreByNameTry(signal)
@@ -204,6 +210,14 @@ func (sy *System) ComputeWaitFence(fence string) error {
 	if err != nil {
 		return err
 	}
+	vk.WaitForFences(sy.Device.Device, 1, []vk.Fence{fc}, vk.True, vk.MaxUint64)
+	vk.ResetFences(sy.Device.Device, 1, []vk.Fence{fc})
+	return nil
+}
+
+// ComputeWait waits for the standard ComputeWait fence
+func (sy *System) ComputeWait() error {
+	fc, _ := sy.FenceByNameTry("ComputeWait")
 	vk.WaitForFences(sy.Device.Device, 1, []vk.Fence{fc}, vk.True, vk.MaxUint64)
 	vk.ResetFences(sy.Device.Device, 1, []vk.Fence{fc})
 	return nil
