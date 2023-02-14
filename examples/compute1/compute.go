@@ -70,12 +70,12 @@ func main() {
 	pl.ComputeCommand(nGps, 1, 1)
 	sy.ComputeSubmitWait() // if no wait, faster, but validation complains
 	fmt.Printf("submit 0\n")
-	for cy := 1; cy < 10; cy++ {
-		sy.ComputeSubmitWait()
-		fmt.Printf("submit %d\n", cy)
-	}
-	// note: could use semaphore here instead of waiting on the compute
-	// sy.ComputeWait()
+	// for cy := 1; cy < 10; cy++ {
+	// 	sy.ComputeSubmitWait()
+	// 	fmt.Printf("submit %d\n", cy)
+	// }
+	// // note: could use semaphore here instead of waiting on the compute
+	// // sy.ComputeWait()
 
 	sy.Mem.SyncValIdxFmGPU(0, "Out", 0)
 	_, ovl, _ := vars.ValByIdxTry(0, "Out", 0)

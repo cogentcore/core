@@ -142,12 +142,8 @@ func (sy *System) ComputeCmdWaitMemory() {
 // Then waits for the commands to finish before returning
 // control to the CPU.  Results will be available immediately
 // thereafter for retrieving back fro the GPU.
-// Uses ComputeFence to wait.
 func (sy *System) ComputeSubmitWait() {
-	fc, _ := sy.FenceByNameTry("ComputeWait") // always created
-	CmdEnd(sy.CmdPool.Buff)
-	CmdSubmitFence(sy.CmdPool.Buff, &sy.Device, fc)
-	sy.ComputeWait()
+	CmdEndSubmitWait(sy.CmdPool.Buff, &sy.Device)
 }
 
 // ComputeCmdEnd adds an end to command buffer
