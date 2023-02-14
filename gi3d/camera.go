@@ -106,6 +106,14 @@ func (cm *Camera) ViewVector() mat32.Vec3 {
 	return cm.Pose.Pos.Sub(cm.Target)
 }
 
+// DistTo is the distance from camera to given point
+func (cm *Camera) DistTo(pt mat32.Vec3) float32 {
+	cm.CamMu.RLock()
+	defer cm.CamMu.RUnlock()
+	dv := cm.Pose.Pos.Sub(pt)
+	return dv.Length()
+}
+
 // ViewMainAxis returns the dimension along which the view vector is largest
 // along with the sign of that axis (+1 for positive, -1 for negative).
 // this is useful for determining how manipulations should function, for example.

@@ -243,8 +243,9 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		}
 		// fmt.Printf("mpos: %v  camd: %v  sgn: %v  dm: %v\n", mpos, camd, sgn, dm)
 		updt := ssc.UpdateStart()
-		scDel := float32(.01)
-		panDel := float32(.01)
+		cdist := ssc.Camera.DistTo(ssc.Camera.Target)
+		scDel := float32(.0005) * cdist
+		panDel := float32(.0005) * cdist
 		// todo: use SVG ApplyDeltaXForm logic
 		switch {
 		case key.HasAllModifierBits(me.Modifiers, key.Control): // scale
@@ -257,6 +258,7 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 			if camd == mat32.Y {
 				dang = -sgn * dm.X * (dy + dx)
 			}
+			dang *= 0.01 * cdist
 			var rvec mat32.Vec3
 			rvec.SetDim(camd, 1)
 			mb.Pose.RotateOnAxis(rvec.X, rvec.Y, rvec.Z, dang)

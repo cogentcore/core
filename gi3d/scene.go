@@ -372,8 +372,10 @@ func (sc *Scene) NavEvents() {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		if ssc.IsDragging() {
-			orbDel := float32(.2)
-			panDel := float32(.01)
+			cdist := ssc.Camera.DistTo(ssc.Camera.Target)
+			orbDel := 0.018 * cdist
+			panDel := 0.001 * cdist
+
 			if !ssc.SetDragCursor {
 				oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Push(cursor.HandOpen)
 				ssc.SetDragCursor = true
@@ -443,8 +445,9 @@ func (sc *Scene) NavEvents() {
 		}
 		pt := me.Where.Sub(sc.ObjBBox.Min)
 		sz := ssc.Geom.Size
+		cdist := ssc.Camera.DistTo(ssc.Camera.Target)
 		zoom := float32(me.NonZeroDelta(false))
-		zoomDel := float32(.01)
+		zoomDel := float32(.001) * cdist
 		switch {
 		case key.HasAllModifierBits(me.Modifiers, key.Alt):
 			ssc.Camera.PanTarget(0, 0, zoom*zoomDel)
