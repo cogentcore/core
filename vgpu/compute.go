@@ -150,6 +150,11 @@ func (sy *System) ComputeSubmitWait() {
 	sy.ComputeWait()
 }
 
+// ComputeCmdEnd adds an end to command buffer
+func (sy *System) ComputeCmdEnd() {
+	CmdEnd(sy.CmdPool.Buff)
+}
+
 // ComputeSubmitWaitSignal submits command in buffer to system device queue
 // with given wait semaphore and given signal semaphore (by name) when done,
 // and with given fence (use empty string for none).
