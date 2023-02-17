@@ -1032,6 +1032,18 @@ func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {
 // is based on masterminds/vcs
 var VersCtrlSystems = []string{"git", "svn", "bzr", "hg"}
 
+// IsVersCtrlSystem returns true if the given string matches one of the
+// standard VersCtrlSystems -- uses lowercase version of str.
+func IsVersCtrlSystem(str string) bool {
+	stl := strings.ToLower(str)
+	for _, vcn := range VersCtrlSystems {
+		if stl == vcn {
+			return true
+		}
+	}
+	return false
+}
+
 // VersCtrlName is the name of a version control system
 type VersCtrlName string
 

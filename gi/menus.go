@@ -423,6 +423,41 @@ func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvF
 	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
 }
 
+// SubStringsChooserPopup creates a menu of the sub-strings in the given
+// slice of string slices, and calls the given function on receiver when
+// the user selects.  This is the ActionSig signal, coming from the Action
+// for the given menu item.
+// The sub-menu name is the first element of each sub-slice.
+// The name of the Action is the string value, and the data is an
+// []int{s,i} slice of submenu and item indexes.
+// A string of subMenu: item equal to curSel will be marked as selected.
+// Location is from the ContextMenuPos of recv node.
+func SubStringsChooserPopup(strs [][]string, curSel string, recv Node2D, fun ki.RecvFunc) *Viewport2D {
+	var menu Menu
+	for si, ss := range strs {
+		sz := len(ss)
+		if sz < 2 {
+			continue
+		}
+		s1 := ss[0]
+		sm := menu.AddAction(ActOpts{Label: s1}, nil, nil)
+		sm.SetAsMenu()
+		for i := 1; i < sz; i++ {
+			it := ss[i]
+			cnm := s1 + ": " + it
+			ac := sm.Menu.AddAction(ActOpts{Label: it, Data: []int{si, i}}, recv, fun)
+			ac.SetSelectedState(cnm == curSel)
+		}
+	}
+	nb := recv.AsNode2D()
+	pos := recv.ContextMenuPos()
+	vp := nb.ViewportSafe()
+	if vp == nil {
+		vp = recv.AsViewport2D()
+	}
+	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
+}
+
 // StringsInsertFirst inserts the given string at start of a string slice,
 // while keeping overall length to given max value
 // useful for a "recents" kind of string list

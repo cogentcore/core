@@ -540,6 +540,18 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			} else {
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, submenu-func must be of type SubMenuFunc", methNm))
 			}
+		case "subsubmenu-func":
+			if sf, ok := pv.(SubSubMenuFunc); ok {
+				ac.MakeMenuFunc = MethViewSubMenuFunc
+				md.SubSubMenuFunc = sf
+				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+			} else if sf, ok := pv.(func(it interface{}, vp *gi.Viewport2D) [][]string); ok {
+				ac.MakeMenuFunc = MethViewSubMenuFunc
+				md.SubSubMenuFunc = SubSubMenuFunc(sf)
+				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+			} else {
+				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, subsubmenu-func must be of type SubMenuFunc", methNm))
+			}
 		case "Args":
 			argv, ok := pv.(ki.PropSlice)
 			if !ok {
@@ -619,6 +631,12 @@ var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, kit.BitFlag, n
 // first argument is the object on which the method is defined (receiver)
 type SubMenuFunc func(it interface{}, vp *gi.Viewport2D) []string
 
+// SubSubMenuFunc is a function that returns a slice of string slices
+// to create submenu items each having their own submenus.
+// used in MethView submenu-func option
+// first argument is the object on which the method is defined (receiver)
+type SubSubMenuFunc func(it interface{}, vp *gi.Viewport2D) [][]string
+
 // ShortcutFunc is a function that returns a key.Chord string for a shortcut
 // used in MethView shortcut-func option
 // first argument is the object on which the method is defined (receiver)
@@ -635,22 +653,23 @@ type ActionUpdateFunc func(it interface{}, act *gi.Action)
 // MethViewData is set to the Action.Data field for all MethView actions,
 // containing info needed to actually call the Method on value Val.
 type MethViewData struct {
-	Val          interface{}
-	ValVal       reflect.Value
-	Vp           *gi.Viewport2D
-	Method       string
-	MethVal      reflect.Value
-	MethTyp      reflect.Method
-	ArgProps     ki.PropSlice     `desc:"names and other properties of args, in one-to-one with method args"`
-	SpecProps    ki.Props         `desc:"props for special action types, e.g., FileView"`
-	Desc         string           `desc:"prompt shown in arg dialog or confirm prompt dialog"`
-	UpdateFunc   ActionUpdateFunc `desc:"update function defined in properties -- called by our wrapper update function"`
-	SubMenuSlice interface{}      `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
-	SubMenuField string           `desc:"value for submenu generation as name of field on obj"`
-	SubMenuFunc  SubMenuFunc      `desc:"function that will generate submenu items, as []string slice"`
-	SubMenuVal   interface{}      `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
-	KeyFun       gi.KeyFuns       `desc:"key function that we emit, if MethViewKeyFun type"`
-	Flags        MethViewFlags
+	Val            interface{}
+	ValVal         reflect.Value
+	Vp             *gi.Viewport2D
+	Method         string
+	MethVal        reflect.Value
+	MethTyp        reflect.Method
+	ArgProps       ki.PropSlice     `desc:"names and other properties of args, in one-to-one with method args"`
+	SpecProps      ki.Props         `desc:"props for special action types, e.g., FileView"`
+	Desc           string           `desc:"prompt shown in arg dialog or confirm prompt dialog"`
+	UpdateFunc     ActionUpdateFunc `desc:"update function defined in properties -- called by our wrapper update function"`
+	SubMenuSlice   interface{}      `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
+	SubMenuField   string           `desc:"value for submenu generation as name of field on obj"`
+	SubMenuFunc    SubMenuFunc      `desc:"function that will generate submenu items, as []string slice"`
+	SubSubMenuFunc SubSubMenuFunc   `desc:"function that will generate sub-submenu items, as [][]string slice"`
+	SubMenuVal     interface{}      `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
+	KeyFun         gi.KeyFuns       `desc:"key function that we emit, if MethViewKeyFun type"`
+	Flags          MethViewFlags
 }
 
 func (md *MethViewData) MethName() string {
@@ -957,6 +976,8 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	smd := md.SubMenuSlice
 	if md.SubMenuFunc != nil {
 		smd = md.SubMenuFunc(md.Val, md.Vp)
+	} else if md.SubSubMenuFunc != nil {
+		smd = md.SubSubMenuFunc(md.Val, md.Vp)
 	} else if md.SubMenuField != "" {
 		if flv, ok := MethViewFieldValue(md.ValVal, md.SubMenuField); ok {
 			smd = flv.Interface()
@@ -979,9 +1000,41 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 
 	mv := reflect.ValueOf(smd)
 	mvnp := kit.NonPtrValue(mv)
+	md.MakeMenuSliceValue(mvnp, m, false, defstr, gotDef)
+	md.Vp.Win.MainMenuUpdated()
+}
+
+func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub bool, defstr string, gotDef bool) {
 	sz := mvnp.Len()
-	*m = make(gi.Menu, sz)
-	for i := 0; i < sz; i++ {
+	if sz == 0 {
+		return
+	}
+	*m = make(gi.Menu, 0, sz)
+	e1 := mvnp.Index(0)
+	if e1.Kind() == reflect.Slice { // multi-slice -- sub-menus
+		for i := 0; i < sz; i++ {
+			val := mvnp.Index(i)
+			if val.Len() < 2 {
+				continue
+			}
+			s1 := val.Index(0)
+			nm := kit.ToString(s1)
+			nac := &gi.Action{}
+			nac.InitName(nac, nm)
+			nac.Text = nm
+			nac.SetAsMenu()
+			*m = append(*m, nac)
+			md.MakeMenuSliceValue(val, &nac.Menu, true, defstr, gotDef) // sub
+		}
+		return
+	}
+	st := 0
+	subMenuName := ""
+	if isSub { // skip the first one -- used as a label for the higher-level menu
+		subMenuName = kit.ToString(mvnp.Index(0)) + ": "
+		st = 1
+	}
+	for i := st; i < sz; i++ {
 		val := mvnp.Index(i)
 		vi := val.Interface()
 		nm := kit.ToString(val)
@@ -989,7 +1042,7 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 			sp := &gi.Separator{}
 			sp.InitName(sp, "sep")
 			sp.Horiz = true
-			(*m)[i] = sp
+			*m = append(*m, sp)
 			continue
 		}
 		nac := &gi.Action{}
@@ -998,7 +1051,11 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 		nac.SetAsMenu()
 		nac.ActionSig.Connect(md.Vp.This(), MethViewCall)
 		nd := *md // copy
-		nd.SubMenuVal = vi
+		if isSub {
+			nd.SubMenuVal = subMenuName + nm // qualified name
+		} else {
+			nd.SubMenuVal = vi
+		}
 		if gotDef {
 			if kit.ToString(vi) == defstr {
 				nac.SetSelected()
@@ -1006,7 +1063,6 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 		}
 		bitflag.Set32((*int32)(&nd.Flags), int(MethViewHasSubMenuVal))
 		nac.Data = &nd
-		(*m)[i] = nac
+		*m = append(*m, nac)
 	}
-	md.Vp.Win.MainMenuUpdated()
 }
