@@ -373,7 +373,7 @@ func (sc *Scene) NavEvents() {
 		me.SetProcessed()
 		if ssc.IsDragging() {
 			cdist := ssc.Camera.DistTo(ssc.Camera.Target)
-			orbDel := 0.018 * cdist
+			orbDel := 0.025 * cdist
 			panDel := 0.001 * cdist
 
 			if !ssc.SetDragCursor {
