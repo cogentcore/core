@@ -30,7 +30,7 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
 	golang.org/x/exp v0.0.0-20230105202349-8879d0199aa3
-	golang.org/x/image v0.3.0
+	golang.org/x/image v0.5.0
 	golang.org/x/net v0.5.0
 )
 
@@ -49,6 +49,6 @@ require (
 	github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f // indirect
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/tools v0.5.0 // indirect
 )
