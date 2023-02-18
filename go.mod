@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/akutz/sortfold v0.2.1
-	github.com/alecthomas/chroma v0.10.0
+	github.com/alecthomas/chroma/v2 v2.5.0
 	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/goki/ki v1.1.11
 	github.com/goki/prof v1.0.0
