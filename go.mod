@@ -20,7 +20,7 @@ require (
 	github.com/goki/ki v1.1.11
 	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.14
-	github.com/goki/pi v1.0.23
+	github.com/goki/pi v1.0.24
 	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
 	github.com/goki/vgpu v1.0.21
