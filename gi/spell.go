@@ -39,6 +39,9 @@ func OpenSpellModel() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	openpath := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Open(openpath)
+	if err != nil {
+		log.Printf("ERROR opening spelling dictionary: %s  error: %s\n", openpath, err)
+	}
 	return err
 }
 

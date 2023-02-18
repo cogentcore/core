@@ -18,6 +18,3 @@ test:
 clean: 
 	$(GOCLEAN)
 
-bindata:
-	go-bindata -pkg histyle defaults.histys
-	

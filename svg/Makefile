@@ -17,7 +17,4 @@ test:
 
 clean: 
 	$(GOCLEAN)
-
-bindata:
-	go-bindata -pkg svg ../icons/*.svg
 	

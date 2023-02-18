@@ -5,6 +5,7 @@
 package histyle
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -18,6 +19,9 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/pi"
 )
+
+//go:embed defaults.histys
+var content embed.FS
 
 // Styles is a collection of styles
 type Styles map[string]*Style
@@ -136,17 +140,9 @@ func (hs *Styles) SaveAll(dir gi.FileName) {
 }
 
 // OpenDefaults opens the default highlighting styles (from chroma originally)
-// These are encoded as an asset from defaults.histys
+// These are encoded as an embed from defaults.histys
 func (hs *Styles) OpenDefaults() error {
-	// path, err := dirs.GoSrcDir("github.com/goki/gi/histyle")
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return err
-	// }
-	// dfnm := filepath.Join(path, "defaults.histys")
-	// rval := hs.OpenJSON(gi.FileName(dfnm))
-
-	defb, err := Asset("defaults.histys")
+	defb, err := content.ReadFile("defaults.histys")
 	if err != nil {
 		log.Println(err)
 		return err
