@@ -8,7 +8,6 @@ import (
 	"bufio"
 	"bytes"
 	"embed"
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -132,8 +131,9 @@ func Save(filename string) error {
 	ResetLearnTime()
 	err := model.Save(filename)
 	if err == nil {
-		fmt.Printf("spell: %s\n", filename)
 		openTime, err = ModTime(filename)
+	} else {
+		log.Printf("pi.Spell: Error saving file: %s  %s\n", filename, err)
 	}
 	return err
 }
