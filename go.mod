@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/Masterminds/vcs v1.13.3
-	github.com/alecthomas/chroma v0.10.0
+	github.com/alecthomas/chroma/v2 v2.5.0
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/antonmedv/expr v1.12.0
 	github.com/aymerick/douceur v0.2.0
@@ -20,7 +20,7 @@ require (
 	github.com/goki/ki v1.1.11
 	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.14
-	github.com/goki/pi v1.0.24
+	github.com/goki/pi v1.0.25
 	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
 	github.com/goki/vgpu v1.0.21

@@ -9,9 +9,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/alecthomas/chroma"
-	"github.com/alecthomas/chroma/formatters/html"
-	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v2/formatters/html"
+	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/ki/ints"
@@ -70,10 +70,10 @@ func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileStates) {
 	}
 
 	if hm.PiLang == nil {
-		lexer := lexers.Match(hm.Info.Name)
-		// if lexer == nil && len(pist.Src.Lines) > 0 {
-		// 	lexer = lexers.Analyse(string(tb.Txt))
-		// }
+		lexer := lexers.MatchMimeType(hm.Info.Mime)
+		if lexer == nil {
+			lexer = lexers.Match(hm.Info.Name)
+		}
 		if lexer != nil {
 			hm.Lang = lexer.Config().Name
 			hm.lexer = lexer

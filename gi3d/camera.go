@@ -232,7 +232,9 @@ func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
 	wdir := mat32.NewVec3FromVec4(cdir.MulMat4(&cm.Pose.Matrix))
-	cm.Pose.Pos.SetAdd(wdir.MulScalar(zoomPct))
+	del := wdir.MulScalar(zoomPct)
+	cm.Pose.Pos.SetAdd(del)
+	cm.Target.SetAdd(del)
 	cm.CamMu.Unlock()
 }
 
