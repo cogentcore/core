@@ -18,6 +18,3 @@ test:
 clean: 
 	$(GOCLEAN)
 
-bindata:
-	go-bindata -pkg spell spell_en_us.json
-

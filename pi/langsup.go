@@ -7,8 +7,7 @@ package pi
 import (
 	"fmt"
 	"log"
-	"path/filepath"
-	"strings"
+	"time"
 
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
@@ -116,19 +115,8 @@ var LangSupport = LangSupporter{}
 func (ll *LangSupporter) OpenStd() error {
 	lex.TheLangLexer = &LangSupport
 
-	// path, err := dirs.GoSrcDir("github.com/goki/pi/langs")
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return err
-	// }
 	for sl, lp := range StdLangProps {
-		ln := strings.ToLower(sl.String())
-		lndir := ln
-		if lndir == "go" {
-			lndir = "golang" // can't name a package "go"..
-		}
-		fn := filepath.Join(lndir, ln+".pi")
-		pib, err := langs.Asset(fn)
+		pib, err := langs.OpenParser(sl)
 		if err != nil {
 			continue
 		}
@@ -136,13 +124,11 @@ func (ll *LangSupporter) OpenStd() error {
 		err = pr.ReadJSON(pib)
 		if err != nil {
 			log.Println(err)
-			continue
+			return nil
 		}
+		pr.ModTime = time.Date(2023, 02, 10, 00, 00, 00, 0, time.UTC)
+		pr.InitAll()
 		lp.Parser = pr
-		pinfo, _ := langs.AssetInfo(fn)
-		pr.ModTime = pinfo.ModTime()
-		lp.Parser.InitAll()
-		StdLangProps[sl] = lp
 	}
 	return nil
 }

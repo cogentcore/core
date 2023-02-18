@@ -7,6 +7,8 @@ package spell
 import (
 	"bufio"
 	"bytes"
+	"embed"
+	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -16,6 +18,9 @@ import (
 
 	"github.com/goki/pi/lex"
 )
+
+//go:embed spell_en_us.json
+var content embed.FS
 
 // SaveAfterLearnIntervalSecs is number of seconds since file has been opened / saved
 // above which model is saved after learning.
@@ -95,21 +100,20 @@ func OpenCheck() error {
 // TODO: need different languages obviously!
 func OpenDefault() error {
 	fn := "spell_en_us.json"
-	return OpenAsset(fn)
+	return OpenEmbed(fn)
 }
 
-// OpenAsset loads json-formatted model from compiled-in asset
-func OpenAsset(fname string) error {
+// OpenEmbed loads json-formatted model from embedded data
+func OpenEmbed(fname string) error {
 	spellMu.Lock()
 	defer spellMu.Unlock()
 
 	ResetLearnTime()
-	defb, err := Asset(fname)
+	defb, err := content.ReadFile(fname)
 	if err != nil {
 		return err
 	}
-	pinfo, _ := AssetInfo(fname)
-	openTime = pinfo.ModTime()
+	openTime = time.Date(2022, 02, 10, 00, 00, 00, 0, time.UTC)
 	inited = true
 	model, err = FromReader(bytes.NewBuffer(defb))
 	return err
@@ -128,6 +132,7 @@ func Save(filename string) error {
 	ResetLearnTime()
 	err := model.Save(filename)
 	if err == nil {
+		fmt.Printf("spell: %s\n", filename)
 		openTime, err = ModTime(filename)
 	}
 	return err
