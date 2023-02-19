@@ -372,7 +372,7 @@ func (sc *Scene) NavEvents() {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		if ssc.IsDragging() {
-			cdist := ssc.Camera.DistTo(ssc.Camera.Target)
+			cdist := mat32.Max(ssc.Camera.DistTo(ssc.Camera.Target), 1.0)
 			orbDel := 0.025 * cdist
 			panDel := 0.001 * cdist
 
@@ -445,7 +445,7 @@ func (sc *Scene) NavEvents() {
 		}
 		pt := me.Where.Sub(sc.ObjBBox.Min)
 		sz := ssc.Geom.Size
-		cdist := ssc.Camera.DistTo(ssc.Camera.Target)
+		cdist := mat32.Max(ssc.Camera.DistTo(ssc.Camera.Target), 1.0)
 		zoom := float32(me.NonZeroDelta(false))
 		zoomDel := float32(.001) * cdist
 		switch {

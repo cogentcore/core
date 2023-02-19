@@ -199,6 +199,17 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 	cm.LookAtTarget()
 }
 
+// TargetFmView updates the target location from the current view matrix,
+// by projecting the current target distance along the current camera
+// view matrix.
+func (cm *Camera) TargetFmView() {
+	cm.CamMu.Lock()
+	trgdist := cm.Pose.Pos.Sub(cm.Target).Length() // distance to existing target
+	tpos := mat32.Vec4{0, 0, -trgdist, 1}          // target is that distance along -Z axis in front of me
+	cm.Target = mat32.NewVec3FromVec4(tpos.MulMat4(&cm.Pose.Matrix))
+	cm.CamMu.Unlock()
+}
+
 // Zoom moves along axis given pct closer or further from the target
 // it always moves the target back also if it distance is < 1
 func (cm *Camera) Zoom(zoomPct float32) {
@@ -234,8 +245,9 @@ func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	wdir := mat32.NewVec3FromVec4(cdir.MulMat4(&cm.Pose.Matrix))
 	del := wdir.MulScalar(zoomPct)
 	cm.Pose.Pos.SetAdd(del)
-	cm.Target.SetAdd(del)
 	cm.CamMu.Unlock()
+	cm.UpdateMatrix()
+	cm.TargetFmView()
 }
 
 // CameraProps define the ToolBar and MenuBar for StructView
