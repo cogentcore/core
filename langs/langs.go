@@ -5,24 +5,17 @@
 package langs
 
 import (
-	"embed"
-	"path/filepath"
-	"strings"
+	"fmt"
 
 	"github.com/goki/pi/filecat"
 )
 
-//go:embed golang/go.pi
-//go:embed markdown/markdown.pi
-//go:embed tex/tex.pi
-var content embed.FS
+var ParserBytes map[filecat.Supported][]byte
 
 func OpenParser(sl filecat.Supported) ([]byte, error) {
-	ln := strings.ToLower(sl.String())
-	lndir := ln
-	if lndir == "go" {
-		lndir = "golang" // can't name a package "go"..
+	parserBytes, ok := ParserBytes[sl]
+	if !ok {
+		return nil, fmt.Errorf("langs.OpenParser: no parser bytes for %v", sl)
 	}
-	fn := filepath.Join(lndir, ln+".pi")
-	return content.ReadFile(fn)
+	return parserBytes, nil
 }

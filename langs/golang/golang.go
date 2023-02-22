@@ -5,6 +5,7 @@
 package golang
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -14,10 +15,14 @@ import (
 
 	"github.com/goki/ki/indent"
 	"github.com/goki/pi/filecat"
+	"github.com/goki/pi/langs"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/token"
 )
+
+//go:embed go.pi
+var parserBytes []byte
 
 // GoLang implements the Lang interface for the Go language
 type GoLang struct {
@@ -29,8 +34,7 @@ var TheGoLang = GoLang{}
 
 func init() {
 	pi.StdLangProps[filecat.Go].Lang = &TheGoLang
-	if pi.StdLangProps[filecat.Go].Lang == nil {
-	}
+	langs.ParserBytes[filecat.Go] = parserBytes
 }
 
 func (gl *GoLang) Parser() *pi.Parser {
