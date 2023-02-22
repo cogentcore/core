@@ -10,7 +10,7 @@ import (
 	"github.com/goki/pi/filecat"
 )
 
-var ParserBytes map[filecat.Supported][]byte
+var ParserBytes map[filecat.Supported][]byte = make(map[filecat.Supported][]byte)
 
 func OpenParser(sl filecat.Supported) ([]byte, error) {
 	parserBytes, ok := ParserBytes[sl]
