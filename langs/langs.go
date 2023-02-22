@@ -12,9 +12,9 @@ import (
 	"github.com/goki/pi/filecat"
 )
 
-//go:embed golang/*.pi
-//go:embed markdown/*.pi
-//go:embed tex/*.pi
+//go:embed golang/go.pi
+//go:embed markdown/markdown.pi
+//go:embed tex/tex.pi
 var content embed.FS
 
 func OpenParser(sl filecat.Supported) ([]byte, error) {
