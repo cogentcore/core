@@ -5,18 +5,23 @@
 package markdown
 
 import (
+	_ "embed"
 	"strings"
 	"unicode"
 
 	"github.com/goki/ki/indent"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/filecat"
+	"github.com/goki/pi/langs"
 	"github.com/goki/pi/langs/bibtex"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
 	"github.com/goki/pi/token"
 )
+
+//go:embed markdown.pi
+var parserBytes []byte
 
 // MarkdownLang implements the Lang interface for the Markdown language
 type MarkdownLang struct {
@@ -29,6 +34,7 @@ var TheMarkdownLang = MarkdownLang{}
 
 func init() {
 	pi.StdLangProps[filecat.Markdown].Lang = &TheMarkdownLang
+	langs.ParserBytes[filecat.Markdown] = parserBytes
 }
 
 func (ml *MarkdownLang) Parser() *pi.Parser {

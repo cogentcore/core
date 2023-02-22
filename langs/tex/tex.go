@@ -5,16 +5,21 @@
 package tex
 
 import (
+	_ "embed"
 	"strings"
 	"unicode"
 
 	"github.com/goki/ki/indent"
 	"github.com/goki/pi/filecat"
+	"github.com/goki/pi/langs"
 	"github.com/goki/pi/langs/bibtex"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
 )
+
+//go:embed tex.pi
+var parserBytes []byte
 
 // TexLang implements the Lang interface for the Tex / LaTeX language
 type TexLang struct {
@@ -27,6 +32,7 @@ var TheTexLang = TexLang{}
 
 func init() {
 	pi.StdLangProps[filecat.TeX].Lang = &TheTexLang
+	langs.ParserBytes[filecat.TeX] = parserBytes
 }
 
 func (tl *TexLang) Parser() *pi.Parser {
