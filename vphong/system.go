@@ -51,14 +51,12 @@ func (cr *CurRender) NewPush() *PushU {
 
 // ConfigPipeline configures graphics settings on the pipeline
 func (ph *Phong) ConfigPipeline(pl *vgpu.Pipeline) {
-	// gpu.Draw.Op(op)
-	// gpu.Draw.DepthTest(false)
-	// gpu.Draw.StencilTest(false)
-	// gpu.Draw.Multisample(false)
-	// app.drawProg.Activate()
-
 	pl.SetGraphicsDefaults()
-	pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+	if ph.Wireframe {
+		pl.SetRasterization(vk.PolygonModeLine, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+	} else {
+		pl.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+	}
 }
 
 // ConfigSys configures the vDraw System and pipelines.

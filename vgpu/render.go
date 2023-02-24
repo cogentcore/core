@@ -8,8 +8,9 @@
 package vgpu
 
 import (
-	"fmt"
+	"errors"
 	"image"
+	"log"
 
 	vk "github.com/goki/vulkan"
 )
@@ -291,7 +292,7 @@ func (rp *Render) ConfigGrab(dev vk.Device) {
 // ConfigGrabDepth configures the GrabDepth for copying depth image
 // back to host memory.  Uses format of current Depth image.
 func (rp *Render) ConfigGrabDepth(dev vk.Device) {
-	bsz := rp.Format.Size.X * rp.Format.Size.Y * rp.Format.NSamples() * 4 // 32 bit = 4 bytes per pixel
+	bsz := rp.Format.Size.X * rp.Format.Size.Y * 4 // 32 bit = 4 bytes per pixel
 	if rp.GrabDepth.Active {
 		if rp.GrabDepth.Size == bsz {
 			return
@@ -306,7 +307,15 @@ func (rp *Render) ConfigGrabDepth(dev vk.Device) {
 // GrabDepthImage grabs the current render depth image, using given command buffer
 // which must have the cmdBegin called already.  Uses the GrabDepth Storage Buffer.
 // call this after: sys.MemCmdEndSubmitWaitFree()
-func (rp *Render) GrabDepthImage(dev vk.Device, cmd vk.CommandBuffer) {
+func (rp *Render) GrabDepthImage(dev vk.Device, cmd vk.CommandBuffer) error {
+	nsamp := rp.Format.NSamples()
+	if nsamp > 1 {
+		err := errors.New("vgpu.Render.GrabDepthImage(): does not work if multisampling is > 1")
+		if Debug {
+			log.Println(err)
+		}
+		return err
+	}
 	rp.ConfigGrabDepth(dev) // ensure image grab setup
 	// first, prepare ImageGrab to receive copy from render image.
 	// apparently, the color attachment, with src flag already set, does not need this.
@@ -322,37 +331,43 @@ func (rp *Render) GrabDepthImage(dev vk.Device, cmd vk.CommandBuffer) {
 	reg.ImageExtent.Depth = 1
 
 	vk.CmdCopyImageToBuffer(cmd, rp.Depth.Image, vk.ImageLayoutTransferSrcOptimal, rp.GrabDepth.Host, 1, []vk.BufferImageCopy{reg})
+	return nil
 }
 
 // DepthImageArray returns the float values from the last GrabDepthImage call
 // automatically handles down-sampling from multisampling.
 func (rp *Render) DepthImageArray() ([]float32, error) {
 	if rp.GrabDepth.Host == nil {
-		return nil, fmt.Errorf("DepthImageArray: No GrabDepth.Host buffer -- must call GrabDepthImage")
+		err := errors.New("DepthImageArray: No GrabDepth.Host buffer -- must call GrabDepthImage")
+		if Debug {
+			log.Println(err)
+		}
+		return nil, err
 	}
 	sz := rp.Format.Size
-	nsamp := rp.Format.NSamples()
 	fsz := sz.X * sz.Y
 	ary := make([]float32, fsz)
 	const m = 0x7fffffff
-	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0 : fsz*nsamp]
-	if nsamp == 1 {
-		copy(ary, fp)
-	} else {
-		ns2 := nsamp / 2
-		for y := 0; y < sz.Y; y++ {
-			for x := 0; x < sz.X; x++ {
-				sum := float32(0)
-				for ys := 0; ys < ns2; ys++ {
-					for xs := 0; xs < ns2; xs++ {
-						si := (y*ns2+ys)*sz.X*ns2 + x*ns2 + xs
-						sum += fp[si]
-					}
-				}
-				di := y*sz.X + x
-				ary[di] = sum / float32(nsamp)
-			}
-		}
-	}
+	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0:fsz]
+	copy(ary, fp)
+	// note: you cannot specify a greater width than actual width
+	// and resolving depth images GPU-side is not exactly clear:
+	// https://community.khronos.org/t/how-to-resolve-multi-sampled-depth-images/7584
+	// https://www.reddit.com/r/vulkan/comments/rpeywp/is_it_possible_to_resolve_a_depth_msaa_buffer/
+	// furthermore, the function for resolving the multiple samples is not obvious either -- average
+	// is implemented below:
+	// for y := 0; y < sz.Y; y++ {
+	// 	for x := 0; x < sz.X; x++ {
+	// 		sum := float32(0)
+	// 		for ys := 0; ys < ns2; ys++ {
+	// 			for xs := 0; xs < ns2; xs++ {
+	// 				si := (y*ns2+ys)*sz.X*ns2 + x*ns2 + xs
+	// 				sum += fp[si]
+	// 			}
+	// 		}
+	// 		di := y*sz.X + x
+	// 		ary[di] = sum / float32(nsamp)
+	// 	}
+	// }
 	return ary, nil
 }

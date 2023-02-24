@@ -30,13 +30,13 @@ const MaxLights = 8
 // Rendering starts with RenderStart, followed by Use* calls
 // to specify the parameters for each item, and then a Draw call
 // to add the rendering command, followed by RenderEnd.
-//
 type Phong struct {
-	NLights NLights                 `desc:"number of each type of light"`
-	Ambient [MaxLights]AmbientLight `desc:"ambient lights"`
-	Dir     [MaxLights]DirLight     `desc:"directional lights"`
-	Point   [MaxLights]PointLight   `desc:"point lights"`
-	Spot    [MaxLights]SpotLight    `desc:"spot lights"`
+	NLights   NLights                 `desc:"number of each type of light"`
+	Ambient   [MaxLights]AmbientLight `desc:"ambient lights"`
+	Dir       [MaxLights]DirLight     `desc:"directional lights"`
+	Point     [MaxLights]PointLight   `desc:"point lights"`
+	Spot      [MaxLights]SpotLight    `desc:"spot lights"`
+	Wireframe bool                    `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system"`
 
 	Cur      CurRender                    `desc:"state for current rendering"`
 	Meshes   ordmap.Map[string, *Mesh]    `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`
