@@ -71,9 +71,10 @@ var Update3DTrace = false
 type Scene struct {
 	gi.WidgetBase
 	Geom          gi.Geom2DInt                `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	MultiSample   int                         `def:"4" desc:"number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"`
+	Wireframe     bool                        `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"`
 	Camera        Camera                      `desc:"camera determines view onto scene"`
 	BgColor       gist.Color                  `desc:"background color"`
-	Wireframe     bool                        `desc:"if true, render as wireframe instead of filled"`
 	Lights        ordmap.Map[string, Light]   `desc:"all lights used in the scene"`
 	Meshes        ordmap.Map[string, Mesh]    `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`
 	Textures      ordmap.Map[string, Texture] `desc:"textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"`
@@ -103,6 +104,7 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 
 // Defaults sets default scene params (camera, bg = white)
 func (sc *Scene) Defaults() {
+	sc.MultiSample = 4
 	sc.Camera.Defaults()
 	sc.BgColor.SetUInt8(255, 255, 255, 255)
 	sc.SelParams.Defaults()

@@ -71,12 +71,17 @@ func (sc *Scene) ConfigFrameImpl(gpu *vgpu.GPU, dev *vgpu.Device) bool {
 				sz = image.Point{480, 320}
 			}
 			sc.Frame = vgpu.NewRenderFrame(gpu, dev, sz)
+			sc.Frame.Format.SetMultisample(sc.MultiSample)
 			sy := &sc.Phong.Sys
 			sy.InitGraphics(gpu, "vphong.Phong", dev)
 			sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
 			sc.Frame.SetRender(&sy.Render)
 			sc.Phong.ConfigSys()
-			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+			if sc.Wireframe {
+				sy.SetRasterization(vk.PolygonModeLine, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+			} else {
+				sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+			}
 		})
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
@@ -187,6 +192,7 @@ func (sc *Scene) ConfigRender() {
 func (sc *Scene) ConfigMeshesTextures() {
 	sc.ConfigMeshes()
 	sc.ConfigTextures()
+	sc.Phong.Wireframe = sc.Wireframe
 	sc.Phong.Config()
 	sc.SetMeshes()
 }

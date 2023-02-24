@@ -166,6 +166,9 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	scvw.SetStretchMax()
 	scvw.Config()
 	sc := scvw.Scene()
+	// options - must be set here
+	// sc.MultiSample = 1
+	// sc.Wireframe = true
 	// sc.NoNav = true
 
 	// first, add lights, set camera
