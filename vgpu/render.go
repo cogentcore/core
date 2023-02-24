@@ -330,21 +330,28 @@ func (rp *Render) DepthImageArray() ([]float32, error) {
 	if rp.GrabDepth.Host == nil {
 		return nil, fmt.Errorf("DepthImageArray: No GrabDepth.Host buffer -- must call GrabDepthImage")
 	}
+	sz := rp.Format.Size
 	nsamp := rp.Format.NSamples()
-	sz := rp.GrabDepth.Size
-	fsz := sz / (4 * nsamp)
+	fsz := sz.X * sz.Y
 	ary := make([]float32, fsz)
 	const m = 0x7fffffff
-	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0:fsz]
+	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0 : fsz*nsamp]
 	if nsamp == 1 {
 		copy(ary, fp)
 	} else {
-		for i := 0; i < fsz; i++ {
-			var sum float32
-			for j := 0; j < nsamp; j++ {
-				sum += fp[i*nsamp+j]
+		ns2 := nsamp / 2
+		for y := 0; y < sz.Y; y++ {
+			for x := 0; x < sz.X; x++ {
+				sum := float32(0)
+				for ys := 0; ys < ns2; ys++ {
+					for xs := 0; xs < ns2; xs++ {
+						si := (y*ns2+ys)*sz.X*ns2 + x*ns2 + xs
+						sum += fp[si]
+					}
+				}
+				di := y*sz.X + x
+				ary[di] = sum / float32(nsamp)
 			}
-			ary[i] = sum / float32(nsamp)
 		}
 	}
 	return ary, nil
