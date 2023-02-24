@@ -291,16 +291,16 @@ func (rp *Render) ConfigGrab(dev vk.Device) {
 // ConfigGrabDepth configures the GrabDepth for copying depth image
 // back to host memory.  Uses format of current Depth image.
 func (rp *Render) ConfigGrabDepth(dev vk.Device) {
-	sz := rp.Format.Size.X * rp.Format.Size.Y * 4 // 32 bit = 4 bytes per pixel
+	bsz := rp.Format.Size.X * rp.Format.Size.Y * rp.Format.NSamples() * 4 // 32 bit = 4 bytes per pixel
 	if rp.GrabDepth.Active {
-		if rp.GrabDepth.Size == sz {
+		if rp.GrabDepth.Size == bsz {
 			return
 		}
 		rp.GrabDepth.Free(dev)
 	}
 	rp.GrabDepth.GPU = rp.Sys.GPU
 	rp.GrabDepth.Type = StorageBuff
-	rp.GrabDepth.AllocHost(dev, sz)
+	rp.GrabDepth.AllocHost(dev, bsz)
 }
 
 // GrabDepthImage grabs the current render depth image, using given command buffer
@@ -321,25 +321,31 @@ func (rp *Render) GrabDepthImage(dev vk.Device, cmd vk.CommandBuffer) {
 	reg.ImageExtent.Height = uint32(rp.Format.Size.Y)
 	reg.ImageExtent.Depth = 1
 
-	sz := rp.GrabDepth.Size
-	fsz := sz / 4
-	const m = 0x7fffffff
-	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0:fsz]
-	_ = fp
-
 	vk.CmdCopyImageToBuffer(cmd, rp.Depth.Image, vk.ImageLayoutTransferSrcOptimal, rp.GrabDepth.Host, 1, []vk.BufferImageCopy{reg})
 }
 
 // DepthImageArray returns the float values from the last GrabDepthImage call
+// automatically handles down-sampling from multisampling.
 func (rp *Render) DepthImageArray() ([]float32, error) {
 	if rp.GrabDepth.Host == nil {
 		return nil, fmt.Errorf("DepthImageArray: No GrabDepth.Host buffer -- must call GrabDepthImage")
 	}
+	nsamp := rp.Format.NSamples()
 	sz := rp.GrabDepth.Size
-	fsz := sz / 4
+	fsz := sz / (4 * nsamp)
 	ary := make([]float32, fsz)
 	const m = 0x7fffffff
 	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0:fsz]
-	copy(ary, fp)
+	if nsamp == 1 {
+		copy(ary, fp)
+	} else {
+		for i := 0; i < fsz; i++ {
+			var sum float32
+			for j := 0; j < nsamp; j++ {
+				sum += fp[i*nsamp+j]
+			}
+			ary[i] = sum / float32(nsamp)
+		}
+	}
 	return ary, nil
 }

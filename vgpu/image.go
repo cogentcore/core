@@ -194,6 +194,28 @@ func (im *ImageFormat) SetMultisample(nsamp int) {
 	im.Samples = ns
 }
 
+// NSamples returns the integer number of samples based on Samples flag setting
+func (im *ImageFormat) NSamples() int {
+	ns := 1
+	switch im.Samples {
+	case vk.SampleCount1Bit:
+		ns = 1
+	case vk.SampleCount2Bit:
+		ns = 2
+	case vk.SampleCount4Bit:
+		ns = 4
+	case vk.SampleCount8Bit:
+		ns = 8
+	case vk.SampleCount16Bit:
+		ns = 16
+	case vk.SampleCount32Bit:
+		ns = 32
+	case vk.SampleCount64Bit:
+		ns = 64
+	}
+	return ns
+}
+
 // Size32 returns size as uint32 values
 func (im *ImageFormat) Size32() (width, height uint32) {
 	width = uint32(im.Size.X)
