@@ -8,6 +8,7 @@
 package vgpu
 
 import (
+	"fmt"
 	"image"
 
 	vk "github.com/goki/vulkan"
@@ -27,7 +28,8 @@ type Render struct {
 	HasDepth   bool            `desc:"is true if configured with depth buffer"`
 	Multi      Image           `desc:"for multisampling, this is the multisampled image that is the actual render target"`
 	HasMulti   bool            `desc:"is true if multsampled image configured"`
-	Grab       Image           `desc:"this is the host-accessible image that is used to transfer back from a render color attachment to host memory -- requires a different format than color attachment, and is ImageOnHostOnly flagged."`
+	Grab       Image           `desc:"host-accessible image that is used to transfer back from a render color attachment to host memory -- requires a different format than color attachment, and is ImageOnHostOnly flagged."`
+	GrabDepth  MemBuff         `desc:"host-accessible buffer for grabbing the depth map -- must go to a buffer and not an image"`
 	NotSurface bool            `desc:"set this to true if it is not using a Surface render target (i.e., it is a RenderFrame)"`
 	ClearVals  []vk.ClearValue `desc:"values for clearing image when starting render pass"`
 
@@ -46,6 +48,7 @@ func (rp *Render) Destroy() {
 	rp.Depth.Destroy()
 	rp.Multi.Destroy()
 	rp.Grab.Destroy()
+	rp.GrabDepth.Free(rp.Dev)
 }
 
 // Config configures the render pass for given device,
@@ -276,5 +279,67 @@ func (rp *Render) ConfigGrab(dev vk.Device) {
 	rp.Grab.Format.SetMultisample(1) // can't have for grabs
 	rp.Grab.SetFlag(int(ImageOnHostOnly))
 	rp.Grab.Dev = dev
+	rp.Grab.GPU = rp.Sys.GPU
 	rp.Grab.AllocImage()
+}
+
+// https://www.reddit.com/r/vulkan/comments/7yhvep/retrieve_depth_attachment_from_framebuffer/
+// https://pastebin.com/33MxSNmh
+// have to copy to a buffer then sync that back down
+// create the buffer as the GrabDepth item
+
+// ConfigGrabDepth configures the GrabDepth for copying depth image
+// back to host memory.  Uses format of current Depth image.
+func (rp *Render) ConfigGrabDepth(dev vk.Device) {
+	sz := rp.Format.Size.X * rp.Format.Size.Y * 4 // 32 bit = 4 bytes per pixel
+	if rp.GrabDepth.Active {
+		if rp.GrabDepth.Size == sz {
+			return
+		}
+		rp.GrabDepth.Free(dev)
+	}
+	rp.GrabDepth.GPU = rp.Sys.GPU
+	rp.GrabDepth.Type = StorageBuff
+	rp.GrabDepth.AllocHost(dev, sz)
+}
+
+// GrabDepthImage grabs the current render depth image, using given command buffer
+// which must have the cmdBegin called already.  Uses the GrabDepth Storage Buffer.
+// call this after: sys.MemCmdEndSubmitWaitFree()
+func (rp *Render) GrabDepthImage(dev vk.Device, cmd vk.CommandBuffer) {
+	rp.ConfigGrabDepth(dev) // ensure image grab setup
+	// first, prepare ImageGrab to receive copy from render image.
+	// apparently, the color attachment, with src flag already set, does not need this.
+
+	reg := vk.BufferImageCopy{BufferOffset: 0, BufferRowLength: 0, BufferImageHeight: 0}
+	reg.ImageSubresource.AspectMask = vk.ImageAspectFlags(vk.ImageAspectDepthBit)
+	reg.ImageSubresource.MipLevel = 0
+	reg.ImageSubresource.BaseArrayLayer = 0
+	reg.ImageSubresource.LayerCount = 1
+	reg.ImageOffset.X, reg.ImageOffset.Y, reg.ImageOffset.Z = 0, 0, 0
+	reg.ImageExtent.Width = uint32(rp.Format.Size.X)
+	reg.ImageExtent.Height = uint32(rp.Format.Size.Y)
+	reg.ImageExtent.Depth = 1
+
+	sz := rp.GrabDepth.Size
+	fsz := sz / 4
+	const m = 0x7fffffff
+	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0:fsz]
+	_ = fp
+
+	vk.CmdCopyImageToBuffer(cmd, rp.Depth.Image, vk.ImageLayoutTransferSrcOptimal, rp.GrabDepth.Host, 1, []vk.BufferImageCopy{reg})
+}
+
+// DepthImageArray returns the float values from the last GrabDepthImage call
+func (rp *Render) DepthImageArray() ([]float32, error) {
+	if rp.GrabDepth.Host == nil {
+		return nil, fmt.Errorf("DepthImageArray: No GrabDepth.Host buffer -- must call GrabDepthImage")
+	}
+	sz := rp.GrabDepth.Size
+	fsz := sz / 4
+	ary := make([]float32, fsz)
+	const m = 0x7fffffff
+	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0:fsz]
+	copy(ary, fp)
+	return ary, nil
 }

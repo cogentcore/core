@@ -17,8 +17,93 @@ import (
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
 )
+
+// SRGBToLinearComp converts an sRGB rgb component to linear space (removes gamma).
+// Used in converting from sRGB to XYZ colors.
+func SRGBToLinearComp(srgb float32) float32 {
+	if srgb <= 0.04045 {
+		return srgb / 12.92
+	}
+	return mat32.Pow((srgb+0.055)/1.055, 2.4)
+}
+
+// SRGBFmLinearComp converts an sRGB rgb linear component
+// to non-linear (gamma corrected) sRGB value
+// Used in converting from XYZ to sRGB.
+func SRGBFmLinearComp(lin float32) float32 {
+	if lin <= 0.0031308 {
+		return 12.92 * lin
+	}
+	return (1.055*mat32.Pow(lin, 1/2.4) + 0.055)
+}
+
+// SRGBToLinear converts set of sRGB components to linear values,
+// removing gamma correction.
+func SRGBToLinear(r, g, b float32) (rl, gl, bl float32) {
+	rl = SRGBToLinearComp(r)
+	gl = SRGBToLinearComp(g)
+	bl = SRGBToLinearComp(b)
+	return
+}
+
+// SRGBFmLinear converts set of sRGB components from linear values,
+// adding gamma correction.
+func SRGBFmLinear(rl, gl, bl float32) (r, g, b float32) {
+	r = SRGBFmLinearComp(rl)
+	g = SRGBFmLinearComp(gl)
+	b = SRGBFmLinearComp(bl)
+	return
+}
+
+func ImgCompToUint8(val float32) uint8 {
+	if val > 1.0 {
+		val = 1.0
+	}
+	return uint8(val * float32(0xff))
+}
+
+// ImageSRGBFmLinear returns a sRGB colorspace version of given linear
+// colorspace image
+func ImageSRGBFmLinear(img *image.RGBA) *image.RGBA {
+	out := image.NewRGBA(img.Rect)
+	sz := len(img.Pix)
+	tof := 1.0 / float32(0xff)
+	for i := 0; i < sz; i += 4 {
+		r := float32(img.Pix[i]) * tof
+		g := float32(img.Pix[i+1]) * tof
+		b := float32(img.Pix[i+2]) * tof
+		a := img.Pix[i+3]
+		rs, gs, bs := SRGBFmLinear(r, g, b)
+		out.Pix[i] = ImgCompToUint8(rs)
+		out.Pix[i+1] = ImgCompToUint8(gs)
+		out.Pix[i+2] = ImgCompToUint8(bs)
+		out.Pix[i+3] = a
+	}
+	return out
+}
+
+// ImageSRGBToLinear returns a linear colorspace version of sRGB
+// colorspace image
+func ImageSRGBToLinear(img *image.RGBA) *image.RGBA {
+	out := image.NewRGBA(img.Rect)
+	sz := len(img.Pix)
+	tof := 1.0 / float32(0xff)
+	for i := 0; i < sz; i += 4 {
+		r := float32(img.Pix[i]) * tof
+		g := float32(img.Pix[i+1]) * tof
+		b := float32(img.Pix[i+2]) * tof
+		a := img.Pix[i+3]
+		rs, gs, bs := SRGBToLinear(r, g, b)
+		out.Pix[i] = ImgCompToUint8(rs)
+		out.Pix[i+1] = ImgCompToUint8(gs)
+		out.Pix[i+2] = ImgCompToUint8(bs)
+		out.Pix[i+3] = a
+	}
+	return out
+}
 
 // ImageToRGBA returns image.RGBA version of given image
 // either because it already is one, or by converting it.
@@ -64,6 +149,12 @@ func (im *ImageFormat) String() string {
 // which is compatible with go image.RGBA format.
 func (im *ImageFormat) IsStdRGBA() bool {
 	return im.Format == vk.FormatR8g8b8a8Srgb
+}
+
+// IsRGBAUnorm returns true if image format is the vk.FormatR8g8b8a8Unorm format
+// which is compatible with go image.RGBA format with colorspace conversion.
+func (im *ImageFormat) IsRGBAUnorm() bool {
+	return im.Format == vk.FormatR8g8b8a8Unorm
 }
 
 // SetSize sets the width, height
@@ -231,13 +322,16 @@ func (im *Image) GoImage(layer int) (*image.RGBA, error) {
 	if !im.IsHostActive() {
 		return nil, fmt.Errorf("vgpu.Image: Go image not available because Host not active: %s", im.Name)
 	}
-	if !im.Format.IsStdRGBA() {
+	if !im.Format.IsStdRGBA() && !im.Format.IsRGBAUnorm() {
 		return nil, fmt.Errorf("vgpu.Image: Go image not standard RGBA format: %s", im.Name)
 	}
 	rgba := &image.RGBA{}
 	rgba.Pix = im.HostPixels(layer)
 	rgba.Stride = im.Format.Stride()
 	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
+	if im.Format.IsRGBAUnorm() {
+		return ImageSRGBFmLinear(rgba), nil
+	}
 	return rgba, nil
 }
 
@@ -248,8 +342,8 @@ func (im *Image) DevGoImage() (*image.RGBA, error) {
 	if !im.HasFlag(ImageOnHostOnly) || im.Mem == nil {
 		return nil, fmt.Errorf("vgpu.Image: Go image not available because device Image is not HostOnly, or Mem is nil: %s", im.Name)
 	}
-	if !im.Format.IsStdRGBA() {
-		return nil, fmt.Errorf("vgpu.Image: Go image not standard RGBA format: %s", im.Name)
+	if !im.Format.IsStdRGBA() && !im.Format.IsRGBAUnorm() {
+		return nil, fmt.Errorf("vgpu.Image: Go image not standard RGBA format: %s", im.Format.String())
 	}
 	size := im.Format.LayerByteSize()
 	rgba := &image.RGBA{}
@@ -268,6 +362,9 @@ func (im *Image) DevGoImage() (*image.RGBA, error) {
 	vk.UnmapMemory(im.Dev, im.Mem)
 	rgba.Stride = im.Format.Stride()
 	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
+	if im.Format.IsRGBAUnorm() {
+		return ImageSRGBFmLinear(rgba), nil
+	}
 	return rgba, nil
 }
 

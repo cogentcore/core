@@ -16,6 +16,7 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/goki/gi/gi"
 	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
 
@@ -195,16 +196,16 @@ func main() {
 		rf.SubmitRender(cmd) // this is where it waits for the 16 msec
 		rf.WaitForRender()
 
-		if false { // grab  a
-			// tcmd := sy.MemCmdStart()
-			// rf.GrabImage(tcmd, 0)
-			// sy.MemCmdEndSubmitWaitFree()
-			// gimg, err := fr.Render.Grab.DevGoImage()
-			// if err == nil {
-			// 	gi.SaveImage("render.png", gimg)
-			// } else {
-			// 	fmt.Printf("image grab err: %s\n", err)
-			// }
+		if false {
+			tcmd := sy.MemCmdStart()
+			rf.GrabImage(tcmd, 0)
+			sy.MemCmdEndSubmitWaitFree()
+			gimg, err := fr.Render.Grab.DevGoImage()
+			if err == nil {
+				gi.SaveImage("render.png", gimg)
+			} else {
+				fmt.Printf("image grab err: %s\n", err)
+			}
 		}
 
 		drw.SetFrameImage(0, fr)

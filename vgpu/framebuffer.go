@@ -106,6 +106,7 @@ func (fb *Framebuffer) Config() {
 
 // GrabImage grabs the current framebuffer image, using given command buffer
 // which must have the cmdBegin called already.
+// call this after: sys.MemCmdEndSubmitWaitFree()
 func (fb *Framebuffer) GrabImage(dev vk.Device, cmd vk.CommandBuffer) {
 	fb.Render.ConfigGrab(dev) // ensure image grab setup
 	// first, prepare ImageGrab to receive copy from render image.

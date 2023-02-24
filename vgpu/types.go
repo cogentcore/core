@@ -113,6 +113,7 @@ var FormatSizes = map[vk.Format]int{
 	vk.FormatR64g64b64Sfloat:    24,
 	vk.FormatR64g64b64a64Sfloat: 32,
 	vk.FormatR8g8b8a8Srgb:       4,
+	vk.FormatR8g8b8a8Unorm:      4,
 	vk.FormatD32Sfloat:          4,
 	vk.FormatD24UnormS8Uint:     4,
 }

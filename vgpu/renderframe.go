@@ -182,3 +182,10 @@ func (rf *RenderFrame) GrabImage(cmd vk.CommandBuffer, idx int) {
 	dev := rf.Device.Device
 	rf.Frames[idx].GrabImage(dev, cmd)
 }
+
+// GrabDepthImage grabs rendered depth image from the Render,
+// must have waited for render already.
+func (rf *RenderFrame) GrabDepthImage(cmd vk.CommandBuffer) {
+	dev := rf.Device.Device
+	rf.Render.GrabDepthImage(dev, cmd)
+}
