@@ -42,25 +42,41 @@ func (sc *Scene) IsConfiged() bool {
 
 // ConfigFrame configures framebuffer for GPU rendering context
 // returns false if not possible
+// designed to be called prior to each render, to ensure ready.
 func (sc *Scene) ConfigFrame() bool {
+	if sc.Win == nil {
+		return false
+	}
+	drw := sc.Win.OSWin.Drawer()
+	sf := drw.Surf
+	newFrame := sc.ConfigFrameImpl(sf.GPU, &sf.Device)
+	if newFrame {
+		sc.Win.Phongs = append(sc.Win.Phongs, &sc.Phong) // for destroying in sequence
+		sc.Win.Frames = append(sc.Win.Frames, sc.Frame)  // for destroying in sequence
+	}
+	return true
+}
+
+// ConfigFrameImpl configures framebuffer for GPU rendering,
+// using given gpu and device.
+// designed to be called prior to each render, to ensure ready.
+// returns true if the frame was nil and thus configured.
+func (sc *Scene) ConfigFrameImpl(gpu *vgpu.GPU, dev *vgpu.Device) bool {
+	wasConfig := false
 	if sc.Frame == nil {
+		wasConfig = true
 		oswin.TheApp.RunOnMain(func() {
-			drw := sc.Win.OSWin.Drawer()
-			sf := drw.Surf
 			sz := sc.Geom.Size
 			if sz == image.ZP {
 				sz = image.Point{480, 320}
 			}
-			sc.Frame = vgpu.NewRenderFrame(sf.GPU, &sf.Device, sz)
+			sc.Frame = vgpu.NewRenderFrame(gpu, dev, sz)
 			sy := &sc.Phong.Sys
-			sy.InitGraphics(sf.GPU, "vphong.Phong", &sf.Device)
+			sy.InitGraphics(gpu, "vphong.Phong", dev)
 			sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
 			sc.Frame.SetRender(&sy.Render)
 			sc.Phong.ConfigSys()
-			// note:
 			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
-			sc.Win.Phongs = append(sc.Win.Phongs, &sc.Phong) // for destroying in sequence
-			sc.Win.Frames = append(sc.Win.Frames, sc.Frame)  // for destroying in sequence
 		})
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
@@ -71,7 +87,7 @@ func (sc *Scene) ConfigFrame() bool {
 	clr := mat32.NewVec3Color(sc.BgColor).SRGBToLinear()
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
-	return true
+	return wasConfig
 }
 
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
@@ -223,7 +239,10 @@ func (sc *Scene) UpdateNodes3D() {
 	})
 }
 
-// Render renders the scene to the Frame framebuffer
+// Render renders the scene to the Frame framebuffer,
+// and uploads to the window direct draw image texture.
+// for onscreen rendering.
+// returns false if currently already rendering.
 func (sc *Scene) Render() bool {
 	if sc.IsRendering() {
 		return false
@@ -236,13 +255,7 @@ func (sc *Scene) Render() bool {
 		sc.SaveCamera("default")
 	}
 	sc.SetFlag(int(Rendering))
-	sc.Camera.UpdateMatrix()
-	sc.TrackCamera()
-	sc.UpdateNodes3D()
-	sc.UpdateWorldMatrix()
-	sc.UpdateMeshBBox()
-	sc.UpdateMVPMatrix()
-	sc.Render3D(false) // not offscreen
+	sc.RenderImpl(false) // not offscreen
 
 	drw := sc.Win.OSWin.Drawer()
 	drw.SetFrameImage(sc.DirUpIdx, sc.Frame.Frames[0])
@@ -251,6 +264,35 @@ func (sc *Scene) Render() bool {
 	sc.ClearFlag(int(Rendering))
 	sc.RenderMu.Unlock()
 	return true
+}
+
+// RenderOffscreen does an offscreen render to the
+// framebuffer, which can be accessed for its image.
+// MUST call ConfigFrame / Impl on the Scene frame
+// prior to rendering.
+// returns false if currently already rendering.
+func (sc *Scene) RenderOffscreen() bool {
+	if sc.IsRendering() || sc.Frame == nil {
+		return false
+	}
+	sc.RenderMu.Lock()
+	sc.SetFlag(int(Rendering))
+	sc.RenderImpl(true) // yes offscreen
+	sc.ClearFlag(int(Rendering))
+	sc.RenderMu.Unlock()
+	return true
+}
+
+// RenderImpl does the 3D rendering including updating
+// the view / world matricies, and calling Render3D
+func (sc *Scene) RenderImpl(offscreen bool) {
+	sc.Camera.UpdateMatrix()
+	sc.TrackCamera()
+	sc.UpdateNodes3D()
+	sc.UpdateWorldMatrix()
+	sc.UpdateMeshBBox()
+	sc.UpdateMVPMatrix()
+	sc.Render3D(offscreen)
 }
 
 func (sc *Scene) IsDirectWinUpload() bool {
