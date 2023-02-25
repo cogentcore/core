@@ -23,7 +23,7 @@ require (
 	github.com/goki/pi v1.0.27
 	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
-	github.com/goki/vgpu v1.0.21
+	github.com/goki/vgpu v1.0.22
 	github.com/goki/vulkan v1.0.5
 	github.com/iancoleman/strcase v0.2.0
 	github.com/mitchellh/go-homedir v1.1.0
