@@ -227,17 +227,16 @@ func (sy *System) ComputeCmdWaitMemory() {
 // typically from ComputeCommand.
 // Then waits for the commands to finish before returning
 // control to the CPU.  Results will be available immediately
-// thereafter for retrieving back fro the GPU.
+// thereafter for retrieving back from the GPU.
 func (sy *System) ComputeSubmitWait() {
 	CmdEndSubmitWait(sy.CmdPool.Buff, &sy.Device)
 }
 
-// ComputeSubmitWaitCmd adds and End command and
-// submits the current set of commands in the default system CmdPool,
-// typically from ComputeCommand.
+// ComputeSubmitWaitCmd submits the current set of commands
+// in the default system CmdPool, typically from ComputeCommand.
 // Then waits for the commands to finish before returning
 // control to the CPU.  Results will be available immediately
-// thereafter for retrieving back fro the GPU.
+// thereafter for retrieving back from the GPU.
 func (sy *System) ComputeSubmitWaitCmd(cmd vk.CommandBuffer) {
 	CmdSubmitWait(cmd, &sy.Device)
 }
