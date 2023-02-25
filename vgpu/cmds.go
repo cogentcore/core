@@ -43,7 +43,7 @@ func (cp *CmdPool) ConfigResettable(dv *Device) {
 }
 
 // NewBuffer makes a buffer in pool, setting Buff to point to it
-// and also returning the buffer.
+// if Buff == nil, returning the buffer.
 func (cp *CmdPool) NewBuffer(dv *Device) vk.CommandBuffer {
 	var cmdBuff = make([]vk.CommandBuffer, 1)
 	ret := vk.AllocateCommandBuffers(dv.Device, &vk.CommandBufferAllocateInfo{
@@ -54,7 +54,9 @@ func (cp *CmdPool) NewBuffer(dv *Device) vk.CommandBuffer {
 	}, cmdBuff)
 	IfPanic(NewError(ret))
 	cBuff := cmdBuff[0]
-	cp.Buff = cBuff
+	if cp.Buff == nil {
+		cp.Buff = cBuff
+	}
 	return cBuff
 }
 

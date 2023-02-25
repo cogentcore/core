@@ -31,6 +31,16 @@ func (sy *System) ComputeResetBindVars(descIdx int) {
 	sy.CmdResetBindVars(sy.CmdPool.Buff, descIdx)
 }
 
+// ComputeResetBindVarsCmd adds command to the given
+// command buffer, to bind the Vars descriptors,
+// for given collection of descriptors descIdx
+// (see Vars NDescs for info).
+// Required whenever variables have changed their mappings,
+// before running a command.
+func (sy *System) ComputeResetBindVarsCmd(cmd vk.CommandBuffer, descIdx int) {
+	sy.CmdResetBindVars(cmd, descIdx)
+}
+
 // ComputeResetBegin resets and begins the recording of commands
 // on the default system CmdPool -- use prior to ComputeCommand
 // if not needing to call ComputeBindVars
@@ -77,6 +87,36 @@ func (pl *Pipeline) ComputeCommand1D(n, threads int) {
 	pl.ComputeCommand(Warps(n, threads), 1, 1)
 }
 
+// ComputeCommandCmd adds commands to given cmd to run the compute
+// shader for given number of *warps* (groups of threads) along 3 dimensions,
+// which then generate indexes passed into the shader.
+// In HLSL, the [numthreads(x, y, z)] directive specifies the number
+// of threads allocated per warp -- the actual number of elements
+// processed is threads * warps per each dimension. See Warps function.
+// The hardware typically has 32 (NVIDIA, M1, M2) or 64 (AMD) hardware
+// threads per warp, and so 64 is typically used as a default sum of
+// threads per warp across all of the dimensions.
+// Can use subsets of dimensions by using 1 for the other dimensions,
+// and see ComputeCommand1D for a convenience method that automatically
+// computes the number of warps for a 1D compute shader (everthing in x).
+// Uses the system CmdPool -- must have a CmdBegin already executed,
+// either via ComputeBindVars or ComputeResetBegin call.
+// Must call CommandSubmit[Wait] to execute the command.
+func (pl *Pipeline) ComputeCommandCmd(cmd vk.CommandBuffer, nx, ny, nz int) {
+	vk.CmdBindPipeline(cmd, vk.PipelineBindPointCompute, pl.VkPipeline)
+	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
+}
+
+// ComputeCommand1DCmd adds commands to run the compute shader for given
+// number of computational elements along the first (X) dimension,
+// for given number *elements* and threads per warp (typically 64).
+// See ComputeCommand for full info.
+// This is just a convenience method for common 1D case that calls
+// the Warps method for you.
+func (pl *Pipeline) ComputeCommand1DCmd(cmd vk.CommandBuffer, n, threads int) {
+	pl.ComputeCommandCmd(cmd, Warps(n, threads), 1, 1)
+}
+
 // ComputeSetEvent sets an event to be signalled when everything up to this point
 // in the command buffer has completed.
 // This is the best way to coordinate processing within a sequence of
@@ -88,6 +128,20 @@ func (sy *System) ComputeSetEvent(event string) error {
 		return err
 	}
 	vk.CmdSetEvent(sy.CmdPool.Buff, ev, vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit))
+	return nil
+}
+
+// ComputeSetEventCmd sets an event to be signalled when everything
+// up to this point in the named command buffer has completed.
+// This is the best way to coordinate processing within a sequence of
+// compute shader calls within a single command buffer.
+// Returns an error if the named event was not found.
+func (sy *System) ComputeSetEventCmd(cmd vk.CommandBuffer, event string) error {
+	ev, err := sy.EventByNameTry(event)
+	if err != nil {
+		return err
+	}
+	vk.CmdSetEvent(cmd, ev, vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit))
 	return nil
 }
 
@@ -109,6 +163,24 @@ func (sy *System) ComputeWaitEvents(event ...string) error {
 	return nil
 }
 
+// ComputeWaitEventsCmd waits until previous ComputeSetEvent event(s) have signalled.
+// This is the best way to coordinate processing within a sequence of
+// compute shader calls within named command buffer.
+// Returns an error if the named event was not found.
+func (sy *System) ComputeWaitEventsCmd(cmd vk.CommandBuffer, event ...string) error {
+	evts := make([]vk.Event, len(event))
+	for i, enm := range event {
+		ev, err := sy.EventByNameTry(enm)
+		if err != nil {
+			return err
+		}
+		evts[i] = ev
+	}
+	flg := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
+	vk.CmdWaitEvents(cmd, uint32(len(evts)), evts, flg, flg, 0, nil, 0, nil, 0, nil)
+	return nil
+}
+
 // ComputeCmdCopyToGPU records command to copy given regions
 // in the Storage buffer memory from CPU to GPU, in one call.
 // Use SyncRegValIdxFmCPU to get the regions.
@@ -121,6 +193,20 @@ func (sy *System) ComputeCmdCopyToGPU(regs ...MemReg) {
 // Use SyncRegValIdxFmCPU to get the regions.
 func (sy *System) ComputeCmdCopyFmGPU(regs ...MemReg) {
 	sy.Mem.CmdTransferRegsFmGPU(sy.CmdPool.Buff, sy.Mem.Buffs[StorageBuff], regs)
+}
+
+// ComputeCmdCopyToGPUCmd records command to copy given regions
+// in the Storage buffer memory from CPU to GPU, in one call.
+// Use SyncRegValIdxFmCPU to get the regions.
+func (sy *System) ComputeCmdCopyToGPUCmd(cmd vk.CommandBuffer, regs ...MemReg) {
+	sy.Mem.CmdTransferRegsToGPU(cmd, sy.Mem.Buffs[StorageBuff], regs)
+}
+
+// ComputeCmdCopyFmGPUCmd records command to copy given regions
+// in the Storage buffer memory from GPU to CPU, in one call.
+// Use SyncRegValIdxFmCPU to get the regions.
+func (sy *System) ComputeCmdCopyFmGPUCmd(cmd vk.CommandBuffer, regs ...MemReg) {
+	sy.Mem.CmdTransferRegsFmGPU(cmd, sy.Mem.Buffs[StorageBuff], regs)
 }
 
 /*
@@ -146,9 +232,24 @@ func (sy *System) ComputeSubmitWait() {
 	CmdEndSubmitWait(sy.CmdPool.Buff, &sy.Device)
 }
 
+// ComputeSubmitWaitCmd adds and End command and
+// submits the current set of commands in the default system CmdPool,
+// typically from ComputeCommand.
+// Then waits for the commands to finish before returning
+// control to the CPU.  Results will be available immediately
+// thereafter for retrieving back fro the GPU.
+func (sy *System) ComputeSubmitWaitCmd(cmd vk.CommandBuffer) {
+	CmdSubmitWait(cmd, &sy.Device)
+}
+
 // ComputeCmdEnd adds an end to command buffer
 func (sy *System) ComputeCmdEnd() {
 	CmdEnd(sy.CmdPool.Buff)
+}
+
+// ComputeCmdEndCmd adds an end to given command buffer
+func (sy *System) ComputeCmdEndCmd(cmd vk.CommandBuffer) {
+	CmdEnd(cmd)
 }
 
 // ComputeSubmitWaitSignal submits command in buffer to system device queue
@@ -202,6 +303,60 @@ func (sy *System) ComputeSubmitSignal(signal, fence string) error {
 		}
 	}
 	CmdSubmitSignal(sy.CmdPool.Buff, &sy.Device, ss, fc)
+	return nil
+}
+
+// ComputeSubmitWaitSignalCmd submits command in given buffer to system device queue
+// with given wait semaphore and given signal semaphore (by name) when done,
+// and with given fence (use empty string for none).
+// This will cause the GPU to wait until the wait semphaphore is
+// signaled by a previous command with that semaphore as its signal.
+// The optional fence is used typically at the end of a block of
+// such commands, whenever the CPU needs to be sure the submitted GPU
+// commands have completed.  Must use "ComputeWait" if using std
+// ComputeWait function.
+func (sy *System) ComputeSubmitWaitSignalCmd(cmd vk.CommandBuffer, wait, signal, fence string) error {
+	CmdEnd(cmd)
+	ws, err := sy.SemaphoreByNameTry(wait)
+	if err != nil {
+		return err
+	}
+	ss, err := sy.SemaphoreByNameTry(signal)
+	if err != nil {
+		return err
+	}
+	fc := vk.NullFence
+	if fence != "" {
+		fc, err = sy.FenceByNameTry(fence)
+		if err != nil {
+			return err
+		}
+	}
+	CmdSubmitWaitSignal(cmd, &sy.Device, ws, ss, fc)
+	return nil
+}
+
+// ComputeSubmitSignalCmd submits command in buffer to system device queue
+// with given signal semaphore (by name) when done,
+// and with given fence (use empty string for none).
+// The optional fence is used typically at the end of a block of
+// such commands, whenever the CPU needs to be sure the submitted GPU
+// commands have completed.  Must use "ComputeWait" if using std
+// ComputeWait function.
+func (sy *System) ComputeSubmitSignalCmd(cmd vk.CommandBuffer, signal, fence string) error {
+	CmdEnd(cmd)
+	ss, err := sy.SemaphoreByNameTry(signal)
+	if err != nil {
+		return err
+	}
+	fc := vk.NullFence
+	if fence != "" {
+		fc, err = sy.FenceByNameTry(fence)
+		if err != nil {
+			return err
+		}
+	}
+	CmdSubmitSignal(cmd, &sy.Device, ss, fc)
 	return nil
 }
 

@@ -18,18 +18,19 @@ import (
 // compute operations performed on a common set of data.
 // It maintains its own logical device and associated queue.
 type System struct {
-	Name        string                  `desc:"optional name of this System"`
-	GPU         *GPU                    `desc:"gpu device"`
-	Device      Device                  `desc:"logical device for this System, which is a non-owned copy of either Surface or RenderFrame device"`
-	CmdPool     CmdPool                 `desc:"cmd pool specific to this system"`
-	Compute     bool                    `desc:"if true, this is a compute system -- otherwise is graphics"`
-	Pipelines   []*Pipeline             `desc:"all pipelines"`
-	PipelineMap map[string]*Pipeline    `desc:"map of all pipelines -- names must be unique"`
-	Events      map[string]vk.Event     `desc:"map of events for synchronizing processing within a single command stream -- this is the best method for compute shaders to coordinate within a given sequence of shader runs in a single command stream"`
-	Semaphores  map[string]vk.Semaphore `desc:"map of semaphores for GPU-side sync between different submitted commands -- names must be unique -- note: better to use Events within one command if possible."`
-	Fences      map[string]vk.Fence     `desc:"map of fences for CPU-GPU sync -- names must be unique.  WaitIdle implictly uses a fence so it is not essential to use this for simple wait case"`
-	Mem         Memory                  `desc:"manages all the memory for all the Vals"`
-	Render      Render                  `desc:"renderpass with depth buffer for this system"`
+	Name        string                      `desc:"optional name of this System"`
+	GPU         *GPU                        `desc:"gpu device"`
+	Device      Device                      `desc:"logical device for this System, which is a non-owned copy of either Surface or RenderFrame device"`
+	CmdPool     CmdPool                     `desc:"cmd pool specific to this system"`
+	Compute     bool                        `desc:"if true, this is a compute system -- otherwise is graphics"`
+	Pipelines   []*Pipeline                 `desc:"all pipelines"`
+	PipelineMap map[string]*Pipeline        `desc:"map of all pipelines -- names must be unique"`
+	Events      map[string]vk.Event         `desc:"map of events for synchronizing processing within a single command stream -- this is the best method for compute shaders to coordinate within a given sequence of shader runs in a single command stream"`
+	Semaphores  map[string]vk.Semaphore     `desc:"map of semaphores for GPU-side sync between different submitted commands -- names must be unique -- note: better to use Events within one command if possible."`
+	Fences      map[string]vk.Fence         `desc:"map of fences for CPU-GPU sync -- names must be unique.  WaitIdle implictly uses a fence so it is not essential to use this for simple wait case"`
+	CmdBuffs    map[string]vk.CommandBuffer `desc:"map of command buffers, for persistent recorded commands -- names must be unique"`
+	Mem         Memory                      `desc:"manages all the memory for all the Vals"`
+	Render      Render                      `desc:"renderpass with depth buffer for this system"`
 }
 
 // InitGraphics initializes the System for graphics use, using
@@ -85,6 +86,7 @@ func (sy *System) Destroy() {
 		vk.DestroyFence(sy.Device.Device, fc, nil)
 	}
 	sy.Fences = nil
+	sy.CmdBuffs = nil
 	for _, pl := range sy.Pipelines {
 		pl.Destroy()
 	}
@@ -189,6 +191,27 @@ func (sy *System) FenceByNameTry(name string) (vk.Fence, error) {
 		return nil, err
 	}
 	return sp, nil
+}
+
+// NewCmdBuff returns a new fence using system device
+func (sy *System) NewCmdBuff(name string) vk.CommandBuffer {
+	cb := sy.CmdPool.NewBuffer(&sy.Device)
+	if sy.CmdBuffs == nil {
+		sy.CmdBuffs = make(map[string]vk.CommandBuffer)
+	}
+	sy.CmdBuffs[name] = cb
+	return cb
+}
+
+// CmdBuffByNameTry returns fence by name with error for not found
+func (sy *System) CmdBuffByNameTry(name string) (vk.CommandBuffer, error) {
+	cb, ok := sy.CmdBuffs[name]
+	if !ok {
+		err := fmt.Errorf("CmdBuff named: %s not found", name)
+		// log.Println(err)
+		return nil, err
+	}
+	return cb, nil
 }
 
 // ConfigRender configures the renderpass, including the image
