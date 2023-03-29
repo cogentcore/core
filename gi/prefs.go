@@ -414,7 +414,8 @@ var PreferencesProps = ki.Props{
 			"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
 			"Args": ki.PropSlice{
 				{"For Current Screen Only?", ki.Props{
-					"desc": "click this to save zoom specifically for current screen",
+					"desc":    "click this to save zoom specifically for current screen",
+					"default": true,
 				}},
 			},
 		}},
