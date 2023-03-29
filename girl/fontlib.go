@@ -83,9 +83,9 @@ func (fl *FontLib) Init() {
 	if fl.FontPaths == nil {
 		loadFontMu.Lock()
 		// fmt.Printf("Initializing font lib\n")
-		fl.FontPaths = make([]string, 0, 1000)
+		fl.FontPaths = make([]string, 0)
 		fl.FontsAvail = make(map[string]string)
-		fl.FontInfo = make([]FontInfo, 0, 1000)
+		fl.FontInfo = make([]FontInfo, 0)
 		fl.Faces = make(map[string]map[int]*gist.FontFace)
 		loadFontMu.Unlock()
 		return // no paths to load from yet
@@ -270,7 +270,7 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 var FontExts = map[string]struct{}{
 	".ttf": {},
 	".ttc": {}, // note: unpack to raw .ttf to use -- otherwise only getting first font
-	//	".otf": struct{}{},  // not yet supported
+	".otf": {}, // not yet supported
 }
 
 // shortFontMods corrects annoying short font mod names, found in Unity font

@@ -143,7 +143,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 		ucfont.Family = "Arial"
 	}
 	ucfont.Size = sty.Size
-	OpenFont(ucfont, ctxt)
+	OpenFont(ucfont, ctxt) // note: this is lightweight once loaded in library
 
 	nwr := []rune(str)
 	sz := len(nwr)
@@ -151,7 +151,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 	rr := Rune{Face: face, Color: clr, BgColor: bg, Deco: deco}
 	r := nwr[0]
 	lastUc := false
-	if r > 0xFF && unicode.IsSymbol(r) {
+	if _, ok := face.GlyphAdvance(r); !ok {
 		rr.Face = ucfont.Face.Face
 		lastUc = true
 	}
@@ -161,7 +161,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 		rp := Rune{Deco: deco, BgColor: bg}
 		r := nwr[i]
 		if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
-			if r > 0xFF && unicode.IsSymbol(r) {
+			if _, ok := face.GlyphAdvance(r); !ok {
 				if !lastUc {
 					rp.Face = ucfont.Face.Face
 					lastUc = true
@@ -224,7 +224,8 @@ func (sr *Span) SetRenders(sty *gist.Font, ctxt *units.Context, noBG bool, rot, 
 	// use unicode font for all non-ascii symbols
 	lastUc := false
 	for i, r := range sr.Text {
-		if r > 0xFF && unicode.IsSymbol(r) {
+		if _, ok := sty.Face.Face.GlyphAdvance(r); !ok {
+
 			if !lastUc {
 				sr.Render[i].Face = ucfont.Face.Face
 				lastUc = true

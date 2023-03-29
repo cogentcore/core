@@ -16,7 +16,6 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"golang.org/x/image/font/opentype"
-	"golang.org/x/image/font/sfnt"
 )
 
 // OpenFont loads the font specified by the font style from the font library.
@@ -65,12 +64,13 @@ func OpenFontFace(name, path string, size int, strokeWidth int) (*gist.FontFace,
 	ext := strings.ToLower(filepath.Ext(path))
 	if ext == ".otf" {
 		// note: this compiles but otf fonts are NOT yet supported apparently
-		f, err := sfnt.Parse(fontBytes)
+		f, err := opentype.Parse(fontBytes)
 		if err != nil {
 			return nil, err
 		}
 		face, err := opentype.NewFace(f, &opentype.FaceOptions{
 			Size: float64(size),
+			DPI:  72,
 			// Hinting: font.HintingFull,
 		})
 		ff := gist.NewFontFace(name, size, face)
