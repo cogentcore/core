@@ -20,6 +20,54 @@ func TestFastExp(t *testing.T) {
 	}
 }
 
+func TestFastExpNaN(t *testing.T) {
+	// found this in boa function EncodeVal of PopCodeParams
+	x := float32(9.398623)
+	x2 := -(x * x) // should be 88.33411429612902
+	fx := FastExp(x2)
+	if math.IsNaN(float64(fx)) {
+		t.Fatalf("Found NaN at x=%g fx=%g", x2, fx)
+	}
+}
+
+func TestFastExpNaNRange(t *testing.T) {
+	cnt := 0
+	for x := float32(-89); x <= -87; x += 1.0e-03 {
+		cnt++
+		if cnt%10000 == 0 {
+			fmt.Printf("Trying x: %f\n", x)
+		}
+		x2 := x
+		fx := FastExp(x2)
+		if math.IsNaN(float64(fx)) {
+			t.Fatalf("Found NaN at x=%f", x)
+		}
+	}
+	fmt.Printf("cnt: %v\n", cnt)
+}
+
+func TestFastExpFindNaN(t *testing.T) {
+	// use binary search to find the NaN cutoff point
+	left := float32(-89)
+	right := float32(-87)
+	x := float32(0)
+	for cnt := 0; cnt < 100000; cnt++ {
+		x = (left + right) / 2
+		if cnt%1000 == 0 {
+			fmt.Printf("Trying x: %f\n", x)
+		}
+		x2 := x
+		// make sure you comment out the cutoff point in FastExp first
+		fx := FastExp(x2)
+		if math.IsNaN(float64(fx)) {
+			t.Errorf("Found NaN at x=%f", x)
+			left = x
+		} else {
+			right = x
+		}
+	}
+}
+
 var result32 float32
 
 func BenchmarkFastExp(b *testing.B) {
