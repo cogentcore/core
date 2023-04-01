@@ -54,9 +54,8 @@ func TestFastExpFindNaN(t *testing.T) {
 		if cnt%10000 == 0 {
 			fmt.Printf("Trying x: %f\n", x)
 		}
-		x2 := x
 		// make sure you comment out the cutoff point in FastExp first
-		fx := FastExp(x2)
+		fx := FastExp(x)
 		if math.IsNaN(float64(fx)) {
 			t.Errorf("Found NaN at x=%f", x)
 			left = x
