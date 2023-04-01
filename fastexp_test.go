@@ -34,16 +34,14 @@ func TestFastExpNaNRange(t *testing.T) {
 	cnt := 0
 	for x := float32(-89); x <= -87; x += 1.0e-03 {
 		cnt++
-		if cnt%10000 == 0 {
+		if cnt%1000 == 0 {
 			fmt.Printf("Trying x: %f\n", x)
 		}
-		x2 := x
-		fx := FastExp(x2)
+		fx := FastExp(x)
 		if math.IsNaN(float64(fx)) {
 			t.Fatalf("Found NaN at x=%f", x)
 		}
 	}
-	fmt.Printf("cnt: %v\n", cnt)
 }
 
 func TestFastExpFindNaN(t *testing.T) {
@@ -53,7 +51,7 @@ func TestFastExpFindNaN(t *testing.T) {
 	x := float32(0)
 	for cnt := 0; cnt < 100000; cnt++ {
 		x = (left + right) / 2
-		if cnt%1000 == 0 {
+		if cnt%10000 == 0 {
 			fmt.Printf("Trying x: %f\n", x)
 		}
 		x2 := x
