@@ -30,9 +30,22 @@ func TestFastExpNaN(t *testing.T) {
 	}
 }
 
+func TestFastExpNaNConfirm(t *testing.T) {
+	vals := []float32{-88.02967, -88.02968, -88.02969, -88.0297, -88.029701, -88.029702}
+	for _, v := range vals {
+		e := FastExp(v)
+		// fmt.Printf("%g\t%g\n", v, e)
+		if IsNaN(e) {
+			t.Fatalf("Found NaN at x=%g fx=%g", v, e)
+		}
+	}
+}
+
 func TestFastExpNaNRange(t *testing.T) {
+	t.Skip("Enable to find NaN range")
 	cnt := 0
-	for x := float32(-89); x <= -87; x += 1.0e-03 {
+	for x := float32(-88); x > -89; x -= 1.0e-05 {
+		// note: get NaN coming down from top too..
 		cnt++
 		if cnt%1000 == 0 {
 			fmt.Printf("Trying x: %f\n", x)
@@ -44,7 +57,18 @@ func TestFastExpNaNRange(t *testing.T) {
 	}
 }
 
+func TestFastExpConfirmNaNRange(t *testing.T) {
+	t.Skip("Enable to find NaN range")
+	// confirm value:
+	vals := []float32{-88.02967, -88.02968, -88.02969, -88.0297, -88.029701, -88.029702}
+	for _, v := range vals {
+		e := FastExp(v)
+		fmt.Printf("%g\t%g\n", v, e)
+	}
+}
+
 func TestFastExpFindNaN(t *testing.T) {
+	t.Skip("Enable to find NaN range")
 	// use binary search to find the NaN cutoff point
 	left := float32(-89)
 	right := float32(-87)

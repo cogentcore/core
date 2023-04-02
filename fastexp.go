@@ -72,7 +72,7 @@ func FastExp3(x float32) float32 {
 // nonsense when arg is out of range.  Runs in 2.23ns vs. 6.3ns for 64bit which is faster
 // than math32.Exp actually.
 func FastExp(x float32) float32 {
-	if x <= -88.029701 { // this doesn't add anything and -exp is main use-case anyway
+	if x <= -88.02969 { // this doesn't add anything and -exp is main use-case anyway
 		return 0
 	}
 	i := int32(12102203*x) + 127*(1<<23)
