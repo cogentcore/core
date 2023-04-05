@@ -1052,6 +1052,10 @@ func (tv *TableView) EditIdx(idx int) {
 	val := kit.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
 	stru := val.Interface()
 	tynm := kit.NonPtrType(val.Type()).Name()
+	lbl := gi.ToLabel(stru)
+	if lbl != "" {
+		tynm += ": " + lbl
+	}
 	StructViewDialog(tv.Viewport, stru, DlgOpts{Title: tynm}, nil, nil)
 }
 
