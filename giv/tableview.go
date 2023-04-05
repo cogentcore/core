@@ -1050,3 +1050,23 @@ func StructSliceIdxByValue(struSlice interface{}, fldName string, fldVal interfa
 	}
 	return -1, nil
 }
+
+func (tv *TableView) EditIdx(idx int) {
+	val := kit.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
+	stru := val.Interface()
+	tynm := kit.NonPtrType(val.Type()).Name()
+	StructViewDialog(tv.Viewport, stru, DlgOpts{Title: tynm}, nil, nil)
+}
+
+func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
+	if tv.isArray {
+		return
+	}
+	tv.SliceViewBase.StdCtxtMenu(m, idx)
+	m.AddSeparator("sep-edit")
+	m.AddAction(gi.ActOpts{Label: "Edit", Data: idx},
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv.EditIdx(data.(int))
+		})
+}

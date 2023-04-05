@@ -107,6 +107,9 @@ type SliceViewer interface {
 
 	// ItemCtxtMenu pulls up the context menu for given slice index
 	ItemCtxtMenu(idx int)
+
+	// StdCtxtMenu generates the standard context menu for this view
+	StdCtxtMenu(m *gi.Menu, idx int)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1997,10 +2000,10 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	if CtxtMenuView(val, sv.IsInactive(), sv.ViewportSafe(), &men) {
 		if sv.ShowViewCtxtMenu {
 			men.AddSeparator("sep-svmenu")
-			sv.StdCtxtMenu(&men, idx)
+			sv.This().(SliceViewer).StdCtxtMenu(&men, idx)
 		}
 	} else {
-		sv.StdCtxtMenu(&men, idx)
+		sv.This().(SliceViewer).StdCtxtMenu(&men, idx)
 	}
 	if len(men) > 0 {
 		pos := sv.IdxPos(idx)
