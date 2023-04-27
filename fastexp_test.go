@@ -15,7 +15,7 @@ func TestFastExp(t *testing.T) {
 		fx := FastExp(x)
 		sx := float32(math.Exp(float64(x)))
 		if Abs((fx-sx)/sx) > 1.0e-5 {
-			fmt.Printf("Exp4 at: %g  err from cx: %g  vs  %g\n", x, fx, sx)
+			t.Fatalf("Exp4 at: %g  err from cx: %g  vs  %g\n", x, fx, sx)
 		}
 	}
 }
