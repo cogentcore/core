@@ -142,7 +142,7 @@ func (vl *Val) Free() {
 // go-based storage.
 // Set Mod flag when changes have been made.
 func (vl *Val) Bytes() []byte {
-	const m = 0x7fffffff
+	const m = 0x7fffffffffff
 	return (*[m]byte)(vl.MemPtr)[:vl.AllocSize]
 }
 
@@ -152,7 +152,7 @@ func (vl *Val) Bytes() []byte {
 // Set Mod flag when changes have been made.
 func (vl *Val) Floats32() mat32.ArrayF32 {
 	nf := vl.AllocSize / 4
-	const m = 0x7fffffff
+	const m = 0x7fffffffffff
 	return mat32.ArrayF32((*[m]float32)(vl.MemPtr)[:nf])
 }
 
@@ -162,7 +162,7 @@ func (vl *Val) Floats32() mat32.ArrayF32 {
 // Set Mod flag when changes have been made.
 func (vl *Val) UInts32() mat32.ArrayU32 {
 	nf := vl.AllocSize / 4
-	const m = 0x7fffffff
+	const m = 0x7fffffffffff
 	return mat32.ArrayU32((*[m]uint32)(vl.MemPtr)[:nf])
 }
 
@@ -184,7 +184,7 @@ func (vl *Val) CopyFromBytes(srcPtr unsafe.Pointer) {
 		// return
 	}
 	dst := vl.Bytes()
-	const m = 0x7fffffff
+	const m = 0x7fffffffffff
 	src := (*[m]byte)(srcPtr)[:vl.AllocSize]
 	copy(dst, src)
 	vl.SetMod()
@@ -198,7 +198,7 @@ func (vl *Val) CopyToBytes(srcPtr unsafe.Pointer) {
 		return
 	}
 	dst := vl.Bytes()
-	const m = 0x7fffffff
+	const m = 0x7fffffffffff
 	src := (*[m]byte)(srcPtr)[:vl.AllocSize]
 	copy(src, dst)
 }

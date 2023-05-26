@@ -68,7 +68,7 @@ func (sh *Shader) Free(dev vk.Device) {
 // https://stackoverflow.com/questions/11924196/convert-between-slices-of-different-types
 
 func SliceUint32(data []byte) []uint32 {
-	const m = 0x7fffffff
+	const m = 0x7fffffffffff
 	return (*[m / 4]uint32)(unsafe.Pointer(unsafe.Pointer(&(data[0]))))[:len(data)/4]
 }
 

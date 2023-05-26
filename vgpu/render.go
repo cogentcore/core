@@ -347,7 +347,7 @@ func (rp *Render) DepthImageArray() ([]float32, error) {
 	sz := rp.Format.Size
 	fsz := sz.X * sz.Y
 	ary := make([]float32, fsz)
-	const m = 0x7fffffff
+	const m = 0x7fffffffffff
 	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0:fsz]
 	copy(ary, fp)
 	// note: you cannot specify a greater width than actual width

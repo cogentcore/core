@@ -377,7 +377,7 @@ func (im *Image) DevGoImage() (*image.RGBA, error) {
 	offset := int(sublay.Offset)
 
 	ptr := MapMemoryAll(im.Dev, im.Mem)
-	const m = 0x7fffffff
+	const m = 0x7fffffffffff
 	pix := (*[m]byte)(ptr)[offset : size+offset]
 	rgba.Pix = make([]byte, size)
 	copy(rgba.Pix, pix)
@@ -908,7 +908,7 @@ func (hi *HostImage) SetNil() {
 // Pixels returns the byte slice of the pixels for host image
 // Only valid if host is active!  No error checking is performed here.
 func (hi *HostImage) Pixels() []byte {
-	const m = 0x7fffffff
+	const m = 0x7fffffffffff
 	return (*[m]byte)(hi.Ptr)[:hi.Size]
 }
 
