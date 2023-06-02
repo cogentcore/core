@@ -77,8 +77,11 @@ func (dv *Device) MakeDevice(gp *GPU) {
 		EnabledLayerCount:       uint32(len(gp.ValidationLayers)),
 		PpEnabledLayerNames:     gp.ValidationLayers,
 		PEnabledFeatures: []vk.PhysicalDeviceFeatures{{
-			SamplerAnisotropy:                      vk.True,
-			ShaderSampledImageArrayDynamicIndexing: vk.True,
+			SamplerAnisotropy:                       vk.True,
+			ShaderSampledImageArrayDynamicIndexing:  vk.True,
+			ShaderUniformBufferArrayDynamicIndexing: vk.True,
+			ShaderStorageBufferArrayDynamicIndexing: vk.True,
+			ShaderInt64:                             vk.True,
 		}},
 		PNext: unsafe.Pointer(&vk.PhysicalDeviceVulkan12Features{
 			SType:                                    vk.StructureTypePhysicalDeviceVulkan12Features,
