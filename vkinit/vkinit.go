@@ -21,9 +21,15 @@ import (
 	vk "github.com/goki/vulkan"
 )
 
+// IsLoaded is set to true when library is loaded
+var IsLoaded = false
+
 // LoadVulkan loads and initializes the vulkan library, using default lib names
 // for each different platform.
 func LoadVulkan() error {
+	if IsLoaded {
+		return nil
+	}
 	clibnm := C.CString(DlName)
 	defer C.free(unsafe.Pointer(clibnm))
 	handle := C.dlopen(clibnm, C.RTLD_LAZY)
@@ -37,5 +43,6 @@ func LoadVulkan() error {
 		return fmt.Errorf("Vulkan instance proc addr not found!\n")
 	}
 	vk.SetGetInstanceProcAddr(pAddr)
+	IsLoaded = true
 	return vk.Init()
 }

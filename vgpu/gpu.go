@@ -72,6 +72,7 @@ func Init() error {
 // Loads the vulkan library and sets the Vulkan instance proc addr and calls Init.
 // IMPORTANT: must be called on the main initial thread!
 func InitNoDisplay() error {
+
 	err := vkinit.LoadVulkan()
 	if err != nil {
 		log.Println(err)
