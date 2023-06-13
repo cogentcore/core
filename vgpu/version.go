@@ -3,7 +3,7 @@
 package vgpu
 
 const (
-	Version     = "v1.0.26"
-	GitCommit   = "6f3d823"          // the commit JUST BEFORE the release
-	VersionDate = "2023-06-05 20:55" // UTC
+	Version     = "v1.0.27"
+	GitCommit   = "2638a18"          // the commit JUST BEFORE the release
+	VersionDate = "2023-06-13 08:05" // UTC
 )
