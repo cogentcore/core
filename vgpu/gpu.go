@@ -32,6 +32,8 @@ var Debug = false
 type GPU struct {
 	Instance         vk.Instance            `desc:"handle for the vulkan driver instance"`
 	GPU              vk.PhysicalDevice      `desc:"handle for the vulkan physical GPU hardware"`
+	UserOpts         *GPUOpts               `desc:"options passed in during config"`
+	EnabledOpts      GPUOpts                `desc:"set of enabled options set post-Config"`
 	AppName          string                 `desc:"name of application -- set during Config and used in init of GPU"`
 	APIVersion       vk.Version             `desc:"version of vulkan API to target"`
 	AppVersion       vk.Version             `desc:"version of application -- optional"`
@@ -42,6 +44,7 @@ type GPU struct {
 	DebugCallback    vk.DebugReportCallback `desc:"our custom debug callback"`
 
 	GPUProps    vk.PhysicalDeviceProperties       `desc:"properties of physical hardware -- populated after Config"`
+	GPUFeats    vk.PhysicalDeviceFeatures         `desc:"features of physical hardware -- populated after Config"`
 	MemoryProps vk.PhysicalDeviceMemoryProperties `desc:"properties of device memory -- populated after Config"`
 
 	PlatformDeviceNext unsafe.Pointer `view:"-" desc:"platform-specific PNext for CreateDevice call"`
@@ -167,9 +170,15 @@ func (gp *GPU) AddValidationLayer(ext string) bool {
 	return true
 }
 
-// Config
-func (gp *GPU) Config(name string) error {
+// Config configures the GPU given the extensions set in InstanceExts,
+// DeviceExts, and ValidationLayers, and the given GPUOpts options.
+// Only the first such opts will be used -- the variable args is used to enable
+// no options to be passed by default.
+func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	gp.AppName = name
+	if len(opts) > 0 {
+		gp.UserOpts = opts[0]
+	}
 	if Debug {
 		gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
 		gp.AddInstanceExt("VK_EXT_debug_report") // note _utils is not avail yet
@@ -234,8 +243,14 @@ func (gp *GPU) Config(name string) error {
 	IfPanic(NewError(ret))
 
 	gpIdx := gp.SelectGPU(gpus, gpuCount)
-
 	gp.GPU = gpus[gpIdx]
+
+	vk.GetPhysicalDeviceFeatures(gp.GPU, &gp.GPUFeats)
+	gp.GPUFeats.Deref()
+	if !gp.CheckGPUOpts(&gp.GPUFeats, gp.UserOpts, true) {
+		return errors.New("vgpu: fatal config error found, see messages above")
+	}
+
 	vk.GetPhysicalDeviceProperties(gp.GPU, &gp.GPUProps)
 	gp.GPUProps.Deref()
 	gp.GPUProps.Limits.Deref()
@@ -307,6 +322,9 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 	maxSz := 0
 	maxIdx := 0
 	for gi := 0; gi < gpuCount; gi++ {
+		// note: we could potentially check for the optional features here
+		// but generally speaking the discrete device is going to be the most
+		// feature-full, so the practical benefit is unlikely to be significant.
 		var props vk.PhysicalDeviceProperties
 		vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 		props.Deref()

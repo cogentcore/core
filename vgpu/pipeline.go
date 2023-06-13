@@ -266,6 +266,7 @@ func (pl *Pipeline) SetTopology(topo Topologies, restartEnable bool) {
 // SetRasterization sets various options for how to rasterize shapes:
 // Defaults are: vk.PolygonModeFill, vk.CullModeBackBit, vk.FrontFaceCounterClockwise, 1.0
 // There are also separate methods for CullFace, FrontFace, and LineWidth
+// Note: must enable OptFillModeNonSolid option for Line or Point fill mode.
 func (pl *Pipeline) SetRasterization(polygonMode vk.PolygonMode, cullMode vk.CullModeFlagBits, frontFace vk.FrontFace, lineWidth float32) {
 	pl.VkConfig.PRasterizationState = &vk.PipelineRasterizationStateCreateInfo{
 		SType:       vk.StructureTypePipelineRasterizationStateCreateInfo,

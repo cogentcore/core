@@ -67,6 +67,14 @@ func (dv *Device) MakeDevice(gp *GPU) {
 		PQueuePriorities: []float32{1.0},
 	}}
 
+	feats := vk.PhysicalDeviceFeatures{
+		SamplerAnisotropy:                       vk.True, // used in Sampler.Config
+		ShaderSampledImageArrayDynamicIndexing:  vk.True,
+		ShaderUniformBufferArrayDynamicIndexing: vk.True,
+		ShaderStorageBufferArrayDynamicIndexing: vk.True,
+	}
+	gp.SetGPUOpts(&feats, gp.EnabledOpts)
+
 	var device vk.Device
 	ret := vk.CreateDevice(gp.GPU, &vk.DeviceCreateInfo{
 		SType:                   vk.StructureTypeDeviceCreateInfo,
@@ -76,13 +84,7 @@ func (dv *Device) MakeDevice(gp *GPU) {
 		PpEnabledExtensionNames: gp.DeviceExts,
 		EnabledLayerCount:       uint32(len(gp.ValidationLayers)),
 		PpEnabledLayerNames:     gp.ValidationLayers,
-		PEnabledFeatures: []vk.PhysicalDeviceFeatures{{
-			SamplerAnisotropy:                       vk.True,
-			ShaderSampledImageArrayDynamicIndexing:  vk.True,
-			ShaderUniformBufferArrayDynamicIndexing: vk.True,
-			ShaderStorageBufferArrayDynamicIndexing: vk.True,
-			ShaderInt64:                             vk.True,
-		}},
+		PEnabledFeatures:        []vk.PhysicalDeviceFeatures{feats},
 		PNext: unsafe.Pointer(&vk.PhysicalDeviceVulkan12Features{
 			SType:                                    vk.StructureTypePhysicalDeviceVulkan12Features,
 			DescriptorIndexing:                       vk.True,
