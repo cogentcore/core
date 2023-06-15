@@ -11,6 +11,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -512,4 +514,39 @@ func (cb *ComboBox) MakeItemsMenu() {
 			cbb.SelectItemAction(idx)
 		})
 	}
+}
+
+func (cb *ComboBox) ConnectEvents2D() {
+	cb.KeyChordEvent()
+}
+
+// KeyChordEvent handles button KeyChord events
+func (cb *ComboBox) KeyChordEvent() {
+	cb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		cbb := recv.(*ComboBox)
+		if cbb.IsInactive() {
+			return
+		}
+		kt := d.(*key.ChordEvent)
+		if KeyEventTrace {
+			fmt.Printf("ComboBox KeyChordEvent: %v\n", cbb.Path())
+		}
+		kf := KeyFun(kt.Chord())
+		switch kf {
+		case KeyFunMoveUp:
+			kt.SetProcessed()
+			idx := cbb.CurIndex - 1
+			if idx < 0 {
+				idx += len(cbb.Items)
+			}
+			cbb.SelectItemAction(idx)
+		case KeyFunMoveDown:
+			kt.SetProcessed()
+			idx := cbb.CurIndex + 1
+			if idx >= len(cbb.Items) {
+				idx -= len(cbb.Items)
+			}
+			cbb.SelectItemAction(idx)
+		}
+	})
 }
