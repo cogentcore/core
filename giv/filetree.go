@@ -285,6 +285,7 @@ func (ft *FileTree) IsDirOpen(fpath gi.FileName) bool {
 // SetDirOpen sets the given directory path to be open
 func (ft *FileTree) SetDirOpen(fpath gi.FileName) {
 	rp := ft.RelPath(fpath)
+	// fmt.Printf("setdiropen: %s\n", rp)
 	ft.Dirs.SetOpen(rp, true)
 	ft.Dirs.SetMark(rp)
 	ft.WatchPath(fpath)

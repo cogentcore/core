@@ -110,6 +110,9 @@ type SliceViewer interface {
 
 	// StdCtxtMenu generates the standard context menu for this view
 	StdCtxtMenu(m *gi.Menu, idx int)
+
+	// NeedsDoubleReRender returns true if initial render requires a 2nd pass
+	NeedsDoubleReRender() bool
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1023,6 +1026,9 @@ func (sv *SliceViewBase) Render2D() {
 			sv.This().(SliceViewer).UpdateSliceGrid() // enabling this is key for index, +/- rendering, as they are created here and need to be in place before the rerender tree
 			sv.InFullRebuild = true
 			sv.ReRender2DTree()
+			if sv.This().(SliceViewer).NeedsDoubleReRender() {
+				sv.ReRender2DTree()
+			}
 			sv.InFullRebuild = false
 			sv.PopBounds()
 			return
@@ -1038,6 +1044,10 @@ func (sv *SliceViewBase) Render2D() {
 	} else {
 		sv.DisconnectAllEvents(gi.AllPris)
 	}
+}
+
+func (sv *SliceViewBase) NeedsDoubleReRender() bool {
+	return false
 }
 
 func (sv *SliceViewBase) ConnectEvents2D() {
