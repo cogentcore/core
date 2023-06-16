@@ -12,6 +12,7 @@ import (
 
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -155,10 +156,21 @@ func (sb *SpinBox) SetValueAction(val float32) {
 	sb.SpinBoxSig.Emit(sb.This(), 0, sb.Value)
 }
 
-// IncrValue increments the value by given number of steps (+ or -), and enforces it to be an even multiple of the step size (snap-to-value), and emits the signal
+// IncrValue increments the value by given number of steps (+ or -),
+// and enforces it to be an even multiple of the step size (snap-to-value),
+// and emits the signal
 func (sb *SpinBox) IncrValue(steps float32) {
 	val := sb.Value + steps*sb.Step
 	val = mat32.IntMultiple(val, sb.Step)
+	sb.SetValueAction(val)
+}
+
+// PageIncrValue increments the value by given number of page steps (+ or -),
+// and enforces it to be an even multiple of the step size (snap-to-value),
+// and emits the signal
+func (sb *SpinBox) PageIncrValue(steps float32) {
+	val := sb.Value + steps*sb.PageStep
+	val = mat32.IntMultiple(val, sb.PageStep)
 	sb.SetValueAction(val)
 }
 
@@ -327,10 +339,39 @@ func (sb *SpinBox) TextFieldEvent() {
 	})
 }
 
+func (sb *SpinBox) KeyChordEvent() {
+	sb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sbb := recv.(*SpinBox)
+		if sbb.IsInactive() {
+			return
+		}
+		kt := d.(*key.ChordEvent)
+		if KeyEventTrace {
+			fmt.Printf("SpinBox KeyChordEvent: %v\n", sbb.Path())
+		}
+		kf := KeyFun(kt.Chord())
+		switch {
+		case kf == KeyFunMoveUp:
+			kt.SetProcessed()
+			sb.IncrValue(1)
+		case kf == KeyFunMoveDown:
+			kt.SetProcessed()
+			sb.IncrValue(-1)
+		case kf == KeyFunPageUp:
+			kt.SetProcessed()
+			sb.PageIncrValue(1)
+		case kf == KeyFunPageDown:
+			kt.SetProcessed()
+			sb.PageIncrValue(-1)
+		}
+	})
+}
+
 func (sb *SpinBox) SpinBoxEvents() {
 	sb.HoverTooltipEvent()
 	sb.MouseScrollEvent()
 	sb.TextFieldEvent()
+	sb.KeyChordEvent()
 }
 
 func (sb *SpinBox) Init2D() {
@@ -384,6 +425,9 @@ func (sb *SpinBox) StyleFromProps(props ki.Props, vp *Viewport2D) {
 		case "format":
 			sb.Format = kit.ToString(val)
 		}
+	}
+	if sb.PageStep < sb.Step { // often forget to set this..
+		sb.PageStep = 10 * sb.Step
 	}
 }
 

@@ -516,13 +516,20 @@ func (cb *ComboBox) MakeItemsMenu() {
 	}
 }
 
+func (cb *ComboBox) HasFocus2D() bool {
+	if cb.IsInactive() {
+		return false
+	}
+	return cb.ContainsFocus() // needed for getting key events
+}
+
 func (cb *ComboBox) ConnectEvents2D() {
+	cb.ButtonEvents()
 	cb.KeyChordEvent()
 }
 
-// KeyChordEvent handles button KeyChord events
 func (cb *ComboBox) KeyChordEvent() {
-	cb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	cb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		cbb := recv.(*ComboBox)
 		if cbb.IsInactive() {
 			return
@@ -532,21 +539,49 @@ func (cb *ComboBox) KeyChordEvent() {
 			fmt.Printf("ComboBox KeyChordEvent: %v\n", cbb.Path())
 		}
 		kf := KeyFun(kt.Chord())
-		switch kf {
-		case KeyFunMoveUp:
+		switch {
+		case kf == KeyFunMoveUp:
 			kt.SetProcessed()
-			idx := cbb.CurIndex - 1
-			if idx < 0 {
-				idx += len(cbb.Items)
+			if len(cbb.Items) > 0 {
+				idx := cbb.CurIndex - 1
+				if idx < 0 {
+					idx += len(cbb.Items)
+				}
+				cbb.SelectItemAction(idx)
 			}
-			cbb.SelectItemAction(idx)
-		case KeyFunMoveDown:
+		case kf == KeyFunMoveDown:
 			kt.SetProcessed()
-			idx := cbb.CurIndex + 1
-			if idx >= len(cbb.Items) {
-				idx -= len(cbb.Items)
+			if len(cbb.Items) > 0 {
+				idx := cbb.CurIndex + 1
+				if idx >= len(cbb.Items) {
+					idx -= len(cbb.Items)
+				}
+				cbb.SelectItemAction(idx)
 			}
-			cbb.SelectItemAction(idx)
+		case kf == KeyFunPageUp:
+			kt.SetProcessed()
+			if len(cbb.Items) > 10 {
+				idx := cbb.CurIndex - 10
+				for idx < 0 {
+					idx += len(cbb.Items)
+				}
+				cbb.SelectItemAction(idx)
+			}
+		case kf == KeyFunPageDown:
+			kt.SetProcessed()
+			if len(cbb.Items) > 10 {
+				idx := cbb.CurIndex + 10
+				for idx >= len(cbb.Items) {
+					idx -= len(cbb.Items)
+				}
+				cbb.SelectItemAction(idx)
+			}
+		case kf == KeyFunEnter || (!cbb.Editable && kt.Rune == ' '):
+			if !(kt.Rune == ' ' && cbb.Viewport.IsCompleter()) {
+				kt.SetProcessed()
+				cbb.ButtonPress()
+				cbb.ButtonRelease()
+			}
 		}
 	})
 }

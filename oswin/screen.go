@@ -183,11 +183,13 @@ func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) 
 	csz = sc.WinSizeFmPix(sz)
 	cpos = pos
 
+	// fmt.Printf("sz: %v  csz: %v  scsz: %v\n", sz, csz, scsz)
+	// fmt.Println(string(debug.Stack()))
 	if csz.X > scsz.X {
-		csz.X = scsz.X
+		csz.X = scsz.X - 10
 	}
 	if csz.Y > scsz.Y {
-		csz.Y = scsz.Y
+		csz.Y = scsz.Y - 10
 	}
 
 	// these are windows-specific special numbers for minimized windows
