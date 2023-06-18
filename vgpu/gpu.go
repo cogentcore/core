@@ -186,7 +186,11 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	gp.AppName = name
 	gp.UserOpts = DefaultOpts
 	if len(opts) > 0 {
-		gp.UserOpts.CopyFrom(opts[0])
+		if gp.UserOpts == nil {
+			gp.UserOpts = opts[0]
+		} else {
+			gp.UserOpts.CopyFrom(opts[0])
+		}
 	}
 	if Debug {
 		gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
@@ -294,12 +298,17 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	return nil
 }
 
+func (gp *GPU) GetDeviceName(props *vk.PhysicalDeviceProperties) string {
+	nm := string(props.DeviceName[:])
+	return strings.Join(strings.Fields(nm), " ")
+}
+
 func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 	if gpuCount == 1 {
 		var props vk.PhysicalDeviceProperties
 		vk.GetPhysicalDeviceProperties(gpus[0], &props)
 		props.Deref()
-		gp.DeviceName = string(props.DeviceName[:])
+		gp.DeviceName = gp.GetDeviceName(&props)
 		return 0
 	}
 	trgDevNm := ""
@@ -320,7 +329,7 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 			vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 			props.Deref()
 			if bytes.Contains(props.DeviceName[:], []byte(trgDevNm)) {
-				devNm := string(props.DeviceName[:])
+				devNm := gp.GetDeviceName(&props)
 				if Debug {
 					log.Printf("vgpu: selected device named: %s, specified in *_DEVICE_SELECT environment variable, index: %d\n", devNm, gi)
 				}
@@ -357,7 +366,7 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 				// if heap.Flags&vk.MemoryHeapFlags(vk.MemoryHeapDeviceLocalBit) != 0 {
 				sz := int(heap.Size)
 				if sz > maxSz {
-					devNm = string(props.DeviceName[:])
+					devNm = gp.GetDeviceName(&props)
 					maxSz = sz
 					maxIdx = gi
 				}
