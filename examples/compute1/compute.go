@@ -24,8 +24,9 @@ func main() {
 	}
 
 	gp := vgpu.NewComputeGPU()
-	vgpu.Debug = true
+	// vgpu.Debug = true
 	gp.Config("compute1")
+	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
 	// gp.PropsString(true) // print
 

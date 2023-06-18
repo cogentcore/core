@@ -28,12 +28,20 @@ import (
 // Set to true prior to GPU.Config to get validation debugging.
 var Debug = false
 
+// DefaultOpts are default GPU config options that can be set by any app
+// prior to initializing the GPU object -- this may be easier than passing
+// options in from the app during the Config call.  Any such options take
+// precedence over these options (usually best to avoid direct conflits --
+// monitor Debug output to see).
+var DefaultOpts *GPUOpts
+
 // GPU represents the GPU hardware
 type GPU struct {
 	Instance         vk.Instance            `desc:"handle for the vulkan driver instance"`
 	GPU              vk.PhysicalDevice      `desc:"handle for the vulkan physical GPU hardware"`
 	UserOpts         *GPUOpts               `desc:"options passed in during config"`
 	EnabledOpts      GPUOpts                `desc:"set of enabled options set post-Config"`
+	DeviceName       string                 `desc:"name of the physical GPU device"`
 	AppName          string                 `desc:"name of application -- set during Config and used in init of GPU"`
 	APIVersion       vk.Version             `desc:"version of vulkan API to target"`
 	AppVersion       vk.Version             `desc:"version of application -- optional"`
@@ -176,8 +184,9 @@ func (gp *GPU) AddValidationLayer(ext string) bool {
 // no options to be passed by default.
 func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	gp.AppName = name
+	gp.UserOpts = DefaultOpts
 	if len(opts) > 0 {
-		gp.UserOpts = opts[0]
+		gp.UserOpts.CopyFrom(opts[0])
 	}
 	if Debug {
 		gp.AddValidationLayer("VK_LAYER_KHRONOS_validation")
@@ -287,38 +296,44 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 
 func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 	if gpuCount == 1 {
+		var props vk.PhysicalDeviceProperties
+		vk.GetPhysicalDeviceProperties(gpus[0], &props)
+		props.Deref()
+		gp.DeviceName = string(props.DeviceName[:])
 		return 0
 	}
-	devNm := ""
+	trgDevNm := ""
 	if ev := os.Getenv("MESA_VK_DEVICE_SELECT"); ev != "" {
-		devNm = ev
+		trgDevNm = ev
 	} else if ev := os.Getenv("VK_DEVICE_SELECT"); ev != "" {
-		devNm = ev
+		trgDevNm = ev
 	}
 	if gp.Compute {
 		if ev := os.Getenv("VK_COMPUTE_DEVICE_SELECT"); ev != "" {
-			devNm = ev
+			trgDevNm = ev
 		}
 	}
 
-	if devNm != "" {
+	if trgDevNm != "" {
 		for gi := 0; gi < gpuCount; gi++ {
 			var props vk.PhysicalDeviceProperties
 			vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 			props.Deref()
-			if bytes.Contains(props.DeviceName[:], []byte(devNm)) {
+			if bytes.Contains(props.DeviceName[:], []byte(trgDevNm)) {
+				devNm := string(props.DeviceName[:])
 				if Debug {
-					devNm = string(props.DeviceName[:])
 					log.Printf("vgpu: selected device named: %s, specified in *_DEVICE_SELECT environment variable, index: %d\n", devNm, gi)
 				}
+				gp.DeviceName = devNm
 				return gi
 			}
 		}
 		if Debug {
-			log.Printf("vgpu: unable to find device named: %s, specified in *_DEVICE_SELECT environment variable\n", devNm)
+			log.Printf("vgpu: unable to find device named: %s, specified in *_DEVICE_SELECT environment variable\n", trgDevNm)
 		}
 	}
 
+	devNm := ""
 	maxSz := 0
 	maxIdx := 0
 	for gi := 0; gi < gpuCount; gi++ {
@@ -354,6 +369,7 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 			}
 		}
 	}
+	gp.DeviceName = devNm
 	if Debug {
 		log.Printf("vgpu: selected device named: %s, index: %d, memory size: %d\n", devNm, maxIdx, maxSz)
 	}

@@ -231,6 +231,18 @@ func (co *GPUOpts) Add(opt CPUOptions, state OptionStates) {
 	(*co)[opt] = state
 }
 
+// CopyFrom copies options from another opts collection,
+// overwriting any existing in this map.
+func (co *GPUOpts) CopyFrom(fm *GPUOpts) {
+	if fm == nil {
+		return
+	}
+	co.Init()
+	for opt, state := range *fm {
+		(*co)[opt] = state
+	}
+}
+
 // State returns the state of the given option.
 // Any option not explicitly set is assumed to be Disabled.
 func (co *GPUOpts) State(opt CPUOptions) OptionStates {
