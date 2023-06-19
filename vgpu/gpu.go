@@ -462,7 +462,9 @@ func dbgCallbackFunc(flags vk.DebugReportFlags, objectType vk.DebugReportObjectT
 
 	switch {
 	case flags&vk.DebugReportFlags(vk.DebugReportInformationBit) != 0:
-		log.Printf("INFORMATION: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+		if !(strings.Contains(pMessage, "[Loader Message]") && strings.Contains(pMessage, "Device Extension")) {
+			log.Printf("INFORMATION: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+		}
 	case flags&vk.DebugReportFlags(vk.DebugReportWarningBit) != 0:
 		log.Printf("WARNING: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
 	case flags&vk.DebugReportFlags(vk.DebugReportPerformanceWarningBit) != 0:
