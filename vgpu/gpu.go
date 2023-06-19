@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"unsafe"
 
@@ -327,7 +328,20 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 		}
 	}
 
+	// todo: need to be able to pass an index -- devices can all have same name!
+
 	if trgDevNm != "" {
+		idx, err := strconv.Atoi(trgDevNm)
+		if err == nil && idx >= 0 && idx < gpuCount {
+			var props vk.PhysicalDeviceProperties
+			vk.GetPhysicalDeviceProperties(gpus[idx], &props)
+			props.Deref()
+			gp.DeviceName = gp.GetDeviceName(&props, idx)
+			if Debug {
+				log.Printf("vgpu: selected device named: %s, specified by index in *_DEVICE_SELECT environment variable, index: %d\n", gp.DeviceName, idx)
+			}
+			return idx
+		}
 		for gi := 0; gi < gpuCount; gi++ {
 			var props vk.PhysicalDeviceProperties
 			vk.GetPhysicalDeviceProperties(gpus[gi], &props)
