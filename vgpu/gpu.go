@@ -299,7 +299,7 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 }
 
 func (gp *GPU) GetDeviceName(props *vk.PhysicalDeviceProperties, idx int) string {
-	nm := string(props.DeviceName[:])
+	nm := SafeString(string(props.DeviceName[:]))
 	nm = strings.Join(strings.Fields(nm), " ")
 	return fmt.Sprintf("%s: id=%d idx=%d", nm, props.DeviceID, idx)
 }
@@ -310,6 +310,9 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 		vk.GetPhysicalDeviceProperties(gpus[0], &props)
 		props.Deref()
 		gp.DeviceName = gp.GetDeviceName(&props, 0)
+		if Debug {
+			log.Printf("vgpu: selected only device named: %s\n", gp.DeviceName)
+		}
 		return 0
 	}
 	trgDevNm := ""
@@ -353,13 +356,13 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 		var props vk.PhysicalDeviceProperties
 		vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 		props.Deref()
-		dnm := string(props.DeviceName[:])
+		dnm := gp.GetDeviceName(&props, maxIdx)
 		if props.DeviceType == vk.PhysicalDeviceTypeDiscreteGpu {
 			var memProps vk.PhysicalDeviceMemoryProperties
 			vk.GetPhysicalDeviceMemoryProperties(gpus[gi], &memProps)
 			memProps.Deref()
 			if Debug {
-				log.Printf("vgpu: evaluating discrete device named: %s, index: %d\n", dnm, maxIdx)
+				log.Printf("vgpu: %d: evaluating discrete device named: %s\n", maxIdx, dnm)
 			}
 			for mi := uint32(0); mi < memProps.MemoryHeapCount; mi++ {
 				heap := &memProps.MemoryHeaps[mi]
@@ -375,13 +378,13 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 			}
 		} else {
 			if Debug {
-				log.Printf("vgpu: skipping device named: %s, index: %d -- not discrete\n", dnm, maxIdx)
+				log.Printf("vgpu: %d: skipping device named: %s -- not discrete\n", maxIdx, dnm)
 			}
 		}
 	}
 	gp.DeviceName = devNm
 	if Debug {
-		log.Printf("vgpu: selected device named: %s, index: %d, memory size: %d\n", devNm, maxIdx, maxSz)
+		log.Printf("vgpu: %d selected device named: %s, memory size: %d\n", maxIdx, devNm, maxSz)
 	}
 
 	return maxIdx
