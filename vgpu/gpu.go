@@ -298,9 +298,10 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	return nil
 }
 
-func (gp *GPU) GetDeviceName(props *vk.PhysicalDeviceProperties) string {
+func (gp *GPU) GetDeviceName(props *vk.PhysicalDeviceProperties, idx int) string {
 	nm := string(props.DeviceName[:])
-	return strings.Join(strings.Fields(nm), " ")
+	nm = strings.Join(strings.Fields(nm), " ")
+	return fmt.Sprintf("%s: id=%d idx=%d", nm, props.DeviceID, idx)
 }
 
 func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
@@ -308,7 +309,7 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 		var props vk.PhysicalDeviceProperties
 		vk.GetPhysicalDeviceProperties(gpus[0], &props)
 		props.Deref()
-		gp.DeviceName = gp.GetDeviceName(&props)
+		gp.DeviceName = gp.GetDeviceName(&props, 0)
 		return 0
 	}
 	trgDevNm := ""
@@ -329,7 +330,7 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 			vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 			props.Deref()
 			if bytes.Contains(props.DeviceName[:], []byte(trgDevNm)) {
-				devNm := gp.GetDeviceName(&props)
+				devNm := gp.GetDeviceName(&props, gi)
 				if Debug {
 					log.Printf("vgpu: selected device named: %s, specified in *_DEVICE_SELECT environment variable, index: %d\n", devNm, gi)
 				}
@@ -366,7 +367,7 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 				// if heap.Flags&vk.MemoryHeapFlags(vk.MemoryHeapDeviceLocalBit) != 0 {
 				sz := int(heap.Size)
 				if sz > maxSz {
-					devNm = gp.GetDeviceName(&props)
+					devNm = gp.GetDeviceName(&props, gi)
 					maxSz = sz
 					maxIdx = gi
 				}
