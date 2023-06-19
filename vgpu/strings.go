@@ -48,12 +48,20 @@ func SafeStrings(list []string) []string {
 func CleanString(s string) string {
 	s = SafeString(s)
 	ss := ""
+	lastSpace := false
 	for _, r := range s {
 		if unicode.IsLetter(r) || unicode.IsNumber(r) {
 			ss += string(r)
+			lastSpace = false
 		} else {
-			ss += " "
+			if !lastSpace {
+				ss += " "
+				lastSpace = true
+			}
 		}
+	}
+	if lastSpace {
+		return ss[:len(ss)-1]
 	}
 	return ss
 }
