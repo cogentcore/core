@@ -334,11 +334,11 @@ func (gp *GPU) SelectGPU(gpus []vk.PhysicalDevice, gpuCount int) int {
 			curIdx := 0
 			for gi := 0; gi < gpuCount; gi++ {
 				var props vk.PhysicalDeviceProperties
-				vk.GetPhysicalDeviceProperties(gpus[idx], &props)
+				vk.GetPhysicalDeviceProperties(gpus[gi], &props)
 				props.Deref()
 				if props.DeviceType == vk.PhysicalDeviceTypeDiscreteGpu {
 					if curIdx == idx {
-						gp.DeviceName = gp.GetDeviceName(&props, idx)
+						gp.DeviceName = gp.GetDeviceName(&props, gi)
 						if Debug {
 							log.Printf("vgpu: selected device named: %s, specified by index in *_DEVICE_SELECT environment variable, index: %d\n", gp.DeviceName, gi)
 						}
