@@ -460,9 +460,12 @@ func dbgCallbackFunc(flags vk.DebugReportFlags, objectType vk.DebugReportObjectT
 	object uint64, location uint64, messageCode int32, pLayerPrefix string,
 	pMessage string, pUserData unsafe.Pointer) vk.Bool32 {
 
+	exclude := []string{"Loader", "Message", "Device", "Extension"}
 	switch {
 	case flags&vk.DebugReportFlags(vk.DebugReportInformationBit) != 0:
-		log.Printf("INFORMATION: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+		if !HasAllStrings(pMessage, exclude) {
+			log.Printf("INFORMATION: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+		}
 	case flags&vk.DebugReportFlags(vk.DebugReportWarningBit) != 0:
 		log.Printf("WARNING: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
 	case flags&vk.DebugReportFlags(vk.DebugReportPerformanceWarningBit) != 0:
@@ -472,7 +475,7 @@ func dbgCallbackFunc(flags vk.DebugReportFlags, objectType vk.DebugReportObjectT
 	case flags&vk.DebugReportFlags(vk.DebugReportDebugBit) != 0:
 		log.Printf("DEBUG: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
 	default:
-		if !(strings.Contains(pMessage, "Loader Message") && strings.Contains(pMessage, "Device Extension")) {
+		if !HasAllStrings(pMessage, exclude) {
 			log.Printf("INFORMATION: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
 		}
 	}

@@ -8,6 +8,7 @@
 package vgpu
 
 import (
+	"strings"
 	"unicode"
 )
 
@@ -64,4 +65,13 @@ func CleanString(s string) string {
 		return ss[:len(ss)-1]
 	}
 	return ss
+}
+
+func HasAllStrings(s string, strs []string) bool {
+	for _, ss := range strs {
+		if !strings.Contains(s, ss) {
+			return false
+		}
+	}
+	return true
 }
