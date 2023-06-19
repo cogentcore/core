@@ -7,6 +7,10 @@
 
 package vgpu
 
+import (
+	"unicode"
+)
+
 func CheckExisting(actual, required []string) (existing []string, missing int) {
 	existing = make([]string, 0, len(required))
 	for j := range required {
@@ -39,4 +43,17 @@ func SafeStrings(list []string) []string {
 		list[i] = SafeString(list[i])
 	}
 	return list
+}
+
+func CleanString(s string) string {
+	s = SafeString(s)
+	ss := ""
+	for _, r := range s {
+		if unicode.IsLetter(r) || unicode.IsNumber(r) {
+			ss += string(r)
+		} else {
+			ss += " "
+		}
+	}
+	return ss
 }

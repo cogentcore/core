@@ -300,8 +300,7 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 }
 
 func (gp *GPU) GetDeviceName(props *vk.PhysicalDeviceProperties, idx int) string {
-	nm := SafeString(string(props.DeviceName[:]))
-	nm = strings.Join(strings.Fields(nm), " ")
+	nm := CleanString(string(props.DeviceName[:]))
 	return fmt.Sprintf("%s: id=%d idx=%d", nm, props.DeviceID, idx)
 }
 
