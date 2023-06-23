@@ -20,6 +20,13 @@ float FastExp(float x) {
 
 [numthreads(64, 1, 1)]
 void main(uint3 idx : SV_DispatchThreadID) {
-    Out[idx.x] = FastExp(In[idx.x]);
+    // Out[idx.x] = FastExp(In[idx.x]); // 0 diffs
+	float vbio = In[idx.x];
+	float eval = 0.1 * ((vbio + 90.0) + 10.0);
+	// Out[idx.x] = (vbio + 90.0) / (1.0 + FastExp(eval)); // lots of diffs
+	// Out[idx.x] = (vbio + 90.0) / (1.0 + exp(eval)); // worse
+	// Out[idx.x] = eval; // 0 diff
+	Out[idx.x] = float(1.0) / eval; // a few 2.98e-8 diffs already!  no diff from casting
+	// Out[idx.x] = 1.0 / FastExp(eval); // lots more diffs, e-08, -09
 }
 

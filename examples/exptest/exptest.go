@@ -10,7 +10,6 @@ import (
 	"unsafe"
 
 	"github.com/goki/ki/ints"
-	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
 )
 
@@ -56,12 +55,20 @@ func main() {
 	ivals := make([]float32, n)
 	cpuVals := make([]float32, n)
 
-	st := float32(-89)
+	// st := float32(-89)
+	// st := float32(3)
+	st := float32(-70)
 	inc := float32(1.0e-01)
 	cur := st
 	for i := 0; i < n; i++ {
 		ivals[i] = cur
-		cpuVals[i] = mat32.FastExp(ivals[i])
+		// cpuVals[i] = mat32.FastExp(ivals[i]) // 0 diffs
+		vbio := ivals[i]
+		eval := 0.1 * ((vbio + 90.0) + 10.0)
+		// cpuVals[i] = (vbio + 90.0) / (1.0 + mat32.FastExp(eval)) // lots of diffs
+		// cpuVals[i] = eval // 0 diff
+		cpuVals[i] = float32(1.0) / eval // no diff from casting
+		// cpuVals[i] = 1.0 / mat32.FastExp(eval)
 		cur += inc
 	}
 

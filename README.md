@@ -193,3 +193,5 @@ Note that this constraint is largely irrelevant because each dynamic descriptor 
 
 * image formats: https://vulkan.gpuinfo.org/listsurfaceformats.php
 
+* helpful info on dxc compiler, which is best for HLSL inputs: https://github.com/microsoft/DirectXShaderCompiler/blob/main/docs/SPIR-V.rst
+

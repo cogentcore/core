@@ -3,5 +3,5 @@
 all: gpu_exptest.spv
 
 %.spv : %.hlsl
-	dxc -spirv -O3 -T cs_6_0 -E main -Fo $@ $<
+	dxc -spirv -O3 -Ges -T cs_6_2 -E main -Fo $@ $<
 
