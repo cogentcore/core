@@ -595,7 +595,7 @@ func (d *Differ) StructuredDump(tag byte, x []string, low int, high int) (out []
 	size := high - low
 	out = make([]DiffLine, size)
 	for i := 0; i < size; i++ {
-		out[i] = NewDiffLine(tag, x[i + low])
+		out[i] = NewDiffLine(tag, x[i+low])
 	}
 	return out
 }
@@ -792,16 +792,16 @@ func formatRangeUnified(start, stop int) string {
 
 // Unified diff parameters
 type LineDiffParams struct {
-	A        []string             // First sequence lines
-	FromFile string               // First file name
-	FromDate string               // First file time
-	B        []string             // Second sequence lines
-	ToFile   string               // Second file name
-	ToDate   string               // Second file time
-	Eol      string               // Headers end of line, defaults to LF
-	Context  int                  // Number of context lines
-	AutoJunk bool                 // If true, use autojunking
-	IsJunkLine func(string)bool   // How to spot junk lines
+	A          []string          // First sequence lines
+	FromFile   string            // First file name
+	FromDate   string            // First file time
+	B          []string          // Second sequence lines
+	ToFile     string            // Second file name
+	ToDate     string            // Second file time
+	Eol        string            // Headers end of line, defaults to LF
+	Context    int               // Number of context lines
+	AutoJunk   bool              // If true, use autojunking
+	IsJunkLine func(string) bool // How to spot junk lines
 }
 
 // Compare two sequences of lines; generate the delta as a unified diff.
@@ -828,7 +828,7 @@ func WriteUnifiedDiff(writer io.Writer, diff LineDiffParams) error {
 	//defer buf.Flush()
 	var bld strings.Builder
 	bld.Reset()
-	wf := func(format string, args ...interface{}) error {
+	wf := func(format string, args ...any) error {
 		_, err := fmt.Fprintf(&bld, format, args...)
 		return err
 	}
@@ -952,7 +952,7 @@ func WriteContextDiff(writer io.Writer, diff LineDiffParams) error {
 	buf := bufio.NewWriter(writer)
 	defer buf.Flush()
 	var diffErr error
-	wf := func(format string, args ...interface{}) {
+	wf := func(format string, args ...any) {
 		_, err := buf.WriteString(fmt.Sprintf(format, args...))
 		if diffErr == nil && err != nil {
 			diffErr = err
