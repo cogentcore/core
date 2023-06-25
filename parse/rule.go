@@ -213,7 +213,7 @@ func (pr *Rule) IsGroup() bool {
 // SetRuleMap is called on the top-level Rule and initializes the RuleMap
 func (pr *Rule) SetRuleMap(ps *State) {
 	RuleMap = map[string]*Rule{}
-	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d interface{}) bool {
+	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d any) bool {
 		pri := k.(*Rule)
 		if epr, has := RuleMap[pri.Nm]; has {
 			ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.Path(), epr.Path()), pri)
@@ -230,7 +230,7 @@ func (pr *Rule) SetRuleMap(ps *State) {
 func (pr *Rule) CompileAll(ps *State) bool {
 	pr.SetRuleMap(ps)
 	allok := true
-	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d interface{}) bool {
+	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d any) bool {
 		pri := k.(*Rule)
 		ok := pri.Compile(ps)
 		if !ok {
@@ -1708,7 +1708,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 // Find looks for rules in the tree that contain given string in Rule or Name fields
 func (pr *Rule) Find(find string) []*Rule {
 	var res []*Rule
-	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d interface{}) bool {
+	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d any) bool {
 		pri := k.(*Rule)
 		if strings.Contains(pri.Rule, find) || strings.Contains(pri.Nm, find) {
 			res = append(res, pri)

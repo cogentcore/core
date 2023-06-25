@@ -63,15 +63,15 @@ type Edit struct {
 // MatchFunc is the function called to get the list of possible completions
 // and also determines the correct seed based on the text
 // passed as a parameter of CompletionFunc
-type MatchFunc func(data interface{}, text string, posLn, posCh int) Matches
+type MatchFunc func(data any, text string, posLn, posCh int) Matches
 
 // LookupFunc is the function called to get the lookup results for given
 // input test and position.
-type LookupFunc func(data interface{}, text string, posLn, posCh int) Lookup
+type LookupFunc func(data any, text string, posLn, posCh int) Lookup
 
 // EditFunc is passed the current text and the selected completion for text editing.
 // Allows for other editing, e.g. adding "()" or adding "/", etc.
-type EditFunc func(data interface{}, text string, cursorPos int, comp Completion, seed string) Edit
+type EditFunc func(data any, text string, cursorPos int, comp Completion, seed string) Edit
 
 // MatchSeed returns a list of matches given a list of string possibilities and a seed.
 // The seed is basically a prefix.

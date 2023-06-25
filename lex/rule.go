@@ -79,7 +79,7 @@ func (lr *Rule) AsLexRule() *Rule {
 // returns true if everything is ok
 func (lr *Rule) CompileAll(ls *State) bool {
 	allok := false
-	lr.FuncDownMeFirst(0, lr.This(), func(k ki.Ki, level int, d interface{}) bool {
+	lr.FuncDownMeFirst(0, lr.This(), func(k ki.Ki, level int, d any) bool {
 		lri := k.(*Rule)
 		ok := lri.Compile(ls)
 		if !ok {
@@ -462,7 +462,7 @@ func (lr *Rule) DoAct(ls *State, act Actions, tok *token.KeyToken) {
 // Find looks for rules in the tree that contain given string in String or Name fields
 func (lr *Rule) Find(find string) []*Rule {
 	var res []*Rule
-	lr.FuncDownMeFirst(0, lr.This(), func(k ki.Ki, level int, d interface{}) bool {
+	lr.FuncDownMeFirst(0, lr.This(), func(k ki.Ki, level int, d any) bool {
 		lri := k.(*Rule)
 		if strings.Contains(lri.String, find) || strings.Contains(lri.Nm, find) {
 			res = append(res, lri)
