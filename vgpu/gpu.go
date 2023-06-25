@@ -52,9 +52,10 @@ type GPU struct {
 	Compute          bool                   `desc:"this is used for computing, not graphics"`
 	DebugCallback    vk.DebugReportCallback `desc:"our custom debug callback"`
 
-	GPUProps    vk.PhysicalDeviceProperties       `desc:"properties of physical hardware -- populated after Config"`
-	GPUFeats    vk.PhysicalDeviceFeatures         `desc:"features of physical hardware -- populated after Config"`
-	MemoryProps vk.PhysicalDeviceMemoryProperties `desc:"properties of device memory -- populated after Config"`
+	GPUProps                   vk.PhysicalDeviceProperties       `desc:"properties of physical hardware -- populated after Config"`
+	GPUFeats                   vk.PhysicalDeviceFeatures         `desc:"features of physical hardware -- populated after Config"`
+	MemoryProps                vk.PhysicalDeviceMemoryProperties `desc:"properties of device memory -- populated after Config"`
+	MaxComputeWorkGroupCount1D int                               `desc:"maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup[0], which allows for the [1] and [2] maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroup[0] value is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values."`
 
 	PlatformDeviceNext unsafe.Pointer `view:"-" desc:"platform-specific PNext for CreateDevice call"`
 }
@@ -270,6 +271,18 @@ func (gp *GPU) Config(name string, opts ...*GPUOpts) error {
 	gp.GPUProps.Limits.Deref()
 	vk.GetPhysicalDeviceMemoryProperties(gp.GPU, &gp.MemoryProps)
 	gp.MemoryProps.Deref()
+
+	gp.MaxComputeWorkGroupCount1D = int(gp.GPUProps.Limits.MaxComputeWorkGroupCount[0])
+	// note: unclear what the limit is here.
+	// if gp.MaxComputeWorkGroupCount1D == 0 { // otherwise set per-platform in defaults (DARWIN)
+	// if strings.Contains(gp.DeviceName, "NVIDIA") {
+	// 	// according to: https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxComputeWorkGroupInvocations&platform=all
+	// 	// all NVIDIA are either 1 << 31 or -1 of that.
+	// 	gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1 // according to vgpu
+	// } else {
+	// note: if known to be higher for any specific case, please file an issue or PR
+	// }
+	// }
 
 	// Select device extensions
 	requiredDeviceExts := SafeStrings(gp.DeviceExts)
