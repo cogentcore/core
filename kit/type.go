@@ -140,7 +140,7 @@ func StructTags(tags reflect.StructTag) map[string]string {
 
 // StringJSON returns a JSON representation of item, as a string
 // e.g., for printing / debugging etc.
-func StringJSON(it interface{}) string {
+func StringJSON(it any) string {
 	b, _ := json.MarshalIndent(it, "", "  ")
 	return string(b)
 }

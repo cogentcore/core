@@ -23,13 +23,13 @@ import (
 // a pointer to a slice or a direct slice) -- just Elem() of slice type, but using
 // this function makes it more explicit what is going on.  And it uses
 // OnePtrUnderlyingValue to get past any interface wrapping.
-func SliceElType(sl interface{}) reflect.Type {
+func SliceElType(sl any) reflect.Type {
 	return NonPtrValue(OnePtrUnderlyingValue(reflect.ValueOf(sl))).Type().Elem()
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
-func SliceNewAt(sl interface{}, idx int) {
+func SliceNewAt(sl any, idx int) {
 	sltyp := SliceElType(sl)
 	slptr := sltyp.Kind() == reflect.Ptr
 
@@ -50,7 +50,7 @@ func SliceNewAt(sl interface{}, idx int) {
 }
 
 // SliceDeleteAt deletes element at given index from slice
-func SliceDeleteAt(sl interface{}, idx int) {
+func SliceDeleteAt(sl any, idx int) {
 	svl := reflect.ValueOf(sl)
 	svnp := NonPtrValue(svl)
 	svtyp := svnp.Type()
@@ -66,7 +66,7 @@ func SliceDeleteAt(sl interface{}, idx int) {
 // ints.Inter Int(), interfaces first, and then falling back on reflect.Kind
 // float, int, string conversions (first fmt.Stringer String()) and supporting
 // time.Time directly as well.
-func SliceSort(sl interface{}, ascending bool) error {
+func SliceSort(sl any, ascending bool) error {
 	sv := reflect.ValueOf(sl)
 	svnp := NonPtrValue(sv)
 	if svnp.Len() == 0 {
@@ -184,7 +184,7 @@ func SliceSort(sl interface{}, ascending bool) error {
 // conversions (first fmt.Stringer String()) and supporting time.Time directly
 // as well.  There is no direct method for checking the field indexes so those
 // are assumed to be accurate -- will panic if not!
-func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error {
+func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	sv := reflect.ValueOf(struSlice)
 	svnp := NonPtrValue(sv)
 	if svnp.Len() == 0 {

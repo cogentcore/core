@@ -21,7 +21,7 @@ import (
 // provides a way to select a particular return value in a single expression,
 // without having a separate assignment in between -- I just call it "Sel" as
 // I'm unlikely to remember how to type a mu
-func Sel(a ...interface{}) []interface{} {
+func Sel(a ...any) []any {
 	return a
 }
 
@@ -29,7 +29,7 @@ func Sel(a ...interface{}) []interface{} {
 // nil, or the value pointed to by the interface could be nil -- this checks
 // both, safely
 // gopy:interface=handle
-func IfaceIsNil(it interface{}) bool {
+func IfaceIsNil(it any) bool {
 	if it == nil {
 		return true
 	}
@@ -86,7 +86,7 @@ func ValueIsZero(v reflect.Value) bool {
 
 // ToBool robustly converts anything to a bool
 // gopy:interface=handle
-func ToBool(it interface{}) (bool, bool) {
+func ToBool(it any) (bool, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch bt := it.(type) {
 	case bool:
@@ -156,7 +156,7 @@ func ToBool(it interface{}) (bool, bool) {
 // ToInt robustly converts anything to an int64 -- uses the ints.Inter ToInt
 // interface first if available
 // gopy:interface=handle
-func ToInt(it interface{}) (int64, bool) {
+func ToInt(it any) (int64, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
 	case bool:
@@ -244,7 +244,7 @@ func ToInt(it interface{}) (int64, bool) {
 // ToFloat robustly converts anything to a Float64 -- uses the floats.Floater Float()
 // interface first if available
 // gopy:interface=handle
-func ToFloat(it interface{}) (float64, bool) {
+func ToFloat(it any) (float64, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
 	case bool:
@@ -332,7 +332,7 @@ func ToFloat(it interface{}) (float64, bool) {
 // ToFloat32 robustly converts anything to a Float32 -- uses the floats.Floater Float()
 // interface first if available
 // gopy:interface=handle
-func ToFloat32(it interface{}) (float32, bool) {
+func ToFloat32(it any) (float32, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
 	case bool:
@@ -421,7 +421,7 @@ func ToFloat32(it interface{}) (float32, bool) {
 // ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should
 // definitely work in all cases, so there is no bool return value
 // gopy:interface=handle
-func ToString(it interface{}) string {
+func ToString(it any) string {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
 	case string:
@@ -508,7 +508,7 @@ func ToString(it interface{}) string {
 // fact that they are represented with binary bits.  See ToString
 // for more info.
 // gopy:interface=handle
-func ToStringPrec(it interface{}, prec int) string {
+func ToStringPrec(it any, prec int) string {
 	if IfaceIsNil(it) {
 		return "nil"
 	}
@@ -547,7 +547,7 @@ func ToStringPrec(it interface{}, prec int) string {
 // pointer-to -- only for basic field values -- use copier package for more
 // complex cases
 // gopy:interface=handle
-func SetRobust(to, frm interface{}) bool {
+func SetRobust(to, frm any) bool {
 	if IfaceIsNil(to) {
 		return false
 	}
@@ -654,7 +654,7 @@ func MakeSlice(typ reflect.Type, len, cap int) reflect.Value {
 // CloneToType creates a new object of given type, and uses SetRobust to copy
 // an existing value (of perhaps another type) into it -- only expected to
 // work for basic types
-func CloneToType(typ reflect.Type, val interface{}) reflect.Value {
+func CloneToType(typ reflect.Type, val any) reflect.Value {
 	if NonPtrType(typ).Kind() == reflect.Map {
 		return MakeMap(typ)
 	} else if NonPtrType(typ).Kind() == reflect.Slice {

@@ -9,19 +9,19 @@ import (
 	"testing"
 )
 
-func AFun(aa interface{}) bool {
+func AFun(aa any) bool {
 	return IfaceIsNil(aa)
 }
 
 func TestIfaceIsNil(t *testing.T) {
-	ai := interface{}(a)
+	ai := any(a)
 
 	if IfaceIsNil(ai) != false {
 		t.Errorf("should be non-nil: %v\n", ai)
 	}
 
 	var ap *A
-	api := interface{}(ap)
+	api := any(ap)
 
 	if IfaceIsNil(api) != true {
 		t.Errorf("should be nil: %v\n", api)

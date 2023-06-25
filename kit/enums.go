@@ -87,7 +87,7 @@ type EnumRegistry struct {
 	// Props contains properties that can be associated with each enum type
 	// e.g., "BitFlag": true, "AltStrings" : map[int64]string, or other custom settings.
 	// The key here is the short package-qualified name
-	Props map[string]map[string]interface{}
+	Props map[string]map[string]any
 
 	// Vals contains cached EnumValue representations of the enum values.
 	// Used by Values method.
@@ -110,10 +110,10 @@ const (
 // each value represents a bit in a set of bit flags, so the string rep of a
 // value contains an or-list of names for each bit set, separated by | -- can
 // also add additional properties -- they are copied so can be re-used across enums
-func (tr *EnumRegistry) AddEnum(en interface{}, bitFlag bool, props map[string]interface{}) reflect.Type {
+func (tr *EnumRegistry) AddEnum(en any, bitFlag bool, props map[string]any) reflect.Type {
 	if tr.Enums == nil {
 		tr.Enums = make(map[string]reflect.Type)
-		tr.Props = make(map[string]map[string]interface{})
+		tr.Props = make(map[string]map[string]any)
 		tr.Vals = make(map[string][]EnumValue)
 	}
 
@@ -124,7 +124,7 @@ func (tr *EnumRegistry) AddEnum(en interface{}, bitFlag bool, props map[string]i
 	tr.Enums[snm] = typ
 	if props != nil {
 		// make a copy of props for enums -- often shared
-		nwprops := make(map[string]interface{}, len(props))
+		nwprops := make(map[string]any, len(props))
 		for key, val := range props {
 			nwprops[key] = val
 		}
@@ -157,7 +157,7 @@ func EnumBitDepthCheck(typ reflect.Type, n int64) error {
 // AltStrings alternative string map based on the name with given prefix
 // removed (e.g., a type name-based prefix) and lower-cased -- also requires
 // the number of enums -- assumes starts at 0
-func (tr *EnumRegistry) AddEnumAltLower(en interface{}, bitFlag bool, props map[string]interface{}, prefix string) reflect.Type {
+func (tr *EnumRegistry) AddEnumAltLower(en any, bitFlag bool, props map[string]any, prefix string) reflect.Type {
 	typ := tr.AddEnum(en, bitFlag, props)
 	n := EnumIfaceToInt64(en)
 	snm := ShortTypeName(typ)
@@ -178,7 +178,7 @@ func (tr *EnumRegistry) AddEnumAltLower(en interface{}, bitFlag bool, props map[
 // flags, so the string rep of a value contains an or-list of names for each bit set,
 // separated by | -- can also add additional properties -- they are copied so
 // can be re-used across enums
-func (tr *EnumRegistry) AddEnumExt(parTyp reflect.Type, en interface{}, bitFlag bool, props map[string]interface{}) reflect.Type {
+func (tr *EnumRegistry) AddEnumExt(parTyp reflect.Type, en any, bitFlag bool, props map[string]any) reflect.Type {
 	typ := tr.AddEnum(en, bitFlag, props)
 	snm := ShortTypeName(typ)
 	if parTyp == typ {
@@ -194,7 +194,7 @@ func (tr *EnumRegistry) AddEnumExt(parTyp reflect.Type, en interface{}, bitFlag 
 // Automatically initializes AltStrings alternative string map based on the name with
 // given prefix removed (e.g., a type name-based prefix) and lower-cased.
 // Also requires the number of enums -- assumes starts at end of parent.
-func (tr *EnumRegistry) AddEnumExtAltLower(parTyp reflect.Type, en interface{}, bitFlag bool, props map[string]interface{}, prefix string) reflect.Type {
+func (tr *EnumRegistry) AddEnumExtAltLower(parTyp reflect.Type, en any, bitFlag bool, props map[string]any, prefix string) reflect.Type {
 	typ := tr.AddEnumExt(parTyp, en, bitFlag, props)
 	n := EnumIfaceToInt64(en)
 	snm := ShortTypeName(typ)
@@ -233,10 +233,10 @@ func (tr *EnumRegistry) TypeRegistered(typ reflect.Type) bool {
 
 // Props returns properties for this type based on short package-qualified name.
 // Makes props map if not already made.
-func (tr *EnumRegistry) Properties(enumName string) map[string]interface{} {
+func (tr *EnumRegistry) Properties(enumName string) map[string]any {
 	tp, ok := tr.Props[enumName]
 	if !ok {
-		tp = make(map[string]interface{})
+		tp = make(map[string]any)
 		tr.Props[enumName] = tp
 	}
 	return tp
@@ -244,7 +244,7 @@ func (tr *EnumRegistry) Properties(enumName string) map[string]interface{} {
 
 // Prop safely finds an enum type property from short package-qualified name
 // and property key.  Returns nil if not found.
-func (tr *EnumRegistry) Prop(enumName, propKey string) interface{} {
+func (tr *EnumRegistry) Prop(enumName, propKey string) any {
 	tp, ok := tr.Props[enumName]
 	if !ok {
 		// fmt.Printf("no props for enum type: %v\n", enumName)
@@ -259,7 +259,7 @@ func (tr *EnumRegistry) Prop(enumName, propKey string) interface{} {
 }
 
 // SetProp safely sets given property for given enum name
-func (tr *EnumRegistry) SetProp(enumName, propKey string, val interface{}) {
+func (tr *EnumRegistry) SetProp(enumName, propKey string, val any) {
 	tp := tr.Properties(enumName)
 	tp[propKey] = val
 }
@@ -297,7 +297,7 @@ func (tr *EnumRegistry) ParType(enumName string) reflect.Type {
 }
 
 // NVals returns the number of defined enum values for given enum interface
-func (tr *EnumRegistry) NVals(eval interface{}) int64 {
+func (tr *EnumRegistry) NVals(eval any) int64 {
 	typ := reflect.TypeOf(eval)
 	nm := ShortTypeName(typ)
 	n := tr.Prop(nm, "N")
@@ -322,7 +322,7 @@ func (tr *EnumRegistry) IsBitFlag(typ reflect.Type) bool {
 // EnumIfaceToInt64 converts an enum interface{} into an int64 using reflect
 // -- just use int64(eval) when you have the enum value in hand -- this is
 // when you just have a generic interface{}
-func EnumIfaceToInt64(eval interface{}) int64 {
+func EnumIfaceToInt64(eval any) int64 {
 	ev := NonPtrValue(reflect.ValueOf(eval))
 	var ival int64
 	reflect.ValueOf(&ival).Elem().Set(ev.Convert(reflect.TypeOf(ival)))
@@ -332,7 +332,7 @@ func EnumIfaceToInt64(eval interface{}) int64 {
 // SetEnumIfaceFromInt64 sets enum interface{} value from int64 value -- must
 // pass a pointer to the enum and also needs raw type of the enum as well --
 // can't get it from the interface{} reliably
-func SetEnumIfaceFromInt64(eval interface{}, ival int64, typ reflect.Type) error {
+func SetEnumIfaceFromInt64(eval any, ival int64, typ reflect.Type) error {
 	if reflect.TypeOf(eval).Kind() != reflect.Ptr {
 		err := fmt.Errorf("kit.SetEnumFromInt64: must pass a pointer to the enum: Type: %v, Kind: %v\n", reflect.TypeOf(eval).Name(), reflect.TypeOf(eval).Kind())
 		log.Printf("%v", err)
@@ -358,7 +358,7 @@ func SetEnumValueFromInt64(eval reflect.Value, ival int64) error {
 
 // EnumIfaceFromInt64 returns an interface{} value which is an enum value of
 // given type (not a pointer to it), set to given integer value
-func EnumIfaceFromInt64(ival int64, typ reflect.Type) interface{} {
+func EnumIfaceFromInt64(ival int64, typ reflect.Type) any {
 	evn := reflect.New(typ)
 	SetEnumValueFromInt64(evn, ival)
 	return evn.Elem().Interface()
@@ -370,7 +370,7 @@ func EnumIfaceFromInt64(ival int64, typ reflect.Type) interface{} {
 // EnumIfaceToString converts an enum interface{} value to its corresponding
 // string value, using fmt.Stringer interface directly -- same effect as
 // calling fmt.Sprintf("%v") but this is slightly faster
-func EnumIfaceToString(eval interface{}) string {
+func EnumIfaceToString(eval any) string {
 	strer, ok := eval.(fmt.Stringer) // will fail if not impl
 	if !ok {
 		log.Printf("kit.EnumIfaceToString: fmt.Stringer interface not supported by type %v\n", reflect.TypeOf(eval).Name())
@@ -389,7 +389,7 @@ func EnumInt64ToString(ival int64, typ reflect.Type) string {
 // EnumIfaceFromString returns an interface{} value which is an enum value of
 // given type (not a pointer to it), set to given string value -- requires
 // reflect type of enum
-func EnumIfaceFromString(str string, typ reflect.Type) interface{} {
+func EnumIfaceFromString(str string, typ reflect.Type) any {
 	evn := reflect.New(typ)
 	SetEnumValueFromString(evn, str)
 	return evn.Elem().Interface()
@@ -397,7 +397,7 @@ func EnumIfaceFromString(str string, typ reflect.Type) interface{} {
 
 // EnumIfaceToAltString converts an enum interface{} value to its
 // corresponding alternative string value from the enum registry
-func (tr *EnumRegistry) EnumIfaceToAltString(eval interface{}) string {
+func (tr *EnumRegistry) EnumIfaceToAltString(eval any) string {
 	if reflect.TypeOf(eval).Kind() == reflect.Ptr {
 		eval = reflect.ValueOf(eval).Elem() // deref the pointer
 	}
@@ -453,7 +453,7 @@ func SetEnumValueFromString(eval reflect.Value, str string) error {
 // SetEnumIfaceFromString sets enum value from string -- must pass a *pointer*
 // to the enum item. IMPORTANT: requires the modified stringer go generate
 // utility that generates a StringToTypeName method
-func SetEnumIfaceFromString(eptr interface{}, str string) error {
+func SetEnumIfaceFromString(eptr any, str string) error {
 	return SetEnumValueFromString(reflect.ValueOf(eptr), str)
 }
 
@@ -486,7 +486,7 @@ func (tr *EnumRegistry) SetEnumValueFromAltString(eval reflect.Value, str string
 
 // SetEnumIfaceFromAltString sets from alternative string list using an interface{}
 // to the enum -- must pass a *pointer* to the enum item.
-func (tr *EnumRegistry) SetEnumIfaceFromAltString(eptr interface{}, str string) error {
+func (tr *EnumRegistry) SetEnumIfaceFromAltString(eptr any, str string) error {
 	return tr.SetEnumValueFromAltString(reflect.ValueOf(eptr), str)
 }
 
@@ -504,7 +504,7 @@ func (tr *EnumRegistry) SetEnumValueFromStringAltFirst(eval reflect.Value, str s
 // SetEnumIfaceFromStringAltFirst first attempts to set an enum from an
 // alternative string, and if that fails, then it tries to set from the
 // regular string representation func (tr *EnumRegistry)
-func (tr *EnumRegistry) SetEnumIfaceFromStringAltFirst(eptr interface{}, str string) error {
+func (tr *EnumRegistry) SetEnumIfaceFromStringAltFirst(eptr any, str string) error {
 	err := tr.SetEnumIfaceFromAltString(eptr, str)
 	if err != nil {
 		return SetEnumIfaceFromString(eptr, str)
@@ -518,7 +518,7 @@ func (tr *EnumRegistry) SetEnumIfaceFromStringAltFirst(eptr interface{}, str str
 // BitFlagsToString converts an int64 of bit flags into a string
 // representation of the bits that are set -- en is the number of defined
 // bits, and also provides the type name for looking up strings
-func BitFlagsToString(bflg int64, en interface{}) string {
+func BitFlagsToString(bflg int64, en any) string {
 	et := PtrType(reflect.TypeOf(en)).Elem()
 	n := int(EnumIfaceToInt64(en))
 	str := ""
@@ -538,7 +538,7 @@ func BitFlagsToString(bflg int64, en interface{}) string {
 // BitFlagsFromString sets an int64 of bit flags from a string representation
 // of the bits that are set -- en is the number of defined bits, and also
 // provides the type name for looking up strings
-func BitFlagsFromString(bflg *int64, str string, en interface{}) error {
+func BitFlagsFromString(bflg *int64, str string, en any) error {
 	et := PtrType(reflect.TypeOf(en)).Elem()
 	n := int(EnumIfaceToInt64(en))
 	return BitFlagsTypeFromString(bflg, str, et, n)
@@ -604,7 +604,7 @@ func (tr *EnumRegistry) SetAnyEnumValueFromString(eval reflect.Value, str string
 // registered as a bitflag, sets bits from string, otherwise tries to set from
 // alt strings if those exist, and finally tries direct set from string --
 // must pass a *pointer* value to the enum item.
-func (tr *EnumRegistry) SetAnyEnumIfaceFromString(eptr interface{}, str string) error {
+func (tr *EnumRegistry) SetAnyEnumIfaceFromString(eptr any, str string) error {
 	return tr.SetAnyEnumValueFromString(reflect.ValueOf(eptr), str)
 }
 
@@ -686,7 +686,7 @@ func (tr *EnumRegistry) AllTagged(key string) []reflect.Type {
 ///////////////////////////////////////////////////////////////////////////////
 //  JSON, Text Marshal
 
-func EnumMarshalJSON(eval interface{}) ([]byte, error) {
+func EnumMarshalJSON(eval any) ([]byte, error) {
 	et := reflect.TypeOf(eval)
 	b := make([]byte, 0, 50)
 	b = append(b, []byte("\"")...)
@@ -699,7 +699,7 @@ func EnumMarshalJSON(eval interface{}) ([]byte, error) {
 	return b, nil
 }
 
-func EnumUnmarshalJSON(eval interface{}, b []byte) error {
+func EnumUnmarshalJSON(eval any, b []byte) error {
 	et := reflect.TypeOf(eval)
 	noq := string(bytes.Trim(b, "\""))
 	if Enums.IsBitFlag(et) {
@@ -713,7 +713,7 @@ func EnumUnmarshalJSON(eval interface{}, b []byte) error {
 	return SetEnumIfaceFromString(eval, noq)
 }
 
-func EnumMarshalText(eval interface{}) ([]byte, error) {
+func EnumMarshalText(eval any) ([]byte, error) {
 	et := reflect.TypeOf(eval)
 	b := make([]byte, 0, 50)
 	if Enums.IsBitFlag(et) {
@@ -724,7 +724,7 @@ func EnumMarshalText(eval interface{}) ([]byte, error) {
 	return b, nil
 }
 
-func EnumUnmarshalText(eval interface{}, b []byte) error {
+func EnumUnmarshalText(eval any, b []byte) error {
 	et := reflect.TypeOf(eval)
 	noq := string(b)
 	if Enums.IsBitFlag(et) {

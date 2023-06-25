@@ -408,23 +408,23 @@ type Ki interface {
 
 	// SetProp sets given property key to value val -- initializes property
 	// map if nil.
-	SetProp(key string, val interface{})
+	SetProp(key string, val any)
 
 	// Prop returns property value for key that is known to exist.
 	// Returns nil if it actually doesn't -- this version allows
 	// direct conversion of return.  See PropTry for version with
 	// error message if uncertain if property exists.
-	Prop(key string) interface{}
+	Prop(key string) any
 
 	// PropTry returns property value for key.  Returns error message
 	// if property with that key does not exist.
-	PropTry(key string) (interface{}, error)
+	PropTry(key string) (any, error)
 
 	// PropInherit gets property value from key with options for inheriting
 	// property from parents and / or type-level properties.  If inherit, then
 	// checks all parents.  If typ then checks property on type as well
 	// (registered via KiT type registry).  Returns false if not set anywhere.
-	PropInherit(key string, inherit, typ bool) (interface{}, bool)
+	PropInherit(key string, inherit, typ bool) (any, bool)
 
 	// DeleteProp deletes property key on this node.
 	DeleteProp(key string)
@@ -440,21 +440,21 @@ type Ki interface {
 	//   note: always put function args last -- looks better for inline functions
 
 	// FuncFields calls function on all Ki fields within this node.
-	FuncFields(level int, data interface{}, fun Func)
+	FuncFields(level int, data any, fun Func)
 
 	// FuncUp calls function on given node and all the way up to its parents,
 	// and so on -- sequentially all in current go routine (generally
 	// necessary for going up, which is typically quite fast anyway) -- level
 	// is incremented after each step (starts at 0, goes up), and passed to
 	// function -- returns false if fun aborts with false, else true.
-	FuncUp(level int, data interface{}, fun Func) bool
+	FuncUp(level int, data any, fun Func) bool
 
 	// FuncUpParent calls function on parent of node and all the way up to its
 	// parents, and so on -- sequentially all in current go routine (generally
 	// necessary for going up, which is typically quite fast anyway) -- level
 	// is incremented after each step (starts at 0, goes up), and passed to
 	// function -- returns false if fun aborts with false, else true.
-	FuncUpParent(level int, data interface{}, fun Func) bool
+	FuncUpParent(level int, data any, fun Func) bool
 
 	// FuncDownMeFirst calls function on this node (MeFirst) and then iterates
 	// in a depth-first manner over all the children, including Ki Node fields,
@@ -467,7 +467,7 @@ type Ki interface {
 	// If fun returns false then any further traversal of that branch of the tree is
 	// aborted, but other branches continue -- i.e., if fun on current node
 	// returns false, children are not processed further.
-	FuncDownMeFirst(level int, data interface{}, fun Func)
+	FuncDownMeFirst(level int, data any, fun Func)
 
 	// FuncDownMeLast iterates in a depth-first manner over the children, calling
 	// doChildTestFunc on each node to test if processing should proceed (if it returns
@@ -479,13 +479,13 @@ type Ki interface {
 	// a chance of multiple threads running at the same time.
 	// Function calls are sequential all in current go routine.
 	// The level var tracks overall depth in the tree.
-	FuncDownMeLast(level int, data interface{}, doChildTestFunc Func, fun Func)
+	FuncDownMeLast(level int, data any, doChildTestFunc Func, fun Func)
 
 	// FuncDownBreadthFirst calls function on all children in breadth-first order
 	// using the standard queue strategy.  This depends on and updates the
 	// Depth parameter of the node.  If fun returns false then any further
 	// traversal of that branch of the tree is aborted, but other branches continue.
-	FuncDownBreadthFirst(level int, data interface{}, fun Func)
+	FuncDownBreadthFirst(level int, data any, fun Func)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  State update signaling -- automatically consolidates all changes across
@@ -548,7 +548,7 @@ type Ki interface {
 	// conversion routines to e.g., convert from strings to numbers, and
 	// vice-versa, automatically.  Returns error if not successfully set.
 	// wrapped in UpdateStart / End and sets the ValUpdated flag.
-	SetField(field string, val interface{}) error
+	SetField(field string, val any) error
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deep Copy of Trees
@@ -582,7 +582,7 @@ type Ki interface {
 	// can rely on the generic Node-level version.  Furthermore, if the
 	// actual end type itself does not define a custom version of this method
 	// then the generic one will be called for everything.
-	CopyFieldsFrom(frm interface{})
+	CopyFieldsFrom(frm any)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  IO: for JSON and XML formats -- see also Slice
@@ -626,7 +626,7 @@ type Ki interface {
 // Func is a function to call on ki objects walking the tree -- return Break
 // = false means don't continue processing this branch of the tree, but other
 // branches can continue.  return Continue = true continues down the tree.
-type Func func(k Ki, level int, data interface{}) bool
+type Func func(k Ki, level int, data any) bool
 
 // KiType is a Ki reflect.Type, suitable for checking for Type.Implements.
 var KiType = reflect.TypeOf((*Ki)(nil)).Elem()

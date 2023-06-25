@@ -66,7 +66,7 @@ func SetParent(kid Ki, parent Ki) {
 	n.Par = parent
 	if parent != nil && !parent.OnlySelfUpdate() {
 		parup := parent.IsUpdating()
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 			k.SetFlagState(parup, int(Updating))
 			return true
 		})
@@ -119,7 +119,7 @@ func UpdateReset(kn Ki) {
 	if kn.OnlySelfUpdate() {
 		kn.ClearFlag(int(Updating))
 	} else {
-		kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 			k.ClearFlag(int(Updating))
 			return true
 		})
@@ -136,7 +136,7 @@ func UpdateReset(kn Ki) {
 func FieldRoot(kn Ki) Ki {
 	var root Ki
 	gotField := false
-	kn.FuncUpParent(0, kn, func(k Ki, level int, d interface{}) bool {
+	kn.FuncUpParent(0, kn, func(k Ki, level int, d any) bool {
 		if !gotField {
 			if k.IsField() {
 				gotField = true
@@ -246,7 +246,7 @@ func KiFieldsInit(n *Node) (foff []uintptr, fnm []string) {
 	foff = make([]uintptr, 0)
 	fnm = make([]string, 0)
 	kitype := KiType
-	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	FlatFieldsValueFunc(n.This(), func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
 			foff = append(foff, field.Offset)
 			fnm = append(fnm, field.Name)
@@ -262,13 +262,13 @@ func KiFieldsInit(n *Node) (foff []uintptr, fnm []string) {
 
 // FieldByName returns field value by name (can be any type of field --
 // see KiFieldByName for Ki fields) -- returns nil if not found.
-func FieldByName(kn Ki, field string) interface{} {
+func FieldByName(kn Ki, field string) any {
 	return kit.FlatFieldInterfaceByName(kn.This(), field)
 }
 
 // FieldByNameTry returns field value by name (can be any type of field --
 // see KiFieldByName for Ki fields) -- returns error if not found.
-func FieldByNameTry(kn Ki, field string) (interface{}, error) {
+func FieldByNameTry(kn Ki, field string) (any, error) {
 	fld := FieldByName(kn, field)
 	if fld != nil {
 		return fld, nil
@@ -311,7 +311,7 @@ func UniqueNameCheck(k Ki) bool {
 // if not unique, call UniquifyNames or take other steps to ensure uniqueness.
 func UniqueNameCheckAll(kn Ki) bool {
 	allunq := true
-	kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 		unq := UniqueNameCheck(k)
 		if !unq {
 			allunq = false
@@ -411,7 +411,7 @@ func UniquifyNames(kn Ki) {
 // Otherwise, existing names are preserved if they are unique, and only
 // duplicates are renamed.  This is a bit slower.
 func UniquifyNamesAll(kn Ki) {
-	kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 		UniquifyNames(k)
 		return Continue
 	})

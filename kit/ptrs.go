@@ -129,7 +129,7 @@ func UnhideIfaceValue(v reflect.Value) reflect.Value {
 //  interface{} versions
 
 // NonPtrInterface returns the non-pointer value of an interface
-func NonPtrInterface(el interface{}) interface{} {
+func NonPtrInterface(el any) any {
 	v := reflect.ValueOf(el)
 	for v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -138,7 +138,7 @@ func NonPtrInterface(el interface{}) interface{} {
 }
 
 // PtrInterface returns the pointer value of an interface, if it is possible to get one through Addr()
-func PtrInterface(el interface{}) interface{} {
+func PtrInterface(el any) any {
 	v := reflect.ValueOf(el)
 	if v.Kind() == reflect.Ptr {
 		return el
@@ -150,6 +150,6 @@ func PtrInterface(el interface{}) interface{} {
 }
 
 // OnePtrInterface returns the pointer value of an interface, if it is possible to get one through Addr()
-func OnePtrInterface(el interface{}) interface{} {
+func OnePtrInterface(el any) any {
 	return OnePtrValue(reflect.ValueOf(el)).Interface()
 }

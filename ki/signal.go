@@ -55,7 +55,7 @@ var SignalTraceString *string
 // good practice to avoid closures in these functions, which can be numerous
 // and have a long lifetime, by converting the recv, send into their known
 // types and referring to them directly
-type RecvFunc func(recv, send Ki, sig int64, data interface{})
+type RecvFunc func(recv, send Ki, sig int64, data any)
 
 // Signal implements general signal passing between Ki objects, like Qt's
 // Signal / Slot system.
@@ -147,7 +147,7 @@ func (s *Signal) DisconnectAll() {
 }
 
 // EmitTrace records a trace of signal being emitted
-func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
+func (s *Signal) EmitTrace(sender Ki, sig int64, data any) {
 	if SignalTraceString != nil {
 		*SignalTraceString += fmt.Sprintf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.Name(), NodeSignals(sig), data)
 	} else {
@@ -157,7 +157,7 @@ func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
 
 // Emit sends the signal across all the connections to the receivers --
 // sequentially but in random order due to the randomization of map iteration
-func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
+func (s *Signal) Emit(sender Ki, sig int64, data any) {
 	if sender == nil || sender.IsDestroyed() { // dead nodes don't talk..
 		return
 	}
@@ -178,7 +178,7 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 
 // EmitGo is the concurrent version of Emit -- sends the signal across all the
 // connections to the receivers as separate goroutines
-func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
+func (s *Signal) EmitGo(sender Ki, sig int64, data any) {
 	if sender == nil || sender.IsDestroyed() { // dead nodes don't talk..
 		return
 	}
@@ -203,7 +203,7 @@ type SignalFilterFunc func(recv Ki) bool
 
 // EmitFiltered calls function on each potential receiver, and only sends
 // signal if function returns true
-func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, filtFun SignalFilterFunc) {
+func (s *Signal) EmitFiltered(sender Ki, sig int64, data any, filtFun SignalFilterFunc) {
 	s.Mu.RLock()
 	for recv, fun := range s.Cons {
 		if s.DisconnectDestroyed(recv) {
@@ -221,7 +221,7 @@ func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, filtFun Si
 // EmitGoFiltered is the concurrent version of EmitFiltered -- calls function
 // on each potential receiver, and only sends signal if function returns true
 // (filtering is sequential iteration over receivers)
-func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, filtFun SignalFilterFunc) {
+func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data any, filtFun SignalFilterFunc) {
 	s.Mu.RLock()
 	for recv, fun := range s.Cons {
 		if s.DisconnectDestroyed(recv) {
@@ -258,7 +258,7 @@ func (s *Signal) ConsFunc(consFun func(recv Ki, fun RecvFunc) bool) {
 
 // SendSig sends a signal to one given receiver -- receiver must already be
 // connected so that its receiving function is available
-func (s *Signal) SendSig(recv, sender Ki, sig int64, data interface{}) {
+func (s *Signal) SendSig(recv, sender Ki, sig int64, data any) {
 	s.Mu.RLock()
 	fun := s.Cons[recv]
 	s.Mu.RUnlock()

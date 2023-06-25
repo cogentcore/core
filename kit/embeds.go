@@ -76,7 +76,7 @@ func AllFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflec
 // anonymous embedded structs that this struct has, passing the current
 // (embedded) type and StructField -- effectively flattens the reflect field
 // list
-func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
+func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	vv := reflect.ValueOf(stru)
 	if stru == nil || vv.Kind() != reflect.Ptr {
 		log.Printf("kit.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
@@ -164,9 +164,9 @@ func AllFieldsN(typ reflect.Type) int {
 // FlatFieldsVals returns a slice list of all the field reflect.Value's for
 // fields of given struct (must pass a pointer to the struct) and any of its
 // embedded structs -- returns nil on error (logged)
-func FlatFieldVals(stru interface{}) []reflect.Value {
+func FlatFieldVals(stru any) []reflect.Value {
 	ff := make([]reflect.Value, 0)
-	falseErr := FlatFieldsValueFunc(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	falseErr := FlatFieldsValueFunc(stru, func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		ff = append(ff, fieldVal)
 		return true
 	})
@@ -180,9 +180,9 @@ func FlatFieldVals(stru interface{}) []reflect.Value {
 // values *as pointers to the field value* (i.e., calling Addr() on the Field
 // Value) for fields of given struct (must pass a pointer to the struct) and
 // any of its embedded structs -- returns nil on error (logged)
-func FlatFieldInterfaces(stru interface{}) []interface{} {
-	ff := make([]interface{}, 0)
-	falseErr := FlatFieldsValueFunc(stru, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+func FlatFieldInterfaces(stru any) []any {
+	ff := make([]any, 0)
+	falseErr := FlatFieldsValueFunc(stru, func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		ff = append(ff, PtrValue(fieldVal).Interface())
 		return true
 	})
@@ -223,7 +223,7 @@ func FieldByPath(typ reflect.Type, path string) (reflect.StructField, bool) {
 // FieldValueByPath returns field interface in type or embedded structs within
 // type, by a dot-separated path -- finds field by name for each level of the
 // path, and recurses.
-func FieldValueByPath(stru interface{}, path string) (reflect.Value, bool) {
+func FieldValueByPath(stru any, path string) (reflect.Value, bool) {
 	pels := strings.Split(path, ".")
 	sval := reflect.ValueOf(stru)
 	cval := sval
@@ -259,7 +259,7 @@ func FlatFieldTag(typ reflect.Type, nm, tag string) string {
 // FlatFieldValueByName finds field in object and embedded objects, by name,
 // returning reflect.Value of field -- native version of Value function
 // already does flat find, so this just provides a convenient wrapper
-func FlatFieldValueByName(stru interface{}, nm string) reflect.Value {
+func FlatFieldValueByName(stru any, nm string) reflect.Value {
 	vv := reflect.ValueOf(stru)
 	if stru == nil || vv.Kind() != reflect.Ptr {
 		log.Printf("kit.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
@@ -271,7 +271,7 @@ func FlatFieldValueByName(stru interface{}, nm string) reflect.Value {
 
 // FlatFieldInterfaceByName finds field in object and embedded objects, by
 // name, returning interface{} to pointer of field, or nil if not found
-func FlatFieldInterfaceByName(stru interface{}, nm string) interface{} {
+func FlatFieldInterfaceByName(stru any, nm string) any {
 	ff := FlatFieldValueByName(stru, nm)
 	if !ff.IsValid() {
 		return nil
@@ -301,7 +301,7 @@ func TypeEmbeds(typ, embed reflect.Type) bool {
 }
 
 // Embed returns the embedded struct of given type within given struct
-func Embed(stru interface{}, embed reflect.Type) interface{} {
+func Embed(stru any, embed reflect.Type) any {
 	if IfaceIsNil(stru) {
 		return nil
 	}

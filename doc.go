@@ -18,6 +18,5 @@ is a powerful 'kit for dealing with Go's reflect system.
 * ints, floats, dirs, bitflag, atomctr, indent all provide basic
 Go infrastructure that one could argue should have been in the
 standard library, but isn't..
-
 */
 package ki

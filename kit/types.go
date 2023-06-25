@@ -88,11 +88,11 @@ type TypeRegistry struct {
 	// Props are type properties -- nodes can get default properties from
 	// their types and then optionally override them with their own settings.
 	// The key here is the long, full type name.
-	Props map[string]map[string]interface{}
+	Props map[string]map[string]any
 
 	// Insts contain an instance of each type (the one passed during AddType)
 	// The key here is the long, full type name.
-	Insts map[string]interface{}
+	Insts map[string]any
 }
 
 // Types is master registry of types that embed Ki Nodes
@@ -129,7 +129,7 @@ var TypesMu sync.RWMutex
 // properties that can be associated with the type and accessible e.g. for
 // view-specific properties etc -- these props MUST be specific to this type
 // as they are used directly, not copied!!
-func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) reflect.Type {
+func (tr *TypeRegistry) AddType(obj any, props map[string]any) reflect.Type {
 	if tr.Types == nil {
 		tr.Init()
 	}
@@ -142,7 +142,7 @@ func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) r
 	tr.Insts[lnm] = obj
 	if props != nil {
 		// make a copy of props for enums -- often shared
-		nwprops := make(map[string]interface{}, len(props))
+		nwprops := make(map[string]any, len(props))
 		for key, val := range props {
 			nwprops[key] = val
 		}
@@ -166,7 +166,7 @@ func (tr *TypeRegistry) InheritTypeProps(typ reflect.Type) bool {
 	if pp == nil {
 		return false
 	}
-	var myp *map[string]interface{}
+	var myp *map[string]any
 	for k, v := range *pp {
 		if strings.HasPrefix(k, "EnumType:") {
 			if myp == nil {
@@ -207,7 +207,7 @@ func (tr *TypeRegistry) Type(typeName string) reflect.Type {
 // InstByName returns the interface{} instance of given type (it is a pointer
 // to that type) using the long, unambiguous package-qualified name.
 // Returns nil if not found.
-func (tr *TypeRegistry) InstByName(typeName string) interface{} {
+func (tr *TypeRegistry) InstByName(typeName string) any {
 	if inst, ok := tr.Insts[typeName]; ok {
 		return inst
 	}
@@ -216,7 +216,7 @@ func (tr *TypeRegistry) InstByName(typeName string) interface{} {
 
 // Inst returns the interface{} instance of given type (it is a pointer
 // to that type).  Returns nil if not found.
-func (tr *TypeRegistry) Inst(typ reflect.Type) interface{} {
+func (tr *TypeRegistry) Inst(typ reflect.Type) any {
 	return tr.InstByName(LongTypeName(typ))
 }
 
@@ -224,7 +224,7 @@ func (tr *TypeRegistry) Inst(typ reflect.Type) interface{} {
 // unambiguous package-qualified name.
 // It optionally makes props map for this type if not already made.
 // Can use this to register properties for types that are not registered.
-func (tr *TypeRegistry) PropsByName(typeName string, makeNew bool) *map[string]interface{} {
+func (tr *TypeRegistry) PropsByName(typeName string, makeNew bool) *map[string]any {
 	TypesMu.Lock()
 	defer TypesMu.Unlock()
 	tp, ok := tr.Props[typeName]
@@ -232,7 +232,7 @@ func (tr *TypeRegistry) PropsByName(typeName string, makeNew bool) *map[string]i
 		if !makeNew {
 			return nil
 		}
-		tp = make(map[string]interface{})
+		tp = make(map[string]any)
 		tr.Props[typeName] = tp
 	}
 	return &tp
@@ -241,13 +241,13 @@ func (tr *TypeRegistry) PropsByName(typeName string, makeNew bool) *map[string]i
 // Properties returns properties for given type.
 // It optionally makes props map for this type if not already made.
 // Can use this to register properties for types that are not registered.
-func (tr *TypeRegistry) Properties(typ reflect.Type, makeNew bool) *map[string]interface{} {
+func (tr *TypeRegistry) Properties(typ reflect.Type, makeNew bool) *map[string]any {
 	return tr.PropsByName(LongTypeName(typ), makeNew)
 }
 
 // TypeProp provides safe (mutex protected) read access to property map
 // returned by Properties method -- must use this for all Properties access!
-func TypeProp(props map[string]interface{}, key string) (interface{}, bool) {
+func TypeProp(props map[string]any, key string) (any, bool) {
 	TypesMu.RLock()
 	val, ok := props[key]
 	TypesMu.RUnlock()
@@ -256,7 +256,7 @@ func TypeProp(props map[string]interface{}, key string) (interface{}, bool) {
 
 // SetTypeProp provides safe (mutex protected) write setting of property map
 // returned by Properties method -- must use this for all Properties access!
-func SetTypeProp(props map[string]interface{}, key string, val interface{}) {
+func SetTypeProp(props map[string]any, key string, val any) {
 	TypesMu.Lock()
 	props[key] = val
 	TypesMu.Unlock()
@@ -265,7 +265,7 @@ func SetTypeProp(props map[string]interface{}, key string, val interface{}) {
 // PropByName safely finds a type property from type name (using the long,
 // unambiguous package-qualified name) and property key.
 // Returns false if not found
-func (tr *TypeRegistry) PropByName(typeName, propKey string) (interface{}, bool) {
+func (tr *TypeRegistry) PropByName(typeName, propKey string) (any, bool) {
 	TypesMu.RLock()
 	defer TypesMu.RUnlock()
 
@@ -280,12 +280,12 @@ func (tr *TypeRegistry) PropByName(typeName, propKey string) (interface{}, bool)
 
 // Prop safely finds a type property from type and property key -- returns
 // false if not found.
-func (tr *TypeRegistry) Prop(typ reflect.Type, propKey string) (interface{}, bool) {
+func (tr *TypeRegistry) Prop(typ reflect.Type, propKey string) (any, bool) {
 	return tr.PropByName(LongTypeName(typ), propKey)
 }
 
 // SetProps sets the type props for given type, uses write mutex lock
-func (tr *TypeRegistry) SetProps(typ reflect.Type, props map[string]interface{}) {
+func (tr *TypeRegistry) SetProps(typ reflect.Type, props map[string]any) {
 	TypesMu.Lock()
 	defer TypesMu.Unlock()
 	tr.Props[LongTypeName(typ)] = props
@@ -364,19 +364,19 @@ func (tr *TypeRegistry) AllTagged(key string) []reflect.Type {
 // Init initializes the type registry, including adding basic types
 func (tr *TypeRegistry) Init() {
 	tr.Types = make(map[string]reflect.Type, 1000)
-	tr.Insts = make(map[string]interface{}, 1000)
-	tr.Props = make(map[string]map[string]interface{}, 1000)
+	tr.Insts = make(map[string]any, 1000)
+	tr.Props = make(map[string]map[string]any, 1000)
 	tr.ShortNames = make(map[string]string, 1000)
 
 	{
-		var BoolProps = map[string]interface{}{
+		var BoolProps = map[string]any{
 			"basic-type": true,
 		}
 		ob := false
 		tr.AddType(&ob, BoolProps)
 	}
 	{
-		var IntProps = map[string]interface{}{
+		var IntProps = map[string]any{
 			"basic-type": true,
 		}
 		ob := int(0)
@@ -427,7 +427,7 @@ func (tr *TypeRegistry) Init() {
 		tr.AddType(&ob, nil)
 	}
 	{
-		var Float64Props = map[string]interface{}{
+		var Float64Props = map[string]any{
 			"basic-type": true,
 		}
 		ob := float64(0)
@@ -442,7 +442,7 @@ func (tr *TypeRegistry) Init() {
 		tr.AddType(&ob, nil)
 	}
 	{
-		var StringProps = map[string]interface{}{
+		var StringProps = map[string]any{
 			"basic-type": true,
 		}
 		ob := ""

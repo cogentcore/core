@@ -33,14 +33,14 @@ func InitPtrTst() {
 	pt.Enum = TestFlag2
 }
 
-func FieldValue(obj interface{}, fld reflect.StructField) reflect.Value {
+func FieldValue(obj any, fld reflect.StructField) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + fld.Offset)
 	nw := reflect.NewAt(fld.Type, f)
 	return UnhideIfaceValue(nw).Elem()
 }
 
-func SubFieldValue(obj interface{}, fld reflect.StructField, sub reflect.StructField) reflect.Value {
+func SubFieldValue(obj any, fld reflect.StructField, sub reflect.StructField) reflect.Value {
 	ov := reflect.ValueOf(obj)
 	f := unsafe.Pointer(ov.Pointer() + fld.Offset + sub.Offset)
 	nw := reflect.NewAt(sub.Type, f)

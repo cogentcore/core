@@ -22,20 +22,20 @@ import (
 // MapValueType returns the type of the value for the given map (which can be
 // a pointer to a map or a direct map) -- just Elem() of map type, but using
 // this function makes it more explicit what is going on.
-func MapValueType(mp interface{}) reflect.Type {
+func MapValueType(mp any) reflect.Type {
 	return NonPtrType(reflect.TypeOf(mp)).Elem()
 }
 
 // MapKeyType returns the type of the key for the given map (which can be a
 // pointer to a map or a direct map) -- just Key() of map type, but using
 // this function makes it more explicit what is going on.
-func MapKeyType(mp interface{}) reflect.Type {
+func MapKeyType(mp any) reflect.Type {
 	return NonPtrType(reflect.TypeOf(mp)).Key()
 }
 
 // MapElsValueFun calls a function on all the "basic" elements of given map --
 // iterates over maps within maps (but not structs, slices within maps).
-func MapElsValueFun(mp interface{}, fun func(mp interface{}, typ reflect.Type, key, val reflect.Value) bool) bool {
+func MapElsValueFun(mp any, fun func(mp any, typ reflect.Type, key, val reflect.Value) bool) bool {
 	vv := reflect.ValueOf(mp)
 	if mp == nil {
 		log.Printf("kit.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
@@ -79,9 +79,9 @@ func MapElsValueFun(mp interface{}, fun func(mp interface{}, typ reflect.Type, k
 }
 
 // MapElsN returns number of elemental fields in given map type
-func MapElsN(mp interface{}) int {
+func MapElsN(mp any) int {
 	n := 0
-	falseErr := MapElsValueFun(mp, func(mp interface{}, typ reflect.Type, key, val reflect.Value) bool {
+	falseErr := MapElsValueFun(mp, func(mp any, typ reflect.Type, key, val reflect.Value) bool {
 		n++
 		return true
 	})
@@ -93,7 +93,7 @@ func MapElsN(mp interface{}) int {
 
 // MapStructElsValueFun calls a function on all the "basic" elements of given
 // map or struct -- iterates over maps within maps and fields within structs
-func MapStructElsValueFun(mp interface{}, fun func(mp interface{}, typ reflect.Type, val reflect.Value) bool) bool {
+func MapStructElsValueFun(mp any, fun func(mp any, typ reflect.Type, val reflect.Value) bool) bool {
 	vv := reflect.ValueOf(mp)
 	if mp == nil {
 		log.Printf("kit.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
@@ -176,9 +176,9 @@ func MapStructElsValueFun(mp interface{}, fun func(mp interface{}, typ reflect.T
 }
 
 // MapStructElsN returns number of elemental fields in given map / struct types
-func MapStructElsN(mp interface{}) int {
+func MapStructElsN(mp any) int {
 	n := 0
-	falseErr := MapStructElsValueFun(mp, func(mp interface{}, typ reflect.Type, val reflect.Value) bool {
+	falseErr := MapStructElsValueFun(mp, func(mp any, typ reflect.Type, val reflect.Value) bool {
 		n++
 		return true
 	})
@@ -189,7 +189,7 @@ func MapStructElsN(mp interface{}) int {
 }
 
 // MapAdd adds a new blank entry to the map
-func MapAdd(mv interface{}) {
+func MapAdd(mv any) {
 	mpv := reflect.ValueOf(mv)
 	mpvnp := NonPtrValue(mpv)
 	mvtyp := mpvnp.Type()
@@ -209,7 +209,7 @@ func MapAdd(mv interface{}) {
 }
 
 // MapDelete deletes a key-value from the map (set key to a zero value)
-func MapDelete(mv interface{}, key interface{}) {
+func MapDelete(mv any, key any) {
 	mpv := reflect.ValueOf(mv)
 	mpvnp := NonPtrValue(mpv)
 	mpvnp.SetMapIndex(reflect.ValueOf(key), reflect.Value{}) // delete
@@ -217,7 +217,7 @@ func MapDelete(mv interface{}, key interface{}) {
 
 // MapDeleteValue deletes a key-value from the map (set key to a zero value)
 // -- key is already a reflect.Value
-func MapDeleteValue(mv interface{}, key reflect.Value) {
+func MapDeleteValue(mv any, key reflect.Value) {
 	mpv := reflect.ValueOf(mv)
 	mpvnp := NonPtrValue(mpv)
 	mpvnp.SetMapIndex(key, reflect.Value{}) // delete
@@ -225,7 +225,7 @@ func MapDeleteValue(mv interface{}, key reflect.Value) {
 
 // MapSort sorts keys of map either by key or by value, returns those keys as
 // a slice of reflect.Value, as returned by reflect.Value.MapKeys() method
-func MapSort(mp interface{}, byKey, ascending bool) []reflect.Value {
+func MapSort(mp any, byKey, ascending bool) []reflect.Value {
 	mpv := reflect.ValueOf(mp)
 	mpvnp := NonPtrValue(mpv)
 	keys := mpvnp.MapKeys() // note: this is a slice of reflect.Value!

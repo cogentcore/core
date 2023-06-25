@@ -16,7 +16,7 @@ import (
 // Last returns the last node in the tree
 func Last(nd ki.Ki) ki.Ki {
 	var last ki.Ki
-	nd.FuncDownMeFirst(0, nd, func(k ki.Ki, level int, d interface{}) bool {
+	nd.FuncDownMeFirst(0, nd, func(k ki.Ki, level int, d any) bool {
 		last = k
 		return ki.Continue
 	})

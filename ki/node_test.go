@@ -498,7 +498,7 @@ func TestNodeCallFun(t *testing.T) {
 	UniquifyNames(parent.This())
 
 	res := make([]string, 0, 10)
-	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
 		return true
 	})
@@ -510,7 +510,7 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	// test return = false case
-	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
 		if k.Name() == "child1_001" {
 			return Break
@@ -524,7 +524,7 @@ func TestNodeCallFun(t *testing.T) {
 	}
 	res = res[:0]
 
-	schild2.FuncUp(0, "fun_up", func(k Ki, level int, d interface{}) bool {
+	schild2.FuncUp(0, "fun_up", func(k Ki, level int, d any) bool {
 		res = append(res, fmt.Sprintf("%v, %v", k.Name(), d))
 		return Continue
 	})
@@ -536,10 +536,10 @@ func TestNodeCallFun(t *testing.T) {
 	}
 	res = res[:0]
 
-	parent.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d interface{}) bool {
+	parent.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d any) bool {
 		return Continue
 	},
-		func(k Ki, level int, d interface{}) bool {
+		func(k Ki, level int, d any) bool {
 			res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
 			return Continue
 		})
@@ -551,13 +551,13 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	// test for return = false working
-	parent.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d interface{}) bool {
+	parent.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d any) bool {
 		if k.Name() == "child1_001" {
 			return Break
 		}
 		return Continue
 	},
-		func(k Ki, level int, d interface{}) bool {
+		func(k Ki, level int, d any) bool {
 			if k.Name() == "child1_001" {
 				return Break
 			}
@@ -571,7 +571,7 @@ func TestNodeCallFun(t *testing.T) {
 	}
 	res = res[:0]
 
-	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d interface{}) bool {
+	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d any) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
 		return Continue
 	})
@@ -583,7 +583,7 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	// test for return false
-	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d interface{}) bool {
+	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d any) bool {
 		if k.Name() == "child1_001" {
 			return Break
 		}
@@ -606,7 +606,7 @@ func TestNodeUpdate(t *testing.T) {
 	parent.Mbr2 = 32
 
 	res := make([]string, 0, 10)
-	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
+	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
 		res = append(res, fmt.Sprintf("%v sig %v flags %v", s.Name(), NodeSignals(sig),
 			kit.BitFlagsToString((s.Flags()), FlagsN)))
 	})
@@ -635,10 +635,10 @@ func TestNodeUpdate(t *testing.T) {
 	}
 	res = res[:0]
 
-	child2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
+	child2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
 		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), NodeSignals(sig)))
 	})
-	schild2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
+	schild2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
 		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), NodeSignals(sig)))
 	})
 
@@ -657,7 +657,7 @@ func TestNodeUpdate(t *testing.T) {
 
 	UniquifyNamesAll(parent.This())
 
-	parent.FuncDownMeFirst(0, "upcnt", func(n Ki, level int, d interface{}) bool {
+	parent.FuncDownMeFirst(0, "upcnt", func(n Ki, level int, d any) bool {
 		res = append(res, fmt.Sprintf("%v %v", n.Name(), n.IsUpdating()))
 		return Continue
 	})
@@ -678,7 +678,7 @@ func TestProps(t *testing.T) {
 	parent.Mbr2 = 32
 
 	res := make([]string, 0, 10)
-	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
+	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
 		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), sig))
 	})
 	// child1 :=
@@ -820,7 +820,7 @@ func TestNodeFieldFunc(t *testing.T) {
 	parent := NodeField{}
 	parent.InitName(&parent, "par1")
 	res := make([]string, 0, 10)
-	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
 		return Continue
 	})
@@ -834,7 +834,7 @@ func TestNodeFieldFunc(t *testing.T) {
 
 	par2 := NodeField2{}
 	par2.InitName(&par2, "par2")
-	par2.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+	par2.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
 		return Continue
 	})
@@ -845,10 +845,10 @@ func TestNodeFieldFunc(t *testing.T) {
 	}
 	res = res[:0]
 
-	par2.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d interface{}) bool {
+	par2.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d any) bool {
 		return Continue
 	},
-		func(k Ki, level int, d interface{}) bool {
+		func(k Ki, level int, d any) bool {
 			res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
 			return Continue
 		})
@@ -1075,7 +1075,7 @@ func BenchmarkFuncDownMeFirst_NodeEmbed(b *testing.B) {
 	wt := TestGUITree_NodeEmbed
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 			k.ClearFlag(int(Updating))
 			nnodes++
 			return Continue
@@ -1089,7 +1089,7 @@ func BenchmarkFuncDownMeFirst_NodeField(b *testing.B) {
 	wt := TestGUITree_NodeField
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 			k.ClearFlag(int(Updating))
 			nnodes++
 			return Continue
@@ -1103,7 +1103,7 @@ func BenchmarkFuncDownMeFirst_NodeField2(b *testing.B) {
 	wt := TestGUITree_NodeField2
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 			k.ClearFlag(int(Updating))
 			nnodes++
 			return Continue

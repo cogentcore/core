@@ -160,7 +160,7 @@ func (n *Node) IndexInParent() (int, bool) {
 // found, and -1 if not found.
 func (n *Node) ParentLevel(par Ki) int {
 	parLev := -1
-	n.FuncUpParent(0, n, func(k Ki, level int, d interface{}) bool {
+	n.FuncUpParent(0, n, func(k Ki, level int, d any) bool {
 		if k == par {
 			parLev = level
 			return Break
@@ -695,7 +695,7 @@ func (n *Node) Destroy() {
 	n.DisconnectAll()
 	n.DeleteChildren(true) // first delete all my children
 	// and destroy all my fields
-	n.FuncFields(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncFields(0, nil, func(k Ki, level int, d any) bool {
 		k.Destroy()
 		return true
 	})
@@ -825,7 +825,7 @@ func (n *Node) Properties() *Props {
 
 // SetProp sets given property key to value val.
 // initializes property map if nil.
-func (n *Node) SetProp(key string, val interface{}) {
+func (n *Node) SetProp(key string, val any) {
 	if n.Props == nil {
 		n.Props = make(Props)
 	}
@@ -870,13 +870,13 @@ func (n *Node) SetProps(props Props) {
 // Returns nil if it actually doesn't -- this version allows
 // direct conversion of return.  See PropTry for version with
 // error message if uncertain if property exists.
-func (n *Node) Prop(key string) interface{} {
+func (n *Node) Prop(key string) any {
 	return n.Props[key]
 }
 
 // PropTry returns property value for key.  Returns error message
 // if property with that key does not exist.
-func (n *Node) PropTry(key string) (interface{}, error) {
+func (n *Node) PropTry(key string) (any, error) {
 	v, ok := n.Props[key]
 	if !ok {
 		return v, fmt.Errorf("ki.PropTry, could not find property with key %v on node %v", key, n.Nm)
@@ -888,7 +888,7 @@ func (n *Node) PropTry(key string) (interface{}, error) {
 // property from parents and / or type-level properties.  If inherit, then
 // checks all parents.  If typ then checks property on type as well
 // (registered via KiT type registry).  Returns false if not set anywhere.
-func (n *Node) PropInherit(key string, inherit, typ bool) (interface{}, bool) {
+func (n *Node) PropInherit(key string, inherit, typ bool) (any, bool) {
 	// pr := prof.Start("PropInherit")
 	// defer pr.End()
 	v, ok := n.Props[key]
@@ -968,7 +968,7 @@ func (n *Node) PropTag() string {
 
 // FlatFieldsValueFunc is the Node version of this function from kit/embeds.go
 // it is very slow and should be avoided at all costs!
-func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
+func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	v := kit.NonPtrValue(reflect.ValueOf(stru))
 	typ := v.Type()
 	if typ == nil || typ == KiT_Node { // this is only diff from embeds.go version -- prevent processing of any Node fields
@@ -1001,7 +1001,7 @@ func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflec
 }
 
 // FuncFields calls function on all Ki fields within this node.
-func (n *Node) FuncFields(level int, data interface{}, fun Func) {
+func (n *Node) FuncFields(level int, data any, fun Func) {
 	if n.This() == nil {
 		return
 	}
@@ -1018,7 +1018,7 @@ func (n *Node) FuncFields(level int, data interface{}, fun Func) {
 // necessary for going up, which is typically quite fast anyway) -- level
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
-func (n *Node) FuncUp(level int, data interface{}, fun Func) bool {
+func (n *Node) FuncUp(level int, data any, fun Func) bool {
 	cur := n.This()
 	for {
 		if !fun(cur, level, data) { // false return means stop
@@ -1039,7 +1039,7 @@ func (n *Node) FuncUp(level int, data interface{}, fun Func) bool {
 // necessary for going up, which is typically quite fast anyway) -- level
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
-func (n *Node) FuncUpParent(level int, data interface{}, fun Func) bool {
+func (n *Node) FuncUpParent(level int, data any, fun Func) bool {
 	if IsRoot(n) {
 		return true
 	}
@@ -1103,7 +1103,7 @@ func (tm TravMap) Get(k Ki) (curField, curChild int) {
 // If fun returns false then any further traversal of that branch of the tree is
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
-func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) {
+func (n *Node) FuncDownMeFirst(level int, data any, fun Func) {
 	if n.This() == nil || n.IsDeleted() {
 		return
 	}
@@ -1189,7 +1189,7 @@ outer:
 // for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
-func (n *Node) FuncDownMeLast(level int, data interface{}, doChildTestFunc Func, fun Func) {
+func (n *Node) FuncDownMeLast(level int, data any, doChildTestFunc Func, fun Func) {
 	if n.This() == nil || n.IsDeleted() {
 		return
 	}
@@ -1274,7 +1274,7 @@ outer:
 // using the standard queue strategy.  This depends on and updates the
 // Depth parameter of the node.  If fun returns false then any further
 // traversal of that branch of the tree is aborted, but other branches continue.
-func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
+func (n *Node) FuncDownBreadthFirst(level int, data any, fun Func) {
 	start := n.This()
 
 	SetDepth(start, level)
@@ -1291,7 +1291,7 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 
 		if cur.This() != nil && !cur.IsDeleted() && fun(cur, depth, data) { // false return means don't proceed
 			if KiHasKiFields(cur.AsNode()) {
-				cur.FuncFields(depth+1, data, func(k Ki, level int, d interface{}) bool {
+				cur.FuncFields(depth+1, data, func(k Ki, level int, d any) bool {
 					SetDepth(k, level)
 					queue = append(queue, k)
 					return true
@@ -1343,7 +1343,7 @@ func (n *Node) UpdateStart() bool {
 		n.SetFlag(int(Updating))
 	} else {
 		// pr := prof.Start("ki.Node.UpdateStart")
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 			if !k.IsUpdating() {
 				k.ClearFlagMask(int64(UpdateFlagsMask))
 				k.SetFlag(int(Updating))
@@ -1375,7 +1375,7 @@ func (n *Node) UpdateEnd(updt bool) {
 		n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	} else {
 		// pr := prof.Start("ki.Node.UpdateEnd")
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 			k.ClearFlag(int(Updating)) // note: could check first and break here but good to ensure all clear
 			return true
 		})
@@ -1401,7 +1401,7 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 		n.ClearFlag(int(Updating))
 		// n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	} else {
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 			k.ClearFlag(int(Updating)) // note: could check first and break here but good to ensure all clear
 			return true
 		})
@@ -1432,7 +1432,7 @@ func (n *Node) Disconnect() {
 
 // DisconnectAll disconnects all the way from me down the tree.
 func (n *Node) DisconnectAll() {
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 		k.Disconnect()
 		return true
 	})
@@ -1445,7 +1445,7 @@ func (n *Node) DisconnectAll() {
 // conversion routines to e.g., convert from strings to numbers, and
 // vice-versa, automatically.  Returns error if not successfully set.
 // wrapped in UpdateStart / End and sets the ValUpdated flag.
-func (n *Node) SetField(field string, val interface{}) error {
+func (n *Node) SetField(field string, val any) error {
 	fv := kit.FlatFieldValueByName(n.This(), field)
 	if !fv.IsValid() {
 		return fmt.Errorf("ki.SetField, could not find field %v on node %v", field, n.Nm)
@@ -1528,13 +1528,13 @@ func CopyFromRaw(kn, frm Ki) error {
 
 // CopyFieldsFrom copies from primary fields of source object,
 // recursively following anonymous embedded structs
-func (n *Node) CopyFieldsFrom(frm interface{}) {
+func (n *Node) CopyFieldsFrom(frm any) {
 	GenCopyFieldsFrom(n.This(), frm)
 }
 
 // GenCopyFieldsFrom is a general-purpose copy of primary fields
 // of source object, recursively following anonymous embedded structs
-func GenCopyFieldsFrom(to interface{}, frm interface{}) {
+func GenCopyFieldsFrom(to any, frm any) {
 	// pr := prof.Start("GenCopyFieldsFrom")
 	// defer pr.End()
 	kitype := KiType

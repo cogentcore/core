@@ -29,7 +29,7 @@ func TestSignalConnect(t *testing.T) {
 
 	// note: now that signal is a map, cannot test reliably due to ordering
 	res := make([]string, 0, 10)
-	parent.sig1.Connect(child1, func(receiver, sender Ki, sig int64, data interface{}) {
+	parent.sig1.Connect(child1, func(receiver, sender Ki, sig int64, data any) {
 		res = append(res, fmt.Sprintf("recv: %v, sender: %v sig: %v data: %v",
 			receiver.Name(), sender.Name(), NodeSignals(sig), data))
 	})

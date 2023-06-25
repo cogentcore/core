@@ -17,7 +17,7 @@ import (
 
 // Props is the type used for holding generic properties -- the actual Go type
 // is a mouthful and not very gui-friendly, and we need some special json methods
-type Props map[string]interface{}
+type Props map[string]any
 
 var KiT_Props = kit.Types.AddType(&Props{}, PropsProps)
 
@@ -26,7 +26,7 @@ var PropsProps = Props{
 }
 
 // Set sets props value -- safely creates map
-func (pr *Props) Set(key string, val interface{}) {
+func (pr *Props) Set(key string, val any) {
 	if *pr == nil {
 		*pr = make(Props)
 	}
@@ -34,7 +34,7 @@ func (pr *Props) Set(key string, val interface{}) {
 }
 
 // Prop returns property of given key
-func (pr Props) Prop(key string) interface{} {
+func (pr Props) Prop(key string) any {
 	return pr[key]
 }
 
@@ -45,7 +45,7 @@ func (pr Props) Delete(key string) {
 
 // SubProps returns a value that contains another props, or nil and false if
 // it doesn't exist or isn't a Props
-func SubProps(pr map[string]interface{}, key string) (Props, bool) {
+func SubProps(pr map[string]any, key string) (Props, bool) {
 	sp, ok := pr[key]
 	if !ok {
 		return nil, false
@@ -59,7 +59,7 @@ func SubProps(pr map[string]interface{}, key string) (Props, bool) {
 
 // SubTypeProps returns a value that contains another props, or nil and false if
 // it doesn't exist or isn't a Props -- for TypeProps, uses locking
-func SubTypeProps(pr map[string]interface{}, key string) (Props, bool) {
+func SubTypeProps(pr map[string]any, key string) (Props, bool) {
 	sp, ok := kit.TypeProp(pr, key)
 	if !ok {
 		return nil, false
@@ -96,7 +96,7 @@ type BlankProp struct{}
 // properties that require order information (maps do not retain any order)
 type PropStruct struct {
 	Name  string
-	Value interface{}
+	Value any
 }
 
 // PropSlice is a slice of PropStruct, for when order is important within a
@@ -111,7 +111,7 @@ func (ps *PropSlice) ElemLabel(idx int) string {
 
 // SliceProps returns a value that contains a PropSlice, or nil and false if it doesn't
 // exist or isn't a PropSlice
-func SliceProps(pr map[string]interface{}, key string) (PropSlice, bool) {
+func SliceProps(pr map[string]any, key string) (PropSlice, bool) {
 	sp, ok := pr[key]
 	if !ok {
 		return nil, false
@@ -125,7 +125,7 @@ func SliceProps(pr map[string]interface{}, key string) (PropSlice, bool) {
 
 // SliceTypeProps returns a value that contains a PropSlice, or nil and false if it doesn't
 // exist or isn't a PropSlice -- for TypeProps, uses locking
-func SliceTypeProps(pr map[string]interface{}, key string) (PropSlice, bool) {
+func SliceTypeProps(pr map[string]any, key string) (PropSlice, bool) {
 	sp, ok := kit.TypeProp(pr, key)
 	if !ok {
 		return nil, false
@@ -140,13 +140,13 @@ func SliceTypeProps(pr map[string]interface{}, key string) (PropSlice, bool) {
 // CopyProps copies properties from source to destination map.  If deepCopy
 // is true, then any values that are Props or PropSlice are copied too
 // *dest can be nil, in which case it is created.
-func CopyProps(dest *map[string]interface{}, src map[string]interface{}, deepCopy bool) {
+func CopyProps(dest *map[string]any, src map[string]any, deepCopy bool) {
 	if *dest == nil {
 		*dest = make(Props, len(src))
 	}
 	for key, val := range src {
 		if deepCopy {
-			if pv, ok := val.(map[string]interface{}); ok {
+			if pv, ok := val.(map[string]any); ok {
 				var nval Props
 				nval.CopyFrom(pv, deepCopy)
 				(*dest)[key] = nval
@@ -170,8 +170,8 @@ func CopyProps(dest *map[string]interface{}, src map[string]interface{}, deepCop
 // CopyFrom copies properties from source to receiver destination map.  If deepCopy
 // is true, then any values that are Props or PropSlice are copied too
 // *dest can be nil, in which case it is created.
-func (dest *Props) CopyFrom(src map[string]interface{}, deepCopy bool) {
-	CopyProps((*map[string]interface{})(dest), src, deepCopy)
+func (dest *Props) CopyFrom(src map[string]any, deepCopy bool) {
+	CopyProps((*map[string]any)(dest), src, deepCopy)
 }
 
 // CopyFrom copies properties from source to destination propslice.  If deepCopy
@@ -183,14 +183,14 @@ func (dest *PropSlice) CopyFrom(src PropSlice, deepCopy bool) {
 	}
 	for i, val := range src {
 		if deepCopy {
-			if pv, ok := val.Value.(map[string]interface{}); ok {
+			if pv, ok := val.Value.(map[string]any); ok {
 				var nval Props
-				CopyProps((*map[string]interface{})(&nval), pv, deepCopy)
+				CopyProps((*map[string]any)(&nval), pv, deepCopy)
 				(*dest)[i] = PropStruct{Name: val.Name, Value: nval}
 				continue
 			} else if pv, ok := val.Value.(Props); ok {
 				var nval Props
-				CopyProps((*map[string]interface{})(&nval), pv, deepCopy)
+				CopyProps((*map[string]any)(&nval), pv, deepCopy)
 				(*dest)[i] = PropStruct{Name: val.Name, Value: nval}
 				continue
 			} else if pv, ok := val.Value.(PropSlice); ok {
@@ -264,7 +264,7 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 	}
 
 	// load into a temporary map and then process
-	tmp := make(map[string]interface{})
+	tmp := make(map[string]any)
 	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
@@ -318,7 +318,7 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 			continue
 		}
 		// look for sub-maps, make them props..
-		if _, ok := val.(map[string]interface{}); ok {
+		if _, ok := val.(map[string]any); ok {
 			// fmt.Printf("stored new Props map in key: %v\n", key)
 			subp := Props{}
 			tmpb, _ := json.Marshal(val) // string rep of this
