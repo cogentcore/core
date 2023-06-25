@@ -1,13 +1,20 @@
-![alt tag](logo/gogi_logo.png)
+<h1 align="center">
+    <a href="https://goki.dev">
+        <img alt="GoGi Blue Logo" width="150" height="150" src="logo/gogi_logo_blue_transparent.png">
+    </a>
+</h1>
+
+<p align="center">
+    <a href="https://goreportcard.com/report/github.com/goki/gi"><img src="https://goreportcard.com/badge/github.com/goki/gi" alt="Go Report Card"></a>
+    <a href="https://pkg.go.dev/github.com/goki/gi"><img src="https://img.shields.io/badge/dev-reference-007d9c?logo=go&logoColor=white&style=flat" alt="pkg.go.dev docs"></a>
+    <a href="https://github.com/goki/gi/actions/workflows/ci.yml"><img src="https://github.com/goki/gi/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://www.tickgit.com/browse?repo=github.com/goki/gi"><img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/goki/gi" alt="TODOs"></a>
+    <a href="https://github.com/goki/gi/releases/"><img src="https://img.shields.io/github/release/goki/gi?include_prereleases=&sort=semver&color=blue" alt="GitHub release"></a>
+</p>
 
 GoGi is part of the [GoKi](https://GoKi.dev) Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese)
 
 `package gi` is a scenegraph-based 2D and 3D GUI / graphics interface (Gi) in Go, that functions similar to HTML / CSS / SVG  and Qt.
-
-[![Go Report Card](https://goreportcard.com/badge/github.com/goki/gi)](https://goreportcard.com/report/github.com/goki/gi)
-[![Go Reference](https://pkg.go.dev/badge/github.com/goki/gi.svg)](https://pkg.go.dev/github.com/goki/gi)
-[![CI](https://github.com/goki/gi/actions/workflows/ci.yml/badge.svg)](https://github.com/goki/gi/actions/workflows/ci.yml)
-[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/goki/gi)](https://www.tickgit.com/browse?repo=github.com/goki/gi)
 
 NOTE: Requires Go version `1.18+` -- now using the new generics.
 
