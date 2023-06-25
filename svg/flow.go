@@ -25,7 +25,7 @@ func AddNewFlow(parent ki.Ki, name string) *Flow {
 
 func (g *Flow) SVGName() string { return "flow" }
 
-func (g *Flow) CopyFieldsFrom(frm interface{}) {
+func (g *Flow) CopyFieldsFrom(frm any) {
 	fr := frm.(*Flow)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 	g.FlowType = fr.FlowType

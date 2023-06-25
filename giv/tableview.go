@@ -61,11 +61,11 @@ var _ SliceViewer = (*TableView)(nil)
 // configuration of elements in the view.  If style properties are set
 // then you must call widg.AsNode2dD().SetFullReRender() to trigger
 // re-styling during re-render
-type TableViewStyleFunc func(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView)
+type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice (does Update if already viewing).
-func (tv *TableView) SetSlice(sl interface{}) {
+func (tv *TableView) SetSlice(sl any) {
 	if kit.IfaceIsNil(sl) {
 		tv.Slice = nil
 		return
@@ -365,7 +365,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		if dsc != "" {
 			hdr.Tooltip += ": " + dsc
 		}
-		hdr.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		hdr.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			act := send.(*gi.Action)
 			fldIdx := act.Data.(int)
@@ -578,7 +578,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				idxlab.Selectable = true
 				idxlab.Redrawable = true
 				idxlab.Sty.Template = "giv.TableView.IndexLabel"
-				idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
 						row := wbb.Prop("tv-row").(int)
@@ -641,7 +641,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					// wb.Sty.Template = "giv.TableViewView.ItemWidget." + vtyp.Name()
 					wb.SetProp("tv-row", i)
 					wb.ClearSelected()
-					wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						if sig == int64(gi.WidgetSelected) { // || sig == int64(gi.WidgetFocused) {
 							wbb := send.(gi.Node2D).AsWidget()
 							row := wbb.Prop("tv-row").(int)
@@ -657,7 +657,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				} else {
 					vvb := vv.AsValueViewBase()
 					vvb.ViewSig.ConnectOnly(tv.This(), // todo: do we need this?
-						func(recv, send ki.Ki, sig int64, data interface{}) {
+						func(recv, send ki.Ki, sig int64, data any) {
 							tvv, _ := recv.Embed(KiT_TableView).(*TableView)
 							tvv.SetChanged()
 						})
@@ -677,7 +677,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
 					addact.Sty.Template = "giv.TableView.AddAction"
-					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
 						tvv.SliceNewAtRow(act.Data.(int) + 1)
@@ -694,7 +694,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					delact.Tooltip = "delete this element"
 					delact.Data = i
 					delact.Sty.Template = "giv.TableView.DelAction"
-					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
 						tvv.SliceDeleteAtRow(act.Data.(int), true)
@@ -854,13 +854,13 @@ func (tv *TableView) ConfigToolbar() {
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update this TableView to reflect current state of table"},
-			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tvv := recv.Embed(KiT_TableView).(*TableView)
 				tvv.UpdateSliceGrid()
 			})
 		if ndef > 1 {
 			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the table"},
-				tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					tvv := recv.Embed(KiT_TableView).(*TableView)
 					tvv.SliceNewAt(-1)
 				})
@@ -1024,7 +1024,7 @@ func (tv *TableView) SelectFieldVal(fld, val string) bool {
 
 // StructSliceIdxByValue searches for first index that contains given value in field of
 // given name.
-func StructSliceIdxByValue(struSlice interface{}, fldName string, fldVal interface{}) (int, error) {
+func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, error) {
 	svnp := kit.NonPtrValue(reflect.ValueOf(struSlice))
 	sz := svnp.Len()
 	struTyp := kit.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
@@ -1066,7 +1066,7 @@ func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
 	tv.SliceViewBase.StdCtxtMenu(m, idx)
 	m.AddSeparator("sep-edit")
 	m.AddAction(gi.ActOpts{Label: "Edit", Data: idx},
-		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			tvv.EditIdx(data.(int))
 		})

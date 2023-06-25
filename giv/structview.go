@@ -28,7 +28,7 @@ import (
 // set prop toolbar = false to turn off
 type StructView struct {
 	gi.Frame
-	Struct        interface{}       `desc:"the struct that we are a view onto"`
+	Struct        any               `desc:"the struct that we are a view onto"`
 	StructValView ValueView         `desc:"ValueView for the struct itself, if this was created within value view framework -- otherwise nil"`
 	Changed       bool              `desc:"has the value of any field changed?  updated by the ViewSig signals from fields"`
 	ChangeFlag    *reflect.Value    `json:"-" xml:"-" desc:"ValueView for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values."`
@@ -36,7 +36,7 @@ type StructView struct {
 	TmpSave       ValueView         `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig       ki.Signal         `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	ViewPath      string            `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
-	ToolbarStru   interface{}       `desc:"the struct that we successfully set a toolbar for"`
+	ToolbarStru   any               `desc:"the struct that we successfully set a toolbar for"`
 	HasDefs       bool              `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have default values -- update labels when values change"`
 	HasViewIfs    bool              `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have viewif conditional view tags -- update after.."`
 	TypeFieldTags map[string]string `json:"-" xml:"-" inactive:"+" desc:"extra tags by field name -- from type properties"`
@@ -64,7 +64,7 @@ var StructViewProps = ki.Props{
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
-func (sv *StructView) SetStruct(st interface{}) {
+func (sv *StructView) SetStruct(st any) {
 	updt := false
 	if sv.Struct != st {
 		sv.Changed = false
@@ -87,7 +87,7 @@ func (sv *StructView) SetStruct(st interface{}) {
 			}
 		}
 		if k, ok := st.(ki.Ki); ok {
-			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				// todo: check for delete??
 				svv, _ := recv.Embed(KiT_StructView).(*StructView)
 				svv.UpdateFields()
@@ -182,7 +182,7 @@ func (sv *StructView) ConfigToolbar() {
 	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: ttip},
-			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(KiT_StructView).(*StructView)
 				svv.UpdateFields()
 			})
@@ -233,7 +233,7 @@ func (sv *StructView) ConfigStructGrid() {
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
-	kit.FlatFieldsValueFunc(sv.Struct, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	kit.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		ftags := sv.FieldTags(field)
 		_, got := ftags.Lookup("changeflag")
@@ -255,7 +255,7 @@ func (sv *StructView) ConfigStructGrid() {
 		}
 		if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
 			fvalp := fieldVal.Addr().Interface()
-			kit.FlatFieldsValueFunc(fvalp, func(sfval interface{}, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
+			kit.FlatFieldsValueFunc(fvalp, func(sfval any, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
 				svwtag := sfield.Tag.Get("view")
 				if svwtag == "-" {
 					return true
@@ -322,7 +322,7 @@ func (sv *StructView) ConfigStructGrid() {
 		}
 		vv.ConfigWidget(widg)
 		if !sv.IsInactive() && !inactTag {
-			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(KiT_StructView).(*StructView)
 				svv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
@@ -439,7 +439,7 @@ func StructViewFieldDefTag(vv ValueView, lbl *gi.Label) (hasDef bool, isDef bool
 // or low:high value range (only for int or float numeric types)
 // valPtr = pointer to value
 // returns true if value is default, and string to add to tooltip for default values
-func StructFieldIsDef(defs string, valPtr interface{}) (bool, string) {
+func StructFieldIsDef(defs string, valPtr any) (bool, string) {
 	defStr := "[Def: " + defs + "] "
 	def := false
 	if strings.Contains(defs, ":") {
@@ -558,7 +558,7 @@ func (p *viewifPatcher) Visit(node *ast.Node) {
 // true if should be visible, false if not.
 // Prints an error if the expression is not parsed properly
 // or does not evaluate to a boolean.
-func StructViewIf(viewif string, field reflect.StructField, stru interface{}) bool {
+func StructViewIf(viewif string, field reflect.StructField, stru any) bool {
 	// replace = -> == without screwing up existing ==, !=, >=, <=
 	viewif = replaceEqualsRegexp.ReplaceAllString(viewif, "$1==$3")
 
@@ -612,9 +612,9 @@ type StructFieldVals struct {
 // Uses kit.FlatFieldsValueFunc to get all embedded fields.
 // Uses a recursive strategy -- any fields that are themselves structs are
 // expanded, and the field name represented by dots path separators.
-func StructNonDefFields(structPtr interface{}, path string) []StructFieldVals {
+func StructNonDefFields(structPtr any, path string) []StructFieldVals {
 	var flds []StructFieldVals
-	kit.FlatFieldsValueFunc(structPtr, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	kit.FlatFieldsValueFunc(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		vvp := fieldVal.Addr()
 		if field.Type.Kind() == reflect.Struct {
 			spath := path
@@ -647,7 +647,7 @@ func StructNonDefFields(structPtr interface{}, path string) []StructFieldVals {
 // in format: Path.Field: val // default value(s)
 // Uses a recursive strategy -- any fields that are themselves structs are
 // expanded, and the field name represented by dots path separators.
-func StructNonDefFieldsStr(structPtr interface{}, path string) string {
+func StructNonDefFieldsStr(structPtr any, path string) string {
 	flds := StructNonDefFields(structPtr, path)
 	if len(flds) == 0 {
 		return ""

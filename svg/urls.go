@@ -478,7 +478,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 	for _, k := range sv.Defs.Kids {
 		k.SetProp(refkey, 0)
 	}
-	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
 		pr := k.Properties()
 		for _, v := range *pr {
 			ps := kit.ToString(v)

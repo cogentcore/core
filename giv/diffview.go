@@ -584,28 +584,28 @@ func (dv *DiffView) ConfigToolBar() {
 	}
 	gi.AddNewLabel(tb, "label-a", txta)
 	tb.AddAction(gi.ActOpts{Label: "Next", Icon: "wedge-down", Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.NextDiff(0)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Prev", Icon: "wedge-up", Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.PrevDiff(0)
 		})
 	tb.AddAction(gi.ActOpts{Label: "A <- B", Icon: "copy", Tooltip: "for current diff region, apply change from corresponding version in B, and move to next diff", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.ApplyDiff(0, -1)
 			dvv.NextDiff(0)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Undo", Icon: "undo", Tooltip: "undo last diff apply action (A <- B)", UpdateFunc: dv.FileModifiedUpdateA},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.UndoDiff(0)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Save", Icon: "file-save", Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateA},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			CallMethod(dvv, "SaveFileA", dv.Viewport)
 		})
@@ -617,28 +617,28 @@ func (dv *DiffView) ConfigToolBar() {
 	}
 	gi.AddNewLabel(tb, "label-b", txtb)
 	tb.AddAction(gi.ActOpts{Label: "Next", Icon: "wedge-down", Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.NextDiff(1)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Prev", Icon: "wedge-up", Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.PrevDiff(1)
 		})
 	tb.AddAction(gi.ActOpts{Label: "A -> B", Icon: "copy", Tooltip: "for current diff region, apply change from corresponding version in A, and move to next diff", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.ApplyDiff(1, -1)
 			dvv.NextDiff(1)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Undo", Icon: "undo", Tooltip: "undo last diff apply action (A -> B)", UpdateFunc: dv.FileModifiedUpdateB},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.UndoDiff(1)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Save", Icon: "file-save", Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateB},
-		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			CallMethod(dvv, "SaveFileB", dv.Viewport)
 		})
@@ -730,10 +730,10 @@ func (dv *DiffView) ConfigTexts() {
 		bv.SetBuf(dv.BufB)
 
 		// sync scrolling
-		al.ScrollSig.Connect(dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		al.ScrollSig.Connect(dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			bl.ScrollToPos(mat32.Dims(sig), data.(float32))
 		})
-		bl.ScrollSig.Connect(dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		bl.ScrollSig.Connect(dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			al.ScrollToPos(mat32.Dims(sig), data.(float32))
 		})
 	}
@@ -826,13 +826,13 @@ func (tv *DiffTextView) TextViewEvents() {
 	tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
-	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(KiT_DiffTextView).(*DiffTextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me) // gets our new one
 	})
 	tv.MouseFocusEvent()
-	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(KiT_TextView).(*TextView)
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)

@@ -459,7 +459,7 @@ func LayAllocFromParent(ly *Layout) {
 	pni, _ := KiToNode2D(ly.Par)
 	lyp := pni.AsLayout2D()
 	if lyp == nil {
-		ly.FuncUpParent(0, ly.This(), func(k ki.Ki, level int, d interface{}) bool {
+		ly.FuncUpParent(0, ly.This(), func(k ki.Ki, level int, d any) bool {
 			pni, _ := KiToNode2D(k)
 			if pni == nil {
 				return ki.Break

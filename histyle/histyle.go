@@ -68,35 +68,36 @@ var StyleEntryProps = ki.Props{
 }
 
 // // FromChroma copies styles from chroma
-// func (he *StyleEntry) FromChroma(ce chroma.StyleEntry) {
-// 	if ce.Colour.IsSet() {
-// 		he.Color.SetString(ce.Colour.String(), nil)
-// 	} else {
-// 		he.Color.SetToNil()
-// 	}
-// 	if ce.Background.IsSet() {
-// 		he.Background.SetString(ce.Background.String(), nil)
-// 	} else {
-// 		he.Background.SetToNil()
-// 	}
-// 	if ce.Border.IsSet() {
-// 		he.Border.SetString(ce.Border.String(), nil)
-// 	} else {
-// 		he.Border.SetToNil()
-// 	}
-// 	he.Bold = Trilean(ce.Bold)
-// 	he.Italic = Trilean(ce.Italic)
-// 	he.Underline = Trilean(ce.Underline)
-// 	he.NoInherit = ce.NoInherit
-// }
+//
+//	func (he *StyleEntry) FromChroma(ce chroma.StyleEntry) {
+//		if ce.Colour.IsSet() {
+//			he.Color.SetString(ce.Colour.String(), nil)
+//		} else {
+//			he.Color.SetToNil()
+//		}
+//		if ce.Background.IsSet() {
+//			he.Background.SetString(ce.Background.String(), nil)
+//		} else {
+//			he.Background.SetToNil()
+//		}
+//		if ce.Border.IsSet() {
+//			he.Border.SetString(ce.Border.String(), nil)
+//		} else {
+//			he.Border.SetToNil()
+//		}
+//		he.Bold = Trilean(ce.Bold)
+//		he.Italic = Trilean(ce.Italic)
+//		he.Underline = Trilean(ce.Underline)
+//		he.NoInherit = ce.NoInherit
+//	}
 //
 // // StyleEntryFromChroma returns a new style entry from corresponding chroma version
-// func StyleEntryFromChroma(ce chroma.StyleEntry) StyleEntry {
-// 	he := StyleEntry{}
-// 	he.FromChroma(ce)
-// 	return he
-// }
 //
+//	func StyleEntryFromChroma(ce chroma.StyleEntry) StyleEntry {
+//		he := StyleEntry{}
+//		he.FromChroma(ce)
+//		return he
+//	}
 func (se StyleEntry) String() string {
 	out := []string{}
 	if se.Bold != Pass {

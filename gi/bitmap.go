@@ -49,7 +49,7 @@ func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
 	return parent.AddNewChild(KiT_Bitmap, name).(*Bitmap)
 }
 
-func (bm *Bitmap) CopyFieldsFrom(frm interface{}) {
+func (bm *Bitmap) CopyFieldsFrom(frm any) {
 	fr := frm.(*Bitmap)
 	bm.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	bm.Size = fr.Size

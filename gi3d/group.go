@@ -28,7 +28,7 @@ func AddNewGroup(sc *Scene, parent ki.Ki, name string) *Group {
 	return gp
 }
 
-func (gp *Group) CopyFieldsFrom(frm interface{}) {
+func (gp *Group) CopyFieldsFrom(frm any) {
 	fr := frm.(*Group)
 	gp.Node3DBase.CopyFieldsFrom(&fr.Node3DBase)
 }
@@ -75,7 +75,7 @@ type SolidPoint struct {
 // from closest to furthest.
 func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 	var sp []*SolidPoint
-	gp.FuncDownMeFirst(0, gp.This(), func(k ki.Ki, level int, d interface{}) bool {
+	gp.FuncDownMeFirst(0, gp.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ni := KiToNode3D(k)
 		if nii == nil {
 			return ki.Break // going into a different type of thing, bail

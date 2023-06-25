@@ -20,7 +20,7 @@ import (
 // the key names and editor vals for each value.
 type MapViewInline struct {
 	gi.PartsWidgetBase
-	Map        interface{} `desc:"the map that we are a view onto"`
+	Map        any         `desc:"the map that we are a view onto"`
 	MapValView ValueView   `desc:"ValueView for the map itself, if this was created within value view framework -- otherwise nil"`
 	Changed    bool        `desc:"has the map been edited?"`
 	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
@@ -43,7 +43,7 @@ var MapViewInlineProps = ki.Props{
 }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
-func (mv *MapViewInline) SetMap(mp interface{}) {
+func (mv *MapViewInline) SetMap(mp any) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
@@ -101,7 +101,7 @@ func (mv *MapViewInline) ConfigParts() {
 	}
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 			mvv.SetChanged()
 		})
@@ -120,7 +120,7 @@ func (mv *MapViewInline) ConfigParts() {
 		adac := adack.(*gi.Action)
 		adac.SetIcon("plus")
 		adac.Tooltip = "add an entry to the map"
-		adac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		adac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 			mvv.MapAdd()
 		})
@@ -130,7 +130,7 @@ func (mv *MapViewInline) ConfigParts() {
 		edac := edack.(*gi.Action)
 		edac.SetIcon("edit")
 		edac.Tooltip = "map edit dialog"
-		edac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		edac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 			vpath := mvv.ViewPath
 			title := ""
@@ -154,7 +154,7 @@ func (mv *MapViewInline) ConfigParts() {
 			if mvvvk != nil {
 				mvvv := mvvvk.(*MapView)
 				mvvv.MapValView = mvv.MapValView
-				mvvv.ViewSig.ConnectOnly(mvv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				mvvv.ViewSig.ConnectOnly(mvv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					mvvvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 					mvvvv.ViewSig.Emit(mvvvv.This(), 0, nil)
 				})

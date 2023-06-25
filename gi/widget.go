@@ -46,7 +46,7 @@ var WidgetBaseProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
 }
 
-func (wb *WidgetBase) CopyFieldsFrom(frm interface{}) {
+func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*WidgetBase)
 	if !ok {
 		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier WidgetBase one\n", ki.Type(wb).Name())
@@ -563,7 +563,7 @@ func (wb *WidgetBase) Move2DTree() {
 // ParentLayout returns the parent layout
 func (wb *WidgetBase) ParentLayout() *Layout {
 	var parLy *Layout
-	wb.FuncUpParent(0, wb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	wb.FuncUpParent(0, wb.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ok := k.(Node2D)
 		if !ok {
 			return ki.Break // don't keep going up
@@ -690,7 +690,7 @@ func (wb *WidgetBase) EmitContextMenuSignal() {
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
 // widgets should call this as part of their event connection method
 func (wb *WidgetBase) HoverTooltipEvent() {
-	wb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	wb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		wbb := recv.Embed(KiT_WidgetBase).(*WidgetBase)
 		if wbb.Tooltip != "" {
@@ -717,7 +717,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 	if !sel && !ctxtMenu {
 		return
 	}
-	wb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	wb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		if sel {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
@@ -858,7 +858,7 @@ var PartsWidgetBaseProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
 }
 
-func (wb *PartsWidgetBase) CopyFieldsFrom(frm interface{}) {
+func (wb *PartsWidgetBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*PartsWidgetBase)
 	if !ok {
 		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier PartsWidgetBase one\n", wb.This().Name())

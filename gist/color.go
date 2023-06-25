@@ -648,7 +648,7 @@ func (c *Color) Inverse() Color {
 
 // SetIFace sets the color from given interface value, e.g., for ki.Props
 // key is an optional property key for error -- always logs errors
-func (c *Color) SetIFace(val interface{}, ctxt Context, key string) error {
+func (c *Color) SetIFace(val any, ctxt Context, key string) error {
 	switch valv := val.(type) {
 	case string:
 		err := c.SetStringStyle(valv, nil, ctxt)

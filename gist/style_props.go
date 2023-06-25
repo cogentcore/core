@@ -16,7 +16,7 @@ import (
 
 // StyleInhInit detects the style values of "inherit" and "initial",
 // setting the corresponding bool return values
-func StyleInhInit(val, par interface{}) (inh, init bool) {
+func StyleInhInit(val, par any) (inh, init bool) {
 	if str, ok := val.(string); ok {
 		switch str {
 		case "inherit":
@@ -31,11 +31,11 @@ func StyleInhInit(val, par interface{}) (inh, init bool) {
 }
 
 // StyleSetError reports that cannot set property of given key with given value
-func StyleSetError(key string, val interface{}) {
+func StyleSetError(key string, val any) {
 	log.Printf("gist.Style error: cannot set key: %s from value: %v\n", key, val)
 }
 
-type StyleFunc func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context)
+type StyleFunc func(obj any, key string, val any, par any, ctxt Context)
 
 // StyleFromProps sets style field values based on ki.Props properties
 func (s *Style) StyleFromProps(par *Style, props ki.Props, ctxt Context) {
@@ -108,7 +108,7 @@ func (s *Style) StyleFromProps(par *Style, props ki.Props, ctxt Context) {
 
 // StyleStyleFuncs are functions for styling the Style object itself
 var StyleStyleFuncs = map[string]StyleFunc{
-	"display": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"display": func(obj any, key string, val any, par any, ctxt Context) {
 		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -126,7 +126,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"visible": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"visible": func(obj any, key string, val any, par any, ctxt Context) {
 		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -140,7 +140,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			s.Visible = bv
 		}
 	},
-	"inactive": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"inactive": func(obj any, key string, val any, par any, ctxt Context) {
 		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -154,7 +154,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			s.Inactive = bv
 		}
 	},
-	"pointer-events": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"pointer-events": func(obj any, key string, val any, par any, ctxt Context) {
 		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -175,7 +175,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 
 // StyleLayoutFuncs are functions for styling the Layout object
 var StyleLayoutFuncs = map[string]StyleFunc{
-	"z-index": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"z-index": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -189,7 +189,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			ly.ZIndex = int(iv)
 		}
 	},
-	"horizontal-align": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"horizontal-align": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -212,7 +212,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"vertical-align": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"vertical-align": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -235,7 +235,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"x": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"x": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -247,7 +247,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.PosX.SetIFace(val, key)
 	},
-	"y": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"y": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -259,7 +259,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.PosY.SetIFace(val, key)
 	},
-	"width": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"width": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -271,7 +271,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.Width.SetIFace(val, key)
 	},
-	"height": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"height": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -283,7 +283,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.Height.SetIFace(val, key)
 	},
-	"max-width": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"max-width": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -295,7 +295,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.MaxWidth.SetIFace(val, key)
 	},
-	"max-height": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"max-height": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -307,7 +307,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.MaxHeight.SetIFace(val, key)
 	},
-	"min-width": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"min-width": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -319,7 +319,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.MinWidth.SetIFace(val, key)
 	},
-	"min-height": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"min-height": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -331,7 +331,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.MinHeight.SetIFace(val, key)
 	},
-	"margin": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"margin": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -343,7 +343,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.Margin.SetIFace(val, key)
 	},
-	"padding": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"padding": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -355,7 +355,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		ly.Padding.SetIFace(val, key)
 	},
-	"overflow": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"overflow": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -378,7 +378,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"columns": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"columns": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -392,7 +392,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			ly.Columns = int(iv)
 		}
 	},
-	"row": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"row": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -406,7 +406,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			ly.Row = int(iv)
 		}
 	},
-	"col": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"col": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -420,7 +420,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			ly.Col = int(iv)
 		}
 	},
-	"row-span": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"row-span": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -434,7 +434,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			ly.RowSpan = int(iv)
 		}
 	},
-	"col-span": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"col-span": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -448,7 +448,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			ly.ColSpan = int(iv)
 		}
 	},
-	"scrollbar-width": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"scrollbar-width": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -467,7 +467,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 
 // StyleFontFuncs are functions for styling the Font object
 var StyleFontFuncs = map[string]StyleFunc{
-	"color": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"color": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -479,7 +479,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		}
 		fs.Color.SetIFace(val, ctxt, key)
 	},
-	"background-color": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"background-color": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -491,7 +491,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		}
 		fs.BgColor.SetIFace(val, ctxt, key)
 	},
-	"opacity": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"opacity": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -505,7 +505,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			fs.Opacity = iv
 		}
 	},
-	"font-size": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"font-size": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -526,7 +526,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			fs.Size.SetIFace(val, key)
 		}
 	},
-	"font-family": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"font-family": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -538,7 +538,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		}
 		fs.Family = kit.ToString(val)
 	},
-	"font-style": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"font-style": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -561,7 +561,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"font-weight": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"font-weight": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -584,7 +584,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"font-stretch": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"font-stretch": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -607,7 +607,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"font-variant": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"font-variant": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -630,7 +630,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"text-decoration": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"text-decoration": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -657,7 +657,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"baseline-shift": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"baseline-shift": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -687,7 +687,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 
 // StyleTextFuncs are functions for styling the Text object
 var StyleTextFuncs = map[string]StyleFunc{
-	"text-align": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"text-align": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -710,7 +710,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"text-vertical-align": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"text-vertical-align": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -733,7 +733,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"text-anchor": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"text-anchor": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -756,7 +756,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"letter-spacing": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"letter-spacing": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -768,7 +768,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		ts.LetterSpacing.SetIFace(val, key)
 	},
-	"word-spacing": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"word-spacing": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -780,7 +780,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		ts.WordSpacing.SetIFace(val, key)
 	},
-	"line-height": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"line-height": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -794,7 +794,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			ts.LineHeight = iv
 		}
 	},
-	"white-space": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"white-space": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -817,7 +817,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"unicode-bidi": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"unicode-bidi": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -840,7 +840,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"direction": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"direction": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -863,7 +863,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"writing-mode": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"writing-mode": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -886,7 +886,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"glyph-orientation-vertical": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"glyph-orientation-vertical": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -900,7 +900,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			ts.OrientationVert = iv
 		}
 	},
-	"glyph-orientation-horizontal": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"glyph-orientation-horizontal": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -914,7 +914,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 			ts.OrientationHoriz = iv
 		}
 	},
-	"text-indent": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"text-indent": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -926,7 +926,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		ts.Indent.SetIFace(val, key)
 	},
-	"para-spacing": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"para-spacing": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -938,7 +938,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		ts.ParaSpacing.SetIFace(val, key)
 	},
-	"tab-size": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"tab-size": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -959,7 +959,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 
 // StyleBorderFuncs are functions for styling the Border object
 var StyleBorderFuncs = map[string]StyleFunc{
-	"border-style": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"border-style": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -982,7 +982,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"border-width": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"border-width": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -994,7 +994,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 		}
 		bs.Width.SetIFace(val, key)
 	},
-	"border-radius": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"border-radius": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1006,7 +1006,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 		}
 		bs.Radius.SetIFace(val, key)
 	},
-	"border-color": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"border-color": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1025,7 +1025,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 
 // StyleOutlineFuncs are functions for styling the OutlineStyle object
 var StyleOutlineFuncs = map[string]StyleFunc{
-	"outline-style": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"outline-style": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1048,7 +1048,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"outline-width": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"outline-width": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1060,7 +1060,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 		}
 		bs.Width.SetIFace(val, key)
 	},
-	"outline-radius": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"outline-radius": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1072,7 +1072,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 		}
 		bs.Radius.SetIFace(val, key)
 	},
-	"outline-color": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"outline-color": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1091,7 +1091,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 
 // StyleShadowFuncs are functions for styling the Shadow object
 var StyleShadowFuncs = map[string]StyleFunc{
-	"box-shadow.h-offset": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"box-shadow.h-offset": func(obj any, key string, val any, par any, ctxt Context) {
 		ss := obj.(*Shadow)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1103,7 +1103,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 		}
 		ss.HOffset.SetIFace(val, key)
 	},
-	"box-shadow.v-offset": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"box-shadow.v-offset": func(obj any, key string, val any, par any, ctxt Context) {
 		ss := obj.(*Shadow)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1115,7 +1115,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 		}
 		ss.VOffset.SetIFace(val, key)
 	},
-	"box-shadow.blur": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"box-shadow.blur": func(obj any, key string, val any, par any, ctxt Context) {
 		ss := obj.(*Shadow)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1127,7 +1127,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 		}
 		ss.Blur.SetIFace(val, key)
 	},
-	"box-shadow.spread": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"box-shadow.spread": func(obj any, key string, val any, par any, ctxt Context) {
 		ss := obj.(*Shadow)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1139,7 +1139,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 		}
 		ss.Spread.SetIFace(val, key)
 	},
-	"box-shadow.color": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"box-shadow.color": func(obj any, key string, val any, par any, ctxt Context) {
 		ss := obj.(*Shadow)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -1151,7 +1151,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 		}
 		ss.Color.SetIFace(val, ctxt, key)
 	},
-	"box-shadow.inset": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"box-shadow.inset": func(obj any, key string, val any, par any, ctxt Context) {
 		ss := obj.(*Shadow)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {

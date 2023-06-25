@@ -179,7 +179,7 @@ func (em *Embed2D) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	em.Viewport.WinBBox.Max = em.WinBBox.Min.Add(em.Viewport.Geom.Size)
 	em.BBoxMu.Unlock()
 	em.Viewport.BBoxMu.Unlock()
-	em.Viewport.FuncDownMeFirst(0, em.Viewport.This(), func(k ki.Ki, level int, d interface{}) bool {
+	em.Viewport.FuncDownMeFirst(0, em.Viewport.This(), func(k ki.Ki, level int, d any) bool {
 		if k == em.Viewport.This() {
 			return ki.Continue
 		}
@@ -239,7 +239,7 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 }
 
 func (em *Embed2D) ConnectEvents3D(sc *Scene) {
-	em.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	em.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -271,7 +271,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		}
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -297,7 +297,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	em.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
@@ -322,7 +322,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		// note: registering HiPri -- we are outside 2D focus system, and get *all* keyboard events
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene

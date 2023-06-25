@@ -76,7 +76,7 @@ func (cv *ColorView) Config() {
 	widg := nl.AddNewChild(vtyp, "nums").(gi.Node2D)
 	cv.NumView.ConfigWidget(widg)
 	vvb := cv.NumView.AsValueViewBase()
-	vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 		cvv.UpdateSliderGrid()
 		cvv.ViewSig.Emit(cvv.This(), 0, nil)
@@ -185,7 +185,7 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewCh(20))
 	sl.SetMinPrefHeight(units.NewEm(1))
-	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
 		if sig == int64(gi.SliderReleased) {
@@ -242,7 +242,7 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewCh(20))
 	sl.SetMinPrefHeight(units.NewEm(1))
-	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
 		if sig == int64(gi.SliderReleased) {
@@ -300,7 +300,7 @@ func (cv *ColorView) ConfigPalette() {
 		cbt.SetProp("margin", units.NewPx(0))
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
-		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 			if sig == int64(gi.ButtonPressed) {
 				but := send.Embed(gi.KiT_Button).(*gi.Button)
@@ -439,12 +439,12 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 		edac := edack.(*gi.Action)
 		edac.SetIcon("color")
 		edac.Tooltip = "color selection dialog"
-		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
 			vv.Activate(svv.ViewportSafe(), nil, nil)
 		})
 	}
-	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_ColorValueView).(*ColorValueView)
 		vvv.UpdateWidget() // necessary in this case!
 		vvv.ViewSig.Emit(vvv.This(), 0, nil)
@@ -470,7 +470,7 @@ func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.
 		dclr = *clr
 	}
 	ColorViewDialog(vp, dclr, DlgOpts{Title: "Color Value View", Prompt: desc, TmpSave: vv.TmpSave},
-		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				cclr := ColorViewDialogValue(ddlg)
@@ -516,7 +516,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewPx(4))
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_ColorNameValueView).(*ColorNameValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
@@ -554,7 +554,7 @@ func (vv *ColorNameValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc
 	}
 	desc, _ := vv.Tag("desc")
 	TableViewSelectDialog(vp, &sl, DlgOpts{Title: "Select a Color Name", Prompt: desc}, curRow, nil,
-		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				si := TableViewSelectDialogValue(ddlg)

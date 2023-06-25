@@ -50,7 +50,7 @@ type ActOpts struct {
 	Tooltip     string
 	Shortcut    key.Chord
 	ShortcutKey KeyFuns
-	Data        interface{}
+	Data        any
 	UpdateFunc  func(act *Action)
 }
 
@@ -227,19 +227,19 @@ func (m *Menu) FindActionByName(name string) (*Action, bool) {
 // clipboard having something in it.
 func (m *Menu) AddCopyCutPaste(win *Window) {
 	m.AddAction(ActOpts{Label: "Copy", ShortcutKey: KeyFunCopy},
-		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win, func(recv, send ki.Ki, sig int64, data any) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			ww.EventMgr.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
 		})
 	m.AddAction(ActOpts{Label: "Cut", ShortcutKey: KeyFunCut},
-		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win, func(recv, send ki.Ki, sig int64, data any) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			ww.EventMgr.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
 		})
 	m.AddAction(ActOpts{Label: "Paste", ShortcutKey: KeyFunPaste,
 		UpdateFunc: func(ac *Action) {
 			ac.SetInactiveState(oswin.TheApp.ClipBoard(win.OSWin).IsEmpty())
-		}}, win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		}}, win, func(recv, send ki.Ki, sig int64, data any) {
 		ww := recv.Embed(KiT_Window).(*Window)
 		ww.EventMgr.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
 	})
@@ -252,7 +252,7 @@ func (m *Menu) AddCopyCutPasteDupe(win *Window) {
 	m.AddCopyCutPaste(win)
 	dpsc := ActiveKeyMap.ChordForFun(KeyFunDuplicate)
 	m.AddAction(ActOpts{Label: "Duplicate", Shortcut: dpsc},
-		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win, func(recv, send ki.Ki, sig int64, data any) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			ww.EventMgr.SendKeyFunEvent(KeyFunDuplicate, false) // false = ignore popups -- don't send to menu
 		})
@@ -276,17 +276,17 @@ func (m *Menu) AddAppMenu(win *Window) {
 func (m *Menu) AddStdAppMenu(win *Window) {
 	aboutitle := "About " + oswin.TheApp.Name()
 	m.AddAction(ActOpts{Label: aboutitle},
-		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win, func(recv, send ki.Ki, sig int64, data any) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			PromptDialog(ww.Viewport, DlgOpts{Title: aboutitle, Prompt: oswin.TheApp.About()}, AddOk, NoCancel, nil, nil)
 		})
 	m.AddAction(ActOpts{Label: "GoGi Preferences...", Shortcut: "Command+P"},
-		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win, func(recv, send ki.Ki, sig int64, data any) {
 			TheViewIFace.PrefsView(&Prefs)
 		})
 	m.AddSeparator("sepq")
 	m.AddAction(ActOpts{Label: "Quit", Shortcut: "Command+Q"},
-		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win, func(recv, send ki.Ki, sig int64, data any) {
 			oswin.TheApp.QuitReq()
 		})
 }
@@ -295,19 +295,19 @@ func (m *Menu) AddStdAppMenu(win *Window) {
 // must be called under WindowGlobalMu mutex lock!
 func (m *Menu) AddWindowsMenu(win *Window) {
 	m.AddAction(ActOpts{Label: "Minimize"},
-		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win, func(recv, send ki.Ki, sig int64, data any) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			ww.OSWin.Minimize()
 		})
 	m.AddAction(ActOpts{Label: "Focus Next", ShortcutKey: KeyFunWinFocusNext},
-		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win, func(recv, send ki.Ki, sig int64, data any) {
 			AllWindows.FocusNext()
 		})
 	m.AddSeparator("sepa")
 	for _, w := range MainWindows {
 		if w != nil {
 			m.AddAction(ActOpts{Label: w.Title},
-				w, func(recv, send ki.Ki, sig int64, data interface{}) {
+				w, func(recv, send ki.Ki, sig int64, data any) {
 					ww := recv.Embed(KiT_Window).(*Window)
 					ww.OSWin.Raise()
 				})
@@ -318,7 +318,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 		for _, w := range DialogWindows {
 			if w != nil {
 				m.AddAction(ActOpts{Label: w.Title},
-					w, func(recv, send ki.Ki, sig int64, data interface{}) {
+					w, func(recv, send ki.Ki, sig int64, data any) {
 						ww := recv.Embed(KiT_Window).(*Window)
 						ww.OSWin.Raise()
 					})
@@ -571,7 +571,7 @@ func AddNewMenuButton(parent ki.Ki, name string) *MenuButton {
 	return parent.AddNewChild(KiT_MenuButton, name).(*MenuButton)
 }
 
-func (mb *MenuButton) CopyFieldsFrom(frm interface{}) {
+func (mb *MenuButton) CopyFieldsFrom(frm any) {
 	fr := frm.(*MenuButton)
 	mb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
@@ -668,7 +668,7 @@ func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
 	return sp
 }
 
-func (sp *Separator) CopyFieldsFrom(frm interface{}) {
+func (sp *Separator) CopyFieldsFrom(frm any) {
 	fr := frm.(*Separator)
 	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	sp.Horiz = fr.Horiz

@@ -43,7 +43,7 @@ type Labeler interface {
 // interface if it is defined, and falling back on kit.ToString converter
 // otherwise -- also contains label impls for basic interface types for which
 // we cannot easily define the Labeler interface
-func ToLabel(it interface{}) string {
+func ToLabel(it any) string {
 	lbler, ok := it.(Labeler)
 	if !ok {
 		switch v := it.(type) {
@@ -58,7 +58,7 @@ func ToLabel(it interface{}) string {
 }
 
 // ToLabeler returns the Labeler label, true if it was defined, else "", false
-func ToLabeler(it interface{}) (string, bool) {
+func ToLabeler(it any) (string, bool) {
 	if lbler, ok := it.(Labeler); ok {
 		return lbler.Label(), true
 	}

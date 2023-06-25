@@ -101,7 +101,7 @@ var Viewport2DProps = ki.Props{
 	"background-color": &Prefs.Colors.Background,
 }
 
-func (vp *Viewport2D) CopyFieldsFrom(frm interface{}) {
+func (vp *Viewport2D) CopyFieldsFrom(frm any) {
 	fr := frm.(*Viewport2D)
 	vp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	vp.Fill = fr.Fill
@@ -687,7 +687,7 @@ func (vp *Viewport2D) PrefSize(initSz image.Point) image.Point {
 // SignalViewport2D is called by each node in scenegraph through its NodeSig
 // signal to notify its parent viewport whenever it changes, causing a
 // re-render.
-func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
+func SignalViewport2D(vpki, send ki.Ki, sig int64, data any) {
 	vpni, ok := vpki.(Node2D)
 	if !ok {
 		return
@@ -719,7 +719,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 
 // NodeUpdated is called from SignalViewport2D when a valid node's NodeSig sent a signal
 // usually after UpdateEnd.
-func (vp *Viewport2D) NodeUpdated(nii Node2D, sig int64, data interface{}) {
+func (vp *Viewport2D) NodeUpdated(nii Node2D, sig int64, data any) {
 	if !vp.NeedsFullRender() {
 		vp.StackMu.Lock()
 		anchor, full := vp.UpdateLevel(nii, sig, data)
@@ -765,7 +765,7 @@ func (vp *Viewport2D) NodeUpdated(nii Node2D, sig int64, data interface{}) {
 }
 
 // UpdateLevel deteremines what level of updating a node requires
-func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data interface{}) (anchor Node2D, full bool) {
+func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data any) (anchor Node2D, full bool) {
 	ni := nii.AsNode2D()
 	if sig == int64(ki.NodeSignalUpdated) {
 		dflags := data.(int64)

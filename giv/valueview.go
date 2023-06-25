@@ -109,7 +109,7 @@ type ValueViewer interface {
 // interface, then it is used first for structs -- return nil to fall back on
 // the default ToValueView result
 type FieldValueViewer interface {
-	FieldValueView(field string, fval interface{}) ValueView
+	FieldValueView(field string, fval any) ValueView
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +155,7 @@ func StructTagVal(key, tags string) string {
 // used for options that affect what kind of view to create.
 // See FieldToValueView for version that takes into account the properties of the owner.
 // gopy:interface=handle
-func ToValueView(it interface{}, tags string) ValueView {
+func ToValueView(it any, tags string) ValueView {
 	if it == nil {
 		vv := &ValueViewBase{}
 		ki.InitNode(vv)
@@ -343,7 +343,7 @@ func ToValueView(it interface{}, tags string) ValueView {
 // struct -- attempts to get the FieldValueViewer interface, and falls back on
 // ToValueView otherwise, using field value (fval)
 // gopy:interface=handle
-func FieldToValueView(it interface{}, field string, fval interface{}) ValueView {
+func FieldToValueView(it any, field string, fval any) ValueView {
 	if it == nil || field == "" {
 		return ToValueView(fval, "")
 	}
@@ -400,18 +400,18 @@ type ValueView interface {
 	AsValueViewBase() *ValueViewBase
 
 	// SetStructValue sets the value, owner and field information for a struct field.
-	SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView, viewPath string)
+	SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave ValueView, viewPath string)
 
 	// SetMapKey sets the key value and owner for a map key.
-	SetMapKey(val reflect.Value, owner interface{}, tmpSave ValueView)
+	SetMapKey(val reflect.Value, owner any, tmpSave ValueView)
 
 	// SetMapValue sets the value, owner and map key information for a map
 	// element -- needs pointer to ValueView representation of key to track
 	// current key value.
-	SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView, viewPath string)
+	SetMapValue(val reflect.Value, owner any, key any, keyView ValueView, tmpSave ValueView, viewPath string)
 
 	// SetSliceValue sets the value, owner and index information for a slice element.
-	SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView, viewPath string)
+	SetSliceValue(val reflect.Value, owner any, idx int, tmpSave ValueView, viewPath string)
 
 	// SetSoloValue sets the value for a singleton standalone value
 	// (e.g., for arg values).
@@ -462,7 +462,7 @@ type ValueView interface {
 	// SetValue assigns given value to this item (if not Inactive), using
 	// Ki.SetField for Ki types and kit.SetRobust otherwise -- emits a ViewSig
 	// signal when set.
-	SetValue(val interface{}) bool
+	SetValue(val any) bool
 
 	// SetTags sets tags for this valueview, for non-struct values, to
 	// influence interface for this value -- see
@@ -512,10 +512,10 @@ type ValueViewBase struct {
 	OwnKind   reflect.Kind         `desc:"kind of owner that we have -- reflect.Struct, .Map, .Slice are supported"`
 	IsMapKey  bool                 `desc:"for OwnKind = Map, this value represents the Key -- otherwise the Value"`
 	ViewPath  string               `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
-	Owner     interface{}          `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`
+	Owner     any                  `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`
 	Field     *reflect.StructField `desc:"if Owner is a struct, this is the reflect.StructField associated with the value"`
 	Tags      map[string]string    `desc:"set of tags that can be set to customize interface for different types of values -- only source for non-structfield values"`
-	Key       interface{}          `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`
+	Key       any                  `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`
 	KeyView   ValueView            `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`
 	Idx       int                  `desc:"if Owner is a slice, this is the index for the value in the slice"`
 	WidgetTyp reflect.Type         `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
@@ -538,7 +538,7 @@ func (vv *ValueViewBase) AsValueViewBase() *ValueViewBase {
 	return vv
 }
 
-func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView, viewPath string) {
+func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave ValueView, viewPath string) {
 	vv.OwnKind = reflect.Struct
 	vv.Value = val
 	vv.Owner = owner
@@ -548,7 +548,7 @@ func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner interface{}, fi
 	vv.SetName(field.Name)
 }
 
-func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner interface{}, tmpSave ValueView) {
+func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner any, tmpSave ValueView) {
 	vv.OwnKind = reflect.Map
 	vv.IsMapKey = true
 	vv.Value = key
@@ -557,7 +557,7 @@ func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner interface{}, tmpSave
 	vv.SetName(kit.ToString(key.Interface()))
 }
 
-func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView, viewPath string) {
+func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner any, key any, keyView ValueView, tmpSave ValueView, viewPath string) {
 	vv.OwnKind = reflect.Map
 	vv.Value = val
 	vv.Owner = owner
@@ -569,7 +569,7 @@ func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key i
 	vv.SetName(keystr)
 }
 
-func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView, viewPath string) {
+func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner any, idx int, tmpSave ValueView, viewPath string) {
 	vv.OwnKind = reflect.Slice
 	vv.Value = val
 	vv.Owner = owner
@@ -601,7 +601,7 @@ func (vv *ValueViewBase) SetSoloValue(val reflect.Value) {
 // for now, this cannot be a method because gopy doesn't find the
 // key comment below that tells it what to do with the interface
 // gopy:interface=handle
-func SetSoloValueIface(vv *ValueViewBase, val interface{}) {
+func SetSoloValueIface(vv *ValueViewBase, val any) {
 	vv.OwnKind = reflect.Invalid
 	vv.Value = reflect.ValueOf(val)
 }
@@ -635,7 +635,7 @@ func (vv *ValueViewBase) Val() reflect.Value {
 	return vv.Value
 }
 
-func (vv *ValueViewBase) SetValue(val interface{}) bool {
+func (vv *ValueViewBase) SetValue(val any) bool {
 	if vv.This().(ValueView).IsInactive() {
 		return false
 	}
@@ -666,7 +666,7 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 					gi.ChoiceDialog(vp,
 						gi.DlgOpts{Title: "Map Key Conflict", Prompt: fmt.Sprintf("The map key value: %v already exists in the map -- are you sure you want to overwrite the current value?", val)},
 						[]string{"Cancel Change", "Overwrite"},
-						vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							switch sig {
 							case 0:
 								if vp != nil {
@@ -914,7 +914,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 		}
 	}
 
-	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			vvv, _ := recv.Embed(KiT_ValueViewBase).(*ValueViewBase)
 			tf := send.(*gi.TextField)
@@ -962,7 +962,7 @@ func (vv *ValueViewBase) StdConfigWidget(widg gi.Node2D) {
 type ViewIFace struct {
 }
 
-func (vi *ViewIFace) CtxtMenuView(val interface{}, inactive bool, vp *gi.Viewport2D, menu *gi.Menu) bool {
+func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, vp *gi.Viewport2D, menu *gi.Menu) bool {
 	return CtxtMenuView(val, inactive, vp, menu)
 }
 
@@ -1094,7 +1094,7 @@ func (vv *VersCtrlValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewPx(4))
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_VersCtrlValueView).(*VersCtrlValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
@@ -1117,7 +1117,7 @@ func (vv *VersCtrlValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc 
 	} else {
 		recv = vp.This().(gi.Node2D)
 	}
-	gi.StringsChooserPopup(VersCtrlSystems, cur, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
+	gi.StringsChooserPopup(VersCtrlSystems, cur, recv, func(recv, send ki.Ki, sig int64, data any) {
 		ac := send.(*gi.Action)
 		vv.SetValue(ac.Text)
 		vv.UpdateWidget()

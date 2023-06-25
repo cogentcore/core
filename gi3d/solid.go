@@ -35,7 +35,7 @@ func AddNewSolid(sc *Scene, parent ki.Ki, name string, meshName string) *Solid {
 	return sld
 }
 
-func (sld *Solid) CopyFieldsFrom(frm interface{}) {
+func (sld *Solid) CopyFieldsFrom(frm any) {
 	fr := frm.(*Solid)
 	sld.Node3DBase.CopyFieldsFrom(&fr.Node3DBase)
 	sld.Mesh = fr.Mesh

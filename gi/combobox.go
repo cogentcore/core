@@ -26,13 +26,13 @@ import (
 // are displayed using icons instead.
 type ComboBox struct {
 	ButtonBase
-	Editable  bool          `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
-	CurVal    interface{}   `json:"-" xml:"-" desc:"current selected value"`
-	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`
-	Items     []interface{} `json:"-" xml:"-" desc:"items available for selection"`
-	ItemsMenu Menu          `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
-	ComboSig  ki.Signal     `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
-	MaxLength int           `desc:"maximum label length (in runes)"`
+	Editable  bool      `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
+	CurVal    any       `json:"-" xml:"-" desc:"current selected value"`
+	CurIndex  int       `json:"-" xml:"-" desc:"current index in list of possible items"`
+	Items     []any     `json:"-" xml:"-" desc:"items available for selection"`
+	ItemsMenu Menu      `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
+	ComboSig  ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
+	MaxLength int       `desc:"maximum label length (in runes)"`
 }
 
 var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
@@ -42,7 +42,7 @@ func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
 	return parent.AddNewChild(KiT_ComboBox, name).(*ComboBox)
 }
 
-func (cb *ComboBox) CopyFieldsFrom(frm interface{}) {
+func (cb *ComboBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*ComboBox)
 	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 	cb.Editable = fr.Editable
@@ -270,7 +270,7 @@ func (cb *ComboBox) TextField() (*TextField, bool) {
 // creates one with the given capacity
 func (cb *ComboBox) MakeItems(reset bool, capacity int) {
 	if cb.Items == nil || reset {
-		cb.Items = make([]interface{}, 0, capacity)
+		cb.Items = make([]any, 0, capacity)
 	}
 }
 
@@ -310,7 +310,7 @@ func (cb *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLe
 	if sz == 0 {
 		return
 	}
-	cb.Items = make([]interface{}, sz)
+	cb.Items = make([]any, sz)
 	for i, typ := range tl {
 		cb.Items[i] = typ
 	}
@@ -334,7 +334,7 @@ func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) 
 	if sz == 0 {
 		return
 	}
-	cb.Items = make([]interface{}, sz)
+	cb.Items = make([]any, sz)
 	for i, str := range el {
 		cb.Items[i] = str
 	}
@@ -355,7 +355,7 @@ func (cb *ComboBox) ItemsFromIconList(el []IconName, setFirst bool, maxLen int) 
 	if sz == 0 {
 		return
 	}
-	cb.Items = make([]interface{}, sz)
+	cb.Items = make([]any, sz)
 	for i, str := range el {
 		cb.Items[i] = str
 	}
@@ -376,7 +376,7 @@ func (cb *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen 
 	if sz == 0 {
 		return
 	}
-	cb.Items = make([]interface{}, sz)
+	cb.Items = make([]any, sz)
 	for i, enum := range el {
 		cb.Items[i] = enum
 	}
@@ -399,7 +399,7 @@ func (cb *ComboBox) ItemsFromEnum(enumtyp reflect.Type, setFirst bool, maxLen in
 }
 
 // FindItem finds an item on list of items and returns its index
-func (cb *ComboBox) FindItem(it interface{}) int {
+func (cb *ComboBox) FindItem(it any) int {
 	if cb.Items == nil {
 		return -1
 	}
@@ -415,7 +415,7 @@ func (cb *ComboBox) FindItem(it interface{}) int {
 // for that item on the current Items list (adds to items list if not found)
 // -- returns that index -- and sets the text to the string value of that
 // value (using standard Stringer string conversion)
-func (cb *ComboBox) SetCurVal(it interface{}) int {
+func (cb *ComboBox) SetCurVal(it any) int {
 	cb.CurVal = it
 	cb.CurIndex = cb.FindItem(it)
 	if cb.CurIndex < 0 { // add to list if not found..
@@ -430,7 +430,7 @@ func (cb *ComboBox) SetCurVal(it interface{}) int {
 // for that item on the current Items list (-1 if not found) -- returns value
 // -- and sets the text to the string value of that value (using standard
 // Stringer string conversion)
-func (cb *ComboBox) SetCurIndex(idx int) interface{} {
+func (cb *ComboBox) SetCurIndex(idx int) any {
 	cb.CurIndex = idx
 	if idx < 0 || idx >= len(cb.Items) {
 		cb.CurVal = nil
@@ -508,7 +508,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 		ac.Data = i // index is the data
 		ac.SetSelectedState(i == cb.CurIndex)
 		ac.SetAsMenu()
-		ac.ActionSig.ConnectOnly(cb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac.ActionSig.ConnectOnly(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			idx := data.(int)
 			cbb := recv.(*ComboBox)
 			cbb.SelectItemAction(idx)
@@ -529,7 +529,7 @@ func (cb *ComboBox) ConnectEvents2D() {
 }
 
 func (cb *ComboBox) KeyChordEvent() {
-	cb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	cb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		cbb := recv.(*ComboBox)
 		if cbb.IsInactive() {
 			return

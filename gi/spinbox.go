@@ -48,7 +48,7 @@ func AddNewSpinBox(parent ki.Ki, name string) *SpinBox {
 	return parent.AddNewChild(KiT_SpinBox, name).(*SpinBox)
 }
 
-func (sb *SpinBox) CopyFieldsFrom(frm interface{}) {
+func (sb *SpinBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*SpinBox)
 	sb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
 	sb.Value = fr.Value
@@ -210,7 +210,7 @@ func (sb *SpinBox) ConfigParts() {
 				up.Sty.Template = sb.Sty.Template + ".up"
 			}
 			sb.StylePart(Node2D(up))
-			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sbb.IncrValue(1.0)
 			})
@@ -224,7 +224,7 @@ func (sb *SpinBox) ConfigParts() {
 			if sb.Sty.Template != "" {
 				dn.Sty.Template = sb.Sty.Template + ".dn"
 			}
-			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sbb.IncrValue(-1.0)
 			})
@@ -247,7 +247,7 @@ func (sb *SpinBox) ConfigParts() {
 		sb.StylePart(Node2D(tf))
 		tf.Txt = sb.ValToString(sb.Value)
 		if !sb.IsInactive() {
-			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
 					sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 					tf := send.(*TextField)
@@ -317,7 +317,7 @@ func (sb *SpinBox) ConfigPartsIfNeeded() {
 }
 
 func (sb *SpinBox) MouseScrollEvent() {
-	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 		if sbb.IsInactive() || !sbb.HasFocus2D() {
 			return
@@ -330,7 +330,7 @@ func (sb *SpinBox) MouseScrollEvent() {
 
 func (sb *SpinBox) TextFieldEvent() {
 	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
-	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 		if sig == int64(WidgetSelected) {
 			sbb.SetSelectedState(!sbb.IsSelected())
@@ -340,7 +340,7 @@ func (sb *SpinBox) TextFieldEvent() {
 }
 
 func (sb *SpinBox) KeyChordEvent() {
-	sb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.(*SpinBox)
 		if sbb.IsInactive() {
 			return

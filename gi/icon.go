@@ -53,7 +53,7 @@ func AddNewIcon(parent ki.Ki, name string, icon string) *Icon {
 	return ic
 }
 
-func (ic *Icon) CopyFieldsFrom(frm interface{}) {
+func (ic *Icon) CopyFieldsFrom(frm any) {
 	fr := frm.(*Icon)
 	ic.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	ic.Filename = fr.Filename

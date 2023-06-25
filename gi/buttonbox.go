@@ -36,7 +36,7 @@ func AddNewButtonBox(parent ki.Ki, name string) *ButtonBox {
 	return parent.AddNewChild(KiT_ButtonBox, name).(*ButtonBox)
 }
 
-func (bb *ButtonBox) CopyFieldsFrom(frm interface{}) {
+func (bb *ButtonBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*ButtonBox)
 	bb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
 	bb.Items = sliceclone.String(fr.Items)
@@ -184,7 +184,7 @@ func (bb *ButtonBox) ConfigItems() {
 		lbl := bb.Items[i]
 		cb.SetText(lbl)
 		cb.SetProp("index", i)
-		cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig != int64(ButtonToggled) {
 				return
 			}

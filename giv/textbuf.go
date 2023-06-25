@@ -406,7 +406,7 @@ func (tb *TextBuf) FileModCheck() bool {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk: " + DirAndFile(string(tb.Filename)),
 			Prompt: fmt.Sprintf("File has changed on Disk since being opened or saved by you -- what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename)},
 			[]string{"Save As to diff File", "Revert from Disk", "Ignore and Proceed"},
-			tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					CallMethod(tb, "SaveAs", vp)
@@ -511,7 +511,7 @@ func (tb *TextBuf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Exists, Overwrite?",
 			Prompt: fmt.Sprintf("File already exists, overwrite?  File: %v", filename)},
 			[]string{"Cancel", "Overwrite"},
-			tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				cancel := false
 				switch sig {
 				case 0:
@@ -559,7 +559,7 @@ func (tb *TextBuf) Save() error {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
 			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
 			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting"},
-			tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					CallMethod(tb, "SaveAs", vp)
@@ -582,7 +582,7 @@ func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)},
 				[]string{"Save", "Close Without Saving", "Cancel"},
-				tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				tb.This(), func(recv, send ki.Ki, sig int64, data any) {
 					switch sig {
 					case 0:
 						tb.Save()
@@ -601,7 +601,7 @@ func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: "Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As"},
 				[]string{"Close Without Saving", "Cancel"},
-				tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				tb.This(), func(recv, send ki.Ki, sig int64, data any) {
 					switch sig {
 					case 0:
 						tb.ClearChanged()
@@ -2474,7 +2474,7 @@ func (tb *TextBuf) SpacesToTabsRegion(st, ed int) {
 
 // SetCompleter sets completion functions so that completions will
 // automatically be offered as the user types
-func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc,
+func (tb *TextBuf) SetCompleter(data any, matchFun complete.MatchFunc, editFun complete.EditFunc,
 	lookupFun complete.LookupFunc) {
 	if tb.Complete != nil {
 		if tb.Complete.Context == data {
@@ -2492,7 +2492,7 @@ func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, e
 	tb.Complete.EditFunc = editFun
 	tb.Complete.LookupFunc = lookupFun
 	// note: only need to connect once..
-	tb.Complete.CompleteSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tb.Complete.CompleteSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
 		if sig == int64(gi.CompleteSelect) {
 			tbf.CompleteText(data.(string)) // always use data
@@ -2588,7 +2588,7 @@ func (tb *TextBuf) SetSpell() {
 	tb.Spell = &gi.Spell{}
 	tb.Spell.InitName(tb.Spell, "tb-spellcorrect") // needed for standalone Ki's
 	// note: only need to connect once..
-	tb.Spell.SpellSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tb.Spell.SpellSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.SpellSelect) {
 			tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
 			tbf.CorrectText(data.(string)) // always use data

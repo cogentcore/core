@@ -180,7 +180,7 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 	if sc.IsLastLearned(word) {
 		text = "unlearn"
 		m.AddAction(ActOpts{Label: text, Data: text},
-			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sc, func(recv, send ki.Ki, sig int64, data any) {
 				scf := recv.Embed(KiT_Spell).(*Spell)
 				scf.UnLearnLast()
 			})
@@ -192,13 +192,13 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 		if count == 0 {
 			text = "no suggestion"
 			m.AddAction(ActOpts{Label: text, Data: text},
-				sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+				sc, func(recv, send ki.Ki, sig int64, data any) {
 				})
 		} else {
 			for i := 0; i < count; i++ {
 				text = sc.Suggest[i]
 				m.AddAction(ActOpts{Label: text, Data: text},
-					sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+					sc, func(recv, send ki.Ki, sig int64, data any) {
 						scf := recv.Embed(KiT_Spell).(*Spell)
 						scf.Spell(data.(string))
 					})
@@ -207,13 +207,13 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 		m.AddSeparator("")
 		text = "learn"
 		m.AddAction(ActOpts{Label: text, Data: text},
-			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sc, func(recv, send ki.Ki, sig int64, data any) {
 				scf := recv.Embed(KiT_Spell).(*Spell)
 				scf.LearnWord()
 			})
 		text = "ignore"
 		m.AddAction(ActOpts{Label: text, Data: text},
-			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sc, func(recv, send ki.Ki, sig int64, data any) {
 				scf := recv.Embed(KiT_Spell).(*Spell)
 				scf.IgnoreWord()
 			})

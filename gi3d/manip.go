@@ -170,7 +170,7 @@ func AddNewManipPt(sc *Scene, parent ki.Ki, name string, meshName string, clr gi
 
 // Default ManipPt can be selected and manipulated
 func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
-	mpt.ConnectEvent(sc.Win, oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	mpt.ConnectEvent(sc.Win, oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		if me.Action != mouse.Press || !sc.IsVisible() {
 			return
@@ -183,7 +183,7 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		ssc.SetManipPt(mpt)
 		me.SetProcessed()
 	})
-	mpt.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	mpt.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		mpt := recv.Embed(KiT_ManipPt).(*ManipPt)

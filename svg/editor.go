@@ -36,7 +36,7 @@ func AddNewEditor(parent ki.Ki, name string) *Editor {
 	return parent.AddNewChild(KiT_Editor, name).(*Editor)
 }
 
-func (g *Editor) CopyFieldsFrom(frm interface{}) {
+func (g *Editor) CopyFieldsFrom(frm any) {
 	fr := frm.(*Editor)
 	g.SVG.CopyFieldsFrom(&fr.SVG)
 	g.Trans = fr.Trans
@@ -46,7 +46,7 @@ func (g *Editor) CopyFieldsFrom(frm interface{}) {
 
 // EditorEvents handles svg editing events
 func (svg *Editor) EditorEvents() {
-	svg.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	svg.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
@@ -69,7 +69,7 @@ func (svg *Editor) EditorEvents() {
 		}
 
 	})
-	svg.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	svg.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
@@ -86,7 +86,7 @@ func (svg *Editor) EditorEvents() {
 		ssvg.SetFullReRender()
 		ssvg.UpdateSig()
 	})
-	svg.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	svg.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.SetDragCursor {
@@ -101,7 +101,7 @@ func (svg *Editor) EditorEvents() {
 			}
 		}
 	})
-	svg.ConnectEvent(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	svg.ConnectEvent(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(KiT_Editor).(*Editor)

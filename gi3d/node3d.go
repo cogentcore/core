@@ -175,7 +175,7 @@ func KiToNode3DBase(k ki.Ki) *Node3DBase {
 	return k.(Node3D).AsNode3D()
 }
 
-func (nb *Node3DBase) CopyFieldsFrom(frm interface{}) {
+func (nb *Node3DBase) CopyFieldsFrom(frm any) {
 	fr := frm.(*Node3DBase)
 	nb.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 	nb.Pose = fr.Pose
@@ -382,7 +382,7 @@ func (nb *Node3DBase) SetPoseQuat(quat mat32.Quat) {
 
 // Default node can be selected / manipulated per the Scene SelMode settings
 func (nb *Node3DBase) ConnectEvents3D(sc *Scene) {
-	nb.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	nb.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		if me.Action != mouse.Press || !nb.IsVisible() || nb.IsInactive() {
 			return
@@ -419,7 +419,7 @@ func (nb *Node3DBase) DisconnectEvent(win *gi.Window, et oswin.EventType, pri gi
 // This goes down the entire tree from this node on down, as typically everything under
 // will not get an explicit disconnect call because no further updating will happen
 func (nb *Node3DBase) DisconnectAllEvents(win *gi.Window, pri gi.EventPris) {
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		_, ni := KiToNode3D(k)
 		if ni == nil {
 			return ki.Break // going into a different type of thing, bail

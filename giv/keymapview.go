@@ -44,7 +44,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	tv.SetStretchMax()
 
 	gi.AvailKeyMapsChanged = false
-	tv.ViewSig.Connect(mfr.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.ViewSig.Connect(mfr.This(), func(recv, send ki.Ki, sig int64, data any) {
 		gi.AvailKeyMapsChanged = true
 	})
 
@@ -64,7 +64,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save KeyMaps Before Closing?",
 			Prompt: "Do you want to save any changes to std preferences keymaps file before closing, or Cancel the close and do a Save to a different file?"},
 			[]string{"Save and Close", "Discard and Close", "Cancel"},
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					km.SavePrefs()
@@ -124,7 +124,7 @@ func (vv *KeyMapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewPx(4))
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_KeyMapValueView).(*KeyMapValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
@@ -144,7 +144,7 @@ func (vv *KeyMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki
 	_, curRow, _ := gi.AvailKeyMaps.MapByName(gi.KeyMapName(cur))
 	desc, _ := vv.Tag("desc")
 	TableViewSelectDialog(vp, &gi.AvailKeyMaps, DlgOpts{Title: "Select a KeyMap", Prompt: desc}, curRow, nil,
-		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg, _ := send.(*gi.Dialog)
 				si := TableViewSelectDialogValue(ddlg)

@@ -58,7 +58,7 @@ func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetProp("border-radius", units.NewPx(4))
 	ac.SetProp("padding", 0)
 	ac.SetProp("margin", 0)
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_IconValueView).(*IconValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
@@ -77,7 +77,7 @@ func (vv *IconValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	cur := gi.IconName(kit.ToString(vv.Value.Interface()))
 	desc, _ := vv.Tag("desc")
 	IconChooserDialog(vp, cur, DlgOpts{Title: "Select an Icon", Prompt: desc},
-		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				si := SliceViewSelectDialogValue(ddlg)

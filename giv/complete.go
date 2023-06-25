@@ -14,7 +14,7 @@ import (
 // CompletePi uses GoPi symbols and language -- the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
+func CompletePi(data any, text string, posLn, posCh int) (md complete.Matches) {
 	sfs := data.(*pi.FileStates)
 	if sfs == nil {
 		// log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
@@ -38,7 +38,7 @@ func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Ma
 }
 
 // CompleteEditPi uses the selected completion to edit the text
-func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
+func CompleteEditPi(data any, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
 	sfs := data.(*pi.FileStates)
 	if sfs == nil {
 		// log.Printf("CompleteEditPi: data is nil not FileStates or is nil - can't complete\n")
@@ -58,7 +58,7 @@ func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.
 // LookupPi uses GoPi symbols and language -- the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func LookupPi(data interface{}, text string, posLn, posCh int) (ld complete.Lookup) {
+func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 	sfs := data.(*pi.FileStates)
 	if sfs == nil {
 		// log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
@@ -93,7 +93,7 @@ func LookupPi(data interface{}, text string, posLn, posCh int) (ld complete.Look
 }
 
 // CompleteText does completion for text files
-func CompleteText(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
+func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches) {
 	err := gi.InitSpell() // text completion uses the spell code to generate completions and suggestions
 	if err != nil {
 		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
@@ -114,7 +114,7 @@ func CompleteText(data interface{}, text string, posLn, posCh int) (md complete.
 }
 
 // CompleteTextEdit uses the selected completion to edit the text
-func CompleteTextEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
+func CompleteTextEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
 	ed = gi.CompleteEditText(text, cursorPos, completion.Text, seed)
 	return ed
 }

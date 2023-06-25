@@ -3,18 +3,18 @@
 // license that can be found in the LICENSE file.
 
 /*
-	Package Units supports full range of CSS-style length units (em, px, dp, etc)
+Package Units supports full range of CSS-style length units (em, px, dp, etc)
 
-	The unit is stored along with a value, and can be converted at a later point into
-	a raw display pixel value using the Context which contains all the necessary reference
-	values to perform the conversion.  Typically the unit value is parsed early from a style
-	and then converted later once the context is fully resolved.  The Value also holds the
-	converted value (Dots) so it can be used directly without further re-conversion.
+The unit is stored along with a value, and can be converted at a later point into
+a raw display pixel value using the Context which contains all the necessary reference
+values to perform the conversion.  Typically the unit value is parsed early from a style
+and then converted later once the context is fully resolved.  The Value also holds the
+converted value (Dots) so it can be used directly without further re-conversion.
 
-	'Dots' are used as term for underlying raw display pixels because "Pixel" and the px unit
-	are actually not conventionally used as raw display pixels in the current HiDPI
-	environment.  See https://developer.mozilla.org/en/docs/Web/CSS/length -- 1 px = 1/96 in
-	Also supporting dp = density-independent pixel = 1/160 in
+'Dots' are used as term for underlying raw display pixels because "Pixel" and the px unit
+are actually not conventionally used as raw display pixels in the current HiDPI
+environment.  See https://developer.mozilla.org/en/docs/Web/CSS/length -- 1 px = 1/96 in
+Also supporting dp = density-independent pixel = 1/160 in
 */
 package units
 
@@ -454,7 +454,7 @@ func StringToValue(str string) Value {
 
 // SetIFace sets value from an interface value representation as from ki.Props
 // key is optional property key for error message -- always logs the error
-func (v *Value) SetIFace(iface interface{}, key string) error {
+func (v *Value) SetIFace(iface any, key string) error {
 	switch val := iface.(type) {
 	case string:
 		v.SetString(val)

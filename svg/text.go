@@ -53,7 +53,7 @@ func (g *Text) SVGName() string {
 	return "tspan"
 }
 
-func (g *Text) CopyFieldsFrom(frm interface{}) {
+func (g *Text) CopyFieldsFrom(frm any) {
 	fr := frm.(*Text)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 	g.Pos = fr.Pos

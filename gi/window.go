@@ -171,7 +171,7 @@ const (
 type Window struct {
 	NodeBase
 	Title             string       `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	Data              interface{}  `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
+	Data              any          `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 	OSWin             oswin.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 	EventMgr          EventMgr     `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
 	Viewport          *Viewport2D  `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
@@ -415,7 +415,7 @@ func NewMainWindow(name, title string, width, height int) *Window {
 // RecycleMainWindow looks for existing window with same Data --
 // if found brings that to the front, returns true for bool.
 // else (and if data is nil) calls NewDialogWin, and returns false.
-func RecycleMainWindow(data interface{}, name, title string, width, height int) (*Window, bool) {
+func RecycleMainWindow(data any, name, title string, width, height int) (*Window, bool) {
 	if data == nil {
 		return NewMainWindow(name, title, width, height), false
 	}
@@ -468,7 +468,7 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 // RecycleDialogWin looks for existing window with same Data --
 // if found brings that to the front, returns true for bool.
 // else (and if data is nil) calls NewDialogWin, and returns false.
-func RecycleDialogWin(data interface{}, name, title string, width, height int, modal bool) (*Window, bool) {
+func RecycleDialogWin(data any, name, title string, width, height int, modal bool) (*Window, bool) {
 	if data == nil {
 		return NewDialogWin(name, title, width, height, modal), false
 	}
@@ -941,7 +941,7 @@ func (w *Window) StopEventLoop() {
 // to send a custom event just to trigger a pass through the event loop, even
 // if nobody is listening (e.g., if a popup is posted without a surrounding
 // event, as in Complete.ShowCompletions
-func (w *Window) SendCustomEvent(data interface{}) {
+func (w *Window) SendCustomEvent(data any) {
 	oswin.SendCustomEvent(w.OSWin, data)
 }
 
@@ -1282,7 +1282,7 @@ func (w *Window) Publish() {
 
 // SignalWindowPublish is the signal receiver function that publishes the
 // window updates when the window update signal (UpdateEnd) occurs
-func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
+func SignalWindowPublish(winki, node ki.Ki, sig int64, data any) {
 	win := winki.Embed(KiT_Window).(*Window)
 	if WinEventTrace || Render2DTrace {
 		fmt.Printf("Win: %v publishing image due to signal: %v from node: %v\n", win.Path(), ki.NodeSignals(sig), node.Path())
@@ -2552,7 +2552,7 @@ func EndTargProfile() {
 // ReportWinNodes reports the number of nodes in this window
 func (w *Window) ReportWinNodes() {
 	nn := 0
-	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
 		nn++
 		return ki.Continue
 	})

@@ -26,7 +26,7 @@ func AddNewClipPath(parent ki.Ki, name string) *ClipPath {
 
 func (g *ClipPath) SVGName() string { return "clippath" }
 
-func (g *ClipPath) CopyFieldsFrom(frm interface{}) {
+func (g *ClipPath) CopyFieldsFrom(frm any) {
 	fr := frm.(*ClipPath)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 }

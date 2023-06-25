@@ -28,41 +28,40 @@ rendering functions operating on the girl.State in the parent Viewport
 
 For Widget / Layout nodes, rendering is done in 5 separate passes:
 
-	0. Init2D: In a MeFirst downward pass, Viewport pointer is set, styles are
-	initialized, and any other widget-specific init is done.
+ 0. Init2D: In a MeFirst downward pass, Viewport pointer is set, styles are
+    initialized, and any other widget-specific init is done.
 
-	1. Style2D: In a MeFirst downward pass, all properties are cached out in
-	an inherited manner, and incorporating any css styles, into either the
-	Paint (SVG) or Style (Widget) object for each Node.  Only done once after
-	structural changes -- styles are not for dynamic changes.
+ 1. Style2D: In a MeFirst downward pass, all properties are cached out in
+    an inherited manner, and incorporating any css styles, into either the
+    Paint (SVG) or Style (Widget) object for each Node.  Only done once after
+    structural changes -- styles are not for dynamic changes.
 
-	2. Size2D: MeLast downward pass, each node first calls
-	g.Layout.Reset(), then sets their LayoutSize according to their own
-	intrinsic size parameters, and/or those of its children if it is a Layout.
+ 2. Size2D: MeLast downward pass, each node first calls
+    g.Layout.Reset(), then sets their LayoutSize according to their own
+    intrinsic size parameters, and/or those of its children if it is a Layout.
 
-	3. Layout2D: MeFirst downward pass (each node calls on its children at
-	appropriate point) with relevant parent BBox that the children are
-	constrained to render within -- they then intersect this BBox with their
-	own BBox (from BBox2D) -- typically just call Layout2DBase for default
-	behavior -- and add parent position to AllocPos. Layout does all its
-	sizing and positioning of children in this pass, based on the Size2D data
-	gathered bottom-up and constraints applied top-down from higher levels.
-	Typically only a single iteration is required but multiple are supported
-	(needed for word-wrapped text or flow layouts).
+ 3. Layout2D: MeFirst downward pass (each node calls on its children at
+    appropriate point) with relevant parent BBox that the children are
+    constrained to render within -- they then intersect this BBox with their
+    own BBox (from BBox2D) -- typically just call Layout2DBase for default
+    behavior -- and add parent position to AllocPos. Layout does all its
+    sizing and positioning of children in this pass, based on the Size2D data
+    gathered bottom-up and constraints applied top-down from higher levels.
+    Typically only a single iteration is required but multiple are supported
+    (needed for word-wrapped text or flow layouts).
 
-	4. Render2D: Final rendering pass, each node is fully responsible for
-	rendering its own children, to provide maximum flexibility (see
-	Render2DChildren) -- bracket the render calls in PushBounds / PopBounds
-	and a false from PushBounds indicates that VpBBox is empty and no
-	rendering should occur.  Nodes typically connect / disconnect to receive
-	events from the window based on this visibility here.
+ 4. Render2D: Final rendering pass, each node is fully responsible for
+    rendering its own children, to provide maximum flexibility (see
+    Render2DChildren) -- bracket the render calls in PushBounds / PopBounds
+    and a false from PushBounds indicates that VpBBox is empty and no
+    rendering should occur.  Nodes typically connect / disconnect to receive
+    events from the window based on this visibility here.
 
     * Move2D: optional pass invoked by scrollbars to move elements relative to
-      their previously-assigned positions.
+    their previously-assigned positions.
 
     * SVG nodes skip the Size and Layout passes, and render directly into
-      parent SVG viewport
-
+    parent SVG viewport
 */
 type Node2DBase struct {
 	NodeBase
@@ -76,7 +75,7 @@ var Node2DBaseProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
 }
 
-func (nb *Node2DBase) CopyFieldsFrom(frm interface{}) {
+func (nb *Node2DBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*Node2DBase)
 	if !ok {
 		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Node2DBase one\n", ki.Type(nb).Name())
@@ -349,7 +348,7 @@ func (nb *Node2DBase) HasFocus2D() bool {
 func (nb *Node2DBase) GrabFocus() {
 	foc := nb.This()
 	if !nb.CanFocus() {
-		nb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		nb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
 			_, ni := KiToNode2D(k)
 			if ni == nil || ni.This() == nil || ni.IsDeleted() || ni.IsDestroyed() {
 				return ki.Break
@@ -597,7 +596,7 @@ func (nb *Node2DBase) ParentWindow() *Window {
 // Node2D interface
 func (nb *Node2DBase) ParentViewport() *Viewport2D {
 	var parVp *Viewport2D
-	nb.FuncUpParent(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncUpParent(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ok := k.(Node2D)
 		if !ok {
 			return ki.Break // don't keep going up
@@ -641,7 +640,7 @@ func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 	if em == nil {
 		return
 	}
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break // going into a different type of thing, bail
@@ -732,7 +731,7 @@ func (nb *Node2DBase) NeedsFullReRender2DTree() bool {
 		return false
 	}
 	full := false
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
@@ -756,7 +755,7 @@ func (nb *Node2DBase) Init2DTree() {
 		return
 	}
 	pr := prof.Start("Node2D.Init2DTree." + ki.Type(nb).Name())
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
@@ -777,7 +776,7 @@ func (nb *Node2DBase) Style2DTree() {
 	}
 	// fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
 	pr := prof.Start("Node2D.Style2DTree." + ki.Type(nb).Name())
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
@@ -797,7 +796,7 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 	}
 	pr := prof.Start("Node2D.Size2DTree." + ki.Type(nb).Name())
 	nb.FuncDownMeLast(0, nb.This(),
-		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
+		func(k ki.Ki, level int, d any) bool { // tests whether to process node
 			nii, ni := KiToNode2D(k)
 			if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 				return ki.Break
@@ -807,7 +806,7 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 			}
 			return ki.Continue
 		},
-		func(k ki.Ki, level int, d interface{}) bool { // this one does the work
+		func(k ki.Ki, level int, d any) bool { // this one does the work
 			nii, ni := KiToNode2D(k)
 			if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 				return ki.Break
@@ -905,7 +904,7 @@ func (nb *Node2DBase) Render2DChildren() {
 // BBoxReport reports on all the bboxes for everything in the tree
 func (nb *Node2DBase) BBoxReport() string {
 	rpt := ""
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
@@ -955,7 +954,7 @@ func (nb *Node2DBase) ParentPaint() *gist.Paint {
 // that is a ReRenderAnchor -- for optimized re-rendering
 func (nb *Node2DBase) ParentReRenderAnchor() Node2D {
 	var par Node2D
-	nb.FuncUp(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncUp(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil {
 			return false // don't keep going up
@@ -1060,7 +1059,7 @@ type MetaData2D struct {
 
 var KiT_MetaData2D = kit.Types.AddType(&MetaData2D{}, nil)
 
-func (g *MetaData2D) CopyFieldsFrom(frm interface{}) {
+func (g *MetaData2D) CopyFieldsFrom(frm any) {
 	fr := frm.(*MetaData2D)
 	g.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
 	g.MetaData = fr.MetaData

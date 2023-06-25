@@ -165,7 +165,7 @@ func AddNewLayout(parent ki.Ki, name string, layout Layouts) *Layout {
 	return ly
 }
 
-func (ly *Layout) CopyFieldsFrom(frm interface{}) {
+func (ly *Layout) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*Layout)
 	if !ok {
 		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Layout one\n", ki.Type(ly).Name())
@@ -335,7 +335,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 	sc.TrackThr = sc.Step
 	sc.Value = mat32.Min(sc.Value, sc.Max-sc.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
-	sc.SliderSig.ConnectOnly(ly.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sc.SliderSig.ConnectOnly(ly.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig != int64(SliderValueChanged) {
 			return
 		}
@@ -997,7 +997,7 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 	lcnm := strings.ToLower(name)
 	var rki ki.Ki
 	gotAfter := false
-	ly.FuncDownBreadthFirst(0, nil, func(k ki.Ki, level int, data interface{}) bool {
+	ly.FuncDownBreadthFirst(0, nil, func(k ki.Ki, level int, data any) bool {
 		if k == ly.This() { // skip us
 			return ki.Continue
 		}
@@ -1028,18 +1028,18 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 // Layout -- most subclasses of Layout will want these..
 func (ly *Layout) LayoutScrollEvents() {
 	// LowPri to allow other focal widgets to capture
-	ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		li := recv.Embed(KiT_Layout).(*Layout)
 		li.ScrollDelta(me)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
-	ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*dnd.MoveEvent)
 		li := recv.Embed(KiT_Layout).(*Layout)
 		li.AutoScroll(me.Pos())
 	})
-	ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		li := recv.Embed(KiT_Layout).(*Layout)
 		if li.ViewportSafe().IsMenu() {
@@ -1051,7 +1051,7 @@ func (ly *Layout) LayoutScrollEvents() {
 // KeyChordEvent processes (lowpri) layout key events
 func (ly *Layout) KeyChordEvent() {
 	// LowPri to allow other focal widgets to capture
-	ly.ConnectEvent(oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ly.ConnectEvent(oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		li := recv.Embed(KiT_Layout).(*Layout)
 		kt := d.(*key.ChordEvent)
 		li.LayoutKeys(kt)
@@ -1278,7 +1278,7 @@ func AddNewStretch(parent ki.Ki, name string) *Stretch {
 	return parent.AddNewChild(KiT_Stretch, name).(*Stretch)
 }
 
-func (st *Stretch) CopyFieldsFrom(frm interface{}) {
+func (st *Stretch) CopyFieldsFrom(frm any) {
 	fr := frm.(*Stretch)
 	st.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
@@ -1321,7 +1321,7 @@ func AddNewSpace(parent ki.Ki, name string) *Space {
 	return parent.AddNewChild(KiT_Space, name).(*Space)
 }
 
-func (sp *Space) CopyFieldsFrom(frm interface{}) {
+func (sp *Space) CopyFieldsFrom(frm any) {
 	fr := frm.(*Space)
 	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }

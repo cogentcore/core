@@ -63,7 +63,7 @@ func (wl *WindowList) FindName(name string) (*Window, bool) {
 // FindData finds window with given Data on list -- returns
 // window and true if found, nil, false otherwise.
 // data of type string works fine -- does equality comparison on string contents.
-func (wl *WindowList) FindData(data interface{}) (*Window, bool) {
+func (wl *WindowList) FindData(data any) (*Window, bool) {
 	if kit.IfaceIsNil(data) {
 		return nil, false
 	}

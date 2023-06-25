@@ -40,7 +40,7 @@ func (g *Marker) SVGName() string { return "marker" }
 
 func (g *Marker) EnforceSVGName() bool { return false }
 
-func (g *Marker) CopyFieldsFrom(frm interface{}) {
+func (g *Marker) CopyFieldsFrom(frm any) {
 	fr := frm.(*Marker)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 	g.RefPos = fr.RefPos

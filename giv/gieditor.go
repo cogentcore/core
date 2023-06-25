@@ -178,7 +178,7 @@ func (ge *GiEditor) ConfigSplitView() {
 		tvfr.SetReRenderAnchor()
 		tv := AddNewTreeView(tvfr, "tv")
 		sv := AddNewStructView(split, "sv")
-		tv.TreeViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.TreeViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if data == nil {
 				return
 			}
@@ -191,7 +191,7 @@ func (ge *GiEditor) ConfigSplitView() {
 				gee.SetChanged()
 			}
 		})
-		sv.ViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.ViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
 			gee, _ := recv.Embed(KiT_GiEditor).(*GiEditor)
 			gee.SetChanged()
 		})
@@ -232,7 +232,7 @@ var GiEditorProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
 			"icon": "update",
-			"updtfunc": ActionUpdateFunc(func(gei interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
 				act.SetActiveStateUpdt(ge.Changed)
 			}),
@@ -252,7 +252,7 @@ var GiEditorProps = ki.Props{
 		{"Save", ki.Props{
 			"icon": "file-save",
 			"desc": "Save json-formatted Ki tree structure to existing filename",
-			"updtfunc": ActionUpdateFunc(func(gei interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
 				act.SetActiveStateUpdt(ge.Changed && ge.Filename != "")
 			}),
@@ -273,7 +273,7 @@ var GiEditorProps = ki.Props{
 		{"AppMenu", ki.BlankProp{}},
 		{"File", ki.PropSlice{
 			{"Update", ki.Props{
-				"updtfunc": ActionUpdateFunc(func(gei interface{}, act *gi.Action) {
+				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 					ge := gei.(*GiEditor)
 					act.SetActiveState(ge.Changed)
 				}),
@@ -292,7 +292,7 @@ var GiEditorProps = ki.Props{
 			{"Save", ki.Props{
 				"shortcut": gi.KeyFunMenuSave,
 				"desc":     "Save json-formatted Ki tree structure to existing filename",
-				"updtfunc": ActionUpdateFunc(func(gei interface{}, act *gi.Action) {
+				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 					ge := gei.(*GiEditor)
 					act.SetActiveState(ge.Changed && ge.Filename != "")
 				}),
@@ -365,7 +365,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 			Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
 			[]string{"Close Without Saving", "Cancel"},
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					win.Close()

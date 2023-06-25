@@ -30,7 +30,7 @@ func (g *Group) SVGName() string { return "g" }
 
 func (g *Group) EnforceSVGName() bool { return false }
 
-func (g *Group) CopyFieldsFrom(frm interface{}) {
+func (g *Group) CopyFieldsFrom(frm any) {
 	fr := frm.(*Group)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 }

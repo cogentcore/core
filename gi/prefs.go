@@ -358,7 +358,7 @@ var PreferencesProps = ki.Props{
 			}},
 			{"Save", ki.Props{
 				"shortcut": KeyFunMenuSave,
-				"updtfunc": func(pfi interface{}, act *Action) {
+				"updtfunc": func(pfi any, act *Action) {
 					pf := pfi.(*Preferences)
 					act.SetActiveState(pf.Changed)
 				},
@@ -394,7 +394,7 @@ var PreferencesProps = ki.Props{
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs.json file, which is auto-loaded at startup.",
 			"icon": "file-save",
-			"updtfunc": func(pfi interface{}, act *Action) {
+			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*Preferences)
 				act.SetActiveStateUpdt(pf.Changed)
 			},
@@ -967,7 +967,7 @@ var PrefsDetailedProps = ki.Props{
 			}},
 			{"Save", ki.Props{
 				"shortcut": KeyFunMenuSave,
-				"updtfunc": func(pfi interface{}, act *Action) {
+				"updtfunc": func(pfi any, act *Action) {
 					pf := pfi.(*PrefsDetailed)
 					act.SetActiveState(pf.Changed)
 				},
@@ -986,7 +986,7 @@ var PrefsDetailedProps = ki.Props{
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs_det.json file, which is auto-loaded at startup.",
 			"icon": "file-save",
-			"updtfunc": func(pfi interface{}, act *Action) {
+			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*PrefsDetailed)
 				act.SetActiveStateUpdt(pf.Changed)
 			},

@@ -21,7 +21,7 @@ import (
 // show the key names and editor vals for each value.
 type SliceViewInline struct {
 	gi.PartsWidgetBase
-	Slice        interface{} `desc:"the slice that we are a view onto"`
+	Slice        any         `desc:"the slice that we are a view onto"`
 	SliceValView ValueView   `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 	IsArray      bool        `desc:"whether the slice is actually an array -- no modifications"`
 	IsFixedLen   bool        `desc:"whether the slice has a fixed-len flag on it"`
@@ -40,7 +40,7 @@ func (sv *SliceViewInline) Disconnect() {
 }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
-func (sv *SliceViewInline) SetSlice(sl interface{}) {
+func (sv *SliceViewInline) SetSlice(sl any) {
 	updt := false
 	if sv.Slice != sl {
 		updt = sv.UpdateStart()
@@ -100,7 +100,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	}
 	for i, vv := range sv.Values {
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 			svv.SetChanged()
 		})
@@ -119,7 +119,7 @@ func (sv *SliceViewInline) ConfigParts() {
 			adac := adack.(*gi.Action)
 			adac.SetIcon("plus")
 			adac.Tooltip = "add an element to the slice"
-			adac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			adac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 				svv.SliceNewAt(-1, true)
 			})
@@ -130,7 +130,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		edac := edack.(*gi.Action)
 		edac.SetIcon("edit")
 		edac.Tooltip = "edit slice in a dialog window"
-		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 			vpath := svv.ViewPath
 			title := ""
@@ -151,7 +151,7 @@ func (sv *SliceViewInline) ConfigParts() {
 			if svvvk != nil {
 				svvv := svvvk.(*SliceView)
 				svvv.SliceValView = svv.SliceValView
-				svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					svvvv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 					svvvv.ViewSig.Emit(svvvv.This(), 0, nil)
 				})

@@ -79,13 +79,13 @@ func (tv *TwinTextViews) ConfigTexts() {
 		bv.SetBuf(tv.BufB)
 
 		// sync scrolling
-		al.ScrollSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		al.ScrollSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dm := mat32.Dims(sig)
 			if dm == mat32.Y {
 				bl.ScrollToPos(dm, data.(float32))
 			}
 		})
-		bl.ScrollSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		bl.ScrollSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dm := mat32.Dims(sig)
 			if dm == mat32.Y {
 				al.ScrollToPos(dm, data.(float32))

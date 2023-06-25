@@ -32,7 +32,7 @@ var specialMenus = map[string]struct{}{
 // there is no main menu defined for this type, or on errors (which are
 // programmer errors sent to log).
 // gopy:interface=handle
-func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
+func MainMenuView(val any, win *gi.Window, mbar *gi.MenuBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -98,7 +98,7 @@ func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 
 // HasToolBarView returns true if given val has a ToolBar type property
 // registered -- call this to check before then calling ToolBarView.
-func HasToolBarView(val interface{}) bool {
+func HasToolBarView(val any) bool {
 	tpp, _, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -116,7 +116,7 @@ func HasToolBarView(val interface{}) bool {
 // formats and options for configuring the menu.  Returns false if there is no
 // toolbar defined for this type, or on errors (which are programmer errors
 // sent to log).
-func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
+func ToolBarView(val any, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -166,7 +166,7 @@ func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 // cases, and then falls back on "CtxtMenu".  Returns false if there is no
 // context menu defined for this type, or on errors (which are programmer
 // errors sent to log).
-func CtxtMenuView(val interface{}, inactive bool, vp *gi.Viewport2D, menu *gi.Menu) bool {
+func CtxtMenuView(val any, inactive bool, vp *gi.Viewport2D, menu *gi.Menu) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -214,7 +214,7 @@ func CtxtMenuView(val interface{}, inactive bool, vp *gi.Viewport2D, menu *gi.Me
 // lists (in that order).  List of available methods is cached in type
 // properties after first call.
 // gopy:interface=handle
-func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
+func CallMethod(val any, method string, vp *gi.Viewport2D) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		MethViewErr(vtyp, fmt.Sprintf("Type: %v properties not found for CallMethod -- need to register type using kit.AddType\n", vtyp.String()))
@@ -243,7 +243,7 @@ func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
 
 // MethViewSetActionData sets the MethViewData associated with the given action
 // with values updated from the given val and viewport
-func MethViewSetActionData(ac *gi.Action, val interface{}, vp *gi.Viewport2D) {
+func MethViewSetActionData(ac *gi.Action, val any, vp *gi.Viewport2D) {
 	if ac.Data == nil {
 		fmt.Printf("giv.MethView no MethViewData on action: %v\n", ac.Nm)
 		return
@@ -264,7 +264,7 @@ var compileMethsOrder = []string{"CallMethods", "ToolBar", "MainMenu", "CtxtMenu
 // MethViewCompileMeths gets all methods either on the CallMethods list or any
 // of the ToolBar, MainMenu, or CtxtMenu lists (in that order).  Returns
 // property list of them, which are just names -> Actions
-func MethViewCompileMeths(val interface{}, vp *gi.Viewport2D) ki.Props {
+func MethViewCompileMeths(val any, vp *gi.Viewport2D) ki.Props {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return nil
@@ -284,7 +284,7 @@ func MethViewCompileMeths(val interface{}, vp *gi.Viewport2D) ki.Props {
 // MethViewCompileActions processes properties for parent action pa for
 // overall object val of given type -- could have a sub-menu of further
 // actions or might just be a single action
-func MethViewCompileActions(cmp ki.Props, val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, pnm string, pp interface{}) bool {
+func MethViewCompileActions(cmp ki.Props, val any, vtyp reflect.Type, vp *gi.Viewport2D, pnm string, pp any) bool {
 	rval := true
 	if pv, ok := pp.(ki.PropSlice); ok {
 		for _, mm := range pv {
@@ -338,7 +338,7 @@ func MethViewErr(vtyp reflect.Type, msg string) {
 
 // MethViewTypeProps gets props, typ of val, returns false if not found or
 // other err
-func MethViewTypeProps(val interface{}) (ki.Props, reflect.Type, bool) {
+func MethViewTypeProps(val any) (ki.Props, reflect.Type, bool) {
 	if kit.IfaceIsNil(val) {
 		return nil, nil, false
 	}
@@ -352,7 +352,7 @@ func MethViewTypeProps(val interface{}) (ki.Props, reflect.Type, bool) {
 
 // HasMainMenuView returns true if given val has a MainMenu type property
 // registered -- call this to check before then calling MainMenuView
-func HasMainMenuView(val interface{}) bool {
+func HasMainMenuView(val any) bool {
 	tpp, _, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -367,7 +367,7 @@ func HasMainMenuView(val interface{}) bool {
 // MethViewNoUpdateAfterProp returns true if given val has a top-level "MethViewNoUpdateAfter"
 // type property registered -- some types generically want that and it is much easier to
 // just specify once instead of every time..
-func MethViewNoUpdateAfterProp(val interface{}) bool {
+func MethViewNoUpdateAfterProp(val any) bool {
 	tpp, _, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -385,7 +385,7 @@ var MethodViewCallMethsProp = "__MethViewCallMeths"
 // ActionsView processes properties for parent action pa for overall object
 // val of given type -- could have a sub-menu of further actions or might just
 // be a single action
-func ActionsView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, pa *gi.Action, pp interface{}) bool {
+func ActionsView(val any, vtyp reflect.Type, vp *gi.Viewport2D, pa *gi.Action, pp any) bool {
 	pa.Text = strings.Replace(strings.Join(camelcase.Split(pa.Nm), " "), "  ", " ", -1)
 	rval := true
 	switch pv := pp.(type) {
@@ -419,12 +419,12 @@ func ActionsView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, pa *gi.A
 }
 
 // ActionView configures given action with given props
-func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, props ki.Props) bool {
+func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, props ki.Props) bool {
 	// special action names
 	switch ac.Nm {
 	case "Close Window":
 		ac.Shortcut = gi.ShortcutForFun(gi.KeyFunWinClose)
-		ac.ActionSig.Connect(vp.Win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac.ActionSig.Connect(vp.Win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			vp.Win.CloseReq()
 		})
 		return true
@@ -475,7 +475,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 		case "shortcut-func":
 			if sf, ok := pv.(ShortcutFunc); ok {
 				ac.Shortcut = sf(md.Val, ac)
-			} else if sf, ok := pv.(func(it interface{}, act *gi.Action) key.Chord); ok {
+			} else if sf, ok := pv.(func(it any, act *gi.Action) key.Chord); ok {
 				ac.Shortcut = sf(md.Val, ac)
 			} else {
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
@@ -492,7 +492,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			if sf, ok := pv.(LabelFunc); ok {
 				str := sf(md.Val, ac)
 				ac.Text = str
-			} else if sf, ok := pv.(func(it interface{}, act *gi.Action) string); ok {
+			} else if sf, ok := pv.(func(it any, act *gi.Action) string); ok {
 				ac.Text = sf(md.Val, ac)
 			} else {
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, label-func must be of type LabelFunc", methNm))
@@ -514,7 +514,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			if uf, ok := pv.(ActionUpdateFunc); ok {
 				md.UpdateFunc = uf
 				ac.UpdateFunc = MethViewUpdateFunc
-			} else if uf, ok := pv.(func(it interface{}, act *gi.Action)); ok {
+			} else if uf, ok := pv.(func(it any, act *gi.Action)); ok {
 				md.UpdateFunc = ActionUpdateFunc(uf)
 				ac.UpdateFunc = MethViewUpdateFunc
 			} else {
@@ -533,7 +533,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 				ac.MakeMenuFunc = MethViewSubMenuFunc
 				md.SubMenuFunc = sf
 				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
-			} else if sf, ok := pv.(func(it interface{}, vp *gi.Viewport2D) []string); ok {
+			} else if sf, ok := pv.(func(it any, vp *gi.Viewport2D) []string); ok {
 				ac.MakeMenuFunc = MethViewSubMenuFunc
 				md.SubMenuFunc = SubMenuFunc(sf)
 				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
@@ -545,7 +545,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 				ac.MakeMenuFunc = MethViewSubMenuFunc
 				md.SubSubMenuFunc = sf
 				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
-			} else if sf, ok := pv.(func(it interface{}, vp *gi.Viewport2D) [][]string); ok {
+			} else if sf, ok := pv.(func(it any, vp *gi.Viewport2D) [][]string); ok {
 				ac.MakeMenuFunc = MethViewSubMenuFunc
 				md.SubSubMenuFunc = SubSubMenuFunc(sf)
 				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
@@ -629,31 +629,31 @@ var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, kit.BitFlag, n
 // SubMenuFunc is a function that returns a string slice of submenu items
 // used in MethView submenu-func option
 // first argument is the object on which the method is defined (receiver)
-type SubMenuFunc func(it interface{}, vp *gi.Viewport2D) []string
+type SubMenuFunc func(it any, vp *gi.Viewport2D) []string
 
 // SubSubMenuFunc is a function that returns a slice of string slices
 // to create submenu items each having their own submenus.
 // used in MethView submenu-func option
 // first argument is the object on which the method is defined (receiver)
-type SubSubMenuFunc func(it interface{}, vp *gi.Viewport2D) [][]string
+type SubSubMenuFunc func(it any, vp *gi.Viewport2D) [][]string
 
 // ShortcutFunc is a function that returns a key.Chord string for a shortcut
 // used in MethView shortcut-func option
 // first argument is the object on which the method is defined (receiver)
-type ShortcutFunc func(it interface{}, act *gi.Action) key.Chord
+type ShortcutFunc func(it any, act *gi.Action) key.Chord
 
 // LabelFunc is a function that returns a string to set a label
 // first argument is the object on which the method is defined (receiver)
-type LabelFunc func(it interface{}, act *gi.Action) string
+type LabelFunc func(it any, act *gi.Action) string
 
 // ActionUpdateFunc is a function that updates method active / inactive status
 // first argument is the object on which the method is defined (receiver)
-type ActionUpdateFunc func(it interface{}, act *gi.Action)
+type ActionUpdateFunc func(it any, act *gi.Action)
 
 // MethViewData is set to the Action.Data field for all MethView actions,
 // containing info needed to actually call the Method on value Val.
 type MethViewData struct {
-	Val            interface{}
+	Val            any
 	ValVal         reflect.Value
 	Vp             *gi.Viewport2D
 	Method         string
@@ -663,11 +663,11 @@ type MethViewData struct {
 	SpecProps      ki.Props         `desc:"props for special action types, e.g., FileView"`
 	Desc           string           `desc:"prompt shown in arg dialog or confirm prompt dialog"`
 	UpdateFunc     ActionUpdateFunc `desc:"update function defined in properties -- called by our wrapper update function"`
-	SubMenuSlice   interface{}      `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
+	SubMenuSlice   any              `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
 	SubMenuField   string           `desc:"value for submenu generation as name of field on obj"`
 	SubMenuFunc    SubMenuFunc      `desc:"function that will generate submenu items, as []string slice"`
 	SubSubMenuFunc SubSubMenuFunc   `desc:"function that will generate sub-submenu items, as [][]string slice"`
-	SubMenuVal     interface{}      `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
+	SubMenuVal     any              `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
 	KeyFun         gi.KeyFuns       `desc:"key function that we emit, if MethViewKeyFun type"`
 	Flags          MethViewFlags
 }
@@ -680,7 +680,7 @@ func (md *MethViewData) MethName() string {
 
 // MethViewCall is the receiver func for MethView actions that call a method
 // -- it uses the MethViewData to call the target method.
-func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
+func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 	ac := send.(*gi.Action)
 	md := ac.Data.(*MethViewData)
 	if md.ArgProps == nil { // no args -- just call
@@ -707,7 +707,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 			ad.View.SetTag("desc", ad.Desc)
 		}
 		if ad.View.HasAction() {
-			ad.View.Activate(md.Vp, ad.View, func(recv, send ki.Ki, sig int64, data interface{}) {
+			ad.View.Activate(md.Vp, ad.View, func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					MethViewCallMeth(md, args)
 				}
@@ -717,7 +717,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 	}
 
 	ArgViewDialog(md.Vp, ads, DlgOpts{Title: ac.Text, Prompt: md.Desc},
-		md.Vp.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		md.Vp.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				// ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				MethViewCallMeth(md, args)
@@ -737,7 +737,7 @@ func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Val
 	}
 	if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
 		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, gi.AddOk, gi.AddCancel,
-			md.Vp.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			md.Vp.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					MethViewCallMeth(md, args)
 				}
@@ -806,7 +806,7 @@ type ArgData struct {
 	Name    string
 	Desc    string
 	View    ValueView
-	Default interface{}
+	Default any
 	Flags   ArgDataFlags
 }
 
@@ -843,7 +843,7 @@ func (ad *ArgData) HasValSet() bool {
 
 // MethArgHist stores the history of method arg values -- used for setting defaults
 // for next time the method is called.  Key is type:method name
-var MethArgHist = map[string]interface{}{}
+var MethArgHist = map[string]any{}
 
 // MethViewArgData gets the arg data for the method args, returns false if
 // errors -- nprompt is the number of args that require prompting from the
@@ -922,9 +922,9 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 }
 
 // MethViewArgDefaultVal returns the default value of the given argument index
-func MethViewArgDefaultVal(md *MethViewData, ai int) (interface{}, bool) {
+func MethViewArgDefaultVal(md *MethViewData, ai int) (any, bool) {
 	aps := &md.ArgProps[ai]
-	var def interface{}
+	var def any
 	got := false
 	switch apv := aps.Value.(type) {
 	case ki.BlankProp:

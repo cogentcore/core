@@ -51,7 +51,7 @@ func (nb *NodeBase) AsGiNode() *NodeBase {
 	return nb
 }
 
-func (nb *NodeBase) CopyFieldsFrom(frm interface{}) {
+func (nb *NodeBase) CopyFieldsFrom(frm any) {
 	// note: not copying ki.Node as it doesn't have any copy fields
 	fr := frm.(*NodeBase)
 	nb.Class = fr.Class
@@ -395,7 +395,7 @@ func SetStdXMLAttr(ni Node, name, val string) bool {
 // nodes (leaves, terminal nodes) will be considered
 func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
 	var rval ki.Ki
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		if k == nb.This() {
 			return ki.Continue
 		}
@@ -421,7 +421,7 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 // nodes (leaves, terminal nodes) will be considered.
 func (nb *NodeBase) AllWithinBBox(bbox image.Rectangle, leavesOnly bool) ki.Slice {
 	var rval ki.Slice
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		if k == nb.This() {
 			return ki.Continue
 		}

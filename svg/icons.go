@@ -60,7 +60,7 @@ var IconProps = ki.Props{
 	"background-color": color.Transparent,
 }
 
-func (ic *Icon) CopyFieldsFrom(frm interface{}) {
+func (ic *Icon) CopyFieldsFrom(frm any) {
 	fr := frm.(*Icon)
 	ic.SVG.CopyFieldsFrom(&fr.SVG)
 	ic.Filename = fr.Filename

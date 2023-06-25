@@ -71,21 +71,21 @@ func (sv *SceneView) ToolbarConfig() {
 	}
 	tbar.SetStretchMaxWidth()
 	tbar.AddAction(gi.ActOpts{Icon: "update", Tooltip: "reset to default initial display, and rebuild everything"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.SetCamera("default")
 			scc.Update()
 		})
 	tbar.AddAction(gi.ActOpts{Icon: "zoom-in", Tooltip: "zoom in"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Zoom(-.05)
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Icon: "zoom-out", Tooltip: "zoom out"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Zoom(.05)
@@ -94,28 +94,28 @@ func (sv *SceneView) ToolbarConfig() {
 	tbar.AddSeparator("rot")
 	gi.AddNewLabel(tbar, "rot", "Rot:")
 	tbar.AddAction(gi.ActOpts{Icon: "wedge-left"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Orbit(5, 0)
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Icon: "wedge-up"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Orbit(0, 5)
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Icon: "wedge-down"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Orbit(0, -5)
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Icon: "wedge-right"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Orbit(-5, 0)
@@ -124,28 +124,28 @@ func (sv *SceneView) ToolbarConfig() {
 	tbar.AddSeparator("pan")
 	gi.AddNewLabel(tbar, "pan", "Pan:")
 	tbar.AddAction(gi.ActOpts{Icon: "wedge-left"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Pan(-.2, 0)
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Icon: "wedge-up"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Pan(0, .2)
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Icon: "wedge-down"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Pan(0, -.2)
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Icon: "wedge-right"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.Camera.Pan(.2, 0)
@@ -154,7 +154,7 @@ func (sv *SceneView) ToolbarConfig() {
 	tbar.AddSeparator("save")
 	gi.AddNewLabel(tbar, "save", "Save:")
 	tbar.AddAction(gi.ActOpts{Label: "1", Icon: "save", Tooltip: "first click (or + Shift) saves current view, second click restores to saved state"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			em := svv.EventMgr2D()
 			scc := svv.Scene()
@@ -171,7 +171,7 @@ func (sv *SceneView) ToolbarConfig() {
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Label: "2", Icon: "save", Tooltip: "first click saves current view, second click restores to saved state"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			em := svv.EventMgr2D()
 			scc := svv.Scene()
@@ -188,7 +188,7 @@ func (sv *SceneView) ToolbarConfig() {
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Label: "3", Icon: "save", Tooltip: "first click (or + Shift) saves current view, second click restores to saved state"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			em := svv.EventMgr2D()
 			scc := svv.Scene()
@@ -205,7 +205,7 @@ func (sv *SceneView) ToolbarConfig() {
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Label: "4", Icon: "save", Tooltip: "first click (or + Shift) saves current view, second click restores to saved state"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			em := svv.EventMgr2D()
 			scc := svv.Scene()
@@ -225,7 +225,7 @@ func (sv *SceneView) ToolbarConfig() {
 	cb := gi.AddNewComboBox(tbar, "selmode")
 	cb.ItemsFromEnum(KiT_SelModes, true, 25)
 	cb.SetCurIndex(int(sv.Scene().SelMode))
-	cb.ComboSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.ComboSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(KiT_SceneView).(*SceneView)
 		cbb := send.(*gi.ComboBox)
 		scc := svv.Scene()
@@ -233,7 +233,7 @@ func (sv *SceneView) ToolbarConfig() {
 		scc.UpdateSig()
 	})
 	tbar.AddAction(gi.ActOpts{Label: "Edit", Icon: "edit", Tooltip: "edit the currently-selected object"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			if scc.CurSel != nil {
@@ -241,7 +241,7 @@ func (sv *SceneView) ToolbarConfig() {
 			}
 		})
 	tbar.AddAction(gi.ActOpts{Label: "Edit Scene", Icon: "edit", Tooltip: "edit the overall scene object (for access to meshes, etc)"}, sv.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			giv.StructViewDialog(svv.Viewport, scc, giv.DlgOpts{Title: "Scene"}, nil, nil)

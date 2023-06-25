@@ -19,19 +19,19 @@ import (
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --
 // provides a named, optional way to specify these args
 type DlgOpts struct {
-	Title    string      `desc:"generally should be provided -- used for setting name of dialog and associated window"`
-	Prompt   string      `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
-	CSS      ki.Props    `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
-	TmpSave  ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewPath string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
-	Ok       bool        `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
-	Cancel   bool        `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
-	NoAdd    bool        `desc:"if true, user cannot add elements of the slice"`
-	NoDelete bool        `desc:"if true, user cannot delete elements of the slice"`
-	Inactive bool        `desc:"if true all fields will be inactive"`
-	Data     interface{} `desc:"if non-nil, this is data that identifies what the dialog is about -- if an existing dialog for such data is already in place, then it is shown instead of making a new one"`
-	Filename string      `desc:"filename, e.g., for TextView, to get highlighting"`
-	LineNos  bool        `desc:"include line numbers for TextView"`
+	Title    string    `desc:"generally should be provided -- used for setting name of dialog and associated window"`
+	Prompt   string    `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
+	CSS      ki.Props  `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
+	TmpSave  ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	Ok       bool      `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+	Cancel   bool      `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+	NoAdd    bool      `desc:"if true, user cannot add elements of the slice"`
+	NoDelete bool      `desc:"if true, user cannot delete elements of the slice"`
+	Inactive bool      `desc:"if true all fields will be inactive"`
+	Data     any       `desc:"if non-nil, this is data that identifies what the dialog is about -- if an existing dialog for such data is already in place, then it is shown instead of making a new one"`
+	Filename string    `desc:"filename, e.g., for TextView, to get highlighting"`
+	LineNos  bool      `desc:"include line numbers for TextView"`
 }
 
 // ToGiOpts converts giv opts to gi opts
@@ -83,7 +83,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	cpb := gi.AddNewButton(bbox, "copy-to-clip")
 	cpb.SetText("Copy To Clipboard")
 	cpb.SetIcon("copy")
-	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
 			oswin.TheApp.ClipBoard(ddlg.Win.OSWin).Write(mimedata.NewTextBytes(text))
@@ -107,7 +107,7 @@ func TextViewDialogTextView(dlg *gi.Dialog) *TextView {
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
 // gopy:interface=handle
-func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func StructViewDialog(avp *gi.Viewport2D, stru any, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(stru, opts.ToGiOpts(), opts.Ok, opts.Cancel)
 	if recyc {
 		return dlg
@@ -139,7 +139,7 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv k
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 // gopy:interface=handle
-func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func MapViewDialog(avp *gi.Viewport2D, mp any, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	// note: map is not directly comparable, so we have to use the pointer here..
 	mptr := reflect.ValueOf(mp).Pointer()
 	dlg, recyc := gi.RecycleStdDialog(mptr, opts.ToGiOpts(), opts.Ok, opts.Cancel)
@@ -172,7 +172,7 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki,
 // dialog signals (nil to ignore).    Also has an optional styling
 // function for styling elements of the table.
 // gopy:interface=handle
-func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func SliceViewDialog(avp *gi.Viewport2D, slice any, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), opts.Ok, opts.Cancel)
 	if recyc {
 		return dlg
@@ -206,7 +206,7 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleF
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).  This version does not have the style function.
 // gopy:interface=handle
-func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice any, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), opts.Ok, opts.Cancel)
 	if recyc {
 		return dlg
@@ -240,7 +240,7 @@ func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice interface{}, opts DlgOpts,
 // and the overall dialog signal.  Also has an optional styling function for
 // styling elements of the table.
 // gopy:interface=handle
-func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal any, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	if opts.CSS == nil {
 		opts.CSS = ki.Props{
 			"textfield": ki.Props{
@@ -266,7 +266,7 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts D
 	sv.ViewPath = opts.ViewPath
 	sv.SetSlice(slice)
 
-	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(SliceViewDoubleClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
 			ddlg.Accept()
@@ -298,7 +298,7 @@ func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
 // function for dialog signals (nil to ignore).  Also has an optional styling
 // function for styling elements of the table.
 // gopy:interface=handle
-func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func TableViewDialog(avp *gi.Viewport2D, slcOfStru any, opts DlgOpts, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(slcOfStru, opts.ToGiOpts(), opts.Ok, opts.Cancel)
 	if recyc {
 		return dlg
@@ -337,7 +337,7 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, st
 // reporting selection events, and dlgFunc for the overall dialog signals.
 // Also has an optional styling function for styling elements of the table.
 // gopy:interface=handle
-func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, initRow int, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru any, opts DlgOpts, initRow int, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	if opts.CSS == nil {
 		opts.CSS = ki.Props{
 			"textfield": ki.Props{
@@ -363,7 +363,7 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOp
 	sv.ViewPath = opts.ViewPath
 	sv.SetSlice(slcOfStru)
 
-	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(SliceViewDoubleClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
 			ddlg.Accept()
@@ -405,7 +405,7 @@ func FontChooserDialog(avp *gi.Viewport2D, opts DlgOpts, recv ki.Ki, dlgFunc ki.
 	return dlg
 }
 
-func FontInfoStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
+func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView) {
 	if col == 4 {
 		finf, ok := slice.([]girl.FontInfo)
 		if ok {
@@ -435,7 +435,7 @@ func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, opts DlgOpts, recv
 	return dlg
 }
 
-func IconChooserStyleFunc(sv *SliceView, slice interface{}, widg gi.Node2D, row int, vv ValueView) {
+func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Node2D, row int, vv ValueView) {
 	ic, ok := slice.([]gi.IconName)
 	if ok {
 		widg.(*gi.Action).SetText(string(ic[row]))
@@ -500,7 +500,7 @@ func FileViewDialog(avp *gi.Viewport2D, filename, ext string, opts DlgOpts, filt
 	fv.FilterFunc = filterFunc
 	fv.SetFilename(filename, ext)
 
-	fv.FileSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	fv.FileSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(FileViewDoubleClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
 			ddlg.Accept()

@@ -34,5 +34,4 @@
 // main event processing loop.
 //
 // See examples in gi/examples directory for current example code.
-//
 package oswin

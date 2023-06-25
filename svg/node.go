@@ -79,7 +79,7 @@ var NodeBaseProps = ki.Props{
 	"EnumType:Flag": gi.KiT_NodeFlags,
 }
 
-func (g *NodeBase) CopyFieldsFrom(frm interface{}) {
+func (g *NodeBase) CopyFieldsFrom(frm any) {
 	fr := frm.(*NodeBase)
 	g.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
 	g.Pnt = fr.Pnt
@@ -245,7 +245,7 @@ func (g *NodeBase) ReadGeom(dat []float32) {
 // recursing into groups until a non-group item is found.
 func FirstNonGroupNode(kn ki.Ki) ki.Ki {
 	var ngn ki.Ki
-	kn.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	kn.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
 		if k == nil || k.This() == nil || k.IsDeleted() || k.IsDestroyed() {
 			return ki.Break
 		}
@@ -396,7 +396,7 @@ func IsDefs(g *gi.Node2DBase) bool {
 		return false
 	}
 	rv := false
-	g.FuncUpParent(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	g.FuncUpParent(0, nil, func(k ki.Ki, level int, d any) bool {
 		if k == nil || k.This() == nil || k.IsDeleted() || k.IsDestroyed() {
 			return ki.Break
 		}

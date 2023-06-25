@@ -20,7 +20,7 @@ import (
 // editor fields for each field
 type StructViewInline struct {
 	gi.PartsWidgetBase
-	Struct        interface{} `desc:"the struct that we are a view onto"`
+	Struct        any         `desc:"the struct that we are a view onto"`
 	StructValView ValueView   `desc:"ValueView for the struct itself, if this was created within value view framework -- otherwise nil"`
 	AddAction     bool        `desc:"if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'"`
 	FieldViews    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
@@ -40,13 +40,13 @@ func (sv *StructViewInline) Disconnect() {
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
-func (sv *StructViewInline) SetStruct(st interface{}) {
+func (sv *StructViewInline) SetStruct(st any) {
 	updt := false
 	if sv.Struct != st {
 		updt = sv.UpdateStart()
 		sv.Struct = st
 		if k, ok := st.(ki.Ki); ok {
-			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
 				svv.UpdateFields() // this never gets called, per below!
 				// fmt.Printf("struct view inline ki update values\n")
@@ -71,7 +71,7 @@ func (sv *StructViewInline) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
-	kit.FlatFieldsValueFunc(sv.Struct, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	kit.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		vwtag := field.Tag.Get("view")
 		if vwtag == "-" {
@@ -120,7 +120,7 @@ func (sv *StructViewInline) ConfigParts() {
 		}
 		vv.ConfigWidget(widg)
 		if !sv.IsInactive() && !inactTag {
-			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
 				svv.UpdateFieldAction()
 				// note: updating here is redundant

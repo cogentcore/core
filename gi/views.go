@@ -20,7 +20,7 @@ type ViewIFace interface {
 	// falls back on "CtxtMenu".  Returns false if there is no context menu
 	// defined for this type, or on errors (which are programmer errors sent
 	// to log).
-	CtxtMenuView(val interface{}, inactive bool, vp *Viewport2D, menu *Menu) bool
+	CtxtMenuView(val any, inactive bool, vp *Viewport2D, menu *Menu) bool
 
 	// GoGiEditor opens an interactive editor of given Ki tree, at its root
 	GoGiEditor(obj ki.Ki)

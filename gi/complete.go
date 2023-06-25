@@ -20,7 +20,7 @@ import (
 type Completer interface {
 	// SetCompleter sets completion functions so that completions will
 	// automatically be offered as the user types.  data provides context where being used.
-	SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc)
+	SetCompleter(data any, matchFun complete.MatchFunc, editFun complete.EditFunc)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ type Complete struct {
 	MatchFunc   complete.MatchFunc   `desc:"function to get the list of possible completions"`
 	LookupFunc  complete.LookupFunc  `desc:"function to get the text to show for lookup"`
 	EditFunc    complete.EditFunc    `desc:"function to edit text using the selected completion"`
-	Context     interface{}          `desc:"the object that implements complete.Func"`
+	Context     any                  `desc:"the object that implements complete.Func"`
 	SrcLn       int                  `desc:"line number in source that completion is operating on, if relevant"`
 	SrcCh       int                  `desc:"character position in source that completion is operating on"`
 	Completions complete.Completions `desc:"the list of potential completions"`
@@ -152,7 +152,7 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt ima
 		}
 		icon := cmp.Icon
 		m.AddAction(ActOpts{Icon: icon, Label: text, Data: cmp.Text},
-			c, func(recv, send ki.Ki, sig int64, data interface{}) {
+			c, func(recv, send ki.Ki, sig int64, data any) {
 				cc := recv.Embed(KiT_Complete).(*Complete)
 				cc.Complete(data.(string))
 			})

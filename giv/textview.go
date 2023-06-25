@@ -397,7 +397,7 @@ func (tv *TextView) LinesDeleted(tbe *textbuf.Edit) {
 }
 
 // TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
-func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data interface{}) {
+func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data any) {
 	tv := rvwki.Embed(KiT_TextView).(*TextView)
 	switch TextBufSignals(sig) {
 	case TextBufDone:
@@ -1401,7 +1401,7 @@ func (tv *TextView) CursorTransposeWord() {
 func (tv *TextView) JumpToLinePrompt() {
 	gi.StringPromptDialog(tv.Viewport, "", "Line no..",
 		gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
-		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dlg := send.(*gi.Dialog)
 			if sig == int64(gi.DialogAccepted) {
 				val := gi.StringPromptDialogValue(dlg)
@@ -1876,7 +1876,7 @@ func (tv *TextView) QReplacePrompt() {
 	if tv.HasSelection() {
 		find = string(tv.Selection().ToBytes())
 	}
-	QReplaceDialog(tv.Viewport, find, tv.QReplace.LexItems, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	QReplaceDialog(tv.Viewport, find, tv.QReplace.LexItems, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		dlg := send.(*gi.Dialog)
 		if sig == int64(gi.DialogAccepted) {
 			find, repl, lexItems := QReplaceDialogValues(dlg)
@@ -2350,7 +2350,7 @@ func (tv *TextView) PasteHist() {
 		return
 	}
 	cl := TextViewClipHistChooseList()
-	gi.StringsChooserPopup(cl, "", tv, func(recv, send ki.Ki, sig int64, data interface{}) {
+	gi.StringsChooserPopup(cl, "", tv, func(recv, send ki.Ki, sig int64, data any) {
 		ac := send.(*gi.Action)
 		idx := ac.Data.(int)
 		clip := TextViewClipHistory[idx]
@@ -2537,27 +2537,27 @@ func (tv *TextView) ContextMenuPos() (pos image.Point) {
 // MakeContextMenu builds the textview context menu
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy},
-		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			txf := recv.Embed(KiT_TextView).(*TextView)
 			txf.Copy(true)
 		})
 	ac.SetActiveState(tv.HasSelection())
 	if !tv.IsInactive() {
 		ac = m.AddAction(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut},
-			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Cut()
 			})
 		ac.SetActiveState(tv.HasSelection())
 		ac = m.AddAction(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste},
-			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Paste()
 			})
 		ac.SetInactiveState(oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).IsEmpty())
 	} else {
 		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
-			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Clear()
 			})
@@ -4605,7 +4605,7 @@ func (tv *TextView) MouseMoveEvent() {
 	if !tv.HasLinks {
 		return
 	}
-	tv.ConnectEvent(oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEvent(oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
 		tvv := recv.Embed(KiT_TextView).(*TextView)
@@ -4636,7 +4636,7 @@ func (tv *TextView) MouseMoveEvent() {
 }
 
 func (tv *TextView) MouseDragEvent() {
-	tv.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		txf := recv.Embed(KiT_TextView).(*TextView)
@@ -4650,7 +4650,7 @@ func (tv *TextView) MouseDragEvent() {
 }
 
 func (tv *TextView) MouseFocusEvent() {
-	tv.ConnectEvent(oswin.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEvent(oswin.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(KiT_TextView).(*TextView)
 		if txf.IsInactive() {
 			return
@@ -4671,19 +4671,19 @@ func (tv *TextView) TextViewEvents() {
 	tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
-	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(KiT_TextView).(*TextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me)
 	})
 	tv.MouseFocusEvent()
-	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(KiT_TextView).(*TextView)
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)
 	})
 	if dlg, ok := tv.Viewport.This().(*gi.Dialog); ok {
-		dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			txf, _ := recv.Embed(KiT_TextView).(*TextView)
 			if sig == int64(gi.DialogAccepted) {
 				txf.EditDone()

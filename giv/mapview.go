@@ -22,7 +22,7 @@ import (
 // set prop toolbar = false to turn off
 type MapView struct {
 	gi.Frame
-	Map        interface{} `desc:"the map that we are a view onto"`
+	Map        any         `desc:"the map that we are a view onto"`
 	MapValView ValueView   `desc:"ValueView for the map itself, if this was created within value view framework -- otherwise nil"`
 	Changed    bool        `desc:"has the map been edited?"`
 	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
@@ -32,7 +32,7 @@ type MapView struct {
 	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	MapViewSig ki.Signal   `copy:"-" json:"-" xml:"-" desc:"map view specific signals: add, delete, double-click"`
 	ViewPath   string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
-	ToolbarMap interface{} `desc:"the map that we successfully set a toolbar for"`
+	ToolbarMap any         `desc:"the map that we successfully set a toolbar for"`
 }
 
 var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
@@ -50,7 +50,7 @@ func (mv *MapView) Disconnect() {
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to
 // represent this map
-func (mv *MapView) SetMap(mp interface{}) {
+func (mv *MapView) SetMap(mp any) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
@@ -223,7 +223,7 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
 			mvv.SetChanged()
 		})
@@ -231,7 +231,7 @@ func (mv *MapView) ConfigMapGrid() {
 		widg := sg.Child(i*ncol + 1).(gi.Node2D)
 		kv := mv.Keys[i]
 		kvb := kv.AsValueViewBase()
-		kvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		kvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
 			mvv.SetChanged()
 		})
@@ -254,7 +254,7 @@ func (mv *MapView) ConfigMapGrid() {
 			}
 			typw.SetCurVal(vtyp)
 			typw.SetProp("mapview-index", i)
-			typw.ComboSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			typw.ComboSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				cb := send.(*gi.ComboBox)
 				typ := cb.CurVal.(reflect.Type)
 				idx := cb.Prop("mapview-index").(int)
@@ -267,7 +267,7 @@ func (mv *MapView) ConfigMapGrid() {
 		delact.Tooltip = "delete item"
 		delact.Data = kv
 		delact.Sty.Template = "giv.MapView.DelAction"
-		delact.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		delact.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			act := send.(*gi.Action)
 			mvv := recv.Embed(KiT_MapView).(*MapView)
 			mvv.MapDelete(act.Data.(ValueView).Val())
@@ -384,18 +384,18 @@ func (mv *MapView) ConfigToolbar() {
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of map"},
-			mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.UpdateValues()
 			})
 		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: "update", Tooltip: "Switch between sorting by the keys vs. the values"},
-			mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.ToggleSort()
 			})
 		if ndef > 2 {
 			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the map"},
-				mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					mvv := recv.Embed(KiT_MapView).(*MapView)
 					mvv.MapAdd()
 				})

@@ -70,7 +70,7 @@ func (mt *Material) StyleCSS(node Node3D, css ki.Props, selector string, vp *gi.
 
 // StyleMatFuncs are functions for styling the Material
 var StyleMatFuncs = map[string]gist.StyleFunc{
-	"color": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
+	"color": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
 		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
@@ -82,7 +82,7 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 		}
 		mt.Color.SetIFace(val, ctxt, key)
 	},
-	"emissive": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
+	"emissive": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
 		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
@@ -94,7 +94,7 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 		}
 		mt.Emissive.SetIFace(val, ctxt, key)
 	},
-	"shiny": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
+	"shiny": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
 		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
@@ -108,7 +108,7 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 			mt.Shiny = iv
 		}
 	},
-	"reflective": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
+	"reflective": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
 		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
@@ -122,7 +122,7 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 			mt.Reflective = iv
 		}
 	},
-	"bright": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
+	"bright": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
 		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
@@ -136,7 +136,7 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 			mt.Bright = iv
 		}
 	},
-	"texture": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
+	"texture": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
 		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
@@ -148,7 +148,7 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 		}
 		mt.Texture = TexName(kit.ToString(val))
 	},
-	"cull-back": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
+	"cull-back": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
 		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
@@ -162,7 +162,7 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 			mt.CullBack = bv
 		}
 	},
-	"cull-front": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
+	"cull-front": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
 		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {

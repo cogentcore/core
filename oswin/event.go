@@ -229,7 +229,7 @@ func (ev EventBase) OnWinFocus() bool {
 // optional position and focus parameters
 type CustomEvent struct {
 	EventBase
-	Data     interface{}
+	Data     any
 	PosAvail bool        `desc:"set to true if position is available"`
 	Where    image.Point `desc:"position info if relevant -- set PosAvail"`
 	Focus    bool        `desc:"set to true if this event should be sent to widget in focus"`
@@ -262,7 +262,7 @@ func (ce CustomEvent) OnWinFocus() bool {
 // SendCustomEvent sends a new custom event to given window, with
 // given data -- constructs the event and sends it. For other params
 // you can follow these steps yourself..
-func SendCustomEvent(win Window, data interface{}) {
+func SendCustomEvent(win Window, data any) {
 	ce := &CustomEvent{Data: data}
 	ce.Init()
 	win.Send(ce)

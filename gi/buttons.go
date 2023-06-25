@@ -46,7 +46,7 @@ var ButtonBaseProps = ki.Props{
 	"EnumType:Flag": KiT_ButtonFlags,
 }
 
-func (bb *ButtonBase) CopyFieldsFrom(frm interface{}) {
+func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*ButtonBase)
 	if !ok {
 		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", ki.Type(bb).Name())
@@ -299,7 +299,7 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 // OnClicked calls the given function when the button is clicked,
 // which is the default / standard way of activating the button
 func (bb *ButtonBase) OnClicked(fun func()) {
-	bb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	bb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(ButtonClicked) {
 			fun()
 		}
@@ -449,7 +449,7 @@ func (bb *ButtonBase) ButtonExitHover() {
 
 // MouseEvents handles button MouseEvent
 func (bb *ButtonBase) MouseEvent() {
-	bb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	bb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
@@ -470,7 +470,7 @@ func (bb *ButtonBase) MouseEvent() {
 
 // MouseFocusEvents handles button MouseFocusEvent
 func (bb *ButtonBase) MouseFocusEvent() {
-	bb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	bb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
 		if bbb.IsInactive() {
@@ -494,7 +494,7 @@ func (bb *ButtonBase) MouseFocusEvent() {
 
 // KeyChordEvent handles button KeyChord events
 func (bb *ButtonBase) KeyChordEvent() {
-	bb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	bb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
 		if bbb.IsInactive() {
@@ -516,7 +516,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 }
 
 func (bb *ButtonBase) HoverTooltipEvent() {
-	bb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	bb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		wbb := recv.Embed(KiT_ButtonBase).(*ButtonBase)
 		tt := wbb.Tooltip
@@ -754,7 +754,7 @@ func AddNewButton(parent ki.Ki, name string) *Button {
 	return parent.AddNewChild(KiT_Button, name).(*Button)
 }
 
-func (bt *Button) CopyFieldsFrom(frm interface{}) {
+func (bt *Button) CopyFieldsFrom(frm any) {
 	fr := frm.(*Button)
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
@@ -839,7 +839,7 @@ func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
 	return parent.AddNewChild(KiT_CheckBox, name).(*CheckBox)
 }
 
-func (cb *CheckBox) CopyFieldsFrom(frm interface{}) {
+func (cb *CheckBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*CheckBox)
 	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 	cb.IconOff = fr.IconOff
@@ -912,7 +912,7 @@ func (cb *CheckBox) AsButtonBase() *ButtonBase {
 // OnClicked calls the given function when the button is clicked,
 // which is the default / standard way of activating the button
 func (cb *CheckBox) OnClicked(fun func()) {
-	cb.ButtonSig.Connect(cb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.ButtonSig.Connect(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(ButtonToggled) {
 			fun()
 		}

@@ -178,7 +178,7 @@ const (
 
 //go:generate stringer -type=FileViewSignals
 
-func FileViewStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
+func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView) {
 	finf, ok := slice.([]*FileInfo)
 	if ok {
 		wi := widg.AsNode2D()
@@ -252,7 +252,7 @@ func (fv *FileView) ConfigPathBar() {
 	pft, found := pf.TextField()
 	if found {
 		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
-		pft.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		pft.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.TextFieldDone) {
 				fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 				pff, _ := send.(*gi.TextField)
@@ -261,7 +261,7 @@ func (fv *FileView) ConfigPathBar() {
 			}
 		})
 	}
-	pf.ComboSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	pf.ComboSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
 		sp := data.(string)
@@ -280,23 +280,23 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: "wedge-up", Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: "wedge-up", Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.DirPathUp()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: "update", Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: "update", Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.UpdateFilesAction()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: "heart", Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: "heart", Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.AddPathToFavs()
 	})
 
 	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: "folder-plus", Tooltip: "Create a new folder in this folder"},
-		fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.NewFolder()
 		})
@@ -327,7 +327,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetInactive() // select only
 	sv.SelectedIdx = -1
 	sv.SetSlice(&gi.Prefs.FavPaths)
-	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.WidgetSelected) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			svv, _ := send.(*TableView)
@@ -352,14 +352,14 @@ func (fv *FileView) ConfigFilesRow() {
 	if gi.Prefs.FileViewSort != "" {
 		sv.SetSortFieldName(gi.Prefs.FileViewSort)
 	}
-	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.WidgetSelected) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			svv, _ := send.(*TableView)
 			fvv.FileSelectAction(svv.SelectedIdx)
 		}
 	})
-	sv.SliceViewSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.SliceViewSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(SliceViewDoubleClicked) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.SelectFile()
@@ -388,7 +388,7 @@ func (fv *FileView) ConfigSelRow() {
 	sf.SetMinPrefWidth(units.NewCh(60))
 	sf.SetStretchMaxWidth()
 	sf.SetText(fv.SelFile)
-	sf.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sf.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
@@ -403,7 +403,7 @@ func (fv *FileView) ConfigSelRow() {
 	ef := fv.ExtField()
 	ef.SetText(fv.Ext)
 	ef.SetMinPrefWidth(units.NewCh(10))
-	ef.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	ef.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
@@ -777,7 +777,7 @@ func (fv *FileView) ConnectEvents2D() {
 }
 
 func (fv *FileView) FileViewEvents() {
-	fv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	fv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		fvv := recv.Embed(KiT_FileView).(*FileView)
 		kt := d.(*key.ChordEvent)
 		fvv.KeyInput(kt)
@@ -817,7 +817,7 @@ func (fv *FileView) HasFocus2D() bool {
 //  Completion
 
 // FileComplete finds the possible completions for the file field
-func (fv *FileView) FileComplete(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
+func (fv *FileView) FileComplete(data any, text string, posLn, posCh int) (md complete.Matches) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
@@ -845,7 +845,7 @@ func (fv *FileView) FileComplete(data interface{}, text string, posLn, posCh int
 }
 
 // PathComplete finds the possible completions for the path field
-func (fv *FileView) PathComplete(data interface{}, path string, posLn, posCh int) (md complete.Matches) {
+func (fv *FileView) PathComplete(data any, path string, posLn, posCh int) (md complete.Matches) {
 	dir, seed := filepath.Split(path)
 	md.Seed = seed
 	d, err := os.Open(dir)
@@ -874,7 +874,7 @@ func (fv *FileView) PathComplete(data interface{}, path string, posLn, posCh int
 }
 
 // PathCompleteEdit is the editing function called when inserting the completion selection in the path field
-func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.Edit) {
+func (fv *FileView) PathCompleteEdit(data any, text string, cursorPos int, c complete.Completion, seed string) (ed complete.Edit) {
 	ed = complete.EditWord(text, cursorPos, c.Text, seed)
 	path := ed.NewText + string(filepath.Separator)
 	ed.NewText = path
@@ -883,7 +883,7 @@ func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos in
 }
 
 // FileCompleteEdit is the editing function called when inserting the completion selection in the file field
-func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.Edit) {
+func (fv *FileView) FileCompleteEdit(data any, text string, cursorPos int, c complete.Completion, seed string) (ed complete.Edit) {
 	ed = complete.EditWord(text, cursorPos, c.Text, seed)
 	return ed
 }
@@ -895,7 +895,7 @@ func (fv *FileView) EditPaths() {
 	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
 	opts := DlgOpts{Title: "Recent File Paths", Prompt: "Delete paths you no longer use", Ok: true, Cancel: true, NoAdd: true}
 	SliceViewDialog(fv.Viewport, &tmp, opts,
-		nil, fv, func(recv, send ki.Ki, sig int64, data interface{}) {
+		nil, fv, func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				gi.SavedPaths = nil
 				gi.SavedPaths = append(gi.SavedPaths, tmp...)

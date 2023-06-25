@@ -39,7 +39,7 @@ func AddNewPath(parent ki.Ki, name string, data string) *Path {
 
 func (g *Path) SVGName() string { return "path" }
 
-func (g *Path) CopyFieldsFrom(frm interface{}) {
+func (g *Path) CopyFieldsFrom(frm any) {
 	fr := frm.(*Path)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 	g.Data = make([]PathData, len(fr.Data))

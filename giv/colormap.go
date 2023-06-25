@@ -68,7 +68,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 		cur = cv.Map.Name
 	}
 	SliceViewSelectDialog(cv.Viewport, &sl, cur, DlgOpts{Title: "Select a ColorMap", Prompt: "choose color map to use from among available list"}, nil,
-		cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				si := SliceViewSelectDialogValue(ddlg)
@@ -84,7 +84,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 
 // MouseEvent handles button MouseEvent
 func (cv *ColorMapView) MouseEvent() {
-	cv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	cv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		cvv := recv.(*ColorMapView)
 		if me.Button == mouse.Left {
@@ -200,7 +200,7 @@ func (vv *ColorMapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewPx(4))
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_ColorMapValueView).(*ColorMapValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
@@ -220,7 +220,7 @@ func (vv *ColorMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc 
 	cur := kit.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
 	SliceViewSelectDialog(vp, &sl, cur, DlgOpts{Title: "Select a ColorMap", Prompt: desc}, nil,
-		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				si := SliceViewSelectDialogValue(ddlg)

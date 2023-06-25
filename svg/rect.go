@@ -31,7 +31,7 @@ func AddNewRect(parent ki.Ki, name string, x, y, sx, sy float32) *Rect {
 
 func (g *Rect) SVGName() string { return "rect" }
 
-func (g *Rect) CopyFieldsFrom(frm interface{}) {
+func (g *Rect) CopyFieldsFrom(frm any) {
 	fr := frm.(*Rect)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 	g.Pos = fr.Pos

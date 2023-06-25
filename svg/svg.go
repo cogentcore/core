@@ -49,7 +49,7 @@ func AddNewSVG(parent ki.Ki, name string) *SVG {
 	return parent.AddNewChild(KiT_SVG, name).(*SVG)
 }
 
-func (sv *SVG) CopyFieldsFrom(frm interface{}) {
+func (sv *SVG) CopyFieldsFrom(frm any) {
 	fr := frm.(*SVG)
 	sv.Viewport2D.CopyFieldsFrom(&fr.Viewport2D)
 	sv.ViewBox = fr.ViewBox
@@ -287,7 +287,7 @@ func NameId(nm string, id int) string {
 // It automatically renames any that are not unique or empty.
 func (sv *SVG) GatherIds() {
 	sv.UniqueIds = make(map[int]struct{})
-	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
 		sv.NodeEnsureUniqueId(k)
 		return ki.Continue
 	})

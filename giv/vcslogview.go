@@ -42,7 +42,7 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 		lv.RevB = ""
 		lv.SetA = true
 		lv.ConfigToolBar()
-		tv.SliceViewSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.SliceViewSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(SliceViewDoubleClicked) {
 				idx := data.(int)
 				if idx >= 0 && idx < len(lv.Log) {
@@ -128,7 +128,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 		tfa := gi.AddNewTextField(tb, "a-tf")
 		tfa.SetProp("width", "12em")
 		tfa.SetText(lv.RevA)
-		tfa.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tfa.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 				lv.RevA = tfa.Text()
 			}
@@ -140,26 +140,26 @@ func (lv *VCSLogView) ConfigToolBar() {
 		tfb := gi.AddNewTextField(tb, "b-tf")
 		tfb.SetProp("width", "12em")
 		tfb.SetText(lv.RevB)
-		tfb.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tfb.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 				lv.RevB = tfb.Text()
 			}
 		})
 		tb.AddSeparator("dsep")
 		tb.AddAction(gi.ActOpts{Label: "Diff", Icon: "file-sheet", Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
-			func(recv, send ki.Ki, sig int64, data interface{}) {
+			func(recv, send ki.Ki, sig int64, data any) {
 				lvv := recv.Embed(KiT_VCSLogView).(*VCSLogView)
 				DiffViewDialogFromRevs(lvv.ViewportSafe(), lvv.Repo, lvv.File, nil, lvv.RevA, lvv.RevB)
 			})
 
-		cba.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		cba.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.ButtonToggled) {
 				lv.SetA = cba.IsChecked()
 				cbb.SetChecked(!lv.SetA)
 				cbb.UpdateSig()
 			}
 		})
-		cbb.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		cbb.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.ButtonToggled) {
 				lv.SetA = !cbb.IsChecked()
 				cba.SetChecked(lv.SetA)

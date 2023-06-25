@@ -9,6 +9,5 @@ using styles defined in GiSt styles
 Original rendering borrows heavily from: https://github.com/fogleman/gg
 and has been integrated with https://github.com/srwiley/rasterx which
 provides fully SVG compliant and fast rendering.
-
 */
 package girl

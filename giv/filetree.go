@@ -86,7 +86,7 @@ var FileTreeProps = ki.Props{
 	"EnumType:Flag": KiT_FileNodeFlags,
 }
 
-func (ft *FileTree) CopyFieldsFrom(frm interface{}) {
+func (ft *FileTree) CopyFieldsFrom(frm any) {
 	fr := frm.(*FileTree)
 	ft.FileNode.CopyFieldsFrom(&fr.FileNode)
 	ft.DirsOnTop = fr.DirsOnTop
@@ -423,7 +423,7 @@ type FileNode struct {
 
 var KiT_FileNode = kit.Types.AddType(&FileNode{}, FileNodeProps)
 
-func (fn *FileNode) CopyFieldsFrom(frm interface{}) {
+func (fn *FileNode) CopyFieldsFrom(frm any) {
 	// note: not copying ki.Node as it doesn't have any copy fields
 	// fr := frm.(*FileNode)
 	// and indeed nothing here should be copied!
@@ -442,7 +442,7 @@ func (fn *FileNode) IsIrregular() bool {
 // IsExternal returns true if file is external to main file tree
 func (fn *FileNode) IsExternal() bool {
 	isExt := false
-	fn.FuncUp(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncUp(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfni := k.Embed(KiT_FileNode)
 		if sfni == nil {
 			return ki.Break
@@ -460,7 +460,7 @@ func (fn *FileNode) IsExternal() bool {
 // HasClosedParent returns true if node has a parent node with !IsOpen flag set
 func (fn *FileNode) HasClosedParent() bool {
 	hasClosed := false
-	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfni := k.Embed(KiT_FileNode)
 		if sfni == nil {
 			return ki.Break
@@ -785,7 +785,7 @@ func (fn *FileNode) OpenAll() {
 func (fn *FileNode) CloseAll() {
 	fn.SetClosed()
 	fn.FRoot.SetDirClosed(fn.FPath)
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if sfn.IsDir() {
 			sfn.SetClosed()
@@ -940,7 +940,7 @@ func (fn *FileNode) FindFile(fnm string) (*FileNode, bool) {
 
 	var ffn *FileNode
 	found := false
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if strings.HasSuffix(string(sfn.FPath), fneff) {
 			ffn = sfn
@@ -959,7 +959,7 @@ func (fn *FileNode) FilesMatching(match string, ignoreCase bool) []*FileNode {
 	if ignoreCase {
 		match = strings.ToLower(match)
 	}
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if ignoreCase {
 			nm := strings.ToLower(sfn.Nm)
@@ -994,7 +994,7 @@ func FileNodeNameCountSort(ecs []FileNodeNameCount) {
 func (fn *FileNode) FirstVCS() (vci.Repo, *FileNode) {
 	var repo vci.Repo
 	var rnode *FileNode
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
@@ -1012,7 +1012,7 @@ func (fn *FileNode) FirstVCS() (vci.Repo, *FileNode) {
 // (e.g., filecat.Code to find any code files)
 func (fn *FileNode) FileExtCounts(cat filecat.Cat) []FileNodeNameCount {
 	cmap := make(map[string]int, 20)
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if cat != filecat.Unknown {
 			if sfn.Info.Cat != cat {
@@ -1042,7 +1042,7 @@ func (fn *FileNode) FileExtCounts(cat filecat.Cat) []FileNodeNameCount {
 // (e.g., filecat.Code to find any code files)
 func (fn *FileNode) LatestFileMod(cat filecat.Cat) time.Time {
 	tmod := time.Time{}
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if cat != filecat.Unknown {
 			if sfn.Info.Cat != cat {
@@ -1251,7 +1251,7 @@ func (fn *FileNode) Repo() (vci.Repo, *FileNode) {
 	}
 	var repo vci.Repo
 	var rnode *FileNode
-	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfni := k.Embed(KiT_FileNode)
 		if sfni == nil {
 			return ki.Break
@@ -1473,7 +1473,7 @@ func (fn *FileNode) BlameVcs() ([]byte, error) {
 
 // UpdateAllVcs does an update on any repositories below this one in file tree
 func (fn *FileNode) UpdateAllVcs() {
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if !sfn.IsDir() {
 			return ki.Continue
@@ -1748,12 +1748,12 @@ func (ftv *FileTreeView) ConnectEvents2D() {
 }
 
 func (ftv *FileTreeView) FileTreeViewEvents() {
-	ftv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ftv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tvv := recv.Embed(KiT_FileTreeView).(*FileTreeView)
 		kt := d.(*key.ChordEvent)
 		tvv.KeyInput(kt)
 	})
-	ftv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ftv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		de := d.(*dnd.Event)
 		tvvi := recv.Embed(KiT_FileTreeView)
 		if tvvi == nil {
@@ -1771,7 +1771,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 			tvv.DragNDropExternal(de)
 		}
 	})
-	ftv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	ftv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		de := d.(*dnd.FocusEvent)
 		tvvi := recv.Embed(KiT_FileTreeView)
 		if tvvi == nil {
@@ -1789,7 +1789,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	})
 	if ftv.HasChildren() {
 		if wb, ok := ftv.BranchPart(); ok {
-			wb.ButtonSig.ConnectOnly(ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			wb.ButtonSig.ConnectOnly(ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.ButtonToggled) {
 					ftvv, _ := recv.Embed(KiT_FileTreeView).(*FileTreeView)
 					ftvv.ToggleClose()
@@ -1799,7 +1799,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	}
 	if lbl, ok := ftv.LabelPart(); ok {
 		// HiPri is needed to override label's native processing
-		lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			lb, _ := recv.(*gi.Label)
 			ftvvi := lb.Parent().Parent()
 			if ftvvi == nil || ftvvi.This() == nil { // deleted
@@ -1962,7 +1962,7 @@ func (ftv *FileTreeView) DeleteFiles() {
 	gi.ChoiceDialog(ftv.ViewportSafe(), gi.DlgOpts{Title: "Delete Files?",
 		Prompt: "Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted."},
 		[]string{"Delete Files", "Cancel"},
-		ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			switch sig {
 			case 0:
 				ftv.DeleteFilesImpl()
@@ -2358,7 +2358,7 @@ func (ftv *FileTreeView) PasteMimeCopyFilesCheck(tdir *FileNode, md mimedata.Mim
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "File(s) Exist in Target Dir, Overwrite?",
 			Prompt: fmt.Sprintf("File(s): %v exist, do you want to overwrite?", existing)},
 			[]string{"No, Cancel", "Yes, Overwrite"},
-			ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					ftv.DropCancel()
@@ -2417,7 +2417,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 			Prompt: fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files, or cancel?", tfn.Nm)},
 			[]string{"Overwrite Target", "Diff Files", "Cancel"},
-			ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					CopyFile(tpath, srcpath, mode)
@@ -2433,7 +2433,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 			Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files, or cancel?", tfn.Nm, fname, fname)},
 			[]string{"Overwrite Target", "Overwrite Existing", "Diff to Target", "Diff to Existing", "Cancel"},
-			ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					CopyFile(tpath, srcpath, mode)
@@ -2457,7 +2457,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 			Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files, or cancel?", tfn.Nm, fname, fname)},
 			[]string{"Overwrite Target", "Copy New File", "Diff Files", "Cancel"},
-			ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					CopyFile(tpath, srcpath, mode)
@@ -2507,7 +2507,7 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 }
 
 // FileTreeInactiveExternFunc is an ActionUpdateFunc that inactivates action if node is external
-var FileTreeInactiveExternFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+var FileTreeInactiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2516,7 +2516,7 @@ var FileTreeInactiveExternFunc = ActionUpdateFunc(func(fni interface{}, act *gi.
 })
 
 // FileTreeActiveExternFunc is an ActionUpdateFunc that activates action if node is external
-var FileTreeActiveExternFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+var FileTreeActiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2525,7 +2525,7 @@ var FileTreeActiveExternFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Ac
 })
 
 // FileTreeInactiveDirFunc is an ActionUpdateFunc that inactivates action if node is a dir
-var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2534,7 +2534,7 @@ var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Act
 })
 
 // FileTreeActiveDirFunc is an ActionUpdateFunc that activates action if node is a dir
-var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2543,7 +2543,7 @@ var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Actio
 })
 
 // FileTreeActiveNotInVcsFunc is an ActionUpdateFunc that inactivates action if node is not under version control
-var FileTreeActiveNotInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+var FileTreeActiveNotInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2557,7 +2557,7 @@ var FileTreeActiveNotInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.
 })
 
 // FileTreeActiveInVcsFunc is an ActionUpdateFunc that activates action if node is under version control
-var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2572,7 +2572,7 @@ var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Act
 
 // FileTreeActiveInVcsModifiedFunc is an ActionUpdateFunc that activates action if node is under version control
 // and the file has been modified
-var FileTreeActiveInVcsModifiedFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+var FileTreeActiveInVcsModifiedFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2586,7 +2586,7 @@ var FileTreeActiveInVcsModifiedFunc = ActionUpdateFunc(func(fni interface{}, act
 })
 
 // VcsGetRemoveLabelFunc gets the appropriate label for removing from version control
-var VcsLabelFunc = LabelFunc(func(fni interface{}, act *gi.Action) string {
+var VcsLabelFunc = LabelFunc(func(fni any, act *gi.Action) string {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	label := act.Text
@@ -2834,7 +2834,7 @@ func (ft *FileTreeView) Style2D() {
 }
 
 // FileNodeBufSigRecv receives a signal from the buffer and updates view accordingly
-func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
+func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data any) {
 	fn := rvwki.Embed(KiT_FileNode).(*FileNode)
 	switch TextBufSignals(sig) {
 	case TextBufDone, TextBufInsert, TextBufDelete:

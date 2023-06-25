@@ -66,7 +66,7 @@ type Dialog struct {
 	State     DialogState `desc:"state of the dialog"`
 	SigVal    int64       `desc:"signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)"`
 	DialogSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
-	Data      interface{} `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
+	Data      any         `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 }
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
@@ -138,7 +138,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	dlg.Win = nil
 
 	// note: LowPri allows all other events to be processed before dialog
-	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		if KeyEventTrace {
@@ -151,7 +151,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 			kt.SetProcessed()
 		}
 	})
-	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		if KeyEventTrace {
@@ -396,7 +396,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
 		okb := bb.ChildByName("ok", 0).Embed(KiT_Button).(*Button)
 		okb.SetText("Ok")
-		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(KiT_Dialog).(*Dialog)
 				dlg.Accept()
@@ -406,7 +406,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if cancel {
 		canb := bb.ChildByName("cancel", 0).Embed(KiT_Button).(*Button)
 		canb.SetText("Cancel")
-		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(KiT_Dialog).(*Dialog)
 				dlg.Cancel()
@@ -468,7 +468,7 @@ func NewStdDialog(opts DlgOpts, ok, cancel bool) *Dialog {
 // RecycleStdDialog looks for existing dialog window with same Data --
 // if found brings that to the front, returns it, and true bool.
 // else (and if data is nil) calls NewStdDialog, returns false.
-func RecycleStdDialog(data interface{}, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
+func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 	if data == nil {
 		return NewStdDialog(opts, ok, cancel), false
 	}
@@ -531,7 +531,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 		b.SetProp("__cdSigVal", int64(i))
 		b.SetText(ch)
 		if chnm == "cancel" {
-			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(ButtonClicked) {
 					tb := send.Embed(KiT_Button).(*Button)
 					dlg := recv.Embed(KiT_Dialog).(*Dialog)
@@ -540,7 +540,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 				}
 			})
 		} else {
-			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(ButtonClicked) {
 					tb := send.Embed(KiT_Button).(*Button)
 					dlg := recv.Embed(KiT_Dialog).(*Dialog)

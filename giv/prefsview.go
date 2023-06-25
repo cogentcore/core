@@ -49,7 +49,7 @@ func PrefsView(pf *gi.Preferences) *gi.Window {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Prefs Before Closing?",
 			Prompt: "Do you want to save any changes to preferences before closing?"},
 			[]string{"Save and Close", "Discard and Close", "Cancel"},
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					pf.Save()
@@ -114,7 +114,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.Window {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Prefs Before Closing?",
 			Prompt: "Do you want to save any changes to detailed preferences before closing?"},
 			[]string{"Save and Close", "Discard and Close", "Cancel"},
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					pf.Save()

@@ -47,7 +47,7 @@ func (vv *HiStyleValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewPx(4))
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_HiStyleValueView).(*HiStyleValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
@@ -66,7 +66,7 @@ func (vv *HiStyleValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc k
 	cur := kit.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
 	SliceViewSelectDialog(vp, &histyle.StyleNames, cur, DlgOpts{Title: "Select a HiStyle Highlighting Style", Prompt: desc}, nil,
-		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg, _ := send.(*gi.Dialog)
 				si := SliceViewSelectDialogValue(ddlg)
@@ -113,7 +113,7 @@ func HiStylesView(st *histyle.Styles) {
 	tv.SetStretchMax()
 
 	histyle.StylesChanged = false
-	tv.ViewSig.Connect(mfr.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.ViewSig.Connect(mfr.This(), func(recv, send ki.Ki, sig int64, data any) {
 		histyle.StylesChanged = true
 	})
 
@@ -133,7 +133,7 @@ func HiStylesView(st *histyle.Styles) {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Styles Before Closing?",
 			Prompt: "Do you want to save any changes to std preferences styles file before closing, or Cancel the close and do a Save to a different file?"},
 			[]string{"Save and Close", "Discard and Close", "Cancel"},
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
 					st.SavePrefs()

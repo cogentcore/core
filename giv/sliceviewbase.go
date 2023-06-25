@@ -128,7 +128,7 @@ type SliceViewer interface {
 // set prop toolbar = false to turn off
 type SliceViewBase struct {
 	gi.Frame
-	Slice            interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	Slice            any              `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	ViewMu           *sync.Mutex      `copy:"-" view:"-" json:"-" xml:"-" desc:"optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex"`
 	SliceNPVal       reflect.Value    `copy:"-" view:"-" json:"-" xml:"-" desc:"non-ptr reflect.Value of the slice"`
 	SliceValView     ValueView        `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
@@ -140,7 +140,7 @@ type SliceViewBase struct {
 	Values           []ValueView      `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView representations of the slice values"`
 	ShowIndex        bool             `xml:"index" desc:"whether to show index or not -- updated from 'index' property (bool)"`
 	InactKeyNav      bool             `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
-	SelVal           interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
+	SelVal           any              `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
 	SelectedIdx      int              `copy:"-" json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
 	SelectMode       bool             `copy:"-" desc:"editing-mode select rows mode"`
 	InactMultiSel    bool             `desc:"if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported"`
@@ -150,7 +150,7 @@ type SliceViewBase struct {
 	ViewSig          ki.Signal        `copy:"-" json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	ViewPath         string           `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	TmpSave          ValueView        `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ToolbarSlice     interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`
+	ToolbarSlice     any              `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`
 
 	SliceSize     int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"size of slice"`
 	DispRows      int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"actual number of rows displayed = min(VisRows, SliceSize)"`
@@ -187,7 +187,7 @@ func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
-func (sv *SliceViewBase) SetSlice(sl interface{}) {
+func (sv *SliceViewBase) SetSlice(sl any) {
 	if kit.IfaceIsNil(sl) {
 		sv.Slice = nil
 		return
@@ -462,7 +462,7 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb.Step = 1
 	sv.UpdateScroll()
 
-	sb.SliderSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sb.SliderSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig != int64(gi.SliderValueChanged) {
 			return
 		}
@@ -657,7 +657,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				idxlab.Selectable = true
 				idxlab.Redrawable = true
 				idxlab.Sty.Template = "giv.SliceViewBase.IndexLabel"
-				idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
 						row := wbb.Prop("slv-row").(int)
@@ -691,7 +691,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				if wb != nil {
 					wb.SetProp("slv-row", i)
 					wb.ClearSelected()
-					wb.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					wb.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						if sig == int64(gi.WidgetSelected) {
 							wbb := send.(gi.Node2D).AsWidget()
 							row := wbb.Prop("slv-row").(int)
@@ -702,7 +702,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				}
 			} else {
 				vvb := vv.AsValueViewBase()
-				vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					svv, _ := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 					svv.SetChanged()
 				})
@@ -718,7 +718,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						addact.Tooltip = "insert a new element at this index"
 						addact.Data = i
 						addact.Sty.Template = "giv.SliceViewBase.AddAction"
-						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							act := send.(*gi.Action)
 							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 							svv.SliceNewAtRow(act.Data.(int) + 1)
@@ -735,7 +735,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						delact.Tooltip = "delete this element"
 						delact.Data = i
 						delact.Sty.Template = "giv.SliceViewBase.DelAction"
-						delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							act := send.(*gi.Action)
 							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 							svv.SliceDeleteAtRow(act.Data.(int), true)
@@ -799,7 +799,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
 				gi.NewKiDialog(sv.ViewportSafe(), ownki.BaseIface(),
 					gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:"},
-					sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						if sig == int64(gi.DialogAccepted) {
 							// svv, _ := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 							dlg, _ := send.(*gi.Dialog)
@@ -950,14 +950,14 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update this SliceView to reflect current state of slice"},
-			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 				svv.This().(SliceViewer).UpdateSliceGrid()
 
 			})
 		if ndef > 1 {
 			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the slice"},
-				sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 					svv.This().(SliceViewer).SliceNewAt(-1)
 				})
@@ -1070,7 +1070,7 @@ func (sv *SliceViewBase) HasFocus2D() bool {
 
 // SliceVal returns value interface at given slice index
 // must be protected by mutex
-func (sv *SliceViewBase) SliceVal(idx int) interface{} {
+func (sv *SliceViewBase) SliceVal(idx int) any {
 	if idx < 0 || idx >= sv.SliceSize {
 		fmt.Printf("giv.SliceViewBase: slice index out of range: %v\n", idx)
 		return nil
@@ -1221,7 +1221,7 @@ func (sv *SliceViewBase) SelectVal(val string) bool {
 
 // SliceIdxByValue searches for first index that contains given value in slice
 // -- returns false if not found
-func SliceIdxByValue(slc interface{}, fldVal interface{}) (int, bool) {
+func SliceIdxByValue(slc any, fldVal any) (int, bool) {
 	svnp := kit.NonPtrValue(reflect.ValueOf(slc))
 	sz := svnp.Len()
 	for idx := 0; idx < sz; idx++ {
@@ -1583,9 +1583,9 @@ func (sv *SliceViewBase) MimeDataIdx(md *mimedata.Mimes, idx int) {
 }
 
 // FromMimeData creates a slice of structs from mime data
-func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []interface{} {
+func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []any {
 	svtyp := sv.SliceNPVal.Type()
-	sl := make([]interface{}, 0, len(md))
+	sl := make([]any, 0, len(md))
 	for _, d := range md {
 		if d.Type == filecat.DataJson {
 			nval := reflect.New(svtyp.Elem()).Interface()
@@ -1717,23 +1717,23 @@ func (sv *SliceViewBase) PasteIdx(idx int) {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data interface{}, idx int) {
+func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data any, idx int) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 		svv.This().(SliceViewer).PasteAssign(data.(mimedata.Mimes), idx)
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx)
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
 	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	})
 }
 
@@ -1854,7 +1854,7 @@ func (sv *SliceViewBase) DragNDropTarget(de *dnd.Event) {
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
-func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods, idx int) {
+func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod dnd.DropMods, idx int) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1865,20 +1865,20 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.Drop
 		m.AddLabel("Move:")
 	}
 	if mod == dnd.DropCopy {
-		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 			svv.DropAssign(data.(mimedata.Mimes), idx)
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 		svv.DropBefore(data.(mimedata.Mimes), mod, idx) // captures mod
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 		svv.DropAfter(data.(mimedata.Mimes), mod, idx) // captures mod
 	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 		svv.DropCancel()
 	})
@@ -1979,22 +1979,22 @@ func (sv *SliceViewBase) StdCtxtMenu(m *gi.Menu, idx int) {
 		return
 	}
 	m.AddAction(gi.ActOpts{Label: "Copy", Data: idx},
-		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 			svv.CopyIdxs(true)
 		})
 	m.AddAction(gi.ActOpts{Label: "Cut", Data: idx},
-		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 			svv.CutIdxs()
 		})
 	m.AddAction(gi.ActOpts{Label: "Paste", Data: idx},
-		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 			svv.PasteIdx(data.(int))
 		})
 	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: idx},
-		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 			svv.Duplicate()
 		})
@@ -2157,7 +2157,7 @@ func (sv *SliceViewBase) KeyInputInactive(kt *key.ChordEvent) {
 
 func (sv *SliceViewBase) SliceViewBaseEvents() {
 	// LowPri to allow other focal widgets to capture
-	sv.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sv.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 		me.SetProcessed()
@@ -2165,7 +2165,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		cur := float32(sbb.Pos)
 		sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(false))) // preferY
 	})
-	sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 		// if !svv.HasFocus() {
@@ -2185,19 +2185,19 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 	})
 	if sv.IsInactive() {
 		if sv.InactKeyNav {
-			sv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			sv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 				kt := d.(*key.ChordEvent)
 				svv.KeyInputInactive(kt)
 			})
 		}
 	} else {
-		sv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 			kt := d.(*key.ChordEvent)
 			svv.KeyInputActive(kt)
 		})
-		sv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 			de := d.(*dnd.Event)
 			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 			switch de.Action {
@@ -2211,7 +2211,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		})
 		sg := sv.This().(SliceViewer).SliceGrid()
 		if sg != nil {
-			sg.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			sg.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				de := d.(*dnd.FocusEvent)
 				sgg := recv.Embed(gi.KiT_Frame).(*gi.Frame)
 				switch de.Action {

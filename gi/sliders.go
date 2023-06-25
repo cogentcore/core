@@ -71,7 +71,7 @@ var SliderBaseProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
 }
 
-func (sb *SliderBase) CopyFieldsFrom(frm interface{}) {
+func (sb *SliderBase) CopyFieldsFrom(frm any) {
 	fr := frm.(*SliderBase)
 	sb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
 	sb.Value = fr.Value
@@ -407,7 +407,7 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 }
 
 func (sb *SliderBase) MouseDragEvent() {
-	sb.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sb.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sbb.IsInactive() {
@@ -425,7 +425,7 @@ func (sb *SliderBase) MouseDragEvent() {
 }
 
 func (sb *SliderBase) MouseEvent() {
-	sb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sbb.IsInactive() {
@@ -454,7 +454,7 @@ func (sb *SliderBase) MouseEvent() {
 }
 
 func (sb *SliderBase) MouseFocusEvent() {
-	sb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sbb.IsInactive() {
 			return
@@ -470,7 +470,7 @@ func (sb *SliderBase) MouseFocusEvent() {
 }
 
 func (sb *SliderBase) MouseScrollEvent() {
-	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sbb.IsInactive() {
 			return
@@ -487,7 +487,7 @@ func (sb *SliderBase) MouseScrollEvent() {
 }
 
 func (sb *SliderBase) KeyChordEvent() {
-	sb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
 		if sbb.IsInactive() {
 			return
@@ -650,7 +650,7 @@ func AddNewSlider(parent ki.Ki, name string) *Slider {
 	return parent.AddNewChild(KiT_Slider, name).(*Slider)
 }
 
-func (sr *Slider) CopyFieldsFrom(frm interface{}) {
+func (sr *Slider) CopyFieldsFrom(frm any) {
 	fr := frm.(*Slider)
 	sr.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
@@ -852,7 +852,7 @@ func AddNewScrollBar(parent ki.Ki, name string) *ScrollBar {
 	return parent.AddNewChild(KiT_ScrollBar, name).(*ScrollBar)
 }
 
-func (sb *ScrollBar) CopyFieldsFrom(frm interface{}) {
+func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*ScrollBar)
 	sb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
@@ -1013,7 +1013,7 @@ func AddNewProgressBar(parent ki.Ki, name string) *ProgressBar {
 	return pb
 }
 
-func (pb *ProgressBar) CopyFieldsFrom(frm interface{}) {
+func (pb *ProgressBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*ProgressBar)
 	pb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }

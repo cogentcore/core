@@ -68,7 +68,8 @@ func (sv *SVG) OpenXML(fname gi.FileName) error {
 // Removes any existing content in SVG first. To process a byte slice, pass:
 // bytes.NewReader([]byte(str)) -- all errors are logged and also returned.
 // If this is being read into a live scenegraph, then you MUST call
-// 	svg.FullInit2DTree() after to initialize it for rendering.
+//
+//	svg.FullInit2DTree() after to initialize it for rendering.
 func (sv *SVG) ReadXML(reader io.Reader) error {
 	updt := sv.UpdateStart()
 	sv.SetFullReRender()

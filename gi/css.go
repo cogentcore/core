@@ -30,7 +30,7 @@ func AddNewStyleSheet(parent ki.Ki, name string) *StyleSheet {
 	return parent.AddNewChild(KiT_StyleSheet, name).(*StyleSheet)
 }
 
-func (ss *StyleSheet) CopyFieldsFrom(frm interface{}) {
+func (ss *StyleSheet) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*StyleSheet)
 	if !ok {
 		ki.GenCopyFieldsFrom(ss.This(), frm)

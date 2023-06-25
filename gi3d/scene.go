@@ -160,7 +160,7 @@ func (sc *Scene) Validate() error {
 	// 	*errs = append(*errs, err)
 	// }
 	hasError := false
-	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d any) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}
@@ -366,7 +366,7 @@ func (sc *Scene) Render2D() {
 
 // NavEvents handles standard viewer navigation events
 func (sc *Scene) NavEvents() {
-	sc.ConnectEvent(oswin.MouseDragEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sc.ConnectEvent(oswin.MouseDragEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.NoNav {
 			return
@@ -434,7 +434,7 @@ func (sc *Scene) NavEvents() {
 	// 	}
 	// 	ssc.UpdateSig()
 	// })
-	sc.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sc.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.NoNav {
 			return
@@ -458,7 +458,7 @@ func (sc *Scene) NavEvents() {
 		}
 		ssc.UpdateSig()
 	})
-	sc.ConnectEvent(oswin.MouseEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sc.ConnectEvent(oswin.MouseEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.NoNav {
 			return
@@ -478,7 +478,7 @@ func (sc *Scene) NavEvents() {
 		ssc.SetSel(nil) // clear any selection at this point
 		// }
 	})
-	sc.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sc.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.NoNav {
 			return
@@ -611,7 +611,7 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node3D {
 		if kii == nil {
 			continue
 		}
-		kii.FuncDownMeFirst(0, kii.This(), func(k ki.Ki, level int, d interface{}) bool {
+		kii.FuncDownMeFirst(0, kii.This(), func(k ki.Ki, level int, d any) bool {
 			nii, ni := KiToNode3D(k)
 			if nii == nil {
 				return ki.Break // going into a different type of thing, bail

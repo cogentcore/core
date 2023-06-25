@@ -33,7 +33,7 @@ func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
 	return parent.AddNewChild(KiT_MenuBar, name).(*MenuBar)
 }
 
-func (mb *MenuBar) CopyFieldsFrom(frm interface{}) {
+func (mb *MenuBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*MenuBar)
 	mb.Layout.CopyFieldsFrom(&fr.Layout)
 	mb.MainMenu = fr.MainMenu
@@ -319,7 +319,7 @@ func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
 	return parent.AddNewChild(KiT_ToolBar, name).(*ToolBar)
 }
 
-func (tb *ToolBar) CopyFieldsFrom(frm interface{}) {
+func (tb *ToolBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*ToolBar)
 	tb.Layout.CopyFieldsFrom(&fr.Layout)
 }
@@ -402,7 +402,7 @@ func (tb *ToolBar) Render2D() {
 }
 
 func (tb *ToolBar) MouseFocusEvent() {
-	tb.ConnectEvent(oswin.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tb.ConnectEvent(oswin.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.FocusEvent)
 		if me.Action == mouse.Enter {
 			tbb := recv.Embed(KiT_ToolBar).(*ToolBar)

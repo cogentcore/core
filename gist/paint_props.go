@@ -92,7 +92,7 @@ func (pc *Paint) StyleFromProps(par *Paint, props ki.Props, ctxt Context) {
 
 // StyleStrokeFuncs are functions for styling the Stroke object
 var StyleStrokeFuncs = map[string]StyleFunc{
-	"stroke": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"stroke": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -104,7 +104,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		}
 		fs.Color.SetIFace(val, ctxt, key)
 	},
-	"stroke-opacity": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"stroke-opacity": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -118,7 +118,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			fs.Opacity = iv
 		}
 	},
-	"stroke-width": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"stroke-width": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -130,7 +130,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		}
 		fs.Width.SetIFace(val, key)
 	},
-	"stroke-min-width": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"stroke-min-width": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -142,7 +142,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		}
 		fs.MinWidth.SetIFace(val, key)
 	},
-	"stroke-dasharray": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"stroke-dasharray": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -161,7 +161,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			mat32.CopyFloat64s(&fs.Dashes, *vt)
 		}
 	},
-	"stroke-linecap": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"stroke-linecap": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -184,7 +184,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"stroke-linejoin": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"stroke-linejoin": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -207,7 +207,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"stroke-miterlimit": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"stroke-miterlimit": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -228,7 +228,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 
 // StyleFillFuncs are functions for styling the Fill object
 var StyleFillFuncs = map[string]StyleFunc{
-	"fill": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"fill": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Fill)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -240,7 +240,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 		}
 		fs.Color.SetIFace(val, ctxt, key)
 	},
-	"fill-opacity": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"fill-opacity": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Fill)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -254,7 +254,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			fs.Opacity = iv
 		}
 	},
-	"fill-rule": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"fill-rule": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Fill)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -284,7 +284,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 
 // StylePaintFuncs are functions for styling the Stroke object
 var StylePaintFuncs = map[string]StyleFunc{
-	"vector-effect": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"vector-effect": func(obj any, key string, val any, par any, ctxt Context) {
 		pc := obj.(*Paint)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -307,7 +307,7 @@ var StylePaintFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"transform": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"transform": func(obj any, key string, val any, par any, ctxt Context) {
 		pc := obj.(*Paint)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {

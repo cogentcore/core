@@ -55,7 +55,8 @@ var Decoders = map[string]Decoder{}
 // extension.  Returns decoder instance with full decoded state.
 // Supported formats include:
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
-//        must have same name as .obj, or a default material is used.
+//
+//	must have same name as .obj, or a default material is used.
 func DecodeFile(fname string) (Decoder, error) {
 	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
@@ -95,7 +96,8 @@ func DecodeFile(fname string) (Decoder, error) {
 // using a decoder based on the file extension.
 // Supported formats include:
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
-//        must have same name as .obj, or a default material is used.
+//
+//	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenObj(fname string, gp *Group) error {
 	dec, err := DecodeFile(fname)
 	if err != nil {
@@ -112,7 +114,8 @@ func (sc *Scene) OpenObj(fname string, gp *Group) error {
 // under given parent, using a decoder based on the file extension.
 // Supported formats include:
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
-//        must have same name as .obj, or a default material is used.
+//
+//	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenNewObj(fname string, parent ki.Ki) (*Group, error) {
 	dec, err := DecodeFile(fname)
 	if err != nil {
@@ -135,7 +138,8 @@ func (sc *Scene) OpenNewObj(fname string, parent ki.Ki) (*Group, error) {
 // without extension is used.
 // Supported formats include:
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
-//        must have same name as .obj, or a default material is used.
+//
+//	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
 	dec, err := DecodeFile(fname)
 	if err != nil {
@@ -155,9 +159,10 @@ func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
 // the file extension in first file name.
 // Supported formats include:
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
-//        must have same name as .obj, or a default material is used.
-//        Does not support full scene data so only objects are loaded
-//        into a new group in scene.
+//
+//	must have same name as .obj, or a default material is used.
+//	Does not support full scene data so only objects are loaded
+//	into a new group in scene.
 func (sc *Scene) OpenScene(fname string) error {
 	dec, err := DecodeFile(fname)
 	if err != nil {
@@ -177,7 +182,8 @@ func (sc *Scene) OpenScene(fname string) error {
 // for loading data embedded in an executable for example.
 // Supported formats include:
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
-//        is the 2nd reader arg, or a default material is used.
+//
+//	is the 2nd reader arg, or a default material is used.
 func (sc *Scene) ReadObj(fname string, rs []io.Reader, gp *Group) error {
 	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
@@ -203,9 +209,10 @@ func (sc *Scene) ReadObj(fname string, rs []io.Reader, gp *Group) error {
 // This method can be used for loading data embedded in an executable for example.
 // Supported formats include:
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
-//        must have same name as .obj, or a default material is used.
-//        Does not support full scene data so only objects are loaded
-//        into a new group in scene.
+//
+//	must have same name as .obj, or a default material is used.
+//	Does not support full scene data so only objects are loaded
+//	into a new group in scene.
 func (sc *Scene) ReadScene(fname string, rs []io.Reader, gp *Group) error {
 	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]

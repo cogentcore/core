@@ -48,7 +48,7 @@ func AddNewLabel(parent ki.Ki, name string, text string) *Label {
 	return lb
 }
 
-func (lb *Label) CopyFieldsFrom(frm interface{}) {
+func (lb *Label) CopyFieldsFrom(frm any) {
 	fr := frm.(*Label)
 	lb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	lb.Text = fr.Text
@@ -188,7 +188,7 @@ func (lb *Label) OpenLink(tl *girl.TextLink) {
 }
 
 func (lb *Label) HoverEvent() {
-	lb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	lb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		llb := recv.Embed(KiT_Label).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
@@ -216,7 +216,7 @@ func (lb *Label) HoverEvent() {
 }
 
 func (lb *Label) MouseEvent() {
-	lb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	lb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		llb := recv.Embed(KiT_Label).(*Label)
 		hasLinks := len(llb.Render.Links) > 0
@@ -254,7 +254,7 @@ func (lb *Label) MouseMoveEvent() {
 	if !hasLinks {
 		return
 	}
-	lb.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	lb.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
 		llb := recv.Embed(KiT_Label).(*Label)

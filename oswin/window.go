@@ -114,11 +114,11 @@ type Window interface {
 
 	// Parent returns the parent object of a given window -- for GoGi it is a
 	// gi.Window but could be something else in other frameworks.
-	Parent() interface{}
+	Parent() any
 
 	// SetParent sets the parent object of a given window -- for GoGi it is a
 	// gi.Window but could be something else in other frameworks.
-	SetParent(par interface{})
+	SetParent(par any)
 
 	// MainMenu returns the OS-level main menu for this window -- this is
 	// currently for MacOS only -- returns nil for others.
@@ -196,7 +196,7 @@ type Window interface {
 	// cannot always be assumed.  Only provided for unforeseen emergency use --
 	// please file an Issue for anything that should be added to Window
 	// interface.
-	Handle() interface{}
+	Handle() any
 
 	// OSHandle returns the OS-specific underlying window handle:
 	// MacOS: NSWindow*, Windows:  HWND, LinuxX11: X11Window
@@ -233,7 +233,7 @@ type WindowBase struct {
 	DevPixRatio float32
 	PhysDPI     float32
 	LogDPI      float32
-	Par         interface{}
+	Par         any
 	Flag        int64
 	// set this to a function that will destroy GPU resources
 	// in the main thread prior to destroying the drawer
@@ -254,11 +254,11 @@ func (w WindowBase) Title() string {
 	return w.Titl
 }
 
-func (w WindowBase) Parent() interface{} {
+func (w WindowBase) Parent() any {
 	return w.Par
 }
 
-func (w *WindowBase) SetParent(parent interface{}) {
+func (w *WindowBase) SetParent(parent any) {
 	w.Par = parent
 }
 

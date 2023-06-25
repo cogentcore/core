@@ -40,7 +40,7 @@ func AddNewTabView(parent ki.Ki, name string) *TabView {
 	return parent.AddNewChild(KiT_TabView, name).(*TabView)
 }
 
-func (tv *TabView) CopyFieldsFrom(frm interface{}) {
+func (tv *TabView) CopyFieldsFrom(frm any) {
 	fr := frm.(*TabView)
 	tv.Layout.CopyFieldsFrom(&fr.Layout)
 	tv.MaxChars = fr.MaxChars
@@ -107,7 +107,7 @@ func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 	tab.Tooltip = label
 	tab.NoDelete = tv.NoDeleteTabs
 	tab.SetText(label)
-	tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tvv := recv.Embed(KiT_TabView).(*TabView)
 		act := send.Embed(KiT_TabButton).(*TabButton)
 		tabIdx := act.Data.(int)
@@ -391,7 +391,7 @@ func (tv *TabView) ConfigNewTabButton() bool {
 		tab := tb.InsertNewChild(KiT_Action, ntb, "new-tab").(*Action)
 		tab.Data = -1
 		tab.SetIcon("plus")
-		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(KiT_TabView).(*TabView)
 			tvv.SetFullReRender()
 			tvv.AddNewTabAction(tvv.NewTabType, "New Tab")
@@ -657,7 +657,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 		icnm := string(tb.Indicator)
 		cls.SetIcon(icnm)
 		cls.SetProp("no-focus", true)
-		cls.ActionSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		cls.ActionSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tbb := recv.Embed(KiT_TabButton).(*TabButton)
 			tabIdx := tbb.Data.(int)
 			tvv := tb.TabView()

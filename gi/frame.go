@@ -31,7 +31,7 @@ func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
 	return fr
 }
 
-func (fr *Frame) CopyFieldsFrom(frm interface{}) {
+func (fr *Frame) CopyFieldsFrom(frm any) {
 	cp, ok := frm.(*Frame)
 	if !ok {
 		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Frame one\n", ki.Type(fr).Name())

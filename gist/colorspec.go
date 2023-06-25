@@ -191,7 +191,7 @@ func RasterxToMat(mat *rasterx.Matrix2D) mat32.Mat2 {
 
 // RenderColor gets the color for rendering, applying opacity and bounds for
 // gradients
-func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) interface{} {
+func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) any {
 	if cs.Source == SolidColor || cs.Gradient == nil {
 		return rasterx.ApplyOpacity(cs.Color, float64(opacity))
 	} else {
@@ -207,7 +207,7 @@ func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform 
 
 // SetIFace sets the color spec from given interface value, e.g., for ki.Props
 // key is an optional property key for error -- always logs errors
-func (c *ColorSpec) SetIFace(val interface{}, ctxt Context, key string) error {
+func (c *ColorSpec) SetIFace(val any, ctxt Context, key string) error {
 	switch valv := val.(type) {
 	case string:
 		c.SetString(valv, ctxt)

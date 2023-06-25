@@ -109,7 +109,7 @@ func (we *WinEventRecv) Set(r ki.Ki, f ki.RecvFunc, data int) {
 }
 
 // Call calls the function on the recv with the args
-func (we *WinEventRecv) Call(send ki.Ki, sig int64, data interface{}) {
+func (we *WinEventRecv) Call(send ki.Ki, sig int64, data any) {
 	if EventTrace {
 		fmt.Printf("calling event: %v method on: %v\n", data, we.Recv.Path())
 	}
@@ -903,7 +903,8 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	return true
 }
 
-// 	FocusNext sets the focus on the next item that can accept focus after the
+//	FocusNext sets the focus on the next item that can accept focus after the
+//
 // given item (can be nil) -- returns true if a focus item found.
 func (em *EventMgr) FocusNext(foc ki.Ki) bool {
 	gotFocus := false
@@ -915,7 +916,7 @@ func (em *EventMgr) FocusNext(foc ki.Ki) bool {
 	focRoot := em.Master.FocusTopNode()
 
 	for i := 0; i < 2; i++ {
-		focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
+		focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
 			if gotFocus {
 				return ki.Break
 			}
@@ -993,7 +994,7 @@ func (em *EventMgr) FocusPrev(foc ki.Ki) bool {
 
 	focRoot := em.Master.FocusTopNode()
 
-	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
+	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
 		if gotFocus {
 			return ki.Break
 		}
@@ -1026,7 +1027,7 @@ func (em *EventMgr) FocusLast() bool {
 
 	focRoot := em.Master.FocusTopNode()
 
-	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
+	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil || ni.This() == nil {
 			return ki.Continue
@@ -1051,7 +1052,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 	updated := false
 	updt := false
 
-	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
+	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
 		if k == focRoot { // skip top-level
 			return ki.Continue
 		}

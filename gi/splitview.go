@@ -48,7 +48,7 @@ func AddNewSplitView(parent ki.Ki, name string) *SplitView {
 	return parent.AddNewChild(KiT_SplitView, name).(*SplitView)
 }
 
-func (sv *SplitView) CopyFieldsFrom(frm interface{}) {
+func (sv *SplitView) CopyFieldsFrom(frm any) {
 	fr := frm.(*SplitView)
 	sv.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
 	sv.HandleSize = fr.HandleSize
@@ -277,7 +277,7 @@ func (sv *SplitView) ConfigSplitters() {
 		sp.SetProp("thumb-size", sv.HandleSize)
 		sp.ThumbSize = sv.HandleSize
 		if mods {
-			sp.SliderSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			sp.SliderSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(SliderReleased) {
 					spr, _ := recv.Embed(KiT_SplitView).(*SplitView)
 					spl := send.(*Splitter)
@@ -325,7 +325,7 @@ func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
 }
 
 func (sv *SplitView) KeyChordEvent() {
-	sv.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sv.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		svv := recv.Embed(KiT_SplitView).(*SplitView)
 		svv.KeyInput(d.(*key.ChordEvent))
 	})
@@ -614,7 +614,7 @@ func (sr *Splitter) SplitView() *SplitView {
 }
 
 func (sr *Splitter) MouseEvent() {
-	sr.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sr.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		srr := recv.Embed(KiT_Splitter).(*Splitter)
 		if srr.IsInactive() {

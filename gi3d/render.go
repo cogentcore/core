@@ -104,14 +104,14 @@ func (sc *Scene) UpdateMeshBBox() {
 			continue
 		}
 		kii.FuncDownMeLast(0, kii.This(),
-			func(k ki.Ki, level int, d interface{}) bool {
+			func(k ki.Ki, level int, d any) bool {
 				nii, _ := KiToNode3D(k)
 				if nii == nil {
 					return ki.Break // going into a different type of thing, bail
 				}
 				return ki.Continue
 			},
-			func(k ki.Ki, level int, d interface{}) bool {
+			func(k ki.Ki, level int, d any) bool {
 				nii, _ := KiToNode3D(k)
 				if nii == nil {
 					return ki.Break // going into a different type of thing, bail
@@ -132,7 +132,7 @@ func (sc *Scene) UpdateWorldMatrix() {
 			continue
 		}
 		kii.UpdateWorldMatrix(idmtx)
-		kii.FuncDownMeFirst(0, kii.This(), func(k ki.Ki, level int, d interface{}) bool {
+		kii.FuncDownMeFirst(0, kii.This(), func(k ki.Ki, level int, d any) bool {
 			if k == kid {
 				return ki.Continue // skip, already did
 			}
@@ -162,7 +162,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 	sz := sc.Geom.Size
 	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
 
-	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d any) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}
@@ -202,7 +202,7 @@ func (sc *Scene) Init3D() {
 		sc.Defaults()
 	}
 	sc.UpdateWorldMatrix()
-	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d any) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}
@@ -218,7 +218,7 @@ func (sc *Scene) Init3D() {
 }
 
 func (sc *Scene) Style3D() {
-	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d any) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}
@@ -232,7 +232,7 @@ func (sc *Scene) Style3D() {
 }
 
 func (sc *Scene) UpdateNodes3D() {
-	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d any) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}
@@ -329,7 +329,7 @@ func (sc *Scene) Render3D(offscreen bool) {
 	sc.Phong.Sync()
 
 	var rcs [RenderClassesN][]Node3D
-	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d any) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}

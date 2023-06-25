@@ -76,7 +76,7 @@ func AddNewTextField(parent ki.Ki, name string) *TextField {
 	return parent.AddNewChild(KiT_TextField, name).(*TextField)
 }
 
-func (tf *TextField) CopyFieldsFrom(frm interface{}) {
+func (tf *TextField) CopyFieldsFrom(frm any) {
 	fr := frm.(*TextField)
 	tf.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
 	tf.Txt = fr.Txt
@@ -632,7 +632,7 @@ func (tf *TextField) InsertAtCursor(str string) {
 func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
-		tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tff := recv.Embed(KiT_TextField).(*TextField)
 			tff.This().(Clipper).Copy(true)
 		})
@@ -641,13 +641,13 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
 		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
-			tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.This().(Clipper).Cut()
 			})
 		ac.SetActiveState(tf.HasSelection())
 		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
-			tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.This().(Clipper).Paste()
 			})
@@ -660,7 +660,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 
 // SetCompleter sets completion functions so that completions will
 // automatically be offered as the user types
-func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
+func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
 		if tf.Complete != nil {
 			tf.Complete.CompleteSig.Disconnect(tf.This())
@@ -675,7 +675,7 @@ func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc,
 	tf.Complete.MatchFunc = matchFun
 	tf.Complete.EditFunc = editFun
 	// note: only need to connect once..
-	tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tff, _ := recv.Embed(KiT_TextField).(*TextField)
 		if sig == int64(CompleteSelect) {
 			tff.CompleteText(data.(string)) // always use data
@@ -1290,7 +1290,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 }
 
 func (tf *TextField) MouseDragEvent() {
-	tf.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		tff := recv.Embed(KiT_TextField).(*TextField)
@@ -1303,7 +1303,7 @@ func (tf *TextField) MouseDragEvent() {
 }
 
 func (tf *TextField) MouseEvent() {
-	tf.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		me := d.(*mouse.Event)
 		tff.HandleMouseEvent(me)
@@ -1311,7 +1311,7 @@ func (tf *TextField) MouseEvent() {
 }
 
 func (tf *TextField) MouseFocusEvent() {
-	tf.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		if tff.IsInactive() {
 			return
@@ -1327,13 +1327,13 @@ func (tf *TextField) MouseFocusEvent() {
 }
 
 func (tf *TextField) KeyChordEvent() {
-	tf.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	tf.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		kt := d.(*key.ChordEvent)
 		tff.KeyInput(kt)
 	})
 	if dlg, ok := tf.Viewport.This().(*Dialog); ok {
-		dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tff, _ := recv.Embed(KiT_TextField).(*TextField)
 			if sig == int64(DialogAccepted) {
 				tff.EditDone()
@@ -1365,7 +1365,7 @@ func (tf *TextField) ConfigParts() {
 		tf.StylePart(Node2D(clr))
 		clr.SetIcon("close")
 		clr.SetProp("no-focus", true)
-		clr.ActionSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		clr.ActionSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tff := recv.Embed(KiT_TextField).(*TextField)
 			if tff != nil {
 				tff.Clear()
