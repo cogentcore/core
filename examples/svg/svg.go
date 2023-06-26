@@ -57,7 +57,7 @@ func OpenSVG(fnm string) {
 
 func FileViewOpenSVG(vp *gi.Viewport2D) {
 	giv.FileViewDialog(vp, CurFilename, ".svg", giv.DlgOpts{Title: "Open SVG"}, nil,
-		vp.Win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vp.Win, func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				dlg, _ := send.(*gi.Dialog)
 				OpenSVG(giv.FileViewDialogValue(dlg))
@@ -100,7 +100,7 @@ func mainrun() {
 	svge.SetStretchMaxHeight()
 
 	loads := tbar.AddAction(gi.ActOpts{Label: "Open SVG", Icon: "file-open"}, win.This(),
-		func(recv, send ki.Ki, sig int64, data interface{}) {
+		func(recv, send ki.Ki, sig int64, data any) {
 			FileViewOpenSVG(vp)
 		})
 	loads.StartFocus()
@@ -114,7 +114,7 @@ func mainrun() {
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
 	zoomout := tbar.AddAction(gi.ActOpts{Icon: "zoom-out", Name: "zoomout", Tooltip: "zoom out"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			SetZoom(svge.Scale * 0.9)
 			win.FullReRender()
 		})
@@ -129,14 +129,14 @@ func mainrun() {
 	zoom.SetValue(svge.Scale)
 	zoom.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	TheZoom = zoom
-	zoom.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	zoom.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
 		sp := send.(*gi.SpinBox)
 		SetZoom(sp.Value)
 		win.FullReRender()
 	})
 
 	zoomin := tbar.AddAction(gi.ActOpts{Icon: "zoom-in", Name: "zoomin", Tooltip: " zoom in"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			SetZoom(svge.Scale * 1.1)
 			win.FullReRender()
 		})
@@ -156,7 +156,7 @@ func mainrun() {
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	trx.SetValue(svge.Trans.X)
 	TheTransX = trx
-	trx.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	trx.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
 		SetTrans(trx.Value, svge.Trans.Y)
 		win.FullReRender()
 	})
@@ -165,12 +165,12 @@ func mainrun() {
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	try.SetValue(svge.Trans.Y)
 	TheTransY = try
-	try.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	try.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
 		SetTrans(svge.Trans.X, try.Value)
 		win.FullReRender()
 	})
 
-	fnm.TextFieldSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	fnm.TextFieldSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) {
 			tf := send.(*gi.TextField)
 			fn, _ := homedir.Expand(tf.Text())
@@ -178,7 +178,7 @@ func mainrun() {
 		}
 	})
 
-	svge.NodeSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	svge.NodeSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
 		ssvg := send.Embed(svg.KiT_Editor).(*svg.Editor)
 		SetZoom(ssvg.Scale)
 		SetTrans(ssvg.Trans.X, ssvg.Trans.Y)
@@ -204,12 +204,12 @@ func mainrun() {
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
 	fmen.Menu = make(gi.Menu, 0, 10)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			FileViewOpenSVG(vp)
 		})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", Shortcut: "Command+W"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			win.OSWin.Close()
 		})
 

@@ -82,9 +82,9 @@ func mainrun() {
 	curFn := ""
 	exts := ".obj,.dae,.gltf"
 
-	tbar.AddAction(gi.ActOpts{Label: "Open...", Icon: "file-open", Tooltip: "Open a 3D object file for viewing."}, win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tbar.AddAction(gi.ActOpts{Label: "Open...", Icon: "file-open", Tooltip: "Open a 3D object file for viewing."}, win.This(), func(recv, send ki.Ki, sig int64, data any) {
 		giv.FileViewDialog(vp, curFn, exts, giv.DlgOpts{Title: "Open 3D Object", Prompt: "Open a 3D object file for viewing."}, nil,
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					dlg, _ := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 					fn := giv.FileViewDialogValue(dlg)

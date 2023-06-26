@@ -47,7 +47,8 @@ If `pkg-config` or some other misc command is not found, you can use `brew insta
 
 As usual, Microsoft Windows is different -- here's some tips for configuring the client to work on windows.
 
-* First, strongly recommend using the `PowerShell`-- search for that in the  `Microsoft Store` app -- type `store` in the windows taskbar search prompt -- this provides a much better command-line interface than the standard Command Prompt.
+* First, strongly recommend using the `PowerShell`
+-- search for that in the  `Microsoft Store` app -- type `store` in the windows taskbar search prompt -- this provides a much better command-line interface than the standard Command Prompt.
 
 * If you haven't already, install `git` from here: https://git-scm.com/download/win
 

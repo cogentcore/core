@@ -7,8 +7,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin
-// +build !3d
+//go:build darwin && !3d
+// +build darwin,!3d
 
 package macdriver
 
@@ -41,7 +41,7 @@ type windowImpl struct {
 	//	- Cocoa:   uintptr holding a NSOpenGLContext*.
 	//	- X11:     uintptr holding an EGLSurface.
 	//	- Windows: ctxWin32
-	ctx interface{}
+	ctx any
 
 	event.Deque
 	publish     chan struct{}

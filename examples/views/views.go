@@ -111,7 +111,7 @@ func mainrun() {
 	but := gi.AddNewButton(trow, "slice-test")
 	but.SetText("SliceDialog")
 	but.Tooltip = "open a SliceViewDialog slice view with a lot of elments, for performance testing"
-	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data interface{}) {
+	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonClicked) {
 			sl := make([]float32, 2880)
 			gi.ProfileToggle()
@@ -122,7 +122,7 @@ func mainrun() {
 	but = gi.AddNewButton(trow, "table-test")
 	but.SetText("TableDialog")
 	but.Tooltip = "open a TableViewDialog view "
-	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data interface{}) {
+	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonClicked) {
 			giv.TableViewDialog(vp, &tsttable, giv.DlgOpts{Title: "TableView Test", Prompt: "how does it resize."}, nil, nil, nil)
 		}

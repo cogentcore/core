@@ -51,7 +51,7 @@ type windowImpl struct {
 // cannot always be assumed.  Only provided for unforeseen emergency use --
 // please file an Issue for anything that should be added to Window
 // interface.
-func (w *windowImpl) Handle() interface{} {
+func (w *windowImpl) Handle() any {
 	return w.glw
 }
 
@@ -84,13 +84,12 @@ func (w *windowImpl) IsVisible() bool {
 // nothing further should happen.
 // Must call this on app main thread using oswin.TheApp.RunOnMain
 //
-// oswin.TheApp.RunOnMain(func() {
-//    if !win.Activate() {
-//        return
-//    }
-//    // do GPU calls here
-// })
-//
+//	oswin.TheApp.RunOnMain(func() {
+//	   if !win.Activate() {
+//	       return
+//	   }
+//	   // do GPU calls here
+//	})
 func (w *windowImpl) Activate() bool {
 	// note: activate is only run on main thread so we don't need to check for mutex
 	if w == nil || w.glw == nil {

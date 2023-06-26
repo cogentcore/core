@@ -321,7 +321,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	eabut := gi.AddNewCheckBox(evlay, "anim-but")
 	eabut.SetText("Animate")
 	eabut.Tooltip = "toggle animation on and off"
-	eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonToggled) {
 			anim.On = eabut.IsChecked()
 		}
@@ -331,15 +331,15 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	cmb.SetText("Anim Ctrl")
 	cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
 	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			anim.DoTorus = !anim.DoTorus
 		})
 	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Gopher"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			anim.DoGopher = !anim.DoGopher
 		})
 	cmb.Menu.AddAction(gi.ActOpts{Label: "Edit Anim"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 		})
 
@@ -366,11 +366,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// spsld.Tracking = true
 	spsld.Icon = gi.IconName("circlebutton-on")
 
-	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		anim.Speed = sb.Value
 		spsld.SetValue(anim.Speed)
 	})
-	spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if gi.SliderSignals(sig) == gi.SliderValueChanged {
 			anim.Speed = data.(float32)
 			sb.SetValue(anim.Speed)

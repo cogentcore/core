@@ -125,7 +125,7 @@ const (
 	// OSOpenFilesEvent is an event telling app to open given files
 	OSOpenFilesEvent
 
-	// CustomEventType is a user-defined event with a data interface{} field
+	// CustomEventType is a user-defined event with a data any field
 	CustomEventType
 
 	// number of event types

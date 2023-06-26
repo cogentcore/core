@@ -408,7 +408,7 @@ func (sc *Scene) NavEvents() {
 			}
 		}
 	})
-	// sc.ConnectEvent(oswin.MouseMoveEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// sc.ConnectEvent(oswin.MouseMoveEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	me := d.(*mouse.MoveEvent)
 	// 	me.SetProcessed()
 	// 	ssc := recv.Embed(KiT_Scene).(*Scene)

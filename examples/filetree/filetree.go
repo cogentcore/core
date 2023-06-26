@@ -346,7 +346,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 			txed.Viewport = fb.Viewport
 		}
 
-		ft.TreeViewSig.Connect(fb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		ft.TreeViewSig.Connect(fb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if data == nil {
 				return
 			}
@@ -485,7 +485,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
 				[]string{"Close Without Saving", "Cancel"},
-				win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				win.This(), func(recv, send ki.Ki, sig int64, data any) {
 					switch sig {
 					case 0:
 						w.Close()
@@ -505,7 +505,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 			inQuitPrompt = true
 			gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
 				Prompt: "Are you <i>sure</i> you want to quit?"}, gi.AddOk, gi.AddCancel,
-				win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				win.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.DialogAccepted) {
 						gi.Quit()
 					} else {

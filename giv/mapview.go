@@ -287,7 +287,7 @@ func (mv *MapView) SetChanged() {
 }
 
 // MapChangeValueType changes the type of the value for given map element at
-// idx -- for maps with interface{} values
+// idx -- for maps with any values
 func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	if kit.IfaceIsNil(mv.Map) {
 		return

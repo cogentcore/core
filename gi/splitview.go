@@ -653,7 +653,7 @@ func (sr *Splitter) MouseEvent() {
 
 func (sr *Splitter) MouseScrollEvent() {
 	// todo: just disabling at this point to prevent bad side-effects
-	// sr.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// sr.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	srr := recv.Embed(KiT_SliderBase).(*SliderBase)
 	// 	if srr.IsInactive() {
 	// 		return

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build windows
-// +build !3d
+//go:build windows && !3d
+// +build windows,!3d
 
 package windriver
 
@@ -113,7 +113,7 @@ func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rec
 	})
 }
 
-func drawWindow(dc syscall.Handle, src2dst f64.Aff3, src interface{}, sr image.Rectangle, op draw.Op) (retErr error) {
+func drawWindow(dc syscall.Handle, src2dst f64.Aff3, src any, sr image.Rectangle, op draw.Op) (retErr error) {
 	var dr image.Rectangle
 	if src2dst[1] != 0 || src2dst[3] != 0 {
 		// general drawing

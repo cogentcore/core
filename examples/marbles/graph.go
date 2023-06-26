@@ -156,7 +156,7 @@ type Line struct {
 	Color  string                         `desc:"color to draw the line in"`
 	Bounce float32                        `min:"0" max:"2" step:".05" desc:"how bouncy the line is -- 1 = perfectly bouncy, 0 = no bounce at all"`
 	expr   *govaluate.EvaluableExpression `tableview:"-" desc:"the expression evaluator"`
-	params map[string]interface{}         `tableview:"-" desc:"the eval params"`
+	params map[string]any                 `tableview:"-" desc:"the eval params"`
 }
 
 func (ln *Line) Defaults(lidx int) {
@@ -173,7 +173,7 @@ func (ln *Line) Eval(x float32) float32 {
 		return 0
 	}
 	if ln.params == nil {
-		ln.params = make(map[string]interface{}, 1)
+		ln.params = make(map[string]any, 1)
 	}
 	ln.params["x"] = float64(x)
 	yi, _ := ln.expr.Evaluate(ln.params)
@@ -485,27 +485,27 @@ func RunMarbles() {
 }
 
 var functions = map[string]govaluate.ExpressionFunction{
-	"cos": func(args ...interface{}) (interface{}, error) {
+	"cos": func(args ...any) (any, error) {
 		y := math.Cos(args[0].(float64))
 		return y, nil
 	},
-	"sin": func(args ...interface{}) (interface{}, error) {
+	"sin": func(args ...any) (any, error) {
 		y := math.Sin(args[0].(float64))
 		return y, nil
 	},
-	"tan": func(args ...interface{}) (interface{}, error) {
+	"tan": func(args ...any) (any, error) {
 		y := math.Tan(args[0].(float64))
 		return y, nil
 	},
-	"pow": func(args ...interface{}) (interface{}, error) {
+	"pow": func(args ...any) (any, error) {
 		y := math.Pow(args[0].(float64), args[1].(float64))
 		return y, nil
 	},
-	"abs": func(args ...interface{}) (interface{}, error) {
+	"abs": func(args ...any) (any, error) {
 		y := math.Abs(args[0].(float64))
 		return y, nil
 	},
-	"fact": func(args ...interface{}) (interface{}, error) {
+	"fact": func(args ...any) (any, error) {
 		y := FactorialMemoization(int(args[0].(float64)))
 		return y, nil
 	},

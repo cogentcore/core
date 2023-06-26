@@ -720,7 +720,7 @@ func (vv *EnumValueView) EnumType() reflect.Type {
 		return vv.AltType
 	}
 	// derive type indirectly from the interface instead of directly from the value
-	// because that works for interface{} types as in property maps
+	// because that works for any types as in property maps
 	typ := kit.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
 	return typ
 }
@@ -786,7 +786,7 @@ func (vv *BitFlagView) EnumType() reflect.Type {
 		return vv.AltType
 	}
 	// derive type indirectly from the interface instead of directly from the value
-	// because that works for interface{} types as in property maps
+	// because that works for any types as in property maps
 	typ := kit.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
 	return typ
 }

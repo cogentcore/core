@@ -145,7 +145,7 @@ func (e *Event) Chord() Chord {
 		}
 	}
 	// now convert code
-	codestr := strings.TrimPrefix(interface{}(e.Code).(fmt.Stringer).String(), "Code")
+	codestr := strings.TrimPrefix(any(e.Code).(fmt.Stringer).String(), "Code")
 	return Chord(modstr + codestr)
 }
 
@@ -237,7 +237,7 @@ func ModsString(mods int32) string {
 	modstr := ""
 	for m := Shift; m < ModifiersN; m++ {
 		if mods&(1<<uint32(m)) != 0 {
-			modstr += interface{}(m).(fmt.Stringer).String() + "+"
+			modstr += any(m).(fmt.Stringer).String() + "+"
 		}
 	}
 	return modstr
@@ -248,7 +248,7 @@ func ModsString(mods int32) string {
 func ModsFmString(cs string) (int32, string) {
 	var mods int32
 	for m := Shift; m < ModifiersN; m++ {
-		mstr := interface{}(m).(fmt.Stringer).String() + "+"
+		mstr := any(m).(fmt.Stringer).String() + "+"
 		if strings.HasPrefix(cs, mstr) {
 			mods |= (1 << uint32(m))
 			cs = strings.TrimPrefix(cs, mstr)

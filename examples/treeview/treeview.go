@@ -113,7 +113,7 @@ func mainrun() {
 	sv.SetStretchMaxHeight()
 	sv.SetStruct(&srctree)
 
-	tv.TreeViewSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.TreeViewSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if data == nil {
 			return
 		}

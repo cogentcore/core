@@ -128,7 +128,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 		fmt.Printf("Button %s clicked\n", button1.Name())
 		gi.StringPromptDialog(vp, "", "Enter value here..",
 			gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
-			rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 				dlg := send.(*gi.Dialog)
 				if sig == int64(gi.DialogAccepted) {
 					val := gi.StringPromptDialogValue(dlg)
@@ -143,7 +143,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	// button2.SetProp("background-color", "#EDF")
 	button2.Tooltip = "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things"
 	// this is the "full strength" general purpose signaling framework
-	button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) {
 			giv.GoGiEditorDialog(vp)
@@ -152,7 +152,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	checkbox := gi.AddNewCheckBox(brow, "checkbox")
 	checkbox.Text = "Toggle"
-	checkbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	checkbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonToggled) {
 			fmt.Printf("Checkbox toggled: %v\n", checkbox.IsChecked())
 		}
@@ -162,21 +162,21 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	mb1 := gi.AddNewMenuButton(brow, "menubutton1")
 	mb1.SetText("Menu Button")
 	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
 	mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
 
 	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
 	mb1.Menu.AddSeparator("sep1")
 
 	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
@@ -212,13 +212,13 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	slider2.SetStretchMaxHeight()
 	slider2.SetValue(0.5)
 
-	slider1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	slider1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig != int64(gi.SliderMoved) {
 			fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 		}
 	})
 
-	slider2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	slider2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig != int64(gi.SliderMoved) {
 			fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 		}
@@ -234,7 +234,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	scrollbar1.SetValue(0.25)
 	// scrollbar1.Snap = true
 	// scrollbar1.Tracking = true
-	scrollbar1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	scrollbar1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig != int64(gi.SliderMoved) {
 			fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 		}
@@ -252,7 +252,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	scrollbar2.Tracking = true
 	scrollbar2.Step = 1
 	scrollbar2.PageStep = 10
-	scrollbar2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	scrollbar2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.SliderValueChanged) { // typically this is the one you care about
 			fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
 		}
@@ -274,7 +274,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	// edit1.SetText("Edit this text")
 	edit1.SetProp("min-width", "20em")
 	edit1.SetCompleter(edit1, Complete, CompleteEdit) // gets us word demo completion
-	edit1.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	edit1.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		estr := ""
 		if rn, ok := data.([]rune); ok {
 			estr = string(rn)
@@ -293,13 +293,13 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	sb.SetProp("format", "%#X")
 	sb.HasMin = true
 	sb.Min = 0.0
-	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
 	})
 
 	cb := gi.AddNewComboBox(txrow, "combo")
 	cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem(), false), true, true, 50)
-	cb.ComboSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.ComboSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	})
 
@@ -318,24 +318,24 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	// Linux, Windows or Meta for MacOS
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
-		rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:New menu action triggered\n")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
-		rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:Open menu action triggered\n")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
-		rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:Save menu action triggered\n")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
-		rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:SaveAs menu action triggered\n")
 		})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunWinClose},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			win.CloseReq()
 		})
 
@@ -350,7 +350,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 		inQuitPrompt = true
 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
 			Prompt: "Are you <i>sure</i> you want to quit?"}, gi.AddOk, gi.AddCancel,
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					gi.Quit()
 				} else {
@@ -371,7 +371,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 		inClosePrompt = true
 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close Window?",
 			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, gi.AddOk, gi.AddCancel,
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					gi.Quit()
 				} else {
@@ -394,7 +394,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	fmt.Printf("main loop ended\n")
 }
 
-func Complete(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
+func Complete(data any, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = complete.SeedWhiteSpace(text)
 	if md.Seed == "" {
 		return md
@@ -407,7 +407,7 @@ func Complete(data interface{}, text string, posLn, posCh int) (md complete.Matc
 	return md
 }
 
-func CompleteEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
+func CompleteEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
 	ed = complete.EditWord(text, cursorPos, completion.Text, seed)
 	return ed
 }

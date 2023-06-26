@@ -299,7 +299,7 @@ def mainrun():
     # inQuitPrompt = True
     # gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
     # Prompt: "Are you <i>sure</i> you want to quit?"}, True, True,
-    # win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+    # win.This(), func(recv, send ki.Ki, sig int64, data any) {
     # if sig == int64(gi.DialogAccepted) {
     # gi.Quit()
     # } else {
@@ -320,7 +320,7 @@ def mainrun():
     # inClosePrompt = True
     # gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close Window?",
     # Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, True, True,
-    # win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+    # win.This(), func(recv, send ki.Ki, sig int64, data any) {
     # if sig == int64(gi.DialogAccepted) {
     # gi.Quit()
     # } else {
