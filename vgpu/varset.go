@@ -183,10 +183,14 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 	for vi, vr := range st.Vars {
 		bd := vk.DescriptorSetLayoutBinding{
 			Binding:         uint32(vr.BindLoc),
-			DescriptorType:  RoleDescriptors[vr.Role],
+			DescriptorType:  vr.Role.VkDescriptor(),
 			DescriptorCount: 1,
 			StageFlags:      vk.ShaderStageFlags(vr.Shaders),
 		}
+		// if vs.StaticVars {
+		// 	bd.DescriptorType = vr.Role.VkDescriptorStatic()
+		// 	fmt.Printf("static type\n")
+		// }
 		if vr.Role > Storage {
 			vals := vr.Vals.ActiveVals()
 			nvals := len(vals)
@@ -208,12 +212,14 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 			// flags = vk.DescriptorSetLayoutCreateFlags(vk.DescriptorSetLayoutCreateUpdateAfterBindPoolBit)
 		}
 		binds = append(binds, bd)
+		// if !vs.StaticVars {
 		if vr.Role == Uniform || vr.Role == Storage {
 			vr.BindValIdx = make([]int, vs.NDescs)
 			vr.DynOffIdx = dyno
 			vs.AddDynOff()
 			dyno++
 		}
+		// }
 	}
 
 	// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorSetLayoutBindingFlagsCreateInfo.html
@@ -335,6 +341,19 @@ func (st *VarSet) BindDynVar(vs *Vars, vr *Var) error {
 // also, need an option to allow a single val to be used in a static way, selecting from among multiple,
 // instead of always assuming an array used.
 
+// BindStatVarsAll dynamically binds all uniform, storage values
+// in given set, for all variables, for all values.
+//
+// Must call BindVarStart / End around this.
+func (st *VarSet) BindStatVarsAll(vs *Vars) {
+	for _, vr := range st.Vars {
+		if vr.Role < Uniform || vr.Role > Storage {
+			continue
+		}
+		st.BindStatVar(vs, vr)
+	}
+}
+
 // BindStatVars binds all static vars to their current values,
 // for non-Uniform, Storage, variables (e.g., Textures).
 // Each Val for a given Var is given a descriptor binding
@@ -366,19 +385,19 @@ func (st *VarSet) BindStatVarName(vs *Vars, varNm string) error {
 }
 
 // BindStatVar does static variable binding for given var,
-// For non-Uniform, Storage, variables (e.g., Textures).
 // Each Val for a given Var is given a descriptor binding
 // and the shader sees an array of values of corresponding length.
 // All vals must be uploaded to Device memory prior to this,
 // and it is not possible to update anything during a render pass.
 func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
+
 	vals := vr.Vals.ActiveVals()
 	nvals := len(vals)
 	wd := vk.WriteDescriptorSet{
 		SType:          vk.StructureTypeWriteDescriptorSet,
 		DstSet:         st.VkDescSets[vs.BindDescIdx],
 		DstBinding:     uint32(vr.BindLoc),
-		DescriptorType: vr.Role.VkDescriptor(),
+		DescriptorType: vr.Role.VkDescriptor(), // Static(),
 	}
 	bt := vr.BuffType()
 	buff := vs.Mem.Buffs[bt]
@@ -499,6 +518,25 @@ func (vs *VarSet) VkPushConfig() []vk.PushConstantRange {
 
 /////////////////////////////////////////////////////////////////////////
 // Dynamic Binding
+
+// BindDynValsAllIdx dynamically binds all uniform, storage values
+// in given set, for all variables, for given value index.
+//
+// This only dynamically updates the offset to point to the specified val.
+// MUST call System.BindVars prior to any subsequent draw calls for this
+// new offset to be bound at the proper point in the command buffer prior
+// (call after all such dynamic bindings are updated.)
+//
+// Do NOT call BindValsStart / End around this.
+func (st *VarSet) BindDynValsAllIdx(vs *Vars, idx int) {
+	for _, vr := range st.Vars {
+		if vr.Role < Uniform || vr.Role > Storage {
+			continue
+		}
+		vl := vr.Vals.Vals[idx]
+		st.BindDynVal(vs, vr, vl)
+	}
+}
 
 // BindDynValName dynamically binds given uniform or storage value
 // by name for given variable name, in given set.

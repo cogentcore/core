@@ -21,12 +21,13 @@ import (
 // Vars are allocated to bindings / locations sequentially in the
 // order added!
 type Vars struct {
-	SetMap    map[int]*VarSet     `desc:"map of sets, by set number -- VertexSet is -2, PushSet is -1, rest are added incrementally"`
-	RoleMap   map[VarRoles][]*Var `desc:"map of vars by different roles across all sets -- updated in Config(), after all vars added.  This is needed for VkDescPool allocation."`
-	HasVertex bool                `inactive:"+" desc:"true if a VertexSet has been added"`
-	HasPush   bool                `inactive:"+" desc:"true if PushSet has been added"`
-	NDescs    int                 `desc:"number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased."`
-	Mem       *Memory             `view:"-" desc:"our parent memory manager"`
+	SetMap     map[int]*VarSet     `desc:"map of sets, by set number -- VertexSet is -2, PushSet is -1, rest are added incrementally"`
+	RoleMap    map[VarRoles][]*Var `desc:"map of vars by different roles across all sets -- updated in Config(), after all vars added.  This is needed for VkDescPool allocation."`
+	HasVertex  bool                `inactive:"+" desc:"true if a VertexSet has been added"`
+	HasPush    bool                `inactive:"+" desc:"true if PushSet has been added"`
+	NDescs     int                 `desc:"number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased."`
+	Mem        *Memory             `view:"-" desc:"our parent memory manager"`
+	StaticVars bool                `inactive:"+" desc:"if true, variables are statically bound to specific offsets in memory buffers, vs. dynamically bound offsets.  Typically a compute shader operating on fixed data variables can use static binding, while graphics (e.g., vphong) requires dynamic binding to efficiently use the same shader code for multiple different values of the same variable type"`
 
 	VkDescLayout vk.PipelineLayout       `view:"-" desc:"vulkan descriptor layout based on vars"`
 	VkDescPool   vk.DescriptorPool       `view:"-" desc:"vulkan descriptor pool, allocated for NDescs and the different descriptor pools"`
@@ -418,6 +419,23 @@ func (vs *Vars) BindDynVarsAll() {
 	}
 }
 
+// BindStatVarsAll binds all static vars to their current values,
+// for all Uniform and Storage variables, when using Static value binding.
+//
+// All vals must be uploaded to Device memory prior to this.
+func (vs *Vars) BindStatVarsAll() {
+	for i := 0; i < vs.NDescs; i++ {
+		vs.BindVarsStart(i)
+		for si, st := range vs.SetMap {
+			if si < 0 {
+				continue
+			}
+			st.BindStatVarsAll(vs)
+		}
+		vs.BindVarsEnd()
+	}
+}
+
 // BindDynVarName binds dynamic variable for given var
 // looked up by name, for Uniform, Storage variables.
 //
@@ -537,6 +555,24 @@ func (vs *Vars) BindVertexValIdx(varNm string, valIdx int) error {
 	}
 	vr.BindValIdx[vs.BindDescIdx] = vl.Idx // this is then consumed by draw command
 	return nil
+}
+
+// BindDynValsAllIdx dynamically binds all uniform, storage values
+// by index for all variables in all sets.
+//
+// This only dynamically updates the offset to point to the specified val.
+// MUST call System.BindVars prior to any subsequent draw calls for this
+// new offset to be bound at the proper point in the command buffer prior
+// (call after all such dynamic bindings are updated.)
+//
+// Do NOT call BindValsStart / End around this.
+func (vs *Vars) BindDynValsAllIdx(idx int) {
+	for si, st := range vs.SetMap {
+		if si < 0 {
+			continue
+		}
+		st.BindDynValsAllIdx(vs, idx)
+	}
 }
 
 // BindDynValName dynamically binds given uniform or storage value

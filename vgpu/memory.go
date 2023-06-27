@@ -73,13 +73,13 @@ func (mm *Memory) Destroy(dev vk.Device) {
 
 // Config should be called after all Vals have been configured
 // and are ready to go with their initial data.
-// Does: AllocHost(), AllocDev()
+// Does: AllocHost(), AllocDev().
+// Note: dynamic binding must be called separately after this.
 func (mm *Memory) Config(dev vk.Device) {
 	mm.Free()
 	mm.Vars.Config()
 	mm.AllocHost()
 	mm.AllocDev()
-	mm.Vars.BindDynVarsAll()
 }
 
 // AllocHost allocates memory for all buffers

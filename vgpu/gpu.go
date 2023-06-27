@@ -17,7 +17,6 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/ki/kit"
 	"github.com/goki/vgpu/vkinit"
 	vk "github.com/goki/vulkan"
@@ -60,25 +59,6 @@ type GPU struct {
 	PlatformDeviceNext unsafe.Pointer `view:"-" desc:"platform-specific PNext for CreateDevice call"`
 }
 
-// Init initializes vulkan system for Display-enabled use, using glfw.
-// Must call before doing any vgpu stuff.
-// Calls glfw.Init and sets the Vulkan instance proc addr and calls Init.
-// IMPORTANT: must be called on the main initial thread!
-func Init() error {
-	err := glfw.Init()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
-	err = vk.Init()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	return err
-}
-
 // InitNoDisplay initializes vulkan system for a purely compute-based
 // or headless operation, without any display (i.e., without using glfw).
 // Call before doing any vgpu stuff.
@@ -92,12 +72,6 @@ func InitNoDisplay() error {
 		return err
 	}
 	return nil
-}
-
-// Terminate shuts down the vulkan system -- call as last thing before quitting.
-// IMPORTANT: must be called on the main initial thread!
-func Terminate() {
-	glfw.Terminate()
 }
 
 // Defaults sets up default parameters, with the graphics flag

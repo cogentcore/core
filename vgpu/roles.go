@@ -49,9 +49,25 @@ func (vr VarRoles) VkDescriptor() vk.DescriptorType {
 	return RoleDescriptors[vr]
 }
 
+// VkDescriptorStatic returns the vk.DescriptorType for
+// static variable binding type
+func (vr VarRoles) VkDescriptorStatic() vk.DescriptorType {
+	return StaticRoleDescriptors[vr]
+}
+
 var RoleDescriptors = map[VarRoles]vk.DescriptorType{
 	Uniform:      vk.DescriptorTypeUniformBufferDynamic,
 	Storage:      vk.DescriptorTypeStorageBufferDynamic,
+	UniformTexel: vk.DescriptorTypeUniformTexelBuffer,
+	StorageTexel: vk.DescriptorTypeStorageTexelBuffer,
+	StorageImage: vk.DescriptorTypeStorageImage,
+	TextureRole:  vk.DescriptorTypeCombinedImageSampler,
+}
+
+// For static variable binding
+var StaticRoleDescriptors = map[VarRoles]vk.DescriptorType{
+	Uniform:      vk.DescriptorTypeUniformBuffer,
+	Storage:      vk.DescriptorTypeStorageBuffer,
 	UniformTexel: vk.DescriptorTypeUniformTexelBuffer,
 	StorageTexel: vk.DescriptorTypeStorageTexelBuffer,
 	StorageImage: vk.DescriptorTypeStorageImage,

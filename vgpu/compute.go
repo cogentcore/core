@@ -21,31 +21,27 @@ func (sy *System) NewComputePipelineEmbed(name string, efs embed.FS, fname strin
 	return pl
 }
 
-// ComputeResetBindVars adds command to the default system CmdPool
-// command buffer, to bind the Vars descriptors,
-// for given collection of descriptors descIdx
-// (see Vars NDescs for info).
-// Required whenever variables have changed their mappings,
-// before running a command.
-func (sy *System) ComputeResetBindVars(descIdx int) {
-	sy.CmdResetBindVars(sy.CmdPool.Buff, descIdx)
+// ComputeCmdBuff returns the default compute command buffer: CmdPool.Buff
+// which can be used for executing arbitrary compute commands.
+func (sy *System) ComputeCmdBuff() vk.CommandBuffer {
+	return sy.CmdPool.Buff
 }
 
-// ComputeResetBindVarsCmd adds command to the given
+// ComputeResetBindVars adds command to the given
 // command buffer, to bind the Vars descriptors,
 // for given collection of descriptors descIdx
 // (see Vars NDescs for info).
 // Required whenever variables have changed their mappings,
 // before running a command.
-func (sy *System) ComputeResetBindVarsCmd(cmd vk.CommandBuffer, descIdx int) {
+func (sy *System) ComputeResetBindVars(cmd vk.CommandBuffer, descIdx int) {
 	sy.CmdResetBindVars(cmd, descIdx)
 }
 
 // ComputeResetBegin resets and begins the recording of commands
-// on the default system CmdPool -- use prior to ComputeCommand
+// the given command buffer -- use prior to ComputeCommand
 // if not needing to call ComputeBindVars
-func (sy *System) ComputeResetBegin() {
-	CmdResetBegin(sy.CmdPool.Buff)
+func (sy *System) ComputeResetBegin(cmd vk.CommandBuffer) {
+	CmdResetBegin(cmd)
 }
 
 // Warps returns the number of warps (thread groups) that is sufficient
@@ -56,38 +52,7 @@ func Warps(n, threads int) int {
 	return int(math.Ceil(float64(n) / float64(threads)))
 }
 
-// ComputeCommand adds commands to run the compute shader for given
-// number of *warps* (groups of threads) along 3 dimensions,
-// which then generate indexes passed into the shader.
-// In HLSL, the [numthreads(x, y, z)] directive specifies the number
-// of threads allocated per warp -- the actual number of elements
-// processed is threads * warps per each dimension. See Warps function.
-// The hardware typically has 32 (NVIDIA, M1, M2) or 64 (AMD) hardware
-// threads per warp, and so 64 is typically used as a default sum of
-// threads per warp across all of the dimensions.
-// Can use subsets of dimensions by using 1 for the other dimensions,
-// and see ComputeCommand1D for a convenience method that automatically
-// computes the number of warps for a 1D compute shader (everthing in x).
-// Uses the system CmdPool -- must have a CmdBegin already executed,
-// either via ComputeBindVars or ComputeResetBegin call.
-// Must call CommandSubmit[Wait] to execute the command.
-func (pl *Pipeline) ComputeCommand(nx, ny, nz int) {
-	cmd := pl.Sys.CmdPool.Buff
-	vk.CmdBindPipeline(cmd, vk.PipelineBindPointCompute, pl.VkPipeline)
-	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
-}
-
-// ComputeCommand1D adds commands to run the compute shader for given
-// number of computational elements along the first (X) dimension,
-// for given number *elements* and threads per warp (typically 64).
-// See ComputeCommand for full info.
-// This is just a convenience method for common 1D case that calls
-// the Warps method for you.
-func (pl *Pipeline) ComputeCommand1D(n, threads int) {
-	pl.ComputeCommand(Warps(n, threads), 1, 1)
-}
-
-// ComputeCommandCmd adds commands to given cmd to run the compute
+// ComputeDispatch adds commands to given cmd buffer to run the compute
 // shader for given number of *warps* (groups of threads) along 3 dimensions,
 // which then generate indexes passed into the shader.
 // In HLSL, the [numthreads(x, y, z)] directive specifies the number
@@ -97,46 +62,32 @@ func (pl *Pipeline) ComputeCommand1D(n, threads int) {
 // threads per warp, and so 64 is typically used as a default sum of
 // threads per warp across all of the dimensions.
 // Can use subsets of dimensions by using 1 for the other dimensions,
-// and see ComputeCommand1D for a convenience method that automatically
+// and see ComputeDispatch1D for a convenience method that automatically
 // computes the number of warps for a 1D compute shader (everthing in x).
-// Uses the system CmdPool -- must have a CmdBegin already executed,
-// either via ComputeBindVars or ComputeResetBegin call.
+// Must have a CmdBegin already executed, either via ComputeBindVars
+// or ComputeResetBegin call.
 // Must call CommandSubmit[Wait] to execute the command.
-func (pl *Pipeline) ComputeCommandCmd(cmd vk.CommandBuffer, nx, ny, nz int) {
+func (pl *Pipeline) ComputeDispatch(cmd vk.CommandBuffer, nx, ny, nz int) {
 	vk.CmdBindPipeline(cmd, vk.PipelineBindPointCompute, pl.VkPipeline)
 	vk.CmdDispatch(cmd, uint32(nx), uint32(ny), uint32(nz))
 }
 
-// ComputeCommand1DCmd adds commands to run the compute shader for given
+// ComputeDispatch1D adds commands to run the compute shader for given
 // number of computational elements along the first (X) dimension,
 // for given number *elements* and threads per warp (typically 64).
-// See ComputeCommand for full info.
+// See ComputeDispatch for full info.
 // This is just a convenience method for common 1D case that calls
 // the Warps method for you.
-func (pl *Pipeline) ComputeCommand1DCmd(cmd vk.CommandBuffer, n, threads int) {
-	pl.ComputeCommandCmd(cmd, Warps(n, threads), 1, 1)
+func (pl *Pipeline) ComputeDispatch1D(cmd vk.CommandBuffer, n, threads int) {
+	pl.ComputeDispatch(cmd, Warps(n, threads), 1, 1)
 }
 
-// ComputeSetEvent sets an event to be signalled when everything up to this point
-// in the command buffer has completed.
-// This is the best way to coordinate processing within a sequence of
-// compute shader calls within a single command buffer.
-// Returns an error if the named event was not found.
-func (sy *System) ComputeSetEvent(event string) error {
-	ev, err := sy.EventByNameTry(event)
-	if err != nil {
-		return err
-	}
-	vk.CmdSetEvent(sy.CmdPool.Buff, ev, vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit))
-	return nil
-}
-
-// ComputeSetEventCmd sets an event to be signalled when everything
+// ComputeSetEvent sets an event to be signalled when everything
 // up to this point in the named command buffer has completed.
 // This is the best way to coordinate processing within a sequence of
 // compute shader calls within a single command buffer.
 // Returns an error if the named event was not found.
-func (sy *System) ComputeSetEventCmd(cmd vk.CommandBuffer, event string) error {
+func (sy *System) ComputeSetEvent(cmd vk.CommandBuffer, event string) error {
 	ev, err := sy.EventByNameTry(event)
 	if err != nil {
 		return err
@@ -147,27 +98,11 @@ func (sy *System) ComputeSetEventCmd(cmd vk.CommandBuffer, event string) error {
 
 // ComputeWaitEvents waits until previous ComputeSetEvent event(s) have signalled.
 // This is the best way to coordinate processing within a sequence of
-// compute shader calls within a single command buffer.
-// Returns an error if the named event was not found.
-func (sy *System) ComputeWaitEvents(event ...string) error {
-	evts := make([]vk.Event, len(event))
-	for i, enm := range event {
-		ev, err := sy.EventByNameTry(enm)
-		if err != nil {
-			return err
-		}
-		evts[i] = ev
-	}
-	flg := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
-	vk.CmdWaitEvents(sy.CmdPool.Buff, uint32(len(evts)), evts, flg, flg, 0, nil, 0, nil, 0, nil)
-	return nil
-}
-
-// ComputeWaitEventsCmd waits until previous ComputeSetEvent event(s) have signalled.
-// This is the best way to coordinate processing within a sequence of
 // compute shader calls within named command buffer.
+// However, use ComputeWaitMem* calls (e.g., WriteRead) to ensure memory writes
+// have completed, instead of creating an Event.
 // Returns an error if the named event was not found.
-func (sy *System) ComputeWaitEventsCmd(cmd vk.CommandBuffer, event ...string) error {
+func (sy *System) ComputeWaitEvents(cmd vk.CommandBuffer, event ...string) error {
 	evts := make([]vk.Event, len(event))
 	for i, enm := range event {
 		ev, err := sy.EventByNameTry(enm)
@@ -181,41 +116,59 @@ func (sy *System) ComputeWaitEventsCmd(cmd vk.CommandBuffer, event ...string) er
 	return nil
 }
 
-// ComputeCmdCopyToGPU records command to copy given regions
+// ComputeCopyToGPU records command to copy given regions
 // in the Storage buffer memory from CPU to GPU, in one call.
 // Use SyncRegValIdxFmCPU to get the regions.
-func (sy *System) ComputeCmdCopyToGPU(regs ...MemReg) {
-	sy.Mem.CmdTransferStorageRegsToGPU(sy.CmdPool.Buff, regs)
-}
-
-// ComputeCmdCopyFmGPU records command to copy given regions
-// in the Storage buffer memory from GPU to CPU, in one call.
-// Use SyncRegValIdxFmCPU to get the regions.
-func (sy *System) ComputeCmdCopyFmGPU(regs ...MemReg) {
-	sy.Mem.CmdTransferStorageRegsFmGPU(sy.CmdPool.Buff, regs)
-}
-
-// ComputeCmdCopyToGPUCmd records command to copy given regions
-// in the Storage buffer memory from CPU to GPU, in one call.
-// Use SyncRegValIdxFmCPU to get the regions.
-func (sy *System) ComputeCmdCopyToGPUCmd(cmd vk.CommandBuffer, regs ...MemReg) {
+func (sy *System) ComputeCopyToGPU(cmd vk.CommandBuffer, regs ...MemReg) {
 	sy.Mem.CmdTransferStorageRegsToGPU(cmd, regs)
 }
 
-// ComputeCmdCopyFmGPUCmd records command to copy given regions
+// ComputeCopyFmGPU records command to copy given regions
 // in the Storage buffer memory from GPU to CPU, in one call.
 // Use SyncRegValIdxFmCPU to get the regions.
-func (sy *System) ComputeCmdCopyFmGPUCmd(cmd vk.CommandBuffer, regs ...MemReg) {
+func (sy *System) ComputeCopyFmGPU(cmd vk.CommandBuffer, regs ...MemReg) {
 	sy.Mem.CmdTransferStorageRegsFmGPU(cmd, regs)
 }
 
-// ComputeCmdWaitMemory records pipeline barrier ensuring
-// global memory writes have completed from the compute shader,
-// and are ready for the host to read.
-func (sy *System) ComputeCmdWaitMemory() {
+// ComputeWaitMemWriteRead records pipeline barrier ensuring
+// global memory writes from the shader have completed and are ready to read
+// in the next step of a command queue.
+// Use this instead of Events to synchronize steps of a computation.
+func (sy *System) ComputeWaitMemWriteRead(cmd vk.CommandBuffer) {
+	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
+	vk.CmdPipelineBarrier(cmd, shader, shader, vk.DependencyFlags(0), 1,
+		[]vk.MemoryBarrier{{
+			SType:         vk.StructureTypeMemoryBarrier,
+			SrcAccessMask: vk.AccessFlags(vk.AccessShaderWriteBit),
+			DstAccessMask: vk.AccessFlags(vk.AccessShaderReadBit),
+		}}, 0, nil, 0, nil)
+}
+
+// ComputeWaitMemHostToShader records pipeline barrier ensuring
+// global memory writes from the host to shader have completed.
+// Use this if the first commands are to copy memory from host,
+// instead of creating a separate Event.
+func (sy *System) ComputeWaitMemHostToShader(cmd vk.CommandBuffer) {
 	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
 	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
-	vk.CmdPipelineBarrier(sy.CmdPool.Buff, shader, host, vk.DependencyFlags(0), 1,
+	vk.CmdPipelineBarrier(cmd, host, shader, vk.DependencyFlags(0), 1,
+		[]vk.MemoryBarrier{{
+			SType:         vk.StructureTypeMemoryBarrier,
+			SrcAccessMask: vk.AccessFlags(vk.AccessHostWriteBit),
+			DstAccessMask: vk.AccessFlags(vk.AccessShaderReadBit),
+		}}, 0, nil, 0, nil)
+}
+
+// ComputeWaitMemShaderToHost records pipeline barrier ensuring
+// global memory writes have completed from the compute shader,
+// and are ready for the host to read.
+// This is not necessary if a standard QueueWaitIdle is done at
+// the end of a command (basically not really needed,
+// but included for completeness).
+func (sy *System) ComputeWaitMemShaderToHost(cmd vk.CommandBuffer) {
+	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
+	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
+	vk.CmdPipelineBarrier(cmd, shader, host, vk.DependencyFlags(0), 1,
 		[]vk.MemoryBarrier{{
 			SType:         vk.StructureTypeMemoryBarrier,
 			SrcAccessMask: vk.AccessFlags(vk.AccessShaderWriteBit),
@@ -223,14 +176,14 @@ func (sy *System) ComputeCmdWaitMemory() {
 		}}, 0, nil, 0, nil)
 }
 
-// ComputeCmdWaitMemoryBuff records pipeline barrier ensuring
+// ComputeWaitMemoryBuff records pipeline barrier ensuring
 // given buffer's memory writes have completed for given buffer from the compute shader,
 // and are ready for the host to read.  Vulkan docs suggest that global memory
-// buffer barrier is generally better to use (ComputeCmdWaitMemoryBuff)
-func (sy *System) ComputeCmdWaitMemoryBuff(buff *MemBuff) {
+// buffer barrier is generally better to use (ComputeWaitMem*)
+func (sy *System) ComputeWaitMemoryBuff(cmd vk.CommandBuffer, buff *MemBuff) {
 	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
 	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
-	vk.CmdPipelineBarrier(sy.CmdPool.Buff, shader, host, vk.DependencyFlags(0), 0, nil, 1,
+	vk.CmdPipelineBarrier(cmd, shader, host, vk.DependencyFlags(0), 0, nil, 1,
 		[]vk.BufferMemoryBarrier{{
 			SType:         vk.StructureTypeBufferMemoryBarrier,
 			SrcAccessMask: vk.AccessFlags(vk.AccessShaderWriteBit),
@@ -240,36 +193,21 @@ func (sy *System) ComputeCmdWaitMemoryBuff(buff *MemBuff) {
 		}}, 0, nil)
 }
 
-// ComputeSubmitWait adds and End command and
-// submits the current set of commands in the default system CmdPool,
-// typically from ComputeCommand.
+// ComputeSubmitWait submits the current set of commands
+// in the default system CmdPool, typically from ComputeDispatch.
 // Then waits for the commands to finish before returning
 // control to the CPU.  Results will be available immediately
 // thereafter for retrieving back from the GPU.
-func (sy *System) ComputeSubmitWait() {
-	CmdEndSubmitWait(sy.CmdPool.Buff, &sy.Device)
-}
-
-// ComputeSubmitWaitCmd submits the current set of commands
-// in the default system CmdPool, typically from ComputeCommand.
-// Then waits for the commands to finish before returning
-// control to the CPU.  Results will be available immediately
-// thereafter for retrieving back from the GPU.
-func (sy *System) ComputeSubmitWaitCmd(cmd vk.CommandBuffer) {
+func (sy *System) ComputeSubmitWait(cmd vk.CommandBuffer) {
 	CmdSubmitWait(cmd, &sy.Device)
 }
 
-// ComputeCmdEnd adds an end to command buffer
-func (sy *System) ComputeCmdEnd() {
-	CmdEnd(sy.CmdPool.Buff)
-}
-
-// ComputeCmdEndCmd adds an end to given command buffer
-func (sy *System) ComputeCmdEndCmd(cmd vk.CommandBuffer) {
+// ComputeCmdEnd adds an end to given command buffer
+func (sy *System) ComputeCmdEnd(cmd vk.CommandBuffer) {
 	CmdEnd(cmd)
 }
 
-// ComputeSubmitWaitSignal submits command in buffer to system device queue
+// ComputeSubmitWaitSignal submits command in given buffer to system device queue
 // with given wait semaphore and given signal semaphore (by name) when done,
 // and with given fence (use empty string for none).
 // This will cause the GPU to wait until the wait semphaphore is
@@ -278,61 +216,7 @@ func (sy *System) ComputeCmdEndCmd(cmd vk.CommandBuffer) {
 // such commands, whenever the CPU needs to be sure the submitted GPU
 // commands have completed.  Must use "ComputeWait" if using std
 // ComputeWait function.
-func (sy *System) ComputeSubmitWaitSignal(wait, signal, fence string) error {
-	CmdEnd(sy.CmdPool.Buff)
-	ws, err := sy.SemaphoreByNameTry(wait)
-	if err != nil {
-		return err
-	}
-	ss, err := sy.SemaphoreByNameTry(signal)
-	if err != nil {
-		return err
-	}
-	fc := vk.NullFence
-	if fence != "" {
-		fc, err = sy.FenceByNameTry(fence)
-		if err != nil {
-			return err
-		}
-	}
-	CmdSubmitWaitSignal(sy.CmdPool.Buff, &sy.Device, ws, ss, fc)
-	return nil
-}
-
-// ComputeSubmitSignal submits command in buffer to system device queue
-// with given signal semaphore (by name) when done,
-// and with given fence (use empty string for none).
-// The optional fence is used typically at the end of a block of
-// such commands, whenever the CPU needs to be sure the submitted GPU
-// commands have completed.  Must use "ComputeWait" if using std
-// ComputeWait function.
-func (sy *System) ComputeSubmitSignal(signal, fence string) error {
-	CmdEnd(sy.CmdPool.Buff)
-	ss, err := sy.SemaphoreByNameTry(signal)
-	if err != nil {
-		return err
-	}
-	fc := vk.NullFence
-	if fence != "" {
-		fc, err = sy.FenceByNameTry(fence)
-		if err != nil {
-			return err
-		}
-	}
-	CmdSubmitSignal(sy.CmdPool.Buff, &sy.Device, ss, fc)
-	return nil
-}
-
-// ComputeSubmitWaitSignalCmd submits command in given buffer to system device queue
-// with given wait semaphore and given signal semaphore (by name) when done,
-// and with given fence (use empty string for none).
-// This will cause the GPU to wait until the wait semphaphore is
-// signaled by a previous command with that semaphore as its signal.
-// The optional fence is used typically at the end of a block of
-// such commands, whenever the CPU needs to be sure the submitted GPU
-// commands have completed.  Must use "ComputeWait" if using std
-// ComputeWait function.
-func (sy *System) ComputeSubmitWaitSignalCmd(cmd vk.CommandBuffer, wait, signal, fence string) error {
+func (sy *System) ComputeSubmitWaitSignal(cmd vk.CommandBuffer, wait, signal, fence string) error {
 	CmdEnd(cmd)
 	ws, err := sy.SemaphoreByNameTry(wait)
 	if err != nil {
@@ -353,14 +237,14 @@ func (sy *System) ComputeSubmitWaitSignalCmd(cmd vk.CommandBuffer, wait, signal,
 	return nil
 }
 
-// ComputeSubmitSignalCmd submits command in buffer to system device queue
+// ComputeSubmitSignal submits command in buffer to system device queue
 // with given signal semaphore (by name) when done,
 // and with given fence (use empty string for none).
 // The optional fence is used typically at the end of a block of
 // such commands, whenever the CPU needs to be sure the submitted GPU
 // commands have completed.  Must use "ComputeWait" if using std
 // ComputeWait function.
-func (sy *System) ComputeSubmitSignalCmd(cmd vk.CommandBuffer, signal, fence string) error {
+func (sy *System) ComputeSubmitSignal(cmd vk.CommandBuffer, signal, fence string) error {
 	CmdEnd(cmd)
 	ss, err := sy.SemaphoreByNameTry(signal)
 	if err != nil {

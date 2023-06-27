@@ -78,19 +78,14 @@ func main() {
 	ivl.CopyFromBytes(unsafe.Pointer(&(ivals[0])))
 	sy.Mem.SyncToGPU()
 
-	vars.BindDynValIdx(0, "In", 0)
-	vars.BindDynValIdx(0, "Out", 0)
+	vars.BindDynValsAllIdx(0)
 
-	sy.ComputeResetBindVars(0)
-	pl.ComputeCommand(nGps, 1, 1)
-	sy.ComputeSubmitWait() // if no wait, faster, but validation complains
-	fmt.Printf("submit 0\n")
-	// for cy := 1; cy < 10; cy++ {
-	// 	sy.ComputeSubmitWait()
-	// 	fmt.Printf("submit %d\n", cy)
-	// }
-	// // note: could use semaphore here instead of waiting on the compute
-	// // sy.ComputeWait()
+	cmd := sy.ComputeCmdBuff()
+
+	sy.ComputeResetBindVars(cmd, 0)
+	pl.ComputeDispatch(cmd, nGps, 1, 1)
+	sy.ComputeCmdEnd(cmd)
+	sy.ComputeSubmitWait(cmd)
 
 	sy.Mem.SyncValIdxFmGPU(0, "Out", 0)
 	_, ovl, _ := vars.ValByIdxTry(0, "Out", 0)
