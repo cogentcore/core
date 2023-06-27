@@ -185,28 +185,28 @@ func (sy *System) ComputeWaitEventsCmd(cmd vk.CommandBuffer, event ...string) er
 // in the Storage buffer memory from CPU to GPU, in one call.
 // Use SyncRegValIdxFmCPU to get the regions.
 func (sy *System) ComputeCmdCopyToGPU(regs ...MemReg) {
-	sy.Mem.CmdTransferRegsToGPU(sy.CmdPool.Buff, sy.Mem.Buffs[StorageBuff], regs)
+	sy.Mem.CmdTransferStorageRegsToGPU(sy.CmdPool.Buff, regs)
 }
 
 // ComputeCmdCopyFmGPU records command to copy given regions
 // in the Storage buffer memory from GPU to CPU, in one call.
 // Use SyncRegValIdxFmCPU to get the regions.
 func (sy *System) ComputeCmdCopyFmGPU(regs ...MemReg) {
-	sy.Mem.CmdTransferRegsFmGPU(sy.CmdPool.Buff, sy.Mem.Buffs[StorageBuff], regs)
+	sy.Mem.CmdTransferStorageRegsFmGPU(sy.CmdPool.Buff, regs)
 }
 
 // ComputeCmdCopyToGPUCmd records command to copy given regions
 // in the Storage buffer memory from CPU to GPU, in one call.
 // Use SyncRegValIdxFmCPU to get the regions.
 func (sy *System) ComputeCmdCopyToGPUCmd(cmd vk.CommandBuffer, regs ...MemReg) {
-	sy.Mem.CmdTransferRegsToGPU(cmd, sy.Mem.Buffs[StorageBuff], regs)
+	sy.Mem.CmdTransferStorageRegsToGPU(cmd, regs)
 }
 
 // ComputeCmdCopyFmGPUCmd records command to copy given regions
 // in the Storage buffer memory from GPU to CPU, in one call.
 // Use SyncRegValIdxFmCPU to get the regions.
 func (sy *System) ComputeCmdCopyFmGPUCmd(cmd vk.CommandBuffer, regs ...MemReg) {
-	sy.Mem.CmdTransferRegsFmGPU(cmd, sy.Mem.Buffs[StorageBuff], regs)
+	sy.Mem.CmdTransferStorageRegsFmGPU(cmd, regs)
 }
 
 // ComputeCmdWaitMemory records pipeline barrier ensuring
