@@ -20,6 +20,7 @@ require (
 	github.com/goki/ki v1.1.11
 	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.14
+	github.com/goki/mobile v0.0.0-20230626225100-3417752baaf2
 	github.com/goki/pi v1.0.27
 	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
