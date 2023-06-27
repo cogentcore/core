@@ -209,18 +209,36 @@ func (sy *System) ComputeCmdCopyFmGPUCmd(cmd vk.CommandBuffer, regs ...MemReg) {
 	sy.Mem.CmdTransferRegsFmGPU(cmd, sy.Mem.Buffs[StorageBuff], regs)
 }
 
-/*
-// ComputeCmdWaitMemory records command to wait for memory transfer to finish.
-// use this after a ComputeCmdCopyToGPU, or FmGPU
+// ComputeCmdWaitMemory records pipeline barrier ensuring
+// global memory writes have completed from the compute shader,
+// and are ready for the host to read.
 func (sy *System) ComputeCmdWaitMemory() {
-	vk.CmdPipelineBarrier(sy.CmdPool.Buff, []vk.MemoryBarrier{{
-		SType: vk.StructureTypeMemoryBarrier,
-		SrcAccessMask: ,
-		DstAccessMask: ,
-	}}
-	sy.Mem.CmdTransferRegsToGPU(, sy.Mem.Buffs[StorageBuff], regs)
+	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
+	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
+	vk.CmdPipelineBarrier(sy.CmdPool.Buff, shader, host, vk.DependencyFlags(0), 1,
+		[]vk.MemoryBarrier{{
+			SType:         vk.StructureTypeMemoryBarrier,
+			SrcAccessMask: vk.AccessFlags(vk.AccessShaderWriteBit),
+			DstAccessMask: vk.AccessFlags(vk.AccessHostReadBit),
+		}}, 0, nil, 0, nil)
 }
-*/
+
+// ComputeCmdWaitMemoryBuff records pipeline barrier ensuring
+// given buffer's memory writes have completed for given buffer from the compute shader,
+// and are ready for the host to read.  Vulkan docs suggest that global memory
+// buffer barrier is generally better to use (ComputeCmdWaitMemoryBuff)
+func (sy *System) ComputeCmdWaitMemoryBuff(buff *MemBuff) {
+	shader := vk.PipelineStageFlags(vk.PipelineStageComputeShaderBit)
+	host := vk.PipelineStageFlags(vk.PipelineStageHostBit)
+	vk.CmdPipelineBarrier(sy.CmdPool.Buff, shader, host, vk.DependencyFlags(0), 0, nil, 1,
+		[]vk.BufferMemoryBarrier{{
+			SType:         vk.StructureTypeBufferMemoryBarrier,
+			SrcAccessMask: vk.AccessFlags(vk.AccessShaderWriteBit),
+			DstAccessMask: vk.AccessFlags(vk.AccessHostReadBit),
+			Buffer:        buff.Dev,
+			Size:          vk.DeviceSize(buff.Size),
+		}}, 0, nil)
+}
 
 // ComputeSubmitWait adds and End command and
 // submits the current set of commands in the default system CmdPool,

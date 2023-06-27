@@ -153,9 +153,10 @@ func NewBuffer(dev vk.Device, size int, usage vk.BufferUsageFlagBits) vk.Buffer 
 	}
 	var buffer vk.Buffer
 	ret := vk.CreateBuffer(dev, &vk.BufferCreateInfo{
-		SType: vk.StructureTypeBufferCreateInfo,
-		Usage: vk.BufferUsageFlags(usage),
-		Size:  vk.DeviceSize(size),
+		SType:       vk.StructureTypeBufferCreateInfo,
+		Usage:       vk.BufferUsageFlags(usage),
+		Size:        vk.DeviceSize(size),
+		SharingMode: vk.SharingModeExclusive,
 	}, nil, &buffer)
 	IfPanic(NewError(ret))
 	return buffer

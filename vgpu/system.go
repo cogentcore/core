@@ -230,7 +230,9 @@ func (sy *System) ConfigRenderNonSurface(imgFmt *ImageFormat, depthFmt Types) {
 
 // Config configures the entire system, after everything has been
 // setup (Pipelines, Vars, etc).  Memory / Vals do not yet need to
-// be configured and are not Config'd by this call.
+// be initialized but are allocated from the Vars on this call,
+// so the total number of Vals per Var, and number of VarSets,
+// all must be configured.
 func (sy *System) Config() {
 	sy.Mem.Config(sy.Device.Device)
 	if Debug {

@@ -629,6 +629,22 @@ func (vs *Vars) MemSize(buff *MemBuff) int {
 	return tsz
 }
 
+func (vs *Vars) MemSizeStorage(mm *Memory, alignBytes int) {
+	ns := vs.NSets()
+	for si := vs.StartSet(); si < ns; si++ {
+		st := vs.SetMap[si]
+		if st == nil {
+			continue
+		}
+		for _, vr := range st.Vars {
+			if vr.Role.BuffType() != StorageBuff {
+				continue
+			}
+			vr.MemSizeStorage(mm, alignBytes)
+		}
+	}
+}
+
 func (vs *Vars) AllocHost(buff *MemBuff, offset int) int {
 	ns := vs.NSets()
 	tsz := 0
@@ -679,7 +695,30 @@ func (vs *Vars) ModRegs(bt BuffTypes) []MemReg {
 			if vr.Role.BuffType() != bt {
 				continue
 			}
-			md := vr.Vals.ModRegs()
+			md := vr.Vals.ModRegs(vr)
+			mods = append(mods, md...)
+		}
+	}
+	return mods
+}
+
+// ModRegStorage returns the regions of Storage Vals that have been modified
+func (vs *Vars) ModRegsStorage(bufIdx int, buff *MemBuff) []MemReg {
+	ns := vs.NSets()
+	var mods []MemReg
+	for si := vs.StartSet(); si < ns; si++ {
+		st := vs.SetMap[si]
+		if st == nil || st.Set == PushSet {
+			continue
+		}
+		for _, vr := range st.Vars {
+			if vr.Role.BuffType() != StorageBuff {
+				continue
+			}
+			if vr.StorageBuff != bufIdx {
+				continue
+			}
+			md := vr.Vals.ModRegs(vr)
 			mods = append(mods, md...)
 		}
 	}

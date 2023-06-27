@@ -317,7 +317,11 @@ func (st *VarSet) BindDynVar(vs *Vars, vr *Var) error {
 		DescriptorCount: 1,
 		DescriptorType:  vr.Role.VkDescriptor(),
 	}
-	buff := vs.Mem.Buffs[vr.BuffType()]
+	bt := vr.BuffType()
+	buff := vs.Mem.Buffs[bt]
+	if bt == StorageBuff {
+		buff = vs.Mem.StorageBuffs[vr.StorageBuff]
+	}
 	wd.PBufferInfo = []vk.DescriptorBufferInfo{{
 		Offset: 0, // dynamic
 		Range:  vk.DeviceSize(vr.MemSize()),
@@ -376,7 +380,11 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 		DstBinding:     uint32(vr.BindLoc),
 		DescriptorType: vr.Role.VkDescriptor(),
 	}
-	buff := vs.Mem.Buffs[vr.BuffType()]
+	bt := vr.BuffType()
+	buff := vs.Mem.Buffs[bt]
+	if bt == StorageBuff {
+		buff = vs.Mem.StorageBuffs[vr.StorageBuff]
+	}
 	if vr.Role < TextureRole {
 		bis := make([]vk.DescriptorBufferInfo, nvals)
 		for i, vl := range vals {

@@ -251,8 +251,13 @@ func (vl *Val) SetGoImage(img image.Image, layer int, flipY bool) error {
 }
 
 // MemReg returns the memory region for this value
-func (vl *Val) MemReg() MemReg {
-	return MemReg{Offset: vl.Offset, Size: vl.AllocSize}
+func (vl *Val) MemReg(vr *Var) MemReg {
+	bt := vr.Role.BuffType()
+	mr := MemReg{Offset: vl.Offset, Size: vl.AllocSize, BuffType: bt}
+	if bt == StorageBuff {
+		mr.BuffIdx = vr.StorageBuff
+	}
+	return mr
 }
 
 //////////////////////////////////////////////////////////////////
@@ -350,7 +355,6 @@ func (vs *Vals) ActiveVals() []*Val {
 
 // MemSize returns size across all Vals in list
 func (vs *Vals) MemSize(vr *Var, alignBytes int) int {
-	offset := 0
 	tsz := 0
 	vals := vs.ActiveVals()
 	for _, vl := range vals {
@@ -359,7 +363,6 @@ func (vs *Vals) MemSize(vr *Var, alignBytes int) int {
 			continue
 		}
 		esz := MemSizeAlign(sz, alignBytes)
-		offset += esz
 		tsz += esz
 	}
 	return tsz
@@ -404,12 +407,12 @@ func (vs *Vals) Destroy() {
 }
 
 // ModRegs returns the regions of Vals that have been modified
-func (vs *Vals) ModRegs() []MemReg {
+func (vs *Vals) ModRegs(vr *Var) []MemReg {
 	var mods []MemReg
 	vals := vs.ActiveVals()
 	for _, vl := range vals {
 		if vl.IsMod() {
-			mods = append(mods, vl.MemReg())
+			mods = append(mods, vl.MemReg(vr))
 			vl.ClearMod() // assuming it will clear now..
 		}
 	}

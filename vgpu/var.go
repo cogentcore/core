@@ -31,12 +31,13 @@ type Var struct {
 	Shaders     vk.ShaderStageFlagBits `desc:"bit flags for set of shaders that this variable is used in"`
 	Set         int                    `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
 	BindLoc     int                    `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
-	SizeOf      int                    `desc:"size in bytes of one element (not array size).  Note that arrays require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint.  For Push role, SizeOf must be set exactly -- no vals are created."`
-	TextureOwns bool                   `desc:"texture manages its own memory allocation -- set this for texture objects that change size dynamically -- otherwise image host staging memory is allocated in a common buffer"`
-	DynOffIdx   int                    `desc:"index into the dynamic offset list, where dynamic offsets of vals need to be set -- for Uniform and Storage roles -- set during Set:DescLayout"`
+	SizeOf      int                    `desc:"size in bytes of one element (not array size).  Note that arrays in Uniform require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint.  In Storage, with HLSL compute shaders, 4 byte (e.g., float32 or int32) works fine as an array type.  For Push role, SizeOf must be set exactly -- no vals are created."`
+	TextureOwns bool                   `inactive:"+" desc:"texture manages its own memory allocation -- set this for texture objects that change size dynamically -- otherwise image host staging memory is allocated in a common buffer"`
+	DynOffIdx   int                    `inactive:"+" desc:"index into the dynamic offset list, where dynamic offsets of vals need to be set -- for Uniform and Storage roles -- set during Set:DescLayout"`
 	Vals        Vals                   `desc:"the array of values allocated for this variable.  The size of this array is determined by the Set membership of this Var, and the current index is updated at the set level.  For Texture Roles, there is a separate descriptor for each value (image) -- otherwise dynamic offset binding is used."`
-	BindValIdx  []int                  `desc:"for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIdx out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism."`
-	Offset      int                    `desc:"offset -- only for push constants"`
+	BindValIdx  []int                  `inactive:"+" desc:"for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIdx out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism."`
+	StorageBuff int                    `inactive:"+" desc:"index of the storage buffer in Memory that holds this Var -- for Storage buffer types.  Due to support for dynamic binding, all Vals of a given Var must be stored in the same buffer, and the allocation mechanism ensures this.  This constrains large vars approaching the MaxStorageBufferRange capacity to only have 1 val, which is typically reasonable given that compute shaders use large data and tend to use static binding anyway, and graphics uses tend to be smaller."`
+	Offset      int                    `inactive:"+" desc:"offset -- only for push constants"`
 }
 
 // Init initializes the main values
@@ -56,7 +57,11 @@ func (vr *Var) Init(name string, typ Types, arrayN int, role VarRoles, set int, 
 func (vr *Var) String() string {
 	typ := vr.Type.String()
 	if vr.ArrayN > 1 {
-		typ = fmt.Sprintf("%s[%d]", typ, vr.ArrayN)
+		if vr.ArrayN > 10000 {
+			typ = fmt.Sprintf("%s[0x%X]", typ, vr.ArrayN)
+		} else {
+			typ = fmt.Sprintf("%s[%d]", typ, vr.ArrayN)
+		}
 	}
 	s := fmt.Sprintf("%d:\t%s\t%s\t(size: %d)\tVals: %d", vr.BindLoc, vr.Name, typ, vr.SizeOf, len(vr.Vals.Vals))
 	return s
@@ -78,6 +83,13 @@ func (vr *Var) BindVal(descIdx int) (*Val, error) {
 // for all values for this Var, in bytes
 func (vr *Var) ValsMemSize(alignBytes int) int {
 	return vr.Vals.MemSize(vr, alignBytes)
+}
+
+// MemSizeStorage adds a Storage memory allocation record to Memory
+// for all values for this Var
+func (vr *Var) MemSizeStorage(mm *Memory, alignBytes int) {
+	tsz := vr.Vals.MemSize(vr, alignBytes)
+	mm.StorageMems = append(mm.StorageMems, &VarMem{Var: vr, Size: tsz})
 }
 
 // MemSize returns the memory allocation size for this value, in bytes
@@ -111,12 +123,13 @@ func (vr *Var) AllocHost(buff *MemBuff, offset int) int {
 // Free resets the MemPtr for values, resets any self-owned resources (Textures)
 func (vr *Var) Free() {
 	vr.Vals.Free()
+	vr.StorageBuff = -1
 	// todo: free anything in var
 }
 
 // ModRegs returns the regions of Vals that have been modified
 func (vr *Var) ModRegs() []MemReg {
-	return vr.Vals.ModRegs()
+	return vr.Vals.ModRegs(vr)
 }
 
 // SetTextureDev sets Device for textures
