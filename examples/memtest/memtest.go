@@ -30,6 +30,7 @@ func main() {
 	// gp.PropsString(true) // print
 
 	sy := gp.NewComputeSystem("memtest")
+	// sy.StaticVars = true // not working yet
 	pl := sy.NewPipeline("memtest")
 	pl.AddShaderFile("gpu_memtest", vgpu.ComputeShader, "gpu_memtest.spv")
 
@@ -64,13 +65,14 @@ func main() {
 	// bahost := make([]float32, bav)
 	// bbhost := make([]float32, bbv)
 
-	vars.BindDynValIdx(0, "Ba", 0)
-	vars.BindDynValIdx(0, "Bb", 0)
+	vars.BindDynValsAllIdx(0)
 
-	sy.ComputeResetBindVars(0)
-	pl.ComputeCommand(nGps, 1, 1)
-	sy.ComputeCmdWaitMemory()
-	sy.ComputeSubmitWait()
+	cmd := sy.ComputeCmdBuff()
+	sy.ComputeResetBindVars(cmd, 0)
+	// sy.ComputeResetBegin(cmd) // for static
+	pl.ComputeDispatch(cmd, nGps, 1, 1)
+	sy.ComputeCmdEnd(cmd)
+	sy.ComputeSubmitWait(cmd)
 
 	sy.Mem.SyncValIdxFmGPU(0, "Ba", 0)
 	_, bavl, _ := vars.ValByIdxTry(0, "Ba", 0)

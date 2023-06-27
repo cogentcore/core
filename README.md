@@ -8,6 +8,11 @@ vGPU is a Vulkan-based framework for both Graphics and Compute Engine use of GPU
 
 [Vulkan](https://www.vulkan.org) is very low-level and demands a higher-level framework to manage the complexity and verbosity.  While there are many helpful tutorials covering the basic API, many of the tutorials don't provide much of a pathway for how to organize everything at a higher level of abstraction.  vGPU represents one attempt that enforces some reasonable choices that enable a significantly simpler programming model, while still providing considerable flexibility and high levels of performance.  Everything is a tradeoff, and simplicity definitely was prioritized over performance in a few cases, but in practical use-cases, the performance differences should be minimal.
 
+# Platforms
+
+* On desktop (mac, windows, linux), [glfw](https://github.com/go-gl/glfw) is used for initializing the GPU.
+* Mobile (android, ios)...
+
 # Selecting a GPU Device
 
 For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used.  To see what is available and their properties, use:
