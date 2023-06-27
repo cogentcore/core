@@ -1,0 +1,48 @@
+[
+    {
+        "ID": "dev",
+        "Name": "The GoKi Developer Tools",
+        "InstallCommands": {
+            "darwin": [
+                {
+                    "Name": "xcode-select",
+                    "Args": [
+                        "--install"
+                    ]
+                },
+                {
+                    "Name": "curl",
+                    "Args": [
+                        "-O",
+                        "https://sdk.lunarg.com/sdk/download/latest/mac/vulkan_sdk.dmg"
+                    ]
+                },
+                {
+                    "Name": "vulkan_sdk.dmg",
+                    "Args": [
+                        "vulkan_sdk.dmg"
+                    ]
+                }
+            ],
+            "windows": [
+                {
+                    "Name": "echo",
+                    "Args": [
+                        "hi"
+                    ]
+                }
+            ],
+            "linux": [
+                {
+                    "Name": "sudo",
+                    "Args": [
+                        "apt-get",
+                        "install",
+                        "libgl1-mesa-dev",
+                        "xorg-dev"
+                    ]
+                }
+            ]
+        }
+    }
+]
