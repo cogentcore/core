@@ -187,10 +187,9 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 			DescriptorCount: 1,
 			StageFlags:      vk.ShaderStageFlags(vr.Shaders),
 		}
-		// if vs.StaticVars {
-		// 	bd.DescriptorType = vr.Role.VkDescriptorStatic()
-		// 	fmt.Printf("static type\n")
-		// }
+		if vs.StaticVars {
+			bd.DescriptorType = vr.Role.VkDescriptorStatic()
+		}
 		if vr.Role > Storage {
 			vals := vr.Vals.ActiveVals()
 			nvals := len(vals)

@@ -235,13 +235,12 @@ func (sy *System) ConfigRenderNonSurface(imgFmt *ImageFormat, depthFmt Types) {
 // so the total number of Vals per Var, and number of VarSets,
 // all must be configured.
 func (sy *System) Config() {
-	sy.Mem.Vars.StaticVars = false
 	sy.Mem.Config(sy.Device.Device)
-	// if sy.StaticVars {
-	// 	sy.Mem.Vars.BindStatVarsAll()
-	// } else {
-	sy.Mem.Vars.BindDynVarsAll()
-	// }
+	if sy.StaticVars {
+		sy.Mem.Vars.BindStatVarsAll()
+	} else {
+		sy.Mem.Vars.BindDynVarsAll()
+	}
 	if Debug {
 		fmt.Printf("%s\n", sy.Vars().StringDoc())
 	}
