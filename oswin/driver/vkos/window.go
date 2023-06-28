@@ -46,6 +46,8 @@ type windowImpl struct {
 	resettingPos   bool
 }
 
+var _ oswin.Window = &windowImpl{}
+
 // Handle returns the driver-specific handle for this window.
 // Currently, for all platforms, this is *glfw.Window, but that
 // cannot always be assumed.  Only provided for unforeseen emergency use --
