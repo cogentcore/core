@@ -211,14 +211,14 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 			// flags = vk.DescriptorSetLayoutCreateFlags(vk.DescriptorSetLayoutCreateUpdateAfterBindPoolBit)
 		}
 		binds = append(binds, bd)
-		// if !vs.StaticVars {
-		if vr.Role == Uniform || vr.Role == Storage {
-			vr.BindValIdx = make([]int, vs.NDescs)
-			vr.DynOffIdx = dyno
-			vs.AddDynOff()
-			dyno++
+		if !vs.StaticVars {
+			if vr.Role == Uniform || vr.Role == Storage {
+				vr.BindValIdx = make([]int, vs.NDescs)
+				vr.DynOffIdx = dyno
+				vs.AddDynOff()
+				dyno++
+			}
 		}
-		// }
 	}
 
 	// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorSetLayoutBindingFlagsCreateInfo.html
@@ -396,7 +396,7 @@ func (st *VarSet) BindStatVar(vs *Vars, vr *Var) {
 		SType:          vk.StructureTypeWriteDescriptorSet,
 		DstSet:         st.VkDescSets[vs.BindDescIdx],
 		DstBinding:     uint32(vr.BindLoc),
-		DescriptorType: vr.Role.VkDescriptor(), // Static(),
+		DescriptorType: vr.Role.VkDescriptorStatic(),
 	}
 	bt := vr.BuffType()
 	buff := vs.Mem.Buffs[bt]

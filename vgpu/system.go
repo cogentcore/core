@@ -235,6 +235,7 @@ func (sy *System) ConfigRenderNonSurface(imgFmt *ImageFormat, depthFmt Types) {
 // so the total number of Vals per Var, and number of VarSets,
 // all must be configured.
 func (sy *System) Config() {
+	sy.Mem.Vars.StaticVars = sy.StaticVars
 	sy.Mem.Config(sy.Device.Device)
 	if sy.StaticVars {
 		sy.Mem.Vars.BindStatVarsAll()
@@ -343,8 +344,13 @@ func (sy *System) CmdBindVars(cmd vk.CommandBuffer, descIdx int) {
 	doff := vars.DynOffs[descIdx]
 
 	if sy.Compute {
-		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, vars.VkDescLayout,
-			0, uint32(len(dset)), dset, uint32(len(doff)), doff)
+		if sy.StaticVars {
+			vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, vars.VkDescLayout,
+				0, uint32(len(dset)), dset, 0, nil)
+		} else {
+			vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointCompute, vars.VkDescLayout,
+				0, uint32(len(dset)), dset, uint32(len(doff)), doff)
+		}
 	} else {
 		vk.CmdBindDescriptorSets(cmd, vk.PipelineBindPointGraphics, vars.VkDescLayout,
 			0, uint32(len(dset)), dset, uint32(len(doff)), doff)

@@ -282,6 +282,9 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 			DescriptorCount: uint32(dcount),
 			Type:            RoleDescriptors[ri],
 		}
+		if vs.StaticVars {
+			pl.Type = StaticRoleDescriptors[ri]
+		}
 		pools = append(pools, pl)
 	}
 

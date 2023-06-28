@@ -110,7 +110,7 @@ func (mm *Memory) AllocHostStorageBuff() {
 	mm.Vars.MemSizeStorage(mm, alignBytes)
 
 	// 2. allocate to buffers
-	sort.Slice(mm.StorageMems, func(i, j int) bool {
+	sort.SliceStable(mm.StorageMems, func(i, j int) bool {
 		return mm.StorageMems[i].Size < mm.StorageMems[j].Size
 	})
 
