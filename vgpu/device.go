@@ -6,6 +6,7 @@ package vgpu
 
 import (
 	"errors"
+	"unsafe"
 
 	vk "github.com/goki/vulkan"
 )
@@ -86,18 +87,17 @@ func (dv *Device) MakeDevice(gp *GPU) {
 		EnabledLayerCount:       uint32(len(gp.ValidationLayers)),
 		PpEnabledLayerNames:     gp.ValidationLayers,
 		PEnabledFeatures:        []vk.PhysicalDeviceFeatures{feats},
-		// todo: none of the following options work on android:
-		/*
-			PNext: unsafe.Pointer(&vk.PhysicalDeviceVulkan12Features{
-				SType: vk.StructureTypePhysicalDeviceVulkan12Features,
-				DescriptorIndexing: vk.True,
-				DescriptorBindingVariableDescriptorCount: vk.True,
-				DescriptorBindingSampledImageUpdateAfterBind: vk.True,
-				DescriptorBindingPartiallyBound: vk.True,
-				RuntimeDescriptorArray:                       vk.True,
-				PNext: gp.PlatformDeviceNext,
-			}),
-		*/
+		// todo: none of the following options work on android (actually, they do work on Windows Android emulator (and probably Linux and old macs too)):
+
+		PNext: unsafe.Pointer(&vk.PhysicalDeviceVulkan12Features{
+			SType:                                    vk.StructureTypePhysicalDeviceVulkan12Features,
+			DescriptorIndexing:                       vk.True,
+			DescriptorBindingVariableDescriptorCount: vk.True,
+			DescriptorBindingSampledImageUpdateAfterBind: vk.True,
+			DescriptorBindingPartiallyBound:              vk.True,
+			RuntimeDescriptorArray:                       vk.True,
+			PNext:                                        gp.PlatformDeviceNext,
+		}),
 	}, nil, &device)
 	IfPanic(NewError(ret))
 

@@ -89,7 +89,7 @@ func main() {
 					fmt.Printf("format: %s\n", surface.Format.String())
 
 					system = gpu.NewGraphicsSystem("drawtri", &surface.Device)
-					pipeline := system.NewPipeline("drawtri")
+					pipeline = system.NewPipeline("drawtri")
 					system.ConfigRender(&surface.Format, vgpu.UndefType)
 					surface.SetRender(&system.Render)
 
