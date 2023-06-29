@@ -2,147 +2,164 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"log"
 	"time"
 
+	"github.com/goki/mobile/app"
+	"github.com/goki/mobile/event/lifecycle"
+	"github.com/goki/mobile/event/paint"
+	"github.com/goki/mobile/event/size"
+	"github.com/goki/mobile/event/touch"
 	"github.com/goki/vgpu/vgpu"
 	vk "github.com/goki/vulkan"
-	"github.com/xlab/android-go/android"
-	"github.com/xlab/android-go/app"
 )
 
 //go:embed *.spv
 var content embed.FS
 
-func init() {
-	app.SetLogTag("VulkanCube")
+var (
+	gpu      *vgpu.GPU
+	system   *vgpu.System
+	surface  *vgpu.Surface
+	pipeline *vgpu.Pipeline
+	window   uintptr
+
+	frameCount int
+	stTime     time.Time
+	fpsDelay   time.Duration
+	fpsTicker  *time.Ticker
+
+	touchX float32
+	touchY float32
+)
+
+func onStart(a app.App) {
+	winext := vk.GetRequiredInstanceExtensions()
+	log.Printf("required exts: %#v\n", winext)
+	gpu = vgpu.NewGPU()
+	gpu.AddInstanceExt(winext...)
+	gpu.Config("drawtri")
+
+	var sf vk.Surface
+	log.Println("in onStart", gpu.Instance, window, &sf)
+	ret := vk.CreateWindowSurface(gpu.Instance, window, nil, &sf)
+	if err := vk.Error(ret); err != nil {
+		log.Println("vulkan error:", err)
+		return
+	}
+	surface = vgpu.NewSurface(gpu, sf)
+
+	log.Printf("format: %s\n", surface.Format.String())
+
+	system = gpu.NewGraphicsSystem("drawtri", &surface.Device)
+	pipeline = system.NewPipeline("drawtri")
+	system.ConfigRender(&surface.Format, vgpu.UndefType)
+	surface.SetRender(&system.Render)
+
+	pipeline.AddShaderEmbed("trianglelit", vgpu.VertexShader, content, "trianglelit.spv")
+	pipeline.AddShaderEmbed("vtxcolor", vgpu.FragmentShader, content, "vtxcolor.spv")
+
+	system.Config()
+
+	frameCount = 0
+	stTime = time.Now()
+	fpsDelay = time.Second / 60
+	fpsTicker = time.NewTicker(fpsDelay)
+
+	go func() {
+		for {
+			select {
+			case <-fpsTicker.C:
+				if system == nil {
+					log.Println("stopped because system is nil")
+					return
+				}
+				a.Send(paint.Event{})
+				a.Publish()
+			}
+		}
+	}()
+}
+
+func onStop() {
+	vk.DeviceWaitIdle(surface.Device.Device)
+	system.Destroy()
+	system = nil
+	surface.Destroy()
+	gpu.Destroy()
+	vgpu.Terminate()
+}
+
+func onPaint() {
+	if system != nil {
+		idx := surface.AcquireNextImage()
+		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
+		descIdx := 0 // if running multiple frames in parallel, need diff sets
+		cmd := system.CmdPool.Buff
+		system.ResetBeginRenderPass(cmd, surface.Frames[idx], descIdx)
+		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
+		pipeline.BindPipeline(cmd)
+		pipeline.Draw(cmd, 3, 1, 0, 0)
+		system.EndRenderPass(cmd)
+		surface.SubmitRender(cmd) // this is where it waits for the 16 msec
+		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
+		surface.PresentImage(idx)
+
+		frameCount++
+		eTime := time.Now()
+		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
+		if dur > 10 {
+			fps := float64(frameCount) / dur
+			log.Printf("fps: %.0f\n", fps)
+			frameCount = 0
+			stTime = eTime
+		}
+		// log.Println("painted")
+
+		// https://source.android.com/devices/graphics/arch-gameloops
+		// FPS may drop down when no interacton with the app, should skip frames there.
+		// TODO: use VK_GOOGLE_display_timing_enabled as cool guys would do. Don't be an uncool fool.
+		// if lastRender > fpsDelay {
+		// 	// skip frame
+		// 	lastRender = lastRender - fpsDelay
+		// 	continue
+		// }
+		// ts := time.Now()
+	}
 }
 
 func main() {
-	nativeWindowEvents := make(chan app.NativeWindowEvent)
-	inputQueueEvents := make(chan app.InputQueueEvent, 1)
-	inputQueueChan := make(chan *android.InputQueue, 1)
-
-	app.Main(func(a app.NativeActivity) {
-		// disable this to get the stack
-		// defer catcher.Catch(
-		// 	catcher.RecvLog(true),
-		// 	catcher.RecvDie(-1),
-		// )
-
+	app.Main(func(a app.App) {
+		log.SetPrefix("GoMobileVulkan: ")
 		vgpu.Debug = true
-
-		// orPanic(vk.SetDefaultGetInstanceProcAddr())
+		orPanic(vk.SetDefaultGetInstanceProcAddr())
 		orPanic(vk.Init())
-		a.HandleNativeWindowEvents(nativeWindowEvents)
-		a.HandleInputQueueEvents(inputQueueEvents)
-		// just skip input events (so app won't be dead on touch input)
-		go app.HandleInputQueues(inputQueueChan, func() {
-			a.InputQueueHandled()
-		}, app.SkipInputEvents)
-		a.InitDone()
 
-		var (
-			gpu      *vgpu.GPU
-			system   *vgpu.System
-			surface  *vgpu.Surface
-			pipeline *vgpu.Pipeline
-			window   uintptr
-		)
-
-		frameCount := 0
-		stTime := time.Now()
-		fpsDelay := time.Second / 600
-		fpsTicker := time.NewTicker(fpsDelay)
-		for {
-			select {
-			case <-a.LifecycleEvents():
-				// ignore
-			case event := <-inputQueueEvents:
-				switch event.Kind {
-				case app.QueueCreated:
-					inputQueueChan <- event.Queue
-				case app.QueueDestroyed:
-					inputQueueChan <- nil
+		var sz size.Event
+		for e := range a.Events() {
+			switch e := a.Filter(e).(type) {
+			case lifecycle.Event:
+				switch e.Crosses(lifecycle.StageVisible) {
+				case lifecycle.CrossOn:
+					window = a.Window()
+					log.Println("on start, window uintptr:", window)
+					onStart(a)
+				case lifecycle.CrossOff:
+					log.Println("on stop")
+					onStop()
 				}
-			case event := <-nativeWindowEvents:
-				switch event.Kind {
-				case app.NativeWindowCreated:
-
-					winext := vk.GetRequiredInstanceExtensions()
-					log.Printf("required exts: %#v\n", winext)
-					gpu = vgpu.NewGPU()
-					gpu.AddInstanceExt(winext...)
-					vgpu.Debug = true
-					gpu.Config("drawtri")
-					window = event.Window.Ptr()
-
-					var sf vk.Surface
-					ret := vk.CreateWindowSurface(gpu.Instance, window, nil, &sf)
-					if err := vk.Error(ret); err != nil {
-						log.Println("vulkan error:", err)
-						break
-					}
-					surface = vgpu.NewSurface(gpu, sf)
-
-					fmt.Printf("format: %s\n", surface.Format.String())
-
-					system = gpu.NewGraphicsSystem("drawtri", &surface.Device)
-					pipeline = system.NewPipeline("drawtri")
-					system.ConfigRender(&surface.Format, vgpu.UndefType)
-					surface.SetRender(&system.Render)
-
-					pipeline.AddShaderEmbed("trianglelit", vgpu.VertexShader, content, "trianglelit.spv")
-					pipeline.AddShaderEmbed("vtxcolor", vgpu.FragmentShader, content, "vtxcolor.spv")
-
-					system.Config()
-
-				case app.NativeWindowDestroyed:
-					vk.DeviceWaitIdle(surface.Device.Device)
-					system.Destroy()
-					system = nil
-					surface.Destroy()
-					gpu.Destroy()
-					vgpu.Terminate()
-				case app.NativeWindowRedrawNeeded:
-					a.NativeWindowRedrawDone()
-				}
-			case <-fpsTicker.C:
-				if system != nil {
-					idx := surface.AcquireNextImage()
-					// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-					descIdx := 0 // if running multiple frames in parallel, need diff sets
-					cmd := system.CmdPool.Buff
-					system.ResetBeginRenderPass(cmd, surface.Frames[idx], descIdx)
-					// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
-					pipeline.BindPipeline(cmd)
-					pipeline.Draw(cmd, 3, 1, 0, 0)
-					system.EndRenderPass(cmd)
-					surface.SubmitRender(cmd) // this is where it waits for the 16 msec
-					// fmt.Printf("submit %v\n", time.Now().Sub(rt))
-					surface.PresentImage(idx)
-
-					frameCount++
-					eTime := time.Now()
-					dur := float64(eTime.Sub(stTime)) / float64(time.Second)
-					if dur > 10 {
-						fps := float64(frameCount) / dur
-						fmt.Printf("fps: %.0f\n", fps)
-						frameCount = 0
-						stTime = eTime
-					}
-
-					// https://source.android.com/devices/graphics/arch-gameloops
-					// FPS may drop down when no interacton with the app, should skip frames there.
-					// TODO: use VK_GOOGLE_display_timing_enabled as cool guys would do. Don't be an uncool fool.
-					// if lastRender > fpsDelay {
-					// 	// skip frame
-					// 	lastRender = lastRender - fpsDelay
-					// 	continue
-					// }
-					// ts := time.Now()
-				}
+			case size.Event:
+				log.Println("size event")
+				sz = e
+				touchX = float32(sz.WidthPx / 2)
+				touchY = float32(sz.HeightPx / 2)
+			case paint.Event:
+				// log.Println("paint event")
+				onPaint()
+			case touch.Event:
+				log.Println("touch event", e)
+				touchX = e.X
+				touchY = e.Y
 			}
 		}
 	})
