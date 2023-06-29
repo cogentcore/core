@@ -82,6 +82,8 @@ github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 h1:ZdkidVdpLW13BQ9a+
 github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388/go.mod h1:C/WY5lmWfMtPFYYBTd3Lzdn4FTLr+RxlIeiBNye+/os=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
+github.com/xlab/android-go v0.0.0-20221106204035-3cc54d5032fa h1:fJnl39vCautixum6jJL40AULKdF1r+2/IWzPHOcFCeM=
+github.com/xlab/android-go v0.0.0-20221106204035-3cc54d5032fa/go.mod h1:WNGsHAaW0HwZ/T5KZPDOHJHtX+lHUElskKRPVtQ1/xs=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=

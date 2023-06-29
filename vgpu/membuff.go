@@ -52,7 +52,8 @@ func (mb *MemBuff) AllocHost(dev vk.Device, bsz int) bool {
 		devUse |= vk.BufferUsageTransferSrcBit | vk.BufferUsageTransferDstBit
 	}
 	mb.Host = NewBuffer(dev, bsz, hostUse)
-	mb.HostMem = AllocBuffMem(mb.GPU, dev, mb.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
+	// mb.HostMem = AllocBuffMem(mb.GPU, dev, mb.Host, vk.MemoryPropertyHostVisibleBit|vk.MemoryPropertyHostCoherentBit)
+	mb.HostMem = AllocBuffMem(mb.GPU, dev, mb.Host, vk.MemoryPropertyHostVisibleBit)
 	mb.Size = bsz
 	mb.HostPtr = MapMemory(dev, mb.HostMem, mb.Size)
 

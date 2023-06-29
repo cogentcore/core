@@ -6,7 +6,6 @@ package vgpu
 
 import (
 	"errors"
-	"unsafe"
 
 	vk "github.com/goki/vulkan"
 )
@@ -75,6 +74,8 @@ func (dv *Device) MakeDevice(gp *GPU) {
 	}
 	gp.SetGPUOpts(&feats, gp.EnabledOpts)
 
+	// log.Printf("features: %#v\n", feats)
+
 	var device vk.Device
 	ret := vk.CreateDevice(gp.GPU, &vk.DeviceCreateInfo{
 		SType:                   vk.StructureTypeDeviceCreateInfo,
@@ -85,16 +86,18 @@ func (dv *Device) MakeDevice(gp *GPU) {
 		EnabledLayerCount:       uint32(len(gp.ValidationLayers)),
 		PpEnabledLayerNames:     gp.ValidationLayers,
 		PEnabledFeatures:        []vk.PhysicalDeviceFeatures{feats},
-		PNext: unsafe.Pointer(&vk.PhysicalDeviceVulkan12Features{
-			SType:                                    vk.StructureTypePhysicalDeviceVulkan12Features,
-			DescriptorIndexing:                       vk.True,
-			DescriptorBindingVariableDescriptorCount: vk.True,
-			DescriptorBindingSampledImageUpdateAfterBind: vk.True,
-			DescriptorBindingUpdateUnusedWhilePending:    vk.True,
-			DescriptorBindingPartiallyBound:              vk.True,
-			RuntimeDescriptorArray:                       vk.True,
-			PNext:                                        gp.PlatformDeviceNext,
-		}),
+		// todo: none of the following options work on android:
+		/*
+			PNext: unsafe.Pointer(&vk.PhysicalDeviceVulkan12Features{
+				SType: vk.StructureTypePhysicalDeviceVulkan12Features,
+				DescriptorIndexing: vk.True,
+				DescriptorBindingVariableDescriptorCount: vk.True,
+				DescriptorBindingSampledImageUpdateAfterBind: vk.True,
+				DescriptorBindingPartiallyBound: vk.True,
+				RuntimeDescriptorArray:                       vk.True,
+				PNext: gp.PlatformDeviceNext,
+			}),
+		*/
 	}, nil, &device)
 	IfPanic(NewError(ret))
 
