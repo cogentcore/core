@@ -79,13 +79,22 @@ type funcRun struct {
 
 // RunOnMain runs given function on main thread
 func (app *appImpl) RunOnMain(f func()) {
-	f()
+	if app.mainQueue == nil {
+		f()
+	} else {
+		done := make(chan bool)
+		app.mainQueue <- funcRun{f: f, done: done}
+		<-done
+	}
 }
 
 // GoRunOnMain runs given function on main thread and returns immediately
 func (app *appImpl) GoRunOnMain(f func()) {
-	go f()
+	go func() {
+		app.mainQueue <- funcRun{f: f, done: nil}
+	}()
 }
+
 
 // SendEmptyEvent sends an empty, blank event to global event processing
 // system, which has the effect of pushing the system along during cases when
