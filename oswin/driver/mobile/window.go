@@ -9,7 +9,7 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/gi/oswin/window"
+	"github.com/goki/gi/units"
 	"github.com/goki/mobile/event/size"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
@@ -76,15 +76,6 @@ func (w *windowImpl) Activate() bool {
 
 func (w *windowImpl) DeActivate() {}
 
-// for sending window.Event's
-func (w *windowImpl) sendWindowEvent(act window.Actions) {
-	winEv := window.Event{
-		Action: act,
-	}
-	winEv.Init()
-	w.Send(&winEv)
-}
-
 // NextEvent implements the oswin.EventDeque interface.
 func (w *windowImpl) NextEvent() oswin.Event {
 	e := w.Deque.NextEvent()
@@ -93,18 +84,33 @@ func (w *windowImpl) NextEvent() oswin.Event {
 
 // RunOnWin runs given function on the window's unique locked thread.
 func (w *windowImpl) RunOnWin(f func()) {
-	f()
+	if w.IsClosed() {
+		return
+	}
+	done := make(chan bool)
+	w.runQueue <- funcRun{f: f, done: done}
+	<-done
 }
 
 // GoRunOnWin runs given function on window's unique locked thread and returns immediately
 func (w *windowImpl) GoRunOnWin(f func()) {
-	go f()
+	if w.IsClosed() {
+		return
+	}
+	go func() {
+		w.runQueue <- funcRun{f: f, done: nil}
+	}()
 }
 
 // SendEmptyEvent sends an empty, blank event to this window, which just has
 // the effect of pushing the system along during cases when the window
 // event loop needs to be "pinged" to get things moving along..
-func (w *windowImpl) SendEmptyEvent() {}
+func (w *windowImpl) SendEmptyEvent() {
+	if w.IsClosed() {
+		return
+	}
+	oswin.SendCustomEvent(w, nil)
+}
 
 func (w *windowImpl) Screen() *oswin.Screen {
 	sc := w.getScreen()
@@ -183,14 +189,17 @@ func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {}
 //  Window Callbacks
 
 func (w *windowImpl) getScreen() *oswin.Screen {
-	physX, physY := 0.3527*w.size.WidthPt, 0.3527*w.size.HeightPt
+	physX, physY := units.NewPt(float32(w.size.WidthPt)), units.NewPt(float32(w.size.HeightPt))
+	physX.Convert(units.Mm, &units.Context{})
+	physY.Convert(units.Mm, &units.Context{})
 	return &oswin.Screen{
 		ScreenNumber: 0,
 		Geometry:     w.size.Bounds(),
 		PixSize:      w.size.Size(),
-		PhysicalSize: image.Point{X: int(physX), Y: int(physY)},
+		PhysicalSize: image.Point{X: int(physX.Val), Y: int(physY.Val)},
 
 		PhysicalDPI: 72 * w.size.PixelsPerPt,
+		LogicalDPI:  2.0,
 
 		Orientation: oswin.ScreenOrientation(w.size.Orientation),
 	}

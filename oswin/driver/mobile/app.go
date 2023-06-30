@@ -16,12 +16,6 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/touch"
-	"github.com/goki/gi/oswin/window"
-	mapp "github.com/goki/mobile/app"
-	"github.com/goki/mobile/event/lifecycle"
-	"github.com/goki/mobile/event/paint"
-	"github.com/goki/mobile/event/size"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 	vk "github.com/goki/vulkan"
@@ -95,7 +89,6 @@ func (app *appImpl) GoRunOnMain(f func()) {
 	}()
 }
 
-
 // SendEmptyEvent sends an empty, blank event to global event processing
 // system, which has the effect of pushing the system along during cases when
 // the event loop needs to be "pinged" to get things moving along..
@@ -137,80 +130,44 @@ func (app *appImpl) mainLoop() {
 	}
 }
 
-// eventLoop starts running the mobile app event loop
-func (app *appImpl) eventLoop() {
-	mapp.Main(func(a mapp.App) {
-		for e := range a.Events() {
-			switch e := a.Filter(e).(type) {
-			case lifecycle.Event:
-				switch e.Crosses(lifecycle.StageVisible) {
-				case lifecycle.CrossOn:
-					app.winPtr = a.Window()
-					log.Println("on start, window uintptr:", app.winPtr)
-					_, err := app.NewWindow(nil)
-					if err != nil {
-						log.Fatalln("error creating window in lifecycle cross on:", err)
-					}
-					app.window.window = a.Window()
-					log.Println("set window pointer to", app.window.window)
-				case lifecycle.CrossOff:
-					log.Println("on stop")
-					// todo: on stop
-				}
-			case size.Event:
-				log.Println("size event", e.Size())
-				app.window.SetSize(e.Size())
-			case paint.Event:
-				log.Println("paint event")
-				// app.onPaint()
-				app.window.sendWindowEvent(window.Paint)
-				a.Publish()
-			case touch.Event:
-				log.Println("touch event", e)
-				// todo: on touch
-			}
-		}
-	})
-}
+// func (app *appImpl) onPaint() {
+// 	if app.window.System != nil {
+// 		idx := app.window.Surface.AcquireNextImage()
+// 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
+// 		descIdx := 0 // if running multiple frames in parallel, need diff sets
+// 		cmd := app.window.System.CmdPool.Buff
+// 		app.window.System.ResetBeginRenderPass(cmd, app.window.Surface.Frames[idx], descIdx)
+// 		// app.window.Draw.Draw(idx, 0, )
+// 		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
+// 		// pipeline.BindPipeline(cmd)
+// 		// pipeline.Draw(cmd, 3, 1, 0, 0)
+// 		app.window.System.EndRenderPass(cmd)
+// 		app.window.Surface.SubmitRender(cmd) // this is where it waits for the 16 msec
+// 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
+// 		app.window.Surface.PresentImage(idx)
 
-func (app *appImpl) onPaint() {
-	if app.window.System != nil {
-		idx := app.window.Surface.AcquireNextImage()
-		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-		descIdx := 0 // if running multiple frames in parallel, need diff sets
-		cmd := app.window.System.CmdPool.Buff
-		app.window.System.ResetBeginRenderPass(cmd, app.window.Surface.Frames[idx], descIdx)
-		// app.window.Draw.Draw(idx, 0, )
-		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
-		// pipeline.BindPipeline(cmd)
-		// pipeline.Draw(cmd, 3, 1, 0, 0)
-		app.window.System.EndRenderPass(cmd)
-		app.window.Surface.SubmitRender(cmd) // this is where it waits for the 16 msec
-		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
-		app.window.Surface.PresentImage(idx)
+// 		// frameCount++
+// 		// eTime := time.Now()
+// 		// dur := float64(eTime.Sub(stTime)) / float64(time.Second)
+// 		// if dur > 10 {
+// 		// 	fps := float64(frameCount) / dur
+// 		// 	log.Printf("fps: %.0f\n", fps)
+// 		// 	frameCount = 0
+// 		// 	stTime = eTime
+// 		// }
+// 		// log.Println("painted")
 
-		// frameCount++
-		// eTime := time.Now()
-		// dur := float64(eTime.Sub(stTime)) / float64(time.Second)
-		// if dur > 10 {
-		// 	fps := float64(frameCount) / dur
-		// 	log.Printf("fps: %.0f\n", fps)
-		// 	frameCount = 0
-		// 	stTime = eTime
-		// }
-		// log.Println("painted")
-
-		// https://source.android.com/devices/graphics/arch-gameloops
-		// FPS may drop down when no interacton with the app, should skip frames there.
-		// TODO: use VK_GOOGLE_display_timing_enabled as cool guys would do. Don't be an uncool fool.
-		// if lastRender > fpsDelay {
-		// 	// skip frame
-		// 	lastRender = lastRender - fpsDelay
-		// 	continue
-		// }
-		// ts := time.Now()
-	}
-}
+// 		// https://source.android.com/devices/graphics/arch-gameloops
+// 		// FPS may drop down when no interacton with the app, should skip frames there.
+// 		// TODO: use VK_GOOGLE_display_timing_enabled as cool guys would do. Don't be an uncool fool.
+// 		// if lastRender > fpsDelay {
+// 		// 	// skip frame
+// 		// 	lastRender = lastRender - fpsDelay
+// 		// 	continue
+// 		// }
+// 		// ts := time.Now()
+// 	}
+// }
 
 // stopMain stops the main loop and thus terminates the app
 func (app *appImpl) stopMain() {
@@ -242,16 +199,23 @@ func (app *appImpl) initVk() {
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	log.Println("New Window; options nil =", opts == nil, "; window = nil", app.window == nil)
-	if app.window != nil {
-		log.Println("window pointer", app.window.window)
-	}
-	if app.window != nil && app.window.window != 0 {
-		log.Println("Window already exists, so returning existing; window uintptr:", app.window.window)
-		return app.window, nil
-	}
-	oswin.InitScreenLogicalDPIFunc()
+	return app.window, nil
+	// log.Println("New Window; options nil =", opts == nil, "; window = nil", app.window == nil)
+	// if app.window != nil {
+	// 	log.Println("window pointer", app.window.window)
+	// }
+	// if app.window != nil && app.window.window != 0 {
+	// 	log.Println("Window already exists, so returning existing; window uintptr:", app.window.window)
+	// 	return app.window, nil
+	// }
 
+}
+
+func (app *appImpl) newWindow(opts *oswin.NewWindowOptions) error {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+
+	oswin.InitScreenLogicalDPIFunc()
 	var sf vk.Surface
 	app.window = &windowImpl{}
 	log.Println("in NewWindow", app.gpu.Instance, app.winPtr, &sf)
@@ -259,7 +223,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	ret := vk.CreateWindowSurface(app.gpu.Instance, app.winPtr, nil, &sf)
 	if err := vk.Error(ret); err != nil {
 		log.Println("oswin/driver/mobile new window: vulkan error:", err)
-		return nil, err
+		return err
 	}
 	app.window.Surface = vgpu.NewSurface(app.gpu, sf)
 
@@ -277,7 +241,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	// app.window.Draw.ConfigSys()
 	app.window.Draw.ConfigSurface(app.window.Surface, 16)
 
-	return app.window, nil
+	return nil
 }
 
 func (app *appImpl) DeleteWin(w *windowImpl) {
