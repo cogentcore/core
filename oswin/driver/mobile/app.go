@@ -149,7 +149,8 @@ func (app *appImpl) eventLoop() {
 					// todo: on stop
 				}
 			case size.Event:
-				log.Println("size event")
+				log.Println("size event", e.Size())
+				app.window.SetSize(e.Size())
 			case paint.Event:
 				log.Println("paint event")
 				// app.onPaint()

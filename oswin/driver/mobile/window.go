@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/mobile/event/size"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 )
@@ -23,6 +24,7 @@ type windowImpl struct {
 	window         uintptr
 	System         *vgpu.System
 	Surface        *vgpu.Surface
+	size           size.Event
 	Draw           vdraw.Drawer
 	scrnName       string // last known screen name
 	runQueue       chan funcRun
@@ -140,13 +142,22 @@ func (w *windowImpl) SetLogicalDPI(dpi float32) {
 
 func (w *windowImpl) SetTitle(title string) {}
 
-func (w *windowImpl) SetWinSize(sz image.Point) {}
+func (w *windowImpl) SetWinSize(sz image.Point) {
+	w.WnSize = sz
+}
 
-func (w *windowImpl) SetSize(sz image.Point) {}
+func (w *windowImpl) SetSize(sz image.Point) {
+	w.PxSize = sz
+}
 
-func (w *windowImpl) SetPos(pos image.Point) {}
+func (w *windowImpl) SetPos(pos image.Point) {
+	w.Pos = pos
+}
 
-func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {}
+func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
+	w.Pos = pos
+	w.PxSize = sz
+}
 
 func (w *windowImpl) show() {}
 
@@ -172,7 +183,17 @@ func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {}
 //  Window Callbacks
 
 func (w *windowImpl) getScreen() *oswin.Screen {
-	return nil
+	physX, physY := 0.3527*w.size.WidthPt, 0.3527*w.size.HeightPt
+	return &oswin.Screen{
+		ScreenNumber: 0,
+		Geometry:     w.size.Bounds(),
+		PixSize:      w.size.Size(),
+		PhysicalSize: image.Point{X: int(physX), Y: int(physY)},
+
+		PhysicalDPI: 72 * w.size.PixelsPerPt,
+
+		Orientation: oswin.ScreenOrientation(w.size.Orientation),
+	}
 }
 
 // getScreenOvlp gets the monitor for given window
