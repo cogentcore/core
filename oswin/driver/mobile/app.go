@@ -8,6 +8,7 @@ package mobile
 import (
 	"fmt"
 	"go/build"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -15,16 +16,20 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/mobile/app"
+	"github.com/goki/gi/oswin/touch"
+	"github.com/goki/gi/oswin/window"
+	mapp "github.com/goki/mobile/app"
+	"github.com/goki/mobile/event/lifecycle"
+	"github.com/goki/mobile/event/paint"
+	"github.com/goki/mobile/event/size"
+	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
+	vk "github.com/goki/vulkan"
 )
 
 // TODO: actually implement things for mobile app
 
 var theApp = &appImpl{
-	// windows:      make(map[*glfw.Window]*windowImpl),
-	oswindows:    make(map[uintptr]*windowImpl),
-	winlist:      make([]*windowImpl, 0),
 	screens:      make([]*oswin.Screen, 0),
 	name:         "GoGi",
 	quitCloseCnt: make(chan struct{}),
@@ -33,18 +38,15 @@ var theApp = &appImpl{
 var _ oswin.App = theApp
 
 type appImpl struct {
-	mu        sync.Mutex
-	mainQueue chan funcRun
-	mainDone  chan struct{}
-	gpu       *vgpu.GPU
-	// shareWin      *glfw.Window // a non-visible, always-present window that all windows share gl context with
-	// windows       map[*glfw.Window]*windowImpl
-	oswindows     map[uintptr]*windowImpl
-	winlist       []*windowImpl
+	mu            sync.Mutex
+	mainQueue     chan funcRun
+	mainDone      chan struct{}
+	window        *windowImpl
+	winPtr        uintptr
+	gpu           *vgpu.GPU
 	screens       []*oswin.Screen
 	screensAll    []*oswin.Screen // unique list of all screens ever seen -- get info from here if fails
 	noScreens     bool            // if all screens have been disconnected, don't do anything..
-	ctxtwin       *windowImpl     // context window, dynamically set, for e.g., pointer and other methods
 	name          string
 	about         string
 	openFiles     []string
@@ -60,14 +62,14 @@ var mainCallback func(oswin.App)
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(oswin.App)) {
 	mainCallback = f
+	theApp.initVk()
 	oswin.TheApp = theApp
+	go theApp.eventLoop()
 	go func() {
 		mainCallback(theApp)
 		theApp.stopMain()
 	}()
-	app.Main(func(a app.App) {
-
-	})
+	theApp.mainLoop()
 }
 
 type funcRun struct {
@@ -77,12 +79,12 @@ type funcRun struct {
 
 // RunOnMain runs given function on main thread
 func (app *appImpl) RunOnMain(f func()) {
-
+	f()
 }
 
 // GoRunOnMain runs given function on main thread and returns immediately
 func (app *appImpl) GoRunOnMain(f func()) {
-
+	go f()
 }
 
 // SendEmptyEvent sends an empty, blank event to global event processing
@@ -106,7 +108,98 @@ func (app *appImpl) PollEvents() {
 // MainLoop starts running event loop on main thread (must be called
 // from the main thread).
 func (app *appImpl) mainLoop() {
+	app.mainQueue = make(chan funcRun)
+	app.mainDone = make(chan struct{})
+	// SetThreadPri(1)
+	// time.Sleep(100 * time.Millisecond)
+	for {
+		select {
+		case <-app.mainDone:
+			// glfw.Terminate()
+			return
+		case f := <-app.mainQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+			// default:
+			// 	glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
+		}
+	}
+}
 
+// eventLoop starts running the mobile app event loop
+func (app *appImpl) eventLoop() {
+	mapp.Main(func(a mapp.App) {
+		for e := range a.Events() {
+			switch e := a.Filter(e).(type) {
+			case lifecycle.Event:
+				switch e.Crosses(lifecycle.StageVisible) {
+				case lifecycle.CrossOn:
+					app.winPtr = a.Window()
+					log.Println("on start, window uintptr:", app.winPtr)
+					_, err := app.NewWindow(nil)
+					if err != nil {
+						log.Fatalln("error creating window in lifecycle cross on:", err)
+					}
+					app.window.window = a.Window()
+					log.Println("set window pointer to", app.window.window)
+				case lifecycle.CrossOff:
+					log.Println("on stop")
+					// todo: on stop
+				}
+			case size.Event:
+				log.Println("size event")
+			case paint.Event:
+				log.Println("paint event")
+				// app.onPaint()
+				app.window.sendWindowEvent(window.Paint)
+				a.Publish()
+			case touch.Event:
+				log.Println("touch event", e)
+				// todo: on touch
+			}
+		}
+	})
+}
+
+func (app *appImpl) onPaint() {
+	if app.window.System != nil {
+		idx := app.window.Surface.AcquireNextImage()
+		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
+		descIdx := 0 // if running multiple frames in parallel, need diff sets
+		cmd := app.window.System.CmdPool.Buff
+		app.window.System.ResetBeginRenderPass(cmd, app.window.Surface.Frames[idx], descIdx)
+		// app.window.Draw.Draw(idx, 0, )
+		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
+		// pipeline.BindPipeline(cmd)
+		// pipeline.Draw(cmd, 3, 1, 0, 0)
+		app.window.System.EndRenderPass(cmd)
+		app.window.Surface.SubmitRender(cmd) // this is where it waits for the 16 msec
+		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
+		app.window.Surface.PresentImage(idx)
+
+		// frameCount++
+		// eTime := time.Now()
+		// dur := float64(eTime.Sub(stTime)) / float64(time.Second)
+		// if dur > 10 {
+		// 	fps := float64(frameCount) / dur
+		// 	log.Printf("fps: %.0f\n", fps)
+		// 	frameCount = 0
+		// 	stTime = eTime
+		// }
+		// log.Println("painted")
+
+		// https://source.android.com/devices/graphics/arch-gameloops
+		// FPS may drop down when no interacton with the app, should skip frames there.
+		// TODO: use VK_GOOGLE_display_timing_enabled as cool guys would do. Don't be an uncool fool.
+		// if lastRender > fpsDelay {
+		// 	// skip frame
+		// 	lastRender = lastRender - fpsDelay
+		// 	continue
+		// }
+		// ts := time.Now()
+	}
 }
 
 // stopMain stops the main loop and thus terminates the app
@@ -114,14 +207,67 @@ func (app *appImpl) stopMain() {
 	app.mainDone <- struct{}{}
 }
 
-// initVk initializes glfw, vulkan (vgpu), etc
-func (app *appImpl) initVk() {}
+// initVk initializes vulkan things
+func (app *appImpl) initVk() {
+	log.SetPrefix("GoMobileVulkan: ")
+	vgpu.Debug = true
+	err := vk.SetDefaultGetInstanceProcAddr()
+	if err != nil {
+		log.Fatalln("oswin/driver/mobile: failed to set Vulkan DefaultGetInstanceProcAddr")
+	}
+	err = vk.Init()
+	if err != nil {
+		log.Fatalln("oswin/driver/mobile: failed to initialize vulkan")
+	}
+	winext := vk.GetRequiredInstanceExtensions()
+	log.Printf("required exts: %#v\n", winext)
+	app.gpu = vgpu.NewGPU()
+	app.gpu.AddInstanceExt(winext...)
+	app.gpu.Config(app.name)
+}
 
 ////////////////////////////////////////////////////////
 //  Window
 
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
-	return nil, nil
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	log.Println("New Window; options nil =", opts == nil, "; window = nil", app.window == nil)
+	if app.window != nil {
+		log.Println("window pointer", app.window.window)
+	}
+	if app.window != nil && app.window.window != 0 {
+		log.Println("Window already exists, so returning existing; window uintptr:", app.window.window)
+		return app.window, nil
+	}
+	oswin.InitScreenLogicalDPIFunc()
+
+	var sf vk.Surface
+	app.window = &windowImpl{}
+	log.Println("in NewWindow", app.gpu.Instance, app.winPtr, &sf)
+	// log.Println(app.window.window)
+	ret := vk.CreateWindowSurface(app.gpu.Instance, app.winPtr, nil, &sf)
+	if err := vk.Error(ret); err != nil {
+		log.Println("oswin/driver/mobile new window: vulkan error:", err)
+		return nil, err
+	}
+	app.window.Surface = vgpu.NewSurface(app.gpu, sf)
+
+	log.Printf("format: %s\n", app.window.Surface.Format.String())
+
+	app.window.System = app.gpu.NewGraphicsSystem(app.name, &app.window.Surface.Device)
+	app.window.System.ConfigRender(&app.window.Surface.Format, vgpu.UndefType)
+	app.window.Surface.SetRender(&app.window.System.Render)
+	app.window.System.Config()
+
+	app.window.Draw = vdraw.Drawer{
+		Sys: *app.window.System,
+	}
+	app.window.Draw.YIsDown = true
+	// app.window.Draw.ConfigSys()
+	app.window.Draw.ConfigSurface(app.window.Surface, 16)
+
+	return app.window, nil
 }
 
 func (app *appImpl) DeleteWin(w *windowImpl) {
@@ -154,17 +300,14 @@ func (app *appImpl) NoScreens() bool {
 }
 
 func (app *appImpl) NWindows() int {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	return len(app.winlist)
+	return 1
 }
 
 func (app *appImpl) Window(win int) oswin.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	sz := len(app.winlist)
-	if win < sz {
-		return app.winlist[win]
+	if win == 0 {
+		return app.window
 	}
 	return nil
 }
@@ -172,10 +315,8 @@ func (app *appImpl) Window(win int) oswin.Window {
 func (app *appImpl) WindowByName(name string) oswin.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	for _, win := range app.winlist {
-		if win.Name() == name {
-			return win
-		}
+	if app.window.Name() == name {
+		return app.window
 	}
 	return nil
 }
@@ -183,19 +324,16 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 func (app *appImpl) WindowInFocus() oswin.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	for _, win := range app.winlist {
-		if win.IsFocus() {
-			return win
-		}
+	if app.window.IsFocus() {
+		return app.window
 	}
 	return nil
 }
 
 func (app *appImpl) ContextWindow() oswin.Window {
 	app.mu.Lock()
-	cw := app.ctxtwin
-	app.mu.Unlock()
-	return cw
+	defer app.mu.Unlock()
+	return app.window
 }
 
 func (app *appImpl) Name() string {
@@ -235,14 +373,14 @@ func (app *appImpl) PrefsDir() string {
 }
 
 func (app *appImpl) FontPaths() []string {
-	return nil
+	return []string{"/system/fonts"}
 }
 func (app *appImpl) GetScreens() {
 
 }
 
 func (app *appImpl) Platform() oswin.Platforms {
-	return 0
+	return oswin.Android
 }
 
 func (app *appImpl) OpenURL(url string) {
@@ -263,17 +401,17 @@ func SrcDir(dir string) (absDir string, err error) {
 }
 
 func (app *appImpl) ClipBoard(win oswin.Window) clip.Board {
-	app.mu.Lock()
-	app.ctxtwin = win.(*windowImpl)
-	app.mu.Unlock()
+	// app.mu.Lock()
+	// app.ctxtwin = win.(*windowImpl)
+	// app.mu.Unlock()
 	return nil
 	// return &theClip
 }
 
 func (app *appImpl) Cursor(win oswin.Window) cursor.Cursor {
-	app.mu.Lock()
-	app.ctxtwin = win.(*windowImpl)
-	app.mu.Unlock()
+	// app.mu.Lock()
+	// app.ctxtwin = win.(*windowImpl)
+	// app.mu.Unlock()
 	return nil
 	// return &theCursor
 }
@@ -302,21 +440,21 @@ func (app *appImpl) IsQuitting() bool {
 }
 
 func (app *appImpl) QuitClean() {
-	app.quitting = true
-	if app.quitCleanFunc != nil {
-		app.quitCleanFunc()
-	}
-	app.mu.Lock()
-	nwin := len(app.winlist)
-	for i := nwin - 1; i >= 0; i-- {
-		win := app.winlist[i]
-		go win.Close()
-	}
-	app.mu.Unlock()
-	for i := 0; i < nwin; i++ {
-		<-app.quitCloseCnt
-		// fmt.Printf("win closed: %v\n", i)
-	}
+	// app.quitting = true
+	// if app.quitCleanFunc != nil {
+	// 	app.quitCleanFunc()
+	// }
+	// app.mu.Lock()
+	// nwin := len(app.winlist)
+	// for i := nwin - 1; i >= 0; i-- {
+	// 	win := app.winlist[i]
+	// 	go win.Close()
+	// }
+	// app.mu.Unlock()
+	// for i := 0; i < nwin; i++ {
+	// 	<-app.quitCloseCnt
+	// 	// fmt.Printf("win closed: %v\n", i)
+	// }
 }
 
 func (app *appImpl) Quit() {

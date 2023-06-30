@@ -175,6 +175,12 @@ const (
 	// Windows is a Microsoft Windows machine
 	Windows
 
+	// IOS is an Apple iOS or iPadOS mobile phone or iPad
+	IOS
+
+	// Android is an Android mobile phone or tablet
+	Android
+
 	PlatformsN
 )
 

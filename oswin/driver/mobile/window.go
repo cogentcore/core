@@ -9,7 +9,7 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/mobile/gl"
+	"github.com/goki/gi/oswin/window"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 )
@@ -19,12 +19,13 @@ import (
 type windowImpl struct {
 	oswin.WindowBase
 	event.Deque
-	// app            *appImpl
-	ctx      gl.Context
-	Surface  *vgpu.Surface
-	Draw     vdraw.Drawer
-	scrnName string // last known screen name
-	// runQueue       chan funcRun
+	app            *appImpl
+	window         uintptr
+	System         *vgpu.System
+	Surface        *vgpu.Surface
+	Draw           vdraw.Drawer
+	scrnName       string // last known screen name
+	runQueue       chan funcRun
 	publish        chan struct{}
 	publishDone    chan struct{}
 	winClose       chan struct{}
@@ -44,32 +45,27 @@ var _ oswin.Window = &windowImpl{}
 // please file an Issue for anything that should be added to Window
 // interface.
 func (w *windowImpl) Handle() any {
-	return nil
+	return w.window
 }
 
 func (w *windowImpl) OSHandle() uintptr {
-	return 0
+	return w.window
 }
 
 func (w *windowImpl) MainMenu() oswin.MainMenu {
-	return nil
+	return w.mainMenu
 }
 
 func (w *windowImpl) Drawer() *vdraw.Drawer {
-	return nil
+	return &w.Draw
 }
 
 func (w *windowImpl) IsClosed() bool {
-	if w == nil {
-		return true
-	}
-	w.mu.Lock()
-	defer w.mu.Unlock()
-	return w.ctx == nil
+	return false
 }
 
 func (w *windowImpl) IsVisible() bool {
-	return w.IsClosed()
+	return true
 }
 
 func (w *windowImpl) Activate() bool {
@@ -78,6 +74,15 @@ func (w *windowImpl) Activate() bool {
 
 func (w *windowImpl) DeActivate() {}
 
+// for sending window.Event's
+func (w *windowImpl) sendWindowEvent(act window.Actions) {
+	winEv := window.Event{
+		Action: act,
+	}
+	winEv.Init()
+	w.Send(&winEv)
+}
+
 // NextEvent implements the oswin.EventDeque interface.
 func (w *windowImpl) NextEvent() oswin.Event {
 	e := w.Deque.NextEvent()
@@ -85,10 +90,14 @@ func (w *windowImpl) NextEvent() oswin.Event {
 }
 
 // RunOnWin runs given function on the window's unique locked thread.
-func (w *windowImpl) RunOnWin(f func()) {}
+func (w *windowImpl) RunOnWin(f func()) {
+	f()
+}
 
 // GoRunOnWin runs given function on window's unique locked thread and returns immediately
-func (w *windowImpl) GoRunOnWin(f func()) {}
+func (w *windowImpl) GoRunOnWin(f func()) {
+	go f()
+}
 
 // SendEmptyEvent sends an empty, blank event to this window, which just has
 // the effect of pushing the system along during cases when the window

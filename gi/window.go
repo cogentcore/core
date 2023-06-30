@@ -347,6 +347,7 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
 	}
+	log.Println("win handle", win.OSWin.Handle())
 	win.OSWin.SetName(title)
 	win.OSWin.SetParent(win.This())
 	win.NodeSig.Connect(win.This(), SignalWindowPublish)
