@@ -10,6 +10,7 @@
 package oswin
 
 import (
+	"fmt"
 	"image"
 	"math"
 
@@ -152,6 +153,7 @@ func (sc *Screen) UpdateLogicalDPI() {
 		}
 	}
 	sc.LogicalDPI = LogicalFmPhysicalDPI(ZoomFactor*dpisc, sc.PhysicalDPI)
+	fmt.Println("update logical dpi", sc.LogicalDPI, sc.PhysicalDPI, dpisc)
 }
 
 // WinSizeToPix returns window manager size units

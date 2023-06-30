@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build android || ios
+
 package mobile
 
 import (
 	"image"
 	"log"
 
+	"github.com/goki/gi/oswin"
 	omouse "github.com/goki/gi/oswin/mouse"
-	otouch "github.com/goki/gi/oswin/touch"
 	"github.com/goki/gi/oswin/window"
 	mapp "github.com/goki/mobile/app"
 	"github.com/goki/mobile/event/key"
@@ -28,21 +30,31 @@ func (app *appImpl) eventLoop() {
 			case lifecycle.Event:
 				switch e.Crosses(lifecycle.StageVisible) {
 				case lifecycle.CrossOn:
-					app.winPtr = a.Window()
-					log.Println("on start, window uintptr:", app.winPtr)
-					err := app.newWindow(nil)
+					err := app.newWindow(nil, a.Window())
 					if err != nil {
 						log.Fatalln("error creating window in lifecycle cross on:", err)
 					}
-					app.window.window = a.Window()
-					log.Println("set window pointer to", app.window.window)
 				case lifecycle.CrossOff:
 					log.Println("on stop")
 					// todo: on stop
 				}
+				switch e.Crosses(lifecycle.StageFocused) {
+				case lifecycle.CrossOn:
+					app.window.focus(true)
+				case lifecycle.CrossOff:
+					app.window.focus(false)
+				}
 			case size.Event:
 				log.Println("size event", e.Size())
+				app.window.size = e
 				app.window.SetSize(e.Size())
+				app.mu.Lock()
+				app.getScreen()
+				app.mu.Unlock()
+				oswin.InitScreenLogicalDPIFunc()
+				app.window.LogDPI = app.screens[0].LogicalDPI
+				app.window.sendWindowEvent(window.Resize)
+				app.window.sendWindowEvent(window.Paint)
 			case paint.Event:
 				log.Println("paint event")
 				// app.onPaint()
@@ -51,9 +63,7 @@ func (app *appImpl) eventLoop() {
 			case touch.Event:
 				log.Println("touch event", e)
 				// app.window.sendWindowEvent(window.Paint)
-				app.window.SendEmptyEvent()
 				app.window.touchEvent(e)
-				app.window.SendEmptyEvent()
 				a.Publish()
 				// todo: on touch
 			case mouse.Event:
@@ -66,18 +76,29 @@ func (app *appImpl) eventLoop() {
 }
 
 func (w *windowImpl) touchEvent(event touch.Event) {
-	oevent := &otouch.Event{
-		Where:    image.Point{X: int(event.X), Y: int(event.Y)},
-		Sequence: otouch.Sequence(event.Sequence),
-		Action:   otouch.Actions(event.Type), // otouch.Actions and touch.Type have the same enum constant values
-	}
-	oevent.Init()
-	log.Println("oswin touch event", oevent.EventBase, oevent.Where, oevent.Sequence, oevent.Action)
-	w.Send(oevent)
+	// oevent := &otouch.Event{
+	// 	Where:    image.Point{X: int(event.X), Y: int(event.Y)},
+	// 	Sequence: otouch.Sequence(event.Sequence),
+	// 	Action:   otouch.Actions(event.Type), // otouch.Actions and touch.Type have the same enum constant values
+	// }
+	// oevent.Init()
+	// log.Println("oswin touch event", oevent.EventBase, oevent.Where, oevent.Sequence, oevent.Action)
+	// w.Send(oevent)
 	action := omouse.Press
 	if event.Type == touch.TypeEnd {
 		action = omouse.Release
 	}
+
+	// ommvevent := &omouse.MoveEvent{
+	// 	From: image.Point{X: int(0), Y: int(0)},
+	// }
+	// ommvevent.Where = image.Point{X: int(event.X), Y: int(event.Y)}
+	// ommvevent.Action = omouse.Move
+	//
+	// ommvevent.Init()
+	// log.Println("oswin mouse move event", ommvevent.EventBase, ommvevent.Where, ommvevent.Button, ommvevent.Action)
+	// w.Send(ommvevent)
+
 	omevent := &omouse.Event{
 		Where:  image.Point{X: int(event.X), Y: int(event.Y)},
 		Button: omouse.Left,

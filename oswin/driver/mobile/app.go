@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build android || ios
+
 // Package mobile implements oswin interfaces on mobile devices
 package mobile
 
 import (
 	"fmt"
 	"go/build"
+	"image"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,6 +19,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
+	"github.com/goki/gi/units"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 	vk "github.com/goki/vulkan"
@@ -197,8 +201,17 @@ func (app *appImpl) initVk() {
 //  Window
 
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
-	app.mu.Lock()
-	defer app.mu.Unlock()
+	var winptr uintptr
+	for {
+		app.mu.Lock()
+		winptr = app.window.window
+		app.mu.Unlock()
+
+		if winptr != 0 {
+			break
+		}
+	}
+
 	return app.window, nil
 	// log.Println("New Window; options nil =", opts == nil, "; window = nil", app.window == nil)
 	// if app.window != nil {
@@ -211,16 +224,16 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 }
 
-func (app *appImpl) newWindow(opts *oswin.NewWindowOptions) error {
+func (app *appImpl) newWindow(opts *oswin.NewWindowOptions, winPtr uintptr) error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
-	oswin.InitScreenLogicalDPIFunc()
 	var sf vk.Surface
 	app.window = &windowImpl{}
-	log.Println("in NewWindow", app.gpu.Instance, app.winPtr, &sf)
+	app.window.app = app
+	log.Println("in NewWindow", app.gpu.Instance, winPtr, &sf)
 	// log.Println(app.window.window)
-	ret := vk.CreateWindowSurface(app.gpu.Instance, app.winPtr, nil, &sf)
+	ret := vk.CreateWindowSurface(app.gpu.Instance, winPtr, nil, &sf)
 	if err := vk.Error(ret); err != nil {
 		log.Println("oswin/driver/mobile new window: vulkan error:", err)
 		return err
@@ -228,6 +241,7 @@ func (app *appImpl) newWindow(opts *oswin.NewWindowOptions) error {
 	app.window.Surface = vgpu.NewSurface(app.gpu, sf)
 
 	log.Printf("format: %s\n", app.window.Surface.Format.String())
+	// app.getInitialScreen()
 
 	app.window.System = app.gpu.NewGraphicsSystem(app.name, &app.window.Surface.Device)
 	app.window.System.ConfigRender(&app.window.Surface.Format, vgpu.UndefType)
@@ -241,7 +255,58 @@ func (app *appImpl) newWindow(opts *oswin.NewWindowOptions) error {
 	// app.window.Draw.ConfigSys()
 	app.window.Draw.ConfigSurface(app.window.Surface, 16)
 
+	app.window.window = winPtr
+	log.Println("set window pointer to", app.window.window)
+
 	return nil
+}
+
+func (app *appImpl) setScreen(sc *oswin.Screen) {
+	if len(app.screens) == 0 {
+		app.screens = make([]*oswin.Screen, 1)
+	}
+	app.screens[0] = sc
+}
+
+func (app *appImpl) getScreen() {
+	w := app.window
+	physX, physY := units.NewPt(float32(w.size.WidthPt)), units.NewPt(float32(w.size.HeightPt))
+	physX.Convert(units.Mm, &units.Context{})
+	physY.Convert(units.Mm, &units.Context{})
+	w.PhysDPI = 36 * w.size.PixelsPerPt
+	fmt.Println("pixels per pt", w.size.PixelsPerPt)
+	sc := &oswin.Screen{
+		ScreenNumber: 0,
+		Geometry:     w.size.Bounds(),
+		PixSize:      w.size.Size(),
+		PhysicalSize: image.Point{X: int(physX.Val), Y: int(physY.Val)},
+		PhysicalDPI:  36 * w.size.PixelsPerPt,
+		LogicalDPI:   2.0,
+
+		Orientation: oswin.ScreenOrientation(w.size.Orientation),
+	}
+	app.setScreen(sc)
+}
+
+func (app *appImpl) getInitialScreen() {
+	sz := app.window.Surface.Format.Size
+	physX, physY := units.NewPt(float32(sz.X)), units.NewPt(float32(sz.Y))
+	physX.Convert(units.Mm, &units.Context{})
+	physY.Convert(units.Mm, &units.Context{})
+	app.window.PhysDPI = 36 * 6.0
+	sc := &oswin.Screen{
+		ScreenNumber: 0,
+		// Geometry:     w.size.Bounds(),
+		// PixSize:      w.size.Size(),
+		PixSize:      sz,
+		PhysicalSize: image.Point{X: int(physX.Val), Y: int(physY.Val)},
+		PhysicalDPI:  36 * 6.0,
+		LogicalDPI:   2.0,
+		// Orientation: oswin.ScreenOrientation(w.size.Orientation),
+	}
+	app.setScreen(sc)
+	oswin.InitScreenLogicalDPIFunc()
+	app.window.LogDPI = sc.LogicalDPI
 }
 
 func (app *appImpl) DeleteWin(w *windowImpl) {
@@ -350,7 +415,7 @@ func (app *appImpl) FontPaths() []string {
 	return []string{"/system/fonts"}
 }
 func (app *appImpl) GetScreens() {
-
+	// note: this is not applicable in mobile because screen info is not avail until Size event
 }
 
 func (app *appImpl) Platform() oswin.Platforms {

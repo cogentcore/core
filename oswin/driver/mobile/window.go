@@ -1,6 +1,9 @@
 // Copyright 2019 The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+//go:build android || ios
+
 package mobile
 
 import (
@@ -9,7 +12,7 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/gi/units"
+	"github.com/goki/gi/oswin/window"
 	"github.com/goki/mobile/event/size"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
@@ -113,7 +116,7 @@ func (w *windowImpl) SendEmptyEvent() {
 }
 
 func (w *windowImpl) Screen() *oswin.Screen {
-	sc := w.getScreen()
+	sc := w.app.screens[0]
 	return sc
 }
 
@@ -188,23 +191,6 @@ func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {}
 /////////////////////////////////////////////////////////
 //  Window Callbacks
 
-func (w *windowImpl) getScreen() *oswin.Screen {
-	physX, physY := units.NewPt(float32(w.size.WidthPt)), units.NewPt(float32(w.size.HeightPt))
-	physX.Convert(units.Mm, &units.Context{})
-	physY.Convert(units.Mm, &units.Context{})
-	return &oswin.Screen{
-		ScreenNumber: 0,
-		Geometry:     w.size.Bounds(),
-		PixSize:      w.size.Size(),
-		PhysicalSize: image.Point{X: int(physX.Val), Y: int(physY.Val)},
-
-		PhysicalDPI: 72 * w.size.PixelsPerPt,
-		LogicalDPI:  2.0,
-
-		Orientation: oswin.ScreenOrientation(w.size.Orientation),
-	}
-}
-
 // getScreenOvlp gets the monitor for given window
 // based on overlap of geometry, using limited glfw 3.3 api,
 // which does not provide this functionality.
@@ -233,6 +219,14 @@ func (w *windowImpl) getScreenOvlp() *oswin.Screen {
 
 // func (w *windowImpl) refresh(gw *glfw.Window) {}
 
-// func (w *windowImpl) focus(gw *glfw.Window, focused bool) {}
+func (w *windowImpl) focus(focused bool) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if focused {
+		w.sendWindowEvent(window.Focus)
+	} else {
+		w.sendWindowEvent(window.DeFocus)
+	}
+}
 
 // func (w *windowImpl) iconify(gw *glfw.Window, iconified bool) {}

@@ -1571,6 +1571,7 @@ func (w *Window) EventLoop() {
 // ProcessEvent processes given oswin.Event
 func (w *Window) ProcessEvent(evi oswin.Event) {
 	et := evi.Type()
+	log.Printf("Got event: %v\n", et)
 	w.delPop = false                     // if true, delete this popup after event loop
 	if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 		fmt.Printf("Win: %v got out-of-range event: %v\n", w.Nm, et)
