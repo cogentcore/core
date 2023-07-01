@@ -13,7 +13,7 @@ var logAllLevel string
 func init() {
 	rootCmd.AddCommand(logCmd)
 	def := "android"
-	// TODO: uncomment this once ios support is added
+	// TODO: uncomment this and add similar logic to other commands once ios support is added
 	// if runtime.GOOS == "darwin" {
 	// 	def = "ios"
 	// }

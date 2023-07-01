@@ -13,7 +13,7 @@ var buildTarget []string
 
 func init() {
 	rootCmd.AddCommand(buildCmd)
-	buildCmd.PersistentFlags().StringSliceVarP(&buildTarget, "target", "t", []string{runtime.GOOS + "/" + runtime.GOARCH}, "the target platforms to build executables for, in os[/arch] format")
+	buildCmd.PersistentFlags().StringSliceVarP(&buildTarget, "target", "t", []string{"android/" + runtime.GOARCH}, "the target platforms to build executables for, in os[/arch] format")
 	viper.BindPFlag("buildTarget", buildCmd.PersistentFlags().Lookup("target"))
 }
 

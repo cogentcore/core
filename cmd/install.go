@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"runtime"
 	"strings"
 
 	"github.com/goki/packman"
@@ -14,7 +13,7 @@ var installTarget []string
 
 func init() {
 	rootCmd.AddCommand(installCmd)
-	installCmd.PersistentFlags().StringSliceVarP(&installTarget, "target", "t", []string{runtime.GOOS}, "the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)")
+	installCmd.PersistentFlags().StringSliceVarP(&installTarget, "target", "t", []string{"android"}, "the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)")
 	viper.BindPFlag("installTarget", installCmd.PersistentFlags().Lookup("target"))
 }
 
