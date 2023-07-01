@@ -24,7 +24,7 @@ import (
 // DialogsSepWindow determines if dialog windows open in a separate OS-level
 // window, or do they open within the same parent window.  If only within
 // parent window, then they are always effectively modal.
-var DialogsSepWindow = true
+var DialogsSepWindow = false
 
 // DialogState indicates the state of the dialog.
 type DialogState int64
