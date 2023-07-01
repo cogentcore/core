@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
@@ -61,6 +62,7 @@ var mainCallback func(oswin.App)
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(oswin.App)) {
+	gi.DialogsSepWindow = false
 	mainCallback = f
 	theApp.initVk()
 	oswin.TheApp = theApp
