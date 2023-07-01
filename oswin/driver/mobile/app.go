@@ -20,6 +20,7 @@ import (
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"
+	mapp "github.com/goki/mobile/app"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 	vk "github.com/goki/vulkan"
@@ -52,6 +53,7 @@ type appImpl struct {
 	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
 	quitReqFunc   func()
 	quitCleanFunc func()
+	mobapp        mapp.App
 }
 
 var mainCallback func(oswin.App)
@@ -454,4 +456,12 @@ func (app *appImpl) Quit() {
 	}
 	app.QuitClean()
 	app.stopMain()
+}
+
+func (app *appImpl) ShowVirtualKeyboard() {
+	app.mobapp.ShowVirtualKeyboard(mapp.DefaultKeyboard)
+}
+
+func (app *appImpl) HideVirtualKeyboard() {
+	app.mobapp.HideVirtualKeyboard()
 }

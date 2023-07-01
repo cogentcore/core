@@ -480,3 +480,11 @@ func (app *appImpl) Quit() {
 	app.QuitClean()
 	app.stopMain()
 }
+
+func (app *appImpl) ShowVirtualKeyboard() {
+
+}
+
+func (app *appImpl) HideVirtualKeyboard() {
+
+}

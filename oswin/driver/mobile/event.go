@@ -11,6 +11,7 @@ import (
 	"log"
 
 	"github.com/goki/gi/oswin"
+	okey "github.com/goki/gi/oswin/key"
 	omouse "github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/window"
 	mapp "github.com/goki/mobile/app"
@@ -25,6 +26,7 @@ import (
 // eventLoop starts running the mobile app event loop
 func (app *appImpl) eventLoop() {
 	mapp.Main(func(a mapp.App) {
+		app.mobapp = a
 		for e := range a.Events() {
 			switch e := a.Filter(e).(type) {
 			case lifecycle.Event:
@@ -62,11 +64,11 @@ func (app *appImpl) eventLoop() {
 			case touch.Event:
 				log.Println("touch event", e)
 				app.window.touchEvent(e)
-				a.ShowVirtualKeyboard(mapp.DefaultKeyboard)
 			case mouse.Event:
 				log.Println("mouse event", e)
 			case key.Event:
 				log.Println("key event", e)
+				app.window.keyEvent(e)
 			}
 		}
 	})
@@ -104,6 +106,22 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 	omevent.Init()
 	log.Println("oswin mouse event", omevent.EventBase, omevent.Where, omevent.Button, omevent.Action)
 	w.Send(omevent)
+}
+
+func (w *windowImpl) keyEvent(event key.Event) {
+	if event.Direction != key.DirRelease {
+		return
+	}
+	oevent := &okey.ChordEvent{}
+	oevent.Event = okey.Event{
+		Code:      okey.Codes(event.Code),
+		Rune:      event.Rune,
+		Modifiers: int32(event.Modifiers),
+		Action:    okey.Actions(event.Direction),
+	}
+	oevent.Init()
+	log.Printf("gi event: %#v\n", oevent)
+	w.Send(oevent)
 }
 
 // for sending window.Event's

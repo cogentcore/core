@@ -160,6 +160,12 @@ type App interface {
 	// Call this periodically from longer-running functions to ensure
 	// GUI responsiveness.
 	PollEvents()
+
+	// ShowVirtualKeyboard shows a virtual keyboard
+	ShowVirtualKeyboard() // todo: add arg for type of keyboard
+
+	// HideVirtualKeyboard hides the virtual keyboard
+	HideVirtualKeyboard()
 }
 
 // Platforms are all the supported platforms for OSWin

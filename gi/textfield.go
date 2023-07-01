@@ -231,6 +231,7 @@ func (tf *TextField) EditDone() {
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()
+	oswin.TheApp.HideVirtualKeyboard()
 }
 
 // EditDeFocused completes editing and copies the active edited text to the text --
@@ -1566,13 +1567,16 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
 		tf.UpdateSig()
+		oswin.TheApp.ShowVirtualKeyboard()
 	case FocusInactive:
 		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDeFocused()
 		tf.UpdateSig()
+		oswin.TheApp.HideVirtualKeyboard()
 	case FocusActive:
 		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
+		oswin.TheApp.ShowVirtualKeyboard()
 		// tf.UpdateSig()
 		// todo: see about cursor
 	}
