@@ -182,6 +182,8 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		}
 		win.GoStartEventLoop()
 	} else {
+		vpsz.X = 800
+		vpsz.Y = 800
 		x = ints.MaxInt(0, x)
 		y = ints.MaxInt(0, y)
 		if x == 0 && y == 0 {
