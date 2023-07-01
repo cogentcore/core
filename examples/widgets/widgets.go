@@ -53,6 +53,11 @@ func mainrun() {
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 
+	// vp.SetProps(ki.Props{
+	// 	"margin":           units.NewPx(44),
+	// 	"background-color": "red",
+	// })
+
 	// style sheet
 	var css = ki.Props{
 		"button": ki.Props{
@@ -75,6 +80,7 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 	mfr.SetProp("spacing", units.NewEx(1))
+
 	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")

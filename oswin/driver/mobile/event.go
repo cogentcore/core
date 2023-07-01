@@ -57,15 +57,12 @@ func (app *appImpl) eventLoop() {
 				app.window.sendWindowEvent(window.Paint)
 			case paint.Event:
 				log.Println("paint event")
-				// app.onPaint()
 				app.window.sendWindowEvent(window.Paint)
 				a.Publish()
 			case touch.Event:
 				log.Println("touch event", e)
-				// app.window.sendWindowEvent(window.Paint)
 				app.window.touchEvent(e)
-				a.Publish()
-				// todo: on touch
+				a.ShowVirtualKeyboard(mapp.DefaultKeyboard)
 			case mouse.Event:
 				log.Println("mouse event", e)
 			case key.Event:

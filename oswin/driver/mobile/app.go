@@ -97,6 +97,7 @@ func (app *appImpl) GoRunOnMain(f func()) {
 // system, which has the effect of pushing the system along during cases when
 // the event loop needs to be "pinged" to get things moving along..
 func (app *appImpl) SendEmptyEvent() {
+	app.window.SendEmptyEvent()
 }
 
 // PollEventsOnMain does the equivalent of the mainLoop but using PollEvents
@@ -134,45 +135,6 @@ func (app *appImpl) mainLoop() {
 	}
 }
 
-// func (app *appImpl) onPaint() {
-// 	if app.window.System != nil {
-// 		idx := app.window.Surface.AcquireNextImage()
-// 		// fmt.Printf("\nacq: %v\n", time.Now().Sub(rt))
-// 		descIdx := 0 // if running multiple frames in parallel, need diff sets
-// 		cmd := app.window.System.CmdPool.Buff
-// 		app.window.System.ResetBeginRenderPass(cmd, app.window.Surface.Frames[idx], descIdx)
-// 		// app.window.Draw.Draw(idx, 0, )
-// 		// fmt.Printf("rp: %v\n", time.Now().Sub(rt))
-// 		// pipeline.BindPipeline(cmd)
-// 		// pipeline.Draw(cmd, 3, 1, 0, 0)
-// 		app.window.System.EndRenderPass(cmd)
-// 		app.window.Surface.SubmitRender(cmd) // this is where it waits for the 16 msec
-// 		// fmt.Printf("submit %v\n", time.Now().Sub(rt))
-// 		app.window.Surface.PresentImage(idx)
-
-// 		// frameCount++
-// 		// eTime := time.Now()
-// 		// dur := float64(eTime.Sub(stTime)) / float64(time.Second)
-// 		// if dur > 10 {
-// 		// 	fps := float64(frameCount) / dur
-// 		// 	log.Printf("fps: %.0f\n", fps)
-// 		// 	frameCount = 0
-// 		// 	stTime = eTime
-// 		// }
-// 		// log.Println("painted")
-
-// 		// https://source.android.com/devices/graphics/arch-gameloops
-// 		// FPS may drop down when no interacton with the app, should skip frames there.
-// 		// TODO: use VK_GOOGLE_display_timing_enabled as cool guys would do. Don't be an uncool fool.
-// 		// if lastRender > fpsDelay {
-// 		// 	// skip frame
-// 		// 	lastRender = lastRender - fpsDelay
-// 		// 	continue
-// 		// }
-// 		// ts := time.Now()
-// 	}
-// }
-
 // stopMain stops the main loop and thus terminates the app
 func (app *appImpl) stopMain() {
 	app.mainDone <- struct{}{}
@@ -204,24 +166,16 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	var winptr uintptr
 	for {
 		app.mu.Lock()
-		winptr = app.window.window
+		if app.window != nil {
+			winptr = app.window.window
+		}
 		app.mu.Unlock()
 
 		if winptr != 0 {
 			break
 		}
 	}
-
 	return app.window, nil
-	// log.Println("New Window; options nil =", opts == nil, "; window = nil", app.window == nil)
-	// if app.window != nil {
-	// 	log.Println("window pointer", app.window.window)
-	// }
-	// if app.window != nil && app.window.window != 0 {
-	// 	log.Println("Window already exists, so returning existing; window uintptr:", app.window.window)
-	// 	return app.window, nil
-	// }
-
 }
 
 func (app *appImpl) newWindow(opts *oswin.NewWindowOptions, winPtr uintptr) error {
@@ -232,7 +186,6 @@ func (app *appImpl) newWindow(opts *oswin.NewWindowOptions, winPtr uintptr) erro
 	app.window = &windowImpl{}
 	app.window.app = app
 	log.Println("in NewWindow", app.gpu.Instance, winPtr, &sf)
-	// log.Println(app.window.window)
 	ret := vk.CreateWindowSurface(app.gpu.Instance, winPtr, nil, &sf)
 	if err := vk.Error(ret); err != nil {
 		log.Println("oswin/driver/mobile new window: vulkan error:", err)
@@ -241,7 +194,6 @@ func (app *appImpl) newWindow(opts *oswin.NewWindowOptions, winPtr uintptr) erro
 	app.window.Surface = vgpu.NewSurface(app.gpu, sf)
 
 	log.Printf("format: %s\n", app.window.Surface.Format.String())
-	// app.getInitialScreen()
 
 	app.window.System = app.gpu.NewGraphicsSystem(app.name, &app.window.Surface.Device)
 	app.window.System.ConfigRender(&app.window.Surface.Format, vgpu.UndefType)
@@ -288,26 +240,26 @@ func (app *appImpl) getScreen() {
 	app.setScreen(sc)
 }
 
-func (app *appImpl) getInitialScreen() {
-	sz := app.window.Surface.Format.Size
-	physX, physY := units.NewPt(float32(sz.X)), units.NewPt(float32(sz.Y))
-	physX.Convert(units.Mm, &units.Context{})
-	physY.Convert(units.Mm, &units.Context{})
-	app.window.PhysDPI = 36 * 6.0
-	sc := &oswin.Screen{
-		ScreenNumber: 0,
-		// Geometry:     w.size.Bounds(),
-		// PixSize:      w.size.Size(),
-		PixSize:      sz,
-		PhysicalSize: image.Point{X: int(physX.Val), Y: int(physY.Val)},
-		PhysicalDPI:  36 * 6.0,
-		LogicalDPI:   2.0,
-		// Orientation: oswin.ScreenOrientation(w.size.Orientation),
-	}
-	app.setScreen(sc)
-	oswin.InitScreenLogicalDPIFunc()
-	app.window.LogDPI = sc.LogicalDPI
-}
+// func (app *appImpl) getInitialScreen() {
+// 	sz := app.window.Surface.Format.Size
+// 	physX, physY := units.NewPt(float32(sz.X)), units.NewPt(float32(sz.Y))
+// 	physX.Convert(units.Mm, &units.Context{})
+// 	physY.Convert(units.Mm, &units.Context{})
+// 	app.window.PhysDPI = 36 * 6.0
+// 	sc := &oswin.Screen{
+// 		ScreenNumber: 0,
+// 		// Geometry:     w.size.Bounds(),
+// 		// PixSize:      w.size.Size(),
+// 		PixSize:      sz,
+// 		PhysicalSize: image.Point{X: int(physX.Val), Y: int(physY.Val)},
+// 		PhysicalDPI:  36 * 6.0,
+// 		LogicalDPI:   2.0,
+// 		// Orientation: oswin.ScreenOrientation(w.size.Orientation),
+// 	}
+// 	app.setScreen(sc)
+// 	oswin.InitScreenLogicalDPIFunc()
+// 	app.window.LogDPI = sc.LogicalDPI
+// }
 
 func (app *appImpl) DeleteWin(w *windowImpl) {
 	return
@@ -408,7 +360,7 @@ func (app *appImpl) AppPrefsDir() string {
 }
 
 func (app *appImpl) PrefsDir() string {
-	return ""
+	return "/data/data"
 }
 
 func (app *appImpl) FontPaths() []string {
