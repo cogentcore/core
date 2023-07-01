@@ -20,6 +20,11 @@ func Install(pkgID string) error {
 	return fmt.Errorf("error: could not find package %s", pkgID)
 }
 
+// InstallLocal installs a local package from the filesystem on the user's device
+func InstallLocal(pkgPath string) error {
+	return nil
+}
+
 // InstallPackage installs the given package
 func InstallPackage(pkg Package) error {
 	fmt.Println("Installing", pkg.Name)
