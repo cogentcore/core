@@ -11,6 +11,8 @@ import (
 func init() {
 	viper.SetConfigName("goki")
 	viper.AddConfigPath(".")
+	viper.SetEnvPrefix("goki")
+	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
