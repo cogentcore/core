@@ -473,7 +473,7 @@ var KiT_ColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
 func (pf *ColorPrefs) Defaults() {
 	pf.HiStyle = "emacs"
 	pf.Font.SetColor(gist.Black)
-	pf.Border.SetString("#666", nil)
+	pf.Border.SetString("#e6e6e6", nil)
 	pf.Background.SetColor(gist.White)
 	pf.Shadow.SetString("darker-10", &pf.Background)
 	pf.Control.SetString("#F8F8F8", nil)

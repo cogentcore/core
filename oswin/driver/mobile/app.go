@@ -62,6 +62,7 @@ var mainCallback func(oswin.App)
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(oswin.App)) {
+	log.Println("in Main")
 	gi.DialogsSepWindow = false
 	mainCallback = f
 	theApp.initVk()
@@ -169,6 +170,7 @@ func (app *appImpl) destroyVk() {
 	app.window.System.Destroy()
 	app.window.System = nil
 	app.window.Surface.Destroy()
+	app.window = nil
 	app.gpu.Destroy()
 	vgpu.Terminate()
 }

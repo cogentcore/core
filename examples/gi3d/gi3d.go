@@ -5,7 +5,6 @@
 package main
 
 import (
-	"log"
 	"math"
 	"time"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
+
 	// "github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -247,24 +247,24 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sph.Mat.Color.SetName("orange")
 	sph.Mat.Color.A = 200
 
-	// Good strategy for objects if used in multiple places is to load
-	// into library, then add from there.
-	lgo, err := sc.OpenToLibrary("gopher.obj", "")
-	if err != nil {
-		log.Println(err)
-	}
-	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
+	// // Good strategy for objects if used in multiple places is to load
+	// // into library, then add from there.
+	// lgo, err := sc.OpenToLibrary("gopher.obj", "")
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
-	gogp := gi3d.AddNewGroup(sc, sc, "go-group")
+	// gogp := gi3d.AddNewGroup(sc, sc, "go-group")
 
-	bgo, _ := sc.AddFmLibrary("gopher", gogp)
-	bgo.Pose.Scale.Set(.5, .5, .5)
-	bgo.Pose.Pos.Set(1.4, -2.5, 0)
-	bgo.Pose.SetAxisRotation(0, 1, 0, -160)
+	// bgo, _ := sc.AddFmLibrary("gopher", gogp)
+	// bgo.Pose.Scale.Set(.5, .5, .5)
+	// bgo.Pose.Pos.Set(1.4, -2.5, 0)
+	// bgo.Pose.SetAxisRotation(0, 1, 0, -160)
 
-	sgo, _ := sc.AddFmLibrary("gopher", gogp)
-	sgo.Pose.Pos.Set(-1.5, -2, 0)
-	sgo.Pose.Scale.Set(.2, .2, .2)
+	// sgo, _ := sc.AddFmLibrary("gopher", gogp)
+	// sgo.Pose.Pos.Set(-1.5, -2, 0)
+	// sgo.Pose.Scale.Set(.2, .2, .2)
 
 	trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
 	trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
@@ -273,8 +273,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	trs.Mat.Color.SetName("white")
 	trs.Mat.Color.A = 200
 
-	grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
-	_ = grtx
+	// grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
+	// _ = grtx
 	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
 
 	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
@@ -283,9 +283,9 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floor.Mat.Color.SetName("tan")
 	// // floor.Mat.Emissive.SetName("brown")
 	// floor.Mat.Bright = 2 // .5 for wood / brown
-	floor.Mat.SetTexture(sc, grtx)
-	floor.Mat.Tiling.Repeat.Set(40, 40)
-	floor.SetInactive() // not selectable
+	// floor.Mat.SetTexture(sc, grtx)
+	// floor.Mat.Tiling.Repeat.Set(40, 40)
+	// floor.SetInactive() // not selectable
 
 	// txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	// // 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
