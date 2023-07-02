@@ -10,7 +10,6 @@ import (
 	"image"
 	"log"
 
-	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	okey "github.com/goki/gi/oswin/key"
 	omouse "github.com/goki/gi/oswin/mouse"
@@ -40,11 +39,11 @@ func (app *appImpl) eventLoop() {
 							log.Fatalln("error creating window in lifecycle cross on:", err)
 						}
 						bitflag.SetAtomic(&app.window.Flag, int(oswin.Focus))
-						bitflag.SetAtomic(&app.window.Flag, int(gi.FullReRender))
-						app.window.sendWindowEvent(window.Paint)
-						app.window.sendWindowEvent(window.ScreenUpdate)
-						app.window.sendWindowEvent(window.Resize)
-						a.Publish()
+						// bitflag.SetAtomic(&app.window.Flag, int(gi.FullReRender))
+						// app.window.sendWindowEvent(window.Paint)
+						// app.window.sendWindowEvent(window.ScreenUpdate)
+						// app.window.sendWindowEvent(window.Resize)
+						// a.Publish()
 					})
 				case lifecycle.CrossOff:
 					log.Println("on stop")

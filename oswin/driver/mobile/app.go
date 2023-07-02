@@ -191,6 +191,7 @@ func (app *appImpl) destroyVk() {
 ////////////////////////////////////////////////////////
 //  Window
 
+// NewWindow returns the already existing window to satisfy the oswin.App interface. The newWindow is what actually creates a new window.
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
 	var winptr uintptr
 	for {
@@ -229,15 +230,15 @@ func (app *appImpl) newWindow(opts *oswin.NewWindowOptions, winPtr uintptr) erro
 	app.window.System = app.gpu.NewGraphicsSystem(app.name, &app.window.Surface.Device)
 	app.window.System.ConfigRender(&app.window.Surface.Format, vgpu.UndefType)
 	app.window.Surface.SetRender(&app.window.System.Render)
-	// app.window.System.Mem.Vars.NDescs = 16
+	// app.window.System.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
 	app.window.System.Config()
 
 	app.window.Draw = vdraw.Drawer{
-		Sys: *app.window.System,
+		Sys:     *app.window.System,
+		YIsDown: true,
 	}
-	app.window.Draw.YIsDown = true
 	// app.window.Draw.ConfigSys()
-	app.window.Draw.ConfigSurface(app.window.Surface, 16)
+	app.window.Draw.ConfigSurface(app.window.Surface, vgpu.MaxTexturesPerSet)
 
 	app.window.window = winPtr
 	log.Println("set window pointer to", app.window.window)
