@@ -23,7 +23,7 @@ func init() {
 	logCmd.PersistentFlags().BoolVarP(&logKeep, "keep", "k", false, "whether to keep the previous log messages or clear them")
 	viper.BindPFlag("logKeep", logCmd.PersistentFlags().Lookup("keep"))
 
-	logCmd.PersistentFlags().StringVarP(&logAllLevel, "all", "a", "S", "messages not generate from your app equal to or above this log level will be shown")
+	logCmd.PersistentFlags().StringVarP(&logAllLevel, "all", "a", "F", "messages not generate from your app equal to or above this log level will be shown")
 	viper.BindPFlag("logAll", logCmd.PersistentFlags().Lookup("all"))
 }
 

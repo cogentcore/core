@@ -22,6 +22,7 @@ func Log(osName string, keep bool, allLevel string) error {
 		fmt.Println(string(output))
 	}
 	cmd := exec.Command("adb", "logcat", "*:"+allLevel, "Go:I", "GoLog:I")
+	fmt.Println(cmd.Args)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return fmt.Errorf("erroring getting logs: %w", err)
