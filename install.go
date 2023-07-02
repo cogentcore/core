@@ -88,7 +88,7 @@ func installLocalMobile(pkgPath string, osName string) error {
 	if osName == "ios" {
 		return errors.New("ios is not yet supported")
 	}
-	err := buildMobile(pkgPath, osName, []string{runtime.GOARCH})
+	err := Build(pkgPath, Platform{osName, runtime.GOARCH})
 	if err != nil {
 		return fmt.Errorf("install: %w", err)
 	}
