@@ -126,7 +126,7 @@ func (app *appImpl) mainLoop() {
 	for {
 		select {
 		case <-app.mainDone:
-			// glfw.Terminate()
+			app.RunOnMain(app.destroyVk)
 			return
 		case f := <-app.mainQueue:
 			f.f()
@@ -161,6 +161,16 @@ func (app *appImpl) initVk() {
 	app.gpu = vgpu.NewGPU()
 	app.gpu.AddInstanceExt(winext...)
 	app.gpu.Config(app.name)
+}
+
+// destroyVk gets removes vulkan things (ie: when the app is closed)
+func (app *appImpl) destroyVk() {
+	vk.DeviceWaitIdle(app.window.Surface.Device.Device)
+	app.window.System.Destroy()
+	app.window.System = nil
+	app.window.Surface.Destroy()
+	app.gpu.Destroy()
+	vgpu.Terminate()
 }
 
 ////////////////////////////////////////////////////////
@@ -460,8 +470,8 @@ func (app *appImpl) Quit() {
 	app.stopMain()
 }
 
-func (app *appImpl) ShowVirtualKeyboard() {
-	app.mobapp.ShowVirtualKeyboard(mapp.DefaultKeyboard)
+func (app *appImpl) ShowVirtualKeyboard(typ oswin.VirtualKeyboardTypes) {
+	app.mobapp.ShowVirtualKeyboard(mapp.KeyboardType(typ))
 }
 
 func (app *appImpl) HideVirtualKeyboard() {

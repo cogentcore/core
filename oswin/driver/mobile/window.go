@@ -23,23 +23,25 @@ import (
 type windowImpl struct {
 	oswin.WindowBase
 	event.Deque
-	app            *appImpl
-	window         uintptr
-	System         *vgpu.System
-	Surface        *vgpu.Surface
-	size           size.Event
-	Draw           vdraw.Drawer
-	scrnName       string // last known screen name
-	runQueue       chan funcRun
-	publish        chan struct{}
-	publishDone    chan struct{}
-	winClose       chan struct{}
-	mu             sync.Mutex
-	mainMenu       oswin.MainMenu
-	closeReqFunc   func(win oswin.Window)
-	closeCleanFunc func(win oswin.Window)
-	mouseDisabled  bool
-	resettingPos   bool
+	app                *appImpl
+	window             uintptr
+	System             *vgpu.System
+	Surface            *vgpu.Surface
+	size               size.Event
+	Draw               vdraw.Drawer
+	scrnName           string // last known screen name
+	runQueue           chan funcRun
+	publish            chan struct{}
+	publishDone        chan struct{}
+	winClose           chan struct{}
+	mu                 sync.Mutex
+	mainMenu           oswin.MainMenu
+	closeReqFunc       func(win oswin.Window)
+	closeCleanFunc     func(win oswin.Window)
+	mouseDisabled      bool
+	resettingPos       bool
+	lastMouseButtonPos image.Point
+	lastMouseMovePos   image.Point
 }
 
 var _ oswin.Window = &windowImpl{}

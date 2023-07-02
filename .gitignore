@@ -17,3 +17,12 @@
 # mac thing
 .DS_Store
 
+# GoKi stores binaries in bin directories
+bin
+
+# Generated as part of girl/girl_test.go
+girl/test.png
+
+# Go workspace files
+go.work
+go.work.sum

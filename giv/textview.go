@@ -4854,17 +4854,20 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		// tv.EditDone()
 		tv.StopCursor() // make sure no cursor
 		tv.UpdateSig()
+		oswin.TheApp.HideVirtualKeyboard()
 		// fmt.Printf("lost focus: %v\n", tv.Nm)
 	case gi.FocusGot:
 		tv.SetFlag(int(TextViewFocusActive))
 		tv.EmitFocusedSignal()
 		tv.UpdateSig()
+		oswin.TheApp.ShowVirtualKeyboard(oswin.DefaultKeyboard)
 		// fmt.Printf("got focus: %v\n", tv.Nm)
 	case gi.FocusInactive:
 		tv.ClearFlag(int(TextViewFocusActive))
 		tv.StopCursor()
 		// tv.EditDone()
 		// tv.UpdateSig()
+		oswin.TheApp.HideVirtualKeyboard()
 		// fmt.Printf("focus inactive: %v\n", tv.Nm)
 	case gi.FocusActive:
 		// fmt.Printf("focus active: %v\n", tv.Nm)
@@ -4872,5 +4875,6 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		// tv.UpdateSig()
 		// todo: see about cursor
 		tv.StartCursor()
+		oswin.TheApp.ShowVirtualKeyboard(oswin.DefaultKeyboard)
 	}
 }

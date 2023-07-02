@@ -38,7 +38,7 @@ func (app *appImpl) eventLoop() {
 					}
 				case lifecycle.CrossOff:
 					log.Println("on stop")
-					// todo: on stop
+					app.stopMain()
 				}
 				switch e.Crosses(lifecycle.StageFocused) {
 				case lifecycle.CrossOn:
@@ -75,6 +75,7 @@ func (app *appImpl) eventLoop() {
 }
 
 func (w *windowImpl) touchEvent(event touch.Event) {
+	// TODO: decide whether to implement touch
 	// oevent := &otouch.Event{
 	// 	Where:    image.Point{X: int(event.X), Y: int(event.Y)},
 	// 	Sequence: otouch.Sequence(event.Sequence),
@@ -83,41 +84,56 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 	// oevent.Init()
 	// log.Println("oswin touch event", oevent.EventBase, oevent.Where, oevent.Sequence, oevent.Action)
 	// w.Send(oevent)
+
+	if event.Type == touch.TypeMove {
+		pos := image.Point{X: int(event.X), Y: int(event.Y)}
+		oevent := &omouse.DragEvent{
+			MoveEvent: omouse.MoveEvent{
+				Event: omouse.Event{
+					Where:  pos,
+					Button: omouse.Left,
+					Action: omouse.Drag,
+				},
+				From: w.lastMouseMovePos,
+			},
+			Start: w.lastMouseButtonPos,
+		}
+		w.lastMouseMovePos = pos
+		oevent.Init()
+		log.Printf("oswin mouse move event %#v", oevent)
+		w.Send(oevent)
+		return
+	}
+
 	action := omouse.Press
 	if event.Type == touch.TypeEnd {
 		action = omouse.Release
 	}
 
-	// ommvevent := &omouse.MoveEvent{
-	// 	From: image.Point{X: int(0), Y: int(0)},
-	// }
-	// ommvevent.Where = image.Point{X: int(event.X), Y: int(event.Y)}
-	// ommvevent.Action = omouse.Move
-	//
-	// ommvevent.Init()
-	// log.Println("oswin mouse move event", ommvevent.EventBase, ommvevent.Where, ommvevent.Button, ommvevent.Action)
-	// w.Send(ommvevent)
+	pos := image.Point{X: int(event.X), Y: int(event.Y)}
 
-	omevent := &omouse.Event{
-		Where:  image.Point{X: int(event.X), Y: int(event.Y)},
+	oevent := &omouse.Event{
+		Where:  pos,
 		Button: omouse.Left,
 		Action: action,
 	}
-	omevent.Init()
-	log.Println("oswin mouse event", omevent.EventBase, omevent.Where, omevent.Button, omevent.Action)
-	w.Send(omevent)
+	w.lastMouseButtonPos = pos
+	oevent.Init()
+	log.Printf("oswin mouse event %#v", oevent)
+	w.Send(oevent)
 }
 
 func (w *windowImpl) keyEvent(event key.Event) {
 	if event.Direction != key.DirRelease {
 		return
 	}
-	oevent := &okey.ChordEvent{}
-	oevent.Event = okey.Event{
-		Code:      okey.Codes(event.Code),
-		Rune:      event.Rune,
-		Modifiers: int32(event.Modifiers),
-		Action:    okey.Actions(event.Direction),
+	oevent := &okey.ChordEvent{
+		Event: okey.Event{
+			Code:      okey.Codes(event.Code),
+			Rune:      event.Rune,
+			Modifiers: int32(event.Modifiers),
+			Action:    okey.Actions(event.Direction),
+		},
 	}
 	oevent.Init()
 	log.Printf("gi event: %#v\n", oevent)

@@ -161,10 +161,12 @@ type App interface {
 	// GUI responsiveness.
 	PollEvents()
 
-	// ShowVirtualKeyboard shows a virtual keyboard
-	ShowVirtualKeyboard() // todo: add arg for type of keyboard
+	// ShowVirtualKeyboard shows a virtual keyboard of the given type.
+	// ShowVirtualKeyboard only has an effect on mobile platforms (iOS and Android).
+	ShowVirtualKeyboard(typ VirtualKeyboardTypes)
 
-	// HideVirtualKeyboard hides the virtual keyboard
+	// HideVirtualKeyboard hides the virtual keyboard.
+	// HideVirtualKeyboard only has an effect on mobile platforms (iOS and Android).
 	HideVirtualKeyboard()
 }
 
@@ -198,3 +200,19 @@ var KiT_Platforms = kit.Enums.AddEnum(PlatformsN, kit.NotBitFlag, nil)
 func (p Platforms) IsMobile() bool {
 	return p == IOS || p == Android
 }
+
+// VirtualKeyboardTypes are all of the supported virtual keyboard types for mobile platforms
+type VirtualKeyboardTypes int32
+
+const (
+	// DefaultKeyboard is the keyboard with default input style and "return" return key
+	DefaultKeyboard VirtualKeyboardTypes = iota
+	// SingleLineKeyboard is the keyboard with default input style and "Done" return key
+	SingleLineKeyboard
+	// NumberKeyboard is the keyboard with number input style and "Done" return key
+	NumberKeyboard
+
+	VirtualKeyboardTypesN
+)
+
+//go:generate stringer -type=VirtualKeyboardTypes

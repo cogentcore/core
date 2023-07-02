@@ -1567,7 +1567,11 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
 		tf.UpdateSig()
-		oswin.TheApp.ShowVirtualKeyboard()
+		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
+			oswin.TheApp.ShowVirtualKeyboard(oswin.NumberKeyboard)
+		} else {
+			oswin.TheApp.ShowVirtualKeyboard(oswin.SingleLineKeyboard)
+		}
 	case FocusInactive:
 		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDeFocused()
@@ -1576,7 +1580,11 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	case FocusActive:
 		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
-		oswin.TheApp.ShowVirtualKeyboard()
+		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
+			oswin.TheApp.ShowVirtualKeyboard(oswin.NumberKeyboard)
+		} else {
+			oswin.TheApp.ShowVirtualKeyboard(oswin.SingleLineKeyboard)
+		}
 		// tf.UpdateSig()
 		// todo: see about cursor
 	}

@@ -481,10 +481,10 @@ func (app *appImpl) Quit() {
 	app.stopMain()
 }
 
-func (app *appImpl) ShowVirtualKeyboard() {
-
+func (app *appImpl) ShowVirtualKeyboard(typ oswin.VirtualKeyboardTypes) {
+	// no-op
 }
 
 func (app *appImpl) HideVirtualKeyboard() {
-
+	// no-op
 }
