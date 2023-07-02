@@ -70,9 +70,11 @@ func Main(f func(oswin.App)) {
 	go theApp.eventLoop()
 	go func() {
 		mainCallback(theApp)
+		log.Println("main callback done")
 		theApp.stopMain()
 	}()
 	theApp.mainLoop()
+	log.Println("main loop done")
 }
 
 type funcRun struct {
@@ -125,9 +127,10 @@ func (app *appImpl) mainLoop() {
 	// SetThreadPri(1)
 	// time.Sleep(100 * time.Millisecond)
 	for {
+		log.Println("loop")
 		select {
 		case <-app.mainDone:
-			app.RunOnMain(app.destroyVk)
+			app.destroyVk()
 			return
 		case f := <-app.mainQueue:
 			f.f()
@@ -142,6 +145,8 @@ func (app *appImpl) mainLoop() {
 
 // stopMain stops the main loop and thus terminates the app
 func (app *appImpl) stopMain() {
+	log.Println("in stop main")
+	// app.RunOnMain(app.destroyVk)
 	app.mainDone <- struct{}{}
 }
 
@@ -157,15 +162,14 @@ func (app *appImpl) initVk() {
 	if err != nil {
 		log.Fatalln("oswin/driver/mobile: failed to initialize vulkan")
 	}
-	winext := vk.GetRequiredInstanceExtensions()
-	log.Printf("required exts: %#v\n", winext)
-	app.gpu = vgpu.NewGPU()
-	app.gpu.AddInstanceExt(winext...)
-	app.gpu.Config(app.name)
 }
 
 // destroyVk gets removes vulkan things (ie: when the app is closed)
 func (app *appImpl) destroyVk() {
+	log.Println("destroying vk")
+	app.mu.Lock()
+	log.Println("past mutex")
+	defer app.mu.Unlock()
 	vk.DeviceWaitIdle(app.window.Surface.Device.Device)
 	app.window.System.Destroy()
 	app.window.System = nil
@@ -197,6 +201,16 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 func (app *appImpl) newWindow(opts *oswin.NewWindowOptions, winPtr uintptr) error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
+
+	if app.window != nil {
+		return nil
+	}
+
+	winext := vk.GetRequiredInstanceExtensions()
+	log.Printf("required exts: %#v\n", winext)
+	app.gpu = vgpu.NewGPU()
+	app.gpu.AddInstanceExt(winext...)
+	app.gpu.Config(app.name)
 
 	var sf vk.Surface
 	app.window = &windowImpl{}
@@ -465,6 +479,7 @@ func (app *appImpl) QuitClean() {
 }
 
 func (app *appImpl) Quit() {
+	log.Println("IN QUIT")
 	if app.quitting {
 		return
 	}

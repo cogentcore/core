@@ -8,6 +8,7 @@ package mobile
 
 import (
 	"image"
+	"log"
 	"sync"
 
 	"github.com/goki/gi/oswin"
@@ -222,7 +223,9 @@ func (w *windowImpl) getScreenOvlp() *oswin.Screen {
 // func (w *windowImpl) refresh(gw *glfw.Window) {}
 
 func (w *windowImpl) focus(focused bool) {
+	log.Println("in focus")
 	w.mu.Lock()
+	log.Println("past mutex")
 	defer w.mu.Unlock()
 	if focused {
 		w.sendWindowEvent(window.Focus)

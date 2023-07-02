@@ -32,10 +32,12 @@ func (app *appImpl) eventLoop() {
 			case lifecycle.Event:
 				switch e.Crosses(lifecycle.StageVisible) {
 				case lifecycle.CrossOn:
-					err := app.newWindow(nil, a.Window())
-					if err != nil {
-						log.Fatalln("error creating window in lifecycle cross on:", err)
-					}
+					app.RunOnMain(func() {
+						err := app.newWindow(nil, a.Window())
+						if err != nil {
+							log.Fatalln("error creating window in lifecycle cross on:", err)
+						}
+					})
 				case lifecycle.CrossOff:
 					log.Println("on stop")
 					app.stopMain()
@@ -43,6 +45,9 @@ func (app *appImpl) eventLoop() {
 				switch e.Crosses(lifecycle.StageFocused) {
 				case lifecycle.CrossOn:
 					app.window.focus(true)
+					log.Println("focus, window uintptr", app.window.window)
+					// app.window.sendWindowEvent(window.Paint)
+					// a.Publish()
 				case lifecycle.CrossOff:
 					app.window.focus(false)
 				}
@@ -56,7 +61,10 @@ func (app *appImpl) eventLoop() {
 				oswin.InitScreenLogicalDPIFunc()
 				app.window.LogDPI = app.screens[0].LogicalDPI
 				app.window.sendWindowEvent(window.Resize)
+				// app.window.sendWindowEvent(window.ScreenUpdate)
 				app.window.sendWindowEvent(window.Paint)
+				// app.window.sendWindowEvent(window.Paint)
+				// a.Publish()
 			case paint.Event:
 				log.Println("paint event")
 				app.window.sendWindowEvent(window.Paint)
@@ -146,5 +154,6 @@ func (w *windowImpl) sendWindowEvent(act window.Actions) {
 		Action: act,
 	}
 	winEv.Init()
+	log.Printf("Sent window event %#v\n", winEv)
 	w.Send(&winEv)
 }

@@ -1807,6 +1807,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				WinGeomMgr.RecordPref(w)
 			}
 		case window.Focus:
+			log.Println("GOGI WINDOW FOCUS")
 			StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 			if !w.HasFlag(int(WinFlagGotFocus)) {
 				w.SetFlag(int(WinFlagGotFocus))
