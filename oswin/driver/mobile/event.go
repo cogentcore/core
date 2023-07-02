@@ -10,10 +10,12 @@ import (
 	"image"
 	"log"
 
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	okey "github.com/goki/gi/oswin/key"
 	omouse "github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/ki/bitflag"
 	mapp "github.com/goki/mobile/app"
 	"github.com/goki/mobile/event/key"
 	"github.com/goki/mobile/event/lifecycle"
@@ -37,6 +39,12 @@ func (app *appImpl) eventLoop() {
 						if err != nil {
 							log.Fatalln("error creating window in lifecycle cross on:", err)
 						}
+						bitflag.SetAtomic(&app.window.Flag, int(oswin.Focus))
+						bitflag.SetAtomic(&app.window.Flag, int(gi.FullReRender))
+						app.window.sendWindowEvent(window.Paint)
+						app.window.sendWindowEvent(window.ScreenUpdate)
+						app.window.sendWindowEvent(window.Resize)
+						a.Publish()
 					})
 				case lifecycle.CrossOff:
 					log.Println("on stop")
@@ -49,7 +57,7 @@ func (app *appImpl) eventLoop() {
 					// app.window.sendWindowEvent(window.Paint)
 					// a.Publish()
 				case lifecycle.CrossOff:
-					app.window.focus(false)
+					// app.window.focus(false)
 				}
 			case size.Event:
 				log.Println("size event", e.Size())
@@ -66,9 +74,11 @@ func (app *appImpl) eventLoop() {
 				// app.window.sendWindowEvent(window.Paint)
 				// a.Publish()
 			case paint.Event:
+				app.mu.Lock()
 				log.Println("paint event")
 				app.window.sendWindowEvent(window.Paint)
 				a.Publish()
+				app.mu.Unlock()
 			case touch.Event:
 				log.Println("touch event", e)
 				app.window.touchEvent(e)

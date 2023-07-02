@@ -1547,12 +1547,15 @@ func (w *Window) PollEvents() {
 // other state etc (popups, etc).
 func (w *Window) EventLoop() {
 	for {
+		log.Println("Gi Window Event Loop")
 		if w.HasFlag(int(WinFlagStopEventLoop)) {
+			log.Println("BREAK: Gi Window Event Loop")
 			w.ClearFlag(int(WinFlagStopEventLoop))
 			break
 		}
 		evi := w.OSWin.NextEvent()
 		if w.HasFlag(int(WinFlagStopEventLoop)) {
+			log.Println("BREAK: Gi Window Event Loop")
 			w.ClearFlag(int(WinFlagStopEventLoop))
 			break
 		}

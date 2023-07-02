@@ -146,8 +146,8 @@ func (app *appImpl) mainLoop() {
 // stopMain stops the main loop and thus terminates the app
 func (app *appImpl) stopMain() {
 	log.Println("in stop main")
-	// app.RunOnMain(app.destroyVk)
-	app.mainDone <- struct{}{}
+	app.RunOnMain(app.destroyVk)
+	// app.mainDone <- struct{}{}
 }
 
 // initVk initializes vulkan things
@@ -162,6 +162,12 @@ func (app *appImpl) initVk() {
 	if err != nil {
 		log.Fatalln("oswin/driver/mobile: failed to initialize vulkan")
 	}
+
+	winext := vk.GetRequiredInstanceExtensions()
+	log.Printf("required exts: %#v\n", winext)
+	app.gpu = vgpu.NewGPU()
+	app.gpu.AddInstanceExt(winext...)
+	app.gpu.Config(app.name)
 }
 
 // destroyVk gets removes vulkan things (ie: when the app is closed)
@@ -171,12 +177,15 @@ func (app *appImpl) destroyVk() {
 	log.Println("past mutex")
 	defer app.mu.Unlock()
 	vk.DeviceWaitIdle(app.window.Surface.Device.Device)
-	app.window.System.Destroy()
-	app.window.System = nil
+	app.window.Draw.Destroy()
+	// app.window.Draw = nil
+	// app.window.Draw = vdraw.Drawer{}
+	// app.window.System.Destroy()
+	// app.window.System = nil
 	app.window.Surface.Destroy()
-	app.window = nil
-	app.gpu.Destroy()
-	vgpu.Terminate()
+	// app.window = nil
+	// app.gpu.Destroy()
+	// vgpu.Terminate()
 }
 
 ////////////////////////////////////////////////////////
@@ -202,19 +211,11 @@ func (app *appImpl) newWindow(opts *oswin.NewWindowOptions, winPtr uintptr) erro
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
-	if app.window != nil {
-		return nil
-	}
-
-	winext := vk.GetRequiredInstanceExtensions()
-	log.Printf("required exts: %#v\n", winext)
-	app.gpu = vgpu.NewGPU()
-	app.gpu.AddInstanceExt(winext...)
-	app.gpu.Config(app.name)
-
 	var sf vk.Surface
-	app.window = &windowImpl{}
-	app.window.app = app
+	if app.window == nil {
+		app.window = &windowImpl{}
+		app.window.app = app
+	}
 	log.Println("in NewWindow", app.gpu.Instance, winPtr, &sf)
 	ret := vk.CreateWindowSurface(app.gpu.Instance, winPtr, nil, &sf)
 	if err := vk.Error(ret); err != nil {
@@ -228,6 +229,7 @@ func (app *appImpl) newWindow(opts *oswin.NewWindowOptions, winPtr uintptr) erro
 	app.window.System = app.gpu.NewGraphicsSystem(app.name, &app.window.Surface.Device)
 	app.window.System.ConfigRender(&app.window.Surface.Format, vgpu.UndefType)
 	app.window.Surface.SetRender(&app.window.System.Render)
+	// app.window.System.Mem.Vars.NDescs = 16
 	app.window.System.Config()
 
 	app.window.Draw = vdraw.Drawer{
