@@ -258,7 +258,6 @@ func (app *appImpl) getScreen() {
 	physX, physY := units.NewPt(float32(w.size.WidthPt)), units.NewPt(float32(w.size.HeightPt))
 	physX.Convert(units.Mm, &units.Context{})
 	physY.Convert(units.Mm, &units.Context{})
-	w.PhysDPI = 36 * w.size.PixelsPerPt
 	fmt.Println("pixels per pt", w.size.PixelsPerPt)
 	sc := &oswin.Screen{
 		ScreenNumber: 0,
@@ -270,6 +269,9 @@ func (app *appImpl) getScreen() {
 
 		Orientation: oswin.ScreenOrientation(w.size.Orientation),
 	}
+	w.PhysDPI = 36 * w.size.PixelsPerPt
+	w.PxSize = w.size.Size()
+	w.WnSize = w.PxSize
 	app.setScreen(sc)
 }
 

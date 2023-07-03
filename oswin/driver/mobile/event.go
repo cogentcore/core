@@ -39,10 +39,10 @@ func (app *appImpl) eventLoop() {
 							log.Fatalln("error creating window in lifecycle cross on:", err)
 						}
 						bitflag.SetAtomic(&app.window.Flag, int(oswin.Focus))
+						app.window.sendWindowEvent(window.Resize)
 						// bitflag.SetAtomic(&app.window.Flag, int(gi.FullReRender))
 						// app.window.sendWindowEvent(window.Paint)
 						// app.window.sendWindowEvent(window.ScreenUpdate)
-						// app.window.sendWindowEvent(window.Resize)
 						// a.Publish()
 					})
 				case lifecycle.CrossOff:
@@ -67,9 +67,9 @@ func (app *appImpl) eventLoop() {
 				app.mu.Unlock()
 				oswin.InitScreenLogicalDPIFunc()
 				app.window.LogDPI = app.screens[0].LogicalDPI
-				app.window.sendWindowEvent(window.Resize)
-				// app.window.sendWindowEvent(window.ScreenUpdate)
-				app.window.sendWindowEvent(window.Paint)
+				// app.window.sendWindowEvent(window.Resize)
+				app.window.sendWindowEvent(window.ScreenUpdate)
+				// app.window.sendWindowEvent(window.Paint)
 				// app.window.sendWindowEvent(window.Paint)
 				// a.Publish()
 			case paint.Event:

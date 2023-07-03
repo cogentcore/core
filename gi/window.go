@@ -729,12 +729,17 @@ func (w *Window) Resized(sz image.Point) {
 	curSz := w.Viewport.Geom.Size
 	if curSz == sz {
 		if WinEventTrace {
-			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Nm, curSz)
+			fmt.Printf("Win: %v not skipped same-size Resized: %v\n", w.Nm, curSz)
 		}
 		return
 	}
+	drw := w.OSWin.Drawer()
+	if drw.Impl.MaxTextures != vgpu.MaxTexturesPerSet*3 { // this is essential after hibernate
+		drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
+	}
 	w.FocusInactivate()
 	w.InactivateAllSprites()
+	w.ResetUpdateRegions()
 	w.UpMu.Lock()
 	if !w.IsVisible() {
 		if WinEventTrace {
@@ -1833,11 +1838,12 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.ClearFlag(int(WinFlagGotFocus))
 			w.SendWinFocusEvent(window.DeFocus)
 		case window.ScreenUpdate:
-			WinGeomMgr.AbortSave() // anything just prior to this is sus
-			if !oswin.TheApp.NoScreens() {
-				Prefs.UpdateAll()
-				WinGeomMgr.RestoreAll()
-			}
+			w.Resized(w.OSWin.Size())
+			// WinGeomMgr.AbortSave() // anything just prior to this is sus
+			// if !oswin.TheApp.NoScreens() {
+			// 	Prefs.UpdateAll()
+			// 	WinGeomMgr.RestoreAll()
+			// }
 		}
 		return false // don't do anything else!
 	case *mouse.DragEvent:
