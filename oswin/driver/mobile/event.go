@@ -40,38 +40,38 @@ func (app *appImpl) eventLoop() {
 						}
 						bitflag.SetAtomic(&app.window.Flag, int(oswin.Focus))
 						app.window.sendWindowEvent(window.Resize)
-						// bitflag.SetAtomic(&app.window.Flag, int(gi.FullReRender))
-						// app.window.sendWindowEvent(window.Paint)
-						// app.window.sendWindowEvent(window.ScreenUpdate)
-						// a.Publish()
 					})
 				case lifecycle.CrossOff:
 					log.Println("on stop")
+					// we need to set the size of the window to 0 so that it detects a size difference
+					// and lets the size event go through when we come back later
+					app.window.SetSize(image.Point{})
+					app.window.sendWindowEvent(window.Minimize)
+
+					app.RunOnMain(app.destroyVk)
 					app.stopMain()
 				}
 				switch e.Crosses(lifecycle.StageFocused) {
 				case lifecycle.CrossOn:
 					app.window.focus(true)
-					log.Println("focus, window uintptr", app.window.window)
-					// app.window.sendWindowEvent(window.Paint)
-					// a.Publish()
 				case lifecycle.CrossOff:
-					// app.window.focus(false)
+					app.window.focus(false)
+				}
+				switch e.Crosses(lifecycle.StageAlive) {
+				case lifecycle.CrossOff:
+					app.RunOnMain(app.fullDestroyVk)
 				}
 			case size.Event:
 				log.Println("size event", e.Size())
 				app.window.size = e
 				app.window.SetSize(e.Size())
+				app.window.SetPos(image.Point{100, 100})
 				app.mu.Lock()
 				app.getScreen()
 				app.mu.Unlock()
 				oswin.InitScreenLogicalDPIFunc()
 				app.window.LogDPI = app.screens[0].LogicalDPI
-				// app.window.sendWindowEvent(window.Resize)
 				app.window.sendWindowEvent(window.ScreenUpdate)
-				// app.window.sendWindowEvent(window.Paint)
-				// app.window.sendWindowEvent(window.Paint)
-				// a.Publish()
 			case paint.Event:
 				app.mu.Lock()
 				log.Println("paint event")

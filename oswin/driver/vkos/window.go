@@ -239,6 +239,10 @@ func (w *windowImpl) Position() image.Point {
 	return ps
 }
 
+func (w *windowImpl) Insets() (top, bottom, left, right int) {
+	return 0, 0, 0, 0
+}
+
 func (w *windowImpl) PhysicalDPI() float32 {
 	w.mu.Lock()
 	defer w.mu.Unlock()

@@ -69,11 +69,11 @@ func (w *windowImpl) Drawer() *vdraw.Drawer {
 }
 
 func (w *windowImpl) IsClosed() bool {
-	return false
+	return w.app.gpu == nil
 }
 
 func (w *windowImpl) IsVisible() bool {
-	return true
+	return w.Surface != nil
 }
 
 func (w *windowImpl) Activate() bool {
@@ -134,6 +134,11 @@ func (w *windowImpl) WinSize() image.Point {
 func (w *windowImpl) Position() image.Point {
 	return image.Point{}
 }
+
+func (w *windowImpl) Insets() (top, bottom, left, right int) {
+	return w.size.InsetTopPx, w.size.InsetBottomPx, w.size.InsetLeftPx, w.size.InsetRightPx
+}
+
 func (w *windowImpl) PhysicalDPI() float32 {
 	w.mu.Lock()
 	defer w.mu.Unlock()

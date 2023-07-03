@@ -145,9 +145,9 @@ func (app *appImpl) mainLoop() {
 
 // stopMain stops the main loop and thus terminates the app
 func (app *appImpl) stopMain() {
-	log.Println("in stop main")
-	app.RunOnMain(app.destroyVk)
-	// app.mainDone <- struct{}{}
+	// log.Println("in stop main")
+	// app.RunOnMain(app.destroyVk)
+	app.mainDone <- struct{}{}
 }
 
 // initVk initializes vulkan things
@@ -170,22 +170,29 @@ func (app *appImpl) initVk() {
 	app.gpu.Config(app.name)
 }
 
-// destroyVk gets removes vulkan things (ie: when the app is closed)
+// destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
 func (app *appImpl) destroyVk() {
 	log.Println("destroying vk")
 	app.mu.Lock()
-	log.Println("past mutex")
 	defer app.mu.Unlock()
 	vk.DeviceWaitIdle(app.window.Surface.Device.Device)
 	app.window.Draw.Destroy()
-	// app.window.Draw = nil
-	// app.window.Draw = vdraw.Drawer{}
-	// app.window.System.Destroy()
-	// app.window.System = nil
 	app.window.Surface.Destroy()
-	// app.window = nil
-	// app.gpu.Destroy()
-	// vgpu.Terminate()
+	app.window.Surface = nil
+}
+
+// fullDestroyVk destroys all vulkan things for when the app is fully quit
+func (app *appImpl) fullDestroyVk() {
+	log.Println("full destroying vk")
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	vk.DeviceWaitIdle(app.window.Surface.Device.Device)
+	app.window.Draw.Destroy()
+	app.window.Surface.Destroy()
+	app.window.Surface = nil
+	app.window = nil
+	app.gpu.Destroy()
+	vgpu.Terminate()
 }
 
 ////////////////////////////////////////////////////////

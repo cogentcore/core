@@ -723,13 +723,15 @@ func StackAll() []byte {
 
 // Resized updates internal buffers after a window has been resized.
 func (w *Window) Resized(sz image.Point) {
+	log.Println("Gi: Win: Got resize event to", sz, "Window Visible:", w.IsVisible(), "Current Size", w.Viewport.Geom.Size)
 	if !w.IsVisible() {
 		return
 	}
 	curSz := w.Viewport.Geom.Size
+
 	if curSz == sz {
 		if WinEventTrace {
-			fmt.Printf("Win: %v not skipped same-size Resized: %v\n", w.Nm, curSz)
+			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Nm, curSz)
 		}
 		return
 	}
@@ -739,7 +741,6 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	w.FocusInactivate()
 	w.InactivateAllSprites()
-	w.ResetUpdateRegions()
 	w.UpMu.Lock()
 	if !w.IsVisible() {
 		if WinEventTrace {
@@ -1094,6 +1095,8 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
 func (w *Window) UploadAllViewports() {
+	top, bottom, left, right := w.OSWin.Insets()
+	log.Println("window insets", top, bottom, left, right)
 	if !w.IsVisible() {
 		return
 	}
@@ -1779,6 +1782,12 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.Closed()
 			w.SetFlag(int(WinFlagStopEventLoop))
 			return false
+		case window.Minimize:
+			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
+			// and lets the size event go through when we come back later
+			if oswin.TheApp.Platform().IsMobile() {
+				w.Viewport.Geom.Size = image.Point{}
+			}
 		case window.Paint:
 			// fmt.Printf("got paint event for window %v \n", w.Nm)
 			w.SetFlag(int(WinFlagGotPaint))
@@ -1815,7 +1824,6 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				WinGeomMgr.RecordPref(w)
 			}
 		case window.Focus:
-			log.Println("GOGI WINDOW FOCUS")
 			StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 			if !w.HasFlag(int(WinFlagGotFocus)) {
 				w.SetFlag(int(WinFlagGotFocus))
@@ -1838,12 +1846,12 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.ClearFlag(int(WinFlagGotFocus))
 			w.SendWinFocusEvent(window.DeFocus)
 		case window.ScreenUpdate:
+			WinGeomMgr.AbortSave() // anything just prior to this is sus
 			w.Resized(w.OSWin.Size())
-			// WinGeomMgr.AbortSave() // anything just prior to this is sus
-			// if !oswin.TheApp.NoScreens() {
-			// 	Prefs.UpdateAll()
-			// 	WinGeomMgr.RestoreAll()
-			// }
+			if !oswin.TheApp.NoScreens() {
+				Prefs.UpdateAll()
+				WinGeomMgr.RestoreAll()
+			}
 		}
 		return false // don't do anything else!
 	case *mouse.DragEvent:
