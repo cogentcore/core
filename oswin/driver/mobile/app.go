@@ -279,29 +279,10 @@ func (app *appImpl) getScreen() {
 	w.PhysDPI = 36 * w.size.PixelsPerPt
 	w.PxSize = w.size.Size()
 	w.WnSize = w.PxSize
+	w.RenderSize = w.RenderArea().Size()
+	log.Println("px size", w.PxSize)
 	app.setScreen(sc)
 }
-
-// func (app *appImpl) getInitialScreen() {
-// 	sz := app.window.Surface.Format.Size
-// 	physX, physY := units.NewPt(float32(sz.X)), units.NewPt(float32(sz.Y))
-// 	physX.Convert(units.Mm, &units.Context{})
-// 	physY.Convert(units.Mm, &units.Context{})
-// 	app.window.PhysDPI = 36 * 6.0
-// 	sc := &oswin.Screen{
-// 		ScreenNumber: 0,
-// 		// Geometry:     w.size.Bounds(),
-// 		// PixSize:      w.size.Size(),
-// 		PixSize:      sz,
-// 		PhysicalSize: image.Point{X: int(physX.Val), Y: int(physY.Val)},
-// 		PhysicalDPI:  36 * 6.0,
-// 		LogicalDPI:   2.0,
-// 		// Orientation: oswin.ScreenOrientation(w.size.Orientation),
-// 	}
-// 	app.setScreen(sc)
-// 	oswin.InitScreenLogicalDPIFunc()
-// 	app.window.LogDPI = sc.LogicalDPI
-// }
 
 func (app *appImpl) DeleteWin(w *windowImpl) {
 	return

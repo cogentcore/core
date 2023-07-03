@@ -759,6 +759,13 @@ func (w *Window) Resized(sz image.Point) {
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
+	// w.BBoxMu.Lock()
+	// w.BBox = w.OSWin.RenderArea()
+	// w.VpBBox = w.BBox
+	// w.WinBBox = w.BBox
+	// w.ObjBBox = w.BBox
+	// w.BBoxMu.Unlock()
+	// log.Println("window bbox", w.BBox)
 	WinGeomMgr.RecordPref(w)
 	w.UpMu.Unlock()
 	w.FullReRender()
@@ -1095,8 +1102,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
 func (w *Window) UploadAllViewports() {
-	top, bottom, left, right := w.OSWin.Insets()
-	log.Println("window insets", top, bottom, left, right)
+	log.Println("window render area", w.OSWin.RenderArea())
 	if !w.IsVisible() {
 		return
 	}
@@ -1244,7 +1250,7 @@ func (w *Window) Publish() {
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
-	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
+	drw.Scale(0, 0, w.OSWin.RenderArea(), image.ZR, draw.Src, vgpu.NoFlipY)
 	if len(w.UpdtRegs.BeforeDir) > 0 {
 		drw.UseTextureSet(1)
 		w.UpdtRegs.DrawImages(drw, true) // before direct
@@ -1783,6 +1789,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.SetFlag(int(WinFlagStopEventLoop))
 			return false
 		case window.Minimize:
+			log.Println("got minimize event")
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			if oswin.TheApp.Platform().IsMobile() {
@@ -1846,12 +1853,14 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.ClearFlag(int(WinFlagGotFocus))
 			w.SendWinFocusEvent(window.DeFocus)
 		case window.ScreenUpdate:
-			WinGeomMgr.AbortSave() // anything just prior to this is sus
 			w.Resized(w.OSWin.Size())
-			if !oswin.TheApp.NoScreens() {
-				Prefs.UpdateAll()
-				WinGeomMgr.RestoreAll()
-			}
+			// TODO: figure out how to restore this stuff without breaking window size on mobile
+
+			// WinGeomMgr.AbortSave() // anything just prior to this is sus
+			// if !oswin.TheApp.NoScreens() {
+			// 	Prefs.UpdateAll()
+			// 	WinGeomMgr.RestoreAll()
+			// }
 		}
 		return false // don't do anything else!
 	case *mouse.DragEvent:

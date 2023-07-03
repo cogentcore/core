@@ -43,6 +43,7 @@ type windowImpl struct {
 	resettingPos       bool
 	lastMouseButtonPos image.Point
 	lastMouseMovePos   image.Point
+	RenderSize         image.Point
 }
 
 var _ oswin.Window = &windowImpl{}
@@ -124,19 +125,21 @@ func (w *windowImpl) Screen() *oswin.Screen {
 }
 
 func (w *windowImpl) Size() image.Point {
+	log.Println("window: size =", w.PxSize)
 	return w.PxSize
 }
 
 func (w *windowImpl) WinSize() image.Point {
-	return w.WnSize
+	return w.PxSize
 }
 
 func (w *windowImpl) Position() image.Point {
 	return image.Point{}
 }
 
-func (w *windowImpl) Insets() (top, bottom, left, right int) {
-	return w.size.InsetTopPx, w.size.InsetBottomPx, w.size.InsetLeftPx, w.size.InsetRightPx
+func (w *windowImpl) RenderArea() image.Rectangle {
+	log.Println("window size", w.PxSize)
+	return image.Rect(w.size.InsetLeftPx, w.size.InsetTopPx, w.PxSize.X-w.size.InsetRightPx, w.PxSize.Y-w.size.InsetBottomPx)
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {

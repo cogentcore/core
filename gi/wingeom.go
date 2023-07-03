@@ -225,7 +225,7 @@ func (mgr *WinGeomPrefsMgr) RecordPref(win *Window) {
 	if !win.IsVisible() {
 		return
 	}
-	wsz := win.OSWin.Size()
+	wsz := win.OSWin.RenderArea().Size()
 	if wsz == image.ZP {
 		if WinGeomTrace {
 			log.Printf("WinGeomPrefs: RecordPref: NOT storing null size for win: %v\n", win.Nm)

@@ -239,8 +239,8 @@ func (w *windowImpl) Position() image.Point {
 	return ps
 }
 
-func (w *windowImpl) Insets() (top, bottom, left, right int) {
-	return 0, 0, 0, 0
+func (w *windowImpl) RenderArea() image.Rectangle {
+	return image.Rectangle{Max: w.Size()}
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {

@@ -14,7 +14,6 @@ import (
 	okey "github.com/goki/gi/oswin/key"
 	omouse "github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/window"
-	"github.com/goki/ki/bitflag"
 	mapp "github.com/goki/mobile/app"
 	"github.com/goki/mobile/event/key"
 	"github.com/goki/mobile/event/lifecycle"
@@ -38,8 +37,6 @@ func (app *appImpl) eventLoop() {
 						if err != nil {
 							log.Fatalln("error creating window in lifecycle cross on:", err)
 						}
-						bitflag.SetAtomic(&app.window.Flag, int(oswin.Focus))
-						app.window.sendWindowEvent(window.Resize)
 					})
 				case lifecycle.CrossOff:
 					log.Println("on stop")
@@ -64,8 +61,6 @@ func (app *appImpl) eventLoop() {
 			case size.Event:
 				log.Println("size event", e.Size())
 				app.window.size = e
-				app.window.SetSize(e.Size())
-				app.window.SetPos(image.Point{100, 100})
 				app.mu.Lock()
 				app.getScreen()
 				app.mu.Unlock()
@@ -107,7 +102,7 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 		oevent := &omouse.DragEvent{
 			MoveEvent: omouse.MoveEvent{
 				Event: omouse.Event{
-					Where:  pos,
+					Where:  pos.Sub(w.RenderArea().Min),
 					Button: omouse.Left,
 					Action: omouse.Drag,
 				},
@@ -130,7 +125,7 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 	pos := image.Point{X: int(event.X), Y: int(event.Y)}
 
 	oevent := &omouse.Event{
-		Where:  pos,
+		Where:  pos.Sub(w.RenderArea().Min),
 		Button: omouse.Left,
 		Action: action,
 	}

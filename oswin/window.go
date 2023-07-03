@@ -63,10 +63,10 @@ type Window interface {
 	// underlying screen, in OS-specific window manager coordinates.
 	Position() image.Point
 
-	// Insets returns the size of any border area in pixels.
-	// These values define how far in from the screen edge any controls should be drawn.
-	// The inset can be caused by status bars, button overlays or devices cutouts.
-	Insets() (top, bottom, left, right int)
+	// RenderArea returns the area in pixels in which it is safe to render.
+	// This value may be reduced by insets on the window, particularly on mobile platforms.
+	// These insets can be caused by status bars, button overlays, or devices cutouts.
+	RenderArea() image.Rectangle
 
 	// SetWinSize sets the size of the window, in OS-specific window manager
 	// units that may not include any high DPI factors (DevPixRatio)
