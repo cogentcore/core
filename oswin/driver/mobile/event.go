@@ -49,7 +49,6 @@ func (app *appImpl) eventLoop() {
 					app.window.sendWindowEvent(window.Minimize)
 
 					app.RunOnMain(app.destroyVk)
-					app.stopMain()
 				}
 				switch e.Crosses(lifecycle.StageFocused) {
 				case lifecycle.CrossOn:
@@ -60,6 +59,7 @@ func (app *appImpl) eventLoop() {
 				switch e.Crosses(lifecycle.StageAlive) {
 				case lifecycle.CrossOff:
 					app.RunOnMain(app.fullDestroyVk)
+					app.stopMain()
 				}
 			case size.Event:
 				log.Println("size event", e.Size())
