@@ -7,6 +7,7 @@ package gi3d
 import (
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -58,6 +59,16 @@ var Decoders = map[string]Decoder{}
 //
 //	must have same name as .obj, or a default material is used.
 func DecodeFile(fname string) (Decoder, error) {
+	return DecodeFileFS(os.DirFS("."), fname)
+}
+
+// DecodeFileFS decodes the given file from the given filesystem using a decoder based on the file
+// extension.  Returns decoder instance with full decoded state.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+func DecodeFileFS(fsys fs.FS, fname string) (Decoder, error) {
 	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
 	if !has {
@@ -68,7 +79,7 @@ func DecodeFile(fname string) (Decoder, error) {
 	nf := len(files)
 
 	var err error
-	fs := make([]*os.File, nf)
+	fs := make([]fs.File, nf)
 	rs := make([]io.Reader, nf)
 	defer func() {
 		for _, fi := range fs {
@@ -79,7 +90,7 @@ func DecodeFile(fname string) (Decoder, error) {
 	}()
 
 	for i, f := range files {
-		fs[i], err = os.Open(f)
+		fs[i], err = fsys.Open(f)
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +110,17 @@ func DecodeFile(fname string) (Decoder, error) {
 //
 //	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenObj(fname string, gp *Group) error {
-	dec, err := DecodeFile(fname)
+	return sc.OpenObjFS(os.DirFS("."), fname, gp)
+}
+
+// OpenObjFS opens object(s) from given file in the given filesystem into given group in scene,
+// using a decoder based on the file extension.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+func (sc *Scene) OpenObjFS(fsys fs.FS, fname string, gp *Group) error {
+	dec, err := DecodeFileFS(fsys, fname)
 	if err != nil {
 		return err
 	}
@@ -117,7 +138,17 @@ func (sc *Scene) OpenObj(fname string, gp *Group) error {
 //
 //	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenNewObj(fname string, parent ki.Ki) (*Group, error) {
-	dec, err := DecodeFile(fname)
+	return sc.OpenNewObjFS(os.DirFS("."), fname, parent)
+}
+
+// OpenNewObjFS opens object(s) from given file in the given filesystem into a new group
+// under given parent, using a decoder based on the file extension.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+func (sc *Scene) OpenNewObjFS(fsys fs.FS, fname string, parent ki.Ki) (*Group, error) {
+	dec, err := DecodeFileFS(fsys, fname)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +172,19 @@ func (sc *Scene) OpenNewObj(fname string, parent ki.Ki) (*Group, error) {
 //
 //	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
-	dec, err := DecodeFile(fname)
+	return sc.OpenToLibraryFS(os.DirFS("."), fname, libnm)
+}
+
+// OpenToLibraryFS opens object(s) from given file in the given filesystem into the scene's Library
+// using a decoder based on the file extension.  The library key name
+// must be unique, and is given by libnm -- if empty, then the filename (only)
+// without extension is used.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+func (sc *Scene) OpenToLibraryFS(fsys fs.FS, fname string, libnm string) (*Group, error) {
+	dec, err := DecodeFileFS(fsys, fname)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +198,7 @@ func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
 	return gp, nil
 }
 
-// OpenScene opens a scene from given file, using a decoder based on
+// OpenScene opens a scene from the given file, using a decoder based on
 // the file extension in first file name.
 // Supported formats include:
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
@@ -164,7 +207,19 @@ func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
 //	Does not support full scene data so only objects are loaded
 //	into a new group in scene.
 func (sc *Scene) OpenScene(fname string) error {
-	dec, err := DecodeFile(fname)
+	return sc.OpenSceneFS(os.DirFS("."), fname)
+}
+
+// OpenSceneFS opens a scene from the given file in the given filesystem, using a decoder based on
+// the file extension in first file name.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+//	Does not support full scene data so only objects are loaded
+//	into a new group in scene.
+func (sc *Scene) OpenSceneFS(fsys fs.FS, fname string) error {
+	dec, err := DecodeFileFS(fsys, fname)
 	if err != nil {
 		return err
 	}

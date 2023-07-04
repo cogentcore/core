@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// TODO: support text2d on mobile
-
-//go:build !(android || ios)
-
 package gi3d
 
 import (
@@ -16,11 +12,11 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"github.com/goki/vgpu/vgpu"
 )
 
 // Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.
@@ -149,7 +145,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			tx.SetImage(img)
 			txt.Mat.SetTexture(sc, tx)
 		} else {
-			if vkos.VkOsDebug {
+			if vgpu.Debug {
 				fmt.Printf("gi3d.Text2D: error: texture name conflict: %s\n", txname)
 			}
 			txt.Mat.SetTexture(sc, tx)

@@ -5,6 +5,8 @@
 package main
 
 import (
+	"embed"
+	"log"
 	"math"
 	"time"
 
@@ -28,6 +30,9 @@ func main() {
 		mainrun()
 	})
 }
+
+//go:embed *
+var content embed.FS
 
 // Anim has control for animating
 type Anim struct {
@@ -247,24 +252,24 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sph.Mat.Color.SetName("orange")
 	sph.Mat.Color.A = 200
 
-	// // Good strategy for objects if used in multiple places is to load
-	// // into library, then add from there.
-	// lgo, err := sc.OpenToLibrary("gopher.obj", "")
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	// lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
+	// Good strategy for objects if used in multiple places is to load
+	// into library, then add from there.
+	lgo, err := sc.OpenToLibraryFS(content, "gopher.obj", "")
+	if err != nil {
+		log.Println(err)
+	}
+	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
-	// gogp := gi3d.AddNewGroup(sc, sc, "go-group")
+	gogp := gi3d.AddNewGroup(sc, sc, "go-group")
 
-	// bgo, _ := sc.AddFmLibrary("gopher", gogp)
-	// bgo.Pose.Scale.Set(.5, .5, .5)
-	// bgo.Pose.Pos.Set(1.4, -2.5, 0)
-	// bgo.Pose.SetAxisRotation(0, 1, 0, -160)
+	bgo, _ := sc.AddFmLibrary("gopher", gogp)
+	bgo.Pose.Scale.Set(.5, .5, .5)
+	bgo.Pose.Pos.Set(1.4, -2.5, 0)
+	bgo.Pose.SetAxisRotation(0, 1, 0, -160)
 
-	// sgo, _ := sc.AddFmLibrary("gopher", gogp)
-	// sgo.Pose.Pos.Set(-1.5, -2, 0)
-	// sgo.Pose.Scale.Set(.2, .2, .2)
+	sgo, _ := sc.AddFmLibrary("gopher", gogp)
+	sgo.Pose.Pos.Set(-1.5, -2, 0)
+	sgo.Pose.Scale.Set(.2, .2, .2)
 
 	trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
 	trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
@@ -281,21 +286,21 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, -5, 0)
 	floor.Mat.Color.SetName("tan")
-	// // floor.Mat.Emissive.SetName("brown")
-	// floor.Mat.Bright = 2 // .5 for wood / brown
+	// floor.Mat.Emissive.SetName("brown")
+	floor.Mat.Bright = 2 // .5 for wood / brown
 	// floor.Mat.SetTexture(sc, grtx)
 	// floor.Mat.Tiling.Repeat.Set(40, 40)
 	// floor.SetInactive() // not selectable
 
-	// txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
-	// // 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
-	// // txt.SetProp("background-color", "white")
-	// txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
-	// // txt.SetProp("margin", units.NewPt(4)) // default is 2 px
-	// // txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
-	// txt.SetProp("text-align", gist.AlignLeft) // gi.AlignCenter)
-	// txt.Pose.Scale.SetScalar(0.2)
-	// txt.Pose.Pos.Set(0, 2.2, 0)
+	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+	// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
+	// txt.SetProp("background-color", "white")
+	txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
+	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
+	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
+	txt.SetProp("text-align", gist.AlignLeft) // gi.AlignCenter)
+	txt.Pose.Scale.SetScalar(0.2)
+	txt.Pose.Pos.Set(0, 2.2, 0)
 
 	tcg := gi3d.AddNewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
 	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
