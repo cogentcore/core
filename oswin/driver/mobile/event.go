@@ -102,7 +102,7 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 		oevent := &omouse.DragEvent{
 			MoveEvent: omouse.MoveEvent{
 				Event: omouse.Event{
-					Where:  pos.Sub(w.RenderArea().Min),
+					Where:  pos,
 					Button: omouse.Left,
 					Action: omouse.Drag,
 				},
@@ -125,7 +125,7 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 	pos := image.Point{X: int(event.X), Y: int(event.Y)}
 
 	oevent := &omouse.Event{
-		Where:  pos.Sub(w.RenderArea().Min),
+		Where:  pos,
 		Button: omouse.Left,
 		Action: action,
 	}

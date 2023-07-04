@@ -279,8 +279,6 @@ func (app *appImpl) getScreen() {
 	w.PhysDPI = 36 * w.size.PixelsPerPt
 	w.PxSize = w.size.Size()
 	w.WnSize = w.PxSize
-	w.RenderSize = w.RenderArea().Size()
-	log.Println("px size", w.PxSize)
 	app.setScreen(sc)
 }
 

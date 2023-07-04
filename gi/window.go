@@ -496,6 +496,7 @@ func (w *Window) ConfigVLay() {
 	if !vp.HasChildren() {
 		mainVlay := vp.AddNewChild(KiT_Layout, "main-vlay")
 		_ = mainVlay
+		// TODO: set padding/size based on render area size
 		// mainVlay.SetProp("padding", "20px")
 	}
 	w.MasterVLay = vp.Child(0).Embed(KiT_Layout).(*Layout)
@@ -726,14 +727,10 @@ func StackAll() []byte {
 
 // Resized updates internal buffers after a window has been resized.
 func (w *Window) Resized(sz image.Point) {
-	log.Println("Gi: Win: Got resize event to", sz, "Window Visible:", w.IsVisible(), "Current Size", w.Viewport.Geom.Size)
 	if !w.IsVisible() {
 		return
 	}
 	curSz := w.Viewport.Geom.Size
-
-	w.Viewport.Geom.Pos = w.OSWin.RenderArea().Min
-	w.Viewport.Geom.Size = w.OSWin.RenderArea().Size()
 
 	if curSz == sz {
 		if WinEventTrace {
@@ -761,19 +758,10 @@ func (w *Window) Resized(sz image.Point) {
 	if curSz == image.ZP { // first open
 		StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 	}
-	w.Viewport.Resize(w.OSWin.RenderArea().Size())
+	w.Viewport.Resize(sz)
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
-	// w.BBoxMu.Lock()
-	// w.BBox = w.OSWin.RenderArea()
-	// w.VpBBox = w.BBox
-	// w.WinBBox = w.BBox
-	// w.ObjBBox = w.BBox
-	// w.BBoxMu.Unlock()
-	// log.Println("window bbox", w.BBox)
-	w.Viewport.Geom.Pos = w.OSWin.RenderArea().Min
-	w.Viewport.Geom.Size = w.OSWin.RenderArea().Size()
 	WinGeomMgr.RecordPref(w)
 	w.UpMu.Unlock()
 	w.FullReRender()
@@ -1114,7 +1102,6 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
 func (w *Window) UploadAllViewports() {
-	log.Println("window render area", w.OSWin.RenderArea())
 	if !w.IsVisible() {
 		return
 	}
@@ -1262,7 +1249,7 @@ func (w *Window) Publish() {
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
-	drw.Scale(0, 0, w.OSWin.RenderArea(), image.ZR, draw.Src, vgpu.NoFlipY)
+	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
 	if len(w.UpdtRegs.BeforeDir) > 0 {
 		drw.UseTextureSet(1)
 		w.UpdtRegs.DrawImages(drw, true) // before direct

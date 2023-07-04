@@ -125,12 +125,11 @@ func (w *windowImpl) Screen() *oswin.Screen {
 }
 
 func (w *windowImpl) Size() image.Point {
-	log.Println("window: size =", w.PxSize)
 	return w.PxSize
 }
 
 func (w *windowImpl) WinSize() image.Point {
-	return w.PxSize
+	return w.WnSize
 }
 
 func (w *windowImpl) Position() image.Point {
@@ -138,7 +137,6 @@ func (w *windowImpl) Position() image.Point {
 }
 
 func (w *windowImpl) RenderArea() image.Rectangle {
-	log.Println("window size", w.PxSize)
 	return image.Rect(w.size.InsetLeftPx, w.size.InsetTopPx, w.PxSize.X-w.size.InsetRightPx, w.PxSize.Y-w.size.InsetBottomPx)
 }
 
