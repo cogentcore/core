@@ -31,16 +31,16 @@ import (
 // in an expression that also initializes a new global variable
 // that is then useful whenever you need to specify that type:
 //
-//     var KiT_MyEnum = kit.Enums.AddEnum(MyEnumN, bitFlag true/false,
-//        TypeNameProps (or nil))
+//	var KiT_MyEnum = kit.Enums.AddEnum(MyEnumN, bitFlag true/false,
+//	   TypeNameProps (or nil))
 //
 // where MyEnum is the name of the type, MyEnumN is the enum value
 // representing the number of defined enums (always good practice to define
 // this value, for ease of extension by others), and TypeNameProps is nil or a
 // map[string]interface{} of properties, OR:
 //
-//     var KiT_MyEnum = kit.Enums.AddEnumAltLower(MyEnumN, bitFlag true/false,
-//        TypeNameProps, "Prefix")
+//	var KiT_MyEnum = kit.Enums.AddEnumAltLower(MyEnumN, bitFlag true/false,
+//	   TypeNameProps, "Prefix")
 //
 // which automatically registers alternative names as lower-case versions of
 // const names with given prefix removed -- often what is used in e.g., json
@@ -72,14 +72,13 @@ import (
 // safer to save enums as strings than using their raw numerical values, which
 // can change over time:
 //
-//     func (ev TestFlags) MarshalJSON() ([]byte, error) { return kit.EnumMarshalJSON(ev) }
-//     func (ev *TestFlags) UnmarshalJSON() ([]byte, error) { return kit.EnumUnmarshalJSON(ev) }
+//	func (ev TestFlags) MarshalJSON() ([]byte, error) { return kit.EnumMarshalJSON(ev) }
+//	func (ev *TestFlags) UnmarshalJSON() ([]byte, error) { return kit.EnumUnmarshalJSON(ev) }
 //
 // And any value that will be used as a key in a map must define Text versions (which don't use quotes)
 //
-//     func (ev TestFlags) MarshalText() ([]byte, error) { return kit.EnumMarshalText(ev) }
-//     func (ev *TestFlags) UnmarshalText() ([]byte, error) { return kit.EnumUnmarshalText(ev) }
-//
+//	func (ev TestFlags) MarshalText() ([]byte, error) { return kit.EnumMarshalText(ev) }
+//	func (ev *TestFlags) UnmarshalText() ([]byte, error) { return kit.EnumUnmarshalText(ev) }
 type EnumRegistry struct {
 	// Enums is a map from the *short* package-qualified name to reflect.Type
 	Enums map[string]reflect.Type
@@ -426,7 +425,7 @@ func (tr *EnumRegistry) EnumInt64ToAltString(ival int64, typnm string) string {
 
 // SetEnumValueFromString sets enum value from string using reflect.Value
 // IMPORTANT: requires the modified stringer go generate utility
-// that generates a StringToTypeName method
+// that generates a FromString method
 func SetEnumValueFromString(eval reflect.Value, str string) error {
 	etp := eval.Type()
 	if etp.Kind() != reflect.Ptr {
@@ -452,7 +451,7 @@ func SetEnumValueFromString(eval reflect.Value, str string) error {
 
 // SetEnumIfaceFromString sets enum value from string -- must pass a *pointer*
 // to the enum item. IMPORTANT: requires the modified stringer go generate
-// utility that generates a StringToTypeName method
+// utility that generates a FromString method
 func SetEnumIfaceFromString(eptr any, str string) error {
 	return SetEnumValueFromString(reflect.ValueOf(eptr), str)
 }

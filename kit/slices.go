@@ -425,3 +425,34 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 	log.Println(err)
 	return err
 }
+
+// CopySliceRobust robustly copies slices using SetRobust method for the elements.
+func CopySliceRobust(to, fm reflect.Value) error {
+	tonp := NonPtrValue(to)
+	fmnp := NonPtrValue(fm)
+	totyp := tonp.Type()
+	// eltyp := SliceElType(tonp)
+	if totyp.Kind() != reflect.Slice {
+		err := fmt.Errorf("ki.CopySliceRobust: to slice is not slice, is: %v", totyp.String())
+		log.Println(err)
+		return err
+	}
+	fmtyp := fmnp.Type()
+	if fmtyp.Kind() != reflect.Slice {
+		err := fmt.Errorf("ki.CopySliceRobust: from slice is not slice, is: %v", fmtyp.String())
+		log.Println(err)
+		return err
+	}
+	fmlen := fmnp.Len()
+	if tonp.IsNil() {
+		SetRobust(to.Interface(), MakeSlice(totyp, fmlen, fmlen).Interface())
+	}
+	for i := 0; i < fmlen; i++ {
+		tolen := tonp.Len()
+		if i >= tolen {
+			SliceNewAt(to.Interface(), i)
+		}
+		SetRobust(PtrValue(tonp.Index(i)).Interface(), fmnp.Index(i).Interface())
+	}
+	return nil
+}
