@@ -729,6 +729,9 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	curSz := w.Viewport.Geom.Size
 
+	w.Viewport.Geom.Pos = w.OSWin.RenderArea().Min
+	w.Viewport.Geom.Size = w.OSWin.RenderArea().Size()
+
 	if curSz == sz {
 		if WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Nm, curSz)
@@ -766,6 +769,8 @@ func (w *Window) Resized(sz image.Point) {
 	// w.ObjBBox = w.BBox
 	// w.BBoxMu.Unlock()
 	// log.Println("window bbox", w.BBox)
+	w.Viewport.Geom.Pos = w.OSWin.RenderArea().Min
+	w.Viewport.Geom.Size = w.OSWin.RenderArea().Size()
 	WinGeomMgr.RecordPref(w)
 	w.UpMu.Unlock()
 	w.FullReRender()
