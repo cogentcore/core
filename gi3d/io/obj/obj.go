@@ -17,6 +17,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"math"
 	"os"
 	"path/filepath"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gist"
+	"github.com/goki/ki/dirs"
 	"github.com/goki/mat32"
 )
 
@@ -92,6 +94,17 @@ func (dec *Decoder) SetFile(fname string) []string {
 	dec.Objdir, dec.Objfile = filepath.Split(fname)
 	mtlf := strings.TrimSuffix(fname, ".obj") + ".mtl"
 	if _, err := os.Stat(mtlf); !os.IsNotExist(err) {
+		return []string{fname, mtlf}
+	} else {
+		return []string{fname}
+	}
+}
+
+func (dec *Decoder) SetFileFS(fsys fs.FS, fname string) []string {
+	dec.Objdir, dec.Objfile = filepath.Split(fname)
+	mtlf := strings.TrimSuffix(fname, ".obj") + ".mtl"
+	exists, _ := dirs.FileExistsFS(fsys, fname)
+	if exists {
 		return []string{fname, mtlf}
 	} else {
 		return []string{fname}

@@ -7,6 +7,7 @@ package gist
 import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // note: background-color is in FontStyle as it is needed to make that the
@@ -27,25 +28,6 @@ import (
 // func (b *Background) Defaults() {
 // 	b.Color.SetColor(White)
 // }
-
-// BoxSides specifies sides of a box -- some properties can be specified per
-// each side (e.g., border) or not
-type BoxSides int32
-
-const (
-	BoxTop BoxSides = iota
-	BoxRight
-	BoxBottom
-	BoxLeft
-	BoxN
-)
-
-//go:generate stringer -type=BoxSides
-
-var KiT_BoxSides = kit.Enums.AddEnumAltLower(BoxN, kit.NotBitFlag, StylePropProps, "Box")
-
-func (ev BoxSides) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *BoxSides) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // BorderStyles determines how to draw the border
 type BorderStyles int32
@@ -72,6 +54,49 @@ func (ev BorderStyles) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJS
 func (ev *BorderStyles) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleBorderFuncs
+
+// Sides contains values for each side of a box
+type Sides[T any] struct {
+	Top    T `xml:"top" desc:"top value"`
+	Right  T `xml:"right" desc:"right value"`
+	Bottom T `xml:"bottom" desc:"bottom value"`
+	Left   T `xml:"left" desc:"left value"`
+}
+
+func (bs *Sides[T]) SetAll(val T) {
+	bs.Top = val
+	bs.Right = val
+	bs.Bottom = val
+	bs.Left = val
+}
+
+type SideValues Sides[units.Value]
+
+func (bs *SideValues) ToDots(uc *units.Context) {
+	bs.Top.ToDots(uc)
+	bs.Right.ToDots(uc)
+	bs.Bottom.ToDots(uc)
+	bs.Left.ToDots(uc)
+}
+
+// AddToGeom expands position and size to accommodate the additional space
+// in SideValues (e.g., for Padding, Margin)
+func (bs *SideValues) AddToGeom(pos, sz *mat32.Vec2) {
+	pos.Y -= bs.Top.Dots
+	pos.X -= bs.Left.Dots
+	sz.X += bs.Left.Dots + bs.Right.Dots
+	sz.Y += bs.Top.Dots + bs.Bottom.Dots
+}
+
+/* todo: add this in the future
+// Border contains style parameters for borders
+type Border struct {
+	Style  Sides[BorderStyles] `xml:"style" desc:"prop: border-style = how to draw the border"`
+	Width  Sides[units.Value]  `xml:"width" desc:"prop: border-width = width of the border"`
+	Radius Sides[units.Value]  `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
+	Color  Sides[Color]        `xml:"color" desc:"prop: border-color = color of the border"`
+}
+*/
 
 // Border contains style parameters for borders
 type Border struct {

@@ -12,6 +12,7 @@ import (
 	"image"
 	"image/jpeg"
 	"image/png"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -82,6 +83,20 @@ func (bm *Bitmap) LayoutToImgSize() {
 // for that dimension
 func (bm *Bitmap) OpenImage(filename FileName, width, height float32) error {
 	img, err := OpenImage(string(filename))
+	if err != nil {
+		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
+		return err
+	}
+	bm.Filename = filename
+	bm.SetImage(img, width, height)
+	return nil
+}
+
+// OpenImageFS opens an image for the bitmap, and resizes to the size of the image
+// or the specified size -- pass 0 for width and/or height to use the actual image size
+// for that dimension
+func (bm *Bitmap) OpenImageFS(fsys fs.FS, filename FileName, width, height float32) error {
+	img, err := OpenImageFS(fsys, string(filename))
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
@@ -197,6 +212,17 @@ func GrabRenderFrom(nii Node2D) *image.RGBA {
 // OpenImage opens an image from given path filename -- format is inferred automatically.
 func OpenImage(path string) (image.Image, error) {
 	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	im, _, err := image.Decode(file)
+	return im, err
+}
+
+// OpenImageFS opens an image from given path filename -- format is inferred automatically.
+func OpenImageFS(fsys fs.FS, fname string) (image.Image, error) {
+	file, err := fsys.Open(fname)
 	if err != nil {
 		return nil, err
 	}

@@ -36,19 +36,20 @@ var ScrollBarWidthDefault = float32(16)
 
 // Layout contains style preferences on the layout of the element.
 type Layout struct {
-	ZIndex         int         `xml:"z-index" desc:"prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	AlignH         Align       `xml:"horizontal-align" desc:"prop: horizontal-align specifies the horizontal alignment of widget elements within a *vertical* layout container (has no effect within horizontal layouts -- use space / stretch elements instead).  For text layout, use text-align. This is not a standard css property."`
-	AlignV         Align       `xml:"vertical-align" desc:"prop: vertical-align specifies the vertical alignment of widget elements within a *horizontal* layout container (has no effect within vertical layouts -- use space / stretch elements instead).  For text layout, use text-vertical-align.  This is not a standard css property"`
-	PosX           units.Value `xml:"x" desc:"prop: x = horizontal position -- often superseded by layout but otherwise used"`
-	PosY           units.Value `xml:"y" desc:"prop: y = vertical position -- often superseded by layout but otherwise used"`
-	Width          units.Value `xml:"width" desc:"prop: width = specified size of element -- 0 if not specified"`
-	Height         units.Value `xml:"height" desc:"prop: height = specified size of element -- 0 if not specified"`
-	MaxWidth       units.Value `xml:"max-width" desc:"prop: max-width = specified maximum size of element -- 0  means just use other values, negative means stretch"`
-	MaxHeight      units.Value `xml:"max-height" desc:"prop: max-height = specified maximum size of element -- 0 means just use other values, negative means stretch"`
-	MinWidth       units.Value `xml:"min-width" desc:"prop: min-width = specified minimum size of element -- 0 if not specified"`
-	MinHeight      units.Value `xml:"min-height" desc:"prop: min-height = specified minimum size of element -- 0 if not specified"`
-	Margin         units.Value `xml:"margin" desc:"prop: margin = outer-most transparent space around box element -- todo: can be specified per side"`
-	Padding        units.Value `xml:"padding" desc:"prop: padding = transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
+	ZIndex    int         `xml:"z-index" desc:"prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	AlignH    Align       `xml:"horizontal-align" desc:"prop: horizontal-align specifies the horizontal alignment of widget elements within a *vertical* layout container (has no effect within horizontal layouts -- use space / stretch elements instead).  For text layout, use text-align. This is not a standard css property."`
+	AlignV    Align       `xml:"vertical-align" desc:"prop: vertical-align specifies the vertical alignment of widget elements within a *horizontal* layout container (has no effect within vertical layouts -- use space / stretch elements instead).  For text layout, use text-vertical-align.  This is not a standard css property"`
+	PosX      units.Value `xml:"x" desc:"prop: x = horizontal position -- often superseded by layout but otherwise used"`
+	PosY      units.Value `xml:"y" desc:"prop: y = vertical position -- often superseded by layout but otherwise used"`
+	Width     units.Value `xml:"width" desc:"prop: width = specified size of element -- 0 if not specified"`
+	Height    units.Value `xml:"height" desc:"prop: height = specified size of element -- 0 if not specified"`
+	MaxWidth  units.Value `xml:"max-width" desc:"prop: max-width = specified maximum size of element -- 0  means just use other values, negative means stretch"`
+	MaxHeight units.Value `xml:"max-height" desc:"prop: max-height = specified maximum size of element -- 0 means just use other values, negative means stretch"`
+	MinWidth  units.Value `xml:"min-width" desc:"prop: min-width = specified minimum size of element -- 0 if not specified"`
+	MinHeight units.Value `xml:"min-height" desc:"prop: min-height = specified minimum size of element -- 0 if not specified"`
+	Margin    units.Value `xml:"margin" desc:"prop: margin = outer-most transparent space around box element -- todo: can be specified per side"`
+	Padding   units.Value `xml:"padding" desc:"prop: padding = transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
+	// Padding        BoxSideValues `xml:"padding" desc:"prop: padding = transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
 	Overflow       Overflow    `xml:"overflow" desc:"prop: overflow = what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
 	Columns        int         `xml:"columns" alt:"grid-cols" desc:"prop: columns = number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions"`
 	Row            int         `xml:"row" desc:"prop: row = specifies the row that this element should appear within a grid layout"`

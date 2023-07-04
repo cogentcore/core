@@ -12,6 +12,15 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+// is:
+// label.SetProp("background-color", "blue")
+//
+// should be:
+// label.Style.Background.Color = colors.Blue
+// label.ActStyle contains the actual style values, which reflects any properties that
+// have been set via CSS or SetProp, and those set in Style which serves as the starting
+// point for styling.
+
 // These functions set styles from ki.Props which are used for styling
 
 // StyleInhInit detects the style values of "inherit" and "initial",

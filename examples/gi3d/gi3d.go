@@ -16,22 +16,18 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
 
-	// "github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 )
 
 func main() {
-
-	// vkos.VkOsDebug = false
-
 	gimain.Main(func() {
 		mainrun()
 	})
 }
 
-//go:embed *
+//go:embed *.png *.obj *.mtl *.blend
 var content embed.FS
 
 // Anim has control for animating
@@ -278,7 +274,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	trs.Mat.Color.SetName("white")
 	trs.Mat.Color.A = 200
 
-	// grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
+	grtx := gi3d.AddNewTextureFileFS(content, sc, "ground", "ground.png")
 	// _ = grtx
 	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
 
@@ -288,9 +284,9 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floor.Mat.Color.SetName("tan")
 	// floor.Mat.Emissive.SetName("brown")
 	floor.Mat.Bright = 2 // .5 for wood / brown
-	// floor.Mat.SetTexture(sc, grtx)
-	// floor.Mat.Tiling.Repeat.Set(40, 40)
-	// floor.SetInactive() // not selectable
+	floor.Mat.SetTexture(sc, grtx)
+	floor.Mat.Tiling.Repeat.Set(40, 40)
+	floor.SetInactive() // not selectable
 
 	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
@@ -315,7 +311,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	//  Animation & Embedded controls
 
 	anim := &Anim{}
-	anim.Start(sc, false) // start without animation running
 
 	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
 	emb.Pose.Pos.Set(-2, 2, 0)
@@ -393,5 +388,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
+
+	anim.Start(sc, true) // start without animation running
+
 	win.StartEventLoop()
 }
