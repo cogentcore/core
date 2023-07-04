@@ -31,14 +31,18 @@ var (
 
 	touchX float32
 	touchY float32
+
+	started bool
 )
 
 func onStart(a app.App) {
-	winext := vk.GetRequiredInstanceExtensions()
-	log.Printf("required exts: %#v\n", winext)
-	gpu = vgpu.NewGPU()
-	gpu.AddInstanceExt(winext...)
-	gpu.Config("drawtri")
+	if !started {
+		winext := vk.GetRequiredInstanceExtensions()
+		log.Printf("required exts: %#v\n", winext)
+		gpu = vgpu.NewGPU()
+		gpu.AddInstanceExt(winext...)
+		gpu.Config("drawtri")
+	}
 
 	var sf vk.Surface
 	log.Println("in onStart", gpu.Instance, window, &sf)
@@ -79,6 +83,8 @@ func onStart(a app.App) {
 			}
 		}
 	}()
+
+	started = true
 }
 
 func onStop() {
@@ -86,8 +92,8 @@ func onStop() {
 	system.Destroy()
 	system = nil
 	surface.Destroy()
-	gpu.Destroy()
-	vgpu.Terminate()
+	// gpu.Destroy()
+	// vgpu.Terminate()
 }
 
 func onPaint() {
@@ -144,6 +150,7 @@ func main() {
 					window = a.Window()
 					log.Println("on start, window uintptr:", window)
 					onStart(a)
+
 				case lifecycle.CrossOff:
 					log.Println("on stop")
 					onStop()
