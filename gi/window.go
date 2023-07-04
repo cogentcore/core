@@ -403,6 +403,7 @@ func NewMainWindow(name, title string, width, height int) *Window {
 	MainWindows.Add(win)
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
+	vp.SetProp("background-color", "blue")
 	vp.SetProp("color", &Prefs.Colors.Font) // everything inherits this..
 
 	win.AddChild(vp)
@@ -493,7 +494,9 @@ func (w *Window) ConfigVLay() {
 	updt := vp.UpdateStart()
 	defer vp.UpdateEnd(updt)
 	if !vp.HasChildren() {
-		vp.AddNewChild(KiT_Layout, "main-vlay")
+		mainVlay := vp.AddNewChild(KiT_Layout, "main-vlay")
+		_ = mainVlay
+		// mainVlay.SetProp("padding", "20px")
 	}
 	w.MasterVLay = vp.Child(0).Embed(KiT_Layout).(*Layout)
 	if !w.MasterVLay.HasChildren() {
@@ -758,7 +761,7 @@ func (w *Window) Resized(sz image.Point) {
 	if curSz == image.ZP { // first open
 		StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 	}
-	w.Viewport.Resize(sz)
+	w.Viewport.Resize(w.OSWin.RenderArea().Size())
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
@@ -774,6 +777,10 @@ func (w *Window) Resized(sz image.Point) {
 	WinGeomMgr.RecordPref(w)
 	w.UpMu.Unlock()
 	w.FullReRender()
+	// we need a second full re-render for fullscreen and snap resizes on Windows
+	if oswin.TheApp.Platform() == oswin.Windows {
+		w.FullReRender()
+	}
 }
 
 // Raise requests that the window be at the top of the stack of windows,
@@ -1566,7 +1573,7 @@ func (w *Window) PollEvents() {
 // other state etc (popups, etc).
 func (w *Window) EventLoop() {
 	for {
-		log.Println("Gi Window Event Loop")
+		// log.Println("Gi Window Event Loop")
 		if w.HasFlag(int(WinFlagStopEventLoop)) {
 			log.Println("BREAK: Gi Window Event Loop")
 			w.ClearFlag(int(WinFlagStopEventLoop))
@@ -1593,7 +1600,7 @@ func (w *Window) EventLoop() {
 // ProcessEvent processes given oswin.Event
 func (w *Window) ProcessEvent(evi oswin.Event) {
 	et := evi.Type()
-	log.Printf("Got event: %v\n", et)
+	// log.Printf("Got event: %v\n", et)
 	w.delPop = false                     // if true, delete this popup after event loop
 	if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 		fmt.Printf("Win: %v got out-of-range event: %v\n", w.Nm, et)
