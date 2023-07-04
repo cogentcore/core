@@ -8,8 +8,10 @@
 package dirs
 
 import (
+	"errors"
 	"fmt"
 	"go/build"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -182,4 +184,54 @@ func SplitExt(fname string) (fbase, ext string) {
 	ext = filepath.Ext(fname)
 	fbase = strings.TrimSuffix(fname, ext)
 	return
+}
+
+// FindFileOnPaths attempts to locate given file on given list of paths,
+// returning the full Abs path to file if found, else error
+func FindFileOnPaths(paths []string, file string) (string, error) {
+	for _, path := range paths {
+		filePath := filepath.Join(path, file)
+		ok, _ := FileExists(filePath)
+		if ok {
+			return filePath, nil
+		}
+	}
+	return "", fmt.Errorf("FindFileOnPaths: unable to find file: %s on paths: %v\n", file, paths)
+}
+
+// FileExists checks whether given file exists, returning true if so,
+// false if not, and error if there is an error in accessing the file.
+func FileExists(filePath string) (bool, error) {
+	fileInfo, err := os.Stat(filePath)
+	if err == nil {
+		return !fileInfo.IsDir(), nil
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	return false, err
+}
+
+// FileExistsFS checks whether given file exists, returning true if so,
+// false if not, and error if there is an error in accessing the file.
+func FileExistsFS(fsys fs.FS, filePath string) (bool, error) {
+	if fsys, ok := fsys.(fs.StatFS); ok {
+		fileInfo, err := fsys.Stat(filePath)
+		if err == nil {
+			return !fileInfo.IsDir(), nil
+		}
+		if errors.Is(err, fs.ErrNotExist) {
+			return false, nil
+		}
+		return false, err
+	}
+	fp, err := fsys.Open(filePath)
+	if err == nil {
+		fp.Close()
+		return true, nil
+	}
+	if errors.Is(err, fs.ErrNotExist) {
+		return false, nil
+	}
+	return false, err
 }
