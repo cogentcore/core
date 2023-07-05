@@ -20,8 +20,10 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
+	"github.com/goki/gi/oswin/window"
 	"github.com/goki/gi/units"
 	mapp "github.com/goki/mobile/app"
+	"github.com/goki/mobile/event/size"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 	vk "github.com/goki/vulkan"
@@ -41,9 +43,13 @@ type appImpl struct {
 	mu            sync.Mutex
 	mainQueue     chan funcRun
 	mainDone      chan struct{}
-	window        *windowImpl
-	winPtr        uintptr
+	winptr        uintptr
+	System        *vgpu.System
+	Surface       *vgpu.Surface
+	Draw          vdraw.Drawer
+	windows       []*windowImpl
 	gpu           *vgpu.GPU
+	sizeEvent     size.Event // the last size event
 	screens       []*oswin.Screen
 	screensAll    []*oswin.Screen // unique list of all screens ever seen -- get info from here if fails
 	noScreens     bool            // if all screens have been disconnected, don't do anything..
@@ -104,7 +110,7 @@ func (app *appImpl) GoRunOnMain(f func()) {
 // system, which has the effect of pushing the system along during cases when
 // the event loop needs to be "pinged" to get things moving along..
 func (app *appImpl) SendEmptyEvent() {
-	app.window.SendEmptyEvent()
+	app.WindowInFocus().SendEmptyEvent()
 }
 
 // PollEventsOnMain does the equivalent of the mainLoop but using PollEvents
@@ -175,10 +181,10 @@ func (app *appImpl) destroyVk() {
 	log.Println("destroying vk")
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	vk.DeviceWaitIdle(app.window.Surface.Device.Device)
-	app.window.Draw.Destroy()
-	app.window.Surface.Destroy()
-	app.window.Surface = nil
+	vk.DeviceWaitIdle(app.Surface.Device.Device)
+	app.Draw.Destroy()
+	app.Surface.Destroy()
+	app.Surface = nil
 }
 
 // fullDestroyVk destroys all vulkan things for when the app is fully quit
@@ -186,11 +192,11 @@ func (app *appImpl) fullDestroyVk() {
 	log.Println("full destroying vk")
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	vk.DeviceWaitIdle(app.window.Surface.Device.Device)
-	app.window.Draw.Destroy()
-	app.window.Surface.Destroy()
-	app.window.Surface = nil
-	app.window = nil
+	vk.DeviceWaitIdle(app.Surface.Device.Device)
+	app.Draw.Destroy()
+	app.Surface.Destroy()
+	app.Surface = nil
+	app.windows = nil
 	app.gpu.Destroy()
 	vgpu.Terminate()
 }
@@ -200,55 +206,79 @@ func (app *appImpl) fullDestroyVk() {
 
 // NewWindow returns the already existing window to satisfy the oswin.App interface. The newWindow is what actually creates a new window.
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
+	// the actual system window has to exist before we can create the window
 	var winptr uintptr
 	for {
 		app.mu.Lock()
-		if app.window != nil {
-			winptr = app.window.window
-		}
+		winptr = app.winptr
 		app.mu.Unlock()
 
 		if winptr != 0 {
 			break
 		}
 	}
-	return app.window, nil
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	if app.windows == nil {
+		app.windows = []*windowImpl{}
+	}
+	for _, win := range app.windows {
+		win.isVisible = false
+		win.focus(false)
+	}
+	win := &windowImpl{
+		app:       app,
+		isVisible: true,
+	}
+	app.windows = append(app.windows, win)
+	win.focus(true)
+	// if the size event doesn't yet exist (ie: this is probably the first window),
+	// this will get handled later in the event loop.
+	// if not (ie: probably a new window), we need to handle it here.
+	if len(app.windows) != 0 {
+		app.getScreen()
+		oswin.InitScreenLogicalDPIFunc()
+		win.LogDPI = app.screens[0].LogicalDPI
+		win.sendWindowEvent(window.ScreenUpdate)
+	}
+	log.Println("returning window in NewWindow", win)
+	return win, nil
 }
 
-func (app *appImpl) newWindow(opts *oswin.NewWindowOptions, winPtr uintptr) error {
+// setSysWindow sets the underlying system window pointer, surface, system, and drawer
+func (app *appImpl) setSysWindow(opts *oswin.NewWindowOptions, winPtr uintptr) error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
 	var sf vk.Surface
-	if app.window == nil {
-		app.window = &windowImpl{}
-		app.window.app = app
-	}
+	// we have to remake the surface, system, and drawer every time someone reopens the window
+	// because the operating system changes the underlying window
 	log.Println("in NewWindow", app.gpu.Instance, winPtr, &sf)
 	ret := vk.CreateWindowSurface(app.gpu.Instance, winPtr, nil, &sf)
 	if err := vk.Error(ret); err != nil {
 		log.Println("oswin/driver/mobile new window: vulkan error:", err)
 		return err
 	}
-	app.window.Surface = vgpu.NewSurface(app.gpu, sf)
+	app.Surface = vgpu.NewSurface(app.gpu, sf)
 
-	log.Printf("format: %s\n", app.window.Surface.Format.String())
+	log.Printf("format: %s\n", app.Surface.Format.String())
 
-	app.window.System = app.gpu.NewGraphicsSystem(app.name, &app.window.Surface.Device)
-	app.window.System.ConfigRender(&app.window.Surface.Format, vgpu.UndefType)
-	app.window.Surface.SetRender(&app.window.System.Render)
+	app.System = app.gpu.NewGraphicsSystem(app.name, &app.Surface.Device)
+	app.System.ConfigRender(&app.Surface.Format, vgpu.UndefType)
+	app.Surface.SetRender(&app.System.Render)
 	// app.window.System.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
-	app.window.System.Config()
+	app.System.Config()
 
-	app.window.Draw = vdraw.Drawer{
-		Sys:     *app.window.System,
+	app.Draw = vdraw.Drawer{
+		Sys:     *app.System,
 		YIsDown: true,
 	}
 	// app.window.Draw.ConfigSys()
-	app.window.Draw.ConfigSurface(app.window.Surface, vgpu.MaxTexturesPerSet)
+	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
-	app.window.window = winPtr
-	log.Println("set window pointer to", app.window.window)
+	app.winptr = winPtr
+	log.Println("set window pointer to", app.winptr)
+	log.Println("total number of windows:", len(app.windows))
 
 	return nil
 }
@@ -261,24 +291,25 @@ func (app *appImpl) setScreen(sc *oswin.Screen) {
 }
 
 func (app *appImpl) getScreen() {
-	w := app.window
-	physX, physY := units.NewPt(float32(w.size.WidthPt)), units.NewPt(float32(w.size.HeightPt))
+	physX, physY := units.NewPt(float32(app.sizeEvent.WidthPt)), units.NewPt(float32(app.sizeEvent.HeightPt))
 	physX.Convert(units.Mm, &units.Context{})
 	physY.Convert(units.Mm, &units.Context{})
-	fmt.Println("pixels per pt", w.size.PixelsPerPt)
+	fmt.Println("pixels per pt", app.sizeEvent.PixelsPerPt)
 	sc := &oswin.Screen{
 		ScreenNumber: 0,
-		Geometry:     w.size.Bounds(),
-		PixSize:      w.size.Size(),
+		Geometry:     app.sizeEvent.Bounds(),
+		PixSize:      app.sizeEvent.Size(),
 		PhysicalSize: image.Point{X: int(physX.Val), Y: int(physY.Val)},
-		PhysicalDPI:  36 * w.size.PixelsPerPt,
+		PhysicalDPI:  36 * app.sizeEvent.PixelsPerPt,
 		LogicalDPI:   2.0,
 
-		Orientation: oswin.ScreenOrientation(w.size.Orientation),
+		Orientation: oswin.ScreenOrientation(app.sizeEvent.Orientation),
 	}
-	w.PhysDPI = 36 * w.size.PixelsPerPt
-	w.PxSize = w.size.Size()
-	w.WnSize = w.PxSize
+	for _, win := range app.windows {
+		win.PhysDPI = 36 * app.sizeEvent.PixelsPerPt
+		win.PxSize = app.sizeEvent.Size()
+		win.WnSize = win.PxSize
+	}
 	app.setScreen(sc)
 }
 
@@ -318,8 +349,8 @@ func (app *appImpl) NWindows() int {
 func (app *appImpl) Window(win int) oswin.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	if win == 0 {
-		return app.window
+	if win < len(app.windows) {
+		return app.windows[win]
 	}
 	return nil
 }
@@ -327,8 +358,10 @@ func (app *appImpl) Window(win int) oswin.Window {
 func (app *appImpl) WindowByName(name string) oswin.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	if app.window.Name() == name {
-		return app.window
+	for _, window := range app.windows {
+		if window.Name() == name {
+			return window
+		}
 	}
 	return nil
 }
@@ -336,16 +369,20 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 func (app *appImpl) WindowInFocus() oswin.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	if app.window.IsFocus() {
-		return app.window
+	for _, window := range app.windows {
+		if window.IsFocus() {
+			log.Println("got win in focus", window)
+			return window
+		}
 	}
+	log.Println("no window in focus")
 	return nil
 }
 
 func (app *appImpl) ContextWindow() oswin.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	return app.window
+	return app.windows[0]
 }
 
 func (app *appImpl) Name() string {

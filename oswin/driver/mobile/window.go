@@ -14,9 +14,8 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/gi/oswin/window"
-	"github.com/goki/mobile/event/size"
+	"github.com/goki/ki/bitflag"
 	"github.com/goki/vgpu/vdraw"
-	"github.com/goki/vgpu/vgpu"
 )
 
 // TODO: actually implement things for mobile window
@@ -25,11 +24,6 @@ type windowImpl struct {
 	oswin.WindowBase
 	event.Deque
 	app                *appImpl
-	window             uintptr
-	System             *vgpu.System
-	Surface            *vgpu.Surface
-	size               size.Event
-	Draw               vdraw.Drawer
 	scrnName           string // last known screen name
 	runQueue           chan funcRun
 	publish            chan struct{}
@@ -44,6 +38,7 @@ type windowImpl struct {
 	lastMouseButtonPos image.Point
 	lastMouseMovePos   image.Point
 	RenderSize         image.Point
+	isVisible          bool
 }
 
 var _ oswin.Window = &windowImpl{}
@@ -54,11 +49,11 @@ var _ oswin.Window = &windowImpl{}
 // please file an Issue for anything that should be added to Window
 // interface.
 func (w *windowImpl) Handle() any {
-	return w.window
+	return w.app.winptr
 }
 
 func (w *windowImpl) OSHandle() uintptr {
-	return w.window
+	return w.app.winptr
 }
 
 func (w *windowImpl) MainMenu() oswin.MainMenu {
@@ -66,7 +61,7 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) Drawer() *vdraw.Drawer {
-	return &w.Draw
+	return &w.app.Draw
 }
 
 func (w *windowImpl) IsClosed() bool {
@@ -74,7 +69,7 @@ func (w *windowImpl) IsClosed() bool {
 }
 
 func (w *windowImpl) IsVisible() bool {
-	return w.Surface != nil
+	return w.isVisible && w.app.Surface != nil
 }
 
 func (w *windowImpl) Activate() bool {
@@ -137,7 +132,7 @@ func (w *windowImpl) Position() image.Point {
 }
 
 func (w *windowImpl) RenderArea() image.Rectangle {
-	return image.Rect(w.size.InsetLeftPx, w.size.InsetTopPx, w.PxSize.X-w.size.InsetRightPx, w.PxSize.Y-w.size.InsetBottomPx)
+	return image.Rect(w.app.sizeEvent.InsetLeftPx, w.app.sizeEvent.InsetTopPx, w.PxSize.X-w.app.sizeEvent.InsetRightPx, w.PxSize.Y-w.app.sizeEvent.InsetBottomPx)
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {
@@ -177,11 +172,17 @@ func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
 	w.PxSize = sz
 }
 
-func (w *windowImpl) show() {}
+func (w *windowImpl) show() {
+	w.isVisible = true
+}
 
-func (w *windowImpl) Raise() {}
+func (w *windowImpl) Raise() {
+	w.isVisible = true
+}
 
-func (w *windowImpl) Minimize() {}
+func (w *windowImpl) Minimize() {
+	w.isVisible = false
+}
 
 func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {}
 
@@ -234,8 +235,10 @@ func (w *windowImpl) focus(focused bool) {
 	log.Println("past mutex")
 	defer w.mu.Unlock()
 	if focused {
+		bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
 		w.sendWindowEvent(window.Focus)
 	} else {
+		bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
 		w.sendWindowEvent(window.DeFocus)
 	}
 }
