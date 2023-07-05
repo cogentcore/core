@@ -428,30 +428,30 @@ func (o *NewWindowOptions) Fixup() {
 	}
 
 	o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos)
-	// if o.Pos.X == 0 && o.Pos.Y == 0 {
-	// 	wsz := sc.WinSizeFmPix(o.Size)
-	// 	dialog, modal, _, _ := WindowFlagsToBool(o.Flags)
-	// 	nw := TheApp.NWindows()
-	// 	if nw > 0 {
-	// 		lastw := TheApp.Window(nw - 1)
-	// 		lsz := lastw.WinSize()
-	// 		lp := lastw.Position()
-	//
-	// 		nwbig := wsz.X > lsz.X || wsz.Y > lsz.Y
-	//
-	// 		if modal || dialog || !nwbig { // place centered on top of current
-	// 			ctrx := lp.X + (lsz.X / 2)
-	// 			ctry := lp.Y + (lsz.Y / 2)
-	// 			o.Pos.X = ctrx - wsz.X/2
-	// 			o.Pos.Y = ctry - wsz.Y/2
-	// 		} else { // cascade to right
-	// 			o.Pos.X = lp.X + lsz.X // tile to right -- could depend on orientation
-	// 			o.Pos.Y = lp.Y + 72    // and move down a bit
-	// 		}
-	// 	} else { // center in screen
-	// 		o.Pos.X = scsz.X/2 - wsz.X/2
-	// 		o.Pos.Y = scsz.Y/2 - wsz.Y/2
-	// 	}
-	// 	o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos) // make sure ok
-	// }
+	if o.Pos.X == 0 && o.Pos.Y == 0 {
+		wsz := sc.WinSizeFmPix(o.Size)
+		dialog, modal, _, _ := WindowFlagsToBool(o.Flags)
+		nw := TheApp.NWindows()
+		if nw > 0 {
+			lastw := TheApp.Window(nw - 1)
+			lsz := lastw.WinSize()
+			lp := lastw.Position()
+
+			nwbig := wsz.X > lsz.X || wsz.Y > lsz.Y
+
+			if modal || dialog || !nwbig { // place centered on top of current
+				ctrx := lp.X + (lsz.X / 2)
+				ctry := lp.Y + (lsz.Y / 2)
+				o.Pos.X = ctrx - wsz.X/2
+				o.Pos.Y = ctry - wsz.Y/2
+			} else { // cascade to right
+				o.Pos.X = lp.X + lsz.X // tile to right -- could depend on orientation
+				o.Pos.Y = lp.Y + 72    // and move down a bit
+			}
+		} else { // center in screen
+			o.Pos.X = scsz.X/2 - wsz.X/2
+			o.Pos.Y = scsz.Y/2 - wsz.Y/2
+		}
+		o.Size, o.Pos = sc.ConstrainWinGeom(o.Size, o.Pos) // make sure ok
+	}
 }
