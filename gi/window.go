@@ -2050,7 +2050,7 @@ func PopupIsMenu(pop ki.Ki) bool {
 	return false
 }
 
-// PopupIsTooltip returns true if the given popup item is a menu
+// PopupIsTooltip returns true if the given popup item is a tooltip
 func PopupIsTooltip(pop ki.Ki) bool {
 	if pop == nil {
 		return false
@@ -2146,6 +2146,9 @@ func (w *Window) SetDelPopup(pop ki.Ki) {
 
 // ShouldDeletePopupMenu returns true if the given popup item should be deleted
 func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
+	if _, ok := pop.(*Dialog); ok {
+		return true
+	}
 	if !PopupIsMenu(pop) {
 		return false
 	}

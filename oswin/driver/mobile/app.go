@@ -192,10 +192,6 @@ func (app *appImpl) fullDestroyVk() {
 	log.Println("full destroying vk")
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	vk.DeviceWaitIdle(app.Surface.Device.Device)
-	app.Draw.Destroy()
-	app.Surface.Destroy()
-	app.Surface = nil
 	app.windows = nil
 	app.gpu.Destroy()
 	vgpu.Terminate()
@@ -204,7 +200,9 @@ func (app *appImpl) fullDestroyVk() {
 ////////////////////////////////////////////////////////
 //  Window
 
-// NewWindow returns the already existing window to satisfy the oswin.App interface. The newWindow is what actually creates a new window.
+// NewWindow creates a new window with the given options.
+// It waits for the underlying system window to be created first.
+// Also, it hides all other windows and shows the new one.
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
 	// the actual system window has to exist before we can create the window
 	var winptr uintptr
@@ -377,6 +375,16 @@ func (app *appImpl) WindowInFocus() oswin.Window {
 	}
 	log.Println("no window in focus")
 	return nil
+}
+
+// waitWindowInFocus waits until there is a window in focus and then returns it
+func (app *appImpl) waitWindowInFocus() oswin.Window {
+	for {
+		win := app.WindowInFocus()
+		if win != nil {
+			return win
+		}
+	}
 }
 
 func (app *appImpl) ContextWindow() oswin.Window {

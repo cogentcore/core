@@ -76,28 +76,25 @@ func (app *appImpl) eventLoop() {
 				}
 			case paint.Event:
 				log.Println("paint event")
-				win := app.WindowInFocus()
-				if win == nil {
-					continue
+				win := app.waitWindowInFocus()
+				if win != nil {
+					win.(*windowImpl).sendWindowEvent(window.Paint)
+					a.Publish()
 				}
-				win.(*windowImpl).sendWindowEvent(window.Paint)
-				a.Publish()
 			case touch.Event:
 				log.Println("touch event", e)
 				win := app.WindowInFocus()
-				if win == nil {
-					continue
+				if win != nil {
+					win.(*windowImpl).touchEvent(e)
 				}
-				win.(*windowImpl).touchEvent(e)
 			case mouse.Event:
 				log.Println("mouse event", e)
 			case key.Event:
 				log.Println("key event", e)
 				win := app.WindowInFocus()
-				if win == nil {
-					continue
+				if win != nil {
+					win.(*windowImpl).keyEvent(e)
 				}
-				win.(*windowImpl).keyEvent(e)
 			}
 		}
 	})
