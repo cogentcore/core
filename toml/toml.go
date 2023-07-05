@@ -6,6 +6,7 @@ package toml
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"io/fs"
 	"io/ioutil"
@@ -102,4 +103,12 @@ func Save(obj any, file string) error {
 func Write(obj any, writer io.Writer) error {
 	enc := toml.NewEncoder(writer)
 	return enc.Encode(obj)
+}
+
+// WriteBytes writes TOML returning bytes.
+func WriteBytes(obj any) []byte {
+	var b bytes.Buffer
+	enc := toml.NewEncoder(&b)
+	enc.Encode(obj)
+	return b.Bytes()
 }
