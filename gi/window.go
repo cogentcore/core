@@ -2146,8 +2146,10 @@ func (w *Window) SetDelPopup(pop ki.Ki) {
 
 // ShouldDeletePopupMenu returns true if the given popup item should be deleted
 func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
-	if _, ok := pop.(*Dialog); ok {
-		return true
+	// if we have a dialog open, close it if we didn't click in it
+	if dlg, ok := pop.(*Dialog); ok {
+		log.Println("pos", me.Pos(), "bbox", dlg.WinBBox)
+		return !me.Pos().In(dlg.WinBBox)
 	}
 	if !PopupIsMenu(pop) {
 		return false
