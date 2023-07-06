@@ -194,7 +194,7 @@ func (app *appImpl) fullDestroyVk() {
 	defer app.mu.Unlock()
 	app.windows = nil
 	app.gpu.Destroy()
-	vgpu.Terminate()
+	// vgpu.Terminate()
 }
 
 ////////////////////////////////////////////////////////
