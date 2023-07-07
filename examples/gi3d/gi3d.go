@@ -314,7 +314,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	//  Animation & Embedded controls
 
 	anim := &Anim{}
-	anim.Start(sc, false) // start without animation running
 
 	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
 	emb.Pose.Pos.Set(-2, 2, 0)
@@ -392,6 +391,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
-
+	anim.Start(sc, true) // start with animation running
 	win.StartEventLoop()
 }

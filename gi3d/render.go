@@ -7,7 +7,6 @@ package gi3d
 import (
 	"fmt"
 	"image"
-	"log"
 	"sort"
 
 	"github.com/goki/gi/gi"
@@ -251,7 +250,6 @@ func (sc *Scene) UpdateNodes3D() {
 // for onscreen rendering.
 // returns false if currently already rendering.
 func (sc *Scene) Render() bool {
-	log.Println("starting render")
 	if sc.IsRendering() {
 		return false
 	}
@@ -259,28 +257,18 @@ func (sc *Scene) Render() bool {
 		return false
 	}
 	sc.RenderMu.Lock()
-	log.Println("starting to save cameras and set rendering flag")
 	if len(sc.SavedCams) == 0 {
-		log.Println("saving cameras")
 		sc.SaveCamera("default")
 	}
 	sc.SetFlag(int(Rendering))
-	log.Println("calling render impl")
 	sc.RenderImpl(false) // not offscreen
-	log.Println("getting drawer")
 
 	drw := sc.Win.OSWin.Drawer()
-	log.Println("setting frame image")
 	drw.SetFrameImage(sc.DirUpIdx, sc.Frame.Frames[0])
-	log.Println("setting winbbox")
 	sc.Win.DirDraws.SetWinBBox(sc.DirUpIdx, sc.WinBBox)
-	log.Println("syncing images")
 	drw.SyncImages()
-	log.Println("clearing rendering flag")
 	sc.ClearFlag(int(Rendering))
-	log.Println("unlocking mutex")
 	sc.RenderMu.Unlock()
-	log.Println("done")
 	return true
 }
 
@@ -304,21 +292,13 @@ func (sc *Scene) RenderOffscreen() bool {
 // RenderImpl does the 3D rendering including updating
 // the view / world matricies, and calling Render3D
 func (sc *Scene) RenderImpl(offscreen bool) {
-	log.Println("in render impl; updating matrix")
 	sc.Camera.UpdateMatrix()
-	log.Println("tracking camera")
 	sc.TrackCamera()
-	log.Println("updating nodes 3d")
 	sc.UpdateNodes3D()
-	log.Println("updating world matrix")
 	sc.UpdateWorldMatrix()
-	log.Println("updating mesh bbox")
 	sc.UpdateMeshBBox()
-	log.Println("updating mvp matrix")
 	sc.UpdateMVPMatrix()
-	log.Println("rendering 3d")
 	sc.Render3D(offscreen)
-	log.Println("done with renderImpl")
 }
 
 func (sc *Scene) IsDirectWinUpload() bool {
@@ -334,28 +314,19 @@ func (sc *Scene) DirectWinUpload() {
 		return
 	}
 	if Update3DTrace {
-		log.Println("right before scene update print")
 		fmt.Printf("3D Update: Window %s from Scene: %s at: %v\n", sc.Win.Nm, sc.Nm, sc.WinBBox.Min)
-		log.Println("right before calling render")
 	}
-	log.Println("calling render")
 	sc.Render()
 }
 
 // Render3D renders the scene to the framebuffer
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) Render3D(offscreen bool) {
-
-	log.Println("rendering 3d; locking mutex")
 	sc.Phong.UpdtMu.Lock()
-	log.Println("setting view prjn")
 	sc.Phong.SetViewPrjn(&sc.Camera.ViewMatrix, &sc.Camera.VkPrjnMatrix)
-	log.Println("unlocking mutex")
 	sc.Phong.UpdtMu.Unlock()
-	log.Println("syncing phong")
 	sc.Phong.Sync()
 
-	log.Println("calling FuncDownMeFirst")
 	var rcs [RenderClassesN][]Node3D
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d any) bool {
 		if k == sc.This() {
@@ -386,25 +357,18 @@ func (sc *Scene) Render3D(offscreen bool) {
 		return ki.Continue
 	})
 
-	log.Println("locking mutex")
 	sc.Phong.UpdtMu.Lock()
-	log.Println("getting vars")
 	sy := &sc.Phong.Sys
 	cmd := sy.CmdPool.Buff
 	descIdx := 0
-	log.Println("starting render pass")
 	sy.ResetBeginRenderPass(cmd, sc.Frame.Frames[0], descIdx)
-	log.Println("unlocking mutex")
 	sc.Phong.UpdtMu.Unlock()
 
-	log.Println("going over object rcs")
 	for rci, objs := range rcs {
-		log.Println("getting starting variables")
 		rc := RenderClasses(rci)
 		if len(objs) == 0 {
 			continue
 		}
-		log.Println("sorting objects")
 		if rc >= RClassTransTexture { // sort back-to-front for transparent
 			sort.Slice(objs, func(i, j int) bool {
 				return objs[i].NormDCBBox().Min.Z > objs[j].NormDCBBox().Min.Z
@@ -419,27 +383,18 @@ func (sc *Scene) Render3D(offscreen bool) {
 		// 	fmt.Printf("obj: %s  max z: %g   min z: %g\n", objs[i].Name(), objs[i].AsNode3D().NDCBBox.Max.Z, objs[i].AsNode3D().NDCBBox.Min.Z)
 		// }
 
-		log.Println("going over objects")
 		lastrc := RClassOpaqueVertex
 		for _, obj := range objs {
-			log.Println("getting render class")
 			rc = obj.RenderClass()
 			if rc >= RClassTransTexture && rc != lastrc {
 				lastrc = rc
 			}
-			log.Println("rendering object 3d")
 			obj.Render3D(sc)
 		}
 	}
-	log.Println("locking mutex")
 	sc.Phong.UpdtMu.Lock()
-	log.Println("ending render pass")
 	sy.EndRenderPass(cmd)
-	log.Println("submitting render")
 	sc.Frame.SubmitRender(cmd) // this is where it waits for the 16 msec
-	log.Println("waiting for render")
 	sc.Frame.WaitForRender()
-	log.Println("unlocking mutex")
 	sc.Phong.UpdtMu.Unlock()
-	log.Println("done with render 3d")
 }

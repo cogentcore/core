@@ -73,13 +73,12 @@ func Main(f func(oswin.App)) {
 	mainCallback = f
 	theApp.initVk()
 	oswin.TheApp = theApp
-	go theApp.eventLoop()
 	go func() {
 		mainCallback(theApp)
 		log.Println("main callback done")
 		theApp.stopMain()
 	}()
-	theApp.mainLoop()
+	theApp.eventLoop()
 	log.Println("main loop done")
 }
 
@@ -127,27 +126,27 @@ func (app *appImpl) PollEvents() {
 
 // MainLoop starts running event loop on main thread (must be called
 // from the main thread).
-func (app *appImpl) mainLoop() {
-	app.mainQueue = make(chan funcRun)
-	app.mainDone = make(chan struct{})
-	// SetThreadPri(1)
-	// time.Sleep(100 * time.Millisecond)
-	for {
-		log.Println("app main loop iteration")
-		select {
-		case <-app.mainDone:
-			app.destroyVk()
-			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
-			}
-			// default:
-			// 	glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
-		}
-	}
-}
+// func (app *appImpl) mainLoop() {
+// 	app.mainQueue = make(chan funcRun)
+// 	app.mainDone = make(chan struct{})
+// 	// SetThreadPri(1)
+// 	// time.Sleep(100 * time.Millisecond)
+// 	for {
+// 		log.Println("app main loop iteration")
+// 		select {
+// 		case <-app.mainDone:
+// 			app.destroyVk()
+// 			return
+// 		case f := <-app.mainQueue:
+// 			f.f()
+// 			if f.done != nil {
+// 				f.done <- true
+// 			}
+// 			// default:
+// 			// 	glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
+// 		}
+// 	}
+// }
 
 // stopMain stops the main loop and thus terminates the app
 func (app *appImpl) stopMain() {
@@ -174,6 +173,7 @@ func (app *appImpl) initVk() {
 	app.gpu = vgpu.NewGPU()
 	app.gpu.AddInstanceExt(winext...)
 	app.gpu.Config(app.name)
+	log.Println("done vkinit")
 }
 
 // destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
@@ -431,9 +431,6 @@ func (app *appImpl) PrefsDir() string {
 	return "/data/data"
 }
 
-func (app *appImpl) FontPaths() []string {
-	return []string{"/system/fonts"}
-}
 func (app *appImpl) GetScreens() {
 	// note: this is not applicable in mobile because screen info is not avail until Size event
 }

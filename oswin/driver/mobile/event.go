@@ -25,76 +25,104 @@ import (
 
 // eventLoop starts running the mobile app event loop
 func (app *appImpl) eventLoop() {
+	log.Println("entered mobile eventLoop()")
 	mapp.Main(func(a mapp.App) {
+		log.Println("main mobile loop started")
+		app.mainQueue = make(chan funcRun)
+		app.mainDone = make(chan struct{})
 		app.mobapp = a
-		for e := range a.Events() {
-			log.Println("mobile app event loop: got event", e)
-			switch e := a.Filter(e).(type) {
-			case lifecycle.Event:
-				switch e.Crosses(lifecycle.StageVisible) {
-				case lifecycle.CrossOn:
-					app.RunOnMain(func() {
+		for {
+			select {
+			case <-app.mainDone:
+				app.destroyVk()
+				return
+			case f := <-app.mainQueue:
+				f.f()
+				if f.done != nil {
+					f.done <- true
+				}
+			case e := <-a.Events():
+				// log.Println("mobile app event loop: got event", e)
+				switch e := a.Filter(e).(type) {
+				case lifecycle.Event:
+					switch e.Crosses(lifecycle.StageVisible) {
+					case lifecycle.CrossOn:
 						err := app.setSysWindow(nil, a.Window())
 						if err != nil {
 							log.Fatalln("error creating window in lifecycle cross on:", err)
 						}
-					})
-				case lifecycle.CrossOff:
-					log.Println("on stop")
-					// we need to set the size of the window to 0 so that it detects a size difference
-					// and lets the size event go through when we come back later
-					for _, win := range app.windows {
-						win.SetSize(image.Point{})
-						win.sendWindowEvent(window.Minimize)
+					case lifecycle.CrossOff:
+						log.Println("on stop")
+						// we need to set the size of the window to 0 so that it detects a size difference
+						// and lets the size event go through when we come back later
+						for _, win := range app.windows {
+							win.SetSize(image.Point{})
+							win.sendWindowEvent(window.Minimize)
+						}
+						app.destroyVk()
 					}
-					app.RunOnMain(app.destroyVk)
-				}
-				switch e.Crosses(lifecycle.StageFocused) {
-				case lifecycle.CrossOn:
-					for _, win := range app.windows {
-						win.focus(true)
+					switch e.Crosses(lifecycle.StageFocused) {
+					case lifecycle.CrossOn:
+						for _, win := range app.windows {
+							win.focus(true)
+						}
+					case lifecycle.CrossOff:
+						for _, win := range app.windows {
+							win.focus(false)
+						}
 					}
-				case lifecycle.CrossOff:
-					for _, win := range app.windows {
-						win.focus(false)
+					switch e.Crosses(lifecycle.StageAlive) {
+					case lifecycle.CrossOff:
+						app.fullDestroyVk()
+						app.stopMain()
 					}
-				}
-				switch e.Crosses(lifecycle.StageAlive) {
-				case lifecycle.CrossOff:
-					app.RunOnMain(app.fullDestroyVk)
-					app.stopMain()
-				}
-			case size.Event:
-				log.Println("size event", e.Size())
-				app.sizeEvent = e
-				app.mu.Lock()
-				app.getScreen()
-				app.mu.Unlock()
-				oswin.InitScreenLogicalDPIFunc()
-				for _, win := range app.windows {
-					win.LogDPI = app.screens[0].LogicalDPI
-					win.sendWindowEvent(window.ScreenUpdate)
-				}
-			case paint.Event:
-				log.Println("paint event")
-				win := app.waitWindowInFocus()
-				if win != nil {
-					win.(*windowImpl).sendWindowEvent(window.Paint)
-					a.Publish()
-				}
-			case touch.Event:
-				log.Println("touch event", e)
-				win := app.WindowInFocus()
-				if win != nil {
-					win.(*windowImpl).touchEvent(e)
-				}
-			case mouse.Event:
-				log.Println("mouse event", e)
-			case key.Event:
-				log.Println("key event", e)
-				win := app.WindowInFocus()
-				if win != nil {
-					win.(*windowImpl).keyEvent(e)
+				case size.Event:
+					log.Println("size event", e.Size())
+					app.sizeEvent = e
+					app.mu.Lock()
+					if app.Surface == nil {
+						// log.Println("creating sys window")
+						app.mu.Unlock()
+						log.Println("size event with nil surface")
+						// err := app.setSysWindow(nil, a.Window())
+						// if err != nil {
+						// 	log.Fatalln("error creating window in lifecycle cross on:", err)
+						// }
+						// app.mu.Lock()
+					} else {
+						app.getScreen()
+						app.mu.Unlock()
+						oswin.InitScreenLogicalDPIFunc()
+						for _, win := range app.windows {
+							win.LogDPI = app.screens[0].LogicalDPI
+							win.sendWindowEvent(window.ScreenUpdate)
+						}
+					}
+				case paint.Event:
+					// log.Println("paint event")
+					if app.Surface == nil {
+						log.Println("paint event with nil surface")
+					} else {
+						win := app.waitWindowInFocus()
+						if win != nil {
+							win.(*windowImpl).sendWindowEvent(window.Paint)
+							a.Publish()
+						}
+					}
+				case touch.Event:
+					// log.Println("touch event", e)
+					win := app.WindowInFocus()
+					if win != nil {
+						win.(*windowImpl).touchEvent(e)
+					}
+				case mouse.Event:
+					// log.Println("mouse event", e)
+				case key.Event:
+					// log.Println("key event", e)
+					win := app.WindowInFocus()
+					if win != nil {
+						win.(*windowImpl).keyEvent(e)
+					}
 				}
 			}
 		}
