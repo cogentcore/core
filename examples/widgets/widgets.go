@@ -35,7 +35,7 @@ func mainrun() {
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
 	// ki.SignalTrace = true
-	gi.WinEventTrace = true
+	// gi.WinEventTrace = true
 	// gi.EventTrace = true
 	// gi.KeyEventTrace = true
 

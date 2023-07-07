@@ -104,10 +104,8 @@ func (app *appImpl) eventLoop() {
 						log.Println("paint event with nil surface")
 					} else {
 						win := app.waitWindowInFocus()
-						if win != nil {
-							win.(*windowImpl).sendWindowEvent(window.Paint)
-							a.Publish()
-						}
+						win.(*windowImpl).sendWindowEvent(window.Paint)
+						a.Publish()
 					}
 				case touch.Event:
 					// log.Println("touch event", e)
@@ -154,21 +152,21 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 			Start: w.lastMouseButtonPos,
 		}
 		oevent.Init()
-		log.Printf("oswin mouse move event %#v", oevent)
+		// log.Printf("oswin mouse move event %#v", oevent)
 		w.Send(oevent)
 
-		osevent := &omouse.ScrollEvent{
-			Event: omouse.Event{
-				Where:  pos,
-				Action: omouse.Scroll,
-			},
-			// negative because actual movement is the opposite of finger movement,
-			// and divided by 8 because movement seems way too fast otherwise
-			Delta: pos.Sub(w.lastMouseEventPos).Mul(int(-omouse.ScrollWheelSpeed / 8)),
-		}
-		osevent.Init()
-		log.Printf("oswin mouse scroll event %#v", osevent)
-		w.Send(osevent)
+		// osevent := &omouse.ScrollEvent{
+		// 	Event: omouse.Event{
+		// 		Where:  pos,
+		// 		Action: omouse.Scroll,
+		// 	},
+		// 	// negative because actual movement is the opposite of finger movement,
+		// 	// and divided by 8 because movement seems way too fast otherwise
+		// 	Delta: pos.Sub(w.lastMouseEventPos).Mul(int(-omouse.ScrollWheelSpeed / 8)),
+		// }
+		// osevent.Init()
+		// log.Printf("oswin mouse scroll event %#v", osevent)
+		// w.Send(osevent)
 
 		w.lastMouseEventPos = pos
 		return
@@ -189,7 +187,7 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 	w.lastMouseButtonPos = pos
 	w.lastMouseEventPos = pos
 	oevent.Init()
-	log.Printf("oswin mouse event %#v", oevent)
+	// log.Printf("oswin mouse event %#v", oevent)
 	w.Send(oevent)
 }
 
@@ -206,6 +204,6 @@ func (w *windowImpl) keyEvent(event key.Event) {
 		},
 	}
 	oevent.Init()
-	log.Printf("gi event: %#v\n", oevent)
+	// log.Printf("gi event: %#v\n", oevent)
 	w.Send(oevent)
 }

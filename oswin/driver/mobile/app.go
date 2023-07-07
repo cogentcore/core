@@ -371,11 +371,9 @@ func (app *appImpl) WindowInFocus() oswin.Window {
 	defer app.mu.Unlock()
 	for _, window := range app.windows {
 		if window.IsFocus() {
-			log.Println("got win in focus", window)
 			return window
 		}
 	}
-	log.Println("no window in focus")
 	return nil
 }
 
