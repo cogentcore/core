@@ -10,6 +10,7 @@ import (
 	"image"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/event"
@@ -36,7 +37,7 @@ type windowImpl struct {
 	mouseDisabled      bool
 	resettingPos       bool
 	lastMouseButtonPos image.Point
-	lastMouseMovePos   image.Point
+	lastMouseEventPos  image.Point
 	RenderSize         image.Point
 	isVisible          bool
 }
@@ -78,10 +79,46 @@ func (w *windowImpl) Activate() bool {
 
 func (w *windowImpl) DeActivate() {}
 
+// for sending window.Event's
+func (w *windowImpl) sendWindowEvent(act window.Actions) {
+	winEv := window.Event{
+		Action: act,
+	}
+	winEv.Init()
+	log.Printf("Sent window event %#v\n", winEv)
+	w.Send(&winEv)
+}
+
 // NextEvent implements the oswin.EventDeque interface.
 func (w *windowImpl) NextEvent() oswin.Event {
 	e := w.Deque.NextEvent()
 	return e
+}
+
+// winLoop is the window's own locked processing loop.
+func (w *windowImpl) winLoop() {
+	winShow := time.NewTimer(time.Second)
+outer:
+	for {
+		log.Println("mobile window loop iteration")
+		select {
+		case <-w.winClose:
+			break outer
+		case f := <-w.runQueue:
+			if w.app.gpu == nil {
+				break outer
+			}
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+		case <-winShow.C:
+			if w.app.gpu == nil {
+				break outer
+			}
+			w.sendWindowEvent(window.Show)
+		}
+	}
 }
 
 // RunOnWin runs given function on the window's unique locked thread.
@@ -153,7 +190,9 @@ func (w *windowImpl) SetLogicalDPI(dpi float32) {
 	w.LogDPI = dpi
 }
 
-func (w *windowImpl) SetTitle(title string) {}
+func (w *windowImpl) SetTitle(title string) {
+	w.Titl = title
+}
 
 func (w *windowImpl) SetWinSize(sz image.Point) {
 	w.WnSize = sz
@@ -184,15 +223,48 @@ func (w *windowImpl) Minimize() {
 	w.isVisible = false
 }
 
-func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {}
+func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.closeReqFunc = fun
+}
 
-func (w *windowImpl) SetCloseCleanFunc(fun func(win oswin.Window)) {}
+func (w *windowImpl) SetCloseCleanFunc(fun func(win oswin.Window)) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.closeCleanFunc = fun
+}
 
-func (w *windowImpl) CloseReq() {}
+func (w *windowImpl) CloseReq() {
+	if theApp.quitting {
+		w.Close()
+	}
+	if w.closeReqFunc != nil {
+		w.closeReqFunc(w)
+	} else {
+		w.Close()
+	}
+}
 
-func (w *windowImpl) CloseClean() {}
+func (w *windowImpl) CloseClean() {
+	if w.closeCleanFunc != nil {
+		w.closeCleanFunc(w)
+	}
+}
 
-func (w *windowImpl) Close() {}
+func (w *windowImpl) Close() {
+	// this is actually the final common pathway for closing here
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.winClose <- struct{}{} // break out of draw loop
+	w.CloseClean()
+	// fmt.Printf("sending close event to window: %v\n", w.Nm)
+	w.sendWindowEvent(window.Close)
+	theApp.DeleteWin(w)
+	if theApp.quitting {
+		theApp.quitCloseCnt <- struct{}{}
+	}
+}
 
 func (w *windowImpl) SetMousePos(x, y float64) {}
 
@@ -207,7 +279,7 @@ func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {}
 // See: https://github.com/glfw/glfw/issues/1699
 // This is adapted from slawrence2302's code posted there.
 func (w *windowImpl) getScreenOvlp() *oswin.Screen {
-	return nil
+	return w.app.screens[0]
 }
 
 // func (w *windowImpl) moved(gw *glfw.Window, x, y int) {}

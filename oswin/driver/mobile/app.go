@@ -133,7 +133,7 @@ func (app *appImpl) mainLoop() {
 	// SetThreadPri(1)
 	// time.Sleep(100 * time.Millisecond)
 	for {
-		log.Println("loop")
+		log.Println("app main loop iteration")
 		select {
 		case <-app.mainDone:
 			app.destroyVk()
@@ -341,7 +341,9 @@ func (app *appImpl) NoScreens() bool {
 }
 
 func (app *appImpl) NWindows() int {
-	return 1
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	return len(app.windows)
 }
 
 func (app *appImpl) Window(win int) oswin.Window {
@@ -466,11 +468,7 @@ func (app *appImpl) ClipBoard(win oswin.Window) clip.Board {
 }
 
 func (app *appImpl) Cursor(win oswin.Window) cursor.Cursor {
-	// app.mu.Lock()
-	// app.ctxtwin = win.(*windowImpl)
-	// app.mu.Unlock()
-	return nil
-	// return &theCursor
+	return &theCursor
 }
 
 func (app *appImpl) SetQuitReqFunc(fun func()) {

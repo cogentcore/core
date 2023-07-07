@@ -28,6 +28,7 @@ func (app *appImpl) eventLoop() {
 	mapp.Main(func(a mapp.App) {
 		app.mobapp = a
 		for e := range a.Events() {
+			log.Println("mobile app event loop: got event", e)
 			switch e := a.Filter(e).(type) {
 			case lifecycle.Event:
 				switch e.Crosses(lifecycle.StageVisible) {
@@ -120,14 +121,28 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 					Button: omouse.Left,
 					Action: omouse.Drag,
 				},
-				From: w.lastMouseMovePos,
+				From: w.lastMouseEventPos,
 			},
 			Start: w.lastMouseButtonPos,
 		}
-		w.lastMouseMovePos = pos
 		oevent.Init()
 		log.Printf("oswin mouse move event %#v", oevent)
 		w.Send(oevent)
+
+		osevent := &omouse.ScrollEvent{
+			Event: omouse.Event{
+				Where:  pos,
+				Action: omouse.Scroll,
+			},
+			// negative because actual movement is the opposite of finger movement,
+			// and divided by 8 because movement seems way too fast otherwise
+			Delta: pos.Sub(w.lastMouseEventPos).Mul(int(-omouse.ScrollWheelSpeed / 8)),
+		}
+		osevent.Init()
+		log.Printf("oswin mouse scroll event %#v", osevent)
+		w.Send(osevent)
+
+		w.lastMouseEventPos = pos
 		return
 	}
 
@@ -144,6 +159,7 @@ func (w *windowImpl) touchEvent(event touch.Event) {
 		Action: action,
 	}
 	w.lastMouseButtonPos = pos
+	w.lastMouseEventPos = pos
 	oevent.Init()
 	log.Printf("oswin mouse event %#v", oevent)
 	w.Send(oevent)
@@ -164,14 +180,4 @@ func (w *windowImpl) keyEvent(event key.Event) {
 	oevent.Init()
 	log.Printf("gi event: %#v\n", oevent)
 	w.Send(oevent)
-}
-
-// for sending window.Event's
-func (w *windowImpl) sendWindowEvent(act window.Actions) {
-	winEv := window.Event{
-		Action: act,
-	}
-	winEv.Init()
-	log.Printf("Sent window event %#v\n", winEv)
-	w.Send(&winEv)
 }

@@ -195,12 +195,19 @@ func (sld *Solid) RenderClass() RenderClasses {
 
 // Render3D activates this solid for rendering
 func (sld *Solid) Render3D(sc *Scene) {
+	log.Println("rendering solid; using mesh name")
 	sc.Phong.UseMeshName(string(sld.Mesh))
+	log.Println("locking")
 	sld.PoseMu.RLock()
+	log.Println("setting model mtx")
 	sc.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
+	log.Println("unlocking")
 	sld.PoseMu.RUnlock()
+	log.Println("rendering material 3d")
 	sld.Mat.Render3D(sc)
+	log.Println("rendering phong")
 	sc.Phong.Render()
+	log.Println("done")
 }
 
 var SolidProps = ki.Props{

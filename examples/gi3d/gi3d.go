@@ -15,6 +15,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
+	"github.com/goki/vgpu/vgpu"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -121,10 +122,12 @@ func mainrun() {
 	height := 768
 
 	// turn these on to see a traces of various stages of processing..
-	// ki.SignalTrace = true
-	// gi.WinEventTrace = true
-	// gi3d.Update3DTrace = true
-	// gi.Update2DTrace = true
+	ki.SignalTrace = true
+	gi.EventTrace = true
+	gi.WinEventTrace = true
+	gi3d.Update3DTrace = true
+	gi.Update2DTrace = true
+	vgpu.Debug = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
@@ -311,6 +314,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	//  Animation & Embedded controls
 
 	anim := &Anim{}
+	anim.Start(sc, false) // start without animation running
 
 	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
 	emb.Pose.Pos.Set(-2, 2, 0)
@@ -388,8 +392,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
-
-	anim.Start(sc, true) // start without animation running
 
 	win.StartEventLoop()
 }
