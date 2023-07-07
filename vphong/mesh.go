@@ -68,13 +68,16 @@ func (ph *Phong) DeleteMesh(name string) {
 // If mesh has per-vertex colors, these are selected for rendering,
 // and texture is turned off.  UseTexture* after this to override.
 func (ph *Phong) UseMeshName(name string) error {
+	log.Println("getting mesh from IdxByKey")
 	idx, ok := ph.Meshes.IdxByKey(name)
 	if !ok {
+		log.Println("failed to get mesh from IdxByKey; printing error")
 		err := fmt.Errorf("vphong:UseMeshName -- name not found: %s", name)
 		if vgpu.Debug {
 			log.Println(err)
 		}
 	}
+	log.Println("using mesh index")
 	return ph.UseMeshIdx(idx)
 }
 

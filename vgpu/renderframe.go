@@ -6,6 +6,7 @@ package vgpu
 
 import (
 	"image"
+	"log"
 
 	vk "github.com/goki/vulkan"
 )
@@ -151,9 +152,12 @@ func (rf *RenderFrame) Destroy() {
 // sequencing of render commands over time.
 // The ImageAcquired semaphore before the command is run.
 func (rf *RenderFrame) SubmitRender(cmd vk.CommandBuffer) {
+	log.Println("resetting fences")
 	dev := rf.Device.Device
 	vk.ResetFences(dev, 1, []vk.Fence{rf.RenderFence})
+	log.Println("ending command")
 	CmdEnd(cmd)
+	log.Println("submitting queue")
 	ret := vk.QueueSubmit(rf.Device.Queue, 1, []vk.SubmitInfo{{
 		SType: vk.StructureTypeSubmitInfo,
 		PWaitDstStageMask: []vk.PipelineStageFlags{
@@ -166,6 +170,7 @@ func (rf *RenderFrame) SubmitRender(cmd vk.CommandBuffer) {
 		// SignalSemaphoreCount: 1,
 		// PSignalSemaphores:    []vk.Semaphore{rf.RenderDone},
 	}}, rf.RenderFence)
+	log.Println("running if panic")
 	IfPanic(NewError(ret))
 }
 

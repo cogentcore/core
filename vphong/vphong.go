@@ -5,6 +5,7 @@
 package vphong
 
 import (
+	"log"
 	"sync"
 
 	"github.com/goki/kigen/ordmap"
@@ -87,17 +88,26 @@ func (ph *Phong) Sync() {
 
 // Render does one step of rendering given current Use* settings
 func (ph *Phong) Render() {
+	log.Println("rendering phong; locking mutex")
 	ph.UpdtMu.Lock()
+	log.Println("getting variables")
 	sy := &ph.Sys
 	cmd := sy.CmdPool.Buff
+	log.Println("binding command vars")
 	sy.CmdBindVars(cmd, 0) // updates all dynamics
+	log.Println("doing switch")
 	switch {
 	case ph.Cur.UseTexture:
+		log.Println("rendering texture")
 		ph.RenderTexture()
 	case ph.Cur.UseVtxColor:
+		log.Println("rendering vtx color")
 		ph.RenderVtxColor()
 	default:
+		log.Println("rendering onecolor")
 		ph.RenderOnecolor()
 	}
+	log.Println("unlocking mutex")
 	ph.UpdtMu.Unlock()
+	log.Println("done rendering phong")
 }

@@ -9,6 +9,7 @@ package vgpu
 
 import (
 	"fmt"
+	"log"
 	"runtime"
 
 	vk "github.com/goki/vulkan"
@@ -33,11 +34,13 @@ func NewError(ret vk.Result) error {
 }
 
 func IfPanic(err error, finalizers ...func()) {
+	log.Println("in if panic: error =", err)
 	if err != nil {
 		for _, fn := range finalizers {
 			fn()
 		}
-		panic(err)
+		log.Println("not panicking on error", err)
+		// panic(err)
 	}
 }
 
