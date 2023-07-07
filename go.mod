@@ -17,7 +17,7 @@ require (
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
 	github.com/goki/gosl v1.0.13
-	github.com/goki/ki v1.1.11
+	github.com/goki/ki v1.1.14
 	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.15
 	github.com/goki/pi v1.0.27
