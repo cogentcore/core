@@ -192,7 +192,13 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 		sv.Slice = nil
 		return
 	}
-	if sv.Slice == sl && sv.IsConfiged() {
+	newslc := false
+	if reflect.TypeOf(sl).Kind() != reflect.Pointer { // prevent crash on non-comparable
+		newslc = true
+	} else {
+		newslc = (sv.Slice != sl)
+	}
+	if !newslc && sv.IsConfiged() {
 		sv.Update()
 		return
 	}
