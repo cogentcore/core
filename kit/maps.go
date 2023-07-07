@@ -19,6 +19,12 @@ import (
 // This file contains helpful functions for dealing with maps, in the reflect
 // system
 
+// MakeMap makes a map that is actually addressable, getting around the hidden
+// interface{} that reflect.MakeMap makes, by calling UnhideIfaceValue (from ptrs.go)
+func MakeMap(typ reflect.Type) reflect.Value {
+	return UnhideIfaceValue(reflect.MakeMap(typ))
+}
+
 // MapValueType returns the type of the value for the given map (which can be
 // a pointer to a map or a direct map) -- just Elem() of map type, but using
 // this function makes it more explicit what is going on.
@@ -223,6 +229,19 @@ func MapDeleteValue(mv any, key reflect.Value) {
 	mpvnp.SetMapIndex(key, reflect.Value{}) // delete
 }
 
+// MapDeleteAll deletes everything from map
+func MapDeleteAll(mv any) {
+	mpv := reflect.ValueOf(mv)
+	mpvnp := NonPtrValue(mpv)
+	if mpvnp.Len() == 0 {
+		return
+	}
+	itr := mpvnp.MapRange()
+	for itr.Next() {
+		mpvnp.SetMapIndex(itr.Key(), reflect.Value{}) // delete
+	}
+}
+
 // MapSort sorts keys of map either by key or by value, returns those keys as
 // a slice of reflect.Value, as returned by reflect.Value.MapKeys() method
 func MapSort(mp any, byKey, ascending bool) []reflect.Value {
@@ -348,4 +367,38 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 	err := fmt.Errorf("MapValueSort: unable to sort elements of type: %v", eltyp.String())
 	log.Println(err)
 	return err
+}
+
+// CopyMapRobust robustly copies maps using SetRobust method for the elements.
+func CopyMapRobust(to, fm any) error {
+	tov := reflect.ValueOf(to)
+	fmv := reflect.ValueOf(fm)
+	tonp := NonPtrValue(tov)
+	fmnp := NonPtrValue(fmv)
+	totyp := tonp.Type()
+	if totyp.Kind() != reflect.Map {
+		err := fmt.Errorf("ki.CopyMapRobust: 'to' is not map, is: %v", totyp.String())
+		log.Println(err)
+		return err
+	}
+	fmtyp := fmnp.Type()
+	if fmtyp.Kind() != reflect.Map {
+		err := fmt.Errorf("ki.CopyMapRobust: 'from' is not map, is: %v", fmtyp.String())
+		log.Println(err)
+		return err
+	}
+	if tonp.IsNil() {
+		OnePtrValue(tov).Elem().Set(MakeMap(totyp).Elem())
+	} else {
+		MapDeleteAll(to)
+	}
+	if fmnp.Len() == 0 {
+		return nil
+	}
+	eltyp := SliceElType(to)
+	itr := fmnp.MapRange()
+	for itr.Next() {
+		tonp.SetMapIndex(itr.Key(), CloneToType(eltyp, itr.Value().Interface()).Elem())
+	}
+	return nil
 }

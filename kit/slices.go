@@ -19,6 +19,12 @@ import (
 // This file contains helpful functions for dealing with slices, in the reflect
 // system
 
+// MakeSlice makes a map that is actually addressable, getting around the hidden
+// interface{} that reflect.MakeSlice makes, by calling UnhideIfaceValue (from ptrs.go)
+func MakeSlice(typ reflect.Type, len, cap int) reflect.Value {
+	return UnhideIfaceValue(reflect.MakeSlice(typ, len, cap))
+}
+
 // SliceElType returns the type of the elements for the given slice (which can be
 // a pointer to a slice or a direct slice) -- just Elem() of slice type, but using
 // this function makes it more explicit what is going on.  And it uses
@@ -427,30 +433,36 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 }
 
 // CopySliceRobust robustly copies slices using SetRobust method for the elements.
-func CopySliceRobust(to, fm reflect.Value) error {
-	tonp := NonPtrValue(to)
-	fmnp := NonPtrValue(fm)
+func CopySliceRobust(to, fm any) error {
+	tov := reflect.ValueOf(to)
+	fmv := reflect.ValueOf(fm)
+	tonp := NonPtrValue(tov)
+	fmnp := NonPtrValue(fmv)
 	totyp := tonp.Type()
 	// eltyp := SliceElType(tonp)
 	if totyp.Kind() != reflect.Slice {
-		err := fmt.Errorf("ki.CopySliceRobust: to slice is not slice, is: %v", totyp.String())
+		err := fmt.Errorf("ki.CopySliceRobust: 'to' is not slice, is: %v", totyp.String())
 		log.Println(err)
 		return err
 	}
 	fmtyp := fmnp.Type()
 	if fmtyp.Kind() != reflect.Slice {
-		err := fmt.Errorf("ki.CopySliceRobust: from slice is not slice, is: %v", fmtyp.String())
+		err := fmt.Errorf("ki.CopySliceRobust: 'from' is not slice, is: %v", fmtyp.String())
 		log.Println(err)
 		return err
 	}
 	fmlen := fmnp.Len()
 	if tonp.IsNil() {
-		SetRobust(to.Interface(), MakeSlice(totyp, fmlen, fmlen).Interface())
+		OnePtrValue(tonp).Elem().Set(MakeSlice(totyp, fmlen, fmlen).Elem())
+	} else {
+		if tonp.Len() > fmlen {
+			tonp.SetLen(fmlen)
+		}
 	}
 	for i := 0; i < fmlen; i++ {
 		tolen := tonp.Len()
 		if i >= tolen {
-			SliceNewAt(to.Interface(), i)
+			SliceNewAt(to, i)
 		}
 		SetRobust(PtrValue(tonp.Index(i)).Interface(), fmnp.Index(i).Interface())
 	}

@@ -543,9 +543,8 @@ func ToStringPrec(it any, prec int) string {
 	}
 }
 
-// SetRobust robustly sets the to value from the from value -- to must be a
-// pointer-to -- only for basic field values -- use copier package for more
-// complex cases
+// SetRobust robustly sets the 'to' value from the 'from' value.
+// destination must be a pointer-to. Copies slices and maps robustly.
 // gopy:interface=handle
 func SetRobust(to, frm any) bool {
 	if IfaceIsNil(to) {
@@ -596,6 +595,12 @@ func SetRobust(to, frm any) bool {
 		fm := ToString(frm)
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return true
+	case vk == reflect.Slice:
+		err := CopySliceRobust(to, frm)
+		return err == nil
+	case vk == reflect.Map:
+		err := CopyMapRobust(to, frm)
+		return err == nil
 	}
 
 	fv := reflect.ValueOf(frm)
@@ -639,27 +644,10 @@ func SetMapRobust(mp, ky, val reflect.Value) bool {
 	return true
 }
 
-// MakeMap makes a map that is actually addressable, getting around the hidden
-// interface{} that reflect.MakeMap makes, by calling UnhideIfaceValue (from ptrs.go)
-func MakeMap(typ reflect.Type) reflect.Value {
-	return UnhideIfaceValue(reflect.MakeMap(typ))
-}
-
-// MakeSlice makes a map that is actually addressable, getting around the hidden
-// interface{} that reflect.MakeSlice makes, by calling UnhideIfaceValue (from ptrs.go)
-func MakeSlice(typ reflect.Type, len, cap int) reflect.Value {
-	return UnhideIfaceValue(reflect.MakeSlice(typ, len, cap))
-}
-
 // CloneToType creates a new object of given type, and uses SetRobust to copy
 // an existing value (of perhaps another type) into it -- only expected to
 // work for basic types
 func CloneToType(typ reflect.Type, val any) reflect.Value {
-	if NonPtrType(typ).Kind() == reflect.Map {
-		return MakeMap(typ)
-	} else if NonPtrType(typ).Kind() == reflect.Slice {
-		return MakeSlice(typ, 0, 0)
-	}
 	vn := reflect.New(typ)
 	evi := vn.Interface()
 	SetRobust(evi, val)
