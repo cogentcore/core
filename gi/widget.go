@@ -83,7 +83,7 @@ func (wb *WidgetBase) StyleRUnlock() {
 }
 
 // BoxSpace returns the style BoxSpace value under read lock
-func (wb *WidgetBase) BoxSpace() float32 {
+func (wb *WidgetBase) BoxSpace() gist.SideFloats {
 	wb.StyMu.RLock()
 	bs := wb.Sty.BoxSpace()
 	wb.StyMu.RUnlock()
@@ -425,11 +425,11 @@ func (wb *WidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 // margin and padding to children -- call in ChildrenBBox2D for most widgets
 func (wb *WidgetBase) ChildrenBBox2DWidget() image.Rectangle {
 	nb := wb.VpBBox
-	spc := int(wb.BoxSpace())
-	nb.Min.X += spc
-	nb.Min.Y += spc
-	nb.Max.X -= spc
-	nb.Max.Y -= spc
+	spc := wb.BoxSpace()
+	nb.Min.X += int(spc.Left)
+	nb.Min.Y += int(spc.Top)
+	nb.Max.X -= int(spc.Right)
+	nb.Max.Y -= int(spc.Bottom)
 	return nb
 }
 
@@ -823,22 +823,22 @@ func (wb *WidgetBase) Size2DFromWH(w, h float32) {
 	if st.Layout.Height.Dots > 0 {
 		h = mat32.Max(st.Layout.Height.Dots, h)
 	}
-	spc := st.BoxSpace()
-	w += 2.0 * spc
-	h += 2.0 * spc
+	spcsz := st.BoxSpace().Size()
+	w += spcsz.X
+	h += spcsz.Y
 	wb.LayState.Alloc.Size = mat32.Vec2{w, h}
 }
 
 // Size2DAddSpace adds space to existing AllocSize
 func (wb *WidgetBase) Size2DAddSpace() {
 	spc := wb.BoxSpace()
-	wb.LayState.Alloc.Size.SetAddScalar(2 * spc)
+	wb.LayState.Alloc.Size.SetAdd(spc.Size())
 }
 
 // Size2DSubSpace returns AllocSize minus 2 * BoxSpace -- the amount avail to the internal elements
 func (wb *WidgetBase) Size2DSubSpace() mat32.Vec2 {
 	spc := wb.BoxSpace()
-	return wb.LayState.Alloc.Size.SubScalar(2 * spc)
+	return wb.LayState.Alloc.Size.Sub(spc.Size())
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -902,8 +902,8 @@ func (wb *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Po
 
 func (wb *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := wb.BoxSpace()
-	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.AddScalar(spc)
-	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.AddScalar(-2.0 * spc)
+	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.Add(spc.Pos())
+	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.Sub(spc.Size())
 	wb.Parts.Layout2D(parBBox, iter)
 }
 

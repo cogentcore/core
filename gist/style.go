@@ -259,8 +259,17 @@ func (s *Style) CopyUnitContext(ctxt *units.Context) {
 // BoxSpace returns extra space around the central content in the box model,
 // in dots -- todo: must complicate this if we want different spacing on
 // different sides box outside-in: margin | border | padding | content
-func (s *Style) BoxSpace() float32 {
-	return s.Layout.Margin.Dots + s.Border.Width.Dots + s.Layout.Padding.Dots
+func (s *Style) BoxSpace() SideFloats {
+	// total of layout and border
+	lb := s.Layout.Margin.Dots + s.Border.Width.Dots
+	return SideFloats{
+		Sides: Sides[float32]{
+			Top:    lb + s.Layout.Padding.Top.Dots,
+			Right:  lb + s.Layout.Padding.Right.Dots,
+			Bottom: lb + s.Layout.Padding.Bottom.Dots,
+			Left:   lb + s.Layout.Padding.Left.Dots,
+		},
+	}
 }
 
 // SubProps returns a sub-property map from given prop map for a given styling

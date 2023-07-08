@@ -141,7 +141,7 @@ func (lb *Label) SetText(txt string) {
 		sz = lb.LayState.SizePrefOrMax()
 	}
 	if !sz.IsNil() {
-		sz.SetSubScalar(2 * spc)
+		sz.SetSub(spc.Size())
 	}
 	lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 	lb.StyMu.RUnlock()
@@ -339,7 +339,7 @@ func (lb *Label) LayoutLabel() {
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
 	if !sz.IsNil() {
-		sz.SetSubScalar(2 * spc)
+		sz.SetSub(spc.Size())
 	}
 	lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 }
@@ -385,8 +385,7 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 func (lb *Label) TextPos() mat32.Vec2 {
 	lb.StyMu.RLock()
-	sty := &lb.Sty
-	pos := lb.LayState.Alloc.Pos.AddScalar(sty.BoxSpace())
+	pos := lb.LayState.Alloc.Pos.Add(lb.Sty.BoxSpace().Pos())
 	lb.StyMu.RUnlock()
 	return pos
 }

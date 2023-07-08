@@ -358,11 +358,11 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			if inh {
 				ly.Padding = par.(*Layout).Padding
 			} else if init {
-				ly.Padding.Val = 0
+				ly.Padding.Set()
 			}
 			return
 		}
-		ly.Padding.SetIFace(val, key)
+		ly.Padding.SetAny(val)
 	},
 	"overflow": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)

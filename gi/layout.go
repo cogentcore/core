@@ -247,13 +247,14 @@ var LayoutDefault Layout
 // avail
 func (ly *Layout) AvailSize() mat32.Vec2 {
 	spc := ly.BoxSpace()
-	avail := ly.LayState.Alloc.Size.SubScalar(spc) // spc is for right size space
+	avail := ly.LayState.Alloc.Size.SubScalar(spc.Right) // spc is for right size space
 	parni, _ := KiToNode2D(ly.Par)
 	if parni != nil {
 		vp := parni.AsViewport2D()
 		if vp != nil {
 			if vp.ViewportSafe() == nil {
-				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc)
+				// TODO: SideTODO: might not be right
+				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc.Right)
 				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.Path(), vp.Path(), avail)
 			}
 		}
@@ -318,7 +319,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		sc.Min = 0.0
 	}
 	spc := ly.BoxSpace()
-	avail := ly.AvailSize().SubScalar(spc * 2.0)
+	avail := ly.AvailSize().Sub(spc.Size())
 	sc := ly.Scrolls[d]
 	if d == mat32.X {
 		sc.SetFixedHeight(ly.Sty.Layout.ScrollBarWidth)
@@ -331,7 +332,8 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
 	sc.Step = ly.Sty.Font.Size.Dots                    // step by lines
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
-	sc.ThumbVal = avail.Dim(d) - spc
+	// TODO: SideTODO: not sure about this
+	sc.ThumbVal = avail.Dim(d) - spc.SizeDim(d)/2
 	sc.TrackThr = sc.Step
 	sc.Value = mat32.Min(sc.Value, sc.Max-sc.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
@@ -381,9 +383,10 @@ func (ly *Layout) LayoutScrolls() {
 		if ly.HasScroll[d] {
 			sc := ly.Scrolls[d]
 			sc.Size2D(0)
-			sc.LayState.Alloc.PosRel.SetDim(d, spc)
+			sc.LayState.Alloc.PosRel.SetDim(d, spc.PosDim(d))
 			sc.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
-			sc.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc)
+			// TODO: SideTODO: not sure about this
+			sc.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc.SizeDim(d)/2)
 			if ly.HasScroll[odim] { // make room for other
 				sc.LayState.Alloc.Size.SetSubDim(d, sbw)
 			}

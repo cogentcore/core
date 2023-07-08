@@ -234,7 +234,7 @@ func (sb *SliderBase) SizeFromAlloc() {
 		sb.Defaults()
 	}
 	spc := sb.BoxSpace()
-	sb.Size = sb.LayState.Alloc.Size.Dim(sb.Dim) - 2.0*spc
+	sb.Size = sb.LayState.Alloc.Size.Dim(sb.Dim) - spc.SizeDim(sb.Dim)
 	if sb.Size <= 0 {
 		return
 	}
@@ -528,11 +528,11 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 		if ick != nil {
 			ic := ick.(*Icon)
 			mrg := sb.Sty.Layout.Margin.Dots
-			pad := sb.Sty.Layout.Padding.Dots
-			spc := mrg + pad
+			pad := sb.Sty.Layout.Padding.Dots()
 			odim := mat32.OtherDim(sb.Dim)
+			spc := mrg + pad.PosDim(odim)
 			ic.LayState.Alloc.PosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
-			ic.LayState.Alloc.PosRel.SetDim(odim, -pad)
+			ic.LayState.Alloc.PosRel.SetDim(odim, -pad.PosDim(odim))
 			ic.LayState.Alloc.Size.X = sb.ThSize
 			ic.LayState.Alloc.Size.Y = sb.ThSize
 			if render {
@@ -794,10 +794,10 @@ func (sr *Slider) Render2DDefaultStyle() {
 	ht := 0.5 * sr.ThSize
 
 	odim := mat32.OtherDim(sr.Dim)
-	bpos.SetAddDim(odim, spc)
-	bsz.SetSubDim(odim, 2.0*spc)
-	bpos.SetAddDim(sr.Dim, spc+ht)
-	bsz.SetSubDim(sr.Dim, 2.0*(spc+ht))
+	bpos.SetAddDim(odim, spc.PosDim(odim))
+	bsz.SetSubDim(odim, spc.SizeDim(odim))
+	bpos.SetAddDim(sr.Dim, spc.PosDim(odim)+ht)
+	bsz.SetSubDim(sr.Dim, spc.SizeDim(odim)+2*ht)
 	sr.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
 	bsz.SetDim(sr.Dim, sr.Pos)
@@ -961,8 +961,8 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 
 	// scrollbar is basic box in content size
 	spc := st.BoxSpace()
-	pos := sb.LayState.Alloc.Pos.AddScalar(spc)
-	sz := sb.LayState.Alloc.Size.SubScalar(2.0 * spc)
+	pos := sb.LayState.Alloc.Pos.Add(spc.Pos())
+	sz := sb.LayState.Alloc.Size.Sub(spc.Size())
 
 	sb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
 	pos.SetAddDim(sb.Dim, sb.Pos)                    // start of thumb

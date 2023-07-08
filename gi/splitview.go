@@ -250,9 +250,9 @@ func (sv *SplitView) ConfigSplitters() {
 	mods, updt := sv.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.BoxSpace()
-	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - 2*spc
+	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.SizeDim(sv.Dim)
 	handsz := sv.HandleSize.Dots
-	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - 2*spc)
+	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.SizeDim(odim))
 	spicon := IconName("")
 	if sv.Dim == mat32.X {
 		spicon = IconName("handle-circles-vert")
@@ -364,10 +364,10 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sz := len(sv.Kids)
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.BoxSpace()
-	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - 2*spc
+	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.SizeDim(sv.Dim)
 	avail := size - handsz*float32(sz-1)
 	// fmt.Printf("avail: %v\n", avail)
-	osz := sv.LayState.Alloc.Size.Dim(odim) - 2*spc
+	osz := sv.LayState.Alloc.Size.Dim(odim) - spc.SizeDim(odim)
 	pos := float32(0.0)
 
 	spsum := float32(0)
@@ -384,7 +384,7 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		gis.LayState.Alloc.Size.SetDim(odim, osz)
 		gis.LayState.Alloc.SizeOrig = gis.LayState.Alloc.Size
 		gis.LayState.Alloc.PosRel.SetDim(sv.Dim, pos)
-		gis.LayState.Alloc.PosRel.SetDim(odim, spc)
+		gis.LayState.Alloc.PosRel.SetDim(odim, spc.PosDim(odim))
 		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, gis.LayState.Alloc.SizeOrig, gis.LayState.Alloc.PosRel)
 
 		pos += isz + handsz
@@ -517,12 +517,12 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	handsz := sr.ThumbSize.Dots
 	spc := sr.BoxSpace()
 	odim := mat32.OtherDim(sr.Dim)
-	sr.LayState.Alloc.Size.SetDim(odim, 2*(handsz+2*spc))
+	sr.LayState.Alloc.Size.SetDim(odim, 2*(handsz+spc.SizeDim(odim)))
 	sr.LayState.Alloc.SizeOrig = sr.LayState.Alloc.Size
 
 	ic.LayState.Alloc.Size.SetDim(odim, 2*handsz)
 	ic.LayState.Alloc.Size.SetDim(sr.Dim, handsz)
-	ic.LayState.Alloc.PosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc)))
+	ic.LayState.Alloc.PosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc.PosDim(sr.Dim))))
 	ic.LayState.Alloc.PosRel.SetDim(odim, 0)
 	if render {
 		ic.Layout2DTree()
@@ -566,7 +566,6 @@ func (sr *Splitter) PointToRelPos(pt image.Point) image.Point {
 
 func (sr *Splitter) UpdateSplitterPos() {
 	spc := sr.BoxSpace()
-	ispc := int(spc)
 	handsz := sr.ThumbSize.Dots
 	off := 0
 	if sr.Dim == mat32.X {
@@ -576,26 +575,29 @@ func (sr *Splitter) UpdateSplitterPos() {
 	}
 	sz := handsz
 	if !sr.IsDragging() {
-		sz += 2 * spc
+		sz += spc.SizeDim(sr.Dim)
 	}
 	pos := off + int(sr.Pos-0.5*sz)
 	mxpos := off + int(sr.Pos+0.5*sz)
+
+	// TODO: SideTODO: this is all sketchy
 
 	if sr.IsDragging() {
 		win := sr.ParentWindow()
 		spnm := "gi.Splitter:" + sr.Name()
 		spr, ok := win.SpriteByName(spnm)
 		if ok {
-			spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + ispc}
+			spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + int(spc.Top)}
 		}
 	} else {
 		sr.BBoxMu.Lock()
+
 		if sr.Dim == mat32.X {
-			sr.VpBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
-			sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
+			sr.VpBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
+			sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
 		} else {
-			sr.VpBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
-			sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
+			sr.VpBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
+			sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
 		}
 		sr.BBoxMu.Unlock()
 	}

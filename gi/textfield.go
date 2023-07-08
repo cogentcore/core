@@ -760,7 +760,7 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	st := &tf.Sty
 	spc := st.BoxSpace()
-	pos := tf.LayState.Alloc.Pos.AddScalar(spc)
+	pos := tf.LayState.Alloc.Pos.Add(spc.Pos())
 	if wincoords {
 		mvp := tf.ViewportSafe()
 		mvp.BBoxMu.RLock()
@@ -980,7 +980,7 @@ func (tf *TextField) AutoScroll() {
 		return
 	}
 	spc := st.BoxSpace()
-	maxw := tf.EffSize.X - 2.0*spc
+	maxw := tf.EffSize.X - spc.Size().X
 	tf.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch)) // rough guess in chars
 
 	// first rationalize all the values
@@ -1059,7 +1059,7 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 	st := &tf.Sty
 
 	spc := st.BoxSpace()
-	px := pixOff - spc
+	px := pixOff - spc.Pos().X
 
 	if px <= 0 {
 		return tf.StartPos
@@ -1511,7 +1511,7 @@ func (tf *TextField) RenderTextField() {
 	tf.RenderStdBox(st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect()
-	pos := tf.LayState.Alloc.Pos.AddScalar(st.BoxSpace())
+	pos := tf.LayState.Alloc.Pos.Add(st.BoxSpace().Pos())
 	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 		st.Font.Color = st.Font.Color.Highlight(50)
 		tf.RenderVis.SetString(tf.Placeholder, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
