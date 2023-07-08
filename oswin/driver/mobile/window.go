@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/gi/oswin/window"
@@ -168,8 +169,13 @@ func (w *windowImpl) Position() image.Point {
 	return image.Point{}
 }
 
-func (w *windowImpl) RenderArea() image.Rectangle {
-	return image.Rect(w.app.sizeEvent.InsetLeftPx, w.app.sizeEvent.InsetTopPx, w.PxSize.X-w.app.sizeEvent.InsetRightPx, w.PxSize.Y-w.app.sizeEvent.InsetBottomPx)
+func (w *windowImpl) Insets() gist.SideFloats {
+	return gist.NewSideFloats(
+		float32(w.app.sizeEvent.InsetTopPx),
+		float32(w.app.sizeEvent.InsetRightPx),
+		float32(w.app.sizeEvent.InsetBottomPx),
+		float32(w.app.sizeEvent.InsetLeftPx),
+	)
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {

@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/gi/oswin/window"
@@ -239,8 +240,8 @@ func (w *windowImpl) Position() image.Point {
 	return ps
 }
 
-func (w *windowImpl) RenderArea() image.Rectangle {
-	return image.Rectangle{Max: w.Size()}
+func (w *windowImpl) Insets() gist.SideFloats {
+	return gist.NewSideFloats()
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {

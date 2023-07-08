@@ -495,16 +495,7 @@ func (w *Window) ConfigVLay() {
 	updt := vp.UpdateStart()
 	defer vp.UpdateEnd(updt)
 	if !vp.HasChildren() {
-		mainVlay := vp.AddNewChild(KiT_Layout, "main-vlay")
-		_ = mainVlay
-		log.Println(w.OSWin.RenderArea(), w.OSWin.Size(), w.OSWin.WinSize())
-		// TODO: set padding/size based on render area size
-		mainVlay.SetProp("padding", gist.Sides[units.Value]{
-			Top:    units.NewDot(float32(w.OSWin.RenderArea().Min.Y)),
-			Left:   units.NewDot(float32(w.OSWin.RenderArea().Min.X)),
-			Bottom: units.NewDot(float32(w.OSWin.Size().Y - w.OSWin.RenderArea().Max.Y)),
-			Right:  units.NewDot(float32(w.OSWin.Size().X - w.OSWin.RenderArea().Max.X)),
-		})
+		vp.AddNewChild(KiT_Layout, "main-vlay")
 	}
 	w.MasterVLay = vp.Child(0).Embed(KiT_Layout).(*Layout)
 	if !w.MasterVLay.HasChildren() {
@@ -514,6 +505,22 @@ func (w *Window) ConfigVLay() {
 	w.MainMenu = w.MasterVLay.Child(0).(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
+}
+
+// ConfigInsets updates the padding on the main layout of the window
+// to the inset values provided by the OSWin window.
+func (w *Window) ConfigInsets() {
+	mainVlay := w.Viewport.ChildByName("main-vlay", -1)
+	if mainVlay != nil {
+		insets := w.OSWin.Insets()
+		mainVlay.SetProp("padding", gist.NewSides[units.Value](
+			units.NewDot(insets.Top),
+			units.NewDot(insets.Right),
+			units.NewDot(insets.Bottom),
+			units.NewDot(insets.Left),
+		))
+	}
+
 }
 
 // AddMainMenu installs MainMenu as first element of main layout
@@ -766,6 +773,7 @@ func (w *Window) Resized(sz image.Point) {
 		StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 	}
 	w.Viewport.Resize(sz)
+	w.ConfigInsets()
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}

@@ -13,6 +13,7 @@ import (
 	"image"
 	"unicode/utf8"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"github.com/goki/vgpu/vdraw"
@@ -63,10 +64,9 @@ type Window interface {
 	// underlying screen, in OS-specific window manager coordinates.
 	Position() image.Point
 
-	// RenderArea returns the area in pixels in which it is safe to render.
-	// This value may be reduced by insets on the window, particularly on mobile platforms.
+	// Insets returns the size of any insets on the window in raw device pixels (dots).
 	// These insets can be caused by status bars, button overlays, or devices cutouts.
-	RenderArea() image.Rectangle
+	Insets() gist.SideFloats
 
 	// SetWinSize sets the size of the window, in OS-specific window manager
 	// units that may not include any high DPI factors (DevPixRatio)

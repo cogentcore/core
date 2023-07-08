@@ -23,8 +23,17 @@ type Sides[T any] struct {
 }
 
 // NewSides is a helper that creates new sides of the given type
-// and calls Set on them.
-func NewSides[T any](vals ...T) (Sides[T], error) {
+// and calls Set on them with the given values.
+// It does not return any error values and just logs them.
+func NewSides[T any](vals ...T) Sides[T] {
+	sides, _ := NewSidesTry[T](vals...)
+	return sides
+}
+
+// NewSidesTry is a helper that creates new sides of the given type
+// and calls Set on them with the given values.
+// It returns an error value if there is one.
+func NewSidesTry[T any](vals ...T) (Sides[T], error) {
 	sides := Sides[T]{}
 	err := sides.Set(vals...)
 	return sides, err
@@ -149,6 +158,23 @@ type SideValues struct {
 	Sides[units.Value]
 }
 
+// NewSideValues is a helper that creates new side values
+// and calls Set on them with the given values.
+// It does not return any error values and just logs them.
+func NewSideValues(vals ...units.Value) SideValues {
+	sides, _ := NewSideValuesTry(vals...)
+	return sides
+}
+
+// NewSideValuesTry is a helper that creates new side values
+// and calls Set on them with the given values.
+// It returns an error value if there is one.
+func NewSideValuesTry(vals ...units.Value) (SideValues, error) {
+	sides := Sides[units.Value]{}
+	err := sides.Set(vals...)
+	return SideValues{Sides: sides}, err
+}
+
 // ToDots converts the values for each of the sides to raw display pixels (dots)
 // and sets the Dots field for each of the values. It returns the dot values as a SideFloats.
 func (sv *SideValues) ToDots(uc *units.Context) SideFloats {
@@ -180,10 +206,6 @@ func (sv *SideValues) Dots() SideFloats {
 func (sv *SideValues) ApplyToGeom(pos, sz *mat32.Vec2) {
 	sv.ApplyToPos(pos)
 	sv.ApplyToSize(sz)
-	// pos.Y -= sv.Top.Dots
-	// pos.X -= sv.Left.Dots
-	// sz.X += sv.Left.Dots + sv.Right.Dots
-	// sz.Y += sv.Top.Dots + sv.Bottom.Dots
 }
 
 // ApplyToPos adds to the given position the offset in dots caused by the side values
@@ -201,6 +223,22 @@ func (sv *SideValues) ApplyToSize(sz *mat32.Vec2) {
 // SideFloats contains float32 values for each side of a box
 type SideFloats struct {
 	Sides[float32]
+}
+
+// NewSideFloats is a helper that creates new side floats
+// and calls Set on them with the given values.
+// It does not return any error values and just logs them.
+func NewSideFloats(vals ...float32) SideFloats {
+	sides, _ := NewSideFloatsTry(vals...)
+	return sides
+}
+
+// NewSideFloatsTry is a helper that creates new side floats and calls Set on them.
+// It returns an error value if there is one.
+func NewSideFloatsTry(vals ...float32) (SideFloats, error) {
+	sides := Sides[float32]{}
+	err := sides.Set(vals...)
+	return SideFloats{Sides: sides}, err
 }
 
 // // ApplyToGeom adds to the given position and subtracts from the given size
