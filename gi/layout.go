@@ -333,7 +333,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 	sc.Step = ly.Sty.Font.Size.Dots                    // step by lines
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
 	// TODO: SideTODO: not sure about this
-	sc.ThumbVal = avail.Dim(d) - spc.SizeDim(d)/2
+	sc.ThumbVal = avail.Dim(d) - spc.Size().Dim(d)/2
 	sc.TrackThr = sc.Step
 	sc.Value = mat32.Min(sc.Value, sc.Max-sc.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
@@ -383,10 +383,10 @@ func (ly *Layout) LayoutScrolls() {
 		if ly.HasScroll[d] {
 			sc := ly.Scrolls[d]
 			sc.Size2D(0)
-			sc.LayState.Alloc.PosRel.SetDim(d, spc.PosDim(d))
+			sc.LayState.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
 			sc.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
 			// TODO: SideTODO: not sure about this
-			sc.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc.SizeDim(d)/2)
+			sc.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc.Size().Dim(d)/2)
 			if ly.HasScroll[odim] { // make room for other
 				sc.LayState.Alloc.Size.SetSubDim(d, sbw)
 			}

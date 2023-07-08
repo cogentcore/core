@@ -234,7 +234,7 @@ func (sb *SliderBase) SizeFromAlloc() {
 		sb.Defaults()
 	}
 	spc := sb.BoxSpace()
-	sb.Size = sb.LayState.Alloc.Size.Dim(sb.Dim) - spc.SizeDim(sb.Dim)
+	sb.Size = sb.LayState.Alloc.Size.Dim(sb.Dim) - spc.Size().Dim(sb.Dim)
 	if sb.Size <= 0 {
 		return
 	}
@@ -530,9 +530,9 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 			mrg := sb.Sty.Layout.Margin.Dots
 			pad := sb.Sty.Layout.Padding.Dots()
 			odim := mat32.OtherDim(sb.Dim)
-			spc := mrg + pad.PosDim(odim)
+			spc := mrg + pad.Pos().Dim(odim)
 			ic.LayState.Alloc.PosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
-			ic.LayState.Alloc.PosRel.SetDim(odim, -pad.PosDim(odim))
+			ic.LayState.Alloc.PosRel.SetDim(odim, -pad.Pos().Dim(odim))
 			ic.LayState.Alloc.Size.X = sb.ThSize
 			ic.LayState.Alloc.Size.Y = sb.ThSize
 			if render {
@@ -794,10 +794,10 @@ func (sr *Slider) Render2DDefaultStyle() {
 	ht := 0.5 * sr.ThSize
 
 	odim := mat32.OtherDim(sr.Dim)
-	bpos.SetAddDim(odim, spc.PosDim(odim))
-	bsz.SetSubDim(odim, spc.SizeDim(odim))
-	bpos.SetAddDim(sr.Dim, spc.PosDim(odim)+ht)
-	bsz.SetSubDim(sr.Dim, spc.SizeDim(odim)+2*ht)
+	bpos.SetAddDim(odim, spc.Pos().Dim(odim))
+	bsz.SetSubDim(odim, spc.Size().Dim(odim))
+	bpos.SetAddDim(sr.Dim, spc.Pos().Dim(odim)+ht)
+	bsz.SetSubDim(sr.Dim, spc.Size().Dim(odim)+2*ht)
 	sr.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
 
 	bsz.SetDim(sr.Dim, sr.Pos)

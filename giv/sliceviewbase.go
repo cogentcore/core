@@ -515,7 +515,7 @@ func (sv *SliceViewBase) AvailHeight() float32 {
 	if sgHt == 0 {
 		return 0
 	}
-	sgHt -= sg.ExtraSize.Y + sg.Sty.BoxSpace()*2
+	sgHt -= sg.ExtraSize.Y + sg.Sty.BoxSpace().Size().Y
 	return sgHt
 }
 

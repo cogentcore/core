@@ -250,9 +250,9 @@ func (sv *SplitView) ConfigSplitters() {
 	mods, updt := sv.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.BoxSpace()
-	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.SizeDim(sv.Dim)
+	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
 	handsz := sv.HandleSize.Dots
-	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.SizeDim(odim))
+	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
 	spicon := IconName("")
 	if sv.Dim == mat32.X {
 		spicon = IconName("handle-circles-vert")
@@ -364,10 +364,10 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sz := len(sv.Kids)
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.BoxSpace()
-	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.SizeDim(sv.Dim)
+	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
 	avail := size - handsz*float32(sz-1)
 	// fmt.Printf("avail: %v\n", avail)
-	osz := sv.LayState.Alloc.Size.Dim(odim) - spc.SizeDim(odim)
+	osz := sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim)
 	pos := float32(0.0)
 
 	spsum := float32(0)
@@ -384,7 +384,7 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		gis.LayState.Alloc.Size.SetDim(odim, osz)
 		gis.LayState.Alloc.SizeOrig = gis.LayState.Alloc.Size
 		gis.LayState.Alloc.PosRel.SetDim(sv.Dim, pos)
-		gis.LayState.Alloc.PosRel.SetDim(odim, spc.PosDim(odim))
+		gis.LayState.Alloc.PosRel.SetDim(odim, spc.Pos().Dim(odim))
 		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, gis.LayState.Alloc.SizeOrig, gis.LayState.Alloc.PosRel)
 
 		pos += isz + handsz
@@ -517,12 +517,12 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	handsz := sr.ThumbSize.Dots
 	spc := sr.BoxSpace()
 	odim := mat32.OtherDim(sr.Dim)
-	sr.LayState.Alloc.Size.SetDim(odim, 2*(handsz+spc.SizeDim(odim)))
+	sr.LayState.Alloc.Size.SetDim(odim, 2*(handsz+spc.Size().Dim(odim)))
 	sr.LayState.Alloc.SizeOrig = sr.LayState.Alloc.Size
 
 	ic.LayState.Alloc.Size.SetDim(odim, 2*handsz)
 	ic.LayState.Alloc.Size.SetDim(sr.Dim, handsz)
-	ic.LayState.Alloc.PosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc.PosDim(sr.Dim))))
+	ic.LayState.Alloc.PosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc.Pos().Dim(sr.Dim))))
 	ic.LayState.Alloc.PosRel.SetDim(odim, 0)
 	if render {
 		ic.Layout2DTree()
@@ -575,7 +575,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 	}
 	sz := handsz
 	if !sr.IsDragging() {
-		sz += spc.SizeDim(sr.Dim)
+		sz += spc.Size().Dim(sr.Dim)
 	}
 	pos := off + int(sr.Pos-0.5*sz)
 	mxpos := off + int(sr.Pos+0.5*sz)

@@ -27,6 +27,7 @@ import (
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -496,8 +497,14 @@ func (w *Window) ConfigVLay() {
 	if !vp.HasChildren() {
 		mainVlay := vp.AddNewChild(KiT_Layout, "main-vlay")
 		_ = mainVlay
+		log.Println(w.OSWin.RenderArea(), w.OSWin.Size(), w.OSWin.WinSize())
 		// TODO: set padding/size based on render area size
-		// mainVlay.SetProp("padding", "20px")
+		mainVlay.SetProp("padding", gist.Sides[units.Value]{
+			Top:    units.NewDot(float32(w.OSWin.RenderArea().Min.Y)),
+			Left:   units.NewDot(float32(w.OSWin.RenderArea().Min.X)),
+			Bottom: units.NewDot(float32(w.OSWin.Size().Y - w.OSWin.RenderArea().Max.Y)),
+			Right:  units.NewDot(float32(w.OSWin.Size().X - w.OSWin.RenderArea().Max.X)),
+		})
 	}
 	w.MasterVLay = vp.Child(0).Embed(KiT_Layout).(*Layout)
 	if !w.MasterVLay.HasChildren() {

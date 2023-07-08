@@ -2176,9 +2176,9 @@ func (tv *TreeView) Size2D(iter int) {
 
 func (tv *TreeView) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := tv.Sty.BoxSpace()
-	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.AddScalar(spc)
+	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
 	tv.Parts.LayState.Alloc.PosOrig = tv.Parts.LayState.Alloc.Pos
-	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.AddScalar(-2.0 * spc)
+	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size())
 	tv.Parts.Layout2D(parBBox, iter)
 }
 

@@ -508,7 +508,7 @@ func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc gist.Si
 	}
 
 	// TODO: SideTODO: this needs to be set based on layout type
-	pos = spc.PosDim(mat32.X)
+	pos = spc.Pos().Dim(mat32.X)
 	size = need
 	if usePref {
 		size = pref
@@ -536,7 +536,7 @@ func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc gist.Si
 // share the same space, e.g., Horiz for a Vert layout, and vice-versa.
 func LayoutSharedDim(ly *Layout, dim mat32.Dims) {
 	spc := ly.BoxSpace()
-	avail := ly.LayState.Alloc.Size.Dim(dim) - spc.SizeDim(dim)
+	avail := ly.LayState.Alloc.Size.Dim(dim) - spc.Size().Dim(dim)
 	for i, c := range ly.Kids {
 		if c == nil {
 			continue
@@ -571,7 +571,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 	elspc := float32(sz-1) * ly.Spacing.Dots
 	al := ly.Sty.Layout.AlignDim(dim)
 	spc := ly.BoxSpace()
-	exspc := spc.SizeDim(dim) + elspc
+	exspc := spc.Size().Dim(dim) + elspc
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
 	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
 	need := ly.LayState.Size.Need.Dim(dim) - exspc
@@ -635,7 +635,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 	}
 
 	// now arrange everyone
-	pos := spc.PosDim(dim)
+	pos := spc.Pos().Dim(dim)
 
 	// todo: need a direction setting too
 	if gist.IsAlignEnd(al) && !stretchNeed && !stretchMax {
@@ -692,13 +692,13 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 
 	elspc := float32(sz-1) * ly.Spacing.Dots
 	spc := ly.BoxSpace()
-	exspc := spc.SizeDim(dim) + elspc
+	exspc := spc.Size().Dim(dim) + elspc
 
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
 	odim := mat32.OtherDim(dim)
 
 	// TODO: SideTODO: might be odim
-	pos := spc.PosDim(dim)
+	pos := spc.Pos().Dim(dim)
 	for i, c := range ly.Kids {
 		if c == nil {
 			continue
@@ -710,7 +710,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 		size := ni.LayState.Size.Need.Dim(dim)
 		if pos+size > avail {
 			ly.FlowBreaks = append(ly.FlowBreaks, i)
-			pos = spc.PosDim(dim)
+			pos = spc.Pos().Dim(dim)
 		}
 		ni.LayState.Alloc.Size.SetDim(dim, size)
 		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
@@ -777,7 +777,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 	elspc := float32(sz-1) * ly.Spacing.Dots
 	al := ly.Sty.Layout.AlignDim(dim)
 	spc := ly.BoxSpace()
-	exspc := spc.SizeDim(dim) + elspc
+	exspc := spc.Size().Dim(dim) + elspc
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
 	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
 	need := ly.LayState.Size.Need.Dim(dim) - exspc
@@ -827,7 +827,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 	}
 
 	// now arrange everyone
-	pos := spc.PosDim(dim)
+	pos := spc.Pos().Dim(dim)
 
 	// todo: need a direction setting too
 	if gist.IsAlignEnd(al) && !stretchNeed && !stretchMax {
@@ -913,7 +913,7 @@ func LayoutGridLay(ly *Layout) {
 			pref := ni.LayState.Size.Pref.Dim(dim)
 			need := ni.LayState.Size.Need.Dim(dim)
 			max := ni.LayState.Size.Max.Dim(dim)
-			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, 0, al)
+			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, gist.SideFloats{}, al)
 			ni.LayState.Alloc.Size.SetDim(dim, size)
 			ni.LayState.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
 
@@ -926,7 +926,7 @@ func LayoutGridLay(ly *Layout) {
 			pref := ni.LayState.Size.Pref.Dim(dim)
 			need := ni.LayState.Size.Need.Dim(dim)
 			max := ni.LayState.Size.Max.Dim(dim)
-			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, 0, al)
+			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, gist.SideFloats{}, al)
 			ni.LayState.Alloc.Size.SetDim(dim, size)
 			ni.LayState.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
 		}

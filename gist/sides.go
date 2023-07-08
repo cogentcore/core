@@ -108,6 +108,10 @@ type SetStringer interface {
 // SetAny sets the sides from the given value of any type
 func (s *Sides[T]) SetAny(a any) error {
 	switch val := a.(type) {
+	case Sides[T]:
+		*s = val
+	case *Sides[T]:
+		*s = *val
 	case T:
 		s.SetAll(val)
 	case *T:
@@ -137,7 +141,7 @@ func (s *Sides[T]) SetString(str string) error {
 		}
 		ss.SetString(field)
 	}
-	return nil
+	return s.Set(vals...)
 }
 
 // SideValues contains units.Value values for each side of a box
@@ -224,33 +228,7 @@ func (sf SideFloats) Pos() mat32.Vec2 {
 	return mat32.NewVec2(sf.Left, sf.Top)
 }
 
-// PosDim returns the position offset caused by the side values on the
-// given dimension (Left if X, Top if Y)
-func (sf SideFloats) PosDim(dim mat32.Dims) float32 {
-	switch dim {
-	case mat32.X:
-		return sf.Left
-	case mat32.Y:
-		return sf.Top
-	default:
-		panic("dim " + dim.String() + " is out of range")
-	}
-}
-
 // Size returns the toal size the side values take up (Left + Right, Top + Bottom)
 func (sf SideFloats) Size() mat32.Vec2 {
 	return mat32.NewVec2(sf.Left+sf.Right, sf.Top+sf.Bottom)
-}
-
-// SizeDim returns the total size the side values take up on the
-// given dimension (Left + Right if X, Top + Bottom if Y)
-func (sf SideFloats) SizeDim(dim mat32.Dims) float32 {
-	switch dim {
-	case mat32.X:
-		return sf.Left + sf.Right
-	case mat32.Y:
-		return sf.Top + sf.Bottom
-	default:
-		panic("dim " + dim.String() + " is out of range")
-	}
 }

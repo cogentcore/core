@@ -475,8 +475,9 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 	paloc := parw.LayState.Alloc.SizeOrig
 	if !paloc.IsNil() {
 		// fmt.Printf("paloc: %v, pvp: %v  lineonoff: %v\n", paloc, parw.VpBBox, tv.LineNoOff)
-		tv.RenderSz = paloc.Sub(parw.ExtraSize).SubScalar(spc * 2)
-		tv.RenderSz.X -= spc // extra space
+		tv.RenderSz = paloc.Sub(parw.ExtraSize).Sub(spc.Size())
+		// TODO: SideTODO: this is sketchy
+		tv.RenderSz.X -= spc.Size().X / 2 // extra space
 		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
 	} else {
 		sz := tv.LayState.Alloc.SizeOrig
@@ -484,7 +485,7 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 			sz = tv.LayState.SizePrefOrMax()
 		}
 		if !sz.IsNil() {
-			sz.SetSubScalar(2 * spc)
+			sz.SetSub(spc.Size())
 		}
 		tv.RenderSz = sz
 		// fmt.Printf("fallback rendersz: %v\n", tv.RenderSz)
@@ -587,7 +588,7 @@ func (tv *TextView) SetSize() bool {
 	rndsz := tv.RenderSz
 	rndsz.X += tv.LineNoOff
 	netsz := mat32.Vec2{float32(tv.LinesSize.X) + tv.LineNoOff, float32(tv.LinesSize.Y)}
-	cursz := tv.LayState.Alloc.Size.SubScalar(2 * spc)
+	cursz := tv.LayState.Alloc.Size.Sub(spc.Size())
 	if cursz.X < 10 || cursz.Y < 10 {
 		nwsz := netsz.Max(rndsz)
 		tv.Size2DFromWH(nwsz.X, nwsz.Y)
@@ -2954,7 +2955,7 @@ func (tv *TextView) ScrollToLeft(pos int) bool {
 func (tv *TextView) ScrollCursorToLeft() bool {
 	_, ri, _ := tv.WrappedLineNo(tv.CursorPos)
 	if ri <= 0 {
-		return tv.ScrollToLeft(tv.ObjBBox.Min.X - int(tv.Sty.BoxSpace()) - 2)
+		return tv.ScrollToLeft(tv.ObjBBox.Min.X - int(tv.Sty.BoxSpace().Left) - 2)
 	}
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	return tv.ScrollToLeft(curBBox.Min.X)
@@ -3385,7 +3386,8 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgcl
 	spc := sty.BoxSpace()
 
 	rst := tv.RenderStartPos()
-	ex := float32(tv.VpBBox.Max.X) - spc
+	// TODO: SideTODO: this is sketchy
+	ex := float32(tv.VpBBox.Max.X) - spc.Right
 	sx := rst.X + tv.LineNoOff
 
 	// fmt.Printf("select: %v -- %v\n", st, ed)
@@ -3435,7 +3437,7 @@ func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gist.Style, bgclr *gist.C
 func (tv *TextView) RenderStartPos() mat32.Vec2 {
 	st := &tv.Sty
 	spc := st.BoxSpace()
-	pos := tv.LayState.Alloc.Pos.AddScalar(spc)
+	pos := tv.LayState.Alloc.Pos.Add(spc.Pos())
 	return pos
 }
 
@@ -3467,7 +3469,8 @@ func (tv *TextView) VisSizes() {
 	}
 	if lno {
 		tv.SetFlag(int(TextViewHasLineNos))
-		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc // space for icon
+		// TODO: SideTODO: this is sketchy
+		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
 		tv.ClearFlag(int(TextViewHasLineNos))
 		tv.LineNoOff = 0
@@ -3572,7 +3575,8 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	clr := sty.Font.BgColor.Color.Highlight(10)
 	spos := mat32.NewVec2FmPoint(tv.VpBBox.Min)
 	epos := mat32.NewVec2FmPoint(tv.VpBBox.Max)
-	epos.X = spos.X + tv.LineNoOff - spc
+	// TODO: SideTODO: this is sketchy
+	epos.X = spos.X + tv.LineNoOff - spc.Size().X/2
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
 }
 
@@ -3590,7 +3594,8 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	spos.X = float32(tv.VpBBox.Min.X)
 	epos := tv.CharEndPos(lex.Pos{Ln: ed + 1})
 	epos.Y -= tv.LineHeight
-	epos.X = spos.X + tv.LineNoOff - spc
+	// TODO: SideTODO: this is sketchy
+	epos.X = spos.X + tv.LineNoOff - spc.Size().X/2
 	// fmt.Printf("line box: st %v ed: %v spos %v  epos %v\n", st, ed, spos, epos)
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
 }
@@ -3618,7 +3623,8 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	if ln < tv.NLines-1 {
 		ebox.Y -= tv.LineHeight
 	}
-	ebox.X = sbox.X + tv.LineNoOff - spc
+	// TODO: SideTODO: this is sketchy
+	ebox.X = sbox.X + tv.LineNoOff - spc.Size().X/2
 	bsz := ebox.Sub(sbox)
 	lclr, hasLClr := tv.Buf.LineColors[ln]
 	if tv.CursorPos.Ln == ln {
@@ -3647,7 +3653,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	pos := mat32.Vec2{}
 	lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - +mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
-	pos.X = float32(tv.VpBBox.Min.X) + spc
+	pos.X = float32(tv.VpBBox.Min.X) + spc.Pos().X
 
 	tv.LineNoRender.Render(rs, pos)
 	// todo: need an SvgRender interface that just takes an svg file or object
