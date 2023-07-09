@@ -80,8 +80,8 @@ func (fr *Frame) FrameStdRender() {
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 
 	rad := st.Border.Radius.Dots
-	pos = pos.AddScalar(st.Layout.Margin.Dots).SubScalar(0.5 * st.Border.Width.Dots)
-	sz = sz.SubScalar(2.0 * st.Layout.Margin.Dots).AddScalar(st.Border.Width.Dots)
+	pos = pos.Add(st.Layout.Margin.Dots().Pos()).SubScalar(0.5 * st.Border.Width.Dots)
+	sz = sz.Sub(st.Layout.Margin.Dots().Size()).AddScalar(st.Border.Width.Dots)
 
 	// then any shadow -- todo: optimize!
 	if st.BoxShadow.HasShadow() {

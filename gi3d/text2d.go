@@ -124,9 +124,9 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			sz = txt.TxtRender.Size
 		}
 	}
-	marg := txt.Sty.Layout.Margin.Dots
-	sz.SetAddScalar(2 * marg)
-	txt.TxtPos.SetScalar(marg)
+	marg := txt.Sty.Layout.Margin.Dots()
+	sz.SetAdd(marg.Size())
+	txt.TxtPos = marg.Pos()
 	szpt := sz.ToPoint()
 	if szpt == image.ZP {
 		szpt = image.Point{10, 10}

@@ -630,7 +630,8 @@ func (sr *Splitter) MouseEvent() {
 				if me.Action == mouse.Press {
 					ed := srr.This().(SliderPositioner).PointToRelPos(me.Where)
 					st := &srr.Sty
-					spc := st.Layout.Margin.Dots + 0.5*srr.ThSize
+					// TODO: SideTODO: unsure about dim
+					spc := st.Layout.Margin.Dots().Pos().Dim(srr.Dim) + 0.5*srr.ThSize
 					if srr.Dim == mat32.X {
 						srr.SliderPress(float32(ed.X) - spc)
 					} else {

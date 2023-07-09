@@ -17,7 +17,7 @@ import (
 // most of these are inherited
 type Text struct {
 	Align            Align          `xml:"text-align" inherit:"true" desc:"prop: text-align (inherited) = how to align text, horizontally. This *only* applies to the text within its containing element, and is typically relevant only for multi-line text: for single-line text, if element does not have a specified size that is different from the text size, then this has *no effect*."`
-	AlignV           Align          `xml:"text-vertical-align" inherit:desc:"prop: text-vertical-align (inherited) = vertical alignment of text. This *only* applies to the text within its containing element -- if that element does not have a specified size that is different from the text size, then this has *no effect*."`
+	AlignV           Align          `xml:"text-vertical-align" inherit:"true" desc:"prop: text-vertical-align (inherited) = vertical alignment of text. This *only* applies to the text within its containing element -- if that element does not have a specified size that is different from the text size, then this has *no effect*."`
 	Anchor           TextAnchors    `xml:"text-anchor" inherit:"true" desc:"prop: text-anchor (inherited) = for svg rendering only: determines the alignment relative to text position coordinate: for RTL start is right, not left, and start is top for TB"`
 	LetterSpacing    units.Value    `xml:"letter-spacing" desc:"prop: letter-spacing = spacing between characters and lines"`
 	WordSpacing      units.Value    `xml:"word-spacing" inherit:"true" desc:"prop: word-spacing (inherited) = extra space to add between words"`

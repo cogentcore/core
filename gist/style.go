@@ -212,8 +212,8 @@ func (s *Style) SetStyleProps(par *Style, props ki.Props, ctxt Context) {
 		s.InheritFields(par)
 	}
 	s.StyleFromProps(par, props, ctxt)
-	if s.Layout.Margin.Val > 0 && s.Text.ParaSpacing.Val == 0 {
-		s.Text.ParaSpacing = s.Layout.Margin
+	if s.Layout.Margin.Bottom.Dots > 0 && s.Text.ParaSpacing.Val == 0 {
+		s.Text.ParaSpacing = s.Layout.Margin.Bottom
 	}
 	s.Layout.SetStylePost(props)
 	s.Font.SetStylePost(props)
@@ -260,16 +260,12 @@ func (s *Style) CopyUnitContext(ctxt *units.Context) {
 // in dots -- todo: must complicate this if we want different spacing on
 // different sides box outside-in: margin | border | padding | content
 func (s *Style) BoxSpace() SideFloats {
-	// total of layout and border
-	lb := s.Layout.Margin.Dots + s.Border.Width.Dots
-	return SideFloats{
-		Sides: Sides[float32]{
-			Top:    lb + s.Layout.Padding.Top.Dots,
-			Right:  lb + s.Layout.Padding.Right.Dots,
-			Bottom: lb + s.Layout.Padding.Bottom.Dots,
-			Left:   lb + s.Layout.Padding.Left.Dots,
-		},
-	}
+	return NewSideFloats(
+		s.Layout.Margin.Top.Dots+s.Border.Width.Dots+s.Layout.Padding.Top.Dots,
+		s.Layout.Margin.Right.Dots+s.Border.Width.Dots+s.Layout.Padding.Right.Dots,
+		s.Layout.Margin.Bottom.Dots+s.Border.Width.Dots+s.Layout.Padding.Bottom.Dots,
+		s.Layout.Margin.Left.Dots+s.Border.Width.Dots+s.Layout.Padding.Left.Dots,
+	)
 }
 
 // SubProps returns a sub-property map from given prop map for a given styling

@@ -779,8 +779,8 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
 
-	pos := wb.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
-	sz := wb.LayState.Alloc.Size.AddScalar(-2.0 * st.Layout.Margin.Dots)
+	pos := wb.LayState.Alloc.Pos.Add(st.Layout.Margin.Dots().Pos())
+	sz := wb.LayState.Alloc.Size.Sub(st.Layout.Margin.Dots().Size())
 	rad := st.Border.Radius.Dots
 
 	// first do any shadow

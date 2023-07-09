@@ -346,11 +346,11 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			if inh {
 				ly.Margin = par.(*Layout).Margin
 			} else if init {
-				ly.Margin.Val = 0
+				ly.Margin.Set()
 			}
 			return
 		}
-		ly.Margin.SetIFace(val, key)
+		ly.Margin.SetAny(val)
 	},
 	"padding": func(obj any, key string, val any, par any, ctxt Context) {
 		ly := obj.(*Layout)

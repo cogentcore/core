@@ -703,8 +703,8 @@ func (sp *Separator) RenderSeparator() {
 	rs, pc, st := sp.RenderLock()
 	defer sp.RenderUnlock(rs)
 
-	pos := sp.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
-	sz := sp.LayState.Alloc.Size.AddScalar(-2.0 * st.Layout.Margin.Dots)
+	pos := sp.LayState.Alloc.Pos.Add(st.Layout.Margin.Dots().Pos())
+	sz := sp.LayState.Alloc.Size.Sub(st.Layout.Margin.Dots().Size())
 
 	if !st.Font.BgColor.IsNil() {
 		pc.FillBox(rs, pos, sz, &st.Font.BgColor)

@@ -439,7 +439,8 @@ func (sb *SliderBase) MouseEvent() {
 				if me.Action == mouse.Press {
 					ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 					st := &sbb.Sty
-					spc := st.Layout.Margin.Dots + 0.5*sbb.ThSizeReal
+					// TODO: SideTODO: not sure about dim
+					spc := st.Layout.Margin.Dots().Pos().Dim(sbb.Dim) + 0.5*sbb.ThSizeReal
 					if sbb.Dim == mat32.X {
 						sbb.SliderPress(float32(ed.X) - spc)
 					} else {
@@ -527,10 +528,10 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 		ick := sb.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
 		if ick != nil {
 			ic := ick.(*Icon)
-			mrg := sb.Sty.Layout.Margin.Dots
+			mrg := sb.Sty.Layout.Margin.Dots()
 			pad := sb.Sty.Layout.Padding.Dots()
 			odim := mat32.OtherDim(sb.Dim)
-			spc := mrg + pad.Pos().Dim(odim)
+			spc := mrg.Pos().Dim(odim) + pad.Pos().Dim(odim)
 			ic.LayState.Alloc.PosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
 			ic.LayState.Alloc.PosRel.SetDim(odim, -pad.Pos().Dim(odim))
 			ic.LayState.Alloc.Size.X = sb.ThSize
@@ -730,7 +731,7 @@ func (sr *Slider) Size2D(iter int) {
 	}
 	st := &sr.Sty
 	// get at least thumbsize + margin + border.size
-	sz := sr.ThSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
+	sz := sr.ThSize + st.Layout.Margin.Dots().Size().Dim(mat32.OtherDim(sr.Dim)) + 2.0*(st.Border.Width.Dots)
 	sr.LayState.Alloc.Size.SetDim(mat32.OtherDim(sr.Dim), sz)
 }
 

@@ -155,7 +155,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 			giv.GoGiEditorDialog(vp)
 		}
 	})
-	button2.SetProp("padding", "20px 50px 10px 100px")
 
 	checkbox := gi.AddNewCheckBox(brow, "checkbox")
 	checkbox.Text = "Toggle"
