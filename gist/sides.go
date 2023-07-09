@@ -178,47 +178,43 @@ func NewSideValuesTry(vals ...units.Value) (SideValues, error) {
 // ToDots converts the values for each of the sides to raw display pixels (dots)
 // and sets the Dots field for each of the values. It returns the dot values as a SideFloats.
 func (sv *SideValues) ToDots(uc *units.Context) SideFloats {
-	return SideFloats{
-		Sides: Sides[float32]{
-			Top:    sv.Top.ToDots(uc),
-			Right:  sv.Right.ToDots(uc),
-			Bottom: sv.Bottom.ToDots(uc),
-			Left:   sv.Left.ToDots(uc),
-		},
-	}
+	return NewSideFloats(
+		sv.Top.ToDots(uc),
+		sv.Right.ToDots(uc),
+		sv.Bottom.ToDots(uc),
+		sv.Left.ToDots(uc),
+	)
 }
 
 // Dots returns the dot values of the sides as a SideFloats.
 // It does not compute them; see ToDots for that.
-func (sv *SideValues) Dots() SideFloats {
-	return SideFloats{
-		Sides: Sides[float32]{
-			Top:    sv.Top.Dots,
-			Right:  sv.Right.Dots,
-			Bottom: sv.Bottom.Dots,
-			Left:   sv.Left.Dots,
-		},
-	}
+func (sv SideValues) Dots() SideFloats {
+	return NewSideFloats(
+		sv.Top.Dots,
+		sv.Right.Dots,
+		sv.Bottom.Dots,
+		sv.Left.Dots,
+	)
 }
 
-// ApplyToGeom expands position and size to accommodate the additional space
-// in SideValues (e.g., for Padding, Margin)
-func (sv *SideValues) ApplyToGeom(pos, sz *mat32.Vec2) {
-	sv.ApplyToPos(pos)
-	sv.ApplyToSize(sz)
-}
+// // ApplyToGeom expands position and size to accommodate the additional space
+// // in SideValues (e.g., for Padding, Margin)
+// func (sv *SideValues) ApplyToGeom(pos, sz *mat32.Vec2) {
+// 	sv.ApplyToPos(pos)
+// 	sv.ApplyToSize(sz)
+// }
 
-// ApplyToPos adds to the given position the offset in dots caused by the side values
-func (sv *SideValues) ApplyToPos(pos *mat32.Vec2) {
-	pos.X += sv.Left.Dots
-	pos.Y += sv.Top.Dots
-}
+// // ApplyToPos adds to the given position the offset in dots caused by the side values
+// func (sv *SideValues) ApplyToPos(pos *mat32.Vec2) {
+// 	pos.X += sv.Left.Dots
+// 	pos.Y += sv.Top.Dots
+// }
 
-// ApplyToSize subtracts from the given size the offest in dots caused by the side values
-func (sv *SideValues) ApplyToSize(sz *mat32.Vec2) {
-	sz.X -= sv.Right.Dots
-	sz.Y -= sv.Bottom.Dots
-}
+// // ApplyToSize subtracts from the given size the offest in dots caused by the side values
+// func (sv *SideValues) ApplyToSize(sz *mat32.Vec2) {
+// 	sz.X -= sv.Right.Dots
+// 	sz.Y -= sv.Bottom.Dots
+// }
 
 // SideFloats contains float32 values for each side of a box
 type SideFloats struct {
@@ -233,7 +229,8 @@ func NewSideFloats(vals ...float32) SideFloats {
 	return sides
 }
 
-// NewSideFloatsTry is a helper that creates new side floats and calls Set on them.
+// NewSideFloatsTry is a helper that creates new side floats
+// and calls Set on them with the given values.
 // It returns an error value if there is one.
 func NewSideFloatsTry(vals ...float32) (SideFloats, error) {
 	sides := Sides[float32]{}
@@ -269,4 +266,55 @@ func (sf SideFloats) Pos() mat32.Vec2 {
 // Size returns the toal size the side values take up (Left + Right, Top + Bottom)
 func (sf SideFloats) Size() mat32.Vec2 {
 	return mat32.NewVec2(sf.Left+sf.Right, sf.Top+sf.Bottom)
+}
+
+// SideBorders contains Border style values for each side of a box
+type SideBorders struct {
+	Sides[Border]
+}
+
+// NewSideBorders is a helper that creates new side borders
+// and calls Set on them with the given values.
+// It does not return any error values and just logs them.
+func NewSideBorders(vals ...Border) SideBorders {
+	sides, _ := NewSideBordersTry(vals...)
+	return sides
+}
+
+// NewSideBordersTry is a helper that creates new side borders
+// and calls Set on them with the given values.
+// It returns an error value if there is one.
+func NewSideBordersTry(vals ...Border) (SideBorders, error) {
+	sides := Sides[Border]{}
+	err := sides.Set(vals...)
+	return SideBorders{Sides: sides}, err
+}
+
+// ToDots runs ToDots on the unit values to compile
+// down to raw pixel values.
+func (sb *SideBorders) ToDots(uc *units.Context) {
+	sb.Top.ToDots(uc)
+	sb.Right.ToDots(uc)
+	sb.Bottom.ToDots(uc)
+	sb.Left.ToDots(uc)
+}
+
+// Radius returns a side values with the border radius for each side
+func (sb SideBorders) Radius() SideValues {
+	return NewSideValues(
+		sb.Top.Radius,
+		sb.Right.Radius,
+		sb.Bottom.Radius,
+		sb.Left.Radius,
+	)
+}
+
+// Width returns a side values with the border width for each side
+func (sb SideBorders) Width() SideValues {
+	return NewSideValues(
+		sb.Top.Width,
+		sb.Right.Width,
+		sb.Bottom.Width,
+		sb.Left.Width,
+	)
 }

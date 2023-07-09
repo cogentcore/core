@@ -476,19 +476,34 @@ func (pc *Paint) DrawRectangle(rs *State, x, y, w, h float32) {
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h, r float32) {
-	x0, x1, x2, x3 := x, x+r, x+w-r, x+w
-	y0, y1, y2, y3 := y, y+r, y+h-r, y+h
+// DrawRoundedRectangle draws a rounder rectangle with the given x and y position,
+// width and height, and border radius for each corner.
+func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r gist.SideFloats) {
+	// position values; underscores are for unused values
+	var (
+		xtl, ytl   = x, y                 // top left
+		xtli, ytli = x + r.Top, y + r.Top // top left inset
+
+		_, ytr     = x + w, y                     // top right
+		xtri, ytri = x + w - r.Right, y + r.Right // top right inset
+
+		xbr, _     = x + w, y + h                       // bottom right
+		xbri, ybri = x + w - r.Bottom, y + h - r.Bottom // bottom right inset
+
+		_, ybl     = x, y                       // bottom left
+		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
+	)
+
 	pc.NewSubPath(rs)
-	pc.MoveTo(rs, x1, y0)
-	pc.LineTo(rs, x2, y0)
-	pc.DrawArc(rs, x2, y1, r, mat32.DegToRad(270), mat32.DegToRad(360))
-	pc.LineTo(rs, x3, y2)
-	pc.DrawArc(rs, x2, y2, r, mat32.DegToRad(0), mat32.DegToRad(90))
-	pc.LineTo(rs, x1, y3)
-	pc.DrawArc(rs, x1, y2, r, mat32.DegToRad(90), mat32.DegToRad(180))
-	pc.LineTo(rs, x0, y1)
-	pc.DrawArc(rs, x1, y1, r, mat32.DegToRad(180), mat32.DegToRad(270))
+	pc.MoveTo(rs, xtli, ytl)
+	pc.LineTo(rs, xtri, ytr)
+	pc.DrawArc(rs, xtri, ytri, r.Right, mat32.DegToRad(270), mat32.DegToRad(360))
+	pc.LineTo(rs, xbr, ybri)
+	pc.DrawArc(rs, xbri, ybri, r.Bottom, mat32.DegToRad(0), mat32.DegToRad(90))
+	pc.LineTo(rs, xbli, ybl)
+	pc.DrawArc(rs, xbli, ybli, r.Left, mat32.DegToRad(90), mat32.DegToRad(180))
+	pc.LineTo(rs, xtl, ytli)
+	pc.DrawArc(rs, xtli, ytli, r.Top, mat32.DegToRad(180), mat32.DegToRad(270))
 	pc.ClosePath(rs)
 }
 
