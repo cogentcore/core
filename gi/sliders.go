@@ -730,9 +730,10 @@ func (sr *Slider) Size2D(iter int) {
 		sr.Defaults()
 	}
 	st := &sr.Sty
+	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
-	sz := sr.ThSize + st.Layout.Margin.Dots().Size().Dim(mat32.OtherDim(sr.Dim)) + 2.0*(st.Border.Width.Dots)
-	sr.LayState.Alloc.Size.SetDim(mat32.OtherDim(sr.Dim), sz)
+	sz := sr.ThSize + st.Layout.Margin.Dots().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
+	sr.LayState.Alloc.Size.SetDim(odim, sz)
 }
 
 func (sr *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -773,8 +774,10 @@ func (sr *Slider) Render2DDefaultStyle() {
 	// overall fill box
 	sr.RenderStdBox(&sr.StateStyles[SliderBox])
 
-	pc.StrokeStyle.SetColor(&st.Border.Color)
-	pc.StrokeStyle.Width = st.Border.Width
+	// TODO: SideTODO: look here if slider borders break
+
+	// pc.StrokeStyle.SetColor(&st.Border.Color)
+	// pc.StrokeStyle.Width = st.Border.Width
 	pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
 	// layout is as follows, for width dimension
@@ -799,11 +802,11 @@ func (sr *Slider) Render2DDefaultStyle() {
 	bsz.SetSubDim(odim, spc.Size().Dim(odim))
 	bpos.SetAddDim(sr.Dim, spc.Pos().Dim(odim)+ht)
 	bsz.SetSubDim(sr.Dim, spc.Size().Dim(odim)+2*ht)
-	sr.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+	sr.RenderBoxImpl(bpos, bsz, st.Border)
 
 	bsz.SetDim(sr.Dim, sr.Pos)
 	pc.FillStyle.SetColorSpec(&sr.StateStyles[SliderValue].Font.BgColor)
-	sr.RenderBoxImpl(bpos, bsz, st.Border.Radius.Dots)
+	sr.RenderBoxImpl(bpos, bsz, st.Border)
 
 	tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
@@ -956,8 +959,8 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 	// overall fill box
 	sb.RenderStdBox(&sb.StateStyles[SliderBox])
 
-	pc.StrokeStyle.SetColor(&st.Border.Color)
-	pc.StrokeStyle.Width = st.Border.Width
+	// pc.StrokeStyle.SetColor(&st.Border.Color)
+	// pc.StrokeStyle.Width = st.Border.Width
 	pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
 	// scrollbar is basic box in content size
@@ -965,11 +968,11 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 	pos := sb.LayState.Alloc.Pos.Add(spc.Pos())
 	sz := sb.LayState.Alloc.Size.Sub(spc.Size())
 
-	sb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
-	pos.SetAddDim(sb.Dim, sb.Pos)                    // start of thumb
+	sb.RenderBoxImpl(pos, sz, st.Border) // surround box
+	pos.SetAddDim(sb.Dim, sb.Pos)        // start of thumb
 	sz.SetDim(sb.Dim, sb.ThSize)
 	pc.FillStyle.SetColorSpec(&sb.StateStyles[SliderValue].Font.BgColor)
-	sb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+	sb.RenderBoxImpl(pos, sz, st.Border)
 }
 
 func (sb *ScrollBar) ConnectEvents2D() {

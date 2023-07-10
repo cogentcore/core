@@ -510,9 +510,11 @@ func (tv *TabView) RenderTabSeps() {
 	rs, pc, st := tv.RenderLock()
 	defer tv.RenderUnlock(rs)
 
-	pc.StrokeStyle.Width = st.Border.Width
-	pc.StrokeStyle.SetColor(&st.Border.Color)
-	bw := st.Border.Width.Dots
+	// just like with standard separator, use top width like CSS
+	// (see https://www.w3schools.com/howto/howto_css_dividers.asp)
+	pc.StrokeStyle.Width = st.Border.Width.Top
+	pc.StrokeStyle.SetColor(&st.Border.Color.Top)
+	bw := st.Border.Width.Dots()
 
 	tbs := tv.Tabs()
 	sz := len(tbs.Kids)
@@ -522,7 +524,7 @@ func (tv *TabView) RenderTabSeps() {
 
 		pos := ni.LayState.Alloc.Pos
 		sz := ni.LayState.Alloc.Size.Sub(st.Layout.Margin.Dots().Size())
-		pc.DrawLine(rs, pos.X-bw, pos.Y, pos.X-bw, pos.Y+sz.Y)
+		pc.DrawLine(rs, pos.X-bw.Pos().X, pos.Y, pos.X-bw.Pos().X, pos.Y+sz.Y)
 	}
 	pc.FillStrokeClear(rs)
 }

@@ -66,10 +66,10 @@ type Border struct {
 
 // Border contains style parameters for borders
 type Border struct {
-	Style  BorderStyles `xml:"style" desc:"prop: border-style = how to draw the border"`
-	Width  units.Value  `xml:"width" desc:"prop: border-width = width of the border"`
-	Radius units.Value  `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
-	Color  Color        `xml:"color" desc:"prop: border-color = color of the border"`
+	Style  Sides[BorderStyles] `xml:"style" desc:"prop: border-style = how to draw the border"`
+	Width  SideValues          `xml:"width" desc:"prop: border-width = width of the border"`
+	Radius SideValues          `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
+	Color  Sides[Color]        `xml:"color" desc:"prop: border-color = color of the border"`
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels

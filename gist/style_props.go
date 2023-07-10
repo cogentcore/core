@@ -968,13 +968,15 @@ var StyleTextFuncs = map[string]StyleFunc{
 
 // StyleBorderFuncs are functions for styling the Border object
 var StyleBorderFuncs = map[string]StyleFunc{
+	// TODO: SideTODO: need to figure out how to get key and context information for side SetAny calls
+	// with padding, margin, border, etc
 	"border-style": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
 				bs.Style = par.(*Border).Style
 			} else if init {
-				bs.Style = BorderSolid
+				bs.Style.Set(BorderSolid)
 			}
 			return
 		}
@@ -982,10 +984,12 @@ var StyleBorderFuncs = map[string]StyleFunc{
 		case string:
 			kit.Enums.SetAnyEnumIfaceFromString(&bs.Style, vt)
 		case BorderStyles:
-			bs.Style = vt
+			bs.Style.Set(vt)
+		case []BorderStyles:
+			bs.Style.Set(vt...)
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				bs.Style = BorderStyles(iv)
+				bs.Style.Set(BorderStyles(iv))
 			} else {
 				StyleSetError(key, val)
 			}
@@ -997,11 +1001,11 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Width = par.(*Border).Width
 			} else if init {
-				bs.Width.Val = 0
+				bs.Width.Set()
 			}
 			return
 		}
-		bs.Width.SetIFace(val, key)
+		bs.Width.SetAny(val)
 	},
 	"border-radius": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
@@ -1009,11 +1013,11 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Radius = par.(*Border).Radius
 			} else if init {
-				bs.Radius.Val = 0
+				bs.Radius.Set()
 			}
 			return
 		}
-		bs.Radius.SetIFace(val, key)
+		bs.Radius.SetAny(val)
 	},
 	"border-color": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
@@ -1021,11 +1025,11 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Color = par.(*Border).Color
 			} else if init {
-				bs.Color = Black
+				bs.Color.Set(Black)
 			}
 			return
 		}
-		bs.Color.SetIFace(val, ctxt, key)
+		bs.Color.SetAny(val)
 	},
 }
 
@@ -1040,7 +1044,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Style = par.(*Border).Style
 			} else if init {
-				bs.Style = BorderNone
+				bs.Style.Set(BorderNone)
 			}
 			return
 		}
@@ -1048,10 +1052,12 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 		case string:
 			kit.Enums.SetAnyEnumIfaceFromString(&bs.Style, vt)
 		case BorderStyles:
-			bs.Style = vt
+			bs.Style.Set(vt)
+		case []BorderStyles:
+			bs.Style.Set(vt...)
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				bs.Style = BorderStyles(iv)
+				bs.Style.Set(BorderStyles(iv))
 			} else {
 				StyleSetError(key, val)
 			}
@@ -1063,11 +1069,11 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Width = par.(*Border).Width
 			} else if init {
-				bs.Width.Val = 0
+				bs.Width.Set()
 			}
 			return
 		}
-		bs.Width.SetIFace(val, key)
+		bs.Width.SetAny(val)
 	},
 	"outline-radius": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
@@ -1075,11 +1081,11 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Radius = par.(*Border).Radius
 			} else if init {
-				bs.Radius.Val = 0
+				bs.Radius.Set()
 			}
 			return
 		}
-		bs.Radius.SetIFace(val, key)
+		bs.Radius.SetAny(val)
 	},
 	"outline-color": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)
@@ -1087,11 +1093,11 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Color = par.(*Border).Color
 			} else if init {
-				bs.Color = Black
+				bs.Color.Set(Black)
 			}
 			return
 		}
-		bs.Color.SetIFace(val, ctxt, key)
+		bs.Color.SetAny(val)
 	},
 }
 

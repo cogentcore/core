@@ -42,11 +42,33 @@ func ColorFromString(str string, base color.Color) (Color, error) {
 	return c, err
 }
 
-// ColorFromName returns a new color set from given name.
+// MustColorFromString returns a new color set from given string and optional base
+// color for transforms, panicking on any errors -- see ColorFromString
+func MustColorFromString(str string, base color.Color) Color {
+	var c Color
+	err := c.SetString(str, base)
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
+
+// ColorFromName returns a new color set from given name -- see SetName
 func ColorFromName(name string) (Color, error) {
 	var c Color
 	err := c.SetName(name)
 	return c, err
+}
+
+// MustColorFromName returns a new color set from given name,
+// panicking on any errors -- see ColorFromName
+func MustColorFromName(name string) Color {
+	var c Color
+	err := c.SetName(name)
+	if err != nil {
+		panic(err)
+	}
+	return c
 }
 
 // ColorFromColor returns a new gist.Color from image/color.Color

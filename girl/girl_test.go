@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/units"
 	"github.com/goki/mat32"
 )
 
@@ -109,30 +110,47 @@ func TestRender(t *testing.T) {
 	rs.PushBounds(szrec)
 	rs.Lock()
 
-	blk, _ := gist.ColorFromName("black")
-	wht, _ := gist.ColorFromName("white")
-	blu, _ := gist.ColorFromName("blue")
+	ppl := gist.MustColorFromName("purple")
+	wht := gist.MustColorFromName("white")
+	blu := gist.MustColorFromName("blue")
+	grn := gist.MustColorFromName("green")
+	red := gist.MustColorFromName("red")
+	org := gist.MustColorFromName("orange")
+	lbl := gist.MustColorFromName("lightblue")
+
+	bs := gist.Border{}
+	bs.Color.Set(red, blu, grn, org)
+	bs.Width.Set(units.NewDot(20), units.NewDot(30), units.NewDot(40), units.NewDot(50))
+	bs.ToDots(&pc.UnContext)
 
 	// first, draw a frame around the entire image
-	pc.StrokeStyle.SetColor(blk)
+	// pc.StrokeStyle.SetColor(blk)
 	pc.FillStyle.SetColor(wht)
-	pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
-	pc.DrawRectangle(rs, 0, 0, float32(imgsz.X), float32(imgsz.Y))
+	// pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
+	pc.DrawRectangle(rs, 0, 0, float32(imgsz.X), float32(imgsz.Y), bs)
 	pc.FillStrokeClear(rs) // actually render path that has been setup
 
 	// next draw a rounded rectangle
-	pc.FillStyle.SetColor(nil)
+	bs.Color.Set(ppl, grn, red, blu)
+	// bs.Width.Set(units.NewDot(10))
+	bs.Radius.Set(units.NewDot(0), units.NewDot(30), units.NewDot(10))
+	pc.FillStyle.SetColor(lbl)
 	pc.StrokeStyle.Width.SetDot(10)
-	pc.DrawRoundedRectangle(rs, 20, 20, 150, 100, 6)
+	bs.ToDots(&pc.UnContext)
+	pc.DrawRoundedRectangle(rs, 60, 60, 150, 100, bs)
 	pc.FillStrokeClear(rs)
 
-	// use units-based styling instead of dots:
-	pc.StrokeStyle.SetColor(blu)
-	pc.StrokeStyle.Width.SetPct(2) // percent of total image (width)
-	pc.ToDots()                    // convert pct -> dots based on units context
-	// fmt.Printf("pct dots: %g\n", pc.StrokeStyle.Width.Dots) // 6.4
-	pc.DrawRoundedRectangle(rs, 40, 40, 150, 100, 6)
-	pc.FillStrokeClear(rs)
+	// // use units-based styling instead of dots:
+	// bs.Color.Set(blu, grn, blk)
+	// bs.Width.Set(units.NewPct(5), units.NewPct(7), units.NewPct(3), units.NewPct(15))
+	// bs.Width.ToDots(&pc.UnContext)
+	// bs.ToDots(&pc.UnContext)
+	// // pc.StrokeStyle.SetColor(blu)
+	// // pc.StrokeStyle.Width.SetPct(2) // percent of total image (width)
+	// // pc.ToDots() // convert pct -> dots based on units context
+	// // fmt.Printf("pct dots: %g\n", pc.StrokeStyle.Width.Dots) // 6.4
+	// pc.DrawChangingRoundedRectangle(rs, 100, 100, 150, 100, bs)
+	// pc.FillStrokeClear(rs)
 
 	// Text rendering
 	tsty := &gist.Text{}
@@ -150,7 +168,7 @@ func TestRender(t *testing.T) {
 	tsz := txt.LayoutStdLR(tsty, fsty, &pc.UnContext, mat32.Vec2{100, 40})
 	fmt.Printf("text size: %v\n", tsz)
 
-	txt.Render(rs, mat32.Vec2{60, 50})
+	txt.Render(rs, mat32.Vec2{85, 80})
 
 	rs.Unlock()
 

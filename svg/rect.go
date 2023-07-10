@@ -6,6 +6,8 @@ package svg
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -62,11 +64,18 @@ func (g *Rect) Render2D() {
 	}
 	pc := &g.Pnt
 	rs.Lock()
+	// TODO: figure out a better way to do this
+	bs := gist.Border{}
+	bs.Style.Set(gist.BorderSolid)
+	bs.Width.Set(pc.StrokeStyle.Width)
+	bs.Color.Set(pc.StrokeStyle.Color.Color)
+	bs.Radius.Set(units.NewPx(g.Radius.X))
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
-		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
+		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, bs)
 	} else {
 		// todo: only supports 1 radius right now -- easy to add another
-		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, g.Radius.X)
+		// TODO: SideTODO: also support different radii for each corner
+		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, bs)
 	}
 	pc.FillStrokeClear(rs)
 	rs.Unlock()

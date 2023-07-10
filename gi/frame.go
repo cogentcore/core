@@ -72,7 +72,6 @@ func (ev *Stripes) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 
 // FrameStdRender does the standard rendering of the frame itself
 func (fr *Frame) FrameStdRender() {
-	// TODO: SideTODO: IMPORTANT: need to update render functions to use actual values for width and color instead of placeholder top values here
 	rs, pc, st := fr.RenderLock()
 	defer fr.RenderUnlock(rs)
 
@@ -80,20 +79,22 @@ func (fr *Frame) FrameStdRender() {
 	sz := fr.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 
-	rad := st.Border.Radius().Dots()
+	rad := st.Border.Radius.Dots()
 	// TODO: SideTODO: not sure about this
-	pos = pos.Add(st.Layout.Margin.Dots().Pos()).Sub(st.Border.Width().Dots().Pos().MulScalar(0.5))
-	sz = sz.Sub(st.Layout.Margin.Dots().Size()).Add(st.Border.Width().Dots().Size().MulScalar(0.5))
+	pos = pos.Add(st.Layout.Margin.Dots().Pos()).Sub(st.Border.Width.Dots().Pos().MulScalar(0.5))
+	sz = sz.Sub(st.Layout.Margin.Dots().Size()).Add(st.Border.Width.Dots().Size().MulScalar(0.5))
 
 	// then any shadow -- todo: optimize!
 	if st.BoxShadow.HasShadow() {
 		spos := pos.Add(mat32.Vec2{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
+		// TODO: SideTODO: unsure about border styling here
+		// no border on box shadow (we do later)
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColor(&st.BoxShadow.Color)
-		if rad == (gist.SideFloats{}) {
-			pc.DrawRectangle(rs, spos.X, spos.Y, sz.X, sz.Y)
+		if gist.SidesAreZero(rad.This()) {
+			pc.DrawRectangle(rs, spos.X, spos.Y, sz.X, sz.Y, gist.Border{})
 		} else {
-			pc.DrawRoundedRectangle(rs, spos.X, spos.Y, sz.X, sz.Y, rad)
+			pc.DrawRoundedRectangle(rs, spos.X, spos.Y, sz.X, sz.Y, gist.Border{})
 		}
 		pc.FillStrokeClear(rs)
 	}
@@ -103,12 +104,12 @@ func (fr *Frame) FrameStdRender() {
 	}
 
 	pc.FillStyle.SetColor(nil)
-	pc.StrokeStyle.SetColor(&st.Border.Top.Color)
-	pc.StrokeStyle.Width = st.Border.Width().Top
-	if rad == (gist.SideFloats{}) {
-		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
+	// pc.StrokeStyle.SetColor(&st.Border.Color.Top)
+	// pc.StrokeStyle.Width = st.Border.Width.Top
+	if gist.SidesAreZero(rad.This()) {
+		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, st.Border)
 	} else {
-		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, st.Border)
 	}
 	pc.FillStrokeClear(rs)
 }

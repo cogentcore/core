@@ -155,6 +155,9 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 			giv.GoGiEditorDialog(vp)
 		}
 	})
+	button2.SetProp("border-color", gist.NewSides[gist.Color](gist.MustColorFromName("green"), gist.MustColorFromName("red"), gist.MustColorFromName("blue"), gist.MustColorFromName("orange")))
+	button2.SetProp("border-width", "2px 4px 6px 8px")
+	button2.SetProp("border-radius", "0 2 6 10")
 
 	checkbox := gi.AddNewCheckBox(brow, "checkbox")
 	checkbox.Text = "Toggle"

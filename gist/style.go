@@ -42,7 +42,7 @@ type Style struct {
 	Visible       bool          `xml:"visible" desc:"is the item visible or not"`
 	Inactive      bool          `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
 	Layout        Layout        `desc:"layout styles -- do not prefix with any xml"`
-	Border        SideBorders   `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
+	Border        Border        `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
 	BoxShadow     Shadow        `xml:"box-shadow" desc:"prop: box-shadow = type of shadow to render around box"`
 	Font          Font          `desc:"font parameters -- no xml prefix -- also has color, background-color"`
 	Text          Text          `desc:"text parameters -- no xml prefix"`
@@ -59,7 +59,7 @@ func (s *Style) Defaults() {
 	// mostly all the defaults are 0 initial values, except these..
 	s.IsSet = false
 	s.UnContext.Defaults()
-	s.Outline.Style = BorderNone
+	s.Outline.Style.Set(BorderNone)
 	s.Display = true
 	s.PointerEvents = true
 	s.Layout.Defaults()
@@ -261,10 +261,10 @@ func (s *Style) CopyUnitContext(ctxt *units.Context) {
 // different sides box outside-in: margin | border | padding | content
 func (s *Style) BoxSpace() SideFloats {
 	return NewSideFloats(
-		s.Layout.Margin.Top.Dots+s.Border.Top.Width.Dots+s.Layout.Padding.Top.Dots,
-		s.Layout.Margin.Right.Dots+s.Border.Right.Width.Dots+s.Layout.Padding.Right.Dots,
-		s.Layout.Margin.Bottom.Dots+s.Border.Bottom.Width.Dots+s.Layout.Padding.Bottom.Dots,
-		s.Layout.Margin.Left.Dots+s.Border.Left.Width.Dots+s.Layout.Padding.Left.Dots,
+		s.Layout.Margin.Top.Dots+s.Border.Width.Top.Dots+s.Layout.Padding.Top.Dots,
+		s.Layout.Margin.Right.Dots+s.Border.Width.Right.Dots+s.Layout.Padding.Right.Dots,
+		s.Layout.Margin.Bottom.Dots+s.Border.Width.Bottom.Dots+s.Layout.Padding.Bottom.Dots,
+		s.Layout.Margin.Left.Dots+s.Border.Width.Left.Dots+s.Layout.Padding.Left.Dots,
 	)
 }
 

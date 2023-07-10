@@ -739,7 +739,7 @@ func (sr *Splitter) RenderSplitter() {
 		pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
 		pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
 		sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
-		sr.RenderBoxImpl(pos, sz, 0)
+		sr.RenderBoxImpl(pos, sz, gist.Border{})
 
 		sr.RenderUnlock(rs)
 	}

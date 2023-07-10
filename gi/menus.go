@@ -709,10 +709,9 @@ func (sp *Separator) RenderSeparator() {
 	if !st.Font.BgColor.IsNil() {
 		pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 	}
-	// TODO: SideTODO: might want to replace placeholder top values here,
-	// but should be fine because only one border side matters for seperators
-	pc.StrokeStyle.Width = st.Border.Width().Top
-	pc.StrokeStyle.SetColor(&st.Border.Top.Color)
+	// border-top is standard property for separators in CSS (see https://www.w3schools.com/howto/howto_css_dividers.asp)
+	pc.StrokeStyle.Width = st.Border.Width.Top
+	pc.StrokeStyle.SetColor(&st.Border.Color.Top)
 	if sp.Horiz {
 		pc.DrawLine(rs, pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
 	} else {

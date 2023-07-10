@@ -759,13 +759,13 @@ func (wb *WidgetBase) RenderUnlock(rs *girl.State) {
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
-func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, rad float32) {
+func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
-	if rad == 0.0 {
-		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
+	if gist.SidesAreZero(bs.Radius.This()) {
+		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, bs)
 	} else {
-		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, bs)
 	}
 	pc.FillStrokeClear(rs)
 }
@@ -773,6 +773,7 @@ func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, rad float32) 
 // RenderStdBox draws standard box using given style.
 // girl.State and Style must already be locked at this point (RenderLock)
 func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
+	// TODO: SideTODO: this is a pretty critical function, so a goodplace to look if things aren't working
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
@@ -781,7 +782,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 
 	pos := wb.LayState.Alloc.Pos.Add(st.Layout.Margin.Dots().Pos())
 	sz := wb.LayState.Alloc.Size.Sub(st.Layout.Margin.Dots().Size())
-	rad := st.Border.Radius.Dots
+	rad := st.Border.Radius.Dots()
 
 	// first do any shadow
 	if st.BoxShadow.HasShadow() {
@@ -790,28 +791,29 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 		pc.FillStyle.Color.SetShadowGradient(st.BoxShadow.Color, "")
 		// todo: this is not rendering a transparent gradient
 		// pc.FillStyle.Opacity = .5
-		wb.RenderBoxImpl(spos, sz, rad)
+		wb.RenderBoxImpl(spos, sz, st.Border)
 		// pc.FillStyle.Opacity = 1.0
 	}
 	// then draw the box over top of that -- note: won't work well for
 	// transparent! need to set clipping to box first..
 	if !st.Font.BgColor.IsNil() {
-		if rad == 0 {
+		if gist.SidesAreZero(rad.This()) {
 			pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 		} else {
 			pc.FillStyle.SetColorSpec(&st.Font.BgColor)
-			pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+			// no border -- fill only
+			pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, gist.Border{})
 			pc.Fill(rs)
 		}
 	}
 
-	pc.StrokeStyle.SetColor(&st.Border.Color)
-	pc.StrokeStyle.Width = st.Border.Width
+	// pc.StrokeStyle.SetColor(&st.Border.Color)
+	// pc.StrokeStyle.Width = st.Border.Width
 	// pc.FillStyle.SetColor(&st.Font.BgColor)
-	pos = pos.AddScalar(0.5 * st.Border.Width.Dots)
-	sz = sz.SubScalar(st.Border.Width.Dots)
+	pos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
+	sz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
 	pc.FillStyle.SetColor(nil)
-	wb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+	wb.RenderBoxImpl(pos, sz, st.Border)
 }
 
 // set our LayState.Alloc.Size from constraints

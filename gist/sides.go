@@ -109,6 +109,22 @@ func (s *Sides[T]) SetAll(val T) {
 	s.Left = val
 }
 
+// This returns the sides as a sides value (instead of some higher-level value)
+func (s Sides[T]) This() Sides[T] {
+	return s
+}
+
+// SidesAreSame returns whether the given comparable sides are all the same
+func SidesAreSame[T comparable](sides Sides[T]) bool {
+	return sides.Right == sides.Top && sides.Bottom == sides.Top && sides.Left == sides.Top
+}
+
+// SidesAreZero returns whether all of the given comparable sides are equal to zero
+func SidesAreZero[T comparable](sides Sides[T]) bool {
+	var zval T
+	return sides.Top == zval && sides.Right == zval && sides.Bottom == zval && sides.Left == zval
+}
+
 // SetStringer is a type that can be set from a string
 type SetStringer interface {
 	SetString(str string)
@@ -268,53 +284,53 @@ func (sf SideFloats) Size() mat32.Vec2 {
 	return mat32.NewVec2(sf.Left+sf.Right, sf.Top+sf.Bottom)
 }
 
-// SideBorders contains Border style values for each side of a box
-type SideBorders struct {
-	Sides[Border]
-}
+// // SideBorders contains Border style values for each side of a box
+// type SideBorders struct {
+// 	Sides[Border]
+// }
 
-// NewSideBorders is a helper that creates new side borders
-// and calls Set on them with the given values.
-// It does not return any error values and just logs them.
-func NewSideBorders(vals ...Border) SideBorders {
-	sides, _ := NewSideBordersTry(vals...)
-	return sides
-}
+// // NewSideBorders is a helper that creates new side borders
+// // and calls Set on them with the given values.
+// // It does not return any error values and just logs them.
+// func NewSideBorders(vals ...Border) SideBorders {
+// 	sides, _ := NewSideBordersTry(vals...)
+// 	return sides
+// }
 
-// NewSideBordersTry is a helper that creates new side borders
-// and calls Set on them with the given values.
-// It returns an error value if there is one.
-func NewSideBordersTry(vals ...Border) (SideBorders, error) {
-	sides := Sides[Border]{}
-	err := sides.Set(vals...)
-	return SideBorders{Sides: sides}, err
-}
+// // NewSideBordersTry is a helper that creates new side borders
+// // and calls Set on them with the given values.
+// // It returns an error value if there is one.
+// func NewSideBordersTry(vals ...Border) (SideBorders, error) {
+// 	sides := Sides[Border]{}
+// 	err := sides.Set(vals...)
+// 	return SideBorders{Sides: sides}, err
+// }
 
-// ToDots runs ToDots on the unit values to compile
-// down to raw pixel values.
-func (sb *SideBorders) ToDots(uc *units.Context) {
-	sb.Top.ToDots(uc)
-	sb.Right.ToDots(uc)
-	sb.Bottom.ToDots(uc)
-	sb.Left.ToDots(uc)
-}
+// // ToDots runs ToDots on the unit values to compile
+// // down to raw pixel values.
+// func (sb *SideBorders) ToDots(uc *units.Context) {
+// 	sb.Top.ToDots(uc)
+// 	sb.Right.ToDots(uc)
+// 	sb.Bottom.ToDots(uc)
+// 	sb.Left.ToDots(uc)
+// }
 
-// Radius returns a side values with the border radius for each side
-func (sb SideBorders) Radius() SideValues {
-	return NewSideValues(
-		sb.Top.Radius,
-		sb.Right.Radius,
-		sb.Bottom.Radius,
-		sb.Left.Radius,
-	)
-}
+// // Radius returns a side values with the border radius for each side
+// func (sb SideBorders) Radius() SideValues {
+// 	return NewSideValues(
+// 		sb.Top.Radius,
+// 		sb.Right.Radius,
+// 		sb.Bottom.Radius,
+// 		sb.Left.Radius,
+// 	)
+// }
 
-// Width returns a side values with the border width for each side
-func (sb SideBorders) Width() SideValues {
-	return NewSideValues(
-		sb.Top.Width,
-		sb.Right.Width,
-		sb.Bottom.Width,
-		sb.Left.Width,
-	)
-}
+// // Width returns a side values with the border width for each side
+// func (sb SideBorders) Width() SideValues {
+// 	return NewSideValues(
+// 		sb.Top.Width,
+// 		sb.Right.Width,
+// 		sb.Bottom.Width,
+// 		sb.Left.Width,
+// 	)
+// }
