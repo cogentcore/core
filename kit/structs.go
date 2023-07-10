@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 )
 
 // SetFromDefaultTags sets values of fields in given struct based on
@@ -25,6 +26,10 @@ func SetFromDefaultTags(obj any) error {
 		}
 		def, ok := f.Tag.Lookup("def")
 		if !ok || def == "" {
+			continue
+		}
+		def = strings.Split(def, ",")[0]
+		if strings.Contains(def, ":") { // don't do ranges
 			continue
 		}
 		ok = SetRobust(PtrValue(fv).Interface(), def) // overkill but whatever
