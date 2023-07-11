@@ -54,8 +54,8 @@ github.com/goki/go-difflib v1.2.1/go.mod h1:uZuY072AYTnMjRxCn6IkpZQKRVcTj4SIpHHX
 github.com/goki/gosl v1.0.13 h1:fA0Qhr5tK3qdEl7B0Ju8l3ZUfhvElWAfM2xW2QUNaSI=
 github.com/goki/gosl v1.0.13/go.mod h1:NYtMWc78Gqvua2vH84iwVyLfV/3iKpK43AQlLYz6i7k=
 github.com/goki/ki v1.0.0/go.mod h1:X+gmVeAym3JDSbbiA7iF1qkgAlTVWl1JV9sRsGDzxOA=
-github.com/goki/ki v1.1.14 h1:x1M4oW6hJ5XdMPGDqQXyyv9QKUQzIZ9+z4tynrWAsQE=
-github.com/goki/ki v1.1.14/go.mod h1:E+kCXzhA/chnUfo7ecneVn0A4n35KkXpJmFlRSkXhIY=
+github.com/goki/ki v1.1.15 h1:jD6g4+H/Ko1ndJsrIFUIfT+OJRXW8bA9qUS8zLYJV84=
+github.com/goki/ki v1.1.15/go.mod h1:E+kCXzhA/chnUfo7ecneVn0A4n35KkXpJmFlRSkXhIY=
 github.com/goki/kigen v1.0.2 h1:I/s/ce84wiP99CYKdju/MVjY6jzvAL3d4XobERsK1JY=
 github.com/goki/kigen v1.0.2/go.mod h1:ib29cR7secYGaGXWv68WDq83y5tfRMh7dOXi4XRsPOM=
 github.com/goki/mat32 v1.0.15 h1:aPegF2QkpUO+T85n5F9ZvuVWRwPDDKY9URCJafTav0o=
