@@ -476,6 +476,17 @@ func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
 // remainder.
 func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	del := me.Delta
+	hasShift := me.HasAnyModifier(key.Shift, key.Alt) // shift or alt says: use vert for other dimension
+	if hasShift {
+		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
+			me.SetProcessed()
+			return
+		}
+		ly.ScrollActionDelta(mat32.X, float32(del.Y))
+		me.SetProcessed()
+		return
+	}
+
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
 		ly.ScrollActionDelta(mat32.Y, float32(del.Y))
@@ -496,12 +507,6 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 			if del.Y != 0 {
 				me.Delta.X = 0
 			} else {
-				me.SetProcessed()
-			}
-		} else { // use Y instead as mouse wheels typically only have this
-			hasShift := me.HasAnyModifier(key.Shift, key.Alt) // shift or alt says: use vert for other dimension
-			if hasShift {
-				ly.ScrollActionDelta(mat32.X, float32(del.Y))
 				me.SetProcessed()
 			}
 		}

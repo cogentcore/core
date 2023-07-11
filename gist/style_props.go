@@ -1029,7 +1029,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		bs.Color.SetAny(val)
+		bs.Color.SetAny(val, ctxt)
 	},
 }
 
@@ -1097,7 +1097,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		bs.Color.SetAny(val)
+		bs.Color.SetAny(val, ctxt)
 	},
 }
 

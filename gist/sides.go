@@ -170,13 +170,13 @@ func (s *Sides[T]) SetString(str string) error {
 	for i, field := range fields {
 		ss, ok := any(&vals[i]).(SetStringer)
 		if !ok {
-			err := fmt.Errorf("(Sides).SetAny('%s'): to set from a string, the sides type (%T) must implement SetStringer (needs SetString(str string) error function)", str, s)
+			err := fmt.Errorf("(Sides).SetString('%s'): to set from a string, the sides type (%T) must implement SetStringer (needs SetString(str string) error function)", str, s)
 			log.Println(err)
 			return err
 		}
 		err := ss.SetString(field)
 		if err != nil {
-			nerr := fmt.Errorf("(Sides).SetAny('%s'): error setting sides of type %T from string: %w", str, s, err)
+			nerr := fmt.Errorf("(Sides).SetString('%s'): error setting sides of type %T from string: %w", str, s, err)
 			log.Println(nerr)
 			return nerr
 		}
@@ -259,4 +259,64 @@ func (sf SideFloats) Pos() mat32.Vec2 {
 // Size returns the toal size the side/corner values take up (Left + Right, Top + Bottom)
 func (sf SideFloats) Size() mat32.Vec2 {
 	return mat32.NewVec2(sf.Left+sf.Right, sf.Top+sf.Bottom)
+}
+
+// SideColors contains color values for each side/corner of a box
+type SideColors struct {
+	Sides[Color]
+}
+
+// NewSideColors is a helper that creates new side/corner colors
+// and calls Set on them with the given values.
+// It does not return any error values and just logs them.
+func NewSideColors(vals ...Color) SideColors {
+	sides, _ := NewSideColorsTry(vals...)
+	return sides
+}
+
+// NewSideColorsTry is a helper that creates new side/corner colors
+// and calls Set on them with the given values.
+// It returns an error value if there is one.
+func NewSideColorsTry(vals ...Color) (SideColors, error) {
+	sides := Sides[Color]{}
+	err := sides.Set(vals...)
+	return SideColors{Sides: sides}, err
+}
+
+// SetAny sets the sides/corners from the given value of any type
+func (s *SideColors) SetAny(a any, ctxt Context) error {
+	switch val := a.(type) {
+	case Sides[Color]:
+		s.Sides = val
+	case *Sides[Color]:
+		s.Sides = *val
+	case Color:
+		s.SetAll(val)
+	case *Color:
+		s.SetAll(*val)
+	case []Color:
+		s.Set(val...)
+	case *[]Color:
+		s.Set(*val...)
+	case string:
+		return s.SetString(val, ctxt)
+	default:
+		return s.SetString(fmt.Sprint(val), ctxt)
+	}
+	return nil
+}
+
+// SetString sets the sides/corners from the given string value
+func (s *SideColors) SetString(str string, ctxt Context) error {
+	fields := strings.Fields(str)
+	vals := make([]Color, len(fields))
+	for i, field := range fields {
+		err := (&vals[i]).SetStringStyle(field, nil, ctxt)
+		if err != nil {
+			nerr := fmt.Errorf("(SideColors).SetString('%s'): error setting sides of type %T from string: %w", str, s, err)
+			log.Println(nerr)
+			return nerr
+		}
+	}
+	return s.Set(vals...)
 }
