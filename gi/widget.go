@@ -31,6 +31,7 @@ import (
 type WidgetBase struct {
 	Node2DBase
 	Tooltip      string       `desc:"text for tooltip for this widget -- can use HTML formatting"`
+	StyleFunc    func()       `desc:"the function that is called to set the styles of the widget"`
 	Style        gist.Style   `desc:"styling settings for this widget that are used to determine the active styles; these can and should be modified externally, as this is the recommended way to set styles`
 	ActStyle     gist.Style   `json:"-" xml:"-" desc:"active styling settings for this widget (modifying these externally will have no effect) -- set in SetStyle2D during an initialization step, and when the structure changes"`
 	DefStyle     *gist.Style  `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us (modifying these externally will have no effect) -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
@@ -221,6 +222,9 @@ func (wb *WidgetBase) Style2DWidget() {
 	}
 	AggCSS(&wb.CSSAgg, wb.CSS)
 	StyleCSS(gii, wb.Viewport, &wb.ActStyle, wb.CSSAgg, "")
+	if wb.StyleFunc != nil {
+		wb.StyleFunc()
+	}
 
 	SetUnitContext(&wb.ActStyle, wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
 	if wb.ActStyle.Inactive {                                 // inactive can only set, not clear

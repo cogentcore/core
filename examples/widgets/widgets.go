@@ -80,7 +80,6 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 	mfr.SetProp("spacing", units.Ex(1))
-	mfr.Style.Font.BgColor.SetName("purple")
 
 	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
@@ -156,9 +155,18 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 			giv.GoGiEditorDialog(vp)
 		}
 	})
-	button2.SetProp("border-color", gist.NewSides[gist.Color](gist.MustColorFromName("green"), gist.MustColorFromName("red"), gist.MustColorFromName("blue"), gist.MustColorFromName("orange")))
-	button2.SetProp("border-width", "2px 4px 6px 8px")
-	button2.SetProp("border-radius", "0 2 6 10")
+	button2.StyleFunc = func() {
+		button2.ActStyle.Border.Color.Set(gist.Transparent)
+		button2.ActStyle.Border.Width.Set(units.Px(2))
+		button2.ActStyle.Border.Radius.Set(units.Px(10))
+		button2.ActStyle.Font.BgColor.SetColor(gist.MustColorFromName("blue"))
+		button2.ActStyle.Font.Color.SetColor(gist.MustColorFromName("white"))
+		button2.ActStyle.Layout.Padding.Set(units.Px(10), units.Px(5))
+		button2.ActStyle.Layout.Height = units.Px(50)
+	}
+	// button2.SetProp("border-color", gist.NewSides[gist.Color](gist.MustColorFromName("green"), gist.MustColorFromName("red"), gist.MustColorFromName("blue"), gist.MustColorFromName("orange")))
+	// button2.SetProp("border-width", "2px 4px 6px 8px")
+	// button2.SetProp("border-radius", "0 2 6 10")
 
 	checkbox := gi.AddNewCheckBox(brow, "checkbox")
 	checkbox.Text = "Toggle"
