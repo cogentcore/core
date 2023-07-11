@@ -44,59 +44,59 @@ const (
 type Units int32
 
 const (
-	// Px = pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
-	Px Units = iota
+	// UnitPx = pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
+	UnitPx Units = iota
 
-	// Dp = density-independent pixels -- 1dp = 1/160th of 1in
-	Dp
+	// UnitDp = density-independent pixels -- 1dp = 1/160th of 1in
+	UnitDp
 
-	// Pct = percentage of surrounding contextual element
-	Pct
+	// UnitPct = percentage of surrounding contextual element
+	UnitPct
 
-	// Rem = font size of the root element -- defaults to 12pt scaled by DPI factor
-	Rem
+	// UnitRem = font size of the root element -- defaults to 12pt scaled by DPI factor
+	UnitRem
 
-	// Em = font size of the element -- fallback to 12pt by default
-	Em
+	// UnitEm = font size of the element -- fallback to 12pt by default
+	UnitEm
 
-	// Ex = x-height of the element's font (size of 'x' glyph) -- fallback to 0.5em by default
-	Ex
+	// UnitEx = x-height of the element's font (size of 'x' glyph) -- fallback to 0.5em by default
+	UnitEx
 
-	// Ch = width of the '0' glyph in the element's font -- fallback to 0.5em by default
-	Ch
+	// UnitCh = width of the '0' glyph in the element's font -- fallback to 0.5em by default
+	UnitCh
 
-	// Vw = 1% of the viewport's width
-	Vw
+	// UnitVw = 1% of the viewport's width
+	UnitVw
 
-	// Vh = 1% of the viewport's height
-	Vh
+	// UnitVh = 1% of the viewport's height
+	UnitVh
 
-	// Vmin = 1% of the viewport's smaller dimension
-	Vmin
+	// UnitVmin = 1% of the viewport's smaller dimension
+	UnitVmin
 
-	// Vmax = 1% of the viewport's larger dimension
-	Vmax
+	// UnitVmax = 1% of the viewport's larger dimension
+	UnitVmax
 
-	// Cm = centimeters -- 1cm = 96px/2.54
-	Cm
+	// UnitCm = centimeters -- 1cm = 96px/2.54
+	UnitCm
 
-	// Mm = millimeters -- 1mm = 1/10th of cm
-	Mm
+	// UnitMm = millimeters -- 1mm = 1/10th of cm
+	UnitMm
 
-	// Q = quarter-millimeters -- 1q = 1/40th of cm
-	Q
+	// UnitQ = quarter-millimeters -- 1q = 1/40th of cm
+	UnitQ
 
-	// In = inches -- 1in = 2.54cm = 96px
-	In
+	// UnitIn = inches -- 1in = 2.54cm = 96px
+	UnitIn
 
-	// Pc = picas -- 1pc = 1/6th of 1in
-	Pc
+	// UnitPc = picas -- 1pc = 1/6th of 1in
+	UnitPc
 
-	// Pt = points -- 1pt = 1/72th of 1in
-	Pt
+	// UnitPt = points -- 1pt = 1/72th of 1in
+	UnitPt
 
-	// Dot = actual real display pixels -- generally only use internally
-	Dot
+	// UnitDot = actual real display pixels -- generally only use internally
+	UnitDot
 
 	UnitsN
 )
@@ -109,24 +109,24 @@ func (ev Units) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) 
 func (ev *Units) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 var UnitNames = [...]string{
-	Px:   "px",
-	Dp:   "dp",
-	Pct:  "pct",
-	Rem:  "rem",
-	Em:   "em",
-	Ex:   "ex",
-	Ch:   "ch",
-	Vw:   "vw",
-	Vh:   "vh",
-	Vmin: "vmin",
-	Vmax: "vmax",
-	Cm:   "cm",
-	Mm:   "mm",
-	Q:    "q",
-	In:   "in",
-	Pc:   "pc",
-	Pt:   "pt",
-	Dot:  "dot",
+	UnitPx:   "px",
+	UnitDp:   "dp",
+	UnitPct:  "pct",
+	UnitRem:  "rem",
+	UnitEm:   "em",
+	UnitEx:   "ex",
+	UnitCh:   "ch",
+	UnitVw:   "vw",
+	UnitVh:   "vh",
+	UnitVmin: "vmin",
+	UnitVmax: "vmax",
+	UnitCm:   "cm",
+	UnitMm:   "mm",
+	UnitQ:    "q",
+	UnitIn:   "in",
+	UnitPc:   "pc",
+	UnitPt:   "pt",
+	UnitDot:  "dot",
 }
 
 // Context specifies everything about the current context necessary for converting the number
@@ -212,41 +212,41 @@ func (uc *Context) ToDotsFactor(un Units) float32 {
 		uc.Defaults()
 	}
 	switch un {
-	case Pct:
+	case UnitPct:
 		return 0.01 * uc.ElW // todo: height should be in terms of Elh.. but width is much more common
-	case Em:
+	case UnitEm:
 		return uc.FontEm
-	case Ex:
+	case UnitEx:
 		return uc.FontEx
-	case Ch:
+	case UnitCh:
 		return uc.FontCh
-	case Rem:
+	case UnitRem:
 		return uc.FontRem
-	case Vw:
+	case UnitVw:
 		return 0.01 * uc.VpW
-	case Vh:
+	case UnitVh:
 		return 0.01 * uc.VpH
-	case Vmin:
+	case UnitVmin:
 		return kit.Min32(uc.VpW, uc.VpH)
-	case Vmax:
+	case UnitVmax:
 		return kit.Max32(uc.VpW, uc.VpH)
-	case Cm:
+	case UnitCm:
 		return uc.DPI / CmPerInch
-	case Mm:
+	case UnitMm:
 		return uc.DPI / MmPerInch
-	case Q:
+	case UnitQ:
 		return uc.DPI / (4.0 * MmPerInch)
-	case In:
+	case UnitIn:
 		return uc.DPI
-	case Pc:
+	case UnitPc:
 		return uc.DPI / PcPerInch
-	case Pt:
+	case UnitPt:
 		return uc.DPI / PtPerInch
-	case Px:
+	case UnitPx:
 		return uc.DPI / PxPerInch
-	case Dp:
+	case UnitDp:
 		return uc.DPI / DpPerInch
-	case Dot:
+	case UnitDot:
 		return 1.0
 	}
 	return uc.DPI
@@ -259,12 +259,12 @@ func (uc *Context) ToDots(val float32, un Units) float32 {
 
 // PxToDots just converts a value from pixels to dots
 func (uc *Context) PxToDots(val float32) float32 {
-	return val * uc.ToDotsFactor(Px)
+	return val * uc.ToDotsFactor(UnitPx)
 }
 
 // DotsToPx just converts a value from dots to pixels
 func (uc *Context) DotsToPx(val float32) float32 {
-	return val / uc.ToDotsFactor(Px)
+	return val / uc.ToDotsFactor(UnitPx)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -288,44 +288,44 @@ func NewValue(val float32, un Units) Value {
 	return Value{val, un, 0.0}
 }
 
-// NewPx creates a new Px value
-func NewPx(val float32) Value {
-	return Value{val, Px, 0.0}
+// Px creates a new Px value
+func Px(val float32) Value {
+	return Value{val, UnitPx, 0.0}
 }
 
-// NewEm creates a new Em value
-func NewEm(val float32) Value {
-	return Value{val, Em, 0.0}
+// Em creates a new Em value
+func Em(val float32) Value {
+	return Value{val, UnitEm, 0.0}
 }
 
-// NewEx creates a new Ex value
-func NewEx(val float32) Value {
-	return Value{val, Ex, 0.0}
+// Ex creates a new Ex value
+func Ex(val float32) Value {
+	return Value{val, UnitEx, 0.0}
 }
 
-// NewCh creates a new Ch value
-func NewCh(val float32) Value {
-	return Value{val, Ch, 0.0}
+// Ch creates a new Ch value
+func Ch(val float32) Value {
+	return Value{val, UnitCh, 0.0}
 }
 
-// NewPt creates a new Pt value
-func NewPt(val float32) Value {
-	return Value{val, Pt, 0.0}
+// Pt creates a new Pt value
+func Pt(val float32) Value {
+	return Value{val, UnitPt, 0.0}
 }
 
-// NewPct creates a new Pct value
-func NewPct(val float32) Value {
-	return Value{val, Pct, 0.0}
+// Pct creates a new Pct value
+func Pct(val float32) Value {
+	return Value{val, UnitPct, 0.0}
 }
 
-// NewDp creates a new Dp value
-func NewDp(val float32) Value {
-	return Value{val, Dp, 0.0}
+// Dp creates a new Dp value
+func Dp(val float32) Value {
+	return Value{val, UnitDp, 0.0}
 }
 
-// NewDot creates a new Dot value
-func NewDot(val float32) Value {
-	return Value{val, Dot, 0.0}
+// Dot creates a new Dot value
+func Dot(val float32) Value {
+	return Value{val, UnitDot, 0.0}
 }
 
 // Set sets value and units of an existing value
@@ -337,49 +337,49 @@ func (v *Value) Set(val float32, un Units) {
 // SetPx sets value in Px
 func (v *Value) SetPx(val float32) {
 	v.Val = val
-	v.Un = Px
+	v.Un = UnitPx
 }
 
 // SetEm sets value in Em
 func (v *Value) SetEm(val float32) {
 	v.Val = val
-	v.Un = Em
+	v.Un = UnitEm
 }
 
 // SetEx sets value in Ex
 func (v *Value) SetEx(val float32) {
 	v.Val = val
-	v.Un = Ex
+	v.Un = UnitEx
 }
 
 // SetCh sets value in Ch
 func (v *Value) SetCh(val float32) {
 	v.Val = val
-	v.Un = Ch
+	v.Un = UnitCh
 }
 
 // SetPt sets value in Pt
 func (v *Value) SetPt(val float32) {
 	v.Val = val
-	v.Un = Pt
+	v.Un = UnitPt
 }
 
 // SetPct sets value in Pct
 func (v *Value) SetPct(val float32) {
 	v.Val = val
-	v.Un = Pct
+	v.Un = UnitPct
 }
 
 // SetDp sets value in Dp
 func (v *Value) SetDp(val float32) {
 	v.Val = val
-	v.Un = Px
+	v.Un = UnitPx
 }
 
 // SetDot sets value in Dots directly
 func (v *Value) SetDot(val float32) {
 	v.Val = val
-	v.Un = Dot
+	v.Un = UnitDot
 	v.Dots = val
 }
 
@@ -408,14 +408,17 @@ func (v *Value) String() string {
 }
 
 // SetString sets value from a string
-func (v *Value) SetString(str string) {
+func (v *Value) SetString(str string) error {
 	trstr := strings.TrimSpace(strings.Replace(str, "%", "pct", -1))
 	sz := len(trstr)
 	if sz < 2 {
-		vc, _ := kit.ToFloat(str)
+		vc, ok := kit.ToFloat(str)
+		if !ok {
+			return fmt.Errorf("(units.Value).SetString: unable to convert string value '%s' into a number", trstr)
+		}
 		v.Val = float32(vc)
-		v.Un = Px
-		return
+		v.Un = UnitPx
+		return nil
 	}
 	var ends [4]string
 	ends[0] = strings.ToLower(trstr[sz-1:])
@@ -428,7 +431,7 @@ func (v *Value) SetString(str string) {
 	}
 
 	var numstr string
-	var un Units = Px // default to pixels
+	var un Units = UnitPx // default to pixels
 	for i, nm := range UnitNames {
 		unsz := len(nm)
 		if ends[unsz-1] == nm {
@@ -441,8 +444,16 @@ func (v *Value) SetString(str string) {
 		numstr = trstr
 	}
 	var val float32
-	fmt.Sscanf(strings.TrimSpace(numstr), "%g", &val)
+	trspc := strings.TrimSpace(numstr)
+	n, err := fmt.Sscanf(trspc, "%g", &val)
+	if err != nil {
+		return fmt.Errorf("(units.Value).SetString: error scanning string '%s': %w", trspc, err)
+	}
+	if n == 0 {
+		return fmt.Errorf("(units.Value).SetString: no arguments parsed from string '%s'", trspc)
+	}
 	v.Set(val, un)
+	return nil
 }
 
 // StringToValue converts a string to a value representation.
@@ -465,7 +476,7 @@ func (v *Value) SetIFace(iface any, key string) error {
 	default: // assume Px as an implicit default
 		valflt, ok := kit.ToFloat(iface)
 		if ok {
-			v.Set(float32(valflt), Px)
+			v.Set(float32(valflt), UnitPx)
 		} else {
 			err := fmt.Errorf("units.Value could not set property: %v from: %v type: %T", key, val, val)
 			log.Println(err)

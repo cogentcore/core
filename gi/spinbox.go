@@ -74,29 +74,29 @@ var SpinBoxProps = ki.Props{
 		"vertical-align": gist.AlignMiddle,
 	},
 	"#up": ki.Props{
-		"max-width":  units.NewEx(1.5),
-		"max-height": units.NewEx(1.5),
-		"margin":     units.NewPx(1),
-		"padding":    units.NewPx(0),
+		"max-width":  units.Ex(1.5),
+		"max-height": units.Ex(1.5),
+		"margin":     units.Px(1),
+		"padding":    units.Px(0),
 		"fill":       &Prefs.Colors.Icon,
 		"stroke":     &Prefs.Colors.Font,
 	},
 	"#down": ki.Props{
-		"max-width":  units.NewEx(1.5),
-		"max-height": units.NewEx(1.5),
-		"margin":     units.NewPx(1),
-		"padding":    units.NewPx(0),
+		"max-width":  units.Ex(1.5),
+		"max-height": units.Ex(1.5),
+		"margin":     units.Px(1),
+		"padding":    units.Px(0),
 		"fill":       &Prefs.Colors.Icon,
 		"stroke":     &Prefs.Colors.Font,
 	},
 	"#space": ki.Props{
-		"width": units.NewCh(.1),
+		"width": units.Ch(.1),
 	},
 	"#text-field": ki.Props{
-		"min-width": units.NewCh(4),
-		"width":     units.NewCh(8),
-		"margin":    units.NewPx(2),
-		"padding":   units.NewPx(2),
+		"min-width": units.Ch(4),
+		"width":     units.Ch(8),
+		"margin":    units.Px(2),
+		"padding":   units.Px(2),
 		"clear-act": false,
 	},
 }
@@ -183,8 +183,8 @@ func (sb *SpinBox) ConfigParts() {
 	}
 	sb.Parts.Lay = LayoutHoriz
 	sb.Parts.SetProp("vertical-align", gist.AlignMiddle)
-	if sb.Sty.Template != "" {
-		sb.Parts.Sty.Template = sb.Sty.Template + ".Parts"
+	if sb.ActStyle.Template != "" {
+		sb.Parts.ActStyle.Template = sb.ActStyle.Template + ".Parts"
 	}
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "text-field")
@@ -206,8 +206,8 @@ func (sb *SpinBox) ConfigParts() {
 			// not compiled into style prop
 			// up.SetFlagState(sb.IsInactive(), int(Inactive))
 			up.Icon = sb.UpIcon
-			if sb.Sty.Template != "" {
-				up.Sty.Template = sb.Sty.Template + ".up"
+			if sb.ActStyle.Template != "" {
+				up.ActStyle.Template = sb.ActStyle.Template + ".up"
 			}
 			sb.StylePart(Node2D(up))
 			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -221,8 +221,8 @@ func (sb *SpinBox) ConfigParts() {
 			dn.SetProp("no-focus", true)
 			dn.Icon = sb.DownIcon
 			sb.StylePart(Node2D(dn))
-			if sb.Sty.Template != "" {
-				dn.Sty.Template = sb.Sty.Template + ".dn"
+			if sb.ActStyle.Template != "" {
+				dn.ActStyle.Template = sb.ActStyle.Template + ".dn"
 			}
 			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
@@ -230,8 +230,8 @@ func (sb *SpinBox) ConfigParts() {
 			})
 			// space
 			sp := sb.Parts.ChildByName("space", 2).(*Space)
-			if sb.Sty.Template != "" {
-				sp.Sty.Template = sb.Sty.Template + ".space"
+			if sb.ActStyle.Template != "" {
+				sp.ActStyle.Template = sb.ActStyle.Template + ".space"
 			}
 			sb.StylePart(sp) // also get the space
 		}
@@ -241,8 +241,8 @@ func (sb *SpinBox) ConfigParts() {
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
 		tf.SetProp("clear-act", false)
-		if sb.Sty.Template != "" {
-			tf.Sty.Template = sb.Sty.Template + ".text"
+		if sb.ActStyle.Template != "" {
+			tf.ActStyle.Template = sb.ActStyle.Template + ".text"
 		}
 		sb.StylePart(Node2D(tf))
 		tf.Txt = sb.ValToString(sb.Value)
@@ -439,14 +439,14 @@ func (sb *SpinBox) StyleSpinBox() {
 	if sb.Step == 0 {
 		sb.Defaults()
 	}
-	hasTempl, saveTempl := sb.Sty.FromTemplate()
+	hasTempl, saveTempl := sb.ActStyle.FromTemplate()
 	if !hasTempl || saveTempl {
 		sb.Style2DWidget()
 	} else {
-		SetUnitContext(&sb.Sty, sb.Viewport, mat32.Vec2Zero)
+		SetUnitContext(&sb.ActStyle, sb.Viewport, mat32.Vec2Zero)
 	}
 	if hasTempl && saveTempl {
-		sb.Sty.SaveTemplate()
+		sb.ActStyle.SaveTemplate()
 	}
 	sb.StyleFromProps(sb.Props, sb.Viewport)
 }
@@ -454,7 +454,7 @@ func (sb *SpinBox) StyleSpinBox() {
 func (sb *SpinBox) Style2D() {
 	sb.StyleSpinBox()
 	sb.StyMu.Lock()
-	sb.LayState.SetFromStyle(&sb.Sty.Layout) // also does reset
+	sb.LayState.SetFromStyle(&sb.ActStyle.Layout) // also does reset
 	sb.StyMu.Unlock()
 	sb.ConfigParts()
 }

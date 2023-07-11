@@ -2119,8 +2119,8 @@ func (tb *TextBuf) SetLineIcon(ln int, icon string) {
 		ic = &gi.Icon{}
 		ic.InitName(ic, icon)
 		ic.SetIcon(icon)
-		ic.SetProp("width", units.NewEm(1))
-		ic.SetProp("height", units.NewEm(1))
+		ic.SetProp("width", units.Em(1))
+		ic.SetProp("height", units.Em(1))
 		tb.Icons[icon] = ic
 	}
 }

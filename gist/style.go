@@ -94,9 +94,10 @@ var StylePropProps = ki.Props{
 	"style-prop": true,
 }
 
-// Styler defines an interface for anything that has a Style on it
-type Styler interface {
-	Style() *Style
+// ActiveStyler defines an interface for anything
+// that can report its active style
+type ActiveStyler interface {
+	ActiveStyle() *Style
 
 	// StyleRLock does a read-lock for reading the style
 	StyleRLock()

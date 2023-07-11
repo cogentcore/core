@@ -514,10 +514,10 @@ func (w *Window) ConfigInsets() {
 	if mainVlay != nil {
 		insets := w.OSWin.Insets()
 		mainVlay.SetProp("padding", gist.NewSides[units.Value](
-			units.NewDot(insets.Top),
-			units.NewDot(insets.Right),
-			units.NewDot(insets.Bottom),
-			units.NewDot(insets.Left),
+			units.Dot(insets.Top),
+			units.Dot(insets.Right),
+			units.Dot(insets.Bottom),
+			units.Dot(insets.Left),
 		))
 	}
 

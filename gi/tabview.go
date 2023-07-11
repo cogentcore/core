@@ -56,7 +56,7 @@ func (tv *TabView) Disconnect() {
 var TabViewProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
 	"border-color":     &Prefs.Colors.Border,
-	"border-width":     units.NewPx(2),
+	"border-width":     units.Px(2),
 	"background-color": &Prefs.Colors.Background,
 	"color":            &Prefs.Colors.Font,
 	"max-width":        -1,
@@ -430,7 +430,7 @@ func (tv *TabView) Config() {
 		return
 	}
 	tv.StyMu.RLock()
-	needSty := tv.Sty.Font.Size.Val == 0
+	needSty := tv.ActStyle.Font.Size.Val == 0
 	tv.StyMu.RUnlock()
 	if needSty {
 		tv.StyleLayout()
@@ -444,16 +444,16 @@ func (tv *TabView) Config() {
 	tabs.SetStretchMaxWidth()
 	// tabs.SetStretchMaxHeight()
 	// tabs.SetMinPrefWidth(units.NewEm(10))
-	tabs.SetProp("height", units.NewEm(1.8))
+	tabs.SetProp("height", units.Em(1.8))
 	tabs.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
-	tabs.SetProp("padding", units.NewPx(0))
-	tabs.SetProp("margin", units.NewPx(0))
-	tabs.SetProp("spacing", units.NewPx(4))
+	tabs.SetProp("padding", units.Px(0))
+	tabs.SetProp("margin", units.Px(0))
+	tabs.SetProp("spacing", units.Px(4))
 	tabs.SetProp("background-color", "linear-gradient(pref(Control), highlight-10)")
 
 	frame := AddNewFrame(tv, "frame", LayoutStacked)
-	frame.SetMinPrefWidth(units.NewEm(10))
-	frame.SetMinPrefHeight(units.NewEm(7))
+	frame.SetMinPrefWidth(units.Em(10))
+	frame.SetMinPrefHeight(units.Em(7))
 	frame.StackTopOnly = true // key for allowing each tab to have its own size
 	frame.SetStretchMax()
 	frame.SetReRenderAnchor()
@@ -561,45 +561,45 @@ var TabButtonMinWidth = float32(8)
 
 var TabButtonProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
-	"min-width":        units.NewCh(TabButtonMinWidth),
-	"min-height":       units.NewEm(1.6),
-	"border-width":     units.NewPx(0),
-	"border-radius":    units.NewPx(0),
+	"min-width":        units.Ch(TabButtonMinWidth),
+	"min-height":       units.Em(1.6),
+	"border-width":     units.Px(0),
+	"border-radius":    units.Px(0),
 	"border-color":     &Prefs.Colors.Border,
 	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
-	"padding":          units.NewPx(4), // we go to edge of bar
-	"margin":           units.NewPx(0),
+	"padding":          units.Px(4), // we go to edge of bar
+	"margin":           units.Px(0),
 	"indicator":        "close",
 	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"width":   units.Em(1),
+		"height":  units.Em(1),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
 	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 	},
 	"#close-stretch": ki.Props{
-		"width": units.NewCh(1),
+		"width": units.Ch(1),
 	},
 	"#close": ki.Props{
-		"width":          units.NewEx(0.5),
-		"height":         units.NewEx(0.5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
+		"width":          units.Ex(0.5),
+		"height":         units.Ex(0.5),
+		"margin":         units.Px(0),
+		"padding":        units.Px(0),
 		"vertical-align": gist.AlignBottom,
 	},
 	"#shortcut": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 	},
 	"#sc-stretch": ki.Props{
-		"min-width": units.NewCh(2),
+		"min-width": units.Ch(2),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",
@@ -612,7 +612,7 @@ var TabButtonProps = ki.Props{
 		"background-color": "linear-gradient(highlight-10, highlight-10)",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
+		"border-width":     units.Px(2),
 		"background-color": "linear-gradient(samelight-50, highlight-10)",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{

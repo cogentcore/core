@@ -41,9 +41,9 @@ func (mb *MenuBar) CopyFieldsFrom(frm any) {
 
 var MenuBarProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.NewPx(2),
-	"margin":           units.NewPx(0),
-	"spacing":          units.NewPx(4),
+	"padding":          units.Px(2),
+	"margin":           units.Px(0),
+	"spacing":          units.Px(4),
 	"color":            &Prefs.Colors.Font,
 	"background-color": "linear-gradient(pref(Control), highlight-10)",
 }
@@ -326,9 +326,9 @@ func (tb *ToolBar) CopyFieldsFrom(frm any) {
 
 var ToolBarProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.NewPx(2),
-	"margin":           units.NewPx(0),
-	"spacing":          units.NewPx(4),
+	"padding":          units.Px(2),
+	"margin":           units.Px(0),
+	"spacing":          units.Px(4),
 	"color":            &Prefs.Colors.Font,
 	"background-color": "linear-gradient(pref(Control), highlight-10)",
 }

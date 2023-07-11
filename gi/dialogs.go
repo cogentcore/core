@@ -53,7 +53,7 @@ const (
 
 // standard vertical space between elements in a dialog, in Ex units
 var StdDialogVSpace = float32(1)
-var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.Ex, Dots: 0}
+var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.UnitEx, Dots: 0}
 
 // Dialog supports dialog functionality -- based on a viewport that can either
 // be rendered in a separate window or on top of an existing one.
@@ -253,17 +253,17 @@ var DialogProps = ki.Props{
 	"EnumType:Flag": KiT_VpFlags,
 	"color":         &Prefs.Colors.Font,
 	"#frame": ki.Props{
-		"border-width":        units.NewPx(2),
-		"margin":              units.NewPx(8),
-		"padding":             units.NewPx(4),
-		"box-shadow.h-offset": units.NewPx(4),
-		"box-shadow.v-offset": units.NewPx(4),
-		"box-shadow.blur":     units.NewPx(4),
+		"border-width":        units.Px(2),
+		"margin":              units.Px(8),
+		"padding":             units.Px(4),
+		"box-shadow.h-offset": units.Px(4),
+		"box-shadow.v-offset": units.Px(4),
+		"box-shadow.blur":     units.Px(4),
 		"box-shadow.color":    &Prefs.Colors.Shadow,
 	},
 	"#title": ki.Props{
 		// todo: add "bigger" font
-		"max-width":        units.NewPx(-1),
+		"max-width":        units.Px(-1),
 		"horizontal-align": gist.AlignCenter,
 		"vertical-align":   gist.AlignTop,
 		"background-color": "none",
@@ -272,7 +272,7 @@ var DialogProps = ki.Props{
 	"#prompt": ki.Props{
 		"white-space":      gist.WhiteSpaceNormal, // wrap etc
 		"max-width":        -1,
-		"width":            units.NewCh(30),
+		"width":            units.Ch(30),
 		"text-align":       gist.AlignLeft,
 		"vertical-align":   gist.AlignTop,
 		"background-color": "none",
@@ -581,7 +581,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	nsb.Step = 1
 
 	tspc := frame.InsertNewChild(KiT_Space, prIdx+3, "type-space").(*Space)
-	tspc.SetFixedHeight(units.NewEm(0.5))
+	tspc.SetFixedHeight(units.Em(0.5))
 
 	trow := frame.InsertNewChild(KiT_Layout, prIdx+4, "t-row").(*Layout)
 	trow.Lay = LayoutHoriz
@@ -630,7 +630,7 @@ func StringPromptDialog(avp *Viewport2D, strval, placeholder string, opts DlgOpt
 	tf.Placeholder = placeholder
 	tf.SetText(strval)
 	tf.SetStretchMaxWidth()
-	tf.SetMinPrefWidth(units.NewCh(40))
+	tf.SetMinPrefWidth(units.Ch(40))
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)

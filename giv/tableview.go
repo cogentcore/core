@@ -280,7 +280,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
 	sg.Lay = gi.LayoutVert
-	sg.SetMinPrefWidth(units.NewCh(20))
+	sg.SetMinPrefWidth(units.Ch(20))
 	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
 	sg.SetProp("border-width", 0)
@@ -309,7 +309,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgf = tv.This().(SliceViewer).SliceGrid()
 	sgf.Lay = gi.LayoutGrid
 	sgf.Stripes = gi.RowStripes
-	sgf.SetMinPrefHeight(units.NewEm(6))
+	sgf.SetMinPrefHeight(units.Em(6))
 	sgf.SetStretchMax() // for this to work, ALL layers above need it too
 	sgf.SetProp("columns", nWidgPerRow)
 	sgf.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
@@ -447,10 +447,10 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
 		tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
-	if tv.Sty.Font.Face == nil {
-		girl.OpenFont(&tv.Sty.Font, &tv.Sty.UnContext)
+	if tv.ActStyle.Font.Face == nil {
+		girl.OpenFont(&tv.ActStyle.Font, &tv.ActStyle.UnContext)
 	}
-	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Sty.Font.Face.Metrics.Height)
+	tv.RowHeight = mat32.Max(tv.RowHeight, tv.ActStyle.Font.Face.Metrics.Height)
 
 	mvp := tv.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
@@ -497,8 +497,8 @@ func (tv *TableView) LayoutHeader() {
 		if fli == 0 {
 			wd += spc
 		}
-		lbl.SetMinPrefWidth(units.NewValue(wd, units.Dot))
-		lbl.SetProp("max-width", units.NewValue(wd, units.Dot))
+		lbl.SetMinPrefWidth(units.NewValue(wd, units.UnitDot))
+		lbl.SetProp("max-width", units.NewValue(wd, units.UnitDot))
 		sumwd += wd
 	}
 	if !tv.IsInactive() {
@@ -506,12 +506,12 @@ func (tv *TableView) LayoutHeader() {
 		for fli := nfld; fli < mx; fli++ {
 			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 			wd := gd[fli].AllocSize - spc
-			lbl.SetMinPrefWidth(units.NewValue(wd, units.Dot))
-			lbl.SetProp("max-width", units.NewValue(wd, units.Dot))
+			lbl.SetMinPrefWidth(units.NewValue(wd, units.UnitDot))
+			lbl.SetProp("max-width", units.NewValue(wd, units.UnitDot))
 			sumwd += wd
 		}
 	}
-	sgh.SetMinPrefWidth(units.NewValue(sumwd+spc, units.Dot))
+	sgh.SetMinPrefWidth(units.NewValue(sumwd+spc, units.UnitDot))
 }
 
 // UpdateSliceGrid updates grid display -- robust to any time calling
@@ -577,7 +577,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				idxlab.SetProp("tv-row", i)
 				idxlab.Selectable = true
 				idxlab.Redrawable = true
-				idxlab.Sty.Template = "giv.TableView.IndexLabel"
+				idxlab.ActStyle.Template = "giv.TableView.IndexLabel"
 				idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
@@ -676,7 +676,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					addact.SetIcon("plus")
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
-					addact.Sty.Template = "giv.TableView.AddAction"
+					addact.ActStyle.Template = "giv.TableView.AddAction"
 					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
@@ -693,7 +693,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					delact.SetIcon("minus")
 					delact.Tooltip = "delete this element"
 					delact.Data = i
-					delact.Sty.Template = "giv.TableView.DelAction"
+					delact.ActStyle.Template = "giv.TableView.DelAction"
 					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)

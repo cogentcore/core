@@ -43,7 +43,7 @@ func mainrun() {
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewEx(1))
+	mfr.SetProp("spacing", units.Ex(1))
 
 	tbar := gi.AddNewToolBar(mfr, "tbar")
 	tbar.SetStretchMaxWidth()

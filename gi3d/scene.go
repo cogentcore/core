@@ -273,14 +273,14 @@ func (sc *Scene) Style2D() {
 	sc.SetCanFocusIfActive() // we get all key events
 	sc.SetCurWin()
 	sc.Style2DWidget()
-	sc.LayState.SetFromStyle(&sc.Sty.Layout) // also does reset
+	sc.LayState.SetFromStyle(&sc.ActStyle.Layout) // also does reset
 	// note: we do Style3D in Init3D
 }
 
 func (sc *Scene) Size2D(iter int) {
 	sc.InitLayout2D()
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
-	pos := sc.Sty.Layout.PosDots().ToPoint()
+	pos := sc.ActStyle.Layout.PosDots().ToPoint()
 	if pos != image.ZP {
 		sc.Geom.Pos = pos
 	}

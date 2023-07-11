@@ -44,11 +44,11 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 
 var FrameProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.NewPx(2),
-	"border-radius":    units.NewPx(0),
+	"border-width":     units.Px(2),
+	"border-radius":    units.Px(0),
 	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.NewPx(2),
-	"margin":           units.NewPx(2),
+	"padding":          units.Px(2),
+	"margin":           units.Px(2),
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Background,
 }
@@ -79,7 +79,6 @@ func (fr *Frame) FrameStdRender() {
 	sz := fr.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 
-	rad := st.Border.Radius.Dots()
 	// TODO: SideTODO: not sure about this
 	pos = pos.Add(st.Layout.Margin.Dots().Pos()).Sub(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	sz = sz.Sub(st.Layout.Margin.Dots().Size()).Add(st.Border.Width.Dots().Size().MulScalar(0.5))
@@ -91,12 +90,7 @@ func (fr *Frame) FrameStdRender() {
 		// no border on box shadow (we do later)
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColor(&st.BoxShadow.Color)
-		if gist.SidesAreZero(rad.This()) {
-			pc.DrawRectangle(rs, spos.X, spos.Y, sz.X, sz.Y, gist.Border{})
-		} else {
-			pc.DrawRoundedRectangle(rs, spos.X, spos.Y, sz.X, sz.Y, gist.Border{})
-		}
-		pc.FillStrokeClear(rs)
+		pc.DrawBorder(rs, spos.X, spos.Y, sz.X, sz.Y, gist.Border{})
 	}
 
 	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes {
@@ -106,16 +100,11 @@ func (fr *Frame) FrameStdRender() {
 	pc.FillStyle.SetColor(nil)
 	// pc.StrokeStyle.SetColor(&st.Border.Color.Top)
 	// pc.StrokeStyle.Width = st.Border.Width.Top
-	if gist.SidesAreZero(rad.This()) {
-		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, st.Border)
-	} else {
-		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, st.Border)
-	}
-	pc.FillStrokeClear(rs)
+	pc.DrawBorder(rs, pos.X, pos.Y, sz.X, sz.Y, st.Border)
 }
 
 func (fr *Frame) RenderStripes() {
-	st := &fr.Sty
+	st := &fr.ActStyle
 	rs := &fr.Viewport.Render
 	pc := &rs.Paint
 

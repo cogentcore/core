@@ -49,11 +49,11 @@ func (bb *ButtonBox) Disconnect() {
 
 var ButtonBoxProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(2),
+	"border-width":     units.Px(1),
+	"border-radius":    units.Px(2),
 	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.NewPx(2),
-	"margin":           units.NewPx(2),
+	"padding":          units.Px(2),
+	"margin":           units.Px(2),
 	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
@@ -231,7 +231,7 @@ func (bb *ButtonBox) Init2D() {
 func (bb *ButtonBox) Style2D() {
 	bb.StyMu.Lock()
 	bb.Style2DWidget()
-	bb.LayState.SetFromStyle(&bb.Sty.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.ActStyle.Layout) // also does reset
 	bb.StyMu.Unlock()
 	bb.ConfigParts()
 }

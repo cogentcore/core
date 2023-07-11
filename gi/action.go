@@ -46,54 +46,54 @@ func (ac *Action) Disconnect() {
 
 var ActionProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.NewPx(0), // todo: should be default
-	"border-radius":    units.NewPx(0),
+	"border-width":     units.Px(0), // todo: should be default
+	"border-radius":    units.Px(0),
 	"border-color":     &Prefs.Colors.Border,
 	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
-	"padding":          units.NewPx(2),
-	"margin":           units.NewPx(2),
-	"min-width":        units.NewEm(1),
-	"min-height":       units.NewEm(1),
+	"padding":          units.Px(2),
+	"margin":           units.Px(2),
+	"min-width":        units.Em(1),
+	"min-height":       units.Em(1),
 	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"width":   units.Em(1),
+		"height":  units.Em(1),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
 	"#space": ki.Props{
-		"width":     units.NewCh(.5),
-		"min-width": units.NewCh(.5),
+		"width":     units.Ch(.5),
+		"min-width": units.Ch(.5),
 	},
 	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 	},
 	"#indicator": ki.Props{
-		"width":          units.NewEx(1.5),
-		"height":         units.NewEx(1.5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
+		"width":          units.Ex(1.5),
+		"height":         units.Ex(1.5),
+		"margin":         units.Px(0),
+		"padding":        units.Px(0),
 		"vertical-align": gist.AlignBottom,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},
 	"#ind-stretch": ki.Props{
-		"width": units.NewEm(1),
+		"width": units.Em(1),
 	},
 	"#shortcut": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 	},
 	"#sc-stretch": ki.Props{
-		"min-width": units.NewCh(2),
+		"min-width": units.Ch(2),
 	},
 	".menu-action": ki.Props{ // class of actions as menu items
-		"padding":   units.NewPx(2),
-		"margin":    units.NewPx(0),
+		"padding":   units.Px(2),
+		"margin":    units.Px(0),
 		"max-width": -1,
 		"indicator": "wedge-right",
 		ButtonSelectors[ButtonActive]: ki.Props{
@@ -107,7 +107,7 @@ var ActionProps = ki.Props{
 			"background-color": "highlight-10",
 		},
 		ButtonSelectors[ButtonFocus]: ki.Props{
-			"border-width":     units.NewPx(2),
+			"border-width":     units.Px(2),
 			"background-color": "samelight-50",
 		},
 		ButtonSelectors[ButtonDown]: ki.Props{
@@ -119,10 +119,10 @@ var ActionProps = ki.Props{
 		},
 	},
 	".menubar-action": ki.Props{ // class of actions in MenuBar
-		"padding":      units.NewPx(4), // we go to edge of bar
-		"margin":       units.NewPx(0),
+		"padding":      units.Px(4), // we go to edge of bar
+		"margin":       units.Px(0),
 		"indicator":    "none",
-		"border-width": units.NewPx(0),
+		"border-width": units.Px(0),
 		ButtonSelectors[ButtonActive]: ki.Props{
 			"background-color": "linear-gradient(lighter-0, highlight-10)",
 		},
@@ -134,7 +134,7 @@ var ActionProps = ki.Props{
 			"background-color": "linear-gradient(highlight-10, highlight-10)",
 		},
 		ButtonSelectors[ButtonFocus]: ki.Props{
-			"border-width":     units.NewPx(2),
+			"border-width":     units.Px(2),
 			"background-color": "linear-gradient(samelight-50, highlight-10)",
 		},
 		ButtonSelectors[ButtonDown]: ki.Props{
@@ -146,10 +146,10 @@ var ActionProps = ki.Props{
 		},
 	},
 	".toolbar-action": ki.Props{ // class of actions in ToolBar
-		"padding":      units.NewPx(4), // we go to edge of bar
-		"margin":       units.NewPx(0),
+		"padding":      units.Px(4), // we go to edge of bar
+		"margin":       units.Px(0),
 		"indicator":    "none",
-		"border-width": units.NewPx(0.5),
+		"border-width": units.Px(0.5),
 		ButtonSelectors[ButtonActive]: ki.Props{
 			"background-color": "linear-gradient(lighter-0, highlight-10)",
 		},
@@ -161,7 +161,7 @@ var ActionProps = ki.Props{
 			"background-color": "linear-gradient(highlight-10, highlight-10)",
 		},
 		ButtonSelectors[ButtonFocus]: ki.Props{
-			"border-width":     units.NewPx(2),
+			"border-width":     units.Px(2),
 			"background-color": "linear-gradient(samelight-50, highlight-10)",
 		},
 		ButtonSelectors[ButtonDown]: ki.Props{
@@ -184,7 +184,7 @@ var ActionProps = ki.Props{
 			"background-color": "linear-gradient(highlight-10, highlight-10)",
 		},
 		ButtonSelectors[ButtonFocus]: ki.Props{
-			"border-width":     units.NewPx(2),
+			"border-width":     units.Px(2),
 			"background-color": "linear-gradient(samelight-50, highlight-10)",
 		},
 		ButtonSelectors[ButtonDown]: ki.Props{

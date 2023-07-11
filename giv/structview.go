@@ -225,8 +225,8 @@ func (sv *StructView) ConfigStructGrid() {
 	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
 	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.NewEm(1.5))
-	sg.SetMinPrefWidth(units.NewEm(10))
+	sg.SetMinPrefHeight(units.Em(1.5))
+	sg.SetMinPrefWidth(units.Em(10))
 	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
 	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 	sg.SetProp("columns", 2)

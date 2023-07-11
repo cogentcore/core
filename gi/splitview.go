@@ -59,7 +59,7 @@ func (sv *SplitView) CopyFieldsFrom(frm any) {
 
 var SplitViewProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
-	"handle-size":   units.NewPx(10),
+	"handle-size":   units.Px(10),
 	"max-width":     -1.0,
 	"max-height":    -1.0,
 	"margin":        0,
@@ -337,16 +337,16 @@ func (sv *SplitView) SplitViewEvents() {
 
 func (sv *SplitView) StyleSplitView() {
 	sv.Style2DWidget()
-	sv.LayState.SetFromStyle(&sv.Sty.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.ActStyle.Layout) // also does reset
 	sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
-	sv.HandleSize.ToDots(&sv.Sty.UnContext)
+	sv.HandleSize.ToDots(&sv.ActStyle.UnContext)
 }
 
 func (sv *SplitView) Style2D() {
 	sv.StyMu.Lock()
 
 	sv.StyleSplitView()
-	sv.LayState.SetFromStyle(&sv.Sty.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.ActStyle.Layout) // also does reset
 	sv.UpdateSplits()
 	sv.StyMu.Unlock()
 
@@ -447,17 +447,17 @@ var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.NewPx(6),
-	"margin":           units.NewPx(0),
+	"padding":          units.Px(6),
+	"margin":           units.Px(0),
 	"background-color": &Prefs.Colors.Background,
 	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
-		"max-width":      units.NewEm(1),
-		"max-height":     units.NewEm(5),
-		"min-width":      units.NewEm(1),
-		"min-height":     units.NewEm(5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
+		"max-width":      units.Em(1),
+		"max-height":     units.Em(5),
+		"min-width":      units.Em(1),
+		"min-height":     units.Em(5),
+		"margin":         units.Px(0),
+		"padding":        units.Px(0),
 		"vertical-align": gist.AlignMiddle,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
@@ -471,7 +471,7 @@ var SplitterProps = ki.Props{
 		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
+		"border-width":     units.Px(2),
 		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{},
@@ -487,7 +487,7 @@ var SplitterProps = ki.Props{
 
 func (sr *Splitter) Defaults() {
 	sr.ValThumb = false
-	sr.ThumbSize = units.NewPx(10) // will be replaced by parent HandleSize
+	sr.ThumbSize = units.Px(10) // will be replaced by parent HandleSize
 	sr.Step = 0.01
 	sr.PageStep = 0.1
 	sr.Max = 1.0
@@ -533,7 +533,7 @@ func (sr *Splitter) Style2D() {
 	sr.ClearFlag(int(CanFocus))
 	sr.StyleSlider()
 	sr.StyMu.Lock()
-	sr.LayState.SetFromStyle(&sr.Sty.Layout) // also does reset
+	sr.LayState.SetFromStyle(&sr.ActStyle.Layout) // also does reset
 	sr.StyMu.Unlock()
 	sr.ConfigParts()
 }
@@ -629,7 +629,7 @@ func (sr *Splitter) MouseEvent() {
 				me.SetProcessed()
 				if me.Action == mouse.Press {
 					ed := srr.This().(SliderPositioner).PointToRelPos(me.Where)
-					st := &srr.Sty
+					st := &srr.ActStyle
 					// TODO: SideTODO: unsure about dim
 					spc := st.Layout.Margin.Dots().Pos().Dim(srr.Dim) + 0.5*srr.ThSize
 					if srr.Dim == mat32.X {

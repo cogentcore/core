@@ -1845,7 +1845,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = gi.LayoutHoriz
-	tv.Parts.Sty.Template = "giv.TreeView.Parts"
+	tv.Parts.ActStyle.Template = "giv.TreeView.Parts"
 	config := kit.TypeAndNameList{}
 	if tv.HasChildren() {
 		config.Add(gi.KiT_CheckBox, "branch")
@@ -1857,11 +1857,11 @@ func (tv *TreeView) ConfigParts() {
 	mods, updt := tv.Parts.ConfigChildren(config)
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
-			if wb.Sty.Template != "giv.TreeView.Branch" {
+			if wb.ActStyle.Template != "giv.TreeView.Branch" {
 				wb.SetProp("#icon0", TVBranchProps)
 				wb.SetProp("#icon1", TVBranchProps)
 				wb.SetProp("no-focus", true) // note: cannot be in compiled props
-				wb.Sty.Template = "giv.TreeView.Branch"
+				wb.ActStyle.Template = "giv.TreeView.Branch"
 				// unfortunately StylePart only handles default Style obj -- not
 				// these special styles.. todo: fix this somehow
 				if bprpi, err := tv.PropTry("#branch"); err == nil {
@@ -1904,7 +1904,7 @@ func (tv *TreeView) ConfigParts() {
 		// if tv.HasFlag(int(TreeViewFlagNoTemplate)) {
 		// 	lbl.Redrawable = true // this prevents select highlight from rendering properly
 		// }
-		tv.Sty.Font.CopyNonDefaultProps(lbl.This()) // copy our properties to label
+		tv.ActStyle.Font.CopyNonDefaultProps(lbl.This()) // copy our properties to label
 		lbl.SetText(tv.Label())
 		if mods {
 			tv.StylePart(gi.Node2D(lbl))
@@ -1937,40 +1937,40 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 
 var TreeViewProps = ki.Props{
 	"EnumType:Flag":    KiT_TreeViewFlags,
-	"indent":           units.NewCh(4),
-	"spacing":          units.NewCh(.5),
-	"border-width":     units.NewPx(0),
-	"border-radius":    units.NewPx(0),
-	"padding":          units.NewPx(0),
-	"margin":           units.NewPx(1),
+	"indent":           units.Ch(4),
+	"spacing":          units.Ch(.5),
+	"border-width":     units.Px(0),
+	"border-radius":    units.Px(0),
+	"padding":          units.Px(0),
+	"margin":           units.Px(1),
 	"text-align":       gist.AlignLeft,
 	"vertical-align":   gist.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": "inherit",
 	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"width":   units.Em(1),
+		"height":  units.Em(1),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 		"fill":    &gi.Prefs.Colors.Icon,
 		"stroke":  &gi.Prefs.Colors.Font,
 	},
 	"#branch": ki.Props{
 		"icon":             "wedge-down",
 		"icon-off":         "wedge-right",
-		"margin":           units.NewPx(0),
-		"padding":          units.NewPx(0),
+		"margin":           units.Px(0),
+		"padding":          units.Px(0),
 		"background-color": color.Transparent,
-		"max-width":        units.NewEm(.8),
-		"max-height":       units.NewEm(.8),
+		"max-width":        units.Em(.8),
+		"max-height":       units.Em(.8),
 	},
 	"#space": ki.Props{
-		"width": units.NewEm(0.5),
+		"width": units.Em(0.5),
 	},
 	"#label": ki.Props{
-		"margin":    units.NewPx(0),
-		"padding":   units.NewPx(0),
-		"min-width": units.NewCh(16),
+		"margin":    units.Px(0),
+		"padding":   units.Px(0),
+		"min-width": units.Ch(16),
 	},
 	"#menu": ki.Props{
 		"indicator": "none",
@@ -2076,8 +2076,8 @@ func (tv *TreeView) Init2D() {
 	} else {
 		tv.Viewport = tv.ParentViewport()
 	}
-	tv.Sty.Defaults()
-	tv.Sty.Template = "giv.TreeView." + ki.Type(tv).Name()
+	tv.ActStyle.Defaults()
+	tv.ActStyle.Template = "giv.TreeView." + ki.Type(tv).Name()
 	tv.LayState.Defaults() // doesn't overwrite
 	tv.ConfigParts()
 	// tv.ConnectToViewport()
@@ -2098,30 +2098,30 @@ func (tv *TreeView) StyleTreeView() {
 	_, noTempl := tv.PropInherit("no-templates", ki.NoInherit, ki.TypeProps)
 	tv.SetFlagState(noTempl, int(TreeViewFlagNoTemplate))
 	if !noTempl {
-		hasTempl, saveTempl = tv.Sty.FromTemplate()
+		hasTempl, saveTempl = tv.ActStyle.FromTemplate()
 	}
 	if !hasTempl || saveTempl {
 		tv.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		tv.Sty.SaveTemplate()
+		tv.ActStyle.SaveTemplate()
 	}
-	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
+	pst := &(tv.Par.(gi.Node2D).AsWidget().ActStyle)
 	if hasTempl && !saveTempl {
 		for i := 0; i < int(TreeViewStatesN); i++ {
-			tv.StateStyles[i].Template = tv.Sty.Template + TreeViewSelectors[i]
+			tv.StateStyles[i].Template = tv.ActStyle.Template + TreeViewSelectors[i]
 			tv.StateStyles[i].FromTemplate()
 		}
 	} else {
 		for i := 0; i < int(TreeViewStatesN); i++ {
-			tv.StateStyles[i].CopyFrom(&tv.Sty)
+			tv.StateStyles[i].CopyFrom(&tv.ActStyle)
 			tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]), tv.Viewport)
-			tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
+			tv.StateStyles[i].CopyUnitContext(&tv.ActStyle.UnContext)
 		}
 	}
 	if hasTempl && saveTempl {
 		for i := 0; i < int(TreeViewStatesN); i++ {
-			tv.StateStyles[i].Template = tv.Sty.Template + TreeViewSelectors[i]
+			tv.StateStyles[i].Template = tv.ActStyle.Template + TreeViewSelectors[i]
 			tv.StateStyles[i].SaveTemplate()
 		}
 	}
@@ -2132,8 +2132,8 @@ func (tv *TreeView) StyleTreeView() {
 		}
 	}
 	tv.Indent.SetFmInheritProp("indent", tv.This(), ki.NoInherit, ki.TypeProps)
-	tv.Indent.ToDots(&tv.Sty.UnContext)
-	tv.Parts.Sty.InheritFields(&tv.Sty)
+	tv.Indent.ToDots(&tv.ActStyle.UnContext)
+	tv.Parts.ActStyle.InheritFields(&tv.ActStyle)
 	if spc, ok := tv.PropInherit("spacing", ki.NoInherit, ki.TypeProps); ok {
 		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
 	}
@@ -2143,7 +2143,7 @@ func (tv *TreeView) StyleTreeView() {
 
 func (tv *TreeView) Style2D() {
 	tv.StyleTreeView()
-	tv.LayState.SetFromStyle(&tv.Sty.Layout) // also does reset
+	tv.LayState.SetFromStyle(&tv.ActStyle.Layout) // also does reset
 }
 
 // TreeView is tricky for alloc because it is both a layout of its children but has to
@@ -2175,7 +2175,7 @@ func (tv *TreeView) Size2D(iter int) {
 }
 
 func (tv *TreeView) Layout2DParts(parBBox image.Rectangle, iter int) {
-	spc := tv.Sty.BoxSpace()
+	spc := tv.ActStyle.BoxSpace()
 	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
 	tv.Parts.LayState.Alloc.PosOrig = tv.Parts.LayState.Alloc.Pos
 	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size())
@@ -2196,9 +2196,9 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
 
 	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
-	gi.SetUnitContext(&tv.Sty, tv.Viewport, psize) // update units with final layout
+	gi.SetUnitContext(&tv.ActStyle, tv.Viewport, psize) // update units with final layout
 	for i := 0; i < int(TreeViewStatesN); i++ {
-		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
+		tv.StateStyles[i].CopyUnitContext(&tv.ActStyle.UnContext)
 	}
 	tv.BBox = tv.This().(gi.Node2D).BBox2D() // only compute once, at this point
 	tv.This().(gi.Node2D).ComputeBBox2D(parBBox, image.ZP)
@@ -2298,13 +2298,13 @@ func (tv *TreeView) Render2D() {
 		if !tv.VpBBox.Empty() { // we are root and just here for the connections :)
 			tv.UpdateInactive()
 			if tv.IsSelected() {
-				tv.Sty = tv.StateStyles[TreeViewSel]
+				tv.ActStyle = tv.StateStyles[TreeViewSel]
 			} else if tv.HasFocus() {
-				tv.Sty = tv.StateStyles[TreeViewFocus]
+				tv.ActStyle = tv.StateStyles[TreeViewFocus]
 			} else if tv.IsInactive() {
-				tv.Sty = tv.StateStyles[TreeViewInactive]
+				tv.ActStyle = tv.StateStyles[TreeViewInactive]
 			} else {
-				tv.Sty = tv.StateStyles[TreeViewActive]
+				tv.ActStyle = tv.StateStyles[TreeViewActive]
 			}
 			tv.ConfigPartsIfNeeded()
 			tv.This().(gi.Node2D).ConnectEvents2D()

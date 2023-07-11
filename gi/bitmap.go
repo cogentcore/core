@@ -74,8 +74,8 @@ func (bm *Bitmap) SetSize(nwsz image.Point) {
 // LayoutToImgSize sets the width, height properties to the current Size
 // so it will request that size during layout
 func (bm *Bitmap) LayoutToImgSize() {
-	bm.SetProp("width", units.NewValue(float32(bm.Size.X), units.Dot))
-	bm.SetProp("height", units.NewValue(float32(bm.Size.Y), units.Dot))
+	bm.SetProp("width", units.NewValue(float32(bm.Size.X), units.UnitDot))
+	bm.SetProp("height", units.NewValue(float32(bm.Size.Y), units.UnitDot))
 }
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image

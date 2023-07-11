@@ -65,11 +65,11 @@ func (tv *TwinTextViews) ConfigTexts() {
 		updt = tv.UpdateStart()
 	} else {
 		al.SetStretchMax()
-		al.SetMinPrefWidth(units.NewCh(80))
-		al.SetMinPrefHeight(units.NewEm(40))
+		al.SetMinPrefWidth(units.Ch(80))
+		al.SetMinPrefHeight(units.Em(40))
 		bl.SetStretchMax()
-		bl.SetMinPrefWidth(units.NewCh(80))
-		bl.SetMinPrefHeight(units.NewEm(40))
+		bl.SetMinPrefWidth(units.Ch(80))
+		bl.SetMinPrefHeight(units.Em(40))
 
 		av := AddNewTextView(al, "text-a")
 		bv := AddNewTextView(bl, "text-b")

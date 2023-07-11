@@ -12,7 +12,7 @@ import (
 func TestValCvt(t *testing.T) {
 	var ctxt Context
 	ctxt.Defaults()
-	for un := Pct; un <= Dp; un++ {
+	for un := UnitPct; un <= UnitDp; un++ {
 		v1 := NewValue(1.0, un)
 		s1 := fmt.Sprintf("%v = %v dots", v1, v1.ToDots(&ctxt))
 		v2 := StringToValue("1.0" + UnitNames[un])
@@ -23,8 +23,8 @@ func TestValCvt(t *testing.T) {
 			// 	fmt.Printf("%v = %v\n", s1, s2)
 		}
 	}
-	v1 := NewValue(1.0, In)
-	v2 := v1.Convert(Px, &ctxt)
+	v1 := NewValue(1.0, UnitIn)
+	v2 := v1.Convert(UnitPx, &ctxt)
 	s1 := fmt.Sprintf("%v dots\n", v1.ToDots(&ctxt))
 	s2 := fmt.Sprintf("%v dots\n", v2.ToDots(&ctxt))
 	if s1 != s2 {

@@ -64,8 +64,8 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb.Stat() // update markup
 
 	tlv := frame.InsertNewChild(gi.KiT_Layout, prIdx+1, "text-lay").(*gi.Layout)
-	tlv.SetProp("width", units.NewCh(80))
-	tlv.SetProp("height", units.NewEm(40))
+	tlv.SetProp("width", units.Ch(80))
+	tlv.SetProp("height", units.Em(40))
 	tlv.SetProp("line-nos", opts.LineNos)
 	tlv.SetStretchMax()
 	tv := AddNewTextView(tlv, "text-view")
@@ -399,7 +399,7 @@ var FontChooserSizeDots = 18
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
 func FontChooserDialog(avp *gi.Viewport2D, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	FontChooserSizeDots = int(avp.Sty.UnContext.ToDots(float32(FontChooserSize), units.Pt))
+	FontChooserSizeDots = int(avp.ActStyle.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	girl.FontLibrary.OpenAllFonts(FontChooserSizeDots)
 	dlg := TableViewSelectDialog(avp, &girl.FontLibrary.FontInfo, opts, -1, FontInfoStyleFunc, recv, dlgFunc)
 	return dlg
@@ -413,7 +413,7 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 			widg.SetProp("font-stretch", (finf)[row].Stretch)
 			widg.SetProp("font-weight", (finf)[row].Weight)
 			widg.SetProp("font-style", (finf)[row].Style)
-			widg.SetProp("font-size", units.NewPt(float32(FontChooserSize)))
+			widg.SetProp("font-size", units.Pt(float32(FontChooserSize)))
 			widg.AsNode2D().SetFullReRender()
 		}
 	}
@@ -426,8 +426,8 @@ func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, opts DlgOpts, recv
 	if opts.CSS == nil {
 		opts.CSS = ki.Props{
 			"icon": ki.Props{
-				"width":  units.NewEm(2),
-				"height": units.NewEm(2),
+				"width":  units.Em(2),
+				"height": units.Em(2),
 			},
 		}
 	}

@@ -58,7 +58,7 @@ func main() {
 	// next draw a rounded rectangle
 	pc.FillStyle.SetColor(nil)
 	pc.StrokeStyle.Width.SetDot(10)
-	pc.DrawRoundedRectangle(rs, 20, 20, 150, 100, 6)
+	pc.DrawRoundedRectangle(rs, 20, 20, 150, 100, gist.NewSideFloats(6))
 	pc.FillStrokeClear(rs)
 
 	// use units-based styling instead of dots:
@@ -66,7 +66,7 @@ func main() {
 	pc.StrokeStyle.Width.SetPct(2) // percent of total image (width)
 	pc.ToDots()                    // convert pct -> dots based on units context
 	// fmt.Printf("pct dots: %g\n", pc.StrokeStyle.Width.Dots) // 6.4
-	pc.DrawRoundedRectangle(rs, 40, 40, 150, 100, 6)
+	pc.DrawRoundedRectangle(rs, 40, 40, 150, 100, gist.NewSideFloats(6))
 	pc.FillStrokeClear(rs)
 
 	// Text rendering

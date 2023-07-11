@@ -39,7 +39,7 @@ type Font struct {
 func (fs *Font) Defaults() {
 	fs.Color = Black
 	fs.Opacity = 1.0
-	fs.Size = units.NewPt(12)
+	fs.Size = units.Pt(12)
 }
 
 // SetStylePost does any updates after generic xml-tag property setting -- use

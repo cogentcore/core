@@ -90,7 +90,7 @@ func mainrun() {
 	trow.SetStretchMaxWidth()
 
 	spc := gi.AddNewSpace(mfr, "spc1")
-	spc.SetFixedHeight(units.NewEm(2))
+	spc.SetFixedHeight(units.Em(2))
 
 	gi.AddNewStretch(trow, "str1")
 	lab1 := gi.AddNewLabel(trow, "lab1", "This is a test of the TreeView and StructView reflect-ive GUI")

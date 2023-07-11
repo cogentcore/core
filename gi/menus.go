@@ -331,13 +331,13 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 // PopupMenu function
 
 var MenuFrameProps = ki.Props{
-	"border-width":        units.NewPx(0),
+	"border-width":        units.Px(0),
 	"border-color":        "none",
-	"margin":              units.NewPx(4),
-	"padding":             units.NewPx(2),
-	"box-shadow.h-offset": units.NewPx(2),
-	"box-shadow.v-offset": units.NewPx(2),
-	"box-shadow.blur":     units.NewPx(2),
+	"margin":              units.Px(4),
+	"padding":             units.Px(2),
+	"box-shadow.h-offset": units.Px(2),
+	"box-shadow.v-offset": units.Px(2),
+	"box-shadow.blur":     units.Px(2),
 	"box-shadow.color":    &Prefs.Colors.Shadow,
 }
 
@@ -386,10 +386,10 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
 	frame.Size2DTree(0)                                    // collect sizes
 	pvp.Win = nil
-	scextra := frame.Sty.Layout.ScrollBarWidth.Dots
+	scextra := frame.ActStyle.Layout.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
 	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
-	maxht := int(32 * frame.Sty.Font.Face.Metrics.Height)
+	maxht := int(32 * frame.ActStyle.Font.Face.Metrics.Height)
 	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
 	x = ints.MaxInt(0, x)
 	y = ints.MaxInt(0, y)
@@ -578,39 +578,39 @@ func (mb *MenuButton) CopyFieldsFrom(frm any) {
 
 var MenuButtonProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(4),
+	"border-width":     units.Px(1),
+	"border-radius":    units.Px(4),
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     gist.BorderSolid,
-	"padding":          units.NewPx(4),
-	"margin":           units.NewPx(4),
+	"padding":          units.Px(4),
+	"margin":           units.Px(4),
 	"box-shadow.color": &Prefs.Colors.Shadow,
 	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"width":   units.Em(1),
+		"height":  units.Em(1),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
 	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 	},
 	"#indicator": ki.Props{
-		"width":          units.NewEx(1.5),
-		"height":         units.NewEx(1.5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
+		"width":          units.Ex(1.5),
+		"height":         units.Ex(1.5),
+		"margin":         units.Px(0),
+		"padding":        units.Px(0),
 		"vertical-align": gist.AlignBottom,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},
 	"#ind-stretch": ki.Props{
-		"width": units.NewEm(1),
+		"width": units.Em(1),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",
@@ -623,7 +623,7 @@ var MenuButtonProps = ki.Props{
 		"background-color": "linear-gradient(highlight-10, highlight-10)",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
+		"border-width":     units.Px(2),
 		"background-color": "linear-gradient(samelight-50, highlight-10)",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
@@ -676,12 +676,12 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 
 var SeparatorProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.NewPx(0),
-	"margin":           units.NewPx(0),
+	"padding":          units.Px(0),
+	"margin":           units.Px(0),
 	"vertical-align":   gist.AlignCenter,
 	"horizontal-align": gist.AlignCenter,
 	"border-color":     &Prefs.Colors.Border,
-	"border-width":     units.NewPx(2),
+	"border-width":     units.Px(2),
 	"background-color": &Prefs.Colors.Control,
 	// todo: dotted
 }
@@ -690,10 +690,10 @@ func (sp *Separator) Style2D() {
 	sp.StyMu.Lock()
 	if sp.Horiz {
 		sp.SetProp("max-width", -1)
-		sp.SetProp("min-height", units.NewEx(0.5))
+		sp.SetProp("min-height", units.Ex(0.5))
 	} else {
 		sp.SetProp("max-height", -1)
-		sp.SetProp("min-width", units.NewCh(0.5))
+		sp.SetProp("min-width", units.Ch(0.5))
 	}
 	sp.StyMu.Unlock()
 	sp.WidgetBase.Style2D()

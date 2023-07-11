@@ -26,8 +26,8 @@ func TestStyle(t *testing.T) {
 	s.Defaults()
 	p.Defaults()
 	d.Defaults()
-	p.Layout.Height = units.NewValue(42.0, units.In)
-	s.BoxShadow.VOffset = units.NewValue(22.0, units.Pc)
+	p.Layout.Height = units.NewValue(42.0, units.UnitIn)
+	s.BoxShadow.VOffset = units.NewValue(22.0, units.UnitPc)
 	s.SetStyleProps(&p, props, nil)
 
 	fmt.Printf("style width: %v\n", s.Layout.Width)

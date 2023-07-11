@@ -915,14 +915,14 @@ func (nb *Node2DBase) BBoxReport() string {
 	return rpt
 }
 
-// ParentStyle returns parent's style or nil if not avail.
+// ParentActiveStyle returns parent's active style or nil if not avail.
 // Calls StyleRLock so must call ParentStyleRUnlock when done.
-func (nb *Node2DBase) ParentStyle() *gist.Style {
+func (nb *Node2DBase) ParentActiveStyle() *gist.Style {
 	if nb.Par == nil {
 		return nil
 	}
-	if ps, ok := nb.Par.(gist.Styler); ok {
-		st := ps.Style()
+	if ps, ok := nb.Par.(gist.ActiveStyler); ok {
+		st := ps.ActiveStyle()
 		ps.StyleRLock()
 		return st
 	}
@@ -934,7 +934,7 @@ func (nb *Node2DBase) ParentStyleRUnlock() {
 	if nb.Par == nil {
 		return
 	}
-	if ps, ok := nb.Par.(gist.Styler); ok {
+	if ps, ok := nb.Par.(gist.ActiveStyler); ok {
 		ps.StyleRUnlock()
 	}
 }
@@ -1019,12 +1019,12 @@ func (nb *Node2DBase) SetMinPrefHeight(val units.Value) {
 
 // SetStretchMaxWidth sets stretchy max width (-1) -- can grow to take up avail room
 func (nb *Node2DBase) SetStretchMaxWidth() {
-	nb.SetProp("max-width", units.NewPx(-1))
+	nb.SetProp("max-width", units.Px(-1))
 }
 
 // SetStretchMaxHeight sets stretchy max height (-1) -- can grow to take up avail room
 func (nb *Node2DBase) SetStretchMaxHeight() {
-	nb.SetProp("max-height", units.NewPx(-1))
+	nb.SetProp("max-height", units.Px(-1))
 }
 
 // SetStretchMax sets stretchy max width and height (-1) -- can grow to take up avail room

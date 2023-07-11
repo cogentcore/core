@@ -269,9 +269,9 @@ func SetHTMLSimpleTag(tag string, fs *gist.Font, ctxt *units.Context, cssAgg ki.
 		did = true
 	case "sup":
 		fs.SetDeco(gist.DecoSuper)
-		curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
+		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
 		curpts -= 2
-		fs.Size = units.NewPt(float32(curpts))
+		fs.Size = units.Pt(float32(curpts))
 		fs.Size.ToDots(ctxt)
 		OpenFont(fs, ctxt)
 		did = true
@@ -279,21 +279,21 @@ func SetHTMLSimpleTag(tag string, fs *gist.Font, ctxt *units.Context, cssAgg ki.
 		fs.SetDeco(gist.DecoSub)
 		fallthrough
 	case "small":
-		curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
+		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
 		curpts -= 2
-		fs.Size = units.NewPt(float32(curpts))
+		fs.Size = units.Pt(float32(curpts))
 		fs.Size.ToDots(ctxt)
 		OpenFont(fs, ctxt)
 		did = true
 	case "big":
-		curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
+		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
 		curpts += 2
-		fs.Size = units.NewPt(float32(curpts))
+		fs.Size = units.Pt(float32(curpts))
 		fs.Size.ToDots(ctxt)
 		OpenFont(fs, ctxt)
 		did = true
 	case "xx-small", "x-small", "smallf", "medium", "large", "x-large", "xx-large":
-		fs.Size = units.NewPt(gist.FontSizePoints[tag])
+		fs.Size = units.Pt(gist.FontSizePoints[tag])
 		fs.Size.ToDots(ctxt)
 		OpenFont(fs, ctxt)
 		did = true

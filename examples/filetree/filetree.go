@@ -339,8 +339,8 @@ func (fb *FileBrowse) ConfigSplitView() {
 			txly := split.Child(1 + i).(*gi.Layout)
 			txly.SetStretchMaxWidth()
 			txly.SetStretchMaxHeight()
-			txly.SetMinPrefWidth(units.NewCh(20))
-			txly.SetMinPrefHeight(units.NewCh(10))
+			txly.SetMinPrefWidth(units.Ch(20))
+			txly.SetMinPrefHeight(units.Ch(10))
 
 			txed := giv.AddNewTextView(txly, fmt.Sprintf("textview-%v", i))
 			txed.Viewport = fb.Viewport

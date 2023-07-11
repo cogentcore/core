@@ -486,13 +486,13 @@ func (vp *Viewport2D) Style2D() {
 
 	vp.SetCurWin()
 	vp.Style2DWidget()
-	vp.LayState.SetFromStyle(&vp.Sty.Layout) // also does reset
+	vp.LayState.SetFromStyle(&vp.ActStyle.Layout) // also does reset
 }
 
 func (vp *Viewport2D) Size2D(iter int) {
 	vp.InitLayout2D()
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
-	pos := vp.Sty.Layout.PosDots().ToPoint()
+	pos := vp.ActStyle.Layout.PosDots().ToPoint()
 	if pos != image.ZP {
 		vp.Geom.Pos = pos
 	}
@@ -646,7 +646,7 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 func (vp *Viewport2D) FillViewport() {
 	vp.StyMu.RLock()
-	st := &vp.Sty
+	st := &vp.ActStyle
 	rs := &vp.Render
 	rs.Lock()
 	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &st.Font.BgColor)
@@ -697,8 +697,8 @@ func (vp *Viewport2D) PrefSize(initSz image.Point) image.Point {
 	ch := vp.ChildByType(KiT_Layout, ki.Embeds, 0).Embed(KiT_Layout).(*Layout)
 	vpsz := ch.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
-	stw := int(vp.Sty.Layout.MinWidth.Dots)
-	sth := int(vp.Sty.Layout.MinHeight.Dots)
+	stw := int(vp.ActStyle.Layout.MinWidth.Dots)
+	sth := int(vp.ActStyle.Layout.MinHeight.Dots)
 	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
 	vpsz.X = ints.MaxInt(vpsz.X, stw)
 	vpsz.Y = ints.MaxInt(vpsz.Y, sth)

@@ -120,24 +120,24 @@ func TestRender(t *testing.T) {
 
 	bs := gist.Border{}
 	bs.Color.Set(red, blu, grn, org)
-	bs.Width.Set(units.NewDot(20), units.NewDot(30), units.NewDot(40), units.NewDot(50))
+	bs.Width.Set(units.Dot(20), units.Dot(30), units.Dot(40), units.Dot(50))
 	bs.ToDots(&pc.UnContext)
 
 	// first, draw a frame around the entire image
 	// pc.StrokeStyle.SetColor(blk)
 	pc.FillStyle.SetColor(wht)
 	// pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
-	pc.DrawRectangle(rs, 0, 0, float32(imgsz.X), float32(imgsz.Y), bs)
+	pc.DrawBorder(rs, 0, 0, float32(imgsz.X), float32(imgsz.Y), bs)
 	pc.FillStrokeClear(rs) // actually render path that has been setup
 
 	// next draw a rounded rectangle
 	bs.Color.Set(ppl, grn, red, blu)
 	// bs.Width.Set(units.NewDot(10))
-	bs.Radius.Set(units.NewDot(0), units.NewDot(30), units.NewDot(10))
+	bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
 	pc.FillStyle.SetColor(lbl)
 	pc.StrokeStyle.Width.SetDot(10)
 	bs.ToDots(&pc.UnContext)
-	pc.DrawRoundedRectangle(rs, 60, 60, 150, 100, bs)
+	pc.DrawBorder(rs, 60, 60, 150, 100, bs)
 	pc.FillStrokeClear(rs)
 
 	// // use units-based styling instead of dots:

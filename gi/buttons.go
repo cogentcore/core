@@ -199,7 +199,7 @@ func (bb *ButtonBase) SetText(txt string) {
 	}
 	updt := bb.UpdateStart()
 	bb.StyMu.RLock()
-	needSty := bb.Sty.Font.Size.Val == 0
+	needSty := bb.ActStyle.Font.Size.Val == 0
 	bb.StyMu.RUnlock()
 	if needSty {
 		bb.StyleButton()
@@ -222,7 +222,7 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 		return
 	}
 	bb.StyMu.RLock()
-	needSty := bb.Sty.Font.Size.Val == 0
+	needSty := bb.ActStyle.Font.Size.Val == 0
 	bb.StyMu.RUnlock()
 	if needSty {
 		bb.StyleButton()
@@ -254,7 +254,7 @@ func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
 	}
 	bb.State = state
 	bb.StyMu.Lock()
-	bb.Sty = bb.StateStyles[state]
+	bb.ActStyle = bb.StateStyles[state]
 	bb.StyMu.Unlock()
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender to update text, icon
@@ -286,7 +286,7 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 			bb.State = ButtonActive
 		}
 	}
-	bb.Sty = bb.StateStyles[bb.State]
+	bb.ActStyle = bb.StateStyles[bb.State]
 	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender
@@ -621,7 +621,7 @@ func (bb *ButtonBase) StyleButton() {
 	bb.StyMu.Lock()
 	defer bb.StyMu.Unlock()
 
-	hasTempl, saveTempl := bb.Sty.FromTemplate()
+	hasTempl, saveTempl := bb.ActStyle.FromTemplate()
 	if !hasTempl || saveTempl {
 		bb.Style2DWidget()
 	}
@@ -631,35 +631,35 @@ func (bb *ButtonBase) StyleButton() {
 	} else {
 		bb.SetFlagState(!bb.IsInactive(), int(CanFocus))
 	}
-	parSty := bb.ParentStyle()
+	parSty := bb.ParentActiveStyle()
 	clsty := "." + bb.Class
 	var clsp ki.Props
 	if clspi, ok := bb.PropInherit(clsty, ki.NoInherit, ki.TypeProps); ok {
 		clsp, ok = clspi.(ki.Props)
 	}
 	if hasTempl && saveTempl {
-		bb.Sty.SaveTemplate()
+		bb.ActStyle.SaveTemplate()
 	}
 	if hasTempl && !saveTempl {
 		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].Template = bb.Sty.Template + ButtonSelectors[i]
+			bb.StateStyles[i].Template = bb.ActStyle.Template + ButtonSelectors[i]
 			bb.StateStyles[i].FromTemplate()
 		}
 	} else {
 		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].CopyFrom(&bb.Sty)
+			bb.StateStyles[i].CopyFrom(&bb.ActStyle)
 			bb.StateStyles[i].SetStyleProps(parSty, bb.StyleProps(ButtonSelectors[i]), bb.Viewport)
 			if clsp != nil {
 				if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
 					bb.StateStyles[i].SetStyleProps(parSty, stclsp, bb.Viewport)
 				}
 			}
-			bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
+			bb.StateStyles[i].CopyUnitContext(&bb.ActStyle.UnContext)
 		}
 	}
 	if hasTempl && saveTempl {
 		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].Template = bb.Sty.Template + ButtonSelectors[i]
+			bb.StateStyles[i].Template = bb.ActStyle.Template + ButtonSelectors[i]
 			bb.StateStyles[i].SaveTemplate()
 		}
 	}
@@ -670,7 +670,7 @@ func (bb *ButtonBase) Style2D() {
 	bb.StyleButton()
 
 	bb.StyMu.Lock()
-	bb.LayState.SetFromStyle(&bb.Sty.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.ActStyle.Layout) // also does reset
 	bb.StyMu.Unlock()
 	bb.This().(ButtonWidget).ConfigParts()
 	if bb.Menu != nil {
@@ -684,7 +684,7 @@ func (bb *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 	bb.Layout2DParts(parBBox, iter)
 	bb.StyMu.Lock()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
+		bb.StateStyles[i].CopyUnitContext(&bb.ActStyle.UnContext)
 	}
 	bb.StyMu.Unlock()
 	return bb.Layout2DChildren(iter)
@@ -761,44 +761,44 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 
 var ButtonProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(4),
+	"border-width":     units.Px(1),
+	"border-radius":    units.Px(4),
 	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.NewPx(4),
-	"margin":           units.NewPx(2),
-	"min-width":        units.NewEm(1),
-	"min-height":       units.NewEm(1),
+	"padding":          units.Px(4),
+	"margin":           units.Px(2),
+	"min-width":        units.Em(1),
+	"min-height":       units.Em(1),
 	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#space": ki.Props{
-		"width":     units.NewCh(.5),
-		"min-width": units.NewCh(.5),
+		"width":     units.Ch(.5),
+		"min-width": units.Ch(.5),
 	},
 	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"width":   units.Em(1),
+		"height":  units.Em(1),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
 	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 		// "font-size": units.NewPt(24),
 	},
 	"#indicator": ki.Props{
-		"width":          units.NewEx(1.5),
-		"height":         units.NewEx(1.5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
+		"width":          units.Ex(1.5),
+		"height":         units.Ex(1.5),
+		"margin":         units.Px(0),
+		"padding":        units.Px(0),
 		"vertical-align": gist.AlignBottom,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},
 	"#ind-stretch": ki.Props{
-		"width": units.NewEm(1),
+		"width": units.Em(1),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",
@@ -811,7 +811,7 @@ var ButtonProps = ki.Props{
 		"background-color": "linear-gradient(highlight-10, highlight-10)",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
+		"border-width":     units.Px(2),
 		"background-color": "linear-gradient(samelight-50, highlight-10)",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
@@ -852,33 +852,33 @@ var CheckBoxProps = ki.Props{
 	"text-align":       gist.AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
-	"margin":           units.NewPx(1),
-	"padding":          units.NewPx(1),
-	"border-width":     units.NewPx(0),
+	"margin":           units.Px(1),
+	"padding":          units.Px(1),
+	"border-width":     units.Px(0),
 	"#icon0": ki.Props{
-		"width":            units.NewEm(1),
-		"height":           units.NewEm(1),
-		"margin":           units.NewPx(0),
-		"padding":          units.NewPx(0),
+		"width":            units.Em(1),
+		"height":           units.Em(1),
+		"margin":           units.Px(0),
+		"padding":          units.Px(0),
 		"background-color": color.Transparent,
 		"fill":             &Prefs.Colors.Control,
 		"stroke":           &Prefs.Colors.Font,
 	},
 	"#icon1": ki.Props{
-		"width":            units.NewEm(1),
-		"height":           units.NewEm(1),
-		"margin":           units.NewPx(0),
-		"padding":          units.NewPx(0),
+		"width":            units.Em(1),
+		"height":           units.Em(1),
+		"margin":           units.Px(0),
+		"padding":          units.Px(0),
 		"background-color": color.Transparent,
 		"fill":             &Prefs.Colors.Control,
 		"stroke":           &Prefs.Colors.Font,
 	},
 	"#space": ki.Props{
-		"width": units.NewCh(0.1),
+		"width": units.Ch(0.1),
 	},
 	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "lighter-0",
@@ -891,7 +891,7 @@ var CheckBoxProps = ki.Props{
 		"background-color": "highlight-10",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
+		"border-width":     units.Px(2),
 		"background-color": "samelight-50",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{

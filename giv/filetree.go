@@ -1438,10 +1438,10 @@ func BlameDialog(avp *gi.Viewport2D, fname string, blame, fbytes []byte) *TwinTe
 	tva, tvb := tv.TextViews()
 	tva.SetProp("white-space", gist.WhiteSpacePre)
 	tvb.SetProp("white-space", gist.WhiteSpacePre)
-	tva.SetProp("width", units.NewCh(30))
-	tva.SetProp("height", units.NewEm(40))
-	tvb.SetProp("width", units.NewCh(80))
-	tvb.SetProp("height", units.NewEm(40))
+	tva.SetProp("width", units.Ch(30))
+	tva.SetProp("height", units.Em(40))
+	tvb.SetProp("width", units.Ch(80))
+	tvb.SetProp("height", units.Em(40))
 
 	dlg.UpdateEndNoSig(true) // going to be shown
 	dlg.Open(0, 0, avp, nil)
@@ -2601,12 +2601,12 @@ var VcsLabelFunc = LabelFunc(func(fni any, act *gi.Action) string {
 
 var FileTreeViewProps = ki.Props{
 	"EnumType:Flag":    KiT_TreeViewFlags,
-	"indent":           units.NewCh(2),
-	"spacing":          units.NewCh(.5),
-	"border-width":     units.NewPx(0),
-	"border-radius":    units.NewPx(0),
-	"padding":          units.NewPx(0),
-	"margin":           units.NewPx(1),
+	"indent":           units.Ch(2),
+	"spacing":          units.Ch(.5),
+	"border-width":     units.Px(0),
+	"border-radius":    units.Px(0),
+	"padding":          units.Px(0),
+	"margin":           units.Px(1),
 	"text-align":       gist.AlignLeft,
 	"vertical-align":   gist.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
@@ -2637,29 +2637,29 @@ var FileTreeViewProps = ki.Props{
 		"color": "#008060",
 	},
 	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"width":   units.Em(1),
+		"height":  units.Em(1),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 		"fill":    &gi.Prefs.Colors.Icon,
 		"stroke":  &gi.Prefs.Colors.Font,
 	},
 	"#branch": ki.Props{
 		"icon":             "folder-open",
 		"icon-off":         "folder",
-		"margin":           units.NewPx(0),
-		"padding":          units.NewPx(0),
+		"margin":           units.Px(0),
+		"padding":          units.Px(0),
 		"background-color": color.Transparent,
-		"max-width":        units.NewEm(.8),
-		"max-height":       units.NewEm(.8),
+		"max-width":        units.Em(.8),
+		"max-height":       units.Em(.8),
 	},
 	"#space": ki.Props{
-		"width": units.NewEm(.5),
+		"width": units.Em(.5),
 	},
 	"#label": ki.Props{
-		"margin":    units.NewPx(0),
-		"padding":   units.NewPx(0),
-		"min-width": units.NewCh(16),
+		"margin":    units.Px(0),
+		"padding":   units.Px(0),
+		"min-width": units.Ch(16),
 	},
 	"#menu": ki.Props{
 		"indicator": "none",
@@ -2829,7 +2829,7 @@ func (ft *FileTreeView) Style2D() {
 			}
 		}
 		ft.StyleTreeView()
-		ft.LayState.SetFromStyle(&ft.Sty.Layout) // also does reset
+		ft.LayState.SetFromStyle(&ft.ActStyle.Layout) // also does reset
 	}
 }
 

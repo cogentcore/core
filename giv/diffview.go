@@ -714,11 +714,11 @@ func (dv *DiffView) ConfigTexts() {
 		updt = lay.UpdateStart()
 	} else {
 		al.SetStretchMax()
-		al.SetMinPrefWidth(units.NewCh(80))
-		al.SetMinPrefHeight(units.NewEm(40))
+		al.SetMinPrefWidth(units.Ch(80))
+		al.SetMinPrefHeight(units.Em(40))
 		bl.SetStretchMax()
-		bl.SetMinPrefWidth(units.NewCh(80))
-		bl.SetMinPrefHeight(units.NewEm(40))
+		bl.SetMinPrefWidth(units.Ch(80))
+		bl.SetMinPrefHeight(units.Em(40))
 
 		av := AddNewDiffTextView(al, "text-a")
 		bv := AddNewDiffTextView(bl, "text-b")

@@ -87,8 +87,8 @@ func (cv *ColorView) Config() {
 	v := gi.AddNewFrame(vl, "value", gi.LayoutHoriz)
 	sg := gi.AddNewLayout(vl, "slider-grid", gi.LayoutGrid)
 
-	v.SetProp("min-width", units.NewEm(6))
-	v.SetProp("min-height", units.NewEm(6))
+	v.SetProp("min-width", units.Em(6))
+	v.SetProp("min-height", units.Em(6))
 
 	sg.SetProp("columns", 4)
 	rl := gi.AddNewLabel(sg, "rlab", "Red:")
@@ -183,8 +183,8 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SetMinPrefWidth(units.NewCh(20))
-	sl.SetMinPrefHeight(units.NewEm(1))
+	sl.SetMinPrefWidth(units.Ch(20))
+	sl.SetMinPrefHeight(units.Em(1))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
@@ -240,8 +240,8 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SetMinPrefWidth(units.NewCh(20))
-	sl.SetMinPrefHeight(units.NewEm(1))
+	sl.SetMinPrefWidth(units.Ch(20))
+	sl.SetMinPrefHeight(units.Em(1))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
@@ -295,9 +295,9 @@ func (cv *ColorView) ConfigPalette() {
 		c := colornames.Map[cn]
 		cbt := gi.AddNewButton(pg, cn)
 		cbt.SetProp("background-color", c)
-		cbt.SetProp("max-height", units.NewEm(1.3))
-		cbt.SetProp("max-width", units.NewEm(1.3))
-		cbt.SetProp("margin", units.NewPx(0))
+		cbt.SetProp("max-height", units.Em(1.3))
+		cbt.SetProp("max-width", units.Em(1.3))
+		cbt.SetProp("margin", units.Px(0))
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -324,7 +324,7 @@ func (cv *ColorView) UpdateImpl() {
 	cv.UpdateSliderGrid()
 	cv.NumView.UpdateWidget()
 	v := cv.Value()
-	v.Sty.Font.BgColor.Color = cv.Color // direct copy
+	v.ActStyle.Font.BgColor.Color = cv.Color // direct copy
 }
 
 func (cv *ColorView) Render2D() {
@@ -515,7 +515,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.NewPx(4))
+	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_ColorNameValueView).(*ColorNameValueView)
 		ac := vvv.Widget.(*gi.Action)

@@ -60,43 +60,43 @@ func (cb *ComboBox) Disconnect() {
 
 var ComboBoxProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(4),
+	"border-width":     units.Px(1),
+	"border-radius":    units.Px(4),
 	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.NewPx(4),
-	"margin":           units.NewPx(4),
+	"padding":          units.Px(4),
+	"margin":           units.Px(4),
 	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"width":   units.Em(1),
+		"height":  units.Em(1),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
 	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 	},
 	"#text": ki.Props{
-		"margin":    units.NewPx(1),
-		"padding":   units.NewPx(1),
+		"margin":    units.Px(1),
+		"padding":   units.Px(1),
 		"max-width": -1,
-		"width":     units.NewCh(12),
+		"width":     units.Ch(12),
 	},
 	"#indicator": ki.Props{
-		"width":          units.NewEx(1.5),
-		"height":         units.NewEx(1.5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
+		"width":          units.Ex(1.5),
+		"height":         units.Ex(1.5),
+		"margin":         units.Px(0),
+		"padding":        units.Px(0),
 		"vertical-align": gist.AlignBottom,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},
 	"#ind-stretch": ki.Props{
-		"width": units.NewEm(1),
+		"width": units.Em(1),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",
@@ -109,7 +109,7 @@ var ComboBoxProps = ki.Props{
 		"background-color": "linear-gradient(highlight-10, highlight-10)",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
+		"border-width":     units.Px(2),
 		"background-color": "linear-gradient(samelight-50, highlight-10)",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
@@ -188,7 +188,7 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 			}
 			tx.SetProp("__comboInit", true)
 			if cb.MaxLength > 0 {
-				tx.SetMinPrefWidth(units.NewCh(float32(cb.MaxLength)))
+				tx.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
 			}
 			if indIdx > 0 {
 				ispc := cb.Parts.Child(indIdx - 1).(Node2D)
@@ -250,7 +250,7 @@ func (cb *ComboBox) ConfigParts() {
 	}
 	if cb.MaxLength > 0 && lbIdx >= 0 {
 		lbl := cb.Parts.Child(lbIdx).(*Label)
-		lbl.SetMinPrefWidth(units.NewCh(float32(cb.MaxLength)))
+		lbl.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
 	}
 	if mods {
 		cb.UpdateEnd(updt)

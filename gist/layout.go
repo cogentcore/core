@@ -61,9 +61,9 @@ type Layout struct {
 
 func (ls *Layout) Defaults() {
 	ls.AlignV = AlignMiddle
-	ls.MinWidth.Set(2.0, units.Px)
-	ls.MinHeight.Set(2.0, units.Px)
-	ls.ScrollBarWidth.Set(ScrollBarWidthDefault, units.Px)
+	ls.MinWidth.Set(2.0, units.UnitPx)
+	ls.MinHeight.Set(2.0, units.UnitPx)
+	ls.ScrollBarWidth.Set(ScrollBarWidthDefault, units.UnitPx)
 }
 
 func (ls *Layout) SetStylePost(props ki.Props) {

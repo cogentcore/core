@@ -322,7 +322,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			if inh {
 				ly.MinWidth = par.(*Layout).MinWidth
 			} else if init {
-				ly.MinWidth.Set(2, units.Px)
+				ly.MinWidth.Set(2, units.UnitPx)
 			}
 			return
 		}
@@ -334,7 +334,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			if inh {
 				ly.MinHeight = par.(*Layout).MinHeight
 			} else if init {
-				ly.MinHeight.Set(2, units.Px)
+				ly.MinHeight.Set(2, units.UnitPx)
 			}
 			return
 		}
@@ -520,14 +520,14 @@ var StyleFontFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Size = par.(*Font).Size
 			} else if init {
-				fs.Size.Set(12, units.Pt)
+				fs.Size.Set(12, units.UnitPt)
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
 			if psz, ok := FontSizePoints[vt]; ok {
-				fs.Size = units.NewPt(psz)
+				fs.Size = units.Pt(psz)
 			} else {
 				fs.Size.SetIFace(val, key) // also processes string
 			}

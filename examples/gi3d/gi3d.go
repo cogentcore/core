@@ -142,7 +142,7 @@ func mainrun() {
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewEx(1))
+	mfr.SetProp("spacing", units.Ex(1))
 
 	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()
@@ -319,7 +319,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	emb.Pose.Pos.Set(-2, 2, 0)
 	// emb.Zoom = 1.5   // this is how to rescale overall size
 	evlay := gi.AddNewFrame(emb.Viewport, "vlay", gi.LayoutVert)
-	evlay.SetProp("margin", units.NewEx(1))
+	evlay.SetProp("margin", units.Ex(1))
 
 	eabut := gi.AddNewCheckBox(evlay, "anim-but")
 	eabut.SetText("Animate")
@@ -363,8 +363,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	spsld.Max = 1
 	spsld.Step = 0.01
 	spsld.PageStep = 0.1
-	spsld.SetMinPrefWidth(units.NewEm(20))
-	spsld.SetMinPrefHeight(units.NewEm(2))
+	spsld.SetMinPrefWidth(units.Em(20))
+	spsld.SetMinPrefHeight(units.Em(2))
 	spsld.SetValue(anim.Speed)
 	// spsld.Tracking = true
 	spsld.Icon = gi.IconName("circlebutton-on")

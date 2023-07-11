@@ -157,7 +157,7 @@ const (
 var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":value", ":box"}
 
 func (sb *SliderBase) Defaults() { // todo: should just get these from props
-	sb.ThumbSize = units.NewEm(1)
+	sb.ThumbSize = units.Em(1)
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0
@@ -178,7 +178,7 @@ func (sb *SliderBase) SetSliderState(state SliderStates) {
 		state = SliderFocus
 	}
 	sb.State = state
-	sb.Sty = sb.StateStyles[state] // get relevant styles
+	sb.ActStyle = sb.StateStyles[state] // get relevant styles
 }
 
 // SliderPress sets the slider in the down state -- mouse clicked down but
@@ -438,7 +438,7 @@ func (sb *SliderBase) MouseEvent() {
 				me.SetProcessed()
 				if me.Action == mouse.Press {
 					ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
-					st := &sbb.Sty
+					st := &sbb.ActStyle
 					// TODO: SideTODO: not sure about dim
 					spc := st.Layout.Margin.Dots().Pos().Dim(sbb.Dim) + 0.5*sbb.ThSizeReal
 					if sbb.Dim == mat32.X {
@@ -528,8 +528,8 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 		ick := sb.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
 		if ick != nil {
 			ic := ick.(*Icon)
-			mrg := sb.Sty.Layout.Margin.Dots()
-			pad := sb.Sty.Layout.Padding.Dots()
+			mrg := sb.ActStyle.Layout.Margin.Dots()
+			pad := sb.ActStyle.Layout.Padding.Dots()
 			odim := mat32.OtherDim(sb.Dim)
 			spc := mrg.Pos().Dim(odim) + pad.Pos().Dim(odim)
 			ic.LayState.Alloc.PosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
@@ -618,11 +618,11 @@ func (sr *SliderBase) StyleSlider() {
 	defer sr.StyMu.Unlock()
 
 	sr.Style2DWidget()
-	pst := &(sr.Par.(Node2D).AsWidget().Sty)
+	pst := &(sr.Par.(Node2D).AsWidget().ActStyle)
 	for i := 0; i < int(SliderStatesN); i++ {
-		sr.StateStyles[i].CopyFrom(&sr.Sty)
+		sr.StateStyles[i].CopyFrom(&sr.ActStyle)
 		sr.StateStyles[i].SetStyleProps(pst, sr.StyleProps(SliderSelectors[i]), sr.Viewport)
-		sr.StateStyles[i].CopyUnitContext(&sr.Sty.UnContext)
+		sr.StateStyles[i].CopyUnitContext(&sr.ActStyle.UnContext)
 	}
 	sr.StyleFromProps(sr.Props, sr.Viewport)           // does all the min / max / step etc
 	tprops := *kit.Types.Properties(ki.Type(sr), true) // true = makeNew
@@ -631,7 +631,7 @@ func (sr *SliderBase) StyleSlider() {
 		sr.StyleFromProps(tprops, sr.Viewport)
 		kit.TypesMu.RUnlock()
 	}
-	sr.StyleToDots(&sr.Sty.UnContext)
+	sr.StyleToDots(&sr.ActStyle.UnContext)
 	sr.ThSize = sr.ThumbSize.Dots
 }
 
@@ -658,18 +658,18 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 
 var SliderProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(4),
+	"border-width":     units.Px(1),
+	"border-radius":    units.Px(4),
 	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.NewPx(6),
-	"margin":           units.NewPx(4),
+	"padding":          units.Px(6),
+	"margin":           units.Px(4),
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
+		"width":   units.Em(1),
+		"height":  units.Em(1),
+		"margin":  units.Px(0),
+		"padding": units.Px(0),
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
@@ -684,7 +684,7 @@ var SliderProps = ki.Props{
 		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
+		"border-width":     units.Px(2),
 		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{
@@ -701,7 +701,7 @@ var SliderProps = ki.Props{
 }
 
 func (sr *Slider) Defaults() {
-	sr.ThumbSize = units.NewEm(1.5)
+	sr.ThumbSize = units.Em(1.5)
 	sr.ThSize = 25.0
 	sr.ThSizeReal = sr.ThSize
 	sr.Step = 0.1
@@ -719,7 +719,7 @@ func (sr *Slider) Style2D() {
 	sr.SetCanFocusIfActive()
 	sr.StyleSlider()
 	sr.StyMu.Lock()
-	sr.LayState.SetFromStyle(&sr.Sty.Layout) // also does reset
+	sr.LayState.SetFromStyle(&sr.ActStyle.Layout) // also does reset
 	sr.StyMu.Unlock()
 	sr.ConfigParts()
 }
@@ -729,7 +729,7 @@ func (sr *Slider) Size2D(iter int) {
 	if sr.ThSize == 0.0 {
 		sr.Defaults()
 	}
-	st := &sr.Sty
+	st := &sr.ActStyle
 	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
 	sz := sr.ThSize + st.Layout.Margin.Dots().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
@@ -741,7 +741,7 @@ func (sr *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sr.Layout2DBase(parBBox, true, iter) // init style
 	sr.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
-		sr.StateStyles[i].CopyUnitContext(&sr.Sty.UnContext)
+		sr.StateStyles[i].CopyUnitContext(&sr.ActStyle.UnContext)
 	}
 	sr.SizeFromAlloc()
 	return sr.Layout2DChildren(iter)
@@ -863,11 +863,11 @@ func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 
 var ScrollBarProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(4),
+	"border-width":     units.Px(1),
+	"border-radius":    units.Px(4),
 	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.NewPx(0),
-	"margin":           units.NewPx(2),
+	"padding":          units.Px(0),
+	"margin":           units.Px(2),
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	SliderSelectors[SliderActive]: ki.Props{
@@ -881,7 +881,7 @@ var ScrollBarProps = ki.Props{
 		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
+		"border-width":     units.Px(2),
 		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{
@@ -899,7 +899,7 @@ var ScrollBarProps = ki.Props{
 
 func (sb *ScrollBar) Defaults() { // todo: should just get these from props
 	sb.ValThumb = true
-	sb.ThumbSize = units.NewEx(1)
+	sb.ThumbSize = units.Ex(1)
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0
@@ -914,7 +914,7 @@ func (sb *ScrollBar) Style2D() {
 	sb.SetCanFocusIfActive()
 	sb.StyleSlider()
 	sb.StyMu.Lock()
-	sb.LayState.SetFromStyle(&sb.Sty.Layout) // also does reset
+	sb.LayState.SetFromStyle(&sb.ActStyle.Layout) // also does reset
 	sb.StyMu.Unlock()
 	sb.ConfigParts()
 }
@@ -927,7 +927,7 @@ func (sb *ScrollBar) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sb.Layout2DBase(parBBox, true, iter) // init style
 	sb.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
-		sb.StateStyles[i].CopyUnitContext(&sb.Sty.UnContext)
+		sb.StateStyles[i].CopyUnitContext(&sb.ActStyle.UnContext)
 	}
 	sb.SizeFromAlloc()
 	return sb.Layout2DChildren(iter)
@@ -1061,11 +1061,11 @@ func (pb *ProgressBar) ProgStep() {
 
 var ProgressBarProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(4),
+	"border-width":     units.Px(1),
+	"border-radius":    units.Px(4),
 	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.NewPx(0),
-	"margin":           units.NewPx(2),
+	"padding":          units.Px(0),
+	"margin":           units.Px(2),
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	SliderSelectors[SliderActive]: ki.Props{
@@ -1079,7 +1079,7 @@ var ProgressBarProps = ki.Props{
 		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
+		"border-width":     units.Px(2),
 		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{
@@ -1100,12 +1100,12 @@ func (pb *ProgressBar) Defaults() {
 	pb.ValThumb = true
 	pb.ThumbVal = 1
 	pb.Value = 0
-	pb.ThumbSize = units.NewEx(1)
+	pb.ThumbSize = units.Ex(1)
 	pb.Step = 0.1
 	pb.PageStep = 0.2
 	pb.Max = 1.0
 	pb.Prec = 9
 	pb.SetInactive()
-	pb.SetMinPrefWidth(units.NewEm(20))
-	pb.SetMinPrefHeight(units.NewEm(1))
+	pb.SetMinPrefWidth(units.Em(20))
+	pb.SetMinPrefHeight(units.Em(1))
 }

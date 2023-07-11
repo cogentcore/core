@@ -94,8 +94,8 @@ func mainrun() {
 	svge.InitScale()
 	svge.Fill = true
 	svge.SetProp("background-color", "white")
-	svge.SetProp("width", units.NewPx(float32(width-20)))
-	svge.SetProp("height", units.NewPx(float32(height-100)))
+	svge.SetProp("width", units.Px(float32(width-20)))
+	svge.SetProp("height", units.Px(float32(height-100)))
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
@@ -107,7 +107,7 @@ func mainrun() {
 
 	fnm := gi.AddNewTextField(tbar, "cur-fname")
 	TheFile = fnm
-	fnm.SetMinPrefWidth(units.NewCh(60))
+	fnm.SetMinPrefWidth(units.Ch(60))
 
 	zmlb := gi.AddNewLabel(tbar, "zmlb", "Zoom: ")
 	zmlb.SetProp("vertical-align", gist.AlignMiddle)
@@ -121,8 +121,8 @@ func mainrun() {
 	zoomout.SetProp("margin", 0)
 	zoomout.SetProp("padding", 0)
 	zoomout.SetProp("#icon", ki.Props{
-		"width":  units.NewEm(1.5),
-		"height": units.NewEm(1.5),
+		"width":  units.Em(1.5),
+		"height": units.Em(1.5),
 	})
 	zoom := gi.AddNewSpinBox(tbar, "zoom")
 	// zoom.SetMinPrefWidth(units.NewEm(10))
@@ -143,8 +143,8 @@ func mainrun() {
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
 	zoomin.SetProp("#icon", ki.Props{
-		"width":  units.NewEm(1.5),
-		"height": units.NewEm(1.5),
+		"width":  units.Em(1.5),
+		"height": units.Em(1.5),
 	})
 
 	gi.AddNewSpace(tbar, "spctr")

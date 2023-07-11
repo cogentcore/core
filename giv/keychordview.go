@@ -82,17 +82,17 @@ func (kc *KeyChordEdit) Disconnect() {
 
 var KeyChordEditProps = ki.Props{
 	"EnumType:Flag":    gi.KiT_NodeFlags,
-	"padding":          units.NewPx(2),
-	"margin":           units.NewPx(2),
+	"padding":          units.Px(2),
+	"margin":           units.Px(2),
 	"vertical-align":   gist.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Control,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(4),
+	"border-width":     units.Px(1),
+	"border-radius":    units.Px(4),
 	"border-color":     &gi.Prefs.Colors.Border,
 	"border-style":     gist.BorderSolid,
-	"height":           units.NewEm(1),
-	"width":            units.NewCh(20),
+	"height":           units.Em(1),
+	"width":            units.Ch(20),
 	"max-width":        -1,
 	gi.LabelSelectors[gi.LabelActive]: ki.Props{
 		"background-color": "lighter-0",
@@ -161,7 +161,7 @@ func (kc *KeyChordEdit) Style2D() {
 	kc.Redrawable = true
 	kc.StyleLabel()
 	kc.StyMu.Lock()
-	kc.LayState.SetFromStyle(&kc.Sty.Layout) // also does reset
+	kc.LayState.SetFromStyle(&kc.ActStyle.Layout) // also does reset
 	kc.StyMu.Unlock()
 	kc.LayoutLabel()
 }

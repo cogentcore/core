@@ -150,8 +150,8 @@ func (mv *MapView) ConfigMapGrid() {
 	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
 	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.NewEm(1.5))
-	sg.SetMinPrefWidth(units.NewEm(10))
+	sg.SetMinPrefHeight(units.Em(1.5))
+	sg.SetMinPrefWidth(units.Em(10))
 	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
 	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 	config := kit.TypeAndNameList{}
@@ -239,11 +239,11 @@ func (mv *MapView) ConfigMapGrid() {
 		vv.ConfigWidget(widg)
 		wb := widg.AsWidget()
 		if wb != nil {
-			wb.Sty.Template = "giv.MapView.ItemWidget." + vv.WidgetType().Name()
+			wb.ActStyle.Template = "giv.MapView.ItemWidget." + vv.WidgetType().Name()
 		}
 		wb = keyw.AsWidget()
 		if wb != nil {
-			wb.Sty.Template = "giv.MapView.KeyWidget." + kv.WidgetType().Name()
+			wb.ActStyle.Template = "giv.MapView.KeyWidget." + kv.WidgetType().Name()
 		}
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
@@ -266,7 +266,7 @@ func (mv *MapView) ConfigMapGrid() {
 		delact.SetIcon("minus")
 		delact.Tooltip = "delete item"
 		delact.Data = kv
-		delact.Sty.Template = "giv.MapView.DelAction"
+		delact.ActStyle.Template = "giv.MapView.DelAction"
 		delact.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			act := send.(*gi.Action)
 			mvv := recv.Embed(KiT_MapView).(*MapView)
