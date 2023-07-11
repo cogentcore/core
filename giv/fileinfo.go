@@ -120,10 +120,7 @@ func (fi *FileInfo) IsExec() bool {
 		return true
 	}
 	ext := filepath.Ext(fi.Path)
-	if ext == ".exe" {
-		return true
-	}
-	return false
+	return ext == ".exe"
 }
 
 // IsSymLink returns true if file is a symbolic link
@@ -217,7 +214,7 @@ func FileNames(d os.File, names *[]string) (err error) {
 // FileNames returns a slice of file names from the starting directory and its subdirectories
 func (fi *FileInfo) FileNames(names *[]string) (err error) {
 	if !fi.IsDir() {
-		err = errors.New("Not a directory: FileNames returns a list of files within a directory")
+		err = errors.New("not a directory: FileNames returns a list of files within a directory")
 		return err
 	}
 	path := fi.Path

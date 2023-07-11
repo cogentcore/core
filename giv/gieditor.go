@@ -120,7 +120,6 @@ func (ge *GiEditor) Config() {
 	if mods {
 		ge.UpdateEnd(updt)
 	}
-	return
 }
 
 // SetTitle sets the optional title and updates the Title label

@@ -355,10 +355,7 @@ func HasMainMenuView(val any) bool {
 		return false
 	}
 	_, ok = ki.SliceTypeProps(tpp, "MainMenu")
-	if !ok {
-		return false
-	}
-	return true
+	return ok
 }
 
 // MethViewNoUpdateAfterProp returns true if given val has a top-level "MethViewNoUpdateAfter"

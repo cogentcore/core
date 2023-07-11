@@ -108,10 +108,7 @@ func (mv *MapView) Config() {
 
 // IsConfiged returns true if the widget is fully configured
 func (mv *MapView) IsConfiged() bool {
-	if len(mv.Kids) == 0 {
-		return false
-	}
-	return true
+	return len(mv.Kids) != 0
 }
 
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values

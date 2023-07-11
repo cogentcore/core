@@ -1629,7 +1629,7 @@ func (dm *DirFlagMap) IsOpen(path string) bool {
 func (dm *DirFlagMap) SetOpen(path string, open bool) {
 	dm.Init()
 	defer dm.Mu.Unlock()
-	df, _ := dm.Map[path] // 2nd arg makes it ok to fail
+	df := dm.Map[path]
 	bitflag.SetState32((*int32)(&df), open, int(DirIsOpen))
 	dm.Map[path] = df
 }
@@ -1658,7 +1658,7 @@ func (dm *DirFlagMap) SortByModTime(path string) bool {
 func (dm *DirFlagMap) SetSortBy(path string, modTime bool) {
 	dm.Init()
 	defer dm.Mu.Unlock()
-	df, _ := dm.Map[path] // 2nd arg makes it ok to fail
+	df := dm.Map[path]
 	mask := bitflag.Mask32(int(DirSortByName), int(DirSortByModTime))
 	bitflag.ClearMask32((*int32)(&df), mask)
 	if modTime {
@@ -1673,7 +1673,7 @@ func (dm *DirFlagMap) SetSortBy(path string, modTime bool) {
 func (dm *DirFlagMap) SetMark(path string) {
 	dm.Init()
 	defer dm.Mu.Unlock()
-	df, _ := dm.Map[path] // 2nd arg makes it ok to fail
+	df := dm.Map[path]
 	bitflag.Set32((*int32)(&df), int(DirMark))
 	dm.Map[path] = df
 }
@@ -2301,9 +2301,7 @@ func (ftv *FileTreeView) PasteCheckExisting(tfn *FileNode, md mimedata.Mimes) ([
 			continue
 		}
 		path := string(d.Data)
-		if strings.HasPrefix(path, "file://") {
-			path = path[7:]
-		}
+		path = strings.TrimPrefix(path, "file://")
 		if tfn != nil {
 			_, fnm := filepath.Split(path)
 			path = filepath.Join(tpath, fnm)

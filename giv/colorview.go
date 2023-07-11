@@ -133,10 +133,7 @@ func (cv *ColorView) IsConfiged() bool {
 		return false
 	}
 	sl := cv.SliderLay()
-	if !sl.HasChildren() {
-		return false
-	}
-	return true
+	return sl.HasChildren()
 }
 
 func (cv *ColorView) NumLay() *gi.Layout {
