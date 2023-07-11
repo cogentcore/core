@@ -117,7 +117,8 @@ var LayoutFocusNameTimeoutMSec = 500
 var LayoutFocusNameTabMSec = 2000
 
 // Layout is the primary node type responsible for organizing the sizes
-// and positions of child widgets.
+// and positions of child widgets. It does not render, only organize,
+// so properties like background color will have no effect.
 // All arbitrary collections of widgets should generally be contained
 // within a layout -- otherwise the parent widget must take over
 // responsibility for positioning.

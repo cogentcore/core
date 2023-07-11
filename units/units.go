@@ -41,6 +41,7 @@ const (
 	PcPerInch = 6.0
 )
 
+// Units is an enum that represents a unit (px, em, etc)
 type Units int32
 
 const (
@@ -272,9 +273,9 @@ func (uc *Context) DotsToPx(val float32) float32 {
 
 // Value and units, and converted value into raw pixels (dots in DPI)
 type Value struct {
-	Val  float32
-	Un   Units
-	Dots float32
+	Val  float32 `label:"Value" desc:"the value in terms of the specified unit"`
+	Un   Units   `label:"Unit" desc:"the unit used for the value"`
+	Dots float32 `inactive:"+" desc:"the computed value in raw pixels (dots in DPI)"`
 }
 
 var KiT_Value = kit.Types.AddType(&Value{}, ValueProps)
