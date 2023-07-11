@@ -5,6 +5,7 @@
 package kit
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math"
@@ -544,7 +545,8 @@ func ToStringPrec(it any, prec int) string {
 }
 
 // SetRobust robustly sets the 'to' value from the 'from' value.
-// destination must be a pointer-to. Copies slices and maps robustly.
+// destination must be a pointer-to. Copies slices and maps robustly,
+// and can set a struct, slice or map from a JSON-formatted string from value.
 // gopy:interface=handle
 func SetRobust(to, frm any) bool {
 	if IfaceIsNil(to) {
@@ -595,10 +597,35 @@ func SetRobust(to, frm any) bool {
 		fm := ToString(frm)
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return true
+	case vk == reflect.Struct:
+		if NonPtrType(reflect.TypeOf(frm)).Kind() == reflect.String {
+			err := json.Unmarshal([]byte(ToString(frm)), to) // todo: this is not working -- see what marshal says, etc
+			if err != nil {
+				marsh, _ := json.Marshal(to)
+				log.Println("kit.SetRobust, struct from string:", err, "for example:", string(marsh))
+			}
+			return err == nil
+		}
 	case vk == reflect.Slice:
+		if NonPtrType(reflect.TypeOf(frm)).Kind() == reflect.String {
+			err := json.Unmarshal([]byte(ToString(frm)), to)
+			if err != nil {
+				marsh, _ := json.Marshal(to)
+				log.Println("kit.SetRobust, slice from string:", err, "for example:", string(marsh))
+			}
+			return err == nil
+		}
 		err := CopySliceRobust(to, frm)
 		return err == nil
 	case vk == reflect.Map:
+		if NonPtrType(reflect.TypeOf(frm)).Kind() == reflect.String {
+			err := json.Unmarshal([]byte(ToString(frm)), to)
+			if err != nil {
+				marsh, _ := json.Marshal(to)
+				log.Println("kit.SetRobust, map from string:", err, "for example:", string(marsh))
+			}
+			return err == nil
+		}
 		err := CopyMapRobust(to, frm)
 		return err == nil
 	}

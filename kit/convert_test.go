@@ -227,3 +227,16 @@ func TestCopyMap(t *testing.T) {
 		}
 	}
 }
+
+func TestSetRobustFomString(t *testing.T) {
+	ta := A{}
+	ta.Mbr1 = "av"
+	ta.Mbr2 = 22
+	SetRobust(&ta, `{"Mbr1":"aa", "Mbr2":14}`) // note: only uses "
+
+	flts := []float32{1, 2, 3}
+	SetRobust(&flts, `[3, 4, 5]`)
+
+	mp := map[string]float32{"a": 1, "b": 2, "c": 3}
+	SetRobust(&mp, `{"d":3,"e":4,"f":5}`)
+}

@@ -20,17 +20,21 @@ func SetFromDefaultTags(obj any) error {
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
-		if NonPtrType(f.Type).Kind() == reflect.Struct {
+		def, ok := f.Tag.Lookup("def")
+		if NonPtrType(f.Type).Kind() == reflect.Struct && (!ok || def == "") {
 			SetFromDefaultTags(PtrValue(fv).Interface())
 			continue
 		}
-		def, ok := f.Tag.Lookup("def")
 		if !ok || def == "" {
 			continue
 		}
-		def = strings.Split(def, ",")[0]
-		if strings.Contains(def, ":") { // don't do ranges
-			continue
+		if def[0] == '{' || def[0] == '[' { // complex type
+			def = strings.ReplaceAll(def, `'`, `"`) // allow single quote to work as double quote for JSON format
+		} else {
+			def = strings.Split(def, ",")[0]
+			if strings.Contains(def, ":") { // don't do ranges
+				continue
+			}
 		}
 		ok = SetRobust(PtrValue(fv).Interface(), def) // overkill but whatever
 		if !ok {
