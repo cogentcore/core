@@ -67,7 +67,7 @@ func (sc *Scene) ConfigFrameImpl(gpu *vgpu.GPU, dev *vgpu.Device) bool {
 		wasConfig = true
 		oswin.TheApp.RunOnMain(func() {
 			sz := sc.Geom.Size
-			if sz == image.ZP {
+			if sz == (image.Point{}) {
 				sz = image.Point{480, 320}
 			}
 			sc.Frame = vgpu.NewRenderFrame(gpu, dev, sz)
@@ -338,7 +338,7 @@ func (sc *Scene) Render3D(offscreen bool) {
 		}
 		if !offscreen {
 			ni.BBoxMu.RLock()
-			if ni.IsInvisible() || ni.ObjBBox == image.ZR { // objbbox is intersection of scene and obj
+			if ni.IsInvisible() || ni.ObjBBox == (image.Rectangle{}) { // objbbox is intersection of scene and obj
 				ni.BBoxMu.RUnlock()
 				ni.DisconnectAllEvents(sc.Win, gi.AllPris)
 				return ki.Break

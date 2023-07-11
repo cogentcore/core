@@ -120,7 +120,7 @@ func (lb *Label) SetText(txt string) {
 	// }
 
 	lb.StyMu.RLock()
-	needSty := lb.ActStyle.Font.Size.Val == 0
+	needSty := lb.Style.Font.Size.Val == 0
 	lb.StyMu.RUnlock()
 	if needSty {
 		lb.StyleLabel()
@@ -128,12 +128,12 @@ func (lb *Label) SetText(txt string) {
 	lb.SetStateStyle()
 	lb.StyMu.RLock()
 	lb.Text = txt
-	lb.ActStyle.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Style.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
 	// this makes it easier for it to update with dynamic bgs
 	if lb.Text == "" {
-		lb.Render.SetHTML(" ", &lb.ActStyle.Font, &lb.ActStyle.Text, &lb.ActStyle.UnContext, lb.CSSAgg)
+		lb.Render.SetHTML(" ", &lb.Style.Font, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	} else {
-		lb.Render.SetHTML(lb.Text, &lb.ActStyle.Font, &lb.ActStyle.Text, &lb.ActStyle.UnContext, lb.CSSAgg)
+		lb.Render.SetHTML(lb.Text, &lb.Style.Font, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	}
 	spc := lb.BoxSpace()
 	sz := lb.LayState.Alloc.Size
@@ -143,7 +143,7 @@ func (lb *Label) SetText(txt string) {
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.Render.LayoutStdLR(&lb.ActStyle.Text, &lb.ActStyle.Font, &lb.ActStyle.UnContext, sz)
+	lb.Render.LayoutStdLR(&lb.Style.Text, &lb.Style.Font, &lb.Style.UnContext, sz)
 	lb.StyMu.RUnlock()
 	lb.UpdateEnd(updt)
 }
@@ -152,16 +152,16 @@ func (lb *Label) SetText(txt string) {
 func (lb *Label) SetStateStyle() {
 	lb.StyMu.Lock()
 	if lb.IsInactive() {
-		lb.ActStyle = lb.StateStyles[LabelInactive]
+		lb.Style = lb.StateStyles[LabelInactive]
 		if lb.Redrawable && !lb.CurBgColor.IsNil() {
-			lb.ActStyle.Font.BgColor.SetColor(lb.CurBgColor)
+			lb.Style.Font.BgColor.SetColor(lb.CurBgColor)
 		}
 	} else if lb.IsSelected() {
-		lb.ActStyle = lb.StateStyles[LabelSelected]
+		lb.Style = lb.StateStyles[LabelSelected]
 	} else {
-		lb.ActStyle = lb.StateStyles[LabelActive]
+		lb.Style = lb.StateStyles[LabelActive]
 		if (lb.Selectable || lb.Redrawable) && !lb.CurBgColor.IsNil() {
-			lb.ActStyle.Font.BgColor.SetColor(lb.CurBgColor)
+			lb.Style.Font.BgColor.SetColor(lb.CurBgColor)
 		}
 	}
 	lb.StyMu.Unlock()
@@ -298,34 +298,34 @@ func (lb *Label) StyleLabel() {
 	lb.StyMu.Lock()
 	defer lb.StyMu.Unlock()
 
-	hasTempl, saveTempl := lb.ActStyle.FromTemplate()
+	hasTempl, saveTempl := lb.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		lb.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		lb.ActStyle.SaveTemplate()
+		lb.Style.SaveTemplate()
 	}
 	parSty := lb.ParentActiveStyle()
 	if hasTempl && !saveTempl {
 		for i := 0; i < int(LabelStatesN); i++ {
-			lb.StateStyles[i].Template = lb.ActStyle.Template + LabelSelectors[i]
+			lb.StateStyles[i].Template = lb.Style.Template + LabelSelectors[i]
 			lb.StateStyles[i].FromTemplate()
 		}
 	} else {
 		for i := 0; i < int(LabelStatesN); i++ {
-			lb.StateStyles[i].CopyFrom(&lb.ActStyle)
+			lb.StateStyles[i].CopyFrom(&lb.Style)
 			lb.StateStyles[i].SetStyleProps(parSty, lb.StyleProps(LabelSelectors[i]), lb.Viewport)
-			lb.StateStyles[i].CopyUnitContext(&lb.ActStyle.UnContext)
+			lb.StateStyles[i].CopyUnitContext(&lb.Style.UnContext)
 		}
 	}
 	if hasTempl && saveTempl {
 		for i := 0; i < int(LabelStatesN); i++ {
-			lb.StateStyles[i].Template = lb.ActStyle.Template + LabelSelectors[i]
+			lb.StateStyles[i].Template = lb.Style.Template + LabelSelectors[i]
 			lb.StateStyles[i].SaveTemplate()
 		}
 	}
-	if lb.CurBgColor.IsNil() && !lb.ActStyle.Font.BgColor.Color.IsNil() {
-		lb.CurBgColor = lb.ActStyle.Font.BgColor.Color
+	if lb.CurBgColor.IsNil() && !lb.Style.Font.BgColor.Color.IsNil() {
+		lb.CurBgColor = lb.Style.Font.BgColor.Color
 	}
 	lb.ParentStyleRUnlock()
 }
@@ -334,26 +334,26 @@ func (lb *Label) LayoutLabel() {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
-	lb.ActStyle.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
-	lb.Render.SetHTML(lb.Text, &lb.ActStyle.Font, &lb.ActStyle.Text, &lb.ActStyle.UnContext, lb.CSSAgg)
+	lb.Style.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Render.SetHTML(lb.Text, &lb.Style.Font, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.Render.LayoutStdLR(&lb.ActStyle.Text, &lb.ActStyle.Font, &lb.ActStyle.UnContext, sz)
+	lb.Render.LayoutStdLR(&lb.Style.Text, &lb.Style.Font, &lb.Style.UnContext, sz)
 }
 
 func (lb *Label) Style2D() {
 	lb.StyleLabel()
 	lb.StyMu.Lock()
-	lb.LayState.SetFromStyle(&lb.ActStyle.Layout) // also does reset
+	lb.LayState.SetFromStyle(&lb.Style.Layout) // also does reset
 	lb.StyMu.Unlock()
 	lb.LayoutLabel()
 }
 
 func (lb *Label) Size2D(iter int) {
-	if iter > 0 && lb.ActStyle.Text.HasWordWrap() {
+	if iter > 0 && lb.Style.Text.HasWordWrap() {
 		return // already updated in previous iter, don't redo!
 	} else {
 		lb.InitLayout2D()
@@ -366,16 +366,16 @@ func (lb *Label) Size2D(iter int) {
 func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	lb.Layout2DBase(parBBox, true, iter)
 	for i := 0; i < int(LabelStatesN); i++ {
-		lb.StateStyles[i].CopyUnitContext(&lb.ActStyle.UnContext)
+		lb.StateStyles[i].CopyUnitContext(&lb.Style.UnContext)
 	}
 	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
-	lb.ActStyle.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
-	lb.Render.SetHTML(lb.Text, &lb.ActStyle.Font, &lb.ActStyle.Text, &lb.ActStyle.UnContext, lb.CSSAgg)
-	lb.Render.LayoutStdLR(&lb.ActStyle.Text, &lb.ActStyle.Font, &lb.ActStyle.UnContext, sz)
-	if lb.ActStyle.Text.HasWordWrap() {
+	lb.Style.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Render.SetHTML(lb.Text, &lb.Style.Font, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+	lb.Render.LayoutStdLR(&lb.Style.Text, &lb.Style.Font, &lb.Style.UnContext, sz)
+	if lb.Style.Text.HasWordWrap() {
 		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
-			lb.LayState.SetFromStyle(&lb.ActStyle.Layout)
+			lb.LayState.SetFromStyle(&lb.Style.Layout)
 			lb.Size2DFromWH(lb.Render.Size.X, lb.Render.Size.Y)
 			return true // needs a redo!
 		}
@@ -385,7 +385,7 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 func (lb *Label) TextPos() mat32.Vec2 {
 	lb.StyMu.RLock()
-	pos := lb.LayState.Alloc.Pos.Add(lb.ActStyle.BoxSpace().Pos())
+	pos := lb.LayState.Alloc.Pos.Add(lb.Style.BoxSpace().Pos())
 	lb.StyMu.RUnlock()
 	return pos
 }

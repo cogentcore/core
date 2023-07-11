@@ -93,7 +93,7 @@ func (ic *Icon) Size2D(iter int) {
 
 func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
 	ic.StyMu.RLock()
-	needSty := ic.ActStyle.Font.Size.Val == 0
+	needSty := ic.Style.Font.Size.Val == 0
 	ic.StyMu.RUnlock()
 	if needSty {
 		ic.StyleSVG()

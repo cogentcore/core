@@ -231,7 +231,7 @@ func (bb *ButtonBox) Init2D() {
 func (bb *ButtonBox) Style2D() {
 	bb.StyMu.Lock()
 	bb.Style2DWidget()
-	bb.LayState.SetFromStyle(&bb.ActStyle.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.Style.Layout) // also does reset
 	bb.StyMu.Unlock()
 	bb.ConfigParts()
 }

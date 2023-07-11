@@ -843,7 +843,7 @@ type PrefsDetailed struct {
 	DNDStartMSec               int  `def:"200" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
 	DNDStartPix                int  `def:"20" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
 	HoverStartMSec             int  `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
-	HoverMaxPix                int  `def:"5" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`
+	HoverMaxPix                int  `def:"50" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`
 	CompleteWaitMSec           int  `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before offering completions"`
 	CompleteMaxItems           int  `def:"25" min:"5" step:"1" desc:"the maximum number of completions offered in popup"`
 	CursorBlinkMSec            int  `def:"500" min:"0" max:"1000" step:"5" desc:"number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`

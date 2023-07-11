@@ -1845,7 +1845,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = gi.LayoutHoriz
-	tv.Parts.ActStyle.Template = "giv.TreeView.Parts"
+	tv.Parts.Style.Template = "giv.TreeView.Parts"
 	config := kit.TypeAndNameList{}
 	if tv.HasChildren() {
 		config.Add(gi.KiT_CheckBox, "branch")
@@ -1857,11 +1857,11 @@ func (tv *TreeView) ConfigParts() {
 	mods, updt := tv.Parts.ConfigChildren(config)
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
-			if wb.ActStyle.Template != "giv.TreeView.Branch" {
+			if wb.Style.Template != "giv.TreeView.Branch" {
 				wb.SetProp("#icon0", TVBranchProps)
 				wb.SetProp("#icon1", TVBranchProps)
 				wb.SetProp("no-focus", true) // note: cannot be in compiled props
-				wb.ActStyle.Template = "giv.TreeView.Branch"
+				wb.Style.Template = "giv.TreeView.Branch"
 				// unfortunately StylePart only handles default Style obj -- not
 				// these special styles.. todo: fix this somehow
 				if bprpi, err := tv.PropTry("#branch"); err == nil {
@@ -1904,7 +1904,7 @@ func (tv *TreeView) ConfigParts() {
 		// if tv.HasFlag(int(TreeViewFlagNoTemplate)) {
 		// 	lbl.Redrawable = true // this prevents select highlight from rendering properly
 		// }
-		tv.ActStyle.Font.CopyNonDefaultProps(lbl.This()) // copy our properties to label
+		tv.Style.Font.CopyNonDefaultProps(lbl.This()) // copy our properties to label
 		lbl.SetText(tv.Label())
 		if mods {
 			tv.StylePart(gi.Node2D(lbl))
@@ -2076,8 +2076,8 @@ func (tv *TreeView) Init2D() {
 	} else {
 		tv.Viewport = tv.ParentViewport()
 	}
-	tv.ActStyle.Defaults()
-	tv.ActStyle.Template = "giv.TreeView." + ki.Type(tv).Name()
+	tv.Style.Defaults()
+	tv.Style.Template = "giv.TreeView." + ki.Type(tv).Name()
 	tv.LayState.Defaults() // doesn't overwrite
 	tv.ConfigParts()
 	// tv.ConnectToViewport()
@@ -2098,30 +2098,30 @@ func (tv *TreeView) StyleTreeView() {
 	_, noTempl := tv.PropInherit("no-templates", ki.NoInherit, ki.TypeProps)
 	tv.SetFlagState(noTempl, int(TreeViewFlagNoTemplate))
 	if !noTempl {
-		hasTempl, saveTempl = tv.ActStyle.FromTemplate()
+		hasTempl, saveTempl = tv.Style.FromTemplate()
 	}
 	if !hasTempl || saveTempl {
 		tv.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		tv.ActStyle.SaveTemplate()
+		tv.Style.SaveTemplate()
 	}
-	pst := &(tv.Par.(gi.Node2D).AsWidget().ActStyle)
+	pst := &(tv.Par.(gi.Node2D).AsWidget().Style)
 	if hasTempl && !saveTempl {
 		for i := 0; i < int(TreeViewStatesN); i++ {
-			tv.StateStyles[i].Template = tv.ActStyle.Template + TreeViewSelectors[i]
+			tv.StateStyles[i].Template = tv.Style.Template + TreeViewSelectors[i]
 			tv.StateStyles[i].FromTemplate()
 		}
 	} else {
 		for i := 0; i < int(TreeViewStatesN); i++ {
-			tv.StateStyles[i].CopyFrom(&tv.ActStyle)
+			tv.StateStyles[i].CopyFrom(&tv.Style)
 			tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]), tv.Viewport)
-			tv.StateStyles[i].CopyUnitContext(&tv.ActStyle.UnContext)
+			tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 		}
 	}
 	if hasTempl && saveTempl {
 		for i := 0; i < int(TreeViewStatesN); i++ {
-			tv.StateStyles[i].Template = tv.ActStyle.Template + TreeViewSelectors[i]
+			tv.StateStyles[i].Template = tv.Style.Template + TreeViewSelectors[i]
 			tv.StateStyles[i].SaveTemplate()
 		}
 	}
@@ -2132,8 +2132,8 @@ func (tv *TreeView) StyleTreeView() {
 		}
 	}
 	tv.Indent.SetFmInheritProp("indent", tv.This(), ki.NoInherit, ki.TypeProps)
-	tv.Indent.ToDots(&tv.ActStyle.UnContext)
-	tv.Parts.ActStyle.InheritFields(&tv.ActStyle)
+	tv.Indent.ToDots(&tv.Style.UnContext)
+	tv.Parts.Style.InheritFields(&tv.Style)
 	if spc, ok := tv.PropInherit("spacing", ki.NoInherit, ki.TypeProps); ok {
 		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
 	}
@@ -2143,7 +2143,7 @@ func (tv *TreeView) StyleTreeView() {
 
 func (tv *TreeView) Style2D() {
 	tv.StyleTreeView()
-	tv.LayState.SetFromStyle(&tv.ActStyle.Layout) // also does reset
+	tv.LayState.SetFromStyle(&tv.Style.Layout) // also does reset
 }
 
 // TreeView is tricky for alloc because it is both a layout of its children but has to
@@ -2175,7 +2175,7 @@ func (tv *TreeView) Size2D(iter int) {
 }
 
 func (tv *TreeView) Layout2DParts(parBBox image.Rectangle, iter int) {
-	spc := tv.ActStyle.BoxSpace()
+	spc := tv.Style.BoxSpace()
 	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
 	tv.Parts.LayState.Alloc.PosOrig = tv.Parts.LayState.Alloc.Pos
 	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size())
@@ -2196,12 +2196,12 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
 
 	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
-	gi.SetUnitContext(&tv.ActStyle, tv.Viewport, psize) // update units with final layout
+	gi.SetUnitContext(&tv.Style, tv.Viewport, psize) // update units with final layout
 	for i := 0; i < int(TreeViewStatesN); i++ {
-		tv.StateStyles[i].CopyUnitContext(&tv.ActStyle.UnContext)
+		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
 	tv.BBox = tv.This().(gi.Node2D).BBox2D() // only compute once, at this point
-	tv.This().(gi.Node2D).ComputeBBox2D(parBBox, image.ZP)
+	tv.This().(gi.Node2D).ComputeBBox2D(parBBox, image.Point{})
 
 	if gi.Layout2DTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
@@ -2298,13 +2298,13 @@ func (tv *TreeView) Render2D() {
 		if !tv.VpBBox.Empty() { // we are root and just here for the connections :)
 			tv.UpdateInactive()
 			if tv.IsSelected() {
-				tv.ActStyle = tv.StateStyles[TreeViewSel]
+				tv.Style = tv.StateStyles[TreeViewSel]
 			} else if tv.HasFocus() {
-				tv.ActStyle = tv.StateStyles[TreeViewFocus]
+				tv.Style = tv.StateStyles[TreeViewFocus]
 			} else if tv.IsInactive() {
-				tv.ActStyle = tv.StateStyles[TreeViewInactive]
+				tv.Style = tv.StateStyles[TreeViewInactive]
 			} else {
-				tv.ActStyle = tv.StateStyles[TreeViewActive]
+				tv.Style = tv.StateStyles[TreeViewActive]
 			}
 			tv.ConfigPartsIfNeeded()
 			tv.This().(gi.Node2D).ConnectEvents2D()

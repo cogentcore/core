@@ -172,12 +172,12 @@ func (sv *SVG) ContextColorSpecByURL(url string) *gist.ColorSpec {
 func (sv *SVG) StyleSVG() {
 	sv.StyMu.Lock()
 
-	hasTempl, saveTempl := sv.ActStyle.FromTemplate()
+	hasTempl, saveTempl := sv.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		sv.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		sv.ActStyle.SaveTemplate()
+		sv.Style.SaveTemplate()
 	}
 	sv.Pnt.Defaults()
 	sv.StyMu.Unlock()
@@ -188,7 +188,7 @@ func (sv *SVG) StyleSVG() {
 func (sv *SVG) Style2D() {
 	sv.StyleSVG()
 	sv.StyMu.Lock()
-	sv.LayState.SetFromStyle(&sv.ActStyle.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.Style.Layout) // also does reset
 	sv.StyMu.Unlock()
 	if nv, err := sv.PropTry("norm"); err == nil {
 		sv.Norm, _ = kit.ToBool(nv)

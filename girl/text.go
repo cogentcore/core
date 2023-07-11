@@ -138,7 +138,7 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 			}
 			if rr.RotRad == 0 && (rr.ScaleX == 0 || rr.ScaleX == 1) {
 				idr := dr.Intersect(rs.Bounds)
-				soff := image.ZP
+				soff := image.Point{}
 				if dr.Min.X < rs.Bounds.Min.X {
 					soff.X = rs.Bounds.Min.X - dr.Min.X
 					maskp.X += rs.Bounds.Min.X - dr.Min.X

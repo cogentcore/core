@@ -280,8 +280,8 @@ func (ly *Layout) ManageOverflow() {
 		ly.HasScroll[d] = false
 	}
 
-	if ly.ActStyle.Layout.Overflow != gist.OverflowHidden {
-		sbw := ly.ActStyle.Layout.ScrollBarWidth.Dots
+	if ly.Style.Layout.Overflow != gist.OverflowHidden {
+		sbw := ly.Style.Layout.ScrollBarWidth.Dots
 		for d := mat32.X; d <= mat32.Y; d++ {
 			odim := mat32.OtherDim(d)
 			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
@@ -323,15 +323,15 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 	avail := ly.AvailSize().Sub(spc.Size())
 	sc := ly.Scrolls[d]
 	if d == mat32.X {
-		sc.SetFixedHeight(ly.ActStyle.Layout.ScrollBarWidth)
+		sc.SetFixedHeight(ly.Style.Layout.ScrollBarWidth)
 		sc.SetFixedWidth(units.NewValue(avail.Dim(d), units.UnitDot))
 	} else {
-		sc.SetFixedWidth(ly.ActStyle.Layout.ScrollBarWidth)
+		sc.SetFixedWidth(ly.Style.Layout.ScrollBarWidth)
 		sc.SetFixedHeight(units.NewValue(avail.Dim(d), units.UnitDot))
 	}
 	sc.Style2D()
 	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
-	sc.Step = ly.ActStyle.Font.Size.Dots               // step by lines
+	sc.Step = ly.Style.Font.Size.Dots                  // step by lines
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
 	// TODO: SideTODO: not sure about this
 	sc.ThumbVal = avail.Dim(d) - spc.Size().Dim(d)/2
@@ -369,13 +369,13 @@ func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 	defer sc.BBoxMu.Unlock()
 	sc.LayState.Alloc.Pos = mat32.Vec2Zero
 	sc.LayState.Alloc.Size = mat32.Vec2Zero
-	sc.VpBBox = image.ZR
-	sc.WinBBox = image.ZR
+	sc.VpBBox = image.Rectangle{}
+	sc.WinBBox = image.Rectangle{}
 }
 
 // LayoutScrolls arranges scrollbars
 func (ly *Layout) LayoutScrolls() {
-	sbw := ly.ActStyle.Layout.ScrollBarWidth.Dots
+	sbw := ly.Style.Layout.ScrollBarWidth.Dots
 
 	spc := ly.BoxSpace()
 	avail := ly.AvailSize()
@@ -585,7 +585,7 @@ func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
 
-	h := ly.ActStyle.Font.Size.Dots
+	h := ly.Style.Font.Size.Dots
 	dst := h * AutoScrollRate
 
 	mind := ints.MaxInt(0, pos-st)
@@ -659,7 +659,7 @@ func (ly *Layout) ScrollToBoxDim(dim mat32.Dims, minBox, maxBox int) bool {
 		return false
 	}
 
-	h := ly.ActStyle.Font.Size.Dots
+	h := ly.Style.Font.Size.Dots
 
 	if minBox < vpMin { // favors scrolling to start
 		trg := sc.Value + float32(minBox-vpMin) - h
@@ -832,7 +832,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	cur := em.CurFocus()
 	nxti := idx + 1
 	if ly.Lay == LayoutGrid && updn {
-		nxti = idx + ly.ActStyle.Layout.Columns
+		nxti = idx + ly.Style.Layout.Columns
 	}
 	did := false
 	if nxti < sz {
@@ -861,7 +861,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	cur := em.CurFocus()
 	nxti := idx - 1
 	if ly.Lay == LayoutGrid && updn {
-		nxti = idx - ly.ActStyle.Layout.Columns
+		nxti = idx - ly.Style.Layout.Columns
 	}
 	did := false
 	if nxti >= 0 {
@@ -1130,7 +1130,7 @@ func (ly *Layout) StyleLayout() {
 	// pr := prof.Start("StyleLayout")
 	// defer pr.End()
 
-	hasTempl, saveTempl := ly.ActStyle.FromTemplate()
+	hasTempl, saveTempl := ly.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		ly.Style2DWidget()
 	}
@@ -1141,16 +1141,16 @@ func (ly *Layout) StyleLayout() {
 		ly.StyleFromProps(tprops, ly.Viewport)
 		kit.TypesMu.RUnlock()
 	}
-	ly.StyleToDots(&ly.ActStyle.UnContext)
+	ly.StyleToDots(&ly.Style.UnContext)
 	if hasTempl && saveTempl {
-		ly.ActStyle.SaveTemplate()
+		ly.Style.SaveTemplate()
 	}
 }
 
 func (ly *Layout) Style2D() {
 	ly.StyleLayout()
 	ly.StyMu.Lock()
-	ly.LayState.SetFromStyle(&ly.ActStyle.Layout) // also does reset
+	ly.LayState.SetFromStyle(&ly.Style.Layout) // also does reset
 	ly.StyMu.Unlock()
 }
 
@@ -1204,8 +1204,8 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	ly.NeedsRedo = ly.Layout2DChildren(iter) // layout done with canonical positions
 
 	if !ly.NeedsRedo || iter == 1 {
-		delta := ly.Move2DDelta(image.ZP)
-		if delta != image.ZP {
+		delta := ly.Move2DDelta((image.Point{}))
+		if delta != (image.Point{}) {
 			ly.Move2DChildren(delta) // move is a separate step
 		}
 	}
@@ -1297,14 +1297,14 @@ func (st *Stretch) Style2D() {
 	st.StyMu.Lock()
 	defer st.StyMu.Unlock()
 
-	hasTempl, saveTempl := st.ActStyle.FromTemplate()
+	hasTempl, saveTempl := st.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		st.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		st.ActStyle.SaveTemplate()
+		st.Style.SaveTemplate()
 	}
-	st.LayState.SetFromStyle(&st.ActStyle.Layout) // also does reset
+	st.LayState.SetFromStyle(&st.Style.Layout) // also does reset
 }
 
 func (st *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -1340,14 +1340,14 @@ func (sp *Space) Style2D() {
 	sp.StyMu.Lock()
 	defer sp.StyMu.Unlock()
 
-	hasTempl, saveTempl := sp.ActStyle.FromTemplate()
+	hasTempl, saveTempl := sp.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		sp.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		sp.ActStyle.SaveTemplate()
+		sp.Style.SaveTemplate()
 	}
-	sp.LayState.SetFromStyle(&sp.ActStyle.Layout) // also does reset
+	sp.LayState.SetFromStyle(&sp.Style.Layout) // also does reset
 }
 
 func (sp *Space) Layout2D(parBBox image.Rectangle, iter int) bool {

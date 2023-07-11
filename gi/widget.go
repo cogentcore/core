@@ -31,9 +31,8 @@ import (
 type WidgetBase struct {
 	Node2DBase
 	Tooltip      string       `desc:"text for tooltip for this widget -- can use HTML formatting"`
-	StyleFunc    func()       `desc:"the function that is called to set the styles of the widget"`
-	Style        gist.Style   `desc:"styling settings for this widget that are used to determine the active styles; these can and should be modified externally, as this is the recommended way to set styles`
-	ActStyle     gist.Style   `json:"-" xml:"-" desc:"active styling settings for this widget (modifying these externally will have no effect) -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	StyleFunc    func()       `desc:"the function that is called to set the styles of the widget during SetStyle2D; fields on Style should be set in this function"`
+	Style        gist.Style   `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect)"`
 	DefStyle     *gist.Style  `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us (modifying these externally will have no effect) -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	LayState     LayoutState  `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
 	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
@@ -58,7 +57,6 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	wb.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
 	wb.Tooltip = fr.Tooltip
 	wb.Style.CopyFrom(&fr.Style)
-	wb.ActStyle.CopyFrom(&fr.ActStyle)
 }
 
 func (wb *WidgetBase) Disconnect() {
@@ -73,7 +71,7 @@ func (wb *WidgetBase) AsWidget() *WidgetBase {
 // ActiveStyle satisfies the ActiveStyler interface
 // and returns the active style of the widget
 func (wb *WidgetBase) ActiveStyle() *gist.Style {
-	return &wb.ActStyle
+	return &wb.Style
 }
 
 // StyleRLock does a read-lock for reading the style
@@ -89,7 +87,7 @@ func (wb *WidgetBase) StyleRUnlock() {
 // BoxSpace returns the style BoxSpace value under read lock
 func (wb *WidgetBase) BoxSpace() gist.SideFloats {
 	wb.StyMu.RLock()
-	bs := wb.ActStyle.BoxSpace()
+	bs := wb.Style.BoxSpace()
 	wb.StyMu.RUnlock()
 	return bs
 }
@@ -99,7 +97,7 @@ func (wb *WidgetBase) Init2DWidget() {
 	wb.BBoxMu.Lock()
 	wb.StyMu.Lock()
 	wb.Viewport = wb.ParentViewport()
-	wb.ActStyle.Defaults()
+	wb.Style.Defaults()
 	wb.StyMu.Unlock()
 	wb.LayState.Defaults() // doesn't overwrite
 	wb.BBoxMu.Unlock()
@@ -186,19 +184,19 @@ func (wb *WidgetBase) Style2DWidget() {
 	defer wb.Viewport.SetCurStyleNode(nil)
 
 	if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
-		wb.ActStyle.CopyFrom(wb.DefStyle)
+		wb.Style.CopyFrom(wb.DefStyle)
 	} else {
-		wb.ActStyle.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
+		wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
 	}
-	wb.ActStyle.IsSet = false // this is always first call, restart
-	if wb.Viewport == nil {   // robust
+	wb.Style.IsSet = false  // this is always first call, restart
+	if wb.Viewport == nil { // robust
 		wb.StyMu.Unlock()
 		gii.Init2D()
 		wb.StyMu.Lock()
 	}
 	styprops := *wb.Properties()
 	parSty := wb.ParentActiveStyle()
-	wb.ActStyle.SetStyleProps(parSty, styprops, wb.Viewport)
+	wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
 
 	// look for class-specific style sheets among defaults -- have to do these
 	// dynamically now -- cannot compile into default which is type-general
@@ -208,7 +206,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	for _, cl := range classes {
 		clsty := "." + strings.TrimSpace(cl)
 		if sp, ok := ki.SubProps(tprops, clsty); ok {
-			wb.ActStyle.SetStyleProps(parSty, sp, wb.Viewport)
+			wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
 		}
 	}
 	kit.TypesMu.RUnlock()
@@ -221,17 +219,17 @@ func (wb *WidgetBase) Style2DWidget() {
 		wb.CSSAgg = nil // restart
 	}
 	AggCSS(&wb.CSSAgg, wb.CSS)
-	StyleCSS(gii, wb.Viewport, &wb.ActStyle, wb.CSSAgg, "")
+	StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
 	if wb.StyleFunc != nil {
 		wb.StyleFunc()
 	}
 
-	SetUnitContext(&wb.ActStyle, wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
-	if wb.ActStyle.Inactive {                                 // inactive can only set, not clear
+	SetUnitContext(&wb.Style, wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
+	if wb.Style.Inactive {                                 // inactive can only set, not clear
 		wb.SetInactive()
 	}
 
-	wb.Viewport.SetCurrentColor(wb.ActStyle.Font.Color)
+	wb.Viewport.SetCurrentColor(wb.Style.Font.Color)
 }
 
 // StylePart sets the style properties for a child in parts (or any other
@@ -323,14 +321,14 @@ func (wb *WidgetBase) Style2D() {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
 
-	hasTempl, saveTempl := wb.ActStyle.FromTemplate()
+	hasTempl, saveTempl := wb.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		wb.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		wb.ActStyle.SaveTemplate()
+		wb.Style.SaveTemplate()
 	}
-	wb.LayState.SetFromStyle(&wb.ActStyle.Layout) // also does reset
+	wb.LayState.SetFromStyle(&wb.Style.Layout) // also does reset
 }
 
 // SetUnitContext sets the unit context based on size of viewport and parent
@@ -353,7 +351,7 @@ func SetUnitContext(st *gist.Style, vp *Viewport2D, el mat32.Vec2) {
 func (wb *WidgetBase) InitLayout2D() bool {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
-	wb.LayState.SetFromStyle(&wb.ActStyle.Layout)
+	wb.LayState.SetFromStyle(&wb.Style.Layout)
 	return false
 }
 
@@ -412,11 +410,11 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	if initStyle {
 		mvp := wb.ViewportSafe()
-		SetUnitContext(&wb.ActStyle, mvp, psize) // update units with final layout
+		SetUnitContext(&wb.Style, mvp, psize) // update units with final layout
 	}
 	wb.BBox = nii.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
-	nii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
+	nii.ComputeBBox2D(parBBox, image.Point{}) // other bboxes from BBox
 	if Layout2DTrace {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.VpBBox, wb.WinBBox)
 	}
@@ -519,7 +517,7 @@ func (wb *WidgetBase) Render2D() {
 // ReRender2DTree does a re-render of the tree -- after it has already been
 // initialized and styled -- redoes the full stack
 func (wb *WidgetBase) ReRender2DTree() {
-	parBBox := image.ZR
+	parBBox := image.Rectangle{}
 	pni, _ := KiToNode2D(wb.Par)
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()
@@ -558,7 +556,7 @@ func (wb *WidgetBase) Move2DTree() {
 	if wb.HasNoLayout() {
 		return
 	}
-	parBBox := image.ZR
+	parBBox := image.Rectangle{}
 	pnii, pn := KiToNode2D(wb.Par)
 	if pn != nil {
 		parBBox = pnii.ChildrenBBox2D()
@@ -630,7 +628,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
 	lbl.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
-	mwdots := parVp.ActStyle.UnContext.ToDots(40, units.UnitEm)
+	mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
 	mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 
 	lbl.SetProp("max-width", units.Dot(mwdots))
@@ -755,7 +753,7 @@ func (wb *WidgetBase) RenderLock() (*girl.State, *girl.Paint, *gist.Style) {
 	wb.StyMu.RLock()
 	rs := &wb.Viewport.Render
 	rs.Lock()
-	return rs, &rs.Paint, &wb.ActStyle
+	return rs, &rs.Paint, &wb.Style
 }
 
 // RenderUnlock unlocks girl.State and style
@@ -820,7 +818,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 
 // set our LayState.Alloc.Size from constraints
 func (wb *WidgetBase) Size2DFromWH(w, h float32) {
-	st := &wb.ActStyle
+	st := &wb.Style
 	if st.Layout.Width.Dots > 0 {
 		w = mat32.Max(st.Layout.Width.Dots, w)
 	}
@@ -934,8 +932,8 @@ func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 // and label left-to right in a row, based on whether items are nil or empty
 func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icnm string, txt string) (icIdx, lbIdx int) {
 	wb.Parts.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
-	if wb.ActStyle.Template != "" {
-		wb.Parts.ActStyle.Template = wb.ActStyle.Template + ".Parts"
+	if wb.Style.Template != "" {
+		wb.Parts.Style.Template = wb.Style.Template + ".Parts"
 	}
 	icIdx = -1
 	lbIdx = -1
@@ -958,8 +956,8 @@ func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icn
 func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := wb.Parts.Child(icIdx).(*Icon)
-		if wb.ActStyle.Template != "" {
-			ic.ActStyle.Template = wb.ActStyle.Template + ".icon"
+		if wb.Style.Template != "" {
+			ic.Style.Template = wb.Style.Template + ".icon"
 		}
 		if set, _ := ic.SetIcon(icnm); set || wb.NeedsFullReRender() {
 			wb.StylePart(Node2D(ic))
@@ -967,8 +965,8 @@ func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icId
 	}
 	if lbIdx >= 0 {
 		lbl := wb.Parts.Child(lbIdx).(*Label)
-		if wb.ActStyle.Template != "" {
-			lbl.ActStyle.Template = wb.ActStyle.Template + ".icon"
+		if wb.Style.Template != "" {
+			lbl.Style.Template = wb.Style.Template + ".icon"
 		}
 		if lbl.Text != txt {
 			wb.StylePart(Node2D(lbl))
@@ -1003,7 +1001,7 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) boo
 			return true
 		}
 		lbl := lblk.(*Label)
-		lbl.ActStyle.Font.Color = wb.ActStyle.Font.Color
+		lbl.Style.Font.Color = wb.Style.Font.Color
 		if lbl.Text != txt {
 			return true
 		}

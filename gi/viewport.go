@@ -382,7 +382,7 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		return
 	}
 	r := vp.Geom.Bounds()
-	sp := image.ZP
+	sp := image.Point{}
 	if vp.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := KiToNode2D(vp.Par)
 		nr := r.Intersect(pni.ChildrenBBox2D())
@@ -486,17 +486,17 @@ func (vp *Viewport2D) Style2D() {
 
 	vp.SetCurWin()
 	vp.Style2DWidget()
-	vp.LayState.SetFromStyle(&vp.ActStyle.Layout) // also does reset
+	vp.LayState.SetFromStyle(&vp.Style.Layout) // also does reset
 }
 
 func (vp *Viewport2D) Size2D(iter int) {
 	vp.InitLayout2D()
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
-	pos := vp.ActStyle.Layout.PosDots().ToPoint()
-	if pos != image.ZP {
+	pos := vp.Style.Layout.PosDots().ToPoint()
+	if pos != (image.Point{}) {
 		vp.Geom.Pos = pos
 	}
-	if !vp.IsSVG() && vp.Geom.Size != image.ZP {
+	if !vp.IsSVG() && vp.Geom.Size != (image.Point{}) {
 		vp.LayState.Alloc.Size.SetPoint(vp.Geom.Size)
 	}
 }
@@ -521,7 +521,7 @@ func (vp *Viewport2D) BBox2D() image.Rectangle {
 	} else {
 		bb := vp.BBoxFromAlloc()
 		sz := bb.Size()
-		if sz != image.ZP {
+		if sz != (image.Point{}) {
 			vp.Resize(sz)
 		} else {
 			if vp.Pixels == nil {
@@ -556,7 +556,7 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 	if vp.Pixels == nil {
 		sz := vp.Geom.Size
-		if sz != image.ZP {
+		if sz != (image.Point{}) {
 			return vp.Geom.Bounds()
 		}
 		return image.Rectangle{Max: image.Point{100, 100}}
@@ -641,12 +641,12 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 		return
 	}
 	vp.Move2DBase(delta, parBBox)
-	vp.Move2DChildren(image.ZP) // reset delta here -- we absorb the delta in our placement relative to the parent
+	vp.Move2DChildren(image.Point{}) // reset delta here -- we absorb the delta in our placement relative to the parent
 }
 
 func (vp *Viewport2D) FillViewport() {
 	vp.StyMu.RLock()
-	st := &vp.ActStyle
+	st := &vp.Style
 	rs := &vp.Render
 	rs.Lock()
 	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &st.Font.BgColor)
@@ -697,8 +697,8 @@ func (vp *Viewport2D) PrefSize(initSz image.Point) image.Point {
 	ch := vp.ChildByType(KiT_Layout, ki.Embeds, 0).Embed(KiT_Layout).(*Layout)
 	vpsz := ch.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
-	stw := int(vp.ActStyle.Layout.MinWidth.Dots)
-	sth := int(vp.ActStyle.Layout.MinHeight.Dots)
+	stw := int(vp.Style.Layout.MinWidth.Dots)
+	sth := int(vp.Style.Layout.MinHeight.Dots)
 	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
 	vpsz.X = ints.MaxInt(vpsz.X, stw)
 	vpsz.Y = ints.MaxInt(vpsz.Y, sth)

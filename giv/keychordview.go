@@ -161,7 +161,7 @@ func (kc *KeyChordEdit) Style2D() {
 	kc.Redrawable = true
 	kc.StyleLabel()
 	kc.StyMu.Lock()
-	kc.LayState.SetFromStyle(&kc.ActStyle.Layout) // also does reset
+	kc.LayState.SetFromStyle(&kc.Style.Layout) // also does reset
 	kc.StyMu.Unlock()
 	kc.LayoutLabel()
 }

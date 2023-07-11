@@ -447,10 +447,10 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
 		tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
-	if tv.ActStyle.Font.Face == nil {
-		girl.OpenFont(&tv.ActStyle.Font, &tv.ActStyle.UnContext)
+	if tv.Style.Font.Face == nil {
+		girl.OpenFont(&tv.Style.Font, &tv.Style.UnContext)
 	}
-	tv.RowHeight = mat32.Max(tv.RowHeight, tv.ActStyle.Font.Face.Metrics.Height)
+	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Style.Font.Face.Metrics.Height)
 
 	mvp := tv.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
@@ -577,7 +577,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				idxlab.SetProp("tv-row", i)
 				idxlab.Selectable = true
 				idxlab.Redrawable = true
-				idxlab.ActStyle.Template = "giv.TableView.IndexLabel"
+				idxlab.Style.Template = "giv.TableView.IndexLabel"
 				idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
@@ -676,7 +676,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					addact.SetIcon("plus")
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
-					addact.ActStyle.Template = "giv.TableView.AddAction"
+					addact.Style.Template = "giv.TableView.AddAction"
 					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
@@ -693,7 +693,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					delact.SetIcon("minus")
 					delact.Tooltip = "delete this element"
 					delact.Data = i
-					delact.ActStyle.Template = "giv.TableView.DelAction"
+					delact.Style.Template = "giv.TableView.DelAction"
 					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
@@ -935,13 +935,13 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
 	widg := sg.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
-	if widg.VpBBox != image.ZR {
+	if widg.VpBBox != (image.Rectangle{}) {
 		return widg, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		widg := sg.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
-		if widg.VpBBox != image.ZR {
+		if widg.VpBBox != (image.Rectangle{}) {
 			return widg, true
 		}
 	}

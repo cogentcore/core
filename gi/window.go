@@ -769,7 +769,7 @@ func (w *Window) Resized(sz image.Point) {
 	if WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Nm, curSz, sz)
 	}
-	if curSz == image.ZP { // first open
+	if curSz == (image.Point{}) { // first open
 		StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 	}
 	w.Viewport.Resize(sz)
@@ -1264,7 +1264,7 @@ func (w *Window) Publish() {
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
-	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
+	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.Rectangle{}, draw.Src, vgpu.NoFlipY)
 	if len(w.UpdtRegs.BeforeDir) > 0 {
 		drw.UseTextureSet(1)
 		w.UpdtRegs.DrawImages(drw, true) // before direct
@@ -1330,7 +1330,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data any) {
 // This is for gi3d.Scene for example.  Returns the index of the image to upload to.
 func (w *Window) AddDirectUploader(node Node2D) int {
 	w.UpMu.Lock()
-	idx, _ := w.DirDraws.Add(node, image.ZR)
+	idx, _ := w.DirDraws.Add(node, image.Rectangle{})
 	w.UpMu.Unlock()
 	return idx
 }
@@ -1489,7 +1489,7 @@ func (w *Window) DrawSprites() {
 			if !sp.On {
 				continue
 			}
-			drw.Copy(imgidx, ii, sp.Geom.Pos, image.ZR, draw.Over, vgpu.NoFlipY)
+			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, vgpu.NoFlipY)
 		}
 	}
 }

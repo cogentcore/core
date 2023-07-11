@@ -183,8 +183,8 @@ func (sb *SpinBox) ConfigParts() {
 	}
 	sb.Parts.Lay = LayoutHoriz
 	sb.Parts.SetProp("vertical-align", gist.AlignMiddle)
-	if sb.ActStyle.Template != "" {
-		sb.Parts.ActStyle.Template = sb.ActStyle.Template + ".Parts"
+	if sb.Style.Template != "" {
+		sb.Parts.Style.Template = sb.Style.Template + ".Parts"
 	}
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "text-field")
@@ -206,8 +206,8 @@ func (sb *SpinBox) ConfigParts() {
 			// not compiled into style prop
 			// up.SetFlagState(sb.IsInactive(), int(Inactive))
 			up.Icon = sb.UpIcon
-			if sb.ActStyle.Template != "" {
-				up.ActStyle.Template = sb.ActStyle.Template + ".up"
+			if sb.Style.Template != "" {
+				up.Style.Template = sb.Style.Template + ".up"
 			}
 			sb.StylePart(Node2D(up))
 			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -221,8 +221,8 @@ func (sb *SpinBox) ConfigParts() {
 			dn.SetProp("no-focus", true)
 			dn.Icon = sb.DownIcon
 			sb.StylePart(Node2D(dn))
-			if sb.ActStyle.Template != "" {
-				dn.ActStyle.Template = sb.ActStyle.Template + ".dn"
+			if sb.Style.Template != "" {
+				dn.Style.Template = sb.Style.Template + ".dn"
 			}
 			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
@@ -230,8 +230,8 @@ func (sb *SpinBox) ConfigParts() {
 			})
 			// space
 			sp := sb.Parts.ChildByName("space", 2).(*Space)
-			if sb.ActStyle.Template != "" {
-				sp.ActStyle.Template = sb.ActStyle.Template + ".space"
+			if sb.Style.Template != "" {
+				sp.Style.Template = sb.Style.Template + ".space"
 			}
 			sb.StylePart(sp) // also get the space
 		}
@@ -241,8 +241,8 @@ func (sb *SpinBox) ConfigParts() {
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
 		tf.SetProp("clear-act", false)
-		if sb.ActStyle.Template != "" {
-			tf.ActStyle.Template = sb.ActStyle.Template + ".text"
+		if sb.Style.Template != "" {
+			tf.Style.Template = sb.Style.Template + ".text"
 		}
 		sb.StylePart(Node2D(tf))
 		tf.Txt = sb.ValToString(sb.Value)
@@ -439,14 +439,14 @@ func (sb *SpinBox) StyleSpinBox() {
 	if sb.Step == 0 {
 		sb.Defaults()
 	}
-	hasTempl, saveTempl := sb.ActStyle.FromTemplate()
+	hasTempl, saveTempl := sb.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		sb.Style2DWidget()
 	} else {
-		SetUnitContext(&sb.ActStyle, sb.Viewport, mat32.Vec2Zero)
+		SetUnitContext(&sb.Style, sb.Viewport, mat32.Vec2Zero)
 	}
 	if hasTempl && saveTempl {
-		sb.ActStyle.SaveTemplate()
+		sb.Style.SaveTemplate()
 	}
 	sb.StyleFromProps(sb.Props, sb.Viewport)
 }
@@ -454,7 +454,7 @@ func (sb *SpinBox) StyleSpinBox() {
 func (sb *SpinBox) Style2D() {
 	sb.StyleSpinBox()
 	sb.StyMu.Lock()
-	sb.LayState.SetFromStyle(&sb.ActStyle.Layout) // also does reset
+	sb.LayState.SetFromStyle(&sb.Style.Layout) // also does reset
 	sb.StyMu.Unlock()
 	sb.ConfigParts()
 }

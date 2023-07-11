@@ -104,10 +104,7 @@ func HasToolBarView(val any) bool {
 		return false
 	}
 	_, ok = ki.SliceTypeProps(tpp, "ToolBar")
-	if !ok {
-		return false
-	}
-	return true
+	return ok
 }
 
 // ToolBarView configures ToolBar according to the "ToolBar" properties

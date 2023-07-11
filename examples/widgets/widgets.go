@@ -156,13 +156,13 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 		}
 	})
 	button2.StyleFunc = func() {
-		button2.ActStyle.Border.Color.Set(gist.Transparent)
-		button2.ActStyle.Border.Width.Set(units.Px(2))
-		button2.ActStyle.Border.Radius.Set(units.Px(10))
-		button2.ActStyle.Font.BgColor.SetColor(gist.MustColorFromName("blue"))
-		button2.ActStyle.Font.Color.SetColor(gist.MustColorFromName("white"))
-		button2.ActStyle.Layout.Padding.Set(units.Px(10), units.Px(5))
-		button2.ActStyle.Layout.Height = units.Px(50)
+		button2.Style.Border.Color.Set(gist.Transparent)
+		button2.Style.Border.Width.Set(units.Px(2))
+		button2.Style.Border.Radius.Set(units.Px(10))
+		button2.Style.Font.BgColor.SetColor(gist.MustColorFromName("blue"))
+		button2.Style.Font.Color.SetColor(gist.MustColorFromName("white"))
+		button2.Style.Layout.Padding.Set(units.Px(10), units.Px(5))
+		button2.Style.Layout.Height = units.Px(50)
 	}
 	// button2.SetProp("border-color", gist.NewSides[gist.Color](gist.MustColorFromName("green"), gist.MustColorFromName("red"), gist.MustColorFromName("blue"), gist.MustColorFromName("orange")))
 	// button2.SetProp("border-width", "2px 4px 6px 8px")

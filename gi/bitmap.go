@@ -116,7 +116,7 @@ func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
 		bm.SetSize(sz)
-		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), img, image.ZP, draw.Src)
+		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), img, image.Point{}, draw.Src)
 	} else {
 		tsz := sz
 		transformer := draw.BiLinear
@@ -153,7 +153,7 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport2D) {
 	pos := bm.LayState.Alloc.Pos.ToPointCeil()
 	max := pos.Add(bm.Size)
 	r := image.Rectangle{Min: pos, Max: max}
-	sp := image.ZP
+	sp := image.Point{}
 	if bm.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := KiToNode2D(bm.Par)
 		pbb := pni.ChildrenBBox2D()
@@ -192,7 +192,7 @@ func GrabRenderFrom(nii Node2D) *image.RGBA {
 	if nivp != nil && nivp.Pixels != nil {
 		sz := nivp.Pixels.Bounds().Size()
 		img := image.NewRGBA(image.Rectangle{Max: sz})
-		draw.Draw(img, img.Bounds(), nivp.Pixels, image.ZP, draw.Src)
+		draw.Draw(img, img.Bounds(), nivp.Pixels, image.Point{}, draw.Src)
 		return img
 	}
 	nivp = ni.Viewport

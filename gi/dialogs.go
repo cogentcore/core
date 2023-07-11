@@ -129,7 +129,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	}
 
 	vpsz := dlg.DefSize
-	if dlg.DefSize == image.ZP {
+	if dlg.DefSize == (image.Point{}) {
 		vpsz = dlg.PrefSize(win.OSWin.Screen().PixSize)
 		if !DialogsSepWindow {
 			vpsz = dlg.LayState.Size.Pref.Min(win.Viewport.LayState.Alloc.Size.MulScalar(.9)).ToPoint()

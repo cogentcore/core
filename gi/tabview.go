@@ -430,7 +430,7 @@ func (tv *TabView) Config() {
 		return
 	}
 	tv.StyMu.RLock()
-	needSty := tv.ActStyle.Font.Size.Val == 0
+	needSty := tv.Style.Font.Size.Val == 0
 	tv.StyMu.RUnlock()
 	if needSty {
 		tv.StyleLayout()

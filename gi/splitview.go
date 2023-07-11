@@ -337,16 +337,16 @@ func (sv *SplitView) SplitViewEvents() {
 
 func (sv *SplitView) StyleSplitView() {
 	sv.Style2DWidget()
-	sv.LayState.SetFromStyle(&sv.ActStyle.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.Style.Layout) // also does reset
 	sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
-	sv.HandleSize.ToDots(&sv.ActStyle.UnContext)
+	sv.HandleSize.ToDots(&sv.Style.UnContext)
 }
 
 func (sv *SplitView) Style2D() {
 	sv.StyMu.Lock()
 
 	sv.StyleSplitView()
-	sv.LayState.SetFromStyle(&sv.ActStyle.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.Style.Layout) // also does reset
 	sv.UpdateSplits()
 	sv.StyMu.Unlock()
 
@@ -533,7 +533,7 @@ func (sr *Splitter) Style2D() {
 	sr.ClearFlag(int(CanFocus))
 	sr.StyleSlider()
 	sr.StyMu.Lock()
-	sr.LayState.SetFromStyle(&sr.ActStyle.Layout) // also does reset
+	sr.LayState.SetFromStyle(&sr.Style.Layout) // also does reset
 	sr.StyMu.Unlock()
 	sr.ConfigParts()
 }
@@ -629,7 +629,7 @@ func (sr *Splitter) MouseEvent() {
 				me.SetProcessed()
 				if me.Action == mouse.Press {
 					ed := srr.This().(SliderPositioner).PointToRelPos(me.Where)
-					st := &srr.ActStyle
+					st := &srr.Style
 					// TODO: SideTODO: unsure about dim
 					spc := st.Layout.Margin.Dots().Pos().Dim(srr.Dim) + 0.5*srr.ThSize
 					if srr.Dim == mat32.X {
@@ -700,7 +700,7 @@ func (sr *Splitter) Render2D() {
 		}
 		spr, ok := win.SpriteByName(spnm)
 		if !ok {
-			spr = NewSprite(spnm, image.ZP, sr.VpBBox.Min)
+			spr = NewSprite(spnm, image.Point{}, sr.VpBBox.Min)
 			spr.GrabRenderFrom(icvp.(Node2D))
 			win.AddSprite(spr)
 			win.ActivateSprite(spnm)

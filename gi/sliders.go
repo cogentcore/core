@@ -178,7 +178,7 @@ func (sb *SliderBase) SetSliderState(state SliderStates) {
 		state = SliderFocus
 	}
 	sb.State = state
-	sb.ActStyle = sb.StateStyles[state] // get relevant styles
+	sb.Style = sb.StateStyles[state] // get relevant styles
 }
 
 // SliderPress sets the slider in the down state -- mouse clicked down but
@@ -438,7 +438,7 @@ func (sb *SliderBase) MouseEvent() {
 				me.SetProcessed()
 				if me.Action == mouse.Press {
 					ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
-					st := &sbb.ActStyle
+					st := &sbb.Style
 					// TODO: SideTODO: not sure about dim
 					spc := st.Layout.Margin.Dots().Pos().Dim(sbb.Dim) + 0.5*sbb.ThSizeReal
 					if sbb.Dim == mat32.X {
@@ -528,8 +528,8 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 		ick := sb.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
 		if ick != nil {
 			ic := ick.(*Icon)
-			mrg := sb.ActStyle.Layout.Margin.Dots()
-			pad := sb.ActStyle.Layout.Padding.Dots()
+			mrg := sb.Style.Layout.Margin.Dots()
+			pad := sb.Style.Layout.Padding.Dots()
 			odim := mat32.OtherDim(sb.Dim)
 			spc := mrg.Pos().Dim(odim) + pad.Pos().Dim(odim)
 			ic.LayState.Alloc.PosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
@@ -618,11 +618,11 @@ func (sr *SliderBase) StyleSlider() {
 	defer sr.StyMu.Unlock()
 
 	sr.Style2DWidget()
-	pst := &(sr.Par.(Node2D).AsWidget().ActStyle)
+	pst := &(sr.Par.(Node2D).AsWidget().Style)
 	for i := 0; i < int(SliderStatesN); i++ {
-		sr.StateStyles[i].CopyFrom(&sr.ActStyle)
+		sr.StateStyles[i].CopyFrom(&sr.Style)
 		sr.StateStyles[i].SetStyleProps(pst, sr.StyleProps(SliderSelectors[i]), sr.Viewport)
-		sr.StateStyles[i].CopyUnitContext(&sr.ActStyle.UnContext)
+		sr.StateStyles[i].CopyUnitContext(&sr.Style.UnContext)
 	}
 	sr.StyleFromProps(sr.Props, sr.Viewport)           // does all the min / max / step etc
 	tprops := *kit.Types.Properties(ki.Type(sr), true) // true = makeNew
@@ -631,7 +631,7 @@ func (sr *SliderBase) StyleSlider() {
 		sr.StyleFromProps(tprops, sr.Viewport)
 		kit.TypesMu.RUnlock()
 	}
-	sr.StyleToDots(&sr.ActStyle.UnContext)
+	sr.StyleToDots(&sr.Style.UnContext)
 	sr.ThSize = sr.ThumbSize.Dots
 }
 
@@ -719,7 +719,7 @@ func (sr *Slider) Style2D() {
 	sr.SetCanFocusIfActive()
 	sr.StyleSlider()
 	sr.StyMu.Lock()
-	sr.LayState.SetFromStyle(&sr.ActStyle.Layout) // also does reset
+	sr.LayState.SetFromStyle(&sr.Style.Layout) // also does reset
 	sr.StyMu.Unlock()
 	sr.ConfigParts()
 }
@@ -729,7 +729,7 @@ func (sr *Slider) Size2D(iter int) {
 	if sr.ThSize == 0.0 {
 		sr.Defaults()
 	}
-	st := &sr.ActStyle
+	st := &sr.Style
 	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
 	sz := sr.ThSize + st.Layout.Margin.Dots().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
@@ -741,7 +741,7 @@ func (sr *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sr.Layout2DBase(parBBox, true, iter) // init style
 	sr.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
-		sr.StateStyles[i].CopyUnitContext(&sr.ActStyle.UnContext)
+		sr.StateStyles[i].CopyUnitContext(&sr.Style.UnContext)
 	}
 	sr.SizeFromAlloc()
 	return sr.Layout2DChildren(iter)
@@ -914,7 +914,7 @@ func (sb *ScrollBar) Style2D() {
 	sb.SetCanFocusIfActive()
 	sb.StyleSlider()
 	sb.StyMu.Lock()
-	sb.LayState.SetFromStyle(&sb.ActStyle.Layout) // also does reset
+	sb.LayState.SetFromStyle(&sb.Style.Layout) // also does reset
 	sb.StyMu.Unlock()
 	sb.ConfigParts()
 }
@@ -927,7 +927,7 @@ func (sb *ScrollBar) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sb.Layout2DBase(parBBox, true, iter) // init style
 	sb.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
-		sb.StateStyles[i].CopyUnitContext(&sb.ActStyle.UnContext)
+		sb.StateStyles[i].CopyUnitContext(&sb.Style.UnContext)
 	}
 	sb.SizeFromAlloc()
 	return sb.Layout2DChildren(iter)

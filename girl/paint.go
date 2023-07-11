@@ -351,7 +351,7 @@ func (pc *Paint) Fill(rs *State) {
 func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *gist.ColorSpec) {
 	if clr.Source == gist.SolidColor {
 		b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.ZP, draw.Src)
+		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.Point{}, draw.Src)
 	} else {
 		pc.FillStyle.SetColorSpec(clr)
 		pc.DrawRectangle(rs, pos.X, pos.Y, size.X, size.Y)
@@ -362,7 +362,7 @@ func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *gist.ColorSpec) {
 // FillBoxColor is an optimized fill of a square region with given uniform color
 func (pc *Paint) FillBoxColor(rs *State, pos, size mat32.Vec2, clr color.Color) {
 	b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.ZP, draw.Src)
+	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.Point{}, draw.Src)
 }
 
 // ClipPreserve updates the clipping region by intersecting the current
@@ -376,7 +376,7 @@ func (pc *Paint) ClipPreserve(rs *State) {
 		rs.Mask = clip
 	} else { // todo: this one operation MASSIVELY slows down clip usage -- unclear why
 		mask := image.NewAlpha(rs.Image.Bounds())
-		draw.DrawMask(mask, mask.Bounds(), clip, image.ZP, rs.Mask, image.ZP, draw.Over)
+		draw.DrawMask(mask, mask.Bounds(), clip, image.Point{}, rs.Mask, image.Point{}, draw.Over)
 		rs.Mask = mask
 	}
 }
@@ -398,7 +398,7 @@ func (pc *Paint) SetMask(rs *State, mask *image.Alpha) error {
 func (pc *Paint) AsMask(rs *State) *image.Alpha {
 	b := rs.Image.Bounds()
 	mask := image.NewAlpha(b)
-	draw.Draw(mask, b, rs.Image, image.ZP, draw.Src)
+	draw.Draw(mask, b, rs.Image, image.Point{}, draw.Src)
 	return mask
 }
 
@@ -421,7 +421,7 @@ func (pc *Paint) ResetClip(rs *State) {
 // Clear fills the entire image with the current fill color.
 func (pc *Paint) Clear(rs *State) {
 	src := image.NewUniform(&pc.FillStyle.Color.Color)
-	draw.Draw(rs.Image, rs.Image.Bounds(), src, image.ZP, draw.Src)
+	draw.Draw(rs.Image, rs.Image.Bounds(), src, image.Point{}, draw.Src)
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
@@ -1004,7 +1004,7 @@ func (pc *Paint) DrawImageAnchored(rs *State, fmIm image.Image, x, y, ax, ay flo
 	} else {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, &draw.Options{
 			DstMask:  rs.Mask,
-			DstMaskP: image.ZP,
+			DstMaskP: image.Point{},
 		})
 	}
 }
@@ -1025,7 +1025,7 @@ func (pc *Paint) DrawImageScaled(rs *State, fmIm image.Image, x, y, w, h float32
 	} else {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, &draw.Options{
 			DstMask:  rs.Mask,
-			DstMaskP: image.ZP,
+			DstMaskP: image.Point{},
 		})
 	}
 }

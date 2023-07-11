@@ -273,15 +273,15 @@ func (sc *Scene) Style2D() {
 	sc.SetCanFocusIfActive() // we get all key events
 	sc.SetCurWin()
 	sc.Style2DWidget()
-	sc.LayState.SetFromStyle(&sc.ActStyle.Layout) // also does reset
+	sc.LayState.SetFromStyle(&sc.Style.Layout) // also does reset
 	// note: we do Style3D in Init3D
 }
 
 func (sc *Scene) Size2D(iter int) {
 	sc.InitLayout2D()
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
-	pos := sc.ActStyle.Layout.PosDots().ToPoint()
-	if pos != image.ZP {
+	pos := sc.Style.Layout.PosDots().ToPoint()
+	if pos != (image.Point{}) {
 		sc.Geom.Pos = pos
 	}
 }
@@ -294,7 +294,7 @@ func (sc *Scene) Layout2D(parBBox image.Rectangle, iter int) bool {
 func (sc *Scene) BBox2D() image.Rectangle {
 	bb := sc.BBoxFromAlloc()
 	sz := bb.Size()
-	if sz != image.ZP {
+	if sz != (image.Point{}) {
 		sc.Geom.Size = sz
 	} else {
 		bb.Max = bb.Min.Add(image.Point{64, 64}) // min size for zero case

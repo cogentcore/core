@@ -98,7 +98,7 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
 		g.SetImageSize(sz)
-		draw.Draw(g.Pixels, g.Pixels.Bounds(), img, image.ZP, draw.Src)
+		draw.Draw(g.Pixels, g.Pixels.Bounds(), img, image.Point{}, draw.Src)
 		if g.Size.X == 0 && g.Size.Y == 0 {
 			g.Size = mat32.NewVec2FmPoint(sz)
 		}

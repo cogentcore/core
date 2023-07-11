@@ -7,6 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build ((linux && !android) || dragonfly || openbsd) && !3d
 // +build linux,!android dragonfly openbsd
 // +build !3d
 
@@ -173,7 +174,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	pixratio := float32(1.0)
 
 	sc.ScreenNumber = 0
-	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{int(widthPx), int(heightPx)}}
+	sc.Geometry = image.Rectangle{Min: image.Point{}, Max: image.Point{int(widthPx), int(heightPx)}}
 	sc.Depth = int(app.xsci.RootDepth)
 	sc.LogicalDPI = dpi
 	sc.PhysicalDPI = dpi
@@ -200,7 +201,7 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 		pixratio := float32(1.0)
 
 		sc.ScreenNumber = 0
-		sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{int(widthPx), int(heightPx)}}
+		sc.Geometry = image.Rectangle{Min: image.Point{}, Max: image.Point{int(widthPx), int(heightPx)}}
 		sc.Depth = int(sci.RootDepth)
 		sc.LogicalDPI = dpi
 		sc.PhysicalDPI = dpi
@@ -579,7 +580,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	xproto.MapWindow(app.xc, xw)
 
-	if opts.Pos != image.ZP {
+	if opts.Pos != (image.Point{}) {
 		w.SetGeom(opts.Pos, opts.Size)
 	}
 

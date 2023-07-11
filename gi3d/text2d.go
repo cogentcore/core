@@ -128,7 +128,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	sz.SetAdd(marg.Size())
 	txt.TxtPos = marg.Pos()
 	szpt := sz.ToPoint()
-	if szpt == image.ZP {
+	if szpt == (image.Point{}) {
 		szpt = image.Point{10, 10}
 	}
 	bounds := image.Rectangle{Max: szpt}
@@ -165,7 +165,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		rs.Init(szpt.X, szpt.Y, img)
 	}
 	rs.PushBounds(bounds)
-	draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
+	draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.Point{}, draw.Src)
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
 }

@@ -110,20 +110,20 @@ func (ic *Icon) Style2D() {
 	ic.StyMu.Lock()
 	defer ic.StyMu.Unlock()
 
-	hasTempl, saveTempl := ic.ActStyle.FromTemplate()
+	hasTempl, saveTempl := ic.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		ic.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		ic.ActStyle.SaveTemplate()
+		ic.Style.SaveTemplate()
 	}
-	ic.LayState.SetFromStyle(&ic.ActStyle.Layout) // also does reset
+	ic.LayState.SetFromStyle(&ic.Style.Layout) // also does reset
 	sic := ic.SVGIcon()
 	if sic != nil {
 		sic.Nm = ic.Nm
 		sic.Props = ic.Props
 		sic.CSS = ic.CSS
-		sic.ActStyle = ic.ActStyle
+		sic.Style = ic.Style
 		sic.DefStyle = ic.DefStyle
 		if ic.NeedsFullReRender() {
 			sic.SetFullReRender()

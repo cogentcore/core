@@ -2829,7 +2829,7 @@ func (ft *FileTreeView) Style2D() {
 			}
 		}
 		ft.StyleTreeView()
-		ft.LayState.SetFromStyle(&ft.ActStyle.Layout) // also does reset
+		ft.LayState.SetFromStyle(&ft.Style.Layout) // also does reset
 	}
 }
 

@@ -212,7 +212,7 @@ func (tf *TextField) SetText(txt string) {
 		return
 	}
 	tf.StyMu.RLock()
-	needSty := tf.ActStyle.Font.Size.Val == 0
+	needSty := tf.Style.Font.Size.Val == 0
 	tf.StyMu.RUnlock()
 	if needSty {
 		tf.StyleTextField()
@@ -758,7 +758,7 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 // not in visible range, position will be out of range too).
 // if wincoords is true, then adds window box offset -- for cursor, popups
 func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
-	st := &tf.ActStyle
+	st := &tf.Style
 	spc := st.BoxSpace()
 	pos := tf.LayState.Alloc.Pos.Add(spc.Pos())
 	if wincoords {
@@ -928,12 +928,12 @@ func (tf *TextField) CursorSprite() *Sprite {
 			bbsz.X = 2
 		}
 		bbsz.X += 2 // inverse border
-		sp = NewSprite(spnm, bbsz, image.ZP)
+		sp = NewSprite(spnm, bbsz, image.Point{})
 		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color.Inverse()}, image.ZP, draw.Src)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color.Inverse()}, image.Point{}, draw.Src)
 		ibox.Min.X++ // 1 pixel boundary
 		ibox.Max.X--
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color}, image.ZP, draw.Src)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color}, image.Point{}, draw.Src)
 		win.AddSprite(sp)
 	}
 	return sp
@@ -967,7 +967,7 @@ func (tf *TextField) RenderSelect() {
 
 // AutoScroll scrolls the starting position to keep the cursor visible
 func (tf *TextField) AutoScroll() {
-	st := &tf.ActStyle
+	st := &tf.Style
 
 	tf.UpdateRenderAll()
 
@@ -1056,7 +1056,7 @@ func (tf *TextField) AutoScroll() {
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
 func (tf *TextField) PixelToCursor(pixOff float32) int {
-	st := &tf.ActStyle
+	st := &tf.Style
 
 	spc := st.BoxSpace()
 	px := pixOff - spc.Pos().X
@@ -1391,35 +1391,35 @@ func (tf *TextField) StyleTextField() {
 	tf.StyMu.Lock()
 
 	tf.SetCanFocusIfActive()
-	hasTempl, saveTempl := tf.ActStyle.FromTemplate()
+	hasTempl, saveTempl := tf.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		tf.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		tf.ActStyle.SaveTemplate()
+		tf.Style.SaveTemplate()
 	}
-	pst := &(tf.Par.(Node2D).AsWidget().ActStyle)
+	pst := &(tf.Par.(Node2D).AsWidget().Style)
 	if hasTempl && !saveTempl {
 		for i := 0; i < int(TextFieldStatesN); i++ {
-			tf.StateStyles[i].Template = tf.ActStyle.Template + TextFieldSelectors[i]
+			tf.StateStyles[i].Template = tf.Style.Template + TextFieldSelectors[i]
 			tf.StateStyles[i].FromTemplate()
 		}
 	} else {
 		for i := 0; i < int(TextFieldStatesN); i++ {
-			tf.StateStyles[i].CopyFrom(&tf.ActStyle)
+			tf.StateStyles[i].CopyFrom(&tf.Style)
 			tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]), tf.Viewport)
 			StyleCSS(tf.This().(Node2D), tf.Viewport, &tf.StateStyles[i], tf.CSSAgg, TextFieldSelectors[i])
-			tf.StateStyles[i].CopyUnitContext(&tf.ActStyle.UnContext)
+			tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
 		}
 	}
 	if hasTempl && saveTempl {
 		for i := 0; i < int(TextFieldStatesN); i++ {
-			tf.StateStyles[i].Template = tf.ActStyle.Template + TextFieldSelectors[i]
+			tf.StateStyles[i].Template = tf.Style.Template + TextFieldSelectors[i]
 			tf.StateStyles[i].SaveTemplate()
 		}
 	}
 	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), ki.Inherit, ki.TypeProps) // get type defaults
-	tf.CursorWidth.ToDots(&tf.ActStyle.UnContext)
+	tf.CursorWidth.ToDots(&tf.Style.UnContext)
 	if pv, ok := tf.PropInherit("clear-act", ki.Inherit, ki.TypeProps); ok {
 		tf.ClearAct, _ = kit.ToBool(pv)
 	}
@@ -1430,12 +1430,12 @@ func (tf *TextField) StyleTextField() {
 func (tf *TextField) Style2D() {
 	tf.StyleTextField()
 	tf.StyMu.Lock()
-	tf.LayState.SetFromStyle(&tf.ActStyle.Layout) // also does reset
+	tf.LayState.SetFromStyle(&tf.Style.Layout) // also does reset
 	tf.StyMu.Unlock()
 }
 
 func (tf *TextField) UpdateRenderAll() bool {
-	st := &tf.ActStyle
+	st := &tf.Style
 	girl.OpenFont(&st.Font, &st.UnContext)
 	txt := tf.EditTxt
 	if tf.NoEcho {
@@ -1472,7 +1472,7 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tf.Layout2DBase(parBBox, true, iter) // init style
 	tf.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(TextFieldStatesN); i++ {
-		tf.StateStyles[i].CopyUnitContext(&tf.ActStyle.UnContext)
+		tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
 	}
 	redo := tf.Layout2DChildren(iter)
 	sz := tf.LayState.Alloc.Size
@@ -1491,22 +1491,22 @@ func (tf *TextField) RenderTextField() {
 	tf.AutoScroll() // inits paint with our style
 	if tf.IsInactive() {
 		if tf.IsSelected() {
-			tf.ActStyle = tf.StateStyles[TextFieldSel]
+			tf.Style = tf.StateStyles[TextFieldSel]
 		} else {
-			tf.ActStyle = tf.StateStyles[TextFieldInactive]
+			tf.Style = tf.StateStyles[TextFieldInactive]
 		}
 	} else if tf.HasFocus() {
 		if tf.IsFocusActive() {
-			tf.ActStyle = tf.StateStyles[TextFieldFocus]
+			tf.Style = tf.StateStyles[TextFieldFocus]
 		} else {
-			tf.ActStyle = tf.StateStyles[TextFieldActive]
+			tf.Style = tf.StateStyles[TextFieldActive]
 		}
 	} else if tf.IsSelected() {
-		tf.ActStyle = tf.StateStyles[TextFieldSel]
+		tf.Style = tf.StateStyles[TextFieldSel]
 	} else {
-		tf.ActStyle = tf.StateStyles[TextFieldActive]
+		tf.Style = tf.StateStyles[TextFieldActive]
 	}
-	st = &tf.ActStyle // update
+	st = &tf.Style // update
 	girl.OpenFont(&st.Font, &st.UnContext)
 	tf.RenderStdBox(st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]

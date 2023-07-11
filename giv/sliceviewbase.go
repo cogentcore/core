@@ -452,10 +452,10 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb.Dim = mat32.Y
 	sb.Defaults()
 	sb.Tracking = true
-	if sv.ActStyle.Layout.ScrollBarWidth.Dots == 0 {
+	if sv.Style.Layout.ScrollBarWidth.Dots == 0 {
 		sb.SetFixedWidth(units.Px(16))
 	} else {
-		sb.SetFixedWidth(sv.ActStyle.Layout.ScrollBarWidth)
+		sb.SetFixedWidth(sv.Style.Layout.ScrollBarWidth)
 	}
 	sb.SetStretchMaxHeight()
 	sb.Min = 0
@@ -515,7 +515,7 @@ func (sv *SliceViewBase) AvailHeight() float32 {
 	if sgHt == 0 {
 		return 0
 	}
-	sgHt -= sg.ExtraSize.Y + sg.ActStyle.BoxSpace().Size().Y
+	sgHt -= sg.ExtraSize.Y + sg.Style.BoxSpace().Size().Y
 	return sgHt
 }
 
@@ -548,10 +548,10 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
 		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
-	if sv.ActStyle.Font.Face == nil {
-		girl.OpenFont(&sv.ActStyle.Font, &sv.ActStyle.UnContext)
+	if sv.Style.Font.Face == nil {
+		girl.OpenFont(&sv.Style.Font, &sv.Style.UnContext)
 	}
-	sv.RowHeight = mat32.Max(sv.RowHeight, sv.ActStyle.Font.Face.Metrics.Height)
+	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Style.Font.Face.Metrics.Height)
 
 	mvp := sv.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
@@ -656,7 +656,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				idxlab.SetProp("slv-row", i) // all sigs deal with disp rows
 				idxlab.Selectable = true
 				idxlab.Redrawable = true
-				idxlab.ActStyle.Template = "giv.SliceViewBase.IndexLabel"
+				idxlab.Style.Template = "giv.SliceViewBase.IndexLabel"
 				idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
@@ -717,7 +717,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						addact.SetIcon("plus")
 						addact.Tooltip = "insert a new element at this index"
 						addact.Data = i
-						addact.ActStyle.Template = "giv.SliceViewBase.AddAction"
+						addact.Style.Template = "giv.SliceViewBase.AddAction"
 						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							act := send.(*gi.Action)
 							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
@@ -734,7 +734,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						delact.SetIcon("minus")
 						delact.Tooltip = "delete this element"
 						delact.Data = i
-						delact.ActStyle.Template = "giv.SliceViewBase.DelAction"
+						delact.Style.Template = "giv.SliceViewBase.DelAction"
 						delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							act := send.(*gi.Action)
 							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
@@ -2017,7 +2017,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	}
 	if len(men) > 0 {
 		pos := sv.IdxPos(idx)
-		if pos == image.ZP {
+		if pos == (image.Point{}) {
 			em := sv.EventMgr2D()
 			if em != nil {
 				pos = em.LastMousePos

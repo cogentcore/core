@@ -104,14 +104,14 @@ func (fr *Frame) FrameStdRender() {
 }
 
 func (fr *Frame) RenderStripes() {
-	st := &fr.ActStyle
+	st := &fr.Style
 	rs := &fr.Viewport.Render
 	pc := &rs.Paint
 
 	pos := fr.LayState.Alloc.Pos
 	sz := fr.LayState.Alloc.Size
 
-	delta := fr.Move2DDelta(image.ZP)
+	delta := fr.Move2DDelta(image.Point{})
 
 	hic := st.Font.BgColor.Color.Highlight(10)
 	if fr.Stripes == RowStripes {

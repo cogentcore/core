@@ -317,14 +317,14 @@ func (nb *Node2DBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (nb *Node2DBase) BBox2D() image.Rectangle {
-	return image.ZR
+	return image.Rectangle{}
 }
 
 func (nb *Node2DBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 }
 
 func (nb *Node2DBase) ChildrenBBox2D() image.Rectangle {
-	return image.ZR
+	return image.Rectangle{}
 }
 
 func (nb *Node2DBase) Render2D() {
@@ -690,7 +690,7 @@ func (nb *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Poi
 	nb.BBoxMu.Lock()
 	nb.ObjBBox = nb.BBox.Add(delta)
 	nb.VpBBox = parBBox.Intersect(nb.ObjBBox)
-	nb.SetInvisibleState(nb.VpBBox == image.ZR)
+	nb.SetInvisibleState(nb.VpBBox == image.Rectangle{})
 	nb.BBoxMu.Unlock()
 	nb.SetWinBBox()
 }
@@ -825,7 +825,7 @@ func (nb *Node2DBase) Layout2DTree() {
 		return
 	}
 	pr := prof.Start("Node2D.Layout2DTree." + ki.Type(nb).Name())
-	parBBox := image.ZR
+	parBBox := image.Rectangle{}
 	pni, _ := KiToNode2D(nb.Par)
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()

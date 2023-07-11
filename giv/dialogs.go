@@ -399,7 +399,7 @@ var FontChooserSizeDots = 18
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
 func FontChooserDialog(avp *gi.Viewport2D, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	FontChooserSizeDots = int(avp.ActStyle.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
+	FontChooserSizeDots = int(avp.Style.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	girl.FontLibrary.OpenAllFonts(FontChooserSizeDots)
 	dlg := TableViewSelectDialog(avp, &girl.FontLibrary.FontInfo, opts, -1, FontInfoStyleFunc, recv, dlgFunc)
 	return dlg

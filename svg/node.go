@@ -475,9 +475,9 @@ func (g *NodeBase) PushXForm() (bool, *girl.State) {
 	g.BBoxMu.Lock()
 	defer g.BBoxMu.Unlock()
 
-	g.WinBBox = image.ZR
-	g.VpBBox = image.ZR
-	g.ObjBBox = image.ZR
+	g.WinBBox = image.Rectangle{}
+	g.VpBBox = image.Rectangle{}
+	g.ObjBBox = image.Rectangle{}
 	if g.Pnt.Off || g == nil || g.This() == nil {
 		return false, nil
 	}
@@ -498,7 +498,7 @@ func (g *NodeBase) PushXForm() (bool, *girl.State) {
 	g.BBox = g.LocalBBoxToWin(lbb)
 	tvp := g.BBox.Add(mvp.VpBBox.Min)
 	g.VpBBox = mvp.VpBBox.Intersect(tvp)
-	nvis := g.VpBBox == image.ZR
+	nvis := g.VpBBox == image.Rectangle{}
 	// g.SetInvisibleState(nvis) // don't set
 
 	if nvis && !IsDefs(g.AsNode2D()) {

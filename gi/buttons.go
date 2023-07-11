@@ -199,7 +199,7 @@ func (bb *ButtonBase) SetText(txt string) {
 	}
 	updt := bb.UpdateStart()
 	bb.StyMu.RLock()
-	needSty := bb.ActStyle.Font.Size.Val == 0
+	needSty := bb.Style.Font.Size.Val == 0
 	bb.StyMu.RUnlock()
 	if needSty {
 		bb.StyleButton()
@@ -222,7 +222,7 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 		return
 	}
 	bb.StyMu.RLock()
-	needSty := bb.ActStyle.Font.Size.Val == 0
+	needSty := bb.Style.Font.Size.Val == 0
 	bb.StyMu.RUnlock()
 	if needSty {
 		bb.StyleButton()
@@ -254,7 +254,7 @@ func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
 	}
 	bb.State = state
 	bb.StyMu.Lock()
-	bb.ActStyle = bb.StateStyles[state]
+	bb.Style = bb.StateStyles[state]
 	bb.StyMu.Unlock()
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender to update text, icon
@@ -286,7 +286,7 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 			bb.State = ButtonActive
 		}
 	}
-	bb.ActStyle = bb.StateStyles[bb.State]
+	bb.Style = bb.StateStyles[bb.State]
 	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender
@@ -621,7 +621,7 @@ func (bb *ButtonBase) StyleButton() {
 	bb.StyMu.Lock()
 	defer bb.StyMu.Unlock()
 
-	hasTempl, saveTempl := bb.ActStyle.FromTemplate()
+	hasTempl, saveTempl := bb.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		bb.Style2DWidget()
 	}
@@ -638,28 +638,28 @@ func (bb *ButtonBase) StyleButton() {
 		clsp, ok = clspi.(ki.Props)
 	}
 	if hasTempl && saveTempl {
-		bb.ActStyle.SaveTemplate()
+		bb.Style.SaveTemplate()
 	}
 	if hasTempl && !saveTempl {
 		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].Template = bb.ActStyle.Template + ButtonSelectors[i]
+			bb.StateStyles[i].Template = bb.Style.Template + ButtonSelectors[i]
 			bb.StateStyles[i].FromTemplate()
 		}
 	} else {
 		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].CopyFrom(&bb.ActStyle)
+			bb.StateStyles[i].CopyFrom(&bb.Style)
 			bb.StateStyles[i].SetStyleProps(parSty, bb.StyleProps(ButtonSelectors[i]), bb.Viewport)
 			if clsp != nil {
 				if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
 					bb.StateStyles[i].SetStyleProps(parSty, stclsp, bb.Viewport)
 				}
 			}
-			bb.StateStyles[i].CopyUnitContext(&bb.ActStyle.UnContext)
+			bb.StateStyles[i].CopyUnitContext(&bb.Style.UnContext)
 		}
 	}
 	if hasTempl && saveTempl {
 		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].Template = bb.ActStyle.Template + ButtonSelectors[i]
+			bb.StateStyles[i].Template = bb.Style.Template + ButtonSelectors[i]
 			bb.StateStyles[i].SaveTemplate()
 		}
 	}
@@ -670,7 +670,7 @@ func (bb *ButtonBase) Style2D() {
 	bb.StyleButton()
 
 	bb.StyMu.Lock()
-	bb.LayState.SetFromStyle(&bb.ActStyle.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.Style.Layout) // also does reset
 	bb.StyMu.Unlock()
 	bb.This().(ButtonWidget).ConfigParts()
 	if bb.Menu != nil {
@@ -684,7 +684,7 @@ func (bb *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 	bb.Layout2DParts(parBBox, iter)
 	bb.StyMu.Lock()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		bb.StateStyles[i].CopyUnitContext(&bb.ActStyle.UnContext)
+		bb.StateStyles[i].CopyUnitContext(&bb.Style.UnContext)
 	}
 	bb.StyMu.Unlock()
 	return bb.Layout2DChildren(iter)
