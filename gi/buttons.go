@@ -288,6 +288,10 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 	}
 	bb.Style = bb.StateStyles[bb.State]
 	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
+	if bb.StyleFunc != nil {
+		bb.StyleFunc()
+		bb.Style.ToDots()
+	}
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender
 		return true

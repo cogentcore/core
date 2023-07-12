@@ -81,6 +81,24 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 	mfr.SetProp("spacing", units.Ex(1))
 
+	mfr.ClassStyleFuncs = map[string]func(w *gi.WidgetBase){}
+	mfr.ClassStyleFuncs["big"] = func(w *gi.WidgetBase) {
+		w.Style.Layout.Width = units.Pct(50)
+	}
+
+	mfr.ElementStyleFuncs = map[string]func(w *gi.WidgetBase){}
+	mfr.ElementStyleFuncs["button"] = func(w *gi.WidgetBase) {
+		w.Style.Font.BgColor.SetColor(gist.MustColorFromName("purple"))
+		w.Style.Font.Color.SetColor(gist.MustColorFromName("white"))
+	}
+	mfr.ElementStyleFuncs["slider"] = func(w *gi.WidgetBase) {
+		w.Style.Font.BgColor.SetColor(gist.MustColorFromName("green"))
+	}
+	mfr.ElementStyleFuncs["textfield"] = func(w *gi.WidgetBase) {
+		w.Style.Layout.Padding.Set(units.Px(10), units.Px(5))
+		w.Style.Border.Radius.Set(units.Px(5))
+	}
+
 	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
@@ -142,6 +160,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 				}
 			})
 	})
+	button1.Class = "big"
 
 	button2 := gi.AddNewButton(brow, "button2")
 	// button2.SetProp("font-size", "x-large")
@@ -155,15 +174,21 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 			giv.GoGiEditorDialog(vp)
 		}
 	})
-	button2.StyleFunc = func() {
-		button2.Style.Border.Color.Set(gist.Transparent)
-		button2.Style.Border.Width.Set(units.Px(2))
-		button2.Style.Border.Radius.Set(units.Px(10))
-		button2.Style.Font.BgColor.SetColor(gist.MustColorFromName("blue"))
-		button2.Style.Font.Color.SetColor(gist.MustColorFromName("white"))
-		button2.Style.Layout.Padding.Set(units.Px(10), units.Px(5))
-		button2.Style.Layout.Height = units.Px(50)
-	}
+	// button2.StyleFunc = func() {
+	// 	fmt.Println(button2.State)
+	// 	switch button2.State {
+	// 	case gi.ButtonHover:
+	// 		button2.Style.Font.BgColor.SetColor(gist.MustColorFromName("darkblue"))
+	// 	default:
+	// 		button2.Style.Border.Color.Set(gist.Transparent)
+	// 		button2.Style.Border.Width.Set(units.Px(2))
+	// 		button2.Style.Border.Radius.Set(units.Px(10))
+	// 		button2.Style.Font.BgColor.SetColor(gist.MustColorFromName("blue"))
+	// 		button2.Style.Font.Color.SetColor(gist.MustColorFromName("white"))
+	// 		button2.Style.Layout.Padding.Set(units.Px(10), units.Px(5))
+	// 		button2.Style.Layout.Height = units.Px(50)
+	// 	}
+	// }
 	// button2.SetProp("border-color", gist.NewSides[gist.Color](gist.MustColorFromName("green"), gist.MustColorFromName("red"), gist.MustColorFromName("blue"), gist.MustColorFromName("orange")))
 	// button2.SetProp("border-width", "2px 4px 6px 8px")
 	// button2.SetProp("border-radius", "0 2 6 10")
