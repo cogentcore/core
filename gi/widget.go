@@ -30,17 +30,15 @@ import (
 // includes toggling selection on left mouse press.
 type WidgetBase struct {
 	Node2DBase
-	Tooltip           string                         `desc:"text for tooltip for this widget -- can use HTML formatting"`
-	StyleFunc         func()                         `view:"-" desc:"the function that is called to set the styles of the widget during SetStyle2D; fields on Style should be set in this function"`
-	ClassStyleFuncs   map[string]func(w *WidgetBase) `view:"-" desc:"the functions that are called to set the styles of all child widgets (including this widget) with this class during SetStyle2D; fields on Style should be set in this function"`
-	ElementStyleFuncs map[string]func(w *WidgetBase) `view:"-" desc:"the functions that are called to set the styles of all child widgets (including this widget) of the given element type name during SetStyle2D; fields on Style should be set in this function"`
-	OverrideStyle     bool                           `desc:"override the computed styles and allow directly editing Style"`
-	Style             gist.Style                     `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
-	DefStyle          *gist.Style                    `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us (modifying these externally will have no effect) -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
-	LayState          LayoutState                    `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
-	WidgetSig         ki.Signal                      `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
-	CtxtMenuFunc      CtxtMenuFunc                   `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
-	StyMu             sync.RWMutex                   `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting updates to the style"`
+	Tooltip       string     `desc:"text for tooltip for this widget -- can use HTML formatting"`
+	StyleFunc     func()     `view:"-" desc:"the function that is called to set the styles of the widget during SetStyle2D; fields on Style should be set in this function"`
+	OverrideStyle bool       `desc:"override the computed styles and allow directly editing Style"`
+	Style         gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+	// DefStyle      *gist.Style  `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us (modifying these externally will have no effect) -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
+	LayState     LayoutState  `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
+	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
+	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
+	StyMu        sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting updates to the style"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
@@ -186,93 +184,97 @@ func (wb *WidgetBase) Style2DWidget() {
 		return
 	}
 
-	gii, _ := wb.This().(Node2D)
-	wb.Viewport.SetCurStyleNode(gii)
-	defer wb.Viewport.SetCurStyleNode(nil)
+	// gii, _ := wb.This().(Node2D)
+	// wb.Viewport.SetCurStyleNode(gii)
+	// defer wb.Viewport.SetCurStyleNode(nil)
 
-	if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
-		wb.Style.CopyFrom(wb.DefStyle)
-	} else {
-		wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
-	}
-	wb.Style.IsSet = false  // this is always first call, restart
-	if wb.Viewport == nil { // robust
-		wb.StyMu.Unlock()
-		gii.Init2D()
-		wb.StyMu.Lock()
-	}
-	styprops := *wb.Properties()
-	parSty := wb.ParentActiveStyle()
-	wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
+	// if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
+	// 	wb.Style.CopyFrom(wb.DefStyle)
+	// } else {
+	// 	wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
+	// }
+	// wb.Style.IsSet = false  // this is always first call, restart
+	// if wb.Viewport == nil { // robust
+	// 	wb.StyMu.Unlock()
+	// 	gii.Init2D()
+	// 	wb.StyMu.Lock()
+	// }
+	// styprops := *wb.Properties()
+	// parSty := wb.ParentActiveStyle()
+	// wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
 
-	// look for class-specific style sheets among defaults -- have to do these
-	// dynamically now -- cannot compile into default which is type-general
-	tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
-	kit.TypesMu.RLock()
-	classes := strings.Split(strings.ToLower(wb.Class), " ")
-	for _, cl := range classes {
-		clsty := "." + strings.TrimSpace(cl)
-		if sp, ok := ki.SubProps(tprops, clsty); ok {
-			wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
-		}
-	}
-	kit.TypesMu.RUnlock()
-	wb.ParentStyleRUnlock()
+	// // look for class-specific style sheets among defaults -- have to do these
+	// // dynamically now -- cannot compile into default which is type-general
+	// tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
+	// kit.TypesMu.RLock()
+	// classes := strings.Split(strings.ToLower(wb.Class), " ")
+	// for _, cl := range classes {
+	// 	clsty := "." + strings.TrimSpace(cl)
+	// 	if sp, ok := ki.SubProps(tprops, clsty); ok {
+	// 		wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
+	// 	}
+	// }
+	// kit.TypesMu.RUnlock()
+	// wb.ParentStyleRUnlock()
 
-	pagg := wb.ParentCSSAgg()
-	if pagg != nil {
-		AggCSS(&wb.CSSAgg, *pagg)
-	} else {
-		wb.CSSAgg = nil // restart
-	}
-	AggCSS(&wb.CSSAgg, wb.CSS)
-	StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
+	// pagg := wb.ParentCSSAgg()
+	// if pagg != nil {
+	// 	AggCSS(&wb.CSSAgg, *pagg)
+	// } else {
+	// 	wb.CSSAgg = nil // restart
+	// }
+	// AggCSS(&wb.CSSAgg, wb.CSS)
+	// StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
 
-	csf := []func(w *WidgetBase){}
-	esf := []func(w *WidgetBase){}
+	// csf := []func(w *WidgetBase){}
+	// esf := []func(w *WidgetBase){}
 
-	cf := strings.Fields(wb.Class)
-	en := strings.ToLower(ki.Type(wb).Name())
+	// cf := strings.Fields(wb.Class)
+	// en := strings.ToLower(ki.Type(wb).Name())
 
-	// fmt.Println(cf, en)
+	// // fmt.Println(cf, en)
 
-	wb.FuncUp(0, nil, func(k ki.Ki, level int, data any) bool {
-		kwbki := k.Embed(KiT_WidgetBase)
-		ok := kwbki != nil
-		// fmt.Println(ok, level, ki.Type(k).Name())
-		if ok {
-			kwb := kwbki.(*WidgetBase)
-			if kwb.ClassStyleFuncs != nil {
-				for c, f := range kwb.ClassStyleFuncs {
-					for _, field := range cf {
-						if field == c {
-							csf = append(csf, f)
-						}
-					}
-				}
-			}
-			if kwb.ElementStyleFuncs != nil {
-				for e, f := range kwb.ElementStyleFuncs {
-					if e == en {
-						esf = append(esf, f)
-					}
-				}
-			}
-		}
-		return true
-	})
+	// wb.FuncUp(0, nil, func(k ki.Ki, level int, data any) bool {
+	// 	kwbki := k.Embed(KiT_WidgetBase)
+	// 	ok := kwbki != nil
+	// 	// fmt.Println(ok, level, ki.Type(k).Name())
+	// 	if ok {
+	// 		kwb := kwbki.(*WidgetBase)
+	// 		if kwb.ClassStyleFuncs != nil {
+	// 			for c, f := range kwb.ClassStyleFuncs {
+	// 				for _, field := range cf {
+	// 					if field == c {
+	// 						csf = append(csf, f)
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 		if kwb.ElementStyleFuncs != nil {
+	// 			for e, f := range kwb.ElementStyleFuncs {
+	// 				if e == en {
+	// 					esf = append(esf, f)
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	return true
+	// })
 
 	// fmt.Println(wb.Nm, len(esf), len(csf))
 
-	if len(esf) != 0 {
-		for i := len(esf) - 1; i >= 0; i-- {
-			esf[i](wb)
-		}
-	}
-	if len(csf) != 0 {
-		for i := len(csf) - 1; i >= 0; i-- {
-			csf[i](wb)
-		}
+	// if len(esf) != 0 {
+	// 	for i := len(esf) - 1; i >= 0; i-- {
+	// 		esf[i](wb)
+	// 	}
+	// }
+	// if len(csf) != 0 {
+	// 	for i := len(csf) - 1; i >= 0; i-- {
+	// 		csf[i](wb)
+	// 	}
+	// }
+
+	if StyleFunc != nil {
+		StyleFunc(wb)
 	}
 
 	if wb.StyleFunc != nil {
@@ -284,7 +286,7 @@ func (wb *WidgetBase) Style2DWidget() {
 		wb.SetInactive()
 	}
 
-	wb.Viewport.SetCurrentColor(wb.Style.Font.Color)
+	// wb.Viewport.SetCurrentColor(wb.Style.Font.Color)
 }
 
 // StylePart sets the style properties for a child in parts (or any other
@@ -310,8 +312,8 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 	// default style within our type properties..  that's good -- HOWEVER we
 	// cannot put any sub-selector properties within these part styles -- must
 	// all be in the base-level.. hopefully that works..
-	pdst := DefaultStyle2DWidget(wb, stynm, pg)
-	pg.DefStyle = pdst // will use this as starting point for all styles now..
+	// pdst := DefaultStyle2DWidget(wb, stynm, pg)
+	// pg.DefStyle = pdst // will use this as starting point for all styles now..
 
 	if ics := pk.Embed(KiT_Icon); ics != nil {
 		ic := ics.(*Icon)

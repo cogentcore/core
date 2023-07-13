@@ -104,7 +104,7 @@ const (
 
 //go:generate stringer -type=Units
 
-var KiT_Units = kit.Enums.AddEnumAltLower(UnitsN, kit.NotBitFlag, nil, "")
+var KiT_Units = kit.Enums.AddEnumAltLower(UnitsN, kit.NotBitFlag, nil, "Unit")
 
 func (ev Units) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Units) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

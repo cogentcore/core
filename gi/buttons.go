@@ -288,10 +288,9 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 	}
 	bb.Style = bb.StateStyles[bb.State]
 	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
-	if bb.StyleFunc != nil {
-		bb.StyleFunc()
-		bb.Style.ToDots()
-	}
+	bb.StyMu.Lock()
+	bb.Style2DWidget()
+	bb.StyMu.Unlock()
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender
 		return true
@@ -751,7 +750,7 @@ type Button struct {
 	ButtonBase
 }
 
-var KiT_Button = kit.Types.AddType(&Button{}, ButtonProps)
+var KiT_Button = kit.Types.AddType(&Button{}, nil)
 
 // AddNewButton adds a new button to given parent node, with given name.
 func AddNewButton(parent ki.Ki, name string) *Button {
@@ -836,7 +835,7 @@ type CheckBox struct {
 	IconOff IconName `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
-var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
+var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, nil)
 
 // AddNewCheckBox adds a new button to given parent node, with given name.
 func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {

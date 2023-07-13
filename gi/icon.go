@@ -124,7 +124,7 @@ func (ic *Icon) Style2D() {
 		sic.Props = ic.Props
 		sic.CSS = ic.CSS
 		sic.Style = ic.Style
-		sic.DefStyle = ic.DefStyle
+		// sic.DefStyle = ic.DefStyle
 		if ic.NeedsFullReRender() {
 			sic.SetFullReRender()
 		}

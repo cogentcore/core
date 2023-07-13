@@ -30,6 +30,7 @@ import (
 type Preferences struct {
 	LogicalDPIScale      float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
 	ScreenPrefs          map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
+	ColorSchemeType      ColorSchemeTypes       `desc:"the color scheme type (light or dark)"`
 	Colors               ColorPrefs             `desc:"active color preferences"`
 	ColorSchemes         map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`
 	Params               ParamPrefs             `view:"inline" desc:"parameters controlling GUI behavior"`
@@ -60,6 +61,7 @@ func init() {
 
 func (pf *Preferences) Defaults() {
 	pf.LogicalDPIScale = 1.0
+	pf.ColorSchemeType = ColorSchemeLight
 	pf.Colors.Defaults()
 	pf.ColorSchemes = DefaultColorSchemes()
 	pf.Params.Defaults()

@@ -81,23 +81,23 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 	mfr.SetProp("spacing", units.Ex(1))
 
-	mfr.ClassStyleFuncs = map[string]func(w *gi.WidgetBase){}
-	mfr.ClassStyleFuncs["big"] = func(w *gi.WidgetBase) {
-		w.Style.Layout.Width = units.Pct(50)
-	}
+	// mfr.ClassStyleFuncs = map[string]func(w *gi.WidgetBase){}
+	// mfr.ClassStyleFuncs["big"] = func(w *gi.WidgetBase) {
+	// 	w.Style.Layout.Width = units.Pct(50)
+	// }
 
-	mfr.ElementStyleFuncs = map[string]func(w *gi.WidgetBase){}
-	mfr.ElementStyleFuncs["button"] = func(w *gi.WidgetBase) {
-		w.Style.Font.BgColor.SetColor(gist.MustColorFromName("purple"))
-		w.Style.Font.Color.SetColor(gist.MustColorFromName("white"))
-	}
-	mfr.ElementStyleFuncs["slider"] = func(w *gi.WidgetBase) {
-		w.Style.Font.BgColor.SetColor(gist.MustColorFromName("green"))
-	}
-	mfr.ElementStyleFuncs["textfield"] = func(w *gi.WidgetBase) {
-		w.Style.Layout.Padding.Set(units.Px(10), units.Px(5))
-		w.Style.Border.Radius.Set(units.Px(5))
-	}
+	// mfr.ElementStyleFuncs = map[string]func(w *gi.WidgetBase){}
+	// mfr.ElementStyleFuncs["button"] = func(w *gi.WidgetBase) {
+	// 	w.Style.Font.BgColor.SetColor(colors.Orange)
+	// 	w.Style.Font.Color.SetColor(colors.Blue)
+	// }
+	// mfr.ElementStyleFuncs["slider"] = func(w *gi.WidgetBase) {
+	// 	w.Style.Font.BgColor.SetColor(colors.Maroon.Darker(40))
+	// }
+	// mfr.ElementStyleFuncs["textfield"] = func(w *gi.WidgetBase) {
+	// 	w.Style.Layout.Padding.Set(units.Px(10), units.Px(5))
+	// 	w.Style.Border.Radius.Set(units.Px(5))
+	// }
 
 	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")

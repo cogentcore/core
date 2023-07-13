@@ -131,6 +131,17 @@ func (c *Color) IsDark() bool {
 	return hsl.L <= .6
 }
 
+// FontColor returns the color that should be
+// used for displaying text with this color in
+// the background (white or black depending on
+// the result of IsDark)
+func (c *Color) FontColor() Color {
+	if c.IsDark() {
+		return White
+	}
+	return Black
+}
+
 // String returns a human-readable R,G,B,A output
 func (c *Color) String() string {
 	if c == nil {

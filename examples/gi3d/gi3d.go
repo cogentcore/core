@@ -15,7 +15,6 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
-	"github.com/goki/vgpu/vgpu"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -122,12 +121,12 @@ func mainrun() {
 	height := 768
 
 	// turn these on to see a traces of various stages of processing..
-	ki.SignalTrace = true
-	gi.EventTrace = true
-	gi.WinEventTrace = true
-	gi3d.Update3DTrace = true
-	gi.Update2DTrace = true
-	vgpu.Debug = true
+	// ki.SignalTrace = true
+	// gi.EventTrace = true
+	// gi.WinEventTrace = true
+	// gi3d.Update3DTrace = true
+	// gi.Update2DTrace = true
+	// vgpu.Debug = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes

@@ -26,7 +26,7 @@ type Action struct {
 	UpdateFunc func(act *Action) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing"`
 }
 
-var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
+var KiT_Action = kit.Types.AddType(&Action{}, nil)
 
 // AddNewAction adds a new action to given parent node, with given name.
 func AddNewAction(parent ki.Ki, name string) *Action {
