@@ -32,7 +32,7 @@ var TheColorSchemes = ColorSchemes{
 	Dark: ColorScheme{
 		Font:       colors.White,
 		Background: colors.Black.Lighter(10),
-		Primary:    colors.Blue.Lighter(20),
+		Primary:    colors.Lightblue,
 		Secondary:  colors.Black.Lighter(10),
 		Border:     colors.White.Darker(20),
 		Select:     colors.Lightblue,

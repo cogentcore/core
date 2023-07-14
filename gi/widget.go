@@ -206,32 +206,32 @@ func (wb *WidgetBase) Style2DWidget() {
 	// 	wb.ParentStyleRUnlock()
 	// }
 
-	// styprops := *wb.Properties()
-	// parSty := wb.ParentActiveStyle()
-	// wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
+	styprops := *wb.Properties()
+	parSty := wb.ParentActiveStyle()
+	wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
 
-	// // look for class-specific style sheets among defaults -- have to do these
-	// // dynamically now -- cannot compile into default which is type-general
-	// tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
-	// kit.TypesMu.RLock()
-	// classes := strings.Split(strings.ToLower(wb.Class), " ")
-	// for _, cl := range classes {
-	// 	clsty := "." + strings.TrimSpace(cl)
-	// 	if sp, ok := ki.SubProps(tprops, clsty); ok {
-	// 		wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
-	// 	}
-	// }
-	// kit.TypesMu.RUnlock()
-	// wb.ParentStyleRUnlock()
+	// look for class-specific style sheets among defaults -- have to do these
+	// dynamically now -- cannot compile into default which is type-general
+	tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
+	kit.TypesMu.RLock()
+	classes := strings.Split(strings.ToLower(wb.Class), " ")
+	for _, cl := range classes {
+		clsty := "." + strings.TrimSpace(cl)
+		if sp, ok := ki.SubProps(tprops, clsty); ok {
+			wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
+		}
+	}
+	kit.TypesMu.RUnlock()
+	wb.ParentStyleRUnlock()
 
-	// pagg := wb.ParentCSSAgg()
-	// if pagg != nil {
-	// 	AggCSS(&wb.CSSAgg, *pagg)
-	// } else {
-	// 	wb.CSSAgg = nil // restart
-	// }
-	// AggCSS(&wb.CSSAgg, wb.CSS)
-	// StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
+	pagg := wb.ParentCSSAgg()
+	if pagg != nil {
+		AggCSS(&wb.CSSAgg, *pagg)
+	} else {
+		wb.CSSAgg = nil // restart
+	}
+	AggCSS(&wb.CSSAgg, wb.CSS)
+	StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
 
 	// csf := []func(w *WidgetBase){}
 	// esf := []func(w *WidgetBase){}

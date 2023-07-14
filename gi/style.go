@@ -46,7 +46,7 @@ func DefaultStyleFunc(w *WidgetBase) {
 			case ButtonDown:
 				c = cs.Primary.Darker(30)
 			}
-			w.Style.Font.Color.SetColor(c.ContrastColor())
+			w.Style.Font.Color.SetColor(cs.Font.Highlight(100))
 			w.Style.Font.BgColor.SetColor(c)
 
 		} else if w.HasClass("secondary") {
@@ -55,7 +55,7 @@ func DefaultStyleFunc(w *WidgetBase) {
 			w.Style.Border.Style.Set(gist.BorderSolid)
 			w.Style.Border.Width.Set(units.Px(1))
 
-			cc := cs.Primary.ContrastColor()
+			cc := cs.Background
 			switch w.State {
 			case ButtonHover:
 				cc = cc.Highlight(20)

@@ -135,10 +135,10 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	blab.Selectable = true
 
 	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
-	brow.SetProp("spacing", units.Ex(2))
-	brow.SetProp("horizontal-align", gist.AlignLeft)
+	// brow.SetProp("spacing", units.Ex(2))
+	// brow.SetProp("horizontal-align", gist.AlignLeft)
 	// brow.SetProp("horizontal-align", gi.AlignJustify)
-	brow.SetStretchMaxWidth()
+	// brow.SetStretchMaxWidth()
 
 	button1 := gi.AddNewButton(brow, "button1")
 	button1.SetProp("#icon", ki.Props{ // note: must come before SetIcon
