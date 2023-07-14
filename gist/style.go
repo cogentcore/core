@@ -202,6 +202,7 @@ func (s *Style) SaveTemplate() {
 // InheritFields from parent: Manual inheriting of values is much faster than
 // automatic version!
 func (s *Style) InheritFields(par *Style) {
+	fmt.Println("Inheriting from", *par)
 	s.Font.InheritFields(&par.Font)
 	s.Text.InheritFields(&par.Text)
 }

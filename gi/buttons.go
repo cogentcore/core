@@ -14,6 +14,7 @@ import (
 
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -336,7 +337,9 @@ func (bb *ButtonBase) BaseButtonRelease() {
 	}
 	wasPressed := (bb.State == ButtonDown)
 	updt := bb.UpdateStart()
-	bb.SetButtonState(ButtonActive)
+
+	bb.SetButtonState(bb.State)
+	bb.ParentWindow()
 	bb.ButtonSig.Emit(bb.This(), int64(ButtonReleased), nil)
 	if wasPressed {
 		bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)
@@ -437,6 +440,7 @@ func (bb *ButtonBase) ButtonEnterHover() {
 	if bb.State != ButtonHover {
 		updt := bb.UpdateStart()
 		bb.SetButtonState(ButtonHover)
+		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).Push(cursor.HandPointing)
 		bb.UpdateEnd(updt)
 	}
 }
@@ -446,6 +450,7 @@ func (bb *ButtonBase) ButtonExitHover() {
 	if bb.State == ButtonHover {
 		updt := bb.UpdateStart()
 		bb.SetButtonState(ButtonActive)
+		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).Pop()
 		bb.UpdateEnd(updt)
 	}
 }

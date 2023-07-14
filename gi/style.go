@@ -21,29 +21,67 @@ import (
 // should not call this function in StyleFunc.
 func DefaultStyleFunc(w *WidgetBase) {
 	cs := CurrentColorScheme()
+	fmt.Println(w.Nm, ki.Type(w))
 	w.Style.Font.Color.SetColor(cs.Font)
 	w.Style.Font.BgColor.SetColor(cs.Background)
-	fmt.Println(w.Nm, ki.Type(w))
 	switch w := w.This().(type) {
+	case *Viewport2D:
+		fmt.Println("styling viewport")
+		// w.Style.Font.Color.SetColor(cs.Font)
+	case *Label:
+		switch p := w.Parent().Parent().(type) {
+		case *Button:
+			w.Style.Font.Color.SetColor(p.Style.Font.Color)
+		}
 	case *Button:
 		w.Style.Border.Radius.Set(units.Px(5))
 		w.Style.Border.Style.Set(gist.BorderNone)
 		w.Style.Layout.Padding.Set(units.Px(5))
+		fmt.Println(w.State)
 		if w.HasClass("primary") {
-			w.Style.Font.Color.SetColor(cs.Primary.FontColor())
-			w.Style.Font.BgColor.SetColor(cs.Primary)
+			c := cs.Primary
+			switch w.State {
+			case ButtonHover:
+				c = cs.Primary.Darker(20)
+			case ButtonDown:
+				c = cs.Primary.Darker(30)
+			}
+			w.Style.Font.Color.SetColor(c.ContrastColor())
+			w.Style.Font.BgColor.SetColor(c)
+
 		} else if w.HasClass("secondary") {
 			w.Style.Font.Color.SetColor(cs.Primary)
-			w.Style.Font.BgColor.SetColor(cs.Primary.FontColor())
-			w.Style.Border.Style.Set(gist.BorderSolid)
 			w.Style.Border.Color.Set(cs.Primary)
+			w.Style.Border.Style.Set(gist.BorderSolid)
 			w.Style.Border.Width.Set(units.Px(1))
-		} else {
-			w.Style.Font.Color.SetColor(cs.Font)
-			w.Style.Font.BgColor.SetColor(cs.Background.Highlight(10))
-		}
 
+			cc := cs.Primary.ContrastColor()
+			switch w.State {
+			case ButtonHover:
+				cc = cc.Highlight(20)
+			case ButtonDown:
+				cc = cc.Highlight(30)
+			}
+			w.Style.Font.BgColor.SetColor(cc)
+		} else {
+			styleDefaultButton(&w.ButtonBase, cs)
+		}
+	case *Action:
+		w.Style.Layout.Padding.Set(units.Px(5))
+		styleDefaultButton(&w.ButtonBase, cs)
 	}
+}
+
+func styleDefaultButton(bb *ButtonBase, cs ColorScheme) {
+	bb.Style.Font.Color.SetColor(cs.Font)
+	bc := cs.Background.Highlight(5)
+	switch bb.State {
+	case ButtonHover:
+		bc = bc.Highlight(10)
+	case ButtonDown:
+		bc = bc.Highlight(20)
+	}
+	bb.Style.Font.BgColor.SetColor(bc)
 }
 
 // StyleFunc is the global style function

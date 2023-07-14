@@ -184,21 +184,28 @@ func (wb *WidgetBase) Style2DWidget() {
 		return
 	}
 
-	// gii, _ := wb.This().(Node2D)
-	// wb.Viewport.SetCurStyleNode(gii)
-	// defer wb.Viewport.SetCurStyleNode(nil)
+	gii, _ := wb.This().(Node2D)
+	wb.Viewport.SetCurStyleNode(gii)
+	defer wb.Viewport.SetCurStyleNode(nil)
 
 	// if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
 	// 	wb.Style.CopyFrom(wb.DefStyle)
 	// } else {
 	// 	wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
 	// }
-	// wb.Style.IsSet = false  // this is always first call, restart
-	// if wb.Viewport == nil { // robust
-	// 	wb.StyMu.Unlock()
-	// 	gii.Init2D()
-	// 	wb.StyMu.Lock()
+	wb.Style.IsSet = false  // this is always first call, restart
+	if wb.Viewport == nil { // robust
+		wb.StyMu.Unlock()
+		gii.Init2D()
+		wb.StyMu.Lock()
+	}
+	// sty := gist.Style{}
+	// sty.Defaults()
+	// if parSty := wb.ParentActiveStyle(); parSty != nil && *parSty != sty {
+	// 	wb.Style.InheritFields(parSty)
+	// 	wb.ParentStyleRUnlock()
 	// }
+
 	// styprops := *wb.Properties()
 	// parSty := wb.ParentActiveStyle()
 	// wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
@@ -286,7 +293,7 @@ func (wb *WidgetBase) Style2DWidget() {
 		wb.SetInactive()
 	}
 
-	// wb.Viewport.SetCurrentColor(wb.Style.Font.Color)
+	wb.Viewport.SetCurrentColor(wb.Style.Font.Color)
 }
 
 // StylePart sets the style properties for a child in parts (or any other
@@ -295,44 +302,44 @@ func (wb *WidgetBase) Style2DWidget() {
 // ki.Props which is then added to the part's props -- this provides built-in
 // defaults for parts, so it is separate from the CSS process
 func (wb *WidgetBase) StylePart(pk Node2D) {
-	if pk == nil {
-		return
-	}
-	pg := pk.AsWidget()
-	if pg == nil {
-		return
-	}
-	// pr := prof.Start("StylePart")
-	// defer pr.End()
-	// if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
+	// if pk == nil {
 	// 	return
 	// }
-	stynm := "#" + strings.ToLower(pk.Name())
-	// this is called on US (the parent object) so we store the #partname
-	// default style within our type properties..  that's good -- HOWEVER we
-	// cannot put any sub-selector properties within these part styles -- must
-	// all be in the base-level.. hopefully that works..
-	// pdst := DefaultStyle2DWidget(wb, stynm, pg)
-	// pg.DefStyle = pdst // will use this as starting point for all styles now..
+	// pg := pk.AsWidget()
+	// if pg == nil {
+	// 	return
+	// }
+	// // pr := prof.Start("StylePart")
+	// // defer pr.End()
+	// // if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
+	// // 	return
+	// // }
+	// stynm := "#" + strings.ToLower(pk.Name())
+	// // this is called on US (the parent object) so we store the #partname
+	// // default style within our type properties..  that's good -- HOWEVER we
+	// // cannot put any sub-selector properties within these part styles -- must
+	// // all be in the base-level.. hopefully that works..
+	// // pdst := DefaultStyle2DWidget(wb, stynm, pg)
+	// // pg.DefStyle = pdst // will use this as starting point for all styles now..
 
-	if ics := pk.Embed(KiT_Icon); ics != nil {
-		ic := ics.(*Icon)
-		styprops := kit.Types.Properties(ki.Type(wb), true)
-		if sp, ok := ki.SubProps(*styprops, stynm); ok {
-			if fill, ok := sp["fill"]; ok {
-				ic.SetProp("fill", fill)
-			}
-			if stroke, ok := sp["stroke"]; ok {
-				ic.SetProp("stroke", stroke)
-			}
-		}
-		if sp, ok := ki.SubProps(*wb.Properties(), stynm); ok {
-			for k, v := range sp {
-				ic.SetProp(k, v)
-			}
-		}
-		ic.SetFullReRender()
-	}
+	// if ics := pk.Embed(KiT_Icon); ics != nil {
+	// 	ic := ics.(*Icon)
+	// 	styprops := kit.Types.Properties(ki.Type(wb), true)
+	// 	if sp, ok := ki.SubProps(*styprops, stynm); ok {
+	// 		if fill, ok := sp["fill"]; ok {
+	// 			ic.SetProp("fill", fill)
+	// 		}
+	// 		if stroke, ok := sp["stroke"]; ok {
+	// 			ic.SetProp("stroke", stroke)
+	// 		}
+	// 	}
+	// 	if sp, ok := ki.SubProps(*wb.Properties(), stynm); ok {
+	// 		for k, v := range sp {
+	// 			ic.SetProp(k, v)
+	// 		}
+	// 	}
+	// 	ic.SetFullReRender()
+	// }
 }
 
 // ApplyCSS applies css styles for given node, using key to select sub-props
