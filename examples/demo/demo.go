@@ -65,12 +65,21 @@ func mainrun() {
 
 	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutHorizFlow)
 	irow.StyleFunc = func() {
-		brow.Spacing = units.Ex(1)
-		brow.Style.Layout.MaxWidth.SetPct(100)
+		irow.Spacing.SetEx(1)
+		irow.Style.Layout.MaxWidth.SetPx(-1)
 	}
 
 	check := gi.AddNewCheckBox(irow, "check")
 	check.Text = "Checkbox"
+
+	tfield := gi.AddNewTextField(mfr, "tfield")
+	tfield.Placeholder = "Text Field"
+
+	sbox := gi.AddNewSpinBox(mfr, "sbox")
+	sbox.Value = 0.5
+
+	// tview := giv.AddNewTextView(mfr, "tview")
+	// tview.Placeholder = "Text View"
 
 	// Main Menu
 

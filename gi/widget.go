@@ -189,9 +189,9 @@ func (wb *WidgetBase) Style2DWidget() {
 	defer wb.Viewport.SetCurStyleNode(nil)
 
 	// if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
-	// 	wb.Style.CopyFrom(wb.DefStyle)
+	// wb.Style.CopyFrom(wb.DefStyle)
 	// } else {
-	// 	wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
+	wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
 	// }
 	wb.Style.IsSet = false  // this is always first call, restart
 	if wb.Viewport == nil { // robust
@@ -199,39 +199,39 @@ func (wb *WidgetBase) Style2DWidget() {
 		gii.Init2D()
 		wb.StyMu.Lock()
 	}
-	// sty := gist.Style{}
-	// sty.Defaults()
-	// if parSty := wb.ParentActiveStyle(); parSty != nil && *parSty != sty {
-	// 	wb.Style.InheritFields(parSty)
-	// 	wb.ParentStyleRUnlock()
-	// }
+	sty := gist.Style{}
+	sty.Defaults()
+	if parSty := wb.ParentActiveStyle(); parSty != nil && *parSty != sty {
+		wb.Style.InheritFields(parSty)
+		wb.ParentStyleRUnlock()
+	}
 
-	// styprops := *wb.Properties()
-	// parSty := wb.ParentActiveStyle()
-	// wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
+	styprops := *wb.Properties()
+	parSty := wb.ParentActiveStyle()
+	wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
 
-	// // look for class-specific style sheets among defaults -- have to do these
-	// // dynamically now -- cannot compile into default which is type-general
-	// tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
-	// kit.TypesMu.RLock()
-	// classes := strings.Split(strings.ToLower(wb.Class), " ")
-	// for _, cl := range classes {
-	// 	clsty := "." + strings.TrimSpace(cl)
-	// 	if sp, ok := ki.SubProps(tprops, clsty); ok {
-	// 		wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
-	// 	}
-	// }
-	// kit.TypesMu.RUnlock()
-	// wb.ParentStyleRUnlock()
+	// look for class-specific style sheets among defaults -- have to do these
+	// dynamically now -- cannot compile into default which is type-general
+	tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
+	kit.TypesMu.RLock()
+	classes := strings.Split(strings.ToLower(wb.Class), " ")
+	for _, cl := range classes {
+		clsty := "." + strings.TrimSpace(cl)
+		if sp, ok := ki.SubProps(tprops, clsty); ok {
+			wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
+		}
+	}
+	kit.TypesMu.RUnlock()
+	wb.ParentStyleRUnlock()
 
-	// pagg := wb.ParentCSSAgg()
-	// if pagg != nil {
-	// 	AggCSS(&wb.CSSAgg, *pagg)
-	// } else {
-	// 	wb.CSSAgg = nil // restart
-	// }
-	// AggCSS(&wb.CSSAgg, wb.CSS)
-	// StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
+	pagg := wb.ParentCSSAgg()
+	if pagg != nil {
+		AggCSS(&wb.CSSAgg, *pagg)
+	} else {
+		wb.CSSAgg = nil // restart
+	}
+	AggCSS(&wb.CSSAgg, wb.CSS)
+	StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
 
 	// csf := []func(w *WidgetBase){}
 	// esf := []func(w *WidgetBase){}
@@ -302,44 +302,44 @@ func (wb *WidgetBase) Style2DWidget() {
 // ki.Props which is then added to the part's props -- this provides built-in
 // defaults for parts, so it is separate from the CSS process
 func (wb *WidgetBase) StylePart(pk Node2D) {
-	// if pk == nil {
+	if pk == nil {
+		return
+	}
+	pg := pk.AsWidget()
+	if pg == nil {
+		return
+	}
+	// pr := prof.Start("StylePart")
+	// defer pr.End()
+	// if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
 	// 	return
 	// }
-	// pg := pk.AsWidget()
-	// if pg == nil {
-	// 	return
-	// }
-	// // pr := prof.Start("StylePart")
-	// // defer pr.End()
-	// // if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
-	// // 	return
-	// // }
-	// stynm := "#" + strings.ToLower(pk.Name())
-	// // this is called on US (the parent object) so we store the #partname
-	// // default style within our type properties..  that's good -- HOWEVER we
-	// // cannot put any sub-selector properties within these part styles -- must
-	// // all be in the base-level.. hopefully that works..
-	// // pdst := DefaultStyle2DWidget(wb, stynm, pg)
-	// // pg.DefStyle = pdst // will use this as starting point for all styles now..
+	stynm := "#" + strings.ToLower(pk.Name())
+	// this is called on US (the parent object) so we store the #partname
+	// default style within our type properties..  that's good -- HOWEVER we
+	// cannot put any sub-selector properties within these part styles -- must
+	// all be in the base-level.. hopefully that works..
+	// pdst := DefaultStyle2DWidget(wb, stynm, pg)
+	// pg.DefStyle = pdst // will use this as starting point for all styles now..
 
-	// if ics := pk.Embed(KiT_Icon); ics != nil {
-	// 	ic := ics.(*Icon)
-	// 	styprops := kit.Types.Properties(ki.Type(wb), true)
-	// 	if sp, ok := ki.SubProps(*styprops, stynm); ok {
-	// 		if fill, ok := sp["fill"]; ok {
-	// 			ic.SetProp("fill", fill)
-	// 		}
-	// 		if stroke, ok := sp["stroke"]; ok {
-	// 			ic.SetProp("stroke", stroke)
-	// 		}
-	// 	}
-	// 	if sp, ok := ki.SubProps(*wb.Properties(), stynm); ok {
-	// 		for k, v := range sp {
-	// 			ic.SetProp(k, v)
-	// 		}
-	// 	}
-	// 	ic.SetFullReRender()
-	// }
+	if ics := pk.Embed(KiT_Icon); ics != nil {
+		ic := ics.(*Icon)
+		styprops := kit.Types.Properties(ki.Type(wb), true)
+		if sp, ok := ki.SubProps(*styprops, stynm); ok {
+			if fill, ok := sp["fill"]; ok {
+				ic.SetProp("fill", fill)
+			}
+			if stroke, ok := sp["stroke"]; ok {
+				ic.SetProp("stroke", stroke)
+			}
+		}
+		if sp, ok := ki.SubProps(*wb.Properties(), stynm); ok {
+			for k, v := range sp {
+				ic.SetProp(k, v)
+			}
+		}
+		ic.SetFullReRender()
+	}
 }
 
 // ApplyCSS applies css styles for given node, using key to select sub-props

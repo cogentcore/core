@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/units"
 )
 
@@ -20,75 +19,112 @@ import (
 // should not call this function in StyleFunc.
 func DefaultStyleFunc(w *WidgetBase) {
 	cs := CurrentColorScheme()
-	fmt.Printf("%s %T %T\n", w.Nm, w.This(), w.Parent())
+	// fmt.Printf("%s %T %T\n", w.Nm, w.This(), w.Parent())
 	w.Style.Font.Color.SetColor(cs.Font)
 	w.Style.Font.BgColor.SetColor(cs.Background)
 	switch w := w.This().(type) {
 	case *Viewport2D:
-		fmt.Println("styling viewport")
+		// fmt.Println("styling viewport")
 		// w.Style.Font.Color.SetColor(cs.Font)
 	case *Label:
-		switch p := w.Parent().Parent().(type) {
-		case *Button:
-			w.Style.Font.Color.SetColor(p.Style.Font.Color)
-		}
-		switch w.Type {
-		case LabelP:
-			w.Style.Font.Size.SetRem(1)
-		case LabelLabel:
-			w.Style.Font.Size.SetRem(0.75)
-		case LabelH1:
-			w.Style.Font.Size.SetRem(2)
-			w.Style.Font.Weight = gist.WeightBold
-		case LabelH2:
-			w.Style.Font.Size.SetRem(1.5)
-			w.Style.Font.Weight = gist.WeightBold
-		case LabelH3:
-			w.Style.Font.Size.SetRem(1.25)
-			w.Style.Font.Weight = gist.WeightBold
-		}
+		styleLabel(w, cs)
 	case *Icon:
-		fmt.Println("styling icon")
-		w.Style.Layout.Width.SetEm(1.5)
-		w.Style.Layout.Height.SetEm(1.5)
-		w.Style.Font.BgColor.SetColor(colors.White)
+		// fmt.Println("styling icon")
+		styleIcon(w, cs)
 	case *Button:
-		w.Style.Border.Radius.Set(units.Px(5))
-		w.Style.Border.Style.Set(gist.BorderNone)
-		w.Style.Layout.Padding.Set(units.Px(5))
-		fmt.Println(w.State)
-		if w.Type == ButtonPrimary {
-			c := cs.Primary
-			switch w.State {
-			case ButtonHover:
-				c = cs.Primary.Darker(20)
-			case ButtonDown:
-				c = cs.Primary.Darker(30)
-			}
-			w.Style.Font.Color.SetColor(cs.Font.Highlight(100))
-			w.Style.Font.BgColor.SetColor(c)
-
-		} else if w.Type == ButtonSecondary {
-			w.Style.Font.Color.SetColor(cs.Primary)
-			w.Style.Border.Color.Set(cs.Primary)
-			w.Style.Border.Style.Set(gist.BorderSolid)
-			w.Style.Border.Width.Set(units.Px(1))
-
-			cc := cs.Background
-			switch w.State {
-			case ButtonHover:
-				cc = cc.Highlight(20)
-			case ButtonDown:
-				cc = cc.Highlight(30)
-			}
-			w.Style.Font.BgColor.SetColor(cc)
-		} else {
-			styleDefaultButton(&w.ButtonBase, cs)
-		}
+		styleButton(w, cs)
 	case *Action:
 		w.Style.Layout.Padding.Set(units.Px(5))
 		styleDefaultButton(&w.ButtonBase, cs)
+		if _, ok := w.Parent().Parent().(*TextField); ok {
+			fmt.Println("styling textfield icon")
+			w.Style.Layout.Width.SetEx(0.5)
+			w.Style.Layout.Height.SetEx(0.5)
+			w.Style.Layout.Margin.Set()
+			w.Style.Layout.Padding.Set()
+			w.Style.Layout.AlignV = gist.AlignMiddle
+		}
+	case *TextField:
+		styleTextField(w, cs)
 	}
+}
+
+func styleIcon(i *Icon, cs ColorScheme) {
+	i.Style.Layout.Width.SetEm(1.5)
+	i.Style.Layout.Height.SetEm(1.5)
+	i.Style.Font.BgColor.SetColor(gist.Transparent)
+}
+
+func styleButton(b *Button, cs ColorScheme) {
+	b.Style.Border.Radius.Set(units.Px(5))
+	b.Style.Border.Style.Set(gist.BorderNone)
+	b.Style.Layout.Padding.Set(units.Px(5 * Prefs.DensityMultiplier()))
+	// fmt.Println(b.State)
+	if b.Type == ButtonPrimary {
+		c := cs.Primary
+		switch b.State {
+		case ButtonHover:
+			c = cs.Primary.Darker(20)
+		case ButtonDown:
+			c = cs.Primary.Darker(30)
+		}
+		b.Style.Font.Color.SetColor(cs.Font.Highlight(100))
+		b.Style.Font.BgColor.SetColor(c)
+
+	} else if b.Type == ButtonSecondary {
+		b.Style.Font.Color.SetColor(cs.Primary)
+		b.Style.Border.Color.Set(cs.Primary)
+		b.Style.Border.Style.Set(gist.BorderSolid)
+		b.Style.Border.Width.Set(units.Px(1))
+
+		cc := cs.Background
+		switch b.State {
+		case ButtonHover:
+			cc = cc.Highlight(20)
+		case ButtonDown:
+			cc = cc.Highlight(30)
+		}
+		b.Style.Font.BgColor.SetColor(cc)
+	} else {
+		styleDefaultButton(&b.ButtonBase, cs)
+	}
+}
+
+func styleLabel(l *Label, cs ColorScheme) {
+	switch p := l.Parent().Parent().(type) {
+	case *Button:
+		l.Style.Font.Color.SetColor(p.Style.Font.Color)
+	}
+	switch l.Type {
+	case LabelP:
+		l.Style.Font.Size.SetRem(1)
+	case LabelLabel:
+		l.Style.Font.Size.SetRem(0.75)
+	case LabelH1:
+		l.Style.Font.Size.SetRem(2)
+		l.Style.Font.Weight = gist.WeightBold
+	case LabelH2:
+		l.Style.Font.Size.SetRem(1.5)
+		l.Style.Font.Weight = gist.WeightBold
+	case LabelH3:
+		l.Style.Font.Size.SetRem(1.25)
+		l.Style.Font.Weight = gist.WeightBold
+	}
+}
+
+func styleTextField(tf *TextField, cs ColorScheme) {
+	tf.Style.Border.Width.Set(units.Px(1))
+	tf.CursorWidth.SetPx(3)
+	tf.Style.Border.Color.Set(cs.Border)
+	tf.Style.Layout.Width.SetEm(20)
+	tf.Style.Layout.Padding.Set(units.Px(4))
+	tf.Style.Layout.Margin.Set(units.Px(1))
+	tf.Style.Text.Align = gist.AlignLeft
+
+	fmt.Println("text field kids", tf.Parts.Kids)
+
+	// clear := tf.Parts.ChildByName("clear", 1).(*WidgetBase)
+	// fmt.Println("clear", clear)
 }
 
 func styleDefaultButton(bb *ButtonBase, cs ColorScheme) {

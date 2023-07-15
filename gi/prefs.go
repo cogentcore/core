@@ -31,6 +31,7 @@ type Preferences struct {
 	LogicalDPIScale      float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
 	ScreenPrefs          map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
 	ColorSchemeType      ColorSchemeTypes       `desc:"the color scheme type (light or dark)"`
+	Density              Densities              `desc:"the density (compactness) of content`
 	Colors               ColorPrefs             `desc:"active color preferences"`
 	ColorSchemes         map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`
 	Params               ParamPrefs             `view:"inline" desc:"parameters controlling GUI behavior"`
@@ -62,6 +63,7 @@ func init() {
 func (pf *Preferences) Defaults() {
 	pf.LogicalDPIScale = 1.0
 	pf.ColorSchemeType = ColorSchemeLight
+	pf.Density = DensityMedium
 	pf.Colors.Defaults()
 	pf.ColorSchemes = DefaultColorSchemes()
 	pf.Params.Defaults()
@@ -450,6 +452,44 @@ var PreferencesProps = ki.Props{
 			"desc": "Opens the PrefsDbgView editor to control debugging parameters. These are not saved -- only set dynamically during running.",
 		}},
 	},
+}
+
+// Densities is an enum representing the different
+// density options in user preferences
+type Densities int
+
+const (
+	// DensityCompact represents a compact density
+	// with minimal whitespace
+	DensityCompact Densities = iota
+	// DensityMedium represents a medium density
+	// with medium whitespace
+	DensityMedium
+	// DensitySpread represents a spread-out density
+	// with a lot of whitespace
+	DensitySpread
+
+	DensitiesN
+)
+
+//go:generate stringer -type=Densities
+
+var KiT_Densities = kit.Enums.AddEnumAltLower(DensitiesN, kit.NotBitFlag, gist.StylePropProps, "Density")
+
+// DensityMultiplier returns a multiplier centered
+// around 1 representing the density set in the preferences.
+// It should be used for determining padding and margin values.
+func (pf *Preferences) DensityMultiplier() float32 {
+	switch pf.Density {
+	case DensityCompact:
+		return 0.75
+	case DensityMedium:
+		return 1
+	case DensitySpread:
+		return 1.25
+	}
+	log.Println("got invalid preferences density value", pf.Density)
+	return 1
 }
 
 /////////////////////////////////////////////////////////////////////////////////
