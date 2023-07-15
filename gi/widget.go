@@ -280,8 +280,8 @@ func (wb *WidgetBase) Style2DWidget() {
 	// 	}
 	// }
 
-	if StyleFunc != nil {
-		StyleFunc(wb)
+	if MainStyleFunc != nil {
+		MainStyleFunc(wb)
 	}
 
 	if wb.StyleFunc != nil {

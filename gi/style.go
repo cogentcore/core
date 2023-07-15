@@ -9,15 +9,25 @@ import (
 
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
+	"github.com/goki/ki/ki"
 )
 
-// DefaultStyleFunc is the default style function
-// that is called to style widgets. When setting a custom
-// style function in StyleFunc, you need to call this function
-// to keep the default styles and build on top of them.
-// If you wish to completely remove the default styles, you
-// should not call this function in StyleFunc.
-func DefaultStyleFunc(w *WidgetBase) {
+// MainStyleFunc is the main, gloabal style function
+// that is called on all widgets to style them.
+// By default, it is [gimain.StyleFunc], so if you
+// wish to change styles without overriding all of the
+// default styles, you should call [gimain.StyleFunc]
+// at the start of your StyleFunc. For reference on
+// how you should structure your StyleFunc, you
+// should look at https://goki.dev/docs/gi/styling.
+// Also, you can base your code on the code contained in
+// [gimain.StyleFunc].
+var MainStyleFunc func(w *WidgetBase)
+
+// StyleFunc is the default style function
+// for package gi that handles the styling
+// of all widgets in it.
+func StyleFunc(w *WidgetBase) {
 	cs := CurrentColorScheme()
 	// fmt.Printf("%s %T %T\n", w.Nm, w.This(), w.Parent())
 	w.Style.Font.Color.SetColor(cs.Font)
@@ -53,6 +63,7 @@ func styleIcon(i *Icon, cs ColorScheme) {
 	i.Style.Layout.Width.SetEm(1.5)
 	i.Style.Layout.Height.SetEm(1.5)
 	i.Style.Font.BgColor.SetColor(gist.Transparent)
+	i.Style.Font.Opacity = 0
 }
 
 func styleButton(b *Button, cs ColorScheme) {
@@ -87,6 +98,15 @@ func styleButton(b *Button, cs ColorScheme) {
 		b.Style.Font.BgColor.SetColor(cc)
 	} else {
 		styleDefaultButton(&b.ButtonBase, cs)
+	}
+	if iconk := b.Parts.ChildByType(KiT_Icon, ki.NoEmbeds, 0); iconk != nil {
+		icon, ok := iconk.(*Icon)
+		if ok {
+			icon.Style.Layout.Width.SetEm(1)
+			icon.Style.Layout.Height.SetEm(1)
+			icon.Style.Layout.Margin.Set()
+			icon.Style.Layout.Padding.Set()
+		}
 	}
 }
 
@@ -139,15 +159,15 @@ func styleDefaultButton(bb *ButtonBase, cs ColorScheme) {
 	bb.Style.Font.BgColor.SetColor(bc)
 }
 
-// StyleFunc is the global style function
-// that can be set to specify custom styles for
-// widgets based on their characteristics.
-// It is set by default to DefaultStyleFunc, so if you
-// wish to change styles without overriding all of the
-// default styles, you should call DefaultStyleFunc
-// at the start of your StyleFunc. For reference on
-// how you should structure your StyleFunc, you
-// should look at https://goki.dev/docs/gi/styling.
-// Also, you can base your code on the code contained in
-// DefaultStyleFunc.
-var StyleFunc func(w *WidgetBase) = DefaultStyleFunc
+// // StyleFunc is the global style function
+// // that can be set to specify custom styles for
+// // widgets based on their characteristics.
+// // It is set by default to DefaultStyleFunc, so if you
+// // wish to change styles without overriding all of the
+// // default styles, you should call DefaultStyleFunc
+// // at the start of your StyleFunc. For reference on
+// // how you should structure your StyleFunc, you
+// // should look at https://goki.dev/docs/gi/styling.
+// // Also, you can base your code on the code contained in
+// // DefaultStyleFunc.
+// var StyleFunc func(w *WidgetBase) = DefaultStyleFunc

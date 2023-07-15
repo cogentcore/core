@@ -52,10 +52,12 @@ func mainrun() {
 	bpri := gi.AddNewButton(brow, "buttonPrimary")
 	bpri.Text = "Primary Button"
 	bpri.Type = gi.ButtonPrimary
+	bpri.Icon = "forward"
 
 	bsec := gi.AddNewButton(brow, "buttonSecondary")
 	bsec.Text = "Secondary Button"
 	bsec.Type = gi.ButtonSecondary
+	bsec.Icon = "gear"
 
 	bdef := gi.AddNewButton(brow, "buttonDefault")
 	bdef.Text = "Default Button"
