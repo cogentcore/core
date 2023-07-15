@@ -8,9 +8,8 @@ import (
 	"fmt"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/units"
-
-	"github.com/goki/ki/ki"
 )
 
 // DefaultStyleFunc is the default style function
@@ -21,7 +20,7 @@ import (
 // should not call this function in StyleFunc.
 func DefaultStyleFunc(w *WidgetBase) {
 	cs := CurrentColorScheme()
-	fmt.Println(w.Nm, ki.Type(w))
+	fmt.Printf("%s %T %T\n", w.Nm, w.This(), w.Parent())
 	w.Style.Font.Color.SetColor(cs.Font)
 	w.Style.Font.BgColor.SetColor(cs.Background)
 	switch w := w.This().(type) {
@@ -33,12 +32,32 @@ func DefaultStyleFunc(w *WidgetBase) {
 		case *Button:
 			w.Style.Font.Color.SetColor(p.Style.Font.Color)
 		}
+		switch w.Type {
+		case LabelP:
+			w.Style.Font.Size.SetRem(1)
+		case LabelLabel:
+			w.Style.Font.Size.SetRem(0.75)
+		case LabelH1:
+			w.Style.Font.Size.SetRem(2)
+			w.Style.Font.Weight = gist.WeightBold
+		case LabelH2:
+			w.Style.Font.Size.SetRem(1.5)
+			w.Style.Font.Weight = gist.WeightBold
+		case LabelH3:
+			w.Style.Font.Size.SetRem(1.25)
+			w.Style.Font.Weight = gist.WeightBold
+		}
+	case *Icon:
+		fmt.Println("styling icon")
+		w.Style.Layout.Width.SetEm(1.5)
+		w.Style.Layout.Height.SetEm(1.5)
+		w.Style.Font.BgColor.SetColor(colors.White)
 	case *Button:
 		w.Style.Border.Radius.Set(units.Px(5))
 		w.Style.Border.Style.Set(gist.BorderNone)
 		w.Style.Layout.Padding.Set(units.Px(5))
 		fmt.Println(w.State)
-		if w.HasClass("primary") {
+		if w.Type == ButtonPrimary {
 			c := cs.Primary
 			switch w.State {
 			case ButtonHover:
@@ -49,7 +68,7 @@ func DefaultStyleFunc(w *WidgetBase) {
 			w.Style.Font.Color.SetColor(cs.Font.Highlight(100))
 			w.Style.Font.BgColor.SetColor(c)
 
-		} else if w.HasClass("secondary") {
+		} else if w.Type == ButtonSecondary {
 			w.Style.Font.Color.SetColor(cs.Primary)
 			w.Style.Border.Color.Set(cs.Primary)
 			w.Style.Border.Style.Set(gist.BorderSolid)

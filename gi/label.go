@@ -32,6 +32,7 @@ type Label struct {
 	Text        string                   `xml:"text" desc:"label to display"`
 	Selectable  bool                     `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
 	Redrawable  bool                     `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
+	Type        LabelTypes               `desc:"the type of label (p, h1, h2, etc)"`
 	LinkSig     ki.Signal                `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 	StateStyles [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
 	Render      girl.Text                `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
@@ -40,6 +41,43 @@ type Label struct {
 }
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
+
+// LabelTypes is an enum containing the different
+// possible types of labels
+type LabelTypes int
+
+const (
+	// LabelP is a default paragraph-style label,
+	// similar to HTML's <p> element
+	LabelP LabelTypes = iota
+	// LabelLabel is a label that labels something else
+	// like an input, similar to HTML's <label> element
+	LabelLabel
+	// LabelH1 is a large heading-style label,
+	// similar to HTML's <h1> element
+	LabelH1
+	// LabelH2 is a heading-style label slightly
+	// smaller than H1, similar to HTML's <h2> element
+	LabelH2
+	// LabelH3 is a heading-style label slightly
+	// smaller than H2, similar to HTML's <h3> element
+	LabelH3
+	// LabelH4 is a heading-style label slightly
+	// smaller than H3, similar to HTML's <h4> element
+	LabelH4
+	// LabelH5 is a heading-style label slightly
+	// smaller than H4, similar to HTML's <h5> element
+	LabelH5
+	// LabelH6 is a heading-style label slightly
+	// smaller than H5, similar to HTML's <h6> element
+	LabelH6
+
+	LabelTypesN
+)
+
+var KiT_LabelTypes = kit.Enums.AddEnumAltLower(LabelTypesN, kit.NotBitFlag, gist.StylePropProps, "Label")
+
+//go:generate stringer -type=LabelTypes
 
 // AddNewLabel adds a new label to given parent node, with given name and text.
 func AddNewLabel(parent ki.Ki, name string, text string) *Label {

@@ -32,6 +32,7 @@ type ButtonBase struct {
 	Icon         IconName                  `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 	Indicator    IconName                  `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 	Shortcut     key.Chord                 `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
+	Type         ButtonTypes               `desc:"the type of button (default, primary, secondary, etc)"`
 	StateStyles  [ButtonStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State        ButtonStates              `copy:"-" json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
 	ButtonSig    ki.Signal                 `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
@@ -46,6 +47,30 @@ var ButtonBaseProps = ki.Props{
 	"base-type":     true, // excludes type from user selections
 	"EnumType:Flag": KiT_ButtonFlags,
 }
+
+// ButtonTypes is an enum containing the different
+// possible types of buttons
+type ButtonTypes int
+
+const (
+	// ButtonDefault is a default gray button
+	// typically used in menus and checkboxes
+	ButtonDefault ButtonTypes = iota
+	// ButtonPrimary is a primary button colored
+	// as the primary color; it is typically used for
+	// primary actions like save, send, and new
+	ButtonPrimary
+	// ButtonSecondary is a secondary button colored as
+	// the inverse of a primary button; it is typically used
+	// for secondary actions like cancel, back, and options
+	ButtonSecondary
+
+	ButtonTypesN
+)
+
+var KiT_ButtonTypes = kit.Enums.AddEnumAltLower(ButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "Button")
+
+//go:generate stringer -type=ButtonTypes
 
 func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*ButtonBase)
@@ -338,8 +363,7 @@ func (bb *ButtonBase) BaseButtonRelease() {
 	wasPressed := (bb.State == ButtonDown)
 	updt := bb.UpdateStart()
 
-	bb.SetButtonState(bb.State)
-	bb.ParentWindow()
+	bb.SetButtonState(ButtonHover)
 	bb.ButtonSig.Emit(bb.This(), int64(ButtonReleased), nil)
 	if wasPressed {
 		bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)

@@ -294,6 +294,11 @@ func Px(val float32) Value {
 	return Value{val, UnitPx, 0.0}
 }
 
+// Rem creates a new Rem value
+func Rem(val float32) Value {
+	return Value{val, UnitRem, 0.0}
+}
+
 // Em creates a new Em value
 func Em(val float32) Value {
 	return Value{val, UnitEm, 0.0}
@@ -339,6 +344,12 @@ func (v *Value) Set(val float32, un Units) {
 func (v *Value) SetPx(val float32) {
 	v.Val = val
 	v.Un = UnitPx
+}
+
+// SetRem sets value in Rem
+func (v *Value) SetRem(val float32) {
+	v.Val = val
+	v.Un = UnitRem
 }
 
 // SetEm sets value in Em

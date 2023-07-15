@@ -7,6 +7,7 @@ package gi
 import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/gist/colors"
+	"github.com/goki/ki/kit"
 )
 
 // ColorSchemes contains the color schemes for an app.
@@ -61,6 +62,8 @@ const (
 
 	ColorSchemesN
 )
+
+var KiT_ColorSchemeTypes = kit.Enums.AddEnumAltLower(ColorSchemesN, kit.NotBitFlag, gist.StylePropProps, "ColorScheme")
 
 //go:generate stringer -type=ColorSchemeTypes
 
