@@ -57,6 +57,14 @@ func (bm *Bitmap) CopyFieldsFrom(frm any) {
 	bm.Filename = fr.Filename
 }
 
+// DefaultStyle implements the [DefaultStyler] interface
+func (bm *Bitmap) DefaultStyle() {
+	cs := CurrentColorScheme()
+	s := &bm.Style
+
+	s.Font.BgColor.SetColor(cs.Background)
+}
+
 // SetSize sets size of the bitmap image.
 // This does not resize any existing image, just makes a new image
 // if the size is different

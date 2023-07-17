@@ -47,6 +47,21 @@ func (bb *ButtonBox) Disconnect() {
 	bb.ButtonSig.DisconnectAll()
 }
 
+// DefaultStyle implements the [DefaultStyler] interface
+func (bb *ButtonBox) DefaultStyle() {
+	cs := CurrentColorScheme()
+	s := &bb.Style
+
+	s.Border.Style.Set(gist.BorderNone)
+	s.Border.Radius.Set(units.Px(2))
+	s.Border.Color.Set()
+	s.Layout.Padding.Set(units.Px(2))
+	s.Layout.Margin.Set(units.Px(2))
+	s.Text.Align = gist.AlignCenter
+	s.Font.BgColor.SetColor(cs.Secondary)
+	s.Font.Color.SetColor(cs.Secondary.ContrastColor())
+}
+
 var ButtonBoxProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
 	"border-width":     units.Px(1),

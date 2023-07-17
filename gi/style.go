@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"fmt"
-
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/units"
@@ -25,6 +23,15 @@ import (
 // [gimain.StyleFunc].
 var MainStyleFunc func(w *WidgetBase)
 
+// DefaultStyler describes an element that
+// describes its default styles through the
+// DefaultStyle function.
+type DefaultStyler interface {
+	// DefaultStyle applies the default styles
+	// to the element.
+	DefaultStyle()
+}
+
 // StyleFunc is the default style function
 // for package gi that handles the styling
 // of all widgets in it.
@@ -32,15 +39,18 @@ func StyleFunc(w *WidgetBase) {
 	cs := CurrentColorScheme()
 	// fmt.Printf("Styling element\tName:%s\tType:%T\tParent:%v\n", w.Name(), w.This(), w.Parent().Name())
 	if par, ok := w.Parent().Embed(KiT_WidgetBase).(*WidgetBase); ok {
-		fmt.Println("got parent")
+		// fmt.Println("got parent")
 		if par.Style.Font.Color.IsNil() {
 			w.Style.Font.Color.SetColor(cs.Font)
 		} else {
-			fmt.Println("inhereting color", par.Style.Font.Color)
+			// fmt.Println("inhereting color", par.Style.Font.Color)
 			w.Style.Font.Color.SetColor(par.Style.Font.Color)
 		}
 	}
-	w.Style.Font.BgColor.SetColor(cs.Background)
+	if ds, ok := w.This().(DefaultStyler); ok {
+		ds.DefaultStyle()
+	}
+	// w.Style.Font.BgColor.SetColor(cs.Background)
 	switch w := w.This().(type) {
 	case *Viewport2D:
 		// fmt.Println("styling viewport")
@@ -50,10 +60,10 @@ func StyleFunc(w *WidgetBase) {
 	case *Icon:
 		// fmt.Println("styling icon")
 		styleIcon(w, cs)
-	case *Button:
-		styleButton(w, cs)
-	case *Action:
-		styleAction(w, cs)
+	// case *Button:
+	// 	styleButton(w, cs)
+	// case *Action:
+	// 	styleAction(w, cs)
 	case *TextField:
 		styleTextField(w, cs)
 	}

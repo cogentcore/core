@@ -791,6 +791,58 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
+// DefaultStyle implements the [DefaultStyler] interface
+func (bt *Button) DefaultStyle() {
+	cs := CurrentColorScheme()
+	s := &bt.Style
+
+	s.Border.Style.Set(gist.BorderNone)
+	s.Border.Width.Set()
+	s.Border.Color.Set()
+	s.Border.Radius.Set(units.Px(4))
+	s.Layout.Padding.Set(units.Px(4))
+	s.Layout.Margin.Set(units.Px(2))
+	s.Layout.MinWidth.SetEm(1)
+	s.Layout.MinHeight.SetEm(1)
+	s.Text.Align = gist.AlignCenter
+
+	switch bt.Type {
+	case ButtonDefault:
+		c := cs.Secondary
+		switch bt.State {
+		case ButtonHover:
+			c = c.Highlight(10)
+		case ButtonDown:
+			c = c.Highlight(20)
+		}
+		s.Font.BgColor.SetColor(c)
+		s.Font.Color.SetColor(c.ContrastColor())
+	case ButtonPrimary:
+		c := cs.Primary
+		switch bt.State {
+		case ButtonHover:
+			c = c.Highlight(20)
+		case ButtonDown:
+			c = c.Highlight(30)
+		}
+		s.Font.BgColor.SetColor(c)
+		s.Font.Color.SetColor(c.ContrastColor())
+	case ButtonSecondary:
+		c := cs.Background
+		switch bt.State {
+		case ButtonHover:
+			c = c.Highlight(20)
+		case ButtonDown:
+			c = c.Highlight(30)
+		}
+		s.Font.BgColor.SetColor(c)
+		s.Font.Color.SetColor(cs.Primary)
+		s.Border.Style.Set(gist.BorderSolid)
+		s.Border.Width.Set(units.Px(1))
+		s.Border.Color.Set(cs.Primary)
+	}
+}
+
 var ButtonProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
 	"border-width":     units.Px(1),
