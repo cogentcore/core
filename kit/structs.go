@@ -14,8 +14,15 @@ import (
 // SetFromDefaultTags sets values of fields in given struct based on
 // `def:` default value field tags.
 func SetFromDefaultTags(obj any) error {
-	typ := NonPtrType(reflect.TypeOf(obj))
-	val := NonPtrValue(reflect.ValueOf(obj))
+	if IfaceIsNil(obj) {
+		return nil
+	}
+	ov := reflect.ValueOf(obj)
+	if ov.Kind() == reflect.Pointer && ov.IsNil() {
+		return nil
+	}
+	val := NonPtrValue(ov)
+	typ := val.Type()
 	var err error
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
