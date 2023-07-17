@@ -99,6 +99,35 @@ func (lb *Label) Disconnect() {
 	lb.LinkSig.DisconnectAll()
 }
 
+// DefaultStyle implements the [DefaultStyler] interface
+func (lb *Label) DefaultStyle() {
+	cs := CurrentColorScheme()
+	s := &lb.Style
+
+	s.Text.WhiteSpace = gist.WhiteSpacePre
+	s.Layout.Padding.Set(units.Px(2))
+	s.Layout.Margin.Set(units.Px(2))
+	s.Layout.AlignV = gist.AlignTop
+	s.Font.Color.SetColor(cs.Font)
+	s.Font.BgColor.SetColor(color.Transparent)
+
+	switch lb.Type {
+	case LabelP:
+		s.Font.Size.SetRem(1)
+	case LabelLabel:
+		s.Font.Size.SetRem(0.75)
+	case LabelH1:
+		s.Font.Size.SetRem(2)
+		s.Font.Weight = gist.WeightBold
+	case LabelH2:
+		s.Font.Size.SetRem(1.5)
+		s.Font.Weight = gist.WeightBold
+	case LabelH3:
+		s.Font.Size.SetRem(1.25)
+		s.Font.Weight = gist.WeightBold
+	}
+}
+
 var LabelProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
 	"white-space":      gist.WhiteSpacePre, // no wrap, use spaces unless otherwise specified!

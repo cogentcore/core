@@ -74,11 +74,15 @@ func mainrun() {
 	check := gi.AddNewCheckBox(irow, "check")
 	check.Text = "Checkbox"
 
-	tfield := gi.AddNewTextField(mfr, "tfield")
+	tfield := gi.AddNewTextField(irow, "tfield")
 	tfield.Placeholder = "Text Field"
 
-	sbox := gi.AddNewSpinBox(mfr, "sbox")
+	sbox := gi.AddNewSpinBox(irow, "sbox")
 	sbox.Value = 0.5
+
+	cbox := gi.AddNewComboBox(irow, "cbox")
+	cbox.Text = "Select an option"
+	cbox.Items = []any{"Option 1", "Option 2", "Option 3"}
 
 	// tview := giv.AddNewTextView(mfr, "tview")
 	// tview.Placeholder = "Text View"

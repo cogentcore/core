@@ -59,6 +59,13 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 	ic.Filename = fr.Filename
 }
 
+// DefaultStyle implements the [DefaultStyler] interface
+func (ic *Icon) DefaultStyle() {
+	s := &ic.Style
+
+	s.Font.BgColor.SetColor(color.Transparent)
+}
+
 var IconProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
 	"background-color": color.Transparent,
