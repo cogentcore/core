@@ -1386,6 +1386,7 @@ func (tf *TextField) Init2D() {
 	tf.Init2DWidget()
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
+	tf.ClearAct = true
 	tf.ConfigParts()
 }
 

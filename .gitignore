@@ -17,6 +17,9 @@
 # mac thing
 .DS_Store
 
+# VS Code configuration
+.VSCode
+
 # GoKi stores binaries in bin directories
 bin
 

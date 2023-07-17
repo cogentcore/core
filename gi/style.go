@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
@@ -29,8 +30,16 @@ var MainStyleFunc func(w *WidgetBase)
 // of all widgets in it.
 func StyleFunc(w *WidgetBase) {
 	cs := CurrentColorScheme()
-	// fmt.Printf("%s %T %T\n", w.Nm, w.This(), w.Parent())
-	w.Style.Font.Color.SetColor(cs.Font)
+	// fmt.Printf("Styling element\tName:%s\tType:%T\tParent:%v\n", w.Name(), w.This(), w.Parent().Name())
+	if par, ok := w.Parent().Embed(KiT_WidgetBase).(*WidgetBase); ok {
+		fmt.Println("got parent")
+		if par.Style.Font.Color.IsNil() {
+			w.Style.Font.Color.SetColor(cs.Font)
+		} else {
+			fmt.Println("inhereting color", par.Style.Font.Color)
+			w.Style.Font.Color.SetColor(par.Style.Font.Color)
+		}
+	}
 	w.Style.Font.BgColor.SetColor(cs.Background)
 	switch w := w.This().(type) {
 	case *Viewport2D:
@@ -44,26 +53,29 @@ func StyleFunc(w *WidgetBase) {
 	case *Button:
 		styleButton(w, cs)
 	case *Action:
-		w.Style.Layout.Padding.Set(units.Px(5))
-		styleDefaultButton(&w.ButtonBase, cs)
-		if _, ok := w.Parent().Parent().(*TextField); ok {
-			fmt.Println("styling textfield icon")
-			w.Style.Layout.Width.SetEx(0.5)
-			w.Style.Layout.Height.SetEx(0.5)
-			w.Style.Layout.Margin.Set()
-			w.Style.Layout.Padding.Set()
-			w.Style.Layout.AlignV = gist.AlignMiddle
-		}
+		styleAction(w, cs)
 	case *TextField:
 		styleTextField(w, cs)
 	}
+}
+
+func styleAction(a *Action, cs ColorScheme) {
+	styleDefaultButton(&a.ButtonBase, cs)
+	a.Style.Border.Style.Set(gist.BorderNone)
+	a.Style.Border.Width.Set()
+	a.Style.Border.Radius.Set()
+	a.Style.Text.Align = gist.AlignCenter
+	a.Style.Layout.Padding.Set(units.Px(2 * Prefs.DensityMultiplier()))
+	a.Style.Layout.Margin.Set(units.Px(2 * Prefs.DensityMultiplier()))
+	a.Style.Layout.MinWidth.SetEx(0.5)
+	a.Style.Layout.MinHeight.SetEx(0.5)
 }
 
 func styleIcon(i *Icon, cs ColorScheme) {
 	i.Style.Layout.Width.SetEm(1.5)
 	i.Style.Layout.Height.SetEm(1.5)
 	i.Style.Font.BgColor.SetColor(gist.Transparent)
-	i.Style.Font.Opacity = 0
+	i.Style.Font.Color.SetColor(colors.White)
 }
 
 func styleButton(b *Button, cs ColorScheme) {
@@ -99,8 +111,7 @@ func styleButton(b *Button, cs ColorScheme) {
 	} else {
 		styleDefaultButton(&b.ButtonBase, cs)
 	}
-	if iconk := b.Parts.ChildByType(KiT_Icon, ki.NoEmbeds, 0); iconk != nil {
-		icon, ok := iconk.(*Icon)
+	if icon, ok := b.Parts.ChildByType(KiT_Icon, ki.NoEmbeds, 0).(*Icon); ok {
 		if ok {
 			icon.Style.Layout.Width.SetEm(1)
 			icon.Style.Layout.Height.SetEm(1)
@@ -140,11 +151,22 @@ func styleTextField(tf *TextField, cs ColorScheme) {
 	tf.Style.Layout.Padding.Set(units.Px(4))
 	tf.Style.Layout.Margin.Set(units.Px(1))
 	tf.Style.Text.Align = gist.AlignLeft
+	tf.Style.Font.BgColor.SetColor(cs.Background.Highlight(5))
 
-	fmt.Println("text field kids", tf.Parts.Kids)
+	// fmt.Println("text field kids", tf.Parts.Kids)
 
-	// clear := tf.Parts.ChildByName("clear", 1).(*WidgetBase)
-	// fmt.Println("clear", clear)
+	clear, ok := tf.Parts.ChildByName("clear", 1).(*Action)
+	if ok {
+		// fmt.Println("clear", clear)
+		clear.Style.Layout.Width.SetEx(0.5)
+		clear.Style.Layout.Height.SetEx(0.5)
+		clear.Style.Layout.Margin.Set()
+		clear.Style.Layout.Padding.Set()
+		clear.Style.Layout.AlignV = gist.AlignMiddle
+	}
+
+	// space, ok := tf.Parts.ChildByName("space", 2).(*)
+
 }
 
 func styleDefaultButton(bb *ButtonBase, cs ColorScheme) {

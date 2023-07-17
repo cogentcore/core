@@ -1,6 +1,9 @@
 package gimain
 
-import "github.com/goki/gi/gi"
+import (
+	"github.com/goki/gi/gi"
+	"github.com/goki/gi/svg"
+)
 
 // StyleFunc is the default style function
 // that is called on all widgets to style them.
@@ -14,6 +17,7 @@ import "github.com/goki/gi/gi"
 // should not call this function in [gi.MainStyleFunc].
 func StyleFunc(w *gi.WidgetBase) {
 	gi.StyleFunc(w)
+	svg.StyleFunc(w)
 }
 
 func init() {
