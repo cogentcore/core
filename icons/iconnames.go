@@ -8,11963 +8,11963 @@ package icons
 
 const (
 	// X10K is the "10k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/10k.svg
-	X10K Icon = "10k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/10k.svg
+	X10K Icon = "outlined/10k"
 	
 	// X10Mp is the "10mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/10mp.svg
-	X10Mp Icon = "10mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/10mp.svg
+	X10Mp Icon = "outlined/10mp"
 	
 	// X11Mp is the "11mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/11mp.svg
-	X11Mp Icon = "11mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/11mp.svg
+	X11Mp Icon = "outlined/11mp"
 	
 	// X123 is the "123" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/123.svg
-	X123 Icon = "123"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/123.svg
+	X123 Icon = "outlined/123"
 	
 	// X12Mp is the "12mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/12mp.svg
-	X12Mp Icon = "12mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/12mp.svg
+	X12Mp Icon = "outlined/12mp"
 	
 	// X13Mp is the "13mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/13mp.svg
-	X13Mp Icon = "13mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/13mp.svg
+	X13Mp Icon = "outlined/13mp"
 	
 	// X14Mp is the "14mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/14mp.svg
-	X14Mp Icon = "14mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/14mp.svg
+	X14Mp Icon = "outlined/14mp"
 	
 	// X15Mp is the "15mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/15mp.svg
-	X15Mp Icon = "15mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/15mp.svg
+	X15Mp Icon = "outlined/15mp"
 	
 	// X16Mp is the "16mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/16mp.svg
-	X16Mp Icon = "16mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/16mp.svg
+	X16Mp Icon = "outlined/16mp"
 	
 	// X17Mp is the "17mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/17mp.svg
-	X17Mp Icon = "17mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/17mp.svg
+	X17Mp Icon = "outlined/17mp"
 	
 	// X18UpRating is the "18_up_rating" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/18_up_rating.svg
-	X18UpRating Icon = "18_up_rating"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/18_up_rating.svg
+	X18UpRating Icon = "outlined/18_up_rating"
 	
 	// X18Mp is the "18mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/18mp.svg
-	X18Mp Icon = "18mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/18mp.svg
+	X18Mp Icon = "outlined/18mp"
 	
 	// X19Mp is the "19mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/19mp.svg
-	X19Mp Icon = "19mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/19mp.svg
+	X19Mp Icon = "outlined/19mp"
 	
 	// X1K is the "1k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/1k.svg
-	X1K Icon = "1k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/1k.svg
+	X1K Icon = "outlined/1k"
 	
 	// X1KPlus is the "1k_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/1k_plus.svg
-	X1KPlus Icon = "1k_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/1k_plus.svg
+	X1KPlus Icon = "outlined/1k_plus"
 	
 	// X1XMobiledata is the "1x_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/1x_mobiledata.svg
-	X1XMobiledata Icon = "1x_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/1x_mobiledata.svg
+	X1XMobiledata Icon = "outlined/1x_mobiledata"
 	
 	// X1XMobiledataBadge is the "1x_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/1x_mobiledata_badge.svg
-	X1XMobiledataBadge Icon = "1x_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/1x_mobiledata_badge.svg
+	X1XMobiledataBadge Icon = "outlined/1x_mobiledata_badge"
 	
 	// X20Mp is the "20mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/20mp.svg
-	X20Mp Icon = "20mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/20mp.svg
+	X20Mp Icon = "outlined/20mp"
 	
 	// X21Mp is the "21mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/21mp.svg
-	X21Mp Icon = "21mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/21mp.svg
+	X21Mp Icon = "outlined/21mp"
 	
 	// X22Mp is the "22mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/22mp.svg
-	X22Mp Icon = "22mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/22mp.svg
+	X22Mp Icon = "outlined/22mp"
 	
 	// X23Mp is the "23mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/23mp.svg
-	X23Mp Icon = "23mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/23mp.svg
+	X23Mp Icon = "outlined/23mp"
 	
 	// X24Mp is the "24mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/24mp.svg
-	X24Mp Icon = "24mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/24mp.svg
+	X24Mp Icon = "outlined/24mp"
 	
 	// X2D is the "2d" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/2d.svg
-	X2D Icon = "2d"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/2d.svg
+	X2D Icon = "outlined/2d"
 	
 	// X2K is the "2k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/2k.svg
-	X2K Icon = "2k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/2k.svg
+	X2K Icon = "outlined/2k"
 	
 	// X2KPlus is the "2k_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/2k_plus.svg
-	X2KPlus Icon = "2k_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/2k_plus.svg
+	X2KPlus Icon = "outlined/2k_plus"
 	
 	// X2Mp is the "2mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/2mp.svg
-	X2Mp Icon = "2mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/2mp.svg
+	X2Mp Icon = "outlined/2mp"
 	
 	// X30Fps is the "30fps" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/30fps.svg
-	X30Fps Icon = "30fps"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/30fps.svg
+	X30Fps Icon = "outlined/30fps"
 	
 	// X30FpsSelect is the "30fps_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/30fps_select.svg
-	X30FpsSelect Icon = "30fps_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/30fps_select.svg
+	X30FpsSelect Icon = "outlined/30fps_select"
 	
 	// X360 is the "360" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/360.svg
-	X360 Icon = "360"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/360.svg
+	X360 Icon = "outlined/360"
 	
 	// X3DRotation is the "3d_rotation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/3d_rotation.svg
-	X3DRotation Icon = "3d_rotation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/3d_rotation.svg
+	X3DRotation Icon = "outlined/3d_rotation"
 	
 	// X3GMobiledata is the "3g_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/3g_mobiledata.svg
-	X3GMobiledata Icon = "3g_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/3g_mobiledata.svg
+	X3GMobiledata Icon = "outlined/3g_mobiledata"
 	
 	// X3GMobiledataBadge is the "3g_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/3g_mobiledata_badge.svg
-	X3GMobiledataBadge Icon = "3g_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/3g_mobiledata_badge.svg
+	X3GMobiledataBadge Icon = "outlined/3g_mobiledata_badge"
 	
 	// X3K is the "3k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/3k.svg
-	X3K Icon = "3k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/3k.svg
+	X3K Icon = "outlined/3k"
 	
 	// X3KPlus is the "3k_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/3k_plus.svg
-	X3KPlus Icon = "3k_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/3k_plus.svg
+	X3KPlus Icon = "outlined/3k_plus"
 	
 	// X3Mp is the "3mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/3mp.svg
-	X3Mp Icon = "3mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/3mp.svg
+	X3Mp Icon = "outlined/3mp"
 	
 	// X3P is the "3p" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/3p.svg
-	X3P Icon = "3p"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/3p.svg
+	X3P Icon = "outlined/3p"
 	
 	// X4GMobiledata is the "4g_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/4g_mobiledata.svg
-	X4GMobiledata Icon = "4g_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/4g_mobiledata.svg
+	X4GMobiledata Icon = "outlined/4g_mobiledata"
 	
 	// X4GMobiledataBadge is the "4g_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/4g_mobiledata_badge.svg
-	X4GMobiledataBadge Icon = "4g_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/4g_mobiledata_badge.svg
+	X4GMobiledataBadge Icon = "outlined/4g_mobiledata_badge"
 	
 	// X4GPlusMobiledata is the "4g_plus_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/4g_plus_mobiledata.svg
-	X4GPlusMobiledata Icon = "4g_plus_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/4g_plus_mobiledata.svg
+	X4GPlusMobiledata Icon = "outlined/4g_plus_mobiledata"
 	
 	// X4K is the "4k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/4k.svg
-	X4K Icon = "4k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/4k.svg
+	X4K Icon = "outlined/4k"
 	
 	// X4KPlus is the "4k_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/4k_plus.svg
-	X4KPlus Icon = "4k_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/4k_plus.svg
+	X4KPlus Icon = "outlined/4k_plus"
 	
 	// X4Mp is the "4mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/4mp.svg
-	X4Mp Icon = "4mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/4mp.svg
+	X4Mp Icon = "outlined/4mp"
 	
 	// X50Mp is the "50mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/50mp.svg
-	X50Mp Icon = "50mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/50mp.svg
+	X50Mp Icon = "outlined/50mp"
 	
 	// X5G is the "5g" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/5g.svg
-	X5G Icon = "5g"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/5g.svg
+	X5G Icon = "outlined/5g"
 	
 	// X5GMobiledataBadge is the "5g_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/5g_mobiledata_badge.svg
-	X5GMobiledataBadge Icon = "5g_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/5g_mobiledata_badge.svg
+	X5GMobiledataBadge Icon = "outlined/5g_mobiledata_badge"
 	
 	// X5K is the "5k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/5k.svg
-	X5K Icon = "5k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/5k.svg
+	X5K Icon = "outlined/5k"
 	
 	// X5KPlus is the "5k_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/5k_plus.svg
-	X5KPlus Icon = "5k_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/5k_plus.svg
+	X5KPlus Icon = "outlined/5k_plus"
 	
 	// X5Mp is the "5mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/5mp.svg
-	X5Mp Icon = "5mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/5mp.svg
+	X5Mp Icon = "outlined/5mp"
 	
 	// X60Fps is the "60fps" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/60fps.svg
-	X60Fps Icon = "60fps"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/60fps.svg
+	X60Fps Icon = "outlined/60fps"
 	
 	// X60FpsSelect is the "60fps_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/60fps_select.svg
-	X60FpsSelect Icon = "60fps_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/60fps_select.svg
+	X60FpsSelect Icon = "outlined/60fps_select"
 	
 	// X6FtApart is the "6_ft_apart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/6_ft_apart.svg
-	X6FtApart Icon = "6_ft_apart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/6_ft_apart.svg
+	X6FtApart Icon = "outlined/6_ft_apart"
 	
 	// X6K is the "6k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/6k.svg
-	X6K Icon = "6k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/6k.svg
+	X6K Icon = "outlined/6k"
 	
 	// X6KPlus is the "6k_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/6k_plus.svg
-	X6KPlus Icon = "6k_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/6k_plus.svg
+	X6KPlus Icon = "outlined/6k_plus"
 	
 	// X6Mp is the "6mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/6mp.svg
-	X6Mp Icon = "6mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/6mp.svg
+	X6Mp Icon = "outlined/6mp"
 	
 	// X7K is the "7k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/7k.svg
-	X7K Icon = "7k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/7k.svg
+	X7K Icon = "outlined/7k"
 	
 	// X7KPlus is the "7k_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/7k_plus.svg
-	X7KPlus Icon = "7k_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/7k_plus.svg
+	X7KPlus Icon = "outlined/7k_plus"
 	
 	// X7Mp is the "7mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/7mp.svg
-	X7Mp Icon = "7mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/7mp.svg
+	X7Mp Icon = "outlined/7mp"
 	
 	// X8K is the "8k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/8k.svg
-	X8K Icon = "8k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/8k.svg
+	X8K Icon = "outlined/8k"
 	
 	// X8KPlus is the "8k_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/8k_plus.svg
-	X8KPlus Icon = "8k_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/8k_plus.svg
+	X8KPlus Icon = "outlined/8k_plus"
 	
 	// X8Mp is the "8mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/8mp.svg
-	X8Mp Icon = "8mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/8mp.svg
+	X8Mp Icon = "outlined/8mp"
 	
 	// X9K is the "9k" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/9k.svg
-	X9K Icon = "9k"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/9k.svg
+	X9K Icon = "outlined/9k"
 	
 	// X9KPlus is the "9k_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/9k_plus.svg
-	X9KPlus Icon = "9k_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/9k_plus.svg
+	X9KPlus Icon = "outlined/9k_plus"
 	
 	// X9Mp is the "9mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/9mp.svg
-	X9Mp Icon = "9mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/9mp.svg
+	X9Mp Icon = "outlined/9mp"
 	
 	// Abc is the "abc" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/abc.svg
-	Abc Icon = "abc"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/abc.svg
+	Abc Icon = "outlined/abc"
 	
 	// AcUnit is the "ac_unit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ac_unit.svg
-	AcUnit Icon = "ac_unit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ac_unit.svg
+	AcUnit Icon = "outlined/ac_unit"
 	
 	// Accessibility is the "accessibility" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/accessibility.svg
-	Accessibility Icon = "accessibility"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/accessibility.svg
+	Accessibility Icon = "outlined/accessibility"
 	
 	// AccessibilityNew is the "accessibility_new" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/accessibility_new.svg
-	AccessibilityNew Icon = "accessibility_new"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/accessibility_new.svg
+	AccessibilityNew Icon = "outlined/accessibility_new"
 	
 	// Accessible is the "accessible" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/accessible.svg
-	Accessible Icon = "accessible"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/accessible.svg
+	Accessible Icon = "outlined/accessible"
 	
 	// AccessibleForward is the "accessible_forward" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/accessible_forward.svg
-	AccessibleForward Icon = "accessible_forward"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/accessible_forward.svg
+	AccessibleForward Icon = "outlined/accessible_forward"
 	
 	// AccountBalance is the "account_balance" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/account_balance.svg
-	AccountBalance Icon = "account_balance"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/account_balance.svg
+	AccountBalance Icon = "outlined/account_balance"
 	
 	// AccountBalanceWallet is the "account_balance_wallet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/account_balance_wallet.svg
-	AccountBalanceWallet Icon = "account_balance_wallet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/account_balance_wallet.svg
+	AccountBalanceWallet Icon = "outlined/account_balance_wallet"
 	
 	// AccountBox is the "account_box" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/account_box.svg
-	AccountBox Icon = "account_box"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/account_box.svg
+	AccountBox Icon = "outlined/account_box"
 	
 	// AccountCircle is the "account_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/account_circle.svg
-	AccountCircle Icon = "account_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/account_circle.svg
+	AccountCircle Icon = "outlined/account_circle"
 	
 	// AccountCircleOff is the "account_circle_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/account_circle_off.svg
-	AccountCircleOff Icon = "account_circle_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/account_circle_off.svg
+	AccountCircleOff Icon = "outlined/account_circle_off"
 	
 	// AccountTree is the "account_tree" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/account_tree.svg
-	AccountTree Icon = "account_tree"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/account_tree.svg
+	AccountTree Icon = "outlined/account_tree"
 	
 	// ActivityZone is the "activity_zone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/activity_zone.svg
-	ActivityZone Icon = "activity_zone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/activity_zone.svg
+	ActivityZone Icon = "outlined/activity_zone"
 	
 	// Acute is the "acute" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/acute.svg
-	Acute Icon = "acute"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/acute.svg
+	Acute Icon = "outlined/acute"
 	
 	// Ad is the "ad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ad.svg
-	Ad Icon = "ad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ad.svg
+	Ad Icon = "outlined/ad"
 	
 	// AdGroup is the "ad_group" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ad_group.svg
-	AdGroup Icon = "ad_group"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ad_group.svg
+	AdGroup Icon = "outlined/ad_group"
 	
 	// AdGroupOff is the "ad_group_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ad_group_off.svg
-	AdGroupOff Icon = "ad_group_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ad_group_off.svg
+	AdGroupOff Icon = "outlined/ad_group_off"
 	
 	// AdOff is the "ad_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ad_off.svg
-	AdOff Icon = "ad_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ad_off.svg
+	AdOff Icon = "outlined/ad_off"
 	
 	// AdUnits is the "ad_units" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ad_units.svg
-	AdUnits Icon = "ad_units"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ad_units.svg
+	AdUnits Icon = "outlined/ad_units"
 	
 	// Adb is the "adb" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/adb.svg
-	Adb Icon = "adb"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/adb.svg
+	Adb Icon = "outlined/adb"
 	
 	// Add is the "add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add.svg
-	Add Icon = "add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add.svg
+	Add Icon = "outlined/add"
 	
 	// AddAPhoto is the "add_a_photo" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_a_photo.svg
-	AddAPhoto Icon = "add_a_photo"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_a_photo.svg
+	AddAPhoto Icon = "outlined/add_a_photo"
 	
 	// AddAd is the "add_ad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_ad.svg
-	AddAd Icon = "add_ad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_ad.svg
+	AddAd Icon = "outlined/add_ad"
 	
 	// AddAlert is the "add_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_alert.svg
-	AddAlert Icon = "add_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_alert.svg
+	AddAlert Icon = "outlined/add_alert"
 	
 	// AddBox is the "add_box" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_box.svg
-	AddBox Icon = "add_box"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_box.svg
+	AddBox Icon = "outlined/add_box"
 	
 	// AddBusiness is the "add_business" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_business.svg
-	AddBusiness Icon = "add_business"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_business.svg
+	AddBusiness Icon = "outlined/add_business"
 	
 	// AddCall is the "add_call" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_call.svg
-	AddCall Icon = "add_call"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_call.svg
+	AddCall Icon = "outlined/add_call"
 	
 	// AddCard is the "add_card" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_card.svg
-	AddCard Icon = "add_card"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_card.svg
+	AddCard Icon = "outlined/add_card"
 	
 	// AddChart is the "add_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_chart.svg
-	AddChart Icon = "add_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_chart.svg
+	AddChart Icon = "outlined/add_chart"
 	
 	// AddCircle is the "add_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_circle.svg
-	AddCircle Icon = "add_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_circle.svg
+	AddCircle Icon = "outlined/add_circle"
 	
 	// AddComment is the "add_comment" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_comment.svg
-	AddComment Icon = "add_comment"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_comment.svg
+	AddComment Icon = "outlined/add_comment"
 	
 	// AddHome is the "add_home" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_home.svg
-	AddHome Icon = "add_home"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_home.svg
+	AddHome Icon = "outlined/add_home"
 	
 	// AddHomeWork is the "add_home_work" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_home_work.svg
-	AddHomeWork Icon = "add_home_work"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_home_work.svg
+	AddHomeWork Icon = "outlined/add_home_work"
 	
 	// AddLink is the "add_link" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_link.svg
-	AddLink Icon = "add_link"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_link.svg
+	AddLink Icon = "outlined/add_link"
 	
 	// AddLocation is the "add_location" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_location.svg
-	AddLocation Icon = "add_location"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_location.svg
+	AddLocation Icon = "outlined/add_location"
 	
 	// AddLocationAlt is the "add_location_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_location_alt.svg
-	AddLocationAlt Icon = "add_location_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_location_alt.svg
+	AddLocationAlt Icon = "outlined/add_location_alt"
 	
 	// AddModerator is the "add_moderator" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_moderator.svg
-	AddModerator Icon = "add_moderator"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_moderator.svg
+	AddModerator Icon = "outlined/add_moderator"
 	
 	// AddNotes is the "add_notes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_notes.svg
-	AddNotes Icon = "add_notes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_notes.svg
+	AddNotes Icon = "outlined/add_notes"
 	
 	// AddPhotoAlternate is the "add_photo_alternate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_photo_alternate.svg
-	AddPhotoAlternate Icon = "add_photo_alternate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_photo_alternate.svg
+	AddPhotoAlternate Icon = "outlined/add_photo_alternate"
 	
 	// AddReaction is the "add_reaction" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_reaction.svg
-	AddReaction Icon = "add_reaction"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_reaction.svg
+	AddReaction Icon = "outlined/add_reaction"
 	
 	// AddRoad is the "add_road" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_road.svg
-	AddRoad Icon = "add_road"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_road.svg
+	AddRoad Icon = "outlined/add_road"
 	
 	// AddShoppingCart is the "add_shopping_cart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_shopping_cart.svg
-	AddShoppingCart Icon = "add_shopping_cart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_shopping_cart.svg
+	AddShoppingCart Icon = "outlined/add_shopping_cart"
 	
 	// AddTask is the "add_task" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_task.svg
-	AddTask Icon = "add_task"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_task.svg
+	AddTask Icon = "outlined/add_task"
 	
 	// AddToDrive is the "add_to_drive" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_to_drive.svg
-	AddToDrive Icon = "add_to_drive"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_to_drive.svg
+	AddToDrive Icon = "outlined/add_to_drive"
 	
 	// AddToHomeScreen is the "add_to_home_screen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_to_home_screen.svg
-	AddToHomeScreen Icon = "add_to_home_screen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_to_home_screen.svg
+	AddToHomeScreen Icon = "outlined/add_to_home_screen"
 	
 	// AddToPhotos is the "add_to_photos" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_to_photos.svg
-	AddToPhotos Icon = "add_to_photos"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_to_photos.svg
+	AddToPhotos Icon = "outlined/add_to_photos"
 	
 	// AddToQueue is the "add_to_queue" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/add_to_queue.svg
-	AddToQueue Icon = "add_to_queue"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/add_to_queue.svg
+	AddToQueue Icon = "outlined/add_to_queue"
 	
 	// AdfScanner is the "adf_scanner" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/adf_scanner.svg
-	AdfScanner Icon = "adf_scanner"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/adf_scanner.svg
+	AdfScanner Icon = "outlined/adf_scanner"
 	
 	// Adjust is the "adjust" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/adjust.svg
-	Adjust Icon = "adjust"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/adjust.svg
+	Adjust Icon = "outlined/adjust"
 	
 	// AdminMeds is the "admin_meds" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/admin_meds.svg
-	AdminMeds Icon = "admin_meds"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/admin_meds.svg
+	AdminMeds Icon = "outlined/admin_meds"
 	
 	// AdminPanelSettings is the "admin_panel_settings" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/admin_panel_settings.svg
-	AdminPanelSettings Icon = "admin_panel_settings"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/admin_panel_settings.svg
+	AdminPanelSettings Icon = "outlined/admin_panel_settings"
 	
 	// AdsClick is the "ads_click" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ads_click.svg
-	AdsClick Icon = "ads_click"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ads_click.svg
+	AdsClick Icon = "outlined/ads_click"
 	
 	// Agender is the "agender" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/agender.svg
-	Agender Icon = "agender"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/agender.svg
+	Agender Icon = "outlined/agender"
 	
 	// Agriculture is the "agriculture" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/agriculture.svg
-	Agriculture Icon = "agriculture"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/agriculture.svg
+	Agriculture Icon = "outlined/agriculture"
 	
 	// Air is the "air" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/air.svg
-	Air Icon = "air"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/air.svg
+	Air Icon = "outlined/air"
 	
 	// AirFreshener is the "air_freshener" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/air_freshener.svg
-	AirFreshener Icon = "air_freshener"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/air_freshener.svg
+	AirFreshener Icon = "outlined/air_freshener"
 	
 	// AirPurifierGen is the "air_purifier_gen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/air_purifier_gen.svg
-	AirPurifierGen Icon = "air_purifier_gen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/air_purifier_gen.svg
+	AirPurifierGen Icon = "outlined/air_purifier_gen"
 	
 	// AirlineSeatFlat is the "airline_seat_flat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airline_seat_flat.svg
-	AirlineSeatFlat Icon = "airline_seat_flat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airline_seat_flat.svg
+	AirlineSeatFlat Icon = "outlined/airline_seat_flat"
 	
 	// AirlineSeatFlatAngled is the "airline_seat_flat_angled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airline_seat_flat_angled.svg
-	AirlineSeatFlatAngled Icon = "airline_seat_flat_angled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airline_seat_flat_angled.svg
+	AirlineSeatFlatAngled Icon = "outlined/airline_seat_flat_angled"
 	
 	// AirlineSeatIndividualSuite is the "airline_seat_individual_suite" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airline_seat_individual_suite.svg
-	AirlineSeatIndividualSuite Icon = "airline_seat_individual_suite"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airline_seat_individual_suite.svg
+	AirlineSeatIndividualSuite Icon = "outlined/airline_seat_individual_suite"
 	
 	// AirlineSeatLegroomExtra is the "airline_seat_legroom_extra" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airline_seat_legroom_extra.svg
-	AirlineSeatLegroomExtra Icon = "airline_seat_legroom_extra"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airline_seat_legroom_extra.svg
+	AirlineSeatLegroomExtra Icon = "outlined/airline_seat_legroom_extra"
 	
 	// AirlineSeatLegroomNormal is the "airline_seat_legroom_normal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airline_seat_legroom_normal.svg
-	AirlineSeatLegroomNormal Icon = "airline_seat_legroom_normal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airline_seat_legroom_normal.svg
+	AirlineSeatLegroomNormal Icon = "outlined/airline_seat_legroom_normal"
 	
 	// AirlineSeatLegroomReduced is the "airline_seat_legroom_reduced" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airline_seat_legroom_reduced.svg
-	AirlineSeatLegroomReduced Icon = "airline_seat_legroom_reduced"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airline_seat_legroom_reduced.svg
+	AirlineSeatLegroomReduced Icon = "outlined/airline_seat_legroom_reduced"
 	
 	// AirlineSeatReclineExtra is the "airline_seat_recline_extra" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airline_seat_recline_extra.svg
-	AirlineSeatReclineExtra Icon = "airline_seat_recline_extra"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airline_seat_recline_extra.svg
+	AirlineSeatReclineExtra Icon = "outlined/airline_seat_recline_extra"
 	
 	// AirlineSeatReclineNormal is the "airline_seat_recline_normal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airline_seat_recline_normal.svg
-	AirlineSeatReclineNormal Icon = "airline_seat_recline_normal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airline_seat_recline_normal.svg
+	AirlineSeatReclineNormal Icon = "outlined/airline_seat_recline_normal"
 	
 	// AirlineStops is the "airline_stops" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airline_stops.svg
-	AirlineStops Icon = "airline_stops"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airline_stops.svg
+	AirlineStops Icon = "outlined/airline_stops"
 	
 	// Airlines is the "airlines" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airlines.svg
-	Airlines Icon = "airlines"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airlines.svg
+	Airlines Icon = "outlined/airlines"
 	
 	// AirplaneTicket is the "airplane_ticket" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airplane_ticket.svg
-	AirplaneTicket Icon = "airplane_ticket"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airplane_ticket.svg
+	AirplaneTicket Icon = "outlined/airplane_ticket"
 	
 	// AirplanemodeActive is the "airplanemode_active" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airplanemode_active.svg
-	AirplanemodeActive Icon = "airplanemode_active"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airplanemode_active.svg
+	AirplanemodeActive Icon = "outlined/airplanemode_active"
 	
 	// AirplanemodeInactive is the "airplanemode_inactive" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airplanemode_inactive.svg
-	AirplanemodeInactive Icon = "airplanemode_inactive"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airplanemode_inactive.svg
+	AirplanemodeInactive Icon = "outlined/airplanemode_inactive"
 	
 	// Airplay is the "airplay" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airplay.svg
-	Airplay Icon = "airplay"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airplay.svg
+	Airplay Icon = "outlined/airplay"
 	
 	// AirportShuttle is the "airport_shuttle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airport_shuttle.svg
-	AirportShuttle Icon = "airport_shuttle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airport_shuttle.svg
+	AirportShuttle Icon = "outlined/airport_shuttle"
 	
 	// Airware is the "airware" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airware.svg
-	Airware Icon = "airware"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airware.svg
+	Airware Icon = "outlined/airware"
 	
 	// Airwave is the "airwave" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/airwave.svg
-	Airwave Icon = "airwave"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/airwave.svg
+	Airwave Icon = "outlined/airwave"
 	
 	// Alarm is the "alarm" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/alarm.svg
-	Alarm Icon = "alarm"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/alarm.svg
+	Alarm Icon = "outlined/alarm"
 	
 	// AlarmAdd is the "alarm_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/alarm_add.svg
-	AlarmAdd Icon = "alarm_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/alarm_add.svg
+	AlarmAdd Icon = "outlined/alarm_add"
 	
 	// AlarmOff is the "alarm_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/alarm_off.svg
-	AlarmOff Icon = "alarm_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/alarm_off.svg
+	AlarmOff Icon = "outlined/alarm_off"
 	
 	// AlarmOn is the "alarm_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/alarm_on.svg
-	AlarmOn Icon = "alarm_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/alarm_on.svg
+	AlarmOn Icon = "outlined/alarm_on"
 	
 	// AlarmSmartWake is the "alarm_smart_wake" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/alarm_smart_wake.svg
-	AlarmSmartWake Icon = "alarm_smart_wake"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/alarm_smart_wake.svg
+	AlarmSmartWake Icon = "outlined/alarm_smart_wake"
 	
 	// Album is the "album" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/album.svg
-	Album Icon = "album"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/album.svg
+	Album Icon = "outlined/album"
 	
 	// AlignCenter is the "align_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_center.svg
-	AlignCenter Icon = "align_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_center.svg
+	AlignCenter Icon = "outlined/align_center"
 	
 	// AlignEnd is the "align_end" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_end.svg
-	AlignEnd Icon = "align_end"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_end.svg
+	AlignEnd Icon = "outlined/align_end"
 	
 	// AlignFlexCenter is the "align_flex_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_flex_center.svg
-	AlignFlexCenter Icon = "align_flex_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_flex_center.svg
+	AlignFlexCenter Icon = "outlined/align_flex_center"
 	
 	// AlignFlexEnd is the "align_flex_end" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_flex_end.svg
-	AlignFlexEnd Icon = "align_flex_end"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_flex_end.svg
+	AlignFlexEnd Icon = "outlined/align_flex_end"
 	
 	// AlignFlexStart is the "align_flex_start" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_flex_start.svg
-	AlignFlexStart Icon = "align_flex_start"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_flex_start.svg
+	AlignFlexStart Icon = "outlined/align_flex_start"
 	
 	// AlignHorizontalCenter is the "align_horizontal_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_horizontal_center.svg
-	AlignHorizontalCenter Icon = "align_horizontal_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_horizontal_center.svg
+	AlignHorizontalCenter Icon = "outlined/align_horizontal_center"
 	
 	// AlignHorizontalLeft is the "align_horizontal_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_horizontal_left.svg
-	AlignHorizontalLeft Icon = "align_horizontal_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_horizontal_left.svg
+	AlignHorizontalLeft Icon = "outlined/align_horizontal_left"
 	
 	// AlignHorizontalRight is the "align_horizontal_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_horizontal_right.svg
-	AlignHorizontalRight Icon = "align_horizontal_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_horizontal_right.svg
+	AlignHorizontalRight Icon = "outlined/align_horizontal_right"
 	
 	// AlignItemsStretch is the "align_items_stretch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_items_stretch.svg
-	AlignItemsStretch Icon = "align_items_stretch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_items_stretch.svg
+	AlignItemsStretch Icon = "outlined/align_items_stretch"
 	
 	// AlignJustifyCenter is the "align_justify_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_justify_center.svg
-	AlignJustifyCenter Icon = "align_justify_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_justify_center.svg
+	AlignJustifyCenter Icon = "outlined/align_justify_center"
 	
 	// AlignJustifyFlexEnd is the "align_justify_flex_end" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_justify_flex_end.svg
-	AlignJustifyFlexEnd Icon = "align_justify_flex_end"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_justify_flex_end.svg
+	AlignJustifyFlexEnd Icon = "outlined/align_justify_flex_end"
 	
 	// AlignJustifyFlexStart is the "align_justify_flex_start" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_justify_flex_start.svg
-	AlignJustifyFlexStart Icon = "align_justify_flex_start"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_justify_flex_start.svg
+	AlignJustifyFlexStart Icon = "outlined/align_justify_flex_start"
 	
 	// AlignJustifySpaceAround is the "align_justify_space_around" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_justify_space_around.svg
-	AlignJustifySpaceAround Icon = "align_justify_space_around"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_justify_space_around.svg
+	AlignJustifySpaceAround Icon = "outlined/align_justify_space_around"
 	
 	// AlignJustifySpaceBetween is the "align_justify_space_between" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_justify_space_between.svg
-	AlignJustifySpaceBetween Icon = "align_justify_space_between"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_justify_space_between.svg
+	AlignJustifySpaceBetween Icon = "outlined/align_justify_space_between"
 	
 	// AlignJustifySpaceEven is the "align_justify_space_even" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_justify_space_even.svg
-	AlignJustifySpaceEven Icon = "align_justify_space_even"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_justify_space_even.svg
+	AlignJustifySpaceEven Icon = "outlined/align_justify_space_even"
 	
 	// AlignJustifyStretch is the "align_justify_stretch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_justify_stretch.svg
-	AlignJustifyStretch Icon = "align_justify_stretch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_justify_stretch.svg
+	AlignJustifyStretch Icon = "outlined/align_justify_stretch"
 	
 	// AlignSelfStretch is the "align_self_stretch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_self_stretch.svg
-	AlignSelfStretch Icon = "align_self_stretch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_self_stretch.svg
+	AlignSelfStretch Icon = "outlined/align_self_stretch"
 	
 	// AlignSpaceAround is the "align_space_around" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_space_around.svg
-	AlignSpaceAround Icon = "align_space_around"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_space_around.svg
+	AlignSpaceAround Icon = "outlined/align_space_around"
 	
 	// AlignSpaceBetween is the "align_space_between" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_space_between.svg
-	AlignSpaceBetween Icon = "align_space_between"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_space_between.svg
+	AlignSpaceBetween Icon = "outlined/align_space_between"
 	
 	// AlignSpaceEven is the "align_space_even" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_space_even.svg
-	AlignSpaceEven Icon = "align_space_even"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_space_even.svg
+	AlignSpaceEven Icon = "outlined/align_space_even"
 	
 	// AlignStart is the "align_start" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_start.svg
-	AlignStart Icon = "align_start"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_start.svg
+	AlignStart Icon = "outlined/align_start"
 	
 	// AlignStretch is the "align_stretch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_stretch.svg
-	AlignStretch Icon = "align_stretch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_stretch.svg
+	AlignStretch Icon = "outlined/align_stretch"
 	
 	// AlignVerticalBottom is the "align_vertical_bottom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_vertical_bottom.svg
-	AlignVerticalBottom Icon = "align_vertical_bottom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_vertical_bottom.svg
+	AlignVerticalBottom Icon = "outlined/align_vertical_bottom"
 	
 	// AlignVerticalCenter is the "align_vertical_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_vertical_center.svg
-	AlignVerticalCenter Icon = "align_vertical_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_vertical_center.svg
+	AlignVerticalCenter Icon = "outlined/align_vertical_center"
 	
 	// AlignVerticalTop is the "align_vertical_top" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/align_vertical_top.svg
-	AlignVerticalTop Icon = "align_vertical_top"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/align_vertical_top.svg
+	AlignVerticalTop Icon = "outlined/align_vertical_top"
 	
 	// AllInbox is the "all_inbox" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/all_inbox.svg
-	AllInbox Icon = "all_inbox"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/all_inbox.svg
+	AllInbox Icon = "outlined/all_inbox"
 	
 	// AllInclusive is the "all_inclusive" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/all_inclusive.svg
-	AllInclusive Icon = "all_inclusive"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/all_inclusive.svg
+	AllInclusive Icon = "outlined/all_inclusive"
 	
 	// AllMatch is the "all_match" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/all_match.svg
-	AllMatch Icon = "all_match"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/all_match.svg
+	AllMatch Icon = "outlined/all_match"
 	
 	// AllOut is the "all_out" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/all_out.svg
-	AllOut Icon = "all_out"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/all_out.svg
+	AllOut Icon = "outlined/all_out"
 	
 	// Allergies is the "allergies" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/allergies.svg
-	Allergies Icon = "allergies"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/allergies.svg
+	Allergies Icon = "outlined/allergies"
 	
 	// Allergy is the "allergy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/allergy.svg
-	Allergy Icon = "allergy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/allergy.svg
+	Allergy Icon = "outlined/allergy"
 	
 	// AltRoute is the "alt_route" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/alt_route.svg
-	AltRoute Icon = "alt_route"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/alt_route.svg
+	AltRoute Icon = "outlined/alt_route"
 	
 	// AlternateEmail is the "alternate_email" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/alternate_email.svg
-	AlternateEmail Icon = "alternate_email"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/alternate_email.svg
+	AlternateEmail Icon = "outlined/alternate_email"
 	
 	// Altitude is the "altitude" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/altitude.svg
-	Altitude Icon = "altitude"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/altitude.svg
+	Altitude Icon = "outlined/altitude"
 	
 	// AmbientScreen is the "ambient_screen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ambient_screen.svg
-	AmbientScreen Icon = "ambient_screen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ambient_screen.svg
+	AmbientScreen Icon = "outlined/ambient_screen"
 	
 	// Ambulance is the "ambulance" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ambulance.svg
-	Ambulance Icon = "ambulance"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ambulance.svg
+	Ambulance Icon = "outlined/ambulance"
 	
 	// Amend is the "amend" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/amend.svg
-	Amend Icon = "amend"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/amend.svg
+	Amend Icon = "outlined/amend"
 	
 	// AmpStories is the "amp_stories" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/amp_stories.svg
-	AmpStories Icon = "amp_stories"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/amp_stories.svg
+	AmpStories Icon = "outlined/amp_stories"
 	
 	// Analytics is the "analytics" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/analytics.svg
-	Analytics Icon = "analytics"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/analytics.svg
+	Analytics Icon = "outlined/analytics"
 	
 	// Anchor is the "anchor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/anchor.svg
-	Anchor Icon = "anchor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/anchor.svg
+	Anchor Icon = "outlined/anchor"
 	
 	// Android is the "android" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/android.svg
-	Android Icon = "android"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/android.svg
+	Android Icon = "outlined/android"
 	
 	// Animation is the "animation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/animation.svg
-	Animation Icon = "animation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/animation.svg
+	Animation Icon = "outlined/animation"
 	
 	// Aod is the "aod" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/aod.svg
-	Aod Icon = "aod"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/aod.svg
+	Aod Icon = "outlined/aod"
 	
 	// AodTablet is the "aod_tablet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/aod_tablet.svg
-	AodTablet Icon = "aod_tablet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/aod_tablet.svg
+	AodTablet Icon = "outlined/aod_tablet"
 	
 	// AodWatch is the "aod_watch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/aod_watch.svg
-	AodWatch Icon = "aod_watch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/aod_watch.svg
+	AodWatch Icon = "outlined/aod_watch"
 	
 	// Apartment is the "apartment" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/apartment.svg
-	Apartment Icon = "apartment"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/apartment.svg
+	Apartment Icon = "outlined/apartment"
 	
 	// Api is the "api" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/api.svg
-	Api Icon = "api"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/api.svg
+	Api Icon = "outlined/api"
 	
 	// ApkDocument is the "apk_document" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/apk_document.svg
-	ApkDocument Icon = "apk_document"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/apk_document.svg
+	ApkDocument Icon = "outlined/apk_document"
 	
 	// ApkInstall is the "apk_install" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/apk_install.svg
-	ApkInstall Icon = "apk_install"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/apk_install.svg
+	ApkInstall Icon = "outlined/apk_install"
 	
 	// AppBadging is the "app_badging" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/app_badging.svg
-	AppBadging Icon = "app_badging"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/app_badging.svg
+	AppBadging Icon = "outlined/app_badging"
 	
 	// AppBlocking is the "app_blocking" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/app_blocking.svg
-	AppBlocking Icon = "app_blocking"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/app_blocking.svg
+	AppBlocking Icon = "outlined/app_blocking"
 	
 	// AppPromo is the "app_promo" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/app_promo.svg
-	AppPromo Icon = "app_promo"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/app_promo.svg
+	AppPromo Icon = "outlined/app_promo"
 	
 	// AppRegistration is the "app_registration" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/app_registration.svg
-	AppRegistration Icon = "app_registration"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/app_registration.svg
+	AppRegistration Icon = "outlined/app_registration"
 	
 	// AppShortcut is the "app_shortcut" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/app_shortcut.svg
-	AppShortcut Icon = "app_shortcut"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/app_shortcut.svg
+	AppShortcut Icon = "outlined/app_shortcut"
 	
 	// Approval is the "approval" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/approval.svg
-	Approval Icon = "approval"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/approval.svg
+	Approval Icon = "outlined/approval"
 	
 	// ApprovalDelegation is the "approval_delegation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/approval_delegation.svg
-	ApprovalDelegation Icon = "approval_delegation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/approval_delegation.svg
+	ApprovalDelegation Icon = "outlined/approval_delegation"
 	
 	// Apps is the "apps" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/apps.svg
-	Apps Icon = "apps"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/apps.svg
+	Apps Icon = "outlined/apps"
 	
 	// AppsOutage is the "apps_outage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/apps_outage.svg
-	AppsOutage Icon = "apps_outage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/apps_outage.svg
+	AppsOutage Icon = "outlined/apps_outage"
 	
 	// ArOnYou is the "ar_on_you" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ar_on_you.svg
-	ArOnYou Icon = "ar_on_you"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ar_on_you.svg
+	ArOnYou Icon = "outlined/ar_on_you"
 	
 	// Architecture is the "architecture" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/architecture.svg
-	Architecture Icon = "architecture"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/architecture.svg
+	Architecture Icon = "outlined/architecture"
 	
 	// Archive is the "archive" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/archive.svg
-	Archive Icon = "archive"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/archive.svg
+	Archive Icon = "outlined/archive"
 	
 	// AreaChart is the "area_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/area_chart.svg
-	AreaChart Icon = "area_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/area_chart.svg
+	AreaChart Icon = "outlined/area_chart"
 	
 	// ArmingCountdown is the "arming_countdown" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arming_countdown.svg
-	ArmingCountdown Icon = "arming_countdown"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arming_countdown.svg
+	ArmingCountdown Icon = "outlined/arming_countdown"
 	
 	// ArrowAndEdge is the "arrow_and_edge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_and_edge.svg
-	ArrowAndEdge Icon = "arrow_and_edge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_and_edge.svg
+	ArrowAndEdge Icon = "outlined/arrow_and_edge"
 	
 	// ArrowBack is the "arrow_back" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_back.svg
-	ArrowBack Icon = "arrow_back"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_back.svg
+	ArrowBack Icon = "outlined/arrow_back"
 	
 	// ArrowBackIos is the "arrow_back_ios" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_back_ios.svg
-	ArrowBackIos Icon = "arrow_back_ios"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_back_ios.svg
+	ArrowBackIos Icon = "outlined/arrow_back_ios"
 	
 	// ArrowBackIosNew is the "arrow_back_ios_new" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_back_ios_new.svg
-	ArrowBackIosNew Icon = "arrow_back_ios_new"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_back_ios_new.svg
+	ArrowBackIosNew Icon = "outlined/arrow_back_ios_new"
 	
 	// ArrowCircleDown is the "arrow_circle_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_circle_down.svg
-	ArrowCircleDown Icon = "arrow_circle_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_circle_down.svg
+	ArrowCircleDown Icon = "outlined/arrow_circle_down"
 	
 	// ArrowCircleLeft is the "arrow_circle_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_circle_left.svg
-	ArrowCircleLeft Icon = "arrow_circle_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_circle_left.svg
+	ArrowCircleLeft Icon = "outlined/arrow_circle_left"
 	
 	// ArrowCircleRight is the "arrow_circle_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_circle_right.svg
-	ArrowCircleRight Icon = "arrow_circle_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_circle_right.svg
+	ArrowCircleRight Icon = "outlined/arrow_circle_right"
 	
 	// ArrowCircleUp is the "arrow_circle_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_circle_up.svg
-	ArrowCircleUp Icon = "arrow_circle_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_circle_up.svg
+	ArrowCircleUp Icon = "outlined/arrow_circle_up"
 	
 	// ArrowDownward is the "arrow_downward" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_downward.svg
-	ArrowDownward Icon = "arrow_downward"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_downward.svg
+	ArrowDownward Icon = "outlined/arrow_downward"
 	
 	// ArrowDownwardAlt is the "arrow_downward_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_downward_alt.svg
-	ArrowDownwardAlt Icon = "arrow_downward_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_downward_alt.svg
+	ArrowDownwardAlt Icon = "outlined/arrow_downward_alt"
 	
 	// ArrowDropDown is the "arrow_drop_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_drop_down.svg
-	ArrowDropDown Icon = "arrow_drop_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_drop_down.svg
+	ArrowDropDown Icon = "outlined/arrow_drop_down"
 	
 	// ArrowDropDownCircle is the "arrow_drop_down_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_drop_down_circle.svg
-	ArrowDropDownCircle Icon = "arrow_drop_down_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_drop_down_circle.svg
+	ArrowDropDownCircle Icon = "outlined/arrow_drop_down_circle"
 	
 	// ArrowDropUp is the "arrow_drop_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_drop_up.svg
-	ArrowDropUp Icon = "arrow_drop_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_drop_up.svg
+	ArrowDropUp Icon = "outlined/arrow_drop_up"
 	
 	// ArrowForward is the "arrow_forward" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_forward.svg
-	ArrowForward Icon = "arrow_forward"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_forward.svg
+	ArrowForward Icon = "outlined/arrow_forward"
 	
 	// ArrowForwardIos is the "arrow_forward_ios" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_forward_ios.svg
-	ArrowForwardIos Icon = "arrow_forward_ios"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_forward_ios.svg
+	ArrowForwardIos Icon = "outlined/arrow_forward_ios"
 	
 	// ArrowInsert is the "arrow_insert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_insert.svg
-	ArrowInsert Icon = "arrow_insert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_insert.svg
+	ArrowInsert Icon = "outlined/arrow_insert"
 	
 	// ArrowLeft is the "arrow_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_left.svg
-	ArrowLeft Icon = "arrow_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_left.svg
+	ArrowLeft Icon = "outlined/arrow_left"
 	
 	// ArrowLeftAlt is the "arrow_left_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_left_alt.svg
-	ArrowLeftAlt Icon = "arrow_left_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_left_alt.svg
+	ArrowLeftAlt Icon = "outlined/arrow_left_alt"
 	
 	// ArrowOrEdge is the "arrow_or_edge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_or_edge.svg
-	ArrowOrEdge Icon = "arrow_or_edge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_or_edge.svg
+	ArrowOrEdge Icon = "outlined/arrow_or_edge"
 	
 	// ArrowOutward is the "arrow_outward" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_outward.svg
-	ArrowOutward Icon = "arrow_outward"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_outward.svg
+	ArrowOutward Icon = "outlined/arrow_outward"
 	
 	// ArrowRange is the "arrow_range" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_range.svg
-	ArrowRange Icon = "arrow_range"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_range.svg
+	ArrowRange Icon = "outlined/arrow_range"
 	
 	// ArrowRight is the "arrow_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_right.svg
-	ArrowRight Icon = "arrow_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_right.svg
+	ArrowRight Icon = "outlined/arrow_right"
 	
 	// ArrowRightAlt is the "arrow_right_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_right_alt.svg
-	ArrowRightAlt Icon = "arrow_right_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_right_alt.svg
+	ArrowRightAlt Icon = "outlined/arrow_right_alt"
 	
 	// ArrowSelectorTool is the "arrow_selector_tool" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_selector_tool.svg
-	ArrowSelectorTool Icon = "arrow_selector_tool"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_selector_tool.svg
+	ArrowSelectorTool Icon = "outlined/arrow_selector_tool"
 	
 	// ArrowSplit is the "arrow_split" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_split.svg
-	ArrowSplit Icon = "arrow_split"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_split.svg
+	ArrowSplit Icon = "outlined/arrow_split"
 	
 	// ArrowTopLeft is the "arrow_top_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_top_left.svg
-	ArrowTopLeft Icon = "arrow_top_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_top_left.svg
+	ArrowTopLeft Icon = "outlined/arrow_top_left"
 	
 	// ArrowTopRight is the "arrow_top_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_top_right.svg
-	ArrowTopRight Icon = "arrow_top_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_top_right.svg
+	ArrowTopRight Icon = "outlined/arrow_top_right"
 	
 	// ArrowUpward is the "arrow_upward" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_upward.svg
-	ArrowUpward Icon = "arrow_upward"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_upward.svg
+	ArrowUpward Icon = "outlined/arrow_upward"
 	
 	// ArrowUpwardAlt is the "arrow_upward_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrow_upward_alt.svg
-	ArrowUpwardAlt Icon = "arrow_upward_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrow_upward_alt.svg
+	ArrowUpwardAlt Icon = "outlined/arrow_upward_alt"
 	
 	// ArrowsMoreDown is the "arrows_more_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrows_more_down.svg
-	ArrowsMoreDown Icon = "arrows_more_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrows_more_down.svg
+	ArrowsMoreDown Icon = "outlined/arrows_more_down"
 	
 	// ArrowsMoreUp is the "arrows_more_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrows_more_up.svg
-	ArrowsMoreUp Icon = "arrows_more_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrows_more_up.svg
+	ArrowsMoreUp Icon = "outlined/arrows_more_up"
 	
 	// ArrowsOutward is the "arrows_outward" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/arrows_outward.svg
-	ArrowsOutward Icon = "arrows_outward"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/arrows_outward.svg
+	ArrowsOutward Icon = "outlined/arrows_outward"
 	
 	// ArtTrack is the "art_track" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/art_track.svg
-	ArtTrack Icon = "art_track"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/art_track.svg
+	ArtTrack Icon = "outlined/art_track"
 	
 	// Article is the "article" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/article.svg
-	Article Icon = "article"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/article.svg
+	Article Icon = "outlined/article"
 	
 	// AspectRatio is the "aspect_ratio" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/aspect_ratio.svg
-	AspectRatio Icon = "aspect_ratio"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/aspect_ratio.svg
+	AspectRatio Icon = "outlined/aspect_ratio"
 	
 	// Assignment is the "assignment" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assignment.svg
-	Assignment Icon = "assignment"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assignment.svg
+	Assignment Icon = "outlined/assignment"
 	
 	// AssignmentAdd is the "assignment_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assignment_add.svg
-	AssignmentAdd Icon = "assignment_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assignment_add.svg
+	AssignmentAdd Icon = "outlined/assignment_add"
 	
 	// AssignmentInd is the "assignment_ind" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assignment_ind.svg
-	AssignmentInd Icon = "assignment_ind"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assignment_ind.svg
+	AssignmentInd Icon = "outlined/assignment_ind"
 	
 	// AssignmentLate is the "assignment_late" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assignment_late.svg
-	AssignmentLate Icon = "assignment_late"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assignment_late.svg
+	AssignmentLate Icon = "outlined/assignment_late"
 	
 	// AssignmentReturn is the "assignment_return" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assignment_return.svg
-	AssignmentReturn Icon = "assignment_return"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assignment_return.svg
+	AssignmentReturn Icon = "outlined/assignment_return"
 	
 	// AssignmentReturned is the "assignment_returned" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assignment_returned.svg
-	AssignmentReturned Icon = "assignment_returned"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assignment_returned.svg
+	AssignmentReturned Icon = "outlined/assignment_returned"
 	
 	// AssignmentTurnedIn is the "assignment_turned_in" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assignment_turned_in.svg
-	AssignmentTurnedIn Icon = "assignment_turned_in"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assignment_turned_in.svg
+	AssignmentTurnedIn Icon = "outlined/assignment_turned_in"
 	
 	// AssistWalker is the "assist_walker" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assist_walker.svg
-	AssistWalker Icon = "assist_walker"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assist_walker.svg
+	AssistWalker Icon = "outlined/assist_walker"
 	
 	// AssistantDirection is the "assistant_direction" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assistant_direction.svg
-	AssistantDirection Icon = "assistant_direction"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assistant_direction.svg
+	AssistantDirection Icon = "outlined/assistant_direction"
 	
 	// AssistantNavigation is the "assistant_navigation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assistant_navigation.svg
-	AssistantNavigation Icon = "assistant_navigation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assistant_navigation.svg
+	AssistantNavigation Icon = "outlined/assistant_navigation"
 	
 	// AssistantOnHub is the "assistant_on_hub" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assistant_on_hub.svg
-	AssistantOnHub Icon = "assistant_on_hub"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assistant_on_hub.svg
+	AssistantOnHub Icon = "outlined/assistant_on_hub"
 	
 	// AssuredWorkload is the "assured_workload" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/assured_workload.svg
-	AssuredWorkload Icon = "assured_workload"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/assured_workload.svg
+	AssuredWorkload Icon = "outlined/assured_workload"
 	
 	// Atm is the "atm" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/atm.svg
-	Atm Icon = "atm"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/atm.svg
+	Atm Icon = "outlined/atm"
 	
 	// Atr is the "atr" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/atr.svg
-	Atr Icon = "atr"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/atr.svg
+	Atr Icon = "outlined/atr"
 	
 	// AttachEmail is the "attach_email" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/attach_email.svg
-	AttachEmail Icon = "attach_email"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/attach_email.svg
+	AttachEmail Icon = "outlined/attach_email"
 	
 	// AttachFile is the "attach_file" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/attach_file.svg
-	AttachFile Icon = "attach_file"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/attach_file.svg
+	AttachFile Icon = "outlined/attach_file"
 	
 	// AttachFileAdd is the "attach_file_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/attach_file_add.svg
-	AttachFileAdd Icon = "attach_file_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/attach_file_add.svg
+	AttachFileAdd Icon = "outlined/attach_file_add"
 	
 	// AttachMoney is the "attach_money" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/attach_money.svg
-	AttachMoney Icon = "attach_money"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/attach_money.svg
+	AttachMoney Icon = "outlined/attach_money"
 	
 	// Attachment is the "attachment" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/attachment.svg
-	Attachment Icon = "attachment"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/attachment.svg
+	Attachment Icon = "outlined/attachment"
 	
 	// Attractions is the "attractions" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/attractions.svg
-	Attractions Icon = "attractions"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/attractions.svg
+	Attractions Icon = "outlined/attractions"
 	
 	// Attribution is the "attribution" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/attribution.svg
-	Attribution Icon = "attribution"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/attribution.svg
+	Attribution Icon = "outlined/attribution"
 	
 	// AudioFile is the "audio_file" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/audio_file.svg
-	AudioFile Icon = "audio_file"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/audio_file.svg
+	AudioFile Icon = "outlined/audio_file"
 	
 	// AudioVideoReceiver is the "audio_video_receiver" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/audio_video_receiver.svg
-	AudioVideoReceiver Icon = "audio_video_receiver"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/audio_video_receiver.svg
+	AudioVideoReceiver Icon = "outlined/audio_video_receiver"
 	
 	// AutoAwesomeMosaic is the "auto_awesome_mosaic" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/auto_awesome_mosaic.svg
-	AutoAwesomeMosaic Icon = "auto_awesome_mosaic"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/auto_awesome_mosaic.svg
+	AutoAwesomeMosaic Icon = "outlined/auto_awesome_mosaic"
 	
 	// AutoAwesomeMotion is the "auto_awesome_motion" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/auto_awesome_motion.svg
-	AutoAwesomeMotion Icon = "auto_awesome_motion"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/auto_awesome_motion.svg
+	AutoAwesomeMotion Icon = "outlined/auto_awesome_motion"
 	
 	// AutoDelete is the "auto_delete" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/auto_delete.svg
-	AutoDelete Icon = "auto_delete"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/auto_delete.svg
+	AutoDelete Icon = "outlined/auto_delete"
 	
 	// AutoReadPause is the "auto_read_pause" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/auto_read_pause.svg
-	AutoReadPause Icon = "auto_read_pause"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/auto_read_pause.svg
+	AutoReadPause Icon = "outlined/auto_read_pause"
 	
 	// AutoReadPlay is the "auto_read_play" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/auto_read_play.svg
-	AutoReadPlay Icon = "auto_read_play"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/auto_read_play.svg
+	AutoReadPlay Icon = "outlined/auto_read_play"
 	
 	// AutoStories is the "auto_stories" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/auto_stories.svg
-	AutoStories Icon = "auto_stories"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/auto_stories.svg
+	AutoStories Icon = "outlined/auto_stories"
 	
 	// AutofpsSelect is the "autofps_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/autofps_select.svg
-	AutofpsSelect Icon = "autofps_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/autofps_select.svg
+	AutofpsSelect Icon = "outlined/autofps_select"
 	
 	// Autopause is the "autopause" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/autopause.svg
-	Autopause Icon = "autopause"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/autopause.svg
+	Autopause Icon = "outlined/autopause"
 	
 	// Autoplay is the "autoplay" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/autoplay.svg
-	Autoplay Icon = "autoplay"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/autoplay.svg
+	Autoplay Icon = "outlined/autoplay"
 	
 	// Autorenew is the "autorenew" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/autorenew.svg
-	Autorenew Icon = "autorenew"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/autorenew.svg
+	Autorenew Icon = "outlined/autorenew"
 	
 	// Autostop is the "autostop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/autostop.svg
-	Autostop Icon = "autostop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/autostop.svg
+	Autostop Icon = "outlined/autostop"
 	
 	// AvTimer is the "av_timer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/av_timer.svg
-	AvTimer Icon = "av_timer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/av_timer.svg
+	AvTimer Icon = "outlined/av_timer"
 	
 	// AvgPace is the "avg_pace" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/avg_pace.svg
-	AvgPace Icon = "avg_pace"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/avg_pace.svg
+	AvgPace Icon = "outlined/avg_pace"
 	
 	// AvgTime is the "avg_time" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/avg_time.svg
-	AvgTime Icon = "avg_time"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/avg_time.svg
+	AvgTime Icon = "outlined/avg_time"
 	
 	// AwardStar is the "award_star" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/award_star.svg
-	AwardStar Icon = "award_star"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/award_star.svg
+	AwardStar Icon = "outlined/award_star"
 	
 	// Azm is the "azm" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/azm.svg
-	Azm Icon = "azm"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/azm.svg
+	Azm Icon = "outlined/azm"
 	
 	// BabyChangingStation is the "baby_changing_station" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/baby_changing_station.svg
-	BabyChangingStation Icon = "baby_changing_station"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/baby_changing_station.svg
+	BabyChangingStation Icon = "outlined/baby_changing_station"
 	
 	// BackHand is the "back_hand" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/back_hand.svg
-	BackHand Icon = "back_hand"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/back_hand.svg
+	BackHand Icon = "outlined/back_hand"
 	
 	// BackToTab is the "back_to_tab" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/back_to_tab.svg
-	BackToTab Icon = "back_to_tab"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/back_to_tab.svg
+	BackToTab Icon = "outlined/back_to_tab"
 	
 	// BackgroundDotLarge is the "background_dot_large" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/background_dot_large.svg
-	BackgroundDotLarge Icon = "background_dot_large"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/background_dot_large.svg
+	BackgroundDotLarge Icon = "outlined/background_dot_large"
 	
 	// BackgroundGridSmall is the "background_grid_small" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/background_grid_small.svg
-	BackgroundGridSmall Icon = "background_grid_small"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/background_grid_small.svg
+	BackgroundGridSmall Icon = "outlined/background_grid_small"
 	
 	// BackgroundReplace is the "background_replace" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/background_replace.svg
-	BackgroundReplace Icon = "background_replace"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/background_replace.svg
+	BackgroundReplace Icon = "outlined/background_replace"
 	
 	// BacklightHigh is the "backlight_high" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/backlight_high.svg
-	BacklightHigh Icon = "backlight_high"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/backlight_high.svg
+	BacklightHigh Icon = "outlined/backlight_high"
 	
 	// BacklightLow is the "backlight_low" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/backlight_low.svg
-	BacklightLow Icon = "backlight_low"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/backlight_low.svg
+	BacklightLow Icon = "outlined/backlight_low"
 	
 	// Backpack is the "backpack" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/backpack.svg
-	Backpack Icon = "backpack"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/backpack.svg
+	Backpack Icon = "outlined/backpack"
 	
 	// Backspace is the "backspace" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/backspace.svg
-	Backspace Icon = "backspace"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/backspace.svg
+	Backspace Icon = "outlined/backspace"
 	
 	// Backup is the "backup" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/backup.svg
-	Backup Icon = "backup"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/backup.svg
+	Backup Icon = "outlined/backup"
 	
 	// BackupTable is the "backup_table" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/backup_table.svg
-	BackupTable Icon = "backup_table"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/backup_table.svg
+	BackupTable Icon = "outlined/backup_table"
 	
 	// Badge is the "badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/badge.svg
-	Badge Icon = "badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/badge.svg
+	Badge Icon = "outlined/badge"
 	
 	// BadgeCriticalBattery is the "badge_critical_battery" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/badge_critical_battery.svg
-	BadgeCriticalBattery Icon = "badge_critical_battery"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/badge_critical_battery.svg
+	BadgeCriticalBattery Icon = "outlined/badge_critical_battery"
 	
 	// BakeryDining is the "bakery_dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bakery_dining.svg
-	BakeryDining Icon = "bakery_dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bakery_dining.svg
+	BakeryDining Icon = "outlined/bakery_dining"
 	
 	// Balance is the "balance" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/balance.svg
-	Balance Icon = "balance"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/balance.svg
+	Balance Icon = "outlined/balance"
 	
 	// Balcony is the "balcony" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/balcony.svg
-	Balcony Icon = "balcony"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/balcony.svg
+	Balcony Icon = "outlined/balcony"
 	
 	// Ballot is the "ballot" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ballot.svg
-	Ballot Icon = "ballot"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ballot.svg
+	Ballot Icon = "outlined/ballot"
 	
 	// BarChart is the "bar_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bar_chart.svg
-	BarChart Icon = "bar_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bar_chart.svg
+	BarChart Icon = "outlined/bar_chart"
 	
 	// BarChart4Bars is the "bar_chart_4_bars" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bar_chart_4_bars.svg
-	BarChart4Bars Icon = "bar_chart_4_bars"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bar_chart_4_bars.svg
+	BarChart4Bars Icon = "outlined/bar_chart_4_bars"
 	
 	// Barcode is the "barcode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/barcode.svg
-	Barcode Icon = "barcode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/barcode.svg
+	Barcode Icon = "outlined/barcode"
 	
 	// BarcodeReader is the "barcode_reader" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/barcode_reader.svg
-	BarcodeReader Icon = "barcode_reader"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/barcode_reader.svg
+	BarcodeReader Icon = "outlined/barcode_reader"
 	
 	// BarcodeScanner is the "barcode_scanner" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/barcode_scanner.svg
-	BarcodeScanner Icon = "barcode_scanner"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/barcode_scanner.svg
+	BarcodeScanner Icon = "outlined/barcode_scanner"
 	
 	// Barefoot is the "barefoot" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/barefoot.svg
-	Barefoot Icon = "barefoot"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/barefoot.svg
+	Barefoot Icon = "outlined/barefoot"
 	
 	// BatchPrediction is the "batch_prediction" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/batch_prediction.svg
-	BatchPrediction Icon = "batch_prediction"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/batch_prediction.svg
+	BatchPrediction Icon = "outlined/batch_prediction"
 	
 	// BathOutdoor is the "bath_outdoor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bath_outdoor.svg
-	BathOutdoor Icon = "bath_outdoor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bath_outdoor.svg
+	BathOutdoor Icon = "outlined/bath_outdoor"
 	
 	// BathPrivate is the "bath_private" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bath_private.svg
-	BathPrivate Icon = "bath_private"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bath_private.svg
+	BathPrivate Icon = "outlined/bath_private"
 	
 	// BathPublicLarge is the "bath_public_large" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bath_public_large.svg
-	BathPublicLarge Icon = "bath_public_large"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bath_public_large.svg
+	BathPublicLarge Icon = "outlined/bath_public_large"
 	
 	// Bathroom is the "bathroom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bathroom.svg
-	Bathroom Icon = "bathroom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bathroom.svg
+	Bathroom Icon = "outlined/bathroom"
 	
 	// Bathtub is the "bathtub" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bathtub.svg
-	Bathtub Icon = "bathtub"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bathtub.svg
+	Bathtub Icon = "outlined/bathtub"
 	
 	// Battery0Bar is the "battery_0_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_0_bar.svg
-	Battery0Bar Icon = "battery_0_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_0_bar.svg
+	Battery0Bar Icon = "outlined/battery_0_bar"
 	
 	// Battery1Bar is the "battery_1_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_1_bar.svg
-	Battery1Bar Icon = "battery_1_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_1_bar.svg
+	Battery1Bar Icon = "outlined/battery_1_bar"
 	
 	// Battery2Bar is the "battery_2_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_2_bar.svg
-	Battery2Bar Icon = "battery_2_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_2_bar.svg
+	Battery2Bar Icon = "outlined/battery_2_bar"
 	
 	// Battery3Bar is the "battery_3_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_3_bar.svg
-	Battery3Bar Icon = "battery_3_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_3_bar.svg
+	Battery3Bar Icon = "outlined/battery_3_bar"
 	
 	// Battery4Bar is the "battery_4_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_4_bar.svg
-	Battery4Bar Icon = "battery_4_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_4_bar.svg
+	Battery4Bar Icon = "outlined/battery_4_bar"
 	
 	// Battery5Bar is the "battery_5_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_5_bar.svg
-	Battery5Bar Icon = "battery_5_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_5_bar.svg
+	Battery5Bar Icon = "outlined/battery_5_bar"
 	
 	// Battery6Bar is the "battery_6_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_6_bar.svg
-	Battery6Bar Icon = "battery_6_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_6_bar.svg
+	Battery6Bar Icon = "outlined/battery_6_bar"
 	
 	// BatteryAlert is the "battery_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_alert.svg
-	BatteryAlert Icon = "battery_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_alert.svg
+	BatteryAlert Icon = "outlined/battery_alert"
 	
 	// BatteryChange is the "battery_change" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_change.svg
-	BatteryChange Icon = "battery_change"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_change.svg
+	BatteryChange Icon = "outlined/battery_change"
 	
 	// BatteryCharging20 is the "battery_charging_20" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_charging_20.svg
-	BatteryCharging20 Icon = "battery_charging_20"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_charging_20.svg
+	BatteryCharging20 Icon = "outlined/battery_charging_20"
 	
 	// BatteryCharging30 is the "battery_charging_30" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_charging_30.svg
-	BatteryCharging30 Icon = "battery_charging_30"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_charging_30.svg
+	BatteryCharging30 Icon = "outlined/battery_charging_30"
 	
 	// BatteryCharging50 is the "battery_charging_50" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_charging_50.svg
-	BatteryCharging50 Icon = "battery_charging_50"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_charging_50.svg
+	BatteryCharging50 Icon = "outlined/battery_charging_50"
 	
 	// BatteryCharging60 is the "battery_charging_60" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_charging_60.svg
-	BatteryCharging60 Icon = "battery_charging_60"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_charging_60.svg
+	BatteryCharging60 Icon = "outlined/battery_charging_60"
 	
 	// BatteryCharging80 is the "battery_charging_80" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_charging_80.svg
-	BatteryCharging80 Icon = "battery_charging_80"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_charging_80.svg
+	BatteryCharging80 Icon = "outlined/battery_charging_80"
 	
 	// BatteryCharging90 is the "battery_charging_90" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_charging_90.svg
-	BatteryCharging90 Icon = "battery_charging_90"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_charging_90.svg
+	BatteryCharging90 Icon = "outlined/battery_charging_90"
 	
 	// BatteryChargingFull is the "battery_charging_full" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_charging_full.svg
-	BatteryChargingFull Icon = "battery_charging_full"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_charging_full.svg
+	BatteryChargingFull Icon = "outlined/battery_charging_full"
 	
 	// BatteryError is the "battery_error" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_error.svg
-	BatteryError Icon = "battery_error"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_error.svg
+	BatteryError Icon = "outlined/battery_error"
 	
 	// BatteryHoriz000 is the "battery_horiz_000" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_horiz_000.svg
-	BatteryHoriz000 Icon = "battery_horiz_000"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_horiz_000.svg
+	BatteryHoriz000 Icon = "outlined/battery_horiz_000"
 	
 	// BatteryHoriz050 is the "battery_horiz_050" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_horiz_050.svg
-	BatteryHoriz050 Icon = "battery_horiz_050"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_horiz_050.svg
+	BatteryHoriz050 Icon = "outlined/battery_horiz_050"
 	
 	// BatteryHoriz075 is the "battery_horiz_075" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_horiz_075.svg
-	BatteryHoriz075 Icon = "battery_horiz_075"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_horiz_075.svg
+	BatteryHoriz075 Icon = "outlined/battery_horiz_075"
 	
 	// BatteryLow is the "battery_low" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_low.svg
-	BatteryLow Icon = "battery_low"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_low.svg
+	BatteryLow Icon = "outlined/battery_low"
 	
 	// BatteryPlus is the "battery_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_plus.svg
-	BatteryPlus Icon = "battery_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_plus.svg
+	BatteryPlus Icon = "outlined/battery_plus"
 	
 	// BatteryProfile is the "battery_profile" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_profile.svg
-	BatteryProfile Icon = "battery_profile"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_profile.svg
+	BatteryProfile Icon = "outlined/battery_profile"
 	
 	// BatterySaver is the "battery_saver" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_saver.svg
-	BatterySaver Icon = "battery_saver"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_saver.svg
+	BatterySaver Icon = "outlined/battery_saver"
 	
 	// BatteryShare is the "battery_share" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_share.svg
-	BatteryShare Icon = "battery_share"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_share.svg
+	BatteryShare Icon = "outlined/battery_share"
 	
 	// BatteryStatusGood is the "battery_status_good" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_status_good.svg
-	BatteryStatusGood Icon = "battery_status_good"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_status_good.svg
+	BatteryStatusGood Icon = "outlined/battery_status_good"
 	
 	// BatteryUnknown is the "battery_unknown" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_unknown.svg
-	BatteryUnknown Icon = "battery_unknown"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_unknown.svg
+	BatteryUnknown Icon = "outlined/battery_unknown"
 	
 	// BatteryVeryLow is the "battery_very_low" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/battery_very_low.svg
-	BatteryVeryLow Icon = "battery_very_low"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/battery_very_low.svg
+	BatteryVeryLow Icon = "outlined/battery_very_low"
 	
 	// BeachAccess is the "beach_access" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/beach_access.svg
-	BeachAccess Icon = "beach_access"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/beach_access.svg
+	BeachAccess Icon = "outlined/beach_access"
 	
 	// Bed is the "bed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bed.svg
-	Bed Icon = "bed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bed.svg
+	Bed Icon = "outlined/bed"
 	
 	// BedroomBaby is the "bedroom_baby" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bedroom_baby.svg
-	BedroomBaby Icon = "bedroom_baby"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bedroom_baby.svg
+	BedroomBaby Icon = "outlined/bedroom_baby"
 	
 	// BedroomChild is the "bedroom_child" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bedroom_child.svg
-	BedroomChild Icon = "bedroom_child"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bedroom_child.svg
+	BedroomChild Icon = "outlined/bedroom_child"
 	
 	// BedroomParent is the "bedroom_parent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bedroom_parent.svg
-	BedroomParent Icon = "bedroom_parent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bedroom_parent.svg
+	BedroomParent Icon = "outlined/bedroom_parent"
 	
 	// Bedtime is the "bedtime" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bedtime.svg
-	Bedtime Icon = "bedtime"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bedtime.svg
+	Bedtime Icon = "outlined/bedtime"
 	
 	// BedtimeOff is the "bedtime_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bedtime_off.svg
-	BedtimeOff Icon = "bedtime_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bedtime_off.svg
+	BedtimeOff Icon = "outlined/bedtime_off"
 	
 	// Beenhere is the "beenhere" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/beenhere.svg
-	Beenhere Icon = "beenhere"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/beenhere.svg
+	Beenhere Icon = "outlined/beenhere"
 	
 	// Bento is the "bento" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bento.svg
-	Bento Icon = "bento"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bento.svg
+	Bento Icon = "outlined/bento"
 	
 	// Bia is the "bia" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bia.svg
-	Bia Icon = "bia"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bia.svg
+	Bia Icon = "outlined/bia"
 	
 	// BidLandscape is the "bid_landscape" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bid_landscape.svg
-	BidLandscape Icon = "bid_landscape"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bid_landscape.svg
+	BidLandscape Icon = "outlined/bid_landscape"
 	
 	// BidLandscapeDisabled is the "bid_landscape_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bid_landscape_disabled.svg
-	BidLandscapeDisabled Icon = "bid_landscape_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bid_landscape_disabled.svg
+	BidLandscapeDisabled Icon = "outlined/bid_landscape_disabled"
 	
 	// BikeScooter is the "bike_scooter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bike_scooter.svg
-	BikeScooter Icon = "bike_scooter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bike_scooter.svg
+	BikeScooter Icon = "outlined/bike_scooter"
 	
 	// Biotech is the "biotech" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/biotech.svg
-	Biotech Icon = "biotech"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/biotech.svg
+	Biotech Icon = "outlined/biotech"
 	
 	// Blanket is the "blanket" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blanket.svg
-	Blanket Icon = "blanket"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blanket.svg
+	Blanket Icon = "outlined/blanket"
 	
 	// Blender is the "blender" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blender.svg
-	Blender Icon = "blender"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blender.svg
+	Blender Icon = "outlined/blender"
 	
 	// Blind is the "blind" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blind.svg
-	Blind Icon = "blind"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blind.svg
+	Blind Icon = "outlined/blind"
 	
 	// Blinds is the "blinds" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blinds.svg
-	Blinds Icon = "blinds"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blinds.svg
+	Blinds Icon = "outlined/blinds"
 	
 	// BlindsClosed is the "blinds_closed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blinds_closed.svg
-	BlindsClosed Icon = "blinds_closed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blinds_closed.svg
+	BlindsClosed Icon = "outlined/blinds_closed"
 	
 	// Block is the "block" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/block.svg
-	Block Icon = "block"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/block.svg
+	Block Icon = "outlined/block"
 	
 	// BloodPressure is the "blood_pressure" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blood_pressure.svg
-	BloodPressure Icon = "blood_pressure"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blood_pressure.svg
+	BloodPressure Icon = "outlined/blood_pressure"
 	
 	// Bloodtype is the "bloodtype" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bloodtype.svg
-	Bloodtype Icon = "bloodtype"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bloodtype.svg
+	Bloodtype Icon = "outlined/bloodtype"
 	
 	// Bluetooth is the "bluetooth" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bluetooth.svg
-	Bluetooth Icon = "bluetooth"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bluetooth.svg
+	Bluetooth Icon = "outlined/bluetooth"
 	
 	// BluetoothConnected is the "bluetooth_connected" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bluetooth_connected.svg
-	BluetoothConnected Icon = "bluetooth_connected"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bluetooth_connected.svg
+	BluetoothConnected Icon = "outlined/bluetooth_connected"
 	
 	// BluetoothDisabled is the "bluetooth_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bluetooth_disabled.svg
-	BluetoothDisabled Icon = "bluetooth_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bluetooth_disabled.svg
+	BluetoothDisabled Icon = "outlined/bluetooth_disabled"
 	
 	// BluetoothDrive is the "bluetooth_drive" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bluetooth_drive.svg
-	BluetoothDrive Icon = "bluetooth_drive"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bluetooth_drive.svg
+	BluetoothDrive Icon = "outlined/bluetooth_drive"
 	
 	// BluetoothSearching is the "bluetooth_searching" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bluetooth_searching.svg
-	BluetoothSearching Icon = "bluetooth_searching"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bluetooth_searching.svg
+	BluetoothSearching Icon = "outlined/bluetooth_searching"
 	
 	// BlurCircular is the "blur_circular" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blur_circular.svg
-	BlurCircular Icon = "blur_circular"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blur_circular.svg
+	BlurCircular Icon = "outlined/blur_circular"
 	
 	// BlurLinear is the "blur_linear" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blur_linear.svg
-	BlurLinear Icon = "blur_linear"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blur_linear.svg
+	BlurLinear Icon = "outlined/blur_linear"
 	
 	// BlurMedium is the "blur_medium" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blur_medium.svg
-	BlurMedium Icon = "blur_medium"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blur_medium.svg
+	BlurMedium Icon = "outlined/blur_medium"
 	
 	// BlurOff is the "blur_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blur_off.svg
-	BlurOff Icon = "blur_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blur_off.svg
+	BlurOff Icon = "outlined/blur_off"
 	
 	// BlurOn is the "blur_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blur_on.svg
-	BlurOn Icon = "blur_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blur_on.svg
+	BlurOn Icon = "outlined/blur_on"
 	
 	// BlurShort is the "blur_short" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/blur_short.svg
-	BlurShort Icon = "blur_short"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/blur_short.svg
+	BlurShort Icon = "outlined/blur_short"
 	
 	// BodyFat is the "body_fat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/body_fat.svg
-	BodyFat Icon = "body_fat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/body_fat.svg
+	BodyFat Icon = "outlined/body_fat"
 	
 	// BodySystem is the "body_system" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/body_system.svg
-	BodySystem Icon = "body_system"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/body_system.svg
+	BodySystem Icon = "outlined/body_system"
 	
 	// Bolt is the "bolt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bolt.svg
-	Bolt Icon = "bolt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bolt.svg
+	Bolt Icon = "outlined/bolt"
 	
 	// Book is the "book" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/book.svg
-	Book Icon = "book"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/book.svg
+	Book Icon = "outlined/book"
 	
 	// BookOnline is the "book_online" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/book_online.svg
-	BookOnline Icon = "book_online"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/book_online.svg
+	BookOnline Icon = "outlined/book_online"
 	
 	// Bookmark is the "bookmark" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bookmark.svg
-	Bookmark Icon = "bookmark"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bookmark.svg
+	Bookmark Icon = "outlined/bookmark"
 	
 	// BookmarkAdd is the "bookmark_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bookmark_add.svg
-	BookmarkAdd Icon = "bookmark_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bookmark_add.svg
+	BookmarkAdd Icon = "outlined/bookmark_add"
 	
 	// BookmarkAdded is the "bookmark_added" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bookmark_added.svg
-	BookmarkAdded Icon = "bookmark_added"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bookmark_added.svg
+	BookmarkAdded Icon = "outlined/bookmark_added"
 	
 	// BookmarkManager is the "bookmark_manager" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bookmark_manager.svg
-	BookmarkManager Icon = "bookmark_manager"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bookmark_manager.svg
+	BookmarkManager Icon = "outlined/bookmark_manager"
 	
 	// BookmarkRemove is the "bookmark_remove" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bookmark_remove.svg
-	BookmarkRemove Icon = "bookmark_remove"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bookmark_remove.svg
+	BookmarkRemove Icon = "outlined/bookmark_remove"
 	
 	// Bookmarks is the "bookmarks" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bookmarks.svg
-	Bookmarks Icon = "bookmarks"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bookmarks.svg
+	Bookmarks Icon = "outlined/bookmarks"
 	
 	// BorderAll is the "border_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_all.svg
-	BorderAll Icon = "border_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_all.svg
+	BorderAll Icon = "outlined/border_all"
 	
 	// BorderBottom is the "border_bottom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_bottom.svg
-	BorderBottom Icon = "border_bottom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_bottom.svg
+	BorderBottom Icon = "outlined/border_bottom"
 	
 	// BorderClear is the "border_clear" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_clear.svg
-	BorderClear Icon = "border_clear"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_clear.svg
+	BorderClear Icon = "outlined/border_clear"
 	
 	// BorderColor is the "border_color" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_color.svg
-	BorderColor Icon = "border_color"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_color.svg
+	BorderColor Icon = "outlined/border_color"
 	
 	// BorderHorizontal is the "border_horizontal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_horizontal.svg
-	BorderHorizontal Icon = "border_horizontal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_horizontal.svg
+	BorderHorizontal Icon = "outlined/border_horizontal"
 	
 	// BorderInner is the "border_inner" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_inner.svg
-	BorderInner Icon = "border_inner"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_inner.svg
+	BorderInner Icon = "outlined/border_inner"
 	
 	// BorderLeft is the "border_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_left.svg
-	BorderLeft Icon = "border_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_left.svg
+	BorderLeft Icon = "outlined/border_left"
 	
 	// BorderOuter is the "border_outer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_outer.svg
-	BorderOuter Icon = "border_outer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_outer.svg
+	BorderOuter Icon = "outlined/border_outer"
 	
 	// BorderRight is the "border_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_right.svg
-	BorderRight Icon = "border_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_right.svg
+	BorderRight Icon = "outlined/border_right"
 	
 	// BorderStyle is the "border_style" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_style.svg
-	BorderStyle Icon = "border_style"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_style.svg
+	BorderStyle Icon = "outlined/border_style"
 	
 	// BorderTop is the "border_top" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_top.svg
-	BorderTop Icon = "border_top"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_top.svg
+	BorderTop Icon = "outlined/border_top"
 	
 	// BorderVertical is the "border_vertical" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/border_vertical.svg
-	BorderVertical Icon = "border_vertical"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/border_vertical.svg
+	BorderVertical Icon = "outlined/border_vertical"
 	
 	// BottomAppBar is the "bottom_app_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bottom_app_bar.svg
-	BottomAppBar Icon = "bottom_app_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bottom_app_bar.svg
+	BottomAppBar Icon = "outlined/bottom_app_bar"
 	
 	// BottomDrawer is the "bottom_drawer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bottom_drawer.svg
-	BottomDrawer Icon = "bottom_drawer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bottom_drawer.svg
+	BottomDrawer Icon = "outlined/bottom_drawer"
 	
 	// BottomNavigation is the "bottom_navigation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bottom_navigation.svg
-	BottomNavigation Icon = "bottom_navigation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bottom_navigation.svg
+	BottomNavigation Icon = "outlined/bottom_navigation"
 	
 	// BottomPanelClose is the "bottom_panel_close" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bottom_panel_close.svg
-	BottomPanelClose Icon = "bottom_panel_close"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bottom_panel_close.svg
+	BottomPanelClose Icon = "outlined/bottom_panel_close"
 	
 	// BottomPanelOpen is the "bottom_panel_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bottom_panel_open.svg
-	BottomPanelOpen Icon = "bottom_panel_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bottom_panel_open.svg
+	BottomPanelOpen Icon = "outlined/bottom_panel_open"
 	
 	// BottomRightClick is the "bottom_right_click" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bottom_right_click.svg
-	BottomRightClick Icon = "bottom_right_click"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bottom_right_click.svg
+	BottomRightClick Icon = "outlined/bottom_right_click"
 	
 	// BottomSheets is the "bottom_sheets" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bottom_sheets.svg
-	BottomSheets Icon = "bottom_sheets"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bottom_sheets.svg
+	BottomSheets Icon = "outlined/bottom_sheets"
 	
 	// Box is the "box" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/box.svg
-	Box Icon = "box"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/box.svg
+	Box Icon = "outlined/box"
 	
 	// BoxAdd is the "box_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/box_add.svg
-	BoxAdd Icon = "box_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/box_add.svg
+	BoxAdd Icon = "outlined/box_add"
 	
 	// BoxEdit is the "box_edit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/box_edit.svg
-	BoxEdit Icon = "box_edit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/box_edit.svg
+	BoxEdit Icon = "outlined/box_edit"
 	
 	// Boy is the "boy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/boy.svg
-	Boy Icon = "boy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/boy.svg
+	Boy Icon = "outlined/boy"
 	
 	// BrandAwareness is the "brand_awareness" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brand_awareness.svg
-	BrandAwareness Icon = "brand_awareness"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brand_awareness.svg
+	BrandAwareness Icon = "outlined/brand_awareness"
 	
 	// BrandingWatermark is the "branding_watermark" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/branding_watermark.svg
-	BrandingWatermark Icon = "branding_watermark"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/branding_watermark.svg
+	BrandingWatermark Icon = "outlined/branding_watermark"
 	
 	// BreakfastDining is the "breakfast_dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/breakfast_dining.svg
-	BreakfastDining Icon = "breakfast_dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/breakfast_dining.svg
+	BreakfastDining Icon = "outlined/breakfast_dining"
 	
 	// BreakingNews is the "breaking_news" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/breaking_news.svg
-	BreakingNews Icon = "breaking_news"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/breaking_news.svg
+	BreakingNews Icon = "outlined/breaking_news"
 	
 	// BreakingNewsAlt1 is the "breaking_news_alt_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/breaking_news_alt_1.svg
-	BreakingNewsAlt1 Icon = "breaking_news_alt_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/breaking_news_alt_1.svg
+	BreakingNewsAlt1 Icon = "outlined/breaking_news_alt_1"
 	
 	// Breastfeeding is the "breastfeeding" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/breastfeeding.svg
-	Breastfeeding Icon = "breastfeeding"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/breastfeeding.svg
+	Breastfeeding Icon = "outlined/breastfeeding"
 	
 	// Brightness1 is the "brightness_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_1.svg
-	Brightness1 Icon = "brightness_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_1.svg
+	Brightness1 Icon = "outlined/brightness_1"
 	
 	// Brightness2 is the "brightness_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_2.svg
-	Brightness2 Icon = "brightness_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_2.svg
+	Brightness2 Icon = "outlined/brightness_2"
 	
 	// Brightness3 is the "brightness_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_3.svg
-	Brightness3 Icon = "brightness_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_3.svg
+	Brightness3 Icon = "outlined/brightness_3"
 	
 	// Brightness4 is the "brightness_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_4.svg
-	Brightness4 Icon = "brightness_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_4.svg
+	Brightness4 Icon = "outlined/brightness_4"
 	
 	// Brightness5 is the "brightness_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_5.svg
-	Brightness5 Icon = "brightness_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_5.svg
+	Brightness5 Icon = "outlined/brightness_5"
 	
 	// Brightness6 is the "brightness_6" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_6.svg
-	Brightness6 Icon = "brightness_6"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_6.svg
+	Brightness6 Icon = "outlined/brightness_6"
 	
 	// Brightness7 is the "brightness_7" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_7.svg
-	Brightness7 Icon = "brightness_7"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_7.svg
+	Brightness7 Icon = "outlined/brightness_7"
 	
 	// BrightnessAlert is the "brightness_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_alert.svg
-	BrightnessAlert Icon = "brightness_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_alert.svg
+	BrightnessAlert Icon = "outlined/brightness_alert"
 	
 	// BrightnessAuto is the "brightness_auto" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_auto.svg
-	BrightnessAuto Icon = "brightness_auto"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_auto.svg
+	BrightnessAuto Icon = "outlined/brightness_auto"
 	
 	// BrightnessEmpty is the "brightness_empty" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_empty.svg
-	BrightnessEmpty Icon = "brightness_empty"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_empty.svg
+	BrightnessEmpty Icon = "outlined/brightness_empty"
 	
 	// BrightnessHigh is the "brightness_high" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_high.svg
-	BrightnessHigh Icon = "brightness_high"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_high.svg
+	BrightnessHigh Icon = "outlined/brightness_high"
 	
 	// BrightnessLow is the "brightness_low" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_low.svg
-	BrightnessLow Icon = "brightness_low"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_low.svg
+	BrightnessLow Icon = "outlined/brightness_low"
 	
 	// BrightnessMedium is the "brightness_medium" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brightness_medium.svg
-	BrightnessMedium Icon = "brightness_medium"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brightness_medium.svg
+	BrightnessMedium Icon = "outlined/brightness_medium"
 	
 	// BringYourOwnIp is the "bring_your_own_ip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bring_your_own_ip.svg
-	BringYourOwnIp Icon = "bring_your_own_ip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bring_your_own_ip.svg
+	BringYourOwnIp Icon = "outlined/bring_your_own_ip"
 	
 	// BroadcastOnHome is the "broadcast_on_home" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/broadcast_on_home.svg
-	BroadcastOnHome Icon = "broadcast_on_home"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/broadcast_on_home.svg
+	BroadcastOnHome Icon = "outlined/broadcast_on_home"
 	
 	// BroadcastOnPersonal is the "broadcast_on_personal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/broadcast_on_personal.svg
-	BroadcastOnPersonal Icon = "broadcast_on_personal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/broadcast_on_personal.svg
+	BroadcastOnPersonal Icon = "outlined/broadcast_on_personal"
 	
 	// BrokenImage is the "broken_image" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/broken_image.svg
-	BrokenImage Icon = "broken_image"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/broken_image.svg
+	BrokenImage Icon = "outlined/broken_image"
 	
 	// Browse is the "browse" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/browse.svg
-	Browse Icon = "browse"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/browse.svg
+	Browse Icon = "outlined/browse"
 	
 	// BrowseActivity is the "browse_activity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/browse_activity.svg
-	BrowseActivity Icon = "browse_activity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/browse_activity.svg
+	BrowseActivity Icon = "outlined/browse_activity"
 	
 	// BrowseGallery is the "browse_gallery" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/browse_gallery.svg
-	BrowseGallery Icon = "browse_gallery"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/browse_gallery.svg
+	BrowseGallery Icon = "outlined/browse_gallery"
 	
 	// BrowserUpdated is the "browser_updated" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/browser_updated.svg
-	BrowserUpdated Icon = "browser_updated"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/browser_updated.svg
+	BrowserUpdated Icon = "outlined/browser_updated"
 	
 	// BrunchDining is the "brunch_dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brunch_dining.svg
-	BrunchDining Icon = "brunch_dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brunch_dining.svg
+	BrunchDining Icon = "outlined/brunch_dining"
 	
 	// Brush is the "brush" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/brush.svg
-	Brush Icon = "brush"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/brush.svg
+	Brush Icon = "outlined/brush"
 	
 	// Bubble is the "bubble" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bubble.svg
-	Bubble Icon = "bubble"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bubble.svg
+	Bubble Icon = "outlined/bubble"
 	
 	// BubbleChart is the "bubble_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bubble_chart.svg
-	BubbleChart Icon = "bubble_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bubble_chart.svg
+	BubbleChart Icon = "outlined/bubble_chart"
 	
 	// Bubbles is the "bubbles" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bubbles.svg
-	Bubbles Icon = "bubbles"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bubbles.svg
+	Bubbles Icon = "outlined/bubbles"
 	
 	// BugReport is the "bug_report" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bug_report.svg
-	BugReport Icon = "bug_report"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bug_report.svg
+	BugReport Icon = "outlined/bug_report"
 	
 	// Build is the "build" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/build.svg
-	Build Icon = "build"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/build.svg
+	Build Icon = "outlined/build"
 	
 	// BuildCircle is the "build_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/build_circle.svg
-	BuildCircle Icon = "build_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/build_circle.svg
+	BuildCircle Icon = "outlined/build_circle"
 	
 	// Bungalow is the "bungalow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bungalow.svg
-	Bungalow Icon = "bungalow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bungalow.svg
+	Bungalow Icon = "outlined/bungalow"
 	
 	// BurstMode is the "burst_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/burst_mode.svg
-	BurstMode Icon = "burst_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/burst_mode.svg
+	BurstMode Icon = "outlined/burst_mode"
 	
 	// BusAlert is the "bus_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/bus_alert.svg
-	BusAlert Icon = "bus_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/bus_alert.svg
+	BusAlert Icon = "outlined/bus_alert"
 	
 	// BusinessCenter is the "business_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/business_center.svg
-	BusinessCenter Icon = "business_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/business_center.svg
+	BusinessCenter Icon = "outlined/business_center"
 	
 	// BusinessChip is the "business_chip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/business_chip.svg
-	BusinessChip Icon = "business_chip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/business_chip.svg
+	BusinessChip Icon = "outlined/business_chip"
 	
 	// BusinessMessages is the "business_messages" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/business_messages.svg
-	BusinessMessages Icon = "business_messages"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/business_messages.svg
+	BusinessMessages Icon = "outlined/business_messages"
 	
 	// ButtonsAlt is the "buttons_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/buttons_alt.svg
-	ButtonsAlt Icon = "buttons_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/buttons_alt.svg
+	ButtonsAlt Icon = "outlined/buttons_alt"
 	
 	// Cabin is the "cabin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cabin.svg
-	Cabin Icon = "cabin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cabin.svg
+	Cabin Icon = "outlined/cabin"
 	
 	// Cable is the "cable" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cable.svg
-	Cable Icon = "cable"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cable.svg
+	Cable Icon = "outlined/cable"
 	
 	// Cached is the "cached" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cached.svg
-	Cached Icon = "cached"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cached.svg
+	Cached Icon = "outlined/cached"
 	
 	// Cake is the "cake" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cake.svg
-	Cake Icon = "cake"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cake.svg
+	Cake Icon = "outlined/cake"
 	
 	// CakeAdd is the "cake_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cake_add.svg
-	CakeAdd Icon = "cake_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cake_add.svg
+	CakeAdd Icon = "outlined/cake_add"
 	
 	// Calculate is the "calculate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/calculate.svg
-	Calculate Icon = "calculate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/calculate.svg
+	Calculate Icon = "outlined/calculate"
 	
 	// CalendarAddOn is the "calendar_add_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/calendar_add_on.svg
-	CalendarAddOn Icon = "calendar_add_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/calendar_add_on.svg
+	CalendarAddOn Icon = "outlined/calendar_add_on"
 	
 	// CalendarAppsScript is the "calendar_apps_script" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/calendar_apps_script.svg
-	CalendarAppsScript Icon = "calendar_apps_script"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/calendar_apps_script.svg
+	CalendarAppsScript Icon = "outlined/calendar_apps_script"
 	
 	// CalendarMonth is the "calendar_month" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/calendar_month.svg
-	CalendarMonth Icon = "calendar_month"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/calendar_month.svg
+	CalendarMonth Icon = "outlined/calendar_month"
 	
 	// CalendarToday is the "calendar_today" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/calendar_today.svg
-	CalendarToday Icon = "calendar_today"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/calendar_today.svg
+	CalendarToday Icon = "outlined/calendar_today"
 	
 	// CalendarViewDay is the "calendar_view_day" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/calendar_view_day.svg
-	CalendarViewDay Icon = "calendar_view_day"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/calendar_view_day.svg
+	CalendarViewDay Icon = "outlined/calendar_view_day"
 	
 	// CalendarViewMonth is the "calendar_view_month" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/calendar_view_month.svg
-	CalendarViewMonth Icon = "calendar_view_month"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/calendar_view_month.svg
+	CalendarViewMonth Icon = "outlined/calendar_view_month"
 	
 	// CalendarViewWeek is the "calendar_view_week" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/calendar_view_week.svg
-	CalendarViewWeek Icon = "calendar_view_week"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/calendar_view_week.svg
+	CalendarViewWeek Icon = "outlined/calendar_view_week"
 	
 	// Call is the "call" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call.svg
-	Call Icon = "call"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call.svg
+	Call Icon = "outlined/call"
 	
 	// CallEnd is the "call_end" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_end.svg
-	CallEnd Icon = "call_end"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_end.svg
+	CallEnd Icon = "outlined/call_end"
 	
 	// CallLog is the "call_log" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_log.svg
-	CallLog Icon = "call_log"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_log.svg
+	CallLog Icon = "outlined/call_log"
 	
 	// CallMade is the "call_made" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_made.svg
-	CallMade Icon = "call_made"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_made.svg
+	CallMade Icon = "outlined/call_made"
 	
 	// CallMerge is the "call_merge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_merge.svg
-	CallMerge Icon = "call_merge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_merge.svg
+	CallMerge Icon = "outlined/call_merge"
 	
 	// CallMissed is the "call_missed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_missed.svg
-	CallMissed Icon = "call_missed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_missed.svg
+	CallMissed Icon = "outlined/call_missed"
 	
 	// CallMissedOutgoing is the "call_missed_outgoing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_missed_outgoing.svg
-	CallMissedOutgoing Icon = "call_missed_outgoing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_missed_outgoing.svg
+	CallMissedOutgoing Icon = "outlined/call_missed_outgoing"
 	
 	// CallQuality is the "call_quality" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_quality.svg
-	CallQuality Icon = "call_quality"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_quality.svg
+	CallQuality Icon = "outlined/call_quality"
 	
 	// CallReceived is the "call_received" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_received.svg
-	CallReceived Icon = "call_received"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_received.svg
+	CallReceived Icon = "outlined/call_received"
 	
 	// CallSplit is the "call_split" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_split.svg
-	CallSplit Icon = "call_split"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_split.svg
+	CallSplit Icon = "outlined/call_split"
 	
 	// CallToAction is the "call_to_action" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/call_to_action.svg
-	CallToAction Icon = "call_to_action"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/call_to_action.svg
+	CallToAction Icon = "outlined/call_to_action"
 	
 	// Camera is the "camera" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/camera.svg
-	Camera Icon = "camera"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/camera.svg
+	Camera Icon = "outlined/camera"
 	
 	// CameraFront is the "camera_front" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/camera_front.svg
-	CameraFront Icon = "camera_front"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/camera_front.svg
+	CameraFront Icon = "outlined/camera_front"
 	
 	// CameraIndoor is the "camera_indoor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/camera_indoor.svg
-	CameraIndoor Icon = "camera_indoor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/camera_indoor.svg
+	CameraIndoor Icon = "outlined/camera_indoor"
 	
 	// CameraOutdoor is the "camera_outdoor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/camera_outdoor.svg
-	CameraOutdoor Icon = "camera_outdoor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/camera_outdoor.svg
+	CameraOutdoor Icon = "outlined/camera_outdoor"
 	
 	// CameraRear is the "camera_rear" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/camera_rear.svg
-	CameraRear Icon = "camera_rear"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/camera_rear.svg
+	CameraRear Icon = "outlined/camera_rear"
 	
 	// CameraRoll is the "camera_roll" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/camera_roll.svg
-	CameraRoll Icon = "camera_roll"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/camera_roll.svg
+	CameraRoll Icon = "outlined/camera_roll"
 	
 	// CameraVideo is the "camera_video" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/camera_video.svg
-	CameraVideo Icon = "camera_video"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/camera_video.svg
+	CameraVideo Icon = "outlined/camera_video"
 	
 	// Cameraswitch is the "cameraswitch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cameraswitch.svg
-	Cameraswitch Icon = "cameraswitch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cameraswitch.svg
+	Cameraswitch Icon = "outlined/cameraswitch"
 	
 	// Campaign is the "campaign" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/campaign.svg
-	Campaign Icon = "campaign"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/campaign.svg
+	Campaign Icon = "outlined/campaign"
 	
 	// Camping is the "camping" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/camping.svg
-	Camping Icon = "camping"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/camping.svg
+	Camping Icon = "outlined/camping"
 	
 	// Cancel is the "cancel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cancel.svg
-	Cancel Icon = "cancel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cancel.svg
+	Cancel Icon = "outlined/cancel"
 	
 	// CancelPresentation is the "cancel_presentation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cancel_presentation.svg
-	CancelPresentation Icon = "cancel_presentation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cancel_presentation.svg
+	CancelPresentation Icon = "outlined/cancel_presentation"
 	
 	// CancelScheduleSend is the "cancel_schedule_send" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cancel_schedule_send.svg
-	CancelScheduleSend Icon = "cancel_schedule_send"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cancel_schedule_send.svg
+	CancelScheduleSend Icon = "outlined/cancel_schedule_send"
 	
 	// CandlestickChart is the "candlestick_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/candlestick_chart.svg
-	CandlestickChart Icon = "candlestick_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/candlestick_chart.svg
+	CandlestickChart Icon = "outlined/candlestick_chart"
 	
 	// CaptivePortal is the "captive_portal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/captive_portal.svg
-	CaptivePortal Icon = "captive_portal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/captive_portal.svg
+	CaptivePortal Icon = "outlined/captive_portal"
 	
 	// Capture is the "capture" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/capture.svg
-	Capture Icon = "capture"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/capture.svg
+	Capture Icon = "outlined/capture"
 	
 	// CarCrash is the "car_crash" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/car_crash.svg
-	CarCrash Icon = "car_crash"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/car_crash.svg
+	CarCrash Icon = "outlined/car_crash"
 	
 	// CarRental is the "car_rental" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/car_rental.svg
-	CarRental Icon = "car_rental"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/car_rental.svg
+	CarRental Icon = "outlined/car_rental"
 	
 	// CarRepair is the "car_repair" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/car_repair.svg
-	CarRepair Icon = "car_repair"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/car_repair.svg
+	CarRepair Icon = "outlined/car_repair"
 	
 	// CardMembership is the "card_membership" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/card_membership.svg
-	CardMembership Icon = "card_membership"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/card_membership.svg
+	CardMembership Icon = "outlined/card_membership"
 	
 	// CardTravel is the "card_travel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/card_travel.svg
-	CardTravel Icon = "card_travel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/card_travel.svg
+	CardTravel Icon = "outlined/card_travel"
 	
 	// Cardiology is the "cardiology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cardiology.svg
-	Cardiology Icon = "cardiology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cardiology.svg
+	Cardiology Icon = "outlined/cardiology"
 	
 	// Cards is the "cards" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cards.svg
-	Cards Icon = "cards"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cards.svg
+	Cards Icon = "outlined/cards"
 	
 	// Carpenter is the "carpenter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/carpenter.svg
-	Carpenter Icon = "carpenter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/carpenter.svg
+	Carpenter Icon = "outlined/carpenter"
 	
 	// Cases is the "cases" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cases.svg
-	Cases Icon = "cases"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cases.svg
+	Cases Icon = "outlined/cases"
 	
 	// Casino is the "casino" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/casino.svg
-	Casino Icon = "casino"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/casino.svg
+	Casino Icon = "outlined/casino"
 	
 	// Cast is the "cast" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cast.svg
-	Cast Icon = "cast"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cast.svg
+	Cast Icon = "outlined/cast"
 	
 	// CastConnected is the "cast_connected" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cast_connected.svg
-	CastConnected Icon = "cast_connected"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cast_connected.svg
+	CastConnected Icon = "outlined/cast_connected"
 	
 	// CastForEducation is the "cast_for_education" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cast_for_education.svg
-	CastForEducation Icon = "cast_for_education"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cast_for_education.svg
+	CastForEducation Icon = "outlined/cast_for_education"
 	
 	// CastPause is the "cast_pause" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cast_pause.svg
-	CastPause Icon = "cast_pause"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cast_pause.svg
+	CastPause Icon = "outlined/cast_pause"
 	
 	// CastWarning is the "cast_warning" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cast_warning.svg
-	CastWarning Icon = "cast_warning"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cast_warning.svg
+	CastWarning Icon = "outlined/cast_warning"
 	
 	// Castle is the "castle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/castle.svg
-	Castle Icon = "castle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/castle.svg
+	Castle Icon = "outlined/castle"
 	
 	// Category is the "category" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/category.svg
-	Category Icon = "category"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/category.svg
+	Category Icon = "outlined/category"
 	
 	// Celebration is the "celebration" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/celebration.svg
-	Celebration Icon = "celebration"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/celebration.svg
+	Celebration Icon = "outlined/celebration"
 	
 	// CellMerge is the "cell_merge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cell_merge.svg
-	CellMerge Icon = "cell_merge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cell_merge.svg
+	CellMerge Icon = "outlined/cell_merge"
 	
 	// CellTower is the "cell_tower" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cell_tower.svg
-	CellTower Icon = "cell_tower"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cell_tower.svg
+	CellTower Icon = "outlined/cell_tower"
 	
 	// CellWifi is the "cell_wifi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cell_wifi.svg
-	CellWifi Icon = "cell_wifi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cell_wifi.svg
+	CellWifi Icon = "outlined/cell_wifi"
 	
 	// CenterFocusStrong is the "center_focus_strong" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/center_focus_strong.svg
-	CenterFocusStrong Icon = "center_focus_strong"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/center_focus_strong.svg
+	CenterFocusStrong Icon = "outlined/center_focus_strong"
 	
 	// CenterFocusWeak is the "center_focus_weak" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/center_focus_weak.svg
-	CenterFocusWeak Icon = "center_focus_weak"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/center_focus_weak.svg
+	CenterFocusWeak Icon = "outlined/center_focus_weak"
 	
 	// Chair is the "chair" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chair.svg
-	Chair Icon = "chair"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chair.svg
+	Chair Icon = "outlined/chair"
 	
 	// ChairAlt is the "chair_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chair_alt.svg
-	ChairAlt Icon = "chair_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chair_alt.svg
+	ChairAlt Icon = "outlined/chair_alt"
 	
 	// Chalet is the "chalet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chalet.svg
-	Chalet Icon = "chalet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chalet.svg
+	Chalet Icon = "outlined/chalet"
 	
 	// ChangeCircle is the "change_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/change_circle.svg
-	ChangeCircle Icon = "change_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/change_circle.svg
+	ChangeCircle Icon = "outlined/change_circle"
 	
 	// ChangeHistory is the "change_history" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/change_history.svg
-	ChangeHistory Icon = "change_history"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/change_history.svg
+	ChangeHistory Icon = "outlined/change_history"
 	
 	// Charger is the "charger" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/charger.svg
-	Charger Icon = "charger"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/charger.svg
+	Charger Icon = "outlined/charger"
 	
 	// ChargingStation is the "charging_station" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/charging_station.svg
-	ChargingStation Icon = "charging_station"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/charging_station.svg
+	ChargingStation Icon = "outlined/charging_station"
 	
 	// ChartData is the "chart_data" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chart_data.svg
-	ChartData Icon = "chart_data"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chart_data.svg
+	ChartData Icon = "outlined/chart_data"
 	
 	// Chat is the "chat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chat.svg
-	Chat Icon = "chat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chat.svg
+	Chat Icon = "outlined/chat"
 	
 	// ChatAddOn is the "chat_add_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chat_add_on.svg
-	ChatAddOn Icon = "chat_add_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chat_add_on.svg
+	ChatAddOn Icon = "outlined/chat_add_on"
 	
 	// ChatAppsScript is the "chat_apps_script" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chat_apps_script.svg
-	ChatAppsScript Icon = "chat_apps_script"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chat_apps_script.svg
+	ChatAppsScript Icon = "outlined/chat_apps_script"
 	
 	// ChatBubble is the "chat_bubble" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chat_bubble.svg
-	ChatBubble Icon = "chat_bubble"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chat_bubble.svg
+	ChatBubble Icon = "outlined/chat_bubble"
 	
 	// ChatError is the "chat_error" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chat_error.svg
-	ChatError Icon = "chat_error"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chat_error.svg
+	ChatError Icon = "outlined/chat_error"
 	
 	// ChatPasteGo is the "chat_paste_go" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chat_paste_go.svg
-	ChatPasteGo Icon = "chat_paste_go"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chat_paste_go.svg
+	ChatPasteGo Icon = "outlined/chat_paste_go"
 	
 	// Check is the "check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/check.svg
-	Check Icon = "check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/check.svg
+	Check Icon = "outlined/check"
 	
 	// CheckBox is the "check_box" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/check_box.svg
-	CheckBox Icon = "check_box"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/check_box.svg
+	CheckBox Icon = "outlined/check_box"
 	
 	// CheckBoxOutlineBlank is the "check_box_outline_blank" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/check_box_outline_blank.svg
-	CheckBoxOutlineBlank Icon = "check_box_outline_blank"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/check_box_outline_blank.svg
+	CheckBoxOutlineBlank Icon = "outlined/check_box_outline_blank"
 	
 	// CheckCircle is the "check_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/check_circle.svg
-	CheckCircle Icon = "check_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/check_circle.svg
+	CheckCircle Icon = "outlined/check_circle"
 	
 	// CheckInOut is the "check_in_out" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/check_in_out.svg
-	CheckInOut Icon = "check_in_out"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/check_in_out.svg
+	CheckInOut Icon = "outlined/check_in_out"
 	
 	// CheckIndeterminateSmall is the "check_indeterminate_small" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/check_indeterminate_small.svg
-	CheckIndeterminateSmall Icon = "check_indeterminate_small"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/check_indeterminate_small.svg
+	CheckIndeterminateSmall Icon = "outlined/check_indeterminate_small"
 	
 	// CheckSmall is the "check_small" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/check_small.svg
-	CheckSmall Icon = "check_small"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/check_small.svg
+	CheckSmall Icon = "outlined/check_small"
 	
 	// Checklist is the "checklist" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/checklist.svg
-	Checklist Icon = "checklist"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/checklist.svg
+	Checklist Icon = "outlined/checklist"
 	
 	// ChecklistRtl is the "checklist_rtl" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/checklist_rtl.svg
-	ChecklistRtl Icon = "checklist_rtl"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/checklist_rtl.svg
+	ChecklistRtl Icon = "outlined/checklist_rtl"
 	
 	// Checkroom is the "checkroom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/checkroom.svg
-	Checkroom Icon = "checkroom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/checkroom.svg
+	Checkroom Icon = "outlined/checkroom"
 	
 	// Cheer is the "cheer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cheer.svg
-	Cheer Icon = "cheer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cheer.svg
+	Cheer Icon = "outlined/cheer"
 	
 	// Chess is the "chess" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chess.svg
-	Chess Icon = "chess"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chess.svg
+	Chess Icon = "outlined/chess"
 	
 	// ChevronLeft is the "chevron_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chevron_left.svg
-	ChevronLeft Icon = "chevron_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chevron_left.svg
+	ChevronLeft Icon = "outlined/chevron_left"
 	
 	// ChevronRight is the "chevron_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chevron_right.svg
-	ChevronRight Icon = "chevron_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chevron_right.svg
+	ChevronRight Icon = "outlined/chevron_right"
 	
 	// ChildCare is the "child_care" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/child_care.svg
-	ChildCare Icon = "child_care"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/child_care.svg
+	ChildCare Icon = "outlined/child_care"
 	
 	// ChildFriendly is the "child_friendly" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/child_friendly.svg
-	ChildFriendly Icon = "child_friendly"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/child_friendly.svg
+	ChildFriendly Icon = "outlined/child_friendly"
 	
 	// ChipExtraction is the "chip_extraction" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chip_extraction.svg
-	ChipExtraction Icon = "chip_extraction"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chip_extraction.svg
+	ChipExtraction Icon = "outlined/chip_extraction"
 	
 	// Chips is the "chips" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chips.svg
-	Chips Icon = "chips"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chips.svg
+	Chips Icon = "outlined/chips"
 	
 	// ChromeReaderMode is the "chrome_reader_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chrome_reader_mode.svg
-	ChromeReaderMode Icon = "chrome_reader_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chrome_reader_mode.svg
+	ChromeReaderMode Icon = "outlined/chrome_reader_mode"
 	
 	// Chromecast2 is the "chromecast_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chromecast_2.svg
-	Chromecast2 Icon = "chromecast_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chromecast_2.svg
+	Chromecast2 Icon = "outlined/chromecast_2"
 	
 	// ChromecastDevice is the "chromecast_device" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chromecast_device.svg
-	ChromecastDevice Icon = "chromecast_device"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chromecast_device.svg
+	ChromecastDevice Icon = "outlined/chromecast_device"
 	
 	// Chronic is the "chronic" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/chronic.svg
-	Chronic Icon = "chronic"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/chronic.svg
+	Chronic Icon = "outlined/chronic"
 	
 	// Church is the "church" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/church.svg
-	Church Icon = "church"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/church.svg
+	Church Icon = "outlined/church"
 	
 	// CinematicBlur is the "cinematic_blur" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cinematic_blur.svg
-	CinematicBlur Icon = "cinematic_blur"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cinematic_blur.svg
+	CinematicBlur Icon = "outlined/cinematic_blur"
 	
 	// Circle is the "circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/circle.svg
-	Circle Icon = "circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/circle.svg
+	Circle Icon = "outlined/circle"
 	
 	// CircleNotifications is the "circle_notifications" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/circle_notifications.svg
-	CircleNotifications Icon = "circle_notifications"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/circle_notifications.svg
+	CircleNotifications Icon = "outlined/circle_notifications"
 	
 	// Circles is the "circles" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/circles.svg
-	Circles Icon = "circles"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/circles.svg
+	Circles Icon = "outlined/circles"
 	
 	// CirclesExt is the "circles_ext" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/circles_ext.svg
-	CirclesExt Icon = "circles_ext"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/circles_ext.svg
+	CirclesExt Icon = "outlined/circles_ext"
 	
 	// Clarify is the "clarify" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clarify.svg
-	Clarify Icon = "clarify"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clarify.svg
+	Clarify Icon = "outlined/clarify"
 	
 	// CleanHands is the "clean_hands" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clean_hands.svg
-	CleanHands Icon = "clean_hands"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clean_hands.svg
+	CleanHands Icon = "outlined/clean_hands"
 	
 	// CleaningBucket is the "cleaning_bucket" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cleaning_bucket.svg
-	CleaningBucket Icon = "cleaning_bucket"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cleaning_bucket.svg
+	CleaningBucket Icon = "outlined/cleaning_bucket"
 	
 	// CleaningServices is the "cleaning_services" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cleaning_services.svg
-	CleaningServices Icon = "cleaning_services"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cleaning_services.svg
+	CleaningServices Icon = "outlined/cleaning_services"
 	
 	// ClearAll is the "clear_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clear_all.svg
-	ClearAll Icon = "clear_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clear_all.svg
+	ClearAll Icon = "outlined/clear_all"
 	
 	// ClearDay is the "clear_day" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clear_day.svg
-	ClearDay Icon = "clear_day"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clear_day.svg
+	ClearDay Icon = "outlined/clear_day"
 	
 	// ClearNight is the "clear_night" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clear_night.svg
-	ClearNight Icon = "clear_night"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clear_night.svg
+	ClearNight Icon = "outlined/clear_night"
 	
 	// ClimateMiniSplit is the "climate_mini_split" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/climate_mini_split.svg
-	ClimateMiniSplit Icon = "climate_mini_split"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/climate_mini_split.svg
+	ClimateMiniSplit Icon = "outlined/climate_mini_split"
 	
 	// ClinicalNotes is the "clinical_notes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clinical_notes.svg
-	ClinicalNotes Icon = "clinical_notes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clinical_notes.svg
+	ClinicalNotes Icon = "outlined/clinical_notes"
 	
 	// ClockLoader10 is the "clock_loader_10" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clock_loader_10.svg
-	ClockLoader10 Icon = "clock_loader_10"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clock_loader_10.svg
+	ClockLoader10 Icon = "outlined/clock_loader_10"
 	
 	// ClockLoader20 is the "clock_loader_20" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clock_loader_20.svg
-	ClockLoader20 Icon = "clock_loader_20"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clock_loader_20.svg
+	ClockLoader20 Icon = "outlined/clock_loader_20"
 	
 	// ClockLoader40 is the "clock_loader_40" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clock_loader_40.svg
-	ClockLoader40 Icon = "clock_loader_40"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clock_loader_40.svg
+	ClockLoader40 Icon = "outlined/clock_loader_40"
 	
 	// ClockLoader60 is the "clock_loader_60" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clock_loader_60.svg
-	ClockLoader60 Icon = "clock_loader_60"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clock_loader_60.svg
+	ClockLoader60 Icon = "outlined/clock_loader_60"
 	
 	// ClockLoader80 is the "clock_loader_80" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clock_loader_80.svg
-	ClockLoader80 Icon = "clock_loader_80"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clock_loader_80.svg
+	ClockLoader80 Icon = "outlined/clock_loader_80"
 	
 	// ClockLoader90 is the "clock_loader_90" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/clock_loader_90.svg
-	ClockLoader90 Icon = "clock_loader_90"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/clock_loader_90.svg
+	ClockLoader90 Icon = "outlined/clock_loader_90"
 	
 	// Close is the "close" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/close.svg
-	Close Icon = "close"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/close.svg
+	Close Icon = "outlined/close"
 	
 	// CloseFullscreen is the "close_fullscreen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/close_fullscreen.svg
-	CloseFullscreen Icon = "close_fullscreen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/close_fullscreen.svg
+	CloseFullscreen Icon = "outlined/close_fullscreen"
 	
 	// ClosedCaption is the "closed_caption" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/closed_caption.svg
-	ClosedCaption Icon = "closed_caption"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/closed_caption.svg
+	ClosedCaption Icon = "outlined/closed_caption"
 	
 	// ClosedCaptionDisabled is the "closed_caption_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/closed_caption_disabled.svg
-	ClosedCaptionDisabled Icon = "closed_caption_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/closed_caption_disabled.svg
+	ClosedCaptionDisabled Icon = "outlined/closed_caption_disabled"
 	
 	// Cloud is the "cloud" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cloud.svg
-	Cloud Icon = "cloud"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cloud.svg
+	Cloud Icon = "outlined/cloud"
 	
 	// CloudCircle is the "cloud_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cloud_circle.svg
-	CloudCircle Icon = "cloud_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cloud_circle.svg
+	CloudCircle Icon = "outlined/cloud_circle"
 	
 	// CloudDone is the "cloud_done" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cloud_done.svg
-	CloudDone Icon = "cloud_done"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cloud_done.svg
+	CloudDone Icon = "outlined/cloud_done"
 	
 	// CloudDownload is the "cloud_download" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cloud_download.svg
-	CloudDownload Icon = "cloud_download"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cloud_download.svg
+	CloudDownload Icon = "outlined/cloud_download"
 	
 	// CloudOff is the "cloud_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cloud_off.svg
-	CloudOff Icon = "cloud_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cloud_off.svg
+	CloudOff Icon = "outlined/cloud_off"
 	
 	// CloudSync is the "cloud_sync" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cloud_sync.svg
-	CloudSync Icon = "cloud_sync"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cloud_sync.svg
+	CloudSync Icon = "outlined/cloud_sync"
 	
 	// CloudUpload is the "cloud_upload" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cloud_upload.svg
-	CloudUpload Icon = "cloud_upload"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cloud_upload.svg
+	CloudUpload Icon = "outlined/cloud_upload"
 	
 	// CloudySnowing is the "cloudy_snowing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cloudy_snowing.svg
-	CloudySnowing Icon = "cloudy_snowing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cloudy_snowing.svg
+	CloudySnowing Icon = "outlined/cloudy_snowing"
 	
 	// Co2 is the "co2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/co2.svg
-	Co2 Icon = "co2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/co2.svg
+	Co2 Icon = "outlined/co2"
 	
 	// CoPresent is the "co_present" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/co_present.svg
-	CoPresent Icon = "co_present"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/co_present.svg
+	CoPresent Icon = "outlined/co_present"
 	
 	// Code is the "code" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/code.svg
-	Code Icon = "code"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/code.svg
+	Code Icon = "outlined/code"
 	
 	// CodeBlocks is the "code_blocks" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/code_blocks.svg
-	CodeBlocks Icon = "code_blocks"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/code_blocks.svg
+	CodeBlocks Icon = "outlined/code_blocks"
 	
 	// CodeOff is the "code_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/code_off.svg
-	CodeOff Icon = "code_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/code_off.svg
+	CodeOff Icon = "outlined/code_off"
 	
 	// Coffee is the "coffee" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/coffee.svg
-	Coffee Icon = "coffee"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/coffee.svg
+	Coffee Icon = "outlined/coffee"
 	
 	// CoffeeMaker is the "coffee_maker" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/coffee_maker.svg
-	CoffeeMaker Icon = "coffee_maker"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/coffee_maker.svg
+	CoffeeMaker Icon = "outlined/coffee_maker"
 	
 	// Cognition is the "cognition" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cognition.svg
-	Cognition Icon = "cognition"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cognition.svg
+	Cognition Icon = "outlined/cognition"
 	
 	// CollapseAll is the "collapse_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/collapse_all.svg
-	CollapseAll Icon = "collapse_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/collapse_all.svg
+	CollapseAll Icon = "outlined/collapse_all"
 	
 	// CollectionsBookmark is the "collections_bookmark" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/collections_bookmark.svg
-	CollectionsBookmark Icon = "collections_bookmark"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/collections_bookmark.svg
+	CollectionsBookmark Icon = "outlined/collections_bookmark"
 	
 	// Colorize is the "colorize" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/colorize.svg
-	Colorize Icon = "colorize"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/colorize.svg
+	Colorize Icon = "outlined/colorize"
 	
 	// Colors is the "colors" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/colors.svg
-	Colors Icon = "colors"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/colors.svg
+	Colors Icon = "outlined/colors"
 	
 	// ComicBubble is the "comic_bubble" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/comic_bubble.svg
-	ComicBubble Icon = "comic_bubble"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/comic_bubble.svg
+	ComicBubble Icon = "outlined/comic_bubble"
 	
 	// Comment is the "comment" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/comment.svg
-	Comment Icon = "comment"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/comment.svg
+	Comment Icon = "outlined/comment"
 	
 	// CommentBank is the "comment_bank" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/comment_bank.svg
-	CommentBank Icon = "comment_bank"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/comment_bank.svg
+	CommentBank Icon = "outlined/comment_bank"
 	
 	// CommentsDisabled is the "comments_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/comments_disabled.svg
-	CommentsDisabled Icon = "comments_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/comments_disabled.svg
+	CommentsDisabled Icon = "outlined/comments_disabled"
 	
 	// Commit is the "commit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/commit.svg
-	Commit Icon = "commit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/commit.svg
+	Commit Icon = "outlined/commit"
 	
 	// Communication is the "communication" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/communication.svg
-	Communication Icon = "communication"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/communication.svg
+	Communication Icon = "outlined/communication"
 	
 	// Communities is the "communities" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/communities.svg
-	Communities Icon = "communities"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/communities.svg
+	Communities Icon = "outlined/communities"
 	
 	// Commute is the "commute" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/commute.svg
-	Commute Icon = "commute"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/commute.svg
+	Commute Icon = "outlined/commute"
 	
 	// Compare is the "compare" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/compare.svg
-	Compare Icon = "compare"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/compare.svg
+	Compare Icon = "outlined/compare"
 	
 	// CompareArrows is the "compare_arrows" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/compare_arrows.svg
-	CompareArrows Icon = "compare_arrows"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/compare_arrows.svg
+	CompareArrows Icon = "outlined/compare_arrows"
 	
 	// CompassCalibration is the "compass_calibration" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/compass_calibration.svg
-	CompassCalibration Icon = "compass_calibration"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/compass_calibration.svg
+	CompassCalibration Icon = "outlined/compass_calibration"
 	
 	// ComponentExchange is the "component_exchange" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/component_exchange.svg
-	ComponentExchange Icon = "component_exchange"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/component_exchange.svg
+	ComponentExchange Icon = "outlined/component_exchange"
 	
 	// Compost is the "compost" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/compost.svg
-	Compost Icon = "compost"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/compost.svg
+	Compost Icon = "outlined/compost"
 	
 	// Compress is the "compress" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/compress.svg
-	Compress Icon = "compress"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/compress.svg
+	Compress Icon = "outlined/compress"
 	
 	// Computer is the "computer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/computer.svg
-	Computer Icon = "computer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/computer.svg
+	Computer Icon = "outlined/computer"
 	
 	// Conditions is the "conditions" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/conditions.svg
-	Conditions Icon = "conditions"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/conditions.svg
+	Conditions Icon = "outlined/conditions"
 	
 	// ConfirmationNumber is the "confirmation_number" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/confirmation_number.svg
-	ConfirmationNumber Icon = "confirmation_number"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/confirmation_number.svg
+	ConfirmationNumber Icon = "outlined/confirmation_number"
 	
 	// Congenital is the "congenital" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/congenital.svg
-	Congenital Icon = "congenital"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/congenital.svg
+	Congenital Icon = "outlined/congenital"
 	
 	// ConnectWithoutContact is the "connect_without_contact" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/connect_without_contact.svg
-	ConnectWithoutContact Icon = "connect_without_contact"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/connect_without_contact.svg
+	ConnectWithoutContact Icon = "outlined/connect_without_contact"
 	
 	// ConnectedTv is the "connected_tv" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/connected_tv.svg
-	ConnectedTv Icon = "connected_tv"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/connected_tv.svg
+	ConnectedTv Icon = "outlined/connected_tv"
 	
 	// ConnectingAirports is the "connecting_airports" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/connecting_airports.svg
-	ConnectingAirports Icon = "connecting_airports"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/connecting_airports.svg
+	ConnectingAirports Icon = "outlined/connecting_airports"
 	
 	// Construction is the "construction" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/construction.svg
-	Construction Icon = "construction"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/construction.svg
+	Construction Icon = "outlined/construction"
 	
 	// ContactEmergency is the "contact_emergency" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contact_emergency.svg
-	ContactEmergency Icon = "contact_emergency"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contact_emergency.svg
+	ContactEmergency Icon = "outlined/contact_emergency"
 	
 	// ContactMail is the "contact_mail" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contact_mail.svg
-	ContactMail Icon = "contact_mail"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contact_mail.svg
+	ContactMail Icon = "outlined/contact_mail"
 	
 	// ContactPage is the "contact_page" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contact_page.svg
-	ContactPage Icon = "contact_page"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contact_page.svg
+	ContactPage Icon = "outlined/contact_page"
 	
 	// ContactPhone is the "contact_phone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contact_phone.svg
-	ContactPhone Icon = "contact_phone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contact_phone.svg
+	ContactPhone Icon = "outlined/contact_phone"
 	
 	// ContactSupport is the "contact_support" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contact_support.svg
-	ContactSupport Icon = "contact_support"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contact_support.svg
+	ContactSupport Icon = "outlined/contact_support"
 	
 	// Contactless is the "contactless" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contactless.svg
-	Contactless Icon = "contactless"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contactless.svg
+	Contactless Icon = "outlined/contactless"
 	
 	// ContactlessOff is the "contactless_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contactless_off.svg
-	ContactlessOff Icon = "contactless_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contactless_off.svg
+	ContactlessOff Icon = "outlined/contactless_off"
 	
 	// Contacts is the "contacts" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contacts.svg
-	Contacts Icon = "contacts"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contacts.svg
+	Contacts Icon = "outlined/contacts"
 	
 	// ContentCopy is the "content_copy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/content_copy.svg
-	ContentCopy Icon = "content_copy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/content_copy.svg
+	ContentCopy Icon = "outlined/content_copy"
 	
 	// ContentCut is the "content_cut" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/content_cut.svg
-	ContentCut Icon = "content_cut"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/content_cut.svg
+	ContentCut Icon = "outlined/content_cut"
 	
 	// ContentPaste is the "content_paste" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/content_paste.svg
-	ContentPaste Icon = "content_paste"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/content_paste.svg
+	ContentPaste Icon = "outlined/content_paste"
 	
 	// ContentPasteGo is the "content_paste_go" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/content_paste_go.svg
-	ContentPasteGo Icon = "content_paste_go"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/content_paste_go.svg
+	ContentPasteGo Icon = "outlined/content_paste_go"
 	
 	// ContentPasteOff is the "content_paste_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/content_paste_off.svg
-	ContentPasteOff Icon = "content_paste_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/content_paste_off.svg
+	ContentPasteOff Icon = "outlined/content_paste_off"
 	
 	// ContentPasteSearch is the "content_paste_search" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/content_paste_search.svg
-	ContentPasteSearch Icon = "content_paste_search"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/content_paste_search.svg
+	ContentPasteSearch Icon = "outlined/content_paste_search"
 	
 	// Contract is the "contract" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contract.svg
-	Contract Icon = "contract"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contract.svg
+	Contract Icon = "outlined/contract"
 	
 	// ContractDelete is the "contract_delete" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contract_delete.svg
-	ContractDelete Icon = "contract_delete"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contract_delete.svg
+	ContractDelete Icon = "outlined/contract_delete"
 	
 	// ContractEdit is the "contract_edit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contract_edit.svg
-	ContractEdit Icon = "contract_edit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contract_edit.svg
+	ContractEdit Icon = "outlined/contract_edit"
 	
 	// Contrast is the "contrast" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contrast.svg
-	Contrast Icon = "contrast"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contrast.svg
+	Contrast Icon = "outlined/contrast"
 	
 	// ContrastRtlOff is the "contrast_rtl_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/contrast_rtl_off.svg
-	ContrastRtlOff Icon = "contrast_rtl_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/contrast_rtl_off.svg
+	ContrastRtlOff Icon = "outlined/contrast_rtl_off"
 	
 	// ControlCamera is the "control_camera" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/control_camera.svg
-	ControlCamera Icon = "control_camera"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/control_camera.svg
+	ControlCamera Icon = "outlined/control_camera"
 	
 	// ControlPointDuplicate is the "control_point_duplicate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/control_point_duplicate.svg
-	ControlPointDuplicate Icon = "control_point_duplicate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/control_point_duplicate.svg
+	ControlPointDuplicate Icon = "outlined/control_point_duplicate"
 	
 	// ControllerGen is the "controller_gen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/controller_gen.svg
-	ControllerGen Icon = "controller_gen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/controller_gen.svg
+	ControllerGen Icon = "outlined/controller_gen"
 	
 	// ConversionPath is the "conversion_path" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/conversion_path.svg
-	ConversionPath Icon = "conversion_path"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/conversion_path.svg
+	ConversionPath Icon = "outlined/conversion_path"
 	
 	// ConversionPathOff is the "conversion_path_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/conversion_path_off.svg
-	ConversionPathOff Icon = "conversion_path_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/conversion_path_off.svg
+	ConversionPathOff Icon = "outlined/conversion_path_off"
 	
 	// ConveyorBelt is the "conveyor_belt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/conveyor_belt.svg
-	ConveyorBelt Icon = "conveyor_belt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/conveyor_belt.svg
+	ConveyorBelt Icon = "outlined/conveyor_belt"
 	
 	// Cookie is the "cookie" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cookie.svg
-	Cookie Icon = "cookie"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cookie.svg
+	Cookie Icon = "outlined/cookie"
 	
 	// CookieOff is the "cookie_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cookie_off.svg
-	CookieOff Icon = "cookie_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cookie_off.svg
+	CookieOff Icon = "outlined/cookie_off"
 	
 	// Cooking is the "cooking" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cooking.svg
-	Cooking Icon = "cooking"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cooking.svg
+	Cooking Icon = "outlined/cooking"
 	
 	// CoolToDry is the "cool_to_dry" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cool_to_dry.svg
-	CoolToDry Icon = "cool_to_dry"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cool_to_dry.svg
+	CoolToDry Icon = "outlined/cool_to_dry"
 	
 	// CopyAll is the "copy_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/copy_all.svg
-	CopyAll Icon = "copy_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/copy_all.svg
+	CopyAll Icon = "outlined/copy_all"
 	
 	// Copyright is the "copyright" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/copyright.svg
-	Copyright Icon = "copyright"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/copyright.svg
+	Copyright Icon = "outlined/copyright"
 	
 	// Coronavirus is the "coronavirus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/coronavirus.svg
-	Coronavirus Icon = "coronavirus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/coronavirus.svg
+	Coronavirus Icon = "outlined/coronavirus"
 	
 	// CorporateFare is the "corporate_fare" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/corporate_fare.svg
-	CorporateFare Icon = "corporate_fare"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/corporate_fare.svg
+	CorporateFare Icon = "outlined/corporate_fare"
 	
 	// Cottage is the "cottage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cottage.svg
-	Cottage Icon = "cottage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cottage.svg
+	Cottage Icon = "outlined/cottage"
 	
 	// Counter0 is the "counter_0" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_0.svg
-	Counter0 Icon = "counter_0"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_0.svg
+	Counter0 Icon = "outlined/counter_0"
 	
 	// Counter1 is the "counter_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_1.svg
-	Counter1 Icon = "counter_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_1.svg
+	Counter1 Icon = "outlined/counter_1"
 	
 	// Counter2 is the "counter_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_2.svg
-	Counter2 Icon = "counter_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_2.svg
+	Counter2 Icon = "outlined/counter_2"
 	
 	// Counter3 is the "counter_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_3.svg
-	Counter3 Icon = "counter_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_3.svg
+	Counter3 Icon = "outlined/counter_3"
 	
 	// Counter4 is the "counter_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_4.svg
-	Counter4 Icon = "counter_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_4.svg
+	Counter4 Icon = "outlined/counter_4"
 	
 	// Counter5 is the "counter_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_5.svg
-	Counter5 Icon = "counter_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_5.svg
+	Counter5 Icon = "outlined/counter_5"
 	
 	// Counter6 is the "counter_6" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_6.svg
-	Counter6 Icon = "counter_6"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_6.svg
+	Counter6 Icon = "outlined/counter_6"
 	
 	// Counter7 is the "counter_7" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_7.svg
-	Counter7 Icon = "counter_7"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_7.svg
+	Counter7 Icon = "outlined/counter_7"
 	
 	// Counter8 is the "counter_8" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_8.svg
-	Counter8 Icon = "counter_8"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_8.svg
+	Counter8 Icon = "outlined/counter_8"
 	
 	// Counter9 is the "counter_9" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/counter_9.svg
-	Counter9 Icon = "counter_9"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/counter_9.svg
+	Counter9 Icon = "outlined/counter_9"
 	
 	// Countertops is the "countertops" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/countertops.svg
-	Countertops Icon = "countertops"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/countertops.svg
+	Countertops Icon = "outlined/countertops"
 	
 	// CreateNewFolder is the "create_new_folder" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/create_new_folder.svg
-	CreateNewFolder Icon = "create_new_folder"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/create_new_folder.svg
+	CreateNewFolder Icon = "outlined/create_new_folder"
 	
 	// CreditCard is the "credit_card" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/credit_card.svg
-	CreditCard Icon = "credit_card"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/credit_card.svg
+	CreditCard Icon = "outlined/credit_card"
 	
 	// CreditCardOff is the "credit_card_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/credit_card_off.svg
-	CreditCardOff Icon = "credit_card_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/credit_card_off.svg
+	CreditCardOff Icon = "outlined/credit_card_off"
 	
 	// CreditScore is the "credit_score" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/credit_score.svg
-	CreditScore Icon = "credit_score"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/credit_score.svg
+	CreditScore Icon = "outlined/credit_score"
 	
 	// Crib is the "crib" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crib.svg
-	Crib Icon = "crib"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crib.svg
+	Crib Icon = "outlined/crib"
 	
 	// CrisisAlert is the "crisis_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crisis_alert.svg
-	CrisisAlert Icon = "crisis_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crisis_alert.svg
+	CrisisAlert Icon = "outlined/crisis_alert"
 	
 	// Crop is the "crop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop.svg
-	Crop Icon = "crop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop.svg
+	Crop Icon = "outlined/crop"
 	
 	// Crop169 is the "crop_16_9" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop_16_9.svg
-	Crop169 Icon = "crop_16_9"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop_16_9.svg
+	Crop169 Icon = "outlined/crop_16_9"
 	
 	// Crop32 is the "crop_3_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop_3_2.svg
-	Crop32 Icon = "crop_3_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop_3_2.svg
+	Crop32 Icon = "outlined/crop_3_2"
 	
 	// Crop54 is the "crop_5_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop_5_4.svg
-	Crop54 Icon = "crop_5_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop_5_4.svg
+	Crop54 Icon = "outlined/crop_5_4"
 	
 	// Crop75 is the "crop_7_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop_7_5.svg
-	Crop75 Icon = "crop_7_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop_7_5.svg
+	Crop75 Icon = "outlined/crop_7_5"
 	
 	// CropFree is the "crop_free" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop_free.svg
-	CropFree Icon = "crop_free"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop_free.svg
+	CropFree Icon = "outlined/crop_free"
 	
 	// CropLandscape is the "crop_landscape" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop_landscape.svg
-	CropLandscape Icon = "crop_landscape"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop_landscape.svg
+	CropLandscape Icon = "outlined/crop_landscape"
 	
 	// CropPortrait is the "crop_portrait" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop_portrait.svg
-	CropPortrait Icon = "crop_portrait"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop_portrait.svg
+	CropPortrait Icon = "outlined/crop_portrait"
 	
 	// CropRotate is the "crop_rotate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop_rotate.svg
-	CropRotate Icon = "crop_rotate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop_rotate.svg
+	CropRotate Icon = "outlined/crop_rotate"
 	
 	// CropSquare is the "crop_square" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crop_square.svg
-	CropSquare Icon = "crop_square"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crop_square.svg
+	CropSquare Icon = "outlined/crop_square"
 	
 	// Crossword is the "crossword" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crossword.svg
-	Crossword Icon = "crossword"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crossword.svg
+	Crossword Icon = "outlined/crossword"
 	
 	// Crowdsource is the "crowdsource" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/crowdsource.svg
-	Crowdsource Icon = "crowdsource"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/crowdsource.svg
+	Crowdsource Icon = "outlined/crowdsource"
 	
 	// CrueltyFree is the "cruelty_free" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cruelty_free.svg
-	CrueltyFree Icon = "cruelty_free"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cruelty_free.svg
+	CrueltyFree Icon = "outlined/cruelty_free"
 	
 	// Css is the "css" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/css.svg
-	Css Icon = "css"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/css.svg
+	Css Icon = "outlined/css"
 	
 	// Csv is the "csv" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/csv.svg
-	Csv Icon = "csv"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/csv.svg
+	Csv Icon = "outlined/csv"
 	
 	// CurrencyBitcoin is the "currency_bitcoin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/currency_bitcoin.svg
-	CurrencyBitcoin Icon = "currency_bitcoin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/currency_bitcoin.svg
+	CurrencyBitcoin Icon = "outlined/currency_bitcoin"
 	
 	// CurrencyExchange is the "currency_exchange" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/currency_exchange.svg
-	CurrencyExchange Icon = "currency_exchange"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/currency_exchange.svg
+	CurrencyExchange Icon = "outlined/currency_exchange"
 	
 	// CurrencyFranc is the "currency_franc" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/currency_franc.svg
-	CurrencyFranc Icon = "currency_franc"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/currency_franc.svg
+	CurrencyFranc Icon = "outlined/currency_franc"
 	
 	// CurrencyLira is the "currency_lira" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/currency_lira.svg
-	CurrencyLira Icon = "currency_lira"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/currency_lira.svg
+	CurrencyLira Icon = "outlined/currency_lira"
 	
 	// CurrencyPound is the "currency_pound" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/currency_pound.svg
-	CurrencyPound Icon = "currency_pound"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/currency_pound.svg
+	CurrencyPound Icon = "outlined/currency_pound"
 	
 	// CurrencyRuble is the "currency_ruble" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/currency_ruble.svg
-	CurrencyRuble Icon = "currency_ruble"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/currency_ruble.svg
+	CurrencyRuble Icon = "outlined/currency_ruble"
 	
 	// CurrencyRupee is the "currency_rupee" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/currency_rupee.svg
-	CurrencyRupee Icon = "currency_rupee"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/currency_rupee.svg
+	CurrencyRupee Icon = "outlined/currency_rupee"
 	
 	// CurrencyYen is the "currency_yen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/currency_yen.svg
-	CurrencyYen Icon = "currency_yen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/currency_yen.svg
+	CurrencyYen Icon = "outlined/currency_yen"
 	
 	// CurrencyYuan is the "currency_yuan" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/currency_yuan.svg
-	CurrencyYuan Icon = "currency_yuan"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/currency_yuan.svg
+	CurrencyYuan Icon = "outlined/currency_yuan"
 	
 	// Curtains is the "curtains" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/curtains.svg
-	Curtains Icon = "curtains"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/curtains.svg
+	Curtains Icon = "outlined/curtains"
 	
 	// CurtainsClosed is the "curtains_closed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/curtains_closed.svg
-	CurtainsClosed Icon = "curtains_closed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/curtains_closed.svg
+	CurtainsClosed Icon = "outlined/curtains_closed"
 	
 	// CustomTypography is the "custom_typography" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/custom_typography.svg
-	CustomTypography Icon = "custom_typography"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/custom_typography.svg
+	CustomTypography Icon = "outlined/custom_typography"
 	
 	// Cut is the "cut" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cut.svg
-	Cut Icon = "cut"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cut.svg
+	Cut Icon = "outlined/cut"
 	
 	// Cycle is the "cycle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cycle.svg
-	Cycle Icon = "cycle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cycle.svg
+	Cycle Icon = "outlined/cycle"
 	
 	// Cyclone is the "cyclone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/cyclone.svg
-	Cyclone Icon = "cyclone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/cyclone.svg
+	Cyclone Icon = "outlined/cyclone"
 	
 	// Dangerous is the "dangerous" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dangerous.svg
-	Dangerous Icon = "dangerous"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dangerous.svg
+	Dangerous Icon = "outlined/dangerous"
 	
 	// DarkMode is the "dark_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dark_mode.svg
-	DarkMode Icon = "dark_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dark_mode.svg
+	DarkMode Icon = "outlined/dark_mode"
 	
 	// Dashboard is the "dashboard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dashboard.svg
-	Dashboard Icon = "dashboard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dashboard.svg
+	Dashboard Icon = "outlined/dashboard"
 	
 	// DashboardCustomize is the "dashboard_customize" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dashboard_customize.svg
-	DashboardCustomize Icon = "dashboard_customize"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dashboard_customize.svg
+	DashboardCustomize Icon = "outlined/dashboard_customize"
 	
 	// DataAlert is the "data_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_alert.svg
-	DataAlert Icon = "data_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_alert.svg
+	DataAlert Icon = "outlined/data_alert"
 	
 	// DataArray is the "data_array" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_array.svg
-	DataArray Icon = "data_array"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_array.svg
+	DataArray Icon = "outlined/data_array"
 	
 	// DataCheck is the "data_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_check.svg
-	DataCheck Icon = "data_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_check.svg
+	DataCheck Icon = "outlined/data_check"
 	
 	// DataExploration is the "data_exploration" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_exploration.svg
-	DataExploration Icon = "data_exploration"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_exploration.svg
+	DataExploration Icon = "outlined/data_exploration"
 	
 	// DataInfoAlert is the "data_info_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_info_alert.svg
-	DataInfoAlert Icon = "data_info_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_info_alert.svg
+	DataInfoAlert Icon = "outlined/data_info_alert"
 	
 	// DataLossPrevention is the "data_loss_prevention" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_loss_prevention.svg
-	DataLossPrevention Icon = "data_loss_prevention"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_loss_prevention.svg
+	DataLossPrevention Icon = "outlined/data_loss_prevention"
 	
 	// DataObject is the "data_object" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_object.svg
-	DataObject Icon = "data_object"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_object.svg
+	DataObject Icon = "outlined/data_object"
 	
 	// DataSaverOn is the "data_saver_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_saver_on.svg
-	DataSaverOn Icon = "data_saver_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_saver_on.svg
+	DataSaverOn Icon = "outlined/data_saver_on"
 	
 	// DataTable is the "data_table" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_table.svg
-	DataTable Icon = "data_table"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_table.svg
+	DataTable Icon = "outlined/data_table"
 	
 	// DataThresholding is the "data_thresholding" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_thresholding.svg
-	DataThresholding Icon = "data_thresholding"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_thresholding.svg
+	DataThresholding Icon = "outlined/data_thresholding"
 	
 	// DataUsage is the "data_usage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/data_usage.svg
-	DataUsage Icon = "data_usage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/data_usage.svg
+	DataUsage Icon = "outlined/data_usage"
 	
 	// Database is the "database" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/database.svg
-	Database Icon = "database"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/database.svg
+	Database Icon = "outlined/database"
 	
 	// Dataset is the "dataset" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dataset.svg
-	Dataset Icon = "dataset"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dataset.svg
+	Dataset Icon = "outlined/dataset"
 	
 	// DatasetLinked is the "dataset_linked" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dataset_linked.svg
-	DatasetLinked Icon = "dataset_linked"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dataset_linked.svg
+	DatasetLinked Icon = "outlined/dataset_linked"
 	
 	// DateRange is the "date_range" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/date_range.svg
-	DateRange Icon = "date_range"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/date_range.svg
+	DateRange Icon = "outlined/date_range"
 	
 	// Deblur is the "deblur" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/deblur.svg
-	Deblur Icon = "deblur"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/deblur.svg
+	Deblur Icon = "outlined/deblur"
 	
 	// Deceased is the "deceased" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/deceased.svg
-	Deceased Icon = "deceased"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/deceased.svg
+	Deceased Icon = "outlined/deceased"
 	
 	// DecimalDecrease is the "decimal_decrease" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/decimal_decrease.svg
-	DecimalDecrease Icon = "decimal_decrease"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/decimal_decrease.svg
+	DecimalDecrease Icon = "outlined/decimal_decrease"
 	
 	// DecimalIncrease is the "decimal_increase" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/decimal_increase.svg
-	DecimalIncrease Icon = "decimal_increase"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/decimal_increase.svg
+	DecimalIncrease Icon = "outlined/decimal_increase"
 	
 	// Deck is the "deck" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/deck.svg
-	Deck Icon = "deck"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/deck.svg
+	Deck Icon = "outlined/deck"
 	
 	// Dehaze is the "dehaze" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dehaze.svg
-	Dehaze Icon = "dehaze"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dehaze.svg
+	Dehaze Icon = "outlined/dehaze"
 	
 	// Delete is the "delete" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/delete.svg
-	Delete Icon = "delete"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/delete.svg
+	Delete Icon = "outlined/delete"
 	
 	// DeleteForever is the "delete_forever" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/delete_forever.svg
-	DeleteForever Icon = "delete_forever"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/delete_forever.svg
+	DeleteForever Icon = "outlined/delete_forever"
 	
 	// DeleteSweep is the "delete_sweep" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/delete_sweep.svg
-	DeleteSweep Icon = "delete_sweep"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/delete_sweep.svg
+	DeleteSweep Icon = "outlined/delete_sweep"
 	
 	// Demography is the "demography" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/demography.svg
-	Demography Icon = "demography"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/demography.svg
+	Demography Icon = "outlined/demography"
 	
 	// DensityLarge is the "density_large" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/density_large.svg
-	DensityLarge Icon = "density_large"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/density_large.svg
+	DensityLarge Icon = "outlined/density_large"
 	
 	// DensityMedium is the "density_medium" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/density_medium.svg
-	DensityMedium Icon = "density_medium"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/density_medium.svg
+	DensityMedium Icon = "outlined/density_medium"
 	
 	// DensitySmall is the "density_small" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/density_small.svg
-	DensitySmall Icon = "density_small"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/density_small.svg
+	DensitySmall Icon = "outlined/density_small"
 	
 	// Dentistry is the "dentistry" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dentistry.svg
-	Dentistry Icon = "dentistry"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dentistry.svg
+	Dentistry Icon = "outlined/dentistry"
 	
 	// DepartureBoard is the "departure_board" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/departure_board.svg
-	DepartureBoard Icon = "departure_board"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/departure_board.svg
+	DepartureBoard Icon = "outlined/departure_board"
 	
 	// DeployedCode is the "deployed_code" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/deployed_code.svg
-	DeployedCode Icon = "deployed_code"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/deployed_code.svg
+	DeployedCode Icon = "outlined/deployed_code"
 	
 	// DeployedCodeAlert is the "deployed_code_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/deployed_code_alert.svg
-	DeployedCodeAlert Icon = "deployed_code_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/deployed_code_alert.svg
+	DeployedCodeAlert Icon = "outlined/deployed_code_alert"
 	
 	// DeployedCodeHistory is the "deployed_code_history" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/deployed_code_history.svg
-	DeployedCodeHistory Icon = "deployed_code_history"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/deployed_code_history.svg
+	DeployedCodeHistory Icon = "outlined/deployed_code_history"
 	
 	// DeployedCodeUpdate is the "deployed_code_update" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/deployed_code_update.svg
-	DeployedCodeUpdate Icon = "deployed_code_update"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/deployed_code_update.svg
+	DeployedCodeUpdate Icon = "outlined/deployed_code_update"
 	
 	// Dermatology is the "dermatology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dermatology.svg
-	Dermatology Icon = "dermatology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dermatology.svg
+	Dermatology Icon = "outlined/dermatology"
 	
 	// Description is the "description" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/description.svg
-	Description Icon = "description"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/description.svg
+	Description Icon = "outlined/description"
 	
 	// Deselect is the "deselect" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/deselect.svg
-	Deselect Icon = "deselect"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/deselect.svg
+	Deselect Icon = "outlined/deselect"
 	
 	// DesignServices is the "design_services" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/design_services.svg
-	DesignServices Icon = "design_services"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/design_services.svg
+	DesignServices Icon = "outlined/design_services"
 	
 	// Desk is the "desk" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/desk.svg
-	Desk Icon = "desk"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/desk.svg
+	Desk Icon = "outlined/desk"
 	
 	// Deskphone is the "deskphone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/deskphone.svg
-	Deskphone Icon = "deskphone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/deskphone.svg
+	Deskphone Icon = "outlined/deskphone"
 	
 	// DesktopAccessDisabled is the "desktop_access_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/desktop_access_disabled.svg
-	DesktopAccessDisabled Icon = "desktop_access_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/desktop_access_disabled.svg
+	DesktopAccessDisabled Icon = "outlined/desktop_access_disabled"
 	
 	// DesktopMac is the "desktop_mac" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/desktop_mac.svg
-	DesktopMac Icon = "desktop_mac"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/desktop_mac.svg
+	DesktopMac Icon = "outlined/desktop_mac"
 	
 	// DesktopWindows is the "desktop_windows" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/desktop_windows.svg
-	DesktopWindows Icon = "desktop_windows"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/desktop_windows.svg
+	DesktopWindows Icon = "outlined/desktop_windows"
 	
 	// Details is the "details" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/details.svg
-	Details Icon = "details"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/details.svg
+	Details Icon = "outlined/details"
 	
 	// DetectionAndZone is the "detection_and_zone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/detection_and_zone.svg
-	DetectionAndZone Icon = "detection_and_zone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/detection_and_zone.svg
+	DetectionAndZone Icon = "outlined/detection_and_zone"
 	
 	// Detector is the "detector" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/detector.svg
-	Detector Icon = "detector"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/detector.svg
+	Detector Icon = "outlined/detector"
 	
 	// DetectorAlarm is the "detector_alarm" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/detector_alarm.svg
-	DetectorAlarm Icon = "detector_alarm"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/detector_alarm.svg
+	DetectorAlarm Icon = "outlined/detector_alarm"
 	
 	// DetectorBattery is the "detector_battery" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/detector_battery.svg
-	DetectorBattery Icon = "detector_battery"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/detector_battery.svg
+	DetectorBattery Icon = "outlined/detector_battery"
 	
 	// DetectorCo is the "detector_co" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/detector_co.svg
-	DetectorCo Icon = "detector_co"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/detector_co.svg
+	DetectorCo Icon = "outlined/detector_co"
 	
 	// DetectorOffline is the "detector_offline" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/detector_offline.svg
-	DetectorOffline Icon = "detector_offline"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/detector_offline.svg
+	DetectorOffline Icon = "outlined/detector_offline"
 	
 	// DetectorSmoke is the "detector_smoke" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/detector_smoke.svg
-	DetectorSmoke Icon = "detector_smoke"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/detector_smoke.svg
+	DetectorSmoke Icon = "outlined/detector_smoke"
 	
 	// DetectorStatus is the "detector_status" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/detector_status.svg
-	DetectorStatus Icon = "detector_status"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/detector_status.svg
+	DetectorStatus Icon = "outlined/detector_status"
 	
 	// DeveloperBoard is the "developer_board" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/developer_board.svg
-	DeveloperBoard Icon = "developer_board"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/developer_board.svg
+	DeveloperBoard Icon = "outlined/developer_board"
 	
 	// DeveloperBoardOff is the "developer_board_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/developer_board_off.svg
-	DeveloperBoardOff Icon = "developer_board_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/developer_board_off.svg
+	DeveloperBoardOff Icon = "outlined/developer_board_off"
 	
 	// DeveloperGuide is the "developer_guide" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/developer_guide.svg
-	DeveloperGuide Icon = "developer_guide"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/developer_guide.svg
+	DeveloperGuide Icon = "outlined/developer_guide"
 	
 	// DeveloperMode is the "developer_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/developer_mode.svg
-	DeveloperMode Icon = "developer_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/developer_mode.svg
+	DeveloperMode Icon = "outlined/developer_mode"
 	
 	// DeveloperModeTv is the "developer_mode_tv" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/developer_mode_tv.svg
-	DeveloperModeTv Icon = "developer_mode_tv"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/developer_mode_tv.svg
+	DeveloperModeTv Icon = "outlined/developer_mode_tv"
 	
 	// DeviceHub is the "device_hub" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/device_hub.svg
-	DeviceHub Icon = "device_hub"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/device_hub.svg
+	DeviceHub Icon = "outlined/device_hub"
 	
 	// DeviceReset is the "device_reset" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/device_reset.svg
-	DeviceReset Icon = "device_reset"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/device_reset.svg
+	DeviceReset Icon = "outlined/device_reset"
 	
 	// DeviceThermostat is the "device_thermostat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/device_thermostat.svg
-	DeviceThermostat Icon = "device_thermostat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/device_thermostat.svg
+	DeviceThermostat Icon = "outlined/device_thermostat"
 	
 	// DeviceUnknown is the "device_unknown" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/device_unknown.svg
-	DeviceUnknown Icon = "device_unknown"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/device_unknown.svg
+	DeviceUnknown Icon = "outlined/device_unknown"
 	
 	// Devices is the "devices" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/devices.svg
-	Devices Icon = "devices"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/devices.svg
+	Devices Icon = "outlined/devices"
 	
 	// DevicesFold is the "devices_fold" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/devices_fold.svg
-	DevicesFold Icon = "devices_fold"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/devices_fold.svg
+	DevicesFold Icon = "outlined/devices_fold"
 	
 	// DevicesOff is the "devices_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/devices_off.svg
-	DevicesOff Icon = "devices_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/devices_off.svg
+	DevicesOff Icon = "outlined/devices_off"
 	
 	// DevicesOther is the "devices_other" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/devices_other.svg
-	DevicesOther Icon = "devices_other"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/devices_other.svg
+	DevicesOther Icon = "outlined/devices_other"
 	
 	// DevicesWearables is the "devices_wearables" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/devices_wearables.svg
-	DevicesWearables Icon = "devices_wearables"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/devices_wearables.svg
+	DevicesWearables Icon = "outlined/devices_wearables"
 	
 	// DewPoint is the "dew_point" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dew_point.svg
-	DewPoint Icon = "dew_point"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dew_point.svg
+	DewPoint Icon = "outlined/dew_point"
 	
 	// Diagnosis is the "diagnosis" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/diagnosis.svg
-	Diagnosis Icon = "diagnosis"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/diagnosis.svg
+	Diagnosis Icon = "outlined/diagnosis"
 	
 	// DialerSip is the "dialer_sip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dialer_sip.svg
-	DialerSip Icon = "dialer_sip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dialer_sip.svg
+	DialerSip Icon = "outlined/dialer_sip"
 	
 	// Dialogs is the "dialogs" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dialogs.svg
-	Dialogs Icon = "dialogs"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dialogs.svg
+	Dialogs Icon = "outlined/dialogs"
 	
 	// Dialpad is the "dialpad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dialpad.svg
-	Dialpad Icon = "dialpad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dialpad.svg
+	Dialpad Icon = "outlined/dialpad"
 	
 	// Diamond is the "diamond" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/diamond.svg
-	Diamond Icon = "diamond"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/diamond.svg
+	Diamond Icon = "outlined/diamond"
 	
 	// Difference is the "difference" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/difference.svg
-	Difference Icon = "difference"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/difference.svg
+	Difference Icon = "outlined/difference"
 	
 	// DigitalOutOfHome is the "digital_out_of_home" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/digital_out_of_home.svg
-	DigitalOutOfHome Icon = "digital_out_of_home"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/digital_out_of_home.svg
+	DigitalOutOfHome Icon = "outlined/digital_out_of_home"
 	
 	// Dining is the "dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dining.svg
-	Dining Icon = "dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dining.svg
+	Dining Icon = "outlined/dining"
 	
 	// DinnerDining is the "dinner_dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dinner_dining.svg
-	DinnerDining Icon = "dinner_dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dinner_dining.svg
+	DinnerDining Icon = "outlined/dinner_dining"
 	
 	// Directions is the "directions" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions.svg
-	Directions Icon = "directions"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions.svg
+	Directions Icon = "outlined/directions"
 	
 	// DirectionsAlt is the "directions_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_alt.svg
-	DirectionsAlt Icon = "directions_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_alt.svg
+	DirectionsAlt Icon = "outlined/directions_alt"
 	
 	// DirectionsAltOff is the "directions_alt_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_alt_off.svg
-	DirectionsAltOff Icon = "directions_alt_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_alt_off.svg
+	DirectionsAltOff Icon = "outlined/directions_alt_off"
 	
 	// DirectionsBike is the "directions_bike" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_bike.svg
-	DirectionsBike Icon = "directions_bike"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_bike.svg
+	DirectionsBike Icon = "outlined/directions_bike"
 	
 	// DirectionsBoat is the "directions_boat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_boat.svg
-	DirectionsBoat Icon = "directions_boat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_boat.svg
+	DirectionsBoat Icon = "outlined/directions_boat"
 	
 	// DirectionsBus is the "directions_bus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_bus.svg
-	DirectionsBus Icon = "directions_bus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_bus.svg
+	DirectionsBus Icon = "outlined/directions_bus"
 	
 	// DirectionsCar is the "directions_car" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_car.svg
-	DirectionsCar Icon = "directions_car"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_car.svg
+	DirectionsCar Icon = "outlined/directions_car"
 	
 	// DirectionsOff is the "directions_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_off.svg
-	DirectionsOff Icon = "directions_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_off.svg
+	DirectionsOff Icon = "outlined/directions_off"
 	
 	// DirectionsRailway is the "directions_railway" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_railway.svg
-	DirectionsRailway Icon = "directions_railway"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_railway.svg
+	DirectionsRailway Icon = "outlined/directions_railway"
 	
 	// DirectionsRun is the "directions_run" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_run.svg
-	DirectionsRun Icon = "directions_run"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_run.svg
+	DirectionsRun Icon = "outlined/directions_run"
 	
 	// DirectionsSubway is the "directions_subway" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_subway.svg
-	DirectionsSubway Icon = "directions_subway"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_subway.svg
+	DirectionsSubway Icon = "outlined/directions_subway"
 	
 	// DirectionsWalk is the "directions_walk" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directions_walk.svg
-	DirectionsWalk Icon = "directions_walk"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directions_walk.svg
+	DirectionsWalk Icon = "outlined/directions_walk"
 	
 	// DirectorySync is the "directory_sync" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/directory_sync.svg
-	DirectorySync Icon = "directory_sync"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/directory_sync.svg
+	DirectorySync Icon = "outlined/directory_sync"
 	
 	// DirtyLens is the "dirty_lens" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dirty_lens.svg
-	DirtyLens Icon = "dirty_lens"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dirty_lens.svg
+	DirtyLens Icon = "outlined/dirty_lens"
 	
 	// DisabledByDefault is the "disabled_by_default" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/disabled_by_default.svg
-	DisabledByDefault Icon = "disabled_by_default"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/disabled_by_default.svg
+	DisabledByDefault Icon = "outlined/disabled_by_default"
 	
 	// DisabledVisible is the "disabled_visible" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/disabled_visible.svg
-	DisabledVisible Icon = "disabled_visible"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/disabled_visible.svg
+	DisabledVisible Icon = "outlined/disabled_visible"
 	
 	// DiscFull is the "disc_full" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/disc_full.svg
-	DiscFull Icon = "disc_full"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/disc_full.svg
+	DiscFull Icon = "outlined/disc_full"
 	
 	// DiscoverTune is the "discover_tune" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/discover_tune.svg
-	DiscoverTune Icon = "discover_tune"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/discover_tune.svg
+	DiscoverTune Icon = "outlined/discover_tune"
 	
 	// DishwasherGen is the "dishwasher_gen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dishwasher_gen.svg
-	DishwasherGen Icon = "dishwasher_gen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dishwasher_gen.svg
+	DishwasherGen Icon = "outlined/dishwasher_gen"
 	
 	// DisplayExternalInput is the "display_external_input" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/display_external_input.svg
-	DisplayExternalInput Icon = "display_external_input"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/display_external_input.svg
+	DisplayExternalInput Icon = "outlined/display_external_input"
 	
 	// DisplaySettings is the "display_settings" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/display_settings.svg
-	DisplaySettings Icon = "display_settings"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/display_settings.svg
+	DisplaySettings Icon = "outlined/display_settings"
 	
 	// Distance is the "distance" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/distance.svg
-	Distance Icon = "distance"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/distance.svg
+	Distance Icon = "outlined/distance"
 	
 	// Diversity1 is the "diversity_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/diversity_1.svg
-	Diversity1 Icon = "diversity_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/diversity_1.svg
+	Diversity1 Icon = "outlined/diversity_1"
 	
 	// Diversity2 is the "diversity_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/diversity_2.svg
-	Diversity2 Icon = "diversity_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/diversity_2.svg
+	Diversity2 Icon = "outlined/diversity_2"
 	
 	// Diversity3 is the "diversity_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/diversity_3.svg
-	Diversity3 Icon = "diversity_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/diversity_3.svg
+	Diversity3 Icon = "outlined/diversity_3"
 	
 	// Diversity4 is the "diversity_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/diversity_4.svg
-	Diversity4 Icon = "diversity_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/diversity_4.svg
+	Diversity4 Icon = "outlined/diversity_4"
 	
 	// Dns is the "dns" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dns.svg
-	Dns Icon = "dns"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dns.svg
+	Dns Icon = "outlined/dns"
 	
 	// DoNotDisturbOff is the "do_not_disturb_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/do_not_disturb_off.svg
-	DoNotDisturbOff Icon = "do_not_disturb_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/do_not_disturb_off.svg
+	DoNotDisturbOff Icon = "outlined/do_not_disturb_off"
 	
 	// DoNotDisturbOn is the "do_not_disturb_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/do_not_disturb_on.svg
-	DoNotDisturbOn Icon = "do_not_disturb_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/do_not_disturb_on.svg
+	DoNotDisturbOn Icon = "outlined/do_not_disturb_on"
 	
 	// DoNotDisturbOnTotalSilence is the "do_not_disturb_on_total_silence" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/do_not_disturb_on_total_silence.svg
-	DoNotDisturbOnTotalSilence Icon = "do_not_disturb_on_total_silence"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/do_not_disturb_on_total_silence.svg
+	DoNotDisturbOnTotalSilence Icon = "outlined/do_not_disturb_on_total_silence"
 	
 	// DoNotStep is the "do_not_step" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/do_not_step.svg
-	DoNotStep Icon = "do_not_step"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/do_not_step.svg
+	DoNotStep Icon = "outlined/do_not_step"
 	
 	// DoNotTouch is the "do_not_touch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/do_not_touch.svg
-	DoNotTouch Icon = "do_not_touch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/do_not_touch.svg
+	DoNotTouch Icon = "outlined/do_not_touch"
 	
 	// Dock is the "dock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dock.svg
-	Dock Icon = "dock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dock.svg
+	Dock Icon = "outlined/dock"
 	
 	// DockToBottom is the "dock_to_bottom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dock_to_bottom.svg
-	DockToBottom Icon = "dock_to_bottom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dock_to_bottom.svg
+	DockToBottom Icon = "outlined/dock_to_bottom"
 	
 	// DockToLeft is the "dock_to_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dock_to_left.svg
-	DockToLeft Icon = "dock_to_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dock_to_left.svg
+	DockToLeft Icon = "outlined/dock_to_left"
 	
 	// DockToRight is the "dock_to_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dock_to_right.svg
-	DockToRight Icon = "dock_to_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dock_to_right.svg
+	DockToRight Icon = "outlined/dock_to_right"
 	
 	// DocsAddOn is the "docs_add_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/docs_add_on.svg
-	DocsAddOn Icon = "docs_add_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/docs_add_on.svg
+	DocsAddOn Icon = "outlined/docs_add_on"
 	
 	// DocsAppsScript is the "docs_apps_script" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/docs_apps_script.svg
-	DocsAppsScript Icon = "docs_apps_script"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/docs_apps_script.svg
+	DocsAppsScript Icon = "outlined/docs_apps_script"
 	
 	// DocumentScanner is the "document_scanner" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/document_scanner.svg
-	DocumentScanner Icon = "document_scanner"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/document_scanner.svg
+	DocumentScanner Icon = "outlined/document_scanner"
 	
 	// Domain is the "domain" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/domain.svg
-	Domain Icon = "domain"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/domain.svg
+	Domain Icon = "outlined/domain"
 	
 	// DomainAdd is the "domain_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/domain_add.svg
-	DomainAdd Icon = "domain_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/domain_add.svg
+	DomainAdd Icon = "outlined/domain_add"
 	
 	// DomainDisabled is the "domain_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/domain_disabled.svg
-	DomainDisabled Icon = "domain_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/domain_disabled.svg
+	DomainDisabled Icon = "outlined/domain_disabled"
 	
 	// DomainVerification is the "domain_verification" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/domain_verification.svg
-	DomainVerification Icon = "domain_verification"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/domain_verification.svg
+	DomainVerification Icon = "outlined/domain_verification"
 	
 	// DomainVerificationOff is the "domain_verification_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/domain_verification_off.svg
-	DomainVerificationOff Icon = "domain_verification_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/domain_verification_off.svg
+	DomainVerificationOff Icon = "outlined/domain_verification_off"
 	
 	// DominoMask is the "domino_mask" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/domino_mask.svg
-	DominoMask Icon = "domino_mask"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/domino_mask.svg
+	DominoMask Icon = "outlined/domino_mask"
 	
 	// Done is the "done" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/done.svg
-	Done Icon = "done"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/done.svg
+	Done Icon = "outlined/done"
 	
 	// DoneAll is the "done_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/done_all.svg
-	DoneAll Icon = "done_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/done_all.svg
+	DoneAll Icon = "outlined/done_all"
 	
 	// DoneOutline is the "done_outline" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/done_outline.svg
-	DoneOutline Icon = "done_outline"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/done_outline.svg
+	DoneOutline Icon = "outlined/done_outline"
 	
 	// DonutLarge is the "donut_large" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/donut_large.svg
-	DonutLarge Icon = "donut_large"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/donut_large.svg
+	DonutLarge Icon = "outlined/donut_large"
 	
 	// DonutSmall is the "donut_small" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/donut_small.svg
-	DonutSmall Icon = "donut_small"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/donut_small.svg
+	DonutSmall Icon = "outlined/donut_small"
 	
 	// DoorBack is the "door_back" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/door_back.svg
-	DoorBack Icon = "door_back"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/door_back.svg
+	DoorBack Icon = "outlined/door_back"
 	
 	// DoorFront is the "door_front" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/door_front.svg
-	DoorFront Icon = "door_front"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/door_front.svg
+	DoorFront Icon = "outlined/door_front"
 	
 	// DoorOpen is the "door_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/door_open.svg
-	DoorOpen Icon = "door_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/door_open.svg
+	DoorOpen Icon = "outlined/door_open"
 	
 	// DoorSensor is the "door_sensor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/door_sensor.svg
-	DoorSensor Icon = "door_sensor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/door_sensor.svg
+	DoorSensor Icon = "outlined/door_sensor"
 	
 	// DoorSliding is the "door_sliding" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/door_sliding.svg
-	DoorSliding Icon = "door_sliding"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/door_sliding.svg
+	DoorSliding Icon = "outlined/door_sliding"
 	
 	// Doorbell is the "doorbell" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/doorbell.svg
-	Doorbell Icon = "doorbell"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/doorbell.svg
+	Doorbell Icon = "outlined/doorbell"
 	
 	// Doorbell3P is the "doorbell_3p" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/doorbell_3p.svg
-	Doorbell3P Icon = "doorbell_3p"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/doorbell_3p.svg
+	Doorbell3P Icon = "outlined/doorbell_3p"
 	
 	// DoorbellChime is the "doorbell_chime" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/doorbell_chime.svg
-	DoorbellChime Icon = "doorbell_chime"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/doorbell_chime.svg
+	DoorbellChime Icon = "outlined/doorbell_chime"
 	
 	// DoubleArrow is the "double_arrow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/double_arrow.svg
-	DoubleArrow Icon = "double_arrow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/double_arrow.svg
+	DoubleArrow Icon = "outlined/double_arrow"
 	
 	// DownhillSkiing is the "downhill_skiing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/downhill_skiing.svg
-	DownhillSkiing Icon = "downhill_skiing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/downhill_skiing.svg
+	DownhillSkiing Icon = "outlined/downhill_skiing"
 	
 	// Download is the "download" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/download.svg
-	Download Icon = "download"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/download.svg
+	Download Icon = "outlined/download"
 	
 	// DownloadDone is the "download_done" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/download_done.svg
-	DownloadDone Icon = "download_done"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/download_done.svg
+	DownloadDone Icon = "outlined/download_done"
 	
 	// DownloadForOffline is the "download_for_offline" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/download_for_offline.svg
-	DownloadForOffline Icon = "download_for_offline"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/download_for_offline.svg
+	DownloadForOffline Icon = "outlined/download_for_offline"
 	
 	// Downloading is the "downloading" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/downloading.svg
-	Downloading Icon = "downloading"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/downloading.svg
+	Downloading Icon = "outlined/downloading"
 	
 	// Draft is the "draft" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/draft.svg
-	Draft Icon = "draft"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/draft.svg
+	Draft Icon = "outlined/draft"
 	
 	// DraftOrders is the "draft_orders" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/draft_orders.svg
-	DraftOrders Icon = "draft_orders"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/draft_orders.svg
+	DraftOrders Icon = "outlined/draft_orders"
 	
 	// Drafts is the "drafts" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/drafts.svg
-	Drafts Icon = "drafts"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/drafts.svg
+	Drafts Icon = "outlined/drafts"
 	
 	// DragClick is the "drag_click" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/drag_click.svg
-	DragClick Icon = "drag_click"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/drag_click.svg
+	DragClick Icon = "outlined/drag_click"
 	
 	// DragHandle is the "drag_handle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/drag_handle.svg
-	DragHandle Icon = "drag_handle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/drag_handle.svg
+	DragHandle Icon = "outlined/drag_handle"
 	
 	// DragIndicator is the "drag_indicator" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/drag_indicator.svg
-	DragIndicator Icon = "drag_indicator"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/drag_indicator.svg
+	DragIndicator Icon = "outlined/drag_indicator"
 	
 	// DragPan is the "drag_pan" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/drag_pan.svg
-	DragPan Icon = "drag_pan"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/drag_pan.svg
+	DragPan Icon = "outlined/drag_pan"
 	
 	// Draw is the "draw" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/draw.svg
-	Draw Icon = "draw"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/draw.svg
+	Draw Icon = "outlined/draw"
 	
 	// DrawAbstract is the "draw_abstract" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/draw_abstract.svg
-	DrawAbstract Icon = "draw_abstract"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/draw_abstract.svg
+	DrawAbstract Icon = "outlined/draw_abstract"
 	
 	// DrawCollage is the "draw_collage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/draw_collage.svg
-	DrawCollage Icon = "draw_collage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/draw_collage.svg
+	DrawCollage Icon = "outlined/draw_collage"
 	
 	// Dresser is the "dresser" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dresser.svg
-	Dresser Icon = "dresser"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dresser.svg
+	Dresser Icon = "outlined/dresser"
 	
 	// DriveFileMove is the "drive_file_move" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/drive_file_move.svg
-	DriveFileMove Icon = "drive_file_move"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/drive_file_move.svg
+	DriveFileMove Icon = "outlined/drive_file_move"
 	
 	// DriveFolderUpload is the "drive_folder_upload" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/drive_folder_upload.svg
-	DriveFolderUpload Icon = "drive_folder_upload"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/drive_folder_upload.svg
+	DriveFolderUpload Icon = "outlined/drive_folder_upload"
 	
 	// Dropdown is the "dropdown" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dropdown.svg
-	Dropdown Icon = "dropdown"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dropdown.svg
+	Dropdown Icon = "outlined/dropdown"
 	
 	// Dry is the "dry" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dry.svg
-	Dry Icon = "dry"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dry.svg
+	Dry Icon = "outlined/dry"
 	
 	// DryCleaning is the "dry_cleaning" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dry_cleaning.svg
-	DryCleaning Icon = "dry_cleaning"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dry_cleaning.svg
+	DryCleaning Icon = "outlined/dry_cleaning"
 	
 	// DualScreen is the "dual_screen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dual_screen.svg
-	DualScreen Icon = "dual_screen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dual_screen.svg
+	DualScreen Icon = "outlined/dual_screen"
 	
 	// Duo is the "duo" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/duo.svg
-	Duo Icon = "duo"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/duo.svg
+	Duo Icon = "outlined/duo"
 	
 	// Dvr is the "dvr" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dvr.svg
-	Dvr Icon = "dvr"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dvr.svg
+	Dvr Icon = "outlined/dvr"
 	
 	// DynamicFeed is the "dynamic_feed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dynamic_feed.svg
-	DynamicFeed Icon = "dynamic_feed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dynamic_feed.svg
+	DynamicFeed Icon = "outlined/dynamic_feed"
 	
 	// DynamicForm is the "dynamic_form" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/dynamic_form.svg
-	DynamicForm Icon = "dynamic_form"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/dynamic_form.svg
+	DynamicForm Icon = "outlined/dynamic_form"
 	
 	// E911Avatar is the "e911_avatar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/e911_avatar.svg
-	E911Avatar Icon = "e911_avatar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/e911_avatar.svg
+	E911Avatar Icon = "outlined/e911_avatar"
 	
 	// E911Emergency is the "e911_emergency" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/e911_emergency.svg
-	E911Emergency Icon = "e911_emergency"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/e911_emergency.svg
+	E911Emergency Icon = "outlined/e911_emergency"
 	
 	// EMobiledata is the "e_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/e_mobiledata.svg
-	EMobiledata Icon = "e_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/e_mobiledata.svg
+	EMobiledata Icon = "outlined/e_mobiledata"
 	
 	// EMobiledataBadge is the "e_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/e_mobiledata_badge.svg
-	EMobiledataBadge Icon = "e_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/e_mobiledata_badge.svg
+	EMobiledataBadge Icon = "outlined/e_mobiledata_badge"
 	
 	// Earbuds is the "earbuds" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/earbuds.svg
-	Earbuds Icon = "earbuds"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/earbuds.svg
+	Earbuds Icon = "outlined/earbuds"
 	
 	// EarbudsBattery is the "earbuds_battery" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/earbuds_battery.svg
-	EarbudsBattery Icon = "earbuds_battery"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/earbuds_battery.svg
+	EarbudsBattery Icon = "outlined/earbuds_battery"
 	
 	// EarlyOn is the "early_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/early_on.svg
-	EarlyOn Icon = "early_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/early_on.svg
+	EarlyOn Icon = "outlined/early_on"
 	
 	// Earthquake is the "earthquake" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/earthquake.svg
-	Earthquake Icon = "earthquake"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/earthquake.svg
+	Earthquake Icon = "outlined/earthquake"
 	
 	// East is the "east" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/east.svg
-	East Icon = "east"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/east.svg
+	East Icon = "outlined/east"
 	
 	// Ecg is the "ecg" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ecg.svg
-	Ecg Icon = "ecg"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ecg.svg
+	Ecg Icon = "outlined/ecg"
 	
 	// EcgHeart is the "ecg_heart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ecg_heart.svg
-	EcgHeart Icon = "ecg_heart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ecg_heart.svg
+	EcgHeart Icon = "outlined/ecg_heart"
 	
 	// Eco is the "eco" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/eco.svg
-	Eco Icon = "eco"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/eco.svg
+	Eco Icon = "outlined/eco"
 	
 	// Eda is the "eda" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/eda.svg
-	Eda Icon = "eda"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/eda.svg
+	Eda Icon = "outlined/eda"
 	
 	// EdgesensorHigh is the "edgesensor_high" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edgesensor_high.svg
-	EdgesensorHigh Icon = "edgesensor_high"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edgesensor_high.svg
+	EdgesensorHigh Icon = "outlined/edgesensor_high"
 	
 	// EdgesensorLow is the "edgesensor_low" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edgesensor_low.svg
-	EdgesensorLow Icon = "edgesensor_low"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edgesensor_low.svg
+	EdgesensorLow Icon = "outlined/edgesensor_low"
 	
 	// Edit is the "edit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit.svg
-	Edit Icon = "edit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit.svg
+	Edit Icon = "outlined/edit"
 	
 	// EditAttributes is the "edit_attributes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_attributes.svg
-	EditAttributes Icon = "edit_attributes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_attributes.svg
+	EditAttributes Icon = "outlined/edit_attributes"
 	
 	// EditCalendar is the "edit_calendar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_calendar.svg
-	EditCalendar Icon = "edit_calendar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_calendar.svg
+	EditCalendar Icon = "outlined/edit_calendar"
 	
 	// EditDocument is the "edit_document" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_document.svg
-	EditDocument Icon = "edit_document"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_document.svg
+	EditDocument Icon = "outlined/edit_document"
 	
 	// EditLocation is the "edit_location" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_location.svg
-	EditLocation Icon = "edit_location"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_location.svg
+	EditLocation Icon = "outlined/edit_location"
 	
 	// EditLocationAlt is the "edit_location_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_location_alt.svg
-	EditLocationAlt Icon = "edit_location_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_location_alt.svg
+	EditLocationAlt Icon = "outlined/edit_location_alt"
 	
 	// EditNote is the "edit_note" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_note.svg
-	EditNote Icon = "edit_note"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_note.svg
+	EditNote Icon = "outlined/edit_note"
 	
 	// EditNotifications is the "edit_notifications" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_notifications.svg
-	EditNotifications Icon = "edit_notifications"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_notifications.svg
+	EditNotifications Icon = "outlined/edit_notifications"
 	
 	// EditOff is the "edit_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_off.svg
-	EditOff Icon = "edit_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_off.svg
+	EditOff Icon = "outlined/edit_off"
 	
 	// EditRoad is the "edit_road" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_road.svg
-	EditRoad Icon = "edit_road"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_road.svg
+	EditRoad Icon = "outlined/edit_road"
 	
 	// EditSquare is the "edit_square" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/edit_square.svg
-	EditSquare Icon = "edit_square"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/edit_square.svg
+	EditSquare Icon = "outlined/edit_square"
 	
 	// Egg is the "egg" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/egg.svg
-	Egg Icon = "egg"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/egg.svg
+	Egg Icon = "outlined/egg"
 	
 	// EggAlt is the "egg_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/egg_alt.svg
-	EggAlt Icon = "egg_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/egg_alt.svg
+	EggAlt Icon = "outlined/egg_alt"
 	
 	// Eject is the "eject" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/eject.svg
-	Eject Icon = "eject"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/eject.svg
+	Eject Icon = "outlined/eject"
 	
 	// Elderly is the "elderly" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/elderly.svg
-	Elderly Icon = "elderly"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/elderly.svg
+	Elderly Icon = "outlined/elderly"
 	
 	// ElderlyWoman is the "elderly_woman" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/elderly_woman.svg
-	ElderlyWoman Icon = "elderly_woman"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/elderly_woman.svg
+	ElderlyWoman Icon = "outlined/elderly_woman"
 	
 	// ElectricBike is the "electric_bike" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/electric_bike.svg
-	ElectricBike Icon = "electric_bike"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/electric_bike.svg
+	ElectricBike Icon = "outlined/electric_bike"
 	
 	// ElectricBolt is the "electric_bolt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/electric_bolt.svg
-	ElectricBolt Icon = "electric_bolt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/electric_bolt.svg
+	ElectricBolt Icon = "outlined/electric_bolt"
 	
 	// ElectricCar is the "electric_car" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/electric_car.svg
-	ElectricCar Icon = "electric_car"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/electric_car.svg
+	ElectricCar Icon = "outlined/electric_car"
 	
 	// ElectricMeter is the "electric_meter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/electric_meter.svg
-	ElectricMeter Icon = "electric_meter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/electric_meter.svg
+	ElectricMeter Icon = "outlined/electric_meter"
 	
 	// ElectricMoped is the "electric_moped" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/electric_moped.svg
-	ElectricMoped Icon = "electric_moped"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/electric_moped.svg
+	ElectricMoped Icon = "outlined/electric_moped"
 	
 	// ElectricRickshaw is the "electric_rickshaw" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/electric_rickshaw.svg
-	ElectricRickshaw Icon = "electric_rickshaw"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/electric_rickshaw.svg
+	ElectricRickshaw Icon = "outlined/electric_rickshaw"
 	
 	// ElectricScooter is the "electric_scooter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/electric_scooter.svg
-	ElectricScooter Icon = "electric_scooter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/electric_scooter.svg
+	ElectricScooter Icon = "outlined/electric_scooter"
 	
 	// ElectricalServices is the "electrical_services" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/electrical_services.svg
-	ElectricalServices Icon = "electrical_services"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/electrical_services.svg
+	ElectricalServices Icon = "outlined/electrical_services"
 	
 	// Elevation is the "elevation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/elevation.svg
-	Elevation Icon = "elevation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/elevation.svg
+	Elevation Icon = "outlined/elevation"
 	
 	// Elevator is the "elevator" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/elevator.svg
-	Elevator Icon = "elevator"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/elevator.svg
+	Elevator Icon = "outlined/elevator"
 	
 	// Emergency is the "emergency" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emergency.svg
-	Emergency Icon = "emergency"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emergency.svg
+	Emergency Icon = "outlined/emergency"
 	
 	// EmergencyHeat is the "emergency_heat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emergency_heat.svg
-	EmergencyHeat Icon = "emergency_heat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emergency_heat.svg
+	EmergencyHeat Icon = "outlined/emergency_heat"
 	
 	// EmergencyHome is the "emergency_home" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emergency_home.svg
-	EmergencyHome Icon = "emergency_home"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emergency_home.svg
+	EmergencyHome Icon = "outlined/emergency_home"
 	
 	// EmergencyRecording is the "emergency_recording" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emergency_recording.svg
-	EmergencyRecording Icon = "emergency_recording"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emergency_recording.svg
+	EmergencyRecording Icon = "outlined/emergency_recording"
 	
 	// EmergencyShare is the "emergency_share" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emergency_share.svg
-	EmergencyShare Icon = "emergency_share"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emergency_share.svg
+	EmergencyShare Icon = "outlined/emergency_share"
 	
 	// EmergencyShareOff is the "emergency_share_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emergency_share_off.svg
-	EmergencyShareOff Icon = "emergency_share_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emergency_share_off.svg
+	EmergencyShareOff Icon = "outlined/emergency_share_off"
 	
 	// EmojiEvents is the "emoji_events" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emoji_events.svg
-	EmojiEvents Icon = "emoji_events"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emoji_events.svg
+	EmojiEvents Icon = "outlined/emoji_events"
 	
 	// EmojiFlags is the "emoji_flags" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emoji_flags.svg
-	EmojiFlags Icon = "emoji_flags"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emoji_flags.svg
+	EmojiFlags Icon = "outlined/emoji_flags"
 	
 	// EmojiFoodBeverage is the "emoji_food_beverage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emoji_food_beverage.svg
-	EmojiFoodBeverage Icon = "emoji_food_beverage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emoji_food_beverage.svg
+	EmojiFoodBeverage Icon = "outlined/emoji_food_beverage"
 	
 	// EmojiNature is the "emoji_nature" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emoji_nature.svg
-	EmojiNature Icon = "emoji_nature"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emoji_nature.svg
+	EmojiNature Icon = "outlined/emoji_nature"
 	
 	// EmojiObjects is the "emoji_objects" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emoji_objects.svg
-	EmojiObjects Icon = "emoji_objects"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emoji_objects.svg
+	EmojiObjects Icon = "outlined/emoji_objects"
 	
 	// EmojiPeople is the "emoji_people" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emoji_people.svg
-	EmojiPeople Icon = "emoji_people"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emoji_people.svg
+	EmojiPeople Icon = "outlined/emoji_people"
 	
 	// EmojiSymbols is the "emoji_symbols" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emoji_symbols.svg
-	EmojiSymbols Icon = "emoji_symbols"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emoji_symbols.svg
+	EmojiSymbols Icon = "outlined/emoji_symbols"
 	
 	// EmojiTransportation is the "emoji_transportation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emoji_transportation.svg
-	EmojiTransportation Icon = "emoji_transportation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emoji_transportation.svg
+	EmojiTransportation Icon = "outlined/emoji_transportation"
 	
 	// Emoticon is the "emoticon" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/emoticon.svg
-	Emoticon Icon = "emoticon"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/emoticon.svg
+	Emoticon Icon = "outlined/emoticon"
 	
 	// EmptyDashboard is the "empty_dashboard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/empty_dashboard.svg
-	EmptyDashboard Icon = "empty_dashboard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/empty_dashboard.svg
+	EmptyDashboard Icon = "outlined/empty_dashboard"
 	
 	// Enable is the "enable" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/enable.svg
-	Enable Icon = "enable"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/enable.svg
+	Enable Icon = "outlined/enable"
 	
 	// Encrypted is the "encrypted" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/encrypted.svg
-	Encrypted Icon = "encrypted"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/encrypted.svg
+	Encrypted Icon = "outlined/encrypted"
 	
 	// Endocrinology is the "endocrinology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/endocrinology.svg
-	Endocrinology Icon = "endocrinology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/endocrinology.svg
+	Endocrinology Icon = "outlined/endocrinology"
 	
 	// EnergyProgramSaving is the "energy_program_saving" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/energy_program_saving.svg
-	EnergyProgramSaving Icon = "energy_program_saving"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/energy_program_saving.svg
+	EnergyProgramSaving Icon = "outlined/energy_program_saving"
 	
 	// EnergyProgramTimeUsed is the "energy_program_time_used" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/energy_program_time_used.svg
-	EnergyProgramTimeUsed Icon = "energy_program_time_used"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/energy_program_time_used.svg
+	EnergyProgramTimeUsed Icon = "outlined/energy_program_time_used"
 	
 	// EnergySavingsLeaf is the "energy_savings_leaf" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/energy_savings_leaf.svg
-	EnergySavingsLeaf Icon = "energy_savings_leaf"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/energy_savings_leaf.svg
+	EnergySavingsLeaf Icon = "outlined/energy_savings_leaf"
 	
 	// Engineering is the "engineering" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/engineering.svg
-	Engineering Icon = "engineering"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/engineering.svg
+	Engineering Icon = "outlined/engineering"
 	
 	// EnhancedEncryption is the "enhanced_encryption" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/enhanced_encryption.svg
-	EnhancedEncryption Icon = "enhanced_encryption"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/enhanced_encryption.svg
+	EnhancedEncryption Icon = "outlined/enhanced_encryption"
 	
 	// Ent is the "ent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ent.svg
-	Ent Icon = "ent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ent.svg
+	Ent Icon = "outlined/ent"
 	
 	// Equal is the "equal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/equal.svg
-	Equal Icon = "equal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/equal.svg
+	Equal Icon = "outlined/equal"
 	
 	// Equalizer is the "equalizer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/equalizer.svg
-	Equalizer Icon = "equalizer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/equalizer.svg
+	Equalizer Icon = "outlined/equalizer"
 	
 	// Error is the "error" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/error.svg
-	Error Icon = "error"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/error.svg
+	Error Icon = "outlined/error"
 	
 	// ErrorMed is the "error_med" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/error_med.svg
-	ErrorMed Icon = "error_med"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/error_med.svg
+	ErrorMed Icon = "outlined/error_med"
 	
 	// Escalator is the "escalator" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/escalator.svg
-	Escalator Icon = "escalator"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/escalator.svg
+	Escalator Icon = "outlined/escalator"
 	
 	// EscalatorWarning is the "escalator_warning" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/escalator_warning.svg
-	EscalatorWarning Icon = "escalator_warning"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/escalator_warning.svg
+	EscalatorWarning Icon = "outlined/escalator_warning"
 	
 	// Euro is the "euro" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/euro.svg
-	Euro Icon = "euro"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/euro.svg
+	Euro Icon = "outlined/euro"
 	
 	// EuroSymbol is the "euro_symbol" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/euro_symbol.svg
-	EuroSymbol Icon = "euro_symbol"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/euro_symbol.svg
+	EuroSymbol Icon = "outlined/euro_symbol"
 	
 	// EvCharger is the "ev_charger" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ev_charger.svg
-	EvCharger Icon = "ev_charger"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ev_charger.svg
+	EvCharger Icon = "outlined/ev_charger"
 	
 	// EvMobiledataBadge is the "ev_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ev_mobiledata_badge.svg
-	EvMobiledataBadge Icon = "ev_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ev_mobiledata_badge.svg
+	EvMobiledataBadge Icon = "outlined/ev_mobiledata_badge"
 	
 	// EvShadow is the "ev_shadow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ev_shadow.svg
-	EvShadow Icon = "ev_shadow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ev_shadow.svg
+	EvShadow Icon = "outlined/ev_shadow"
 	
 	// EvStation is the "ev_station" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ev_station.svg
-	EvStation Icon = "ev_station"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ev_station.svg
+	EvStation Icon = "outlined/ev_station"
 	
 	// Event is the "event" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/event.svg
-	Event Icon = "event"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/event.svg
+	Event Icon = "outlined/event"
 	
 	// EventAvailable is the "event_available" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/event_available.svg
-	EventAvailable Icon = "event_available"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/event_available.svg
+	EventAvailable Icon = "outlined/event_available"
 	
 	// EventBusy is the "event_busy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/event_busy.svg
-	EventBusy Icon = "event_busy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/event_busy.svg
+	EventBusy Icon = "outlined/event_busy"
 	
 	// EventList is the "event_list" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/event_list.svg
-	EventList Icon = "event_list"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/event_list.svg
+	EventList Icon = "outlined/event_list"
 	
 	// EventNote is the "event_note" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/event_note.svg
-	EventNote Icon = "event_note"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/event_note.svg
+	EventNote Icon = "outlined/event_note"
 	
 	// EventRepeat is the "event_repeat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/event_repeat.svg
-	EventRepeat Icon = "event_repeat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/event_repeat.svg
+	EventRepeat Icon = "outlined/event_repeat"
 	
 	// EventSeat is the "event_seat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/event_seat.svg
-	EventSeat Icon = "event_seat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/event_seat.svg
+	EventSeat Icon = "outlined/event_seat"
 	
 	// EventUpcoming is the "event_upcoming" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/event_upcoming.svg
-	EventUpcoming Icon = "event_upcoming"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/event_upcoming.svg
+	EventUpcoming Icon = "outlined/event_upcoming"
 	
 	// Exclamation is the "exclamation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/exclamation.svg
-	Exclamation Icon = "exclamation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/exclamation.svg
+	Exclamation Icon = "outlined/exclamation"
 	
 	// Exercise is the "exercise" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/exercise.svg
-	Exercise Icon = "exercise"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/exercise.svg
+	Exercise Icon = "outlined/exercise"
 	
 	// ExitToApp is the "exit_to_app" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/exit_to_app.svg
-	ExitToApp Icon = "exit_to_app"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/exit_to_app.svg
+	ExitToApp Icon = "outlined/exit_to_app"
 	
 	// Expand is the "expand" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/expand.svg
-	Expand Icon = "expand"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/expand.svg
+	Expand Icon = "outlined/expand"
 	
 	// ExpandAll is the "expand_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/expand_all.svg
-	ExpandAll Icon = "expand_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/expand_all.svg
+	ExpandAll Icon = "outlined/expand_all"
 	
 	// ExpandCircleDown is the "expand_circle_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/expand_circle_down.svg
-	ExpandCircleDown Icon = "expand_circle_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/expand_circle_down.svg
+	ExpandCircleDown Icon = "outlined/expand_circle_down"
 	
 	// ExpandCircleRight is the "expand_circle_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/expand_circle_right.svg
-	ExpandCircleRight Icon = "expand_circle_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/expand_circle_right.svg
+	ExpandCircleRight Icon = "outlined/expand_circle_right"
 	
 	// ExpandCircleUp is the "expand_circle_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/expand_circle_up.svg
-	ExpandCircleUp Icon = "expand_circle_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/expand_circle_up.svg
+	ExpandCircleUp Icon = "outlined/expand_circle_up"
 	
 	// ExpandContent is the "expand_content" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/expand_content.svg
-	ExpandContent Icon = "expand_content"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/expand_content.svg
+	ExpandContent Icon = "outlined/expand_content"
 	
 	// ExpandLess is the "expand_less" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/expand_less.svg
-	ExpandLess Icon = "expand_less"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/expand_less.svg
+	ExpandLess Icon = "outlined/expand_less"
 	
 	// ExpandMore is the "expand_more" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/expand_more.svg
-	ExpandMore Icon = "expand_more"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/expand_more.svg
+	ExpandMore Icon = "outlined/expand_more"
 	
 	// Explicit is the "explicit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/explicit.svg
-	Explicit Icon = "explicit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/explicit.svg
+	Explicit Icon = "outlined/explicit"
 	
 	// Explore is the "explore" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/explore.svg
-	Explore Icon = "explore"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/explore.svg
+	Explore Icon = "outlined/explore"
 	
 	// ExploreOff is the "explore_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/explore_off.svg
-	ExploreOff Icon = "explore_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/explore_off.svg
+	ExploreOff Icon = "outlined/explore_off"
 	
 	// Explosion is the "explosion" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/explosion.svg
-	Explosion Icon = "explosion"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/explosion.svg
+	Explosion Icon = "outlined/explosion"
 	
 	// ExportNotes is the "export_notes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/export_notes.svg
-	ExportNotes Icon = "export_notes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/export_notes.svg
+	ExportNotes Icon = "outlined/export_notes"
 	
 	// Exposure is the "exposure" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/exposure.svg
-	Exposure Icon = "exposure"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/exposure.svg
+	Exposure Icon = "outlined/exposure"
 	
 	// ExposureNeg1 is the "exposure_neg_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/exposure_neg_1.svg
-	ExposureNeg1 Icon = "exposure_neg_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/exposure_neg_1.svg
+	ExposureNeg1 Icon = "outlined/exposure_neg_1"
 	
 	// ExposureNeg2 is the "exposure_neg_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/exposure_neg_2.svg
-	ExposureNeg2 Icon = "exposure_neg_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/exposure_neg_2.svg
+	ExposureNeg2 Icon = "outlined/exposure_neg_2"
 	
 	// ExposurePlus1 is the "exposure_plus_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/exposure_plus_1.svg
-	ExposurePlus1 Icon = "exposure_plus_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/exposure_plus_1.svg
+	ExposurePlus1 Icon = "outlined/exposure_plus_1"
 	
 	// ExposurePlus2 is the "exposure_plus_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/exposure_plus_2.svg
-	ExposurePlus2 Icon = "exposure_plus_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/exposure_plus_2.svg
+	ExposurePlus2 Icon = "outlined/exposure_plus_2"
 	
 	// ExposureZero is the "exposure_zero" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/exposure_zero.svg
-	ExposureZero Icon = "exposure_zero"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/exposure_zero.svg
+	ExposureZero Icon = "outlined/exposure_zero"
 	
 	// Extension is the "extension" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/extension.svg
-	Extension Icon = "extension"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/extension.svg
+	Extension Icon = "outlined/extension"
 	
 	// ExtensionOff is the "extension_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/extension_off.svg
-	ExtensionOff Icon = "extension_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/extension_off.svg
+	ExtensionOff Icon = "outlined/extension_off"
 	
 	// Eyeglasses is the "eyeglasses" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/eyeglasses.svg
-	Eyeglasses Icon = "eyeglasses"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/eyeglasses.svg
+	Eyeglasses Icon = "outlined/eyeglasses"
 	
 	// Face is the "face" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/face.svg
-	Face Icon = "face"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/face.svg
+	Face Icon = "outlined/face"
 	
 	// Face2 is the "face_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/face_2.svg
-	Face2 Icon = "face_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/face_2.svg
+	Face2 Icon = "outlined/face_2"
 	
 	// Face3 is the "face_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/face_3.svg
-	Face3 Icon = "face_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/face_3.svg
+	Face3 Icon = "outlined/face_3"
 	
 	// Face4 is the "face_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/face_4.svg
-	Face4 Icon = "face_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/face_4.svg
+	Face4 Icon = "outlined/face_4"
 	
 	// Face5 is the "face_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/face_5.svg
-	Face5 Icon = "face_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/face_5.svg
+	Face5 Icon = "outlined/face_5"
 	
 	// Face6 is the "face_6" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/face_6.svg
-	Face6 Icon = "face_6"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/face_6.svg
+	Face6 Icon = "outlined/face_6"
 	
 	// FaceRetouchingOff is the "face_retouching_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/face_retouching_off.svg
-	FaceRetouchingOff Icon = "face_retouching_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/face_retouching_off.svg
+	FaceRetouchingOff Icon = "outlined/face_retouching_off"
 	
 	// FactCheck is the "fact_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fact_check.svg
-	FactCheck Icon = "fact_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fact_check.svg
+	FactCheck Icon = "outlined/fact_check"
 	
 	// Factory is the "factory" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/factory.svg
-	Factory Icon = "factory"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/factory.svg
+	Factory Icon = "outlined/factory"
 	
 	// Falling is the "falling" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/falling.svg
-	Falling Icon = "falling"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/falling.svg
+	Falling Icon = "outlined/falling"
 	
 	// FamiliarFaceAndZone is the "familiar_face_and_zone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/familiar_face_and_zone.svg
-	FamiliarFaceAndZone Icon = "familiar_face_and_zone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/familiar_face_and_zone.svg
+	FamiliarFaceAndZone Icon = "outlined/familiar_face_and_zone"
 	
 	// FamilyHistory is the "family_history" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/family_history.svg
-	FamilyHistory Icon = "family_history"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/family_history.svg
+	FamilyHistory Icon = "outlined/family_history"
 	
 	// FamilyLink is the "family_link" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/family_link.svg
-	FamilyLink Icon = "family_link"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/family_link.svg
+	FamilyLink Icon = "outlined/family_link"
 	
 	// FamilyRestroom is the "family_restroom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/family_restroom.svg
-	FamilyRestroom Icon = "family_restroom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/family_restroom.svg
+	FamilyRestroom Icon = "outlined/family_restroom"
 	
 	// FastForward is the "fast_forward" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fast_forward.svg
-	FastForward Icon = "fast_forward"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fast_forward.svg
+	FastForward Icon = "outlined/fast_forward"
 	
 	// FastRewind is the "fast_rewind" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fast_rewind.svg
-	FastRewind Icon = "fast_rewind"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fast_rewind.svg
+	FastRewind Icon = "outlined/fast_rewind"
 	
 	// Fastfood is the "fastfood" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fastfood.svg
-	Fastfood Icon = "fastfood"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fastfood.svg
+	Fastfood Icon = "outlined/fastfood"
 	
 	// Faucet is the "faucet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/faucet.svg
-	Faucet Icon = "faucet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/faucet.svg
+	Faucet Icon = "outlined/faucet"
 	
 	// Favorite is the "favorite" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/favorite.svg
-	Favorite Icon = "favorite"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/favorite.svg
+	Favorite Icon = "outlined/favorite"
 	
 	// Fax is the "fax" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fax.svg
-	Fax Icon = "fax"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fax.svg
+	Fax Icon = "outlined/fax"
 	
 	// FeatureSearch is the "feature_search" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/feature_search.svg
-	FeatureSearch Icon = "feature_search"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/feature_search.svg
+	FeatureSearch Icon = "outlined/feature_search"
 	
 	// FeaturedPlayList is the "featured_play_list" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/featured_play_list.svg
-	FeaturedPlayList Icon = "featured_play_list"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/featured_play_list.svg
+	FeaturedPlayList Icon = "outlined/featured_play_list"
 	
 	// FeaturedVideo is the "featured_video" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/featured_video.svg
-	FeaturedVideo Icon = "featured_video"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/featured_video.svg
+	FeaturedVideo Icon = "outlined/featured_video"
 	
 	// Feed is the "feed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/feed.svg
-	Feed Icon = "feed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/feed.svg
+	Feed Icon = "outlined/feed"
 	
 	// Feedback is the "feedback" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/feedback.svg
-	Feedback Icon = "feedback"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/feedback.svg
+	Feedback Icon = "outlined/feedback"
 	
 	// Female is the "female" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/female.svg
-	Female Icon = "female"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/female.svg
+	Female Icon = "outlined/female"
 	
 	// Femur is the "femur" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/femur.svg
-	Femur Icon = "femur"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/femur.svg
+	Femur Icon = "outlined/femur"
 	
 	// FemurAlt is the "femur_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/femur_alt.svg
-	FemurAlt Icon = "femur_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/femur_alt.svg
+	FemurAlt Icon = "outlined/femur_alt"
 	
 	// Fence is the "fence" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fence.svg
-	Fence Icon = "fence"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fence.svg
+	Fence Icon = "outlined/fence"
 	
 	// Fertile is the "fertile" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fertile.svg
-	Fertile Icon = "fertile"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fertile.svg
+	Fertile Icon = "outlined/fertile"
 	
 	// Festival is the "festival" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/festival.svg
-	Festival Icon = "festival"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/festival.svg
+	Festival Icon = "outlined/festival"
 	
 	// FiberDvr is the "fiber_dvr" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fiber_dvr.svg
-	FiberDvr Icon = "fiber_dvr"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fiber_dvr.svg
+	FiberDvr Icon = "outlined/fiber_dvr"
 	
 	// FiberManualRecord is the "fiber_manual_record" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fiber_manual_record.svg
-	FiberManualRecord Icon = "fiber_manual_record"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fiber_manual_record.svg
+	FiberManualRecord Icon = "outlined/fiber_manual_record"
 	
 	// FiberNew is the "fiber_new" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fiber_new.svg
-	FiberNew Icon = "fiber_new"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fiber_new.svg
+	FiberNew Icon = "outlined/fiber_new"
 	
 	// FiberPin is the "fiber_pin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fiber_pin.svg
-	FiberPin Icon = "fiber_pin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fiber_pin.svg
+	FiberPin Icon = "outlined/fiber_pin"
 	
 	// FiberSmartRecord is the "fiber_smart_record" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fiber_smart_record.svg
-	FiberSmartRecord Icon = "fiber_smart_record"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fiber_smart_record.svg
+	FiberSmartRecord Icon = "outlined/fiber_smart_record"
 	
 	// FileCopy is the "file_copy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/file_copy.svg
-	FileCopy Icon = "file_copy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/file_copy.svg
+	FileCopy Icon = "outlined/file_copy"
 	
 	// FileDownloadDone is the "file_download_done" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/file_download_done.svg
-	FileDownloadDone Icon = "file_download_done"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/file_download_done.svg
+	FileDownloadDone Icon = "outlined/file_download_done"
 	
 	// FileDownloadOff is the "file_download_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/file_download_off.svg
-	FileDownloadOff Icon = "file_download_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/file_download_off.svg
+	FileDownloadOff Icon = "outlined/file_download_off"
 	
 	// FileOpen is the "file_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/file_open.svg
-	FileOpen Icon = "file_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/file_open.svg
+	FileOpen Icon = "outlined/file_open"
 	
 	// FilePresent is the "file_present" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/file_present.svg
-	FilePresent Icon = "file_present"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/file_present.svg
+	FilePresent Icon = "outlined/file_present"
 	
 	// FileUploadOff is the "file_upload_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/file_upload_off.svg
-	FileUploadOff Icon = "file_upload_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/file_upload_off.svg
+	FileUploadOff Icon = "outlined/file_upload_off"
 	
 	// Filter is the "filter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter.svg
-	Filter Icon = "filter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter.svg
+	Filter Icon = "outlined/filter"
 	
 	// Filter1 is the "filter_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_1.svg
-	Filter1 Icon = "filter_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_1.svg
+	Filter1 Icon = "outlined/filter_1"
 	
 	// Filter2 is the "filter_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_2.svg
-	Filter2 Icon = "filter_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_2.svg
+	Filter2 Icon = "outlined/filter_2"
 	
 	// Filter3 is the "filter_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_3.svg
-	Filter3 Icon = "filter_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_3.svg
+	Filter3 Icon = "outlined/filter_3"
 	
 	// Filter4 is the "filter_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_4.svg
-	Filter4 Icon = "filter_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_4.svg
+	Filter4 Icon = "outlined/filter_4"
 	
 	// Filter5 is the "filter_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_5.svg
-	Filter5 Icon = "filter_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_5.svg
+	Filter5 Icon = "outlined/filter_5"
 	
 	// Filter6 is the "filter_6" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_6.svg
-	Filter6 Icon = "filter_6"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_6.svg
+	Filter6 Icon = "outlined/filter_6"
 	
 	// Filter7 is the "filter_7" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_7.svg
-	Filter7 Icon = "filter_7"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_7.svg
+	Filter7 Icon = "outlined/filter_7"
 	
 	// Filter8 is the "filter_8" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_8.svg
-	Filter8 Icon = "filter_8"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_8.svg
+	Filter8 Icon = "outlined/filter_8"
 	
 	// Filter9 is the "filter_9" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_9.svg
-	Filter9 Icon = "filter_9"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_9.svg
+	Filter9 Icon = "outlined/filter_9"
 	
 	// Filter9Plus is the "filter_9_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_9_plus.svg
-	Filter9Plus Icon = "filter_9_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_9_plus.svg
+	Filter9Plus Icon = "outlined/filter_9_plus"
 	
 	// FilterAlt is the "filter_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_alt.svg
-	FilterAlt Icon = "filter_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_alt.svg
+	FilterAlt Icon = "outlined/filter_alt"
 	
 	// FilterAltOff is the "filter_alt_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_alt_off.svg
-	FilterAltOff Icon = "filter_alt_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_alt_off.svg
+	FilterAltOff Icon = "outlined/filter_alt_off"
 	
 	// FilterBAndW is the "filter_b_and_w" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_b_and_w.svg
-	FilterBAndW Icon = "filter_b_and_w"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_b_and_w.svg
+	FilterBAndW Icon = "outlined/filter_b_and_w"
 	
 	// FilterCenterFocus is the "filter_center_focus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_center_focus.svg
-	FilterCenterFocus Icon = "filter_center_focus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_center_focus.svg
+	FilterCenterFocus Icon = "outlined/filter_center_focus"
 	
 	// FilterDrama is the "filter_drama" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_drama.svg
-	FilterDrama Icon = "filter_drama"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_drama.svg
+	FilterDrama Icon = "outlined/filter_drama"
 	
 	// FilterFrames is the "filter_frames" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_frames.svg
-	FilterFrames Icon = "filter_frames"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_frames.svg
+	FilterFrames Icon = "outlined/filter_frames"
 	
 	// FilterHdr is the "filter_hdr" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_hdr.svg
-	FilterHdr Icon = "filter_hdr"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_hdr.svg
+	FilterHdr Icon = "outlined/filter_hdr"
 	
 	// FilterList is the "filter_list" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_list.svg
-	FilterList Icon = "filter_list"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_list.svg
+	FilterList Icon = "outlined/filter_list"
 	
 	// FilterListOff is the "filter_list_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_list_off.svg
-	FilterListOff Icon = "filter_list_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_list_off.svg
+	FilterListOff Icon = "outlined/filter_list_off"
 	
 	// FilterNone is the "filter_none" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_none.svg
-	FilterNone Icon = "filter_none"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_none.svg
+	FilterNone Icon = "outlined/filter_none"
 	
 	// FilterTiltShift is the "filter_tilt_shift" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_tilt_shift.svg
-	FilterTiltShift Icon = "filter_tilt_shift"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_tilt_shift.svg
+	FilterTiltShift Icon = "outlined/filter_tilt_shift"
 	
 	// FilterVintage is the "filter_vintage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/filter_vintage.svg
-	FilterVintage Icon = "filter_vintage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/filter_vintage.svg
+	FilterVintage Icon = "outlined/filter_vintage"
 	
 	// Finance is the "finance" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/finance.svg
-	Finance Icon = "finance"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/finance.svg
+	Finance Icon = "outlined/finance"
 	
 	// FinanceChip is the "finance_chip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/finance_chip.svg
-	FinanceChip Icon = "finance_chip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/finance_chip.svg
+	FinanceChip Icon = "outlined/finance_chip"
 	
 	// FindInPage is the "find_in_page" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/find_in_page.svg
-	FindInPage Icon = "find_in_page"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/find_in_page.svg
+	FindInPage Icon = "outlined/find_in_page"
 	
 	// FindReplace is the "find_replace" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/find_replace.svg
-	FindReplace Icon = "find_replace"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/find_replace.svg
+	FindReplace Icon = "outlined/find_replace"
 	
 	// Fingerprint is the "fingerprint" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fingerprint.svg
-	Fingerprint Icon = "fingerprint"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fingerprint.svg
+	Fingerprint Icon = "outlined/fingerprint"
 	
 	// FireExtinguisher is the "fire_extinguisher" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fire_extinguisher.svg
-	FireExtinguisher Icon = "fire_extinguisher"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fire_extinguisher.svg
+	FireExtinguisher Icon = "outlined/fire_extinguisher"
 	
 	// FireHydrant is the "fire_hydrant" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fire_hydrant.svg
-	FireHydrant Icon = "fire_hydrant"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fire_hydrant.svg
+	FireHydrant Icon = "outlined/fire_hydrant"
 	
 	// FireTruck is the "fire_truck" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fire_truck.svg
-	FireTruck Icon = "fire_truck"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fire_truck.svg
+	FireTruck Icon = "outlined/fire_truck"
 	
 	// Fireplace is the "fireplace" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fireplace.svg
-	Fireplace Icon = "fireplace"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fireplace.svg
+	Fireplace Icon = "outlined/fireplace"
 	
 	// FirstPage is the "first_page" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/first_page.svg
-	FirstPage Icon = "first_page"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/first_page.svg
+	FirstPage Icon = "outlined/first_page"
 	
 	// FitPage is the "fit_page" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fit_page.svg
-	FitPage Icon = "fit_page"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fit_page.svg
+	FitPage Icon = "outlined/fit_page"
 	
 	// FitScreen is the "fit_screen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fit_screen.svg
-	FitScreen Icon = "fit_screen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fit_screen.svg
+	FitScreen Icon = "outlined/fit_screen"
 	
 	// FitWidth is the "fit_width" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fit_width.svg
-	FitWidth Icon = "fit_width"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fit_width.svg
+	FitWidth Icon = "outlined/fit_width"
 	
 	// FitnessCenter is the "fitness_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fitness_center.svg
-	FitnessCenter Icon = "fitness_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fitness_center.svg
+	FitnessCenter Icon = "outlined/fitness_center"
 	
 	// Flag is the "flag" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flag.svg
-	Flag Icon = "flag"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flag.svg
+	Flag Icon = "outlined/flag"
 	
 	// FlagCircle is the "flag_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flag_circle.svg
-	FlagCircle Icon = "flag_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flag_circle.svg
+	FlagCircle Icon = "outlined/flag_circle"
 	
 	// Flaky is the "flaky" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flaky.svg
-	Flaky Icon = "flaky"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flaky.svg
+	Flaky Icon = "outlined/flaky"
 	
 	// Flare is the "flare" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flare.svg
-	Flare Icon = "flare"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flare.svg
+	Flare Icon = "outlined/flare"
 	
 	// FlashAuto is the "flash_auto" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flash_auto.svg
-	FlashAuto Icon = "flash_auto"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flash_auto.svg
+	FlashAuto Icon = "outlined/flash_auto"
 	
 	// FlashOff is the "flash_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flash_off.svg
-	FlashOff Icon = "flash_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flash_off.svg
+	FlashOff Icon = "outlined/flash_off"
 	
 	// FlashOn is the "flash_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flash_on.svg
-	FlashOn Icon = "flash_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flash_on.svg
+	FlashOn Icon = "outlined/flash_on"
 	
 	// FlashlightOff is the "flashlight_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flashlight_off.svg
-	FlashlightOff Icon = "flashlight_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flashlight_off.svg
+	FlashlightOff Icon = "outlined/flashlight_off"
 	
 	// FlashlightOn is the "flashlight_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flashlight_on.svg
-	FlashlightOn Icon = "flashlight_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flashlight_on.svg
+	FlashlightOn Icon = "outlined/flashlight_on"
 	
 	// Flatware is the "flatware" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flatware.svg
-	Flatware Icon = "flatware"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flatware.svg
+	Flatware Icon = "outlined/flatware"
 	
 	// FlexDirection is the "flex_direction" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flex_direction.svg
-	FlexDirection Icon = "flex_direction"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flex_direction.svg
+	FlexDirection Icon = "outlined/flex_direction"
 	
 	// FlexNoWrap is the "flex_no_wrap" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flex_no_wrap.svg
-	FlexNoWrap Icon = "flex_no_wrap"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flex_no_wrap.svg
+	FlexNoWrap Icon = "outlined/flex_no_wrap"
 	
 	// FlexWrap is the "flex_wrap" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flex_wrap.svg
-	FlexWrap Icon = "flex_wrap"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flex_wrap.svg
+	FlexWrap Icon = "outlined/flex_wrap"
 	
 	// Flight is the "flight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flight.svg
-	Flight Icon = "flight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flight.svg
+	Flight Icon = "outlined/flight"
 	
 	// FlightClass is the "flight_class" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flight_class.svg
-	FlightClass Icon = "flight_class"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flight_class.svg
+	FlightClass Icon = "outlined/flight_class"
 	
 	// FlightLand is the "flight_land" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flight_land.svg
-	FlightLand Icon = "flight_land"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flight_land.svg
+	FlightLand Icon = "outlined/flight_land"
 	
 	// FlightTakeoff is the "flight_takeoff" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flight_takeoff.svg
-	FlightTakeoff Icon = "flight_takeoff"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flight_takeoff.svg
+	FlightTakeoff Icon = "outlined/flight_takeoff"
 	
 	// Flightsmode is the "flightsmode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flightsmode.svg
-	Flightsmode Icon = "flightsmode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flightsmode.svg
+	Flightsmode Icon = "outlined/flightsmode"
 	
 	// Flip is the "flip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flip.svg
-	Flip Icon = "flip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flip.svg
+	Flip Icon = "outlined/flip"
 	
 	// FlipCameraAndroid is the "flip_camera_android" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flip_camera_android.svg
-	FlipCameraAndroid Icon = "flip_camera_android"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flip_camera_android.svg
+	FlipCameraAndroid Icon = "outlined/flip_camera_android"
 	
 	// FlipCameraIos is the "flip_camera_ios" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flip_camera_ios.svg
-	FlipCameraIos Icon = "flip_camera_ios"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flip_camera_ios.svg
+	FlipCameraIos Icon = "outlined/flip_camera_ios"
 	
 	// FlipToBack is the "flip_to_back" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flip_to_back.svg
-	FlipToBack Icon = "flip_to_back"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flip_to_back.svg
+	FlipToBack Icon = "outlined/flip_to_back"
 	
 	// FlipToFront is the "flip_to_front" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flip_to_front.svg
-	FlipToFront Icon = "flip_to_front"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flip_to_front.svg
+	FlipToFront Icon = "outlined/flip_to_front"
 	
 	// Flood is the "flood" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flood.svg
-	Flood Icon = "flood"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flood.svg
+	Flood Icon = "outlined/flood"
 	
 	// Floor is the "floor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/floor.svg
-	Floor Icon = "floor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/floor.svg
+	Floor Icon = "outlined/floor"
 	
 	// FloorLamp is the "floor_lamp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/floor_lamp.svg
-	FloorLamp Icon = "floor_lamp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/floor_lamp.svg
+	FloorLamp Icon = "outlined/floor_lamp"
 	
 	// Flowsheet is the "flowsheet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flowsheet.svg
-	Flowsheet Icon = "flowsheet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flowsheet.svg
+	Flowsheet Icon = "outlined/flowsheet"
 	
 	// Fluid is the "fluid" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fluid.svg
-	Fluid Icon = "fluid"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fluid.svg
+	Fluid Icon = "outlined/fluid"
 	
 	// FluidBalance is the "fluid_balance" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fluid_balance.svg
-	FluidBalance Icon = "fluid_balance"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fluid_balance.svg
+	FluidBalance Icon = "outlined/fluid_balance"
 	
 	// FluidMed is the "fluid_med" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fluid_med.svg
-	FluidMed Icon = "fluid_med"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fluid_med.svg
+	FluidMed Icon = "outlined/fluid_med"
 	
 	// Fluorescent is the "fluorescent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fluorescent.svg
-	Fluorescent Icon = "fluorescent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fluorescent.svg
+	Fluorescent Icon = "outlined/fluorescent"
 	
 	// Flutter is the "flutter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flutter.svg
-	Flutter Icon = "flutter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flutter.svg
+	Flutter Icon = "outlined/flutter"
 	
 	// FlutterDash is the "flutter_dash" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/flutter_dash.svg
-	FlutterDash Icon = "flutter_dash"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/flutter_dash.svg
+	FlutterDash Icon = "outlined/flutter_dash"
 	
 	// FmdBad is the "fmd_bad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fmd_bad.svg
-	FmdBad Icon = "fmd_bad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fmd_bad.svg
+	FmdBad Icon = "outlined/fmd_bad"
 	
 	// Foggy is the "foggy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/foggy.svg
-	Foggy Icon = "foggy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/foggy.svg
+	Foggy Icon = "outlined/foggy"
 	
 	// FoldedHands is the "folded_hands" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folded_hands.svg
-	FoldedHands Icon = "folded_hands"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folded_hands.svg
+	FoldedHands Icon = "outlined/folded_hands"
 	
 	// Folder is the "folder" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder.svg
-	Folder Icon = "folder"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder.svg
+	Folder Icon = "outlined/folder"
 	
 	// FolderCopy is the "folder_copy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder_copy.svg
-	FolderCopy Icon = "folder_copy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder_copy.svg
+	FolderCopy Icon = "outlined/folder_copy"
 	
 	// FolderDelete is the "folder_delete" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder_delete.svg
-	FolderDelete Icon = "folder_delete"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder_delete.svg
+	FolderDelete Icon = "outlined/folder_delete"
 	
 	// FolderManaged is the "folder_managed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder_managed.svg
-	FolderManaged Icon = "folder_managed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder_managed.svg
+	FolderManaged Icon = "outlined/folder_managed"
 	
 	// FolderOff is the "folder_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder_off.svg
-	FolderOff Icon = "folder_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder_off.svg
+	FolderOff Icon = "outlined/folder_off"
 	
 	// FolderOpen is the "folder_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder_open.svg
-	FolderOpen Icon = "folder_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder_open.svg
+	FolderOpen Icon = "outlined/folder_open"
 	
 	// FolderShared is the "folder_shared" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder_shared.svg
-	FolderShared Icon = "folder_shared"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder_shared.svg
+	FolderShared Icon = "outlined/folder_shared"
 	
 	// FolderSpecial is the "folder_special" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder_special.svg
-	FolderSpecial Icon = "folder_special"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder_special.svg
+	FolderSpecial Icon = "outlined/folder_special"
 	
 	// FolderSupervised is the "folder_supervised" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder_supervised.svg
-	FolderSupervised Icon = "folder_supervised"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder_supervised.svg
+	FolderSupervised Icon = "outlined/folder_supervised"
 	
 	// FolderZip is the "folder_zip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/folder_zip.svg
-	FolderZip Icon = "folder_zip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/folder_zip.svg
+	FolderZip Icon = "outlined/folder_zip"
 	
 	// FollowTheSigns is the "follow_the_signs" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/follow_the_signs.svg
-	FollowTheSigns Icon = "follow_the_signs"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/follow_the_signs.svg
+	FollowTheSigns Icon = "outlined/follow_the_signs"
 	
 	// FontDownload is the "font_download" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/font_download.svg
-	FontDownload Icon = "font_download"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/font_download.svg
+	FontDownload Icon = "outlined/font_download"
 	
 	// FontDownloadOff is the "font_download_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/font_download_off.svg
-	FontDownloadOff Icon = "font_download_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/font_download_off.svg
+	FontDownloadOff Icon = "outlined/font_download_off"
 	
 	// FoodBank is the "food_bank" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/food_bank.svg
-	FoodBank Icon = "food_bank"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/food_bank.svg
+	FoodBank Icon = "outlined/food_bank"
 	
 	// FootBones is the "foot_bones" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/foot_bones.svg
-	FootBones Icon = "foot_bones"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/foot_bones.svg
+	FootBones Icon = "outlined/foot_bones"
 	
 	// Footprint is the "footprint" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/footprint.svg
-	Footprint Icon = "footprint"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/footprint.svg
+	Footprint Icon = "outlined/footprint"
 	
 	// Forest is the "forest" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forest.svg
-	Forest Icon = "forest"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forest.svg
+	Forest Icon = "outlined/forest"
 	
 	// ForkLeft is the "fork_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fork_left.svg
-	ForkLeft Icon = "fork_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fork_left.svg
+	ForkLeft Icon = "outlined/fork_left"
 	
 	// ForkRight is the "fork_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fork_right.svg
-	ForkRight Icon = "fork_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fork_right.svg
+	ForkRight Icon = "outlined/fork_right"
 	
 	// Forklift is the "forklift" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forklift.svg
-	Forklift Icon = "forklift"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forklift.svg
+	Forklift Icon = "outlined/forklift"
 	
 	// FormatAlignCenter is the "format_align_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_align_center.svg
-	FormatAlignCenter Icon = "format_align_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_align_center.svg
+	FormatAlignCenter Icon = "outlined/format_align_center"
 	
 	// FormatAlignJustify is the "format_align_justify" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_align_justify.svg
-	FormatAlignJustify Icon = "format_align_justify"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_align_justify.svg
+	FormatAlignJustify Icon = "outlined/format_align_justify"
 	
 	// FormatAlignLeft is the "format_align_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_align_left.svg
-	FormatAlignLeft Icon = "format_align_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_align_left.svg
+	FormatAlignLeft Icon = "outlined/format_align_left"
 	
 	// FormatAlignRight is the "format_align_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_align_right.svg
-	FormatAlignRight Icon = "format_align_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_align_right.svg
+	FormatAlignRight Icon = "outlined/format_align_right"
 	
 	// FormatBold is the "format_bold" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_bold.svg
-	FormatBold Icon = "format_bold"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_bold.svg
+	FormatBold Icon = "outlined/format_bold"
 	
 	// FormatClear is the "format_clear" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_clear.svg
-	FormatClear Icon = "format_clear"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_clear.svg
+	FormatClear Icon = "outlined/format_clear"
 	
 	// FormatColorFill is the "format_color_fill" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_color_fill.svg
-	FormatColorFill Icon = "format_color_fill"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_color_fill.svg
+	FormatColorFill Icon = "outlined/format_color_fill"
 	
 	// FormatColorReset is the "format_color_reset" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_color_reset.svg
-	FormatColorReset Icon = "format_color_reset"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_color_reset.svg
+	FormatColorReset Icon = "outlined/format_color_reset"
 	
 	// FormatColorText is the "format_color_text" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_color_text.svg
-	FormatColorText Icon = "format_color_text"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_color_text.svg
+	FormatColorText Icon = "outlined/format_color_text"
 	
 	// FormatH1 is the "format_h1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_h1.svg
-	FormatH1 Icon = "format_h1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_h1.svg
+	FormatH1 Icon = "outlined/format_h1"
 	
 	// FormatH2 is the "format_h2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_h2.svg
-	FormatH2 Icon = "format_h2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_h2.svg
+	FormatH2 Icon = "outlined/format_h2"
 	
 	// FormatH3 is the "format_h3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_h3.svg
-	FormatH3 Icon = "format_h3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_h3.svg
+	FormatH3 Icon = "outlined/format_h3"
 	
 	// FormatH4 is the "format_h4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_h4.svg
-	FormatH4 Icon = "format_h4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_h4.svg
+	FormatH4 Icon = "outlined/format_h4"
 	
 	// FormatH5 is the "format_h5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_h5.svg
-	FormatH5 Icon = "format_h5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_h5.svg
+	FormatH5 Icon = "outlined/format_h5"
 	
 	// FormatH6 is the "format_h6" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_h6.svg
-	FormatH6 Icon = "format_h6"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_h6.svg
+	FormatH6 Icon = "outlined/format_h6"
 	
 	// FormatImageLeft is the "format_image_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_image_left.svg
-	FormatImageLeft Icon = "format_image_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_image_left.svg
+	FormatImageLeft Icon = "outlined/format_image_left"
 	
 	// FormatImageRight is the "format_image_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_image_right.svg
-	FormatImageRight Icon = "format_image_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_image_right.svg
+	FormatImageRight Icon = "outlined/format_image_right"
 	
 	// FormatIndentDecrease is the "format_indent_decrease" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_indent_decrease.svg
-	FormatIndentDecrease Icon = "format_indent_decrease"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_indent_decrease.svg
+	FormatIndentDecrease Icon = "outlined/format_indent_decrease"
 	
 	// FormatIndentIncrease is the "format_indent_increase" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_indent_increase.svg
-	FormatIndentIncrease Icon = "format_indent_increase"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_indent_increase.svg
+	FormatIndentIncrease Icon = "outlined/format_indent_increase"
 	
 	// FormatInkHighlighter is the "format_ink_highlighter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_ink_highlighter.svg
-	FormatInkHighlighter Icon = "format_ink_highlighter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_ink_highlighter.svg
+	FormatInkHighlighter Icon = "outlined/format_ink_highlighter"
 	
 	// FormatItalic is the "format_italic" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_italic.svg
-	FormatItalic Icon = "format_italic"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_italic.svg
+	FormatItalic Icon = "outlined/format_italic"
 	
 	// FormatLetterSpacing is the "format_letter_spacing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_letter_spacing.svg
-	FormatLetterSpacing Icon = "format_letter_spacing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_letter_spacing.svg
+	FormatLetterSpacing Icon = "outlined/format_letter_spacing"
 	
 	// FormatLetterSpacing2 is the "format_letter_spacing_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_letter_spacing_2.svg
-	FormatLetterSpacing2 Icon = "format_letter_spacing_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_letter_spacing_2.svg
+	FormatLetterSpacing2 Icon = "outlined/format_letter_spacing_2"
 	
 	// FormatLetterSpacingStandard is the "format_letter_spacing_standard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_letter_spacing_standard.svg
-	FormatLetterSpacingStandard Icon = "format_letter_spacing_standard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_letter_spacing_standard.svg
+	FormatLetterSpacingStandard Icon = "outlined/format_letter_spacing_standard"
 	
 	// FormatLetterSpacingWide is the "format_letter_spacing_wide" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_letter_spacing_wide.svg
-	FormatLetterSpacingWide Icon = "format_letter_spacing_wide"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_letter_spacing_wide.svg
+	FormatLetterSpacingWide Icon = "outlined/format_letter_spacing_wide"
 	
 	// FormatLetterSpacingWider is the "format_letter_spacing_wider" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_letter_spacing_wider.svg
-	FormatLetterSpacingWider Icon = "format_letter_spacing_wider"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_letter_spacing_wider.svg
+	FormatLetterSpacingWider Icon = "outlined/format_letter_spacing_wider"
 	
 	// FormatLineSpacing is the "format_line_spacing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_line_spacing.svg
-	FormatLineSpacing Icon = "format_line_spacing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_line_spacing.svg
+	FormatLineSpacing Icon = "outlined/format_line_spacing"
 	
 	// FormatListBulleted is the "format_list_bulleted" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_list_bulleted.svg
-	FormatListBulleted Icon = "format_list_bulleted"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_list_bulleted.svg
+	FormatListBulleted Icon = "outlined/format_list_bulleted"
 	
 	// FormatListBulletedAdd is the "format_list_bulleted_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_list_bulleted_add.svg
-	FormatListBulletedAdd Icon = "format_list_bulleted_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_list_bulleted_add.svg
+	FormatListBulletedAdd Icon = "outlined/format_list_bulleted_add"
 	
 	// FormatListNumbered is the "format_list_numbered" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_list_numbered.svg
-	FormatListNumbered Icon = "format_list_numbered"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_list_numbered.svg
+	FormatListNumbered Icon = "outlined/format_list_numbered"
 	
 	// FormatListNumberedRtl is the "format_list_numbered_rtl" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_list_numbered_rtl.svg
-	FormatListNumberedRtl Icon = "format_list_numbered_rtl"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_list_numbered_rtl.svg
+	FormatListNumberedRtl Icon = "outlined/format_list_numbered_rtl"
 	
 	// FormatOverline is the "format_overline" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_overline.svg
-	FormatOverline Icon = "format_overline"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_overline.svg
+	FormatOverline Icon = "outlined/format_overline"
 	
 	// FormatPaint is the "format_paint" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_paint.svg
-	FormatPaint Icon = "format_paint"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_paint.svg
+	FormatPaint Icon = "outlined/format_paint"
 	
 	// FormatParagraph is the "format_paragraph" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_paragraph.svg
-	FormatParagraph Icon = "format_paragraph"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_paragraph.svg
+	FormatParagraph Icon = "outlined/format_paragraph"
 	
 	// FormatQuote is the "format_quote" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_quote.svg
-	FormatQuote Icon = "format_quote"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_quote.svg
+	FormatQuote Icon = "outlined/format_quote"
 	
 	// FormatShapes is the "format_shapes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_shapes.svg
-	FormatShapes Icon = "format_shapes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_shapes.svg
+	FormatShapes Icon = "outlined/format_shapes"
 	
 	// FormatSize is the "format_size" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_size.svg
-	FormatSize Icon = "format_size"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_size.svg
+	FormatSize Icon = "outlined/format_size"
 	
 	// FormatStrikethrough is the "format_strikethrough" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_strikethrough.svg
-	FormatStrikethrough Icon = "format_strikethrough"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_strikethrough.svg
+	FormatStrikethrough Icon = "outlined/format_strikethrough"
 	
 	// FormatTextClip is the "format_text_clip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_text_clip.svg
-	FormatTextClip Icon = "format_text_clip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_text_clip.svg
+	FormatTextClip Icon = "outlined/format_text_clip"
 	
 	// FormatTextOverflow is the "format_text_overflow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_text_overflow.svg
-	FormatTextOverflow Icon = "format_text_overflow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_text_overflow.svg
+	FormatTextOverflow Icon = "outlined/format_text_overflow"
 	
 	// FormatTextWrap is the "format_text_wrap" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_text_wrap.svg
-	FormatTextWrap Icon = "format_text_wrap"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_text_wrap.svg
+	FormatTextWrap Icon = "outlined/format_text_wrap"
 	
 	// FormatTextdirectionLToR is the "format_textdirection_l_to_r" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_textdirection_l_to_r.svg
-	FormatTextdirectionLToR Icon = "format_textdirection_l_to_r"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_textdirection_l_to_r.svg
+	FormatTextdirectionLToR Icon = "outlined/format_textdirection_l_to_r"
 	
 	// FormatTextdirectionRToL is the "format_textdirection_r_to_l" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_textdirection_r_to_l.svg
-	FormatTextdirectionRToL Icon = "format_textdirection_r_to_l"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_textdirection_r_to_l.svg
+	FormatTextdirectionRToL Icon = "outlined/format_textdirection_r_to_l"
 	
 	// FormatUnderlined is the "format_underlined" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_underlined.svg
-	FormatUnderlined Icon = "format_underlined"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_underlined.svg
+	FormatUnderlined Icon = "outlined/format_underlined"
 	
 	// FormatUnderlinedSquiggle is the "format_underlined_squiggle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/format_underlined_squiggle.svg
-	FormatUnderlinedSquiggle Icon = "format_underlined_squiggle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/format_underlined_squiggle.svg
+	FormatUnderlinedSquiggle Icon = "outlined/format_underlined_squiggle"
 	
 	// FormsAddOn is the "forms_add_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forms_add_on.svg
-	FormsAddOn Icon = "forms_add_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forms_add_on.svg
+	FormsAddOn Icon = "outlined/forms_add_on"
 	
 	// FormsAppsScript is the "forms_apps_script" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forms_apps_script.svg
-	FormsAppsScript Icon = "forms_apps_script"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forms_apps_script.svg
+	FormsAppsScript Icon = "outlined/forms_apps_script"
 	
 	// Fort is the "fort" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fort.svg
-	Fort Icon = "fort"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fort.svg
+	Fort Icon = "outlined/fort"
 	
 	// Forum is the "forum" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forum.svg
-	Forum Icon = "forum"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forum.svg
+	Forum Icon = "outlined/forum"
 	
 	// Forward is the "forward" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forward.svg
-	Forward Icon = "forward"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forward.svg
+	Forward Icon = "outlined/forward"
 	
 	// Forward10 is the "forward_10" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forward_10.svg
-	Forward10 Icon = "forward_10"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forward_10.svg
+	Forward10 Icon = "outlined/forward_10"
 	
 	// Forward30 is the "forward_30" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forward_30.svg
-	Forward30 Icon = "forward_30"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forward_30.svg
+	Forward30 Icon = "outlined/forward_30"
 	
 	// Forward5 is the "forward_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forward_5.svg
-	Forward5 Icon = "forward_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forward_5.svg
+	Forward5 Icon = "outlined/forward_5"
 	
 	// ForwardCircle is the "forward_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forward_circle.svg
-	ForwardCircle Icon = "forward_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forward_circle.svg
+	ForwardCircle Icon = "outlined/forward_circle"
 	
 	// ForwardMedia is the "forward_media" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forward_media.svg
-	ForwardMedia Icon = "forward_media"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forward_media.svg
+	ForwardMedia Icon = "outlined/forward_media"
 	
 	// ForwardToInbox is the "forward_to_inbox" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/forward_to_inbox.svg
-	ForwardToInbox Icon = "forward_to_inbox"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/forward_to_inbox.svg
+	ForwardToInbox Icon = "outlined/forward_to_inbox"
 	
 	// Foundation is the "foundation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/foundation.svg
-	Foundation Icon = "foundation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/foundation.svg
+	Foundation Icon = "outlined/foundation"
 	
 	// FrameInspect is the "frame_inspect" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/frame_inspect.svg
-	FrameInspect Icon = "frame_inspect"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/frame_inspect.svg
+	FrameInspect Icon = "outlined/frame_inspect"
 	
 	// FramePerson is the "frame_person" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/frame_person.svg
-	FramePerson Icon = "frame_person"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/frame_person.svg
+	FramePerson Icon = "outlined/frame_person"
 	
 	// FramePersonOff is the "frame_person_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/frame_person_off.svg
-	FramePersonOff Icon = "frame_person_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/frame_person_off.svg
+	FramePersonOff Icon = "outlined/frame_person_off"
 	
 	// FrameReload is the "frame_reload" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/frame_reload.svg
-	FrameReload Icon = "frame_reload"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/frame_reload.svg
+	FrameReload Icon = "outlined/frame_reload"
 	
 	// FrameSource is the "frame_source" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/frame_source.svg
-	FrameSource Icon = "frame_source"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/frame_source.svg
+	FrameSource Icon = "outlined/frame_source"
 	
 	// FreeCancellation is the "free_cancellation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/free_cancellation.svg
-	FreeCancellation Icon = "free_cancellation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/free_cancellation.svg
+	FreeCancellation Icon = "outlined/free_cancellation"
 	
 	// FrontHand is the "front_hand" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/front_hand.svg
-	FrontHand Icon = "front_hand"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/front_hand.svg
+	FrontHand Icon = "outlined/front_hand"
 	
 	// FrontLoader is the "front_loader" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/front_loader.svg
-	FrontLoader Icon = "front_loader"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/front_loader.svg
+	FrontLoader Icon = "outlined/front_loader"
 	
 	// FullCoverage is the "full_coverage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/full_coverage.svg
-	FullCoverage Icon = "full_coverage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/full_coverage.svg
+	FullCoverage Icon = "outlined/full_coverage"
 	
 	// FullStackedBarChart is the "full_stacked_bar_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/full_stacked_bar_chart.svg
-	FullStackedBarChart Icon = "full_stacked_bar_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/full_stacked_bar_chart.svg
+	FullStackedBarChart Icon = "outlined/full_stacked_bar_chart"
 	
 	// Fullscreen is the "fullscreen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fullscreen.svg
-	Fullscreen Icon = "fullscreen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fullscreen.svg
+	Fullscreen Icon = "outlined/fullscreen"
 	
 	// FullscreenExit is the "fullscreen_exit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/fullscreen_exit.svg
-	FullscreenExit Icon = "fullscreen_exit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/fullscreen_exit.svg
+	FullscreenExit Icon = "outlined/fullscreen_exit"
 	
 	// Function is the "function" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/function.svg
-	Function Icon = "function"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/function.svg
+	Function Icon = "outlined/function"
 	
 	// Functions is the "functions" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/functions.svg
-	Functions Icon = "functions"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/functions.svg
+	Functions Icon = "outlined/functions"
 	
 	// GMobiledata is the "g_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/g_mobiledata.svg
-	GMobiledata Icon = "g_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/g_mobiledata.svg
+	GMobiledata Icon = "outlined/g_mobiledata"
 	
 	// GMobiledataBadge is the "g_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/g_mobiledata_badge.svg
-	GMobiledataBadge Icon = "g_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/g_mobiledata_badge.svg
+	GMobiledataBadge Icon = "outlined/g_mobiledata_badge"
 	
 	// GTranslate is the "g_translate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/g_translate.svg
-	GTranslate Icon = "g_translate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/g_translate.svg
+	GTranslate Icon = "outlined/g_translate"
 	
 	// GalleryThumbnail is the "gallery_thumbnail" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gallery_thumbnail.svg
-	GalleryThumbnail Icon = "gallery_thumbnail"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gallery_thumbnail.svg
+	GalleryThumbnail Icon = "outlined/gallery_thumbnail"
 	
 	// Gamepad is the "gamepad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gamepad.svg
-	Gamepad Icon = "gamepad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gamepad.svg
+	Gamepad Icon = "outlined/gamepad"
 	
 	// Garage is the "garage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/garage.svg
-	Garage Icon = "garage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/garage.svg
+	Garage Icon = "outlined/garage"
 	
 	// GarageHome is the "garage_home" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/garage_home.svg
-	GarageHome Icon = "garage_home"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/garage_home.svg
+	GarageHome Icon = "outlined/garage_home"
 	
 	// GardenCart is the "garden_cart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/garden_cart.svg
-	GardenCart Icon = "garden_cart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/garden_cart.svg
+	GardenCart Icon = "outlined/garden_cart"
 	
 	// GasMeter is the "gas_meter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gas_meter.svg
-	GasMeter Icon = "gas_meter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gas_meter.svg
+	GasMeter Icon = "outlined/gas_meter"
 	
 	// Gastroenterology is the "gastroenterology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gastroenterology.svg
-	Gastroenterology Icon = "gastroenterology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gastroenterology.svg
+	Gastroenterology Icon = "outlined/gastroenterology"
 	
 	// Gate is the "gate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gate.svg
-	Gate Icon = "gate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gate.svg
+	Gate Icon = "outlined/gate"
 	
 	// Gavel is the "gavel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gavel.svg
-	Gavel Icon = "gavel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gavel.svg
+	Gavel Icon = "outlined/gavel"
 	
 	// Genetics is the "genetics" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/genetics.svg
-	Genetics Icon = "genetics"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/genetics.svg
+	Genetics Icon = "outlined/genetics"
 	
 	// Genres is the "genres" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/genres.svg
-	Genres Icon = "genres"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/genres.svg
+	Genres Icon = "outlined/genres"
 	
 	// Gesture is the "gesture" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gesture.svg
-	Gesture Icon = "gesture"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gesture.svg
+	Gesture Icon = "outlined/gesture"
 	
 	// GestureSelect is the "gesture_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gesture_select.svg
-	GestureSelect Icon = "gesture_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gesture_select.svg
+	GestureSelect Icon = "outlined/gesture_select"
 	
 	// Gif is the "gif" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gif.svg
-	Gif Icon = "gif"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gif.svg
+	Gif Icon = "outlined/gif"
 	
 	// GifBox is the "gif_box" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gif_box.svg
-	GifBox Icon = "gif_box"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gif_box.svg
+	GifBox Icon = "outlined/gif_box"
 	
 	// Girl is the "girl" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/girl.svg
-	Girl Icon = "girl"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/girl.svg
+	Girl Icon = "outlined/girl"
 	
 	// Gite is the "gite" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gite.svg
-	Gite Icon = "gite"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gite.svg
+	Gite Icon = "outlined/gite"
 	
 	// GlassCup is the "glass_cup" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/glass_cup.svg
-	GlassCup Icon = "glass_cup"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/glass_cup.svg
+	GlassCup Icon = "outlined/glass_cup"
 	
 	// GlobeAsia is the "globe_asia" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/globe_asia.svg
-	GlobeAsia Icon = "globe_asia"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/globe_asia.svg
+	GlobeAsia Icon = "outlined/globe_asia"
 	
 	// GlobeUk is the "globe_uk" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/globe_uk.svg
-	GlobeUk Icon = "globe_uk"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/globe_uk.svg
+	GlobeUk Icon = "outlined/globe_uk"
 	
 	// Glucose is the "glucose" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/glucose.svg
-	Glucose Icon = "glucose"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/glucose.svg
+	Glucose Icon = "outlined/glucose"
 	
 	// Glyphs is the "glyphs" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/glyphs.svg
-	Glyphs Icon = "glyphs"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/glyphs.svg
+	Glyphs Icon = "outlined/glyphs"
 	
 	// GoToLine is the "go_to_line" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/go_to_line.svg
-	GoToLine Icon = "go_to_line"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/go_to_line.svg
+	GoToLine Icon = "outlined/go_to_line"
 	
 	// GolfCourse is the "golf_course" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/golf_course.svg
-	GolfCourse Icon = "golf_course"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/golf_course.svg
+	GolfCourse Icon = "outlined/golf_course"
 	
 	// GoogleTvRemote is the "google_tv_remote" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/google_tv_remote.svg
-	GoogleTvRemote Icon = "google_tv_remote"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/google_tv_remote.svg
+	GoogleTvRemote Icon = "outlined/google_tv_remote"
 	
 	// GoogleWifi is the "google_wifi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/google_wifi.svg
-	GoogleWifi Icon = "google_wifi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/google_wifi.svg
+	GoogleWifi Icon = "outlined/google_wifi"
 	
 	// GppBad is the "gpp_bad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gpp_bad.svg
-	GppBad Icon = "gpp_bad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gpp_bad.svg
+	GppBad Icon = "outlined/gpp_bad"
 	
 	// GppMaybe is the "gpp_maybe" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gpp_maybe.svg
-	GppMaybe Icon = "gpp_maybe"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gpp_maybe.svg
+	GppMaybe Icon = "outlined/gpp_maybe"
 	
 	// Grade is the "grade" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grade.svg
-	Grade Icon = "grade"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grade.svg
+	Grade Icon = "outlined/grade"
 	
 	// Gradient is the "gradient" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gradient.svg
-	Gradient Icon = "gradient"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gradient.svg
+	Gradient Icon = "outlined/gradient"
 	
 	// Grading is the "grading" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grading.svg
-	Grading Icon = "grading"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grading.svg
+	Grading Icon = "outlined/grading"
 	
 	// Grain is the "grain" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grain.svg
-	Grain Icon = "grain"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grain.svg
+	Grain Icon = "outlined/grain"
 	
 	// GraphicEq is the "graphic_eq" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/graphic_eq.svg
-	GraphicEq Icon = "graphic_eq"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/graphic_eq.svg
+	GraphicEq Icon = "outlined/graphic_eq"
 	
 	// Grass is the "grass" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grass.svg
-	Grass Icon = "grass"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grass.svg
+	Grass Icon = "outlined/grass"
 	
 	// Grid3X3 is the "grid_3x3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grid_3x3.svg
-	Grid3X3 Icon = "grid_3x3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grid_3x3.svg
+	Grid3X3 Icon = "outlined/grid_3x3"
 	
 	// Grid3X3Off is the "grid_3x3_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grid_3x3_off.svg
-	Grid3X3Off Icon = "grid_3x3_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grid_3x3_off.svg
+	Grid3X3Off Icon = "outlined/grid_3x3_off"
 	
 	// Grid4X4 is the "grid_4x4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grid_4x4.svg
-	Grid4X4 Icon = "grid_4x4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grid_4x4.svg
+	Grid4X4 Icon = "outlined/grid_4x4"
 	
 	// GridGoldenratio is the "grid_goldenratio" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grid_goldenratio.svg
-	GridGoldenratio Icon = "grid_goldenratio"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grid_goldenratio.svg
+	GridGoldenratio Icon = "outlined/grid_goldenratio"
 	
 	// GridGuides is the "grid_guides" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grid_guides.svg
-	GridGuides Icon = "grid_guides"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grid_guides.svg
+	GridGuides Icon = "outlined/grid_guides"
 	
 	// GridOff is the "grid_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grid_off.svg
-	GridOff Icon = "grid_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grid_off.svg
+	GridOff Icon = "outlined/grid_off"
 	
 	// GridOn is the "grid_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grid_on.svg
-	GridOn Icon = "grid_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grid_on.svg
+	GridOn Icon = "outlined/grid_on"
 	
 	// GridView is the "grid_view" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grid_view.svg
-	GridView Icon = "grid_view"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grid_view.svg
+	GridView Icon = "outlined/grid_view"
 	
 	// Group is the "group" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/group.svg
-	Group Icon = "group"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/group.svg
+	Group Icon = "outlined/group"
 	
 	// GroupAdd is the "group_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/group_add.svg
-	GroupAdd Icon = "group_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/group_add.svg
+	GroupAdd Icon = "outlined/group_add"
 	
 	// GroupOff is the "group_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/group_off.svg
-	GroupOff Icon = "group_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/group_off.svg
+	GroupOff Icon = "outlined/group_off"
 	
 	// GroupRemove is the "group_remove" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/group_remove.svg
-	GroupRemove Icon = "group_remove"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/group_remove.svg
+	GroupRemove Icon = "outlined/group_remove"
 	
 	// GroupWork is the "group_work" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/group_work.svg
-	GroupWork Icon = "group_work"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/group_work.svg
+	GroupWork Icon = "outlined/group_work"
 	
 	// GroupedBarChart is the "grouped_bar_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/grouped_bar_chart.svg
-	GroupedBarChart Icon = "grouped_bar_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/grouped_bar_chart.svg
+	GroupedBarChart Icon = "outlined/grouped_bar_chart"
 	
 	// Groups is the "groups" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/groups.svg
-	Groups Icon = "groups"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/groups.svg
+	Groups Icon = "outlined/groups"
 	
 	// Groups2 is the "groups_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/groups_2.svg
-	Groups2 Icon = "groups_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/groups_2.svg
+	Groups2 Icon = "outlined/groups_2"
 	
 	// Groups3 is the "groups_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/groups_3.svg
-	Groups3 Icon = "groups_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/groups_3.svg
+	Groups3 Icon = "outlined/groups_3"
 	
 	// Gynecology is the "gynecology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/gynecology.svg
-	Gynecology Icon = "gynecology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/gynecology.svg
+	Gynecology Icon = "outlined/gynecology"
 	
 	// HMobiledata is the "h_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/h_mobiledata.svg
-	HMobiledata Icon = "h_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/h_mobiledata.svg
+	HMobiledata Icon = "outlined/h_mobiledata"
 	
 	// HMobiledataBadge is the "h_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/h_mobiledata_badge.svg
-	HMobiledataBadge Icon = "h_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/h_mobiledata_badge.svg
+	HMobiledataBadge Icon = "outlined/h_mobiledata_badge"
 	
 	// HPlusMobiledata is the "h_plus_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/h_plus_mobiledata.svg
-	HPlusMobiledata Icon = "h_plus_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/h_plus_mobiledata.svg
+	HPlusMobiledata Icon = "outlined/h_plus_mobiledata"
 	
 	// HPlusMobiledataBadge is the "h_plus_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/h_plus_mobiledata_badge.svg
-	HPlusMobiledataBadge Icon = "h_plus_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/h_plus_mobiledata_badge.svg
+	HPlusMobiledataBadge Icon = "outlined/h_plus_mobiledata_badge"
 	
 	// Hail is the "hail" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hail.svg
-	Hail Icon = "hail"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hail.svg
+	Hail Icon = "outlined/hail"
 	
 	// Hallway is the "hallway" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hallway.svg
-	Hallway Icon = "hallway"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hallway.svg
+	Hallway Icon = "outlined/hallway"
 	
 	// HandBones is the "hand_bones" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hand_bones.svg
-	HandBones Icon = "hand_bones"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hand_bones.svg
+	HandBones Icon = "outlined/hand_bones"
 	
 	// HandGesture is the "hand_gesture" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hand_gesture.svg
-	HandGesture Icon = "hand_gesture"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hand_gesture.svg
+	HandGesture Icon = "outlined/hand_gesture"
 	
 	// Handshake is the "handshake" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/handshake.svg
-	Handshake Icon = "handshake"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/handshake.svg
+	Handshake Icon = "outlined/handshake"
 	
 	// Handyman is the "handyman" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/handyman.svg
-	Handyman Icon = "handyman"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/handyman.svg
+	Handyman Icon = "outlined/handyman"
 	
 	// HangoutVideo is the "hangout_video" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hangout_video.svg
-	HangoutVideo Icon = "hangout_video"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hangout_video.svg
+	HangoutVideo Icon = "outlined/hangout_video"
 	
 	// HangoutVideoOff is the "hangout_video_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hangout_video_off.svg
-	HangoutVideoOff Icon = "hangout_video_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hangout_video_off.svg
+	HangoutVideoOff Icon = "outlined/hangout_video_off"
 	
 	// HardDrive is the "hard_drive" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hard_drive.svg
-	HardDrive Icon = "hard_drive"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hard_drive.svg
+	HardDrive Icon = "outlined/hard_drive"
 	
 	// HardDrive2 is the "hard_drive_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hard_drive_2.svg
-	HardDrive2 Icon = "hard_drive_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hard_drive_2.svg
+	HardDrive2 Icon = "outlined/hard_drive_2"
 	
 	// Hardware is the "hardware" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hardware.svg
-	Hardware Icon = "hardware"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hardware.svg
+	Hardware Icon = "outlined/hardware"
 	
 	// Hd is the "hd" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hd.svg
-	Hd Icon = "hd"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hd.svg
+	Hd Icon = "outlined/hd"
 	
 	// HdrAuto is the "hdr_auto" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_auto.svg
-	HdrAuto Icon = "hdr_auto"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_auto.svg
+	HdrAuto Icon = "outlined/hdr_auto"
 	
 	// HdrAutoSelect is the "hdr_auto_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_auto_select.svg
-	HdrAutoSelect Icon = "hdr_auto_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_auto_select.svg
+	HdrAutoSelect Icon = "outlined/hdr_auto_select"
 	
 	// HdrEnhancedSelect is the "hdr_enhanced_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_enhanced_select.svg
-	HdrEnhancedSelect Icon = "hdr_enhanced_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_enhanced_select.svg
+	HdrEnhancedSelect Icon = "outlined/hdr_enhanced_select"
 	
 	// HdrOff is the "hdr_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_off.svg
-	HdrOff Icon = "hdr_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_off.svg
+	HdrOff Icon = "outlined/hdr_off"
 	
 	// HdrOffSelect is the "hdr_off_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_off_select.svg
-	HdrOffSelect Icon = "hdr_off_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_off_select.svg
+	HdrOffSelect Icon = "outlined/hdr_off_select"
 	
 	// HdrOn is the "hdr_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_on.svg
-	HdrOn Icon = "hdr_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_on.svg
+	HdrOn Icon = "outlined/hdr_on"
 	
 	// HdrOnSelect is the "hdr_on_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_on_select.svg
-	HdrOnSelect Icon = "hdr_on_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_on_select.svg
+	HdrOnSelect Icon = "outlined/hdr_on_select"
 	
 	// HdrPlus is the "hdr_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_plus.svg
-	HdrPlus Icon = "hdr_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_plus.svg
+	HdrPlus Icon = "outlined/hdr_plus"
 	
 	// HdrStrong is the "hdr_strong" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_strong.svg
-	HdrStrong Icon = "hdr_strong"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_strong.svg
+	HdrStrong Icon = "outlined/hdr_strong"
 	
 	// HdrWeak is the "hdr_weak" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hdr_weak.svg
-	HdrWeak Icon = "hdr_weak"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hdr_weak.svg
+	HdrWeak Icon = "outlined/hdr_weak"
 	
 	// Headphones is the "headphones" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/headphones.svg
-	Headphones Icon = "headphones"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/headphones.svg
+	Headphones Icon = "outlined/headphones"
 	
 	// HeadphonesBattery is the "headphones_battery" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/headphones_battery.svg
-	HeadphonesBattery Icon = "headphones_battery"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/headphones_battery.svg
+	HeadphonesBattery Icon = "outlined/headphones_battery"
 	
 	// HeadsetMic is the "headset_mic" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/headset_mic.svg
-	HeadsetMic Icon = "headset_mic"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/headset_mic.svg
+	HeadsetMic Icon = "outlined/headset_mic"
 	
 	// HeadsetOff is the "headset_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/headset_off.svg
-	HeadsetOff Icon = "headset_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/headset_off.svg
+	HeadsetOff Icon = "outlined/headset_off"
 	
 	// Healing is the "healing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/healing.svg
-	Healing Icon = "healing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/healing.svg
+	Healing Icon = "outlined/healing"
 	
 	// HealthAndSafety is the "health_and_safety" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/health_and_safety.svg
-	HealthAndSafety Icon = "health_and_safety"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/health_and_safety.svg
+	HealthAndSafety Icon = "outlined/health_and_safety"
 	
 	// HealthMetrics is the "health_metrics" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/health_metrics.svg
-	HealthMetrics Icon = "health_metrics"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/health_metrics.svg
+	HealthMetrics Icon = "outlined/health_metrics"
 	
 	// HeapSnapshotLarge is the "heap_snapshot_large" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/heap_snapshot_large.svg
-	HeapSnapshotLarge Icon = "heap_snapshot_large"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/heap_snapshot_large.svg
+	HeapSnapshotLarge Icon = "outlined/heap_snapshot_large"
 	
 	// HeapSnapshotMultiple is the "heap_snapshot_multiple" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/heap_snapshot_multiple.svg
-	HeapSnapshotMultiple Icon = "heap_snapshot_multiple"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/heap_snapshot_multiple.svg
+	HeapSnapshotMultiple Icon = "outlined/heap_snapshot_multiple"
 	
 	// HeapSnapshotThumbnail is the "heap_snapshot_thumbnail" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/heap_snapshot_thumbnail.svg
-	HeapSnapshotThumbnail Icon = "heap_snapshot_thumbnail"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/heap_snapshot_thumbnail.svg
+	HeapSnapshotThumbnail Icon = "outlined/heap_snapshot_thumbnail"
 	
 	// Hearing is the "hearing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hearing.svg
-	Hearing Icon = "hearing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hearing.svg
+	Hearing Icon = "outlined/hearing"
 	
 	// HearingDisabled is the "hearing_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hearing_disabled.svg
-	HearingDisabled Icon = "hearing_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hearing_disabled.svg
+	HearingDisabled Icon = "outlined/hearing_disabled"
 	
 	// HeartBroken is the "heart_broken" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/heart_broken.svg
-	HeartBroken Icon = "heart_broken"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/heart_broken.svg
+	HeartBroken Icon = "outlined/heart_broken"
 	
 	// HeartCheck is the "heart_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/heart_check.svg
-	HeartCheck Icon = "heart_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/heart_check.svg
+	HeartCheck Icon = "outlined/heart_check"
 	
 	// HeartMinus is the "heart_minus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/heart_minus.svg
-	HeartMinus Icon = "heart_minus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/heart_minus.svg
+	HeartMinus Icon = "outlined/heart_minus"
 	
 	// HeartPlus is the "heart_plus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/heart_plus.svg
-	HeartPlus Icon = "heart_plus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/heart_plus.svg
+	HeartPlus Icon = "outlined/heart_plus"
 	
 	// HeatPump is the "heat_pump" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/heat_pump.svg
-	HeatPump Icon = "heat_pump"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/heat_pump.svg
+	HeatPump Icon = "outlined/heat_pump"
 	
 	// HeatPumpBalance is the "heat_pump_balance" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/heat_pump_balance.svg
-	HeatPumpBalance Icon = "heat_pump_balance"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/heat_pump_balance.svg
+	HeatPumpBalance Icon = "outlined/heat_pump_balance"
 	
 	// Height is the "height" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/height.svg
-	Height Icon = "height"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/height.svg
+	Height Icon = "outlined/height"
 	
 	// Helicopter is the "helicopter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/helicopter.svg
-	Helicopter Icon = "helicopter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/helicopter.svg
+	Helicopter Icon = "outlined/helicopter"
 	
 	// Help is the "help" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/help.svg
-	Help Icon = "help"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/help.svg
+	Help Icon = "outlined/help"
 	
 	// HelpCenter is the "help_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/help_center.svg
-	HelpCenter Icon = "help_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/help_center.svg
+	HelpCenter Icon = "outlined/help_center"
 	
 	// HelpClinic is the "help_clinic" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/help_clinic.svg
-	HelpClinic Icon = "help_clinic"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/help_clinic.svg
+	HelpClinic Icon = "outlined/help_clinic"
 	
 	// Hematology is the "hematology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hematology.svg
-	Hematology Icon = "hematology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hematology.svg
+	Hematology Icon = "outlined/hematology"
 	
 	// Hevc is the "hevc" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hevc.svg
-	Hevc Icon = "hevc"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hevc.svg
+	Hevc Icon = "outlined/hevc"
 	
 	// Hexagon is the "hexagon" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hexagon.svg
-	Hexagon Icon = "hexagon"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hexagon.svg
+	Hexagon Icon = "outlined/hexagon"
 	
 	// Hide is the "hide" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hide.svg
-	Hide Icon = "hide"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hide.svg
+	Hide Icon = "outlined/hide"
 	
 	// HideImage is the "hide_image" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hide_image.svg
-	HideImage Icon = "hide_image"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hide_image.svg
+	HideImage Icon = "outlined/hide_image"
 	
 	// HideSource is the "hide_source" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hide_source.svg
-	HideSource Icon = "hide_source"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hide_source.svg
+	HideSource Icon = "outlined/hide_source"
 	
 	// HighDensity is the "high_density" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/high_density.svg
-	HighDensity Icon = "high_density"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/high_density.svg
+	HighDensity Icon = "outlined/high_density"
 	
 	// HighQuality is the "high_quality" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/high_quality.svg
-	HighQuality Icon = "high_quality"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/high_quality.svg
+	HighQuality Icon = "outlined/high_quality"
 	
 	// Highlight is the "highlight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/highlight.svg
-	Highlight Icon = "highlight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/highlight.svg
+	Highlight Icon = "outlined/highlight"
 	
 	// HighlighterSize1 is the "highlighter_size_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/highlighter_size_1.svg
-	HighlighterSize1 Icon = "highlighter_size_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/highlighter_size_1.svg
+	HighlighterSize1 Icon = "outlined/highlighter_size_1"
 	
 	// HighlighterSize2 is the "highlighter_size_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/highlighter_size_2.svg
-	HighlighterSize2 Icon = "highlighter_size_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/highlighter_size_2.svg
+	HighlighterSize2 Icon = "outlined/highlighter_size_2"
 	
 	// HighlighterSize3 is the "highlighter_size_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/highlighter_size_3.svg
-	HighlighterSize3 Icon = "highlighter_size_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/highlighter_size_3.svg
+	HighlighterSize3 Icon = "outlined/highlighter_size_3"
 	
 	// HighlighterSize4 is the "highlighter_size_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/highlighter_size_4.svg
-	HighlighterSize4 Icon = "highlighter_size_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/highlighter_size_4.svg
+	HighlighterSize4 Icon = "outlined/highlighter_size_4"
 	
 	// HighlighterSize5 is the "highlighter_size_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/highlighter_size_5.svg
-	HighlighterSize5 Icon = "highlighter_size_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/highlighter_size_5.svg
+	HighlighterSize5 Icon = "outlined/highlighter_size_5"
 	
 	// Hiking is the "hiking" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hiking.svg
-	Hiking Icon = "hiking"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hiking.svg
+	Hiking Icon = "outlined/hiking"
 	
 	// History is the "history" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/history.svg
-	History Icon = "history"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/history.svg
+	History Icon = "outlined/history"
 	
 	// HistoryEdu is the "history_edu" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/history_edu.svg
-	HistoryEdu Icon = "history_edu"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/history_edu.svg
+	HistoryEdu Icon = "outlined/history_edu"
 	
 	// HistoryToggleOff is the "history_toggle_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/history_toggle_off.svg
-	HistoryToggleOff Icon = "history_toggle_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/history_toggle_off.svg
+	HistoryToggleOff Icon = "outlined/history_toggle_off"
 	
 	// Hive is the "hive" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hive.svg
-	Hive Icon = "hive"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hive.svg
+	Hive Icon = "outlined/hive"
 	
 	// Hls is the "hls" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hls.svg
-	Hls Icon = "hls"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hls.svg
+	Hls Icon = "outlined/hls"
 	
 	// HlsOff is the "hls_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hls_off.svg
-	HlsOff Icon = "hls_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hls_off.svg
+	HlsOff Icon = "outlined/hls_off"
 	
 	// HolidayVillage is the "holiday_village" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/holiday_village.svg
-	HolidayVillage Icon = "holiday_village"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/holiday_village.svg
+	HolidayVillage Icon = "outlined/holiday_village"
 	
 	// Home is the "home" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home.svg
-	Home Icon = "home"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home.svg
+	Home Icon = "outlined/home"
 	
 	// HomeAppLogo is the "home_app_logo" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_app_logo.svg
-	HomeAppLogo Icon = "home_app_logo"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_app_logo.svg
+	HomeAppLogo Icon = "outlined/home_app_logo"
 	
 	// HomeHealth is the "home_health" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_health.svg
-	HomeHealth Icon = "home_health"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_health.svg
+	HomeHealth Icon = "outlined/home_health"
 	
 	// HomeIotDevice is the "home_iot_device" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_iot_device.svg
-	HomeIotDevice Icon = "home_iot_device"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_iot_device.svg
+	HomeIotDevice Icon = "outlined/home_iot_device"
 	
 	// HomeMax is the "home_max" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_max.svg
-	HomeMax Icon = "home_max"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_max.svg
+	HomeMax Icon = "outlined/home_max"
 	
 	// HomeMaxDots is the "home_max_dots" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_max_dots.svg
-	HomeMaxDots Icon = "home_max_dots"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_max_dots.svg
+	HomeMaxDots Icon = "outlined/home_max_dots"
 	
 	// HomeMini is the "home_mini" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_mini.svg
-	HomeMini Icon = "home_mini"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_mini.svg
+	HomeMini Icon = "outlined/home_mini"
 	
 	// HomePin is the "home_pin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_pin.svg
-	HomePin Icon = "home_pin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_pin.svg
+	HomePin Icon = "outlined/home_pin"
 	
 	// HomeRepairService is the "home_repair_service" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_repair_service.svg
-	HomeRepairService Icon = "home_repair_service"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_repair_service.svg
+	HomeRepairService Icon = "outlined/home_repair_service"
 	
 	// HomeSpeaker is the "home_speaker" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_speaker.svg
-	HomeSpeaker Icon = "home_speaker"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_speaker.svg
+	HomeSpeaker Icon = "outlined/home_speaker"
 	
 	// HomeStorage is the "home_storage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_storage.svg
-	HomeStorage Icon = "home_storage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_storage.svg
+	HomeStorage Icon = "outlined/home_storage"
 	
 	// HomeWork is the "home_work" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/home_work.svg
-	HomeWork Icon = "home_work"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/home_work.svg
+	HomeWork Icon = "outlined/home_work"
 	
 	// HorizontalDistribute is the "horizontal_distribute" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/horizontal_distribute.svg
-	HorizontalDistribute Icon = "horizontal_distribute"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/horizontal_distribute.svg
+	HorizontalDistribute Icon = "outlined/horizontal_distribute"
 	
 	// HorizontalRule is the "horizontal_rule" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/horizontal_rule.svg
-	HorizontalRule Icon = "horizontal_rule"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/horizontal_rule.svg
+	HorizontalRule Icon = "outlined/horizontal_rule"
 	
 	// HorizontalSplit is the "horizontal_split" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/horizontal_split.svg
-	HorizontalSplit Icon = "horizontal_split"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/horizontal_split.svg
+	HorizontalSplit Icon = "outlined/horizontal_split"
 	
 	// HotTub is the "hot_tub" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hot_tub.svg
-	HotTub Icon = "hot_tub"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hot_tub.svg
+	HotTub Icon = "outlined/hot_tub"
 	
 	// Hotel is the "hotel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hotel.svg
-	Hotel Icon = "hotel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hotel.svg
+	Hotel Icon = "outlined/hotel"
 	
 	// HotelClass is the "hotel_class" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hotel_class.svg
-	HotelClass Icon = "hotel_class"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hotel_class.svg
+	HotelClass Icon = "outlined/hotel_class"
 	
 	// HourglassBottom is the "hourglass_bottom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hourglass_bottom.svg
-	HourglassBottom Icon = "hourglass_bottom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hourglass_bottom.svg
+	HourglassBottom Icon = "outlined/hourglass_bottom"
 	
 	// HourglassDisabled is the "hourglass_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hourglass_disabled.svg
-	HourglassDisabled Icon = "hourglass_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hourglass_disabled.svg
+	HourglassDisabled Icon = "outlined/hourglass_disabled"
 	
 	// HourglassEmpty is the "hourglass_empty" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hourglass_empty.svg
-	HourglassEmpty Icon = "hourglass_empty"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hourglass_empty.svg
+	HourglassEmpty Icon = "outlined/hourglass_empty"
 	
 	// HourglassTop is the "hourglass_top" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hourglass_top.svg
-	HourglassTop Icon = "hourglass_top"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hourglass_top.svg
+	HourglassTop Icon = "outlined/hourglass_top"
 	
 	// House is the "house" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/house.svg
-	House Icon = "house"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/house.svg
+	House Icon = "outlined/house"
 	
 	// HouseSiding is the "house_siding" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/house_siding.svg
-	HouseSiding Icon = "house_siding"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/house_siding.svg
+	HouseSiding Icon = "outlined/house_siding"
 	
 	// HouseWithShield is the "house_with_shield" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/house_with_shield.svg
-	HouseWithShield Icon = "house_with_shield"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/house_with_shield.svg
+	HouseWithShield Icon = "outlined/house_with_shield"
 	
 	// Houseboat is the "houseboat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/houseboat.svg
-	Houseboat Icon = "houseboat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/houseboat.svg
+	Houseboat Icon = "outlined/houseboat"
 	
 	// HowToReg is the "how_to_reg" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/how_to_reg.svg
-	HowToReg Icon = "how_to_reg"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/how_to_reg.svg
+	HowToReg Icon = "outlined/how_to_reg"
 	
 	// HowToVote is the "how_to_vote" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/how_to_vote.svg
-	HowToVote Icon = "how_to_vote"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/how_to_vote.svg
+	HowToVote Icon = "outlined/how_to_vote"
 	
 	// HrResting is the "hr_resting" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hr_resting.svg
-	HrResting Icon = "hr_resting"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hr_resting.svg
+	HrResting Icon = "outlined/hr_resting"
 	
 	// Html is the "html" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/html.svg
-	Html Icon = "html"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/html.svg
+	Html Icon = "outlined/html"
 	
 	// Http is the "http" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/http.svg
-	Http Icon = "http"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/http.svg
+	Http Icon = "outlined/http"
 	
 	// Hub is the "hub" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hub.svg
-	Hub Icon = "hub"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hub.svg
+	Hub Icon = "outlined/hub"
 	
 	// Humerus is the "humerus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/humerus.svg
-	Humerus Icon = "humerus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/humerus.svg
+	Humerus Icon = "outlined/humerus"
 	
 	// HumerusAlt is the "humerus_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/humerus_alt.svg
-	HumerusAlt Icon = "humerus_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/humerus_alt.svg
+	HumerusAlt Icon = "outlined/humerus_alt"
 	
 	// HumidityHigh is the "humidity_high" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/humidity_high.svg
-	HumidityHigh Icon = "humidity_high"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/humidity_high.svg
+	HumidityHigh Icon = "outlined/humidity_high"
 	
 	// HumidityLow is the "humidity_low" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/humidity_low.svg
-	HumidityLow Icon = "humidity_low"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/humidity_low.svg
+	HumidityLow Icon = "outlined/humidity_low"
 	
 	// HumidityMid is the "humidity_mid" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/humidity_mid.svg
-	HumidityMid Icon = "humidity_mid"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/humidity_mid.svg
+	HumidityMid Icon = "outlined/humidity_mid"
 	
 	// HumidityPercentage is the "humidity_percentage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/humidity_percentage.svg
-	HumidityPercentage Icon = "humidity_percentage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/humidity_percentage.svg
+	HumidityPercentage Icon = "outlined/humidity_percentage"
 	
 	// Hvac is the "hvac" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/hvac.svg
-	Hvac Icon = "hvac"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/hvac.svg
+	Hvac Icon = "outlined/hvac"
 	
 	// IceSkating is the "ice_skating" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ice_skating.svg
-	IceSkating Icon = "ice_skating"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ice_skating.svg
+	IceSkating Icon = "outlined/ice_skating"
 	
 	// Icecream is the "icecream" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/icecream.svg
-	Icecream Icon = "icecream"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/icecream.svg
+	Icecream Icon = "outlined/icecream"
 	
 	// Ifl is the "ifl" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ifl.svg
-	Ifl Icon = "ifl"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ifl.svg
+	Ifl Icon = "outlined/ifl"
 	
 	// Iframe is the "iframe" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/iframe.svg
-	Iframe Icon = "iframe"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/iframe.svg
+	Iframe Icon = "outlined/iframe"
 	
 	// IframeOff is the "iframe_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/iframe_off.svg
-	IframeOff Icon = "iframe_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/iframe_off.svg
+	IframeOff Icon = "outlined/iframe_off"
 	
 	// Image is the "image" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/image.svg
-	Image Icon = "image"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/image.svg
+	Image Icon = "outlined/image"
 	
 	// ImageAspectRatio is the "image_aspect_ratio" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/image_aspect_ratio.svg
-	ImageAspectRatio Icon = "image_aspect_ratio"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/image_aspect_ratio.svg
+	ImageAspectRatio Icon = "outlined/image_aspect_ratio"
 	
 	// ImageNotSupported is the "image_not_supported" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/image_not_supported.svg
-	ImageNotSupported Icon = "image_not_supported"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/image_not_supported.svg
+	ImageNotSupported Icon = "outlined/image_not_supported"
 	
 	// ImageSearch is the "image_search" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/image_search.svg
-	ImageSearch Icon = "image_search"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/image_search.svg
+	ImageSearch Icon = "outlined/image_search"
 	
 	// ImagesearchRoller is the "imagesearch_roller" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/imagesearch_roller.svg
-	ImagesearchRoller Icon = "imagesearch_roller"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/imagesearch_roller.svg
+	ImagesearchRoller Icon = "outlined/imagesearch_roller"
 	
 	// Imagesmode is the "imagesmode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/imagesmode.svg
-	Imagesmode Icon = "imagesmode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/imagesmode.svg
+	Imagesmode Icon = "outlined/imagesmode"
 	
 	// Immunology is the "immunology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/immunology.svg
-	Immunology Icon = "immunology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/immunology.svg
+	Immunology Icon = "outlined/immunology"
 	
 	// ImportContacts is the "import_contacts" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/import_contacts.svg
-	ImportContacts Icon = "import_contacts"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/import_contacts.svg
+	ImportContacts Icon = "outlined/import_contacts"
 	
 	// ImportantDevices is the "important_devices" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/important_devices.svg
-	ImportantDevices Icon = "important_devices"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/important_devices.svg
+	ImportantDevices Icon = "outlined/important_devices"
 	
 	// InHomeMode is the "in_home_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/in_home_mode.svg
-	InHomeMode Icon = "in_home_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/in_home_mode.svg
+	InHomeMode Icon = "outlined/in_home_mode"
 	
 	// InactiveOrder is the "inactive_order" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/inactive_order.svg
-	InactiveOrder Icon = "inactive_order"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/inactive_order.svg
+	InactiveOrder Icon = "outlined/inactive_order"
 	
 	// Inbox is the "inbox" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/inbox.svg
-	Inbox Icon = "inbox"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/inbox.svg
+	Inbox Icon = "outlined/inbox"
 	
 	// InboxCustomize is the "inbox_customize" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/inbox_customize.svg
-	InboxCustomize Icon = "inbox_customize"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/inbox_customize.svg
+	InboxCustomize Icon = "outlined/inbox_customize"
 	
 	// IncompleteCircle is the "incomplete_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/incomplete_circle.svg
-	IncompleteCircle Icon = "incomplete_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/incomplete_circle.svg
+	IncompleteCircle Icon = "outlined/incomplete_circle"
 	
 	// IndeterminateCheckBox is the "indeterminate_check_box" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/indeterminate_check_box.svg
-	IndeterminateCheckBox Icon = "indeterminate_check_box"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/indeterminate_check_box.svg
+	IndeterminateCheckBox Icon = "outlined/indeterminate_check_box"
 	
 	// Info is the "info" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/info.svg
-	Info Icon = "info"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/info.svg
+	Info Icon = "outlined/info"
 	
 	// InfoI is the "info_i" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/info_i.svg
-	InfoI Icon = "info_i"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/info_i.svg
+	InfoI Icon = "outlined/info_i"
 	
 	// Infrared is the "infrared" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/infrared.svg
-	Infrared Icon = "infrared"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/infrared.svg
+	Infrared Icon = "outlined/infrared"
 	
 	// InkEraser is the "ink_eraser" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ink_eraser.svg
-	InkEraser Icon = "ink_eraser"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ink_eraser.svg
+	InkEraser Icon = "outlined/ink_eraser"
 	
 	// InkEraserOff is the "ink_eraser_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ink_eraser_off.svg
-	InkEraserOff Icon = "ink_eraser_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ink_eraser_off.svg
+	InkEraserOff Icon = "outlined/ink_eraser_off"
 	
 	// InkHighlighter is the "ink_highlighter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ink_highlighter.svg
-	InkHighlighter Icon = "ink_highlighter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ink_highlighter.svg
+	InkHighlighter Icon = "outlined/ink_highlighter"
 	
 	// InkMarker is the "ink_marker" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ink_marker.svg
-	InkMarker Icon = "ink_marker"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ink_marker.svg
+	InkMarker Icon = "outlined/ink_marker"
 	
 	// InkPen is the "ink_pen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ink_pen.svg
-	InkPen Icon = "ink_pen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ink_pen.svg
+	InkPen Icon = "outlined/ink_pen"
 	
 	// Inpatient is the "inpatient" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/inpatient.svg
-	Inpatient Icon = "inpatient"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/inpatient.svg
+	Inpatient Icon = "outlined/inpatient"
 	
 	// Input is the "input" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/input.svg
-	Input Icon = "input"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/input.svg
+	Input Icon = "outlined/input"
 	
 	// InputCircle is the "input_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/input_circle.svg
-	InputCircle Icon = "input_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/input_circle.svg
+	InputCircle Icon = "outlined/input_circle"
 	
 	// InsertChart is the "insert_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/insert_chart.svg
-	InsertChart Icon = "insert_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/insert_chart.svg
+	InsertChart Icon = "outlined/insert_chart"
 	
 	// InsertPageBreak is the "insert_page_break" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/insert_page_break.svg
-	InsertPageBreak Icon = "insert_page_break"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/insert_page_break.svg
+	InsertPageBreak Icon = "outlined/insert_page_break"
 	
 	// InsertText is the "insert_text" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/insert_text.svg
-	InsertText Icon = "insert_text"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/insert_text.svg
+	InsertText Icon = "outlined/insert_text"
 	
 	// InstallDesktop is the "install_desktop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/install_desktop.svg
-	InstallDesktop Icon = "install_desktop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/install_desktop.svg
+	InstallDesktop Icon = "outlined/install_desktop"
 	
 	// InstallMobile is the "install_mobile" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/install_mobile.svg
-	InstallMobile Icon = "install_mobile"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/install_mobile.svg
+	InstallMobile Icon = "outlined/install_mobile"
 	
 	// InstantMix is the "instant_mix" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/instant_mix.svg
-	InstantMix Icon = "instant_mix"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/instant_mix.svg
+	InstantMix Icon = "outlined/instant_mix"
 	
 	// IntegrationInstructions is the "integration_instructions" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/integration_instructions.svg
-	IntegrationInstructions Icon = "integration_instructions"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/integration_instructions.svg
+	IntegrationInstructions Icon = "outlined/integration_instructions"
 	
 	// InteractiveSpace is the "interactive_space" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/interactive_space.svg
-	InteractiveSpace Icon = "interactive_space"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/interactive_space.svg
+	InteractiveSpace Icon = "outlined/interactive_space"
 	
 	// Interests is the "interests" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/interests.svg
-	Interests Icon = "interests"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/interests.svg
+	Interests Icon = "outlined/interests"
 	
 	// InterpreterMode is the "interpreter_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/interpreter_mode.svg
-	InterpreterMode Icon = "interpreter_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/interpreter_mode.svg
+	InterpreterMode Icon = "outlined/interpreter_mode"
 	
 	// Inventory is the "inventory" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/inventory.svg
-	Inventory Icon = "inventory"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/inventory.svg
+	Inventory Icon = "outlined/inventory"
 	
 	// Inventory2 is the "inventory_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/inventory_2.svg
-	Inventory2 Icon = "inventory_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/inventory_2.svg
+	Inventory2 Icon = "outlined/inventory_2"
 	
 	// InvertColors is the "invert_colors" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/invert_colors.svg
-	InvertColors Icon = "invert_colors"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/invert_colors.svg
+	InvertColors Icon = "outlined/invert_colors"
 	
 	// InvertColorsOff is the "invert_colors_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/invert_colors_off.svg
-	InvertColorsOff Icon = "invert_colors_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/invert_colors_off.svg
+	InvertColorsOff Icon = "outlined/invert_colors_off"
 	
 	// IosShare is the "ios_share" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ios_share.svg
-	IosShare Icon = "ios_share"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ios_share.svg
+	IosShare Icon = "outlined/ios_share"
 	
 	// Iron is the "iron" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/iron.svg
-	Iron Icon = "iron"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/iron.svg
+	Iron Icon = "outlined/iron"
 	
 	// JamboardKiosk is the "jamboard_kiosk" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/jamboard_kiosk.svg
-	JamboardKiosk Icon = "jamboard_kiosk"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/jamboard_kiosk.svg
+	JamboardKiosk Icon = "outlined/jamboard_kiosk"
 	
 	// Javascript is the "javascript" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/javascript.svg
-	Javascript Icon = "javascript"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/javascript.svg
+	Javascript Icon = "outlined/javascript"
 	
 	// Join is the "join" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/join.svg
-	Join Icon = "join"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/join.svg
+	Join Icon = "outlined/join"
 	
 	// JoinInner is the "join_inner" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/join_inner.svg
-	JoinInner Icon = "join_inner"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/join_inner.svg
+	JoinInner Icon = "outlined/join_inner"
 	
 	// JoinLeft is the "join_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/join_left.svg
-	JoinLeft Icon = "join_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/join_left.svg
+	JoinLeft Icon = "outlined/join_left"
 	
 	// JoinRight is the "join_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/join_right.svg
-	JoinRight Icon = "join_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/join_right.svg
+	JoinRight Icon = "outlined/join_right"
 	
 	// Joystick is the "joystick" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/joystick.svg
-	Joystick Icon = "joystick"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/joystick.svg
+	Joystick Icon = "outlined/joystick"
 	
 	// JumpToElement is the "jump_to_element" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/jump_to_element.svg
-	JumpToElement Icon = "jump_to_element"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/jump_to_element.svg
+	JumpToElement Icon = "outlined/jump_to_element"
 	
 	// Kayaking is the "kayaking" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/kayaking.svg
-	Kayaking Icon = "kayaking"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/kayaking.svg
+	Kayaking Icon = "outlined/kayaking"
 	
 	// KebabDining is the "kebab_dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/kebab_dining.svg
-	KebabDining Icon = "kebab_dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/kebab_dining.svg
+	KebabDining Icon = "outlined/kebab_dining"
 	
 	// Kettle is the "kettle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/kettle.svg
-	Kettle Icon = "kettle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/kettle.svg
+	Kettle Icon = "outlined/kettle"
 	
 	// Key is the "key" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/key.svg
-	Key Icon = "key"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/key.svg
+	Key Icon = "outlined/key"
 	
 	// KeyOff is the "key_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/key_off.svg
-	KeyOff Icon = "key_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/key_off.svg
+	KeyOff Icon = "outlined/key_off"
 	
 	// KeyVisualizer is the "key_visualizer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/key_visualizer.svg
-	KeyVisualizer Icon = "key_visualizer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/key_visualizer.svg
+	KeyVisualizer Icon = "outlined/key_visualizer"
 	
 	// Keyboard is the "keyboard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard.svg
-	Keyboard Icon = "keyboard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard.svg
+	Keyboard Icon = "outlined/keyboard"
 	
 	// KeyboardAlt is the "keyboard_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_alt.svg
-	KeyboardAlt Icon = "keyboard_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_alt.svg
+	KeyboardAlt Icon = "outlined/keyboard_alt"
 	
 	// KeyboardArrowDown is the "keyboard_arrow_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_arrow_down.svg
-	KeyboardArrowDown Icon = "keyboard_arrow_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_arrow_down.svg
+	KeyboardArrowDown Icon = "outlined/keyboard_arrow_down"
 	
 	// KeyboardArrowLeft is the "keyboard_arrow_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_arrow_left.svg
-	KeyboardArrowLeft Icon = "keyboard_arrow_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_arrow_left.svg
+	KeyboardArrowLeft Icon = "outlined/keyboard_arrow_left"
 	
 	// KeyboardArrowRight is the "keyboard_arrow_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_arrow_right.svg
-	KeyboardArrowRight Icon = "keyboard_arrow_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_arrow_right.svg
+	KeyboardArrowRight Icon = "outlined/keyboard_arrow_right"
 	
 	// KeyboardArrowUp is the "keyboard_arrow_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_arrow_up.svg
-	KeyboardArrowUp Icon = "keyboard_arrow_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_arrow_up.svg
+	KeyboardArrowUp Icon = "outlined/keyboard_arrow_up"
 	
 	// KeyboardBackspace is the "keyboard_backspace" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_backspace.svg
-	KeyboardBackspace Icon = "keyboard_backspace"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_backspace.svg
+	KeyboardBackspace Icon = "outlined/keyboard_backspace"
 	
 	// KeyboardCapslock is the "keyboard_capslock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_capslock.svg
-	KeyboardCapslock Icon = "keyboard_capslock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_capslock.svg
+	KeyboardCapslock Icon = "outlined/keyboard_capslock"
 	
 	// KeyboardCapslockBadge is the "keyboard_capslock_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_capslock_badge.svg
-	KeyboardCapslockBadge Icon = "keyboard_capslock_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_capslock_badge.svg
+	KeyboardCapslockBadge Icon = "outlined/keyboard_capslock_badge"
 	
 	// KeyboardCommandKey is the "keyboard_command_key" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_command_key.svg
-	KeyboardCommandKey Icon = "keyboard_command_key"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_command_key.svg
+	KeyboardCommandKey Icon = "outlined/keyboard_command_key"
 	
 	// KeyboardControlKey is the "keyboard_control_key" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_control_key.svg
-	KeyboardControlKey Icon = "keyboard_control_key"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_control_key.svg
+	KeyboardControlKey Icon = "outlined/keyboard_control_key"
 	
 	// KeyboardDoubleArrowDown is the "keyboard_double_arrow_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_double_arrow_down.svg
-	KeyboardDoubleArrowDown Icon = "keyboard_double_arrow_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_double_arrow_down.svg
+	KeyboardDoubleArrowDown Icon = "outlined/keyboard_double_arrow_down"
 	
 	// KeyboardDoubleArrowLeft is the "keyboard_double_arrow_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_double_arrow_left.svg
-	KeyboardDoubleArrowLeft Icon = "keyboard_double_arrow_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_double_arrow_left.svg
+	KeyboardDoubleArrowLeft Icon = "outlined/keyboard_double_arrow_left"
 	
 	// KeyboardDoubleArrowRight is the "keyboard_double_arrow_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_double_arrow_right.svg
-	KeyboardDoubleArrowRight Icon = "keyboard_double_arrow_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_double_arrow_right.svg
+	KeyboardDoubleArrowRight Icon = "outlined/keyboard_double_arrow_right"
 	
 	// KeyboardDoubleArrowUp is the "keyboard_double_arrow_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_double_arrow_up.svg
-	KeyboardDoubleArrowUp Icon = "keyboard_double_arrow_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_double_arrow_up.svg
+	KeyboardDoubleArrowUp Icon = "outlined/keyboard_double_arrow_up"
 	
 	// KeyboardExternalInput is the "keyboard_external_input" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_external_input.svg
-	KeyboardExternalInput Icon = "keyboard_external_input"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_external_input.svg
+	KeyboardExternalInput Icon = "outlined/keyboard_external_input"
 	
 	// KeyboardFull is the "keyboard_full" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_full.svg
-	KeyboardFull Icon = "keyboard_full"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_full.svg
+	KeyboardFull Icon = "outlined/keyboard_full"
 	
 	// KeyboardHide is the "keyboard_hide" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_hide.svg
-	KeyboardHide Icon = "keyboard_hide"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_hide.svg
+	KeyboardHide Icon = "outlined/keyboard_hide"
 	
 	// KeyboardKeys is the "keyboard_keys" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_keys.svg
-	KeyboardKeys Icon = "keyboard_keys"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_keys.svg
+	KeyboardKeys Icon = "outlined/keyboard_keys"
 	
 	// KeyboardOff is the "keyboard_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_off.svg
-	KeyboardOff Icon = "keyboard_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_off.svg
+	KeyboardOff Icon = "outlined/keyboard_off"
 	
 	// KeyboardOnscreen is the "keyboard_onscreen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_onscreen.svg
-	KeyboardOnscreen Icon = "keyboard_onscreen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_onscreen.svg
+	KeyboardOnscreen Icon = "outlined/keyboard_onscreen"
 	
 	// KeyboardOptionKey is the "keyboard_option_key" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_option_key.svg
-	KeyboardOptionKey Icon = "keyboard_option_key"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_option_key.svg
+	KeyboardOptionKey Icon = "outlined/keyboard_option_key"
 	
 	// KeyboardPreviousLanguage is the "keyboard_previous_language" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_previous_language.svg
-	KeyboardPreviousLanguage Icon = "keyboard_previous_language"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_previous_language.svg
+	KeyboardPreviousLanguage Icon = "outlined/keyboard_previous_language"
 	
 	// KeyboardReturn is the "keyboard_return" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_return.svg
-	KeyboardReturn Icon = "keyboard_return"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_return.svg
+	KeyboardReturn Icon = "outlined/keyboard_return"
 	
 	// KeyboardTab is the "keyboard_tab" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_tab.svg
-	KeyboardTab Icon = "keyboard_tab"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_tab.svg
+	KeyboardTab Icon = "outlined/keyboard_tab"
 	
 	// KeyboardTabRtl is the "keyboard_tab_rtl" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_tab_rtl.svg
-	KeyboardTabRtl Icon = "keyboard_tab_rtl"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_tab_rtl.svg
+	KeyboardTabRtl Icon = "outlined/keyboard_tab_rtl"
 	
 	// KeyboardVoice is the "keyboard_voice" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/keyboard_voice.svg
-	KeyboardVoice Icon = "keyboard_voice"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/keyboard_voice.svg
+	KeyboardVoice Icon = "outlined/keyboard_voice"
 	
 	// KingBed is the "king_bed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/king_bed.svg
-	KingBed Icon = "king_bed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/king_bed.svg
+	KingBed Icon = "outlined/king_bed"
 	
 	// Kitchen is the "kitchen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/kitchen.svg
-	Kitchen Icon = "kitchen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/kitchen.svg
+	Kitchen Icon = "outlined/kitchen"
 	
 	// Kitesurfing is the "kitesurfing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/kitesurfing.svg
-	Kitesurfing Icon = "kitesurfing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/kitesurfing.svg
+	Kitesurfing Icon = "outlined/kitesurfing"
 	
 	// LabPanel is the "lab_panel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lab_panel.svg
-	LabPanel Icon = "lab_panel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lab_panel.svg
+	LabPanel Icon = "outlined/lab_panel"
 	
 	// LabProfile is the "lab_profile" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lab_profile.svg
-	LabProfile Icon = "lab_profile"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lab_profile.svg
+	LabProfile Icon = "outlined/lab_profile"
 	
 	// LabResearch is the "lab_research" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lab_research.svg
-	LabResearch Icon = "lab_research"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lab_research.svg
+	LabResearch Icon = "outlined/lab_research"
 	
 	// Label is the "label" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/label.svg
-	Label Icon = "label"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/label.svg
+	Label Icon = "outlined/label"
 	
 	// LabelImportant is the "label_important" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/label_important.svg
-	LabelImportant Icon = "label_important"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/label_important.svg
+	LabelImportant Icon = "outlined/label_important"
 	
 	// LabelOff is the "label_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/label_off.svg
-	LabelOff Icon = "label_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/label_off.svg
+	LabelOff Icon = "outlined/label_off"
 	
 	// Labs is the "labs" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/labs.svg
-	Labs Icon = "labs"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/labs.svg
+	Labs Icon = "outlined/labs"
 	
 	// Lan is the "lan" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lan.svg
-	Lan Icon = "lan"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lan.svg
+	Lan Icon = "outlined/lan"
 	
 	// Landscape is the "landscape" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/landscape.svg
-	Landscape Icon = "landscape"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/landscape.svg
+	Landscape Icon = "outlined/landscape"
 	
 	// Landslide is the "landslide" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/landslide.svg
-	Landslide Icon = "landslide"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/landslide.svg
+	Landslide Icon = "outlined/landslide"
 	
 	// Language is the "language" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language.svg
-	Language Icon = "language"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language.svg
+	Language Icon = "outlined/language"
 	
 	// LanguageChineseArray is the "language_chinese_array" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_chinese_array.svg
-	LanguageChineseArray Icon = "language_chinese_array"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_chinese_array.svg
+	LanguageChineseArray Icon = "outlined/language_chinese_array"
 	
 	// LanguageChineseCangjie is the "language_chinese_cangjie" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_chinese_cangjie.svg
-	LanguageChineseCangjie Icon = "language_chinese_cangjie"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_chinese_cangjie.svg
+	LanguageChineseCangjie Icon = "outlined/language_chinese_cangjie"
 	
 	// LanguageChineseDayi is the "language_chinese_dayi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_chinese_dayi.svg
-	LanguageChineseDayi Icon = "language_chinese_dayi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_chinese_dayi.svg
+	LanguageChineseDayi Icon = "outlined/language_chinese_dayi"
 	
 	// LanguageChinesePinyin is the "language_chinese_pinyin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_chinese_pinyin.svg
-	LanguageChinesePinyin Icon = "language_chinese_pinyin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_chinese_pinyin.svg
+	LanguageChinesePinyin Icon = "outlined/language_chinese_pinyin"
 	
 	// LanguageChineseQuick is the "language_chinese_quick" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_chinese_quick.svg
-	LanguageChineseQuick Icon = "language_chinese_quick"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_chinese_quick.svg
+	LanguageChineseQuick Icon = "outlined/language_chinese_quick"
 	
 	// LanguageChineseWubi is the "language_chinese_wubi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_chinese_wubi.svg
-	LanguageChineseWubi Icon = "language_chinese_wubi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_chinese_wubi.svg
+	LanguageChineseWubi Icon = "outlined/language_chinese_wubi"
 	
 	// LanguageFrench is the "language_french" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_french.svg
-	LanguageFrench Icon = "language_french"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_french.svg
+	LanguageFrench Icon = "outlined/language_french"
 	
 	// LanguageGbEnglish is the "language_gb_english" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_gb_english.svg
-	LanguageGbEnglish Icon = "language_gb_english"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_gb_english.svg
+	LanguageGbEnglish Icon = "outlined/language_gb_english"
 	
 	// LanguageInternational is the "language_international" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_international.svg
-	LanguageInternational Icon = "language_international"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_international.svg
+	LanguageInternational Icon = "outlined/language_international"
 	
 	// LanguageKoreanLatin is the "language_korean_latin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_korean_latin.svg
-	LanguageKoreanLatin Icon = "language_korean_latin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_korean_latin.svg
+	LanguageKoreanLatin Icon = "outlined/language_korean_latin"
 	
 	// LanguagePinyin is the "language_pinyin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_pinyin.svg
-	LanguagePinyin Icon = "language_pinyin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_pinyin.svg
+	LanguagePinyin Icon = "outlined/language_pinyin"
 	
 	// LanguageSpanish is the "language_spanish" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_spanish.svg
-	LanguageSpanish Icon = "language_spanish"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_spanish.svg
+	LanguageSpanish Icon = "outlined/language_spanish"
 	
 	// LanguageUs is the "language_us" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_us.svg
-	LanguageUs Icon = "language_us"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_us.svg
+	LanguageUs Icon = "outlined/language_us"
 	
 	// LanguageUsColemak is the "language_us_colemak" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_us_colemak.svg
-	LanguageUsColemak Icon = "language_us_colemak"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_us_colemak.svg
+	LanguageUsColemak Icon = "outlined/language_us_colemak"
 	
 	// LanguageUsDvorak is the "language_us_dvorak" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/language_us_dvorak.svg
-	LanguageUsDvorak Icon = "language_us_dvorak"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/language_us_dvorak.svg
+	LanguageUsDvorak Icon = "outlined/language_us_dvorak"
 	
 	// Laps is the "laps" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/laps.svg
-	Laps Icon = "laps"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/laps.svg
+	Laps Icon = "outlined/laps"
 	
 	// LaptopChromebook is the "laptop_chromebook" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/laptop_chromebook.svg
-	LaptopChromebook Icon = "laptop_chromebook"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/laptop_chromebook.svg
+	LaptopChromebook Icon = "outlined/laptop_chromebook"
 	
 	// LaptopMac is the "laptop_mac" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/laptop_mac.svg
-	LaptopMac Icon = "laptop_mac"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/laptop_mac.svg
+	LaptopMac Icon = "outlined/laptop_mac"
 	
 	// LaptopWindows is the "laptop_windows" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/laptop_windows.svg
-	LaptopWindows Icon = "laptop_windows"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/laptop_windows.svg
+	LaptopWindows Icon = "outlined/laptop_windows"
 	
 	// LassoSelect is the "lasso_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lasso_select.svg
-	LassoSelect Icon = "lasso_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lasso_select.svg
+	LassoSelect Icon = "outlined/lasso_select"
 	
 	// LastPage is the "last_page" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/last_page.svg
-	LastPage Icon = "last_page"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/last_page.svg
+	LastPage Icon = "outlined/last_page"
 	
 	// Laundry is the "laundry" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/laundry.svg
-	Laundry Icon = "laundry"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/laundry.svg
+	Laundry Icon = "outlined/laundry"
 	
 	// Layers is the "layers" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/layers.svg
-	Layers Icon = "layers"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/layers.svg
+	Layers Icon = "outlined/layers"
 	
 	// LayersClear is the "layers_clear" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/layers_clear.svg
-	LayersClear Icon = "layers_clear"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/layers_clear.svg
+	LayersClear Icon = "outlined/layers_clear"
 	
 	// Lda is the "lda" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lda.svg
-	Lda Icon = "lda"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lda.svg
+	Lda Icon = "outlined/lda"
 	
 	// Leaderboard is the "leaderboard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/leaderboard.svg
-	Leaderboard Icon = "leaderboard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/leaderboard.svg
+	Leaderboard Icon = "outlined/leaderboard"
 	
 	// LeakAdd is the "leak_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/leak_add.svg
-	LeakAdd Icon = "leak_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/leak_add.svg
+	LeakAdd Icon = "outlined/leak_add"
 	
 	// LeakRemove is the "leak_remove" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/leak_remove.svg
-	LeakRemove Icon = "leak_remove"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/leak_remove.svg
+	LeakRemove Icon = "outlined/leak_remove"
 	
 	// LeftClick is the "left_click" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/left_click.svg
-	LeftClick Icon = "left_click"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/left_click.svg
+	LeftClick Icon = "outlined/left_click"
 	
 	// LeftPanelClose is the "left_panel_close" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/left_panel_close.svg
-	LeftPanelClose Icon = "left_panel_close"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/left_panel_close.svg
+	LeftPanelClose Icon = "outlined/left_panel_close"
 	
 	// LeftPanelOpen is the "left_panel_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/left_panel_open.svg
-	LeftPanelOpen Icon = "left_panel_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/left_panel_open.svg
+	LeftPanelOpen Icon = "outlined/left_panel_open"
 	
 	// LegendToggle is the "legend_toggle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/legend_toggle.svg
-	LegendToggle Icon = "legend_toggle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/legend_toggle.svg
+	LegendToggle Icon = "outlined/legend_toggle"
 	
 	// Lens is the "lens" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lens.svg
-	Lens Icon = "lens"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lens.svg
+	Lens Icon = "outlined/lens"
 	
 	// LensBlur is the "lens_blur" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lens_blur.svg
-	LensBlur Icon = "lens_blur"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lens_blur.svg
+	LensBlur Icon = "outlined/lens_blur"
 	
 	// LetterSwitch is the "letter_switch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/letter_switch.svg
-	LetterSwitch Icon = "letter_switch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/letter_switch.svg
+	LetterSwitch Icon = "outlined/letter_switch"
 	
 	// LibraryAdd is the "library_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/library_add.svg
-	LibraryAdd Icon = "library_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/library_add.svg
+	LibraryAdd Icon = "outlined/library_add"
 	
 	// LibraryAddCheck is the "library_add_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/library_add_check.svg
-	LibraryAddCheck Icon = "library_add_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/library_add_check.svg
+	LibraryAddCheck Icon = "outlined/library_add_check"
 	
 	// LibraryBooks is the "library_books" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/library_books.svg
-	LibraryBooks Icon = "library_books"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/library_books.svg
+	LibraryBooks Icon = "outlined/library_books"
 	
 	// LibraryMusic is the "library_music" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/library_music.svg
-	LibraryMusic Icon = "library_music"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/library_music.svg
+	LibraryMusic Icon = "outlined/library_music"
 	
 	// LiftToTalk is the "lift_to_talk" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lift_to_talk.svg
-	LiftToTalk Icon = "lift_to_talk"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lift_to_talk.svg
+	LiftToTalk Icon = "outlined/lift_to_talk"
 	
 	// Light is the "light" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/light.svg
-	Light Icon = "light"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/light.svg
+	Light Icon = "outlined/light"
 	
 	// LightGroup is the "light_group" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/light_group.svg
-	LightGroup Icon = "light_group"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/light_group.svg
+	LightGroup Icon = "outlined/light_group"
 	
 	// LightMode is the "light_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/light_mode.svg
-	LightMode Icon = "light_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/light_mode.svg
+	LightMode Icon = "outlined/light_mode"
 	
 	// Lightbulb is the "lightbulb" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lightbulb.svg
-	Lightbulb Icon = "lightbulb"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lightbulb.svg
+	Lightbulb Icon = "outlined/lightbulb"
 	
 	// LightbulbCircle is the "lightbulb_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lightbulb_circle.svg
-	LightbulbCircle Icon = "lightbulb_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lightbulb_circle.svg
+	LightbulbCircle Icon = "outlined/lightbulb_circle"
 	
 	// LineAxis is the "line_axis" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_axis.svg
-	LineAxis Icon = "line_axis"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_axis.svg
+	LineAxis Icon = "outlined/line_axis"
 	
 	// LineCurve is the "line_curve" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_curve.svg
-	LineCurve Icon = "line_curve"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_curve.svg
+	LineCurve Icon = "outlined/line_curve"
 	
 	// LineEnd is the "line_end" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_end.svg
-	LineEnd Icon = "line_end"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_end.svg
+	LineEnd Icon = "outlined/line_end"
 	
 	// LineEndArrow is the "line_end_arrow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_end_arrow.svg
-	LineEndArrow Icon = "line_end_arrow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_end_arrow.svg
+	LineEndArrow Icon = "outlined/line_end_arrow"
 	
 	// LineEndArrowNotch is the "line_end_arrow_notch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_end_arrow_notch.svg
-	LineEndArrowNotch Icon = "line_end_arrow_notch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_end_arrow_notch.svg
+	LineEndArrowNotch Icon = "outlined/line_end_arrow_notch"
 	
 	// LineEndCircle is the "line_end_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_end_circle.svg
-	LineEndCircle Icon = "line_end_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_end_circle.svg
+	LineEndCircle Icon = "outlined/line_end_circle"
 	
 	// LineEndDiamond is the "line_end_diamond" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_end_diamond.svg
-	LineEndDiamond Icon = "line_end_diamond"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_end_diamond.svg
+	LineEndDiamond Icon = "outlined/line_end_diamond"
 	
 	// LineEndSquare is the "line_end_square" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_end_square.svg
-	LineEndSquare Icon = "line_end_square"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_end_square.svg
+	LineEndSquare Icon = "outlined/line_end_square"
 	
 	// LineStart is the "line_start" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_start.svg
-	LineStart Icon = "line_start"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_start.svg
+	LineStart Icon = "outlined/line_start"
 	
 	// LineStartArrow is the "line_start_arrow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_start_arrow.svg
-	LineStartArrow Icon = "line_start_arrow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_start_arrow.svg
+	LineStartArrow Icon = "outlined/line_start_arrow"
 	
 	// LineStartArrowNotch is the "line_start_arrow_notch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_start_arrow_notch.svg
-	LineStartArrowNotch Icon = "line_start_arrow_notch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_start_arrow_notch.svg
+	LineStartArrowNotch Icon = "outlined/line_start_arrow_notch"
 	
 	// LineStartCircle is the "line_start_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_start_circle.svg
-	LineStartCircle Icon = "line_start_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_start_circle.svg
+	LineStartCircle Icon = "outlined/line_start_circle"
 	
 	// LineStartDiamond is the "line_start_diamond" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_start_diamond.svg
-	LineStartDiamond Icon = "line_start_diamond"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_start_diamond.svg
+	LineStartDiamond Icon = "outlined/line_start_diamond"
 	
 	// LineStartSquare is the "line_start_square" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_start_square.svg
-	LineStartSquare Icon = "line_start_square"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_start_square.svg
+	LineStartSquare Icon = "outlined/line_start_square"
 	
 	// LineStyle is the "line_style" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_style.svg
-	LineStyle Icon = "line_style"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_style.svg
+	LineStyle Icon = "outlined/line_style"
 	
 	// LineWeight is the "line_weight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/line_weight.svg
-	LineWeight Icon = "line_weight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/line_weight.svg
+	LineWeight Icon = "outlined/line_weight"
 	
 	// LinearScale is the "linear_scale" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/linear_scale.svg
-	LinearScale Icon = "linear_scale"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/linear_scale.svg
+	LinearScale Icon = "outlined/linear_scale"
 	
 	// Link is the "link" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/link.svg
-	Link Icon = "link"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/link.svg
+	Link Icon = "outlined/link"
 	
 	// LinkOff is the "link_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/link_off.svg
-	LinkOff Icon = "link_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/link_off.svg
+	LinkOff Icon = "outlined/link_off"
 	
 	// LinkedCamera is the "linked_camera" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/linked_camera.svg
-	LinkedCamera Icon = "linked_camera"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/linked_camera.svg
+	LinkedCamera Icon = "outlined/linked_camera"
 	
 	// Liquor is the "liquor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/liquor.svg
-	Liquor Icon = "liquor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/liquor.svg
+	Liquor Icon = "outlined/liquor"
 	
 	// List is the "list" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/list.svg
-	List Icon = "list"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/list.svg
+	List Icon = "outlined/list"
 	
 	// ListAlt is the "list_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/list_alt.svg
-	ListAlt Icon = "list_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/list_alt.svg
+	ListAlt Icon = "outlined/list_alt"
 	
 	// ListAltAdd is the "list_alt_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/list_alt_add.svg
-	ListAltAdd Icon = "list_alt_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/list_alt_add.svg
+	ListAltAdd Icon = "outlined/list_alt_add"
 	
 	// Lists is the "lists" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lists.svg
-	Lists Icon = "lists"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lists.svg
+	Lists Icon = "outlined/lists"
 	
 	// LiveHelp is the "live_help" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/live_help.svg
-	LiveHelp Icon = "live_help"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/live_help.svg
+	LiveHelp Icon = "outlined/live_help"
 	
 	// LiveTv is the "live_tv" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/live_tv.svg
-	LiveTv Icon = "live_tv"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/live_tv.svg
+	LiveTv Icon = "outlined/live_tv"
 	
 	// Living is the "living" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/living.svg
-	Living Icon = "living"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/living.svg
+	Living Icon = "outlined/living"
 	
 	// LocalActivity is the "local_activity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_activity.svg
-	LocalActivity Icon = "local_activity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_activity.svg
+	LocalActivity Icon = "outlined/local_activity"
 	
 	// LocalAtm is the "local_atm" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_atm.svg
-	LocalAtm Icon = "local_atm"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_atm.svg
+	LocalAtm Icon = "outlined/local_atm"
 	
 	// LocalBar is the "local_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_bar.svg
-	LocalBar Icon = "local_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_bar.svg
+	LocalBar Icon = "outlined/local_bar"
 	
 	// LocalCafe is the "local_cafe" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_cafe.svg
-	LocalCafe Icon = "local_cafe"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_cafe.svg
+	LocalCafe Icon = "outlined/local_cafe"
 	
 	// LocalCarWash is the "local_car_wash" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_car_wash.svg
-	LocalCarWash Icon = "local_car_wash"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_car_wash.svg
+	LocalCarWash Icon = "outlined/local_car_wash"
 	
 	// LocalConvenienceStore is the "local_convenience_store" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_convenience_store.svg
-	LocalConvenienceStore Icon = "local_convenience_store"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_convenience_store.svg
+	LocalConvenienceStore Icon = "outlined/local_convenience_store"
 	
 	// LocalDining is the "local_dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_dining.svg
-	LocalDining Icon = "local_dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_dining.svg
+	LocalDining Icon = "outlined/local_dining"
 	
 	// LocalDrink is the "local_drink" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_drink.svg
-	LocalDrink Icon = "local_drink"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_drink.svg
+	LocalDrink Icon = "outlined/local_drink"
 	
 	// LocalFireDepartment is the "local_fire_department" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_fire_department.svg
-	LocalFireDepartment Icon = "local_fire_department"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_fire_department.svg
+	LocalFireDepartment Icon = "outlined/local_fire_department"
 	
 	// LocalFlorist is the "local_florist" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_florist.svg
-	LocalFlorist Icon = "local_florist"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_florist.svg
+	LocalFlorist Icon = "outlined/local_florist"
 	
 	// LocalGasStation is the "local_gas_station" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_gas_station.svg
-	LocalGasStation Icon = "local_gas_station"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_gas_station.svg
+	LocalGasStation Icon = "outlined/local_gas_station"
 	
 	// LocalHospital is the "local_hospital" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_hospital.svg
-	LocalHospital Icon = "local_hospital"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_hospital.svg
+	LocalHospital Icon = "outlined/local_hospital"
 	
 	// LocalLaundryService is the "local_laundry_service" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_laundry_service.svg
-	LocalLaundryService Icon = "local_laundry_service"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_laundry_service.svg
+	LocalLaundryService Icon = "outlined/local_laundry_service"
 	
 	// LocalLibrary is the "local_library" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_library.svg
-	LocalLibrary Icon = "local_library"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_library.svg
+	LocalLibrary Icon = "outlined/local_library"
 	
 	// LocalMall is the "local_mall" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_mall.svg
-	LocalMall Icon = "local_mall"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_mall.svg
+	LocalMall Icon = "outlined/local_mall"
 	
 	// LocalParking is the "local_parking" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_parking.svg
-	LocalParking Icon = "local_parking"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_parking.svg
+	LocalParking Icon = "outlined/local_parking"
 	
 	// LocalPharmacy is the "local_pharmacy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_pharmacy.svg
-	LocalPharmacy Icon = "local_pharmacy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_pharmacy.svg
+	LocalPharmacy Icon = "outlined/local_pharmacy"
 	
 	// LocalPizza is the "local_pizza" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_pizza.svg
-	LocalPizza Icon = "local_pizza"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_pizza.svg
+	LocalPizza Icon = "outlined/local_pizza"
 	
 	// LocalPolice is the "local_police" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_police.svg
-	LocalPolice Icon = "local_police"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_police.svg
+	LocalPolice Icon = "outlined/local_police"
 	
 	// LocalPostOffice is the "local_post_office" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_post_office.svg
-	LocalPostOffice Icon = "local_post_office"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_post_office.svg
+	LocalPostOffice Icon = "outlined/local_post_office"
 	
 	// LocalSee is the "local_see" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_see.svg
-	LocalSee Icon = "local_see"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_see.svg
+	LocalSee Icon = "outlined/local_see"
 	
 	// LocalShipping is the "local_shipping" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_shipping.svg
-	LocalShipping Icon = "local_shipping"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_shipping.svg
+	LocalShipping Icon = "outlined/local_shipping"
 	
 	// LocalTaxi is the "local_taxi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/local_taxi.svg
-	LocalTaxi Icon = "local_taxi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/local_taxi.svg
+	LocalTaxi Icon = "outlined/local_taxi"
 	
 	// LocationAway is the "location_away" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/location_away.svg
-	LocationAway Icon = "location_away"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/location_away.svg
+	LocationAway Icon = "outlined/location_away"
 	
 	// LocationChip is the "location_chip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/location_chip.svg
-	LocationChip Icon = "location_chip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/location_chip.svg
+	LocationChip Icon = "outlined/location_chip"
 	
 	// LocationCity is the "location_city" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/location_city.svg
-	LocationCity Icon = "location_city"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/location_city.svg
+	LocationCity Icon = "outlined/location_city"
 	
 	// LocationDisabled is the "location_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/location_disabled.svg
-	LocationDisabled Icon = "location_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/location_disabled.svg
+	LocationDisabled Icon = "outlined/location_disabled"
 	
 	// LocationHome is the "location_home" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/location_home.svg
-	LocationHome Icon = "location_home"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/location_home.svg
+	LocationHome Icon = "outlined/location_home"
 	
 	// LocationOff is the "location_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/location_off.svg
-	LocationOff Icon = "location_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/location_off.svg
+	LocationOff Icon = "outlined/location_off"
 	
 	// LocationOn is the "location_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/location_on.svg
-	LocationOn Icon = "location_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/location_on.svg
+	LocationOn Icon = "outlined/location_on"
 	
 	// LocationSearching is the "location_searching" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/location_searching.svg
-	LocationSearching Icon = "location_searching"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/location_searching.svg
+	LocationSearching Icon = "outlined/location_searching"
 	
 	// Lock is the "lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lock.svg
-	Lock Icon = "lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lock.svg
+	Lock Icon = "outlined/lock"
 	
 	// LockClock is the "lock_clock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lock_clock.svg
-	LockClock Icon = "lock_clock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lock_clock.svg
+	LockClock Icon = "outlined/lock_clock"
 	
 	// LockOpen is the "lock_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lock_open.svg
-	LockOpen Icon = "lock_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lock_open.svg
+	LockOpen Icon = "outlined/lock_open"
 	
 	// LockOpenRight is the "lock_open_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lock_open_right.svg
-	LockOpenRight Icon = "lock_open_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lock_open_right.svg
+	LockOpenRight Icon = "outlined/lock_open_right"
 	
 	// LockPerson is the "lock_person" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lock_person.svg
-	LockPerson Icon = "lock_person"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lock_person.svg
+	LockPerson Icon = "outlined/lock_person"
 	
 	// LockReset is the "lock_reset" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lock_reset.svg
-	LockReset Icon = "lock_reset"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lock_reset.svg
+	LockReset Icon = "outlined/lock_reset"
 	
 	// Login is the "login" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/login.svg
-	Login Icon = "login"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/login.svg
+	Login Icon = "outlined/login"
 	
 	// LogoDev is the "logo_dev" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/logo_dev.svg
-	LogoDev Icon = "logo_dev"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/logo_dev.svg
+	LogoDev Icon = "outlined/logo_dev"
 	
 	// Logout is the "logout" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/logout.svg
-	Logout Icon = "logout"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/logout.svg
+	Logout Icon = "outlined/logout"
 	
 	// Looks is the "looks" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/looks.svg
-	Looks Icon = "looks"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/looks.svg
+	Looks Icon = "outlined/looks"
 	
 	// Looks3 is the "looks_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/looks_3.svg
-	Looks3 Icon = "looks_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/looks_3.svg
+	Looks3 Icon = "outlined/looks_3"
 	
 	// Looks4 is the "looks_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/looks_4.svg
-	Looks4 Icon = "looks_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/looks_4.svg
+	Looks4 Icon = "outlined/looks_4"
 	
 	// Looks5 is the "looks_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/looks_5.svg
-	Looks5 Icon = "looks_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/looks_5.svg
+	Looks5 Icon = "outlined/looks_5"
 	
 	// Looks6 is the "looks_6" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/looks_6.svg
-	Looks6 Icon = "looks_6"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/looks_6.svg
+	Looks6 Icon = "outlined/looks_6"
 	
 	// LooksOne is the "looks_one" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/looks_one.svg
-	LooksOne Icon = "looks_one"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/looks_one.svg
+	LooksOne Icon = "outlined/looks_one"
 	
 	// LooksTwo is the "looks_two" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/looks_two.svg
-	LooksTwo Icon = "looks_two"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/looks_two.svg
+	LooksTwo Icon = "outlined/looks_two"
 	
 	// Loupe is the "loupe" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/loupe.svg
-	Loupe Icon = "loupe"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/loupe.svg
+	Loupe Icon = "outlined/loupe"
 	
 	// LowDensity is the "low_density" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/low_density.svg
-	LowDensity Icon = "low_density"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/low_density.svg
+	LowDensity Icon = "outlined/low_density"
 	
 	// LowPriority is the "low_priority" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/low_priority.svg
-	LowPriority Icon = "low_priority"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/low_priority.svg
+	LowPriority Icon = "outlined/low_priority"
 	
 	// Loyalty is the "loyalty" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/loyalty.svg
-	Loyalty Icon = "loyalty"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/loyalty.svg
+	Loyalty Icon = "outlined/loyalty"
 	
 	// LteMobiledata is the "lte_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lte_mobiledata.svg
-	LteMobiledata Icon = "lte_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lte_mobiledata.svg
+	LteMobiledata Icon = "outlined/lte_mobiledata"
 	
 	// LteMobiledataBadge is the "lte_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lte_mobiledata_badge.svg
-	LteMobiledataBadge Icon = "lte_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lte_mobiledata_badge.svg
+	LteMobiledataBadge Icon = "outlined/lte_mobiledata_badge"
 	
 	// LtePlusMobiledata is the "lte_plus_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lte_plus_mobiledata.svg
-	LtePlusMobiledata Icon = "lte_plus_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lte_plus_mobiledata.svg
+	LtePlusMobiledata Icon = "outlined/lte_plus_mobiledata"
 	
 	// LtePlusMobiledataBadge is the "lte_plus_mobiledata_badge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lte_plus_mobiledata_badge.svg
-	LtePlusMobiledataBadge Icon = "lte_plus_mobiledata_badge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lte_plus_mobiledata_badge.svg
+	LtePlusMobiledataBadge Icon = "outlined/lte_plus_mobiledata_badge"
 	
 	// Luggage is the "luggage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/luggage.svg
-	Luggage Icon = "luggage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/luggage.svg
+	Luggage Icon = "outlined/luggage"
 	
 	// LunchDining is the "lunch_dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lunch_dining.svg
-	LunchDining Icon = "lunch_dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lunch_dining.svg
+	LunchDining Icon = "outlined/lunch_dining"
 	
 	// Lyrics is the "lyrics" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/lyrics.svg
-	Lyrics Icon = "lyrics"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/lyrics.svg
+	Lyrics Icon = "outlined/lyrics"
 	
 	// MacroAuto is the "macro_auto" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/macro_auto.svg
-	MacroAuto Icon = "macro_auto"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/macro_auto.svg
+	MacroAuto Icon = "outlined/macro_auto"
 	
 	// MacroOff is the "macro_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/macro_off.svg
-	MacroOff Icon = "macro_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/macro_off.svg
+	MacroOff Icon = "outlined/macro_off"
 	
 	// MagnificationLarge is the "magnification_large" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/magnification_large.svg
-	MagnificationLarge Icon = "magnification_large"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/magnification_large.svg
+	MagnificationLarge Icon = "outlined/magnification_large"
 	
 	// MagnificationSmall is the "magnification_small" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/magnification_small.svg
-	MagnificationSmall Icon = "magnification_small"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/magnification_small.svg
+	MagnificationSmall Icon = "outlined/magnification_small"
 	
 	// MagnifyDocked is the "magnify_docked" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/magnify_docked.svg
-	MagnifyDocked Icon = "magnify_docked"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/magnify_docked.svg
+	MagnifyDocked Icon = "outlined/magnify_docked"
 	
 	// MagnifyFullscreen is the "magnify_fullscreen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/magnify_fullscreen.svg
-	MagnifyFullscreen Icon = "magnify_fullscreen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/magnify_fullscreen.svg
+	MagnifyFullscreen Icon = "outlined/magnify_fullscreen"
 	
 	// Mail is the "mail" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mail.svg
-	Mail Icon = "mail"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mail.svg
+	Mail Icon = "outlined/mail"
 	
 	// MailLock is the "mail_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mail_lock.svg
-	MailLock Icon = "mail_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mail_lock.svg
+	MailLock Icon = "outlined/mail_lock"
 	
 	// Male is the "male" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/male.svg
-	Male Icon = "male"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/male.svg
+	Male Icon = "outlined/male"
 	
 	// Man is the "man" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/man.svg
-	Man Icon = "man"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/man.svg
+	Man Icon = "outlined/man"
 	
 	// Man2 is the "man_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/man_2.svg
-	Man2 Icon = "man_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/man_2.svg
+	Man2 Icon = "outlined/man_2"
 	
 	// Man3 is the "man_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/man_3.svg
-	Man3 Icon = "man_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/man_3.svg
+	Man3 Icon = "outlined/man_3"
 	
 	// Man4 is the "man_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/man_4.svg
-	Man4 Icon = "man_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/man_4.svg
+	Man4 Icon = "outlined/man_4"
 	
 	// ManageAccounts is the "manage_accounts" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/manage_accounts.svg
-	ManageAccounts Icon = "manage_accounts"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/manage_accounts.svg
+	ManageAccounts Icon = "outlined/manage_accounts"
 	
 	// ManageHistory is the "manage_history" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/manage_history.svg
-	ManageHistory Icon = "manage_history"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/manage_history.svg
+	ManageHistory Icon = "outlined/manage_history"
 	
 	// ManageSearch is the "manage_search" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/manage_search.svg
-	ManageSearch Icon = "manage_search"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/manage_search.svg
+	ManageSearch Icon = "outlined/manage_search"
 	
 	// Manga is the "manga" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/manga.svg
-	Manga Icon = "manga"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/manga.svg
+	Manga Icon = "outlined/manga"
 	
 	// Map is the "map" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/map.svg
-	Map Icon = "map"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/map.svg
+	Map Icon = "outlined/map"
 	
 	// MapsUgc is the "maps_ugc" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/maps_ugc.svg
-	MapsUgc Icon = "maps_ugc"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/maps_ugc.svg
+	MapsUgc Icon = "outlined/maps_ugc"
 	
 	// Margin is the "margin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/margin.svg
-	Margin Icon = "margin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/margin.svg
+	Margin Icon = "outlined/margin"
 	
 	// MarkAsUnread is the "mark_as_unread" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mark_as_unread.svg
-	MarkAsUnread Icon = "mark_as_unread"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mark_as_unread.svg
+	MarkAsUnread Icon = "outlined/mark_as_unread"
 	
 	// MarkChatRead is the "mark_chat_read" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mark_chat_read.svg
-	MarkChatRead Icon = "mark_chat_read"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mark_chat_read.svg
+	MarkChatRead Icon = "outlined/mark_chat_read"
 	
 	// MarkChatUnread is the "mark_chat_unread" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mark_chat_unread.svg
-	MarkChatUnread Icon = "mark_chat_unread"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mark_chat_unread.svg
+	MarkChatUnread Icon = "outlined/mark_chat_unread"
 	
 	// MarkEmailRead is the "mark_email_read" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mark_email_read.svg
-	MarkEmailRead Icon = "mark_email_read"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mark_email_read.svg
+	MarkEmailRead Icon = "outlined/mark_email_read"
 	
 	// MarkEmailUnread is the "mark_email_unread" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mark_email_unread.svg
-	MarkEmailUnread Icon = "mark_email_unread"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mark_email_unread.svg
+	MarkEmailUnread Icon = "outlined/mark_email_unread"
 	
 	// MarkUnreadChatAlt is the "mark_unread_chat_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mark_unread_chat_alt.svg
-	MarkUnreadChatAlt Icon = "mark_unread_chat_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mark_unread_chat_alt.svg
+	MarkUnreadChatAlt Icon = "outlined/mark_unread_chat_alt"
 	
 	// MarkunreadMailbox is the "markunread_mailbox" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/markunread_mailbox.svg
-	MarkunreadMailbox Icon = "markunread_mailbox"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/markunread_mailbox.svg
+	MarkunreadMailbox Icon = "outlined/markunread_mailbox"
 	
 	// MaskedTransitions is the "masked_transitions" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/masked_transitions.svg
-	MaskedTransitions Icon = "masked_transitions"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/masked_transitions.svg
+	MaskedTransitions Icon = "outlined/masked_transitions"
 	
 	// Masks is the "masks" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/masks.svg
-	Masks Icon = "masks"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/masks.svg
+	Masks Icon = "outlined/masks"
 	
 	// MatchCase is the "match_case" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/match_case.svg
-	MatchCase Icon = "match_case"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/match_case.svg
+	MatchCase Icon = "outlined/match_case"
 	
 	// MatchWord is the "match_word" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/match_word.svg
-	MatchWord Icon = "match_word"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/match_word.svg
+	MatchWord Icon = "outlined/match_word"
 	
 	// Matter is the "matter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/matter.svg
-	Matter Icon = "matter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/matter.svg
+	Matter Icon = "outlined/matter"
 	
 	// Maximize is the "maximize" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/maximize.svg
-	Maximize Icon = "maximize"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/maximize.svg
+	Maximize Icon = "outlined/maximize"
 	
 	// MeasuringTape is the "measuring_tape" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/measuring_tape.svg
-	MeasuringTape Icon = "measuring_tape"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/measuring_tape.svg
+	MeasuringTape Icon = "outlined/measuring_tape"
 	
 	// MediaBluetoothOff is the "media_bluetooth_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/media_bluetooth_off.svg
-	MediaBluetoothOff Icon = "media_bluetooth_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/media_bluetooth_off.svg
+	MediaBluetoothOff Icon = "outlined/media_bluetooth_off"
 	
 	// MediaBluetoothOn is the "media_bluetooth_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/media_bluetooth_on.svg
-	MediaBluetoothOn Icon = "media_bluetooth_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/media_bluetooth_on.svg
+	MediaBluetoothOn Icon = "outlined/media_bluetooth_on"
 	
 	// MediaLink is the "media_link" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/media_link.svg
-	MediaLink Icon = "media_link"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/media_link.svg
+	MediaLink Icon = "outlined/media_link"
 	
 	// Mediation is the "mediation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mediation.svg
-	Mediation Icon = "mediation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mediation.svg
+	Mediation Icon = "outlined/mediation"
 	
 	// MedicalInformation is the "medical_information" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/medical_information.svg
-	MedicalInformation Icon = "medical_information"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/medical_information.svg
+	MedicalInformation Icon = "outlined/medical_information"
 	
 	// MedicalMask is the "medical_mask" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/medical_mask.svg
-	MedicalMask Icon = "medical_mask"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/medical_mask.svg
+	MedicalMask Icon = "outlined/medical_mask"
 	
 	// MedicalServices is the "medical_services" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/medical_services.svg
-	MedicalServices Icon = "medical_services"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/medical_services.svg
+	MedicalServices Icon = "outlined/medical_services"
 	
 	// Medication is the "medication" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/medication.svg
-	Medication Icon = "medication"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/medication.svg
+	Medication Icon = "outlined/medication"
 	
 	// MedicationLiquid is the "medication_liquid" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/medication_liquid.svg
-	MedicationLiquid Icon = "medication_liquid"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/medication_liquid.svg
+	MedicationLiquid Icon = "outlined/medication_liquid"
 	
 	// MeetingRoom is the "meeting_room" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/meeting_room.svg
-	MeetingRoom Icon = "meeting_room"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/meeting_room.svg
+	MeetingRoom Icon = "outlined/meeting_room"
 	
 	// Memory is the "memory" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/memory.svg
-	Memory Icon = "memory"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/memory.svg
+	Memory Icon = "outlined/memory"
 	
 	// MemoryAlt is the "memory_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/memory_alt.svg
-	MemoryAlt Icon = "memory_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/memory_alt.svg
+	MemoryAlt Icon = "outlined/memory_alt"
 	
 	// MenstrualHealth is the "menstrual_health" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/menstrual_health.svg
-	MenstrualHealth Icon = "menstrual_health"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/menstrual_health.svg
+	MenstrualHealth Icon = "outlined/menstrual_health"
 	
 	// Menu is the "menu" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/menu.svg
-	Menu Icon = "menu"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/menu.svg
+	Menu Icon = "outlined/menu"
 	
 	// MenuBook is the "menu_book" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/menu_book.svg
-	MenuBook Icon = "menu_book"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/menu_book.svg
+	MenuBook Icon = "outlined/menu_book"
 	
 	// MenuOpen is the "menu_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/menu_open.svg
-	MenuOpen Icon = "menu_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/menu_open.svg
+	MenuOpen Icon = "outlined/menu_open"
 	
 	// Merge is the "merge" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/merge.svg
-	Merge Icon = "merge"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/merge.svg
+	Merge Icon = "outlined/merge"
 	
 	// MergeType is the "merge_type" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/merge_type.svg
-	MergeType Icon = "merge_type"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/merge_type.svg
+	MergeType Icon = "outlined/merge_type"
 	
 	// Metabolism is the "metabolism" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/metabolism.svg
-	Metabolism Icon = "metabolism"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/metabolism.svg
+	Metabolism Icon = "outlined/metabolism"
 	
 	// MfgNestYaleLock is the "mfg_nest_yale_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mfg_nest_yale_lock.svg
-	MfgNestYaleLock Icon = "mfg_nest_yale_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mfg_nest_yale_lock.svg
+	MfgNestYaleLock Icon = "outlined/mfg_nest_yale_lock"
 	
 	// Mic is the "mic" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mic.svg
-	Mic Icon = "mic"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mic.svg
+	Mic Icon = "outlined/mic"
 	
 	// MicDouble is the "mic_double" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mic_double.svg
-	MicDouble Icon = "mic_double"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mic_double.svg
+	MicDouble Icon = "outlined/mic_double"
 	
 	// MicExternalOff is the "mic_external_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mic_external_off.svg
-	MicExternalOff Icon = "mic_external_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mic_external_off.svg
+	MicExternalOff Icon = "outlined/mic_external_off"
 	
 	// MicExternalOn is the "mic_external_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mic_external_on.svg
-	MicExternalOn Icon = "mic_external_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mic_external_on.svg
+	MicExternalOn Icon = "outlined/mic_external_on"
 	
 	// MicOff is the "mic_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mic_off.svg
-	MicOff Icon = "mic_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mic_off.svg
+	MicOff Icon = "outlined/mic_off"
 	
 	// Microbiology is the "microbiology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/microbiology.svg
-	Microbiology Icon = "microbiology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/microbiology.svg
+	Microbiology Icon = "outlined/microbiology"
 	
 	// Microwave is the "microwave" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/microwave.svg
-	Microwave Icon = "microwave"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/microwave.svg
+	Microwave Icon = "outlined/microwave"
 	
 	// MicrowaveGen is the "microwave_gen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/microwave_gen.svg
-	MicrowaveGen Icon = "microwave_gen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/microwave_gen.svg
+	MicrowaveGen Icon = "outlined/microwave_gen"
 	
 	// MilitaryTech is the "military_tech" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/military_tech.svg
-	MilitaryTech Icon = "military_tech"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/military_tech.svg
+	MilitaryTech Icon = "outlined/military_tech"
 	
 	// Mimo is the "mimo" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mimo.svg
-	Mimo Icon = "mimo"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mimo.svg
+	Mimo Icon = "outlined/mimo"
 	
 	// MimoDisconnect is the "mimo_disconnect" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mimo_disconnect.svg
-	MimoDisconnect Icon = "mimo_disconnect"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mimo_disconnect.svg
+	MimoDisconnect Icon = "outlined/mimo_disconnect"
 	
 	// Mindfulness is the "mindfulness" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mindfulness.svg
-	Mindfulness Icon = "mindfulness"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mindfulness.svg
+	Mindfulness Icon = "outlined/mindfulness"
 	
 	// Minimize is the "minimize" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/minimize.svg
-	Minimize Icon = "minimize"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/minimize.svg
+	Minimize Icon = "outlined/minimize"
 	
 	// MinorCrash is the "minor_crash" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/minor_crash.svg
-	MinorCrash Icon = "minor_crash"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/minor_crash.svg
+	MinorCrash Icon = "outlined/minor_crash"
 	
 	// MissedVideoCall is the "missed_video_call" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/missed_video_call.svg
-	MissedVideoCall Icon = "missed_video_call"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/missed_video_call.svg
+	MissedVideoCall Icon = "outlined/missed_video_call"
 	
 	// Mist is the "mist" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mist.svg
-	Mist Icon = "mist"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mist.svg
+	Mist Icon = "outlined/mist"
 	
 	// MixtureMed is the "mixture_med" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mixture_med.svg
-	MixtureMed Icon = "mixture_med"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mixture_med.svg
+	MixtureMed Icon = "outlined/mixture_med"
 	
 	// Mms is the "mms" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mms.svg
-	Mms Icon = "mms"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mms.svg
+	Mms Icon = "outlined/mms"
 	
 	// MobileFriendly is the "mobile_friendly" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mobile_friendly.svg
-	MobileFriendly Icon = "mobile_friendly"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mobile_friendly.svg
+	MobileFriendly Icon = "outlined/mobile_friendly"
 	
 	// MobileOff is the "mobile_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mobile_off.svg
-	MobileOff Icon = "mobile_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mobile_off.svg
+	MobileOff Icon = "outlined/mobile_off"
 	
 	// MobileScreenShare is the "mobile_screen_share" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mobile_screen_share.svg
-	MobileScreenShare Icon = "mobile_screen_share"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mobile_screen_share.svg
+	MobileScreenShare Icon = "outlined/mobile_screen_share"
 	
 	// MobiledataOff is the "mobiledata_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mobiledata_off.svg
-	MobiledataOff Icon = "mobiledata_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mobiledata_off.svg
+	MobiledataOff Icon = "outlined/mobiledata_off"
 	
 	// ModeComment is the "mode_comment" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_comment.svg
-	ModeComment Icon = "mode_comment"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_comment.svg
+	ModeComment Icon = "outlined/mode_comment"
 	
 	// ModeCool is the "mode_cool" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_cool.svg
-	ModeCool Icon = "mode_cool"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_cool.svg
+	ModeCool Icon = "outlined/mode_cool"
 	
 	// ModeCoolOff is the "mode_cool_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_cool_off.svg
-	ModeCoolOff Icon = "mode_cool_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_cool_off.svg
+	ModeCoolOff Icon = "outlined/mode_cool_off"
 	
 	// ModeFan is the "mode_fan" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_fan.svg
-	ModeFan Icon = "mode_fan"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_fan.svg
+	ModeFan Icon = "outlined/mode_fan"
 	
 	// ModeFanOff is the "mode_fan_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_fan_off.svg
-	ModeFanOff Icon = "mode_fan_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_fan_off.svg
+	ModeFanOff Icon = "outlined/mode_fan_off"
 	
 	// ModeHeat is the "mode_heat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_heat.svg
-	ModeHeat Icon = "mode_heat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_heat.svg
+	ModeHeat Icon = "outlined/mode_heat"
 	
 	// ModeHeatCool is the "mode_heat_cool" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_heat_cool.svg
-	ModeHeatCool Icon = "mode_heat_cool"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_heat_cool.svg
+	ModeHeatCool Icon = "outlined/mode_heat_cool"
 	
 	// ModeHeatOff is the "mode_heat_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_heat_off.svg
-	ModeHeatOff Icon = "mode_heat_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_heat_off.svg
+	ModeHeatOff Icon = "outlined/mode_heat_off"
 	
 	// ModeNight is the "mode_night" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_night.svg
-	ModeNight Icon = "mode_night"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_night.svg
+	ModeNight Icon = "outlined/mode_night"
 	
 	// ModeOfTravel is the "mode_of_travel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_of_travel.svg
-	ModeOfTravel Icon = "mode_of_travel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_of_travel.svg
+	ModeOfTravel Icon = "outlined/mode_of_travel"
 	
 	// ModeOffOn is the "mode_off_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_off_on.svg
-	ModeOffOn Icon = "mode_off_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_off_on.svg
+	ModeOffOn Icon = "outlined/mode_off_on"
 	
 	// ModeStandby is the "mode_standby" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mode_standby.svg
-	ModeStandby Icon = "mode_standby"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mode_standby.svg
+	ModeStandby Icon = "outlined/mode_standby"
 	
 	// ModelTraining is the "model_training" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/model_training.svg
-	ModelTraining Icon = "model_training"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/model_training.svg
+	ModelTraining Icon = "outlined/model_training"
 	
 	// MonetizationOn is the "monetization_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/monetization_on.svg
-	MonetizationOn Icon = "monetization_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/monetization_on.svg
+	MonetizationOn Icon = "outlined/monetization_on"
 	
 	// Money is the "money" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/money.svg
-	Money Icon = "money"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/money.svg
+	Money Icon = "outlined/money"
 	
 	// MoneyOff is the "money_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/money_off.svg
-	MoneyOff Icon = "money_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/money_off.svg
+	MoneyOff Icon = "outlined/money_off"
 	
 	// Monitor is the "monitor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/monitor.svg
-	Monitor Icon = "monitor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/monitor.svg
+	Monitor Icon = "outlined/monitor"
 	
 	// MonitorHeart is the "monitor_heart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/monitor_heart.svg
-	MonitorHeart Icon = "monitor_heart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/monitor_heart.svg
+	MonitorHeart Icon = "outlined/monitor_heart"
 	
 	// MonitorWeight is the "monitor_weight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/monitor_weight.svg
-	MonitorWeight Icon = "monitor_weight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/monitor_weight.svg
+	MonitorWeight Icon = "outlined/monitor_weight"
 	
 	// MonitorWeightGain is the "monitor_weight_gain" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/monitor_weight_gain.svg
-	MonitorWeightGain Icon = "monitor_weight_gain"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/monitor_weight_gain.svg
+	MonitorWeightGain Icon = "outlined/monitor_weight_gain"
 	
 	// MonitorWeightLoss is the "monitor_weight_loss" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/monitor_weight_loss.svg
-	MonitorWeightLoss Icon = "monitor_weight_loss"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/monitor_weight_loss.svg
+	MonitorWeightLoss Icon = "outlined/monitor_weight_loss"
 	
 	// Monitoring is the "monitoring" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/monitoring.svg
-	Monitoring Icon = "monitoring"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/monitoring.svg
+	Monitoring Icon = "outlined/monitoring"
 	
 	// MonochromePhotos is the "monochrome_photos" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/monochrome_photos.svg
-	MonochromePhotos Icon = "monochrome_photos"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/monochrome_photos.svg
+	MonochromePhotos Icon = "outlined/monochrome_photos"
 	
 	// Mood is the "mood" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mood.svg
-	Mood Icon = "mood"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mood.svg
+	Mood Icon = "outlined/mood"
 	
 	// MoodBad is the "mood_bad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mood_bad.svg
-	MoodBad Icon = "mood_bad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mood_bad.svg
+	MoodBad Icon = "outlined/mood_bad"
 	
 	// Mop is the "mop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mop.svg
-	Mop Icon = "mop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mop.svg
+	Mop Icon = "outlined/mop"
 	
 	// More is the "more" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/more.svg
-	More Icon = "more"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/more.svg
+	More Icon = "outlined/more"
 	
 	// MoreDown is the "more_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/more_down.svg
-	MoreDown Icon = "more_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/more_down.svg
+	MoreDown Icon = "outlined/more_down"
 	
 	// MoreHoriz is the "more_horiz" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/more_horiz.svg
-	MoreHoriz Icon = "more_horiz"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/more_horiz.svg
+	MoreHoriz Icon = "outlined/more_horiz"
 	
 	// MoreTime is the "more_time" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/more_time.svg
-	MoreTime Icon = "more_time"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/more_time.svg
+	MoreTime Icon = "outlined/more_time"
 	
 	// MoreUp is the "more_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/more_up.svg
-	MoreUp Icon = "more_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/more_up.svg
+	MoreUp Icon = "outlined/more_up"
 	
 	// MoreVert is the "more_vert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/more_vert.svg
-	MoreVert Icon = "more_vert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/more_vert.svg
+	MoreVert Icon = "outlined/more_vert"
 	
 	// Mosque is the "mosque" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mosque.svg
-	Mosque Icon = "mosque"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mosque.svg
+	Mosque Icon = "outlined/mosque"
 	
 	// MotionBlur is the "motion_blur" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_blur.svg
-	MotionBlur Icon = "motion_blur"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_blur.svg
+	MotionBlur Icon = "outlined/motion_blur"
 	
 	// MotionMode is the "motion_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_mode.svg
-	MotionMode Icon = "motion_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_mode.svg
+	MotionMode Icon = "outlined/motion_mode"
 	
 	// MotionPhotosAuto is the "motion_photos_auto" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_photos_auto.svg
-	MotionPhotosAuto Icon = "motion_photos_auto"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_photos_auto.svg
+	MotionPhotosAuto Icon = "outlined/motion_photos_auto"
 	
 	// MotionPhotosOff is the "motion_photos_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_photos_off.svg
-	MotionPhotosOff Icon = "motion_photos_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_photos_off.svg
+	MotionPhotosOff Icon = "outlined/motion_photos_off"
 	
 	// MotionPhotosOn is the "motion_photos_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_photos_on.svg
-	MotionPhotosOn Icon = "motion_photos_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_photos_on.svg
+	MotionPhotosOn Icon = "outlined/motion_photos_on"
 	
 	// MotionPhotosPaused is the "motion_photos_paused" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_photos_paused.svg
-	MotionPhotosPaused Icon = "motion_photos_paused"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_photos_paused.svg
+	MotionPhotosPaused Icon = "outlined/motion_photos_paused"
 	
 	// MotionSensorActive is the "motion_sensor_active" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_sensor_active.svg
-	MotionSensorActive Icon = "motion_sensor_active"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_sensor_active.svg
+	MotionSensorActive Icon = "outlined/motion_sensor_active"
 	
 	// MotionSensorAlert is the "motion_sensor_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_sensor_alert.svg
-	MotionSensorAlert Icon = "motion_sensor_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_sensor_alert.svg
+	MotionSensorAlert Icon = "outlined/motion_sensor_alert"
 	
 	// MotionSensorIdle is the "motion_sensor_idle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_sensor_idle.svg
-	MotionSensorIdle Icon = "motion_sensor_idle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_sensor_idle.svg
+	MotionSensorIdle Icon = "outlined/motion_sensor_idle"
 	
 	// MotionSensorUrgent is the "motion_sensor_urgent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motion_sensor_urgent.svg
-	MotionSensorUrgent Icon = "motion_sensor_urgent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motion_sensor_urgent.svg
+	MotionSensorUrgent Icon = "outlined/motion_sensor_urgent"
 	
 	// Motorcycle is the "motorcycle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/motorcycle.svg
-	Motorcycle Icon = "motorcycle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/motorcycle.svg
+	Motorcycle Icon = "outlined/motorcycle"
 	
 	// MountainFlag is the "mountain_flag" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mountain_flag.svg
-	MountainFlag Icon = "mountain_flag"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mountain_flag.svg
+	MountainFlag Icon = "outlined/mountain_flag"
 	
 	// Mouse is the "mouse" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mouse.svg
-	Mouse Icon = "mouse"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mouse.svg
+	Mouse Icon = "outlined/mouse"
 	
 	// Move is the "move" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move.svg
-	Move Icon = "move"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move.svg
+	Move Icon = "outlined/move"
 	
 	// MoveDown is the "move_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_down.svg
-	MoveDown Icon = "move_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_down.svg
+	MoveDown Icon = "outlined/move_down"
 	
 	// MoveGroup is the "move_group" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_group.svg
-	MoveGroup Icon = "move_group"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_group.svg
+	MoveGroup Icon = "outlined/move_group"
 	
 	// MoveItem is the "move_item" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_item.svg
-	MoveItem Icon = "move_item"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_item.svg
+	MoveItem Icon = "outlined/move_item"
 	
 	// MoveLocation is the "move_location" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_location.svg
-	MoveLocation Icon = "move_location"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_location.svg
+	MoveLocation Icon = "outlined/move_location"
 	
 	// MoveSelectionDown is the "move_selection_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_selection_down.svg
-	MoveSelectionDown Icon = "move_selection_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_selection_down.svg
+	MoveSelectionDown Icon = "outlined/move_selection_down"
 	
 	// MoveSelectionLeft is the "move_selection_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_selection_left.svg
-	MoveSelectionLeft Icon = "move_selection_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_selection_left.svg
+	MoveSelectionLeft Icon = "outlined/move_selection_left"
 	
 	// MoveSelectionRight is the "move_selection_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_selection_right.svg
-	MoveSelectionRight Icon = "move_selection_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_selection_right.svg
+	MoveSelectionRight Icon = "outlined/move_selection_right"
 	
 	// MoveSelectionUp is the "move_selection_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_selection_up.svg
-	MoveSelectionUp Icon = "move_selection_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_selection_up.svg
+	MoveSelectionUp Icon = "outlined/move_selection_up"
 	
 	// MoveToInbox is the "move_to_inbox" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_to_inbox.svg
-	MoveToInbox Icon = "move_to_inbox"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_to_inbox.svg
+	MoveToInbox Icon = "outlined/move_to_inbox"
 	
 	// MoveUp is the "move_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/move_up.svg
-	MoveUp Icon = "move_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/move_up.svg
+	MoveUp Icon = "outlined/move_up"
 	
 	// MovedLocation is the "moved_location" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/moved_location.svg
-	MovedLocation Icon = "moved_location"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/moved_location.svg
+	MovedLocation Icon = "outlined/moved_location"
 	
 	// Movie is the "movie" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/movie.svg
-	Movie Icon = "movie"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/movie.svg
+	Movie Icon = "outlined/movie"
 	
 	// MovieEdit is the "movie_edit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/movie_edit.svg
-	MovieEdit Icon = "movie_edit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/movie_edit.svg
+	MovieEdit Icon = "outlined/movie_edit"
 	
 	// MovieInfo is the "movie_info" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/movie_info.svg
-	MovieInfo Icon = "movie_info"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/movie_info.svg
+	MovieInfo Icon = "outlined/movie_info"
 	
 	// Moving is the "moving" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/moving.svg
-	Moving Icon = "moving"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/moving.svg
+	Moving Icon = "outlined/moving"
 	
 	// MovingBeds is the "moving_beds" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/moving_beds.svg
-	MovingBeds Icon = "moving_beds"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/moving_beds.svg
+	MovingBeds Icon = "outlined/moving_beds"
 	
 	// MovingMinistry is the "moving_ministry" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/moving_ministry.svg
-	MovingMinistry Icon = "moving_ministry"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/moving_ministry.svg
+	MovingMinistry Icon = "outlined/moving_ministry"
 	
 	// Mp is the "mp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mp.svg
-	Mp Icon = "mp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mp.svg
+	Mp Icon = "outlined/mp"
 	
 	// Multicooker is the "multicooker" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/multicooker.svg
-	Multicooker Icon = "multicooker"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/multicooker.svg
+	Multicooker Icon = "outlined/multicooker"
 	
 	// MultilineChart is the "multiline_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/multiline_chart.svg
-	MultilineChart Icon = "multiline_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/multiline_chart.svg
+	MultilineChart Icon = "outlined/multiline_chart"
 	
 	// MultipleStop is the "multiple_stop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/multiple_stop.svg
-	MultipleStop Icon = "multiple_stop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/multiple_stop.svg
+	MultipleStop Icon = "outlined/multiple_stop"
 	
 	// Museum is the "museum" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/museum.svg
-	Museum Icon = "museum"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/museum.svg
+	Museum Icon = "outlined/museum"
 	
 	// MusicNote is the "music_note" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/music_note.svg
-	MusicNote Icon = "music_note"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/music_note.svg
+	MusicNote Icon = "outlined/music_note"
 	
 	// MusicOff is the "music_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/music_off.svg
-	MusicOff Icon = "music_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/music_off.svg
+	MusicOff Icon = "outlined/music_off"
 	
 	// MusicVideo is the "music_video" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/music_video.svg
-	MusicVideo Icon = "music_video"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/music_video.svg
+	MusicVideo Icon = "outlined/music_video"
 	
 	// MyLocation is the "my_location" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/my_location.svg
-	MyLocation Icon = "my_location"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/my_location.svg
+	MyLocation Icon = "outlined/my_location"
 	
 	// Mystery is the "mystery" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/mystery.svg
-	Mystery Icon = "mystery"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/mystery.svg
+	Mystery Icon = "outlined/mystery"
 	
 	// Nat is the "nat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nat.svg
-	Nat Icon = "nat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nat.svg
+	Nat Icon = "outlined/nat"
 	
 	// Nature is the "nature" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nature.svg
-	Nature Icon = "nature"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nature.svg
+	Nature Icon = "outlined/nature"
 	
 	// NaturePeople is the "nature_people" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nature_people.svg
-	NaturePeople Icon = "nature_people"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nature_people.svg
+	NaturePeople Icon = "outlined/nature_people"
 	
 	// NavigateBefore is the "navigate_before" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/navigate_before.svg
-	NavigateBefore Icon = "navigate_before"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/navigate_before.svg
+	NavigateBefore Icon = "outlined/navigate_before"
 	
 	// NavigateNext is the "navigate_next" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/navigate_next.svg
-	NavigateNext Icon = "navigate_next"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/navigate_next.svg
+	NavigateNext Icon = "outlined/navigate_next"
 	
 	// Navigation is the "navigation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/navigation.svg
-	Navigation Icon = "navigation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/navigation.svg
+	Navigation Icon = "outlined/navigation"
 	
 	// NearMe is the "near_me" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/near_me.svg
-	NearMe Icon = "near_me"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/near_me.svg
+	NearMe Icon = "outlined/near_me"
 	
 	// NearMeDisabled is the "near_me_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/near_me_disabled.svg
-	NearMeDisabled Icon = "near_me_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/near_me_disabled.svg
+	NearMeDisabled Icon = "outlined/near_me_disabled"
 	
 	// Nearby is the "nearby" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nearby.svg
-	Nearby Icon = "nearby"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nearby.svg
+	Nearby Icon = "outlined/nearby"
 	
 	// NearbyError is the "nearby_error" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nearby_error.svg
-	NearbyError Icon = "nearby_error"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nearby_error.svg
+	NearbyError Icon = "outlined/nearby_error"
 	
 	// NearbyOff is the "nearby_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nearby_off.svg
-	NearbyOff Icon = "nearby_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nearby_off.svg
+	NearbyOff Icon = "outlined/nearby_off"
 	
 	// Nephrology is the "nephrology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nephrology.svg
-	Nephrology Icon = "nephrology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nephrology.svg
+	Nephrology Icon = "outlined/nephrology"
 	
 	// NestAudio is the "nest_audio" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_audio.svg
-	NestAudio Icon = "nest_audio"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_audio.svg
+	NestAudio Icon = "outlined/nest_audio"
 	
 	// NestCamFloodlight is the "nest_cam_floodlight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_cam_floodlight.svg
-	NestCamFloodlight Icon = "nest_cam_floodlight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_cam_floodlight.svg
+	NestCamFloodlight Icon = "outlined/nest_cam_floodlight"
 	
 	// NestCamIndoor is the "nest_cam_indoor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_cam_indoor.svg
-	NestCamIndoor Icon = "nest_cam_indoor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_cam_indoor.svg
+	NestCamIndoor Icon = "outlined/nest_cam_indoor"
 	
 	// NestCamIq is the "nest_cam_iq" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_cam_iq.svg
-	NestCamIq Icon = "nest_cam_iq"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_cam_iq.svg
+	NestCamIq Icon = "outlined/nest_cam_iq"
 	
 	// NestCamIqOutdoor is the "nest_cam_iq_outdoor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_cam_iq_outdoor.svg
-	NestCamIqOutdoor Icon = "nest_cam_iq_outdoor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_cam_iq_outdoor.svg
+	NestCamIqOutdoor Icon = "outlined/nest_cam_iq_outdoor"
 	
 	// NestCamMagnetMount is the "nest_cam_magnet_mount" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_cam_magnet_mount.svg
-	NestCamMagnetMount Icon = "nest_cam_magnet_mount"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_cam_magnet_mount.svg
+	NestCamMagnetMount Icon = "outlined/nest_cam_magnet_mount"
 	
 	// NestCamOutdoor is the "nest_cam_outdoor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_cam_outdoor.svg
-	NestCamOutdoor Icon = "nest_cam_outdoor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_cam_outdoor.svg
+	NestCamOutdoor Icon = "outlined/nest_cam_outdoor"
 	
 	// NestCamStand is the "nest_cam_stand" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_cam_stand.svg
-	NestCamStand Icon = "nest_cam_stand"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_cam_stand.svg
+	NestCamStand Icon = "outlined/nest_cam_stand"
 	
 	// NestCamWallMount is the "nest_cam_wall_mount" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_cam_wall_mount.svg
-	NestCamWallMount Icon = "nest_cam_wall_mount"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_cam_wall_mount.svg
+	NestCamWallMount Icon = "outlined/nest_cam_wall_mount"
 	
 	// NestCamWiredStand is the "nest_cam_wired_stand" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_cam_wired_stand.svg
-	NestCamWiredStand Icon = "nest_cam_wired_stand"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_cam_wired_stand.svg
+	NestCamWiredStand Icon = "outlined/nest_cam_wired_stand"
 	
 	// NestClockFarsightAnalog is the "nest_clock_farsight_analog" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_clock_farsight_analog.svg
-	NestClockFarsightAnalog Icon = "nest_clock_farsight_analog"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_clock_farsight_analog.svg
+	NestClockFarsightAnalog Icon = "outlined/nest_clock_farsight_analog"
 	
 	// NestClockFarsightDigital is the "nest_clock_farsight_digital" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_clock_farsight_digital.svg
-	NestClockFarsightDigital Icon = "nest_clock_farsight_digital"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_clock_farsight_digital.svg
+	NestClockFarsightDigital Icon = "outlined/nest_clock_farsight_digital"
 	
 	// NestConnect is the "nest_connect" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_connect.svg
-	NestConnect Icon = "nest_connect"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_connect.svg
+	NestConnect Icon = "outlined/nest_connect"
 	
 	// NestDetect is the "nest_detect" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_detect.svg
-	NestDetect Icon = "nest_detect"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_detect.svg
+	NestDetect Icon = "outlined/nest_detect"
 	
 	// NestDisplay is the "nest_display" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_display.svg
-	NestDisplay Icon = "nest_display"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_display.svg
+	NestDisplay Icon = "outlined/nest_display"
 	
 	// NestDisplayMax is the "nest_display_max" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_display_max.svg
-	NestDisplayMax Icon = "nest_display_max"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_display_max.svg
+	NestDisplayMax Icon = "outlined/nest_display_max"
 	
 	// NestDoorbellVisitor is the "nest_doorbell_visitor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_doorbell_visitor.svg
-	NestDoorbellVisitor Icon = "nest_doorbell_visitor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_doorbell_visitor.svg
+	NestDoorbellVisitor Icon = "outlined/nest_doorbell_visitor"
 	
 	// NestEcoLeaf is the "nest_eco_leaf" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_eco_leaf.svg
-	NestEcoLeaf Icon = "nest_eco_leaf"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_eco_leaf.svg
+	NestEcoLeaf Icon = "outlined/nest_eco_leaf"
 	
 	// NestFarsightWeather is the "nest_farsight_weather" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_farsight_weather.svg
-	NestFarsightWeather Icon = "nest_farsight_weather"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_farsight_weather.svg
+	NestFarsightWeather Icon = "outlined/nest_farsight_weather"
 	
 	// NestFoundSavings is the "nest_found_savings" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_found_savings.svg
-	NestFoundSavings Icon = "nest_found_savings"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_found_savings.svg
+	NestFoundSavings Icon = "outlined/nest_found_savings"
 	
 	// NestHeatLinkE is the "nest_heat_link_e" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_heat_link_e.svg
-	NestHeatLinkE Icon = "nest_heat_link_e"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_heat_link_e.svg
+	NestHeatLinkE Icon = "outlined/nest_heat_link_e"
 	
 	// NestHeatLinkGen3 is the "nest_heat_link_gen_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_heat_link_gen_3.svg
-	NestHeatLinkGen3 Icon = "nest_heat_link_gen_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_heat_link_gen_3.svg
+	NestHeatLinkGen3 Icon = "outlined/nest_heat_link_gen_3"
 	
 	// NestHelloDoorbell is the "nest_hello_doorbell" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_hello_doorbell.svg
-	NestHelloDoorbell Icon = "nest_hello_doorbell"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_hello_doorbell.svg
+	NestHelloDoorbell Icon = "outlined/nest_hello_doorbell"
 	
 	// NestMini is the "nest_mini" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_mini.svg
-	NestMini Icon = "nest_mini"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_mini.svg
+	NestMini Icon = "outlined/nest_mini"
 	
 	// NestMultiRoom is the "nest_multi_room" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_multi_room.svg
-	NestMultiRoom Icon = "nest_multi_room"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_multi_room.svg
+	NestMultiRoom Icon = "outlined/nest_multi_room"
 	
 	// NestProtect is the "nest_protect" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_protect.svg
-	NestProtect Icon = "nest_protect"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_protect.svg
+	NestProtect Icon = "outlined/nest_protect"
 	
 	// NestRemote is the "nest_remote" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_remote.svg
-	NestRemote Icon = "nest_remote"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_remote.svg
+	NestRemote Icon = "outlined/nest_remote"
 	
 	// NestRemoteComfortSensor is the "nest_remote_comfort_sensor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_remote_comfort_sensor.svg
-	NestRemoteComfortSensor Icon = "nest_remote_comfort_sensor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_remote_comfort_sensor.svg
+	NestRemoteComfortSensor Icon = "outlined/nest_remote_comfort_sensor"
 	
 	// NestSecureAlarm is the "nest_secure_alarm" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_secure_alarm.svg
-	NestSecureAlarm Icon = "nest_secure_alarm"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_secure_alarm.svg
+	NestSecureAlarm Icon = "outlined/nest_secure_alarm"
 	
 	// NestSunblock is the "nest_sunblock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_sunblock.svg
-	NestSunblock Icon = "nest_sunblock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_sunblock.svg
+	NestSunblock Icon = "outlined/nest_sunblock"
 	
 	// NestTag is the "nest_tag" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_tag.svg
-	NestTag Icon = "nest_tag"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_tag.svg
+	NestTag Icon = "outlined/nest_tag"
 	
 	// NestThermostat is the "nest_thermostat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_thermostat.svg
-	NestThermostat Icon = "nest_thermostat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_thermostat.svg
+	NestThermostat Icon = "outlined/nest_thermostat"
 	
 	// NestThermostatEEu is the "nest_thermostat_e_eu" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_thermostat_e_eu.svg
-	NestThermostatEEu Icon = "nest_thermostat_e_eu"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_thermostat_e_eu.svg
+	NestThermostatEEu Icon = "outlined/nest_thermostat_e_eu"
 	
 	// NestThermostatGen3 is the "nest_thermostat_gen_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_thermostat_gen_3.svg
-	NestThermostatGen3 Icon = "nest_thermostat_gen_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_thermostat_gen_3.svg
+	NestThermostatGen3 Icon = "outlined/nest_thermostat_gen_3"
 	
 	// NestThermostatSensor is the "nest_thermostat_sensor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_thermostat_sensor.svg
-	NestThermostatSensor Icon = "nest_thermostat_sensor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_thermostat_sensor.svg
+	NestThermostatSensor Icon = "outlined/nest_thermostat_sensor"
 	
 	// NestThermostatSensorEu is the "nest_thermostat_sensor_eu" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_thermostat_sensor_eu.svg
-	NestThermostatSensorEu Icon = "nest_thermostat_sensor_eu"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_thermostat_sensor_eu.svg
+	NestThermostatSensorEu Icon = "outlined/nest_thermostat_sensor_eu"
 	
 	// NestThermostatZirconiumEu is the "nest_thermostat_zirconium_eu" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_thermostat_zirconium_eu.svg
-	NestThermostatZirconiumEu Icon = "nest_thermostat_zirconium_eu"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_thermostat_zirconium_eu.svg
+	NestThermostatZirconiumEu Icon = "outlined/nest_thermostat_zirconium_eu"
 	
 	// NestTrueRadiant is the "nest_true_radiant" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_true_radiant.svg
-	NestTrueRadiant Icon = "nest_true_radiant"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_true_radiant.svg
+	NestTrueRadiant Icon = "outlined/nest_true_radiant"
 	
 	// NestWakeOnApproach is the "nest_wake_on_approach" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_wake_on_approach.svg
-	NestWakeOnApproach Icon = "nest_wake_on_approach"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_wake_on_approach.svg
+	NestWakeOnApproach Icon = "outlined/nest_wake_on_approach"
 	
 	// NestWakeOnPress is the "nest_wake_on_press" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_wake_on_press.svg
-	NestWakeOnPress Icon = "nest_wake_on_press"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_wake_on_press.svg
+	NestWakeOnPress Icon = "outlined/nest_wake_on_press"
 	
 	// NestWifiGale is the "nest_wifi_gale" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_wifi_gale.svg
-	NestWifiGale Icon = "nest_wifi_gale"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_wifi_gale.svg
+	NestWifiGale Icon = "outlined/nest_wifi_gale"
 	
 	// NestWifiPoint is the "nest_wifi_point" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_wifi_point.svg
-	NestWifiPoint Icon = "nest_wifi_point"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_wifi_point.svg
+	NestWifiPoint Icon = "outlined/nest_wifi_point"
 	
 	// NestWifiRouter is the "nest_wifi_router" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nest_wifi_router.svg
-	NestWifiRouter Icon = "nest_wifi_router"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nest_wifi_router.svg
+	NestWifiRouter Icon = "outlined/nest_wifi_router"
 	
 	// NetworkCell is the "network_cell" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_cell.svg
-	NetworkCell Icon = "network_cell"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_cell.svg
+	NetworkCell Icon = "outlined/network_cell"
 	
 	// NetworkCheck is the "network_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_check.svg
-	NetworkCheck Icon = "network_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_check.svg
+	NetworkCheck Icon = "outlined/network_check"
 	
 	// NetworkIntelligenceHistory is the "network_intelligence_history" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_intelligence_history.svg
-	NetworkIntelligenceHistory Icon = "network_intelligence_history"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_intelligence_history.svg
+	NetworkIntelligenceHistory Icon = "outlined/network_intelligence_history"
 	
 	// NetworkIntelligenceUpdate is the "network_intelligence_update" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_intelligence_update.svg
-	NetworkIntelligenceUpdate Icon = "network_intelligence_update"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_intelligence_update.svg
+	NetworkIntelligenceUpdate Icon = "outlined/network_intelligence_update"
 	
 	// NetworkLocked is the "network_locked" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_locked.svg
-	NetworkLocked Icon = "network_locked"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_locked.svg
+	NetworkLocked Icon = "outlined/network_locked"
 	
 	// NetworkManage is the "network_manage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_manage.svg
-	NetworkManage Icon = "network_manage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_manage.svg
+	NetworkManage Icon = "outlined/network_manage"
 	
 	// NetworkPing is the "network_ping" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_ping.svg
-	NetworkPing Icon = "network_ping"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_ping.svg
+	NetworkPing Icon = "outlined/network_ping"
 	
 	// NetworkWifi is the "network_wifi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_wifi.svg
-	NetworkWifi Icon = "network_wifi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_wifi.svg
+	NetworkWifi Icon = "outlined/network_wifi"
 	
 	// NetworkWifi1Bar is the "network_wifi_1_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_wifi_1_bar.svg
-	NetworkWifi1Bar Icon = "network_wifi_1_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_wifi_1_bar.svg
+	NetworkWifi1Bar Icon = "outlined/network_wifi_1_bar"
 	
 	// NetworkWifi2Bar is the "network_wifi_2_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_wifi_2_bar.svg
-	NetworkWifi2Bar Icon = "network_wifi_2_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_wifi_2_bar.svg
+	NetworkWifi2Bar Icon = "outlined/network_wifi_2_bar"
 	
 	// NetworkWifi3Bar is the "network_wifi_3_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/network_wifi_3_bar.svg
-	NetworkWifi3Bar Icon = "network_wifi_3_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/network_wifi_3_bar.svg
+	NetworkWifi3Bar Icon = "outlined/network_wifi_3_bar"
 	
 	// Neurology is the "neurology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/neurology.svg
-	Neurology Icon = "neurology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/neurology.svg
+	Neurology Icon = "outlined/neurology"
 	
 	// NewLabel is the "new_label" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/new_label.svg
-	NewLabel Icon = "new_label"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/new_label.svg
+	NewLabel Icon = "outlined/new_label"
 	
 	// NewReleases is the "new_releases" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/new_releases.svg
-	NewReleases Icon = "new_releases"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/new_releases.svg
+	NewReleases Icon = "outlined/new_releases"
 	
 	// NewWindow is the "new_window" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/new_window.svg
-	NewWindow Icon = "new_window"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/new_window.svg
+	NewWindow Icon = "outlined/new_window"
 	
 	// News is the "news" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/news.svg
-	News Icon = "news"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/news.svg
+	News Icon = "outlined/news"
 	
 	// Newsmode is the "newsmode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/newsmode.svg
-	Newsmode Icon = "newsmode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/newsmode.svg
+	Newsmode Icon = "outlined/newsmode"
 	
 	// Newspaper is the "newspaper" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/newspaper.svg
-	Newspaper Icon = "newspaper"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/newspaper.svg
+	Newspaper Icon = "outlined/newspaper"
 	
 	// NextPlan is the "next_plan" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/next_plan.svg
-	NextPlan Icon = "next_plan"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/next_plan.svg
+	NextPlan Icon = "outlined/next_plan"
 	
 	// NextWeek is the "next_week" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/next_week.svg
-	NextWeek Icon = "next_week"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/next_week.svg
+	NextWeek Icon = "outlined/next_week"
 	
 	// Nfc is the "nfc" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nfc.svg
-	Nfc Icon = "nfc"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nfc.svg
+	Nfc Icon = "outlined/nfc"
 	
 	// NightShelter is the "night_shelter" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/night_shelter.svg
-	NightShelter Icon = "night_shelter"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/night_shelter.svg
+	NightShelter Icon = "outlined/night_shelter"
 	
 	// NightSightAuto is the "night_sight_auto" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/night_sight_auto.svg
-	NightSightAuto Icon = "night_sight_auto"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/night_sight_auto.svg
+	NightSightAuto Icon = "outlined/night_sight_auto"
 	
 	// NightSightAutoOff is the "night_sight_auto_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/night_sight_auto_off.svg
-	NightSightAutoOff Icon = "night_sight_auto_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/night_sight_auto_off.svg
+	NightSightAutoOff Icon = "outlined/night_sight_auto_off"
 	
 	// NightSightMax is the "night_sight_max" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/night_sight_max.svg
-	NightSightMax Icon = "night_sight_max"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/night_sight_max.svg
+	NightSightMax Icon = "outlined/night_sight_max"
 	
 	// Nightlife is the "nightlife" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nightlife.svg
-	Nightlife Icon = "nightlife"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nightlife.svg
+	Nightlife Icon = "outlined/nightlife"
 	
 	// Nightlight is the "nightlight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nightlight.svg
-	Nightlight Icon = "nightlight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nightlight.svg
+	Nightlight Icon = "outlined/nightlight"
 	
 	// NightsStay is the "nights_stay" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nights_stay.svg
-	NightsStay Icon = "nights_stay"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nights_stay.svg
+	NightsStay Icon = "outlined/nights_stay"
 	
 	// NoAccounts is the "no_accounts" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_accounts.svg
-	NoAccounts Icon = "no_accounts"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_accounts.svg
+	NoAccounts Icon = "outlined/no_accounts"
 	
 	// NoAdultContent is the "no_adult_content" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_adult_content.svg
-	NoAdultContent Icon = "no_adult_content"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_adult_content.svg
+	NoAdultContent Icon = "outlined/no_adult_content"
 	
 	// NoBackpack is the "no_backpack" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_backpack.svg
-	NoBackpack Icon = "no_backpack"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_backpack.svg
+	NoBackpack Icon = "outlined/no_backpack"
 	
 	// NoCrash is the "no_crash" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_crash.svg
-	NoCrash Icon = "no_crash"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_crash.svg
+	NoCrash Icon = "outlined/no_crash"
 	
 	// NoDrinks is the "no_drinks" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_drinks.svg
-	NoDrinks Icon = "no_drinks"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_drinks.svg
+	NoDrinks Icon = "outlined/no_drinks"
 	
 	// NoEncryption is the "no_encryption" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_encryption.svg
-	NoEncryption Icon = "no_encryption"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_encryption.svg
+	NoEncryption Icon = "outlined/no_encryption"
 	
 	// NoFlash is the "no_flash" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_flash.svg
-	NoFlash Icon = "no_flash"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_flash.svg
+	NoFlash Icon = "outlined/no_flash"
 	
 	// NoFood is the "no_food" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_food.svg
-	NoFood Icon = "no_food"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_food.svg
+	NoFood Icon = "outlined/no_food"
 	
 	// NoLuggage is the "no_luggage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_luggage.svg
-	NoLuggage Icon = "no_luggage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_luggage.svg
+	NoLuggage Icon = "outlined/no_luggage"
 	
 	// NoMeals is the "no_meals" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_meals.svg
-	NoMeals Icon = "no_meals"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_meals.svg
+	NoMeals Icon = "outlined/no_meals"
 	
 	// NoMeetingRoom is the "no_meeting_room" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_meeting_room.svg
-	NoMeetingRoom Icon = "no_meeting_room"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_meeting_room.svg
+	NoMeetingRoom Icon = "outlined/no_meeting_room"
 	
 	// NoPhotography is the "no_photography" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_photography.svg
-	NoPhotography Icon = "no_photography"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_photography.svg
+	NoPhotography Icon = "outlined/no_photography"
 	
 	// NoSim is the "no_sim" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_sim.svg
-	NoSim Icon = "no_sim"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_sim.svg
+	NoSim Icon = "outlined/no_sim"
 	
 	// NoSound is the "no_sound" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_sound.svg
-	NoSound Icon = "no_sound"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_sound.svg
+	NoSound Icon = "outlined/no_sound"
 	
 	// NoStroller is the "no_stroller" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_stroller.svg
-	NoStroller Icon = "no_stroller"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_stroller.svg
+	NoStroller Icon = "outlined/no_stroller"
 	
 	// NoTransfer is the "no_transfer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/no_transfer.svg
-	NoTransfer Icon = "no_transfer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/no_transfer.svg
+	NoTransfer Icon = "outlined/no_transfer"
 	
 	// NoiseAware is the "noise_aware" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/noise_aware.svg
-	NoiseAware Icon = "noise_aware"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/noise_aware.svg
+	NoiseAware Icon = "outlined/noise_aware"
 	
 	// NoiseControlOff is the "noise_control_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/noise_control_off.svg
-	NoiseControlOff Icon = "noise_control_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/noise_control_off.svg
+	NoiseControlOff Icon = "outlined/noise_control_off"
 	
 	// NoiseControlOn is the "noise_control_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/noise_control_on.svg
-	NoiseControlOn Icon = "noise_control_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/noise_control_on.svg
+	NoiseControlOn Icon = "outlined/noise_control_on"
 	
 	// NordicWalking is the "nordic_walking" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nordic_walking.svg
-	NordicWalking Icon = "nordic_walking"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nordic_walking.svg
+	NordicWalking Icon = "outlined/nordic_walking"
 	
 	// North is the "north" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/north.svg
-	North Icon = "north"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/north.svg
+	North Icon = "outlined/north"
 	
 	// NorthEast is the "north_east" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/north_east.svg
-	NorthEast Icon = "north_east"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/north_east.svg
+	NorthEast Icon = "outlined/north_east"
 	
 	// NorthWest is the "north_west" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/north_west.svg
-	NorthWest Icon = "north_west"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/north_west.svg
+	NorthWest Icon = "outlined/north_west"
 	
 	// NotAccessible is the "not_accessible" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/not_accessible.svg
-	NotAccessible Icon = "not_accessible"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/not_accessible.svg
+	NotAccessible Icon = "outlined/not_accessible"
 	
 	// NotListedLocation is the "not_listed_location" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/not_listed_location.svg
-	NotListedLocation Icon = "not_listed_location"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/not_listed_location.svg
+	NotListedLocation Icon = "outlined/not_listed_location"
 	
 	// NotStarted is the "not_started" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/not_started.svg
-	NotStarted Icon = "not_started"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/not_started.svg
+	NotStarted Icon = "outlined/not_started"
 	
 	// Note is the "note" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/note.svg
-	Note Icon = "note"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/note.svg
+	Note Icon = "outlined/note"
 	
 	// NoteAdd is the "note_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/note_add.svg
-	NoteAdd Icon = "note_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/note_add.svg
+	NoteAdd Icon = "outlined/note_add"
 	
 	// NoteAlt is the "note_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/note_alt.svg
-	NoteAlt Icon = "note_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/note_alt.svg
+	NoteAlt Icon = "outlined/note_alt"
 	
 	// Notes is the "notes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/notes.svg
-	Notes Icon = "notes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/notes.svg
+	Notes Icon = "outlined/notes"
 	
 	// NotificationAdd is the "notification_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/notification_add.svg
-	NotificationAdd Icon = "notification_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/notification_add.svg
+	NotificationAdd Icon = "outlined/notification_add"
 	
 	// NotificationImportant is the "notification_important" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/notification_important.svg
-	NotificationImportant Icon = "notification_important"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/notification_important.svg
+	NotificationImportant Icon = "outlined/notification_important"
 	
 	// NotificationMultiple is the "notification_multiple" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/notification_multiple.svg
-	NotificationMultiple Icon = "notification_multiple"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/notification_multiple.svg
+	NotificationMultiple Icon = "outlined/notification_multiple"
 	
 	// Notifications is the "notifications" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/notifications.svg
-	Notifications Icon = "notifications"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/notifications.svg
+	Notifications Icon = "outlined/notifications"
 	
 	// NotificationsActive is the "notifications_active" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/notifications_active.svg
-	NotificationsActive Icon = "notifications_active"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/notifications_active.svg
+	NotificationsActive Icon = "outlined/notifications_active"
 	
 	// NotificationsOff is the "notifications_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/notifications_off.svg
-	NotificationsOff Icon = "notifications_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/notifications_off.svg
+	NotificationsOff Icon = "outlined/notifications_off"
 	
 	// NotificationsPaused is the "notifications_paused" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/notifications_paused.svg
-	NotificationsPaused Icon = "notifications_paused"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/notifications_paused.svg
+	NotificationsPaused Icon = "outlined/notifications_paused"
 	
 	// Numbers is the "numbers" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/numbers.svg
-	Numbers Icon = "numbers"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/numbers.svg
+	Numbers Icon = "outlined/numbers"
 	
 	// Nutrition is the "nutrition" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/nutrition.svg
-	Nutrition Icon = "nutrition"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/nutrition.svg
+	Nutrition Icon = "outlined/nutrition"
 	
 	// Ods is the "ods" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ods.svg
-	Ods Icon = "ods"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ods.svg
+	Ods Icon = "outlined/ods"
 	
 	// Odt is the "odt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/odt.svg
-	Odt Icon = "odt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/odt.svg
+	Odt Icon = "outlined/odt"
 	
 	// OfflineBolt is the "offline_bolt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/offline_bolt.svg
-	OfflineBolt Icon = "offline_bolt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/offline_bolt.svg
+	OfflineBolt Icon = "outlined/offline_bolt"
 	
 	// OfflinePin is the "offline_pin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/offline_pin.svg
-	OfflinePin Icon = "offline_pin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/offline_pin.svg
+	OfflinePin Icon = "outlined/offline_pin"
 	
 	// OfflineShare is the "offline_share" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/offline_share.svg
-	OfflineShare Icon = "offline_share"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/offline_share.svg
+	OfflineShare Icon = "outlined/offline_share"
 	
 	// OilBarrel is the "oil_barrel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/oil_barrel.svg
-	OilBarrel Icon = "oil_barrel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/oil_barrel.svg
+	OilBarrel Icon = "outlined/oil_barrel"
 	
 	// OnDeviceTraining is the "on_device_training" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/on_device_training.svg
-	OnDeviceTraining Icon = "on_device_training"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/on_device_training.svg
+	OnDeviceTraining Icon = "outlined/on_device_training"
 	
 	// Oncology is the "oncology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/oncology.svg
-	Oncology Icon = "oncology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/oncology.svg
+	Oncology Icon = "outlined/oncology"
 	
 	// OnlinePrediction is the "online_prediction" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/online_prediction.svg
-	OnlinePrediction Icon = "online_prediction"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/online_prediction.svg
+	OnlinePrediction Icon = "outlined/online_prediction"
 	
 	// Onsen is the "onsen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/onsen.svg
-	Onsen Icon = "onsen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/onsen.svg
+	Onsen Icon = "outlined/onsen"
 	
 	// Opacity is the "opacity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/opacity.svg
-	Opacity Icon = "opacity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/opacity.svg
+	Opacity Icon = "outlined/opacity"
 	
 	// OpenInBrowser is the "open_in_browser" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/open_in_browser.svg
-	OpenInBrowser Icon = "open_in_browser"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/open_in_browser.svg
+	OpenInBrowser Icon = "outlined/open_in_browser"
 	
 	// OpenInFull is the "open_in_full" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/open_in_full.svg
-	OpenInFull Icon = "open_in_full"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/open_in_full.svg
+	OpenInFull Icon = "outlined/open_in_full"
 	
 	// OpenInNew is the "open_in_new" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/open_in_new.svg
-	OpenInNew Icon = "open_in_new"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/open_in_new.svg
+	OpenInNew Icon = "outlined/open_in_new"
 	
 	// OpenInNewDown is the "open_in_new_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/open_in_new_down.svg
-	OpenInNewDown Icon = "open_in_new_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/open_in_new_down.svg
+	OpenInNewDown Icon = "outlined/open_in_new_down"
 	
 	// OpenInNewOff is the "open_in_new_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/open_in_new_off.svg
-	OpenInNewOff Icon = "open_in_new_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/open_in_new_off.svg
+	OpenInNewOff Icon = "outlined/open_in_new_off"
 	
 	// OpenInPhone is the "open_in_phone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/open_in_phone.svg
-	OpenInPhone Icon = "open_in_phone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/open_in_phone.svg
+	OpenInPhone Icon = "outlined/open_in_phone"
 	
 	// OpenJam is the "open_jam" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/open_jam.svg
-	OpenJam Icon = "open_jam"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/open_jam.svg
+	OpenJam Icon = "outlined/open_jam"
 	
 	// OpenWith is the "open_with" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/open_with.svg
-	OpenWith Icon = "open_with"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/open_with.svg
+	OpenWith Icon = "outlined/open_with"
 	
 	// Ophthalmology is the "ophthalmology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ophthalmology.svg
-	Ophthalmology Icon = "ophthalmology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ophthalmology.svg
+	Ophthalmology Icon = "outlined/ophthalmology"
 	
 	// OralDisease is the "oral_disease" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/oral_disease.svg
-	OralDisease Icon = "oral_disease"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/oral_disease.svg
+	OralDisease Icon = "outlined/oral_disease"
 	
 	// OrderApprove is the "order_approve" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/order_approve.svg
-	OrderApprove Icon = "order_approve"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/order_approve.svg
+	OrderApprove Icon = "outlined/order_approve"
 	
 	// OrderPlay is the "order_play" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/order_play.svg
-	OrderPlay Icon = "order_play"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/order_play.svg
+	OrderPlay Icon = "outlined/order_play"
 	
 	// Orthopedics is the "orthopedics" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/orthopedics.svg
-	Orthopedics Icon = "orthopedics"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/orthopedics.svg
+	Orthopedics Icon = "outlined/orthopedics"
 	
 	// OtherAdmission is the "other_admission" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/other_admission.svg
-	OtherAdmission Icon = "other_admission"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/other_admission.svg
+	OtherAdmission Icon = "outlined/other_admission"
 	
 	// OtherHouses is the "other_houses" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/other_houses.svg
-	OtherHouses Icon = "other_houses"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/other_houses.svg
+	OtherHouses Icon = "outlined/other_houses"
 	
 	// Outbound is the "outbound" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/outbound.svg
-	Outbound Icon = "outbound"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/outbound.svg
+	Outbound Icon = "outlined/outbound"
 	
 	// Outbox is the "outbox" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/outbox.svg
-	Outbox Icon = "outbox"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/outbox.svg
+	Outbox Icon = "outlined/outbox"
 	
 	// OutboxAlt is the "outbox_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/outbox_alt.svg
-	OutboxAlt Icon = "outbox_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/outbox_alt.svg
+	OutboxAlt Icon = "outlined/outbox_alt"
 	
 	// OutdoorGarden is the "outdoor_garden" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/outdoor_garden.svg
-	OutdoorGarden Icon = "outdoor_garden"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/outdoor_garden.svg
+	OutdoorGarden Icon = "outlined/outdoor_garden"
 	
 	// OutdoorGrill is the "outdoor_grill" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/outdoor_grill.svg
-	OutdoorGrill Icon = "outdoor_grill"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/outdoor_grill.svg
+	OutdoorGrill Icon = "outlined/outdoor_grill"
 	
 	// OutgoingMail is the "outgoing_mail" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/outgoing_mail.svg
-	OutgoingMail Icon = "outgoing_mail"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/outgoing_mail.svg
+	OutgoingMail Icon = "outlined/outgoing_mail"
 	
 	// Outlet is the "outlet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/outlet.svg
-	Outlet Icon = "outlet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/outlet.svg
+	Outlet Icon = "outlined/outlet"
 	
 	// Outpatient is the "outpatient" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/outpatient.svg
-	Outpatient Icon = "outpatient"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/outpatient.svg
+	Outpatient Icon = "outlined/outpatient"
 	
 	// OutpatientMed is the "outpatient_med" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/outpatient_med.svg
-	OutpatientMed Icon = "outpatient_med"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/outpatient_med.svg
+	OutpatientMed Icon = "outlined/outpatient_med"
 	
 	// Output is the "output" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/output.svg
-	Output Icon = "output"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/output.svg
+	Output Icon = "outlined/output"
 	
 	// OutputCircle is the "output_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/output_circle.svg
-	OutputCircle Icon = "output_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/output_circle.svg
+	OutputCircle Icon = "outlined/output_circle"
 	
 	// OvenGen is the "oven_gen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/oven_gen.svg
-	OvenGen Icon = "oven_gen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/oven_gen.svg
+	OvenGen Icon = "outlined/oven_gen"
 	
 	// Overview is the "overview" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/overview.svg
-	Overview Icon = "overview"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/overview.svg
+	Overview Icon = "outlined/overview"
 	
 	// OverviewKey is the "overview_key" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/overview_key.svg
-	OverviewKey Icon = "overview_key"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/overview_key.svg
+	OverviewKey Icon = "outlined/overview_key"
 	
 	// OxygenSaturation is the "oxygen_saturation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/oxygen_saturation.svg
-	OxygenSaturation Icon = "oxygen_saturation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/oxygen_saturation.svg
+	OxygenSaturation Icon = "outlined/oxygen_saturation"
 	
 	// Pace is the "pace" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pace.svg
-	Pace Icon = "pace"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pace.svg
+	Pace Icon = "outlined/pace"
 	
 	// Pacemaker is the "pacemaker" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pacemaker.svg
-	Pacemaker Icon = "pacemaker"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pacemaker.svg
+	Pacemaker Icon = "outlined/pacemaker"
 	
 	// Package is the "package" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/package.svg
-	Package Icon = "package"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/package.svg
+	Package Icon = "outlined/package"
 	
 	// Padding is the "padding" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/padding.svg
-	Padding Icon = "padding"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/padding.svg
+	Padding Icon = "outlined/padding"
 	
 	// PageControl is the "page_control" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/page_control.svg
-	PageControl Icon = "page_control"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/page_control.svg
+	PageControl Icon = "outlined/page_control"
 	
 	// PageInfo is the "page_info" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/page_info.svg
-	PageInfo Icon = "page_info"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/page_info.svg
+	PageInfo Icon = "outlined/page_info"
 	
 	// Pages is the "pages" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pages.svg
-	Pages Icon = "pages"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pages.svg
+	Pages Icon = "outlined/pages"
 	
 	// Pageview is the "pageview" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pageview.svg
-	Pageview Icon = "pageview"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pageview.svg
+	Pageview Icon = "outlined/pageview"
 	
 	// Paid is the "paid" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/paid.svg
-	Paid Icon = "paid"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/paid.svg
+	Paid Icon = "outlined/paid"
 	
 	// Palette is the "palette" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/palette.svg
-	Palette Icon = "palette"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/palette.svg
+	Palette Icon = "outlined/palette"
 	
 	// Pallet is the "pallet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pallet.svg
-	Pallet Icon = "pallet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pallet.svg
+	Pallet Icon = "outlined/pallet"
 	
 	// PanTool is the "pan_tool" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pan_tool.svg
-	PanTool Icon = "pan_tool"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pan_tool.svg
+	PanTool Icon = "outlined/pan_tool"
 	
 	// PanToolAlt is the "pan_tool_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pan_tool_alt.svg
-	PanToolAlt Icon = "pan_tool_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pan_tool_alt.svg
+	PanToolAlt Icon = "outlined/pan_tool_alt"
 	
 	// PanZoom is the "pan_zoom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pan_zoom.svg
-	PanZoom Icon = "pan_zoom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pan_zoom.svg
+	PanZoom Icon = "outlined/pan_zoom"
 	
 	// Panorama is the "panorama" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/panorama.svg
-	Panorama Icon = "panorama"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/panorama.svg
+	Panorama Icon = "outlined/panorama"
 	
 	// PanoramaFishEye is the "panorama_fish_eye" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/panorama_fish_eye.svg
-	PanoramaFishEye Icon = "panorama_fish_eye"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/panorama_fish_eye.svg
+	PanoramaFishEye Icon = "outlined/panorama_fish_eye"
 	
 	// PanoramaHorizontal is the "panorama_horizontal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/panorama_horizontal.svg
-	PanoramaHorizontal Icon = "panorama_horizontal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/panorama_horizontal.svg
+	PanoramaHorizontal Icon = "outlined/panorama_horizontal"
 	
 	// PanoramaPhotosphere is the "panorama_photosphere" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/panorama_photosphere.svg
-	PanoramaPhotosphere Icon = "panorama_photosphere"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/panorama_photosphere.svg
+	PanoramaPhotosphere Icon = "outlined/panorama_photosphere"
 	
 	// PanoramaVertical is the "panorama_vertical" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/panorama_vertical.svg
-	PanoramaVertical Icon = "panorama_vertical"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/panorama_vertical.svg
+	PanoramaVertical Icon = "outlined/panorama_vertical"
 	
 	// PanoramaWideAngle is the "panorama_wide_angle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/panorama_wide_angle.svg
-	PanoramaWideAngle Icon = "panorama_wide_angle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/panorama_wide_angle.svg
+	PanoramaWideAngle Icon = "outlined/panorama_wide_angle"
 	
 	// Paragliding is the "paragliding" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/paragliding.svg
-	Paragliding Icon = "paragliding"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/paragliding.svg
+	Paragliding Icon = "outlined/paragliding"
 	
 	// Park is the "park" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/park.svg
-	Park Icon = "park"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/park.svg
+	Park Icon = "outlined/park"
 	
 	// PartlyCloudyDay is the "partly_cloudy_day" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/partly_cloudy_day.svg
-	PartlyCloudyDay Icon = "partly_cloudy_day"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/partly_cloudy_day.svg
+	PartlyCloudyDay Icon = "outlined/partly_cloudy_day"
 	
 	// PartlyCloudyNight is the "partly_cloudy_night" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/partly_cloudy_night.svg
-	PartlyCloudyNight Icon = "partly_cloudy_night"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/partly_cloudy_night.svg
+	PartlyCloudyNight Icon = "outlined/partly_cloudy_night"
 	
 	// PartnerExchange is the "partner_exchange" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/partner_exchange.svg
-	PartnerExchange Icon = "partner_exchange"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/partner_exchange.svg
+	PartnerExchange Icon = "outlined/partner_exchange"
 	
 	// PartnerReports is the "partner_reports" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/partner_reports.svg
-	PartnerReports Icon = "partner_reports"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/partner_reports.svg
+	PartnerReports Icon = "outlined/partner_reports"
 	
 	// PartyMode is the "party_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/party_mode.svg
-	PartyMode Icon = "party_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/party_mode.svg
+	PartyMode Icon = "outlined/party_mode"
 	
 	// Password is the "password" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/password.svg
-	Password Icon = "password"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/password.svg
+	Password Icon = "outlined/password"
 	
 	// PatientList is the "patient_list" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/patient_list.svg
-	PatientList Icon = "patient_list"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/patient_list.svg
+	PatientList Icon = "outlined/patient_list"
 	
 	// Pattern is the "pattern" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pattern.svg
-	Pattern Icon = "pattern"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pattern.svg
+	Pattern Icon = "outlined/pattern"
 	
 	// Pause is the "pause" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pause.svg
-	Pause Icon = "pause"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pause.svg
+	Pause Icon = "outlined/pause"
 	
 	// PauseCircle is the "pause_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pause_circle.svg
-	PauseCircle Icon = "pause_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pause_circle.svg
+	PauseCircle Icon = "outlined/pause_circle"
 	
 	// PausePresentation is the "pause_presentation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pause_presentation.svg
-	PausePresentation Icon = "pause_presentation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pause_presentation.svg
+	PausePresentation Icon = "outlined/pause_presentation"
 	
 	// Payments is the "payments" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/payments.svg
-	Payments Icon = "payments"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/payments.svg
+	Payments Icon = "outlined/payments"
 	
 	// PedalBike is the "pedal_bike" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pedal_bike.svg
-	PedalBike Icon = "pedal_bike"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pedal_bike.svg
+	PedalBike Icon = "outlined/pedal_bike"
 	
 	// Pediatrics is the "pediatrics" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pediatrics.svg
-	Pediatrics Icon = "pediatrics"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pediatrics.svg
+	Pediatrics Icon = "outlined/pediatrics"
 	
 	// PenSize1 is the "pen_size_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pen_size_1.svg
-	PenSize1 Icon = "pen_size_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pen_size_1.svg
+	PenSize1 Icon = "outlined/pen_size_1"
 	
 	// PenSize2 is the "pen_size_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pen_size_2.svg
-	PenSize2 Icon = "pen_size_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pen_size_2.svg
+	PenSize2 Icon = "outlined/pen_size_2"
 	
 	// PenSize3 is the "pen_size_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pen_size_3.svg
-	PenSize3 Icon = "pen_size_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pen_size_3.svg
+	PenSize3 Icon = "outlined/pen_size_3"
 	
 	// PenSize4 is the "pen_size_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pen_size_4.svg
-	PenSize4 Icon = "pen_size_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pen_size_4.svg
+	PenSize4 Icon = "outlined/pen_size_4"
 	
 	// PenSize5 is the "pen_size_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pen_size_5.svg
-	PenSize5 Icon = "pen_size_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pen_size_5.svg
+	PenSize5 Icon = "outlined/pen_size_5"
 	
 	// Pending is the "pending" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pending.svg
-	Pending Icon = "pending"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pending.svg
+	Pending Icon = "outlined/pending"
 	
 	// PendingActions is the "pending_actions" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pending_actions.svg
-	PendingActions Icon = "pending_actions"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pending_actions.svg
+	PendingActions Icon = "outlined/pending_actions"
 	
 	// Pentagon is the "pentagon" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pentagon.svg
-	Pentagon Icon = "pentagon"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pentagon.svg
+	Pentagon Icon = "outlined/pentagon"
 	
 	// Percent is the "percent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/percent.svg
-	Percent Icon = "percent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/percent.svg
+	Percent Icon = "outlined/percent"
 	
 	// Pergola is the "pergola" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pergola.svg
-	Pergola Icon = "pergola"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pergola.svg
+	Pergola Icon = "outlined/pergola"
 	
 	// PermCameraMic is the "perm_camera_mic" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/perm_camera_mic.svg
-	PermCameraMic Icon = "perm_camera_mic"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/perm_camera_mic.svg
+	PermCameraMic Icon = "outlined/perm_camera_mic"
 	
 	// PermContactCalendar is the "perm_contact_calendar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/perm_contact_calendar.svg
-	PermContactCalendar Icon = "perm_contact_calendar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/perm_contact_calendar.svg
+	PermContactCalendar Icon = "outlined/perm_contact_calendar"
 	
 	// PermDataSetting is the "perm_data_setting" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/perm_data_setting.svg
-	PermDataSetting Icon = "perm_data_setting"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/perm_data_setting.svg
+	PermDataSetting Icon = "outlined/perm_data_setting"
 	
 	// PermDeviceInformation is the "perm_device_information" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/perm_device_information.svg
-	PermDeviceInformation Icon = "perm_device_information"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/perm_device_information.svg
+	PermDeviceInformation Icon = "outlined/perm_device_information"
 	
 	// PermMedia is the "perm_media" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/perm_media.svg
-	PermMedia Icon = "perm_media"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/perm_media.svg
+	PermMedia Icon = "outlined/perm_media"
 	
 	// PermPhoneMsg is the "perm_phone_msg" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/perm_phone_msg.svg
-	PermPhoneMsg Icon = "perm_phone_msg"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/perm_phone_msg.svg
+	PermPhoneMsg Icon = "outlined/perm_phone_msg"
 	
 	// PermScanWifi is the "perm_scan_wifi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/perm_scan_wifi.svg
-	PermScanWifi Icon = "perm_scan_wifi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/perm_scan_wifi.svg
+	PermScanWifi Icon = "outlined/perm_scan_wifi"
 	
 	// Person is the "person" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person.svg
-	Person Icon = "person"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person.svg
+	Person Icon = "outlined/person"
 	
 	// Person2 is the "person_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_2.svg
-	Person2 Icon = "person_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_2.svg
+	Person2 Icon = "outlined/person_2"
 	
 	// Person3 is the "person_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_3.svg
-	Person3 Icon = "person_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_3.svg
+	Person3 Icon = "outlined/person_3"
 	
 	// Person4 is the "person_4" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_4.svg
-	Person4 Icon = "person_4"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_4.svg
+	Person4 Icon = "outlined/person_4"
 	
 	// PersonAdd is the "person_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_add.svg
-	PersonAdd Icon = "person_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_add.svg
+	PersonAdd Icon = "outlined/person_add"
 	
 	// PersonAddDisabled is the "person_add_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_add_disabled.svg
-	PersonAddDisabled Icon = "person_add_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_add_disabled.svg
+	PersonAddDisabled Icon = "outlined/person_add_disabled"
 	
 	// PersonApron is the "person_apron" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_apron.svg
-	PersonApron Icon = "person_apron"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_apron.svg
+	PersonApron Icon = "outlined/person_apron"
 	
 	// PersonBook is the "person_book" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_book.svg
-	PersonBook Icon = "person_book"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_book.svg
+	PersonBook Icon = "outlined/person_book"
 	
 	// PersonCelebrate is the "person_celebrate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_celebrate.svg
-	PersonCelebrate Icon = "person_celebrate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_celebrate.svg
+	PersonCelebrate Icon = "outlined/person_celebrate"
 	
 	// PersonOff is the "person_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_off.svg
-	PersonOff Icon = "person_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_off.svg
+	PersonOff Icon = "outlined/person_off"
 	
 	// PersonPin is the "person_pin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_pin.svg
-	PersonPin Icon = "person_pin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_pin.svg
+	PersonPin Icon = "outlined/person_pin"
 	
 	// PersonPinCircle is the "person_pin_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_pin_circle.svg
-	PersonPinCircle Icon = "person_pin_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_pin_circle.svg
+	PersonPinCircle Icon = "outlined/person_pin_circle"
 	
 	// PersonPlay is the "person_play" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_play.svg
-	PersonPlay Icon = "person_play"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_play.svg
+	PersonPlay Icon = "outlined/person_play"
 	
 	// PersonRaisedHand is the "person_raised_hand" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_raised_hand.svg
-	PersonRaisedHand Icon = "person_raised_hand"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_raised_hand.svg
+	PersonRaisedHand Icon = "outlined/person_raised_hand"
 	
 	// PersonRemove is the "person_remove" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_remove.svg
-	PersonRemove Icon = "person_remove"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_remove.svg
+	PersonRemove Icon = "outlined/person_remove"
 	
 	// PersonSearch is the "person_search" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/person_search.svg
-	PersonSearch Icon = "person_search"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/person_search.svg
+	PersonSearch Icon = "outlined/person_search"
 	
 	// PersonalInjury is the "personal_injury" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/personal_injury.svg
-	PersonalInjury Icon = "personal_injury"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/personal_injury.svg
+	PersonalInjury Icon = "outlined/personal_injury"
 	
 	// PestControl is the "pest_control" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pest_control.svg
-	PestControl Icon = "pest_control"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pest_control.svg
+	PestControl Icon = "outlined/pest_control"
 	
 	// PestControlRodent is the "pest_control_rodent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pest_control_rodent.svg
-	PestControlRodent Icon = "pest_control_rodent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pest_control_rodent.svg
+	PestControlRodent Icon = "outlined/pest_control_rodent"
 	
 	// PetSupplies is the "pet_supplies" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pet_supplies.svg
-	PetSupplies Icon = "pet_supplies"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pet_supplies.svg
+	PetSupplies Icon = "outlined/pet_supplies"
 	
 	// Pets is the "pets" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pets.svg
-	Pets Icon = "pets"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pets.svg
+	Pets Icon = "outlined/pets"
 	
 	// Phishing is the "phishing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phishing.svg
-	Phishing Icon = "phishing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phishing.svg
+	Phishing Icon = "outlined/phishing"
 	
 	// PhoneAndroid is the "phone_android" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_android.svg
-	PhoneAndroid Icon = "phone_android"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_android.svg
+	PhoneAndroid Icon = "outlined/phone_android"
 	
 	// PhoneBluetoothSpeaker is the "phone_bluetooth_speaker" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_bluetooth_speaker.svg
-	PhoneBluetoothSpeaker Icon = "phone_bluetooth_speaker"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_bluetooth_speaker.svg
+	PhoneBluetoothSpeaker Icon = "outlined/phone_bluetooth_speaker"
 	
 	// PhoneCallback is the "phone_callback" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_callback.svg
-	PhoneCallback Icon = "phone_callback"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_callback.svg
+	PhoneCallback Icon = "outlined/phone_callback"
 	
 	// PhoneDisabled is the "phone_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_disabled.svg
-	PhoneDisabled Icon = "phone_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_disabled.svg
+	PhoneDisabled Icon = "outlined/phone_disabled"
 	
 	// PhoneEnabled is the "phone_enabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_enabled.svg
-	PhoneEnabled Icon = "phone_enabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_enabled.svg
+	PhoneEnabled Icon = "outlined/phone_enabled"
 	
 	// PhoneForwarded is the "phone_forwarded" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_forwarded.svg
-	PhoneForwarded Icon = "phone_forwarded"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_forwarded.svg
+	PhoneForwarded Icon = "outlined/phone_forwarded"
 	
 	// PhoneInTalk is the "phone_in_talk" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_in_talk.svg
-	PhoneInTalk Icon = "phone_in_talk"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_in_talk.svg
+	PhoneInTalk Icon = "outlined/phone_in_talk"
 	
 	// PhoneIphone is the "phone_iphone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_iphone.svg
-	PhoneIphone Icon = "phone_iphone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_iphone.svg
+	PhoneIphone Icon = "outlined/phone_iphone"
 	
 	// PhoneLocked is the "phone_locked" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_locked.svg
-	PhoneLocked Icon = "phone_locked"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_locked.svg
+	PhoneLocked Icon = "outlined/phone_locked"
 	
 	// PhoneMissed is the "phone_missed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_missed.svg
-	PhoneMissed Icon = "phone_missed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_missed.svg
+	PhoneMissed Icon = "outlined/phone_missed"
 	
 	// PhonePaused is the "phone_paused" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phone_paused.svg
-	PhonePaused Icon = "phone_paused"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phone_paused.svg
+	PhonePaused Icon = "outlined/phone_paused"
 	
 	// PhonelinkErase is the "phonelink_erase" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phonelink_erase.svg
-	PhonelinkErase Icon = "phonelink_erase"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phonelink_erase.svg
+	PhonelinkErase Icon = "outlined/phonelink_erase"
 	
 	// PhonelinkLock is the "phonelink_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phonelink_lock.svg
-	PhonelinkLock Icon = "phonelink_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phonelink_lock.svg
+	PhonelinkLock Icon = "outlined/phonelink_lock"
 	
 	// PhonelinkOff is the "phonelink_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phonelink_off.svg
-	PhonelinkOff Icon = "phonelink_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phonelink_off.svg
+	PhonelinkOff Icon = "outlined/phonelink_off"
 	
 	// PhonelinkRing is the "phonelink_ring" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phonelink_ring.svg
-	PhonelinkRing Icon = "phonelink_ring"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phonelink_ring.svg
+	PhonelinkRing Icon = "outlined/phonelink_ring"
 	
 	// PhonelinkRingOff is the "phonelink_ring_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phonelink_ring_off.svg
-	PhonelinkRingOff Icon = "phonelink_ring_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phonelink_ring_off.svg
+	PhonelinkRingOff Icon = "outlined/phonelink_ring_off"
 	
 	// PhonelinkSetup is the "phonelink_setup" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/phonelink_setup.svg
-	PhonelinkSetup Icon = "phonelink_setup"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/phonelink_setup.svg
+	PhonelinkSetup Icon = "outlined/phonelink_setup"
 	
 	// Photo is the "photo" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo.svg
-	Photo Icon = "photo"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo.svg
+	Photo Icon = "outlined/photo"
 	
 	// PhotoAlbum is the "photo_album" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo_album.svg
-	PhotoAlbum Icon = "photo_album"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo_album.svg
+	PhotoAlbum Icon = "outlined/photo_album"
 	
 	// PhotoCamera is the "photo_camera" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo_camera.svg
-	PhotoCamera Icon = "photo_camera"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo_camera.svg
+	PhotoCamera Icon = "outlined/photo_camera"
 	
 	// PhotoCameraBack is the "photo_camera_back" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo_camera_back.svg
-	PhotoCameraBack Icon = "photo_camera_back"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo_camera_back.svg
+	PhotoCameraBack Icon = "outlined/photo_camera_back"
 	
 	// PhotoCameraFront is the "photo_camera_front" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo_camera_front.svg
-	PhotoCameraFront Icon = "photo_camera_front"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo_camera_front.svg
+	PhotoCameraFront Icon = "outlined/photo_camera_front"
 	
 	// PhotoFrame is the "photo_frame" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo_frame.svg
-	PhotoFrame Icon = "photo_frame"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo_frame.svg
+	PhotoFrame Icon = "outlined/photo_frame"
 	
 	// PhotoLibrary is the "photo_library" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo_library.svg
-	PhotoLibrary Icon = "photo_library"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo_library.svg
+	PhotoLibrary Icon = "outlined/photo_library"
 	
 	// PhotoPrints is the "photo_prints" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo_prints.svg
-	PhotoPrints Icon = "photo_prints"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo_prints.svg
+	PhotoPrints Icon = "outlined/photo_prints"
 	
 	// PhotoSizeSelectLarge is the "photo_size_select_large" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo_size_select_large.svg
-	PhotoSizeSelectLarge Icon = "photo_size_select_large"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo_size_select_large.svg
+	PhotoSizeSelectLarge Icon = "outlined/photo_size_select_large"
 	
 	// PhotoSizeSelectSmall is the "photo_size_select_small" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/photo_size_select_small.svg
-	PhotoSizeSelectSmall Icon = "photo_size_select_small"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/photo_size_select_small.svg
+	PhotoSizeSelectSmall Icon = "outlined/photo_size_select_small"
 	
 	// Php is the "php" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/php.svg
-	Php Icon = "php"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/php.svg
+	Php Icon = "outlined/php"
 	
 	// PhysicalTherapy is the "physical_therapy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/physical_therapy.svg
-	PhysicalTherapy Icon = "physical_therapy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/physical_therapy.svg
+	PhysicalTherapy Icon = "outlined/physical_therapy"
 	
 	// Piano is the "piano" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/piano.svg
-	Piano Icon = "piano"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/piano.svg
+	Piano Icon = "outlined/piano"
 	
 	// PianoOff is the "piano_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/piano_off.svg
-	PianoOff Icon = "piano_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/piano_off.svg
+	PianoOff Icon = "outlined/piano_off"
 	
 	// PictureAsPdf is the "picture_as_pdf" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/picture_as_pdf.svg
-	PictureAsPdf Icon = "picture_as_pdf"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/picture_as_pdf.svg
+	PictureAsPdf Icon = "outlined/picture_as_pdf"
 	
 	// PictureInPicture is the "picture_in_picture" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/picture_in_picture.svg
-	PictureInPicture Icon = "picture_in_picture"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/picture_in_picture.svg
+	PictureInPicture Icon = "outlined/picture_in_picture"
 	
 	// PictureInPictureAlt is the "picture_in_picture_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/picture_in_picture_alt.svg
-	PictureInPictureAlt Icon = "picture_in_picture_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/picture_in_picture_alt.svg
+	PictureInPictureAlt Icon = "outlined/picture_in_picture_alt"
 	
 	// PieChart is the "pie_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pie_chart.svg
-	PieChart Icon = "pie_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pie_chart.svg
+	PieChart Icon = "outlined/pie_chart"
 	
 	// Pill is the "pill" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pill.svg
-	Pill Icon = "pill"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pill.svg
+	Pill Icon = "outlined/pill"
 	
 	// PillOff is the "pill_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pill_off.svg
-	PillOff Icon = "pill_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pill_off.svg
+	PillOff Icon = "outlined/pill_off"
 	
 	// Pin is the "pin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pin.svg
-	Pin Icon = "pin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pin.svg
+	Pin Icon = "outlined/pin"
 	
 	// PinDrop is the "pin_drop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pin_drop.svg
-	PinDrop Icon = "pin_drop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pin_drop.svg
+	PinDrop Icon = "outlined/pin_drop"
 	
 	// PinEnd is the "pin_end" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pin_end.svg
-	PinEnd Icon = "pin_end"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pin_end.svg
+	PinEnd Icon = "outlined/pin_end"
 	
 	// PinInvoke is the "pin_invoke" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pin_invoke.svg
-	PinInvoke Icon = "pin_invoke"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pin_invoke.svg
+	PinInvoke Icon = "outlined/pin_invoke"
 	
 	// Pinch is the "pinch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pinch.svg
-	Pinch Icon = "pinch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pinch.svg
+	Pinch Icon = "outlined/pinch"
 	
 	// PinchZoomIn is the "pinch_zoom_in" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pinch_zoom_in.svg
-	PinchZoomIn Icon = "pinch_zoom_in"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pinch_zoom_in.svg
+	PinchZoomIn Icon = "outlined/pinch_zoom_in"
 	
 	// PinchZoomOut is the "pinch_zoom_out" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pinch_zoom_out.svg
-	PinchZoomOut Icon = "pinch_zoom_out"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pinch_zoom_out.svg
+	PinchZoomOut Icon = "outlined/pinch_zoom_out"
 	
 	// Pip is the "pip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pip.svg
-	Pip Icon = "pip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pip.svg
+	Pip Icon = "outlined/pip"
 	
 	// PipExit is the "pip_exit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pip_exit.svg
-	PipExit Icon = "pip_exit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pip_exit.svg
+	PipExit Icon = "outlined/pip_exit"
 	
 	// PivotTableChart is the "pivot_table_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pivot_table_chart.svg
-	PivotTableChart Icon = "pivot_table_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pivot_table_chart.svg
+	PivotTableChart Icon = "outlined/pivot_table_chart"
 	
 	// PlaceItem is the "place_item" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/place_item.svg
-	PlaceItem Icon = "place_item"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/place_item.svg
+	PlaceItem Icon = "outlined/place_item"
 	
 	// Plagiarism is the "plagiarism" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/plagiarism.svg
-	Plagiarism Icon = "plagiarism"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/plagiarism.svg
+	Plagiarism Icon = "outlined/plagiarism"
 	
 	// PlannerBannerAdPt is the "planner_banner_ad_pt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/planner_banner_ad_pt.svg
-	PlannerBannerAdPt Icon = "planner_banner_ad_pt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/planner_banner_ad_pt.svg
+	PlannerBannerAdPt Icon = "outlined/planner_banner_ad_pt"
 	
 	// PlayArrow is the "play_arrow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/play_arrow.svg
-	PlayArrow Icon = "play_arrow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/play_arrow.svg
+	PlayArrow Icon = "outlined/play_arrow"
 	
 	// PlayCircle is the "play_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/play_circle.svg
-	PlayCircle Icon = "play_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/play_circle.svg
+	PlayCircle Icon = "outlined/play_circle"
 	
 	// PlayDisabled is the "play_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/play_disabled.svg
-	PlayDisabled Icon = "play_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/play_disabled.svg
+	PlayDisabled Icon = "outlined/play_disabled"
 	
 	// PlayForWork is the "play_for_work" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/play_for_work.svg
-	PlayForWork Icon = "play_for_work"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/play_for_work.svg
+	PlayForWork Icon = "outlined/play_for_work"
 	
 	// PlayLesson is the "play_lesson" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/play_lesson.svg
-	PlayLesson Icon = "play_lesson"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/play_lesson.svg
+	PlayLesson Icon = "outlined/play_lesson"
 	
 	// PlayPause is the "play_pause" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/play_pause.svg
-	PlayPause Icon = "play_pause"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/play_pause.svg
+	PlayPause Icon = "outlined/play_pause"
 	
 	// PlayShapes is the "play_shapes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/play_shapes.svg
-	PlayShapes Icon = "play_shapes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/play_shapes.svg
+	PlayShapes Icon = "outlined/play_shapes"
 	
 	// PlayingCards is the "playing_cards" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/playing_cards.svg
-	PlayingCards Icon = "playing_cards"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/playing_cards.svg
+	PlayingCards Icon = "outlined/playing_cards"
 	
 	// PlaylistAdd is the "playlist_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/playlist_add.svg
-	PlaylistAdd Icon = "playlist_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/playlist_add.svg
+	PlaylistAdd Icon = "outlined/playlist_add"
 	
 	// PlaylistAddCheck is the "playlist_add_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/playlist_add_check.svg
-	PlaylistAddCheck Icon = "playlist_add_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/playlist_add_check.svg
+	PlaylistAddCheck Icon = "outlined/playlist_add_check"
 	
 	// PlaylistAddCheckCircle is the "playlist_add_check_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/playlist_add_check_circle.svg
-	PlaylistAddCheckCircle Icon = "playlist_add_check_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/playlist_add_check_circle.svg
+	PlaylistAddCheckCircle Icon = "outlined/playlist_add_check_circle"
 	
 	// PlaylistAddCircle is the "playlist_add_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/playlist_add_circle.svg
-	PlaylistAddCircle Icon = "playlist_add_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/playlist_add_circle.svg
+	PlaylistAddCircle Icon = "outlined/playlist_add_circle"
 	
 	// PlaylistPlay is the "playlist_play" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/playlist_play.svg
-	PlaylistPlay Icon = "playlist_play"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/playlist_play.svg
+	PlaylistPlay Icon = "outlined/playlist_play"
 	
 	// PlaylistRemove is the "playlist_remove" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/playlist_remove.svg
-	PlaylistRemove Icon = "playlist_remove"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/playlist_remove.svg
+	PlaylistRemove Icon = "outlined/playlist_remove"
 	
 	// Plumbing is the "plumbing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/plumbing.svg
-	Plumbing Icon = "plumbing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/plumbing.svg
+	Plumbing Icon = "outlined/plumbing"
 	
 	// Podcasts is the "podcasts" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/podcasts.svg
-	Podcasts Icon = "podcasts"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/podcasts.svg
+	Podcasts Icon = "outlined/podcasts"
 	
 	// Podiatry is the "podiatry" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/podiatry.svg
-	Podiatry Icon = "podiatry"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/podiatry.svg
+	Podiatry Icon = "outlined/podiatry"
 	
 	// Podium is the "podium" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/podium.svg
-	Podium Icon = "podium"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/podium.svg
+	Podium Icon = "outlined/podium"
 	
 	// PointOfSale is the "point_of_sale" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/point_of_sale.svg
-	PointOfSale Icon = "point_of_sale"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/point_of_sale.svg
+	PointOfSale Icon = "outlined/point_of_sale"
 	
 	// PointScan is the "point_scan" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/point_scan.svg
-	PointScan Icon = "point_scan"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/point_scan.svg
+	PointScan Icon = "outlined/point_scan"
 	
 	// Policy is the "policy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/policy.svg
-	Policy Icon = "policy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/policy.svg
+	Policy Icon = "outlined/policy"
 	
 	// Polyline is the "polyline" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/polyline.svg
-	Polyline Icon = "polyline"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/polyline.svg
+	Polyline Icon = "outlined/polyline"
 	
 	// Polymer is the "polymer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/polymer.svg
-	Polymer Icon = "polymer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/polymer.svg
+	Polymer Icon = "outlined/polymer"
 	
 	// Pool is the "pool" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pool.svg
-	Pool Icon = "pool"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pool.svg
+	Pool Icon = "outlined/pool"
 	
 	// PortableWifiOff is the "portable_wifi_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/portable_wifi_off.svg
-	PortableWifiOff Icon = "portable_wifi_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/portable_wifi_off.svg
+	PortableWifiOff Icon = "outlined/portable_wifi_off"
 	
 	// PositionBottomLeft is the "position_bottom_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/position_bottom_left.svg
-	PositionBottomLeft Icon = "position_bottom_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/position_bottom_left.svg
+	PositionBottomLeft Icon = "outlined/position_bottom_left"
 	
 	// PositionBottomRight is the "position_bottom_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/position_bottom_right.svg
-	PositionBottomRight Icon = "position_bottom_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/position_bottom_right.svg
+	PositionBottomRight Icon = "outlined/position_bottom_right"
 	
 	// PositionTopRight is the "position_top_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/position_top_right.svg
-	PositionTopRight Icon = "position_top_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/position_top_right.svg
+	PositionTopRight Icon = "outlined/position_top_right"
 	
 	// Post is the "post" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/post.svg
-	Post Icon = "post"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/post.svg
+	Post Icon = "outlined/post"
 	
 	// PostAdd is the "post_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/post_add.svg
-	PostAdd Icon = "post_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/post_add.svg
+	PostAdd Icon = "outlined/post_add"
 	
 	// PottedPlant is the "potted_plant" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/potted_plant.svg
-	PottedPlant Icon = "potted_plant"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/potted_plant.svg
+	PottedPlant Icon = "outlined/potted_plant"
 	
 	// Power is the "power" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/power.svg
-	Power Icon = "power"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/power.svg
+	Power Icon = "outlined/power"
 	
 	// PowerInput is the "power_input" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/power_input.svg
-	PowerInput Icon = "power_input"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/power_input.svg
+	PowerInput Icon = "outlined/power_input"
 	
 	// PowerOff is the "power_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/power_off.svg
-	PowerOff Icon = "power_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/power_off.svg
+	PowerOff Icon = "outlined/power_off"
 	
 	// PowerSettingsNew is the "power_settings_new" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/power_settings_new.svg
-	PowerSettingsNew Icon = "power_settings_new"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/power_settings_new.svg
+	PowerSettingsNew Icon = "outlined/power_settings_new"
 	
 	// PrayerTimes is the "prayer_times" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/prayer_times.svg
-	PrayerTimes Icon = "prayer_times"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/prayer_times.svg
+	PrayerTimes Icon = "outlined/prayer_times"
 	
 	// PrecisionManufacturing is the "precision_manufacturing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/precision_manufacturing.svg
-	PrecisionManufacturing Icon = "precision_manufacturing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/precision_manufacturing.svg
+	PrecisionManufacturing Icon = "outlined/precision_manufacturing"
 	
 	// Pregnancy is the "pregnancy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pregnancy.svg
-	Pregnancy Icon = "pregnancy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pregnancy.svg
+	Pregnancy Icon = "outlined/pregnancy"
 	
 	// PregnantWoman is the "pregnant_woman" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pregnant_woman.svg
-	PregnantWoman Icon = "pregnant_woman"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pregnant_woman.svg
+	PregnantWoman Icon = "outlined/pregnant_woman"
 	
 	// Preliminary is the "preliminary" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/preliminary.svg
-	Preliminary Icon = "preliminary"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/preliminary.svg
+	Preliminary Icon = "outlined/preliminary"
 	
 	// Prescriptions is the "prescriptions" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/prescriptions.svg
-	Prescriptions Icon = "prescriptions"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/prescriptions.svg
+	Prescriptions Icon = "outlined/prescriptions"
 	
 	// PresentToAll is the "present_to_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/present_to_all.svg
-	PresentToAll Icon = "present_to_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/present_to_all.svg
+	PresentToAll Icon = "outlined/present_to_all"
 	
 	// Preview is the "preview" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/preview.svg
-	Preview Icon = "preview"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/preview.svg
+	Preview Icon = "outlined/preview"
 	
 	// PreviewOff is the "preview_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/preview_off.svg
-	PreviewOff Icon = "preview_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/preview_off.svg
+	PreviewOff Icon = "outlined/preview_off"
 	
 	// PriceChange is the "price_change" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/price_change.svg
-	PriceChange Icon = "price_change"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/price_change.svg
+	PriceChange Icon = "outlined/price_change"
 	
 	// PriceCheck is the "price_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/price_check.svg
-	PriceCheck Icon = "price_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/price_check.svg
+	PriceCheck Icon = "outlined/price_check"
 	
 	// Print is the "print" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/print.svg
-	Print Icon = "print"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/print.svg
+	Print Icon = "outlined/print"
 	
 	// PrintAdd is the "print_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/print_add.svg
-	PrintAdd Icon = "print_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/print_add.svg
+	PrintAdd Icon = "outlined/print_add"
 	
 	// PrintConnect is the "print_connect" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/print_connect.svg
-	PrintConnect Icon = "print_connect"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/print_connect.svg
+	PrintConnect Icon = "outlined/print_connect"
 	
 	// PrintDisabled is the "print_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/print_disabled.svg
-	PrintDisabled Icon = "print_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/print_disabled.svg
+	PrintDisabled Icon = "outlined/print_disabled"
 	
 	// PrintError is the "print_error" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/print_error.svg
-	PrintError Icon = "print_error"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/print_error.svg
+	PrintError Icon = "outlined/print_error"
 	
 	// PrintLock is the "print_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/print_lock.svg
-	PrintLock Icon = "print_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/print_lock.svg
+	PrintLock Icon = "outlined/print_lock"
 	
 	// Priority is the "priority" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/priority.svg
-	Priority Icon = "priority"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/priority.svg
+	Priority Icon = "outlined/priority"
 	
 	// PriorityHigh is the "priority_high" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/priority_high.svg
-	PriorityHigh Icon = "priority_high"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/priority_high.svg
+	PriorityHigh Icon = "outlined/priority_high"
 	
 	// Privacy is the "privacy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/privacy.svg
-	Privacy Icon = "privacy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/privacy.svg
+	Privacy Icon = "outlined/privacy"
 	
 	// PrivacyTip is the "privacy_tip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/privacy_tip.svg
-	PrivacyTip Icon = "privacy_tip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/privacy_tip.svg
+	PrivacyTip Icon = "outlined/privacy_tip"
 	
 	// PrivateConnectivity is the "private_connectivity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/private_connectivity.svg
-	PrivateConnectivity Icon = "private_connectivity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/private_connectivity.svg
+	PrivateConnectivity Icon = "outlined/private_connectivity"
 	
 	// Problem is the "problem" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/problem.svg
-	Problem Icon = "problem"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/problem.svg
+	Problem Icon = "outlined/problem"
 	
 	// Procedure is the "procedure" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/procedure.svg
-	Procedure Icon = "procedure"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/procedure.svg
+	Procedure Icon = "outlined/procedure"
 	
 	// ProcessChart is the "process_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/process_chart.svg
-	ProcessChart Icon = "process_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/process_chart.svg
+	ProcessChart Icon = "outlined/process_chart"
 	
 	// ProductionQuantityLimits is the "production_quantity_limits" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/production_quantity_limits.svg
-	ProductionQuantityLimits Icon = "production_quantity_limits"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/production_quantity_limits.svg
+	ProductionQuantityLimits Icon = "outlined/production_quantity_limits"
 	
 	// Productivity is the "productivity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/productivity.svg
-	Productivity Icon = "productivity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/productivity.svg
+	Productivity Icon = "outlined/productivity"
 	
 	// ProgressActivity is the "progress_activity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/progress_activity.svg
-	ProgressActivity Icon = "progress_activity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/progress_activity.svg
+	ProgressActivity Icon = "outlined/progress_activity"
 	
 	// Propane is the "propane" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/propane.svg
-	Propane Icon = "propane"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/propane.svg
+	Propane Icon = "outlined/propane"
 	
 	// PropaneTank is the "propane_tank" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/propane_tank.svg
-	PropaneTank Icon = "propane_tank"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/propane_tank.svg
+	PropaneTank Icon = "outlined/propane_tank"
 	
 	// Psychiatry is the "psychiatry" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/psychiatry.svg
-	Psychiatry Icon = "psychiatry"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/psychiatry.svg
+	Psychiatry Icon = "outlined/psychiatry"
 	
 	// Psychology is the "psychology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/psychology.svg
-	Psychology Icon = "psychology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/psychology.svg
+	Psychology Icon = "outlined/psychology"
 	
 	// PsychologyAlt is the "psychology_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/psychology_alt.svg
-	PsychologyAlt Icon = "psychology_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/psychology_alt.svg
+	PsychologyAlt Icon = "outlined/psychology_alt"
 	
 	// Public is the "public" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/public.svg
-	Public Icon = "public"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/public.svg
+	Public Icon = "outlined/public"
 	
 	// PublicOff is the "public_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/public_off.svg
-	PublicOff Icon = "public_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/public_off.svg
+	PublicOff Icon = "outlined/public_off"
 	
 	// Publish is the "publish" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/publish.svg
-	Publish Icon = "publish"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/publish.svg
+	Publish Icon = "outlined/publish"
 	
 	// PublishedWithChanges is the "published_with_changes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/published_with_changes.svg
-	PublishedWithChanges Icon = "published_with_changes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/published_with_changes.svg
+	PublishedWithChanges Icon = "outlined/published_with_changes"
 	
 	// Pulmonology is the "pulmonology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/pulmonology.svg
-	Pulmonology Icon = "pulmonology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/pulmonology.svg
+	Pulmonology Icon = "outlined/pulmonology"
 	
 	// PunchClock is the "punch_clock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/punch_clock.svg
-	PunchClock Icon = "punch_clock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/punch_clock.svg
+	PunchClock Icon = "outlined/punch_clock"
 	
 	// PushPin is the "push_pin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/push_pin.svg
-	PushPin Icon = "push_pin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/push_pin.svg
+	PushPin Icon = "outlined/push_pin"
 	
 	// QrCode is the "qr_code" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/qr_code.svg
-	QrCode Icon = "qr_code"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/qr_code.svg
+	QrCode Icon = "outlined/qr_code"
 	
 	// QrCode2 is the "qr_code_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/qr_code_2.svg
-	QrCode2 Icon = "qr_code_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/qr_code_2.svg
+	QrCode2 Icon = "outlined/qr_code_2"
 	
 	// QrCode2Add is the "qr_code_2_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/qr_code_2_add.svg
-	QrCode2Add Icon = "qr_code_2_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/qr_code_2_add.svg
+	QrCode2Add Icon = "outlined/qr_code_2_add"
 	
 	// QrCodeScanner is the "qr_code_scanner" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/qr_code_scanner.svg
-	QrCodeScanner Icon = "qr_code_scanner"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/qr_code_scanner.svg
+	QrCodeScanner Icon = "outlined/qr_code_scanner"
 	
 	// QueryStats is the "query_stats" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/query_stats.svg
-	QueryStats Icon = "query_stats"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/query_stats.svg
+	QueryStats Icon = "outlined/query_stats"
 	
 	// QuestionExchange is the "question_exchange" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/question_exchange.svg
-	QuestionExchange Icon = "question_exchange"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/question_exchange.svg
+	QuestionExchange Icon = "outlined/question_exchange"
 	
 	// QuestionMark is the "question_mark" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/question_mark.svg
-	QuestionMark Icon = "question_mark"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/question_mark.svg
+	QuestionMark Icon = "outlined/question_mark"
 	
 	// QueueMusic is the "queue_music" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/queue_music.svg
-	QueueMusic Icon = "queue_music"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/queue_music.svg
+	QueueMusic Icon = "outlined/queue_music"
 	
 	// QueuePlayNext is the "queue_play_next" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/queue_play_next.svg
-	QueuePlayNext Icon = "queue_play_next"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/queue_play_next.svg
+	QueuePlayNext Icon = "outlined/queue_play_next"
 	
 	// QuickPhrases is the "quick_phrases" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/quick_phrases.svg
-	QuickPhrases Icon = "quick_phrases"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/quick_phrases.svg
+	QuickPhrases Icon = "outlined/quick_phrases"
 	
 	// QuickReference is the "quick_reference" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/quick_reference.svg
-	QuickReference Icon = "quick_reference"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/quick_reference.svg
+	QuickReference Icon = "outlined/quick_reference"
 	
 	// QuickReferenceAll is the "quick_reference_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/quick_reference_all.svg
-	QuickReferenceAll Icon = "quick_reference_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/quick_reference_all.svg
+	QuickReferenceAll Icon = "outlined/quick_reference_all"
 	
 	// Quickreply is the "quickreply" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/quickreply.svg
-	Quickreply Icon = "quickreply"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/quickreply.svg
+	Quickreply Icon = "outlined/quickreply"
 	
 	// QuietTime is the "quiet_time" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/quiet_time.svg
-	QuietTime Icon = "quiet_time"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/quiet_time.svg
+	QuietTime Icon = "outlined/quiet_time"
 	
 	// QuietTimeActive is the "quiet_time_active" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/quiet_time_active.svg
-	QuietTimeActive Icon = "quiet_time_active"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/quiet_time_active.svg
+	QuietTimeActive Icon = "outlined/quiet_time_active"
 	
 	// Quiz is the "quiz" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/quiz.svg
-	Quiz Icon = "quiz"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/quiz.svg
+	Quiz Icon = "outlined/quiz"
 	
 	// RMobiledata is the "r_mobiledata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/r_mobiledata.svg
-	RMobiledata Icon = "r_mobiledata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/r_mobiledata.svg
+	RMobiledata Icon = "outlined/r_mobiledata"
 	
 	// Radar is the "radar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/radar.svg
-	Radar Icon = "radar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/radar.svg
+	Radar Icon = "outlined/radar"
 	
 	// Radio is the "radio" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/radio.svg
-	Radio Icon = "radio"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/radio.svg
+	Radio Icon = "outlined/radio"
 	
 	// RadioButtonChecked is the "radio_button_checked" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/radio_button_checked.svg
-	RadioButtonChecked Icon = "radio_button_checked"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/radio_button_checked.svg
+	RadioButtonChecked Icon = "outlined/radio_button_checked"
 	
 	// RadioButtonUnchecked is the "radio_button_unchecked" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/radio_button_unchecked.svg
-	RadioButtonUnchecked Icon = "radio_button_unchecked"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/radio_button_unchecked.svg
+	RadioButtonUnchecked Icon = "outlined/radio_button_unchecked"
 	
 	// Radiology is the "radiology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/radiology.svg
-	Radiology Icon = "radiology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/radiology.svg
+	Radiology Icon = "outlined/radiology"
 	
 	// RailwayAlert is the "railway_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/railway_alert.svg
-	RailwayAlert Icon = "railway_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/railway_alert.svg
+	RailwayAlert Icon = "outlined/railway_alert"
 	
 	// Rainy is the "rainy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rainy.svg
-	Rainy Icon = "rainy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rainy.svg
+	Rainy Icon = "outlined/rainy"
 	
 	// RainyHeavy is the "rainy_heavy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rainy_heavy.svg
-	RainyHeavy Icon = "rainy_heavy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rainy_heavy.svg
+	RainyHeavy Icon = "outlined/rainy_heavy"
 	
 	// RainyLight is the "rainy_light" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rainy_light.svg
-	RainyLight Icon = "rainy_light"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rainy_light.svg
+	RainyLight Icon = "outlined/rainy_light"
 	
 	// RainySnow is the "rainy_snow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rainy_snow.svg
-	RainySnow Icon = "rainy_snow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rainy_snow.svg
+	RainySnow Icon = "outlined/rainy_snow"
 	
 	// RamenDining is the "ramen_dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ramen_dining.svg
-	RamenDining Icon = "ramen_dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ramen_dining.svg
+	RamenDining Icon = "outlined/ramen_dining"
 	
 	// RampLeft is the "ramp_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ramp_left.svg
-	RampLeft Icon = "ramp_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ramp_left.svg
+	RampLeft Icon = "outlined/ramp_left"
 	
 	// RampRight is the "ramp_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ramp_right.svg
-	RampRight Icon = "ramp_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ramp_right.svg
+	RampRight Icon = "outlined/ramp_right"
 	
 	// RangeHood is the "range_hood" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/range_hood.svg
-	RangeHood Icon = "range_hood"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/range_hood.svg
+	RangeHood Icon = "outlined/range_hood"
 	
 	// RateReview is the "rate_review" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rate_review.svg
-	RateReview Icon = "rate_review"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rate_review.svg
+	RateReview Icon = "outlined/rate_review"
 	
 	// RawOff is the "raw_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/raw_off.svg
-	RawOff Icon = "raw_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/raw_off.svg
+	RawOff Icon = "outlined/raw_off"
 	
 	// RawOn is the "raw_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/raw_on.svg
-	RawOn Icon = "raw_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/raw_on.svg
+	RawOn Icon = "outlined/raw_on"
 	
 	// ReadMore is the "read_more" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/read_more.svg
-	ReadMore Icon = "read_more"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/read_more.svg
+	ReadMore Icon = "outlined/read_more"
 	
 	// ReadinessScore is the "readiness_score" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/readiness_score.svg
-	ReadinessScore Icon = "readiness_score"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/readiness_score.svg
+	ReadinessScore Icon = "outlined/readiness_score"
 	
 	// RealEstateAgent is the "real_estate_agent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/real_estate_agent.svg
-	RealEstateAgent Icon = "real_estate_agent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/real_estate_agent.svg
+	RealEstateAgent Icon = "outlined/real_estate_agent"
 	
 	// RearCamera is the "rear_camera" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rear_camera.svg
-	RearCamera Icon = "rear_camera"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rear_camera.svg
+	RearCamera Icon = "outlined/rear_camera"
 	
 	// Rebase is the "rebase" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rebase.svg
-	Rebase Icon = "rebase"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rebase.svg
+	Rebase Icon = "outlined/rebase"
 	
 	// RebaseEdit is the "rebase_edit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rebase_edit.svg
-	RebaseEdit Icon = "rebase_edit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rebase_edit.svg
+	RebaseEdit Icon = "outlined/rebase_edit"
 	
 	// Receipt is the "receipt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/receipt.svg
-	Receipt Icon = "receipt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/receipt.svg
+	Receipt Icon = "outlined/receipt"
 	
 	// ReceiptLong is the "receipt_long" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/receipt_long.svg
-	ReceiptLong Icon = "receipt_long"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/receipt_long.svg
+	ReceiptLong Icon = "outlined/receipt_long"
 	
 	// RecentActors is the "recent_actors" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/recent_actors.svg
-	RecentActors Icon = "recent_actors"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/recent_actors.svg
+	RecentActors Icon = "outlined/recent_actors"
 	
 	// RecentPatient is the "recent_patient" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/recent_patient.svg
-	RecentPatient Icon = "recent_patient"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/recent_patient.svg
+	RecentPatient Icon = "outlined/recent_patient"
 	
 	// Recommend is the "recommend" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/recommend.svg
-	Recommend Icon = "recommend"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/recommend.svg
+	Recommend Icon = "outlined/recommend"
 	
 	// RecordVoiceOver is the "record_voice_over" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/record_voice_over.svg
-	RecordVoiceOver Icon = "record_voice_over"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/record_voice_over.svg
+	RecordVoiceOver Icon = "outlined/record_voice_over"
 	
 	// Rectangle is the "rectangle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rectangle.svg
-	Rectangle Icon = "rectangle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rectangle.svg
+	Rectangle Icon = "outlined/rectangle"
 	
 	// Recycling is the "recycling" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/recycling.svg
-	Recycling Icon = "recycling"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/recycling.svg
+	Recycling Icon = "outlined/recycling"
 	
 	// Redeem is the "redeem" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/redeem.svg
-	Redeem Icon = "redeem"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/redeem.svg
+	Redeem Icon = "outlined/redeem"
 	
 	// Redo is the "redo" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/redo.svg
-	Redo Icon = "redo"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/redo.svg
+	Redo Icon = "outlined/redo"
 	
 	// ReduceCapacity is the "reduce_capacity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/reduce_capacity.svg
-	ReduceCapacity Icon = "reduce_capacity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/reduce_capacity.svg
+	ReduceCapacity Icon = "outlined/reduce_capacity"
 	
 	// Refresh is the "refresh" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/refresh.svg
-	Refresh Icon = "refresh"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/refresh.svg
+	Refresh Icon = "outlined/refresh"
 	
 	// RegularExpression is the "regular_expression" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/regular_expression.svg
-	RegularExpression Icon = "regular_expression"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/regular_expression.svg
+	RegularExpression Icon = "outlined/regular_expression"
 	
 	// Relax is the "relax" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/relax.svg
-	Relax Icon = "relax"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/relax.svg
+	Relax Icon = "outlined/relax"
 	
 	// ReleaseAlert is the "release_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/release_alert.svg
-	ReleaseAlert Icon = "release_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/release_alert.svg
+	ReleaseAlert Icon = "outlined/release_alert"
 	
 	// RememberMe is the "remember_me" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/remember_me.svg
-	RememberMe Icon = "remember_me"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/remember_me.svg
+	RememberMe Icon = "outlined/remember_me"
 	
 	// Reminder is the "reminder" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/reminder.svg
-	Reminder Icon = "reminder"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/reminder.svg
+	Reminder Icon = "outlined/reminder"
 	
 	// RemoteGen is the "remote_gen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/remote_gen.svg
-	RemoteGen Icon = "remote_gen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/remote_gen.svg
+	RemoteGen Icon = "outlined/remote_gen"
 	
 	// Remove is the "remove" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/remove.svg
-	Remove Icon = "remove"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/remove.svg
+	Remove Icon = "outlined/remove"
 	
 	// RemoveDone is the "remove_done" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/remove_done.svg
-	RemoveDone Icon = "remove_done"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/remove_done.svg
+	RemoveDone Icon = "outlined/remove_done"
 	
 	// RemoveFromQueue is the "remove_from_queue" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/remove_from_queue.svg
-	RemoveFromQueue Icon = "remove_from_queue"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/remove_from_queue.svg
+	RemoveFromQueue Icon = "outlined/remove_from_queue"
 	
 	// RemoveModerator is the "remove_moderator" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/remove_moderator.svg
-	RemoveModerator Icon = "remove_moderator"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/remove_moderator.svg
+	RemoveModerator Icon = "outlined/remove_moderator"
 	
 	// RemoveRoad is the "remove_road" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/remove_road.svg
-	RemoveRoad Icon = "remove_road"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/remove_road.svg
+	RemoveRoad Icon = "outlined/remove_road"
 	
 	// RemoveSelection is the "remove_selection" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/remove_selection.svg
-	RemoveSelection Icon = "remove_selection"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/remove_selection.svg
+	RemoveSelection Icon = "outlined/remove_selection"
 	
 	// RemoveShoppingCart is the "remove_shopping_cart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/remove_shopping_cart.svg
-	RemoveShoppingCart Icon = "remove_shopping_cart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/remove_shopping_cart.svg
+	RemoveShoppingCart Icon = "outlined/remove_shopping_cart"
 	
 	// ReopenWindow is the "reopen_window" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/reopen_window.svg
-	ReopenWindow Icon = "reopen_window"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/reopen_window.svg
+	ReopenWindow Icon = "outlined/reopen_window"
 	
 	// Reorder is the "reorder" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/reorder.svg
-	Reorder Icon = "reorder"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/reorder.svg
+	Reorder Icon = "outlined/reorder"
 	
 	// Repartition is the "repartition" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/repartition.svg
-	Repartition Icon = "repartition"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/repartition.svg
+	Repartition Icon = "outlined/repartition"
 	
 	// Repeat is the "repeat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/repeat.svg
-	Repeat Icon = "repeat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/repeat.svg
+	Repeat Icon = "outlined/repeat"
 	
 	// RepeatOn is the "repeat_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/repeat_on.svg
-	RepeatOn Icon = "repeat_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/repeat_on.svg
+	RepeatOn Icon = "outlined/repeat_on"
 	
 	// RepeatOne is the "repeat_one" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/repeat_one.svg
-	RepeatOne Icon = "repeat_one"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/repeat_one.svg
+	RepeatOne Icon = "outlined/repeat_one"
 	
 	// RepeatOneOn is the "repeat_one_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/repeat_one_on.svg
-	RepeatOneOn Icon = "repeat_one_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/repeat_one_on.svg
+	RepeatOneOn Icon = "outlined/repeat_one_on"
 	
 	// Replay is the "replay" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/replay.svg
-	Replay Icon = "replay"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/replay.svg
+	Replay Icon = "outlined/replay"
 	
 	// Replay10 is the "replay_10" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/replay_10.svg
-	Replay10 Icon = "replay_10"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/replay_10.svg
+	Replay10 Icon = "outlined/replay_10"
 	
 	// Replay30 is the "replay_30" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/replay_30.svg
-	Replay30 Icon = "replay_30"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/replay_30.svg
+	Replay30 Icon = "outlined/replay_30"
 	
 	// Replay5 is the "replay_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/replay_5.svg
-	Replay5 Icon = "replay_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/replay_5.svg
+	Replay5 Icon = "outlined/replay_5"
 	
 	// Reply is the "reply" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/reply.svg
-	Reply Icon = "reply"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/reply.svg
+	Reply Icon = "outlined/reply"
 	
 	// ReplyAll is the "reply_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/reply_all.svg
-	ReplyAll Icon = "reply_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/reply_all.svg
+	ReplyAll Icon = "outlined/reply_all"
 	
 	// Report is the "report" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/report.svg
-	Report Icon = "report"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/report.svg
+	Report Icon = "outlined/report"
 	
 	// ReportOff is the "report_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/report_off.svg
-	ReportOff Icon = "report_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/report_off.svg
+	ReportOff Icon = "outlined/report_off"
 	
 	// RequestPage is the "request_page" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/request_page.svg
-	RequestPage Icon = "request_page"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/request_page.svg
+	RequestPage Icon = "outlined/request_page"
 	
 	// RequestQuote is the "request_quote" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/request_quote.svg
-	RequestQuote Icon = "request_quote"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/request_quote.svg
+	RequestQuote Icon = "outlined/request_quote"
 	
 	// ResetImage is the "reset_image" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/reset_image.svg
-	ResetImage Icon = "reset_image"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/reset_image.svg
+	ResetImage Icon = "outlined/reset_image"
 	
 	// ResetTv is the "reset_tv" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/reset_tv.svg
-	ResetTv Icon = "reset_tv"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/reset_tv.svg
+	ResetTv Icon = "outlined/reset_tv"
 	
 	// Resize is the "resize" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/resize.svg
-	Resize Icon = "resize"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/resize.svg
+	Resize Icon = "outlined/resize"
 	
 	// RespiratoryRate is the "respiratory_rate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/respiratory_rate.svg
-	RespiratoryRate Icon = "respiratory_rate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/respiratory_rate.svg
+	RespiratoryRate Icon = "outlined/respiratory_rate"
 	
 	// RestartAlt is the "restart_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/restart_alt.svg
-	RestartAlt Icon = "restart_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/restart_alt.svg
+	RestartAlt Icon = "outlined/restart_alt"
 	
 	// Restaurant is the "restaurant" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/restaurant.svg
-	Restaurant Icon = "restaurant"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/restaurant.svg
+	Restaurant Icon = "outlined/restaurant"
 	
 	// RestaurantMenu is the "restaurant_menu" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/restaurant_menu.svg
-	RestaurantMenu Icon = "restaurant_menu"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/restaurant_menu.svg
+	RestaurantMenu Icon = "outlined/restaurant_menu"
 	
 	// RestoreFromTrash is the "restore_from_trash" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/restore_from_trash.svg
-	RestoreFromTrash Icon = "restore_from_trash"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/restore_from_trash.svg
+	RestoreFromTrash Icon = "outlined/restore_from_trash"
 	
 	// RestorePage is the "restore_page" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/restore_page.svg
-	RestorePage Icon = "restore_page"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/restore_page.svg
+	RestorePage Icon = "outlined/restore_page"
 	
 	// Resume is the "resume" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/resume.svg
-	Resume Icon = "resume"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/resume.svg
+	Resume Icon = "outlined/resume"
 	
 	// Reviews is the "reviews" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/reviews.svg
-	Reviews Icon = "reviews"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/reviews.svg
+	Reviews Icon = "outlined/reviews"
 	
 	// RewardedAds is the "rewarded_ads" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rewarded_ads.svg
-	RewardedAds Icon = "rewarded_ads"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rewarded_ads.svg
+	RewardedAds Icon = "outlined/rewarded_ads"
 	
 	// Rheumatology is the "rheumatology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rheumatology.svg
-	Rheumatology Icon = "rheumatology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rheumatology.svg
+	Rheumatology Icon = "outlined/rheumatology"
 	
 	// RibCage is the "rib_cage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rib_cage.svg
-	RibCage Icon = "rib_cage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rib_cage.svg
+	RibCage Icon = "outlined/rib_cage"
 	
 	// RiceBowl is the "rice_bowl" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rice_bowl.svg
-	RiceBowl Icon = "rice_bowl"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rice_bowl.svg
+	RiceBowl Icon = "outlined/rice_bowl"
 	
 	// RightClick is the "right_click" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/right_click.svg
-	RightClick Icon = "right_click"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/right_click.svg
+	RightClick Icon = "outlined/right_click"
 	
 	// RightPanelClose is the "right_panel_close" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/right_panel_close.svg
-	RightPanelClose Icon = "right_panel_close"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/right_panel_close.svg
+	RightPanelClose Icon = "outlined/right_panel_close"
 	
 	// RightPanelOpen is the "right_panel_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/right_panel_open.svg
-	RightPanelOpen Icon = "right_panel_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/right_panel_open.svg
+	RightPanelOpen Icon = "outlined/right_panel_open"
 	
 	// RingVolume is the "ring_volume" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ring_volume.svg
-	RingVolume Icon = "ring_volume"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ring_volume.svg
+	RingVolume Icon = "outlined/ring_volume"
 	
 	// Ripples is the "ripples" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ripples.svg
-	Ripples Icon = "ripples"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ripples.svg
+	Ripples Icon = "outlined/ripples"
 	
 	// Robot is the "robot" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/robot.svg
-	Robot Icon = "robot"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/robot.svg
+	Robot Icon = "outlined/robot"
 	
 	// Robot2 is the "robot_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/robot_2.svg
-	Robot2 Icon = "robot_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/robot_2.svg
+	Robot2 Icon = "outlined/robot_2"
 	
 	// Rocket is the "rocket" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rocket.svg
-	Rocket Icon = "rocket"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rocket.svg
+	Rocket Icon = "outlined/rocket"
 	
 	// RocketLaunch is the "rocket_launch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rocket_launch.svg
-	RocketLaunch Icon = "rocket_launch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rocket_launch.svg
+	RocketLaunch Icon = "outlined/rocket_launch"
 	
 	// RollerShades is the "roller_shades" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/roller_shades.svg
-	RollerShades Icon = "roller_shades"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/roller_shades.svg
+	RollerShades Icon = "outlined/roller_shades"
 	
 	// RollerShadesClosed is the "roller_shades_closed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/roller_shades_closed.svg
-	RollerShadesClosed Icon = "roller_shades_closed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/roller_shades_closed.svg
+	RollerShadesClosed Icon = "outlined/roller_shades_closed"
 	
 	// RollerSkating is the "roller_skating" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/roller_skating.svg
-	RollerSkating Icon = "roller_skating"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/roller_skating.svg
+	RollerSkating Icon = "outlined/roller_skating"
 	
 	// Roofing is the "roofing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/roofing.svg
-	Roofing Icon = "roofing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/roofing.svg
+	Roofing Icon = "outlined/roofing"
 	
 	// RoomPreferences is the "room_preferences" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/room_preferences.svg
-	RoomPreferences Icon = "room_preferences"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/room_preferences.svg
+	RoomPreferences Icon = "outlined/room_preferences"
 	
 	// RoomService is the "room_service" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/room_service.svg
-	RoomService Icon = "room_service"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/room_service.svg
+	RoomService Icon = "outlined/room_service"
 	
 	// Rotate90DegreesCcw is the "rotate_90_degrees_ccw" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rotate_90_degrees_ccw.svg
-	Rotate90DegreesCcw Icon = "rotate_90_degrees_ccw"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rotate_90_degrees_ccw.svg
+	Rotate90DegreesCcw Icon = "outlined/rotate_90_degrees_ccw"
 	
 	// Rotate90DegreesCw is the "rotate_90_degrees_cw" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rotate_90_degrees_cw.svg
-	Rotate90DegreesCw Icon = "rotate_90_degrees_cw"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rotate_90_degrees_cw.svg
+	Rotate90DegreesCw Icon = "outlined/rotate_90_degrees_cw"
 	
 	// RotateLeft is the "rotate_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rotate_left.svg
-	RotateLeft Icon = "rotate_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rotate_left.svg
+	RotateLeft Icon = "outlined/rotate_left"
 	
 	// RotateRight is the "rotate_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rotate_right.svg
-	RotateRight Icon = "rotate_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rotate_right.svg
+	RotateRight Icon = "outlined/rotate_right"
 	
 	// RoundaboutLeft is the "roundabout_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/roundabout_left.svg
-	RoundaboutLeft Icon = "roundabout_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/roundabout_left.svg
+	RoundaboutLeft Icon = "outlined/roundabout_left"
 	
 	// RoundaboutRight is the "roundabout_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/roundabout_right.svg
-	RoundaboutRight Icon = "roundabout_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/roundabout_right.svg
+	RoundaboutRight Icon = "outlined/roundabout_right"
 	
 	// RoundedCorner is the "rounded_corner" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rounded_corner.svg
-	RoundedCorner Icon = "rounded_corner"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rounded_corner.svg
+	RoundedCorner Icon = "outlined/rounded_corner"
 	
 	// Route is the "route" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/route.svg
-	Route Icon = "route"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/route.svg
+	Route Icon = "outlined/route"
 	
 	// Router is the "router" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/router.svg
-	Router Icon = "router"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/router.svg
+	Router Icon = "outlined/router"
 	
 	// Routine is the "routine" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/routine.svg
-	Routine Icon = "routine"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/routine.svg
+	Routine Icon = "outlined/routine"
 	
 	// Rowing is the "rowing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rowing.svg
-	Rowing Icon = "rowing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rowing.svg
+	Rowing Icon = "outlined/rowing"
 	
 	// RssFeed is the "rss_feed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rss_feed.svg
-	RssFeed Icon = "rss_feed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rss_feed.svg
+	RssFeed Icon = "outlined/rss_feed"
 	
 	// Rsvp is the "rsvp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rsvp.svg
-	Rsvp Icon = "rsvp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rsvp.svg
+	Rsvp Icon = "outlined/rsvp"
 	
 	// Rtt is the "rtt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rtt.svg
-	Rtt Icon = "rtt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rtt.svg
+	Rtt Icon = "outlined/rtt"
 	
 	// Rule is the "rule" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rule.svg
-	Rule Icon = "rule"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rule.svg
+	Rule Icon = "outlined/rule"
 	
 	// RuleFolder is the "rule_folder" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rule_folder.svg
-	RuleFolder Icon = "rule_folder"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rule_folder.svg
+	RuleFolder Icon = "outlined/rule_folder"
 	
 	// RuleSettings is the "rule_settings" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rule_settings.svg
-	RuleSettings Icon = "rule_settings"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rule_settings.svg
+	RuleSettings Icon = "outlined/rule_settings"
 	
 	// RunCircle is the "run_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/run_circle.svg
-	RunCircle Icon = "run_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/run_circle.svg
+	RunCircle Icon = "outlined/run_circle"
 	
 	// RunningWithErrors is the "running_with_errors" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/running_with_errors.svg
-	RunningWithErrors Icon = "running_with_errors"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/running_with_errors.svg
+	RunningWithErrors Icon = "outlined/running_with_errors"
 	
 	// RvHookup is the "rv_hookup" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/rv_hookup.svg
-	RvHookup Icon = "rv_hookup"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/rv_hookup.svg
+	RvHookup Icon = "outlined/rv_hookup"
 	
 	// SafetyCheck is the "safety_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/safety_check.svg
-	SafetyCheck Icon = "safety_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/safety_check.svg
+	SafetyCheck Icon = "outlined/safety_check"
 	
 	// SafetyCheckOff is the "safety_check_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/safety_check_off.svg
-	SafetyCheckOff Icon = "safety_check_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/safety_check_off.svg
+	SafetyCheckOff Icon = "outlined/safety_check_off"
 	
 	// SafetyDivider is the "safety_divider" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/safety_divider.svg
-	SafetyDivider Icon = "safety_divider"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/safety_divider.svg
+	SafetyDivider Icon = "outlined/safety_divider"
 	
 	// Sailing is the "sailing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sailing.svg
-	Sailing Icon = "sailing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sailing.svg
+	Sailing Icon = "outlined/sailing"
 	
 	// Salinity is the "salinity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/salinity.svg
-	Salinity Icon = "salinity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/salinity.svg
+	Salinity Icon = "outlined/salinity"
 	
 	// Sanitizer is the "sanitizer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sanitizer.svg
-	Sanitizer Icon = "sanitizer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sanitizer.svg
+	Sanitizer Icon = "outlined/sanitizer"
 	
 	// Satellite is the "satellite" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/satellite.svg
-	Satellite Icon = "satellite"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/satellite.svg
+	Satellite Icon = "outlined/satellite"
 	
 	// SatelliteAlt is the "satellite_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/satellite_alt.svg
-	SatelliteAlt Icon = "satellite_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/satellite_alt.svg
+	SatelliteAlt Icon = "outlined/satellite_alt"
 	
 	// Sauna is the "sauna" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sauna.svg
-	Sauna Icon = "sauna"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sauna.svg
+	Sauna Icon = "outlined/sauna"
 	
 	// Save is the "save" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/save.svg
-	Save Icon = "save"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/save.svg
+	Save Icon = "outlined/save"
 	
 	// SaveAs is the "save_as" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/save_as.svg
-	SaveAs Icon = "save_as"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/save_as.svg
+	SaveAs Icon = "outlined/save_as"
 	
 	// SavedSearch is the "saved_search" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/saved_search.svg
-	SavedSearch Icon = "saved_search"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/saved_search.svg
+	SavedSearch Icon = "outlined/saved_search"
 	
 	// Savings is the "savings" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/savings.svg
-	Savings Icon = "savings"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/savings.svg
+	Savings Icon = "outlined/savings"
 	
 	// Scale is the "scale" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/scale.svg
-	Scale Icon = "scale"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/scale.svg
+	Scale Icon = "outlined/scale"
 	
 	// Scan is the "scan" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/scan.svg
-	Scan Icon = "scan"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/scan.svg
+	Scan Icon = "outlined/scan"
 	
 	// ScanDelete is the "scan_delete" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/scan_delete.svg
-	ScanDelete Icon = "scan_delete"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/scan_delete.svg
+	ScanDelete Icon = "outlined/scan_delete"
 	
 	// Scanner is the "scanner" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/scanner.svg
-	Scanner Icon = "scanner"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/scanner.svg
+	Scanner Icon = "outlined/scanner"
 	
 	// ScatterPlot is the "scatter_plot" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/scatter_plot.svg
-	ScatterPlot Icon = "scatter_plot"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/scatter_plot.svg
+	ScatterPlot Icon = "outlined/scatter_plot"
 	
 	// Scene is the "scene" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/scene.svg
-	Scene Icon = "scene"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/scene.svg
+	Scene Icon = "outlined/scene"
 	
 	// Schedule is the "schedule" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/schedule.svg
-	Schedule Icon = "schedule"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/schedule.svg
+	Schedule Icon = "outlined/schedule"
 	
 	// ScheduleSend is the "schedule_send" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/schedule_send.svg
-	ScheduleSend Icon = "schedule_send"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/schedule_send.svg
+	ScheduleSend Icon = "outlined/schedule_send"
 	
 	// Schema is the "schema" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/schema.svg
-	Schema Icon = "schema"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/schema.svg
+	Schema Icon = "outlined/schema"
 	
 	// School is the "school" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/school.svg
-	School Icon = "school"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/school.svg
+	School Icon = "outlined/school"
 	
 	// Science is the "science" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/science.svg
-	Science Icon = "science"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/science.svg
+	Science Icon = "outlined/science"
 	
 	// Score is the "score" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/score.svg
-	Score Icon = "score"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/score.svg
+	Score Icon = "outlined/score"
 	
 	// Scoreboard is the "scoreboard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/scoreboard.svg
-	Scoreboard Icon = "scoreboard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/scoreboard.svg
+	Scoreboard Icon = "outlined/scoreboard"
 	
 	// ScreenLockLandscape is the "screen_lock_landscape" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screen_lock_landscape.svg
-	ScreenLockLandscape Icon = "screen_lock_landscape"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screen_lock_landscape.svg
+	ScreenLockLandscape Icon = "outlined/screen_lock_landscape"
 	
 	// ScreenLockPortrait is the "screen_lock_portrait" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screen_lock_portrait.svg
-	ScreenLockPortrait Icon = "screen_lock_portrait"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screen_lock_portrait.svg
+	ScreenLockPortrait Icon = "outlined/screen_lock_portrait"
 	
 	// ScreenLockRotation is the "screen_lock_rotation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screen_lock_rotation.svg
-	ScreenLockRotation Icon = "screen_lock_rotation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screen_lock_rotation.svg
+	ScreenLockRotation Icon = "outlined/screen_lock_rotation"
 	
 	// ScreenRecord is the "screen_record" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screen_record.svg
-	ScreenRecord Icon = "screen_record"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screen_record.svg
+	ScreenRecord Icon = "outlined/screen_record"
 	
 	// ScreenRotation is the "screen_rotation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screen_rotation.svg
-	ScreenRotation Icon = "screen_rotation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screen_rotation.svg
+	ScreenRotation Icon = "outlined/screen_rotation"
 	
 	// ScreenRotationAlt is the "screen_rotation_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screen_rotation_alt.svg
-	ScreenRotationAlt Icon = "screen_rotation_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screen_rotation_alt.svg
+	ScreenRotationAlt Icon = "outlined/screen_rotation_alt"
 	
 	// ScreenRotationUp is the "screen_rotation_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screen_rotation_up.svg
-	ScreenRotationUp Icon = "screen_rotation_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screen_rotation_up.svg
+	ScreenRotationUp Icon = "outlined/screen_rotation_up"
 	
 	// ScreenSearchDesktop is the "screen_search_desktop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screen_search_desktop.svg
-	ScreenSearchDesktop Icon = "screen_search_desktop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screen_search_desktop.svg
+	ScreenSearchDesktop Icon = "outlined/screen_search_desktop"
 	
 	// ScreenShare is the "screen_share" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screen_share.svg
-	ScreenShare Icon = "screen_share"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screen_share.svg
+	ScreenShare Icon = "outlined/screen_share"
 	
 	// Screenshot is the "screenshot" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screenshot.svg
-	Screenshot Icon = "screenshot"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screenshot.svg
+	Screenshot Icon = "outlined/screenshot"
 	
 	// ScreenshotFrame is the "screenshot_frame" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screenshot_frame.svg
-	ScreenshotFrame Icon = "screenshot_frame"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screenshot_frame.svg
+	ScreenshotFrame Icon = "outlined/screenshot_frame"
 	
 	// ScreenshotKeyboard is the "screenshot_keyboard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screenshot_keyboard.svg
-	ScreenshotKeyboard Icon = "screenshot_keyboard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screenshot_keyboard.svg
+	ScreenshotKeyboard Icon = "outlined/screenshot_keyboard"
 	
 	// ScreenshotMonitor is the "screenshot_monitor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screenshot_monitor.svg
-	ScreenshotMonitor Icon = "screenshot_monitor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screenshot_monitor.svg
+	ScreenshotMonitor Icon = "outlined/screenshot_monitor"
 	
 	// ScreenshotRegion is the "screenshot_region" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screenshot_region.svg
-	ScreenshotRegion Icon = "screenshot_region"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screenshot_region.svg
+	ScreenshotRegion Icon = "outlined/screenshot_region"
 	
 	// ScreenshotTablet is the "screenshot_tablet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/screenshot_tablet.svg
-	ScreenshotTablet Icon = "screenshot_tablet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/screenshot_tablet.svg
+	ScreenshotTablet Icon = "outlined/screenshot_tablet"
 	
 	// ScrollableHeader is the "scrollable_header" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/scrollable_header.svg
-	ScrollableHeader Icon = "scrollable_header"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/scrollable_header.svg
+	ScrollableHeader Icon = "outlined/scrollable_header"
 	
 	// ScubaDiving is the "scuba_diving" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/scuba_diving.svg
-	ScubaDiving Icon = "scuba_diving"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/scuba_diving.svg
+	ScubaDiving Icon = "outlined/scuba_diving"
 	
 	// Sd is the "sd" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sd.svg
-	Sd Icon = "sd"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sd.svg
+	Sd Icon = "outlined/sd"
 	
 	// SdCard is the "sd_card" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sd_card.svg
-	SdCard Icon = "sd_card"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sd_card.svg
+	SdCard Icon = "outlined/sd_card"
 	
 	// SdCardAlert is the "sd_card_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sd_card_alert.svg
-	SdCardAlert Icon = "sd_card_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sd_card_alert.svg
+	SdCardAlert Icon = "outlined/sd_card_alert"
 	
 	// Search is the "search" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/search.svg
-	Search Icon = "search"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/search.svg
+	Search Icon = "outlined/search"
 	
 	// SearchCheck is the "search_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/search_check.svg
-	SearchCheck Icon = "search_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/search_check.svg
+	SearchCheck Icon = "outlined/search_check"
 	
 	// SearchOff is the "search_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/search_off.svg
-	SearchOff Icon = "search_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/search_off.svg
+	SearchOff Icon = "outlined/search_off"
 	
 	// Security is the "security" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/security.svg
-	Security Icon = "security"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/security.svg
+	Security Icon = "outlined/security"
 	
 	// SecurityUpdateGood is the "security_update_good" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/security_update_good.svg
-	SecurityUpdateGood Icon = "security_update_good"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/security_update_good.svg
+	SecurityUpdateGood Icon = "outlined/security_update_good"
 	
 	// SecurityUpdateWarning is the "security_update_warning" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/security_update_warning.svg
-	SecurityUpdateWarning Icon = "security_update_warning"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/security_update_warning.svg
+	SecurityUpdateWarning Icon = "outlined/security_update_warning"
 	
 	// Segment is the "segment" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/segment.svg
-	Segment Icon = "segment"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/segment.svg
+	Segment Icon = "outlined/segment"
 	
 	// Select is the "select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/select.svg
-	Select Icon = "select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/select.svg
+	Select Icon = "outlined/select"
 	
 	// SelectAll is the "select_all" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/select_all.svg
-	SelectAll Icon = "select_all"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/select_all.svg
+	SelectAll Icon = "outlined/select_all"
 	
 	// SelectCheckBox is the "select_check_box" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/select_check_box.svg
-	SelectCheckBox Icon = "select_check_box"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/select_check_box.svg
+	SelectCheckBox Icon = "outlined/select_check_box"
 	
 	// SelectToSpeak is the "select_to_speak" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/select_to_speak.svg
-	SelectToSpeak Icon = "select_to_speak"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/select_to_speak.svg
+	SelectToSpeak Icon = "outlined/select_to_speak"
 	
 	// SelectWindow is the "select_window" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/select_window.svg
-	SelectWindow Icon = "select_window"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/select_window.svg
+	SelectWindow Icon = "outlined/select_window"
 	
 	// SelectWindowOff is the "select_window_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/select_window_off.svg
-	SelectWindowOff Icon = "select_window_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/select_window_off.svg
+	SelectWindowOff Icon = "outlined/select_window_off"
 	
 	// SelfCare is the "self_care" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/self_care.svg
-	SelfCare Icon = "self_care"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/self_care.svg
+	SelfCare Icon = "outlined/self_care"
 	
 	// SelfImprovement is the "self_improvement" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/self_improvement.svg
-	SelfImprovement Icon = "self_improvement"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/self_improvement.svg
+	SelfImprovement Icon = "outlined/self_improvement"
 	
 	// Sell is the "sell" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sell.svg
-	Sell Icon = "sell"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sell.svg
+	Sell Icon = "outlined/sell"
 	
 	// Send is the "send" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/send.svg
-	Send Icon = "send"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/send.svg
+	Send Icon = "outlined/send"
 	
 	// SendAndArchive is the "send_and_archive" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/send_and_archive.svg
-	SendAndArchive Icon = "send_and_archive"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/send_and_archive.svg
+	SendAndArchive Icon = "outlined/send_and_archive"
 	
 	// SendMoney is the "send_money" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/send_money.svg
-	SendMoney Icon = "send_money"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/send_money.svg
+	SendMoney Icon = "outlined/send_money"
 	
 	// SendTimeExtension is the "send_time_extension" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/send_time_extension.svg
-	SendTimeExtension Icon = "send_time_extension"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/send_time_extension.svg
+	SendTimeExtension Icon = "outlined/send_time_extension"
 	
 	// SendToMobile is the "send_to_mobile" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/send_to_mobile.svg
-	SendToMobile Icon = "send_to_mobile"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/send_to_mobile.svg
+	SendToMobile Icon = "outlined/send_to_mobile"
 	
 	// SensorDoor is the "sensor_door" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sensor_door.svg
-	SensorDoor Icon = "sensor_door"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sensor_door.svg
+	SensorDoor Icon = "outlined/sensor_door"
 	
 	// SensorOccupied is the "sensor_occupied" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sensor_occupied.svg
-	SensorOccupied Icon = "sensor_occupied"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sensor_occupied.svg
+	SensorOccupied Icon = "outlined/sensor_occupied"
 	
 	// SensorWindow is the "sensor_window" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sensor_window.svg
-	SensorWindow Icon = "sensor_window"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sensor_window.svg
+	SensorWindow Icon = "outlined/sensor_window"
 	
 	// Sensors is the "sensors" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sensors.svg
-	Sensors Icon = "sensors"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sensors.svg
+	Sensors Icon = "outlined/sensors"
 	
 	// SensorsOff is the "sensors_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sensors_off.svg
-	SensorsOff Icon = "sensors_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sensors_off.svg
+	SensorsOff Icon = "outlined/sensors_off"
 	
 	// SentimentCalm is the "sentiment_calm" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_calm.svg
-	SentimentCalm Icon = "sentiment_calm"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_calm.svg
+	SentimentCalm Icon = "outlined/sentiment_calm"
 	
 	// SentimentContent is the "sentiment_content" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_content.svg
-	SentimentContent Icon = "sentiment_content"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_content.svg
+	SentimentContent Icon = "outlined/sentiment_content"
 	
 	// SentimentDissatisfied is the "sentiment_dissatisfied" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_dissatisfied.svg
-	SentimentDissatisfied Icon = "sentiment_dissatisfied"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_dissatisfied.svg
+	SentimentDissatisfied Icon = "outlined/sentiment_dissatisfied"
 	
 	// SentimentExcited is the "sentiment_excited" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_excited.svg
-	SentimentExcited Icon = "sentiment_excited"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_excited.svg
+	SentimentExcited Icon = "outlined/sentiment_excited"
 	
 	// SentimentExtremelyDissatisfied is the "sentiment_extremely_dissatisfied" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_extremely_dissatisfied.svg
-	SentimentExtremelyDissatisfied Icon = "sentiment_extremely_dissatisfied"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_extremely_dissatisfied.svg
+	SentimentExtremelyDissatisfied Icon = "outlined/sentiment_extremely_dissatisfied"
 	
 	// SentimentFrustrated is the "sentiment_frustrated" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_frustrated.svg
-	SentimentFrustrated Icon = "sentiment_frustrated"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_frustrated.svg
+	SentimentFrustrated Icon = "outlined/sentiment_frustrated"
 	
 	// SentimentNeutral is the "sentiment_neutral" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_neutral.svg
-	SentimentNeutral Icon = "sentiment_neutral"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_neutral.svg
+	SentimentNeutral Icon = "outlined/sentiment_neutral"
 	
 	// SentimentSad is the "sentiment_sad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_sad.svg
-	SentimentSad Icon = "sentiment_sad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_sad.svg
+	SentimentSad Icon = "outlined/sentiment_sad"
 	
 	// SentimentSatisfied is the "sentiment_satisfied" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_satisfied.svg
-	SentimentSatisfied Icon = "sentiment_satisfied"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_satisfied.svg
+	SentimentSatisfied Icon = "outlined/sentiment_satisfied"
 	
 	// SentimentStressed is the "sentiment_stressed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_stressed.svg
-	SentimentStressed Icon = "sentiment_stressed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_stressed.svg
+	SentimentStressed Icon = "outlined/sentiment_stressed"
 	
 	// SentimentVeryDissatisfied is the "sentiment_very_dissatisfied" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_very_dissatisfied.svg
-	SentimentVeryDissatisfied Icon = "sentiment_very_dissatisfied"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_very_dissatisfied.svg
+	SentimentVeryDissatisfied Icon = "outlined/sentiment_very_dissatisfied"
 	
 	// SentimentVerySatisfied is the "sentiment_very_satisfied" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_very_satisfied.svg
-	SentimentVerySatisfied Icon = "sentiment_very_satisfied"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_very_satisfied.svg
+	SentimentVerySatisfied Icon = "outlined/sentiment_very_satisfied"
 	
 	// SentimentWorried is the "sentiment_worried" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sentiment_worried.svg
-	SentimentWorried Icon = "sentiment_worried"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sentiment_worried.svg
+	SentimentWorried Icon = "outlined/sentiment_worried"
 	
 	// SetMeal is the "set_meal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/set_meal.svg
-	SetMeal Icon = "set_meal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/set_meal.svg
+	SetMeal Icon = "outlined/set_meal"
 	
 	// Settings is the "settings" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings.svg
-	Settings Icon = "settings"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings.svg
+	Settings Icon = "outlined/settings"
 	
 	// SettingsAccessibility is the "settings_accessibility" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_accessibility.svg
-	SettingsAccessibility Icon = "settings_accessibility"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_accessibility.svg
+	SettingsAccessibility Icon = "outlined/settings_accessibility"
 	
 	// SettingsAccountBox is the "settings_account_box" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_account_box.svg
-	SettingsAccountBox Icon = "settings_account_box"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_account_box.svg
+	SettingsAccountBox Icon = "outlined/settings_account_box"
 	
 	// SettingsAlert is the "settings_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_alert.svg
-	SettingsAlert Icon = "settings_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_alert.svg
+	SettingsAlert Icon = "outlined/settings_alert"
 	
 	// SettingsApplications is the "settings_applications" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_applications.svg
-	SettingsApplications Icon = "settings_applications"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_applications.svg
+	SettingsApplications Icon = "outlined/settings_applications"
 	
 	// SettingsBRoll is the "settings_b_roll" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_b_roll.svg
-	SettingsBRoll Icon = "settings_b_roll"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_b_roll.svg
+	SettingsBRoll Icon = "outlined/settings_b_roll"
 	
 	// SettingsBackupRestore is the "settings_backup_restore" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_backup_restore.svg
-	SettingsBackupRestore Icon = "settings_backup_restore"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_backup_restore.svg
+	SettingsBackupRestore Icon = "outlined/settings_backup_restore"
 	
 	// SettingsBluetooth is the "settings_bluetooth" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_bluetooth.svg
-	SettingsBluetooth Icon = "settings_bluetooth"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_bluetooth.svg
+	SettingsBluetooth Icon = "outlined/settings_bluetooth"
 	
 	// SettingsBrightness is the "settings_brightness" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_brightness.svg
-	SettingsBrightness Icon = "settings_brightness"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_brightness.svg
+	SettingsBrightness Icon = "outlined/settings_brightness"
 	
 	// SettingsCell is the "settings_cell" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_cell.svg
-	SettingsCell Icon = "settings_cell"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_cell.svg
+	SettingsCell Icon = "outlined/settings_cell"
 	
 	// SettingsCinematicBlur is the "settings_cinematic_blur" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_cinematic_blur.svg
-	SettingsCinematicBlur Icon = "settings_cinematic_blur"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_cinematic_blur.svg
+	SettingsCinematicBlur Icon = "outlined/settings_cinematic_blur"
 	
 	// SettingsEthernet is the "settings_ethernet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_ethernet.svg
-	SettingsEthernet Icon = "settings_ethernet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_ethernet.svg
+	SettingsEthernet Icon = "outlined/settings_ethernet"
 	
 	// SettingsInputAntenna is the "settings_input_antenna" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_input_antenna.svg
-	SettingsInputAntenna Icon = "settings_input_antenna"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_input_antenna.svg
+	SettingsInputAntenna Icon = "outlined/settings_input_antenna"
 	
 	// SettingsInputComponent is the "settings_input_component" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_input_component.svg
-	SettingsInputComponent Icon = "settings_input_component"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_input_component.svg
+	SettingsInputComponent Icon = "outlined/settings_input_component"
 	
 	// SettingsInputHdmi is the "settings_input_hdmi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_input_hdmi.svg
-	SettingsInputHdmi Icon = "settings_input_hdmi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_input_hdmi.svg
+	SettingsInputHdmi Icon = "outlined/settings_input_hdmi"
 	
 	// SettingsInputSvideo is the "settings_input_svideo" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_input_svideo.svg
-	SettingsInputSvideo Icon = "settings_input_svideo"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_input_svideo.svg
+	SettingsInputSvideo Icon = "outlined/settings_input_svideo"
 	
 	// SettingsMotionMode is the "settings_motion_mode" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_motion_mode.svg
-	SettingsMotionMode Icon = "settings_motion_mode"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_motion_mode.svg
+	SettingsMotionMode Icon = "outlined/settings_motion_mode"
 	
 	// SettingsNightSight is the "settings_night_sight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_night_sight.svg
-	SettingsNightSight Icon = "settings_night_sight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_night_sight.svg
+	SettingsNightSight Icon = "outlined/settings_night_sight"
 	
 	// SettingsOverscan is the "settings_overscan" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_overscan.svg
-	SettingsOverscan Icon = "settings_overscan"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_overscan.svg
+	SettingsOverscan Icon = "outlined/settings_overscan"
 	
 	// SettingsPanorama is the "settings_panorama" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_panorama.svg
-	SettingsPanorama Icon = "settings_panorama"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_panorama.svg
+	SettingsPanorama Icon = "outlined/settings_panorama"
 	
 	// SettingsPhone is the "settings_phone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_phone.svg
-	SettingsPhone Icon = "settings_phone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_phone.svg
+	SettingsPhone Icon = "outlined/settings_phone"
 	
 	// SettingsPhotoCamera is the "settings_photo_camera" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_photo_camera.svg
-	SettingsPhotoCamera Icon = "settings_photo_camera"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_photo_camera.svg
+	SettingsPhotoCamera Icon = "outlined/settings_photo_camera"
 	
 	// SettingsPower is the "settings_power" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_power.svg
-	SettingsPower Icon = "settings_power"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_power.svg
+	SettingsPower Icon = "outlined/settings_power"
 	
 	// SettingsRemote is the "settings_remote" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_remote.svg
-	SettingsRemote Icon = "settings_remote"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_remote.svg
+	SettingsRemote Icon = "outlined/settings_remote"
 	
 	// SettingsSlowMotion is the "settings_slow_motion" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_slow_motion.svg
-	SettingsSlowMotion Icon = "settings_slow_motion"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_slow_motion.svg
+	SettingsSlowMotion Icon = "outlined/settings_slow_motion"
 	
 	// SettingsSystemDaydream is the "settings_system_daydream" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_system_daydream.svg
-	SettingsSystemDaydream Icon = "settings_system_daydream"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_system_daydream.svg
+	SettingsSystemDaydream Icon = "outlined/settings_system_daydream"
 	
 	// SettingsTimelapse is the "settings_timelapse" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_timelapse.svg
-	SettingsTimelapse Icon = "settings_timelapse"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_timelapse.svg
+	SettingsTimelapse Icon = "outlined/settings_timelapse"
 	
 	// SettingsVideoCamera is the "settings_video_camera" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_video_camera.svg
-	SettingsVideoCamera Icon = "settings_video_camera"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_video_camera.svg
+	SettingsVideoCamera Icon = "outlined/settings_video_camera"
 	
 	// SettingsVoice is the "settings_voice" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settings_voice.svg
-	SettingsVoice Icon = "settings_voice"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settings_voice.svg
+	SettingsVoice Icon = "outlined/settings_voice"
 	
 	// SettopComponent is the "settop_component" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/settop_component.svg
-	SettopComponent Icon = "settop_component"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/settop_component.svg
+	SettopComponent Icon = "outlined/settop_component"
 	
 	// SevereCold is the "severe_cold" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/severe_cold.svg
-	SevereCold Icon = "severe_cold"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/severe_cold.svg
+	SevereCold Icon = "outlined/severe_cold"
 	
 	// Shadow is the "shadow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shadow.svg
-	Shadow Icon = "shadow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shadow.svg
+	Shadow Icon = "outlined/shadow"
 	
 	// ShapeLine is the "shape_line" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shape_line.svg
-	ShapeLine Icon = "shape_line"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shape_line.svg
+	ShapeLine Icon = "outlined/shape_line"
 	
 	// Shapes is the "shapes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shapes.svg
-	Shapes Icon = "shapes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shapes.svg
+	Shapes Icon = "outlined/shapes"
 	
 	// Share is the "share" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/share.svg
-	Share Icon = "share"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/share.svg
+	Share Icon = "outlined/share"
 	
 	// ShareLocation is the "share_location" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/share_location.svg
-	ShareLocation Icon = "share_location"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/share_location.svg
+	ShareLocation Icon = "outlined/share_location"
 	
 	// ShareOff is the "share_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/share_off.svg
-	ShareOff Icon = "share_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/share_off.svg
+	ShareOff Icon = "outlined/share_off"
 	
 	// ShareReviews is the "share_reviews" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/share_reviews.svg
-	ShareReviews Icon = "share_reviews"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/share_reviews.svg
+	ShareReviews Icon = "outlined/share_reviews"
 	
 	// ShareWindows is the "share_windows" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/share_windows.svg
-	ShareWindows Icon = "share_windows"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/share_windows.svg
+	ShareWindows Icon = "outlined/share_windows"
 	
 	// SheetsRtl is the "sheets_rtl" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sheets_rtl.svg
-	SheetsRtl Icon = "sheets_rtl"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sheets_rtl.svg
+	SheetsRtl Icon = "outlined/sheets_rtl"
 	
 	// ShelfAutoHide is the "shelf_auto_hide" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shelf_auto_hide.svg
-	ShelfAutoHide Icon = "shelf_auto_hide"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shelf_auto_hide.svg
+	ShelfAutoHide Icon = "outlined/shelf_auto_hide"
 	
 	// ShelfPosition is the "shelf_position" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shelf_position.svg
-	ShelfPosition Icon = "shelf_position"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shelf_position.svg
+	ShelfPosition Icon = "outlined/shelf_position"
 	
 	// Shelves is the "shelves" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shelves.svg
-	Shelves Icon = "shelves"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shelves.svg
+	Shelves Icon = "outlined/shelves"
 	
 	// Shield is the "shield" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shield.svg
-	Shield Icon = "shield"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shield.svg
+	Shield Icon = "outlined/shield"
 	
 	// ShieldLock is the "shield_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shield_lock.svg
-	ShieldLock Icon = "shield_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shield_lock.svg
+	ShieldLock Icon = "outlined/shield_lock"
 	
 	// ShieldLocked is the "shield_locked" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shield_locked.svg
-	ShieldLocked Icon = "shield_locked"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shield_locked.svg
+	ShieldLocked Icon = "outlined/shield_locked"
 	
 	// ShieldMoon is the "shield_moon" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shield_moon.svg
-	ShieldMoon Icon = "shield_moon"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shield_moon.svg
+	ShieldMoon Icon = "outlined/shield_moon"
 	
 	// ShieldPerson is the "shield_person" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shield_person.svg
-	ShieldPerson Icon = "shield_person"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shield_person.svg
+	ShieldPerson Icon = "outlined/shield_person"
 	
 	// ShieldWithHeart is the "shield_with_heart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shield_with_heart.svg
-	ShieldWithHeart Icon = "shield_with_heart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shield_with_heart.svg
+	ShieldWithHeart Icon = "outlined/shield_with_heart"
 	
 	// ShieldWithHouse is the "shield_with_house" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shield_with_house.svg
-	ShieldWithHouse Icon = "shield_with_house"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shield_with_house.svg
+	ShieldWithHouse Icon = "outlined/shield_with_house"
 	
 	// Shift is the "shift" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shift.svg
-	Shift Icon = "shift"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shift.svg
+	Shift Icon = "outlined/shift"
 	
 	// ShiftLock is the "shift_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shift_lock.svg
-	ShiftLock Icon = "shift_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shift_lock.svg
+	ShiftLock Icon = "outlined/shift_lock"
 	
 	// Shop is the "shop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shop.svg
-	Shop Icon = "shop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shop.svg
+	Shop Icon = "outlined/shop"
 	
 	// ShopTwo is the "shop_two" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shop_two.svg
-	ShopTwo Icon = "shop_two"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shop_two.svg
+	ShopTwo Icon = "outlined/shop_two"
 	
 	// ShoppingBag is the "shopping_bag" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shopping_bag.svg
-	ShoppingBag Icon = "shopping_bag"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shopping_bag.svg
+	ShoppingBag Icon = "outlined/shopping_bag"
 	
 	// ShoppingBasket is the "shopping_basket" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shopping_basket.svg
-	ShoppingBasket Icon = "shopping_basket"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shopping_basket.svg
+	ShoppingBasket Icon = "outlined/shopping_basket"
 	
 	// ShoppingCart is the "shopping_cart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shopping_cart.svg
-	ShoppingCart Icon = "shopping_cart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shopping_cart.svg
+	ShoppingCart Icon = "outlined/shopping_cart"
 	
 	// ShoppingCartCheckout is the "shopping_cart_checkout" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shopping_cart_checkout.svg
-	ShoppingCartCheckout Icon = "shopping_cart_checkout"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shopping_cart_checkout.svg
+	ShoppingCartCheckout Icon = "outlined/shopping_cart_checkout"
 	
 	// ShortStay is the "short_stay" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/short_stay.svg
-	ShortStay Icon = "short_stay"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/short_stay.svg
+	ShortStay Icon = "outlined/short_stay"
 	
 	// ShortText is the "short_text" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/short_text.svg
-	ShortText Icon = "short_text"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/short_text.svg
+	ShortText Icon = "outlined/short_text"
 	
 	// ShowChart is the "show_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/show_chart.svg
-	ShowChart Icon = "show_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/show_chart.svg
+	ShowChart Icon = "outlined/show_chart"
 	
 	// Shower is the "shower" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shower.svg
-	Shower Icon = "shower"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shower.svg
+	Shower Icon = "outlined/shower"
 	
 	// Shuffle is the "shuffle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shuffle.svg
-	Shuffle Icon = "shuffle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shuffle.svg
+	Shuffle Icon = "outlined/shuffle"
 	
 	// ShuffleOn is the "shuffle_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shuffle_on.svg
-	ShuffleOn Icon = "shuffle_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shuffle_on.svg
+	ShuffleOn Icon = "outlined/shuffle_on"
 	
 	// ShutterSpeed is the "shutter_speed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/shutter_speed.svg
-	ShutterSpeed Icon = "shutter_speed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/shutter_speed.svg
+	ShutterSpeed Icon = "outlined/shutter_speed"
 	
 	// Sick is the "sick" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sick.svg
-	Sick Icon = "sick"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sick.svg
+	Sick Icon = "outlined/sick"
 	
 	// SideNavigation is the "side_navigation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/side_navigation.svg
-	SideNavigation Icon = "side_navigation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/side_navigation.svg
+	SideNavigation Icon = "outlined/side_navigation"
 	
 	// SignLanguage is the "sign_language" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sign_language.svg
-	SignLanguage Icon = "sign_language"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sign_language.svg
+	SignLanguage Icon = "outlined/sign_language"
 	
 	// SignalCellular0Bar is the "signal_cellular_0_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_0_bar.svg
-	SignalCellular0Bar Icon = "signal_cellular_0_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_0_bar.svg
+	SignalCellular0Bar Icon = "outlined/signal_cellular_0_bar"
 	
 	// SignalCellular1Bar is the "signal_cellular_1_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_1_bar.svg
-	SignalCellular1Bar Icon = "signal_cellular_1_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_1_bar.svg
+	SignalCellular1Bar Icon = "outlined/signal_cellular_1_bar"
 	
 	// SignalCellular2Bar is the "signal_cellular_2_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_2_bar.svg
-	SignalCellular2Bar Icon = "signal_cellular_2_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_2_bar.svg
+	SignalCellular2Bar Icon = "outlined/signal_cellular_2_bar"
 	
 	// SignalCellular3Bar is the "signal_cellular_3_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_3_bar.svg
-	SignalCellular3Bar Icon = "signal_cellular_3_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_3_bar.svg
+	SignalCellular3Bar Icon = "outlined/signal_cellular_3_bar"
 	
 	// SignalCellular4Bar is the "signal_cellular_4_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_4_bar.svg
-	SignalCellular4Bar Icon = "signal_cellular_4_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_4_bar.svg
+	SignalCellular4Bar Icon = "outlined/signal_cellular_4_bar"
 	
 	// SignalCellularAdd is the "signal_cellular_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_add.svg
-	SignalCellularAdd Icon = "signal_cellular_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_add.svg
+	SignalCellularAdd Icon = "outlined/signal_cellular_add"
 	
 	// SignalCellularAlt is the "signal_cellular_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_alt.svg
-	SignalCellularAlt Icon = "signal_cellular_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_alt.svg
+	SignalCellularAlt Icon = "outlined/signal_cellular_alt"
 	
 	// SignalCellularAlt1Bar is the "signal_cellular_alt_1_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_alt_1_bar.svg
-	SignalCellularAlt1Bar Icon = "signal_cellular_alt_1_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_alt_1_bar.svg
+	SignalCellularAlt1Bar Icon = "outlined/signal_cellular_alt_1_bar"
 	
 	// SignalCellularAlt2Bar is the "signal_cellular_alt_2_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_alt_2_bar.svg
-	SignalCellularAlt2Bar Icon = "signal_cellular_alt_2_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_alt_2_bar.svg
+	SignalCellularAlt2Bar Icon = "outlined/signal_cellular_alt_2_bar"
 	
 	// SignalCellularConnectedNoInternet0Bar is the "signal_cellular_connected_no_internet_0_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_connected_no_internet_0_bar.svg
-	SignalCellularConnectedNoInternet0Bar Icon = "signal_cellular_connected_no_internet_0_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_connected_no_internet_0_bar.svg
+	SignalCellularConnectedNoInternet0Bar Icon = "outlined/signal_cellular_connected_no_internet_0_bar"
 	
 	// SignalCellularConnectedNoInternet4Bar is the "signal_cellular_connected_no_internet_4_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_connected_no_internet_4_bar.svg
-	SignalCellularConnectedNoInternet4Bar Icon = "signal_cellular_connected_no_internet_4_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_connected_no_internet_4_bar.svg
+	SignalCellularConnectedNoInternet4Bar Icon = "outlined/signal_cellular_connected_no_internet_4_bar"
 	
 	// SignalCellularNodata is the "signal_cellular_nodata" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_nodata.svg
-	SignalCellularNodata Icon = "signal_cellular_nodata"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_nodata.svg
+	SignalCellularNodata Icon = "outlined/signal_cellular_nodata"
 	
 	// SignalCellularNull is the "signal_cellular_null" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_null.svg
-	SignalCellularNull Icon = "signal_cellular_null"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_null.svg
+	SignalCellularNull Icon = "outlined/signal_cellular_null"
 	
 	// SignalCellularOff is the "signal_cellular_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_off.svg
-	SignalCellularOff Icon = "signal_cellular_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_off.svg
+	SignalCellularOff Icon = "outlined/signal_cellular_off"
 	
 	// SignalCellularPause is the "signal_cellular_pause" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_cellular_pause.svg
-	SignalCellularPause Icon = "signal_cellular_pause"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_cellular_pause.svg
+	SignalCellularPause Icon = "outlined/signal_cellular_pause"
 	
 	// SignalDisconnected is the "signal_disconnected" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_disconnected.svg
-	SignalDisconnected Icon = "signal_disconnected"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_disconnected.svg
+	SignalDisconnected Icon = "outlined/signal_disconnected"
 	
 	// SignalWifi0Bar is the "signal_wifi_0_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_wifi_0_bar.svg
-	SignalWifi0Bar Icon = "signal_wifi_0_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_wifi_0_bar.svg
+	SignalWifi0Bar Icon = "outlined/signal_wifi_0_bar"
 	
 	// SignalWifi4Bar is the "signal_wifi_4_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_wifi_4_bar.svg
-	SignalWifi4Bar Icon = "signal_wifi_4_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_wifi_4_bar.svg
+	SignalWifi4Bar Icon = "outlined/signal_wifi_4_bar"
 	
 	// SignalWifiBad is the "signal_wifi_bad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_wifi_bad.svg
-	SignalWifiBad Icon = "signal_wifi_bad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_wifi_bad.svg
+	SignalWifiBad Icon = "outlined/signal_wifi_bad"
 	
 	// SignalWifiOff is the "signal_wifi_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_wifi_off.svg
-	SignalWifiOff Icon = "signal_wifi_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_wifi_off.svg
+	SignalWifiOff Icon = "outlined/signal_wifi_off"
 	
 	// SignalWifiStatusbarNotConnected is the "signal_wifi_statusbar_not_connected" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_wifi_statusbar_not_connected.svg
-	SignalWifiStatusbarNotConnected Icon = "signal_wifi_statusbar_not_connected"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_wifi_statusbar_not_connected.svg
+	SignalWifiStatusbarNotConnected Icon = "outlined/signal_wifi_statusbar_not_connected"
 	
 	// SignalWifiStatusbarNull is the "signal_wifi_statusbar_null" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signal_wifi_statusbar_null.svg
-	SignalWifiStatusbarNull Icon = "signal_wifi_statusbar_null"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signal_wifi_statusbar_null.svg
+	SignalWifiStatusbarNull Icon = "outlined/signal_wifi_statusbar_null"
 	
 	// Signature is the "signature" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signature.svg
-	Signature Icon = "signature"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signature.svg
+	Signature Icon = "outlined/signature"
 	
 	// Signpost is the "signpost" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/signpost.svg
-	Signpost Icon = "signpost"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/signpost.svg
+	Signpost Icon = "outlined/signpost"
 	
 	// SimCard is the "sim_card" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sim_card.svg
-	SimCard Icon = "sim_card"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sim_card.svg
+	SimCard Icon = "outlined/sim_card"
 	
 	// SimCardDownload is the "sim_card_download" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sim_card_download.svg
-	SimCardDownload Icon = "sim_card_download"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sim_card_download.svg
+	SimCardDownload Icon = "outlined/sim_card_download"
 	
 	// SingleBed is the "single_bed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/single_bed.svg
-	SingleBed Icon = "single_bed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/single_bed.svg
+	SingleBed Icon = "outlined/single_bed"
 	
 	// Sip is the "sip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sip.svg
-	Sip Icon = "sip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sip.svg
+	Sip Icon = "outlined/sip"
 	
 	// Skateboarding is the "skateboarding" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/skateboarding.svg
-	Skateboarding Icon = "skateboarding"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/skateboarding.svg
+	Skateboarding Icon = "outlined/skateboarding"
 	
 	// Skeleton is the "skeleton" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/skeleton.svg
-	Skeleton Icon = "skeleton"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/skeleton.svg
+	Skeleton Icon = "outlined/skeleton"
 	
 	// SkipNext is the "skip_next" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/skip_next.svg
-	SkipNext Icon = "skip_next"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/skip_next.svg
+	SkipNext Icon = "outlined/skip_next"
 	
 	// SkipPrevious is the "skip_previous" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/skip_previous.svg
-	SkipPrevious Icon = "skip_previous"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/skip_previous.svg
+	SkipPrevious Icon = "outlined/skip_previous"
 	
 	// Skull is the "skull" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/skull.svg
-	Skull Icon = "skull"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/skull.svg
+	Skull Icon = "outlined/skull"
 	
 	// Sledding is the "sledding" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sledding.svg
-	Sledding Icon = "sledding"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sledding.svg
+	Sledding Icon = "outlined/sledding"
 	
 	// SleepScore is the "sleep_score" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sleep_score.svg
-	SleepScore Icon = "sleep_score"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sleep_score.svg
+	SleepScore Icon = "outlined/sleep_score"
 	
 	// SlideLibrary is the "slide_library" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/slide_library.svg
-	SlideLibrary Icon = "slide_library"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/slide_library.svg
+	SlideLibrary Icon = "outlined/slide_library"
 	
 	// Sliders is the "sliders" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sliders.svg
-	Sliders Icon = "sliders"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sliders.svg
+	Sliders Icon = "outlined/sliders"
 	
 	// Slideshow is the "slideshow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/slideshow.svg
-	Slideshow Icon = "slideshow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/slideshow.svg
+	Slideshow Icon = "outlined/slideshow"
 	
 	// SlowMotionVideo is the "slow_motion_video" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/slow_motion_video.svg
-	SlowMotionVideo Icon = "slow_motion_video"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/slow_motion_video.svg
+	SlowMotionVideo Icon = "outlined/slow_motion_video"
 	
 	// SmartDisplay is the "smart_display" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/smart_display.svg
-	SmartDisplay Icon = "smart_display"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/smart_display.svg
+	SmartDisplay Icon = "outlined/smart_display"
 	
 	// SmartOutlet is the "smart_outlet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/smart_outlet.svg
-	SmartOutlet Icon = "smart_outlet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/smart_outlet.svg
+	SmartOutlet Icon = "outlined/smart_outlet"
 	
 	// SmartScreen is the "smart_screen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/smart_screen.svg
-	SmartScreen Icon = "smart_screen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/smart_screen.svg
+	SmartScreen Icon = "outlined/smart_screen"
 	
 	// SmartToy is the "smart_toy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/smart_toy.svg
-	SmartToy Icon = "smart_toy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/smart_toy.svg
+	SmartToy Icon = "outlined/smart_toy"
 	
 	// Smartphone is the "smartphone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/smartphone.svg
-	Smartphone Icon = "smartphone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/smartphone.svg
+	Smartphone Icon = "outlined/smartphone"
 	
 	// SmbShare is the "smb_share" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/smb_share.svg
-	SmbShare Icon = "smb_share"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/smb_share.svg
+	SmbShare Icon = "outlined/smb_share"
 	
 	// SmokeFree is the "smoke_free" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/smoke_free.svg
-	SmokeFree Icon = "smoke_free"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/smoke_free.svg
+	SmokeFree Icon = "outlined/smoke_free"
 	
 	// SmokingRooms is the "smoking_rooms" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/smoking_rooms.svg
-	SmokingRooms Icon = "smoking_rooms"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/smoking_rooms.svg
+	SmokingRooms Icon = "outlined/smoking_rooms"
 	
 	// Sms is the "sms" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sms.svg
-	Sms Icon = "sms"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sms.svg
+	Sms Icon = "outlined/sms"
 	
 	// SnippetFolder is the "snippet_folder" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/snippet_folder.svg
-	SnippetFolder Icon = "snippet_folder"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/snippet_folder.svg
+	SnippetFolder Icon = "outlined/snippet_folder"
 	
 	// Snooze is the "snooze" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/snooze.svg
-	Snooze Icon = "snooze"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/snooze.svg
+	Snooze Icon = "outlined/snooze"
 	
 	// Snowboarding is the "snowboarding" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/snowboarding.svg
-	Snowboarding Icon = "snowboarding"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/snowboarding.svg
+	Snowboarding Icon = "outlined/snowboarding"
 	
 	// Snowing is the "snowing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/snowing.svg
-	Snowing Icon = "snowing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/snowing.svg
+	Snowing Icon = "outlined/snowing"
 	
 	// SnowingHeavy is the "snowing_heavy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/snowing_heavy.svg
-	SnowingHeavy Icon = "snowing_heavy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/snowing_heavy.svg
+	SnowingHeavy Icon = "outlined/snowing_heavy"
 	
 	// Snowmobile is the "snowmobile" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/snowmobile.svg
-	Snowmobile Icon = "snowmobile"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/snowmobile.svg
+	Snowmobile Icon = "outlined/snowmobile"
 	
 	// Snowshoeing is the "snowshoeing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/snowshoeing.svg
-	Snowshoeing Icon = "snowshoeing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/snowshoeing.svg
+	Snowshoeing Icon = "outlined/snowshoeing"
 	
 	// Soap is the "soap" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/soap.svg
-	Soap Icon = "soap"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/soap.svg
+	Soap Icon = "outlined/soap"
 	
 	// SocialDistance is the "social_distance" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/social_distance.svg
-	SocialDistance Icon = "social_distance"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/social_distance.svg
+	SocialDistance Icon = "outlined/social_distance"
 	
 	// SocialLeaderboard is the "social_leaderboard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/social_leaderboard.svg
-	SocialLeaderboard Icon = "social_leaderboard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/social_leaderboard.svg
+	SocialLeaderboard Icon = "outlined/social_leaderboard"
 	
 	// SolarPower is the "solar_power" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/solar_power.svg
-	SolarPower Icon = "solar_power"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/solar_power.svg
+	SolarPower Icon = "outlined/solar_power"
 	
 	// Sort is the "sort" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sort.svg
-	Sort Icon = "sort"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sort.svg
+	Sort Icon = "outlined/sort"
 	
 	// SortByAlpha is the "sort_by_alpha" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sort_by_alpha.svg
-	SortByAlpha Icon = "sort_by_alpha"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sort_by_alpha.svg
+	SortByAlpha Icon = "outlined/sort_by_alpha"
 	
 	// Sos is the "sos" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sos.svg
-	Sos Icon = "sos"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sos.svg
+	Sos Icon = "outlined/sos"
 	
 	// SoundDetectionDogBarking is the "sound_detection_dog_barking" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sound_detection_dog_barking.svg
-	SoundDetectionDogBarking Icon = "sound_detection_dog_barking"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sound_detection_dog_barking.svg
+	SoundDetectionDogBarking Icon = "outlined/sound_detection_dog_barking"
 	
 	// SoundDetectionGlassBreak is the "sound_detection_glass_break" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sound_detection_glass_break.svg
-	SoundDetectionGlassBreak Icon = "sound_detection_glass_break"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sound_detection_glass_break.svg
+	SoundDetectionGlassBreak Icon = "outlined/sound_detection_glass_break"
 	
 	// SoundDetectionLoudSound is the "sound_detection_loud_sound" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sound_detection_loud_sound.svg
-	SoundDetectionLoudSound Icon = "sound_detection_loud_sound"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sound_detection_loud_sound.svg
+	SoundDetectionLoudSound Icon = "outlined/sound_detection_loud_sound"
 	
 	// SoundSampler is the "sound_sampler" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sound_sampler.svg
-	SoundSampler Icon = "sound_sampler"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sound_sampler.svg
+	SoundSampler Icon = "outlined/sound_sampler"
 	
 	// SoupKitchen is the "soup_kitchen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/soup_kitchen.svg
-	SoupKitchen Icon = "soup_kitchen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/soup_kitchen.svg
+	SoupKitchen Icon = "outlined/soup_kitchen"
 	
 	// SourceNotes is the "source_notes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/source_notes.svg
-	SourceNotes Icon = "source_notes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/source_notes.svg
+	SourceNotes Icon = "outlined/source_notes"
 	
 	// South is the "south" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/south.svg
-	South Icon = "south"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/south.svg
+	South Icon = "outlined/south"
 	
 	// SouthAmerica is the "south_america" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/south_america.svg
-	SouthAmerica Icon = "south_america"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/south_america.svg
+	SouthAmerica Icon = "outlined/south_america"
 	
 	// SouthEast is the "south_east" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/south_east.svg
-	SouthEast Icon = "south_east"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/south_east.svg
+	SouthEast Icon = "outlined/south_east"
 	
 	// SouthWest is the "south_west" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/south_west.svg
-	SouthWest Icon = "south_west"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/south_west.svg
+	SouthWest Icon = "outlined/south_west"
 	
 	// Spa is the "spa" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/spa.svg
-	Spa Icon = "spa"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/spa.svg
+	Spa Icon = "outlined/spa"
 	
 	// SpaceBar is the "space_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/space_bar.svg
-	SpaceBar Icon = "space_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/space_bar.svg
+	SpaceBar Icon = "outlined/space_bar"
 	
 	// SpaceDashboard is the "space_dashboard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/space_dashboard.svg
-	SpaceDashboard Icon = "space_dashboard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/space_dashboard.svg
+	SpaceDashboard Icon = "outlined/space_dashboard"
 	
 	// SpatialAudio is the "spatial_audio" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/spatial_audio.svg
-	SpatialAudio Icon = "spatial_audio"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/spatial_audio.svg
+	SpatialAudio Icon = "outlined/spatial_audio"
 	
 	// SpatialAudioOff is the "spatial_audio_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/spatial_audio_off.svg
-	SpatialAudioOff Icon = "spatial_audio_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/spatial_audio_off.svg
+	SpatialAudioOff Icon = "outlined/spatial_audio_off"
 	
 	// SpatialTracking is the "spatial_tracking" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/spatial_tracking.svg
-	SpatialTracking Icon = "spatial_tracking"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/spatial_tracking.svg
+	SpatialTracking Icon = "outlined/spatial_tracking"
 	
 	// Speaker is the "speaker" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/speaker.svg
-	Speaker Icon = "speaker"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/speaker.svg
+	Speaker Icon = "outlined/speaker"
 	
 	// SpeakerGroup is the "speaker_group" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/speaker_group.svg
-	SpeakerGroup Icon = "speaker_group"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/speaker_group.svg
+	SpeakerGroup Icon = "outlined/speaker_group"
 	
 	// SpeakerNotes is the "speaker_notes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/speaker_notes.svg
-	SpeakerNotes Icon = "speaker_notes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/speaker_notes.svg
+	SpeakerNotes Icon = "outlined/speaker_notes"
 	
 	// SpeakerNotesOff is the "speaker_notes_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/speaker_notes_off.svg
-	SpeakerNotesOff Icon = "speaker_notes_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/speaker_notes_off.svg
+	SpeakerNotesOff Icon = "outlined/speaker_notes_off"
 	
 	// SpeakerPhone is the "speaker_phone" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/speaker_phone.svg
-	SpeakerPhone Icon = "speaker_phone"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/speaker_phone.svg
+	SpeakerPhone Icon = "outlined/speaker_phone"
 	
 	// SpecialCharacter is the "special_character" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/special_character.svg
-	SpecialCharacter Icon = "special_character"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/special_character.svg
+	SpecialCharacter Icon = "outlined/special_character"
 	
 	// SpecificGravity is the "specific_gravity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/specific_gravity.svg
-	SpecificGravity Icon = "specific_gravity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/specific_gravity.svg
+	SpecificGravity Icon = "outlined/specific_gravity"
 	
 	// SpeechToText is the "speech_to_text" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/speech_to_text.svg
-	SpeechToText Icon = "speech_to_text"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/speech_to_text.svg
+	SpeechToText Icon = "outlined/speech_to_text"
 	
 	// Speed is the "speed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/speed.svg
-	Speed Icon = "speed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/speed.svg
+	Speed Icon = "outlined/speed"
 	
 	// Spellcheck is the "spellcheck" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/spellcheck.svg
-	Spellcheck Icon = "spellcheck"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/spellcheck.svg
+	Spellcheck Icon = "outlined/spellcheck"
 	
 	// Splitscreen is the "splitscreen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/splitscreen.svg
-	Splitscreen Icon = "splitscreen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/splitscreen.svg
+	Splitscreen Icon = "outlined/splitscreen"
 	
 	// SplitscreenBottom is the "splitscreen_bottom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/splitscreen_bottom.svg
-	SplitscreenBottom Icon = "splitscreen_bottom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/splitscreen_bottom.svg
+	SplitscreenBottom Icon = "outlined/splitscreen_bottom"
 	
 	// SplitscreenLeft is the "splitscreen_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/splitscreen_left.svg
-	SplitscreenLeft Icon = "splitscreen_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/splitscreen_left.svg
+	SplitscreenLeft Icon = "outlined/splitscreen_left"
 	
 	// SplitscreenRight is the "splitscreen_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/splitscreen_right.svg
-	SplitscreenRight Icon = "splitscreen_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/splitscreen_right.svg
+	SplitscreenRight Icon = "outlined/splitscreen_right"
 	
 	// SplitscreenTop is the "splitscreen_top" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/splitscreen_top.svg
-	SplitscreenTop Icon = "splitscreen_top"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/splitscreen_top.svg
+	SplitscreenTop Icon = "outlined/splitscreen_top"
 	
 	// Spo2 is the "spo2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/spo2.svg
-	Spo2 Icon = "spo2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/spo2.svg
+	Spo2 Icon = "outlined/spo2"
 	
 	// Spoke is the "spoke" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/spoke.svg
-	Spoke Icon = "spoke"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/spoke.svg
+	Spoke Icon = "outlined/spoke"
 	
 	// Sports is the "sports" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports.svg
-	Sports Icon = "sports"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports.svg
+	Sports Icon = "outlined/sports"
 	
 	// SportsBar is the "sports_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_bar.svg
-	SportsBar Icon = "sports_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_bar.svg
+	SportsBar Icon = "outlined/sports_bar"
 	
 	// SportsBaseball is the "sports_baseball" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_baseball.svg
-	SportsBaseball Icon = "sports_baseball"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_baseball.svg
+	SportsBaseball Icon = "outlined/sports_baseball"
 	
 	// SportsBasketball is the "sports_basketball" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_basketball.svg
-	SportsBasketball Icon = "sports_basketball"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_basketball.svg
+	SportsBasketball Icon = "outlined/sports_basketball"
 	
 	// SportsCricket is the "sports_cricket" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_cricket.svg
-	SportsCricket Icon = "sports_cricket"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_cricket.svg
+	SportsCricket Icon = "outlined/sports_cricket"
 	
 	// SportsEsports is the "sports_esports" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_esports.svg
-	SportsEsports Icon = "sports_esports"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_esports.svg
+	SportsEsports Icon = "outlined/sports_esports"
 	
 	// SportsFootball is the "sports_football" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_football.svg
-	SportsFootball Icon = "sports_football"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_football.svg
+	SportsFootball Icon = "outlined/sports_football"
 	
 	// SportsGolf is the "sports_golf" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_golf.svg
-	SportsGolf Icon = "sports_golf"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_golf.svg
+	SportsGolf Icon = "outlined/sports_golf"
 	
 	// SportsGymnastics is the "sports_gymnastics" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_gymnastics.svg
-	SportsGymnastics Icon = "sports_gymnastics"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_gymnastics.svg
+	SportsGymnastics Icon = "outlined/sports_gymnastics"
 	
 	// SportsHandball is the "sports_handball" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_handball.svg
-	SportsHandball Icon = "sports_handball"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_handball.svg
+	SportsHandball Icon = "outlined/sports_handball"
 	
 	// SportsHockey is the "sports_hockey" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_hockey.svg
-	SportsHockey Icon = "sports_hockey"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_hockey.svg
+	SportsHockey Icon = "outlined/sports_hockey"
 	
 	// SportsKabaddi is the "sports_kabaddi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_kabaddi.svg
-	SportsKabaddi Icon = "sports_kabaddi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_kabaddi.svg
+	SportsKabaddi Icon = "outlined/sports_kabaddi"
 	
 	// SportsMartialArts is the "sports_martial_arts" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_martial_arts.svg
-	SportsMartialArts Icon = "sports_martial_arts"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_martial_arts.svg
+	SportsMartialArts Icon = "outlined/sports_martial_arts"
 	
 	// SportsMma is the "sports_mma" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_mma.svg
-	SportsMma Icon = "sports_mma"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_mma.svg
+	SportsMma Icon = "outlined/sports_mma"
 	
 	// SportsMotorsports is the "sports_motorsports" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_motorsports.svg
-	SportsMotorsports Icon = "sports_motorsports"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_motorsports.svg
+	SportsMotorsports Icon = "outlined/sports_motorsports"
 	
 	// SportsRugby is the "sports_rugby" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_rugby.svg
-	SportsRugby Icon = "sports_rugby"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_rugby.svg
+	SportsRugby Icon = "outlined/sports_rugby"
 	
 	// SportsScore is the "sports_score" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_score.svg
-	SportsScore Icon = "sports_score"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_score.svg
+	SportsScore Icon = "outlined/sports_score"
 	
 	// SportsSoccer is the "sports_soccer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_soccer.svg
-	SportsSoccer Icon = "sports_soccer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_soccer.svg
+	SportsSoccer Icon = "outlined/sports_soccer"
 	
 	// SportsTennis is the "sports_tennis" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_tennis.svg
-	SportsTennis Icon = "sports_tennis"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_tennis.svg
+	SportsTennis Icon = "outlined/sports_tennis"
 	
 	// SportsVolleyball is the "sports_volleyball" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sports_volleyball.svg
-	SportsVolleyball Icon = "sports_volleyball"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sports_volleyball.svg
+	SportsVolleyball Icon = "outlined/sports_volleyball"
 	
 	// Sprinkler is the "sprinkler" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sprinkler.svg
-	Sprinkler Icon = "sprinkler"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sprinkler.svg
+	Sprinkler Icon = "outlined/sprinkler"
 	
 	// Sprint is the "sprint" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sprint.svg
-	Sprint Icon = "sprint"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sprint.svg
+	Sprint Icon = "outlined/sprint"
 	
 	// Square is the "square" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/square.svg
-	Square Icon = "square"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/square.svg
+	Square Icon = "outlined/square"
 	
 	// SquareFoot is the "square_foot" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/square_foot.svg
-	SquareFoot Icon = "square_foot"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/square_foot.svg
+	SquareFoot Icon = "outlined/square_foot"
 	
 	// SsidChart is the "ssid_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ssid_chart.svg
-	SsidChart Icon = "ssid_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ssid_chart.svg
+	SsidChart Icon = "outlined/ssid_chart"
 	
 	// Stack is the "stack" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stack.svg
-	Stack Icon = "stack"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stack.svg
+	Stack Icon = "outlined/stack"
 	
 	// StackOff is the "stack_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stack_off.svg
-	StackOff Icon = "stack_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stack_off.svg
+	StackOff Icon = "outlined/stack_off"
 	
 	// StackStar is the "stack_star" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stack_star.svg
-	StackStar Icon = "stack_star"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stack_star.svg
+	StackStar Icon = "outlined/stack_star"
 	
 	// StackedBarChart is the "stacked_bar_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stacked_bar_chart.svg
-	StackedBarChart Icon = "stacked_bar_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stacked_bar_chart.svg
+	StackedBarChart Icon = "outlined/stacked_bar_chart"
 	
 	// StackedEmail is the "stacked_email" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stacked_email.svg
-	StackedEmail Icon = "stacked_email"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stacked_email.svg
+	StackedEmail Icon = "outlined/stacked_email"
 	
 	// StackedInbox is the "stacked_inbox" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stacked_inbox.svg
-	StackedInbox Icon = "stacked_inbox"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stacked_inbox.svg
+	StackedInbox Icon = "outlined/stacked_inbox"
 	
 	// StackedLineChart is the "stacked_line_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stacked_line_chart.svg
-	StackedLineChart Icon = "stacked_line_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stacked_line_chart.svg
+	StackedLineChart Icon = "outlined/stacked_line_chart"
 	
 	// StadiaController is the "stadia_controller" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stadia_controller.svg
-	StadiaController Icon = "stadia_controller"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stadia_controller.svg
+	StadiaController Icon = "outlined/stadia_controller"
 	
 	// Stadium is the "stadium" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stadium.svg
-	Stadium Icon = "stadium"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stadium.svg
+	Stadium Icon = "outlined/stadium"
 	
 	// Stairs is the "stairs" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stairs.svg
-	Stairs Icon = "stairs"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stairs.svg
+	Stairs Icon = "outlined/stairs"
 	
 	// Star is the "star" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/star.svg
-	Star Icon = "star"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/star.svg
+	Star Icon = "outlined/star"
 	
 	// StarHalf is the "star_half" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/star_half.svg
-	StarHalf Icon = "star_half"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/star_half.svg
+	StarHalf Icon = "outlined/star_half"
 	
 	// StarRate is the "star_rate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/star_rate.svg
-	StarRate Icon = "star_rate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/star_rate.svg
+	StarRate Icon = "outlined/star_rate"
 	
 	// StarRateHalf is the "star_rate_half" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/star_rate_half.svg
-	StarRateHalf Icon = "star_rate_half"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/star_rate_half.svg
+	StarRateHalf Icon = "outlined/star_rate_half"
 	
 	// Stars is the "stars" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stars.svg
-	Stars Icon = "stars"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stars.svg
+	Stars Icon = "outlined/stars"
 	
 	// Start is the "start" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/start.svg
-	Start Icon = "start"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/start.svg
+	Start Icon = "outlined/start"
 	
 	// Stat1 is the "stat_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stat_1.svg
-	Stat1 Icon = "stat_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stat_1.svg
+	Stat1 Icon = "outlined/stat_1"
 	
 	// Stat2 is the "stat_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stat_2.svg
-	Stat2 Icon = "stat_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stat_2.svg
+	Stat2 Icon = "outlined/stat_2"
 	
 	// Stat3 is the "stat_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stat_3.svg
-	Stat3 Icon = "stat_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stat_3.svg
+	Stat3 Icon = "outlined/stat_3"
 	
 	// StatMinus1 is the "stat_minus_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stat_minus_1.svg
-	StatMinus1 Icon = "stat_minus_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stat_minus_1.svg
+	StatMinus1 Icon = "outlined/stat_minus_1"
 	
 	// StatMinus2 is the "stat_minus_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stat_minus_2.svg
-	StatMinus2 Icon = "stat_minus_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stat_minus_2.svg
+	StatMinus2 Icon = "outlined/stat_minus_2"
 	
 	// StatMinus3 is the "stat_minus_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stat_minus_3.svg
-	StatMinus3 Icon = "stat_minus_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stat_minus_3.svg
+	StatMinus3 Icon = "outlined/stat_minus_3"
 	
 	// StayCurrentLandscape is the "stay_current_landscape" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stay_current_landscape.svg
-	StayCurrentLandscape Icon = "stay_current_landscape"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stay_current_landscape.svg
+	StayCurrentLandscape Icon = "outlined/stay_current_landscape"
 	
 	// StayCurrentPortrait is the "stay_current_portrait" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stay_current_portrait.svg
-	StayCurrentPortrait Icon = "stay_current_portrait"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stay_current_portrait.svg
+	StayCurrentPortrait Icon = "outlined/stay_current_portrait"
 	
 	// StayPrimaryLandscape is the "stay_primary_landscape" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stay_primary_landscape.svg
-	StayPrimaryLandscape Icon = "stay_primary_landscape"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stay_primary_landscape.svg
+	StayPrimaryLandscape Icon = "outlined/stay_primary_landscape"
 	
 	// StayPrimaryPortrait is the "stay_primary_portrait" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stay_primary_portrait.svg
-	StayPrimaryPortrait Icon = "stay_primary_portrait"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stay_primary_portrait.svg
+	StayPrimaryPortrait Icon = "outlined/stay_primary_portrait"
 	
 	// Step is the "step" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/step.svg
-	Step Icon = "step"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/step.svg
+	Step Icon = "outlined/step"
 	
 	// StepInto is the "step_into" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/step_into.svg
-	StepInto Icon = "step_into"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/step_into.svg
+	StepInto Icon = "outlined/step_into"
 	
 	// StepOut is the "step_out" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/step_out.svg
-	StepOut Icon = "step_out"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/step_out.svg
+	StepOut Icon = "outlined/step_out"
 	
 	// StepOver is the "step_over" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/step_over.svg
-	StepOver Icon = "step_over"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/step_over.svg
+	StepOver Icon = "outlined/step_over"
 	
 	// Steppers is the "steppers" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/steppers.svg
-	Steppers Icon = "steppers"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/steppers.svg
+	Steppers Icon = "outlined/steppers"
 	
 	// Steps is the "steps" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/steps.svg
-	Steps Icon = "steps"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/steps.svg
+	Steps Icon = "outlined/steps"
 	
 	// Stethoscope is the "stethoscope" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stethoscope.svg
-	Stethoscope Icon = "stethoscope"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stethoscope.svg
+	Stethoscope Icon = "outlined/stethoscope"
 	
 	// StethoscopeArrow is the "stethoscope_arrow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stethoscope_arrow.svg
-	StethoscopeArrow Icon = "stethoscope_arrow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stethoscope_arrow.svg
+	StethoscopeArrow Icon = "outlined/stethoscope_arrow"
 	
 	// StethoscopeCheck is the "stethoscope_check" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stethoscope_check.svg
-	StethoscopeCheck Icon = "stethoscope_check"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stethoscope_check.svg
+	StethoscopeCheck Icon = "outlined/stethoscope_check"
 	
 	// StickyNote is the "sticky_note" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sticky_note.svg
-	StickyNote Icon = "sticky_note"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sticky_note.svg
+	StickyNote Icon = "outlined/sticky_note"
 	
 	// StickyNote2 is the "sticky_note_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sticky_note_2.svg
-	StickyNote2 Icon = "sticky_note_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sticky_note_2.svg
+	StickyNote2 Icon = "outlined/sticky_note_2"
 	
 	// Stop is the "stop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stop.svg
-	Stop Icon = "stop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stop.svg
+	Stop Icon = "outlined/stop"
 	
 	// StopCircle is the "stop_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stop_circle.svg
-	StopCircle Icon = "stop_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stop_circle.svg
+	StopCircle Icon = "outlined/stop_circle"
 	
 	// StopScreenShare is the "stop_screen_share" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stop_screen_share.svg
-	StopScreenShare Icon = "stop_screen_share"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stop_screen_share.svg
+	StopScreenShare Icon = "outlined/stop_screen_share"
 	
 	// Storage is the "storage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/storage.svg
-	Storage Icon = "storage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/storage.svg
+	Storage Icon = "outlined/storage"
 	
 	// Store is the "store" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/store.svg
-	Store Icon = "store"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/store.svg
+	Store Icon = "outlined/store"
 	
 	// Storefront is the "storefront" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/storefront.svg
-	Storefront Icon = "storefront"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/storefront.svg
+	Storefront Icon = "outlined/storefront"
 	
 	// Storm is the "storm" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/storm.svg
-	Storm Icon = "storm"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/storm.svg
+	Storm Icon = "outlined/storm"
 	
 	// Straight is the "straight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/straight.svg
-	Straight Icon = "straight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/straight.svg
+	Straight Icon = "outlined/straight"
 	
 	// Straighten is the "straighten" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/straighten.svg
-	Straighten Icon = "straighten"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/straighten.svg
+	Straighten Icon = "outlined/straighten"
 	
 	// Strategy is the "strategy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/strategy.svg
-	Strategy Icon = "strategy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/strategy.svg
+	Strategy Icon = "outlined/strategy"
 	
 	// Stream is the "stream" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stream.svg
-	Stream Icon = "stream"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stream.svg
+	Stream Icon = "outlined/stream"
 	
 	// StreamApps is the "stream_apps" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stream_apps.svg
-	StreamApps Icon = "stream_apps"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stream_apps.svg
+	StreamApps Icon = "outlined/stream_apps"
 	
 	// Streetview is the "streetview" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/streetview.svg
-	Streetview Icon = "streetview"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/streetview.svg
+	Streetview Icon = "outlined/streetview"
 	
 	// StressManagement is the "stress_management" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stress_management.svg
-	StressManagement Icon = "stress_management"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stress_management.svg
+	StressManagement Icon = "outlined/stress_management"
 	
 	// StrikethroughS is the "strikethrough_s" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/strikethrough_s.svg
-	StrikethroughS Icon = "strikethrough_s"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/strikethrough_s.svg
+	StrikethroughS Icon = "outlined/strikethrough_s"
 	
 	// StrokeFull is the "stroke_full" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stroke_full.svg
-	StrokeFull Icon = "stroke_full"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stroke_full.svg
+	StrokeFull Icon = "outlined/stroke_full"
 	
 	// StrokePartial is the "stroke_partial" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stroke_partial.svg
-	StrokePartial Icon = "stroke_partial"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stroke_partial.svg
+	StrokePartial Icon = "outlined/stroke_partial"
 	
 	// Stroller is the "stroller" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stroller.svg
-	Stroller Icon = "stroller"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stroller.svg
+	Stroller Icon = "outlined/stroller"
 	
 	// Style is the "style" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/style.svg
-	Style Icon = "style"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/style.svg
+	Style Icon = "outlined/style"
 	
 	// Styler is the "styler" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/styler.svg
-	Styler Icon = "styler"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/styler.svg
+	Styler Icon = "outlined/styler"
 	
 	// Stylus is the "stylus" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stylus.svg
-	Stylus Icon = "stylus"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stylus.svg
+	Stylus Icon = "outlined/stylus"
 	
 	// StylusLaserPointer is the "stylus_laser_pointer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stylus_laser_pointer.svg
-	StylusLaserPointer Icon = "stylus_laser_pointer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stylus_laser_pointer.svg
+	StylusLaserPointer Icon = "outlined/stylus_laser_pointer"
 	
 	// StylusNote is the "stylus_note" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/stylus_note.svg
-	StylusNote Icon = "stylus_note"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/stylus_note.svg
+	StylusNote Icon = "outlined/stylus_note"
 	
 	// SubdirectoryArrowLeft is the "subdirectory_arrow_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/subdirectory_arrow_left.svg
-	SubdirectoryArrowLeft Icon = "subdirectory_arrow_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/subdirectory_arrow_left.svg
+	SubdirectoryArrowLeft Icon = "outlined/subdirectory_arrow_left"
 	
 	// SubdirectoryArrowRight is the "subdirectory_arrow_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/subdirectory_arrow_right.svg
-	SubdirectoryArrowRight Icon = "subdirectory_arrow_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/subdirectory_arrow_right.svg
+	SubdirectoryArrowRight Icon = "outlined/subdirectory_arrow_right"
 	
 	// Subheader is the "subheader" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/subheader.svg
-	Subheader Icon = "subheader"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/subheader.svg
+	Subheader Icon = "outlined/subheader"
 	
 	// Subject is the "subject" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/subject.svg
-	Subject Icon = "subject"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/subject.svg
+	Subject Icon = "outlined/subject"
 	
 	// Subscript is the "subscript" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/subscript.svg
-	Subscript Icon = "subscript"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/subscript.svg
+	Subscript Icon = "outlined/subscript"
 	
 	// Subscriptions is the "subscriptions" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/subscriptions.svg
-	Subscriptions Icon = "subscriptions"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/subscriptions.svg
+	Subscriptions Icon = "outlined/subscriptions"
 	
 	// Subtitles is the "subtitles" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/subtitles.svg
-	Subtitles Icon = "subtitles"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/subtitles.svg
+	Subtitles Icon = "outlined/subtitles"
 	
 	// SubtitlesOff is the "subtitles_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/subtitles_off.svg
-	SubtitlesOff Icon = "subtitles_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/subtitles_off.svg
+	SubtitlesOff Icon = "outlined/subtitles_off"
 	
 	// Subway is the "subway" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/subway.svg
-	Subway Icon = "subway"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/subway.svg
+	Subway Icon = "outlined/subway"
 	
 	// Summarize is the "summarize" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/summarize.svg
-	Summarize Icon = "summarize"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/summarize.svg
+	Summarize Icon = "outlined/summarize"
 	
 	// Sunny is the "sunny" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sunny.svg
-	Sunny Icon = "sunny"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sunny.svg
+	Sunny Icon = "outlined/sunny"
 	
 	// SunnySnowing is the "sunny_snowing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sunny_snowing.svg
-	SunnySnowing Icon = "sunny_snowing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sunny_snowing.svg
+	SunnySnowing Icon = "outlined/sunny_snowing"
 	
 	// Superscript is the "superscript" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/superscript.svg
-	Superscript Icon = "superscript"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/superscript.svg
+	Superscript Icon = "outlined/superscript"
 	
 	// SupervisedUserCircle is the "supervised_user_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/supervised_user_circle.svg
-	SupervisedUserCircle Icon = "supervised_user_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/supervised_user_circle.svg
+	SupervisedUserCircle Icon = "outlined/supervised_user_circle"
 	
 	// SupervisedUserCircleOff is the "supervised_user_circle_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/supervised_user_circle_off.svg
-	SupervisedUserCircleOff Icon = "supervised_user_circle_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/supervised_user_circle_off.svg
+	SupervisedUserCircleOff Icon = "outlined/supervised_user_circle_off"
 	
 	// SupervisorAccount is the "supervisor_account" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/supervisor_account.svg
-	SupervisorAccount Icon = "supervisor_account"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/supervisor_account.svg
+	SupervisorAccount Icon = "outlined/supervisor_account"
 	
 	// Support is the "support" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/support.svg
-	Support Icon = "support"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/support.svg
+	Support Icon = "outlined/support"
 	
 	// SupportAgent is the "support_agent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/support_agent.svg
-	SupportAgent Icon = "support_agent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/support_agent.svg
+	SupportAgent Icon = "outlined/support_agent"
 	
 	// Surfing is the "surfing" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/surfing.svg
-	Surfing Icon = "surfing"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/surfing.svg
+	Surfing Icon = "outlined/surfing"
 	
 	// Surgical is the "surgical" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/surgical.svg
-	Surgical Icon = "surgical"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/surgical.svg
+	Surgical Icon = "outlined/surgical"
 	
 	// SurroundSound is the "surround_sound" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/surround_sound.svg
-	SurroundSound Icon = "surround_sound"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/surround_sound.svg
+	SurroundSound Icon = "outlined/surround_sound"
 	
 	// SwapCalls is the "swap_calls" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swap_calls.svg
-	SwapCalls Icon = "swap_calls"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swap_calls.svg
+	SwapCalls Icon = "outlined/swap_calls"
 	
 	// SwapDrivingAppsWheel is the "swap_driving_apps_wheel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swap_driving_apps_wheel.svg
-	SwapDrivingAppsWheel Icon = "swap_driving_apps_wheel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swap_driving_apps_wheel.svg
+	SwapDrivingAppsWheel Icon = "outlined/swap_driving_apps_wheel"
 	
 	// SwapHoriz is the "swap_horiz" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swap_horiz.svg
-	SwapHoriz Icon = "swap_horiz"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swap_horiz.svg
+	SwapHoriz Icon = "outlined/swap_horiz"
 	
 	// SwapHorizontalCircle is the "swap_horizontal_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swap_horizontal_circle.svg
-	SwapHorizontalCircle Icon = "swap_horizontal_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swap_horizontal_circle.svg
+	SwapHorizontalCircle Icon = "outlined/swap_horizontal_circle"
 	
 	// SwapVert is the "swap_vert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swap_vert.svg
-	SwapVert Icon = "swap_vert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swap_vert.svg
+	SwapVert Icon = "outlined/swap_vert"
 	
 	// SwapVerticalCircle is the "swap_vertical_circle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swap_vertical_circle.svg
-	SwapVerticalCircle Icon = "swap_vertical_circle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swap_vertical_circle.svg
+	SwapVerticalCircle Icon = "outlined/swap_vertical_circle"
 	
 	// Sweep is the "sweep" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sweep.svg
-	Sweep Icon = "sweep"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sweep.svg
+	Sweep Icon = "outlined/sweep"
 	
 	// Swipe is the "swipe" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe.svg
-	Swipe Icon = "swipe"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe.svg
+	Swipe Icon = "outlined/swipe"
 	
 	// SwipeDown is the "swipe_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe_down.svg
-	SwipeDown Icon = "swipe_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe_down.svg
+	SwipeDown Icon = "outlined/swipe_down"
 	
 	// SwipeDownAlt is the "swipe_down_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe_down_alt.svg
-	SwipeDownAlt Icon = "swipe_down_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe_down_alt.svg
+	SwipeDownAlt Icon = "outlined/swipe_down_alt"
 	
 	// SwipeLeft is the "swipe_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe_left.svg
-	SwipeLeft Icon = "swipe_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe_left.svg
+	SwipeLeft Icon = "outlined/swipe_left"
 	
 	// SwipeLeftAlt is the "swipe_left_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe_left_alt.svg
-	SwipeLeftAlt Icon = "swipe_left_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe_left_alt.svg
+	SwipeLeftAlt Icon = "outlined/swipe_left_alt"
 	
 	// SwipeRight is the "swipe_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe_right.svg
-	SwipeRight Icon = "swipe_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe_right.svg
+	SwipeRight Icon = "outlined/swipe_right"
 	
 	// SwipeRightAlt is the "swipe_right_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe_right_alt.svg
-	SwipeRightAlt Icon = "swipe_right_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe_right_alt.svg
+	SwipeRightAlt Icon = "outlined/swipe_right_alt"
 	
 	// SwipeUp is the "swipe_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe_up.svg
-	SwipeUp Icon = "swipe_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe_up.svg
+	SwipeUp Icon = "outlined/swipe_up"
 	
 	// SwipeUpAlt is the "swipe_up_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe_up_alt.svg
-	SwipeUpAlt Icon = "swipe_up_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe_up_alt.svg
+	SwipeUpAlt Icon = "outlined/swipe_up_alt"
 	
 	// SwipeVertical is the "swipe_vertical" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swipe_vertical.svg
-	SwipeVertical Icon = "swipe_vertical"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swipe_vertical.svg
+	SwipeVertical Icon = "outlined/swipe_vertical"
 	
 	// Switch is the "switch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switch.svg
-	Switch Icon = "switch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switch.svg
+	Switch Icon = "outlined/switch"
 	
 	// SwitchAccess is the "switch_access" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switch_access.svg
-	SwitchAccess Icon = "switch_access"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switch_access.svg
+	SwitchAccess Icon = "outlined/switch_access"
 	
 	// SwitchAccessShortcut is the "switch_access_shortcut" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switch_access_shortcut.svg
-	SwitchAccessShortcut Icon = "switch_access_shortcut"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switch_access_shortcut.svg
+	SwitchAccessShortcut Icon = "outlined/switch_access_shortcut"
 	
 	// SwitchAccessShortcutAdd is the "switch_access_shortcut_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switch_access_shortcut_add.svg
-	SwitchAccessShortcutAdd Icon = "switch_access_shortcut_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switch_access_shortcut_add.svg
+	SwitchAccessShortcutAdd Icon = "outlined/switch_access_shortcut_add"
 	
 	// SwitchAccount is the "switch_account" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switch_account.svg
-	SwitchAccount Icon = "switch_account"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switch_account.svg
+	SwitchAccount Icon = "outlined/switch_account"
 	
 	// SwitchCamera is the "switch_camera" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switch_camera.svg
-	SwitchCamera Icon = "switch_camera"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switch_camera.svg
+	SwitchCamera Icon = "outlined/switch_camera"
 	
 	// SwitchLeft is the "switch_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switch_left.svg
-	SwitchLeft Icon = "switch_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switch_left.svg
+	SwitchLeft Icon = "outlined/switch_left"
 	
 	// SwitchRight is the "switch_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switch_right.svg
-	SwitchRight Icon = "switch_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switch_right.svg
+	SwitchRight Icon = "outlined/switch_right"
 	
 	// SwitchVideo is the "switch_video" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switch_video.svg
-	SwitchVideo Icon = "switch_video"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switch_video.svg
+	SwitchVideo Icon = "outlined/switch_video"
 	
 	// Switches is the "switches" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/switches.svg
-	Switches Icon = "switches"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/switches.svg
+	Switches Icon = "outlined/switches"
 	
 	// SwordRose is the "sword_rose" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sword_rose.svg
-	SwordRose Icon = "sword_rose"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sword_rose.svg
+	SwordRose Icon = "outlined/sword_rose"
 	
 	// Swords is the "swords" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/swords.svg
-	Swords Icon = "swords"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/swords.svg
+	Swords Icon = "outlined/swords"
 	
 	// Symptoms is the "symptoms" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/symptoms.svg
-	Symptoms Icon = "symptoms"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/symptoms.svg
+	Symptoms Icon = "outlined/symptoms"
 	
 	// Synagogue is the "synagogue" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/synagogue.svg
-	Synagogue Icon = "synagogue"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/synagogue.svg
+	Synagogue Icon = "outlined/synagogue"
 	
 	// Sync is the "sync" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sync.svg
-	Sync Icon = "sync"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sync.svg
+	Sync Icon = "outlined/sync"
 	
 	// SyncAlt is the "sync_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sync_alt.svg
-	SyncAlt Icon = "sync_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sync_alt.svg
+	SyncAlt Icon = "outlined/sync_alt"
 	
 	// SyncDisabled is the "sync_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sync_disabled.svg
-	SyncDisabled Icon = "sync_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sync_disabled.svg
+	SyncDisabled Icon = "outlined/sync_disabled"
 	
 	// SyncLock is the "sync_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sync_lock.svg
-	SyncLock Icon = "sync_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sync_lock.svg
+	SyncLock Icon = "outlined/sync_lock"
 	
 	// SyncProblem is the "sync_problem" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sync_problem.svg
-	SyncProblem Icon = "sync_problem"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sync_problem.svg
+	SyncProblem Icon = "outlined/sync_problem"
 	
 	// SyncSavedLocally is the "sync_saved_locally" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/sync_saved_locally.svg
-	SyncSavedLocally Icon = "sync_saved_locally"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/sync_saved_locally.svg
+	SyncSavedLocally Icon = "outlined/sync_saved_locally"
 	
 	// Syringe is the "syringe" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/syringe.svg
-	Syringe Icon = "syringe"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/syringe.svg
+	Syringe Icon = "outlined/syringe"
 	
 	// SystemUpdate is the "system_update" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/system_update.svg
-	SystemUpdate Icon = "system_update"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/system_update.svg
+	SystemUpdate Icon = "outlined/system_update"
 	
 	// SystemUpdateAlt is the "system_update_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/system_update_alt.svg
-	SystemUpdateAlt Icon = "system_update_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/system_update_alt.svg
+	SystemUpdateAlt Icon = "outlined/system_update_alt"
 	
 	// Tab is the "tab" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tab.svg
-	Tab Icon = "tab"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tab.svg
+	Tab Icon = "outlined/tab"
 	
 	// TabClose is the "tab_close" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tab_close.svg
-	TabClose Icon = "tab_close"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tab_close.svg
+	TabClose Icon = "outlined/tab_close"
 	
 	// TabCloseRight is the "tab_close_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tab_close_right.svg
-	TabCloseRight Icon = "tab_close_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tab_close_right.svg
+	TabCloseRight Icon = "outlined/tab_close_right"
 	
 	// TabDuplicate is the "tab_duplicate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tab_duplicate.svg
-	TabDuplicate Icon = "tab_duplicate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tab_duplicate.svg
+	TabDuplicate Icon = "outlined/tab_duplicate"
 	
 	// TabGroup is the "tab_group" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tab_group.svg
-	TabGroup Icon = "tab_group"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tab_group.svg
+	TabGroup Icon = "outlined/tab_group"
 	
 	// TabMove is the "tab_move" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tab_move.svg
-	TabMove Icon = "tab_move"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tab_move.svg
+	TabMove Icon = "outlined/tab_move"
 	
 	// TabNewRight is the "tab_new_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tab_new_right.svg
-	TabNewRight Icon = "tab_new_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tab_new_right.svg
+	TabNewRight Icon = "outlined/tab_new_right"
 	
 	// TabRecent is the "tab_recent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tab_recent.svg
-	TabRecent Icon = "tab_recent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tab_recent.svg
+	TabRecent Icon = "outlined/tab_recent"
 	
 	// TabUnselected is the "tab_unselected" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tab_unselected.svg
-	TabUnselected Icon = "tab_unselected"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tab_unselected.svg
+	TabUnselected Icon = "outlined/tab_unselected"
 	
 	// Table is the "table" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/table.svg
-	Table Icon = "table"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/table.svg
+	Table Icon = "outlined/table"
 	
 	// TableBar is the "table_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/table_bar.svg
-	TableBar Icon = "table_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/table_bar.svg
+	TableBar Icon = "outlined/table_bar"
 	
 	// TableChart is the "table_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/table_chart.svg
-	TableChart Icon = "table_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/table_chart.svg
+	TableChart Icon = "outlined/table_chart"
 	
 	// TableChartView is the "table_chart_view" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/table_chart_view.svg
-	TableChartView Icon = "table_chart_view"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/table_chart_view.svg
+	TableChartView Icon = "outlined/table_chart_view"
 	
 	// TableLamp is the "table_lamp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/table_lamp.svg
-	TableLamp Icon = "table_lamp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/table_lamp.svg
+	TableLamp Icon = "outlined/table_lamp"
 	
 	// TableRestaurant is the "table_restaurant" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/table_restaurant.svg
-	TableRestaurant Icon = "table_restaurant"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/table_restaurant.svg
+	TableRestaurant Icon = "outlined/table_restaurant"
 	
 	// TableRows is the "table_rows" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/table_rows.svg
-	TableRows Icon = "table_rows"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/table_rows.svg
+	TableRows Icon = "outlined/table_rows"
 	
 	// TableRowsNarrow is the "table_rows_narrow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/table_rows_narrow.svg
-	TableRowsNarrow Icon = "table_rows_narrow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/table_rows_narrow.svg
+	TableRowsNarrow Icon = "outlined/table_rows_narrow"
 	
 	// TableView is the "table_view" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/table_view.svg
-	TableView Icon = "table_view"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/table_view.svg
+	TableView Icon = "outlined/table_view"
 	
 	// Tablet is the "tablet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tablet.svg
-	Tablet Icon = "tablet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tablet.svg
+	Tablet Icon = "outlined/tablet"
 	
 	// TabletAndroid is the "tablet_android" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tablet_android.svg
-	TabletAndroid Icon = "tablet_android"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tablet_android.svg
+	TabletAndroid Icon = "outlined/tablet_android"
 	
 	// TabletMac is the "tablet_mac" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tablet_mac.svg
-	TabletMac Icon = "tablet_mac"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tablet_mac.svg
+	TabletMac Icon = "outlined/tablet_mac"
 	
 	// Tabs is the "tabs" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tabs.svg
-	Tabs Icon = "tabs"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tabs.svg
+	Tabs Icon = "outlined/tabs"
 	
 	// Tag is the "tag" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tag.svg
-	Tag Icon = "tag"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tag.svg
+	Tag Icon = "outlined/tag"
 	
 	// TakeoutDining is the "takeout_dining" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/takeout_dining.svg
-	TakeoutDining Icon = "takeout_dining"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/takeout_dining.svg
+	TakeoutDining Icon = "outlined/takeout_dining"
 	
 	// TamperDetectionOff is the "tamper_detection_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tamper_detection_off.svg
-	TamperDetectionOff Icon = "tamper_detection_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tamper_detection_off.svg
+	TamperDetectionOff Icon = "outlined/tamper_detection_off"
 	
 	// TamperDetectionOn is the "tamper_detection_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tamper_detection_on.svg
-	TamperDetectionOn Icon = "tamper_detection_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tamper_detection_on.svg
+	TamperDetectionOn Icon = "outlined/tamper_detection_on"
 	
 	// TapAndPlay is the "tap_and_play" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tap_and_play.svg
-	TapAndPlay Icon = "tap_and_play"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tap_and_play.svg
+	TapAndPlay Icon = "outlined/tap_and_play"
 	
 	// Tapas is the "tapas" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tapas.svg
-	Tapas Icon = "tapas"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tapas.svg
+	Tapas Icon = "outlined/tapas"
 	
 	// Target is the "target" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/target.svg
-	Target Icon = "target"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/target.svg
+	Target Icon = "outlined/target"
 	
 	// Task is the "task" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/task.svg
-	Task Icon = "task"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/task.svg
+	Task Icon = "outlined/task"
 	
 	// TaskAlt is the "task_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/task_alt.svg
-	TaskAlt Icon = "task_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/task_alt.svg
+	TaskAlt Icon = "outlined/task_alt"
 	
 	// Taunt is the "taunt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/taunt.svg
-	Taunt Icon = "taunt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/taunt.svg
+	Taunt Icon = "outlined/taunt"
 	
 	// TaxiAlert is the "taxi_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/taxi_alert.svg
-	TaxiAlert Icon = "taxi_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/taxi_alert.svg
+	TaxiAlert Icon = "outlined/taxi_alert"
 	
 	// TeamDashboard is the "team_dashboard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/team_dashboard.svg
-	TeamDashboard Icon = "team_dashboard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/team_dashboard.svg
+	TeamDashboard Icon = "outlined/team_dashboard"
 	
 	// TempPreferencesEco is the "temp_preferences_eco" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/temp_preferences_eco.svg
-	TempPreferencesEco Icon = "temp_preferences_eco"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/temp_preferences_eco.svg
+	TempPreferencesEco Icon = "outlined/temp_preferences_eco"
 	
 	// TempleBuddhist is the "temple_buddhist" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/temple_buddhist.svg
-	TempleBuddhist Icon = "temple_buddhist"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/temple_buddhist.svg
+	TempleBuddhist Icon = "outlined/temple_buddhist"
 	
 	// TempleHindu is the "temple_hindu" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/temple_hindu.svg
-	TempleHindu Icon = "temple_hindu"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/temple_hindu.svg
+	TempleHindu Icon = "outlined/temple_hindu"
 	
 	// Tenancy is the "tenancy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tenancy.svg
-	Tenancy Icon = "tenancy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tenancy.svg
+	Tenancy Icon = "outlined/tenancy"
 	
 	// Terminal is the "terminal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/terminal.svg
-	Terminal Icon = "terminal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/terminal.svg
+	Terminal Icon = "outlined/terminal"
 	
 	// TextAd is the "text_ad" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_ad.svg
-	TextAd Icon = "text_ad"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_ad.svg
+	TextAd Icon = "outlined/text_ad"
 	
 	// TextDecrease is the "text_decrease" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_decrease.svg
-	TextDecrease Icon = "text_decrease"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_decrease.svg
+	TextDecrease Icon = "outlined/text_decrease"
 	
 	// TextFields is the "text_fields" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_fields.svg
-	TextFields Icon = "text_fields"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_fields.svg
+	TextFields Icon = "outlined/text_fields"
 	
 	// TextFormat is the "text_format" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_format.svg
-	TextFormat Icon = "text_format"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_format.svg
+	TextFormat Icon = "outlined/text_format"
 	
 	// TextIncrease is the "text_increase" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_increase.svg
-	TextIncrease Icon = "text_increase"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_increase.svg
+	TextIncrease Icon = "outlined/text_increase"
 	
 	// TextRotateUp is the "text_rotate_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_rotate_up.svg
-	TextRotateUp Icon = "text_rotate_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_rotate_up.svg
+	TextRotateUp Icon = "outlined/text_rotate_up"
 	
 	// TextRotateVertical is the "text_rotate_vertical" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_rotate_vertical.svg
-	TextRotateVertical Icon = "text_rotate_vertical"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_rotate_vertical.svg
+	TextRotateVertical Icon = "outlined/text_rotate_vertical"
 	
 	// TextRotationAngledown is the "text_rotation_angledown" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_rotation_angledown.svg
-	TextRotationAngledown Icon = "text_rotation_angledown"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_rotation_angledown.svg
+	TextRotationAngledown Icon = "outlined/text_rotation_angledown"
 	
 	// TextRotationAngleup is the "text_rotation_angleup" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_rotation_angleup.svg
-	TextRotationAngleup Icon = "text_rotation_angleup"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_rotation_angleup.svg
+	TextRotationAngleup Icon = "outlined/text_rotation_angleup"
 	
 	// TextRotationDown is the "text_rotation_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_rotation_down.svg
-	TextRotationDown Icon = "text_rotation_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_rotation_down.svg
+	TextRotationDown Icon = "outlined/text_rotation_down"
 	
 	// TextRotationNone is the "text_rotation_none" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_rotation_none.svg
-	TextRotationNone Icon = "text_rotation_none"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_rotation_none.svg
+	TextRotationNone Icon = "outlined/text_rotation_none"
 	
 	// TextSelectEnd is the "text_select_end" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_end.svg
-	TextSelectEnd Icon = "text_select_end"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_end.svg
+	TextSelectEnd Icon = "outlined/text_select_end"
 	
 	// TextSelectJumpToBeginning is the "text_select_jump_to_beginning" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_jump_to_beginning.svg
-	TextSelectJumpToBeginning Icon = "text_select_jump_to_beginning"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_jump_to_beginning.svg
+	TextSelectJumpToBeginning Icon = "outlined/text_select_jump_to_beginning"
 	
 	// TextSelectJumpToEnd is the "text_select_jump_to_end" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_jump_to_end.svg
-	TextSelectJumpToEnd Icon = "text_select_jump_to_end"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_jump_to_end.svg
+	TextSelectJumpToEnd Icon = "outlined/text_select_jump_to_end"
 	
 	// TextSelectMoveBackCharacter is the "text_select_move_back_character" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_move_back_character.svg
-	TextSelectMoveBackCharacter Icon = "text_select_move_back_character"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_move_back_character.svg
+	TextSelectMoveBackCharacter Icon = "outlined/text_select_move_back_character"
 	
 	// TextSelectMoveBackWord is the "text_select_move_back_word" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_move_back_word.svg
-	TextSelectMoveBackWord Icon = "text_select_move_back_word"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_move_back_word.svg
+	TextSelectMoveBackWord Icon = "outlined/text_select_move_back_word"
 	
 	// TextSelectMoveDown is the "text_select_move_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_move_down.svg
-	TextSelectMoveDown Icon = "text_select_move_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_move_down.svg
+	TextSelectMoveDown Icon = "outlined/text_select_move_down"
 	
 	// TextSelectMoveForwardCharacter is the "text_select_move_forward_character" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_move_forward_character.svg
-	TextSelectMoveForwardCharacter Icon = "text_select_move_forward_character"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_move_forward_character.svg
+	TextSelectMoveForwardCharacter Icon = "outlined/text_select_move_forward_character"
 	
 	// TextSelectMoveForwardWord is the "text_select_move_forward_word" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_move_forward_word.svg
-	TextSelectMoveForwardWord Icon = "text_select_move_forward_word"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_move_forward_word.svg
+	TextSelectMoveForwardWord Icon = "outlined/text_select_move_forward_word"
 	
 	// TextSelectMoveUp is the "text_select_move_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_move_up.svg
-	TextSelectMoveUp Icon = "text_select_move_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_move_up.svg
+	TextSelectMoveUp Icon = "outlined/text_select_move_up"
 	
 	// TextSelectStart is the "text_select_start" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_select_start.svg
-	TextSelectStart Icon = "text_select_start"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_select_start.svg
+	TextSelectStart Icon = "outlined/text_select_start"
 	
 	// TextSnippet is the "text_snippet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_snippet.svg
-	TextSnippet Icon = "text_snippet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_snippet.svg
+	TextSnippet Icon = "outlined/text_snippet"
 	
 	// TextToSpeech is the "text_to_speech" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/text_to_speech.svg
-	TextToSpeech Icon = "text_to_speech"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/text_to_speech.svg
+	TextToSpeech Icon = "outlined/text_to_speech"
 	
 	// Texture is the "texture" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/texture.svg
-	Texture Icon = "texture"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/texture.svg
+	Texture Icon = "outlined/texture"
 	
 	// TheaterComedy is the "theater_comedy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/theater_comedy.svg
-	TheaterComedy Icon = "theater_comedy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/theater_comedy.svg
+	TheaterComedy Icon = "outlined/theater_comedy"
 	
 	// Theaters is the "theaters" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/theaters.svg
-	Theaters Icon = "theaters"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/theaters.svg
+	Theaters Icon = "outlined/theaters"
 	
 	// Thermometer is the "thermometer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thermometer.svg
-	Thermometer Icon = "thermometer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thermometer.svg
+	Thermometer Icon = "outlined/thermometer"
 	
 	// ThermometerGain is the "thermometer_gain" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thermometer_gain.svg
-	ThermometerGain Icon = "thermometer_gain"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thermometer_gain.svg
+	ThermometerGain Icon = "outlined/thermometer_gain"
 	
 	// ThermometerLoss is the "thermometer_loss" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thermometer_loss.svg
-	ThermometerLoss Icon = "thermometer_loss"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thermometer_loss.svg
+	ThermometerLoss Icon = "outlined/thermometer_loss"
 	
 	// Thermostat is the "thermostat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thermostat.svg
-	Thermostat Icon = "thermostat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thermostat.svg
+	Thermostat Icon = "outlined/thermostat"
 	
 	// ThermostatAuto is the "thermostat_auto" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thermostat_auto.svg
-	ThermostatAuto Icon = "thermostat_auto"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thermostat_auto.svg
+	ThermostatAuto Icon = "outlined/thermostat_auto"
 	
 	// ThermostatCarbon is the "thermostat_carbon" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thermostat_carbon.svg
-	ThermostatCarbon Icon = "thermostat_carbon"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thermostat_carbon.svg
+	ThermostatCarbon Icon = "outlined/thermostat_carbon"
 	
 	// ThumbDown is the "thumb_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thumb_down.svg
-	ThumbDown Icon = "thumb_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thumb_down.svg
+	ThumbDown Icon = "outlined/thumb_down"
 	
 	// ThumbUp is the "thumb_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thumb_up.svg
-	ThumbUp Icon = "thumb_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thumb_up.svg
+	ThumbUp Icon = "outlined/thumb_up"
 	
 	// ThumbnailBar is the "thumbnail_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thumbnail_bar.svg
-	ThumbnailBar Icon = "thumbnail_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thumbnail_bar.svg
+	ThumbnailBar Icon = "outlined/thumbnail_bar"
 	
 	// ThumbsUpDown is the "thumbs_up_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thumbs_up_down.svg
-	ThumbsUpDown Icon = "thumbs_up_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thumbs_up_down.svg
+	ThumbsUpDown Icon = "outlined/thumbs_up_down"
 	
 	// Thunderstorm is the "thunderstorm" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/thunderstorm.svg
-	Thunderstorm Icon = "thunderstorm"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/thunderstorm.svg
+	Thunderstorm Icon = "outlined/thunderstorm"
 	
 	// Tibia is the "tibia" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tibia.svg
-	Tibia Icon = "tibia"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tibia.svg
+	Tibia Icon = "outlined/tibia"
 	
 	// TibiaAlt is the "tibia_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tibia_alt.svg
-	TibiaAlt Icon = "tibia_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tibia_alt.svg
+	TibiaAlt Icon = "outlined/tibia_alt"
 	
 	// TimeAuto is the "time_auto" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/time_auto.svg
-	TimeAuto Icon = "time_auto"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/time_auto.svg
+	TimeAuto Icon = "outlined/time_auto"
 	
 	// Timelapse is the "timelapse" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timelapse.svg
-	Timelapse Icon = "timelapse"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timelapse.svg
+	Timelapse Icon = "outlined/timelapse"
 	
 	// Timeline is the "timeline" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timeline.svg
-	Timeline Icon = "timeline"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timeline.svg
+	Timeline Icon = "outlined/timeline"
 	
 	// Timer is the "timer" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timer.svg
-	Timer Icon = "timer"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timer.svg
+	Timer Icon = "outlined/timer"
 	
 	// Timer10 is the "timer_10" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timer_10.svg
-	Timer10 Icon = "timer_10"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timer_10.svg
+	Timer10 Icon = "outlined/timer_10"
 	
 	// Timer10Alt1 is the "timer_10_alt_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timer_10_alt_1.svg
-	Timer10Alt1 Icon = "timer_10_alt_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timer_10_alt_1.svg
+	Timer10Alt1 Icon = "outlined/timer_10_alt_1"
 	
 	// Timer10Select is the "timer_10_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timer_10_select.svg
-	Timer10Select Icon = "timer_10_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timer_10_select.svg
+	Timer10Select Icon = "outlined/timer_10_select"
 	
 	// Timer3 is the "timer_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timer_3.svg
-	Timer3 Icon = "timer_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timer_3.svg
+	Timer3 Icon = "outlined/timer_3"
 	
 	// Timer3Alt1 is the "timer_3_alt_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timer_3_alt_1.svg
-	Timer3Alt1 Icon = "timer_3_alt_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timer_3_alt_1.svg
+	Timer3Alt1 Icon = "outlined/timer_3_alt_1"
 	
 	// Timer3Select is the "timer_3_select" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timer_3_select.svg
-	Timer3Select Icon = "timer_3_select"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timer_3_select.svg
+	Timer3Select Icon = "outlined/timer_3_select"
 	
 	// TimerOff is the "timer_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/timer_off.svg
-	TimerOff Icon = "timer_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/timer_off.svg
+	TimerOff Icon = "outlined/timer_off"
 	
 	// TireRepair is the "tire_repair" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tire_repair.svg
-	TireRepair Icon = "tire_repair"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tire_repair.svg
+	TireRepair Icon = "outlined/tire_repair"
 	
 	// Title is the "title" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/title.svg
-	Title Icon = "title"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/title.svg
+	Title Icon = "outlined/title"
 	
 	// Toast is the "toast" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/toast.svg
-	Toast Icon = "toast"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/toast.svg
+	Toast Icon = "outlined/toast"
 	
 	// Toc is the "toc" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/toc.svg
-	Toc Icon = "toc"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/toc.svg
+	Toc Icon = "outlined/toc"
 	
 	// Today is the "today" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/today.svg
-	Today Icon = "today"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/today.svg
+	Today Icon = "outlined/today"
 	
 	// ToggleOff is the "toggle_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/toggle_off.svg
-	ToggleOff Icon = "toggle_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/toggle_off.svg
+	ToggleOff Icon = "outlined/toggle_off"
 	
 	// ToggleOn is the "toggle_on" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/toggle_on.svg
-	ToggleOn Icon = "toggle_on"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/toggle_on.svg
+	ToggleOn Icon = "outlined/toggle_on"
 	
 	// Token is the "token" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/token.svg
-	Token Icon = "token"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/token.svg
+	Token Icon = "outlined/token"
 	
 	// Toll is the "toll" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/toll.svg
-	Toll Icon = "toll"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/toll.svg
+	Toll Icon = "outlined/toll"
 	
 	// Tonality is the "tonality" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tonality.svg
-	Tonality Icon = "tonality"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tonality.svg
+	Tonality Icon = "outlined/tonality"
 	
 	// Toolbar is the "toolbar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/toolbar.svg
-	Toolbar Icon = "toolbar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/toolbar.svg
+	Toolbar Icon = "outlined/toolbar"
 	
 	// ToolsFlatHead is the "tools_flat_head" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tools_flat_head.svg
-	ToolsFlatHead Icon = "tools_flat_head"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tools_flat_head.svg
+	ToolsFlatHead Icon = "outlined/tools_flat_head"
 	
 	// ToolsInstallationKit is the "tools_installation_kit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tools_installation_kit.svg
-	ToolsInstallationKit Icon = "tools_installation_kit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tools_installation_kit.svg
+	ToolsInstallationKit Icon = "outlined/tools_installation_kit"
 	
 	// ToolsLadder is the "tools_ladder" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tools_ladder.svg
-	ToolsLadder Icon = "tools_ladder"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tools_ladder.svg
+	ToolsLadder Icon = "outlined/tools_ladder"
 	
 	// ToolsLevel is the "tools_level" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tools_level.svg
-	ToolsLevel Icon = "tools_level"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tools_level.svg
+	ToolsLevel Icon = "outlined/tools_level"
 	
 	// ToolsPhillips is the "tools_phillips" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tools_phillips.svg
-	ToolsPhillips Icon = "tools_phillips"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tools_phillips.svg
+	ToolsPhillips Icon = "outlined/tools_phillips"
 	
 	// ToolsPliersWireStripper is the "tools_pliers_wire_stripper" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tools_pliers_wire_stripper.svg
-	ToolsPliersWireStripper Icon = "tools_pliers_wire_stripper"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tools_pliers_wire_stripper.svg
+	ToolsPliersWireStripper Icon = "outlined/tools_pliers_wire_stripper"
 	
 	// ToolsPowerDrill is the "tools_power_drill" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tools_power_drill.svg
-	ToolsPowerDrill Icon = "tools_power_drill"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tools_power_drill.svg
+	ToolsPowerDrill Icon = "outlined/tools_power_drill"
 	
 	// Tooltip is the "tooltip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tooltip.svg
-	Tooltip Icon = "tooltip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tooltip.svg
+	Tooltip Icon = "outlined/tooltip"
 	
 	// TopPanelClose is the "top_panel_close" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/top_panel_close.svg
-	TopPanelClose Icon = "top_panel_close"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/top_panel_close.svg
+	TopPanelClose Icon = "outlined/top_panel_close"
 	
 	// TopPanelOpen is the "top_panel_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/top_panel_open.svg
-	TopPanelOpen Icon = "top_panel_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/top_panel_open.svg
+	TopPanelOpen Icon = "outlined/top_panel_open"
 	
 	// Topic is the "topic" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/topic.svg
-	Topic Icon = "topic"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/topic.svg
+	Topic Icon = "outlined/topic"
 	
 	// Tornado is the "tornado" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tornado.svg
-	Tornado Icon = "tornado"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tornado.svg
+	Tornado Icon = "outlined/tornado"
 	
 	// TotalDissolvedSolids is the "total_dissolved_solids" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/total_dissolved_solids.svg
-	TotalDissolvedSolids Icon = "total_dissolved_solids"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/total_dissolved_solids.svg
+	TotalDissolvedSolids Icon = "outlined/total_dissolved_solids"
 	
 	// TouchApp is the "touch_app" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/touch_app.svg
-	TouchApp Icon = "touch_app"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/touch_app.svg
+	TouchApp Icon = "outlined/touch_app"
 	
 	// TouchpadMouse is the "touchpad_mouse" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/touchpad_mouse.svg
-	TouchpadMouse Icon = "touchpad_mouse"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/touchpad_mouse.svg
+	TouchpadMouse Icon = "outlined/touchpad_mouse"
 	
 	// Tour is the "tour" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tour.svg
-	Tour Icon = "tour"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tour.svg
+	Tour Icon = "outlined/tour"
 	
 	// Toys is the "toys" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/toys.svg
-	Toys Icon = "toys"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/toys.svg
+	Toys Icon = "outlined/toys"
 	
 	// ToysFan is the "toys_fan" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/toys_fan.svg
-	ToysFan Icon = "toys_fan"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/toys_fan.svg
+	ToysFan Icon = "outlined/toys_fan"
 	
 	// TrackChanges is the "track_changes" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/track_changes.svg
-	TrackChanges Icon = "track_changes"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/track_changes.svg
+	TrackChanges Icon = "outlined/track_changes"
 	
 	// Traffic is the "traffic" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/traffic.svg
-	Traffic Icon = "traffic"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/traffic.svg
+	Traffic Icon = "outlined/traffic"
 	
 	// TrailLength is the "trail_length" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/trail_length.svg
-	TrailLength Icon = "trail_length"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/trail_length.svg
+	TrailLength Icon = "outlined/trail_length"
 	
 	// TrailLengthMedium is the "trail_length_medium" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/trail_length_medium.svg
-	TrailLengthMedium Icon = "trail_length_medium"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/trail_length_medium.svg
+	TrailLengthMedium Icon = "outlined/trail_length_medium"
 	
 	// TrailLengthShort is the "trail_length_short" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/trail_length_short.svg
-	TrailLengthShort Icon = "trail_length_short"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/trail_length_short.svg
+	TrailLengthShort Icon = "outlined/trail_length_short"
 	
 	// Train is the "train" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/train.svg
-	Train Icon = "train"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/train.svg
+	Train Icon = "outlined/train"
 	
 	// Tram is the "tram" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tram.svg
-	Tram Icon = "tram"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tram.svg
+	Tram Icon = "outlined/tram"
 	
 	// Transcribe is the "transcribe" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/transcribe.svg
-	Transcribe Icon = "transcribe"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/transcribe.svg
+	Transcribe Icon = "outlined/transcribe"
 	
 	// TransferWithinAStation is the "transfer_within_a_station" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/transfer_within_a_station.svg
-	TransferWithinAStation Icon = "transfer_within_a_station"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/transfer_within_a_station.svg
+	TransferWithinAStation Icon = "outlined/transfer_within_a_station"
 	
 	// Transform is the "transform" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/transform.svg
-	Transform Icon = "transform"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/transform.svg
+	Transform Icon = "outlined/transform"
 	
 	// Transgender is the "transgender" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/transgender.svg
-	Transgender Icon = "transgender"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/transgender.svg
+	Transgender Icon = "outlined/transgender"
 	
 	// TransitEnterexit is the "transit_enterexit" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/transit_enterexit.svg
-	TransitEnterexit Icon = "transit_enterexit"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/transit_enterexit.svg
+	TransitEnterexit Icon = "outlined/transit_enterexit"
 	
 	// Translate is the "translate" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/translate.svg
-	Translate Icon = "translate"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/translate.svg
+	Translate Icon = "outlined/translate"
 	
 	// Transportation is the "transportation" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/transportation.svg
-	Transportation Icon = "transportation"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/transportation.svg
+	Transportation Icon = "outlined/transportation"
 	
 	// Travel is the "travel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/travel.svg
-	Travel Icon = "travel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/travel.svg
+	Travel Icon = "outlined/travel"
 	
 	// TravelExplore is the "travel_explore" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/travel_explore.svg
-	TravelExplore Icon = "travel_explore"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/travel_explore.svg
+	TravelExplore Icon = "outlined/travel_explore"
 	
 	// TrendingDown is the "trending_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/trending_down.svg
-	TrendingDown Icon = "trending_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/trending_down.svg
+	TrendingDown Icon = "outlined/trending_down"
 	
 	// TrendingFlat is the "trending_flat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/trending_flat.svg
-	TrendingFlat Icon = "trending_flat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/trending_flat.svg
+	TrendingFlat Icon = "outlined/trending_flat"
 	
 	// TrendingUp is the "trending_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/trending_up.svg
-	TrendingUp Icon = "trending_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/trending_up.svg
+	TrendingUp Icon = "outlined/trending_up"
 	
 	// TripOrigin is the "trip_origin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/trip_origin.svg
-	TripOrigin Icon = "trip_origin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/trip_origin.svg
+	TripOrigin Icon = "outlined/trip_origin"
 	
 	// Trolley is the "trolley" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/trolley.svg
-	Trolley Icon = "trolley"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/trolley.svg
+	Trolley Icon = "outlined/trolley"
 	
 	// Trophy is the "trophy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/trophy.svg
-	Trophy Icon = "trophy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/trophy.svg
+	Trophy Icon = "outlined/trophy"
 	
 	// Troubleshoot is the "troubleshoot" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/troubleshoot.svg
-	Troubleshoot Icon = "troubleshoot"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/troubleshoot.svg
+	Troubleshoot Icon = "outlined/troubleshoot"
 	
 	// Tsunami is the "tsunami" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tsunami.svg
-	Tsunami Icon = "tsunami"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tsunami.svg
+	Tsunami Icon = "outlined/tsunami"
 	
 	// Tsv is the "tsv" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tsv.svg
-	Tsv Icon = "tsv"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tsv.svg
+	Tsv Icon = "outlined/tsv"
 	
 	// Tty is the "tty" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tty.svg
-	Tty Icon = "tty"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tty.svg
+	Tty Icon = "outlined/tty"
 	
 	// Tune is the "tune" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tune.svg
-	Tune Icon = "tune"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tune.svg
+	Tune Icon = "outlined/tune"
 	
 	// TurnLeft is the "turn_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/turn_left.svg
-	TurnLeft Icon = "turn_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/turn_left.svg
+	TurnLeft Icon = "outlined/turn_left"
 	
 	// TurnRight is the "turn_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/turn_right.svg
-	TurnRight Icon = "turn_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/turn_right.svg
+	TurnRight Icon = "outlined/turn_right"
 	
 	// TurnSharpLeft is the "turn_sharp_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/turn_sharp_left.svg
-	TurnSharpLeft Icon = "turn_sharp_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/turn_sharp_left.svg
+	TurnSharpLeft Icon = "outlined/turn_sharp_left"
 	
 	// TurnSharpRight is the "turn_sharp_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/turn_sharp_right.svg
-	TurnSharpRight Icon = "turn_sharp_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/turn_sharp_right.svg
+	TurnSharpRight Icon = "outlined/turn_sharp_right"
 	
 	// TurnSlightLeft is the "turn_slight_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/turn_slight_left.svg
-	TurnSlightLeft Icon = "turn_slight_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/turn_slight_left.svg
+	TurnSlightLeft Icon = "outlined/turn_slight_left"
 	
 	// TurnSlightRight is the "turn_slight_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/turn_slight_right.svg
-	TurnSlightRight Icon = "turn_slight_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/turn_slight_right.svg
+	TurnSlightRight Icon = "outlined/turn_slight_right"
 	
 	// Tv is the "tv" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tv.svg
-	Tv Icon = "tv"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tv.svg
+	Tv Icon = "outlined/tv"
 	
 	// TvGen is the "tv_gen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tv_gen.svg
-	TvGen Icon = "tv_gen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tv_gen.svg
+	TvGen Icon = "outlined/tv_gen"
 	
 	// TvGuide is the "tv_guide" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tv_guide.svg
-	TvGuide Icon = "tv_guide"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tv_guide.svg
+	TvGuide Icon = "outlined/tv_guide"
 	
 	// TvOff is the "tv_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tv_off.svg
-	TvOff Icon = "tv_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tv_off.svg
+	TvOff Icon = "outlined/tv_off"
 	
 	// TvOptionsEditChannels is the "tv_options_edit_channels" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tv_options_edit_channels.svg
-	TvOptionsEditChannels Icon = "tv_options_edit_channels"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tv_options_edit_channels.svg
+	TvOptionsEditChannels Icon = "outlined/tv_options_edit_channels"
 	
 	// TvRemote is the "tv_remote" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tv_remote.svg
-	TvRemote Icon = "tv_remote"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tv_remote.svg
+	TvRemote Icon = "outlined/tv_remote"
 	
 	// TvSignin is the "tv_signin" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tv_signin.svg
-	TvSignin Icon = "tv_signin"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tv_signin.svg
+	TvSignin Icon = "outlined/tv_signin"
 	
 	// TvWithAssistant is the "tv_with_assistant" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/tv_with_assistant.svg
-	TvWithAssistant Icon = "tv_with_assistant"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/tv_with_assistant.svg
+	TvWithAssistant Icon = "outlined/tv_with_assistant"
 	
 	// TwoWheeler is the "two_wheeler" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/two_wheeler.svg
-	TwoWheeler Icon = "two_wheeler"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/two_wheeler.svg
+	TwoWheeler Icon = "outlined/two_wheeler"
 	
 	// TypeSpecimen is the "type_specimen" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/type_specimen.svg
-	TypeSpecimen Icon = "type_specimen"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/type_specimen.svg
+	TypeSpecimen Icon = "outlined/type_specimen"
 	
 	// UTurnLeft is the "u_turn_left" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/u_turn_left.svg
-	UTurnLeft Icon = "u_turn_left"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/u_turn_left.svg
+	UTurnLeft Icon = "outlined/u_turn_left"
 	
 	// UTurnRight is the "u_turn_right" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/u_turn_right.svg
-	UTurnRight Icon = "u_turn_right"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/u_turn_right.svg
+	UTurnRight Icon = "outlined/u_turn_right"
 	
 	// UlnaRadius is the "ulna_radius" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ulna_radius.svg
-	UlnaRadius Icon = "ulna_radius"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ulna_radius.svg
+	UlnaRadius Icon = "outlined/ulna_radius"
 	
 	// UlnaRadiusAlt is the "ulna_radius_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ulna_radius_alt.svg
-	UlnaRadiusAlt Icon = "ulna_radius_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ulna_radius_alt.svg
+	UlnaRadiusAlt Icon = "outlined/ulna_radius_alt"
 	
 	// Umbrella is the "umbrella" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/umbrella.svg
-	Umbrella Icon = "umbrella"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/umbrella.svg
+	Umbrella Icon = "outlined/umbrella"
 	
 	// Unarchive is the "unarchive" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unarchive.svg
-	Unarchive Icon = "unarchive"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unarchive.svg
+	Unarchive Icon = "outlined/unarchive"
 	
 	// Undo is the "undo" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/undo.svg
-	Undo Icon = "undo"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/undo.svg
+	Undo Icon = "outlined/undo"
 	
 	// UnfoldLess is the "unfold_less" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unfold_less.svg
-	UnfoldLess Icon = "unfold_less"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unfold_less.svg
+	UnfoldLess Icon = "outlined/unfold_less"
 	
 	// UnfoldLessDouble is the "unfold_less_double" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unfold_less_double.svg
-	UnfoldLessDouble Icon = "unfold_less_double"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unfold_less_double.svg
+	UnfoldLessDouble Icon = "outlined/unfold_less_double"
 	
 	// UnfoldMore is the "unfold_more" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unfold_more.svg
-	UnfoldMore Icon = "unfold_more"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unfold_more.svg
+	UnfoldMore Icon = "outlined/unfold_more"
 	
 	// UnfoldMoreDouble is the "unfold_more_double" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unfold_more_double.svg
-	UnfoldMoreDouble Icon = "unfold_more_double"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unfold_more_double.svg
+	UnfoldMoreDouble Icon = "outlined/unfold_more_double"
 	
 	// Ungroup is the "ungroup" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ungroup.svg
-	Ungroup Icon = "ungroup"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ungroup.svg
+	Ungroup Icon = "outlined/ungroup"
 	
 	// UniversalCurrencyAlt is the "universal_currency_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/universal_currency_alt.svg
-	UniversalCurrencyAlt Icon = "universal_currency_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/universal_currency_alt.svg
+	UniversalCurrencyAlt Icon = "outlined/universal_currency_alt"
 	
 	// Unknown2 is the "unknown_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unknown_2.svg
-	Unknown2 Icon = "unknown_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unknown_2.svg
+	Unknown2 Icon = "outlined/unknown_2"
 	
 	// Unknown5 is the "unknown_5" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unknown_5.svg
-	Unknown5 Icon = "unknown_5"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unknown_5.svg
+	Unknown5 Icon = "outlined/unknown_5"
 	
 	// UnknownDocument is the "unknown_document" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unknown_document.svg
-	UnknownDocument Icon = "unknown_document"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unknown_document.svg
+	UnknownDocument Icon = "outlined/unknown_document"
 	
 	// UnknownMed is the "unknown_med" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unknown_med.svg
-	UnknownMed Icon = "unknown_med"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unknown_med.svg
+	UnknownMed Icon = "outlined/unknown_med"
 	
 	// Unpublished is the "unpublished" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unpublished.svg
-	Unpublished Icon = "unpublished"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unpublished.svg
+	Unpublished Icon = "outlined/unpublished"
 	
 	// Unsubscribe is the "unsubscribe" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/unsubscribe.svg
-	Unsubscribe Icon = "unsubscribe"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/unsubscribe.svg
+	Unsubscribe Icon = "outlined/unsubscribe"
 	
 	// Upcoming is the "upcoming" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/upcoming.svg
-	Upcoming Icon = "upcoming"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/upcoming.svg
+	Upcoming Icon = "outlined/upcoming"
 	
 	// Update is the "update" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/update.svg
-	Update Icon = "update"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/update.svg
+	Update Icon = "outlined/update"
 	
 	// UpdateDisabled is the "update_disabled" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/update_disabled.svg
-	UpdateDisabled Icon = "update_disabled"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/update_disabled.svg
+	UpdateDisabled Icon = "outlined/update_disabled"
 	
 	// Upgrade is the "upgrade" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/upgrade.svg
-	Upgrade Icon = "upgrade"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/upgrade.svg
+	Upgrade Icon = "outlined/upgrade"
 	
 	// Upload is the "upload" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/upload.svg
-	Upload Icon = "upload"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/upload.svg
+	Upload Icon = "outlined/upload"
 	
 	// UploadFile is the "upload_file" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/upload_file.svg
-	UploadFile Icon = "upload_file"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/upload_file.svg
+	UploadFile Icon = "outlined/upload_file"
 	
 	// Urology is the "urology" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/urology.svg
-	Urology Icon = "urology"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/urology.svg
+	Urology Icon = "outlined/urology"
 	
 	// Usb is the "usb" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/usb.svg
-	Usb Icon = "usb"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/usb.svg
+	Usb Icon = "outlined/usb"
 	
 	// UsbOff is the "usb_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/usb_off.svg
-	UsbOff Icon = "usb_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/usb_off.svg
+	UsbOff Icon = "outlined/usb_off"
 	
 	// Vaccines is the "vaccines" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vaccines.svg
-	Vaccines Icon = "vaccines"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vaccines.svg
+	Vaccines Icon = "outlined/vaccines"
 	
 	// Valve is the "valve" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/valve.svg
-	Valve Icon = "valve"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/valve.svg
+	Valve Icon = "outlined/valve"
 	
 	// VapeFree is the "vape_free" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vape_free.svg
-	VapeFree Icon = "vape_free"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vape_free.svg
+	VapeFree Icon = "outlined/vape_free"
 	
 	// VapingRooms is the "vaping_rooms" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vaping_rooms.svg
-	VapingRooms Icon = "vaping_rooms"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vaping_rooms.svg
+	VapingRooms Icon = "outlined/vaping_rooms"
 	
 	// Variables is the "variables" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/variables.svg
-	Variables Icon = "variables"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/variables.svg
+	Variables Icon = "outlined/variables"
 	
 	// Ventilator is the "ventilator" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ventilator.svg
-	Ventilator Icon = "ventilator"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ventilator.svg
+	Ventilator Icon = "outlined/ventilator"
 	
 	// Verified is the "verified" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/verified.svg
-	Verified Icon = "verified"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/verified.svg
+	Verified Icon = "outlined/verified"
 	
 	// VerifiedUser is the "verified_user" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/verified_user.svg
-	VerifiedUser Icon = "verified_user"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/verified_user.svg
+	VerifiedUser Icon = "outlined/verified_user"
 	
 	// VerticalAlignBottom is the "vertical_align_bottom" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vertical_align_bottom.svg
-	VerticalAlignBottom Icon = "vertical_align_bottom"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vertical_align_bottom.svg
+	VerticalAlignBottom Icon = "outlined/vertical_align_bottom"
 	
 	// VerticalAlignCenter is the "vertical_align_center" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vertical_align_center.svg
-	VerticalAlignCenter Icon = "vertical_align_center"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vertical_align_center.svg
+	VerticalAlignCenter Icon = "outlined/vertical_align_center"
 	
 	// VerticalAlignTop is the "vertical_align_top" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vertical_align_top.svg
-	VerticalAlignTop Icon = "vertical_align_top"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vertical_align_top.svg
+	VerticalAlignTop Icon = "outlined/vertical_align_top"
 	
 	// VerticalDistribute is the "vertical_distribute" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vertical_distribute.svg
-	VerticalDistribute Icon = "vertical_distribute"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vertical_distribute.svg
+	VerticalDistribute Icon = "outlined/vertical_distribute"
 	
 	// VerticalShades is the "vertical_shades" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vertical_shades.svg
-	VerticalShades Icon = "vertical_shades"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vertical_shades.svg
+	VerticalShades Icon = "outlined/vertical_shades"
 	
 	// VerticalShadesClosed is the "vertical_shades_closed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vertical_shades_closed.svg
-	VerticalShadesClosed Icon = "vertical_shades_closed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vertical_shades_closed.svg
+	VerticalShadesClosed Icon = "outlined/vertical_shades_closed"
 	
 	// VerticalSplit is the "vertical_split" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vertical_split.svg
-	VerticalSplit Icon = "vertical_split"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vertical_split.svg
+	VerticalSplit Icon = "outlined/vertical_split"
 	
 	// Vibration is the "vibration" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vibration.svg
-	Vibration Icon = "vibration"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vibration.svg
+	Vibration Icon = "outlined/vibration"
 	
 	// VideoCall is the "video_call" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_call.svg
-	VideoCall Icon = "video_call"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_call.svg
+	VideoCall Icon = "outlined/video_call"
 	
 	// VideoCameraBack is the "video_camera_back" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_camera_back.svg
-	VideoCameraBack Icon = "video_camera_back"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_camera_back.svg
+	VideoCameraBack Icon = "outlined/video_camera_back"
 	
 	// VideoCameraFront is the "video_camera_front" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_camera_front.svg
-	VideoCameraFront Icon = "video_camera_front"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_camera_front.svg
+	VideoCameraFront Icon = "outlined/video_camera_front"
 	
 	// VideoCameraFrontOff is the "video_camera_front_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_camera_front_off.svg
-	VideoCameraFrontOff Icon = "video_camera_front_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_camera_front_off.svg
+	VideoCameraFrontOff Icon = "outlined/video_camera_front_off"
 	
 	// VideoChat is the "video_chat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_chat.svg
-	VideoChat Icon = "video_chat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_chat.svg
+	VideoChat Icon = "outlined/video_chat"
 	
 	// VideoFile is the "video_file" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_file.svg
-	VideoFile Icon = "video_file"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_file.svg
+	VideoFile Icon = "outlined/video_file"
 	
 	// VideoLabel is the "video_label" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_label.svg
-	VideoLabel Icon = "video_label"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_label.svg
+	VideoLabel Icon = "outlined/video_label"
 	
 	// VideoLibrary is the "video_library" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_library.svg
-	VideoLibrary Icon = "video_library"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_library.svg
+	VideoLibrary Icon = "outlined/video_library"
 	
 	// VideoSearch is the "video_search" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_search.svg
-	VideoSearch Icon = "video_search"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_search.svg
+	VideoSearch Icon = "outlined/video_search"
 	
 	// VideoSettings is the "video_settings" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_settings.svg
-	VideoSettings Icon = "video_settings"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_settings.svg
+	VideoSettings Icon = "outlined/video_settings"
 	
 	// VideoStable is the "video_stable" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/video_stable.svg
-	VideoStable Icon = "video_stable"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/video_stable.svg
+	VideoStable Icon = "outlined/video_stable"
 	
 	// Videocam is the "videocam" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/videocam.svg
-	Videocam Icon = "videocam"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/videocam.svg
+	Videocam Icon = "outlined/videocam"
 	
 	// VideocamOff is the "videocam_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/videocam_off.svg
-	VideocamOff Icon = "videocam_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/videocam_off.svg
+	VideocamOff Icon = "outlined/videocam_off"
 	
 	// VideogameAsset is the "videogame_asset" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/videogame_asset.svg
-	VideogameAsset Icon = "videogame_asset"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/videogame_asset.svg
+	VideogameAsset Icon = "outlined/videogame_asset"
 	
 	// VideogameAssetOff is the "videogame_asset_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/videogame_asset_off.svg
-	VideogameAssetOff Icon = "videogame_asset_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/videogame_asset_off.svg
+	VideogameAssetOff Icon = "outlined/videogame_asset_off"
 	
 	// ViewAgenda is the "view_agenda" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_agenda.svg
-	ViewAgenda Icon = "view_agenda"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_agenda.svg
+	ViewAgenda Icon = "outlined/view_agenda"
 	
 	// ViewArray is the "view_array" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_array.svg
-	ViewArray Icon = "view_array"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_array.svg
+	ViewArray Icon = "outlined/view_array"
 	
 	// ViewCarousel is the "view_carousel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_carousel.svg
-	ViewCarousel Icon = "view_carousel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_carousel.svg
+	ViewCarousel Icon = "outlined/view_carousel"
 	
 	// ViewColumn is the "view_column" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_column.svg
-	ViewColumn Icon = "view_column"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_column.svg
+	ViewColumn Icon = "outlined/view_column"
 	
 	// ViewColumn2 is the "view_column_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_column_2.svg
-	ViewColumn2 Icon = "view_column_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_column_2.svg
+	ViewColumn2 Icon = "outlined/view_column_2"
 	
 	// ViewComfy is the "view_comfy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_comfy.svg
-	ViewComfy Icon = "view_comfy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_comfy.svg
+	ViewComfy Icon = "outlined/view_comfy"
 	
 	// ViewComfyAlt is the "view_comfy_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_comfy_alt.svg
-	ViewComfyAlt Icon = "view_comfy_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_comfy_alt.svg
+	ViewComfyAlt Icon = "outlined/view_comfy_alt"
 	
 	// ViewCompact is the "view_compact" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_compact.svg
-	ViewCompact Icon = "view_compact"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_compact.svg
+	ViewCompact Icon = "outlined/view_compact"
 	
 	// ViewCompactAlt is the "view_compact_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_compact_alt.svg
-	ViewCompactAlt Icon = "view_compact_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_compact_alt.svg
+	ViewCompactAlt Icon = "outlined/view_compact_alt"
 	
 	// ViewCozy is the "view_cozy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_cozy.svg
-	ViewCozy Icon = "view_cozy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_cozy.svg
+	ViewCozy Icon = "outlined/view_cozy"
 	
 	// ViewDay is the "view_day" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_day.svg
-	ViewDay Icon = "view_day"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_day.svg
+	ViewDay Icon = "outlined/view_day"
 	
 	// ViewHeadline is the "view_headline" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_headline.svg
-	ViewHeadline Icon = "view_headline"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_headline.svg
+	ViewHeadline Icon = "outlined/view_headline"
 	
 	// ViewInAr is the "view_in_ar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_in_ar.svg
-	ViewInAr Icon = "view_in_ar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_in_ar.svg
+	ViewInAr Icon = "outlined/view_in_ar"
 	
 	// ViewInArOff is the "view_in_ar_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_in_ar_off.svg
-	ViewInArOff Icon = "view_in_ar_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_in_ar_off.svg
+	ViewInArOff Icon = "outlined/view_in_ar_off"
 	
 	// ViewKanban is the "view_kanban" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_kanban.svg
-	ViewKanban Icon = "view_kanban"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_kanban.svg
+	ViewKanban Icon = "outlined/view_kanban"
 	
 	// ViewList is the "view_list" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_list.svg
-	ViewList Icon = "view_list"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_list.svg
+	ViewList Icon = "outlined/view_list"
 	
 	// ViewModule is the "view_module" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_module.svg
-	ViewModule Icon = "view_module"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_module.svg
+	ViewModule Icon = "outlined/view_module"
 	
 	// ViewQuilt is the "view_quilt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_quilt.svg
-	ViewQuilt Icon = "view_quilt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_quilt.svg
+	ViewQuilt Icon = "outlined/view_quilt"
 	
 	// ViewSidebar is the "view_sidebar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_sidebar.svg
-	ViewSidebar Icon = "view_sidebar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_sidebar.svg
+	ViewSidebar Icon = "outlined/view_sidebar"
 	
 	// ViewStream is the "view_stream" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_stream.svg
-	ViewStream Icon = "view_stream"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_stream.svg
+	ViewStream Icon = "outlined/view_stream"
 	
 	// ViewTimeline is the "view_timeline" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_timeline.svg
-	ViewTimeline Icon = "view_timeline"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_timeline.svg
+	ViewTimeline Icon = "outlined/view_timeline"
 	
 	// ViewWeek is the "view_week" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/view_week.svg
-	ViewWeek Icon = "view_week"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/view_week.svg
+	ViewWeek Icon = "outlined/view_week"
 	
 	// Vignette is the "vignette" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vignette.svg
-	Vignette Icon = "vignette"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vignette.svg
+	Vignette Icon = "outlined/vignette"
 	
 	// Villa is the "villa" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/villa.svg
-	Villa Icon = "villa"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/villa.svg
+	Villa Icon = "outlined/villa"
 	
 	// Visibility is the "visibility" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/visibility.svg
-	Visibility Icon = "visibility"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/visibility.svg
+	Visibility Icon = "outlined/visibility"
 	
 	// VisibilityLock is the "visibility_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/visibility_lock.svg
-	VisibilityLock Icon = "visibility_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/visibility_lock.svg
+	VisibilityLock Icon = "outlined/visibility_lock"
 	
 	// VisibilityOff is the "visibility_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/visibility_off.svg
-	VisibilityOff Icon = "visibility_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/visibility_off.svg
+	VisibilityOff Icon = "outlined/visibility_off"
 	
 	// VitalSigns is the "vital_signs" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vital_signs.svg
-	VitalSigns Icon = "vital_signs"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vital_signs.svg
+	VitalSigns Icon = "outlined/vital_signs"
 	
 	// VoiceChat is the "voice_chat" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/voice_chat.svg
-	VoiceChat Icon = "voice_chat"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/voice_chat.svg
+	VoiceChat Icon = "outlined/voice_chat"
 	
 	// VoiceOverOff is the "voice_over_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/voice_over_off.svg
-	VoiceOverOff Icon = "voice_over_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/voice_over_off.svg
+	VoiceOverOff Icon = "outlined/voice_over_off"
 	
 	// Voicemail is the "voicemail" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/voicemail.svg
-	Voicemail Icon = "voicemail"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/voicemail.svg
+	Voicemail Icon = "outlined/voicemail"
 	
 	// Volcano is the "volcano" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/volcano.svg
-	Volcano Icon = "volcano"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/volcano.svg
+	Volcano Icon = "outlined/volcano"
 	
 	// VolumeDown is the "volume_down" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/volume_down.svg
-	VolumeDown Icon = "volume_down"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/volume_down.svg
+	VolumeDown Icon = "outlined/volume_down"
 	
 	// VolumeDownAlt is the "volume_down_alt" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/volume_down_alt.svg
-	VolumeDownAlt Icon = "volume_down_alt"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/volume_down_alt.svg
+	VolumeDownAlt Icon = "outlined/volume_down_alt"
 	
 	// VolumeMute is the "volume_mute" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/volume_mute.svg
-	VolumeMute Icon = "volume_mute"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/volume_mute.svg
+	VolumeMute Icon = "outlined/volume_mute"
 	
 	// VolumeOff is the "volume_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/volume_off.svg
-	VolumeOff Icon = "volume_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/volume_off.svg
+	VolumeOff Icon = "outlined/volume_off"
 	
 	// VolumeUp is the "volume_up" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/volume_up.svg
-	VolumeUp Icon = "volume_up"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/volume_up.svg
+	VolumeUp Icon = "outlined/volume_up"
 	
 	// VolunteerActivism is the "volunteer_activism" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/volunteer_activism.svg
-	VolunteerActivism Icon = "volunteer_activism"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/volunteer_activism.svg
+	VolunteerActivism Icon = "outlined/volunteer_activism"
 	
 	// VotingChip is the "voting_chip" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/voting_chip.svg
-	VotingChip Icon = "voting_chip"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/voting_chip.svg
+	VotingChip Icon = "outlined/voting_chip"
 	
 	// VpnKey is the "vpn_key" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vpn_key.svg
-	VpnKey Icon = "vpn_key"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vpn_key.svg
+	VpnKey Icon = "outlined/vpn_key"
 	
 	// VpnKeyAlert is the "vpn_key_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vpn_key_alert.svg
-	VpnKeyAlert Icon = "vpn_key_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vpn_key_alert.svg
+	VpnKeyAlert Icon = "outlined/vpn_key_alert"
 	
 	// VpnKeyOff is the "vpn_key_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vpn_key_off.svg
-	VpnKeyOff Icon = "vpn_key_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vpn_key_off.svg
+	VpnKeyOff Icon = "outlined/vpn_key_off"
 	
 	// VpnLock is the "vpn_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vpn_lock.svg
-	VpnLock Icon = "vpn_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vpn_lock.svg
+	VpnLock Icon = "outlined/vpn_lock"
 	
 	// Vr180Create2D is the "vr180_create2d" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vr180_create2d.svg
-	Vr180Create2D Icon = "vr180_create2d"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vr180_create2d.svg
+	Vr180Create2D Icon = "outlined/vr180_create2d"
 	
 	// Vrpano is the "vrpano" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/vrpano.svg
-	Vrpano Icon = "vrpano"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/vrpano.svg
+	Vrpano Icon = "outlined/vrpano"
 	
 	// WallArt is the "wall_art" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wall_art.svg
-	WallArt Icon = "wall_art"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wall_art.svg
+	WallArt Icon = "outlined/wall_art"
 	
 	// WallLamp is the "wall_lamp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wall_lamp.svg
-	WallLamp Icon = "wall_lamp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wall_lamp.svg
+	WallLamp Icon = "outlined/wall_lamp"
 	
 	// Wallet is the "wallet" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wallet.svg
-	Wallet Icon = "wallet"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wallet.svg
+	Wallet Icon = "outlined/wallet"
 	
 	// Wallpaper is the "wallpaper" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wallpaper.svg
-	Wallpaper Icon = "wallpaper"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wallpaper.svg
+	Wallpaper Icon = "outlined/wallpaper"
 	
 	// WallpaperSlideshow is the "wallpaper_slideshow" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wallpaper_slideshow.svg
-	WallpaperSlideshow Icon = "wallpaper_slideshow"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wallpaper_slideshow.svg
+	WallpaperSlideshow Icon = "outlined/wallpaper_slideshow"
 	
 	// Ward is the "ward" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/ward.svg
-	Ward Icon = "ward"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/ward.svg
+	Ward Icon = "outlined/ward"
 	
 	// Warehouse is the "warehouse" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/warehouse.svg
-	Warehouse Icon = "warehouse"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/warehouse.svg
+	Warehouse Icon = "outlined/warehouse"
 	
 	// Warning is the "warning" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/warning.svg
-	Warning Icon = "warning"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/warning.svg
+	Warning Icon = "outlined/warning"
 	
 	// WarningOff is the "warning_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/warning_off.svg
-	WarningOff Icon = "warning_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/warning_off.svg
+	WarningOff Icon = "outlined/warning_off"
 	
 	// Wash is the "wash" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wash.svg
-	Wash Icon = "wash"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wash.svg
+	Wash Icon = "outlined/wash"
 	
 	// Watch is the "watch" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/watch.svg
-	Watch Icon = "watch"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/watch.svg
+	Watch Icon = "outlined/watch"
 	
 	// WatchButtonPress is the "watch_button_press" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/watch_button_press.svg
-	WatchButtonPress Icon = "watch_button_press"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/watch_button_press.svg
+	WatchButtonPress Icon = "outlined/watch_button_press"
 	
 	// WatchOff is the "watch_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/watch_off.svg
-	WatchOff Icon = "watch_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/watch_off.svg
+	WatchOff Icon = "outlined/watch_off"
 	
 	// WatchScreentime is the "watch_screentime" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/watch_screentime.svg
-	WatchScreentime Icon = "watch_screentime"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/watch_screentime.svg
+	WatchScreentime Icon = "outlined/watch_screentime"
 	
 	// WatchWake is the "watch_wake" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/watch_wake.svg
-	WatchWake Icon = "watch_wake"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/watch_wake.svg
+	WatchWake Icon = "outlined/watch_wake"
 	
 	// Water is the "water" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water.svg
-	Water Icon = "water"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water.svg
+	Water Icon = "outlined/water"
 	
 	// WaterBottle is the "water_bottle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_bottle.svg
-	WaterBottle Icon = "water_bottle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_bottle.svg
+	WaterBottle Icon = "outlined/water_bottle"
 	
 	// WaterBottleLarge is the "water_bottle_large" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_bottle_large.svg
-	WaterBottleLarge Icon = "water_bottle_large"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_bottle_large.svg
+	WaterBottleLarge Icon = "outlined/water_bottle_large"
 	
 	// WaterDamage is the "water_damage" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_damage.svg
-	WaterDamage Icon = "water_damage"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_damage.svg
+	WaterDamage Icon = "outlined/water_damage"
 	
 	// WaterDo is the "water_do" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_do.svg
-	WaterDo Icon = "water_do"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_do.svg
+	WaterDo Icon = "outlined/water_do"
 	
 	// WaterDrop is the "water_drop" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_drop.svg
-	WaterDrop Icon = "water_drop"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_drop.svg
+	WaterDrop Icon = "outlined/water_drop"
 	
 	// WaterEc is the "water_ec" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_ec.svg
-	WaterEc Icon = "water_ec"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_ec.svg
+	WaterEc Icon = "outlined/water_ec"
 	
 	// WaterFull is the "water_full" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_full.svg
-	WaterFull Icon = "water_full"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_full.svg
+	WaterFull Icon = "outlined/water_full"
 	
 	// WaterHeater is the "water_heater" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_heater.svg
-	WaterHeater Icon = "water_heater"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_heater.svg
+	WaterHeater Icon = "outlined/water_heater"
 	
 	// WaterLock is the "water_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_lock.svg
-	WaterLock Icon = "water_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_lock.svg
+	WaterLock Icon = "outlined/water_lock"
 	
 	// WaterLoss is the "water_loss" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_loss.svg
-	WaterLoss Icon = "water_loss"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_loss.svg
+	WaterLoss Icon = "outlined/water_loss"
 	
 	// WaterLux is the "water_lux" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_lux.svg
-	WaterLux Icon = "water_lux"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_lux.svg
+	WaterLux Icon = "outlined/water_lux"
 	
 	// WaterMedium is the "water_medium" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_medium.svg
-	WaterMedium Icon = "water_medium"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_medium.svg
+	WaterMedium Icon = "outlined/water_medium"
 	
 	// WaterOrp is the "water_orp" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_orp.svg
-	WaterOrp Icon = "water_orp"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_orp.svg
+	WaterOrp Icon = "outlined/water_orp"
 	
 	// WaterPh is the "water_ph" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_ph.svg
-	WaterPh Icon = "water_ph"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_ph.svg
+	WaterPh Icon = "outlined/water_ph"
 	
 	// WaterPump is the "water_pump" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_pump.svg
-	WaterPump Icon = "water_pump"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_pump.svg
+	WaterPump Icon = "outlined/water_pump"
 	
 	// WaterVoc is the "water_voc" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/water_voc.svg
-	WaterVoc Icon = "water_voc"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/water_voc.svg
+	WaterVoc Icon = "outlined/water_voc"
 	
 	// WaterfallChart is the "waterfall_chart" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/waterfall_chart.svg
-	WaterfallChart Icon = "waterfall_chart"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/waterfall_chart.svg
+	WaterfallChart Icon = "outlined/waterfall_chart"
 	
 	// Waves is the "waves" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/waves.svg
-	Waves Icon = "waves"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/waves.svg
+	Waves Icon = "outlined/waves"
 	
 	// WavingHand is the "waving_hand" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/waving_hand.svg
-	WavingHand Icon = "waving_hand"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/waving_hand.svg
+	WavingHand Icon = "outlined/waving_hand"
 	
 	// WbAuto is the "wb_auto" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wb_auto.svg
-	WbAuto Icon = "wb_auto"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wb_auto.svg
+	WbAuto Icon = "outlined/wb_auto"
 	
 	// WbIncandescent is the "wb_incandescent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wb_incandescent.svg
-	WbIncandescent Icon = "wb_incandescent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wb_incandescent.svg
+	WbIncandescent Icon = "outlined/wb_incandescent"
 	
 	// WbIridescent is the "wb_iridescent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wb_iridescent.svg
-	WbIridescent Icon = "wb_iridescent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wb_iridescent.svg
+	WbIridescent Icon = "outlined/wb_iridescent"
 	
 	// WbShade is the "wb_shade" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wb_shade.svg
-	WbShade Icon = "wb_shade"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wb_shade.svg
+	WbShade Icon = "outlined/wb_shade"
 	
 	// WbSunny is the "wb_sunny" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wb_sunny.svg
-	WbSunny Icon = "wb_sunny"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wb_sunny.svg
+	WbSunny Icon = "outlined/wb_sunny"
 	
 	// WbTwilight is the "wb_twilight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wb_twilight.svg
-	WbTwilight Icon = "wb_twilight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wb_twilight.svg
+	WbTwilight Icon = "outlined/wb_twilight"
 	
 	// Wc is the "wc" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wc.svg
-	Wc Icon = "wc"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wc.svg
+	Wc Icon = "outlined/wc"
 	
 	// WeatherHail is the "weather_hail" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/weather_hail.svg
-	WeatherHail Icon = "weather_hail"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/weather_hail.svg
+	WeatherHail Icon = "outlined/weather_hail"
 	
 	// WeatherMix is the "weather_mix" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/weather_mix.svg
-	WeatherMix Icon = "weather_mix"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/weather_mix.svg
+	WeatherMix Icon = "outlined/weather_mix"
 	
 	// WeatherSnowy is the "weather_snowy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/weather_snowy.svg
-	WeatherSnowy Icon = "weather_snowy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/weather_snowy.svg
+	WeatherSnowy Icon = "outlined/weather_snowy"
 	
 	// Web is the "web" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/web.svg
-	Web Icon = "web"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/web.svg
+	Web Icon = "outlined/web"
 	
 	// WebAsset is the "web_asset" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/web_asset.svg
-	WebAsset Icon = "web_asset"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/web_asset.svg
+	WebAsset Icon = "outlined/web_asset"
 	
 	// WebAssetOff is the "web_asset_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/web_asset_off.svg
-	WebAssetOff Icon = "web_asset_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/web_asset_off.svg
+	WebAssetOff Icon = "outlined/web_asset_off"
 	
 	// WebStories is the "web_stories" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/web_stories.svg
-	WebStories Icon = "web_stories"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/web_stories.svg
+	WebStories Icon = "outlined/web_stories"
 	
 	// Webhook is the "webhook" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/webhook.svg
-	Webhook Icon = "webhook"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/webhook.svg
+	Webhook Icon = "outlined/webhook"
 	
 	// Weekend is the "weekend" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/weekend.svg
-	Weekend Icon = "weekend"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/weekend.svg
+	Weekend Icon = "outlined/weekend"
 	
 	// Weight is the "weight" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/weight.svg
-	Weight Icon = "weight"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/weight.svg
+	Weight Icon = "outlined/weight"
 	
 	// West is the "west" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/west.svg
-	West Icon = "west"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/west.svg
+	West Icon = "outlined/west"
 	
 	// Whatshot is the "whatshot" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/whatshot.svg
-	Whatshot Icon = "whatshot"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/whatshot.svg
+	Whatshot Icon = "outlined/whatshot"
 	
 	// WheelchairPickup is the "wheelchair_pickup" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wheelchair_pickup.svg
-	WheelchairPickup Icon = "wheelchair_pickup"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wheelchair_pickup.svg
+	WheelchairPickup Icon = "outlined/wheelchair_pickup"
 	
 	// WhereToVote is the "where_to_vote" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/where_to_vote.svg
-	WhereToVote Icon = "where_to_vote"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/where_to_vote.svg
+	WhereToVote Icon = "outlined/where_to_vote"
 	
 	// Widgets is the "widgets" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/widgets.svg
-	Widgets Icon = "widgets"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/widgets.svg
+	Widgets Icon = "outlined/widgets"
 	
 	// Width is the "width" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/width.svg
-	Width Icon = "width"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/width.svg
+	Width Icon = "outlined/width"
 	
 	// WidthFull is the "width_full" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/width_full.svg
-	WidthFull Icon = "width_full"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/width_full.svg
+	WidthFull Icon = "outlined/width_full"
 	
 	// WidthNormal is the "width_normal" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/width_normal.svg
-	WidthNormal Icon = "width_normal"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/width_normal.svg
+	WidthNormal Icon = "outlined/width_normal"
 	
 	// WidthWide is the "width_wide" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/width_wide.svg
-	WidthWide Icon = "width_wide"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/width_wide.svg
+	WidthWide Icon = "outlined/width_wide"
 	
 	// Wifi is the "wifi" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi.svg
-	Wifi Icon = "wifi"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi.svg
+	Wifi Icon = "outlined/wifi"
 	
 	// Wifi1Bar is the "wifi_1_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_1_bar.svg
-	Wifi1Bar Icon = "wifi_1_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_1_bar.svg
+	Wifi1Bar Icon = "outlined/wifi_1_bar"
 	
 	// Wifi2Bar is the "wifi_2_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_2_bar.svg
-	Wifi2Bar Icon = "wifi_2_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_2_bar.svg
+	Wifi2Bar Icon = "outlined/wifi_2_bar"
 	
 	// WifiAdd is the "wifi_add" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_add.svg
-	WifiAdd Icon = "wifi_add"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_add.svg
+	WifiAdd Icon = "outlined/wifi_add"
 	
 	// WifiCalling is the "wifi_calling" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_calling.svg
-	WifiCalling Icon = "wifi_calling"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_calling.svg
+	WifiCalling Icon = "outlined/wifi_calling"
 	
 	// WifiCalling1 is the "wifi_calling_1" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_calling_1.svg
-	WifiCalling1 Icon = "wifi_calling_1"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_calling_1.svg
+	WifiCalling1 Icon = "outlined/wifi_calling_1"
 	
 	// WifiCalling2 is the "wifi_calling_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_calling_2.svg
-	WifiCalling2 Icon = "wifi_calling_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_calling_2.svg
+	WifiCalling2 Icon = "outlined/wifi_calling_2"
 	
 	// WifiCalling3 is the "wifi_calling_3" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_calling_3.svg
-	WifiCalling3 Icon = "wifi_calling_3"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_calling_3.svg
+	WifiCalling3 Icon = "outlined/wifi_calling_3"
 	
 	// WifiChannel is the "wifi_channel" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_channel.svg
-	WifiChannel Icon = "wifi_channel"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_channel.svg
+	WifiChannel Icon = "outlined/wifi_channel"
 	
 	// WifiFind is the "wifi_find" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_find.svg
-	WifiFind Icon = "wifi_find"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_find.svg
+	WifiFind Icon = "outlined/wifi_find"
 	
 	// WifiHome is the "wifi_home" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_home.svg
-	WifiHome Icon = "wifi_home"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_home.svg
+	WifiHome Icon = "outlined/wifi_home"
 	
 	// WifiLock is the "wifi_lock" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_lock.svg
-	WifiLock Icon = "wifi_lock"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_lock.svg
+	WifiLock Icon = "outlined/wifi_lock"
 	
 	// WifiNotification is the "wifi_notification" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_notification.svg
-	WifiNotification Icon = "wifi_notification"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_notification.svg
+	WifiNotification Icon = "outlined/wifi_notification"
 	
 	// WifiOff is the "wifi_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_off.svg
-	WifiOff Icon = "wifi_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_off.svg
+	WifiOff Icon = "outlined/wifi_off"
 	
 	// WifiPassword is the "wifi_password" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_password.svg
-	WifiPassword Icon = "wifi_password"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_password.svg
+	WifiPassword Icon = "outlined/wifi_password"
 	
 	// WifiProtectedSetup is the "wifi_protected_setup" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_protected_setup.svg
-	WifiProtectedSetup Icon = "wifi_protected_setup"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_protected_setup.svg
+	WifiProtectedSetup Icon = "outlined/wifi_protected_setup"
 	
 	// WifiProxy is the "wifi_proxy" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_proxy.svg
-	WifiProxy Icon = "wifi_proxy"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_proxy.svg
+	WifiProxy Icon = "outlined/wifi_proxy"
 	
 	// WifiTethering is the "wifi_tethering" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_tethering.svg
-	WifiTethering Icon = "wifi_tethering"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_tethering.svg
+	WifiTethering Icon = "outlined/wifi_tethering"
 	
 	// WifiTetheringError is the "wifi_tethering_error" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_tethering_error.svg
-	WifiTetheringError Icon = "wifi_tethering_error"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_tethering_error.svg
+	WifiTetheringError Icon = "outlined/wifi_tethering_error"
 	
 	// WifiTetheringOff is the "wifi_tethering_off" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wifi_tethering_off.svg
-	WifiTetheringOff Icon = "wifi_tethering_off"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wifi_tethering_off.svg
+	WifiTetheringOff Icon = "outlined/wifi_tethering_off"
 	
 	// WindPower is the "wind_power" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wind_power.svg
-	WindPower Icon = "wind_power"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wind_power.svg
+	WindPower Icon = "outlined/wind_power"
 	
 	// Window is the "window" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/window.svg
-	Window Icon = "window"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/window.svg
+	Window Icon = "outlined/window"
 	
 	// WindowClosed is the "window_closed" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/window_closed.svg
-	WindowClosed Icon = "window_closed"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/window_closed.svg
+	WindowClosed Icon = "outlined/window_closed"
 	
 	// WindowOpen is the "window_open" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/window_open.svg
-	WindowOpen Icon = "window_open"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/window_open.svg
+	WindowOpen Icon = "outlined/window_open"
 	
 	// WindowSensor is the "window_sensor" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/window_sensor.svg
-	WindowSensor Icon = "window_sensor"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/window_sensor.svg
+	WindowSensor Icon = "outlined/window_sensor"
 	
 	// WineBar is the "wine_bar" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wine_bar.svg
-	WineBar Icon = "wine_bar"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wine_bar.svg
+	WineBar Icon = "outlined/wine_bar"
 	
 	// Woman is the "woman" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/woman.svg
-	Woman Icon = "woman"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/woman.svg
+	Woman Icon = "outlined/woman"
 	
 	// Woman2 is the "woman_2" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/woman_2.svg
-	Woman2 Icon = "woman_2"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/woman_2.svg
+	Woman2 Icon = "outlined/woman_2"
 	
 	// Work is the "work" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/work.svg
-	Work Icon = "work"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/work.svg
+	Work Icon = "outlined/work"
 	
 	// WorkAlert is the "work_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/work_alert.svg
-	WorkAlert Icon = "work_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/work_alert.svg
+	WorkAlert Icon = "outlined/work_alert"
 	
 	// WorkHistory is the "work_history" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/work_history.svg
-	WorkHistory Icon = "work_history"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/work_history.svg
+	WorkHistory Icon = "outlined/work_history"
 	
 	// WorkUpdate is the "work_update" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/work_update.svg
-	WorkUpdate Icon = "work_update"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/work_update.svg
+	WorkUpdate Icon = "outlined/work_update"
 	
 	// WorkspacePremium is the "workspace_premium" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/workspace_premium.svg
-	WorkspacePremium Icon = "workspace_premium"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/workspace_premium.svg
+	WorkspacePremium Icon = "outlined/workspace_premium"
 	
 	// Workspaces is the "workspaces" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/workspaces.svg
-	Workspaces Icon = "workspaces"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/workspaces.svg
+	Workspaces Icon = "outlined/workspaces"
 	
 	// WoundsInjuries is the "wounds_injuries" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wounds_injuries.svg
-	WoundsInjuries Icon = "wounds_injuries"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wounds_injuries.svg
+	WoundsInjuries Icon = "outlined/wounds_injuries"
 	
 	// WrapText is the "wrap_text" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wrap_text.svg
-	WrapText Icon = "wrap_text"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wrap_text.svg
+	WrapText Icon = "outlined/wrap_text"
 	
 	// Wrist is the "wrist" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wrist.svg
-	Wrist Icon = "wrist"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wrist.svg
+	Wrist Icon = "outlined/wrist"
 	
 	// WrongLocation is the "wrong_location" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wrong_location.svg
-	WrongLocation Icon = "wrong_location"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wrong_location.svg
+	WrongLocation Icon = "outlined/wrong_location"
 	
 	// Wysiwyg is the "wysiwyg" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/wysiwyg.svg
-	Wysiwyg Icon = "wysiwyg"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/wysiwyg.svg
+	Wysiwyg Icon = "outlined/wysiwyg"
 	
 	// Yard is the "yard" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/yard.svg
-	Yard Icon = "yard"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/yard.svg
+	Yard Icon = "outlined/yard"
 	
 	// YourTrips is the "your_trips" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/your_trips.svg
-	YourTrips Icon = "your_trips"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/your_trips.svg
+	YourTrips Icon = "outlined/your_trips"
 	
 	// YoutubeActivity is the "youtube_activity" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/youtube_activity.svg
-	YoutubeActivity Icon = "youtube_activity"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/youtube_activity.svg
+	YoutubeActivity Icon = "outlined/youtube_activity"
 	
 	// YoutubeSearchedFor is the "youtube_searched_for" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/youtube_searched_for.svg
-	YoutubeSearchedFor Icon = "youtube_searched_for"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/youtube_searched_for.svg
+	YoutubeSearchedFor Icon = "outlined/youtube_searched_for"
 	
 	// ZonePersonAlert is the "zone_person_alert" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/zone_person_alert.svg
-	ZonePersonAlert Icon = "zone_person_alert"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/zone_person_alert.svg
+	ZonePersonAlert Icon = "outlined/zone_person_alert"
 	
 	// ZonePersonIdle is the "zone_person_idle" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/zone_person_idle.svg
-	ZonePersonIdle Icon = "zone_person_idle"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/zone_person_idle.svg
+	ZonePersonIdle Icon = "outlined/zone_person_idle"
 	
 	// ZonePersonUrgent is the "zone_person_urgent" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/zone_person_urgent.svg
-	ZonePersonUrgent Icon = "zone_person_urgent"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/zone_person_urgent.svg
+	ZonePersonUrgent Icon = "outlined/zone_person_urgent"
 	
 	// ZoomIn is the "zoom_in" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/zoom_in.svg
-	ZoomIn Icon = "zoom_in"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/zoom_in.svg
+	ZoomIn Icon = "outlined/zoom_in"
 	
 	// ZoomInMap is the "zoom_in_map" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/zoom_in_map.svg
-	ZoomInMap Icon = "zoom_in_map"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/zoom_in_map.svg
+	ZoomInMap Icon = "outlined/zoom_in_map"
 	
 	// ZoomOut is the "zoom_out" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/zoom_out.svg
-	ZoomOut Icon = "zoom_out"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/zoom_out.svg
+	ZoomOut Icon = "outlined/zoom_out"
 	
 	// ZoomOutMap is the "zoom_out_map" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/outlined/zoom_out_map.svg
-	ZoomOutMap Icon = "zoom_out_map"
+	// defined at https://github.com/goki/gi/blob/mobile/icons/outlined/zoom_out_map.svg
+	ZoomOutMap Icon = "outlined/zoom_out_map"
 	
 )

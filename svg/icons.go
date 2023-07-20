@@ -258,7 +258,7 @@ func (iset *IconSet) OpenIconsFromPath(path string) error {
 }
 
 func (iset *IconSet) OpenDefaultIcons() error {
-	err := iset.OpenIconsFromEmbedDir(icons.Icons, ".")
+	err := iset.OpenIconsFromEmbedDir(icons.Icons, "outlined")
 	if err != nil {
 		log.Println(err)
 		return err
