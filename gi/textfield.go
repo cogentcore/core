@@ -1352,7 +1352,7 @@ func (tf *TextField) TextFieldEvents() {
 }
 
 func (tf *TextField) ConfigParts() {
-	fmt.Println("tf config parts")
+	// fmt.Println("tf config parts")
 	tf.Parts.Lay = LayoutHoriz
 	if !tf.ClearAct || tf.IsInactive() {
 		tf.Parts.DeleteChildren(ki.DestroyKids)
@@ -1362,7 +1362,7 @@ func (tf *TextField) ConfigParts() {
 	config.Add(KiT_Stretch, "clr-str")
 	config.Add(KiT_Action, "clear")
 	mods, updt := tf.Parts.ConfigChildren(config)
-	fmt.Println("configured children")
+	// fmt.Println("configured children")
 	if mods || gist.RebuildDefaultStyles {
 		clr := tf.Parts.Child(1).(*Action)
 		tf.StylePart(Node2D(clr))
@@ -1382,7 +1382,7 @@ func (tf *TextField) ConfigParts() {
 //  Node2D Interface
 
 func (tf *TextField) Init2D() {
-	fmt.Println("tf init 2d")
+	// fmt.Println("tf init 2d")
 	tf.Init2DWidget()
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
@@ -1392,7 +1392,7 @@ func (tf *TextField) Init2D() {
 
 // StyleTextField does text field styling -- sets StyMu Lock
 func (tf *TextField) StyleTextField() {
-	fmt.Println("tf style")
+	// fmt.Println("tf style")
 	tf.StyMu.Lock()
 
 	tf.SetCanFocusIfActive()

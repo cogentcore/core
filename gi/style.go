@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"fmt"
+
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/units"
@@ -37,7 +39,7 @@ type DefaultStyler interface {
 // of all widgets in it.
 func StyleFunc(w *WidgetBase) {
 	cs := CurrentColorScheme()
-	// fmt.Printf("Styling element\tName:%s\tType:%T\tParent:%v\n", w.Name(), w.This(), w.Parent().Name())
+	fmt.Printf("Styling\t%v\n", w.This())
 	if par, ok := w.Parent().Embed(KiT_WidgetBase).(*WidgetBase); ok {
 		// fmt.Println("got parent")
 		if par.Style.Font.Color.IsNil() {
@@ -156,8 +158,9 @@ func styleLabel(l *Label, cs ColorScheme) {
 func styleTextField(tf *TextField, cs ColorScheme) {
 	tf.Style.Border.Width.Set(units.Px(1))
 	tf.CursorWidth.SetPx(3)
-	tf.Style.Border.Color.Set(cs.Border)
+	tf.Style.Border.Color.Set(cs.Font.Highlight(30))
 	tf.Style.Layout.Width.SetEm(20)
+	tf.Style.Layout.Height.SetPx(2)
 	tf.Style.Layout.Padding.Set(units.Px(4))
 	tf.Style.Layout.Margin.Set(units.Px(1))
 	tf.Style.Text.Align = gist.AlignLeft
@@ -167,12 +170,17 @@ func styleTextField(tf *TextField, cs ColorScheme) {
 
 	clear, ok := tf.Parts.ChildByName("clear", 1).(*Action)
 	if ok {
+		clear.StyleFunc = func() {
+			clear.Style.Layout.Width.SetEx(0.5)
+			clear.Style.Layout.Height.SetEx(0.5)
+			clear.Style.Layout.MinWidth.SetEx(0.5)
+			clear.Style.Layout.MinHeight.SetEx(0.5)
+			clear.Style.Layout.Margin.Set()
+			clear.Style.Layout.Padding.Set()
+			clear.Style.Layout.AlignV = gist.AlignMiddle
+		}
 		// fmt.Println("clear", clear)
-		clear.Style.Layout.Width.SetEx(0.5)
-		clear.Style.Layout.Height.SetEx(0.5)
-		clear.Style.Layout.Margin.Set()
-		clear.Style.Layout.Padding.Set()
-		clear.Style.Layout.AlignV = gist.AlignMiddle
+
 	}
 
 	// space, ok := tf.Parts.ChildByName("space", 2).(*)

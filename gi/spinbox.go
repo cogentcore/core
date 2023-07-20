@@ -68,6 +68,26 @@ func (sb *SpinBox) Disconnect() {
 	sb.SpinBoxSig.DisconnectAll()
 }
 
+// DefaultStyle implements the [DefaultStyler] interface
+func (sb *SpinBox) DefaultStyle() {
+	// fmt.Println("spin box children", sb.Parts.Kids)
+	bts := sb.Parts.ChildByName("buttons", 2)
+	if bts != nil {
+		if up, ok := bts.ChildByName("up", 0).(*Action); ok {
+			up.StyleFunc = func() {
+				up.Style.Layout.MaxWidth.SetEx(1.5)
+				up.Style.Layout.MaxHeight.SetEx(1.5)
+			}
+		}
+		if down, ok := bts.ChildByName("down", 1).(*Action); ok {
+			down.StyleFunc = func() {
+				down.Style.Layout.MaxWidth.SetEx(1.5)
+				down.Style.Layout.MaxHeight.SetEx(1.5)
+			}
+		}
+	}
+}
+
 var SpinBoxProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
 	"#buttons": ki.Props{
@@ -375,8 +395,8 @@ func (sb *SpinBox) SpinBoxEvents() {
 }
 
 func (sb *SpinBox) Init2D() {
-	sb.Init2DWidget()
 	sb.ConfigParts()
+	sb.Init2DWidget()
 }
 
 // StyleFromProps styles SpinBox-specific fields from ki.Prop properties

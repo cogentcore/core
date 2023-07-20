@@ -26,18 +26,14 @@ var TheColorSchemes = ColorSchemes{
 		Background: colors.White,
 		Primary:    colors.Blue,
 		Secondary:  colors.White.Darker(10),
-		Border:     colors.Black.Lighter(20),
-		Select:     colors.Lightblue,
-		Highlight:  colors.Lightblue,
+		Accent:     colors.Lightblue,
 	},
 	Dark: ColorScheme{
 		Font:       colors.White,
 		Background: colors.Black.Lighter(10),
 		Primary:    colors.Lightblue,
 		Secondary:  colors.Black.Lighter(10),
-		Border:     colors.White.Darker(20),
-		Select:     colors.Lightblue,
-		Highlight:  colors.Lightblue,
+		Accent:     colors.Lightblue,
 	},
 }
 
@@ -74,7 +70,5 @@ type ColorScheme struct {
 	Background gist.Color `desc:"default background color"`
 	Primary    gist.Color `desc:"the primary button color"`
 	Secondary  gist.Color `desc:"the secondary button color"`
-	Border     gist.Color `desc:"default border color, for button, frame borders, etc"`
-	Select     gist.Color `desc:"color for selected elements"`
-	Highlight  gist.Color `desc:"color for highlight background"`
+	Accent     gist.Color `desc:"the accent color, typically used for selected elements"`
 }
