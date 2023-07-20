@@ -21,9 +21,7 @@ func main() {
 
 	vkos.VkOsDebug = false
 
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {

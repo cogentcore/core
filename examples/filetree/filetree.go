@@ -537,9 +537,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 //  main
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {

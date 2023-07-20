@@ -46,9 +46,7 @@ type TestNodeB struct {
 var KiT_TestNodeB = kit.Types.AddType(&TestNodeB{}, nil)
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {

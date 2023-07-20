@@ -15,9 +15,7 @@ import (
 var samplefile gi.FileName = "sample.go"
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {

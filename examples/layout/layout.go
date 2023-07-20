@@ -14,9 +14,7 @@ import (
 )
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {

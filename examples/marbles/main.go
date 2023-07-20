@@ -28,9 +28,7 @@ var gmin, gmax, gsz, ginc mat32.Vec2
 var GraphSize float32 = 800
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {

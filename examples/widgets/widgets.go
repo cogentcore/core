@@ -21,9 +21,7 @@ import (
 
 func main() {
 	// vkos.VkOsDebug = true  // vulkan debugging
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {

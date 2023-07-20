@@ -22,9 +22,7 @@ import (
 )
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 //go:embed *.png *.obj *.mtl *.blend

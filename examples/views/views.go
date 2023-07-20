@@ -24,9 +24,7 @@ var (
 )
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 type TableStruct struct {
