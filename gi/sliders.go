@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -49,7 +50,7 @@ type SliderBase struct {
 	ThSizeReal  float32                   `xml:"-" desc:"computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value"`
 	ThumbSize   units.Value               `xml:"thumb-size" desc:"styled fixed size of the thumb"`
 	Prec        int                       `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	Icon        IconName                  `view:"show-name" desc:"optional icon for the dragging knob"`
+	Icon        icons.Icon                `view:"show-name" desc:"optional icon for the dragging knob"`
 	ValThumb    bool                      `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
 	ThumbVal    float32                   `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
 	Pos         float32                   `xml:"-" desc:"logical position of the slider relative to Size"`
@@ -512,19 +513,19 @@ func (sb *SliderBase) Init2DSlider() {
 func (sb *SliderBase) ConfigParts() {
 	sb.Parts.Lay = LayoutNil
 	config := kit.TypeAndNameList{}
-	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, string(sb.Icon), "")
+	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, sb.Icon, "")
 	mods, updt := sb.Parts.ConfigChildren(config)
-	sb.ConfigPartsSetIconLabel(string(sb.Icon), "", icIdx, lbIdx)
+	sb.ConfigPartsSetIconLabel(sb.Icon, "", icIdx, lbIdx)
 	if mods {
 		sb.UpdateEnd(updt)
 	}
 }
 
 func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
-	if sb.PartsNeedUpdateIconLabel(string(sb.Icon), "") {
+	if sb.PartsNeedUpdateIconLabel(sb.Icon, "") {
 		sb.ConfigParts()
 	}
-	if sb.Icon.IsValid() && sb.Parts.HasChildren() {
+	if TheIconMgr.IsValid(sb.Icon) && sb.Parts.HasChildren() {
 		ick := sb.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
 		if ick != nil {
 			ic := ick.(*Icon)
@@ -812,7 +813,7 @@ func (sr *Slider) Render2DDefaultStyle() {
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
 	pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
-	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
+	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.RenderUnlock(rs)
 		sr.Parts.Render2DTree()
 	} else {

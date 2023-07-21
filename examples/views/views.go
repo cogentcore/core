@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/gosl/slbool"
 	_ "github.com/goki/gosl/slboolview"
@@ -28,7 +29,7 @@ func main() {
 }
 
 type TableStruct struct {
-	Icon       gi.IconName `desc:"an icon"`
+	Icon       icons.Icon  `desc:"an icon"`
 	IntField   int         `desc:"an integer field"`
 	FloatField float32     `desc:"a float field"`
 	StrField   string      `desc:"a string field"`

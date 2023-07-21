@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -253,11 +254,11 @@ func (sv *SplitView) ConfigSplitters() {
 	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
 	handsz := sv.HandleSize.Dots
 	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
-	spicon := IconName("")
+	spicon := icons.Icon("")
 	if sv.Dim == mat32.X {
-		spicon = IconName("handle-circles-vert")
+		spicon = "handle-circles-vert"
 	} else {
-		spicon = IconName("handle-circles-horiz")
+		spicon = "handle-circles-horiz"
 	}
 	for i, spk := range *sv.Parts.Children() {
 		sp := spk.(*Splitter)
@@ -503,10 +504,10 @@ func (sr *Splitter) Init2D() {
 }
 
 func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
-	if sr.PartsNeedUpdateIconLabel(string(sr.Icon), "") {
+	if sr.PartsNeedUpdateIconLabel(sr.Icon, "") {
 		sr.ConfigParts()
 	}
-	if !sr.Icon.IsValid() || !sr.Parts.HasChildren() {
+	if !TheIconMgr.IsValid(sr.Icon) || !sr.Parts.HasChildren() {
 		return
 	}
 	ick := sr.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
@@ -728,7 +729,7 @@ func (sr *Splitter) RenderSplitter() {
 	sr.UpdateSplitterPos()
 	sr.ConfigPartsIfNeeded(true)
 
-	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
+	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.Parts.Render2DTree()
 	} else {
 		rs, pc, st := sr.RenderLock()

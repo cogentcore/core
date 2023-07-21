@@ -15,6 +15,7 @@ import (
 
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
@@ -761,9 +762,9 @@ func (pf *EditorPrefs) StyleFromProps(props ki.Props) {
 // favorites.  Is an ordered list instead of a map because user can organize
 // in order
 type FavPathItem struct {
-	Ic   IconName `desc:"icon for item"`
-	Name string   `width:"20" desc:"name of the favorite item"`
-	Path string   `tableview:"-select"`
+	Ic   icons.Icon `desc:"icon for item"`
+	Name string     `width:"20" desc:"name of the favorite item"`
+	Path string     `tableview:"-select"`
 }
 
 // Label satisfies the Labeler interface

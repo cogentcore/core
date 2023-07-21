@@ -243,7 +243,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	slider1.SetValue(0.5)
 	slider1.Snap = true
 	slider1.Tracking = true
-	slider1.Icon = gi.IconName("circlebutton-on")
+	slider1.Icon = "circlebutton-on"
 
 	slider2 := gi.AddNewSlider(srow, "slider2")
 	slider2.Dim = mat32.Y

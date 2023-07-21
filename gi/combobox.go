@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
@@ -175,11 +176,11 @@ func (cb *ComboBox) ButtonRelease() {
 
 // ConfigPartsIconText returns a standard config for creating parts, of icon
 // and text left-to right in a row -- always makes text
-func (cb *ComboBox) ConfigPartsIconText(config *kit.TypeAndNameList, icnm string) (icIdx, txIdx int) {
+func (cb *ComboBox) ConfigPartsIconText(config *kit.TypeAndNameList, icnm icons.Icon) (icIdx, txIdx int) {
 	// todo: add some styles for button layout
 	icIdx = -1
 	txIdx = -1
-	if IconName(icnm).IsValid() {
+	if TheIconMgr.IsValid(icnm) {
 		icIdx = len(*config)
 		config.Add(KiT_Icon, "icon")
 		config.Add(KiT_Space, "space")
@@ -229,11 +230,11 @@ func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *kit.TypeAndNameList, 
 func (cb *ComboBox) ConfigPartsIfNeeded() {
 	if cb.Editable {
 		cn := cb.Parts.ChildByName("text", 2)
-		if !cb.PartsNeedUpdateIconLabel(string(cb.Icon), "") && cn != nil {
+		if !cb.PartsNeedUpdateIconLabel(cb.Icon, "") && cn != nil {
 			return
 		}
 	} else {
-		if !cb.PartsNeedUpdateIconLabel(string(cb.Icon), cb.Text) {
+		if !cb.PartsNeedUpdateIconLabel(cb.Icon, cb.Text) {
 			return
 		}
 	}
@@ -248,16 +249,16 @@ func (cb *ComboBox) ConfigParts() {
 	var icIdx, lbIdx, txIdx, indIdx int
 	if cb.Editable {
 		lbIdx = -1
-		icIdx, txIdx = cb.ConfigPartsIconText(&config, string(cb.Icon))
+		icIdx, txIdx = cb.ConfigPartsIconText(&config, cb.Icon)
 		cb.SetProp("no-focus", true)
 		indIdx = cb.ConfigPartsAddIndicatorSpace(&config, true) // use space instead of stretch
 	} else {
 		txIdx = -1
-		icIdx, lbIdx = cb.ConfigPartsIconLabel(&config, string(cb.Icon), cb.Text)
+		icIdx, lbIdx = cb.ConfigPartsIconLabel(&config, cb.Icon, cb.Text)
 		indIdx = cb.ConfigPartsAddIndicator(&config, true) // default on
 	}
 	mods, updt := cb.Parts.ConfigChildren(config)
-	cb.ConfigPartsSetIconLabel(string(cb.Icon), cb.Text, icIdx, lbIdx)
+	cb.ConfigPartsSetIconLabel(cb.Icon, cb.Text, icIdx, lbIdx)
 	cb.ConfigPartsIndicator(indIdx)
 	if txIdx >= 0 {
 		cb.ConfigPartsSetText(cb.Text, txIdx, icIdx, indIdx)
@@ -360,11 +361,11 @@ func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) 
 	}
 }
 
-// ItemsFromIconList sets the Items list from a list of IconName values -- if
+// ItemsFromIconList sets the Items list from a list of icons.Icon values -- if
 // setFirst then set current item to the first item in the list, and maxLen if
 // > 0 auto-sets the width of the button to the contents, with the given upper
 // limit
-func (cb *ComboBox) ItemsFromIconList(el []IconName, setFirst bool, maxLen int) {
+func (cb *ComboBox) ItemsFromIconList(el []icons.Icon, setFirst bool, maxLen int) {
 	sz := len(el)
 	if sz == 0 {
 		return
@@ -459,7 +460,7 @@ func (cb *ComboBox) SetCurIndex(idx int) any {
 // ShowCurVal updates the display to present the
 // currently-selected value (CurVal)
 func (cb *ComboBox) ShowCurVal() {
-	if icnm, isic := cb.CurVal.(IconName); isic {
+	if icnm, isic := cb.CurVal.(icons.Icon); isic {
 		cb.SetIcon(string(icnm))
 	} else {
 		cb.SetText(ToLabel(cb.CurVal))
@@ -501,7 +502,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 	if nitm == 0 {
 		return
 	}
-	_, icons := cb.Items[0].(IconName) // if true, we render as icons
+	_, ics := cb.Items[0].(icons.Icon) // if true, we render as icons
 	for i, it := range cb.Items {
 		var ac *Action
 		if sz > i {
@@ -513,8 +514,8 @@ func (cb *ComboBox) MakeItemsMenu() {
 		}
 		nm := fmt.Sprintf("Item_%v", i)
 		ac.SetName(nm)
-		if icons {
-			ac.Icon = it.(IconName)
+		if ics {
+			ac.Icon = it.(icons.Icon)
 			ac.Tooltip = string(ac.Icon)
 		} else {
 			ac.Text = ToLabel(it)

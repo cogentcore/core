@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -356,11 +357,11 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 		nm = opts.Label
 	}
 	if nm == "" {
-		nm = opts.Icon
+		nm = string(opts.Icon)
 	}
 	ac := AddNewAction(tb, nm)
 	ac.Text = opts.Label
-	ac.Icon = IconName(opts.Icon)
+	ac.Icon = icons.Icon(opts.Icon)
 	ac.Tooltip = opts.Tooltip
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	if opts.ShortcutKey != KeyFunNil {

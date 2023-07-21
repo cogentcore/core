@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -29,8 +30,8 @@ import (
 type ButtonBase struct {
 	PartsWidgetBase
 	Text         string                    `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon         IconName                  `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
-	Indicator    IconName                  `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
+	Icon         icons.Icon                `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
+	Indicator    icons.Icon                `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 	Shortcut     key.Chord                 `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
 	Type         ButtonTypes               `desc:"the type of button (default, primary, secondary, etc)"`
 	StateStyles  [ButtonStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
@@ -244,7 +245,7 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 	updt := bb.UpdateStart()
 	defer bb.UpdateEnd(updt)
 	if !bb.IsVisible() {
-		bb.Icon = IconName(iconName)
+		bb.Icon = icons.Icon(iconName)
 		return
 	}
 	bb.StyMu.RLock()
@@ -253,10 +254,10 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 	if needSty {
 		bb.StyleButton()
 	}
-	if bb.Icon != IconName(iconName) {
+	if bb.Icon != icons.Icon(iconName) {
 		bb.SetFullReRender()
 	}
-	bb.Icon = IconName(iconName)
+	bb.Icon = icons.Icon(iconName)
 	bb.This().(ButtonWidget).ConfigParts()
 }
 
@@ -449,11 +450,11 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 		return
 	}
 	ic := bb.Parts.Child(indIdx).(*Icon)
-	icnm := string(bb.Indicator)
-	if IconName(icnm).IsNil() {
+	icnm := bb.Indicator
+	if icnm.IsNil() {
 		icnm = "wedge-down"
 	}
-	if set, _ := IconName(icnm).SetIcon(ic); set {
+	if set, _ := ic.SetIcon(icnm); set {
 		bb.StylePart(bb.Parts.Child(indIdx - 1).(Node2D)) // also get the stretch
 		bb.StylePart(Node2D(ic))
 	}
@@ -620,21 +621,21 @@ func (bb *ButtonBase) ButtonRelease() {
 func (bb *ButtonBase) StyleParts() {
 	if pv, ok := bb.PropInherit("indicator", ki.NoInherit, ki.TypeProps); ok {
 		pvs := kit.ToString(pv)
-		bb.Indicator = IconName(pvs)
+		bb.Indicator = icons.Icon(pvs)
 	}
 	if pv, ok := bb.PropInherit("icon", ki.NoInherit, ki.TypeProps); ok {
 		pvs := kit.ToString(pv)
-		bb.Icon = IconName(pvs)
+		bb.Icon = icons.Icon(pvs)
 	}
 }
 
 func (bb *ButtonBase) ConfigParts() {
 	bb.Parts.Lay = LayoutHoriz
 	config := kit.TypeAndNameList{}
-	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, string(bb.Icon), bb.Text)
+	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, bb.Icon, bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := bb.Parts.ConfigChildren(config)
-	bb.ConfigPartsSetIconLabel(string(bb.Icon), bb.Text, icIdx, lbIdx)
+	bb.ConfigPartsSetIconLabel(bb.Icon, bb.Text, icIdx, lbIdx)
 	bb.ConfigPartsIndicator(indIdx)
 	if mods {
 		bb.UpdateEnd(updt)
@@ -642,7 +643,7 @@ func (bb *ButtonBase) ConfigParts() {
 }
 
 func (bb *ButtonBase) ConfigPartsIfNeeded() {
-	if !bb.PartsNeedUpdateIconLabel(string(bb.Icon), bb.Text) {
+	if !bb.PartsNeedUpdateIconLabel(bb.Icon, bb.Text) {
 		return
 	}
 	bb.This().(ButtonWidget).ConfigParts()
@@ -913,7 +914,7 @@ var ButtonProps = ki.Props{
 // CheckBox toggles between a checked and unchecked state
 type CheckBox struct {
 	ButtonBase
-	IconOff IconName `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
+	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, nil)
@@ -1011,8 +1012,8 @@ func (cb *CheckBox) ButtonRelease() {
 // states, and updates button
 func (cb *CheckBox) SetIcons(icOn, icOff string) {
 	updt := cb.UpdateStart()
-	cb.Icon = IconName(icOn)
-	cb.IconOff = IconName(icOff)
+	cb.Icon = icons.Icon(icOn)
+	cb.IconOff = icons.Icon(icOff)
 	cb.This().(ButtonWidget).ConfigParts()
 	cb.UpdateEnd(updt)
 }
@@ -1038,16 +1039,16 @@ func (cb *CheckBox) StyleParts() {
 	cb.ButtonBase.StyleParts()
 	if pv, ok := cb.PropInherit("icon-off", false, true); ok { // no inh, yes type
 		pvs := kit.ToString(pv)
-		cb.IconOff = IconName(pvs)
+		cb.IconOff = icons.Icon(pvs)
 	}
 }
 
 func (cb *CheckBox) ConfigParts() {
 	cb.SetCheckable(true)
-	if !cb.Icon.IsValid() {
+	if !TheIconMgr.IsValid(cb.Icon) {
 		cb.Icon = "checked-box" // fallback
 	}
-	if !cb.IconOff.IsValid() {
+	if !TheIconMgr.IsValid(cb.IconOff) {
 		cb.IconOff = "unchecked-box"
 	}
 	config := kit.TypeAndNameList{}
@@ -1065,11 +1066,11 @@ func (cb *CheckBox) ConfigParts() {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
-		if set, _ := cb.Icon.SetIcon(icon); set {
+		if set, _ := icon.SetIcon(cb.Icon); set {
 			cb.StylePart(Node2D(icon))
 		}
 		icoff := ist.Child(1).(*Icon)
-		if set, _ := cb.IconOff.SetIcon(icoff); set {
+		if set, _ := icoff.SetIcon(cb.IconOff); set {
 			cb.StylePart(Node2D(icoff))
 		}
 	}
@@ -1097,18 +1098,18 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 	}
 	icIdx := 0 // always there
 	ist := cb.Parts.Child(icIdx).(*Layout)
-	if cb.Icon.IsValid() {
+	if TheIconMgr.IsValid(cb.Icon) {
 		icon := ist.Child(0).(*Icon)
 		if !icon.HasChildren() || icon.Nm != string(cb.Icon) || cb.NeedsFullReRender() {
-			if set, _ := cb.Icon.SetIcon(icon); set {
+			if set, _ := icon.SetIcon(cb.Icon); set {
 				cb.StylePart(Node2D(icon))
 			}
 		}
 	}
-	if cb.IconOff.IsValid() {
+	if TheIconMgr.IsValid(cb.IconOff) {
 		icoff := ist.Child(1).(*Icon)
 		if !icoff.HasChildren() || icoff.Nm != string(cb.IconOff) || cb.NeedsFullReRender() {
-			if set, _ := cb.IconOff.SetIcon(icoff); set {
+			if set, _ := icoff.SetIcon(cb.IconOff); set {
 				cb.StylePart(Node2D(icoff))
 			}
 		}

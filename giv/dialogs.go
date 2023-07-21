@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
@@ -422,7 +423,7 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 // IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
 // if non-nil are connected to the selection signal for the slice view, and
 // the dialog signal.
-func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func IconChooserDialog(avp *gi.Viewport2D, curIc icons.Icon, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	if opts.CSS == nil {
 		opts.CSS = ki.Props{
 			"icon": ki.Props{
@@ -436,7 +437,7 @@ func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, opts DlgOpts, recv
 }
 
 func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Node2D, row int, vv ValueView) {
-	ic, ok := slice.([]gi.IconName)
+	ic, ok := slice.([]icons.Icon)
 	if ok {
 		widg.(*gi.Action).SetText(string(ic[row]))
 		widg.SetProp("max-width", -1)

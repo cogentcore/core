@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
@@ -46,7 +47,7 @@ type MakeMenuFunc func(obj ki.Ki, m *Menu)
 type ActOpts struct {
 	Name        string
 	Label       string
-	Icon        string
+	Icon        icons.Icon
 	Tooltip     string
 	Shortcut    key.Chord
 	ShortcutKey KeyFuns
@@ -61,12 +62,12 @@ func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc)
 		nm = opts.Label
 	}
 	if nm == "" {
-		nm = opts.Icon
+		nm = string(opts.Icon)
 	}
 	ac.InitName(ac, nm)
 	ac.Text = opts.Label
 	ac.Tooltip = opts.Tooltip
-	ac.Icon = IconName(opts.Icon)
+	ac.Icon = icons.Icon(opts.Icon)
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	if opts.ShortcutKey != KeyFunNil {
 		ac.Shortcut = ShortcutForFun(opts.ShortcutKey)
@@ -651,10 +652,10 @@ var MenuButtonProps = ki.Props{
 
 func (mb *MenuButton) ConfigParts() {
 	config := kit.TypeAndNameList{}
-	icIdx, lbIdx := mb.ConfigPartsIconLabel(&config, string(mb.Icon), mb.Text)
+	icIdx, lbIdx := mb.ConfigPartsIconLabel(&config, mb.Icon, mb.Text)
 	indIdx := mb.ConfigPartsAddIndicator(&config, true) // default on
 	mods, updt := mb.Parts.ConfigChildren(config)
-	mb.ConfigPartsSetIconLabel(string(mb.Icon), mb.Text, icIdx, lbIdx)
+	mb.ConfigPartsSetIconLabel(mb.Icon, mb.Text, icIdx, lbIdx)
 	mb.ConfigPartsIndicator(indIdx)
 	if mods {
 		mb.UpdateEnd(updt)

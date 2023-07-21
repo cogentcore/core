@@ -13,6 +13,7 @@ import (
 	"github.com/fatih/camelcase"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/ki/bitflag"
@@ -492,7 +493,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, label-func must be of type LabelFunc", methNm))
 			}
 		case "icon":
-			ac.Icon = gi.IconName(kit.ToString(pv))
+			ac.Icon = icons.Icon(kit.ToString(pv))
 		case "desc":
 			md.Desc = kit.ToString(pv)
 			ac.Tooltip = md.Desc

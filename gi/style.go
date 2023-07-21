@@ -38,15 +38,15 @@ type DefaultStyler interface {
 func StyleFunc(w *WidgetBase) {
 	cs := CurrentColorScheme()
 	// fmt.Printf("Styling\t%v\n", w.This())
-	if par, ok := w.Parent().Embed(KiT_WidgetBase).(*WidgetBase); ok {
-		// fmt.Println("got parent")
-		if par.Style.Font.Color.IsNil() {
-			w.Style.Font.Color.SetColor(cs.Font)
-		} else {
-			// fmt.Println("inhereting color", par.Style.Font.Color)
-			w.Style.Font.Color.SetColor(par.Style.Font.Color)
-		}
-	}
+	// if par, ok := w.Parent().Embed(KiT_WidgetBase).(*WidgetBase); ok {
+	// 	// fmt.Println("got parent")
+	// 	if par.Style.Font.Color.IsNil() {
+	// 		w.Style.Font.Color.SetColor(cs.Font)
+	// 	} else {
+	// 		// fmt.Println("inhereting color", par.Style.Font.Color)
+	// 		w.Style.Font.Color.SetColor(par.Style.Font.Color)
+	// 	}
+	// }
 	if ds, ok := w.This().(DefaultStyler); ok {
 		ds.DefaultStyle()
 	}

@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/complete"
@@ -151,7 +152,7 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt ima
 			text = cmp.Label
 		}
 		icon := cmp.Icon
-		m.AddAction(ActOpts{Icon: icon, Label: text, Data: cmp.Text},
+		m.AddAction(ActOpts{Icon: icons.Icon(icon), Label: text, Data: cmp.Text},
 			c, func(recv, send ki.Ki, sig int64, data any) {
 				cc := recv.Embed(KiT_Complete).(*Complete)
 				cc.Complete(data.(string))

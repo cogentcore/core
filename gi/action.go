@@ -285,10 +285,10 @@ func (ac *Action) ConfigPartsShortcut(scIdx int) {
 // ConfigPartsButton sets the label, icon etc for the button
 func (ac *Action) ConfigPartsButton() {
 	config := kit.TypeAndNameList{}
-	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, string(ac.Icon), ac.Text)
+	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := ac.Parts.ConfigChildren(config)
-	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
+	ac.ConfigPartsSetIconLabel(ac.Icon, ac.Text, icIdx, lbIdx)
 	ac.ConfigPartsIndicator(indIdx)
 	if mods {
 		ac.UpdateEnd(updt)
@@ -298,7 +298,7 @@ func (ac *Action) ConfigPartsButton() {
 // ConfigPartsMenuItem sets the label, icon, etc for action menu item
 func (ac *Action) ConfigPartsMenuItem() {
 	config := kit.TypeAndNameList{}
-	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, string(ac.Icon), ac.Text)
+	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	scIdx := -1
 	if indIdx < 0 && ac.Shortcut != "" {
@@ -307,7 +307,7 @@ func (ac *Action) ConfigPartsMenuItem() {
 		log.Printf("gi.Action shortcut cannot be used on a sub-menu for action: %v\n", ac.Text)
 	}
 	mods, updt := ac.Parts.ConfigChildren(config)
-	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
+	ac.ConfigPartsSetIconLabel(ac.Icon, ac.Text, icIdx, lbIdx)
 	ac.ConfigPartsIndicator(indIdx)
 	ac.ConfigPartsShortcut(scIdx)
 	if mods {

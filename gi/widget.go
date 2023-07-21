@@ -13,6 +13,7 @@ import (
 
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -994,14 +995,14 @@ func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 // ConfigPartsIconLabel adds to config to create parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
-func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icnm string, txt string) (icIdx, lbIdx int) {
+func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
 	wb.Parts.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
 	if wb.Style.Template != "" {
 		wb.Parts.Style.Template = wb.Style.Template + ".Parts"
 	}
 	icIdx = -1
 	lbIdx = -1
-	if IconName(icnm).IsValid() {
+	if TheIconMgr.IsValid(icnm) {
 		icIdx = len(*config)
 		config.Add(KiT_Icon, "icon")
 		if txt != "" {
@@ -1017,7 +1018,7 @@ func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icn
 
 // ConfigPartsSetIconLabel sets the icon and text values in parts, and get
 // part style props, using given props if not set in object props
-func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
+func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := wb.Parts.Child(icIdx).(*Icon)
 		if wb.Style.Template != "" {
@@ -1043,8 +1044,8 @@ func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icId
 }
 
 // PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
-func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool {
-	if IconName(icnm).IsValid() {
+func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm icons.Icon, txt string) bool {
+	if TheIconMgr.IsValid(icnm) {
 		ick := wb.Parts.ChildByName("icon", 0)
 		if ick == nil {
 			return true

@@ -14,6 +14,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/histyle"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -22,7 +23,7 @@ import (
 
 func init() {
 	gi.TheViewIFace = &ViewIFace{}
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.IconName(""))), func() ValueView {
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() ValueView {
 		vv := &IconValueView{}
 		ki.InitNode(vv)
 		return vv

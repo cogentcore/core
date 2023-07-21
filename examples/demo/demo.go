@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
@@ -52,12 +53,12 @@ func mainrun() {
 	bpri := gi.AddNewButton(brow, "buttonPrimary")
 	bpri.Text = "Primary Button"
 	bpri.Type = gi.ButtonPrimary
-	bpri.Icon = "forward"
+	bpri.Icon = icons.FastForward
 
 	bsec := gi.AddNewButton(brow, "buttonSecondary")
 	bsec.Text = "Secondary Button"
 	bsec.Type = gi.ButtonSecondary
-	bsec.Icon = "gear"
+	bsec.Icon = icons.Settings
 
 	bdef := gi.AddNewButton(brow, "buttonDefault")
 	bdef.Text = "Default Button"

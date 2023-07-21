@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -27,18 +28,18 @@ import (
 // decrementing values -- all configured within the Parts of the widget
 type SpinBox struct {
 	PartsWidgetBase
-	Value      float32   `xml:"value" desc:"current value"`
-	HasMin     bool      `xml:"has-min" desc:"is there a minimum value to enforce"`
-	Min        float32   `xml:"min" desc:"minimum value in range"`
-	HasMax     bool      `xml:"has-max" desc:"is there a maximumvalue to enforce"`
-	Max        float32   `xml:"max" desc:"maximum value in range"`
-	Step       float32   `xml:"step" desc:"smallest step size to increment"`
-	PageStep   float32   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
-	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	Format     string    `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
-	UpIcon     IconName  `view:"show-name" desc:"icon to use for up button -- defaults to wedge-up"`
-	DownIcon   IconName  `view:"show-name" desc:"icon to use for down button -- defaults to wedge-down"`
-	SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
+	Value      float32    `xml:"value" desc:"current value"`
+	HasMin     bool       `xml:"has-min" desc:"is there a minimum value to enforce"`
+	Min        float32    `xml:"min" desc:"minimum value in range"`
+	HasMax     bool       `xml:"has-max" desc:"is there a maximumvalue to enforce"`
+	Max        float32    `xml:"max" desc:"maximum value in range"`
+	Step       float32    `xml:"step" desc:"smallest step size to increment"`
+	PageStep   float32    `xml:"pagestep" desc:"larger PageUp / Dn step size"`
+	Prec       int        `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
+	Format     string     `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
+	UpIcon     icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to wedge-up"`
+	DownIcon   icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to wedge-down"`
+	SpinBoxSig ki.Signal  `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
 var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
@@ -196,10 +197,10 @@ func (sb *SpinBox) PageIncrValue(steps float32) {
 
 func (sb *SpinBox) ConfigParts() {
 	if sb.UpIcon.IsNil() {
-		sb.UpIcon = IconName("wedge-up")
+		sb.UpIcon = "wedge-up"
 	}
 	if sb.DownIcon.IsNil() {
-		sb.DownIcon = IconName("wedge-down")
+		sb.DownIcon = "wedge-down"
 	}
 	sb.Parts.Lay = LayoutHoriz
 	sb.Parts.SetProp("vertical-align", gist.AlignMiddle)

@@ -14,6 +14,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -50,7 +51,7 @@ type TreeView struct {
 	TreeViewSig      ki.Signal                   `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
 	StateStyles      [TreeViewStatesN]gist.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize       mat32.Vec2                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
-	Icon             gi.IconName                 `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
+	Icon             icons.Icon                  `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
 	RootView         *TreeView                   `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
@@ -1850,7 +1851,7 @@ func (tv *TreeView) ConfigParts() {
 	if tv.HasChildren() {
 		config.Add(gi.KiT_CheckBox, "branch")
 	}
-	if tv.Icon.IsValid() {
+	if gi.TheIconMgr.IsValid(tv.Icon) {
 		config.Add(gi.KiT_Icon, "icon")
 	}
 	config.Add(gi.KiT_Label, "label")
@@ -1887,11 +1888,11 @@ func (tv *TreeView) ConfigParts() {
 			}
 		}
 	}
-	if tv.Icon.IsValid() {
+	if gi.TheIconMgr.IsValid(tv.Icon) {
 		if ic, ok := tv.IconPart(); ok {
 			// this only works after a second redraw..
 			// ic.Sty.Template = "giv.TreeView.Icon"
-			set, _ := ic.SetIcon(string(tv.Icon))
+			set, _ := ic.SetIcon(tv.Icon)
 			if set || tv.NeedsFullReRender() || tv.RootView.NeedsFullReRender() || mods {
 				tv.StylePart(gi.Node2D(ic))
 			}
@@ -1917,9 +1918,9 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 	if !tv.Parts.HasChildren() {
 		tv.ConfigParts()
 	}
-	if tv.Icon.IsValid() {
+	if gi.TheIconMgr.IsValid(tv.Icon) {
 		if ic, ok := tv.IconPart(); ok {
-			ic.SetIcon(string(tv.Icon))
+			ic.SetIcon(tv.Icon)
 		}
 	}
 	if lbl, ok := tv.LabelPart(); ok {

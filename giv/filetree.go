@@ -2793,9 +2793,9 @@ func (ft *FileTreeView) Style2D() {
 	if fn != nil {
 		if fn.IsDir() {
 			if fn.HasChildren() {
-				ft.Icon = gi.IconName("")
+				ft.Icon = ""
 			} else {
-				ft.Icon = gi.IconName("folder")
+				ft.Icon = "folder"
 			}
 			ft.AddClass("folder")
 		} else {

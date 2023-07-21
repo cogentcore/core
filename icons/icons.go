@@ -16,13 +16,13 @@ import (
 //go:embed svg/*.svg
 var Icons embed.FS
 
-// An Icon contains the path of an icon
+// An Icon contains the name of an icon
 type Icon string
 
 // Fill returns the icon as a filled icon.
 // It returns the icon unchanged if it is already filled.
 func (i Icon) Fill() Icon {
-	if strings.HasSuffix(string(i), "-fill") {
+	if i.IsFilled() {
 		return i
 	}
 	return i + "-fill"
@@ -34,4 +34,16 @@ func (i Icon) Fill() Icon {
 // need to call this to reverse a prior [Icon.Fill] call
 func (i Icon) Unfill() Icon {
 	return Icon(strings.TrimSuffix(string(i), "-fill"))
+}
+
+// IsFilled returns whether the icon
+// is a filled icon.
+func (i Icon) IsFilled() bool {
+	return strings.HasSuffix(string(i), "-fill")
+}
+
+// IsNil returns whether the icon name is empty,
+// "none", or "nil"; those indicate not to use an icon.
+func (i Icon) IsNil() bool {
+	return i == "" || i == "none" || i == "nil"
 }

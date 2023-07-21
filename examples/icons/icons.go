@@ -61,7 +61,7 @@ func mainrun() {
 
 	for _, icnm := range il {
 		icnms := string(icnm)
-		if icnms == "none" || strings.HasSuffix(icnms, "-fill") {
+		if icnm.IsNil() || strings.HasSuffix(icnms, "-fill") {
 			continue
 		}
 		vb := gi.AddNewLayout(grid, "vb", gi.LayoutVert)
@@ -69,7 +69,7 @@ func mainrun() {
 		vb.SetProp("overflow", "hidden")
 		gi.AddNewLabel(vb, "lab1", icnms)
 
-		smico := gi.AddNewIcon(vb, icnms, icnms)
+		smico := gi.AddNewIcon(vb, icnms, icnm)
 		smico.SetMinPrefWidth(units.Px(24))
 		smico.SetMinPrefHeight(units.Px(24))
 		smico.SetProp("background-color", color.Transparent)
