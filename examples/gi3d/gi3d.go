@@ -15,6 +15,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/icons"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -364,7 +365,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	spsld.SetMinPrefHeight(units.Em(2))
 	spsld.SetValue(anim.Speed)
 	// spsld.Tracking = true
-	spsld.Icon = "circlebutton-on"
+	spsld.Icon = icons.RadioButtonUnchecked
 
 	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		anim.Speed = sb.Value

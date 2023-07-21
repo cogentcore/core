@@ -256,9 +256,9 @@ func (sv *SplitView) ConfigSplitters() {
 	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
 	spicon := icons.Icon("")
 	if sv.Dim == mat32.X {
-		spicon = "handle-circles-vert"
+		spicon = icons.DragHandle
 	} else {
-		spicon = "handle-circles-horiz"
+		spicon = icons.DragHandle
 	}
 	for i, spk := range *sv.Parts.Children() {
 		sp := spk.(*Splitter)

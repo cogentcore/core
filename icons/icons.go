@@ -47,3 +47,7 @@ func (i Icon) IsFilled() bool {
 func (i Icon) IsNil() bool {
 	return i == "" || i == "none" || i == "nil"
 }
+
+// Blank is a blank icon that can be used as a
+// placeholder when no other icon is appropriate
+const Blank Icon = "blank"

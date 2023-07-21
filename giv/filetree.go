@@ -26,6 +26,7 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -2795,13 +2796,13 @@ func (ft *FileTreeView) Style2D() {
 			if fn.HasChildren() {
 				ft.Icon = ""
 			} else {
-				ft.Icon = "folder"
+				ft.Icon = icons.Folder
 			}
 			ft.AddClass("folder")
 		} else {
 			ft.Icon = fn.Info.Ic
-			if ft.Icon == "" || ft.Icon == "none" {
-				ft.Icon = "blank"
+			if ft.Icon.IsNil() {
+				ft.Icon = icons.Blank
 			}
 			if fn.IsExec() {
 				ft.AddClass("exec")

@@ -197,10 +197,10 @@ func (sb *SpinBox) PageIncrValue(steps float32) {
 
 func (sb *SpinBox) ConfigParts() {
 	if sb.UpIcon.IsNil() {
-		sb.UpIcon = "wedge-up"
+		sb.UpIcon = icons.KeyboardArrowUp
 	}
 	if sb.DownIcon.IsNil() {
-		sb.DownIcon = "wedge-down"
+		sb.DownIcon = icons.KeyboardArrowDown
 	}
 	sb.Parts.Lay = LayoutHoriz
 	sb.Parts.SetProp("vertical-align", gist.AlignMiddle)

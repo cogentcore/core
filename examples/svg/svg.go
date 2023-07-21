@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/svg"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -97,7 +98,7 @@ func mainrun() {
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
-	loads := tbar.AddAction(gi.ActOpts{Label: "Open SVG", Icon: "file-open"}, win.This(),
+	loads := tbar.AddAction(gi.ActOpts{Label: "Open SVG", Icon: icons.FileOpen}, win.This(),
 		func(recv, send ki.Ki, sig int64, data any) {
 			FileViewOpenSVG(vp)
 		})
@@ -111,7 +112,7 @@ func mainrun() {
 	zmlb.SetProp("vertical-align", gist.AlignMiddle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
-	zoomout := tbar.AddAction(gi.ActOpts{Icon: "zoom-out", Name: "zoomout", Tooltip: "zoom out"},
+	zoomout := tbar.AddAction(gi.ActOpts{Icon: icons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			SetZoom(svge.Scale * 0.9)
 			win.FullReRender()
@@ -133,7 +134,7 @@ func mainrun() {
 		win.FullReRender()
 	})
 
-	zoomin := tbar.AddAction(gi.ActOpts{Icon: "zoom-in", Name: "zoomin", Tooltip: " zoom in"},
+	zoomin := tbar.AddAction(gi.ActOpts{Icon: icons.ZoomIn, Name: "zoomin", Tooltip: " zoom in"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			SetZoom(svge.Scale * 1.1)
 			win.FullReRender()

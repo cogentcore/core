@@ -1046,10 +1046,10 @@ func (cb *CheckBox) StyleParts() {
 func (cb *CheckBox) ConfigParts() {
 	cb.SetCheckable(true)
 	if !TheIconMgr.IsValid(cb.Icon) {
-		cb.Icon = "checked-box" // fallback
+		cb.Icon = icons.CheckBox // fallback
 	}
 	if !TheIconMgr.IsValid(cb.IconOff) {
-		cb.IconOff = "unchecked-box"
+		cb.IconOff = icons.CheckBoxOutlineBlank
 	}
 	config := kit.TypeAndNameList{}
 	icIdx := 0 // always there

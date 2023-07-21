@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -243,7 +244,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	slider1.SetValue(0.5)
 	slider1.Snap = true
 	slider1.Tracking = true
-	slider1.Icon = "circlebutton-on"
+	slider1.Icon = icons.RadioButtonChecked
 
 	slider2 := gi.AddNewSlider(srow, "slider2")
 	slider2.Dim = mat32.Y

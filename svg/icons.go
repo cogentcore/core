@@ -331,6 +331,10 @@ func (iset *IconSet) IconList(alphaSort bool) []icons.Icon {
 
 func MakeDefaultIcons() IconSet {
 	iset := make(IconSet, 100)
+	ic := &Icon{}
+	ic.InitName(ic, "blank")
+	ic.ViewBox.Size.SetScalar(1)
+	iset["blank"] = ic
 	// if true {
 	// 	{
 	// 		ic := &Icon{}

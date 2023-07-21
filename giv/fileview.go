@@ -17,6 +17,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -280,22 +281,22 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: "wedge-up", Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: icons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.DirPathUp()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: "update", Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: icons.Update, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.UpdateFilesAction()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: "heart", Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: icons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.AddPathToFavs()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: "folder-plus", Tooltip: "Create a new folder in this folder"},
+	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: icons.CreateNewFolder, Tooltip: "Create a new folder in this folder"},
 		fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.NewFolder()
