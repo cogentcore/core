@@ -258,7 +258,7 @@ func (iset *IconSet) OpenIconsFromPath(path string) error {
 }
 
 func (iset *IconSet) OpenDefaultIcons() error {
-	err := iset.OpenIconsFromEmbedDir(icons.Icons, "outlined")
+	err := iset.OpenIconsFromEmbedDir(icons.Icons, "svg")
 	if err != nil {
 		log.Println(err)
 		return err
@@ -286,7 +286,11 @@ func (iset *IconSet) OpenIconsFromEmbedDir(fs embed.FS, dirName string) error {
 		nm := strings.ToLower(bfn)
 		fpath := fnm
 		if dirName != "" && dirName != "." {
-			nm = dirName + "-" + nm
+			// omit "svg-" prefix because it is the
+			// standard location for icons
+			if dirName != "svg" {
+				nm = dirName + "-" + nm
+			}
 			fpath = filepath.Join(dirName, fnm)
 		}
 		ic := Icon{}

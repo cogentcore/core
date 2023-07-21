@@ -13,7 +13,7 @@ import (
 
 // TheIcons contains all of the default embedded svg icons
 //
-//go:embed outlined/*.svg
+//go:embed svg/*.svg
 var Icons embed.FS
 
 // An Icon contains the path of an icon

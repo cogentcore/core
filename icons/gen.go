@@ -43,14 +43,14 @@ var iconTmpl = template.Must(template.New("icon").Parse(
 	`
 	// {{.Camel}} is the "{{.Snake}}" icon from Material Design Symbols,
 	// defined at https://github.com/goki/gi/blob/mobile/icons/{{.Dir}}{{.Snake}}.svg
-	{{.Camel}} Icon = "{{.Dir}}{{.Snake}}"
+	{{.Camel}} Icon = "{{.Snake}}"
 	`,
 ))
 
 func main() {
 	buf := bytes.NewBuffer([]byte(preamble))
 
-	fs.WalkDir(icons.Icons, "outlined", func(path string, d fs.DirEntry, err error) error {
+	fs.WalkDir(icons.Icons, "svg", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
 			return nil
 		}
