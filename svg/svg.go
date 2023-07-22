@@ -15,6 +15,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -380,7 +381,7 @@ var SVGProps = ki.Props{
 		{"OpenXML", ki.Props{
 			"label": "Open...",
 			"desc":  "Open SVG XML-formatted file",
-			"icon":  "file-open",
+			"icon":  icons.FileOpen,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".svg",
@@ -390,7 +391,7 @@ var SVGProps = ki.Props{
 		{"SaveXML", ki.Props{
 			"label": "SaveAs...",
 			"desc":  "Save SVG content to an XML-formatted file.",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".svg",

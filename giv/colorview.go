@@ -12,6 +12,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -434,7 +435,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	edack, err := sv.Parts.Children().ElemFromEndTry(0) // action at end, from AddAction above
 	if err == nil {
 		edac := edack.(*gi.Action)
-		edac.SetIcon("color")
+		edac.SetIcon(icons.Colors)
 		edac.Tooltip = "color selection dialog"
 		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)

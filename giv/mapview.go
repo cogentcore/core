@@ -10,6 +10,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -260,7 +261,7 @@ func (mv *MapView) ConfigMapGrid() {
 			})
 		}
 		delact := sg.Child(i*ncol + ncol - 1).(*gi.Action)
-		delact.SetIcon("minus")
+		delact.SetIcon(icons.Delete)
 		delact.Tooltip = "delete item"
 		delact.Data = kv
 		delact.Style.Template = "giv.MapView.DelAction"
@@ -380,18 +381,18 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of map"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.UpdateValues()
 			})
-		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: "update", Tooltip: "Switch between sorting by the keys vs. the values"},
+		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.ToggleSort()
 			})
 		if ndef > 2 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the map"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the map"},
 				mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					mvv := recv.Embed(KiT_MapView).(*MapView)
 					mvv.MapAdd()

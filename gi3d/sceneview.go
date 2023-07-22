@@ -71,7 +71,7 @@ func (sv *SceneView) ToolbarConfig() {
 		return
 	}
 	tbar.SetStretchMaxWidth()
-	tbar.AddAction(gi.ActOpts{Icon: icons.ResetImage, Tooltip: "reset to default initial display, and rebuild everything"}, sv.This(),
+	tbar.AddAction(gi.ActOpts{Icon: icons.DeviceReset, Tooltip: "reset to default initial display, and rebuild everything"}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()

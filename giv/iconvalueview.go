@@ -40,7 +40,7 @@ func (vv *IconValueView) UpdateWidget() {
 	if icons.Icon(txt).IsNil() {
 		ac.SetIcon("blank")
 	} else {
-		ac.SetIcon(txt)
+		ac.SetIcon(icons.Icon(txt))
 	}
 	if sntag, ok := vv.Tag("view"); ok {
 		if strings.Contains(sntag, "show-name") {

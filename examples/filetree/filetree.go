@@ -15,6 +15,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -414,15 +415,15 @@ var FileBrowseProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"UpdateFiles", ki.Props{
 			"shortcut": "Command+U",
-			"icon":     "update",
+			"icon":     icons.Refresh,
 		}},
 		{"SaveActiveView", ki.Props{
 			"label": "Save",
-			"icon":  "file-save",
+			"icon":  icons.Save,
 		}},
 		{"SaveActiveViewAs", ki.Props{
 			"label": "Save As...",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "ActiveFilename",

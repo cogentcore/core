@@ -461,7 +461,7 @@ func (cb *ComboBox) SetCurIndex(idx int) any {
 // currently-selected value (CurVal)
 func (cb *ComboBox) ShowCurVal() {
 	if icnm, isic := cb.CurVal.(icons.Icon); isic {
-		cb.SetIcon(string(icnm))
+		cb.SetIcon(icnm)
 	} else {
 		cb.SetText(ToLabel(cb.CurVal))
 	}

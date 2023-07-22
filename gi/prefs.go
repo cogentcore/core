@@ -394,12 +394,12 @@ var PreferencesProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"UpdateAll", ki.Props{
 			"desc": "Updates all open windows with current preferences -- triggers rebuild of default styles.",
-			"icon": "update",
+			"icon": icons.Refresh,
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs.json file, which is auto-loaded at startup.",
-			"icon": "file-save",
+			"icon": icons.Save,
 			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*Preferences)
 				act.SetActiveStateUpdt(pf.Changed)
@@ -408,15 +408,15 @@ var PreferencesProps = ki.Props{
 		{"sep-color", ki.BlankProp{}},
 		{"LightMode", ki.Props{
 			"desc": "Set color mode to Light mode as defined in ColorSchemes -- automatically does Save and UpdateAll ",
-			"icon": "color",
+			"icon": icons.LightMode,
 		}},
 		{"DarkMode", ki.Props{
 			"desc": "Set color mode to Dark mode as defined in ColorSchemes -- automatically does Save and UpdateAll",
-			"icon": "color",
+			"icon": icons.DarkMode,
 		}},
 		{"sep-scrn", ki.BlankProp{}},
 		{"SaveZoom", ki.Props{
-			"icon": "zoom-in",
+			"icon": icons.ZoomIn,
 			"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
 			"Args": ki.PropSlice{
 				{"For Current Screen Only?", ki.Props{
@@ -427,29 +427,29 @@ var PreferencesProps = ki.Props{
 		}},
 		{"ScreenInfo", ki.Props{
 			"desc":        "shows parameters about all the active screens",
-			"icon":        "info",
+			"icon":        icons.Info,
 			"show-return": true,
 		}},
 		{"VersionInfo", ki.Props{
 			"desc":        "shows current GoGi version information",
-			"icon":        "info",
+			"icon":        icons.Info,
 			"show-return": true,
 		}},
 		{"sep-key", ki.BlankProp{}},
 		{"EditKeyMaps", ki.Props{
-			"icon": "keyboard",
+			"icon": icons.Keyboard,
 			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current keymaps are saved and loaded with preferences automatically if SaveKeyMaps is clicked (will be turned on automatically if you open this editor).",
 		}},
 		{"EditHiStyles", ki.Props{
-			"icon": "file-binary",
+			"icon": icons.InkHighlighter,
 			"desc": "opens the HiStylesView editor of highlighting styles.",
 		}},
 		{"EditDetailed", ki.Props{
-			"icon": "file-binary",
+			"icon": icons.Description,
 			"desc": "opens the PrefsDetView editor to edit detailed params that are not typically user-modified, but can be if you really care..  Turns on the SaveDetailed flag so these will be saved and loaded automatically -- can toggle that back off if you don't actually want to.",
 		}},
 		{"EditDebug", ki.Props{
-			"icon": "file-binary",
+			"icon": icons.BugReport,
 			"desc": "Opens the PrefsDbgView editor to control debugging parameters. These are not saved -- only set dynamically during running.",
 		}},
 	},
@@ -616,7 +616,7 @@ var ColorPrefsProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenJSON", ki.Props{
 			"label": "Open...",
-			"icon":  "file-open",
+			"icon":  icons.FileOpen,
 			"desc":  "open set of colors from a json-formatted file",
 			"Args": ki.PropSlice{
 				{"Color File Name", ki.Props{
@@ -627,7 +627,7 @@ var ColorPrefsProps = ki.Props{
 		{"SaveJSON", ki.Props{
 			"label": "Save As...",
 			"desc":  "Saves colors to JSON formatted file.",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"Color File Name", ki.Props{
 					"ext": ".json",
@@ -636,7 +636,7 @@ var ColorPrefsProps = ki.Props{
 		}},
 		{"SetToPrefs", ki.Props{
 			"desc": "Sets this color scheme as the current active color scheme in Prefs.",
-			"icon": "reset",
+			"icon": icons.Palette,
 		}},
 	},
 }
@@ -1024,12 +1024,12 @@ var PrefsDetailedProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Apply", ki.Props{
 			"desc": "Apply parameters to affect actual behavior.",
-			"icon": "update",
+			"icon": icons.Refresh,
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs_det.json file, which is auto-loaded at startup.",
-			"icon": "file-save",
+			"icon": icons.Save,
 			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*PrefsDetailed)
 				act.SetActiveStateUpdt(pf.Changed)
@@ -1086,7 +1086,7 @@ var PrefsDebugProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Profile", ki.Props{
 			"desc": "Toggle profiling of program on or off -- does both targeted and global CPU and Memory profiling.",
-			"icon": "update",
+			"icon": icons.LabProfile,
 		}},
 	},
 }

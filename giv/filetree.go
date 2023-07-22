@@ -2644,7 +2644,7 @@ var FileTreeViewProps = ki.Props{
 		"stroke":  &gi.Prefs.Colors.Font,
 	},
 	"#branch": ki.Props{
-		"icon":             "folder-open",
+		"icon":             icons.FolderOpen,
 		"icon-off":         "folder",
 		"margin":           units.Px(0),
 		"padding":          units.Px(0),

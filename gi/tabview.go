@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -390,7 +391,7 @@ func (tv *TabView) ConfigNewTabButton() bool {
 		}
 		tab := tb.InsertNewChild(KiT_Action, ntb, "new-tab").(*Action)
 		tab.Data = -1
-		tab.SetIcon("plus")
+		tab.SetIcon(icons.Add)
 		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(KiT_TabView).(*TabView)
 			tvv.SetFullReRender()
@@ -656,7 +657,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 		}
 		tb.StylePart(Node2D(cls))
 
-		icnm := string(tb.Indicator)
+		icnm := tb.Indicator
 		cls.SetIcon(icnm)
 		cls.SetProp("no-focus", true)
 		cls.ActionSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {

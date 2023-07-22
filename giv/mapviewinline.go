@@ -10,6 +10,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -118,7 +119,7 @@ func (mv *MapViewInline) ConfigParts() {
 	adack, err := mv.Parts.Children().ElemFromEndTry(1)
 	if err == nil {
 		adac := adack.(*gi.Action)
-		adac.SetIcon("plus")
+		adac.SetIcon(icons.Add)
 		adac.Tooltip = "add an entry to the map"
 		adac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
@@ -128,7 +129,7 @@ func (mv *MapViewInline) ConfigParts() {
 	edack, err := mv.Parts.Children().ElemFromEndTry(0)
 	if err == nil {
 		edac := edack.(*gi.Action)
-		edac.SetIcon("edit")
+		edac.SetIcon(icons.Edit)
 		edac.Tooltip = "map edit dialog"
 		edac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)

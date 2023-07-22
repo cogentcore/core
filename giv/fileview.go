@@ -286,7 +286,7 @@ func (fv *FileView) ConfigPathBar() {
 		fvv.DirPathUp()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: icons.Update, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: icons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.UpdateFilesAction()
 	})

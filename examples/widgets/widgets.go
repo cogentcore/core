@@ -47,8 +47,6 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-widgets-demo", "GoGi Widgets Demo", width, height)
 
-	icnm := "wedge-down"
-
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 
@@ -146,7 +144,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	})
 	button1.Tooltip = "press this <i>button</i> to pop up a dialog box"
 
-	button1.SetIcon(icnm)
+	button1.SetIcon(icons.OpenInNew)
 	button1.OnClicked(func() {
 		fmt.Printf("Button %s clicked\n", button1.Name())
 		gi.StringPromptDialog(vp, "", "Enter value here..",

@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"log"
 	"strconv"
 
@@ -76,14 +77,16 @@ func (sb *SpinBox) DefaultStyle() {
 	if bts != nil {
 		if up, ok := bts.ChildByName("up", 0).(*Action); ok {
 			up.StyleFunc = func() {
-				up.Style.Layout.MaxWidth.SetEx(1.5)
-				up.Style.Layout.MaxHeight.SetEx(1.5)
+				up.Style.Layout.MaxWidth.SetEx(2)
+				up.Style.Layout.MaxHeight.SetEx(2)
+				up.Style.Font.BgColor.SetColor(color.Transparent)
 			}
 		}
 		if down, ok := bts.ChildByName("down", 1).(*Action); ok {
 			down.StyleFunc = func() {
-				down.Style.Layout.MaxWidth.SetEx(1.5)
-				down.Style.Layout.MaxHeight.SetEx(1.5)
+				down.Style.Layout.MaxWidth.SetEx(2)
+				down.Style.Layout.MaxHeight.SetEx(2)
+				down.Style.Font.BgColor.SetColor(color.Transparent)
 			}
 		}
 	}

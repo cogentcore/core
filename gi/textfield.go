@@ -15,6 +15,7 @@ import (
 
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -1366,7 +1367,7 @@ func (tf *TextField) ConfigParts() {
 	if mods || gist.RebuildDefaultStyles {
 		clr := tf.Parts.Child(1).(*Action)
 		tf.StylePart(Node2D(clr))
-		clr.SetIcon("close")
+		clr.SetIcon(icons.Close)
 		clr.SetProp("no-focus", true)
 		clr.ActionSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tff := recv.Embed(KiT_TextField).(*TextField)

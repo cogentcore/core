@@ -241,11 +241,11 @@ func (bb *ButtonBase) SetText(txt string) {
 
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and
 // updates the button
-func (bb *ButtonBase) SetIcon(iconName string) {
+func (bb *ButtonBase) SetIcon(iconName icons.Icon) {
 	updt := bb.UpdateStart()
 	defer bb.UpdateEnd(updt)
 	if !bb.IsVisible() {
-		bb.Icon = icons.Icon(iconName)
+		bb.Icon = iconName
 		return
 	}
 	bb.StyMu.RLock()
@@ -254,10 +254,10 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 	if needSty {
 		bb.StyleButton()
 	}
-	if bb.Icon != icons.Icon(iconName) {
+	if bb.Icon != iconName {
 		bb.SetFullReRender()
 	}
-	bb.Icon = icons.Icon(iconName)
+	bb.Icon = iconName
 	bb.This().(ButtonWidget).ConfigParts()
 }
 
@@ -452,7 +452,7 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	ic := bb.Parts.Child(indIdx).(*Icon)
 	icnm := bb.Indicator
 	if icnm.IsNil() {
-		icnm = "wedge-down"
+		icnm = icons.KeyboardArrowDown
 	}
 	if set, _ := ic.SetIcon(icnm); set {
 		bb.StylePart(bb.Parts.Child(indIdx - 1).(Node2D)) // also get the stretch
@@ -932,8 +932,8 @@ func (cb *CheckBox) CopyFieldsFrom(frm any) {
 
 var CheckBoxProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
-	"icon":             "checked-box",
-	"icon-off":         "unchecked-box",
+	"icon":             icons.CheckBox,
+	"icon-off":         icons.CheckBoxOutlineBlank,
 	"text-align":       gist.AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,

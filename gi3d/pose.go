@@ -5,6 +5,7 @@
 package gi3d
 
 import (
+	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -198,7 +199,7 @@ var PoseProps = ki.Props{
 		{"GenGoSet", ki.Props{
 			"label":       "Go Code",
 			"desc":        "returns Go Code that sets the current Pose, based on given path to Pose.",
-			"icon":        "edit",
+			"icon":        icons.Code,
 			"show-return": true,
 			"Args": ki.PropSlice{
 				{"Path", ki.BlankProp{}},
@@ -206,7 +207,7 @@ var PoseProps = ki.Props{
 		}},
 		{"SetEulerRotation", ki.Props{
 			"desc": "Set the local rotation (relative to parent) using Euler angles, in degrees.",
-			"icon": "rotate-3d",
+			"icon": icons.X360,
 			"Args": ki.PropSlice{
 				{"Pitch", ki.Props{
 					"desc": "rotation up / down along the X axis (in the Y-Z plane), e.g., the altitude (climbing, descending) for motion along the Z depth axis",
@@ -221,7 +222,7 @@ var PoseProps = ki.Props{
 		}},
 		{"SetAxisRotation", ki.Props{
 			"desc": "Set the local rotation (relative to parent) using Axis about which to rotate, and the angle.",
-			"icon": "rotate-3d",
+			"icon": icons.X360,
 			"Args": ki.PropSlice{
 				{"X", ki.BlankProp{}},
 				{"Y", ki.BlankProp{}},
@@ -231,7 +232,7 @@ var PoseProps = ki.Props{
 		}},
 		{"RotateEuler", ki.Props{
 			"desc": "rotate (relative to current rotation) using Euler angles, in degrees.",
-			"icon": "rotate-3d",
+			"icon": icons.X360,
 			"Args": ki.PropSlice{
 				{"Pitch", ki.Props{
 					"desc": "rotation up / down along the X axis (in the Y-Z plane), e.g., the altitude (climbing, descending) for motion along the Z depth axis",
@@ -246,7 +247,7 @@ var PoseProps = ki.Props{
 		}},
 		{"RotateOnAxis", ki.Props{
 			"desc": "Rotate (relative to current rotation) using Axis about which to rotate, and the angle.",
-			"icon": "rotate-3d",
+			"icon": icons.X360,
 			"Args": ki.PropSlice{
 				{"X", ki.BlankProp{}},
 				{"Y", ki.BlankProp{}},
@@ -255,7 +256,7 @@ var PoseProps = ki.Props{
 			},
 		}},
 		{"LookAt", ki.Props{
-			"icon": "rotate-3d",
+			"icon": icons.X360,
 			"Args": ki.PropSlice{
 				{"Target", ki.BlankProp{}},
 				{"UpDir", ki.BlankProp{}},
@@ -263,13 +264,13 @@ var PoseProps = ki.Props{
 		}},
 		{"EulerRotation", ki.Props{
 			"desc":        "The local rotation (relative to parent) in Euler angles in degrees (X = Pitch, Y = Yaw, Z = Roll)",
-			"icon":        "rotate-3d",
+			"icon":        icons.X360,
 			"show-return": "true",
 		}},
 		{"sep-rot", ki.BlankProp{}},
 		{"MoveOnAxis", ki.Props{
 			"desc": "Move given distance on given X,Y,Z axis relative to current rotation orientation.",
-			"icon": "pan",
+			"icon": icons.PanTool,
 			"Args": ki.PropSlice{
 				{"X", ki.BlankProp{}},
 				{"Y", ki.BlankProp{}},
@@ -279,7 +280,7 @@ var PoseProps = ki.Props{
 		}},
 		{"MoveOnAxisAbs", ki.Props{
 			"desc": "Move given distance on given X,Y,Z axis in absolute coords, not relative to current rotation orientation.",
-			"icon": "pan",
+			"icon": icons.PanTool,
 			"Args": ki.PropSlice{
 				{"X", ki.BlankProp{}},
 				{"Y", ki.BlankProp{}},

@@ -12,6 +12,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -633,7 +634,7 @@ var SceneProps = ki.Props{
 	"EnumType:Flag": KiT_SceneFlags,
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
-			"icon": "update",
+			"icon": icons.Refresh,
 		}},
 	},
 }

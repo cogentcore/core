@@ -17,6 +17,7 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/svg"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -44,7 +45,7 @@ var GraphProps = ki.Props{
 		{"OpenJSON", ki.Props{
 			"label": "Open...",
 			"desc":  "Opens line equations and params from a .json file.",
-			"icon":  "file-open",
+			"icon":  icons.FileOpen,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".json",
@@ -54,7 +55,7 @@ var GraphProps = ki.Props{
 		{"SaveJSON", ki.Props{
 			"label": "Save As...",
 			"desc":  "Saves line equations and params to a .json file.",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".json",
@@ -64,26 +65,26 @@ var GraphProps = ki.Props{
 		{"sep-ctrl", ki.BlankProp{}},
 		{"Graph", ki.Props{
 			"desc": "updates graph for current equations",
-			"icon": "file-image",
+			"icon": icons.Image,
 		}},
 		{"Run", ki.Props{
 			"desc":            "runs the marbles for NSteps",
-			"icon":            "run",
+			"icon":            icons.PlayCircle,
 			"no-update-after": true,
 		}},
 		{"Stop", ki.Props{
 			"desc":            "runs the marbles for NSteps",
-			"icon":            "stop",
+			"icon":            icons.Stop,
 			"no-update-after": true,
 		}},
 		{"Step", ki.Props{
 			"desc":            "steps the marbles for one step",
-			"icon":            "step-fwd",
+			"icon":            icons.KeyboardArrowRight,
 			"no-update-after": true,
 		}},
 		{"Reset", ki.Props{
 			"desc": "resets marbles to their initial starting positions",
-			"icon": "update",
+			"icon": icons.DeviceReset,
 		}},
 	},
 }

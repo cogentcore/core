@@ -8,6 +8,7 @@ import (
 	"image"
 	"sync"
 
+	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -255,38 +256,38 @@ var CameraProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Defaults", ki.Props{
 			"label": "Defaults",
-			"icon":  "reset",
+			"icon":  icons.DeviceReset,
 		}},
 		{"LookAt", ki.Props{
-			"icon": "rotate-3d",
+			"icon": icons.Visibility,
 			"Args": ki.PropSlice{
 				{"Target", ki.BlankProp{}},
 				{"UpDir", ki.BlankProp{}},
 			},
 		}},
 		{"Orbit", ki.Props{
-			"icon": "rotate-3d",
+			"icon": icons.X360,
 			"Args": ki.PropSlice{
 				{"DeltaX", ki.BlankProp{}},
 				{"DeltaY", ki.BlankProp{}},
 			},
 		}},
 		{"Pan", ki.Props{
-			"icon": "pan",
+			"icon": icons.PanTool,
 			"Args": ki.PropSlice{
 				{"DeltaX", ki.BlankProp{}},
 				{"DeltaY", ki.BlankProp{}},
 			},
 		}},
 		{"PanAxis", ki.Props{
-			"icon": "pan",
+			"icon": icons.PanTool,
 			"Args": ki.PropSlice{
 				{"DeltaX", ki.BlankProp{}},
 				{"DeltaY", ki.BlankProp{}},
 			},
 		}},
 		{"PanTarget", ki.Props{
-			"icon": "pan",
+			"icon": icons.PanTool,
 			"Args": ki.PropSlice{
 				{"DeltaX", ki.BlankProp{}},
 				{"DeltaY", ki.BlankProp{}},
@@ -294,7 +295,7 @@ var CameraProps = ki.Props{
 			},
 		}},
 		{"Zoom", ki.Props{
-			"icon": "zoom-in",
+			"icon": icons.ZoomIn,
 			"Args": ki.PropSlice{
 				{"ZoomPct", ki.BlankProp{}},
 			},

@@ -83,7 +83,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	}
 	cpb := gi.AddNewButton(bbox, "copy-to-clip")
 	cpb.SetText("Copy To Clipboard")
-	cpb.SetIcon("copy")
+	cpb.SetIcon(icons.ContentCopy)
 	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)

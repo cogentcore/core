@@ -1957,8 +1957,8 @@ var TreeViewProps = ki.Props{
 		"stroke":  &gi.Prefs.Colors.Font,
 	},
 	"#branch": ki.Props{
-		"icon":             "wedge-down",
-		"icon-off":         "wedge-right",
+		"icon":             icons.KeyboardArrowDown,
+		"icon-off":         icons.KeyboardArrowRight,
 		"margin":           units.Px(0),
 		"padding":          units.Px(0),
 		"background-color": color.Transparent,

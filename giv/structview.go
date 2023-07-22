@@ -15,6 +15,7 @@ import (
 	"github.com/antonmedv/expr/ast"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/gosl/slbool"
 	"github.com/goki/ki/ki"
@@ -181,7 +182,7 @@ func (sv *StructView) ConfigToolbar() {
 	svtp := kit.NonPtrType(reflect.TypeOf(sv.Struct))
 	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: ttip},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: ttip},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(KiT_StructView).(*StructView)
 				svv.UpdateFields()

@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -230,7 +231,7 @@ var GiEditorProps = ki.Props{
 	},
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
-			"icon": "update",
+			"icon": icons.Refresh,
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
 				act.SetActiveStateUpdt(ge.Changed)
@@ -239,7 +240,7 @@ var GiEditorProps = ki.Props{
 		{"sep-file", ki.BlankProp{}},
 		{"Open", ki.Props{
 			"label": "Open",
-			"icon":  "file-open",
+			"icon":  icons.FileOpen,
 			"desc":  "Open a json-formatted Ki tree structure",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -249,7 +250,7 @@ var GiEditorProps = ki.Props{
 			},
 		}},
 		{"Save", ki.Props{
-			"icon": "file-save",
+			"icon": icons.Save,
 			"desc": "Save json-formatted Ki tree structure to existing filename",
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
@@ -258,7 +259,7 @@ var GiEditorProps = ki.Props{
 		}},
 		{"SaveAs", ki.Props{
 			"label": "Save As...",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"desc":  "Save as a json-formatted Ki tree structure",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
