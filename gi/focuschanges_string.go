@@ -42,7 +42,7 @@ func (i *FocusChanges) FromString(s string) error {
 var _FocusChanges_descMap = map[FocusChanges]string{
 	0: `FocusLost means that keyboard focus is on a different widget (typically) and this one lost focus`,
 	1: `FocusGot means that this widget just got keyboard focus`,
-	2: `FocusInactive means that although this widget retains keyboard focus (nobody else has it), the user has clicked on something else and therefore the focus should be considered inactive (distracted), and any changes should be applied as this other action could result in closing of a dialog etc.  Keyboard events will still be sent to the focus widget, but it is up to the widget if or how to process them (e.g., it could reactivate on its own).`,
+	2: `FocusInactive means that although this widget retains keyboard focus (nobody else has it), the user has clicked on something else and therefore the focus should be considered inactive (distracted), and any changes should be applied as this other action could result in closing of a dialog etc. Keyboard events will still be sent to the focus widget, but it is up to the widget if or how to process them (e.g., it could reactivate on its own).`,
 	3: `FocusActive means that the user has moved the mouse back into the focused widget to resume active keyboard focus.`,
 	4: ``,
 }

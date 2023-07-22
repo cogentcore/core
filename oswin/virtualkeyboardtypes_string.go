@@ -39,9 +39,9 @@ func (i *VirtualKeyboardTypes) FromString(s string) error {
 }
 
 var _VirtualKeyboardTypes_descMap = map[VirtualKeyboardTypes]string{
-	0: `DefaultKeyboard is the keyboard with default input style and "return" return key`,
-	1: `SingleLineKeyboard is the keyboard with default input style and "Done" return key`,
-	2: `NumberKeyboard is the keyboard with number input style and "Done" return key`,
+	0: `DefaultKeyboard is the keyboard with default input style and &#34;return&#34; return key`,
+	1: `SingleLineKeyboard is the keyboard with default input style and &#34;Done&#34; return key`,
+	2: `NumberKeyboard is the keyboard with number input style and &#34;Done&#34; return key`,
 	3: ``,
 }
 

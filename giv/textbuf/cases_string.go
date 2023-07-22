@@ -49,7 +49,7 @@ var _Cases_descMap = map[Cases]string{
 	3: `LowerCamelCase has first letter lower-case`,
 	4: `SnakeCase is snake_case -- lower with underbars`,
 	5: `UpperSnakeCase is SNAKE_CASE -- upper with underbars`,
-	6: `KebabCase is kebab-case -- lower with -'s`,
+	6: `KebabCase is kebab-case -- lower with -&#39;s`,
 	7: `CasesN is the number of textview states`,
 }
 

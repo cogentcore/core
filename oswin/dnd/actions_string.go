@@ -52,7 +52,7 @@ var _Actions_descMap = map[Actions]string{
 	4: `External is triggered from an external drop event`,
 	5: `Move is sent whenever mouse is moving while dragging -- usually not needed.`,
 	6: `Enter is sent when drag enters a given widget, in a FocusEvent.`,
-	7: `Exit is sent when drag exits a given widget, in a FocusEvent.  Exit from one widget always happens before entering another (so you can reset cursor to Not).`,
+	7: `Exit is sent when drag exits a given widget, in a FocusEvent. Exit from one widget always happens before entering another (so you can reset cursor to Not).`,
 	8: `Hover is sent when drag is hovering over a widget without moving -- can use this for spring-loaded opening of items to drag into, for example.`,
 	9: ``,
 }

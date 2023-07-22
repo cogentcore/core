@@ -46,7 +46,7 @@ var _WindowFlags_descMap = map[WindowFlags]string{
 	1: `Modal indicates that this dialog window blocks events going to other windows until it is closed.`,
 	2: `Tool indicates that this is a floating tool window that has minimized window decoration.`,
 	3: `Fullscreen indicates a window that occupies the entire screen.`,
-	4: `Minimized indicates a window reduced to an icon, or otherwise no longer visible or active.  Otherwise, the window should be assumed to be visible.`,
+	4: `Minimized indicates a window reduced to an icon, or otherwise no longer visible or active. Otherwise, the window should be assumed to be visible.`,
 	5: `Focus indicates that the window has the focus.`,
 	6: ``,
 }

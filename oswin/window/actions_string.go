@@ -47,7 +47,7 @@ func (i *Actions) FromString(s string) error {
 var _Actions_descMap = map[Actions]string{
 	0: `Close means that the window is about to close, but has not yet closed.`,
 	1: `Minimize means that the window has been iconified / miniaturized / is no longer visible.`,
-	2: `Resize means that the window was resized, including changes in DPI associated with moving to a new screen.  Position may have also changed too.  Requires a redraw.`,
+	2: `Resize means that the window was resized, including changes in DPI associated with moving to a new screen. Position may have also changed too. Requires a redraw.`,
 	3: `Move means that the window was moved but NOT resized or changed in any other way -- does not require a redraw, but anything tracking positions will want to update.`,
 	4: `Focus indicates that the window has been activated for receiving user input.`,
 	5: `DeFocus indicates that the window is no longer activated for receiving input.`,

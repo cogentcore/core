@@ -76,28 +76,28 @@ func (sb *SpinBox) DefaultStyle() {
 	bts := sb.Parts.ChildByName("buttons", 2)
 	if bts != nil {
 		if up, ok := bts.ChildByName("up", 0).(*Action); ok {
-			up.StyleFunc = func() {
+			up.AddStyleFunc(func() {
 				up.Style.Layout.MaxWidth.SetEm(1)
 				up.Style.Layout.MaxHeight.SetEm(1)
 				up.Style.Layout.Margin.Set()
 				up.Style.Layout.Padding.Set()
 				up.Style.Font.BgColor.SetColor(color.Transparent)
-			}
+			})
 		}
 		if down, ok := bts.ChildByName("down", 1).(*Action); ok {
-			down.StyleFunc = func() {
+			down.AddStyleFunc(func() {
 				down.Style.Layout.MaxWidth.SetEm(1)
 				down.Style.Layout.MaxHeight.SetEm(1)
 				down.Style.Layout.Margin.Set()
 				down.Style.Layout.Padding.Set()
 				down.Style.Font.BgColor.SetColor(color.Transparent)
-			}
+			})
 		}
 	}
 	if spc, ok := sb.Parts.ChildByName("space", 1).(*Space); ok {
-		spc.StyleFunc = func() {
+		spc.AddStyleFunc(func() {
 			spc.Style.Layout.Width.SetEx(0)
-		}
+		})
 	}
 }
 

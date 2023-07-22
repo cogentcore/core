@@ -43,7 +43,7 @@ var _TreeViewFlags_descMap = map[TreeViewFlags]string{
 	24: `TreeViewFlagClosed means node is toggled closed (children not visible)`,
 	25: `TreeViewFlagChanged is updated on the root node whenever a gui edit is made through the tree view on the tree -- this does not track any other changes that might have occurred in the tree itself. Also emits a TreeViewChanged signal on the root node.`,
 	26: `TreeViewFlagNoTemplate -- this node is not using a style template -- should be restyled on any full re-render change`,
-	27: `TreeViewFlagUpdtRoot -- for any update signal that comes from the source root node, do a full update of the treeview.  This increases responsiveness of the updating and makes it easy to trigger a full update by updating the root node, but can be slower when not needed`,
+	27: `TreeViewFlagUpdtRoot -- for any update signal that comes from the source root node, do a full update of the treeview. This increases responsiveness of the updating and makes it easy to trigger a full update by updating the root node, but can be slower when not needed`,
 	28: ``,
 }
 

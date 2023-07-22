@@ -40,10 +40,10 @@ func (i *Overflow) FromString(s string) error {
 }
 
 var _Overflow_descMap = map[Overflow]string{
-	0: `OverflowAuto automatically determines if scrollbars should be added to show the overflow.  Scrollbars are added only if the actual content size is greater than the currently available size.  Typically, an outer-most Layout will scale up and add scrollbars to accommodate the Min needs of its child elements, so if you want to have scrollbars show up on inner elements, they need to have a style setting that restricts their Min size, but also allows them to stretch so they use whatever space they are allocated.`,
-	1: `OverflowScroll means add scrollbars when necessary, and is essentially identical to Auto.  However, only during Viewport PrefSize call, the actual content size is used -- otherwise it behaves just like Auto.`,
+	0: `OverflowAuto automatically determines if scrollbars should be added to show the overflow. Scrollbars are added only if the actual content size is greater than the currently available size. Typically, an outer-most Layout will scale up and add scrollbars to accommodate the Min needs of its child elements, so if you want to have scrollbars show up on inner elements, they need to have a style setting that restricts their Min size, but also allows them to stretch so they use whatever space they are allocated.`,
+	1: `OverflowScroll means add scrollbars when necessary, and is essentially identical to Auto. However, only during Viewport PrefSize call, the actual content size is used -- otherwise it behaves just like Auto.`,
 	2: `OverflowVisible makes the overflow visible -- this is generally unsafe and not very feasible and will be ignored as long as possible. Currently it falls back on Auto, but could go to Hidden if that works better overall.`,
-	3: `OverflowHidden hides the overflow and doesn't present scrollbars (supported).`,
+	3: `OverflowHidden hides the overflow and doesn&#39;t present scrollbars (supported).`,
 	4: ``,
 }
 

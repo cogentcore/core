@@ -69,7 +69,7 @@ var _EventType_descMap = map[EventType]string{
 	8:  `TouchEvent is a generic touch-based event`,
 	9:  `MagnifyEvent is a touch-based magnify event (e.g., pinch)`,
 	10: `RotateEvent is a touch-based rotate event`,
-	11: `WindowEvent reports any changes in the window size, orientation, iconify, close, open, paint -- these are all "internal" events from OS to GUI system, and not sent to widgets`,
+	11: `WindowEvent reports any changes in the window size, orientation, iconify, close, open, paint -- these are all &#34;internal&#34; events from OS to GUI system, and not sent to widgets`,
 	12: `WindowResizeEvent is specifically for window resize events which need special treatment -- this is an internal event not sent to widgets`,
 	13: `WindowPaintEvent is specifically for window paint events which need special treatment -- this is an internal event not sent to widgets, triggered right after window is opened for initial painting.`,
 	14: `WindowShowEvent is a synthetic event sent to widget consumers, sent *only once* when window is shown for the very first time`,

@@ -42,8 +42,8 @@ func (i *WhiteSpaces) FromString(s string) error {
 
 var _WhiteSpaces_descMap = map[WhiteSpaces]string{
 	0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary`,
-	1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line. The text continues on the same line until a <br> tag is encountered`,
-	2: `WhiteSpacePre means that whitespace is preserved by the browser. Text will only wrap on line breaks. Acts like the <pre> tag in HTML.  This invokes a different hand-written parser because the default golang parser automatically throws away whitespace`,
+	1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line. The text continues on the same line until a &lt;br&gt; tag is encountered`,
+	2: `WhiteSpacePre means that whitespace is preserved by the browser. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default golang parser automatically throws away whitespace`,
 	3: `WhiteSpacePreLine means that sequences of whitespace will collapse into a single whitespace. Text will wrap when necessary, and on line breaks`,
 	4: `WhiteSpacePreWrap means that whitespace is preserved by the browser. Text will wrap when necessary, and on line breaks`,
 	5: ``,

@@ -44,14 +44,14 @@ func (i *LabelTypes) FromString(s string) error {
 }
 
 var _LabelTypes_descMap = map[LabelTypes]string{
-	0: `LabelP is a default paragraph-style label, similar to HTML's <p> element`,
-	1: `LabelLabel is a label that labels something else like an input, similar to HTML's <label> element`,
-	2: `LabelH1 is a large heading-style label, similar to HTML's <h1> element`,
-	3: `LabelH2 is a heading-style label slightly smaller than H1, similar to HTML's <h2> element`,
-	4: `LabelH3 is a heading-style label slightly smaller than H2, similar to HTML's <h3> element`,
-	5: `LabelH4 is a heading-style label slightly smaller than H3, similar to HTML's <h4> element`,
-	6: `LabelH5 is a heading-style label slightly smaller than H4, similar to HTML's <h5> element`,
-	7: `LabelH6 is a heading-style label slightly smaller than H5, similar to HTML's <h6> element`,
+	0: `LabelP is a default paragraph-style label, similar to HTML&#39;s &lt;p&gt; element`,
+	1: `LabelLabel is a label that labels something else like an input, similar to HTML&#39;s &lt;label&gt; element`,
+	2: `LabelH1 is a large heading-style label, similar to HTML&#39;s &lt;h1&gt; element`,
+	3: `LabelH2 is a heading-style label slightly smaller than H1, similar to HTML&#39;s &lt;h2&gt; element`,
+	4: `LabelH3 is a heading-style label slightly smaller than H2, similar to HTML&#39;s &lt;h3&gt; element`,
+	5: `LabelH4 is a heading-style label slightly smaller than H3, similar to HTML&#39;s &lt;h4&gt; element`,
+	6: `LabelH5 is a heading-style label slightly smaller than H4, similar to HTML&#39;s &lt;h5&gt; element`,
+	7: `LabelH6 is a heading-style label slightly smaller than H5, similar to HTML&#39;s &lt;h6&gt; element`,
 	8: ``,
 }
 

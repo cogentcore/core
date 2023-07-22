@@ -41,7 +41,7 @@ func StringToTextBufFlags(s string) (TextBufFlags, error) {
 
 var _TextBufFlags_descMap = map[TextBufFlags]string{
 	24: `TextBufAutoSaving is used in atomically safe way to protect autosaving`,
-	25: `TextBufMarkingUp indicates current markup operation in progress -- don't redo`,
+	25: `TextBufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
 	26: `TextBufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
 	27: `TextBufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
 	28: ``,

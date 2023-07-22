@@ -51,7 +51,7 @@ var _TreeViewSignals_descMap = map[TreeViewSignals]string{
 	3: `TreeView all items were unselected`,
 	4: `closed TreeView was opened`,
 	5: `open TreeView was closed -- children not visible`,
-	6: `means that some kind of edit operation has taken place by the user via the gui -- we don't track the details, just that changes have happened`,
+	6: `means that some kind of edit operation has taken place by the user via the gui -- we don&#39;t track the details, just that changes have happened`,
 	7: `a node was inserted into the tree (Paste, DND) in this case, the data is the *source node* that was inserted`,
 	8: `a node was deleted from the tree (Cut, DND Move)`,
 	9: ``,

@@ -53,7 +53,7 @@ var _WinFlags_descMap = map[WinFlags]string{
 	27: `WinFlagIsResizing is atomic flag indicating window is resizing`,
 	28: `WinFlagGotPaint have we received our first paint event yet? ignore other window events before this point`,
 	29: `WinFlagGotFocus indicates that have we received OSWin focus`,
-	30: `WinFlagSentShow have we sent the show event yet?  Only ever sent ONCE`,
+	30: `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
 	31: `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
 	32: `WinFlagStopEventLoop is set when event loop stop is requested`,
 	33: `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,

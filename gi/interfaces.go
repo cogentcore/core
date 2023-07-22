@@ -72,14 +72,6 @@ type SliceLabeler interface {
 	ElemLabel(idx int) string
 }
 
-// Describer interface provides a GUI-appropriate description
-// for an item, to be displayed on hover as a tooltip
-type Describer interface {
-	// Desc returns a GUI-appropriate description
-	// for an item
-	Desc() string
-}
-
 /////////////////////////////////////////////////////////////
 //  Clipper
 

@@ -43,8 +43,8 @@ func (i *TextFieldSignals) FromString(s string) error {
 }
 
 var _TextFieldSignals_descMap = map[TextFieldSignals]string{
-	0: `TextFieldDone is main signal -- return or tab was pressed and the edit was intentionally completed.  data is the text.`,
-	1: `TextFieldDeFocused means that the user has transitioned focus away from the text field due to interactions elsewhere, and any ongoing changes have been applied and the editor is no longer active.  data is the text. If you have a button that performs the same action as pressing enter in a textfield, then pressing that button will trigger a TextFieldDeFocused event, for any active edits.  Otherwise, you probably want to respond to both TextFieldDone and TextFieldDeFocused as "apply" events that trigger actions associated with the field.`,
+	0: `TextFieldDone is main signal -- return or tab was pressed and the edit was intentionally completed. data is the text.`,
+	1: `TextFieldDeFocused means that the user has transitioned focus away from the text field due to interactions elsewhere, and any ongoing changes have been applied and the editor is no longer active. data is the text. If you have a button that performs the same action as pressing enter in a textfield, then pressing that button will trigger a TextFieldDeFocused event, for any active edits. Otherwise, you probably want to respond to both TextFieldDone and TextFieldDeFocused as &#34;apply&#34; events that trigger actions associated with the field.`,
 	2: `TextFieldSelected means that some text was selected (for Inactive state, selection is via WidgetSig)`,
 	3: `TextFieldCleared means the clear button was clicked`,
 	4: `TextFieldInsert is emitted when a character is inserted into the textfield`,

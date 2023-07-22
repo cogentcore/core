@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"strings"
 	"sync"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -409,10 +411,7 @@ func (tf *TextField) ClearSelected() {
 // HasSelection returns whether there is a selected region of text
 func (tf *TextField) HasSelection() bool {
 	tf.SelectUpdate()
-	if tf.SelectStart < tf.SelectEnd {
-		return true
-	}
-	return false
+	return tf.SelectStart < tf.SelectEnd
 }
 
 // Selection returns the currently selected text
@@ -1379,6 +1378,20 @@ func (tf *TextField) ConfigParts() {
 	}
 }
 
+func (tf *TextField) ConfigStyles() {
+	tf.AddStyleFunc(func() {
+		tf.Style.Font.BgColor.SetColor(colors.Purple)
+	})
+	clr, ok := tf.Parts.ChildByName("clear", -1).(*Action)
+	if ok {
+		clr.AddStyleFunc(func() {
+			clr.Style.Font.BgColor.SetColor(color.Transparent)
+			clr.Style.Layout.Width.SetEx(0.5)
+			clr.Style.Layout.Height.SetEx(0.5)
+		})
+	}
+}
+
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
@@ -1389,6 +1402,7 @@ func (tf *TextField) Init2D() {
 	tf.Edited = false
 	tf.ClearAct = true
 	tf.ConfigParts()
+	tf.ConfigStyles()
 }
 
 // StyleTextField does text field styling -- sets StyMu Lock

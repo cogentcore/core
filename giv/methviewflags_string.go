@@ -47,7 +47,7 @@ var _MethViewFlags_descMap = map[MethViewFlags]string{
 	2: `MethViewNoUpdateAfter means do not update window after method runs (default is to do so)`,
 	3: `MethViewHasSubMenu means that this action has a submenu option -- argument values will be selected from the auto-generated submenu`,
 	4: `MethViewHasSubMenuVal means that this action was called using a submenu and the SubMenuVal has the selected value`,
-	5: `MethViewKeyFun means this action's only function is to emit the key fun`,
+	5: `MethViewKeyFun means this action&#39;s only function is to emit the key fun`,
 	6: ``,
 }
 

@@ -30,7 +30,7 @@ func mainrun() {
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
-	mfr.StyleFunc = func() {
+	mfr.FinalStyleFunc = func() {
 		mfr.Spacing.SetEx(1)
 		mfr.Style.Layout.Padding.Set(units.Px(8))
 	}
@@ -45,7 +45,7 @@ func mainrun() {
 	bdesc.Type = gi.LabelH3
 
 	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
-	brow.StyleFunc = func() {
+	brow.FinalStyleFunc = func() {
 		brow.Spacing.SetEx(1)
 		brow.Style.Layout.MaxWidth.SetPx(-1)
 	}
@@ -67,7 +67,7 @@ func mainrun() {
 	idesc.Type = gi.LabelH3
 
 	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutHorizFlow)
-	irow.StyleFunc = func() {
+	irow.FinalStyleFunc = func() {
 		irow.Spacing.SetEx(1)
 		irow.Style.Layout.MaxWidth.SetPx(-1)
 	}

@@ -39,9 +39,9 @@ func (i *ScreenOrientation) FromString(s string) error {
 }
 
 var _ScreenOrientation_descMap = map[ScreenOrientation]string{
-	0: `OrientationUnknown means device orientation cannot be determined.  Equivalent on Android to Configuration.ORIENTATION_UNKNOWN and on iOS to: 	UIDeviceOrientationUnknown 	UIDeviceOrientationFaceUp 	UIDeviceOrientationFaceDown`,
-	1: `Portrait is a device oriented so it is tall and thin.  Equivalent on Android to Configuration.ORIENTATION_PORTRAIT and on iOS to: 	UIDeviceOrientationPortrait 	UIDeviceOrientationPortraitUpsideDown`,
-	2: `Landscape is a device oriented so it is short and wide.  Equivalent on Android to Configuration.ORIENTATION_LANDSCAPE and on iOS to: 	UIDeviceOrientationLandscapeLeft 	UIDeviceOrientationLandscapeRight`,
+	0: `OrientationUnknown means device orientation cannot be determined. Equivalent on Android to Configuration.ORIENTATION_UNKNOWN and on iOS to: UIDeviceOrientationUnknown UIDeviceOrientationFaceUp UIDeviceOrientationFaceDown`,
+	1: `Portrait is a device oriented so it is tall and thin. Equivalent on Android to Configuration.ORIENTATION_PORTRAIT and on iOS to: UIDeviceOrientationPortrait UIDeviceOrientationPortraitUpsideDown`,
+	2: `Landscape is a device oriented so it is short and wide. Equivalent on Android to Configuration.ORIENTATION_LANDSCAPE and on iOS to: UIDeviceOrientationLandscapeLeft UIDeviceOrientationLandscapeRight`,
 	3: ``,
 }
 

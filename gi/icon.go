@@ -60,11 +60,17 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 	ic.Filename = fr.Filename
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (ic *Icon) DefaultStyle() {
-	s := &ic.Style
+func (ic *Icon) ConfigStyles() {
+	ic.AddStyleFunc(func() {
+		ic.Style.Layout.Width.SetEm(1.5)
+		ic.Style.Layout.Height.SetEm(1.5)
+		ic.Style.Font.BgColor.SetColor(color.Transparent)
+	})
+}
 
-	s.Font.BgColor.SetColor(color.Transparent)
+func (ic *Icon) Init2D() {
+	ic.ConfigStyles()
+	ic.Init2DWidget()
 }
 
 var IconProps = ki.Props{

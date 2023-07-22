@@ -43,7 +43,7 @@ var _TreeViewStates_descMap = map[TreeViewStates]string{
 	0: `TreeViewActive is normal state -- there but not being interacted with`,
 	1: `TreeViewSel is selected`,
 	2: `TreeViewFocus is in focus -- will respond to keyboard input`,
-	3: `TreeViewInactive is inactive -- if SrcNode is nil, or source has "inactive" property set, or treeview node has inactive property set directly`,
+	3: `TreeViewInactive is inactive -- if SrcNode is nil, or source has &#34;inactive&#34; property set, or treeview node has inactive property set directly`,
 	4: ``,
 }
 

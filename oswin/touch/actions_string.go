@@ -39,9 +39,9 @@ func (i *Actions) FromString(s string) error {
 }
 
 var _Actions_descMap = map[Actions]string{
-	0: `Begin is a user first touching the device.  On Android, this is a AMOTION_EVENT_ACTION_DOWN. On iOS, this is a call to touchesBegan.`,
-	1: `Move is a user dragging across the device.  A TypeMove is delivered between a TypeBegin and TypeEnd.  On Android, this is a AMOTION_EVENT_ACTION_MOVE. On iOS, this is a call to touchesMoved.`,
-	2: `End is a user no longer touching the device.  On Android, this is a AMOTION_EVENT_ACTION_UP. On iOS, this is a call to touchesEnded.`,
+	0: `Begin is a user first touching the device. On Android, this is a AMOTION_EVENT_ACTION_DOWN. On iOS, this is a call to touchesBegan.`,
+	1: `Move is a user dragging across the device. A TypeMove is delivered between a TypeBegin and TypeEnd. On Android, this is a AMOTION_EVENT_ACTION_MOVE. On iOS, this is a call to touchesMoved.`,
+	2: `End is a user no longer touching the device. On Android, this is a AMOTION_EVENT_ACTION_UP. On iOS, this is a call to touchesEnded.`,
 	3: ``,
 }
 

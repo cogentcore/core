@@ -40,7 +40,7 @@ func (i *SliderSignals) FromString(s string) error {
 }
 
 var _SliderSignals_descMap = map[SliderSignals]string{
-	0: `SliderValueChanged indicates that the value has changed -- if tracking is enabled, then this tracks online changes -- otherwise only at the end.  The data on the signal is the float32 Value.`,
+	0: `SliderValueChanged indicates that the value has changed -- if tracking is enabled, then this tracks online changes -- otherwise only at the end. The data on the signal is the float32 Value.`,
 	1: `SliderPressed means slider was pushed down but not yet up.`,
 	2: `SliderReleased means the slider has been released after being pressed.`,
 	3: `SliderMoved means the slider position has moved (low level move event).`,
