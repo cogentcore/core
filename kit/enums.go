@@ -607,6 +607,14 @@ func (tr *EnumRegistry) SetAnyEnumIfaceFromString(eptr any, str string) error {
 	return tr.SetAnyEnumValueFromString(reflect.ValueOf(eptr), str)
 }
 
+// Describer interface provides a description
+// for an item, typically to be displayed
+// on hover as a tooltip in a GUI
+type Describer interface {
+	// Desc returns a description for an item
+	Desc() string
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //  EnumValue
 
@@ -615,13 +623,15 @@ type EnumValue struct {
 	Name  string       `desc:"name for this value"`
 	Value int64        `desc:"integer value"`
 	Type  reflect.Type `desc:"the enum type that this value belongs to"`
+	Desc  string       `desc:"the comment description of the enum value"`
 }
 
 // Set sets the values of the EnumValue struct
-func (ev *EnumValue) Set(name string, val int64, typ reflect.Type) {
+func (ev *EnumValue) Set(name string, val int64, typ reflect.Type, desc string) {
 	ev.Name = name
 	ev.Value = val
 	ev.Type = typ
+	ev.Desc = desc
 }
 
 // String satisfies fmt.Stringer and provides a string representation of enum: just the name
@@ -655,7 +665,11 @@ func (tr *EnumRegistry) Values(enumName string, alt bool) []EnumValue {
 		if alt && alts != nil {
 			str = alts[i]
 		}
-		vals[i].Set(str, i, et)
+		desc := ""
+		if d, ok := reflect.ValueOf(vals[i].Value).Convert(et).Interface().(Describer); ok {
+			desc = d.Desc()
+		}
+		vals[i].Set(str, i, et, desc)
 	}
 	tr.Vals[enumName] = vals
 	return vals
