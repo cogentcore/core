@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -37,4 +35,17 @@ func StringToNodeFlags(s string) (NodeFlags, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: NodeFlags")
+}
+
+var _NodeFlags_descMap = map[NodeFlags]string{
+	24: `WorldMatrixUpdated means that the Pose.WorldMatrix has been updated`,
+	25: `VectorsUpdated means that the rendering vectors information is updated`,
+	26: ``,
+}
+
+func (i NodeFlags) Desc() string {
+	if str, ok := _NodeFlags_descMap[i]; ok {
+		return str
+	}
+	return "NodeFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

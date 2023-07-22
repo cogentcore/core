@@ -37,11 +37,8 @@ func (i *CompleteSignals) FromString(s string) error {
 }
 
 var _CompleteSignals_descMap = map[CompleteSignals]string{
-	0: `CompleteSelect means the user chose one of the possible completions
-`,
-	1: `CompleteExtend means user has requested that the seed extend if all
-completions have a common prefix longer than current seed
-`,
+	0: `CompleteSelect means the user chose one of the possible completions`,
+	1: `CompleteExtend means user has requested that the seed extend if all completions have a common prefix longer than current seed`,
 }
 
 func (i CompleteSignals) Desc() string {

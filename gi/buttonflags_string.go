@@ -39,12 +39,9 @@ func StringToButtonFlags(s string) (ButtonFlags, error) {
 }
 
 var _ButtonFlags_descMap = map[ButtonFlags]string{
-	24: `button is checkable -- enables display of check control
-`,
-	25: `button is checked
-`,
-	26: `Menu flag means that the button is a menu item
-`,
+	24: `button is checkable -- enables display of check control`,
+	25: `button is checked`,
+	26: `Menu flag means that the button is a menu item`,
 	27: ``,
 }
 

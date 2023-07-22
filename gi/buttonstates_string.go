@@ -42,21 +42,13 @@ func (i *ButtonStates) FromString(s string) error {
 }
 
 var _ButtonStates_descMap = map[ButtonStates]string{
-	0: `normal active state -- there but not being interacted with
-`,
-	1: `inactive -- not pressable -- no events
-`,
-	2: `mouse is hovering over the button
-`,
-	3: `button is the focus -- will respond to keyboard input
-`,
-	4: `button is currently being pressed down
-`,
-	5: `button has been selected -- selection is a general widget property used
-by views and other complex widgets -- checked state is independent of this
-`,
-	6: `total number of button states
-`,
+	0: `normal active state -- there but not being interacted with`,
+	1: `inactive -- not pressable -- no events`,
+	2: `mouse is hovering over the button`,
+	3: `button is the focus -- will respond to keyboard input`,
+	4: `button is currently being pressed down`,
+	5: `button has been selected -- selection is a general widget property used by views and other complex widgets -- checked state is independent of this`,
+	6: `total number of button states`,
 }
 
 func (i ButtonStates) Desc() string {

@@ -43,22 +43,14 @@ func (i *SliderStates) FromString(s string) error {
 }
 
 var _SliderStates_descMap = map[SliderStates]string{
-	0: `normal state -- there but not being interacted with
-`,
-	1: `inactive -- not responsive
-`,
-	2: `mouse is hovering over the slider
-`,
-	3: `slider is the focus -- will respond to keyboard input
-`,
-	4: `slider is currently being pressed down
-`,
-	5: `use background-color here to fill in selected value of slider
-`,
-	6: `these styles define the overall box around slider -- typically no border and a white background -- needs a background to allow local re-rendering
-`,
-	7: `total number of slider states
-`,
+	0: `normal state -- there but not being interacted with`,
+	1: `inactive -- not responsive`,
+	2: `mouse is hovering over the slider`,
+	3: `slider is the focus -- will respond to keyboard input`,
+	4: `slider is currently being pressed down`,
+	5: `use background-color here to fill in selected value of slider`,
+	6: `these styles define the overall box around slider -- typically no border and a white background -- needs a background to allow local re-rendering`,
+	7: `total number of slider states`,
 }
 
 func (i SliderStates) Desc() string {

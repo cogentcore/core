@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -39,4 +37,19 @@ func (i *Modifiers) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Modifiers")
+}
+
+var _Modifiers_descMap = map[Modifiers]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+	4: ``,
+}
+
+func (i Modifiers) Desc() string {
+	if str, ok := _Modifiers_descMap[i]; ok {
+		return str
+	}
+	return "Modifiers(" + strconv.FormatInt(int64(i), 10) + ")"
 }

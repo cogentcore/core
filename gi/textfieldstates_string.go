@@ -40,14 +40,10 @@ func (i *TextFieldStates) FromString(s string) error {
 }
 
 var _TextFieldStates_descMap = map[TextFieldStates]string{
-	0: `normal state -- there but not being interacted with
-`,
-	1: `textfield is the focus -- will respond to keyboard input
-`,
-	2: `inactive -- not editable
-`,
-	3: `selected -- for inactive state, can select entire element
-`,
+	0: `normal state -- there but not being interacted with`,
+	1: `textfield is the focus -- will respond to keyboard input`,
+	2: `inactive -- not editable`,
+	3: `selected -- for inactive state, can select entire element`,
 	4: ``,
 }
 

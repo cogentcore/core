@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -44,4 +42,24 @@ func (i *TreeViewSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TreeViewSignals")
+}
+
+var _TreeViewSignals_descMap = map[TreeViewSignals]string{
+	0: `node was selected`,
+	1: `TreeView unselected`,
+	2: `TreeView all items were selected`,
+	3: `TreeView all items were unselected`,
+	4: `closed TreeView was opened`,
+	5: `open TreeView was closed -- children not visible`,
+	6: `means that some kind of edit operation has taken place by the user via the gui -- we don't track the details, just that changes have happened`,
+	7: `a node was inserted into the tree (Paste, DND) in this case, the data is the *source node* that was inserted`,
+	8: `a node was deleted from the tree (Cut, DND Move)`,
+	9: ``,
+}
+
+func (i TreeViewSignals) Desc() string {
+	if str, ok := _TreeViewSignals_descMap[i]; ok {
+		return str
+	}
+	return "TreeViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

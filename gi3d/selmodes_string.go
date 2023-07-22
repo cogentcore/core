@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -39,4 +37,19 @@ func (i *SelModes) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: SelModes")
+}
+
+var _SelModes_descMap = map[SelModes]string{
+	0: `NotSelectable means that selection events are ignored entirely`,
+	1: `Selectable means that nodes can be selected but no visible consequence occurs`,
+	2: `SelectionBox means that a selection bounding box is drawn around selected nodes`,
+	3: `Manipulable means that a manipulation box will be created for selected nodes, which can update the Pose parameters dynamically.`,
+	4: ``,
+}
+
+func (i SelModes) Desc() string {
+	if str, ok := _SelModes_descMap[i]; ok {
+		return str
+	}
+	return "SelModes(" + strconv.FormatInt(int64(i), 10) + ")"
 }

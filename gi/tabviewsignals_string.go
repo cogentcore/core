@@ -39,12 +39,9 @@ func (i *TabViewSignals) FromString(s string) error {
 }
 
 var _TabViewSignals_descMap = map[TabViewSignals]string{
-	0: `TabSelected indicates tab was selected -- data is the tab index
-`,
-	1: `TabAdded indicates tab was added -- data is the tab index
-`,
-	2: `TabDeleted indicates tab was deleted -- data is the tab name
-`,
+	0: `TabSelected indicates tab was selected -- data is the tab index`,
+	1: `TabAdded indicates tab was added -- data is the tab index`,
+	2: `TabDeleted indicates tab was deleted -- data is the tab name`,
 	3: ``,
 }
 

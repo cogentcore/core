@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -53,4 +51,33 @@ func (i *Units) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Units")
+}
+
+var _Units_descMap = map[Units]string{
+	0:  `UnitPx = pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels`,
+	1:  `UnitDp = density-independent pixels -- 1dp = 1/160th of 1in`,
+	2:  `UnitPct = percentage of surrounding contextual element`,
+	3:  `UnitRem = font size of the root element -- defaults to 12pt scaled by DPI factor`,
+	4:  `UnitEm = font size of the element -- fallback to 12pt by default`,
+	5:  `UnitEx = x-height of the element's font (size of 'x' glyph) -- fallback to 0.5em by default`,
+	6:  `UnitCh = width of the '0' glyph in the element's font -- fallback to 0.5em by default`,
+	7:  `UnitVw = 1% of the viewport's width`,
+	8:  `UnitVh = 1% of the viewport's height`,
+	9:  `UnitVmin = 1% of the viewport's smaller dimension`,
+	10: `UnitVmax = 1% of the viewport's larger dimension`,
+	11: `UnitCm = centimeters -- 1cm = 96px/2.54`,
+	12: `UnitMm = millimeters -- 1mm = 1/10th of cm`,
+	13: `UnitQ = quarter-millimeters -- 1q = 1/40th of cm`,
+	14: `UnitIn = inches -- 1in = 2.54cm = 96px`,
+	15: `UnitPc = picas -- 1pc = 1/6th of 1in`,
+	16: `UnitPt = points -- 1pt = 1/72th of 1in`,
+	17: `UnitDot = actual real display pixels -- generally only use internally`,
+	18: ``,
+}
+
+func (i Units) Desc() string {
+	if str, ok := _Units_descMap[i]; ok {
+		return str
+	}
+	return "Units(" + strconv.FormatInt(int64(i), 10) + ")"
 }

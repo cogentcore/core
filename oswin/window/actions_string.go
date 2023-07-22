@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -44,4 +42,24 @@ func (i *Actions) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Actions")
+}
+
+var _Actions_descMap = map[Actions]string{
+	0: `Close means that the window is about to close, but has not yet closed.`,
+	1: `Minimize means that the window has been iconified / miniaturized / is no longer visible.`,
+	2: `Resize means that the window was resized, including changes in DPI associated with moving to a new screen.  Position may have also changed too.  Requires a redraw.`,
+	3: `Move means that the window was moved but NOT resized or changed in any other way -- does not require a redraw, but anything tracking positions will want to update.`,
+	4: `Focus indicates that the window has been activated for receiving user input.`,
+	5: `DeFocus indicates that the window is no longer activated for receiving input.`,
+	6: `Paint indicates a request to repaint the window. This is sent right after the window is opened.`,
+	7: `Show is for the WindowShow event -- sent by the system 500 msec after the window has opened, to trigger one-time actions such as configuring the main menu after the window has opened.`,
+	8: `ScreenUpdate occurs when any of the screen information is updated This event is sent to the first window on the list of active windows and it should then perform any necessary updating`,
+	9: ``,
+}
+
+func (i Actions) Desc() string {
+	if str, ok := _Actions_descMap[i]; ok {
+		return str
+	}
+	return "Actions(" + strconv.FormatInt(int64(i), 10) + ")"
 }

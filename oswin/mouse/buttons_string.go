@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -39,4 +37,19 @@ func (i *Buttons) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Buttons")
+}
+
+var _Buttons_descMap = map[Buttons]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+	4: ``,
+}
+
+func (i Buttons) Desc() string {
+	if str, ok := _Buttons_descMap[i]; ok {
+		return str
+	}
+	return "Buttons(" + strconv.FormatInt(int64(i), 10) + ")"
 }

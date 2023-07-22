@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -40,4 +38,20 @@ func (i *TextViewSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TextViewSignals")
+}
+
+var _TextViewSignals_descMap = map[TextViewSignals]string{
+	0: `TextViewDone signal indicates return was pressed and an edit was completed -- data is the text`,
+	1: `TextViewSelected signal indicates some text was selected (for Inactive state, selection is via WidgetSig)`,
+	2: `TextViewCursorMoved signal indicates cursor moved emitted for every cursor movement -- e.g., for displaying cursor pos`,
+	3: `TextViewISearch is emitted for every update of interactive search process -- see ISearch.* members for current state`,
+	4: `TextViewQReplace is emitted for every update of query-replace process -- see QReplace.* members for current state`,
+	5: `TextViewSignalsN is the number of TextViewSignals`,
+}
+
+func (i TextViewSignals) Desc() string {
+	if str, ok := _TextViewSignals_descMap[i]; ok {
+		return str
+	}
+	return "TextViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

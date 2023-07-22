@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -42,4 +40,22 @@ func StringToTextViewFlags(s string) (TextViewFlags, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: TextViewFlags")
+}
+
+var _TextViewFlags_descMap = map[TextViewFlags]string{
+	24: `TextViewNeedsRefresh indicates when refresh is required`,
+	25: `TextViewInReLayout indicates that we are currently resizing ourselves via parent layout`,
+	26: `TextViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender`,
+	27: `TextViewFocusActive is set if the keyboard focus is active -- when we lose active focus we apply changes`,
+	28: `TextViewHasLineNos indicates that this view has line numbers (per TextBuf option)`,
+	29: `TextViewLastWasTabAI indicates that last key was a Tab auto-indent`,
+	30: `TextViewLastWasUndo indicates that last key was an undo`,
+	31: ``,
+}
+
+func (i TextViewFlags) Desc() string {
+	if str, ok := _TextViewFlags_descMap[i]; ok {
+		return str
+	}
+	return "TextViewFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

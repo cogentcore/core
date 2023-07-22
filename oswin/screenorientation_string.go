@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,18 @@ func (i *ScreenOrientation) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: ScreenOrientation")
+}
+
+var _ScreenOrientation_descMap = map[ScreenOrientation]string{
+	0: `OrientationUnknown means device orientation cannot be determined.  Equivalent on Android to Configuration.ORIENTATION_UNKNOWN and on iOS to: 	UIDeviceOrientationUnknown 	UIDeviceOrientationFaceUp 	UIDeviceOrientationFaceDown`,
+	1: `Portrait is a device oriented so it is tall and thin.  Equivalent on Android to Configuration.ORIENTATION_PORTRAIT and on iOS to: 	UIDeviceOrientationPortrait 	UIDeviceOrientationPortraitUpsideDown`,
+	2: `Landscape is a device oriented so it is short and wide.  Equivalent on Android to Configuration.ORIENTATION_LANDSCAPE and on iOS to: 	UIDeviceOrientationLandscapeLeft 	UIDeviceOrientationLandscapeRight`,
+	3: ``,
+}
+
+func (i ScreenOrientation) Desc() string {
+	if str, ok := _ScreenOrientation_descMap[i]; ok {
+		return str
+	}
+	return "ScreenOrientation(" + strconv.FormatInt(int64(i), 10) + ")"
 }

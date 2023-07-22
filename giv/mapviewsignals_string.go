@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,18 @@ func (i *MapViewSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: MapViewSignals")
+}
+
+var _MapViewSignals_descMap = map[MapViewSignals]string{
+	0: `MapViewDoubleClicked emitted during inactive mode when item double-clicked -- can be used for accepting dialog.`,
+	1: `MapViewAdded emitted when a new blank item is added -- no data is sent.`,
+	2: `MapViewDeleted emitted when an item is deleted -- data is key of item deleted`,
+	3: ``,
+}
+
+func (i MapViewSignals) Desc() string {
+	if str, ok := _MapViewSignals_descMap[i]; ok {
+		return str
+	}
+	return "MapViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

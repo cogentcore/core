@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -55,4 +53,35 @@ func (i *FontWeights) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: FontWeights")
+}
+
+var _FontWeights_descMap = map[FontWeights]string{
+	0:  ``,
+	1:  ``,
+	2:  ``,
+	3:  ``,
+	4:  ``,
+	5:  ``,
+	6:  ``,
+	7:  ``,
+	8:  ``,
+	9:  ``,
+	10: ``,
+	11: ``,
+	12: ``,
+	13: ``,
+	14: ``,
+	15: ``,
+	16: ``,
+	17: ``,
+	18: ``,
+	19: ``,
+	20: ``,
+}
+
+func (i FontWeights) Desc() string {
+	if str, ok := _FontWeights_descMap[i]; ok {
+		return str
+	}
+	return "FontWeights(" + strconv.FormatInt(int64(i), 10) + ")"
 }

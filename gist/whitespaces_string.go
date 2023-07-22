@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -40,4 +38,20 @@ func (i *WhiteSpaces) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: WhiteSpaces")
+}
+
+var _WhiteSpaces_descMap = map[WhiteSpaces]string{
+	0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary`,
+	1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line. The text continues on the same line until a <br> tag is encountered`,
+	2: `WhiteSpacePre means that whitespace is preserved by the browser. Text will only wrap on line breaks. Acts like the <pre> tag in HTML.  This invokes a different hand-written parser because the default golang parser automatically throws away whitespace`,
+	3: `WhiteSpacePreLine means that sequences of whitespace will collapse into a single whitespace. Text will wrap when necessary, and on line breaks`,
+	4: `WhiteSpacePreWrap means that whitespace is preserved by the browser. Text will wrap when necessary, and on line breaks`,
+	5: ``,
+}
+
+func (i WhiteSpaces) Desc() string {
+	if str, ok := _WhiteSpaces_descMap[i]; ok {
+		return str
+	}
+	return "WhiteSpaces(" + strconv.FormatInt(int64(i), 10) + ")"
 }

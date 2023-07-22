@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -40,4 +38,20 @@ func (i *Platforms) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Platforms")
+}
+
+var _Platforms_descMap = map[Platforms]string{
+	0: `MacOS is a mac desktop machine (aka Darwin)`,
+	1: `LinuxX11 is a Linux OS machine running X11 window server`,
+	2: `Windows is a Microsoft Windows machine`,
+	3: `IOS is an Apple iOS or iPadOS mobile phone or iPad`,
+	4: `Android is an Android mobile phone or tablet`,
+	5: ``,
+}
+
+func (i Platforms) Desc() string {
+	if str, ok := _Platforms_descMap[i]; ok {
+		return str
+	}
+	return "Platforms(" + strconv.FormatInt(int64(i), 10) + ")"
 }

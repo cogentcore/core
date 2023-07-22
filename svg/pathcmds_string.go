@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -55,4 +53,35 @@ func (i *PathCmds) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: PathCmds")
+}
+
+var _PathCmds_descMap = map[PathCmds]string{
+	0:  `move pen, abs coords`,
+	1:  `move pen, rel coords`,
+	2:  `lineto, abs`,
+	3:  `lineto, rel`,
+	4:  `horizontal lineto, abs`,
+	5:  `relative lineto, rel`,
+	6:  `vertical lineto, abs`,
+	7:  `vertical lineto, rel`,
+	8:  `Bezier curveto, abs`,
+	9:  `Bezier curveto, rel`,
+	10: `smooth Bezier curveto, abs`,
+	11: `smooth Bezier curveto, rel`,
+	12: `quadratic Bezier curveto, abs`,
+	13: `quadratic Bezier curveto, rel`,
+	14: `smooth quadratic Bezier curveto, abs`,
+	15: `smooth quadratic Bezier curveto, rel`,
+	16: `elliptical arc, abs`,
+	17: `elliptical arc, rel`,
+	18: `close path`,
+	19: `close path`,
+	20: `error -- invalid command`,
+}
+
+func (i PathCmds) Desc() string {
+	if str, ok := _PathCmds_descMap[i]; ok {
+		return str
+	}
+	return "PathCmds(" + strconv.FormatInt(int64(i), 10) + ")"
 }

@@ -39,15 +39,9 @@ func (i *Densities) FromString(s string) error {
 }
 
 var _Densities_descMap = map[Densities]string{
-	0: `DensityCompact represents a compact density
-with minimal whitespace
-`,
-	1: `DensityMedium represents a medium density
-with medium whitespace
-`,
-	2: `DensitySpread represents a spread-out density
-with a lot of whitespace
-`,
+	0: `DensityCompact represents a compact density with minimal whitespace`,
+	1: `DensityMedium represents a medium density with medium whitespace`,
+	2: `DensitySpread represents a spread-out density with a lot of whitespace`,
 	3: ``,
 }
 

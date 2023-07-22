@@ -38,10 +38,8 @@ func (i *ColorSchemeTypes) FromString(s string) error {
 }
 
 var _ColorSchemeTypes_descMap = map[ColorSchemeTypes]string{
-	0: `ColorSchemeLight is a light color scheme
-`,
-	1: `ColorSchemeDark is a dark color scheme
-`,
+	0: `ColorSchemeLight is a light color scheme`,
+	1: `ColorSchemeDark is a dark color scheme`,
 	2: ``,
 }
 

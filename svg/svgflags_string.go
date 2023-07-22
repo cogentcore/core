@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -36,4 +34,16 @@ func StringToSVGFlags(s string) (SVGFlags, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: SVGFlags")
+}
+
+var _SVGFlags_descMap = map[SVGFlags]string{
+	35: `Rendering means that the SVG is currently redrawing Can be useful to check for animations etc to decide whether to drive another update`,
+	36: ``,
+}
+
+func (i SVGFlags) Desc() string {
+	if str, ok := _SVGFlags_descMap[i]; ok {
+		return str
+	}
+	return "SVGFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

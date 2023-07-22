@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -43,4 +41,23 @@ func (i *TextDirections) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TextDirections")
+}
+
+var _TextDirections_descMap = map[TextDirections]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+	4: ``,
+	5: ``,
+	6: ``,
+	7: ``,
+	8: ``,
+}
+
+func (i TextDirections) Desc() string {
+	if str, ok := _TextDirections_descMap[i]; ok {
+		return str
+	}
+	return "TextDirections(" + strconv.FormatInt(int64(i), 10) + ")"
 }

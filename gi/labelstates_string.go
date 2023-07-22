@@ -39,14 +39,10 @@ func (i *LabelStates) FromString(s string) error {
 }
 
 var _LabelStates_descMap = map[LabelStates]string{
-	0: `normal active state
-`,
-	1: `inactive -- font is dimmed
-`,
-	2: `selected -- background is selected color
-`,
-	3: `total number of button states
-`,
+	0: `normal active state`,
+	1: `inactive -- font is dimmed`,
+	2: `selected -- background is selected color`,
+	3: `total number of button states`,
 }
 
 func (i LabelStates) Desc() string {

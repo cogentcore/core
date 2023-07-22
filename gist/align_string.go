@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -50,4 +48,30 @@ func (i *Align) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Align")
+}
+
+var _Align_descMap = map[Align]string{
+	0:  ``,
+	1:  ``,
+	2:  ``,
+	3:  `middle = vertical version of center`,
+	4:  ``,
+	5:  ``,
+	6:  ``,
+	7:  `same as CSS space-between`,
+	8:  ``,
+	9:  ``,
+	10: ``,
+	11: ``,
+	12: ``,
+	13: `align to subscript`,
+	14: `align to superscript`,
+	15: ``,
+}
+
+func (i Align) Desc() string {
+	if str, ok := _Align_descMap[i]; ok {
+		return str
+	}
+	return "Align(" + strconv.FormatInt(int64(i), 10) + ")"
 }

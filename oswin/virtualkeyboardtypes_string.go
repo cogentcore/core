@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,18 @@ func (i *VirtualKeyboardTypes) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: VirtualKeyboardTypes")
+}
+
+var _VirtualKeyboardTypes_descMap = map[VirtualKeyboardTypes]string{
+	0: `DefaultKeyboard is the keyboard with default input style and "return" return key`,
+	1: `SingleLineKeyboard is the keyboard with default input style and "Done" return key`,
+	2: `NumberKeyboard is the keyboard with number input style and "Done" return key`,
+	3: ``,
+}
+
+func (i VirtualKeyboardTypes) Desc() string {
+	if str, ok := _VirtualKeyboardTypes_descMap[i]; ok {
+		return str
+	}
+	return "VirtualKeyboardTypes(" + strconv.FormatInt(int64(i), 10) + ")"
 }

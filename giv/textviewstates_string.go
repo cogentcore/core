@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -40,4 +38,20 @@ func (i *TextViewStates) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TextViewStates")
+}
+
+var _TextViewStates_descMap = map[TextViewStates]string{
+	0: `TextViewActive is the normal state -- there but not being interacted with`,
+	1: `TextViewFocus states means textvieww is the focus -- will respond to keyboard input`,
+	2: `TextViewInactive means the textview is inactive -- not editable`,
+	3: `TextViewSel means the text region is selected`,
+	4: `TextViewHighlight means the text region is highlighted`,
+	5: `TextViewStatesN is the number of textview states`,
+}
+
+func (i TextViewStates) Desc() string {
+	if str, ok := _TextViewStates_descMap[i]; ok {
+		return str
+	}
+	return "TextViewStates(" + strconv.FormatInt(int64(i), 10) + ")"
 }

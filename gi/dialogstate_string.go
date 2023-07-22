@@ -41,17 +41,11 @@ func (i *DialogState) FromString(s string) error {
 }
 
 var _DialogState_descMap = map[DialogState]string{
-	0: `DialogExists is the existential state -- struct exists and is likely
-being constructed.
-`,
-	1: `DialogOpenModal means dialog is open in a modal state, blocking all other input.
-`,
-	2: `DialogOpenModeless means dialog is open in a modeless state, allowing other input.
-`,
-	3: `DialogAccepted means Ok was pressed -- dialog accepted.
-`,
-	4: `DialogCanceled means Cancel was pressed -- button canceled.
-`,
+	0: `DialogExists is the existential state -- struct exists and is likely being constructed.`,
+	1: `DialogOpenModal means dialog is open in a modal state, blocking all other input.`,
+	2: `DialogOpenModeless means dialog is open in a modeless state, allowing other input.`,
+	3: `DialogAccepted means Ok was pressed -- dialog accepted.`,
+	4: `DialogCanceled means Cancel was pressed -- button canceled.`,
 	5: ``,
 }
 

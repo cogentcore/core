@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -41,4 +39,21 @@ func (i *LineJoins) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: LineJoins")
+}
+
+var _LineJoins_descMap = map[LineJoins]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+	4: ``,
+	5: `rasterx extension`,
+	6: ``,
+}
+
+func (i LineJoins) Desc() string {
+	if str, ok := _LineJoins_descMap[i]; ok {
+		return str
+	}
+	return "LineJoins(" + strconv.FormatInt(int64(i), 10) + ")"
 }

@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -36,4 +34,16 @@ func StringToSceneFlags(s string) (SceneFlags, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: SceneFlags")
+}
+
+var _SceneFlags_descMap = map[SceneFlags]string{
+	24: `Rendering means that the scene is currently rendering`,
+	25: ``,
+}
+
+func (i SceneFlags) Desc() string {
+	if str, ok := _SceneFlags_descMap[i]; ok {
+		return str
+	}
+	return "SceneFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

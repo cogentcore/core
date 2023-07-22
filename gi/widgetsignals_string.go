@@ -39,20 +39,9 @@ func (i *WidgetSignals) FromString(s string) error {
 }
 
 var _WidgetSignals_descMap = map[WidgetSignals]string{
-	0: `WidgetSelected is triggered when a widget is selected, typically via
-left mouse button click (see EmitSelectedSignal) -- is NOT contingent
-on actual IsSelected status -- just reports the click event.
-The data is the index of the selected item for multi-item widgets
-(-1 = none / unselected)
-`,
-	1: `WidgetFocused is triggered when a widget receives keyboard focus (see
-EmitFocusedSignal -- call in FocusChanged2D for gotFocus
-`,
-	2: `WidgetContextMenu is triggered when a widget receives a
-right-mouse-button press, BEFORE generating and displaying the context
-menu, so that relevant state can be updated etc (see
-EmitContextMenuSignal)
-`,
+	0: `WidgetSelected is triggered when a widget is selected, typically via left mouse button click (see EmitSelectedSignal) -- is NOT contingent on actual IsSelected status -- just reports the click event. The data is the index of the selected item for multi-item widgets (-1 = none / unselected)`,
+	1: `WidgetFocused is triggered when a widget receives keyboard focus (see EmitFocusedSignal -- call in FocusChanged2D for gotFocus`,
+	2: `WidgetContextMenu is triggered when a widget receives a right-mouse-button press, BEFORE generating and displaying the context menu, so that relevant state can be updated etc (see EmitContextMenuSignal)`,
 	3: ``,
 }
 

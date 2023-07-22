@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -40,4 +38,20 @@ func (i *LineCaps) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: LineCaps")
+}
+
+var _LineCaps_descMap = map[LineCaps]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: `rasterx extension`,
+	4: `rasterx extension`,
+	5: ``,
+}
+
+func (i LineCaps) Desc() string {
+	if str, ok := _LineCaps_descMap[i]; ok {
+		return str
+	}
+	return "LineCaps(" + strconv.FormatInt(int64(i), 10) + ")"
 }

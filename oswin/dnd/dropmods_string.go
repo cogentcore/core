@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -40,4 +38,20 @@ func (i *DropMods) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: DropMods")
+}
+
+var _DropMods_descMap = map[DropMods]string{
+	0: ``,
+	1: `Copy is the default and implies data is just copied -- receiver can do with it as they please and source does not need to take any further action`,
+	2: `Move is signaled with a Shift or Meta key (by default) and implies that the source should delete itself when it receives the DropFmSource event action with this Mod value set -- receiver must update the Mod to reflect actual action taken, and be particularly careful with this one`,
+	3: `Link can be any other kind of alternative action -- link is applicable to files (symbolic link)`,
+	4: `Ignore means that the receiver chose to not process this drop`,
+	5: ``,
+}
+
+func (i DropMods) Desc() string {
+	if str, ok := _DropMods_descMap[i]; ok {
+		return str
+	}
+	return "DropMods(" + strconv.FormatInt(int64(i), 10) + ")"
 }

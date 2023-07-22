@@ -102,16 +102,14 @@ func (i *KeyFuns) FromString(s string) error {
 }
 
 var _KeyFuns_descMap = map[KeyFuns]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: ``,
-	4: ``,
-	5: ``,
-	6: ``,
-	7: `KeyFunPageRight
-KeyFunPageLeft
-`,
+	0:  ``,
+	1:  ``,
+	2:  ``,
+	3:  ``,
+	4:  ``,
+	5:  ``,
+	6:  ``,
+	7:  `KeyFunPageRight KeyFunPageLeft`,
 	8:  ``,
 	9:  ``,
 	10: ``,
@@ -125,8 +123,7 @@ KeyFunPageLeft
 	18: ``,
 	19: ``,
 	20: ``,
-	21: `KeyFunEditItem
-`,
+	21: `KeyFunEditItem`,
 	22: ``,
 	23: ``,
 	24: ``,
@@ -160,9 +157,7 @@ KeyFunPageLeft
 	52: ``,
 	53: ``,
 	54: ``,
-	55: `Below are menu specific functions -- use these as shortcuts for menu actions
-allows uniqueness of mapping and easy customization of all key actions
-`,
+	55: `Below are menu specific functions -- use these as shortcuts for menu actions allows uniqueness of mapping and easy customization of all key actions`,
 	56: ``,
 	57: ``,
 	58: ``,

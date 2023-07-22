@@ -40,17 +40,10 @@ func (i *ButtonSignals) FromString(s string) error {
 }
 
 var _ButtonSignals_descMap = map[ButtonSignals]string{
-	0: `ButtonClicked is the main signal to check for normal button activation
--- button pressed down and up
-`,
-	1: `Pressed means button pushed down but not yet up
-`,
-	2: `Released means mouse button was released - typically look at
-ButtonClicked instead of this one
-`,
-	3: `Toggled means the checked / unchecked state was toggled -- only sent
-for buttons with Checkable flag set
-`,
+	0: `ButtonClicked is the main signal to check for normal button activation -- button pressed down and up`,
+	1: `Pressed means button pushed down but not yet up`,
+	2: `Released means mouse button was released - typically look at ButtonClicked instead of this one`,
+	3: `Toggled means the checked / unchecked state was toggled -- only sent for buttons with Checkable flag set`,
 	4: ``,
 }
 

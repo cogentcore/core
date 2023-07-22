@@ -41,20 +41,12 @@ func StringToEventPris(s string) (EventPris, error) {
 }
 
 var _EventPris_descMap = map[EventPris]string{
-	-1: `AllPris = -1 = all priorities (for delete cases only)
-`,
-	0: `HiPri = high priority -- event receivers processed first -- can be used
-to override default behavior
-`,
-	1: `RegPri = default regular priority -- most should be here
-`,
-	2: `LowPri = low priority -- processed last -- typically for containers /
-dialogs etc
-`,
-	3: `LowRawPri = unfiltered (raw) low priority -- ignores whether the event
-was already processed.
-`,
-	4: ``,
+	-1: `AllPris = -1 = all priorities (for delete cases only)`,
+	0:  `HiPri = high priority -- event receivers processed first -- can be used to override default behavior`,
+	1:  `RegPri = default regular priority -- most should be here`,
+	2:  `LowPri = low priority -- processed last -- typically for containers / dialogs etc`,
+	3:  `LowRawPri = unfiltered (raw) low priority -- ignores whether the event was already processed.`,
+	4:  ``,
 }
 
 func (i EventPris) Desc() string {
