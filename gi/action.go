@@ -44,6 +44,25 @@ func (ac *Action) Disconnect() {
 	ac.ActionSig.DisconnectAll()
 }
 
+// DefaultStyle implements the [DefaultStyler] interface
+func (ac *Action) DefaultStyle() {
+	cs := CurrentColorScheme()
+	s := &ac.Style
+
+	s.Border.Style.Set(gist.BorderNone)
+	s.Border.Width.Set()
+	s.Border.Radius.Set()
+	s.Border.Color.Set()
+	s.Text.Align = gist.AlignCenter
+	s.Font.BgColor.SetColor(cs.Secondary)
+	s.Font.Color.SetColor(cs.Secondary.ContrastColor())
+
+	s.Layout.Padding.Set(units.Px(2))
+	s.Layout.Margin.Set(units.Px(2))
+	s.Layout.MinWidth.SetEm(1)
+	s.Layout.MinHeight.SetEm(1)
+}
+
 var ActionProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
 	"border-width":     units.Px(0), // todo: should be default
@@ -195,25 +214,6 @@ var ActionProps = ki.Props{
 			"background-color": "linear-gradient(pref(Select), highlight-10)",
 		},
 	},
-}
-
-// DefaultStyle implements the [DefaultStyler] interface
-func (ac *Action) DefaultStyle() {
-	cs := CurrentColorScheme()
-	s := &ac.Style
-
-	s.Border.Style.Set(gist.BorderNone)
-	s.Border.Width.Set()
-	s.Border.Radius.Set()
-	s.Border.Color.Set()
-	s.Text.Align = gist.AlignCenter
-	s.Font.BgColor.SetColor(cs.Secondary)
-	s.Font.Color.SetColor(cs.Secondary.ContrastColor())
-
-	s.Layout.Padding.Set(units.Px(2))
-	s.Layout.Margin.Set(units.Px(2))
-	s.Layout.MinWidth.SetEm(1)
-	s.Layout.MinHeight.SetEm(1)
 }
 
 // ButtonWidget interface

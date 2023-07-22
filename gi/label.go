@@ -130,7 +130,7 @@ func (lb *Label) DefaultStyle() {
 
 var LabelProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"white-space":      gist.WhiteSpaceNormal, // no wrap, use spaces unless otherwise specified!
+	"white-space":      gist.WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
 	"padding":          units.Px(2),
 	"margin":           units.Px(2),
 	"vertical-align":   gist.AlignTop,
