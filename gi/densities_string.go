@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,24 @@ func (i *Densities) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Densities")
+}
+
+var _Densities_descMap = map[Densities]string{
+	0: `DensityCompact represents a compact density
+with minimal whitespace
+`,
+	1: `DensityMedium represents a medium density
+with medium whitespace
+`,
+	2: `DensitySpread represents a spread-out density
+with a lot of whitespace
+`,
+	3: ``,
+}
+
+func (i Densities) Desc() string {
+	if str, ok := _Densities_descMap[i]; ok {
+		return str
+	}
+	return "Densities(" + strconv.FormatInt(int64(i), 10) + ")"
 }

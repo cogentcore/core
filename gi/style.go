@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"fmt"
-
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/units"
@@ -39,7 +37,7 @@ type DefaultStyler interface {
 // of all widgets in it.
 func StyleFunc(w *WidgetBase) {
 	cs := CurrentColorScheme()
-	fmt.Printf("Styling\t%v\n", w.This())
+	// fmt.Printf("Styling\t%v\n", w.This())
 	// if par, ok := w.Parent().Embed(KiT_WidgetBase).(*WidgetBase); ok {
 	// 	// fmt.Println("got parent")
 	// 	if par.Style.Font.Color.IsNil() {

@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -42,4 +40,37 @@ func (i *TextFieldSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TextFieldSignals")
+}
+
+var _TextFieldSignals_descMap = map[TextFieldSignals]string{
+	0: `TextFieldDone is main signal -- return or tab was pressed and the edit was
+intentionally completed.  data is the text.
+`,
+	1: `TextFieldDeFocused means that the user has transitioned focus away from
+the text field due to interactions elsewhere, and any ongoing changes have been
+applied and the editor is no longer active.  data is the text.
+If you have a button that performs the same action as pressing enter in a textfield,
+then pressing that button will trigger a TextFieldDeFocused event, for any active
+edits.  Otherwise, you probably want to respond to both TextFieldDone and
+TextFieldDeFocused as "apply" events that trigger actions associated with the field.
+`,
+	2: `TextFieldSelected means that some text was selected (for Inactive state,
+selection is via WidgetSig)
+`,
+	3: `TextFieldCleared means the clear button was clicked
+`,
+	4: `TextFieldInsert is emitted when a character is inserted into the textfield
+`,
+	5: `TextFieldBackspace is emitted when a character before cursor is deleted
+`,
+	6: `TextFieldDelete is emitted when a character after cursor is deleted
+`,
+	7: ``,
+}
+
+func (i TextFieldSignals) Desc() string {
+	if str, ok := _TextFieldSignals_descMap[i]; ok {
+		return str
+	}
+	return "TextFieldSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

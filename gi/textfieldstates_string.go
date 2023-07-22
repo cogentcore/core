@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -39,4 +37,23 @@ func (i *TextFieldStates) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TextFieldStates")
+}
+
+var _TextFieldStates_descMap = map[TextFieldStates]string{
+	0: `normal state -- there but not being interacted with
+`,
+	1: `textfield is the focus -- will respond to keyboard input
+`,
+	2: `inactive -- not editable
+`,
+	3: `selected -- for inactive state, can select entire element
+`,
+	4: ``,
+}
+
+func (i TextFieldStates) Desc() string {
+	if str, ok := _TextFieldStates_descMap[i]; ok {
+		return str
+	}
+	return "TextFieldStates(" + strconv.FormatInt(int64(i), 10) + ")"
 }

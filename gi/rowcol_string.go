@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -37,4 +35,17 @@ func (i *RowCol) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: RowCol")
+}
+
+var _RowCol_descMap = map[RowCol]string{
+	0: ``,
+	1: ``,
+	2: ``,
+}
+
+func (i RowCol) Desc() string {
+	if str, ok := _RowCol_descMap[i]; ok {
+		return str
+	}
+	return "RowCol(" + strconv.FormatInt(int64(i), 10) + ")"
 }

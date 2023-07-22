@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,29 @@ func (i *WidgetSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: WidgetSignals")
+}
+
+var _WidgetSignals_descMap = map[WidgetSignals]string{
+	0: `WidgetSelected is triggered when a widget is selected, typically via
+left mouse button click (see EmitSelectedSignal) -- is NOT contingent
+on actual IsSelected status -- just reports the click event.
+The data is the index of the selected item for multi-item widgets
+(-1 = none / unselected)
+`,
+	1: `WidgetFocused is triggered when a widget receives keyboard focus (see
+EmitFocusedSignal -- call in FocusChanged2D for gotFocus
+`,
+	2: `WidgetContextMenu is triggered when a widget receives a
+right-mouse-button press, BEFORE generating and displaying the context
+menu, so that relevant state can be updated etc (see
+EmitContextMenuSignal)
+`,
+	3: ``,
+}
+
+func (i WidgetSignals) Desc() string {
+	if str, ok := _WidgetSignals_descMap[i]; ok {
+		return str
+	}
+	return "WidgetSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

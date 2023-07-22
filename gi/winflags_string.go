@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -46,4 +44,40 @@ func StringToWinFlags(s string) (WinFlags, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: WinFlags")
+}
+
+var _WinFlags_descMap = map[WinFlags]string{
+	24: `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that
+sized it -- affects whether other default geom should be applied.
+`,
+	25: `WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail
+`,
+	26: `WinFlagIsClosing is atomic flag indicating window is closing
+`,
+	27: `WinFlagIsResizing is atomic flag indicating window is resizing
+`,
+	28: `WinFlagGotPaint have we received our first paint event yet?
+ignore other window events before this point
+`,
+	29: `WinFlagGotFocus indicates that have we received OSWin focus
+`,
+	30: `WinFlagSentShow have we sent the show event yet?  Only ever sent ONCE
+`,
+	31: `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end
+`,
+	32: `WinFlagStopEventLoop is set when event loop stop is requested
+`,
+	33: `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window
+is properly shown
+`,
+	34: `WinFlagFocusActive indicates if widget focus is currently in an active state or not
+`,
+	35: ``,
+}
+
+func (i WinFlags) Desc() string {
+	if str, ok := _WinFlags_descMap[i]; ok {
+		return str
+	}
+	return "WinFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

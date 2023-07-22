@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,21 @@ func (i *TabViewSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TabViewSignals")
+}
+
+var _TabViewSignals_descMap = map[TabViewSignals]string{
+	0: `TabSelected indicates tab was selected -- data is the tab index
+`,
+	1: `TabAdded indicates tab was added -- data is the tab index
+`,
+	2: `TabDeleted indicates tab was deleted -- data is the tab name
+`,
+	3: ``,
+}
+
+func (i TabViewSignals) Desc() string {
+	if str, ok := _TabViewSignals_descMap[i]; ok {
+		return str
+	}
+	return "TabViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

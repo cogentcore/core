@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,26 @@ func (i *ButtonTypes) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: ButtonTypes")
+}
+
+var _ButtonTypes_descMap = map[ButtonTypes]string{
+	0: `ButtonDefault is a default gray button
+typically used in menus and checkboxes
+`,
+	1: `ButtonPrimary is a primary button colored
+as the primary color; it is typically used for
+primary actions like save, send, and new
+`,
+	2: `ButtonSecondary is a secondary button colored as
+the inverse of a primary button; it is typically used
+for secondary actions like cancel, back, and options
+`,
+	3: ``,
+}
+
+func (i ButtonTypes) Desc() string {
+	if str, ok := _ButtonTypes_descMap[i]; ok {
+		return str
+	}
+	return "ButtonTypes(" + strconv.FormatInt(int64(i), 10) + ")"
 }

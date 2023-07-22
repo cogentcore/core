@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -101,4 +99,86 @@ func (i *KeyFuns) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: KeyFuns")
+}
+
+var _KeyFuns_descMap = map[KeyFuns]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+	4: ``,
+	5: ``,
+	6: ``,
+	7: `KeyFunPageRight
+KeyFunPageLeft
+`,
+	8:  ``,
+	9:  ``,
+	10: ``,
+	11: ``,
+	12: ``,
+	13: ``,
+	14: ``,
+	15: ``,
+	16: ``,
+	17: ``,
+	18: ``,
+	19: ``,
+	20: ``,
+	21: `KeyFunEditItem
+`,
+	22: ``,
+	23: ``,
+	24: ``,
+	25: ``,
+	26: ``,
+	27: ``,
+	28: ``,
+	29: ``,
+	30: ``,
+	31: ``,
+	32: ``,
+	33: ``,
+	34: ``,
+	35: ``,
+	36: ``,
+	37: ``,
+	38: ``,
+	39: ``,
+	40: ``,
+	41: ``,
+	42: ``,
+	43: ``,
+	44: ``,
+	45: ``,
+	46: ``,
+	47: ``,
+	48: ``,
+	49: ``,
+	50: ``,
+	51: ``,
+	52: ``,
+	53: ``,
+	54: ``,
+	55: `Below are menu specific functions -- use these as shortcuts for menu actions
+allows uniqueness of mapping and easy customization of all key actions
+`,
+	56: ``,
+	57: ``,
+	58: ``,
+	59: ``,
+	60: ``,
+	61: ``,
+	62: ``,
+	63: ``,
+	64: ``,
+	65: ``,
+	66: ``,
+}
+
+func (i KeyFuns) Desc() string {
+	if str, ok := _KeyFuns_descMap[i]; ok {
+		return str
+	}
+	return "KeyFuns(" + strconv.FormatInt(int64(i), 10) + ")"
 }

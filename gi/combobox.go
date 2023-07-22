@@ -519,6 +519,18 @@ func (cb *ComboBox) MakeItemsMenu() {
 			ac.Tooltip = string(ac.Icon)
 		} else {
 			ac.Text = ToLabel(it)
+			fmt.Printf("text %s type %T\n", ac.Text, it)
+			if d, ok := it.(Describer); ok {
+				ac.Tooltip = d.Desc()
+			} else if ev, ok := it.(kit.EnumValue); ok {
+				dt := reflect.TypeOf((*Describer)(nil)).Elem()
+				if ev.Type.Implements(dt) {
+					if d, ok := reflect.ValueOf(ev.Value).Convert(ev.Type).Convert(dt).Interface().(Describer); ok {
+						ac.Tooltip = d.Desc()
+					}
+					fmt.Println("tooltip", ac.Tooltip)
+				}
+			}
 		}
 		ac.Data = i // index is the data
 		ac.SetSelectedState(i == cb.CurIndex)

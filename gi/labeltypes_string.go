@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -43,4 +41,39 @@ func (i *LabelTypes) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: LabelTypes")
+}
+
+var _LabelTypes_descMap = map[LabelTypes]string{
+	0: `LabelP is a default paragraph-style label,
+similar to HTML's <p> element
+`,
+	1: `LabelLabel is a label that labels something else
+like an input, similar to HTML's <label> element
+`,
+	2: `LabelH1 is a large heading-style label,
+similar to HTML's <h1> element
+`,
+	3: `LabelH2 is a heading-style label slightly
+smaller than H1, similar to HTML's <h2> element
+`,
+	4: `LabelH3 is a heading-style label slightly
+smaller than H2, similar to HTML's <h3> element
+`,
+	5: `LabelH4 is a heading-style label slightly
+smaller than H3, similar to HTML's <h4> element
+`,
+	6: `LabelH5 is a heading-style label slightly
+smaller than H4, similar to HTML's <h5> element
+`,
+	7: `LabelH6 is a heading-style label slightly
+smaller than H5, similar to HTML's <h6> element
+`,
+	8: ``,
+}
+
+func (i LabelTypes) Desc() string {
+	if str, ok := _LabelTypes_descMap[i]; ok {
+		return str
+	}
+	return "LabelTypes(" + strconv.FormatInt(int64(i), 10) + ")"
 }

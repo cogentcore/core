@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -39,4 +37,24 @@ func (i *DNDStages) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: DNDStages")
+}
+
+var _DNDStages_descMap = map[DNDStages]string{
+	0: `DNDNotStarted = nothing happening
+`,
+	1: `DNDStartSent means that the Start event was sent out, but receiver has
+not yet started the DND on its end by calling StartDragNDrop
+`,
+	2: `DNDStarted means that a node called StartDragNDrop
+`,
+	3: `DNDDropped means that drop event has been sent
+`,
+	4: ``,
+}
+
+func (i DNDStages) Desc() string {
+	if str, ok := _DNDStages_descMap[i]; ok {
+		return str
+	}
+	return "DNDStages(" + strconv.FormatInt(int64(i), 10) + ")"
 }

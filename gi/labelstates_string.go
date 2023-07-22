@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,22 @@ func (i *LabelStates) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: LabelStates")
+}
+
+var _LabelStates_descMap = map[LabelStates]string{
+	0: `normal active state
+`,
+	1: `inactive -- font is dimmed
+`,
+	2: `selected -- background is selected color
+`,
+	3: `total number of button states
+`,
+}
+
+func (i LabelStates) Desc() string {
+	if str, ok := _LabelStates_descMap[i]; ok {
+		return str
+	}
+	return "LabelStates(" + strconv.FormatInt(int64(i), 10) + ")"
 }
