@@ -4,12 +4,13 @@
 
 package gi
 
-// CustomStyleFunc is the custom, global style function
-// that is called on all widgets to style them.
-// By default, it is nil. For reference on
+// CustomConfigStyles is the custom, global style configuration function
+// that is called on all widgets to configure their style functions.
+// By default, it is nil. If you set it, you should mostly call
+// AddStyleFunc within it. For reference on
 // how you should structure your CustomStyleFunc, you
 // should look at https://goki.dev/docs/gi/styling.
-var CustomStyleFunc func(w *WidgetBase)
+var CustomConfigStyles func(w *WidgetBase)
 
 // // DefaultStyler describes an element that
 // // describes its default styles through the

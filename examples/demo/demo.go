@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -30,10 +31,10 @@ func mainrun() {
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
-	mfr.FinalStyleFunc = func() {
+	mfr.AddStyleFunc(func() {
 		mfr.Spacing.SetEx(1)
 		mfr.Style.Layout.Padding.Set(units.Px(8))
-	}
+	})
 
 	title := gi.AddNewLabel(mfr, "title", "The GoGi Demo")
 	title.Type = gi.LabelH1
@@ -45,10 +46,10 @@ func mainrun() {
 	bdesc.Type = gi.LabelH3
 
 	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
-	brow.FinalStyleFunc = func() {
+	brow.AddStyleFunc(func() {
 		brow.Spacing.SetEx(1)
 		brow.Style.Layout.MaxWidth.SetPx(-1)
-	}
+	})
 
 	bpri := gi.AddNewButton(brow, "buttonPrimary")
 	bpri.Text = "Primary Button"
@@ -67,16 +68,19 @@ func mainrun() {
 	idesc.Type = gi.LabelH3
 
 	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutHorizFlow)
-	irow.FinalStyleFunc = func() {
+	irow.AddStyleFunc(func() {
 		irow.Spacing.SetEx(1)
 		irow.Style.Layout.MaxWidth.SetPx(-1)
-	}
+	})
 
 	check := gi.AddNewCheckBox(irow, "check")
 	check.Text = "Checkbox"
 
 	tfield := gi.AddNewTextField(irow, "tfield")
 	tfield.Placeholder = "Text Field"
+	tfield.AddStyleFunc(func() {
+		tfield.Style.Font.BgColor.SetColor(colors.Green)
+	})
 
 	sbox := gi.AddNewSpinBox(irow, "sbox")
 	sbox.Value = 0.5

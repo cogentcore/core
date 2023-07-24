@@ -31,11 +31,10 @@ import (
 // includes toggling selection on left mouse press.
 type WidgetBase struct {
 	Node2DBase
-	Tooltip        string     `desc:"text for tooltip for this widget -- can use HTML formatting"`
-	StyleFuncs     []func()   `view:"-" desc:"a slice of style functions that is called in sequential ascending order to style the element; these should be set by parents on children using AddStyleFunc (not by end-user code)"`
-	FinalStyleFunc func()     `view:"-" desc:"the final function that is called to set the styles of the widget during SetStyle2D (this should only be set by end-user code); fields on Style that you want to only apply to this element should be set in this function"`
-	OverrideStyle  bool       `desc:"override the computed styles and allow directly editing Style"`
-	Style          gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+	Tooltip       string     `desc:"text for tooltip for this widget -- can use HTML formatting"`
+	StyleFuncs    []func()   `view:"-" desc:"a slice of style functions that are called in sequential descending (so the first added function is called last and thus overrides all other functions) in order to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
+	OverrideStyle bool       `desc:"override the computed styles and allow directly editing Style"`
+	Style         gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
 	// DefStyle      *gist.Style  `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us (modifying these externally will have no effect) -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	LayState     LayoutState  `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
 	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
@@ -97,6 +96,7 @@ func (wb *WidgetBase) BoxSpace() gist.SideFloats {
 
 // Init2DWidget handles basic node initialization -- Init2D can then do special things
 func (wb *WidgetBase) Init2DWidget() {
+	// fmt.Println("Init2DWidget", wb.Path())
 	wb.BBoxMu.Lock()
 	wb.StyMu.Lock()
 	wb.Viewport = wb.ParentViewport()
@@ -120,6 +120,19 @@ func (wb *WidgetBase) AddStyleFunc(f func()) {
 		wb.StyleFuncs = []func(){}
 	}
 	wb.StyleFuncs = append(wb.StyleFuncs, f)
+}
+
+// AddChildStyleFunc is a helper function that adds the
+// given style function to the child of the given name
+// if it exists, starting searching at the given start index.
+func (wb *WidgetBase) AddChildStyleFunc(childName string, startIdx int, f func(w *WidgetBase)) {
+	child, ok := wb.ChildByName(childName, startIdx).(*WidgetBase)
+	fmt.Println("add child style func; ok =", ok)
+	if ok {
+		child.AddStyleFunc(func() {
+			f(child)
+		})
+	}
 }
 
 // WidgetDefStyleKey is the key for accessing the default style stored in the
@@ -293,17 +306,19 @@ func (wb *WidgetBase) Style2DWidget() {
 	// 	}
 	// }
 
-	for _, f := range wb.StyleFuncs {
-		f()
+	if len(wb.StyleFuncs) != 0 {
+		for i := len(wb.StyleFuncs) - 1; i >= 0; i-- {
+			wb.StyleFuncs[i]()
+		}
 	}
 
-	if CustomStyleFunc != nil {
-		CustomStyleFunc(wb)
-	}
+	// if CustomStyleFunc != nil {
+	// 	CustomStyleFunc(wb)
+	// }
 
-	if wb.FinalStyleFunc != nil {
-		wb.FinalStyleFunc()
-	}
+	// if wb.FinalStyleFunc != nil {
+	// 	wb.FinalStyleFunc()
+	// }
 
 	SetUnitContext(&wb.Style, wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
 	if wb.Style.Inactive {                                 // inactive can only set, not clear

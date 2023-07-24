@@ -5,9 +5,12 @@
 package gi
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -24,9 +27,32 @@ type Action struct {
 	Data       any               `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
 	ActionSig  ki.Signal         `json:"-" xml:"-" view:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
 	UpdateFunc func(act *Action) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing"`
+	Type       ActionTypes       `desc:"the type of action"`
 }
 
 var KiT_Action = kit.Types.AddType(&Action{}, nil)
+
+// ActionTypes is an enum representing
+// the different possible types of actions
+type ActionTypes int
+
+const (
+	// ActionMenu is an action contained
+	// within a popup menu
+	ActionMenu ActionTypes = iota
+	// ActionMenuBar is an action contained
+	// within a menu bar
+	ActionMenuBar
+	// ActionToolBar is an action contained
+	// within a toolbar
+	ActionToolBar
+
+	ActionTypesN
+)
+
+var KiT_ActionTypes = kit.Enums.AddEnumAltLower(ActionTypesN, kit.NotBitFlag, gist.StylePropProps, "Action")
+
+//go:generate stringer -type=ActionTypes
 
 // AddNewAction adds a new action to given parent node, with given name.
 func AddNewAction(parent ki.Ki, name string) *Action {
@@ -114,7 +140,7 @@ var ActionProps = ki.Props{
 		"padding":   units.Px(2),
 		"margin":    units.Px(0),
 		"max-width": -1,
-		"indicator": "wedge-right",
+		"indicator": icons.KeyboardArrowRight,
 		ButtonSelectors[ButtonActive]: ki.Props{
 			"background-color": "lighter-0",
 		},
@@ -258,6 +284,7 @@ func (ac *Action) ButtonRelease() {
 func (ac *Action) Init2D() {
 	ac.Init2DWidget()
 	ac.ConfigParts()
+	ac.ConfigStyles()
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
@@ -340,12 +367,40 @@ func (ac *Action) ConfigParts() {
 			ac.Class = "menu-action"
 		}
 		if ac.Indicator == "" {
-			ac.Indicator = "wedge-right"
+			ac.Indicator = icons.KeyboardArrowRight
 		}
 		ac.ConfigPartsMenuItem()
 	default:
 		ac.ConfigPartsButton()
 	}
+}
+
+func (ac *Action) ConfigStyles() {
+	fmt.Println("action children", *ac.Children(), "parts children", *ac.Parts.Children())
+	ac.AddStyleFunc(func() {
+		ac.Style.Border.Style.Set(gist.BorderNone)
+		ac.Style.Border.Radius.Set()
+		ac.Style.Text.Align = gist.AlignCenter
+		bg := CurrentColorScheme().Background
+		ac.Style.Font.BgColor.SetColor(bg.Highlight(10))
+		ac.Style.Font.Color.SetColor(CurrentColorScheme().Font)
+		ac.Style.Layout.Padding.Set(units.Px(2))
+		ac.Style.Layout.Margin.Set(units.Px(2))
+	})
+	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, func(icon *WidgetBase) {
+		icon.Style.Layout.Width.SetEm(1)
+		icon.Style.Layout.Height.SetEm(1)
+		icon.Style.Layout.Margin.Set()
+		icon.Style.Layout.Padding.Set()
+	})
+	ac.Parts.AddChildStyleFunc("space", ki.StartMiddle, func(space *WidgetBase) {
+		space.Style.Layout.Width.SetCh(0.5)
+		space.Style.Layout.MinWidth.SetCh(0.5)
+	})
+	ac.Parts.AddChildStyleFunc("label", ki.StartMiddle, func(label *WidgetBase) {
+		fmt.Println("STYLING LABEL")
+		label.Style.Font.Color.SetColor(colors.Red)
+	})
 }
 
 // UpdateActions calls UpdateFunc on me and any of my menu items
