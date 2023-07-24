@@ -61,7 +61,7 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 }
 
 func (ic *Icon) ConfigStyles() {
-	ic.AddStyleFunc(func() {
+	ic.AddStyleFunc(StyleFuncDefault, func() {
 		ic.Style.Layout.Width.SetEm(1.5)
 		ic.Style.Layout.Height.SetEm(1.5)
 		ic.Style.Font.BgColor.SetColor(color.Transparent)

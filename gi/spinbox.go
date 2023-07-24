@@ -73,32 +73,26 @@ func (sb *SpinBox) Disconnect() {
 // DefaultStyle implements the [DefaultStyler] interface
 func (sb *SpinBox) DefaultStyle() {
 	// fmt.Println("spin box children", sb.Parts.Kids)
-	bts := sb.Parts.ChildByName("buttons", 2)
-	if bts != nil {
-		if up, ok := bts.ChildByName("up", 0).(*Action); ok {
-			up.AddStyleFunc(func() {
-				up.Style.Layout.MaxWidth.SetEm(1)
-				up.Style.Layout.MaxHeight.SetEm(1)
-				up.Style.Layout.Margin.Set()
-				up.Style.Layout.Padding.Set()
-				up.Style.Font.BgColor.SetColor(color.Transparent)
-			})
-		}
-		if down, ok := bts.ChildByName("down", 1).(*Action); ok {
-			down.AddStyleFunc(func() {
-				down.Style.Layout.MaxWidth.SetEm(1)
-				down.Style.Layout.MaxHeight.SetEm(1)
-				down.Style.Layout.Margin.Set()
-				down.Style.Layout.Padding.Set()
-				down.Style.Font.BgColor.SetColor(color.Transparent)
-			})
-		}
-	}
-	if spc, ok := sb.Parts.ChildByName("space", 1).(*Space); ok {
-		spc.AddStyleFunc(func() {
-			spc.Style.Layout.Width.SetEx(0)
+	bts, ok := sb.Parts.ChildByName("buttons", 2).(*WidgetBase)
+	if ok {
+		bts.AddChildStyleFunc("up", 0, StyleFuncParts(sb), func(up *WidgetBase) {
+			up.Style.Layout.MaxWidth.SetEm(1)
+			up.Style.Layout.MaxHeight.SetEm(1)
+			up.Style.Layout.Margin.Set()
+			up.Style.Layout.Padding.Set()
+			up.Style.Font.BgColor.SetColor(color.Transparent)
+		})
+		bts.AddChildStyleFunc("down", 1, StyleFuncParts(sb), func(down *WidgetBase) {
+			down.Style.Layout.MaxWidth.SetEm(1)
+			down.Style.Layout.MaxHeight.SetEm(1)
+			down.Style.Layout.Margin.Set()
+			down.Style.Layout.Padding.Set()
+			down.Style.Font.BgColor.SetColor(color.Transparent)
 		})
 	}
+	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(spc *WidgetBase) {
+		spc.Style.Layout.Width.SetEx(0)
+	})
 }
 
 var SpinBoxProps = ki.Props{

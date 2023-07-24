@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/goki/gi/gist"
@@ -376,8 +375,7 @@ func (ac *Action) ConfigParts() {
 }
 
 func (ac *Action) ConfigStyles() {
-	fmt.Println("action children", *ac.Children(), "parts children", *ac.Parts.Children())
-	ac.AddStyleFunc(func() {
+	ac.AddStyleFunc(StyleFuncDefault, func() {
 		ac.Style.Border.Style.Set(gist.BorderNone)
 		ac.Style.Border.Radius.Set()
 		ac.Style.Text.Align = gist.AlignCenter
@@ -387,18 +385,17 @@ func (ac *Action) ConfigStyles() {
 		ac.Style.Layout.Padding.Set(units.Px(2))
 		ac.Style.Layout.Margin.Set(units.Px(2))
 	})
-	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, func(icon *WidgetBase) {
+	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, StyleFuncParts(ac), func(icon *WidgetBase) {
 		icon.Style.Layout.Width.SetEm(1)
 		icon.Style.Layout.Height.SetEm(1)
 		icon.Style.Layout.Margin.Set()
 		icon.Style.Layout.Padding.Set()
 	})
-	ac.Parts.AddChildStyleFunc("space", ki.StartMiddle, func(space *WidgetBase) {
+	ac.Parts.AddChildStyleFunc("space", ki.StartMiddle, StyleFuncParts(ac), func(space *WidgetBase) {
 		space.Style.Layout.Width.SetCh(0.5)
 		space.Style.Layout.MinWidth.SetCh(0.5)
 	})
-	ac.Parts.AddChildStyleFunc("label", ki.StartMiddle, func(label *WidgetBase) {
-		fmt.Println("STYLING LABEL")
+	ac.Parts.AddChildStyleFunc("label", ki.StartMiddle, StyleFuncParts(ac), func(label *WidgetBase) {
 		label.Style.Font.Color.SetColor(colors.Red)
 	})
 }

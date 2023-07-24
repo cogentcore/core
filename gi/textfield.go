@@ -1379,17 +1379,14 @@ func (tf *TextField) ConfigParts() {
 }
 
 func (tf *TextField) ConfigStyles() {
-	tf.AddStyleFunc(func() {
+	tf.AddStyleFunc(StyleFuncDefault, func() {
 		tf.Style.Font.BgColor.SetColor(colors.Purple)
 	})
-	clr, ok := tf.Parts.ChildByName("clear", -1).(*Action)
-	if ok {
-		clr.AddStyleFunc(func() {
-			clr.Style.Font.BgColor.SetColor(color.Transparent)
-			clr.Style.Layout.Width.SetEx(0.5)
-			clr.Style.Layout.Height.SetEx(0.5)
-		})
-	}
+	tf.Parts.AddChildStyleFunc("clear", 1, StyleFuncParts(tf), func(clr *WidgetBase) {
+		clr.Style.Font.BgColor.SetColor(color.Transparent)
+		clr.Style.Layout.Width.SetEx(0.5)
+		clr.Style.Layout.Height.SetEx(0.5)
+	})
 }
 
 ////////////////////////////////////////////////////

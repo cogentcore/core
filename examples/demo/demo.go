@@ -31,7 +31,7 @@ func mainrun() {
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
-	mfr.AddStyleFunc(func() {
+	mfr.AddStyleFunc(gi.StyleFuncFinal, func() {
 		mfr.Spacing.SetEx(1)
 		mfr.Style.Layout.Padding.Set(units.Px(8))
 	})
@@ -46,7 +46,7 @@ func mainrun() {
 	bdesc.Type = gi.LabelH3
 
 	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
-	brow.AddStyleFunc(func() {
+	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		brow.Spacing.SetEx(1)
 		brow.Style.Layout.MaxWidth.SetPx(-1)
 	})
@@ -68,7 +68,7 @@ func mainrun() {
 	idesc.Type = gi.LabelH3
 
 	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutHorizFlow)
-	irow.AddStyleFunc(func() {
+	irow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		irow.Spacing.SetEx(1)
 		irow.Style.Layout.MaxWidth.SetPx(-1)
 	})
@@ -78,7 +78,7 @@ func mainrun() {
 
 	tfield := gi.AddNewTextField(irow, "tfield")
 	tfield.Placeholder = "Text Field"
-	tfield.AddStyleFunc(func() {
+	tfield.AddStyleFunc(gi.StyleFuncFinal, func() {
 		tfield.Style.Font.BgColor.SetColor(colors.Green)
 	})
 

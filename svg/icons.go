@@ -299,7 +299,7 @@ func (iset *IconSet) OpenIconsFromEmbedDir(fs embed.FS, dirName string) error {
 			if dirName != "svg" {
 				nm = dirName + "-" + nm
 			}
-			fpath = filepath.Join(dirName, fnm)
+			fpath = dirName + "/" + fnm // fs uses slashes, even on windows (see https://pkg.go.dev/io/fs#ValidPath)
 		}
 		ic := Icon{}
 		ic.InitName(&ic, nm)

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"strings"
 	"sync"
 
@@ -20,6 +21,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/kigen/ordmap"
 	"github.com/goki/mat32"
 )
 
@@ -31,10 +33,10 @@ import (
 // includes toggling selection on left mouse press.
 type WidgetBase struct {
 	Node2DBase
-	Tooltip       string     `desc:"text for tooltip for this widget -- can use HTML formatting"`
-	StyleFuncs    []func()   `view:"-" desc:"a slice of style functions that are called in sequential descending (so the first added function is called last and thus overrides all other functions) in order to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
-	OverrideStyle bool       `desc:"override the computed styles and allow directly editing Style"`
-	Style         gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+	Tooltip       string                             `desc:"text for tooltip for this widget -- can use HTML formatting"`
+	StyleFuncs    *ordmap.Map[StyleFuncName, func()] `desc:"a slice of style functions that are called in sequential descending (so the first added function is called last and thus overrides all other functions) in order to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
+	OverrideStyle bool                               `desc:"override the computed styles and allow directly editing Style"`
+	Style         gist.Style                         `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
 	// DefStyle      *gist.Style  `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us (modifying these externally will have no effect) -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	LayState     LayoutState  `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
 	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
@@ -47,6 +49,31 @@ var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
 var WidgetBaseProps = ki.Props{
 	"base-type":     true,
 	"EnumType:Flag": KiT_NodeFlags,
+}
+
+// StyleFuncName is the name of
+// a style function
+type StyleFuncName string
+
+const (
+	// StyleFuncDefault is the style function name
+	// that indicates that a style function was set
+	// on an element by itself in ConfigStyles
+	// as its default style function
+	StyleFuncDefault StyleFuncName = "default"
+	// StyleFuncFinal is the style function name
+	// that indicates that a style function was set
+	// on an element by end-user code as a final,
+	// overriding style function
+	StyleFuncFinal StyleFuncName = "final"
+)
+
+// StyleFuncParts returns a style function name
+// that indicates that a style function was set
+// on a part by the given parent in ConfigStyles
+// as its default style function
+func StyleFuncParts(parent ki.Ki) StyleFuncName {
+	return "parts." + StyleFuncName(reflect.TypeOf(parent).Name())
 }
 
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
@@ -115,23 +142,25 @@ func (wb *WidgetBase) Init2D() {
 // widget's style functions, initializing them if necessary.
 // This function should typically be called by parents
 // on children, and not by end-user code.
-func (wb *WidgetBase) AddStyleFunc(f func()) {
+func (wb *WidgetBase) AddStyleFunc(name StyleFuncName, f func()) {
 	if wb.StyleFuncs == nil {
-		wb.StyleFuncs = []func(){}
+		wb.StyleFuncs = ordmap.New[StyleFuncName, func()]()
 	}
-	wb.StyleFuncs = append(wb.StyleFuncs, f)
+	wb.StyleFuncs.Add(name, f)
 }
 
 // AddChildStyleFunc is a helper function that adds the
 // given style function to the child of the given name
 // if it exists, starting searching at the given start index.
-func (wb *WidgetBase) AddChildStyleFunc(childName string, startIdx int, f func(w *WidgetBase)) {
-	child, ok := wb.ChildByName(childName, startIdx).(*WidgetBase)
-	fmt.Println("add child style func; ok =", ok)
-	if ok {
-		child.AddStyleFunc(func() {
-			f(child)
-		})
+func (wb *WidgetBase) AddChildStyleFunc(childName string, startIdx int, funcName StyleFuncName, f func(w *WidgetBase)) {
+	child := wb.ChildByName(childName, startIdx)
+	if child != nil {
+		wb, ok := child.Embed(KiT_WidgetBase).(*WidgetBase)
+		if ok {
+			wb.AddStyleFunc(funcName, func() {
+				f(wb)
+			})
+		}
 	}
 }
 
@@ -306,9 +335,12 @@ func (wb *WidgetBase) Style2DWidget() {
 	// 	}
 	// }
 
-	if len(wb.StyleFuncs) != 0 {
-		for i := len(wb.StyleFuncs) - 1; i >= 0; i-- {
-			wb.StyleFuncs[i]()
+	if wb.StyleFuncs != nil {
+		vals := wb.StyleFuncs.Vals()
+		if len(vals) != 0 {
+			for i := len(vals) - 1; i >= 0; i-- {
+				vals[i]()
+			}
 		}
 	}
 
