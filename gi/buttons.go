@@ -792,57 +792,56 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (bt *Button) DefaultStyle() {
-	cs := CurrentColorScheme()
-	s := &bt.Style
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (bt *Button) DefaultStyle() {
+// 	s := &bt.Style
 
-	s.Border.Style.Set(gist.BorderNone)
-	s.Border.Width.Set()
-	s.Border.Color.Set()
-	s.Border.Radius.Set(units.Px(4))
-	s.Layout.Padding.Set(units.Px(4))
-	s.Layout.Margin.Set(units.Px(2))
-	s.Layout.MinWidth.SetEm(1)
-	s.Layout.MinHeight.SetEm(1)
-	s.Text.Align = gist.AlignCenter
+// 	s.Border.Style.Set(gist.BorderNone)
+// 	s.Border.Width.Set()
+// 	s.Border.Color.Set()
+// 	s.Border.Radius.Set(units.Px(4))
+// 	s.Layout.Padding.Set(units.Px(4))
+// 	s.Layout.Margin.Set(units.Px(2))
+// 	s.Layout.MinWidth.SetEm(1)
+// 	s.Layout.MinHeight.SetEm(1)
+// 	s.Text.Align = gist.AlignCenter
 
-	switch bt.Type {
-	case ButtonDefault:
-		c := cs.Secondary
-		switch bt.State {
-		case ButtonHover:
-			c = c.Highlight(10)
-		case ButtonDown:
-			c = c.Highlight(20)
-		}
-		s.Font.BgColor.SetColor(c)
-		s.Font.Color.SetColor(c.ContrastColor())
-	case ButtonPrimary:
-		c := cs.Primary
-		switch bt.State {
-		case ButtonHover:
-			c = c.Highlight(20)
-		case ButtonDown:
-			c = c.Highlight(30)
-		}
-		s.Font.BgColor.SetColor(c)
-		s.Font.Color.SetColor(c.ContrastColor())
-	case ButtonSecondary:
-		c := cs.Background
-		switch bt.State {
-		case ButtonHover:
-			c = c.Highlight(20)
-		case ButtonDown:
-			c = c.Highlight(30)
-		}
-		s.Font.BgColor.SetColor(c)
-		s.Font.Color.SetColor(cs.Primary)
-		s.Border.Style.Set(gist.BorderSolid)
-		s.Border.Width.Set(units.Px(1))
-		s.Border.Color.Set(cs.Primary)
-	}
-}
+// 	switch bt.Type {
+// 	case ButtonDefault:
+// 		c := TheColorScheme.Secondary
+// 		switch bt.State {
+// 		case ButtonHover:
+// 			c = c.Highlight(10)
+// 		case ButtonDown:
+// 			c = c.Highlight(20)
+// 		}
+// 		s.Font.BgColor.SetColor(c)
+// 		s.Font.Color.SetColor(c.ContrastColor())
+// 	case ButtonPrimary:
+// 		c := TheColorScheme.Primary
+// 		switch bt.State {
+// 		case ButtonHover:
+// 			c = c.Highlight(20)
+// 		case ButtonDown:
+// 			c = c.Highlight(30)
+// 		}
+// 		s.Font.BgColor.SetColor(c)
+// 		s.Font.Color.SetColor(c.ContrastColor())
+// 	case ButtonSecondary:
+// 		c := TheColorScheme.Background
+// 		switch bt.State {
+// 		case ButtonHover:
+// 			c = c.Highlight(20)
+// 		case ButtonDown:
+// 			c = c.Highlight(30)
+// 		}
+// 		s.Font.BgColor.SetColor(c)
+// 		s.Font.Color.SetColor(TheColorScheme.Primary)
+// 		s.Border.Style.Set(gist.BorderSolid)
+// 		s.Border.Width.Set(units.Px(1))
+// 		s.Border.Color.Set(TheColorScheme.Primary)
+// 	}
+// }
 
 var ButtonProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
@@ -1124,15 +1123,14 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 
 func (cb *CheckBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
-		cs := CurrentColorScheme()
-		cb.Style.Font.Color.SetColor(cs.Font)
+		cb.Style.Font.Color.SetColor(Colors.Font)
 		switch cb.State {
 		default:
-			cb.Style.Font.BgColor.SetColor(cs.Background)
+			cb.Style.Font.BgColor.SetColor(Colors.Background)
 		case ButtonHover:
-			cb.Style.Font.BgColor.SetColor(cs.Background.Highlight(10))
+			cb.Style.Font.BgColor.SetColor(Colors.Background.Highlight(10))
 		case ButtonDown:
-			cb.Style.Font.BgColor.SetColor(cs.Background.Highlight(20))
+			cb.Style.Font.BgColor.SetColor(Colors.Background.Highlight(20))
 		}
 	})
 }

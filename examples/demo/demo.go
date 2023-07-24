@@ -9,7 +9,6 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -78,9 +77,9 @@ func mainrun() {
 
 	tfield := gi.AddNewTextField(irow, "tfield")
 	tfield.Placeholder = "Text Field"
-	tfield.AddStyleFunc(gi.StyleFuncFinal, func() {
-		tfield.Style.Font.BgColor.SetColor(colors.Green)
-	})
+	// tfield.AddStyleFunc(gi.StyleFuncFinal, func() {
+	// 	tfield.Style.Font.BgColor.SetColor(colors.Green)
+	// })
 
 	sbox := gi.AddNewSpinBox(irow, "sbox")
 	sbox.Value = 0.5

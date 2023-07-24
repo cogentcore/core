@@ -59,19 +59,18 @@ func (cb *ComboBox) Disconnect() {
 	cb.ComboSig.DisconnectAll()
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (cb *ComboBox) DefaultStyle() {
-	cs := CurrentColorScheme()
-	s := &cb.Style
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (cb *ComboBox) DefaultStyle() {
+// 	s := &cb.Style
 
-	s.Border.Style.Set(gist.BorderNone)
-	s.Border.Radius.Set(units.Px(4))
-	s.Layout.Padding.Set(units.Px(4))
-	s.Layout.Margin.Set(units.Px(4))
-	s.Text.Align = gist.AlignCenter
-	s.Font.BgColor.SetColor(cs.Background)
-	s.Font.Color.SetColor(cs.Font)
-}
+// 	s.Border.Style.Set(gist.BorderNone)
+// 	s.Border.Radius.Set(units.Px(4))
+// 	s.Layout.Padding.Set(units.Px(4))
+// 	s.Layout.Margin.Set(units.Px(4))
+// 	s.Text.Align = gist.AlignCenter
+// 	s.Font.BgColor.SetColor(TheColorScheme.Background)
+// 	s.Font.Color.SetColor(TheColorScheme.Font)
+// }
 
 var ComboBoxProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,

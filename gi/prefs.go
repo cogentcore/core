@@ -152,24 +152,14 @@ func (pf *Preferences) SaveColors(filename FileName) error {
 
 // LightMode sets colors to light mode
 func (pf *Preferences) LightMode() {
-	lc, ok := pf.ColorSchemes["Light"]
-	if !ok {
-		log.Printf("Light ColorScheme not found\n")
-		return
-	}
-	pf.Colors = *lc
+	pf.ColorSchemeType = ColorSchemeLight
 	pf.Save()
 	pf.UpdateAll()
 }
 
 // DarkMode sets colors to dark mode
 func (pf *Preferences) DarkMode() {
-	lc, ok := pf.ColorSchemes["Dark"]
-	if !ok {
-		log.Printf("Dark ColorScheme not found\n")
-		return
-	}
-	pf.Colors = *lc
+	pf.ColorSchemeType = ColorSchemeDark
 	pf.Save()
 	pf.UpdateAll()
 }
@@ -193,6 +183,11 @@ func (pf *Preferences) Apply() {
 	}
 	if pf.ColorSchemes["Dark"].HiStyle == "" {
 		pf.ColorSchemes["Dark"].HiStyle = "monokai"
+	}
+	if pf.ColorSchemeType == ColorSchemeLight {
+		Colors = TheColorSchemes.Light
+	} else {
+		Colors = TheColorSchemes.Dark
 	}
 
 	TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)

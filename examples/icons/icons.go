@@ -73,8 +73,8 @@ func mainrun() {
 		smico.SetMinPrefWidth(units.Px(24))
 		smico.SetMinPrefHeight(units.Px(24))
 		smico.SetProp("background-color", color.Transparent)
-		smico.SetProp("fill", gi.CurrentColorScheme().Font)
-		smico.SetProp("stroke", gi.CurrentColorScheme().Font)
+		smico.SetProp("fill", gi.Colors.Font)
+		smico.SetProp("stroke", gi.Colors.Font)
 		// smico.SetProp("horizontal-align", gi.AlignLeft)
 
 		// ico := gi.AddNewIcon(vb, icnms+"_big", icnms)

@@ -8,7 +8,6 @@ import (
 	"log"
 
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -69,24 +68,23 @@ func (ac *Action) Disconnect() {
 	ac.ActionSig.DisconnectAll()
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (ac *Action) DefaultStyle() {
-	cs := CurrentColorScheme()
-	s := &ac.Style
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (ac *Action) DefaultStyle() {
+// 	s := &ac.Style
 
-	s.Border.Style.Set(gist.BorderNone)
-	s.Border.Width.Set()
-	s.Border.Radius.Set()
-	s.Border.Color.Set()
-	s.Text.Align = gist.AlignCenter
-	s.Font.BgColor.SetColor(cs.Secondary)
-	s.Font.Color.SetColor(cs.Secondary.ContrastColor())
+// 	s.Border.Style.Set(gist.BorderNone)
+// 	s.Border.Width.Set()
+// 	s.Border.Radius.Set()
+// 	s.Border.Color.Set()
+// 	s.Text.Align = gist.AlignCenter
+// 	s.Font.BgColor.SetColor(TheColorScheme.Secondary)
+// 	s.Font.Color.SetColor(TheColorScheme.Secondary.ContrastColor())
 
-	s.Layout.Padding.Set(units.Px(2))
-	s.Layout.Margin.Set(units.Px(2))
-	s.Layout.MinWidth.SetEm(1)
-	s.Layout.MinHeight.SetEm(1)
-}
+// 	s.Layout.Padding.Set(units.Px(2))
+// 	s.Layout.Margin.Set(units.Px(2))
+// 	s.Layout.MinWidth.SetEm(1)
+// 	s.Layout.MinHeight.SetEm(1)
+// }
 
 var ActionProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
@@ -379,9 +377,8 @@ func (ac *Action) ConfigStyles() {
 		ac.Style.Border.Style.Set(gist.BorderNone)
 		ac.Style.Border.Radius.Set()
 		ac.Style.Text.Align = gist.AlignCenter
-		bg := CurrentColorScheme().Background
-		ac.Style.Font.BgColor.SetColor(bg.Highlight(10))
-		ac.Style.Font.Color.SetColor(CurrentColorScheme().Font)
+		ac.Style.Font.BgColor.SetColor(Colors.Background.Highlight(10))
+		ac.Style.Font.Color.SetColor(Colors.Font)
 		ac.Style.Layout.Padding.Set(units.Px(2))
 		ac.Style.Layout.Margin.Set(units.Px(2))
 	})
@@ -396,7 +393,7 @@ func (ac *Action) ConfigStyles() {
 		space.Style.Layout.MinWidth.SetCh(0.5)
 	})
 	ac.Parts.AddChildStyleFunc("label", ki.StartMiddle, StyleFuncParts(ac), func(label *WidgetBase) {
-		label.Style.Font.Color.SetColor(colors.Red)
+		label.Style.Font.Color.SetColor(Colors.Font)
 	})
 }
 

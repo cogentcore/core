@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"log"
 	"strconv"
 
@@ -70,30 +69,30 @@ func (sb *SpinBox) Disconnect() {
 	sb.SpinBoxSig.DisconnectAll()
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (sb *SpinBox) DefaultStyle() {
-	// fmt.Println("spin box children", sb.Parts.Kids)
-	bts, ok := sb.Parts.ChildByName("buttons", 2).(*WidgetBase)
-	if ok {
-		bts.AddChildStyleFunc("up", 0, StyleFuncParts(sb), func(up *WidgetBase) {
-			up.Style.Layout.MaxWidth.SetEm(1)
-			up.Style.Layout.MaxHeight.SetEm(1)
-			up.Style.Layout.Margin.Set()
-			up.Style.Layout.Padding.Set()
-			up.Style.Font.BgColor.SetColor(color.Transparent)
-		})
-		bts.AddChildStyleFunc("down", 1, StyleFuncParts(sb), func(down *WidgetBase) {
-			down.Style.Layout.MaxWidth.SetEm(1)
-			down.Style.Layout.MaxHeight.SetEm(1)
-			down.Style.Layout.Margin.Set()
-			down.Style.Layout.Padding.Set()
-			down.Style.Font.BgColor.SetColor(color.Transparent)
-		})
-	}
-	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(spc *WidgetBase) {
-		spc.Style.Layout.Width.SetEx(0)
-	})
-}
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (sb *SpinBox) DefaultStyle() {
+// 	// fmt.Println("spin box children", sb.Parts.Kids)
+// 	bts, ok := sb.Parts.ChildByName("buttons", 2).(*WidgetBase)
+// 	if ok {
+// 		bts.AddChildStyleFunc("up", 0, StyleFuncParts(sb), func(up *WidgetBase) {
+// 			up.Style.Layout.MaxWidth.SetEm(1)
+// 			up.Style.Layout.MaxHeight.SetEm(1)
+// 			up.Style.Layout.Margin.Set()
+// 			up.Style.Layout.Padding.Set()
+// 			up.Style.Font.BgColor.SetColor(color.Transparent)
+// 		})
+// 		bts.AddChildStyleFunc("down", 1, StyleFuncParts(sb), func(down *WidgetBase) {
+// 			down.Style.Layout.MaxWidth.SetEm(1)
+// 			down.Style.Layout.MaxHeight.SetEm(1)
+// 			down.Style.Layout.Margin.Set()
+// 			down.Style.Layout.Padding.Set()
+// 			down.Style.Font.BgColor.SetColor(color.Transparent)
+// 		})
+// 	}
+// 	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(spc *WidgetBase) {
+// 		spc.Style.Layout.Width.SetEx(0)
+// 	})
+// }
 
 var SpinBoxProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,

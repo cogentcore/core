@@ -577,19 +577,19 @@ func (mb *MenuButton) CopyFieldsFrom(frm any) {
 	mb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (mb *MenuButton) DefaultStyle() {
-	cs := CurrentColorScheme()
-	s := &mb.Style
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (mb *MenuButton) DefaultStyle() {
+// 	cs := CurrentColorScheme()
+// 	s := &mb.Style
 
-	s.Border.Style.Set(gist.BorderNone)
-	s.Border.Width.Set()
-	s.Layout.Margin.Set(units.Px(4))
-	s.Layout.Padding.Set(units.Px(4))
-	s.Text.Align = gist.AlignCenter
-	s.Font.BgColor.SetColor(cs.Background.Highlight(10))
-	s.Font.Color.SetColor(cs.Font)
-}
+// 	s.Border.Style.Set(gist.BorderNone)
+// 	s.Border.Width.Set()
+// 	s.Layout.Margin.Set(units.Px(4))
+// 	s.Layout.Padding.Set(units.Px(4))
+// 	s.Text.Align = gist.AlignCenter
+// 	s.Font.BgColor.SetColor(cs.Background.Highlight(10))
+// 	s.Font.Color.SetColor(cs.Font)
+// }
 
 var MenuButtonProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
@@ -689,19 +689,19 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 	sp.Horiz = fr.Horiz
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (sp *Separator) DefaultStyle() {
-	cs := CurrentColorScheme()
-	s := &sp.Style
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (sp *Separator) DefaultStyle() {
+// 	cs := CurrentColorScheme()
+// 	s := &sp.Style
 
-	s.Layout.Padding.Set()
-	s.Layout.Margin.Set()
-	s.Layout.AlignV = gist.AlignCenter
-	s.Layout.AlignH = gist.AlignCenter
-	s.Border.Color.Set(cs.Background.Highlight(30))
-	s.Border.Width.Set(units.Px(2))
-	s.Font.BgColor.SetColor(cs.Background.Highlight(10))
-}
+// 	s.Layout.Padding.Set()
+// 	s.Layout.Margin.Set()
+// 	s.Layout.AlignV = gist.AlignCenter
+// 	s.Layout.AlignH = gist.AlignCenter
+// 	s.Border.Color.Set(cs.Background.Highlight(30))
+// 	s.Border.Width.Set(units.Px(2))
+// 	s.Font.BgColor.SetColor(cs.Background.Highlight(10))
+// }
 
 var SeparatorProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,

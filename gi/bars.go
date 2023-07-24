@@ -49,17 +49,16 @@ var MenuBarProps = ki.Props{
 	"background-color": "linear-gradient(pref(Control), highlight-10)",
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (mb *MenuBar) DefaultStyle() {
-	cs := CurrentColorScheme()
-	s := &mb.Style
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (mb *MenuBar) DefaultStyle() {
+// 	s := &mb.Style
 
-	s.Layout.Padding.Set(units.Px(2))
-	s.Layout.Margin.Set()
-	mb.Spacing.SetPx(4)
-	s.Font.Color.SetColor(cs.Font)
-	s.Font.BgColor.SetColor(cs.Secondary)
-}
+// 	s.Layout.Padding.Set(units.Px(2))
+// 	s.Layout.Margin.Set()
+// 	mb.Spacing.SetPx(4)
+// 	s.Font.Color.SetColor(TheColorScheme.Font)
+// 	s.Font.BgColor.SetColor(TheColorScheme.Secondary)
+// }
 
 // MenuBarStdRender does the standard rendering of the bar
 func (mb *MenuBar) MenuBarStdRender() {

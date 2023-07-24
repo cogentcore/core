@@ -42,18 +42,18 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 	fr.Stripes = cp.Stripes
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (fr *Frame) DefaultStyle() {
-	cs := CurrentColorScheme()
-	s := &fr.Style
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (fr *Frame) DefaultStyle() {
+// 	cs := CurrentColorScheme()
+// 	s := &fr.Style
 
-	s.Border.Style.Set(gist.BorderNone)
-	s.Border.Radius.Set()
-	s.Layout.Padding.Set(units.Px(2))
-	s.Layout.Margin.Set(units.Px(2))
-	s.Font.Color.SetColor(cs.Font)
-	s.Font.BgColor.SetColor(cs.Background)
-}
+// 	s.Border.Style.Set(gist.BorderNone)
+// 	s.Border.Radius.Set()
+// 	s.Layout.Padding.Set(units.Px(2))
+// 	s.Layout.Margin.Set(units.Px(2))
+// 	s.Font.Color.SetColor(cs.Font)
+// 	s.Font.BgColor.SetColor(cs.Background)
+// }
 
 var FrameProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,

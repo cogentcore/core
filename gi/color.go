@@ -20,6 +20,8 @@ type ColorSchemes struct {
 // TheColorSchemes are the color schemes used to style
 // the app. You should set them in your mainrun funtion
 // if you want to change the color schemes.
+// [Colors] is set based on TheColorSchemes and
+// the user preferences.
 var TheColorSchemes = ColorSchemes{
 	Light: ColorScheme{
 		Font:       colors.Black,
@@ -37,14 +39,13 @@ var TheColorSchemes = ColorSchemes{
 	},
 }
 
-// CurrentColorScheme returns the current color scheme
-// to be used to style things.
-func CurrentColorScheme() ColorScheme {
-	if Prefs.ColorSchemeType == ColorSchemeLight {
-		return TheColorSchemes.Light
-	}
-	return TheColorSchemes.Dark
-}
+// Colors is the current color scheme
+// that is used to style the app. It should
+// not be set by end-user code, as it is set
+// automatically from the user's preferences and
+// [TheColorSchemes]. You should set [TheColorSchemes]
+// to customize the color scheme of your app.
+var Colors ColorScheme
 
 // ColorSchemeTypes is an enum that contains
 // the supported color scheme types

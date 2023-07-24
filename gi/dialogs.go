@@ -76,13 +76,13 @@ func (dlg *Dialog) Disconnect() {
 	dlg.DialogSig.DisconnectAll()
 }
 
-// DefaultStyle implements the [DefaultStyler] interface
-func (dlg *Dialog) DefaultStyle() {
-	cs := CurrentColorScheme()
-	s := &dlg.Style
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (dlg *Dialog) DefaultStyle() {
+// 	cs := CurrentColorScheme()
+// 	s := &dlg.Style
 
-	s.Font.Color.SetColor(cs.Font)
-}
+// 	s.Font.Color.SetColor(cs.Font)
+// }
 
 // ValidViewport finds a non-nil viewport, either using the provided one, or
 // using the first main window's viewport

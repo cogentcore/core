@@ -16,7 +16,6 @@ import (
 
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -1380,7 +1379,7 @@ func (tf *TextField) ConfigParts() {
 
 func (tf *TextField) ConfigStyles() {
 	tf.AddStyleFunc(StyleFuncDefault, func() {
-		tf.Style.Font.BgColor.SetColor(colors.Purple)
+		tf.Style.Font.BgColor.SetColor(Colors.Background)
 	})
 	tf.Parts.AddChildStyleFunc("clear", 1, StyleFuncParts(tf), func(clr *WidgetBase) {
 		clr.Style.Font.BgColor.SetColor(color.Transparent)
