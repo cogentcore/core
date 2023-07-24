@@ -472,10 +472,10 @@ const (
 
 var KiT_Densities = kit.Enums.AddEnumAltLower(DensitiesN, kit.NotBitFlag, gist.StylePropProps, "Density")
 
-// DensityMultiplier returns a multiplier centered
+// DensityMul returns a multiplier centered
 // around 1 representing the density set in the preferences.
 // It should be used for determining padding and margin values.
-func (pf *Preferences) DensityMultiplier() float32 {
+func (pf *Preferences) DensityMul() float32 {
 	switch pf.Density {
 	case DensityCompact:
 		return 0.75

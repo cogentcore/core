@@ -33,7 +33,6 @@ type ButtonBase struct {
 	Icon         icons.Icon                `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 	Indicator    icons.Icon                `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 	Shortcut     key.Chord                 `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
-	Type         ButtonTypes               `desc:"the type of button (default, primary, secondary, etc)"`
 	StateStyles  [ButtonStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State        ButtonStates              `copy:"-" json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
 	ButtonSig    ki.Signal                 `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
@@ -778,6 +777,7 @@ func (bb *ButtonBase) Destroy() {
 // right
 type Button struct {
 	ButtonBase
+	Type ButtonTypes `desc:"the type of button (default, primary, secondary, etc)"`
 }
 
 var KiT_Button = kit.Types.AddType(&Button{}, nil)

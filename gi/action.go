@@ -379,8 +379,8 @@ func (ac *Action) ConfigStyles() {
 		ac.Style.Text.Align = gist.AlignCenter
 		ac.Style.Font.BgColor.SetColor(Colors.Background.Highlight(10))
 		ac.Style.Font.Color.SetColor(Colors.Font)
-		ac.Style.Layout.Padding.Set(units.Px(2))
-		ac.Style.Layout.Margin.Set(units.Px(2))
+		ac.Style.Layout.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		ac.Style.Layout.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 	})
 	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, StyleFuncParts(ac), func(icon *WidgetBase) {
 		icon.Style.Layout.Width.SetEm(1)
@@ -393,7 +393,25 @@ func (ac *Action) ConfigStyles() {
 		space.Style.Layout.MinWidth.SetCh(0.5)
 	})
 	ac.Parts.AddChildStyleFunc("label", ki.StartMiddle, StyleFuncParts(ac), func(label *WidgetBase) {
-		label.Style.Font.Color.SetColor(Colors.Font)
+		label.Style.Layout.Margin.Set()
+		label.Style.Layout.Padding.Set()
+	})
+	ac.Parts.AddChildStyleFunc("indicator", ki.StartMiddle, StyleFuncParts(ac), func(ind *WidgetBase) {
+		ind.Style.Layout.Width.SetEx(1.5)
+		ind.Style.Layout.Height.SetEx(1.5)
+		ind.Style.Layout.Margin.Set()
+		ind.Style.Layout.Padding.Set()
+		ind.Style.Layout.AlignV = gist.AlignBottom
+	})
+	ac.Parts.AddChildStyleFunc("ind-stretch", ki.StartMiddle, StyleFuncParts(ac), func(ins *WidgetBase) {
+		ins.Style.Layout.Width.SetEm(1)
+	})
+	ac.Parts.AddChildStyleFunc("shortcut", ki.StartMiddle, StyleFuncParts(ac), func(short *WidgetBase) {
+		short.Style.Layout.Margin.Set()
+		short.Style.Layout.Padding.Set()
+	})
+	ac.Parts.AddChildStyleFunc("sc-stretch", ki.StartMiddle, StyleFuncParts(ac), func(scs *WidgetBase) {
+		scs.Style.Layout.MinWidth.SetCh(2)
 	})
 }
 
