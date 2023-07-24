@@ -1124,6 +1124,15 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 
 func (cb *CheckBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
-		cb.Style.Font.Color.SetColor(CurrentColorScheme().Font)
+		cs := CurrentColorScheme()
+		cb.Style.Font.Color.SetColor(cs.Font)
+		switch cb.State {
+		default:
+			cb.Style.Font.BgColor.SetColor(cs.Background)
+		case ButtonHover:
+			cb.Style.Font.BgColor.SetColor(cs.Background.Highlight(10))
+		case ButtonDown:
+			cb.Style.Font.BgColor.SetColor(cs.Background.Highlight(20))
+		}
 	})
 }
