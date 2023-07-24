@@ -1033,6 +1033,7 @@ func (cb *CheckBox) Init2D() {
 	cb.SetCheckable(true)
 	cb.Init2DWidget()
 	cb.This().(ButtonWidget).ConfigParts()
+	cb.ConfigStyles()
 }
 
 func (cb *CheckBox) StyleParts() {
@@ -1119,4 +1120,10 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 	} else {
 		ist.StackTop = 1
 	}
+}
+
+func (cb *CheckBox) ConfigStyles() {
+	cb.AddStyleFunc(StyleFuncDefault, func() {
+		cb.Style.Font.Color.SetColor(CurrentColorScheme().Font)
+	})
 }
