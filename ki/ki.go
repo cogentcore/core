@@ -46,16 +46,15 @@ import (
 // This requires proper initialization via Init method of the Ki interface.
 //
 // Ki nodes also support the following core functionality:
-// * UpdateStart() / UpdateEnd() to wrap around tree updating code, which then
-//   automatically triggers update signals at the highest level of the
-//   affected tree, resulting in efficient updating logic for arbitrary
-//   nested tree modifications.
-// * Signal framework for sending messages such as the Update signals, used
-//   extensively in the GoGi GUI framework for sending event messages etc.
-// * ConfigChildren system for minimally updating children to fit a given
-//   Name & Type template.
-// * Automatic JSON I/O of entire tree including type information.
-//
+//   - UpdateStart() / UpdateEnd() to wrap around tree updating code, which then
+//     automatically triggers update signals at the highest level of the
+//     affected tree, resulting in efficient updating logic for arbitrary
+//     nested tree modifications.
+//   - Signal framework for sending messages such as the Update signals, used
+//     extensively in the GoGi GUI framework for sending event messages etc.
+//   - ConfigChildren system for minimally updating children to fit a given
+//     Name & Type template.
+//   - Automatic JSON I/O of entire tree including type information.
 type Ki interface {
 	// InitName initializes this node to given actual object as a Ki interface
 	// and sets its name.  The names should be unique among children of a node.
@@ -160,14 +159,14 @@ type Ki interface {
 	// ChildByName returns first element that has given name, nil if not found.
 	// startIdx arg allows for optimized bidirectional find if you have
 	// an idea where it might be -- can be key speedup for large lists -- pass
-	// -1 to start in the middle (good default).
+	// [ki.StartMiddle] to start in the middle (good default).
 	ChildByName(name string, startIdx int) Ki
 
 	// ChildByNameTry returns first element that has given name -- Try version
 	// returns error message if not found.
 	// startIdx arg allows for optimized bidirectional find if you have
 	// an idea where it might be -- can be key speedup for large lists -- pass
-	// -1 to start in the middle (good default).
+	// [ki.StartMiddle] to start in the middle (good default).
 	ChildByNameTry(name string, startIdx int) (Ki, error)
 
 	// ChildByType returns first element that has given type, nil if not found.
@@ -175,7 +174,7 @@ type Ki interface {
 	// at any level of anonymous embedding.
 	// startIdx arg allows for optimized bidirectional find if you have
 	// an idea where it might be -- can be key speedup for large lists -- pass
-	// -1 to start in the middle (good default).
+	// [ki.StartMiddle] to start in the middle (good default).
 	ChildByType(t reflect.Type, embeds bool, startIdx int) Ki
 
 	// ChildByTypeTry returns first element that has given name -- Try version
@@ -184,7 +183,7 @@ type Ki interface {
 	// at any level of anonymous embedding.
 	// startIdx arg allows for optimized bidirectional find if you have
 	// an idea where it might be -- can be key speedup for large lists -- pass
-	// -1 to start in the middle (good default).
+	// [ki.StartMiddle] to start in the middle (good default).
 	ChildByTypeTry(t reflect.Type, embeds bool, startIdx int) (Ki, error)
 
 	//////////////////////////////////////////////////////////////////////////

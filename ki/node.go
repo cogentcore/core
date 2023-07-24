@@ -271,7 +271,7 @@ func (n *Node) ChildTry(idx int) (Ki, error) {
 // ChildByName returns first element that has given name, nil if not found.
 // startIdx arg allows for optimized bidirectional find if you have
 // an idea where it might be -- can be key speedup for large lists -- pass
-// -1 to start in the middle (good default).
+// [ki.StartMiddle] to start in the middle (good default).
 func (n *Node) ChildByName(name string, startIdx int) Ki {
 	return n.Kids.ElemByName(name, startIdx)
 }
@@ -279,7 +279,7 @@ func (n *Node) ChildByName(name string, startIdx int) Ki {
 // ChildByNameTry returns first element that has given name, error if not found.
 // startIdx arg allows for optimized bidirectional find if you have
 // an idea where it might be -- can be key speedup for large lists -- pass
-// -1 to start in the middle (good default).
+// [ki.StartMiddle] to start in the middle (good default).
 func (n *Node) ChildByNameTry(name string, startIdx int) (Ki, error) {
 	idx, ok := n.Kids.IndexByName(name, startIdx)
 	if !ok {
@@ -293,7 +293,7 @@ func (n *Node) ChildByNameTry(name string, startIdx int) (Ki, error) {
 // at any level of anonymous embedding.
 // startIdx arg allows for optimized bidirectional find if you have
 // an idea where it might be -- can be key speedup for large lists -- pass
-// -1 to start in the middle (good default).
+// [ki.StartMiddle] to start in the middle (good default).
 func (n *Node) ChildByType(t reflect.Type, embeds bool, startIdx int) Ki {
 	return n.Kids.ElemByType(t, embeds, startIdx)
 }
@@ -304,7 +304,7 @@ func (n *Node) ChildByType(t reflect.Type, embeds bool, startIdx int) Ki {
 // at any level of anonymous embedding.
 // startIdx arg allows for optimized bidirectional find if you have
 // an idea where it might be -- can be key speedup for large lists -- pass
-// -1 to start in the middle (good default).
+// [ki.StartMiddle] to start in the middle (good default).
 func (n *Node) ChildByTypeTry(t reflect.Type, embeds bool, startIdx int) (Ki, error) {
 	idx, ok := n.Kids.IndexByType(t, embeds, startIdx)
 	if !ok {
@@ -1328,13 +1328,15 @@ func (n *Node) NodeSignal() *Signal {
 // multiple times at multiple levels -- it is essential to ensure that all
 // such Start's have an End!  Usage:
 //
-//   updt := n.UpdateStart()
-//   ... code
-//   n.UpdateEnd(updt)
+//	updt := n.UpdateStart()
+//	... code
+//	n.UpdateEnd(updt)
+//
 // or
-//   updt := n.UpdateStart()
-//   defer n.UpdateEnd(updt)
-//   ... code
+//
+//	updt := n.UpdateStart()
+//	defer n.UpdateEnd(updt)
+//	... code
 func (n *Node) UpdateStart() bool {
 	if n.IsUpdating() || n.IsDestroyed() {
 		return false

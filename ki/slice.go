@@ -16,6 +16,10 @@ import (
 // underlying types
 type Slice []Ki
 
+// StartMiddle indicates to start searching
+// in the middle for slice search functions.
+const StartMiddle int = -1
+
 // NOTE: we have to define Slice* functions operating on a generic *[]Ki
 // element as the first (not receiver) argument, to be able to use these
 // functions in any other types that are based on ki.Slice or are other forms
@@ -73,7 +77,7 @@ func (sl *Slice) ElemFromEndTry(idx int) (Ki, error) {
 // SliceIndexByFunc finds index of item based on match function (which must
 // return true for a find match, false for not).  Returns false if not found.
 // startIdx arg allows for optimized bidirectional find if you have an idea
-// where it might be -- can be key speedup for large lists -- pass -1 to start
+// where it might be -- can be key speedup for large lists -- pass [ki.StartMiddle] to start
 // in the middle (good default)
 func SliceIndexByFunc(sl *[]Ki, startIdx int, match func(k Ki) bool) (int, bool) {
 	sz := len(*sl)
@@ -121,7 +125,7 @@ func SliceIndexByFunc(sl *[]Ki, startIdx int, match func(k Ki) bool) (int, bool)
 // IndexByFunc finds index of item based on match function (which must return
 // true for a find match, false for not).  Returns false if not found.
 // startIdx arg allows for optimized bidirectional find if you have an idea
-// where it might be -- can be key speedup for large lists -- pass -1 to start
+// where it might be -- can be key speedup for large lists -- pass [ki.StartMiddle] to start
 // in the middle (good default).
 func (sl *Slice) IndexByFunc(startIdx int, match func(k Ki) bool) (int, bool) {
 	return SliceIndexByFunc((*[]Ki)(sl), startIdx, match)
@@ -129,7 +133,7 @@ func (sl *Slice) IndexByFunc(startIdx int, match func(k Ki) bool) (int, bool) {
 
 // SliceIndexOf returns index of element in list, false if not there.  startIdx arg
 // allows for optimized bidirectional find if you have an idea where it might
-// be -- can be key speedup for large lists -- pass -1 to start in the middle
+// be -- can be key speedup for large lists -- pass [ki.StartMiddle] to start in the middle
 // (good default).
 func SliceIndexOf(sl *[]Ki, kid Ki, startIdx int) (int, bool) {
 	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch == kid })
@@ -137,7 +141,7 @@ func SliceIndexOf(sl *[]Ki, kid Ki, startIdx int) (int, bool) {
 
 // IndexOf returns index of element in list, false if not there.  startIdx arg
 // allows for optimized bidirectional find if you have an idea where it might
-// be -- can be key speedup for large lists -- pass -1 to start in the middle
+// be -- can be key speedup for large lists -- pass [ki.StartMiddle] to start in the middle
 // (good default).
 func (sl *Slice) IndexOf(kid Ki, startIdx int) (int, bool) {
 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch == kid })
