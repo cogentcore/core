@@ -472,7 +472,7 @@ func SetUnitContext(st *gist.Style, vp *Viewport2D, el mat32.Vec2) {
 			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
-	girl.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
+	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
 	st.ToDots()
 }
 

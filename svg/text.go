@@ -106,7 +106,7 @@ func (g *Text) TextBBox() mat32.Box2 {
 		return mat32.Box2{}
 	}
 	pc := &g.Pnt
-	girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
+	pc.FontStyle.Font = girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, 0, 1)
 	sr := &(g.TextRender.Spans[0])
 	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
@@ -179,13 +179,13 @@ func (g *Text) RenderText() {
 	if scalex == 1 {
 		scalex = 0
 	}
-	girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
+	pc.FontStyle.Font = girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
 	if !pc.FillStyle.Color.IsNil() {
-		*pc.FontStyle.Color = pc.FillStyle.Color.Color
+		pc.FontStyle.Color = pc.FillStyle.Color.Color
 	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
 	pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
-	girl.OpenFont(&pc.FontStyle, &pc.UnContext)
+	pc.FontStyle.Font = girl.OpenFont(&pc.FontStyle, &pc.UnContext)
 	sr := &(g.TextRender.Spans[0])
 	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 	g.TextRender.Size = g.TextRender.Size.Mul(mat32.Vec2{scx, scy})

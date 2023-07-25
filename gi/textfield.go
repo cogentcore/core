@@ -1452,7 +1452,7 @@ func (tf *TextField) Style2D() {
 
 func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Style
-	girl.OpenFont(st.FontRender(), &st.UnContext)
+	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext)
 	txt := tf.EditTxt
 	if tf.NoEcho {
 		txt = concealDots(len(tf.EditTxt))
@@ -1523,7 +1523,7 @@ func (tf *TextField) RenderTextField() {
 		tf.Style = tf.StateStyles[TextFieldActive]
 	}
 	st = &tf.Style // update
-	girl.OpenFont(st.FontRender(), &st.UnContext)
+	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext)
 	tf.RenderStdBox(st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect()

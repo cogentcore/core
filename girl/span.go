@@ -136,14 +136,14 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 	if len(str) == 0 {
 		return
 	}
-	ucfont := gist.NewFontRender()
+	ucfont := &gist.FontRender{}
 	if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
 		ucfont.Family = "Arial Unicode"
 	} else {
 		ucfont.Family = "Arial"
 	}
 	ucfont.Size = sty.Size
-	OpenFont(ucfont, ctxt) // note: this is lightweight once loaded in library
+	ucfont.Font = OpenFont(ucfont, ctxt) // note: this is lightweight once loaded in library
 
 	nwr := []rune(str)
 	sz := len(nwr)
@@ -189,10 +189,10 @@ func (sr *Span) SetRenders(sty *gist.FontRender, ctxt *units.Context, noBG bool,
 		bgc = nil
 	}
 
-	ucfont := gist.NewFontRender()
+	ucfont := &gist.FontRender{}
 	ucfont.Family = "Arial Unicode"
 	ucfont.Size = sty.Size
-	OpenFont(ucfont, ctxt)
+	ucfont.Font = OpenFont(ucfont, ctxt)
 
 	sr.HasDecoUpdate(bgc, sty.Deco)
 	sr.Render = make([]Rune, sz)

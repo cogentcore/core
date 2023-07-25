@@ -253,11 +253,11 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 	switch tag {
 	case "b", "strong":
 		fs.Weight = gist.WeightBold
-		OpenFont(fs, ctxt)
+		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "i", "em", "var", "cite":
 		fs.Style = gist.FontItalic
-		OpenFont(fs, ctxt)
+		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "ins":
 		fallthrough
@@ -273,7 +273,7 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 		curpts -= 2
 		fs.Size = units.Pt(float32(curpts))
 		fs.Size.ToDots(ctxt)
-		OpenFont(fs, ctxt)
+		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "sub":
 		fs.SetDeco(gist.DecoSub)
@@ -283,19 +283,19 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 		curpts -= 2
 		fs.Size = units.Pt(float32(curpts))
 		fs.Size.ToDots(ctxt)
-		OpenFont(fs, ctxt)
+		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "big":
 		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
 		curpts += 2
 		fs.Size = units.Pt(float32(curpts))
 		fs.Size.ToDots(ctxt)
-		OpenFont(fs, ctxt)
+		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "xx-small", "x-small", "smallf", "medium", "large", "x-large", "xx-large":
 		fs.Size = units.Pt(gist.FontSizePoints[tag])
 		fs.Size.ToDots(ctxt)
-		OpenFont(fs, ctxt)
+		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "mark":
 		fs.BackgroundColor.SetColor(gist.ThePrefs.PrefColor("highlight"))
@@ -305,7 +305,7 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 		did = true
 	case "tt", "kbd", "samp", "code":
 		fs.Family = "monospace"
-		OpenFont(fs, ctxt)
+		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	}
 	return did
@@ -362,7 +362,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 	decoder.Entity = xml.HTMLEntity
 	decoder.CharsetReader = charset.NewReaderLabel
 
-	OpenFont(font, ctxt)
+	font.Font = OpenFont(font, ctxt)
 
 	// set when a </p> is encountered
 	nextIsParaStart := false
@@ -438,7 +438,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 							clnm := "." + attr.Value
 							if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
 								fs.SetStyleProps(nil, aggp, nil)
-								OpenFont(&fs, ctxt)
+								fs.Font = OpenFont(&fs, ctxt)
 							}
 						}
 					default:
@@ -446,7 +446,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 					}
 				}
 				fs.SetStyleProps(nil, sprop, nil)
-				OpenFont(&fs, ctxt)
+				fs.Font = OpenFont(&fs, ctxt)
 			}
 			if cssAgg != nil {
 				FontStyleCSS(&fs, nm, cssAgg, ctxt, nil)
@@ -519,7 +519,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 	initsz := ints.MinInt(sz, 1020)
 	curSp.Init(initsz)
 
-	OpenFont(font, ctxt)
+	font.Font = OpenFont(font, ctxt)
 
 	nextIsParaStart := false
 	curLinkIdx := -1 // if currently processing an <a> link element
@@ -661,7 +661,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 								clnm := "." + vl
 								if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
 									fs.SetStyleProps(nil, aggp, nil)
-									OpenFont(&fs, ctxt)
+									fs.Font = OpenFont(&fs, ctxt)
 								}
 							}
 						default:
@@ -669,7 +669,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 						}
 					}
 					fs.SetStyleProps(nil, sprop, nil)
-					OpenFont(&fs, ctxt)
+					fs.Font = OpenFont(&fs, ctxt)
 				}
 				if cssAgg != nil {
 					FontStyleCSS(&fs, stag, cssAgg, ctxt, nil)
@@ -825,7 +825,7 @@ func (tr *Text) LayoutStdLR(txtSty *gist.Text, fontSty *gist.FontRender, ctxt *u
 	// defer pr.End()
 	//
 	tr.Dir = gist.LRTB
-	OpenFont(fontSty, ctxt)
+	fontSty.Font = OpenFont(fontSty, ctxt)
 	fht := fontSty.Face.Metrics.Height
 	dsc := mat32.FromFixed(fontSty.Face.Face.Metrics().Descent)
 	lspc := fht * txtSty.EffLineHeight()

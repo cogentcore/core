@@ -3448,7 +3448,7 @@ func (tv *TextView) VisSizes() {
 	}
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	girl.OpenFont(sty.FontRender(), &sty.UnContext)
+	sty.Font = girl.OpenFont(sty.FontRender(), &sty.UnContext)
 	tv.FontHeight = sty.Font.Face.Metrics.Height
 	tv.LineHeight = tv.FontHeight * sty.Text.EffLineHeight()
 	sz := tv.VpBBox.Size()

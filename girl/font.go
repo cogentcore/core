@@ -21,11 +21,12 @@ import (
 // OpenFont loads the font specified by the font style from the font library.
 // This is the primary method to use for loading fonts, as it uses a robust
 // fallback method to finding an appropriate font, and falls back on the
-// builtin Go font as a last resort.  The Face field will have the resulting
-// font.  The font size is always rounded to nearest integer, to produce
+// builtin Go font as a last resort.  It returns the font
+// style object with Face set to the resulting font.
+// The font size is always rounded to nearest integer, to produce
 // better-looking results (presumably).  The current metrics and given
 // unit.Context are updated based on the properties of the font.
-func OpenFont(fs *gist.FontRender, ctxt *units.Context) {
+func OpenFont(fs *gist.FontRender, ctxt *units.Context) gist.Font {
 	facenm := FontFaceName(fs.Family, fs.Stretch, fs.Weight, fs.Style)
 	if fs.Size.Dots == 0 {
 		fs.Size.ToDots(ctxt)
@@ -47,6 +48,7 @@ func OpenFont(fs *gist.FontRender, ctxt *units.Context) {
 	}
 	fs.Rem = ctxt.ToDots(12, units.UnitPt)
 	fs.SetUnitContext(ctxt)
+	return fs.Font
 }
 
 // OpenFontFace loads a font file at given path, with given raw size in
