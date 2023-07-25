@@ -7,6 +7,7 @@ package girl
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"html"
 	"image"
 	"io"
@@ -262,6 +263,7 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 	case "ins":
 		fallthrough
 	case "u":
+		fmt.Println("set deco underline")
 		fs.SetDeco(gist.DecoUnderline)
 		did = true
 	case "s", "del", "strike":
@@ -388,6 +390,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 			if !SetHTMLSimpleTag(nm, &fs, ctxt, cssAgg) {
 				switch nm {
 				case "a":
+					fmt.Println("link")
 					fs.Color.SetColor(gist.ThePrefs.PrefColor("link"))
 					fs.SetDeco(gist.DecoUnderline)
 					curLinkIdx = len(tr.Links)

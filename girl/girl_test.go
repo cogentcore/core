@@ -155,7 +155,7 @@ func TestRender(t *testing.T) {
 	// Text rendering
 	tsty := &gist.Text{}
 	tsty.Defaults()
-	fsty := gist.NewFontRender()
+	fsty := &gist.FontRender{}
 	fsty.Defaults()
 
 	// experiment!

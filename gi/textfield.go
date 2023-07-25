@@ -1452,12 +1452,13 @@ func (tf *TextField) Style2D() {
 
 func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Style
-	girl.OpenFont(st.FontRender(), &st.UnContext)
+	fr := st.FontRender()
+	girl.OpenFont(&fr, &st.UnContext)
 	txt := tf.EditTxt
 	if tf.NoEcho {
 		txt = concealDots(len(tf.EditTxt))
 	}
-	tf.RenderAll.SetRunes(txt, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
+	tf.RenderAll.SetRunes(txt, &fr, &st.UnContext, &st.Text, true, 0, 0)
 	return true
 }
 
@@ -1523,21 +1524,22 @@ func (tf *TextField) RenderTextField() {
 		tf.Style = tf.StateStyles[TextFieldActive]
 	}
 	st = &tf.Style // update
-	girl.OpenFont(st.FontRender(), &st.UnContext)
+	fr := tf.Style.FontRender()
+	girl.OpenFont(&fr, &st.UnContext)
 	tf.RenderStdBox(st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect()
 	pos := tf.LayState.Alloc.Pos.Add(st.BoxSpace().Pos())
 	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 		st.Color = st.Color.Highlight(50)
-		tf.RenderVis.SetString(tf.Placeholder, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
+		tf.RenderVis.SetString(tf.Placeholder, &fr, &st.UnContext, &st.Text, true, 0, 0)
 		tf.RenderVis.RenderTopPos(rs, pos)
 
 	} else {
 		if tf.NoEcho {
 			cur = concealDots(len(cur))
 		}
-		tf.RenderVis.SetRunes(cur, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
+		tf.RenderVis.SetRunes(cur, &fr, &st.UnContext, &st.Text, true, 0, 0)
 		tf.RenderVis.RenderTopPos(rs, pos)
 	}
 }

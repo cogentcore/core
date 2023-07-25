@@ -136,7 +136,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 	if len(str) == 0 {
 		return
 	}
-	ucfont := gist.NewFontRender()
+	ucfont := &gist.FontRender{}
 	if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
 		ucfont.Family = "Arial Unicode"
 	} else {
@@ -189,7 +189,7 @@ func (sr *Span) SetRenders(sty *gist.FontRender, ctxt *units.Context, noBG bool,
 		bgc = nil
 	}
 
-	ucfont := gist.NewFontRender()
+	ucfont := &gist.FontRender{}
 	ucfont.Family = "Arial Unicode"
 	ucfont.Size = sty.Size
 	OpenFont(ucfont, ctxt)

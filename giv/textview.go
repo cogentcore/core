@@ -559,8 +559,8 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	tv.Buf.MarkupMu.RLock()
 	tv.HasLinks = false
 	for ln := 0; ln < nln; ln++ {
-		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
+		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
+		tv.Renders[ln].LayoutStdLR(&sty.Text, &fst, &sty.UnContext, sz)
 		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
 			tv.HasLinks = true
 		}
@@ -651,8 +651,8 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 	tv.Buf.MarkupMu.RLock()
 	for ln := st; ln <= ed; ln++ {
 		curspans := len(tv.Renders[ln].Spans)
-		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, tv.RenderSz)
+		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
+		tv.Renders[ln].LayoutStdLR(&sty.Text, &fst, &sty.UnContext, tv.RenderSz)
 		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
 			tv.HasLinks = true
 		}
@@ -3448,7 +3448,8 @@ func (tv *TextView) VisSizes() {
 	}
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	girl.OpenFont(sty.FontRender(), &sty.UnContext)
+	fr := sty.FontRender()
+	girl.OpenFont(&fr, &sty.UnContext)
 	tv.FontHeight = sty.Font.Face.Metrics.Height
 	tv.LineHeight = tv.FontHeight * sty.Text.EffLineHeight()
 	sz := tv.VpBBox.Size()
@@ -3649,7 +3650,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	lfmt := fmt.Sprintf("%d", tv.LineNoDigs)
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
-	tv.LineNoRender.SetString(lnstr, fst, &sty.UnContext, &sty.Text, true, 0, 0)
+	tv.LineNoRender.SetString(lnstr, &fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := mat32.Vec2{}
 	lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - +mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)

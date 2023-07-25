@@ -114,12 +114,13 @@ func (txt *Text2D) StyleText(sc *Scene) {
 
 func (txt *Text2D) RenderText(sc *Scene) {
 	txt.StyleText(sc)
-	txt.TxtRender.SetHTML(txt.Text, txt.Sty.FontRender(), &txt.Sty.Text, &txt.Sty.UnContext, txt.CSSAgg)
+	fr := txt.Sty.FontRender()
+	txt.TxtRender.SetHTML(txt.Text, &fr, &txt.Sty.Text, &txt.Sty.UnContext, txt.CSSAgg)
 	sz := txt.TxtRender.Size
-	txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
+	txt.TxtRender.LayoutStdLR(&txt.Sty.Text, &fr, &txt.Sty.UnContext, sz)
 	if txt.TxtRender.Size != sz {
 		sz = txt.TxtRender.Size
-		txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
+		txt.TxtRender.LayoutStdLR(&txt.Sty.Text, &fr, &txt.Sty.UnContext, sz)
 		if txt.TxtRender.Size != sz {
 			sz = txt.TxtRender.Size
 		}
