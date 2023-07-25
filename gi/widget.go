@@ -456,7 +456,7 @@ func (wb *WidgetBase) Style2D() {
 	if hasTempl && saveTempl {
 		wb.Style.SaveTemplate()
 	}
-	wb.LayState.SetFromStyle(&wb.Style.Layout) // also does reset
+	wb.LayState.SetFromStyle(&wb.Style) // also does reset
 }
 
 // SetUnitContext sets the unit context based on size of viewport and parent
@@ -479,7 +479,7 @@ func SetUnitContext(st *gist.Style, vp *Viewport2D, el mat32.Vec2) {
 func (wb *WidgetBase) InitLayout2D() bool {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
-	wb.LayState.SetFromStyle(&wb.Style.Layout)
+	wb.LayState.SetFromStyle(&wb.Style)
 	return false
 }
 
@@ -908,8 +908,8 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
 
-	pos := wb.LayState.Alloc.Pos.Add(st.Layout.Margin.Dots().Pos())
-	sz := wb.LayState.Alloc.Size.Sub(st.Layout.Margin.Dots().Size())
+	pos := wb.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
+	sz := wb.LayState.Alloc.Size.Sub(st.Margin.Dots().Size())
 	rad := st.Border.Radius.Dots()
 
 	// first do any shadow
@@ -947,11 +947,11 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 // set our LayState.Alloc.Size from constraints
 func (wb *WidgetBase) Size2DFromWH(w, h float32) {
 	st := &wb.Style
-	if st.Layout.Width.Dots > 0 {
-		w = mat32.Max(st.Layout.Width.Dots, w)
+	if st.Width.Dots > 0 {
+		w = mat32.Max(st.Width.Dots, w)
 	}
-	if st.Layout.Height.Dots > 0 {
-		h = mat32.Max(st.Layout.Height.Dots, h)
+	if st.Height.Dots > 0 {
+		h = mat32.Max(st.Height.Dots, h)
 	}
 	spcsz := st.BoxSpace().Size()
 	w += spcsz.X

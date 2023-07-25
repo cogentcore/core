@@ -54,8 +54,8 @@ func (bb *ButtonBox) Disconnect() {
 // 	s.Border.Style.Set(gist.BorderNone)
 // 	s.Border.Radius.Set(units.Px(2))
 // 	s.Border.Color.Set()
-// 	s.Layout.Padding.Set(units.Px(2))
-// 	s.Layout.Margin.Set(units.Px(2))
+// 	s.Padding.Set(units.Px(2))
+// 	s.Margin.Set(units.Px(2))
 // 	s.Text.Align = gist.AlignCenter
 // 	s.Font.BgColor.SetColor(TheColorScheme.Secondary)
 // 	s.Font.Color.SetColor(TheColorScheme.Secondary.ContrastColor())
@@ -245,7 +245,7 @@ func (bb *ButtonBox) Init2D() {
 func (bb *ButtonBox) Style2D() {
 	bb.StyMu.Lock()
 	bb.Style2DWidget()
-	bb.LayState.SetFromStyle(&bb.Style.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.Style) // also does reset
 	bb.StyMu.Unlock()
 	bb.ConfigParts()
 }

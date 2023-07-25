@@ -80,7 +80,7 @@ func mainrun() {
 
 	// mfr.ClassStyleFuncs = map[string]func(w *gi.WidgetBase){}
 	// mfr.ClassStyleFuncs["big"] = func(w *gi.WidgetBase) {
-	// 	w.Style.Layout.Width = units.Pct(50)
+	// 	w.Style.Width = units.Pct(50)
 	// }
 
 	// mfr.ElementStyleFuncs = map[string]func(w *gi.WidgetBase){}
@@ -92,7 +92,7 @@ func mainrun() {
 	// 	w.Style.Font.BgColor.SetColor(colors.Maroon.Darker(40))
 	// }
 	// mfr.ElementStyleFuncs["textfield"] = func(w *gi.WidgetBase) {
-	// 	w.Style.Layout.Padding.Set(units.Px(10), units.Px(5))
+	// 	w.Style.Padding.Set(units.Px(10), units.Px(5))
 	// 	w.Style.Border.Radius.Set(units.Px(5))
 	// }
 
@@ -182,8 +182,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	// 		button2.Style.Border.Radius.Set(units.Px(10))
 	// 		button2.Style.Font.BgColor.SetColor(gist.MustColorFromName("blue"))
 	// 		button2.Style.Font.Color.SetColor(gist.MustColorFromName("white"))
-	// 		button2.Style.Layout.Padding.Set(units.Px(10), units.Px(5))
-	// 		button2.Style.Layout.Height = units.Px(50)
+	// 		button2.Style.Padding.Set(units.Px(10), units.Px(5))
+	// 		button2.Style.Height = units.Px(50)
 	// 	}
 	// }
 	// button2.SetProp("border-color", gist.NewSides[gist.Color](gist.MustColorFromName("green"), gist.MustColorFromName("red"), gist.MustColorFromName("blue"), gist.MustColorFromName("orange")))

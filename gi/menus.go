@@ -387,7 +387,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
 	frame.Size2DTree(0)                                    // collect sizes
 	pvp.Win = nil
-	scextra := frame.Style.Layout.ScrollBarWidth.Dots
+	scextra := frame.Style.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
 	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
 	maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
@@ -584,8 +584,8 @@ func (mb *MenuButton) CopyFieldsFrom(frm any) {
 
 // 	s.Border.Style.Set(gist.BorderNone)
 // 	s.Border.Width.Set()
-// 	s.Layout.Margin.Set(units.Px(4))
-// 	s.Layout.Padding.Set(units.Px(4))
+// 	s.Margin.Set(units.Px(4))
+// 	s.Padding.Set(units.Px(4))
 // 	s.Text.Align = gist.AlignCenter
 // 	s.Font.BgColor.SetColor(cs.Background.Highlight(10))
 // 	s.Font.Color.SetColor(cs.Font)
@@ -694,10 +694,10 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 // 	cs := CurrentColorScheme()
 // 	s := &sp.Style
 
-// 	s.Layout.Padding.Set()
-// 	s.Layout.Margin.Set()
-// 	s.Layout.AlignV = gist.AlignCenter
-// 	s.Layout.AlignH = gist.AlignCenter
+// 	s.Padding.Set()
+// 	s.Margin.Set()
+// 	s.AlignV = gist.AlignCenter
+// 	s.AlignH = gist.AlignCenter
 // 	s.Border.Color.Set(cs.Background.Highlight(30))
 // 	s.Border.Width.Set(units.Px(2))
 // 	s.Font.BgColor.SetColor(cs.Background.Highlight(10))
@@ -732,8 +732,8 @@ func (sp *Separator) RenderSeparator() {
 	rs, pc, st := sp.RenderLock()
 	defer sp.RenderUnlock(rs)
 
-	pos := sp.LayState.Alloc.Pos.Add(st.Layout.Margin.Dots().Pos())
-	sz := sp.LayState.Alloc.Size.Sub(st.Layout.Margin.Dots().Size())
+	pos := sp.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
+	sz := sp.LayState.Alloc.Size.Sub(st.Margin.Dots().Size())
 
 	if !st.Font.BgColor.IsNil() {
 		pc.FillBox(rs, pos, sz, &st.Font.BgColor)

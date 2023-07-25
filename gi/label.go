@@ -105,9 +105,9 @@ func (lb *Label) Disconnect() {
 // 	s := &lb.Style
 
 // 	s.Text.WhiteSpace = gist.WhiteSpacePre
-// 	s.Layout.Padding.Set(units.Px(2))
-// 	s.Layout.Margin.Set(units.Px(2))
-// 	s.Layout.AlignV = gist.AlignTop
+// 	s.Padding.Set(units.Px(2))
+// 	s.Margin.Set(units.Px(2))
+// 	s.AlignV = gist.AlignTop
 // 	s.Font.Color.SetColor(cs.Font)
 // 	s.Font.BgColor.SetColor(color.Transparent)
 
@@ -414,7 +414,7 @@ func (lb *Label) LayoutLabel() {
 func (lb *Label) Style2D() {
 	lb.StyleLabel()
 	lb.StyMu.Lock()
-	lb.LayState.SetFromStyle(&lb.Style.Layout) // also does reset
+	lb.LayState.SetFromStyle(&lb.Style) // also does reset
 	lb.StyMu.Unlock()
 	lb.LayoutLabel()
 }
@@ -442,7 +442,7 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	lb.Render.LayoutStdLR(&lb.Style.Text, &lb.Style.Font, &lb.Style.UnContext, sz)
 	if lb.Style.Text.HasWordWrap() {
 		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
-			lb.LayState.SetFromStyle(&lb.Style.Layout)
+			lb.LayState.SetFromStyle(&lb.Style)
 			lb.Size2DFromWH(lb.Render.Size.X, lb.Render.Size.Y)
 			return true // needs a redo!
 		}

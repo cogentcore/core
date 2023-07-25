@@ -1383,8 +1383,8 @@ func (tf *TextField) ConfigStyles() {
 	})
 	tf.Parts.AddChildStyleFunc("clear", 1, StyleFuncParts(tf), func(clr *WidgetBase) {
 		clr.Style.Font.BgColor.SetColor(color.Transparent)
-		clr.Style.Layout.Width.SetEx(0.5)
-		clr.Style.Layout.Height.SetEx(0.5)
+		clr.Style.Width.SetEx(0.5)
+		clr.Style.Height.SetEx(0.5)
 	})
 }
 
@@ -1446,7 +1446,7 @@ func (tf *TextField) StyleTextField() {
 func (tf *TextField) Style2D() {
 	tf.StyleTextField()
 	tf.StyMu.Lock()
-	tf.LayState.SetFromStyle(&tf.Style.Layout) // also does reset
+	tf.LayState.SetFromStyle(&tf.Style) // also does reset
 	tf.StyMu.Unlock()
 }
 

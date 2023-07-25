@@ -59,9 +59,9 @@ func (s *Style) StyleFromProps(par *Style, props ki.Props, ctxt Context) {
 		}
 		if sfunc, ok := StyleLayoutFuncs[key]; ok {
 			if par != nil {
-				sfunc(&s.Layout, key, val, &par.Layout, ctxt)
+				sfunc(s, key, val, &par, ctxt)
 			} else {
-				sfunc(&s.Layout, key, val, nil, ctxt)
+				sfunc(s, key, val, nil, ctxt)
 			}
 			continue
 		}
@@ -185,154 +185,154 @@ var StyleStyleFuncs = map[string]StyleFunc{
 // StyleLayoutFuncs are functions for styling the Layout object
 var StyleLayoutFuncs = map[string]StyleFunc{
 	"z-index": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.ZIndex = par.(*Layout).ZIndex
+				s.ZIndex = par.(*Style).ZIndex
 			} else if init {
-				ly.ZIndex = 0
+				s.ZIndex = 0
 			}
 			return
 		}
 		if iv, ok := kit.ToInt(val); ok {
-			ly.ZIndex = int(iv)
+			s.ZIndex = int(iv)
 		}
 	},
 	"horizontal-align": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.AlignH = par.(*Layout).AlignH
+				s.AlignH = par.(*Style).AlignH
 			} else if init {
-				ly.AlignH = AlignLeft
+				s.AlignH = AlignLeft
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			kit.Enums.SetAnyEnumIfaceFromString(&ly.AlignH, vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&s.AlignH, vt)
 		case Align:
-			ly.AlignH = vt
+			s.AlignH = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				ly.AlignH = Align(iv)
+				s.AlignH = Align(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
 	"vertical-align": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.AlignV = par.(*Layout).AlignV
+				s.AlignV = par.(*Style).AlignV
 			} else if init {
-				ly.AlignV = AlignMiddle
+				s.AlignV = AlignMiddle
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			kit.Enums.SetAnyEnumIfaceFromString(&ly.AlignV, vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&s.AlignV, vt)
 		case Align:
-			ly.AlignV = vt
+			s.AlignV = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				ly.AlignV = Align(iv)
+				s.AlignV = Align(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
 	"x": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.PosX = par.(*Layout).PosX
+				s.PosX = par.(*Style).PosX
 			} else if init {
-				ly.PosX.Val = 0
+				s.PosX.Val = 0
 			}
 			return
 		}
-		ly.PosX.SetIFace(val, key)
+		s.PosX.SetIFace(val, key)
 	},
 	"y": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.PosY = par.(*Layout).PosY
+				s.PosY = par.(*Style).PosY
 			} else if init {
-				ly.PosY.Val = 0
+				s.PosY.Val = 0
 			}
 			return
 		}
-		ly.PosY.SetIFace(val, key)
+		s.PosY.SetIFace(val, key)
 	},
 	"width": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.Width = par.(*Layout).Width
+				s.Width = par.(*Style).Width
 			} else if init {
-				ly.Width.Val = 0
+				s.Width.Val = 0
 			}
 			return
 		}
-		ly.Width.SetIFace(val, key)
+		s.Width.SetIFace(val, key)
 	},
 	"height": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.Height = par.(*Layout).Height
+				s.Height = par.(*Style).Height
 			} else if init {
-				ly.Height.Val = 0
+				s.Height.Val = 0
 			}
 			return
 		}
-		ly.Height.SetIFace(val, key)
+		s.Height.SetIFace(val, key)
 	},
 	"max-width": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.MaxWidth = par.(*Layout).MaxWidth
+				s.MaxWidth = par.(*Style).MaxWidth
 			} else if init {
-				ly.MaxWidth.Val = 0
+				s.MaxWidth.Val = 0
 			}
 			return
 		}
-		ly.MaxWidth.SetIFace(val, key)
+		s.MaxWidth.SetIFace(val, key)
 	},
 	"max-height": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.MaxHeight = par.(*Layout).MaxHeight
+				s.MaxHeight = par.(*Style).MaxHeight
 			} else if init {
-				ly.MaxHeight.Val = 0
+				s.MaxHeight.Val = 0
 			}
 			return
 		}
-		ly.MaxHeight.SetIFace(val, key)
+		s.MaxHeight.SetIFace(val, key)
 	},
 	"min-width": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.MinWidth = par.(*Layout).MinWidth
+				s.MinWidth = par.(*Style).MinWidth
 			} else if init {
-				ly.MinWidth.Set(2, units.UnitPx)
+				s.MinWidth.Set(2, units.UnitPx)
 			}
 			return
 		}
-		ly.MinWidth.SetIFace(val, key)
+		s.MinWidth.SetIFace(val, key)
 	},
 	"min-height": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		ly := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.MinHeight = par.(*Layout).MinHeight
+				ly.MinHeight = par.(*Style).MinHeight
 			} else if init {
 				ly.MinHeight.Set(2, units.UnitPx)
 			}
@@ -341,133 +341,133 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		ly.MinHeight.SetIFace(val, key)
 	},
 	"margin": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.Margin = par.(*Layout).Margin
+				s.Margin = par.(*Style).Margin
 			} else if init {
-				ly.Margin.Set()
+				s.Margin.Set()
 			}
 			return
 		}
-		ly.Margin.SetAny(val)
+		s.Margin.SetAny(val)
 	},
 	"padding": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.Padding = par.(*Layout).Padding
+				s.Padding = par.(*Style).Padding
 			} else if init {
-				ly.Padding.Set()
+				s.Padding.Set()
 			}
 			return
 		}
-		ly.Padding.SetAny(val)
+		s.Padding.SetAny(val)
 	},
 	"overflow": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.Overflow = par.(*Layout).Overflow
+				s.Overflow = par.(*Style).Overflow
 			} else if init {
-				ly.Overflow = OverflowAuto
+				s.Overflow = OverflowAuto
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			kit.Enums.SetAnyEnumIfaceFromString(&ly.Overflow, vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&s.Overflow, vt)
 		case Overflow:
-			ly.Overflow = vt
+			s.Overflow = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				ly.Overflow = Overflow(iv)
+				s.Overflow = Overflow(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
 	"columns": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.Columns = par.(*Layout).Columns
+				s.Columns = par.(*Style).Columns
 			} else if init {
-				ly.Columns = 0
+				s.Columns = 0
 			}
 			return
 		}
 		if iv, ok := kit.ToInt(val); ok {
-			ly.Columns = int(iv)
+			s.Columns = int(iv)
 		}
 	},
 	"row": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.Row = par.(*Layout).Row
+				s.Row = par.(*Style).Row
 			} else if init {
-				ly.Row = 0
+				s.Row = 0
 			}
 			return
 		}
 		if iv, ok := kit.ToInt(val); ok {
-			ly.Row = int(iv)
+			s.Row = int(iv)
 		}
 	},
 	"col": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.Col = par.(*Layout).Col
+				s.Col = par.(*Style).Col
 			} else if init {
-				ly.Col = 0
+				s.Col = 0
 			}
 			return
 		}
 		if iv, ok := kit.ToInt(val); ok {
-			ly.Col = int(iv)
+			s.Col = int(iv)
 		}
 	},
 	"row-span": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.RowSpan = par.(*Layout).RowSpan
+				s.RowSpan = par.(*Style).RowSpan
 			} else if init {
-				ly.RowSpan = 0
+				s.RowSpan = 0
 			}
 			return
 		}
 		if iv, ok := kit.ToInt(val); ok {
-			ly.RowSpan = int(iv)
+			s.RowSpan = int(iv)
 		}
 	},
 	"col-span": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.ColSpan = par.(*Layout).ColSpan
+				s.ColSpan = par.(*Style).ColSpan
 			} else if init {
-				ly.ColSpan = 0
+				s.ColSpan = 0
 			}
 			return
 		}
 		if iv, ok := kit.ToInt(val); ok {
-			ly.ColSpan = int(iv)
+			s.ColSpan = int(iv)
 		}
 	},
 	"scrollbar-width": func(obj any, key string, val any, par any, ctxt Context) {
-		ly := obj.(*Layout)
+		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				ly.ScrollBarWidth = par.(*Layout).ScrollBarWidth
+				s.ScrollBarWidth = par.(*Style).ScrollBarWidth
 			} else if init {
-				ly.ScrollBarWidth.Val = 0
+				s.ScrollBarWidth.Val = 0
 			}
 			return
 		}
-		ly.ScrollBarWidth.SetIFace(val, key)
+		s.ScrollBarWidth.SetIFace(val, key)
 	},
 }
 

@@ -189,7 +189,7 @@ func (sv *SVG) StyleSVG() {
 func (sv *SVG) Style2D() {
 	sv.StyleSVG()
 	sv.StyMu.Lock()
-	sv.LayState.SetFromStyle(&sv.Style.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.Style) // also does reset
 	sv.StyMu.Unlock()
 	if nv, err := sv.PropTry("norm"); err == nil {
 		sv.Norm, _ = kit.ToBool(nv)

@@ -49,8 +49,8 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 
 // 	s.Border.Style.Set(gist.BorderNone)
 // 	s.Border.Radius.Set()
-// 	s.Layout.Padding.Set(units.Px(2))
-// 	s.Layout.Margin.Set(units.Px(2))
+// 	s.Padding.Set(units.Px(2))
+// 	s.Margin.Set(units.Px(2))
 // 	s.Font.Color.SetColor(cs.Font)
 // 	s.Font.BgColor.SetColor(cs.Background)
 // }
@@ -93,8 +93,8 @@ func (fr *Frame) FrameStdRender() {
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 
 	// TODO: SideTODO: not sure about this
-	pos = pos.Add(st.Layout.Margin.Dots().Pos()).Sub(st.Border.Width.Dots().Pos().MulScalar(0.5))
-	sz = sz.Sub(st.Layout.Margin.Dots().Size()).Add(st.Border.Width.Dots().Size().MulScalar(0.5))
+	pos = pos.Add(st.Margin.Dots().Pos()).Sub(st.Border.Width.Dots().Pos().MulScalar(0.5))
+	sz = sz.Sub(st.Margin.Dots().Size()).Add(st.Border.Width.Dots().Size().MulScalar(0.5))
 
 	// then any shadow -- todo: optimize!
 	if st.BoxShadow.HasShadow() {

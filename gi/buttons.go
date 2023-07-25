@@ -702,7 +702,7 @@ func (bb *ButtonBase) Style2D() {
 	bb.StyleButton()
 
 	bb.StyMu.Lock()
-	bb.LayState.SetFromStyle(&bb.Style.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.Style) // also does reset
 	bb.StyMu.Unlock()
 	bb.This().(ButtonWidget).ConfigParts()
 	if bb.Menu != nil {
@@ -800,10 +800,10 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 // 	s.Border.Width.Set()
 // 	s.Border.Color.Set()
 // 	s.Border.Radius.Set(units.Px(4))
-// 	s.Layout.Padding.Set(units.Px(4))
-// 	s.Layout.Margin.Set(units.Px(2))
-// 	s.Layout.MinWidth.SetEm(1)
-// 	s.Layout.MinHeight.SetEm(1)
+// 	s.Padding.Set(units.Px(4))
+// 	s.Margin.Set(units.Px(2))
+// 	s.MinWidth.SetEm(1)
+// 	s.MinHeight.SetEm(1)
 // 	s.Text.Align = gist.AlignCenter
 
 // 	switch bt.Type {

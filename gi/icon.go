@@ -62,8 +62,8 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 
 func (ic *Icon) ConfigStyles() {
 	ic.AddStyleFunc(StyleFuncDefault, func() {
-		ic.Style.Layout.Width.SetEm(1.5)
-		ic.Style.Layout.Height.SetEm(1.5)
+		ic.Style.Width.SetEm(1.5)
+		ic.Style.Height.SetEm(1.5)
 		ic.Style.Font.BgColor.SetColor(color.Transparent)
 	})
 }
@@ -131,7 +131,7 @@ func (ic *Icon) Style2D() {
 	if hasTempl && saveTempl {
 		ic.Style.SaveTemplate()
 	}
-	ic.LayState.SetFromStyle(&ic.Style.Layout) // also does reset
+	ic.LayState.SetFromStyle(&ic.Style) // also does reset
 	sic := ic.SVGIcon()
 	if sic != nil {
 		sic.Nm = ic.Nm

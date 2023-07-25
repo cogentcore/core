@@ -64,7 +64,7 @@ type LayoutState struct {
 func (ld *LayoutState) Defaults() {
 }
 
-func (ld *LayoutState) SetFromStyle(ls *gist.Layout) {
+func (ld *LayoutState) SetFromStyle(ls *gist.Style) {
 	ld.Reset()
 	// these are layout hints:
 	ld.Size.Need = ls.MinSizeDots()
@@ -280,8 +280,8 @@ func (ly *Layout) ManageOverflow() {
 		ly.HasScroll[d] = false
 	}
 
-	if ly.Style.Layout.Overflow != gist.OverflowHidden {
-		sbw := ly.Style.Layout.ScrollBarWidth.Dots
+	if ly.Style.Overflow != gist.OverflowHidden {
+		sbw := ly.Style.ScrollBarWidth.Dots
 		for d := mat32.X; d <= mat32.Y; d++ {
 			odim := mat32.OtherDim(d)
 			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
@@ -323,10 +323,10 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 	avail := ly.AvailSize().Sub(spc.Size())
 	sc := ly.Scrolls[d]
 	if d == mat32.X {
-		sc.SetFixedHeight(ly.Style.Layout.ScrollBarWidth)
+		sc.SetFixedHeight(ly.Style.ScrollBarWidth)
 		sc.SetFixedWidth(units.NewValue(avail.Dim(d), units.UnitDot))
 	} else {
-		sc.SetFixedWidth(ly.Style.Layout.ScrollBarWidth)
+		sc.SetFixedWidth(ly.Style.ScrollBarWidth)
 		sc.SetFixedHeight(units.NewValue(avail.Dim(d), units.UnitDot))
 	}
 	sc.Style2D()
@@ -375,7 +375,7 @@ func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 
 // LayoutScrolls arranges scrollbars
 func (ly *Layout) LayoutScrolls() {
-	sbw := ly.Style.Layout.ScrollBarWidth.Dots
+	sbw := ly.Style.ScrollBarWidth.Dots
 
 	spc := ly.BoxSpace()
 	avail := ly.AvailSize()
@@ -837,7 +837,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	cur := em.CurFocus()
 	nxti := idx + 1
 	if ly.Lay == LayoutGrid && updn {
-		nxti = idx + ly.Style.Layout.Columns
+		nxti = idx + ly.Style.Columns
 	}
 	did := false
 	if nxti < sz {
@@ -866,7 +866,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	cur := em.CurFocus()
 	nxti := idx - 1
 	if ly.Lay == LayoutGrid && updn {
-		nxti = idx - ly.Style.Layout.Columns
+		nxti = idx - ly.Style.Columns
 	}
 	did := false
 	if nxti >= 0 {
@@ -1155,7 +1155,7 @@ func (ly *Layout) StyleLayout() {
 func (ly *Layout) Style2D() {
 	ly.StyleLayout()
 	ly.StyMu.Lock()
-	ly.LayState.SetFromStyle(&ly.Style.Layout) // also does reset
+	ly.LayState.SetFromStyle(&ly.Style) // also does reset
 	ly.StyMu.Unlock()
 }
 
@@ -1309,7 +1309,7 @@ func (st *Stretch) Style2D() {
 	if hasTempl && saveTempl {
 		st.Style.SaveTemplate()
 	}
-	st.LayState.SetFromStyle(&st.Style.Layout) // also does reset
+	st.LayState.SetFromStyle(&st.Style) // also does reset
 }
 
 func (st *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -1352,7 +1352,7 @@ func (sp *Space) Style2D() {
 	if hasTempl && saveTempl {
 		sp.Style.SaveTemplate()
 	}
-	sp.LayState.SetFromStyle(&sp.Style.Layout) // also does reset
+	sp.LayState.SetFromStyle(&sp.Style) // also does reset
 }
 
 func (sp *Space) Layout2D(parBBox image.Rectangle, iter int) bool {

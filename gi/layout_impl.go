@@ -99,7 +99,7 @@ func GatherSizes(ly *Layout) {
 	prefSizing := false
 	mvp := ly.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(VpFlagPrefSizing)) {
-		prefSizing = ly.Style.Layout.Overflow == gist.OverflowScroll // special case
+		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
 	}
 
 	for d := mat32.X; d <= mat32.Y; d++ {
@@ -259,7 +259,7 @@ func GatherSizesGrid(ly *Layout) {
 		return
 	}
 
-	cols := ly.Style.Layout.Columns
+	cols := ly.Style.Columns
 	rows := 0
 
 	sz := len(ly.Kids)
@@ -273,13 +273,13 @@ func GatherSizesGrid(ly *Layout) {
 			continue
 		}
 		ni.StyMu.RLock()
-		lst := ni.Style.Layout
+		st := &ni.Style
 		ni.StyMu.RUnlock()
-		if lst.Col > 0 {
-			cols = ints.MaxInt(cols, lst.Col+lst.ColSpan)
+		if st.Col > 0 {
+			cols = ints.MaxInt(cols, st.Col+st.ColSpan)
 		}
-		if lst.Row > 0 {
-			rows = ints.MaxInt(rows, lst.Row+lst.RowSpan)
+		if st.Row > 0 {
+			rows = ints.MaxInt(rows, st.Row+st.RowSpan)
 		}
 	}
 
@@ -326,13 +326,13 @@ func GatherSizesGrid(ly *Layout) {
 		}
 		ni.LayState.UpdateSizes()
 		ni.StyMu.RLock()
-		lst := ni.Style.Layout
+		st := &ni.Style
 		ni.StyMu.RUnlock()
-		if lst.Col > 0 {
-			col = lst.Col
+		if st.Col > 0 {
+			col = st.Col
 		}
-		if lst.Row > 0 {
-			row = lst.Row
+		if st.Row > 0 {
+			row = st.Row
 		}
 		// r   0   1   col X = max(ea in col) (Y = not used)
 		//   +--+---+
@@ -379,12 +379,12 @@ func GatherSizesGrid(ly *Layout) {
 	prefSizing := false
 	mvp := ly.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(VpFlagPrefSizing)) {
-		prefSizing = ly.Style.Layout.Overflow == gist.OverflowScroll // special case
+		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
 	}
 
 	// if there aren't existing prefs, we need to compute size
 	if prefSizing || ly.LayState.Size.Pref.X == 0 || ly.LayState.Size.Pref.Y == 0 {
-		sbw := ly.Style.Layout.ScrollBarWidth.Dots
+		sbw := ly.Style.ScrollBarWidth.Dots
 		maxRow := len(ly.GridData[Row])
 		maxCol := len(ly.GridData[Col])
 		if prefSizing {
@@ -549,7 +549,7 @@ func LayoutSharedDim(ly *Layout, dim mat32.Dims) {
 			continue
 		}
 		ni.StyMu.RLock()
-		al := ni.Style.Layout.AlignDim(dim)
+		al := ni.Style.AlignDim(dim)
 		ni.StyMu.RUnlock()
 		pref := ni.LayState.Size.Pref.Dim(dim)
 		need := ni.LayState.Size.Need.Dim(dim)
@@ -569,7 +569,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 	}
 
 	elspc := float32(sz-1) * ly.Spacing.Dots
-	al := ly.Style.Layout.AlignDim(dim)
+	al := ly.Style.AlignDim(dim)
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
@@ -739,7 +739,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 				continue
 			}
 			ni.StyMu.RLock()
-			al := ni.Style.Layout.AlignDim(odim)
+			al := ni.Style.AlignDim(odim)
 			ni.StyMu.RUnlock()
 			pref := ni.LayState.Size.Pref.Dim(odim)
 			need := ni.LayState.Size.Need.Dim(odim)
@@ -775,7 +775,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 		return
 	}
 	elspc := float32(sz-1) * ly.Spacing.Dots
-	al := ly.Style.Layout.AlignDim(dim)
+	al := ly.Style.AlignDim(dim)
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
@@ -896,20 +896,20 @@ func LayoutGridLay(ly *Layout) {
 		}
 
 		ni.StyMu.RLock()
-		lst := ni.Style.Layout
+		st := &ni.Style
 		ni.StyMu.RUnlock()
-		if lst.Col > 0 {
-			col = lst.Col
+		if st.Col > 0 {
+			col = st.Col
 		}
-		if lst.Row > 0 {
-			row = lst.Row
+		if st.Row > 0 {
+			row = st.Row
 		}
 
 		{ // col, X dim
 			dim := mat32.X
 			gd := ly.GridData[Col][col]
 			avail := gd.AllocSize
-			al := lst.AlignDim(dim)
+			al := st.AlignDim(dim)
 			pref := ni.LayState.Size.Pref.Dim(dim)
 			need := ni.LayState.Size.Need.Dim(dim)
 			max := ni.LayState.Size.Max.Dim(dim)
@@ -922,7 +922,7 @@ func LayoutGridLay(ly *Layout) {
 			dim := mat32.Y
 			gd := ly.GridData[Row][row]
 			avail := gd.AllocSize
-			al := lst.AlignDim(dim)
+			al := st.AlignDim(dim)
 			pref := ni.LayState.Size.Pref.Dim(dim)
 			need := ni.LayState.Size.Need.Dim(dim)
 			max := ni.LayState.Size.Max.Dim(dim)

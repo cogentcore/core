@@ -65,15 +65,15 @@ var CustomConfigStyles func(w *WidgetBase)
 // 	a.Style.Border.Width.Set()
 // 	a.Style.Border.Radius.Set()
 // 	a.Style.Text.Align = gist.AlignCenter
-// 	a.Style.Layout.Padding.Set(units.Px(2 * Prefs.DensityMultiplier()))
-// 	a.Style.Layout.Margin.Set(units.Px(2 * Prefs.DensityMultiplier()))
-// 	a.Style.Layout.MinWidth.SetEx(0.5)
-// 	a.Style.Layout.MinHeight.SetEx(0.5)
+// 	a.Style.Padding.Set(units.Px(2 * Prefs.DensityMultiplier()))
+// 	a.Style.Margin.Set(units.Px(2 * Prefs.DensityMultiplier()))
+// 	a.Style.MinWidth.SetEx(0.5)
+// 	a.Style.MinHeight.SetEx(0.5)
 // }
 
 // func styleIcon(i *Icon, cs ColorScheme) {
-// 	i.Style.Layout.Width.SetEm(1.5)
-// 	i.Style.Layout.Height.SetEm(1.5)
+// 	i.Style.Width.SetEm(1.5)
+// 	i.Style.Height.SetEm(1.5)
 // 	i.Style.Font.BgColor.SetColor(gist.Transparent)
 // 	i.Style.Font.Color.SetColor(colors.White)
 // }
@@ -81,7 +81,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // func styleButton(b *Button, cs ColorScheme) {
 // 	b.Style.Border.Radius.Set(units.Px(5))
 // 	b.Style.Border.Style.Set(gist.BorderNone)
-// 	b.Style.Layout.Padding.Set(units.Px(5 * Prefs.DensityMultiplier()))
+// 	b.Style.Padding.Set(units.Px(5 * Prefs.DensityMultiplier()))
 // 	// fmt.Println(b.State)
 // 	if b.Type == ButtonPrimary {
 // 		c := cs.Primary
@@ -113,10 +113,10 @@ var CustomConfigStyles func(w *WidgetBase)
 // 	}
 // 	if icon, ok := b.Parts.ChildByType(KiT_Icon, ki.NoEmbeds, 0).(*Icon); ok {
 // 		if ok {
-// 			icon.Style.Layout.Width.SetEm(1)
-// 			icon.Style.Layout.Height.SetEm(1)
-// 			icon.Style.Layout.Margin.Set()
-// 			icon.Style.Layout.Padding.Set()
+// 			icon.Style.Width.SetEm(1)
+// 			icon.Style.Height.SetEm(1)
+// 			icon.Style.Margin.Set()
+// 			icon.Style.Padding.Set()
 // 		}
 // 	}
 // }
@@ -147,10 +147,10 @@ var CustomConfigStyles func(w *WidgetBase)
 // 	tf.Style.Border.Width.Set(units.Px(1))
 // 	tf.CursorWidth.SetPx(3)
 // 	tf.Style.Border.Color.Set(cs.Font.Highlight(30))
-// 	tf.Style.Layout.Width.SetEm(20)
-// 	tf.Style.Layout.Height.SetPx(2)
-// 	tf.Style.Layout.Padding.Set(units.Px(4))
-// 	tf.Style.Layout.Margin.Set(units.Px(1))
+// 	tf.Style.Width.SetEm(20)
+// 	tf.Style.Height.SetPx(2)
+// 	tf.Style.Padding.Set(units.Px(4))
+// 	tf.Style.Margin.Set(units.Px(1))
 // 	tf.Style.Text.Align = gist.AlignLeft
 // 	tf.Style.Font.BgColor.SetColor(cs.Background.Highlight(5))
 
@@ -159,13 +159,13 @@ var CustomConfigStyles func(w *WidgetBase)
 // 	clear, ok := tf.Parts.ChildByName("clear", 1).(*Action)
 // 	if ok {
 // 		clear.StyleFunc = func() {
-// 			clear.Style.Layout.Width.SetEx(0.5)
-// 			clear.Style.Layout.Height.SetEx(0.5)
-// 			clear.Style.Layout.MinWidth.SetEx(0.5)
-// 			clear.Style.Layout.MinHeight.SetEx(0.5)
-// 			clear.Style.Layout.Margin.Set()
-// 			clear.Style.Layout.Padding.Set()
-// 			clear.Style.Layout.AlignV = gist.AlignMiddle
+// 			clear.Style.Width.SetEx(0.5)
+// 			clear.Style.Height.SetEx(0.5)
+// 			clear.Style.MinWidth.SetEx(0.5)
+// 			clear.Style.MinHeight.SetEx(0.5)
+// 			clear.Style.Margin.Set()
+// 			clear.Style.Padding.Set()
+// 			clear.Style.AlignV = gist.AlignMiddle
 // 		}
 // 		// fmt.Println("clear", clear)
 

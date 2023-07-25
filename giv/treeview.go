@@ -2144,7 +2144,7 @@ func (tv *TreeView) StyleTreeView() {
 
 func (tv *TreeView) Style2D() {
 	tv.StyleTreeView()
-	tv.LayState.SetFromStyle(&tv.Style.Layout) // also does reset
+	tv.LayState.SetFromStyle(&tv.Style) // also does reset
 }
 
 // TreeView is tricky for alloc because it is both a layout of its children but has to
@@ -2318,8 +2318,8 @@ func (tv *TreeView) Render2D() {
 			// pc.StrokeStyle.Width = st.Border.Width
 			pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 			// tv.RenderStdBox()
-			pos := tv.LayState.Alloc.Pos.Add(st.Layout.Margin.Dots().Pos())
-			sz := tv.WidgetSize.Sub(st.Layout.Margin.Dots().Size())
+			pos := tv.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
+			sz := tv.WidgetSize.Sub(st.Margin.Dots().Size())
 			tv.RenderBoxImpl(pos, sz, st.Border)
 			tv.RenderUnlock(rs)
 			tv.Render2DParts()

@@ -53,8 +53,8 @@ var MenuBarProps = ki.Props{
 // func (mb *MenuBar) DefaultStyle() {
 // 	s := &mb.Style
 
-// 	s.Layout.Padding.Set(units.Px(2))
-// 	s.Layout.Margin.Set()
+// 	s.Padding.Set(units.Px(2))
+// 	s.Margin.Set()
 // 	mb.Spacing.SetPx(4)
 // 	s.Font.Color.SetColor(TheColorScheme.Font)
 // 	s.Font.BgColor.SetColor(TheColorScheme.Secondary)

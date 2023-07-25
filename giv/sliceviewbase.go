@@ -453,10 +453,10 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb.Dim = mat32.Y
 	sb.Defaults()
 	sb.Tracking = true
-	if sv.Style.Layout.ScrollBarWidth.Dots == 0 {
+	if sv.Style.ScrollBarWidth.Dots == 0 {
 		sb.SetFixedWidth(units.Px(16))
 	} else {
-		sb.SetFixedWidth(sv.Style.Layout.ScrollBarWidth)
+		sb.SetFixedWidth(sv.Style.ScrollBarWidth)
 	}
 	sb.SetStretchMaxHeight()
 	sb.Min = 0

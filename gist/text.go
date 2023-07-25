@@ -29,7 +29,7 @@ type Text struct {
 	OrientationVert  float32        `xml:"glyph-orientation-vertical" inherit:"true" desc:"prop: glyph-orientation-vertical (inherited) = for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright"`
 	OrientationHoriz float32        `xml:"glyph-orientation-horizontal" inherit:"true" desc:"prop: glyph-orientation-horizontal (inherited) = for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)"`
 	Indent           units.Value    `xml:"text-indent" inherit:"true" desc:"prop: text-indent (inherited) = how much to indent the first line in a paragraph"`
-	ParaSpacing      units.Value    `xml:"para-spacing" inherit:"true" desc:"prop: para-spacing (inherited) = extra spacing between paragraphs -- copied from Style.Layout.Margin per CSS spec if that is non-zero, else can be set directly with para-spacing"`
+	ParaSpacing      units.Value    `xml:"para-spacing" inherit:"true" desc:"prop: para-spacing (inherited) = extra spacing between paragraphs -- copied from Style.Margin per CSS spec if that is non-zero, else can be set directly with para-spacing"`
 	TabSize          int            `xml:"tab-size" inherit:"true" desc:"prop: tab-size (inherited) = tab size, in number of characters"`
 	// todo:
 	// page-break options

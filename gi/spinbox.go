@@ -75,22 +75,22 @@ func (sb *SpinBox) Disconnect() {
 // 	bts, ok := sb.Parts.ChildByName("buttons", 2).(*WidgetBase)
 // 	if ok {
 // 		bts.AddChildStyleFunc("up", 0, StyleFuncParts(sb), func(up *WidgetBase) {
-// 			up.Style.Layout.MaxWidth.SetEm(1)
-// 			up.Style.Layout.MaxHeight.SetEm(1)
-// 			up.Style.Layout.Margin.Set()
-// 			up.Style.Layout.Padding.Set()
+// 			up.Style.MaxWidth.SetEm(1)
+// 			up.Style.MaxHeight.SetEm(1)
+// 			up.Style.Margin.Set()
+// 			up.Style.Padding.Set()
 // 			up.Style.Font.BgColor.SetColor(color.Transparent)
 // 		})
 // 		bts.AddChildStyleFunc("down", 1, StyleFuncParts(sb), func(down *WidgetBase) {
-// 			down.Style.Layout.MaxWidth.SetEm(1)
-// 			down.Style.Layout.MaxHeight.SetEm(1)
-// 			down.Style.Layout.Margin.Set()
-// 			down.Style.Layout.Padding.Set()
+// 			down.Style.MaxWidth.SetEm(1)
+// 			down.Style.MaxHeight.SetEm(1)
+// 			down.Style.Margin.Set()
+// 			down.Style.Padding.Set()
 // 			down.Style.Font.BgColor.SetColor(color.Transparent)
 // 		})
 // 	}
 // 	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(spc *WidgetBase) {
-// 		spc.Style.Layout.Width.SetEx(0)
+// 		spc.Style.Width.SetEx(0)
 // 	})
 // }
 
@@ -480,7 +480,7 @@ func (sb *SpinBox) StyleSpinBox() {
 func (sb *SpinBox) Style2D() {
 	sb.StyleSpinBox()
 	sb.StyMu.Lock()
-	sb.LayState.SetFromStyle(&sb.Style.Layout) // also does reset
+	sb.LayState.SetFromStyle(&sb.Style) // also does reset
 	sb.StyMu.Unlock()
 	sb.ConfigParts()
 }

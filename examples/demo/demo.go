@@ -32,7 +32,7 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 	mfr.AddStyleFunc(gi.StyleFuncFinal, func() {
 		mfr.Spacing.SetEx(1)
-		mfr.Style.Layout.Padding.Set(units.Px(8))
+		mfr.Style.Padding.Set(units.Px(8))
 	})
 
 	title := gi.AddNewLabel(mfr, "title", "The GoGi Demo")
@@ -47,7 +47,7 @@ func mainrun() {
 	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
 	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		brow.Spacing.SetEx(1)
-		brow.Style.Layout.MaxWidth.SetPx(-1)
+		brow.Style.MaxWidth.SetPx(-1)
 	})
 
 	bpri := gi.AddNewButton(brow, "buttonPrimary")
@@ -69,7 +69,7 @@ func mainrun() {
 	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutHorizFlow)
 	irow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		irow.Spacing.SetEx(1)
-		irow.Style.Layout.MaxWidth.SetPx(-1)
+		irow.Style.MaxWidth.SetPx(-1)
 	})
 
 	check := gi.AddNewCheckBox(irow, "check")

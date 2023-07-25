@@ -441,7 +441,7 @@ func (sb *SliderBase) MouseEvent() {
 					ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 					st := &sbb.Style
 					// TODO: SideTODO: not sure about dim
-					spc := st.Layout.Margin.Dots().Pos().Dim(sbb.Dim) + 0.5*sbb.ThSizeReal
+					spc := st.Margin.Dots().Pos().Dim(sbb.Dim) + 0.5*sbb.ThSizeReal
 					if sbb.Dim == mat32.X {
 						sbb.SliderPress(float32(ed.X) - spc)
 					} else {
@@ -529,8 +529,8 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 		ick := sb.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
 		if ick != nil {
 			ic := ick.(*Icon)
-			mrg := sb.Style.Layout.Margin.Dots()
-			pad := sb.Style.Layout.Padding.Dots()
+			mrg := sb.Style.Margin.Dots()
+			pad := sb.Style.Padding.Dots()
 			odim := mat32.OtherDim(sb.Dim)
 			spc := mrg.Pos().Dim(odim) + pad.Pos().Dim(odim)
 			ic.LayState.Alloc.PosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
@@ -720,7 +720,7 @@ func (sr *Slider) Style2D() {
 	sr.SetCanFocusIfActive()
 	sr.StyleSlider()
 	sr.StyMu.Lock()
-	sr.LayState.SetFromStyle(&sr.Style.Layout) // also does reset
+	sr.LayState.SetFromStyle(&sr.Style) // also does reset
 	sr.StyMu.Unlock()
 	sr.ConfigParts()
 }
@@ -733,7 +733,7 @@ func (sr *Slider) Size2D(iter int) {
 	st := &sr.Style
 	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
-	sz := sr.ThSize + st.Layout.Margin.Dots().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
+	sz := sr.ThSize + st.Margin.Dots().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
 	sr.LayState.Alloc.Size.SetDim(odim, sz)
 }
 
@@ -915,7 +915,7 @@ func (sb *ScrollBar) Style2D() {
 	sb.SetCanFocusIfActive()
 	sb.StyleSlider()
 	sb.StyMu.Lock()
-	sb.LayState.SetFromStyle(&sb.Style.Layout) // also does reset
+	sb.LayState.SetFromStyle(&sb.Style) // also does reset
 	sb.StyMu.Unlock()
 	sb.ConfigParts()
 }

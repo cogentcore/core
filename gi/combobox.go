@@ -65,8 +65,8 @@ func (cb *ComboBox) Disconnect() {
 
 // 	s.Border.Style.Set(gist.BorderNone)
 // 	s.Border.Radius.Set(units.Px(4))
-// 	s.Layout.Padding.Set(units.Px(4))
-// 	s.Layout.Margin.Set(units.Px(4))
+// 	s.Padding.Set(units.Px(4))
+// 	s.Margin.Set(units.Px(4))
 // 	s.Text.Align = gist.AlignCenter
 // 	s.Font.BgColor.SetColor(TheColorScheme.Background)
 // 	s.Font.Color.SetColor(TheColorScheme.Font)
