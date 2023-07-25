@@ -174,7 +174,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// sc.NoNav = true
 
 	// first, add lights, set camera
-	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
+	sc.BackgroundColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
 	gi3d.AddNewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
 	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)

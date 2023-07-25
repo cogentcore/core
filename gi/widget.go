@@ -357,7 +357,7 @@ func (wb *WidgetBase) Style2DWidget() {
 		wb.SetInactive()
 	}
 
-	wb.Viewport.SetCurrentColor(wb.Style.Font.Color)
+	wb.Viewport.SetCurrentColor(wb.Style.Color)
 }
 
 // StylePart sets the style properties for a child in parts (or any other
@@ -472,7 +472,7 @@ func SetUnitContext(st *gist.Style, vp *Viewport2D, el mat32.Vec2) {
 			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
-	girl.OpenFont(&st.Font, &st.UnContext) // calls SetUnContext after updating metrics
+	girl.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
 	st.ToDots()
 }
 
@@ -924,11 +924,11 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	}
 	// then draw the box over top of that -- note: won't work well for
 	// transparent! need to set clipping to box first..
-	if !st.Font.BgColor.IsNil() {
+	if !st.BackgroundColor.IsNil() {
 		if rad.IsZero() {
-			pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+			pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 		} else {
-			pc.FillStyle.SetColorSpec(&st.Font.BgColor)
+			pc.FillStyle.SetColorSpec(&st.BackgroundColor)
 			// no border -- fill only
 			pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
 			pc.Fill(rs)
@@ -937,7 +937,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
-	// pc.FillStyle.SetColor(&st.Font.BgColor)
+	// pc.FillStyle.SetColor(&st.BackgroundColor)
 	pos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	sz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
 	pc.FillStyle.SetColor(nil)
@@ -1129,7 +1129,7 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm icons.Icon, txt string)
 			return true
 		}
 		lbl := lblk.(*Label)
-		lbl.Style.Font.Color = wb.Style.Font.Color
+		lbl.Style.Color = wb.Style.Color
 		if lbl.Text != txt {
 			return true
 		}

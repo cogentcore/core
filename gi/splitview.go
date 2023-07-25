@@ -735,7 +735,7 @@ func (sr *Splitter) RenderSplitter() {
 		rs, pc, st := sr.RenderLock()
 
 		pc.StrokeStyle.SetColor(nil)
-		pc.FillStyle.SetColorSpec(&st.Font.BgColor)
+		pc.FillStyle.SetColorSpec(&st.BackgroundColor)
 
 		pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
 		pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)

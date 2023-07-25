@@ -20,11 +20,11 @@ func _() {
 	_ = x[DecoParaStart-6]
 	_ = x[DecoSuper-7]
 	_ = x[DecoSub-8]
-	_ = x[DecoBgColor-9]
+	_ = x[DecoBackgroundColor-9]
 	_ = x[TextDecorationsN-10]
 }
 
-const _TextDecorations_name = "DecoNoneDecoUnderlineDecoOverlineDecoLineThroughDecoBlinkDecoDottedUnderlineDecoParaStartDecoSuperDecoSubDecoBgColorTextDecorationsN"
+const _TextDecorations_name = "DecoNoneDecoUnderlineDecoOverlineDecoLineThroughDecoBlinkDecoDottedUnderlineDecoParaStartDecoSuperDecoSubDecoBackgroundColorTextDecorationsN"
 
 var _TextDecorations_index = [...]uint8{0, 8, 21, 33, 48, 57, 76, 89, 98, 105, 116, 132}
 
@@ -55,7 +55,7 @@ var _TextDecorations_descMap = map[TextDecorations]string{
 	6:  `DecoParaStart at start of a SpanRender indicates that it should be styled as the start of a new paragraph and not just the start of a new line`,
 	7:  `DecoSuper indicates super-scripted text`,
 	8:  `DecoSub indicates sub-scripted text`,
-	9:  `DecoBgColor indicates that a bg color has been set -- for use in optimizing rendering`,
+	9:  `DecoBackgroundColor indicates that a bg color has been set -- for use in optimizing rendering`,
 	10: ``,
 }
 

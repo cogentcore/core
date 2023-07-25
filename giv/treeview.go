@@ -2312,11 +2312,11 @@ func (tv *TreeView) Render2D() {
 
 			// note: this is std except using WidgetSize instead of AllocSize
 			rs, pc, st := tv.RenderLock()
-			pc.FontStyle = st.Font
+			pc.FontStyle = *st.FontRender()
 			// TODO: SideTODO: look here if tree view borders break
 			// pc.StrokeStyle.SetColor(&st.Border.Color)
 			// pc.StrokeStyle.Width = st.Border.Width
-			pc.FillStyle.SetColorSpec(&st.Font.BgColor)
+			pc.FillStyle.SetColorSpec(&st.BackgroundColor)
 			// tv.RenderStdBox()
 			pos := tv.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
 			sz := tv.WidgetSize.Sub(st.Margin.Dots().Size())

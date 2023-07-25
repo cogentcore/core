@@ -25,7 +25,7 @@ type Paint struct {
 	Display     bool          `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
 	StrokeStyle Stroke        `desc:"stroke (line drawing) parameters"`
 	FillStyle   Fill          `desc:"fill (region filling) parameters"`
-	FontStyle   Font          `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	FontStyle   FontRender    `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
 	TextStyle   Text          `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
 	VecEff      VectorEffects `xml:"vector-effect" desc:"prop: vector-effect = various rendering special effects settings"`
 	XForm       mat32.Mat2    `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`

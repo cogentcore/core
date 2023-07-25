@@ -551,16 +551,16 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 
 	// fmt.Printf("rendersize: %v\n", sz)
 	sty := &tv.Style
-	fst := sty.Font
-	fst.BgColor.SetColor(nil)
+	fst := sty.FontRender()
+	fst.BackgroundColor.SetColor(nil)
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
 	tv.Buf.MarkupMu.RLock()
 	tv.HasLinks = false
 	for ln := 0; ln < nln; ln++ {
-		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
+		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
+		tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
 		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
 			tv.HasLinks = true
 		}
@@ -643,16 +643,16 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 		return false
 	}
 	sty := &tv.Style
-	fst := sty.Font
-	fst.BgColor.SetColor(nil)
+	fst := sty.FontRender()
+	fst.BackgroundColor.SetColor(nil)
 	mxwd := float32(tv.LinesSize.X)
 	rerend := false
 
 	tv.Buf.MarkupMu.RLock()
 	for ln := st; ln <= ed; ln++ {
 		curspans := len(tv.Renders[ln].Spans)
-		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, tv.RenderSz)
+		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
+		tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, tv.RenderSz)
 		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
 			tv.HasLinks = true
 		}
@@ -3213,10 +3213,10 @@ func (tv *TextView) CursorSprite() *gi.Sprite {
 		bbsz.X += 2 // inverse border
 		sp = gi.NewSprite(spnm, bbsz, image.Point{})
 		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color.Inverse()}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Color.Inverse()}, image.Point{}, draw.Src)
 		ibox.Min.X++ // 1 pixel boundary
 		ibox.Max.X--
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Color}, image.Point{}, draw.Src)
 		win.AddSprite(sp)
 	}
 	return sp
@@ -3247,7 +3247,7 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	tv.Buf.MarkupMu.RLock() // needed for HiTags access
 	defer tv.Buf.MarkupMu.RUnlock()
 	sty := &tv.Style
-	cspec := sty.Font.BgColor
+	cspec := sty.BackgroundColor
 	bg := cspec.Color
 	isDark := bg.IsDark()
 	nclrs := len(TextViewDepthColors)
@@ -3367,7 +3367,7 @@ func (tv *TextView) ClearScopelights() {
 // RenderRegionBox renders a region in background color according to given state style
 func (tv *TextView) RenderRegionBox(reg textbuf.Region, state TextViewStates) {
 	sty := &tv.StateStyles[state]
-	tv.RenderRegionBoxSty(reg, sty, &sty.Font.BgColor)
+	tv.RenderRegionBoxSty(reg, sty, &sty.BackgroundColor)
 }
 
 // RenderRegionBoxSty renders a region in given style and background color
@@ -3448,7 +3448,7 @@ func (tv *TextView) VisSizes() {
 	}
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	girl.OpenFont(&sty.Font, &sty.UnContext)
+	girl.OpenFont(sty.FontRender(), &sty.UnContext)
 	tv.FontHeight = sty.Font.Face.Metrics.Height
 	tv.LineHeight = tv.FontHeight * sty.Text.EffLineHeight()
 	sz := tv.VpBBox.Size()
@@ -3508,7 +3508,7 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	tv.VisSizes()
 	pos := mat32.NewVec2FmPoint(tv.VpBBox.Min)
 	epos := mat32.NewVec2FmPoint(tv.VpBBox.Max)
-	pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
+	pc.FillBox(rs, pos, epos.Sub(pos), &sty.BackgroundColor)
 	pos = tv.RenderStartPos()
 	stln := -1
 	edln := -1
@@ -3572,7 +3572,7 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	pc := &rs.Paint
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	clr := sty.Font.BgColor.Color.Highlight(10)
+	clr := sty.BackgroundColor.Color.Highlight(10)
 	spos := mat32.NewVec2FmPoint(tv.VpBBox.Min)
 	epos := mat32.NewVec2FmPoint(tv.VpBBox.Max)
 	// TODO: SideTODO: this is sketchy
@@ -3589,7 +3589,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	pc := &rs.Paint
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	clr := sty.Font.BgColor.Color.Highlight(10)
+	clr := sty.BackgroundColor.Color.Highlight(10)
 	spos := tv.CharStartPos(lex.Pos{Ln: st})
 	spos.X = float32(tv.VpBBox.Min.X)
 	epos := tv.CharEndPos(lex.Pos{Ln: ed + 1})
@@ -3612,7 +3612,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	vp := tv.Viewport
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	fst := sty.Font
+	fst := sty.FontRender()
 	rs := &vp.Render
 	pc := &rs.Paint
 
@@ -3641,15 +3641,15 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	} else if hasLClr {
 		pc.FillBoxColor(rs, sbox, bsz, lclr)
 	} else if defFill {
-		bgclr := fst.BgColor.Color.Highlight(10)
+		bgclr := fst.BackgroundColor.Color.Highlight(10)
 		pc.FillBoxColor(rs, sbox, bsz, bgclr)
 	}
 
-	fst.BgColor.SetColor(nil)
+	fst.BackgroundColor.SetColor(nil)
 	lfmt := fmt.Sprintf("%d", tv.LineNoDigs)
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
-	tv.LineNoRender.SetString(lnstr, &fst, &sty.UnContext, &sty.Text, true, 0, 0)
+	tv.LineNoRender.SetString(lnstr, fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := mat32.Vec2{}
 	lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - +mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
@@ -3671,7 +3671,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// 	ied.X += int(spc)
 	// 	ist.X = ied.X - 20
 	// 	r := image.Rectangle{Min: ist, Max: ied}
-	// 	sic.Sty.Font.BgColor.SetName("black")
+	// 	sic.Sty.BackgroundColor.SetName("black")
 	// 	sic.FillViewport()
 	// 	draw.Draw(tv.Viewport.Pixels, r, sic.Pixels, image.Point{}, draw.Over)
 	// }
@@ -3746,7 +3746,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		rs.Lock()
 		boxMin.X = float32(tv.VpBBox.Min.X) // go all the way
 		boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
-		pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
+		pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.BackgroundColor)
 		// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 
 		tv.RenderDepthBg(visSt, visEd)

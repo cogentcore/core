@@ -78,7 +78,7 @@ func mainrun() {
 	tfield := gi.AddNewTextField(irow, "tfield")
 	tfield.Placeholder = "Text Field"
 	// tfield.AddStyleFunc(gi.StyleFuncFinal, func() {
-	// 	tfield.Style.Font.BgColor.SetColor(colors.Green)
+	// 	tfield.Style.BackgroundColor.SetColor(colors.Green)
 	// })
 
 	sbox := gi.AddNewSpinBox(irow, "sbox")

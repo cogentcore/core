@@ -426,9 +426,9 @@ func StructViewFieldDefTag(vv ValueView, lbl *gi.Label) (hasDef bool, isDef bool
 		hasDef = true
 		isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface())
 		if isDef {
-			lbl.CurBgColor = gi.Prefs.Colors.Background
+			lbl.CurBackgroundColor = gi.Prefs.Colors.Background
 		} else {
-			lbl.CurBgColor = gi.Prefs.Colors.Highlight
+			lbl.CurBackgroundColor = gi.Prefs.Colors.Highlight
 		}
 		return
 	}

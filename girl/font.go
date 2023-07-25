@@ -25,7 +25,7 @@ import (
 // font.  The font size is always rounded to nearest integer, to produce
 // better-looking results (presumably).  The current metrics and given
 // unit.Context are updated based on the properties of the font.
-func OpenFont(fs *gist.Font, ctxt *units.Context) {
+func OpenFont(fs *gist.FontRender, ctxt *units.Context) {
 	facenm := FontFaceName(fs.Family, fs.Stretch, fs.Weight, fs.Style)
 	if fs.Size.Dots == 0 {
 		fs.Size.ToDots(ctxt)
@@ -93,7 +93,7 @@ func OpenFontFace(name, path string, size int, strokeWidth int) (*gist.FontFace,
 
 // FontStyleCSS looks for "tag" name props in cssAgg props, and applies those to
 // style if found, and returns true -- false if no such tag found
-func FontStyleCSS(fs *gist.Font, tag string, cssAgg ki.Props, unit *units.Context, ctxt gist.Context) bool {
+func FontStyleCSS(fs *gist.FontRender, tag string, cssAgg ki.Props, unit *units.Context, ctxt gist.Context) bool {
 	if cssAgg == nil {
 		return false
 	}

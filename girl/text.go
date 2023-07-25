@@ -96,7 +96,7 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 		}
 
 		// todo: cache flags if these are actually needed
-		if bitflag.Has32(int32(sr.HasDeco), int(gist.DecoBgColor)) {
+		if bitflag.Has32(int32(sr.HasDeco), int(gist.DecoBackgroundColor)) {
 			sr.RenderBg(rs, tpos)
 		}
 		if bitflag.HasAny32(int32(sr.HasDeco), int(gist.DecoUnderline), int(gist.DecoDottedUnderline)) {
@@ -190,9 +190,9 @@ func (tr *Text) RenderTopPos(rs *State, tpos mat32.Vec2) {
 // entire string, and does standard layout (LR currently).  rot and scalex are
 // general rotation and x-scaling to apply to all chars -- alternatively can
 // apply these per character after.  Be sure that OpenFont has been run so a
-// valid Face is available.  noBG ignores any BgColor in font style, and never
+// valid Face is available.  noBG ignores any BackgroundColor in font style, and never
 // renders background color
-func (tr *Text) SetString(str string, fontSty *gist.Font, ctxt *units.Context, txtSty *gist.Text, noBG bool, rot, scalex float32) {
+func (tr *Text) SetString(str string, fontSty *gist.FontRender, ctxt *units.Context, txtSty *gist.Text, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]Span, 1)
 	}
@@ -210,8 +210,8 @@ func (tr *Text) SetString(str string, fontSty *gist.Font, ctxt *units.Context, t
 // SetHTML for tag-formatted text) -- configures a single Span with the
 // entire string, and does TB rotated layout (-90 deg).
 // Be sure that OpenFont has been run so a valid Face is available.
-// noBG ignores any BgColor in font style, and never renders background color
-func (tr *Text) SetStringRot90(str string, fontSty *gist.Font, ctxt *units.Context, txtSty *gist.Text, noBG bool, scalex float32) {
+// noBG ignores any BackgroundColor in font style, and never renders background color
+func (tr *Text) SetStringRot90(str string, fontSty *gist.FontRender, ctxt *units.Context, txtSty *gist.Text, noBG bool, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]Span, 1)
 	}
@@ -230,9 +230,9 @@ func (tr *Text) SetStringRot90(str string, fontSty *gist.Font, ctxt *units.Conte
 // entire string, and does standard layout (LR currently).  rot and scalex are
 // general rotation and x-scaling to apply to all chars -- alternatively can
 // apply these per character after Be sure that OpenFont has been run so a
-// valid Face is available.  noBG ignores any BgColor in font style, and never
+// valid Face is available.  noBG ignores any BackgroundColor in font style, and never
 // renders background color
-func (tr *Text) SetRunes(str []rune, fontSty *gist.Font, ctxt *units.Context, txtSty *gist.Text, noBG bool, rot, scalex float32) {
+func (tr *Text) SetRunes(str []rune, fontSty *gist.FontRender, ctxt *units.Context, txtSty *gist.Text, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]Span, 1)
 	}
@@ -248,7 +248,7 @@ func (tr *Text) SetRunes(str []rune, fontSty *gist.Font, ctxt *units.Context, tx
 // SetHTMLSimpleTag sets the styling parameters for simple html style tags
 // that only require updating the given font spec values -- returns true if handled
 // https://www.w3schools.com/cssref/css_default_values.asp
-func SetHTMLSimpleTag(tag string, fs *gist.Font, ctxt *units.Context, cssAgg ki.Props) bool {
+func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssAgg ki.Props) bool {
 	did := false
 	switch tag {
 	case "b", "strong":
@@ -298,7 +298,7 @@ func SetHTMLSimpleTag(tag string, fs *gist.Font, ctxt *units.Context, cssAgg ki.
 		OpenFont(fs, ctxt)
 		did = true
 	case "mark":
-		fs.BgColor.SetColor(gist.ThePrefs.PrefColor("highlight"))
+		fs.BackgroundColor.SetColor(gist.ThePrefs.PrefColor("highlight"))
 		did = true
 	case "abbr", "acronym":
 		fs.SetDeco(gist.DecoDottedUnderline)
@@ -321,7 +321,7 @@ func SetHTMLSimpleTag(tag string, fs *gist.Font, ctxt *units.Context, cssAgg ki.
 // -- result can then be processed by different layout algorithms as needed.
 // cssAgg, if non-nil, should contain CSSAgg properties -- will be tested for
 // special css styling of each element.
-func (tr *Text) SetHTML(str string, font *gist.Font, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *Text) SetHTML(str string, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre([]byte(str), font, txtSty, ctxt, cssAgg)
 	} else {
@@ -331,7 +331,7 @@ func (tr *Text) SetHTML(str string, font *gist.Font, txtSty *gist.Text, ctxt *un
 
 // SetHTMLBytes does SetHTML with bytes as input -- more efficient -- use this
 // if already in bytes
-func (tr *Text) SetHTMLBytes(str []byte, font *gist.Font, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *Text) SetHTMLBytes(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre(str, font, txtSty, ctxt, cssAgg)
 	} else {
@@ -341,7 +341,7 @@ func (tr *Text) SetHTMLBytes(str []byte, font *gist.Font, txtSty *gist.Text, ctx
 
 // This is the No-Pre parser that uses the golang XML decoder system, which
 // strips all whitespace and is thus unsuitable for any Pre case
-func (tr *Text) SetHTMLNoPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
 	//	errstr := "gi.Text SetHTML"
 	sz := len(str)
 	if sz == 0 {
@@ -368,7 +368,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.Font, txtSty *gist.Text, ctx
 	nextIsParaStart := false
 	curLinkIdx := -1 // if currently processing an <a> link element
 
-	fstack := make([]*gist.Font, 1, 10)
+	fstack := make([]*gist.FontRender, 1, 10)
 	fstack[0] = font
 	for {
 		t, err := decoder.Token()
@@ -406,7 +406,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.Font, txtSty *gist.Text, ctx
 				case "q":
 					curf := fstack[len(fstack)-1]
 					atStart := len(curSp.Text) == 0
-					curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+					curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.BackgroundColor.ColorOrNil(), curf.Deco)
 					if nextIsParaStart && atStart {
 						curSp.SetNewPara()
 					}
@@ -463,7 +463,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.Font, txtSty *gist.Text, ctx
 				curSp = &(tr.Spans[len(tr.Spans)-1])
 			case "q":
 				curf := fstack[len(fstack)-1]
-				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.BackgroundColor.ColorOrNil(), curf.Deco)
 			case "a":
 				if curLinkIdx >= 0 {
 					tl := &tr.Links[curLinkIdx]
@@ -484,7 +484,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.Font, txtSty *gist.Text, ctx
 					return unicode.IsSpace(r)
 				})
 			}
-			curSp.AppendString(sstr, curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+			curSp.AppendString(sstr, curf.Face.Face, curf.Color, curf.BackgroundColor.ColorOrNil(), curf.Deco, font, ctxt)
 			if nextIsParaStart && atStart {
 				curSp.SetNewPara()
 			}
@@ -506,7 +506,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.Font, txtSty *gist.Text, ctx
 // Only basic styling tags, including <span> elements with style parameters
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's
-func (tr *Text) SetHTMLPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
 	// errstr := "gi.Text SetHTMLPre"
 
 	sz := len(str)
@@ -524,7 +524,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt 
 	nextIsParaStart := false
 	curLinkIdx := -1 // if currently processing an <a> link element
 
-	fstack := make([]*gist.Font, 1, 10)
+	fstack := make([]*gist.FontRender, 1, 10)
 	fstack[0] = font
 
 	tagstack := make([]string, 0, 10)
@@ -543,7 +543,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt 
 				bidx += eidx + 2
 			} else { // get past <
 				curf := fstack[len(fstack)-1]
-				curSp.AppendString(string(str[bidx:bidx+1]), curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+				curSp.AppendString(string(str[bidx:bidx+1]), curf.Face.Face, curf.Color, curf.BackgroundColor.ColorOrNil(), curf.Deco, font, ctxt)
 				bidx++
 			}
 		}
@@ -567,7 +567,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt 
 				// 	curSp = &(tr.Spans[len(tr.Spans)-1])
 				case "q":
 					curf := fstack[len(fstack)-1]
-					curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+					curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.BackgroundColor.ColorOrNil(), curf.Deco)
 				case "a":
 					if curLinkIdx >= 0 {
 						tl := &tr.Links[curLinkIdx]
@@ -622,7 +622,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt 
 					case "q":
 						curf := fstack[len(fstack)-1]
 						atStart := len(curSp.Text) == 0
-						curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+						curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.BackgroundColor.ColorOrNil(), curf.Deco)
 						if nextIsParaStart && atStart {
 							curSp.SetNewPara()
 						}
@@ -698,7 +698,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt 
 					}
 				case '\n': // todo absorb other line endings
 					unestr := html.UnescapeString(string(tmpbuf))
-					curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+					curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.BackgroundColor.ColorOrNil(), curf.Deco, font, ctxt)
 					tmpbuf = tmpbuf[0:0]
 					tr.Spans = append(tr.Spans, Span{})
 					curSp = &(tr.Spans[len(tr.Spans)-1])
@@ -711,7 +711,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt 
 			if !didNl {
 				unestr := html.UnescapeString(string(tmpbuf))
 				// fmt.Printf("%v added: %v\n", bidx, unestr)
-				curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+				curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.BackgroundColor.ColorOrNil(), curf.Deco, font, ctxt)
 				if curLinkIdx >= 0 {
 					tl := &tr.Links[curLinkIdx]
 					tl.Label = unestr
@@ -816,7 +816,7 @@ func (tx *Text) RuneEndPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) {
 // resulting size box for text.  Font face in gist.Font is used for
 // determining line spacing here -- other versions can do more expensive
 // calculations of variable line spacing as needed.
-func (tr *Text) LayoutStdLR(txtSty *gist.Text, fontSty *gist.Font, ctxt *units.Context, size mat32.Vec2) mat32.Vec2 {
+func (tr *Text) LayoutStdLR(txtSty *gist.Text, fontSty *gist.FontRender, ctxt *units.Context, size mat32.Vec2) mat32.Vec2 {
 	if len(tr.Spans) == 0 {
 		return mat32.Vec2Zero
 	}

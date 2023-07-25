@@ -649,7 +649,7 @@ func (vp *Viewport2D) FillViewport() {
 	st := &vp.Style
 	rs := &vp.Render
 	rs.Lock()
-	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &st.Font.BgColor)
+	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &st.BackgroundColor)
 	rs.Unlock()
 	vp.StyMu.RUnlock()
 }

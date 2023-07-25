@@ -62,7 +62,7 @@ func (bm *Bitmap) CopyFieldsFrom(frm any) {
 // func (bm *Bitmap) DefaultStyle() {
 // 	s := &bm.Style
 
-// 	s.Font.BgColor.SetColor(TheColorScheme.Background)
+// 	s.BackgroundColor.SetColor(TheColorScheme.Background)
 // }
 
 // SetSize sets size of the bitmap image.

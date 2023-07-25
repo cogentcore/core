@@ -79,14 +79,14 @@ func (sb *SpinBox) Disconnect() {
 // 			up.Style.MaxHeight.SetEm(1)
 // 			up.Style.Margin.Set()
 // 			up.Style.Padding.Set()
-// 			up.Style.Font.BgColor.SetColor(color.Transparent)
+// 			up.Style.BackgroundColor.SetColor(color.Transparent)
 // 		})
 // 		bts.AddChildStyleFunc("down", 1, StyleFuncParts(sb), func(down *WidgetBase) {
 // 			down.Style.MaxWidth.SetEm(1)
 // 			down.Style.MaxHeight.SetEm(1)
 // 			down.Style.Margin.Set()
 // 			down.Style.Padding.Set()
-// 			down.Style.Font.BgColor.SetColor(color.Transparent)
+// 			down.Style.BackgroundColor.SetColor(color.Transparent)
 // 		})
 // 	}
 // 	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(spc *WidgetBase) {

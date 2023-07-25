@@ -815,8 +815,8 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 // 		case ButtonDown:
 // 			c = c.Highlight(20)
 // 		}
-// 		s.Font.BgColor.SetColor(c)
-// 		s.Font.Color.SetColor(c.ContrastColor())
+// 		s.BackgroundColor.SetColor(c)
+// 		s.Color.SetColor(c.ContrastColor())
 // 	case ButtonPrimary:
 // 		c := TheColorScheme.Primary
 // 		switch bt.State {
@@ -825,8 +825,8 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 // 		case ButtonDown:
 // 			c = c.Highlight(30)
 // 		}
-// 		s.Font.BgColor.SetColor(c)
-// 		s.Font.Color.SetColor(c.ContrastColor())
+// 		s.BackgroundColor.SetColor(c)
+// 		s.Color.SetColor(c.ContrastColor())
 // 	case ButtonSecondary:
 // 		c := TheColorScheme.Background
 // 		switch bt.State {
@@ -835,8 +835,8 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 // 		case ButtonDown:
 // 			c = c.Highlight(30)
 // 		}
-// 		s.Font.BgColor.SetColor(c)
-// 		s.Font.Color.SetColor(TheColorScheme.Primary)
+// 		s.BackgroundColor.SetColor(c)
+// 		s.Color.SetColor(TheColorScheme.Primary)
 // 		s.Border.Style.Set(gist.BorderSolid)
 // 		s.Border.Width.Set(units.Px(1))
 // 		s.Border.Color.Set(TheColorScheme.Primary)
@@ -1123,14 +1123,14 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 
 func (cb *CheckBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
-		cb.Style.Font.Color.SetColor(Colors.Font)
+		cb.Style.Color.SetColor(Colors.Text)
 		switch cb.State {
 		default:
-			cb.Style.Font.BgColor.SetColor(Colors.Background)
+			cb.Style.BackgroundColor.SetColor(Colors.Background)
 		case ButtonHover:
-			cb.Style.Font.BgColor.SetColor(Colors.Background.Highlight(10))
+			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
 		case ButtonDown:
-			cb.Style.Font.BgColor.SetColor(Colors.Background.Highlight(20))
+			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
 		}
 	})
 }

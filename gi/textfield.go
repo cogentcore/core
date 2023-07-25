@@ -929,10 +929,10 @@ func (tf *TextField) CursorSprite() *Sprite {
 		bbsz.X += 2 // inverse border
 		sp = NewSprite(spnm, bbsz, image.Point{})
 		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color.Inverse()}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Color.Inverse()}, image.Point{}, draw.Src)
 		ibox.Min.X++ // 1 pixel boundary
 		ibox.Max.X--
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Font.Color}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Color}, image.Point{}, draw.Src)
 		win.AddSprite(sp)
 	}
 	return sp
@@ -961,7 +961,7 @@ func (tf *TextField) RenderSelect() {
 	pc := &rs.Paint
 	st := &tf.StateStyles[TextFieldSel]
 	tsz := tf.TextWidth(effst, effed)
-	pc.FillBox(rs, spos, mat32.Vec2{tsz, tf.FontHeight}, &st.Font.BgColor)
+	pc.FillBox(rs, spos, mat32.Vec2{tsz, tf.FontHeight}, &st.BackgroundColor)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
@@ -1379,10 +1379,10 @@ func (tf *TextField) ConfigParts() {
 
 func (tf *TextField) ConfigStyles() {
 	tf.AddStyleFunc(StyleFuncDefault, func() {
-		tf.Style.Font.BgColor.SetColor(Colors.Background)
+		tf.Style.BackgroundColor.SetColor(Colors.Background)
 	})
 	tf.Parts.AddChildStyleFunc("clear", 1, StyleFuncParts(tf), func(clr *WidgetBase) {
-		clr.Style.Font.BgColor.SetColor(color.Transparent)
+		clr.Style.BackgroundColor.SetColor(color.Transparent)
 		clr.Style.Width.SetEx(0.5)
 		clr.Style.Height.SetEx(0.5)
 	})
@@ -1452,12 +1452,12 @@ func (tf *TextField) Style2D() {
 
 func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Style
-	girl.OpenFont(&st.Font, &st.UnContext)
+	girl.OpenFont(st.FontRender(), &st.UnContext)
 	txt := tf.EditTxt
 	if tf.NoEcho {
 		txt = concealDots(len(tf.EditTxt))
 	}
-	tf.RenderAll.SetRunes(txt, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
+	tf.RenderAll.SetRunes(txt, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
 	return true
 }
 
@@ -1523,21 +1523,21 @@ func (tf *TextField) RenderTextField() {
 		tf.Style = tf.StateStyles[TextFieldActive]
 	}
 	st = &tf.Style // update
-	girl.OpenFont(&st.Font, &st.UnContext)
+	girl.OpenFont(st.FontRender(), &st.UnContext)
 	tf.RenderStdBox(st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect()
 	pos := tf.LayState.Alloc.Pos.Add(st.BoxSpace().Pos())
 	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
-		st.Font.Color = st.Font.Color.Highlight(50)
-		tf.RenderVis.SetString(tf.Placeholder, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
+		st.Color = st.Color.Highlight(50)
+		tf.RenderVis.SetString(tf.Placeholder, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
 		tf.RenderVis.RenderTopPos(rs, pos)
 
 	} else {
 		if tf.NoEcho {
 			cur = concealDots(len(cur))
 		}
-		tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
+		tf.RenderVis.SetRunes(cur, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
 		tf.RenderVis.RenderTopPos(rs, pos)
 	}
 }

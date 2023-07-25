@@ -64,7 +64,7 @@ func (ic *Icon) ConfigStyles() {
 	ic.AddStyleFunc(StyleFuncDefault, func() {
 		ic.Style.Width.SetEm(1.5)
 		ic.Style.Height.SetEm(1.5)
-		ic.Style.Font.BgColor.SetColor(color.Transparent)
+		ic.Style.BackgroundColor.SetColor(color.Transparent)
 	})
 }
 

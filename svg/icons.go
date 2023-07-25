@@ -58,7 +58,7 @@ func AddNewIcon(parent ki.Ki, name string) *Icon {
 // 	s := &ic.Style
 // 	cs := gi.CurrentColorScheme()
 
-// 	s.Font.BgColor.SetColor(color.Transparent)
+// 	s.BackgroundColor.SetColor(color.Transparent)
 // 	ic.Pnt.FillStyle.Color.SetColor(cs.Font)
 // 	ic.Pnt.StrokeStyle.Color.SetColor(cs.Font)
 // }

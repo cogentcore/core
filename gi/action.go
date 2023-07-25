@@ -77,8 +77,8 @@ func (ac *Action) Disconnect() {
 // 	s.Border.Radius.Set()
 // 	s.Border.Color.Set()
 // 	s.Text.Align = gist.AlignCenter
-// 	s.Font.BgColor.SetColor(TheColorScheme.Secondary)
-// 	s.Font.Color.SetColor(TheColorScheme.Secondary.ContrastColor())
+// 	s.BackgroundColor.SetColor(TheColorScheme.Secondary)
+// 	s.Color.SetColor(TheColorScheme.Secondary.ContrastColor())
 
 // 	s.Padding.Set(units.Px(2))
 // 	s.Margin.Set(units.Px(2))
@@ -377,8 +377,8 @@ func (ac *Action) ConfigStyles() {
 		ac.Style.Border.Style.Set(gist.BorderNone)
 		ac.Style.Border.Radius.Set()
 		ac.Style.Text.Align = gist.AlignCenter
-		ac.Style.Font.BgColor.SetColor(Colors.Background.Highlight(10))
-		ac.Style.Font.Color.SetColor(Colors.Font)
+		ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+		ac.Style.Color.SetColor(Colors.Text)
 		ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 	})

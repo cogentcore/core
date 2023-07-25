@@ -103,7 +103,7 @@ func (sr *Span) RuneEndPos(idx int) mat32.Vec2 {
 func (sr *Span) HasDecoUpdate(bg color.Color, deco gist.TextDecorations) {
 	sr.HasDeco |= deco
 	if bg != nil {
-		bitflag.Set32((*int32)(&sr.HasDeco), int(gist.DecoBgColor))
+		bitflag.Set32((*int32)(&sr.HasDeco), int(gist.DecoBackgroundColor))
 	}
 }
 
@@ -125,18 +125,18 @@ func (sr *Span) SetNewPara() {
 // AppendRune adds one rune and associated formatting info
 func (sr *Span) AppendRune(r rune, face font.Face, clr, bg color.Color, deco gist.TextDecorations) {
 	sr.Text = append(sr.Text, r)
-	rr := Rune{Face: face, Color: clr, BgColor: bg, Deco: deco}
+	rr := Rune{Face: face, Color: clr, BackgroundColor: bg, Deco: deco}
 	sr.Render = append(sr.Render, rr)
 	sr.HasDecoUpdate(bg, deco)
 }
 
 // AppendString adds string and associated formatting info, optimized with
 // only first rune having non-nil face and color settings
-func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, deco gist.TextDecorations, sty *gist.Font, ctxt *units.Context) {
+func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, deco gist.TextDecorations, sty *gist.FontRender, ctxt *units.Context) {
 	if len(str) == 0 {
 		return
 	}
-	ucfont := &gist.Font{}
+	ucfont := gist.NewFontRender()
 	if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
 		ucfont.Family = "Arial Unicode"
 	} else {
@@ -148,7 +148,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 	nwr := []rune(str)
 	sz := len(nwr)
 	sr.Text = append(sr.Text, nwr...)
-	rr := Rune{Face: face, Color: clr, BgColor: bg, Deco: deco}
+	rr := Rune{Face: face, Color: clr, BackgroundColor: bg, Deco: deco}
 	r := nwr[0]
 	lastUc := false
 	if _, ok := face.GlyphAdvance(r); !ok {
@@ -158,7 +158,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 	sr.HasDecoUpdate(bg, deco)
 	sr.Render = append(sr.Render, rr)
 	for i := 1; i < sz; i++ { // optimize by setting rest to nil for same
-		rp := Rune{Deco: deco, BgColor: bg}
+		rp := Rune{Deco: deco, BackgroundColor: bg}
 		r := nwr[i]
 		if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
 			if _, ok := face.GlyphAdvance(r); !ok {
@@ -178,18 +178,18 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 }
 
 // SetRenders sets rendering parameters based on style
-func (sr *Span) SetRenders(sty *gist.Font, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *Span) SetRenders(sty *gist.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sz := len(sr.Text)
 	if sz == 0 {
 		return
 	}
 
-	bgc := (color.Color)(&sty.BgColor.Color)
+	bgc := (color.Color)(&sty.BackgroundColor.Color)
 	if noBG {
 		bgc = nil
 	}
 
-	ucfont := &gist.Font{}
+	ucfont := gist.NewFontRender()
 	ucfont.Family = "Arial Unicode"
 	ucfont.Size = sty.Size
 	OpenFont(ucfont, ctxt)
@@ -202,12 +202,12 @@ func (sr *Span) SetRenders(sty *gist.Font, ctxt *units.Context, noBG bool, rot, 
 		sr.Render[0].Face = sty.Face.Face
 	}
 	sr.Render[0].Color = sty.Color
-	sr.Render[0].BgColor = bgc
+	sr.Render[0].BackgroundColor = bgc
 	sr.Render[0].RotRad = rot
 	sr.Render[0].ScaleX = scalex
 	if bgc != nil {
 		for i := range sr.Text {
-			sr.Render[i].BgColor = bgc
+			sr.Render[i].BackgroundColor = bgc
 		}
 	}
 	if rot != 0 || scalex != 0 {
@@ -242,7 +242,7 @@ func (sr *Span) SetRenders(sty *gist.Font, ctxt *units.Context, noBG bool, rot, 
 // SetString initializes to given plain text string, with given default style
 // parameters that are set for the first render element -- constructs Render
 // slice of same size as Text
-func (sr *Span) SetString(str string, sty *gist.Font, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *Span) SetString(str string, sty *gist.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sr.Text = []rune(str)
 	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
@@ -250,7 +250,7 @@ func (sr *Span) SetString(str string, sty *gist.Font, ctxt *units.Context, noBG 
 // SetRunes initializes to given plain rune string, with given default style
 // parameters that are set for the first render element -- constructs Render
 // slice of same size as Text
-func (sr *Span) SetRunes(str []rune, sty *gist.Font, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *Span) SetRunes(str []rune, sty *gist.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sr.Text = str
 	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
@@ -651,7 +651,7 @@ func (sr *Span) RenderBg(rs *State, tpos mat32.Vec2) {
 
 	for i := range sr.Text {
 		rr := &(sr.Render[i])
-		if rr.BgColor == nil {
+		if rr.BackgroundColor == nil {
 			if didLast {
 				pc.Fill(rs)
 			}
@@ -676,7 +676,7 @@ func (sr *Span) RenderBg(rs *State, tpos mat32.Vec2) {
 			didLast = false
 			continue
 		}
-		pc.FillStyle.Color.SetColor(rr.BgColor)
+		pc.FillStyle.Color.SetColor(rr.BackgroundColor)
 		szt := mat32.Vec2{rr.Size.X, -rr.Size.Y}
 		sp := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, dsc32}))
 		ul := sp.Add(tx.MulVec2AsVec(mat32.Vec2{0, szt.Y}))

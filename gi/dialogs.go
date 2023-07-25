@@ -81,7 +81,7 @@ func (dlg *Dialog) Disconnect() {
 // 	cs := CurrentColorScheme()
 // 	s := &dlg.Style
 
-// 	s.Font.Color.SetColor(cs.Font)
+// 	s.Color.SetColor(cs.Font)
 // }
 
 // ValidViewport finds a non-nil viewport, either using the provided one, or

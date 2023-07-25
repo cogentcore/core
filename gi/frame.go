@@ -51,8 +51,8 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 // 	s.Border.Radius.Set()
 // 	s.Padding.Set(units.Px(2))
 // 	s.Margin.Set(units.Px(2))
-// 	s.Font.Color.SetColor(cs.Font)
-// 	s.Font.BgColor.SetColor(cs.Background)
+// 	s.Color.SetColor(cs.Font)
+// 	s.BackgroundColor.SetColor(cs.Background)
 // }
 
 var FrameProps = ki.Props{
@@ -90,7 +90,7 @@ func (fr *Frame) FrameStdRender() {
 
 	pos := fr.LayState.Alloc.Pos
 	sz := fr.LayState.Alloc.Size
-	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 
 	// TODO: SideTODO: not sure about this
 	pos = pos.Add(st.Margin.Dots().Pos()).Sub(st.Border.Width.Dots().Pos().MulScalar(0.5))
@@ -126,7 +126,7 @@ func (fr *Frame) RenderStripes() {
 
 	delta := fr.Move2DDelta(image.Point{})
 
-	hic := st.Font.BgColor.Color.Highlight(10)
+	hic := st.BackgroundColor.Color.Highlight(10)
 	if fr.Stripes == RowStripes {
 		for r, gd := range fr.GridData[Row] {
 			if r%2 == 0 {

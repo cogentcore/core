@@ -322,7 +322,7 @@ func (cv *ColorView) UpdateImpl() {
 	cv.UpdateSliderGrid()
 	cv.NumView.UpdateWidget()
 	v := cv.Value()
-	v.Style.Font.BgColor.Color = cv.Color // direct copy
+	v.Style.BackgroundColor.Color = cv.Color // direct copy
 }
 
 func (cv *ColorView) Render2D() {

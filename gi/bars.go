@@ -56,8 +56,8 @@ var MenuBarProps = ki.Props{
 // 	s.Padding.Set(units.Px(2))
 // 	s.Margin.Set()
 // 	mb.Spacing.SetPx(4)
-// 	s.Font.Color.SetColor(TheColorScheme.Font)
-// 	s.Font.BgColor.SetColor(TheColorScheme.Secondary)
+// 	s.Color.SetColor(TheColorScheme.Font)
+// 	s.BackgroundColor.SetColor(TheColorScheme.Secondary)
 // }
 
 // MenuBarStdRender does the standard rendering of the bar
@@ -65,7 +65,7 @@ func (mb *MenuBar) MenuBarStdRender() {
 	rs, pc, st := mb.RenderLock()
 	pos := mb.LayState.Alloc.Pos
 	sz := mb.LayState.Alloc.Size
-	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 	mb.RenderUnlock(rs)
 }
 
@@ -391,7 +391,7 @@ func (tb *ToolBar) ToolBarStdRender() {
 	rs, pc, st := tb.RenderLock()
 	pos := tb.LayState.Alloc.Pos
 	sz := tb.LayState.Alloc.Size
-	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 	tb.RenderUnlock(rs)
 }
 

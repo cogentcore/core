@@ -18,7 +18,7 @@ func StyleFunc(w *gi.WidgetBase) {
 	// cs := gi.CurrentColorScheme()
 	switch w := w.This().(type) {
 	case *Icon:
-		w.Style.Font.BgColor.SetColor(color.Transparent)
-		w.Style.Font.Color.SetColor(colors.White)
+		w.Style.BackgroundColor.SetColor(color.Transparent)
+		w.Style.Color.SetColor(colors.White)
 	}
 }

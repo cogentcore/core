@@ -68,8 +68,8 @@ func (cb *ComboBox) Disconnect() {
 // 	s.Padding.Set(units.Px(4))
 // 	s.Margin.Set(units.Px(4))
 // 	s.Text.Align = gist.AlignCenter
-// 	s.Font.BgColor.SetColor(TheColorScheme.Background)
-// 	s.Font.Color.SetColor(TheColorScheme.Font)
+// 	s.BackgroundColor.SetColor(TheColorScheme.Background)
+// 	s.Color.SetColor(TheColorScheme.Font)
 // }
 
 var ComboBoxProps = ki.Props{

@@ -587,8 +587,8 @@ func (mb *MenuButton) CopyFieldsFrom(frm any) {
 // 	s.Margin.Set(units.Px(4))
 // 	s.Padding.Set(units.Px(4))
 // 	s.Text.Align = gist.AlignCenter
-// 	s.Font.BgColor.SetColor(cs.Background.Highlight(10))
-// 	s.Font.Color.SetColor(cs.Font)
+// 	s.BackgroundColor.SetColor(cs.Background.Highlight(10))
+// 	s.Color.SetColor(cs.Font)
 // }
 
 var MenuButtonProps = ki.Props{
@@ -700,7 +700,7 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 // 	s.AlignH = gist.AlignCenter
 // 	s.Border.Color.Set(cs.Background.Highlight(30))
 // 	s.Border.Width.Set(units.Px(2))
-// 	s.Font.BgColor.SetColor(cs.Background.Highlight(10))
+// 	s.BackgroundColor.SetColor(cs.Background.Highlight(10))
 // }
 
 var SeparatorProps = ki.Props{
@@ -735,8 +735,8 @@ func (sp *Separator) RenderSeparator() {
 	pos := sp.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
 	sz := sp.LayState.Alloc.Size.Sub(st.Margin.Dots().Size())
 
-	if !st.Font.BgColor.IsNil() {
-		pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+	if !st.BackgroundColor.IsNil() {
+		pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 	}
 	// border-top is standard property for separators in CSS (see https://www.w3schools.com/howto/howto_css_dividers.asp)
 	pc.StrokeStyle.Width = st.Border.Width.Top

@@ -550,7 +550,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
 	if sv.Style.Font.Face == nil {
-		girl.OpenFont(&sv.Style.Font, &sv.Style.UnContext)
+		girl.OpenFont(sv.Style.FontRender(), &sv.Style.UnContext)
 	}
 	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Style.Font.Face.Metrics.Height)
 
@@ -667,7 +667,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 					}
 				})
 			}
-			idxlab.CurBgColor = gi.Prefs.Colors.Background
+			idxlab.CurBackgroundColor = gi.Prefs.Colors.Background
 			idxlab.SetText(sitxt)
 			idxlab.SetSelectedState(issel)
 		}

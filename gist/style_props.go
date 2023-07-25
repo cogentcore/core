@@ -177,12 +177,38 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			s.PointerEvents = bv
 		}
 	},
+	"color": func(obj any, key string, val any, par any, ctxt Context) {
+		fs := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				fs.Color = par.(*Style).Color
+			} else if init {
+				fs.Color = Black
+			}
+			return
+		}
+		fs.Color.SetIFace(val, ctxt, key)
+	},
+	"background-color": func(obj any, key string, val any, par any, ctxt Context) {
+		fs := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				fs.BackgroundColor = par.(*Style).BackgroundColor
+			} else if init {
+				fs.BackgroundColor = ColorSpec{}
+			}
+			return
+		}
+		fs.BackgroundColor.SetIFace(val, ctxt, key)
+	},
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 //  Layout
 
-// StyleLayoutFuncs are functions for styling the Layout object
+// StyleLayoutFuncs are functions for styling the layout
+// style properties; they are still stored on the main style object,
+// but they are done separately to improve clarity
 var StyleLayoutFuncs = map[string]StyleFunc{
 	"z-index": func(obj any, key string, val any, par any, ctxt Context) {
 		s := obj.(*Style)
@@ -476,30 +502,6 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 
 // StyleFontFuncs are functions for styling the Font object
 var StyleFontFuncs = map[string]StyleFunc{
-	"color": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Font)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.Color = par.(*Font).Color
-			} else if init {
-				fs.Color = Black
-			}
-			return
-		}
-		fs.Color.SetIFace(val, ctxt, key)
-	},
-	"background-color": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Font)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.BgColor = par.(*Font).BgColor
-			} else if init {
-				fs.BgColor = ColorSpec{}
-			}
-			return
-		}
-		fs.BgColor.SetIFace(val, ctxt, key)
-	},
 	"opacity": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {

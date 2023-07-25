@@ -29,15 +29,15 @@ import (
 // other options to get word-wrapping etc.
 type Label struct {
 	WidgetBase
-	Text        string                   `xml:"text" desc:"label to display"`
-	Selectable  bool                     `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
-	Redrawable  bool                     `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
-	Type        LabelTypes               `desc:"the type of label (p, h1, h2, etc)"`
-	LinkSig     ki.Signal                `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
-	StateStyles [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
-	Render      girl.Text                `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
-	RenderPos   mat32.Vec2               `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
-	CurBgColor  gist.Color               `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
+	Text               string                   `xml:"text" desc:"label to display"`
+	Selectable         bool                     `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
+	Redrawable         bool                     `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
+	Type               LabelTypes               `desc:"the type of label (p, h1, h2, etc)"`
+	LinkSig            ki.Signal                `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+	StateStyles        [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
+	Render             girl.Text                `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
+	RenderPos          mat32.Vec2               `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
+	CurBackgroundColor gist.Color               `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
@@ -108,8 +108,8 @@ func (lb *Label) Disconnect() {
 // 	s.Padding.Set(units.Px(2))
 // 	s.Margin.Set(units.Px(2))
 // 	s.AlignV = gist.AlignTop
-// 	s.Font.Color.SetColor(cs.Font)
-// 	s.Font.BgColor.SetColor(color.Transparent)
+// 	s.Color.SetColor(cs.Font)
+// 	s.BackgroundColor.SetColor(color.Transparent)
 
 // 	switch lb.Type {
 // 	case LabelP:
@@ -195,12 +195,12 @@ func (lb *Label) SetText(txt string) {
 	lb.SetStateStyle()
 	lb.StyMu.RLock()
 	lb.Text = txt
-	lb.Style.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
 	// this makes it easier for it to update with dynamic bgs
 	if lb.Text == "" {
-		lb.Render.SetHTML(" ", &lb.Style.Font, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+		lb.Render.SetHTML(" ", lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	} else {
-		lb.Render.SetHTML(lb.Text, &lb.Style.Font, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+		lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	}
 	spc := lb.BoxSpace()
 	sz := lb.LayState.Alloc.Size
@@ -210,7 +210,7 @@ func (lb *Label) SetText(txt string) {
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.Render.LayoutStdLR(&lb.Style.Text, &lb.Style.Font, &lb.Style.UnContext, sz)
+	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	lb.StyMu.RUnlock()
 	lb.UpdateEnd(updt)
 }
@@ -220,15 +220,15 @@ func (lb *Label) SetStateStyle() {
 	lb.StyMu.Lock()
 	if lb.IsInactive() {
 		lb.Style = lb.StateStyles[LabelInactive]
-		if lb.Redrawable && !lb.CurBgColor.IsNil() {
-			lb.Style.Font.BgColor.SetColor(lb.CurBgColor)
+		if lb.Redrawable && !lb.CurBackgroundColor.IsNil() {
+			lb.Style.BackgroundColor.SetColor(lb.CurBackgroundColor)
 		}
 	} else if lb.IsSelected() {
 		lb.Style = lb.StateStyles[LabelSelected]
 	} else {
 		lb.Style = lb.StateStyles[LabelActive]
-		if (lb.Selectable || lb.Redrawable) && !lb.CurBgColor.IsNil() {
-			lb.Style.Font.BgColor.SetColor(lb.CurBgColor)
+		if (lb.Selectable || lb.Redrawable) && !lb.CurBackgroundColor.IsNil() {
+			lb.Style.BackgroundColor.SetColor(lb.CurBackgroundColor)
 		}
 	}
 	lb.StyMu.Unlock()
@@ -348,16 +348,16 @@ func (lb *Label) LabelEvents() {
 	lb.MouseMoveEvent()
 }
 
-func (lb *Label) GrabCurBgColor() {
+func (lb *Label) GrabCurBackgroundColor() {
 	if lb.Viewport == nil || lb.IsSelected() {
 		return
 	}
-	if !gist.RebuildDefaultStyles && !lb.CurBgColor.IsNil() {
+	if !gist.RebuildDefaultStyles && !lb.CurBackgroundColor.IsNil() {
 		return
 	}
 	pos := lb.ContextMenuPos()
 	clr := lb.Viewport.Pixels.At(pos.X, pos.Y)
-	lb.CurBgColor.SetColor(clr)
+	lb.CurBackgroundColor.SetColor(clr)
 }
 
 // StyleLabel does label styling -- it sets the StyMu Lock
@@ -391,8 +391,8 @@ func (lb *Label) StyleLabel() {
 			lb.StateStyles[i].SaveTemplate()
 		}
 	}
-	if lb.CurBgColor.IsNil() && !lb.Style.Font.BgColor.Color.IsNil() {
-		lb.CurBgColor = lb.Style.Font.BgColor.Color
+	if lb.CurBackgroundColor.IsNil() && !lb.Style.BackgroundColor.Color.IsNil() {
+		lb.CurBackgroundColor = lb.Style.BackgroundColor.Color
 	}
 	lb.ParentStyleRUnlock()
 }
@@ -401,14 +401,14 @@ func (lb *Label) LayoutLabel() {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
-	lb.Style.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
-	lb.Render.SetHTML(lb.Text, &lb.Style.Font, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.Render.LayoutStdLR(&lb.Style.Text, &lb.Style.Font, &lb.Style.UnContext, sz)
+	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 }
 
 func (lb *Label) Style2D() {
@@ -437,9 +437,9 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
-	lb.Style.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
-	lb.Render.SetHTML(lb.Text, &lb.Style.Font, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
-	lb.Render.LayoutStdLR(&lb.Style.Text, &lb.Style.Font, &lb.Style.UnContext, sz)
+	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	if lb.Style.Text.HasWordWrap() {
 		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
 			lb.LayState.SetFromStyle(&lb.Style)
@@ -458,7 +458,7 @@ func (lb *Label) TextPos() mat32.Vec2 {
 }
 
 func (lb *Label) RenderLabel() {
-	lb.GrabCurBgColor()
+	lb.GrabCurBackgroundColor()
 	lb.SetStateStyle()
 	rs, _, st := lb.RenderLock()
 	defer lb.RenderUnlock(rs)

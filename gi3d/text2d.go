@@ -114,12 +114,12 @@ func (txt *Text2D) StyleText(sc *Scene) {
 
 func (txt *Text2D) RenderText(sc *Scene) {
 	txt.StyleText(sc)
-	txt.TxtRender.SetHTML(txt.Text, &txt.Sty.Font, &txt.Sty.Text, &txt.Sty.UnContext, txt.CSSAgg)
+	txt.TxtRender.SetHTML(txt.Text, txt.Sty.FontRender(), &txt.Sty.Text, &txt.Sty.UnContext, txt.CSSAgg)
 	sz := txt.TxtRender.Size
-	txt.TxtRender.LayoutStdLR(&txt.Sty.Text, &txt.Sty.Font, &txt.Sty.UnContext, sz)
+	txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
 	if txt.TxtRender.Size != sz {
 		sz = txt.TxtRender.Size
-		txt.TxtRender.LayoutStdLR(&txt.Sty.Text, &txt.Sty.Font, &txt.Sty.UnContext, sz)
+		txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
 		if txt.TxtRender.Size != sz {
 			sz = txt.TxtRender.Size
 		}
@@ -165,7 +165,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		rs.Init(szpt.X, szpt.Y, img)
 	}
 	rs.PushBounds(bounds)
-	draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.Point{}, draw.Src)
+	draw.Draw(img, bounds, &image.Uniform{txt.Sty.BackgroundColor.Color}, image.Point{}, draw.Src)
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
 }
@@ -204,7 +204,7 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 }
 
 func (txt *Text2D) IsTransparent() bool {
-	if txt.Sty.Font.BgColor.Color.A < 255 {
+	if txt.Sty.BackgroundColor.Color.A < 255 {
 		return true
 	}
 	return false

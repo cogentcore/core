@@ -779,7 +779,7 @@ func (sr *Slider) Render2DDefaultStyle() {
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
-	pc.FillStyle.SetColorSpec(&st.Font.BgColor)
+	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
 
 	// layout is as follows, for width dimension
 	// |      bw             bw     |
@@ -806,12 +806,12 @@ func (sr *Slider) Render2DDefaultStyle() {
 	sr.RenderBoxImpl(bpos, bsz, st.Border)
 
 	bsz.SetDim(sr.Dim, sr.Pos)
-	pc.FillStyle.SetColorSpec(&sr.StateStyles[SliderValue].Font.BgColor)
+	pc.FillStyle.SetColorSpec(&sr.StateStyles[SliderValue].BackgroundColor)
 	sr.RenderBoxImpl(bpos, bsz, st.Border)
 
 	tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
-	pc.FillStyle.SetColorSpec(&st.Font.BgColor)
+	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.RenderUnlock(rs)
@@ -962,7 +962,7 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
-	pc.FillStyle.SetColorSpec(&st.Font.BgColor)
+	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
 
 	// scrollbar is basic box in content size
 	spc := st.BoxSpace()
@@ -972,7 +972,7 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 	sb.RenderBoxImpl(pos, sz, st.Border) // surround box
 	pos.SetAddDim(sb.Dim, sb.Pos)        // start of thumb
 	sz.SetDim(sb.Dim, sb.ThSize)
-	pc.FillStyle.SetColorSpec(&sb.StateStyles[SliderValue].Font.BgColor)
+	pc.FillStyle.SetColorSpec(&sb.StateStyles[SliderValue].BackgroundColor)
 	sb.RenderBoxImpl(pos, sz, st.Border)
 }
 

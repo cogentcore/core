@@ -89,7 +89,7 @@ func (sc *Scene) ConfigFrameImpl(gpu *vgpu.GPU, dev *vgpu.Device) bool {
 	sc.Camera.CamMu.Lock()
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.CamMu.Unlock()
-	clr := mat32.NewVec3Color(sc.BgColor).SRGBToLinear()
+	clr := mat32.NewVec3Color(sc.BackgroundColor).SRGBToLinear()
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	return wasConfig

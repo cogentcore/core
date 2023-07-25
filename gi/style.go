@@ -29,22 +29,22 @@ var CustomConfigStyles func(w *WidgetBase)
 // 	// fmt.Printf("Styling\t%v\n", w.This())
 // 	if par, ok := w.Parent().Embed(KiT_WidgetBase).(*WidgetBase); ok {
 // 		// fmt.Println("got parent")
-// 		if par.Style.Font.Color.IsNil() {
-// 			w.Style.Font.Color.SetColor(cs.Font)
+// 		if par.Style.Color.IsNil() {
+// 			w.Style.Color.SetColor(cs.Font)
 // 		} else {
-// 			// fmt.Println("inhereting color", par.Style.Font.Color)
-// 			w.Style.Font.Color.SetColor(par.Style.Font.Color)
+// 			// fmt.Println("inhereting color", par.Style.Color)
+// 			w.Style.Color.SetColor(par.Style.Color)
 // 		}
 // 		w.Style.Text.WhiteSpace = par.Style.Text.WhiteSpace
 // 	}
 // 	if ds, ok := w.This().(DefaultStyler); ok {
 // 		ds.DefaultStyle()
 // 	}
-// 	// w.Style.Font.BgColor.SetColor(cs.Background)
+// 	// w.Style.BackgroundColor.SetColor(cs.Background)
 // 	switch w := w.This().(type) {
 // 	case *Viewport2D:
 // 		// fmt.Println("styling viewport")
-// 		// w.Style.Font.Color.SetColor(cs.Font)
+// 		// w.Style.Color.SetColor(cs.Font)
 // 	case *Label:
 // 		styleLabel(w, cs)
 // 	case *Icon:
@@ -74,8 +74,8 @@ var CustomConfigStyles func(w *WidgetBase)
 // func styleIcon(i *Icon, cs ColorScheme) {
 // 	i.Style.Width.SetEm(1.5)
 // 	i.Style.Height.SetEm(1.5)
-// 	i.Style.Font.BgColor.SetColor(gist.Transparent)
-// 	i.Style.Font.Color.SetColor(colors.White)
+// 	i.Style.BackgroundColor.SetColor(gist.Transparent)
+// 	i.Style.Color.SetColor(colors.White)
 // }
 
 // func styleButton(b *Button, cs ColorScheme) {
@@ -91,11 +91,11 @@ var CustomConfigStyles func(w *WidgetBase)
 // 		case ButtonDown:
 // 			c = cs.Primary.Darker(30)
 // 		}
-// 		b.Style.Font.Color.SetColor(cs.Font.Highlight(100))
-// 		b.Style.Font.BgColor.SetColor(c)
+// 		b.Style.Color.SetColor(cs.Font.Highlight(100))
+// 		b.Style.BackgroundColor.SetColor(c)
 
 // 	} else if b.Type == ButtonSecondary {
-// 		b.Style.Font.Color.SetColor(cs.Primary)
+// 		b.Style.Color.SetColor(cs.Primary)
 // 		b.Style.Border.Color.Set(cs.Primary)
 // 		b.Style.Border.Style.Set(gist.BorderSolid)
 // 		b.Style.Border.Width.Set(units.Px(1))
@@ -107,7 +107,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // 		case ButtonDown:
 // 			cc = cc.Highlight(30)
 // 		}
-// 		b.Style.Font.BgColor.SetColor(cc)
+// 		b.Style.BackgroundColor.SetColor(cc)
 // 	} else {
 // 		styleDefaultButton(&b.ButtonBase, cs)
 // 	}
@@ -124,7 +124,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // func styleLabel(l *Label, cs ColorScheme) {
 // 	switch p := l.Parent().Parent().(type) {
 // 	case *Button:
-// 		l.Style.Font.Color.SetColor(p.Style.Font.Color)
+// 		l.Style.Color.SetColor(p.Style.Color)
 // 	}
 // 	switch l.Type {
 // 	case LabelP:
@@ -152,7 +152,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // 	tf.Style.Padding.Set(units.Px(4))
 // 	tf.Style.Margin.Set(units.Px(1))
 // 	tf.Style.Text.Align = gist.AlignLeft
-// 	tf.Style.Font.BgColor.SetColor(cs.Background.Highlight(5))
+// 	tf.Style.BackgroundColor.SetColor(cs.Background.Highlight(5))
 
 // 	// fmt.Println("text field kids", tf.Parts.Kids)
 
@@ -176,7 +176,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // }
 
 // func styleDefaultButton(bb *ButtonBase, cs ColorScheme) {
-// 	bb.Style.Font.Color.SetColor(cs.Font)
+// 	bb.Style.Color.SetColor(cs.Font)
 // 	bc := cs.Background.Highlight(5)
 // 	switch bb.State {
 // 	case ButtonHover:
@@ -184,7 +184,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // 	case ButtonDown:
 // 		bc = bc.Highlight(20)
 // 	}
-// 	bb.Style.Font.BgColor.SetColor(bc)
+// 	bb.Style.BackgroundColor.SetColor(bc)
 // }
 
 // // // StyleFunc is the global style function

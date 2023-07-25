@@ -66,6 +66,11 @@ type Style struct {
 	ColSpan        int         `xml:"col-span" desc:"prop: col-span = specifies the number of sequential columns that this element should occupy within a grid layout"`
 	ScrollBarWidth units.Value `xml:"scrollbar-width" desc:"prop: scrollbar-width = width of a layout scrollbar"`
 
+	// Color styles
+
+	Color           Color     `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
+	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+
 	Border        Border        `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
 	BoxShadow     Shadow        `xml:"box-shadow" desc:"prop: box-shadow = type of shadow to render around box"`
 	Font          Font          `desc:"font parameters -- no xml prefix -- also has color, background-color"`
@@ -88,6 +93,7 @@ func (s *Style) Defaults() {
 	s.PointerEvents = true
 
 	s.LayoutDefaults()
+	s.Color = Black
 	s.Font.Defaults()
 	s.Text.Defaults()
 }
@@ -175,7 +181,7 @@ func (s *Style) CopyFrom(cp *Style) {
 	lu := s.lastUnCtxt
 	tm := s.Template
 	*s = *cp
-	s.Font.BgColor = cp.Font.BgColor
+	s.BackgroundColor = cp.BackgroundColor
 	s.IsSet = is
 	s.PropsNil = pn
 	s.dotsSet = ds
@@ -228,6 +234,7 @@ func (s *Style) SaveTemplate() {
 // automatic version!
 func (s *Style) InheritFields(par *Style) {
 	// fmt.Println("Inheriting from", *par)
+	s.Color = par.Color
 	s.Font.InheritFields(&par.Font)
 	s.Text.InheritFields(&par.Text)
 }

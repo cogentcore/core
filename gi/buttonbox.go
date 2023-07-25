@@ -57,8 +57,8 @@ func (bb *ButtonBox) Disconnect() {
 // 	s.Padding.Set(units.Px(2))
 // 	s.Margin.Set(units.Px(2))
 // 	s.Text.Align = gist.AlignCenter
-// 	s.Font.BgColor.SetColor(TheColorScheme.Secondary)
-// 	s.Font.Color.SetColor(TheColorScheme.Secondary.ContrastColor())
+// 	s.BackgroundColor.SetColor(TheColorScheme.Secondary)
+// 	s.Color.SetColor(TheColorScheme.Secondary.ContrastColor())
 // }
 
 var ButtonBoxProps = ki.Props{
