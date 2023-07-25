@@ -181,7 +181,7 @@ func (g *Text) RenderText() {
 	}
 	girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
 	if !pc.FillStyle.Color.IsNil() {
-		pc.FontStyle.Color = pc.FillStyle.Color.Color
+		*pc.FontStyle.Color = pc.FillStyle.Color.Color
 	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
 	pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y

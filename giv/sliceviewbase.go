@@ -550,8 +550,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
 	if sv.Style.Font.Face == nil {
-		fr := sv.Style.FontRender()
-		girl.OpenFont(&fr, &sv.Style.UnContext)
+		girl.OpenFont(sv.Style.FontRender(), &sv.Style.UnContext)
 	}
 	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Style.Font.Face.Metrics.Height)
 

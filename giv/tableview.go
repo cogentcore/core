@@ -449,8 +449,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 		tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
 	if tv.Style.Font.Face == nil {
-		fr := tv.Style.FontRender()
-		girl.OpenFont(&fr, &tv.Style.UnContext)
+		girl.OpenFont(tv.Style.FontRender(), &tv.Style.UnContext)
 	}
 	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Style.Font.Face.Metrics.Height)
 

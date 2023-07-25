@@ -5,7 +5,6 @@
 package girl
 
 import (
-	"fmt"
 	"image"
 	"log"
 	"sync"
@@ -176,12 +175,9 @@ func (rs *State) PopClip() {
 // BackupPaint copies style settings from Paint to PaintBack
 func (rs *State) BackupPaint() {
 	rs.PaintBack.CopyStyleFrom(&rs.Paint.Paint)
-	fmt.Println("paint backup", rs.PaintBack.Paint.FontStyle.Font)
 }
 
 // RestorePaint restores style settings from PaintBack to Paint
 func (rs *State) RestorePaint() {
-	fmt.Println("before restore", rs.Paint.Paint.FontStyle.Font)
 	rs.Paint.CopyStyleFrom(&rs.PaintBack.Paint)
-	fmt.Println("paint restore", rs.Paint.Paint.FontStyle.Font)
 }

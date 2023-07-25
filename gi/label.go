@@ -197,11 +197,10 @@ func (lb *Label) SetText(txt string) {
 	lb.Text = txt
 	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
 	// this makes it easier for it to update with dynamic bgs
-	fr := lb.Style.FontRender()
 	if lb.Text == "" {
-		lb.Render.SetHTML(" ", &fr, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+		lb.Render.SetHTML(" ", lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	} else {
-		lb.Render.SetHTML(lb.Text, &fr, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+		lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	}
 	spc := lb.BoxSpace()
 	sz := lb.LayState.Alloc.Size
@@ -211,7 +210,7 @@ func (lb *Label) SetText(txt string) {
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.Render.LayoutStdLR(&lb.Style.Text, &fr, &lb.Style.UnContext, sz)
+	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	lb.StyMu.RUnlock()
 	lb.UpdateEnd(updt)
 }
@@ -403,14 +402,13 @@ func (lb *Label) LayoutLabel() {
 	defer lb.StyMu.RUnlock()
 
 	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
-	fr := lb.Style.FontRender()
-	lb.Render.SetHTML(lb.Text, &fr, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.Render.LayoutStdLR(&lb.Style.Text, &fr, &lb.Style.UnContext, sz)
+	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 }
 
 func (lb *Label) Style2D() {
@@ -440,9 +438,8 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
 	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
-	fr := lb.Style.FontRender()
-	lb.Render.SetHTML(lb.Text, &fr, &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
-	lb.Render.LayoutStdLR(&lb.Style.Text, &fr, &lb.Style.UnContext, sz)
+	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	if lb.Style.Text.HasWordWrap() {
 		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
 			lb.LayState.SetFromStyle(&lb.Style)

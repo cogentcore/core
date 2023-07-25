@@ -461,63 +461,46 @@ func FixFontMods(fn string) string {
 // It stores all values as pointers so that they correspond
 // to the values of the style object it was derived from.
 type FontRender struct {
-	Font
-	Color           Color     `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
-	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+	*Font
+	Color           *Color     `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
+	BackgroundColor *ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
 }
 
-// // NewFontRender returns a new FontRender object
-// func NewFontRender() *FontRender {
-// 	return &FontRender{
-// 		Font:            Font{},
-// 		Color:           Color{},
-// 		BackgroundColor: ColorSpec{},
-// 	}
-// }
-
-// FontRender returns the font-rendering-related
-// styles of the style object as a FontRender
-func (s *Style) FontRender() FontRender {
-	return FontRender{
-		Font:            s.Font,
-		Color:           s.Color,
-		BackgroundColor: s.BackgroundColor,
+// NewFontRender returns a new FontRender object
+func NewFontRender() *FontRender {
+	return &FontRender{
+		Font:            &Font{},
+		Color:           &Color{},
+		BackgroundColor: &ColorSpec{},
 	}
 }
 
-// // Init initializes the fields of the FontRender
-// // object if they have not already been
-// func (fr *FontRender) Init() {
-// 	if fr.Color == nil {
-// 		fr.Color = &Color{}
-// 	}
-// 	if fr.BackgroundColor == nil {
-// 		fr.BackgroundColor = &ColorSpec{}
-// 	}
-// 	if fr.Font == nil {
-// 		fr.Font = &Font{}
-// 	}
-// }
-
-// func (fr *FontRender) CopyFieldsFrom(frm *FontRender) {
-// 	fr.Init()
-// 	// fmt.Println("before\t", fr)
-// 	// before := *fr
-// 	*(fr.Font) = *(frm.Font)
-// 	*(fr.Color) = *(frm.Color)
-// 	*(fr.BackgroundColor) = *(frm.BackgroundColor)
-// 	// fmt.Println("before=after\t", before == *fr)
-// 	// fmt.Println("after\t", fr)
-// }
+// FontRender returns the font-rendering-related
+// styles of the style object as a FontRender
+func (s *Style) FontRender() *FontRender {
+	return &FontRender{
+		Font:            &s.Font,
+		Color:           &s.Color,
+		BackgroundColor: &s.BackgroundColor,
+	}
+}
 
 func (fr *FontRender) Defaults() {
-	// fr.Init()
-	fr.Color = Black
+	if fr.Color == nil {
+		fr.Color = &Color{}
+	}
+	*fr.Color = Black
+	if fr.BackgroundColor == nil {
+		fr.BackgroundColor = &ColorSpec{}
+	}
+	if fr.Font == nil {
+		fr.Font = &Font{}
+	}
 	fr.Font.Defaults()
 }
 
 // InheritFields from parent
 func (fr *FontRender) InheritFields(par *FontRender) {
-	fr.Color = par.Color
-	fr.Font.InheritFields(&par.Font)
+	*fr.Color = *par.Color
+	fr.Font.InheritFields(par.Font)
 }
