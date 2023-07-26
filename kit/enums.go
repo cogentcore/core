@@ -666,7 +666,7 @@ func (tr *EnumRegistry) Values(enumName string, alt bool) []EnumValue {
 			str = alts[i]
 		}
 		desc := ""
-		if d, ok := reflect.ValueOf(vals[i].Value).Convert(et).Interface().(Describer); ok {
+		if d, ok := reflect.ValueOf(i).Convert(et).Interface().(Describer); ok {
 			desc = d.Desc()
 		}
 		vals[i].Set(str, i, et, desc)
