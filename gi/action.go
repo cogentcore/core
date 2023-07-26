@@ -418,9 +418,9 @@ func (ac *Action) ConfigStyles() {
 			ac.Style.BackgroundColor.SetColor(Colors.Background)
 			ac.Style.Color.SetColor(Colors.Text.Highlight(30))
 		case ButtonFocus, ButtonSelected:
-			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
-		case ButtonHover:
 			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+		case ButtonHover:
+			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
 		case ButtonDown:
 			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
 		}

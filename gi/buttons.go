@@ -64,6 +64,8 @@ const (
 	// the inverse of a primary button; it is typically used
 	// for secondary actions like cancel, back, and options
 	ButtonSecondary
+	// ButtonText is a button with no border or background color.
+	// It should be used as a low-priority secondary button
 
 	ButtonTypesN
 )
@@ -908,6 +910,60 @@ var ButtonProps = ki.Props{
 	},
 }
 
+func (bt *Button) Init2D() {
+	bt.ButtonBase.Init2D()
+	bt.ConfigStyles()
+}
+
+func (bt *Button) ConfigStyles() {
+	bt.AddStyleFunc(StyleFuncDefault, func() {
+		bt.Style.Border.Radius.Set(units.Px(4))
+		bt.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
+		bt.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		bt.Style.Text.Align = gist.AlignCenter
+		switch bt.Type {
+		case ButtonDefault:
+			bt.Style.Border.Style.Set(gist.BorderNone)
+			bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			bt.Style.Color = Colors.Text
+		case ButtonPrimary:
+			bt.Style.Border.Style.Set(gist.BorderNone)
+			bt.Style.BackgroundColor.SetColor(Colors.Primary)
+			bt.Style.Color = bt.Style.BackgroundColor.Color.ContrastColor()
+		case ButtonSecondary:
+			bt.Style.Border.Style.Set(gist.BorderSolid)
+			bt.Style.Border.Width.Set(units.Px(1))
+			bt.Style.Border.Color.Set(Colors.Primary)
+			bt.Style.BackgroundColor.SetColor(Colors.Background)
+			bt.Style.Color = Colors.Primary
+		}
+	})
+	bt.AddChildStyleFunc("icon", 0, StyleFuncParts(bt), func(icon *WidgetBase) {
+		icon.Style.Width.SetEm(1)
+		icon.Style.Height.SetEm(1)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+	})
+	bt.AddChildStyleFunc("space", 1, StyleFuncParts(bt), func(space *WidgetBase) {
+		space.Style.Width.SetCh(0.5)
+		space.Style.MinWidth.SetCh(0.5)
+	})
+	bt.AddChildStyleFunc("label", 2, StyleFuncParts(bt), func(label *WidgetBase) {
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
+	})
+	bt.AddChildStyleFunc("ind-stretch", 3, StyleFuncParts(bt), func(ins *WidgetBase) {
+		ins.Style.Width.SetEm(1)
+	})
+	bt.AddChildStyleFunc("indicator", 4, StyleFuncParts(bt), func(ind *WidgetBase) {
+		ind.Style.Width.SetEx(1.5)
+		ind.Style.Height.SetEx(1.5)
+		ind.Style.Margin.Set()
+		ind.Style.Padding.Set()
+		ind.Style.AlignV = gist.AlignBottom
+	})
+}
+
 ///////////////////////////////////////////////////////////
 // CheckBox
 
@@ -931,61 +987,61 @@ func (cb *CheckBox) CopyFieldsFrom(frm any) {
 }
 
 var CheckBoxProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"icon":             icons.CheckBox,
-	"icon-off":         icons.CheckBoxOutlineBlank,
-	"text-align":       gist.AlignLeft,
-	"color":            &Prefs.Colors.Font,
-	"background-color": &Prefs.Colors.Control,
-	"margin":           units.Px(1),
-	"padding":          units.Px(1),
-	"border-width":     units.Px(0),
-	"#icon0": ki.Props{
-		"width":            units.Em(1),
-		"height":           units.Em(1),
-		"margin":           units.Px(0),
-		"padding":          units.Px(0),
-		"background-color": color.Transparent,
-		"fill":             &Prefs.Colors.Control,
-		"stroke":           &Prefs.Colors.Font,
-	},
-	"#icon1": ki.Props{
-		"width":            units.Em(1),
-		"height":           units.Em(1),
-		"margin":           units.Px(0),
-		"padding":          units.Px(0),
-		"background-color": color.Transparent,
-		"fill":             &Prefs.Colors.Control,
-		"stroke":           &Prefs.Colors.Font,
-	},
-	"#space": ki.Props{
-		"width": units.Ch(0.1),
-	},
-	"#label": ki.Props{
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "lighter-0",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "highlight-10",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.Px(2),
-		"background-color": "samelight-50",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "highlight-90",
-		"background-color": "highlight-30",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": &Prefs.Colors.Select,
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "icon":             icons.CheckBox,
+	// "icon-off":         icons.CheckBoxOutlineBlank,
+	// "text-align":       gist.AlignLeft,
+	// "color":            &Prefs.Colors.Font,
+	// "background-color": &Prefs.Colors.Control,
+	// "margin":           units.Px(1),
+	// "padding":          units.Px(1),
+	// "border-width":     units.Px(0),
+	// "#icon0": ki.Props{
+	// 	"width":            units.Em(1),
+	// 	"height":           units.Em(1),
+	// 	"margin":           units.Px(0),
+	// 	"padding":          units.Px(0),
+	// 	"background-color": color.Transparent,
+	// 	"fill":             &Prefs.Colors.Control,
+	// 	"stroke":           &Prefs.Colors.Font,
+	// },
+	// "#icon1": ki.Props{
+	// 	"width":            units.Em(1),
+	// 	"height":           units.Em(1),
+	// 	"margin":           units.Px(0),
+	// 	"padding":          units.Px(0),
+	// 	"background-color": color.Transparent,
+	// 	"fill":             &Prefs.Colors.Control,
+	// 	"stroke":           &Prefs.Colors.Font,
+	// },
+	// "#space": ki.Props{
+	// 	"width": units.Ch(0.1),
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// ButtonSelectors[ButtonActive]: ki.Props{
+	// 	"background-color": "lighter-0",
+	// },
+	// ButtonSelectors[ButtonInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// ButtonSelectors[ButtonHover]: ki.Props{
+	// 	"background-color": "highlight-10",
+	// },
+	// ButtonSelectors[ButtonFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "samelight-50",
+	// },
+	// ButtonSelectors[ButtonDown]: ki.Props{
+	// 	"color":            "highlight-90",
+	// 	"background-color": "highlight-30",
+	// },
+	// ButtonSelectors[ButtonSelected]: ki.Props{
+	// 	"background-color": &Prefs.Colors.Select,
+	// },
 }
 
 // CheckBoxWidget interface
@@ -1124,14 +1180,43 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 
 func (cb *CheckBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
+		cb.Style.Text.Align = gist.AlignLeft
 		cb.Style.Color.SetColor(Colors.Text)
+		cb.Style.BackgroundColor.SetColor(Colors.Background)
+		cb.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
+		cb.Style.Padding.Set(units.Px(1 * Prefs.DensityMul()))
+		cb.Style.Border.Style.Set(gist.BorderNone)
 		switch cb.State {
-		default:
+		case ButtonActive:
 			cb.Style.BackgroundColor.SetColor(Colors.Background)
-		case ButtonHover:
+		case ButtonInactive:
+			cb.Style.BackgroundColor.SetColor(Colors.Background)
+			cb.Style.Color.SetColor(Colors.Text.Highlight(30))
+		case ButtonFocus, ButtonSelected:
 			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+		case ButtonHover:
+			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
 		case ButtonDown:
 			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
 		}
+	})
+	if stack, ok := cb.Parts.ChildByName("stack", 0).(*Layout); ok {
+		// same style function for both icon on and off
+		icsf := func(icon *WidgetBase) {
+			icon.Style.Width.SetEm(1.5)
+			icon.Style.Height.SetEm(1.5)
+			icon.Style.Margin.Set()
+			icon.Style.Padding.Set()
+			icon.Style.BackgroundColor.SetColor(color.Transparent)
+		}
+		stack.AddChildStyleFunc("icon0", 0, StyleFuncParts(cb), icsf)
+		stack.AddChildStyleFunc("icon1", 1, StyleFuncParts(cb), icsf)
+	}
+	cb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(cb), func(space *WidgetBase) {
+		space.Style.Width.SetCh(0.1)
+	})
+	cb.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(cb), func(label *WidgetBase) {
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
 	})
 }

@@ -64,15 +64,15 @@ func (bb *ButtonBox) Disconnect() {
 // }
 
 var ButtonBoxProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.Px(1),
-	"border-radius":    units.Px(2),
-	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.Px(2),
-	"margin":           units.Px(2),
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(2),
+	// "border-color":     &Prefs.Colors.Border,
+	// "padding":          units.Px(2),
+	// "margin":           units.Px(2),
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
 }
 
 // SelectItem activates a given item but does NOT emit the ButtonSig signal.
@@ -251,6 +251,7 @@ func (bb *ButtonBox) ConfigPartsIfNeeded() {
 func (bb *ButtonBox) Init2D() {
 	bb.Init2DWidget()
 	bb.ConfigParts()
+	bb.ConfigStyles()
 }
 
 func (bb *ButtonBox) Style2D() {
@@ -287,4 +288,16 @@ func (bb *ButtonBox) Render2D() {
 	} else {
 		bb.DisconnectAllEvents(RegPri)
 	}
+}
+
+func (bb *ButtonBox) ConfigStyles() {
+	bb.AddStyleFunc(StyleFuncDefault, func() {
+		bb.Style.Border.Style.Set(gist.BorderNone)
+		bb.Style.Border.Radius.Set(units.Px(2))
+		bb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		bb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		bb.Style.Text.Align = gist.AlignCenter
+		bb.Style.BackgroundColor.SetColor(Colors.Background)
+		bb.Style.Color.SetColor(Colors.Text)
+	})
 }

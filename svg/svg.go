@@ -110,7 +110,8 @@ func (sv *SVG) Init2D() {
 	sv.Viewport2D.Init2D()
 	sv.SetFlag(int(gi.VpFlagSVG)) // we are an svg type
 	sv.Pnt.Defaults()
-	sv.Pnt.FontStyle.BackgroundColor.SetColor(gist.White)
+	// sv.Pnt.FontStyle.BackgroundColor.SetColor(gist.White)
+	sv.ConfigStyles()
 }
 
 func (sv *SVG) Size2D(iter int) {
@@ -183,6 +184,8 @@ func (sv *SVG) StyleSVG() {
 	sv.Pnt.Defaults()
 	sv.StyMu.Unlock()
 	StyleSVG(sv.This().(gi.Node2D))
+	// TODO: cleaner svg styling from text color property
+	sv.StyleFuncs.Vals()[0]()
 	SetUnitContext(&sv.Pnt.Paint, sv.AsViewport2D(), sv.ViewBox.Size) // context is viewbox
 }
 
@@ -399,4 +402,14 @@ var SVGProps = ki.Props{
 			},
 		}},
 	},
+}
+
+func (sv *SVG) ConfigStyles() {
+	sv.AddStyleFunc(gi.StyleFuncDefault, func() {
+		if par, ok := sv.Parent().Embed(gi.KiT_WidgetBase).(*gi.WidgetBase); ok {
+			sv.Pnt.FillStyle.Color.SetColor(par.Style.Color)
+			sv.Pnt.StrokeStyle.Color.SetColor(par.Style.Color)
+			fmt.Println("svg fill color", sv.Pnt.FillStyle.Color, "stroke color", sv.Pnt.StrokeStyle.Color)
+		}
+	})
 }

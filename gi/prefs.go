@@ -478,11 +478,11 @@ var KiT_Densities = kit.Enums.AddEnumAltLower(DensitiesN, kit.NotBitFlag, gist.S
 func (pf *Preferences) DensityMul() float32 {
 	switch pf.Density {
 	case DensityCompact:
-		return 0.75
+		return 0.5
 	case DensityMedium:
 		return 1
 	case DensitySpread:
-		return 1.25
+		return 1.5
 	}
 	log.Println("got invalid preferences density value", pf.Density)
 	return 1
