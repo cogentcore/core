@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
@@ -25,6 +26,7 @@ import (
 type ButtonBox struct {
 	PartsWidgetBase
 	Items     []string  `desc:"the list of items (checbox button labels)"`
+	Tooltips  []string  `desc:"an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items"`
 	Mutex     bool      `desc:"make the items mutually exclusive -- checking one turns off all the others"`
 	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
 }
@@ -150,8 +152,10 @@ func (bb *ButtonBox) ItemsFromEnumList(el []kit.EnumValue) {
 		return
 	}
 	bb.Items = make([]string, sz)
+	bb.Tooltips = make([]string, sz)
 	for i, enum := range el {
 		bb.Items[i] = enum.Name
+		bb.Tooltips[i] = enum.Desc
 	}
 }
 
@@ -197,6 +201,13 @@ func (bb *ButtonBox) ConfigItems() {
 		cb := cbi.(*CheckBox)
 		lbl := bb.Items[i]
 		cb.SetText(lbl)
+		if len(bb.Tooltips) > i {
+			cb.Tooltip = bb.Tooltips[i]
+		}
+		if bb.Mutex {
+			cb.Icon = icons.RadioButtonChecked
+			cb.IconOff = icons.RadioButtonUnchecked
+		}
 		cb.SetProp("index", i)
 		cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig != int64(ButtonToggled) {

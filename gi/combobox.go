@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strconv"
 	"unicode/utf8"
 
 	"github.com/goki/gi/gist"
@@ -511,14 +512,13 @@ func (cb *ComboBox) MakeItemsMenu() {
 			ki.InitNode(ac)
 			cb.ItemsMenu = append(cb.ItemsMenu, ac.This().(Node2D))
 		}
-		nm := fmt.Sprintf("Item_%v", i)
+		nm := "Item_" + strconv.Itoa(i)
 		ac.SetName(nm)
 		if ics {
 			ac.Icon = it.(icons.Icon)
 			ac.Tooltip = string(ac.Icon)
 		} else {
 			ac.Text = ToLabel(it)
-			fmt.Printf("text %s type %T\n", ac.Text, it)
 			if d, ok := it.(kit.Describer); ok {
 				ac.Tooltip = d.Desc()
 			} else if ev, ok := it.(kit.EnumValue); ok {

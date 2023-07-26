@@ -350,16 +350,19 @@ func (ac *Action) ConfigParts() {
 	switch {
 	case ismbar:
 		ac.Indicator = "none" // menu-bar specifically
+		ac.Type = ActionMenuBar
 		if ac.Class == "" {
 			ac.Class = "menubar-action"
 		}
 		ac.ConfigPartsButton()
 	case istbar:
+		ac.Type = ActionToolBar
 		if ac.Class == "" {
 			ac.Class = "toolbar-action"
 		}
 		ac.ConfigPartsButton()
 	case ac.IsMenu():
+		ac.Type = ActionMenu
 		if ac.Class == "" {
 			ac.Class = "menu-action"
 		}
@@ -377,10 +380,16 @@ func (ac *Action) ConfigStyles() {
 		ac.Style.Border.Style.Set(gist.BorderNone)
 		ac.Style.Border.Radius.Set()
 		ac.Style.Text.Align = gist.AlignCenter
-		ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+		ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(5))
 		ac.Style.Color.SetColor(Colors.Text)
 		ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		switch ac.Type {
+		case ActionMenu:
+			ac.Style.Margin.Set()
+			ac.Style.MaxWidth.SetPx(-1)
+			ac.Indicator = icons.KeyboardArrowRight
+		}
 	})
 	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, StyleFuncParts(ac), func(icon *WidgetBase) {
 		icon.Style.Width.SetEm(1)

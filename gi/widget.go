@@ -164,6 +164,67 @@ func (wb *WidgetBase) AddChildStyleFunc(childName string, startIdx int, funcName
 	}
 }
 
+// TODO: use these instead of those on NodeBase2D
+// // Style helper methods
+
+// // SetMinPrefWidth sets minimum and preferred width;
+// // will get at least this amount; max unspecified.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetMinPrefWidth(val units.Value) {
+// 	wb.Style.Width = val
+// 	wb.Style.MinWidth = val
+// }
+
+// // SetMinPrefHeight sets minimum and preferred height;
+// // will get at least this amount; max unspecified.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetMinPrefHeight(val units.Value) {
+// 	wb.Style.Height = val
+// 	wb.Style.MinHeight = val
+// }
+
+// // SetStretchMaxWidth sets stretchy max width (-1);
+// // can grow to take up avail room.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetStretchMaxWidth() {
+// 	wb.Style.MaxWidth.SetPx(-1)
+// }
+
+// // SetStretchMaxHeight sets stretchy max height (-1);
+// // can grow to take up avail room.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetStretchMaxHeight() {
+// 	wb.Style.MaxHeight.SetPx(-1)
+// }
+
+// // SetStretchMax sets stretchy max width and height (-1);
+// // can grow to take up avail room.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetStretchMax() {
+// 	wb.SetStretchMaxWidth()
+// 	wb.SetStretchMaxHeight()
+// }
+
+// // SetFixedWidth sets all width style options
+// // (Width, MinWidth, and MaxWidth) to
+// // the given fixed width unit value.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetFixedWidth(val units.Value) {
+// 	wb.Style.Width = val
+// 	wb.Style.MinWidth = val
+// 	wb.Style.MaxWidth = val
+// }
+
+// // SetFixedHeight sets all height style options
+// // (Height, MinHeight, and MaxHeight) to
+// // the given fixed height unit value.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetFixedHeight(val units.Value) {
+// 	wb.Style.Height = val
+// 	wb.Style.MinHeight = val
+// 	wb.Style.MaxHeight = val
+// }
+
 // WidgetDefStyleKey is the key for accessing the default style stored in the
 // type-properties for a given type -- also ones with sub-selectors for parts
 // in there with selector appended to this key
