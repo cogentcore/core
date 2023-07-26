@@ -3,9 +3,19 @@
 package kit
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[TestFlagsNil-0]
+	_ = x[TestFlag1-1]
+	_ = x[TestFlag2-2]
+	_ = x[TestFlagsN-3]
+}
 
 const _TestFlags_name = "TestFlagsNilTestFlag1TestFlag2TestFlagsN"
 
@@ -25,5 +35,19 @@ func (i *TestFlags) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type TestFlags", s)
+	return errors.New("String: " + s + " is not a valid option for type: TestFlags")
+}
+
+var _TestFlags_descMap = map[TestFlags]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+}
+
+func (i TestFlags) Desc() string {
+	if str, ok := _TestFlags_descMap[i]; ok {
+		return str
+	}
+	return "TestFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

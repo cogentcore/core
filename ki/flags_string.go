@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -46,4 +44,26 @@ func (i *Flags) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Flags")
+}
+
+var _Flags_descMap = map[Flags]string{
+	0:  `IsField indicates a node is a field in its parent node, not a child in children.`,
+	1:  `HasKiFields indicates a node has Ki Node fields that will be processed in recursive descent. Use the HasFields() method to check as it will establish validity of flags on first call. If neither HasFields nor HasNoFields are set, then it knows to update flags.`,
+	2:  `HasNoKiFields indicates a node has NO Ki Node fields that will be processed in recursive descent. Use the HasFields() method to check as it will establish validity of flags on first call. If neither HasFields nor HasNoFields are set, then it knows to update flags.`,
+	3:  `Updating flag is set at UpdateStart and cleared if we were the first updater at UpdateEnd.`,
+	4:  `OnlySelfUpdate means that the UpdateStart / End logic only applies to this node in isolation, not to its children -- useful for a parent node that has a different functional role than its children.`,
+	5:  `NodeDeleted means this node has been deleted.`,
+	6:  `NodeDestroyed means this node has been destroyed -- do not trigger any more update signals on it.`,
+	7:  `ChildAdded means one or more new children were added to the node.`,
+	8:  `ChildDeleted means one or more children were deleted from the node.`,
+	9:  `ChildrenDeleted means all children were deleted.`,
+	10: `ValUpdated means a value was updated (Field, Prop, any kind of value)`,
+	11: `FlagsN is total number of flags used by base Ki Node -- can extend from here up to 64 bits.`,
+}
+
+func (i Flags) Desc() string {
+	if str, ok := _Flags_descMap[i]; ok {
+		return str
+	}
+	return "Flags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

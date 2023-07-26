@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,18 @@ func (i *NodeSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: NodeSignals")
+}
+
+var _NodeSignals_descMap = map[NodeSignals]string{
+	0: `NodeSignalNil is a nil signal value`,
+	1: `NodeSignalUpdated indicates that the node was updated -- the node Flags accumulate the specific changes made since the last update signal -- these flags are sent in the signal data -- strongly recommend using that instead of the flags, which can be subsequently updated by the time a signal is processed`,
+	2: `NodeSignalDeleting indicates that the node is being deleted from its parent children list -- this is not blocked by Updating status and is delivered immediately. No further notifications are sent -- assume it will be destroyed unless you hear from it again.`,
+	3: ``,
+}
+
+func (i NodeSignals) Desc() string {
+	if str, ok := _NodeSignals_descMap[i]; ok {
+		return str
+	}
+	return "NodeSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }
