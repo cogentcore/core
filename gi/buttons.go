@@ -586,7 +586,7 @@ func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 
 func (bb *ButtonBase) Init2D() {
 	bb.Init2DWidget()
-	bb.State = ButtonActive
+	// bb.State = ButtonActive
 	bb.This().(ButtonWidget).ConfigParts()
 }
 
@@ -919,8 +919,8 @@ func (bt *Button) Init2D() {
 func (bt *Button) ConfigStyles() {
 	bt.AddStyleFunc(StyleFuncDefault, func() {
 		bt.Style.Border.Radius.Set(units.Px(10))
-		bt.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
 		bt.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		bt.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
 		bt.Style.Text.Align = gist.AlignCenter
 		switch bt.Type {
 		case ButtonDefault:
@@ -930,8 +930,8 @@ func (bt *Button) ConfigStyles() {
 			case ButtonActive:
 				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
 			case ButtonInactive:
-				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
-				bt.Style.Color = Colors.Background.Highlight(30)
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+				bt.Style.Color = Colors.Text.Highlight(20)
 			case ButtonFocus, ButtonSelected:
 				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
 			case ButtonHover:
@@ -945,7 +945,7 @@ func (bt *Button) ConfigStyles() {
 			case ButtonActive:
 				bt.Style.BackgroundColor.SetColor(Colors.Primary)
 			case ButtonInactive:
-				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(30))
+				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(20))
 			case ButtonFocus, ButtonSelected:
 				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(10))
 			case ButtonHover:
@@ -955,7 +955,7 @@ func (bt *Button) ConfigStyles() {
 			}
 			bt.Style.Color = bt.Style.BackgroundColor.Color.ContrastColor()
 			if bt.State == ButtonInactive {
-				bt.Style.Color = bt.Style.Color.Highlight(30)
+				bt.Style.Color = bt.Style.Color.Highlight(20)
 			}
 		case ButtonSecondary:
 			bt.Style.Border.Style.Set(gist.BorderSolid)
@@ -966,8 +966,8 @@ func (bt *Button) ConfigStyles() {
 			case ButtonActive:
 				bt.Style.BackgroundColor.SetColor(Colors.Background)
 			case ButtonInactive:
-				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
-				bt.Style.Color = Colors.Primary.Highlight(30)
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+				bt.Style.Color = Colors.Primary.Highlight(20)
 			case ButtonFocus, ButtonSelected:
 				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
 			case ButtonHover:

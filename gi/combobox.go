@@ -32,7 +32,7 @@ type ComboBox struct {
 	CurVal    any           `json:"-" xml:"-" desc:"current selected value"`
 	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`
 	Items     []any         `json:"-" xml:"-" desc:"items available for selection"`
-	Tooltips  []string      `json:"-" xml:"-" desc:"an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items`
+	Tooltips  []string      `json:"-" xml:"-" desc:"an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items"`
 	ItemsMenu Menu          `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
 	Type      ComboBoxTypes `desc:"the type of combo box"`
 	ComboSig  ki.Signal     `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
@@ -124,40 +124,40 @@ var ComboBoxProps = ki.Props{
 	// 	"max-width": -1,
 	// 	"width":     units.Ch(12),
 	// },
-	"#indicator": ki.Props{
-		"width":          units.Ex(1.5),
-		"height":         units.Ex(1.5),
-		"margin":         units.Px(0),
-		"padding":        units.Px(0),
-		"vertical-align": gist.AlignBottom,
-		"fill":           &Prefs.Colors.Icon,
-		"stroke":         &Prefs.Colors.Font,
-	},
-	"#ind-stretch": ki.Props{
-		"width": units.Em(1),
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "linear-gradient(lighter-0, highlight-10)",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "linear-gradient(highlight-10, highlight-10)",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.Px(2),
-		"background-color": "linear-gradient(samelight-50, highlight-10)",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "highlight-90",
-		"background-color": "linear-gradient(highlight-30, highlight-10)",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(Select), highlight-10)",
-		"color":            "highlight-90",
-	},
+	// "#indicator": ki.Props{
+	// 	"width":          units.Ex(1.5),
+	// 	"height":         units.Ex(1.5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignBottom,
+	// 	"fill":           &Prefs.Colors.Icon,
+	// 	"stroke":         &Prefs.Colors.Font,
+	// },
+	// "#ind-stretch": ki.Props{
+	// 	"width": units.Em(1),
+	// },
+	// ButtonSelectors[ButtonActive]: ki.Props{
+	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// ButtonSelectors[ButtonHover]: ki.Props{
+	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonDown]: ki.Props{
+	// 	"color":            "highlight-90",
+	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonSelected]: ki.Props{
+	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// 	"color":            "highlight-90",
+	// },
 }
 
 // ButtonWidget interface
@@ -637,9 +637,13 @@ func (cb *ComboBox) Init2D() {
 func (cb *ComboBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
 		cb.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
-		cb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
 		cb.Style.Text.Align = gist.AlignCenter
 		cb.Style.Color = Colors.Text
+		if cb.Editable {
+			cb.Style.Padding.Set()
+		} else {
+			cb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
+		}
 		switch cb.Type {
 		case ComboBoxFilled:
 			cb.Style.Border.Style.Set(gist.BorderNone)
@@ -651,22 +655,47 @@ func (cb *ComboBox) ConfigStyles() {
 			cb.Style.Border.Radius.Set(units.Px(10))
 			cb.Style.BackgroundColor.SetColor(Colors.Background)
 		}
+		switch cb.State {
+		case ButtonActive:
+			// use background as already specified above
+		case ButtonInactive:
+			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(20))
+			cb.Style.Color = Colors.Text.Highlight(20)
+		case ButtonFocus, ButtonSelected:
+			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(10))
+		case ButtonHover:
+			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(15))
+		case ButtonDown:
+			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(20))
+		}
 	})
 	cb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(cb), func(icon *WidgetBase) {
-		cb.Style.Width.SetEm(1)
-		cb.Style.Height.SetEm(1)
-		cb.Style.Margin.Set()
-		cb.Style.Padding.Set()
+		icon.Style.Width.SetEm(1)
+		icon.Style.Height.SetEm(1)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
 	})
-	cb.Parts.AddChildStyleFunc("label", 1, StyleFuncParts(cb), func(w *WidgetBase) {
-		cb.Style.Margin.Set()
-		cb.Style.Padding.Set()
+	cb.Parts.AddChildStyleFunc("label", 1, StyleFuncParts(cb), func(label *WidgetBase) {
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
+		label.Style.AlignV = gist.AlignMiddle
 	})
-	cb.Parts.AddChildStyleFunc("text", 2, StyleFuncParts(cb), func(w *WidgetBase) {
-		cb.Style.Margin.Set()
-		cb.Style.Padding.Set()
-		cb.Style.MaxWidth.SetPx(-1)
-		cb.Style.Width.SetCh(12)
-		cb.Style.Border.Style.Set(gist.BorderNone)
+	cb.Parts.AddChildStyleFunc("text", 1, StyleFuncParts(cb), func(text *WidgetBase) {
+		text.Style.Margin.Set()
+		text.Style.Padding.Set()
+		text.Style.MaxWidth.SetPx(-1)
+		text.Style.Width.SetCh(12)
+		text.Style.Border.Style.Set(gist.BorderNone)
+	})
+	cb.Parts.AddChildStyleFunc("ind-stretch", 2, StyleFuncParts(cb), func(ins *WidgetBase) {
+		ins.Style.Width.SetEm(1)
+	})
+	cb.Parts.AddChildStyleFunc("indicator", 3, StyleFuncParts(cb), func(ind *WidgetBase) {
+		ind.Style.Width.SetEx(1.5)
+		ind.Style.Height.SetEx(1.5)
+		ind.Style.Margin.Set()
+		ind.Style.Padding.Set()
+		ind.Style.AlignV = gist.AlignMiddle
+		ind.Style.AlignH = gist.AlignCenter
 	})
 }
