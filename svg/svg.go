@@ -409,7 +409,6 @@ func (sv *SVG) ConfigStyles() {
 		if par, ok := sv.Parent().Embed(gi.KiT_WidgetBase).(*gi.WidgetBase); ok {
 			sv.Pnt.FillStyle.Color.SetColor(par.Style.Color)
 			sv.Pnt.StrokeStyle.Color.SetColor(par.Style.Color)
-			fmt.Println("svg fill color", sv.Pnt.FillStyle.Color, "stroke color", sv.Pnt.StrokeStyle.Color)
 		}
 	})
 }

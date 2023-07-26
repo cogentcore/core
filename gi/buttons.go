@@ -64,6 +64,7 @@ const (
 	// the inverse of a primary button; it is typically used
 	// for secondary actions like cancel, back, and options
 	ButtonSecondary
+	// TODO: add more button types like text and danger
 	// ButtonText is a button with no border or background color.
 	// It should be used as a low-priority secondary button
 
@@ -917,25 +918,63 @@ func (bt *Button) Init2D() {
 
 func (bt *Button) ConfigStyles() {
 	bt.AddStyleFunc(StyleFuncDefault, func() {
-		bt.Style.Border.Radius.Set(units.Px(4))
+		bt.Style.Border.Radius.Set(units.Px(10))
 		bt.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
 		bt.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		bt.Style.Text.Align = gist.AlignCenter
 		switch bt.Type {
 		case ButtonDefault:
 			bt.Style.Border.Style.Set(gist.BorderNone)
-			bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
 			bt.Style.Color = Colors.Text
+			switch bt.State {
+			case ButtonActive:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			case ButtonInactive:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+				bt.Style.Color = Colors.Background.Highlight(30)
+			case ButtonFocus, ButtonSelected:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			case ButtonHover:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
+			case ButtonDown:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+			}
 		case ButtonPrimary:
 			bt.Style.Border.Style.Set(gist.BorderNone)
-			bt.Style.BackgroundColor.SetColor(Colors.Primary)
+			switch bt.State {
+			case ButtonActive:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary)
+			case ButtonInactive:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(30))
+			case ButtonFocus, ButtonSelected:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(10))
+			case ButtonHover:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(20))
+			case ButtonDown:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(30))
+			}
 			bt.Style.Color = bt.Style.BackgroundColor.Color.ContrastColor()
+			if bt.State == ButtonInactive {
+				bt.Style.Color = bt.Style.Color.Highlight(30)
+			}
 		case ButtonSecondary:
 			bt.Style.Border.Style.Set(gist.BorderSolid)
 			bt.Style.Border.Width.Set(units.Px(1))
 			bt.Style.Border.Color.Set(Colors.Primary)
-			bt.Style.BackgroundColor.SetColor(Colors.Background)
 			bt.Style.Color = Colors.Primary
+			switch bt.State {
+			case ButtonActive:
+				bt.Style.BackgroundColor.SetColor(Colors.Background)
+			case ButtonInactive:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+				bt.Style.Color = Colors.Primary.Highlight(30)
+			case ButtonFocus, ButtonSelected:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			case ButtonHover:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			case ButtonDown:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+			}
 		}
 	})
 	bt.AddChildStyleFunc("icon", 0, StyleFuncParts(bt), func(icon *WidgetBase) {
@@ -1218,5 +1257,6 @@ func (cb *CheckBox) ConfigStyles() {
 	cb.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(cb), func(label *WidgetBase) {
 		label.Style.Margin.Set()
 		label.Style.Padding.Set()
+		label.Style.AlignV = gist.AlignMiddle
 	})
 }

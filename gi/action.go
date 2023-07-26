@@ -394,7 +394,7 @@ func (ac *Action) ConfigStyles() {
 		ac.Style.Border.Style.Set(gist.BorderNone)
 		ac.Style.Border.Radius.Set()
 		ac.Style.Text.Align = gist.AlignCenter
-		ac.Style.Color.SetColor(Colors.Text)
+		ac.Style.Color = Colors.Text
 		ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		switch ac.Type {
@@ -415,8 +415,8 @@ func (ac *Action) ConfigStyles() {
 		case ButtonActive:
 			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
 		case ButtonInactive:
-			ac.Style.BackgroundColor.SetColor(Colors.Background)
-			ac.Style.Color.SetColor(Colors.Text.Highlight(30))
+			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+			ac.Style.Color = Colors.Text.Highlight(30)
 		case ButtonFocus, ButtonSelected:
 			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
 		case ButtonHover:

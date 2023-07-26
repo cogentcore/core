@@ -54,15 +54,38 @@ func mainrun() {
 	bpri := gi.AddNewButton(brow, "buttonPrimary")
 	bpri.Text = "Primary Button"
 	bpri.Type = gi.ButtonPrimary
-	bpri.Icon = icons.FastForward
+	bpri.Icon = icons.PlayArrow
 
 	bsec := gi.AddNewButton(brow, "buttonSecondary")
 	bsec.Text = "Secondary Button"
 	bsec.Type = gi.ButtonSecondary
-	bsec.Icon = icons.Settings
+	// bsec.Icon = icons.Settings
 
 	bdef := gi.AddNewButton(brow, "buttonDefault")
 	bdef.Text = "Default Button"
+	bdef.Icon = icons.Reviews
+
+	browi := gi.AddNewLayout(mfr, "browi", gi.LayoutHorizFlow)
+	browi.AddStyleFunc(gi.StyleFuncFinal, func() {
+		browi.Spacing.SetEx(1)
+		browi.Style.MaxWidth.SetPx(-1)
+	})
+
+	bprii := gi.AddNewButton(browi, "buttonPrimaryInactive")
+	bprii.Text = "Inactive Primary Button"
+	bprii.Type = gi.ButtonPrimary
+	bprii.Icon = icons.OpenInNew
+	bprii.SetInactive()
+
+	bseci := gi.AddNewButton(browi, "buttonSecondaryInactive")
+	bseci.Text = "Inactive Secondary Button"
+	bseci.Type = gi.ButtonSecondary
+	bseci.Icon = icons.Settings
+	bseci.SetInactive()
+
+	bdefi := gi.AddNewButton(browi, "buttonDefaultInactive")
+	bdefi.Text = "Inactive Default Button"
+	bdefi.SetInactive()
 
 	idesc := gi.AddNewLabel(mfr, "idesc", "Inputs")
 	idesc.Type = gi.LabelH3
