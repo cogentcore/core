@@ -67,10 +67,10 @@ func mainrun() {
 	idesc := gi.AddNewLabel(mfr, "idesc", "Inputs")
 	idesc.Type = gi.LabelH3
 
-	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutVertFlow)
+	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutVert)
 	irow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		irow.Spacing.SetEx(1)
-		irow.Style.MaxWidth.SetPx(500)
+		irow.Style.MaxWidth.SetPx(-1)
 		irow.Style.MaxHeight.SetPx(500)
 	})
 
@@ -90,9 +90,18 @@ func mainrun() {
 	cbox.Text = "Select an option"
 	cbox.Items = []any{"Option 1", "Option 2", "Option 3"}
 
+	bbox := gi.AddNewButtonBox(irow, "bbox")
+	bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
+	bbox.Tooltips = []string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"}
+
+	bboxr := gi.AddNewButtonBox(irow, "bboxr")
+	bboxr.Items = []string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}
+	bboxr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
+	bboxr.Mutex = true
+
 	tbuf := &giv.TextBuf{}
 	tbuf.InitName(tbuf, "tbuf")
-	tbuf.SetText([]byte("Hello,\nWorld"))
+	tbuf.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
 
 	tview := giv.AddNewTextView(mfr, "tview")
 	tview.SetBuf(tbuf)

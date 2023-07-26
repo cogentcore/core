@@ -457,6 +457,8 @@ var BitmapProps = ki.Props{
 
 func (bm *Bitmap) ConfigStyles() {
 	bm.AddStyleFunc(StyleFuncDefault, func() {
+		bm.Style.MinWidth.SetPx(float32(bm.Size.X))
+		bm.Style.MinHeight.SetPx(float32(bm.Size.Y))
 		bm.Style.BackgroundColor.SetColor(Colors.Background)
 	})
 }
