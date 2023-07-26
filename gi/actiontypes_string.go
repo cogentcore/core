@@ -11,15 +11,16 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[ActionMenu-0]
-	_ = x[ActionMenuBar-1]
-	_ = x[ActionToolBar-2]
-	_ = x[ActionTypesN-3]
+	_ = x[ActionDefault-0]
+	_ = x[ActionMenu-1]
+	_ = x[ActionMenuBar-2]
+	_ = x[ActionToolBar-3]
+	_ = x[ActionTypesN-4]
 }
 
-const _ActionTypes_name = "ActionMenuActionMenuBarActionToolBarActionTypesN"
+const _ActionTypes_name = "ActionDefaultActionMenuActionMenuBarActionToolBarActionTypesN"
 
-var _ActionTypes_index = [...]uint8{0, 10, 23, 36, 48}
+var _ActionTypes_index = [...]uint8{0, 13, 23, 36, 49, 61}
 
 func (i ActionTypes) String() string {
 	if i < 0 || i >= ActionTypes(len(_ActionTypes_index)-1) {
@@ -39,10 +40,11 @@ func (i *ActionTypes) FromString(s string) error {
 }
 
 var _ActionTypes_descMap = map[ActionTypes]string{
-	0: `ActionMenu is an action contained within a popup menu`,
-	1: `ActionMenuBar is an action contained within a menu bar`,
-	2: `ActionToolBar is an action contained within a toolbar`,
-	3: ``,
+	0: `ActionDefault is a default, standalone action that is not part of a menu, menubar, or toolbar`,
+	1: `ActionMenu is an action contained within a popup menu`,
+	2: `ActionMenuBar is an action contained within a menu bar`,
+	3: `ActionToolBar is an action contained within a toolbar`,
+	4: ``,
 }
 
 func (i ActionTypes) Desc() string {

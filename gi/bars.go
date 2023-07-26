@@ -41,12 +41,12 @@ func (mb *MenuBar) CopyFieldsFrom(frm any) {
 }
 
 var MenuBarProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.Px(2),
-	"margin":           units.Px(0),
-	"spacing":          units.Px(4),
-	"color":            &Prefs.Colors.Font,
-	"background-color": "linear-gradient(pref(Control), highlight-10)",
+	"EnumType:Flag": KiT_NodeFlags,
+	// "padding":          units.Px(2),
+	// "margin":           units.Px(0),
+	// "spacing":          units.Px(4),
+	// "color":            &Prefs.Colors.Font,
+	// "background-color": "linear-gradient(pref(Control), highlight-10)",
 }
 
 // // DefaultStyle implements the [DefaultStyler] interface
@@ -79,6 +79,11 @@ func (mb *MenuBar) ShowMenuBar() bool {
 		}
 	}
 	return true
+}
+
+func (mb *MenuBar) Init2D() {
+	mb.Init2DWidget()
+	mb.ConfigStyles()
 }
 
 func (mb *MenuBar) Size2D(iter int) {
@@ -315,6 +320,16 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 	}
 }
 
+func (mb *MenuBar) ConfigStyles() {
+	mb.AddStyleFunc(StyleFuncDefault, func() {
+		mb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		mb.Style.Margin.Set()
+		mb.Spacing.SetPx(4 * Prefs.DensityMul())
+		mb.Style.Color.SetColor(Colors.Text)
+		mb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
+	})
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // ToolBar
 
@@ -337,12 +352,12 @@ func (tb *ToolBar) CopyFieldsFrom(frm any) {
 }
 
 var ToolBarProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.Px(2),
-	"margin":           units.Px(0),
-	"spacing":          units.Px(4),
-	"color":            &Prefs.Colors.Font,
-	"background-color": "linear-gradient(pref(Control), highlight-10)",
+	"EnumType:Flag": KiT_NodeFlags,
+	// "padding":          units.Px(2),
+	// "margin":           units.Px(0),
+	// "spacing":          units.Px(4),
+	// "color":            &Prefs.Colors.Font,
+	// "background-color": "linear-gradient(pref(Control), highlight-10)",
 }
 
 // AddAction adds an action to the toolbar using given options, and connects
@@ -393,6 +408,11 @@ func (tb *ToolBar) ToolBarStdRender() {
 	sz := tb.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 	tb.RenderUnlock(rs)
+}
+
+func (tb *ToolBar) Init2D() {
+	tb.Init2DWidget()
+	tb.ConfigStyles()
 }
 
 func (tb *ToolBar) Render2D() {
@@ -501,4 +521,14 @@ func (tb *ToolBar) FindActionByName(name string) (*Action, bool) {
 		}
 	}
 	return nil, false
+}
+
+func (tb *ToolBar) ConfigStyles() {
+	tb.AddStyleFunc(StyleFuncDefault, func() {
+		tb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		tb.Style.Margin.Set()
+		tb.Spacing.SetPx(4 * Prefs.DensityMul())
+		tb.Style.Color.SetColor(Colors.Text)
+		tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
+	})
 }

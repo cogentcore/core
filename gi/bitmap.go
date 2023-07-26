@@ -189,6 +189,11 @@ func (bm *Bitmap) Render2D() {
 	}
 }
 
+func (bm *Bitmap) Init2D() {
+	bm.Init2DWidget()
+	bm.ConfigStyles()
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 //  Image IO
 
@@ -428,8 +433,8 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 //  Props
 
 var BitmapProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"background-color": &Prefs.Colors.Background,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "background-color": &Prefs.Colors.Background,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
@@ -448,4 +453,10 @@ var BitmapProps = ki.Props{
 			},
 		}},
 	},
+}
+
+func (bm *Bitmap) ConfigStyles() {
+	bm.AddStyleFunc(StyleFuncDefault, func() {
+		bm.Style.BackgroundColor.SetColor(Colors.Background)
+	})
 }

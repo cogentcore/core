@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -44,7 +45,7 @@ func mainrun() {
 	bdesc := gi.AddNewLabel(mfr, "bdesc", "Buttons")
 	bdesc.Type = gi.LabelH3
 
-	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
+	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHorizFlow)
 	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		brow.Spacing.SetEx(1)
 		brow.Style.MaxWidth.SetPx(-1)
@@ -66,10 +67,11 @@ func mainrun() {
 	idesc := gi.AddNewLabel(mfr, "idesc", "Inputs")
 	idesc.Type = gi.LabelH3
 
-	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutHorizFlow)
+	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutVertFlow)
 	irow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		irow.Spacing.SetEx(1)
-		irow.Style.MaxWidth.SetPx(-1)
+		irow.Style.MaxWidth.SetPx(500)
+		irow.Style.MaxHeight.SetPx(500)
 	})
 
 	check := gi.AddNewCheckBox(irow, "check")
@@ -88,8 +90,22 @@ func mainrun() {
 	cbox.Text = "Select an option"
 	cbox.Items = []any{"Option 1", "Option 2", "Option 3"}
 
-	// tview := giv.AddNewTextView(mfr, "tview")
-	// tview.Placeholder = "Text View"
+	tbuf := &giv.TextBuf{}
+	tbuf.InitName(tbuf, "tbuf")
+	tbuf.SetText([]byte("Hello,\nWorld"))
+
+	tview := giv.AddNewTextView(mfr, "tview")
+	tview.SetBuf(tbuf)
+	tview.AddStyleFunc(gi.StyleFuncFinal, func() {
+		tview.Style.MaxWidth.SetPx(500)
+		tview.Style.MaxHeight.SetPx(300)
+	})
+
+	bmap := gi.AddNewBitmap(mfr, "bmap")
+	err := bmap.OpenImage("gopher.png", 300, 300)
+	if err != nil {
+		fmt.Println("error loading gopher image:", err)
+	}
 
 	// Main Menu
 

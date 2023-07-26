@@ -69,6 +69,7 @@ func (tv *TreeView) Disconnect() {
 	tv.TreeViewSig.DisconnectAll()
 }
 
+// TODO: any reason for this instead of direct setting in KiT_TreeView declaration?
 func init() {
 	kit.Types.SetProps(KiT_TreeView, TreeViewProps)
 }
