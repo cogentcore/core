@@ -48,33 +48,6 @@ var ButtonBaseProps = ki.Props{
 	"EnumType:Flag": KiT_ButtonFlags,
 }
 
-// ButtonTypes is an enum containing the different
-// possible types of buttons
-type ButtonTypes int
-
-const (
-	// ButtonDefault is a default gray button
-	// typically used in menus and checkboxes
-	ButtonDefault ButtonTypes = iota
-	// ButtonPrimary is a primary button colored
-	// as the primary color; it is typically used for
-	// primary actions like save, send, and new
-	ButtonPrimary
-	// ButtonSecondary is a secondary button colored as
-	// the inverse of a primary button; it is typically used
-	// for secondary actions like cancel, back, and options
-	ButtonSecondary
-	// TODO: add more button types like text and danger
-	// ButtonText is a button with no border or background color.
-	// It should be used as a low-priority secondary button
-
-	ButtonTypesN
-)
-
-var KiT_ButtonTypes = kit.Enums.AddEnumAltLower(ButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "Button")
-
-//go:generate stringer -type=ButtonTypes
-
 func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*ButtonBase)
 	if !ok {
@@ -786,6 +759,33 @@ type Button struct {
 
 var KiT_Button = kit.Types.AddType(&Button{}, nil)
 
+// ButtonTypes is an enum containing the
+// different possible types of buttons
+type ButtonTypes int
+
+const (
+	// ButtonDefault is a default gray button
+	// typically used in menus and checkboxes
+	ButtonDefault ButtonTypes = iota
+	// ButtonPrimary is a primary button colored
+	// as the primary color; it is typically used for
+	// primary actions like save, send, and new
+	ButtonPrimary
+	// ButtonSecondary is a secondary button colored as
+	// the inverse of a primary button; it is typically used
+	// for secondary actions like cancel, back, and options
+	ButtonSecondary
+	// TODO: add more button types like text and danger
+	// ButtonText is a button with no border or background color.
+	// It should be used as a low-priority secondary button
+
+	ButtonTypesN
+)
+
+var KiT_ButtonTypes = kit.Enums.AddEnumAltLower(ButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "Button")
+
+//go:generate stringer -type=ButtonTypes
+
 // AddNewButton adds a new button to given parent node, with given name.
 func AddNewButton(parent ki.Ki, name string) *Button {
 	return parent.AddNewChild(KiT_Button, name).(*Button)
@@ -848,67 +848,67 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 // }
 
 var ButtonProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.Px(1),
-	"border-radius":    units.Px(4),
-	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.Px(4),
-	"margin":           units.Px(2),
-	"min-width":        units.Em(1),
-	"min-height":       units.Em(1),
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	"#space": ki.Props{
-		"width":     units.Ch(.5),
-		"min-width": units.Ch(.5),
-	},
-	"#icon": ki.Props{
-		"width":   units.Em(1),
-		"height":  units.Em(1),
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-		"fill":    &Prefs.Colors.Icon,
-		"stroke":  &Prefs.Colors.Font,
-	},
-	"#label": ki.Props{
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-		// "font-size": units.NewPt(24),
-	},
-	"#indicator": ki.Props{
-		"width":          units.Ex(1.5),
-		"height":         units.Ex(1.5),
-		"margin":         units.Px(0),
-		"padding":        units.Px(0),
-		"vertical-align": gist.AlignBottom,
-		"fill":           &Prefs.Colors.Icon,
-		"stroke":         &Prefs.Colors.Font,
-	},
-	"#ind-stretch": ki.Props{
-		"width": units.Em(1),
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "linear-gradient(lighter-0, highlight-10)",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "lighter-50",
-		"color":        "lighter-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "linear-gradient(highlight-10, highlight-10)",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.Px(2),
-		"background-color": "linear-gradient(samelight-50, highlight-10)",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "lighter-90",
-		"background-color": "linear-gradient(highlight-30, highlight-10)",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(Select), highlight-10)",
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(4),
+	// "border-color":     &Prefs.Colors.Border,
+	// "padding":          units.Px(4),
+	// "margin":           units.Px(2),
+	// "min-width":        units.Em(1),
+	// "min-height":       units.Em(1),
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// "#space": ki.Props{
+	// 	"width":     units.Ch(.5),
+	// 	"min-width": units.Ch(.5),
+	// },
+	// "#icon": ki.Props{
+	// 	"width":   units.Em(1),
+	// 	"height":  units.Em(1),
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	"fill":    &Prefs.Colors.Icon,
+	// 	"stroke":  &Prefs.Colors.Font,
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	// "font-size": units.NewPt(24),
+	// },
+	// "#indicator": ki.Props{
+	// 	"width":          units.Ex(1.5),
+	// 	"height":         units.Ex(1.5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignBottom,
+	// 	"fill":           &Prefs.Colors.Icon,
+	// 	"stroke":         &Prefs.Colors.Font,
+	// },
+	// "#ind-stretch": ki.Props{
+	// 	"width": units.Em(1),
+	// },
+	// ButtonSelectors[ButtonActive]: ki.Props{
+	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonInactive]: ki.Props{
+	// 	"border-color": "lighter-50",
+	// 	"color":        "lighter-50",
+	// },
+	// ButtonSelectors[ButtonHover]: ki.Props{
+	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonDown]: ki.Props{
+	// 	"color":            "lighter-90",
+	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonSelected]: ki.Props{
+	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// },
 }
 
 func (bt *Button) Init2D() {
@@ -977,24 +977,25 @@ func (bt *Button) ConfigStyles() {
 			}
 		}
 	})
-	bt.AddChildStyleFunc("icon", 0, StyleFuncParts(bt), func(icon *WidgetBase) {
-		icon.Style.Width.SetEm(1)
-		icon.Style.Height.SetEm(1)
+	bt.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(bt), func(icon *WidgetBase) {
+		icon.Style.Width.SetEm(1.5)
+		icon.Style.Height.SetEm(1.5)
 		icon.Style.Margin.Set()
 		icon.Style.Padding.Set()
 	})
-	bt.AddChildStyleFunc("space", 1, StyleFuncParts(bt), func(space *WidgetBase) {
+	bt.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(bt), func(space *WidgetBase) {
 		space.Style.Width.SetCh(0.5)
 		space.Style.MinWidth.SetCh(0.5)
 	})
-	bt.AddChildStyleFunc("label", 2, StyleFuncParts(bt), func(label *WidgetBase) {
+	bt.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(bt), func(label *WidgetBase) {
 		label.Style.Margin.Set()
 		label.Style.Padding.Set()
+		label.Style.AlignV = gist.AlignMiddle
 	})
-	bt.AddChildStyleFunc("ind-stretch", 3, StyleFuncParts(bt), func(ins *WidgetBase) {
+	bt.Parts.AddChildStyleFunc("ind-stretch", 3, StyleFuncParts(bt), func(ins *WidgetBase) {
 		ins.Style.Width.SetEm(1)
 	})
-	bt.AddChildStyleFunc("indicator", 4, StyleFuncParts(bt), func(ind *WidgetBase) {
+	bt.Parts.AddChildStyleFunc("indicator", 4, StyleFuncParts(bt), func(ind *WidgetBase) {
 		ind.Style.Width.SetEx(1.5)
 		ind.Style.Height.SetEx(1.5)
 		ind.Style.Margin.Set()

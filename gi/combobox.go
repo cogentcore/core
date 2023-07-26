@@ -28,16 +28,39 @@ import (
 // are displayed using icons instead.
 type ComboBox struct {
 	ButtonBase
-	Editable  bool      `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
-	CurVal    any       `json:"-" xml:"-" desc:"current selected value"`
-	CurIndex  int       `json:"-" xml:"-" desc:"current index in list of possible items"`
-	Items     []any     `json:"-" xml:"-" desc:"items available for selection"`
-	ItemsMenu Menu      `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
-	ComboSig  ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
-	MaxLength int       `desc:"maximum label length (in runes)"`
+	Editable  bool          `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
+	CurVal    any           `json:"-" xml:"-" desc:"current selected value"`
+	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`
+	Items     []any         `json:"-" xml:"-" desc:"items available for selection"`
+	Tooltips  []string      `json:"-" xml:"-" desc:"an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items`
+	ItemsMenu Menu          `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
+	Type      ComboBoxTypes `desc:"the type of combo box"`
+	ComboSig  ki.Signal     `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
+	MaxLength int           `desc:"maximum label length (in runes)"`
 }
 
 var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
+
+// ComboBoxTypes is an enum containing the
+// different possible types of combo boxes
+type ComboBoxTypes int
+
+const (
+	// ComboBoxFilled represents a filled
+	// ComboBox with a background color
+	// and a bottom border
+	ComboBoxFilled ComboBoxTypes = iota
+	// ComboBoxOutlined represents an outlined
+	// ComboBox with a border on all sides
+	// and no background color
+	ComboBoxOutlined
+
+	ComboBoxTypesN
+)
+
+var KiT_ComboBoxTypes = kit.Enums.AddEnumAltLower(ComboBoxTypesN, kit.NotBitFlag, gist.StylePropProps, "ComboBox")
+
+//go:generate stringer -type=ComboBoxTypes
 
 // AddNewComboBox adds a new button to given parent node, with given name.
 func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
@@ -74,33 +97,33 @@ func (cb *ComboBox) Disconnect() {
 // }
 
 var ComboBoxProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.Px(1),
-	"border-radius":    units.Px(4),
-	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.Px(4),
-	"margin":           units.Px(4),
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	"#icon": ki.Props{
-		"width":   units.Em(1),
-		"height":  units.Em(1),
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-		"fill":    &Prefs.Colors.Icon,
-		"stroke":  &Prefs.Colors.Font,
-	},
-	"#label": ki.Props{
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-	},
-	"#text": ki.Props{
-		"margin":    units.Px(1),
-		"padding":   units.Px(1),
-		"max-width": -1,
-		"width":     units.Ch(12),
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(4),
+	// "border-color":     &Prefs.Colors.Border,
+	// "padding":          units.Px(4),
+	// "margin":           units.Px(4),
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// "#icon": ki.Props{
+	// 	"width":   units.Em(1),
+	// 	"height":  units.Em(1),
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	"fill":    &Prefs.Colors.Icon,
+	// 	"stroke":  &Prefs.Colors.Font,
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// "#text": ki.Props{
+	// 	"margin":    units.Px(1),
+	// 	"padding":   units.Px(1),
+	// 	"max-width": -1,
+	// 	"width":     units.Ch(12),
+	// },
 	"#indicator": ki.Props{
 		"width":          units.Ex(1.5),
 		"height":         units.Ex(1.5),
@@ -392,8 +415,10 @@ func (cb *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen 
 		return
 	}
 	cb.Items = make([]any, sz)
+	cb.Tooltips = make([]string, sz)
 	for i, enum := range el {
 		cb.Items[i] = enum
+		cb.Tooltips[i] = enum.Desc
 	}
 	if maxLen > 0 {
 		cb.SetToMaxLength(maxLen)
@@ -519,10 +544,8 @@ func (cb *ComboBox) MakeItemsMenu() {
 			ac.Tooltip = string(ac.Icon)
 		} else {
 			ac.Text = ToLabel(it)
-			if d, ok := it.(kit.Describer); ok {
-				ac.Tooltip = d.Desc()
-			} else if ev, ok := it.(kit.EnumValue); ok {
-				ac.Tooltip = ev.Desc
+			if len(cb.Tooltips) > i {
+				ac.Tooltip = cb.Tooltips[i]
 			}
 		}
 		ac.Data = i // index is the data
@@ -603,5 +626,47 @@ func (cb *ComboBox) KeyChordEvent() {
 				cbb.ButtonRelease()
 			}
 		}
+	})
+}
+
+func (cb *ComboBox) Init2D() {
+	cb.ButtonBase.Init2D()
+	cb.ConfigStyles()
+}
+
+func (cb *ComboBox) ConfigStyles() {
+	cb.AddStyleFunc(StyleFuncDefault, func() {
+		cb.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
+		cb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
+		cb.Style.Text.Align = gist.AlignCenter
+		cb.Style.Color = Colors.Text
+		switch cb.Type {
+		case ComboBoxFilled:
+			cb.Style.Border.Style.Set(gist.BorderNone)
+			cb.Style.Border.Radius.Set(units.Px(10))
+			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+		case ComboBoxOutlined:
+			cb.Style.Border.Style.Set(gist.BorderSolid)
+			cb.Style.Border.Width.Set(units.Px(1))
+			cb.Style.Border.Radius.Set(units.Px(10))
+			cb.Style.BackgroundColor.SetColor(Colors.Background)
+		}
+	})
+	cb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(cb), func(icon *WidgetBase) {
+		cb.Style.Width.SetEm(1)
+		cb.Style.Height.SetEm(1)
+		cb.Style.Margin.Set()
+		cb.Style.Padding.Set()
+	})
+	cb.Parts.AddChildStyleFunc("label", 1, StyleFuncParts(cb), func(w *WidgetBase) {
+		cb.Style.Margin.Set()
+		cb.Style.Padding.Set()
+	})
+	cb.Parts.AddChildStyleFunc("text", 2, StyleFuncParts(cb), func(w *WidgetBase) {
+		cb.Style.Margin.Set()
+		cb.Style.Padding.Set()
+		cb.Style.MaxWidth.SetPx(-1)
+		cb.Style.Width.SetCh(12)
+		cb.Style.Border.Style.Set(gist.BorderNone)
 	})
 }

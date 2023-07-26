@@ -73,7 +73,7 @@ const (
 // on a part by the given parent in ConfigStyles
 // as its default style function
 func StyleFuncParts(parent ki.Ki) StyleFuncName {
-	return "parts." + StyleFuncName(reflect.TypeOf(parent).Name())
+	return "parts/" + StyleFuncName(reflect.TypeOf(parent.This()).String())
 }
 
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {

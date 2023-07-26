@@ -31,21 +31,28 @@ func mainrun() {
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
-	mfr.AddStyleFunc(gi.StyleFuncFinal, func() {
-		mfr.Spacing.SetEx(1)
-		mfr.Style.Padding.Set(units.Px(8))
+
+	tv := gi.AddNewTabView(mfr, "tv")
+
+	_, home := tv.AddNewTabFrame(gi.KiT_Frame, "Home")
+	home.Lay = gi.LayoutVert
+	home.AddStyleFunc(gi.StyleFuncFinal, func() {
+		home.Spacing.SetEx(1)
+		home.Style.Padding.Set(units.Px(8))
+		home.Style.MaxWidth.SetPx(-1)
+		home.Style.MaxHeight.SetPx(-1)
 	})
 
-	title := gi.AddNewLabel(mfr, "title", "The GoGi Demo")
+	title := gi.AddNewLabel(home, "title", "The GoGi Demo")
 	title.Type = gi.LabelH1
 
-	desc := gi.AddNewLabel(mfr, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
+	desc := gi.AddNewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
 	desc.Type = gi.LabelP
 
-	bdesc := gi.AddNewLabel(mfr, "bdesc", "Buttons")
+	bdesc := gi.AddNewLabel(home, "bdesc", "Buttons")
 	bdesc.Type = gi.LabelH3
 
-	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHorizFlow)
+	brow := gi.AddNewLayout(home, "brow", gi.LayoutHorizFlow)
 	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		brow.Spacing.SetEx(1)
 		brow.Style.MaxWidth.SetPx(-1)
@@ -65,7 +72,7 @@ func mainrun() {
 	bdef.Text = "Default Button"
 	bdef.Icon = icons.Reviews
 
-	browi := gi.AddNewLayout(mfr, "browi", gi.LayoutHorizFlow)
+	browi := gi.AddNewLayout(home, "browi", gi.LayoutHorizFlow)
 	browi.AddStyleFunc(gi.StyleFuncFinal, func() {
 		browi.Spacing.SetEx(1)
 		browi.Style.MaxWidth.SetPx(-1)
@@ -87,10 +94,10 @@ func mainrun() {
 	bdefi.Text = "Inactive Default Button"
 	bdefi.SetInactive()
 
-	idesc := gi.AddNewLabel(mfr, "idesc", "Inputs")
+	idesc := gi.AddNewLabel(home, "idesc", "Inputs")
 	idesc.Type = gi.LabelH3
 
-	irow := gi.AddNewLayout(mfr, "irow", gi.LayoutVert)
+	irow := gi.AddNewLayout(home, "irow", gi.LayoutVert)
 	irow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		irow.Spacing.SetEx(1)
 		irow.Style.MaxWidth.SetPx(-1)
@@ -112,6 +119,13 @@ func mainrun() {
 	cbox := gi.AddNewComboBox(irow, "cbox")
 	cbox.Text = "Select an option"
 	cbox.Items = []any{"Option 1", "Option 2", "Option 3"}
+	cbox.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
+
+	cboxe := gi.AddNewComboBox(irow, "cboxe")
+	cboxe.Editable = true
+	cboxe.Text = "Select or type an option"
+	cboxe.Items = []any{"Option 1", "Option 2", "Option 3"}
+	cboxe.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
 
 	bbox := gi.AddNewButtonBox(irow, "bbox")
 	bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
@@ -126,14 +140,14 @@ func mainrun() {
 	tbuf.InitName(tbuf, "tbuf")
 	tbuf.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
 
-	tview := giv.AddNewTextView(mfr, "tview")
+	tview := giv.AddNewTextView(home, "tview")
 	tview.SetBuf(tbuf)
 	tview.AddStyleFunc(gi.StyleFuncFinal, func() {
 		tview.Style.MaxWidth.SetPx(500)
 		tview.Style.MaxHeight.SetPx(300)
 	})
 
-	bmap := gi.AddNewBitmap(mfr, "bmap")
+	bmap := gi.AddNewBitmap(home, "bmap")
 	err := bmap.OpenImage("gopher.png", 300, 300)
 	if err != nil {
 		fmt.Println("error loading gopher image:", err)
