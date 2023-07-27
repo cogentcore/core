@@ -24,7 +24,7 @@ import (
 // ComboBox is for selecting items from a dropdown list, with an optional
 // edit TextField for typing directly.
 // The items can be of any type, including enum values -- they are converted
-// to strings for the display.  If the items are IconName type, then they
+// to strings for the display.  If the items are [icons.Icon] type, then they
 // are displayed using icons instead.
 type ComboBox struct {
 	ButtonBase
