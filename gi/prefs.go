@@ -788,11 +788,11 @@ func (pf *FavPaths) FindPath(path string) (int, bool) {
 
 // DefaultPaths are default favorite paths
 var DefaultPaths = FavPaths{
-	{"home", "home", "~"},
-	{"desktop", "Desktop", "~/Desktop"},
-	{"documents", "Documents", "~/Documents"},
-	{"folder-download", "Downloads", "~/Downloads"},
-	{"computer", "root", "/"},
+	{icons.Home, "home", "~"},
+	{icons.DesktopMac, "Desktop", "~/Desktop"},
+	{icons.LabProfile, "Documents", "~/Documents"},
+	{icons.Download, "Downloads", "~/Downloads"},
+	{icons.Computer, "root", "/"},
 }
 
 //////////////////////////////////////////////////////////////////

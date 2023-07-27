@@ -43,11 +43,18 @@ func (i Icon) IsFilled() bool {
 }
 
 // IsNil returns whether the icon name is empty,
-// "none", or "nil"; those indicate not to use an icon.
+// [None], or "nil"; those indicate not to use an icon.
 func (i Icon) IsNil() bool {
-	return i == "" || i == "none" || i == "nil"
+	return i == "" || i == None || i == "nil"
 }
 
+// None is an icon that indicates to not use an icon.
+// It completely prevents the rendering of an icon,
+// whereas [Blank] renders a blank icon.
+const None Icon = "none"
+
 // Blank is a blank icon that can be used as a
-// placeholder when no other icon is appropriate
+// placeholder when no other icon is appropriate.
+// It still renders an icon, just a blank one,
+// whereas [None] indicates to not render one at all.
 const Blank Icon = "blank"

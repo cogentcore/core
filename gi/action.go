@@ -167,7 +167,7 @@ var ActionProps = ki.Props{
 	// ".menubar-action": ki.Props{ // class of actions in MenuBar
 	// 	"padding":      units.Px(4), // we go to edge of bar
 	// 	"margin":       units.Px(0),
-	// 	"indicator":    "none",
+	// 	"indicator":    icons.None,
 	// 	"border-width": units.Px(0),
 	// 	ButtonSelectors[ButtonActive]: ki.Props{
 	// 		"background-color": "linear-gradient(lighter-0, highlight-10)",
@@ -194,7 +194,7 @@ var ActionProps = ki.Props{
 	// ".toolbar-action": ki.Props{ // class of actions in ToolBar
 	// 	"padding":      units.Px(4), // we go to edge of bar
 	// 	"margin":       units.Px(0),
-	// 	"indicator":    "none",
+	// 	"indicator":    icons.None,
 	// 	"border-width": units.Px(0.5),
 	// 	ButtonSelectors[ButtonActive]: ki.Props{
 	// 		"background-color": "linear-gradient(lighter-0, highlight-10)",
@@ -353,7 +353,7 @@ func (ac *Action) ConfigParts() {
 	}
 	switch {
 	case ismbar:
-		ac.Indicator = "none" // menu-bar specifically
+		ac.Indicator = icons.None // menu-bar specifically
 		ac.Type = ActionMenuBar
 		if ac.Class == "" {
 			ac.Class = "menubar-action"
@@ -405,11 +405,11 @@ func (ac *Action) ConfigStyles() {
 		case ActionMenuBar:
 			ac.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
 			ac.Style.Margin.Set()
-			ac.Indicator = "none"
+			ac.Indicator = icons.None
 		case ActionToolBar:
 			ac.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
 			ac.Style.Margin.Set()
-			ac.Indicator = "none"
+			ac.Indicator = icons.None
 		}
 		switch ac.State {
 		case ButtonActive:

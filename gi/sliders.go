@@ -658,22 +658,22 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 }
 
 var SliderProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.Px(1),
-	"border-radius":    units.Px(4),
-	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.Px(6),
-	"margin":           units.Px(4),
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	"#icon": ki.Props{
-		"width":   units.Em(1),
-		"height":  units.Em(1),
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-		"fill":    &Prefs.Colors.Icon,
-		"stroke":  &Prefs.Colors.Font,
-	},
+	"EnumType:Flag": KiT_NodeFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(4),
+	// "border-color":     &Prefs.Colors.Border,
+	// "padding":          units.Px(6),
+	// "margin":           units.Px(4),
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// "#icon": ki.Props{
+	// 	"width":   units.Em(1),
+	// 	"height":  units.Em(1),
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	"fill":    &Prefs.Colors.Icon,
+	// 	"stroke":  &Prefs.Colors.Font,
+	// },
 	SliderSelectors[SliderActive]: ki.Props{
 		"background-color": "lighter-0",
 	},
@@ -714,6 +714,7 @@ func (sr *Slider) Defaults() {
 func (sr *Slider) Init2D() {
 	sr.Init2DSlider()
 	sr.ConfigParts()
+	sr.ConfigStyles()
 }
 
 func (sr *Slider) Style2D() {
@@ -840,6 +841,24 @@ func (sr *Slider) FocusChanged2D(change FocusChanges) {
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
+}
+
+func (sr *Slider) ConfigStyles() {
+	sr.AddStyleFunc(StyleFuncDefault, func() {
+		sr.Style.Border.Style.Set(gist.BorderNone)
+		sr.Style.Border.Radius.Set(units.Px(4))
+		sr.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
+		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
+		sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+		sr.Style.Color = Colors.Text
+		// fmt.Println("slider state", sr.State)
+	})
+	sr.AddChildStyleFunc("icon", 0, StyleFuncParts(sr), func(icon *WidgetBase) {
+		icon.Style.Width.SetEm(1)
+		icon.Style.Height.SetEm(1)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

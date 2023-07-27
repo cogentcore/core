@@ -325,7 +325,7 @@ func (iset *IconSet) OpenIconsFromEmbedDir(fs embed.FS, dirName string) error {
 // IconList returns a list of names of icons in the icon set
 func (iset *IconSet) IconList(alphaSort bool) []icons.Icon {
 	il := make([]icons.Icon, len(*iset)+1)
-	il[0] = "none"
+	il[0] = icons.None
 	idx := 1
 	for _, ic := range *iset {
 		il[idx] = icons.Icon(ic.Nm)

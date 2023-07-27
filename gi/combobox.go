@@ -239,7 +239,7 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 // ConfigPartsAddIndicatorSpace adds indicator with a space instead of a stretch
 // for editable combobox, where textfield then takes up the rest of the space
 func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *kit.TypeAndNameList, defOn bool) int {
-	needInd := (bb.HasMenu() || defOn) && bb.Indicator != "none"
+	needInd := (bb.HasMenu() || defOn) && bb.Indicator != icons.None
 	if !needInd {
 		return -1
 	}

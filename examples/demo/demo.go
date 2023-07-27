@@ -13,6 +13,7 @@ import (
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
+	"github.com/goki/mat32"
 )
 
 func main() {
@@ -33,8 +34,10 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	tv := gi.AddNewTabView(mfr, "tv")
+	tv.NoDeleteTabs = true
 
-	_, home := tv.AddNewTabFrame(gi.KiT_Frame, "Home")
+	homeNode := tv.AddNewTab(gi.KiT_Frame, "Home")
+	home := homeNode.(*gi.Frame)
 	home.Lay = gi.LayoutVert
 	home.AddStyleFunc(gi.StyleFuncFinal, func() {
 		home.Spacing.SetEx(1)
@@ -49,15 +52,217 @@ func mainrun() {
 	desc := gi.AddNewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
 	desc.Type = gi.LabelStandard
 
-	idesc := gi.AddNewLabel(home, "idesc", "Inputs")
-	idesc.Type = gi.LabelH3
+	bmap := gi.AddNewBitmap(home, "bmap")
+	err := bmap.OpenImage("gopher.png", 300, 300)
+	if err != nil {
+		fmt.Println("error loading gopher image:", err)
+	}
 
-	irow := gi.AddNewLayout(home, "irow", gi.LayoutVert)
+	buttonsNode := tv.AddNewTab(gi.KiT_Frame, "Buttons")
+	buttons := buttonsNode.(*gi.Frame)
+	buttons.Lay = gi.LayoutVert
+	buttons.AddStyleFunc(gi.StyleFuncFinal, func() {
+		buttons.Spacing.SetEx(1)
+		buttons.Style.Padding.Set(units.Px(8))
+		buttons.Style.MaxWidth.SetPx(-1)
+		buttons.Style.MaxHeight.SetPx(-1)
+	})
+
+	btitle := gi.AddNewLabel(buttons, "btitle", "Buttons")
+	btitle.Type = gi.LabelH1
+
+	bdesc := gi.AddNewLabel(buttons, "bdesc",
+		`GoGi provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`,
+	)
+	bdesc.Type = gi.LabelP
+
+	sbdesc := gi.AddNewLabel(buttons, "bdesc", "Standard Buttons")
+	sbdesc.Type = gi.LabelH3
+
+	brow := gi.AddNewLayout(buttons, "brow", gi.LayoutHorizFlow)
+	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
+		brow.Spacing.SetEx(1)
+		brow.Style.MaxWidth.SetPx(-1)
+	})
+
+	bpri := gi.AddNewButton(brow, "buttonPrimary")
+	bpri.Text = "Primary Button"
+	bpri.Type = gi.ButtonPrimary
+	bpri.Icon = icons.InstallDesktop
+
+	bsec := gi.AddNewButton(brow, "buttonSecondary")
+	bsec.Text = "Secondary Button"
+	bsec.Type = gi.ButtonSecondary
+	bsec.Icon = icons.Settings
+
+	bdef := gi.AddNewButton(brow, "buttonDefault")
+	bdef.Text = "Default Button"
+	bdef.Icon = icons.Star
+
+	browto := gi.AddNewLayout(buttons, "browTextOnly", gi.LayoutHorizFlow)
+	browto.AddStyleFunc(gi.StyleFuncFinal, func() {
+		browto.Spacing.SetEx(1)
+		browto.Style.MaxWidth.SetPx(-1)
+	})
+
+	bprito := gi.AddNewButton(browto, "buttonPrimaryTextOnly")
+	bprito.Text = "Primary Button"
+	bprito.Type = gi.ButtonPrimary
+
+	bsecto := gi.AddNewButton(browto, "buttonSecondaryTextOnly")
+	bsecto.Text = "Secondary Button"
+	bsecto.Type = gi.ButtonSecondary
+
+	bdefto := gi.AddNewButton(browto, "buttonDefaultTextOnly")
+	bdefto.Text = "Default Button"
+
+	browio := gi.AddNewLayout(buttons, "browIconOnly", gi.LayoutHorizFlow)
+	browio.AddStyleFunc(gi.StyleFuncFinal, func() {
+		browio.Spacing.SetEx(1)
+		browio.Style.MaxWidth.SetPx(-1)
+	})
+
+	bpriio := gi.AddNewButton(browio, "buttonPrimaryTextOnly")
+	bpriio.Icon = icons.Send
+	bpriio.Type = gi.ButtonPrimary
+
+	bsecio := gi.AddNewButton(browio, "buttonSecondaryTextOnly")
+	bsecio.Icon = icons.Info
+	bsecio.Type = gi.ButtonSecondary
+
+	bdefio := gi.AddNewButton(browio, "buttonDefaultTextOnly")
+	bdefio.Icon = icons.AccountCircle
+
+	bidesc := gi.AddNewLabel(buttons, "bidesc", "Inactive Standard Buttons")
+	bidesc.Type = gi.LabelH3
+
+	browi := gi.AddNewLayout(buttons, "browi", gi.LayoutHorizFlow)
+	browi.AddStyleFunc(gi.StyleFuncFinal, func() {
+		browi.Spacing.SetEx(1)
+		browi.Style.MaxWidth.SetPx(-1)
+	})
+
+	bprii := gi.AddNewButton(browi, "buttonPrimaryInactive")
+	bprii.Text = "Inactive Primary Button"
+	bprii.Type = gi.ButtonPrimary
+	bprii.Icon = icons.OpenInNew
+	bprii.SetInactive()
+
+	bseci := gi.AddNewButton(browi, "buttonSecondaryInactive")
+	bseci.Text = "Inactive Secondary Button"
+	bseci.Type = gi.ButtonSecondary
+	bseci.Icon = icons.Settings
+	bseci.SetInactive()
+
+	bdefi := gi.AddNewButton(browi, "buttonDefaultInactive")
+	bdefi.Text = "Inactive Default Button"
+	bdefi.SetInactive()
+
+	mbdesc := gi.AddNewLabel(buttons, "mbdesc", "Menu Buttons")
+	mbdesc.Type = gi.LabelH3
+
+	mbrow := gi.AddNewLayout(buttons, "mbrow", gi.LayoutHorizFlow)
+	mbrow.AddStyleFunc(gi.StyleFuncFinal, func() {
+		mbrow.Spacing.SetEx(1)
+		mbrow.Style.MaxWidth.SetPx(-1)
+	})
+
+	mbfill := gi.AddNewMenuButton(mbrow, "menuButtonFilled")
+	mbfill.Text = "Filled Menu Button"
+	mbfill.Type = gi.MenuButtonFilled
+	mbfill.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mi2 := mbfill.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
+
+	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mbfill.Menu.AddSeparator("sep1")
+
+	mbfill.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mbout := gi.AddNewMenuButton(mbrow, "menuButtonOutlined")
+	mbout.Text = "Outlined Menu Button"
+	mbout.Type = gi.MenuButtonOutlined
+	mbout.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mi2 = mbout.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
+
+	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mbout.Menu.AddSeparator("sep1")
+
+	mbout.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mbtxt := gi.AddNewMenuButton(mbrow, "menuButtonText")
+	mbtxt.Text = "Text Menu Button"
+	mbtxt.Type = gi.MenuButtonText
+	mbtxt.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mi2 = mbtxt.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
+
+	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mbtxt.Menu.AddSeparator("sep1")
+
+	mbtxt.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	inputsNode := tv.AddNewTab(gi.KiT_Frame, "Inputs")
+	inputs := inputsNode.(*gi.Frame)
+	inputs.Lay = gi.LayoutVert
+	inputs.AddStyleFunc(gi.StyleFuncFinal, func() {
+		inputs.Spacing.SetEx(1)
+		inputs.Style.Padding.Set(units.Px(8))
+		inputs.Style.MaxWidth.SetPx(-1)
+		inputs.Style.MaxHeight.SetPx(-1)
+	})
+
+	ititle := gi.AddNewLabel(inputs, "ititle", "Inputs")
+	ititle.Type = gi.LabelH1
+
+	idesc := gi.AddNewLabel(inputs, "idesc",
+		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`,
+	)
+	idesc.Type = gi.LabelP
+
+	irow := gi.AddNewLayout(inputs, "irow", gi.LayoutVert)
 	irow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		irow.Spacing.SetEx(1)
 		irow.Style.MaxWidth.SetPx(-1)
 		irow.Style.MaxHeight.SetPx(500)
 	})
+
+	slider := gi.AddNewSlider(irow, "slider")
+	slider.Dim = mat32.X
+	slider.Defaults()
+	slider.SetMinPrefWidth(units.Em(20))
+	slider.SetMinPrefHeight(units.Em(2))
 
 	check := gi.AddNewCheckBox(irow, "check")
 	check.Text = "Checkbox"
@@ -96,128 +301,12 @@ func mainrun() {
 	tbuf.InitName(tbuf, "tbuf")
 	tbuf.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
 
-	tview := giv.AddNewTextView(home, "tview")
+	tview := giv.AddNewTextView(inputs, "tview")
 	tview.SetBuf(tbuf)
 	tview.AddStyleFunc(gi.StyleFuncFinal, func() {
 		tview.Style.MaxWidth.SetPx(500)
 		tview.Style.MaxHeight.SetPx(300)
 	})
-
-	bmap := gi.AddNewBitmap(home, "bmap")
-	err := bmap.OpenImage("gopher.png", 300, 300)
-	if err != nil {
-		fmt.Println("error loading gopher image:", err)
-	}
-
-	_, buttons := tv.AddNewTabFrame(gi.KiT_Frame, "Buttons")
-	buttons.Lay = gi.LayoutVert
-	buttons.AddStyleFunc(gi.StyleFuncFinal, func() {
-		buttons.Spacing.SetEx(1)
-		buttons.Style.Padding.Set(units.Px(8))
-		buttons.Style.MaxWidth.SetPx(-1)
-		buttons.Style.MaxHeight.SetPx(-1)
-	})
-
-	bdesc := gi.AddNewLabel(buttons, "bdesc", "Standard Buttons")
-	bdesc.Type = gi.LabelH3
-
-	brow := gi.AddNewLayout(buttons, "brow", gi.LayoutHorizFlow)
-	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
-		brow.Spacing.SetEx(1)
-		brow.Style.MaxWidth.SetPx(-1)
-	})
-
-	bpri := gi.AddNewButton(brow, "buttonPrimary")
-	bpri.Text = "Primary Button"
-	bpri.Type = gi.ButtonPrimary
-	bpri.Icon = icons.PlayArrow
-
-	bsec := gi.AddNewButton(brow, "buttonSecondary")
-	bsec.Text = "Secondary Button"
-	bsec.Type = gi.ButtonSecondary
-	// bsec.Icon = icons.Settings
-
-	bdef := gi.AddNewButton(brow, "buttonDefault")
-	bdef.Text = "Default Button"
-	bdef.Icon = icons.Reviews
-
-	bidesc := gi.AddNewLabel(buttons, "bidesc", "Inactive Standard Buttons")
-	bidesc.Type = gi.LabelH3
-
-	browi := gi.AddNewLayout(buttons, "browi", gi.LayoutHorizFlow)
-	browi.AddStyleFunc(gi.StyleFuncFinal, func() {
-		browi.Spacing.SetEx(1)
-		browi.Style.MaxWidth.SetPx(-1)
-	})
-
-	bprii := gi.AddNewButton(browi, "buttonPrimaryInactive")
-	bprii.Text = "Inactive Primary Button"
-	bprii.Type = gi.ButtonPrimary
-	bprii.Icon = icons.OpenInNew
-	bprii.SetInactive()
-
-	bseci := gi.AddNewButton(browi, "buttonSecondaryInactive")
-	bseci.Text = "Inactive Secondary Button"
-	bseci.Type = gi.ButtonSecondary
-	bseci.Icon = icons.Settings
-	bseci.SetInactive()
-
-	bdefi := gi.AddNewButton(browi, "buttonDefaultInactive")
-	bdefi.Text = "Inactive Default Button"
-	bdefi.SetInactive()
-
-	mbdesc := gi.AddNewLabel(buttons, "mbdesc", "Menu Buttons")
-	mbdesc.Type = gi.LabelH3
-
-	mbrow := gi.AddNewLayout(buttons, "mbrow", gi.LayoutHorizFlow)
-	mbrow.AddStyleFunc(gi.StyleFuncFinal, func() {
-		mbrow.Spacing.SetEx(1)
-		mbrow.Style.MaxWidth.SetPx(-1)
-	})
-
-	mbfill := gi.AddNewMenuButton(mbrow, "menuButtonFill")
-	mbfill.Text = "Filled Menu Button"
-	mbfill.Type = gi.MenuButtonFilled
-	mbfill.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
-
-	mi2 := mbfill.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
-
-	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
-
-	mbfill.Menu.AddSeparator("sep1")
-
-	mbfill.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
-
-	mbout := gi.AddNewMenuButton(mbrow, "menuButtonFill")
-	mbout.Text = "Outlined Menu Button"
-	mbout.Type = gi.MenuButtonOutlined
-	mbout.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
-
-	mi2 = mbout.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
-
-	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
-
-	mbout.Menu.AddSeparator("sep1")
-
-	mbout.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
 
 	// Main Menu
 

@@ -500,6 +500,7 @@ func (lb *Label) ConfigStyles() {
 		lb.Style.AlignV = gist.AlignTop
 		lb.Style.Color = Colors.Text
 		lb.Style.BackgroundColor.SetColor(color.Transparent)
+		lb.Style.MaxWidth.SetPct(100)
 		switch lb.State {
 		case LabelActive:
 		case LabelInactive:

@@ -405,12 +405,12 @@ func (bb *ButtonBase) ResetMenu() {
 }
 
 // ConfigPartsAddIndicator adds a menu indicator if there is a menu present,
-// and the Indicator field is not "none" -- defOn = true means default to
+// and the Indicator field is not [icons.None] -- defOn = true means default to
 // adding the indicator even if no menu is yet present -- returns the index in
 // Parts of the indicator object, which is named "indicator" -- an
 // "ind-stretch" is added as well to put on the right by default.
 func (bb *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn bool) int {
-	needInd := (bb.HasMenu() || defOn) && bb.Indicator != "none"
+	needInd := (bb.HasMenu() || defOn) && bb.Indicator != icons.None
 	if !needInd {
 		return -1
 	}

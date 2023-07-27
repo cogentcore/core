@@ -695,8 +695,14 @@ var MenuButtonProps = ki.Props{
 
 func (mb *MenuButton) ConfigParts() {
 	config := kit.TypeAndNameList{}
+	if mb.Icon == "" {
+		mb.Icon = icons.Menu
+	}
+	if mb.Indicator == "" {
+		mb.Indicator = icons.None
+	}
 	icIdx, lbIdx := mb.ConfigPartsIconLabel(&config, mb.Icon, mb.Text)
-	indIdx := mb.ConfigPartsAddIndicator(&config, true) // default on
+	indIdx := mb.ConfigPartsAddIndicator(&config, false) // default on
 	mods, updt := mb.Parts.ConfigChildren(config)
 	mb.ConfigPartsSetIconLabel(mb.Icon, mb.Text, icIdx, lbIdx)
 	mb.ConfigPartsIndicator(indIdx)
@@ -810,27 +816,27 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 // }
 
 var SeparatorProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.Px(0),
-	"margin":           units.Px(0),
-	"vertical-align":   gist.AlignCenter,
-	"horizontal-align": gist.AlignCenter,
-	"border-color":     &Prefs.Colors.Border,
-	"border-width":     units.Px(2),
-	"background-color": &Prefs.Colors.Control,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "padding":          units.Px(0),
+	// "margin":           units.Px(0),
+	// "vertical-align":   gist.AlignCenter,
+	// "horizontal-align": gist.AlignCenter,
+	// "border-color":     &Prefs.Colors.Border,
+	// "border-width":     units.Px(2),
+	// "background-color": &Prefs.Colors.Control,
 	// todo: dotted
 }
 
 func (sp *Separator) Style2D() {
-	sp.StyMu.Lock()
-	if sp.Horiz {
-		sp.SetProp("max-width", -1)
-		sp.SetProp("min-height", units.Ex(0.5))
-	} else {
-		sp.SetProp("max-height", -1)
-		sp.SetProp("min-width", units.Ch(0.5))
-	}
-	sp.StyMu.Unlock()
+	// sp.StyMu.Lock()
+	// if sp.Horiz {
+	// 	sp.SetProp("max-width", -1)
+	// 	sp.SetProp("min-height", units.Ex(0.5))
+	// } else {
+	// 	sp.SetProp("max-height", -1)
+	// 	sp.SetProp("min-width", units.Ch(0.5))
+	// }
+	// sp.StyMu.Unlock()
 	sp.WidgetBase.Style2D()
 }
 
@@ -861,4 +867,30 @@ func (sp *Separator) Render2D() {
 		sp.Render2DChildren()
 		sp.PopBounds()
 	}
+}
+
+func (sp *Separator) Init2D() {
+	sp.Init2DWidget()
+	sp.ConfigStyles()
+}
+
+func (sp *Separator) ConfigStyles() {
+	// TODO: fix disappearing separator in menu
+	sp.AddStyleFunc(StyleFuncDefault, func() {
+		sp.Style.Margin.Set()
+		sp.Style.Padding.Set()
+		sp.Style.AlignV = gist.AlignCenter
+		sp.Style.AlignH = gist.AlignCenter
+		sp.Style.Border.Style.Set(gist.BorderSolid)
+		sp.Style.Border.Width.Set(units.Px(0))
+		sp.Style.Border.Color.Set(Colors.Text.Highlight(20))
+		sp.Style.BackgroundColor.SetColor(Colors.Text.Highlight(20))
+		if sp.Horiz {
+			sp.Style.MaxWidth.SetPx(-1)
+			sp.Style.MinHeight.SetPx(1)
+		} else {
+			sp.Style.MaxHeight.SetPx(-1)
+			sp.Style.MinWidth.SetPx(1)
+		}
+	})
 }

@@ -306,7 +306,7 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 		}
 	}
 
-	icn := icons.Icon("none")
+	icn := icons.None
 	return icn, false
 }
 

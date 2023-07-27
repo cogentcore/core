@@ -2661,7 +2661,7 @@ var FileTreeViewProps = ki.Props{
 		"min-width": units.Ch(16),
 	},
 	"#menu": ki.Props{
-		"indicator": "none",
+		"indicator": icons.None,
 	},
 	TreeViewSelectors[TreeViewActive]: ki.Props{},
 	TreeViewSelectors[TreeViewSel]: ki.Props{
