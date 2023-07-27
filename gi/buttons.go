@@ -953,7 +953,9 @@ func (bt *Button) ConfigStyles() {
 			case ButtonDown:
 				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(30))
 			}
-			bt.Style.Color = bt.Style.BackgroundColor.Color.ContrastColor()
+			// we always use the contrast color of the primary color
+			// to prevent text color changing on state change
+			bt.Style.Color = Colors.Primary.ContrastColor()
 			if bt.State == ButtonInactive {
 				bt.Style.Color = bt.Style.Color.Highlight(20)
 			}
@@ -988,6 +990,9 @@ func (bt *Button) ConfigStyles() {
 		space.Style.MinWidth.SetCh(0.5)
 	})
 	bt.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(bt), func(label *WidgetBase) {
+		// need to override so label's default color
+		// doesn't take control on state changes
+		label.Style.Color = bt.Style.Color
 		label.Style.Margin.Set()
 		label.Style.Padding.Set()
 		label.Style.AlignV = gist.AlignMiddle

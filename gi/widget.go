@@ -1162,7 +1162,13 @@ func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, 
 			if icIdx >= 0 {
 				wb.StylePart(wb.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
 			}
-			lbl.SetText(txt)
+			// avoiding SetText here makes it so label default
+			// styles don't end up first, which is needed for
+			// parent styles to override. However, there might have
+			// been a reason for calling SetText, so we will see if
+			// any bugs show up. TODO: figure out a good long-term solution for this.
+			lbl.Text = txt
+			// lbl.SetText(txt)
 		}
 	}
 }
