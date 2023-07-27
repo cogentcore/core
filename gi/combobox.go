@@ -644,15 +644,15 @@ func (cb *ComboBox) ConfigStyles() {
 		} else {
 			cb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
 		}
+		cb.Style.Border.Radius.Set(units.Px(10))
 		switch cb.Type {
 		case ComboBoxFilled:
 			cb.Style.Border.Style.Set(gist.BorderNone)
-			cb.Style.Border.Radius.Set(units.Px(10))
 			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
 		case ComboBoxOutlined:
 			cb.Style.Border.Style.Set(gist.BorderSolid)
 			cb.Style.Border.Width.Set(units.Px(1))
-			cb.Style.Border.Radius.Set(units.Px(10))
+			cb.Style.Border.Color.Set(Colors.Text)
 			cb.Style.BackgroundColor.SetColor(Colors.Background)
 		}
 		switch cb.State {

@@ -575,14 +575,40 @@ func StringsRemoveExtras(items *[]string, extras []string) {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// MenuButton pops up a menu, has an indicator by default
+// //////////////////////////////////////////////////////////////////////////////////////
 
+// MenuButton is a button that pops up a menu.
+// It has an indicator by default.
 type MenuButton struct {
 	ButtonBase
+	Type MenuButtonTypes `desc:"type is the type of the menu button"`
 }
 
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
+
+// MenuButtonTypes is an enum containing the
+// different possible types of menu buttons
+type MenuButtonTypes int
+
+const (
+	// MenuButtonFilled represents a filled
+	// MenuButton with a background color
+	// and no border
+	MenuButtonFilled MenuButtonTypes = iota
+	// MenuButtonOutlined represents an outlined
+	// MenuButton with a border on all sides
+	// and no background color
+	MenuButtonOutlined
+	// MenuButtonText represents a MenuButton
+	// with no border or background color.
+	MenuButtonText
+
+	MenuButtonTypesN
+)
+
+var KiT_MenuButtonTypes = kit.Enums.AddEnumAltLower(MenuButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "MenuButton")
+
+//go:generate stringer -type=MenuButtonTypes
 
 // AddNewMenuButton adds a new button to given parent node, with given name.
 func AddNewMenuButton(parent ki.Ki, name string) *MenuButton {
@@ -609,62 +635,62 @@ func (mb *MenuButton) CopyFieldsFrom(frm any) {
 // }
 
 var MenuButtonProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.Px(1),
-	"border-radius":    units.Px(4),
-	"border-color":     &Prefs.Colors.Border,
-	"border-style":     gist.BorderSolid,
-	"padding":          units.Px(4),
-	"margin":           units.Px(4),
-	"box-shadow.color": &Prefs.Colors.Shadow,
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	"#icon": ki.Props{
-		"width":   units.Em(1),
-		"height":  units.Em(1),
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-		"fill":    &Prefs.Colors.Icon,
-		"stroke":  &Prefs.Colors.Font,
-	},
-	"#label": ki.Props{
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-	},
-	"#indicator": ki.Props{
-		"width":          units.Ex(1.5),
-		"height":         units.Ex(1.5),
-		"margin":         units.Px(0),
-		"padding":        units.Px(0),
-		"vertical-align": gist.AlignBottom,
-		"fill":           &Prefs.Colors.Icon,
-		"stroke":         &Prefs.Colors.Font,
-	},
-	"#ind-stretch": ki.Props{
-		"width": units.Em(1),
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "linear-gradient(lighter-0, highlight-10)",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "linear-gradient(highlight-10, highlight-10)",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.Px(2),
-		"background-color": "linear-gradient(samelight-50, highlight-10)",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "highlight-90",
-		"background-color": "linear-gradient(highlight-30, highlight-10)",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(Select), highlight-10)",
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(4),
+	// "border-color":     &Prefs.Colors.Border,
+	// "border-style":     gist.BorderSolid,
+	// "padding":          units.Px(4),
+	// "margin":           units.Px(4),
+	// "box-shadow.color": &Prefs.Colors.Shadow,
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// "#icon": ki.Props{
+	// 	"width":   units.Em(1),
+	// 	"height":  units.Em(1),
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	"fill":    &Prefs.Colors.Icon,
+	// 	"stroke":  &Prefs.Colors.Font,
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// "#indicator": ki.Props{
+	// 	"width":          units.Ex(1.5),
+	// 	"height":         units.Ex(1.5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignBottom,
+	// 	"fill":           &Prefs.Colors.Icon,
+	// 	"stroke":         &Prefs.Colors.Font,
+	// },
+	// "#ind-stretch": ki.Props{
+	// 	"width": units.Em(1),
+	// },
+	// ButtonSelectors[ButtonActive]: ki.Props{
+	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// ButtonSelectors[ButtonHover]: ki.Props{
+	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonDown]: ki.Props{
+	// 	"color":            "highlight-90",
+	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonSelected]: ki.Props{
+	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// },
 }
 
 func (mb *MenuButton) ConfigParts() {
@@ -677,6 +703,69 @@ func (mb *MenuButton) ConfigParts() {
 	if mods {
 		mb.UpdateEnd(updt)
 	}
+}
+
+func (mb *MenuButton) Init2D() {
+	mb.Init2DWidget()
+	mb.ConfigStyles()
+}
+
+func (mb *MenuButton) ConfigStyles() {
+	mb.AddStyleFunc(StyleFuncDefault, func() {
+		mb.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
+		mb.Style.Text.Align = gist.AlignCenter
+		mb.Style.Color = Colors.Text
+		mb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
+		mb.Style.Border.Radius.Set(units.Px(10))
+		switch mb.Type {
+		case MenuButtonFilled:
+			mb.Style.Border.Style.Set(gist.BorderNone)
+			mb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+		case MenuButtonOutlined:
+			mb.Style.Border.Style.Set(gist.BorderSolid)
+			mb.Style.Border.Width.Set(units.Px(1))
+			mb.Style.Border.Color.Set(Colors.Text)
+			mb.Style.BackgroundColor.SetColor(Colors.Background)
+		case MenuButtonText:
+			mb.Style.Border.Style.Set(gist.BorderNone)
+			mb.Style.BackgroundColor.SetColor(Colors.Background)
+		}
+		switch mb.State {
+		case ButtonActive:
+			// use background as already specified above
+		case ButtonInactive:
+			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(20))
+			mb.Style.Color = Colors.Text.Highlight(20)
+		case ButtonFocus, ButtonSelected:
+			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(10))
+		case ButtonHover:
+			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(15))
+		case ButtonDown:
+			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(20))
+		}
+	})
+	mb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(mb), func(icon *WidgetBase) {
+		icon.Style.Width.SetEm(1)
+		icon.Style.Height.SetEm(1)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+	})
+	mb.Parts.AddChildStyleFunc("label", 1, StyleFuncParts(mb), func(label *WidgetBase) {
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
+		label.Style.AlignV = gist.AlignMiddle
+	})
+	mb.Parts.AddChildStyleFunc("ind-stretch", 2, StyleFuncParts(mb), func(ins *WidgetBase) {
+		ins.Style.Width.SetEm(1)
+	})
+	mb.Parts.AddChildStyleFunc("indicator", 3, StyleFuncParts(mb), func(ind *WidgetBase) {
+		ind.Style.Width.SetEx(1.5)
+		ind.Style.Height.SetEx(1.5)
+		ind.Style.Margin.Set()
+		ind.Style.Padding.Set()
+		ind.Style.AlignV = gist.AlignMiddle
+		ind.Style.AlignH = gist.AlignCenter
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

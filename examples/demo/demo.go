@@ -49,51 +49,6 @@ func mainrun() {
 	desc := gi.AddNewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
 	desc.Type = gi.LabelStandard
 
-	bdesc := gi.AddNewLabel(home, "bdesc", "Buttons")
-	bdesc.Type = gi.LabelH3
-
-	brow := gi.AddNewLayout(home, "brow", gi.LayoutHorizFlow)
-	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
-		brow.Spacing.SetEx(1)
-		brow.Style.MaxWidth.SetPx(-1)
-	})
-
-	bpri := gi.AddNewButton(brow, "buttonPrimary")
-	bpri.Text = "Primary Button"
-	bpri.Type = gi.ButtonPrimary
-	bpri.Icon = icons.PlayArrow
-
-	bsec := gi.AddNewButton(brow, "buttonSecondary")
-	bsec.Text = "Secondary Button"
-	bsec.Type = gi.ButtonSecondary
-	// bsec.Icon = icons.Settings
-
-	bdef := gi.AddNewButton(brow, "buttonDefault")
-	bdef.Text = "Default Button"
-	bdef.Icon = icons.Reviews
-
-	browi := gi.AddNewLayout(home, "browi", gi.LayoutHorizFlow)
-	browi.AddStyleFunc(gi.StyleFuncFinal, func() {
-		browi.Spacing.SetEx(1)
-		browi.Style.MaxWidth.SetPx(-1)
-	})
-
-	bprii := gi.AddNewButton(browi, "buttonPrimaryInactive")
-	bprii.Text = "Inactive Primary Button"
-	bprii.Type = gi.ButtonPrimary
-	bprii.Icon = icons.OpenInNew
-	bprii.SetInactive()
-
-	bseci := gi.AddNewButton(browi, "buttonSecondaryInactive")
-	bseci.Text = "Inactive Secondary Button"
-	bseci.Type = gi.ButtonSecondary
-	bseci.Icon = icons.Settings
-	bseci.SetInactive()
-
-	bdefi := gi.AddNewButton(browi, "buttonDefaultInactive")
-	bdefi.Text = "Inactive Default Button"
-	bdefi.SetInactive()
-
 	idesc := gi.AddNewLabel(home, "idesc", "Inputs")
 	idesc.Type = gi.LabelH3
 
@@ -109,9 +64,10 @@ func mainrun() {
 
 	tfield := gi.AddNewTextField(irow, "tfield")
 	tfield.Placeholder = "Text Field"
-	// tfield.AddStyleFunc(gi.StyleFuncFinal, func() {
-	// 	tfield.Style.BackgroundColor.SetColor(colors.Green)
-	// })
+
+	tfieldp := gi.AddNewTextField(irow, "tfieldp")
+	tfieldp.Placeholder = "Password Text Field"
+	tfieldp.NoEcho = true
 
 	sbox := gi.AddNewSpinBox(irow, "sbox")
 	sbox.Value = 0.5
@@ -152,6 +108,116 @@ func mainrun() {
 	if err != nil {
 		fmt.Println("error loading gopher image:", err)
 	}
+
+	_, buttons := tv.AddNewTabFrame(gi.KiT_Frame, "Buttons")
+	buttons.Lay = gi.LayoutVert
+	buttons.AddStyleFunc(gi.StyleFuncFinal, func() {
+		buttons.Spacing.SetEx(1)
+		buttons.Style.Padding.Set(units.Px(8))
+		buttons.Style.MaxWidth.SetPx(-1)
+		buttons.Style.MaxHeight.SetPx(-1)
+	})
+
+	bdesc := gi.AddNewLabel(buttons, "bdesc", "Standard Buttons")
+	bdesc.Type = gi.LabelH3
+
+	brow := gi.AddNewLayout(buttons, "brow", gi.LayoutHorizFlow)
+	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
+		brow.Spacing.SetEx(1)
+		brow.Style.MaxWidth.SetPx(-1)
+	})
+
+	bpri := gi.AddNewButton(brow, "buttonPrimary")
+	bpri.Text = "Primary Button"
+	bpri.Type = gi.ButtonPrimary
+	bpri.Icon = icons.PlayArrow
+
+	bsec := gi.AddNewButton(brow, "buttonSecondary")
+	bsec.Text = "Secondary Button"
+	bsec.Type = gi.ButtonSecondary
+	// bsec.Icon = icons.Settings
+
+	bdef := gi.AddNewButton(brow, "buttonDefault")
+	bdef.Text = "Default Button"
+	bdef.Icon = icons.Reviews
+
+	bidesc := gi.AddNewLabel(buttons, "bidesc", "Inactive Standard Buttons")
+	bidesc.Type = gi.LabelH3
+
+	browi := gi.AddNewLayout(buttons, "browi", gi.LayoutHorizFlow)
+	browi.AddStyleFunc(gi.StyleFuncFinal, func() {
+		browi.Spacing.SetEx(1)
+		browi.Style.MaxWidth.SetPx(-1)
+	})
+
+	bprii := gi.AddNewButton(browi, "buttonPrimaryInactive")
+	bprii.Text = "Inactive Primary Button"
+	bprii.Type = gi.ButtonPrimary
+	bprii.Icon = icons.OpenInNew
+	bprii.SetInactive()
+
+	bseci := gi.AddNewButton(browi, "buttonSecondaryInactive")
+	bseci.Text = "Inactive Secondary Button"
+	bseci.Type = gi.ButtonSecondary
+	bseci.Icon = icons.Settings
+	bseci.SetInactive()
+
+	bdefi := gi.AddNewButton(browi, "buttonDefaultInactive")
+	bdefi.Text = "Inactive Default Button"
+	bdefi.SetInactive()
+
+	mbdesc := gi.AddNewLabel(buttons, "mbdesc", "Menu Buttons")
+	mbdesc.Type = gi.LabelH3
+
+	mbrow := gi.AddNewLayout(buttons, "mbrow", gi.LayoutHorizFlow)
+	mbrow.AddStyleFunc(gi.StyleFuncFinal, func() {
+		mbrow.Spacing.SetEx(1)
+		mbrow.Style.MaxWidth.SetPx(-1)
+	})
+
+	mbfill := gi.AddNewMenuButton(mbrow, "menuButtonFill")
+	mbfill.Text = "Filled Menu Button"
+	mbfill.Type = gi.MenuButtonFilled
+	mbfill.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mi2 := mbfill.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
+
+	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mbfill.Menu.AddSeparator("sep1")
+
+	mbfill.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mbout := gi.AddNewMenuButton(mbrow, "menuButtonFill")
+	mbout.Text = "Outlined Menu Button"
+	mbout.Type = gi.MenuButtonOutlined
+	mbout.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mi2 = mbout.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
+
+	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mbout.Menu.AddSeparator("sep1")
+
+	mbout.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
+		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
 
 	// Main Menu
 
