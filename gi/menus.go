@@ -331,15 +331,31 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // PopupMenu function
 
-var MenuFrameProps = ki.Props{
-	"border-width":        units.Px(0),
-	"border-color":        "none",
-	"margin":              units.Px(4),
-	"padding":             units.Px(2),
-	"box-shadow.h-offset": units.Px(2),
-	"box-shadow.v-offset": units.Px(2),
-	"box-shadow.blur":     units.Px(2),
-	"box-shadow.color":    &Prefs.Colors.Shadow,
+//	var MenuFrameProps = ki.Props{
+//		"border-width":        units.Px(0),
+//		"border-color":        "none",
+//		"margin":              units.Px(4),
+//		"padding":             units.Px(2),
+//		"box-shadow.h-offset": units.Px(2),
+//		"box-shadow.v-offset": units.Px(2),
+//		"box-shadow.blur":     units.Px(2),
+//		"box-shadow.color":    &Prefs.Colors.Shadow,
+//	}
+//
+// MenuFrameConfigStyles configures the default styles
+// for the given pop-up menu frame with the given parent.
+// It should be called on menu frames  when they are created.
+func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
+	frame.AddStyleFunc(StyleFuncParts(par), func() {
+		frame.Style.Border.Style.Set(gist.BorderNone)
+		frame.Style.Padding.Set()
+		frame.Style.Margin.Set()
+		// doesn't seem to work; TODO: fix box shadow here
+		// frame.Style.BoxShadow.HOffset.SetPx(2)
+		// frame.Style.BoxShadow.VOffset.SetPx(2)
+		// frame.Style.BoxShadow.Blur.SetPx(2)
+		// frame.Style.BoxShadow.Color = Colors.Background.Highlight(30)
+	})
 }
 
 // MenuMaxHeight is the maximum height of any menu popup panel in units of font height
@@ -371,7 +387,8 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
 	frame := AddNewFrame(pvp, "Frame", LayoutVert)
-	frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
+	MenuFrameConfigStyles(&parVp.WidgetBase, frame)
+	// frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
 	var focus ki.Ki
 	for _, ac := range menu {
 		acn, ac := KiToNode2D(ac)

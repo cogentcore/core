@@ -34,7 +34,7 @@ import (
 type WidgetBase struct {
 	Node2DBase
 	Tooltip       string                             `desc:"text for tooltip for this widget -- can use HTML formatting"`
-	StyleFuncs    *ordmap.Map[StyleFuncName, func()] `desc:"a slice of style functions that are called in sequential descending (so the first added function is called last and thus overrides all other functions) in order to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
+	StyleFuncs    *ordmap.Map[StyleFuncName, func()] `desc:"a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
 	OverrideStyle bool                               `desc:"override the computed styles and allow directly editing Style"`
 	Style         gist.Style                         `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
 	// DefStyle      *gist.Style  `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us (modifying these externally will have no effect) -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`

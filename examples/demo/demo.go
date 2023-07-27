@@ -47,7 +47,7 @@ func mainrun() {
 	title.Type = gi.LabelH1
 
 	desc := gi.AddNewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
-	desc.Type = gi.LabelP
+	desc.Type = gi.LabelStandard
 
 	bdesc := gi.AddNewLabel(home, "bdesc", "Buttons")
 	bdesc.Type = gi.LabelH3

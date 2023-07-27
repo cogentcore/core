@@ -1294,8 +1294,8 @@ func (st *Stretch) CopyFieldsFrom(frm any) {
 
 var StretchProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
-	"max-width":     -1.0,
-	"max-height":    -1.0,
+	// "max-width":     -1.0,
+	// "max-height":    -1.0,
 }
 
 func (st *Stretch) Style2D() {
@@ -1315,6 +1315,18 @@ func (st *Stretch) Style2D() {
 func (st *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
 	st.Layout2DBase(parBBox, true, iter) // init style
 	return st.Layout2DChildren(iter)
+}
+
+func (st *Stretch) Init2D() {
+	st.Init2DWidget()
+	st.ConfigStyles()
+}
+
+func (st *Stretch) ConfigStyles() {
+	st.AddStyleFunc(StyleFuncDefault, func() {
+		st.Style.MaxWidth.SetPx(-1)
+		st.Style.MaxHeight.SetPx(-1)
+	})
 }
 
 // Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set
@@ -1337,8 +1349,8 @@ func (sp *Space) CopyFieldsFrom(frm any) {
 
 var SpaceProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
-	"width":         units.Ch(1),
-	"height":        units.Em(1),
+	// "width":         units.Ch(1),
+	// "height":        units.Em(1),
 }
 
 func (sp *Space) Style2D() {
@@ -1358,4 +1370,16 @@ func (sp *Space) Style2D() {
 func (sp *Space) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sp.Layout2DBase(parBBox, true, iter) // init style
 	return sp.Layout2DChildren(iter)
+}
+
+func (sp *Space) Init2D() {
+	sp.Init2DWidget()
+	sp.ConfigStyles()
+}
+
+func (sp *Space) ConfigStyles() {
+	sp.AddStyleFunc(StyleFuncDefault, func() {
+		sp.Style.Width.SetCh(1)
+		sp.Style.Height.SetEm(1)
+	})
 }

@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"log"
 	"reflect"
 
@@ -259,32 +260,32 @@ func (dlg *Dialog) Cancel() {
 
 var DialogProps = ki.Props{
 	"EnumType:Flag": KiT_VpFlags,
-	"color":         &Prefs.Colors.Font,
-	"#frame": ki.Props{
-		"border-width":        units.Px(2),
-		"margin":              units.Px(8),
-		"padding":             units.Px(4),
-		"box-shadow.h-offset": units.Px(4),
-		"box-shadow.v-offset": units.Px(4),
-		"box-shadow.blur":     units.Px(4),
-		"box-shadow.color":    &Prefs.Colors.Shadow,
-	},
-	"#title": ki.Props{
-		// todo: add "bigger" font
-		"max-width":        units.Px(-1),
-		"horizontal-align": gist.AlignCenter,
-		"vertical-align":   gist.AlignTop,
-		"background-color": "none",
-		"font-size":        "large",
-	},
-	"#prompt": ki.Props{
-		"white-space":      gist.WhiteSpaceNormal, // wrap etc
-		"max-width":        -1,
-		"width":            units.Ch(30),
-		"text-align":       gist.AlignLeft,
-		"vertical-align":   gist.AlignTop,
-		"background-color": "none",
-	},
+	// "color":         &Prefs.Colors.Font,
+	// "#frame": ki.Props{
+	// 	"border-width":        units.Px(2),
+	// 	"margin":              units.Px(8),
+	// 	"padding":             units.Px(4),
+	// 	"box-shadow.h-offset": units.Px(4),
+	// 	"box-shadow.v-offset": units.Px(4),
+	// 	"box-shadow.blur":     units.Px(4),
+	// 	"box-shadow.color":    &Prefs.Colors.Shadow,
+	// },
+	// "#title": ki.Props{
+	// 	// todo: add "bigger" font
+	// 	"max-width":        units.Px(-1),
+	// 	"horizontal-align": gist.AlignCenter,
+	// 	"vertical-align":   gist.AlignTop,
+	// 	"background-color": "none",
+	// 	"font-size":        "large",
+	// },
+	// "#prompt": ki.Props{
+	// 	"white-space":      gist.WhiteSpaceNormal, // wrap etc
+	// 	"max-width":        -1,
+	// 	"width":            units.Ch(30),
+	// 	"text-align":       gist.AlignLeft,
+	// 	"vertical-align":   gist.AlignTop,
+	// 	"background-color": "none",
+	// },
 }
 
 // SetFrame creates a standard vertical column frame layout as first element of the dialog, named "frame"
@@ -305,6 +306,7 @@ func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	dlg.Title = title
 	if frame != nil {
 		lab := AddNewLabel(frame, "title", title)
+		lab.Type = LabelH2
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}
@@ -406,6 +408,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
 		okb := bb.ChildByName("ok", 0).Embed(KiT_Button).(*Button)
 		okb.SetText("Ok")
+		okb.Type = ButtonPrimary
 		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(KiT_Dialog).(*Dialog)
@@ -416,6 +419,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if cancel {
 		canb := bb.ChildByName("cancel", 0).Embed(KiT_Button).(*Button)
 		canb.SetText("Cancel")
+		canb.Type = ButtonSecondary
 		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(KiT_Dialog).(*Dialog)
@@ -498,6 +502,7 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 
 func (dlg *Dialog) Init2D() {
 	dlg.Viewport2D.Init2D()
+	dlg.ConfigStyles()
 }
 
 func (dlg *Dialog) HasFocus2D() bool {
@@ -653,4 +658,37 @@ func StringPromptDialogValue(dlg *Dialog) string {
 	frame := dlg.Frame()
 	tf := frame.ChildByName("str-field", 0).(*TextField)
 	return tf.Text()
+}
+
+func (dlg *Dialog) ConfigStyles() {
+	dlg.AddStyleFunc(StyleFuncDefault, func() {
+		dlg.Style.Color = Colors.Text
+	})
+	frame, ok := dlg.ChildByName("frame", 0).(*Frame)
+	if ok {
+		frame.AddStyleFunc(StyleFuncParts(dlg), func() {
+			frame.Style.Border.Style.Set(gist.BorderNone)
+			frame.Style.Margin.Set(units.Px(8))
+			frame.Style.Padding.Set(units.Px(4))
+			frame.Style.BackgroundColor.SetColor(Colors.Background)
+			// frame.Style.BoxShadow.HOffset.SetPx(4)
+			// frame.Style.BoxShadow.VOffset.SetPx(4)
+			// frame.Style.BoxShadow.Blur.SetPx(4)
+			// frame.Style.BoxShadow.Color = Colors.Background.Highlight(30)
+		})
+		frame.AddChildStyleFunc("title", 0, StyleFuncParts(dlg), func(title *WidgetBase) {
+			title.Style.MaxWidth.SetPx(-1)
+			title.Style.AlignH = gist.AlignCenter
+			title.Style.AlignV = gist.AlignTop
+			title.Style.BackgroundColor.SetColor(color.Transparent)
+		})
+		frame.AddChildStyleFunc("prompt", 0, StyleFuncParts(dlg), func(prompt *WidgetBase) {
+			prompt.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
+			prompt.Style.MaxWidth.SetPx(-1)
+			prompt.Style.Width.SetCh(30)
+			prompt.Style.Text.Align = gist.AlignLeft
+			prompt.Style.AlignV = gist.AlignTop
+			prompt.Style.BackgroundColor.SetColor(color.Transparent)
+		})
+	}
 }

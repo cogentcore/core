@@ -56,14 +56,14 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 // }
 
 var FrameProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.Px(2),
-	"border-radius":    units.Px(0),
-	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.Px(2),
-	"margin":           units.Px(2),
-	"color":            &Prefs.Colors.Font,
-	"background-color": &Prefs.Colors.Background,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "border-width":     units.Px(2),
+	// "border-radius":    units.Px(0),
+	// "border-color":     &Prefs.Colors.Border,
+	// "padding":          units.Px(2),
+	// "margin":           units.Px(2),
+	// "color":            &Prefs.Colors.Font,
+	// "background-color": &Prefs.Colors.Background,
 }
 
 // Stripes defines stripes options for elements that can render striped backgrounds
@@ -176,4 +176,20 @@ func (fr *Frame) Render2D() {
 		fr.SetScrollsOff()
 		fr.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
+}
+
+func (fr *Frame) Init2D() {
+	fr.Init2DWidget()
+	fr.ConfigStyles()
+}
+
+func (fr *Frame) ConfigStyles() {
+	fr.AddStyleFunc(StyleFuncDefault, func() {
+		fr.Style.Border.Style.Set(gist.BorderNone)
+		fr.Style.Border.Radius.Set()
+		fr.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		fr.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		fr.Style.BackgroundColor.SetColor(Colors.Background)
+		fr.Style.Color = Colors.Text
+	})
 }

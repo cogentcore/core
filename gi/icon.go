@@ -60,22 +60,14 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 	ic.Filename = fr.Filename
 }
 
-func (ic *Icon) ConfigStyles() {
-	ic.AddStyleFunc(StyleFuncDefault, func() {
-		ic.Style.Width.SetEm(1.5)
-		ic.Style.Height.SetEm(1.5)
-		ic.Style.BackgroundColor.SetColor(color.Transparent)
-	})
-}
-
 func (ic *Icon) Init2D() {
-	ic.ConfigStyles()
 	ic.Init2DWidget()
+	ic.ConfigStyles()
 }
 
 var IconProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"background-color": color.Transparent,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "background-color": color.Transparent,
 }
 
 // SetIcon sets the icon by name into given Icon wrapper, returning error
@@ -163,6 +155,14 @@ func (ic *Icon) Render2D() {
 		ic.Render2DChildren()
 		ic.PopBounds()
 	}
+}
+
+func (ic *Icon) ConfigStyles() {
+	ic.AddStyleFunc(StyleFuncDefault, func() {
+		ic.Style.Width.SetEm(1.5)
+		ic.Style.Height.SetEm(1.5)
+		ic.Style.BackgroundColor.SetColor(color.Transparent)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

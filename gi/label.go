@@ -33,6 +33,7 @@ type Label struct {
 	Selectable         bool                     `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
 	Redrawable         bool                     `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
 	Type               LabelTypes               `desc:"the type of label (p, h1, h2, etc)"`
+	State              LabelStates              `desc:"the current state of the label (active, inactive, selected, etc)"`
 	LinkSig            ki.Signal                `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 	StateStyles        [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
 	Render             girl.Text                `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
@@ -47,12 +48,12 @@ var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
 type LabelTypes int
 
 const (
-	// LabelP is a default paragraph-style label,
+	// LabelStandard is a standard label that just contains
+	// text, similar to HTML's <span> and <label> elements
+	LabelStandard LabelTypes = iota
+	// LabelP is a paragraph-style label,
 	// similar to HTML's <p> element
-	LabelP LabelTypes = iota
-	// LabelLabel is a label that labels something else
-	// like an input, similar to HTML's <label> element
-	LabelLabel
+	LabelP
 	// LabelH1 is a large heading-style label,
 	// similar to HTML's <h1> element
 	LabelH1
@@ -129,22 +130,22 @@ func (lb *Label) Disconnect() {
 // }
 
 var LabelProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"white-space":      gist.WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
-	"padding":          units.Px(2),
-	"margin":           units.Px(2),
-	"vertical-align":   gist.AlignTop,
-	"color":            &Prefs.Colors.Font,
-	"background-color": color.Transparent,
-	LabelSelectors[LabelActive]: ki.Props{
-		"background-color": color.Transparent,
-	},
-	LabelSelectors[LabelInactive]: ki.Props{
-		"color": "lighter-50",
-	},
-	LabelSelectors[LabelSelected]: ki.Props{
-		"background-color": &Prefs.Colors.Select,
-	},
+	"EnumType:Flag": KiT_NodeFlags,
+	// "white-space":      gist.WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
+	// "padding":          units.Px(2),
+	// "margin":           units.Px(2),
+	// "vertical-align":   gist.AlignTop,
+	// "color":            &Prefs.Colors.Font,
+	// "background-color": color.Transparent,
+	// LabelSelectors[LabelActive]: ki.Props{
+	// 	"background-color": color.Transparent,
+	// },
+	// LabelSelectors[LabelInactive]: ki.Props{
+	// 	"color": "lighter-50",
+	// },
+	// LabelSelectors[LabelSelected]: ki.Props{
+	// 	"background-color": &Prefs.Colors.Select,
+	// },
 }
 
 // LabelStates are mutually-exclusive label states -- determines appearance
@@ -219,13 +220,16 @@ func (lb *Label) SetText(txt string) {
 func (lb *Label) SetStateStyle() {
 	lb.StyMu.Lock()
 	if lb.IsInactive() {
+		lb.State = LabelInactive
 		lb.Style = lb.StateStyles[LabelInactive]
 		if lb.Redrawable && !lb.CurBackgroundColor.IsNil() {
 			lb.Style.BackgroundColor.SetColor(lb.CurBackgroundColor)
 		}
 	} else if lb.IsSelected() {
+		lb.State = LabelSelected
 		lb.Style = lb.StateStyles[LabelSelected]
 	} else {
+		lb.State = LabelActive
 		lb.Style = lb.StateStyles[LabelActive]
 		if (lb.Selectable || lb.Redrawable) && !lb.CurBackgroundColor.IsNil() {
 			lb.Style.BackgroundColor.SetColor(lb.CurBackgroundColor)
@@ -483,4 +487,61 @@ func (lb *Label) Render2D() {
 
 func (lb *Label) ConnectEvents2D() {
 	lb.LabelEvents()
+}
+
+func (lb *Label) Init2D() {
+	lb.Init2DWidget()
+	lb.ConfigStyles()
+}
+
+func (lb *Label) ConfigStyles() {
+	lb.AddStyleFunc(StyleFuncDefault, func() {
+		lb.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
+		lb.Style.AlignV = gist.AlignTop
+		lb.Style.Color = Colors.Text
+		lb.Style.BackgroundColor.SetColor(color.Transparent)
+		switch lb.State {
+		case LabelActive:
+		case LabelInactive:
+			lb.Style.Color = Colors.Text.Highlight(30)
+		case LabelSelected:
+			lb.Style.BackgroundColor.SetColor(Colors.Accent)
+		}
+		// Styling based on https://www.w3schools.com/tags/tag_hn.asp
+		// and https://www.w3schools.com/tags/tag_p.asp
+		switch lb.Type {
+		case LabelStandard:
+			lb.Style.Font.Size.SetRem(1)
+			lb.Style.Text.WhiteSpace = gist.WhiteSpacePre
+			lb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+			lb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		case LabelP:
+			lb.Style.Font.Size.SetRem(1)
+			lb.Style.Margin.Set(units.Em(1*Prefs.DensityMul()), units.Px(0))
+		case LabelH1:
+			lb.Style.Font.Size.SetRem(2)
+			lb.Style.Font.Weight = gist.WeightBold
+			lb.Style.Margin.Set(units.Em(0.67*Prefs.DensityMul()), units.Px(0))
+		case LabelH2:
+			lb.Style.Font.Size.SetRem(1.5)
+			lb.Style.Font.Weight = gist.WeightBold
+			lb.Style.Margin.Set(units.Em(0.83*Prefs.DensityMul()), units.Px(0))
+		case LabelH3:
+			lb.Style.Font.Size.SetRem(1.17)
+			lb.Style.Font.Weight = gist.WeightBold
+			lb.Style.Margin.Set(units.Em(1*Prefs.DensityMul()), units.Px(0))
+		case LabelH4:
+			lb.Style.Font.Size.SetRem(1)
+			lb.Style.Font.Weight = gist.WeightBold
+			lb.Style.Margin.Set(units.Em(1.33*Prefs.DensityMul()), units.Px(0))
+		case LabelH5:
+			lb.Style.Font.Size.SetRem(0.83)
+			lb.Style.Font.Weight = gist.WeightBold
+			lb.Style.Margin.Set(units.Em(1.67*Prefs.DensityMul()), units.Px(0))
+		case LabelH6:
+			lb.Style.Font.Size.SetRem(0.67)
+			lb.Style.Font.Weight = gist.WeightBold
+			lb.Style.Margin.Set(units.Em(2.33*Prefs.DensityMul()), units.Px(0))
+		}
+	})
 }

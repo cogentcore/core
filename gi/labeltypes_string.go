@@ -11,8 +11,8 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[LabelP-0]
-	_ = x[LabelLabel-1]
+	_ = x[LabelStandard-0]
+	_ = x[LabelP-1]
 	_ = x[LabelH1-2]
 	_ = x[LabelH2-3]
 	_ = x[LabelH3-4]
@@ -22,9 +22,9 @@ func _() {
 	_ = x[LabelTypesN-8]
 }
 
-const _LabelTypes_name = "LabelPLabelLabelLabelH1LabelH2LabelH3LabelH4LabelH5LabelH6LabelTypesN"
+const _LabelTypes_name = "LabelStandardLabelPLabelH1LabelH2LabelH3LabelH4LabelH5LabelH6LabelTypesN"
 
-var _LabelTypes_index = [...]uint8{0, 6, 16, 23, 30, 37, 44, 51, 58, 69}
+var _LabelTypes_index = [...]uint8{0, 13, 19, 26, 33, 40, 47, 54, 61, 72}
 
 func (i LabelTypes) String() string {
 	if i < 0 || i >= LabelTypes(len(_LabelTypes_index)-1) {
@@ -44,8 +44,8 @@ func (i *LabelTypes) FromString(s string) error {
 }
 
 var _LabelTypes_descMap = map[LabelTypes]string{
-	0: `LabelP is a default paragraph-style label, similar to HTML&#39;s &lt;p&gt; element`,
-	1: `LabelLabel is a label that labels something else like an input, similar to HTML&#39;s &lt;label&gt; element`,
+	0: `LabelStandard is a standard label that just contains text, similar to HTML&#39;s &lt;span&gt; and &lt;label&gt; elements`,
+	1: `LabelP is a paragraph-style label, similar to HTML&#39;s &lt;p&gt; element`,
 	2: `LabelH1 is a large heading-style label, similar to HTML&#39;s &lt;h1&gt; element`,
 	3: `LabelH2 is a heading-style label slightly smaller than H1, similar to HTML&#39;s &lt;h2&gt; element`,
 	4: `LabelH3 is a heading-style label slightly smaller than H2, similar to HTML&#39;s &lt;h3&gt; element`,
