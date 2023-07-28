@@ -403,7 +403,6 @@ func NewMainWindow(name, title string, width, height int) *Window {
 	MainWindows.Add(win)
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
-	vp.SetProp("background-color", "blue")
 	vp.SetProp("color", &Prefs.Colors.Font) // everything inherits this..
 
 	win.AddChild(vp)

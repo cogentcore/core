@@ -262,7 +262,7 @@ func (ac *Action) ButtonRelease() {
 	}
 	wasPressed := (ac.State == ButtonDown)
 	updt := ac.UpdateStart()
-	ac.SetButtonState(ButtonActive)
+	ac.SetButtonState(ButtonHover)
 	ac.ButtonSig.Emit(ac.This(), int64(ButtonReleased), nil)
 	menOpen := false
 	if wasPressed {

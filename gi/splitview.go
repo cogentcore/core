@@ -255,11 +255,9 @@ func (sv *SplitView) ConfigSplitters() {
 	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
 	handsz := sv.HandleSize.Dots
 	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
-	spicon := icons.Icon("")
+	spicon := icons.DragHandle
 	if sv.Dim == mat32.X {
-		spicon = icons.DragHandle
-	} else {
-		spicon = icons.DragHandle
+		spicon = icons.DragIndicator
 	}
 	for i, spk := range *sv.Parts.Children() {
 		sp := spk.(*Splitter)
@@ -458,43 +456,43 @@ type Splitter struct {
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.Px(6),
-	"margin":           units.Px(0),
-	"background-color": &Prefs.Colors.Background,
-	"color":            &Prefs.Colors.Font,
-	"#icon": ki.Props{
-		"max-width":      units.Em(1),
-		"max-height":     units.Em(5),
-		"min-width":      units.Em(1),
-		"min-height":     units.Em(5),
-		"margin":         units.Px(0),
-		"padding":        units.Px(0),
-		"vertical-align": gist.AlignMiddle,
-		"fill":           &Prefs.Colors.Icon,
-		"stroke":         &Prefs.Colors.Font,
-	},
-	SliderSelectors[SliderActive]: ki.Props{},
-	SliderSelectors[SliderInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "highlight-10",
-	},
-	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.Px(2),
-		"background-color": "samelight-50",
-	},
-	SliderSelectors[SliderDown]: ki.Props{},
-	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     &Prefs.Colors.Icon,
-		"background-color": &Prefs.Colors.Icon,
-	},
-	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     &Prefs.Colors.Background,
-		"background-color": &Prefs.Colors.Background,
-	},
+	"EnumType:Flag": KiT_NodeFlags,
+	// "padding":          units.Px(6),
+	// "margin":           units.Px(0),
+	// "background-color": &Prefs.Colors.Background,
+	// "color":            &Prefs.Colors.Font,
+	// "#icon": ki.Props{
+	// 	"max-width":      units.Em(1),
+	// 	"max-height":     units.Em(5),
+	// 	"min-width":      units.Em(1),
+	// 	"min-height":     units.Em(5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignMiddle,
+	// 	"fill":           &Prefs.Colors.Icon,
+	// 	"stroke":         &Prefs.Colors.Font,
+	// },
+	// SliderSelectors[SliderActive]: ki.Props{},
+	// SliderSelectors[SliderInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// SliderSelectors[SliderHover]: ki.Props{
+	// 	"background-color": "highlight-10",
+	// },
+	// SliderSelectors[SliderFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "samelight-50",
+	// },
+	// SliderSelectors[SliderDown]: ki.Props{},
+	// SliderSelectors[SliderValue]: ki.Props{
+	// 	"border-color":     &Prefs.Colors.Icon,
+	// 	"background-color": &Prefs.Colors.Icon,
+	// },
+	// SliderSelectors[SliderBox]: ki.Props{
+	// 	"border-color":     &Prefs.Colors.Background,
+	// 	"background-color": &Prefs.Colors.Background,
+	// },
 }
 
 func (sr *Splitter) Defaults() {
@@ -512,6 +510,7 @@ func (sr *Splitter) Init2D() {
 	sr.Init2DSlider()
 	sr.Defaults()
 	sr.ConfigParts()
+	sr.ConfigStyles()
 }
 
 func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
@@ -742,19 +741,20 @@ func (sr *Splitter) RenderSplitter() {
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.Parts.Render2DTree()
-	} else {
-		rs, pc, st := sr.RenderLock()
-
-		pc.StrokeStyle.SetColor(nil)
-		pc.FillStyle.SetColorSpec(&st.BackgroundColor)
-
-		pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
-		pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
-		sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
-		sr.RenderBoxImpl(pos, sz, gist.Border{})
-
-		sr.RenderUnlock(rs)
 	}
+	// else {
+	rs, pc, st := sr.RenderLock()
+
+	pc.StrokeStyle.SetColor(nil)
+	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+
+	pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
+	pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
+	sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
+	sr.RenderBoxImpl(pos, sz, st.Border)
+
+	sr.RenderUnlock(rs)
+	// }
 }
 
 func (sr *Splitter) FocusChanged2D(change FocusChanges) {
@@ -769,4 +769,35 @@ func (sr *Splitter) FocusChanged2D(change FocusChanges) {
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
+}
+
+func (sr *Splitter) ConfigStyles() {
+	sr.AddStyleFunc(StyleFuncDefault, func() {
+		sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
+
+		sr.Style.Margin.Set()
+		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
+		sr.Style.BackgroundColor.SetColor(Colors.Accent)
+		sr.Style.Color = Colors.Text
+		sr.Style.Border.Width.Set(units.Px(1))
+		sr.Style.Border.Color.Set(Colors.Text)
+		if sr.Dim == mat32.X {
+			sr.Style.MinWidth.SetPx(2)
+			sr.Style.MinHeight.SetPx(100)
+			sr.Style.Height.SetPx(100)
+			sr.Style.MaxHeight.SetPx(100)
+		} else {
+			sr.Style.MinHeight.SetPx(2)
+			sr.Style.MinWidth.SetPx(100)
+		}
+	})
+	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(sr), func(icon *WidgetBase) {
+		icon.Style.MaxWidth.SetEm(1)
+		icon.Style.MaxHeight.SetEm(5)
+		icon.Style.MinWidth.SetEm(1)
+		icon.Style.MinHeight.SetEm(5)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+		icon.Style.AlignV = gist.AlignMiddle
+	})
 }

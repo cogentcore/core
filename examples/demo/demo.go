@@ -40,6 +40,7 @@ func mainrun() {
 	makeHome(tv)
 	makeButtons(win, tv)
 	makeInputs(tv)
+	makeLayouts(tv)
 	doWindowSetup(win, vp)
 
 	vp.UpdateEndNoSig(updt)
@@ -47,8 +48,7 @@ func mainrun() {
 }
 
 func makeHome(tv *gi.TabView) {
-	homeNode := tv.AddNewTab(gi.KiT_Frame, "Home")
-	home := homeNode.(*gi.Frame)
+	home := tv.AddNewTab(gi.KiT_Frame, "Home").(*gi.Frame)
 	home.Lay = gi.LayoutVert
 	home.AddStyleFunc(gi.StyleFuncFinal, func() {
 		home.Spacing.SetEx(1)
@@ -83,8 +83,7 @@ func makeHome(tv *gi.TabView) {
 }
 
 func makeButtons(win *gi.Window, tv *gi.TabView) {
-	buttonsNode := tv.AddNewTab(gi.KiT_Frame, "Buttons")
-	buttons := buttonsNode.(*gi.Frame)
+	buttons := tv.AddNewTab(gi.KiT_Frame, "Buttons").(*gi.Frame)
 	buttons.Lay = gi.LayoutVert
 	buttons.AddStyleFunc(gi.StyleFuncFinal, func() {
 		buttons.Spacing.SetEx(1)
@@ -260,8 +259,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 }
 
 func makeInputs(tv *gi.TabView) {
-	inputsNode := tv.AddNewTab(gi.KiT_Frame, "Inputs")
-	inputs := inputsNode.(*gi.Frame)
+	inputs := tv.AddNewTab(gi.KiT_Frame, "Inputs").(*gi.Frame)
 	inputs.Lay = gi.LayoutVert
 	inputs.AddStyleFunc(gi.StyleFuncFinal, func() {
 		inputs.Spacing.SetEx(1)
@@ -353,6 +351,31 @@ func makeInputs(tv *gi.TabView) {
 		tview.Style.MaxWidth.SetPx(500)
 		tview.Style.MaxHeight.SetPx(300)
 	})
+}
+
+func makeLayouts(tv *gi.TabView) {
+	layouts := tv.AddNewTab(gi.KiT_Frame, "Layouts").(*gi.Frame)
+	layouts.Lay = gi.LayoutVert
+	layouts.AddStyleFunc(gi.StyleFuncFinal, func() {
+		layouts.Spacing.SetEx(1)
+		layouts.Style.Padding.Set(units.Px(8))
+		layouts.Style.MaxWidth.SetPx(-1)
+		layouts.Style.MaxHeight.SetPx(-1)
+	})
+
+	sv := gi.AddNewSplitView(layouts, "sv")
+	sv.Dim = mat32.X
+
+	left := gi.AddNewFrame(sv, "left", gi.LayoutVert)
+
+	leftTitle := gi.AddNewLabel(left, "leftTitle", "Left")
+	leftTitle.Type = gi.LabelH2
+
+	right := gi.AddNewFrame(sv, "right", gi.LayoutVert)
+
+	rightTitle := gi.AddNewLabel(right, "rightTitle", "Right")
+	rightTitle.Type = gi.LabelH2
+
 }
 
 func doWindowSetup(win *gi.Window, vp *gi.Viewport2D) {
