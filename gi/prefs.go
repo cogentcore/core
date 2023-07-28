@@ -213,7 +213,6 @@ func (pf *Preferences) Apply() {
 // ApplyDPI updates the screen LogicalDPI values according to current
 // preferences and zoom factor, and then updates all open windows as well.
 func (pf *Preferences) ApplyDPI() {
-	fmt.Println("in applydpi")
 	n := oswin.TheApp.NScreens()
 	for i := 0; i < n; i++ {
 		sc := oswin.TheApp.Screen(i)

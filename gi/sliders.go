@@ -148,6 +148,8 @@ const (
 	// slider has been selected
 	SliderSelected
 
+	// TODO: remove these hacky states
+
 	// use background-color here to fill in selected value of slider
 	SliderValue
 
@@ -1077,8 +1079,6 @@ func (sb *ScrollBar) ConfigStyles() {
 		sb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		sb.Style.Padding.Set()
 		sb.Style.Color = Colors.Text
-		sbpath := sb.Path()
-		fmt.Println(sbpath, sb.State)
 		if sb.Dim == mat32.X {
 			sb.Style.MinHeight.SetEm(2)
 		} else {
@@ -1172,39 +1172,39 @@ func (pb *ProgressBar) ProgStep() {
 }
 
 var ProgressBarProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.Px(1),
-	"border-radius":    units.Px(4),
-	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.Px(0),
-	"margin":           units.Px(2),
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	SliderSelectors[SliderActive]: ki.Props{
-		"background-color": "lighter-0",
-	},
-	SliderSelectors[SliderInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "highlight-10",
-	},
-	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.Px(2),
-		"background-color": "samelight-50",
-	},
-	SliderSelectors[SliderDown]: ki.Props{
-		"background-color": "highlight-20",
-	},
-	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     &Prefs.Colors.Icon,
-		"background-color": &Prefs.Colors.Icon,
-	},
-	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     &Prefs.Colors.Background,
-		"background-color": &Prefs.Colors.Background,
-	},
+	"EnumType:Flag": KiT_NodeFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(4),
+	// "border-color":     &Prefs.Colors.Border,
+	// "padding":          units.Px(0),
+	// "margin":           units.Px(2),
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// SliderSelectors[SliderActive]: ki.Props{
+	// 	"background-color": "lighter-0",
+	// },
+	// SliderSelectors[SliderInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// SliderSelectors[SliderHover]: ki.Props{
+	// 	"background-color": "highlight-10",
+	// },
+	// SliderSelectors[SliderFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "samelight-50",
+	// },
+	// SliderSelectors[SliderDown]: ki.Props{
+	// 	"background-color": "highlight-20",
+	// },
+	// SliderSelectors[SliderValue]: ki.Props{
+	// 	"border-color":     &Prefs.Colors.Icon,
+	// 	"background-color": &Prefs.Colors.Icon,
+	// },
+	// SliderSelectors[SliderBox]: ki.Props{
+	// 	"border-color":     &Prefs.Colors.Background,
+	// 	"background-color": &Prefs.Colors.Background,
+	// },
 }
 
 func (pb *ProgressBar) Defaults() {
@@ -1220,4 +1220,8 @@ func (pb *ProgressBar) Defaults() {
 	pb.SetInactive()
 	pb.SetMinPrefWidth(units.Em(20))
 	pb.SetMinPrefHeight(units.Em(1))
+}
+
+func (pb *ProgressBar) Init2D() {
+	pb.ScrollBar.Init2D()
 }

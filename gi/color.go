@@ -37,7 +37,7 @@ var TheColorSchemes = ColorSchemes{
 		Background: colors.Black.Lighter(10),
 		Primary:    colors.Lightblue,
 		Secondary:  colors.Black.Lighter(10),
-		Accent:     colors.Lightblue,
+		Accent:     colors.Blue,
 		Success:    colors.Green,
 		Failure:    colors.Red,
 	},

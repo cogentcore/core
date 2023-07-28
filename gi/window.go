@@ -348,7 +348,6 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
 		return nil
 	}
-	log.Println("win handle", win.OSWin.Handle())
 	win.OSWin.SetName(title)
 	win.OSWin.SetParent(win.This())
 	win.NodeSig.Connect(win.This(), SignalWindowPublish)
@@ -1575,15 +1574,12 @@ func (w *Window) PollEvents() {
 // other state etc (popups, etc).
 func (w *Window) EventLoop() {
 	for {
-		// log.Println("Gi Window Event Loop")
 		if w.HasFlag(int(WinFlagStopEventLoop)) {
-			log.Println("BREAK: Gi Window Event Loop")
 			w.ClearFlag(int(WinFlagStopEventLoop))
 			break
 		}
 		evi := w.OSWin.NextEvent()
 		if w.HasFlag(int(WinFlagStopEventLoop)) {
-			log.Println("BREAK: Gi Window Event Loop")
 			w.ClearFlag(int(WinFlagStopEventLoop))
 			break
 		}
@@ -1806,7 +1802,6 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.SetFlag(int(WinFlagStopEventLoop))
 			return false
 		case window.Minimize:
-			log.Println("got minimize event")
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			if oswin.TheApp.Platform().IsMobile() {

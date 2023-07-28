@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
@@ -36,6 +37,16 @@ func mainrun() {
 	tv := gi.AddNewTabView(mfr, "tv")
 	tv.NoDeleteTabs = true
 
+	makeHome(tv)
+	makeButtons(win, tv)
+	makeInputs(tv)
+	doWindowSetup(win, vp)
+
+	vp.UpdateEndNoSig(updt)
+	win.StartEventLoop()
+}
+
+func makeHome(tv *gi.TabView) {
 	homeNode := tv.AddNewTab(gi.KiT_Frame, "Home")
 	home := homeNode.(*gi.Frame)
 	home.Lay = gi.LayoutVert
@@ -52,12 +63,26 @@ func mainrun() {
 	desc := gi.AddNewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
 	desc.Type = gi.LabelStandard
 
+	pbar := gi.AddNewProgressBar(home, "pbar")
+	pbar.Start(100)
+	go func() {
+		for {
+			if pbar.ProgCur >= pbar.ProgMax {
+				pbar.Start(100)
+			}
+			time.Sleep(100 * time.Millisecond)
+			pbar.ProgStep()
+		}
+	}()
+
 	bmap := gi.AddNewBitmap(home, "bmap")
 	err := bmap.OpenImage("gopher.png", 300, 300)
 	if err != nil {
 		fmt.Println("error loading gopher image:", err)
 	}
+}
 
+func makeButtons(win *gi.Window, tv *gi.TabView) {
 	buttonsNode := tv.AddNewTab(gi.KiT_Frame, "Buttons")
 	buttons := buttonsNode.(*gi.Frame)
 	buttons.Lay = gi.LayoutVert
@@ -232,7 +257,9 @@ func mainrun() {
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
+}
 
+func makeInputs(tv *gi.TabView) {
 	inputsNode := tv.AddNewTab(gi.KiT_Frame, "Inputs")
 	inputs := inputsNode.(*gi.Frame)
 	inputs.Lay = gi.LayoutVert
@@ -250,6 +277,18 @@ func mainrun() {
 		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`,
 	)
 	idesc.Type = gi.LabelP
+
+	tfieldf := gi.AddNewTextField(inputs, "tfieldf")
+	tfieldf.Placeholder = "Filled Text Field"
+	tfieldf.Type = gi.TextFieldFilled
+
+	tfieldo := gi.AddNewTextField(inputs, "tfieldo")
+	tfieldo.Placeholder = "Outlined Text Field"
+	tfieldo.Type = gi.TextFieldOutlined
+
+	tfieldp := gi.AddNewTextField(inputs, "tfieldp")
+	tfieldp.Placeholder = "Password Text Field"
+	tfieldp.NoEcho = true
 
 	irow := gi.AddNewLayout(inputs, "irow", gi.LayoutVert)
 	irow.AddStyleFunc(gi.StyleFuncFinal, func() {
@@ -280,13 +319,6 @@ func mainrun() {
 
 	check := gi.AddNewCheckBox(irow, "check")
 	check.Text = "Checkbox"
-
-	tfield := gi.AddNewTextField(irow, "tfield")
-	tfield.Placeholder = "Text Field"
-
-	tfieldp := gi.AddNewTextField(irow, "tfieldp")
-	tfieldp.Placeholder = "Password Text Field"
-	tfieldp.NoEcho = true
 
 	sbox := gi.AddNewSpinBox(irow, "sbox")
 	sbox.Value = 0.5
@@ -321,7 +353,9 @@ func mainrun() {
 		tview.Style.MaxWidth.SetPx(500)
 		tview.Style.MaxHeight.SetPx(300)
 	})
+}
 
+func doWindowSetup(win *gi.Window, vp *gi.Viewport2D) {
 	// Main Menu
 
 	appnm := gi.AppName()
@@ -333,19 +367,19 @@ func mainrun() {
 
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
-		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:New menu action triggered\n")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
-		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:Open menu action triggered\n")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
-		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:Save menu action triggered\n")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
-		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:SaveAs menu action triggered\n")
 		})
 	fmen.Menu.AddSeparator("csep")
@@ -400,6 +434,4 @@ func mainrun() {
 	})
 
 	win.MainMenuUpdated()
-	vp.UpdateEndNoSig(updt)
-	win.StartEventLoop()
 }
