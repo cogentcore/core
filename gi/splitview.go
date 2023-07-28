@@ -60,11 +60,11 @@ func (sv *SplitView) CopyFieldsFrom(frm any) {
 
 var SplitViewProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
-	"handle-size":   units.Px(10),
-	"max-width":     -1.0,
-	"max-height":    -1.0,
-	"margin":        0,
-	"padding":       0,
+	// "handle-size":   units.Px(10),
+	// "max-width":     -1.0,
+	// "max-height":    -1.0,
+	// "margin":        0,
+	// "padding":       0,
 }
 
 // UpdateSplits updates the splits to be same length as number of children,
@@ -244,6 +244,7 @@ func (sv *SplitView) Init2D() {
 	sv.Init2DWidget()
 	sv.UpdateSplits()
 	sv.ConfigSplitters()
+	sv.ConfigStyles()
 }
 
 func (sv *SplitView) ConfigSplitters() {
@@ -430,6 +431,16 @@ func (sv *SplitView) ConnectEvents2D() {
 
 func (sv *SplitView) HasFocus2D() bool {
 	return sv.ContainsFocus() // anyone within us gives us focus..
+}
+
+func (sv *SplitView) ConfigStyles() {
+	sv.AddStyleFunc(StyleFuncDefault, func() {
+		sv.HandleSize.SetPx(10)
+		sv.Style.MaxWidth.SetPx(-1)
+		sv.Style.MaxHeight.SetPx(-1)
+		sv.Style.Margin.Set()
+		sv.Style.Padding.Set()
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
