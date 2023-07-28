@@ -92,14 +92,14 @@ func (fr *Frame) FrameStdRender() {
 	sz := fr.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 
-	// TODO: SideTODO: not sure about this
+	// SidesTODO: not sure about this
 	pos = pos.Add(st.Margin.Dots().Pos()).Sub(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	sz = sz.Sub(st.Margin.Dots().Size()).Add(st.Border.Width.Dots().Size().MulScalar(0.5))
 
 	// then any shadow -- todo: optimize!
 	if st.BoxShadow.HasShadow() {
 		spos := pos.Add(mat32.Vec2{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
-		// TODO: SideTODO: unsure about border styling here
+		// SidesTODO: unsure about border styling here
 		// no border on box shadow (we do later)
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColor(&st.BoxShadow.Color)

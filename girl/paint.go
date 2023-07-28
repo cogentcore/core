@@ -486,22 +486,26 @@ func (pc *Paint) DrawPolygonPxToDots(rs *State, points []mat32.Vec2) {
 // DrawBorder is a higher-level function that draws, strokes, and fills
 // an potentially rounded border box with the given position, size, and border styles.
 func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
+	r := bs.Radius.Dots()
+	min := mat32.Min(w/2, h/2)
+	r.Top = mat32.Clamp(r.Top, 0, min)
+	r.Right = mat32.Clamp(r.Right, 0, min)
+	r.Bottom = mat32.Clamp(r.Bottom, 0, min)
+	r.Left = mat32.Clamp(r.Left, 0, min)
 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 		// set the color if it is not nil and it is not the same as the already set color
 		if !bs.Color.Top.IsNil() && (pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color) {
 			pc.StrokeStyle.SetColor(bs.Color.Top)
 		}
 		pc.StrokeStyle.Width = bs.Width.Top
-		if bs.Radius.IsZero() {
+		if r.IsZero() {
 			pc.DrawRectangle(rs, x, y, w, h)
 		} else {
-			pc.DrawRoundedRectangle(rs, x, y, w, h, bs.Radius.Dots())
+			pc.DrawRoundedRectangle(rs, x, y, w, h, r)
 		}
 		pc.FillStrokeClear(rs)
 		return
 	}
-
-	r := bs.Radius.Dots()
 
 	// use consistent rounded rectangle for fill, and then draw borders side by side
 	pc.DrawRoundedRectangle(rs, x, y, w, h, r)
@@ -522,7 +526,7 @@ func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
 		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
 	)
 
-	// TODO: SideTODO: need to figure out how to style rounded corners correctly
+	// SidesTODO: need to figure out how to style rounded corners correctly
 	// (in CSS they are split in the middle between different border side styles)
 
 	pc.NewSubPath(rs)
@@ -680,7 +684,7 @@ func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r gist.Side
 		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
 	)
 
-	// TODO: SideTODO: need to figure out how to style rounded corners correctly
+	// SidesTODO: need to figure out how to style rounded corners correctly
 	// (in CSS they are split in the middle between different border side styles)
 
 	pc.NewSubPath(rs)
@@ -732,7 +736,7 @@ func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r gist.Side
 // 		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
 // 	)
 
-// 	// TODO: SideTODO: need to figure out how to style rounded corners correctly
+// 	// SidesTODO: need to figure out how to style rounded corners correctly
 // 	// (in CSS they are split in the middle between different border side styles)
 
 // 	pc.NewSubPath(rs)

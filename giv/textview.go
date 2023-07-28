@@ -476,7 +476,7 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 	if !paloc.IsNil() {
 		// fmt.Printf("paloc: %v, pvp: %v  lineonoff: %v\n", paloc, parw.VpBBox, tv.LineNoOff)
 		tv.RenderSz = paloc.Sub(parw.ExtraSize).Sub(spc.Size())
-		// TODO: SideTODO: this is sketchy
+		// SidesTODO: this is sketchy
 		tv.RenderSz.X -= spc.Size().X / 2 // extra space
 		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
 	} else {
@@ -3386,7 +3386,7 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgcl
 	spc := sty.BoxSpace()
 
 	rst := tv.RenderStartPos()
-	// TODO: SideTODO: this is sketchy
+	// SidesTODO: this is sketchy
 	ex := float32(tv.VpBBox.Max.X) - spc.Right
 	sx := rst.X + tv.LineNoOff
 
@@ -3469,7 +3469,7 @@ func (tv *TextView) VisSizes() {
 	}
 	if lno {
 		tv.SetFlag(int(TextViewHasLineNos))
-		// TODO: SideTODO: this is sketchy
+		// SidesTODO: this is sketchy
 		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
 		tv.ClearFlag(int(TextViewHasLineNos))
@@ -3575,7 +3575,7 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	clr := sty.BackgroundColor.Color.Highlight(10)
 	spos := mat32.NewVec2FmPoint(tv.VpBBox.Min)
 	epos := mat32.NewVec2FmPoint(tv.VpBBox.Max)
-	// TODO: SideTODO: this is sketchy
+	// SidesTODO: this is sketchy
 	epos.X = spos.X + tv.LineNoOff - spc.Size().X/2
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
 }
@@ -3594,7 +3594,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	spos.X = float32(tv.VpBBox.Min.X)
 	epos := tv.CharEndPos(lex.Pos{Ln: ed + 1})
 	epos.Y -= tv.LineHeight
-	// TODO: SideTODO: this is sketchy
+	// SidesTODO: this is sketchy
 	epos.X = spos.X + tv.LineNoOff - spc.Size().X/2
 	// fmt.Printf("line box: st %v ed: %v spos %v  epos %v\n", st, ed, spos, epos)
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
@@ -3623,7 +3623,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	if ln < tv.NLines-1 {
 		ebox.Y -= tv.LineHeight
 	}
-	// TODO: SideTODO: this is sketchy
+	// SidesTODO: this is sketchy
 	ebox.X = sbox.X + tv.LineNoOff - spc.Size().X/2
 	bsz := ebox.Sub(sbox)
 	lclr, hasLClr := tv.Buf.LineColors[ln]

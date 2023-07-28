@@ -74,7 +74,7 @@ func (g *Rect) Render2D() {
 		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
 		// todo: only supports 1 radius right now -- easy to add another
-		// TODO: SideTODO: also support different radii for each corner
+		// SidesTODO: also support different radii for each corner
 		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, gist.NewSideFloats(g.Radius.X))
 	}
 	pc.FillStrokeClear(rs)

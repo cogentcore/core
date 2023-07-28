@@ -465,7 +465,7 @@ func (sb *SliderBase) MouseEvent() {
 				if me.Action == mouse.Press {
 					ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 					st := &sbb.Style
-					// TODO: SideTODO: not sure about dim
+					// SidesTODO: not sure about dim
 					spc := st.Margin.Dots().Pos().Dim(sbb.Dim) + 0.5*sbb.ThSizeReal
 					if sbb.Dim == mat32.X {
 						sbb.SliderPress(float32(ed.X) - spc)
@@ -805,7 +805,7 @@ func (sr *Slider) Render2DDefaultStyle() {
 	// overall fill box
 	sr.RenderStdBox(&sr.StyleBox)
 
-	// TODO: SideTODO: look here if slider borders break
+	// SidesTODO: look here if slider borders break
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width

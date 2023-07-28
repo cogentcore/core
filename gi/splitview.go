@@ -581,7 +581,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 	pos := off + int(sr.Pos-0.5*sz)
 	mxpos := off + int(sr.Pos+0.5*sz)
 
-	// TODO: SideTODO: this is all sketchy
+	// SidesTODO: this is all sketchy
 
 	if sr.IsDragging() {
 		win := sr.ParentWindow()
@@ -631,7 +631,7 @@ func (sr *Splitter) MouseEvent() {
 				if me.Action == mouse.Press {
 					ed := srr.This().(SliderPositioner).PointToRelPos(me.Where)
 					st := &srr.Style
-					// TODO: SideTODO: unsure about dim
+					// SidesTODO: unsure about dim
 					spc := st.Margin.Dots().Pos().Dim(srr.Dim) + 0.5*srr.ThSize
 					if srr.Dim == mat32.X {
 						srr.SliderPress(float32(ed.X) - spc)

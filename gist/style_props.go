@@ -970,7 +970,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 
 // StyleBorderFuncs are functions for styling the Border object
 var StyleBorderFuncs = map[string]StyleFunc{
-	// TODO: SideTODO: need to figure out how to get key and context information for side SetAny calls
+	// SidesTODO: need to figure out how to get key and context information for side SetAny calls
 	// with padding, margin, border, etc
 	"border-style": func(obj any, key string, val any, par any, ctxt Context) {
 		bs := obj.(*Border)

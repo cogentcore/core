@@ -968,7 +968,7 @@ func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs gist.Borde
 // RenderStdBox draws standard box using given style.
 // girl.State and Style must already be locked at this point (RenderLock)
 func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
-	// TODO: SideTODO: this is a pretty critical function, so a good place to look if things aren't working
+	// SidesTODO: this is a pretty critical function, so a good place to look if things aren't working
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
@@ -977,7 +977,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 
 	pos := wb.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
 	sz := wb.LayState.Alloc.Size.Sub(st.Margin.Dots().Size())
-	rad := st.Border.Radius.Dots()
+	// rad := st.Border.Radius.Dots()
 
 	// first do any shadow
 	if st.BoxShadow.HasShadow() {
@@ -991,23 +991,25 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	}
 	// then draw the box over top of that -- note: won't work well for
 	// transparent! need to set clipping to box first..
-	if !st.BackgroundColor.IsNil() {
-		if rad.IsZero() {
-			pc.FillBox(rs, pos, sz, &st.BackgroundColor)
-		} else {
-			pc.FillStyle.SetColorSpec(&st.BackgroundColor)
-			// no border -- fill only
-			pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
-			pc.Fill(rs)
-		}
-	}
+	// if !st.BackgroundColor.IsNil() {
+	// 	if rad.IsZero() {
+	// 		pc.FillBox(rs, pos, sz, &st.BackgroundColor)
+	// 	} else {
+	// 		pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+	// 		// no border -- fill only
+	// 		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+	// 		pc.Fill(rs)
+	// 	}
+	// }
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
-	// pc.FillStyle.SetColor(&st.BackgroundColor)
+	if !st.BackgroundColor.IsNil() {
+		pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+	}
 	pos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	sz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
-	pc.FillStyle.SetColor(nil)
+	// pc.FillStyle.SetColor(nil)
 	wb.RenderBoxImpl(pos, sz, st.Border)
 }
 

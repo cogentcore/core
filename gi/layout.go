@@ -254,7 +254,7 @@ func (ly *Layout) AvailSize() mat32.Vec2 {
 		vp := parni.AsViewport2D()
 		if vp != nil {
 			if vp.ViewportSafe() == nil {
-				// TODO: SideTODO: might not be right
+				// SidesTODO: might not be right
 				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc.Right)
 				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.Path(), vp.Path(), avail)
 			}
@@ -333,7 +333,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
 	sc.Step = ly.Style.Font.Size.Dots                  // step by lines
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
-	// TODO: SideTODO: not sure about this
+	// SidesTODO: not sure about this
 	sc.ThumbVal = avail.Dim(d) - spc.Size().Dim(d)/2
 	sc.TrackThr = sc.Step
 	sc.Value = mat32.Min(sc.Value, sc.Max-sc.ThumbVal) // keep in range
@@ -386,7 +386,7 @@ func (ly *Layout) LayoutScrolls() {
 			sc.Size2D(0)
 			sc.LayState.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
 			sc.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
-			// TODO: SideTODO: not sure about this
+			// SidesTODO: not sure about this
 			sc.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc.Size().Dim(d)/2)
 			if ly.HasScroll[odim] { // make room for other
 				sc.LayState.Alloc.Size.SetSubDim(d, sbw)

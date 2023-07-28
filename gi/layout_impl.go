@@ -507,7 +507,7 @@ func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc gist.Si
 		stretchNeed = true // stretch relative to need
 	}
 
-	// TODO: SideTODO: this needs to be set based on layout type
+	// SidesTODO: this needs to be set based on layout type
 	pos = spc.Pos().Dim(mat32.X)
 	size = need
 	if usePref {
@@ -697,7 +697,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
 	odim := mat32.OtherDim(dim)
 
-	// TODO: SideTODO: might be odim
+	// SidesTODO: might be odim
 	pos := spc.Pos().Dim(dim)
 	for i, c := range ly.Kids {
 		if c == nil {
