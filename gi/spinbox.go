@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"strconv"
 
 	"github.com/goki/gi/gist"
@@ -37,8 +38,8 @@ type SpinBox struct {
 	PageStep   float32    `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 	Prec       int        `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 	Format     string     `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
-	UpIcon     icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to wedge-up"`
-	DownIcon   icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to wedge-down"`
+	UpIcon     icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to icons.KeyboardArrowUp"`
+	DownIcon   icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to icons.KeyboardArrowDown"`
 	SpinBoxSig ki.Signal  `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
@@ -96,35 +97,35 @@ func (sb *SpinBox) Disconnect() {
 
 var SpinBoxProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
-	"#buttons": ki.Props{
-		"vertical-align": gist.AlignMiddle,
-	},
-	"#up": ki.Props{
-		"max-width":  units.Ex(1.5),
-		"max-height": units.Ex(1.5),
-		"margin":     units.Px(1),
-		"padding":    units.Px(0),
-		"fill":       &Prefs.Colors.Icon,
-		"stroke":     &Prefs.Colors.Font,
-	},
-	"#down": ki.Props{
-		"max-width":  units.Ex(1.5),
-		"max-height": units.Ex(1.5),
-		"margin":     units.Px(1),
-		"padding":    units.Px(0),
-		"fill":       &Prefs.Colors.Icon,
-		"stroke":     &Prefs.Colors.Font,
-	},
-	"#space": ki.Props{
-		"width": units.Ch(.1),
-	},
-	"#text-field": ki.Props{
-		"min-width": units.Ch(4),
-		"width":     units.Ch(8),
-		"margin":    units.Px(2),
-		"padding":   units.Px(2),
-		"clear-act": false,
-	},
+	// "#buttons": ki.Props{
+	// 	"vertical-align": gist.AlignMiddle,
+	// },
+	// "#up": ki.Props{
+	// 	"max-width":  units.Ex(1.5),
+	// 	"max-height": units.Ex(1.5),
+	// 	"margin":     units.Px(1),
+	// 	"padding":    units.Px(0),
+	// 	"fill":       &Prefs.Colors.Icon,
+	// 	"stroke":     &Prefs.Colors.Font,
+	// },
+	// "#down": ki.Props{
+	// 	"max-width":  units.Ex(1.5),
+	// 	"max-height": units.Ex(1.5),
+	// 	"margin":     units.Px(1),
+	// 	"padding":    units.Px(0),
+	// 	"fill":       &Prefs.Colors.Icon,
+	// 	"stroke":     &Prefs.Colors.Font,
+	// },
+	// "#space": ki.Props{
+	// 	"width": units.Ch(.1),
+	// },
+	// "#text-field": ki.Props{
+	// 	"min-width": units.Ch(4),
+	// 	"width":     units.Ch(8),
+	// 	"margin":    units.Px(2),
+	// 	"padding":   units.Px(2),
+	// 	"clear-act": false,
+	// },
 }
 
 func (sb *SpinBox) Defaults() { // todo: should just get these from props
@@ -401,8 +402,9 @@ func (sb *SpinBox) SpinBoxEvents() {
 }
 
 func (sb *SpinBox) Init2D() {
-	sb.ConfigParts()
 	sb.Init2DWidget()
+	sb.ConfigParts()
+	sb.ConfigStyles()
 }
 
 // StyleFromProps styles SpinBox-specific fields from ki.Prop properties
@@ -522,4 +524,55 @@ func (sb *SpinBox) HasFocus2D() bool {
 		return false
 	}
 	return sb.ContainsFocus() // needed for getting key events
+}
+
+func (sb *SpinBox) ConfigStyles() {
+	sb.Parts.AddChildStyleFunc("text-field", 0, StyleFuncParts(sb), func(tfw *WidgetBase) {
+		tf, ok := tfw.This().(*TextField)
+		if !ok {
+			log.Println("(*gi.SpinBox).ConfigStyles: expected child named text-field to be of type *gi.TextField, not", reflect.TypeOf(tfw.This()))
+			return
+		}
+		tf.Style.MinWidth.SetCh(4)
+		tf.Style.Width.SetCh(8)
+		tf.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		tf.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		tf.ClearAct = false
+	})
+	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(space *WidgetBase) {
+		space.Style.Width.SetCh(0.1)
+	})
+	if buttons, ok := sb.Parts.ChildByName("buttons", 2).(*Layout); ok {
+		buttons.AddStyleFunc(StyleFuncParts(sb), func() {
+			buttons.Style.AlignV = gist.AlignMiddle
+		})
+		// same style function for both button up and down
+		btsf := func(buttonw *WidgetBase) {
+			button, ok := buttonw.This().(*Action)
+			if !ok {
+				log.Println("(*gi.SpinBox).ConfigStyles: expected child of Parts/buttons to be of type *gi.Action, not", reflect.TypeOf(buttonw.This()))
+				return
+			}
+			button.Style.MaxWidth.SetEx(2)
+			button.Style.MaxHeight.SetEx(2)
+			button.Style.Padding.Set()
+			button.Style.Margin.Set()
+			button.Style.Color = Colors.Text
+			switch button.State {
+			case ButtonActive:
+				button.Style.BackgroundColor.SetColor(Colors.Background)
+			case ButtonInactive:
+				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+				button.Style.Color = Colors.Text.Highlight(20)
+			case ButtonFocus, ButtonSelected:
+				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			case ButtonHover:
+				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+			case ButtonDown:
+				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			}
+		}
+		buttons.AddChildStyleFunc("up", 0, StyleFuncParts(sb), btsf)
+		buttons.AddChildStyleFunc("down", 1, StyleFuncParts(sb), btsf)
+	}
 }

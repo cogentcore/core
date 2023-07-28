@@ -908,7 +908,7 @@ func (sr *Slider) ConfigStyles() {
 		}
 		sr.ThumbColor = sr.ValueColor
 	})
-	sr.AddChildStyleFunc("icon", 0, StyleFuncParts(sr), func(icon *WidgetBase) {
+	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(sr), func(icon *WidgetBase) {
 		icon.Style.Width.SetEm(1)
 		icon.Style.Height.SetEm(1)
 		icon.Style.Margin.Set()
