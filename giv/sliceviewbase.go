@@ -202,6 +202,14 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 	sv.Slice = sl
 	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice))
 	sv.isArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+	// make sure elements aren't nil to prevent later panics
+	for i := 0; i < sv.SliceNPVal.Len(); i++ {
+		val := sv.SliceNPVal.Index(i)
+		k := val.Kind()
+		if (k == reflect.Chan || k == reflect.Func || k == reflect.Interface || k == reflect.Map || k == reflect.Pointer || k == reflect.Slice) && val.IsNil() {
+			val.Set(reflect.New(kit.NonPtrType(val.Type())))
+		}
+	}
 	if !sv.IsInactive() {
 		sv.SelectedIdx = -1
 	}
