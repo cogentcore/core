@@ -16,14 +16,15 @@ func _() {
 	_ = x[SliderHover-2]
 	_ = x[SliderFocus-3]
 	_ = x[SliderDown-4]
-	_ = x[SliderValue-5]
-	_ = x[SliderBox-6]
-	_ = x[SliderStatesN-7]
+	_ = x[SliderSelected-5]
+	_ = x[SliderValue-6]
+	_ = x[SliderBox-7]
+	_ = x[SliderStatesN-8]
 }
 
-const _SliderStates_name = "SliderActiveSliderInactiveSliderHoverSliderFocusSliderDownSliderValueSliderBoxSliderStatesN"
+const _SliderStates_name = "SliderActiveSliderInactiveSliderHoverSliderFocusSliderDownSliderSelectedSliderValueSliderBoxSliderStatesN"
 
-var _SliderStates_index = [...]uint8{0, 12, 26, 37, 48, 58, 69, 78, 91}
+var _SliderStates_index = [...]uint8{0, 12, 26, 37, 48, 58, 72, 83, 92, 105}
 
 func (i SliderStates) String() string {
 	if i < 0 || i >= SliderStates(len(_SliderStates_index)-1) {
@@ -48,9 +49,10 @@ var _SliderStates_descMap = map[SliderStates]string{
 	2: `mouse is hovering over the slider`,
 	3: `slider is the focus -- will respond to keyboard input`,
 	4: `slider is currently being pressed down`,
-	5: `use background-color here to fill in selected value of slider`,
-	6: `these styles define the overall box around slider -- typically no border and a white background -- needs a background to allow local re-rendering`,
-	7: `total number of slider states`,
+	5: `slider has been selected`,
+	6: `use background-color here to fill in selected value of slider`,
+	7: `these styles define the overall box around slider -- typically no border and a white background -- needs a background to allow local re-rendering`,
+	8: `total number of slider states`,
 }
 
 func (i SliderStates) Desc() string {

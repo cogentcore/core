@@ -185,7 +185,7 @@ func (sv *SVG) StyleSVG() {
 	sv.StyMu.Unlock()
 	StyleSVG(sv.This().(gi.Node2D))
 	// TODO: cleaner svg styling from text color property
-	sv.StyleFuncs.Vals()[0]()
+	sv.RunStyleFuncs()
 	SetUnitContext(&sv.Pnt.Paint, sv.AsViewport2D(), sv.ViewBox.Size) // context is viewbox
 }
 

@@ -396,14 +396,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	// 	}
 	// }
 
-	if wb.StyleFuncs != nil {
-		vals := wb.StyleFuncs.Vals()
-		if len(vals) != 0 {
-			for i := len(vals) - 1; i >= 0; i-- {
-				vals[i]()
-			}
-		}
-	}
+	wb.RunStyleFuncs()
 
 	// if CustomStyleFunc != nil {
 	// 	CustomStyleFunc(wb)
@@ -419,6 +412,19 @@ func (wb *WidgetBase) Style2DWidget() {
 	}
 
 	wb.Viewport.SetCurrentColor(wb.Style.Color)
+}
+
+// RunStyleFuncs runs the style functions specified in
+// the StyleFuncs field in descending order.
+func (wb *WidgetBase) RunStyleFuncs() {
+	if wb.StyleFuncs != nil {
+		vals := wb.StyleFuncs.Vals()
+		if len(vals) != 0 {
+			for i := len(vals) - 1; i >= 0; i-- {
+				vals[i]()
+			}
+		}
+	}
 }
 
 // StylePart sets the style properties for a child in parts (or any other

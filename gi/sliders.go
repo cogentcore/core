@@ -60,6 +60,9 @@ type SliderBase struct {
 	TrackThr    float32                   `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                      `xml:"snap" desc:"snap the values to Step size increments"`
 	Off         bool                      `desc:"can turn off e.g., scrollbar rendering with this flag -- just prevents rendering"`
+	StyleBox    gist.Style                `desc:"an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering"`
+	ValueColor  gist.ColorSpec            `desc:"the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is"`
+	ThumbColor  gist.ColorSpec            `desc:"the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is"`
 	State       SliderStates              `json:"-" xml:"-" desc:"state of slider"`
 	StateStyles [SliderStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	SliderSig   ki.Signal                 `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
@@ -142,6 +145,9 @@ const (
 	// slider is currently being pressed down
 	SliderDown
 
+	// slider has been selected
+	SliderSelected
+
 	// use background-color here to fill in selected value of slider
 	SliderValue
 
@@ -155,7 +161,7 @@ const (
 //go:generate stringer -type=SliderStates
 
 // SliderSelectors are Style selector names for the different states
-var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":value", ":box"}
+var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected", ":value", ":box"}
 
 func (sb *SliderBase) Defaults() { // todo: should just get these from props
 	sb.ThumbSize = units.Em(1)
@@ -175,11 +181,28 @@ func (sb *SliderBase) SnapValue() {
 
 // SetSliderState sets the slider state to given state, updates style
 func (sb *SliderBase) SetSliderState(state SliderStates) {
-	if state == SliderActive && sb.HasFocus() {
-		state = SliderFocus
+	prev := sb.State
+	if sb.IsInactive() {
+		if sb.IsSelected() {
+			state = SliderSelected
+		} else {
+			state = SliderInactive
+		}
+	} else {
+		if state == SliderActive && sb.IsSelected() {
+			state = SliderSelected
+		} else if state == SliderActive && sb.HasFocus() {
+			state = SliderFocus
+		}
 	}
 	sb.State = state
 	sb.Style = sb.StateStyles[state] // get relevant styles
+	if prev != state {
+		sb.StyMu.Lock()
+		sb.Style2DWidget()
+		sb.StyMu.Unlock()
+		// sb.Viewport.SetNeedsFullRender()
+	}
 }
 
 // SliderPress sets the slider in the down state -- mouse clicked down but
@@ -200,7 +223,7 @@ func (sb *SliderBase) SliderPress(pos float32) {
 func (sb *SliderBase) SliderRelease() {
 	wasPressed := (sb.State == SliderDown)
 	updt := sb.UpdateStart()
-	sb.SetSliderState(SliderActive)
+	sb.SetSliderState(SliderHover)
 	sb.SliderSig.Emit(sb.This(), int64(SliderReleased), sb.Value)
 	if wasPressed {
 		sb.EmitNewValue()
@@ -508,6 +531,10 @@ func (sb *SliderBase) SliderEvents() {
 
 func (sb *SliderBase) Init2DSlider() {
 	sb.Init2DWidget()
+	sb.State = SliderActive
+	if sb.IsInactive() {
+		sb.State = SliderInactive
+	}
 }
 
 func (sb *SliderBase) ConfigParts() {
@@ -674,31 +701,31 @@ var SliderProps = ki.Props{
 	// 	"fill":    &Prefs.Colors.Icon,
 	// 	"stroke":  &Prefs.Colors.Font,
 	// },
-	SliderSelectors[SliderActive]: ki.Props{
-		"background-color": "lighter-0",
-	},
-	SliderSelectors[SliderInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "highlight-10",
-	},
-	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.Px(2),
-		"background-color": "samelight-50",
-	},
-	SliderSelectors[SliderDown]: ki.Props{
-		"background-color": "highlight-20",
-	},
-	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     &Prefs.Colors.Icon,
-		"background-color": &Prefs.Colors.Icon,
-	},
-	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     &Prefs.Colors.Background,
-		"background-color": &Prefs.Colors.Background,
-	},
+	// SliderSelectors[SliderActive]: ki.Props{
+	// 	"background-color": "lighter-0",
+	// },
+	// SliderSelectors[SliderInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// SliderSelectors[SliderHover]: ki.Props{
+	// 	"background-color": "highlight-10",
+	// },
+	// SliderSelectors[SliderFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "samelight-50",
+	// },
+	// SliderSelectors[SliderDown]: ki.Props{
+	// 	"background-color": "highlight-20",
+	// },
+	// SliderSelectors[SliderValue]: ki.Props{
+	// 	"border-color":     &Prefs.Colors.Icon,
+	// 	"background-color": &Prefs.Colors.Icon,
+	// },
+	// SliderSelectors[SliderBox]: ki.Props{
+	// 	"border-color":     &Prefs.Colors.Background,
+	// 	"background-color": &Prefs.Colors.Background,
+	// },
 }
 
 func (sr *Slider) Defaults() {
@@ -774,7 +801,7 @@ func (sr *Slider) Render2DDefaultStyle() {
 	sr.ConfigPartsIfNeeded(true)
 
 	// overall fill box
-	sr.RenderStdBox(&sr.StateStyles[SliderBox])
+	sr.RenderStdBox(&sr.StyleBox)
 
 	// TODO: SideTODO: look here if slider borders break
 
@@ -807,12 +834,12 @@ func (sr *Slider) Render2DDefaultStyle() {
 	sr.RenderBoxImpl(bpos, bsz, st.Border)
 
 	bsz.SetDim(sr.Dim, sr.Pos)
-	pc.FillStyle.SetColorSpec(&sr.StateStyles[SliderValue].BackgroundColor)
+	pc.FillStyle.SetColorSpec(&sr.ValueColor)
 	sr.RenderBoxImpl(bpos, bsz, st.Border)
 
 	tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
-	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+	pc.FillStyle.SetColorSpec(&sr.ThumbColor)
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.RenderUnlock(rs)
@@ -845,13 +872,39 @@ func (sr *Slider) FocusChanged2D(change FocusChanges) {
 
 func (sr *Slider) ConfigStyles() {
 	sr.AddStyleFunc(StyleFuncDefault, func() {
+		sr.StyleBox.BackgroundColor.SetColor(Colors.Background)
+		sr.StyleBox.Border.Style.Set(gist.BorderNone)
+
 		sr.Style.Border.Style.Set(gist.BorderNone)
 		sr.Style.Border.Radius.Set(units.Px(4))
 		sr.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
 		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
-		sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+		if sr.Dim == mat32.X {
+			sr.Style.MinWidth.SetEm(20)
+			sr.Style.MinHeight.SetEm(2)
+		} else {
+			sr.Style.MinHeight.SetEm(20)
+			sr.Style.MinWidth.SetEm(2)
+		}
 		sr.Style.Color = Colors.Text
-		// fmt.Println("slider state", sr.State)
+		switch sr.State {
+		case SliderActive:
+			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+			sr.ValueColor.SetColor(Colors.Primary)
+		case SliderInactive:
+			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+			sr.ValueColor.SetColor(Colors.Primary.Pastel(100))
+		case SliderFocus, SliderSelected:
+			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
+			sr.ValueColor.SetColor(Colors.Primary.Highlight(10))
+		case SliderHover:
+			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+			sr.ValueColor.SetColor(Colors.Primary.Highlight(15))
+		case SliderDown:
+			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(35))
+			sr.ValueColor.SetColor(Colors.Primary.Highlight(20))
+		}
+		sr.ThumbColor = sr.ValueColor
 	})
 	sr.AddChildStyleFunc("icon", 0, StyleFuncParts(sr), func(icon *WidgetBase) {
 		icon.Style.Width.SetEm(1)
@@ -882,39 +935,39 @@ func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 }
 
 var ScrollBarProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.Px(1),
-	"border-radius":    units.Px(4),
-	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.Px(0),
-	"margin":           units.Px(2),
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	SliderSelectors[SliderActive]: ki.Props{
-		"background-color": "lighter-0",
-	},
-	SliderSelectors[SliderInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "highlight-10",
-	},
-	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.Px(2),
-		"background-color": "samelight-50",
-	},
-	SliderSelectors[SliderDown]: ki.Props{
-		"background-color": "highlight-20",
-	},
-	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     &Prefs.Colors.Icon,
-		"background-color": &Prefs.Colors.Icon,
-	},
-	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     &Prefs.Colors.Background,
-		"background-color": &Prefs.Colors.Background,
-	},
+	"EnumType:Flag": KiT_NodeFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(4),
+	// "border-color":     &Prefs.Colors.Border,
+	// "padding":          units.Px(0),
+	// "margin":           units.Px(2),
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// SliderSelectors[SliderActive]: ki.Props{
+	// 	"background-color": "lighter-0",
+	// },
+	// SliderSelectors[SliderInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// SliderSelectors[SliderHover]: ki.Props{
+	// 	"background-color": "highlight-10",
+	// },
+	// SliderSelectors[SliderFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "samelight-50",
+	// },
+	// SliderSelectors[SliderDown]: ki.Props{
+	// 	"background-color": "highlight-20",
+	// },
+	// SliderSelectors[SliderValue]: ki.Props{
+	// "border-color":     &Prefs.Colors.Icon,
+	// 	"background-color": &Prefs.Colors.Icon,
+	// },
+	// SliderSelectors[SliderBox]: ki.Props{
+	// 	"border-color":     &Prefs.Colors.Background,
+	// 	"background-color": &Prefs.Colors.Background,
+	// },
 }
 
 func (sb *ScrollBar) Defaults() { // todo: should just get these from props
@@ -928,6 +981,7 @@ func (sb *ScrollBar) Defaults() { // todo: should just get these from props
 
 func (sb *ScrollBar) Init2D() {
 	sb.Init2DSlider()
+	sb.ConfigStyles()
 }
 
 func (sb *ScrollBar) Style2D() {
@@ -977,7 +1031,7 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 	defer sb.RenderUnlock(rs)
 
 	// overall fill box
-	sb.RenderStdBox(&sb.StateStyles[SliderBox])
+	sb.RenderStdBox(&sb.StyleBox)
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
@@ -991,7 +1045,7 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 	sb.RenderBoxImpl(pos, sz, st.Border) // surround box
 	pos.SetAddDim(sb.Dim, sb.Pos)        // start of thumb
 	sz.SetDim(sb.Dim, sb.ThSize)
-	pc.FillStyle.SetColorSpec(&sb.StateStyles[SliderValue].BackgroundColor)
+	pc.FillStyle.SetColorSpec(&sb.ValueColor)
 	sb.RenderBoxImpl(pos, sz, st.Border)
 }
 
@@ -1011,6 +1065,44 @@ func (sb *ScrollBar) FocusChanged2D(change FocusChanges) {
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
+}
+
+func (sb *ScrollBar) ConfigStyles() {
+	sb.AddStyleFunc(StyleFuncDefault, func() {
+		sb.StyleBox.Border.Style.Set(gist.BorderNone)
+		sb.StyleBox.BackgroundColor.SetColor(Colors.Background)
+
+		sb.Style.Border.Style.Set(gist.BorderNone)
+		sb.Style.Border.Radius.Set(units.Px(4))
+		sb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		sb.Style.Padding.Set()
+		sb.Style.Color = Colors.Text
+		sbpath := sb.Path()
+		fmt.Println(sbpath, sb.State)
+		if sb.Dim == mat32.X {
+			sb.Style.MinHeight.SetEm(2)
+		} else {
+			sb.Style.MinWidth.SetEm(2)
+		}
+		switch sb.State {
+		case SliderActive:
+			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			sb.ValueColor.SetColor(Colors.Background.Highlight(30))
+		case SliderInactive:
+			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+			sb.ValueColor.SetColor(Colors.Background.Highlight(50))
+		case SliderFocus, SliderSelected:
+			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			sb.ValueColor.SetColor(Colors.Background.Highlight(40))
+		case SliderHover:
+			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
+			sb.ValueColor.SetColor(Colors.Background.Highlight(45))
+		case SliderDown:
+			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+			sb.ValueColor.SetColor(Colors.Background.Highlight(50))
+		}
+		// sb.ThumbColor = sb.ValueColor
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

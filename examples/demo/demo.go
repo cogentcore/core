@@ -258,11 +258,25 @@ func mainrun() {
 		irow.Style.MaxHeight.SetPx(500)
 	})
 
-	slider := gi.AddNewSlider(irow, "slider")
-	slider.Dim = mat32.X
-	slider.Defaults()
-	slider.SetMinPrefWidth(units.Em(20))
-	slider.SetMinPrefHeight(units.Em(2))
+	sliderx := gi.AddNewSlider(irow, "sliderx")
+	sliderx.Dim = mat32.X
+	sliderx.Value = 0.5
+
+	sliderxi := gi.AddNewSlider(irow, "sliderxi")
+	sliderxi.Dim = mat32.X
+	sliderxi.Value = 0.7
+	sliderxi.SetInactive()
+
+	sliderys := gi.AddNewLayout(irow, "sliderys", gi.LayoutHorizFlow)
+
+	slidery := gi.AddNewSlider(sliderys, "slidery")
+	slidery.Dim = mat32.Y
+	slidery.Value = 0.3
+
+	slideryi := gi.AddNewSlider(sliderys, "slideryi")
+	slideryi.Dim = mat32.Y
+	slideryi.Value = 0.2
+	slideryi.SetInactive()
 
 	check := gi.AddNewCheckBox(irow, "check")
 	check.Text = "Checkbox"
