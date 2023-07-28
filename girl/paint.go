@@ -487,11 +487,6 @@ func (pc *Paint) DrawPolygonPxToDots(rs *State, points []mat32.Vec2) {
 // an potentially rounded border box with the given position, size, and border styles.
 func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
 	r := bs.Radius.Dots()
-	min := mat32.Min(w/2, h/2)
-	r.Top = mat32.Clamp(r.Top, 0, min)
-	r.Right = mat32.Clamp(r.Right, 0, min)
-	r.Bottom = mat32.Clamp(r.Bottom, 0, min)
-	r.Left = mat32.Clamp(r.Left, 0, min)
 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 		// set the color if it is not nil and it is not the same as the already set color
 		if !bs.Color.Top.IsNil() && (pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color) {
@@ -510,6 +505,13 @@ func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
 	// use consistent rounded rectangle for fill, and then draw borders side by side
 	pc.DrawRoundedRectangle(rs, x, y, w, h, r)
 	pc.Fill(rs)
+
+	// clamp border radius values
+	min := mat32.Min(w/2, h/2)
+	r.Top = mat32.Clamp(r.Top, 0, min)
+	r.Right = mat32.Clamp(r.Right, 0, min)
+	r.Bottom = mat32.Clamp(r.Bottom, 0, min)
+	r.Left = mat32.Clamp(r.Left, 0, min)
 
 	// position values
 	var (
@@ -669,6 +671,13 @@ func (pc *Paint) DrawRectangle(rs *State, x, y, w, h float32) {
 // with a consistent border and with the given x and y position,
 // width and height, and border radius for each corner.
 func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r gist.SideFloats) {
+	// clamp border radius values
+	min := mat32.Min(w/2, h/2)
+	r.Top = mat32.Clamp(r.Top, 0, min)
+	r.Right = mat32.Clamp(r.Right, 0, min)
+	r.Bottom = mat32.Clamp(r.Bottom, 0, min)
+	r.Left = mat32.Clamp(r.Left, 0, min)
+
 	// position values; some variables are missing because they are unused
 	var (
 		xtl, ytl   = x, y                 // top left
