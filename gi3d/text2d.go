@@ -12,11 +12,11 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"github.com/goki/vgpu/vgpu"
 )
 
 // Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.
@@ -56,8 +56,8 @@ func (txt *Text2D) Defaults(sc *Scene) {
 	txt.SetMesh(sc, tm)
 	txt.Solid.Defaults()
 	txt.Pose.Scale.SetScalar(.005)
-	txt.SetProp("font-size", units.NewPt(36))
-	txt.SetProp("margin", units.NewPx(2))
+	txt.SetProp("font-size", units.Pt(36))
+	txt.SetProp("margin", units.Px(2))
 	txt.SetProp("color", &gi.Prefs.Colors.Font)
 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0})
 	txt.Mat.Bright = 4 // this is key for making e.g., a white background show up as white..
@@ -114,21 +114,21 @@ func (txt *Text2D) StyleText(sc *Scene) {
 
 func (txt *Text2D) RenderText(sc *Scene) {
 	txt.StyleText(sc)
-	txt.TxtRender.SetHTML(txt.Text, &txt.Sty.Font, &txt.Sty.Text, &txt.Sty.UnContext, txt.CSSAgg)
+	txt.TxtRender.SetHTML(txt.Text, txt.Sty.FontRender(), &txt.Sty.Text, &txt.Sty.UnContext, txt.CSSAgg)
 	sz := txt.TxtRender.Size
-	txt.TxtRender.LayoutStdLR(&txt.Sty.Text, &txt.Sty.Font, &txt.Sty.UnContext, sz)
+	txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
 	if txt.TxtRender.Size != sz {
 		sz = txt.TxtRender.Size
-		txt.TxtRender.LayoutStdLR(&txt.Sty.Text, &txt.Sty.Font, &txt.Sty.UnContext, sz)
+		txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
 		if txt.TxtRender.Size != sz {
 			sz = txt.TxtRender.Size
 		}
 	}
-	marg := txt.Sty.Layout.Margin.Dots
-	sz.SetAddScalar(2 * marg)
-	txt.TxtPos.SetScalar(marg)
+	marg := txt.Sty.Margin.Dots()
+	sz.SetAdd(marg.Size())
+	txt.TxtPos = marg.Pos()
 	szpt := sz.ToPoint()
-	if szpt == image.ZP {
+	if szpt == (image.Point{}) {
 		szpt = image.Point{10, 10}
 	}
 	bounds := image.Rectangle{Max: szpt}
@@ -145,7 +145,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			tx.SetImage(img)
 			txt.Mat.SetTexture(sc, tx)
 		} else {
-			if vkos.VkOsDebug {
+			if vgpu.Debug {
 				fmt.Printf("gi3d.Text2D: error: texture name conflict: %s\n", txname)
 			}
 			txt.Mat.SetTexture(sc, tx)
@@ -165,7 +165,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		rs.Init(szpt.X, szpt.Y, img)
 	}
 	rs.PushBounds(bounds)
-	draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
+	draw.Draw(img, bounds, &image.Uniform{txt.Sty.BackgroundColor.Color}, image.Point{}, draw.Src)
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
 }
@@ -204,7 +204,7 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 }
 
 func (txt *Text2D) IsTransparent() bool {
-	if txt.Sty.Font.BgColor.Color.A < 255 {
+	if txt.Sty.BackgroundColor.Color.A < 255 {
 		return true
 	}
 	return false

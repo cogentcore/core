@@ -15,6 +15,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -339,8 +340,8 @@ func (fb *FileBrowse) ConfigSplitView() {
 			txly := split.Child(1 + i).(*gi.Layout)
 			txly.SetStretchMaxWidth()
 			txly.SetStretchMaxHeight()
-			txly.SetMinPrefWidth(units.NewCh(20))
-			txly.SetMinPrefHeight(units.NewCh(10))
+			txly.SetMinPrefWidth(units.Ch(20))
+			txly.SetMinPrefHeight(units.Ch(10))
 
 			txed := giv.AddNewTextView(txly, fmt.Sprintf("textview-%v", i))
 			txed.Viewport = fb.Viewport
@@ -414,15 +415,15 @@ var FileBrowseProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"UpdateFiles", ki.Props{
 			"shortcut": "Command+U",
-			"icon":     "update",
+			"icon":     icons.Refresh,
 		}},
 		{"SaveActiveView", ki.Props{
 			"label": "Save",
-			"icon":  "file-save",
+			"icon":  icons.Save,
 		}},
 		{"SaveActiveViewAs", ki.Props{
 			"label": "Save As...",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "ActiveFilename",
@@ -537,9 +538,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 //  main
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {

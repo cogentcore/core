@@ -34,7 +34,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 
 	title := mfr.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.SetText("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
-	title.SetProp("width", units.NewCh(30)) // need for wrap
+	title.SetProp("width", units.Ch(30)) // need for wrap
 	title.SetStretchMaxWidth()
 	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
@@ -123,7 +123,7 @@ func (vv *KeyMapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.NewPx(4))
+	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_KeyMapValueView).(*KeyMapValueView)
 		ac := vvv.Widget.(*gi.Action)

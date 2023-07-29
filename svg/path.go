@@ -582,7 +582,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 					cp = PathDataNextVec(data, &i)
 				}
 				nc.X, nc.Y = girl.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
-				if !fun(i-2, cmd, np, cp, []mat32.Vec2{nc, prv, rad, mat32.Vec2{X: ang}, mat32.Vec2{laf, sf}}) {
+				if !fun(i-2, cmd, np, cp, []mat32.Vec2{nc, prv, rad, {X: ang}, {laf, sf}}) {
 					return
 				}
 			}

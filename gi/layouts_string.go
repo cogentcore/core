@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -42,4 +40,22 @@ func (i *Layouts) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Layouts")
+}
+
+var _Layouts_descMap = map[Layouts]string{
+	0: `LayoutHoriz arranges items horizontally across a row`,
+	1: `LayoutVert arranges items vertically in a column`,
+	2: `LayoutGrid arranges items according to a regular grid`,
+	3: `LayoutHorizFlow arranges items horizontally across a row, overflowing vertically as needed. Ballpark target width or height props should be set to generate initial first-pass sizing estimates.`,
+	4: `LayoutVertFlow arranges items vertically within a column, overflowing horizontally as needed. Ballpark target width or height props should be set to generate initial first-pass sizing estimates.`,
+	5: `LayoutStacked arranges items stacked on top of each other -- Top index indicates which to show -- overall size accommodates largest in each dimension`,
+	6: `LayoutNil is a nil layout -- doesn&#39;t do anything -- for cases when a parent wants to take over the job of the layout`,
+	7: ``,
+}
+
+func (i Layouts) Desc() string {
+	if str, ok := _Layouts_descMap[i]; ok {
+		return str
+	}
+	return "Layouts(" + strconv.FormatInt(int64(i), 10) + ")"
 }

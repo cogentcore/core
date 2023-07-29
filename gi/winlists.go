@@ -273,7 +273,7 @@ func (wu *WindowUpdates) DrawImages(drw *vdraw.Drawer, beforeDir bool) {
 		kv := wu.Updates.Order[i]
 		winBBox := kv.Key
 		idx := wu.Idx(i)
-		drw.Copy(idx, 0, winBBox.Min, image.ZR, draw.Src, vgpu.NoFlipY)
+		drw.Copy(idx, 0, winBBox.Min, image.Rectangle{}, draw.Src, vgpu.NoFlipY)
 	}
 }
 

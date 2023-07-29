@@ -7,22 +7,20 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[TextFieldActive-0]
-	_ = x[TextFieldFocus-1]
-	_ = x[TextFieldInactive-2]
+	_ = x[TextFieldInactive-1]
+	_ = x[TextFieldFocus-2]
 	_ = x[TextFieldSel-3]
 	_ = x[TextFieldStatesN-4]
 }
 
-const _TextFieldStates_name = "TextFieldActiveTextFieldFocusTextFieldInactiveTextFieldSelTextFieldStatesN"
+const _TextFieldStates_name = "TextFieldActiveTextFieldInactiveTextFieldFocusTextFieldSelTextFieldStatesN"
 
-var _TextFieldStates_index = [...]uint8{0, 15, 29, 46, 58, 74}
+var _TextFieldStates_index = [...]uint8{0, 15, 32, 46, 58, 74}
 
 func (i TextFieldStates) String() string {
 	if i < 0 || i >= TextFieldStates(len(_TextFieldStates_index)-1) {
@@ -39,4 +37,19 @@ func (i *TextFieldStates) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TextFieldStates")
+}
+
+var _TextFieldStates_descMap = map[TextFieldStates]string{
+	0: `normal state -- there but not being interacted with`,
+	1: `inactive -- not editable`,
+	2: `textfield is the focus -- will respond to keyboard input`,
+	3: `selected -- for inactive state, can select entire element`,
+	4: ``,
+}
+
+func (i TextFieldStates) Desc() string {
+	if str, ok := _TextFieldStates_descMap[i]; ok {
+		return str
+	}
+	return "TextFieldStates(" + strconv.FormatInt(int64(i), 10) + ")"
 }

@@ -17,6 +17,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -246,7 +247,7 @@ func (fv *FileView) ConfigPathBar() {
 	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
 	pf := gi.AddNewComboBox(pr, "path")
 	pf.Editable = true
-	pf.SetMinPrefWidth(units.NewCh(60))
+	pf.SetMinPrefWidth(units.Ch(60))
 	pf.SetStretchMaxWidth()
 	pf.ConfigParts()
 	pft, found := pf.TextField()
@@ -280,22 +281,22 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: "wedge-up", Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: icons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.DirPathUp()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: "update", Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: icons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.UpdateFilesAction()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: "heart", Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: icons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 		fvv.AddPathToFavs()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: "folder-plus", Tooltip: "Create a new folder in this folder"},
+	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: icons.CreateNewFolder, Tooltip: "Create a new folder in this folder"},
 		fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.NewFolder()
@@ -370,7 +371,7 @@ func (fv *FileView) ConfigFilesRow() {
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.SelRow()
 	sr.Lay = gi.LayoutHoriz
-	sr.SetProp("spacing", units.NewPx(4))
+	sr.SetProp("spacing", units.Px(4))
 	sr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "sel-lbl")
@@ -385,7 +386,7 @@ func (fv *FileView) ConfigSelRow() {
 	sf := fv.SelField()
 	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", gi.ShortcutForFun(gi.KeyFunWordLeft), gi.ShortcutForFun(gi.KeyFunJump), gi.ShortcutForFun(gi.KeyFunSelectMode), gi.ShortcutForFun(gi.KeyFunInsert), gi.ShortcutForFun(gi.KeyFunInsertAfter), gi.ShortcutForFun(gi.KeyFunMenuOpen), gi.ShortcutForFun(gi.KeyFunHistPrev), gi.ShortcutForFun(gi.KeyFunHistNext), gi.ShortcutForFun(gi.KeyFunSearch))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
-	sf.SetMinPrefWidth(units.NewCh(60))
+	sf.SetMinPrefWidth(units.Ch(60))
 	sf.SetStretchMaxWidth()
 	sf.SetText(fv.SelFile)
 	sf.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -402,7 +403,7 @@ func (fv *FileView) ConfigSelRow() {
 	el.Tooltip = "target extension(s) to highlight -- if multiple, separate with commas, and do include the . at the start"
 	ef := fv.ExtField()
 	ef.SetText(fv.Ext)
-	ef.SetMinPrefWidth(units.NewCh(10))
+	ef.SetMinPrefWidth(units.Ch(10))
 	ef.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)

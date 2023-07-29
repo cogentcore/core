@@ -27,6 +27,7 @@ import (
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -504,6 +505,22 @@ func (w *Window) ConfigVLay() {
 	w.MainMenu.SetStretchMaxWidth()
 }
 
+// ConfigInsets updates the padding on the main layout of the window
+// to the inset values provided by the OSWin window.
+func (w *Window) ConfigInsets() {
+	mainVlay := w.Viewport.ChildByName("main-vlay", -1)
+	if mainVlay != nil {
+		insets := w.OSWin.Insets()
+		mainVlay.SetProp("padding", gist.NewSides[units.Value](
+			units.Dot(insets.Top),
+			units.Dot(insets.Right),
+			units.Dot(insets.Bottom),
+			units.Dot(insets.Left),
+		))
+	}
+
+}
+
 // AddMainMenu installs MainMenu as first element of main layout
 // used for dialogs that don't always have a main menu -- returns
 // menubar -- safe to call even if there is a menubar
@@ -726,11 +743,16 @@ func (w *Window) Resized(sz image.Point) {
 		return
 	}
 	curSz := w.Viewport.Geom.Size
+
 	if curSz == sz {
 		if WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Nm, curSz)
 		}
 		return
+	}
+	drw := w.OSWin.Drawer()
+	if drw.Impl.MaxTextures != vgpu.MaxTexturesPerSet*3 { // this is essential after hibernate
+		drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
 	}
 	w.FocusInactivate()
 	w.InactivateAllSprites()
@@ -745,16 +767,21 @@ func (w *Window) Resized(sz image.Point) {
 	if WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Nm, curSz, sz)
 	}
-	if curSz == image.ZP { // first open
+	if curSz == (image.Point{}) { // first open
 		StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 	}
 	w.Viewport.Resize(sz)
+	w.ConfigInsets()
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
 	WinGeomMgr.RecordPref(w)
 	w.UpMu.Unlock()
 	w.FullReRender()
+	// we need a second full re-render for fullscreen and snap resizes on Windows
+	if oswin.TheApp.Platform() == oswin.Windows {
+		w.FullReRender()
+	}
 }
 
 // Raise requests that the window be at the top of the stack of windows,
@@ -1235,7 +1262,7 @@ func (w *Window) Publish() {
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
-	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.ZR, draw.Src, vgpu.NoFlipY)
+	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.Rectangle{}, draw.Src, vgpu.NoFlipY)
 	if len(w.UpdtRegs.BeforeDir) > 0 {
 		drw.UseTextureSet(1)
 		w.UpdtRegs.DrawImages(drw, true) // before direct
@@ -1301,7 +1328,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data any) {
 // This is for gi3d.Scene for example.  Returns the index of the image to upload to.
 func (w *Window) AddDirectUploader(node Node2D) int {
 	w.UpMu.Lock()
-	idx, _ := w.DirDraws.Add(node, image.ZR)
+	idx, _ := w.DirDraws.Add(node, image.Rectangle{})
 	w.UpMu.Unlock()
 	return idx
 }
@@ -1460,7 +1487,7 @@ func (w *Window) DrawSprites() {
 			if !sp.On {
 				continue
 			}
-			drw.Copy(imgidx, ii, sp.Geom.Pos, image.ZR, draw.Over, vgpu.NoFlipY)
+			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, vgpu.NoFlipY)
 		}
 	}
 }
@@ -1570,6 +1597,7 @@ func (w *Window) EventLoop() {
 // ProcessEvent processes given oswin.Event
 func (w *Window) ProcessEvent(evi oswin.Event) {
 	et := evi.Type()
+	// log.Printf("Got event: %v\n", et)
 	w.delPop = false                     // if true, delete this popup after event loop
 	if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 		fmt.Printf("Win: %v got out-of-range event: %v\n", w.Nm, et)
@@ -1629,6 +1657,9 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 			w.EventMgr.Scrolling = nil // not valid
 		}
 		hasFocus = true // doesn't need focus!
+	}
+	if _, ok := evi.(*mouse.MoveEvent); ok {
+		hasFocus = true // also doesn't need focus (there can be hover events while not focused)
 	}
 
 	if (hasFocus || !evi.OnWinFocus()) && !evi.IsProcessed() {
@@ -1769,6 +1800,12 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.Closed()
 			w.SetFlag(int(WinFlagStopEventLoop))
 			return false
+		case window.Minimize:
+			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
+			// and lets the size event go through when we come back later
+			if oswin.TheApp.Platform().IsMobile() {
+				w.Viewport.Geom.Size = image.Point{}
+			}
 		case window.Paint:
 			// fmt.Printf("got paint event for window %v \n", w.Nm)
 			w.SetFlag(int(WinFlagGotPaint))
@@ -1827,11 +1864,14 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.ClearFlag(int(WinFlagGotFocus))
 			w.SendWinFocusEvent(window.DeFocus)
 		case window.ScreenUpdate:
-			WinGeomMgr.AbortSave() // anything just prior to this is sus
-			if !oswin.TheApp.NoScreens() {
-				Prefs.UpdateAll()
-				WinGeomMgr.RestoreAll()
-			}
+			w.Resized(w.OSWin.Size())
+			// TODO: figure out how to restore this stuff without breaking window size on mobile
+
+			// WinGeomMgr.AbortSave() // anything just prior to this is sus
+			// if !oswin.TheApp.NoScreens() {
+			// 	Prefs.UpdateAll()
+			// 	WinGeomMgr.RestoreAll()
+			// }
 		}
 		return false // don't do anything else!
 	case *mouse.DragEvent:
@@ -2022,7 +2062,7 @@ func PopupIsMenu(pop ki.Ki) bool {
 	return false
 }
 
-// PopupIsTooltip returns true if the given popup item is a menu
+// PopupIsTooltip returns true if the given popup item is a tooltip
 func PopupIsTooltip(pop ki.Ki) bool {
 	if pop == nil {
 		return false
@@ -2118,6 +2158,11 @@ func (w *Window) SetDelPopup(pop ki.Ki) {
 
 // ShouldDeletePopupMenu returns true if the given popup item should be deleted
 func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
+	// if we have a dialog open, close it if we didn't click in it
+	if dlg, ok := pop.(*Dialog); ok {
+		log.Println("pos", me.Pos(), "bbox", dlg.WinBBox)
+		return !me.Pos().In(dlg.WinBBox)
+	}
 	if !PopupIsMenu(pop) {
 		return false
 	}

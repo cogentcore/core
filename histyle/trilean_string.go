@@ -7,7 +7,15 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[Pass-0]
+	_ = x[Yes-1]
+	_ = x[No-2]
+	_ = x[TrileanN-3]
+}
 
 const _Trilean_name = "PassYesNoTrileanN"
 
@@ -28,4 +36,18 @@ func (i *Trilean) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Trilean")
+}
+
+var _Trilean_descMap = map[Trilean]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+}
+
+func (i Trilean) Desc() string {
+	if str, ok := _Trilean_descMap[i]; ok {
+		return str
+	}
+	return "Trilean(" + strconv.FormatInt(int64(i), 10) + ")"
 }

@@ -18,6 +18,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/token"
@@ -364,7 +365,7 @@ var StyleProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenJSON", ki.Props{
 			"label": "Open from file",
-			"icon":  "file-open",
+			"icon":  icons.FileOpen,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -374,7 +375,7 @@ var StyleProps = ki.Props{
 		}},
 		{"SaveJSON", ki.Props{
 			"label": "Save to file",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{

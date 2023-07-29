@@ -127,7 +127,7 @@ func (ss *Sprites) AllocSizes() {
 	idx := 0
 	for _, kv := range ss.Names.Order {
 		sp := kv.Val
-		if sp.Geom.Size == image.ZP {
+		if sp.Geom.Size == (image.Point{}) {
 			continue
 		}
 		szs[idx] = sp.Geom.Size

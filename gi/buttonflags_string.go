@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,18 @@ func StringToButtonFlags(s string) (ButtonFlags, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: ButtonFlags")
+}
+
+var _ButtonFlags_descMap = map[ButtonFlags]string{
+	24: `button is checkable -- enables display of check control`,
+	25: `button is checked`,
+	26: `Menu flag means that the button is a menu item`,
+	27: ``,
+}
+
+func (i ButtonFlags) Desc() string {
+	if str, ok := _ButtonFlags_descMap[i]; ok {
+		return str
+	}
+	return "ButtonFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

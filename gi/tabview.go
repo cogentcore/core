@@ -6,11 +6,13 @@ package gi
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"reflect"
 	"sync"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -54,13 +56,13 @@ func (tv *TabView) Disconnect() {
 }
 
 var TabViewProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"border-color":     &Prefs.Colors.Border,
-	"border-width":     units.NewPx(2),
-	"background-color": &Prefs.Colors.Background,
-	"color":            &Prefs.Colors.Font,
-	"max-width":        -1,
-	"max-height":       -1,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "border-color":     &Prefs.Colors.Border,
+	// "border-width":     units.Px(2),
+	// "background-color": &Prefs.Colors.Background,
+	// "color":            &Prefs.Colors.Font,
+	// "max-width":        -1,
+	// "max-height":       -1,
 }
 
 // NTabs returns number of tabs
@@ -390,11 +392,12 @@ func (tv *TabView) ConfigNewTabButton() bool {
 		}
 		tab := tb.InsertNewChild(KiT_Action, ntb, "new-tab").(*Action)
 		tab.Data = -1
-		tab.SetIcon("plus")
+		tab.SetIcon(icons.Add)
 		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(KiT_TabView).(*TabView)
 			tvv.SetFullReRender()
 			tvv.AddNewTabAction(tvv.NewTabType, "New Tab")
+			tvv.SelectTabIndex(len(*tvv.Frame().Children()) - 1)
 		})
 		return true
 	} else {
@@ -430,7 +433,7 @@ func (tv *TabView) Config() {
 		return
 	}
 	tv.StyMu.RLock()
-	needSty := tv.Sty.Font.Size.Val == 0
+	needSty := tv.Style.Font.Size.Val == 0
 	tv.StyMu.RUnlock()
 	if needSty {
 		tv.StyleLayout()
@@ -440,22 +443,22 @@ func (tv *TabView) Config() {
 	tv.Lay = LayoutVert
 	tv.SetReRenderAnchor()
 
-	tabs := AddNewFrame(tv, "tabs", LayoutHorizFlow)
-	tabs.SetStretchMaxWidth()
-	// tabs.SetStretchMaxHeight()
-	// tabs.SetMinPrefWidth(units.NewEm(10))
-	tabs.SetProp("height", units.NewEm(1.8))
-	tabs.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
-	tabs.SetProp("padding", units.NewPx(0))
-	tabs.SetProp("margin", units.NewPx(0))
-	tabs.SetProp("spacing", units.NewPx(4))
-	tabs.SetProp("background-color", "linear-gradient(pref(Control), highlight-10)")
+	AddNewFrame(tv, "tabs", LayoutHorizFlow)
+	// tabs.SetStretchMaxWidth()
+	// // tabs.SetStretchMaxHeight()
+	// // tabs.SetMinPrefWidth(units.NewEm(10))
+	// tabs.SetProp("height", units.Em(1.8))
+	// tabs.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
+	// tabs.SetProp("padding", units.Px(0))
+	// tabs.SetProp("margin", units.Px(0))
+	// tabs.SetProp("spacing", units.Px(4))
+	// tabs.SetProp("background-color", "linear-gradient(pref(Control), highlight-10)")
 
 	frame := AddNewFrame(tv, "frame", LayoutStacked)
-	frame.SetMinPrefWidth(units.NewEm(10))
-	frame.SetMinPrefHeight(units.NewEm(7))
+	// frame.SetMinPrefWidth(units.Em(10))
+	// frame.SetMinPrefHeight(units.Em(7))
 	frame.StackTopOnly = true // key for allowing each tab to have its own size
-	frame.SetStretchMax()
+	// frame.SetStretchMax()
 	frame.SetReRenderAnchor()
 
 	tv.ConfigNewTabButton()
@@ -510,9 +513,11 @@ func (tv *TabView) RenderTabSeps() {
 	rs, pc, st := tv.RenderLock()
 	defer tv.RenderUnlock(rs)
 
-	pc.StrokeStyle.Width = st.Border.Width
-	pc.StrokeStyle.SetColor(&st.Border.Color)
-	bw := st.Border.Width.Dots
+	// just like with standard separator, use top width like CSS
+	// (see https://www.w3schools.com/howto/howto_css_dividers.asp)
+	pc.StrokeStyle.Width = st.Border.Width.Top
+	pc.StrokeStyle.SetColor(&st.Border.Color.Top)
+	bw := st.Border.Width.Dots()
 
 	tbs := tv.Tabs()
 	sz := len(tbs.Kids)
@@ -521,8 +526,8 @@ func (tv *TabView) RenderTabSeps() {
 		ni := tb.AsWidget()
 
 		pos := ni.LayState.Alloc.Pos
-		sz := ni.LayState.Alloc.Size.AddScalar(-2.0 * st.Layout.Margin.Dots)
-		pc.DrawLine(rs, pos.X-bw, pos.Y, pos.X-bw, pos.Y+sz.Y)
+		sz := ni.LayState.Alloc.Size.Sub(st.Margin.Dots().Size())
+		pc.DrawLine(rs, pos.X-bw.Pos().X, pos.Y, pos.X-bw.Pos().X, pos.Y+sz.Y)
 	}
 	pc.FillStrokeClear(rs)
 }
@@ -542,6 +547,46 @@ func (tv *TabView) Render2D() {
 	}
 }
 
+func (tv *TabView) Init2D() {
+	tv.Init2DWidget()
+	tv.ConfigStyles()
+}
+
+func (tv *TabView) ConfigStyles() {
+	tv.AddStyleFunc(StyleFuncDefault, func() {
+		// need border for separators (see RenderTabSeps)
+		tv.Style.Border.Style.Set(gist.BorderSolid)
+		tv.Style.Border.Width.Set(units.Px(1))
+		tv.Style.Border.Color.Set(Colors.Background.Highlight(50))
+		tv.Style.BackgroundColor.SetColor(Colors.Background)
+		tv.Style.Color = Colors.Text
+		tv.Style.MaxWidth.SetPx(-1)
+		tv.Style.MaxHeight.SetPx(-1)
+	})
+	tv.AddChildStyleFunc("tabs", 0, StyleFuncParts(tv), func(tabsw *WidgetBase) {
+		tabs, ok := tabsw.This().(*Frame)
+		if !ok {
+			log.Println("(*gi.TabView).ConfigStyles: expected child named tabs to be of type *gi.Frame, not", reflect.TypeOf(tabsw.This()))
+			return
+		}
+		tabs.Style.MaxWidth.SetPx(-1)
+		tabs.Style.Height.SetEm(1.8)
+		tabs.Style.Overflow = gist.OverflowHidden // no scrollbars!
+		tabs.Style.Margin.Set()
+		tabs.Style.Padding.Set()
+		// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
+		tabs.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
+	})
+	tv.AddChildStyleFunc("frame", 1, StyleFuncParts(tv), func(frame *WidgetBase) {
+		frame.Style.Width.SetEm(10)
+		frame.Style.MinWidth.SetEm(10)
+		frame.Style.MaxWidth.SetPx(-1)
+		frame.Style.Height.SetEm(7)
+		frame.Style.MinHeight.SetEm(7)
+		frame.Style.MaxHeight.SetPx(-1)
+	})
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // TabButton
 
@@ -554,72 +599,69 @@ type TabButton struct {
 
 var KiT_TabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
 
-// TabButtonMinWidth is the minimum width of the tab button, in Ch units
-var TabButtonMinWidth = float32(8)
-
 var TabButtonProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"min-width":        units.NewCh(TabButtonMinWidth),
-	"min-height":       units.NewEm(1.6),
-	"border-width":     units.NewPx(0),
-	"border-radius":    units.NewPx(0),
-	"border-color":     &Prefs.Colors.Border,
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	"padding":          units.NewPx(4), // we go to edge of bar
-	"margin":           units.NewPx(0),
-	"indicator":        "close",
-	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-		"fill":    &Prefs.Colors.Icon,
-		"stroke":  &Prefs.Colors.Font,
-	},
-	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-	},
-	"#close-stretch": ki.Props{
-		"width": units.NewCh(1),
-	},
-	"#close": ki.Props{
-		"width":          units.NewEx(0.5),
-		"height":         units.NewEx(0.5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
-		"vertical-align": gist.AlignBottom,
-	},
-	"#shortcut": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-	},
-	"#sc-stretch": ki.Props{
-		"min-width": units.NewCh(2),
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "linear-gradient(lighter-0, highlight-10)",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "lighter-50",
-		"color":        "lighter-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "linear-gradient(highlight-10, highlight-10)",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
-		"background-color": "linear-gradient(samelight-50, highlight-10)",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "lighter-90",
-		"background-color": "linear-gradient(highlight-30, highlight-10)",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(Select), highlight-10)",
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "min-width":        units.Ch(TabButtonMinWidth),
+	// "min-height":       units.Em(1.6),
+	// "border-width":     units.Px(0),
+	// "border-radius":    units.Px(0),
+	// "border-color":     &Prefs.Colors.Border,
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// "padding":          units.Px(4), // we go to edge of bar
+	// "margin":           units.Px(0),
+	// "indicator":        "close",
+	// "#icon": ki.Props{
+	// 	"width":   units.Em(1),
+	// 	"height":  units.Em(1),
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	"fill":    &Prefs.Colors.Icon,
+	// 	"stroke":  &Prefs.Colors.Font,
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// "#close-stretch": ki.Props{
+	// 	"width": units.Ch(1),
+	// },
+	// "#close": ki.Props{
+	// 	"width":          units.Ex(0.5),
+	// 	"height":         units.Ex(0.5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignBottom,
+	// },
+	// "#shortcut": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// "#sc-stretch": ki.Props{
+	// 	"min-width": units.Ch(2),
+	// },
+	// ButtonSelectors[ButtonActive]: ki.Props{
+	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonInactive]: ki.Props{
+	// 	"border-color": "lighter-50",
+	// 	"color":        "lighter-50",
+	// },
+	// ButtonSelectors[ButtonHover]: ki.Props{
+	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonDown]: ki.Props{
+	// 	"color":            "lighter-90",
+	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonSelected]: ki.Props{
+	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// },
 }
 
 func (tb *TabButton) TabView() *TabView {
@@ -641,12 +683,12 @@ func (tb *TabButton) ConfigParts() {
 
 func (tb *TabButton) ConfigPartsDeleteButton() {
 	config := kit.TypeAndNameList{}
-	clsIdx := 0
-	config.Add(KiT_Action, "close")
+	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 	config.Add(KiT_Stretch, "close-stretch")
-	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, string(tb.Icon), tb.Text)
+	clsIdx := len(config)
+	config.Add(KiT_Action, "close")
 	mods, updt := tb.Parts.ConfigChildren(config)
-	tb.ConfigPartsSetIconLabel(string(tb.Icon), tb.Text, icIdx, lbIdx)
+	tb.ConfigPartsSetIconLabel(tb.Icon, tb.Text, icIdx, lbIdx)
 	if mods {
 		cls := tb.Parts.Child(clsIdx).(*Action)
 		if tb.Indicator.IsNil() {
@@ -654,7 +696,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 		}
 		tb.StylePart(Node2D(cls))
 
-		icnm := string(tb.Indicator)
+		icnm := tb.Indicator
 		cls.SetIcon(icnm)
 		cls.SetProp("no-focus", true)
 		cls.ActionSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -662,7 +704,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 			tabIdx := tbb.Data.(int)
 			tvv := tb.TabView()
 			if tvv != nil {
-				if tbb.IsSelected() { // only process delete when already selected
+				if !Prefs.Params.OnlyCloseActiveTab || tbb.IsSelected() { // only process delete when already selected if OnlyCloseActiveTab is on
 					tvv.DeleteTabIndexAction(tabIdx)
 				} else {
 					tvv.SelectTabIndexAction(tabIdx) // otherwise select
@@ -671,4 +713,79 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 		})
 		tb.UpdateEnd(updt)
 	}
+}
+
+func (tb *TabButton) Init2D() {
+	tb.Init2DWidget()
+	tb.ConfigParts()
+	tb.ConfigStyles()
+}
+
+func (tb *TabButton) ConfigStyles() {
+	tb.AddStyleFunc(StyleFuncDefault, func() {
+		tb.Style.MinWidth.SetCh(8)
+		tb.Style.MaxWidth.SetPx(500)
+		tb.Style.MinHeight.SetEm(1.6)
+		tb.Style.Border.Style.Set(gist.BorderNone)
+		// tb.Style.Border.Style.Right = gist.BorderSolid
+		// tb.Style.Border.Width.Right.SetPx(1)
+
+		tb.Style.Border.Radius.Set()
+		tb.Style.Text.Align = gist.AlignLeft
+		tb.Style.Color = Colors.Text
+		tb.Style.Margin.Set()
+		tb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
+		tb.Indicator = icons.Close
+		// need to do selected as a separate thing at the start
+		// so that we can apply additional styles based on state
+		// while selected
+		baseColor := Colors.Background
+		if tb.IsSelected() {
+			baseColor = Colors.Accent
+		}
+		switch tb.State {
+		case ButtonActive:
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(7))
+		case ButtonInactive:
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(20))
+			tb.Style.Color = Colors.Text.Highlight(20)
+		case ButtonFocus:
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(15))
+		case ButtonHover:
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(20))
+		case ButtonDown:
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(25))
+		case ButtonSelected:
+			tb.Style.BackgroundColor.SetColor(baseColor)
+		}
+	})
+	tb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(tb), func(icon *WidgetBase) {
+		icon.Style.Width.SetEm(1)
+		icon.Style.Height.SetEm(1)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+	})
+	tb.Parts.AddChildStyleFunc("label", 1, StyleFuncParts(tb), func(label *WidgetBase) {
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
+	})
+	tb.Parts.AddChildStyleFunc("close-stretch", 2, StyleFuncParts(tb), func(cls *WidgetBase) {
+		cls.Style.Width.SetCh(1)
+	})
+	tb.Parts.AddChildStyleFunc("close", 3, StyleFuncParts(tb), func(close *WidgetBase) {
+		close.Style.Width.SetEx(0.5)
+		close.Style.Height.SetEx(0.5)
+		close.Style.Margin.Set()
+		close.Style.Padding.Set()
+		close.Style.AlignV = gist.AlignMiddle
+		close.Style.Border.Radius.Set(units.Px(100))
+		close.Style.BackgroundColor.SetColor(color.Transparent)
+	})
+	tb.Parts.AddChildStyleFunc("sc-stretch", 4, StyleFuncParts(tb), func(scs *WidgetBase) {
+		scs.Style.MinWidth.SetCh(2)
+	})
+	tb.Parts.AddChildStyleFunc("shortcut", 5, StyleFuncParts(tb), func(shortcut *WidgetBase) {
+		shortcut.Style.Margin.Set()
+		shortcut.Style.Padding.Set()
+	})
 }

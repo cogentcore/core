@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"strconv"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -27,18 +29,18 @@ import (
 // decrementing values -- all configured within the Parts of the widget
 type SpinBox struct {
 	PartsWidgetBase
-	Value      float32   `xml:"value" desc:"current value"`
-	HasMin     bool      `xml:"has-min" desc:"is there a minimum value to enforce"`
-	Min        float32   `xml:"min" desc:"minimum value in range"`
-	HasMax     bool      `xml:"has-max" desc:"is there a maximumvalue to enforce"`
-	Max        float32   `xml:"max" desc:"maximum value in range"`
-	Step       float32   `xml:"step" desc:"smallest step size to increment"`
-	PageStep   float32   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
-	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	Format     string    `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
-	UpIcon     IconName  `view:"show-name" desc:"icon to use for up button -- defaults to wedge-up"`
-	DownIcon   IconName  `view:"show-name" desc:"icon to use for down button -- defaults to wedge-down"`
-	SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
+	Value      float32    `xml:"value" desc:"current value"`
+	HasMin     bool       `xml:"has-min" desc:"is there a minimum value to enforce"`
+	Min        float32    `xml:"min" desc:"minimum value in range"`
+	HasMax     bool       `xml:"has-max" desc:"is there a maximumvalue to enforce"`
+	Max        float32    `xml:"max" desc:"maximum value in range"`
+	Step       float32    `xml:"step" desc:"smallest step size to increment"`
+	PageStep   float32    `xml:"pagestep" desc:"larger PageUp / Dn step size"`
+	Prec       int        `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
+	Format     string     `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
+	UpIcon     icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to icons.KeyboardArrowUp"`
+	DownIcon   icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to icons.KeyboardArrowDown"`
+	SpinBoxSig ki.Signal  `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
 var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
@@ -68,37 +70,62 @@ func (sb *SpinBox) Disconnect() {
 	sb.SpinBoxSig.DisconnectAll()
 }
 
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (sb *SpinBox) DefaultStyle() {
+// 	// fmt.Println("spin box children", sb.Parts.Kids)
+// 	bts, ok := sb.Parts.ChildByName("buttons", 2).(*WidgetBase)
+// 	if ok {
+// 		bts.AddChildStyleFunc("up", 0, StyleFuncParts(sb), func(up *WidgetBase) {
+// 			up.Style.MaxWidth.SetEm(1)
+// 			up.Style.MaxHeight.SetEm(1)
+// 			up.Style.Margin.Set()
+// 			up.Style.Padding.Set()
+// 			up.Style.BackgroundColor.SetColor(color.Transparent)
+// 		})
+// 		bts.AddChildStyleFunc("down", 1, StyleFuncParts(sb), func(down *WidgetBase) {
+// 			down.Style.MaxWidth.SetEm(1)
+// 			down.Style.MaxHeight.SetEm(1)
+// 			down.Style.Margin.Set()
+// 			down.Style.Padding.Set()
+// 			down.Style.BackgroundColor.SetColor(color.Transparent)
+// 		})
+// 	}
+// 	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(spc *WidgetBase) {
+// 		spc.Style.Width.SetEx(0)
+// 	})
+// }
+
 var SpinBoxProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
-	"#buttons": ki.Props{
-		"vertical-align": gist.AlignMiddle,
-	},
-	"#up": ki.Props{
-		"max-width":  units.NewEx(1.5),
-		"max-height": units.NewEx(1.5),
-		"margin":     units.NewPx(1),
-		"padding":    units.NewPx(0),
-		"fill":       &Prefs.Colors.Icon,
-		"stroke":     &Prefs.Colors.Font,
-	},
-	"#down": ki.Props{
-		"max-width":  units.NewEx(1.5),
-		"max-height": units.NewEx(1.5),
-		"margin":     units.NewPx(1),
-		"padding":    units.NewPx(0),
-		"fill":       &Prefs.Colors.Icon,
-		"stroke":     &Prefs.Colors.Font,
-	},
-	"#space": ki.Props{
-		"width": units.NewCh(.1),
-	},
-	"#text-field": ki.Props{
-		"min-width": units.NewCh(4),
-		"width":     units.NewCh(8),
-		"margin":    units.NewPx(2),
-		"padding":   units.NewPx(2),
-		"clear-act": false,
-	},
+	// "#buttons": ki.Props{
+	// 	"vertical-align": gist.AlignMiddle,
+	// },
+	// "#up": ki.Props{
+	// 	"max-width":  units.Ex(1.5),
+	// 	"max-height": units.Ex(1.5),
+	// 	"margin":     units.Px(1),
+	// 	"padding":    units.Px(0),
+	// 	"fill":       &Prefs.Colors.Icon,
+	// 	"stroke":     &Prefs.Colors.Font,
+	// },
+	// "#down": ki.Props{
+	// 	"max-width":  units.Ex(1.5),
+	// 	"max-height": units.Ex(1.5),
+	// 	"margin":     units.Px(1),
+	// 	"padding":    units.Px(0),
+	// 	"fill":       &Prefs.Colors.Icon,
+	// 	"stroke":     &Prefs.Colors.Font,
+	// },
+	// "#space": ki.Props{
+	// 	"width": units.Ch(.1),
+	// },
+	// "#text-field": ki.Props{
+	// 	"min-width": units.Ch(4),
+	// 	"width":     units.Ch(8),
+	// 	"margin":    units.Px(2),
+	// 	"padding":   units.Px(2),
+	// 	"clear-act": false,
+	// },
 }
 
 func (sb *SpinBox) Defaults() { // todo: should just get these from props
@@ -176,15 +203,15 @@ func (sb *SpinBox) PageIncrValue(steps float32) {
 
 func (sb *SpinBox) ConfigParts() {
 	if sb.UpIcon.IsNil() {
-		sb.UpIcon = IconName("wedge-up")
+		sb.UpIcon = icons.KeyboardArrowUp
 	}
 	if sb.DownIcon.IsNil() {
-		sb.DownIcon = IconName("wedge-down")
+		sb.DownIcon = icons.KeyboardArrowDown
 	}
 	sb.Parts.Lay = LayoutHoriz
 	sb.Parts.SetProp("vertical-align", gist.AlignMiddle)
-	if sb.Sty.Template != "" {
-		sb.Parts.Sty.Template = sb.Sty.Template + ".Parts"
+	if sb.Style.Template != "" {
+		sb.Parts.Style.Template = sb.Style.Template + ".Parts"
 	}
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "text-field")
@@ -206,8 +233,8 @@ func (sb *SpinBox) ConfigParts() {
 			// not compiled into style prop
 			// up.SetFlagState(sb.IsInactive(), int(Inactive))
 			up.Icon = sb.UpIcon
-			if sb.Sty.Template != "" {
-				up.Sty.Template = sb.Sty.Template + ".up"
+			if sb.Style.Template != "" {
+				up.Style.Template = sb.Style.Template + ".up"
 			}
 			sb.StylePart(Node2D(up))
 			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -221,8 +248,8 @@ func (sb *SpinBox) ConfigParts() {
 			dn.SetProp("no-focus", true)
 			dn.Icon = sb.DownIcon
 			sb.StylePart(Node2D(dn))
-			if sb.Sty.Template != "" {
-				dn.Sty.Template = sb.Sty.Template + ".dn"
+			if sb.Style.Template != "" {
+				dn.Style.Template = sb.Style.Template + ".dn"
 			}
 			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
@@ -230,8 +257,8 @@ func (sb *SpinBox) ConfigParts() {
 			})
 			// space
 			sp := sb.Parts.ChildByName("space", 2).(*Space)
-			if sb.Sty.Template != "" {
-				sp.Sty.Template = sb.Sty.Template + ".space"
+			if sb.Style.Template != "" {
+				sp.Style.Template = sb.Style.Template + ".space"
 			}
 			sb.StylePart(sp) // also get the space
 		}
@@ -241,8 +268,8 @@ func (sb *SpinBox) ConfigParts() {
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
 		tf.SetProp("clear-act", false)
-		if sb.Sty.Template != "" {
-			tf.Sty.Template = sb.Sty.Template + ".text"
+		if sb.Style.Template != "" {
+			tf.Style.Template = sb.Style.Template + ".text"
 		}
 		sb.StylePart(Node2D(tf))
 		tf.Txt = sb.ValToString(sb.Value)
@@ -377,6 +404,7 @@ func (sb *SpinBox) SpinBoxEvents() {
 func (sb *SpinBox) Init2D() {
 	sb.Init2DWidget()
 	sb.ConfigParts()
+	sb.ConfigStyles()
 }
 
 // StyleFromProps styles SpinBox-specific fields from ki.Prop properties
@@ -439,14 +467,14 @@ func (sb *SpinBox) StyleSpinBox() {
 	if sb.Step == 0 {
 		sb.Defaults()
 	}
-	hasTempl, saveTempl := sb.Sty.FromTemplate()
+	hasTempl, saveTempl := sb.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		sb.Style2DWidget()
 	} else {
-		SetUnitContext(&sb.Sty, sb.Viewport, mat32.Vec2Zero)
+		SetUnitContext(&sb.Style, sb.Viewport, mat32.Vec2Zero)
 	}
 	if hasTempl && saveTempl {
-		sb.Sty.SaveTemplate()
+		sb.Style.SaveTemplate()
 	}
 	sb.StyleFromProps(sb.Props, sb.Viewport)
 }
@@ -454,7 +482,7 @@ func (sb *SpinBox) StyleSpinBox() {
 func (sb *SpinBox) Style2D() {
 	sb.StyleSpinBox()
 	sb.StyMu.Lock()
-	sb.LayState.SetFromStyle(&sb.Sty.Layout) // also does reset
+	sb.LayState.SetFromStyle(&sb.Style) // also does reset
 	sb.StyMu.Unlock()
 	sb.ConfigParts()
 }
@@ -496,4 +524,55 @@ func (sb *SpinBox) HasFocus2D() bool {
 		return false
 	}
 	return sb.ContainsFocus() // needed for getting key events
+}
+
+func (sb *SpinBox) ConfigStyles() {
+	sb.Parts.AddChildStyleFunc("text-field", 0, StyleFuncParts(sb), func(tfw *WidgetBase) {
+		tf, ok := tfw.This().(*TextField)
+		if !ok {
+			log.Println("(*gi.SpinBox).ConfigStyles: expected child named text-field to be of type *gi.TextField, not", reflect.TypeOf(tfw.This()))
+			return
+		}
+		tf.Style.MinWidth.SetCh(4)
+		tf.Style.Width.SetCh(8)
+		tf.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		tf.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		tf.ClearAct = false
+	})
+	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(space *WidgetBase) {
+		space.Style.Width.SetCh(0.1)
+	})
+	if buttons, ok := sb.Parts.ChildByName("buttons", 2).(*Layout); ok {
+		buttons.AddStyleFunc(StyleFuncParts(sb), func() {
+			buttons.Style.AlignV = gist.AlignMiddle
+		})
+		// same style function for both button up and down
+		btsf := func(buttonw *WidgetBase) {
+			button, ok := buttonw.This().(*Action)
+			if !ok {
+				log.Println("(*gi.SpinBox).ConfigStyles: expected child of Parts/buttons to be of type *gi.Action, not", reflect.TypeOf(buttonw.This()))
+				return
+			}
+			button.Style.MaxWidth.SetEx(2)
+			button.Style.MaxHeight.SetEx(2)
+			button.Style.Padding.Set()
+			button.Style.Margin.Set()
+			button.Style.Color = Colors.Text
+			switch button.State {
+			case ButtonActive:
+				button.Style.BackgroundColor.SetColor(Colors.Background)
+			case ButtonInactive:
+				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+				button.Style.Color = Colors.Text.Highlight(20)
+			case ButtonFocus, ButtonSelected:
+				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			case ButtonHover:
+				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+			case ButtonDown:
+				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			}
+		}
+		buttons.AddChildStyleFunc("up", 0, StyleFuncParts(sb), btsf)
+		buttons.AddChildStyleFunc("down", 1, StyleFuncParts(sb), btsf)
+	}
 }

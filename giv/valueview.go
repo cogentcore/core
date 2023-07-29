@@ -14,6 +14,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/histyle"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -22,7 +23,7 @@ import (
 
 func init() {
 	gi.TheViewIFace = &ViewIFace{}
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.IconName(""))), func() ValueView {
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() ValueView {
 		vv := &IconValueView{}
 		ki.InitNode(vv)
 		return vv
@@ -901,7 +902,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
-	tf.SetProp("min-width", units.NewCh(16))
+	tf.SetProp("min-width", units.Ch(16))
 	if completetag, ok := vv.Tag("complete"); ok {
 		// todo: this does not seem to be up-to-date and should use Completer interface..
 		in := []reflect.Value{reflect.ValueOf(tf)}
@@ -932,25 +933,25 @@ func (vv *ValueViewBase) StdConfigWidget(widg gi.Node2D) {
 	if widthtag, ok := vv.Tag("width"); ok {
 		width, ok := kit.ToFloat32(widthtag)
 		if ok {
-			nb.SetMinPrefWidth(units.NewCh(width))
+			nb.SetMinPrefWidth(units.Ch(width))
 		}
 	}
 	if maxwidthtag, ok := vv.Tag("max-width"); ok {
 		width, ok := kit.ToFloat32(maxwidthtag)
 		if ok {
-			nb.SetProp("max-width", units.NewCh(width))
+			nb.SetProp("max-width", units.Ch(width))
 		}
 	}
 	if heighttag, ok := vv.Tag("height"); ok {
 		height, ok := kit.ToFloat32(heighttag)
 		if ok {
-			nb.SetMinPrefHeight(units.NewEm(height))
+			nb.SetMinPrefHeight(units.Em(height))
 		}
 	}
 	if maxheighttag, ok := vv.Tag("max-height"); ok {
 		height, ok := kit.ToFloat32(maxheighttag)
 		if ok {
-			nb.SetProp("max-height", units.NewEm(height))
+			nb.SetProp("max-height", units.Em(height))
 		}
 	}
 }
@@ -1093,7 +1094,7 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 func (vv *VersCtrlValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.NewPx(4))
+	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_VersCtrlValueView).(*VersCtrlValueView)
 		ac := vvv.Widget.(*gi.Action)

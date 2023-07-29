@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -21,9 +22,7 @@ import (
 
 func main() {
 	// vkos.VkOsDebug = true  // vulkan debugging
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {
@@ -36,7 +35,7 @@ func mainrun() {
 	// gi.Layout2DTrace = true
 	// ki.SignalTrace = true
 	// gi.WinEventTrace = true
-	gi.EventTrace = false
+	// gi.EventTrace = true
 	// gi.KeyEventTrace = true
 
 	rec := ki.Node{}          // receiver for events
@@ -48,10 +47,13 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-widgets-demo", "GoGi Widgets Demo", width, height)
 
-	icnm := "wedge-down"
-
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
+
+	// vp.SetProps(ki.Props{
+	// 	"margin":           units.NewPx(44),
+	// 	"background-color": "red",
+	// })
 
 	// style sheet
 	var css = ki.Props{
@@ -74,7 +76,26 @@ func mainrun() {
 	vp.CSS = css
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewEx(1))
+	mfr.SetProp("spacing", units.Ex(1))
+
+	// mfr.ClassStyleFuncs = map[string]func(w *gi.WidgetBase){}
+	// mfr.ClassStyleFuncs["big"] = func(w *gi.WidgetBase) {
+	// 	w.Style.Width = units.Pct(50)
+	// }
+
+	// mfr.ElementStyleFuncs = map[string]func(w *gi.WidgetBase){}
+	// mfr.ElementStyleFuncs["button"] = func(w *gi.WidgetBase) {
+	// 	w.Style.BackgroundColor.SetColor(colors.Orange)
+	// 	w.Style.Color.SetColor(colors.Blue)
+	// }
+	// mfr.ElementStyleFuncs["slider"] = func(w *gi.WidgetBase) {
+	// 	w.Style.BackgroundColor.SetColor(colors.Maroon.Darker(40))
+	// }
+	// mfr.ElementStyleFuncs["textfield"] = func(w *gi.WidgetBase) {
+	// 	w.Style.Padding.Set(units.Px(10), units.Px(5))
+	// 	w.Style.Border.Radius.Set(units.Px(5))
+	// }
+
 	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
@@ -111,19 +132,19 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	blab.Selectable = true
 
 	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
-	brow.SetProp("spacing", units.NewEx(2))
-	brow.SetProp("horizontal-align", gist.AlignLeft)
+	// brow.SetProp("spacing", units.Ex(2))
+	// brow.SetProp("horizontal-align", gist.AlignLeft)
 	// brow.SetProp("horizontal-align", gi.AlignJustify)
-	brow.SetStretchMaxWidth()
+	// brow.SetStretchMaxWidth()
 
 	button1 := gi.AddNewButton(brow, "button1")
 	button1.SetProp("#icon", ki.Props{ // note: must come before SetIcon
-		"width":  units.NewEm(1.5),
-		"height": units.NewEm(1.5),
+		"width":  units.Em(1.5),
+		"height": units.Em(1.5),
 	})
 	button1.Tooltip = "press this <i>button</i> to pop up a dialog box"
 
-	button1.SetIcon(icnm)
+	button1.SetIcon(icons.OpenInNew)
 	button1.OnClicked(func() {
 		fmt.Printf("Button %s clicked\n", button1.Name())
 		gi.StringPromptDialog(vp, "", "Enter value here..",
@@ -136,6 +157,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 				}
 			})
 	})
+	button1.Class = "big"
 
 	button2 := gi.AddNewButton(brow, "button2")
 	// button2.SetProp("font-size", "x-large")
@@ -149,6 +171,24 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 			giv.GoGiEditorDialog(vp)
 		}
 	})
+	// button2.StyleFunc = func() {
+	// 	fmt.Println(button2.State)
+	// 	switch button2.State {
+	// 	case gi.ButtonHover:
+	// 		button2.Style.BackgroundColor.SetColor(gist.MustColorFromName("darkblue"))
+	// 	default:
+	// 		button2.Style.Border.Color.Set(gist.Transparent)
+	// 		button2.Style.Border.Width.Set(units.Px(2))
+	// 		button2.Style.Border.Radius.Set(units.Px(10))
+	// 		button2.Style.BackgroundColor.SetColor(gist.MustColorFromName("blue"))
+	// 		button2.Style.Color.SetColor(gist.MustColorFromName("white"))
+	// 		button2.Style.Padding.Set(units.Px(10), units.Px(5))
+	// 		button2.Style.Height = units.Px(50)
+	// 	}
+	// }
+	// button2.SetProp("border-color", gist.NewSides[gist.Color](gist.MustColorFromName("green"), gist.MustColorFromName("red"), gist.MustColorFromName("blue"), gist.MustColorFromName("orange")))
+	// button2.SetProp("border-width", "2px 4px 6px 8px")
+	// button2.SetProp("border-radius", "0 2 6 10")
 
 	checkbox := gi.AddNewCheckBox(brow, "checkbox")
 	checkbox.Text = "Toggle"
@@ -188,7 +228,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	gi.AddNewLabel(slrow, "slab", "Sliders:")
 
 	srow := gi.AddNewLayout(mfr, "srow", gi.LayoutHoriz)
-	srow.SetProp("spacing", units.NewEx(2))
+	srow.SetProp("spacing", units.Ex(2))
 	srow.SetProp("horizontal-align", "left")
 	srow.SetStretchMaxWidth()
 
@@ -197,18 +237,18 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	// slider1.Class = "hslides"
 	slider1.SetProp(":value", ki.Props{"background-color": "red"})
 	slider1.Defaults()
-	slider1.SetMinPrefWidth(units.NewEm(20))
-	slider1.SetMinPrefHeight(units.NewEm(2))
+	slider1.SetMinPrefWidth(units.Em(20))
+	slider1.SetMinPrefHeight(units.Em(2))
 	slider1.SetValue(0.5)
 	slider1.Snap = true
 	slider1.Tracking = true
-	slider1.Icon = gi.IconName("circlebutton-on")
+	slider1.Icon = icons.RadioButtonChecked
 
 	slider2 := gi.AddNewSlider(srow, "slider2")
 	slider2.Dim = mat32.Y
 	slider2.Defaults()
-	slider2.SetMinPrefHeight(units.NewEm(10))
-	slider2.SetMinPrefWidth(units.NewEm(1))
+	slider2.SetMinPrefHeight(units.Em(10))
+	slider2.SetMinPrefWidth(units.Em(1))
 	slider2.SetStretchMaxHeight()
 	slider2.SetValue(0.5)
 
@@ -228,8 +268,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	scrollbar1.Dim = mat32.X
 	scrollbar1.Class = "hslides"
 	scrollbar1.Defaults()
-	scrollbar1.SetMinPrefWidth(units.NewEm(20))
-	scrollbar1.SetMinPrefHeight(units.NewEm(1))
+	scrollbar1.SetMinPrefWidth(units.Em(20))
+	scrollbar1.SetMinPrefHeight(units.Em(1))
 	scrollbar1.SetThumbValue(0.25)
 	scrollbar1.SetValue(0.25)
 	// scrollbar1.Snap = true
@@ -243,8 +283,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	scrollbar2 := gi.AddNewScrollBar(srow, "scrollbar2")
 	scrollbar2.Dim = mat32.Y
 	scrollbar2.Defaults()
-	scrollbar2.SetMinPrefHeight(units.NewEm(10))
-	scrollbar2.SetMinPrefWidth(units.NewEm(1))
+	scrollbar2.SetMinPrefHeight(units.Em(10))
+	scrollbar2.SetMinPrefWidth(units.Em(1))
 	scrollbar2.SetStretchMaxHeight()
 	scrollbar2.SetThumbValue(10)
 	scrollbar2.SetValue(0)
@@ -265,7 +305,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	txlrow := gi.AddNewLayout(mfr, "txlrow", gi.LayoutHoriz)
 	gi.AddNewLabel(txlrow, "txlab", "Text Widgets:")
 	txrow := gi.AddNewLayout(mfr, "txrow", gi.LayoutHoriz)
-	txrow.SetProp("spacing", units.NewEx(2))
+	txrow.SetProp("spacing", units.Ex(2))
 	// txrow.SetProp("horizontal-align", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
 

@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -40,4 +38,20 @@ func StringToEventPris(s string) (EventPris, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: EventPris")
+}
+
+var _EventPris_descMap = map[EventPris]string{
+	-1: `AllPris = -1 = all priorities (for delete cases only)`,
+	0:  `HiPri = high priority -- event receivers processed first -- can be used to override default behavior`,
+	1:  `RegPri = default regular priority -- most should be here`,
+	2:  `LowPri = low priority -- processed last -- typically for containers / dialogs etc`,
+	3:  `LowRawPri = unfiltered (raw) low priority -- ignores whether the event was already processed.`,
+	4:  ``,
+}
+
+func (i EventPris) Desc() string {
+	if str, ok := _EventPris_descMap[i]; ok {
+		return str
+	}
+	return "EventPris(" + strconv.FormatInt(int64(i), 10) + ")"
 }

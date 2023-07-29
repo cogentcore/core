@@ -351,7 +351,7 @@ func (pc *Paint) Fill(rs *State) {
 func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *gist.ColorSpec) {
 	if clr.Source == gist.SolidColor {
 		b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.ZP, draw.Src)
+		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.Point{}, draw.Src)
 	} else {
 		pc.FillStyle.SetColorSpec(clr)
 		pc.DrawRectangle(rs, pos.X, pos.Y, size.X, size.Y)
@@ -362,7 +362,7 @@ func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *gist.ColorSpec) {
 // FillBoxColor is an optimized fill of a square region with given uniform color
 func (pc *Paint) FillBoxColor(rs *State, pos, size mat32.Vec2, clr color.Color) {
 	b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.ZP, draw.Src)
+	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.Point{}, draw.Src)
 }
 
 // ClipPreserve updates the clipping region by intersecting the current
@@ -376,7 +376,7 @@ func (pc *Paint) ClipPreserve(rs *State) {
 		rs.Mask = clip
 	} else { // todo: this one operation MASSIVELY slows down clip usage -- unclear why
 		mask := image.NewAlpha(rs.Image.Bounds())
-		draw.DrawMask(mask, mask.Bounds(), clip, image.ZP, rs.Mask, image.ZP, draw.Over)
+		draw.DrawMask(mask, mask.Bounds(), clip, image.Point{}, rs.Mask, image.Point{}, draw.Over)
 		rs.Mask = mask
 	}
 }
@@ -398,7 +398,7 @@ func (pc *Paint) SetMask(rs *State, mask *image.Alpha) error {
 func (pc *Paint) AsMask(rs *State) *image.Alpha {
 	b := rs.Image.Bounds()
 	mask := image.NewAlpha(b)
-	draw.Draw(mask, b, rs.Image, image.ZP, draw.Src)
+	draw.Draw(mask, b, rs.Image, image.Point{}, draw.Src)
 	return mask
 }
 
@@ -421,7 +421,7 @@ func (pc *Paint) ResetClip(rs *State) {
 // Clear fills the entire image with the current fill color.
 func (pc *Paint) Clear(rs *State) {
 	src := image.NewUniform(&pc.FillStyle.Color.Color)
-	draw.Draw(rs.Image, rs.Image.Bounds(), src, image.ZP, draw.Src)
+	draw.Draw(rs.Image, rs.Image.Bounds(), src, image.Point{}, draw.Src)
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
@@ -467,6 +467,130 @@ func (pc *Paint) DrawPolygonPxToDots(rs *State, points []mat32.Vec2) {
 	pc.ClosePath(rs)
 }
 
+// // DrawRectangle draws a rectangle by setting the stroke style and width
+// // and calling DrawConsistentRectangle if the given border width and
+// // color styles for each side are the same. Otherwise, it calls DrawChangingRectangle.
+// func (pc *Paint) DrawRectangle1(rs *State, x, y, w, h float32, bs gist.Border) {
+// 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
+// 		// set the color if it is not the same as the already set color
+// 		if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+// 			pc.StrokeStyle.SetColor(bs.Color.Top)
+// 		}
+// 		pc.StrokeStyle.Width = bs.Width.Top
+// 		pc.DrawConsistentRectangle(rs, x, y, w, h)
+// 		return
+// 	}
+// 	pc.DrawChangingRectangle(rs, x, y, w, h, bs)
+// }
+
+// DrawBorder is a higher-level function that draws, strokes, and fills
+// an potentially rounded border box with the given position, size, and border styles.
+func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
+	r := bs.Radius.Dots()
+	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
+		// set the color if it is not nil and it is not the same as the already set color
+		if !bs.Color.Top.IsNil() && (pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color) {
+			pc.StrokeStyle.SetColor(bs.Color.Top)
+		}
+		pc.StrokeStyle.Width = bs.Width.Top
+		if r.IsZero() {
+			pc.DrawRectangle(rs, x, y, w, h)
+		} else {
+			pc.DrawRoundedRectangle(rs, x, y, w, h, r)
+		}
+		pc.FillStrokeClear(rs)
+		return
+	}
+
+	// use consistent rounded rectangle for fill, and then draw borders side by side
+	pc.DrawRoundedRectangle(rs, x, y, w, h, r)
+	pc.Fill(rs)
+
+	// clamp border radius values
+	min := mat32.Min(w/2, h/2)
+	r.Top = mat32.Clamp(r.Top, 0, min)
+	r.Right = mat32.Clamp(r.Right, 0, min)
+	r.Bottom = mat32.Clamp(r.Bottom, 0, min)
+	r.Left = mat32.Clamp(r.Left, 0, min)
+
+	// position values
+	var (
+		xtl, ytl   = x, y                 // top left
+		xtli, ytli = x + r.Top, y + r.Top // top left inset
+
+		xtr, ytr   = x + w, y                     // top right
+		xtri, ytri = x + w - r.Right, y + r.Right // top right inset
+
+		xbr, ybr   = x + w, y + h                       // bottom right
+		xbri, ybri = x + w - r.Bottom, y + h - r.Bottom // bottom right inset
+
+		xbl, ybl   = x, y + h                   // bottom left
+		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
+	)
+
+	// SidesTODO: need to figure out how to style rounded corners correctly
+	// (in CSS they are split in the middle between different border side styles)
+
+	pc.NewSubPath(rs)
+	pc.MoveTo(rs, xtli, ytl)
+
+	// set the color if it is not the same as the already set color
+	if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+		pc.StrokeStyle.SetColor(bs.Color.Top)
+	}
+	pc.StrokeStyle.Width = bs.Width.Top
+	pc.LineTo(rs, xtri, ytr)
+	if r.Right != 0 {
+		pc.DrawArc(rs, xtri, ytri, r.Right, mat32.DegToRad(270), mat32.DegToRad(360))
+	}
+	// if the color or width is changing for the next one, we have to stroke now
+	if bs.Color.Top != bs.Color.Right || bs.Width.Top.Dots != bs.Width.Right.Dots {
+		pc.Stroke(rs)
+		pc.NewSubPath(rs)
+		pc.MoveTo(rs, xtr, ytri)
+	}
+
+	if bs.Color.Right != pc.StrokeStyle.Color.Color {
+		pc.StrokeStyle.SetColor(bs.Color.Right)
+	}
+	pc.StrokeStyle.Width = bs.Width.Right
+	pc.LineTo(rs, xbr, ybri)
+	if r.Bottom != 0 {
+		pc.DrawArc(rs, xbri, ybri, r.Bottom, mat32.DegToRad(0), mat32.DegToRad(90))
+	}
+	if bs.Color.Right != bs.Color.Bottom || bs.Width.Right.Dots != bs.Width.Bottom.Dots {
+		pc.Stroke(rs)
+		pc.NewSubPath(rs)
+		pc.MoveTo(rs, xbri, ybr)
+	}
+
+	if bs.Color.Bottom != pc.StrokeStyle.Color.Color {
+		pc.StrokeStyle.SetColor(bs.Color.Bottom)
+	}
+	pc.StrokeStyle.Width = bs.Width.Bottom
+	pc.LineTo(rs, xbli, ybl)
+	if r.Left != 0 {
+		pc.DrawArc(rs, xbli, ybli, r.Left, mat32.DegToRad(90), mat32.DegToRad(180))
+	}
+	if bs.Color.Bottom != bs.Color.Left || bs.Width.Bottom.Dots != bs.Width.Left.Dots {
+		pc.Stroke(rs)
+		pc.NewSubPath(rs)
+		pc.MoveTo(rs, xbl, ybli)
+	}
+
+	if bs.Color.Left != pc.StrokeStyle.Color.Color {
+		pc.StrokeStyle.SetColor(bs.Color.Left)
+	}
+	pc.StrokeStyle.Width = bs.Width.Left
+	pc.LineTo(rs, xtl, ytli)
+	if r.Top != 0 {
+		pc.DrawArc(rs, xtli, ytli, r.Top, mat32.DegToRad(180), mat32.DegToRad(270))
+	}
+	pc.LineTo(rs, xtli, ytl)
+	pc.Stroke(rs)
+}
+
+// DrawRectangle draws (but does not stroke or fill) a standard rectangle with a consistent border
 func (pc *Paint) DrawRectangle(rs *State, x, y, w, h float32) {
 	pc.NewSubPath(rs)
 	pc.MoveTo(rs, x, y)
@@ -476,21 +600,211 @@ func (pc *Paint) DrawRectangle(rs *State, x, y, w, h float32) {
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h, r float32) {
-	x0, x1, x2, x3 := x, x+r, x+w-r, x+w
-	y0, y1, y2, y3 := y, y+r, y+h-r, y+h
+// // DrawChangingRectangle draws a rectangle with changing border styles
+// func (pc *Paint) DrawChangingRectangle(rs *State, x, y, w, h float32, bs gist.Border) {
+// 	// use consistent rectangle for fill, and then draw borders side by side
+// 	pc.DrawConsistentRectangle(rs, x, y, w, h)
+// 	pc.Fill(rs)
+
+// 	pc.NewSubPath(rs)
+// 	pc.MoveTo(rs, x, y)
+
+// 	// set the color if it is not the same as the already set color
+// 	if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+// 		pc.StrokeStyle.SetColor(bs.Color.Top)
+// 	}
+// 	pc.StrokeStyle.Width = bs.Width.Top
+// 	pc.LineTo(rs, x+w, y)
+// 	// if the color or width is changing for the next one, we have to stroke now
+// 	if bs.Color.Top != bs.Color.Right || bs.Width.Top.Dots != bs.Width.Right.Dots {
+// 		pc.Stroke(rs)
+// 		pc.NewSubPath(rs)
+// 		pc.MoveTo(rs, x+w, y)
+// 	}
+
+// 	if bs.Color.Right != pc.StrokeStyle.Color.Color {
+// 		pc.StrokeStyle.SetColor(bs.Color.Right)
+// 	}
+// 	pc.StrokeStyle.Width = bs.Width.Right
+// 	pc.LineTo(rs, x+w, y+h)
+// 	if bs.Color.Right != bs.Color.Bottom || bs.Width.Right.Dots != bs.Width.Bottom.Dots {
+// 		pc.Stroke(rs)
+// 		pc.NewSubPath(rs)
+// 		pc.MoveTo(rs, x+w, y+h)
+// 	}
+
+// 	if bs.Color.Bottom != pc.StrokeStyle.Color.Color {
+// 		pc.StrokeStyle.SetColor(bs.Color.Bottom)
+// 	}
+// 	pc.StrokeStyle.Width = bs.Width.Bottom
+// 	pc.LineTo(rs, x, y+h)
+// 	if bs.Color.Bottom != bs.Color.Left || bs.Width.Bottom.Dots != bs.Width.Left.Dots {
+// 		pc.Stroke(rs)
+// 		pc.NewSubPath(rs)
+// 		pc.MoveTo(rs, x, y+h)
+// 	}
+
+// 	if bs.Color.Left != pc.StrokeStyle.Color.Color {
+// 		pc.StrokeStyle.SetColor(bs.Color.Left)
+// 	}
+// 	pc.StrokeStyle.Width = bs.Width.Left
+// 	pc.LineTo(rs, x, y)
+// }
+
+// // DrawRectangle draws a rounded rectangle by setting the stroke style and width
+// // and calling DrawConsistentRoundedRectangle if the given border width and
+// // color styles for each side are the same. Otherwise, it calls DrawChangingRoundedRectangle.
+// func (pc *Paint) DrawRoundedRectangle1(rs *State, x, y, w, h float32, bs gist.Border) {
+// 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
+// 		// set the color if it is not the same as the already set color
+// 		if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+// 			pc.StrokeStyle.SetColor(bs.Color.Top)
+// 		}
+// 		pc.StrokeStyle.Width = bs.Width.Top
+// 		pc.DrawConsistentRoundedRectangle(rs, x, y, w, h, bs.Radius.Dots())
+// 		return
+// 	}
+// 	pc.DrawChangingRoundedRectangle(rs, x, y, w, h, bs)
+// }
+
+// DrawRoundedRectangle draws a standard rounded rectangle
+// with a consistent border and with the given x and y position,
+// width and height, and border radius for each corner.
+func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r gist.SideFloats) {
+	// clamp border radius values
+	min := mat32.Min(w/2, h/2)
+	r.Top = mat32.Clamp(r.Top, 0, min)
+	r.Right = mat32.Clamp(r.Right, 0, min)
+	r.Bottom = mat32.Clamp(r.Bottom, 0, min)
+	r.Left = mat32.Clamp(r.Left, 0, min)
+
+	// position values; some variables are missing because they are unused
+	var (
+		xtl, ytl   = x, y                 // top left
+		xtli, ytli = x + r.Top, y + r.Top // top left inset
+
+		ytr        = y                            // top right
+		xtri, ytri = x + w - r.Right, y + r.Right // top right inset
+
+		xbr        = x + w                              // bottom right
+		xbri, ybri = x + w - r.Bottom, y + h - r.Bottom // bottom right inset
+
+		ybl        = y + h                      // bottom left
+		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
+	)
+
+	// SidesTODO: need to figure out how to style rounded corners correctly
+	// (in CSS they are split in the middle between different border side styles)
+
 	pc.NewSubPath(rs)
-	pc.MoveTo(rs, x1, y0)
-	pc.LineTo(rs, x2, y0)
-	pc.DrawArc(rs, x2, y1, r, mat32.DegToRad(270), mat32.DegToRad(360))
-	pc.LineTo(rs, x3, y2)
-	pc.DrawArc(rs, x2, y2, r, mat32.DegToRad(0), mat32.DegToRad(90))
-	pc.LineTo(rs, x1, y3)
-	pc.DrawArc(rs, x1, y2, r, mat32.DegToRad(90), mat32.DegToRad(180))
-	pc.LineTo(rs, x0, y1)
-	pc.DrawArc(rs, x1, y1, r, mat32.DegToRad(180), mat32.DegToRad(270))
+	pc.MoveTo(rs, xtli, ytl)
+
+	pc.LineTo(rs, xtri, ytr)
+	if r.Right != 0 {
+		pc.DrawArc(rs, xtri, ytri, r.Right, mat32.DegToRad(270), mat32.DegToRad(360))
+	}
+
+	pc.LineTo(rs, xbr, ybri)
+	if r.Bottom != 0 {
+		pc.DrawArc(rs, xbri, ybri, r.Bottom, mat32.DegToRad(0), mat32.DegToRad(90))
+	}
+
+	pc.LineTo(rs, xbli, ybl)
+	if r.Left != 0 {
+		pc.DrawArc(rs, xbli, ybli, r.Left, mat32.DegToRad(90), mat32.DegToRad(180))
+	}
+
+	pc.LineTo(rs, xtl, ytli)
+	if r.Top != 0 {
+		pc.DrawArc(rs, xtli, ytli, r.Top, mat32.DegToRad(180), mat32.DegToRad(270))
+	}
 	pc.ClosePath(rs)
 }
+
+// // DrawChangingRectangle draws a rounder rectangle with the given x and y position,
+// // width and height, and border radius for each corner.
+// func (pc *Paint) DrawMultiStyleBorder(rs *State, x, y, w, h float32, bs gist.Border) {
+// 	r := bs.Radius.Dots()
+
+// 	// use consistent rounded rectangle for fill, and then draw borders side by side
+// 	pc.DrawConsistentRoundedRectangle(rs, x, y, w, h, r)
+// 	pc.Fill(rs)
+
+// 	// position values
+// 	var (
+// 		xtl, ytl   = x, y                 // top left
+// 		xtli, ytli = x + r.Top, y + r.Top // top left inset
+
+// 		xtr, ytr   = x + w, y                     // top right
+// 		xtri, ytri = x + w - r.Right, y + r.Right // top right inset
+
+// 		xbr, ybr   = x + w, y + h                       // bottom right
+// 		xbri, ybri = x + w - r.Bottom, y + h - r.Bottom // bottom right inset
+
+// 		xbl, ybl   = x, y + h                   // bottom left
+// 		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
+// 	)
+
+// 	// SidesTODO: need to figure out how to style rounded corners correctly
+// 	// (in CSS they are split in the middle between different border side styles)
+
+// 	pc.NewSubPath(rs)
+// 	pc.MoveTo(rs, xtli, ytl)
+
+// 	// set the color if it is not the same as the already set color
+// 	if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+// 		pc.StrokeStyle.SetColor(bs.Color.Top)
+// 	}
+// 	pc.StrokeStyle.Width = bs.Width.Top
+// 	pc.LineTo(rs, xtri, ytr)
+// 	if r.Right != 0 {
+// 		pc.DrawArc(rs, xtri, ytri, r.Right, mat32.DegToRad(270), mat32.DegToRad(360))
+// 	}
+// 	// if the color or width is changing for the next one, we have to stroke now
+// 	if bs.Color.Top != bs.Color.Right || bs.Width.Top.Dots != bs.Width.Right.Dots {
+// 		pc.Stroke(rs)
+// 		pc.NewSubPath(rs)
+// 		pc.MoveTo(rs, xtr, ytri)
+// 	}
+
+// 	if bs.Color.Right != pc.StrokeStyle.Color.Color {
+// 		pc.StrokeStyle.SetColor(bs.Color.Right)
+// 	}
+// 	pc.StrokeStyle.Width = bs.Width.Right
+// 	pc.LineTo(rs, xbr, ybri)
+// 	if r.Bottom != 0 {
+// 		pc.DrawArc(rs, xbri, ybri, r.Bottom, mat32.DegToRad(0), mat32.DegToRad(90))
+// 	}
+// 	if bs.Color.Right != bs.Color.Bottom || bs.Width.Right.Dots != bs.Width.Bottom.Dots {
+// 		pc.Stroke(rs)
+// 		pc.NewSubPath(rs)
+// 		pc.MoveTo(rs, xbri, ybr)
+// 	}
+
+// 	if bs.Color.Bottom != pc.StrokeStyle.Color.Color {
+// 		pc.StrokeStyle.SetColor(bs.Color.Bottom)
+// 	}
+// 	pc.StrokeStyle.Width = bs.Width.Bottom
+// 	pc.LineTo(rs, xbli, ybl)
+// 	if r.Left != 0 {
+// 		pc.DrawArc(rs, xbli, ybli, r.Left, mat32.DegToRad(90), mat32.DegToRad(180))
+// 	}
+// 	if bs.Color.Bottom != bs.Color.Left || bs.Width.Bottom.Dots != bs.Width.Left.Dots {
+// 		pc.Stroke(rs)
+// 		pc.NewSubPath(rs)
+// 		pc.MoveTo(rs, xbl, ybli)
+// 	}
+
+// 	if bs.Color.Left != pc.StrokeStyle.Color.Color {
+// 		pc.StrokeStyle.SetColor(bs.Color.Left)
+// 	}
+// 	pc.StrokeStyle.Width = bs.Width.Left
+// 	pc.LineTo(rs, xtl, ytli)
+// 	if r.Top != 0 {
+// 		pc.DrawArc(rs, xtli, ytli, r.Top, mat32.DegToRad(180), mat32.DegToRad(270))
+// 	}
+// 	pc.LineTo(rs, xtli, ytl)
+// }
 
 // DrawEllipticalArc draws arc between angle1 and angle2 along an ellipse,
 // using quadratic bezier curves -- centers of ellipse are at cx, cy with
@@ -703,7 +1017,7 @@ func (pc *Paint) DrawImageAnchored(rs *State, fmIm image.Image, x, y, ax, ay flo
 	} else {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, &draw.Options{
 			DstMask:  rs.Mask,
-			DstMaskP: image.ZP,
+			DstMaskP: image.Point{},
 		})
 	}
 }
@@ -724,7 +1038,7 @@ func (pc *Paint) DrawImageScaled(rs *State, fmIm image.Image, x, y, w, h float32
 	} else {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, &draw.Options{
 			DstMask:  rs.Mask,
-			DstMaskP: image.ZP,
+			DstMaskP: image.Point{},
 		})
 	}
 }

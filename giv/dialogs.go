@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
@@ -64,8 +65,8 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb.Stat() // update markup
 
 	tlv := frame.InsertNewChild(gi.KiT_Layout, prIdx+1, "text-lay").(*gi.Layout)
-	tlv.SetProp("width", units.NewCh(80))
-	tlv.SetProp("height", units.NewEm(40))
+	tlv.SetProp("width", units.Ch(80))
+	tlv.SetProp("height", units.Em(40))
 	tlv.SetProp("line-nos", opts.LineNos)
 	tlv.SetStretchMax()
 	tv := AddNewTextView(tlv, "text-view")
@@ -82,7 +83,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	}
 	cpb := gi.AddNewButton(bbox, "copy-to-clip")
 	cpb.SetText("Copy To Clipboard")
-	cpb.SetIcon("copy")
+	cpb.SetIcon(icons.ContentCopy)
 	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
@@ -399,7 +400,7 @@ var FontChooserSizeDots = 18
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
 func FontChooserDialog(avp *gi.Viewport2D, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	FontChooserSizeDots = int(avp.Sty.UnContext.ToDots(float32(FontChooserSize), units.Pt))
+	FontChooserSizeDots = int(avp.Style.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	girl.FontLibrary.OpenAllFonts(FontChooserSizeDots)
 	dlg := TableViewSelectDialog(avp, &girl.FontLibrary.FontInfo, opts, -1, FontInfoStyleFunc, recv, dlgFunc)
 	return dlg
@@ -413,7 +414,7 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 			widg.SetProp("font-stretch", (finf)[row].Stretch)
 			widg.SetProp("font-weight", (finf)[row].Weight)
 			widg.SetProp("font-style", (finf)[row].Style)
-			widg.SetProp("font-size", units.NewPt(float32(FontChooserSize)))
+			widg.SetProp("font-size", units.Pt(float32(FontChooserSize)))
 			widg.AsNode2D().SetFullReRender()
 		}
 	}
@@ -422,12 +423,12 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 // IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
 // if non-nil are connected to the selection signal for the slice view, and
 // the dialog signal.
-func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func IconChooserDialog(avp *gi.Viewport2D, curIc icons.Icon, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	if opts.CSS == nil {
 		opts.CSS = ki.Props{
 			"icon": ki.Props{
-				"width":  units.NewEm(2),
-				"height": units.NewEm(2),
+				"width":  units.Em(2),
+				"height": units.Em(2),
 			},
 		}
 	}
@@ -436,7 +437,7 @@ func IconChooserDialog(avp *gi.Viewport2D, curIc gi.IconName, opts DlgOpts, recv
 }
 
 func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Node2D, row int, vv ValueView) {
-	ic, ok := slice.([]gi.IconName)
+	ic, ok := slice.([]icons.Icon)
 	if ok {
 		widg.(*gi.Action).SetText(string(ic[row]))
 		widg.SetProp("max-width", -1)

@@ -272,16 +272,16 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 		nb.ObjBBox = bbvis.Add(sc.BBox.Min)
 		nb.VpBBox = nb.ObjBBox.Add(sc.ObjBBox.Min.Sub(sc.BBox.Min)) // move amount
 		nb.VpBBox = nb.VpBBox.Intersect(sc.VpBBox)
-		if nb.VpBBox != image.ZR {
+		if nb.VpBBox != (image.Rectangle{}) {
 			nb.WinBBox = nb.VpBBox.Add(sc.WinBBox.Min.Sub(sc.VpBBox.Min))
 		} else {
 			nb.WinBBox = nb.VpBBox
 		}
 	} else {
 		// fmt.Printf("not vis: %v  wbb: %v\n", nb.Name(), nb.WorldBBox.BBox)
-		nb.ObjBBox = image.ZR
-		nb.VpBBox = image.ZR
-		nb.WinBBox = image.ZR
+		nb.ObjBBox = image.Rectangle{}
+		nb.VpBBox = image.Rectangle{}
+		nb.WinBBox = image.Rectangle{}
 	}
 }
 

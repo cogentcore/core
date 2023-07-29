@@ -210,6 +210,12 @@ func (sc *Screen) ConstrainWinGeom(sz, pos image.Point) (csz, cpos image.Point) 
 	if cpos.Y+csz.Y > scsz.Y {
 		cpos.Y = scsz.Y - csz.Y
 	}
+	if cpos.X < 0 {
+		cpos.X = 0
+	}
+	if cpos.Y < 0 {
+		cpos.Y = 0
+	}
 
 	csz = sc.WinSizeToPix(csz)
 	return

@@ -15,12 +15,11 @@ import (
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleFontFuncs
 
-// Font contains all font styling information, including everything that
-// is used in SVG text rendering -- used in Paint and in Style. Most of font
-// information is inherited.
+// Font contains all font styling information.
+// Most of font information is inherited.
+// Font does not include all information needed
+// for rendering -- see [FontRender] for that.
 type Font struct {
-	Color   Color           `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
-	BgColor ColorSpec       `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
 	Opacity float32         `xml:"opacity" desc:"prop: opacity = alpha value to apply to all elements"`
 	Size    units.Value     `xml:"font-size" inherit:"true" desc:"prop: font-size (inherited)= size of font to render -- convert to points when getting font to use"`
 	Family  string          `xml:"font-family" inherit:"true" desc:"prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse"`
@@ -37,9 +36,9 @@ type Font struct {
 }
 
 func (fs *Font) Defaults() {
-	fs.Color = Black
+	// fs.Color = Black
 	fs.Opacity = 1.0
-	fs.Size = units.NewPt(12)
+	fs.Size = units.Pt(12)
 }
 
 // SetStylePost does any updates after generic xml-tag property setting -- use
@@ -51,7 +50,7 @@ func (fs *Font) SetStylePost(props ki.Props) {
 // InheritFields from parent: Manual inheriting of values is much faster than
 // automatic version!
 func (fs *Font) InheritFields(par *Font) {
-	fs.Color = par.Color
+	// fs.Color = par.Color
 	fs.Family = par.Family
 	fs.Style = par.Style
 	if par.Size.Val != 0 {
@@ -115,14 +114,14 @@ func (fs *Font) SetStyleProps(parent *Font, props ki.Props, ctxt Context) {
 // CopyNonDefaultProps does SetProp on given node for all of the style settings
 // that are not at their default values.
 func (fs *Font) CopyNonDefaultProps(node ki.Ki) {
-	prefclr := ThePrefs.PrefColor("font")
+	// prefclr := ThePrefs.PrefColor("font")
 	preffont := ThePrefs.PrefFontFamily()
-	if fs.Color != *prefclr {
-		node.SetProp("color", fs.Color)
-	}
-	if !fs.BgColor.Color.IsNil() {
-		node.SetProp("background-color", fs.BgColor.Color)
-	}
+	// if fs.Color != *prefclr {
+	// 	node.SetProp("color", fs.Color)
+	// }
+	// if !fs.BackgroundColor.Color.IsNil() {
+	// 	node.SetProp("background-color", fs.BackgroundColor.Color)
+	// }
 	if fs.Opacity != 1 {
 		node.SetProp("opacity", fs.Opacity)
 	}
@@ -320,8 +319,8 @@ const (
 	DecoSuper
 	// DecoSub indicates sub-scripted text
 	DecoSub
-	// DecoBgColor indicates that a bg color has been set -- for use in optimizing rendering
-	DecoBgColor
+	// DecoBackgroundColor indicates that a bg color has been set -- for use in optimizing rendering
+	DecoBackgroundColor
 	TextDecorationsN
 )
 
@@ -453,4 +452,37 @@ func FixFontMods(fn string) string {
 	fn = strings.TrimSuffix(fn, " Regular")
 	fn = strings.TrimSuffix(fn, "Regular")
 	return fn
+}
+
+// FontRender contains all font styling information
+// that is needed for SVG text rendering. It is passed to
+// Paint and Style functions. It should typically not be
+// used by end-user code -- see [Font] for that.
+// It stores all values as pointers so that they correspond
+// to the values of the style object it was derived from.
+type FontRender struct {
+	Font
+	Color           Color     `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
+	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+}
+
+// FontRender returns the font-rendering-related
+// styles of the style object as a FontRender
+func (s *Style) FontRender() *FontRender {
+	return &FontRender{
+		Font:            s.Font,
+		Color:           s.Color,
+		BackgroundColor: s.BackgroundColor,
+	}
+}
+
+func (fr *FontRender) Defaults() {
+	fr.Color = Black
+	fr.Font.Defaults()
+}
+
+// InheritFields from parent
+func (fr *FontRender) InheritFields(par *FontRender) {
+	fr.Color = par.Color
+	fr.Font.InheritFields(&par.Font)
 }

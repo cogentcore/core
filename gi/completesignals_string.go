@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -36,4 +34,16 @@ func (i *CompleteSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: CompleteSignals")
+}
+
+var _CompleteSignals_descMap = map[CompleteSignals]string{
+	0: `CompleteSelect means the user chose one of the possible completions`,
+	1: `CompleteExtend means user has requested that the seed extend if all completions have a common prefix longer than current seed`,
+}
+
+func (i CompleteSignals) Desc() string {
+	if str, ok := _CompleteSignals_descMap[i]; ok {
+		return str
+	}
+	return "CompleteSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

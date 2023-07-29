@@ -5,20 +5,21 @@
 package main
 
 import (
+	"log"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 )
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {
 	width := 1024
 	height := 768
 	win := gi.NewMainWindow("gogi-basic", "Basic Test Window", width, height)
+	log.Println("new window", win)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 	"log"
+	"strings"
 	"sync"
 
 	"github.com/goki/gi/gist"
@@ -334,6 +335,18 @@ func (nb *NodeBase) AddClass(cls string) {
 	} else {
 		nb.Class += " " + cls
 	}
+}
+
+// HasClass returns whether the node has the given class name
+// as one of its classes.
+func (nb *NodeBase) HasClass(cls string) bool {
+	fields := strings.Fields(nb.Class)
+	for _, field := range fields {
+		if field == cls {
+			return true
+		}
+	}
+	return false
 }
 
 // StyleProps returns a property that contains another map of properties for a

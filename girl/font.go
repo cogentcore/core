@@ -21,11 +21,12 @@ import (
 // OpenFont loads the font specified by the font style from the font library.
 // This is the primary method to use for loading fonts, as it uses a robust
 // fallback method to finding an appropriate font, and falls back on the
-// builtin Go font as a last resort.  The Face field will have the resulting
-// font.  The font size is always rounded to nearest integer, to produce
+// builtin Go font as a last resort.  It returns the font
+// style object with Face set to the resulting font.
+// The font size is always rounded to nearest integer, to produce
 // better-looking results (presumably).  The current metrics and given
 // unit.Context are updated based on the properties of the font.
-func OpenFont(fs *gist.Font, ctxt *units.Context) {
+func OpenFont(fs *gist.FontRender, ctxt *units.Context) gist.Font {
 	facenm := FontFaceName(fs.Family, fs.Stretch, fs.Weight, fs.Style)
 	if fs.Size.Dots == 0 {
 		fs.Size.ToDots(ctxt)
@@ -45,8 +46,9 @@ func OpenFont(fs *gist.Font, ctxt *units.Context) {
 	} else {
 		fs.Face = face
 	}
-	fs.Rem = ctxt.ToDots(12, units.Pt)
+	fs.Rem = ctxt.ToDots(12, units.UnitPt)
 	fs.SetUnitContext(ctxt)
+	return fs.Font
 }
 
 // OpenFontFace loads a font file at given path, with given raw size in
@@ -93,7 +95,7 @@ func OpenFontFace(name, path string, size int, strokeWidth int) (*gist.FontFace,
 
 // FontStyleCSS looks for "tag" name props in cssAgg props, and applies those to
 // style if found, and returns true -- false if no such tag found
-func FontStyleCSS(fs *gist.Font, tag string, cssAgg ki.Props, unit *units.Context, ctxt gist.Context) bool {
+func FontStyleCSS(fs *gist.FontRender, tag string, cssAgg ki.Props, unit *units.Context, ctxt gist.Context) bool {
 	if cssAgg == nil {
 		return false
 	}

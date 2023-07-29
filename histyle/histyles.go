@@ -14,6 +14,7 @@ import (
 	"sort"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -234,14 +235,14 @@ var StylesProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Add", ki.Props{ // note: overrides default Add
 			"desc": "Add a new style to the list.",
-			"icon": "plus",
+			"icon": icons.Add,
 			"updtfunc": func(sti any, act *gi.Action) {
 				act.SetActiveStateUpdt(sti.(*Styles) == &CustomStyles)
 			},
 		}},
 		{"SavePrefs", ki.Props{
 			"desc": "saves styles to app prefs directory, in file hi_styles.json, which will be loaded automatically at startup into your CustomStyles.",
-			"icon": "file-save",
+			"icon": icons.Save,
 			"updtfunc": func(sti any, act *gi.Action) {
 				act.SetActiveStateUpdt(StylesChanged && sti.(*Styles) == &CustomStyles)
 			},
@@ -249,7 +250,7 @@ var StylesProps = ki.Props{
 		{"sep-file", ki.BlankProp{}},
 		{"OpenJSON", ki.Props{
 			"label": "Open from file",
-			"icon":  "file-open",
+			"icon":  icons.FileOpen,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -259,7 +260,7 @@ var StylesProps = ki.Props{
 		}},
 		{"SaveJSON", ki.Props{
 			"label": "Save to file",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{

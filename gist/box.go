@@ -28,25 +28,6 @@ import (
 // 	b.Color.SetColor(White)
 // }
 
-// BoxSides specifies sides of a box -- some properties can be specified per
-// each side (e.g., border) or not
-type BoxSides int32
-
-const (
-	BoxTop BoxSides = iota
-	BoxRight
-	BoxBottom
-	BoxLeft
-	BoxN
-)
-
-//go:generate stringer -type=BoxSides
-
-var KiT_BoxSides = kit.Enums.AddEnumAltLower(BoxN, kit.NotBitFlag, StylePropProps, "Box")
-
-func (ev BoxSides) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *BoxSides) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
 // BorderStyles determines how to draw the border
 type BorderStyles int32
 
@@ -73,12 +54,22 @@ func (ev *BorderStyles) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshal
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleBorderFuncs
 
+/* todo: add this in the future
 // Border contains style parameters for borders
 type Border struct {
-	Style  BorderStyles `xml:"style" desc:"prop: border-style = how to draw the border"`
-	Width  units.Value  `xml:"width" desc:"prop: border-width = width of the border"`
-	Radius units.Value  `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
-	Color  Color        `xml:"color" desc:"prop: border-color = color of the border"`
+	Style  Sides[BorderStyles] `xml:"style" desc:"prop: border-style = how to draw the border"`
+	Width  Sides[units.Value]  `xml:"width" desc:"prop: border-width = width of the border"`
+	Radius Sides[units.Value]  `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
+	Color  Sides[Color]        `xml:"color" desc:"prop: border-color = color of the border"`
+}
+*/
+
+// Border contains style parameters for borders
+type Border struct {
+	Style  Sides[BorderStyles] `xml:"style" desc:"prop: border-style = how to draw the border"`
+	Width  SideValues          `xml:"width" desc:"prop: border-width = width of the border"`
+	Radius SideValues          `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
+	Color  SideColors          `xml:"color" desc:"prop: border-color = color of the border"`
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels

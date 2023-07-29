@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
@@ -25,6 +26,7 @@ import (
 type ButtonBox struct {
 	PartsWidgetBase
 	Items     []string  `desc:"the list of items (checbox button labels)"`
+	Tooltips  []string  `desc:"an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items"`
 	Mutex     bool      `desc:"make the items mutually exclusive -- checking one turns off all the others"`
 	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
 }
@@ -47,16 +49,30 @@ func (bb *ButtonBox) Disconnect() {
 	bb.ButtonSig.DisconnectAll()
 }
 
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (bb *ButtonBox) DefaultStyle() {
+// 	s := &bb.Style
+
+// 	s.Border.Style.Set(gist.BorderNone)
+// 	s.Border.Radius.Set(units.Px(2))
+// 	s.Border.Color.Set()
+// 	s.Padding.Set(units.Px(2))
+// 	s.Margin.Set(units.Px(2))
+// 	s.Text.Align = gist.AlignCenter
+// 	s.BackgroundColor.SetColor(TheColorScheme.Secondary)
+// 	s.Color.SetColor(TheColorScheme.Secondary.ContrastColor())
+// }
+
 var ButtonBoxProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(2),
-	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.NewPx(2),
-	"margin":           units.NewPx(2),
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(2),
+	// "border-color":     &Prefs.Colors.Border,
+	// "padding":          units.Px(2),
+	// "margin":           units.Px(2),
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
 }
 
 // SelectItem activates a given item but does NOT emit the ButtonSig signal.
@@ -136,8 +152,10 @@ func (bb *ButtonBox) ItemsFromEnumList(el []kit.EnumValue) {
 		return
 	}
 	bb.Items = make([]string, sz)
+	bb.Tooltips = make([]string, sz)
 	for i, enum := range el {
 		bb.Items[i] = enum.Name
+		bb.Tooltips[i] = enum.Desc
 	}
 }
 
@@ -183,6 +201,13 @@ func (bb *ButtonBox) ConfigItems() {
 		cb := cbi.(*CheckBox)
 		lbl := bb.Items[i]
 		cb.SetText(lbl)
+		if len(bb.Tooltips) > i {
+			cb.Tooltip = bb.Tooltips[i]
+		}
+		if bb.Mutex {
+			cb.Icon = icons.RadioButtonChecked
+			cb.IconOff = icons.RadioButtonUnchecked
+		}
 		cb.SetProp("index", i)
 		cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig != int64(ButtonToggled) {
@@ -226,12 +251,13 @@ func (bb *ButtonBox) ConfigPartsIfNeeded() {
 func (bb *ButtonBox) Init2D() {
 	bb.Init2DWidget()
 	bb.ConfigParts()
+	bb.ConfigStyles()
 }
 
 func (bb *ButtonBox) Style2D() {
 	bb.StyMu.Lock()
 	bb.Style2DWidget()
-	bb.LayState.SetFromStyle(&bb.Sty.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.Style) // also does reset
 	bb.StyMu.Unlock()
 	bb.ConfigParts()
 }
@@ -262,4 +288,16 @@ func (bb *ButtonBox) Render2D() {
 	} else {
 		bb.DisconnectAllEvents(RegPri)
 	}
+}
+
+func (bb *ButtonBox) ConfigStyles() {
+	bb.AddStyleFunc(StyleFuncDefault, func() {
+		bb.Style.Border.Style.Set(gist.BorderNone)
+		bb.Style.Border.Radius.Set(units.Px(2))
+		bb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		bb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		bb.Style.Text.Align = gist.AlignCenter
+		bb.Style.BackgroundColor.SetColor(Colors.Background)
+		bb.Style.Color.SetColor(Colors.Text)
+	})
 }

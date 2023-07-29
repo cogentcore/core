@@ -19,10 +19,8 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
 )
 
 func init() {
@@ -54,6 +52,16 @@ var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
 func AddNewIcon(parent ki.Ki, name string) *Icon {
 	return parent.AddNewChild(KiT_Icon, name).(*Icon)
 }
+
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (ic *Icon) DefaultStyle() {
+// 	s := &ic.Style
+// 	cs := gi.CurrentColorScheme()
+
+// 	s.BackgroundColor.SetColor(color.Transparent)
+// 	ic.Pnt.FillStyle.Color.SetColor(cs.Font)
+// 	ic.Pnt.StrokeStyle.Color.SetColor(cs.Font)
+// }
 
 var IconProps = ki.Props{
 	"EnumType:Flag":    gi.KiT_VpFlags,
@@ -93,7 +101,7 @@ func (ic *Icon) Size2D(iter int) {
 
 func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
 	ic.StyMu.RLock()
-	needSty := ic.Sty.Font.Size.Val == 0
+	needSty := ic.Style.Font.Size.Val == 0
 	ic.StyMu.RUnlock()
 	if needSty {
 		ic.StyleSVG()
@@ -141,12 +149,12 @@ func (ic *Icon) Render2D() {
 type IconMgr struct {
 }
 
-func (im *IconMgr) IsValid(iconName string) bool {
+func (im *IconMgr) IsValid(iconName icons.Icon) bool {
 	if im == nil {
 		fmt.Println("TheIconMgr is nil -- you MUST import gi/svg as e.g., import \"_ github.com/goki/gi/svg\" to properly initialize the SVG icon manager")
 		return false
 	}
-	if gi.IconName(iconName).IsNil() {
+	if iconName.IsNil() {
 		return false
 	}
 	if _, ok := CurIconSet[iconName]; ok {
@@ -161,8 +169,8 @@ func (im *IconMgr) IsValid(iconName string) bool {
 // IconByName is main function to get icon by name -- looks in CurIconSet and
 // falls back to DefaultIconSet if not found there -- returns error
 // message if not found.  cast result to *svg.Icon
-func (im *IconMgr) IconByName(name string) (ki.Ki, error) {
-	if gi.IconName(name).IsNil() {
+func (im *IconMgr) IconByName(name icons.Icon) (ki.Ki, error) {
+	if name.IsNil() {
 		return nil, nil
 	}
 	if !im.IsValid(name) {
@@ -183,7 +191,7 @@ func (im *IconMgr) IconByName(name string) (ki.Ki, error) {
 // SetIcon sets the icon by name into given Icon wrapper, returning error
 // message if not found etc.  This is how gi.Icon is initialized from
 // underlying svg.Icon items.
-func (im *IconMgr) SetIcon(ic *gi.Icon, iconName string) error {
+func (im *IconMgr) SetIcon(ic *gi.Icon, iconName icons.Icon) error {
 	sici, err := im.IconByName(iconName)
 	if err != nil {
 		return err
@@ -206,7 +214,7 @@ func (im *IconMgr) SetIcon(ic *gi.Icon, iconName string) error {
 
 // IconList returns the current list of all available icons,
 // optionally sorted in alphabetical order.
-func (im *IconMgr) IconList(alphaSort bool) []gi.IconName {
+func (im *IconMgr) IconList(alphaSort bool) []icons.Icon {
 	return CurIconSet.IconList(alphaSort)
 }
 
@@ -214,7 +222,7 @@ func (im *IconMgr) IconList(alphaSort bool) []gi.IconName {
 // IconSet is a list of icons
 
 // IconSet is a collection of icons
-type IconSet map[string]*Icon
+type IconSet map[icons.Icon]*Icon
 
 // DefaultIconSet is the default icon set, initialized by default
 var DefaultIconSet IconSet
@@ -247,7 +255,7 @@ func (iset *IconSet) OpenIconsFromPath(path string) error {
 			ic := Icon{}
 			ic.InitName(&ic, nm)
 			ic.Filename = p
-			(*iset)[nm] = &ic
+			(*iset)[icons.Icon(nm)] = &ic
 		}
 		return nil
 	})
@@ -258,7 +266,7 @@ func (iset *IconSet) OpenIconsFromPath(path string) error {
 }
 
 func (iset *IconSet) OpenDefaultIcons() error {
-	err := iset.OpenIconsFromEmbedDir(icons.Icons, ".")
+	err := iset.OpenIconsFromEmbedDir(icons.Icons, "svg")
 	if err != nil {
 		log.Println(err)
 		return err
@@ -286,8 +294,12 @@ func (iset *IconSet) OpenIconsFromEmbedDir(fs embed.FS, dirName string) error {
 		nm := strings.ToLower(bfn)
 		fpath := fnm
 		if dirName != "" && dirName != "." {
-			nm = dirName + "-" + nm
-			fpath = filepath.Join(dirName, fnm)
+			// omit "svg-" prefix because it is the
+			// standard location for icons
+			if dirName != "svg" {
+				nm = dirName + "-" + nm
+			}
+			fpath = dirName + "/" + fnm // fs uses slashes, even on windows (see https://pkg.go.dev/io/fs#ValidPath)
 		}
 		ic := Icon{}
 		ic.InitName(&ic, nm)
@@ -297,7 +309,7 @@ func (iset *IconSet) OpenIconsFromEmbedDir(fs embed.FS, dirName string) error {
 			err = ic.ReadXML(bytes.NewBuffer(b))
 			if err == nil || err == io.EOF {
 				ki.UniquifyNamesAll(ic.This())
-				(*iset)[nm] = &ic
+				(*iset)[icons.Icon(nm)] = &ic
 			} else {
 				lasterr = err
 				log.Println(err)
@@ -311,12 +323,12 @@ func (iset *IconSet) OpenIconsFromEmbedDir(fs embed.FS, dirName string) error {
 }
 
 // IconList returns a list of names of icons in the icon set
-func (iset *IconSet) IconList(alphaSort bool) []gi.IconName {
-	il := make([]gi.IconName, len(*iset)+1)
-	il[0] = gi.IconName("none")
+func (iset *IconSet) IconList(alphaSort bool) []icons.Icon {
+	il := make([]icons.Icon, len(*iset)+1)
+	il[0] = icons.None
 	idx := 1
 	for _, ic := range *iset {
-		il[idx] = gi.IconName(ic.Nm)
+		il[idx] = icons.Icon(ic.Nm)
 		idx++
 	}
 	if alphaSort {
@@ -329,115 +341,119 @@ func (iset *IconSet) IconList(alphaSort bool) []gi.IconName {
 
 func MakeDefaultIcons() IconSet {
 	iset := make(IconSet, 100)
-	if true {
-		{
-			ic := &Icon{}
-			ic.InitName(ic, "wedge-down")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			p := AddNewPath(ic, "p", "M 0.05 0.05 .95 0.05 .5 .95 Z")
-			p.SetProp("stroke-width", units.NewPct(1))
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			ic.InitName(ic, "wedge-up")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			p := AddNewPath(ic, "p", "M 0.05 0.95 .95 0.95 .5 .05 Z")
-			p.SetProp("stroke-width", units.NewPct(1))
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			ic.InitName(ic, "wedge-left")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			p := AddNewPath(ic, "p", "M 0.95 0.05 .95 0.95 .05 .5 Z")
-			p.SetProp("stroke-width", units.NewPct(1))
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			ic.InitName(ic, "wedge-right")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			p := AddNewPath(ic, "p", "M 0.05 0.05 .05 0.95 .95 .5 Z")
-			p.SetProp("stroke-width", units.NewPct(1))
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			ic.InitName(ic, "checkmark")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			p := AddNewPath(ic, "p", "M 0.1 0.5 .5 0.9 .9 .1")
-			p.SetProp("stroke-width", units.NewPct(20))
-			p.SetProp("fill", "none")
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			ic.InitName(ic, "checked-box")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			bx := AddNewRect(ic, "bx", 0.05, 0.05, 0.9, 0.9)
-			bx.SetProp("stroke-width", units.NewPct(5))
-			// bx.Radius.Set(0.02, 0.02)
-			p := AddNewPath(ic, "p", "M 0.2 0.5 .5 0.8 .8 .2")
-			p.SetProp("stroke-width", units.NewPct(20))
-			p.SetProp("fill", "none")
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			ic.InitName(ic, "unchecked-box")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			bx := AddNewRect(ic, "bx", 0.05, 0.05, 0.9, 0.9)
-			bx.SetProp("stroke-width", units.NewPct(5))
-			// bx.Radius.Set(0.02, 0.02) // not rendering well at small sizes
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			ic.InitName(ic, "circlebutton-on")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			oc := AddNewCircle(ic, "oc", 0.5, 0.5, 0.4)
-			oc.SetProp("fill", "none")
-			oc.SetProp("stroke-width", units.NewPct(10))
-			inc := AddNewCircle(ic, "ic", 0.5, 0.5, 0.2)
-			inc.SetProp("stroke-width", units.NewPct(10))
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			ic.InitName(ic, "circlebutton-off")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			oc := AddNewCircle(ic, "oc", 0.5, 0.5, 0.4)
-			oc.SetProp("fill", "none")
-			oc.SetProp("stroke-width", units.NewPct(10))
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			rad := mat32.Vec2{0.25, 0.12}
-			ic.InitName(ic, "handle-circles-vert")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			c0 := AddNewEllipse(ic, "c0", 0.5, 0.15, rad.X, rad.Y)
-			c0.SetProp("stroke-width", units.NewPct(5))
-			c1 := AddNewEllipse(ic, "c1", 0.5, 0.5, rad.X, rad.Y)
-			c1.SetProp("stroke-width", units.NewPct(5))
-			c2 := AddNewEllipse(ic, "c2", 0.5, 0.85, rad.X, rad.Y)
-			c2.SetProp("stroke-width", units.NewPct(5))
-			iset[ic.Nm] = ic
-		}
-		{
-			ic := &Icon{}
-			rad := mat32.Vec2{0.12, 0.25}
-			ic.InitName(ic, "handle-circles-horiz")
-			ic.ViewBox.Size = mat32.Vec2{1, 1}
-			c0 := AddNewEllipse(ic, "c0", 0.15, 0.5, rad.X, rad.Y)
-			c0.SetProp("stroke-width", units.NewPct(5))
-			c1 := AddNewEllipse(ic, "c1", 0.5, 0.5, rad.X, rad.Y)
-			c1.SetProp("stroke-width", units.NewPct(5))
-			c2 := AddNewEllipse(ic, "c2", 0.85, 0.5, rad.X, rad.Y)
-			c2.SetProp("stroke-width", units.NewPct(5))
-			iset[ic.Nm] = ic
-		}
-	}
+	ic := &Icon{}
+	ic.InitName(ic, "blank")
+	ic.ViewBox.Size.SetScalar(1)
+	iset["blank"] = ic
+	// if true {
+	// 	{
+	// 		ic := &Icon{}
+	// 		ic.InitName(ic, "wedge-down")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		p := AddNewPath(ic, "p", "M 0.05 0.05 .95 0.05 .5 .95 Z")
+	// 		p.SetProp("stroke-width", units.Pct(1))
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		ic.InitName(ic, "wedge-up")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		p := AddNewPath(ic, "p", "M 0.05 0.95 .95 0.95 .5 .05 Z")
+	// 		p.SetProp("stroke-width", units.Pct(1))
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		ic.InitName(ic, "wedge-left")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		p := AddNewPath(ic, "p", "M 0.95 0.05 .95 0.95 .05 .5 Z")
+	// 		p.SetProp("stroke-width", units.Pct(1))
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		ic.InitName(ic, "wedge-right")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		p := AddNewPath(ic, "p", "M 0.05 0.05 .05 0.95 .95 .5 Z")
+	// 		p.SetProp("stroke-width", units.Pct(1))
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		ic.InitName(ic, "checkmark")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		p := AddNewPath(ic, "p", "M 0.1 0.5 .5 0.9 .9 .1")
+	// 		p.SetProp("stroke-width", units.Pct(20))
+	// 		p.SetProp("fill", "none")
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		ic.InitName(ic, "checked-box")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		bx := AddNewRect(ic, "bx", 0.05, 0.05, 0.9, 0.9)
+	// 		bx.SetProp("stroke-width", units.Pct(5))
+	// 		// bx.Radius.Set(0.02, 0.02)
+	// 		p := AddNewPath(ic, "p", "M 0.2 0.5 .5 0.8 .8 .2")
+	// 		p.SetProp("stroke-width", units.Pct(20))
+	// 		p.SetProp("fill", "none")
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		ic.InitName(ic, "unchecked-box")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		bx := AddNewRect(ic, "bx", 0.05, 0.05, 0.9, 0.9)
+	// 		bx.SetProp("stroke-width", units.Pct(5))
+	// 		// bx.Radius.Set(0.02, 0.02) // not rendering well at small sizes
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		ic.InitName(ic, "circlebutton-on")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		oc := AddNewCircle(ic, "oc", 0.5, 0.5, 0.4)
+	// 		oc.SetProp("fill", "none")
+	// 		oc.SetProp("stroke-width", units.Pct(10))
+	// 		inc := AddNewCircle(ic, "ic", 0.5, 0.5, 0.2)
+	// 		inc.SetProp("stroke-width", units.Pct(10))
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		ic.InitName(ic, "circlebutton-off")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		oc := AddNewCircle(ic, "oc", 0.5, 0.5, 0.4)
+	// 		oc.SetProp("fill", "none")
+	// 		oc.SetProp("stroke-width", units.Pct(10))
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		rad := mat32.Vec2{0.25, 0.12}
+	// 		ic.InitName(ic, "handle-circles-vert")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		c0 := AddNewEllipse(ic, "c0", 0.5, 0.15, rad.X, rad.Y)
+	// 		c0.SetProp("stroke-width", units.Pct(5))
+	// 		c1 := AddNewEllipse(ic, "c1", 0.5, 0.5, rad.X, rad.Y)
+	// 		c1.SetProp("stroke-width", units.Pct(5))
+	// 		c2 := AddNewEllipse(ic, "c2", 0.5, 0.85, rad.X, rad.Y)
+	// 		c2.SetProp("stroke-width", units.Pct(5))
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// 	{
+	// 		ic := &Icon{}
+	// 		rad := mat32.Vec2{0.12, 0.25}
+	// 		ic.InitName(ic, "handle-circles-horiz")
+	// 		ic.ViewBox.Size = mat32.Vec2{1, 1}
+	// 		c0 := AddNewEllipse(ic, "c0", 0.15, 0.5, rad.X, rad.Y)
+	// 		c0.SetProp("stroke-width", units.Pct(5))
+	// 		c1 := AddNewEllipse(ic, "c1", 0.5, 0.5, rad.X, rad.Y)
+	// 		c1.SetProp("stroke-width", units.Pct(5))
+	// 		c2 := AddNewEllipse(ic, "c2", 0.85, 0.5, rad.X, rad.Y)
+	// 		c2.SetProp("stroke-width", units.Pct(5))
+	// 		iset[ic.Nm] = ic
+	// 	}
+	// }
 	return iset
 }

@@ -124,7 +124,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Width = par.(*Stroke).Width
 			} else if init {
-				fs.Width.Set(1, units.Px)
+				fs.Width.Set(1, units.UnitPx)
 			}
 			return
 		}
@@ -136,7 +136,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			if inh {
 				fs.MinWidth = par.(*Stroke).MinWidth
 			} else if init {
-				fs.MinWidth.Set(1, units.Px)
+				fs.MinWidth.Set(1, units.UnitPx)
 			}
 			return
 		}

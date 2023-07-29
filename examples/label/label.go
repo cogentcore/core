@@ -13,9 +13,7 @@ import (
 )
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {
@@ -82,7 +80,7 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 	gi.AddNewLabel(mfr, "etxt", "this is to test bottom after word wrapped text")
 
 	str := gi.AddNewStretch(mfr, "str")
-	str.SetMinPrefHeight(units.NewEm(5))
+	str.SetMinPrefHeight(units.Em(5))
 
 	gi.AddNewLabel(mfr, "etxt2", "this is after final stretch")
 

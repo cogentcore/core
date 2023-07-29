@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build windows
-// +build !3d
+//go:build windows && !3d
+// +build windows,!3d
 
 // Package windriver provides the Windows driver for accessing a screen.
 package windriver

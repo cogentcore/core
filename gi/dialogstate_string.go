@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -40,4 +38,20 @@ func (i *DialogState) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: DialogState")
+}
+
+var _DialogState_descMap = map[DialogState]string{
+	0: `DialogExists is the existential state -- struct exists and is likely being constructed.`,
+	1: `DialogOpenModal means dialog is open in a modal state, blocking all other input.`,
+	2: `DialogOpenModeless means dialog is open in a modeless state, allowing other input.`,
+	3: `DialogAccepted means Ok was pressed -- dialog accepted.`,
+	4: `DialogCanceled means Cancel was pressed -- button canceled.`,
+	5: ``,
+}
+
+func (i DialogState) Desc() string {
+	if str, ok := _DialogState_descMap[i]; ok {
+		return str
+	}
+	return "DialogState(" + strconv.FormatInt(int64(i), 10) + ")"
 }

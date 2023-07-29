@@ -9,7 +9,6 @@
 // be encoded / decoded from mime multipart.
 //
 // see filecat package for known mimetypes
-//
 package mimedata
 
 import (

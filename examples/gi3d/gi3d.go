@@ -5,6 +5,7 @@
 package main
 
 import (
+	"embed"
 	"log"
 	"math"
 	"time"
@@ -14,20 +15,19 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
-	"github.com/goki/gi/oswin/driver/vkos"
+	"github.com/goki/gi/icons"
+
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 )
 
 func main() {
-
-	vkos.VkOsDebug = false
-
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
+
+//go:embed *.png *.obj *.mtl *.blend
+var content embed.FS
 
 // Anim has control for animating
 type Anim struct {
@@ -121,9 +121,11 @@ func mainrun() {
 
 	// turn these on to see a traces of various stages of processing..
 	// ki.SignalTrace = true
+	// gi.EventTrace = true
 	// gi.WinEventTrace = true
 	// gi3d.Update3DTrace = true
 	// gi.Update2DTrace = true
+	// vgpu.Debug = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
@@ -138,7 +140,7 @@ func mainrun() {
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewEx(1))
+	mfr.SetProp("spacing", units.Ex(1))
 
 	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()
@@ -172,7 +174,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// sc.NoNav = true
 
 	// first, add lights, set camera
-	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
+	sc.BackgroundColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
 	gi3d.AddNewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
 	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
@@ -249,7 +251,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	// Good strategy for objects if used in multiple places is to load
 	// into library, then add from there.
-	lgo, err := sc.OpenToLibrary("gopher.obj", "")
+	lgo, err := sc.OpenToLibraryFS(content, "gopher.obj", "")
 	if err != nil {
 		log.Println(err)
 	}
@@ -273,16 +275,16 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	trs.Mat.Color.SetName("white")
 	trs.Mat.Color.A = 200
 
-	grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
-	_ = grtx
+	grtx := gi3d.AddNewTextureFileFS(content, sc, "ground", "ground.png")
+	// _ = grtx
 	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
 
 	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
 	floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, -5, 0)
 	floor.Mat.Color.SetName("tan")
-	// // floor.Mat.Emissive.SetName("brown")
-	// floor.Mat.Bright = 2 // .5 for wood / brown
+	// floor.Mat.Emissive.SetName("brown")
+	floor.Mat.Bright = 2 // .5 for wood / brown
 	floor.Mat.SetTexture(sc, grtx)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 	floor.SetInactive() // not selectable
@@ -310,13 +312,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	//  Animation & Embedded controls
 
 	anim := &Anim{}
-	anim.Start(sc, false) // start without animation running
 
 	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
 	emb.Pose.Pos.Set(-2, 2, 0)
 	// emb.Zoom = 1.5   // this is how to rescale overall size
 	evlay := gi.AddNewFrame(emb.Viewport, "vlay", gi.LayoutVert)
-	evlay.SetProp("margin", units.NewEx(1))
+	evlay.SetProp("margin", units.Ex(1))
 
 	eabut := gi.AddNewCheckBox(evlay, "anim-but")
 	eabut.SetText("Animate")
@@ -360,11 +361,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	spsld.Max = 1
 	spsld.Step = 0.01
 	spsld.PageStep = 0.1
-	spsld.SetMinPrefWidth(units.NewEm(20))
-	spsld.SetMinPrefHeight(units.NewEm(2))
+	spsld.SetMinPrefWidth(units.Em(20))
+	spsld.SetMinPrefHeight(units.Em(2))
 	spsld.SetValue(anim.Speed)
 	// spsld.Tracking = true
-	spsld.Icon = gi.IconName("circlebutton-on")
+	spsld.Icon = icons.RadioButtonUnchecked
 
 	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		anim.Speed = sb.Value
@@ -388,5 +389,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
+	anim.Start(sc, true) // start with animation running
 	win.StartEventLoop()
 }

@@ -14,9 +14,7 @@ import (
 )
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {
@@ -68,9 +66,9 @@ func mainrun() {
 		// fr.SetProp("horizontal-align", "inherit")
 		fr.SetProp("margin", "inherit")
 		if i == 2 {
-			fr.SetFixedWidth(units.NewEm(20))
+			fr.SetFixedWidth(units.Em(20))
 			spc := row1.AddNewChild(gi.KiT_Space, "spc").(*gi.Space)
-			spc.SetFixedWidth(units.NewEm(4))
+			spc.SetFixedWidth(units.Em(4))
 		} else {
 			fr.SetProp("max-width", -1) // spacer
 		}
@@ -108,7 +106,7 @@ func mainrun() {
 	// row3.SetProp("horizontal-align", "left")
 	row3.SetProp("margin", 4.0)
 	row3.SetProp("spacing", 6.0)
-	row3.SetProp("width", units.NewPt(200)) // needs default to set
+	row3.SetProp("width", units.Pt(200)) // needs default to set
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)

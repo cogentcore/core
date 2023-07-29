@@ -67,7 +67,7 @@ func (sc *Scene) ConfigFrameImpl(gpu *vgpu.GPU, dev *vgpu.Device) bool {
 		wasConfig = true
 		oswin.TheApp.RunOnMain(func() {
 			sz := sc.Geom.Size
-			if sz == image.ZP {
+			if sz == (image.Point{}) {
 				sz = image.Point{480, 320}
 			}
 			sc.Frame = vgpu.NewRenderFrame(gpu, dev, sz)
@@ -89,7 +89,7 @@ func (sc *Scene) ConfigFrameImpl(gpu *vgpu.GPU, dev *vgpu.Device) bool {
 	sc.Camera.CamMu.Lock()
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.CamMu.Unlock()
-	clr := mat32.NewVec3Color(sc.BgColor).SRGBToLinear()
+	clr := mat32.NewVec3Color(sc.BackgroundColor).SRGBToLinear()
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	return wasConfig
@@ -322,7 +322,6 @@ func (sc *Scene) DirectWinUpload() {
 // Render3D renders the scene to the framebuffer
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) Render3D(offscreen bool) {
-
 	sc.Phong.UpdtMu.Lock()
 	sc.Phong.SetViewPrjn(&sc.Camera.ViewMatrix, &sc.Camera.VkPrjnMatrix)
 	sc.Phong.UpdtMu.Unlock()
@@ -339,7 +338,7 @@ func (sc *Scene) Render3D(offscreen bool) {
 		}
 		if !offscreen {
 			ni.BBoxMu.RLock()
-			if ni.IsInvisible() || ni.ObjBBox == image.ZR { // objbbox is intersection of scene and obj
+			if ni.IsInvisible() || ni.ObjBBox == (image.Rectangle{}) { // objbbox is intersection of scene and obj
 				ni.BBoxMu.RUnlock()
 				ni.DisconnectAllEvents(sc.Win, gi.AllPris)
 				return ki.Break
@@ -393,7 +392,6 @@ func (sc *Scene) Render3D(offscreen bool) {
 			obj.Render3D(sc)
 		}
 	}
-
 	sc.Phong.UpdtMu.Lock()
 	sy.EndRenderPass(cmd)
 	sc.Frame.SubmitRender(cmd) // this is where it waits for the 16 msec

@@ -317,14 +317,14 @@ func (nb *Node2DBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (nb *Node2DBase) BBox2D() image.Rectangle {
-	return image.ZR
+	return image.Rectangle{}
 }
 
 func (nb *Node2DBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 }
 
 func (nb *Node2DBase) ChildrenBBox2D() image.Rectangle {
-	return image.ZR
+	return image.Rectangle{}
 }
 
 func (nb *Node2DBase) Render2D() {
@@ -690,7 +690,7 @@ func (nb *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Poi
 	nb.BBoxMu.Lock()
 	nb.ObjBBox = nb.BBox.Add(delta)
 	nb.VpBBox = parBBox.Intersect(nb.ObjBBox)
-	nb.SetInvisibleState(nb.VpBBox == image.ZR)
+	nb.SetInvisibleState(nb.VpBBox == image.Rectangle{})
 	nb.BBoxMu.Unlock()
 	nb.SetWinBBox()
 }
@@ -825,7 +825,7 @@ func (nb *Node2DBase) Layout2DTree() {
 		return
 	}
 	pr := prof.Start("Node2D.Layout2DTree." + ki.Type(nb).Name())
-	parBBox := image.ZR
+	parBBox := image.Rectangle{}
 	pni, _ := KiToNode2D(nb.Par)
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()
@@ -915,14 +915,14 @@ func (nb *Node2DBase) BBoxReport() string {
 	return rpt
 }
 
-// ParentStyle returns parent's style or nil if not avail.
+// ParentActiveStyle returns parent's active style or nil if not avail.
 // Calls StyleRLock so must call ParentStyleRUnlock when done.
-func (nb *Node2DBase) ParentStyle() *gist.Style {
+func (nb *Node2DBase) ParentActiveStyle() *gist.Style {
 	if nb.Par == nil {
 		return nil
 	}
-	if ps, ok := nb.Par.(gist.Styler); ok {
-		st := ps.Style()
+	if ps, ok := nb.Par.(gist.ActiveStyler); ok {
+		st := ps.ActiveStyle()
 		ps.StyleRLock()
 		return st
 	}
@@ -934,7 +934,7 @@ func (nb *Node2DBase) ParentStyleRUnlock() {
 	if nb.Par == nil {
 		return
 	}
-	if ps, ok := nb.Par.(gist.Styler); ok {
+	if ps, ok := nb.Par.(gist.ActiveStyler); ok {
 		ps.StyleRUnlock()
 	}
 }
@@ -1019,12 +1019,12 @@ func (nb *Node2DBase) SetMinPrefHeight(val units.Value) {
 
 // SetStretchMaxWidth sets stretchy max width (-1) -- can grow to take up avail room
 func (nb *Node2DBase) SetStretchMaxWidth() {
-	nb.SetProp("max-width", units.NewPx(-1))
+	nb.SetProp("max-width", units.Px(-1))
 }
 
 // SetStretchMaxHeight sets stretchy max height (-1) -- can grow to take up avail room
 func (nb *Node2DBase) SetStretchMaxHeight() {
-	nb.SetProp("max-height", units.NewPx(-1))
+	nb.SetProp("max-height", units.Px(-1))
 }
 
 // SetStretchMax sets stretchy max width and height (-1) -- can grow to take up avail room

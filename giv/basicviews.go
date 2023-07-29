@@ -61,9 +61,9 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.SetProp("padding", units.NewPx(2))
-	ac.SetProp("margin", units.NewPx(2))
-	ac.SetProp("border-radius", units.NewPx(4))
+	ac.SetProp("padding", units.Px(2))
+	ac.SetProp("margin", units.Px(2))
+	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -191,9 +191,9 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	}
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.SetProp("padding", units.NewPx(2))
-	ac.SetProp("margin", units.NewPx(2))
-	ac.SetProp("border-radius", units.NewPx(4))
+	ac.SetProp("padding", units.Px(2))
+	ac.SetProp("margin", units.Px(2))
+	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -329,9 +329,9 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.SetProp("padding", units.NewPx(2))
-	ac.SetProp("margin", units.NewPx(2))
-	ac.SetProp("border-radius", units.NewPx(4))
+	ac.SetProp("padding", units.Px(2))
+	ac.SetProp("margin", units.Px(2))
+	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -469,8 +469,8 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	mb := vv.Widget.(*gi.MenuButton)
 	mb.Tooltip, _ = vv.Tag("desc")
-	mb.SetProp("padding", units.NewPx(2))
-	mb.SetProp("margin", units.NewPx(2))
+	mb.SetProp("padding", units.Px(2))
+	mb.SetProp("margin", units.Px(2))
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -591,7 +591,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	sb.SetProp("#textfield", ki.Props{
-		"width": units.NewCh(5),
+		"width": units.Ch(5),
 	})
 	vk := vv.Value.Kind()
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {
@@ -749,8 +749,8 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
-	cb.SetProp("padding", units.NewPx(2))
-	cb.SetProp("margin", units.NewPx(2))
+	cb.SetProp("padding", units.Px(2))
+	cb.SetProp("margin", units.Px(2))
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ, false, 50)
@@ -817,8 +817,8 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Node2D) {
 	cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
-	cb.SetProp("padding", units.NewPx(2))
-	cb.SetProp("margin", units.NewPx(2))
+	cb.SetProp("padding", units.Px(2))
+	cb.SetProp("margin", units.Px(2))
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ)
@@ -931,7 +931,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetStretchMaxWidth()
-	tf.SetProp("min-width", units.NewCh(16))
+	tf.SetProp("min-width", units.Ch(16))
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -979,7 +979,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetStretchMaxWidth()
-	tf.SetProp("min-width", units.NewCh(16))
+	tf.SetProp("min-width", units.Ch(16))
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -1076,7 +1076,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
-	tf.SetProp("min-width", units.NewCh(float32(len(DefaultTimeFormat)+2)))
+	tf.SetProp("min-width", units.Ch(float32(len(DefaultTimeFormat)+2)))
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			vvv, _ := recv.Embed(KiT_TimeValueView).(*TimeValueView)

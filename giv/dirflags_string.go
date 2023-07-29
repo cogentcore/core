@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -39,4 +37,19 @@ func (i *DirFlags) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: DirFlags")
+}
+
+var _DirFlags_descMap = map[DirFlags]string{
+	0: `DirMark means directory is marked -- unmarked entries are deleted post-update`,
+	1: `DirIsOpen means directory is open -- else closed`,
+	2: `DirSortByName means sort the directory entries by name. this is mutex with other sorts -- keeping option open for non-binary sort choices.`,
+	3: `DirSortByModTime means sort the directory entries by modification time`,
+	4: ``,
+}
+
+func (i DirFlags) Desc() string {
+	if str, ok := _DirFlags_descMap[i]; ok {
+		return str
+	}
+	return "DirFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

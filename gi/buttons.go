@@ -13,7 +13,9 @@ import (
 	"sync"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -28,8 +30,8 @@ import (
 type ButtonBase struct {
 	PartsWidgetBase
 	Text         string                    `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon         IconName                  `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
-	Indicator    IconName                  `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
+	Icon         icons.Icon                `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
+	Indicator    icons.Icon                `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 	Shortcut     key.Chord                 `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
 	StateStyles  [ButtonStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State        ButtonStates              `copy:"-" json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
@@ -199,7 +201,7 @@ func (bb *ButtonBase) SetText(txt string) {
 	}
 	updt := bb.UpdateStart()
 	bb.StyMu.RLock()
-	needSty := bb.Sty.Font.Size.Val == 0
+	needSty := bb.Style.Font.Size.Val == 0
 	bb.StyMu.RUnlock()
 	if needSty {
 		bb.StyleButton()
@@ -214,23 +216,23 @@ func (bb *ButtonBase) SetText(txt string) {
 
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and
 // updates the button
-func (bb *ButtonBase) SetIcon(iconName string) {
+func (bb *ButtonBase) SetIcon(iconName icons.Icon) {
 	updt := bb.UpdateStart()
 	defer bb.UpdateEnd(updt)
 	if !bb.IsVisible() {
-		bb.Icon = IconName(iconName)
+		bb.Icon = iconName
 		return
 	}
 	bb.StyMu.RLock()
-	needSty := bb.Sty.Font.Size.Val == 0
+	needSty := bb.Style.Font.Size.Val == 0
 	bb.StyMu.RUnlock()
 	if needSty {
 		bb.StyleButton()
 	}
-	if bb.Icon != IconName(iconName) {
+	if bb.Icon != iconName {
 		bb.SetFullReRender()
 	}
-	bb.Icon = IconName(iconName)
+	bb.Icon = iconName
 	bb.This().(ButtonWidget).ConfigParts()
 }
 
@@ -254,7 +256,7 @@ func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
 	}
 	bb.State = state
 	bb.StyMu.Lock()
-	bb.Sty = bb.StateStyles[state]
+	bb.Style = bb.StateStyles[state]
 	bb.StyMu.Unlock()
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender to update text, icon
@@ -286,8 +288,11 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 			bb.State = ButtonActive
 		}
 	}
-	bb.Sty = bb.StateStyles[bb.State]
+	bb.Style = bb.StateStyles[bb.State]
 	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
+	bb.StyMu.Lock()
+	bb.Style2DWidget()
+	bb.StyMu.Unlock()
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender
 		return true
@@ -333,7 +338,8 @@ func (bb *ButtonBase) BaseButtonRelease() {
 	}
 	wasPressed := (bb.State == ButtonDown)
 	updt := bb.UpdateStart()
-	bb.SetButtonState(ButtonActive)
+
+	bb.SetButtonState(ButtonHover)
 	bb.ButtonSig.Emit(bb.This(), int64(ButtonReleased), nil)
 	if wasPressed {
 		bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)
@@ -386,6 +392,7 @@ func (bb *ButtonBase) OpenMenu() bool {
 	}
 	bb.BBoxMu.RUnlock()
 	if bb.Viewport != nil {
+		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).Pop()
 		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Viewport, bb.Text)
 		return true
 	}
@@ -398,12 +405,12 @@ func (bb *ButtonBase) ResetMenu() {
 }
 
 // ConfigPartsAddIndicator adds a menu indicator if there is a menu present,
-// and the Indicator field is not "none" -- defOn = true means default to
+// and the Indicator field is not [icons.None] -- defOn = true means default to
 // adding the indicator even if no menu is yet present -- returns the index in
 // Parts of the indicator object, which is named "indicator" -- an
 // "ind-stretch" is added as well to put on the right by default.
 func (bb *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn bool) int {
-	needInd := (bb.HasMenu() || defOn) && bb.Indicator != "none"
+	needInd := (bb.HasMenu() || defOn) && bb.Indicator != icons.None
 	if !needInd {
 		return -1
 	}
@@ -419,11 +426,11 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 		return
 	}
 	ic := bb.Parts.Child(indIdx).(*Icon)
-	icnm := string(bb.Indicator)
-	if IconName(icnm).IsNil() {
-		icnm = "wedge-down"
+	icnm := bb.Indicator
+	if icnm.IsNil() {
+		icnm = icons.KeyboardArrowDown
 	}
-	if set, _ := IconName(icnm).SetIcon(ic); set {
+	if set, _ := ic.SetIcon(icnm); set {
 		bb.StylePart(bb.Parts.Child(indIdx - 1).(Node2D)) // also get the stretch
 		bb.StylePart(Node2D(ic))
 	}
@@ -434,6 +441,7 @@ func (bb *ButtonBase) ButtonEnterHover() {
 	if bb.State != ButtonHover {
 		updt := bb.UpdateStart()
 		bb.SetButtonState(ButtonHover)
+		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).Push(cursor.HandPointing)
 		bb.UpdateEnd(updt)
 	}
 }
@@ -443,6 +451,7 @@ func (bb *ButtonBase) ButtonExitHover() {
 	if bb.State == ButtonHover {
 		updt := bb.UpdateStart()
 		bb.SetButtonState(ButtonActive)
+		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).Pop()
 		bb.UpdateEnd(updt)
 	}
 }
@@ -577,7 +586,7 @@ func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 
 func (bb *ButtonBase) Init2D() {
 	bb.Init2DWidget()
-	bb.State = ButtonActive
+	// bb.State = ButtonActive
 	bb.This().(ButtonWidget).ConfigParts()
 }
 
@@ -588,21 +597,21 @@ func (bb *ButtonBase) ButtonRelease() {
 func (bb *ButtonBase) StyleParts() {
 	if pv, ok := bb.PropInherit("indicator", ki.NoInherit, ki.TypeProps); ok {
 		pvs := kit.ToString(pv)
-		bb.Indicator = IconName(pvs)
+		bb.Indicator = icons.Icon(pvs)
 	}
 	if pv, ok := bb.PropInherit("icon", ki.NoInherit, ki.TypeProps); ok {
 		pvs := kit.ToString(pv)
-		bb.Icon = IconName(pvs)
+		bb.Icon = icons.Icon(pvs)
 	}
 }
 
 func (bb *ButtonBase) ConfigParts() {
 	bb.Parts.Lay = LayoutHoriz
 	config := kit.TypeAndNameList{}
-	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, string(bb.Icon), bb.Text)
+	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, bb.Icon, bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := bb.Parts.ConfigChildren(config)
-	bb.ConfigPartsSetIconLabel(string(bb.Icon), bb.Text, icIdx, lbIdx)
+	bb.ConfigPartsSetIconLabel(bb.Icon, bb.Text, icIdx, lbIdx)
 	bb.ConfigPartsIndicator(indIdx)
 	if mods {
 		bb.UpdateEnd(updt)
@@ -610,7 +619,7 @@ func (bb *ButtonBase) ConfigParts() {
 }
 
 func (bb *ButtonBase) ConfigPartsIfNeeded() {
-	if !bb.PartsNeedUpdateIconLabel(string(bb.Icon), bb.Text) {
+	if !bb.PartsNeedUpdateIconLabel(bb.Icon, bb.Text) {
 		return
 	}
 	bb.This().(ButtonWidget).ConfigParts()
@@ -621,7 +630,7 @@ func (bb *ButtonBase) StyleButton() {
 	bb.StyMu.Lock()
 	defer bb.StyMu.Unlock()
 
-	hasTempl, saveTempl := bb.Sty.FromTemplate()
+	hasTempl, saveTempl := bb.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		bb.Style2DWidget()
 	}
@@ -631,35 +640,35 @@ func (bb *ButtonBase) StyleButton() {
 	} else {
 		bb.SetFlagState(!bb.IsInactive(), int(CanFocus))
 	}
-	parSty := bb.ParentStyle()
+	parSty := bb.ParentActiveStyle()
 	clsty := "." + bb.Class
 	var clsp ki.Props
 	if clspi, ok := bb.PropInherit(clsty, ki.NoInherit, ki.TypeProps); ok {
 		clsp, ok = clspi.(ki.Props)
 	}
 	if hasTempl && saveTempl {
-		bb.Sty.SaveTemplate()
+		bb.Style.SaveTemplate()
 	}
 	if hasTempl && !saveTempl {
 		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].Template = bb.Sty.Template + ButtonSelectors[i]
+			bb.StateStyles[i].Template = bb.Style.Template + ButtonSelectors[i]
 			bb.StateStyles[i].FromTemplate()
 		}
 	} else {
 		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].CopyFrom(&bb.Sty)
+			bb.StateStyles[i].CopyFrom(&bb.Style)
 			bb.StateStyles[i].SetStyleProps(parSty, bb.StyleProps(ButtonSelectors[i]), bb.Viewport)
 			if clsp != nil {
 				if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
 					bb.StateStyles[i].SetStyleProps(parSty, stclsp, bb.Viewport)
 				}
 			}
-			bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
+			bb.StateStyles[i].CopyUnitContext(&bb.Style.UnContext)
 		}
 	}
 	if hasTempl && saveTempl {
 		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].Template = bb.Sty.Template + ButtonSelectors[i]
+			bb.StateStyles[i].Template = bb.Style.Template + ButtonSelectors[i]
 			bb.StateStyles[i].SaveTemplate()
 		}
 	}
@@ -670,7 +679,7 @@ func (bb *ButtonBase) Style2D() {
 	bb.StyleButton()
 
 	bb.StyMu.Lock()
-	bb.LayState.SetFromStyle(&bb.Sty.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.Style) // also does reset
 	bb.StyMu.Unlock()
 	bb.This().(ButtonWidget).ConfigParts()
 	if bb.Menu != nil {
@@ -684,7 +693,7 @@ func (bb *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 	bb.Layout2DParts(parBBox, iter)
 	bb.StyMu.Lock()
 	for i := 0; i < int(ButtonStatesN); i++ {
-		bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
+		bb.StateStyles[i].CopyUnitContext(&bb.Style.UnContext)
 	}
 	bb.StyMu.Unlock()
 	return bb.Layout2DChildren(iter)
@@ -745,9 +754,37 @@ func (bb *ButtonBase) Destroy() {
 // right
 type Button struct {
 	ButtonBase
+	Type ButtonTypes `desc:"the type of button (default, primary, secondary, etc)"`
 }
 
-var KiT_Button = kit.Types.AddType(&Button{}, ButtonProps)
+var KiT_Button = kit.Types.AddType(&Button{}, nil)
+
+// ButtonTypes is an enum containing the
+// different possible types of buttons
+type ButtonTypes int
+
+const (
+	// ButtonDefault is a default gray button
+	// typically used in menus and checkboxes
+	ButtonDefault ButtonTypes = iota
+	// ButtonPrimary is a primary button colored
+	// as the primary color; it is typically used for
+	// primary actions like save, send, and new
+	ButtonPrimary
+	// ButtonSecondary is a secondary button colored as
+	// the inverse of a primary button; it is typically used
+	// for secondary actions like cancel, back, and options
+	ButtonSecondary
+	// TODO: add more button types like text and danger
+	// ButtonText is a button with no border or background color.
+	// It should be used as a low-priority secondary button
+
+	ButtonTypesN
+)
+
+var KiT_ButtonTypes = kit.Enums.AddEnumAltLower(ButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "Button")
+
+//go:generate stringer -type=ButtonTypes
 
 // AddNewButton adds a new button to given parent node, with given name.
 func AddNewButton(parent ki.Ki, name string) *Button {
@@ -759,68 +796,217 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (bt *Button) DefaultStyle() {
+// 	s := &bt.Style
+
+// 	s.Border.Style.Set(gist.BorderNone)
+// 	s.Border.Width.Set()
+// 	s.Border.Color.Set()
+// 	s.Border.Radius.Set(units.Px(4))
+// 	s.Padding.Set(units.Px(4))
+// 	s.Margin.Set(units.Px(2))
+// 	s.MinWidth.SetEm(1)
+// 	s.MinHeight.SetEm(1)
+// 	s.Text.Align = gist.AlignCenter
+
+// 	switch bt.Type {
+// 	case ButtonDefault:
+// 		c := TheColorScheme.Secondary
+// 		switch bt.State {
+// 		case ButtonHover:
+// 			c = c.Highlight(10)
+// 		case ButtonDown:
+// 			c = c.Highlight(20)
+// 		}
+// 		s.BackgroundColor.SetColor(c)
+// 		s.Color.SetColor(c.ContrastColor())
+// 	case ButtonPrimary:
+// 		c := TheColorScheme.Primary
+// 		switch bt.State {
+// 		case ButtonHover:
+// 			c = c.Highlight(20)
+// 		case ButtonDown:
+// 			c = c.Highlight(30)
+// 		}
+// 		s.BackgroundColor.SetColor(c)
+// 		s.Color.SetColor(c.ContrastColor())
+// 	case ButtonSecondary:
+// 		c := TheColorScheme.Background
+// 		switch bt.State {
+// 		case ButtonHover:
+// 			c = c.Highlight(20)
+// 		case ButtonDown:
+// 			c = c.Highlight(30)
+// 		}
+// 		s.BackgroundColor.SetColor(c)
+// 		s.Color.SetColor(TheColorScheme.Primary)
+// 		s.Border.Style.Set(gist.BorderSolid)
+// 		s.Border.Width.Set(units.Px(1))
+// 		s.Border.Color.Set(TheColorScheme.Primary)
+// 	}
+// }
+
 var ButtonProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(4),
-	"border-color":     &Prefs.Colors.Border,
-	"padding":          units.NewPx(4),
-	"margin":           units.NewPx(2),
-	"min-width":        units.NewEm(1),
-	"min-height":       units.NewEm(1),
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	"#space": ki.Props{
-		"width":     units.NewCh(.5),
-		"min-width": units.NewCh(.5),
-	},
-	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-		"fill":    &Prefs.Colors.Icon,
-		"stroke":  &Prefs.Colors.Font,
-	},
-	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-		// "font-size": units.NewPt(24),
-	},
-	"#indicator": ki.Props{
-		"width":          units.NewEx(1.5),
-		"height":         units.NewEx(1.5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
-		"vertical-align": gist.AlignBottom,
-		"fill":           &Prefs.Colors.Icon,
-		"stroke":         &Prefs.Colors.Font,
-	},
-	"#ind-stretch": ki.Props{
-		"width": units.NewEm(1),
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "linear-gradient(lighter-0, highlight-10)",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "lighter-50",
-		"color":        "lighter-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "linear-gradient(highlight-10, highlight-10)",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
-		"background-color": "linear-gradient(samelight-50, highlight-10)",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "lighter-90",
-		"background-color": "linear-gradient(highlight-30, highlight-10)",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(Select), highlight-10)",
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(4),
+	// "border-color":     &Prefs.Colors.Border,
+	// "padding":          units.Px(4),
+	// "margin":           units.Px(2),
+	// "min-width":        units.Em(1),
+	// "min-height":       units.Em(1),
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// "#space": ki.Props{
+	// 	"width":     units.Ch(.5),
+	// 	"min-width": units.Ch(.5),
+	// },
+	// "#icon": ki.Props{
+	// 	"width":   units.Em(1),
+	// 	"height":  units.Em(1),
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	"fill":    &Prefs.Colors.Icon,
+	// 	"stroke":  &Prefs.Colors.Font,
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	// "font-size": units.NewPt(24),
+	// },
+	// "#indicator": ki.Props{
+	// 	"width":          units.Ex(1.5),
+	// 	"height":         units.Ex(1.5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignBottom,
+	// 	"fill":           &Prefs.Colors.Icon,
+	// 	"stroke":         &Prefs.Colors.Font,
+	// },
+	// "#ind-stretch": ki.Props{
+	// 	"width": units.Em(1),
+	// },
+	// ButtonSelectors[ButtonActive]: ki.Props{
+	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonInactive]: ki.Props{
+	// 	"border-color": "lighter-50",
+	// 	"color":        "lighter-50",
+	// },
+	// ButtonSelectors[ButtonHover]: ki.Props{
+	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonDown]: ki.Props{
+	// 	"color":            "lighter-90",
+	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonSelected]: ki.Props{
+	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// },
+}
+
+func (bt *Button) Init2D() {
+	bt.ButtonBase.Init2D()
+	bt.ConfigStyles()
+}
+
+func (bt *Button) ConfigStyles() {
+	bt.AddStyleFunc(StyleFuncDefault, func() {
+		bt.Style.Border.Radius.Set(units.Px(100))
+		bt.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		bt.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
+		bt.Style.Text.Align = gist.AlignCenter
+		switch bt.Type {
+		case ButtonDefault:
+			bt.Style.Border.Style.Set(gist.BorderNone)
+			bt.Style.Color = Colors.Text
+			switch bt.State {
+			case ButtonActive:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			case ButtonInactive:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+				bt.Style.Color = Colors.Text.Highlight(20)
+			case ButtonFocus, ButtonSelected:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			case ButtonHover:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
+			case ButtonDown:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+			}
+		case ButtonPrimary:
+			bt.Style.Border.Style.Set(gist.BorderNone)
+			switch bt.State {
+			case ButtonActive:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary)
+			case ButtonInactive:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(20))
+			case ButtonFocus, ButtonSelected:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(10))
+			case ButtonHover:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(20))
+			case ButtonDown:
+				bt.Style.BackgroundColor.SetColor(Colors.Primary.Highlight(30))
+			}
+			// we always use the contrast color of the primary color
+			// to prevent text color changing on state change
+			bt.Style.Color = Colors.Primary.ContrastColor()
+			if bt.State == ButtonInactive {
+				bt.Style.Color = bt.Style.Color.Highlight(20)
+			}
+		case ButtonSecondary:
+			bt.Style.Border.Style.Set(gist.BorderSolid)
+			bt.Style.Border.Width.Set(units.Px(1))
+			bt.Style.Border.Color.Set(Colors.Primary)
+			bt.Style.Color = Colors.Primary
+			switch bt.State {
+			case ButtonActive:
+				bt.Style.BackgroundColor.SetColor(Colors.Background)
+			case ButtonInactive:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+				bt.Style.Color = Colors.Primary.Highlight(20)
+			case ButtonFocus, ButtonSelected:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			case ButtonHover:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			case ButtonDown:
+				bt.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
+			}
+		}
+	})
+	bt.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(bt), func(icon *WidgetBase) {
+		icon.Style.Width.SetEm(1.5)
+		icon.Style.Height.SetEm(1.5)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+	})
+	bt.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(bt), func(space *WidgetBase) {
+		space.Style.Width.SetCh(0.5)
+		space.Style.MinWidth.SetCh(0.5)
+	})
+	bt.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(bt), func(label *WidgetBase) {
+		// need to override so label's default color
+		// doesn't take control on state changes
+		label.Style.Color = bt.Style.Color
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
+		label.Style.AlignV = gist.AlignMiddle
+	})
+	bt.Parts.AddChildStyleFunc("ind-stretch", 3, StyleFuncParts(bt), func(ins *WidgetBase) {
+		ins.Style.Width.SetEm(1)
+	})
+	bt.Parts.AddChildStyleFunc("indicator", 4, StyleFuncParts(bt), func(ind *WidgetBase) {
+		ind.Style.Width.SetEx(1.5)
+		ind.Style.Height.SetEx(1.5)
+		ind.Style.Margin.Set()
+		ind.Style.Padding.Set()
+		ind.Style.AlignV = gist.AlignBottom
+	})
 }
 
 ///////////////////////////////////////////////////////////
@@ -829,10 +1015,10 @@ var ButtonProps = ki.Props{
 // CheckBox toggles between a checked and unchecked state
 type CheckBox struct {
 	ButtonBase
-	IconOff IconName `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
+	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
-var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
+var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, nil)
 
 // AddNewCheckBox adds a new button to given parent node, with given name.
 func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
@@ -846,61 +1032,61 @@ func (cb *CheckBox) CopyFieldsFrom(frm any) {
 }
 
 var CheckBoxProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"icon":             "checked-box",
-	"icon-off":         "unchecked-box",
-	"text-align":       gist.AlignLeft,
-	"color":            &Prefs.Colors.Font,
-	"background-color": &Prefs.Colors.Control,
-	"margin":           units.NewPx(1),
-	"padding":          units.NewPx(1),
-	"border-width":     units.NewPx(0),
-	"#icon0": ki.Props{
-		"width":            units.NewEm(1),
-		"height":           units.NewEm(1),
-		"margin":           units.NewPx(0),
-		"padding":          units.NewPx(0),
-		"background-color": color.Transparent,
-		"fill":             &Prefs.Colors.Control,
-		"stroke":           &Prefs.Colors.Font,
-	},
-	"#icon1": ki.Props{
-		"width":            units.NewEm(1),
-		"height":           units.NewEm(1),
-		"margin":           units.NewPx(0),
-		"padding":          units.NewPx(0),
-		"background-color": color.Transparent,
-		"fill":             &Prefs.Colors.Control,
-		"stroke":           &Prefs.Colors.Font,
-	},
-	"#space": ki.Props{
-		"width": units.NewCh(0.1),
-	},
-	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "lighter-0",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "highlight-10",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
-		"background-color": "samelight-50",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "highlight-90",
-		"background-color": "highlight-30",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": &Prefs.Colors.Select,
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "icon":             icons.CheckBox,
+	// "icon-off":         icons.CheckBoxOutlineBlank,
+	// "text-align":       gist.AlignLeft,
+	// "color":            &Prefs.Colors.Font,
+	// "background-color": &Prefs.Colors.Control,
+	// "margin":           units.Px(1),
+	// "padding":          units.Px(1),
+	// "border-width":     units.Px(0),
+	// "#icon0": ki.Props{
+	// 	"width":            units.Em(1),
+	// 	"height":           units.Em(1),
+	// 	"margin":           units.Px(0),
+	// 	"padding":          units.Px(0),
+	// 	"background-color": color.Transparent,
+	// 	"fill":             &Prefs.Colors.Control,
+	// 	"stroke":           &Prefs.Colors.Font,
+	// },
+	// "#icon1": ki.Props{
+	// 	"width":            units.Em(1),
+	// 	"height":           units.Em(1),
+	// 	"margin":           units.Px(0),
+	// 	"padding":          units.Px(0),
+	// 	"background-color": color.Transparent,
+	// 	"fill":             &Prefs.Colors.Control,
+	// 	"stroke":           &Prefs.Colors.Font,
+	// },
+	// "#space": ki.Props{
+	// 	"width": units.Ch(0.1),
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// ButtonSelectors[ButtonActive]: ki.Props{
+	// 	"background-color": "lighter-0",
+	// },
+	// ButtonSelectors[ButtonInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// ButtonSelectors[ButtonHover]: ki.Props{
+	// 	"background-color": "highlight-10",
+	// },
+	// ButtonSelectors[ButtonFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "samelight-50",
+	// },
+	// ButtonSelectors[ButtonDown]: ki.Props{
+	// 	"color":            "highlight-90",
+	// 	"background-color": "highlight-30",
+	// },
+	// ButtonSelectors[ButtonSelected]: ki.Props{
+	// 	"background-color": &Prefs.Colors.Select,
+	// },
 }
 
 // CheckBoxWidget interface
@@ -927,8 +1113,8 @@ func (cb *CheckBox) ButtonRelease() {
 // states, and updates button
 func (cb *CheckBox) SetIcons(icOn, icOff string) {
 	updt := cb.UpdateStart()
-	cb.Icon = IconName(icOn)
-	cb.IconOff = IconName(icOff)
+	cb.Icon = icons.Icon(icOn)
+	cb.IconOff = icons.Icon(icOff)
 	cb.This().(ButtonWidget).ConfigParts()
 	cb.UpdateEnd(updt)
 }
@@ -948,23 +1134,24 @@ func (cb *CheckBox) Init2D() {
 	cb.SetCheckable(true)
 	cb.Init2DWidget()
 	cb.This().(ButtonWidget).ConfigParts()
+	cb.ConfigStyles()
 }
 
 func (cb *CheckBox) StyleParts() {
 	cb.ButtonBase.StyleParts()
 	if pv, ok := cb.PropInherit("icon-off", false, true); ok { // no inh, yes type
 		pvs := kit.ToString(pv)
-		cb.IconOff = IconName(pvs)
+		cb.IconOff = icons.Icon(pvs)
 	}
 }
 
 func (cb *CheckBox) ConfigParts() {
 	cb.SetCheckable(true)
-	if !cb.Icon.IsValid() {
-		cb.Icon = "checked-box" // fallback
+	if !TheIconMgr.IsValid(cb.Icon) {
+		cb.Icon = icons.CheckBox // fallback
 	}
-	if !cb.IconOff.IsValid() {
-		cb.IconOff = "unchecked-box"
+	if !TheIconMgr.IsValid(cb.IconOff) {
+		cb.IconOff = icons.CheckBoxOutlineBlank
 	}
 	config := kit.TypeAndNameList{}
 	icIdx := 0 // always there
@@ -981,11 +1168,11 @@ func (cb *CheckBox) ConfigParts() {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
-		if set, _ := cb.Icon.SetIcon(icon); set {
+		if set, _ := icon.SetIcon(cb.Icon); set {
 			cb.StylePart(Node2D(icon))
 		}
 		icoff := ist.Child(1).(*Icon)
-		if set, _ := cb.IconOff.SetIcon(icoff); set {
+		if set, _ := icoff.SetIcon(cb.IconOff); set {
 			cb.StylePart(Node2D(icoff))
 		}
 	}
@@ -1013,18 +1200,18 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 	}
 	icIdx := 0 // always there
 	ist := cb.Parts.Child(icIdx).(*Layout)
-	if cb.Icon.IsValid() {
+	if TheIconMgr.IsValid(cb.Icon) {
 		icon := ist.Child(0).(*Icon)
 		if !icon.HasChildren() || icon.Nm != string(cb.Icon) || cb.NeedsFullReRender() {
-			if set, _ := cb.Icon.SetIcon(icon); set {
+			if set, _ := icon.SetIcon(cb.Icon); set {
 				cb.StylePart(Node2D(icon))
 			}
 		}
 	}
-	if cb.IconOff.IsValid() {
+	if TheIconMgr.IsValid(cb.IconOff) {
 		icoff := ist.Child(1).(*Icon)
 		if !icoff.HasChildren() || icoff.Nm != string(cb.IconOff) || cb.NeedsFullReRender() {
-			if set, _ := cb.IconOff.SetIcon(icoff); set {
+			if set, _ := icoff.SetIcon(cb.IconOff); set {
 				cb.StylePart(Node2D(icoff))
 			}
 		}
@@ -1034,4 +1221,48 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 	} else {
 		ist.StackTop = 1
 	}
+}
+
+func (cb *CheckBox) ConfigStyles() {
+	cb.AddStyleFunc(StyleFuncDefault, func() {
+		cb.Style.Text.Align = gist.AlignLeft
+		cb.Style.Color.SetColor(Colors.Text)
+		cb.Style.BackgroundColor.SetColor(Colors.Background)
+		cb.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
+		cb.Style.Padding.Set(units.Px(1 * Prefs.DensityMul()))
+		cb.Style.Border.Style.Set(gist.BorderNone)
+		switch cb.State {
+		case ButtonActive:
+			cb.Style.BackgroundColor.SetColor(Colors.Background)
+		case ButtonInactive:
+			cb.Style.BackgroundColor.SetColor(Colors.Background)
+			cb.Style.Color.SetColor(Colors.Text.Highlight(30))
+		case ButtonFocus, ButtonSelected:
+			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+		case ButtonHover:
+			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+		case ButtonDown:
+			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+		}
+	})
+	if stack, ok := cb.Parts.ChildByName("stack", 0).(*Layout); ok {
+		// same style function for both icon on and off
+		icsf := func(icon *WidgetBase) {
+			icon.Style.Width.SetEm(1.5)
+			icon.Style.Height.SetEm(1.5)
+			icon.Style.Margin.Set()
+			icon.Style.Padding.Set()
+			icon.Style.BackgroundColor.SetColor(color.Transparent)
+		}
+		stack.AddChildStyleFunc("icon0", 0, StyleFuncParts(cb), icsf)
+		stack.AddChildStyleFunc("icon1", 1, StyleFuncParts(cb), icsf)
+	}
+	cb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(cb), func(space *WidgetBase) {
+		space.Style.Width.SetCh(0.1)
+	})
+	cb.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(cb), func(label *WidgetBase) {
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
+		label.Style.AlignV = gist.AlignMiddle
+	})
 }

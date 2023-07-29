@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,18 @@ func (i *SliceViewSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: SliceViewSignals")
+}
+
+var _SliceViewSignals_descMap = map[SliceViewSignals]string{
+	0: `SliceViewDoubleClicked emitted during inactive mode when item double-clicked -- can be used for accepting dialog.`,
+	1: `SliceViewInserted emitted when a new item is inserted -- data is index of new item`,
+	2: `SliceViewDeleted emitted when an item is deleted -- data is index of item deleted`,
+	3: ``,
+}
+
+func (i SliceViewSignals) Desc() string {
+	if str, ok := _SliceViewSignals_descMap[i]; ok {
+		return str
+	}
+	return "SliceViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

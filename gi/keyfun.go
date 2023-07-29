@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/ki/ki"
@@ -427,7 +428,7 @@ var KeyMapsProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"SavePrefs", ki.Props{
 			"desc": "saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json, which will be loaded automatically at startup if prefs SaveKeyMaps is checked (should be if you're using custom keymaps)",
-			"icon": "file-save",
+			"icon": icons.Save,
 			"updtfunc": func(kmi any, act *Action) {
 				act.SetActiveState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
 			},
@@ -435,7 +436,7 @@ var KeyMapsProps = ki.Props{
 		{"sep-file", ki.BlankProp{}},
 		{"OpenJSON", ki.Props{
 			"label": "Open from file",
-			"icon":  "file-open",
+			"icon":  icons.FileOpen,
 			"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -445,7 +446,7 @@ var KeyMapsProps = ki.Props{
 		}},
 		{"SaveJSON", ki.Props{
 			"label": "Save to file",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -462,7 +463,7 @@ var KeyMapsProps = ki.Props{
 			},
 		}},
 		{"RevertToStd", ki.Props{
-			"icon":    "update",
+			"icon":    icons.DeviceReset,
 			"desc":    "This reverts the keymaps to using the StdKeyMaps that are compiled into the program and have all the lastest key functions bound to standard key chords.  If you have edited your maps, and are finding things not working, it is a good idea to save your current maps and try this, or at least do ViewStdMaps to see the current standards.  <b>Your current map edits will be lost if you proceed!</b>  Continue?",
 			"confirm": true,
 			"updtfunc": func(kmi any, act *Action) {

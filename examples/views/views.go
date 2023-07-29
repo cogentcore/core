@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/gosl/slbool"
 	_ "github.com/goki/gosl/slboolview"
@@ -24,13 +25,11 @@ var (
 )
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 type TableStruct struct {
-	Icon       gi.IconName `desc:"an icon"`
+	Icon       icons.Icon  `desc:"an icon"`
 	IntField   int         `desc:"an integer field"`
 	FloatField float32     `desc:"a float field"`
 	StrField   string      `desc:"a string field"`
@@ -105,7 +104,7 @@ func mainrun() {
 	trow.SetStretchMaxWidth()
 
 	spc := gi.AddNewSpace(mfr, "spc1")
-	spc.SetFixedHeight(units.NewEm(2))
+	spc.SetFixedHeight(units.Em(2))
 
 	gi.AddNewStretch(trow, "str1")
 	but := gi.AddNewButton(trow, "slice-test")

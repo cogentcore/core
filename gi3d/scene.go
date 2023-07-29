@@ -12,6 +12,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -70,27 +71,27 @@ var Update3DTrace = false
 // "first person" effects.
 type Scene struct {
 	gi.WidgetBase
-	Geom          gi.Geom2DInt                `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	MultiSample   int                         `def:"4" desc:"number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"`
-	Wireframe     bool                        `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"`
-	Camera        Camera                      `desc:"camera determines view onto scene"`
-	BgColor       gist.Color                  `desc:"background color"`
-	Lights        ordmap.Map[string, Light]   `desc:"all lights used in the scene"`
-	Meshes        ordmap.Map[string, Mesh]    `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`
-	Textures      ordmap.Map[string, Texture] `desc:"textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"`
-	Library       map[string]*Group           `desc:"library of objects that can be used in the scene"`
-	NoNav         bool                        `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
-	SavedCams     map[string]Camera           `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
-	Win           *gi.Window                  `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
-	SetDragCursor bool                        `view:"-" desc:"has dragging cursor been set yet?"`
-	SelMode       SelModes                    `desc:"how to deal with selection / manipulation events"`
-	CurSel        Node3D                      `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected node"`
-	CurManipPt    *ManipPt                    `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected manipulation control point"`
-	SelParams     SelParams                   `view:"inline" desc:"parameters for selection / manipulation box"`
-	Phong         vphong.Phong                `desc:"the vphong rendering system"`
-	Frame         *vgpu.RenderFrame           `desc:"the vgpu render frame holding the rendered scene"`
-	DirUpIdx      int                         `desc:"index in list of window direct uploading images"`
-	RenderMu      sync.Mutex                  `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on rendering"`
+	Geom            gi.Geom2DInt                `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	MultiSample     int                         `def:"4" desc:"number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"`
+	Wireframe       bool                        `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"`
+	Camera          Camera                      `desc:"camera determines view onto scene"`
+	BackgroundColor gist.Color                  `desc:"background color"`
+	Lights          ordmap.Map[string, Light]   `desc:"all lights used in the scene"`
+	Meshes          ordmap.Map[string, Mesh]    `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`
+	Textures        ordmap.Map[string, Texture] `desc:"textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"`
+	Library         map[string]*Group           `desc:"library of objects that can be used in the scene"`
+	NoNav           bool                        `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
+	SavedCams       map[string]Camera           `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
+	Win             *gi.Window                  `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
+	SetDragCursor   bool                        `view:"-" desc:"has dragging cursor been set yet?"`
+	SelMode         SelModes                    `desc:"how to deal with selection / manipulation events"`
+	CurSel          Node3D                      `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected node"`
+	CurManipPt      *ManipPt                    `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected manipulation control point"`
+	SelParams       SelParams                   `view:"inline" desc:"parameters for selection / manipulation box"`
+	Phong           vphong.Phong                `desc:"the vphong rendering system"`
+	Frame           *vgpu.RenderFrame           `desc:"the vgpu render frame holding the rendered scene"`
+	DirUpIdx        int                         `desc:"index in list of window direct uploading images"`
+	RenderMu        sync.Mutex                  `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on rendering"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
@@ -106,7 +107,7 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 func (sc *Scene) Defaults() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
-	sc.BgColor.SetUInt8(255, 255, 255, 255)
+	sc.BackgroundColor.SetUInt8(255, 255, 255, 255)
 	sc.SelParams.Defaults()
 }
 
@@ -273,15 +274,15 @@ func (sc *Scene) Style2D() {
 	sc.SetCanFocusIfActive() // we get all key events
 	sc.SetCurWin()
 	sc.Style2DWidget()
-	sc.LayState.SetFromStyle(&sc.Sty.Layout) // also does reset
+	sc.LayState.SetFromStyle(&sc.Style) // also does reset
 	// note: we do Style3D in Init3D
 }
 
 func (sc *Scene) Size2D(iter int) {
 	sc.InitLayout2D()
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
-	pos := sc.Sty.Layout.PosDots().ToPoint()
-	if pos != image.ZP {
+	pos := sc.Style.PosDots().ToPoint()
+	if pos != (image.Point{}) {
 		sc.Geom.Pos = pos
 	}
 }
@@ -294,7 +295,7 @@ func (sc *Scene) Layout2D(parBBox image.Rectangle, iter int) bool {
 func (sc *Scene) BBox2D() image.Rectangle {
 	bb := sc.BBoxFromAlloc()
 	sz := bb.Size()
-	if sz != image.ZP {
+	if sz != (image.Point{}) {
 		sc.Geom.Size = sz
 	} else {
 		bb.Max = bb.Min.Add(image.Point{64, 64}) // min size for zero case
@@ -633,7 +634,7 @@ var SceneProps = ki.Props{
 	"EnumType:Flag": KiT_SceneFlags,
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
-			"icon": "update",
+			"icon": icons.Refresh,
 		}},
 	},
 }

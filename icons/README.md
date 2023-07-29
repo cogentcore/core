@@ -1,6 +1,5 @@
 # Standard Icons for GoGi
 
-These icons were selected from the excellent collection at: https://leungwensen.github.io/svg-icon/
+These icons are from [Material Design Symbols](https://fonts.google.com/icons), sourced through [marella/material-symbols](https://github.com/marella/material-symbols).
 
-That collection is under an MIT license, see LICENSE file.
-
+Both of those sources are under an Apache 2.0 license; see the LICENSE file.

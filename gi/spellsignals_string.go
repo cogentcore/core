@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -36,4 +34,16 @@ func (i *SpellSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: SpellSignals")
+}
+
+var _SpellSignals_descMap = map[SpellSignals]string{
+	0: `SpellSelect means the user chose one of the possible corrections`,
+	1: `SpellIgnore signals the user chose ignore so clear the tag`,
+}
+
+func (i SpellSignals) Desc() string {
+	if str, ok := _SpellSignals_descMap[i]; ok {
+		return str
+	}
+	return "SpellSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

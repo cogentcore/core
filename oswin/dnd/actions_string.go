@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -44,4 +42,24 @@ func (i *Actions) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Actions")
+}
+
+var _Actions_descMap = map[Actions]string{
+	0: ``,
+	1: `Start is triggered when criteria for DND starting have been met -- it is the chance for potential sources to start a DND event.`,
+	2: `DropOnTarget is set when event is sent to the target where the item is dropped.`,
+	3: `DropFmSource is set when event is sent back to the source after the target has been dropped on a valid target that did not ignore the event -- the source should check if Mod = DropMove, and typically delete itself in this case.`,
+	4: `External is triggered from an external drop event`,
+	5: `Move is sent whenever mouse is moving while dragging -- usually not needed.`,
+	6: `Enter is sent when drag enters a given widget, in a FocusEvent.`,
+	7: `Exit is sent when drag exits a given widget, in a FocusEvent. Exit from one widget always happens before entering another (so you can reset cursor to Not).`,
+	8: `Hover is sent when drag is hovering over a widget without moving -- can use this for spring-loaded opening of items to drag into, for example.`,
+	9: ``,
+}
+
+func (i Actions) Desc() string {
+	if str, ok := _Actions_descMap[i]; ok {
+		return str
+	}
+	return "Actions(" + strconv.FormatInt(int64(i), 10) + ")"
 }

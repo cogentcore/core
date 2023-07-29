@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -42,4 +40,22 @@ func (i *SelectModes) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: SelectModes")
+}
+
+var _SelectModes_descMap = map[SelectModes]string{
+	0: `SelectOne selects a single item, and is the default when no modifier key is pressed`,
+	1: `ExtendContinuous, activated by Shift key, extends the selection to select a continuous region of selected items, with no gaps`,
+	2: `ExtendOne, activated by Control or Meta / Command, extends the selection by adding the one additional item just clicked on, creating a potentially discontinuous set of selected items`,
+	3: `NoSelect means do not update selection -- this is used programmatically and not available via modifier key`,
+	4: `Unselect means unselect items -- this is used programmatically and not available via modifier key -- typically ExtendOne will unselect if already selected`,
+	5: `SelectQuiet means select without doing other updates or signals -- for bulk updates with a final update at the end -- used programmatically`,
+	6: `UnselectQuiet means unselect without doing other updates or signals -- for bulk updates with a final update at the end -- used programmatically`,
+	7: ``,
+}
+
+func (i SelectModes) Desc() string {
+	if str, ok := _SelectModes_descMap[i]; ok {
+		return str
+	}
+	return "SelectModes(" + strconv.FormatInt(int64(i), 10) + ")"
 }

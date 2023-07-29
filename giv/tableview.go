@@ -14,6 +14,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"
@@ -280,7 +281,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
 	sg.Lay = gi.LayoutVert
-	sg.SetMinPrefWidth(units.NewCh(20))
+	sg.SetMinPrefWidth(units.Ch(20))
 	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
 	sg.SetProp("border-width", 0)
@@ -309,7 +310,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgf = tv.This().(SliceViewer).SliceGrid()
 	sgf.Lay = gi.LayoutGrid
 	sgf.Stripes = gi.RowStripes
-	sgf.SetMinPrefHeight(units.NewEm(6))
+	sgf.SetMinPrefHeight(units.Em(6))
 	sgf.SetStretchMax() // for this to work, ALL layers above need it too
 	sgf.SetProp("columns", nWidgPerRow)
 	sgf.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
@@ -354,9 +355,9 @@ func (tv *TableView) ConfigSliceGrid() {
 		hdr.SetText(field.Name)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
-				hdr.SetIcon("wedge-down")
+				hdr.SetIcon(icons.KeyboardArrowDown)
 			} else {
-				hdr.SetIcon("wedge-up")
+				hdr.SetIcon(icons.KeyboardArrowUp)
 			}
 		}
 		hdr.Data = fli
@@ -397,7 +398,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			addnm := fmt.Sprintf("add-%v", itxt)
 			addact := gi.Action{}
 			sgf.SetChild(&addact, cidx, addnm)
-			addact.SetIcon("plus")
+			addact.SetIcon(icons.Add)
 			cidx++
 		}
 		if !tv.NoDelete {
@@ -407,7 +408,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			delnm := fmt.Sprintf("del-%v", itxt)
 			delact := gi.Action{}
 			sgf.SetChild(&delact, cidx, delnm)
-			delact.SetIcon("minus")
+			delact.SetIcon(icons.Delete)
 			cidx++
 		}
 	}
@@ -447,10 +448,10 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
 		tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
-	if tv.Sty.Font.Face == nil {
-		girl.OpenFont(&tv.Sty.Font, &tv.Sty.UnContext)
+	if tv.Style.Font.Face == nil {
+		tv.Style.Font = girl.OpenFont(tv.Style.FontRender(), &tv.Style.UnContext)
 	}
-	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Sty.Font.Face.Metrics.Height)
+	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Style.Font.Face.Metrics.Height)
 
 	mvp := tv.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
@@ -497,8 +498,8 @@ func (tv *TableView) LayoutHeader() {
 		if fli == 0 {
 			wd += spc
 		}
-		lbl.SetMinPrefWidth(units.NewValue(wd, units.Dot))
-		lbl.SetProp("max-width", units.NewValue(wd, units.Dot))
+		lbl.SetMinPrefWidth(units.NewValue(wd, units.UnitDot))
+		lbl.SetProp("max-width", units.NewValue(wd, units.UnitDot))
 		sumwd += wd
 	}
 	if !tv.IsInactive() {
@@ -506,12 +507,12 @@ func (tv *TableView) LayoutHeader() {
 		for fli := nfld; fli < mx; fli++ {
 			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 			wd := gd[fli].AllocSize - spc
-			lbl.SetMinPrefWidth(units.NewValue(wd, units.Dot))
-			lbl.SetProp("max-width", units.NewValue(wd, units.Dot))
+			lbl.SetMinPrefWidth(units.NewValue(wd, units.UnitDot))
+			lbl.SetProp("max-width", units.NewValue(wd, units.UnitDot))
 			sumwd += wd
 		}
 	}
-	sgh.SetMinPrefWidth(units.NewValue(sumwd+spc, units.Dot))
+	sgh.SetMinPrefWidth(units.NewValue(sumwd+spc, units.UnitDot))
 }
 
 // UpdateSliceGrid updates grid display -- robust to any time calling
@@ -577,7 +578,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				idxlab.SetProp("tv-row", i)
 				idxlab.Selectable = true
 				idxlab.Redrawable = true
-				idxlab.Sty.Template = "giv.TableView.IndexLabel"
+				idxlab.Style.Template = "giv.TableView.IndexLabel"
 				idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
@@ -587,7 +588,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					}
 				})
 			}
-			idxlab.CurBgColor = gi.Prefs.Colors.Background
+			idxlab.CurBackgroundColor = gi.Prefs.Colors.Background
 			idxlab.SetSelectedState(issel)
 			idxlab.SetText(sitxt)
 		}
@@ -673,10 +674,10 @@ func (tv *TableView) UpdateSliceGrid() {
 					addnm := fmt.Sprintf("add-%v", itxt)
 					addact := gi.Action{}
 					sg.SetChild(&addact, cidx, addnm)
-					addact.SetIcon("plus")
+					addact.SetIcon(icons.Add)
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
-					addact.Sty.Template = "giv.TableView.AddAction"
+					addact.Style.Template = "giv.TableView.AddAction"
 					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
@@ -690,10 +691,10 @@ func (tv *TableView) UpdateSliceGrid() {
 					delnm := fmt.Sprintf("del-%v", itxt)
 					delact := gi.Action{}
 					sg.SetChild(&delact, cidx, delnm)
-					delact.SetIcon("minus")
+					delact.SetIcon(icons.Delete)
 					delact.Tooltip = "delete this element"
 					delact.Data = i
-					delact.Sty.Template = "giv.TableView.DelAction"
+					delact.Style.Template = "giv.TableView.DelAction"
 					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
@@ -816,9 +817,9 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 				tv.SortDesc = false
 			}
 			if ascending {
-				hdr.SetIcon("wedge-up")
+				hdr.SetIcon(icons.KeyboardArrowUp)
 			} else {
-				hdr.SetIcon("wedge-down")
+				hdr.SetIcon(icons.KeyboardArrowDown)
 			}
 		} else {
 			hdr.SetIcon("none")
@@ -853,13 +854,13 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update this TableView to reflect current state of table"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tvv := recv.Embed(KiT_TableView).(*TableView)
 				tvv.UpdateSliceGrid()
 			})
 		if ndef > 1 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the table"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"},
 				tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					tvv := recv.Embed(KiT_TableView).(*TableView)
 					tvv.SliceNewAt(-1)
@@ -935,13 +936,13 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
 	widg := sg.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
-	if widg.VpBBox != image.ZR {
+	if widg.VpBBox != (image.Rectangle{}) {
 		return widg, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		widg := sg.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
-		if widg.VpBBox != image.ZR {
+		if widg.VpBBox != (image.Rectangle{}) {
 			return widg, true
 		}
 	}

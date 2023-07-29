@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
@@ -46,7 +47,7 @@ type MakeMenuFunc func(obj ki.Ki, m *Menu)
 type ActOpts struct {
 	Name        string
 	Label       string
-	Icon        string
+	Icon        icons.Icon
 	Tooltip     string
 	Shortcut    key.Chord
 	ShortcutKey KeyFuns
@@ -61,12 +62,12 @@ func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc)
 		nm = opts.Label
 	}
 	if nm == "" {
-		nm = opts.Icon
+		nm = string(opts.Icon)
 	}
 	ac.InitName(ac, nm)
 	ac.Text = opts.Label
 	ac.Tooltip = opts.Tooltip
-	ac.Icon = IconName(opts.Icon)
+	ac.Icon = icons.Icon(opts.Icon)
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	if opts.ShortcutKey != KeyFunNil {
 		ac.Shortcut = ShortcutForFun(opts.ShortcutKey)
@@ -330,15 +331,31 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // PopupMenu function
 
-var MenuFrameProps = ki.Props{
-	"border-width":        units.NewPx(0),
-	"border-color":        "none",
-	"margin":              units.NewPx(4),
-	"padding":             units.NewPx(2),
-	"box-shadow.h-offset": units.NewPx(2),
-	"box-shadow.v-offset": units.NewPx(2),
-	"box-shadow.blur":     units.NewPx(2),
-	"box-shadow.color":    &Prefs.Colors.Shadow,
+//	var MenuFrameProps = ki.Props{
+//		"border-width":        units.Px(0),
+//		"border-color":        "none",
+//		"margin":              units.Px(4),
+//		"padding":             units.Px(2),
+//		"box-shadow.h-offset": units.Px(2),
+//		"box-shadow.v-offset": units.Px(2),
+//		"box-shadow.blur":     units.Px(2),
+//		"box-shadow.color":    &Prefs.Colors.Shadow,
+//	}
+//
+// MenuFrameConfigStyles configures the default styles
+// for the given pop-up menu frame with the given parent.
+// It should be called on menu frames  when they are created.
+func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
+	frame.AddStyleFunc(StyleFuncParts(par), func() {
+		frame.Style.Border.Style.Set(gist.BorderNone)
+		frame.Style.Padding.Set()
+		frame.Style.Margin.Set()
+		// doesn't seem to work; TODO: fix box shadow here
+		// frame.Style.BoxShadow.HOffset.SetPx(2)
+		// frame.Style.BoxShadow.VOffset.SetPx(2)
+		// frame.Style.BoxShadow.Blur.SetPx(2)
+		// frame.Style.BoxShadow.Color = Colors.Background.Highlight(30)
+	})
 }
 
 // MenuMaxHeight is the maximum height of any menu popup panel in units of font height
@@ -370,7 +387,8 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
 	frame := AddNewFrame(pvp, "Frame", LayoutVert)
-	frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
+	MenuFrameConfigStyles(&parVp.WidgetBase, frame)
+	// frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
 	var focus ki.Ki
 	for _, ac := range menu {
 		acn, ac := KiToNode2D(ac)
@@ -386,10 +404,10 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
 	frame.Size2DTree(0)                                    // collect sizes
 	pvp.Win = nil
-	scextra := frame.Sty.Layout.ScrollBarWidth.Dots
+	scextra := frame.Style.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
 	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
-	maxht := int(32 * frame.Sty.Font.Face.Metrics.Height)
+	maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
 	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
 	x = ints.MaxInt(0, x)
 	y = ints.MaxInt(0, y)
@@ -557,14 +575,40 @@ func StringsRemoveExtras(items *[]string, extras []string) {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// MenuButton pops up a menu, has an indicator by default
+// //////////////////////////////////////////////////////////////////////////////////////
 
+// MenuButton is a button that pops up a menu.
+// It has an indicator by default.
 type MenuButton struct {
 	ButtonBase
+	Type MenuButtonTypes `desc:"type is the type of the menu button"`
 }
 
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
+
+// MenuButtonTypes is an enum containing the
+// different possible types of menu buttons
+type MenuButtonTypes int
+
+const (
+	// MenuButtonFilled represents a filled
+	// MenuButton with a background color
+	// and no border
+	MenuButtonFilled MenuButtonTypes = iota
+	// MenuButtonOutlined represents an outlined
+	// MenuButton with a border on all sides
+	// and no background color
+	MenuButtonOutlined
+	// MenuButtonText represents a MenuButton
+	// with no border or background color.
+	MenuButtonText
+
+	MenuButtonTypesN
+)
+
+var KiT_MenuButtonTypes = kit.Enums.AddEnumAltLower(MenuButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "MenuButton")
+
+//go:generate stringer -type=MenuButtonTypes
 
 // AddNewMenuButton adds a new button to given parent node, with given name.
 func AddNewMenuButton(parent ki.Ki, name string) *MenuButton {
@@ -576,75 +620,158 @@ func (mb *MenuButton) CopyFieldsFrom(frm any) {
 	mb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (mb *MenuButton) DefaultStyle() {
+// 	cs := CurrentColorScheme()
+// 	s := &mb.Style
+
+// 	s.Border.Style.Set(gist.BorderNone)
+// 	s.Border.Width.Set()
+// 	s.Margin.Set(units.Px(4))
+// 	s.Padding.Set(units.Px(4))
+// 	s.Text.Align = gist.AlignCenter
+// 	s.BackgroundColor.SetColor(cs.Background.Highlight(10))
+// 	s.Color.SetColor(cs.Font)
+// }
+
 var MenuButtonProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.NewPx(1),
-	"border-radius":    units.NewPx(4),
-	"border-color":     &Prefs.Colors.Border,
-	"border-style":     gist.BorderSolid,
-	"padding":          units.NewPx(4),
-	"margin":           units.NewPx(4),
-	"box-shadow.color": &Prefs.Colors.Shadow,
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-		"fill":    &Prefs.Colors.Icon,
-		"stroke":  &Prefs.Colors.Font,
-	},
-	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-	},
-	"#indicator": ki.Props{
-		"width":          units.NewEx(1.5),
-		"height":         units.NewEx(1.5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
-		"vertical-align": gist.AlignBottom,
-		"fill":           &Prefs.Colors.Icon,
-		"stroke":         &Prefs.Colors.Font,
-	},
-	"#ind-stretch": ki.Props{
-		"width": units.NewEm(1),
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "linear-gradient(lighter-0, highlight-10)",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "linear-gradient(highlight-10, highlight-10)",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
-		"background-color": "linear-gradient(samelight-50, highlight-10)",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "highlight-90",
-		"background-color": "linear-gradient(highlight-30, highlight-10)",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(Select), highlight-10)",
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "border-width":     units.Px(1),
+	// "border-radius":    units.Px(4),
+	// "border-color":     &Prefs.Colors.Border,
+	// "border-style":     gist.BorderSolid,
+	// "padding":          units.Px(4),
+	// "margin":           units.Px(4),
+	// "box-shadow.color": &Prefs.Colors.Shadow,
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// "#icon": ki.Props{
+	// 	"width":   units.Em(1),
+	// 	"height":  units.Em(1),
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	"fill":    &Prefs.Colors.Icon,
+	// 	"stroke":  &Prefs.Colors.Font,
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// "#indicator": ki.Props{
+	// 	"width":          units.Ex(1.5),
+	// 	"height":         units.Ex(1.5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignBottom,
+	// 	"fill":           &Prefs.Colors.Icon,
+	// 	"stroke":         &Prefs.Colors.Font,
+	// },
+	// "#ind-stretch": ki.Props{
+	// 	"width": units.Em(1),
+	// },
+	// ButtonSelectors[ButtonActive]: ki.Props{
+	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// ButtonSelectors[ButtonHover]: ki.Props{
+	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonDown]: ki.Props{
+	// 	"color":            "highlight-90",
+	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonSelected]: ki.Props{
+	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// },
 }
 
 func (mb *MenuButton) ConfigParts() {
 	config := kit.TypeAndNameList{}
-	icIdx, lbIdx := mb.ConfigPartsIconLabel(&config, string(mb.Icon), mb.Text)
-	indIdx := mb.ConfigPartsAddIndicator(&config, true) // default on
+	if mb.Icon == "" {
+		mb.Icon = icons.Menu
+	}
+	if mb.Indicator == "" {
+		mb.Indicator = icons.None
+	}
+	icIdx, lbIdx := mb.ConfigPartsIconLabel(&config, mb.Icon, mb.Text)
+	indIdx := mb.ConfigPartsAddIndicator(&config, false) // default on
 	mods, updt := mb.Parts.ConfigChildren(config)
-	mb.ConfigPartsSetIconLabel(string(mb.Icon), mb.Text, icIdx, lbIdx)
+	mb.ConfigPartsSetIconLabel(mb.Icon, mb.Text, icIdx, lbIdx)
 	mb.ConfigPartsIndicator(indIdx)
 	if mods {
 		mb.UpdateEnd(updt)
 	}
+}
+
+func (mb *MenuButton) Init2D() {
+	mb.Init2DWidget()
+	mb.ConfigStyles()
+}
+
+func (mb *MenuButton) ConfigStyles() {
+	mb.AddStyleFunc(StyleFuncDefault, func() {
+		mb.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
+		mb.Style.Text.Align = gist.AlignCenter
+		mb.Style.Color = Colors.Text
+		mb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
+		mb.Style.Border.Radius.Set(units.Px(10))
+		switch mb.Type {
+		case MenuButtonFilled:
+			mb.Style.Border.Style.Set(gist.BorderNone)
+			mb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+		case MenuButtonOutlined:
+			mb.Style.Border.Style.Set(gist.BorderSolid)
+			mb.Style.Border.Width.Set(units.Px(1))
+			mb.Style.Border.Color.Set(Colors.Text)
+			mb.Style.BackgroundColor.SetColor(Colors.Background)
+		case MenuButtonText:
+			mb.Style.Border.Style.Set(gist.BorderNone)
+			mb.Style.BackgroundColor.SetColor(Colors.Background)
+		}
+		switch mb.State {
+		case ButtonActive:
+			// use background as already specified above
+		case ButtonInactive:
+			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(20))
+			mb.Style.Color = Colors.Text.Highlight(20)
+		case ButtonFocus, ButtonSelected:
+			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(10))
+		case ButtonHover:
+			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(15))
+		case ButtonDown:
+			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(20))
+		}
+	})
+	mb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(mb), func(icon *WidgetBase) {
+		icon.Style.Width.SetEm(1)
+		icon.Style.Height.SetEm(1)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+	})
+	mb.Parts.AddChildStyleFunc("label", 1, StyleFuncParts(mb), func(label *WidgetBase) {
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
+		label.Style.AlignV = gist.AlignMiddle
+	})
+	mb.Parts.AddChildStyleFunc("ind-stretch", 2, StyleFuncParts(mb), func(ins *WidgetBase) {
+		ins.Style.Width.SetEm(1)
+	})
+	mb.Parts.AddChildStyleFunc("indicator", 3, StyleFuncParts(mb), func(ind *WidgetBase) {
+		ind.Style.Width.SetEx(1.5)
+		ind.Style.Height.SetEx(1.5)
+		ind.Style.Margin.Set()
+		ind.Style.Padding.Set()
+		ind.Style.AlignV = gist.AlignMiddle
+		ind.Style.AlignH = gist.AlignCenter
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -674,28 +801,42 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 	sp.Horiz = fr.Horiz
 }
 
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (sp *Separator) DefaultStyle() {
+// 	cs := CurrentColorScheme()
+// 	s := &sp.Style
+
+// 	s.Padding.Set()
+// 	s.Margin.Set()
+// 	s.AlignV = gist.AlignCenter
+// 	s.AlignH = gist.AlignCenter
+// 	s.Border.Color.Set(cs.Background.Highlight(30))
+// 	s.Border.Width.Set(units.Px(2))
+// 	s.BackgroundColor.SetColor(cs.Background.Highlight(10))
+// }
+
 var SeparatorProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.NewPx(0),
-	"margin":           units.NewPx(0),
-	"vertical-align":   gist.AlignCenter,
-	"horizontal-align": gist.AlignCenter,
-	"border-color":     &Prefs.Colors.Border,
-	"border-width":     units.NewPx(2),
-	"background-color": &Prefs.Colors.Control,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "padding":          units.Px(0),
+	// "margin":           units.Px(0),
+	// "vertical-align":   gist.AlignCenter,
+	// "horizontal-align": gist.AlignCenter,
+	// "border-color":     &Prefs.Colors.Border,
+	// "border-width":     units.Px(2),
+	// "background-color": &Prefs.Colors.Control,
 	// todo: dotted
 }
 
 func (sp *Separator) Style2D() {
-	sp.StyMu.Lock()
-	if sp.Horiz {
-		sp.SetProp("max-width", -1)
-		sp.SetProp("min-height", units.NewEx(0.5))
-	} else {
-		sp.SetProp("max-height", -1)
-		sp.SetProp("min-width", units.NewCh(0.5))
-	}
-	sp.StyMu.Unlock()
+	// sp.StyMu.Lock()
+	// if sp.Horiz {
+	// 	sp.SetProp("max-width", -1)
+	// 	sp.SetProp("min-height", units.Ex(0.5))
+	// } else {
+	// 	sp.SetProp("max-height", -1)
+	// 	sp.SetProp("min-width", units.Ch(0.5))
+	// }
+	// sp.StyMu.Unlock()
 	sp.WidgetBase.Style2D()
 }
 
@@ -703,15 +844,15 @@ func (sp *Separator) RenderSeparator() {
 	rs, pc, st := sp.RenderLock()
 	defer sp.RenderUnlock(rs)
 
-	pos := sp.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
-	sz := sp.LayState.Alloc.Size.AddScalar(-2.0 * st.Layout.Margin.Dots)
+	pos := sp.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
+	sz := sp.LayState.Alloc.Size.Sub(st.Margin.Dots().Size())
 
-	if !st.Font.BgColor.IsNil() {
-		pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+	if !st.BackgroundColor.IsNil() {
+		pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 	}
-
-	pc.StrokeStyle.Width = st.Border.Width
-	pc.StrokeStyle.SetColor(&st.Border.Color)
+	// border-top is standard property for separators in CSS (see https://www.w3schools.com/howto/howto_css_dividers.asp)
+	pc.StrokeStyle.Width = st.Border.Width.Top
+	pc.StrokeStyle.SetColor(&st.Border.Color.Top)
 	if sp.Horiz {
 		pc.DrawLine(rs, pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
 	} else {
@@ -726,4 +867,30 @@ func (sp *Separator) Render2D() {
 		sp.Render2DChildren()
 		sp.PopBounds()
 	}
+}
+
+func (sp *Separator) Init2D() {
+	sp.Init2DWidget()
+	sp.ConfigStyles()
+}
+
+func (sp *Separator) ConfigStyles() {
+	// TODO: fix disappearing separator in menu
+	sp.AddStyleFunc(StyleFuncDefault, func() {
+		sp.Style.Margin.Set()
+		sp.Style.Padding.Set()
+		sp.Style.AlignV = gist.AlignCenter
+		sp.Style.AlignH = gist.AlignCenter
+		sp.Style.Border.Style.Set(gist.BorderSolid)
+		sp.Style.Border.Width.Set(units.Px(0))
+		sp.Style.Border.Color.Set(Colors.Text.Highlight(20))
+		sp.Style.BackgroundColor.SetColor(Colors.Text.Highlight(20))
+		if sp.Horiz {
+			sp.Style.MaxWidth.SetPx(-1)
+			sp.Style.MinHeight.SetPx(1)
+		} else {
+			sp.Style.MaxHeight.SetPx(-1)
+			sp.Style.MinWidth.SetPx(1)
+		}
+	})
 }

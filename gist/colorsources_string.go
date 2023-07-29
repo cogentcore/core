@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,18 @@ func (i *ColorSources) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: ColorSources")
+}
+
+var _ColorSources_descMap = map[ColorSources]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+}
+
+func (i ColorSources) Desc() string {
+	if str, ok := _ColorSources_descMap[i]; ok {
+		return str
+	}
+	return "ColorSources(" + strconv.FormatInt(int64(i), 10) + ")"
 }

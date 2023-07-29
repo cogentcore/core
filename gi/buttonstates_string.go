@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -41,4 +39,21 @@ func (i *ButtonStates) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: ButtonStates")
+}
+
+var _ButtonStates_descMap = map[ButtonStates]string{
+	0: `normal active state -- there but not being interacted with`,
+	1: `inactive -- not pressable -- no events`,
+	2: `mouse is hovering over the button`,
+	3: `button is the focus -- will respond to keyboard input`,
+	4: `button is currently being pressed down`,
+	5: `button has been selected -- selection is a general widget property used by views and other complex widgets -- checked state is independent of this`,
+	6: `total number of button states`,
+}
+
+func (i ButtonStates) Desc() string {
+	if str, ok := _ButtonStates_descMap[i]; ok {
+		return str
+	}
+	return "ButtonStates(" + strconv.FormatInt(int64(i), 10) + ")"
 }

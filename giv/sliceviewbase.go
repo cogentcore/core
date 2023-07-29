@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -207,6 +208,14 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 	sv.Slice = sl
 	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice))
 	sv.isArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+	// make sure elements aren't nil to prevent later panics
+	for i := 0; i < sv.SliceNPVal.Len(); i++ {
+		val := sv.SliceNPVal.Index(i)
+		k := val.Kind()
+		if (k == reflect.Chan || k == reflect.Func || k == reflect.Interface || k == reflect.Map || k == reflect.Pointer || k == reflect.Slice) && val.IsNil() {
+			val.Set(reflect.New(kit.NonPtrType(val.Type())))
+		}
+	}
 	if !sv.IsInactive() {
 		sv.SelectedIdx = -1
 	}
@@ -392,8 +401,8 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	sg.Stripes = gi.RowStripes
 	sg.SetProp("columns", nWidgPerRow)
 	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.NewEm(6))
-	sg.SetMinPrefWidth(units.NewCh(20))
+	sg.SetMinPrefHeight(units.Em(6))
+	sg.SetMinPrefWidth(units.Ch(20))
 	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
 	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 
@@ -438,7 +447,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			addnm := fmt.Sprintf("add-%v", itxt)
 			addact := gi.Action{}
 			sg.SetChild(&addact, cidx, addnm)
-			addact.SetIcon("plus")
+			addact.SetIcon(icons.Add)
 		}
 		if !sv.NoDelete {
 			cidx++
@@ -446,7 +455,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			delact := gi.Action{}
 			sg.SetChild(&delact, cidx, delnm)
 
-			delact.SetIcon("minus")
+			delact.SetIcon(icons.Delete)
 		}
 	}
 	sv.ConfigScroll()
@@ -458,10 +467,10 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb.Dim = mat32.Y
 	sb.Defaults()
 	sb.Tracking = true
-	if sv.Sty.Layout.ScrollBarWidth.Dots == 0 {
-		sb.SetFixedWidth(units.NewPx(16))
+	if sv.Style.ScrollBarWidth.Dots == 0 {
+		sb.SetFixedWidth(units.Px(16))
 	} else {
-		sb.SetFixedWidth(sv.Sty.Layout.ScrollBarWidth)
+		sb.SetFixedWidth(sv.Style.ScrollBarWidth)
 	}
 	sb.SetStretchMaxHeight()
 	sb.Min = 0
@@ -521,7 +530,7 @@ func (sv *SliceViewBase) AvailHeight() float32 {
 	if sgHt == 0 {
 		return 0
 	}
-	sgHt -= sg.ExtraSize.Y + sg.Sty.BoxSpace()*2
+	sgHt -= sg.ExtraSize.Y + sg.Style.BoxSpace().Size().Y
 	return sgHt
 }
 
@@ -554,10 +563,10 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
 		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
-	if sv.Sty.Font.Face == nil {
-		girl.OpenFont(&sv.Sty.Font, &sv.Sty.UnContext)
+	if sv.Style.Font.Face == nil {
+		sv.Style.Font = girl.OpenFont(sv.Style.FontRender(), &sv.Style.UnContext)
 	}
-	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Sty.Font.Face.Metrics.Height)
+	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Style.Font.Face.Metrics.Height)
 
 	mvp := sv.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
@@ -662,7 +671,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				idxlab.SetProp("slv-row", i) // all sigs deal with disp rows
 				idxlab.Selectable = true
 				idxlab.Redrawable = true
-				idxlab.Sty.Template = "giv.SliceViewBase.IndexLabel"
+				idxlab.Style.Template = "giv.SliceViewBase.IndexLabel"
 				idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
@@ -672,7 +681,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 					}
 				})
 			}
-			idxlab.CurBgColor = gi.Prefs.Colors.Background
+			idxlab.CurBackgroundColor = gi.Prefs.Colors.Background
 			idxlab.SetText(sitxt)
 			idxlab.SetSelectedState(issel)
 		}
@@ -720,10 +729,10 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						addact := gi.Action{}
 						sg.SetChild(&addact, cidx, addnm)
 
-						addact.SetIcon("plus")
+						addact.SetIcon(icons.Add)
 						addact.Tooltip = "insert a new element at this index"
 						addact.Data = i
-						addact.Sty.Template = "giv.SliceViewBase.AddAction"
+						addact.Style.Template = "giv.SliceViewBase.AddAction"
 						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							act := send.(*gi.Action)
 							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
@@ -737,10 +746,10 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						delact := gi.Action{}
 						sg.SetChild(&delact, cidx, delnm)
 
-						delact.SetIcon("minus")
+						delact.SetIcon(icons.Delete)
 						delact.Tooltip = "delete this element"
 						delact.Data = i
-						delact.Sty.Template = "giv.SliceViewBase.DelAction"
+						delact.Style.Template = "giv.SliceViewBase.DelAction"
 						delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							act := send.(*gi.Action)
 							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
@@ -955,14 +964,14 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update this SliceView to reflect current state of slice"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 				svv.This().(SliceViewer).UpdateSliceGrid()
 
 			})
 		if ndef > 1 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the slice"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the slice"},
 				sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 					svv.This().(SliceViewer).SliceNewAt(-1)
@@ -2023,7 +2032,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	}
 	if len(men) > 0 {
 		pos := sv.IdxPos(idx)
-		if pos == image.ZP {
+		if pos == (image.Point{}) {
 			em := sv.EventMgr2D()
 			if em != nil {
 				pos = em.LastMousePos

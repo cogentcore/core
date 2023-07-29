@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build windows
-// +build !3d
+//go:build windows && !3d
+// +build windows,!3d
 
 package windriver
 
@@ -212,7 +212,7 @@ func (app *appImpl) initScreens() {
 	pixratio := float32(1.0)
 
 	sc.ScreenNumber = 0
-	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{int(widthPx), int(heightPx)}}
+	sc.Geometry = image.Rectangle{Min: image.Point{}, Max: image.Point{int(widthPx), int(heightPx)}}
 	sc.Depth = depth
 	sc.LogicalDPI = dpi // oswin.LogicalFmPhysicalDPI(dpi)
 	sc.PhysicalDPI = dpi
@@ -399,7 +399,7 @@ func sendQuit(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult
 //////////////////////////////////////////////////////////////////
 //   Windows utilities
 
-////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////
 // appWND is the handle to the "AppWindow".  The window encapsulates all
 // oswin.Window operations in an actual Windows window so they all run on the
 // main thread.  Since any messages sent to a window will be executed on the

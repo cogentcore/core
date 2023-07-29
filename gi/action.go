@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -24,9 +25,36 @@ type Action struct {
 	Data       any               `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
 	ActionSig  ki.Signal         `json:"-" xml:"-" view:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
 	UpdateFunc func(act *Action) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing"`
+	Type       ActionTypes       `desc:"the type of action"`
 }
 
-var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
+var KiT_Action = kit.Types.AddType(&Action{}, nil)
+
+// ActionTypes is an enum representing
+// the different possible types of actions
+type ActionTypes int
+
+const (
+	// ActionDefault is a default, standalone
+	// action that is not part of a menu,
+	// menubar, or toolbar
+	ActionDefault ActionTypes = iota
+	// ActionMenu is an action contained
+	// within a popup menu
+	ActionMenu
+	// ActionMenuBar is an action contained
+	// within a menu bar
+	ActionMenuBar
+	// ActionToolBar is an action contained
+	// within a toolbar
+	ActionToolBar
+
+	ActionTypesN
+)
+
+var KiT_ActionTypes = kit.Enums.AddEnumAltLower(ActionTypesN, kit.NotBitFlag, gist.StylePropProps, "Action")
+
+//go:generate stringer -type=ActionTypes
 
 // AddNewAction adds a new action to given parent node, with given name.
 func AddNewAction(parent ki.Ki, name string) *Action {
@@ -44,157 +72,175 @@ func (ac *Action) Disconnect() {
 	ac.ActionSig.DisconnectAll()
 }
 
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (ac *Action) DefaultStyle() {
+// 	s := &ac.Style
+
+// 	s.Border.Style.Set(gist.BorderNone)
+// 	s.Border.Width.Set()
+// 	s.Border.Radius.Set()
+// 	s.Border.Color.Set()
+// 	s.Text.Align = gist.AlignCenter
+// 	s.BackgroundColor.SetColor(TheColorScheme.Secondary)
+// 	s.Color.SetColor(TheColorScheme.Secondary.ContrastColor())
+
+// 	s.Padding.Set(units.Px(2))
+// 	s.Margin.Set(units.Px(2))
+// 	s.MinWidth.SetEm(1)
+// 	s.MinHeight.SetEm(1)
+// }
+
 var ActionProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"border-width":     units.NewPx(0), // todo: should be default
-	"border-radius":    units.NewPx(0),
-	"border-color":     &Prefs.Colors.Border,
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	"padding":          units.NewPx(2),
-	"margin":           units.NewPx(2),
-	"min-width":        units.NewEm(1),
-	"min-height":       units.NewEm(1),
-	"#icon": ki.Props{
-		"width":   units.NewEm(1),
-		"height":  units.NewEm(1),
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-		"fill":    &Prefs.Colors.Icon,
-		"stroke":  &Prefs.Colors.Font,
-	},
-	"#space": ki.Props{
-		"width":     units.NewCh(.5),
-		"min-width": units.NewCh(.5),
-	},
-	"#label": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-	},
-	"#indicator": ki.Props{
-		"width":          units.NewEx(1.5),
-		"height":         units.NewEx(1.5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
-		"vertical-align": gist.AlignBottom,
-		"fill":           &Prefs.Colors.Icon,
-		"stroke":         &Prefs.Colors.Font,
-	},
-	"#ind-stretch": ki.Props{
-		"width": units.NewEm(1),
-	},
-	"#shortcut": ki.Props{
-		"margin":  units.NewPx(0),
-		"padding": units.NewPx(0),
-	},
-	"#sc-stretch": ki.Props{
-		"min-width": units.NewCh(2),
-	},
-	".menu-action": ki.Props{ // class of actions as menu items
-		"padding":   units.NewPx(2),
-		"margin":    units.NewPx(0),
-		"max-width": -1,
-		"indicator": "wedge-right",
-		ButtonSelectors[ButtonActive]: ki.Props{
-			"background-color": "lighter-0",
-		},
-		ButtonSelectors[ButtonInactive]: ki.Props{
-			"border-color": "highlight-50",
-			"color":        "highlight-50",
-		},
-		ButtonSelectors[ButtonHover]: ki.Props{
-			"background-color": "highlight-10",
-		},
-		ButtonSelectors[ButtonFocus]: ki.Props{
-			"border-width":     units.NewPx(2),
-			"background-color": "samelight-50",
-		},
-		ButtonSelectors[ButtonDown]: ki.Props{
-			"color":            "highlight-90",
-			"background-color": "highlight-30",
-		},
-		ButtonSelectors[ButtonSelected]: ki.Props{
-			"background-color": &Prefs.Colors.Select,
-		},
-	},
-	".menubar-action": ki.Props{ // class of actions in MenuBar
-		"padding":      units.NewPx(4), // we go to edge of bar
-		"margin":       units.NewPx(0),
-		"indicator":    "none",
-		"border-width": units.NewPx(0),
-		ButtonSelectors[ButtonActive]: ki.Props{
-			"background-color": "linear-gradient(lighter-0, highlight-10)",
-		},
-		ButtonSelectors[ButtonInactive]: ki.Props{
-			"border-color": "lighter-50",
-			"color":        "lighter-50",
-		},
-		ButtonSelectors[ButtonHover]: ki.Props{
-			"background-color": "linear-gradient(highlight-10, highlight-10)",
-		},
-		ButtonSelectors[ButtonFocus]: ki.Props{
-			"border-width":     units.NewPx(2),
-			"background-color": "linear-gradient(samelight-50, highlight-10)",
-		},
-		ButtonSelectors[ButtonDown]: ki.Props{
-			"color":            "lighter-90",
-			"background-color": "linear-gradient(highlight-30, highlight-10)",
-		},
-		ButtonSelectors[ButtonSelected]: ki.Props{
-			"background-color": "linear-gradient(pref(Select), highlight-10)",
-		},
-	},
-	".toolbar-action": ki.Props{ // class of actions in ToolBar
-		"padding":      units.NewPx(4), // we go to edge of bar
-		"margin":       units.NewPx(0),
-		"indicator":    "none",
-		"border-width": units.NewPx(0.5),
-		ButtonSelectors[ButtonActive]: ki.Props{
-			"background-color": "linear-gradient(lighter-0, highlight-10)",
-		},
-		ButtonSelectors[ButtonInactive]: ki.Props{
-			"border-color": "lighter-50",
-			"color":        "lighter-50",
-		},
-		ButtonSelectors[ButtonHover]: ki.Props{
-			"background-color": "linear-gradient(highlight-10, highlight-10)",
-		},
-		ButtonSelectors[ButtonFocus]: ki.Props{
-			"border-width":     units.NewPx(2),
-			"background-color": "linear-gradient(samelight-50, highlight-10)",
-		},
-		ButtonSelectors[ButtonDown]: ki.Props{
-			"color":            "lighter-90",
-			"background-color": "linear-gradient(highlight-30, highlight-10)",
-		},
-		ButtonSelectors[ButtonSelected]: ki.Props{
-			"background-color": "linear-gradient(pref(Select), highlight-10)",
-		},
-	},
-	".": ki.Props{ // default class -- stand-alone buttons presumably
-		ButtonSelectors[ButtonActive]: ki.Props{
-			"background-color": "linear-gradient(lighter-0, highlight-10)",
-		},
-		ButtonSelectors[ButtonInactive]: ki.Props{
-			"border-color": "lighter-50",
-			"color":        "lighter-50",
-		},
-		ButtonSelectors[ButtonHover]: ki.Props{
-			"background-color": "linear-gradient(highlight-10, highlight-10)",
-		},
-		ButtonSelectors[ButtonFocus]: ki.Props{
-			"border-width":     units.NewPx(2),
-			"background-color": "linear-gradient(samelight-50, highlight-10)",
-		},
-		ButtonSelectors[ButtonDown]: ki.Props{
-			"color":            "lighter-90",
-			"background-color": "linear-gradient(highlight-30, highlight-10)",
-		},
-		ButtonSelectors[ButtonSelected]: ki.Props{
-			"background-color": "linear-gradient(pref(Select), highlight-10)",
-		},
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "border-width":     units.Px(0), // todo: should be default
+	// "border-radius":    units.Px(0),
+	// "border-color":     &Prefs.Colors.Border,
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// "padding":          units.Px(2),
+	// "margin":           units.Px(2),
+	// "min-width":        units.Em(1),
+	// "min-height":       units.Em(1),
+	// "#icon": ki.Props{
+	// 	"width":   units.Em(1),
+	// 	"height":  units.Em(1),
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	"fill":    &Prefs.Colors.Icon,
+	// 	"stroke":  &Prefs.Colors.Font,
+	// },
+	// "#space": ki.Props{
+	// 	"width":     units.Ch(.5),
+	// 	"min-width": units.Ch(.5),
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// "#indicator": ki.Props{
+	// 	"width":          units.Ex(1.5),
+	// 	"height":         units.Ex(1.5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignBottom,
+	// 	"fill":           &Prefs.Colors.Icon,
+	// 	"stroke":         &Prefs.Colors.Font,
+	// },
+	// "#ind-stretch": ki.Props{
+	// 	"width": units.Em(1),
+	// },
+	// "#shortcut": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// "#sc-stretch": ki.Props{
+	// 	"min-width": units.Ch(2),
+	// },
+	// ".menu-action": ki.Props{ // class of actions as menu items
+	// 	"padding":   units.Px(2),
+	// 	"margin":    units.Px(0),
+	// 	"max-width": -1,
+	// 	"indicator": icons.KeyboardArrowRight,
+	// 	ButtonSelectors[ButtonActive]: ki.Props{
+	// 		"background-color": "lighter-0",
+	// 	},
+	// 	ButtonSelectors[ButtonInactive]: ki.Props{
+	// 		"border-color": "highlight-50",
+	// 		"color":        "highlight-50",
+	// 	},
+	// 	ButtonSelectors[ButtonHover]: ki.Props{
+	// 		"background-color": "highlight-10",
+	// 	},
+	// 	ButtonSelectors[ButtonFocus]: ki.Props{
+	// 		"border-width":     units.Px(2),
+	// 		"background-color": "samelight-50",
+	// 	},
+	// 	ButtonSelectors[ButtonDown]: ki.Props{
+	// 		"color":            "highlight-90",
+	// 		"background-color": "highlight-30",
+	// 	},
+	// 	ButtonSelectors[ButtonSelected]: ki.Props{
+	// 		"background-color": &Prefs.Colors.Select,
+	// 	},
+	// },
+	// ".menubar-action": ki.Props{ // class of actions in MenuBar
+	// 	"padding":      units.Px(4), // we go to edge of bar
+	// 	"margin":       units.Px(0),
+	// 	"indicator":    icons.None,
+	// 	"border-width": units.Px(0),
+	// 	ButtonSelectors[ButtonActive]: ki.Props{
+	// 		"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonInactive]: ki.Props{
+	// 		"border-color": "lighter-50",
+	// 		"color":        "lighter-50",
+	// 	},
+	// 	ButtonSelectors[ButtonHover]: ki.Props{
+	// 		"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonFocus]: ki.Props{
+	// 		"border-width":     units.Px(2),
+	// 		"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonDown]: ki.Props{
+	// 		"color":            "lighter-90",
+	// 		"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonSelected]: ki.Props{
+	// 		"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// 	},
+	// },
+	// ".toolbar-action": ki.Props{ // class of actions in ToolBar
+	// 	"padding":      units.Px(4), // we go to edge of bar
+	// 	"margin":       units.Px(0),
+	// 	"indicator":    icons.None,
+	// 	"border-width": units.Px(0.5),
+	// 	ButtonSelectors[ButtonActive]: ki.Props{
+	// 		"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonInactive]: ki.Props{
+	// 		"border-color": "lighter-50",
+	// 		"color":        "lighter-50",
+	// 	},
+	// 	ButtonSelectors[ButtonHover]: ki.Props{
+	// 		"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonFocus]: ki.Props{
+	// 		"border-width":     units.Px(2),
+	// 		"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonDown]: ki.Props{
+	// 		"color":            "lighter-90",
+	// 		"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonSelected]: ki.Props{
+	// 		"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// 	},
+	// },
+	// ".": ki.Props{ // default class -- stand-alone buttons presumably
+	// 	ButtonSelectors[ButtonActive]: ki.Props{
+	// 		"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonInactive]: ki.Props{
+	// 		"border-color": "lighter-50",
+	// 		"color":        "lighter-50",
+	// 	},
+	// 	ButtonSelectors[ButtonHover]: ki.Props{
+	// 		"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonFocus]: ki.Props{
+	// 		"border-width":     units.Px(2),
+	// 		"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonDown]: ki.Props{
+	// 		"color":            "lighter-90",
+	// 		"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// 	},
+	// 	ButtonSelectors[ButtonSelected]: ki.Props{
+	// 		"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// 	},
+	// },
 }
 
 // ButtonWidget interface
@@ -216,7 +262,7 @@ func (ac *Action) ButtonRelease() {
 	}
 	wasPressed := (ac.State == ButtonDown)
 	updt := ac.UpdateStart()
-	ac.SetButtonState(ButtonActive)
+	ac.SetButtonState(ButtonHover)
 	ac.ButtonSig.Emit(ac.This(), int64(ButtonReleased), nil)
 	menOpen := false
 	if wasPressed {
@@ -239,6 +285,7 @@ func (ac *Action) ButtonRelease() {
 func (ac *Action) Init2D() {
 	ac.Init2DWidget()
 	ac.ConfigParts()
+	ac.ConfigStyles()
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
@@ -266,10 +313,10 @@ func (ac *Action) ConfigPartsShortcut(scIdx int) {
 // ConfigPartsButton sets the label, icon etc for the button
 func (ac *Action) ConfigPartsButton() {
 	config := kit.TypeAndNameList{}
-	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, string(ac.Icon), ac.Text)
+	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := ac.Parts.ConfigChildren(config)
-	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
+	ac.ConfigPartsSetIconLabel(ac.Icon, ac.Text, icIdx, lbIdx)
 	ac.ConfigPartsIndicator(indIdx)
 	if mods {
 		ac.UpdateEnd(updt)
@@ -279,7 +326,7 @@ func (ac *Action) ConfigPartsButton() {
 // ConfigPartsMenuItem sets the label, icon, etc for action menu item
 func (ac *Action) ConfigPartsMenuItem() {
 	config := kit.TypeAndNameList{}
-	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, string(ac.Icon), ac.Text)
+	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	scIdx := -1
 	if indIdx < 0 && ac.Shortcut != "" {
@@ -288,7 +335,7 @@ func (ac *Action) ConfigPartsMenuItem() {
 		log.Printf("gi.Action shortcut cannot be used on a sub-menu for action: %v\n", ac.Text)
 	}
 	mods, updt := ac.Parts.ConfigChildren(config)
-	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
+	ac.ConfigPartsSetIconLabel(ac.Icon, ac.Text, icIdx, lbIdx)
 	ac.ConfigPartsIndicator(indIdx)
 	ac.ConfigPartsShortcut(scIdx)
 	if mods {
@@ -306,22 +353,25 @@ func (ac *Action) ConfigParts() {
 	}
 	switch {
 	case ismbar:
-		ac.Indicator = "none" // menu-bar specifically
+		ac.Indicator = icons.None // menu-bar specifically
+		ac.Type = ActionMenuBar
 		if ac.Class == "" {
 			ac.Class = "menubar-action"
 		}
 		ac.ConfigPartsButton()
 	case istbar:
+		ac.Type = ActionToolBar
 		if ac.Class == "" {
 			ac.Class = "toolbar-action"
 		}
 		ac.ConfigPartsButton()
 	case ac.IsMenu():
+		ac.Type = ActionMenu
 		if ac.Class == "" {
 			ac.Class = "menu-action"
 		}
 		if ac.Indicator == "" {
-			ac.Indicator = "wedge-right"
+			ac.Indicator = icons.KeyboardArrowRight
 		}
 		ac.ConfigPartsMenuItem()
 	default:
@@ -337,4 +387,73 @@ func (ac *Action) UpdateActions() {
 	if ac.Menu != nil {
 		ac.Menu.UpdateActions()
 	}
+}
+
+func (ac *Action) ConfigStyles() {
+	ac.AddStyleFunc(StyleFuncDefault, func() {
+		ac.Style.Border.Style.Set(gist.BorderNone)
+		ac.Style.Border.Radius.Set()
+		ac.Style.Text.Align = gist.AlignCenter
+		ac.Style.Color = Colors.Text
+		ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		switch ac.Type {
+		case ActionMenu:
+			ac.Style.Margin.Set()
+			ac.Style.MaxWidth.SetPx(-1)
+			ac.Indicator = icons.KeyboardArrowRight
+		case ActionMenuBar:
+			ac.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
+			ac.Style.Margin.Set()
+			ac.Indicator = icons.None
+		case ActionToolBar:
+			ac.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
+			ac.Style.Margin.Set()
+			ac.Indicator = icons.None
+		}
+		switch ac.State {
+		case ButtonActive:
+			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
+		case ButtonInactive:
+			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			ac.Style.Color = Colors.Text.Highlight(20)
+		case ButtonFocus, ButtonSelected:
+			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+		case ButtonHover:
+			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+		case ButtonDown:
+			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
+		}
+	})
+	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, StyleFuncParts(ac), func(icon *WidgetBase) {
+		icon.Style.Width.SetEm(1)
+		icon.Style.Height.SetEm(1)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+	})
+	ac.Parts.AddChildStyleFunc("space", ki.StartMiddle, StyleFuncParts(ac), func(space *WidgetBase) {
+		space.Style.Width.SetCh(0.5)
+		space.Style.MinWidth.SetCh(0.5)
+	})
+	ac.Parts.AddChildStyleFunc("label", ki.StartMiddle, StyleFuncParts(ac), func(label *WidgetBase) {
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
+	})
+	ac.Parts.AddChildStyleFunc("indicator", ki.StartMiddle, StyleFuncParts(ac), func(ind *WidgetBase) {
+		ind.Style.Width.SetEx(1.5)
+		ind.Style.Height.SetEx(1.5)
+		ind.Style.Margin.Set()
+		ind.Style.Padding.Set()
+		ind.Style.AlignV = gist.AlignBottom
+	})
+	ac.Parts.AddChildStyleFunc("ind-stretch", ki.StartMiddle, StyleFuncParts(ac), func(ins *WidgetBase) {
+		ins.Style.Width.SetEm(1)
+	})
+	ac.Parts.AddChildStyleFunc("shortcut", ki.StartMiddle, StyleFuncParts(ac), func(short *WidgetBase) {
+		short.Style.Margin.Set()
+		short.Style.Padding.Set()
+	})
+	ac.Parts.AddChildStyleFunc("sc-stretch", ki.StartMiddle, StyleFuncParts(ac), func(scs *WidgetBase) {
+		scs.Style.MinWidth.SetCh(2)
+	})
 }

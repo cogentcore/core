@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -46,4 +44,26 @@ func StringToVpFlags(s string) (VpFlags, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: VpFlags")
+}
+
+var _VpFlags_descMap = map[VpFlags]string{
+	24: `VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey parent bounds (otherwise does)`,
+	25: `VpFlagMenu means viewport is serving as a popup menu -- affects how window processes clicks`,
+	26: `VpFlagCompleter means viewport is serving as a popup menu for code completion -- only applies if the VpFlagMenu is also set`,
+	27: `VpFlagCorrector means viewport is serving as a popup menu for spelling correction -- only applies if the VpFlagMenu is also set`,
+	28: `VpFlagTooltip means viewport is serving as a tooltip`,
+	29: `VpFlagPopupDestroyAll means that if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)`,
+	30: `VpFlagSVG means that this viewport is an SVG viewport -- SVG elements look for this for re-rendering`,
+	31: `VpFlagUpdatingNode means that this viewport is currently handling the update of a node, and is under the UpdtMu mutex lock. This can be checked to see about whether to add another update or not.`,
+	32: `VpFlagNeedsFullRender means that this viewport needs to do a full render -- this is set during signal processing and will preempt other lower-level updates etc.`,
+	33: `VpFlagDoingFullRender means that this viewport is currently doing a full render -- can be used by elements to drive deep rebuild in case underlying data has changed.`,
+	34: `VpFlagPrefSizing means that this viewport is currently doing a PrefSize computation to compute the size of the viewport (for sizing window for example) -- affects layout size computation only for Over`,
+	35: ``,
+}
+
+func (i VpFlags) Desc() string {
+	if str, ok := _VpFlags_descMap[i]; ok {
+		return str
+	}
+	return "VpFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

@@ -3,9 +3,19 @@
 package touch
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[Begin-0]
+	_ = x[Move-1]
+	_ = x[End-2]
+	_ = x[ActionsN-3]
+}
 
 const _Actions_name = "BeginMoveEndActionsN"
 
@@ -25,5 +35,19 @@ func (i *Actions) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type Actions", s)
+	return errors.New("String: " + s + " is not a valid option for type: Actions")
+}
+
+var _Actions_descMap = map[Actions]string{
+	0: `Begin is a user first touching the device. On Android, this is a AMOTION_EVENT_ACTION_DOWN. On iOS, this is a call to touchesBegan.`,
+	1: `Move is a user dragging across the device. A TypeMove is delivered between a TypeBegin and TypeEnd. On Android, this is a AMOTION_EVENT_ACTION_MOVE. On iOS, this is a call to touchesMoved.`,
+	2: `End is a user no longer touching the device. On Android, this is a AMOTION_EVENT_ACTION_UP. On iOS, this is a call to touchesEnded.`,
+	3: ``,
+}
+
+func (i Actions) Desc() string {
+	if str, ok := _Actions_descMap[i]; ok {
+		return str
+	}
+	return "Actions(" + strconv.FormatInt(int64(i), 10) + ")"
 }

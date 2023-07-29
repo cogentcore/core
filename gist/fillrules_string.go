@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -37,4 +35,17 @@ func (i *FillRules) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: FillRules")
+}
+
+var _FillRules_descMap = map[FillRules]string{
+	0: ``,
+	1: ``,
+	2: ``,
+}
+
+func (i FillRules) Desc() string {
+	if str, ok := _FillRules_descMap[i]; ok {
+		return str
+	}
+	return "FillRules(" + strconv.FormatInt(int64(i), 10) + ")"
 }

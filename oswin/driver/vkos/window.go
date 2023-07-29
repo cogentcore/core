@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/gi/oswin/window"
@@ -45,6 +46,8 @@ type windowImpl struct {
 	mouseDisabled  bool
 	resettingPos   bool
 }
+
+var _ oswin.Window = &windowImpl{}
 
 // Handle returns the driver-specific handle for this window.
 // Currently, for all platforms, this is *glfw.Window, but that
@@ -235,6 +238,10 @@ func (w *windowImpl) Position() image.Point {
 	ps.X, ps.Y = w.glw.GetPos()
 	w.Pos = ps
 	return ps
+}
+
+func (w *windowImpl) Insets() gist.SideFloats {
+	return gist.NewSideFloats()
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {

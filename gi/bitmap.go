@@ -12,6 +12,7 @@ import (
 	"image"
 	"image/jpeg"
 	"image/png"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -20,6 +21,7 @@ import (
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -56,6 +58,13 @@ func (bm *Bitmap) CopyFieldsFrom(frm any) {
 	bm.Filename = fr.Filename
 }
 
+// // DefaultStyle implements the [DefaultStyler] interface
+// func (bm *Bitmap) DefaultStyle() {
+// 	s := &bm.Style
+
+// 	s.BackgroundColor.SetColor(TheColorScheme.Background)
+// }
+
 // SetSize sets size of the bitmap image.
 // This does not resize any existing image, just makes a new image
 // if the size is different
@@ -73,8 +82,8 @@ func (bm *Bitmap) SetSize(nwsz image.Point) {
 // LayoutToImgSize sets the width, height properties to the current Size
 // so it will request that size during layout
 func (bm *Bitmap) LayoutToImgSize() {
-	bm.SetProp("width", units.NewValue(float32(bm.Size.X), units.Dot))
-	bm.SetProp("height", units.NewValue(float32(bm.Size.Y), units.Dot))
+	bm.SetProp("width", units.NewValue(float32(bm.Size.X), units.UnitDot))
+	bm.SetProp("height", units.NewValue(float32(bm.Size.Y), units.UnitDot))
 }
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image
@@ -82,6 +91,20 @@ func (bm *Bitmap) LayoutToImgSize() {
 // for that dimension
 func (bm *Bitmap) OpenImage(filename FileName, width, height float32) error {
 	img, err := OpenImage(string(filename))
+	if err != nil {
+		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
+		return err
+	}
+	bm.Filename = filename
+	bm.SetImage(img, width, height)
+	return nil
+}
+
+// OpenImageFS opens an image for the bitmap, and resizes to the size of the image
+// or the specified size -- pass 0 for width and/or height to use the actual image size
+// for that dimension
+func (bm *Bitmap) OpenImageFS(fsys fs.FS, filename FileName, width, height float32) error {
+	img, err := OpenImageFS(fsys, string(filename))
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
@@ -101,7 +124,7 @@ func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
 		bm.SetSize(sz)
-		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), img, image.ZP, draw.Src)
+		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), img, image.Point{}, draw.Src)
 	} else {
 		tsz := sz
 		transformer := draw.BiLinear
@@ -138,7 +161,7 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport2D) {
 	pos := bm.LayState.Alloc.Pos.ToPointCeil()
 	max := pos.Add(bm.Size)
 	r := image.Rectangle{Min: pos, Max: max}
-	sp := image.ZP
+	sp := image.Point{}
 	if bm.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := KiToNode2D(bm.Par)
 		pbb := pni.ChildrenBBox2D()
@@ -166,6 +189,11 @@ func (bm *Bitmap) Render2D() {
 	}
 }
 
+func (bm *Bitmap) Init2D() {
+	bm.Init2DWidget()
+	bm.ConfigStyles()
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 //  Image IO
 
@@ -177,7 +205,7 @@ func GrabRenderFrom(nii Node2D) *image.RGBA {
 	if nivp != nil && nivp.Pixels != nil {
 		sz := nivp.Pixels.Bounds().Size()
 		img := image.NewRGBA(image.Rectangle{Max: sz})
-		draw.Draw(img, img.Bounds(), nivp.Pixels, image.ZP, draw.Src)
+		draw.Draw(img, img.Bounds(), nivp.Pixels, image.Point{}, draw.Src)
 		return img
 	}
 	nivp = ni.Viewport
@@ -197,6 +225,17 @@ func GrabRenderFrom(nii Node2D) *image.RGBA {
 // OpenImage opens an image from given path filename -- format is inferred automatically.
 func OpenImage(path string) (image.Image, error) {
 	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	im, _, err := image.Decode(file)
+	return im, err
+}
+
+// OpenImageFS opens an image from given path filename -- format is inferred automatically.
+func OpenImageFS(fsys fs.FS, fname string) (image.Image, error) {
+	file, err := fsys.Open(fname)
 	if err != nil {
 		return nil, err
 	}
@@ -394,12 +433,12 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 //  Props
 
 var BitmapProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"background-color": &Prefs.Colors.Background,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "background-color": &Prefs.Colors.Background,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
-			"icon": "file-open",
+			"icon": icons.FileOpen,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
@@ -414,4 +453,12 @@ var BitmapProps = ki.Props{
 			},
 		}},
 	},
+}
+
+func (bm *Bitmap) ConfigStyles() {
+	bm.AddStyleFunc(StyleFuncDefault, func() {
+		bm.Style.MinWidth.SetPx(float32(bm.Size.X))
+		bm.Style.MinHeight.SetPx(float32(bm.Size.Y))
+		bm.Style.BackgroundColor.SetColor(Colors.Background)
+	})
 }

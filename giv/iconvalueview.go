@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -36,10 +37,10 @@ func (vv *IconValueView) UpdateWidget() {
 	}
 	ac := vv.Widget.(*gi.Action)
 	txt := kit.ToString(vv.Value.Interface())
-	if gi.IconName(txt).IsNil() {
+	if icons.Icon(txt).IsNil() {
 		ac.SetIcon("blank")
 	} else {
-		ac.SetIcon(txt)
+		ac.SetIcon(icons.Icon(txt))
 	}
 	if sntag, ok := vv.Tag("view"); ok {
 		if strings.Contains(sntag, "show-name") {
@@ -55,7 +56,7 @@ func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.NewPx(4))
+	ac.SetProp("border-radius", units.Px(4))
 	ac.SetProp("padding", 0)
 	ac.SetProp("margin", 0)
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -74,7 +75,7 @@ func (vv *IconValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	if vv.IsInactive() {
 		return
 	}
-	cur := gi.IconName(kit.ToString(vv.Value.Interface()))
+	cur := icons.Icon(kit.ToString(vv.Value.Interface()))
 	desc, _ := vv.Tag("desc")
 	IconChooserDialog(vp, cur, DlgOpts{Title: "Select an Icon", Prompt: desc},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {

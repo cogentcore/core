@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -37,4 +35,17 @@ func (i *ViewBoxMeetOrSlice) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: ViewBoxMeetOrSlice")
+}
+
+var _ViewBoxMeetOrSlice_descMap = map[ViewBoxMeetOrSlice]string{
+	0: `Meet means the entire ViewBox is visible within Viewport, and it is scaled up as much as possible to meet the align constraints`,
+	1: `Slice means the entire ViewBox is covered by the ViewBox, and the ViewBox is scaled down as much as possible, while still meeting the align constraints`,
+	2: ``,
+}
+
+func (i ViewBoxMeetOrSlice) Desc() string {
+	if str, ok := _ViewBoxMeetOrSlice_descMap[i]; ok {
+		return str
+	}
+	return "ViewBoxMeetOrSlice(" + strconv.FormatInt(int64(i), 10) + ")"
 }

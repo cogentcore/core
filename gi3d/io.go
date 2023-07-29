@@ -7,10 +7,11 @@ package gi3d
 import (
 	"fmt"
 	"io"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"strings"
 
+	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/ki"
 )
 
@@ -28,6 +29,12 @@ type Decoder interface {
 	// Returns a list of files that should be loaded along with the main one, if needed.
 	// For example, .obj decoder adds a corresponding .mtl file.
 	SetFile(fname string) []string
+
+	// SetFileFS sets the file name being used for decoding -- needed in case
+	// of loading other files such as textures / materials from the same directory.
+	// Returns a list of files that should be loaded along with the main one, if needed.
+	// For example, .obj decoder adds a corresponding .mtl file.
+	SetFileFS(fsys fs.FS, fname string) []string
 
 	// Decode reads the given data and decodes it, returning a new instance
 	// of the Decoder that contains all the decoded info.
@@ -58,17 +65,31 @@ var Decoders = map[string]Decoder{}
 //
 //	must have same name as .obj, or a default material is used.
 func DecodeFile(fname string) (Decoder, error) {
+	dfs, fnm, err := dirs.DirFS(fname)
+	if err != nil {
+		return nil, err
+	}
+	return DecodeFileFS(dfs, fnm)
+}
+
+// DecodeFileFS decodes the given file from the given filesystem using a decoder based on the file
+// extension.  Returns decoder instance with full decoded state.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+func DecodeFileFS(fsys fs.FS, fname string) (Decoder, error) {
 	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
 	if !has {
 		return nil, fmt.Errorf("gi3d.DecodeFile: file extension: %v not found in Decoders list for file %v", ext, fname)
 	}
 	dec := dt.New()
-	files := dec.SetFile(fname)
+	files := dec.SetFileFS(fsys, fname)
 	nf := len(files)
 
 	var err error
-	fs := make([]*os.File, nf)
+	fs := make([]fs.File, nf)
 	rs := make([]io.Reader, nf)
 	defer func() {
 		for _, fi := range fs {
@@ -79,7 +100,7 @@ func DecodeFile(fname string) (Decoder, error) {
 	}()
 
 	for i, f := range files {
-		fs[i], err = os.Open(f)
+		fs[i], err = fsys.Open(f)
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +120,21 @@ func DecodeFile(fname string) (Decoder, error) {
 //
 //	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenObj(fname string, gp *Group) error {
-	dec, err := DecodeFile(fname)
+	dfs, fnm, err := dirs.DirFS(fname)
+	if err != nil {
+		return err
+	}
+	return sc.OpenObjFS(dfs, fnm, gp)
+}
+
+// OpenObjFS opens object(s) from given file in the given filesystem into given group in scene,
+// using a decoder based on the file extension.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+func (sc *Scene) OpenObjFS(fsys fs.FS, fname string, gp *Group) error {
+	dec, err := DecodeFileFS(fsys, fname)
 	if err != nil {
 		return err
 	}
@@ -117,7 +152,21 @@ func (sc *Scene) OpenObj(fname string, gp *Group) error {
 //
 //	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenNewObj(fname string, parent ki.Ki) (*Group, error) {
-	dec, err := DecodeFile(fname)
+	dfs, fnm, err := dirs.DirFS(fname)
+	if err != nil {
+		return nil, err
+	}
+	return sc.OpenNewObjFS(dfs, fnm, parent)
+}
+
+// OpenNewObjFS opens object(s) from given file in the given filesystem into a new group
+// under given parent, using a decoder based on the file extension.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+func (sc *Scene) OpenNewObjFS(fsys fs.FS, fname string, parent ki.Ki) (*Group, error) {
+	dec, err := DecodeFileFS(fsys, fname)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +190,23 @@ func (sc *Scene) OpenNewObj(fname string, parent ki.Ki) (*Group, error) {
 //
 //	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
-	dec, err := DecodeFile(fname)
+	dfs, fnm, err := dirs.DirFS(fname)
+	if err != nil {
+		return nil, err
+	}
+	return sc.OpenToLibraryFS(dfs, fnm, libnm)
+}
+
+// OpenToLibraryFS opens object(s) from given file in the given filesystem into the scene's Library
+// using a decoder based on the file extension.  The library key name
+// must be unique, and is given by libnm -- if empty, then the filename (only)
+// without extension is used.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+func (sc *Scene) OpenToLibraryFS(fsys fs.FS, fname string, libnm string) (*Group, error) {
+	dec, err := DecodeFileFS(fsys, fname)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +220,7 @@ func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
 	return gp, nil
 }
 
-// OpenScene opens a scene from given file, using a decoder based on
+// OpenScene opens a scene from the given file, using a decoder based on
 // the file extension in first file name.
 // Supported formats include:
 // .obj = Wavefront OBJ format, including associated materials (.mtl) which
@@ -164,7 +229,23 @@ func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
 //	Does not support full scene data so only objects are loaded
 //	into a new group in scene.
 func (sc *Scene) OpenScene(fname string) error {
-	dec, err := DecodeFile(fname)
+	dfs, fnm, err := dirs.DirFS(fname)
+	if err != nil {
+		return err
+	}
+	return sc.OpenSceneFS(dfs, fnm)
+}
+
+// OpenSceneFS opens a scene from the given file in the given filesystem, using a decoder based on
+// the file extension in first file name.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//
+//	must have same name as .obj, or a default material is used.
+//	Does not support full scene data so only objects are loaded
+//	into a new group in scene.
+func (sc *Scene) OpenSceneFS(fsys fs.FS, fname string) error {
+	dec, err := DecodeFileFS(fsys, fname)
 	if err != nil {
 		return err
 	}

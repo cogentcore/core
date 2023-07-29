@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -98,7 +99,7 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
 		g.SetImageSize(sz)
-		draw.Draw(g.Pixels, g.Pixels.Bounds(), img, image.ZP, draw.Src)
+		draw.Draw(g.Pixels, g.Pixels.Bounds(), img, image.Point{}, draw.Src)
 		if g.Size.X == 0 && g.Size.Y == 0 {
 			g.Size = mat32.NewVec2FmPoint(sz)
 		}
@@ -224,7 +225,7 @@ var ImageProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open image file for this image node, rescaling to given size -- use 0, 0 to use native image size.",
-			"icon": "file-open",
+			"icon": icons.FileOpen,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
@@ -236,7 +237,7 @@ var ImageProps = ki.Props{
 		}},
 		{"SaveImage", ki.Props{
 			"desc": "Save image to a file.",
-			"icon": "file-save",
+			"icon": icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",

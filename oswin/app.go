@@ -160,6 +160,14 @@ type App interface {
 	// Call this periodically from longer-running functions to ensure
 	// GUI responsiveness.
 	PollEvents()
+
+	// ShowVirtualKeyboard shows a virtual keyboard of the given type.
+	// ShowVirtualKeyboard only has an effect on mobile platforms (iOS and Android).
+	ShowVirtualKeyboard(typ VirtualKeyboardTypes)
+
+	// HideVirtualKeyboard hides the virtual keyboard.
+	// HideVirtualKeyboard only has an effect on mobile platforms (iOS and Android).
+	HideVirtualKeyboard()
 }
 
 // Platforms are all the supported platforms for OSWin
@@ -175,9 +183,36 @@ const (
 	// Windows is a Microsoft Windows machine
 	Windows
 
+	// IOS is an Apple iOS or iPadOS mobile phone or iPad
+	IOS
+
+	// Android is an Android mobile phone or tablet
+	Android
+
 	PlatformsN
 )
 
 //go:generate stringer -type=Platforms
 
 var KiT_Platforms = kit.Enums.AddEnum(PlatformsN, kit.NotBitFlag, nil)
+
+// IsMobile returns whether the platform is a mobile platform (iOS or Android)
+func (p Platforms) IsMobile() bool {
+	return p == IOS || p == Android
+}
+
+// VirtualKeyboardTypes are all of the supported virtual keyboard types for mobile platforms
+type VirtualKeyboardTypes int32
+
+const (
+	// DefaultKeyboard is the keyboard with default input style and "return" return key
+	DefaultKeyboard VirtualKeyboardTypes = iota
+	// SingleLineKeyboard is the keyboard with default input style and "Done" return key
+	SingleLineKeyboard
+	// NumberKeyboard is the keyboard with number input style and "Done" return key
+	NumberKeyboard
+
+	VirtualKeyboardTypesN
+)
+
+//go:generate stringer -type=VirtualKeyboardTypes

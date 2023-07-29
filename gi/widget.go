@@ -8,17 +8,20 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/kigen/ordmap"
 	"github.com/goki/mat32"
 )
 
@@ -30,9 +33,11 @@ import (
 // includes toggling selection on left mouse press.
 type WidgetBase struct {
 	Node2DBase
-	Tooltip      string       `desc:"text for tooltip for this widget -- can use HTML formatting"`
-	Sty          gist.Style   `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
-	DefStyle     *gist.Style  `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
+	Tooltip       string                             `desc:"text for tooltip for this widget -- can use HTML formatting"`
+	StyleFuncs    *ordmap.Map[StyleFuncName, func()] `desc:"a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
+	OverrideStyle bool                               `desc:"override the computed styles and allow directly editing Style"`
+	Style         gist.Style                         `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+	// DefStyle      *gist.Style  `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us (modifying these externally will have no effect) -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	LayState     LayoutState  `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
 	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
 	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
@@ -46,6 +51,31 @@ var WidgetBaseProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
 }
 
+// StyleFuncName is the name of
+// a style function
+type StyleFuncName string
+
+const (
+	// StyleFuncDefault is the style function name
+	// that indicates that a style function was set
+	// on an element by itself in ConfigStyles
+	// as its default style function
+	StyleFuncDefault StyleFuncName = "default"
+	// StyleFuncFinal is the style function name
+	// that indicates that a style function was set
+	// on an element by end-user code as a final,
+	// overriding style function
+	StyleFuncFinal StyleFuncName = "final"
+)
+
+// StyleFuncParts returns a style function name
+// that indicates that a style function was set
+// on a part by the given parent in ConfigStyles
+// as its default style function
+func StyleFuncParts(parent ki.Ki) StyleFuncName {
+	return "parts/" + StyleFuncName(reflect.TypeOf(parent.This()).String())
+}
+
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*WidgetBase)
 	if !ok {
@@ -55,7 +85,7 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	}
 	wb.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
 	wb.Tooltip = fr.Tooltip
-	wb.Sty.CopyFrom(&fr.Sty)
+	wb.Style.CopyFrom(&fr.Style)
 }
 
 func (wb *WidgetBase) Disconnect() {
@@ -67,9 +97,10 @@ func (wb *WidgetBase) AsWidget() *WidgetBase {
 	return wb
 }
 
-// Style satisfies the Styler interface
-func (wb *WidgetBase) Style() *gist.Style {
-	return &wb.Sty
+// ActiveStyle satisfies the ActiveStyler interface
+// and returns the active style of the widget
+func (wb *WidgetBase) ActiveStyle() *gist.Style {
+	return &wb.Style
 }
 
 // StyleRLock does a read-lock for reading the style
@@ -83,19 +114,20 @@ func (wb *WidgetBase) StyleRUnlock() {
 }
 
 // BoxSpace returns the style BoxSpace value under read lock
-func (wb *WidgetBase) BoxSpace() float32 {
+func (wb *WidgetBase) BoxSpace() gist.SideFloats {
 	wb.StyMu.RLock()
-	bs := wb.Sty.BoxSpace()
+	bs := wb.Style.BoxSpace()
 	wb.StyMu.RUnlock()
 	return bs
 }
 
 // Init2DWidget handles basic node initialization -- Init2D can then do special things
 func (wb *WidgetBase) Init2DWidget() {
+	// fmt.Println("Init2DWidget", wb.Path())
 	wb.BBoxMu.Lock()
 	wb.StyMu.Lock()
 	wb.Viewport = wb.ParentViewport()
-	wb.Sty.Defaults()
+	wb.Style.Defaults()
 	wb.StyMu.Unlock()
 	wb.LayState.Defaults() // doesn't overwrite
 	wb.BBoxMu.Unlock()
@@ -105,6 +137,93 @@ func (wb *WidgetBase) Init2DWidget() {
 func (wb *WidgetBase) Init2D() {
 	wb.Init2DWidget()
 }
+
+// AddStyleFunc adds the given style function to the
+// widget's style functions, initializing them if necessary.
+// This function should typically be called by parents
+// on children, and not by end-user code.
+func (wb *WidgetBase) AddStyleFunc(name StyleFuncName, f func()) {
+	if wb.StyleFuncs == nil {
+		wb.StyleFuncs = ordmap.New[StyleFuncName, func()]()
+	}
+	wb.StyleFuncs.Add(name, f)
+}
+
+// AddChildStyleFunc is a helper function that adds the
+// given style function to the child of the given name
+// if it exists, starting searching at the given start index.
+func (wb *WidgetBase) AddChildStyleFunc(childName string, startIdx int, funcName StyleFuncName, f func(w *WidgetBase)) {
+	child := wb.ChildByName(childName, startIdx)
+	if child != nil {
+		wb, ok := child.Embed(KiT_WidgetBase).(*WidgetBase)
+		if ok {
+			wb.AddStyleFunc(funcName, func() {
+				f(wb)
+			})
+		}
+	}
+}
+
+// TODO: use these instead of those on NodeBase2D
+// // Style helper methods
+
+// // SetMinPrefWidth sets minimum and preferred width;
+// // will get at least this amount; max unspecified.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetMinPrefWidth(val units.Value) {
+// 	wb.Style.Width = val
+// 	wb.Style.MinWidth = val
+// }
+
+// // SetMinPrefHeight sets minimum and preferred height;
+// // will get at least this amount; max unspecified.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetMinPrefHeight(val units.Value) {
+// 	wb.Style.Height = val
+// 	wb.Style.MinHeight = val
+// }
+
+// // SetStretchMaxWidth sets stretchy max width (-1);
+// // can grow to take up avail room.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetStretchMaxWidth() {
+// 	wb.Style.MaxWidth.SetPx(-1)
+// }
+
+// // SetStretchMaxHeight sets stretchy max height (-1);
+// // can grow to take up avail room.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetStretchMaxHeight() {
+// 	wb.Style.MaxHeight.SetPx(-1)
+// }
+
+// // SetStretchMax sets stretchy max width and height (-1);
+// // can grow to take up avail room.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetStretchMax() {
+// 	wb.SetStretchMaxWidth()
+// 	wb.SetStretchMaxHeight()
+// }
+
+// // SetFixedWidth sets all width style options
+// // (Width, MinWidth, and MaxWidth) to
+// // the given fixed width unit value.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetFixedWidth(val units.Value) {
+// 	wb.Style.Width = val
+// 	wb.Style.MinWidth = val
+// 	wb.Style.MaxWidth = val
+// }
+
+// // SetFixedHeight sets all height style options
+// // (Height, MinHeight, and MaxHeight) to
+// // the given fixed height unit value.
+// // This should only be called in a style function.
+// func (wb *WidgetBase) SetFixedHeight(val units.Value) {
+// 	wb.Style.Height = val
+// 	wb.Style.MinHeight = val
+// 	wb.Style.MaxHeight = val
+// }
 
 // WidgetDefStyleKey is the key for accessing the default style stored in the
 // type-properties for a given type -- also ones with sub-selectors for parts
@@ -139,7 +258,7 @@ func DefaultStyle2DWidget(wb *WidgetBase, selector string, part *WidgetBase) *gi
 		}
 	}
 
-	parSty := wb.ParentStyle()
+	parSty := wb.ParentActiveStyle()
 
 	var dsty *gist.Style
 	stKey := WidgetDefStyleKey + selector
@@ -177,24 +296,35 @@ func (wb *WidgetBase) Style2DWidget() {
 	// pr := prof.Start("Style2DWidget")
 	// defer pr.End()
 
+	if wb.OverrideStyle {
+		return
+	}
+
 	gii, _ := wb.This().(Node2D)
 	wb.Viewport.SetCurStyleNode(gii)
 	defer wb.Viewport.SetCurStyleNode(nil)
 
-	if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
-		wb.Sty.CopyFrom(wb.DefStyle)
-	} else {
-		wb.Sty.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
-	}
-	wb.Sty.IsSet = false    // this is always first call, restart
+	// if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
+	// wb.Style.CopyFrom(wb.DefStyle)
+	// } else {
+	wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
+	// }
+	wb.Style.IsSet = false  // this is always first call, restart
 	if wb.Viewport == nil { // robust
 		wb.StyMu.Unlock()
 		gii.Init2D()
 		wb.StyMu.Lock()
 	}
+	sty := gist.Style{}
+	sty.Defaults()
+	if parSty := wb.ParentActiveStyle(); parSty != nil && *parSty != sty {
+		wb.Style.InheritFields(parSty)
+		wb.ParentStyleRUnlock()
+	}
+
 	styprops := *wb.Properties()
-	parSty := wb.ParentStyle()
-	wb.Sty.SetStyleProps(parSty, styprops, wb.Viewport)
+	parSty := wb.ParentActiveStyle()
+	wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
 
 	// look for class-specific style sheets among defaults -- have to do these
 	// dynamically now -- cannot compile into default which is type-general
@@ -204,7 +334,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	for _, cl := range classes {
 		clsty := "." + strings.TrimSpace(cl)
 		if sp, ok := ki.SubProps(tprops, clsty); ok {
-			wb.Sty.SetStyleProps(parSty, sp, wb.Viewport)
+			wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
 		}
 	}
 	kit.TypesMu.RUnlock()
@@ -217,14 +347,84 @@ func (wb *WidgetBase) Style2DWidget() {
 		wb.CSSAgg = nil // restart
 	}
 	AggCSS(&wb.CSSAgg, wb.CSS)
-	StyleCSS(gii, wb.Viewport, &wb.Sty, wb.CSSAgg, "")
+	StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
 
-	SetUnitContext(&wb.Sty, wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
-	if wb.Sty.Inactive {                                 // inactive can only set, not clear
+	// csf := []func(w *WidgetBase){}
+	// esf := []func(w *WidgetBase){}
+
+	// cf := strings.Fields(wb.Class)
+	// en := strings.ToLower(ki.Type(wb).Name())
+
+	// // fmt.Println(cf, en)
+
+	// wb.FuncUp(0, nil, func(k ki.Ki, level int, data any) bool {
+	// 	kwbki := k.Embed(KiT_WidgetBase)
+	// 	ok := kwbki != nil
+	// 	// fmt.Println(ok, level, ki.Type(k).Name())
+	// 	if ok {
+	// 		kwb := kwbki.(*WidgetBase)
+	// 		if kwb.ClassStyleFuncs != nil {
+	// 			for c, f := range kwb.ClassStyleFuncs {
+	// 				for _, field := range cf {
+	// 					if field == c {
+	// 						csf = append(csf, f)
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 		if kwb.ElementStyleFuncs != nil {
+	// 			for e, f := range kwb.ElementStyleFuncs {
+	// 				if e == en {
+	// 					esf = append(esf, f)
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	return true
+	// })
+
+	// fmt.Println(wb.Nm, len(esf), len(csf))
+
+	// if len(esf) != 0 {
+	// 	for i := len(esf) - 1; i >= 0; i-- {
+	// 		esf[i](wb)
+	// 	}
+	// }
+	// if len(csf) != 0 {
+	// 	for i := len(csf) - 1; i >= 0; i-- {
+	// 		csf[i](wb)
+	// 	}
+	// }
+
+	wb.RunStyleFuncs()
+
+	// if CustomStyleFunc != nil {
+	// 	CustomStyleFunc(wb)
+	// }
+
+	// if wb.FinalStyleFunc != nil {
+	// 	wb.FinalStyleFunc()
+	// }
+
+	SetUnitContext(&wb.Style, wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
+	if wb.Style.Inactive {                                 // inactive can only set, not clear
 		wb.SetInactive()
 	}
 
-	wb.Viewport.SetCurrentColor(wb.Sty.Font.Color)
+	wb.Viewport.SetCurrentColor(wb.Style.Color)
+}
+
+// RunStyleFuncs runs the style functions specified in
+// the StyleFuncs field in descending order.
+func (wb *WidgetBase) RunStyleFuncs() {
+	if wb.StyleFuncs != nil {
+		vals := wb.StyleFuncs.Vals()
+		if len(vals) != 0 {
+			for i := len(vals) - 1; i >= 0; i-- {
+				vals[i]()
+			}
+		}
+	}
 }
 
 // StylePart sets the style properties for a child in parts (or any other
@@ -250,8 +450,8 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 	// default style within our type properties..  that's good -- HOWEVER we
 	// cannot put any sub-selector properties within these part styles -- must
 	// all be in the base-level.. hopefully that works..
-	pdst := DefaultStyle2DWidget(wb, stynm, pg)
-	pg.DefStyle = pdst // will use this as starting point for all styles now..
+	// pdst := DefaultStyle2DWidget(wb, stynm, pg)
+	// pg.DefStyle = pdst // will use this as starting point for all styles now..
 
 	if ics := pk.Embed(KiT_Icon); ics != nil {
 		ic := ics.(*Icon)
@@ -291,7 +491,7 @@ func ApplyCSS(node Node2D, vp *Viewport2D, st *gist.Style, css ki.Props, key, se
 			return false
 		}
 	}
-	parSty := node.AsNode2D().ParentStyle()
+	parSty := node.AsNode2D().ParentActiveStyle()
 	st.SetStyleProps(parSty, pmap, vp)
 	node.AsNode2D().ParentStyleRUnlock()
 	return true
@@ -316,14 +516,14 @@ func (wb *WidgetBase) Style2D() {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
 
-	hasTempl, saveTempl := wb.Sty.FromTemplate()
+	hasTempl, saveTempl := wb.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		wb.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		wb.Sty.SaveTemplate()
+		wb.Style.SaveTemplate()
 	}
-	wb.LayState.SetFromStyle(&wb.Sty.Layout) // also does reset
+	wb.LayState.SetFromStyle(&wb.Style) // also does reset
 }
 
 // SetUnitContext sets the unit context based on size of viewport and parent
@@ -339,14 +539,14 @@ func SetUnitContext(st *gist.Style, vp *Viewport2D, el mat32.Vec2) {
 			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
-	girl.OpenFont(&st.Font, &st.UnContext) // calls SetUnContext after updating metrics
+	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
 	st.ToDots()
 }
 
 func (wb *WidgetBase) InitLayout2D() bool {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
-	wb.LayState.SetFromStyle(&wb.Sty.Layout)
+	wb.LayState.SetFromStyle(&wb.Style)
 	return false
 }
 
@@ -405,11 +605,11 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	if initStyle {
 		mvp := wb.ViewportSafe()
-		SetUnitContext(&wb.Sty, mvp, psize) // update units with final layout
+		SetUnitContext(&wb.Style, mvp, psize) // update units with final layout
 	}
 	wb.BBox = nii.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
-	nii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
+	nii.ComputeBBox2D(parBBox, image.Point{}) // other bboxes from BBox
 	if Layout2DTrace {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.VpBBox, wb.WinBBox)
 	}
@@ -425,11 +625,11 @@ func (wb *WidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 // margin and padding to children -- call in ChildrenBBox2D for most widgets
 func (wb *WidgetBase) ChildrenBBox2DWidget() image.Rectangle {
 	nb := wb.VpBBox
-	spc := int(wb.BoxSpace())
-	nb.Min.X += spc
-	nb.Min.Y += spc
-	nb.Max.X -= spc
-	nb.Max.Y -= spc
+	spc := wb.BoxSpace()
+	nb.Min.X += int(spc.Left)
+	nb.Min.Y += int(spc.Top)
+	nb.Max.X -= int(spc.Right)
+	nb.Max.Y -= int(spc.Bottom)
 	return nb
 }
 
@@ -512,7 +712,7 @@ func (wb *WidgetBase) Render2D() {
 // ReRender2DTree does a re-render of the tree -- after it has already been
 // initialized and styled -- redoes the full stack
 func (wb *WidgetBase) ReRender2DTree() {
-	parBBox := image.ZR
+	parBBox := image.Rectangle{}
 	pni, _ := KiToNode2D(wb.Par)
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()
@@ -551,7 +751,7 @@ func (wb *WidgetBase) Move2DTree() {
 	if wb.HasNoLayout() {
 		return
 	}
-	parBBox := image.ZR
+	parBBox := image.Rectangle{}
 	pnii, pn := KiToNode2D(wb.Par)
 	if pn != nil {
 		parBBox = pnii.ChildrenBBox2D()
@@ -592,13 +792,13 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 
 var TooltipFrameProps = ki.Props{
 	"background-color":    &Prefs.Colors.Highlight,
-	"border-width":        units.NewPx(0),
+	"border-width":        units.Px(0),
 	"border-color":        "none",
-	"margin":              units.NewPx(0),
-	"padding":             units.NewPx(2),
-	"box-shadow.h-offset": units.NewPx(0),
-	"box-shadow.v-offset": units.NewPx(0),
-	"box-shadow.blur":     units.NewPx(0),
+	"margin":              units.Px(0),
+	"padding":             units.Px(2),
+	"box-shadow.h-offset": units.Px(0),
+	"box-shadow.v-offset": units.Px(0),
+	"box-shadow.blur":     units.Px(0),
 	"box-shadow.color":    &Prefs.Colors.Shadow,
 }
 
@@ -623,10 +823,10 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
 	lbl.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
-	mwdots := parVp.Sty.UnContext.ToDots(40, units.Em)
+	mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
 	mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 
-	lbl.SetProp("max-width", units.NewDot(mwdots))
+	lbl.SetProp("max-width", units.Dot(mwdots))
 	lbl.Text = tooltip
 	frame.Init2DTree()
 	frame.Style2DTree()                                    // sufficient to get sizes
@@ -748,7 +948,7 @@ func (wb *WidgetBase) RenderLock() (*girl.State, *girl.Paint, *gist.Style) {
 	wb.StyMu.RLock()
 	rs := &wb.Viewport.Render
 	rs.Lock()
-	return rs, &rs.Paint, &wb.Sty
+	return rs, &rs.Paint, &wb.Style
 }
 
 // RenderUnlock unlocks girl.State and style
@@ -759,29 +959,25 @@ func (wb *WidgetBase) RenderUnlock(rs *girl.State) {
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
-func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, rad float32) {
+func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
-	if rad == 0.0 {
-		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
-	} else {
-		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
-	}
-	pc.FillStrokeClear(rs)
+	pc.DrawBorder(rs, pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
 // RenderStdBox draws standard box using given style.
 // girl.State and Style must already be locked at this point (RenderLock)
 func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
+	// SidesTODO: this is a pretty critical function, so a good place to look if things aren't working
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
 
-	pos := wb.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
-	sz := wb.LayState.Alloc.Size.AddScalar(-2.0 * st.Layout.Margin.Dots)
-	rad := st.Border.Radius.Dots
+	pos := wb.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
+	sz := wb.LayState.Alloc.Size.Sub(st.Margin.Dots().Size())
+	rad := st.Border.Radius.Dots()
 
 	// first do any shadow
 	if st.BoxShadow.HasShadow() {
@@ -790,55 +986,61 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 		pc.FillStyle.Color.SetShadowGradient(st.BoxShadow.Color, "")
 		// todo: this is not rendering a transparent gradient
 		// pc.FillStyle.Opacity = .5
-		wb.RenderBoxImpl(spos, sz, rad)
+		wb.RenderBoxImpl(spos, sz, st.Border)
 		// pc.FillStyle.Opacity = 1.0
 	}
 	// then draw the box over top of that -- note: won't work well for
 	// transparent! need to set clipping to box first..
-	if !st.Font.BgColor.IsNil() {
-		if rad == 0 {
-			pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+	// we need to draw things twice here because we need to clear
+	// the whole area with the background color first so the border
+	// doesn't render weirdly
+	if !st.BackgroundColor.IsNil() {
+		if rad.IsZero() {
+			pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 		} else {
-			pc.FillStyle.SetColorSpec(&st.Font.BgColor)
+			pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+			// no border -- fill only
 			pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
 			pc.Fill(rs)
 		}
 	}
 
-	pc.StrokeStyle.SetColor(&st.Border.Color)
-	pc.StrokeStyle.Width = st.Border.Width
-	// pc.FillStyle.SetColor(&st.Font.BgColor)
-	pos = pos.AddScalar(0.5 * st.Border.Width.Dots)
-	sz = sz.SubScalar(st.Border.Width.Dots)
+	// pc.StrokeStyle.SetColor(&st.Border.Color)
+	// pc.StrokeStyle.Width = st.Border.Width
+	// pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+	pos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
+	sz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
 	pc.FillStyle.SetColor(nil)
-	wb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+	// now that we have drawn background color
+	// above, we can draw the border
+	wb.RenderBoxImpl(pos, sz, st.Border)
 }
 
 // set our LayState.Alloc.Size from constraints
 func (wb *WidgetBase) Size2DFromWH(w, h float32) {
-	st := &wb.Sty
-	if st.Layout.Width.Dots > 0 {
-		w = mat32.Max(st.Layout.Width.Dots, w)
+	st := &wb.Style
+	if st.Width.Dots > 0 {
+		w = mat32.Max(st.Width.Dots, w)
 	}
-	if st.Layout.Height.Dots > 0 {
-		h = mat32.Max(st.Layout.Height.Dots, h)
+	if st.Height.Dots > 0 {
+		h = mat32.Max(st.Height.Dots, h)
 	}
-	spc := st.BoxSpace()
-	w += 2.0 * spc
-	h += 2.0 * spc
+	spcsz := st.BoxSpace().Size()
+	w += spcsz.X
+	h += spcsz.Y
 	wb.LayState.Alloc.Size = mat32.Vec2{w, h}
 }
 
 // Size2DAddSpace adds space to existing AllocSize
 func (wb *WidgetBase) Size2DAddSpace() {
 	spc := wb.BoxSpace()
-	wb.LayState.Alloc.Size.SetAddScalar(2 * spc)
+	wb.LayState.Alloc.Size.SetAdd(spc.Size())
 }
 
 // Size2DSubSpace returns AllocSize minus 2 * BoxSpace -- the amount avail to the internal elements
 func (wb *WidgetBase) Size2DSubSpace() mat32.Vec2 {
 	spc := wb.BoxSpace()
-	return wb.LayState.Alloc.Size.SubScalar(2 * spc)
+	return wb.LayState.Alloc.Size.Sub(spc.Size())
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -902,8 +1104,8 @@ func (wb *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Po
 
 func (wb *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := wb.BoxSpace()
-	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.AddScalar(spc)
-	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.AddScalar(-2.0 * spc)
+	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.Add(spc.Pos())
+	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.Sub(spc.Size())
 	wb.Parts.Layout2D(parBBox, iter)
 }
 
@@ -928,14 +1130,14 @@ func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 // ConfigPartsIconLabel adds to config to create parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
-func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icnm string, txt string) (icIdx, lbIdx int) {
+func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
 	wb.Parts.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
-	if wb.Sty.Template != "" {
-		wb.Parts.Sty.Template = wb.Sty.Template + ".Parts"
+	if wb.Style.Template != "" {
+		wb.Parts.Style.Template = wb.Style.Template + ".Parts"
 	}
 	icIdx = -1
 	lbIdx = -1
-	if IconName(icnm).IsValid() {
+	if TheIconMgr.IsValid(icnm) {
 		icIdx = len(*config)
 		config.Add(KiT_Icon, "icon")
 		if txt != "" {
@@ -951,11 +1153,11 @@ func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icn
 
 // ConfigPartsSetIconLabel sets the icon and text values in parts, and get
 // part style props, using given props if not set in object props
-func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
+func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := wb.Parts.Child(icIdx).(*Icon)
-		if wb.Sty.Template != "" {
-			ic.Sty.Template = wb.Sty.Template + ".icon"
+		if wb.Style.Template != "" {
+			ic.Style.Template = wb.Style.Template + ".icon"
 		}
 		if set, _ := ic.SetIcon(icnm); set || wb.NeedsFullReRender() {
 			wb.StylePart(Node2D(ic))
@@ -963,22 +1165,28 @@ func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icId
 	}
 	if lbIdx >= 0 {
 		lbl := wb.Parts.Child(lbIdx).(*Label)
-		if wb.Sty.Template != "" {
-			lbl.Sty.Template = wb.Sty.Template + ".icon"
+		if wb.Style.Template != "" {
+			lbl.Style.Template = wb.Style.Template + ".icon"
 		}
 		if lbl.Text != txt {
 			wb.StylePart(Node2D(lbl))
 			if icIdx >= 0 {
 				wb.StylePart(wb.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
 			}
-			lbl.SetText(txt)
+			// avoiding SetText here makes it so label default
+			// styles don't end up first, which is needed for
+			// parent styles to override. However, there might have
+			// been a reason for calling SetText, so we will see if
+			// any bugs show up. TODO: figure out a good long-term solution for this.
+			lbl.Text = txt
+			// lbl.SetText(txt)
 		}
 	}
 }
 
 // PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
-func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool {
-	if IconName(icnm).IsValid() {
+func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm icons.Icon, txt string) bool {
+	if TheIconMgr.IsValid(icnm) {
 		ick := wb.Parts.ChildByName("icon", 0)
 		if ick == nil {
 			return true
@@ -999,7 +1207,7 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) boo
 			return true
 		}
 		lbl := lblk.(*Label)
-		lbl.Sty.Font.Color = wb.Sty.Font.Color
+		lbl.Style.Color = wb.Style.Color
 		if lbl.Text != txt {
 			return true
 		}

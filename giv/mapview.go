@@ -10,6 +10,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -108,10 +109,7 @@ func (mv *MapView) Config() {
 
 // IsConfiged returns true if the widget is fully configured
 func (mv *MapView) IsConfiged() bool {
-	if len(mv.Kids) == 0 {
-		return false
-	}
-	return true
+	return len(mv.Kids) != 0
 }
 
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values
@@ -150,8 +148,8 @@ func (mv *MapView) ConfigMapGrid() {
 	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
 	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.NewEm(1.5))
-	sg.SetMinPrefWidth(units.NewEm(10))
+	sg.SetMinPrefHeight(units.Em(1.5))
+	sg.SetMinPrefWidth(units.Em(10))
 	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
 	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 	config := kit.TypeAndNameList{}
@@ -239,11 +237,11 @@ func (mv *MapView) ConfigMapGrid() {
 		vv.ConfigWidget(widg)
 		wb := widg.AsWidget()
 		if wb != nil {
-			wb.Sty.Template = "giv.MapView.ItemWidget." + vv.WidgetType().Name()
+			wb.Style.Template = "giv.MapView.ItemWidget." + vv.WidgetType().Name()
 		}
 		wb = keyw.AsWidget()
 		if wb != nil {
-			wb.Sty.Template = "giv.MapView.KeyWidget." + kv.WidgetType().Name()
+			wb.Style.Template = "giv.MapView.KeyWidget." + kv.WidgetType().Name()
 		}
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
@@ -263,10 +261,10 @@ func (mv *MapView) ConfigMapGrid() {
 			})
 		}
 		delact := sg.Child(i*ncol + ncol - 1).(*gi.Action)
-		delact.SetIcon("minus")
+		delact.SetIcon(icons.Delete)
 		delact.Tooltip = "delete item"
 		delact.Data = kv
-		delact.Sty.Template = "giv.MapView.DelAction"
+		delact.Style.Template = "giv.MapView.DelAction"
 		delact.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			act := send.(*gi.Action)
 			mvv := recv.Embed(KiT_MapView).(*MapView)
@@ -383,18 +381,18 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of map"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.UpdateValues()
 			})
-		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: "update", Tooltip: "Switch between sorting by the keys vs. the values"},
+		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.ToggleSort()
 			})
 		if ndef > 2 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the map"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the map"},
 				mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					mvv := recv.Embed(KiT_MapView).(*MapView)
 					mvv.MapAdd()

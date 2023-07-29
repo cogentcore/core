@@ -25,7 +25,7 @@ type Paint struct {
 	Display     bool          `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
 	StrokeStyle Stroke        `desc:"stroke (line drawing) parameters"`
 	FillStyle   Fill          `desc:"fill (region filling) parameters"`
-	FontStyle   Font          `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	FontStyle   FontRender    `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
 	TextStyle   Text          `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
 	VecEff      VectorEffects `xml:"vector-effect" desc:"prop: vector-effect = various rendering special effects settings"`
 	XForm       mat32.Mat2    `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`
@@ -290,8 +290,8 @@ type Stroke struct {
 func (ps *Stroke) Defaults() {
 	ps.On = false // svg says default is off
 	ps.SetColor(Black)
-	ps.Width.Set(1.0, units.Px)
-	ps.MinWidth.Set(.5, units.Dot)
+	ps.Width.Set(1.0, units.UnitPx)
+	ps.MinWidth.Set(.5, units.UnitDot)
 	ps.Cap = LineCapButt
 	ps.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel
 	ps.MiterLimit = 10.0

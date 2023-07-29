@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -42,4 +40,22 @@ func (i *Cases) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: Cases")
+}
+
+var _Cases_descMap = map[Cases]string{
+	0: ``,
+	1: ``,
+	2: `CamelCase is init-caps`,
+	3: `LowerCamelCase has first letter lower-case`,
+	4: `SnakeCase is snake_case -- lower with underbars`,
+	5: `UpperSnakeCase is SNAKE_CASE -- upper with underbars`,
+	6: `KebabCase is kebab-case -- lower with -&#39;s`,
+	7: `CasesN is the number of textview states`,
+}
+
+func (i Cases) Desc() string {
+	if str, ok := _Cases_descMap[i]; ok {
+		return str
+	}
+	return "Cases(" + strconv.FormatInt(int64(i), 10) + ")"
 }

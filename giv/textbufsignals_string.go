@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -41,4 +39,21 @@ func (i *TextBufSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TextBufSignals")
+}
+
+var _TextBufSignals_descMap = map[TextBufSignals]string{
+	0: `TextBufDone means that editing was completed and applied to Txt field -- data is Txt bytes`,
+	1: `TextBufNew signals that entirely new text is present -- all views update -- data is Txt bytes.`,
+	2: `TextBufInsert signals that some text was inserted -- data is textbuf.Edit describing change -- the TextBuf always reflects the current state *after* the edit.`,
+	3: `TextBufDelete signals that some text was deleted -- data is textbuf.Edit describing change -- the TextBuf always reflects the current state *after* the edit.`,
+	4: `TextBufMarkUpdt signals that the Markup text has been updated -- this signal is typically sent from a separate goroutine so should be used with a mutex`,
+	5: `TextBufClosed signals that the textbuf was closed`,
+	6: ``,
+}
+
+func (i TextBufSignals) Desc() string {
+	if str, ok := _TextBufSignals_descMap[i]; ok {
+		return str
+	}
+	return "TextBufSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

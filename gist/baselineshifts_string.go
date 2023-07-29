@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -38,4 +36,18 @@ func (i *BaselineShifts) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: BaselineShifts")
+}
+
+var _BaselineShifts_descMap = map[BaselineShifts]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+}
+
+func (i BaselineShifts) Desc() string {
+	if str, ok := _BaselineShifts_descMap[i]; ok {
+		return str
+	}
+	return "BaselineShifts(" + strconv.FormatInt(int64(i), 10) + ")"
 }

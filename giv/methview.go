@@ -13,6 +13,7 @@ import (
 	"github.com/fatih/camelcase"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/ki/bitflag"
@@ -104,10 +105,7 @@ func HasToolBarView(val any) bool {
 		return false
 	}
 	_, ok = ki.SliceTypeProps(tpp, "ToolBar")
-	if !ok {
-		return false
-	}
-	return true
+	return ok
 }
 
 // ToolBarView configures ToolBar according to the "ToolBar" properties
@@ -358,10 +356,7 @@ func HasMainMenuView(val any) bool {
 		return false
 	}
 	_, ok = ki.SliceTypeProps(tpp, "MainMenu")
-	if !ok {
-		return false
-	}
-	return true
+	return ok
 }
 
 // MethViewNoUpdateAfterProp returns true if given val has a top-level "MethViewNoUpdateAfter"
@@ -498,7 +493,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, label-func must be of type LabelFunc", methNm))
 			}
 		case "icon":
-			ac.Icon = gi.IconName(kit.ToString(pv))
+			ac.Icon = icons.Icon(kit.ToString(pv))
 		case "desc":
 			md.Desc = kit.ToString(pv)
 			ac.Tooltip = md.Desc

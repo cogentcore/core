@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -40,4 +38,20 @@ func (i *FileViewSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: FileViewSignals")
+}
+
+var _FileViewSignals_descMap = map[FileViewSignals]string{
+	0: `FileViewDoubleClicked emitted for double-click on a non-directory file in table view (data is full selected file name w/ path) -- typically closes dialog.`,
+	1: `FileViewWillUpdate emitted when list of files is about to be updated based on user action (data is current path) -- current DirPath will be used -- can intervene here if needed.`,
+	2: `FileViewUpdated emitted after list of files has been updated (data is current path).`,
+	3: `FileViewNewFolder emitted when a new folder was created (data is current path).`,
+	4: `FileViewFavAdded emitted when a new favorite was added (data is new favorite path).`,
+	5: ``,
+}
+
+func (i FileViewSignals) Desc() string {
+	if str, ok := _FileViewSignals_descMap[i]; ok {
+		return str
+	}
+	return "FileViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

@@ -17,6 +17,7 @@ import (
 
 	"github.com/c2h5oh/datasize"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
@@ -26,7 +27,7 @@ import (
 // FileInfo represents the information about a given file / directory,
 // including icon, mimetype, etc
 type FileInfo struct {
-	Ic      gi.IconName       `tableview:"no-header" desc:"icon for file"`
+	Ic      icons.Icon        `tableview:"no-header" desc:"icon for file"`
 	Name    string            `width:"40" desc:"name of the file, without any path"`
 	Size    FileSize          `desc:"size of the file in bytes"`
 	Kind    string            `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`
@@ -120,10 +121,7 @@ func (fi *FileInfo) IsExec() bool {
 		return true
 	}
 	ext := filepath.Ext(fi.Path)
-	if ext == ".exe" {
-		return true
-	}
-	return false
+	return ext == ".exe"
 }
 
 // IsSymLink returns true if file is a symbolic link
@@ -217,7 +215,7 @@ func FileNames(d os.File, names *[]string) (err error) {
 // FileNames returns a slice of file names from the starting directory and its subdirectories
 func (fi *FileInfo) FileNames(names *[]string) (err error) {
 	if !fi.IsDir() {
-		err = errors.New("Not a directory: FileNames returns a list of files within a directory")
+		err = errors.New("not a directory: FileNames returns a list of files within a directory")
 		return err
 	}
 	path := fi.Path
@@ -273,42 +271,42 @@ func (fi *FileInfo) Rename(path string) (newpath string, err error) {
 // FindIcon uses file info to find an appropriate icon for this file -- uses
 // Kind string first to find a correspondingly-named icon, and then tries the
 // extension.  Returns true on success.
-func (fi *FileInfo) FindIcon() (gi.IconName, bool) {
+func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 	if fi.IsDir() {
-		return gi.IconName("folder"), true
+		return "folder", true
 	}
 	if fi.Sup != filecat.NoSupport {
 		snm := strings.ToLower(fi.Sup.String())
-		if icn := gi.IconName(snm); icn.IsValid() {
+		if icn := icons.Icon(snm); gi.TheIconMgr.IsValid(icn) {
 			return icn, true
 		}
-		if icn := gi.IconName("file-" + snm); icn.IsValid() {
+		if icn := icons.Icon("file-" + snm); gi.TheIconMgr.IsValid(icn) {
 			return icn, true
 		}
 	}
 	subt := strings.ToLower(filecat.MimeSub(fi.Mime))
 	if subt != "" {
-		if icn := gi.IconName(subt); icn.IsValid() {
+		if icn := icons.Icon(subt); gi.TheIconMgr.IsValid(icn) {
 			return icn, true
 		}
 	}
 	if fi.Cat != filecat.Unknown {
 		cat := strings.ToLower(fi.Cat.String())
-		if icn := gi.IconName(cat); icn.IsValid() {
+		if icn := icons.Icon(cat); gi.TheIconMgr.IsValid(icn) {
 			return icn, true
 		}
-		if icn := gi.IconName("file-" + cat); icn.IsValid() {
+		if icn := icons.Icon("file-" + cat); gi.TheIconMgr.IsValid(icn) {
 			return icn, true
 		}
 	}
 	ext := filepath.Ext(fi.Name)
 	if ext != "" {
-		if icn := gi.IconName(ext[1:]); icn.IsValid() {
+		if icn := icons.Icon(ext[1:]); gi.TheIconMgr.IsValid(icn) {
 			return icn, true
 		}
 	}
 
-	icn := gi.IconName("none")
+	icn := icons.None
 	return icn, false
 }
 

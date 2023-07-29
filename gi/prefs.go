@@ -15,6 +15,7 @@ import (
 
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
@@ -30,6 +31,8 @@ import (
 type Preferences struct {
 	LogicalDPIScale      float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
 	ScreenPrefs          map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
+	ColorSchemeType      ColorSchemeTypes       `desc:"the color scheme type (light or dark)"`
+	Density              Densities              `desc:"the density (compactness) of content"`
 	Colors               ColorPrefs             `desc:"active color preferences"`
 	ColorSchemes         map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`
 	Params               ParamPrefs             `view:"inline" desc:"parameters controlling GUI behavior"`
@@ -60,6 +63,8 @@ func init() {
 
 func (pf *Preferences) Defaults() {
 	pf.LogicalDPIScale = 1.0
+	pf.ColorSchemeType = ColorSchemeLight
+	pf.Density = DensityMedium
 	pf.Colors.Defaults()
 	pf.ColorSchemes = DefaultColorSchemes()
 	pf.Params.Defaults()
@@ -147,24 +152,14 @@ func (pf *Preferences) SaveColors(filename FileName) error {
 
 // LightMode sets colors to light mode
 func (pf *Preferences) LightMode() {
-	lc, ok := pf.ColorSchemes["Light"]
-	if !ok {
-		log.Printf("Light ColorScheme not found\n")
-		return
-	}
-	pf.Colors = *lc
+	pf.ColorSchemeType = ColorSchemeLight
 	pf.Save()
 	pf.UpdateAll()
 }
 
 // DarkMode sets colors to dark mode
 func (pf *Preferences) DarkMode() {
-	lc, ok := pf.ColorSchemes["Dark"]
-	if !ok {
-		log.Printf("Dark ColorScheme not found\n")
-		return
-	}
-	pf.Colors = *lc
+	pf.ColorSchemeType = ColorSchemeDark
 	pf.Save()
 	pf.UpdateAll()
 }
@@ -188,6 +183,11 @@ func (pf *Preferences) Apply() {
 	}
 	if pf.ColorSchemes["Dark"].HiStyle == "" {
 		pf.ColorSchemes["Dark"].HiStyle = "monokai"
+	}
+	if pf.ColorSchemeType == ColorSchemeLight {
+		Colors = TheColorSchemes.Light
+	} else {
+		Colors = TheColorSchemes.Dark
 	}
 
 	TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)
@@ -388,12 +388,12 @@ var PreferencesProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"UpdateAll", ki.Props{
 			"desc": "Updates all open windows with current preferences -- triggers rebuild of default styles.",
-			"icon": "update",
+			"icon": icons.Refresh,
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs.json file, which is auto-loaded at startup.",
-			"icon": "file-save",
+			"icon": icons.Save,
 			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*Preferences)
 				act.SetActiveStateUpdt(pf.Changed)
@@ -402,15 +402,15 @@ var PreferencesProps = ki.Props{
 		{"sep-color", ki.BlankProp{}},
 		{"LightMode", ki.Props{
 			"desc": "Set color mode to Light mode as defined in ColorSchemes -- automatically does Save and UpdateAll ",
-			"icon": "color",
+			"icon": icons.LightMode,
 		}},
 		{"DarkMode", ki.Props{
 			"desc": "Set color mode to Dark mode as defined in ColorSchemes -- automatically does Save and UpdateAll",
-			"icon": "color",
+			"icon": icons.DarkMode,
 		}},
 		{"sep-scrn", ki.BlankProp{}},
 		{"SaveZoom", ki.Props{
-			"icon": "zoom-in",
+			"icon": icons.ZoomIn,
 			"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
 			"Args": ki.PropSlice{
 				{"For Current Screen Only?", ki.Props{
@@ -421,32 +421,70 @@ var PreferencesProps = ki.Props{
 		}},
 		{"ScreenInfo", ki.Props{
 			"desc":        "shows parameters about all the active screens",
-			"icon":        "info",
+			"icon":        icons.Info,
 			"show-return": true,
 		}},
 		{"VersionInfo", ki.Props{
 			"desc":        "shows current GoGi version information",
-			"icon":        "info",
+			"icon":        icons.Info,
 			"show-return": true,
 		}},
 		{"sep-key", ki.BlankProp{}},
 		{"EditKeyMaps", ki.Props{
-			"icon": "keyboard",
+			"icon": icons.Keyboard,
 			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current keymaps are saved and loaded with preferences automatically if SaveKeyMaps is clicked (will be turned on automatically if you open this editor).",
 		}},
 		{"EditHiStyles", ki.Props{
-			"icon": "file-binary",
+			"icon": icons.InkHighlighter,
 			"desc": "opens the HiStylesView editor of highlighting styles.",
 		}},
 		{"EditDetailed", ki.Props{
-			"icon": "file-binary",
+			"icon": icons.Description,
 			"desc": "opens the PrefsDetView editor to edit detailed params that are not typically user-modified, but can be if you really care..  Turns on the SaveDetailed flag so these will be saved and loaded automatically -- can toggle that back off if you don't actually want to.",
 		}},
 		{"EditDebug", ki.Props{
-			"icon": "file-binary",
+			"icon": icons.BugReport,
 			"desc": "Opens the PrefsDbgView editor to control debugging parameters. These are not saved -- only set dynamically during running.",
 		}},
 	},
+}
+
+// Densities is an enum representing the different
+// density options in user preferences
+type Densities int
+
+const (
+	// DensityCompact represents a compact density
+	// with minimal whitespace
+	DensityCompact Densities = iota
+	// DensityMedium represents a medium density
+	// with medium whitespace
+	DensityMedium
+	// DensitySpread represents a spread-out density
+	// with a lot of whitespace
+	DensitySpread
+
+	DensitiesN
+)
+
+//go:generate stringer -type=Densities
+
+var KiT_Densities = kit.Enums.AddEnumAltLower(DensitiesN, kit.NotBitFlag, gist.StylePropProps, "Density")
+
+// DensityMul returns a multiplier centered
+// around 1 representing the density set in the preferences.
+// It should be used for determining padding and margin values.
+func (pf *Preferences) DensityMul() float32 {
+	switch pf.Density {
+	case DensityCompact:
+		return 0.5
+	case DensityMedium:
+		return 1
+	case DensitySpread:
+		return 1.5
+	}
+	log.Println("got invalid preferences density value", pf.Density)
+	return 1
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -472,7 +510,7 @@ var KiT_ColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
 func (pf *ColorPrefs) Defaults() {
 	pf.HiStyle = "emacs"
 	pf.Font.SetColor(gist.Black)
-	pf.Border.SetString("#666", nil)
+	pf.Border.SetString("#e6e6e6", nil)
 	pf.Background.SetColor(gist.White)
 	pf.Shadow.SetString("darker-10", &pf.Background)
 	pf.Control.SetString("#F8F8F8", nil)
@@ -572,7 +610,7 @@ var ColorPrefsProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenJSON", ki.Props{
 			"label": "Open...",
-			"icon":  "file-open",
+			"icon":  icons.FileOpen,
 			"desc":  "open set of colors from a json-formatted file",
 			"Args": ki.PropSlice{
 				{"Color File Name", ki.Props{
@@ -583,7 +621,7 @@ var ColorPrefsProps = ki.Props{
 		{"SaveJSON", ki.Props{
 			"label": "Save As...",
 			"desc":  "Saves colors to JSON formatted file.",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"Color File Name", ki.Props{
 					"ext": ".json",
@@ -592,7 +630,7 @@ var ColorPrefsProps = ki.Props{
 		}},
 		{"SetToPrefs", ki.Props{
 			"desc": "Sets this color scheme as the current active color scheme in Prefs.",
-			"icon": "reset",
+			"icon": icons.Palette,
 		}},
 	},
 }
@@ -609,18 +647,22 @@ type ScreenPrefs struct {
 
 // ParamPrefs contains misc parameters controlling GUI behavior.
 type ParamPrefs struct {
-	DoubleClickMSec  int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
-	ScrollWheelSpeed float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
-	LocalMainMenu    bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
-	BigFileSize      int     `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`
-	SavedPathsMax    int     `desc:"maximum number of saved paths to save in FileView"`
-	Smooth3D         bool    `desc:"turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)"`
+	DoubleClickMSec    int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
+	ScrollWheelSpeed   float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
+	LocalMainMenu      bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
+	OnlyCloseActiveTab bool    `def:"false" desc:"only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it"`
+	ZebraStripeWeight  float32 `def:"0" min:"0" max:"100" step:"1" desc:"the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)"`
+	BigFileSize        int     `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`
+	SavedPathsMax      int     `desc:"maximum number of saved paths to save in FileView"`
+	Smooth3D           bool    `desc:"turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)"`
 }
 
 func (pf *ParamPrefs) Defaults() {
 	pf.DoubleClickMSec = 500
 	pf.ScrollWheelSpeed = 20
 	pf.LocalMainMenu = true // much better
+	pf.OnlyCloseActiveTab = false
+	pf.ZebraStripeWeight = 0
 	pf.BigFileSize = 10000000
 	pf.SavedPathsMax = 50
 	pf.Smooth3D = true
@@ -718,9 +760,9 @@ func (pf *EditorPrefs) StyleFromProps(props ki.Props) {
 // favorites.  Is an ordered list instead of a map because user can organize
 // in order
 type FavPathItem struct {
-	Ic   IconName `desc:"icon for item"`
-	Name string   `width:"20" desc:"name of the favorite item"`
-	Path string   `tableview:"-select"`
+	Ic   icons.Icon `desc:"icon for item"`
+	Name string     `width:"20" desc:"name of the favorite item"`
+	Path string     `tableview:"-select"`
 }
 
 // Label satisfies the Labeler interface
@@ -749,11 +791,11 @@ func (pf *FavPaths) FindPath(path string) (int, bool) {
 
 // DefaultPaths are default favorite paths
 var DefaultPaths = FavPaths{
-	{"home", "home", "~"},
-	{"desktop", "Desktop", "~/Desktop"},
-	{"documents", "Documents", "~/Documents"},
-	{"folder-download", "Downloads", "~/Downloads"},
-	{"computer", "root", "/"},
+	{icons.Home, "home", "~"},
+	{icons.DesktopMac, "Desktop", "~/Desktop"},
+	{icons.LabProfile, "Documents", "~/Documents"},
+	{icons.Download, "Downloads", "~/Downloads"},
+	{icons.Computer, "root", "/"},
 }
 
 //////////////////////////////////////////////////////////////////
@@ -841,8 +883,8 @@ type PrefsDetailed struct {
 	DragStartPix               int  `def:"4" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
 	DNDStartMSec               int  `def:"200" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
 	DNDStartPix                int  `def:"20" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
-	HoverStartMSec             int  `def:"1000" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
-	HoverMaxPix                int  `def:"5" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`
+	HoverStartMSec             int  `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
+	HoverMaxPix                int  `def:"50" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`
 	CompleteWaitMSec           int  `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before offering completions"`
 	CompleteMaxItems           int  `def:"25" min:"5" step:"1" desc:"the maximum number of completions offered in popup"`
 	CursorBlinkMSec            int  `def:"500" min:"0" max:"1000" step:"5" desc:"number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`
@@ -980,12 +1022,12 @@ var PrefsDetailedProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Apply", ki.Props{
 			"desc": "Apply parameters to affect actual behavior.",
-			"icon": "update",
+			"icon": icons.Refresh,
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs_det.json file, which is auto-loaded at startup.",
-			"icon": "file-save",
+			"icon": icons.Save,
 			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*PrefsDetailed)
 				act.SetActiveStateUpdt(pf.Changed)
@@ -1042,7 +1084,7 @@ var PrefsDebugProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Profile", ki.Props{
 			"desc": "Toggle profiling of program on or off -- does both targeted and global CPU and Memory profiling.",
-			"icon": "update",
+			"icon": icons.LabProfile,
 		}},
 	},
 }

@@ -64,7 +64,7 @@ type LayoutState struct {
 func (ld *LayoutState) Defaults() {
 }
 
-func (ld *LayoutState) SetFromStyle(ls *gist.Layout) {
+func (ld *LayoutState) SetFromStyle(ls *gist.Style) {
 	ld.Reset()
 	// these are layout hints:
 	ld.Size.Need = ls.MinSizeDots()
@@ -117,7 +117,8 @@ var LayoutFocusNameTimeoutMSec = 500
 var LayoutFocusNameTabMSec = 2000
 
 // Layout is the primary node type responsible for organizing the sizes
-// and positions of child widgets.
+// and positions of child widgets. It does not render, only organize,
+// so properties like background color will have no effect.
 // All arbitrary collections of widgets should generally be contained
 // within a layout -- otherwise the parent widget must take over
 // responsibility for positioning.
@@ -247,13 +248,14 @@ var LayoutDefault Layout
 // avail
 func (ly *Layout) AvailSize() mat32.Vec2 {
 	spc := ly.BoxSpace()
-	avail := ly.LayState.Alloc.Size.SubScalar(spc) // spc is for right size space
+	avail := ly.LayState.Alloc.Size.SubScalar(spc.Right) // spc is for right size space
 	parni, _ := KiToNode2D(ly.Par)
 	if parni != nil {
 		vp := parni.AsViewport2D()
 		if vp != nil {
 			if vp.ViewportSafe() == nil {
-				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc)
+				// SidesTODO: might not be right
+				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc.Right)
 				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.Path(), vp.Path(), avail)
 			}
 		}
@@ -278,8 +280,8 @@ func (ly *Layout) ManageOverflow() {
 		ly.HasScroll[d] = false
 	}
 
-	if ly.Sty.Layout.Overflow != gist.OverflowHidden {
-		sbw := ly.Sty.Layout.ScrollBarWidth.Dots
+	if ly.Style.Overflow != gist.OverflowHidden {
+		sbw := ly.Style.ScrollBarWidth.Dots
 		for d := mat32.X; d <= mat32.Y; d++ {
 			odim := mat32.OtherDim(d)
 			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
@@ -318,20 +320,21 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		sc.Min = 0.0
 	}
 	spc := ly.BoxSpace()
-	avail := ly.AvailSize().SubScalar(spc * 2.0)
+	avail := ly.AvailSize().Sub(spc.Size())
 	sc := ly.Scrolls[d]
 	if d == mat32.X {
-		sc.SetFixedHeight(ly.Sty.Layout.ScrollBarWidth)
-		sc.SetFixedWidth(units.NewValue(avail.Dim(d), units.Dot))
+		sc.SetFixedHeight(ly.Style.ScrollBarWidth)
+		sc.SetFixedWidth(units.NewValue(avail.Dim(d), units.UnitDot))
 	} else {
-		sc.SetFixedWidth(ly.Sty.Layout.ScrollBarWidth)
-		sc.SetFixedHeight(units.NewValue(avail.Dim(d), units.Dot))
+		sc.SetFixedWidth(ly.Style.ScrollBarWidth)
+		sc.SetFixedHeight(units.NewValue(avail.Dim(d), units.UnitDot))
 	}
 	sc.Style2D()
 	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
-	sc.Step = ly.Sty.Font.Size.Dots                    // step by lines
+	sc.Step = ly.Style.Font.Size.Dots                  // step by lines
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
-	sc.ThumbVal = avail.Dim(d) - spc
+	// SidesTODO: not sure about this
+	sc.ThumbVal = avail.Dim(d) - spc.Size().Dim(d)/2
 	sc.TrackThr = sc.Step
 	sc.Value = mat32.Min(sc.Value, sc.Max-sc.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
@@ -366,13 +369,13 @@ func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 	defer sc.BBoxMu.Unlock()
 	sc.LayState.Alloc.Pos = mat32.Vec2Zero
 	sc.LayState.Alloc.Size = mat32.Vec2Zero
-	sc.VpBBox = image.ZR
-	sc.WinBBox = image.ZR
+	sc.VpBBox = image.Rectangle{}
+	sc.WinBBox = image.Rectangle{}
 }
 
 // LayoutScrolls arranges scrollbars
 func (ly *Layout) LayoutScrolls() {
-	sbw := ly.Sty.Layout.ScrollBarWidth.Dots
+	sbw := ly.Style.ScrollBarWidth.Dots
 
 	spc := ly.BoxSpace()
 	avail := ly.AvailSize()
@@ -381,9 +384,10 @@ func (ly *Layout) LayoutScrolls() {
 		if ly.HasScroll[d] {
 			sc := ly.Scrolls[d]
 			sc.Size2D(0)
-			sc.LayState.Alloc.PosRel.SetDim(d, spc)
+			sc.LayState.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
 			sc.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
-			sc.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc)
+			// SidesTODO: not sure about this
+			sc.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc.Size().Dim(d)/2)
 			if ly.HasScroll[odim] { // make room for other
 				sc.LayState.Alloc.Size.SetSubDim(d, sbw)
 			}
@@ -472,6 +476,17 @@ func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
 // remainder.
 func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	del := me.Delta
+	hasShift := me.HasAnyModifier(key.Shift, key.Alt) // shift or alt says: use vert for other dimension
+	if hasShift {
+		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
+			me.SetProcessed()
+			return
+		}
+		ly.ScrollActionDelta(mat32.X, float32(del.Y))
+		me.SetProcessed()
+		return
+	}
+
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
 		ly.ScrollActionDelta(mat32.Y, float32(del.Y))
@@ -492,12 +507,6 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 			if del.Y != 0 {
 				me.Delta.X = 0
 			} else {
-				me.SetProcessed()
-			}
-		} else { // use Y instead as mouse wheels typically only have this
-			hasShift := me.HasAnyModifier(key.Shift, key.Alt) // shift or alt says: use vert for other dimension
-			if hasShift {
-				ly.ScrollActionDelta(mat32.X, float32(del.Y))
 				me.SetProcessed()
 			}
 		}
@@ -581,7 +590,7 @@ func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
 
-	h := ly.Sty.Font.Size.Dots
+	h := ly.Style.Font.Size.Dots
 	dst := h * AutoScrollRate
 
 	mind := ints.MaxInt(0, pos-st)
@@ -655,7 +664,7 @@ func (ly *Layout) ScrollToBoxDim(dim mat32.Dims, minBox, maxBox int) bool {
 		return false
 	}
 
-	h := ly.Sty.Font.Size.Dots
+	h := ly.Style.Font.Size.Dots
 
 	if minBox < vpMin { // favors scrolling to start
 		trg := sc.Value + float32(minBox-vpMin) - h
@@ -828,7 +837,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	cur := em.CurFocus()
 	nxti := idx + 1
 	if ly.Lay == LayoutGrid && updn {
-		nxti = idx + ly.Sty.Layout.Columns
+		nxti = idx + ly.Style.Columns
 	}
 	did := false
 	if nxti < sz {
@@ -857,7 +866,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	cur := em.CurFocus()
 	nxti := idx - 1
 	if ly.Lay == LayoutGrid && updn {
-		nxti = idx - ly.Sty.Layout.Columns
+		nxti = idx - ly.Style.Columns
 	}
 	did := false
 	if nxti >= 0 {
@@ -1126,7 +1135,7 @@ func (ly *Layout) StyleLayout() {
 	// pr := prof.Start("StyleLayout")
 	// defer pr.End()
 
-	hasTempl, saveTempl := ly.Sty.FromTemplate()
+	hasTempl, saveTempl := ly.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		ly.Style2DWidget()
 	}
@@ -1137,16 +1146,16 @@ func (ly *Layout) StyleLayout() {
 		ly.StyleFromProps(tprops, ly.Viewport)
 		kit.TypesMu.RUnlock()
 	}
-	ly.StyleToDots(&ly.Sty.UnContext)
+	ly.StyleToDots(&ly.Style.UnContext)
 	if hasTempl && saveTempl {
-		ly.Sty.SaveTemplate()
+		ly.Style.SaveTemplate()
 	}
 }
 
 func (ly *Layout) Style2D() {
 	ly.StyleLayout()
 	ly.StyMu.Lock()
-	ly.LayState.SetFromStyle(&ly.Sty.Layout) // also does reset
+	ly.LayState.SetFromStyle(&ly.Style) // also does reset
 	ly.StyMu.Unlock()
 }
 
@@ -1200,8 +1209,8 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	ly.NeedsRedo = ly.Layout2DChildren(iter) // layout done with canonical positions
 
 	if !ly.NeedsRedo || iter == 1 {
-		delta := ly.Move2DDelta(image.ZP)
-		if delta != image.ZP {
+		delta := ly.Move2DDelta((image.Point{}))
+		if delta != (image.Point{}) {
 			ly.Move2DChildren(delta) // move is a separate step
 		}
 	}
@@ -1285,27 +1294,39 @@ func (st *Stretch) CopyFieldsFrom(frm any) {
 
 var StretchProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
-	"max-width":     -1.0,
-	"max-height":    -1.0,
+	// "max-width":     -1.0,
+	// "max-height":    -1.0,
 }
 
 func (st *Stretch) Style2D() {
 	st.StyMu.Lock()
 	defer st.StyMu.Unlock()
 
-	hasTempl, saveTempl := st.Sty.FromTemplate()
+	hasTempl, saveTempl := st.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		st.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		st.Sty.SaveTemplate()
+		st.Style.SaveTemplate()
 	}
-	st.LayState.SetFromStyle(&st.Sty.Layout) // also does reset
+	st.LayState.SetFromStyle(&st.Style) // also does reset
 }
 
 func (st *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
 	st.Layout2DBase(parBBox, true, iter) // init style
 	return st.Layout2DChildren(iter)
+}
+
+func (st *Stretch) Init2D() {
+	st.Init2DWidget()
+	st.ConfigStyles()
+}
+
+func (st *Stretch) ConfigStyles() {
+	st.AddStyleFunc(StyleFuncDefault, func() {
+		st.Style.MaxWidth.SetPx(-1)
+		st.Style.MaxHeight.SetPx(-1)
+	})
 }
 
 // Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set
@@ -1328,25 +1349,37 @@ func (sp *Space) CopyFieldsFrom(frm any) {
 
 var SpaceProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
-	"width":         units.NewCh(1),
-	"height":        units.NewEm(1),
+	// "width":         units.Ch(1),
+	// "height":        units.Em(1),
 }
 
 func (sp *Space) Style2D() {
 	sp.StyMu.Lock()
 	defer sp.StyMu.Unlock()
 
-	hasTempl, saveTempl := sp.Sty.FromTemplate()
+	hasTempl, saveTempl := sp.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		sp.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		sp.Sty.SaveTemplate()
+		sp.Style.SaveTemplate()
 	}
-	sp.LayState.SetFromStyle(&sp.Sty.Layout) // also does reset
+	sp.LayState.SetFromStyle(&sp.Style) // also does reset
 }
 
 func (sp *Space) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sp.Layout2DBase(parBBox, true, iter) // init style
 	return sp.Layout2DChildren(iter)
+}
+
+func (sp *Space) Init2D() {
+	sp.Init2DWidget()
+	sp.ConfigStyles()
+}
+
+func (sp *Space) ConfigStyles() {
+	sp.AddStyleFunc(StyleFuncDefault, func() {
+		sp.Style.Width.SetCh(1)
+		sp.Style.Height.SetEm(1)
+	})
 }

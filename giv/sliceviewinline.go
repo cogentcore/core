@@ -10,6 +10,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -68,7 +69,7 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 
 var SliceViewInlineProps = ki.Props{
 	"EnumType:Flag": gi.KiT_NodeFlags,
-	"min-width":     units.NewCh(20),
+	"min-width":     units.Ch(20),
 }
 
 // ConfigParts configures Parts for the current slice
@@ -127,7 +128,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		adack, err := sv.Parts.Children().ElemFromEndTry(1)
 		if err == nil {
 			adac := adack.(*gi.Action)
-			adac.SetIcon("plus")
+			adac.SetIcon(icons.Add)
 			adac.Tooltip = "add an element to the slice"
 			adac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
@@ -138,7 +139,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	edack, err := sv.Parts.Children().ElemFromEndTry(0)
 	if err == nil {
 		edac := edack.(*gi.Action)
-		edac.SetIcon("edit")
+		edac.SetIcon(icons.Edit)
 		edac.Tooltip = "edit slice in a dialog window"
 		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)

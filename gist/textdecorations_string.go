@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -22,11 +20,11 @@ func _() {
 	_ = x[DecoParaStart-6]
 	_ = x[DecoSuper-7]
 	_ = x[DecoSub-8]
-	_ = x[DecoBgColor-9]
+	_ = x[DecoBackgroundColor-9]
 	_ = x[TextDecorationsN-10]
 }
 
-const _TextDecorations_name = "DecoNoneDecoUnderlineDecoOverlineDecoLineThroughDecoBlinkDecoDottedUnderlineDecoParaStartDecoSuperDecoSubDecoBgColorTextDecorationsN"
+const _TextDecorations_name = "DecoNoneDecoUnderlineDecoOverlineDecoLineThroughDecoBlinkDecoDottedUnderlineDecoParaStartDecoSuperDecoSubDecoBackgroundColorTextDecorationsN"
 
 var _TextDecorations_index = [...]uint8{0, 8, 21, 33, 48, 57, 76, 89, 98, 105, 116, 132}
 
@@ -45,4 +43,25 @@ func (i *TextDecorations) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: TextDecorations")
+}
+
+var _TextDecorations_descMap = map[TextDecorations]string{
+	0:  ``,
+	1:  ``,
+	2:  ``,
+	3:  ``,
+	4:  `Blink is not currently supported (and probably a bad idea generally ;)`,
+	5:  `DottedUnderline is used for abbr tag -- otherwise not a standard text-decoration option afaik`,
+	6:  `DecoParaStart at start of a SpanRender indicates that it should be styled as the start of a new paragraph and not just the start of a new line`,
+	7:  `DecoSuper indicates super-scripted text`,
+	8:  `DecoSub indicates sub-scripted text`,
+	9:  `DecoBackgroundColor indicates that a bg color has been set -- for use in optimizing rendering`,
+	10: ``,
+}
+
+func (i TextDecorations) Desc() string {
+	if str, ok := _TextDecorations_descMap[i]; ok {
+		return str
+	}
+	return "TextDecorations(" + strconv.FormatInt(int64(i), 10) + ")"
 }

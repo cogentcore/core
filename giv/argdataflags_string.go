@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -37,4 +35,17 @@ func (i *ArgDataFlags) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: ArgDataFlags")
+}
+
+var _ArgDataFlags_descMap = map[ArgDataFlags]string{
+	0: `ArgDataHasDef means that there was a Default value set`,
+	1: `ArgDataValSet means that there is a fixed value for this arg, given in the config props and set in the Default, so it does not need to be prompted for`,
+	2: ``,
+}
+
+func (i ArgDataFlags) Desc() string {
+	if str, ok := _ArgDataFlags_descMap[i]; ok {
+		return str
+	}
+	return "ArgDataFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

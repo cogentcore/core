@@ -37,7 +37,7 @@ func (g *Group) CopyFieldsFrom(frm any) {
 
 // BBoxFromChildren sets the Group BBox from children
 func BBoxFromChildren(gii gi.Node2D) image.Rectangle {
-	bb := image.ZR
+	bb := image.Rectangle{}
 	for i, kid := range *gii.Children() {
 		_, gi := gi.KiToNode2D(kid)
 		if gi != nil {

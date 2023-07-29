@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -37,4 +35,17 @@ func StringToFileNodeFlags(s string) (FileNodeFlags, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: FileNodeFlags")
+}
+
+var _FileNodeFlags_descMap = map[FileNodeFlags]string{
+	11: `FileNodeOpen means file is open -- for directories, this means that sub-files should be / have been loaded -- for files, means that they have been opened e.g., for editing`,
+	12: `FileNodeSymLink indicates that file is a symbolic link -- file info is all for the target of the symlink`,
+	13: ``,
+}
+
+func (i FileNodeFlags) Desc() string {
+	if str, ok := _FileNodeFlags_descMap[i]; ok {
+		return str
+	}
+	return "FileNodeFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

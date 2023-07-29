@@ -7,6 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build darwin && (386 || amd64) && !ios && !3d
 // +build darwin
 // +build 386 amd64
 // +build !ios
@@ -412,7 +413,7 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 	theApp.mu.Unlock()
 
 	sc.ScreenNumber = scrIdx
-	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{widthPx, heightPx}}
+	sc.Geometry = image.Rectangle{Min: image.Point{}, Max: image.Point{widthPx, heightPx}}
 	sc.Depth = depth
 	sc.LogicalDPI = dpi
 	sc.PhysicalDPI = dpi
@@ -854,6 +855,7 @@ func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
 // into the standard keycodes used by the key package.
 //
 // To get a sense of the key map, see the diagram on
+//
 //	http://boredzo.org/blog/archives/2007-05-22/virtual-key-codes
 func cocoaKeyCode(vkcode uint16) key.Codes {
 	switch vkcode {

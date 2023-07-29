@@ -7,9 +7,11 @@ package gi3d
 import (
 	"fmt"
 	"image"
+	"io/fs"
 	"log"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
 	"github.com/goki/vgpu/vgpu"
 	"github.com/goki/vgpu/vphong"
@@ -81,6 +83,7 @@ func (tx *TextureBase) SetImage(img image.Image) {
 // TextureFile is a texture loaded from a file
 type TextureFile struct {
 	TextureBase
+	FSys fs.FS       `desc:"filesystem for embedded etc"`
 	File gi.FileName `desc:"filename for the texture"`
 }
 
@@ -90,6 +93,21 @@ var KiT_TextureFile = kit.Types.AddType(&TextureFile{}, nil)
 func AddNewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
 	tx.Nm = name
+	dfs, fnm, err := dirs.DirFS(string(tx.File))
+	if err != nil {
+		log.Println(err)
+	}
+	tx.FSys = dfs
+	tx.File = gi.FileName(fnm)
+	sc.AddTexture(tx)
+	return tx
+}
+
+// AddNewTextureFileFS adds a new texture from file of given name and filename
+func AddNewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *TextureFile {
+	tx := &TextureFile{}
+	tx.Nm = name
+	tx.FSys = fsys
 	tx.File = gi.FileName(filename)
 	sc.AddTexture(tx)
 	return tx
@@ -104,7 +122,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		log.Println(err)
 		return nil
 	}
-	img, err := gi.OpenImage(string(tx.File))
+	img, err := gi.OpenImageFS(tx.FSys, string(tx.File))
 	if err != nil {
 		log.Println(err)
 		return nil

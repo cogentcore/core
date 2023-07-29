@@ -6,6 +6,7 @@ package main
 
 import (
 	"image/color"
+	"strings"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
@@ -13,9 +14,7 @@ import (
 )
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {
@@ -37,14 +36,14 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	row1 := gi.AddNewLayout(mfr, "row1", gi.LayoutHoriz)
-	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
+	row1.SetProp("margin", units.Px(2))
 	row1.SetStretchMaxWidth()
 
 	spc := gi.AddNewSpace(mfr, "spc1")
-	spc.SetFixedHeight(units.NewEm(2))
+	spc.SetFixedHeight(units.Em(2))
 
 	gi.AddNewStretch(row1, "str1")
-	lab1 := gi.AddNewLabel(row1, "lab1", "These are all the GoGi Icons, in a small and large size")
+	lab1 := gi.AddNewLabel(row1, "lab1", "These are all of the GoGi Icons")
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")
 	gi.AddNewStretch(row1, "str2")
@@ -53,8 +52,8 @@ func mainrun() {
 	grid.Stripes = gi.RowStripes
 	grid.SetProp("columns", nColumns)
 	grid.SetProp("horizontal-align", "center")
-	grid.SetProp("margin", 2.0)
-	grid.SetProp("spacing", 6.0)
+	grid.SetProp("margin", units.Px(1))
+	// grid.SetProp("spacing", units.Px(1))
 	grid.SetStretchMaxWidth()
 	grid.SetStretchMaxHeight()
 
@@ -62,26 +61,28 @@ func mainrun() {
 
 	for _, icnm := range il {
 		icnms := string(icnm)
-		if icnms == "none" {
+		if icnm.IsNil() || strings.HasSuffix(icnms, "-fill") {
 			continue
 		}
 		vb := gi.AddNewLayout(grid, "vb", gi.LayoutVert)
+		vb.SetProp("max-width", "19vw")
+		vb.SetProp("overflow", "hidden")
 		gi.AddNewLabel(vb, "lab1", icnms)
 
-		smico := gi.AddNewIcon(vb, icnms, icnms)
-		smico.SetMinPrefWidth(units.NewPx(20))
-		smico.SetMinPrefHeight(units.NewPx(20))
+		smico := gi.AddNewIcon(vb, icnms, icnm)
+		smico.SetMinPrefWidth(units.Px(24))
+		smico.SetMinPrefHeight(units.Px(24))
 		smico.SetProp("background-color", color.Transparent)
-		smico.SetProp("fill", "#88F")
-		smico.SetProp("stroke", "black")
+		smico.SetProp("fill", gi.Colors.Text)
+		smico.SetProp("stroke", gi.Colors.Text)
 		// smico.SetProp("horizontal-align", gi.AlignLeft)
 
-		ico := gi.AddNewIcon(vb, icnms+"_big", icnms)
-		ico.SetMinPrefWidth(units.NewPx(100))
-		ico.SetMinPrefHeight(units.NewPx(100))
-		ico.SetProp("background-color", color.Transparent)
-		ico.SetProp("fill", "#88F")
-		ico.SetProp("stroke", "black")
+		// ico := gi.AddNewIcon(vb, icnms+"_big", icnms)
+		// ico.SetMinPrefWidth(units.Px(100))
+		// ico.SetMinPrefHeight(units.Px(100))
+		// ico.SetProp("background-color", color.Transparent)
+		// ico.SetProp("fill", "#88F")
+		// ico.SetProp("stroke", "black")
 		// ico.SetProp("horizontal-align", gi.AlignLeft)
 	}
 

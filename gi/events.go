@@ -460,6 +460,20 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 		}
 		em.TimerMu.Unlock()
 	}
+	// if we have started dragging but aren't dragging anything, scroll
+	if (em.dragStarted || em.dndStarted) && em.Dragging == nil && em.DNDSource == nil {
+		scev := &mouse.ScrollEvent{
+			Event: mouse.Event{
+				Where:  me.Pos(),
+				Action: mouse.Scroll,
+			},
+			// negative because response should be the opposite direction of finger movement
+			Delta: me.Pos().Sub(me.MoveEvent.From).Mul(-1),
+		}
+		scev.ClearProcessed()
+		scev.Init()
+		em.SendEventSignal(scev, NoPopups)
+	}
 }
 
 // ResetMouseDrag resets all the mouse dragging variables after last drag

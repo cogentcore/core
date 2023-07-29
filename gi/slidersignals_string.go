@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -39,4 +37,19 @@ func (i *SliderSignals) FromString(s string) error {
 		}
 	}
 	return errors.New("String: " + s + " is not a valid option for type: SliderSignals")
+}
+
+var _SliderSignals_descMap = map[SliderSignals]string{
+	0: `SliderValueChanged indicates that the value has changed -- if tracking is enabled, then this tracks online changes -- otherwise only at the end. The data on the signal is the float32 Value.`,
+	1: `SliderPressed means slider was pushed down but not yet up.`,
+	2: `SliderReleased means the slider has been released after being pressed.`,
+	3: `SliderMoved means the slider position has moved (low level move event).`,
+	4: ``,
+}
+
+func (i SliderSignals) Desc() string {
+	if str, ok := _SliderSignals_descMap[i]; ok {
+		return str
+	}
+	return "SliderSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 }

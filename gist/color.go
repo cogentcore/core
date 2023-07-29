@@ -42,11 +42,33 @@ func ColorFromString(str string, base color.Color) (Color, error) {
 	return c, err
 }
 
-// ColorFromName returns a new color set from given name.
+// MustColorFromString returns a new color set from given string and optional base
+// color for transforms, panicking on any errors -- see ColorFromString
+func MustColorFromString(str string, base color.Color) Color {
+	var c Color
+	err := c.SetString(str, base)
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
+
+// ColorFromName returns a new color set from given name -- see SetName
 func ColorFromName(name string) (Color, error) {
 	var c Color
 	err := c.SetName(name)
 	return c, err
+}
+
+// MustColorFromName returns a new color set from given name,
+// panicking on any errors -- see ColorFromName
+func MustColorFromName(name string) Color {
+	var c Color
+	err := c.SetName(name)
+	if err != nil {
+		panic(err)
+	}
+	return c
 }
 
 // ColorFromColor returns a new gist.Color from image/color.Color
@@ -107,6 +129,17 @@ func (c *Color) IsBlack() bool {
 func (c *Color) IsDark() bool {
 	hsl := HSLAModel.Convert(*c).(HSLA)
 	return hsl.L <= .6
+}
+
+// ContrastColor returns the contrast color that should be
+// used for displaying text with this color in
+// the background (white or black depending on
+// the result of IsDark)
+func (c *Color) ContrastColor() Color {
+	if c.IsDark() {
+		return White
+	}
+	return Black
 }
 
 // String returns a human-readable R,G,B,A output
@@ -560,12 +593,12 @@ func (c *Color) Darker(pct float32) Color {
 
 // Highlight returns a color that is either lighter or darker by the given
 // percent, e.g., 50 = 50% change relative to maximum possible lightness,
-// depending on how light the color is already -- if lightness > 50% then goes
+// depending on how light the color is already -- if lightness >= 50% then goes
 // darker, and vice-versa
 func (c *Color) Highlight(pct float32) Color {
 	hsl := HSLAModel.Convert(*c).(HSLA)
 	pct = mat32.Clamp(pct, 0, 100.0)
-	if hsl.L > .5 {
+	if hsl.L >= .5 {
 		hsl.L -= hsl.L * (pct / 100.0)
 	} else {
 		hsl.L += (1.0 - hsl.L) * (pct / 100.0)
@@ -574,11 +607,11 @@ func (c *Color) Highlight(pct float32) Color {
 }
 
 // Samelight is the opposite of Highlight -- makes a color darker if already
-// darker than 50%, and lighter if already lighter than 50%
+// darker than 50%, and lighter if already lighter than or equal to 50%
 func (c *Color) Samelight(pct float32) Color {
 	hsl := HSLAModel.Convert(*c).(HSLA)
 	pct = mat32.Clamp(pct, 0, 100.0)
-	if hsl.L > .5 {
+	if hsl.L >= .5 {
 		hsl.L += (1.0 - hsl.L) * (pct / 100.0)
 	} else {
 		hsl.L -= hsl.L * (pct / 100.0)

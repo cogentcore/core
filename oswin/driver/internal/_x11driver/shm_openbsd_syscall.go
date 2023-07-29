@@ -7,6 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build openbsd && (i386 || amd64) && !3d
 // +build openbsd
 // +build i386 amd64
 // +build !3d

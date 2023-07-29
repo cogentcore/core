@@ -210,7 +210,7 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 	theApp.mu.Unlock()
 
 	sc.ScreenNumber = scrIdx
-	sc.Geometry = image.Rectangle{Min: image.ZP, Max: image.Point{widthPx, heightPx}}
+	sc.Geometry = image.Rectangle{Min: image.Point{}, Max: image.Point{widthPx, heightPx}}
 	sc.Depth = depth
 	sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(dpi)
 	sc.PhysicalDPI = dpi
@@ -272,7 +272,7 @@ func onMouse(id uintptr, x, y int32, state uint16, button, dir uint8) {
 		return
 	}
 	where := image.Point{int(x), int(y)}
-	from := image.ZP
+	from := image.Point{}
 	if lastMouseEvent != nil {
 		from = lastMouseEvent.Pos()
 	}

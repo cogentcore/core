@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin/driver/vkos"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -21,9 +22,7 @@ func main() {
 
 	vkos.VkOsDebug = false
 
-	gimain.Main(func() {
-		mainrun()
-	})
+	gimain.Main(mainrun)
 }
 
 func mainrun() {
@@ -43,7 +42,7 @@ func mainrun() {
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewEx(1))
+	mfr.SetProp("spacing", units.Ex(1))
 
 	tbar := gi.AddNewToolBar(mfr, "tbar")
 	tbar.SetStretchMaxWidth()
@@ -58,7 +57,7 @@ func mainrun() {
 	sc := scvw.Scene()
 
 	// first, add lights, set camera
-	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
+	sc.BackgroundColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
 	gi3d.AddNewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
 	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
@@ -82,7 +81,7 @@ func mainrun() {
 	curFn := ""
 	exts := ".obj,.dae,.gltf"
 
-	tbar.AddAction(gi.ActOpts{Label: "Open...", Icon: "file-open", Tooltip: "Open a 3D object file for viewing."}, win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	tbar.AddAction(gi.ActOpts{Label: "Open...", Icon: icons.FileOpen, Tooltip: "Open a 3D object file for viewing."}, win.This(), func(recv, send ki.Ki, sig int64, data any) {
 		giv.FileViewDialog(vp, curFn, exts, giv.DlgOpts{Title: "Open 3D Object", Prompt: "Open a 3D object file for viewing."}, nil,
 			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {

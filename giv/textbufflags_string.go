@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var _ = errors.New("dummy error")
-
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
@@ -39,4 +37,19 @@ func StringToTextBufFlags(s string) (TextBufFlags, error) {
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: TextBufFlags")
+}
+
+var _TextBufFlags_descMap = map[TextBufFlags]string{
+	24: `TextBufAutoSaving is used in atomically safe way to protect autosaving`,
+	25: `TextBufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
+	26: `TextBufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
+	27: `TextBufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
+	28: ``,
+}
+
+func (i TextBufFlags) Desc() string {
+	if str, ok := _TextBufFlags_descMap[i]; ok {
+		return str
+	}
+	return "TextBufFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 }

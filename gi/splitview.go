@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -59,11 +60,11 @@ func (sv *SplitView) CopyFieldsFrom(frm any) {
 
 var SplitViewProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
-	"handle-size":   units.NewPx(10),
-	"max-width":     -1.0,
-	"max-height":    -1.0,
-	"margin":        0,
-	"padding":       0,
+	// "handle-size":   units.Px(10),
+	// "max-width":     -1.0,
+	// "max-height":    -1.0,
+	// "margin":        0,
+	// "padding":       0,
 }
 
 // UpdateSplits updates the splits to be same length as number of children,
@@ -243,6 +244,7 @@ func (sv *SplitView) Init2D() {
 	sv.Init2DWidget()
 	sv.UpdateSplits()
 	sv.ConfigSplitters()
+	sv.ConfigStyles()
 }
 
 func (sv *SplitView) ConfigSplitters() {
@@ -250,14 +252,12 @@ func (sv *SplitView) ConfigSplitters() {
 	mods, updt := sv.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.BoxSpace()
-	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - 2*spc
+	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
 	handsz := sv.HandleSize.Dots
-	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - 2*spc)
-	spicon := IconName("")
+	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
+	spicon := icons.DragHandle
 	if sv.Dim == mat32.X {
-		spicon = IconName("handle-circles-vert")
-	} else {
-		spicon = IconName("handle-circles-horiz")
+		spicon = icons.DragIndicator
 	}
 	for i, spk := range *sv.Parts.Children() {
 		sp := spk.(*Splitter)
@@ -337,16 +337,16 @@ func (sv *SplitView) SplitViewEvents() {
 
 func (sv *SplitView) StyleSplitView() {
 	sv.Style2DWidget()
-	sv.LayState.SetFromStyle(&sv.Sty.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.Style) // also does reset
 	sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
-	sv.HandleSize.ToDots(&sv.Sty.UnContext)
+	sv.HandleSize.ToDots(&sv.Style.UnContext)
 }
 
 func (sv *SplitView) Style2D() {
 	sv.StyMu.Lock()
 
 	sv.StyleSplitView()
-	sv.LayState.SetFromStyle(&sv.Sty.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.Style) // also does reset
 	sv.UpdateSplits()
 	sv.StyMu.Unlock()
 
@@ -364,10 +364,10 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sz := len(sv.Kids)
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.BoxSpace()
-	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - 2*spc
+	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
 	avail := size - handsz*float32(sz-1)
 	// fmt.Printf("avail: %v\n", avail)
-	osz := sv.LayState.Alloc.Size.Dim(odim) - 2*spc
+	osz := sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim)
 	pos := float32(0.0)
 
 	spsum := float32(0)
@@ -384,7 +384,7 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		gis.LayState.Alloc.Size.SetDim(odim, osz)
 		gis.LayState.Alloc.SizeOrig = gis.LayState.Alloc.Size
 		gis.LayState.Alloc.PosRel.SetDim(sv.Dim, pos)
-		gis.LayState.Alloc.PosRel.SetDim(odim, spc)
+		gis.LayState.Alloc.PosRel.SetDim(odim, spc.Pos().Dim(odim))
 		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, gis.LayState.Alloc.SizeOrig, gis.LayState.Alloc.PosRel)
 
 		pos += isz + handsz
@@ -431,6 +431,16 @@ func (sv *SplitView) HasFocus2D() bool {
 	return sv.ContainsFocus() // anyone within us gives us focus..
 }
 
+func (sv *SplitView) ConfigStyles() {
+	sv.AddStyleFunc(StyleFuncDefault, func() {
+		sv.HandleSize.SetPx(10)
+		sv.Style.MaxWidth.SetPx(-1)
+		sv.Style.MaxHeight.SetPx(-1)
+		sv.Style.Margin.Set()
+		sv.Style.Padding.Set()
+	})
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //    Splitter
 
@@ -446,48 +456,48 @@ type Splitter struct {
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"padding":          units.NewPx(6),
-	"margin":           units.NewPx(0),
-	"background-color": &Prefs.Colors.Background,
-	"color":            &Prefs.Colors.Font,
-	"#icon": ki.Props{
-		"max-width":      units.NewEm(1),
-		"max-height":     units.NewEm(5),
-		"min-width":      units.NewEm(1),
-		"min-height":     units.NewEm(5),
-		"margin":         units.NewPx(0),
-		"padding":        units.NewPx(0),
-		"vertical-align": gist.AlignMiddle,
-		"fill":           &Prefs.Colors.Icon,
-		"stroke":         &Prefs.Colors.Font,
-	},
-	SliderSelectors[SliderActive]: ki.Props{},
-	SliderSelectors[SliderInactive]: ki.Props{
-		"border-color": "highlight-50",
-		"color":        "highlight-50",
-	},
-	SliderSelectors[SliderHover]: ki.Props{
-		"background-color": "highlight-10",
-	},
-	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.NewPx(2),
-		"background-color": "samelight-50",
-	},
-	SliderSelectors[SliderDown]: ki.Props{},
-	SliderSelectors[SliderValue]: ki.Props{
-		"border-color":     &Prefs.Colors.Icon,
-		"background-color": &Prefs.Colors.Icon,
-	},
-	SliderSelectors[SliderBox]: ki.Props{
-		"border-color":     &Prefs.Colors.Background,
-		"background-color": &Prefs.Colors.Background,
-	},
+	"EnumType:Flag": KiT_NodeFlags,
+	// "padding":          units.Px(6),
+	// "margin":           units.Px(0),
+	// "background-color": &Prefs.Colors.Background,
+	// "color":            &Prefs.Colors.Font,
+	// "#icon": ki.Props{
+	// 	"max-width":      units.Em(1),
+	// 	"max-height":     units.Em(5),
+	// 	"min-width":      units.Em(1),
+	// 	"min-height":     units.Em(5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignMiddle,
+	// 	"fill":           &Prefs.Colors.Icon,
+	// 	"stroke":         &Prefs.Colors.Font,
+	// },
+	// SliderSelectors[SliderActive]: ki.Props{},
+	// SliderSelectors[SliderInactive]: ki.Props{
+	// 	"border-color": "highlight-50",
+	// 	"color":        "highlight-50",
+	// },
+	// SliderSelectors[SliderHover]: ki.Props{
+	// 	"background-color": "highlight-10",
+	// },
+	// SliderSelectors[SliderFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "samelight-50",
+	// },
+	// SliderSelectors[SliderDown]: ki.Props{},
+	// SliderSelectors[SliderValue]: ki.Props{
+	// 	"border-color":     &Prefs.Colors.Icon,
+	// 	"background-color": &Prefs.Colors.Icon,
+	// },
+	// SliderSelectors[SliderBox]: ki.Props{
+	// 	"border-color":     &Prefs.Colors.Background,
+	// 	"background-color": &Prefs.Colors.Background,
+	// },
 }
 
 func (sr *Splitter) Defaults() {
 	sr.ValThumb = false
-	sr.ThumbSize = units.NewPx(10) // will be replaced by parent HandleSize
+	sr.ThumbSize = units.Px(10) // will be replaced by parent HandleSize
 	sr.Step = 0.01
 	sr.PageStep = 0.1
 	sr.Max = 1.0
@@ -500,13 +510,14 @@ func (sr *Splitter) Init2D() {
 	sr.Init2DSlider()
 	sr.Defaults()
 	sr.ConfigParts()
+	sr.ConfigStyles()
 }
 
 func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
-	if sr.PartsNeedUpdateIconLabel(string(sr.Icon), "") {
+	if sr.PartsNeedUpdateIconLabel(sr.Icon, "") {
 		sr.ConfigParts()
 	}
-	if !sr.Icon.IsValid() || !sr.Parts.HasChildren() {
+	if !TheIconMgr.IsValid(sr.Icon) || !sr.Parts.HasChildren() {
 		return
 	}
 	ick := sr.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
@@ -517,12 +528,12 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	handsz := sr.ThumbSize.Dots
 	spc := sr.BoxSpace()
 	odim := mat32.OtherDim(sr.Dim)
-	sr.LayState.Alloc.Size.SetDim(odim, 2*(handsz+2*spc))
+	sr.LayState.Alloc.Size.SetDim(odim, 2*(handsz+spc.Size().Dim(odim)))
 	sr.LayState.Alloc.SizeOrig = sr.LayState.Alloc.Size
 
 	ic.LayState.Alloc.Size.SetDim(odim, 2*handsz)
 	ic.LayState.Alloc.Size.SetDim(sr.Dim, handsz)
-	ic.LayState.Alloc.PosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc)))
+	ic.LayState.Alloc.PosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc.Pos().Dim(sr.Dim))))
 	ic.LayState.Alloc.PosRel.SetDim(odim, 0)
 	if render {
 		ic.Layout2DTree()
@@ -533,7 +544,7 @@ func (sr *Splitter) Style2D() {
 	sr.ClearFlag(int(CanFocus))
 	sr.StyleSlider()
 	sr.StyMu.Lock()
-	sr.LayState.SetFromStyle(&sr.Sty.Layout) // also does reset
+	sr.LayState.SetFromStyle(&sr.Style) // also does reset
 	sr.StyMu.Unlock()
 	sr.ConfigParts()
 }
@@ -566,7 +577,6 @@ func (sr *Splitter) PointToRelPos(pt image.Point) image.Point {
 
 func (sr *Splitter) UpdateSplitterPos() {
 	spc := sr.BoxSpace()
-	ispc := int(spc)
 	handsz := sr.ThumbSize.Dots
 	off := 0
 	if sr.Dim == mat32.X {
@@ -576,26 +586,29 @@ func (sr *Splitter) UpdateSplitterPos() {
 	}
 	sz := handsz
 	if !sr.IsDragging() {
-		sz += 2 * spc
+		sz += spc.Size().Dim(sr.Dim)
 	}
 	pos := off + int(sr.Pos-0.5*sz)
 	mxpos := off + int(sr.Pos+0.5*sz)
+
+	// SidesTODO: this is all sketchy
 
 	if sr.IsDragging() {
 		win := sr.ParentWindow()
 		spnm := "gi.Splitter:" + sr.Name()
 		spr, ok := win.SpriteByName(spnm)
 		if ok {
-			spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + ispc}
+			spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + int(spc.Top)}
 		}
 	} else {
 		sr.BBoxMu.Lock()
+
 		if sr.Dim == mat32.X {
-			sr.VpBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
-			sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
+			sr.VpBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
+			sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
 		} else {
-			sr.VpBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
-			sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
+			sr.VpBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
+			sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
 		}
 		sr.BBoxMu.Unlock()
 	}
@@ -627,8 +640,9 @@ func (sr *Splitter) MouseEvent() {
 				me.SetProcessed()
 				if me.Action == mouse.Press {
 					ed := srr.This().(SliderPositioner).PointToRelPos(me.Where)
-					st := &srr.Sty
-					spc := st.Layout.Margin.Dots + 0.5*srr.ThSize
+					st := &srr.Style
+					// SidesTODO: unsure about dim
+					spc := st.Margin.Dots().Pos().Dim(srr.Dim) + 0.5*srr.ThSize
 					if srr.Dim == mat32.X {
 						srr.SliderPress(float32(ed.X) - spc)
 					} else {
@@ -697,7 +711,7 @@ func (sr *Splitter) Render2D() {
 		}
 		spr, ok := win.SpriteByName(spnm)
 		if !ok {
-			spr = NewSprite(spnm, image.ZP, sr.VpBBox.Min)
+			spr = NewSprite(spnm, image.Point{}, sr.VpBBox.Min)
 			spr.GrabRenderFrom(icvp.(Node2D))
 			win.AddSprite(spr)
 			win.ActivateSprite(spnm)
@@ -725,21 +739,22 @@ func (sr *Splitter) RenderSplitter() {
 	sr.UpdateSplitterPos()
 	sr.ConfigPartsIfNeeded(true)
 
-	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
+	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.Parts.Render2DTree()
-	} else {
-		rs, pc, st := sr.RenderLock()
-
-		pc.StrokeStyle.SetColor(nil)
-		pc.FillStyle.SetColorSpec(&st.Font.BgColor)
-
-		pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
-		pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
-		sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
-		sr.RenderBoxImpl(pos, sz, 0)
-
-		sr.RenderUnlock(rs)
 	}
+	// else {
+	rs, pc, st := sr.RenderLock()
+
+	pc.StrokeStyle.SetColor(nil)
+	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+
+	pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
+	pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
+	sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
+	sr.RenderBoxImpl(pos, sz, st.Border)
+
+	sr.RenderUnlock(rs)
+	// }
 }
 
 func (sr *Splitter) FocusChanged2D(change FocusChanges) {
@@ -754,4 +769,35 @@ func (sr *Splitter) FocusChanged2D(change FocusChanges) {
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
+}
+
+func (sr *Splitter) ConfigStyles() {
+	sr.AddStyleFunc(StyleFuncDefault, func() {
+		// sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
+
+		sr.Style.Margin.Set()
+		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
+		// sr.Style.BackgroundColor.SetColor(Colors.Accent)
+		sr.Style.Color = Colors.Text
+		// sr.Style.Border.Width.Set(units.Px(1))
+		// sr.Style.Border.Color.Set(Colors.Text)
+		if sr.Dim == mat32.X {
+			sr.Style.MinWidth.SetPx(2)
+			sr.Style.MinHeight.SetPx(100)
+			sr.Style.Height.SetPx(100)
+			sr.Style.MaxHeight.SetPx(100)
+		} else {
+			sr.Style.MinHeight.SetPx(2)
+			sr.Style.MinWidth.SetPx(100)
+		}
+	})
+	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(sr), func(icon *WidgetBase) {
+		icon.Style.MaxWidth.SetEm(1)
+		icon.Style.MaxHeight.SetEm(5)
+		icon.Style.MinWidth.SetEm(1)
+		icon.Style.MinHeight.SetEm(5)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+		icon.Style.AlignV = gist.AlignMiddle
+	})
 }

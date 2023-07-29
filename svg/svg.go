@@ -15,6 +15,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -109,7 +110,8 @@ func (sv *SVG) Init2D() {
 	sv.Viewport2D.Init2D()
 	sv.SetFlag(int(gi.VpFlagSVG)) // we are an svg type
 	sv.Pnt.Defaults()
-	sv.Pnt.FontStyle.BgColor.SetColor(gist.White)
+	// sv.Pnt.FontStyle.BackgroundColor.SetColor(gist.White)
+	sv.ConfigStyles()
 }
 
 func (sv *SVG) Size2D(iter int) {
@@ -172,23 +174,25 @@ func (sv *SVG) ContextColorSpecByURL(url string) *gist.ColorSpec {
 func (sv *SVG) StyleSVG() {
 	sv.StyMu.Lock()
 
-	hasTempl, saveTempl := sv.Sty.FromTemplate()
+	hasTempl, saveTempl := sv.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		sv.Style2DWidget()
 	}
 	if hasTempl && saveTempl {
-		sv.Sty.SaveTemplate()
+		sv.Style.SaveTemplate()
 	}
 	sv.Pnt.Defaults()
 	sv.StyMu.Unlock()
 	StyleSVG(sv.This().(gi.Node2D))
+	// TODO: cleaner svg styling from text color property
+	sv.RunStyleFuncs()
 	SetUnitContext(&sv.Pnt.Paint, sv.AsViewport2D(), sv.ViewBox.Size) // context is viewbox
 }
 
 func (sv *SVG) Style2D() {
 	sv.StyleSVG()
 	sv.StyMu.Lock()
-	sv.LayState.SetFromStyle(&sv.Sty.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.Style) // also does reset
 	sv.StyMu.Unlock()
 	if nv, err := sv.PropTry("norm"); err == nil {
 		sv.Norm, _ = kit.ToBool(nv)
@@ -380,7 +384,7 @@ var SVGProps = ki.Props{
 		{"OpenXML", ki.Props{
 			"label": "Open...",
 			"desc":  "Open SVG XML-formatted file",
-			"icon":  "file-open",
+			"icon":  icons.FileOpen,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".svg",
@@ -390,7 +394,7 @@ var SVGProps = ki.Props{
 		{"SaveXML", ki.Props{
 			"label": "SaveAs...",
 			"desc":  "Save SVG content to an XML-formatted file.",
-			"icon":  "file-save",
+			"icon":  icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".svg",
@@ -398,4 +402,13 @@ var SVGProps = ki.Props{
 			},
 		}},
 	},
+}
+
+func (sv *SVG) ConfigStyles() {
+	sv.AddStyleFunc(gi.StyleFuncDefault, func() {
+		if par, ok := sv.Parent().Embed(gi.KiT_WidgetBase).(*gi.WidgetBase); ok {
+			sv.Pnt.FillStyle.Color.SetColor(par.Style.Color)
+			sv.Pnt.StrokeStyle.Color.SetColor(par.Style.Color)
+		}
+	})
 }
