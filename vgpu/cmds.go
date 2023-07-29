@@ -7,7 +7,9 @@
 
 package vgpu
 
-import vk "github.com/goki/vulkan"
+import (
+	vk "github.com/goki/vulkan"
+)
 
 // CmdPool is a command pool and buffer
 type CmdPool struct {
@@ -113,11 +115,11 @@ func (cp *CmdPool) FreeBuffer(dev *Device) {
 
 // Destroy
 func (cp *CmdPool) Destroy(dev vk.Device) {
-	if cp.Pool == nil {
+	if cp.Pool == vk.NullCommandPool {
 		return
 	}
 	vk.DestroyCommandPool(dev, cp.Pool, nil)
-	cp.Pool = nil
+	cp.Pool = vk.NullCommandPool
 }
 
 //////////////////////////////////////////////////////////////

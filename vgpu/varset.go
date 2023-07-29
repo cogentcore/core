@@ -164,7 +164,7 @@ func (st *VarSet) Destroy(dev vk.Device) {
 // DestroyLayout destroys layout
 func (st *VarSet) DestroyLayout(dev vk.Device) {
 	vk.DestroyDescriptorSetLayout(dev, st.VkLayout, nil)
-	st.VkLayout = nil
+	st.VkLayout = vk.NullDescriptorSetLayout
 }
 
 // DescLayout creates the DescriptorSetLayout in DescLayout for given set.

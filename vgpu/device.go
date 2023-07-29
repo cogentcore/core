@@ -75,6 +75,8 @@ func (dv *Device) MakeDevice(gp *GPU) {
 	}
 	gp.SetGPUOpts(&feats, gp.EnabledOpts)
 
+	// log.Printf("features: %#v\n", feats)
+
 	var device vk.Device
 	ret := vk.CreateDevice(gp.GPU, &vk.DeviceCreateInfo{
 		SType:                   vk.StructureTypeDeviceCreateInfo,
@@ -85,15 +87,15 @@ func (dv *Device) MakeDevice(gp *GPU) {
 		EnabledLayerCount:       uint32(len(gp.ValidationLayers)),
 		PpEnabledLayerNames:     gp.ValidationLayers,
 		PEnabledFeatures:        []vk.PhysicalDeviceFeatures{feats},
+		// todo: these options aren't supported for swiftshader used on android for vulkan on mac
 		PNext: unsafe.Pointer(&vk.PhysicalDeviceVulkan12Features{
-			SType:                                    vk.StructureTypePhysicalDeviceVulkan12Features,
-			DescriptorIndexing:                       vk.True,
-			DescriptorBindingVariableDescriptorCount: vk.True,
-			DescriptorBindingSampledImageUpdateAfterBind: vk.True,
-			DescriptorBindingUpdateUnusedWhilePending:    vk.True,
+			SType:                                        vk.StructureTypePhysicalDeviceVulkan12Features,
+			DescriptorBindingVariableDescriptorCount:     vk.True,
 			DescriptorBindingPartiallyBound:              vk.True,
 			RuntimeDescriptorArray:                       vk.True,
-			PNext:                                        gp.PlatformDeviceNext,
+			DescriptorIndexing:                           vk.True, // might not be needed?  not for phong or vdraw
+			DescriptorBindingSampledImageUpdateAfterBind: vk.True, // might not be needed?  not for phong or vdraw
+			PNext: gp.PlatformDeviceNext,
 		}),
 	}, nil, &device)
 	IfPanic(NewError(ret))

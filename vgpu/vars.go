@@ -237,10 +237,10 @@ func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 // DescLayout configures the PipelineLayout of DescriptorSetLayout
 // info for all of the non-Vertex vars
 func (vs *Vars) DescLayout(dev vk.Device) {
-	if vs.VkDescLayout != nil {
+	if vs.VkDescLayout != vk.NullPipelineLayout {
 		vk.DestroyPipelineLayout(dev, vs.VkDescLayout, nil)
 	}
-	if vs.VkDescPool != nil {
+	if vs.VkDescPool != vk.NullDescriptorPool {
 		vk.DestroyDescriptorPool(dev, vs.VkDescPool, nil)
 	}
 	if vs.NDescs < 1 {
@@ -256,7 +256,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 		}, nil, &pipelineLayout)
 		IfPanic(NewError(ret))
 		vs.VkDescLayout = pipelineLayout
-		vs.VkDescPool = nil
+		vs.VkDescPool = vk.NullDescriptorPool
 		vs.VkDescSets = nil
 		return
 	}

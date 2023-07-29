@@ -79,8 +79,9 @@ func InitNoDisplay() error {
 func (gp *GPU) Defaults(graphics bool) {
 	gp.APIVersion = vk.Version(vk.MakeVersion(1, 2, 0))
 	gp.AppVersion = vk.Version(vk.MakeVersion(1, 0, 0))
-	gp.DeviceExts = []string{"VK_EXT_descriptor_indexing"}
-	gp.InstanceExts = []string{"VK_KHR_get_physical_device_properties2"}
+	// TODO: these don't work on mobile, but might be needed on desktop
+	// gp.DeviceExts = []string{"VK_EXT_descriptor_indexing"}
+	// gp.InstanceExts = []string{"VK_KHR_get_physical_device_properties2"}
 	if graphics {
 		gp.DeviceExts = append(gp.DeviceExts, []string{"VK_KHR_swapchain"}...)
 	} else {

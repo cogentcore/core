@@ -147,7 +147,7 @@ func (sy *System) SemaphoreByNameTry(name string) (vk.Semaphore, error) {
 	if !ok {
 		err := fmt.Errorf("Semaphore named: %s not found", name)
 		log.Println(err)
-		return nil, err
+		return vk.NullSemaphore, err
 	}
 	return sp, nil
 }
@@ -168,7 +168,7 @@ func (sy *System) EventByNameTry(name string) (vk.Event, error) {
 	if !ok {
 		err := fmt.Errorf("Event named: %s not found", name)
 		log.Println(err)
-		return nil, err
+		return vk.NullEvent, err
 	}
 	return sp, nil
 }
@@ -189,7 +189,7 @@ func (sy *System) FenceByNameTry(name string) (vk.Fence, error) {
 	if !ok {
 		err := fmt.Errorf("Fence named: %s not found", name)
 		log.Println(err)
-		return nil, err
+		return vk.NullFence, err
 	}
 	return sp, nil
 }
