@@ -150,7 +150,7 @@ var BuffUsages = map[BuffTypes]vk.BufferUsageFlagBits{
 // NewBuffer makes a buffer of given size, usage
 func NewBuffer(dev vk.Device, size int, usage vk.BufferUsageFlagBits) vk.Buffer {
 	if size == 0 {
-		return nil
+		return vk.NullBuffer
 	}
 	var buffer vk.Buffer
 	ret := vk.CreateBuffer(dev, &vk.BufferCreateInfo{
@@ -213,20 +213,20 @@ func MapMemoryAll(dev vk.Device, mem vk.DeviceMemory) unsafe.Pointer {
 
 // FreeBuffMem frees given device memory to nil
 func FreeBuffMem(dev vk.Device, memory *vk.DeviceMemory) {
-	if *memory == nil {
+	if *memory == vk.NullDeviceMemory {
 		return
 	}
 	vk.FreeMemory(dev, *memory, nil)
-	*memory = nil
+	*memory = vk.NullDeviceMemory
 }
 
 // DestroyBuffer destroys given buffer and nils the pointer
 func DestroyBuffer(dev vk.Device, buff *vk.Buffer) {
-	if *buff == nil {
+	if *buff == vk.NullBuffer {
 		return
 	}
 	vk.DestroyBuffer(dev, *buff, nil)
-	*buff = nil
+	*buff = vk.NullBuffer
 }
 
 func FindRequiredMemoryType(props vk.PhysicalDeviceMemoryProperties,

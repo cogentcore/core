@@ -361,7 +361,7 @@ func (im *Image) GoImage(layer int) (*image.RGBA, error) {
 // memory representation.  Only works if ImageOnHostOnly and Format
 // is default vk.FormatR8g8b8a8Srgb (strongly recommended in any case)
 func (im *Image) DevGoImage() (*image.RGBA, error) {
-	if !im.HasFlag(ImageOnHostOnly) || im.Mem == nil {
+	if !im.HasFlag(ImageOnHostOnly) || im.Mem == vk.NullDeviceMemory {
 		return nil, fmt.Errorf("vgpu.Image: Go image not available because device Image is not HostOnly, or Mem is nil: %s", im.Name)
 	}
 	if !im.Format.IsStdRGBA() && !im.Format.IsRGBAUnorm() {
@@ -377,8 +377,7 @@ func (im *Image) DevGoImage() (*image.RGBA, error) {
 	offset := int(sublay.Offset)
 
 	ptr := MapMemoryAll(im.Dev, im.Mem)
-	const m = 0x7fffffffffff
-	pix := (*[m]byte)(ptr)[offset : size+offset]
+	pix := (*[ByteCopyMemoryLimit]byte)(ptr)[offset : size+offset]
 	rgba.Pix = make([]byte, size)
 	copy(rgba.Pix, pix)
 	vk.UnmapMemory(im.Dev, im.Mem)
@@ -590,12 +589,12 @@ func (im *Image) ConfigDepthView() {
 
 // DestroyView destroys any existing view
 func (im *Image) DestroyView() {
-	if im.View == nil {
+	if im.View == vk.NullImageView {
 		return
 	}
 	im.ClearFlag(int(ImageActive))
 	vk.DestroyImageView(im.Dev, im.View, nil)
-	im.View = nil
+	im.View = vk.NullImageView
 }
 
 // FreeImage frees device memory version of image that we own
@@ -605,14 +604,14 @@ func (im *Image) FreeImage() {
 	}
 	vk.DeviceWaitIdle(im.Dev)
 	im.DestroyView()
-	if im.Image == nil || !im.IsImageOwner() {
+	if im.Image == vk.NullImage || !im.IsImageOwner() {
 		return
 	}
 	im.ClearFlag(int(ImageOwnsImage))
 	vk.FreeMemory(im.Dev, im.Mem, nil)
 	vk.DestroyImage(im.Dev, im.Image, nil)
-	im.Mem = nil
-	im.Image = nil
+	im.Mem = vk.NullDeviceMemory
+	im.Image = vk.NullImage
 }
 
 // FreeHost frees memory in host buffer representation of image
@@ -633,14 +632,14 @@ func (im *Image) Destroy() {
 	im.FreeImage()
 	im.FreeHost()
 	im.DestroyView()
-	im.Image = nil
+	im.Image = vk.NullImage
 	im.Dev = nil
 }
 
 // SetNil sets everything to nil, for shared image
 func (im *Image) SetNil() {
-	im.View = nil
-	im.Image = nil
+	im.View = vk.NullImageView
+	im.Image = vk.NullImage
 	im.Dev = nil
 	im.Host.SetNil()
 	im.Flags = 0
@@ -772,7 +771,7 @@ func (im *Image) ConfigValHost(buff *MemBuff, buffPtr unsafe.Pointer, offset int
 	}
 	imsz := im.Format.TotalByteSize()
 	im.Host.Buff = buff.Host
-	im.Host.Mem = nil
+	im.Host.Mem = vk.NullDeviceMemory
 	im.Host.Size = imsz
 	im.Host.Ptr = unsafe.Pointer(uintptr(buffPtr) + uintptr(offset))
 	im.Host.Offset = offset
@@ -899,17 +898,16 @@ type HostImage struct {
 
 func (hi *HostImage) SetNil() {
 	hi.Size = 0
-	hi.Buff = nil
+	hi.Buff = vk.NullBuffer
 	hi.Offset = 0
-	hi.Mem = nil
+	hi.Mem = vk.NullDeviceMemory
 	hi.Ptr = nil
 }
 
 // Pixels returns the byte slice of the pixels for host image
 // Only valid if host is active!  No error checking is performed here.
 func (hi *HostImage) Pixels() []byte {
-	const m = 0x7fffffffffff
-	return (*[m]byte)(hi.Ptr)[:hi.Size]
+	return (*[ByteCopyMemoryLimit]byte)(hi.Ptr)[:hi.Size]
 }
 
 /////////////////////////////////////////////////////////////////////

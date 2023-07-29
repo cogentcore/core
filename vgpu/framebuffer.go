@@ -58,11 +58,11 @@ func (fb *Framebuffer) Destroy() {
 
 // DestroyFrame destroys the framebuffer if non-nil
 func (fb *Framebuffer) DestroyFrame() {
-	if fb.Render == nil || fb.Render.Dev == nil || fb.Framebuffer == nil {
+	if fb.Render == nil || fb.Render.Dev == nil || fb.Framebuffer == vk.NullFramebuffer {
 		return
 	}
 	vk.DestroyFramebuffer(fb.Render.Dev, fb.Framebuffer, nil)
-	fb.Framebuffer = nil
+	fb.Framebuffer = vk.NullFramebuffer
 }
 
 // Config configures a new vulkan framebuffer object with current settings,

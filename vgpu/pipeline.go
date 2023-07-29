@@ -106,8 +106,8 @@ func (pl *Pipeline) Destroy() {
 func (pl *Pipeline) DestroyPipeline() {
 	vk.DestroyPipelineCache(pl.Sys.Device.Device, pl.VkCache, nil)
 	vk.DestroyPipeline(pl.Sys.Device.Device, pl.VkPipeline, nil)
-	pl.VkCache = nil
-	pl.VkPipeline = nil
+	pl.VkCache = vk.NullPipelineCache
+	pl.VkPipeline = vk.NullPipeline
 }
 
 // Init initializes pipeline as part of given System
@@ -124,7 +124,7 @@ func (pl *Pipeline) InitPipeline() {
 // using Set* methods, and the shaders have been loaded.
 // The parent System has already done what it can for its config
 func (pl *Pipeline) Config() {
-	if pl.VkPipeline != nil {
+	if pl.VkPipeline != vk.NullPipeline {
 		return // note: it is not possible to reconfig without loading shaders!
 	}
 	pl.ConfigStages()

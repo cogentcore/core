@@ -28,7 +28,7 @@ func (tx *Texture) Destroy() {
 // AllocTexture allocates texture device image, stdview, and sampler
 func (tx *Texture) AllocTexture() {
 	tx.AllocImage()
-	if tx.Sampler.VkSampler == nil {
+	if tx.Sampler.VkSampler == vk.NullSampler {
 		tx.Sampler.Config(tx.GPU, tx.Dev)
 	}
 	tx.ConfigStdView()
@@ -76,9 +76,9 @@ func (sm *Sampler) Config(gp *GPU, dev vk.Device) {
 }
 
 func (sm *Sampler) Destroy(dev vk.Device) {
-	if sm.VkSampler != nil {
+	if sm.VkSampler != vk.NullSampler {
 		vk.DestroySampler(dev, sm.VkSampler, nil)
-		sm.VkSampler = nil
+		sm.VkSampler = vk.NullSampler
 	}
 }
 

@@ -399,7 +399,7 @@ func (mm *Memory) TransferRegsToGPU(regs []MemReg) {
 		return
 	}
 	buff := mm.Buffs[bt]
-	if buff.Size == 0 || buff.DevMem == nil {
+	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory {
 		return
 	}
 	cmd := mm.CmdPool.NewBuffer(&mm.Device)
@@ -421,7 +421,7 @@ func (mm *Memory) TransferRegsFmGPU(regs []MemReg) {
 		return
 	}
 	buff := mm.Buffs[bt]
-	if buff.Size == 0 || buff.DevMem == nil {
+	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory {
 		return
 	}
 	cmd := mm.CmdPool.NewBuffer(&mm.Device)
@@ -433,7 +433,7 @@ func (mm *Memory) TransferRegsFmGPU(regs []MemReg) {
 // CmdTransferRegsToGPU transfers memory from CPU to GPU for given regions
 // by recording command to given buffer.
 func (mm *Memory) CmdTransferRegsToGPU(cmd vk.CommandBuffer, buff *MemBuff, regs []MemReg) {
-	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
+	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory || len(regs) == 0 {
 		return
 	}
 	rg := make([]vk.BufferCopy, len(regs))
@@ -446,7 +446,7 @@ func (mm *Memory) CmdTransferRegsToGPU(cmd vk.CommandBuffer, buff *MemBuff, regs
 // CmdTransferRegsFmGPU transfers memory from GPU to CPU for given regions
 // by recording command to given buffer.
 func (mm *Memory) CmdTransferRegsFmGPU(cmd vk.CommandBuffer, buff *MemBuff, regs []MemReg) {
-	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
+	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory || len(regs) == 0 {
 		return
 	}
 	rg := make([]vk.BufferCopy, len(regs))
@@ -505,7 +505,7 @@ func (mm *Memory) CmdTransferStorageRegsToGPU(cmd vk.CommandBuffer, regs []MemRe
 // CmdTransferStorageBuffRegsToGPU transfers memory from CPU to GPU for given regions
 // by recording command to given storage buffer of given index.
 func (mm *Memory) CmdTransferStorageBuffRegsToGPU(cmd vk.CommandBuffer, buff *MemBuff, buffIdx int, regs []MemReg) {
-	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
+	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory || len(regs) == 0 {
 		return
 	}
 	var rg []vk.BufferCopy
@@ -543,7 +543,7 @@ func (mm *Memory) CmdTransferStorageRegsFmGPU(cmd vk.CommandBuffer, regs []MemRe
 // CmdTransferStorageBuffRegsFmGPU transfers memory from GPU to CPU for given regions
 // by recording command to given storage buffer of given index.
 func (mm *Memory) CmdTransferStorageBuffRegsFmGPU(cmd vk.CommandBuffer, buff *MemBuff, buffIdx int, regs []MemReg) {
-	if buff.Size == 0 || buff.DevMem == nil || len(regs) == 0 {
+	if buff.Size == 0 || buff.DevMem == vk.NullDeviceMemory || len(regs) == 0 {
 		return
 	}
 	var rg []vk.BufferCopy

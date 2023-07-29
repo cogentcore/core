@@ -39,13 +39,13 @@ type Render struct {
 }
 
 func (rp *Render) Destroy() {
-	if rp.VkClearPass == nil {
+	if rp.VkClearPass == vk.NullRenderPass {
 		return
 	}
 	vk.DestroyRenderPass(rp.Dev, rp.VkClearPass, nil)
 	vk.DestroyRenderPass(rp.Dev, rp.VkLoadPass, nil)
-	rp.VkClearPass = nil
-	rp.VkLoadPass = nil
+	rp.VkClearPass = vk.NullRenderPass
+	rp.VkLoadPass = vk.NullRenderPass
 	rp.Depth.Destroy()
 	rp.Multi.Destroy()
 	rp.Grab.Destroy()
@@ -337,7 +337,7 @@ func (rp *Render) GrabDepthImage(dev vk.Device, cmd vk.CommandBuffer) error {
 // DepthImageArray returns the float values from the last GrabDepthImage call
 // automatically handles down-sampling from multisampling.
 func (rp *Render) DepthImageArray() ([]float32, error) {
-	if rp.GrabDepth.Host == nil {
+	if rp.GrabDepth.Host == vk.NullBuffer {
 		err := errors.New("DepthImageArray: No GrabDepth.Host buffer -- must call GrabDepthImage")
 		if Debug {
 			log.Println(err)
@@ -347,8 +347,7 @@ func (rp *Render) DepthImageArray() ([]float32, error) {
 	sz := rp.Format.Size
 	fsz := sz.X * sz.Y
 	ary := make([]float32, fsz)
-	const m = 0x7fffffffffff
-	fp := (*[m]float32)(rp.GrabDepth.HostPtr)[0:fsz]
+	fp := (*[ByteCopyMemoryLimit]float32)(rp.GrabDepth.HostPtr)[0:fsz]
 	copy(ary, fp)
 	// note: you cannot specify a greater width than actual width
 	// and resolving depth images GPU-side is not exactly clear:

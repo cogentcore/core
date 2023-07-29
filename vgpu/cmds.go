@@ -8,8 +8,6 @@
 package vgpu
 
 import (
-	"unsafe"
-
 	vk "github.com/goki/vulkan"
 )
 
@@ -117,11 +115,11 @@ func (cp *CmdPool) FreeBuffer(dev *Device) {
 
 // Destroy
 func (cp *CmdPool) Destroy(dev vk.Device) {
-	if IsNil(cp.Pool) {
+	if cp.Pool == vk.NullCommandPool {
 		return
 	}
 	vk.DestroyCommandPool(dev, cp.Pool, nil)
-	SetNil(unsafe.Pointer(&cp.Pool))
+	cp.Pool = vk.NullCommandPool
 }
 
 //////////////////////////////////////////////////////////////

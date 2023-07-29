@@ -142,8 +142,7 @@ func (vl *Val) Free() {
 // go-based storage.
 // Set Mod flag when changes have been made.
 func (vl *Val) Bytes() []byte {
-	const m = 0x7fffffffffff
-	return (*[m]byte)(vl.MemPtr)[:vl.AllocSize]
+	return (*[ByteCopyMemoryLimit]byte)(vl.MemPtr)[:vl.AllocSize]
 }
 
 // Floats32 returns mat32.ArrayF32 of the Val data -- can be written to directly.
@@ -152,8 +151,7 @@ func (vl *Val) Bytes() []byte {
 // Set Mod flag when changes have been made.
 func (vl *Val) Floats32() mat32.ArrayF32 {
 	nf := vl.AllocSize / 4
-	const m = 0x7fffffffffff
-	return mat32.ArrayF32((*[m]float32)(vl.MemPtr)[:nf])
+	return mat32.ArrayF32((*[ByteCopyMemoryLimit]float32)(vl.MemPtr)[:nf])
 }
 
 // UInts32 returns mat32.ArrayU32 of the Val data -- can be written to directly.
@@ -162,8 +160,7 @@ func (vl *Val) Floats32() mat32.ArrayF32 {
 // Set Mod flag when changes have been made.
 func (vl *Val) UInts32() mat32.ArrayU32 {
 	nf := vl.AllocSize / 4
-	const m = 0x7fffffffffff
-	return mat32.ArrayU32((*[m]uint32)(vl.MemPtr)[:nf])
+	return mat32.ArrayU32((*[ByteCopyMemoryLimit]uint32)(vl.MemPtr)[:nf])
 }
 
 // PaddedArrayCheck checks if this is an array with padding on the elements
@@ -184,8 +181,7 @@ func (vl *Val) CopyFromBytes(srcPtr unsafe.Pointer) {
 		// return
 	}
 	dst := vl.Bytes()
-	const m = 0x7fffffffffff
-	src := (*[m]byte)(srcPtr)[:vl.AllocSize]
+	src := (*[ByteCopyMemoryLimit]byte)(srcPtr)[:vl.AllocSize]
 	copy(dst, src)
 	vl.SetMod()
 }
@@ -198,8 +194,7 @@ func (vl *Val) CopyToBytes(srcPtr unsafe.Pointer) {
 		return
 	}
 	dst := vl.Bytes()
-	const m = 0x7fffffffffff
-	src := (*[m]byte)(srcPtr)[:vl.AllocSize]
+	src := (*[ByteCopyMemoryLimit]byte)(srcPtr)[:vl.AllocSize]
 	copy(src, dst)
 }
 
