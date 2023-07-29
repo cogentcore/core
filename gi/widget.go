@@ -995,7 +995,6 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	// the whole area with the background color first so the border
 	// doesn't render weirdly
 	if !st.BackgroundColor.IsNil() {
-		fmt.Println(pos, sz, st.BackgroundColor)
 		if rad.IsZero() {
 			pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 		} else {

@@ -55,13 +55,13 @@ func (tv *TabView) Disconnect() {
 }
 
 var TabViewProps = ki.Props{
-	"EnumType:Flag":    KiT_NodeFlags,
-	"border-color":     &Prefs.Colors.Border,
-	"border-width":     units.Px(2),
-	"background-color": &Prefs.Colors.Background,
-	"color":            &Prefs.Colors.Font,
-	"max-width":        -1,
-	"max-height":       -1,
+	"EnumType:Flag": KiT_NodeFlags,
+	// "border-color":     &Prefs.Colors.Border,
+	// "border-width":     units.Px(2),
+	// "background-color": &Prefs.Colors.Background,
+	// "color":            &Prefs.Colors.Font,
+	// "max-width":        -1,
+	// "max-height":       -1,
 }
 
 // NTabs returns number of tabs
@@ -543,6 +543,21 @@ func (tv *TabView) Render2D() {
 	} else {
 		tv.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
+}
+
+func (tv *TabView) Init2D() {
+	tv.Init2DWidget()
+	tv.ConfigStyles()
+}
+
+func (tv *TabView) ConfigStyles() {
+	tv.AddStyleFunc(StyleFuncDefault, func() {
+		tv.Style.Border.Style.Set(gist.BorderNone)
+		tv.Style.BackgroundColor.SetColor(Colors.Background)
+		tv.Style.Color = Colors.Text
+		tv.Style.MaxWidth.SetPx(-1)
+		tv.Style.MaxHeight.SetPx(-1)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
