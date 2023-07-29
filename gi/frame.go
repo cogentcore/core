@@ -106,7 +106,7 @@ func (fr *Frame) FrameStdRender() {
 		pc.DrawBorder(rs, spos.X, spos.Y, sz.X, sz.Y, gist.Border{})
 	}
 
-	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes {
+	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes && Prefs.Params.ZebraStripeWeight != 0 {
 		fr.RenderStripes()
 	}
 
@@ -126,7 +126,7 @@ func (fr *Frame) RenderStripes() {
 
 	delta := fr.Move2DDelta(image.Point{})
 
-	hic := st.BackgroundColor.Color.Highlight(10)
+	hic := st.BackgroundColor.Color.Highlight(Prefs.Params.ZebraStripeWeight)
 	if fr.Stripes == RowStripes {
 		for r, gd := range fr.GridData[Row] {
 			if r%2 == 0 {

@@ -773,14 +773,14 @@ func (sr *Splitter) FocusChanged2D(change FocusChanges) {
 
 func (sr *Splitter) ConfigStyles() {
 	sr.AddStyleFunc(StyleFuncDefault, func() {
-		sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
+		// sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
 
 		sr.Style.Margin.Set()
 		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
-		sr.Style.BackgroundColor.SetColor(Colors.Accent)
+		// sr.Style.BackgroundColor.SetColor(Colors.Accent)
 		sr.Style.Color = Colors.Text
-		sr.Style.Border.Width.Set(units.Px(1))
-		sr.Style.Border.Color.Set(Colors.Text)
+		// sr.Style.Border.Width.Set(units.Px(1))
+		// sr.Style.Border.Color.Set(Colors.Text)
 		if sr.Dim == mat32.X {
 			sr.Style.MinWidth.SetPx(2)
 			sr.Style.MinHeight.SetPx(100)
