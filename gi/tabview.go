@@ -441,22 +441,22 @@ func (tv *TabView) Config() {
 	tv.Lay = LayoutVert
 	tv.SetReRenderAnchor()
 
-	tabs := AddNewFrame(tv, "tabs", LayoutHorizFlow)
-	tabs.SetStretchMaxWidth()
-	// tabs.SetStretchMaxHeight()
-	// tabs.SetMinPrefWidth(units.NewEm(10))
-	tabs.SetProp("height", units.Em(1.8))
-	tabs.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
-	tabs.SetProp("padding", units.Px(0))
-	tabs.SetProp("margin", units.Px(0))
-	tabs.SetProp("spacing", units.Px(4))
-	tabs.SetProp("background-color", "linear-gradient(pref(Control), highlight-10)")
+	AddNewFrame(tv, "tabs", LayoutHorizFlow)
+	// tabs.SetStretchMaxWidth()
+	// // tabs.SetStretchMaxHeight()
+	// // tabs.SetMinPrefWidth(units.NewEm(10))
+	// tabs.SetProp("height", units.Em(1.8))
+	// tabs.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
+	// tabs.SetProp("padding", units.Px(0))
+	// tabs.SetProp("margin", units.Px(0))
+	// tabs.SetProp("spacing", units.Px(4))
+	// tabs.SetProp("background-color", "linear-gradient(pref(Control), highlight-10)")
 
 	frame := AddNewFrame(tv, "frame", LayoutStacked)
-	frame.SetMinPrefWidth(units.Em(10))
-	frame.SetMinPrefHeight(units.Em(7))
+	// frame.SetMinPrefWidth(units.Em(10))
+	// frame.SetMinPrefHeight(units.Em(7))
 	frame.StackTopOnly = true // key for allowing each tab to have its own size
-	frame.SetStretchMax()
+	// frame.SetStretchMax()
 	frame.SetReRenderAnchor()
 
 	tv.ConfigNewTabButton()
@@ -557,6 +557,28 @@ func (tv *TabView) ConfigStyles() {
 		tv.Style.Color = Colors.Text
 		tv.Style.MaxWidth.SetPx(-1)
 		tv.Style.MaxHeight.SetPx(-1)
+	})
+	tv.AddChildStyleFunc("tabs", 0, StyleFuncParts(tv), func(tabsw *WidgetBase) {
+		tabs, ok := tabsw.This().(*Frame)
+		if !ok {
+			log.Println("(*gi.TabView).ConfigStyles: expected child named tabs to be of type *gi.Frame, not", reflect.TypeOf(tabsw.This()))
+			return
+		}
+		tabs.Style.MaxWidth.SetPx(-1)
+		tabs.Style.Height.SetEm(1.8)
+		tabs.Style.Overflow = gist.OverflowHidden // no scrollbars!
+		tabs.Style.Margin.Set()
+		tabs.Style.Padding.Set()
+		tabs.Spacing.SetPx(4 * Prefs.DensityMul())
+		tabs.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
+	})
+	tv.AddChildStyleFunc("frame", 1, StyleFuncParts(tv), func(frame *WidgetBase) {
+		frame.Style.Width.SetEm(10)
+		frame.Style.MinWidth.SetEm(10)
+		frame.Style.MaxWidth.SetPx(-1)
+		frame.Style.Height.SetEm(7)
+		frame.Style.MinHeight.SetEm(7)
+		frame.Style.MaxHeight.SetPx(-1)
 	})
 }
 
