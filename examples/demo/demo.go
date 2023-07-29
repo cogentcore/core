@@ -35,7 +35,8 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	tv := gi.AddNewTabView(mfr, "tv")
-	tv.NoDeleteTabs = true
+	// tv.NoDeleteTabs = true
+	tv.NewTabButton = true
 
 	makeHome(tv)
 	makeButtons(win, tv)

@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"reflect"
 	"sync"
@@ -569,7 +570,7 @@ func (tv *TabView) ConfigStyles() {
 		tabs.Style.Overflow = gist.OverflowHidden // no scrollbars!
 		tabs.Style.Margin.Set()
 		tabs.Style.Padding.Set()
-		tabs.Spacing.SetPx(4 * Prefs.DensityMul())
+		// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
 		tabs.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
 	})
 	tv.AddChildStyleFunc("frame", 1, StyleFuncParts(tv), func(frame *WidgetBase) {
@@ -594,72 +595,69 @@ type TabButton struct {
 
 var KiT_TabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
 
-// TabButtonMinWidth is the minimum width of the tab button, in Ch units
-var TabButtonMinWidth = float32(8)
-
 var TabButtonProps = ki.Props{
-	"EnumType:Flag":    KiT_ButtonFlags,
-	"min-width":        units.Ch(TabButtonMinWidth),
-	"min-height":       units.Em(1.6),
-	"border-width":     units.Px(0),
-	"border-radius":    units.Px(0),
-	"border-color":     &Prefs.Colors.Border,
-	"text-align":       gist.AlignCenter,
-	"background-color": &Prefs.Colors.Control,
-	"color":            &Prefs.Colors.Font,
-	"padding":          units.Px(4), // we go to edge of bar
-	"margin":           units.Px(0),
-	"indicator":        "close",
-	"#icon": ki.Props{
-		"width":   units.Em(1),
-		"height":  units.Em(1),
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-		"fill":    &Prefs.Colors.Icon,
-		"stroke":  &Prefs.Colors.Font,
-	},
-	"#label": ki.Props{
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-	},
-	"#close-stretch": ki.Props{
-		"width": units.Ch(1),
-	},
-	"#close": ki.Props{
-		"width":          units.Ex(0.5),
-		"height":         units.Ex(0.5),
-		"margin":         units.Px(0),
-		"padding":        units.Px(0),
-		"vertical-align": gist.AlignBottom,
-	},
-	"#shortcut": ki.Props{
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-	},
-	"#sc-stretch": ki.Props{
-		"min-width": units.Ch(2),
-	},
-	ButtonSelectors[ButtonActive]: ki.Props{
-		"background-color": "linear-gradient(lighter-0, highlight-10)",
-	},
-	ButtonSelectors[ButtonInactive]: ki.Props{
-		"border-color": "lighter-50",
-		"color":        "lighter-50",
-	},
-	ButtonSelectors[ButtonHover]: ki.Props{
-		"background-color": "linear-gradient(highlight-10, highlight-10)",
-	},
-	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.Px(2),
-		"background-color": "linear-gradient(samelight-50, highlight-10)",
-	},
-	ButtonSelectors[ButtonDown]: ki.Props{
-		"color":            "lighter-90",
-		"background-color": "linear-gradient(highlight-30, highlight-10)",
-	},
-	ButtonSelectors[ButtonSelected]: ki.Props{
-		"background-color": "linear-gradient(pref(Select), highlight-10)",
-	},
+	"EnumType:Flag": KiT_ButtonFlags,
+	// "min-width":        units.Ch(TabButtonMinWidth),
+	// "min-height":       units.Em(1.6),
+	// "border-width":     units.Px(0),
+	// "border-radius":    units.Px(0),
+	// "border-color":     &Prefs.Colors.Border,
+	// "text-align":       gist.AlignCenter,
+	// "background-color": &Prefs.Colors.Control,
+	// "color":            &Prefs.Colors.Font,
+	// "padding":          units.Px(4), // we go to edge of bar
+	// "margin":           units.Px(0),
+	// "indicator":        "close",
+	// "#icon": ki.Props{
+	// 	"width":   units.Em(1),
+	// 	"height":  units.Em(1),
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// 	"fill":    &Prefs.Colors.Icon,
+	// 	"stroke":  &Prefs.Colors.Font,
+	// },
+	// "#label": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// "#close-stretch": ki.Props{
+	// 	"width": units.Ch(1),
+	// },
+	// "#close": ki.Props{
+	// 	"width":          units.Ex(0.5),
+	// 	"height":         units.Ex(0.5),
+	// 	"margin":         units.Px(0),
+	// 	"padding":        units.Px(0),
+	// 	"vertical-align": gist.AlignBottom,
+	// },
+	// "#shortcut": ki.Props{
+	// 	"margin":  units.Px(0),
+	// 	"padding": units.Px(0),
+	// },
+	// "#sc-stretch": ki.Props{
+	// 	"min-width": units.Ch(2),
+	// },
+	// ButtonSelectors[ButtonActive]: ki.Props{
+	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonInactive]: ki.Props{
+	// 	"border-color": "lighter-50",
+	// 	"color":        "lighter-50",
+	// },
+	// ButtonSelectors[ButtonHover]: ki.Props{
+	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonFocus]: ki.Props{
+	// 	"border-width":     units.Px(2),
+	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonDown]: ki.Props{
+	// 	"color":            "lighter-90",
+	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
+	// },
+	// ButtonSelectors[ButtonSelected]: ki.Props{
+	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
+	// },
 }
 
 func (tb *TabButton) TabView() *TabView {
@@ -681,10 +679,10 @@ func (tb *TabButton) ConfigParts() {
 
 func (tb *TabButton) ConfigPartsDeleteButton() {
 	config := kit.TypeAndNameList{}
-	clsIdx := 0
-	config.Add(KiT_Action, "close")
-	config.Add(KiT_Stretch, "close-stretch")
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
+	config.Add(KiT_Stretch, "close-stretch")
+	clsIdx := len(config)
+	config.Add(KiT_Action, "close")
 	mods, updt := tb.Parts.ConfigChildren(config)
 	tb.ConfigPartsSetIconLabel(tb.Icon, tb.Text, icIdx, lbIdx)
 	if mods {
@@ -702,7 +700,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 			tabIdx := tbb.Data.(int)
 			tvv := tb.TabView()
 			if tvv != nil {
-				if tbb.IsSelected() { // only process delete when already selected
+				if !Prefs.Params.OnlyCloseActiveTab || tbb.IsSelected() { // only process delete when already selected if OnlyCloseActiveTab is on
 					tvv.DeleteTabIndexAction(tabIdx)
 				} else {
 					tvv.SelectTabIndexAction(tabIdx) // otherwise select
@@ -711,4 +709,72 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 		})
 		tb.UpdateEnd(updt)
 	}
+}
+
+func (tb *TabButton) Init2D() {
+	tb.Init2DWidget()
+	tb.ConfigParts()
+	tb.ConfigStyles()
+}
+
+func (tb *TabButton) ConfigStyles() {
+	tb.AddStyleFunc(StyleFuncDefault, func() {
+		tb.Style.MinWidth.SetCh(8)
+		tb.Style.MaxWidth.SetPx(500)
+		tb.Style.MinHeight.SetEm(1.6)
+		tb.Style.Border.Style.Set(gist.BorderNone)
+		// tb.Style.Border.Style.Right = gist.BorderSolid
+		// tb.Style.Border.Width.Right.SetPx(1)
+
+		tb.Style.Border.Radius.Set()
+		tb.Style.Text.Align = gist.AlignLeft
+		tb.Style.Color = Colors.Text
+		tb.Style.Margin.Set()
+		tb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
+		tb.Indicator = icons.Close
+		switch tb.State {
+		case ButtonActive:
+			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
+		case ButtonInactive:
+			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			tb.Style.Color = Colors.Text.Highlight(20)
+		case ButtonFocus:
+			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+		case ButtonHover:
+			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+		case ButtonDown:
+			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
+		case ButtonSelected:
+			tb.Style.BackgroundColor.SetColor(Colors.Accent)
+		}
+	})
+	tb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(tb), func(icon *WidgetBase) {
+		icon.Style.Width.SetEm(1)
+		icon.Style.Height.SetEm(1)
+		icon.Style.Margin.Set()
+		icon.Style.Padding.Set()
+	})
+	tb.Parts.AddChildStyleFunc("label", 1, StyleFuncParts(tb), func(label *WidgetBase) {
+		label.Style.Margin.Set()
+		label.Style.Padding.Set()
+	})
+	tb.Parts.AddChildStyleFunc("close-stretch", 2, StyleFuncParts(tb), func(cls *WidgetBase) {
+		cls.Style.Width.SetCh(1)
+	})
+	tb.Parts.AddChildStyleFunc("close", 3, StyleFuncParts(tb), func(close *WidgetBase) {
+		close.Style.Width.SetEx(0.5)
+		close.Style.Height.SetEx(0.5)
+		close.Style.Margin.Set()
+		close.Style.Padding.Set()
+		close.Style.AlignV = gist.AlignMiddle
+		close.Style.Border.Radius.Set(units.Px(100))
+		close.Style.BackgroundColor.SetColor(color.Transparent)
+	})
+	tb.Parts.AddChildStyleFunc("sc-stretch", 4, StyleFuncParts(tb), func(scs *WidgetBase) {
+		scs.Style.MinWidth.SetCh(2)
+	})
+	tb.Parts.AddChildStyleFunc("shortcut", 5, StyleFuncParts(tb), func(shortcut *WidgetBase) {
+		shortcut.Style.Margin.Set()
+		shortcut.Style.Padding.Set()
+	})
 }

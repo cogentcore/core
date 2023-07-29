@@ -647,18 +647,20 @@ type ScreenPrefs struct {
 
 // ParamPrefs contains misc parameters controlling GUI behavior.
 type ParamPrefs struct {
-	DoubleClickMSec  int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
-	ScrollWheelSpeed float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
-	LocalMainMenu    bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
-	BigFileSize      int     `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`
-	SavedPathsMax    int     `desc:"maximum number of saved paths to save in FileView"`
-	Smooth3D         bool    `desc:"turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)"`
+	DoubleClickMSec    int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
+	ScrollWheelSpeed   float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
+	LocalMainMenu      bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
+	OnlyCloseActiveTab bool    `def:"false" desc:"only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it"`
+	BigFileSize        int     `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`
+	SavedPathsMax      int     `desc:"maximum number of saved paths to save in FileView"`
+	Smooth3D           bool    `desc:"turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)"`
 }
 
 func (pf *ParamPrefs) Defaults() {
 	pf.DoubleClickMSec = 500
 	pf.ScrollWheelSpeed = 20
 	pf.LocalMainMenu = true // much better
+	pf.OnlyCloseActiveTab = false
 	pf.BigFileSize = 10000000
 	pf.SavedPathsMax = 50
 	pf.Smooth3D = true
