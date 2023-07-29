@@ -132,9 +132,7 @@ func (un *Undo) UndoStackSave() {
 	if len(un.UndoStack) == 0 {
 		return
 	}
-	for _, utbe := range un.UndoStack {
-		un.Stack = append(un.Stack, utbe)
-	}
+	un.Stack = append(un.Stack, un.UndoStack...)
 	un.Pos = len(un.Stack)
 	un.UndoStack = nil
 	if UndoTrace {

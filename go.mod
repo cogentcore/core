@@ -17,14 +17,14 @@ require (
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
 	github.com/goki/gosl v1.0.13
-	github.com/goki/ki v1.1.12-0.20230704054826-0d7b59ef3c44
-	github.com/goki/kigen v1.0.2
-	github.com/goki/mat32 v1.0.14
 	github.com/goki/mobile v0.0.0-20230626225100-3417752baaf2
+	github.com/goki/ki v1.1.15
+	github.com/goki/kigen v1.0.2
+	github.com/goki/mat32 v1.0.15
 	github.com/goki/pi v1.0.27
 	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
-	github.com/goki/vgpu v1.0.32
+	github.com/goki/vgpu v1.0.33
 	github.com/goki/vulkan v1.0.6
 	github.com/iancoleman/strcase v0.2.0
 	github.com/mitchellh/go-homedir v1.1.0

@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -424,7 +425,7 @@ func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Node2D, isInact bo
 func StructViewFieldDefTag(vv ValueView, lbl *gi.Label) (hasDef bool, isDef bool, defStr string) {
 	if dtag, has := vv.Tag("def"); has {
 		hasDef = true
-		isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface())
+		isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface(), kit.NonPtrValue(vv.Val()).Kind())
 		if isDef {
 			lbl.CurBackgroundColor = gi.Prefs.Colors.Background
 		} else {
@@ -439,11 +440,26 @@ func StructViewFieldDefTag(vv ValueView, lbl *gi.Label) (hasDef bool, isDef bool
 // defs = default values as strings as either comma-separated list of valid values
 // or low:high value range (only for int or float numeric types)
 // valPtr = pointer to value
-// returns true if value is default, and string to add to tooltip for default values
-func StructFieldIsDef(defs string, valPtr any) (bool, string) {
+// returns true if value is default, and string to add to tooltip for default values.
+// Uses JSON format for composite types (struct, slice, map), replacing " with '
+// so it is easier to use in def tag.
+func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string) {
 	defStr := "[Def: " + defs + "] "
 	def := false
-	if strings.Contains(defs, ":") {
+	switch {
+	case kind == reflect.Struct || kind == reflect.Slice || kind == reflect.Map:
+		jb, _ := json.Marshal(valPtr)
+		jstr := string(jb)
+		// fmt.Println(jstr, defs)
+		if defs == jstr {
+			def = true
+		} else {
+			jstr = strings.ReplaceAll(jstr, `"`, `'`)
+			if defs == jstr {
+				def = true
+			}
+		}
+	case strings.Contains(defs, ":"):
 		dtags := strings.Split(defs, ":")
 		lo, _ := strconv.ParseFloat(dtags[0], 64)
 		hi, _ := strconv.ParseFloat(dtags[1], 64)
@@ -469,7 +485,7 @@ func StructFieldIsDef(defs string, valPtr any) (bool, string) {
 				def = true
 			}
 		}
-	} else {
+	default:
 		val := kit.ToStringPrec(valPtr, 6)
 		if strings.HasPrefix(val, "&") {
 			val = val[1:]
@@ -617,7 +633,8 @@ func StructNonDefFields(structPtr any, path string) []StructFieldVals {
 	var flds []StructFieldVals
 	kit.FlatFieldsValueFunc(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		vvp := fieldVal.Addr()
-		if field.Type.Kind() == reflect.Struct {
+		dtag, got := field.Tag.Lookup("def")
+		if field.Type.Kind() == reflect.Struct && (!got || dtag == "") {
 			spath := path
 			if path != "" {
 				spath += "."
@@ -629,11 +646,10 @@ func StructNonDefFields(structPtr any, path string) []StructFieldVals {
 			}
 			return true
 		}
-		dtag, got := field.Tag.Lookup("def")
 		if !got {
 			return true
 		}
-		def, defStr := StructFieldIsDef(dtag, vvp.Interface())
+		def, defStr := StructFieldIsDef(dtag, vvp.Interface(), field.Type.Kind())
 		if def {
 			return true
 		}

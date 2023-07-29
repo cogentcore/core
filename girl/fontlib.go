@@ -176,9 +176,7 @@ func (fl *FontLib) InitFontPaths(paths ...string) {
 
 func (fl *FontLib) AddFontPaths(paths ...string) bool {
 	fl.Init()
-	for _, p := range paths {
-		fl.FontPaths = append(fl.FontPaths, p)
-	}
+	fl.FontPaths = append(fl.FontPaths, paths...)
 	return fl.UpdateFontsAvail()
 }
 

@@ -42,8 +42,18 @@ func (sv *SliceViewInline) Disconnect() {
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
 func (sv *SliceViewInline) SetSlice(sl any) {
+	if kit.IfaceIsNil(sl) {
+		sv.Slice = nil
+		return
+	}
 	updt := false
-	if sv.Slice != sl {
+	newslc := false
+	if reflect.TypeOf(sl).Kind() != reflect.Pointer { // prevent crash on non-comparable
+		newslc = true
+	} else {
+		newslc = (sv.Slice != sl)
+	}
+	if newslc {
 		updt = sv.UpdateStart()
 		sv.Slice = sl
 		sv.IsArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
