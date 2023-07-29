@@ -59,7 +59,7 @@ func (s *Style) StyleFromProps(par *Style, props ki.Props, ctxt Context) {
 		}
 		if sfunc, ok := StyleLayoutFuncs[key]; ok {
 			if par != nil {
-				sfunc(s, key, val, &par, ctxt)
+				sfunc(s, key, val, par, ctxt)
 			} else {
 				sfunc(s, key, val, nil, ctxt)
 			}
