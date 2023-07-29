@@ -397,6 +397,7 @@ func (tv *TabView) ConfigNewTabButton() bool {
 			tvv := recv.Embed(KiT_TabView).(*TabView)
 			tvv.SetFullReRender()
 			tvv.AddNewTabAction(tvv.NewTabType, "New Tab")
+			tvv.SelectTabIndex(len(*tvv.Frame().Children()) - 1)
 		})
 		return true
 	} else {
@@ -553,7 +554,10 @@ func (tv *TabView) Init2D() {
 
 func (tv *TabView) ConfigStyles() {
 	tv.AddStyleFunc(StyleFuncDefault, func() {
-		tv.Style.Border.Style.Set(gist.BorderNone)
+		// need border for separators (see RenderTabSeps)
+		tv.Style.Border.Style.Set(gist.BorderSolid)
+		tv.Style.Border.Width.Set(units.Px(1))
+		tv.Style.Border.Color.Set(Colors.Background.Highlight(50))
 		tv.Style.BackgroundColor.SetColor(Colors.Background)
 		tv.Style.Color = Colors.Text
 		tv.Style.MaxWidth.SetPx(-1)
@@ -732,20 +736,27 @@ func (tb *TabButton) ConfigStyles() {
 		tb.Style.Margin.Set()
 		tb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
 		tb.Indicator = icons.Close
+		// need to do selected as a separate thing at the start
+		// so that we can apply additional styles based on state
+		// while selected
+		baseColor := Colors.Background
+		if tb.IsSelected() {
+			baseColor = Colors.Accent
+		}
 		switch tb.State {
 		case ButtonActive:
-			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(7))
 		case ButtonInactive:
-			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(20))
 			tb.Style.Color = Colors.Text.Highlight(20)
 		case ButtonFocus:
-			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(15))
 		case ButtonHover:
-			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(20))
 		case ButtonDown:
-			tb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
+			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(25))
 		case ButtonSelected:
-			tb.Style.BackgroundColor.SetColor(Colors.Accent)
+			tb.Style.BackgroundColor.SetColor(baseColor)
 		}
 	})
 	tb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(tb), func(icon *WidgetBase) {
