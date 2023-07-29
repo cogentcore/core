@@ -790,16 +790,37 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 	TheViewIFace.CtxtMenuView(wb.This(), wb.IsInactive(), mvp, m)
 }
 
-var TooltipFrameProps = ki.Props{
-	"background-color":    &Prefs.Colors.Highlight,
-	"border-width":        units.Px(0),
-	"border-color":        "none",
-	"margin":              units.Px(0),
-	"padding":             units.Px(2),
-	"box-shadow.h-offset": units.Px(0),
-	"box-shadow.v-offset": units.Px(0),
-	"box-shadow.blur":     units.Px(0),
-	"box-shadow.color":    &Prefs.Colors.Shadow,
+// var TooltipFrameProps = ki.Props{
+// "background-color":    &Prefs.Colors.Highlight,
+// "border-width":        units.Px(0),
+// "border-color":        "none",
+// "margin":              units.Px(0),
+// "padding":             units.Px(2),
+// "box-shadow.h-offset": units.Px(0),
+// "box-shadow.v-offset": units.Px(0),
+// "box-shadow.blur":     units.Px(0),
+// "box-shadow.color":    &Prefs.Colors.Shadow,
+// }
+
+// TooltipConfigStyles configures the default styles
+// for the given tooltip frame with the given parent.
+// It should be called on tooltips when they are created.
+func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
+	tooltip.AddStyleFunc(StyleFuncParts(par), func() {
+		tooltip.Style.BackgroundColor.SetColor(Colors.Accent)
+		tooltip.Style.Color = Colors.Accent.ContrastColor()
+		tooltip.Style.Border.Style.Set(gist.BorderNone)
+		tooltip.Style.Margin.Set()
+		tooltip.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		// TODO: maybe add box shadow
+		// tooltip.Style.BoxShadow.HOffset.SetPx(2)
+		// tooltip.Style.BoxShadow.VOffset.SetPx(2)
+		// tooltip.Style.BoxShadow.Blur.SetPx(2)
+		// tooltip.Style.BoxShadow.Color = Colors.Accent.Highlight(20)
+	})
+	tooltip.AddChildStyleFunc("ttlbl", 0, StyleFuncParts(par), func(label *WidgetBase) {
+		label.Style.Text.WhiteSpace = gist.WhiteSpaceNormal // wrap
+	})
 }
 
 // PopupTooltip pops up a viewport displaying the tooltip text
@@ -819,9 +840,11 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.SetFlag(int(VpFlagPopupDestroyAll)) // nuke it all
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutVert
-	frame.Properties().CopyFrom(TooltipFrameProps, ki.DeepCopy)
+	// frame.Properties().CopyFrom(TooltipFrameProps, ki.DeepCopy)
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
-	lbl.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
+	// lbl.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
+
+	TooltipConfigStyles(&pvp.WidgetBase, frame)
 
 	mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
 	mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))

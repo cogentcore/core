@@ -344,7 +344,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 //
 // MenuFrameConfigStyles configures the default styles
 // for the given pop-up menu frame with the given parent.
-// It should be called on menu frames  when they are created.
+// It should be called on menu frames when they are created.
 func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
 	frame.AddStyleFunc(StyleFuncParts(par), func() {
 		frame.Style.Border.Style.Set(gist.BorderNone)
