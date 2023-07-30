@@ -381,8 +381,11 @@ func (nb *NodeBase) ParentCSSAgg() *ki.Props {
 	if nb.Par == nil {
 		return nil
 	}
-	pn := nb.Par.Embed(TypeNodeBase).(*NodeBase)
-	return &pn.CSSAgg
+	pn := nb.Par.Embed(TypeNodeBase)
+	if pn == nil {
+		return nil
+	}
+	return &pn.(*NodeBase).CSSAgg
 }
 
 // SetStdXMLAttr sets standard attributes of node given XML-style name /
