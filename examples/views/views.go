@@ -13,8 +13,9 @@ import (
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
-	"github.com/goki/gosl/slbool"
-	_ "github.com/goki/gosl/slboolview"
+
+	// "github.com/goki/gosl/slbool"
+	// _ "github.com/goki/gosl/slboolview"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 )
@@ -37,7 +38,7 @@ type TableStruct struct {
 }
 
 type ILStruct struct {
-	On     slbool.Bool `desc:"click to show next"`
+	On     bool        `desc:"click to show next"`
 	ShowMe string      `viewif:"On" desc:"can u see me?"`
 	Cond   int         `viewif:"On" desc:"a conditional"`
 	Cond1  string      `viewif:"On&&Cond==0" desc:"On and Cond=0 -- note that slbool as bool cannot be used directly.."`
@@ -48,7 +49,7 @@ type ILStruct struct {
 type Struct struct {
 	Stripes  gi.Stripes  `desc:"an enum"`
 	Name     string      `viewif:"!(Stripes==[RowStripes,ColStripes])" desc:"a string"`
-	ShowNext slbool.Bool `desc:"click to show next"`
+	ShowNext bool        `desc:"click to show next"`
 	ShowMe   string      `viewif:"ShowNext" desc:"can u see me?"`
 	Inline   ILStruct    `view:"inline" desc:"how about that"`
 	Cond     int         `desc:"a conditional"`
