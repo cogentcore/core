@@ -108,7 +108,7 @@ const (
 
 //go:generate stringer -type=KeyFuns
 
-var KiT_KeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, kit.NotBitFlag, gist.StylePropProps, "KeyFun")
+var TypeKeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, kit.NotBitFlag, gist.StylePropProps, "KeyFun")
 
 func (kf KeyFuns) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
 func (kf *KeyFuns) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }
@@ -286,7 +286,7 @@ func (km KeyMapsItem) Label() string {
 // a custom one, just duplicate an existing map, rename, and customize
 type KeyMaps []KeyMapsItem
 
-var KiT_KeyMaps = kit.Types.AddType(&KeyMaps{}, KeyMapsProps)
+var TypeKeyMaps = kit.Types.AddType(&KeyMaps{}, KeyMapsProps)
 
 // AvailKeyMaps is the current list of available keymaps for use -- can be
 // loaded / saved / edited with preferences.  This is set to StdKeyMaps at

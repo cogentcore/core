@@ -31,11 +31,11 @@ type ButtonBox struct {
 	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
 }
 
-var KiT_ButtonBox = kit.Types.AddType(&ButtonBox{}, ButtonBoxProps)
+var TypeButtonBox = kit.Types.AddType(&ButtonBox{}, ButtonBoxProps)
 
 // AddNewButtonBox adds a new button to given parent node, with given name.
 func AddNewButtonBox(parent ki.Ki, name string) *ButtonBox {
-	return parent.AddNewChild(KiT_ButtonBox, name).(*ButtonBox)
+	return parent.AddNewChild(TypeButtonBox, name).(*ButtonBox)
 }
 
 func (bb *ButtonBox) CopyFieldsFrom(frm any) {
@@ -64,7 +64,7 @@ func (bb *ButtonBox) Disconnect() {
 // }
 
 var ButtonBoxProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(2),
 	// "border-color":     &Prefs.Colors.Border,
@@ -213,7 +213,7 @@ func (bb *ButtonBox) ConfigItems() {
 			if sig != int64(ButtonToggled) {
 				return
 			}
-			bbb, _ := recv.Embed(KiT_ButtonBox).(*ButtonBox)
+			bbb, _ := recv.Embed(TypeButtonBox).(*ButtonBox)
 			cbb := send.(*CheckBox)
 			idx := cbb.Prop("index").(int)
 			ischk := cbb.IsChecked()
@@ -232,7 +232,7 @@ func (bb *ButtonBox) ConfigParts() {
 	}
 	config := kit.TypeAndNameList{}
 	for _, lb := range bb.Items {
-		config.Add(KiT_CheckBox, lb)
+		config.Add(TypeCheckBox, lb)
 	}
 	mods, updt := bb.Parts.ConfigChildren(config)
 	if mods || gist.RebuildDefaultStyles {

@@ -50,7 +50,7 @@ const (
 // ViewBoxMeetOrSlice defines values for the PreserveAspectRatio meet or slice factor
 type ViewBoxMeetOrSlice int32
 
-var KiT_ViewBoxMeetOrSlice = kit.Enums.AddEnumAltLower(ViewBoxMeetOrSliceN, kit.NotBitFlag, gist.StylePropProps, "")
+var TypeViewBoxMeetOrSlice = kit.Enums.AddEnumAltLower(ViewBoxMeetOrSliceN, kit.NotBitFlag, gist.StylePropProps, "")
 
 func (ev ViewBoxMeetOrSlice) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *ViewBoxMeetOrSlice) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

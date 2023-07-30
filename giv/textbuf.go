@@ -95,7 +95,7 @@ type TextBuf struct {
 	CurView          *TextView               `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
 }
 
-var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
+var TypeTextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
 
 func (tb *TextBuf) Disconnect() {
 	tb.Node.Disconnect()
@@ -105,7 +105,7 @@ func (tb *TextBuf) Disconnect() {
 }
 
 var TextBufProps = ki.Props{
-	"EnumType:Flag": KiT_TextBufFlags,
+	"EnumType:Flag": TypeTextBufFlags,
 	"CallMethods": ki.PropSlice{
 		{"SaveAs", ki.Props{
 			"Args": ki.PropSlice{
@@ -157,7 +157,7 @@ type TextBufFlags int
 
 //go:generate stringer -type=TextBufFlags
 
-var KiT_TextBufFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TextBufFlagsN, kit.BitFlag, nil)
+var TypeTextBufFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, TextBufFlagsN, kit.BitFlag, nil)
 
 const (
 	// TextBufAutoSaving is used in atomically safe way to protect autosaving
@@ -2494,7 +2494,7 @@ func (tb *TextBuf) SetCompleter(data any, matchFun complete.MatchFunc, editFun c
 	tb.Complete.LookupFunc = lookupFun
 	// note: only need to connect once..
 	tb.Complete.CompleteSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
+		tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
 		if sig == int64(gi.CompleteSelect) {
 			tbf.CompleteText(data.(string)) // always use data
 		} else if sig == int64(gi.CompleteExtend) {
@@ -2591,10 +2591,10 @@ func (tb *TextBuf) SetSpell() {
 	// note: only need to connect once..
 	tb.Spell.SpellSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.SpellSelect) {
-			tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
+			tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
 			tbf.CorrectText(data.(string)) // always use data
 		} else if sig == int64(gi.SpellIgnore) {
-			tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
+			tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
 			tbf.CorrectText(data.(string)) // always use data
 		}
 	})
@@ -2731,7 +2731,7 @@ type TextBufList struct {
 
 // New returns a new TextBuf buffer
 func (tl *TextBufList) New() *TextBuf {
-	tb := tl.AddNewChild(KiT_TextBuf, "newbuf").(*TextBuf)
+	tb := tl.AddNewChild(TypeTextBuf, "newbuf").(*TextBuf)
 	return tb
 }
 

@@ -24,7 +24,7 @@ type VCSLogView struct {
 	SetA  bool     `desc:"double-click will set the A revision -- else B"`
 }
 
-var KiT_VCSLogView = kit.Types.AddType(&VCSLogView{}, VCSLogViewProps)
+var TypeVCSLogView = kit.Types.AddType(&VCSLogView{}, VCSLogViewProps)
 
 // Config configures to given repo, log and file (file could be empty)
 func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
@@ -34,8 +34,8 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 	lv.Since = since
 	lv.Lay = gi.LayoutVert
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(KiT_TableView, "log")
+	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(TypeTableView, "log")
 	mods, updt := lv.ConfigChildren(config)
 	tv := lv.TableView()
 	if mods {
@@ -149,7 +149,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 		tb.AddSeparator("dsep")
 		tb.AddAction(gi.ActOpts{Label: "Diff", Icon: icons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
 			func(recv, send ki.Ki, sig int64, data any) {
-				lvv := recv.Embed(KiT_VCSLogView).(*VCSLogView)
+				lvv := recv.Embed(TypeVCSLogView).(*VCSLogView)
 				DiffViewDialogFromRevs(lvv.ViewportSafe(), lvv.Repo, lvv.File, nil, lvv.RevA, lvv.RevB)
 			})
 
@@ -173,7 +173,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 
 // VCSLogViewProps are style properties for DebugView
 var VCSLogViewProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 	"max-width":     -1,
 	"max-height":    -1,
 }
@@ -193,8 +193,8 @@ func VCSLogViewDialog(repo vci.Repo, lg vci.Log, file, since string) *gi.Dialog 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	lv := frame.InsertNewChild(KiT_VCSLogView, prIdx+1, "vcslog").(*VCSLogView)
-	lv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	lv := frame.InsertNewChild(TypeVCSLogView, prIdx+1, "vcslog").(*VCSLogView)
+	lv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	lv.Config(repo, lg, file, since)
 
 	dlg.UpdateEndNoSig(true)

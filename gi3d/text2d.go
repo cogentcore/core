@@ -41,11 +41,11 @@ type Text2D struct {
 	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
 }
 
-var KiT_Text2D = kit.Types.AddType(&Text2D{}, Text2DProps)
+var TypeText2D = kit.Types.AddType(&Text2D{}, Text2DProps)
 
 // AddNewText2D adds a new text of given name and text string to given parent
 func AddNewText2D(sc *Scene, parent ki.Ki, name string, text string) *Text2D {
-	txt := parent.AddNewChild(KiT_Text2D, name).(*Text2D)
+	txt := parent.AddNewChild(TypeText2D, name).(*Text2D)
 	txt.Defaults(sc)
 	txt.Text = text
 	return txt
@@ -218,5 +218,5 @@ func (txt *Text2D) RenderClass() RenderClasses {
 }
 
 var Text2DProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 }

@@ -29,15 +29,15 @@ func mainrun() {
 	tv := gi.AddNewTabView(mfr, "tv")
 	tv.NewTabButton = true
 
-	lbl1 := tv.AddNewTab(gi.KiT_Label, "This is Label1").(*gi.Label)
+	lbl1 := tv.AddNewTab(gi.TypeLabel, "This is Label1").(*gi.Label)
 	lbl1.SetText("this is the contents of the first tab")
 	lbl1.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
-	lbl2 := tv.AddNewTab(gi.KiT_Label, "And this Label2").(*gi.Label)
+	lbl2 := tv.AddNewTab(gi.TypeLabel, "And this Label2").(*gi.Label)
 	lbl2.SetText("this is the contents of the second tab")
 	lbl2.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
-	tv1i, tv1ly := tv.AddNewTabLayout(giv.KiT_TextView, "TextView1")
+	tv1i, tv1ly := tv.AddNewTabLayout(giv.TypeTextView, "TextView1")
 	tv1ly.SetStretchMax()
 	tv1 := tv1i.(*giv.TextView)
 	tb1 := &giv.TextBuf{}

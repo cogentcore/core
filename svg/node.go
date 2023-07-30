@@ -72,11 +72,11 @@ type NodeBase struct {
 	Pnt girl.Paint `json:"-" xml:"-" desc:"full paint information for this node"`
 }
 
-var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
+var TypeNodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
 var NodeBaseProps = ki.Props{
 	"base-type":     true, // excludes type from user selections
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 }
 
 func (g *NodeBase) CopyFieldsFrom(frm any) {
@@ -141,8 +141,8 @@ func (g *NodeBase) ParXForm(self bool) mat32.Mat2 {
 		if nb.Par == nil {
 			break
 		}
-		if ki.TypeEmbeds(nb.Par, KiT_SVG) {
-			top := nb.Par.Embed(KiT_SVG).(*SVG)
+		if ki.TypeEmbeds(nb.Par, TypeSVG) {
+			top := nb.Par.Embed(TypeSVG).(*SVG)
 			xf = top.Pnt.XForm
 			break
 		}
@@ -382,7 +382,7 @@ func ParentSVG(g *gi.Node2DBase) *SVG {
 	pvp := g.ParentViewport()
 	for pvp != nil {
 		if pvp.IsSVG() {
-			return pvp.This().Embed(KiT_SVG).(*SVG)
+			return pvp.This().Embed(TypeSVG).(*SVG)
 		}
 		pvp = pvp.ParentViewport()
 	}

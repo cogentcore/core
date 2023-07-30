@@ -23,10 +23,10 @@ type FontValueView struct {
 	ValueViewBase
 }
 
-var KiT_FontValueView = kit.Types.AddType(&FontValueView{}, nil)
+var TypeFontValueView = kit.Types.AddType(&FontValueView{}, nil)
 
 func (vv *FontValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Action
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -46,7 +46,7 @@ func (vv *FontValueView) ConfigWidget(widg gi.Node2D) {
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_FontValueView).(*FontValueView)
+		vvv, _ := recv.Embed(TypeFontValueView).(*FontValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
@@ -66,7 +66,7 @@ func (vv *FontValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	FontChooserDialog(vp, DlgOpts{Title: "Select a Font", Prompt: desc},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
 				si := TableViewSelectDialogValue(ddlg)
 				if si >= 0 {
 					fi := girl.FontLibrary.FontInfo[si]

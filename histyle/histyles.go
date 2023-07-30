@@ -27,7 +27,7 @@ var content embed.FS
 // Styles is a collection of styles
 type Styles map[string]*Style
 
-var KiT_Styles = kit.Types.AddType(&Styles{}, StylesProps)
+var TypeStyles = kit.Types.AddType(&Styles{}, StylesProps)
 
 // StdStyles are the styles from chroma package
 var StdStyles Styles

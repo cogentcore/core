@@ -26,10 +26,10 @@ type KeyChordValueView struct {
 	ValueViewBase
 }
 
-var KiT_KeyChordValueView = kit.Types.AddType(&KeyChordValueView{}, nil)
+var TypeKeyChordValueView = kit.Types.AddType(&KeyChordValueView{}, nil)
 
 func (vv *KeyChordValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_KeyChordEdit
+	vv.WidgetTyp = TypeKeyChordEdit
 	return vv.WidgetTyp
 }
 
@@ -47,7 +47,7 @@ func (vv *KeyChordValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	kc := vv.Widget.(*KeyChordEdit)
 	kc.KeyChordSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_KeyChordValueView).(*KeyChordValueView)
+		vvv, _ := recv.Embed(TypeKeyChordValueView).(*KeyChordValueView)
 		kcc := vvv.Widget.(*KeyChordEdit)
 		if vvv.SetValue(key.Chord(kcc.Text)) {
 			vvv.UpdateWidget()
@@ -73,7 +73,7 @@ type KeyChordEdit struct {
 	KeyChordSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal -- only one event, when chord is updated from key input"`
 }
 
-var KiT_KeyChordEdit = kit.Types.AddType(&KeyChordEdit{}, KeyChordEditProps)
+var TypeKeyChordEdit = kit.Types.AddType(&KeyChordEdit{}, KeyChordEditProps)
 
 func (kc *KeyChordEdit) Disconnect() {
 	kc.Label.Disconnect()
@@ -81,7 +81,7 @@ func (kc *KeyChordEdit) Disconnect() {
 }
 
 var KeyChordEditProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"padding":          units.Px(2),
 	"margin":           units.Px(2),
 	"vertical-align":   gist.AlignTop,
@@ -113,7 +113,7 @@ func (kc *KeyChordEdit) ChordUpdated() {
 func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
 	m.AddAction(gi.ActOpts{Label: "Clear"},
 		kc, func(recv, send ki.Ki, sig int64, data any) {
-			kcc := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
+			kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 			kcc.SetText("")
 			kcc.ChordUpdated()
 		})
@@ -122,7 +122,7 @@ func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
 func (kc *KeyChordEdit) MouseEvent() {
 	kc.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		kcc := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
+		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if me.Action == mouse.Press && me.Button == mouse.Left {
 			if kcc.Selectable {
 				me.SetProcessed()
@@ -144,7 +144,7 @@ func (kc *KeyChordEdit) MouseEvent() {
 
 func (kc *KeyChordEdit) KeyChordEvent() {
 	kc.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		kcc := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
+		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if kcc.HasFocus() && kcc.FocusActive {
 			kt := d.(*key.ChordEvent)
 			kt.SetProcessed()

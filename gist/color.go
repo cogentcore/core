@@ -28,7 +28,7 @@ type Color struct {
 	R, G, B, A uint8
 }
 
-var KiT_Color = kit.Types.AddType(&Color{}, ColorProps)
+var TypeColor = kit.Types.AddType(&Color{}, ColorProps)
 
 var ColorProps = ki.Props{
 	"style-prop": true,

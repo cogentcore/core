@@ -31,7 +31,7 @@ type LightBase struct {
 	Clr   gist.Color `desc:"color of light a full intensity"`
 }
 
-var KiT_LightBase = kit.Types.AddType(&LightBase{}, nil)
+var TypeLightBase = kit.Types.AddType(&LightBase{}, nil)
 
 // Name returns name of the light -- lights are accessed by name
 func (lb *LightBase) Name() string {
@@ -54,7 +54,7 @@ type AmbientLight struct {
 	LightBase
 }
 
-var KiT_AmbientLight = kit.Types.AddType(&AmbientLight{}, nil)
+var TypeAmbientLight = kit.Types.AddType(&AmbientLight{}, nil)
 
 // AddNewAmbientLight adds Ambient to given scene, with given name, standard color, and lumens (0-1 normalized)
 func AddNewAmbientLight(sc *Scene, name string, lumens float32, color LightColors) *AmbientLight {
@@ -76,7 +76,7 @@ type DirLight struct {
 	Pos mat32.Vec3 `desc:"position of direct light -- assumed to point at the origin so this determines direction"`
 }
 
-var KiT_DirLight = kit.Types.AddType(&DirLight{}, nil)
+var TypeDirLight = kit.Types.AddType(&DirLight{}, nil)
 
 // AddNewDirLight adds direct light to given scene, with given name, standard color, and lumens (0-1 normalized)
 // By default it is located overhead and toward the default camera (0, 1, 1) -- change Pos otherwise
@@ -107,7 +107,7 @@ type PointLight struct {
 	QuadDecay float32    `desc:"Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"`
 }
 
-var KiT_PointLight = kit.Types.AddType(&PointLight{}, nil)
+var TypePointLight = kit.Types.AddType(&PointLight{}, nil)
 
 // AddNewPointLight adds point light to given scene, with given name, standard color, and lumens (0-1 normalized)
 // By default it is located at 0,5,5 (up and between default camera and origin) -- set Pos to change.
@@ -141,7 +141,7 @@ type SpotLight struct {
 	QuadDecay   float32 `desc:"Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances"`
 }
 
-var KiT_SpotLight = kit.Types.AddType(&SpotLight{}, nil)
+var TypeSpotLight = kit.Types.AddType(&SpotLight{}, nil)
 
 // AddNewSpotLight adds spot light to given scene, with given name, standard color, and lumens (0-1 normalized)
 // By default it is located at 0,5,5 (up and between default camera and origin) and pointing at the origin.
@@ -241,7 +241,7 @@ const (
 
 //go:generate stringer -type=LightColors
 
-var KiT_LightColors = kit.Enums.AddEnum(LightColorsN, kit.NotBitFlag, nil)
+var TypeLightColors = kit.Enums.AddEnum(LightColorsN, kit.NotBitFlag, nil)
 
 // LightColorMap provides a map of named light colors
 var LightColorMap = map[LightColors]gist.Color{

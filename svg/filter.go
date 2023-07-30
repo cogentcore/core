@@ -16,11 +16,11 @@ type Filter struct {
 	FilterType string
 }
 
-var KiT_Filter = kit.Types.AddType(&Filter{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
+var TypeFilter = kit.Types.AddType(&Filter{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
 
 // AddNewFilter adds a new filter to given parent node, with given name.
 func AddNewFilter(parent ki.Ki, name string) *Filter {
-	return parent.AddNewChild(KiT_Filter, name).(*Filter)
+	return parent.AddNewChild(TypeFilter, name).(*Filter)
 }
 
 func (g *Filter) SVGName() string { return "filter" }

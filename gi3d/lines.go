@@ -34,7 +34,7 @@ type Lines struct {
 	Closed bool         `desc:"if true, connect the first and last points to form a closed shape"`
 }
 
-var KiT_Lines = kit.Types.AddType(&Lines{}, nil)
+var TypeLines = kit.Types.AddType(&Lines{}, nil)
 
 const (
 	// CloseLines is used for the closed arg in AddNewLines:

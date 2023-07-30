@@ -31,7 +31,7 @@ type Embed2D struct {
 	DPISize    image.Point    `desc:"original size scaled according to logical dpi"`
 }
 
-var KiT_Embed2D = kit.Types.AddType(&Embed2D{}, Embed2DProps)
+var TypeEmbed2D = kit.Types.AddType(&Embed2D{}, Embed2DProps)
 
 const (
 	// FitContent is used as arg for NewEmbed2D to specify that plane should be resized
@@ -49,7 +49,7 @@ const (
 // first and only element in Viewport is a gi.Layout, then it will be resized
 // to fit content size (though no smaller than given size).
 func AddNewEmbed2D(sc *Scene, parent ki.Ki, name string, width, height int, fitContent bool) *Embed2D {
-	em := parent.AddNewChild(KiT_Embed2D, name).(*Embed2D)
+	em := parent.AddNewChild(TypeEmbed2D, name).(*Embed2D)
 	em.Defaults(sc)
 	em.StdSize = image.Point{width, height}
 	em.Viewport = NewEmbedViewport(sc, em, name, width, height)
@@ -200,7 +200,7 @@ func (em *Embed2D) RenderClass() RenderClasses {
 }
 
 var Embed2DProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 }
 
 func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
@@ -240,7 +240,7 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 
 func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 	em.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
 			return
@@ -272,7 +272,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
 			return
@@ -298,7 +298,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() {
 			return
@@ -324,7 +324,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 	})
 	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		// note: registering HiPri -- we are outside 2D focus system, and get *all* keyboard events
-		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() || !ssc.HasFocus2D() {
 			return
@@ -357,10 +357,10 @@ type EmbedViewport struct {
 	TopUpdated bool        `json:"-" xml:"-" desc:"update flag for top-level updates"`
 }
 
-var KiT_EmbedViewport = kit.Types.AddType(&EmbedViewport{}, EmbedViewportProps)
+var TypeEmbedViewport = kit.Types.AddType(&EmbedViewport{}, EmbedViewportProps)
 
 var EmbedViewportProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_VpFlags,
+	"EnumType:Flag":    gi.TypeVpFlags,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Background,
 }

@@ -41,11 +41,11 @@ type ButtonBase struct {
 	ButStateMu   sync.Mutex                `copy:"-" json:"-" xml:"-" view:"-" desc:"button state mutex"`
 }
 
-var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
+var TypeButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
 
 var ButtonBaseProps = ki.Props{
 	"base-type":     true, // excludes type from user selections
-	"EnumType:Flag": KiT_ButtonFlags,
+	"EnumType:Flag": TypeButtonFlags,
 }
 
 func (bb *ButtonBase) CopyFieldsFrom(frm any) {
@@ -73,7 +73,7 @@ type ButtonFlags int
 
 //go:generate stringer -type=ButtonFlags
 
-var KiT_ButtonFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, ButtonFlagsN, kit.BitFlag, nil)
+var TypeButtonFlags = kit.Enums.AddEnumExt(TypeNodeFlags, ButtonFlagsN, kit.BitFlag, nil)
 
 const (
 	// button is checkable -- enables display of check control
@@ -119,7 +119,7 @@ type ButtonStates int32
 
 //go:generate stringer -type=ButtonStates
 
-var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, kit.NotBitFlag, gist.StylePropProps, "Button")
+var TypeButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, kit.NotBitFlag, gist.StylePropProps, "Button")
 
 func (ev ButtonStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *ButtonStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -415,9 +415,9 @@ func (bb *ButtonBase) ConfigPartsAddIndicator(config *kit.TypeAndNameList, defOn
 		return -1
 	}
 	indIdx := -1
-	config.Add(KiT_Stretch, "ind-stretch")
+	config.Add(TypeStretch, "ind-stretch")
 	indIdx = len(*config)
-	config.Add(KiT_Icon, "indicator")
+	config.Add(TypeIcon, "indicator")
 	return indIdx
 }
 
@@ -527,7 +527,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 func (bb *ButtonBase) HoverTooltipEvent() {
 	bb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
-		wbb := recv.Embed(KiT_ButtonBase).(*ButtonBase)
+		wbb := recv.Embed(TypeButtonBase).(*ButtonBase)
 		tt := wbb.Tooltip
 		if wbb.Shortcut != "" {
 			tt = "[ " + wbb.Shortcut.Shortcut() + " ]: " + tt
@@ -757,7 +757,7 @@ type Button struct {
 	Type ButtonTypes `desc:"the type of button (default, primary, secondary, etc)"`
 }
 
-var KiT_Button = kit.Types.AddType(&Button{}, nil)
+var TypeButton = kit.Types.AddType(&Button{}, nil)
 
 // ButtonTypes is an enum containing the
 // different possible types of buttons
@@ -782,13 +782,13 @@ const (
 	ButtonTypesN
 )
 
-var KiT_ButtonTypes = kit.Enums.AddEnumAltLower(ButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "Button")
+var TypeButtonTypes = kit.Enums.AddEnumAltLower(ButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "Button")
 
 //go:generate stringer -type=ButtonTypes
 
 // AddNewButton adds a new button to given parent node, with given name.
 func AddNewButton(parent ki.Ki, name string) *Button {
-	return parent.AddNewChild(KiT_Button, name).(*Button)
+	return parent.AddNewChild(TypeButton, name).(*Button)
 }
 
 func (bt *Button) CopyFieldsFrom(frm any) {
@@ -848,7 +848,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 // }
 
 var ButtonProps = ki.Props{
-	"EnumType:Flag": KiT_ButtonFlags,
+	"EnumType:Flag": TypeButtonFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,
@@ -1018,11 +1018,11 @@ type CheckBox struct {
 	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
-var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, nil)
+var TypeCheckBox = kit.Types.AddType(&CheckBox{}, nil)
 
 // AddNewCheckBox adds a new button to given parent node, with given name.
 func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
-	return parent.AddNewChild(KiT_CheckBox, name).(*CheckBox)
+	return parent.AddNewChild(TypeCheckBox, name).(*CheckBox)
 }
 
 func (cb *CheckBox) CopyFieldsFrom(frm any) {
@@ -1032,7 +1032,7 @@ func (cb *CheckBox) CopyFieldsFrom(frm any) {
 }
 
 var CheckBoxProps = ki.Props{
-	"EnumType:Flag": KiT_ButtonFlags,
+	"EnumType:Flag": TypeButtonFlags,
 	// "icon":             icons.CheckBox,
 	// "icon-off":         icons.CheckBoxOutlineBlank,
 	// "text-align":       gist.AlignLeft,
@@ -1156,17 +1156,17 @@ func (cb *CheckBox) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	icIdx := 0 // always there
 	lbIdx := -1
-	config.Add(KiT_Layout, "stack")
+	config.Add(TypeLayout, "stack")
 	if cb.Text != "" {
-		config.Add(KiT_Space, "space")
+		config.Add(TypeSpace, "space")
 		lbIdx = len(config)
-		config.Add(KiT_Label, "label")
+		config.Add(TypeLabel, "label")
 	}
 	mods, updt := cb.Parts.ConfigChildren(config)
 	ist := cb.Parts.Child(icIdx).(*Layout)
 	if mods || gist.RebuildDefaultStyles {
 		ist.Lay = LayoutStacked
-		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
+		ist.SetNChildren(2, TypeIcon, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
 		if set, _ := icon.SetIcon(cb.Icon); set {
 			cb.StylePart(Node2D(icon))

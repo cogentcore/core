@@ -45,11 +45,11 @@ type Icon struct {
 	Filename string     `desc:"file name for the loaded icon, if loaded"`
 }
 
-var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
+var TypeIcon = kit.Types.AddType(&Icon{}, IconProps)
 
 // AddNewIcon adds a new icon to given parent node, with given name, and icon name.
 func AddNewIcon(parent ki.Ki, name string, icon icons.Icon) *Icon {
-	ic := parent.AddNewChild(KiT_Icon, name).(*Icon)
+	ic := parent.AddNewChild(TypeIcon, name).(*Icon)
 	ic.SetIcon(icon)
 	return ic
 }
@@ -66,7 +66,7 @@ func (ic *Icon) Init2D() {
 }
 
 var IconProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "background-color": color.Transparent,
 }
 
@@ -97,7 +97,7 @@ func (ic *Icon) SVGIcon() *Viewport2D {
 	if !ic.HasChildren() {
 		return nil
 	}
-	sic := ic.Child(0).Embed(KiT_Viewport2D).(*Viewport2D)
+	sic := ic.Child(0).Embed(TypeViewport2D).(*Viewport2D)
 	return sic
 }
 

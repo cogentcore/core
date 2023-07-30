@@ -19,11 +19,11 @@ type Group struct {
 	NodeBase
 }
 
-var KiT_Group = kit.Types.AddType(&Group{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
+var TypeGroup = kit.Types.AddType(&Group{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
 
 // AddNewGroup adds a new group to given parent node, with given name.
 func AddNewGroup(parent ki.Ki, name string) *Group {
-	return parent.AddNewChild(KiT_Group, name).(*Group)
+	return parent.AddNewChild(TypeGroup, name).(*Group)
 }
 
 func (g *Group) SVGName() string { return "g" }

@@ -165,11 +165,11 @@ type SliceViewBase struct {
 	CurIdx        int     `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`
 }
 
-var KiT_SliceViewBase = kit.Types.AddType(&SliceViewBase{}, nil)
+var TypeSliceViewBase = kit.Types.AddType(&SliceViewBase{}, nil)
 
 // AddNewSliceViewBase adds a new sliceview to given parent node, with given name.
 func AddNewSliceViewBase(parent ki.Ki, name string) *SliceViewBase {
-	return parent.AddNewChild(KiT_SliceViewBase, name).(*SliceViewBase)
+	return parent.AddNewChild(TypeSliceViewBase, name).(*SliceViewBase)
 }
 
 func (sv *SliceViewBase) Disconnect() {
@@ -284,16 +284,16 @@ func (sv *SliceViewBase) Config() {
 	sv.Lay = gi.LayoutVert
 	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_Layout, "grid-lay")
+	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.TypeLayout, "grid-lay")
 	mods, updt := sv.ConfigChildren(config)
 
 	gl := sv.GridLayout()
 	gl.Lay = gi.LayoutHoriz
 	gl.SetStretchMax() // for this to work, ALL layers above need it too
 	gconfig := kit.TypeAndNameList{}
-	gconfig.Add(gi.KiT_Frame, "grid")
-	gconfig.Add(gi.KiT_ScrollBar, "scrollbar")
+	gconfig.Add(gi.TypeFrame, "grid")
+	gconfig.Add(gi.TypeScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
 
 	sv.ConfigSliceGrid()
@@ -481,7 +481,7 @@ func (sv *SliceViewBase) ConfigScroll() {
 		if sig != int64(gi.SliderValueChanged) {
 			return
 		}
-		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		wupdt := sv.TopUpdateStart()
 		svv.StartIdx = int(sb.Value)
 		svv.This().(SliceViewer).UpdateSliceGrid()
@@ -676,7 +676,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
 						row := wbb.Prop("slv-row").(int)
-						svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+						svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 						svv.UpdateSelectRow(row, wbb.IsSelected())
 					}
 				})
@@ -710,7 +710,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						if sig == int64(gi.WidgetSelected) {
 							wbb := send.(gi.Node2D).AsWidget()
 							row := wbb.Prop("slv-row").(int)
-							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 							svv.UpdateSelectRow(row, wbb.IsSelected())
 						}
 					})
@@ -718,7 +718,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 			} else {
 				vvb := vv.AsValueViewBase()
 				vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					svv, _ := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+					svv, _ := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 					svv.SetChanged()
 				})
 				if !sv.isArray {
@@ -735,7 +735,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						addact.Style.Template = "giv.SliceViewBase.AddAction"
 						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							act := send.(*gi.Action)
-							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 							svv.SliceNewAtRow(act.Data.(int) + 1)
 						})
 					}
@@ -752,7 +752,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						delact.Style.Template = "giv.SliceViewBase.DelAction"
 						delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							act := send.(*gi.Action)
-							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 							svv.SliceDeleteAtRow(act.Data.(int), true)
 						})
 					}
@@ -816,7 +816,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 					gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:"},
 					sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						if sig == int64(gi.DialogAccepted) {
-							// svv, _ := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+							// svv, _ := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 							dlg, _ := send.(*gi.Dialog)
 							n, typ := gi.NewKiDialogValues(dlg)
 							updt := ownki.UpdateStart()
@@ -966,14 +966,14 @@ func (sv *SliceViewBase) ConfigToolbar() {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 				svv.This().(SliceViewer).UpdateSliceGrid()
 
 			})
 		if ndef > 1 {
 			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the slice"},
 				sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+					svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 					svv.This().(SliceViewer).SliceNewAt(-1)
 				})
 		}
@@ -1737,15 +1737,15 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data any, idx int) {
 		return
 	}
 	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.This().(SliceViewer).PasteAssign(data.(mimedata.Mimes), idx)
 	})
 	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx)
 	})
 	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
 	})
 	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -1881,20 +1881,20 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod dnd.DropMods, id
 	}
 	if mod == dnd.DropCopy {
 		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.DropAssign(data.(mimedata.Mimes), idx)
 		})
 	}
 	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.DropBefore(data.(mimedata.Mimes), mod, idx) // captures mod
 	})
 	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.DropAfter(data.(mimedata.Mimes), mod, idx) // captures mod
 	})
 	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.DropCancel()
 	})
 }
@@ -1995,22 +1995,22 @@ func (sv *SliceViewBase) StdCtxtMenu(m *gi.Menu, idx int) {
 	}
 	m.AddAction(gi.ActOpts{Label: "Copy", Data: idx},
 		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.CopyIdxs(true)
 		})
 	m.AddAction(gi.ActOpts{Label: "Cut", Data: idx},
 		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.CutIdxs()
 		})
 	m.AddAction(gi.ActOpts{Label: "Paste", Data: idx},
 		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.PasteIdx(data.(int))
 		})
 	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: idx},
 		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.Duplicate()
 		})
 }
@@ -2174,7 +2174,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 	// LowPri to allow other focal widgets to capture
 	sv.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
-		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		me.SetProcessed()
 		sbb := svv.This().(SliceViewer).ScrollBar()
 		cur := float32(sbb.Pos)
@@ -2182,7 +2182,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 	})
 	sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		// if !svv.HasFocus() {
 		// 	svv.GrabFocus()
 		// }
@@ -2201,20 +2201,20 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 	if sv.IsInactive() {
 		if sv.InactKeyNav {
 			sv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-				svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 				kt := d.(*key.ChordEvent)
 				svv.KeyInputInactive(kt)
 			})
 		}
 	} else {
 		sv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
-			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			kt := d.(*key.ChordEvent)
 			svv.KeyInputActive(kt)
 		})
 		sv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 			de := d.(*dnd.Event)
-			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			switch de.Action {
 			case dnd.Start:
 				svv.DragNDropStart()
@@ -2228,7 +2228,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		if sg != nil {
 			sg.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				de := d.(*dnd.FocusEvent)
-				sgg := recv.Embed(gi.KiT_Frame).(*gi.Frame)
+				sgg := recv.Embed(gi.TypeFrame).(*gi.Frame)
 				switch de.Action {
 				case dnd.Enter:
 					sgg.ParentWindow().DNDSetCursor(de.Mod)

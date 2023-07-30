@@ -22,10 +22,10 @@ type FileValueView struct {
 	ValueViewBase
 }
 
-var KiT_FileValueView = kit.Types.AddType(&FileValueView{}, nil)
+var TypeFileValueView = kit.Types.AddType(&FileValueView{}, nil)
 
 func (vv *FileValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Action
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -47,7 +47,7 @@ func (vv *FileValueView) ConfigWidget(widg gi.Node2D) {
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_FileValueView).(*FileValueView)
+		vvv, _ := recv.Embed(TypeFileValueView).(*FileValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
 	})
@@ -68,7 +68,7 @@ func (vv *FileValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	FileViewDialog(vp, cur, ext, DlgOpts{Title: vv.Name(), Prompt: desc}, nil,
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
-				dlg, _ := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+				dlg, _ := send.Embed(gi.TypeDialog).(*gi.Dialog)
 				fn := FileViewDialogValue(dlg)
 				vv.SetValue(fn)
 				vv.UpdateWidget()

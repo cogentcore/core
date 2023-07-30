@@ -27,11 +27,11 @@ type MenuBar struct {
 	OSMainMenus map[string]*Action `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"`
 }
 
-var KiT_MenuBar = kit.Types.AddType(&MenuBar{}, MenuBarProps)
+var TypeMenuBar = kit.Types.AddType(&MenuBar{}, MenuBarProps)
 
 // AddNewMenuBar adds a new menubar to given parent node, with given name.
 func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
-	return parent.AddNewChild(KiT_MenuBar, name).(*MenuBar)
+	return parent.AddNewChild(TypeMenuBar, name).(*MenuBar)
 }
 
 func (mb *MenuBar) CopyFieldsFrom(frm any) {
@@ -41,7 +41,7 @@ func (mb *MenuBar) CopyFieldsFrom(frm any) {
 }
 
 var MenuBarProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "padding":          units.Px(2),
 	// "margin":           units.Px(0),
 	// "spacing":          units.Px(4),
@@ -122,8 +122,8 @@ func (mb *MenuBar) UpdateActions() {
 		return
 	}
 	for _, mi := range mb.Kids {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			ac.UpdateActions()
 		}
 	}
@@ -137,8 +137,8 @@ func (mb *MenuBar) SetShortcuts() {
 		return
 	}
 	for _, k := range mb.Kids {
-		if ki.TypeEmbeds(k, KiT_Action) {
-			ac := k.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(k, TypeAction) {
+			ac := k.Embed(TypeAction).(*Action)
 			win.AddShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -156,8 +156,8 @@ func (mb *MenuBar) DeleteShortcuts() {
 		return
 	}
 	for _, k := range mb.Kids {
-		if ki.TypeEmbeds(k, KiT_Action) {
-			ac := k.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(k, TypeAction) {
+			ac := k.Embed(TypeAction).(*Action)
 			win.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -172,8 +172,8 @@ func (m *MenuBar) FindActionByName(name string) (*Action, bool) {
 		return nil, false
 	}
 	for _, mi := range m.Kids {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			if ac.Name() == name {
 				return ac, true
 			}
@@ -196,18 +196,18 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 	}
 	sz := len(menus)
 	tnl := make(kit.TypeAndNameList, sz+1)
-	typ := KiT_Action // note: could pass in action type to make it more flexible, but..
+	typ := TypeAction // note: could pass in action type to make it more flexible, but..
 	for i, m := range menus {
 		tnl[i].Type = typ
 		tnl[i].Name = m
 	}
-	tnl[sz].Type = KiT_Stretch
+	tnl[sz].Type = TypeStretch
 	tnl[sz].Name = "menstr"
 	_, updt := mb.ConfigChildren(tnl)
 	for i, m := range menus {
 		mi := mb.Kids[i]
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			ac.SetText(m)
 			ac.SetAsMenu()
 		}
@@ -251,8 +251,8 @@ func (mb *MenuBar) UpdateMainMenu(win *Window) {
 	osmm.Reset(mm)
 	mb.OSMainMenus = make(map[string]*Action, 100)
 	for _, mi := range mb.Kids {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			subm := osmm.AddSubMenu(mm, ac.Text)
 			mb.SetMainMenuSub(osmm, subm, ac)
 		}
@@ -281,8 +281,8 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 // SetMainMenuSub iterates over sub-menus, adding items to overall main menu.
 func (mb *MenuBar) SetMainMenuSub(osmm oswin.MainMenu, subm oswin.Menu, am *Action) {
 	for i, mi := range am.Menu {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			if len(ac.Menu) > 0 {
 				ssubm := osmm.AddSubMenu(subm, ac.Text)
 				mb.SetMainMenuSub(osmm, ssubm, ac)
@@ -339,11 +339,11 @@ type ToolBar struct {
 	Layout
 }
 
-var KiT_ToolBar = kit.Types.AddType(&ToolBar{}, ToolBarProps)
+var TypeToolBar = kit.Types.AddType(&ToolBar{}, ToolBarProps)
 
 // AddNewToolBar adds a new toolbar to given parent node, with given name.
 func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
-	return parent.AddNewChild(KiT_ToolBar, name).(*ToolBar)
+	return parent.AddNewChild(TypeToolBar, name).(*ToolBar)
 }
 
 func (tb *ToolBar) CopyFieldsFrom(frm any) {
@@ -352,7 +352,7 @@ func (tb *ToolBar) CopyFieldsFrom(frm any) {
 }
 
 var ToolBarProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "padding":          units.Px(2),
 	// "margin":           units.Px(0),
 	// "spacing":          units.Px(4),
@@ -437,7 +437,7 @@ func (tb *ToolBar) MouseFocusEvent() {
 	tb.ConnectEvent(oswin.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.FocusEvent)
 		if me.Action == mouse.Enter {
-			tbb := recv.Embed(KiT_ToolBar).(*ToolBar)
+			tbb := recv.Embed(TypeToolBar).(*ToolBar)
 			tbb.UpdateActions()
 			// do NOT mark as processed -- HiPri and not mutex
 		}
@@ -458,8 +458,8 @@ func (tb *ToolBar) SetShortcuts() {
 		return
 	}
 	for _, k := range tb.Kids {
-		if ki.TypeEmbeds(k, KiT_Action) {
-			ac := k.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(k, TypeAction) {
+			ac := k.Embed(TypeAction).(*Action)
 			win.AddShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -477,8 +477,8 @@ func (tb *ToolBar) DeleteShortcuts() {
 		return
 	}
 	for _, k := range tb.Kids {
-		if ki.TypeEmbeds(k, KiT_Action) {
-			ac := k.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(k, TypeAction) {
+			ac := k.Embed(TypeAction).(*Action)
 			win.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -495,8 +495,8 @@ func (tb *ToolBar) UpdateActions() {
 		defer tb.TopUpdateEnd(wupdt)
 	}
 	for _, mi := range tb.Kids {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			ac.UpdateActions()
 		}
 	}
@@ -508,8 +508,8 @@ func (tb *ToolBar) UpdateActions() {
 // is empty)) -- returns false if not found
 func (tb *ToolBar) FindActionByName(name string) (*Action, bool) {
 	for _, mi := range tb.Kids {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			if ac.Name() == name {
 				return ac, true
 			}

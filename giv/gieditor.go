@@ -27,11 +27,11 @@ type GiEditor struct {
 	Filename gi.FileName `desc:"current filename for saving / loading"`
 }
 
-var KiT_GiEditor = kit.Types.AddType(&GiEditor{}, GiEditorProps)
+var TypeGiEditor = kit.Types.AddType(&GiEditor{}, GiEditorProps)
 
 // AddNewGiEditor adds a new gieditor to given parent node, with given name.
 func AddNewGiEditor(parent ki.Ki, name string) *GiEditor {
-	return parent.AddNewChild(KiT_GiEditor, name).(*GiEditor)
+	return parent.AddNewChild(TypeGiEditor, name).(*GiEditor)
 }
 
 // Update updates the objects being edited (e.g., updating display changes)
@@ -93,7 +93,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 // func (ge *GiEditor) GetAllUpdates(root ki.Ki) {
 // 	ge.KiRoot.FuncDownMeFirst(0, ge, func(k ki.Ki, level int, d any) bool {
 // 		k.NodeSignal().Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
-// 			gee := recv.Embed(KiT_GiEditor).(*GiEditor)
+// 			gee := recv.Embed(TypeGiEditor).(*GiEditor)
 // 			if !gee.Changed {
 // 				fmt.Printf("GiEditor: Tree changed with signal: %v\n", ki.NodeSignals(sig))
 // 				gee.Changed = true
@@ -111,9 +111,9 @@ func (ge *GiEditor) Config() {
 	ge.Lay = gi.LayoutVert
 	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Label, "title")
-	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_SplitView, "splitview")
+	config.Add(gi.TypeLabel, "title")
+	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.TypeSplitView, "splitview")
 	mods, updt := ge.ConfigChildren(config)
 	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
 	ge.ConfigSplitView()
@@ -182,9 +182,9 @@ func (ge *GiEditor) ConfigSplitView() {
 			if data == nil {
 				return
 			}
-			gee, _ := recv.Embed(KiT_GiEditor).(*GiEditor)
+			gee, _ := recv.Embed(TypeGiEditor).(*GiEditor)
 			svr := gee.StructView()
-			tvn, _ := data.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
+			tvn, _ := data.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 			if sig == int64(TreeViewSelected) {
 				svr.SetStruct(tvn.SrcNode)
 			} else if sig == int64(TreeViewChanged) {
@@ -192,7 +192,7 @@ func (ge *GiEditor) ConfigSplitView() {
 			}
 		})
 		sv.ViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
-			gee, _ := recv.Embed(KiT_GiEditor).(*GiEditor)
+			gee, _ := recv.Embed(TypeGiEditor).(*GiEditor)
 			gee.SetChanged()
 		})
 		split.SetSplits(.3, .7)
@@ -219,7 +219,7 @@ func (ge *GiEditor) Render2D() {
 }
 
 var GiEditorProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
 	"max-width":        -1,

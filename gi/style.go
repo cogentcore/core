@@ -27,7 +27,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // func StyleFunc(w *WidgetBase) {
 // 	cs := CurrentColorScheme()
 // 	// fmt.Printf("Styling\t%v\n", w.This())
-// 	if par, ok := w.Parent().Embed(KiT_WidgetBase).(*WidgetBase); ok {
+// 	if par, ok := w.Parent().Embed(TypeWidgetBase).(*WidgetBase); ok {
 // 		// fmt.Println("got parent")
 // 		if par.Style.Color.IsNil() {
 // 			w.Style.Color.SetColor(cs.Font)
@@ -111,7 +111,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // 	} else {
 // 		styleDefaultButton(&b.ButtonBase, cs)
 // 	}
-// 	if icon, ok := b.Parts.ChildByType(KiT_Icon, ki.NoEmbeds, 0).(*Icon); ok {
+// 	if icon, ok := b.Parts.ChildByType(TypeIcon, ki.NoEmbeds, 0).(*Icon); ok {
 // 		if ok {
 // 			icon.Style.Width.SetEm(1)
 // 			icon.Style.Height.SetEm(1)

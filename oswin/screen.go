@@ -122,7 +122,7 @@ const (
 
 //go:generate stringer -type=ScreenOrientation
 
-var KiT_ScreenOrientation = kit.Enums.AddEnum(ScreenOrientationN, kit.NotBitFlag, nil)
+var TypeScreenOrientation = kit.Enums.AddEnum(ScreenOrientationN, kit.NotBitFlag, nil)
 
 // LogicalFmPhysicalDPI computes the logical DPI used in actual screen scaling
 // based on the given logical DPI scale factor (logScale), and also makes it a

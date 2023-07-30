@@ -149,7 +149,7 @@ const (
 
 //go:generate stringer -type=FillRules
 
-var KiT_FillRules = kit.Enums.AddEnumAltLower(FillRulesN, kit.NotBitFlag, StylePropProps, "FillRules")
+var TypeFillRules = kit.Enums.AddEnumAltLower(FillRulesN, kit.NotBitFlag, StylePropProps, "FillRules")
 
 func (ev FillRules) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *FillRules) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -169,7 +169,7 @@ const (
 
 //go:generate stringer -type=VectorEffects
 
-var KiT_VectorEffects = kit.Enums.AddEnumAltLower(VecEffN, kit.NotBitFlag, StylePropProps, "VecEff")
+var TypeVectorEffects = kit.Enums.AddEnumAltLower(VecEffN, kit.NotBitFlag, StylePropProps, "VecEff")
 
 func (ev VectorEffects) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *VectorEffects) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -245,7 +245,7 @@ const (
 
 //go:generate stringer -type=LineCaps
 
-var KiT_LineCaps = kit.Enums.AddEnumAltLower(LineCapsN, kit.NotBitFlag, StylePropProps, "LineCaps")
+var TypeLineCaps = kit.Enums.AddEnumAltLower(LineCapsN, kit.NotBitFlag, StylePropProps, "LineCaps")
 
 func (ev LineCaps) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *LineCaps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -266,7 +266,7 @@ const (
 
 //go:generate stringer -type=LineJoins
 
-var KiT_LineJoins = kit.Enums.AddEnumAltLower(LineJoinsN, kit.NotBitFlag, StylePropProps, "LineJoins")
+var TypeLineJoins = kit.Enums.AddEnumAltLower(LineJoinsN, kit.NotBitFlag, StylePropProps, "LineJoins")
 
 func (ev LineJoins) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *LineJoins) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

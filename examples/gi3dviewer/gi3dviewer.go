@@ -85,7 +85,7 @@ func mainrun() {
 		giv.FileViewDialog(vp, curFn, exts, giv.DlgOpts{Title: "Open 3D Object", Prompt: "Open a 3D object file for viewing."}, nil,
 			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
-					dlg, _ := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+					dlg, _ := send.Embed(gi.TypeDialog).(*gi.Dialog)
 					fn := giv.FileViewDialogValue(dlg)
 					curFn = fn
 					updt := sc.UpdateStart()

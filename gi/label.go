@@ -41,7 +41,7 @@ type Label struct {
 	CurBackgroundColor gist.Color               `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
-var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
+var TypeLabel = kit.Types.AddType(&Label{}, LabelProps)
 
 // LabelTypes is an enum containing the different
 // possible types of labels
@@ -76,13 +76,13 @@ const (
 	LabelTypesN
 )
 
-var KiT_LabelTypes = kit.Enums.AddEnumAltLower(LabelTypesN, kit.NotBitFlag, gist.StylePropProps, "Label")
+var TypeLabelTypes = kit.Enums.AddEnumAltLower(LabelTypesN, kit.NotBitFlag, gist.StylePropProps, "Label")
 
 //go:generate stringer -type=LabelTypes
 
 // AddNewLabel adds a new label to given parent node, with given name and text.
 func AddNewLabel(parent ki.Ki, name string, text string) *Label {
-	lb := parent.AddNewChild(KiT_Label, name).(*Label)
+	lb := parent.AddNewChild(TypeLabel, name).(*Label)
 	lb.Text = text
 	return lb
 }
@@ -130,7 +130,7 @@ func (lb *Label) Disconnect() {
 // }
 
 var LabelProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "white-space":      gist.WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
 	// "padding":          units.Px(2),
 	// "margin":           units.Px(2),
@@ -167,7 +167,7 @@ const (
 
 //go:generate stringer -type=LabelStates
 
-var KiT_LabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, kit.NotBitFlag, gist.StylePropProps, "Label")
+var TypeLabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, kit.NotBitFlag, gist.StylePropProps, "Label")
 
 func (ev LabelStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *LabelStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -261,7 +261,7 @@ func (lb *Label) OpenLink(tl *girl.TextLink) {
 func (lb *Label) HoverEvent() {
 	lb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
-		llb := recv.Embed(KiT_Label).(*Label)
+		llb := recv.Embed(TypeLabel).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
 		if hasLinks {
 			pos := llb.RenderPos
@@ -289,7 +289,7 @@ func (lb *Label) HoverEvent() {
 func (lb *Label) MouseEvent() {
 	lb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		llb := recv.Embed(KiT_Label).(*Label)
+		llb := recv.Embed(TypeLabel).(*Label)
 		hasLinks := len(llb.Render.Links) > 0
 		pos := llb.RenderPos
 		if llb.Selectable || hasLinks {
@@ -328,7 +328,7 @@ func (lb *Label) MouseMoveEvent() {
 	lb.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
-		llb := recv.Embed(KiT_Label).(*Label)
+		llb := recv.Embed(TypeLabel).(*Label)
 		pos := llb.RenderPos
 		inLink := false
 		for _, tl := range llb.Render.Links {

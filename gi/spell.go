@@ -116,7 +116,7 @@ type Spell struct {
 	Vp          *Viewport2D `desc:"the viewport where the current popup menu is presented"`
 }
 
-var KiT_Spell = kit.Types.AddType(&Spell{}, nil)
+var TypeSpell = kit.Types.AddType(&Spell{}, nil)
 
 func (sc *Spell) Disconnect() {
 	sc.Node.Disconnect()
@@ -181,7 +181,7 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 		text = "unlearn"
 		m.AddAction(ActOpts{Label: text, Data: text},
 			sc, func(recv, send ki.Ki, sig int64, data any) {
-				scf := recv.Embed(KiT_Spell).(*Spell)
+				scf := recv.Embed(TypeSpell).(*Spell)
 				scf.UnLearnLast()
 			})
 	} else {
@@ -199,7 +199,7 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 				text = sc.Suggest[i]
 				m.AddAction(ActOpts{Label: text, Data: text},
 					sc, func(recv, send ki.Ki, sig int64, data any) {
-						scf := recv.Embed(KiT_Spell).(*Spell)
+						scf := recv.Embed(TypeSpell).(*Spell)
 						scf.Spell(data.(string))
 					})
 			}
@@ -208,13 +208,13 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 		text = "learn"
 		m.AddAction(ActOpts{Label: text, Data: text},
 			sc, func(recv, send ki.Ki, sig int64, data any) {
-				scf := recv.Embed(KiT_Spell).(*Spell)
+				scf := recv.Embed(TypeSpell).(*Spell)
 				scf.LearnWord()
 			})
 		text = "ignore"
 		m.AddAction(ActOpts{Label: text, Data: text},
 			sc, func(recv, send ki.Ki, sig int64, data any) {
-				scf := recv.Embed(KiT_Spell).(*Spell)
+				scf := recv.Embed(TypeSpell).(*Spell)
 				scf.IgnoreWord()
 			})
 	}

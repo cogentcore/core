@@ -213,7 +213,7 @@ const (
 
 //go:generate stringer -type=Actions
 
-var KiT_Actions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
+var TypeActions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 
 // Modifiers are used as bitflags representing a set of modifier keys -- see
 // SetModifiers method
@@ -230,7 +230,7 @@ const (
 
 //go:generate stringer -type=Modifiers
 
-var KiT_Modifiers = kit.Enums.AddEnum(ModifiersN, kit.BitFlag, nil)
+var TypeModifiers = kit.Enums.AddEnum(ModifiersN, kit.BitFlag, nil)
 
 // ModsString returns the string representation of the modifiers
 func ModsString(mods int32) string {

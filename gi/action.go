@@ -28,7 +28,7 @@ type Action struct {
 	Type       ActionTypes       `desc:"the type of action"`
 }
 
-var KiT_Action = kit.Types.AddType(&Action{}, nil)
+var TypeAction = kit.Types.AddType(&Action{}, nil)
 
 // ActionTypes is an enum representing
 // the different possible types of actions
@@ -52,13 +52,13 @@ const (
 	ActionTypesN
 )
 
-var KiT_ActionTypes = kit.Enums.AddEnumAltLower(ActionTypesN, kit.NotBitFlag, gist.StylePropProps, "Action")
+var TypeActionTypes = kit.Enums.AddEnumAltLower(ActionTypesN, kit.NotBitFlag, gist.StylePropProps, "Action")
 
 //go:generate stringer -type=ActionTypes
 
 // AddNewAction adds a new action to given parent node, with given name.
 func AddNewAction(parent ki.Ki, name string) *Action {
-	return parent.AddNewChild(KiT_Action, name).(*Action)
+	return parent.AddNewChild(TypeAction, name).(*Action)
 }
 
 func (ac *Action) CopyFieldsFrom(frm any) {
@@ -91,7 +91,7 @@ func (ac *Action) Disconnect() {
 // }
 
 var ActionProps = ki.Props{
-	"EnumType:Flag": KiT_ButtonFlags,
+	"EnumType:Flag": TypeButtonFlags,
 	// "border-width":     units.Px(0), // todo: should be default
 	// "border-radius":    units.Px(0),
 	// "border-color":     &Prefs.Colors.Border,
@@ -290,9 +290,9 @@ func (ac *Action) Init2D() {
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
 func (ac *Action) ConfigPartsAddShortcut(config *kit.TypeAndNameList) int {
-	config.Add(KiT_Stretch, "sc-stretch")
+	config.Add(TypeStretch, "sc-stretch")
 	scIdx := len(*config)
-	config.Add(KiT_Label, "shortcut")
+	config.Add(TypeLabel, "shortcut")
 	return scIdx
 }
 

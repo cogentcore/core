@@ -46,11 +46,11 @@ type Icon struct {
 	RendSize image.Point `copy:"-" json:"-" xml:"-" desc:"size at which we previously rendered"`
 }
 
-var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
+var TypeIcon = kit.Types.AddType(&Icon{}, IconProps)
 
 // AddNewIcon adds a new icon to given parent node, with given name.
 func AddNewIcon(parent ki.Ki, name string) *Icon {
-	return parent.AddNewChild(KiT_Icon, name).(*Icon)
+	return parent.AddNewChild(TypeIcon, name).(*Icon)
 }
 
 // // DefaultStyle implements the [DefaultStyler] interface
@@ -64,7 +64,7 @@ func AddNewIcon(parent ki.Ki, name string) *Icon {
 // }
 
 var IconProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_VpFlags,
+	"EnumType:Flag":    gi.TypeVpFlags,
 	"background-color": color.Transparent,
 }
 
@@ -197,7 +197,7 @@ func (im *IconMgr) SetIcon(ic *gi.Icon, iconName icons.Icon) error {
 		return err
 	}
 	sic := sici.(*Icon)
-	ic.SetNChildren(1, KiT_Icon, "icon")
+	ic.SetNChildren(1, TypeIcon, "icon")
 	nic := ic.Child(0).(*Icon)
 	nic.CopyFromIcon(sic)
 	ic.Filename = sic.Filename

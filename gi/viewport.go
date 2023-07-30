@@ -93,10 +93,10 @@ type Viewport2D struct {
 	StyleMu      sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
 }
 
-var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
+var TypeViewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
 
 var Viewport2DProps = ki.Props{
-	"EnumType:Flag":    KiT_VpFlags,
+	"EnumType:Flag":    TypeVpFlags,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Background,
 }
@@ -172,7 +172,7 @@ type VpFlags int
 
 //go:generate stringer -type=VpFlags
 
-var KiT_VpFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, VpFlagsN, kit.BitFlag, nil)
+var TypeVpFlags = kit.Enums.AddEnumExt(TypeNodeFlags, VpFlagsN, kit.BitFlag, nil)
 
 const (
 	// VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey
@@ -694,7 +694,7 @@ func (vp *Viewport2D) PrefSize(initSz image.Point) image.Point {
 	vp.LayState.Alloc.Size.SetPoint(initSz)
 	vp.Size2DTree(0) // collect sizes
 	vp.ClearFlag(int(VpFlagPrefSizing))
-	ch := vp.ChildByType(KiT_Layout, ki.Embeds, 0).Embed(KiT_Layout).(*Layout)
+	ch := vp.ChildByType(TypeLayout, ki.Embeds, 0).Embed(TypeLayout).(*Layout)
 	vpsz := ch.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
 	stw := int(vp.Style.MinWidth.Dots)

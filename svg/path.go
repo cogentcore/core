@@ -26,11 +26,11 @@ type Path struct {
 	DataStr string     `xml:"d" desc:"string version of the path data"`
 }
 
-var KiT_Path = kit.Types.AddType(&Path{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
+var TypePath = kit.Types.AddType(&Path{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
 
 // AddNewPath adds a new button to given parent node, with given name and path data.
 func AddNewPath(parent ki.Ki, name string, data string) *Path {
-	g := parent.AddNewChild(KiT_Path, name).(*Path)
+	g := parent.AddNewChild(TypePath, name).(*Path)
 	if data != "" {
 		g.SetData(data)
 	}
@@ -177,7 +177,7 @@ const (
 
 //go:generate stringer -type=PathCmds
 
-var KiT_PathCmds = kit.Enums.AddEnumAltLower(PcErr, kit.NotBitFlag, nil, "Pc")
+var TypePathCmds = kit.Enums.AddEnumAltLower(PcErr, kit.NotBitFlag, nil, "Pc")
 
 func (ev PathCmds) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *PathCmds) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

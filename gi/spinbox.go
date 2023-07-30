@@ -43,11 +43,11 @@ type SpinBox struct {
 	SpinBoxSig ki.Signal  `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
-var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
+var TypeSpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
 
 // AddNewSpinBox adds a new spinbox to given parent node, with given name.
 func AddNewSpinBox(parent ki.Ki, name string) *SpinBox {
-	return parent.AddNewChild(KiT_SpinBox, name).(*SpinBox)
+	return parent.AddNewChild(TypeSpinBox, name).(*SpinBox)
 }
 
 func (sb *SpinBox) CopyFieldsFrom(frm any) {
@@ -96,7 +96,7 @@ func (sb *SpinBox) Disconnect() {
 // }
 
 var SpinBoxProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "#buttons": ki.Props{
 	// 	"vertical-align": gist.AlignMiddle,
 	// },
@@ -214,10 +214,10 @@ func (sb *SpinBox) ConfigParts() {
 		sb.Parts.Style.Template = sb.Style.Template + ".Parts"
 	}
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_TextField, "text-field")
+	config.Add(TypeTextField, "text-field")
 	if !sb.IsInactive() {
-		config.Add(KiT_Space, "space")
-		config.Add(KiT_Layout, "buttons")
+		config.Add(TypeSpace, "space")
+		config.Add(TypeLayout, "buttons")
 	}
 	mods, updt := sb.Parts.ConfigChildren(config)
 	if mods || gist.RebuildDefaultStyles {
@@ -225,7 +225,7 @@ func (sb *SpinBox) ConfigParts() {
 			buts := sb.Parts.ChildByName("buttons", 1).(*Layout)
 			buts.Lay = LayoutVert
 			sb.StylePart(Node2D(buts))
-			buts.SetNChildren(2, KiT_Action, "but")
+			buts.SetNChildren(2, TypeAction, "but")
 			// up
 			up := buts.Child(0).(*Action)
 			up.SetName("up")
@@ -238,7 +238,7 @@ func (sb *SpinBox) ConfigParts() {
 			}
 			sb.StylePart(Node2D(up))
 			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
+				sbb := recv.Embed(TypeSpinBox).(*SpinBox)
 				sbb.IncrValue(1.0)
 			})
 			// dn
@@ -252,7 +252,7 @@ func (sb *SpinBox) ConfigParts() {
 				dn.Style.Template = sb.Style.Template + ".dn"
 			}
 			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
+				sbb := recv.Embed(TypeSpinBox).(*SpinBox)
 				sbb.IncrValue(-1.0)
 			})
 			// space
@@ -276,7 +276,7 @@ func (sb *SpinBox) ConfigParts() {
 		if !sb.IsInactive() {
 			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
-					sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
+					sbb := recv.Embed(TypeSpinBox).(*SpinBox)
 					tf := send.(*TextField)
 					vl, err := sb.StringToVal(tf.Text())
 					if err == nil {
@@ -345,7 +345,7 @@ func (sb *SpinBox) ConfigPartsIfNeeded() {
 
 func (sb *SpinBox) MouseScrollEvent() {
 	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
+		sbb := recv.Embed(TypeSpinBox).(*SpinBox)
 		if sbb.IsInactive() || !sbb.HasFocus2D() {
 			return
 		}
@@ -358,7 +358,7 @@ func (sb *SpinBox) MouseScrollEvent() {
 func (sb *SpinBox) TextFieldEvent() {
 	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
 	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-		sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
+		sbb := recv.Embed(TypeSpinBox).(*SpinBox)
 		if sig == int64(WidgetSelected) {
 			sbb.SetSelectedState(!sbb.IsSelected())
 		}

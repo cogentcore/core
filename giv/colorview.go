@@ -34,11 +34,11 @@ type ColorView struct {
 	ViewPath string     `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
-var KiT_ColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
+var TypeColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
 
 // AddNewColorView adds a new colorview to given parent node, with given name.
 func AddNewColorView(parent ki.Ki, name string) *ColorView {
-	return parent.AddNewChild(KiT_ColorView, name).(*ColorView)
+	return parent.AddNewChild(TypeColorView, name).(*ColorView)
 }
 
 func (cv *ColorView) Disconnect() {
@@ -48,7 +48,7 @@ func (cv *ColorView) Disconnect() {
 }
 
 var ColorViewProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
 }
@@ -78,7 +78,7 @@ func (cv *ColorView) Config() {
 	cv.NumView.ConfigWidget(widg)
 	vvb := cv.NumView.AsValueViewBase()
 	vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
+		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		cvv.UpdateSliderGrid()
 		cvv.ViewSig.Emit(cvv.This(), 0, nil)
 	})
@@ -184,8 +184,8 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.SetMinPrefWidth(units.Ch(20))
 	sl.SetMinPrefHeight(units.Em(1))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
-		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
+		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
+		slv := send.Embed(gi.TypeSlider).(*gi.Slider)
 		if sig == int64(gi.SliderReleased) {
 			updt := cvv.UpdateStart()
 			cvv.SetRGBValue(slv.Value, rgb)
@@ -241,8 +241,8 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.SetMinPrefWidth(units.Ch(20))
 	sl.SetMinPrefHeight(units.Em(1))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
-		slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
+		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
+		slv := send.Embed(gi.TypeSlider).(*gi.Slider)
 		if sig == int64(gi.SliderReleased) {
 			updt := cvv.UpdateStart()
 			cvv.SetHSLValue(slv.Value, hsl)
@@ -299,9 +299,9 @@ func (cv *ColorView) ConfigPalette() {
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
+			cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 			if sig == int64(gi.ButtonPressed) {
-				but := send.Embed(gi.KiT_Button).(*gi.Button)
+				but := send.Embed(gi.TypeButton).(*gi.Button)
 				cvv.Color.SetName(but.Nm)
 				cvv.ViewSig.Emit(cvv.This(), 0, nil)
 				cvv.Update()
@@ -347,7 +347,7 @@ type ColorValueView struct {
 	TmpColor gist.Color
 }
 
-var KiT_ColorValueView = kit.Types.AddType(&ColorValueView{}, nil)
+var TypeColorValueView = kit.Types.AddType(&ColorValueView{}, nil)
 
 // Color returns a standardized color value from whatever value is represented
 // internally
@@ -401,7 +401,7 @@ func (vv *ColorValueView) SetColor(clr gist.Color) {
 }
 
 func (vv *ColorValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_StructViewInline
+	vv.WidgetTyp = TypeStructViewInline
 	return vv.WidgetTyp
 }
 
@@ -438,12 +438,12 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 		edac.SetIcon(icons.Colors)
 		edac.Tooltip = "color selection dialog"
 		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
+			svv, _ := recv.Embed(TypeStructViewInline).(*StructViewInline)
 			vv.Activate(svv.ViewportSafe(), nil, nil)
 		})
 	}
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_ColorValueView).(*ColorValueView)
+		vvv, _ := recv.Embed(TypeColorValueView).(*ColorValueView)
 		vvv.UpdateWidget() // necessary in this case!
 		vvv.ViewSig.Emit(vvv.This(), 0, nil)
 	})
@@ -470,7 +470,7 @@ func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.
 	ColorViewDialog(vp, dclr, DlgOpts{Title: "Color Value View", Prompt: desc, TmpSave: vv.TmpSave},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
 				cclr := ColorViewDialogValue(ddlg)
 				vv.SetColor(cclr)
 				vv.UpdateWidget()
@@ -490,10 +490,10 @@ type ColorNameValueView struct {
 	ValueViewBase
 }
 
-var KiT_ColorNameValueView = kit.Types.AddType(&ColorNameValueView{}, nil)
+var TypeColorNameValueView = kit.Types.AddType(&ColorNameValueView{}, nil)
 
 func (vv *ColorNameValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Action
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -515,7 +515,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_ColorNameValueView).(*ColorNameValueView)
+		vvv, _ := recv.Embed(TypeColorNameValueView).(*ColorNameValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
@@ -554,7 +554,7 @@ func (vv *ColorNameValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc
 	TableViewSelectDialog(vp, &sl, DlgOpts{Title: "Select a Color Name", Prompt: desc}, curRow, nil,
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
 				si := TableViewSelectDialogValue(ddlg)
 				if si >= 0 {
 					vv.SetValue(sl[si].Name)

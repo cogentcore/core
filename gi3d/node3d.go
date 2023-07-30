@@ -133,11 +133,11 @@ type Node3DBase struct {
 	NDCBBox   mat32.Box3   `desc:"normalized display coordinates bounding box, used for frustrum clipping"`
 }
 
-var KiT_Node3DBase = kit.Types.AddType(&Node3DBase{}, Node3DBaseProps)
+var TypeNode3DBase = kit.Types.AddType(&Node3DBase{}, Node3DBaseProps)
 
 var Node3DBaseProps = ki.Props{
 	"base-type":     true, // excludes type from user selections
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 }
 
 // NodeFlags extend gi.NodeFlags to hold 3D node state
@@ -145,7 +145,7 @@ type NodeFlags int
 
 //go:generate stringer -type=NodeFlags
 
-var KiT_NodeFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, NodeFlagsN, kit.BitFlag, nil)
+var TypeNodeFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, NodeFlagsN, kit.BitFlag, nil)
 
 const (
 	// WorldMatrixUpdated means that the Pose.WorldMatrix has been updated
@@ -214,7 +214,7 @@ func (nb *Node3DBase) IsVisible() bool {
 	if nb.Par == nil || nb.Par.This() == nil {
 		return false
 	}
-	sc := nb.Par.Embed(KiT_Scene)
+	sc := nb.Par.Embed(TypeScene)
 	if sc != nil {
 		return sc.(*Scene).IsVisible()
 	}
@@ -387,11 +387,11 @@ func (nb *Node3DBase) ConnectEvents3D(sc *Scene) {
 		if me.Action != mouse.Press || !nb.IsVisible() || nb.IsInactive() {
 			return
 		}
-		sci, err := recv.ParentByTypeTry(KiT_Scene, ki.Embeds)
+		sci, err := recv.ParentByTypeTry(TypeScene, ki.Embeds)
 		if err != nil {
 			return
 		}
-		ssc := sci.Embed(KiT_Scene).(*Scene)
+		ssc := sci.Embed(TypeScene).(*Scene)
 		ni := nb.This().(Node3D)
 		if ssc.CurSel != ni {
 			ssc.SetSel(ni)

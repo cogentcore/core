@@ -19,11 +19,11 @@ type Group struct {
 	Node3DBase
 }
 
-var KiT_Group = kit.Types.AddType(&Group{}, GroupProps)
+var TypeGroup = kit.Types.AddType(&Group{}, GroupProps)
 
 // AddNewGroup adds a new group of given name to given parent
 func AddNewGroup(sc *Scene, parent ki.Ki, name string) *Group {
-	gp := parent.AddNewChild(KiT_Group, name).(*Group)
+	gp := parent.AddNewChild(TypeGroup, name).(*Group)
 	gp.Defaults()
 	return gp
 }
@@ -105,5 +105,5 @@ func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 var _ Node3D = &Group{}
 
 var GroupProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 }

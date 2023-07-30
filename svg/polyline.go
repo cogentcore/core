@@ -16,11 +16,11 @@ type Polyline struct {
 	Points []mat32.Vec2 `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
 }
 
-var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
+var TypePolyline = kit.Types.AddType(&Polyline{}, nil)
 
 // AddNewPolyline adds a new polyline to given parent node, with given name and points.
 func AddNewPolyline(parent ki.Ki, name string, points []mat32.Vec2) *Polyline {
-	g := parent.AddNewChild(KiT_Polyline, name).(*Polyline)
+	g := parent.AddNewChild(TypePolyline, name).(*Polyline)
 	g.Points = points
 	return g
 }

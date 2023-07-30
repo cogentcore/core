@@ -47,7 +47,7 @@ const (
 
 //go:generate stringer -type=BorderStyles
 
-var KiT_BorderStyles = kit.Enums.AddEnumAltLower(BorderN, kit.NotBitFlag, StylePropProps, "Border")
+var TypeBorderStyles = kit.Enums.AddEnumAltLower(BorderN, kit.NotBitFlag, StylePropProps, "Border")
 
 func (ev BorderStyles) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *BorderStyles) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

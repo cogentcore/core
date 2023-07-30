@@ -54,7 +54,7 @@ type FileView struct {
 	PrevPath    string             `view:"-" desc:"Previous path that was processed via UpdateFiles"`
 }
 
-var KiT_FileView = kit.Types.AddType(&FileView{}, FileViewProps)
+var TypeFileView = kit.Types.AddType(&FileView{}, FileViewProps)
 
 func (fv *FileView) Disconnect() {
 	if fv.Watcher != nil {
@@ -136,7 +136,7 @@ func (fv *FileView) SelectFile() {
 }
 
 var FileViewProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Background,
 	"max-width":        -1,
@@ -190,8 +190,8 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 			wi.SetProp("color", clr)
 			return
 		}
-		if fvv := tv.ParentByType(KiT_FileView, ki.Embeds); fvv != nil {
-			fv := fvv.Embed(KiT_FileView).(*FileView)
+		if fvv := tv.ParentByType(TypeFileView, ki.Embeds); fvv != nil {
+			fv := fvv.Embed(TypeFileView).(*FileView)
 			fn := finf[row].Name
 			ext := strings.ToLower(filepath.Ext(fn))
 			if _, has := fv.ExtMap[ext]; has {
@@ -214,9 +214,9 @@ func (fv *FileView) Config() {
 	fv.Lay = gi.LayoutVert
 	fv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_ToolBar, "path-tbar")
-	config.Add(gi.KiT_Layout, "files-row")
-	config.Add(gi.KiT_Layout, "sel-row")
+	config.Add(gi.TypeToolBar, "path-tbar")
+	config.Add(gi.TypeLayout, "files-row")
+	config.Add(gi.TypeLayout, "sel-row")
 	mods, updt := fv.ConfigChildren(config)
 	if mods {
 		fv.ConfigPathBar()
@@ -236,12 +236,12 @@ func (fv *FileView) ConfigPathBar() {
 	pr.SetStretchMaxWidth()
 
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Label, "path-lbl")
-	config.Add(gi.KiT_ComboBox, "path")
-	config.Add(gi.KiT_Action, "path-up")
-	config.Add(gi.KiT_Action, "path-ref")
-	config.Add(gi.KiT_Action, "path-fav")
-	config.Add(gi.KiT_Action, "new-folder")
+	config.Add(gi.TypeLabel, "path-lbl")
+	config.Add(gi.TypeComboBox, "path")
+	config.Add(gi.TypeAction, "path-up")
+	config.Add(gi.TypeAction, "path-ref")
+	config.Add(gi.TypeAction, "path-fav")
+	config.Add(gi.TypeAction, "new-folder")
 
 	pl := gi.AddNewLabel(pr, "path-lbl", "Path:")
 	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
@@ -255,7 +255,7 @@ func (fv *FileView) ConfigPathBar() {
 		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
 		pft.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.TextFieldDone) {
-				fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+				fvv, _ := recv.Embed(TypeFileView).(*FileView)
 				pff, _ := send.(*gi.TextField)
 				fvv.DirPath = pff.Text()
 				fvv.UpdateFilesAction()
@@ -263,8 +263,8 @@ func (fv *FileView) ConfigPathBar() {
 		})
 	}
 	pf.ComboSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-		pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
+		fvv, _ := recv.Embed(TypeFileView).(*FileView)
+		pff := send.Embed(gi.TypeComboBox).(*gi.ComboBox)
 		sp := data.(string)
 		if sp == gi.FileViewResetPaths {
 			gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.Params.SavedPathsMax)
@@ -282,23 +282,23 @@ func (fv *FileView) ConfigPathBar() {
 	})
 
 	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: icons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+		fvv, _ := recv.Embed(TypeFileView).(*FileView)
 		fvv.DirPathUp()
 	})
 
 	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: icons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+		fvv, _ := recv.Embed(TypeFileView).(*FileView)
 		fvv.UpdateFilesAction()
 	})
 
 	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: icons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+		fvv, _ := recv.Embed(TypeFileView).(*FileView)
 		fvv.AddPathToFavs()
 	})
 
 	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: icons.CreateNewFolder, Tooltip: "Create a new folder in this folder"},
 		fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(TypeFileView).(*FileView)
 			fvv.NewFolder()
 		})
 }
@@ -308,8 +308,8 @@ func (fv *FileView) ConfigFilesRow() {
 	fr.SetStretchMax()
 	fr.Lay = gi.LayoutHoriz
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_TableView, "favs-view")
-	config.Add(KiT_TableView, "files-view")
+	config.Add(TypeTableView, "favs-view")
+	config.Add(TypeTableView, "files-view")
 	fr.ConfigChildren(config) // already covered by parent update
 
 	sv := fv.FavsView()
@@ -330,7 +330,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetSlice(&gi.Prefs.FavPaths)
 	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.WidgetSelected) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(TypeFileView).(*FileView)
 			svv, _ := send.(*TableView)
 			fvv.FavSelect(svv.SelectedIdx)
 		}
@@ -355,14 +355,14 @@ func (fv *FileView) ConfigFilesRow() {
 	}
 	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.WidgetSelected) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(TypeFileView).(*FileView)
 			svv, _ := send.(*TableView)
 			fvv.FileSelectAction(svv.SelectedIdx)
 		}
 	})
 	sv.SliceViewSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(SliceViewDoubleClicked) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(TypeFileView).(*FileView)
 			fvv.SelectFile()
 		}
 	})
@@ -374,10 +374,10 @@ func (fv *FileView) ConfigSelRow() {
 	sr.SetProp("spacing", units.Px(4))
 	sr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Label, "sel-lbl")
-	config.Add(gi.KiT_TextField, "sel")
-	config.Add(gi.KiT_Label, "ext-lbl")
-	config.Add(gi.KiT_TextField, "ext")
+	config.Add(gi.TypeLabel, "sel-lbl")
+	config.Add(gi.TypeTextField, "sel")
+	config.Add(gi.TypeLabel, "ext-lbl")
+	config.Add(gi.TypeTextField, "ext")
 	sr.ConfigChildren(config) // already covered by parent update
 
 	sl := sr.ChildByName("sel-lbl", 0).(*gi.Label)
@@ -391,7 +391,7 @@ func (fv *FileView) ConfigSelRow() {
 	sf.SetText(fv.SelFile)
 	sf.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(TypeFileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
 			fvv.SetSelFileAction(pff.Text())
 		}
@@ -406,7 +406,7 @@ func (fv *FileView) ConfigSelRow() {
 	ef.SetMinPrefWidth(units.Ch(10))
 	ef.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+			fvv, _ := recv.Embed(TypeFileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
 			fvv.SetExtAction(pff.Text())
 		}
@@ -779,7 +779,7 @@ func (fv *FileView) ConnectEvents2D() {
 
 func (fv *FileView) FileViewEvents() {
 	fv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		fvv := recv.Embed(KiT_FileView).(*FileView)
+		fvv := recv.Embed(TypeFileView).(*FileView)
 		kt := d.(*key.ChordEvent)
 		fvv.KeyInput(kt)
 	})

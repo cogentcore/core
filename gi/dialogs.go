@@ -70,7 +70,7 @@ type Dialog struct {
 	Data      any         `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 }
 
-var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
+var TypeDialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
 func (dlg *Dialog) Disconnect() {
 	dlg.Viewport2D.Disconnect()
@@ -127,7 +127,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		win.Data = dlg.Data
 		win.AddChild(dlg)
 		win.Viewport = &dlg.Viewport2D
-		win.MasterVLay = dlg.Frame().Embed(KiT_Layout).(*Layout)
+		win.MasterVLay = dlg.Frame().Embed(TypeLayout).(*Layout)
 		// fmt.Printf("new win dpi: %v\n", win.LogicalDPI())
 	}
 
@@ -149,7 +149,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	// note: LowPri allows all other events to be processed before dialog
 	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		kt := d.(*key.ChordEvent)
-		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
+		ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 		if KeyEventTrace {
 			fmt.Printf("gi.Dialog LowPri KeyInput: %v\n", ddlg.Path())
 		}
@@ -162,7 +162,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	})
 	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		kt := d.(*key.ChordEvent)
-		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
+		ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 		if KeyEventTrace {
 			fmt.Printf("gi.Dialog LowPriRaw KeyInput: %v\n", ddlg.Path())
 		}
@@ -176,7 +176,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	// this is not a good idea
 	// win.ConnectEvent(dlg.This(), oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	me := d.(*mouse.Event)
-	// 	ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
+	// 	ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
 	// 		ddlg.Accept()
 	// 		me.SetProcessed()
@@ -259,7 +259,7 @@ func (dlg *Dialog) Cancel() {
 //  Configuration functions construct standard types of dialogs but anything can be done
 
 var DialogProps = ki.Props{
-	"EnumType:Flag": KiT_VpFlags,
+	"EnumType:Flag": TypeVpFlags,
 	// "color":         &Prefs.Colors.Font,
 	// "#frame": ki.Props{
 	// 	"border-width":        units.Px(2),
@@ -388,16 +388,16 @@ const (
 func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	if stretch {
-		config.Add(KiT_Stretch, "stretch")
+		config.Add(TypeStretch, "stretch")
 	}
 	if ok {
-		config.Add(KiT_Button, "ok")
+		config.Add(TypeButton, "ok")
 	}
 	if cancel {
 		if ok {
-			config.Add(KiT_Space, "space")
+			config.Add(TypeSpace, "space")
 		}
-		config.Add(KiT_Button, "cancel")
+		config.Add(TypeButton, "cancel")
 	}
 	return config
 }
@@ -406,23 +406,23 @@ func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList
 // Accept / Cancel actions
 func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
-		okb := bb.ChildByName("ok", 0).Embed(KiT_Button).(*Button)
+		okb := bb.ChildByName("ok", 0).Embed(TypeButton).(*Button)
 		okb.SetText("Ok")
 		okb.Type = ButtonPrimary
 		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
-				dlg := recv.Embed(KiT_Dialog).(*Dialog)
+				dlg := recv.Embed(TypeDialog).(*Dialog)
 				dlg.Accept()
 			}
 		})
 	}
 	if cancel {
-		canb := bb.ChildByName("cancel", 0).Embed(KiT_Button).(*Button)
+		canb := bb.ChildByName("cancel", 0).Embed(TypeButton).(*Button)
 		canb.SetText("Cancel")
 		canb.Type = ButtonSecondary
 		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
-				dlg := recv.Embed(KiT_Dialog).(*Dialog)
+				dlg := recv.Embed(TypeDialog).(*Dialog)
 				dlg.Cancel()
 			}
 		})
@@ -489,7 +489,7 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 	ew, has := DialogWindows.FindData(data)
 	if has && ew.NumChildren() > 0 {
 		ew.OSWin.Raise()
-		dlg := ew.Child(0).Embed(KiT_Dialog).(*Dialog)
+		dlg := ew.Child(0).Embed(TypeDialog).(*Dialog)
 		return dlg, true
 	}
 	dlg := NewStdDialog(opts, ok, cancel)
@@ -548,8 +548,8 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 		if chnm == "cancel" {
 			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(ButtonClicked) {
-					tb := send.Embed(KiT_Button).(*Button)
-					dlg := recv.Embed(KiT_Dialog).(*Dialog)
+					tb := send.Embed(TypeButton).(*Button)
+					dlg := recv.Embed(TypeDialog).(*Dialog)
 					dlg.SigVal = tb.Prop("__cdSigVal").(int64)
 					dlg.Cancel()
 				}
@@ -557,8 +557,8 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 		} else {
 			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(ButtonClicked) {
-					tb := send.Embed(KiT_Button).(*Button)
-					dlg := recv.Embed(KiT_Dialog).(*Dialog)
+					tb := send.Embed(TypeButton).(*Button)
+					dlg := recv.Embed(TypeDialog).(*Dialog)
 					dlg.SigVal = tb.Prop("__cdSigVal").(int64)
 					dlg.Accept()
 				}
@@ -582,7 +582,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nrow := frame.InsertNewChild(KiT_Layout, prIdx+2, "n-row").(*Layout)
+	nrow := frame.InsertNewChild(TypeLayout, prIdx+2, "n-row").(*Layout)
 	nrow.Lay = LayoutHoriz
 
 	AddNewLabel(nrow, "n-label", "Number:  ")
@@ -593,10 +593,10 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	nsb.Value = 1
 	nsb.Step = 1
 
-	tspc := frame.InsertNewChild(KiT_Space, prIdx+3, "type-space").(*Space)
+	tspc := frame.InsertNewChild(TypeSpace, prIdx+3, "type-space").(*Space)
 	tspc.SetFixedHeight(units.Em(0.5))
 
-	trow := frame.InsertNewChild(KiT_Layout, prIdx+4, "t-row").(*Layout)
+	trow := frame.InsertNewChild(TypeLayout, prIdx+4, "t-row").(*Layout)
 	trow.Lay = LayoutHoriz
 
 	AddNewLabel(trow, "t-label", "Type:    ")
@@ -639,7 +639,7 @@ func StringPromptDialog(avp *Viewport2D, strval, placeholder string, opts DlgOpt
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
-	tf := frame.InsertNewChild(KiT_TextField, prIdx+1, "str-field").(*TextField)
+	tf := frame.InsertNewChild(TypeTextField, prIdx+1, "str-field").(*TextField)
 	tf.Placeholder = placeholder
 	tf.SetText(strval)
 	tf.SetStretchMaxWidth()

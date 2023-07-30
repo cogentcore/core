@@ -68,11 +68,11 @@ type SliderBase struct {
 	SliderSig   ki.Signal                 `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
 }
 
-var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
+var TypeSliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
 
 var SliderBaseProps = ki.Props{
 	"base-type":     true,
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 }
 
 func (sb *SliderBase) CopyFieldsFrom(frm any) {
@@ -435,7 +435,7 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 func (sb *SliderBase) MouseDragEvent() {
 	sb.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
-		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsInactive() {
 			return
 		}
@@ -453,7 +453,7 @@ func (sb *SliderBase) MouseDragEvent() {
 func (sb *SliderBase) MouseEvent() {
 	sb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsInactive() {
 			me.SetProcessed()
 			sbb.SetSelectedState(!sbb.IsSelected())
@@ -482,7 +482,7 @@ func (sb *SliderBase) MouseEvent() {
 
 func (sb *SliderBase) MouseFocusEvent() {
 	sb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsInactive() {
 			return
 		}
@@ -498,7 +498,7 @@ func (sb *SliderBase) MouseFocusEvent() {
 
 func (sb *SliderBase) MouseScrollEvent() {
 	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsInactive() {
 			return
 		}
@@ -515,7 +515,7 @@ func (sb *SliderBase) MouseScrollEvent() {
 
 func (sb *SliderBase) KeyChordEvent() {
 	sb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := recv.Embed(KiT_SliderBase).(*SliderBase)
+		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsInactive() {
 			return
 		}
@@ -555,7 +555,7 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 		sb.ConfigParts()
 	}
 	if TheIconMgr.IsValid(sb.Icon) && sb.Parts.HasChildren() {
-		ick := sb.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
+		ick := sb.Parts.ChildByType(TypeIcon, ki.Embeds, 0)
 		if ick != nil {
 			ic := ick.(*Icon)
 			mrg := sb.Style.Margin.Dots()
@@ -674,11 +674,11 @@ type Slider struct {
 	SliderBase
 }
 
-var KiT_Slider = kit.Types.AddType(&Slider{}, SliderProps)
+var TypeSlider = kit.Types.AddType(&Slider{}, SliderProps)
 
 // AddNewSlider adds a new slider to given parent node, with given name.
 func AddNewSlider(parent ki.Ki, name string) *Slider {
-	return parent.AddNewChild(KiT_Slider, name).(*Slider)
+	return parent.AddNewChild(TypeSlider, name).(*Slider)
 }
 
 func (sr *Slider) CopyFieldsFrom(frm any) {
@@ -687,7 +687,7 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 }
 
 var SliderProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,
@@ -924,11 +924,11 @@ type ScrollBar struct {
 	SliderBase
 }
 
-var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
+var TypeScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
 
 // AddNewScrollBar adds a new scrollbar to given parent node, with given name.
 func AddNewScrollBar(parent ki.Ki, name string) *ScrollBar {
-	return parent.AddNewChild(KiT_ScrollBar, name).(*ScrollBar)
+	return parent.AddNewChild(TypeScrollBar, name).(*ScrollBar)
 }
 
 func (sb *ScrollBar) CopyFieldsFrom(frm any) {
@@ -937,7 +937,7 @@ func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 }
 
 var ScrollBarProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,
@@ -1120,11 +1120,11 @@ type ProgressBar struct {
 	ProgMu  sync.Mutex `desc:"mutex for updating progress"`
 }
 
-var KiT_ProgressBar = kit.Types.AddType(&ProgressBar{}, ProgressBarProps)
+var TypeProgressBar = kit.Types.AddType(&ProgressBar{}, ProgressBarProps)
 
 // AddNewProgressBar adds a new progress bar to given parent node, with given name.
 func AddNewProgressBar(parent ki.Ki, name string) *ProgressBar {
-	pb := parent.AddNewChild(KiT_ProgressBar, name).(*ProgressBar)
+	pb := parent.AddNewChild(TypeProgressBar, name).(*ProgressBar)
 	pb.Defaults()
 	return pb
 }
@@ -1172,7 +1172,7 @@ func (pb *ProgressBar) ProgStep() {
 }
 
 var ProgressBarProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,

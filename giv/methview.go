@@ -135,7 +135,7 @@ func ToolBarView(val any, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 	rval := true
 	for _, te := range tp {
 		if strings.HasPrefix(te.Name, "sep-") {
-			sep := tb.AddNewChild(gi.KiT_Separator, te.Name).(*gi.Separator)
+			sep := tb.AddNewChild(gi.TypeSeparator, te.Name).(*gi.Separator)
 			sep.Horiz = false
 			continue
 		}
@@ -145,7 +145,7 @@ func ToolBarView(val any, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 			//			fmt.Printf("ToolBar action override: %v\n", ac.Nm)
 			ac.ActionSig.DisconnectAll()
 		} else {
-			ac = tb.AddNewChild(gi.KiT_Action, te.Name).(*gi.Action)
+			ac = tb.AddNewChild(gi.TypeAction, te.Name).(*gi.Action)
 		}
 		rv := ActionsView(val, vtyp, vp, ac, te.Value)
 		if !rv {
@@ -619,7 +619,7 @@ const (
 
 //go:generate stringer -type=MethViewFlags
 
-var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, kit.BitFlag, nil, "MethView")
+var TypeMethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, kit.BitFlag, nil, "MethView")
 
 // SubMenuFunc is a function that returns a string slice of submenu items
 // used in MethView submenu-func option
@@ -714,7 +714,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 	ArgViewDialog(md.Vp, ads, DlgOpts{Title: ac.Text, Prompt: md.Desc},
 		md.Vp.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
-				// ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+				// ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
 				MethViewCallMeth(md, args)
 			}
 		})
@@ -822,7 +822,7 @@ const (
 
 //go:generate stringer -type=ArgDataFlags
 
-var KiT_ArgDataFlags = kit.Enums.AddEnumAltLower(ArgDataFlagsN, kit.BitFlag, nil, "ArgData")
+var TypeArgDataFlags = kit.Enums.AddEnumAltLower(ArgDataFlagsN, kit.BitFlag, nil, "ArgData")
 
 func (ad *ArgData) HasDef() bool {
 	return bitflag.Has32(int32(ad.Flags), int(ArgDataHasDef))

@@ -35,7 +35,7 @@ const (
 
 //go:generate stringer -type=Actions
 
-var KiT_Actions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
+var TypeActions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 
 /////////////////////////////
 // oswin.Event interface

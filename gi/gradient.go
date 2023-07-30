@@ -21,11 +21,11 @@ type Gradient struct {
 	StopsName string         `desc:"name of another gradient to get stops from"`
 }
 
-var KiT_Gradient = kit.Types.AddType(&Gradient{}, nil)
+var TypeGradient = kit.Types.AddType(&Gradient{}, nil)
 
 // AddNewGradient adds a new gradient to given parent node, with given name.
 func AddNewGradient(parent ki.Ki, name string) *Gradient {
-	return parent.AddNewChild(KiT_Gradient, name).(*Gradient)
+	return parent.AddNewChild(TypeGradient, name).(*Gradient)
 }
 
 func (gr *Gradient) CopyFieldsFrom(frm any) {

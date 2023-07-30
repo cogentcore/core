@@ -36,11 +36,11 @@ type FileBrowse struct {
 	ActiveTextViewIdx int               `json:"-" desc:"index of the currently-active textview -- new files will be viewed in other views if available"`
 }
 
-var KiT_FileBrowse = kit.Types.AddType(&FileBrowse{}, FileBrowseProps)
+var TypeFileBrowse = kit.Types.AddType(&FileBrowse{}, FileBrowseProps)
 
 // AddNewFileBrowse adds a new filebrowse to given parent node, with given name.
 func AddNewFileBrowse(parent ki.Ki, name string) *FileBrowse {
-	return parent.AddNewChild(KiT_FileBrowse, name).(*FileBrowse)
+	return parent.AddNewChild(TypeFileBrowse, name).(*FileBrowse)
 }
 
 // UpdateFiles updates the list of files saved in project
@@ -223,9 +223,9 @@ func (fb *FileBrowse) Defaults() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (fb *FileBrowse) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Label, "title")
-	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_SplitView, "splitview")
+	config.Add(gi.TypeLabel, "title")
+	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.TypeSplitView, "splitview")
 	return config
 }
 
@@ -276,7 +276,7 @@ func (fb *FileBrowse) TextViewByIndex(idx int) *giv.TextView {
 	stidx := 1 // 0 = file browser -- could be collapsed but always there.
 	if split != nil {
 		svk := split.Child(stidx + idx).Child(0)
-		if !ki.TypeEmbeds(svk, giv.KiT_TextView) {
+		if !ki.TypeEmbeds(svk, giv.TypeTextView) {
 			log.Printf("FileBrowse: text view not at index: %v\n", idx)
 			return nil
 		}
@@ -307,9 +307,9 @@ func (fb *FileBrowse) ConfigToolbar() {
 // SplitViewConfig returns a TypeAndNameList for configuring the SplitView
 func (fb *FileBrowse) SplitViewConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Frame, "filetree-fr")
+	config.Add(gi.TypeFrame, "filetree-fr")
 	for i := 0; i < fb.NTextViews; i++ {
-		config.Add(gi.KiT_Layout, fmt.Sprintf("textview-lay-%v", i))
+		config.Add(gi.TypeLayout, fmt.Sprintf("textview-lay-%v", i))
 	}
 	// todo: tab view
 	return config
@@ -351,9 +351,9 @@ func (fb *FileBrowse) ConfigSplitView() {
 			if data == nil {
 				return
 			}
-			tvn, _ := data.(ki.Ki).Embed(giv.KiT_FileTreeView).(*giv.FileTreeView)
-			fbb, _ := recv.Embed(KiT_FileBrowse).(*FileBrowse)
-			fn := tvn.SrcNode.Embed(giv.KiT_FileNode).(*giv.FileNode)
+			tvn, _ := data.(ki.Ki).Embed(giv.TypeFileTreeView).(*giv.FileTreeView)
+			fbb, _ := recv.Embed(TypeFileBrowse).(*FileBrowse)
+			fn := tvn.SrcNode.Embed(giv.TypeFileNode).(*giv.FileNode)
 			switch sig {
 			case int64(giv.TreeViewSelected):
 				fbb.FileNodeSelected(fn, tvn)

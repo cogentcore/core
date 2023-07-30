@@ -64,13 +64,13 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb.Opts.LineNos = opts.LineNos
 	tb.Stat() // update markup
 
-	tlv := frame.InsertNewChild(gi.KiT_Layout, prIdx+1, "text-lay").(*gi.Layout)
+	tlv := frame.InsertNewChild(gi.TypeLayout, prIdx+1, "text-lay").(*gi.Layout)
 	tlv.SetProp("width", units.Ch(80))
 	tlv.SetProp("height", units.Em(40))
 	tlv.SetProp("line-nos", opts.LineNos)
 	tlv.SetStretchMax()
 	tv := AddNewTextView(tlv, "text-view")
-	tv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	tv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	tv.SetInactive()
 	tv.SetProp("font-family", gi.Prefs.MonoFont)
 	tv.SetBuf(tb)
@@ -86,7 +86,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	cpb.SetIcon(icons.ContentCopy)
 	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonClicked) {
-			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
+			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
 			oswin.TheApp.ClipBoard(ddlg.Win.OSWin).Write(mimedata.NewTextBytes(text))
 		}
 	})
@@ -117,8 +117,8 @@ func StructViewDialog(avp *gi.Viewport2D, stru any, opts DlgOpts, recv ki.Ki, dl
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	sv := frame.InsertNewChild(KiT_StructView, prIdx+1, "struct-view").(*StructView)
-	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv := frame.InsertNewChild(TypeStructView, prIdx+1, "struct-view").(*StructView)
+	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	if opts.Inactive {
 		sv.SetInactive()
 	}
@@ -151,8 +151,8 @@ func MapViewDialog(avp *gi.Viewport2D, mp any, opts DlgOpts, recv ki.Ki, dlgFunc
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	sv := frame.InsertNewChild(KiT_MapView, prIdx+1, "map-view").(*MapView)
-	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv := frame.InsertNewChild(TypeMapView, prIdx+1, "map-view").(*MapView)
+	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetMap(mp)
@@ -182,8 +182,8 @@ func SliceViewDialog(avp *gi.Viewport2D, slice any, opts DlgOpts, styleFunc Slic
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
-	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
+	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	sv.SetInactiveState(false)
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
@@ -216,8 +216,8 @@ func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice any, opts DlgOpts, recv ki
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
-	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
+	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	sv.SetInactiveState(false)
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
@@ -259,8 +259,8 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal any, opts DlgOpts, 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
-	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
+	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	sv.SetInactiveState(true)
 	sv.StyleFunc = styleFunc
 	sv.SelVal = curVal
@@ -269,7 +269,7 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal any, opts DlgOpts, 
 
 	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(SliceViewDoubleClicked) {
-			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
+			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
 			ddlg.Accept()
 		}
 	})
@@ -308,8 +308,8 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru any, opts DlgOpts, styleFunc 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	sv := frame.InsertNewChild(KiT_TableView, prIdx+1, "tableview").(*TableView)
-	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv := frame.InsertNewChild(TypeTableView, prIdx+1, "tableview").(*TableView)
+	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	sv.SetInactiveState(false)
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
@@ -356,8 +356,8 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru any, opts DlgOpts, init
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	sv := frame.InsertNewChild(KiT_TableView, prIdx+1, "tableview").(*TableView)
-	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv := frame.InsertNewChild(TypeTableView, prIdx+1, "tableview").(*TableView)
+	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	sv.SetInactiveState(true)
 	sv.StyleFunc = styleFunc
 	sv.SelectedIdx = initRow
@@ -366,7 +366,7 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru any, opts DlgOpts, init
 
 	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(SliceViewDoubleClicked) {
-			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
+			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
 			ddlg.Accept()
 		}
 	})
@@ -456,8 +456,8 @@ func ColorViewDialog(avp *gi.Viewport2D, clr gist.Color, opts DlgOpts, recv ki.K
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	sv := frame.InsertNewChild(KiT_ColorView, prIdx+1, "color-view").(*ColorView)
-	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv := frame.InsertNewChild(TypeColorView, prIdx+1, "color-view").(*ColorView)
+	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetColor(clr)
@@ -474,7 +474,7 @@ func ColorViewDialog(avp *gi.Viewport2D, clr gist.Color, opts DlgOpts, recv ki.K
 // ColorViewDialogValue gets the color from the dialog
 func ColorViewDialogValue(dlg *gi.Dialog) gist.Color {
 	frame := dlg.Frame()
-	cvvvk := frame.ChildByType(KiT_ColorView, ki.Embeds, 2)
+	cvvvk := frame.ChildByType(TypeColorView, ki.Embeds, 2)
 	if cvvvk != nil {
 		cvvv := cvvvk.(*ColorView)
 		return cvvv.Color
@@ -496,14 +496,14 @@ func FileViewDialog(avp *gi.Viewport2D, filename, ext string, opts DlgOpts, filt
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	fv := frame.InsertNewChild(KiT_FileView, prIdx+1, "file-view").(*FileView)
-	fv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	fv := frame.InsertNewChild(TypeFileView, prIdx+1, "file-view").(*FileView)
+	fv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	fv.FilterFunc = filterFunc
 	fv.SetFilename(filename, ext)
 
 	fv.FileSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(FileViewDoubleClicked) {
-			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
+			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
 			ddlg.Accept()
 		}
 	})
@@ -536,8 +536,8 @@ func ArgViewDialog(avp *gi.Viewport2D, args []ArgData, opts DlgOpts, recv ki.Ki,
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	sv := frame.InsertNewChild(KiT_ArgView, prIdx+1, "arg-view").(*ArgView)
-	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv := frame.InsertNewChild(TypeArgView, prIdx+1, "arg-view").(*ArgView)
+	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	sv.SetInactiveState(false)
 	sv.SetArgs(args)
 

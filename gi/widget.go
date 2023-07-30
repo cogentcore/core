@@ -44,11 +44,11 @@ type WidgetBase struct {
 	StyMu        sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting updates to the style"`
 }
 
-var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
+var TypeWidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
 
 var WidgetBaseProps = ki.Props{
 	"base-type":     true,
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 }
 
 // StyleFuncName is the name of
@@ -155,7 +155,7 @@ func (wb *WidgetBase) AddStyleFunc(name StyleFuncName, f func()) {
 func (wb *WidgetBase) AddChildStyleFunc(childName string, startIdx int, funcName StyleFuncName, f func(w *WidgetBase)) {
 	child := wb.ChildByName(childName, startIdx)
 	if child != nil {
-		wb, ok := child.Embed(KiT_WidgetBase).(*WidgetBase)
+		wb, ok := child.Embed(TypeWidgetBase).(*WidgetBase)
 		if ok {
 			wb.AddStyleFunc(funcName, func() {
 				f(wb)
@@ -358,7 +358,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	// // fmt.Println(cf, en)
 
 	// wb.FuncUp(0, nil, func(k ki.Ki, level int, data any) bool {
-	// 	kwbki := k.Embed(KiT_WidgetBase)
+	// 	kwbki := k.Embed(TypeWidgetBase)
 	// 	ok := kwbki != nil
 	// 	// fmt.Println(ok, level, ki.Type(k).Name())
 	// 	if ok {
@@ -453,7 +453,7 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 	// pdst := DefaultStyle2DWidget(wb, stynm, pg)
 	// pg.DefStyle = pdst // will use this as starting point for all styles now..
 
-	if ics := pk.Embed(KiT_Icon); ics != nil {
+	if ics := pk.Embed(TypeIcon); ics != nil {
 		ic := ics.(*Icon)
 		styprops := kit.Types.Properties(ki.Type(wb), true)
 		if sp, ok := ki.SubProps(*styprops, stynm); ok {
@@ -646,7 +646,7 @@ func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 		if Render2DTrace {
 			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.Path(), wb.VpBBox)
 		}
-		// if ki.TypeEmbeds(wb.This(), KiT_Frame) || strings.Contains(ki.Type(wb.This()).String(), "TextView") {
+		// if ki.TypeEmbeds(wb.This(), TypeFrame) || strings.Contains(ki.Type(wb.This()).String(), "TextView") {
 		// 	fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.Path(), wb.VpBBox)
 		// }
 		wb.ClearFullReRender()
@@ -838,10 +838,10 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.SetFlag(int(VpFlagPopupDestroyAll)) // nuke it all
-	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
+	frame := pvp.AddNewChild(TypeFrame, "Frame").(*Frame)
 	frame.Lay = LayoutVert
 	// frame.Properties().CopyFrom(TooltipFrameProps, ki.DeepCopy)
-	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
+	lbl := frame.AddNewChild(TypeLabel, "ttlbl").(*Label)
 	// lbl.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
 	TooltipConfigStyles(&pvp.WidgetBase, frame)
@@ -915,7 +915,7 @@ func (wb *WidgetBase) EmitContextMenuSignal() {
 func (wb *WidgetBase) HoverTooltipEvent() {
 	wb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
-		wbb := recv.Embed(KiT_WidgetBase).(*WidgetBase)
+		wbb := recv.Embed(TypeWidgetBase).(*WidgetBase)
 		if wbb.Tooltip != "" {
 			me.SetProcessed()
 			pos := wbb.WinBBox.Max
@@ -945,7 +945,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 		if sel {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				me.SetProcessed()
-				wbb := recv.Embed(KiT_WidgetBase).(*WidgetBase)
+				wbb := recv.Embed(TypeWidgetBase).(*WidgetBase)
 				wbb.SetSelectedState(!wbb.IsSelected())
 				wbb.EmitSelectedSignal()
 				wbb.UpdateSig()
@@ -954,7 +954,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 		if ctxtMenu {
 			if me.Action == mouse.Release && me.Button == mouse.Right {
 				me.SetProcessed()
-				wbb := recv.Embed(KiT_WidgetBase).(*WidgetBase)
+				wbb := recv.Embed(TypeWidgetBase).(*WidgetBase)
 				wbb.EmitContextMenuSignal()
 				wbb.This().(Node2D).ContextMenu()
 			}
@@ -1076,11 +1076,11 @@ type PartsWidgetBase struct {
 	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 }
 
-var KiT_PartsWidgetBase = kit.Types.AddType(&PartsWidgetBase{}, PartsWidgetBaseProps)
+var TypePartsWidgetBase = kit.Types.AddType(&PartsWidgetBase{}, PartsWidgetBaseProps)
 
 var PartsWidgetBaseProps = ki.Props{
 	"base-type":     true,
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 }
 
 func (wb *PartsWidgetBase) CopyFieldsFrom(frm any) {
@@ -1162,14 +1162,14 @@ func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icn
 	lbIdx = -1
 	if TheIconMgr.IsValid(icnm) {
 		icIdx = len(*config)
-		config.Add(KiT_Icon, "icon")
+		config.Add(TypeIcon, "icon")
 		if txt != "" {
-			config.Add(KiT_Space, "space")
+			config.Add(TypeSpace, "space")
 		}
 	}
 	if txt != "" {
 		lbIdx = len(*config)
-		config.Add(KiT_Label, "label")
+		config.Add(TypeLabel, "label")
 	}
 	return
 }

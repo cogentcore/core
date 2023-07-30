@@ -17,11 +17,11 @@ type ClipPath struct {
 	NodeBase
 }
 
-var KiT_ClipPath = kit.Types.AddType(&ClipPath{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
+var TypeClipPath = kit.Types.AddType(&ClipPath{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
 
 // AddNewClipPath adds a new clippath to given parent node, with given name.
 func AddNewClipPath(parent ki.Ki, name string) *ClipPath {
-	return parent.AddNewChild(KiT_ClipPath, name).(*ClipPath)
+	return parent.AddNewChild(TypeClipPath, name).(*ClipPath)
 }
 
 func (g *ClipPath) SVGName() string { return "clippath" }

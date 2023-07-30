@@ -188,7 +188,7 @@ const (
 
 //go:generate stringer -type=Buttons
 
-var KiT_Buttons = kit.Enums.AddEnum(ButtonsN, kit.NotBitFlag, nil)
+var TypeButtons = kit.Enums.AddEnum(ButtonsN, kit.NotBitFlag, nil)
 
 // Actions taken with the mouse button -- different ones are applicable to
 // different mouse event types
@@ -211,7 +211,7 @@ const (
 
 //go:generate stringer -type=Actions
 
-var KiT_Actions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
+var TypeActions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 
 // SelectModes interprets the modifier keys to determine what type of selection mode to use
 // This is also used for selection actions and has modes not directly activated by
@@ -254,7 +254,7 @@ const (
 
 //go:generate stringer -type=SelectModes
 
-var KiT_SelectModes = kit.Enums.AddEnum(SelectModesN, kit.NotBitFlag, nil)
+var TypeSelectModes = kit.Enums.AddEnum(SelectModesN, kit.NotBitFlag, nil)
 
 /////////////////////////////
 // oswin.Event interface

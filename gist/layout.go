@@ -145,7 +145,7 @@ const (
 
 //go:generate stringer -type=Align
 
-var KiT_Align = kit.Enums.AddEnumAltLower(AlignN, kit.NotBitFlag, StylePropProps, "Align")
+var TypeAlign = kit.Enums.AddEnumAltLower(AlignN, kit.NotBitFlag, StylePropProps, "Align")
 
 func (ev Align) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Align) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -195,7 +195,7 @@ const (
 	OverflowN
 )
 
-var KiT_Overflow = kit.Enums.AddEnumAltLower(OverflowN, kit.NotBitFlag, StylePropProps, "Overflow")
+var TypeOverflow = kit.Enums.AddEnumAltLower(OverflowN, kit.NotBitFlag, StylePropProps, "Overflow")
 
 func (ev Overflow) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Overflow) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

@@ -23,11 +23,11 @@ type StyleSheet struct {
 	Sheet *css.Stylesheet
 }
 
-var KiT_StyleSheet = kit.Types.AddType(&StyleSheet{}, nil)
+var TypeStyleSheet = kit.Types.AddType(&StyleSheet{}, nil)
 
 // AddNewStyleSheet adds a new CSS stylesheet to given parent node, with given name.
 func AddNewStyleSheet(parent ki.Ki, name string) *StyleSheet {
-	return parent.AddNewChild(KiT_StyleSheet, name).(*StyleSheet)
+	return parent.AddNewChild(TypeStyleSheet, name).(*StyleSheet)
 }
 
 func (ss *StyleSheet) CopyFieldsFrom(frm any) {

@@ -40,7 +40,7 @@ type FileInfo struct {
 	Path    string            `tableview:"-" desc:"full path to file, including name -- for file functions"`
 }
 
-var KiT_FileInfo = kit.Types.AddType(&FileInfo{}, FileInfoProps)
+var TypeFileInfo = kit.Types.AddType(&FileInfo{}, FileInfoProps)
 
 // NewFileInfo returns a new FileInfo based on a filename -- directly returns
 // filepath.Abs or os.Stat error on the given file.  filename can be anything

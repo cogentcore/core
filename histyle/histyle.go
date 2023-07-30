@@ -46,7 +46,7 @@ func (t Trilean) Prefix(s string) string {
 
 //go:generate stringer -type=Trilean
 
-var KiT_Trilean = kit.Enums.AddEnumAltLower(TrileanN, kit.NotBitFlag, nil, "")
+var TypeTrilean = kit.Enums.AddEnumAltLower(TrileanN, kit.NotBitFlag, nil, "")
 
 func (ev Trilean) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Trilean) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -62,7 +62,7 @@ type StyleEntry struct {
 	NoInherit  bool       `desc:"don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited"`
 }
 
-var KiT_StyleEntry = kit.Types.AddType(&StyleEntry{}, StyleEntryProps)
+var TypeStyleEntry = kit.Types.AddType(&StyleEntry{}, StyleEntryProps)
 
 var StyleEntryProps = ki.Props{
 	"inline": true,
@@ -234,7 +234,7 @@ func (s StyleEntry) IsZero() bool {
 // Style is a full style map of styles for different token.Tokens tag values
 type Style map[token.Tokens]*StyleEntry
 
-var KiT_Style = kit.Types.AddType(&Style{}, StyleProps)
+var TypeStyle = kit.Types.AddType(&Style{}, StyleProps)
 
 // CopyFrom copies a style from source style
 func (hs *Style) CopyFrom(ss *Style) {

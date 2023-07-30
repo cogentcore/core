@@ -29,7 +29,7 @@ type TestNodeA struct {
 	Rect       image.Rectangle `desc:"rect"`
 }
 
-var KiT_TestNodeA = kit.Types.AddType(&TestNodeA{}, nil)
+var TypeTestNodeA = kit.Types.AddType(&TestNodeA{}, nil)
 
 // B node for testing
 type TestNodeB struct {
@@ -43,7 +43,7 @@ type TestNodeB struct {
 	SubObj     TestNodeA       `desc:"a sub-object"`
 }
 
-var KiT_TestNodeB = kit.Types.AddType(&TestNodeB{}, nil)
+var TypeTestNodeB = kit.Types.AddType(&TestNodeB{}, nil)
 
 func main() {
 	gimain.Main(mainrun)
@@ -54,12 +54,12 @@ func mainrun() {
 	srctree := TestNodeB{}
 	srctree.InitName(&srctree, "par1")
 	// child1 :=
-	srctree.AddNewChild(KiT_TestNodeB, "child1")
-	child2 := srctree.AddNewChild(KiT_TestNodeB, "child2")
+	srctree.AddNewChild(TypeTestNodeB, "child1")
+	child2 := srctree.AddNewChild(TypeTestNodeB, "child2")
 	// child3 :=
-	srctree.AddNewChild(KiT_TestNodeB, "child3")
+	srctree.AddNewChild(TypeTestNodeB, "child3")
 	// schild2 :=
-	child2.AddNewChild(KiT_TestNodeB, "subchild1")
+	child2.AddNewChild(TypeTestNodeB, "subchild1")
 
 	srctree.SetProp("test1", "string val")
 	srctree.SetProp("test2", 3.14)
@@ -115,9 +115,9 @@ func mainrun() {
 		if data == nil {
 			return
 		}
-		// tvr, _ := send.Embed(giv.KiT_TreeView).(*gi.TreeView) // root is sender
-		tvn, _ := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
-		svr, _ := recv.Embed(giv.KiT_StructView).(*giv.StructView)
+		// tvr, _ := send.Embed(giv.TypeTreeView).(*gi.TreeView) // root is sender
+		tvn, _ := data.(ki.Ki).Embed(giv.TypeTreeView).(*giv.TreeView)
+		svr, _ := recv.Embed(giv.TypeStructView).(*giv.StructView)
 		if sig == int64(giv.TreeViewSelected) {
 			svr.SetStruct(tvn.SrcNode)
 		}

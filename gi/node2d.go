@@ -68,11 +68,11 @@ type Node2DBase struct {
 	Viewport *Viewport2D `copy:"-" json:"-" xml:"-" view:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter -- use ViewportSafe() method to access under BBoxMu read lock"`
 }
 
-var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
+var TypeNode2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
 
 var Node2DBaseProps = ki.Props{
 	"base-type":     true, // excludes type from user selections
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 }
 
 func (nb *Node2DBase) CopyFieldsFrom(frm any) {
@@ -584,12 +584,12 @@ func (nb *Node2DBase) ParentWindow() *Window {
 	if mvp != nil && mvp.Win != nil {
 		return mvp.Win
 	}
-	wini, err := nb.ParentByTypeTry(KiT_Window, ki.Embeds)
+	wini, err := nb.ParentByTypeTry(TypeWindow, ki.Embeds)
 	if err != nil {
 		// log.Println(err)
 		return nil
 	}
-	return wini.Embed(KiT_Window).(*Window)
+	return wini.Embed(TypeWindow).(*Window)
 }
 
 // ParentViewport returns the parent viewport -- uses AsViewport2D() method on
@@ -970,20 +970,20 @@ func (nb *Node2DBase) ParentReRenderAnchor() Node2D {
 
 // ParentLayout returns the parent layout
 func (nb *Node2DBase) ParentLayout() *Layout {
-	ly := nb.ParentByType(KiT_Layout, ki.Embeds)
+	ly := nb.ParentByType(TypeLayout, ki.Embeds)
 	if ly == nil {
 		return nil
 	}
-	return ly.Embed(KiT_Layout).(*Layout)
+	return ly.Embed(TypeLayout).(*Layout)
 }
 
 // ParentScrollLayout returns the parent layout that has active scrollbars
 func (nb *Node2DBase) ParentScrollLayout() *Layout {
-	lyk := nb.ParentByType(KiT_Layout, ki.Embeds)
+	lyk := nb.ParentByType(TypeLayout, ki.Embeds)
 	if lyk == nil {
 		return nil
 	}
-	ly := lyk.Embed(KiT_Layout).(*Layout)
+	ly := lyk.Embed(TypeLayout).(*Layout)
 	if ly.HasAnyScroll() {
 		return ly
 	}
@@ -1057,7 +1057,7 @@ type MetaData2D struct {
 	MetaData string
 }
 
-var KiT_MetaData2D = kit.Types.AddType(&MetaData2D{}, nil)
+var TypeMetaData2D = kit.Types.AddType(&MetaData2D{}, nil)
 
 func (g *MetaData2D) CopyFieldsFrom(frm any) {
 	fr := frm.(*MetaData2D)

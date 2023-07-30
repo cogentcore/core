@@ -194,7 +194,7 @@ const (
 
 //go:generate stringer -type=Platforms
 
-var KiT_Platforms = kit.Enums.AddEnum(PlatformsN, kit.NotBitFlag, nil)
+var TypePlatforms = kit.Enums.AddEnum(PlatformsN, kit.NotBitFlag, nil)
 
 // IsMobile returns whether the platform is a mobile platform (iOS or Android)
 func (p Platforms) IsMobile() bool {

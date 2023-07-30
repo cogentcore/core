@@ -308,7 +308,7 @@ func ToValueView(it any, tags string) ValueView {
 		}
 	case vk == reflect.Struct:
 		// note: we need to handle these here b/c cannot define new methods for gi types
-		if nptyp == gist.KiT_Color {
+		if nptyp == gist.TypeColor {
 			vv := &ColorValueView{}
 			ki.InitNode(vv)
 			return vv
@@ -524,7 +524,7 @@ type ValueViewBase struct {
 	TmpSave   ValueView            `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
-var KiT_ValueViewBase = kit.Types.AddType(&ValueViewBase{}, ValueViewBaseProps)
+var TypeValueViewBase = kit.Types.AddType(&ValueViewBase{}, ValueViewBaseProps)
 
 var ValueViewBaseProps = ki.Props{
 	"base-type": true,
@@ -873,7 +873,7 @@ func (vv *ValueViewBase) Label() (label, newPath string, isZero bool) {
 //   Base Widget Functions -- these are typically redefined in ValueView subtypes
 
 func (vv *ValueViewBase) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_TextField
+	vv.WidgetTyp = gi.TypeTextField
 	return vv.WidgetTyp
 }
 
@@ -917,7 +917,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			vvv, _ := recv.Embed(KiT_ValueViewBase).(*ValueViewBase)
+			vvv, _ := recv.Embed(TypeValueViewBase).(*ValueViewBase)
 			tf := send.(*gi.TextField)
 			if vvv.SetValue(tf.Text()) {
 				vvv.UpdateWidget() // always update after setting value..
@@ -1072,10 +1072,10 @@ type VersCtrlValueView struct {
 	ValueViewBase
 }
 
-var KiT_VersCtrlValueView = kit.Types.AddType(&VersCtrlValueView{}, nil)
+var TypeVersCtrlValueView = kit.Types.AddType(&VersCtrlValueView{}, nil)
 
 func (vv *VersCtrlValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Action
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -1096,7 +1096,7 @@ func (vv *VersCtrlValueView) ConfigWidget(widg gi.Node2D) {
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_VersCtrlValueView).(*VersCtrlValueView)
+		vvv, _ := recv.Embed(TypeVersCtrlValueView).(*VersCtrlValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
 	})

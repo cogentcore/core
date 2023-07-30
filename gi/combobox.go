@@ -39,7 +39,7 @@ type ComboBox struct {
 	MaxLength int           `desc:"maximum label length (in runes)"`
 }
 
-var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
+var TypeComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
 
 // ComboBoxTypes is an enum containing the
 // different possible types of combo boxes
@@ -58,13 +58,13 @@ const (
 	ComboBoxTypesN
 )
 
-var KiT_ComboBoxTypes = kit.Enums.AddEnumAltLower(ComboBoxTypesN, kit.NotBitFlag, gist.StylePropProps, "ComboBox")
+var TypeComboBoxTypes = kit.Enums.AddEnumAltLower(ComboBoxTypesN, kit.NotBitFlag, gist.StylePropProps, "ComboBox")
 
 //go:generate stringer -type=ComboBoxTypes
 
 // AddNewComboBox adds a new button to given parent node, with given name.
 func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
-	return parent.AddNewChild(KiT_ComboBox, name).(*ComboBox)
+	return parent.AddNewChild(TypeComboBox, name).(*ComboBox)
 }
 
 func (cb *ComboBox) CopyFieldsFrom(frm any) {
@@ -97,7 +97,7 @@ func (cb *ComboBox) Disconnect() {
 // }
 
 var ComboBoxProps = ki.Props{
-	"EnumType:Flag": KiT_ButtonFlags,
+	"EnumType:Flag": TypeButtonFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,
@@ -205,11 +205,11 @@ func (cb *ComboBox) ConfigPartsIconText(config *kit.TypeAndNameList, icnm icons.
 	txIdx = -1
 	if TheIconMgr.IsValid(icnm) {
 		icIdx = len(*config)
-		config.Add(KiT_Icon, "icon")
-		config.Add(KiT_Space, "space")
+		config.Add(TypeIcon, "icon")
+		config.Add(TypeSpace, "space")
 	}
 	txIdx = len(*config)
-	config.Add(KiT_TextField, "text")
+	config.Add(TypeTextField, "text")
 	return
 }
 
@@ -244,9 +244,9 @@ func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *kit.TypeAndNameList, 
 		return -1
 	}
 	indIdx := -1
-	config.Add(KiT_Space, "ind-stretch")
+	config.Add(TypeSpace, "ind-stretch")
 	indIdx = len(*config)
-	config.Add(KiT_Icon, "indicator")
+	config.Add(TypeIcon, "indicator")
 	return indIdx
 }
 

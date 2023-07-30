@@ -33,7 +33,7 @@ type SliceViewInline struct {
 	ViewPath     string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
-var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
+var TypeSliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
 
 func (sv *SliceViewInline) Disconnect() {
 	sv.PartsWidgetBase.Disconnect()
@@ -68,7 +68,7 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 }
 
 var SliceViewInlineProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 	"min-width":     units.Ch(20),
 }
 
@@ -102,9 +102,9 @@ func (sv *SliceViewInline) ConfigParts() {
 		sv.Values = append(sv.Values, vv)
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
-		config.Add(gi.KiT_Action, "add-action")
+		config.Add(gi.TypeAction, "add-action")
 	}
-	config.Add(gi.KiT_Action, "edit-action")
+	config.Add(gi.TypeAction, "edit-action")
 	mods, updt := sv.Parts.ConfigChildren(config)
 	if !mods {
 		updt = sv.Parts.UpdateStart()
@@ -112,7 +112,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	for i, vv := range sv.Values {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
+			svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
 			svv.SetChanged()
 		})
 		widg := sv.Parts.Child(i).(gi.Node2D)
@@ -131,7 +131,7 @@ func (sv *SliceViewInline) ConfigParts() {
 			adac.SetIcon(icons.Add)
 			adac.Tooltip = "add an element to the slice"
 			adac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
+				svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
 				svv.SliceNewAt(-1, true)
 			})
 		}
@@ -142,7 +142,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		edac.SetIcon(icons.Edit)
 		edac.Tooltip = "edit slice in a dialog window"
 		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
+			svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
 			vpath := svv.ViewPath
 			title := ""
 			if svv.SliceValView != nil {
@@ -158,12 +158,12 @@ func (sv *SliceViewInline) ConfigParts() {
 				title = "Slice of " + kit.NonPtrType(elType).Name()
 			}
 			dlg := SliceViewDialog(svv.Viewport, svv.Slice, DlgOpts{Title: title, TmpSave: svv.TmpSave, ViewPath: vpath}, nil, nil, nil)
-			svvvk := dlg.Frame().ChildByType(KiT_SliceView, ki.Embeds, 2)
+			svvvk := dlg.Frame().ChildByType(TypeSliceView, ki.Embeds, 2)
 			if svvvk != nil {
 				svvv := svvvk.(*SliceView)
 				svvv.SliceValView = svv.SliceValView
 				svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					svvvv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
+					svvvv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
 					svvvv.ViewSig.Emit(svvvv.This(), 0, nil)
 				})
 			}

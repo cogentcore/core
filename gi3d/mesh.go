@@ -78,7 +78,7 @@ type MeshBase struct {
 	BBoxMu  sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on bbox access"`
 }
 
-var KiT_MeshBase = kit.Types.AddType(&MeshBase{}, nil)
+var TypeMeshBase = kit.Types.AddType(&MeshBase{}, nil)
 
 func (ms *MeshBase) Name() string                           { return ms.Nm }
 func (ms *MeshBase) SetName(nm string)                      { ms.Nm = nm }

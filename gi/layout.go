@@ -153,15 +153,15 @@ type Layout struct {
 	ScrollSig     ki.Signal           `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"`
 }
 
-var KiT_Layout = kit.Types.AddType(&Layout{}, LayoutProps)
+var TypeLayout = kit.Types.AddType(&Layout{}, LayoutProps)
 
 var LayoutProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 }
 
 // AddNewLayout adds a new layout to given parent node, with given name and layout
 func AddNewLayout(parent ki.Ki, name string, layout Layouts) *Layout {
-	ly := parent.AddNewChild(KiT_Layout, name).(*Layout)
+	ly := parent.AddNewChild(TypeLayout, name).(*Layout)
 	ly.Lay = layout
 	return ly
 }
@@ -219,7 +219,7 @@ const (
 
 //go:generate stringer -type=Layouts
 
-var KiT_Layouts = kit.Enums.AddEnumAltLower(LayoutsN, kit.NotBitFlag, gist.StylePropProps, "Layout")
+var TypeLayouts = kit.Enums.AddEnumAltLower(LayoutsN, kit.NotBitFlag, gist.StylePropProps, "Layout")
 
 func (ev Layouts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Layouts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -233,7 +233,7 @@ const (
 	RowColN
 )
 
-var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, kit.NotBitFlag, gist.StylePropProps, "")
+var TypeRowCol = kit.Enums.AddEnumAltLower(RowColN, kit.NotBitFlag, gist.StylePropProps, "")
 
 func (ev RowCol) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -1039,18 +1039,18 @@ func (ly *Layout) LayoutScrollEvents() {
 	// LowPri to allow other focal widgets to capture
 	ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
-		li := recv.Embed(KiT_Layout).(*Layout)
+		li := recv.Embed(TypeLayout).(*Layout)
 		li.ScrollDelta(me)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
 	ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*dnd.MoveEvent)
-		li := recv.Embed(KiT_Layout).(*Layout)
+		li := recv.Embed(TypeLayout).(*Layout)
 		li.AutoScroll(me.Pos())
 	})
 	ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
-		li := recv.Embed(KiT_Layout).(*Layout)
+		li := recv.Embed(TypeLayout).(*Layout)
 		if li.ViewportSafe().IsMenu() {
 			li.AutoScroll(me.Pos())
 		}
@@ -1061,7 +1061,7 @@ func (ly *Layout) LayoutScrollEvents() {
 func (ly *Layout) KeyChordEvent() {
 	// LowPri to allow other focal widgets to capture
 	ly.ConnectEvent(oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		li := recv.Embed(KiT_Layout).(*Layout)
+		li := recv.Embed(TypeLayout).(*Layout)
 		kt := d.(*key.ChordEvent)
 		li.LayoutKeys(kt)
 	})
@@ -1280,11 +1280,11 @@ type Stretch struct {
 	WidgetBase
 }
 
-var KiT_Stretch = kit.Types.AddType(&Stretch{}, StretchProps)
+var TypeStretch = kit.Types.AddType(&Stretch{}, StretchProps)
 
 // AddNewStretch adds a new stretch to given parent node, with given name.
 func AddNewStretch(parent ki.Ki, name string) *Stretch {
-	return parent.AddNewChild(KiT_Stretch, name).(*Stretch)
+	return parent.AddNewChild(TypeStretch, name).(*Stretch)
 }
 
 func (st *Stretch) CopyFieldsFrom(frm any) {
@@ -1293,7 +1293,7 @@ func (st *Stretch) CopyFieldsFrom(frm any) {
 }
 
 var StretchProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "max-width":     -1.0,
 	// "max-height":    -1.0,
 }
@@ -1335,11 +1335,11 @@ type Space struct {
 	WidgetBase
 }
 
-var KiT_Space = kit.Types.AddType(&Space{}, SpaceProps)
+var TypeSpace = kit.Types.AddType(&Space{}, SpaceProps)
 
 // AddNewSpace adds a new space to given parent node, with given name.
 func AddNewSpace(parent ki.Ki, name string) *Space {
-	return parent.AddNewChild(KiT_Space, name).(*Space)
+	return parent.AddNewChild(TypeSpace, name).(*Space)
 }
 
 func (sp *Space) CopyFieldsFrom(frm any) {
@@ -1348,7 +1348,7 @@ func (sp *Space) CopyFieldsFrom(frm any) {
 }
 
 var SpaceProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "width":         units.Ch(1),
 	// "height":        units.Em(1),
 }

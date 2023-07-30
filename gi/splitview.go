@@ -42,11 +42,11 @@ type SplitView struct {
 	Dim         mat32.Dims  `desc:"dimension along which to split the space"`
 }
 
-var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
+var TypeSplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
 
 // AddNewSplitView adds a new splitview to given parent node, with given name.
 func AddNewSplitView(parent ki.Ki, name string) *SplitView {
-	return parent.AddNewChild(KiT_SplitView, name).(*SplitView)
+	return parent.AddNewChild(TypeSplitView, name).(*SplitView)
 }
 
 func (sv *SplitView) CopyFieldsFrom(frm any) {
@@ -59,7 +59,7 @@ func (sv *SplitView) CopyFieldsFrom(frm any) {
 }
 
 var SplitViewProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "handle-size":   units.Px(10),
 	// "max-width":     -1.0,
 	// "max-height":    -1.0,
@@ -249,7 +249,7 @@ func (sv *SplitView) Init2D() {
 
 func (sv *SplitView) ConfigSplitters() {
 	sz := len(sv.Kids)
-	mods, updt := sv.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
+	mods, updt := sv.Parts.SetNChildren(sz-1, TypeSplitter, "Splitter")
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.BoxSpace()
 	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
@@ -279,7 +279,7 @@ func (sv *SplitView) ConfigSplitters() {
 		if mods {
 			sp.SliderSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(SliderReleased) {
-					spr, _ := recv.Embed(KiT_SplitView).(*SplitView)
+					spr, _ := recv.Embed(TypeSplitView).(*SplitView)
 					spl := send.(*Splitter)
 					spr.SetSplitAction(spl.SplitterNo, spl.Value)
 				}
@@ -326,7 +326,7 @@ func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
 
 func (sv *SplitView) KeyChordEvent() {
 	sv.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		svv := recv.Embed(KiT_SplitView).(*SplitView)
+		svv := recv.Embed(TypeSplitView).(*SplitView)
 		svv.KeyInput(d.(*key.ChordEvent))
 	})
 }
@@ -376,7 +376,7 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		if gis == nil {
 			continue
 		}
-		if ki.TypeEmbeds(gis, KiT_Frame) {
+		if ki.TypeEmbeds(gis, TypeFrame) {
 			gis.SetReRenderAnchor()
 		}
 		isz := sp * avail
@@ -453,10 +453,10 @@ type Splitter struct {
 	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself"`
 }
 
-var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
+var TypeSplitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "padding":          units.Px(6),
 	// "margin":           units.Px(0),
 	// "background-color": &Prefs.Colors.Background,
@@ -520,7 +520,7 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	if !TheIconMgr.IsValid(sr.Icon) || !sr.Parts.HasChildren() {
 		return
 	}
-	ick := sr.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
+	ick := sr.Parts.ChildByType(TypeIcon, ki.Embeds, 0)
 	if ick == nil {
 		return
 	}
@@ -619,7 +619,7 @@ func (sr *Splitter) SplitView() *SplitView {
 	if sr.Par == nil || sr.Par.Parent() == nil {
 		return nil
 	}
-	svi := sr.Par.Parent().Embed(KiT_SplitView)
+	svi := sr.Par.Parent().Embed(TypeSplitView)
 	if svi == nil {
 		return nil
 	}
@@ -629,7 +629,7 @@ func (sr *Splitter) SplitView() *SplitView {
 func (sr *Splitter) MouseEvent() {
 	sr.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		srr := recv.Embed(KiT_Splitter).(*Splitter)
+		srr := recv.Embed(TypeSplitter).(*Splitter)
 		if srr.IsInactive() {
 			me.SetProcessed()
 			srr.SetSelectedState(!srr.IsSelected())
@@ -668,7 +668,7 @@ func (sr *Splitter) MouseEvent() {
 func (sr *Splitter) MouseScrollEvent() {
 	// todo: just disabling at this point to prevent bad side-effects
 	// sr.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	srr := recv.Embed(KiT_SliderBase).(*SliderBase)
+	// 	srr := recv.Embed(TypeSliderBase).(*SliderBase)
 	// 	if srr.IsInactive() {
 	// 		return
 	// 	}
@@ -700,12 +700,12 @@ func (sr *Splitter) Render2D() {
 	sr.This().(Node2D).ConnectEvents2D()
 	spnm := "gi.Splitter:" + sr.Name()
 	if sr.IsDragging() {
-		ick := sr.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
+		ick := sr.Parts.ChildByType(TypeIcon, ki.Embeds, 0)
 		if ick == nil {
 			return
 		}
 		ic := ick.(*Icon)
-		icvp := ic.ChildByType(KiT_Viewport2D, ki.Embeds, 0)
+		icvp := ic.ChildByType(TypeViewport2D, ki.Embeds, 0)
 		if icvp == nil {
 			return
 		}

@@ -51,7 +51,7 @@ type TextureBase struct {
 	Img   *image.RGBA `desc:"cached image"`
 }
 
-var KiT_TextureBase = kit.Types.AddType(&TextureBase{}, nil)
+var TypeTextureBase = kit.Types.AddType(&TextureBase{}, nil)
 
 func (tx *TextureBase) Name() string {
 	return tx.Nm
@@ -87,7 +87,7 @@ type TextureFile struct {
 	File gi.FileName `desc:"filename for the texture"`
 }
 
-var KiT_TextureFile = kit.Types.AddType(&TextureFile{}, nil)
+var TypeTextureFile = kit.Types.AddType(&TextureFile{}, nil)
 
 // AddNewTextureFile adds a new texture from file of given name and filename
 func AddNewTextureFile(sc *Scene, name string, filename string) *TextureFile {

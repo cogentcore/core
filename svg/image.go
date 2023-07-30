@@ -28,11 +28,11 @@ type Image struct {
 	Pixels              *image.RGBA `copy:"-" xml:"-" json:"-" view:"-" desc:"the image pixels"`
 }
 
-var KiT_Image = kit.Types.AddType(&Image{}, ImageProps)
+var TypeImage = kit.Types.AddType(&Image{}, ImageProps)
 
 // AddNewImage adds a new image to given parent node, with given name and pos
 func AddNewImage(parent ki.Ki, name string, x, y float32) *Image {
-	g := parent.AddNewChild(KiT_Image, name).(*Image)
+	g := parent.AddNewChild(TypeImage, name).(*Image)
 	g.Pos.Set(x, y)
 	return g
 }
@@ -221,7 +221,7 @@ func (g *Image) ReadGeom(dat []float32) {
 
 // ImageProps define the ToolBar for images
 var ImageProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open image file for this image node, rescaling to given size -- use 0, 0 to use native image size.",

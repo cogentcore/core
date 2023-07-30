@@ -44,11 +44,11 @@ type StructView struct {
 	TypeFieldTags map[string]string `json:"-" xml:"-" inactive:"+" desc:"extra tags by field name -- from type properties"`
 }
 
-var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
+var TypeStructView = kit.Types.AddType(&StructView{}, StructViewProps)
 
 // AddNewStructView adds a new structview to given parent node, with given name.
 func AddNewStructView(parent ki.Ki, name string) *StructView {
-	return parent.AddNewChild(KiT_StructView, name).(*StructView)
+	return parent.AddNewChild(TypeStructView, name).(*StructView)
 }
 
 func (sv *StructView) Disconnect() {
@@ -57,7 +57,7 @@ func (sv *StructView) Disconnect() {
 }
 
 var StructViewProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
 	"max-width":        -1,
@@ -91,7 +91,7 @@ func (sv *StructView) SetStruct(st any) {
 		if k, ok := st.(ki.Ki); ok {
 			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				// todo: check for delete??
-				svv, _ := recv.Embed(KiT_StructView).(*StructView)
+				svv, _ := recv.Embed(TypeStructView).(*StructView)
 				svv.UpdateFields()
 				svv.ViewSig.Emit(svv.This(), 0, nil)
 			})
@@ -133,8 +133,8 @@ func (sv *StructView) Config() {
 	sv.Lay = gi.LayoutVert
 	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_Frame, "struct-grid")
+	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.TypeFrame, "struct-grid")
 	mods, updt := sv.ConfigChildren(config)
 	sv.ConfigStructGrid()
 	sv.ConfigToolbar()
@@ -185,7 +185,7 @@ func (sv *StructView) ConfigToolbar() {
 	if len(*tb.Children()) == 0 {
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: ttip},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv := recv.Embed(KiT_StructView).(*StructView)
+				svv := recv.Embed(TypeStructView).(*StructView)
 				svv.UpdateFields()
 			})
 	} else {
@@ -282,7 +282,7 @@ func (sv *StructView) ConfigStructGrid() {
 				svv.SetTag("label", fnm)
 				labnm := fmt.Sprintf("label-%v", fnm)
 				valnm := fmt.Sprintf("value-%v", fnm)
-				config.Add(gi.KiT_Label, labnm)
+				config.Add(gi.TypeLabel, labnm)
 				config.Add(svtyp, valnm) // todo: extend to diff types using interface..
 				sv.FieldViews = append(sv.FieldViews, svv)
 				return true
@@ -299,7 +299,7 @@ func (sv *StructView) ConfigStructGrid() {
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)
 		valnm := fmt.Sprintf("value-%v", field.Name)
-		config.Add(gi.KiT_Label, labnm)
+		config.Add(gi.TypeLabel, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
@@ -325,7 +325,7 @@ func (sv *StructView) ConfigStructGrid() {
 		vv.ConfigWidget(widg)
 		if !sv.IsInactive() && !inactTag {
 			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv := recv.Embed(KiT_StructView).(*StructView)
+				svv := recv.Embed(TypeStructView).(*StructView)
 				svv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
 				svv.Changed = true
@@ -344,7 +344,7 @@ func (sv *StructView) ConfigStructGrid() {
 					tb.UpdateActions()
 				}
 				svv.ViewSig.Emit(svv.This(), 0, nil)
-				// vvv, _ := send.Embed(KiT_ValueViewBase).(*ValueViewBase)
+				// vvv, _ := send.Embed(TypeValueViewBase).(*ValueViewBase)
 				// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
 			})
 		}

@@ -22,11 +22,11 @@ type Frame struct {
 	Stripes Stripes `desc:"options for striped backgrounds -- rendered as darker bands relative to background color"`
 }
 
-var KiT_Frame = kit.Types.AddType(&Frame{}, FrameProps)
+var TypeFrame = kit.Types.AddType(&Frame{}, FrameProps)
 
 // AddNewFrame adds a new frame to given parent node, with given name and layout
 func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
-	fr := parent.AddNewChild(KiT_Frame, name).(*Frame)
+	fr := parent.AddNewChild(TypeFrame, name).(*Frame)
 	fr.Lay = layout
 	return fr
 }
@@ -56,7 +56,7 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 // }
 
 var FrameProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "border-width":     units.Px(2),
 	// "border-radius":    units.Px(0),
 	// "border-color":     &Prefs.Colors.Border,
@@ -78,7 +78,7 @@ const (
 
 //go:generate stringer -type=Stripes
 
-var KiT_Stripes = kit.Enums.AddEnumAltLower(StripesN, kit.NotBitFlag, gist.StylePropProps, "Stripes")
+var TypeStripes = kit.Enums.AddEnumAltLower(StripesN, kit.NotBitFlag, gist.StylePropProps, "Stripes")
 
 func (ev Stripes) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Stripes) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

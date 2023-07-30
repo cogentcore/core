@@ -64,7 +64,7 @@ const (
 	ColorSchemesN
 )
 
-var KiT_ColorSchemeTypes = kit.Enums.AddEnumAltLower(ColorSchemesN, kit.NotBitFlag, gist.StylePropProps, "ColorScheme")
+var TypeColorSchemeTypes = kit.Enums.AddEnumAltLower(ColorSchemesN, kit.NotBitFlag, gist.StylePropProps, "ColorScheme")
 
 //go:generate stringer -type=ColorSchemeTypes
 

@@ -18,11 +18,11 @@ type Line struct {
 	End   mat32.Vec2 `xml:"{x2,y2}" desc:"position of the end of the line"`
 }
 
-var KiT_Line = kit.Types.AddType(&Line{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
+var TypeLine = kit.Types.AddType(&Line{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
 
 // AddNewLine adds a new line to given parent node, with given name, st and end.
 func AddNewLine(parent ki.Ki, name string, sx, sy, ex, ey float32) *Line {
-	g := parent.AddNewChild(KiT_Line, name).(*Line)
+	g := parent.AddNewChild(TypeLine, name).(*Line)
 	g.Start.Set(sx, sy)
 	g.End.Set(ex, ey)
 	return g

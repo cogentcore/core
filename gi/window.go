@@ -200,10 +200,10 @@ type Window struct {
 	Frames        []*vgpu.RenderFrame `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 }
 
-var KiT_Window = kit.Types.AddType(&Window{}, WindowProps)
+var TypeWindow = kit.Types.AddType(&Window{}, WindowProps)
 
 var WindowProps = ki.Props{
-	"EnumType:Flag": KiT_WinFlags,
+	"EnumType:Flag": TypeWinFlags,
 }
 
 // WinFlags extend NodeBase NodeFlags to hold Window state
@@ -211,7 +211,7 @@ type WinFlags int
 
 //go:generate stringer -type=WinFlags
 
-var KiT_WinFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, WinFlagsN, kit.BitFlag, nil)
+var TypeWinFlags = kit.Enums.AddEnumExt(TypeNodeFlags, WinFlagsN, kit.BitFlag, nil)
 
 const (
 	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that
@@ -493,11 +493,11 @@ func (w *Window) ConfigVLay() {
 	updt := vp.UpdateStart()
 	defer vp.UpdateEnd(updt)
 	if !vp.HasChildren() {
-		vp.AddNewChild(KiT_Layout, "main-vlay")
+		vp.AddNewChild(TypeLayout, "main-vlay")
 	}
-	w.MasterVLay = vp.Child(0).Embed(KiT_Layout).(*Layout)
+	w.MasterVLay = vp.Child(0).Embed(TypeLayout).(*Layout)
 	if !w.MasterVLay.HasChildren() {
-		w.MasterVLay.AddNewChild(KiT_MenuBar, "main-menu")
+		w.MasterVLay.AddNewChild(TypeMenuBar, "main-menu")
 	}
 	w.MasterVLay.Lay = LayoutVert
 	w.MainMenu = w.MasterVLay.Child(0).(*MenuBar)
@@ -529,11 +529,11 @@ func (w *Window) AddMainMenu() *MenuBar {
 	updt := vp.UpdateStart()
 	defer vp.UpdateEnd(updt)
 	if !vp.HasChildren() {
-		vp.AddNewChild(KiT_Layout, "main-vlay")
+		vp.AddNewChild(TypeLayout, "main-vlay")
 	}
-	w.MasterVLay = vp.Child(0).Embed(KiT_Layout).(*Layout)
+	w.MasterVLay = vp.Child(0).Embed(TypeLayout).(*Layout)
 	if !w.MasterVLay.HasChildren() {
-		w.MainMenu = w.MasterVLay.AddNewChild(KiT_MenuBar, "main-menu").(*MenuBar)
+		w.MainMenu = w.MasterVLay.AddNewChild(TypeMenuBar, "main-menu").(*MenuBar)
 	} else {
 		mmi := w.MasterVLay.ChildByName("main-menu", 0)
 		if mmi != nil {
@@ -542,7 +542,7 @@ func (w *Window) AddMainMenu() *MenuBar {
 			return mm
 		}
 	}
-	w.MainMenu = w.MasterVLay.InsertNewChild(KiT_MenuBar, 0, "main-menu").(*MenuBar)
+	w.MainMenu = w.MasterVLay.InsertNewChild(TypeMenuBar, 0, "main-menu").(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
 	return w.MainMenu
@@ -583,7 +583,7 @@ func (w *Window) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
 // SetMainFrame sets the main widget of this window as a Frame, with a default
 // column-wise vertical layout and max stretch sizing, and returns that frame.
 func (w *Window) SetMainFrame() *Frame {
-	fr := w.SetMainWidgetType(KiT_Frame, "main-frame").(*Frame)
+	fr := w.SetMainWidgetType(TypeFrame, "main-frame").(*Frame)
 	fr.Lay = LayoutVert
 	fr.SetStretchMax()
 	return fr
@@ -606,7 +606,7 @@ func (w *Window) MainFrame() (*Frame, error) {
 // SetMainLayout sets the main widget of this window as a Layout, with a default
 // column-wise vertical layout and max stretch sizing, and returns it.
 func (w *Window) SetMainLayout() *Layout {
-	fr := w.SetMainWidgetType(KiT_Layout, "main-lay").(*Layout)
+	fr := w.SetMainWidgetType(TypeLayout, "main-lay").(*Layout)
 	fr.Lay = LayoutVert
 	fr.SetStretchMax()
 	return fr
@@ -694,11 +694,11 @@ func (w *Window) ZoomDPI(steps int) {
 // WinViewport2D returns the viewport directly under this window that serves
 // as the master viewport for the entire window.
 func (w *Window) WinViewport2D() *Viewport2D {
-	vpi := w.ChildByType(KiT_Viewport2D, ki.Embeds, 0)
+	vpi := w.ChildByType(TypeViewport2D, ki.Embeds, 0)
 	if vpi == nil { // shouldn't happen
 		return nil
 	}
-	vp, _ := vpi.Embed(KiT_Viewport2D).(*Viewport2D)
+	vp, _ := vpi.Embed(TypeViewport2D).(*Viewport2D)
 	return vp
 }
 
@@ -1310,7 +1310,7 @@ func (w *Window) Publish() {
 // SignalWindowPublish is the signal receiver function that publishes the
 // window updates when the window update signal (UpdateEnd) occurs
 func SignalWindowPublish(winki, node ki.Ki, sig int64, data any) {
-	win := winki.Embed(KiT_Window).(*Window)
+	win := winki.Embed(TypeWindow).(*Window)
 	if WinEventTrace || Render2DTrace {
 		fmt.Printf("Win: %v publishing image due to signal: %v from node: %v\n", win.Path(), ki.NodeSignals(sig), node.Path())
 	}
@@ -1960,9 +1960,9 @@ func (w *Window) IsInScope(k ki.Ki, popup bool) bool {
 	}
 	_, ni := KiToNode2D(k)
 	if ni == nil {
-		np := k.ParentByType(KiT_Node2DBase, ki.Embeds)
+		np := k.ParentByType(TypeNode2DBase, ki.Embeds)
 		if np != nil {
-			ni = np.Embed(KiT_Node2DBase).(*Node2DBase)
+			ni = np.Embed(TypeNode2DBase).(*Node2DBase)
 		} else {
 			return false
 		}

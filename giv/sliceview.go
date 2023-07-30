@@ -25,11 +25,11 @@ type SliceView struct {
 	StyleFunc SliceViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
 }
 
-var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
+var TypeSliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
 
 // AddNewSliceView adds a new sliceview to given parent node, with given name.
 func AddNewSliceView(parent ki.Ki, name string) *SliceView {
-	return parent.AddNewChild(KiT_SliceView, name).(*SliceView)
+	return parent.AddNewChild(TypeSliceView, name).(*SliceView)
 }
 
 // check for interface impl
@@ -42,7 +42,7 @@ var _ SliceViewer = (*SliceView)(nil)
 type SliceViewStyleFunc func(sv *SliceView, slice any, widg gi.Node2D, row int, vv ValueView)
 
 var SliceViewProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"max-width":        -1,
 	"max-height":       -1,

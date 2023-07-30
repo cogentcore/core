@@ -26,7 +26,7 @@ type Plane struct {
 	Offset   float32     `desc:"offset from origin along direction of normal to the plane"`
 }
 
-var KiT_Plane = kit.Types.AddType(&Plane{}, nil)
+var TypePlane = kit.Types.AddType(&Plane{}, nil)
 
 // AddNewPlane adds Plane mesh to given scene,
 // with given name and size, with its normal pointing
@@ -70,7 +70,7 @@ type Box struct {
 	Segs mat32.Vec3i `desc:"number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"`
 }
 
-var KiT_Box = kit.Types.AddType(&Box{}, nil)
+var TypeBox = kit.Types.AddType(&Box{}, nil)
 
 // AddNewBox adds Box mesh to given scene, with given name and size
 func AddNewBox(sc *Scene, name string, width, height, depth float32) *Box {
@@ -113,7 +113,7 @@ type Sphere struct {
 	ElevLen    float32 `min:"0" max:"180" step:"5" desc:"total angle to generate in degrees (max = 180)"`
 }
 
-var KiT_Sphere = kit.Types.AddType(&Sphere{}, nil)
+var TypeSphere = kit.Types.AddType(&Sphere{}, nil)
 
 // AddNewSphere creates a sphere mesh with the specified radius,
 // number of segments (resolution).
@@ -174,7 +174,7 @@ type Cylinder struct {
 	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 
-var KiT_Cylinder = kit.Types.AddType(&Cylinder{}, nil)
+var TypeCylinder = kit.Types.AddType(&Cylinder{}, nil)
 
 // AddNewCone creates a cone mesh with the specified base radius, height,
 // number of radial segments, number of height segments, and presence of a bottom cap.
@@ -256,7 +256,7 @@ type Capsule struct {
 	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 
-var KiT_Capsule = kit.Types.AddType(&Capsule{}, nil)
+var TypeCapsule = kit.Types.AddType(&Capsule{}, nil)
 
 // AddNewCapsule creates a generalized capsule mesh (cylinder + hemisphere caps)
 // with the specified height and radius, number of radial, sphere segments,
@@ -347,7 +347,7 @@ type Torus struct {
 	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
 }
 
-var KiT_Torus = kit.Types.AddType(&Torus{}, nil)
+var TypeTorus = kit.Types.AddType(&Torus{}, nil)
 
 // AddNewTorus creates a sphere mesh with the specified outer ring radius,
 // solid tube radius, and number of segments (resolution).

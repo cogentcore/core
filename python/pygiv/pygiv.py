@@ -86,7 +86,7 @@ class ClassViewInline(object):
             tags = self.FieldTags(nm)
             if HasTagValue(tags, "view", "-") or nm == "Tags" or nm.startswith("ClassView"):
                 continue
-            lbl = gi.Label(self.Lay.AddNewChild(gi.KiT_Label(), "lbl_" + nm))
+            lbl = gi.Label(self.Lay.AddNewChild(gi.TypeLabel(), "lbl_" + nm))
             lbl.Redrawable = True
             lbl.SetProp("horizontal-align", "left")
             lbl.SetText(nm)
@@ -143,7 +143,7 @@ class ClassView(object):
         
     def AddFrame(self, par):
         """ Add a new gi.Frame for the view to given parent gi object """
-        self.Frame = gi.Frame(par.AddNewChild(gi.KiT_Frame(), "classview"))
+        self.Frame = gi.Frame(par.AddNewChild(gi.TypeFrame(), "classview"))
     
     def FieldTags(self, field):
         """ returns the full string of tags for given field, empty string if none """
@@ -171,7 +171,7 @@ class ClassView(object):
             tags = self.FieldTags(nm)
             if HasTagValue(tags, "view", "-") or nm == "Tags" or nm.startswith("ClassView"):
                 continue
-            lbl = gi.Label(self.Frame.AddNewChild(gi.KiT_Label(), "lbl_" + nm))
+            lbl = gi.Label(self.Frame.AddNewChild(gi.TypeLabel(), "lbl_" + nm))
             lbl.SetText(nm)
             dsc = self.FieldTagVal(nm, "desc")
             if dsc != "":
@@ -217,10 +217,10 @@ def ClassViewDialog(vp, obj, name, tags, opts):
     prIdx = dlg.PromptWidgetIdx(frame)
 
     cv = obj.NewClassView(name)
-    cv.Frame = gi.Frame(frame.InsertNewChild(gi.KiT_Frame(), prIdx+1, "cv-frame"))
+    cv.Frame = gi.Frame(frame.InsertNewChild(gi.TypeFrame(), prIdx+1, "cv-frame"))
     cv.Config()
     
-    # sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+    # sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
     # if opts.Inactive {
     #     sv.SetInactive()
     # }

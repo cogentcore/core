@@ -25,15 +25,15 @@ type Editor struct {
 	SetDragCursor bool       `view:"-" desc:"has dragging cursor been set yet?"`
 }
 
-var KiT_Editor = kit.Types.AddType(&Editor{}, EditorProps)
+var TypeEditor = kit.Types.AddType(&Editor{}, EditorProps)
 
 var EditorProps = ki.Props{
-	"EnumType:Flag": gi.KiT_VpFlags,
+	"EnumType:Flag": gi.TypeVpFlags,
 }
 
 // AddNewEditor adds a new editor to given parent node, with given name.
 func AddNewEditor(parent ki.Ki, name string) *Editor {
-	return parent.AddNewChild(KiT_Editor, name).(*Editor)
+	return parent.AddNewChild(TypeEditor, name).(*Editor)
 }
 
 func (g *Editor) CopyFieldsFrom(frm any) {
@@ -49,7 +49,7 @@ func (svg *Editor) EditorEvents() {
 	svg.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		ssvg := recv.Embed(KiT_Editor).(*Editor)
+		ssvg := recv.Embed(TypeEditor).(*Editor)
 		if ssvg.IsDragging() {
 			if !ssvg.SetDragCursor {
 				oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Push(cursor.HandOpen)
@@ -72,7 +72,7 @@ func (svg *Editor) EditorEvents() {
 	svg.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
-		ssvg := recv.Embed(KiT_Editor).(*Editor)
+		ssvg := recv.Embed(TypeEditor).(*Editor)
 		if ssvg.SetDragCursor {
 			oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
 			ssvg.SetDragCursor = false
@@ -88,7 +88,7 @@ func (svg *Editor) EditorEvents() {
 	})
 	svg.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		ssvg := recv.Embed(KiT_Editor).(*Editor)
+		ssvg := recv.Embed(TypeEditor).(*Editor)
 		if ssvg.SetDragCursor {
 			oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
 			ssvg.SetDragCursor = false
@@ -104,7 +104,7 @@ func (svg *Editor) EditorEvents() {
 	svg.ConnectEvent(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
-		ssvg := recv.Embed(KiT_Editor).(*Editor)
+		ssvg := recv.Embed(TypeEditor).(*Editor)
 		obj := ssvg.FirstContainingPoint(me.Where, true)
 		if obj != nil {
 			pos := me.Where

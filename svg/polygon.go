@@ -16,11 +16,11 @@ type Polygon struct {
 	Polyline
 }
 
-var KiT_Polygon = kit.Types.AddType(&Polygon{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
+var TypePolygon = kit.Types.AddType(&Polygon{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
 
 // AddNewPolygon adds a new polygon to given parent node, with given name and points.
 func AddNewPolygon(parent ki.Ki, name string, points []mat32.Vec2) *Polygon {
-	g := parent.AddNewChild(KiT_Polygon, name).(*Polygon)
+	g := parent.AddNewChild(TypePolygon, name).(*Polygon)
 	g.Points = points
 	return g
 }

@@ -26,7 +26,7 @@ type ColorSpec struct {
 	Gradient *rasterx.Gradient `desc:"gradient parameters for gradient color source"`
 }
 
-var KiT_ColorSpec = kit.Types.AddType(&ColorSpec{}, nil)
+var TypeColorSpec = kit.Types.AddType(&ColorSpec{}, nil)
 
 // see colorparse.go for ColorSpec.SetString() method
 
@@ -42,7 +42,7 @@ const (
 
 //go:generate stringer -type=ColorSources
 
-var KiT_ColorSources = kit.Enums.AddEnumAltLower(ColorSourcesN, kit.NotBitFlag, StylePropProps, "")
+var TypeColorSources = kit.Enums.AddEnumAltLower(ColorSourcesN, kit.NotBitFlag, StylePropProps, "")
 
 func (ev ColorSources) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *ColorSources) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

@@ -18,11 +18,11 @@ type Ellipse struct {
 	Radii mat32.Vec2 `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
 
-var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
+var TypeEllipse = kit.Types.AddType(&Ellipse{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
 
 // AddNewEllipse adds a new button to given parent node, with given name, pos and radii.
 func AddNewEllipse(parent ki.Ki, name string, x, y, rx, ry float32) *Ellipse {
-	g := parent.AddNewChild(KiT_Ellipse, name).(*Ellipse)
+	g := parent.AddNewChild(TypeEllipse, name).(*Ellipse)
 	g.Pos.Set(x, y)
 	g.Radii.Set(rx, ry)
 	return g

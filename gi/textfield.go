@@ -74,11 +74,11 @@ type TextField struct {
 	NoEcho           bool                         `copy:"-" json:"-" xml:"-" desc:"replace displayed characters with bullets to conceal text"`
 }
 
-var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
+var TypeTextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 
 // AddNewTextField adds a new textfield to given parent node, with given name.
 func AddNewTextField(parent ki.Ki, name string) *TextField {
-	return parent.AddNewChild(KiT_TextField, name).(*TextField)
+	return parent.AddNewChild(TypeTextField, name).(*TextField)
 }
 
 func (tf *TextField) CopyFieldsFrom(frm any) {
@@ -98,7 +98,7 @@ func (tf *TextField) Disconnect() {
 }
 
 var TextFieldProps = ki.Props{
-	// "EnumType:Flag":    KiT_NodeFlags,
+	// "EnumType:Flag":    TypeNodeFlags,
 	// "border-width":     units.Px(1),
 	// "cursor-width":     units.Px(3),
 	// "border-color":     &Prefs.Colors.Border,
@@ -147,7 +147,7 @@ const (
 	TextFieldTypesN
 )
 
-var KiT_TextFieldTypes = kit.Enums.AddEnumAltLower(TextFieldTypesN, kit.NotBitFlag, gist.StylePropProps, "TextField")
+var TypeTextFieldTypes = kit.Enums.AddEnumAltLower(TextFieldTypesN, kit.NotBitFlag, gist.StylePropProps, "TextField")
 
 //go:generate stringer -type=TextFieldTypes
 
@@ -657,7 +657,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
 		tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tff := recv.Embed(KiT_TextField).(*TextField)
+			tff := recv.Embed(TypeTextField).(*TextField)
 			tff.This().(Clipper).Copy(true)
 		})
 	ac.SetActiveState(tf.HasSelection())
@@ -666,13 +666,13 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
 		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
 			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tff := recv.Embed(KiT_TextField).(*TextField)
+				tff := recv.Embed(TypeTextField).(*TextField)
 				tff.This().(Clipper).Cut()
 			})
 		ac.SetActiveState(tf.HasSelection())
 		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
 			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tff := recv.Embed(KiT_TextField).(*TextField)
+				tff := recv.Embed(TypeTextField).(*TextField)
 				tff.This().(Clipper).Paste()
 			})
 		ac.SetInactiveState(oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).IsEmpty())
@@ -700,7 +700,7 @@ func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun
 	tf.Complete.EditFunc = editFun
 	// note: only need to connect once..
 	tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tff, _ := recv.Embed(KiT_TextField).(*TextField)
+		tff, _ := recv.Embed(TypeTextField).(*TextField)
 		if sig == int64(CompleteSelect) {
 			tff.CompleteText(data.(string)) // always use data
 		} else if sig == int64(CompleteExtend) {
@@ -1320,7 +1320,7 @@ func (tf *TextField) MouseDragEvent() {
 	tf.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		tff := recv.Embed(KiT_TextField).(*TextField)
+		tff := recv.Embed(TypeTextField).(*TextField)
 		if !tff.SelectMode {
 			tff.SelectModeToggle()
 		}
@@ -1331,7 +1331,7 @@ func (tf *TextField) MouseDragEvent() {
 
 func (tf *TextField) MouseEvent() {
 	tf.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tff := recv.Embed(KiT_TextField).(*TextField)
+		tff := recv.Embed(TypeTextField).(*TextField)
 		me := d.(*mouse.Event)
 		tff.HandleMouseEvent(me)
 	})
@@ -1339,7 +1339,7 @@ func (tf *TextField) MouseEvent() {
 
 func (tf *TextField) MouseFocusEvent() {
 	tf.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tff := recv.Embed(KiT_TextField).(*TextField)
+		tff := recv.Embed(TypeTextField).(*TextField)
 		if tff.IsInactive() {
 			return
 		}
@@ -1355,13 +1355,13 @@ func (tf *TextField) MouseFocusEvent() {
 
 func (tf *TextField) KeyChordEvent() {
 	tf.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tff := recv.Embed(KiT_TextField).(*TextField)
+		tff := recv.Embed(TypeTextField).(*TextField)
 		kt := d.(*key.ChordEvent)
 		tff.KeyInput(kt)
 	})
 	if dlg, ok := tf.Viewport.This().(*Dialog); ok {
 		dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tff, _ := recv.Embed(KiT_TextField).(*TextField)
+			tff, _ := recv.Embed(TypeTextField).(*TextField)
 			if sig == int64(DialogAccepted) {
 				tff.EditDone()
 			}
@@ -1385,8 +1385,8 @@ func (tf *TextField) ConfigParts() {
 		return
 	}
 	config := kit.TypeAndNameList{}
-	config.Add(KiT_Stretch, "clr-str")
-	config.Add(KiT_Action, "clear")
+	config.Add(TypeStretch, "clr-str")
+	config.Add(TypeAction, "clear")
 	mods, updt := tf.Parts.ConfigChildren(config)
 	// fmt.Println("configured children")
 	if mods || gist.RebuildDefaultStyles {
@@ -1395,7 +1395,7 @@ func (tf *TextField) ConfigParts() {
 		clr.SetIcon(icons.Close)
 		clr.SetProp("no-focus", true)
 		clr.ActionSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tff := recv.Embed(KiT_TextField).(*TextField)
+			tff := recv.Embed(TypeTextField).(*TextField)
 			if tff != nil {
 				tff.Clear()
 			}

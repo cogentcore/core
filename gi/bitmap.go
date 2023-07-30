@@ -44,11 +44,11 @@ type Bitmap struct {
 	Pixels   *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"`
 }
 
-var KiT_Bitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
+var TypeBitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
 
 // AddNewBitmap adds a new bitmap to given parent node, with given name.
 func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
-	return parent.AddNewChild(KiT_Bitmap, name).(*Bitmap)
+	return parent.AddNewChild(TypeBitmap, name).(*Bitmap)
 }
 
 func (bm *Bitmap) CopyFieldsFrom(frm any) {
@@ -433,7 +433,7 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 //  Props
 
 var BitmapProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "background-color": &Prefs.Colors.Background,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{

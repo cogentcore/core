@@ -38,7 +38,7 @@ const (
 
 //go:generate stringer -type=SelModes
 
-var KiT_SelModes = kit.Enums.AddEnum(SelModesN, kit.NotBitFlag, nil)
+var TypeSelModes = kit.Enums.AddEnum(SelModesN, kit.NotBitFlag, nil)
 
 // SelParams are parameters for selection / manipulation box
 type SelParams struct {
@@ -156,11 +156,11 @@ type ManipPt struct {
 	Solid
 }
 
-var KiT_ManipPt = kit.Types.AddType(&ManipPt{}, ManipPtProps)
+var TypeManipPt = kit.Types.AddType(&ManipPt{}, ManipPtProps)
 
 // AddNewManipPt adds a new manipulation point
 func AddNewManipPt(sc *Scene, parent ki.Ki, name string, meshName string, clr gist.Color, pos mat32.Vec3) *ManipPt {
-	mpt := parent.AddNewChild(KiT_ManipPt, name).(*ManipPt)
+	mpt := parent.AddNewChild(TypeManipPt, name).(*ManipPt)
 	mpt.SetMeshName(sc, meshName)
 	mpt.Defaults()
 	mpt.Pose.Pos = pos
@@ -175,24 +175,24 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		if me.Action != mouse.Press || !sc.IsVisible() {
 			return
 		}
-		sci, err := recv.ParentByTypeTry(KiT_Scene, ki.Embeds)
+		sci, err := recv.ParentByTypeTry(TypeScene, ki.Embeds)
 		if err != nil {
 			return
 		}
-		ssc := sci.Embed(KiT_Scene).(*Scene)
+		ssc := sci.Embed(TypeScene).(*Scene)
 		ssc.SetManipPt(mpt)
 		me.SetProcessed()
 	})
 	mpt.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		mpt := recv.Embed(KiT_ManipPt).(*ManipPt)
+		mpt := recv.Embed(TypeManipPt).(*ManipPt)
 		mb := mpt.Par.(*Group)
-		sci, err := mpt.ParentByTypeTry(KiT_Scene, ki.Embeds)
+		sci, err := mpt.ParentByTypeTry(TypeScene, ki.Embeds)
 		if err != nil {
 			return
 		}
-		ssc := sci.Embed(KiT_Scene).(*Scene)
+		ssc := sci.Embed(TypeScene).(*Scene)
 		if ssc.CurSel == nil {
 			return
 		}
@@ -278,5 +278,5 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 }
 
 var ManipPtProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 }

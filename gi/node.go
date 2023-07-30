@@ -41,11 +41,11 @@ type NodeBase struct {
 	BBoxMu  sync.RWMutex    `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread"`
 }
 
-var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
+var TypeNodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
 var NodeBaseProps = ki.Props{
 	"base-type":     true, // excludes type from user selections
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 }
 
 func (nb *NodeBase) AsGiNode() *NodeBase {
@@ -66,7 +66,7 @@ type NodeFlags int
 
 //go:generate stringer -type=NodeFlags
 
-var KiT_NodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, NodeFlagsN, kit.BitFlag, nil)
+var TypeNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, NodeFlagsN, kit.BitFlag, nil)
 
 const (
 	// NoLayout means that this node does not participate in the layout
@@ -381,7 +381,7 @@ func (nb *NodeBase) ParentCSSAgg() *ki.Props {
 	if nb.Par == nil {
 		return nil
 	}
-	pn := nb.Par.Embed(KiT_NodeBase).(*NodeBase)
+	pn := nb.Par.Embed(TypeNodeBase).(*NodeBase)
 	return &pn.CSSAgg
 }
 

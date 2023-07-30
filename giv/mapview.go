@@ -36,11 +36,11 @@ type MapView struct {
 	ToolbarMap any         `desc:"the map that we successfully set a toolbar for"`
 }
 
-var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
+var TypeMapView = kit.Types.AddType(&MapView{}, MapViewProps)
 
 // AddNewMapView adds a new mapview to given parent node, with given name.
 func AddNewMapView(parent ki.Ki, name string) *MapView {
-	return parent.AddNewChild(KiT_MapView, name).(*MapView)
+	return parent.AddNewChild(TypeMapView, name).(*MapView)
 }
 
 func (mv *MapView) Disconnect() {
@@ -59,7 +59,7 @@ func (mv *MapView) SetMap(mp any) {
 }
 
 var MapViewProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"max-width":        -1,
 	"max-height":       -1,
@@ -97,8 +97,8 @@ func (mv *MapView) Config() {
 	mv.Lay = gi.LayoutVert
 	mv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_Frame, "map-grid")
+	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.TypeFrame, "map-grid")
 	mods, updt := mv.ConfigChildren(config)
 	mv.ConfigMapGrid()
 	mv.ConfigToolbar()
@@ -207,9 +207,9 @@ func (mv *MapView) ConfigMapGrid() {
 		config.Add(vv.WidgetType(), valnm)
 		if ifaceType {
 			typnm := fmt.Sprintf("type-%v", keytxt)
-			config.Add(gi.KiT_ComboBox, typnm)
+			config.Add(gi.TypeComboBox, typnm)
 		}
-		config.Add(gi.KiT_Action, delnm)
+		config.Add(gi.TypeAction, delnm)
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
@@ -222,7 +222,7 @@ func (mv *MapView) ConfigMapGrid() {
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
+			mvv, _ := recv.Embed(TypeMapView).(*MapView)
 			mvv.SetChanged()
 		})
 		keyw := sg.Child(i * ncol).(gi.Node2D)
@@ -230,7 +230,7 @@ func (mv *MapView) ConfigMapGrid() {
 		kv := mv.Keys[i]
 		kvb := kv.AsValueViewBase()
 		kvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
+			mvv, _ := recv.Embed(TypeMapView).(*MapView)
 			mvv.SetChanged()
 		})
 		kv.ConfigWidget(keyw)
@@ -256,7 +256,7 @@ func (mv *MapView) ConfigMapGrid() {
 				cb := send.(*gi.ComboBox)
 				typ := cb.CurVal.(reflect.Type)
 				idx := cb.Prop("mapview-index").(int)
-				mvv := recv.Embed(KiT_MapView).(*MapView)
+				mvv := recv.Embed(TypeMapView).(*MapView)
 				mvv.MapChangeValueType(idx, typ)
 			})
 		}
@@ -267,7 +267,7 @@ func (mv *MapView) ConfigMapGrid() {
 		delact.Style.Template = "giv.MapView.DelAction"
 		delact.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			act := send.(*gi.Action)
-			mvv := recv.Embed(KiT_MapView).(*MapView)
+			mvv := recv.Embed(TypeMapView).(*MapView)
 			mvv.MapDelete(act.Data.(ValueView).Val())
 		})
 	}
@@ -383,18 +383,18 @@ func (mv *MapView) ConfigToolbar() {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				mvv := recv.Embed(KiT_MapView).(*MapView)
+				mvv := recv.Embed(TypeMapView).(*MapView)
 				mvv.UpdateValues()
 			})
 		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				mvv := recv.Embed(KiT_MapView).(*MapView)
+				mvv := recv.Embed(TypeMapView).(*MapView)
 				mvv.ToggleSort()
 			})
 		if ndef > 2 {
 			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the map"},
 				mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					mvv := recv.Embed(KiT_MapView).(*MapView)
+					mvv := recv.Embed(TypeMapView).(*MapView)
 					mvv.MapAdd()
 				})
 		}

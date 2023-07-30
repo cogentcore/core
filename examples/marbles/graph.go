@@ -37,7 +37,7 @@ type Graph struct {
 // Gr is current graph
 var Gr Graph
 
-var KiT_Graph = kit.Types.AddType(&Graph{}, GraphProps)
+var TypeGraph = kit.Types.AddType(&Graph{}, GraphProps)
 
 // GraphProps define the ToolBar for overall app
 var GraphProps = ki.Props{
@@ -185,7 +185,7 @@ func (ln *Line) Eval(x float32) float32 {
 // Lines is a collection of lines
 type Lines []*Line
 
-var KiT_Lines = kit.Types.AddType(&Lines{}, LinesProps)
+var TypeLines = kit.Types.AddType(&Lines{}, LinesProps)
 
 // LinesProps define the ToolBar for lines
 var LinesProps = ki.Props{

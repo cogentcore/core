@@ -25,7 +25,7 @@ type Pose struct {
 	NormMatrix  mat32.Mat3 `view:"-" desc:"normal matrix has no offsets, for normal vector rotation only, based on MVMatrix"`
 }
 
-var KiT_Pose = kit.Types.AddType(&Pose{}, PoseProps)
+var TypePose = kit.Types.AddType(&Pose{}, PoseProps)
 
 // Defaults sets defaults only if current values are nil
 func (ps *Pose) Defaults() {

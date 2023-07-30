@@ -147,9 +147,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			switch {
 			case nm == "svg":
 				if curPar != sv.This() {
-					curPar = curPar.AddNewChild(KiT_SVG, "svg").(gi.Node2D)
+					curPar = curPar.AddNewChild(TypeSVG, "svg").(gi.Node2D)
 				}
-				csvg := curPar.Embed(KiT_SVG).(*SVG)
+				csvg := curPar.Embed(TypeSVG).(*SVG)
 				curSvg = csvg
 				for _, attr := range se.Attr {
 					if gi.SetStdXMLAttr(csvg, attr.Name.Local, attr.Value) {
@@ -184,7 +184,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				defPrevPar = curPar
 				curPar = &curSvg.Defs
 			case nm == "g":
-				curPar = curPar.AddNewChild(KiT_Group, "g").(gi.Node2D)
+				curPar = curPar.AddNewChild(TypeGroup, "g").(gi.Node2D)
 				for _, attr := range se.Attr {
 					if gi.SetStdXMLAttr(curPar.AsNode2D(), attr.Name.Local, attr.Value) {
 						continue
@@ -555,7 +555,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				curCSS = sty
 				// style code shows up in CharData below
 			case nm == "clipPath":
-				curPar = curPar.AddNewChild(KiT_ClipPath, "clip-path").(gi.Node2D)
+				curPar = curPar.AddNewChild(TypeClipPath, "clip-path").(gi.Node2D)
 				cp := curPar.(*ClipPath)
 				for _, attr := range se.Attr {
 					if gi.SetStdXMLAttr(cp, attr.Name.Local, attr.Value) {
@@ -567,7 +567,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "marker":
-				curPar = curPar.AddNewChild(KiT_Marker, "marker").(gi.Node2D)
+				curPar = curPar.AddNewChild(TypeMarker, "marker").(gi.Node2D)
 				mrk := curPar.(*Marker)
 				var rx, ry float32
 				szx := float32(3)
@@ -646,7 +646,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "guide":
 				fallthrough
 			case nm == "metadata":
-				curPar = curPar.AddNewChild(gi.KiT_MetaData2D, nm).(gi.Node2D)
+				curPar = curPar.AddNewChild(gi.TypeMetaData2D, nm).(gi.Node2D)
 				md := curPar.(*gi.MetaData2D)
 				md.Class = nm
 				for _, attr := range se.Attr {
@@ -659,7 +659,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case strings.HasPrefix(nm, "flow"):
-				curPar = curPar.AddNewChild(KiT_Flow, nm).(gi.Node2D)
+				curPar = curPar.AddNewChild(TypeFlow, nm).(gi.Node2D)
 				md := curPar.(*Flow)
 				md.Class = nm
 				md.FlowType = nm
@@ -677,7 +677,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case strings.HasPrefix(nm, "path-effect"):
 				fallthrough
 			case strings.HasPrefix(nm, "filter"):
-				curPar = curPar.AddNewChild(KiT_Filter, nm).(gi.Node2D)
+				curPar = curPar.AddNewChild(TypeFilter, nm).(gi.Node2D)
 				md := curPar.(*Filter)
 				md.Class = nm
 				md.FilterType = nm
@@ -736,9 +736,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar == sv.This() {
 					break
 				}
-				curSvgk := curPar.ParentByType(KiT_SVG, ki.Embeds)
+				curSvgk := curPar.ParentByType(TypeSVG, ki.Embeds)
 				if curSvgk != nil {
-					curSvg = curSvgk.Embed(KiT_SVG).(*SVG)
+					curSvg = curSvgk.Embed(TypeSVG).(*SVG)
 				}
 			}
 		case xml.CharData:

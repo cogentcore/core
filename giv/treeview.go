@@ -55,11 +55,11 @@ type TreeView struct {
 	RootView         *TreeView                   `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
-var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
+var TypeTreeView = kit.Types.AddType(&TreeView{}, nil)
 
 // AddNewTreeView adds a new treeview to given parent node, with given name.
 func AddNewTreeView(parent ki.Ki, name string) *TreeView {
-	tv := parent.AddNewChild(KiT_TreeView, name).(*TreeView)
+	tv := parent.AddNewChild(TypeTreeView, name).(*TreeView)
 	tv.OpenDepth = 4
 	return tv
 }
@@ -69,9 +69,9 @@ func (tv *TreeView) Disconnect() {
 	tv.TreeViewSig.DisconnectAll()
 }
 
-// TODO: any reason for this instead of direct setting in KiT_TreeView declaration?
+// TODO: any reason for this instead of direct setting in TypeTreeView declaration?
 func init() {
-	kit.Types.SetProps(KiT_TreeView, TreeViewProps)
+	kit.Types.SetProps(TypeTreeView, TreeViewProps)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	}
 	idx := 0
 	for i, fld := range flds {
-		vk := tv.Kids[idx].Embed(KiT_TreeView).(*TreeView)
+		vk := tv.Kids[idx].Embed(TypeTreeView).(*TreeView)
 		vk.SetSrcNode(fld, tvIdx, init, depth+1)
 		if mods {
 			vk.SetClosedState(fldClosed[i])
@@ -181,7 +181,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 		if len(tv.Kids) <= idx {
 			break
 		}
-		vk := tv.Kids[idx].Embed(KiT_TreeView).(*TreeView)
+		vk := tv.Kids[idx].Embed(TypeTreeView).(*TreeView)
 		vk.SetSrcNode(skid, tvIdx, init, depth+1)
 		if mods {
 			if vcp, ok := skid.PropInherit(vcprop, ki.NoInherit, ki.TypeProps); ok {
@@ -200,7 +200,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 
 // SrcNodeSignalFunc is the function for receiving node signals from our SrcNode
 func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data any) {
-	tv := tvki.Embed(KiT_TreeView).(*TreeView)
+	tv := tvki.Embed(TypeTreeView).(*TreeView)
 	// always keep name updated in case that changed
 	if data != nil {
 		dflags := data.(int64)
@@ -271,8 +271,8 @@ func (tv *TreeView) HasClosedParent() bool {
 		if pg == nil {
 			return ki.Break
 		}
-		if ki.TypeEmbeds(pg, KiT_TreeView) {
-			// nw := pg.Embed(KiT_TreeView).(*TreeView)
+		if ki.TypeEmbeds(pg, TypeTreeView) {
+			// nw := pg.Embed(TypeTreeView).(*TreeView)
 			if pg.HasFlag(int(TreeViewFlagClosed)) {
 				pcol = true
 				return ki.Break
@@ -369,7 +369,7 @@ type TreeViewFlags int
 
 //go:generate stringer -type=TreeViewFlags
 
-var KiT_TreeViewFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TreeViewFlagsN, kit.BitFlag, nil)
+var TypeTreeViewFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, TreeViewFlagsN, kit.BitFlag, nil)
 
 const (
 	// TreeViewFlagClosed means node is toggled closed (children not visible)
@@ -664,7 +664,7 @@ func (tv *TreeView) MoveDown(selMode mouse.SelectModes) *TreeView {
 		return tv.MoveDownSibling(selMode)
 	} else {
 		if tv.HasChildren() {
-			nn := tv.Child(0).Embed(KiT_TreeView).(*TreeView)
+			nn := tv.Child(0).Embed(TypeTreeView).(*TreeView)
 			if nn != nil {
 				nn.SelectUpdate(selMode)
 				return nn
@@ -697,13 +697,13 @@ func (tv *TreeView) MoveDownSibling(selMode mouse.SelectModes) *TreeView {
 	}
 	myidx, ok := tv.IndexInParent()
 	if ok && myidx < len(*tv.Par.Children())-1 {
-		nn := tv.Par.Child(myidx + 1).Embed(KiT_TreeView).(*TreeView)
+		nn := tv.Par.Child(myidx + 1).Embed(TypeTreeView).(*TreeView)
 		if nn != nil {
 			nn.SelectUpdate(selMode)
 			return nn
 		}
 	} else {
-		return tv.Par.Embed(KiT_TreeView).(*TreeView).MoveDownSibling(selMode) // try up
+		return tv.Par.Embed(TypeTreeView).(*TreeView).MoveDownSibling(selMode) // try up
 	}
 	return nil
 }
@@ -716,13 +716,13 @@ func (tv *TreeView) MoveUp(selMode mouse.SelectModes) *TreeView {
 	}
 	myidx, ok := tv.IndexInParent()
 	if ok && myidx > 0 {
-		nn := tv.Par.Child(myidx - 1).Embed(KiT_TreeView).(*TreeView)
+		nn := tv.Par.Child(myidx - 1).Embed(TypeTreeView).(*TreeView)
 		if nn != nil {
 			return nn.MoveToLastChild(selMode)
 		}
 	} else {
 		if tv.Par != nil {
-			nn := tv.Par.Embed(KiT_TreeView).(*TreeView)
+			nn := tv.Par.Embed(TypeTreeView).(*TreeView)
 			if nn != nil {
 				nn.SelectUpdate(selMode)
 				return nn
@@ -816,7 +816,7 @@ func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) *TreeView {
 	if !tv.IsClosed() && tv.HasChildren() {
 		nnk, err := tv.Children().ElemFromEndTry(0)
 		if err == nil {
-			nn := nnk.Embed(KiT_TreeView).(*TreeView)
+			nn := nnk.Embed(TypeTreeView).(*TreeView)
 			return nn.MoveToLastChild(selMode)
 		}
 	} else {
@@ -914,7 +914,7 @@ func (tv *TreeView) OpenAll() {
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
 	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d any) bool {
-		tvki := k.Embed(KiT_TreeView)
+		tvki := k.Embed(TypeTreeView)
 		if tvki != nil {
 			tvki.(*TreeView).SetClosedState(false)
 		}
@@ -931,7 +931,7 @@ func (tv *TreeView) CloseAll() {
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
 	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d any) bool {
-		tvki := k.Embed(KiT_TreeView)
+		tvki := k.Embed(TypeTreeView)
 		if tvki != nil {
 			tvki.(*TreeView).SetClosedState(true)
 			return ki.Continue
@@ -949,7 +949,7 @@ func (tv *TreeView) OpenParents() {
 	updt := tv.RootView.UpdateStart()
 	tv.RootView.SetFullReRender()
 	tv.FuncUpParent(0, tv.This(), func(k ki.Ki, level int, d any) bool {
-		tvki := k.Embed(KiT_TreeView)
+		tvki := k.Embed(TypeTreeView)
 		if tvki != nil {
 			tvki.(*TreeView).SetClosedState(false)
 			return ki.Continue
@@ -965,7 +965,7 @@ func (tv *TreeView) OpenParents() {
 func (tv *TreeView) FindSrcNode(kn ki.Ki) *TreeView {
 	var ttv *TreeView
 	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d any) bool {
-		tvki := k.Embed(KiT_TreeView)
+		tvki := k.Embed(TypeTreeView)
 		if tvki != nil {
 			tvk := tvki.(*TreeView)
 			if tvk.SrcNode == kn {
@@ -1061,7 +1061,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 		gi.DlgOpts{Title: actNm, Prompt: "Number and Type of Items to Insert:"},
 		tv.Par.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
-				tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
+				tvv, _ := recv.Embed(TypeTreeView).(*TreeView)
 				par := tvv.SrcNode
 				dlg, _ := send.(*gi.Dialog)
 				n, typ := gi.NewKiDialogValues(dlg)
@@ -1080,7 +1080,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 				par.UpdateEnd(updt)
 				if ski != nil {
 					if tvk := tvv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
-						stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
+						stv, _ := tvk.Embed(TypeTreeView).(*TreeView)
 						stv.SelectAction(mouse.SelectOne)
 					}
 				}
@@ -1101,7 +1101,7 @@ func (tv *TreeView) SrcAddChild() {
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Add:"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
-				tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
+				tvv, _ := recv.Embed(TypeTreeView).(*TreeView)
 				sk := tvv.SrcNode
 				dlg, _ := send.(*gi.Dialog)
 				n, typ := gi.NewKiDialogValues(dlg)
@@ -1121,7 +1121,7 @@ func (tv *TreeView) SrcAddChild() {
 				if ski != nil {
 					tvv.Open()
 					if tvk := tvv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
-						stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
+						stv, _ := tvk.Embed(TypeTreeView).(*TreeView)
 						stv.SelectAction(mouse.SelectOne)
 					}
 				}
@@ -1164,7 +1164,7 @@ func (tv *TreeView) SrcDuplicate() {
 	if tv.Par == nil {
 		return
 	}
-	tvpar := tv.Par.Embed(KiT_TreeView).(*TreeView)
+	tvpar := tv.Par.Embed(TypeTreeView).(*TreeView)
 	par := tvpar.SrcNode
 	if par == nil {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tvpar.Path())
@@ -1184,7 +1184,7 @@ func (tv *TreeView) SrcDuplicate() {
 	par.UpdateEnd(updt)
 	tvpar.SetChanged()
 	if tvk := tvpar.ChildByName("tv_"+nm, 0); tvk != nil {
-		stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
+		stv, _ := tvk.Embed(TypeTreeView).(*TreeView)
 		stv.SelectAction(mouse.SelectOne)
 	}
 }
@@ -1298,20 +1298,20 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data any) {
 		return
 	}
 	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		tvv.PasteAssign(data.(mimedata.Mimes))
 	})
 	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		tvv.PasteChildren(data.(mimedata.Mimes), dnd.DropCopy)
 	})
 	if !tv.IsRootOrField("") && tv.RootView.This() != tv.This() {
 		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
+			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.PasteBefore(data.(mimedata.Mimes), dnd.DropCopy)
 		})
 		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
+			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.PasteAfter(data.(mimedata.Mimes), dnd.DropCopy)
 		})
 	}
@@ -1375,7 +1375,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	if tv.Par == nil {
 		return
 	}
-	tvpar := tv.Par.Embed(KiT_TreeView).(*TreeView)
+	tvpar := tv.Par.Embed(TypeTreeView).(*TreeView)
 	sk := tv.SrcNode
 	if sk == nil {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", actNm, tv.Path())
@@ -1417,7 +1417,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	tvpar.SetChanged()
 	if ski != nil {
 		if tvk := tvpar.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
-			stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
+			stv, _ := tvk.Embed(TypeTreeView).(*TreeView)
 			stv.SelectAction(mouse.SelectOne)
 		}
 	}
@@ -1549,26 +1549,26 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod dnd.DropMods) {
 	}
 	if mod == dnd.DropCopy {
 		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
+			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.DropAssign(data.(mimedata.Mimes))
 		})
 	}
 	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		tvv.DropChildren(data.(mimedata.Mimes), mod) // captures mod
 	})
 	if !tv.IsRootOrField("") && tv.RootView.This() != tv.This() {
 		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
+			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.DropBefore(data.(mimedata.Mimes), mod) // captures mod
 		})
 		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(KiT_TreeView).(*TreeView)
+			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.DropAfter(data.(mimedata.Mimes), mod) // captures mod
 		})
 	}
 	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		tvv.DropCancel()
 	})
 	// todo: compare, etc..
@@ -1625,8 +1625,8 @@ func (tv *TreeView) TreeViewParent() *TreeView {
 	if tv.Par == nil {
 		return nil
 	}
-	if ki.TypeEmbeds(tv.Par, KiT_TreeView) {
-		return tv.Par.Embed(KiT_TreeView).(*TreeView)
+	if ki.TypeEmbeds(tv.Par, TypeTreeView) {
+		return tv.Par.Embed(TypeTreeView).(*TreeView)
 	}
 	// I am rootview!
 	return nil
@@ -1642,8 +1642,8 @@ func (tv *TreeView) RootTreeView() *TreeView {
 		if pg == nil {
 			return false
 		}
-		if ki.TypeEmbeds(k, KiT_TreeView) {
-			rn = k.Embed(KiT_TreeView).(*TreeView)
+		if ki.TypeEmbeds(k, TypeTreeView) {
+			rn = k.Embed(TypeTreeView).(*TreeView)
 			return true
 		} else {
 			return false
@@ -1734,7 +1734,7 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 
 func (tv *TreeView) TreeViewEvents() {
 	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		kt := d.(*key.ChordEvent)
 		tvv.KeyInput(kt)
 	})
@@ -1743,7 +1743,7 @@ func (tv *TreeView) TreeViewEvents() {
 			return
 		}
 		de := d.(*dnd.Event)
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		switch de.Action {
 		case dnd.Start:
 			tvv.DragNDropStart()
@@ -1760,7 +1760,7 @@ func (tv *TreeView) TreeViewEvents() {
 			return
 		}
 		de := d.(*dnd.FocusEvent)
-		tvv := recv.Embed(KiT_TreeView).(*TreeView)
+		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		switch de.Action {
 		case dnd.Enter:
 			tvv.ParentWindow().DNDSetCursor(de.Mod)
@@ -1774,7 +1774,7 @@ func (tv *TreeView) TreeViewEvents() {
 		if wb, ok := tv.BranchPart(); ok {
 			wb.ButtonSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.ButtonToggled) {
-					tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
+					tvv, _ := recv.Embed(TypeTreeView).(*TreeView)
 					tvv.ToggleClose()
 				}
 			})
@@ -1788,7 +1788,7 @@ func (tv *TreeView) TreeViewEvents() {
 			if tvvi == nil || tvvi.This() == nil { // deleted
 				return
 			}
-			tvv := tvvi.Embed(KiT_TreeView).(*TreeView)
+			tvv := tvvi.Embed(TypeTreeView).(*TreeView)
 			me := d.(*mouse.Event)
 			switch me.Button {
 			case mouse.Left:
@@ -1850,12 +1850,12 @@ func (tv *TreeView) ConfigParts() {
 	tv.Parts.Style.Template = "giv.TreeView.Parts"
 	config := kit.TypeAndNameList{}
 	if tv.HasChildren() {
-		config.Add(gi.KiT_CheckBox, "branch")
+		config.Add(gi.TypeCheckBox, "branch")
 	}
 	if gi.TheIconMgr.IsValid(tv.Icon) {
-		config.Add(gi.KiT_Icon, "icon")
+		config.Add(gi.TypeIcon, "icon")
 	}
-	config.Add(gi.KiT_Label, "label")
+	config.Add(gi.TypeLabel, "label")
 	mods, updt := tv.Parts.ConfigChildren(config)
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
@@ -1938,7 +1938,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 }
 
 var TreeViewProps = ki.Props{
-	"EnumType:Flag":    KiT_TreeViewFlags,
+	"EnumType:Flag":    TypeTreeViewFlags,
 	"indent":           units.Ch(4),
 	"spacing":          units.Ch(.5),
 	"border-width":     units.Px(0),
@@ -1995,7 +1995,7 @@ var TreeViewProps = ki.Props{
 			"label":    "Insert Before",
 			"shortcut": gi.KeyFunInsert,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
-				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
+				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
 			}),
 		}},
@@ -2003,7 +2003,7 @@ var TreeViewProps = ki.Props{
 			"label":    "Insert After",
 			"shortcut": gi.KeyFunInsertAfter,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
-				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
+				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
 			}),
 		}},
@@ -2011,7 +2011,7 @@ var TreeViewProps = ki.Props{
 			"label":    "Duplicate",
 			"shortcut": gi.KeyFunDuplicate,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
-				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
+				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
 			}),
 		}},
@@ -2019,7 +2019,7 @@ var TreeViewProps = ki.Props{
 			"label":    "Delete",
 			"shortcut": gi.KeyFunDelete,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
-				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
+				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
 			}),
 		}},
@@ -2035,7 +2035,7 @@ var TreeViewProps = ki.Props{
 		{"Cut", ki.Props{
 			"shortcut": gi.KeyFunCut,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
-				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
+				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
 			}),
 		}},

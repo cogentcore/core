@@ -24,10 +24,10 @@ type IconValueView struct {
 	ValueViewBase
 }
 
-var KiT_IconValueView = kit.Types.AddType(&IconValueView{}, nil)
+var TypeIconValueView = kit.Types.AddType(&IconValueView{}, nil)
 
 func (vv *IconValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Action
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -60,7 +60,7 @@ func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetProp("padding", 0)
 	ac.SetProp("margin", 0)
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_IconValueView).(*IconValueView)
+		vvv, _ := recv.Embed(TypeIconValueView).(*IconValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
@@ -80,7 +80,7 @@ func (vv *IconValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	IconChooserDialog(vp, cur, DlgOpts{Title: "Select an Icon", Prompt: desc},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
 				si := SliceViewSelectDialogValue(ddlg)
 				if si >= 0 {
 					ic := gi.CurIconList[si]

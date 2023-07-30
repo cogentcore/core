@@ -23,11 +23,11 @@ type TwinTextViews struct {
 	BufB *TextBuf `json:"-" xml:"-" desc:"textbuf for B"`
 }
 
-var KiT_TwinTextViews = kit.Types.AddType(&TwinTextViews{}, TwinTextViewsProps)
+var TypeTwinTextViews = kit.Types.AddType(&TwinTextViews{}, TwinTextViewsProps)
 
 // AddNewTwinTextViews adds a new diffview to given parent node, with given name.
 func AddNewTwinTextViews(parent ki.Ki, name string) *TwinTextViews {
-	return parent.AddNewChild(KiT_TwinTextViews, name).(*TwinTextViews)
+	return parent.AddNewChild(TypeTwinTextViews, name).(*TwinTextViews)
 }
 
 // MakeBufs ensures that the TextBufs are made, if nil
@@ -57,8 +57,8 @@ func (tv *TwinTextViews) ConfigTexts() {
 	tv.Dim = mat32.X
 	tv.SetStretchMax()
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Layout, "text-a-lay")
-	config.Add(gi.KiT_Layout, "text-b-lay")
+	config.Add(gi.TypeLayout, "text-a-lay")
+	config.Add(gi.TypeLayout, "text-b-lay")
 	mods, updt := tv.ConfigChildren(config)
 	al, bl := tv.TextViewLays()
 	if !mods {
@@ -112,7 +112,7 @@ func (tv *TwinTextViews) TextViews() (*TextView, *TextView) {
 
 // TwinTextViewsProps are style properties for TwinTextViews
 var TwinTextViewsProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"max-width":        -1,
 	"max-height":       -1,
 	"background-color": &gi.Prefs.Colors.Background,

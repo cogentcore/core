@@ -26,10 +26,10 @@ type HiStyleValueView struct {
 	ValueViewBase
 }
 
-var KiT_HiStyleValueView = kit.Types.AddType(&HiStyleValueView{}, nil)
+var TypeHiStyleValueView = kit.Types.AddType(&HiStyleValueView{}, nil)
 
 func (vv *HiStyleValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Action
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -48,7 +48,7 @@ func (vv *HiStyleValueView) ConfigWidget(widg gi.Node2D) {
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_HiStyleValueView).(*HiStyleValueView)
+		vvv, _ := recv.Embed(TypeHiStyleValueView).(*HiStyleValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
@@ -101,13 +101,13 @@ func HiStylesView(st *histyle.Styles) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	title := mfr.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
+	title := mfr.AddNewChild(gi.TypeLabel, "title").(*gi.Label)
 	title.SetText("Hilighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
 	title.SetProp("width", units.Ch(30)) // need for wrap
 	title.SetStretchMaxWidth()
 	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
-	tv := mfr.AddNewChild(KiT_MapView, "tv").(*MapView)
+	tv := mfr.AddNewChild(TypeMapView, "tv").(*MapView)
 	tv.Viewport = vp
 	tv.SetMap(st)
 	tv.SetStretchMax()

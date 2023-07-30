@@ -52,7 +52,7 @@ type Preferences struct {
 	Changed              bool                   `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
-var KiT_Preferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
+var TypePreferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
 
 // Prefs are the overall preferences
 var Prefs = Preferences{}
@@ -469,7 +469,7 @@ const (
 
 //go:generate stringer -type=Densities
 
-var KiT_Densities = kit.Enums.AddEnumAltLower(DensitiesN, kit.NotBitFlag, gist.StylePropProps, "Density")
+var TypeDensities = kit.Enums.AddEnumAltLower(DensitiesN, kit.NotBitFlag, gist.StylePropProps, "Density")
 
 // DensityMul returns a multiplier centered
 // around 1 representing the density set in the preferences.
@@ -505,7 +505,7 @@ type ColorPrefs struct {
 	Link       gist.Color  `desc:"color for links in text etc"`
 }
 
-var KiT_ColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
+var TypeColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
 
 func (pf *ColorPrefs) Defaults() {
 	pf.HiStyle = "emacs"
@@ -904,7 +904,7 @@ type PrefsDetailed struct {
 	Changed                    bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
-var KiT_PrefsDetailed = kit.Types.AddType(&PrefsDetailed{}, PrefsDetailedProps)
+var TypePrefsDetailed = kit.Types.AddType(&PrefsDetailed{}, PrefsDetailedProps)
 
 // PrefsDet are the overall detailed preferences
 var PrefsDet = PrefsDetailed{}
@@ -1074,7 +1074,7 @@ type PrefsDebug struct {
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
-var KiT_PrefsDebug = kit.Types.AddType(&PrefsDebug{}, PrefsDebugProps)
+var TypePrefsDebug = kit.Types.AddType(&PrefsDebug{}, PrefsDebugProps)
 
 // PrefsDbg are the overall debugging preferences
 var PrefsDbg = PrefsDebug{}

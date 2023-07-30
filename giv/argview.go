@@ -26,7 +26,7 @@ type ArgView struct {
 	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
-var KiT_ArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
+var TypeArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
 
 func (av *ArgView) Disconnect() {
 	av.Frame.Disconnect()
@@ -34,7 +34,7 @@ func (av *ArgView) Disconnect() {
 }
 
 var ArgViewProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
 	"max-width":        -1,
@@ -61,8 +61,8 @@ func (av *ArgView) Config() {
 	av.Lay = gi.LayoutVert
 	av.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Label, "title")
-	config.Add(gi.KiT_Frame, "args-grid")
+	config.Add(gi.TypeLabel, "title")
+	config.Add(gi.TypeFrame, "args-grid")
 	mods, updt := av.ConfigChildren(config)
 	av.ConfigArgsGrid()
 	if mods {
@@ -116,7 +116,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		knm := strcase.ToKebab(ad.Name)
 		labnm := fmt.Sprintf("label-%v", knm)
 		valnm := fmt.Sprintf("value-%v", knm)
-		config.Add(gi.KiT_Label, labnm)
+		config.Add(gi.TypeLabel, labnm)
 		config.Add(vtyp, valnm)
 	}
 	mods, updt := sg.ConfigChildren(config) // not sure if always unique?
@@ -133,7 +133,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := ad.View.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(av.This(), func(recv, send ki.Ki, sig int64, data any) {
-			avv, _ := recv.Embed(KiT_ArgView).(*ArgView)
+			avv, _ := recv.Embed(TypeArgView).(*ArgView)
 			// note: updating here is redundant -- relevant field will have already updated
 			avv.ViewSig.Emit(avv.This(), 0, nil)
 		})

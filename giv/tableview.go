@@ -48,11 +48,11 @@ type TableView struct {
 	NVisFields int                   `copy:"-" view:"-" json:"-" xml:"-" desc:"number of visible fields"`
 }
 
-var KiT_TableView = kit.Types.AddType(&TableView{}, TableViewProps)
+var TypeTableView = kit.Types.AddType(&TableView{}, TableViewProps)
 
 // AddNewTableView adds a new tableview to given parent node, with given name.
 func AddNewTableView(parent ki.Ki, name string) *TableView {
-	return parent.AddNewChild(KiT_TableView, name).(*TableView)
+	return parent.AddNewChild(TypeTableView, name).(*TableView)
 }
 
 // check for interface impl
@@ -115,7 +115,7 @@ func (tv *TableView) SetSlice(sl any) {
 }
 
 var TableViewProps = ki.Props{
-	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"EnumType:Flag":    gi.TypeNodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
 	"max-width":        -1,
@@ -187,8 +187,8 @@ func (tv *TableView) Config() {
 	tv.Lay = gi.LayoutVert
 	tv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_Frame, "frame")
+	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.TypeFrame, "frame")
 	mods, updt := tv.ConfigChildren(config)
 	tv.ConfigSliceGrid()
 	tv.ConfigToolbar()
@@ -289,8 +289,8 @@ func (tv *TableView) ConfigSliceGrid() {
 	sg.SetProp("padding", 0)
 
 	sgcfg := kit.TypeAndNameList{}
-	sgcfg.Add(gi.KiT_ToolBar, "header")
-	sgcfg.Add(gi.KiT_Layout, "grid-lay")
+	sgcfg.Add(gi.TypeToolBar, "header")
+	sgcfg.Add(gi.TypeLayout, "grid-lay")
 	sg.ConfigChildren(sgcfg)
 
 	sgh := tv.SliceHeader()
@@ -303,8 +303,8 @@ func (tv *TableView) ConfigSliceGrid() {
 	gl.Lay = gi.LayoutHoriz
 	gl.SetStretchMax() // for this to work, ALL layers above need it too
 	gconfig := kit.TypeAndNameList{}
-	gconfig.Add(gi.KiT_Frame, "grid")
-	gconfig.Add(gi.KiT_ScrollBar, "scrollbar")
+	gconfig.Add(gi.TypeFrame, "grid")
+	gconfig.Add(gi.TypeScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
 
 	sgf = tv.This().(SliceViewer).SliceGrid()
@@ -320,16 +320,16 @@ func (tv *TableView) ConfigSliceGrid() {
 	// Configure Header
 	hcfg := kit.TypeAndNameList{}
 	if tv.ShowIndex {
-		hcfg.Add(gi.KiT_Label, "head-idx")
+		hcfg.Add(gi.TypeLabel, "head-idx")
 	}
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
 		labnm := fmt.Sprintf("head-%v", fld.Name)
-		hcfg.Add(gi.KiT_Action, labnm)
+		hcfg.Add(gi.TypeAction, labnm)
 	}
 	if !tv.IsInactive() {
-		hcfg.Add(gi.KiT_Label, "head-add")
-		hcfg.Add(gi.KiT_Label, "head-del")
+		hcfg.Add(gi.TypeLabel, "head-add")
+		hcfg.Add(gi.TypeLabel, "head-del")
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 
@@ -367,7 +367,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			hdr.Tooltip += ": " + dsc
 		}
 		hdr.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv := recv.Embed(TypeTableView).(*TableView)
 			act := send.(*gi.Action)
 			fldIdx := act.Data.(int)
 			tvv.SortSliceAction(fldIdx)
@@ -583,7 +583,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
 						row := wbb.Prop("tv-row").(int)
-						tvv := recv.Embed(KiT_TableView).(*TableView)
+						tvv := recv.Embed(TypeTableView).(*TableView)
 						tvv.UpdateSelectRow(row, wbb.IsSelected())
 					}
 				})
@@ -646,7 +646,7 @@ func (tv *TableView) UpdateSliceGrid() {
 						if sig == int64(gi.WidgetSelected) { // || sig == int64(gi.WidgetFocused) {
 							wbb := send.(gi.Node2D).AsWidget()
 							row := wbb.Prop("tv-row").(int)
-							tvv := recv.Embed(KiT_TableView).(*TableView)
+							tvv := recv.Embed(TypeTableView).(*TableView)
 							// if sig != int64(gi.WidgetFocused) || !tvv.InFocusGrab {
 							tvv.UpdateSelectRow(row, wbb.IsSelected())
 							// }
@@ -659,7 +659,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					vvb := vv.AsValueViewBase()
 					vvb.ViewSig.ConnectOnly(tv.This(), // todo: do we need this?
 						func(recv, send ki.Ki, sig int64, data any) {
-							tvv, _ := recv.Embed(KiT_TableView).(*TableView)
+							tvv, _ := recv.Embed(TypeTableView).(*TableView)
 							tvv.SetChanged()
 						})
 				}
@@ -680,7 +680,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					addact.Style.Template = "giv.TableView.AddAction"
 					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
-						tvv := recv.Embed(KiT_TableView).(*TableView)
+						tvv := recv.Embed(TypeTableView).(*TableView)
 						tvv.SliceNewAtRow(act.Data.(int) + 1)
 					})
 				}
@@ -697,7 +697,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					delact.Style.Template = "giv.TableView.DelAction"
 					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Action)
-						tvv := recv.Embed(KiT_TableView).(*TableView)
+						tvv := recv.Embed(TypeTableView).(*TableView)
 						tvv.SliceDeleteAtRow(act.Data.(int), true)
 					})
 				}
@@ -856,13 +856,13 @@ func (tv *TableView) ConfigToolbar() {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tvv := recv.Embed(KiT_TableView).(*TableView)
+				tvv := recv.Embed(TypeTableView).(*TableView)
 				tvv.UpdateSliceGrid()
 			})
 		if ndef > 1 {
 			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"},
 				tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					tvv := recv.Embed(KiT_TableView).(*TableView)
+					tvv := recv.Embed(TypeTableView).(*TableView)
 					tvv.SliceNewAt(-1)
 				})
 		}
@@ -1068,7 +1068,7 @@ func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
 	m.AddSeparator("sep-edit")
 	m.AddAction(gi.ActOpts{Label: "Edit", Data: idx},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv := recv.Embed(TypeTableView).(*TableView)
 			tvv.EditIdx(data.(int))
 		})
 }

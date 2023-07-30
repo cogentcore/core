@@ -29,11 +29,11 @@ type Marker struct {
 	EffSize     mat32.Vec2  `desc:"effective size for actual rendering"`
 }
 
-var KiT_Marker = kit.Types.AddType(&Marker{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
+var TypeMarker = kit.Types.AddType(&Marker{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
 
 // AddNewMarker adds a new marker to given parent node, with given name.
 func AddNewMarker(parent ki.Ki, name string) *Marker {
-	return parent.AddNewChild(KiT_Marker, name).(*Marker)
+	return parent.AddNewChild(TypeMarker, name).(*Marker)
 }
 
 func (g *Marker) SVGName() string { return "marker" }
@@ -66,7 +66,7 @@ const (
 
 //go:generate stringer -type=MarkerUnits
 
-var KiT_MarkerUnits = kit.Enums.AddEnumAltLower(MarkerUnitsN, kit.NotBitFlag, gist.StylePropProps, "")
+var TypeMarkerUnits = kit.Enums.AddEnumAltLower(MarkerUnitsN, kit.NotBitFlag, gist.StylePropProps, "")
 
 func (ev MarkerUnits) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *MarkerUnits) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

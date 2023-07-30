@@ -35,11 +35,11 @@ type TabView struct {
 	Mu           sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
 }
 
-var KiT_TabView = kit.Types.AddType(&TabView{}, TabViewProps)
+var TypeTabView = kit.Types.AddType(&TabView{}, TabViewProps)
 
 // AddNewTabView adds a new tabview to given parent node, with given name.
 func AddNewTabView(parent ki.Ki, name string) *TabView {
-	return parent.AddNewChild(KiT_TabView, name).(*TabView)
+	return parent.AddNewChild(TypeTabView, name).(*TabView)
 }
 
 func (tv *TabView) CopyFieldsFrom(frm any) {
@@ -56,7 +56,7 @@ func (tv *TabView) Disconnect() {
 }
 
 var TabViewProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "border-color":     &Prefs.Colors.Border,
 	// "border-width":     units.Px(2),
 	// "background-color": &Prefs.Colors.Background,
@@ -104,14 +104,14 @@ func (tv *TabView) AddTab(widg Node2D, label string) int {
 func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 	tb := tv.Tabs()
 	tb.SetChildAdded()
-	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
+	tab := tb.InsertNewChild(TypeTabButton, idx, label).(*TabButton)
 	tab.Data = idx
 	tab.Tooltip = label
 	tab.NoDelete = tv.NoDeleteTabs
 	tab.SetText(label)
 	tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tvv := recv.Embed(KiT_TabView).(*TabView)
-		act := send.Embed(KiT_TabButton).(*TabButton)
+		tvv := recv.Embed(TypeTabView).(*TabView)
+		act := send.Embed(TypeTabButton).(*TabButton)
 		tabIdx := act.Data.(int)
 		tvv.SelectTabIndexAction(tabIdx)
 	})
@@ -151,7 +151,7 @@ func (tv *TabView) AddNewTab(typ reflect.Type, label string) Node2D {
 // A Layout is added first and the widget is added to that layout.
 // The Layout has "-lay" suffix added to name.
 func (tv *TabView) AddNewTabLayout(typ reflect.Type, label string) (Node2D, *Layout) {
-	ly := tv.AddNewTab(KiT_Layout, label).(*Layout)
+	ly := tv.AddNewTab(TypeLayout, label).(*Layout)
 	ly.SetName(label + "-lay")
 	widg := ly.AddNewChild(typ, label).(Node2D)
 	return widg, ly
@@ -162,7 +162,7 @@ func (tv *TabView) AddNewTabLayout(typ reflect.Type, label string) (Node2D, *Lay
 // A Frame is added first and the widget is added to that Frame.
 // The Frame has "-frame" suffix added to name.
 func (tv *TabView) AddNewTabFrame(typ reflect.Type, label string) (Node2D, *Frame) {
-	fr := tv.AddNewTab(KiT_Frame, label).(*Frame)
+	fr := tv.AddNewTab(TypeFrame, label).(*Frame)
 	fr.SetName(label + "-frame")
 	widg := fr.AddNewChild(typ, label).(Node2D)
 	return widg, fr
@@ -204,7 +204,7 @@ func (tv *TabView) TabAtIndex(idx int) (Node2D, *TabButton, bool) {
 		log.Printf("giv.TabView: index %v out of range for number of tabs: %v\n", idx, sz)
 		return nil, nil, false
 	}
-	tab := tb.Child(idx).Embed(KiT_TabButton).(*TabButton)
+	tab := tb.Child(idx).Embed(TypeTabButton).(*TabButton)
 	widg := fr.Child(idx).(Node2D)
 	return widg, tab, true
 }
@@ -388,13 +388,13 @@ func (tv *TabView) ConfigNewTabButton() bool {
 			return false
 		}
 		if tv.NewTabType == nil {
-			tv.NewTabType = KiT_Frame
+			tv.NewTabType = TypeFrame
 		}
-		tab := tb.InsertNewChild(KiT_Action, ntb, "new-tab").(*Action)
+		tab := tb.InsertNewChild(TypeAction, ntb, "new-tab").(*Action)
 		tab.Data = -1
 		tab.SetIcon(icons.Add)
 		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(KiT_TabView).(*TabView)
+			tvv := recv.Embed(TypeTabView).(*TabView)
 			tvv.SetFullReRender()
 			tvv.AddNewTabAction(tvv.NewTabType, "New Tab")
 			tvv.SelectTabIndex(len(*tvv.Frame().Children()) - 1)
@@ -486,7 +486,7 @@ func (tv *TabView) UnselectOtherTabs(idx int) {
 		if i == idx {
 			continue
 		}
-		tb := tbs.Child(i).Embed(KiT_TabButton).(*TabButton)
+		tb := tbs.Child(i).Embed(TypeTabButton).(*TabButton)
 		if tb.IsSelected() {
 			tb.SetSelectedState(false)
 		}
@@ -498,7 +498,7 @@ func (tv *TabView) RenumberTabs() {
 	sz := tv.NTabs()
 	tbs := tv.Tabs()
 	for i := 0; i < sz; i++ {
-		tb := tbs.Child(i).Embed(KiT_TabButton).(*TabButton)
+		tb := tbs.Child(i).Embed(TypeTabButton).(*TabButton)
 		tb.Data = i
 	}
 }
@@ -597,10 +597,10 @@ type TabButton struct {
 	NoDelete bool `desc:"if true, this tab does not have the delete button avail"`
 }
 
-var KiT_TabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
+var TypeTabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
 
 var TabButtonProps = ki.Props{
-	"EnumType:Flag": KiT_ButtonFlags,
+	"EnumType:Flag": TypeButtonFlags,
 	// "min-width":        units.Ch(TabButtonMinWidth),
 	// "min-height":       units.Em(1.6),
 	// "border-width":     units.Px(0),
@@ -665,11 +665,11 @@ var TabButtonProps = ki.Props{
 }
 
 func (tb *TabButton) TabView() *TabView {
-	tv := tb.ParentByType(KiT_TabView, ki.Embeds)
+	tv := tb.ParentByType(TypeTabView, ki.Embeds)
 	if tv == nil {
 		return nil
 	}
-	return tv.Embed(KiT_TabView).(*TabView)
+	return tv.Embed(TypeTabView).(*TabView)
 }
 
 func (tb *TabButton) ConfigParts() {
@@ -684,9 +684,9 @@ func (tb *TabButton) ConfigParts() {
 func (tb *TabButton) ConfigPartsDeleteButton() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
-	config.Add(KiT_Stretch, "close-stretch")
+	config.Add(TypeStretch, "close-stretch")
 	clsIdx := len(config)
-	config.Add(KiT_Action, "close")
+	config.Add(TypeAction, "close")
 	mods, updt := tb.Parts.ConfigChildren(config)
 	tb.ConfigPartsSetIconLabel(tb.Icon, tb.Text, icIdx, lbIdx)
 	if mods {
@@ -700,7 +700,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 		cls.SetIcon(icnm)
 		cls.SetProp("no-focus", true)
 		cls.ActionSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tbb := recv.Embed(KiT_TabButton).(*TabButton)
+			tbb := recv.Embed(TypeTabButton).(*TabButton)
 			tabIdx := tbb.Data.(int)
 			tvv := tb.TabView()
 			if tvv != nil {

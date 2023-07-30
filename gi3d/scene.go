@@ -94,11 +94,11 @@ type Scene struct {
 	RenderMu        sync.Mutex                  `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on rendering"`
 }
 
-var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
+var TypeScene = kit.Types.AddType(&Scene{}, SceneProps)
 
 // AddNewScene adds a new scene to given parent node, with given name.
 func AddNewScene(parent ki.Ki, name string) *Scene {
-	sc := parent.AddNewChild(KiT_Scene, name).(*Scene)
+	sc := parent.AddNewChild(TypeScene, name).(*Scene)
 	sc.Defaults()
 	return sc
 }
@@ -368,7 +368,7 @@ func (sc *Scene) Render2D() {
 // NavEvents handles standard viewer navigation events
 func (sc *Scene) NavEvents() {
 	sc.ConnectEvent(oswin.MouseDragEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(KiT_Scene).(*Scene)
+		ssc := recv.Embed(TypeScene).(*Scene)
 		if ssc.NoNav {
 			return
 		}
@@ -412,7 +412,7 @@ func (sc *Scene) NavEvents() {
 	// sc.ConnectEvent(oswin.MouseMoveEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	me := d.(*mouse.MoveEvent)
 	// 	me.SetProcessed()
-	// 	ssc := recv.Embed(KiT_Scene).(*Scene)
+	// 	ssc := recv.Embed(TypeScene).(*Scene)
 	// 	orbDel := float32(.2)
 	// 	panDel := float32(.05)
 	// 	del := me.Where.Sub(me.From)
@@ -436,7 +436,7 @@ func (sc *Scene) NavEvents() {
 	// 	ssc.UpdateSig()
 	// })
 	sc.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(KiT_Scene).(*Scene)
+		ssc := recv.Embed(TypeScene).(*Scene)
 		if ssc.NoNav {
 			return
 		}
@@ -460,7 +460,7 @@ func (sc *Scene) NavEvents() {
 		ssc.UpdateSig()
 	})
 	sc.ConnectEvent(oswin.MouseEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(KiT_Scene).(*Scene)
+		ssc := recv.Embed(TypeScene).(*Scene)
 		if ssc.NoNav {
 			return
 		}
@@ -480,7 +480,7 @@ func (sc *Scene) NavEvents() {
 		// }
 	})
 	sc.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(KiT_Scene).(*Scene)
+		ssc := recv.Embed(TypeScene).(*Scene)
 		if ssc.NoNav {
 			return
 		}
@@ -631,7 +631,7 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node3D {
 
 // SceneProps define the ToolBar and MenuBar for StructView
 var SceneProps = ki.Props{
-	"EnumType:Flag": KiT_SceneFlags,
+	"EnumType:Flag": TypeSceneFlags,
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
 			"icon": icons.Refresh,
@@ -644,7 +644,7 @@ type SceneFlags int
 
 //go:generate stringer -type=SceneFlags
 
-var KiT_SceneFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, SceneFlagsN, kit.BitFlag, nil)
+var TypeSceneFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, SceneFlagsN, kit.BitFlag, nil)
 
 const (
 	// Rendering means that the scene is currently rendering

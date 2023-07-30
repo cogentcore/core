@@ -47,7 +47,7 @@ type Complete struct {
 	ShowMu      sync.Mutex
 }
 
-var KiT_Complete = kit.Types.AddType(&Complete{}, nil)
+var TypeComplete = kit.Types.AddType(&Complete{}, nil)
 
 func (cm *Complete) Disconnect() {
 	cm.Node.Disconnect()
@@ -154,7 +154,7 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt ima
 		icon := cmp.Icon
 		m.AddAction(ActOpts{Icon: icons.Icon(icon), Label: text, Data: cmp.Text},
 			c, func(recv, send ki.Ki, sig int64, data any) {
-				cc := recv.Embed(KiT_Complete).(*Complete)
+				cc := recv.Embed(TypeComplete).(*Complete)
 				cc.Complete(data.(string))
 			})
 	}

@@ -43,11 +43,11 @@ type SVG struct {
 	UniqueIds  map[int]struct{} `view:"-" json:"-" xml:"-" desc:"map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds"`
 }
 
-var KiT_SVG = kit.Types.AddType(&SVG{}, SVGProps)
+var TypeSVG = kit.Types.AddType(&SVG{}, SVGProps)
 
 // AddNewSVG adds a new svg viewport to given parent node, with given name.
 func AddNewSVG(parent ki.Ki, name string) *SVG {
-	return parent.AddNewChild(KiT_SVG, name).(*SVG)
+	return parent.AddNewChild(TypeSVG, name).(*SVG)
 }
 
 func (sv *SVG) CopyFieldsFrom(frm any) {
@@ -367,7 +367,7 @@ type SVGFlags int
 
 //go:generate stringer -type=SVGFlags
 
-var KiT_SVGFlags = kit.Enums.AddEnumExt(gi.KiT_VpFlags, SVGFlagsN, kit.BitFlag, nil)
+var TypeSVGFlags = kit.Enums.AddEnumExt(gi.TypeVpFlags, SVGFlagsN, kit.BitFlag, nil)
 
 const (
 	// Rendering means that the SVG is currently redrawing
@@ -379,7 +379,7 @@ const (
 )
 
 var SVGProps = ki.Props{
-	"EnumType:Flag": KiT_SVGFlags,
+	"EnumType:Flag": TypeSVGFlags,
 	"ToolBar": ki.PropSlice{
 		{"OpenXML", ki.Props{
 			"label": "Open...",
@@ -406,7 +406,7 @@ var SVGProps = ki.Props{
 
 func (sv *SVG) ConfigStyles() {
 	sv.AddStyleFunc(gi.StyleFuncDefault, func() {
-		if par, ok := sv.Parent().Embed(gi.KiT_WidgetBase).(*gi.WidgetBase); ok {
+		if par, ok := sv.Parent().Embed(gi.TypeWidgetBase).(*gi.WidgetBase); ok {
 			sv.Pnt.FillStyle.Color.SetColor(par.Style.Color)
 			sv.Pnt.StrokeStyle.Color.SetColor(par.Style.Color)
 		}

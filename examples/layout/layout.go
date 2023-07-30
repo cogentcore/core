@@ -67,7 +67,7 @@ func mainrun() {
 		fr.SetProp("margin", "inherit")
 		if i == 2 {
 			fr.SetFixedWidth(units.Em(20))
-			spc := row1.AddNewChild(gi.KiT_Space, "spc").(*gi.Space)
+			spc := row1.AddNewChild(gi.TypeSpace, "spc").(*gi.Space)
 			spc.SetFixedWidth(units.Em(4))
 		} else {
 			fr.SetProp("max-width", -1) // spacer

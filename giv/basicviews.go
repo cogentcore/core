@@ -26,10 +26,10 @@ type StructValueView struct {
 	ValueViewBase
 }
 
-var KiT_StructValueView = kit.Types.AddType(&StructValueView{}, nil)
+var TypeStructValueView = kit.Types.AddType(&StructValueView{}, nil)
 
 func (vv *StructValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Action
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -65,7 +65,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetProp("margin", units.Px(2))
 	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
+		vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
 	})
@@ -89,7 +89,7 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 	}
 	inact := vv.This().(ValueView).IsInactive()
 	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
-	svk := dlg.Frame().ChildByType(KiT_StructView, ki.Embeds, 2)
+	svk := dlg.Frame().ChildByType(TypeStructView, ki.Embeds, 2)
 	if svk != nil {
 		sv := svk.(*StructView)
 		sv.StructValView = vv
@@ -105,10 +105,10 @@ type StructInlineValueView struct {
 	ValueViewBase
 }
 
-var KiT_StructInlineValueView = kit.Types.AddType(&StructInlineValueView{}, nil)
+var TypeStructInlineValueView = kit.Types.AddType(&StructInlineValueView{}, nil)
 
 func (vv *StructInlineValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_StructViewInline
+	vv.WidgetTyp = TypeStructViewInline
 	return vv.WidgetTyp
 }
 
@@ -136,7 +136,7 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface())
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_StructInlineValueView).(*StructInlineValueView)
+		vvv, _ := recv.Embed(TypeStructInlineValueView).(*StructInlineValueView)
 		// vvv.UpdateWidget() // prob not necc..
 		vvv.ViewSig.Emit(vvv.This(), 0, nil)
 	})
@@ -154,10 +154,10 @@ type SliceValueView struct {
 	ElIsStruct bool         // whether non-pointer element type is a struct or not
 }
 
-var KiT_SliceValueView = kit.Types.AddType(&SliceValueView{}, nil)
+var TypeSliceValueView = kit.Types.AddType(&SliceValueView{}, nil)
 
 func (vv *SliceValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Action
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -195,7 +195,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetProp("margin", units.Px(2))
 	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
+		vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
 	})
@@ -222,24 +222,24 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
 		dlg := TableViewDialog(vp, slci, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, nil, recv, dlgFunc)
-		svk := dlg.Frame().ChildByType(KiT_TableView, ki.Embeds, 2)
+		svk := dlg.Frame().ChildByType(TypeTableView, ki.Embeds, 2)
 		if svk != nil {
 			sv := svk.(*TableView)
 			sv.SliceValView = vv
 			sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
+				vv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
 				vv.UpdateWidget()
 				vv.ViewSig.Emit(vv.This(), 0, nil)
 			})
 		}
 	} else {
 		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, nil, recv, dlgFunc)
-		svk := dlg.Frame().ChildByType(KiT_SliceView, ki.Embeds, 2)
+		svk := dlg.Frame().ChildByType(TypeSliceView, ki.Embeds, 2)
 		if svk != nil {
 			sv := svk.(*SliceView)
 			sv.SliceValView = vv
 			sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
+				vv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
 				vv.UpdateWidget()
 				vv.ViewSig.Emit(vv.This(), 0, nil)
 			})
@@ -255,10 +255,10 @@ type SliceInlineValueView struct {
 	ValueViewBase
 }
 
-var KiT_SliceInlineValueView = kit.Types.AddType(&SliceInlineValueView{}, nil)
+var TypeSliceInlineValueView = kit.Types.AddType(&SliceInlineValueView{}, nil)
 
 func (vv *SliceInlineValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_SliceViewInline
+	vv.WidgetTyp = TypeSliceViewInline
 	return vv.WidgetTyp
 }
 
@@ -287,7 +287,7 @@ func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv.SetInactiveState(vv.This().(ValueView).IsInactive())
 	sv.SetSlice(vv.Value.Interface())
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_SliceInlineValueView).(*SliceInlineValueView)
+		vvv, _ := recv.Embed(TypeSliceInlineValueView).(*SliceInlineValueView)
 		vvv.UpdateWidget()
 		vvv.ViewSig.Emit(vvv.This(), 0, nil)
 	})
@@ -301,10 +301,10 @@ type MapValueView struct {
 	ValueViewBase
 }
 
-var KiT_MapValueView = kit.Types.AddType(&MapValueView{}, nil)
+var TypeMapValueView = kit.Types.AddType(&MapValueView{}, nil)
 
 func (vv *MapValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Action
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -333,7 +333,7 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetProp("margin", units.Px(2))
 	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
+		vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
 	})
@@ -354,12 +354,12 @@ func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvF
 	mpi := vv.Value.Interface()
 	inact := vv.This().(ValueView).IsInactive()
 	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
-	mvk := dlg.Frame().ChildByType(KiT_MapView, ki.Embeds, 2)
+	mvk := dlg.Frame().ChildByType(TypeMapView, ki.Embeds, 2)
 	if mvk != nil {
 		mv := mvk.(*MapView)
 		mv.MapValView = vv
 		mv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			vv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
+			vv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
 			vv.UpdateWidget()
 			vv.ViewSig.Emit(vv.This(), 0, nil)
 		})
@@ -374,10 +374,10 @@ type MapInlineValueView struct {
 	ValueViewBase
 }
 
-var KiT_MapInlineValueView = kit.Types.AddType(&MapInlineValueView{}, nil)
+var TypeMapInlineValueView = kit.Types.AddType(&MapInlineValueView{}, nil)
 
 func (vv *MapInlineValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = KiT_MapViewInline
+	vv.WidgetTyp = TypeMapViewInline
 	return vv.WidgetTyp
 }
 
@@ -406,7 +406,7 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv.SetInactiveState(vv.This().(ValueView).IsInactive())
 	sv.SetMap(vv.Value.Interface())
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_MapInlineValueView).(*MapInlineValueView)
+		vvv, _ := recv.Embed(TypeMapInlineValueView).(*MapInlineValueView)
 		vvv.UpdateWidget()
 		vvv.ViewSig.Emit(vvv.This(), 0, nil)
 	})
@@ -420,10 +420,10 @@ type KiPtrValueView struct {
 	ValueViewBase
 }
 
-var KiT_KiPtrValueView = kit.Types.AddType(&KiPtrValueView{}, nil)
+var TypeKiPtrValueView = kit.Types.AddType(&KiPtrValueView{}, nil)
 
 func (vv *KiPtrValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_MenuButton
+	vv.WidgetTyp = gi.TypeMenuButton
 	return vv.WidgetTyp
 }
 
@@ -474,7 +474,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
+			vvv, _ := recv.Embed(TypeKiPtrValueView).(*KiPtrValueView)
 			k := vvv.KiStruct()
 			if k != nil {
 				mb := vvv.Widget.(*gi.MenuButton)
@@ -483,7 +483,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 		})
 	mb.Menu.AddAction(gi.ActOpts{Label: "GoGiEditor"},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
+			vvv, _ := recv.Embed(TypeKiPtrValueView).(*KiPtrValueView)
 			k := vvv.KiStruct()
 			if k != nil {
 				GoGiEditorDialog(k)
@@ -519,10 +519,10 @@ type BoolValueView struct {
 	ValueViewBase
 }
 
-var KiT_BoolValueView = kit.Types.AddType(&BoolValueView{}, nil)
+var TypeBoolValueView = kit.Types.AddType(&BoolValueView{}, nil)
 
 func (vv *BoolValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_CheckBox
+	vv.WidgetTyp = gi.TypeCheckBox
 	return vv.WidgetTyp
 }
 
@@ -544,7 +544,7 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
 	cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonToggled) {
-			vvv, _ := recv.Embed(KiT_BoolValueView).(*BoolValueView)
+			vvv, _ := recv.Embed(TypeBoolValueView).(*BoolValueView)
 			cbb := vvv.Widget.(*gi.CheckBox)
 			if vvv.SetValue(cbb.IsChecked()) {
 				vvv.UpdateWidget() // always update after setting value..
@@ -562,10 +562,10 @@ type IntValueView struct {
 	ValueViewBase
 }
 
-var KiT_IntValueView = kit.Types.AddType(&IntValueView{}, nil)
+var TypeIntValueView = kit.Types.AddType(&IntValueView{}, nil)
 
 func (vv *IntValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_SpinBox
+	vv.WidgetTyp = gi.TypeSpinBox
 	return vv.WidgetTyp
 }
 
@@ -619,7 +619,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 		sb.Format = fmttag
 	}
 	sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_IntValueView).(*IntValueView)
+		vvv, _ := recv.Embed(TypeIntValueView).(*IntValueView)
 		sbb := vvv.Widget.(*gi.SpinBox)
 		if vvv.SetValue(sbb.Value) {
 			vvv.UpdateWidget()
@@ -636,10 +636,10 @@ type FloatValueView struct {
 	ValueViewBase
 }
 
-var KiT_FloatValueView = kit.Types.AddType(&FloatValueView{}, nil)
+var TypeFloatValueView = kit.Types.AddType(&FloatValueView{}, nil)
 
 func (vv *FloatValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_SpinBox
+	vv.WidgetTyp = gi.TypeSpinBox
 	return vv.WidgetTyp
 }
 
@@ -690,7 +690,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	}
 
 	sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_FloatValueView).(*FloatValueView)
+		vvv, _ := recv.Embed(TypeFloatValueView).(*FloatValueView)
 		sbb := vvv.Widget.(*gi.SpinBox)
 		if vvv.SetValue(sbb.Value) {
 			vvv.UpdateWidget()
@@ -708,10 +708,10 @@ type EnumValueView struct {
 	AltType reflect.Type // alternative type, e.g., from EnumType: property
 }
 
-var KiT_EnumValueView = kit.Types.AddType(&EnumValueView{}, nil)
+var TypeEnumValueView = kit.Types.AddType(&EnumValueView{}, nil)
 
 func (vv *EnumValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_ComboBox
+	vv.WidgetTyp = gi.TypeComboBox
 	return vv.WidgetTyp
 }
 
@@ -755,7 +755,7 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ, false, 50)
 	cb.ComboSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_EnumValueView).(*EnumValueView)
+		vvv, _ := recv.Embed(TypeEnumValueView).(*EnumValueView)
 		cbb := vvv.Widget.(*gi.ComboBox)
 		eval := cbb.CurVal.(kit.EnumValue)
 		if vvv.SetEnumValueFromInt(eval.Value) { // todo: using index
@@ -774,10 +774,10 @@ type BitFlagView struct {
 	AltType reflect.Type // alternative type, e.g., from EnumType: property
 }
 
-var KiT_BitFlagView = kit.Types.AddType(&BitFlagView{}, nil)
+var TypeBitFlagView = kit.Types.AddType(&BitFlagView{}, nil)
 
 func (vv *BitFlagView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_ButtonBox
+	vv.WidgetTyp = gi.TypeButtonBox
 	return vv.WidgetTyp
 }
 
@@ -824,7 +824,7 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Node2D) {
 	cb.ItemsFromEnum(typ)
 	cb.ConfigParts()
 	cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_BitFlagView).(*BitFlagView)
+		vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
 		cbb := vvv.Widget.(*gi.ButtonBox)
 		etyp := vvv.EnumType()
 		val := cbb.BitFlagsValue(etyp)
@@ -842,10 +842,10 @@ type TypeValueView struct {
 	ValueViewBase
 }
 
-var KiT_TypeValueView = kit.Types.AddType(&TypeValueView{}, nil)
+var TypeTypeValueView = kit.Types.AddType(&TypeValueView{}, nil)
 
 func (vv *TypeValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_ComboBox
+	vv.WidgetTyp = gi.TypeComboBox
 	return vv.WidgetTyp
 }
 
@@ -887,7 +887,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 	cb.ItemsFromTypes(tl, false, true, 50)
 
 	cb.ComboSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(KiT_TypeValueView).(*TypeValueView)
+		vvv, _ := recv.Embed(TypeTypeValueView).(*TypeValueView)
 		cbb := vvv.Widget.(*gi.ComboBox)
 		tval := cbb.CurVal.(reflect.Type)
 		if vvv.SetValue(tval) {
@@ -905,10 +905,10 @@ type ByteSliceValueView struct {
 	ValueViewBase
 }
 
-var KiT_ByteSliceValueView = kit.Types.AddType(&ByteSliceValueView{}, nil)
+var TypeByteSliceValueView = kit.Types.AddType(&ByteSliceValueView{}, nil)
 
 func (vv *ByteSliceValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_TextField
+	vv.WidgetTyp = gi.TypeTextField
 	return vv.WidgetTyp
 }
 
@@ -935,7 +935,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			vvv, _ := recv.Embed(KiT_ByteSliceValueView).(*ByteSliceValueView)
+			vvv, _ := recv.Embed(TypeByteSliceValueView).(*ByteSliceValueView)
 			tf := send.(*gi.TextField)
 			if vvv.SetValue(tf.Text()) {
 				vvv.UpdateWidget() // always update after setting value..
@@ -953,10 +953,10 @@ type RuneSliceValueView struct {
 	ValueViewBase
 }
 
-var KiT_RuneSliceValueView = kit.Types.AddType(&RuneSliceValueView{}, nil)
+var TypeRuneSliceValueView = kit.Types.AddType(&RuneSliceValueView{}, nil)
 
 func (vv *RuneSliceValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_TextField
+	vv.WidgetTyp = gi.TypeTextField
 	return vv.WidgetTyp
 }
 
@@ -983,7 +983,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			vvv, _ := recv.Embed(KiT_RuneSliceValueView).(*RuneSliceValueView)
+			vvv, _ := recv.Embed(TypeRuneSliceValueView).(*RuneSliceValueView)
 			tf := send.(*gi.TextField)
 			if vvv.SetValue(tf.Text()) {
 				vvv.UpdateWidget() // always update after setting value..
@@ -1001,10 +1001,10 @@ type NilValueView struct {
 	ValueViewBase
 }
 
-var KiT_NilValueView = kit.Types.AddType(&NilValueView{}, nil)
+var TypeNilValueView = kit.Types.AddType(&NilValueView{}, nil)
 
 func (vv *NilValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_Label
+	vv.WidgetTyp = gi.TypeLabel
 	return vv.WidgetTyp
 }
 
@@ -1041,10 +1041,10 @@ type TimeValueView struct {
 	ValueViewBase
 }
 
-var KiT_TimeValueView = kit.Types.AddType(&TimeValueView{}, nil)
+var TypeTimeValueView = kit.Types.AddType(&TimeValueView{}, nil)
 
 func (vv *TimeValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.KiT_TextField
+	vv.WidgetTyp = gi.TypeTextField
 	return vv.WidgetTyp
 }
 
@@ -1079,7 +1079,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetProp("min-width", units.Ch(float32(len(DefaultTimeFormat)+2)))
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			vvv, _ := recv.Embed(KiT_TimeValueView).(*TimeValueView)
+			vvv, _ := recv.Embed(TypeTimeValueView).(*TimeValueView)
 			tf := send.(*gi.TextField)
 			nt, err := time.Parse(DefaultTimeFormat, tf.Text())
 			if err != nil {

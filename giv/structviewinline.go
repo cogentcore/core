@@ -31,7 +31,7 @@ type StructViewInline struct {
 	HasViewIfs    bool        `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have viewif conditional view tags -- update after.."`
 }
 
-var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
+var TypeStructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
 
 func (sv *StructViewInline) Disconnect() {
 	sv.PartsWidgetBase.Disconnect()
@@ -47,7 +47,7 @@ func (sv *StructViewInline) SetStruct(st any) {
 		sv.Struct = st
 		if k, ok := st.(ki.Ki); ok {
 			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
+				svv, _ := recv.Embed(TypeStructViewInline).(*StructViewInline)
 				svv.UpdateFields() // this never gets called, per below!
 				// fmt.Printf("struct view inline ki update values\n")
 				svv.ViewSig.Emit(svv.This(), 0, k)
@@ -59,7 +59,7 @@ func (sv *StructViewInline) SetStruct(st any) {
 }
 
 var StructViewInlineProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 }
 
 // ConfigParts configures Parts for the current struct
@@ -94,13 +94,13 @@ func (sv *StructViewInline) ConfigParts() {
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)
 		valnm := fmt.Sprintf("value-%v", field.Name)
-		config.Add(gi.KiT_Label, labnm)
+		config.Add(gi.TypeLabel, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
 	if sv.AddAction {
-		config.Add(gi.KiT_Action, "edit-action")
+		config.Add(gi.TypeAction, "edit-action")
 	}
 	mods, updt := sv.Parts.ConfigChildren(config)
 	if !mods {
@@ -121,7 +121,7 @@ func (sv *StructViewInline) ConfigParts() {
 		vv.ConfigWidget(widg)
 		if !sv.IsInactive() && !inactTag {
 			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
+				svv, _ := recv.Embed(TypeStructViewInline).(*StructViewInline)
 				svv.UpdateFieldAction()
 				// note: updating here is redundant
 				svv.ViewSig.Emit(svv.This(), 0, nil)

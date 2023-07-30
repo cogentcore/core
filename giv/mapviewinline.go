@@ -31,7 +31,7 @@ type MapViewInline struct {
 	ViewPath   string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
-var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
+var TypeMapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
 
 func (mv *MapViewInline) Disconnect() {
 	mv.PartsWidgetBase.Disconnect()
@@ -39,7 +39,7 @@ func (mv *MapViewInline) Disconnect() {
 }
 
 var MapViewInlineProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 	"min-width":     units.Ex(60),
 }
 
@@ -94,8 +94,8 @@ func (mv *MapViewInline) ConfigParts() {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
-	config.Add(gi.KiT_Action, "add-action")
-	config.Add(gi.KiT_Action, "edit-action")
+	config.Add(gi.TypeAction, "add-action")
+	config.Add(gi.TypeAction, "edit-action")
 	mods, updt := mv.Parts.ConfigChildren(config)
 	if !mods {
 		updt = mv.Parts.UpdateStart()
@@ -103,7 +103,7 @@ func (mv *MapViewInline) ConfigParts() {
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
+			mvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
 			mvv.SetChanged()
 		})
 		keyw := mv.Parts.Child(i * 2).(gi.Node2D)
@@ -122,7 +122,7 @@ func (mv *MapViewInline) ConfigParts() {
 		adac.SetIcon(icons.Add)
 		adac.Tooltip = "add an entry to the map"
 		adac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
+			mvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
 			mvv.MapAdd()
 		})
 	}
@@ -132,7 +132,7 @@ func (mv *MapViewInline) ConfigParts() {
 		edac.SetIcon(icons.Edit)
 		edac.Tooltip = "map edit dialog"
 		edac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
+			mvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
 			vpath := mvv.ViewPath
 			title := ""
 			if mvv.MapValView != nil {
@@ -151,12 +151,12 @@ func (mv *MapViewInline) ConfigParts() {
 				// }
 			}
 			dlg := MapViewDialog(mvv.Viewport, mvv.Map, DlgOpts{Title: title, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave, ViewPath: vpath}, nil, nil)
-			mvvvk := dlg.Frame().ChildByType(KiT_MapView, ki.Embeds, 2)
+			mvvvk := dlg.Frame().ChildByType(TypeMapView, ki.Embeds, 2)
 			if mvvvk != nil {
 				mvvv := mvvvk.(*MapView)
 				mvvv.MapValView = mvv.MapValView
 				mvvv.ViewSig.ConnectOnly(mvv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					mvvvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
+					mvvvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
 					mvvvv.ViewSig.Emit(mvvvv.This(), 0, nil)
 				})
 			}

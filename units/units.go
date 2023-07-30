@@ -104,7 +104,7 @@ const (
 
 //go:generate stringer -type=Units
 
-var KiT_Units = kit.Enums.AddEnumAltLower(UnitsN, kit.NotBitFlag, nil, "Unit")
+var TypeUnits = kit.Enums.AddEnumAltLower(UnitsN, kit.NotBitFlag, nil, "Unit")
 
 func (ev Units) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Units) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -278,7 +278,7 @@ type Value struct {
 	Dots float32 `inactive:"+" desc:"the computed value in raw pixels (dots in DPI)"`
 }
 
-var KiT_Value = kit.Types.AddType(&Value{}, ValueProps)
+var TypeValue = kit.Types.AddType(&Value{}, ValueProps)
 
 var ValueProps = ki.Props{
 	"style-prop": true,

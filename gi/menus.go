@@ -168,8 +168,8 @@ func (m *Menu) SetShortcuts(win *Window) {
 		return
 	}
 	for _, mi := range *m {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			win.AddShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -181,8 +181,8 @@ func (m *Menu) DeleteShortcuts(win *Window) {
 		return
 	}
 	for _, mi := range *m {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			win.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -192,8 +192,8 @@ func (m *Menu) DeleteShortcuts(win *Window) {
 // of their sub-actions
 func (m *Menu) UpdateActions() {
 	for _, mi := range *m {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			ac.UpdateActions()
 		}
 	}
@@ -205,8 +205,8 @@ func (m *Menu) UpdateActions() {
 // is empty)) -- returns false if not found
 func (m *Menu) FindActionByName(name string) (*Action, bool) {
 	for _, mi := range *m {
-		if ki.TypeEmbeds(mi, KiT_Action) {
-			ac := mi.Embed(KiT_Action).(*Action)
+		if ki.TypeEmbeds(mi, TypeAction) {
+			ac := mi.Embed(TypeAction).(*Action)
 			if ac.Name() == name {
 				return ac, true
 			}
@@ -229,19 +229,19 @@ func (m *Menu) FindActionByName(name string) (*Action, bool) {
 func (m *Menu) AddCopyCutPaste(win *Window) {
 	m.AddAction(ActOpts{Label: "Copy", ShortcutKey: KeyFunCopy},
 		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(KiT_Window).(*Window)
+			ww := recv.Embed(TypeWindow).(*Window)
 			ww.EventMgr.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
 		})
 	m.AddAction(ActOpts{Label: "Cut", ShortcutKey: KeyFunCut},
 		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(KiT_Window).(*Window)
+			ww := recv.Embed(TypeWindow).(*Window)
 			ww.EventMgr.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
 		})
 	m.AddAction(ActOpts{Label: "Paste", ShortcutKey: KeyFunPaste,
 		UpdateFunc: func(ac *Action) {
 			ac.SetInactiveState(oswin.TheApp.ClipBoard(win.OSWin).IsEmpty())
 		}}, win, func(recv, send ki.Ki, sig int64, data any) {
-		ww := recv.Embed(KiT_Window).(*Window)
+		ww := recv.Embed(TypeWindow).(*Window)
 		ww.EventMgr.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
 	})
 }
@@ -254,7 +254,7 @@ func (m *Menu) AddCopyCutPasteDupe(win *Window) {
 	dpsc := ActiveKeyMap.ChordForFun(KeyFunDuplicate)
 	m.AddAction(ActOpts{Label: "Duplicate", Shortcut: dpsc},
 		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(KiT_Window).(*Window)
+			ww := recv.Embed(TypeWindow).(*Window)
 			ww.EventMgr.SendKeyFunEvent(KeyFunDuplicate, false) // false = ignore popups -- don't send to menu
 		})
 }
@@ -278,7 +278,7 @@ func (m *Menu) AddStdAppMenu(win *Window) {
 	aboutitle := "About " + oswin.TheApp.Name()
 	m.AddAction(ActOpts{Label: aboutitle},
 		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(KiT_Window).(*Window)
+			ww := recv.Embed(TypeWindow).(*Window)
 			PromptDialog(ww.Viewport, DlgOpts{Title: aboutitle, Prompt: oswin.TheApp.About()}, AddOk, NoCancel, nil, nil)
 		})
 	m.AddAction(ActOpts{Label: "GoGi Preferences...", Shortcut: "Command+P"},
@@ -297,7 +297,7 @@ func (m *Menu) AddStdAppMenu(win *Window) {
 func (m *Menu) AddWindowsMenu(win *Window) {
 	m.AddAction(ActOpts{Label: "Minimize"},
 		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(KiT_Window).(*Window)
+			ww := recv.Embed(TypeWindow).(*Window)
 			ww.OSWin.Minimize()
 		})
 	m.AddAction(ActOpts{Label: "Focus Next", ShortcutKey: KeyFunWinFocusNext},
@@ -309,7 +309,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 		if w != nil {
 			m.AddAction(ActOpts{Label: w.Title},
 				w, func(recv, send ki.Ki, sig int64, data any) {
-					ww := recv.Embed(KiT_Window).(*Window)
+					ww := recv.Embed(TypeWindow).(*Window)
 					ww.OSWin.Raise()
 				})
 		}
@@ -320,7 +320,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 			if w != nil {
 				m.AddAction(ActOpts{Label: w.Title},
 					w, func(recv, send ki.Ki, sig int64, data any) {
-						ww := recv.Embed(KiT_Window).(*Window)
+						ww := recv.Embed(TypeWindow).(*Window)
 						ww.OSWin.Raise()
 					})
 			}
@@ -584,7 +584,7 @@ type MenuButton struct {
 	Type MenuButtonTypes `desc:"type is the type of the menu button"`
 }
 
-var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
+var TypeMenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
 
 // MenuButtonTypes is an enum containing the
 // different possible types of menu buttons
@@ -606,13 +606,13 @@ const (
 	MenuButtonTypesN
 )
 
-var KiT_MenuButtonTypes = kit.Enums.AddEnumAltLower(MenuButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "MenuButton")
+var TypeMenuButtonTypes = kit.Enums.AddEnumAltLower(MenuButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "MenuButton")
 
 //go:generate stringer -type=MenuButtonTypes
 
 // AddNewMenuButton adds a new button to given parent node, with given name.
 func AddNewMenuButton(parent ki.Ki, name string) *MenuButton {
-	return parent.AddNewChild(KiT_MenuButton, name).(*MenuButton)
+	return parent.AddNewChild(TypeMenuButton, name).(*MenuButton)
 }
 
 func (mb *MenuButton) CopyFieldsFrom(frm any) {
@@ -635,7 +635,7 @@ func (mb *MenuButton) CopyFieldsFrom(frm any) {
 // }
 
 var MenuButtonProps = ki.Props{
-	"EnumType:Flag": KiT_ButtonFlags,
+	"EnumType:Flag": TypeButtonFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,
@@ -786,11 +786,11 @@ type Separator struct {
 	Horiz bool `xml:"horiz" desc:"is this a horizontal separator -- otherwise vertical"`
 }
 
-var KiT_Separator = kit.Types.AddType(&Separator{}, SeparatorProps)
+var TypeSeparator = kit.Types.AddType(&Separator{}, SeparatorProps)
 
 // AddNewSeparator adds a new separator to given parent node, with given name and Horiz (else Vert).
 func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
-	sp := parent.AddNewChild(KiT_Separator, name).(*Separator)
+	sp := parent.AddNewChild(TypeSeparator, name).(*Separator)
 	sp.Horiz = horiz
 	return sp
 }
@@ -816,7 +816,7 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 // }
 
 var SeparatorProps = ki.Props{
-	"EnumType:Flag": KiT_NodeFlags,
+	"EnumType:Flag": TypeNodeFlags,
 	// "padding":          units.Px(0),
 	// "margin":           units.Px(0),
 	// "vertical-align":   gist.AlignCenter,

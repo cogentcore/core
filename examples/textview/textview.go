@@ -42,18 +42,18 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+	trow := mfr.AddNewChild(gi.TypeLayout, "trow").(*gi.Layout)
 	trow.Lay = gi.LayoutHoriz
 	trow.SetStretchMaxWidth()
 
-	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
+	title := trow.AddNewChild(gi.TypeLabel, "title").(*gi.Label)
 	hdrText := `This is a <b>test</b> of the TextView`
 	title.Text = hdrText
 	title.SetProp("text-align", gist.AlignCenter)
 	title.SetProp("vertical-align", gist.AlignTop)
 	title.SetProp("font-size", "x-large")
 
-	splt := mfr.AddNewChild(gi.KiT_SplitView, "split-view").(*gi.SplitView)
+	splt := mfr.AddNewChild(gi.TypeSplitView, "split-view").(*gi.SplitView)
 	splt.SetSplits(.5, .5)
 	// these are all inherited so we can put them at the top "editor panel" level
 	splt.SetProp("white-space", gist.WhiteSpacePreWrap)
@@ -62,23 +62,23 @@ func mainrun() {
 	splt.SetProp("line-height", 1.1)
 
 	// generally need to put text view within its own layout for scrolling
-	txly1 := splt.AddNewChild(gi.KiT_Layout, "view-layout-1").(*gi.Layout)
+	txly1 := splt.AddNewChild(gi.TypeLayout, "view-layout-1").(*gi.Layout)
 	txly1.SetStretchMaxWidth()
 	txly1.SetStretchMaxHeight()
 	txly1.SetMinPrefWidth(units.Ch(20))
 	txly1.SetMinPrefHeight(units.Ch(10))
 
-	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
+	txed1 := txly1.AddNewChild(giv.TypeTextView, "textview-1").(*giv.TextView)
 	txed1.Viewport = vp
 
 	// generally need to put text view within its own layout for scrolling
-	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
+	txly2 := splt.AddNewChild(gi.TypeLayout, "view-layout-2").(*gi.Layout)
 	txly2.SetStretchMaxWidth()
 	txly2.SetStretchMaxHeight()
 	txly2.SetMinPrefWidth(units.Ch(20))
 	txly2.SetMinPrefHeight(units.Ch(10))
 
-	txed2 := txly2.AddNewChild(giv.KiT_TextView, "textview-2").(*giv.TextView)
+	txed2 := txly2.AddNewChild(giv.TypeTextView, "textview-2").(*giv.TextView)
 	txed2.Viewport = vp
 
 	txbuf := giv.NewTextBuf()

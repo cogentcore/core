@@ -32,7 +32,7 @@ type Camera struct {
 	Frustum       *mat32.Frustum `view:"-" desc:"frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"`
 }
 
-var KiT_Camera = kit.Types.AddType(&Camera{}, CameraProps)
+var TypeCamera = kit.Types.AddType(&Camera{}, CameraProps)
 
 func (cm *Camera) Defaults() {
 	cm.FOV = 30

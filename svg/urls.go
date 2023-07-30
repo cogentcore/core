@@ -345,7 +345,7 @@ func (sv *SVG) AddNewGradient(radial bool) (*gi.Gradient, string) {
 	id := sv.NewUniqueId()
 	gnm = NameId(gnm, id)
 	sv.SetChildAdded()
-	gr := sv.Defs.AddNewChild(gi.KiT_Gradient, gnm).(*gi.Gradient)
+	gr := sv.Defs.AddNewChild(gi.TypeGradient, gnm).(*gi.Gradient)
 	url := NameToURL(gnm)
 	if radial {
 		gr.Grad.NewRadialGradient()

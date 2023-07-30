@@ -25,11 +25,11 @@ type Solid struct {
 	MeshPtr Mesh     `view:"-" desc:"cached pointer to mesh"`
 }
 
-var KiT_Solid = kit.Types.AddType(&Solid{}, SolidProps)
+var TypeSolid = kit.Types.AddType(&Solid{}, SolidProps)
 
 // AddNewSolid adds a new solid of given name and mesh to given parent
 func AddNewSolid(sc *Scene, parent ki.Ki, name string, meshName string) *Solid {
-	sld := parent.AddNewChild(KiT_Solid, name).(*Solid)
+	sld := parent.AddNewChild(TypeSolid, name).(*Solid)
 	sld.SetMeshName(sc, meshName)
 	sld.Defaults()
 	return sld
@@ -103,7 +103,7 @@ func (sld *Solid) ParentMaterial() *Material {
 	if sld.Par == nil {
 		return nil
 	}
-	psi := sld.Par.Embed(KiT_Solid)
+	psi := sld.Par.Embed(TypeSolid)
 	if psi == nil {
 		return nil
 	}
@@ -204,5 +204,5 @@ func (sld *Solid) Render3D(sc *Scene) {
 }
 
 var SolidProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
+	"EnumType:Flag": gi.TypeNodeFlags,
 }

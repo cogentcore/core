@@ -84,11 +84,11 @@ type TextView struct {
 	lastFilename           gi.FileName
 }
 
-var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
+var TypeTextView = kit.Types.AddType(&TextView{}, TextViewProps)
 
 // AddNewTextView adds a new textview to given parent node, with given name.
 func AddNewTextView(parent ki.Ki, name string) *TextView {
-	return parent.AddNewChild(KiT_TextView, name).(*TextView)
+	return parent.AddNewChild(TypeTextView, name).(*TextView)
 }
 
 // AddNewTextViewLayout adds a new layout with textview
@@ -96,7 +96,7 @@ func AddNewTextView(parent ki.Ki, name string) *TextView {
 // Textview should always have a parent Layout to manage
 // the scrollbars.
 func AddNewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
-	ly := parent.AddNewChild(gi.KiT_Layout, name+"-lay").(*gi.Layout)
+	ly := parent.AddNewChild(gi.TypeLayout, name+"-lay").(*gi.Layout)
 	tv := AddNewTextView(ly, name)
 	return tv, ly
 }
@@ -108,7 +108,7 @@ func (tv *TextView) Disconnect() {
 }
 
 var TextViewProps = ki.Props{
-	"EnumType:Flag":    KiT_TextViewFlags,
+	"EnumType:Flag":    TypeTextViewFlags,
 	"white-space":      gist.WhiteSpacePreWrap,
 	"border-width":     0, // don't render our own border
 	"cursor-width":     units.Px(3),
@@ -198,7 +198,7 @@ type TextViewFlags int
 
 //go:generate stringer -type=TextViewFlags
 
-var KiT_TextViewFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TextViewFlagsN, kit.BitFlag, nil)
+var TypeTextViewFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, TextViewFlagsN, kit.BitFlag, nil)
 
 const (
 	// TextViewNeedsRefresh indicates when refresh is required
@@ -398,7 +398,7 @@ func (tv *TextView) LinesDeleted(tbe *textbuf.Edit) {
 
 // TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
 func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data any) {
-	tv := rvwki.Embed(KiT_TextView).(*TextView)
+	tv := rvwki.Embed(TypeTextView).(*TextView)
 	switch TextBufSignals(sig) {
 	case TextBufDone:
 	case TextBufNew:
@@ -1823,7 +1823,7 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, lexitems bool, opts gi.DlgO
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
-	tff := frame.InsertNewChild(gi.KiT_ComboBox, prIdx+1, "find").(*gi.ComboBox)
+	tff := frame.InsertNewChild(gi.TypeComboBox, prIdx+1, "find").(*gi.ComboBox)
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.Ch(60))
@@ -1833,14 +1833,14 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, lexitems bool, opts gi.DlgO
 		tff.SetCurVal(find)
 	}
 
-	tfr := frame.InsertNewChild(gi.KiT_ComboBox, prIdx+2, "repl").(*gi.ComboBox)
+	tfr := frame.InsertNewChild(gi.TypeComboBox, prIdx+2, "repl").(*gi.ComboBox)
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.Ch(60))
 	tfr.ConfigParts()
 	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 
-	lb := frame.InsertNewChild(gi.KiT_CheckBox, prIdx+3, "lexb").(*gi.CheckBox)
+	lb := frame.InsertNewChild(gi.TypeCheckBox, prIdx+3, "lexb").(*gi.CheckBox)
 	lb.SetText("Lexical Items")
 	lb.SetChecked(lexitems)
 	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
@@ -2539,27 +2539,27 @@ func (tv *TextView) ContextMenuPos() (pos image.Point) {
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			txf := recv.Embed(KiT_TextView).(*TextView)
+			txf := recv.Embed(TypeTextView).(*TextView)
 			txf.Copy(true)
 		})
 	ac.SetActiveState(tv.HasSelection())
 	if !tv.IsInactive() {
 		ac = m.AddAction(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				txf := recv.Embed(KiT_TextView).(*TextView)
+				txf := recv.Embed(TypeTextView).(*TextView)
 				txf.Cut()
 			})
 		ac.SetActiveState(tv.HasSelection())
 		ac = m.AddAction(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				txf := recv.Embed(KiT_TextView).(*TextView)
+				txf := recv.Embed(TypeTextView).(*TextView)
 				txf.Paste()
 			})
 		ac.SetInactiveState(oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).IsEmpty())
 	} else {
 		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				txf := recv.Embed(KiT_TextView).(*TextView)
+				txf := recv.Embed(TypeTextView).(*TextView)
 				txf.Clear()
 			})
 	}
@@ -4614,7 +4614,7 @@ func (tv *TextView) MouseMoveEvent() {
 	tv.ConnectEvent(oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
-		tvv := recv.Embed(KiT_TextView).(*TextView)
+		tvv := recv.Embed(TypeTextView).(*TextView)
 		pt := tv.PointToRelPos(me.Pos())
 		mpos := tvv.PixelToCursor(pt)
 		if mpos.Ln >= tvv.NLines {
@@ -4645,7 +4645,7 @@ func (tv *TextView) MouseDragEvent() {
 	tv.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		txf := recv.Embed(KiT_TextView).(*TextView)
+		txf := recv.Embed(TypeTextView).(*TextView)
 		if !txf.SelectMode {
 			txf.SelectModeToggle()
 		}
@@ -4657,7 +4657,7 @@ func (tv *TextView) MouseDragEvent() {
 
 func (tv *TextView) MouseFocusEvent() {
 	tv.ConnectEvent(oswin.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		txf := recv.Embed(KiT_TextView).(*TextView)
+		txf := recv.Embed(TypeTextView).(*TextView)
 		if txf.IsInactive() {
 			return
 		}
@@ -4678,19 +4678,19 @@ func (tv *TextView) TextViewEvents() {
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
 	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		txf := recv.Embed(KiT_TextView).(*TextView)
+		txf := recv.Embed(TypeTextView).(*TextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me)
 	})
 	tv.MouseFocusEvent()
 	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		txf := recv.Embed(KiT_TextView).(*TextView)
+		txf := recv.Embed(TypeTextView).(*TextView)
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)
 	})
 	if dlg, ok := tv.Viewport.This().(*gi.Dialog); ok {
 		dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			txf, _ := recv.Embed(KiT_TextView).(*TextView)
+			txf, _ := recv.Embed(TypeTextView).(*TextView)
 			if sig == int64(gi.DialogAccepted) {
 				txf.EditDone()
 			}

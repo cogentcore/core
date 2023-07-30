@@ -40,7 +40,7 @@ const (
 
 //go:generate stringer -type=Cases
 
-var KiT_Cases = kit.Enums.AddEnum(CasesN, kit.NotBitFlag, gist.StylePropProps)
+var TypeCases = kit.Enums.AddEnum(CasesN, kit.NotBitFlag, gist.StylePropProps)
 
 func (ev Cases) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Cases) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
