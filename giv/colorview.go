@@ -48,9 +48,9 @@ func (cv *ColorView) Disconnect() {
 }
 
 var ColorViewProps = ki.Props{
-	"EnumType:Flag":    gi.TypeNodeFlags,
-	"background-color": &gi.Prefs.Colors.Background,
-	"color":            &gi.Prefs.Colors.Font,
+	"EnumType:Flag": gi.TypeNodeFlags,
+	// "background-color": &gi.Prefs.Colors.Background,
+	// "color":            &gi.Prefs.Colors.Font,
 }
 
 // SetColor sets the source color
@@ -292,10 +292,12 @@ func (cv *ColorView) ConfigPalette() {
 	for _, cn := range nms {
 		c := colornames.Map[cn]
 		cbt := gi.AddNewButton(pg, cn)
-		cbt.SetProp("background-color", c)
-		cbt.SetProp("max-height", units.Em(1.3))
-		cbt.SetProp("max-width", units.Em(1.3))
-		cbt.SetProp("margin", units.Px(0))
+		cbt.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+			cbt.Style.BackgroundColor.SetColor(c)
+			cbt.Style.MaxHeight.SetEm(1.3)
+			cbt.Style.MaxWidth.SetEm(1.3)
+			cbt.Style.Margin.Set()
+		})
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -336,6 +338,18 @@ func (cv *ColorView) Render2D() {
 		cv.PopBounds()
 	}
 	cv.Frame.Render2D()
+}
+
+func (cv *ColorView) Init2D() {
+	cv.Init2DWidget()
+	cv.ConfigStyles()
+}
+
+func (cv *ColorView) ConfigStyles() {
+	cv.AddStyleFunc(gi.StyleFuncDefault, func() {
+		cv.Style.BackgroundColor.SetColor(gi.Colors.Background)
+		cv.Style.Color = gi.Colors.Text
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -415,7 +429,10 @@ func (vv *ColorValueView) UpdateWidget() {
 		edack, err := sv.Parts.Children().ElemFromEndTry(0) // action at end, from AddAction above
 		if err == nil {
 			edac := edack.(*gi.Action)
-			edac.SetProp("background-color", *clr)
+			edac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+				edac.Style.BackgroundColor.SetColor(*clr)
+				edac.Style.Color = (*clr).ContrastColor()
+			})
 			edac.SetFullReRender()
 		}
 	}
@@ -426,6 +443,9 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*StructViewInline)
+	// TODO: prevent infinite color view loop with this
+	// fmt.Println(reflect.TypeOf(sv.Parent()))
+	// sv.AddAction = reflect.TypeOf(sv.Parent()) != TypeColorView
 	sv.AddAction = true
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
@@ -513,7 +533,9 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.Px(4))
+	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		ac.Style.Border.Radius.Set(units.Px(100))
+	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeColorNameValueView).(*ColorNameValueView)
 		ac := vvv.Widget.(*gi.Action)

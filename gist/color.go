@@ -100,7 +100,7 @@ var (
 
 // IsNil checks if color is the nil initial default color -- a = 0 means fully
 // transparent black
-func (c *Color) IsNil() bool {
+func (c Color) IsNil() bool {
 	if c.R == 0 && c.G == 0 && c.B == 0 && c.A == 0 {
 		return true
 	}
@@ -108,7 +108,7 @@ func (c *Color) IsNil() bool {
 }
 
 // IsWhite checks if color is a full opaque white color
-func (c *Color) IsWhite() bool {
+func (c Color) IsWhite() bool {
 	if c.R == 255 && c.G == 255 && c.B == 255 && c.A == 255 {
 		return true
 	}
@@ -116,7 +116,7 @@ func (c *Color) IsWhite() bool {
 }
 
 // IsBlack checks if color is a full opaque black color
-func (c *Color) IsBlack() bool {
+func (c Color) IsBlack() bool {
 	if c.R == 0 && c.G == 0 && c.B == 0 && c.A == 255 {
 		return true
 	}
@@ -126,8 +126,8 @@ func (c *Color) IsBlack() bool {
 // IsDark checks if HSL lightness value is < .6, which is a good
 // value for distinguishing when white vs. black text should be used
 // as a contrast color.
-func (c *Color) IsDark() bool {
-	hsl := HSLAModel.Convert(*c).(HSLA)
+func (c Color) IsDark() bool {
+	hsl := HSLAModel.Convert(c).(HSLA)
 	return hsl.L <= .6
 }
 
@@ -135,7 +135,7 @@ func (c *Color) IsDark() bool {
 // used for displaying text with this color in
 // the background (white or black depending on
 // the result of IsDark)
-func (c *Color) ContrastColor() Color {
+func (c Color) ContrastColor() Color {
 	if c.IsDark() {
 		return White
 	}
@@ -287,7 +287,7 @@ func (c *Color) SetHSL(h, s, l float32) {
 
 // ToHSLA converts to HSLA: [0..360], Saturation [0..1], and Luminance
 // (lightness) [0..1] of the color using float32 values
-func (c *Color) ToHSLA() (h, s, l, a float32) {
+func (c Color) ToHSLA() (h, s, l, a float32) {
 	r, g, b, a := c.ToNPFloat32()
 	h, s, l = RGBtoHSLf32(r, g, b)
 	return
@@ -574,8 +574,8 @@ func (c *Color) ParseHex(x string) error {
 // Lighter returns a color that is lighter by the given percent, e.g., 50 = 50%
 // lighter, relative to maximum possible lightness -- converts to HSL,
 // multiplies the L factor, and then converts back to RGBA
-func (c *Color) Lighter(pct float32) Color {
-	hsl := HSLAModel.Convert(*c).(HSLA)
+func (c Color) Lighter(pct float32) Color {
+	hsl := HSLAModel.Convert(c).(HSLA)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	hsl.L += (1.0 - hsl.L) * (pct / 100.0)
 	return ColorModel.Convert(hsl).(Color)
@@ -584,8 +584,8 @@ func (c *Color) Lighter(pct float32) Color {
 // Darker returns a color that is darker by the given percent, e.g., 50 = 50%
 // darker, relative to maximum possible darkness -- converts to HSL,
 // multiplies the L factor, and then converts back to RGBA
-func (c *Color) Darker(pct float32) Color {
-	hsl := HSLAModel.Convert(*c).(HSLA)
+func (c Color) Darker(pct float32) Color {
+	hsl := HSLAModel.Convert(c).(HSLA)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	hsl.L -= hsl.L * (pct / 100.0)
 	return ColorModel.Convert(hsl).(Color)
@@ -595,8 +595,8 @@ func (c *Color) Darker(pct float32) Color {
 // percent, e.g., 50 = 50% change relative to maximum possible lightness,
 // depending on how light the color is already -- if lightness >= 50% then goes
 // darker, and vice-versa
-func (c *Color) Highlight(pct float32) Color {
-	hsl := HSLAModel.Convert(*c).(HSLA)
+func (c Color) Highlight(pct float32) Color {
+	hsl := HSLAModel.Convert(c).(HSLA)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	if hsl.L >= .5 {
 		hsl.L -= hsl.L * (pct / 100.0)
@@ -608,8 +608,8 @@ func (c *Color) Highlight(pct float32) Color {
 
 // Samelight is the opposite of Highlight -- makes a color darker if already
 // darker than 50%, and lighter if already lighter than or equal to 50%
-func (c *Color) Samelight(pct float32) Color {
-	hsl := HSLAModel.Convert(*c).(HSLA)
+func (c Color) Samelight(pct float32) Color {
+	hsl := HSLAModel.Convert(c).(HSLA)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	if hsl.L >= .5 {
 		hsl.L += (1.0 - hsl.L) * (pct / 100.0)
@@ -622,8 +622,8 @@ func (c *Color) Samelight(pct float32) Color {
 // Saturate returns a color that is more saturated by the given percent: 100 =
 // 100% more saturated, etc -- converts to HSL, multiplies the S factor, and
 // then converts back to RGBA
-func (c *Color) Saturate(pct float32) Color {
-	hsl := HSLAModel.Convert(*c).(HSLA)
+func (c Color) Saturate(pct float32) Color {
+	hsl := HSLAModel.Convert(c).(HSLA)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	hsl.S += (1.0 - hsl.S) * (pct / 100.0)
 	return ColorModel.Convert(hsl).(Color)
@@ -632,8 +632,8 @@ func (c *Color) Saturate(pct float32) Color {
 // Pastel returns a color that is less saturated (more pastel-like) by the
 // given percent: 100 = 100% less saturated (i.e., grey) -- converts to HSL,
 // multiplies the S factor, and then converts back to RGBA
-func (c *Color) Pastel(pct float32) Color {
-	hsl := HSLAModel.Convert(*c).(HSLA)
+func (c Color) Pastel(pct float32) Color {
+	hsl := HSLAModel.Convert(c).(HSLA)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	hsl.S -= hsl.S * (pct / 100.0)
 	return ColorModel.Convert(hsl).(Color)
@@ -641,8 +641,8 @@ func (c *Color) Pastel(pct float32) Color {
 
 // Clearer returns a color that is given percent more transparent (lower alpha
 // value) relative to current alpha level
-func (c *Color) Clearer(pct float32) Color {
-	f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
+func (c Color) Clearer(pct float32) Color {
+	f32 := NRGBAf32Model.Convert(c).(NRGBAf32)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	f32.A -= f32.A * (pct / 100.0)
 	return ColorModel.Convert(f32).(Color)
@@ -650,8 +650,8 @@ func (c *Color) Clearer(pct float32) Color {
 
 // Opaquer returns a color that is given percent more opaque (higher alpha
 // value) relative to current alpha level
-func (c *Color) Opaquer(pct float32) Color {
-	f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
+func (c Color) Opaquer(pct float32) Color {
+	f32 := NRGBAf32Model.Convert(c).(NRGBAf32)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	f32.A += (1.0 - f32.A) * (pct / 100.0)
 	return ColorModel.Convert(f32).(Color)
@@ -660,8 +660,8 @@ func (c *Color) Opaquer(pct float32) Color {
 // Blend returns a color that is the given percent blend between current color
 // and given clr -- 10 = 10% of the clr and 90% of the current color, etc --
 // blending is done directly on non-pre-multiplied RGB values
-func (c *Color) Blend(pct float32, clr color.Color) Color {
-	f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
+func (c Color) Blend(pct float32, clr color.Color) Color {
+	f32 := NRGBAf32Model.Convert(c).(NRGBAf32)
 	othc := NRGBAf32Model.Convert(clr).(NRGBAf32)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	oth := pct / 100.0
@@ -675,7 +675,7 @@ func (c *Color) Blend(pct float32, clr color.Color) Color {
 
 // Inverse returns inverse current color (255 - each component)
 // does not change the alpha channel.
-func (c *Color) Inverse() Color {
+func (c Color) Inverse() Color {
 	return Color{255 - c.R, 255 - c.G, 255 - c.B, c.A}
 }
 
