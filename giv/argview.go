@@ -99,12 +99,6 @@ func (av *ArgView) ConfigArgsGrid() {
 	sg := av.ArgsGrid()
 	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
-	// setting a pref here is key for giving it a scrollbar in larger context
-	// sg.SetMinPrefHeight(units.Em(1.5))
-	// sg.SetMinPrefWidth(units.Em(10))
-	// sg.SetStretchMax() // for this to work, ALL layers above need it too
-	// sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
-	// sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{}
 	for i := range av.Args {
 		ad := &av.Args[i]
@@ -138,8 +132,10 @@ func (av *ArgView) ConfigArgsGrid() {
 		})
 		lbl.Text = ad.Name
 		lbl.Tooltip = ad.Desc
-		widg := sg.Child((i * 2) + 1).(gi.Node2D)
-		widg.SetProp("horizontal-align", gist.AlignLeft)
+		widg := sg.Child((i * 2) + 1).(*gi.WidgetBase)
+		widg.AddStyleFunc(gi.StyleFuncParts(av), func() {
+			av.Style.AlignH = gist.AlignCenter
+		})
 		ad.View.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
@@ -173,6 +169,7 @@ func (av *ArgView) ConfigStyles() {
 		title.Style.AlignV = gist.AlignTop
 	})
 	av.AddChildStyleFunc("args-grid", 1, gi.StyleFuncParts(av), func(grid *gi.WidgetBase) {
+		// setting a pref here is key for giving it a scrollbar in larger context
 		grid.Style.MinWidth.SetEm(1.5)
 		grid.Style.Width.SetEm(1.5)
 		grid.Style.MaxWidth.SetPx(-1) // for this to work, ALL layers above need it too

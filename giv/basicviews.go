@@ -61,9 +61,11 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.SetProp("padding", units.Px(2))
-	ac.SetProp("margin", units.Px(2))
-	ac.SetProp("border-radius", units.Px(4))
+	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		ac.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		ac.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		ac.Style.Border.Radius.Set(units.Px(100))
+	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -191,9 +193,11 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	}
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.SetProp("padding", units.Px(2))
-	ac.SetProp("margin", units.Px(2))
-	ac.SetProp("border-radius", units.Px(4))
+	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		ac.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		ac.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		ac.Style.Border.Radius.Set(units.Px(100))
+	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -329,9 +333,11 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.SetProp("padding", units.Px(2))
-	ac.SetProp("margin", units.Px(2))
-	ac.SetProp("border-radius", units.Px(4))
+	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		ac.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		ac.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		ac.Style.Border.Radius.Set(units.Px(100))
+	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -469,8 +475,11 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	mb := vv.Widget.(*gi.MenuButton)
 	mb.Tooltip, _ = vv.Tag("desc")
-	mb.SetProp("padding", units.Px(2))
-	mb.SetProp("margin", units.Px(2))
+	mb.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		mb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		mb.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		mb.Style.Border.Radius.Set(units.Px(100))
+	})
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -590,8 +599,8 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
-	sb.SetProp("#textfield", ki.Props{
-		"width": units.Ch(5),
+	sb.Parts.AddChildStyleFunc("textfield", 0, gi.StyleFuncParts(vv), func(tf *gi.WidgetBase) {
+		tf.Style.Width.SetCh(5)
 	})
 	vk := vv.Value.Kind()
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {
@@ -749,8 +758,10 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
-	cb.SetProp("padding", units.Px(2))
-	cb.SetProp("margin", units.Px(2))
+	cb.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		cb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		cb.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
+	})
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ, false, 50)
@@ -817,8 +828,10 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Node2D) {
 	cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
-	cb.SetProp("padding", units.Px(2))
-	cb.SetProp("margin", units.Px(2))
+	cb.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		cb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
+		cb.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
+	})
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ)
@@ -930,8 +943,10 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
-	tf.SetStretchMaxWidth()
-	tf.SetProp("min-width", units.Ch(16))
+	tf.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		tf.Style.MinWidth.SetCh(16)
+		tf.Style.MaxWidth.SetPx(-1)
+	})
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -978,8 +993,10 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
-	tf.SetStretchMaxWidth()
-	tf.SetProp("min-width", units.Ch(16))
+	tf.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		tf.Style.MinWidth.SetCh(16)
+		tf.Style.MaxWidth.SetPx(-1)
+	})
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -1076,7 +1093,9 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
-	tf.SetProp("min-width", units.Ch(float32(len(DefaultTimeFormat)+2)))
+	tf.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
+	})
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			vvv, _ := recv.Embed(TypeTimeValueView).(*TimeValueView)
