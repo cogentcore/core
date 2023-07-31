@@ -190,6 +190,7 @@ func (cv *ColorView) SetRGBValue(val float32, rgb int) {
 	case 3:
 		cv.Color.A = uint8(val)
 	}
+	cv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
 	if cv.TmpSave != nil {
 		cv.TmpSave.SaveTmp()
 	}
@@ -289,14 +290,13 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 }
 
 func (cv *ColorView) UpdateHSLSlider(sl *gi.Slider, hsl int) {
-	h, s, l, _ := cv.Color.ToHSLA()
 	switch hsl {
 	case 0:
-		sl.SetValue(h)
+		sl.SetValue(cv.ColorHSLA.H)
 	case 1:
-		sl.SetValue(s * 360.0)
+		sl.SetValue(cv.ColorHSLA.S * 360.0)
 	case 2:
-		sl.SetValue(l * 360.0)
+		sl.SetValue(cv.ColorHSLA.L * 360.0)
 	}
 }
 

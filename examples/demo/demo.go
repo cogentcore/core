@@ -297,8 +297,6 @@ func makeInputs(tv *gi.TabView) {
 	colorvv.SetSoloValue(reflect.ValueOf(&clr))
 	cvvw := inputs.AddNewChild(colorvv.WidgetType(), "cvvw").(gi.Node2D)
 	colorvv.ConfigWidget(cvvw)
-	// colorvv.ConfigWidget(colorvv.Widget)
-	// colorvv.SetColor(clr)
 
 	irow := gi.AddNewLayout(inputs, "irow", gi.LayoutVert)
 	irow.AddStyleFunc(gi.StyleFuncFinal, func() {
