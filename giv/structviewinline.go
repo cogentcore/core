@@ -33,6 +33,11 @@ type StructViewInline struct {
 
 var TypeStructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
 
+// AddNewStructViewInline adds a new inline structview to given parent node, with given name.
+func AddNewStructViewInline(parent ki.Ki, name string) *StructViewInline {
+	return parent.AddNewChild(TypeStructViewInline, name).(*StructViewInline)
+}
+
 func (sv *StructViewInline) Disconnect() {
 	sv.PartsWidgetBase.Disconnect()
 	sv.ViewSig.DisconnectAll()

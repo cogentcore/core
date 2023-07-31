@@ -26,12 +26,13 @@ import (
 // ColorView shows a color, using sliders or numbers to set values.
 type ColorView struct {
 	gi.Frame
-	Color    gist.Color `desc:"the color that we view"`
-	NumView  ValueView  `desc:"inline struct view of the numbers"`
-	TmpSave  ValueView  `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig  ki.Signal  `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	ManipSig ki.Signal  `json:"-" xml:"-" desc:"manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value"`
-	ViewPath string     `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	Color     gist.Color `desc:"the color that we view"`
+	ColorHSLA gist.HSLA  `desc:"the color that we view, in HSLA form"`
+	NumView   ValueView  `desc:"inline struct view of the numbers"`
+	TmpSave   ValueView  `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig   ki.Signal  `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ManipSig  ki.Signal  `json:"-" xml:"-" desc:"manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value"`
+	ViewPath  string     `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
 var TypeColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
@@ -56,6 +57,7 @@ var ColorViewProps = ki.Props{
 // SetColor sets the source color
 func (cv *ColorView) SetColor(clr color.Color) {
 	cv.Color.SetColor(clr)
+	cv.ColorHSLA = gist.HSLAModel.Convert(clr).(gist.HSLA)
 	cv.Config()
 	cv.Update()
 }
@@ -67,7 +69,9 @@ func (cv *ColorView) Config() {
 	}
 	updt := cv.UpdateStart()
 	cv.Lay = gi.LayoutVert
-	cv.SetProp("spacing", gi.StdDialogVSpaceUnits)
+	cv.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+		cv.Spacing = gi.StdDialogVSpaceUnits
+	})
 	vl := gi.AddNewLayout(cv, "slider-lay", gi.LayoutHoriz)
 	nl := gi.AddNewLayout(cv, "num-lay", gi.LayoutHoriz)
 
@@ -79,19 +83,37 @@ func (cv *ColorView) Config() {
 	vvb := cv.NumView.AsValueViewBase()
 	vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
+		cvv.ColorHSLA = gist.HSLAModel.Convert(cvv.Color).(gist.HSLA)
+		cvv.UpdateSliderGrid()
+		cvv.ViewSig.Emit(cvv.This(), 0, nil)
+	})
+
+	nlh := gi.AddNewLayout(cv, "num-lay-hsla", gi.LayoutHoriz)
+
+	nvs := AddNewStructViewInline(nlh, "nums-hsla")
+	nvs.SetStruct(&cv.ColorHSLA)
+	nvs.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		cvv.UpdateSliderGrid()
 		cvv.ViewSig.Emit(cvv.This(), 0, nil)
 	})
 
 	// slider layer
-	vl.SetProp("spacing", gi.StdDialogVSpaceUnits)
+	vl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+		vl.Spacing = gi.StdDialogVSpaceUnits
+	})
 	v := gi.AddNewFrame(vl, "value", gi.LayoutHoriz)
 	sg := gi.AddNewLayout(vl, "slider-grid", gi.LayoutGrid)
 
-	v.SetProp("min-width", units.Em(6))
-	v.SetProp("min-height", units.Em(6))
+	v.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+		v.Style.MinWidth.SetEm(6)
+		v.Style.MinHeight.SetEm(6)
+		v.Style.Border.Radius.Set(units.Px(100))
+	})
 
-	sg.SetProp("columns", 4)
+	sg.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+		sg.Style.Columns = 4
+	})
 	rl := gi.AddNewLabel(sg, "rlab", "Red:")
 	rs := gi.AddNewSlider(sg, "red")
 	hl := gi.AddNewLabel(sg, "hlab", "Hue:")
@@ -181,8 +203,12 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SetMinPrefWidth(units.Ch(20))
-	sl.SetMinPrefHeight(units.Em(1))
+	sl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+		sl.Style.MinWidth.SetCh(20)
+		sl.Style.Width.SetCh(20)
+		sl.Style.MinHeight.SetEm(1)
+		sl.Style.Height.SetEm(1)
+	})
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		slv := send.Embed(gi.TypeSlider).(*gi.Slider)
@@ -238,8 +264,12 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SetMinPrefWidth(units.Ch(20))
-	sl.SetMinPrefHeight(units.Em(1))
+	sl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+		sl.Style.MinWidth.SetCh(20)
+		sl.Style.Width.SetCh(20)
+		sl.Style.MinHeight.SetEm(1)
+		sl.Style.Height.SetEm(1)
+	})
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		slv := send.Embed(gi.TypeSlider).(*gi.Slider)
@@ -287,7 +317,9 @@ func (cv *ColorView) ConfigPalette() {
 
 	nms := gist.HSLSortedColorNames()
 
-	pg.SetProp("columns", 25)
+	pg.AddStyleFunc(gi.StyleFuncParts(pg), func() {
+		pg.Style.Columns = 25
+	})
 
 	for _, cn := range nms {
 		c := colornames.Map[cn]
@@ -443,9 +475,8 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*StructViewInline)
-	// TODO: prevent infinite color view loop with this
 	// fmt.Println(reflect.TypeOf(sv.Parent()))
-	// sv.AddAction = reflect.TypeOf(sv.Parent()) != TypeColorView
+	// sv.AddAction = reflect.TypeOf(sv.Parent().Parent()) != TypeColorView
 	sv.AddAction = true
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
