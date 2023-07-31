@@ -6,10 +6,12 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
@@ -288,6 +290,15 @@ func makeInputs(tv *gi.TabView) {
 	tfieldp := gi.AddNewTextField(inputs, "tfieldp")
 	tfieldp.Placeholder = "Password Text Field"
 	tfieldp.NoEcho = true
+
+	clr := colors.Blue
+
+	colorvv := giv.ToValueView(&clr, "")
+	colorvv.SetSoloValue(reflect.ValueOf(&clr))
+	cvvw := inputs.AddNewChild(colorvv.WidgetType(), "cvvw").(gi.Node2D)
+	colorvv.ConfigWidget(cvvw)
+	// colorvv.ConfigWidget(colorvv.Widget)
+	// colorvv.SetColor(clr)
 
 	irow := gi.AddNewLayout(inputs, "irow", gi.LayoutVert)
 	irow.AddStyleFunc(gi.StyleFuncFinal, func() {

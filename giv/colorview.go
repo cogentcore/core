@@ -28,11 +28,11 @@ type ColorView struct {
 	gi.Frame
 	Color     gist.Color `desc:"the color that we view"`
 	ColorHSLA gist.HSLA  `desc:"the color that we view, in HSLA form"`
-	NumView   ValueView  `desc:"inline struct view of the numbers"`
-	TmpSave   ValueView  `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig   ki.Signal  `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	ManipSig  ki.Signal  `json:"-" xml:"-" desc:"manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value"`
-	ViewPath  string     `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	// NumView   ValueView  `desc:"inline struct view of the numbers"`
+	TmpSave  ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig  ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ManipSig ki.Signal `json:"-" xml:"-" desc:"manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value"`
+	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
 var TypeColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
@@ -73,24 +73,25 @@ func (cv *ColorView) Config() {
 		cv.Spacing = gi.StdDialogVSpaceUnits
 	})
 	vl := gi.AddNewLayout(cv, "slider-lay", gi.LayoutHoriz)
-	nl := gi.AddNewLayout(cv, "num-lay", gi.LayoutHoriz)
+	nl := gi.AddNewLayout(cv, "num-lay", gi.LayoutVert)
 
-	cv.NumView = ToValueView(&cv.Color, "")
-	cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
-	vtyp := cv.NumView.WidgetType()
-	widg := nl.AddNewChild(vtyp, "nums").(gi.Node2D)
-	cv.NumView.ConfigWidget(widg)
-	vvb := cv.NumView.AsValueViewBase()
-	vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-		cvv.ColorHSLA = gist.HSLAModel.Convert(cvv.Color).(gist.HSLA)
-		cvv.UpdateSliderGrid()
-		cvv.ViewSig.Emit(cvv.This(), 0, nil)
-	})
+	// cv.NumView = ToValueView(&cv.Color, "")
+	// cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
+	// vtyp := cv.NumView.WidgetType()
+	// widg := nl.AddNewChild(vtyp, "nums").(gi.Node2D)
+	// cv.NumView.ConfigWidget(widg)
+	// vvb := cv.NumView.AsValueViewBase()
+	// vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	cvv, _ := recv.Embed(TypeColorView).(*ColorView)
+	// 	cvv.ColorHSLA = gist.HSLAModel.Convert(cvv.Color).(gist.HSLA)
+	// 	cvv.UpdateSliderGrid()
+	// 	cvv.ViewSig.Emit(cvv.This(), 0, nil)
+	// })
 
-	nlh := gi.AddNewLayout(cv, "num-lay-hsla", gi.LayoutHoriz)
+	nv := AddNewStructViewInline(nl, "nums")
+	nv.SetStruct(&cv.Color)
 
-	nvs := AddNewStructViewInline(nlh, "nums-hsla")
+	nvs := AddNewStructViewInline(nl, "nums-hsla")
 	nvs.SetStruct(&cv.ColorHSLA)
 	nvs.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
@@ -354,7 +355,7 @@ func (cv *ColorView) Update() {
 // without UpdateStart / End wrapper
 func (cv *ColorView) UpdateImpl() {
 	cv.UpdateSliderGrid()
-	cv.NumView.UpdateWidget()
+	// cv.NumView.UpdateWidget()
 	v := cv.Value()
 	v.Style.BackgroundColor.Color = cv.Color // direct copy
 }
@@ -394,6 +395,11 @@ type ColorValueView struct {
 }
 
 var TypeColorValueView = kit.Types.AddType(&ColorValueView{}, nil)
+
+// AddNewColorValueView adds a new color value view to given parent node, with given name.
+func AddNewColorValueView(parent ki.Ki, name string) *ColorValueView {
+	return parent.AddNewChild(TypeColorValueView, name).(*ColorValueView)
+}
 
 // Color returns a standardized color value from whatever value is represented
 // internally
