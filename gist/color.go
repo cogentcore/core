@@ -622,89 +622,104 @@ func (c *Color) ParseHex(x string) error {
 	return nil
 }
 
-// Lighter returns a color that is lighter by the given percent, e.g., 50 = 50%
-// lighter, relative to maximum possible lightness -- converts to HSL,
-// multiplies the L factor, and then converts back to RGBA
+// Lighter returns a color that is lighter by the
+// given absolute HSL percent, e.g., 50 = 50%
+// lighter, relative to the maximum possible lightness;
+// it converts to HSL, adds to the L factor,
+// and then converts back to RGBA.
 func (c Color) Lighter(pct float32) Color {
 	hsl := HSLAModel.Convert(c).(HSLA)
-	pct = mat32.Clamp(pct, 0, 100.0)
-	hsl.L += (1.0 - hsl.L) * (pct / 100.0)
+	hsl.L += pct / 100
+	hsl.L = mat32.Clamp(hsl.L, 0, 1)
 	return ColorModel.Convert(hsl).(Color)
 }
 
-// Darker returns a color that is darker by the given percent, e.g., 50 = 50%
-// darker, relative to maximum possible darkness -- converts to HSL,
-// multiplies the L factor, and then converts back to RGBA
+// Darker returns a color that is darker by the
+// given absolute HSL percent, e.g., 50 = 50%
+// darker, relative to the maximum possible lightness;
+// it converts to HSL, subtracts from the L factor,
+// and then converts back to RGBA.
 func (c Color) Darker(pct float32) Color {
 	hsl := HSLAModel.Convert(c).(HSLA)
-	pct = mat32.Clamp(pct, 0, 100.0)
-	hsl.L -= hsl.L * (pct / 100.0)
+	hsl.L -= pct / 100
+	hsl.L = mat32.Clamp(hsl.L, 0, 1)
 	return ColorModel.Convert(hsl).(Color)
 }
 
-// Highlight returns a color that is either lighter or darker by the given
-// percent, e.g., 50 = 50% change relative to maximum possible lightness,
-// depending on how light the color is already -- if lightness >= 50% then goes
-// darker, and vice-versa
+// Highlight returns a color that is lighter or darker by the
+// given absolute HSL percent, based on whether the color is already
+// light or dark; if the color is lighter than or equal to 50%,
+// it becomes darker, and if it is darker than 50%, it becomes lighter.
+// For example, 50 = 50% lighter or darker, relative to the maximum
+// possible lightness; it converts to HSL, adds or subtracts
+// from the L factor, and then converts back to RGBA.
 func (c Color) Highlight(pct float32) Color {
 	hsl := HSLAModel.Convert(c).(HSLA)
-	pct = mat32.Clamp(pct, 0, 100.0)
 	if hsl.L >= .5 {
-		hsl.L -= hsl.L * (pct / 100.0)
+		hsl.L -= pct / 100
 	} else {
-		hsl.L += (1.0 - hsl.L) * (pct / 100.0)
+		hsl.L += pct / 100
 	}
+	hsl.L = mat32.Clamp(hsl.L, 0, 1)
 	return ColorModel.Convert(hsl).(Color)
 }
 
-// Samelight is the opposite of Highlight -- makes a color darker if already
-// darker than 50%, and lighter if already lighter than or equal to 50%
+// Samelight is the opposite of [Color.Highlight];
+// it makes a color darker if it is already
+// darker than 50%, and lighter if already
+// lighter than or equal to 50%
 func (c Color) Samelight(pct float32) Color {
 	hsl := HSLAModel.Convert(c).(HSLA)
-	pct = mat32.Clamp(pct, 0, 100.0)
 	if hsl.L >= .5 {
-		hsl.L += (1.0 - hsl.L) * (pct / 100.0)
+		hsl.L += pct / 100
 	} else {
-		hsl.L -= hsl.L * (pct / 100.0)
+		hsl.L -= pct / 100
 	}
+	hsl.L = mat32.Clamp(hsl.L, 0, 1)
 	return ColorModel.Convert(hsl).(Color)
 }
 
-// Saturate returns a color that is more saturated by the given percent: 100 =
-// 100% more saturated, etc -- converts to HSL, multiplies the S factor, and
-// then converts back to RGBA
+// Saturate returns a color that is more saturated by the
+// given absolute HSL percent, e.g., 50 = 50%
+// more saturated, relative to the maximum possible saturation;
+// it converts to HSL, adds to the S factor,
+// and then converts back to RGBA.
 func (c Color) Saturate(pct float32) Color {
 	hsl := HSLAModel.Convert(c).(HSLA)
-	pct = mat32.Clamp(pct, 0, 100.0)
-	hsl.S += (1.0 - hsl.S) * (pct / 100.0)
+	hsl.S += pct / 100
+	hsl.S = mat32.Clamp(hsl.S, 0, 1)
 	return ColorModel.Convert(hsl).(Color)
 }
 
 // Pastel returns a color that is less saturated (more pastel-like) by the
-// given percent: 100 = 100% less saturated (i.e., grey) -- converts to HSL,
-// multiplies the S factor, and then converts back to RGBA
+// given absolute HSL percent, e.g., 50 = 50%
+// less saturated, relative to the maximum possible saturation;
+// it converts to HSL, subtracts from the S factor,
+// and then converts back to RGBA.
 func (c Color) Pastel(pct float32) Color {
 	hsl := HSLAModel.Convert(c).(HSLA)
-	pct = mat32.Clamp(pct, 0, 100.0)
-	hsl.S -= hsl.S * (pct / 100.0)
+	hsl.S -= pct / 100
+	hsl.S = mat32.Clamp(hsl.S, 0, 1)
 	return ColorModel.Convert(hsl).(Color)
 }
 
-// Clearer returns a color that is given percent more transparent (lower alpha
-// value) relative to current alpha level
+// Clearer returns a color that is the given percent
+// more transparent (lower alpha value)
+// relative to the maximum possible alpha level
 func (c Color) Clearer(pct float32) Color {
 	f32 := NRGBAf32Model.Convert(c).(NRGBAf32)
-	pct = mat32.Clamp(pct, 0, 100.0)
-	f32.A -= f32.A * (pct / 100.0)
+	f32.A -= pct / 100
+	f32.A = mat32.Clamp(f32.A, 0, 1)
 	return ColorModel.Convert(f32).(Color)
 }
 
-// Opaquer returns a color that is given percent more opaque (higher alpha
-// value) relative to current alpha level
+// Opaquer returns a color that is the given percent
+// more opaque (higher alpha value)
+// relative to the maximum possible alpha level
 func (c Color) Opaquer(pct float32) Color {
 	f32 := NRGBAf32Model.Convert(c).(NRGBAf32)
-	pct = mat32.Clamp(pct, 0, 100.0)
-	f32.A += (1.0 - f32.A) * (pct / 100.0)
+	f32.A += pct / 100
+	f32.A = mat32.Clamp(f32.A, 0, 1)
 	return ColorModel.Convert(f32).(Color)
 }
 

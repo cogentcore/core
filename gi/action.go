@@ -403,7 +403,7 @@ func (ac *Action) ConfigStyles() {
 			ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
 			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			ac.Style.BackgroundColor.SetColor(Colors.Accent.Samelight(10).Pastel(40))
+			ac.Style.BackgroundColor.SetColor(Colors.Accent.Samelight(10).Pastel(70))
 		case ActionParts:
 			ac.Style.Border.Radius.Set()
 			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
