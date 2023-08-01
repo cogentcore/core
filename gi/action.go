@@ -395,14 +395,22 @@ func (ac *Action) UpdateActions() {
 func (ac *Action) ConfigStyles() {
 	ac.AddStyleFunc(StyleFuncDefault, func() {
 		ac.Style.Border.Style.Set(gist.BorderNone)
-		ac.Style.Border.Radius.Set()
 		ac.Style.Text.Align = gist.AlignCenter
+		ac.Style.BackgroundColor.SetColor(Colors.Background)
 		ac.Style.Color = Colors.Text
-		ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		switch ac.Type {
+		case ActionStandalone:
+			ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
+			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
+			ac.Style.BackgroundColor.SetColor(Colors.Accent.Samelight(10).Pastel(40))
+		case ActionParts:
+			ac.Style.Border.Radius.Set()
+			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+			ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		case ActionMenu:
 			ac.Style.Margin.Set()
+			ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 			ac.Style.MaxWidth.SetPx(-1)
 			ac.Indicator = icons.KeyboardArrowRight
 		case ActionMenuBar:
@@ -416,16 +424,16 @@ func (ac *Action) ConfigStyles() {
 		}
 		switch ac.State {
 		case ButtonActive:
-			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
+			ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(7))
 		case ButtonInactive:
-			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(20))
 			ac.Style.Color = Colors.Text.Highlight(20)
 		case ButtonFocus, ButtonSelected:
-			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+			ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(15))
 		case ButtonHover:
-			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+			ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(20))
 		case ButtonDown:
-			ac.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
+			ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(25))
 		}
 	})
 	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, StyleFuncParts(ac), func(icon *WidgetBase) {

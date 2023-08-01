@@ -60,6 +60,7 @@ var ColorViewProps = ki.Props{
 func (cv *ColorView) SetColor(clr color.Color) {
 	cv.Color.SetColor(clr)
 	cv.ColorHSLA = gist.HSLAModel.Convert(clr).(gist.HSLA)
+	cv.ColorHSLA.Round()
 	cv.Config()
 	cv.Update()
 }

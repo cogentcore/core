@@ -64,11 +64,6 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	ac := vv.Widget.(*gi.Action)
 	ac.Icon = icons.OpenInNew
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
-		ac.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		ac.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
-	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -197,11 +192,6 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	ac := vv.Widget.(*gi.Action)
 	ac.Icon = icons.OpenInNew
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
-		ac.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		ac.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
-	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -338,11 +328,6 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	ac := vv.Widget.(*gi.Action)
 	ac.Icon = icons.OpenInNew
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
-		ac.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		ac.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
-	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)

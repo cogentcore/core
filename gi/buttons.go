@@ -920,7 +920,7 @@ func (bt *Button) ConfigStyles() {
 	bt.AddStyleFunc(StyleFuncDefault, func() {
 		bt.Style.Border.Radius.Set(gist.BorderRadiusFull)
 		bt.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-		bt.Style.Padding.Set(units.Px(4*Prefs.DensityMul()), units.Px(8*Prefs.DensityMul()))
+		bt.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
 		bt.Style.Text.Align = gist.AlignCenter
 		switch bt.Type {
 		case ButtonDefault:
