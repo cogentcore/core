@@ -403,7 +403,11 @@ func NewMainWindow(name, title string, width, height int) *Window {
 	MainWindows.Add(win)
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
-	vp.SetProp("color", &Prefs.Colors.Font) // everything inherits this..
+	vp.Fill = true
+	vp.AddStyleFunc(StyleFuncParts(win), func() {
+		vp.Style.BackgroundColor.SetColor(Colors.Background)
+		vp.Style.Color = Colors.Text // everything inherits this
+	})
 
 	win.AddChild(vp)
 	win.Viewport = vp
@@ -508,15 +512,17 @@ func (w *Window) ConfigVLay() {
 // ConfigInsets updates the padding on the main layout of the window
 // to the inset values provided by the OSWin window.
 func (w *Window) ConfigInsets() {
-	mainVlay := w.Viewport.ChildByName("main-vlay", -1)
-	if mainVlay != nil {
+	mainVlay, ok := w.Viewport.ChildByName("main-vlay", 0).(*Layout)
+	if ok {
 		insets := w.OSWin.Insets()
-		mainVlay.SetProp("padding", gist.NewSides[units.Value](
-			units.Dot(insets.Top),
-			units.Dot(insets.Right),
-			units.Dot(insets.Bottom),
-			units.Dot(insets.Left),
-		))
+		mainVlay.AddStyleFunc(StyleFuncParts(w), func() {
+			mainVlay.Style.Padding.Set(
+				units.Dot(insets.Top),
+				units.Dot(insets.Right),
+				units.Dot(insets.Bottom),
+				units.Dot(insets.Left),
+			)
+		})
 	}
 
 }

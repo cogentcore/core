@@ -962,7 +962,7 @@ func (bt *Button) ConfigStyles() {
 		case ButtonSecondary:
 			bt.Style.Border.Style.Set(gist.BorderSolid)
 			bt.Style.Border.Width.Set(units.Px(1))
-			bt.Style.Border.Color.Set(Colors.Primary.Pastel(50))
+			bt.Style.Border.Color.Set(Colors.Primary.Pastel(100))
 			bt.Style.Color = Colors.Primary
 			switch bt.State {
 			case ButtonActive:

@@ -127,6 +127,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		win.Data = dlg.Data
 		win.AddChild(dlg)
 		win.Viewport = &dlg.Viewport2D
+		win.Viewport.Fill = true
 		win.MasterVLay = dlg.Frame().Embed(TypeLayout).(*Layout)
 		// fmt.Printf("new win dpi: %v\n", win.LogicalDPI())
 	}
@@ -662,6 +663,7 @@ func StringPromptDialogValue(dlg *Dialog) string {
 
 func (dlg *Dialog) ConfigStyles() {
 	dlg.AddStyleFunc(StyleFuncDefault, func() {
+		dlg.Style.BackgroundColor.SetColor(Colors.Background)
 		dlg.Style.Color = Colors.Text
 	})
 	frame, ok := dlg.ChildByName("frame", 0).(*Frame)

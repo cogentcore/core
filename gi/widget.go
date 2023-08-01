@@ -998,6 +998,14 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
 
+	// TODO: maybe implement some version of this to render background color
+	// in margin if the parent element doesn't render for us
+	// if pwb, ok := wb.Parent().(*WidgetBase); ok {
+	// 	if pwb.Embed(TypeLayout) != nil && pwb.Embed(TypeFrame) == nil {
+	// 		pc.FillBox(rs, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &st.BackgroundColor)
+	// 	}
+	// }
+
 	pos := wb.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
 	sz := wb.LayState.Alloc.Size.Sub(st.Margin.Dots().Size())
 	rad := st.Border.Radius.Dots()
