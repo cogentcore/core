@@ -473,6 +473,7 @@ func (cv *ColorView) ConfigPalette() {
 				but := send.Embed(gi.TypeButton).(*gi.Button)
 				cvv.Color.SetName(but.Nm)
 				cvv.ColorHSLA = gist.HSLAModel.Convert(cvv.Color).(gist.HSLA)
+				cvv.ColorHSLA.Round()
 				cvv.ViewSig.Emit(cvv.This(), 0, nil)
 				cvv.Update()
 			}

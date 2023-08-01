@@ -11,16 +11,17 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[ActionDefault-0]
-	_ = x[ActionMenu-1]
-	_ = x[ActionMenuBar-2]
-	_ = x[ActionToolBar-3]
-	_ = x[ActionTypesN-4]
+	_ = x[ActionStandalone-0]
+	_ = x[ActionParts-1]
+	_ = x[ActionMenu-2]
+	_ = x[ActionMenuBar-3]
+	_ = x[ActionToolBar-4]
+	_ = x[ActionTypesN-5]
 }
 
-const _ActionTypes_name = "ActionDefaultActionMenuActionMenuBarActionToolBarActionTypesN"
+const _ActionTypes_name = "ActionStandaloneActionPartsActionMenuActionMenuBarActionToolBarActionTypesN"
 
-var _ActionTypes_index = [...]uint8{0, 13, 23, 36, 49, 61}
+var _ActionTypes_index = [...]uint8{0, 16, 27, 37, 50, 63, 75}
 
 func (i ActionTypes) String() string {
 	if i < 0 || i >= ActionTypes(len(_ActionTypes_index)-1) {
@@ -40,11 +41,12 @@ func (i *ActionTypes) FromString(s string) error {
 }
 
 var _ActionTypes_descMap = map[ActionTypes]string{
-	0: `ActionDefault is a default, standalone action that is not part of a menu, menubar, or toolbar`,
-	1: `ActionMenu is an action contained within a popup menu`,
-	2: `ActionMenuBar is an action contained within a menu bar`,
-	3: `ActionToolBar is an action contained within a toolbar`,
-	4: ``,
+	0: `ActionStandalone is a default, standalone action that is not part of a menu, menubar, or toolbar`,
+	1: `ActionParts is an action that is part of another element (like a clear button in a textfield)`,
+	2: `ActionMenu is an action contained within a popup menu`,
+	3: `ActionMenuBar is an action contained within a menu bar`,
+	4: `ActionToolBar is an action contained within a toolbar`,
+	5: ``,
 }
 
 func (i ActionTypes) Desc() string {

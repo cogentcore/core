@@ -35,10 +35,13 @@ var TypeAction = kit.Types.AddType(&Action{}, nil)
 type ActionTypes int
 
 const (
-	// ActionDefault is a default, standalone
+	// ActionStandalone is a default, standalone
 	// action that is not part of a menu,
-	// menubar, or toolbar
-	ActionDefault ActionTypes = iota
+	// menubar, toolbar, or other element
+	ActionStandalone ActionTypes = iota
+	// ActionParts is an action that is part of
+	// another element (like a clear button in a textfield)
+	ActionParts
 	// ActionMenu is an action contained
 	// within a popup menu
 	ActionMenu
