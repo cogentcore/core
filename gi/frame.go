@@ -12,7 +12,6 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
 )
 
 // Frame is a Layout that renders a background according to the
@@ -85,35 +84,14 @@ func (ev *Stripes) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 
 // FrameStdRender does the standard rendering of the frame itself
 func (fr *Frame) FrameStdRender() {
-	rs, pc, st := fr.RenderLock()
+	rs, _, st := fr.RenderLock()
 	defer fr.RenderUnlock(rs)
 
-	pos := fr.LayState.Alloc.Pos
-	sz := fr.LayState.Alloc.Size
-	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
-
-	// SidesTODO: not sure about this
-	pos = pos.Add(st.Margin.Dots().Pos()).Sub(st.Border.Width.Dots().Pos().MulScalar(0.5))
-	sz = sz.Sub(st.Margin.Dots().Size()).Add(st.Border.Width.Dots().Size().MulScalar(0.5))
-
-	// then any shadow -- todo: optimize!
-	if st.BoxShadow.HasShadow() {
-		spos := pos.Add(mat32.Vec2{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
-		// SidesTODO: unsure about border styling here
-		// no border on box shadow (we do later)
-		pc.StrokeStyle.SetColor(nil)
-		pc.FillStyle.SetColor(&st.BoxShadow.Color)
-		pc.DrawBorder(rs, spos.X, spos.Y, sz.X, sz.Y, gist.Border{})
-	}
+	fr.RenderStdBox(st)
 
 	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes && Prefs.Params.ZebraStripeWeight != 0 {
 		fr.RenderStripes()
 	}
-
-	pc.FillStyle.SetColor(nil)
-	// pc.StrokeStyle.SetColor(&st.Border.Color.Top)
-	// pc.StrokeStyle.Width = st.Border.Width.Top
-	pc.DrawBorder(rs, pos.X, pos.Y, sz.X, sz.Y, st.Border)
 }
 
 func (fr *Frame) RenderStripes() {

@@ -90,13 +90,22 @@ func (cv *ColorView) Config() {
 
 	nv := AddNewStructViewInline(nl, "nums")
 	nv.SetStruct(&cv.Color)
+	nv.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
+		updt := cvv.UpdateStart()
+		cvv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
+		cvv.ViewSig.Emit(cvv.This(), 0, nil)
+		cvv.UpdateEnd(updt)
+	})
 
 	nvs := AddNewStructViewInline(nl, "nums-hsla")
 	nvs.SetStruct(&cv.ColorHSLA)
 	nvs.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-		cvv.UpdateSliderGrid()
+		updt := cvv.UpdateStart()
+		cvv.Color = gist.ColorModel.Convert(cv.ColorHSLA).(gist.Color)
 		cvv.ViewSig.Emit(cvv.This(), 0, nil)
+		cvv.UpdateEnd(updt)
 	})
 
 	// slider layer
@@ -110,6 +119,7 @@ func (cv *ColorView) Config() {
 		v.Style.MinWidth.SetEm(6)
 		v.Style.MinHeight.SetEm(6)
 		v.Style.Border.Radius.Set(units.Px(100))
+		v.Style.BackgroundColor.SetColor(cv.Color)
 	})
 
 	sg.AddStyleFunc(gi.StyleFuncParts(cv), func() {
@@ -246,10 +256,13 @@ func (cv *ColorView) SetHSLValue(val float32, hsl int) {
 	switch hsl {
 	case 0:
 		h = val
+		cv.ColorHSLA.H = h
 	case 1:
 		s = val / 360.0
+		cv.ColorHSLA.S = s
 	case 2:
 		l = val / 360.0
+		cv.ColorHSLA.L = l
 	}
 	cv.Color.SetHSL(h, s, l)
 	if cv.TmpSave != nil {
@@ -338,6 +351,7 @@ func (cv *ColorView) ConfigPalette() {
 			if sig == int64(gi.ButtonPressed) {
 				but := send.Embed(gi.TypeButton).(*gi.Button)
 				cvv.Color.SetName(but.Nm)
+				cvv.ColorHSLA = gist.HSLAModel.Convert(cvv.Color).(gist.HSLA)
 				cvv.ViewSig.Emit(cvv.This(), 0, nil)
 				cvv.Update()
 			}
@@ -355,9 +369,24 @@ func (cv *ColorView) Update() {
 // without UpdateStart / End wrapper
 func (cv *ColorView) UpdateImpl() {
 	cv.UpdateSliderGrid()
+	cv.UpdateNums()
+	cv.UpdateValueFrame()
 	// cv.NumView.UpdateWidget()
-	v := cv.Value()
-	v.Style.BackgroundColor.Color = cv.Color // direct copy
+	// v := cv.Value()
+	// v.Style.BackgroundColor.Color = cv.Color // direct copy
+}
+
+// UpdateValueFrame updates the value frame of the color view
+// that displays the color.
+func (cv *ColorView) UpdateValueFrame() {
+	cv.SliderLay().ChildByName("value", 0).(*gi.Frame).Style.BackgroundColor.Color = cv.Color // direct copy
+}
+
+// UpdateNums updates the values of the number inputs
+// in the color view to reflect the latest values
+func (cv *ColorView) UpdateNums() {
+	cv.NumLay().ChildByName("nums", 0).(*StructViewInline).UpdateFields()
+	cv.NumLay().ChildByName("nums-hsla", 1).(*StructViewInline).UpdateFields()
 }
 
 func (cv *ColorView) Render2D() {

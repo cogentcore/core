@@ -25,7 +25,10 @@ import (
 // Color extends image/color.RGBA with more methods for converting to / from
 // strings etc -- it has standard uint8 0..255 color values
 type Color struct {
-	R, G, B, A uint8
+	R uint8 `min:"0" max:"255" step:"5" desc:"the red part of the color"`
+	G uint8 `min:"0" max:"255" step:"5" desc:"the green part of the color"`
+	B uint8 `min:"0" max:"255" step:"5" desc:"the blue part of the color"`
+	A uint8 `min:"0" max:"255" step:"5" desc:"the transparency of the color"`
 }
 
 var TypeColor = kit.Types.AddType(&Color{}, ColorProps)
@@ -71,10 +74,39 @@ func MustColorFromName(name string) Color {
 	return c
 }
 
-// ColorFromColor returns a new gist.Color from image/color.Color
+// ColorFromColor returns a new [gist.Color] from a [color.Color]
 func ColorFromColor(clr color.Color) Color {
 	var c Color
 	c.SetColor(clr)
+	return c
+}
+
+// ColorFromRGB returns a new color from the given uint8 RGB values
+func ColorFromRGB(r, g, b uint8) Color {
+	return Color{R: r, G: g, B: b, A: 255}
+}
+
+// ColorFromHSLA returns a new color from the given uint8 RGBA values
+func ColorFromRGBA(r, g, b, a uint8) Color {
+	return Color{R: r, G: g, B: b, A: a}
+}
+
+// ColorFromHSL returns a new color from the given HSL values:
+// Hue [0..360], Saturation [0..1], and Luminance
+// (lightness) [0..1] using float32 values
+func ColorFromHSL(h, s, l float32) Color {
+	var c Color
+	c.A = 255
+	c.SetHSL(h, s, l)
+	return c
+}
+
+// ColorFromHSLA returns a new color from the given HSLA values:
+// Hue [0..360], Saturation [0..1], Luminance
+// (lightness) [0..1], and Transparency [0..1] using float32 values
+func ColorFromHSLA(h, s, l, a float32) Color {
+	var c Color
+	c.SetHSLA(h, s, l, a)
 	return c
 }
 
@@ -278,15 +310,15 @@ func (c *Color) SetHSLA(h, s, l, a float32) {
 	c.SetNPFloat32(r, g, b, a)
 }
 
-// SetHSL converts from HSL: [0..360], Saturation [0..1], and Luminance
+// SetHSL converts from HSL: Hue [0..360], Saturation [0..1], and Luminance
 // (lightness) [0..1] of the color using float32 values
 func (c *Color) SetHSL(h, s, l float32) {
 	r, g, b := HSLtoRGBf32(h, s, l)
 	c.SetNPFloat32(r, g, b, float32(c.A)/255.0)
 }
 
-// ToHSLA converts to HSLA: [0..360], Saturation [0..1], and Luminance
-// (lightness) [0..1] of the color using float32 values
+// ToHSLA converts to HSLA: Hue [0..360], Saturation [0..1], Luminance
+// (lightness) [0..1], and Transparency [0..1] of the color using float32 values
 func (c Color) ToHSLA() (h, s, l, a float32) {
 	r, g, b, a := c.ToNPFloat32()
 	h, s, l = RGBtoHSLf32(r, g, b)
@@ -742,7 +774,10 @@ func (c NRGBAf32) RGBA() (r, g, b, a uint32) {
 // HSLA represents the Hue [0..360], Saturation [0..1], and Luminance
 // (lightness) [0..1] of the color using float32 values
 type HSLA struct {
-	H, S, L, A float32
+	H float32 `min:"0" max:"360" step:"5" desc:"the hue of the color"`
+	S float32 `min:"0" max:"1" step:"0.05" desc:"the saturation of the color"`
+	L float32 `min:"0" max:"1" step:"0.05" desc:"the luminance (lightness) of the color"`
+	A float32 `min:"0" max:"1" step:"0.05" desc:"the transparency of the color"`
 }
 
 // Implements the color.Color interface
