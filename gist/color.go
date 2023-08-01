@@ -110,6 +110,25 @@ func ColorFromHSLA(h, s, l, a float32) Color {
 	return c
 }
 
+// ColorFromHex returns the color specified by the given
+// Hex string, and an error if the string is invalid.
+func ColorFromHex(hex string) (Color, error) {
+	var c Color
+	err := c.ParseHex(hex)
+	return c, err
+}
+
+// MustColorFromHex is a helper function that calls
+// [ColorFromHex] and panics if there is an error.
+// Otherwise, it returns the resulting color.
+func MustColorFromHex(hex string) Color {
+	c, err := ColorFromHex(hex)
+	if err != nil {
+		panic("MustColorFromHex: error parsing hex:" + err.Error())
+	}
+	return c
+}
+
 // implements color.Color interface -- returns values in range 0x0000 - 0xffff
 func (c Color) RGBA() (r, g, b, a uint32) {
 	r = uint32(c.R)
@@ -567,7 +586,7 @@ func (c *Color) SetStringStyle(str string, base color.Color, ctxt Context) error
 	}
 }
 
-// parse Hex color -- this is from fogleman/gg I think..
+// ParseHex parses the given Hex color string
 func (c *Color) ParseHex(x string) error {
 	x = strings.TrimPrefix(x, "#")
 	var r, g, b, a int

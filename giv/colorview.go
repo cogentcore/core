@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 	"reflect"
@@ -13,6 +14,8 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -87,9 +90,11 @@ func (cv *ColorView) Config() {
 	// 	cvv.ViewSig.Emit(cvv.This(), 0, nil)
 	// })
 
-	nv := AddNewStructViewInline(nl, "nums")
-	nv.SetStruct(&cv.Color)
-	nv.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	rgbalay := gi.AddNewLayout(nl, "nums-rgba-lay", gi.LayoutHoriz)
+
+	nrgba := AddNewStructViewInline(rgbalay, "nums-rgba")
+	nrgba.SetStruct(&cv.Color)
+	nrgba.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		updt := cvv.UpdateStart()
 		cvv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
@@ -97,9 +102,39 @@ func (cv *ColorView) Config() {
 		cvv.UpdateEnd(updt)
 	})
 
-	nvs := AddNewStructViewInline(nl, "nums-hsla")
-	nvs.SetStruct(&cv.ColorHSLA)
-	nvs.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	rgbacopy := gi.AddNewMenuButton(rgbalay, "rgbacopy")
+	rgbacopy.Icon = icons.ContentCopy
+	rgbacopy.Tooltip = "Copy RGBA Color"
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGB(r, g, b)"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := fmt.Sprintf("gist.ColorFromRGB(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGBA(r, g, b, a)"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := fmt.Sprintf("gist.ColorFromRGBA(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgb(r, g, b)"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := fmt.Sprintf("rgb(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgba(r, g, b, a)"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := fmt.Sprintf("rgba(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+
+	hslalay := gi.AddNewLayout(nl, "nums-hsla-lay", gi.LayoutHoriz)
+
+	nhsla := AddNewStructViewInline(hslalay, "nums-hsla")
+	nhsla.SetStruct(&cv.ColorHSLA)
+	nhsla.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		updt := cvv.UpdateStart()
 		cvv.Color = gist.ColorModel.Convert(cv.ColorHSLA).(gist.Color)
@@ -107,9 +142,40 @@ func (cv *ColorView) Config() {
 		cvv.UpdateEnd(updt)
 	})
 
+	hslacopy := gi.AddNewMenuButton(hslalay, "hslacopy")
+	hslacopy.Icon = icons.ContentCopy
+	hslacopy.Tooltip = "Copy HSLA Color"
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSL(h, s, l)"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := fmt.Sprintf("gist.ColorFromHSL(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSLA(h, s, l, a)"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := fmt.Sprintf("gist.ColorFromHSLA(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsl(h, s, l)"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := fmt.Sprintf("hsl(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsla(h, s, l, a)"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := fmt.Sprintf("hsla(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+
 	hexlay := gi.AddNewLayout(nl, "nums-hex-lay", gi.LayoutHoriz)
 
-	gi.AddNewLabel(hexlay, "hexlbl", "Hex")
+	hexlbl := gi.AddNewLabel(hexlay, "hexlbl", "Hex")
+	hexlbl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+		hexlbl.Style.AlignV = gist.AlignMiddle
+	})
 
 	hex := gi.AddNewTextField(hexlay, "nums-hex")
 	hex.Tooltip = "The color in hexadecimal form"
@@ -129,6 +195,37 @@ func (cv *ColorView) Config() {
 	hex.AddStyleFunc(gi.StyleFuncParts(cv), func() {
 		hex.Style.MinWidth.SetCh(20)
 	})
+
+	hexcopy := gi.AddNewMenuButton(hexlay, "hexcopy")
+	hexcopy.Icon = icons.ContentCopy
+	hexcopy.Tooltip = "Copy Hex Color"
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBB")`},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			hs := cvv.Color.HexString()
+			// get rid of transparency because this is just RRGGBB
+			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, hs[:len(hs)-2])
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBBAA")`},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, cvv.Color.HexString())
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBB"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			hs := cvv.Color.HexString()
+			text := hs[:len(hs)-2]
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBBAA"},
+		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			cvv := recv.(*ColorView)
+			text := cvv.Color.HexString()
+			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+		})
 
 	// slider layer
 	vl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
@@ -409,8 +506,8 @@ func (cv *ColorView) UpdateValueFrame() {
 // UpdateNums updates the values of the number inputs
 // in the color view to reflect the latest values
 func (cv *ColorView) UpdateNums() {
-	cv.NumLay().ChildByName("nums", 0).(*StructViewInline).UpdateFields()
-	cv.NumLay().ChildByName("nums-hsla", 1).(*StructViewInline).UpdateFields()
+	cv.NumLay().ChildByName("nums-rgba-lay", 0).ChildByName("nums-rgba", 0).(*StructViewInline).UpdateFields()
+	cv.NumLay().ChildByName("nums-hsla-lay", 1).ChildByName("nums-hsla", 0).(*StructViewInline).UpdateFields()
 	hs := cv.Color.HexString()
 	// if we are fully opaque, which is typical,
 	// then we can skip displaying transparency in hex
