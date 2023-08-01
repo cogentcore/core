@@ -9,9 +9,9 @@ import (
 
 	"github.com/goki/gi/colormap"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -200,7 +200,7 @@ func (vv *ColorMapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
-		ac.Style.Border.Radius.Set(units.Px(100))
+		ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
 	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeColorMapValueView).(*ColorMapValueView)

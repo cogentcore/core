@@ -13,7 +13,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -127,6 +126,9 @@ func (cv *ColorView) Config() {
 			cvv.UpdateEnd(updt)
 		}
 	})
+	hex.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+		hex.Style.MinWidth.SetCh(20)
+	})
 
 	// slider layer
 	vl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
@@ -138,7 +140,7 @@ func (cv *ColorView) Config() {
 	v.AddStyleFunc(gi.StyleFuncParts(cv), func() {
 		v.Style.MinWidth.SetEm(6)
 		v.Style.MinHeight.SetEm(6)
-		v.Style.Border.Radius.Set(units.Px(100))
+		v.Style.Border.Radius.Set(gist.BorderRadiusFull)
 		v.Style.BackgroundColor.SetColor(cv.Color)
 	})
 
@@ -221,6 +223,7 @@ func (cv *ColorView) SetRGBValue(val float32, rgb int) {
 		cv.Color.A = uint8(val)
 	}
 	cv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
+	cv.ColorHSLA.Round()
 	if cv.TmpSave != nil {
 		cv.TmpSave.SaveTmp()
 	}
@@ -284,6 +287,7 @@ func (cv *ColorView) SetHSLValue(val float32, hsl int) {
 		l = val / 360.0
 		cv.ColorHSLA.L = l
 	}
+	cv.ColorHSLA.Round()
 	cv.Color.SetHSL(h, s, l)
 	if cv.TmpSave != nil {
 		cv.TmpSave.SaveTmp()
@@ -524,8 +528,12 @@ func (vv *ColorValueView) UpdateWidget() {
 		if err == nil {
 			edac := edack.(*gi.Action)
 			edac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
-				edac.Style.BackgroundColor.SetColor(*clr)
-				edac.Style.Color = (*clr).ContrastColor()
+				// we need to display button as non-transparent
+				// so that it can be seen
+				dclr := *clr
+				dclr.A = 255
+				edac.Style.BackgroundColor.SetColor(dclr)
+				edac.Style.Color = (dclr).ContrastColor()
 			})
 			edac.SetFullReRender()
 		}
@@ -627,7 +635,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
-		ac.Style.Border.Radius.Set(units.Px(100))
+		ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
 	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeColorNameValueView).(*ColorNameValueView)

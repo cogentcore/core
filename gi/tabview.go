@@ -778,7 +778,7 @@ func (tb *TabButton) ConfigStyles() {
 		close.Style.Margin.Set()
 		close.Style.Padding.Set()
 		close.Style.AlignV = gist.AlignMiddle
-		close.Style.Border.Radius.Set(units.Px(100))
+		close.Style.Border.Radius.Set(gist.BorderRadiusFull)
 		close.Style.BackgroundColor.SetColor(color.Transparent)
 	})
 	tb.Parts.AddChildStyleFunc("sc-stretch", 4, StyleFuncParts(tb), func(scs *WidgetBase) {

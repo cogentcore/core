@@ -790,6 +790,15 @@ func (c HSLA) RGBA() (r, g, b, a uint32) {
 	return
 }
 
+// Round rounds the HSLA values (H to the nearest 1
+// and S, L, and A to the nearest 0.01)
+func (c *HSLA) Round() {
+	c.H = mat32.Round(c.H)
+	c.S = mat32.Round(c.S*100) / 100
+	c.L = mat32.Round(c.L*100) / 100
+	c.A = mat32.Round(c.A*100) / 100
+}
+
 // HSLtoRGBf32 converts HSL values to RGB float32 0..1 values (non alpha-premultiplied) -- based on https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion, https://www.w3.org/TR/css-color-3/ and github.com/lucasb-eyer/go-colorful
 func HSLtoRGBf32(h, s, l float32) (r, g, b float32) {
 	if s == 0 {
