@@ -98,6 +98,7 @@ func (cv *ColorView) Config() {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		updt := cvv.UpdateStart()
 		cvv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
+		cvv.ColorHSLA.Round()
 		cvv.ViewSig.Emit(cvv.This(), 0, nil)
 		cvv.UpdateEnd(updt)
 	})
