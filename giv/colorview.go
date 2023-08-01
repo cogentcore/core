@@ -108,6 +108,26 @@ func (cv *ColorView) Config() {
 		cvv.UpdateEnd(updt)
 	})
 
+	hexlay := gi.AddNewLayout(nl, "nums-hex-lay", gi.LayoutHoriz)
+
+	gi.AddNewLabel(hexlay, "hexlbl", "Hex")
+
+	hex := gi.AddNewTextField(hexlay, "nums-hex")
+	hex.Tooltip = "The color in hexadecimal form"
+	hex.TextFieldSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
+			cvv, _ := recv.Embed(TypeColorView).(*ColorView)
+			updt := cvv.UpdateStart()
+			err := cvv.Color.ParseHex(hex.Text())
+			if err != nil {
+				log.Println("color view: error parsing hex '"+hex.Text()+"':", err)
+			}
+			cvv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
+			cvv.ViewSig.Emit(cvv.This(), 0, nil)
+			cvv.UpdateEnd(updt)
+		}
+	})
+
 	// slider layer
 	vl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
 		vl.Spacing = gi.StdDialogVSpaceUnits
@@ -387,6 +407,13 @@ func (cv *ColorView) UpdateValueFrame() {
 func (cv *ColorView) UpdateNums() {
 	cv.NumLay().ChildByName("nums", 0).(*StructViewInline).UpdateFields()
 	cv.NumLay().ChildByName("nums-hsla", 1).(*StructViewInline).UpdateFields()
+	hs := cv.Color.HexString()
+	// if we are fully opaque, which is typical,
+	// then we can skip displaying transparency in hex
+	if cv.Color.A == 255 {
+		hs = hs[:len(hs)-2]
+	}
+	cv.NumLay().ChildByName("nums-hex-lay", 2).ChildByName("nums-hex", 1).(*gi.TextField).SetText(hs)
 }
 
 func (cv *ColorView) Render2D() {
