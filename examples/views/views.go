@@ -14,8 +14,6 @@ import (
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
 
-	// "github.com/goki/gosl/slbool"
-	// _ "github.com/goki/gosl/slboolview"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 )

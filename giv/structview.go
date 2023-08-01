@@ -506,6 +506,7 @@ type viewifPatcher struct{}
 var (
 	replaceEqualsRegexp = regexp.MustCompile(`([^\!\=\<\>])(=)([^\!\=\<\>])`)
 	stringer            = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+	booler              = reflect.TypeOf((*bools.Booler)(nil)).Elem()
 	// slboolv             = reflect.TypeOf((*slbool.Bool)(nil)).Elem()
 )
 
@@ -516,7 +517,7 @@ func (p *viewifPatcher) Visit(node *ast.Node) {
 		if lt == nil {
 			return
 		}
-		if lt.Implements(reflect.TypeOf((*bools.Booler)(nil)).Elem()) {
+		if lt.Implements(booler) {
 			ast.Patch(node, &ast.CallNode{
 				Callee: &ast.MemberNode{
 					Node:     *node,
