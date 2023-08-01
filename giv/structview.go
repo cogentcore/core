@@ -18,7 +18,7 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"
-	"github.com/goki/gosl/slbool"
+	"github.com/goki/ki/bools"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -506,7 +506,7 @@ type viewifPatcher struct{}
 var (
 	replaceEqualsRegexp = regexp.MustCompile(`([^\!\=\<\>])(=)([^\!\=\<\>])`)
 	stringer            = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
-	slboolv             = reflect.TypeOf((*slbool.Bool)(nil)).Elem()
+	// slboolv             = reflect.TypeOf((*slbool.Bool)(nil)).Elem()
 )
 
 func (p *viewifPatcher) Visit(node *ast.Node) {
@@ -516,12 +516,11 @@ func (p *viewifPatcher) Visit(node *ast.Node) {
 		if lt == nil {
 			return
 		}
-		switch {
-		case lt == slboolv:
+		if lt.Implements(reflect.TypeOf((*bools.Booler)(nil)).Elem()) {
 			ast.Patch(node, &ast.CallNode{
 				Callee: &ast.MemberNode{
 					Node:     *node,
-					Property: &ast.StringNode{Value: "IsTrue"},
+					Property: &ast.StringNode{Value: "Bool"},
 				},
 			})
 		}

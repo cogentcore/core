@@ -5,8 +5,6 @@
 package gist
 
 import (
-	"math"
-
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
 )
@@ -81,8 +79,10 @@ func (bs *Border) ToDots(uc *units.Context) {
 }
 
 // BorderRadiusFull indicates to use a full border radius
-// that creates a circle or a pill-shaped object
-var BorderRadiusFull = units.Px(math.MaxFloat32)
+// that creates a circle or a pill-shaped object.
+// It is defined to be a value that the width/height of an object
+// should never exceed.
+var BorderRadiusFull = units.Px(1_000_000_000)
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleShadowFuncs
 
