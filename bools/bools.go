@@ -7,6 +7,23 @@ package bools does conversion to / from booleans and other go standard types
 */
 package bools
 
+// A Booler is a type that can return
+// its value as a boolean value
+type Booler interface {
+	// Bool returns the boolean
+	// representation of the value
+	Bool() bool
+}
+
+// A BoolSetter is a Booler that can also
+// set its value from a bool value
+type BoolSetter interface {
+	Booler
+	// SetBool sets the value from the
+	// boolean representation of the value
+	SetBool(val bool)
+}
+
 // ToFloat32 converts a bool to a 1 (true) or 0 (false)
 func ToFloat32(b bool) float32 {
 	if b {
