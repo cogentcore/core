@@ -188,6 +188,7 @@ func (cv *ColorView) Config() {
 				log.Println("color view: error parsing hex '"+hex.Text()+"':", err)
 			}
 			cvv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
+			cvv.ColorHSLA.Round()
 			cvv.ViewSig.Emit(cvv.This(), 0, nil)
 			cvv.UpdateEnd(updt)
 		}
