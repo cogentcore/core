@@ -185,9 +185,9 @@ func (pf *Preferences) Apply() {
 		pf.ColorSchemes["Dark"].HiStyle = "monokai"
 	}
 	if pf.ColorSchemeType == ColorSchemeLight {
-		Colors = TheColorSchemes.Light
+		ColorScheme = TheColorSchemes.Light
 	} else {
-		Colors = TheColorSchemes.Dark
+		ColorScheme = TheColorSchemes.Dark
 	}
 
 	TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)

@@ -778,7 +778,7 @@ func (sr *Splitter) ConfigStyles() {
 		sr.Style.Margin.Set()
 		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
 		// sr.Style.BackgroundColor.SetColor(Colors.Accent)
-		sr.Style.Color = Colors.Text
+		sr.Style.Color = ColorScheme.Text
 		// sr.Style.Border.Width.Set(units.Px(1))
 		// sr.Style.Border.Color.Set(Colors.Text)
 		if sr.Dim == mat32.X {

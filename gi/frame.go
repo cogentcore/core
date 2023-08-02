@@ -167,7 +167,7 @@ func (fr *Frame) ConfigStyles() {
 		fr.Style.Border.Radius.Set()
 		fr.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		fr.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		fr.Style.BackgroundColor.SetColor(Colors.Background)
-		fr.Style.Color = Colors.Text
+		fr.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		fr.Style.Color = ColorScheme.Text
 	})
 }

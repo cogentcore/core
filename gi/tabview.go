@@ -557,9 +557,9 @@ func (tv *TabView) ConfigStyles() {
 		// need border for separators (see RenderTabSeps)
 		tv.Style.Border.Style.Set(gist.BorderSolid)
 		tv.Style.Border.Width.Set(units.Px(1))
-		tv.Style.Border.Color.Set(Colors.Background.Highlight(50))
-		tv.Style.BackgroundColor.SetColor(Colors.Background)
-		tv.Style.Color = Colors.Text
+		tv.Style.Border.Color.Set(ColorScheme.Background.Highlight(50))
+		tv.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		tv.Style.Color = ColorScheme.Text
 		tv.Style.MaxWidth.SetPx(-1)
 		tv.Style.MaxHeight.SetPx(-1)
 	})
@@ -575,7 +575,7 @@ func (tv *TabView) ConfigStyles() {
 		tabs.Style.Margin.Set()
 		tabs.Style.Padding.Set()
 		// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
-		tabs.Style.BackgroundColor.SetColor(Colors.Background.Highlight(7))
+		tabs.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(7))
 	})
 	tv.AddChildStyleFunc("frame", 1, StyleFuncParts(tv), func(frame *WidgetBase) {
 		frame.Style.Width.SetEm(10)
@@ -732,23 +732,23 @@ func (tb *TabButton) ConfigStyles() {
 
 		tb.Style.Border.Radius.Set()
 		tb.Style.Text.Align = gist.AlignLeft
-		tb.Style.Color = Colors.Text
+		tb.Style.Color = ColorScheme.Text
 		tb.Style.Margin.Set()
 		tb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
 		tb.Indicator = icons.Close
 		// need to do selected as a separate thing at the start
 		// so that we can apply additional styles based on state
 		// while selected
-		baseColor := Colors.Background
+		baseColor := ColorScheme.Background
 		if tb.IsSelected() {
-			baseColor = Colors.Accent
+			baseColor = ColorScheme.Accent
 		}
 		switch tb.State {
 		case ButtonActive:
 			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(7))
 		case ButtonInactive:
 			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(20))
-			tb.Style.Color = Colors.Text.Highlight(20)
+			tb.Style.Color = ColorScheme.Text.Highlight(20)
 		case ButtonFocus:
 			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(15))
 		case ButtonHover:

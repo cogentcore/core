@@ -459,6 +459,6 @@ func (bm *Bitmap) ConfigStyles() {
 	bm.AddStyleFunc(StyleFuncDefault, func() {
 		bm.Style.MinWidth.SetPx(float32(bm.Size.X))
 		bm.Style.MinHeight.SetPx(float32(bm.Size.Y))
-		bm.Style.BackgroundColor.SetColor(Colors.Background)
+		bm.Style.BackgroundColor.SetColor(ColorScheme.Background)
 	})
 }

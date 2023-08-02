@@ -663,8 +663,8 @@ func StringPromptDialogValue(dlg *Dialog) string {
 
 func (dlg *Dialog) ConfigStyles() {
 	dlg.AddStyleFunc(StyleFuncDefault, func() {
-		dlg.Style.BackgroundColor.SetColor(Colors.Background)
-		dlg.Style.Color = Colors.Text
+		dlg.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		dlg.Style.Color = ColorScheme.Text
 	})
 	frame, ok := dlg.ChildByName("frame", 0).(*Frame)
 	if ok {
@@ -672,7 +672,7 @@ func (dlg *Dialog) ConfigStyles() {
 			frame.Style.Border.Style.Set(gist.BorderNone)
 			frame.Style.Margin.Set(units.Px(8))
 			frame.Style.Padding.Set(units.Px(4))
-			frame.Style.BackgroundColor.SetColor(Colors.Background)
+			frame.Style.BackgroundColor.SetColor(ColorScheme.Background)
 			// frame.Style.BoxShadow.HOffset.SetPx(4)
 			// frame.Style.BoxShadow.VOffset.SetPx(4)
 			// frame.Style.BoxShadow.Blur.SetPx(4)

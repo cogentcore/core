@@ -720,28 +720,28 @@ func (mb *MenuButton) ConfigStyles() {
 	mb.AddStyleFunc(StyleFuncDefault, func() {
 		mb.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
 		mb.Style.Text.Align = gist.AlignCenter
-		mb.Style.Color = Colors.Text
+		mb.Style.Color = ColorScheme.Text
 		mb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
 		mb.Style.Border.Radius.Set(units.Px(10))
 		switch mb.Type {
 		case MenuButtonFilled:
 			mb.Style.Border.Style.Set(gist.BorderNone)
-			mb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			mb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
 		case MenuButtonOutlined:
 			mb.Style.Border.Style.Set(gist.BorderSolid)
 			mb.Style.Border.Width.Set(units.Px(1))
-			mb.Style.Border.Color.Set(Colors.Text)
-			mb.Style.BackgroundColor.SetColor(Colors.Background)
+			mb.Style.Border.Color.Set(ColorScheme.Text)
+			mb.Style.BackgroundColor.SetColor(ColorScheme.Background)
 		case MenuButtonText:
 			mb.Style.Border.Style.Set(gist.BorderNone)
-			mb.Style.BackgroundColor.SetColor(Colors.Background)
+			mb.Style.BackgroundColor.SetColor(ColorScheme.Background)
 		}
 		switch mb.State {
 		case ButtonActive:
 			// use background as already specified above
 		case ButtonInactive:
 			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(20))
-			mb.Style.Color = Colors.Text.Highlight(20)
+			mb.Style.Color = ColorScheme.Text.Highlight(20)
 		case ButtonFocus, ButtonSelected:
 			mb.Style.BackgroundColor.SetColor(mb.Style.BackgroundColor.Color.Highlight(10))
 		case ButtonHover:
@@ -883,8 +883,8 @@ func (sp *Separator) ConfigStyles() {
 		sp.Style.AlignH = gist.AlignCenter
 		sp.Style.Border.Style.Set(gist.BorderSolid)
 		sp.Style.Border.Width.Set(units.Px(0))
-		sp.Style.Border.Color.Set(Colors.Text.Highlight(20))
-		sp.Style.BackgroundColor.SetColor(Colors.Text.Highlight(20))
+		sp.Style.Border.Color.Set(ColorScheme.Text.Highlight(20))
+		sp.Style.BackgroundColor.SetColor(ColorScheme.Text.Highlight(20))
 		if sp.Horiz {
 			sp.Style.MaxWidth.SetPx(-1)
 			sp.Style.MinHeight.SetPx(1)

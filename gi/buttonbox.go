@@ -297,7 +297,7 @@ func (bb *ButtonBox) ConfigStyles() {
 		bb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		bb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		bb.Style.Text.Align = gist.AlignCenter
-		bb.Style.BackgroundColor.SetColor(Colors.Background)
-		bb.Style.Color.SetColor(Colors.Text)
+		bb.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		bb.Style.Color.SetColor(ColorScheme.Text)
 	})
 }

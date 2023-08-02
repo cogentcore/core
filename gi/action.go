@@ -396,14 +396,14 @@ func (ac *Action) ConfigStyles() {
 	ac.AddStyleFunc(StyleFuncDefault, func() {
 		ac.Style.Border.Style.Set(gist.BorderNone)
 		ac.Style.Text.Align = gist.AlignCenter
-		ac.Style.BackgroundColor.SetColor(Colors.Background)
-		ac.Style.Color = Colors.Text
+		ac.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		ac.Style.Color = ColorScheme.Text
 		switch ac.Type {
 		case ActionStandalone:
 			ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
 			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			ac.Style.BackgroundColor.SetColor(Colors.Accent.Samelight(10).Pastel(70))
+			ac.Style.BackgroundColor.SetColor(ColorScheme.Accent.Samelight(10).Pastel(70))
 		case ActionParts:
 			ac.Style.Border.Radius.Set()
 			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
@@ -427,7 +427,7 @@ func (ac *Action) ConfigStyles() {
 			ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(7))
 		case ButtonInactive:
 			ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(20))
-			ac.Style.Color = Colors.Text.Highlight(20)
+			ac.Style.Color = ColorScheme.Text.Highlight(20)
 		case ButtonFocus, ButtonSelected:
 			ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(15))
 		case ButtonHover:

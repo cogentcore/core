@@ -638,7 +638,7 @@ func (cb *ComboBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
 		cb.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
 		cb.Style.Text.Align = gist.AlignCenter
-		cb.Style.Color = Colors.Text
+		cb.Style.Color = ColorScheme.Text
 		if cb.Editable {
 			cb.Style.Padding.Set()
 		} else {
@@ -648,19 +648,19 @@ func (cb *ComboBox) ConfigStyles() {
 		switch cb.Type {
 		case ComboBoxFilled:
 			cb.Style.Border.Style.Set(gist.BorderNone)
-			cb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+			cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
 		case ComboBoxOutlined:
 			cb.Style.Border.Style.Set(gist.BorderSolid)
 			cb.Style.Border.Width.Set(units.Px(1))
-			cb.Style.Border.Color.Set(Colors.Text)
-			cb.Style.BackgroundColor.SetColor(Colors.Background)
+			cb.Style.Border.Color.Set(ColorScheme.Text)
+			cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
 		}
 		switch cb.State {
 		case ButtonActive:
 			// use background as already specified above
 		case ButtonInactive:
 			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(20))
-			cb.Style.Color = Colors.Text.Highlight(20)
+			cb.Style.Color = ColorScheme.Text.Highlight(20)
 		case ButtonFocus, ButtonSelected:
 			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(10))
 		case ButtonHover:

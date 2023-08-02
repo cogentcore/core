@@ -557,19 +557,19 @@ func (sb *SpinBox) ConfigStyles() {
 			button.Style.MaxHeight.SetEx(2)
 			button.Style.Padding.Set()
 			button.Style.Margin.Set()
-			button.Style.Color = Colors.Text
+			button.Style.Color = ColorScheme.Text
 			switch button.State {
 			case ButtonActive:
-				button.Style.BackgroundColor.SetColor(Colors.Background)
+				button.Style.BackgroundColor.SetColor(ColorScheme.Background)
 			case ButtonInactive:
-				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
-				button.Style.Color = Colors.Text.Highlight(20)
+				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+				button.Style.Color = ColorScheme.Text.Highlight(20)
 			case ButtonFocus, ButtonSelected:
-				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
+				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
 			case ButtonHover:
-				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
+				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
 			case ButtonDown:
-				button.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
+				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
 			}
 		}
 		buttons.AddChildStyleFunc("up", 0, StyleFuncParts(sb), btsf)

@@ -874,7 +874,7 @@ func (sr *Slider) FocusChanged2D(change FocusChanges) {
 
 func (sr *Slider) ConfigStyles() {
 	sr.AddStyleFunc(StyleFuncDefault, func() {
-		sr.StyleBox.BackgroundColor.SetColor(Colors.Background)
+		sr.StyleBox.BackgroundColor.SetColor(ColorScheme.Background)
 		sr.StyleBox.Border.Style.Set(gist.BorderNone)
 
 		sr.Style.Border.Style.Set(gist.BorderNone)
@@ -888,23 +888,23 @@ func (sr *Slider) ConfigStyles() {
 			sr.Style.MinHeight.SetEm(20)
 			sr.Style.MinWidth.SetEm(2)
 		}
-		sr.Style.Color = Colors.Text
+		sr.Style.Color = ColorScheme.Text
 		switch sr.State {
 		case SliderActive:
-			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(15))
-			sr.ValueColor.SetColor(Colors.Primary)
+			sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
+			sr.ValueColor.SetColor(ColorScheme.Primary)
 		case SliderInactive:
-			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
-			sr.ValueColor.SetColor(Colors.Primary.Pastel(100))
+			sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
+			sr.ValueColor.SetColor(ColorScheme.Primary.Pastel(100))
 		case SliderFocus, SliderSelected:
-			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
-			sr.ValueColor.SetColor(Colors.Primary.Highlight(10))
+			sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(25))
+			sr.ValueColor.SetColor(ColorScheme.Primary.Highlight(10))
 		case SliderHover:
-			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
-			sr.ValueColor.SetColor(Colors.Primary.Highlight(15))
+			sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
+			sr.ValueColor.SetColor(ColorScheme.Primary.Highlight(15))
 		case SliderDown:
-			sr.Style.BackgroundColor.SetColor(Colors.Background.Highlight(35))
-			sr.ValueColor.SetColor(Colors.Primary.Highlight(20))
+			sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(35))
+			sr.ValueColor.SetColor(ColorScheme.Primary.Highlight(20))
 		}
 		sr.ThumbColor = sr.ValueColor
 	})
@@ -1072,13 +1072,13 @@ func (sb *ScrollBar) FocusChanged2D(change FocusChanges) {
 func (sb *ScrollBar) ConfigStyles() {
 	sb.AddStyleFunc(StyleFuncDefault, func() {
 		sb.StyleBox.Border.Style.Set(gist.BorderNone)
-		sb.StyleBox.BackgroundColor.SetColor(Colors.Background)
+		sb.StyleBox.BackgroundColor.SetColor(ColorScheme.Background)
 
 		sb.Style.Border.Style.Set(gist.BorderNone)
 		sb.Style.Border.Radius.Set(units.Px(4))
 		sb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		sb.Style.Padding.Set()
-		sb.Style.Color = Colors.Text
+		sb.Style.Color = ColorScheme.Text
 		if sb.Dim == mat32.X {
 			sb.Style.MinHeight.SetEm(2)
 		} else {
@@ -1086,20 +1086,20 @@ func (sb *ScrollBar) ConfigStyles() {
 		}
 		switch sb.State {
 		case SliderActive:
-			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(10))
-			sb.ValueColor.SetColor(Colors.Background.Highlight(30))
+			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
+			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(30))
 		case SliderInactive:
-			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
-			sb.ValueColor.SetColor(Colors.Background.Highlight(50))
+			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
+			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(50))
 		case SliderFocus, SliderSelected:
-			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(20))
-			sb.ValueColor.SetColor(Colors.Background.Highlight(40))
+			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(40))
 		case SliderHover:
-			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(25))
-			sb.ValueColor.SetColor(Colors.Background.Highlight(45))
+			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(25))
+			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(45))
 		case SliderDown:
-			sb.Style.BackgroundColor.SetColor(Colors.Background.Highlight(30))
-			sb.ValueColor.SetColor(Colors.Background.Highlight(50))
+			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
+			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(50))
 		}
 		// sb.ThumbColor = sb.ValueColor
 	})
