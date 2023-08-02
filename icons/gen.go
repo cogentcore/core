@@ -48,7 +48,7 @@ var iconTmpl = template.Must(template.New("icon").Parse(
 ))
 
 func main() {
-	buf := bytes.NewBuffer([]byte(preamble))
+	buf := bytes.NewBufferString(preamble)
 
 	fs.WalkDir(icons.Icons, "svg", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
@@ -74,7 +74,7 @@ func main() {
 		}
 		return iconTmpl.Execute(buf, data)
 	})
-	buf.Write([]byte("\n)"))
+	buf.WriteString("\n)")
 	err := os.WriteFile("iconnames.go", buf.Bytes(), 0666)
 	if err != nil {
 		log.Fatalln("error writing result to iconnames.go:", err)
