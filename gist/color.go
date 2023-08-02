@@ -814,7 +814,7 @@ type HSLA struct {
 	A float32 `min:"0" max:"1" step:"0.05" desc:"the transparency of the color"`
 }
 
-// Implements the color.Color interface
+// Implements the [color.Color] interface
 func (c HSLA) RGBA() (r, g, b, a uint32) {
 	fr, fg, fb := HSLtoRGBf32(c.H, c.S, c.L)
 	r = uint32(fr*c.A*65535.0 + 0.5)
