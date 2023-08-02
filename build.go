@@ -57,7 +57,7 @@ func Build(pkgPath string, platforms ...Platform) error {
 func buildDesktop(pkgPath string, platform Platform) error {
 	cmd := exec.Command("go", "build", "-o", BuildPath(pkgPath), pkgPath)
 	cmd.Env = append(os.Environ(), "GOOS="+platform.OS, "GOARCH="+platform.Arch)
-	fmt.Println(cmd.Args)
+	fmt.Println(CmdString(cmd))
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w, %s", platform.OS, platform.Arch, err, string(output))
@@ -77,11 +77,26 @@ func buildMobile(pkgPath string, osName string, archs []string) error {
 		}
 	}
 	cmd := exec.Command("gomobile", "build", "-o", filepath.Join(BuildPath(pkgPath), AppName(pkgPath)+".apk"), "-target", target, pkgPath)
-	fmt.Println(cmd.Args)
+	fmt.Println(CmdString(cmd))
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%v: %w, %s", osName, archs, err, string(output))
 	}
 	fmt.Println(string(output))
 	return nil
+}
+
+// CmdString returns a string representation of the given command.
+func CmdString(cmd *exec.Cmd) string {
+	if cmd.Args == nil {
+		return "nil"
+	}
+	res := ""
+	for i, arg := range cmd.Args {
+		res += arg
+		if i != len(cmd.Args)-1 {
+			res += " "
+		}
+	}
+	return res
 }

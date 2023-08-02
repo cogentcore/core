@@ -16,8 +16,9 @@ func init() {
 	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Println("Did not find a GoKi configuration file in current directory, so using the default values.\nTo make a configuration file, create a file named goki.toml, goki.yaml, or goki.json in your current directory.")
-			fmt.Println()
+			// Maybe add back in some way later, but too annoying to have every time.
+			// fmt.Println("Did not find a GoKi configuration file; use goki init to create one.")
+			// fmt.Println()
 		} else {
 			fmt.Fprintln(os.Stderr, "error loading configuration file:", err)
 		}
@@ -35,7 +36,6 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

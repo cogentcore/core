@@ -14,7 +14,7 @@ func Log(osName string, keep bool, allLevel string) error {
 	}
 	if !keep {
 		cmd := exec.Command("adb", "logcat", "-c")
-		fmt.Println(cmd.Args)
+		fmt.Println(CmdString(cmd))
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			return fmt.Errorf("error clearing logs: %w, %s", err, string(output))
@@ -22,7 +22,7 @@ func Log(osName string, keep bool, allLevel string) error {
 		fmt.Println(string(output))
 	}
 	cmd := exec.Command("adb", "logcat", "*:"+allLevel, "Go:I", "GoLog:I")
-	fmt.Println(cmd.Args)
+	fmt.Println(CmdString(cmd))
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return fmt.Errorf("erroring getting logs: %w", err)
