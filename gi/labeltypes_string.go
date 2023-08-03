@@ -11,27 +11,27 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[LabelDisplayLarge-0]
-	_ = x[LabelDisplayMedium-1]
-	_ = x[LabelDisplaySmall-2]
-	_ = x[LabelHeadlineLarge-3]
-	_ = x[LabelHeadlineMedium-4]
-	_ = x[LabelHeadlineSmall-5]
+	_ = x[LabelLabelLarge-0]
+	_ = x[LabelLabelMedium-1]
+	_ = x[LabelLabelSmall-2]
+	_ = x[LabelBodyLarge-3]
+	_ = x[LabelBodyMedium-4]
+	_ = x[LabelBodySmall-5]
 	_ = x[LabelTitleLarge-6]
 	_ = x[LabelTitleMedium-7]
 	_ = x[LabelTitleSmall-8]
-	_ = x[LabelBodyLarge-9]
-	_ = x[LabelBodyMedium-10]
-	_ = x[LabelBodySmall-11]
-	_ = x[LabelLarge-12]
-	_ = x[LabelMedium-13]
-	_ = x[LabelSmall-14]
+	_ = x[LabelHeadlineLarge-9]
+	_ = x[LabelHeadlineMedium-10]
+	_ = x[LabelHeadlineSmall-11]
+	_ = x[LabelDisplayLarge-12]
+	_ = x[LabelDisplayMedium-13]
+	_ = x[LabelDisplaySmall-14]
 	_ = x[LabelTypesN-15]
 }
 
-const _LabelTypes_name = "LabelDisplayLargeLabelDisplayMediumLabelDisplaySmallLabelHeadlineLargeLabelHeadlineMediumLabelHeadlineSmallLabelTitleLargeLabelTitleMediumLabelTitleSmallLabelBodyLargeLabelBodyMediumLabelBodySmallLabelLargeLabelMediumLabelSmallLabelTypesN"
+const _LabelTypes_name = "LabelLabelLargeLabelLabelMediumLabelLabelSmallLabelBodyLargeLabelBodyMediumLabelBodySmallLabelTitleLargeLabelTitleMediumLabelTitleSmallLabelHeadlineLargeLabelHeadlineMediumLabelHeadlineSmallLabelDisplayLargeLabelDisplayMediumLabelDisplaySmallLabelTypesN"
 
-var _LabelTypes_index = [...]uint8{0, 17, 35, 52, 70, 89, 107, 122, 138, 153, 167, 182, 196, 206, 217, 227, 238}
+var _LabelTypes_index = [...]uint8{0, 15, 31, 46, 60, 75, 89, 104, 120, 135, 153, 172, 190, 207, 225, 242, 253}
 
 func (i LabelTypes) String() string {
 	if i < 0 || i >= LabelTypes(len(_LabelTypes_index)-1) {
@@ -51,21 +51,21 @@ func (i *LabelTypes) FromString(s string) error {
 }
 
 var _LabelTypes_descMap = map[LabelTypes]string{
-	0:  `LabelDisplayLarge is a large, short, and important display label with a default font size of 57px.`,
-	1:  `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45px.`,
-	2:  `LabelDisplaySmall is a small, short, and important display label with a default font size of 36px.`,
-	3:  `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32px.`,
-	4:  `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28px.`,
-	5:  `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24px.`,
+	0:  `LabelLabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14px.`,
+	1:  `LabelLabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12px.`,
+	2:  `LabelLabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11px.`,
+	3:  `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16px.`,
+	4:  `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14px.`,
+	5:  `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12px.`,
 	6:  `LabelTitleLarge is a large, medium-emphasis title label with a default font size of 22px.`,
 	7:  `LabelTitleMedium is a medium-sized, medium-emphasis title label with a default font size of 16px.`,
 	8:  `LabelTitleSmall is a small, medium-emphasis title label with a default font size of 14px.`,
-	9:  `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16px.`,
-	10: `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14px.`,
-	11: `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12px.`,
-	12: `LabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14px.`,
-	13: `LabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12px.`,
-	14: `LabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11px.`,
+	9:  `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32px.`,
+	10: `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28px.`,
+	11: `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24px.`,
+	12: `LabelDisplayLarge is a large, short, and important display label with a default font size of 57px.`,
+	13: `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45px.`,
+	14: `LabelDisplaySmall is a small, short, and important display label with a default font size of 36px.`,
 	15: ``,
 }
 
