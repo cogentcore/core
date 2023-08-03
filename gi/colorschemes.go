@@ -11,7 +11,7 @@ import (
 // if you want to change the color schemes.
 // [ColorScheme] is set based on ColorSchemes and
 // the user preferences. The default color schemes
-// are generated through the "goki colorgen" command, 
+// are generated through the "goki colorgen" command,
 // and you should use the same command to generate your
 // custom color scheme. You should not directly access
 // ColorSchemes when styling things; instead, you should

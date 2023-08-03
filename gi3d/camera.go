@@ -266,7 +266,7 @@ var CameraProps = ki.Props{
 			},
 		}},
 		{"Orbit", ki.Props{
-			"icon": icons.X360,
+			"icon": icons.X3DRotation,
 			"Args": ki.PropSlice{
 				{"DeltaX", ki.BlankProp{}},
 				{"DeltaY", ki.BlankProp{}},

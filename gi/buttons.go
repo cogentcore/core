@@ -938,7 +938,24 @@ func (bt *Button) ConfigStyles() {
 		bt.Style.Text.Align = gist.AlignCenter
 		switch bt.Type {
 		case ButtonFilled:
-
+			bt.Style.BackgroundColor.SetColor(ColorScheme.Primary)
+			bt.Style.Color = ColorScheme.OnPrimary
+		case ButtonTonal:
+			bt.Style.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
+			bt.Style.Color = ColorScheme.OnSecondaryContainer
+		case ButtonElevated:
+			// MTBTODO: replace with SurfaceContainerLow
+			bt.Style.BackgroundColor.SetColor(ColorScheme.SurfaceVariant)
+			bt.Style.Color = ColorScheme.Primary
+		case ButtonOutlined:
+			bt.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+			bt.Style.Color = ColorScheme.Primary
+			bt.Style.Border.Style.Set(gist.BorderSolid)
+			bt.Style.Border.Color.Set(ColorScheme.Outline)
+			bt.Style.Border.Width.Set(units.Px(1))
+		case ButtonText:
+			bt.Style.BackgroundColor.SetColor(ColorScheme.Background)
+			bt.Style.Color = ColorScheme.Primary
 			// case ButtonDefault:
 			// 	bt.Style.Border.Style.Set(gist.BorderNone)
 			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Secondary)
@@ -1015,11 +1032,11 @@ func (bt *Button) ConfigStyles() {
 		label.Style.AlignV = gist.AlignMiddle
 	})
 	bt.Parts.AddChildStyleFunc("ind-stretch", 3, StyleFuncParts(bt), func(ins *WidgetBase) {
-		ins.Style.Width.SetEm(1)
+		ins.Style.Width.SetEm(0.5)
 	})
 	bt.Parts.AddChildStyleFunc("indicator", 4, StyleFuncParts(bt), func(ind *WidgetBase) {
-		ind.Style.Width.SetEx(1.5)
-		ind.Style.Height.SetEx(1.5)
+		ind.Style.Width.SetEm(1.125)
+		ind.Style.Height.SetEm(1.125)
 		ind.Style.Margin.Set()
 		ind.Style.Padding.Set()
 		ind.Style.AlignV = gist.AlignBottom

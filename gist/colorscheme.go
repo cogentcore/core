@@ -31,7 +31,10 @@ var TypeColorSchemeTypes = kit.Enums.AddEnumAltLower(ColorSchemesN, kit.NotBitFl
 type ColorScheme struct {
 	// NOTE: the commented out fields are those mentioned in the Material 3
 	// documentation but not actually used by their theme builder.
-	// They may be added later.
+	// They will be added later once they are added to the theme builder
+	// (see https://github.com/material-foundation/material-theme-builder/issues/187).
+	// Mark any colors that should be changed to use the new colors with
+	// MTBTODO:
 
 	Primary            Color `desc:"Primary is the base primary color applied to important elements"`
 	OnPrimary          Color `desc:"OnPrimary is the color applied to content on top of Primary. It defaults to the contrast color of Primary."`
