@@ -861,66 +861,6 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 
 var ButtonProps = ki.Props{
 	"EnumType:Flag": TypeButtonFlags,
-	// "border-width":     units.Px(1),
-	// "border-radius":    units.Px(4),
-	// "border-color":     &Prefs.Colors.Border,
-	// "padding":          units.Px(4),
-	// "margin":           units.Px(2),
-	// "min-width":        units.Em(1),
-	// "min-height":       units.Em(1),
-	// "text-align":       gist.AlignCenter,
-	// "background-color": &Prefs.Colors.Control,
-	// "color":            &Prefs.Colors.Font,
-	// "#space": ki.Props{
-	// 	"width":     units.Ch(.5),
-	// 	"min-width": units.Ch(.5),
-	// },
-	// "#icon": ki.Props{
-	// 	"width":   units.Em(1),
-	// 	"height":  units.Em(1),
-	// 	"margin":  units.Px(0),
-	// 	"padding": units.Px(0),
-	// 	"fill":    &Prefs.Colors.Icon,
-	// 	"stroke":  &Prefs.Colors.Font,
-	// },
-	// "#label": ki.Props{
-	// 	"margin":  units.Px(0),
-	// 	"padding": units.Px(0),
-	// 	// "font-size": units.NewPt(24),
-	// },
-	// "#indicator": ki.Props{
-	// 	"width":          units.Ex(1.5),
-	// 	"height":         units.Ex(1.5),
-	// 	"margin":         units.Px(0),
-	// 	"padding":        units.Px(0),
-	// 	"vertical-align": gist.AlignBottom,
-	// 	"fill":           &Prefs.Colors.Icon,
-	// 	"stroke":         &Prefs.Colors.Font,
-	// },
-	// "#ind-stretch": ki.Props{
-	// 	"width": units.Em(1),
-	// },
-	// ButtonSelectors[ButtonActive]: ki.Props{
-	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonInactive]: ki.Props{
-	// 	"border-color": "lighter-50",
-	// 	"color":        "lighter-50",
-	// },
-	// ButtonSelectors[ButtonHover]: ki.Props{
-	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonFocus]: ki.Props{
-	// 	"border-width":     units.Px(2),
-	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonDown]: ki.Props{
-	// 	"color":            "lighter-90",
-	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonSelected]: ki.Props{
-	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
-	// },
 }
 
 func (bt *Button) Init2D() {
@@ -956,62 +896,8 @@ func (bt *Button) ConfigStyles() {
 		case ButtonText:
 			bt.Style.BackgroundColor.SetColor(ColorScheme.Background)
 			bt.Style.Color = ColorScheme.Primary
-			// case ButtonDefault:
-			// 	bt.Style.Border.Style.Set(gist.BorderNone)
-			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Secondary)
-			// 	bt.Style.Color = ColorScheme.OnSecondary
-			// 	// switch bt.State {
-			// 	// case ButtonActive:
-			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Secondary)
-			// 	// case ButtonInactive:
-			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			// 	// 	bt.Style.Color = ColorScheme.OnSecondary.Highlight(20)
-			// 	// case ButtonFocus, ButtonSelected:
-			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			// 	// case ButtonHover:
-			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(25))
-			// 	// case ButtonDown:
-			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
-			// 	// }
-			// case ButtonPrimary:
-			// 	bt.Style.Border.Style.Set(gist.BorderNone)
-			// 	switch bt.State {
-			// 	case ButtonActive:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary)
-			// 	case ButtonInactive:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(20))
-			// 	case ButtonFocus, ButtonSelected:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(10))
-			// 	case ButtonHover:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(20))
-			// 	case ButtonDown:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(30))
-			// 	}
-			// 	// we always use the contrast color of the primary color
-			// 	// to prevent text color changing on state change
-			// 	bt.Style.Color = ColorScheme.Primary.ContrastColor()
-			// 	if bt.State == ButtonInactive {
-			// 		bt.Style.Color = bt.Style.Color.Highlight(20)
-			// 	}
-			// case ButtonSecondary:
-			// 	bt.Style.Border.Style.Set(gist.BorderSolid)
-			// 	bt.Style.Border.Width.Set(units.Px(1))
-			// 	bt.Style.Border.Color.Set(ColorScheme.Primary.Pastel(100))
-			// 	bt.Style.Color = ColorScheme.Primary
-			// 	switch bt.State {
-			// 	case ButtonActive:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background)
-			// 	case ButtonInactive:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			// 		bt.Style.Color = ColorScheme.Primary.Highlight(20)
-			// 	case ButtonFocus, ButtonSelected:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
-			// 	case ButtonHover:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			// 	case ButtonDown:
-			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
-			// 	}
 		}
+		// STYTODO: add state styles for buttons
 	})
 	bt.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(bt), func(icon *WidgetBase) {
 		icon.Style.Width.SetEm(1.125)
