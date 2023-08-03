@@ -42,23 +42,7 @@ func (mb *MenuBar) CopyFieldsFrom(frm any) {
 
 var MenuBarProps = ki.Props{
 	"EnumType:Flag": TypeNodeFlags,
-	// "padding":          units.Px(2),
-	// "margin":           units.Px(0),
-	// "spacing":          units.Px(4),
-	// "color":            &Prefs.Colors.Font,
-	// "background-color": "linear-gradient(pref(Control), highlight-10)",
 }
-
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (mb *MenuBar) DefaultStyle() {
-// 	s := &mb.Style
-
-// 	s.Padding.Set(units.Px(2))
-// 	s.Margin.Set()
-// 	mb.Spacing.SetPx(4)
-// 	s.Color.SetColor(TheColorScheme.Font)
-// 	s.BackgroundColor.SetColor(TheColorScheme.Secondary)
-// }
 
 // MenuBarStdRender does the standard rendering of the bar
 func (mb *MenuBar) MenuBarStdRender() {
@@ -322,9 +306,9 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 
 func (mb *MenuBar) ConfigStyles() {
 	mb.AddStyleFunc(StyleFuncDefault, func() {
-		mb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		mb.Style.Margin.Set()
-		mb.Spacing.SetPx(4 * Prefs.DensityMul())
+		mb.Style.Padding.Set(units.Em(1 * Prefs.DensityMul()))
+		mb.Spacing.SetEm(1.5 * Prefs.DensityMul())
 		mb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
 		mb.Style.Color = ColorScheme.OnSurface
 	})
