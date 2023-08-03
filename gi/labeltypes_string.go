@@ -11,20 +11,27 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[LabelStandard-0]
-	_ = x[LabelP-1]
-	_ = x[LabelH1-2]
-	_ = x[LabelH2-3]
-	_ = x[LabelH3-4]
-	_ = x[LabelH4-5]
-	_ = x[LabelH5-6]
-	_ = x[LabelH6-7]
-	_ = x[LabelTypesN-8]
+	_ = x[LabelDisplayLarge-0]
+	_ = x[LabelDisplayMedium-1]
+	_ = x[LabelDisplaySmall-2]
+	_ = x[LabelHeadlineLarge-3]
+	_ = x[LabelHeadlineMedium-4]
+	_ = x[LabelHeadlineSmall-5]
+	_ = x[LabelTitleLarge-6]
+	_ = x[LabelTitleMedium-7]
+	_ = x[LabelTitleSmall-8]
+	_ = x[LabelBodyLarge-9]
+	_ = x[LabelBodyMedium-10]
+	_ = x[LabelBodySmall-11]
+	_ = x[LabelLarge-12]
+	_ = x[LabelMedium-13]
+	_ = x[LabelSmall-14]
+	_ = x[LabelTypesN-15]
 }
 
-const _LabelTypes_name = "LabelStandardLabelPLabelH1LabelH2LabelH3LabelH4LabelH5LabelH6LabelTypesN"
+const _LabelTypes_name = "LabelDisplayLargeLabelDisplayMediumLabelDisplaySmallLabelHeadlineLargeLabelHeadlineMediumLabelHeadlineSmallLabelTitleLargeLabelTitleMediumLabelTitleSmallLabelBodyLargeLabelBodyMediumLabelBodySmallLabelLargeLabelMediumLabelSmallLabelTypesN"
 
-var _LabelTypes_index = [...]uint8{0, 13, 19, 26, 33, 40, 47, 54, 61, 72}
+var _LabelTypes_index = [...]uint8{0, 17, 35, 52, 70, 89, 107, 122, 138, 153, 167, 182, 196, 206, 217, 227, 238}
 
 func (i LabelTypes) String() string {
 	if i < 0 || i >= LabelTypes(len(_LabelTypes_index)-1) {
@@ -44,15 +51,22 @@ func (i *LabelTypes) FromString(s string) error {
 }
 
 var _LabelTypes_descMap = map[LabelTypes]string{
-	0: `LabelStandard is a standard label that just contains text, similar to HTML&#39;s &lt;span&gt; and &lt;label&gt; elements`,
-	1: `LabelP is a paragraph-style label, similar to HTML&#39;s &lt;p&gt; element`,
-	2: `LabelH1 is a large heading-style label, similar to HTML&#39;s &lt;h1&gt; element`,
-	3: `LabelH2 is a heading-style label slightly smaller than H1, similar to HTML&#39;s &lt;h2&gt; element`,
-	4: `LabelH3 is a heading-style label slightly smaller than H2, similar to HTML&#39;s &lt;h3&gt; element`,
-	5: `LabelH4 is a heading-style label slightly smaller than H3, similar to HTML&#39;s &lt;h4&gt; element`,
-	6: `LabelH5 is a heading-style label slightly smaller than H4, similar to HTML&#39;s &lt;h5&gt; element`,
-	7: `LabelH6 is a heading-style label slightly smaller than H5, similar to HTML&#39;s &lt;h6&gt; element`,
-	8: ``,
+	0:  `LabelDisplayLarge is a large, short, and important display label with a default font size of 57px.`,
+	1:  `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45px.`,
+	2:  `LabelDisplaySmall is a small, short, and important display label with a default font size of 36px.`,
+	3:  `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32px.`,
+	4:  `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28px.`,
+	5:  `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24px.`,
+	6:  `LabelTitleLarge is a large, medium-emphasis title label with a default font size of 22px.`,
+	7:  `LabelTitleMedium is a medium-sized, medium-emphasis title label with a default font size of 16px.`,
+	8:  `LabelTitleSmall is a small, medium-emphasis title label with a default font size of 14px.`,
+	9:  `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16px.`,
+	10: `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14px.`,
+	11: `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12px.`,
+	12: `LabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14px.`,
+	13: `LabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12px.`,
+	14: `LabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11px.`,
+	15: ``,
 }
 
 func (i LabelTypes) Desc() string {

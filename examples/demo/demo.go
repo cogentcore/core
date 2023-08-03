@@ -61,10 +61,10 @@ func makeHome(tv *gi.TabView) {
 	})
 
 	title := gi.AddNewLabel(home, "title", "The GoGi Demo")
-	title.Type = gi.LabelH1
+	title.Type = gi.LabelHeadlineLarge
 
 	desc := gi.AddNewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
-	desc.Type = gi.LabelStandard
+	desc.Type = gi.LabelBodyLarge
 
 	pbar := gi.AddNewProgressBar(home, "pbar")
 	pbar.Start(100)
@@ -96,15 +96,15 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 	})
 
 	btitle := gi.AddNewLabel(buttons, "btitle", "Buttons")
-	btitle.Type = gi.LabelH1
+	btitle.Type = gi.LabelHeadlineLarge
 
 	bdesc := gi.AddNewLabel(buttons, "bdesc",
 		`GoGi provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`,
 	)
-	bdesc.Type = gi.LabelP
+	bdesc.Type = gi.LabelBodyLarge
 
 	sbdesc := gi.AddNewLabel(buttons, "bdesc", "Standard Buttons")
-	sbdesc.Type = gi.LabelH3
+	sbdesc.Type = gi.LabelHeadlineSmall
 
 	brow := gi.AddNewLayout(buttons, "brow", gi.LayoutHorizFlow)
 	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
@@ -197,7 +197,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 	// bdefi.SetInactive()
 
 	mbdesc := gi.AddNewLabel(buttons, "mbdesc", "Menu Buttons")
-	mbdesc.Type = gi.LabelH3
+	mbdesc.Type = gi.LabelHeadlineSmall
 
 	mbrow := gi.AddNewLayout(buttons, "mbrow", gi.LayoutHorizFlow)
 	mbrow.AddStyleFunc(gi.StyleFuncFinal, func() {
@@ -283,12 +283,12 @@ func makeInputs(tv *gi.TabView) {
 	})
 
 	ititle := gi.AddNewLabel(inputs, "ititle", "Inputs")
-	ititle.Type = gi.LabelH1
+	ititle.Type = gi.LabelHeadlineLarge
 
 	idesc := gi.AddNewLabel(inputs, "idesc",
 		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`,
 	)
-	idesc.Type = gi.LabelP
+	idesc.Type = gi.LabelBodyLarge
 
 	tfieldf := gi.AddNewTextField(inputs, "tfieldf")
 	tfieldf.Placeholder = "Filled Text Field"
@@ -390,12 +390,12 @@ func makeLayouts(tv *gi.TabView) {
 	left := gi.AddNewFrame(sv, "left", gi.LayoutVert)
 
 	leftTitle := gi.AddNewLabel(left, "leftTitle", "Left")
-	leftTitle.Type = gi.LabelH2
+	leftTitle.Type = gi.LabelHeadlineMedium
 
 	right := gi.AddNewFrame(sv, "right", gi.LayoutVert)
 
 	rightTitle := gi.AddNewLabel(right, "rightTitle", "Right")
-	rightTitle.Type = gi.LabelH2
+	rightTitle.Type = gi.LabelHeadlineMedium
 
 }
 

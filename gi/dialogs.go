@@ -307,7 +307,7 @@ func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	dlg.Title = title
 	if frame != nil {
 		lab := AddNewLabel(frame, "title", title)
-		lab.Type = LabelH2
+		lab.Type = LabelHeadlineLarge
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}

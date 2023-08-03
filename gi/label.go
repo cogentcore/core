@@ -13,7 +13,6 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -32,7 +31,7 @@ type Label struct {
 	Text               string                   `xml:"text" desc:"label to display"`
 	Selectable         bool                     `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
 	Redrawable         bool                     `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
-	Type               LabelTypes               `desc:"the type of label (p, h1, h2, etc)"`
+	Type               LabelTypes               `desc:"the type of label"`
 	State              LabelStates              `desc:"the current state of the label (active, inactive, selected, etc)"`
 	LinkSig            ki.Signal                `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 	StateStyles        [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
@@ -48,30 +47,55 @@ var TypeLabel = kit.Types.AddType(&Label{}, LabelProps)
 type LabelTypes int
 
 const (
-	// LabelStandard is a standard label that just contains
-	// text, similar to HTML's <span> and <label> elements
-	LabelStandard LabelTypes = iota
-	// LabelP is a paragraph-style label,
-	// similar to HTML's <p> element
-	LabelP
-	// LabelH1 is a large heading-style label,
-	// similar to HTML's <h1> element
-	LabelH1
-	// LabelH2 is a heading-style label slightly
-	// smaller than H1, similar to HTML's <h2> element
-	LabelH2
-	// LabelH3 is a heading-style label slightly
-	// smaller than H2, similar to HTML's <h3> element
-	LabelH3
-	// LabelH4 is a heading-style label slightly
-	// smaller than H3, similar to HTML's <h4> element
-	LabelH4
-	// LabelH5 is a heading-style label slightly
-	// smaller than H4, similar to HTML's <h5> element
-	LabelH5
-	// LabelH6 is a heading-style label slightly
-	// smaller than H5, similar to HTML's <h6> element
-	LabelH6
+	// LabelDisplayLarge is a large, short, and important
+	// display label with a default font size of 57px.
+	LabelDisplayLarge LabelTypes = iota
+	// LabelDisplayMedium is a medium-sized, short, and important
+	// display label with a default font size of 45px.
+	LabelDisplayMedium
+	// LabelDisplaySmall is a small, short, and important
+	// display label with a default font size of 36px.
+	LabelDisplaySmall
+
+	// LabelHeadlineLarge is a large, high-emphasis
+	// headline label with a default font size of 32px.
+	LabelHeadlineLarge
+	// LabelHeadlineMedium is a medium-sized, high-emphasis
+	// headline label with a default font size of 28px.
+	LabelHeadlineMedium
+	// LabelHeadlineSmall is a small, high-emphasis
+	// headline label with a default font size of 24px.
+	LabelHeadlineSmall
+
+	// LabelTitleLarge is a large, medium-emphasis
+	// title label with a default font size of 22px.
+	LabelTitleLarge
+	// LabelTitleMedium is a medium-sized, medium-emphasis
+	// title label with a default font size of 16px.
+	LabelTitleMedium
+	// LabelTitleSmall is a small, medium-emphasis
+	// title label with a default font size of 14px.
+	LabelTitleSmall
+
+	// LabelBodyLarge is a large body label used for longer
+	// passages of text with a default font size of 16px.
+	LabelBodyLarge
+	// LabelBodyMedium is a medium-sized body label used for longer
+	// passages of text with a default font size of 14px.
+	LabelBodyMedium
+	// LabelBodySmall is a small body label used for longer
+	// passages of text with a default font size of 12px.
+	LabelBodySmall
+
+	// LabelLarge is a large label used for label text (like a caption or
+	// the text inside a button) with a default font size of 14px.
+	LabelLarge
+	// LabelMedium is a medium-sized label used for label text (like a caption or
+	// the text inside a button) with a default font size of 12px.
+	LabelMedium
+	// LabelSmall is a small label used for label text (like a caption or
+	// the text inside a button) with a default font size of 11px.
+	LabelSmall
 
 	LabelTypesN
 )
@@ -508,41 +532,41 @@ func (lb *Label) ConfigStyles() {
 		case LabelSelected:
 			lb.Style.BackgroundColor.SetColor(ColorScheme.Tertiary)
 		}
-		// Styling based on https://www.w3schools.com/tags/tag_hn.asp
-		// and https://www.w3schools.com/tags/tag_p.asp
-		switch lb.Type {
-		case LabelStandard:
-			lb.Style.Font.Size.SetRem(1)
-			lb.Style.Text.WhiteSpace = gist.WhiteSpacePre
-			lb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-			lb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		case LabelP:
-			lb.Style.Font.Size.SetRem(1)
-			lb.Style.Margin.Set(units.Em(1*Prefs.DensityMul()), units.Px(0))
-		case LabelH1:
-			lb.Style.Font.Size.SetRem(2)
-			lb.Style.Font.Weight = gist.WeightBold
-			lb.Style.Margin.Set(units.Em(0.67*Prefs.DensityMul()), units.Px(0))
-		case LabelH2:
-			lb.Style.Font.Size.SetRem(1.5)
-			lb.Style.Font.Weight = gist.WeightBold
-			lb.Style.Margin.Set(units.Em(0.83*Prefs.DensityMul()), units.Px(0))
-		case LabelH3:
-			lb.Style.Font.Size.SetRem(1.17)
-			lb.Style.Font.Weight = gist.WeightBold
-			lb.Style.Margin.Set(units.Em(1*Prefs.DensityMul()), units.Px(0))
-		case LabelH4:
-			lb.Style.Font.Size.SetRem(1)
-			lb.Style.Font.Weight = gist.WeightBold
-			lb.Style.Margin.Set(units.Em(1.33*Prefs.DensityMul()), units.Px(0))
-		case LabelH5:
-			lb.Style.Font.Size.SetRem(0.83)
-			lb.Style.Font.Weight = gist.WeightBold
-			lb.Style.Margin.Set(units.Em(1.67*Prefs.DensityMul()), units.Px(0))
-		case LabelH6:
-			lb.Style.Font.Size.SetRem(0.67)
-			lb.Style.Font.Weight = gist.WeightBold
-			lb.Style.Margin.Set(units.Em(2.33*Prefs.DensityMul()), units.Px(0))
-		}
+		// // Styling based on https://www.w3schools.com/tags/tag_hn.asp
+		// // and https://www.w3schools.com/tags/tag_p.asp
+		// switch lb.Type {
+		// case LabelStandard:
+		// 	lb.Style.Font.Size.SetRem(1)
+		// 	lb.Style.Text.WhiteSpace = gist.WhiteSpacePre
+		// 	lb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		// 	lb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		// case LabelP:
+		// 	lb.Style.Font.Size.SetRem(1)
+		// 	lb.Style.Margin.Set(units.Em(1*Prefs.DensityMul()), units.Px(0))
+		// case LabelH1:
+		// 	lb.Style.Font.Size.SetRem(2)
+		// 	lb.Style.Font.Weight = gist.WeightBold
+		// 	lb.Style.Margin.Set(units.Em(0.67*Prefs.DensityMul()), units.Px(0))
+		// case LabelH2:
+		// 	lb.Style.Font.Size.SetRem(1.5)
+		// 	lb.Style.Font.Weight = gist.WeightBold
+		// 	lb.Style.Margin.Set(units.Em(0.83*Prefs.DensityMul()), units.Px(0))
+		// case LabelH3:
+		// 	lb.Style.Font.Size.SetRem(1.17)
+		// 	lb.Style.Font.Weight = gist.WeightBold
+		// 	lb.Style.Margin.Set(units.Em(1*Prefs.DensityMul()), units.Px(0))
+		// case LabelH4:
+		// 	lb.Style.Font.Size.SetRem(1)
+		// 	lb.Style.Font.Weight = gist.WeightBold
+		// 	lb.Style.Margin.Set(units.Em(1.33*Prefs.DensityMul()), units.Px(0))
+		// case LabelH5:
+		// 	lb.Style.Font.Size.SetRem(0.83)
+		// 	lb.Style.Font.Weight = gist.WeightBold
+		// 	lb.Style.Margin.Set(units.Em(1.67*Prefs.DensityMul()), units.Px(0))
+		// case LabelH6:
+		// 	lb.Style.Font.Size.SetRem(0.67)
+		// 	lb.Style.Font.Weight = gist.WeightBold
+		// 	lb.Style.Margin.Set(units.Em(2.33*Prefs.DensityMul()), units.Px(0))
+		// }
 	})
 }
