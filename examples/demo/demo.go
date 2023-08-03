@@ -112,19 +112,30 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 		brow.Style.MaxWidth.SetPx(-1)
 	})
 
-	bpri := gi.AddNewButton(brow, "buttonPrimary")
-	bpri.Text = "Primary Button"
-	bpri.Type = gi.ButtonPrimary
-	bpri.Icon = icons.InstallDesktop
+	bfill := gi.AddNewButton(brow, "buttonFilled")
+	bfill.Text = "Filled"
+	bfill.Type = gi.ButtonFilled
+	bfill.Icon = icons.InstallDesktop
 
-	bsec := gi.AddNewButton(brow, "buttonSecondary")
-	bsec.Text = "Secondary Button"
-	bsec.Type = gi.ButtonSecondary
-	bsec.Icon = icons.Settings
+	bton := gi.AddNewButton(brow, "buttonTonal")
+	bton.Text = "Tonal"
+	bton.Type = gi.ButtonTonal
+	bton.Icon = icons.Settings
 
-	bdef := gi.AddNewButton(brow, "buttonDefault")
-	bdef.Text = "Default Button"
-	bdef.Icon = icons.Star
+	belv := gi.AddNewButton(brow, "buttonElevated")
+	belv.Text = "Elevated"
+	belv.Type = gi.ButtonElevated
+	belv.Icon = icons.Star
+
+	bout := gi.AddNewButton(brow, "buttonOutlined")
+	bout.Text = "Outlined"
+	bout.Type = gi.ButtonOutlined
+	bout.Icon = icons.Close
+
+	btxt := gi.AddNewButton(brow, "buttonText")
+	btxt.Text = "Text"
+	btxt.Type = gi.ButtonText
+	btxt.Icon = icons.Cabin
 
 	browto := gi.AddNewLayout(buttons, "browTextOnly", gi.LayoutHorizFlow)
 	browto.AddStyleFunc(gi.StyleFuncFinal, func() {
@@ -134,11 +145,11 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 
 	bprito := gi.AddNewButton(browto, "buttonPrimaryTextOnly")
 	bprito.Text = "Primary Button"
-	bprito.Type = gi.ButtonPrimary
+	bprito.Type = gi.ButtonFilled
 
 	bsecto := gi.AddNewButton(browto, "buttonSecondaryTextOnly")
 	bsecto.Text = "Secondary Button"
-	bsecto.Type = gi.ButtonSecondary
+	bsecto.Type = gi.ButtonTonal
 
 	bdefto := gi.AddNewButton(browto, "buttonDefaultTextOnly")
 	bdefto.Text = "Default Button"
@@ -151,11 +162,11 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 
 	bpriio := gi.AddNewButton(browio, "buttonPrimaryTextOnly")
 	bpriio.Icon = icons.Send
-	bpriio.Type = gi.ButtonPrimary
+	bpriio.Type = gi.ButtonFilled
 
 	bsecio := gi.AddNewButton(browio, "buttonSecondaryTextOnly")
 	bsecio.Icon = icons.Info
-	bsecio.Type = gi.ButtonSecondary
+	bsecio.Type = gi.ButtonTonal
 
 	bdefio := gi.AddNewButton(browio, "buttonDefaultTextOnly")
 	bdefio.Icon = icons.AccountCircle
@@ -171,13 +182,13 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 
 	bprii := gi.AddNewButton(browi, "buttonPrimaryInactive")
 	bprii.Text = "Inactive Primary Button"
-	bprii.Type = gi.ButtonPrimary
+	bprii.Type = gi.ButtonFilled
 	bprii.Icon = icons.OpenInNew
 	bprii.SetInactive()
 
 	bseci := gi.AddNewButton(browi, "buttonSecondaryInactive")
 	bseci.Text = "Inactive Secondary Button"
-	bseci.Type = gi.ButtonSecondary
+	bseci.Type = gi.ButtonTonal
 	bseci.Icon = icons.Settings
 	bseci.SetInactive()
 

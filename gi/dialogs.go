@@ -409,7 +409,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
 		okb := bb.ChildByName("ok", 0).Embed(TypeButton).(*Button)
 		okb.SetText("Ok")
-		okb.Type = ButtonPrimary
+		okb.Type = ButtonFilled
 		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(TypeDialog).(*Dialog)
@@ -420,7 +420,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if cancel {
 		canb := bb.ChildByName("cancel", 0).Embed(TypeButton).(*Button)
 		canb.SetText("Cancel")
-		canb.Type = ButtonSecondary
+		canb.Type = ButtonOutlined
 		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(TypeDialog).(*Dialog)

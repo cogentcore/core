@@ -770,11 +770,11 @@ const (
 	// that are the final in a sequence. It is equivalent
 	// to Material Design's filled button.
 	ButtonFilled ButtonTypes = iota
-	// ButtonFilledTonal is a filled button, similar
+	// ButtonTonal is a filled button, similar
 	// to [ButtonFilled]. It is used for the same purposes,
 	// but it has a lighter background color and less emphasis.
 	// It is equivalent to Material Design's filled tonal button.
-	ButtonFilledTonal
+	ButtonTonal
 	// ButtonElevated is an elevated button with
 	// a light background color and a shadow.
 	// It is equivalent to Material Design's elevated button.
@@ -931,76 +931,80 @@ func (bt *Button) Init2D() {
 func (bt *Button) ConfigStyles() {
 	bt.AddStyleFunc(StyleFuncDefault, func() {
 		bt.Style.Border.Radius.Set(gist.BorderRadiusFull)
-		bt.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-		bt.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
+		bt.Style.Padding.Set(units.Em(0.75*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
+		if !bt.Icon.IsNil() {
+			bt.Style.Padding.Left.SetEm(1 * Prefs.DensityMul())
+		}
 		bt.Style.Text.Align = gist.AlignCenter
 		switch bt.Type {
-		case ButtonDefault:
-			bt.Style.Border.Style.Set(gist.BorderNone)
-			bt.Style.BackgroundColor.SetColor(ColorScheme.Secondary)
-			bt.Style.Color = ColorScheme.OnSecondary
-			// switch bt.State {
-			// case ButtonActive:
+		case ButtonFilled:
+
+			// case ButtonDefault:
+			// 	bt.Style.Border.Style.Set(gist.BorderNone)
 			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Secondary)
-			// case ButtonInactive:
-			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			// 	bt.Style.Color = ColorScheme.OnSecondary.Highlight(20)
-			// case ButtonFocus, ButtonSelected:
-			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			// case ButtonHover:
-			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(25))
-			// case ButtonDown:
-			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
-			// }
-		case ButtonPrimary:
-			bt.Style.Border.Style.Set(gist.BorderNone)
-			switch bt.State {
-			case ButtonActive:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Primary)
-			case ButtonInactive:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(20))
-			case ButtonFocus, ButtonSelected:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(10))
-			case ButtonHover:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(20))
-			case ButtonDown:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(30))
-			}
-			// we always use the contrast color of the primary color
-			// to prevent text color changing on state change
-			bt.Style.Color = ColorScheme.Primary.ContrastColor()
-			if bt.State == ButtonInactive {
-				bt.Style.Color = bt.Style.Color.Highlight(20)
-			}
-		case ButtonSecondary:
-			bt.Style.Border.Style.Set(gist.BorderSolid)
-			bt.Style.Border.Width.Set(units.Px(1))
-			bt.Style.Border.Color.Set(ColorScheme.Primary.Pastel(100))
-			bt.Style.Color = ColorScheme.Primary
-			switch bt.State {
-			case ButtonActive:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background)
-			case ButtonInactive:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-				bt.Style.Color = ColorScheme.Primary.Highlight(20)
-			case ButtonFocus, ButtonSelected:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
-			case ButtonHover:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			case ButtonDown:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
-			}
+			// 	bt.Style.Color = ColorScheme.OnSecondary
+			// 	// switch bt.State {
+			// 	// case ButtonActive:
+			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Secondary)
+			// 	// case ButtonInactive:
+			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+			// 	// 	bt.Style.Color = ColorScheme.OnSecondary.Highlight(20)
+			// 	// case ButtonFocus, ButtonSelected:
+			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+			// 	// case ButtonHover:
+			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(25))
+			// 	// case ButtonDown:
+			// 	// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
+			// 	// }
+			// case ButtonPrimary:
+			// 	bt.Style.Border.Style.Set(gist.BorderNone)
+			// 	switch bt.State {
+			// 	case ButtonActive:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary)
+			// 	case ButtonInactive:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(20))
+			// 	case ButtonFocus, ButtonSelected:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(10))
+			// 	case ButtonHover:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(20))
+			// 	case ButtonDown:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Primary.Highlight(30))
+			// 	}
+			// 	// we always use the contrast color of the primary color
+			// 	// to prevent text color changing on state change
+			// 	bt.Style.Color = ColorScheme.Primary.ContrastColor()
+			// 	if bt.State == ButtonInactive {
+			// 		bt.Style.Color = bt.Style.Color.Highlight(20)
+			// 	}
+			// case ButtonSecondary:
+			// 	bt.Style.Border.Style.Set(gist.BorderSolid)
+			// 	bt.Style.Border.Width.Set(units.Px(1))
+			// 	bt.Style.Border.Color.Set(ColorScheme.Primary.Pastel(100))
+			// 	bt.Style.Color = ColorScheme.Primary
+			// 	switch bt.State {
+			// 	case ButtonActive:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background)
+			// 	case ButtonInactive:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+			// 		bt.Style.Color = ColorScheme.Primary.Highlight(20)
+			// 	case ButtonFocus, ButtonSelected:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
+			// 	case ButtonHover:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+			// 	case ButtonDown:
+			// 		bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
+			// 	}
 		}
 	})
 	bt.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(bt), func(icon *WidgetBase) {
-		icon.Style.Width.SetEm(1.5)
-		icon.Style.Height.SetEm(1.5)
+		icon.Style.Width.SetEm(1.125)
+		icon.Style.Height.SetEm(1.125)
 		icon.Style.Margin.Set()
 		icon.Style.Padding.Set()
 	})
 	bt.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(bt), func(space *WidgetBase) {
-		space.Style.Width.SetCh(0.5)
-		space.Style.MinWidth.SetCh(0.5)
+		space.Style.Width.SetEm(0.5)
+		space.Style.MinWidth.SetEm(0.5)
 	})
 	bt.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(bt), func(label *WidgetBase) {
 		// need to override so label's default color
