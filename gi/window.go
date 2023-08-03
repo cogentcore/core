@@ -406,7 +406,7 @@ func NewMainWindow(name, title string, width, height int) *Window {
 	vp.Fill = true
 	vp.AddStyleFunc(StyleFuncParts(win), func() {
 		vp.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		vp.Style.Color = ColorScheme.Text // everything inherits this
+		vp.Style.Color = ColorScheme.OnBackground // everything inherits this
 	})
 
 	win.AddChild(vp)

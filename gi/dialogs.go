@@ -663,8 +663,8 @@ func StringPromptDialogValue(dlg *Dialog) string {
 
 func (dlg *Dialog) ConfigStyles() {
 	dlg.AddStyleFunc(StyleFuncDefault, func() {
-		dlg.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		dlg.Style.Color = ColorScheme.Text
+		dlg.Style.BackgroundColor.SetColor(ColorScheme.SurfaceVariant)
+		dlg.Style.Color = ColorScheme.OnSurfaceVariant
 	})
 	frame, ok := dlg.ChildByName("frame", 0).(*Frame)
 	if ok {

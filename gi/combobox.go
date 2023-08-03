@@ -638,36 +638,37 @@ func (cb *ComboBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
 		cb.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
 		cb.Style.Text.Align = gist.AlignCenter
-		cb.Style.Color = ColorScheme.Text
+		cb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceVariant)
+		cb.Style.Color = ColorScheme.OnSurfaceVariant
 		if cb.Editable {
 			cb.Style.Padding.Set()
 		} else {
 			cb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
 		}
 		cb.Style.Border.Radius.Set(units.Px(10))
-		switch cb.Type {
-		case ComboBoxFilled:
-			cb.Style.Border.Style.Set(gist.BorderNone)
-			cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
-		case ComboBoxOutlined:
-			cb.Style.Border.Style.Set(gist.BorderSolid)
-			cb.Style.Border.Width.Set(units.Px(1))
-			cb.Style.Border.Color.Set(ColorScheme.Text)
-			cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		}
-		switch cb.State {
-		case ButtonActive:
-			// use background as already specified above
-		case ButtonInactive:
-			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(20))
-			cb.Style.Color = ColorScheme.Text.Highlight(20)
-		case ButtonFocus, ButtonSelected:
-			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(10))
-		case ButtonHover:
-			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(15))
-		case ButtonDown:
-			cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(20))
-		}
+		// switch cb.Type {
+		// case ComboBoxFilled:
+		// 	cb.Style.Border.Style.Set(gist.BorderNone)
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
+		// case ComboBoxOutlined:
+		// 	cb.Style.Border.Style.Set(gist.BorderSolid)
+		// 	cb.Style.Border.Width.Set(units.Px(1))
+		// 	cb.Style.Border.Color.Set(ColorScheme.OnBackground)
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		// }
+		// switch cb.State {
+		// case ButtonActive:
+		// 	// use background as already specified above
+		// case ButtonInactive:
+		// 	cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(20))
+		// 	cb.Style.Color = ColorScheme.OnBackground.Highlight(20)
+		// case ButtonFocus, ButtonSelected:
+		// 	cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(10))
+		// case ButtonHover:
+		// 	cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(15))
+		// case ButtonDown:
+		// 	cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(20))
+		// }
 	})
 	cb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(cb), func(icon *WidgetBase) {
 		icon.Style.Width.SetEm(1)

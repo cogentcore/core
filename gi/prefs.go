@@ -31,7 +31,7 @@ import (
 type Preferences struct {
 	LogicalDPIScale      float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
 	ScreenPrefs          map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
-	ColorSchemeType      ColorSchemeTypes       `desc:"the color scheme type (light or dark)"`
+	ColorSchemeType      gist.ColorSchemeTypes  `desc:"the color scheme type (light or dark)"`
 	Density              Densities              `desc:"the density (compactness) of content"`
 	Colors               ColorPrefs             `desc:"active color preferences"`
 	ColorSchemes         map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`
@@ -63,7 +63,7 @@ func init() {
 
 func (pf *Preferences) Defaults() {
 	pf.LogicalDPIScale = 1.0
-	pf.ColorSchemeType = ColorSchemeLight
+	pf.ColorSchemeType = gist.ColorSchemeLight
 	pf.Density = DensityMedium
 	pf.Colors.Defaults()
 	pf.ColorSchemes = DefaultColorSchemes()
@@ -152,14 +152,14 @@ func (pf *Preferences) SaveColors(filename FileName) error {
 
 // LightMode sets colors to light mode
 func (pf *Preferences) LightMode() {
-	pf.ColorSchemeType = ColorSchemeLight
+	pf.ColorSchemeType = gist.ColorSchemeLight
 	pf.Save()
 	pf.UpdateAll()
 }
 
 // DarkMode sets colors to dark mode
 func (pf *Preferences) DarkMode() {
-	pf.ColorSchemeType = ColorSchemeDark
+	pf.ColorSchemeType = gist.ColorSchemeDark
 	pf.Save()
 	pf.UpdateAll()
 }
@@ -184,10 +184,10 @@ func (pf *Preferences) Apply() {
 	if pf.ColorSchemes["Dark"].HiStyle == "" {
 		pf.ColorSchemes["Dark"].HiStyle = "monokai"
 	}
-	if pf.ColorSchemeType == ColorSchemeLight {
-		ColorScheme = TheColorSchemes.Light
+	if pf.ColorSchemeType == gist.ColorSchemeLight {
+		ColorScheme = ColorSchemes.Light
 	} else {
-		ColorScheme = TheColorSchemes.Dark
+		ColorScheme = ColorSchemes.Dark
 	}
 
 	TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)

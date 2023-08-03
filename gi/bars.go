@@ -325,8 +325,8 @@ func (mb *MenuBar) ConfigStyles() {
 		mb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		mb.Style.Margin.Set()
 		mb.Spacing.SetPx(4 * Prefs.DensityMul())
-		mb.Style.Color.SetColor(ColorScheme.Text)
-		mb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(7))
+		mb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+		mb.Style.Color = ColorScheme.OnSurface
 	})
 }
 
@@ -528,7 +528,7 @@ func (tb *ToolBar) ConfigStyles() {
 		tb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		tb.Style.Margin.Set()
 		tb.Spacing.SetPx(4 * Prefs.DensityMul())
-		tb.Style.Color.SetColor(ColorScheme.Text)
-		tb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(7))
+		tb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+		tb.Style.Color.SetColor(ColorScheme.OnSurface)
 	})
 }

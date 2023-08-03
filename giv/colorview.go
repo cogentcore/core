@@ -542,7 +542,7 @@ func (cv *ColorView) Init2D() {
 func (cv *ColorView) ConfigStyles() {
 	cv.AddStyleFunc(gi.StyleFuncDefault, func() {
 		cv.Style.BackgroundColor.SetColor(gi.ColorScheme.Background)
-		cv.Style.Color = gi.ColorScheme.Text
+		cv.Style.Color = gi.ColorScheme.OnBackground
 	})
 }
 

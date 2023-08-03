@@ -807,8 +807,8 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 // It should be called on tooltips when they are created.
 func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
 	tooltip.AddStyleFunc(StyleFuncParts(par), func() {
-		tooltip.Style.BackgroundColor.SetColor(ColorScheme.Accent)
-		tooltip.Style.Color = ColorScheme.Accent.ContrastColor()
+		tooltip.Style.BackgroundColor.SetColor(ColorScheme.Tertiary)
+		tooltip.Style.Color = ColorScheme.Tertiary.ContrastColor()
 		tooltip.Style.Border.Style.Set(gist.BorderNone)
 		tooltip.Style.Margin.Set()
 		tooltip.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))

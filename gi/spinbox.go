@@ -557,13 +557,13 @@ func (sb *SpinBox) ConfigStyles() {
 			button.Style.MaxHeight.SetEx(2)
 			button.Style.Padding.Set()
 			button.Style.Margin.Set()
-			button.Style.Color = ColorScheme.Text
+			button.Style.Color = ColorScheme.OnBackground
 			switch button.State {
 			case ButtonActive:
 				button.Style.BackgroundColor.SetColor(ColorScheme.Background)
 			case ButtonInactive:
 				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-				button.Style.Color = ColorScheme.Text.Highlight(20)
+				button.Style.Color = ColorScheme.OnBackground.Highlight(20)
 			case ButtonFocus, ButtonSelected:
 				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
 			case ButtonHover:

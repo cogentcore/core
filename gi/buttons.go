@@ -925,20 +925,21 @@ func (bt *Button) ConfigStyles() {
 		switch bt.Type {
 		case ButtonDefault:
 			bt.Style.Border.Style.Set(gist.BorderNone)
-			bt.Style.Color = ColorScheme.Text
-			switch bt.State {
-			case ButtonActive:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
-			case ButtonInactive:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-				bt.Style.Color = ColorScheme.Text.Highlight(20)
-			case ButtonFocus, ButtonSelected:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			case ButtonHover:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(25))
-			case ButtonDown:
-				bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
-			}
+			bt.Style.BackgroundColor.SetColor(ColorScheme.Secondary)
+			bt.Style.Color = ColorScheme.OnSecondary
+			// switch bt.State {
+			// case ButtonActive:
+			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Secondary)
+			// case ButtonInactive:
+			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+			// 	bt.Style.Color = ColorScheme.OnSecondary.Highlight(20)
+			// case ButtonFocus, ButtonSelected:
+			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+			// case ButtonHover:
+			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(25))
+			// case ButtonDown:
+			// 	bt.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
+			// }
 		case ButtonPrimary:
 			bt.Style.Border.Style.Set(gist.BorderNone)
 			switch bt.State {
@@ -1226,24 +1227,24 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 func (cb *CheckBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
 		cb.Style.Text.Align = gist.AlignLeft
-		cb.Style.Color.SetColor(ColorScheme.Text)
+		cb.Style.Color = ColorScheme.OnBackground
 		cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
 		cb.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
 		cb.Style.Padding.Set(units.Px(1 * Prefs.DensityMul()))
 		cb.Style.Border.Style.Set(gist.BorderNone)
-		switch cb.State {
-		case ButtonActive:
-			cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		case ButtonInactive:
-			cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
-			cb.Style.Color.SetColor(ColorScheme.Text.Highlight(30))
-		case ButtonFocus, ButtonSelected:
-			cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
-		case ButtonHover:
-			cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
-		case ButtonDown:
-			cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-		}
+		// switch cb.State {
+		// case ButtonActive:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		// case ButtonInactive:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		// 	cb.Style.Color.SetColor(ColorScheme.OnBackground.Highlight(30))
+		// case ButtonFocus, ButtonSelected:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
+		// case ButtonHover:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
+		// case ButtonDown:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+		// }
 	})
 	if stack, ok := cb.Parts.ChildByName("stack", 0).(*Layout); ok {
 		// same style function for both icon on and off

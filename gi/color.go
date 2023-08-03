@@ -10,6 +10,8 @@ import "github.com/goki/gi/gist"
 // that is used to style the app. It should
 // not be set by end-user code, as it is set
 // automatically from the user's preferences and
-// [TheColorSchemes]. You should set [TheColorSchemes]
+// [ColorSchemes]. You should set [ColorSchemes]
 // to customize the color scheme of your app.
 var ColorScheme gist.ColorScheme
+
+//go:generate goki colorgen colors.xml

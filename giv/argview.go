@@ -159,7 +159,7 @@ func (av *ArgView) Init2D() {
 func (av *ArgView) ConfigStyles() {
 	av.AddStyleFunc(gi.StyleFuncDefault, func() {
 		av.Style.BackgroundColor.SetColor(gi.ColorScheme.Background)
-		av.Style.Color = gi.ColorScheme.Text
+		av.Style.Color = gi.ColorScheme.OnBackground
 		av.Style.MaxWidth.SetPx(-1)
 		av.Style.MaxHeight.SetPx(-1)
 	})

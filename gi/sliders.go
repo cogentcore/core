@@ -888,7 +888,7 @@ func (sr *Slider) ConfigStyles() {
 			sr.Style.MinHeight.SetEm(20)
 			sr.Style.MinWidth.SetEm(2)
 		}
-		sr.Style.Color = ColorScheme.Text
+		sr.Style.Color = ColorScheme.OnBackground
 		switch sr.State {
 		case SliderActive:
 			sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
@@ -1078,7 +1078,7 @@ func (sb *ScrollBar) ConfigStyles() {
 		sb.Style.Border.Radius.Set(units.Px(4))
 		sb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		sb.Style.Padding.Set()
-		sb.Style.Color = ColorScheme.Text
+		sb.Style.Color = ColorScheme.OnBackground
 		if sb.Dim == mat32.X {
 			sb.Style.MinHeight.SetEm(2)
 		} else {

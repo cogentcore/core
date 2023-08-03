@@ -1635,8 +1635,8 @@ func (tf *TextField) ConfigStyles() {
 		tf.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
 		tf.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
 		tf.Style.Text.Align = gist.AlignLeft
-		tf.Style.Color = ColorScheme.Text
-		tf.SelectColor.SetColor(ColorScheme.Accent)
+		tf.Style.Color = ColorScheme.OnBackground
+		tf.SelectColor.SetColor(ColorScheme.Tertiary)
 		tf.ClearAct = true
 		switch tf.Type {
 		case TextFieldFilled:
@@ -1645,7 +1645,7 @@ func (tf *TextField) ConfigStyles() {
 		case TextFieldOutlined:
 			tf.Style.Border.Style.Set(gist.BorderSolid)
 			tf.Style.Border.Width.Set(units.Px(1))
-			tf.Style.Border.Color.Set(ColorScheme.Text)
+			tf.Style.Border.Color.Set(ColorScheme.OnBackground)
 			tf.Style.BackgroundColor.SetColor(ColorScheme.Background)
 		}
 		switch tf.State {
@@ -1653,11 +1653,11 @@ func (tf *TextField) ConfigStyles() {
 			// use background as already specified above
 		case TextFieldInactive:
 			tf.Style.BackgroundColor.SetColor(tf.Style.BackgroundColor.Color.Highlight(20))
-			tf.Style.Color = ColorScheme.Text.Highlight(20)
+			tf.Style.Color = ColorScheme.OnBackground.Highlight(20)
 		case TextFieldFocus:
 			tf.Style.BackgroundColor.SetColor(tf.Style.BackgroundColor.Color.Highlight(10))
 		case TextFieldSel:
-			tf.Style.BackgroundColor.SetColor(ColorScheme.Accent)
+			tf.Style.BackgroundColor.SetColor(ColorScheme.Tertiary)
 		}
 		tf.PlaceholderColor = tf.Style.Color.Highlight(40)
 	})

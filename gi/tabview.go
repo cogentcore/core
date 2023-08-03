@@ -559,7 +559,7 @@ func (tv *TabView) ConfigStyles() {
 		tv.Style.Border.Width.Set(units.Px(1))
 		tv.Style.Border.Color.Set(ColorScheme.Background.Highlight(50))
 		tv.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		tv.Style.Color = ColorScheme.Text
+		tv.Style.Color = ColorScheme.OnBackground
 		tv.Style.MaxWidth.SetPx(-1)
 		tv.Style.MaxHeight.SetPx(-1)
 	})
@@ -732,7 +732,7 @@ func (tb *TabButton) ConfigStyles() {
 
 		tb.Style.Border.Radius.Set()
 		tb.Style.Text.Align = gist.AlignLeft
-		tb.Style.Color = ColorScheme.Text
+		tb.Style.Color = ColorScheme.OnBackground
 		tb.Style.Margin.Set()
 		tb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
 		tb.Indicator = icons.Close
@@ -741,14 +741,14 @@ func (tb *TabButton) ConfigStyles() {
 		// while selected
 		baseColor := ColorScheme.Background
 		if tb.IsSelected() {
-			baseColor = ColorScheme.Accent
+			baseColor = ColorScheme.Tertiary
 		}
 		switch tb.State {
 		case ButtonActive:
 			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(7))
 		case ButtonInactive:
 			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(20))
-			tb.Style.Color = ColorScheme.Text.Highlight(20)
+			tb.Style.Color = ColorScheme.OnBackground.Highlight(20)
 		case ButtonFocus:
 			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(15))
 		case ButtonHover:
