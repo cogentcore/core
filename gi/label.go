@@ -521,10 +521,15 @@ func (lb *Label) Init2D() {
 func (lb *Label) ConfigStyles() {
 	lb.AddStyleFunc(StyleFuncDefault, func() {
 		lb.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
-		lb.Style.AlignV = gist.AlignTop
-		lb.Style.Color = ColorScheme.OnBackground
+		lb.Style.AlignV = gist.AlignMiddle
 		lb.Style.BackgroundColor.SetColor(color.Transparent)
-		lb.Style.MaxWidth.SetPct(100)
+		switch lb.Type {
+		case LabelLabelLarge:
+			lb.Style.Text.LineHeight = 20.0 / 14.0
+			lb.Style.Font.Size.SetPx(14)
+			lb.Style.Text.LetterSpacing.SetPx(0.1)
+			lb.Style.Font.Weight = gist.WeightMedium
+		}
 		switch lb.State {
 		case LabelActive:
 		case LabelInactive:
