@@ -11,15 +11,17 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[ButtonDefault-0]
-	_ = x[ButtonPrimary-1]
-	_ = x[ButtonSecondary-2]
-	_ = x[ButtonTypesN-3]
+	_ = x[ButtonFilled-0]
+	_ = x[ButtonFilledTonal-1]
+	_ = x[ButtonElevated-2]
+	_ = x[ButtonOutlined-3]
+	_ = x[ButtonText-4]
+	_ = x[ButtonTypesN-5]
 }
 
-const _ButtonTypes_name = "ButtonDefaultButtonPrimaryButtonSecondaryButtonTypesN"
+const _ButtonTypes_name = "ButtonFilledButtonFilledTonalButtonElevatedButtonOutlinedButtonTextButtonTypesN"
 
-var _ButtonTypes_index = [...]uint8{0, 13, 26, 41, 53}
+var _ButtonTypes_index = [...]uint8{0, 12, 29, 43, 57, 67, 79}
 
 func (i ButtonTypes) String() string {
 	if i < 0 || i >= ButtonTypes(len(_ButtonTypes_index)-1) {
@@ -39,10 +41,12 @@ func (i *ButtonTypes) FromString(s string) error {
 }
 
 var _ButtonTypes_descMap = map[ButtonTypes]string{
-	0: `ButtonDefault is a default gray button typically used in menus and checkboxes`,
-	1: `ButtonPrimary is a primary button colored as the primary color; it is typically used for primary actions like save, send, and new`,
-	2: `ButtonSecondary is a secondary button colored as the inverse of a primary button; it is typically used for secondary actions like cancel, back, and options`,
-	3: ``,
+	0: `ButtonFilled is a filled button with a contrasting background color. It should be used for prominent actions, typically those that are the final in a sequence. It is equivalent to Material Design&#39;s filled button.`,
+	1: `ButtonFilledTonal is a filled button, similar to [ButtonFilled]. It is used for the same purposes, but it has a lighter background color and less emphasis. It is equivalent to Material Design&#39;s filled tonal button.`,
+	2: `ButtonElevated is an elevated button with a light background color and a shadow. It is equivalent to Material Design&#39;s elevated button.`,
+	3: `ButtonOutlined is an outlined button that is used for secondary actions that are still important. It is equivalent to Material Design&#39;s outlined button.`,
+	4: `ButtonText is a low-importance button with only text and/or an icon and no border, background color, or shadow. They should only be used for low emphasis actions, and you must ensure they stand out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s text and icon buttons.`,
+	5: ``,
 }
 
 func (i ButtonTypes) Desc() string {

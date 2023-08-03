@@ -764,20 +764,32 @@ var TypeButton = kit.Types.AddType(&Button{}, nil)
 type ButtonTypes int
 
 const (
-	// ButtonDefault is a default gray button
-	// typically used in menus and checkboxes
-	ButtonDefault ButtonTypes = iota
-	// ButtonPrimary is a primary button colored
-	// as the primary color; it is typically used for
-	// primary actions like save, send, and new
-	ButtonPrimary
-	// ButtonSecondary is a secondary button colored as
-	// the inverse of a primary button; it is typically used
-	// for secondary actions like cancel, back, and options
-	ButtonSecondary
-	// TODO: add more button types like text and danger
-	// ButtonText is a button with no border or background color.
-	// It should be used as a low-priority secondary button
+	// ButtonFilled is a filled button with a
+	// contrasting background color. It should be
+	// used for prominent actions, typically those
+	// that are the final in a sequence. It is equivalent
+	// to Material Design's filled button.
+	ButtonFilled ButtonTypes = iota
+	// ButtonFilledTonal is a filled button, similar
+	// to [ButtonFilled]. It is used for the same purposes,
+	// but it has a lighter background color and less emphasis.
+	// It is equivalent to Material Design's filled tonal button.
+	ButtonFilledTonal
+	// ButtonElevated is an elevated button with
+	// a light background color and a shadow.
+	// It is equivalent to Material Design's elevated button.
+	ButtonElevated
+	// ButtonOutlined is an outlined button that is
+	// used for secondary actions that are still important.
+	// It is equivalent to Material Design's outlined button.
+	ButtonOutlined
+	// ButtonText is a low-importance button with only
+	// text and/or an icon and no border, background color,
+	// or shadow. They should only be used for low emphasis
+	// actions, and you must ensure they stand out from the
+	// surrounding context sufficiently. It is equivalent
+	// to Material Design's text and icon buttons.
+	ButtonText
 
 	ButtonTypesN
 )
