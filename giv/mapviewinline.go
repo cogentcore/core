@@ -21,14 +21,14 @@ import (
 // the key names and editor vals for each value.
 type MapViewInline struct {
 	gi.PartsWidgetBase
-	Map        any         `desc:"the map that we are a view onto"`
-	MapValView ValueView   `desc:"ValueView for the map itself, if this was created within value view framework -- otherwise nil"`
-	Changed    bool        `desc:"has the map been edited?"`
-	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
-	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	ViewPath   string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	Map        any         `desc:"the map that we are a view onto"`                                                                                                                                                        // the map that we are a view onto
+	MapValView ValueView   `desc:"ValueView for the map itself, if this was created within value view framework -- otherwise nil"`                                                                                         // ValueView for the map itself, if this was created within value view framework -- otherwise nil
+	Changed    bool        `desc:"has the map been edited?"`                                                                                                                                                               // has the map been edited?
+	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`                                                                                                                             // ValueView representations of the map keys
+	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`                                                                                                                               // ValueView representations of the fields
+	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"` // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`           // signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
+	ViewPath   string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`                                                        // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 }
 
 var TypeMapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)

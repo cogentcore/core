@@ -230,9 +230,9 @@ func (ev EventBase) OnWinFocus() bool {
 type CustomEvent struct {
 	EventBase
 	Data     any
-	PosAvail bool        `desc:"set to true if position is available"`
-	Where    image.Point `desc:"position info if relevant -- set PosAvail"`
-	Focus    bool        `desc:"set to true if this event should be sent to widget in focus"`
+	PosAvail bool        `desc:"set to true if position is available"`                        // set to true if position is available
+	Where    image.Point `desc:"position info if relevant -- set PosAvail"`                   // position info if relevant -- set PosAvail
+	Focus    bool        `desc:"set to true if this event should be sent to widget in focus"` // set to true if this event should be sent to widget in focus
 }
 
 func (ce CustomEvent) Type() EventType {

@@ -36,15 +36,15 @@ type WinGeomPrefs map[string]map[string]WindowGeom
 // WinGeomPrefsMgr is the manager of window geometry preferences.
 // Records window geometry in a persistent file, used when opening new windows.
 type WinGeomPrefsMgr struct {
-	Geoms         WinGeomPrefs  `desc:"the full set of window geometries"`
-	Cache         WinGeomPrefs  `desc:"temporary cached geometries -- saved to Geoms after SaveDelay"`
-	FileName      string        `desc:"base name of the preferences file in GoGi prefs directory"`
-	LastSave      time.Time     `desc:"when prefs were last saved -- if we weren't the last to save, then we need to re-open before modifying"`
-	SettingNoSave bool          `desc:"if true, we are setting geometry so don't save -- caller must call SettingStart() SettingEnd() to block"`
-	Mu            sync.RWMutex  `desc:"read-write mutex that protects updating of WinGeomPrefs"`
-	LockSleep     time.Duration `desc:"wait time before trying to lock file again"`
-	SaveDelay     time.Duration `desc:"wait time before saving the Cache into Geoms"`
-	saveTimer     *time.Timer   `desc:"timer for delayed save"`
+	Geoms         WinGeomPrefs  `desc:"the full set of window geometries"`                                                                       // the full set of window geometries
+	Cache         WinGeomPrefs  `desc:"temporary cached geometries -- saved to Geoms after SaveDelay"`                                           // temporary cached geometries -- saved to Geoms after SaveDelay
+	FileName      string        `desc:"base name of the preferences file in GoGi prefs directory"`                                               // base name of the preferences file in GoGi prefs directory
+	LastSave      time.Time     `desc:"when prefs were last saved -- if we weren't the last to save, then we need to re-open before modifying"`  // when prefs were last saved -- if we weren't the last to save, then we need to re-open before modifying
+	SettingNoSave bool          `desc:"if true, we are setting geometry so don't save -- caller must call SettingStart() SettingEnd() to block"` // if true, we are setting geometry so don't save -- caller must call SettingStart() SettingEnd() to block
+	Mu            sync.RWMutex  `desc:"read-write mutex that protects updating of WinGeomPrefs"`                                                 // read-write mutex that protects updating of WinGeomPrefs
+	LockSleep     time.Duration `desc:"wait time before trying to lock file again"`                                                              // wait time before trying to lock file again
+	SaveDelay     time.Duration `desc:"wait time before saving the Cache into Geoms"`                                                            // wait time before saving the Cache into Geoms
+	saveTimer     *time.Timer   `desc:"timer for delayed save"`                                                                                  // timer for delayed save
 }
 
 // Init does initialization if not yet initialized

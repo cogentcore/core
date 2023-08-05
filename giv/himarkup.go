@@ -26,16 +26,16 @@ import (
 // HiMarkup manages the syntax highlighting state for TextBuf
 // it uses Pi if available, otherwise falls back on chroma
 type HiMarkup struct {
-	Info      *FileInfo      `desc:"full info about the file including category etc"`
-	Style     gi.HiStyleName `desc:"syntax highlighting style"`
-	Lang      string         `desc:"chroma-based language name for syntax highlighting the code"`
-	Has       bool           `desc:"true if both lang and style are set"`
-	TabSize   int            `desc:"tab size, in chars"`
-	CSSProps  ki.Props       `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
-	PiState   *pi.FileStates `desc:"pi parser state info"`
-	PiLang    pi.Lang        `desc:"if supported, this is the pi Lang support for parsing"`
-	HiStyle   *histyle.Style `desc:"current highlighting style"`
-	Off       bool           `desc:"external toggle to turn off automatic highlighting"`
+	Info      *FileInfo      `desc:"full info about the file including category etc"`                        // full info about the file including category etc
+	Style     gi.HiStyleName `desc:"syntax highlighting style"`                                              // syntax highlighting style
+	Lang      string         `desc:"chroma-based language name for syntax highlighting the code"`            // chroma-based language name for syntax highlighting the code
+	Has       bool           `desc:"true if both lang and style are set"`                                    // true if both lang and style are set
+	TabSize   int            `desc:"tab size, in chars"`                                                     // tab size, in chars
+	CSSProps  ki.Props       `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"` // Commpiled CSS properties for given highlighting style
+	PiState   *pi.FileStates `desc:"pi parser state info"`                                                   // pi parser state info
+	PiLang    pi.Lang        `desc:"if supported, this is the pi Lang support for parsing"`                  // if supported, this is the pi Lang support for parsing
+	HiStyle   *histyle.Style `desc:"current highlighting style"`                                             // current highlighting style
+	Off       bool           `desc:"external toggle to turn off automatic highlighting"`                     // external toggle to turn off automatic highlighting
 	lastLang  string
 	lastStyle gi.HiStyleName
 	lexer     chroma.Lexer

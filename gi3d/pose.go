@@ -14,15 +14,15 @@ import (
 // Pose contains the full specification of position and orientation,
 // always relevant to the parent element.
 type Pose struct {
-	Pos         mat32.Vec3 `desc:"position of center of element (relative to parent)"`
-	Scale       mat32.Vec3 `desc:"scale (relative to parent)"`
-	Quat        mat32.Quat `desc:"Node rotation specified as a Quat (relative to parent)"`
-	Matrix      mat32.Mat4 `view:"-" desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`
-	ParMatrix   mat32.Mat4 `view:"-" desc:"Parent's world matrix -- we cache this so that we can independently update our own matrix"`
-	WorldMatrix mat32.Mat4 `view:"-" desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"`
-	MVMatrix    mat32.Mat4 `view:"-" desc:"model * view matrix -- tranforms into camera-centered coords"`
-	MVPMatrix   mat32.Mat4 `view:"-" desc:"model * view * projection matrix -- full final render matrix"`
-	NormMatrix  mat32.Mat3 `view:"-" desc:"normal matrix has no offsets, for normal vector rotation only, based on MVMatrix"`
+	Pos         mat32.Vec3 `desc:"position of center of element (relative to parent)"`                                                                                       // position of center of element (relative to parent)
+	Scale       mat32.Vec3 `desc:"scale (relative to parent)"`                                                                                                               // scale (relative to parent)
+	Quat        mat32.Quat `desc:"Node rotation specified as a Quat (relative to parent)"`                                                                                   // Node rotation specified as a Quat (relative to parent)
+	Matrix      mat32.Mat4 `view:"-" desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`                                             // Local matrix. Contains all position/rotation/scale information (relative to parent)
+	ParMatrix   mat32.Mat4 `view:"-" desc:"Parent's world matrix -- we cache this so that we can independently update our own matrix"`                                       // Parent's world matrix -- we cache this so that we can independently update our own matrix
+	WorldMatrix mat32.Mat4 `view:"-" desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"` // World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)
+	MVMatrix    mat32.Mat4 `view:"-" desc:"model * view matrix -- tranforms into camera-centered coords"`                                                                    // model * view matrix -- tranforms into camera-centered coords
+	MVPMatrix   mat32.Mat4 `view:"-" desc:"model * view * projection matrix -- full final render matrix"`                                                                    // model * view * projection matrix -- full final render matrix
+	NormMatrix  mat32.Mat3 `view:"-" desc:"normal matrix has no offsets, for normal vector rotation only, based on MVMatrix"`                                                // normal matrix has no offsets, for normal vector rotation only, based on MVMatrix
 }
 
 var TypePose = kit.Types.AddType(&Pose{}, PoseProps)

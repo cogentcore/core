@@ -66,10 +66,10 @@ type Border struct {
 
 // Border contains style parameters for borders
 type Border struct {
-	Style  Sides[BorderStyles] `xml:"style" desc:"prop: border-style = how to draw the border"`
-	Width  SideValues          `xml:"width" desc:"prop: border-width = width of the border"`
-	Radius SideValues          `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
-	Color  SideColors          `xml:"color" desc:"prop: border-color = color of the border"`
+	Style  Sides[BorderStyles] `xml:"style" desc:"prop: border-style = how to draw the border"`    // prop: border-style = how to draw the border
+	Width  SideValues          `xml:"width" desc:"prop: border-width = width of the border"`       // prop: border-width = width of the border
+	Radius SideValues          `xml:"radius" desc:"prop: border-radius = rounding of the corners"` // prop: border-radius = rounding of the corners
+	Color  SideColors          `xml:"color" desc:"prop: border-color = color of the border"`       // prop: border-color = color of the border
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -88,12 +88,12 @@ var BorderRadiusFull = units.Px(1_000_000_000)
 
 // style parameters for shadows
 type Shadow struct {
-	HOffset units.Value `xml:".h-offset" desc:"prop: .h-offset = horizontal offset of shadow -- positive = right side, negative = left side"`
-	VOffset units.Value `xml:".v-offset" desc:"prop: .v-offset = vertical offset of shadow -- positive = below, negative = above"`
-	Blur    units.Value `xml:".blur" desc:"prop: .blur = blur radius -- higher numbers = more blurry"`
-	Spread  units.Value `xml:".spread" desc:"prop: .spread = spread radius -- positive number increases size of shadow, negative decreases size"`
-	Color   Color       `xml:".color" desc:"prop: .color = color of the shadow"`
-	Inset   bool        `xml:".inset" desc:"prop: .inset = shadow is inset within box instead of outset outside of box"`
+	HOffset units.Value `xml:".h-offset" desc:"prop: .h-offset = horizontal offset of shadow -- positive = right side, negative = left side"`     // prop: .h-offset = horizontal offset of shadow -- positive = right side, negative = left side
+	VOffset units.Value `xml:".v-offset" desc:"prop: .v-offset = vertical offset of shadow -- positive = below, negative = above"`                // prop: .v-offset = vertical offset of shadow -- positive = below, negative = above
+	Blur    units.Value `xml:".blur" desc:"prop: .blur = blur radius -- higher numbers = more blurry"`                                            // prop: .blur = blur radius -- higher numbers = more blurry
+	Spread  units.Value `xml:".spread" desc:"prop: .spread = spread radius -- positive number increases size of shadow, negative decreases size"` // prop: .spread = spread radius -- positive number increases size of shadow, negative decreases size
+	Color   Color       `xml:".color" desc:"prop: .color = color of the shadow"`                                                                  // prop: .color = color of the shadow
+	Inset   bool        `xml:".inset" desc:"prop: .inset = shadow is inset within box instead of outset outside of box"`                          // prop: .inset = shadow is inset within box instead of outset outside of box
 }
 
 func (s *Shadow) HasShadow() bool {

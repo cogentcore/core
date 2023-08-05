@@ -581,7 +581,7 @@ func StringsRemoveExtras(items *[]string, extras []string) {
 // It has an indicator by default.
 type MenuButton struct {
 	ButtonBase
-	Type MenuButtonTypes `desc:"type is the type of the menu button"`
+	Type MenuButtonTypes `desc:"type is the type of the menu button"` // type is the type of the menu button
 }
 
 var TypeMenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
@@ -783,7 +783,7 @@ var MenuTextSeparator = "-------------"
 // Separator draws a vertical or horizontal line
 type Separator struct {
 	WidgetBase
-	Horiz bool `xml:"horiz" desc:"is this a horizontal separator -- otherwise vertical"`
+	Horiz bool `xml:"horiz" desc:"is this a horizontal separator -- otherwise vertical"` // is this a horizontal separator -- otherwise vertical
 }
 
 var TypeSeparator = kit.Types.AddType(&Separator{}, SeparatorProps)

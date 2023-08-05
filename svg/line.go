@@ -14,8 +14,8 @@ import (
 // Line is a SVG line
 type Line struct {
 	NodeBase
-	Start mat32.Vec2 `xml:"{x1,y1}" desc:"position of the start of the line"`
-	End   mat32.Vec2 `xml:"{x2,y2}" desc:"position of the end of the line"`
+	Start mat32.Vec2 `xml:"{x1,y1}" desc:"position of the start of the line"` // position of the start of the line
+	End   mat32.Vec2 `xml:"{x2,y2}" desc:"position of the end of the line"`   // position of the end of the line
 }
 
 var TypeLine = kit.Types.AddType(&Line{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})

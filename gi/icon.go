@@ -41,8 +41,8 @@ import (
 // an original source icon and then can be customized from there.
 type Icon struct {
 	WidgetBase
-	IconNm   icons.Icon `desc:"icon name that has been set -- optimizes to prevent reloading of icon"`
-	Filename string     `desc:"file name for the loaded icon, if loaded"`
+	IconNm   icons.Icon `desc:"icon name that has been set -- optimizes to prevent reloading of icon"` // icon name that has been set -- optimizes to prevent reloading of icon
+	Filename string     `desc:"file name for the loaded icon, if loaded"`                              // file name for the loaded icon, if loaded
 }
 
 var TypeIcon = kit.Types.AddType(&Icon{}, IconProps)

@@ -22,15 +22,15 @@ import (
 // show the key names and editor vals for each value.
 type SliceViewInline struct {
 	gi.PartsWidgetBase
-	Slice        any         `desc:"the slice that we are a view onto"`
-	SliceValView ValueView   `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
-	IsArray      bool        `desc:"whether the slice is actually an array -- no modifications"`
-	IsFixedLen   bool        `desc:"whether the slice has a fixed-len flag on it"`
-	Changed      bool        `desc:"has the slice been edited?"`
-	Values       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	TmpSave      ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig      ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	ViewPath     string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	Slice        any         `desc:"the slice that we are a view onto"`                                                                                                                                                      // the slice that we are a view onto
+	SliceValView ValueView   `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`                                                                                       // ValueView for the slice itself, if this was created within value view framework -- otherwise nil
+	IsArray      bool        `desc:"whether the slice is actually an array -- no modifications"`                                                                                                                             // whether the slice is actually an array -- no modifications
+	IsFixedLen   bool        `desc:"whether the slice has a fixed-len flag on it"`                                                                                                                                           // whether the slice has a fixed-len flag on it
+	Changed      bool        `desc:"has the slice been edited?"`                                                                                                                                                             // has the slice been edited?
+	Values       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`                                                                                                                               // ValueView representations of the fields
+	TmpSave      ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"` // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	ViewSig      ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`           // signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
+	ViewPath     string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`                                                        // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 }
 
 var TypeSliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)

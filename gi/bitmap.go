@@ -39,9 +39,9 @@ import (
 // can grab the image of another vp and show that
 type Bitmap struct {
 	WidgetBase
-	Filename FileName    `desc:"file name of image loaded -- set by OpenImage"`
-	Size     image.Point `desc:"size of the image"`
-	Pixels   *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"`
+	Filename FileName    `desc:"file name of image loaded -- set by OpenImage"`       // file name of image loaded -- set by OpenImage
+	Size     image.Point `desc:"size of the image"`                                   // size of the image
+	Pixels   *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"` // the bitmap image
 }
 
 var TypeBitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)

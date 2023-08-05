@@ -79,18 +79,18 @@ type Viewport interface {
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
 	WidgetBase
-	Fill         bool         `desc:"fill the viewport with background-color from style"`
-	Geom         Geom2DInt    `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Render       girl.State   `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
-	Pixels       *image.RGBA  `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
-	Win          *Window      `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
-	CurStyleNode Node2D       `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
-	CurColor     gist.Color   `copy:"-" json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"`
-	UpdtMu       sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"UpdtMu is mutex for viewport updates"`
-	UpdtStack    []Node2D     `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requring basic updating"`
-	ReStack      []Node2D     `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requiring a ReRender (i.e., anchors)"`
-	StackMu      sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"StackMu is mutex for adding to UpdtStack"`
-	StyleMu      sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
+	Fill         bool         `desc:"fill the viewport with background-color from style"`                                                                                                                                                                        // fill the viewport with background-color from style
+	Geom         Geom2DInt    `desc:"Viewport-level viewbox within any parent Viewport2D"`                                                                                                                                                                       // Viewport-level viewbox within any parent Viewport2D
+	Render       girl.State   `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`                                                                                                                                                             // render state for rendering
+	Pixels       *image.RGBA  `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`                                                                                                                                                        // live pixels that we render into
+	Win          *Window      `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`                                                                                                                                                           // our parent window that we render into
+	CurStyleNode Node2D       `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`                                               // CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass
+	CurColor     gist.Color   `copy:"-" json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"` // CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access
+	UpdtMu       sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"UpdtMu is mutex for viewport updates"`                                                                                                                                                   // UpdtMu is mutex for viewport updates
+	UpdtStack    []Node2D     `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requring basic updating"`                                                                                                                                                 // stack of nodes requring basic updating
+	ReStack      []Node2D     `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requiring a ReRender (i.e., anchors)"`                                                                                                                                    // stack of nodes requiring a ReRender (i.e., anchors)
+	StackMu      sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"StackMu is mutex for adding to UpdtStack"`                                                                                                                                               // StackMu is mutex for adding to UpdtStack
+	StyleMu      sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`                                                                                                                     // StyleMu is RW mutex protecting access to Style-related global vars
 }
 
 var TypeViewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)

@@ -20,10 +20,10 @@ import (
 // to the corners as follows: Top = top left, Right = top right,
 // Bottom = bottom right, Left = bottom left.
 type Sides[T comparable] struct {
-	Top    T `xml:"top" desc:"top/top-left value"`
-	Right  T `xml:"right" desc:"right/top-right value"`
-	Bottom T `xml:"bottom" desc:"bottom/bottom-right value"`
-	Left   T `xml:"left" desc:"left/bottom-left value"`
+	Top    T `xml:"top" desc:"top/top-left value"`           // top/top-left value
+	Right  T `xml:"right" desc:"right/top-right value"`      // right/top-right value
+	Bottom T `xml:"bottom" desc:"bottom/bottom-right value"` // bottom/bottom-right value
+	Left   T `xml:"left" desc:"left/bottom-left value"`      // left/bottom-left value
 }
 
 // NewSides is a helper that creates new sides/corners of the given type

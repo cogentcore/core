@@ -126,11 +126,11 @@ type Node3D interface {
 // There are only two different kinds of Nodes: Group and Solid
 type Node3DBase struct {
 	gi.NodeBase
-	Pose      Pose         `desc:"complete specification of position and orientation"`
-	PoseMu    sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on pose access -- needed for parallel updating"`
-	MeshBBox  BBox         `desc:"mesh-based local bounding box (aggregated for groups)"`
-	WorldBBox BBox         `desc:"world coordinates bounding box"`
-	NDCBBox   mat32.Box3   `desc:"normalized display coordinates bounding box, used for frustrum clipping"`
+	Pose      Pose         `desc:"complete specification of position and orientation"`                                      // complete specification of position and orientation
+	PoseMu    sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on pose access -- needed for parallel updating"` // mutex on pose access -- needed for parallel updating
+	MeshBBox  BBox         `desc:"mesh-based local bounding box (aggregated for groups)"`                                   // mesh-based local bounding box (aggregated for groups)
+	WorldBBox BBox         `desc:"world coordinates bounding box"`                                                          // world coordinates bounding box
+	NDCBBox   mat32.Box3   `desc:"normalized display coordinates bounding box, used for frustrum clipping"`                 // normalized display coordinates bounding box, used for frustrum clipping
 }
 
 var TypeNode3DBase = kit.Types.AddType(&Node3DBase{}, Node3DBaseProps)

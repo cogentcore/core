@@ -20,19 +20,18 @@ import (
 // Font does not include all information needed
 // for rendering -- see [FontRender] for that.
 type Font struct {
-	Opacity float32         `xml:"opacity" desc:"prop: opacity = alpha value to apply to all elements"`
-	Size    units.Value     `xml:"font-size" inherit:"true" desc:"prop: font-size (inherited)= size of font to render -- convert to points when getting font to use"`
-	Family  string          `xml:"font-family" inherit:"true" desc:"prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse"`
-	Style   FontStyles      `xml:"font-style" inherit:"true" desc:"prop: font-style = style -- normal, italic, etc"`
-	Weight  FontWeights     `xml:"font-weight" inherit:"true" desc:"prop: font-weight = weight: normal, bold, etc"`
-	Stretch FontStretch     `xml:"font-stretch" inherit:"true" desc:"prop: font-stretch = font stretch / condense options"`
-	Variant FontVariants    `xml:"font-variant" inherit:"true" desc:"prop: font-variant = normal or small caps"`
-	Deco    TextDecorations `xml:"text-decoration" desc:"prop: text-decoration = underline, line-through, etc -- not inherited"`
-	Shift   BaselineShifts  `xml:"baseline-shift" desc:"prop: baseline-shift = super / sub script -- not inherited"`
-	Face    *FontFace       `view:"-" desc:"full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts"`
-	Rem     float32         `desc:"Rem size of font -- 12pt converted to same effective DPI as above measurements"`
-	// todo: kerning
-	// todo: stretch -- css 3 -- not supported
+	Opacity float32         `xml:"opacity" desc:"prop: opacity = alpha value to apply to all elements"`                                                                                                             // prop: opacity = alpha value to apply to all elements
+	Size    units.Value     `xml:"font-size" inherit:"true" desc:"prop: font-size (inherited)= size of font to render -- convert to points when getting font to use"`                                               // prop: font-size (inherited)= size of font to render -- convert to points when getting font to use
+	Family  string          `xml:"font-family" inherit:"true" desc:"prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse"` // prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse
+	Style   FontStyles      `xml:"font-style" inherit:"true" desc:"prop: font-style = style -- normal, italic, etc"`                                                                                                // prop: font-style = style -- normal, italic, etc
+	Weight  FontWeights     `xml:"font-weight" inherit:"true" desc:"prop: font-weight = weight: normal, bold, etc"`                                                                                                 // prop: font-weight = weight: normal, bold, etc
+	Stretch FontStretch     `xml:"font-stretch" inherit:"true" desc:"prop: font-stretch = font stretch / condense options"`                                                                                         // prop: font-stretch = font stretch / condense options
+	Variant FontVariants    `xml:"font-variant" inherit:"true" desc:"prop: font-variant = normal or small caps"`                                                                                                    // prop: font-variant = normal or small caps
+	Deco    TextDecorations `xml:"text-decoration" desc:"prop: text-decoration = underline, line-through, etc -- not inherited"`                                                                                    // prop: text-decoration = underline, line-through, etc -- not inherited
+	Shift   BaselineShifts  `xml:"baseline-shift" desc:"prop: baseline-shift = super / sub script -- not inherited"`                                                                                                // prop: baseline-shift = super / sub script -- not inherited
+	Face    *FontFace       `view:"-" desc:"full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts"`                         // full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts
+	Rem     float32         `desc:"Rem size of font -- 12pt converted to same effective DPI as above measurements"`                                                                                                 // Rem size of font -- 12pt converted to same effective DPI as above measurements
+
 }
 
 func (fs *Font) Defaults() {
@@ -462,8 +461,8 @@ func FixFontMods(fn string) string {
 // to the values of the style object it was derived from.
 type FontRender struct {
 	Font
-	Color           Color     `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
-	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+	Color           Color     `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"` // prop: color (inherited) = text color -- also defines the currentColor variable value
+	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`       // prop: background-color = background color -- not inherited, transparent by default
 }
 
 // FontRender returns the font-rendering-related

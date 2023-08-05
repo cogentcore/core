@@ -43,9 +43,9 @@ import (
 // representing a separate line of text (but they can be anything).
 type Text struct {
 	Spans []Span
-	Size  mat32.Vec2          `desc:"last size of overall rendered text"`
-	Dir   gist.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
-	Links []TextLink          `desc:"hyperlinks within rendered text"`
+	Size  mat32.Vec2          `desc:"last size of overall rendered text"`                                          // last size of overall rendered text
+	Dir   gist.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"` // where relevant, this is the (default, dominant) text direction for the span
+	Links []TextLink          `desc:"hyperlinks within rendered text"`                                             // hyperlinks within rendered text
 }
 
 // InsertSpan inserts a new span at given index

@@ -28,15 +28,15 @@ import (
 // are displayed using icons instead.
 type ComboBox struct {
 	ButtonBase
-	Editable  bool          `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
-	CurVal    any           `json:"-" xml:"-" desc:"current selected value"`
-	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`
-	Items     []any         `json:"-" xml:"-" desc:"items available for selection"`
-	Tooltips  []string      `json:"-" xml:"-" desc:"an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items"`
-	ItemsMenu Menu          `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
-	Type      ComboBoxTypes `desc:"the type of combo box"`
-	ComboSig  ki.Signal     `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
-	MaxLength int           `desc:"maximum label length (in runes)"`
+	Editable  bool          `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`                                                 // provide a text field for editing the value, or just a button for selecting items?  Set the editable property
+	CurVal    any           `json:"-" xml:"-" desc:"current selected value"`                                                                                                                                     // current selected value
+	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`                                                                                                                    // current index in list of possible items
+	Items     []any         `json:"-" xml:"-" desc:"items available for selection"`                                                                                                                              // items available for selection
+	Tooltips  []string      `json:"-" xml:"-" desc:"an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items"`                                 // an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items
+	ItemsMenu Menu          `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`                                                                              // the menu of actions for selecting items -- automatically generated from Items
+	Type      ComboBoxTypes `desc:"the type of combo box"`                                                                                                                                                       // the type of combo box
+	ComboSig  ki.Signal     `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"` // signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value
+	MaxLength int           `desc:"maximum label length (in runes)"`                                                                                                                                             // maximum label length (in runes)
 }
 
 var TypeComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)

@@ -16,20 +16,20 @@ import (
 
 // Camera defines the properties of the camera
 type Camera struct {
-	Pose          Pose           `desc:"overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"`
-	CamMu         sync.RWMutex   `desc:"mutex protecting camera data"`
-	Target        mat32.Vec3     `desc:"target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"`
-	UpDir         mat32.Vec3     `desc:"up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"`
-	Ortho         bool           `desc:"default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."`
-	FOV           float32        `desc:"field of view in degrees "`
-	Aspect        float32        `desc:"aspect ratio (width/height)"`
-	Near          float32        `desc:"near plane z coordinate"`
-	Far           float32        `desc:"far plane z coordinate"`
-	ViewMatrix    mat32.Mat4     `view:"-" desc:"view matrix (inverse of the Pose.Matrix)"`
-	PrjnMatrix    mat32.Mat4     `view:"-" desc:"projection matrix, defining the camera perspective / ortho transform"`
-	VkPrjnMatrix  mat32.Mat4     `view:"-" desc:"vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math"`
-	InvPrjnMatrix mat32.Mat4     `view:"-" desc:"inverse of the projection matrix"`
-	Frustum       *mat32.Frustum `view:"-" desc:"frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"`
+	Pose          Pose           `desc:"overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"`                                                                                 // overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction
+	CamMu         sync.RWMutex   `desc:"mutex protecting camera data"`                                                                                                                                                                            // mutex protecting camera data
+	Target        mat32.Vec3     `desc:"target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"`                                          // target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method
+	UpDir         mat32.Vec3     `desc:"up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"`                                                                                        // up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method
+	Ortho         bool           `desc:"default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."` // default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far).
+	FOV           float32        `desc:"field of view in degrees "`                                                                                                                                                                               // field of view in degrees
+	Aspect        float32        `desc:"aspect ratio (width/height)"`                                                                                                                                                                             // aspect ratio (width/height)
+	Near          float32        `desc:"near plane z coordinate"`                                                                                                                                                                                 // near plane z coordinate
+	Far           float32        `desc:"far plane z coordinate"`                                                                                                                                                                                  // far plane z coordinate
+	ViewMatrix    mat32.Mat4     `view:"-" desc:"view matrix (inverse of the Pose.Matrix)"`                                                                                                                                                       // view matrix (inverse of the Pose.Matrix)
+	PrjnMatrix    mat32.Mat4     `view:"-" desc:"projection matrix, defining the camera perspective / ortho transform"`                                                                                                                           // projection matrix, defining the camera perspective / ortho transform
+	VkPrjnMatrix  mat32.Mat4     `view:"-" desc:"vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math"`                                                                   // vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math
+	InvPrjnMatrix mat32.Mat4     `view:"-" desc:"inverse of the projection matrix"`                                                                                                                                                               // inverse of the projection matrix
+	Frustum       *mat32.Frustum `view:"-" desc:"frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"`                                                                                                              // frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
 }
 
 var TypeCamera = kit.Types.AddType(&Camera{}, CameraProps)

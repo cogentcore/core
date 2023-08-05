@@ -17,27 +17,26 @@ import (
 // The State holds all the current rendering state information used
 // while painting -- a viewport just has one of these
 type State struct {
-	Paint  Paint           `desc:"communal painter -- for widgets -- SVG have their own"`
-	XForm  mat32.Mat2      `desc:"current transform"`
-	Path   rasterx.Path    `desc:"current path"`
-	Raster *rasterx.Dasher `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
-	//	Scanner        *scanFT.ScannerFT `desc:"scanner for freetype-based rasterx"`
-	// CompSpanner    *scanx.CompressSpanner `desc:"spanner for scanx"`
-	Scanner        *scanx.Scanner    `desc:"scanner for scanx"`
-	ImgSpanner     *scanx.ImgSpanner `desc:"spanner for scanx"`
-	Start          mat32.Vec2        `desc:"starting point, for close path"`
-	Current        mat32.Vec2        `desc:"current point"`
-	HasCurrent     bool              `desc:"is current point current?"`
-	Image          *image.RGBA       `desc:"pointer to image to render into"`
-	Mask           *image.Alpha      `desc:"current mask"`
-	Bounds         image.Rectangle   `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"`
-	LastRenderBBox image.Rectangle   `desc:"bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects"`
-	XFormStack     []mat32.Mat2      `desc:"stack of transforms"`
-	BoundsStack    []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
-	ClipStack      []*image.Alpha    `desc:"stack of clips, if needed"`
-	PaintBack      Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
-	RenderMu       sync.Mutex        `desc:"mutex for overall rendering"`
-	RasterMu       sync.Mutex        `desc:"mutex for final rasterx rendering -- only one at a time"`
+	Paint  Paint           `desc:"communal painter -- for widgets -- SVG have their own"`     // communal painter -- for widgets -- SVG have their own
+	XForm  mat32.Mat2      `desc:"current transform"`                                         // current transform
+	Path   rasterx.Path    `desc:"current path"`                                              // current path
+	Raster *rasterx.Dasher `desc:"rasterizer -- stroke / fill rendering engine from rasterx"` // rasterizer -- stroke / fill rendering engine from rasterx
+
+	Scanner        *scanx.Scanner    `desc:"scanner for scanx"`                                                                                                                 // scanner for scanx
+	ImgSpanner     *scanx.ImgSpanner `desc:"spanner for scanx"`                                                                                                                 // spanner for scanx
+	Start          mat32.Vec2        `desc:"starting point, for close path"`                                                                                                    // starting point, for close path
+	Current        mat32.Vec2        `desc:"current point"`                                                                                                                     // current point
+	HasCurrent     bool              `desc:"is current point current?"`                                                                                                         // is current point current?
+	Image          *image.RGBA       `desc:"pointer to image to render into"`                                                                                                   // pointer to image to render into
+	Mask           *image.Alpha      `desc:"current mask"`                                                                                                                      // current mask
+	Bounds         image.Rectangle   `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"` // boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing
+	LastRenderBBox image.Rectangle   `desc:"bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects"`                        // bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects
+	XFormStack     []mat32.Mat2      `desc:"stack of transforms"`                                                                                                               // stack of transforms
+	BoundsStack    []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`                                       // stack of bounds -- every render starts with a push onto this stack, and finishes with a pop
+	ClipStack      []*image.Alpha    `desc:"stack of clips, if needed"`                                                                                                         // stack of clips, if needed
+	PaintBack      Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`                                              // backup of paint -- don't need a full stack but sometimes safer to backup and restore
+	RenderMu       sync.Mutex        `desc:"mutex for overall rendering"`                                                                                                       // mutex for overall rendering
+	RasterMu       sync.Mutex        `desc:"mutex for final rasterx rendering -- only one at a time"`                                                                           // mutex for final rasterx rendering -- only one at a time
 }
 
 // Init initializes State -- must be called whenever image size changes

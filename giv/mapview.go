@@ -23,17 +23,17 @@ import (
 // set prop toolbar = false to turn off
 type MapView struct {
 	gi.Frame
-	Map        any         `desc:"the map that we are a view onto"`
-	MapValView ValueView   `desc:"ValueView for the map itself, if this was created within value view framework -- otherwise nil"`
-	Changed    bool        `desc:"has the map been edited?"`
-	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
-	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
-	SortVals   bool        `desc:"sort by values instead of keys"`
-	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	MapViewSig ki.Signal   `copy:"-" json:"-" xml:"-" desc:"map view specific signals: add, delete, double-click"`
-	ViewPath   string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
-	ToolbarMap any         `desc:"the map that we successfully set a toolbar for"`
+	Map        any         `desc:"the map that we are a view onto"`                                                                                                                                                        // the map that we are a view onto
+	MapValView ValueView   `desc:"ValueView for the map itself, if this was created within value view framework -- otherwise nil"`                                                                                         // ValueView for the map itself, if this was created within value view framework -- otherwise nil
+	Changed    bool        `desc:"has the map been edited?"`                                                                                                                                                               // has the map been edited?
+	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`                                                                                                                             // ValueView representations of the map keys
+	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`                                                                                                                           // ValueView representations of the map values
+	SortVals   bool        `desc:"sort by values instead of keys"`                                                                                                                                                         // sort by values instead of keys
+	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"` // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`           // signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
+	MapViewSig ki.Signal   `copy:"-" json:"-" xml:"-" desc:"map view specific signals: add, delete, double-click"`                                                                                                         // map view specific signals: add, delete, double-click
+	ViewPath   string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`                                                        // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	ToolbarMap any         `desc:"the map that we successfully set a toolbar for"`                                                                                                                                         // the map that we successfully set a toolbar for
 }
 
 var TypeMapView = kit.Types.AddType(&MapView{}, MapViewProps)

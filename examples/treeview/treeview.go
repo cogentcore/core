@@ -21,12 +21,12 @@ import (
 // A node for testing
 type TestNodeA struct {
 	ki.Node
-	StrField   string          `desc:"a string"`
-	IntField   int             `min:"5" max:"25" step:"5" desc:"an int"`
-	FloatField float64         `min:"-1" max:"1" step:".25" desc:"a float"`
-	BoolField  bool            `desc:"a bool"`
-	Vec        mat32.Vec2      `desc:"a vec"`
-	Rect       image.Rectangle `desc:"rect"`
+	StrField   string          `desc:"a string"`                            // a string
+	IntField   int             `min:"5" max:"25" step:"5" desc:"an int"`    // an int
+	FloatField float64         `min:"-1" max:"1" step:".25" desc:"a float"` // a float
+	BoolField  bool            `desc:"a bool"`                              // a bool
+	Vec        mat32.Vec2      `desc:"a vec"`                               // a vec
+	Rect       image.Rectangle `desc:"rect"`                                // rect
 }
 
 var TypeTestNodeA = kit.Types.AddType(&TestNodeA{}, nil)
@@ -34,13 +34,13 @@ var TypeTestNodeA = kit.Types.AddType(&TestNodeA{}, nil)
 // B node for testing
 type TestNodeB struct {
 	ki.Node
-	StrField   string          `desc:"a string"`
-	IntField   int             `min:"5" max:"25" step:"5" desc:"an int"`
-	FloatField float64         `min:"-1" max:"1" step:".25" desc:"a float"`
-	BoolField  bool            `desc:"a bool"`
-	Vec        mat32.Vec2      `desc:"a vec"`
-	Rect       image.Rectangle `desc:"rect"`
-	SubObj     TestNodeA       `desc:"a sub-object"`
+	StrField   string          `desc:"a string"`                            // a string
+	IntField   int             `min:"5" max:"25" step:"5" desc:"an int"`    // an int
+	FloatField float64         `min:"-1" max:"1" step:".25" desc:"a float"` // a float
+	BoolField  bool            `desc:"a bool"`                              // a bool
+	Vec        mat32.Vec2      `desc:"a vec"`                               // a vec
+	Rect       image.Rectangle `desc:"rect"`                                // rect
+	SubObj     TestNodeA       `desc:"a sub-object"`                        // a sub-object
 }
 
 var TypeTestNodeB = kit.Types.AddType(&TestNodeB{}, nil)

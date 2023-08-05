@@ -68,14 +68,14 @@ type Mesh interface {
 
 // MeshBase provides the core implementation of Mesh interface
 type MeshBase struct {
-	Nm      string       `desc:"name of mesh -- meshes are linked to Solids by name so this matters"`
-	NVtx    int          `desc:"number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called"`
-	NIdx    int          `desc:"number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called"`
-	Color   bool         `desc:"has per-vertex colors, as mat32.Vec4 per vertex"`
-	Dynamic bool         `desc:"if true, this mesh changes frequently -- otherwise considered to be static"`
-	Trans   bool         `desc:"set to true if color has transparency -- not worth checking manually"`
-	BBox    BBox         `desc:"computed bounding-box and other gross solid properties"`
-	BBoxMu  sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on bbox access"`
+	Nm      string       `desc:"name of mesh -- meshes are linked to Solids by name so this matters"`                                                                                         // name of mesh -- meshes are linked to Solids by name so this matters
+	NVtx    int          `desc:"number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called"` // number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called
+	NIdx    int          `desc:"number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called"`                                                                            // number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called
+	Color   bool         `desc:"has per-vertex colors, as mat32.Vec4 per vertex"`                                                                                                             // has per-vertex colors, as mat32.Vec4 per vertex
+	Dynamic bool         `desc:"if true, this mesh changes frequently -- otherwise considered to be static"`                                                                                  // if true, this mesh changes frequently -- otherwise considered to be static
+	Trans   bool         `desc:"set to true if color has transparency -- not worth checking manually"`                                                                                        // set to true if color has transparency -- not worth checking manually
+	BBox    BBox         `desc:"computed bounding-box and other gross solid properties"`                                                                                                      // computed bounding-box and other gross solid properties
+	BBoxMu  sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on bbox access"`                                                                                                     // mutex on bbox access
 }
 
 var TypeMeshBase = kit.Types.AddType(&MeshBase{}, nil)

@@ -10,10 +10,10 @@ import (
 
 // BBox contains bounding box and other gross solid properties
 type BBox struct {
-	BBox    mat32.Box3   `desc:"bounding box in local coords"`
-	BSphere mat32.Sphere `desc:"bounding sphere in local coords"`
-	Area    float32      `desc:"area"`
-	Volume  float32      `desc:"volume"`
+	BBox    mat32.Box3   `desc:"bounding box in local coords"`    // bounding box in local coords
+	BSphere mat32.Sphere `desc:"bounding sphere in local coords"` // bounding sphere in local coords
+	Area    float32      `desc:"area"`                            // area
+	Volume  float32      `desc:"volume"`                          // volume
 }
 
 // SetBounds sets BBox from min, max and updates other factors based on that

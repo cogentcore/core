@@ -30,17 +30,17 @@ import (
 // in UpdateStart / End loop.
 type SVG struct {
 	gi.Viewport2D
-	ViewBox    ViewBox          `desc:"viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering"`
-	PhysWidth  units.Value      `desc:"physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata"`
-	PhysHeight units.Value      `desc:"physical height of the drawing, e.g., when printed -- does not affect rendering -- metadata"`
-	Norm       bool             `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
-	InvertY    bool             `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
-	Pnt        girl.Paint       `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
-	Defs       Group            `desc:"all defs defined elements go here (gradients, symbols, etc)"`
-	Title      string           `xml:"title" desc:"the title of the svg"`
-	Desc       string           `xml:"desc" desc:"the description of the svg"`
-	DefIdxs    map[string]int   `view:"-" json:"-" xml:"-" desc:"map of def names to index -- uses starting index to find element -- always updated after each search"`
-	UniqueIds  map[int]struct{} `view:"-" json:"-" xml:"-" desc:"map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds"`
+	ViewBox    ViewBox          `desc:"viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering"`                                   // viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering
+	PhysWidth  units.Value      `desc:"physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata"`                                                                                     // physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata
+	PhysHeight units.Value      `desc:"physical height of the drawing, e.g., when printed -- does not affect rendering -- metadata"`                                                                                    // physical height of the drawing, e.g., when printed -- does not affect rendering -- metadata
+	Norm       bool             `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`                                                    // prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size
+	InvertY    bool             `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"` // prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default
+	Pnt        girl.Paint       `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`                                                                                                                            // paint styles -- inherited by nodes
+	Defs       Group            `desc:"all defs defined elements go here (gradients, symbols, etc)"`                                                                                                                    // all defs defined elements go here (gradients, symbols, etc)
+	Title      string           `xml:"title" desc:"the title of the svg"`                                                                                                                                               // the title of the svg
+	Desc       string           `xml:"desc" desc:"the description of the svg"`                                                                                                                                          // the description of the svg
+	DefIdxs    map[string]int   `view:"-" json:"-" xml:"-" desc:"map of def names to index -- uses starting index to find element -- always updated after each search"`                                                 // map of def names to index -- uses starting index to find element -- always updated after each search
+	UniqueIds  map[int]struct{} `view:"-" json:"-" xml:"-" desc:"map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds"`   // map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds
 }
 
 var TypeSVG = kit.Types.AddType(&SVG{}, SVGProps)

@@ -16,11 +16,11 @@ import (
 // insertions (a change is a sequence of those, given normal editing
 // processes).  The TextBuf always reflects the current state *after* the edit.
 type Edit struct {
-	Reg    Region   `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert.  Also contains the Time stamp for this edit."`
-	Text   [][]rune `desc:"text deleted or inserted -- in lines.  For Rect this is just for the spanning character distance per line, times number of lines."`
-	Group  int      `desc:"optional grouping number, for grouping edits in Undo for example"`
-	Delete bool     `desc:"action is either a deletion or an insertion"`
-	Rect   bool     `desc:"this is a rectangular region with upper left corner = Reg.Start and lower right corner = Reg.End -- otherwise it is for the full continuous region."`
+	Reg    Region   `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert.  Also contains the Time stamp for this edit."` // region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert.  Also contains the Time stamp for this edit.
+	Text   [][]rune `desc:"text deleted or inserted -- in lines.  For Rect this is just for the spanning character distance per line, times number of lines."`                                                               // text deleted or inserted -- in lines.  For Rect this is just for the spanning character distance per line, times number of lines.
+	Group  int      `desc:"optional grouping number, for grouping edits in Undo for example"`                                                                                                                                // optional grouping number, for grouping edits in Undo for example
+	Delete bool     `desc:"action is either a deletion or an insertion"`                                                                                                                                                     // action is either a deletion or an insertion
+	Rect   bool     `desc:"this is a rectangular region with upper left corner = Reg.Start and lower right corner = Reg.End -- otherwise it is for the full continuous region."`                                             // this is a rectangular region with upper left corner = Reg.Start and lower right corner = Reg.End -- otherwise it is for the full continuous region.
 }
 
 // ToBytes returns the Text of this edit record to a byte string, with

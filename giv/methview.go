@@ -654,16 +654,16 @@ type MethViewData struct {
 	Method         string
 	MethVal        reflect.Value
 	MethTyp        reflect.Method
-	ArgProps       ki.PropSlice     `desc:"names and other properties of args, in one-to-one with method args"`
-	SpecProps      ki.Props         `desc:"props for special action types, e.g., FileView"`
-	Desc           string           `desc:"prompt shown in arg dialog or confirm prompt dialog"`
-	UpdateFunc     ActionUpdateFunc `desc:"update function defined in properties -- called by our wrapper update function"`
-	SubMenuSlice   any              `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
-	SubMenuField   string           `desc:"value for submenu generation as name of field on obj"`
-	SubMenuFunc    SubMenuFunc      `desc:"function that will generate submenu items, as []string slice"`
-	SubSubMenuFunc SubSubMenuFunc   `desc:"function that will generate sub-submenu items, as [][]string slice"`
-	SubMenuVal     any              `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
-	KeyFun         gi.KeyFuns       `desc:"key function that we emit, if MethViewKeyFun type"`
+	ArgProps       ki.PropSlice     `desc:"names and other properties of args, in one-to-one with method args"`                                                         // names and other properties of args, in one-to-one with method args
+	SpecProps      ki.Props         `desc:"props for special action types, e.g., FileView"`                                                                             // props for special action types, e.g., FileView
+	Desc           string           `desc:"prompt shown in arg dialog or confirm prompt dialog"`                                                                        // prompt shown in arg dialog or confirm prompt dialog
+	UpdateFunc     ActionUpdateFunc `desc:"update function defined in properties -- called by our wrapper update function"`                                             // update function defined in properties -- called by our wrapper update function
+	SubMenuSlice   any              `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`                       // value for submenu generation as a literal slice of items of appropriate type for method being called
+	SubMenuField   string           `desc:"value for submenu generation as name of field on obj"`                                                                       // value for submenu generation as name of field on obj
+	SubMenuFunc    SubMenuFunc      `desc:"function that will generate submenu items, as []string slice"`                                                               // function that will generate submenu items, as []string slice
+	SubSubMenuFunc SubSubMenuFunc   `desc:"function that will generate sub-submenu items, as [][]string slice"`                                                         // function that will generate sub-submenu items, as [][]string slice
+	SubMenuVal     any              `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"` // value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method
+	KeyFun         gi.KeyFuns       `desc:"key function that we emit, if MethViewKeyFun type"`                                                                          // key function that we emit, if MethViewKeyFun type
 	Flags          MethViewFlags
 }
 

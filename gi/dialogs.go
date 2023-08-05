@@ -60,14 +60,14 @@ var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.UnitEx, D
 // be rendered in a separate window or on top of an existing one.
 type Dialog struct {
 	Viewport2D
-	Title     string      `desc:"title text displayed as the window title for the dialog"`
-	Prompt    string      `desc:"a prompt string displayed below the title"`
-	Modal     bool        `desc:"open the dialog in a modal state, blocking all other input"`
-	DefSize   image.Point `desc:"default size -- if non-zero, then this is used instead of doing an initial size computation -- can save a lot of time for complex dialogs -- sizes are remembered and used after first use anyway"`
-	State     DialogState `desc:"state of the dialog"`
-	SigVal    int64       `desc:"signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)"`
-	DialogSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
-	Data      any         `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
+	Title     string      `desc:"title text displayed as the window title for the dialog"`                                                                                                                                           // title text displayed as the window title for the dialog
+	Prompt    string      `desc:"a prompt string displayed below the title"`                                                                                                                                                         // a prompt string displayed below the title
+	Modal     bool        `desc:"open the dialog in a modal state, blocking all other input"`                                                                                                                                        // open the dialog in a modal state, blocking all other input
+	DefSize   image.Point `desc:"default size -- if non-zero, then this is used instead of doing an initial size computation -- can save a lot of time for complex dialogs -- sizes are remembered and used after first use anyway"` // default size -- if non-zero, then this is used instead of doing an initial size computation -- can save a lot of time for complex dialogs -- sizes are remembered and used after first use anyway
+	State     DialogState `desc:"state of the dialog"`                                                                                                                                                                               // state of the dialog
+	SigVal    int64       `desc:"signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)"`                                                              // signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)
+	DialogSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`                                                                                                  // signal for dialog -- sends a signal when opened, accepted, or canceled
+	Data      any         `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`             // the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows
 }
 
 var TypeDialog = kit.Types.AddType(&Dialog{}, DialogProps)
@@ -456,9 +456,9 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 // DlgOpts are the basic dialog options accepted by all dialog methods --
 // provides a named, optional way to specify these args
 type DlgOpts struct {
-	Title  string   `desc:"generally should be provided -- will also be used for setting name of dialog and associated window"`
-	Prompt string   `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
-	CSS    ki.Props `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
+	Title  string   `desc:"generally should be provided -- will also be used for setting name of dialog and associated window"`                                                 // generally should be provided -- will also be used for setting name of dialog and associated window
+	Prompt string   `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."` // optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc.
+	CSS    ki.Props `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`                                             // optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs
 }
 
 // NewStdDialog returns a basic standard dialog with given options (title,

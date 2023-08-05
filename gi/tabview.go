@@ -27,12 +27,12 @@ import (
 // max stretch and a set preferred size, so it expands.
 type TabView struct {
 	Layout
-	MaxChars     int          `desc:"maximum number of characters to include in tab label -- elides labels that are longer than that"`
-	TabViewSig   ki.Signal    `copy:"-" json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
-	NewTabButton bool         `desc:"show a new tab button at right of list of tabs"`
-	NoDeleteTabs bool         `desc:"if true, tabs are not user-deleteable"`
-	NewTabType   reflect.Type `desc:"type of widget to create in a new tab via new tab button -- Frame by default"`
-	Mu           sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
+	MaxChars     int          `desc:"maximum number of characters to include in tab label -- elides labels that are longer than that"`                                                        // maximum number of characters to include in tab label -- elides labels that are longer than that
+	TabViewSig   ki.Signal    `copy:"-" json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`                                                                    // signal for tab widget -- see TabViewSignals for the types
+	NewTabButton bool         `desc:"show a new tab button at right of list of tabs"`                                                                                                         // show a new tab button at right of list of tabs
+	NoDeleteTabs bool         `desc:"if true, tabs are not user-deleteable"`                                                                                                                  // if true, tabs are not user-deleteable
+	NewTabType   reflect.Type `desc:"type of widget to create in a new tab via new tab button -- Frame by default"`                                                                           // type of widget to create in a new tab via new tab button -- Frame by default
+	Mu           sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"` // mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
 }
 
 var TypeTabView = kit.Types.AddType(&TabView{}, TabViewProps)
@@ -594,7 +594,7 @@ func (tv *TabView) ConfigStyles() {
 // icon is used for close icon.
 type TabButton struct {
 	Action
-	NoDelete bool `desc:"if true, this tab does not have the delete button avail"`
+	NoDelete bool `desc:"if true, this tab does not have the delete button avail"` // if true, this tab does not have the delete button avail
 }
 
 var TypeTabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)

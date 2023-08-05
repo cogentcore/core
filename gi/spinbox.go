@@ -29,18 +29,18 @@ import (
 // decrementing values -- all configured within the Parts of the widget
 type SpinBox struct {
 	PartsWidgetBase
-	Value      float32    `xml:"value" desc:"current value"`
-	HasMin     bool       `xml:"has-min" desc:"is there a minimum value to enforce"`
-	Min        float32    `xml:"min" desc:"minimum value in range"`
-	HasMax     bool       `xml:"has-max" desc:"is there a maximumvalue to enforce"`
-	Max        float32    `xml:"max" desc:"maximum value in range"`
-	Step       float32    `xml:"step" desc:"smallest step size to increment"`
-	PageStep   float32    `xml:"pagestep" desc:"larger PageUp / Dn step size"`
-	Prec       int        `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	Format     string     `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
-	UpIcon     icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to icons.KeyboardArrowUp"`
-	DownIcon   icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to icons.KeyboardArrowDown"`
-	SpinBoxSig ki.Signal  `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
+	Value      float32    `xml:"value" desc:"current value"`                                                                                                                                                                                 // current value
+	HasMin     bool       `xml:"has-min" desc:"is there a minimum value to enforce"`                                                                                                                                                         // is there a minimum value to enforce
+	Min        float32    `xml:"min" desc:"minimum value in range"`                                                                                                                                                                          // minimum value in range
+	HasMax     bool       `xml:"has-max" desc:"is there a maximumvalue to enforce"`                                                                                                                                                          // is there a maximumvalue to enforce
+	Max        float32    `xml:"max" desc:"maximum value in range"`                                                                                                                                                                          // maximum value in range
+	Step       float32    `xml:"step" desc:"smallest step size to increment"`                                                                                                                                                                // smallest step size to increment
+	PageStep   float32    `xml:"pagestep" desc:"larger PageUp / Dn step size"`                                                                                                                                                               // larger PageUp / Dn step size
+	Prec       int        `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`        // specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
+	Format     string     `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"` // prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
+	UpIcon     icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to icons.KeyboardArrowUp"`                                                                                                                           // icon to use for up button -- defaults to icons.KeyboardArrowUp
+	DownIcon   icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to icons.KeyboardArrowDown"`                                                                                                                       // icon to use for down button -- defaults to icons.KeyboardArrowDown
+	SpinBoxSig ki.Signal  `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`                                                                                        // signal for spin box -- has no signal types, just emitted when the value changes
 }
 
 var TypeSpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)

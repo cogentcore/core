@@ -179,12 +179,12 @@ var FocusWindows []string
 // the vdraw image index holding this image.
 // Automatically handles range issues.
 type WindowUpdates struct {
-	StartIdx  int   `desc:"starting index for this set of regions"`
-	MaxIdx    int   `desc:"max index (exclusive) for this set of regions"`
-	Order     []int `desc:"order of updates to draw -- when an existing image is updated it goes to the top of the stack."`
-	BeforeDir []int `desc:"updates that must be drawn before direct uploads because they fully occlude them"`
+	StartIdx  int   `desc:"starting index for this set of regions"`                                                         // starting index for this set of regions
+	MaxIdx    int   `desc:"max index (exclusive) for this set of regions"`                                                  // max index (exclusive) for this set of regions
+	Order     []int `desc:"order of updates to draw -- when an existing image is updated it goes to the top of the stack."` // order of updates to draw -- when an existing image is updated it goes to the top of the stack.
+	BeforeDir []int `desc:"updates that must be drawn before direct uploads because they fully occlude them"`               // updates that must be drawn before direct uploads because they fully occlude them
 
-	Updates *ordmap.Map[image.Rectangle, *Viewport2D] `desc:"ordered map of updates -- order (indx) is the image"`
+	Updates *ordmap.Map[image.Rectangle, *Viewport2D] `desc:"ordered map of updates -- order (indx) is the image"` // ordered map of updates -- order (indx) is the image
 }
 
 // SetIdxRange sets the index range based on starting index and n
@@ -284,11 +284,11 @@ func (wu *WindowUpdates) DrawImages(drw *vdraw.Drawer, beforeDir bool) {
 // directly to the window.  This list manages the index for
 // the vdraw image index holding this image.
 type WindowDrawers struct {
-	StartIdx int  `desc:"starting index for this set of Nodes"`
-	MaxIdx   int  `desc:"max index (exclusive) for this set of Nodes"`
-	FlipY    bool `desc:"set to true to flip Y axis in drawing these images"`
+	StartIdx int  `desc:"starting index for this set of Nodes"`               // starting index for this set of Nodes
+	MaxIdx   int  `desc:"max index (exclusive) for this set of Nodes"`        // max index (exclusive) for this set of Nodes
+	FlipY    bool `desc:"set to true to flip Y axis in drawing these images"` // set to true to flip Y axis in drawing these images
 
-	Nodes *ordmap.Map[*NodeBase, image.Rectangle] `desc:"ordered map of nodes with window bounding box"`
+	Nodes *ordmap.Map[*NodeBase, image.Rectangle] `desc:"ordered map of nodes with window bounding box"` // ordered map of nodes with window bounding box
 }
 
 // SetIdxRange sets the index range based on starting index and n

@@ -25,10 +25,10 @@ import (
 // determines how they are displayed.
 type ButtonBox struct {
 	PartsWidgetBase
-	Items     []string  `desc:"the list of items (checbox button labels)"`
-	Tooltips  []string  `desc:"an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items"`
-	Mutex     bool      `desc:"make the items mutually exclusive -- checking one turns off all the others"`
-	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
+	Items     []string  `desc:"the list of items (checbox button labels)"`                                                                                                                            // the list of items (checbox button labels)
+	Tooltips  []string  `desc:"an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items"`                                           // an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items
+	Mutex     bool      `desc:"make the items mutually exclusive -- checking one turns off all the others"`                                                                                           // make the items mutually exclusive -- checking one turns off all the others
+	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"` // signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label
 }
 
 var TypeButtonBox = kit.Types.AddType(&ButtonBox{}, ButtonBoxProps)

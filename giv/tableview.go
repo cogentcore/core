@@ -39,13 +39,13 @@ import (
 // set prop toolbar = false to turn off
 type TableView struct {
 	SliceViewBase
-	StyleFunc  TableViewStyleFunc    `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
-	SelField   string                `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
-	SortIdx    int                   `desc:"current sort index"`
-	SortDesc   bool                  `desc:"whether current sort order is descending"`
-	StruType   reflect.Type          `copy:"-" view:"-" json:"-" xml:"-" desc:"struct type for each row"`
-	VisFields  []reflect.StructField `copy:"-" view:"-" json:"-" xml:"-" desc:"the visible fields"`
-	NVisFields int                   `copy:"-" view:"-" json:"-" xml:"-" desc:"number of visible fields"`
+	StyleFunc  TableViewStyleFunc    `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`                                       // optional styling function
+	SelField   string                `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"` // current selection field -- initially select value in this field
+	SortIdx    int                   `desc:"current sort index"`                                                                                 // current sort index
+	SortDesc   bool                  `desc:"whether current sort order is descending"`                                                           // whether current sort order is descending
+	StruType   reflect.Type          `copy:"-" view:"-" json:"-" xml:"-" desc:"struct type for each row"`                                        // struct type for each row
+	VisFields  []reflect.StructField `copy:"-" view:"-" json:"-" xml:"-" desc:"the visible fields"`                                              // the visible fields
+	NVisFields int                   `copy:"-" view:"-" json:"-" xml:"-" desc:"number of visible fields"`                                        // number of visible fields
 }
 
 var TypeTableView = kit.Types.AddType(&TableView{}, TableViewProps)

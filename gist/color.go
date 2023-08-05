@@ -25,10 +25,10 @@ import (
 // Color extends image/color.RGBA with more methods for converting to / from
 // strings etc -- it has standard uint8 0..255 color values
 type Color struct {
-	R uint8 `min:"0" max:"255" step:"5" desc:"the red part of the color"`
-	G uint8 `min:"0" max:"255" step:"5" desc:"the green part of the color"`
-	B uint8 `min:"0" max:"255" step:"5" desc:"the blue part of the color"`
-	A uint8 `min:"0" max:"255" step:"5" desc:"the transparency of the color"`
+	R uint8 `min:"0" max:"255" step:"5" desc:"the red part of the color"`     // the red part of the color
+	G uint8 `min:"0" max:"255" step:"5" desc:"the green part of the color"`   // the green part of the color
+	B uint8 `min:"0" max:"255" step:"5" desc:"the blue part of the color"`    // the blue part of the color
+	A uint8 `min:"0" max:"255" step:"5" desc:"the transparency of the color"` // the transparency of the color
 }
 
 var TypeColor = kit.Types.AddType(&Color{}, ColorProps)
@@ -808,10 +808,10 @@ func (c NRGBAf32) RGBA() (r, g, b, a uint32) {
 // HSLA represents the Hue [0..360], Saturation [0..1], and Luminance
 // (lightness) [0..1] of the color using float32 values
 type HSLA struct {
-	H float32 `min:"0" max:"360" step:"5" desc:"the hue of the color"`
-	S float32 `min:"0" max:"1" step:"0.05" desc:"the saturation of the color"`
-	L float32 `min:"0" max:"1" step:"0.05" desc:"the luminance (lightness) of the color"`
-	A float32 `min:"0" max:"1" step:"0.05" desc:"the transparency of the color"`
+	H float32 `min:"0" max:"360" step:"5" desc:"the hue of the color"`                    // the hue of the color
+	S float32 `min:"0" max:"1" step:"0.05" desc:"the saturation of the color"`            // the saturation of the color
+	L float32 `min:"0" max:"1" step:"0.05" desc:"the luminance (lightness) of the color"` // the luminance (lightness) of the color
+	A float32 `min:"0" max:"1" step:"0.05" desc:"the transparency of the color"`          // the transparency of the color
 }
 
 // Implements the [color.Color] interface

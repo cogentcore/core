@@ -19,10 +19,10 @@ import (
 // framework.
 type ArgView struct {
 	gi.Frame
-	Args     []ArgData `desc:"the args that we are a view onto"`
-	Title    string    `desc:"title / prompt to show above the editor fields"`
-	ViewSig  ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	Args     []ArgData `desc:"the args that we are a view onto"`                                                                                                                                             // the args that we are a view onto
+	Title    string    `desc:"title / prompt to show above the editor fields"`                                                                                                                               // title / prompt to show above the editor fields
+	ViewSig  ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"` // signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
+	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`                                              // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 }
 
 var TypeArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)

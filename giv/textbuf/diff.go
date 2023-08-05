@@ -91,8 +91,8 @@ func DiffLinesUnified(astr, bstr []string, context int, afile, adate, bfile, bda
 // PatchRec is a self-contained record of a DiffLines result that contains
 // the source lines of the b buffer needed to patch a into b
 type PatchRec struct {
-	Op     difflib.OpCode `desc:"diff operation: 'r', 'd', 'i', 'e'"`
-	Blines []string       `desc:"lines from B buffer needed for 'r' and 'i' operations"`
+	Op     difflib.OpCode `desc:"diff operation: 'r', 'd', 'i', 'e'"`                    // diff operation: 'r', 'd', 'i', 'e'
+	Blines []string       `desc:"lines from B buffer needed for 'r' and 'i' operations"` // lines from B buffer needed for 'r' and 'i' operations
 }
 
 // Patch is a collection of patch records needed to turn original a buffer into b

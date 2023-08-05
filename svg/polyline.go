@@ -13,7 +13,7 @@ import (
 // Polyline is a SVG multi-line shape
 type Polyline struct {
 	NodeBase
-	Points []mat32.Vec2 `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
+	Points []mat32.Vec2 `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"` // the coordinates to draw -- does a moveto on the first, then lineto for all the rest
 }
 
 var TypePolyline = kit.Types.AddType(&Polyline{}, nil)

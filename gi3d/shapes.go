@@ -19,11 +19,11 @@ import (
 // axis facing either positive or negative
 type Plane struct {
 	MeshBase
-	NormAxis mat32.Dims  `desc:"axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."`
-	NormNeg  bool        `desc:"if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true"`
-	Size     mat32.Vec2  `desc:"2D size of plane"`
-	Segs     mat32.Vec2i `desc:"number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"`
-	Offset   float32     `desc:"offset from origin along direction of normal to the plane"`
+	NormAxis mat32.Dims  `desc:"axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."` // axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
+	NormNeg  bool        `desc:"if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true"`                                                                                                     // if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true
+	Size     mat32.Vec2  `desc:"2D size of plane"`                                                                                                                                                                                                                     // 2D size of plane
+	Segs     mat32.Vec2i `desc:"number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"`                                                                                                        // number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
+	Offset   float32     `desc:"offset from origin along direction of normal to the plane"`                                                                                                                                                                            // offset from origin along direction of normal to the plane
 }
 
 var TypePlane = kit.Types.AddType(&Plane{}, nil)
@@ -66,8 +66,8 @@ func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, 
 // Box is a rectangular-shaped solid (cuboid)
 type Box struct {
 	MeshBase
-	Size mat32.Vec3  `desc:"size along each dimension"`
-	Segs mat32.Vec3i `desc:"number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"`
+	Size mat32.Vec3  `desc:"size along each dimension"`                                                                                                          // size along each dimension
+	Segs mat32.Vec3i `desc:"number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"` // number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
 }
 
 var TypeBox = kit.Types.AddType(&Box{}, nil)
@@ -104,13 +104,13 @@ func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, id
 // Sphere is a sphere mesh
 type Sphere struct {
 	MeshBase
-	Radius     float32 `desc:"radius of the sphere"`
-	WidthSegs  int     `min:"3" desc:"number of segments around the width of the sphere (32 is reasonable default for full circle)"`
-	HeightSegs int     `min:"3" desc:"number of height segments (32 is reasonable default for full height)"`
-	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees, relative to -1,0,0 left side starting point"`
-	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
-	ElevStart  float32 `min:"0" max:"180" step:"5" desc:"starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"`
-	ElevLen    float32 `min:"0" max:"180" step:"5" desc:"total angle to generate in degrees (max = 180)"`
+	Radius     float32 `desc:"radius of the sphere"`                                                                                          // radius of the sphere
+	WidthSegs  int     `min:"3" desc:"number of segments around the width of the sphere (32 is reasonable default for full circle)"`          // number of segments around the width of the sphere (32 is reasonable default for full circle)
+	HeightSegs int     `min:"3" desc:"number of height segments (32 is reasonable default for full height)"`                                  // number of height segments (32 is reasonable default for full height)
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees, relative to -1,0,0 left side starting point"`      // starting radial angle in degrees, relative to -1,0,0 left side starting point
+	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`                              // total radial angle to generate in degrees (max = 360)
+	ElevStart  float32 `min:"0" max:"180" step:"5" desc:"starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"` // starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom
+	ElevLen    float32 `min:"0" max:"180" step:"5" desc:"total angle to generate in degrees (max = 180)"`                                     // total angle to generate in degrees (max = 180)
 }
 
 var TypeSphere = kit.Types.AddType(&Sphere{}, nil)
@@ -163,15 +163,15 @@ func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32,
 // Height is up along the Y axis.
 type Cylinder struct {
 	MeshBase
-	Height     float32 `desc:"height of the cylinder"`
-	TopRad     float32 `desc:"radius of the top -- set to 0 for a cone"`
-	BotRad     float32 `desc:"radius of the bottom"`
-	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
-	HeightSegs int     `desc:"number of height segments"`
-	Top        bool    `desc:"render the top disc"`
-	Bottom     bool    `desc:"render the bottom disc"`
-	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
-	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
+	Height     float32 `desc:"height of the cylinder"`                                                                            // height of the cylinder
+	TopRad     float32 `desc:"radius of the top -- set to 0 for a cone"`                                                          // radius of the top -- set to 0 for a cone
+	BotRad     float32 `desc:"radius of the bottom"`                                                                              // radius of the bottom
+	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`                    // number of radial segments (32 is a reasonable default for full circle)
+	HeightSegs int     `desc:"number of height segments"`                                                                         // number of height segments
+	Top        bool    `desc:"render the top disc"`                                                                               // render the top disc
+	Bottom     bool    `desc:"render the bottom disc"`                                                                            // render the bottom disc
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"` // starting angle in degrees, relative to -1,0,0 left side starting point
+	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`                           // total angle to generate in degrees (max 360)
 }
 
 var TypeCylinder = kit.Types.AddType(&Cylinder{}, nil)
@@ -246,14 +246,14 @@ func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF3
 // Height is along the Y axis -- total height is Height + TopRad + BotRad.
 type Capsule struct {
 	MeshBase
-	Height     float32 `desc:"height of the cylinder portion"`
-	TopRad     float32 `desc:"radius of the top -- set to 0 for a cone"`
-	BotRad     float32 `desc:"radius of the bottom"`
-	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
-	HeightSegs int     `desc:"number of height segments"`
-	CapSegs    int     `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`
-	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
-	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
+	Height     float32 `desc:"height of the cylinder portion"`                                                                    // height of the cylinder portion
+	TopRad     float32 `desc:"radius of the top -- set to 0 for a cone"`                                                          // radius of the top -- set to 0 for a cone
+	BotRad     float32 `desc:"radius of the bottom"`                                                                              // radius of the bottom
+	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`                    // number of radial segments (32 is a reasonable default for full circle)
+	HeightSegs int     `desc:"number of height segments"`                                                                         // number of height segments
+	CapSegs    int     `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`                        // number of segments in the hemisphere cap ends (16 is a reasonable default)
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"` // starting angle in degrees, relative to -1,0,0 left side starting point
+	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`                           // total angle to generate in degrees (max 360)
 }
 
 var TypeCapsule = kit.Types.AddType(&Capsule{}, nil)
@@ -339,12 +339,12 @@ func (cp *Capsule) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32
 // larger radius of the ring.
 type Torus struct {
 	MeshBase
-	Radius     float32 `desc:"larger radius of the torus ring"`
-	TubeRadius float32 `desc:"radius of the solid tube"`
-	RadialSegs int     `min:"1" desc:"number of segments around the radius of the torus (32 is reasonable default for full circle)"`
-	TubeSegs   int     `min:"1" desc:"number of segments for the tube itself (32 is reasonable default for full height)"`
-	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees relative to 1,0,0 starting point"`
-	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
+	Radius     float32 `desc:"larger radius of the torus ring"`                                                                      // larger radius of the torus ring
+	TubeRadius float32 `desc:"radius of the solid tube"`                                                                             // radius of the solid tube
+	RadialSegs int     `min:"1" desc:"number of segments around the radius of the torus (32 is reasonable default for full circle)"` // number of segments around the radius of the torus (32 is reasonable default for full circle)
+	TubeSegs   int     `min:"1" desc:"number of segments for the tube itself (32 is reasonable default for full height)"`            // number of segments for the tube itself (32 is reasonable default for full height)
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees relative to 1,0,0 starting point"`         // starting radial angle in degrees relative to 1,0,0 starting point
+	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`                     // total radial angle to generate in degrees (max = 360)
 }
 
 var TypeTorus = kit.Types.AddType(&Torus{}, nil)

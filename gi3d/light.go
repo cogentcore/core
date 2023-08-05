@@ -25,10 +25,10 @@ type Light interface {
 
 // LightBase provides the base implementation for Light interface
 type LightBase struct {
-	Nm    string     `desc:"name of light -- lights accessed by name so it matters"`
-	On    bool       `desc:"whether light is on or off"`
-	Lumns float32    `min:"0" step:"0.1" desc:"brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"`
-	Clr   gist.Color `desc:"color of light a full intensity"`
+	Nm    string     `desc:"name of light -- lights accessed by name so it matters"`                                                                                                                              // name of light -- lights accessed by name so it matters
+	On    bool       `desc:"whether light is on or off"`                                                                                                                                                          // whether light is on or off
+	Lumns float32    `min:"0" step:"0.1" desc:"brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"` // brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness
+	Clr   gist.Color `desc:"color of light a full intensity"`                                                                                                                                                     // color of light a full intensity
 }
 
 var TypeLightBase = kit.Types.AddType(&LightBase{}, nil)
@@ -73,7 +73,7 @@ func AddNewAmbientLight(sc *Scene, name string, lumens float32, color LightColor
 // vector (i.e., absolute distance doesn't matter)
 type DirLight struct {
 	LightBase
-	Pos mat32.Vec3 `desc:"position of direct light -- assumed to point at the origin so this determines direction"`
+	Pos mat32.Vec3 `desc:"position of direct light -- assumed to point at the origin so this determines direction"` // position of direct light -- assumed to point at the origin so this determines direction
 }
 
 var TypeDirLight = kit.Types.AddType(&DirLight{}, nil)
@@ -102,9 +102,9 @@ func (dl *DirLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
 // linear and quadratic distance.  The quadratic factor dominates at longer distances.
 type PointLight struct {
 	LightBase
-	Pos       mat32.Vec3 `desc:"position of light in world coordinates"`
-	LinDecay  float32    `desc:"Distance linear decay factor -- defaults to .1"`
-	QuadDecay float32    `desc:"Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"`
+	Pos       mat32.Vec3 `desc:"position of light in world coordinates"`                                              // position of light in world coordinates
+	LinDecay  float32    `desc:"Distance linear decay factor -- defaults to .1"`                                      // Distance linear decay factor -- defaults to .1
+	QuadDecay float32    `desc:"Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"` // Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances
 }
 
 var TypePointLight = kit.Types.AddType(&PointLight{}, nil)
@@ -135,10 +135,10 @@ func (pl *PointLight) ViewPos(viewMat *mat32.Mat4) mat32.Vec3 {
 type SpotLight struct {
 	LightBase
 	Pose        Pose    // position and orientation
-	AngDecay    float32 `desc:"Angular decay factor -- defaults to 15"`
-	CutoffAngle float32 `max:"90" min:"1" desc:"Cut off angle (in degrees) -- defaults to 45 -- max of 90"`
-	LinDecay    float32 `desc:"Distance linear decay factor -- defaults to .01"`
-	QuadDecay   float32 `desc:"Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances"`
+	AngDecay    float32 `desc:"Angular decay factor -- defaults to 15"`                                               // Angular decay factor -- defaults to 15
+	CutoffAngle float32 `max:"90" min:"1" desc:"Cut off angle (in degrees) -- defaults to 45 -- max of 90"`           // Cut off angle (in degrees) -- defaults to 45 -- max of 90
+	LinDecay    float32 `desc:"Distance linear decay factor -- defaults to .01"`                                      // Distance linear decay factor -- defaults to .01
+	QuadDecay   float32 `desc:"Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances"` // Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances
 }
 
 var TypeSpotLight = kit.Types.AddType(&SpotLight{}, nil)

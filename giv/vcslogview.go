@@ -15,13 +15,13 @@ import (
 // VCSLogView is a view of the variables
 type VCSLogView struct {
 	gi.Layout
-	Log   vci.Log  `desc:"current log"`
-	File  string   `desc:"file that this is a log of -- if blank then it is entire repository"`
-	Since string   `desc:"date expression for how long ago to include log entries from"`
-	Repo  vci.Repo `json:"-" xml:"-" copy:"-" desc:"version control system repository"`
-	RevA  string   `desc:"revision A -- defaults to HEAD"`
-	RevB  string   `desc:"revision B -- blank means current working copy"`
-	SetA  bool     `desc:"double-click will set the A revision -- else B"`
+	Log   vci.Log  `desc:"current log"`                                                         // current log
+	File  string   `desc:"file that this is a log of -- if blank then it is entire repository"` // file that this is a log of -- if blank then it is entire repository
+	Since string   `desc:"date expression for how long ago to include log entries from"`        // date expression for how long ago to include log entries from
+	Repo  vci.Repo `json:"-" xml:"-" copy:"-" desc:"version control system repository"`         // version control system repository
+	RevA  string   `desc:"revision A -- defaults to HEAD"`                                      // revision A -- defaults to HEAD
+	RevB  string   `desc:"revision B -- blank means current working copy"`                      // revision B -- blank means current working copy
+	SetA  bool     `desc:"double-click will set the A revision -- else B"`                      // double-click will set the A revision -- else B
 }
 
 var TypeVCSLogView = kit.Types.AddType(&VCSLogView{}, VCSLogViewProps)

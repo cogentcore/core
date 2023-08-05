@@ -22,8 +22,8 @@ import (
 // background and has convenience methods for adding menus.
 type MenuBar struct {
 	Layout
-	MainMenu    bool               `desc:"is this the main menu bar for a window?  controls whether displayed on macOS"`
-	OSMainMenus map[string]*Action `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"`
+	MainMenu    bool               `desc:"is this the main menu bar for a window?  controls whether displayed on macOS"`            // is this the main menu bar for a window?  controls whether displayed on macOS
+	OSMainMenus map[string]*Action `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"` // map of main menu items for callback from OS main menu (MacOS specific)
 }
 
 var TypeMenuBar = kit.Types.AddType(&MenuBar{}, MenuBarProps)

@@ -19,9 +19,9 @@ import (
 // the character just prior to that character) but the lines are always *inclusive*
 // (i.e., it is the actual line, not the next line).
 type Region struct {
-	Start lex.Pos     `desc:"starting position"`
-	End   lex.Pos     `desc:"ending position: line number is *inclusive* but character position is *exclusive* (-1)"`
-	Time  nptime.Time `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
+	Start lex.Pos     `desc:"starting position"`                                                                                                            // starting position
+	End   lex.Pos     `desc:"ending position: line number is *inclusive* but character position is *exclusive* (-1)"`                                       // ending position: line number is *inclusive* but character position is *exclusive* (-1)
+	Time  nptime.Time `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"` // time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)
 }
 
 // RegionNil is the empty (zero) text region -- all zeros

@@ -21,11 +21,11 @@ import (
 // Image is an SVG image (bitmap)
 type Image struct {
 	NodeBase
-	Pos                 mat32.Vec2  `xml:"{x,y}" desc:"position of the top-left of the image"`
-	Size                mat32.Vec2  `xml:"{width,height}" desc:"rendered size of the image (imposes a scaling on image when it is rendered)"`
-	PreserveAspectRatio bool        `xml:"preserveAspectRatio" desc:"directs resize operations to preserve aspect ratio"`
-	Filename            gi.FileName `desc:"file name of image loaded -- set by OpenImage"`
-	Pixels              *image.RGBA `copy:"-" xml:"-" json:"-" view:"-" desc:"the image pixels"`
+	Pos                 mat32.Vec2  `xml:"{x,y}" desc:"position of the top-left of the image"`                                                // position of the top-left of the image
+	Size                mat32.Vec2  `xml:"{width,height}" desc:"rendered size of the image (imposes a scaling on image when it is rendered)"` // rendered size of the image (imposes a scaling on image when it is rendered)
+	PreserveAspectRatio bool        `xml:"preserveAspectRatio" desc:"directs resize operations to preserve aspect ratio"`                     // directs resize operations to preserve aspect ratio
+	Filename            gi.FileName `desc:"file name of image loaded -- set by OpenImage"`                                                    // file name of image loaded -- set by OpenImage
+	Pixels              *image.RGBA `copy:"-" xml:"-" json:"-" view:"-" desc:"the image pixels"`                                              // the image pixels
 }
 
 var TypeImage = kit.Types.AddType(&Image{}, ImageProps)

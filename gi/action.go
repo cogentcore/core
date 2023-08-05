@@ -22,10 +22,10 @@ import (
 // menu, menubar, or toolbar
 type Action struct {
 	ButtonBase
-	Data       any               `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
-	ActionSig  ki.Signal         `json:"-" xml:"-" view:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
-	UpdateFunc func(act *Action) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing"`
-	Type       ActionTypes       `desc:"the type of action"`
+	Data       any               `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`                                                                                // optional data that is sent with the ActionSig when it is emitted
+	ActionSig  ki.Signal         `json:"-" xml:"-" view:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`                    // signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action
+	UpdateFunc func(act *Action) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing"` // optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing
+	Type       ActionTypes       `desc:"the type of action"`                                                                                                                                                        // the type of action
 }
 
 var TypeAction = kit.Types.AddType(&Action{}, nil)

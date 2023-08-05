@@ -68,17 +68,17 @@ const (
 // interface into it.
 type FileTree struct {
 	FileNode
-	ExtFiles      []string          `desc:"external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"`
-	Dirs          DirFlagMap        `desc:"records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"`
-	DirsOnTop     bool              `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed"`
-	NodeType      reflect.Type      `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
-	InOpenAll     bool              `desc:"if true, we are in midst of an OpenAll call -- nodes should open all dirs"`
-	Watcher       *fsnotify.Watcher `view:"-" desc:"change notify for all dirs"`
-	DoneWatcher   chan bool         `view:"-" desc:"channel to close watcher watcher"`
-	WatchedPaths  map[string]bool   `view:"-" desc:"map of paths that have been added to watcher -- only active if bool = true"`
-	LastWatchUpdt string            `view:"-" desc:"last path updated by watcher"`
-	LastWatchTime time.Time         `view:"-" desc:"timestamp of last update"`
-	UpdtMu        sync.Mutex        `view:"-" desc:"Update mutex"`
+	ExtFiles      []string          `desc:"external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"`                   // external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update
+	Dirs          DirFlagMap        `desc:"records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"` // records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree
+	DirsOnTop     bool              `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed"`                                                                              // if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed
+	NodeType      reflect.Type      `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`                                                                         // type of node to create -- defaults to giv.FileNode but can use custom node types
+	InOpenAll     bool              `desc:"if true, we are in midst of an OpenAll call -- nodes should open all dirs"`                                                                                                          // if true, we are in midst of an OpenAll call -- nodes should open all dirs
+	Watcher       *fsnotify.Watcher `view:"-" desc:"change notify for all dirs"`                                                                                                                                                // change notify for all dirs
+	DoneWatcher   chan bool         `view:"-" desc:"channel to close watcher watcher"`                                                                                                                                          // channel to close watcher watcher
+	WatchedPaths  map[string]bool   `view:"-" desc:"map of paths that have been added to watcher -- only active if bool = true"`                                                                                                // map of paths that have been added to watcher -- only active if bool = true
+	LastWatchUpdt string            `view:"-" desc:"last path updated by watcher"`                                                                                                                                              // last path updated by watcher
+	LastWatchTime time.Time         `view:"-" desc:"timestamp of last update"`                                                                                                                                                  // timestamp of last update
+	UpdtMu        sync.Mutex        `view:"-" desc:"Update mutex"`                                                                                                                                                              // Update mutex
 }
 
 var TypeFileTree = kit.Types.AddType(&FileTree{}, FileTreeProps)
@@ -414,12 +414,12 @@ var FileNodeHiStyle = histyle.StyleDefault
 // the name of the file.  Folders have children containing further nodes.
 type FileNode struct {
 	ki.Node
-	FPath     gi.FileName `json:"-" xml:"-" copy:"-" desc:"full path to this file"`
-	Info      FileInfo    `json:"-" xml:"-" copy:"-" desc:"full standard file info about this file"`
-	Buf       *TextBuf    `json:"-" xml:"-" copy:"-" desc:"file buffer for editing this file"`
-	FRoot     *FileTree   `json:"-" xml:"-" copy:"-" desc:"root of the tree -- has global state"`
-	DirRepo   vci.Repo    `json:"-" xml:"-" copy:"-" desc:"version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control"`
-	RepoFiles vci.Files   `json:"-" xml:"-" copy:"-" desc:"version control system repository file status -- only valid during ReadDir"`
+	FPath     gi.FileName `json:"-" xml:"-" copy:"-" desc:"full path to this file"`                                                                                                                  // full path to this file
+	Info      FileInfo    `json:"-" xml:"-" copy:"-" desc:"full standard file info about this file"`                                                                                                 // full standard file info about this file
+	Buf       *TextBuf    `json:"-" xml:"-" copy:"-" desc:"file buffer for editing this file"`                                                                                                       // file buffer for editing this file
+	FRoot     *FileTree   `json:"-" xml:"-" copy:"-" desc:"root of the tree -- has global state"`                                                                                                    // root of the tree -- has global state
+	DirRepo   vci.Repo    `json:"-" xml:"-" copy:"-" desc:"version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control"` // version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control
+	RepoFiles vci.Files   `json:"-" xml:"-" copy:"-" desc:"version control system repository file status -- only valid during ReadDir"`                                                              // version control system repository file status -- only valid during ReadDir
 }
 
 var TypeFileNode = kit.Types.AddType(&FileNode{}, FileNodeProps)
@@ -1604,8 +1604,8 @@ const (
 // mark active paths and inactive (unmarked) ones can be removed.
 // Map access is protected by Mutex.
 type DirFlagMap struct {
-	Map map[string]DirFlags `desc:"map of paths and associated flags"`
-	Mu  sync.Mutex          `view:"-" json:"-" xml:"-" desc:"mutex for accessing map"`
+	Map map[string]DirFlags `desc:"map of paths and associated flags"`                 // map of paths and associated flags
+	Mu  sync.Mutex          `view:"-" json:"-" xml:"-" desc:"mutex for accessing map"` // mutex for accessing map
 }
 
 // Init initializes the map, and sets the Mutex lock -- must unlock manually

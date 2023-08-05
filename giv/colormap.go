@@ -27,9 +27,9 @@ type ColorMapName string
 // Note that this is not a ValueView widget
 type ColorMapView struct {
 	gi.WidgetBase
-	Orient      mat32.Dims    `desc:"orientation along which to display the spectrum"`
-	Map         *colormap.Map `desc:"the colormap that we view"`
-	ColorMapSig ki.Signal     `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
+	Orient      mat32.Dims    `desc:"orientation along which to display the spectrum"`                                                  // orientation along which to display the spectrum
+	Map         *colormap.Map `desc:"the colormap that we view"`                                                                        // the colormap that we view
+	ColorMapSig ki.Signal     `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"` // signal for color map -- triggers when new color map is set via chooser
 }
 
 var TypeColorMapView = kit.Types.AddType(&ColorMapView{}, nil)

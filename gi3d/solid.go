@@ -20,9 +20,9 @@ import (
 // and points to a mesh structure defining the shape of the solid.
 type Solid struct {
 	Node3DBase
-	Mesh    MeshName `desc:"name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"`
-	Mat     Material `view:"add-fields" desc:"material properties of the surface (color, shininess, texture, etc)"`
-	MeshPtr Mesh     `view:"-" desc:"cached pointer to mesh"`
+	Mesh    MeshName `desc:"name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"` // name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene
+	Mat     Material `view:"add-fields" desc:"material properties of the surface (color, shininess, texture, etc)"`                     // material properties of the surface (color, shininess, texture, etc)
+	MeshPtr Mesh     `view:"-" desc:"cached pointer to mesh"`                                                                           // cached pointer to mesh
 }
 
 var TypeSolid = kit.Types.AddType(&Solid{}, SolidProps)

@@ -273,9 +273,9 @@ func (uc *Context) DotsToPx(val float32) float32 {
 
 // Value and units, and converted value into raw pixels (dots in DPI)
 type Value struct {
-	Val  float32 `label:"Value" desc:"the value in terms of the specified unit"`
-	Un   Units   `label:"Unit" desc:"the unit used for the value"`
-	Dots float32 `inactive:"+" desc:"the computed value in raw pixels (dots in DPI)"`
+	Val  float32 `label:"Value" desc:"the value in terms of the specified unit"`      // the value in terms of the specified unit
+	Un   Units   `label:"Unit" desc:"the unit used for the value"`                    // the unit used for the value
+	Dots float32 `inactive:"+" desc:"the computed value in raw pixels (dots in DPI)"` // the computed value in raw pixels (dots in DPI)
 }
 
 var TypeValue = kit.Types.AddType(&Value{}, ValueProps)

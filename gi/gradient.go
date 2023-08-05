@@ -17,8 +17,8 @@ import (
 // name is id for lookup in url
 type Gradient struct {
 	Node2DBase
-	Grad      gist.ColorSpec `desc:"the color gradient"`
-	StopsName string         `desc:"name of another gradient to get stops from"`
+	Grad      gist.ColorSpec `desc:"the color gradient"`                         // the color gradient
+	StopsName string         `desc:"name of another gradient to get stops from"` // name of another gradient to get stops from
 }
 
 var TypeGradient = kit.Types.AddType(&Gradient{}, nil)

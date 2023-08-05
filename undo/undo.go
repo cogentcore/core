@@ -41,11 +41,11 @@ var DefaultRawInterval = 50
 // The state saved in this record is the state *before* the action took place.
 // The state is either saved as a Raw value or as a diff Patch to the previous state.
 type Rec struct {
-	Action   string        `desc:"description of this action, for user to see"`
-	Data     string        `desc:"action data, encoded however you want -- some undo records can just be about this action data that can be interpeted to Undo / Redo a non-state-changing action"`
-	Raw      []string      `desc:"if present, then direct save of full state -- do this at intervals to speed up computing prior states"`
-	Patch    textbuf.Patch `desc:"patch to get from previous record to this one"`
-	UndoSave bool          `desc:"this record is an UndoSave, when Undo first called from end of stack"`
+	Action   string        `desc:"description of this action, for user to see"`                                                                                                                     // description of this action, for user to see
+	Data     string        `desc:"action data, encoded however you want -- some undo records can just be about this action data that can be interpeted to Undo / Redo a non-state-changing action"` // action data, encoded however you want -- some undo records can just be about this action data that can be interpeted to Undo / Redo a non-state-changing action
+	Raw      []string      `desc:"if present, then direct save of full state -- do this at intervals to speed up computing prior states"`                                                           // if present, then direct save of full state -- do this at intervals to speed up computing prior states
+	Patch    textbuf.Patch `desc:"patch to get from previous record to this one"`                                                                                                                   // patch to get from previous record to this one
+	UndoSave bool          `desc:"this record is an UndoSave, when Undo first called from end of stack"`                                                                                            // this record is an UndoSave, when Undo first called from end of stack
 }
 
 // Init sets the action and data in a record -- overwriting any prior values
@@ -59,10 +59,10 @@ func (rc *Rec) Init(action, data string) {
 
 // Mgr is the undo manager, managing the undo / redo process
 type Mgr struct {
-	Idx         int        `desc:"current index in the undo records -- this is the record that will be undone if user hits undo"`
-	Recs        []*Rec     `desc:"the list of saved state / action records"`
-	RawInterval int        `desc:"interval for saving raw data -- need to do this at some interval to prevent having it take too long to compute patches from all the diffs."`
-	Mu          sync.Mutex `desc:"mutex that protects updates -- we do diff computation as a separate goroutine so it is instant from perspective of UI"`
+	Idx         int        `desc:"current index in the undo records -- this is the record that will be undone if user hits undo"`                                              // current index in the undo records -- this is the record that will be undone if user hits undo
+	Recs        []*Rec     `desc:"the list of saved state / action records"`                                                                                                   // the list of saved state / action records
+	RawInterval int        `desc:"interval for saving raw data -- need to do this at some interval to prevent having it take too long to compute patches from all the diffs."` // interval for saving raw data -- need to do this at some interval to prevent having it take too long to compute patches from all the diffs.
+	Mu          sync.Mutex `desc:"mutex that protects updates -- we do diff computation as a separate goroutine so it is instant from perspective of UI"`                      // mutex that protects updates -- we do diff computation as a separate goroutine so it is instant from perspective of UI
 }
 
 // RecState returns the state for given index, reconstructing from diffs

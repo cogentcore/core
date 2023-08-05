@@ -108,18 +108,18 @@ func DiffViewDialog(avp *gi.Viewport2D, astr, bstr []string, afile, bfile, arev,
 // between two files (represented as lines of strings).
 type DiffView struct {
 	gi.Frame
-	FileA  string        `desc:"first file name being compared"`
-	FileB  string        `desc:"second file name being compared"`
-	RevA   string        `desc:"revision for first file, if relevant"`
-	RevB   string        `desc:"revision for second file, if relevant"`
-	Diffs  textbuf.Diffs `json:"-" xml:"-" desc:"the diff records"`
-	BufA   *TextBuf      `json:"-" xml:"-" desc:"textbuf for A"`
-	BufB   *TextBuf      `json:"-" xml:"-" desc:"textbuf for B"`
-	AlignD textbuf.Diffs `json:"-" xml:"-" desc:"aligned diffs records diff for aligned lines"`
-	EditA  textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
-	EditB  textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
-	UndoA  textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
-	UndoB  textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
+	FileA  string        `desc:"first file name being compared"`                                       // first file name being compared
+	FileB  string        `desc:"second file name being compared"`                                      // second file name being compared
+	RevA   string        `desc:"revision for first file, if relevant"`                                 // revision for first file, if relevant
+	RevB   string        `desc:"revision for second file, if relevant"`                                // revision for second file, if relevant
+	Diffs  textbuf.Diffs `json:"-" xml:"-" desc:"the diff records"`                                    // the diff records
+	BufA   *TextBuf      `json:"-" xml:"-" desc:"textbuf for A"`                                       // textbuf for A
+	BufB   *TextBuf      `json:"-" xml:"-" desc:"textbuf for B"`                                       // textbuf for B
+	AlignD textbuf.Diffs `json:"-" xml:"-" desc:"aligned diffs records diff for aligned lines"`        // aligned diffs records diff for aligned lines
+	EditA  textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"` // edit diffs records aligned diffs with edits applied
+	EditB  textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"` // edit diffs records aligned diffs with edits applied
+	UndoA  textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"` // undo diffs records aligned diffs with edits applied
+	UndoB  textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"` // undo diffs records aligned diffs with edits applied
 }
 
 var TypeDiffView = kit.Types.AddType(&DiffView{}, DiffViewProps)

@@ -29,27 +29,27 @@ import (
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
 // the GoGi user preferences directory -- see oswin/App for further info.
 type Preferences struct {
-	LogicalDPIScale      float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
-	ScreenPrefs          map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
-	ColorSchemeType      gist.ColorSchemeTypes  `desc:"the color scheme type (light or dark)"`
-	Density              Densities              `desc:"the density (compactness) of content"`
-	Colors               ColorPrefs             `desc:"active color preferences"`
-	ColorSchemes         map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`
-	Params               ParamPrefs             `view:"inline" desc:"parameters controlling GUI behavior"`
-	Editor               EditorPrefs            `view:"inline" desc:"editor preferences -- for TextView etc"`
-	KeyMap               KeyMapName             `desc:"select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list"`
-	SaveKeyMaps          bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"`
-	SaveDetailed         bool                   `desc:"if set, the detailed preferences are saved and loaded at startup -- only "`
-	CustomStyles         ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
-	CustomStylesOverride bool                   `desc:"if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first)."`
-	FontFamily           FontName               `desc:"default font family when otherwise not specified"`
-	MonoFont             FontName               `desc:"default mono-spaced font family"`
-	FontPaths            []string               `desc:"extra font paths, beyond system defaults -- searched first"`
-	User                 User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`
-	FavPaths             FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
-	FileViewSort         string                 `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
-	ColorFilename        FileName               `view:"-" ext:".json" desc:"filename for saving / loading colors"`
-	Changed              bool                   `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
+	LogicalDPIScale      float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`                                                                                                                                                                                                                                                                // overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc
+	ScreenPrefs          map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`                                                                                                                                                                                                                                                                                                                                         // screen-specific preferences -- will override overall defaults if set
+	ColorSchemeType      gist.ColorSchemeTypes  `desc:"the color scheme type (light or dark)"`                                                                                                                                                                                                                                                                                                                                                                        // the color scheme type (light or dark)
+	Density              Densities              `desc:"the density (compactness) of content"`                                                                                                                                                                                                                                                                                                                                                                         // the density (compactness) of content
+	Colors               ColorPrefs             `desc:"active color preferences"`                                                                                                                                                                                                                                                                                                                                                                                     // active color preferences
+	ColorSchemes         map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`                                                                                                                                                                                                                                                                                                                                                 // named color schemes -- has Light and Dark schemes by default
+	Params               ParamPrefs             `view:"inline" desc:"parameters controlling GUI behavior"`                                                                                                                                                                                                                                                                                                                                                            // parameters controlling GUI behavior
+	Editor               EditorPrefs            `view:"inline" desc:"editor preferences -- for TextView etc"`                                                                                                                                                                                                                                                                                                                                                         // editor preferences -- for TextView etc
+	KeyMap               KeyMapName             `desc:"select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list"`                                                                                                                                                                                                                                                                                         // select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list
+	SaveKeyMaps          bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"` // if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords
+	SaveDetailed         bool                   `desc:"if set, the detailed preferences are saved and loaded at startup -- only "`                                                                                                                                                                                                                                                                                                                                    // if set, the detailed preferences are saved and loaded at startup -- only
+	CustomStyles         ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`                                                                                                                                                                                                                       // a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive
+	CustomStylesOverride bool                   `desc:"if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first)."`                                                                                                                                                                                                    // if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first).
+	FontFamily           FontName               `desc:"default font family when otherwise not specified"`                                                                                                                                                                                                                                                                                                                                                             // default font family when otherwise not specified
+	MonoFont             FontName               `desc:"default mono-spaced font family"`                                                                                                                                                                                                                                                                                                                                                                              // default mono-spaced font family
+	FontPaths            []string               `desc:"extra font paths, beyond system defaults -- searched first"`                                                                                                                                                                                                                                                                                                                                                   // extra font paths, beyond system defaults -- searched first
+	User                 User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`                                                                                                                                                                                                                                                                                                                          // user info -- partially filled-out automatically if empty / when prefs first created
+	FavPaths             FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`                                                                                                                                                                                                                                                                                                                                                  // favorite paths, shown in FileViewer and also editable there
+	FileViewSort         string                 `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`                                                                                                                                                                                                                                                                                                 // column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
+	ColorFilename        FileName               `view:"-" ext:".json" desc:"filename for saving / loading colors"`                                                                                                                                                                                                                                                                                                                                                    // filename for saving / loading colors
+	Changed              bool                   `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`                                                                                                                                                                                                                                                // flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 }
 
 var TypePreferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
@@ -493,16 +493,16 @@ func (pf *Preferences) DensityMul() float32 {
 // ColorPrefs specify colors for all major categories of GUI elements, and are
 // used in the default styles.
 type ColorPrefs struct {
-	HiStyle    HiStyleName `desc:"text highilighting style / theme"`
-	Font       gist.Color  `desc:"default font / pen color"`
-	Background gist.Color  `desc:"default background color"`
-	Shadow     gist.Color  `desc:"color for shadows -- should generally be a darker shade of the background color"`
-	Border     gist.Color  `desc:"default border color, for button, frame borders, etc"`
-	Control    gist.Color  `desc:"default main color for controls: buttons, etc"`
-	Icon       gist.Color  `desc:"color for icons or other solidly-colored, small elements"`
-	Select     gist.Color  `desc:"color for selected elements"`
-	Highlight  gist.Color  `desc:"color for highlight background"`
-	Link       gist.Color  `desc:"color for links in text etc"`
+	HiStyle    HiStyleName `desc:"text highilighting style / theme"`                                                // text highilighting style / theme
+	Font       gist.Color  `desc:"default font / pen color"`                                                        // default font / pen color
+	Background gist.Color  `desc:"default background color"`                                                        // default background color
+	Shadow     gist.Color  `desc:"color for shadows -- should generally be a darker shade of the background color"` // color for shadows -- should generally be a darker shade of the background color
+	Border     gist.Color  `desc:"default border color, for button, frame borders, etc"`                            // default border color, for button, frame borders, etc
+	Control    gist.Color  `desc:"default main color for controls: buttons, etc"`                                   // default main color for controls: buttons, etc
+	Icon       gist.Color  `desc:"color for icons or other solidly-colored, small elements"`                        // color for icons or other solidly-colored, small elements
+	Select     gist.Color  `desc:"color for selected elements"`                                                     // color for selected elements
+	Highlight  gist.Color  `desc:"color for highlight background"`                                                  // color for highlight background
+	Link       gist.Color  `desc:"color for links in text etc"`                                                     // color for links in text etc
 }
 
 var TypeColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
@@ -642,19 +642,19 @@ var ColorPrefsProps = ki.Props{
 // info on the different screens -- these prefs are indexed by the Screen.Name
 // -- settings here override those in the global preferences.
 type ScreenPrefs struct {
-	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient."`
+	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient."` // overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.
 }
 
 // ParamPrefs contains misc parameters controlling GUI behavior.
 type ParamPrefs struct {
-	DoubleClickMSec    int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
-	ScrollWheelSpeed   float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
-	LocalMainMenu      bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
-	OnlyCloseActiveTab bool    `def:"false" desc:"only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it"`
-	ZebraStripeWeight  float32 `def:"0" min:"0" max:"100" step:"1" desc:"the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)"`
-	BigFileSize        int     `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`
-	SavedPathsMax      int     `desc:"maximum number of saved paths to save in FileView"`
-	Smooth3D           bool    `desc:"turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)"`
+	DoubleClickMSec    int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`                                                                                                                                                                                                                    // the maximum time interval in msec between button press events to count as a double-click
+	ScrollWheelSpeed   float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`                                     // how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.
+	LocalMainMenu      bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."` // controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
+	OnlyCloseActiveTab bool    `def:"false" desc:"only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it"`                                                                                                                                      // only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
+	ZebraStripeWeight  float32 `def:"0" min:"0" max:"100" step:"1" desc:"the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)"`                                                                                                                                                                  // the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
+	BigFileSize        int     `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`                                                                                                                                                                                                                         // the limit of file size, above which user will be prompted before opening / copying, etc.
+	SavedPathsMax      int     `desc:"maximum number of saved paths to save in FileView"`                                                                                                                                                                                                                                                                               // maximum number of saved paths to save in FileView
+	Smooth3D           bool    `desc:"turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)"`                                                                                                                                                        // turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)
 }
 
 func (pf *ParamPrefs) Defaults() {
@@ -671,7 +671,7 @@ func (pf *ParamPrefs) Defaults() {
 // User basic user information that might be needed for different apps
 type User struct {
 	user.User
-	Email string `desc:"default email address -- e.g., for recording changes in a version control system"`
+	Email string `desc:"default email address -- e.g., for recording changes in a version control system"` // default email address -- e.g., for recording changes in a version control system
 }
 
 //////////////////////////////////////////////////////////////////
@@ -680,15 +680,15 @@ type User struct {
 // EditorPrefs contains editor preferences.  It can also be set
 // from ki.Props style properties.
 type EditorPrefs struct {
-	TabSize      int  `xml:"tab-size" desc:"size of a tab, in chars -- also determines indent level for space indent"`
-	SpaceIndent  bool `xml:"space-indent" desc:"use spaces for indentation, otherwise tabs"`
-	WordWrap     bool `xml:"word-wrap" desc:"wrap lines at word boundaries -- otherwise long lines scroll off the end"`
-	LineNos      bool `xml:"line-nos" desc:"show line numbers"`
-	Completion   bool `xml:"completion" desc:"use the completion system to suggest options while typing"`
-	SpellCorrect bool `xml:"spell-correct" desc:"suggest corrections for unknown words while typing"`
-	AutoIndent   bool `xml:"auto-indent" desc:"automatically indent lines when enter, tab, }, etc pressed"`
-	EmacsUndo    bool `xml:"emacs-undo" desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
-	DepthColor   bool `xml:"depth-color" desc:"colorize the background according to nesting depth"`
+	TabSize      int  `xml:"tab-size" desc:"size of a tab, in chars -- also determines indent level for space indent"`                                                                                         // size of a tab, in chars -- also determines indent level for space indent
+	SpaceIndent  bool `xml:"space-indent" desc:"use spaces for indentation, otherwise tabs"`                                                                                                                   // use spaces for indentation, otherwise tabs
+	WordWrap     bool `xml:"word-wrap" desc:"wrap lines at word boundaries -- otherwise long lines scroll off the end"`                                                                                        // wrap lines at word boundaries -- otherwise long lines scroll off the end
+	LineNos      bool `xml:"line-nos" desc:"show line numbers"`                                                                                                                                                // show line numbers
+	Completion   bool `xml:"completion" desc:"use the completion system to suggest options while typing"`                                                                                                      // use the completion system to suggest options while typing
+	SpellCorrect bool `xml:"spell-correct" desc:"suggest corrections for unknown words while typing"`                                                                                                          // suggest corrections for unknown words while typing
+	AutoIndent   bool `xml:"auto-indent" desc:"automatically indent lines when enter, tab, }, etc pressed"`                                                                                                    // automatically indent lines when enter, tab, }, etc pressed
+	EmacsUndo    bool `xml:"emacs-undo" desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"` // use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
+	DepthColor   bool `xml:"depth-color" desc:"colorize the background according to nesting depth"`                                                                                                            // colorize the background according to nesting depth
 }
 
 // Defaults are the defaults for EditorPrefs
@@ -760,8 +760,8 @@ func (pf *EditorPrefs) StyleFromProps(props ki.Props) {
 // favorites.  Is an ordered list instead of a map because user can organize
 // in order
 type FavPathItem struct {
-	Ic   icons.Icon `desc:"icon for item"`
-	Name string     `width:"20" desc:"name of the favorite item"`
+	Ic   icons.Icon `desc:"icon for item"`                        // icon for item
+	Name string     `width:"20" desc:"name of the favorite item"` // name of the favorite item
 	Path string     `tableview:"-select"`
 }
 
@@ -876,32 +876,32 @@ func OpenPaths() {
 // PrefsDetailed are more detailed params not usually customized, but
 // available for those who really care..
 type PrefsDetailed struct {
-	MenuMaxHeight              int  `def:"30" min:"5" step:"1" desc:"the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size."`
-	EventSkipLagMSec           int  `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped"`
-	FilterLaggyKeyEvents       bool `def:"false" desc:"set to true to apply laggy filter to KeyEvents (normally excluded)"`
-	DragStartMSec              int  `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
-	DragStartPix               int  `def:"4" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
-	DNDStartMSec               int  `def:"200" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
-	DNDStartPix                int  `def:"20" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
-	HoverStartMSec             int  `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
-	HoverMaxPix                int  `def:"50" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`
-	CompleteWaitMSec           int  `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before offering completions"`
-	CompleteMaxItems           int  `def:"25" min:"5" step:"1" desc:"the maximum number of completions offered in popup"`
-	CursorBlinkMSec            int  `def:"500" min:"0" max:"1000" step:"5" desc:"number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`
-	LayoutAutoScrollDelayMSec  int  `def:"25" min:"1" step:"5" desc:"is amount of time to wait (in Milliseconds) before trying to autoscroll again"`
-	LayoutPageSteps            int  `def:"10" min:"1" step:"1" desc:"number of steps to take in PageUp / Down events in terms of number of items"`
-	LayoutFocusNameTimeoutMSec int  `def:"500" min:"0" max:"5000" step:"20" desc:"the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay"`
-	LayoutFocusNameTabMSec     int  `def:"2000" min:"10" max:"10000" step:"100" desc:"the number of milliseconds since last focus name event to allow tab to focus on next element with same name."`
-	DialogsSepWindow           bool `def:"true" desc:"open dialogs in separate windows -- else do as popups in main window"`
-	TextViewClipHistMax        int  `def:"100" min:"0" max:"1000" step:"5" desc:"Maximum amount of clipboard history to retain"`
-	TextBufMaxScopeLines       int  `def:"100" min:"10" step:"10" desc:"maximum number of lines to look for matching scope syntax (parens, brackets)"`
-	TextBufDiffRevertLines     int  `def:"10000" min:"0" step:"1000" desc:"text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted"`
-	TextBufDiffRevertDiffs     int  `def:"20" min:"0" step:"1" desc:"text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert"`
-	TextBufMarkupDelayMSec     int  `def:"1000" min:"100" step:"100" desc:"number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)"`
-	MapInlineLen               int  `def:"3" min:"2" step:"1" desc:"the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props"`
-	StructInlineLen            int  `def:"6" min:"2" step:"1" desc:"the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs"`
-	SliceInlineLen             int  `def:"6" min:"2" step:"1" desc:"the number of slice elements below which inline will be used"`
-	Changed                    bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
+	MenuMaxHeight              int  `def:"30" min:"5" step:"1" desc:"the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size."`                                                                        // the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
+	EventSkipLagMSec           int  `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped"` // the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped
+	FilterLaggyKeyEvents       bool `def:"false" desc:"set to true to apply laggy filter to KeyEvents (normally excluded)"`                                                                                                                                    // set to true to apply laggy filter to KeyEvents (normally excluded)
+	DragStartMSec              int  `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`                                                          // the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)
+	DragStartPix               int  `def:"4" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`                                                       // the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)
+	DNDStartMSec               int  `def:"200" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`                                                                  // the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it
+	DNDStartPix                int  `def:"20" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`                                                               // the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it
+	HoverStartMSec             int  `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`                                                                         // the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)
+	HoverMaxPix                int  `def:"50" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`                                                                                            // the maximum number of pixels that mouse can move and still register a Hover event
+	CompleteWaitMSec           int  `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before offering completions"`                                                                                                           // the number of milliseconds to wait before offering completions
+	CompleteMaxItems           int  `def:"25" min:"5" step:"1" desc:"the maximum number of completions offered in popup"`                                                                                                                                      // the maximum number of completions offered in popup
+	CursorBlinkMSec            int  `def:"500" min:"0" max:"1000" step:"5" desc:"number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`                                                                                        // number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking
+	LayoutAutoScrollDelayMSec  int  `def:"25" min:"1" step:"5" desc:"is amount of time to wait (in Milliseconds) before trying to autoscroll again"`                                                                                                           // is amount of time to wait (in Milliseconds) before trying to autoscroll again
+	LayoutPageSteps            int  `def:"10" min:"1" step:"1" desc:"number of steps to take in PageUp / Down events in terms of number of items"`                                                                                                             // number of steps to take in PageUp / Down events in terms of number of items
+	LayoutFocusNameTimeoutMSec int  `def:"500" min:"0" max:"5000" step:"20" desc:"the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay"`                                  // the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay
+	LayoutFocusNameTabMSec     int  `def:"2000" min:"10" max:"10000" step:"100" desc:"the number of milliseconds since last focus name event to allow tab to focus on next element with same name."`                                                           // the number of milliseconds since last focus name event to allow tab to focus on next element with same name.
+	DialogsSepWindow           bool `def:"true" desc:"open dialogs in separate windows -- else do as popups in main window"`                                                                                                                                   // open dialogs in separate windows -- else do as popups in main window
+	TextViewClipHistMax        int  `def:"100" min:"0" max:"1000" step:"5" desc:"Maximum amount of clipboard history to retain"`                                                                                                                               // Maximum amount of clipboard history to retain
+	TextBufMaxScopeLines       int  `def:"100" min:"10" step:"10" desc:"maximum number of lines to look for matching scope syntax (parens, brackets)"`                                                                                                         // maximum number of lines to look for matching scope syntax (parens, brackets)
+	TextBufDiffRevertLines     int  `def:"10000" min:"0" step:"1000" desc:"text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted"`                                                                       // text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
+	TextBufDiffRevertDiffs     int  `def:"20" min:"0" step:"1" desc:"text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert"`                                     // text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
+	TextBufMarkupDelayMSec     int  `def:"1000" min:"100" step:"100" desc:"number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)"`             // number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
+	MapInlineLen               int  `def:"3" min:"2" step:"1" desc:"the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props"`                                             // the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props
+	StructInlineLen            int  `def:"6" min:"2" step:"1" desc:"the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs"`                                    // the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs
+	SliceInlineLen             int  `def:"6" min:"2" step:"1" desc:"the number of slice elements below which inline will be used"`                                                                                                                             // the number of slice elements below which inline will be used
+	Changed                    bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`                                                     // flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 }
 
 var TypePrefsDetailed = kit.Types.AddType(&PrefsDetailed{}, PrefsDetailedProps)
@@ -1045,33 +1045,33 @@ var StructViewIfDebug = false
 
 // PrefsDebug are debugging params
 type PrefsDebug struct {
-	Update2DTrace *bool `desc:"reports trace of updates that trigger re-rendering (printfs to stdout)"`
+	Update2DTrace *bool `desc:"reports trace of updates that trigger re-rendering (printfs to stdout)"` // reports trace of updates that trigger re-rendering (printfs to stdout)
 
-	Render2DTrace *bool `desc:"reports trace of the nodes rendering (printfs to stdout)"`
+	Render2DTrace *bool `desc:"reports trace of the nodes rendering (printfs to stdout)"` // reports trace of the nodes rendering (printfs to stdout)
 
-	Layout2DTrace *bool `desc:"reports trace of all layouts (printfs to stdout)"`
+	Layout2DTrace *bool `desc:"reports trace of all layouts (printfs to stdout)"` // reports trace of all layouts (printfs to stdout)
 
-	WinEventTrace *bool `desc:"reports trace of window events (printfs to stdout)"`
+	WinEventTrace *bool `desc:"reports trace of window events (printfs to stdout)"` // reports trace of window events (printfs to stdout)
 
-	WinPublishTrace *bool `desc:"reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent"`
+	WinPublishTrace *bool `desc:"reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent"` // reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent
 
-	WinDrawTrace *bool `desc:"WinDrawTrace highlights the window regions that are drawn to update the window, using filled colored rectangles"`
+	WinDrawTrace *bool `desc:"WinDrawTrace highlights the window regions that are drawn to update the window, using filled colored rectangles"` // WinDrawTrace highlights the window regions that are drawn to update the window, using filled colored rectangles
 
-	WinGeomTrace *bool `desc:"WinGeomTrace records window geometry saving / loading functions"`
+	WinGeomTrace *bool `desc:"WinGeomTrace records window geometry saving / loading functions"` // WinGeomTrace records window geometry saving / loading functions
 
-	KeyEventTrace *bool `desc:"reports trace of keyboard events (printfs to stdout)"`
+	KeyEventTrace *bool `desc:"reports trace of keyboard events (printfs to stdout)"` // reports trace of keyboard events (printfs to stdout)
 
-	EventTrace *bool `desc:"reports trace of event handling (printfs to stdout)"`
+	EventTrace *bool `desc:"reports trace of event handling (printfs to stdout)"` // reports trace of event handling (printfs to stdout)
 
-	DNDTrace *bool `desc:"reports trace of DND events handling"`
+	DNDTrace *bool `desc:"reports trace of DND events handling"` // reports trace of DND events handling
 
-	GoCompleteTrace *bool `desc:"reports trace of Go language completion & lookup process"`
+	GoCompleteTrace *bool `desc:"reports trace of Go language completion & lookup process"` // reports trace of Go language completion & lookup process
 
-	GoTypeTrace *bool `desc:"reports trace of Go language type parsing and inference process"`
+	GoTypeTrace *bool `desc:"reports trace of Go language type parsing and inference process"` // reports trace of Go language type parsing and inference process
 
-	StructViewIfDebug *bool `desc:"reports errors for viewif directives in struct field tags, for giv.StructView"`
+	StructViewIfDebug *bool `desc:"reports errors for viewif directives in struct field tags, for giv.StructView"` // reports errors for viewif directives in struct field tags, for giv.StructView
 
-	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
+	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."` // flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 }
 
 var TypePrefsDebug = kit.Types.AddType(&PrefsDebug{}, PrefsDebugProps)

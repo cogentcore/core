@@ -27,13 +27,13 @@ import (
 // IDE framework, and remains simple to test / demo the file tree component.
 type FileBrowse struct {
 	gi.Frame
-	ProjRoot          gi.FileName       `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
-	ActiveFilename    gi.FileName       `desc:"filename of the currently-active textview"`
-	Changed           bool              `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
-	Files             giv.FileTree      `desc:"all the files in the project directory and subdirectories"`
-	FilesView         *giv.FileTreeView `desc:"treeview of all the files in the project directory and subdirectories"`
-	NTextViews        int               `xml:"n-text-views" desc:"number of textviews available for editing files (default 2) -- configurable with n-text-views property"`
-	ActiveTextViewIdx int               `json:"-" desc:"index of the currently-active textview -- new files will be viewed in other views if available"`
+	ProjRoot          gi.FileName       `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"` // root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename
+	ActiveFilename    gi.FileName       `desc:"filename of the currently-active textview"`                                                                                                                                                                          // filename of the currently-active textview
+	Changed           bool              `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`                                                                                                                                    // has the root changed?  we receive update signals from root for changes
+	Files             giv.FileTree      `desc:"all the files in the project directory and subdirectories"`                                                                                                                                                          // all the files in the project directory and subdirectories
+	FilesView         *giv.FileTreeView `desc:"treeview of all the files in the project directory and subdirectories"`                                                                                                                                              // treeview of all the files in the project directory and subdirectories
+	NTextViews        int               `xml:"n-text-views" desc:"number of textviews available for editing files (default 2) -- configurable with n-text-views property"`                                                                                          // number of textviews available for editing files (default 2) -- configurable with n-text-views property
+	ActiveTextViewIdx int               `json:"-" desc:"index of the currently-active textview -- new files will be viewed in other views if available"`                                                                                                            // index of the currently-active textview -- new files will be viewed in other views if available
 }
 
 var TypeFileBrowse = kit.Types.AddType(&FileBrowse{}, FileBrowseProps)

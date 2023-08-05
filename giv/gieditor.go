@@ -22,9 +22,9 @@ import (
 // box at the bottom where methods can be invoked
 type GiEditor struct {
 	gi.Frame
-	KiRoot   ki.Ki       `desc:"root of tree being edited"`
-	Changed  bool        `desc:"has the root changed via gui actions?  updated from treeview and structview for changes"`
-	Filename gi.FileName `desc:"current filename for saving / loading"`
+	KiRoot   ki.Ki       `desc:"root of tree being edited"`                                                               // root of tree being edited
+	Changed  bool        `desc:"has the root changed via gui actions?  updated from treeview and structview for changes"` // has the root changed via gui actions?  updated from treeview and structview for changes
+	Filename gi.FileName `desc:"current filename for saving / loading"`                                                   // current filename for saving / loading
 }
 
 var TypeGiEditor = kit.Types.AddType(&GiEditor{}, GiEditorProps)

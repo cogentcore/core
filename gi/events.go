@@ -59,26 +59,26 @@ const (
 // EventMgr is an event manager that handles distributing events to nodes.
 // It relies on the EventMaster for a few things outside of its scope.
 type EventMgr struct {
-	Master          EventMaster                             `desc:"master of this event mangager -- handles broader scope issues"`
-	EventSigs       [oswin.EventTypeN][EventPrisN]ki.Signal `desc:"signals for communicating each type of event, organized by priority"`
-	EventMu         sync.Mutex                              `desc:"mutex that protects event sending"`
-	TimerMu         sync.Mutex                              `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
-	Dragging        ki.Ki                                   `desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
-	Scrolling       ki.Ki                                   `desc:"node receiving mouse scrolling events -- anchor to same"`
-	DNDStage        DNDStages                               `desc:"stage of DND process"`
-	DNDData         mimedata.Mimes                          `desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource       ki.Ki                                   `desc:"drag-n-drop source node"`
-	DNDFinalEvent   *dnd.Event                              `desc:"final event for DND which is sent if a finalize is received"`
-	DNDDropMod      dnd.DropMods                            `desc:"modifier in place at time of drop event (DropMove or DropCopy)"`
-	Focus           ki.Ki                                   `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
-	FocusMu         sync.RWMutex                            `desc:"mutex that protects focus updating"`
-	FocusStack      []ki.Ki                                 `desc:"stack of focus"`
-	StartFocus      ki.Ki                                   `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
-	LastModBits     int32                                   `desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
-	LastSelMode     mouse.SelectModes                       `desc:"Last Select Mode from most recent Mouse, Keyboard events"`
-	LastMousePos    image.Point                             `desc:"Last mouse position from most recent Mouse events"`
-	LagSkipDeltaPos image.Point                             `desc:"change in position accumulated from skipped-over laggy mouse move events"`
-	LagLastSkipped  bool                                    `desc:"true if last event was skipped due to lag"`
+	Master          EventMaster                             `desc:"master of this event mangager -- handles broader scope issues"`                                 // master of this event mangager -- handles broader scope issues
+	EventSigs       [oswin.EventTypeN][EventPrisN]ki.Signal `desc:"signals for communicating each type of event, organized by priority"`                           // signals for communicating each type of event, organized by priority
+	EventMu         sync.Mutex                              `desc:"mutex that protects event sending"`                                                             // mutex that protects event sending
+	TimerMu         sync.Mutex                              `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`                          // mutex that protects timer variable updates (e.g., hover AfterFunc's)
+	Dragging        ki.Ki                                   `desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"` // node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same
+	Scrolling       ki.Ki                                   `desc:"node receiving mouse scrolling events -- anchor to same"`                                       // node receiving mouse scrolling events -- anchor to same
+	DNDStage        DNDStages                               `desc:"stage of DND process"`                                                                          // stage of DND process
+	DNDData         mimedata.Mimes                          `desc:"drag-n-drop data -- if non-nil, then DND is taking place"`                                      // drag-n-drop data -- if non-nil, then DND is taking place
+	DNDSource       ki.Ki                                   `desc:"drag-n-drop source node"`                                                                       // drag-n-drop source node
+	DNDFinalEvent   *dnd.Event                              `desc:"final event for DND which is sent if a finalize is received"`                                   // final event for DND which is sent if a finalize is received
+	DNDDropMod      dnd.DropMods                            `desc:"modifier in place at time of drop event (DropMove or DropCopy)"`                                // modifier in place at time of drop event (DropMove or DropCopy)
+	Focus           ki.Ki                                   `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`                                      // node receiving keyboard events -- use SetFocus, CurFocus
+	FocusMu         sync.RWMutex                            `desc:"mutex that protects focus updating"`                                                            // mutex that protects focus updating
+	FocusStack      []ki.Ki                                 `desc:"stack of focus"`                                                                                // stack of focus
+	StartFocus      ki.Ki                                   `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`           // node to focus on at start when no other focus has been set yet -- use SetStartFocus
+	LastModBits     int32                                   `desc:"Last modifier key bits from most recent Mouse, Keyboard events"`                                // Last modifier key bits from most recent Mouse, Keyboard events
+	LastSelMode     mouse.SelectModes                       `desc:"Last Select Mode from most recent Mouse, Keyboard events"`                                      // Last Select Mode from most recent Mouse, Keyboard events
+	LastMousePos    image.Point                             `desc:"Last mouse position from most recent Mouse events"`                                             // Last mouse position from most recent Mouse events
+	LagSkipDeltaPos image.Point                             `desc:"change in position accumulated from skipped-over laggy mouse move events"`                      // change in position accumulated from skipped-over laggy mouse move events
+	LagLastSkipped  bool                                    `desc:"true if last event was skipped due to lag"`                                                     // true if last event was skipped due to lag
 	startDrag       *mouse.DragEvent
 	dragStarted     bool
 	startDND        *mouse.DragEvent

@@ -30,8 +30,8 @@ var colors = []string{"black", "red", "blue", "green", "purple", "brown", "orang
 
 // Graph represents the overall graph parameters -- lines and params
 type Graph struct {
-	Params Params `desc:"the parameters for updating the marbles"`
-	Lines  Lines  `view:"-" desc:"the lines of the graph -- can have any number"`
+	Params Params `desc:"the parameters for updating the marbles"`                // the parameters for updating the marbles
+	Lines  Lines  `view:"-" desc:"the lines of the graph -- can have any number"` // the lines of the graph -- can have any number
 }
 
 // Gr is current graph
@@ -151,13 +151,13 @@ func (gr *Graph) Reset() {
 
 // Line represents one line with an equation etc
 type Line struct {
-	Eq     string                         `width:"60" desc:"equation: use 'x' for the x value, and must use * for multiplication, and start with 0 for decimal numbers (0.01 instead of .01)"`
-	MinX   float32                        `step:"1" desc:"Minimum x value for this line."`
-	MaxX   float32                        `step:"1" desc:"Maximum x value for this line."`
-	Color  string                         `desc:"color to draw the line in"`
-	Bounce float32                        `min:"0" max:"2" step:".05" desc:"how bouncy the line is -- 1 = perfectly bouncy, 0 = no bounce at all"`
-	expr   *govaluate.EvaluableExpression `tableview:"-" desc:"the expression evaluator"`
-	params map[string]any                 `tableview:"-" desc:"the eval params"`
+	Eq     string                         `width:"60" desc:"equation: use 'x' for the x value, and must use * for multiplication, and start with 0 for decimal numbers (0.01 instead of .01)"` // equation: use 'x' for the x value, and must use * for multiplication, and start with 0 for decimal numbers (0.01 instead of .01)
+	MinX   float32                        `step:"1" desc:"Minimum x value for this line."`                                                                                                     // Minimum x value for this line.
+	MaxX   float32                        `step:"1" desc:"Maximum x value for this line."`                                                                                                     // Maximum x value for this line.
+	Color  string                         `desc:"color to draw the line in"`                                                                                                                   // color to draw the line in
+	Bounce float32                        `min:"0" max:"2" step:".05" desc:"how bouncy the line is -- 1 = perfectly bouncy, 0 = no bounce at all"`                                             // how bouncy the line is -- 1 = perfectly bouncy, 0 = no bounce at all
+	expr   *govaluate.EvaluableExpression `tableview:"-" desc:"the expression evaluator"`                                                                                                      // the expression evaluator
+	params map[string]any                 `tableview:"-" desc:"the eval params"`                                                                                                               // the eval params
 }
 
 func (ln *Line) Defaults(lidx int) {
@@ -339,11 +339,11 @@ var Marbles []*Marble
 
 // Params holds our parameters
 type Params struct {
-	NMarbles   int     `min:"1" max:"10000" step:"10" desc:"number of marbles"`
-	NSteps     int     `min:"100" max:"10000" step:"10" desc:"number of steps to take when running"`
-	StartSpeed float32 `min:"0" max:"2" step:".05" desc:"Coordinates per unit of time"`
-	UpdtRate   float32 `min:"0.001" max:"1" step:".01" desc:"how fast to move along velocity vector -- lower = smoother, more slow-mo"`
-	Gravity    float32 `min:"0" max:"2" step:".01" desc:"how fast it accelerates down"`
+	NMarbles   int     `min:"1" max:"10000" step:"10" desc:"number of marbles"`                                                         // number of marbles
+	NSteps     int     `min:"100" max:"10000" step:"10" desc:"number of steps to take when running"`                                    // number of steps to take when running
+	StartSpeed float32 `min:"0" max:"2" step:".05" desc:"Coordinates per unit of time"`                                                 // Coordinates per unit of time
+	UpdtRate   float32 `min:"0.001" max:"1" step:".01" desc:"how fast to move along velocity vector -- lower = smoother, more slow-mo"` // how fast to move along velocity vector -- lower = smoother, more slow-mo
+	Gravity    float32 `min:"0" max:"2" step:".01" desc:"how fast it accelerates down"`                                                 // how fast it accelerates down
 	Width      float32 `length of spawning zone for marbles, set to 0 for all spawn in a column`
 }
 

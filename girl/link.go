@@ -14,14 +14,14 @@ import (
 
 // TextLink represents a hyperlink within rendered text
 type TextLink struct {
-	Label     string   `desc:"text label for the link"`
-	URL       string   `desc:"full URL for the link"`
-	Props     ki.Props `desc:"properties defined for the link"`
-	StartSpan int      `desc:"span index where link starts"`
-	StartIdx  int      `desc:"index in StartSpan where link starts"`
-	EndSpan   int      `desc:"span index where link ends (can be same as EndSpan)"`
-	EndIdx    int      `desc:"index in EndSpan where link ends (index of last rune in label)"`
-	Widget    ki.Ki    `desc:"the widget that owns this text link -- only set prior to passing off to handler function"`
+	Label     string   `desc:"text label for the link"`                                                                  // text label for the link
+	URL       string   `desc:"full URL for the link"`                                                                    // full URL for the link
+	Props     ki.Props `desc:"properties defined for the link"`                                                          // properties defined for the link
+	StartSpan int      `desc:"span index where link starts"`                                                             // span index where link starts
+	StartIdx  int      `desc:"index in StartSpan where link starts"`                                                     // index in StartSpan where link starts
+	EndSpan   int      `desc:"span index where link ends (can be same as EndSpan)"`                                      // span index where link ends (can be same as EndSpan)
+	EndIdx    int      `desc:"index in EndSpan where link ends (index of last rune in label)"`                           // index in EndSpan where link ends (index of last rune in label)
+	Widget    ki.Ki    `desc:"the widget that owns this text link -- only set prior to passing off to handler function"` // the widget that owns this text link -- only set prior to passing off to handler function
 }
 
 // Bounds returns the bounds of the link

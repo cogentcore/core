@@ -207,9 +207,9 @@ func (ev *Overflow) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON
 
 // SizePrefs represents size preferences
 type SizePrefs struct {
-	Need mat32.Vec2 `desc:"minimum size needed -- set to at least computed allocsize"`
-	Pref mat32.Vec2 `desc:"preferred size -- start here for layout"`
-	Max  mat32.Vec2 `desc:"maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch"`
+	Need mat32.Vec2 `desc:"minimum size needed -- set to at least computed allocsize"`                         // minimum size needed -- set to at least computed allocsize
+	Pref mat32.Vec2 `desc:"preferred size -- start here for layout"`                                           // preferred size -- start here for layout
+	Max  mat32.Vec2 `desc:"maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch"` // maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch
 }
 
 // return true if Max < 0 meaning can stretch infinitely along given dimension

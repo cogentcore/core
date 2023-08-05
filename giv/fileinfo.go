@@ -27,17 +27,17 @@ import (
 // FileInfo represents the information about a given file / directory,
 // including icon, mimetype, etc
 type FileInfo struct {
-	Ic      icons.Icon        `tableview:"no-header" desc:"icon for file"`
-	Name    string            `width:"40" desc:"name of the file, without any path"`
-	Size    FileSize          `desc:"size of the file in bytes"`
-	Kind    string            `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`
-	Mime    string            `tableview:"-" desc:"full official mime type of the contents"`
-	Cat     filecat.Cat       `tableview:"-" desc:"functional category of the file, based on mime data etc"`
-	Sup     filecat.Supported `tableview:"-" desc:"supported file type"`
-	Mode    os.FileMode       `desc:"file mode bits"`
-	ModTime FileTime          `desc:"time that contents (only) were last modified"`
-	Vcs     vci.FileStatus    `tableview:"-" desc:"version control system status, when enabled"`
-	Path    string            `tableview:"-" desc:"full path to file, including name -- for file functions"`
+	Ic      icons.Icon        `tableview:"no-header" desc:"icon for file"`                                                                                       // icon for file
+	Name    string            `width:"40" desc:"name of the file, without any path"`                                                                             // name of the file, without any path
+	Size    FileSize          `desc:"size of the file in bytes"`                                                                                                 // size of the file in bytes
+	Kind    string            `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"` // type of file / directory -- shorter, more user-friendly version of mime type, based on category
+	Mime    string            `tableview:"-" desc:"full official mime type of the contents"`                                                                     // full official mime type of the contents
+	Cat     filecat.Cat       `tableview:"-" desc:"functional category of the file, based on mime data etc"`                                                     // functional category of the file, based on mime data etc
+	Sup     filecat.Supported `tableview:"-" desc:"supported file type"`                                                                                         // supported file type
+	Mode    os.FileMode       `desc:"file mode bits"`                                                                                                            // file mode bits
+	ModTime FileTime          `desc:"time that contents (only) were last modified"`                                                                              // time that contents (only) were last modified
+	Vcs     vci.FileStatus    `tableview:"-" desc:"version control system status, when enabled"`                                                                 // version control system status, when enabled
+	Path    string            `tableview:"-" desc:"full path to file, including name -- for file functions"`                                                     // full path to file, including name -- for file functions
 }
 
 var TypeFileInfo = kit.Types.AddType(&FileInfo{}, FileInfoProps)

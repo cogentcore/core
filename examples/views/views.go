@@ -28,32 +28,32 @@ func main() {
 }
 
 type TableStruct struct {
-	Icon       icons.Icon  `desc:"an icon"`
-	IntField   int         `desc:"an integer field"`
-	FloatField float32     `desc:"a float field"`
-	StrField   string      `desc:"a string field"`
-	File       gi.FileName `desc:"a file"`
+	Icon       icons.Icon  `desc:"an icon"`          // an icon
+	IntField   int         `desc:"an integer field"` // an integer field
+	FloatField float32     `desc:"a float field"`    // a float field
+	StrField   string      `desc:"a string field"`   // a string field
+	File       gi.FileName `desc:"a file"`           // a file
 }
 
 type ILStruct struct {
-	On     bool        `desc:"click to show next"`
-	ShowMe string      `viewif:"On" desc:"can u see me?"`
-	Cond   int         `viewif:"On" desc:"a conditional"`
-	Cond1  string      `viewif:"On&&Cond==0" desc:"On and Cond=0 -- note that slbool as bool cannot be used directly.."`
-	Cond2  TableStruct `viewif:"On&&Cond<=1" desc:"if Cond=0"`
-	Val    float32     `desc:"a value"`
+	On     bool        `desc:"click to show next"`                                                                       // click to show next
+	ShowMe string      `viewif:"On" desc:"can u see me?"`                                                                // can u see me?
+	Cond   int         `viewif:"On" desc:"a conditional"`                                                                // a conditional
+	Cond1  string      `viewif:"On&&Cond==0" desc:"On and Cond=0 -- note that slbool as bool cannot be used directly.."` // On and Cond=0 -- note that slbool as bool cannot be used directly..
+	Cond2  TableStruct `viewif:"On&&Cond<=1" desc:"if Cond=0"`                                                           // if Cond=0
+	Val    float32     `desc:"a value"`                                                                                  // a value
 }
 
 type Struct struct {
-	Stripes  gi.Stripes  `desc:"an enum"`
-	Name     string      `viewif:"!(Stripes==[RowStripes,ColStripes])" desc:"a string"`
-	ShowNext bool        `desc:"click to show next"`
-	ShowMe   string      `viewif:"ShowNext" desc:"can u see me?"`
-	Inline   ILStruct    `view:"inline" desc:"how about that"`
-	Cond     int         `desc:"a conditional"`
-	Cond1    string      `viewif:"Cond==0" desc:"if Cond=0"`
-	Cond2    TableStruct `viewif:"Cond>=0" desc:"if Cond=0"`
-	Val      float32     `desc:"a value"`
+	Stripes  gi.Stripes  `desc:"an enum"`                                               // an enum
+	Name     string      `viewif:"!(Stripes==[RowStripes,ColStripes])" desc:"a string"` // a string
+	ShowNext bool        `desc:"click to show next"`                                    // click to show next
+	ShowMe   string      `viewif:"ShowNext" desc:"can u see me?"`                       // can u see me?
+	Inline   ILStruct    `view:"inline" desc:"how about that"`                          // how about that
+	Cond     int         `desc:"a conditional"`                                         // a conditional
+	Cond1    string      `viewif:"Cond==0" desc:"if Cond=0"`                            // if Cond=0
+	Cond2    TableStruct `viewif:"Cond>=0" desc:"if Cond=0"`                            // if Cond=0
+	Val      float32     `desc:"a value"`                                               // a value
 }
 
 func mainrun() {
