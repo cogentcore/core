@@ -3450,7 +3450,7 @@ func (tv *TextView) VisSizes() {
 	spc := sty.BoxSpace()
 	sty.Font = girl.OpenFont(sty.FontRender(), &sty.UnContext)
 	tv.FontHeight = sty.Font.Face.Metrics.Height
-	tv.LineHeight = tv.FontHeight * sty.Text.EffLineHeight()
+	tv.LineHeight = sty.Text.EffLineHeight(tv.FontHeight)
 	sz := tv.VpBBox.Size()
 	if sz == (image.Point{}) {
 		tv.VisSize.Y = 40

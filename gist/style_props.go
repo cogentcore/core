@@ -797,13 +797,11 @@ var StyleTextFuncs = map[string]StyleFunc{
 			if inh {
 				ts.LineHeight = par.(*Text).LineHeight
 			} else if init {
-				ts.LineHeight = 1
+				ts.LineHeight = LineHeightNormal
 			}
 			return
 		}
-		if iv, ok := kit.ToFloat32(val); ok {
-			ts.LineHeight = iv
-		}
+		ts.LineHeight.SetIFace(val, key)
 	},
 	"white-space": func(obj any, key string, val any, par any, ctxt Context) {
 		ts := obj.(*Text)

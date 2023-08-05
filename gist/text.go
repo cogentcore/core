@@ -21,7 +21,7 @@ type Text struct {
 	Anchor           TextAnchors    `xml:"text-anchor" inherit:"true" desc:"prop: text-anchor (inherited) = for svg rendering only: determines the alignment relative to text position coordinate: for RTL start is right, not left, and start is top for TB"`
 	LetterSpacing    units.Value    `xml:"letter-spacing" desc:"prop: letter-spacing = spacing between characters and lines"`
 	WordSpacing      units.Value    `xml:"word-spacing" inherit:"true" desc:"prop: word-spacing (inherited) = extra space to add between words"`
-	LineHeight       float32        `xml:"line-height" inherit:"true" desc:"prop: line-height (inherited) = specified height of a line of text, in proportion to default font height, 0 = 1 = normal (todo: specific values such as pixels are not supported, in order to properly support percentage) -- text is centered within the overall lineheight"`
+	LineHeight       units.Value    `xml:"line-height" inherit:"true" desc:"prop: line-height (inherited) = specified height of a line of text; text is centered within the overall lineheight; the standard way to specify line height is in terms of em"`
 	WhiteSpace       WhiteSpaces    `xml:"white-space" desc:"prop: white-space (*not* inherited) = specifies how white space is processed, and how lines are wrapped"`
 	UnicodeBidi      UnicodeBidi    `xml:"unicode-bidi" inherit:"true" desc:"prop: unicode-bidi (inherited) = determines how to treat unicode bidirectional information"`
 	Direction        TextDirections `xml:"direction" inherit:"true" desc:"prop: direction (inherited) = direction of text -- only applicable for unicode-bidi = bidi-override or embed -- applies to all text elements"`
@@ -40,8 +40,12 @@ type Text struct {
 	// user-select -- can user select text?
 }
 
+// LineHeightNormal represents a normal line height,
+// equal to the default height of the font being used.
+var LineHeightNormal = units.Px(-1)
+
 func (ts *Text) Defaults() {
-	ts.LineHeight = 1
+	ts.LineHeight = LineHeightNormal
 	ts.Align = AlignLeft
 	ts.AlignV = AlignBaseline
 	ts.Direction = LTR
@@ -53,6 +57,7 @@ func (ts *Text) Defaults() {
 func (ts *Text) ToDots(uc *units.Context) {
 	ts.LetterSpacing.ToDots(uc)
 	ts.WordSpacing.ToDots(uc)
+	ts.LineHeight.ToDots(uc)
 	ts.Indent.ToDots(uc)
 	ts.ParaSpacing.ToDots(uc)
 }
@@ -80,12 +85,13 @@ func (ts *Text) InheritFields(par *Text) {
 	ts.TabSize = par.TabSize
 }
 
-// EffLineHeight returns the effective line height (taking into account 0 value)
-func (ts *Text) EffLineHeight() float32 {
-	if ts.LineHeight == 0 {
-		return 1.0
+// EffLineHeight returns the effective line height for the given
+// font height, handling the [LineHeightNormal] special case.
+func (ts *Text) EffLineHeight(fontHeight float32) float32 {
+	if ts.LineHeight.Val < 0 {
+		return fontHeight
 	}
-	return ts.LineHeight
+	return ts.LineHeight.Dots
 }
 
 // AlignFactors gets basic text alignment factors

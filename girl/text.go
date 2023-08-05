@@ -828,7 +828,7 @@ func (tr *Text) LayoutStdLR(txtSty *gist.Text, fontSty *gist.FontRender, ctxt *u
 	fontSty.Font = OpenFont(fontSty, ctxt)
 	fht := fontSty.Face.Metrics.Height
 	dsc := mat32.FromFixed(fontSty.Face.Face.Metrics().Descent)
-	lspc := fht * txtSty.EffLineHeight()
+	lspc := txtSty.EffLineHeight(fht)
 	lpad := (lspc - fht) / 2 // padding above / below text box for centering in line
 
 	maxw := float32(0)
