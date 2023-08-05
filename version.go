@@ -3,8 +3,7 @@
 package prof
 
 const (
-	Version = "v1.0.0"
-	GitCommit = "f6c1290" // the commit JUST BEFORE the release
+	Version     = "v1.0.0"
+	GitCommit   = "f6c1290"          // the commit JUST BEFORE the release
 	VersionDate = "2022-06-27 23:27" // UTC
 )
-
