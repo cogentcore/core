@@ -15,20 +15,40 @@ import (
 // for parsing to first break the source down into statement-sized chunks.  A separate
 // list of EOS token positions is maintained for very fast access.
 type PassTwo struct {
-	DoEos     bool               `desc:"should we perform EOS detection on this type of file?"`
-	Eol       bool               `desc:"use end-of-line as a default EOS, if nesting depth is same as start of line (python) -- see also EolToks"`
-	Semi      bool               `desc:"replace all semicolons with EOS to keep it consistent (C, Go..)"`
-	Backslash bool               `desc:"use backslash as a line continuer (python)"`
-	RBraceEos bool               `desc:"if a right-brace } is detected anywhere in the line, insert an EOS *before* RBrace AND after it (needed for Go) -- do not include RBrace in EolToks in this case"`
-	EolToks   token.KeyTokenList `desc:"specific tokens to recognize at the end of a line that trigger an EOS (Go)"`
+
+	// should we perform EOS detection on this type of file?
+	DoEos bool `desc:"should we perform EOS detection on this type of file?"`
+
+	// use end-of-line as a default EOS, if nesting depth is same as start of line (python) -- see also EolToks
+	Eol bool `desc:"use end-of-line as a default EOS, if nesting depth is same as start of line (python) -- see also EolToks"`
+
+	// replace all semicolons with EOS to keep it consistent (C, Go..)
+	Semi bool `desc:"replace all semicolons with EOS to keep it consistent (C, Go..)"`
+
+	// use backslash as a line continuer (python)
+	Backslash bool `desc:"use backslash as a line continuer (python)"`
+
+	// if a right-brace } is detected anywhere in the line, insert an EOS *before* RBrace AND after it (needed for Go) -- do not include RBrace in EolToks in this case
+	RBraceEos bool `desc:"if a right-brace } is detected anywhere in the line, insert an EOS *before* RBrace AND after it (needed for Go) -- do not include RBrace in EolToks in this case"`
+
+	// specific tokens to recognize at the end of a line that trigger an EOS (Go)
+	EolToks token.KeyTokenList `desc:"specific tokens to recognize at the end of a line that trigger an EOS (Go)"`
 }
 
 // TwoState is the state maintained for the PassTwo process
 type TwoState struct {
-	Pos       Pos            `desc:"position in lex tokens we're on"`
-	Src       *File          `desc:"file that we're operating on"`
+
+	// position in lex tokens we're on
+	Pos Pos `desc:"position in lex tokens we're on"`
+
+	// file that we're operating on
+	Src *File `desc:"file that we're operating on"`
+
+	// stack of nesting tokens
 	NestStack []token.Tokens `desc:"stack of nesting tokens"`
-	Errs      ErrorList      `desc:"any error messages accumulated during lexing specifically"`
+
+	// any error messages accumulated during lexing specifically
+	Errs ErrorList `desc:"any error messages accumulated during lexing specifically"`
 }
 
 // Init initializes state for a new pass -- called at start of NestDepth

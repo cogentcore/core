@@ -43,5 +43,4 @@
 // The piv sub-package provides the GUI for constructing and testing a
 // lexer and parser interactively.  It is the only sub-package with
 // significant dependencies, especially on GoGi and Gide.
-//
 package pi

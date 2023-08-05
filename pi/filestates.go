@@ -15,15 +15,33 @@ import (
 // a common set of file information set in each of the FileState items when
 // they are used.
 type FileStates struct {
-	Filename string            `desc:"the filename"`
-	Sup      filecat.Supported `desc:"the supported file type, if supported (typically only supported files are processed)"`
-	BasePath string            `desc:"base path for reporting file names -- this must be set externally e.g., by gide for the project root path"`
-	DoneIdx  int               `desc:"index of the state that is done"`
-	FsA      FileState         `desc:"one filestate"`
-	FsB      FileState         `desc:"one filestate"`
-	SwitchMu sync.Mutex        `desc:"mutex locking the switching of Done vs. Proc states"`
-	ProcMu   sync.Mutex        `desc:"mutex locking the parsing of Proc state -- reading states can happen fine with this locked, but no switching"`
-	Meta     map[string]string `desc:"extra meta data associated with this FileStates"`
+
+	// the filename
+	Filename string `desc:"the filename"`
+
+	// the supported file type, if supported (typically only supported files are processed)
+	Sup filecat.Supported `desc:"the supported file type, if supported (typically only supported files are processed)"`
+
+	// base path for reporting file names -- this must be set externally e.g., by gide for the project root path
+	BasePath string `desc:"base path for reporting file names -- this must be set externally e.g., by gide for the project root path"`
+
+	// index of the state that is done
+	DoneIdx int `desc:"index of the state that is done"`
+
+	// one filestate
+	FsA FileState `desc:"one filestate"`
+
+	// one filestate
+	FsB FileState `desc:"one filestate"`
+
+	// mutex locking the switching of Done vs. Proc states
+	SwitchMu sync.Mutex `desc:"mutex locking the switching of Done vs. Proc states"`
+
+	// mutex locking the parsing of Proc state -- reading states can happen fine with this locked, but no switching
+	ProcMu sync.Mutex `desc:"mutex locking the parsing of Proc state -- reading states can happen fine with this locked, but no switching"`
+
+	// extra meta data associated with this FileStates
+	Meta map[string]string `desc:"extra meta data associated with this FileStates"`
 }
 
 // NewFileStates returns a new FileStates for given filename, basepath,

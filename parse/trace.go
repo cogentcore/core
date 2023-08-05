@@ -15,18 +15,42 @@ import (
 
 // TraceOpts provides options for debugging / monitoring the rule matching and execution process
 type TraceOpts struct {
-	On           bool     `desc:"perform tracing"`
-	Rules        string   `width:"50" desc:"trace specific named rules here (space separated) -- if blank, then all rules are traced"`
-	Match        bool     `desc:"trace full rule matches -- when a rule fully matches"`
-	SubMatch     bool     `desc:"trace sub-rule matches -- when the parts of each rule match"`
-	NoMatch      bool     `desc:"trace sub-rule non-matches -- why a rule doesn't match -- which terminates the matching process at first non-match (can be a lot of info)"`
-	Run          bool     `desc:"trace progress running through each of the sub-rules when a rule has matched and is 'running'"`
-	RunAct       bool     `desc:"trace actions performed by running rules"`
-	ScopeSrc     bool     `desc:"if true, shows the full scope source for every trace statement"`
-	FullStackOut bool     `desc:"for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one"`
-	RulesList    []string `view:"-" json:"-" xml:"-" desc:"list of rules"`
-	OutWrite     *os.File `view:"-" json:"-" xml:"-" desc:"trace output is written here, connected via os.Pipe to OutRead"`
-	OutRead      *os.File `view:"-" json:"-" xml:"-" desc:"trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output"`
+
+	// perform tracing
+	On bool `desc:"perform tracing"`
+
+	// trace specific named rules here (space separated) -- if blank, then all rules are traced
+	Rules string `width:"50" desc:"trace specific named rules here (space separated) -- if blank, then all rules are traced"`
+
+	// trace full rule matches -- when a rule fully matches
+	Match bool `desc:"trace full rule matches -- when a rule fully matches"`
+
+	// trace sub-rule matches -- when the parts of each rule match
+	SubMatch bool `desc:"trace sub-rule matches -- when the parts of each rule match"`
+
+	// trace sub-rule non-matches -- why a rule doesn't match -- which terminates the matching process at first non-match (can be a lot of info)
+	NoMatch bool `desc:"trace sub-rule non-matches -- why a rule doesn't match -- which terminates the matching process at first non-match (can be a lot of info)"`
+
+	// trace progress running through each of the sub-rules when a rule has matched and is 'running'
+	Run bool `desc:"trace progress running through each of the sub-rules when a rule has matched and is 'running'"`
+
+	// trace actions performed by running rules
+	RunAct bool `desc:"trace actions performed by running rules"`
+
+	// if true, shows the full scope source for every trace statement
+	ScopeSrc bool `desc:"if true, shows the full scope source for every trace statement"`
+
+	// for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one
+	FullStackOut bool `desc:"for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one"`
+
+	// list of rules
+	RulesList []string `view:"-" json:"-" xml:"-" desc:"list of rules"`
+
+	// trace output is written here, connected via os.Pipe to OutRead
+	OutWrite *os.File `view:"-" json:"-" xml:"-" desc:"trace output is written here, connected via os.Pipe to OutRead"`
+
+	// trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output
+	OutRead *os.File `view:"-" json:"-" xml:"-" desc:"trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output"`
 }
 
 // Init intializes tracer after any changes -- opens pipe if not already open

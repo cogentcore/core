@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-	Package Complete provides functions for text completion
+Package Complete provides functions for text completion
 */
 package complete
 
@@ -20,10 +20,20 @@ import (
 
 // Completion holds one potential completion
 type Completion struct {
-	Text  string            `desc:"completion text -- what will actually be inserted if selected"`
-	Label string            `desc:"label to show the user -- only used for menu display if non-empty -- otherwise Text is used"`
-	Icon  string            `desc:"icon name"`
-	Desc  string            `desc:"possible extra information, e.g. type, arguments, etc. - not currently used"`
+
+	// completion text -- what will actually be inserted if selected
+	Text string `desc:"completion text -- what will actually be inserted if selected"`
+
+	// label to show the user -- only used for menu display if non-empty -- otherwise Text is used
+	Label string `desc:"label to show the user -- only used for menu display if non-empty -- otherwise Text is used"`
+
+	// icon name
+	Icon string `desc:"icon name"`
+
+	// possible extra information, e.g. type, arguments, etc. - not currently used
+	Desc string `desc:"possible extra information, e.g. type, arguments, etc. - not currently used"`
+
+	// lang specific or other, e.g. class or type
 	Extra map[string]string `desc:"lang specific or other, e.g. class or type"`
 }
 
@@ -33,16 +43,28 @@ type Completions []Completion
 // Matches is used for passing completions around.
 // contains seed in addition to completions
 type Matches struct {
+
+	// the matches based on seed
 	Matches Completions `desc:"the matches based on seed"`
-	Seed    string      `desc:"seed is the prefix we use to find possible completions"`
+
+	// seed is the prefix we use to find possible completions
+	Seed string `desc:"seed is the prefix we use to find possible completions"`
 }
 
 // Lookup is used for returning lookup results
 type Lookup struct {
+
+	// if non-empty, the result is to view this file (full path)
 	Filename string `desc:"if non-empty, the result is to view this file (full path)"`
-	StLine   int    `desc:"starting line number within file to display"`
-	EdLine   int    `desc:"ending line number within file"`
-	Text     []byte `desc:"if filename is empty, this is raw text to display for lookup result"`
+
+	// starting line number within file to display
+	StLine int `desc:"starting line number within file to display"`
+
+	// ending line number within file
+	EdLine int `desc:"ending line number within file"`
+
+	// if filename is empty, this is raw text to display for lookup result
+	Text []byte `desc:"if filename is empty, this is raw text to display for lookup result"`
 }
 
 // SetFile sets file info
@@ -55,9 +77,15 @@ func (lk *Lookup) SetFile(fname string, st, ed int) {
 // Edit is returned from completion edit function
 // to incorporate the selected completion
 type Edit struct {
-	NewText       string `desc:"completion text after special edits"`
-	ForwardDelete int    `desc:"number of runes, past the cursor, to delete, if any"`
-	CursorAdjust  int    `desc:"cursor adjustment if cursor should be placed in a location other than at end of newText"`
+
+	// completion text after special edits
+	NewText string `desc:"completion text after special edits"`
+
+	// number of runes, past the cursor, to delete, if any
+	ForwardDelete int `desc:"number of runes, past the cursor, to delete, if any"`
+
+	// cursor adjustment if cursor should be placed in a location other than at end of newText
+	CursorAdjust int `desc:"cursor adjustment if cursor should be placed in a location other than at end of newText"`
 }
 
 // MatchFunc is the function called to get the list of possible completions

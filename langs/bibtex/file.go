@@ -13,9 +13,15 @@ import (
 
 // File maintains a record for an bibtex file
 type File struct {
-	File   string    `desc:"file name -- full path"`
-	BibTex *BibTex   `desc:"bibtex data loaded from file"`
-	Mod    time.Time `desc:"mod time for loaded bibfile -- to detect updates"`
+
+	// file name -- full path
+	File string `desc:"file name -- full path"`
+
+	// bibtex data loaded from file
+	BibTex *BibTex `desc:"bibtex data loaded from file"`
+
+	// mod time for loaded bibfile -- to detect updates
+	Mod time.Time `desc:"mod time for loaded bibfile -- to detect updates"`
 }
 
 // FullPath returns full path to given bibtex file,

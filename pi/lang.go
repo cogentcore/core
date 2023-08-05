@@ -111,7 +111,13 @@ type Lang interface {
 
 // LangDirOpts provides options for Lang ParseDir method
 type LangDirOpts struct {
+
+	// process subdirectories -- otherwise not
 	Subdirs bool `desc:"process subdirectories -- otherwise not"`
+
+	// rebuild the symbols by reprocessing from scratch instead of using cache
 	Rebuild bool `desc:"rebuild the symbols by reprocessing from scratch instead of using cache"`
+
+	// do not update the cache with results from processing
 	Nocache bool `desc:"do not update the cache with results from processing"`
 }

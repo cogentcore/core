@@ -14,16 +14,36 @@ import (
 
 // parse.State is the state maintained for parsing
 type State struct {
-	Src        *lex.File      `view:"no-inline" desc:"source and lexed version of source we're parsing"`
-	Trace      TraceOpts      `desc:"tracing for this parser"`
-	Ast        *Ast           `desc:"root of the Ast abstract syntax tree we're updating"`
-	Syms       syms.SymMap    `desc:"symbol map that everything gets added to from current file of parsing -- typically best for subsequent management to just have a single outer-most scoping symbol here (e.g., in Go it is the package), and then everything is a child under that"`
-	Scopes     syms.SymStack  `desc:"stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself"`
-	Pos        lex.Pos        `desc:"the current lex token position"`
-	Errs       lex.ErrorList  `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
-	Matches    [][]MatchStack `view:"no-inline" desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
-	NonMatches ScopeRuleSet   `view:"no-inline" desc:"rules that did NOT match -- represented as a map by scope of a RuleSet"`
-	Stack      lex.Stack      `view:"no-inline" desc:"stack for context-sensitive rules"`
+
+	// source and lexed version of source we're parsing
+	Src *lex.File `view:"no-inline" desc:"source and lexed version of source we're parsing"`
+
+	// tracing for this parser
+	Trace TraceOpts `desc:"tracing for this parser"`
+
+	// root of the Ast abstract syntax tree we're updating
+	Ast *Ast `desc:"root of the Ast abstract syntax tree we're updating"`
+
+	// symbol map that everything gets added to from current file of parsing -- typically best for subsequent management to just have a single outer-most scoping symbol here (e.g., in Go it is the package), and then everything is a child under that
+	Syms syms.SymMap `desc:"symbol map that everything gets added to from current file of parsing -- typically best for subsequent management to just have a single outer-most scoping symbol here (e.g., in Go it is the package), and then everything is a child under that"`
+
+	// stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself
+	Scopes syms.SymStack `desc:"stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself"`
+
+	// the current lex token position
+	Pos lex.Pos `desc:"the current lex token position"`
+
+	// any error messages accumulated during parsing specifically
+	Errs lex.ErrorList `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
+
+	// rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims
+	Matches [][]MatchStack `view:"no-inline" desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
+
+	// rules that did NOT match -- represented as a map by scope of a RuleSet
+	NonMatches ScopeRuleSet `view:"no-inline" desc:"rules that did NOT match -- represented as a map by scope of a RuleSet"`
+
+	// stack for context-sensitive rules
+	Stack lex.Stack `view:"no-inline" desc:"stack for context-sensitive rules"`
 }
 
 // Init initializes the state at start of parsing
@@ -238,9 +258,15 @@ func (ps *State) AddAst(parAst *Ast, rule string, reg lex.Reg) *Ast {
 
 // MatchState holds state info for rules that matched, recorded at starting position of match
 type MatchState struct {
-	Rule  *Rule   `desc:"rule that either matched or ran here"`
+
+	// rule that either matched or ran here
+	Rule *Rule `desc:"rule that either matched or ran here"`
+
+	// scope for match
 	Scope lex.Reg `desc:"scope for match"`
-	Regs  Matches `desc:"regions of match for each sub-region"`
+
+	// regions of match for each sub-region
+	Regs Matches `desc:"regions of match for each sub-region"`
 }
 
 // String is fmt.Stringer
@@ -377,7 +403,9 @@ func (ps *State) FindNameScoped(nm string) (*syms.Symbol, bool) {
 }
 
 // FindNameTopScope searches only in top of current scope for something
-//  with the given name in symbols
+//
+//	with the given name in symbols
+//
 // also looks in ps.Syms if not found in Scope stack.
 func (ps *State) FindNameTopScope(nm string) (*syms.Symbol, bool) {
 	sy := ps.Scopes.Top()

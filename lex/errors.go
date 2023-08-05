@@ -26,11 +26,21 @@ import (
 // the offending token, and the error condition is described
 // by Msg.
 type Error struct {
-	Pos      Pos    `desc:"position where the error occurred in the source"`
+
+	// position where the error occurred in the source
+	Pos Pos `desc:"position where the error occurred in the source"`
+
+	// full filename with path
 	Filename string `desc:"full filename with path"`
-	Msg      string `desc:"brief error message"`
-	Src      string `desc:"line of source where error was"`
-	Rule     ki.Ki  `desc:"lexer or parser rule that emitted the error"`
+
+	// brief error message
+	Msg string `desc:"brief error message"`
+
+	// line of source where error was
+	Src string `desc:"line of source where error was"`
+
+	// lexer or parser rule that emitted the error
+	Rule ki.Ki `desc:"lexer or parser rule that emitted the error"`
 }
 
 // Error implements the error interface -- gives the minimal version of error string
@@ -75,7 +85,6 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 
 // ErrorList is a list of *Errors.
 // The zero value for an ErrorList is an empty ErrorList ready to use.
-//
 type ErrorList []*Error
 
 // Add adds an Error with given position and error message to an ErrorList.
@@ -190,7 +199,6 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 // PrintError is a utility function that prints a list of errors to w,
 // one error per line, if the err parameter is an ErrorList. Otherwise
 // it prints the err string.
-//
 func PrintError(w io.Writer, err error) {
 	if list, ok := err.(ErrorList); ok {
 		for _, e := range list {

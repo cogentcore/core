@@ -15,7 +15,6 @@ import (
 // of these builtin types.
 //
 // See: https://en.wikipedia.org/wiki/List_of_data_structures
-//
 type Kinds int
 
 //go:generate stringer -type=Kinds

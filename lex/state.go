@@ -26,20 +26,48 @@ var TheLangLexer LangLexer
 
 // lex.State is the state maintained for lexing
 type State struct {
-	Filename  string      `desc:"the current file being lex'd"`
-	KeepWS    bool        `desc:"if true, record whitespace tokens -- else ignore"`
-	Src       []rune      `desc:"the current line of source being processed"`
-	Lex       Line        `desc:"the lex output for this line"`
-	Comments  Line        `desc:"the comments output for this line -- kept separately"`
-	Pos       int         `desc:"the current rune char position within the line"`
-	Ln        int         `desc:"the line within overall source that we're operating on (0 indexed)"`
-	Ch        rune        `desc:"the current rune read by NextRune"`
-	Stack     Stack       `desc:"state stack"`
-	LastName  string      `desc:"the last name that was read"`
-	GuestLex  *Rule       `desc:"a guest lexer that can be installed for managing a different language type, e.g., quoted text in markdown files"`
-	SaveStack Stack       `desc:"copy of stack at point when guest lexer was installed -- restore when popped"`
-	Time      nptime.Time `desc:"time stamp for lexing -- set at start of new lex process"`
-	Errs      ErrorList   `desc:"any error messages accumulated during lexing specifically"`
+
+	// the current file being lex'd
+	Filename string `desc:"the current file being lex'd"`
+
+	// if true, record whitespace tokens -- else ignore
+	KeepWS bool `desc:"if true, record whitespace tokens -- else ignore"`
+
+	// the current line of source being processed
+	Src []rune `desc:"the current line of source being processed"`
+
+	// the lex output for this line
+	Lex Line `desc:"the lex output for this line"`
+
+	// the comments output for this line -- kept separately
+	Comments Line `desc:"the comments output for this line -- kept separately"`
+
+	// the current rune char position within the line
+	Pos int `desc:"the current rune char position within the line"`
+
+	// the line within overall source that we're operating on (0 indexed)
+	Ln int `desc:"the line within overall source that we're operating on (0 indexed)"`
+
+	// the current rune read by NextRune
+	Ch rune `desc:"the current rune read by NextRune"`
+
+	// state stack
+	Stack Stack `desc:"state stack"`
+
+	// the last name that was read
+	LastName string `desc:"the last name that was read"`
+
+	// a guest lexer that can be installed for managing a different language type, e.g., quoted text in markdown files
+	GuestLex *Rule `desc:"a guest lexer that can be installed for managing a different language type, e.g., quoted text in markdown files"`
+
+	// copy of stack at point when guest lexer was installed -- restore when popped
+	SaveStack Stack `desc:"copy of stack at point when guest lexer was installed -- restore when popped"`
+
+	// time stamp for lexing -- set at start of new lex process
+	Time nptime.Time `desc:"time stamp for lexing -- set at start of new lex process"`
+
+	// any error messages accumulated during lexing specifically
+	Errs ErrorList `desc:"any error messages accumulated during lexing specifically"`
 }
 
 // Init initializes the state at start of parsing

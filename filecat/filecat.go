@@ -21,7 +21,6 @@
 // github.com/gabriel-vasile/mimetype
 // github.com/h2non/filetype
 // (which constrained our package name to not be either of those two)
-//
 package filecat
 
 import (
@@ -37,7 +36,6 @@ import (
 // No single categorization scheme is perfect, so any given use
 // may require examination of the full mime type etc, but this
 // provides a useful broad-scope categorization of file types.
-//
 type Cat int32
 
 const (

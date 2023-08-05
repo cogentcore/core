@@ -24,14 +24,22 @@ import (
 
 // ParseDirLock provides a lock protecting parsing of a package directory
 type ParseDirLock struct {
-	Path string     `desc:"logical import path"`
-	Mu   sync.Mutex `json:"-" xml:"-" desc:"mutex protecting processing of this path"`
+
+	// logical import path
+	Path string `desc:"logical import path"`
+
+	// mutex protecting processing of this path
+	Mu sync.Mutex `json:"-" xml:"-" desc:"mutex protecting processing of this path"`
 }
 
 // ParseDirLocks manages locking for parsing package directories
 type ParseDirLocks struct {
+
+	// map of paths with processing status
 	Dirs map[string]*ParseDirLock `desc:"map of paths with processing status"`
-	Mu   sync.Mutex               `json:"-" xml:"-" desc:"mutex protecting access to Dirs"`
+
+	// mutex protecting access to Dirs
+	Mu sync.Mutex `json:"-" xml:"-" desc:"mutex protecting access to Dirs"`
 }
 
 // TheParseDirs is the parse dirs locking manager

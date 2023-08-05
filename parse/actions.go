@@ -71,11 +71,21 @@ const (
 
 // Act is one action to perform, operating on the Ast output
 type Act struct {
-	RunIdx int          `desc:"at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant Ast nodes have been added, but for scope setting, must be early enough so that scope is present"`
-	Act    Actions      `desc:"what action to perform"`
-	Path   string       `width:"50" desc:"Ast path, relative to current node: empty = current node; [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | or & and will be tried in order until one succeeds (for |) or all that succeed will be used for &. ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack"`
-	Tok    token.Tokens `desc:"for ChgToken, the new token type to assign to token at given path"`
-	FmTok  token.Tokens `desc:"for ChgToken, only change if token is this to start with (only if != None))"`
+
+	// at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant Ast nodes have been added, but for scope setting, must be early enough so that scope is present
+	RunIdx int `desc:"at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant Ast nodes have been added, but for scope setting, must be early enough so that scope is present"`
+
+	// what action to perform
+	Act Actions `desc:"what action to perform"`
+
+	// Ast path, relative to current node: empty = current node; [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | or & and will be tried in order until one succeeds (for |) or all that succeed will be used for &. ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack
+	Path string `width:"50" desc:"Ast path, relative to current node: empty = current node; [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | or & and will be tried in order until one succeeds (for |) or all that succeed will be used for &. ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack"`
+
+	// for ChgToken, the new token type to assign to token at given path
+	Tok token.Tokens `desc:"for ChgToken, the new token type to assign to token at given path"`
+
+	// for ChgToken, only change if token is this to start with (only if != None))
+	FmTok token.Tokens `desc:"for ChgToken, only change if token is this to start with (only if != None))"`
 }
 
 // String satisfies fmt.Stringer interface

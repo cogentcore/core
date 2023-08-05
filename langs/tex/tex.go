@@ -23,7 +23,9 @@ var parserBytes []byte
 
 // TexLang implements the Lang interface for the Tex / LaTeX language
 type TexLang struct {
-	Pr   *pi.Parser
+	Pr *pi.Parser
+
+	// bibliography files that have been loaded, keyed by file path from bibfile metadata stored in filestate
 	Bibs bibtex.Files `desc:"bibliography files that have been loaded, keyed by file path from bibfile metadata stored in filestate"`
 }
 

@@ -20,14 +20,30 @@ import (
 // memory, and represented by Line as runes, so that positions in
 // the file are directly convertible to indexes in Lines structure
 type File struct {
-	Filename   string            `desc:"the current file being lex'd"`
-	Sup        filecat.Supported `desc:"the supported file type, if supported (typically only supported files are processed)"`
-	BasePath   string            `desc:"base path for reporting file names -- this must be set externally e.g., by gide for the project root path"`
-	Lexs       []Line            `desc:"lex'd version of the lines -- allocated to size of Lines"`
-	Comments   []Line            `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
-	LastStacks []Stack           `desc:"stack present at the end of each line -- needed for contextualizing line-at-time lexing while editing"`
-	EosPos     []EosPos          `desc:"token positions per line for the EOS (end of statement) tokens -- very important for scoping top-down parsing"`
-	Lines      [][]rune          `desc:"contents of the file as lines of runes"`
+
+	// the current file being lex'd
+	Filename string `desc:"the current file being lex'd"`
+
+	// the supported file type, if supported (typically only supported files are processed)
+	Sup filecat.Supported `desc:"the supported file type, if supported (typically only supported files are processed)"`
+
+	// base path for reporting file names -- this must be set externally e.g., by gide for the project root path
+	BasePath string `desc:"base path for reporting file names -- this must be set externally e.g., by gide for the project root path"`
+
+	// lex'd version of the lines -- allocated to size of Lines
+	Lexs []Line `desc:"lex'd version of the lines -- allocated to size of Lines"`
+
+	// comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses
+	Comments []Line `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
+
+	// stack present at the end of each line -- needed for contextualizing line-at-time lexing while editing
+	LastStacks []Stack `desc:"stack present at the end of each line -- needed for contextualizing line-at-time lexing while editing"`
+
+	// token positions per line for the EOS (end of statement) tokens -- very important for scoping top-down parsing
+	EosPos []EosPos `desc:"token positions per line for the EOS (end of statement) tokens -- very important for scoping top-down parsing"`
+
+	// contents of the file as lines of runes
+	Lines [][]rune `desc:"contents of the file as lines of runes"`
 }
 
 // SetSrc sets the source to given content, and alloc Lexs -- if basepath is empty

@@ -20,18 +20,42 @@ import (
 // e.g., fields for a struct or class, multiple values for a go function,
 // or the two types for a map (key, value), etc..
 type Type struct {
-	Name     string   `desc:"name of the type -- can be the name of a field or the role for a type element"`
-	Kind     Kinds    `desc:"kind of type -- overall nature of the type"`
-	Desc     string   `desc:"documentation about this type, extracted from code"`
-	Inited   bool     `inactive:"-" desc:"set to true after type has been initialized during post-parse processing"`
-	Els      TypeEls  `desc:"elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)"`
-	Meths    TypeMap  `desc:"methods defined for this type"`
-	Size     []int    `desc:"for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is [0] (including receiver param for methods) and return vals is [1])"`
-	Filename string   `desc:"full filename / URI of source where type is defined (may be empty for auto types)"`
-	Region   lex.Reg  `desc:"region in source encompassing this type"`
-	Scopes   SymNames `desc:"relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc.."`
-	Props    ki.Props `desc:"additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property"`
-	Ast      ki.Ki    `json:"-" xml:"-" desc:"Ast node that corresponds to this type -- only valid during parsing"`
+
+	// name of the type -- can be the name of a field or the role for a type element
+	Name string `desc:"name of the type -- can be the name of a field or the role for a type element"`
+
+	// kind of type -- overall nature of the type
+	Kind Kinds `desc:"kind of type -- overall nature of the type"`
+
+	// documentation about this type, extracted from code
+	Desc string `desc:"documentation about this type, extracted from code"`
+
+	// set to true after type has been initialized during post-parse processing
+	Inited bool `inactive:"-" desc:"set to true after type has been initialized during post-parse processing"`
+
+	// elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)
+	Els TypeEls `desc:"elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)"`
+
+	// methods defined for this type
+	Meths TypeMap `desc:"methods defined for this type"`
+
+	// for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is [0] (including receiver param for methods) and return vals is [1])
+	Size []int `desc:"for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is [0] (including receiver param for methods) and return vals is [1])"`
+
+	// full filename / URI of source where type is defined (may be empty for auto types)
+	Filename string `desc:"full filename / URI of source where type is defined (may be empty for auto types)"`
+
+	// region in source encompassing this type
+	Region lex.Reg `desc:"region in source encompassing this type"`
+
+	// relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc..
+	Scopes SymNames `desc:"relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc.."`
+
+	// additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property
+	Props ki.Props `desc:"additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property"`
+
+	// Ast node that corresponds to this type -- only valid during parsing
+	Ast ki.Ki `json:"-" xml:"-" desc:"Ast node that corresponds to this type -- only valid during parsing"`
 }
 
 // NewType returns a new Type struct initialized with given name and kind
@@ -193,7 +217,11 @@ func (ty *Type) WriteDoc(out io.Writer, depth int) {
 // TypeEl is a type element -- has a name (local to the type, e.g., field name)
 // and a type name that can be looked up in a master list of types
 type TypeEl struct {
+
+	// element name -- e.g., field name for struct, or functional name for other types
 	Name string `desc:"element name -- e.g., field name for struct, or functional name for other types"`
+
+	// type name -- looked up on relevant lists -- includes scoping / package / namespace name as appropriate
 	Type string `desc:"type name -- looked up on relevant lists -- includes scoping / package / namespace name as appropriate"`
 }
 

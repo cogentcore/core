@@ -20,12 +20,24 @@ import (
 
 // Parser is the overall parser for managing the parsing
 type Parser struct {
-	Lexer      lex.Rule    `desc:"lexer rules for first pass of lexing file"`
-	PassTwo    lex.PassTwo `desc:"second pass after lexing -- computes nesting depth and EOS finding"`
-	Parser     parse.Rule  `desc:"parser rules for parsing lexed tokens"`
-	Filename   string      `desc:"file name for overall parser (not file being parsed!)"`
-	ReportErrs bool        `desc:"if true, reports errors after parsing, to stdout"`
-	ModTime    time.Time   `json:"-" xml:"-" desc:"when loaded from file, this is the modification time of the parser -- re-processes cache if parser is newer than cached files"`
+
+	// lexer rules for first pass of lexing file
+	Lexer lex.Rule `desc:"lexer rules for first pass of lexing file"`
+
+	// second pass after lexing -- computes nesting depth and EOS finding
+	PassTwo lex.PassTwo `desc:"second pass after lexing -- computes nesting depth and EOS finding"`
+
+	// parser rules for parsing lexed tokens
+	Parser parse.Rule `desc:"parser rules for parsing lexed tokens"`
+
+	// file name for overall parser (not file being parsed!)
+	Filename string `desc:"file name for overall parser (not file being parsed!)"`
+
+	// if true, reports errors after parsing, to stdout
+	ReportErrs bool `desc:"if true, reports errors after parsing, to stdout"`
+
+	// when loaded from file, this is the modification time of the parser -- re-processes cache if parser is newer than cached files
+	ModTime time.Time `json:"-" xml:"-" desc:"when loaded from file, this is the modification time of the parser -- re-processes cache if parser is newer than cached files"`
 }
 
 // Init initializes the parser -- must be called after creation

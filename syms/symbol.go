@@ -47,18 +47,42 @@ import (
 // It corresponds to the LSP DocumentSymbol structure, and
 // the Go Object type.
 type Symbol struct {
-	Name      string       `desc:"name of the symbol"`
-	Detail    string       `desc:"additional detail and specification of the symbol -- e.g. if a function, the signature of the function"`
-	Kind      token.Tokens `desc:"lexical kind of symbol, using token.Tokens list"`
-	Type      string       `desc:"Type name for this symbol -- if it is a type, this is its corresponding type representation -- if it is a variable then this is its type"`
-	Index     int          `desc:"index for ordering children within a given scope, e.g., fields in a struct / class"`
-	Filename  string       `desc:"full filename / URI of source"`
-	Region    lex.Reg      `desc:"region in source encompassing this item -- if = RegZero then this is a temp symbol and children are not added to it"`
-	SelectReg lex.Reg      `desc:"region that should be selected when activated, etc"`
-	Scopes    SymNames     `desc:"relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc.."`
-	Children  SymMap       `desc:"children of this symbol -- this includes e.g., methods and fields of classes / structs / types, and all elements within packages, etc"`
-	Types     TypeMap      `desc:"types defined within the scope of this symbol"`
-	Ast       ki.Ki        `json:"-" xml:"-" desc:"Ast node that created this symbol -- only valid during parsing"`
+
+	// name of the symbol
+	Name string `desc:"name of the symbol"`
+
+	// additional detail and specification of the symbol -- e.g. if a function, the signature of the function
+	Detail string `desc:"additional detail and specification of the symbol -- e.g. if a function, the signature of the function"`
+
+	// lexical kind of symbol, using token.Tokens list
+	Kind token.Tokens `desc:"lexical kind of symbol, using token.Tokens list"`
+
+	// Type name for this symbol -- if it is a type, this is its corresponding type representation -- if it is a variable then this is its type
+	Type string `desc:"Type name for this symbol -- if it is a type, this is its corresponding type representation -- if it is a variable then this is its type"`
+
+	// index for ordering children within a given scope, e.g., fields in a struct / class
+	Index int `desc:"index for ordering children within a given scope, e.g., fields in a struct / class"`
+
+	// full filename / URI of source
+	Filename string `desc:"full filename / URI of source"`
+
+	// region in source encompassing this item -- if = RegZero then this is a temp symbol and children are not added to it
+	Region lex.Reg `desc:"region in source encompassing this item -- if = RegZero then this is a temp symbol and children are not added to it"`
+
+	// region that should be selected when activated, etc
+	SelectReg lex.Reg `desc:"region that should be selected when activated, etc"`
+
+	// relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc..
+	Scopes SymNames `desc:"relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc.."`
+
+	// children of this symbol -- this includes e.g., methods and fields of classes / structs / types, and all elements within packages, etc
+	Children SymMap `desc:"children of this symbol -- this includes e.g., methods and fields of classes / structs / types, and all elements within packages, etc"`
+
+	// types defined within the scope of this symbol
+	Types TypeMap `desc:"types defined within the scope of this symbol"`
+
+	// Ast node that created this symbol -- only valid during parsing
+	Ast ki.Ki `json:"-" xml:"-" desc:"Ast node that created this symbol -- only valid during parsing"`
 }
 
 var KiT_Symbol = kit.Types.AddType(&Symbol{}, nil)

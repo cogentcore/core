@@ -48,13 +48,27 @@ const (
 // LangProps contains properties of languages supported by the Pi parser
 // framework
 type LangProps struct {
-	Sup       filecat.Supported `desc:"language -- must be a supported one from Supported list"`
-	CommentLn string            `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
-	CommentSt string            `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
-	CommentEd string            `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
-	Flags     []LangFlags       `desc:"special properties for this language -- as an explicit list of options to make them easier to see and set in defaults"`
-	Lang      Lang              `json:"-" xml:"-" desc:"Lang interface for this language"`
-	Parser    *Parser           `json:"-" xml:"-" desc:"parser for this language -- initialized in OpenStd"`
+
+	// language -- must be a supported one from Supported list
+	Sup filecat.Supported `desc:"language -- must be a supported one from Supported list"`
+
+	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
+	CommentLn string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
+
+	// character(s) that start a multi-line comment or one that requires both start and end
+	CommentSt string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
+
+	// character(s) that end a multi-line comment or one that requires both start and end
+	CommentEd string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
+
+	// special properties for this language -- as an explicit list of options to make them easier to see and set in defaults
+	Flags []LangFlags `desc:"special properties for this language -- as an explicit list of options to make them easier to see and set in defaults"`
+
+	// Lang interface for this language
+	Lang Lang `json:"-" xml:"-" desc:"Lang interface for this language"`
+
+	// parser for this language -- initialized in OpenStd
+	Parser *Parser `json:"-" xml:"-" desc:"parser for this language -- initialized in OpenStd"`
 }
 
 // HasFlag returns true if given flag is set in Flags

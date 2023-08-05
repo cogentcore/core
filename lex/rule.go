@@ -49,20 +49,48 @@ type Lexer interface {
 // leave the more complex things for the parsing step.
 type Rule struct {
 	ki.Node
-	Off       bool             `desc:"disable this rule -- useful for testing and exploration"`
-	Desc      string           `desc:"description / comments about this rule"`
-	Token     token.Tokens     `desc:"the token value that this rule generates -- use None for non-terminals"`
-	Match     Matches          `desc:"the lexical match that we look for to engage this rule"`
-	Pos       MatchPos         `desc:"position where match can occur"`
-	String    string           `desc:"if action is LexMatch, this is the string we match"`
-	Offset    int              `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
-	SizeAdj   int              `desc:"adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging"`
-	Acts      []Actions        `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
-	Until     string           `desc:"string(s) for ReadUntil action -- will read until any of these strings are found -- separate different options with | -- if you need to read until a literal | just put two || in a row and that will show up as a blank, which is interpreted as a literal |"`
-	PushState string           `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
-	NameMap   bool             `desc:"create an optimization map for this rule, which must be a parent with children that all match against a Name string -- this reads the Name and directly activates the associated rule with that String, without having to iterate through them -- use this for keywords etc -- produces a SIGNIFICANT speedup for long lists of keywords."`
-	MatchLen  int              `view:"-" json:"-" xml:"-" desc:"length of source that matched -- if Next is called, this is what will be skipped to"`
-	NmMap     map[string]*Rule `inactive:"+" json:"-" xml:"-" desc:"NameMap lookup map -- created during Compile"`
+
+	// disable this rule -- useful for testing and exploration
+	Off bool `desc:"disable this rule -- useful for testing and exploration"`
+
+	// description / comments about this rule
+	Desc string `desc:"description / comments about this rule"`
+
+	// the token value that this rule generates -- use None for non-terminals
+	Token token.Tokens `desc:"the token value that this rule generates -- use None for non-terminals"`
+
+	// the lexical match that we look for to engage this rule
+	Match Matches `desc:"the lexical match that we look for to engage this rule"`
+
+	// position where match can occur
+	Pos MatchPos `desc:"position where match can occur"`
+
+	// if action is LexMatch, this is the string we match
+	String string `desc:"if action is LexMatch, this is the string we match"`
+
+	// offset into the input to look for a match: 0 = current char, 1 = next one, etc
+	Offset int `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
+
+	// adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging
+	SizeAdj int `desc:"adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging"`
+
+	// the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes
+	Acts []Actions `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
+
+	// string(s) for ReadUntil action -- will read until any of these strings are found -- separate different options with | -- if you need to read until a literal | just put two || in a row and that will show up as a blank, which is interpreted as a literal |
+	Until string `desc:"string(s) for ReadUntil action -- will read until any of these strings are found -- separate different options with | -- if you need to read until a literal | just put two || in a row and that will show up as a blank, which is interpreted as a literal |"`
+
+	// the state to push if our action is PushState -- note that State matching is on String, not this value
+	PushState string `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
+
+	// create an optimization map for this rule, which must be a parent with children that all match against a Name string -- this reads the Name and directly activates the associated rule with that String, without having to iterate through them -- use this for keywords etc -- produces a SIGNIFICANT speedup for long lists of keywords.
+	NameMap bool `desc:"create an optimization map for this rule, which must be a parent with children that all match against a Name string -- this reads the Name and directly activates the associated rule with that String, without having to iterate through them -- use this for keywords etc -- produces a SIGNIFICANT speedup for long lists of keywords."`
+
+	// length of source that matched -- if Next is called, this is what will be skipped to
+	MatchLen int `view:"-" json:"-" xml:"-" desc:"length of source that matched -- if Next is called, this is what will be skipped to"`
+
+	// NameMap lookup map -- created during Compile
+	NmMap map[string]*Rule `inactive:"+" json:"-" xml:"-" desc:"NameMap lookup map -- created during Compile"`
 }
 
 var KiT_Rule = kit.Types.AddType(&Rule{}, RuleProps)

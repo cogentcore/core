@@ -23,7 +23,6 @@ import (
 // See http://pygments.org/docs/tokens/ for more docs on the different categories
 //
 // Anything missing should be added via a pull request etc
-//
 type Tokens int
 
 //go:generate stringer -type=Tokens

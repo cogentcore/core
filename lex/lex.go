@@ -15,10 +15,18 @@ import (
 // within a line of a file.  Critically it also contains the nesting depth computed from
 // all the parens, brackets, braces.  Todo: also support XML < > </ > tag depth.
 type Lex struct {
-	Tok  token.KeyToken `desc:"token, includes cache of keyword for keyword types, and also has nesting depth: starting at 0 at start of file and going up for every increment in bracket / paren / start tag and down for every decrement. Is computed once and used extensively in parsing."`
-	St   int            `desc:"start rune index within original source line for this token"`
-	Ed   int            `desc:"end rune index within original source line for this token (exclusive -- ends one before this)"`
-	Time nptime.Time    `desc:"time when region was set -- used for updating locations in the text based on time stamp (using efficient non-pointer time)"`
+
+	// token, includes cache of keyword for keyword types, and also has nesting depth: starting at 0 at start of file and going up for every increment in bracket / paren / start tag and down for every decrement. Is computed once and used extensively in parsing.
+	Tok token.KeyToken `desc:"token, includes cache of keyword for keyword types, and also has nesting depth: starting at 0 at start of file and going up for every increment in bracket / paren / start tag and down for every decrement. Is computed once and used extensively in parsing."`
+
+	// start rune index within original source line for this token
+	St int `desc:"start rune index within original source line for this token"`
+
+	// end rune index within original source line for this token (exclusive -- ends one before this)
+	Ed int `desc:"end rune index within original source line for this token (exclusive -- ends one before this)"`
+
+	// time when region was set -- used for updating locations in the text based on time stamp (using efficient non-pointer time)
+	Time nptime.Time `desc:"time when region was set -- used for updating locations in the text based on time stamp (using efficient non-pointer time)"`
 }
 
 func NewLex(tok token.KeyToken, st, ed int) Lex {

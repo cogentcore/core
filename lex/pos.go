@@ -78,7 +78,11 @@ func (ps *Pos) FromString(link string) bool {
 
 // Reg is a contiguous region within the source file
 type Reg struct {
+
+	// starting position of region
 	St Pos `desc:"starting position of region"`
+
+	// ending position of region
 	Ed Pos `desc:"ending position of region"`
 }
 
