@@ -871,7 +871,7 @@ func (bt *Button) Init2D() {
 func (bt *Button) ConfigStyles() {
 	bt.AddStyleFunc(StyleFuncDefault, func() {
 		bt.Style.Border.Radius.Set(gist.BorderRadiusFull)
-		bt.Style.Padding.Set(units.Em(0.75*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
+		bt.Style.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
 		if !bt.Icon.IsNil() {
 			bt.Style.Padding.Left.SetEm(1 * Prefs.DensityMul())
 		}

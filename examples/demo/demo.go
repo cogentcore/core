@@ -135,7 +135,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 	btxt := gi.AddNewButton(brow, "buttonText")
 	btxt.Text = "Text"
 	btxt.Type = gi.ButtonText
-	btxt.Icon = icons.Cabin
+	btxt.Icon = icons.Home
 
 	// browto := gi.AddNewLayout(buttons, "browTextOnly", gi.LayoutHorizFlow)
 	// browto.AddStyleFunc(gi.StyleFuncFinal, func() {
