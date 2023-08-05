@@ -604,46 +604,12 @@ func (lb *Label) ConfigStyles() {
 		}
 		switch lb.State {
 		case LabelActive:
+			// use styles as above
 		case LabelInactive:
-			lb.Style.Color = ColorScheme.OnBackground.Highlight(30)
+			lb.Style.Font.Opacity = 0.7
 		case LabelSelected:
-			lb.Style.BackgroundColor.SetColor(ColorScheme.Tertiary)
+			lb.Style.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
+			lb.Style.Color = ColorScheme.OnSecondaryContainer
 		}
-		// // Styling based on https://www.w3schools.com/tags/tag_hn.asp
-		// // and https://www.w3schools.com/tags/tag_p.asp
-		// switch lb.Type {
-		// case LabelStandard:
-		// 	lb.Style.Font.Size.SetRem(1)
-		// 	lb.Style.Text.WhiteSpace = gist.WhiteSpacePre
-		// 	lb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-		// 	lb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		// case LabelP:
-		// 	lb.Style.Font.Size.SetRem(1)
-		// 	lb.Style.Margin.Set(units.Em(1*Prefs.DensityMul()), units.Px(0))
-		// case LabelH1:
-		// 	lb.Style.Font.Size.SetRem(2)
-		// 	lb.Style.Font.Weight = gist.WeightBold
-		// 	lb.Style.Margin.Set(units.Em(0.67*Prefs.DensityMul()), units.Px(0))
-		// case LabelH2:
-		// 	lb.Style.Font.Size.SetRem(1.5)
-		// 	lb.Style.Font.Weight = gist.WeightBold
-		// 	lb.Style.Margin.Set(units.Em(0.83*Prefs.DensityMul()), units.Px(0))
-		// case LabelH3:
-		// 	lb.Style.Font.Size.SetRem(1.17)
-		// 	lb.Style.Font.Weight = gist.WeightBold
-		// 	lb.Style.Margin.Set(units.Em(1*Prefs.DensityMul()), units.Px(0))
-		// case LabelH4:
-		// 	lb.Style.Font.Size.SetRem(1)
-		// 	lb.Style.Font.Weight = gist.WeightBold
-		// 	lb.Style.Margin.Set(units.Em(1.33*Prefs.DensityMul()), units.Px(0))
-		// case LabelH5:
-		// 	lb.Style.Font.Size.SetRem(0.83)
-		// 	lb.Style.Font.Weight = gist.WeightBold
-		// 	lb.Style.Margin.Set(units.Em(1.67*Prefs.DensityMul()), units.Px(0))
-		// case LabelH6:
-		// 	lb.Style.Font.Size.SetRem(0.67)
-		// 	lb.Style.Font.Weight = gist.WeightBold
-		// 	lb.Style.Margin.Set(units.Em(2.33*Prefs.DensityMul()), units.Px(0))
-		// }
 	})
 }
