@@ -21,9 +21,15 @@ import (
 // ColorSpec fully specifies the color for rendering -- used in FillStyle and
 // StrokeStyle
 type ColorSpec struct {
-	Source   ColorSources      `desc:"source of color (solid, gradient)"`             // source of color (solid, gradient)
-	Color    Color             `desc:"color for solid color source"`                  // color for solid color source
-	Gradient *rasterx.Gradient `desc:"gradient parameters for gradient color source"` // gradient parameters for gradient color source
+
+	// source of color (solid, gradient)
+	Source ColorSources `desc:"source of color (solid, gradient)"`
+
+	// color for solid color source
+	Color Color `desc:"color for solid color source"`
+
+	// gradient parameters for gradient color source
+	Gradient *rasterx.Gradient `desc:"gradient parameters for gradient color source"`
 }
 
 var TypeColorSpec = kit.Types.AddType(&ColorSpec{}, nil)

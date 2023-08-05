@@ -69,8 +69,12 @@ func (vv *KeyChordValueView) HasAction() bool {
 // used for representing and editing key chords.
 type KeyChordEdit struct {
 	gi.Label
-	FocusActive bool      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"` // true if the keyboard focus is active or not -- when we lose active focus we apply changes
-	KeyChordSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal -- only one event, when chord is updated from key input"`                   // signal -- only one event, when chord is updated from key input
+
+	// true if the keyboard focus is active or not -- when we lose active focus we apply changes
+	FocusActive bool `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
+
+	// signal -- only one event, when chord is updated from key input
+	KeyChordSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal -- only one event, when chord is updated from key input"`
 }
 
 var TypeKeyChordEdit = kit.Types.AddType(&KeyChordEdit{}, KeyChordEditProps)

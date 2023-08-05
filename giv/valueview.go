@@ -508,20 +508,48 @@ type ValueView interface {
 // fallback for everything that doesn't provide a specific ValueViewer type.
 type ValueViewBase struct {
 	ki.Node
-	ViewSig   ki.Signal            `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update -- data is the value that was set"` // signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update -- data is the value that was set
-	Value     reflect.Value        `desc:"the reflect.Value representation of the value"`                                                                                                                                                                  // the reflect.Value representation of the value
-	OwnKind   reflect.Kind         `desc:"kind of owner that we have -- reflect.Struct, .Map, .Slice are supported"`                                                                                                                                       // kind of owner that we have -- reflect.Struct, .Map, .Slice are supported
-	IsMapKey  bool                 `desc:"for OwnKind = Map, this value represents the Key -- otherwise the Value"`                                                                                                                                        // for OwnKind = Map, this value represents the Key -- otherwise the Value
-	ViewPath  string               `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`                                                                                // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	Owner     any                  `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`                                                    // the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating
-	Field     *reflect.StructField `desc:"if Owner is a struct, this is the reflect.StructField associated with the value"`                                                                                                                                // if Owner is a struct, this is the reflect.StructField associated with the value
-	Tags      map[string]string    `desc:"set of tags that can be set to customize interface for different types of values -- only source for non-structfield values"`                                                                                     // set of tags that can be set to customize interface for different types of values -- only source for non-structfield values
-	Key       any                  `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`                                                                                                                              // if Owner is a map, and this is a value, this is the key for this value in the map
-	KeyView   ValueView            `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`                                                       // if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited
-	Idx       int                  `desc:"if Owner is a slice, this is the index for the value in the slice"`                                                                                                                                              // if Owner is a slice, this is the index for the value in the slice
-	WidgetTyp reflect.Type         `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`                                                          // type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface
-	Widget    gi.Node2D            `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`                                                                        // the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
-	TmpSave   ValueView            `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`                                          // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+
+	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update -- data is the value that was set
+	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update -- data is the value that was set"`
+
+	// the reflect.Value representation of the value
+	Value reflect.Value `desc:"the reflect.Value representation of the value"`
+
+	// kind of owner that we have -- reflect.Struct, .Map, .Slice are supported
+	OwnKind reflect.Kind `desc:"kind of owner that we have -- reflect.Struct, .Map, .Slice are supported"`
+
+	// for OwnKind = Map, this value represents the Key -- otherwise the Value
+	IsMapKey bool `desc:"for OwnKind = Map, this value represents the Key -- otherwise the Value"`
+
+	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+
+	// the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating
+	Owner any `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`
+
+	// if Owner is a struct, this is the reflect.StructField associated with the value
+	Field *reflect.StructField `desc:"if Owner is a struct, this is the reflect.StructField associated with the value"`
+
+	// set of tags that can be set to customize interface for different types of values -- only source for non-structfield values
+	Tags map[string]string `desc:"set of tags that can be set to customize interface for different types of values -- only source for non-structfield values"`
+
+	// if Owner is a map, and this is a value, this is the key for this value in the map
+	Key any `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`
+
+	// if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited
+	KeyView ValueView `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`
+
+	// if Owner is a slice, this is the index for the value in the slice
+	Idx int `desc:"if Owner is a slice, this is the index for the value in the slice"`
+
+	// type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface
+	WidgetTyp reflect.Type `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
+
+	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
+	Widget gi.Node2D `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
+
+	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
 var TypeValueViewBase = kit.Types.AddType(&ValueViewBase{}, ValueViewBaseProps)

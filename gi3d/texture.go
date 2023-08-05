@@ -46,9 +46,15 @@ type Texture interface {
 // TextureBase is the base texture implementation
 // it uses an image.RGBA as underlying image storage to facilitate interface with GPU
 type TextureBase struct {
-	Nm    string      `desc:"name of the texture -- textures are connected to material by name"` // name of the texture -- textures are connected to material by name
-	Trans bool        `desc:"set to true if texture has transparency"`                           // set to true if texture has transparency
-	Img   *image.RGBA `desc:"cached image"`                                                      // cached image
+
+	// name of the texture -- textures are connected to material by name
+	Nm string `desc:"name of the texture -- textures are connected to material by name"`
+
+	// set to true if texture has transparency
+	Trans bool `desc:"set to true if texture has transparency"`
+
+	// cached image
+	Img *image.RGBA `desc:"cached image"`
 }
 
 var TypeTextureBase = kit.Types.AddType(&TextureBase{}, nil)
@@ -83,8 +89,12 @@ func (tx *TextureBase) SetImage(img image.Image) {
 // TextureFile is a texture loaded from a file
 type TextureFile struct {
 	TextureBase
-	FSys fs.FS       `desc:"filesystem for embedded etc"` // filesystem for embedded etc
-	File gi.FileName `desc:"filename for the texture"`    // filename for the texture
+
+	// filesystem for embedded etc
+	FSys fs.FS `desc:"filesystem for embedded etc"`
+
+	// filename for the texture
+	File gi.FileName `desc:"filename for the texture"`
 }
 
 var TypeTextureFile = kit.Types.AddType(&TextureFile{}, nil)

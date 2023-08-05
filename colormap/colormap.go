@@ -14,10 +14,16 @@ import (
 // Map maps a value onto a color by interpolating between a list of colors
 // defining a spectrum, or optionally as an indexed list of colors.
 type Map struct {
-	Name    string
-	NoColor gist.Color   `desc:"color to display for invalid numbers (e.g., NaN)"`                                                                                                                                                                 // color to display for invalid numbers (e.g., NaN)
-	Colors  []gist.Color `desc:"list of colors to interpolate between"`                                                                                                                                                                            // list of colors to interpolate between
-	Indexed bool         `desc:"if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex"` // if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex
+	Name string
+
+	// color to display for invalid numbers (e.g., NaN)
+	NoColor gist.Color `desc:"color to display for invalid numbers (e.g., NaN)"`
+
+	// list of colors to interpolate between
+	Colors []gist.Color `desc:"list of colors to interpolate between"`
+
+	// if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex
+	Indexed bool `desc:"if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex"`
 }
 
 // Map returns color for normalized value in range 0-1.  NaN returns NoColor

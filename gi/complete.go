@@ -31,20 +31,42 @@ type Completer interface {
 // the list of possible completions and for editing text after a completion is selected
 type Complete struct {
 	ki.Node
-	MatchFunc   complete.MatchFunc   `desc:"function to get the list of possible completions"`                                   // function to get the list of possible completions
-	LookupFunc  complete.LookupFunc  `desc:"function to get the text to show for lookup"`                                        // function to get the text to show for lookup
-	EditFunc    complete.EditFunc    `desc:"function to edit text using the selected completion"`                                // function to edit text using the selected completion
-	Context     any                  `desc:"the object that implements complete.Func"`                                           // the object that implements complete.Func
-	SrcLn       int                  `desc:"line number in source that completion is operating on, if relevant"`                 // line number in source that completion is operating on, if relevant
-	SrcCh       int                  `desc:"character position in source that completion is operating on"`                       // character position in source that completion is operating on
-	Completions complete.Completions `desc:"the list of potential completions"`                                                  // the list of potential completions
-	Seed        string               `desc:"current completion seed"`                                                            // current completion seed
-	CompleteSig ki.Signal            `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"` // signal for complete -- see CompleteSignals for the types
-	Completion  string               `desc:"the user's completion selection'"`                                                   // the user's completion selection'
-	Vp          *Viewport2D          `desc:"the viewport where the current popup menu is presented"`                             // the viewport where the current popup menu is presented
-	DelayTimer  *time.Timer
-	DelayMu     sync.Mutex
-	ShowMu      sync.Mutex
+
+	// function to get the list of possible completions
+	MatchFunc complete.MatchFunc `desc:"function to get the list of possible completions"`
+
+	// function to get the text to show for lookup
+	LookupFunc complete.LookupFunc `desc:"function to get the text to show for lookup"`
+
+	// function to edit text using the selected completion
+	EditFunc complete.EditFunc `desc:"function to edit text using the selected completion"`
+
+	// the object that implements complete.Func
+	Context any `desc:"the object that implements complete.Func"`
+
+	// line number in source that completion is operating on, if relevant
+	SrcLn int `desc:"line number in source that completion is operating on, if relevant"`
+
+	// character position in source that completion is operating on
+	SrcCh int `desc:"character position in source that completion is operating on"`
+
+	// the list of potential completions
+	Completions complete.Completions `desc:"the list of potential completions"`
+
+	// current completion seed
+	Seed string `desc:"current completion seed"`
+
+	// signal for complete -- see CompleteSignals for the types
+	CompleteSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
+
+	// the user's completion selection'
+	Completion string `desc:"the user's completion selection'"`
+
+	// the viewport where the current popup menu is presented
+	Vp         *Viewport2D `desc:"the viewport where the current popup menu is presented"`
+	DelayTimer *time.Timer
+	DelayMu    sync.Mutex
+	ShowMu     sync.Mutex
 }
 
 var TypeComplete = kit.Types.AddType(&Complete{}, nil)

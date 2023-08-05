@@ -171,33 +171,73 @@ const (
 //     unlimited number packed into a few descriptors for standard sizes.
 type Window struct {
 	NodeBase
-	Title             string       `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`                                              // displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc
-	Data              any          `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"` // the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows
-	OSWin             oswin.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`                                                               // OS-specific window interface -- handles all the os-specific functions, including delivering events etc
-	EventMgr          EventMgr     `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`                                                                                                                // event manager that handles dispersing events to nodes
-	Viewport          *Viewport2D  `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`                                                                                     // convenience pointer to window's master viewport child that handles the rendering
-	MasterVLay        *Layout      `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`                                                               // main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)
-	MainMenu          *MenuBar     `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`                                             // main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu
-	Sprites           Sprites      `json:"-" xml:"-" desc:"sprites are named images that are rendered last overlaying everything else."`                                                                                          // sprites are named images that are rendered last overlaying everything else.
-	SpriteDragging    string       `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`                                                                       // name of sprite that is being dragged -- sprite event function is responsible for setting this.
-	UpMu              sync.Mutex   `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`                                                                                                    // mutex that protects all updating / uploading of Textures
-	Shortcuts         Shortcuts    `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`                        // currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)
-	Popup             ki.Ki        `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`                                                                                                                          // Current popup viewport that gets all events
-	PopupStack        []ki.Ki      `json:"-" xml:"-" desc:"stack of popups"`                                                                                                                                                      // stack of popups
-	NextPopup         ki.Ki        `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`                                                                                  // this popup will be pushed at the end of the current event cycle -- use SetNextPopup
-	PopupFocus        ki.Ki        `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`                                                                                                    // node to focus on when next popup is activated -- use SetNextPopup
-	DelPopup          ki.Ki        `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`                                                                                   // this popup will be popped at the end of the current event cycle -- use SetDelPopup
-	PopMu             sync.RWMutex `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`                                                                                                    // read-write mutex that protects popup updating and access
+
+	// displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc
+	Title string `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+
+	// the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows
+	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
+
+	// OS-specific window interface -- handles all the os-specific functions, including delivering events etc
+	OSWin oswin.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+
+	// event manager that handles dispersing events to nodes
+	EventMgr EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
+
+	// convenience pointer to window's master viewport child that handles the rendering
+	Viewport *Viewport2D `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+
+	// main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)
+	MasterVLay *Layout `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
+
+	// main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu
+	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+
+	// sprites are named images that are rendered last overlaying everything else.
+	Sprites Sprites `json:"-" xml:"-" desc:"sprites are named images that are rendered last overlaying everything else."`
+
+	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
+	SpriteDragging string `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
+
+	// mutex that protects all updating / uploading of Textures
+	UpMu sync.Mutex `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
+
+	// currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)
+	Shortcuts Shortcuts `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
+
+	// Current popup viewport that gets all events
+	Popup ki.Ki `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+
+	// stack of popups
+	PopupStack []ki.Ki `json:"-" xml:"-" desc:"stack of popups"`
+
+	// this popup will be pushed at the end of the current event cycle -- use SetNextPopup
+	NextPopup ki.Ki `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`
+
+	// node to focus on when next popup is activated -- use SetNextPopup
+	PopupFocus ki.Ki `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`
+
+	// this popup will be popped at the end of the current event cycle -- use SetDelPopup
+	DelPopup ki.Ki `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
+
+	// read-write mutex that protects popup updating and access
+	PopMu             sync.RWMutex `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
 	lastWinMenuUpdate time.Time
 	// below are internal vars used during the event loop
 	delPop        bool
 	skippedResize *window.Event
 	lastEt        oswin.EventType
-	DirDraws      WindowDrawers       `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"` // dir draws are direct upload regions -- direct uploaders upload their images directly to an image here
-	PopDraws      WindowDrawers       // popup regions
-	UpdtRegs      WindowUpdates       // misc vp update regions
-	Phongs        []*vphong.Phong     `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"` // this popup will be popped at the end of the current event cycle -- use SetDelPopup
-	Frames        []*vgpu.RenderFrame `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"` // this popup will be popped at the end of the current event cycle -- use SetDelPopup
+
+	// dir draws are direct upload regions -- direct uploaders upload their images directly to an image here
+	DirDraws WindowDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
+	PopDraws WindowDrawers // popup regions
+	UpdtRegs WindowUpdates // misc vp update regions
+
+	// this popup will be popped at the end of the current event cycle -- use SetDelPopup
+	Phongs []*vphong.Phong `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
+
+	// this popup will be popped at the end of the current event cycle -- use SetDelPopup
+	Frames []*vgpu.RenderFrame `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 }
 
 var TypeWindow = kit.Types.AddType(&Window{}, WindowProps)

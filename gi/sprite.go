@@ -19,12 +19,24 @@ import (
 // the OverTex overlay texture of a window.  Sprites are used for cursors
 // and for dynamic editing / interactive GUI elements (e.g., drag-n-drop elments)
 type Sprite struct {
-	On     bool                           `desc:"whether this sprite is active now or not"`                         // whether this sprite is active now or not
-	Name   string                         `desc:"unique name of sprite"`                                            // unique name of sprite
-	Props  ki.Props                       `desc:"properties for sprite -- allows user-extensible data"`             // properties for sprite -- allows user-extensible data
-	Geom   Geom2DInt                      `desc:"position and size of the image within the overlay window texture"` // position and size of the image within the overlay window texture
-	Pixels *image.RGBA                    `desc:"pixels to render -- should be same size as Geom.Size"`             // pixels to render -- should be same size as Geom.Size
-	Events map[oswin.EventType]*ki.Signal `desc:"optional event signals for given event type"`                      // optional event signals for given event type
+
+	// whether this sprite is active now or not
+	On bool `desc:"whether this sprite is active now or not"`
+
+	// unique name of sprite
+	Name string `desc:"unique name of sprite"`
+
+	// properties for sprite -- allows user-extensible data
+	Props ki.Props `desc:"properties for sprite -- allows user-extensible data"`
+
+	// position and size of the image within the overlay window texture
+	Geom Geom2DInt `desc:"position and size of the image within the overlay window texture"`
+
+	// pixels to render -- should be same size as Geom.Size
+	Pixels *image.RGBA `desc:"pixels to render -- should be same size as Geom.Size"`
+
+	// optional event signals for given event type
+	Events map[oswin.EventType]*ki.Signal `desc:"optional event signals for given event type"`
 }
 
 // NewSprite returns a new sprite with given name, which must remain
@@ -110,10 +122,18 @@ func (sp *Sprite) DisconnectAllEvents() {
 
 // Sprites manages a collection of sprites organized by size and name
 type Sprites struct {
-	Names    ordmap.Map[string, *Sprite] `desc:"map of uniquely named sprites"`                               // map of uniquely named sprites
-	SzAlloc  szalloc.SzAlloc             `desc:"allocation of sprites by size for rendering"`                 // allocation of sprites by size for rendering
-	Modified bool                        `desc:"set to true if sprites have been modified since last config"` // set to true if sprites have been modified since last config
-	Active   int                         `desc:"number of active sprites"`                                    // number of active sprites
+
+	// map of uniquely named sprites
+	Names ordmap.Map[string, *Sprite] `desc:"map of uniquely named sprites"`
+
+	// allocation of sprites by size for rendering
+	SzAlloc szalloc.SzAlloc `desc:"allocation of sprites by size for rendering"`
+
+	// set to true if sprites have been modified since last config
+	Modified bool `desc:"set to true if sprites have been modified since last config"`
+
+	// number of active sprites
+	Active int `desc:"number of active sprites"`
 }
 
 func (ss *Sprites) Init() {

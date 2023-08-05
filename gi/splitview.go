@@ -36,10 +36,18 @@ import (
 // displayed within each region.
 type SplitView struct {
 	PartsWidgetBase
-	HandleSize  units.Value `xml:"handle-size" desc:"size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this"` // size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this
-	Splits      []float32   `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`                                     // proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element
-	SavedSplits []float32   `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`                                                         // A saved version of the splits which can be restored -- for dynamic collapse / expand operations
-	Dim         mat32.Dims  `desc:"dimension along which to split the space"`                                                                                                                // dimension along which to split the space
+
+	// size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this
+	HandleSize units.Value `xml:"handle-size" desc:"size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this"`
+
+	// proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element
+	Splits []float32 `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
+
+	// A saved version of the splits which can be restored -- for dynamic collapse / expand operations
+	SavedSplits []float32 `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
+
+	// dimension along which to split the space
+	Dim mat32.Dims `desc:"dimension along which to split the space"`
 }
 
 var TypeSplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
@@ -449,8 +457,12 @@ func (sv *SplitView) ConfigStyles() {
 // layout of the SplitView -- based on SliderBase
 type Splitter struct {
 	SliderBase
-	SplitterNo  int             `desc:"splitter number this one is"`                                                                                                        // splitter number this one is
-	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself"` // copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself
+
+	// splitter number this one is
+	SplitterNo int `desc:"splitter number this one is"`
+
+	// copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself
+	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself"`
 }
 
 var TypeSplitter = kit.Types.AddType(&Splitter{}, SplitterProps)

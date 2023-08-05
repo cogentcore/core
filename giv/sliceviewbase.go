@@ -129,40 +129,105 @@ type SliceViewer interface {
 // set prop toolbar = false to turn off
 type SliceViewBase struct {
 	gi.Frame
-	Slice            any              `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`                                                                                                                                                                                        // the slice that we are a view onto -- must be a pointer to that slice
-	ViewMu           *sync.Mutex      `copy:"-" view:"-" json:"-" xml:"-" desc:"optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex"` // optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex
-	SliceNPVal       reflect.Value    `copy:"-" view:"-" json:"-" xml:"-" desc:"non-ptr reflect.Value of the slice"`                                                                                                                                                                                                                          // non-ptr reflect.Value of the slice
-	SliceValView     ValueView        `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`                                                                                                                                                            // ValueView for the slice itself, if this was created within value view framework -- otherwise nil
-	isArray          bool             `copy:"-" view:"-" json:"-" xml:"-" desc:"whether the slice is actually an array -- no modifications -- set by SetSlice"`                                                                                                                                                                               // whether the slice is actually an array -- no modifications -- set by SetSlice
-	NoAdd            bool             `desc:"if true, user cannot add elements to the slice"`                                                                                                                                                                                                                                                 // if true, user cannot add elements to the slice
-	NoDelete         bool             `desc:"if true, user cannot delete elements from the slice"`                                                                                                                                                                                                                                            // if true, user cannot delete elements from the slice
-	ShowViewCtxtMenu bool             `desc:"if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`                                                                                                                                                                   // if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?
-	Changed          bool             `desc:"has the slice been edited?"`                                                                                                                                                                                                                                                                     // has the slice been edited?
-	Values           []ValueView      `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView representations of the slice values"`                                                                                                                                                                                                               // ValueView representations of the slice values
-	ShowIndex        bool             `xml:"index" desc:"whether to show index or not -- updated from 'index' property (bool)"`                                                                                                                                                                                                               // whether to show index or not -- updated from 'index' property (bool)
-	InactKeyNav      bool             `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`                                                                       // support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events
-	SelVal           any              `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`                                                                                                                                                                                               // current selection value -- initially select this value if set
-	SelectedIdx      int              `copy:"-" json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`                                                                                                                                                                                                              // index of currently-selected item, in Inactive mode only
-	SelectMode       bool             `copy:"-" desc:"editing-mode select rows mode"`                                                                                                                                                                                                                                                         // editing-mode select rows mode
-	InactMultiSel    bool             `desc:"if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported"`                                                                                                                            // if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported
-	SelectedIdxs     map[int]struct{} `copy:"-" desc:"list of currently-selected slice indexes"`                                                                                                                                                                                                                                              // list of currently-selected slice indexes
-	DraggedIdxs      []int            `copy:"-" desc:"list of currently-dragged indexes"`                                                                                                                                                                                                                                                     // list of currently-dragged indexes
-	SliceViewSig     ki.Signal        `copy:"-" json:"-" xml:"-" desc:"slice view specific signals: insert, delete, double-click"`                                                                                                                                                                                                            // slice view specific signals: insert, delete, double-click
-	ViewSig          ki.Signal        `copy:"-" json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`                                                                                                          // signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
-	ViewPath         string           `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`                                                                                                                                                                // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	TmpSave          ValueView        `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`                                                                                                // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	ToolbarSlice     any              `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`                                                                                                                                                                                                            // the slice that we successfully set a toolbar for
 
-	SliceSize     int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"size of slice"`                                                    // size of slice
-	DispRows      int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"actual number of rows displayed = min(VisRows, SliceSize)"`        // actual number of rows displayed = min(VisRows, SliceSize)
-	StartIdx      int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"starting slice index of visible rows"`                             // starting slice index of visible rows
-	RowHeight     float32 `inactive:"+" copy:"-" json:"-" xml:"-" desc:"height of a single row"`                                           // height of a single row
-	VisRows       int     `inactive:"+" copy:"-" json:"-" xml:"-" desc:"total number of rows visible in allocated display size"`           // total number of rows visible in allocated display size
-	LayoutHeight  float32 `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"` // the height of grid from last layout -- determines when update needed
-	RenderedRows  int     `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`                     // the number of rows rendered -- determines update
-	InFocusGrab   bool    `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive focus grabbing"`                                   // guard for recursive focus grabbing
-	InFullRebuild bool    `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive rebuild"`                                          // guard for recursive rebuild
-	CurIdx        int     `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`                                         // temp idx state for e.g., dnd
+	// the slice that we are a view onto -- must be a pointer to that slice
+	Slice any `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+
+	// optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex
+	ViewMu *sync.Mutex `copy:"-" view:"-" json:"-" xml:"-" desc:"optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex"`
+
+	// non-ptr reflect.Value of the slice
+	SliceNPVal reflect.Value `copy:"-" view:"-" json:"-" xml:"-" desc:"non-ptr reflect.Value of the slice"`
+
+	// ValueView for the slice itself, if this was created within value view framework -- otherwise nil
+	SliceValView ValueView `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
+
+	// whether the slice is actually an array -- no modifications -- set by SetSlice
+	isArray bool `copy:"-" view:"-" json:"-" xml:"-" desc:"whether the slice is actually an array -- no modifications -- set by SetSlice"`
+
+	// if true, user cannot add elements to the slice
+	NoAdd bool `desc:"if true, user cannot add elements to the slice"`
+
+	// if true, user cannot delete elements from the slice
+	NoDelete bool `desc:"if true, user cannot delete elements from the slice"`
+
+	// if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?
+	ShowViewCtxtMenu bool `desc:"if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
+
+	// has the slice been edited?
+	Changed bool `desc:"has the slice been edited?"`
+
+	// ValueView representations of the slice values
+	Values []ValueView `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView representations of the slice values"`
+
+	// whether to show index or not -- updated from 'index' property (bool)
+	ShowIndex bool `xml:"index" desc:"whether to show index or not -- updated from 'index' property (bool)"`
+
+	// support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events
+	InactKeyNav bool `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+
+	// current selection value -- initially select this value if set
+	SelVal any `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
+
+	// index of currently-selected item, in Inactive mode only
+	SelectedIdx int `copy:"-" json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
+
+	// editing-mode select rows mode
+	SelectMode bool `copy:"-" desc:"editing-mode select rows mode"`
+
+	// if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported
+	InactMultiSel bool `desc:"if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported"`
+
+	// list of currently-selected slice indexes
+	SelectedIdxs map[int]struct{} `copy:"-" desc:"list of currently-selected slice indexes"`
+
+	// list of currently-dragged indexes
+	DraggedIdxs []int `copy:"-" desc:"list of currently-dragged indexes"`
+
+	// slice view specific signals: insert, delete, double-click
+	SliceViewSig ki.Signal `copy:"-" json:"-" xml:"-" desc:"slice view specific signals: insert, delete, double-click"`
+
+	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
+	ViewSig ki.Signal `copy:"-" json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+
+	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+
+	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	TmpSave ValueView `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+
+	// the slice that we successfully set a toolbar for
+	ToolbarSlice any `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`
+
+	// size of slice
+	SliceSize int `inactive:"+" copy:"-" json:"-" xml:"-" desc:"size of slice"`
+
+	// actual number of rows displayed = min(VisRows, SliceSize)
+	DispRows int `inactive:"+" copy:"-" json:"-" xml:"-" desc:"actual number of rows displayed = min(VisRows, SliceSize)"`
+
+	// starting slice index of visible rows
+	StartIdx int `inactive:"+" copy:"-" json:"-" xml:"-" desc:"starting slice index of visible rows"`
+
+	// height of a single row
+	RowHeight float32 `inactive:"+" copy:"-" json:"-" xml:"-" desc:"height of a single row"`
+
+	// total number of rows visible in allocated display size
+	VisRows int `inactive:"+" copy:"-" json:"-" xml:"-" desc:"total number of rows visible in allocated display size"`
+
+	// the height of grid from last layout -- determines when update needed
+	LayoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"`
+
+	// the number of rows rendered -- determines update
+	RenderedRows int `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`
+
+	// guard for recursive focus grabbing
+	InFocusGrab bool `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive focus grabbing"`
+
+	// guard for recursive rebuild
+	InFullRebuild bool `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive rebuild"`
+
+	// temp idx state for e.g., dnd
+	CurIdx int `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`
 }
 
 var TypeSliceViewBase = kit.Types.AddType(&SliceViewBase{}, nil)

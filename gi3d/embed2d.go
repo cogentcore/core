@@ -24,11 +24,21 @@ import (
 // 2D elements can be embedded.
 type Embed2D struct {
 	Solid
-	Viewport   *EmbedViewport `desc:"the embedded viewport to display"`                                                                                                                                                                                                                                         // the embedded viewport to display
-	Zoom       float32        `desc:"overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view"`                                                                                                                                // overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view
-	FitContent bool           `desc:"if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport"` // if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport
-	StdSize    image.Point    `desc:"original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent"`                                                                                                             // original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent
-	DPISize    image.Point    `desc:"original size scaled according to logical dpi"`                                                                                                                                                                                                                            // original size scaled according to logical dpi
+
+	// the embedded viewport to display
+	Viewport *EmbedViewport `desc:"the embedded viewport to display"`
+
+	// overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view
+	Zoom float32 `desc:"overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view"`
+
+	// if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport
+	FitContent bool `desc:"if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport"`
+
+	// original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent
+	StdSize image.Point `desc:"original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent"`
+
+	// original size scaled according to logical dpi
+	DPISize image.Point `desc:"original size scaled according to logical dpi"`
 }
 
 var TypeEmbed2D = kit.Types.AddType(&Embed2D{}, Embed2DProps)
@@ -351,10 +361,18 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 // events instead of using the Window.
 type EmbedViewport struct {
 	gi.Viewport2D
-	EventMgr   gi.EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"` // event manager that handles dispersing events to nodes
-	Scene      *Scene      `json:"-" xml:"-" desc:"parent scene -- trigger updates"`                       // parent scene -- trigger updates
-	EmbedPar   *Embed2D    `json:"-" xml:"-" desc:"parent Embed2D -- render updates"`                      // parent Embed2D -- render updates
-	TopUpdated bool        `json:"-" xml:"-" desc:"update flag for top-level updates"`                     // update flag for top-level updates
+
+	// event manager that handles dispersing events to nodes
+	EventMgr gi.EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
+
+	// parent scene -- trigger updates
+	Scene *Scene `json:"-" xml:"-" desc:"parent scene -- trigger updates"`
+
+	// parent Embed2D -- render updates
+	EmbedPar *Embed2D `json:"-" xml:"-" desc:"parent Embed2D -- render updates"`
+
+	// update flag for top-level updates
+	TopUpdated bool `json:"-" xml:"-" desc:"update flag for top-level updates"`
 }
 
 var TypeEmbedViewport = kit.Types.AddType(&EmbedViewport{}, EmbedViewportProps)

@@ -33,15 +33,30 @@ import (
 // includes toggling selection on left mouse press.
 type WidgetBase struct {
 	Node2DBase
-	Tooltip       string                             `desc:"text for tooltip for this widget -- can use HTML formatting"`                                                                                                                                                                                                                                                                                                                                                          // text for tooltip for this widget -- can use HTML formatting
-	StyleFuncs    *ordmap.Map[StyleFuncName, func()] `desc:"a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`                                                                                                                                        // a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code
-	OverrideStyle bool                               `desc:"override the computed styles and allow directly editing Style"`                                                                                                                                                                                                                                                                                                                                                        // override the computed styles and allow directly editing Style
-	Style         gist.Style                         `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"` // styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
 
-	LayState     LayoutState  `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`                                                                                                                                                           // all the layout state information for this item
-	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`                   // general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets
-	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"` // optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate
-	StyMu        sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting updates to the style"`                                                                                                                                                           // mutex protecting updates to the style
+	// text for tooltip for this widget -- can use HTML formatting
+	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
+
+	// a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code
+	StyleFuncs *ordmap.Map[StyleFuncName, func()] `desc:"a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
+
+	// override the computed styles and allow directly editing Style
+	OverrideStyle bool `desc:"override the computed styles and allow directly editing Style"`
+
+	// styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
+	Style gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+
+	// all the layout state information for this item
+	LayState LayoutState `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
+
+	// general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets
+	WidgetSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
+
+	// optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate
+	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
+
+	// mutex protecting updates to the style
+	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting updates to the style"`
 }
 
 var TypeWidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
@@ -1081,7 +1096,9 @@ func (wb *WidgetBase) Size2DSubSpace() mat32.Vec2 {
 // a set of constituent parts
 type PartsWidgetBase struct {
 	WidgetBase
-	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"` // a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
+
+	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
+	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 }
 
 var TypePartsWidgetBase = kit.Types.AddType(&PartsWidgetBase{}, PartsWidgetBaseProps)

@@ -21,19 +21,45 @@ import (
 // tspan is nested under a parent text -- text has empty Text string.
 type Text struct {
 	NodeBase
-	Pos          mat32.Vec2 `xml:"{x,y}" desc:"position of the left, baseline of the text"`                             // position of the left, baseline of the text
-	Width        float32    `xml:"width" desc:"width of text to render if using word-wrapping"`                         // width of text to render if using word-wrapping
-	Text         string     `xml:"text" desc:"text string to render"`                                                   // text string to render
-	TextRender   girl.Text  `xml:"-" json:"-" desc:"render version of text"`                                            // render version of text
-	CharPosX     []float32  `desc:"character positions along X axis, if specified"`                                     // character positions along X axis, if specified
-	CharPosY     []float32  `desc:"character positions along Y axis, if specified"`                                     // character positions along Y axis, if specified
-	CharPosDX    []float32  `desc:"character delta-positions along X axis, if specified"`                               // character delta-positions along X axis, if specified
-	CharPosDY    []float32  `desc:"character delta-positions along Y axis, if specified"`                               // character delta-positions along Y axis, if specified
-	CharRots     []float32  `desc:"character rotations, if specified"`                                                  // character rotations, if specified
-	TextLength   float32    `desc:"author's computed text length, if specified -- we attempt to match"`                 // author's computed text length, if specified -- we attempt to match
-	AdjustGlyphs bool       `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"` // in attempting to match TextLength, should we adjust glyphs in addition to spacing?
-	LastPos      mat32.Vec2 `xml:"-" json:"-" desc:"last text render position -- lower-left baseline of start"`         // last text render position -- lower-left baseline of start
-	LastBBox     mat32.Box2 `xml:"-" json:"-" desc:"last actual bounding box in display units (dots)"`                  // last actual bounding box in display units (dots)
+
+	// position of the left, baseline of the text
+	Pos mat32.Vec2 `xml:"{x,y}" desc:"position of the left, baseline of the text"`
+
+	// width of text to render if using word-wrapping
+	Width float32 `xml:"width" desc:"width of text to render if using word-wrapping"`
+
+	// text string to render
+	Text string `xml:"text" desc:"text string to render"`
+
+	// render version of text
+	TextRender girl.Text `xml:"-" json:"-" desc:"render version of text"`
+
+	// character positions along X axis, if specified
+	CharPosX []float32 `desc:"character positions along X axis, if specified"`
+
+	// character positions along Y axis, if specified
+	CharPosY []float32 `desc:"character positions along Y axis, if specified"`
+
+	// character delta-positions along X axis, if specified
+	CharPosDX []float32 `desc:"character delta-positions along X axis, if specified"`
+
+	// character delta-positions along Y axis, if specified
+	CharPosDY []float32 `desc:"character delta-positions along Y axis, if specified"`
+
+	// character rotations, if specified
+	CharRots []float32 `desc:"character rotations, if specified"`
+
+	// author's computed text length, if specified -- we attempt to match
+	TextLength float32 `desc:"author's computed text length, if specified -- we attempt to match"`
+
+	// in attempting to match TextLength, should we adjust glyphs in addition to spacing?
+	AdjustGlyphs bool `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
+
+	// last text render position -- lower-left baseline of start
+	LastPos mat32.Vec2 `xml:"-" json:"-" desc:"last text render position -- lower-left baseline of start"`
+
+	// last actual bounding box in display units (dots)
+	LastBBox mat32.Box2 `xml:"-" json:"-" desc:"last actual bounding box in display units (dots)"`
 }
 
 var TypeText = kit.Types.AddType(&Text{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})

@@ -22,16 +22,36 @@ import (
 // TestPrefs are needed for setting gist.ThePrefs, for any text-based
 // rendering, as it relies on these prefs
 type TestPrefs struct {
-	FontFamily string     `desc:"font family name"`                                                                // font family name
-	Font       gist.Color `desc:"default font / pen color"`                                                        // default font / pen color
-	Background gist.Color `desc:"default background color"`                                                        // default background color
-	Shadow     gist.Color `desc:"color for shadows -- should generally be a darker shade of the background color"` // color for shadows -- should generally be a darker shade of the background color
-	Border     gist.Color `desc:"default border color, for button, frame borders, etc"`                            // default border color, for button, frame borders, etc
-	Control    gist.Color `desc:"default main color for controls: buttons, etc"`                                   // default main color for controls: buttons, etc
-	Icon       gist.Color `desc:"color for icons or other solidly-colored, small elements"`                        // color for icons or other solidly-colored, small elements
-	Select     gist.Color `desc:"color for selected elements"`                                                     // color for selected elements
-	Highlight  gist.Color `desc:"color for highlight background"`                                                  // color for highlight background
-	Link       gist.Color `desc:"color for links in text etc"`                                                     // color for links in text etc
+
+	// font family name
+	FontFamily string `desc:"font family name"`
+
+	// default font / pen color
+	Font gist.Color `desc:"default font / pen color"`
+
+	// default background color
+	Background gist.Color `desc:"default background color"`
+
+	// color for shadows -- should generally be a darker shade of the background color
+	Shadow gist.Color `desc:"color for shadows -- should generally be a darker shade of the background color"`
+
+	// default border color, for button, frame borders, etc
+	Border gist.Color `desc:"default border color, for button, frame borders, etc"`
+
+	// default main color for controls: buttons, etc
+	Control gist.Color `desc:"default main color for controls: buttons, etc"`
+
+	// color for icons or other solidly-colored, small elements
+	Icon gist.Color `desc:"color for icons or other solidly-colored, small elements"`
+
+	// color for selected elements
+	Select gist.Color `desc:"color for selected elements"`
+
+	// color for highlight background
+	Highlight gist.Color `desc:"color for highlight background"`
+
+	// color for links in text etc
+	Link gist.Color `desc:"color for links in text etc"`
 }
 
 func (pf *TestPrefs) Defaults() {

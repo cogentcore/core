@@ -53,13 +53,27 @@ func (ev *Trilean) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 
 // StyleEntry is one value in the map of highlight style values
 type StyleEntry struct {
-	Color      gist.Color `desc:"text color"`                                                                                                         // text color
-	Background gist.Color `desc:"background color"`                                                                                                   // background color
-	Border     gist.Color `view:"-" desc:"border color? not sure what this is -- not really used"`                                                    // border color? not sure what this is -- not really used
-	Bold       Trilean    `desc:"bold font"`                                                                                                          // bold font
-	Italic     Trilean    `desc:"italic font"`                                                                                                        // italic font
-	Underline  Trilean    `desc:"underline"`                                                                                                          // underline
-	NoInherit  bool       `desc:"don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited"` // don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited
+
+	// text color
+	Color gist.Color `desc:"text color"`
+
+	// background color
+	Background gist.Color `desc:"background color"`
+
+	// border color? not sure what this is -- not really used
+	Border gist.Color `view:"-" desc:"border color? not sure what this is -- not really used"`
+
+	// bold font
+	Bold Trilean `desc:"bold font"`
+
+	// italic font
+	Italic Trilean `desc:"italic font"`
+
+	// underline
+	Underline Trilean `desc:"underline"`
+
+	// don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited
+	NoInherit bool `desc:"don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited"`
 }
 
 var TypeStyleEntry = kit.Types.AddType(&StyleEntry{}, StyleEntryProps)

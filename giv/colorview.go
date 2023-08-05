@@ -28,13 +28,24 @@ import (
 // ColorView shows a color, using sliders or numbers to set values.
 type ColorView struct {
 	gi.Frame
-	Color     gist.Color `desc:"the color that we view"`               // the color that we view
-	ColorHSLA gist.HSLA  `desc:"the color that we view, in HSLA form"` // the color that we view, in HSLA form
 
-	TmpSave  ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"` // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	ViewSig  ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`           // signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
-	ManipSig ki.Signal `json:"-" xml:"-" desc:"manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value"`                                        // manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value
-	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`                                                        // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	// the color that we view
+	Color gist.Color `desc:"the color that we view"`
+
+	// the color that we view, in HSLA form
+	ColorHSLA gist.HSLA `desc:"the color that we view, in HSLA form"`
+
+	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+
+	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
+	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+
+	// manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value
+	ManipSig ki.Signal `json:"-" xml:"-" desc:"manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value"`
+
+	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
 var TypeColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)

@@ -35,11 +35,21 @@ var LayoutPrefMaxCols = 20
 // LayoutAllocs contains all the the layout allocations: size, position.
 // These are set by the parent Layout during the Layout process.
 type LayoutAllocs struct {
-	Size     mat32.Vec2 `desc:"allocated size of this item, by the parent layout -- also used temporarily during size process to hold computed size constraints based on content in terminal nodes"`                                        // allocated size of this item, by the parent layout -- also used temporarily during size process to hold computed size constraints based on content in terminal nodes
-	Pos      mat32.Vec2 `desc:"position of this item, computed by adding in the PosRel to parent position"`                                                                                                                                 // position of this item, computed by adding in the PosRel to parent position
-	PosRel   mat32.Vec2 `desc:"allocated relative position of this item, computed by the parent layout"`                                                                                                                                    // allocated relative position of this item, computed by the parent layout
-	SizeOrig mat32.Vec2 `desc:"original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size"` // original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size
-	PosOrig  mat32.Vec2 `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`                                                                            // original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos
+
+	// allocated size of this item, by the parent layout -- also used temporarily during size process to hold computed size constraints based on content in terminal nodes
+	Size mat32.Vec2 `desc:"allocated size of this item, by the parent layout -- also used temporarily during size process to hold computed size constraints based on content in terminal nodes"`
+
+	// position of this item, computed by adding in the PosRel to parent position
+	Pos mat32.Vec2 `desc:"position of this item, computed by adding in the PosRel to parent position"`
+
+	// allocated relative position of this item, computed by the parent layout
+	PosRel mat32.Vec2 `desc:"allocated relative position of this item, computed by the parent layout"`
+
+	// original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size
+	SizeOrig mat32.Vec2 `desc:"original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size"`
+
+	// original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos
+	PosOrig mat32.Vec2 `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
 }
 
 // Reset is called at start of layout process -- resets all values back to 0
@@ -52,8 +62,12 @@ func (la *LayoutAllocs) Reset() {
 // LayoutState contains all the state needed to specify the layout of an item
 // within a Layout.  Is initialized with computed values of style prefs.
 type LayoutState struct {
-	Size  gist.SizePrefs `desc:"size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it"` // size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it
-	Alloc LayoutAllocs   `desc:"allocated size and position -- set by parent Layout"`                                                                                              // allocated size and position -- set by parent Layout
+
+	// size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it
+	Size gist.SizePrefs `desc:"size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it"`
+
+	// allocated size and position -- set by parent Layout
+	Alloc LayoutAllocs `desc:"allocated size and position -- set by parent Layout"`
 }
 
 // todo: not using yet:
@@ -134,23 +148,57 @@ var LayoutFocusNameTabMSec = 2000
 // elements.
 type Layout struct {
 	WidgetBase
-	Lay           Layouts             `xml:"lay" desc:"type of layout to use"`                                                                                                                                                                              // type of layout to use
-	Spacing       units.Value         `xml:"spacing" desc:"extra space to add between elements in the layout"`                                                                                                                                              // extra space to add between elements in the layout
-	StackTop      int                 `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`                                                         // for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered
-	StackTopOnly  bool                `desc:"for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't"`                             // for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't
-	ChildSize     mat32.Vec2          `copy:"-" json:"-" xml:"-" desc:"total max size of children as laid out"`                                                                                                                                             // total max size of children as laid out
-	ExtraSize     mat32.Vec2          `copy:"-" json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`                                                                                                                                    // extra size in each dim due to scrollbars we add
-	HasScroll     [2]bool             `copy:"-" json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`                                                                                                                                            // whether scrollbar is used for given dim
-	Scrolls       [2]*ScrollBar       `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`                                                                                                                                      // scroll bars -- we fully manage them as needed
-	GridSize      image.Point         `copy:"-" json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`                                                                                         // computed size of a grid layout based on all the constraints -- computed during Size2D pass
-	GridData      [RowColN][]GridData `copy:"-" json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`                                                                                                                                          // grid data for rows in [0] and cols in [1]
-	FlowBreaks    []int               `copy:"-" json:"-" xml:"-" desc:"line breaks for flow layout"`                                                                                                                                                        // line breaks for flow layout
-	NeedsRedo     bool                `copy:"-" json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`                                                       // true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
-	FocusName     string              `copy:"-" json:"-" xml:"-" desc:"accumulated name to search for when keys are typed"`                                                                                                                                 // accumulated name to search for when keys are typed
-	FocusNameTime time.Time           `copy:"-" json:"-" xml:"-" desc:"time of last focus name event -- for timeout"`                                                                                                                                       // time of last focus name event -- for timeout
-	FocusNameLast ki.Ki               `copy:"-" json:"-" xml:"-" desc:"last element focused on -- used as a starting point if name is the same"`                                                                                                            // last element focused on -- used as a starting point if name is the same
-	ScrollsOff    bool                `copy:"-" json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`                                                                      // scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible
-	ScrollSig     ki.Signal           `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"` // signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)
+
+	// type of layout to use
+	Lay Layouts `xml:"lay" desc:"type of layout to use"`
+
+	// extra space to add between elements in the layout
+	Spacing units.Value `xml:"spacing" desc:"extra space to add between elements in the layout"`
+
+	// for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered
+	StackTop int `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`
+
+	// for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't
+	StackTopOnly bool `desc:"for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't"`
+
+	// total max size of children as laid out
+	ChildSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"total max size of children as laid out"`
+
+	// extra size in each dim due to scrollbars we add
+	ExtraSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+
+	// whether scrollbar is used for given dim
+	HasScroll [2]bool `copy:"-" json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
+
+	// scroll bars -- we fully manage them as needed
+	Scrolls [2]*ScrollBar `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
+
+	// computed size of a grid layout based on all the constraints -- computed during Size2D pass
+	GridSize image.Point `copy:"-" json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
+
+	// grid data for rows in [0] and cols in [1]
+	GridData [RowColN][]GridData `copy:"-" json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
+
+	// line breaks for flow layout
+	FlowBreaks []int `copy:"-" json:"-" xml:"-" desc:"line breaks for flow layout"`
+
+	// true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
+	NeedsRedo bool `copy:"-" json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`
+
+	// accumulated name to search for when keys are typed
+	FocusName string `copy:"-" json:"-" xml:"-" desc:"accumulated name to search for when keys are typed"`
+
+	// time of last focus name event -- for timeout
+	FocusNameTime time.Time `copy:"-" json:"-" xml:"-" desc:"time of last focus name event -- for timeout"`
+
+	// last element focused on -- used as a starting point if name is the same
+	FocusNameLast ki.Ki `copy:"-" json:"-" xml:"-" desc:"last element focused on -- used as a starting point if name is the same"`
+
+	// scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible
+	ScrollsOff bool `copy:"-" json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`
+
+	// signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)
+	ScrollSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"`
 }
 
 var TypeLayout = kit.Types.AddType(&Layout{}, LayoutProps)

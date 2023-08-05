@@ -34,11 +34,21 @@ import (
 // but can be set to any color.
 type Text2D struct {
 	Solid
-	Text        string     `desc:"the text string to display"`                                                                // the text string to display
-	Sty         gist.Style `json:"-" xml:"-" desc:"styling settings for the text"`                                            // styling settings for the text
-	TxtPos      mat32.Vec2 `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"` // position offset of start of text rendering relative to upper-left corner
-	TxtRender   girl.Text  `view:"-" xml:"-" json:"-" desc:"render data for text label"`                                      // render data for text label
-	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`                        // render state for rendering text
+
+	// the text string to display
+	Text string `desc:"the text string to display"`
+
+	// styling settings for the text
+	Sty gist.Style `json:"-" xml:"-" desc:"styling settings for the text"`
+
+	// position offset of start of text rendering relative to upper-left corner
+	TxtPos mat32.Vec2 `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
+
+	// render data for text label
+	TxtRender girl.Text `view:"-" xml:"-" json:"-" desc:"render data for text label"`
+
+	// render state for rendering text
+	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
 }
 
 var TypeText2D = kit.Types.AddType(&Text2D{}, Text2DProps)

@@ -28,16 +28,36 @@ import (
 // other options to get word-wrapping etc.
 type Label struct {
 	WidgetBase
-	Text               string                   `xml:"text" desc:"label to display"`                                                                                                                                                                                                                                                                                            // label to display
-	Selectable         bool                     `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`                                                                                                                                                                            // is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks
-	Redrawable         bool                     `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."` // is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other.
-	Type               LabelTypes               `desc:"the type of label"`                                                                                                                                                                                                                                                                                                      // the type of label
-	State              LabelStates              `desc:"the current state of the label (active, inactive, selected, etc)"`                                                                                                                                                                                                                                                       // the current state of the label (active, inactive, selected, etc)
-	LinkSig            ki.Signal                `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`                                                                                                                                              // signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
-	StateStyles        [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`                                                                                                                                                                                                                                                         // styles for different states of label
-	Render             girl.Text                `copy:"-" xml:"-" json:"-" desc:"render data for text label"`                                                                                                                                                                                                                                                                   // render data for text label
-	RenderPos          mat32.Vec2               `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`                                                                                                                                                                       // position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.
-	CurBackgroundColor gist.Color               `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`                                                                                                                                            // current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg
+
+	// label to display
+	Text string `xml:"text" desc:"label to display"`
+
+	// is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks
+	Selectable bool `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
+
+	// is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other.
+	Redrawable bool `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
+
+	// the type of label
+	Type LabelTypes `desc:"the type of label"`
+
+	// the current state of the label (active, inactive, selected, etc)
+	State LabelStates `desc:"the current state of the label (active, inactive, selected, etc)"`
+
+	// signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
+	LinkSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+
+	// styles for different states of label
+	StateStyles [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
+
+	// render data for text label
+	Render girl.Text `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
+
+	// position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.
+	RenderPos mat32.Vec2 `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
+
+	// current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg
+	CurBackgroundColor gist.Color `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
 var TypeLabel = kit.Types.AddType(&Label{}, LabelProps)

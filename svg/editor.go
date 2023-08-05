@@ -20,9 +20,15 @@ import (
 // Editor supports editing of SVG elements
 type Editor struct {
 	SVG
-	Trans         mat32.Vec2 `desc:"view translation offset (from dragging)"`    // view translation offset (from dragging)
-	Scale         float32    `desc:"view scaling (from zooming)"`                // view scaling (from zooming)
-	SetDragCursor bool       `view:"-" desc:"has dragging cursor been set yet?"` // has dragging cursor been set yet?
+
+	// view translation offset (from dragging)
+	Trans mat32.Vec2 `desc:"view translation offset (from dragging)"`
+
+	// view scaling (from zooming)
+	Scale float32 `desc:"view scaling (from zooming)"`
+
+	// has dragging cursor been set yet?
+	SetDragCursor bool `view:"-" desc:"has dragging cursor been set yet?"`
 }
 
 var TypeEditor = kit.Types.AddType(&Editor{}, EditorProps)

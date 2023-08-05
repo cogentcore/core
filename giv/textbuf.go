@@ -63,36 +63,92 @@ var TextBufMarkupDelayMSec = 1000
 // Windows/DOS CRLF format.
 type TextBuf struct {
 	ki.Node
-	Txt              []byte                  `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`                                                                                                                                                   // the current value of the entire text being edited -- using []byte slice for greater efficiency
-	Autosave         bool                    `desc:"if true, auto-save file after changes (in a separate routine)"`                                                                                                                                                                                                        // if true, auto-save file after changes (in a separate routine)
-	Opts             textbuf.Opts            `desc:"options for how text editing / viewing works"`                                                                                                                                                                                                                         // options for how text editing / viewing works
-	Filename         gi.FileName             `json:"-" xml:"-" desc:"filename of file last loaded or saved"`                                                                                                                                                                                                               // filename of file last loaded or saved
-	Info             FileInfo                `desc:"full info about file"`                                                                                                                                                                                                                                                 // full info about file
-	PiState          pi.FileStates           `desc:"Pi parsing state info for file"`                                                                                                                                                                                                                                       // Pi parsing state info for file
-	Hi               HiMarkup                `desc:"syntax highlighting markup parameters (language, style, etc)"`                                                                                                                                                                                                         // syntax highlighting markup parameters (language, style, etc)
-	NLines           int                     `json:"-" xml:"-" desc:"number of lines"`                                                                                                                                                                                                                                     // number of lines
-	LineIcons        map[int]icons.Icon      `desc:"icons for given lines -- use SetLineIcon and DeleteLineIcon"`                                                                                                                                                                                                          // icons for given lines -- use SetLineIcon and DeleteLineIcon
-	LineColors       map[int]gist.Color      `desc:"special line number colors given lines -- use SetLineColor and DeleteLineColor"`                                                                                                                                                                                       // special line number colors given lines -- use SetLineColor and DeleteLineColor
-	Icons            map[icons.Icon]*gi.Icon `json:"-" xml:"-" desc:"icons for each LineIcons being used"`                                                                                                                                                                                                                 // icons for each LineIcons being used
-	Lines            [][]rune                `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`          // the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!
-	LineBytes        [][]byte                `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"` // the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes
-	Tags             []lex.Line              `json:"extra custom tagged regions for each line"`
-	HiTags           []lex.Line              `json:"syntax highlighting tags -- auto-generated"`
-	Markup           [][]byte                `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`                                                                                // marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered
-	MarkupEdits      []*textbuf.Edit         `json:"-" xml:"-" desc:"edits that have been made since last full markup"`                                                                                                                                                                          // edits that have been made since last full markup
-	ByteOffs         []int                   `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"` // offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines
-	TotalBytes       int                     `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`                                                                                                                                                            // total bytes in document -- see ByteOffs for when it is updated
-	LinesMu          sync.RWMutex            `json:"-" xml:"-" desc:"mutex for updating lines"`                                                                                                                                                                                                  // mutex for updating lines
-	MarkupMu         sync.RWMutex            `json:"-" xml:"-" desc:"mutex for updating markup"`                                                                                                                                                                                                 // mutex for updating markup
-	MarkupDelayTimer *time.Timer             `json:"-" xml:"-" desc:"markup delay timer"`                                                                                                                                                                                                        // markup delay timer
-	MarkupDelayMu    sync.Mutex              `json:"-" xml:"-" desc:"mutex for updating markup delay timer"`                                                                                                                                                                                     // mutex for updating markup delay timer
-	TextBufSig       ki.Signal               `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`                                                                                                                                                            // signal for buffer -- see TextBufSignals for the types
-	Views            []*TextView             `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`                                                                                                                                                                      // the TextViews that are currently viewing this buffer
-	Undos            textbuf.Undo            `json:"-" xml:"-" desc:"undo manager"`                                                                                                                                                                                                              // undo manager
-	PosHistory       []lex.Pos               `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`                                                                                                                                                                 // history of cursor positions -- can move back through them
-	Complete         *gi.Complete            `json:"-" xml:"-" desc:"functions and data for text completion"`                                                                                                                                                                                    // functions and data for text completion
-	Spell            *gi.Spell               `json:"-" xml:"-" desc:"functions and data for spelling correction"`                                                                                                                                                                                // functions and data for spelling correction
-	CurView          *TextView               `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`                                                                 // current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
+
+	// the current value of the entire text being edited -- using []byte slice for greater efficiency
+	Txt []byte `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
+
+	// if true, auto-save file after changes (in a separate routine)
+	Autosave bool `desc:"if true, auto-save file after changes (in a separate routine)"`
+
+	// options for how text editing / viewing works
+	Opts textbuf.Opts `desc:"options for how text editing / viewing works"`
+
+	// filename of file last loaded or saved
+	Filename gi.FileName `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
+
+	// full info about file
+	Info FileInfo `desc:"full info about file"`
+
+	// Pi parsing state info for file
+	PiState pi.FileStates `desc:"Pi parsing state info for file"`
+
+	// syntax highlighting markup parameters (language, style, etc)
+	Hi HiMarkup `desc:"syntax highlighting markup parameters (language, style, etc)"`
+
+	// number of lines
+	NLines int `json:"-" xml:"-" desc:"number of lines"`
+
+	// icons for given lines -- use SetLineIcon and DeleteLineIcon
+	LineIcons map[int]icons.Icon `desc:"icons for given lines -- use SetLineIcon and DeleteLineIcon"`
+
+	// special line number colors given lines -- use SetLineColor and DeleteLineColor
+	LineColors map[int]gist.Color `desc:"special line number colors given lines -- use SetLineColor and DeleteLineColor"`
+
+	// icons for each LineIcons being used
+	Icons map[icons.Icon]*gi.Icon `json:"-" xml:"-" desc:"icons for each LineIcons being used"`
+
+	// the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!
+	Lines [][]rune `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
+
+	// the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes
+	LineBytes [][]byte   `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"`
+	Tags      []lex.Line `json:"extra custom tagged regions for each line"`
+	HiTags    []lex.Line `json:"syntax highlighting tags -- auto-generated"`
+
+	// marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered
+	Markup [][]byte `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
+
+	// edits that have been made since last full markup
+	MarkupEdits []*textbuf.Edit `json:"-" xml:"-" desc:"edits that have been made since last full markup"`
+
+	// offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines
+	ByteOffs []int `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
+
+	// total bytes in document -- see ByteOffs for when it is updated
+	TotalBytes int `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
+
+	// mutex for updating lines
+	LinesMu sync.RWMutex `json:"-" xml:"-" desc:"mutex for updating lines"`
+
+	// mutex for updating markup
+	MarkupMu sync.RWMutex `json:"-" xml:"-" desc:"mutex for updating markup"`
+
+	// markup delay timer
+	MarkupDelayTimer *time.Timer `json:"-" xml:"-" desc:"markup delay timer"`
+
+	// mutex for updating markup delay timer
+	MarkupDelayMu sync.Mutex `json:"-" xml:"-" desc:"mutex for updating markup delay timer"`
+
+	// signal for buffer -- see TextBufSignals for the types
+	TextBufSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
+
+	// the TextViews that are currently viewing this buffer
+	Views []*TextView `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
+
+	// undo manager
+	Undos textbuf.Undo `json:"-" xml:"-" desc:"undo manager"`
+
+	// history of cursor positions -- can move back through them
+	PosHistory []lex.Pos `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
+
+	// functions and data for text completion
+	Complete *gi.Complete `json:"-" xml:"-" desc:"functions and data for text completion"`
+
+	// functions and data for spelling correction
+	Spell *gi.Spell `json:"-" xml:"-" desc:"functions and data for spelling correction"`
+
+	// current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
+	CurView *TextView `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
 }
 
 var TypeTextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)

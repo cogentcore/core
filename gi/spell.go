@@ -106,14 +106,30 @@ func SaveSpellModel() error {
 // Spell
 type Spell struct {
 	ki.Node
-	SrcLn       int         `desc:"line number in source that spelling is operating on, if relevant"`                           // line number in source that spelling is operating on, if relevant
-	SrcCh       int         `desc:"character position in source that spelling is operating on (start of word to be corrected)"` // character position in source that spelling is operating on (start of word to be corrected)
-	Suggest     []string    `desc:"list of suggested corrections"`                                                              // list of suggested corrections
-	Word        string      `desc:"word being checked"`                                                                         // word being checked
-	LastLearned string      `desc:"last word learned -- can be undone -- stored in lowercase format"`                           // last word learned -- can be undone -- stored in lowercase format
-	SpellSig    ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`               // signal for Spell -- see SpellSignals for the types
-	Correction  string      `desc:"the user's correction selection'"`                                                           // the user's correction selection'
-	Vp          *Viewport2D `desc:"the viewport where the current popup menu is presented"`                                     // the viewport where the current popup menu is presented
+
+	// line number in source that spelling is operating on, if relevant
+	SrcLn int `desc:"line number in source that spelling is operating on, if relevant"`
+
+	// character position in source that spelling is operating on (start of word to be corrected)
+	SrcCh int `desc:"character position in source that spelling is operating on (start of word to be corrected)"`
+
+	// list of suggested corrections
+	Suggest []string `desc:"list of suggested corrections"`
+
+	// word being checked
+	Word string `desc:"word being checked"`
+
+	// last word learned -- can be undone -- stored in lowercase format
+	LastLearned string `desc:"last word learned -- can be undone -- stored in lowercase format"`
+
+	// signal for Spell -- see SpellSignals for the types
+	SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
+
+	// the user's correction selection'
+	Correction string `desc:"the user's correction selection'"`
+
+	// the viewport where the current popup menu is presented
+	Vp *Viewport2D `desc:"the viewport where the current popup menu is presented"`
 }
 
 var TypeSpell = kit.Types.AddType(&Spell{}, nil)

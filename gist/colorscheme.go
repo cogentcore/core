@@ -29,45 +29,96 @@ var TypeColorSchemeTypes = kit.Enums.AddEnumAltLower(ColorSchemesN, kit.NotBitFl
 // ColorScheme contains the colors for
 // one color scheme (ex: light or dark).
 type ColorScheme struct {
-	Primary            Color `desc:"Primary is the base primary color applied to important elements"`                                                                       // Primary is the base primary color applied to important elements
-	OnPrimary          Color `desc:"OnPrimary is the color applied to content on top of Primary. It defaults to the contrast color of Primary."`                            // OnPrimary is the color applied to content on top of Primary. It defaults to the contrast color of Primary.
-	PrimaryContainer   Color `desc:"PrimaryContainer is the color applied to elements with less emphasis than Primary"`                                                     // PrimaryContainer is the color applied to elements with less emphasis than Primary
-	OnPrimaryContainer Color `desc:"OnPrimaryContainer is the color applied to content on top of PrimaryContainer. It defaults to the contrast color of PrimaryContainer."` // OnPrimaryContainer is the color applied to content on top of PrimaryContainer. It defaults to the contrast color of PrimaryContainer.
 
-	Secondary            Color `desc:"Secondary is the base secondary color applied to less important elements"`                                                                    // Secondary is the base secondary color applied to less important elements
-	OnSecondary          Color `desc:"OnSecondary is the color applied to content on top of Secondary. It defaults to the contrast color of Secondary."`                            // OnSecondary is the color applied to content on top of Secondary. It defaults to the contrast color of Secondary.
-	SecondaryContainer   Color `desc:"SecondaryContainer is the color applied to elements with less emphasis than Secondary"`                                                       // SecondaryContainer is the color applied to elements with less emphasis than Secondary
-	OnSecondaryContainer Color `desc:"OnSecondaryContainer is the color applied to content on top of SecondaryContainer. It defaults to the contrast color of SecondaryContainer."` // OnSecondaryContainer is the color applied to content on top of SecondaryContainer. It defaults to the contrast color of SecondaryContainer.
+	// Primary is the base primary color applied to important elements
+	Primary Color `desc:"Primary is the base primary color applied to important elements"`
 
-	Tertiary            Color `desc:"Tertiary is the base tertiary color applied as an accent to highlight elements and screate contrast between other colors"`                 // Tertiary is the base tertiary color applied as an accent to highlight elements and screate contrast between other colors
-	OnTertiary          Color `desc:"OnTertiary is the color applied to content on top of Tertiary. It defaults to the contrast color of Tertiary."`                            // OnTertiary is the color applied to content on top of Tertiary. It defaults to the contrast color of Tertiary.
-	TertiaryContainer   Color `desc:"TertiaryContainer is the color applied to elements with less emphasis than Tertiary"`                                                      // TertiaryContainer is the color applied to elements with less emphasis than Tertiary
-	OnTertiaryContainer Color `desc:"OnTertiaryContainer is the color applied to content on top of TertiaryContainer. It defaults to the contrast color of TertiaryContainer."` // OnTertiaryContainer is the color applied to content on top of TertiaryContainer. It defaults to the contrast color of TertiaryContainer.
+	// OnPrimary is the color applied to content on top of Primary. It defaults to the contrast color of Primary.
+	OnPrimary Color `desc:"OnPrimary is the color applied to content on top of Primary. It defaults to the contrast color of Primary."`
 
-	Error            Color `desc:"Error is the base error color applied to elements that indicate an error or danger"`                                              // Error is the base error color applied to elements that indicate an error or danger
-	OnError          Color `desc:"OnError is the color applied to content on top of Error. It defaults to the contrast color of Error."`                            // OnError is the color applied to content on top of Error. It defaults to the contrast color of Error.
-	ErrorContainer   Color `desc:"ErrorContainer is the color applied to elements with less emphasis than Error"`                                                   // ErrorContainer is the color applied to elements with less emphasis than Error
-	OnErrorContainer Color `desc:"OnErrorContainer is the color applied to content on top of ErrorContainer. It defaults to the contrast color of ErrorContainer."` // OnErrorContainer is the color applied to content on top of ErrorContainer. It defaults to the contrast color of ErrorContainer.
+	// PrimaryContainer is the color applied to elements with less emphasis than Primary
+	PrimaryContainer Color `desc:"PrimaryContainer is the color applied to elements with less emphasis than Primary"`
 
-	Outline        Color `desc:"Outline is the color applied to borders to create emphasized boundaries that need to have sufficient contrast"` // Outline is the color applied to borders to create emphasized boundaries that need to have sufficient contrast
-	OutlineVariant Color `desc:"OutlineVariant is the color applied to create decorative boundaries"`                                           // OutlineVariant is the color applied to create decorative boundaries
+	// OnPrimaryContainer is the color applied to content on top of PrimaryContainer. It defaults to the contrast color of PrimaryContainer.
+	OnPrimaryContainer Color `desc:"OnPrimaryContainer is the color applied to content on top of PrimaryContainer. It defaults to the contrast color of PrimaryContainer."`
 
-	Background   Color `desc:"Background is the color applied to the background of the app and other low-emphasis areas"` // Background is the color applied to the background of the app and other low-emphasis areas
-	OnBackground Color `desc:"OnBackground is the color applied to content on top of Background"`                         // OnBackground is the color applied to content on top of Background
+	// Secondary is the base secondary color applied to less important elements
+	Secondary Color `desc:"Secondary is the base secondary color applied to less important elements"`
 
-	Surface          Color `desc:"Surface is the color applied to contained areas, like the background of an app"`                 // Surface is the color applied to contained areas, like the background of an app
-	OnSurface        Color `desc:"OnSurface is the color applied to content on top of Surface elements"`                           // OnSurface is the color applied to content on top of Surface elements
-	SurfaceVariant   Color `desc:"SurfaceVariant is the color applied to contained areas that contrast standard Surface elements"` // SurfaceVariant is the color applied to contained areas that contrast standard Surface elements
-	OnSurfaceVariant Color `desc:"OnSurfaceVariant is the color applied to content on top of SurfaceVariant elements"`             // OnSurfaceVariant is the color applied to content on top of SurfaceVariant elements
+	// OnSecondary is the color applied to content on top of Secondary. It defaults to the contrast color of Secondary.
+	OnSecondary Color `desc:"OnSecondary is the color applied to content on top of Secondary. It defaults to the contrast color of Secondary."`
 
-	InverseSurface   Color `desc:"InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect"` // InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect
-	InverseOnSurface Color `desc:"InverseOnSurface is the color applied to content on top of InverseSurface"`                                                                  // InverseOnSurface is the color applied to content on top of InverseSurface
-	InversePrimary   Color `desc:"InversePrimary is the color applied to interactive elements on top of InverseSurface"`                                                       // InversePrimary is the color applied to interactive elements on top of InverseSurface
+	// SecondaryContainer is the color applied to elements with less emphasis than Secondary
+	SecondaryContainer Color `desc:"SecondaryContainer is the color applied to elements with less emphasis than Secondary"`
 
-	Shadow      Color `desc:"Shadow is the color applied to shadows"`            // Shadow is the color applied to shadows
-	SurfaceTint Color `desc:"SurfaceTint is the color applied to tint surfaces"` // SurfaceTint is the color applied to tint surfaces
+	// OnSecondaryContainer is the color applied to content on top of SecondaryContainer. It defaults to the contrast color of SecondaryContainer.
+	OnSecondaryContainer Color `desc:"OnSecondaryContainer is the color applied to content on top of SecondaryContainer. It defaults to the contrast color of SecondaryContainer."`
 
-	Scrim Color `desc:"Scrim is the color applied to scrims (semi-transparent overlays)"` // Scrim is the color applied to scrims (semi-transparent overlays)
+	// Tertiary is the base tertiary color applied as an accent to highlight elements and screate contrast between other colors
+	Tertiary Color `desc:"Tertiary is the base tertiary color applied as an accent to highlight elements and screate contrast between other colors"`
+
+	// OnTertiary is the color applied to content on top of Tertiary. It defaults to the contrast color of Tertiary.
+	OnTertiary Color `desc:"OnTertiary is the color applied to content on top of Tertiary. It defaults to the contrast color of Tertiary."`
+
+	// TertiaryContainer is the color applied to elements with less emphasis than Tertiary
+	TertiaryContainer Color `desc:"TertiaryContainer is the color applied to elements with less emphasis than Tertiary"`
+
+	// OnTertiaryContainer is the color applied to content on top of TertiaryContainer. It defaults to the contrast color of TertiaryContainer.
+	OnTertiaryContainer Color `desc:"OnTertiaryContainer is the color applied to content on top of TertiaryContainer. It defaults to the contrast color of TertiaryContainer."`
+
+	// Error is the base error color applied to elements that indicate an error or danger
+	Error Color `desc:"Error is the base error color applied to elements that indicate an error or danger"`
+
+	// OnError is the color applied to content on top of Error. It defaults to the contrast color of Error.
+	OnError Color `desc:"OnError is the color applied to content on top of Error. It defaults to the contrast color of Error."`
+
+	// ErrorContainer is the color applied to elements with less emphasis than Error
+	ErrorContainer Color `desc:"ErrorContainer is the color applied to elements with less emphasis than Error"`
+
+	// OnErrorContainer is the color applied to content on top of ErrorContainer. It defaults to the contrast color of ErrorContainer.
+	OnErrorContainer Color `desc:"OnErrorContainer is the color applied to content on top of ErrorContainer. It defaults to the contrast color of ErrorContainer."`
+
+	// Outline is the color applied to borders to create emphasized boundaries that need to have sufficient contrast
+	Outline Color `desc:"Outline is the color applied to borders to create emphasized boundaries that need to have sufficient contrast"`
+
+	// OutlineVariant is the color applied to create decorative boundaries
+	OutlineVariant Color `desc:"OutlineVariant is the color applied to create decorative boundaries"`
+
+	// Background is the color applied to the background of the app and other low-emphasis areas
+	Background Color `desc:"Background is the color applied to the background of the app and other low-emphasis areas"`
+
+	// OnBackground is the color applied to content on top of Background
+	OnBackground Color `desc:"OnBackground is the color applied to content on top of Background"`
+
+	// Surface is the color applied to contained areas, like the background of an app
+	Surface Color `desc:"Surface is the color applied to contained areas, like the background of an app"`
+
+	// OnSurface is the color applied to content on top of Surface elements
+	OnSurface Color `desc:"OnSurface is the color applied to content on top of Surface elements"`
+
+	// SurfaceVariant is the color applied to contained areas that contrast standard Surface elements
+	SurfaceVariant Color `desc:"SurfaceVariant is the color applied to contained areas that contrast standard Surface elements"`
+
+	// OnSurfaceVariant is the color applied to content on top of SurfaceVariant elements
+	OnSurfaceVariant Color `desc:"OnSurfaceVariant is the color applied to content on top of SurfaceVariant elements"`
+
+	// InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect
+	InverseSurface Color `desc:"InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect"`
+
+	// InverseOnSurface is the color applied to content on top of InverseSurface
+	InverseOnSurface Color `desc:"InverseOnSurface is the color applied to content on top of InverseSurface"`
+
+	// InversePrimary is the color applied to interactive elements on top of InverseSurface
+	InversePrimary Color `desc:"InversePrimary is the color applied to interactive elements on top of InverseSurface"`
+
+	// Shadow is the color applied to shadows
+	Shadow Color `desc:"Shadow is the color applied to shadows"`
+
+	// SurfaceTint is the color applied to tint surfaces
+	SurfaceTint Color `desc:"SurfaceTint is the color applied to tint surfaces"`
+
+	// Scrim is the color applied to scrims (semi-transparent overlays)
+	Scrim Color `desc:"Scrim is the color applied to scrims (semi-transparent overlays)"`
 
 	// PrimaryFixed          Color `desc:"PrimaryFixed is a primary fill color that stays the same regardless of color scheme type (light/dark)"`
 	// PrimaryFixedDim       Color `desc:"PrimaryFixedDim is a higher-emphasis, dimmer primary fill color that stays the same regardless of color scheme type (light/dark)"`

@@ -69,7 +69,9 @@ type NodeSVG interface {
 // layout logic -- just renders into parent SVG viewport
 type NodeBase struct {
 	gi.Node2DBase
-	Pnt girl.Paint `json:"-" xml:"-" desc:"full paint information for this node"` // full paint information for this node
+
+	// full paint information for this node
+	Pnt girl.Paint `json:"-" xml:"-" desc:"full paint information for this node"`
 }
 
 var TypeNodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)

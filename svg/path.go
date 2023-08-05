@@ -22,8 +22,12 @@ import (
 // Path renders SVG data sequences that can render just about anything
 type Path struct {
 	NodeBase
-	Data    []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"` // the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow
-	DataStr string     `xml:"d" desc:"string version of the path data"`                                                                                                                              // string version of the path data
+
+	// the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow
+	Data []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
+
+	// string version of the path data
+	DataStr string `xml:"d" desc:"string version of the path data"`
 }
 
 var TypePath = kit.Types.AddType(&Path{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})

@@ -42,9 +42,15 @@ var TypeSelModes = kit.Enums.AddEnum(SelModesN, kit.NotBitFlag, nil)
 
 // SelParams are parameters for selection / manipulation box
 type SelParams struct {
-	Color  gi.ColorName `desc:"name of color to use for selection box (default yellow)"` // name of color to use for selection box (default yellow)
-	Width  float32      `desc:"width of the box lines (.01 default)"`                    // width of the box lines (.01 default)
-	Radius float32      `desc:"radius of the manipulation control point spheres"`        // radius of the manipulation control point spheres
+
+	// name of color to use for selection box (default yellow)
+	Color gi.ColorName `desc:"name of color to use for selection box (default yellow)"`
+
+	// width of the box lines (.01 default)
+	Width float32 `desc:"width of the box lines (.01 default)"`
+
+	// radius of the manipulation control point spheres
+	Radius float32 `desc:"radius of the manipulation control point spheres"`
 }
 
 func (sp *SelParams) Defaults() {

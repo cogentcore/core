@@ -21,19 +21,41 @@ type Painter interface {
 
 // Paint provides the styling parameters for rendering
 type Paint struct {
-	Off         bool          `desc:"prop: display:none -- node and everything below it are off, non-rendering"`                                                                   // prop: display:none -- node and everything below it are off, non-rendering
-	Display     bool          `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`                                                                   // todo big enum of how to display item -- controls layout etc
-	StrokeStyle Stroke        `desc:"stroke (line drawing) parameters"`                                                                                                            // stroke (line drawing) parameters
-	FillStyle   Fill          `desc:"fill (region filling) parameters"`                                                                                                            // fill (region filling) parameters
-	FontStyle   FontRender    `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"` // font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed
-	TextStyle   Text          `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"` // font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed
-	VecEff      VectorEffects `xml:"vector-effect" desc:"prop: vector-effect = various rendering special effects settings"`                                                        // prop: vector-effect = various rendering special effects settings
-	XForm       mat32.Mat2    `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`                                                      // prop: transform = our additions to transform -- pushed to render state
-	UnContext   units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`                                                                  // units context -- parameters necessary for anchoring relative units
-	StyleSet    bool          `desc:"have the styles already been set?"`                                                                                                           // have the styles already been set?
-	PropsNil    bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`                                                                   // set to true if parent node has no props -- allows optimization of styling
-	dotsSet     bool
-	lastUnCtxt  units.Context
+
+	// prop: display:none -- node and everything below it are off, non-rendering
+	Off bool `desc:"prop: display:none -- node and everything below it are off, non-rendering"`
+
+	// todo big enum of how to display item -- controls layout etc
+	Display bool `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
+
+	// stroke (line drawing) parameters
+	StrokeStyle Stroke `desc:"stroke (line drawing) parameters"`
+
+	// fill (region filling) parameters
+	FillStyle Fill `desc:"fill (region filling) parameters"`
+
+	// font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed
+	FontStyle FontRender `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+
+	// font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed
+	TextStyle Text `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+
+	// prop: vector-effect = various rendering special effects settings
+	VecEff VectorEffects `xml:"vector-effect" desc:"prop: vector-effect = various rendering special effects settings"`
+
+	// prop: transform = our additions to transform -- pushed to render state
+	XForm mat32.Mat2 `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`
+
+	// units context -- parameters necessary for anchoring relative units
+	UnContext units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+
+	// have the styles already been set?
+	StyleSet bool `desc:"have the styles already been set?"`
+
+	// set to true if parent node has no props -- allows optimization of styling
+	PropsNil   bool `desc:"set to true if parent node has no props -- allows optimization of styling"`
+	dotsSet    bool
+	lastUnCtxt units.Context
 }
 
 func (pc *Paint) Defaults() {
@@ -178,10 +200,18 @@ func (ev *VectorEffects) UnmarshalJSON(b []byte) error { return kit.EnumUnmarsha
 
 // Fill contains all the properties for filling a region
 type Fill struct {
-	On      bool      `desc:"is fill active -- if property is none then false"`                                               // is fill active -- if property is none then false
-	Color   ColorSpec `xml:"fill" desc:"prop: fill = fill color specification"`                                               // prop: fill = fill color specification
-	Opacity float32   `xml:"fill-opacity" desc:"prop: fill-opacity = global alpha opacity / transparency factor"`             // prop: fill-opacity = global alpha opacity / transparency factor
-	Rule    FillRules `xml:"fill-rule" desc:"prop: fill-rule = rule for how to fill more complex shapes with crossing lines"` // prop: fill-rule = rule for how to fill more complex shapes with crossing lines
+
+	// is fill active -- if property is none then false
+	On bool `desc:"is fill active -- if property is none then false"`
+
+	// prop: fill = fill color specification
+	Color ColorSpec `xml:"fill" desc:"prop: fill = fill color specification"`
+
+	// prop: fill-opacity = global alpha opacity / transparency factor
+	Opacity float32 `xml:"fill-opacity" desc:"prop: fill-opacity = global alpha opacity / transparency factor"`
+
+	// prop: fill-rule = rule for how to fill more complex shapes with crossing lines
+	Rule FillRules `xml:"fill-rule" desc:"prop: fill-rule = rule for how to fill more complex shapes with crossing lines"`
 }
 
 // Defaults initializes default values for paint fill
@@ -275,15 +305,33 @@ func (ev *LineJoins) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSO
 
 // Stroke contains all the properties for painting a line
 type Stroke struct {
-	On         bool        `desc:"is stroke active -- if property is none then false"`                                                                                                                                                                                                                                                                                    // is stroke active -- if property is none then false
-	Color      ColorSpec   `xml:"stroke" desc:"prop: stroke = stroke color specification"`                                                                                                                                                                                                                                                                                // prop: stroke = stroke color specification
-	Opacity    float32     `xml:"stroke-opacity" desc:"prop: stroke-opacity = global alpha opacity / transparency factor"`                                                                                                                                                                                                                                                // prop: stroke-opacity = global alpha opacity / transparency factor
-	Width      units.Value `xml:"stroke-width" desc:"prop: stroke-width = line width"`                                                                                                                                                                                                                                                                                    // prop: stroke-width = line width
-	MinWidth   units.Value `xml:"stroke-min-width" desc:"prop: stroke-min-width = minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard"` // prop: stroke-min-width = minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard
-	Dashes     []float64   `xml:"stroke-dasharray" desc:"prop: stroke-dasharray = dash pattern, in terms of alternating on and off distances -- e.g., [4 4] = 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units."`                                                                                           // prop: stroke-dasharray = dash pattern, in terms of alternating on and off distances -- e.g., [4 4] = 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units.
-	Cap        LineCaps    `xml:"stroke-linecap" desc:"prop: stroke-linecap = how to draw the end cap of lines"`                                                                                                                                                                                                                                                          // prop: stroke-linecap = how to draw the end cap of lines
-	Join       LineJoins   `xml:"stroke-linejoin" desc:"prop: stroke-linejoin = how to join line segments"`                                                                                                                                                                                                                                                               // prop: stroke-linejoin = how to join line segments
-	MiterLimit float32     `xml:"stroke-miterlimit" min:"1" desc:"prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger"`                                                                                                                                                                                                                            // prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger
+
+	// is stroke active -- if property is none then false
+	On bool `desc:"is stroke active -- if property is none then false"`
+
+	// prop: stroke = stroke color specification
+	Color ColorSpec `xml:"stroke" desc:"prop: stroke = stroke color specification"`
+
+	// prop: stroke-opacity = global alpha opacity / transparency factor
+	Opacity float32 `xml:"stroke-opacity" desc:"prop: stroke-opacity = global alpha opacity / transparency factor"`
+
+	// prop: stroke-width = line width
+	Width units.Value `xml:"stroke-width" desc:"prop: stroke-width = line width"`
+
+	// prop: stroke-min-width = minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard
+	MinWidth units.Value `xml:"stroke-min-width" desc:"prop: stroke-min-width = minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard"`
+
+	// prop: stroke-dasharray = dash pattern, in terms of alternating on and off distances -- e.g., [4 4] = 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units.
+	Dashes []float64 `xml:"stroke-dasharray" desc:"prop: stroke-dasharray = dash pattern, in terms of alternating on and off distances -- e.g., [4 4] = 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units."`
+
+	// prop: stroke-linecap = how to draw the end cap of lines
+	Cap LineCaps `xml:"stroke-linecap" desc:"prop: stroke-linecap = how to draw the end cap of lines"`
+
+	// prop: stroke-linejoin = how to join line segments
+	Join LineJoins `xml:"stroke-linejoin" desc:"prop: stroke-linejoin = how to join line segments"`
+
+	// prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger
+	MiterLimit float32 `xml:"stroke-miterlimit" min:"1" desc:"prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger"`
 }
 
 // Defaults initializes default values for paint stroke

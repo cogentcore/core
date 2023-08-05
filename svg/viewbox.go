@@ -15,9 +15,15 @@ import (
 
 // ViewBox is used in SVG to define the coordinate system
 type ViewBox struct {
-	Min                 mat32.Vec2                 `desc:"offset or starting point in parent Viewport2D"`      // offset or starting point in parent Viewport2D
-	Size                mat32.Vec2                 `desc:"size of viewbox within parent Viewport2D"`           // size of viewbox within parent Viewport2D
-	PreserveAspectRatio ViewBoxPreserveAspectRatio `desc:"how to scale the view box within parent Viewport2D"` // how to scale the view box within parent Viewport2D
+
+	// offset or starting point in parent Viewport2D
+	Min mat32.Vec2 `desc:"offset or starting point in parent Viewport2D"`
+
+	// size of viewbox within parent Viewport2D
+	Size mat32.Vec2 `desc:"size of viewbox within parent Viewport2D"`
+
+	// how to scale the view box within parent Viewport2D
+	PreserveAspectRatio ViewBoxPreserveAspectRatio `desc:"how to scale the view box within parent Viewport2D"`
 }
 
 // todo: need to implement the viewbox preserve aspect ratio logic!
@@ -72,6 +78,10 @@ const (
 
 // ViewBoxPreserveAspectRatio determines how to scale the view box within parent Viewport2D
 type ViewBoxPreserveAspectRatio struct {
-	Align       ViewBoxAlign       `svg:"align" desc:"how to align x,y coordinates within viewbox"`              // how to align x,y coordinates within viewbox
-	MeetOrSlice ViewBoxMeetOrSlice `svg:"meetOrSlice" desc:"how to scale the view box relative to the viewport"` // how to scale the view box relative to the viewport
+
+	// how to align x,y coordinates within viewbox
+	Align ViewBoxAlign `svg:"align" desc:"how to align x,y coordinates within viewbox"`
+
+	// how to scale the view box relative to the viewport
+	MeetOrSlice ViewBoxMeetOrSlice `svg:"meetOrSlice" desc:"how to scale the view box relative to the viewport"`
 }

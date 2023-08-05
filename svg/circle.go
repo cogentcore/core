@@ -14,8 +14,12 @@ import (
 // Circle is a SVG circle
 type Circle struct {
 	NodeBase
-	Pos    mat32.Vec2 `xml:"{cx,cy}" desc:"position of the center of the circle"` // position of the center of the circle
-	Radius float32    `xml:"r" desc:"radius of the circle"`                       // radius of the circle
+
+	// position of the center of the circle
+	Pos mat32.Vec2 `xml:"{cx,cy}" desc:"position of the center of the circle"`
+
+	// radius of the circle
+	Radius float32 `xml:"r" desc:"radius of the circle"`
 }
 
 var TypeCircle = kit.Types.AddType(&Circle{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})

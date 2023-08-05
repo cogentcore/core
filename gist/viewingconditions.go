@@ -26,23 +26,54 @@ import "github.com/goki/mat32"
 // ViewingConditions contains the information about
 // the context in which an [HCTA] color is viewed.
 type ViewingConditions struct {
-	WhitePoint            mat32.Vec3 `desc:"the coordinates of white in XYZ color space"`             // the coordinates of white in XYZ color space
-	AdaptingLuminance     float32    `desc:"the light strength in lux"`                               // the light strength in lux
-	BackgroundLstar       float32    `desc:"the average luminance of 10 degrees around the color"`    // the average luminance of 10 degrees around the color
-	Surround              float32    `desc:"the brightness of the entire environment"`                // the brightness of the entire environment
-	DiscountingIlluminant bool       `desc:"whether the person's eyes have adjusted to the lighting"` // whether the person's eyes have adjusted to the lighting
 
-	BackgroundYToWhitePointY float32    `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	AW                       float32    `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	NBB                      float32    `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	NCB                      float32    `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	C                        float32    `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	NC                       float32    `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	DRGBInverse              mat32.Vec3 `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	RGBD                     mat32.Vec3 `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	FL                       float32    `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	FLRoot                   float32    `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
-	Z                        float32    `desc:"this is an intermediate computed value and should not be modified by the end-user"` // this is an intermediate computed value and should not be modified by the end-user
+	// the coordinates of white in XYZ color space
+	WhitePoint mat32.Vec3 `desc:"the coordinates of white in XYZ color space"`
+
+	// the light strength in lux
+	AdaptingLuminance float32 `desc:"the light strength in lux"`
+
+	// the average luminance of 10 degrees around the color
+	BackgroundLstar float32 `desc:"the average luminance of 10 degrees around the color"`
+
+	// the brightness of the entire environment
+	Surround float32 `desc:"the brightness of the entire environment"`
+
+	// whether the person's eyes have adjusted to the lighting
+	DiscountingIlluminant bool `desc:"whether the person's eyes have adjusted to the lighting"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	BackgroundYToWhitePointY float32 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	AW float32 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	NBB float32 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	NCB float32 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	C float32 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	NC float32 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	DRGBInverse mat32.Vec3 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	RGBD mat32.Vec3 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	FL float32 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	FLRoot float32 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
+
+	// this is an intermediate computed value and should not be modified by the end-user
+	Z float32 `desc:"this is an intermediate computed value and should not be modified by the end-user"`
 }
 
 // Init initializes the values of the viewing conditions

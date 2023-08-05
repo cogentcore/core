@@ -14,10 +14,18 @@ import (
 // Opts contains options for TextBufs -- contains everything necessary to
 // conditionalize editing of a given text file
 type Opts struct {
-	gi.EditorPrefs `desc:"editor prefs from gogi prefs"` // editor prefs from gogi prefs
-	CommentLn      string                                `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"` // character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
-	CommentSt      string                                `desc:"character(s) that start a multi-line comment or one that requires both start and end"`                  // character(s) that start a multi-line comment or one that requires both start and end
-	CommentEd      string                                `desc:"character(s) that end a multi-line comment or one that requires both start and end"`                    // character(s) that end a multi-line comment or one that requires both start and end
+
+	// editor prefs from gogi prefs
+	gi.EditorPrefs `desc:"editor prefs from gogi prefs"`
+
+	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
+	CommentLn string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
+
+	// character(s) that start a multi-line comment or one that requires both start and end
+	CommentSt string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
+
+	// character(s) that end a multi-line comment or one that requires both start and end
+	CommentEd string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
 }
 
 // CommentStrs returns the comment start and end strings, using line-based CommentLn first if set

@@ -43,35 +43,93 @@ var CursorBlinkMSec = 500
 // TextField is a widget for editing a line of text
 type TextField struct {
 	PartsWidgetBase
-	Txt              string                       `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`                                                                                                                         // the last saved value of the text string being edited
-	Placeholder      string                       `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`                                                                                            // text that is displayed when the field is empty, in a lower-contrast manner
-	ClearAct         bool                         `xml:"clear-act" desc:"add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default"`                                                                             // add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default
-	CursorWidth      units.Value                  `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`                                                                                                                 // width of cursor -- set from cursor-width property (inherited)
-	Type             TextFieldTypes               `desc:"the type of the text field"`                                                                                                                                                                       // the type of the text field
-	State            TextFieldStates              `desc:"the current state of the text field"`                                                                                                                                                              // the current state of the text field
-	PlaceholderColor gist.Color                   `desc:"the color used for the placeholder text; this should be set in StyleFuncs like all other style properties; it is typically a highlighted version of the normal text color"`                        // the color used for the placeholder text; this should be set in StyleFuncs like all other style properties; it is typically a highlighted version of the normal text color
-	SelectColor      gist.ColorSpec               `desc:"the color used for the text selection background color on active text fields; this should be set in StyleFuncs like all other style properties"`                                                   // the color used for the text selection background color on active text fields; this should be set in StyleFuncs like all other style properties
-	Edited           bool                         `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`                                                                                                                       // true if the text has been edited relative to the original
-	EditTxt          []rune                       `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`                                                                                                // the live text string being edited, with latest modifications -- encoded as runes
-	MaxWidthReq      int                          `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"` // maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
-	EffSize          mat32.Vec2                   `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting the close widget"`                                                                                                                           // effective size, subtracting the close widget
-	StartPos         int                          `copy:"-" json:"-" xml:"-" desc:"starting display position in the string"`                                                                                                                                // starting display position in the string
-	EndPos           int                          `copy:"-" json:"-" xml:"-" desc:"ending display position in the string"`                                                                                                                                  // ending display position in the string
-	CursorPos        int                          `copy:"-" json:"-" xml:"-" desc:"current cursor position"`                                                                                                                                                // current cursor position
-	CharWidth        int                          `copy:"-" json:"-" xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`                                                                           // approximate number of chars that can be displayed at any time -- computed from font size etc
-	SelectStart      int                          `copy:"-" json:"-" xml:"-" desc:"starting position of selection in the string"`                                                                                                                           // starting position of selection in the string
-	SelectEnd        int                          `copy:"-" json:"-" xml:"-" desc:"ending position of selection in the string"`                                                                                                                             // ending position of selection in the string
-	SelectInit       int                          `copy:"-" json:"-" xml:"-" desc:"initial selection position -- where it started"`                                                                                                                         // initial selection position -- where it started
-	SelectMode       bool                         `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`                                                                                                                                   // if true, select text as cursor moves
-	TextFieldSig     ki.Signal                    `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`                                                                                                    // signal for line edit -- see TextFieldSignals for the types
-	RenderAll        girl.Text                    `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`                                                                                                                              // render version of entire text, for sizing
-	RenderVis        girl.Text                    `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`                                                                                                                                    // render version of just visible text
-	StateStyles      [TextFieldStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"normal style and focus style"`                                                                                                                                           // normal style and focus style
-	FontHeight       float32                      `copy:"-" json:"-" xml:"-" desc:"font height, cached during styling"`                                                                                                                                     // font height, cached during styling
-	BlinkOn          bool                         `copy:"-" json:"-" xml:"-" desc:"oscillates between on and off for blinking"`                                                                                                                             // oscillates between on and off for blinking
-	CursorMu         sync.Mutex                   `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`                                                                                                           // mutex for updating cursor between blinker and field
-	Complete         *Complete                    `copy:"-" json:"-" xml:"-" desc:"functions and data for textfield completion"`                                                                                                                            // functions and data for textfield completion
-	NoEcho           bool                         `copy:"-" json:"-" xml:"-" desc:"replace displayed characters with bullets to conceal text"`                                                                                                              // replace displayed characters with bullets to conceal text
+
+	// the last saved value of the text string being edited
+	Txt string `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+
+	// text that is displayed when the field is empty, in a lower-contrast manner
+	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+
+	// add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default
+	ClearAct bool `xml:"clear-act" desc:"add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default"`
+
+	// width of cursor -- set from cursor-width property (inherited)
+	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+
+	// the type of the text field
+	Type TextFieldTypes `desc:"the type of the text field"`
+
+	// the current state of the text field
+	State TextFieldStates `desc:"the current state of the text field"`
+
+	// the color used for the placeholder text; this should be set in StyleFuncs like all other style properties; it is typically a highlighted version of the normal text color
+	PlaceholderColor gist.Color `desc:"the color used for the placeholder text; this should be set in StyleFuncs like all other style properties; it is typically a highlighted version of the normal text color"`
+
+	// the color used for the text selection background color on active text fields; this should be set in StyleFuncs like all other style properties
+	SelectColor gist.ColorSpec `desc:"the color used for the text selection background color on active text fields; this should be set in StyleFuncs like all other style properties"`
+
+	// true if the text has been edited relative to the original
+	Edited bool `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+
+	// the live text string being edited, with latest modifications -- encoded as runes
+	EditTxt []rune `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
+
+	// maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
+	MaxWidthReq int `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+
+	// effective size, subtracting the close widget
+	EffSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting the close widget"`
+
+	// starting display position in the string
+	StartPos int `copy:"-" json:"-" xml:"-" desc:"starting display position in the string"`
+
+	// ending display position in the string
+	EndPos int `copy:"-" json:"-" xml:"-" desc:"ending display position in the string"`
+
+	// current cursor position
+	CursorPos int `copy:"-" json:"-" xml:"-" desc:"current cursor position"`
+
+	// approximate number of chars that can be displayed at any time -- computed from font size etc
+	CharWidth int `copy:"-" json:"-" xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+
+	// starting position of selection in the string
+	SelectStart int `copy:"-" json:"-" xml:"-" desc:"starting position of selection in the string"`
+
+	// ending position of selection in the string
+	SelectEnd int `copy:"-" json:"-" xml:"-" desc:"ending position of selection in the string"`
+
+	// initial selection position -- where it started
+	SelectInit int `copy:"-" json:"-" xml:"-" desc:"initial selection position -- where it started"`
+
+	// if true, select text as cursor moves
+	SelectMode bool `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+
+	// signal for line edit -- see TextFieldSignals for the types
+	TextFieldSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+
+	// render version of entire text, for sizing
+	RenderAll girl.Text `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+
+	// render version of just visible text
+	RenderVis girl.Text `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
+
+	// normal style and focus style
+	StateStyles [TextFieldStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"normal style and focus style"`
+
+	// font height, cached during styling
+	FontHeight float32 `copy:"-" json:"-" xml:"-" desc:"font height, cached during styling"`
+
+	// oscillates between on and off for blinking
+	BlinkOn bool `copy:"-" json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
+
+	// mutex for updating cursor between blinker and field
+	CursorMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
+
+	// functions and data for textfield completion
+	Complete *Complete `copy:"-" json:"-" xml:"-" desc:"functions and data for textfield completion"`
+
+	// replace displayed characters with bullets to conceal text
+	NoEcho bool `copy:"-" json:"-" xml:"-" desc:"replace displayed characters with bullets to conceal text"`
 }
 
 var TypeTextField = kit.Types.AddType(&TextField{}, TextFieldProps)

@@ -16,9 +16,15 @@ import (
 // Rect is a SVG rectangle, optionally with rounded corners
 type Rect struct {
 	NodeBase
-	Pos    mat32.Vec2 `xml:"{x,y}" desc:"position of the top-left of the rectangle"`                    // position of the top-left of the rectangle
-	Size   mat32.Vec2 `xml:"{width,height}" desc:"size of the rectangle"`                               // size of the rectangle
-	Radius mat32.Vec2 `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"` // radii for curved corners, as a proportion of width, height
+
+	// position of the top-left of the rectangle
+	Pos mat32.Vec2 `xml:"{x,y}" desc:"position of the top-left of the rectangle"`
+
+	// size of the rectangle
+	Size mat32.Vec2 `xml:"{width,height}" desc:"size of the rectangle"`
+
+	// radii for curved corners, as a proportion of width, height
+	Radius mat32.Vec2 `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`
 }
 
 var TypeRect = kit.Types.AddType(&Rect{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})

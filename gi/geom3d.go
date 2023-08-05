@@ -16,9 +16,15 @@ type Region2D struct {
 
 // defines how a region in 2D space is mapped
 type RegionMap2D struct {
-	Target  Region2D   `desc:"target region to render into (e.g., in RenderPlane)"`                                                                                                            // target region to render into (e.g., in RenderPlane)
-	Rescale mgl32.Vec2 `desc:"rescaling that we provide for children nodes into the Target Size region -- we present region that is at Offset lower-left corner, of size Size * Rescale size"` // rescaling that we provide for children nodes into the Target Size region -- we present region that is at Offset lower-left corner, of size Size * Rescale size
-	Size    mgl32.Vec2 `desc:"Our overall size: Target.Size * Rescale"`                                                                                                                        // Our overall size: Target.Size * Rescale
+
+	// target region to render into (e.g., in RenderPlane)
+	Target Region2D `desc:"target region to render into (e.g., in RenderPlane)"`
+
+	// rescaling that we provide for children nodes into the Target Size region -- we present region that is at Offset lower-left corner, of size Size * Rescale size
+	Rescale mgl32.Vec2 `desc:"rescaling that we provide for children nodes into the Target Size region -- we present region that is at Offset lower-left corner, of size Size * Rescale size"`
+
+	// Our overall size: Target.Size * Rescale
+	Size mgl32.Vec2 `desc:"Our overall size: Target.Size * Rescale"`
 }
 
 // 3D transform

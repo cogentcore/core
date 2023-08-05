@@ -31,17 +31,39 @@ var content embed.FS
 
 // Anim has control for animating
 type Anim struct {
-	On            bool         `desc:"run the animation"`                                 // run the animation
-	Speed         float32      `min:"0.01" step:"0.01" desc:"angular speed (in radians)"` // angular speed (in radians)
-	DoTorus       bool         `desc:"animate the torus"`                                 // animate the torus
-	DoGopher      bool         `desc:"animate the gopher"`                                // animate the gopher
-	Ang           float32      `inactive:"+" desc:"current angle"`                        // current angle
-	Ticker        *time.Ticker `view:"-" desc:"the time.Ticker for animating the scene"`  // the time.Ticker for animating the scene
-	Scene         *gi3d.Scene  `desc:"the scene"`                                         // the scene
-	Torus         *gi3d.Solid  `desc:"the torus"`                                         // the torus
-	Gopher        *gi3d.Group  `desc:"the gopher"`                                        // the gopher
-	TorusPosOrig  mat32.Vec3   `desc:"original position"`                                 // original position
-	GopherPosOrig mat32.Vec3   `desc:"original position"`                                 // original position
+
+	// run the animation
+	On bool `desc:"run the animation"`
+
+	// angular speed (in radians)
+	Speed float32 `min:"0.01" step:"0.01" desc:"angular speed (in radians)"`
+
+	// animate the torus
+	DoTorus bool `desc:"animate the torus"`
+
+	// animate the gopher
+	DoGopher bool `desc:"animate the gopher"`
+
+	// current angle
+	Ang float32 `inactive:"+" desc:"current angle"`
+
+	// the time.Ticker for animating the scene
+	Ticker *time.Ticker `view:"-" desc:"the time.Ticker for animating the scene"`
+
+	// the scene
+	Scene *gi3d.Scene `desc:"the scene"`
+
+	// the torus
+	Torus *gi3d.Solid `desc:"the torus"`
+
+	// the gopher
+	Gopher *gi3d.Group `desc:"the gopher"`
+
+	// original position
+	TorusPosOrig mat32.Vec3 `desc:"original position"`
+
+	// original position
+	GopherPosOrig mat32.Vec3 `desc:"original position"`
 }
 
 // Start starts the animation ticker timer -- if on is true, then

@@ -71,27 +71,69 @@ var Update3DTrace = false
 // "first person" effects.
 type Scene struct {
 	gi.WidgetBase
-	Geom            gi.Geom2DInt                `desc:"Viewport-level viewbox within any parent Viewport2D"`                                                                                                                // Viewport-level viewbox within any parent Viewport2D
-	MultiSample     int                         `def:"4" desc:"number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"`                           // number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
-	Wireframe       bool                        `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"` // render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)
-	Camera          Camera                      `desc:"camera determines view onto scene"`                                                                                                                                  // camera determines view onto scene
-	BackgroundColor gist.Color                  `desc:"background color"`                                                                                                                                                   // background color
-	Lights          ordmap.Map[string, Light]   `desc:"all lights used in the scene"`                                                                                                                                       // all lights used in the scene
-	Meshes          ordmap.Map[string, Mesh]    `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`                                                                                         // meshes -- holds all the mesh data -- must be configured prior to rendering
-	Textures        ordmap.Map[string, Texture] `desc:"textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"`                                     // textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability
-	Library         map[string]*Group           `desc:"library of objects that can be used in the scene"`                                                                                                                   // library of objects that can be used in the scene
-	NoNav           bool                        `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`                                                  // don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene
-	SavedCams       map[string]Camera           `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`                                                                                    // saved cameras -- can Save and Set these to view the scene from different angles
-	Win             *gi.Window                  `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`                                                                                                    // our parent window that we render into
-	SetDragCursor   bool                        `view:"-" desc:"has dragging cursor been set yet?"`                                                                                                                         // has dragging cursor been set yet?
-	SelMode         SelModes                    `desc:"how to deal with selection / manipulation events"`                                                                                                                   // how to deal with selection / manipulation events
-	CurSel          Node3D                      `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected node"`                                                                                                         // currently selected node
-	CurManipPt      *ManipPt                    `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected manipulation control point"`                                                                                   // currently selected manipulation control point
-	SelParams       SelParams                   `view:"inline" desc:"parameters for selection / manipulation box"`                                                                                                          // parameters for selection / manipulation box
-	Phong           vphong.Phong                `desc:"the vphong rendering system"`                                                                                                                                        // the vphong rendering system
-	Frame           *vgpu.RenderFrame           `desc:"the vgpu render frame holding the rendered scene"`                                                                                                                   // the vgpu render frame holding the rendered scene
-	DirUpIdx        int                         `desc:"index in list of window direct uploading images"`                                                                                                                    // index in list of window direct uploading images
-	RenderMu        sync.Mutex                  `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on rendering"`                                                                                                              // mutex on rendering
+
+	// Viewport-level viewbox within any parent Viewport2D
+	Geom gi.Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport2D"`
+
+	// number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
+	MultiSample int `def:"4" desc:"number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"`
+
+	// render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)
+	Wireframe bool `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"`
+
+	// camera determines view onto scene
+	Camera Camera `desc:"camera determines view onto scene"`
+
+	// background color
+	BackgroundColor gist.Color `desc:"background color"`
+
+	// all lights used in the scene
+	Lights ordmap.Map[string, Light] `desc:"all lights used in the scene"`
+
+	// meshes -- holds all the mesh data -- must be configured prior to rendering
+	Meshes ordmap.Map[string, Mesh] `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`
+
+	// textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability
+	Textures ordmap.Map[string, Texture] `desc:"textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"`
+
+	// library of objects that can be used in the scene
+	Library map[string]*Group `desc:"library of objects that can be used in the scene"`
+
+	// don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene
+	NoNav bool `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
+
+	// saved cameras -- can Save and Set these to view the scene from different angles
+	SavedCams map[string]Camera `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
+
+	// our parent window that we render into
+	Win *gi.Window `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
+
+	// has dragging cursor been set yet?
+	SetDragCursor bool `view:"-" desc:"has dragging cursor been set yet?"`
+
+	// how to deal with selection / manipulation events
+	SelMode SelModes `desc:"how to deal with selection / manipulation events"`
+
+	// currently selected node
+	CurSel Node3D `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected node"`
+
+	// currently selected manipulation control point
+	CurManipPt *ManipPt `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected manipulation control point"`
+
+	// parameters for selection / manipulation box
+	SelParams SelParams `view:"inline" desc:"parameters for selection / manipulation box"`
+
+	// the vphong rendering system
+	Phong vphong.Phong `desc:"the vphong rendering system"`
+
+	// the vgpu render frame holding the rendered scene
+	Frame *vgpu.RenderFrame `desc:"the vgpu render frame holding the rendered scene"`
+
+	// index in list of window direct uploading images
+	DirUpIdx int `desc:"index in list of window direct uploading images"`
+
+	// mutex on rendering
+	RenderMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on rendering"`
 }
 
 var TypeScene = kit.Types.AddType(&Scene{}, SceneProps)

@@ -17,16 +17,36 @@ import (
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)
 type Marker struct {
 	NodeBase
-	RefPos      mat32.Vec2  `xml:"{refX,refY}" desc:"reference position to align the vertex position with, specified in ViewBox coordinates"` // reference position to align the vertex position with, specified in ViewBox coordinates
-	Size        mat32.Vec2  `xml:"{markerWidth,markerHeight}" desc:"size of marker to render, in Units units"`                                // size of marker to render, in Units units
-	Units       MarkerUnits `xml:"markerUnits" desc:"units to use"`                                                                           // units to use
-	ViewBox     ViewBox     `desc:"viewbox defines the internal coordinate system for the drawing elements within the marker"`                // viewbox defines the internal coordinate system for the drawing elements within the marker
-	Orient      string      `xml:"orient" desc:"orientation of the marker -- either 'auto' or an angle"`                                      // orientation of the marker -- either 'auto' or an angle
-	VertexPos   mat32.Vec2  `desc:"current vertex position"`                                                                                  // current vertex position
-	VertexAngle float32     `desc:"current vertex angle in radians"`                                                                          // current vertex angle in radians
-	StrokeWidth float32     `desc:"current stroke width"`                                                                                     // current stroke width
-	XForm       mat32.Mat2  `desc:"net transform computed from settings and current values -- applied prior to rendering"`                    // net transform computed from settings and current values -- applied prior to rendering
-	EffSize     mat32.Vec2  `desc:"effective size for actual rendering"`                                                                      // effective size for actual rendering
+
+	// reference position to align the vertex position with, specified in ViewBox coordinates
+	RefPos mat32.Vec2 `xml:"{refX,refY}" desc:"reference position to align the vertex position with, specified in ViewBox coordinates"`
+
+	// size of marker to render, in Units units
+	Size mat32.Vec2 `xml:"{markerWidth,markerHeight}" desc:"size of marker to render, in Units units"`
+
+	// units to use
+	Units MarkerUnits `xml:"markerUnits" desc:"units to use"`
+
+	// viewbox defines the internal coordinate system for the drawing elements within the marker
+	ViewBox ViewBox `desc:"viewbox defines the internal coordinate system for the drawing elements within the marker"`
+
+	// orientation of the marker -- either 'auto' or an angle
+	Orient string `xml:"orient" desc:"orientation of the marker -- either 'auto' or an angle"`
+
+	// current vertex position
+	VertexPos mat32.Vec2 `desc:"current vertex position"`
+
+	// current vertex angle in radians
+	VertexAngle float32 `desc:"current vertex angle in radians"`
+
+	// current stroke width
+	StrokeWidth float32 `desc:"current stroke width"`
+
+	// net transform computed from settings and current values -- applied prior to rendering
+	XForm mat32.Mat2 `desc:"net transform computed from settings and current values -- applied prior to rendering"`
+
+	// effective size for actual rendering
+	EffSize mat32.Vec2 `desc:"effective size for actual rendering"`
 }
 
 var TypeMarker = kit.Types.AddType(&Marker{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})

@@ -14,8 +14,12 @@ import (
 // Ellipse is a SVG ellipse
 type Ellipse struct {
 	NodeBase
-	Pos   mat32.Vec2 `xml:"{cx,cy}" desc:"position of the center of the ellipse"`                 // position of the center of the ellipse
-	Radii mat32.Vec2 `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"` // radii of the ellipse in the horizontal, vertical axes
+
+	// position of the center of the ellipse
+	Pos mat32.Vec2 `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
+
+	// radii of the ellipse in the horizontal, vertical axes
+	Radii mat32.Vec2 `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
 
 var TypeEllipse = kit.Types.AddType(&Ellipse{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})

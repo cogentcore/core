@@ -648,23 +648,43 @@ type ActionUpdateFunc func(it any, act *gi.Action)
 // MethViewData is set to the Action.Data field for all MethView actions,
 // containing info needed to actually call the Method on value Val.
 type MethViewData struct {
-	Val            any
-	ValVal         reflect.Value
-	Vp             *gi.Viewport2D
-	Method         string
-	MethVal        reflect.Value
-	MethTyp        reflect.Method
-	ArgProps       ki.PropSlice     `desc:"names and other properties of args, in one-to-one with method args"`                                                         // names and other properties of args, in one-to-one with method args
-	SpecProps      ki.Props         `desc:"props for special action types, e.g., FileView"`                                                                             // props for special action types, e.g., FileView
-	Desc           string           `desc:"prompt shown in arg dialog or confirm prompt dialog"`                                                                        // prompt shown in arg dialog or confirm prompt dialog
-	UpdateFunc     ActionUpdateFunc `desc:"update function defined in properties -- called by our wrapper update function"`                                             // update function defined in properties -- called by our wrapper update function
-	SubMenuSlice   any              `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`                       // value for submenu generation as a literal slice of items of appropriate type for method being called
-	SubMenuField   string           `desc:"value for submenu generation as name of field on obj"`                                                                       // value for submenu generation as name of field on obj
-	SubMenuFunc    SubMenuFunc      `desc:"function that will generate submenu items, as []string slice"`                                                               // function that will generate submenu items, as []string slice
-	SubSubMenuFunc SubSubMenuFunc   `desc:"function that will generate sub-submenu items, as [][]string slice"`                                                         // function that will generate sub-submenu items, as [][]string slice
-	SubMenuVal     any              `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"` // value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method
-	KeyFun         gi.KeyFuns       `desc:"key function that we emit, if MethViewKeyFun type"`                                                                          // key function that we emit, if MethViewKeyFun type
-	Flags          MethViewFlags
+	Val     any
+	ValVal  reflect.Value
+	Vp      *gi.Viewport2D
+	Method  string
+	MethVal reflect.Value
+	MethTyp reflect.Method
+
+	// names and other properties of args, in one-to-one with method args
+	ArgProps ki.PropSlice `desc:"names and other properties of args, in one-to-one with method args"`
+
+	// props for special action types, e.g., FileView
+	SpecProps ki.Props `desc:"props for special action types, e.g., FileView"`
+
+	// prompt shown in arg dialog or confirm prompt dialog
+	Desc string `desc:"prompt shown in arg dialog or confirm prompt dialog"`
+
+	// update function defined in properties -- called by our wrapper update function
+	UpdateFunc ActionUpdateFunc `desc:"update function defined in properties -- called by our wrapper update function"`
+
+	// value for submenu generation as a literal slice of items of appropriate type for method being called
+	SubMenuSlice any `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
+
+	// value for submenu generation as name of field on obj
+	SubMenuField string `desc:"value for submenu generation as name of field on obj"`
+
+	// function that will generate submenu items, as []string slice
+	SubMenuFunc SubMenuFunc `desc:"function that will generate submenu items, as []string slice"`
+
+	// function that will generate sub-submenu items, as [][]string slice
+	SubSubMenuFunc SubSubMenuFunc `desc:"function that will generate sub-submenu items, as [][]string slice"`
+
+	// value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method
+	SubMenuVal any `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
+
+	// key function that we emit, if MethViewKeyFun type
+	KeyFun gi.KeyFuns `desc:"key function that we emit, if MethViewKeyFun type"`
+	Flags  MethViewFlags
 }
 
 func (md *MethViewData) MethName() string {

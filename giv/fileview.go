@@ -40,18 +40,42 @@ import (
 // FileView is a viewer onto files -- core of the file chooser dialog
 type FileView struct {
 	gi.Frame
-	DirPath     string             `desc:"path to directory of files to display"`                                                                                              // path to directory of files to display
-	SelFile     string             `desc:"selected file"`                                                                                                                      // selected file
-	Ext         string             `desc:"target extension(s) (comma separated if multiple, including initial .), if any"`                                                     // target extension(s) (comma separated if multiple, including initial .), if any
-	FilterFunc  FileViewFilterFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`                                                                                // optional styling function
-	ExtMap      map[string]string  `desc:"map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"` // map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value
-	Files       []*FileInfo        `desc:"files for current directory"`                                                                                                        // files for current directory
-	SelectedIdx int                `desc:"index of currently-selected file in Files list (-1 if none)"`                                                                        // index of currently-selected file in Files list (-1 if none)
-	FileSig     ki.Signal          `desc:"signal for file actions"`                                                                                                            // signal for file actions
-	Watcher     *fsnotify.Watcher  `view:"-" desc:"change notify for current dir"`                                                                                             // change notify for current dir
-	DoneWatcher chan bool          `view:"-" desc:"channel to close watcher watcher"`                                                                                          // channel to close watcher watcher
-	UpdtMu      sync.Mutex         `view:"-" desc:"UpdateFiles mutex"`                                                                                                         // UpdateFiles mutex
-	PrevPath    string             `view:"-" desc:"Previous path that was processed via UpdateFiles"`                                                                          // Previous path that was processed via UpdateFiles
+
+	// path to directory of files to display
+	DirPath string `desc:"path to directory of files to display"`
+
+	// selected file
+	SelFile string `desc:"selected file"`
+
+	// target extension(s) (comma separated if multiple, including initial .), if any
+	Ext string `desc:"target extension(s) (comma separated if multiple, including initial .), if any"`
+
+	// optional styling function
+	FilterFunc FileViewFilterFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
+
+	// map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value
+	ExtMap map[string]string `desc:"map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"`
+
+	// files for current directory
+	Files []*FileInfo `desc:"files for current directory"`
+
+	// index of currently-selected file in Files list (-1 if none)
+	SelectedIdx int `desc:"index of currently-selected file in Files list (-1 if none)"`
+
+	// signal for file actions
+	FileSig ki.Signal `desc:"signal for file actions"`
+
+	// change notify for current dir
+	Watcher *fsnotify.Watcher `view:"-" desc:"change notify for current dir"`
+
+	// channel to close watcher watcher
+	DoneWatcher chan bool `view:"-" desc:"channel to close watcher watcher"`
+
+	// UpdateFiles mutex
+	UpdtMu sync.Mutex `view:"-" desc:"UpdateFiles mutex"`
+
+	// Previous path that was processed via UpdateFiles
+	PrevPath string `view:"-" desc:"Previous path that was processed via UpdateFiles"`
 }
 
 var TypeFileView = kit.Types.AddType(&FileView{}, FileViewProps)

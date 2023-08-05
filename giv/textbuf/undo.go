@@ -21,12 +21,24 @@ var UndoGroupDelayMSec = 250
 
 // Undo is the TextBuf undo manager
 type Undo struct {
-	Off       bool       `desc:"if true, saving and using undos is turned off (e.g., inactive buffers)"`                  // if true, saving and using undos is turned off (e.g., inactive buffers)
-	Stack     []*Edit    `desc:"undo stack of edits"`                                                                     // undo stack of edits
-	UndoStack []*Edit    `desc:"undo stack of *undo* edits -- added to whenever an Undo is done -- for emacs-style undo"` // undo stack of *undo* edits -- added to whenever an Undo is done -- for emacs-style undo
-	Pos       int        `desc:"undo position in stack"`                                                                  // undo position in stack
-	Group     int        `desc:"group counter"`                                                                           // group counter
-	Mu        sync.Mutex `json:"-" xml:"-" desc:"mutex protecting all updates"`                                           // mutex protecting all updates
+
+	// if true, saving and using undos is turned off (e.g., inactive buffers)
+	Off bool `desc:"if true, saving and using undos is turned off (e.g., inactive buffers)"`
+
+	// undo stack of edits
+	Stack []*Edit `desc:"undo stack of edits"`
+
+	// undo stack of *undo* edits -- added to whenever an Undo is done -- for emacs-style undo
+	UndoStack []*Edit `desc:"undo stack of *undo* edits -- added to whenever an Undo is done -- for emacs-style undo"`
+
+	// undo position in stack
+	Pos int `desc:"undo position in stack"`
+
+	// group counter
+	Group int `desc:"group counter"`
+
+	// mutex protecting all updates
+	Mu sync.Mutex `json:"-" xml:"-" desc:"mutex protecting all updates"`
 }
 
 // NewGroup increments the Group counter so subsequent undos will be grouped separately

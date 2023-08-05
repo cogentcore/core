@@ -43,16 +43,36 @@ import (
 //     styling applied differentially to individual nodes (e.g., FileNode).
 type TreeView struct {
 	gi.PartsWidgetBase
-	SrcNode          ki.Ki                       `copy:"-" json:"-" xml:"-" desc:"Ki Node that this widget is viewing in the tree -- the source"`                                                                                                                            // Ki Node that this widget is viewing in the tree -- the source
-	ShowViewCtxtMenu bool                        `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?"`                                                                                          // if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?
-	ViewIdx          int                         `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`                                                                          // linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses
-	Indent           units.Value                 `xml:"indent" desc:"styled amount to indent children relative to this node"`                                                                                                                                                // styled amount to indent children relative to this node
-	OpenDepth        int                         `xml:"open-depth" desc:"styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4."`                                                                    // styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4.
-	TreeViewSig      ki.Signal                   `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`                                                             // signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types
-	StateStyles      [TreeViewStatesN]gist.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"` // styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that
-	WidgetSize       mat32.Vec2                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`                                                                                                                         // just the size of our widget -- our alloc includes all of our children, but we only draw us
-	Icon             icons.Icon                  `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`                                                                                                                    // optional icon, displayed to the the left of the text label
-	RootView         *TreeView                   `json:"-" xml:"-" desc:"cached root of the view"`                                                                                                                                                                           // cached root of the view
+
+	// Ki Node that this widget is viewing in the tree -- the source
+	SrcNode ki.Ki `copy:"-" json:"-" xml:"-" desc:"Ki Node that this widget is viewing in the tree -- the source"`
+
+	// if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?
+	ShowViewCtxtMenu bool `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?"`
+
+	// linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses
+	ViewIdx int `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
+
+	// styled amount to indent children relative to this node
+	Indent units.Value `xml:"indent" desc:"styled amount to indent children relative to this node"`
+
+	// styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4.
+	OpenDepth int `xml:"open-depth" desc:"styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4."`
+
+	// signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types
+	TreeViewSig ki.Signal `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
+
+	// styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that
+	StateStyles [TreeViewStatesN]gist.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+
+	// just the size of our widget -- our alloc includes all of our children, but we only draw us
+	WidgetSize mat32.Vec2 `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
+
+	// optional icon, displayed to the the left of the text label
+	Icon icons.Icon `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
+
+	// cached root of the view
+	RootView *TreeView `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
 var TypeTreeView = kit.Types.AddType(&TreeView{}, nil)

@@ -28,10 +28,18 @@ import (
 // Rotate the solid to put into other planes.
 type Lines struct {
 	MeshBase
-	Points []mat32.Vec3 `desc:"line points (must be 2 or more)"`                                       // line points (must be 2 or more)
-	Width  mat32.Vec2   `desc:"line width, Y = height perpendicular to line direction, and X = depth"` // line width, Y = height perpendicular to line direction, and X = depth
-	Colors []gist.Color `desc:"optional colors for each point -- actual color interpolates between"`   // optional colors for each point -- actual color interpolates between
-	Closed bool         `desc:"if true, connect the first and last points to form a closed shape"`     // if true, connect the first and last points to form a closed shape
+
+	// line points (must be 2 or more)
+	Points []mat32.Vec3 `desc:"line points (must be 2 or more)"`
+
+	// line width, Y = height perpendicular to line direction, and X = depth
+	Width mat32.Vec2 `desc:"line width, Y = height perpendicular to line direction, and X = depth"`
+
+	// optional colors for each point -- actual color interpolates between
+	Colors []gist.Color `desc:"optional colors for each point -- actual color interpolates between"`
+
+	// if true, connect the first and last points to form a closed shape
+	Closed bool `desc:"if true, connect the first and last points to form a closed shape"`
 }
 
 var TypeLines = kit.Types.AddType(&Lines{}, nil)

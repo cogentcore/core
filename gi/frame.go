@@ -18,7 +18,9 @@ import (
 // background-color style setting, and optional striping for grid layouts
 type Frame struct {
 	Layout
-	Stripes Stripes `desc:"options for striped backgrounds -- rendered as darker bands relative to background color"` // options for striped backgrounds -- rendered as darker bands relative to background color
+
+	// options for striped backgrounds -- rendered as darker bands relative to background color
+	Stripes Stripes `desc:"options for striped backgrounds -- rendered as darker bands relative to background color"`
 }
 
 var TypeFrame = kit.Types.AddType(&Frame{}, FrameProps)

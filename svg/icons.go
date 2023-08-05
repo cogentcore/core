@@ -41,9 +41,15 @@ func init() {
 // original source icon and then can be customized from there.
 type Icon struct {
 	SVG
-	Filename string      `desc:"file name with full path for icon if loaded from file"`                                                                                                              // file name with full path for icon if loaded from file
-	Rendered bool        `copy:"-" json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"` // we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render
-	RendSize image.Point `copy:"-" json:"-" xml:"-" desc:"size at which we previously rendered"`                                                                                                     // size at which we previously rendered
+
+	// file name with full path for icon if loaded from file
+	Filename string `desc:"file name with full path for icon if loaded from file"`
+
+	// we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render
+	Rendered bool `copy:"-" json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
+
+	// size at which we previously rendered
+	RendSize image.Point `copy:"-" json:"-" xml:"-" desc:"size at which we previously rendered"`
 }
 
 var TypeIcon = kit.Types.AddType(&Icon{}, IconProps)

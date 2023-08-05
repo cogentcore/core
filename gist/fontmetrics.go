@@ -12,10 +12,18 @@ import (
 // FontFace is our enhanced Font Face structure which contains the enhanced computed
 // metrics in addition to the font.Face face
 type FontFace struct {
-	Name    string      `desc:"The full FaceName that the font is accessed by"` // The full FaceName that the font is accessed by
-	Size    int         `desc:"The integer font size in raw dots"`              // The integer font size in raw dots
-	Face    font.Face   `desc:"The system image.Font font rendering interface"` // The system image.Font font rendering interface
-	Metrics FontMetrics `desc:"enhanced metric information for the font"`       // enhanced metric information for the font
+
+	// The full FaceName that the font is accessed by
+	Name string `desc:"The full FaceName that the font is accessed by"`
+
+	// The integer font size in raw dots
+	Size int `desc:"The integer font size in raw dots"`
+
+	// The system image.Font font rendering interface
+	Face font.Face `desc:"The system image.Font font rendering interface"`
+
+	// enhanced metric information for the font
+	Metrics FontMetrics `desc:"enhanced metric information for the font"`
 }
 
 // NewFontFace returns a new font face
@@ -29,10 +37,18 @@ func NewFontFace(nm string, sz int, face font.Face) *FontFace {
 // the standard font.Metrics lib, including Ex and Ch being defined in terms of
 // the actual letter x and 0
 type FontMetrics struct {
-	Height float32 `desc:"reference 1.0 spacing line height of font in dots -- computed from font as ascent + descent + lineGap, where lineGap is specified by the font as the recommended line spacing"`                                                               // reference 1.0 spacing line height of font in dots -- computed from font as ascent + descent + lineGap, where lineGap is specified by the font as the recommended line spacing
-	Em     float32 `desc:"Em size of font -- this is NOT actually the width of the letter M, but rather the specified point size of the font (in actual display dots, not points) -- it does NOT include the descender and will not fit the entire height of the font"` // Em size of font -- this is NOT actually the width of the letter M, but rather the specified point size of the font (in actual display dots, not points) -- it does NOT include the descender and will not fit the entire height of the font
-	Ex     float32 `desc:"Ex size of font -- this is the actual height of the letter x in the font"`                                                                                                                                                                    // Ex size of font -- this is the actual height of the letter x in the font
-	Ch     float32 `desc:"Ch size of font -- this is the actual width of the 0 glyph in the font"`                                                                                                                                                                      // Ch size of font -- this is the actual width of the 0 glyph in the font
+
+	// reference 1.0 spacing line height of font in dots -- computed from font as ascent + descent + lineGap, where lineGap is specified by the font as the recommended line spacing
+	Height float32 `desc:"reference 1.0 spacing line height of font in dots -- computed from font as ascent + descent + lineGap, where lineGap is specified by the font as the recommended line spacing"`
+
+	// Em size of font -- this is NOT actually the width of the letter M, but rather the specified point size of the font (in actual display dots, not points) -- it does NOT include the descender and will not fit the entire height of the font
+	Em float32 `desc:"Em size of font -- this is NOT actually the width of the letter M, but rather the specified point size of the font (in actual display dots, not points) -- it does NOT include the descender and will not fit the entire height of the font"`
+
+	// Ex size of font -- this is the actual height of the letter x in the font
+	Ex float32 `desc:"Ex size of font -- this is the actual height of the letter x in the font"`
+
+	// Ch size of font -- this is the actual width of the 0 glyph in the font
+	Ch float32 `desc:"Ch size of font -- this is the actual width of the 0 glyph in the font"`
 }
 
 // ComputeMetrics computes the Height, Em, Ex, Ch and Rem metrics associated

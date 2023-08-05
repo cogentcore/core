@@ -32,12 +32,24 @@ import (
 // span-as-line.  The first Rune RelPos for LR text should be at X=0
 // (LastPos = 0 for RL) -- i.e., relpos positions are minimal for given span.
 type Span struct {
-	Text    []rune               `desc:"text as runes"`                                                                                                                                                                                                                                                                              // text as runes
-	Render  []Rune               `desc:"render info for each rune in one-to-one correspondence"`                                                                                                                                                                                                                                     // render info for each rune in one-to-one correspondence
-	RelPos  mat32.Vec2           `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position"` // position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position
-	LastPos mat32.Vec2           `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same Text relative coordinates"`                                                       // rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same Text relative coordinates
-	Dir     gist.TextDirections  `desc:"where relevant, this is the (default, dominant) text direction for the span"`                                                                                                                                                                                                                // where relevant, this is the (default, dominant) text direction for the span
-	HasDeco gist.TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`                                                                                                                                                                                                          // mask of decorations that have been set on this span -- optimizes rendering passes
+
+	// text as runes
+	Text []rune `desc:"text as runes"`
+
+	// render info for each rune in one-to-one correspondence
+	Render []Rune `desc:"render info for each rune in one-to-one correspondence"`
+
+	// position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position
+	RelPos mat32.Vec2 `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
+
+	// rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same Text relative coordinates
+	LastPos mat32.Vec2 `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same Text relative coordinates"`
+
+	// where relevant, this is the (default, dominant) text direction for the span
+	Dir gist.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+
+	// mask of decorations that have been set on this span -- optimizes rendering passes
+	HasDeco gist.TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`
 }
 
 // Init initializes a new span with given capacity

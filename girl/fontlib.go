@@ -37,11 +37,21 @@ var loadFontMu sync.RWMutex
 // FontInfo contains basic font information for choosing a given font --
 // displayed in the font chooser dialog.
 type FontInfo struct {
-	Name    string           `desc:"official regularized name of font"`                          // official regularized name of font
-	Stretch gist.FontStretch `xml:"stretch" desc:"stretch: normal, expanded, condensed, etc"`    // stretch: normal, expanded, condensed, etc
-	Weight  gist.FontWeights `xml:"weight" desc:"weight: normal, bold, etc"`                     // weight: normal, bold, etc
-	Style   gist.FontStyles  `xml:"style" desc:"style -- normal, italic, etc"`                   // style -- normal, italic, etc
-	Example string           `desc:"example text -- styled according to font params in chooser"` // example text -- styled according to font params in chooser
+
+	// official regularized name of font
+	Name string `desc:"official regularized name of font"`
+
+	// stretch: normal, expanded, condensed, etc
+	Stretch gist.FontStretch `xml:"stretch" desc:"stretch: normal, expanded, condensed, etc"`
+
+	// weight: normal, bold, etc
+	Weight gist.FontWeights `xml:"weight" desc:"weight: normal, bold, etc"`
+
+	// style -- normal, italic, etc
+	Style gist.FontStyles `xml:"style" desc:"style -- normal, italic, etc"`
+
+	// example text -- styled according to font params in chooser
+	Example string `desc:"example text -- styled according to font params in chooser"`
 }
 
 // Label satisfies the Labeler interface
@@ -56,10 +66,18 @@ func (fi FontInfo) Label() string {
 // each font name specifies a particular font weight and style.  When fonts
 // are loaded into the library, the names are appropriately regularized.
 type FontLib struct {
-	FontPaths  []string                          `desc:"list of font paths to search for fonts"`                                                             // list of font paths to search for fonts
-	FontsAvail map[string]string                 `desc:"map of font name to path to file"`                                                                   // map of font name to path to file
-	FontInfo   []FontInfo                        `desc:"information about each font -- this list should be used for selecting valid regularized font names"` // information about each font -- this list should be used for selecting valid regularized font names
-	Faces      map[string]map[int]*gist.FontFace `desc:"double-map of cached fonts, by font name and then integer font size within that"`                    // double-map of cached fonts, by font name and then integer font size within that
+
+	// list of font paths to search for fonts
+	FontPaths []string `desc:"list of font paths to search for fonts"`
+
+	// map of font name to path to file
+	FontsAvail map[string]string `desc:"map of font name to path to file"`
+
+	// information about each font -- this list should be used for selecting valid regularized font names
+	FontInfo []FontInfo `desc:"information about each font -- this list should be used for selecting valid regularized font names"`
+
+	// double-map of cached fonts, by font name and then integer font size within that
+	Faces map[string]map[int]*gist.FontFace `desc:"double-map of cached fonts, by font name and then integer font size within that"`
 }
 
 // FontLibrary is the gi font library, initialized from fonts available on font paths

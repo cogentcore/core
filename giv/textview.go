@@ -45,43 +45,111 @@ import (
 // require extensive protections throughout code otherwise.
 type TextView struct {
 	gi.WidgetBase
-	Buf                    *TextBuf                    `json:"-" xml:"-" desc:"the text buffer that we're editing"`                                                                                                                          // the text buffer that we're editing
-	Placeholder            string                      `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`                                                                        // text that is displayed when the field is empty, in a lower-contrast manner
-	CursorWidth            units.Value                 `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`                                                                                             // width of cursor -- set from cursor-width property (inherited)
-	NLines                 int                         `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`                                             // number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc
-	Renders                []girl.Text                 `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`                    // renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)
-	Offs                   []float32                   `json:"-" xml:"-" desc:"starting offsets for top of each line"`                                                                                                                       // starting offsets for top of each line
-	LineNoDigs             int                         `json:"-" xml:"-" desc:"number of line number digits needed"`                                                                                                                         // number of line number digits needed
-	LineNoOff              float32                     `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`                                                                                                      // horizontal offset for start of text after line numbers
-	LineNoRender           girl.Text                   `json:"-" xml:"-" desc:"render for line numbers"`                                                                                                                                     // render for line numbers
-	LinesSize              image.Point                 `json:"-" xml:"-" desc:"total size of all lines as rendered"`                                                                                                                         // total size of all lines as rendered
-	RenderSz               mat32.Vec2                  `json:"-" xml:"-" desc:"size params to use in render call"`                                                                                                                           // size params to use in render call
-	CursorPos              lex.Pos                     `json:"-" xml:"-" desc:"current cursor position"`                                                                                                                                     // current cursor position
-	CursorCol              int                         `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"` // desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
-	ScrollToCursorOnRender bool                        `json:"-" xml:"-" desc:"if true, scroll screen to cursor on next render"`                                                                                                             // if true, scroll screen to cursor on next render
-	ScrollToCursorPos      lex.Pos                     `json:"-" xml:"-" desc:"cursor position to scroll to"`                                                                                                                                // cursor position to scroll to
-	PosHistIdx             int                         `json:"-" xml:"-" desc:"current index within PosHistory"`                                                                                                                             // current index within PosHistory
-	SelectStart            lex.Pos                     `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`                                       // starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
-	SelectReg              textbuf.Region              `json:"-" xml:"-" desc:"current selection region"`                                                                                                                                    // current selection region
-	PrevSelectReg          textbuf.Region              `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`                                                                            // previous selection region, that was actually rendered -- needed to update render
-	Highlights             []textbuf.Region            `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`                                                                                                               // highlighted regions, e.g., for search results
-	Scopelights            []textbuf.Region            `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`                                                                                                              // highlighted regions, specific to scope markers
-	SelectMode             bool                        `json:"-" xml:"-" desc:"if true, select text as cursor moves"`                                                                                                                        // if true, select text as cursor moves
-	ForceComplete          bool                        `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`                                                                                                   // if true, complete regardless of any disqualifying reasons
-	ISearch                ISearch                     `json:"-" xml:"-" desc:"interactive search data"`                                                                                                                                     // interactive search data
-	QReplace               QReplace                    `json:"-" xml:"-" desc:"query replace data"`                                                                                                                                          // query replace data
-	TextViewSig            ki.Signal                   `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`                                                                                          // signal for text view -- see TextViewSignals for the types
-	LinkSig                ki.Signal                   `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`             // signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
-	StateStyles            [TextViewStatesN]gist.Style `json:"-" xml:"-" desc:"normal style and focus style"`                                                                                                                                // normal style and focus style
-	FontHeight             float32                     `json:"-" xml:"-" desc:"font height, cached during styling"`                                                                                                                          // font height, cached during styling
-	LineHeight             float32                     `json:"-" xml:"-" desc:"line height, cached during styling"`                                                                                                                          // line height, cached during styling
-	VisSize                image.Point                 `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`                                                                                                      // height in lines and width in chars of the visible area
-	BlinkOn                bool                        `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`                                                                                                                  // oscillates between on and off for blinking
-	CursorMu               sync.Mutex                  `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`                                                                            // mutex protecting cursor rendering -- shared between blink and main code
-	HasLinks               bool                        `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`                                                                 // at least one of the renders has links -- determines if we set the cursor for hand movements
-	lastRecenter           int
-	lastAutoInsert         rune
-	lastFilename           gi.FileName
+
+	// the text buffer that we're editing
+	Buf *TextBuf `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+
+	// text that is displayed when the field is empty, in a lower-contrast manner
+	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+
+	// width of cursor -- set from cursor-width property (inherited)
+	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+
+	// number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc
+	NLines int `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
+
+	// renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)
+	Renders []girl.Text `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+
+	// starting offsets for top of each line
+	Offs []float32 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+
+	// number of line number digits needed
+	LineNoDigs int `json:"-" xml:"-" desc:"number of line number digits needed"`
+
+	// horizontal offset for start of text after line numbers
+	LineNoOff float32 `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
+
+	// render for line numbers
+	LineNoRender girl.Text `json:"-" xml:"-" desc:"render for line numbers"`
+
+	// total size of all lines as rendered
+	LinesSize image.Point `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+
+	// size params to use in render call
+	RenderSz mat32.Vec2 `json:"-" xml:"-" desc:"size params to use in render call"`
+
+	// current cursor position
+	CursorPos lex.Pos `json:"-" xml:"-" desc:"current cursor position"`
+
+	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
+	CursorCol int `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+
+	// if true, scroll screen to cursor on next render
+	ScrollToCursorOnRender bool `json:"-" xml:"-" desc:"if true, scroll screen to cursor on next render"`
+
+	// cursor position to scroll to
+	ScrollToCursorPos lex.Pos `json:"-" xml:"-" desc:"cursor position to scroll to"`
+
+	// current index within PosHistory
+	PosHistIdx int `json:"-" xml:"-" desc:"current index within PosHistory"`
+
+	// starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
+	SelectStart lex.Pos `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
+
+	// current selection region
+	SelectReg textbuf.Region `json:"-" xml:"-" desc:"current selection region"`
+
+	// previous selection region, that was actually rendered -- needed to update render
+	PrevSelectReg textbuf.Region `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+
+	// highlighted regions, e.g., for search results
+	Highlights []textbuf.Region `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
+
+	// highlighted regions, specific to scope markers
+	Scopelights []textbuf.Region `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`
+
+	// if true, select text as cursor moves
+	SelectMode bool `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+
+	// if true, complete regardless of any disqualifying reasons
+	ForceComplete bool `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
+
+	// interactive search data
+	ISearch ISearch `json:"-" xml:"-" desc:"interactive search data"`
+
+	// query replace data
+	QReplace QReplace `json:"-" xml:"-" desc:"query replace data"`
+
+	// signal for text view -- see TextViewSignals for the types
+	TextViewSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
+
+	// signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
+	LinkSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+
+	// normal style and focus style
+	StateStyles [TextViewStatesN]gist.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+
+	// font height, cached during styling
+	FontHeight float32 `json:"-" xml:"-" desc:"font height, cached during styling"`
+
+	// line height, cached during styling
+	LineHeight float32 `json:"-" xml:"-" desc:"line height, cached during styling"`
+
+	// height in lines and width in chars of the visible area
+	VisSize image.Point `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+
+	// oscillates between on and off for blinking
+	BlinkOn bool `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
+
+	// mutex protecting cursor rendering -- shared between blink and main code
+	CursorMu sync.Mutex `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
+
+	// at least one of the renders has links -- determines if we set the cursor for hand movements
+	HasLinks       bool `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
+	lastRecenter   int
+	lastAutoInsert rune
+	lastFilename   gi.FileName
 }
 
 var TypeTextView = kit.Types.AddType(&TextView{}, TextViewProps)
@@ -1618,13 +1686,27 @@ func (tv *TextView) MatchFromPos(matches []textbuf.Match, cpos lex.Pos) (int, bo
 
 // ISearch holds all the interactive search data
 type ISearch struct {
-	On       bool            `json:"-" xml:"-" desc:"if true, in interactive search mode"`                                          // if true, in interactive search mode
-	Find     string          `json:"-" xml:"-" desc:"current interactive search string"`                                            // current interactive search string
-	UseCase  bool            `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"` // pay attention to case in isearch -- triggered by typing an upper-case letter
-	Matches  []textbuf.Match `json:"-" xml:"-" desc:"current search matches"`                                                       // current search matches
-	Pos      int             `json:"-" xml:"-" desc:"position within isearch matches"`                                              // position within isearch matches
-	PrevPos  int             `json:"-" xml:"-" desc:"position in search list from previous search"`                                 // position in search list from previous search
-	StartPos lex.Pos         `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`                // starting position for search -- returns there after on cancel
+
+	// if true, in interactive search mode
+	On bool `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+
+	// current interactive search string
+	Find string `json:"-" xml:"-" desc:"current interactive search string"`
+
+	// pay attention to case in isearch -- triggered by typing an upper-case letter
+	UseCase bool `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+
+	// current search matches
+	Matches []textbuf.Match `json:"-" xml:"-" desc:"current search matches"`
+
+	// position within isearch matches
+	Pos int `json:"-" xml:"-" desc:"position within isearch matches"`
+
+	// position in search list from previous search
+	PrevPos int `json:"-" xml:"-" desc:"position in search list from previous search"`
+
+	// starting position for search -- returns there after on cancel
+	StartPos lex.Pos `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
 }
 
 // TextViewMaxFindHighlights is the maximum number of regions to highlight on find
@@ -1794,15 +1876,33 @@ func (tv *TextView) ISearchCancel() {
 
 // QReplace holds all the query-replace data
 type QReplace struct {
-	On       bool            `json:"-" xml:"-" desc:"if true, in interactive search mode"`                                                                      // if true, in interactive search mode
-	Find     string          `json:"-" xml:"-" desc:"current interactive search string"`                                                                        // current interactive search string
-	Replace  string          `json:"-" xml:"-" desc:"current interactive search string"`                                                                        // current interactive search string
-	UseCase  bool            `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`                             // pay attention to case in isearch -- triggered by typing an upper-case letter
-	LexItems bool            `json:"-" xml:"-" desc:"search only as entire lexically-tagged item boundaries -- key for replacing short local variables like i"` // search only as entire lexically-tagged item boundaries -- key for replacing short local variables like i
-	Matches  []textbuf.Match `json:"-" xml:"-" desc:"current search matches"`                                                                                   // current search matches
-	Pos      int             `json:"-" xml:"-" desc:"position within isearch matches"`                                                                          // position within isearch matches
-	PrevPos  int             `json:"-" xml:"-" desc:"position in search list from previous search"`                                                             // position in search list from previous search
-	StartPos lex.Pos         `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`                                            // starting position for search -- returns there after on cancel
+
+	// if true, in interactive search mode
+	On bool `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+
+	// current interactive search string
+	Find string `json:"-" xml:"-" desc:"current interactive search string"`
+
+	// current interactive search string
+	Replace string `json:"-" xml:"-" desc:"current interactive search string"`
+
+	// pay attention to case in isearch -- triggered by typing an upper-case letter
+	UseCase bool `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+
+	// search only as entire lexically-tagged item boundaries -- key for replacing short local variables like i
+	LexItems bool `json:"-" xml:"-" desc:"search only as entire lexically-tagged item boundaries -- key for replacing short local variables like i"`
+
+	// current search matches
+	Matches []textbuf.Match `json:"-" xml:"-" desc:"current search matches"`
+
+	// position within isearch matches
+	Pos int `json:"-" xml:"-" desc:"position within isearch matches"`
+
+	// position in search list from previous search
+	PrevPos int `json:"-" xml:"-" desc:"position in search list from previous search"`
+
+	// starting position for search -- returns there after on cancel
+	StartPos lex.Pos `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
 }
 
 // PrevQReplaceFinds are the previous QReplace strings

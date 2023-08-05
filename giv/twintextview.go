@@ -19,8 +19,12 @@ import (
 // that scroll in sync with each other.
 type TwinTextViews struct {
 	gi.SplitView
-	BufA *TextBuf `json:"-" xml:"-" desc:"textbuf for A"` // textbuf for A
-	BufB *TextBuf `json:"-" xml:"-" desc:"textbuf for B"` // textbuf for B
+
+	// textbuf for A
+	BufA *TextBuf `json:"-" xml:"-" desc:"textbuf for A"`
+
+	// textbuf for B
+	BufB *TextBuf `json:"-" xml:"-" desc:"textbuf for B"`
 }
 
 var TypeTwinTextViews = kit.Types.AddType(&TwinTextViews{}, TwinTextViewsProps)

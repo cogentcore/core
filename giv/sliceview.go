@@ -22,7 +22,9 @@ import (
 // signals when selection is updated.
 type SliceView struct {
 	SliceViewBase
-	StyleFunc SliceViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"` // optional styling function
+
+	// optional styling function
+	StyleFunc SliceViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
 }
 
 var TypeSliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
