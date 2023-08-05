@@ -896,6 +896,10 @@ func (bt *Button) ConfigStyles() {
 		case ButtonText:
 			bt.Style.BackgroundColor.SetColor(ColorScheme.Background)
 			bt.Style.Color = ColorScheme.Primary
+			bt.Style.Padding.SetHoriz(units.Em(0.75 * Prefs.DensityMul()))
+			if !bt.Icon.IsNil() {
+				bt.Style.Padding.Right.SetPx(1 * Prefs.DensityMul())
+			}
 		}
 		// STYTODO: add state styles for buttons
 	})
