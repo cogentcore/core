@@ -11,7 +11,6 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -306,9 +305,7 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 
 func (mb *MenuBar) ConfigStyles() {
 	mb.AddStyleFunc(StyleFuncDefault, func() {
-		mb.Style.Margin.Set()
-		mb.Style.Padding.Set(units.Em(1 * Prefs.DensityMul()))
-		mb.Spacing.SetEm(1.5 * Prefs.DensityMul())
+		mb.Style.MaxWidth.SetPx(-1)
 		mb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
 		mb.Style.Color = ColorScheme.OnSurface
 	})
@@ -509,9 +506,7 @@ func (tb *ToolBar) FindActionByName(name string) (*Action, bool) {
 
 func (tb *ToolBar) ConfigStyles() {
 	tb.AddStyleFunc(StyleFuncDefault, func() {
-		tb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		tb.Style.Margin.Set()
-		tb.Spacing.SetPx(4 * Prefs.DensityMul())
+		tb.Style.MaxWidth.SetPx(-1)
 		tb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
 		tb.Style.Color.SetColor(ColorScheme.OnSurface)
 	})

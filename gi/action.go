@@ -396,8 +396,8 @@ func (ac *Action) ConfigStyles() {
 	ac.AddStyleFunc(StyleFuncDefault, func() {
 		ac.Style.Border.Style.Set(gist.BorderNone)
 		ac.Style.Text.Align = gist.AlignCenter
-		ac.Style.BackgroundColor.SetColor(ColorScheme.Secondary)
-		ac.Style.Color = ColorScheme.OnSecondary
+		ac.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+		ac.Style.Color = ColorScheme.OnSurface
 		switch ac.Type {
 		case ActionStandalone:
 			ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
@@ -416,11 +416,11 @@ func (ac *Action) ConfigStyles() {
 			ac.Style.MaxWidth.SetPx(-1)
 			ac.Indicator = icons.KeyboardArrowRight
 		case ActionMenuBar:
-			ac.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
+			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			ac.Style.Margin.Set()
 			ac.Indicator = icons.None
 		case ActionToolBar:
-			ac.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
+			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			ac.Style.Margin.Set()
 			ac.Indicator = icons.None
 		}

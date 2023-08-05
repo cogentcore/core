@@ -165,7 +165,6 @@ func (fr *Frame) ConfigStyles() {
 	fr.AddStyleFunc(StyleFuncDefault, func() {
 		fr.Style.Border.Style.Set(gist.BorderNone)
 		fr.Style.Border.Radius.Set()
-		fr.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		fr.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		fr.Style.BackgroundColor.SetColor(ColorScheme.Background)
 		fr.Style.Color = ColorScheme.OnBackground
