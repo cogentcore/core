@@ -6,10 +6,20 @@ package vci
 
 // Commit is one VCS commit entry, as returned in a Log
 type Commit struct {
-	Rev     string `desc:"revision number / hash code / unique id"`
-	Date    string `desc:"date (author's time) when comitted"`
-	Author  string `desc:"author's name"`
-	Email   string `desc:"author's email"`
+
+	// revision number / hash code / unique id
+	Rev string `desc:"revision number / hash code / unique id"`
+
+	// date (author's time) when comitted
+	Date string `desc:"date (author's time) when comitted"`
+
+	// author's name
+	Author string `desc:"author's name"`
+
+	// author's email
+	Email string `desc:"author's email"`
+
+	// message / subject line for commit
 	Message string `width:"100" desc:"message / subject line for commit"`
 }
 
