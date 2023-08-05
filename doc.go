@@ -18,7 +18,6 @@
 // The pointer-based approach was retained for the Matrix classes,
 // which are larger and that is likely more performant.
 //
-// Many names were shortened, consistent with more ideomatic Go naming.
+// Many names were shortened, consistent with more idiomatic Go naming.
 // and again with the go-gl/mathgl library
-//
 package mat32
