@@ -94,8 +94,10 @@ type RecvFunc func(recv, send Ki, sig int64, data any)
 // SendType (otherwise if it is known to be of a given type, just directly
 // converting as such is fine)
 type Signal struct {
+	// map of receivers and their functions
 	Cons map[Ki]RecvFunc `view:"-" json:"-" xml:"-" desc:"map of receivers and their functions"`
-	Mu   sync.RWMutex    `view:"-" json:"-" xml:"-" desc:"read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes"`
+	// read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes
+	Mu sync.RWMutex `view:"-" json:"-" xml:"-" desc:"read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes"`
 }
 
 var KiT_Signal = kit.Types.AddType(&Signal{}, nil)

@@ -16,7 +16,9 @@ import "time"
 // location information, so it is more memory efficient when lots of time
 // values are being stored.
 type Time struct {
-	Sec  int64  `desc:"time.Time.Unix() seconds since 1970"`
+	// time.Time.Unix() seconds since 1970
+	Sec int64 `desc:"time.Time.Unix() seconds since 1970"`
+	// time.Time.Nanosecond() -- nanosecond offset within second, *not* UnixNano()
 	NSec uint32 `desc:"time.Time.Nanosecond() -- nanosecond offset within second, *not* UnixNano()"`
 }
 

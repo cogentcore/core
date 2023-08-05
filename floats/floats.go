@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/* package floats provides a standard Floater interface and all the std math functions
+/*
+	package floats provides a standard Floater interface and all the std math functions
+
 defined on Floater types.  Furthermore, fully generic slice sort and
 conversion methods in the kit type kit package attempt to use this interface,
 before falling back on reflection.  If you have a struct that can be converted

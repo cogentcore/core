@@ -31,15 +31,25 @@ import (
 // for other such tags controlling a wide range of GUI and other functionality
 // -- Ki makes extensive use of such tags.
 type Node struct {
-	Nm        string    `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
-	Flag      int64     `tableview:"-" copy:"-" json:"-" xml:"-" max-width:"80" height:"3" desc:"bit flags for internal node state"`
-	Props     Props     `tableview:"-" xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
-	Par       Ki        `tableview:"-" copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
-	Kids      Slice     `tableview:"-" copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
-	NodeSig   Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	Ths       Ki        `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access."`
-	index     int       `copy:"-" json:"-" xml:"-" view:"-" desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method"`
-	depth     int       `copy:"-" json:"-" xml:"-" view:"-" desc:"optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function"`
+	// Ki.Name() user-supplied name of this node -- can be empty or non-unique
+	Nm string `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
+	// bit flags for internal node state
+	Flag int64 `tableview:"-" copy:"-" json:"-" xml:"-" max-width:"80" height:"3" desc:"bit flags for internal node state"`
+	// Ki.Properties() property map for arbitrary extensible properties, including style properties
+	Props Props `tableview:"-" xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
+	// Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent
+	Par Ki `tableview:"-" copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
+	// Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage
+	Kids Slice `tableview:"-" copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
+	// Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead
+	NodeSig Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	// we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access.
+	Ths Ki `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access."`
+	// last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method
+	index int `copy:"-" json:"-" xml:"-" view:"-" desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method"`
+	// optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function
+	depth int `copy:"-" json:"-" xml:"-" view:"-" desc:"optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function"`
+	// cached version of the field offsets relative to base Node address -- used in generic field access.
 	fieldOffs []uintptr `copy:"-" json:"-" xml:"-" view:"-" desc:"cached version of the field offsets relative to base Node address -- used in generic field access."`
 }
 
@@ -1062,7 +1072,9 @@ func (n *Node) FuncUpParent(level int, data any, fun Func) bool {
 
 // TravIdxs are tree traversal indexes
 type TravIdxs struct {
+	// current index of field: -1 for start
 	Field int `desc:"current index of field: -1 for start"`
+	// current index of children: -1 for start
 	Child int `desc:"current index of children: -1 for start"`
 }
 

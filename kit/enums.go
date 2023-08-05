@@ -620,10 +620,14 @@ type Describer interface {
 
 // EnumValue represents enum values, in common int64 terms, e.g., for GUI
 type EnumValue struct {
-	Name  string       `desc:"name for this value"`
-	Value int64        `desc:"integer value"`
-	Type  reflect.Type `desc:"the enum type that this value belongs to"`
-	Desc  string       `desc:"the comment description of the enum value"`
+	// name for this value
+	Name string `desc:"name for this value"`
+	// integer value
+	Value int64 `desc:"integer value"`
+	// the enum type that this value belongs to
+	Type reflect.Type `desc:"the enum type that this value belongs to"`
+	// the comment description of the enum value
+	Desc string `desc:"the comment description of the enum value"`
 }
 
 // Set sets the values of the EnumValue struct
