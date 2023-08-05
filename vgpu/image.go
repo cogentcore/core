@@ -118,10 +118,18 @@ func ImageToRGBA(img image.Image) *image.RGBA {
 // ImageFormat describes the size and vulkan format of an Image
 // If Layers > 1, all must be the same size.
 type ImageFormat struct {
-	Size    image.Point            `desc:"Size of image"`
-	Format  vk.Format              `desc:"Image format -- FormatR8g8b8a8Srgb is a standard default"`
+
+	// Size of image
+	Size image.Point `desc:"Size of image"`
+
+	// Image format -- FormatR8g8b8a8Srgb is a standard default
+	Format vk.Format `desc:"Image format -- FormatR8g8b8a8Srgb is a standard default"`
+
+	// number of samples -- set higher for Framebuffer rendering but otherwise default of SampleCount1Bit
 	Samples vk.SampleCountFlagBits `desc:"number of samples -- set higher for Framebuffer rendering but otherwise default of SampleCount1Bit"`
-	Layers  int                    `desc:"number of layers for texture arrays"`
+
+	// number of layers for texture arrays
+	Layers int `desc:"number of layers for texture arrays"`
 }
 
 // NewImageFormat returns a new ImageFormat with default format and given size
@@ -276,15 +284,33 @@ func (im *ImageFormat) Stride() int {
 // There can also be an optional host-visible, plain pixel buffer
 // which can be a pointer into a larger buffer or owned by the Image.
 type Image struct {
-	Name   string          `desc:"name of the image -- e.g., same as Val name if used that way -- helpful for debugging -- set to filename if loaded from a file and otherwise empty"`
-	Flags  int32           `desc:"bit flags for image state, for indicating nature of ownership and state"`
-	Format ImageFormat     `desc:"format & size of image"`
-	Image  vk.Image        `view:"-" desc:"vulkan image handle, in device memory"`
-	View   vk.ImageView    `view:"-" desc:"vulkan image view"`
-	Mem    vk.DeviceMemory `view:"-" desc:"memory for image when we allocate it"`
-	Dev    vk.Device       `view:"-" desc:"keep track of device for destroying view"`
-	Host   HostImage       `desc:"host memory buffer representation of the image"`
-	GPU    *GPU            `desc:"pointer to our GPU"`
+
+	// name of the image -- e.g., same as Val name if used that way -- helpful for debugging -- set to filename if loaded from a file and otherwise empty
+	Name string `desc:"name of the image -- e.g., same as Val name if used that way -- helpful for debugging -- set to filename if loaded from a file and otherwise empty"`
+
+	// bit flags for image state, for indicating nature of ownership and state
+	Flags int32 `desc:"bit flags for image state, for indicating nature of ownership and state"`
+
+	// format & size of image
+	Format ImageFormat `desc:"format & size of image"`
+
+	// vulkan image handle, in device memory
+	Image vk.Image `view:"-" desc:"vulkan image handle, in device memory"`
+
+	// vulkan image view
+	View vk.ImageView `view:"-" desc:"vulkan image view"`
+
+	// memory for image when we allocate it
+	Mem vk.DeviceMemory `view:"-" desc:"memory for image when we allocate it"`
+
+	// keep track of device for destroying view
+	Dev vk.Device `view:"-" desc:"keep track of device for destroying view"`
+
+	// host memory buffer representation of the image
+	Host HostImage `desc:"host memory buffer representation of the image"`
+
+	// pointer to our GPU
+	GPU *GPU `desc:"pointer to our GPU"`
 }
 
 // HasFlag checks if flag is set
@@ -889,11 +915,21 @@ func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, n
 
 // HostImage is the host representation of an Image
 type HostImage struct {
-	Size   int             `desc:"size in bytes allocated for host representation of image"`
-	Buff   vk.Buffer       `view:"-" desc:"buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)"`
-	Offset int             `desc:"offset into host buffer, when Buff is Memory managed"`
-	Mem    vk.DeviceMemory `view:"-" desc:"host CPU-visible memory, for staging, when we manage our own memory"`
-	Ptr    unsafe.Pointer  `view:"-" desc:"memory mapped pointer into host memory -- remains mapped"`
+
+	// size in bytes allocated for host representation of image
+	Size int `desc:"size in bytes allocated for host representation of image"`
+
+	// buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)
+	Buff vk.Buffer `view:"-" desc:"buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)"`
+
+	// offset into host buffer, when Buff is Memory managed
+	Offset int `desc:"offset into host buffer, when Buff is Memory managed"`
+
+	// host CPU-visible memory, for staging, when we manage our own memory
+	Mem vk.DeviceMemory `view:"-" desc:"host CPU-visible memory, for staging, when we manage our own memory"`
+
+	// memory mapped pointer into host memory -- remains mapped
+	Ptr unsafe.Pointer `view:"-" desc:"memory mapped pointer into host memory -- remains mapped"`
 }
 
 func (hi *HostImage) SetNil() {

@@ -17,12 +17,24 @@ import (
 // Multiple fill operations can be performed in one pass, but only
 // one Image can be used at a time.
 type Drawer struct {
-	Sys     vgpu.System       `desc:"drawing system"`
-	Surf    *vgpu.Surface     `desc:"surface if render target"`
-	Frame   *vgpu.RenderFrame `desc:"render frame if render target"`
-	YIsDown bool              `desc:"render so the Y axis points down, with 0,0 at the upper left, which is the Vulkan standard.  default is Y is up, with 0,0 at bottom left, which is OpenGL default.  this must be set prior to configuring, the surface, as it determines the rendering parameters."`
-	Impl    DrawerImpl        `desc:"implementation state -- ignore"`
-	UpdtMu  sync.Mutex        `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on updating"`
+
+	// drawing system
+	Sys vgpu.System `desc:"drawing system"`
+
+	// surface if render target
+	Surf *vgpu.Surface `desc:"surface if render target"`
+
+	// render frame if render target
+	Frame *vgpu.RenderFrame `desc:"render frame if render target"`
+
+	// render so the Y axis points down, with 0,0 at the upper left, which is the Vulkan standard.  default is Y is up, with 0,0 at bottom left, which is OpenGL default.  this must be set prior to configuring, the surface, as it determines the rendering parameters.
+	YIsDown bool `desc:"render so the Y axis points down, with 0,0 at the upper left, which is the Vulkan standard.  default is Y is up, with 0,0 at bottom left, which is OpenGL default.  this must be set prior to configuring, the surface, as it determines the rendering parameters."`
+
+	// implementation state -- ignore
+	Impl DrawerImpl `desc:"implementation state -- ignore"`
+
+	// mutex on updating
+	UpdtMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on updating"`
 }
 
 // ConfigSurface configures the Drawer to use given surface as a render target.

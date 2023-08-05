@@ -31,20 +31,42 @@ const MaxLights = 8
 // to specify the parameters for each item, and then a Draw call
 // to add the rendering command, followed by RenderEnd.
 type Phong struct {
-	NLights   NLights                 `desc:"number of each type of light"`
-	Ambient   [MaxLights]AmbientLight `desc:"ambient lights"`
-	Dir       [MaxLights]DirLight     `desc:"directional lights"`
-	Point     [MaxLights]PointLight   `desc:"point lights"`
-	Spot      [MaxLights]SpotLight    `desc:"spot lights"`
-	Wireframe bool                    `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system"`
 
-	Cur      CurRender                    `desc:"state for current rendering"`
-	Meshes   ordmap.Map[string, *Mesh]    `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`
+	// number of each type of light
+	NLights NLights `desc:"number of each type of light"`
+
+	// ambient lights
+	Ambient [MaxLights]AmbientLight `desc:"ambient lights"`
+
+	// directional lights
+	Dir [MaxLights]DirLight `desc:"directional lights"`
+
+	// point lights
+	Point [MaxLights]PointLight `desc:"point lights"`
+
+	// spot lights
+	Spot [MaxLights]SpotLight `desc:"spot lights"`
+
+	// render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system
+	Wireframe bool `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system"`
+
+	// state for current rendering
+	Cur CurRender `desc:"state for current rendering"`
+
+	// meshes -- holds all the mesh data -- must be configured prior to rendering
+	Meshes ordmap.Map[string, *Mesh] `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`
+
+	// textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability
 	Textures ordmap.Map[string, *Texture] `desc:"textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"`
-	Colors   ordmap.Map[string, *Colors]  `desc:"colors, optionally available for looking up by name -- not used directly in rendering"`
 
-	Sys    vgpu.System `desc:"rendering system"`
-	UpdtMu sync.Mutex  `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on updating"`
+	// colors, optionally available for looking up by name -- not used directly in rendering
+	Colors ordmap.Map[string, *Colors] `desc:"colors, optionally available for looking up by name -- not used directly in rendering"`
+
+	// rendering system
+	Sys vgpu.System `desc:"rendering system"`
+
+	// mutex on updating
+	UpdtMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on updating"`
 }
 
 func (ph *Phong) Destroy() {

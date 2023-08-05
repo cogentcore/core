@@ -13,9 +13,15 @@ import (
 // Idxs contains the indexes where a given item image size is allocated
 // there is one of these per each ItemSizes
 type Idxs struct {
+
+	// percent size of this image relative to max size allocated
 	PctSize mat32.Vec2 `desc:"percent size of this image relative to max size allocated"`
-	GpIdx   int        `desc:"group index"`
-	ItemIdx int        `desc:"item index within group (e.g., Layer)"`
+
+	// group index
+	GpIdx int `desc:"group index"`
+
+	// item index within group (e.g., Layer)
+	ItemIdx int `desc:"item index within group (e.g., Layer)"`
 }
 
 func NewIdxs(gpi, itmi int, sz, mxsz image.Point) *Idxs {

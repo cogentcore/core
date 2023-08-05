@@ -16,8 +16,14 @@ import (
 // which always includes normals and texture coordinates, and
 // optionally per-vertex colors.
 type Mesh struct {
-	NVtx     int  `desc:"number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates"`
-	NIdx     int  `desc:"number of indexes, as mat32.ArrayU32"`
+
+	// number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates
+	NVtx int `desc:"number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates"`
+
+	// number of indexes, as mat32.ArrayU32
+	NIdx int `desc:"number of indexes, as mat32.ArrayU32"`
+
+	// has per-vertex colors, as mat32.Vec4 per vertex
 	HasColor bool `desc:"has per-vertex colors, as mat32.Vec4 per vertex"`
 }
 

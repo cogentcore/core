@@ -26,10 +26,18 @@ type Mtxs struct {
 
 // DrawerImpl contains implementation state -- ignore..
 type DrawerImpl struct {
-	SurfIdx     uint32  `desc:"surface index for current render process"`
-	MaxTextures int     `desc:"maximum number of images per pass -- set by user at config"`
-	FlipY       bool    `desc:"whether to render image with flipped Y"`
-	LastOp      draw.Op `desc:"last draw operation used -- used for switching pipeline"`
+
+	// surface index for current render process
+	SurfIdx uint32 `desc:"surface index for current render process"`
+
+	// maximum number of images per pass -- set by user at config
+	MaxTextures int `desc:"maximum number of images per pass -- set by user at config"`
+
+	// whether to render image with flipped Y
+	FlipY bool `desc:"whether to render image with flipped Y"`
+
+	// last draw operation used -- used for switching pipeline
+	LastOp draw.Op `desc:"last draw operation used -- used for switching pipeline"`
 }
 
 // ConfigPipeline configures graphics settings on the pipeline

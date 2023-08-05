@@ -26,22 +26,54 @@ const MaxIters = 100
 // under the severe constraints of only 16 images.
 // Only a maximum of MaxItemsPerGp items can be allocated per grouping.
 type SzAlloc struct {
-	On            bool                `desc:"true if configured and ready to use"`
-	MaxGps        image.Point         `desc:"maximum number of groups in X and Y dimensions"`
-	MaxNGps       int                 `desc:"maximum number of groups = X * Y"`
-	MaxItemsPerGp int                 `desc:"maximum number of items per group -- constraint is enforced in addition to MaxGps"`
-	ItemSizes     []image.Point       `desc:"original list of item sizes to be allocated"`
-	UniqSizes     []image.Point       `desc:"list of all unique sizes -- operate on this for grouping"`
-	UniqSzMap     map[image.Point]int `desc:"map of all unique sizes, with group index as value"`
-	UniqSzItems   []int               `desc:"indexes into UniqSizes slice, ordered by ItemSizes indexes"`
-	GpSizes       []image.Point       `desc:"list of allocated group sizes"`
-	GpAllocs      [][]int             `desc:"allocation of image indexes by group -- first index is group, second is list of items for that group"`
-	ItemIdxs      []*Idxs             `desc:"allocation image value indexes to image indexes"`
-	XSizes        []int               `desc:"sorted list of all unique sizes"`
-	YSizes        []int               `desc:"sorted list of all unique sizes"`
-	GpNs          image.Point         `desc:"number of items in each dimension group (X, Y)"`
-	XGpIdxs       []int               `desc:"list of x group indexes"`
-	YGpIdxs       []int               `desc:"list of y group indexes"`
+
+	// true if configured and ready to use
+	On bool `desc:"true if configured and ready to use"`
+
+	// maximum number of groups in X and Y dimensions
+	MaxGps image.Point `desc:"maximum number of groups in X and Y dimensions"`
+
+	// maximum number of groups = X * Y
+	MaxNGps int `desc:"maximum number of groups = X * Y"`
+
+	// maximum number of items per group -- constraint is enforced in addition to MaxGps
+	MaxItemsPerGp int `desc:"maximum number of items per group -- constraint is enforced in addition to MaxGps"`
+
+	// original list of item sizes to be allocated
+	ItemSizes []image.Point `desc:"original list of item sizes to be allocated"`
+
+	// list of all unique sizes -- operate on this for grouping
+	UniqSizes []image.Point `desc:"list of all unique sizes -- operate on this for grouping"`
+
+	// map of all unique sizes, with group index as value
+	UniqSzMap map[image.Point]int `desc:"map of all unique sizes, with group index as value"`
+
+	// indexes into UniqSizes slice, ordered by ItemSizes indexes
+	UniqSzItems []int `desc:"indexes into UniqSizes slice, ordered by ItemSizes indexes"`
+
+	// list of allocated group sizes
+	GpSizes []image.Point `desc:"list of allocated group sizes"`
+
+	// allocation of image indexes by group -- first index is group, second is list of items for that group
+	GpAllocs [][]int `desc:"allocation of image indexes by group -- first index is group, second is list of items for that group"`
+
+	// allocation image value indexes to image indexes
+	ItemIdxs []*Idxs `desc:"allocation image value indexes to image indexes"`
+
+	// sorted list of all unique sizes
+	XSizes []int `desc:"sorted list of all unique sizes"`
+
+	// sorted list of all unique sizes
+	YSizes []int `desc:"sorted list of all unique sizes"`
+
+	// number of items in each dimension group (X, Y)
+	GpNs image.Point `desc:"number of items in each dimension group (X, Y)"`
+
+	// list of x group indexes
+	XGpIdxs []int `desc:"list of x group indexes"`
+
+	// list of y group indexes
+	YGpIdxs []int `desc:"list of y group indexes"`
 }
 
 // SetSizes sets the max number of groups along each dimension (X, Y),

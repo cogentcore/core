@@ -24,20 +24,48 @@ import (
 // the render pass, but new information can be written to an as-yet unused Val
 // prior to using in a render (although this comes at a performance cost).
 type Var struct {
-	Name        string                 `desc:"variable name"`
-	Type        Types                  `desc:"type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  Texture Images do not have such alignment constraints, and can be allocated in a big host buffer or in separate buffers depending on how frequently they are updated with different sizes."`
-	ArrayN      int                    `desc:"number of elements if this is a fixed array -- use 1 if singular element, and 0 if a variable-sized array, where each Val can have its own specific size. This also works for arrays of Textures -- up to 128 max."`
-	Role        VarRoles               `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet.  For TextureRole items, the last such Var in a set will automatically be flagged as variable sized, so the shader can specify: #extension GL_EXT_nonuniform_qualifier : require and the list of textures can be specified as a [] array."`
-	Shaders     vk.ShaderStageFlagBits `desc:"bit flags for set of shaders that this variable is used in"`
-	Set         int                    `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
-	BindLoc     int                    `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
-	SizeOf      int                    `desc:"size in bytes of one element (not array size).  Note that arrays in Uniform require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint.  In Storage, with HLSL compute shaders, 4 byte (e.g., float32 or int32) works fine as an array type.  For Push role, SizeOf must be set exactly -- no vals are created."`
-	TextureOwns bool                   `inactive:"+" desc:"texture manages its own memory allocation -- set this for texture objects that change size dynamically -- otherwise image host staging memory is allocated in a common buffer"`
-	DynOffIdx   int                    `inactive:"+" desc:"index into the dynamic offset list, where dynamic offsets of vals need to be set -- for Uniform and Storage roles -- set during Set:DescLayout"`
-	Vals        Vals                   `desc:"the array of values allocated for this variable.  The size of this array is determined by the Set membership of this Var, and the current index is updated at the set level.  For Texture Roles, there is a separate descriptor for each value (image) -- otherwise dynamic offset binding is used."`
-	BindValIdx  []int                  `inactive:"+" desc:"for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIdx out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism."`
-	StorageBuff int                    `inactive:"+" desc:"index of the storage buffer in Memory that holds this Var -- for Storage buffer types.  Due to support for dynamic binding, all Vals of a given Var must be stored in the same buffer, and the allocation mechanism ensures this.  This constrains large vars approaching the MaxStorageBufferRange capacity to only have 1 val, which is typically reasonable given that compute shaders use large data and tend to use static binding anyway, and graphics uses tend to be smaller."`
-	Offset      int                    `inactive:"+" desc:"offset -- only for push constants"`
+
+	// variable name
+	Name string `desc:"variable name"`
+
+	// type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  Texture Images do not have such alignment constraints, and can be allocated in a big host buffer or in separate buffers depending on how frequently they are updated with different sizes.
+	Type Types `desc:"type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  Texture Images do not have such alignment constraints, and can be allocated in a big host buffer or in separate buffers depending on how frequently they are updated with different sizes."`
+
+	// number of elements if this is a fixed array -- use 1 if singular element, and 0 if a variable-sized array, where each Val can have its own specific size. This also works for arrays of Textures -- up to 128 max.
+	ArrayN int `desc:"number of elements if this is a fixed array -- use 1 if singular element, and 0 if a variable-sized array, where each Val can have its own specific size. This also works for arrays of Textures -- up to 128 max."`
+
+	// role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet.  For TextureRole items, the last such Var in a set will automatically be flagged as variable sized, so the shader can specify: #extension GL_EXT_nonuniform_qualifier : require and the list of textures can be specified as a [] array.
+	Role VarRoles `desc:"role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet.  For TextureRole items, the last such Var in a set will automatically be flagged as variable sized, so the shader can specify: #extension GL_EXT_nonuniform_qualifier : require and the list of textures can be specified as a [] array."`
+
+	// bit flags for set of shaders that this variable is used in
+	Shaders vk.ShaderStageFlagBits `desc:"bit flags for set of shaders that this variable is used in"`
+
+	// DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set
+	Set int `desc:"DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set"`
+
+	// binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools
+	BindLoc int `desc:"binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools"`
+
+	// size in bytes of one element (not array size).  Note that arrays in Uniform require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint.  In Storage, with HLSL compute shaders, 4 byte (e.g., float32 or int32) works fine as an array type.  For Push role, SizeOf must be set exactly -- no vals are created.
+	SizeOf int `desc:"size in bytes of one element (not array size).  Note that arrays in Uniform require 16 byte alignment for each element, so if using arrays, it is best to work within that constraint.  In Storage, with HLSL compute shaders, 4 byte (e.g., float32 or int32) works fine as an array type.  For Push role, SizeOf must be set exactly -- no vals are created."`
+
+	// texture manages its own memory allocation -- set this for texture objects that change size dynamically -- otherwise image host staging memory is allocated in a common buffer
+	TextureOwns bool `inactive:"+" desc:"texture manages its own memory allocation -- set this for texture objects that change size dynamically -- otherwise image host staging memory is allocated in a common buffer"`
+
+	// index into the dynamic offset list, where dynamic offsets of vals need to be set -- for Uniform and Storage roles -- set during Set:DescLayout
+	DynOffIdx int `inactive:"+" desc:"index into the dynamic offset list, where dynamic offsets of vals need to be set -- for Uniform and Storage roles -- set during Set:DescLayout"`
+
+	// the array of values allocated for this variable.  The size of this array is determined by the Set membership of this Var, and the current index is updated at the set level.  For Texture Roles, there is a separate descriptor for each value (image) -- otherwise dynamic offset binding is used.
+	Vals Vals `desc:"the array of values allocated for this variable.  The size of this array is determined by the Set membership of this Var, and the current index is updated at the set level.  For Texture Roles, there is a separate descriptor for each value (image) -- otherwise dynamic offset binding is used."`
+
+	// for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIdx out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism.
+	BindValIdx []int `inactive:"+" desc:"for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIdx out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism."`
+
+	// index of the storage buffer in Memory that holds this Var -- for Storage buffer types.  Due to support for dynamic binding, all Vals of a given Var must be stored in the same buffer, and the allocation mechanism ensures this.  This constrains large vars approaching the MaxStorageBufferRange capacity to only have 1 val, which is typically reasonable given that compute shaders use large data and tend to use static binding anyway, and graphics uses tend to be smaller.
+	StorageBuff int `inactive:"+" desc:"index of the storage buffer in Memory that holds this Var -- for Storage buffer types.  Due to support for dynamic binding, all Vals of a given Var must be stored in the same buffer, and the allocation mechanism ensures this.  This constrains large vars approaching the MaxStorageBufferRange capacity to only have 1 val, which is typically reasonable given that compute shaders use large data and tend to use static binding anyway, and graphics uses tend to be smaller."`
+
+	// offset -- only for push constants
+	Offset int `inactive:"+" desc:"offset -- only for push constants"`
 }
 
 // Init initializes the main values
@@ -180,7 +208,11 @@ func (vr *Var) TextureValidIdx(stIdx, idx int) int {
 
 // VarList is a list of variables
 type VarList struct {
-	Vars   []*Var          `desc:"variables in order"`
+
+	// variables in order
+	Vars []*Var `desc:"variables in order"`
+
+	// map of vars by name -- names must be unique
 	VarMap map[string]*Var `desc:"map of vars by name -- names must be unique"`
 }
 

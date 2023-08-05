@@ -12,6 +12,8 @@ import (
 // Texture supplies an Image and a Sampler
 type Texture struct {
 	Image
+
+	// sampler for image
 	Sampler `desc:"sampler for image"`
 }
 
@@ -38,12 +40,22 @@ func (tx *Texture) AllocTexture() {
 
 // Sampler represents a vulkan image sampler
 type Sampler struct {
-	Name      string
-	UMode     SamplerModes `desc:"for U (horizontal) axis -- what to do when going off the edge"`
-	VMode     SamplerModes `desc:"for V (vertical) axis -- what to do when going off the edge"`
-	WMode     SamplerModes `desc:"for W (horizontal) axis -- what to do when going off the edge"`
-	Border    BorderColors `desc:"border color for Clamp modes"`
-	VkSampler vk.Sampler   `desc:"the vulkan sampler"`
+	Name string
+
+	// for U (horizontal) axis -- what to do when going off the edge
+	UMode SamplerModes `desc:"for U (horizontal) axis -- what to do when going off the edge"`
+
+	// for V (vertical) axis -- what to do when going off the edge
+	VMode SamplerModes `desc:"for V (vertical) axis -- what to do when going off the edge"`
+
+	// for W (horizontal) axis -- what to do when going off the edge
+	WMode SamplerModes `desc:"for W (horizontal) axis -- what to do when going off the edge"`
+
+	// border color for Clamp modes
+	Border BorderColors `desc:"border color for Clamp modes"`
+
+	// the vulkan sampler
+	VkSampler vk.Sampler `desc:"the vulkan sampler"`
 }
 
 func (sm *Sampler) Defaults() {

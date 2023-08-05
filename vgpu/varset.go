@@ -55,14 +55,27 @@ const (
 // The first set at index -1 contains Vertex and Index data, handed separately.
 type VarSet struct {
 	VarList
-	Set           int                 `desc:"set number"`
-	NValsPer      int                 `desc:"number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible.  For Texture vars, each of the NDesc sets can have a maximum of MaxTexturesPerSet (16) -- if NValsPer > MaxTexturesPerSet, then vals are wrapped across sets, and accessing them requires using the appropriate DescIdx, as in System.CmdBindTextureVarIdx."`
-	NTextureDescs int                 `desc:"for texture vars, this is the number of descriptor sets required to represent all of the different Texture image Vals that have been allocated.  Use Vars.BindAllTextureVals to bind all such vals, and System.CmdBindTextureVarIdx to automatically bind the correct set."`
-	RoleMap       map[VarRoles][]*Var `desc:"map of vars by different roles, within this set -- updated in Config(), after all vars added"`
-	ParentVars    *Vars               `desc:"the parent vars we belong to"`
 
-	VkLayout   vk.DescriptorSetLayout `desc:"set layout info -- static description of each var type, role, binding, stages"`
-	VkDescSets []vk.DescriptorSet     `desc:"allocated descriptor set -- one of these per Vars.NDescs -- can have multiple sets that can be independently updated, e.g., for parallel rendering passes.  If only rendering one at a time, only need one."`
+	// set number
+	Set int `desc:"set number"`
+
+	// number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible.  For Texture vars, each of the NDesc sets can have a maximum of MaxTexturesPerSet (16) -- if NValsPer > MaxTexturesPerSet, then vals are wrapped across sets, and accessing them requires using the appropriate DescIdx, as in System.CmdBindTextureVarIdx.
+	NValsPer int `desc:"number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible.  For Texture vars, each of the NDesc sets can have a maximum of MaxTexturesPerSet (16) -- if NValsPer > MaxTexturesPerSet, then vals are wrapped across sets, and accessing them requires using the appropriate DescIdx, as in System.CmdBindTextureVarIdx."`
+
+	// for texture vars, this is the number of descriptor sets required to represent all of the different Texture image Vals that have been allocated.  Use Vars.BindAllTextureVals to bind all such vals, and System.CmdBindTextureVarIdx to automatically bind the correct set.
+	NTextureDescs int `desc:"for texture vars, this is the number of descriptor sets required to represent all of the different Texture image Vals that have been allocated.  Use Vars.BindAllTextureVals to bind all such vals, and System.CmdBindTextureVarIdx to automatically bind the correct set."`
+
+	// map of vars by different roles, within this set -- updated in Config(), after all vars added
+	RoleMap map[VarRoles][]*Var `desc:"map of vars by different roles, within this set -- updated in Config(), after all vars added"`
+
+	// the parent vars we belong to
+	ParentVars *Vars `desc:"the parent vars we belong to"`
+
+	// set layout info -- static description of each var type, role, binding, stages
+	VkLayout vk.DescriptorSetLayout `desc:"set layout info -- static description of each var type, role, binding, stages"`
+
+	// allocated descriptor set -- one of these per Vars.NDescs -- can have multiple sets that can be independently updated, e.g., for parallel rendering passes.  If only rendering one at a time, only need one.
+	VkDescSets []vk.DescriptorSet `desc:"allocated descriptor set -- one of these per Vars.NDescs -- can have multiple sets that can be independently updated, e.g., for parallel rendering passes.  If only rendering one at a time, only need one."`
 }
 
 // AddVar adds given variable

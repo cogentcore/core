@@ -12,7 +12,11 @@ import (
 
 // Mtxs contains the camera view and projection matricies, for uniform uploading
 type Mtxs struct {
+
+	// View Matrix: transforms world into camera-centered, 3D coordinates
 	View mat32.Mat4 `desc:"View Matrix: transforms world into camera-centered, 3D coordinates"`
+
+	// Projection Matrix: transforms camera coords into 2D render coordinates
 	Prjn mat32.Mat4 `desc:"Projection Matrix: transforms camera coords into 2D render coordinates"`
 }
 

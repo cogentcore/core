@@ -22,20 +22,45 @@ import (
 // The Render object lives on the System, and any associated Surface,
 // RenderFrame, and Framebuffers point to it.
 type Render struct {
-	Sys        *System         `desc:"system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc"`
-	Dev        vk.Device       `desc:"the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface"`
-	Format     ImageFormat     `desc:"image format information for the framebuffer we render to"`
-	Depth      Image           `desc:"the associated depth buffer, if set"`
-	HasDepth   bool            `desc:"is true if configured with depth buffer"`
-	Multi      Image           `desc:"for multisampling, this is the multisampled image that is the actual render target"`
-	HasMulti   bool            `desc:"is true if multsampled image configured"`
-	Grab       Image           `desc:"host-accessible image that is used to transfer back from a render color attachment to host memory -- requires a different format than color attachment, and is ImageOnHostOnly flagged."`
-	GrabDepth  MemBuff         `desc:"host-accessible buffer for grabbing the depth map -- must go to a buffer and not an image"`
-	NotSurface bool            `desc:"set this to true if it is not using a Surface render target (i.e., it is a RenderFrame)"`
-	ClearVals  []vk.ClearValue `desc:"values for clearing image when starting render pass"`
 
+	// system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc
+	Sys *System `desc:"system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc"`
+
+	// the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface
+	Dev vk.Device `desc:"the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface"`
+
+	// image format information for the framebuffer we render to
+	Format ImageFormat `desc:"image format information for the framebuffer we render to"`
+
+	// the associated depth buffer, if set
+	Depth Image `desc:"the associated depth buffer, if set"`
+
+	// is true if configured with depth buffer
+	HasDepth bool `desc:"is true if configured with depth buffer"`
+
+	// for multisampling, this is the multisampled image that is the actual render target
+	Multi Image `desc:"for multisampling, this is the multisampled image that is the actual render target"`
+
+	// is true if multsampled image configured
+	HasMulti bool `desc:"is true if multsampled image configured"`
+
+	// host-accessible image that is used to transfer back from a render color attachment to host memory -- requires a different format than color attachment, and is ImageOnHostOnly flagged.
+	Grab Image `desc:"host-accessible image that is used to transfer back from a render color attachment to host memory -- requires a different format than color attachment, and is ImageOnHostOnly flagged."`
+
+	// host-accessible buffer for grabbing the depth map -- must go to a buffer and not an image
+	GrabDepth MemBuff `desc:"host-accessible buffer for grabbing the depth map -- must go to a buffer and not an image"`
+
+	// set this to true if it is not using a Surface render target (i.e., it is a RenderFrame)
+	NotSurface bool `desc:"set this to true if it is not using a Surface render target (i.e., it is a RenderFrame)"`
+
+	// values for clearing image when starting render pass
+	ClearVals []vk.ClearValue `desc:"values for clearing image when starting render pass"`
+
+	// the vulkan renderpass config that clears target first
 	VkClearPass vk.RenderPass `desc:"the vulkan renderpass config that clears target first"`
-	VkLoadPass  vk.RenderPass `desc:"the vulkan renderpass config that does not clear target first (loads previous)"`
+
+	// the vulkan renderpass config that does not clear target first (loads previous)
+	VkLoadPass vk.RenderPass `desc:"the vulkan renderpass config that does not clear target first (loads previous)"`
 }
 
 func (rp *Render) Destroy() {

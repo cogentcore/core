@@ -9,7 +9,11 @@ import "github.com/goki/mat32"
 // Box is a rectangular-shaped solid (cuboid)
 type Box struct {
 	ShapeBase
-	Size mat32.Vec3  `desc:"size along each dimension"`
+
+	// size along each dimension
+	Size mat32.Vec3 `desc:"size along each dimension"`
+
+	// number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
 	Segs mat32.Vec3i `desc:"number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"`
 }
 

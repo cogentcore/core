@@ -15,16 +15,34 @@ import (
 // MemBuff is a memory buffer holding a particular type of memory
 // with staging Host-based memory and Device memory
 type MemBuff struct {
-	GPU        *GPU
-	Type       BuffTypes       `desc:"type of memory in this buffer"`
-	Size       int             `desc:"allocated buffer size"`
-	Host       vk.Buffer       `view:"-" desc:"logical descriptor for host CPU-visible memory, for staging"`
-	HostMem    vk.DeviceMemory `view:"-" desc:"host CPU-visible memory, for staging"`
-	Dev        vk.Buffer       `view:"-" desc:"logical descriptor for device GPU-local memory, for computation"`
-	DevMem     vk.DeviceMemory `view:"-" desc:"device GPU-local memory, for computation"`
-	HostPtr    unsafe.Pointer  `view:"-" desc:"memory mapped pointer into host memory -- remains mapped"`
-	AlignBytes int             `desc:"alignment of offsets into this buffer"`
-	Active     bool            `inactive:"+" desc:"true if memory has been allocated, copied, transfered"`
+	GPU *GPU
+
+	// type of memory in this buffer
+	Type BuffTypes `desc:"type of memory in this buffer"`
+
+	// allocated buffer size
+	Size int `desc:"allocated buffer size"`
+
+	// logical descriptor for host CPU-visible memory, for staging
+	Host vk.Buffer `view:"-" desc:"logical descriptor for host CPU-visible memory, for staging"`
+
+	// host CPU-visible memory, for staging
+	HostMem vk.DeviceMemory `view:"-" desc:"host CPU-visible memory, for staging"`
+
+	// logical descriptor for device GPU-local memory, for computation
+	Dev vk.Buffer `view:"-" desc:"logical descriptor for device GPU-local memory, for computation"`
+
+	// device GPU-local memory, for computation
+	DevMem vk.DeviceMemory `view:"-" desc:"device GPU-local memory, for computation"`
+
+	// memory mapped pointer into host memory -- remains mapped
+	HostPtr unsafe.Pointer `view:"-" desc:"memory mapped pointer into host memory -- remains mapped"`
+
+	// alignment of offsets into this buffer
+	AlignBytes int `desc:"alignment of offsets into this buffer"`
+
+	// true if memory has been allocated, copied, transfered
+	Active bool `inactive:"+" desc:"true if memory has been allocated, copied, transfered"`
 }
 
 // AllocHost allocates memory for this buffer of given size in bytes,

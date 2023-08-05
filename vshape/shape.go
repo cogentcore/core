@@ -29,10 +29,18 @@ type Shape interface {
 
 // ShapeBase is the base shape element
 type ShapeBase struct {
-	VtxOff int        `desc:"vertex offset, in points"`
-	IdxOff int        `desc:"index offset, in points"`
-	CBBox  mat32.Box3 `desc:"cubic bounding box in local coords"`
-	Pos    mat32.Vec3 `desc:"all shapes take a 3D position offset to enable composition"`
+
+	// vertex offset, in points
+	VtxOff int `desc:"vertex offset, in points"`
+
+	// index offset, in points
+	IdxOff int `desc:"index offset, in points"`
+
+	// cubic bounding box in local coords
+	CBBox mat32.Box3 `desc:"cubic bounding box in local coords"`
+
+	// all shapes take a 3D position offset to enable composition
+	Pos mat32.Vec3 `desc:"all shapes take a 3D position offset to enable composition"`
 }
 
 // Offs returns starting offset for verticies, indexes in full shape array,

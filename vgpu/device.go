@@ -13,9 +13,15 @@ import (
 
 // Device holds Device and associated Queue info
 type Device struct {
-	Device     vk.Device `desc:"logical device"`
-	QueueIndex uint32    `desc:"queue index for device"`
-	Queue      vk.Queue  `desc:"queue for device"`
+
+	// logical device
+	Device vk.Device `desc:"logical device"`
+
+	// queue index for device
+	QueueIndex uint32 `desc:"queue index for device"`
+
+	// queue for device
+	Queue vk.Queue `desc:"queue for device"`
 }
 
 // Init initializes a device based on QueueFlagBits

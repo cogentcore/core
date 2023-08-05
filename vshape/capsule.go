@@ -11,14 +11,30 @@ import "github.com/goki/mat32"
 // Height is along the Y axis -- total height is Height + TopRad + BotRad.
 type Capsule struct {
 	ShapeBase
-	Height     float32 `desc:"height of the cylinder portion"`
-	TopRad     float32 `desc:"radius of the top -- set to 0 to omit top cap"`
-	BotRad     float32 `desc:"radius of the bottom -- set to 0 to omit bottom cap"`
-	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
-	HeightSegs int     `desc:"number of height segments"`
-	CapSegs    int     `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`
-	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
-	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
+
+	// height of the cylinder portion
+	Height float32 `desc:"height of the cylinder portion"`
+
+	// radius of the top -- set to 0 to omit top cap
+	TopRad float32 `desc:"radius of the top -- set to 0 to omit top cap"`
+
+	// radius of the bottom -- set to 0 to omit bottom cap
+	BotRad float32 `desc:"radius of the bottom -- set to 0 to omit bottom cap"`
+
+	// number of radial segments (32 is a reasonable default for full circle)
+	RadialSegs int `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
+
+	// number of height segments
+	HeightSegs int `desc:"number of height segments"`
+
+	// number of segments in the hemisphere cap ends (16 is a reasonable default)
+	CapSegs int `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`
+
+	// starting angle in degrees, relative to -1,0,0 left side starting point
+	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
+
+	// total angle to generate in degrees (max 360)
+	AngLen float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 
 // NewCapsule returns a Capsule shape with given radius, height,

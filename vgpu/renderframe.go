@@ -13,16 +13,36 @@ import (
 // RenderFrame is an offscreen, non-window-backed rendering target,
 // functioning like a Surface
 type RenderFrame struct {
-	GPU           *GPU           `desc:"pointer to gpu device, for convenience"`
-	Device        Device         `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
-	Render        *Render        `desc:"the Render for this RenderFrame, typically from a System"`
-	Format        ImageFormat    `desc:"has the current image format and dimensions"`
-	NFrames       int            `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
-	Frames        []*Framebuffer `desc:"Framebuffers representing the Image owned by the RenderFrame -- we iterate through these in rendering subsequent frames"`
-	ImageAcquired vk.Semaphore   `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
-	RenderDone    vk.Semaphore   `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
-	RenderFence   vk.Fence       `view:"-" desc:"fence for rendering command running"`
-	OwnDevice     bool           `desc:"do we own the device?"`
+
+	// pointer to gpu device, for convenience
+	GPU *GPU `desc:"pointer to gpu device, for convenience"`
+
+	// device for this surface -- each window surface has its own device, configured for that surface
+	Device Device `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
+
+	// the Render for this RenderFrame, typically from a System
+	Render *Render `desc:"the Render for this RenderFrame, typically from a System"`
+
+	// has the current image format and dimensions
+	Format ImageFormat `desc:"has the current image format and dimensions"`
+
+	// number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number
+	NFrames int `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
+
+	// Framebuffers representing the Image owned by the RenderFrame -- we iterate through these in rendering subsequent frames
+	Frames []*Framebuffer `desc:"Framebuffers representing the Image owned by the RenderFrame -- we iterate through these in rendering subsequent frames"`
+
+	// semaphore used internally for waiting on acquisition of next frame
+	ImageAcquired vk.Semaphore `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
+
+	// semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
+	RenderDone vk.Semaphore `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
+
+	// fence for rendering command running
+	RenderFence vk.Fence `view:"-" desc:"fence for rendering command running"`
+
+	// do we own the device?
+	OwnDevice bool `desc:"do we own the device?"`
 }
 
 // NewRenderFrameOwnDevice returns a new renderframe initialized for given GPU,

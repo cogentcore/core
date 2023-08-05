@@ -17,18 +17,42 @@ import (
 // Surface manages the physical device for the visible image
 // of a window surface, and the swapchain for presenting images.
 type Surface struct {
-	GPU            *GPU           `desc:"pointer to gpu device, for convenience"`
-	Device         Device         `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
-	Render         *Render        `desc:"the Render for this Surface, typically from a System"`
-	Format         ImageFormat    `desc:"has the current swapchain image format and dimensions"`
-	DesiredFormats []vk.Format    `desc:"ordered list of surface formats to select"`
-	NFrames        int            `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
-	Frames         []*Framebuffer `desc:"Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames"`
-	Surface        vk.Surface     `view:"-" desc:"vulkan handle for surface"`
-	Swapchain      vk.Swapchain   `view:"-" desc:"vulkan handle for swapchain"`
-	ImageAcquired  vk.Semaphore   `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
-	RenderDone     vk.Semaphore   `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
-	RenderFence    vk.Fence       `view:"-" desc:"fence for rendering command running"`
+
+	// pointer to gpu device, for convenience
+	GPU *GPU `desc:"pointer to gpu device, for convenience"`
+
+	// device for this surface -- each window surface has its own device, configured for that surface
+	Device Device `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
+
+	// the Render for this Surface, typically from a System
+	Render *Render `desc:"the Render for this Surface, typically from a System"`
+
+	// has the current swapchain image format and dimensions
+	Format ImageFormat `desc:"has the current swapchain image format and dimensions"`
+
+	// ordered list of surface formats to select
+	DesiredFormats []vk.Format `desc:"ordered list of surface formats to select"`
+
+	// number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number
+	NFrames int `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
+
+	// Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames
+	Frames []*Framebuffer `desc:"Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames"`
+
+	// vulkan handle for surface
+	Surface vk.Surface `view:"-" desc:"vulkan handle for surface"`
+
+	// vulkan handle for swapchain
+	Swapchain vk.Swapchain `view:"-" desc:"vulkan handle for swapchain"`
+
+	// semaphore used internally for waiting on acquisition of next frame
+	ImageAcquired vk.Semaphore `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
+
+	// semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
+	RenderDone vk.Semaphore `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
+
+	// fence for rendering command running
+	RenderFence vk.Fence `view:"-" desc:"fence for rendering command running"`
 }
 
 // NewSurface returns a new surface initialized for given GPU and vulkan

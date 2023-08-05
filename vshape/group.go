@@ -9,6 +9,8 @@ import "github.com/goki/mat32"
 // ShapeGroup is a group of shapes -- returns summary data for shape elements
 type ShapeGroup struct {
 	ShapeBase
+
+	// list of shapes in group
 	Shapes []Shape `desc:"list of shapes in group"`
 }
 

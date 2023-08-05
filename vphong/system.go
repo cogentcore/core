@@ -20,22 +20,44 @@ var content embed.FS
 // Use* methods -- determines which pipeline is used.
 // Default is single color.
 type CurRender struct {
-	DescIdx     int        `desc:"index of descriptor collection to use -- for threaded / parallel rendering -- see vgup.Vars NDescs for more info"`
-	UseTexture  bool       `desc:"a texture was selected -- if true, overrides other options"`
-	UseVtxColor bool       `desc:"a per-vertex color was selected"`
-	ModelMtx    mat32.Mat4 `desc:"current model pose matrix"`
-	VPMtx       Mtxs       `desc:"camera view and projection matrixes"`
-	Color       Colors     `desc:"current color surface properties"`
-	TexPars     TexPars    `desc:"texture parameters -- repeat, offset"`
-	TexIdx      int        `desc:"index of currently-selected texture"`
+
+	// index of descriptor collection to use -- for threaded / parallel rendering -- see vgup.Vars NDescs for more info
+	DescIdx int `desc:"index of descriptor collection to use -- for threaded / parallel rendering -- see vgup.Vars NDescs for more info"`
+
+	// a texture was selected -- if true, overrides other options
+	UseTexture bool `desc:"a texture was selected -- if true, overrides other options"`
+
+	// a per-vertex color was selected
+	UseVtxColor bool `desc:"a per-vertex color was selected"`
+
+	// current model pose matrix
+	ModelMtx mat32.Mat4 `desc:"current model pose matrix"`
+
+	// camera view and projection matrixes
+	VPMtx Mtxs `desc:"camera view and projection matrixes"`
+
+	// current color surface properties
+	Color Colors `desc:"current color surface properties"`
+
+	// texture parameters -- repeat, offset
+	TexPars TexPars `desc:"texture parameters -- repeat, offset"`
+
+	// index of currently-selected texture
+	TexIdx int `desc:"index of currently-selected texture"`
 }
 
 // PushU is the push constants structure, holding everything that
 // updates per object -- avoids any limitations on capacity.
 type PushU struct {
+
+	// Model Matrix: poses object in world coordinates
 	ModelMtx mat32.Mat4 `desc:"Model Matrix: poses object in world coordinates"`
-	Color    Colors     `desc:"surface colors"`
-	Tex      TexPars    `desc:"texture parameters"`
+
+	// surface colors
+	Color Colors `desc:"surface colors"`
+
+	// texture parameters
+	Tex TexPars `desc:"texture parameters"`
 }
 
 // NewPush generates a new Push object based on current render settings

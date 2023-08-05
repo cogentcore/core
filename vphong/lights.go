@@ -27,6 +27,8 @@ func (nl *NLights) Reset() {
 
 // AmbientLight provides diffuse uniform lighting -- typically only one of these
 type AmbientLight struct {
+
+	// color of light -- multiplies ambient color of materials
 	Color mat32.Vec3 `desc:"color of light -- multiplies ambient color of materials"`
 	pad0  float32
 }
@@ -36,20 +38,30 @@ type AmbientLight struct {
 // For rendering, the position is negated and normalized to get the direction
 // vector (i.e., absolute distance doesn't matter)
 type DirLight struct {
+
+	// color of light at full intensity
 	Color mat32.Vec3 `desc:"color of light at full intensity"`
 	pad0  float32
-	Pos   mat32.Vec3 `desc:"position of light vector -- think of it shining down from this position toward the origin, i.e., the negation of this position is the vector."`
-	pad1  float32
+
+	// position of light vector -- think of it shining down from this position toward the origin, i.e., the negation of this position is the vector.
+	Pos  mat32.Vec3 `desc:"position of light vector -- think of it shining down from this position toward the origin, i.e., the negation of this position is the vector."`
+	pad1 float32
 }
 
 // PointLight is an omnidirectional light with a position
 // and associated decay factors, which divide the light intensity as a function of
 // linear and quadratic distance.  The quadratic factor dominates at longer distances.
 type PointLight struct {
+
+	// color of light a full intensity
 	Color mat32.Vec3 `desc:"color of light a full intensity"`
 	pad0  float32
-	Pos   mat32.Vec3 `desc:"position of light in world coordinates"`
-	pad1  float32
+
+	// position of light in world coordinates
+	Pos  mat32.Vec3 `desc:"position of light in world coordinates"`
+	pad1 float32
+
+	// X = Linear, Y = Quad: Distance linear decay factor -- defaults to .1; Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances
 	Decay mat32.Vec3 `desc:"X = Linear, Y = Quad: Distance linear decay factor -- defaults to .1; Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"`
 	pad2  float32
 }
@@ -60,12 +72,20 @@ type PointLight struct {
 // linear and quadratic distance.
 // The quadratic factor dominates at longer distances.
 type SpotLight struct {
+
+	// color of light a full intensity
 	Color mat32.Vec3 `desc:"color of light a full intensity"`
 	pad0  float32
-	Pos   mat32.Vec3 `desc:"position of light in world coordinates"`
-	pad1  float32
-	Dir   mat32.Vec3 `desc:"direction of light vector"`
-	pad2  float32
+
+	// position of light in world coordinates
+	Pos  mat32.Vec3 `desc:"position of light in world coordinates"`
+	pad1 float32
+
+	// direction of light vector
+	Dir  mat32.Vec3 `desc:"direction of light vector"`
+	pad2 float32
+
+	// X = Angular Decay, Y = CutAngle, Z = LinDecay, W = QuadDecay: Angular decay factor -- defaults to 15; Cut off angle (in degrees) -- defaults to 45 -- max of 90; Distance linear decay factor -- defaults to 1; Distance quadratic decay factor -- defaults to 1 -- dominates at longer distances
 	Decay mat32.Vec4 `desc:"X = Angular Decay, Y = CutAngle, Z = LinDecay, W = QuadDecay: Angular decay factor -- defaults to 15; Cut off angle (in degrees) -- defaults to 45 -- max of 90; Distance linear decay factor -- defaults to 1; Distance quadratic decay factor -- defaults to 1 -- dominates at longer distances"`
 }
 
