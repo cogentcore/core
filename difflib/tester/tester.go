@@ -35,20 +35,18 @@ func prepareStrings(seed int64) (A, B []string) {
 		}
 	}
 	// Do some copies from A to B
-	maxcopy := rand.Intn(len(A)-1)+1
+	maxcopy := rand.Intn(len(A)-1) + 1
 	for copied, tocopy := 0, rand.Intn(2*len(A)/3); copied < tocopy; {
-		l := rand.Intn(rand.Intn(maxcopy-1)+1)
-		for a,b,n := rand.Intn(len(A)), rand.Intn(len(B)), 0;
-		           a < len(A) && b < len(B) && n < l; a,b,n = a+1,b+1,n+1 {
+		l := rand.Intn(rand.Intn(maxcopy-1) + 1)
+		for a, b, n := rand.Intn(len(A)), rand.Intn(len(B)), 0; a < len(A) && b < len(B) && n < l; a, b, n = a+1, b+1, n+1 {
 			B[b] = A[a]
 			copied++
 		}
 	}
 	// And some from B to A
 	for copied, tocopy := 0, rand.Intn(2*len(A)/3); copied < tocopy; {
-		l := rand.Intn(rand.Intn(maxcopy-1)+1)
-		for a,b,n := rand.Intn(len(A)), rand.Intn(len(B)), 0;
-		           a < len(A) && b < len(B) && n < l; a,b,n = a+1,b+1,n+1 {
+		l := rand.Intn(rand.Intn(maxcopy-1) + 1)
+		for a, b, n := rand.Intn(len(A)), rand.Intn(len(B)), 0; a < len(A) && b < len(B) && n < l; a, b, n = a+1, b+1, n+1 {
 			A[a] = B[b]
 			copied++
 		}
@@ -60,7 +58,7 @@ func PrepareStringsToDiff(count, seed int) (As, Bs [][]string) {
 	As = make([][]string, count)
 	Bs = make([][]string, count)
 	for i := range As {
-		As[i], Bs[i] = prepareStrings(int64(i+seed))
+		As[i], Bs[i] = prepareStrings(int64(i + seed))
 	}
 	return
 }

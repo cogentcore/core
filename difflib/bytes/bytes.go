@@ -20,10 +20,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"hash/adler32"
 	"io"
 	"strings"
 	"unicode"
-	"hash/adler32"
 )
 
 func min(a, b int) int {
@@ -50,7 +50,7 @@ func calculateRatio(matches, length int) float64 {
 func listifyString(str []byte) (lst [][]byte) {
 	lst = make([][]byte, len(str))
 	for i := range str {
-		lst[i] = str[i:i+1]
+		lst[i] = str[i : i+1]
 	}
 	return lst
 }
@@ -80,20 +80,21 @@ func _hash(line []byte) lineHash {
 // store copies of the lines.
 // It needs to hold a reference to the underlying slice of lines.
 type B2J struct {
-	store map[lineHash] [][]int
-	b [][]byte
+	store map[lineHash][][]int
+	b     [][]byte
 }
 
 type lineType int8
+
 const (
-	lineNONE    lineType =  0
-	lineNORMAL  lineType =  1
+	lineNONE    lineType = 0
+	lineNORMAL  lineType = 1
 	lineJUNK    lineType = -1
 	linePOPULAR lineType = -2
 )
 
 func (b2j *B2J) _find(line *[]byte) (h lineHash, slotIndex int,
-                                     slot []int, lt lineType) {
+	slot []int, lt lineType) {
 	h = _hash(*line)
 	for slotIndex, slot = range b2j.store[h] {
 		// Thanks to the qualities of sha1, the probability of having more than
@@ -119,8 +120,8 @@ func (b2j *B2J) _find(line *[]byte) (h lineHash, slotIndex int,
 	return
 }
 
-func newB2J (b [][]byte, isJunk func([]byte) bool, autoJunk bool) *B2J {
-	b2j := B2J{store: map[lineHash] [][]int{}, b: b}
+func newB2J(b [][]byte, isJunk func([]byte) bool, autoJunk bool) *B2J {
+	b2j := B2J{store: map[lineHash][][]int{}, b: b}
 	ntest := len(b)
 	if autoJunk && ntest >= 200 {
 		ntest = ntest/100 + 1
@@ -258,12 +259,15 @@ func (m *SequenceMatcher) chainB() {
 // If IsJunk is not defined:
 //
 // Return (i,j,k) such that a[i:i+k] is equal to b[j:j+k], where
-//     alo <= i <= i+k <= ahi
-//     blo <= j <= j+k <= bhi
+//
+//	alo <= i <= i+k <= ahi
+//	blo <= j <= j+k <= bhi
+//
 // and for all (i',j',k') meeting those conditions,
-//     k >= k'
-//     i <= i'
-//     and if i == i', j <= j'
+//
+//	k >= k'
+//	i <= i'
+//	and if i == i', j <= j'
 //
 // In other words, of all maximal matching blocks, return one that
 // starts earliest in a, and of all those maximal matching blocks that
@@ -625,7 +629,7 @@ func NewDiffer() *Differ {
 
 var MINUS = []byte("-")
 var SPACE = []byte(" ")
-var PLUS  = []byte("+")
+var PLUS = []byte("+")
 var CARET = []byte("^")
 
 func (d *Differ) Compare(a [][]byte, b [][]byte) (diffs [][]byte, err error) {
@@ -665,7 +669,7 @@ func (d *Differ) StructuredDump(tag byte, x [][]byte, low int, high int) (out []
 	size := high - low
 	out = make([]DiffLine, size)
 	for i := 0; i < size; i++ {
-		out[i] = NewDiffLine(tag, x[i + low])
+		out[i] = NewDiffLine(tag, x[i+low])
 	}
 	return out
 }
@@ -835,7 +839,7 @@ func (d *Differ) QFormat(aline []byte, bline []byte, atags []byte, btags []byte)
 
 	out = [][]byte{append([]byte("- "), aline...)}
 	if len(atags) > 0 {
-		t := make([]byte, 0, len(atags) + common + 3)
+		t := make([]byte, 0, len(atags)+common+3)
 		t = append(t, []byte("? ")...)
 		for i := 0; i < common; i++ {
 			t = append(t, byte('\t'))
@@ -846,7 +850,7 @@ func (d *Differ) QFormat(aline []byte, bline []byte, atags []byte, btags []byte)
 	}
 	out = append(out, append([]byte("+ "), bline...))
 	if len(btags) > 0 {
-		t := make([]byte, 0, len(btags) + common + 3)
+		t := make([]byte, 0, len(btags)+common+3)
 		t = append(t, []byte("? ")...)
 		for i := 0; i < common; i++ {
 			t = append(t, byte('\t'))
