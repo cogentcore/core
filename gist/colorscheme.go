@@ -29,6 +29,12 @@ var TypeColorSchemeTypes = kit.Enums.AddEnumAltLower(ColorSchemesN, kit.NotBitFl
 // ColorScheme contains the colors for
 // one color scheme (ex: light or dark).
 type ColorScheme struct {
+	// NOTE: the commented out fields are those mentioned in the Material 3
+	// documentation but not actually used by their theme builder.
+	// They will be added later once they are added to the theme builder
+	// (see https://github.com/material-foundation/material-theme-builder/issues/187).
+	// Mark any colors that should be changed to use the new colors with
+	// MTBTODO:
 
 	// Primary is the base primary color applied to important elements
 	Primary Color `desc:"Primary is the base primary color applied to important elements"`
@@ -90,8 +96,14 @@ type ColorScheme struct {
 	// OnBackground is the color applied to content on top of Background
 	OnBackground Color `desc:"OnBackground is the color applied to content on top of Background"`
 
+	// SurfaceDim is the color applied to elements that will always have the dimmest surface color (see Surface for more information)
+	SurfaceDim Color `desc:"SurfaceDim is the color applied to elements that will always have the dimmest surface color (see Surface for more information)"`
+
 	// Surface is the color applied to contained areas, like the background of an app
 	Surface Color `desc:"Surface is the color applied to contained areas, like the background of an app"`
+
+	// SurfaceBright is the color applied to elements that will always have the brightest surface color (see Surface for more information)
+	SurfaceBright Color `desc:"SurfaceBright is the color applied to elements that will always have the brightest surface color (see Surface for more information)"`
 
 	// OnSurface is the color applied to content on top of Surface elements
 	OnSurface Color `desc:"OnSurface is the color applied to content on top of Surface elements"`
@@ -101,6 +113,21 @@ type ColorScheme struct {
 
 	// OnSurfaceVariant is the color applied to content on top of SurfaceVariant elements
 	OnSurfaceVariant Color `desc:"OnSurfaceVariant is the color applied to content on top of SurfaceVariant elements"`
+
+	// SurfaceContainerLowest is the color applied to surface container elements that have the lowest emphasis (see SurfaceContainer for more information)
+	SurfaceContainerLowest Color `desc:"SurfaceContainerLowest is the color applied to surface container elements that have the lowest emphasis (see SurfaceContainer for more information)"`
+
+	// SurfaceContainerLow is the color applied to surface container elements that have lower emphasis (see SurfaceContainer for more information)
+	SurfaceContainerLow Color `desc:"SurfaceContainerLow is the color applied to surface container elements that have lower emphasis (see SurfaceContainer for more information)"`
+
+	// SurfaceContainer is the color applied to container elements that contrast elements with the surface color
+	SurfaceContainer Color `desc:"SurfaceContainer is the color applied to container elements that contrast elements with the surface color"`
+
+	// SurfaceContainerHigh is the color applied to surface container elements that have higher emphasis (see SurfaceContainer for more information)
+	SurfaceContainerHigh Color `desc:"SurfaceContainerHigh is the color applied to surface container elements that have higher emphasis (see SurfaceContainer for more information)"`
+
+	// SurfaceContainerHigher is the color applied to surface container elements that have the highest emphasis (see SurfaceContainer for more information)
+	SurfaceContainerHigher Color `desc:"SurfaceContainerHigher is the color applied to surface container elements that have the highest emphasis (see SurfaceContainer for more information)"`
 
 	// InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect
 	InverseSurface Color `desc:"InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect"`
