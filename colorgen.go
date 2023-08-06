@@ -98,6 +98,22 @@ var colorDataTmpl = template.Must(template.New("colorData").Parse(
 		{{.Name}}: gist.MustColorFromHex("{{.Color}}"),`,
 ))
 
+// tempCustomColors is a TEMPORARY slice of color scheme colors
+// to be added into the resulting colorschemes.go file. It contains
+// some of the colors that have not been added to the material theme
+// builder yet. TODO: remove this once the rest of the colors are
+// added to the material theme builder
+// (see https://github.com/material-foundation/material-theme-builder/issues/187).
+var tempCustomColors = []ColorSchemeColor{
+	{Name: "Light surface dim", Color: "#DED8E1"},
+	{Name: "Light surface bright", Color: "#FEF7FF"},
+	{Name: "Light surface container lowest", Color: "#FFFFFF"},
+	{Name: "Light surface container low", Color: "#F7F2FA"},
+	{Name: "Light surface container", Color: "#F3EDF7"},
+	{Name: "Light surface container high", Color: "#ECE6F0"},
+	{Name: "Light surface container highest", Color: "#E6E0E9"},
+}
+
 // GenerateColorScheme generates a Go color scheme
 // declaration file from a Material Theme Builder
 // Android Views XML file located at the given source
