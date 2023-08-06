@@ -49,16 +49,16 @@ type FileState struct {
 	// External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code.
 	ExtSyms syms.SymMap `json:"-" xml:"-" desc:"External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code."`
 
-	// mutex protecting updates / reading of Syms symbols
+	// [view: -] mutex protecting updates / reading of Syms symbols
 	SymsMu sync.RWMutex `view:"-" json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
 
-	// waitgroup for coordinating processing of other items
+	// [view: -] waitgroup for coordinating processing of other items
 	WaitGp sync.WaitGroup `view:"-" json:"-" xml:"-" desc:"waitgroup for coordinating processing of other items"`
 
-	// anonymous counter -- counts up
+	// [view: -] anonymous counter -- counts up
 	AnonCtr int `view:"-" json:"-" xml:"-" desc:"anonymous counter -- counts up "`
 
-	// path mapping cache -- for other files referred to by this file, this stores the full path associated with a logical path (e.g., in go, the logical import path -> local path with actual files) -- protected for access from any thread
+	// [view: -] path mapping cache -- for other files referred to by this file, this stores the full path associated with a logical path (e.g., in go, the logical import path -> local path with actual files) -- protected for access from any thread
 	PathMap sync.Map `view:"-" json:"-" xml:"-" desc:"path mapping cache -- for other files referred to by this file, this stores the full path associated with a logical path (e.g., in go, the logical import path -> local path with actual files) -- protected for access from any thread"`
 }
 

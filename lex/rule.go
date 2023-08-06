@@ -86,7 +86,7 @@ type Rule struct {
 	// create an optimization map for this rule, which must be a parent with children that all match against a Name string -- this reads the Name and directly activates the associated rule with that String, without having to iterate through them -- use this for keywords etc -- produces a SIGNIFICANT speedup for long lists of keywords.
 	NameMap bool `desc:"create an optimization map for this rule, which must be a parent with children that all match against a Name string -- this reads the Name and directly activates the associated rule with that String, without having to iterate through them -- use this for keywords etc -- produces a SIGNIFICANT speedup for long lists of keywords."`
 
-	// length of source that matched -- if Next is called, this is what will be skipped to
+	// [view: -] length of source that matched -- if Next is called, this is what will be skipped to
 	MatchLen int `view:"-" json:"-" xml:"-" desc:"length of source that matched -- if Next is called, this is what will be skipped to"`
 
 	// NameMap lookup map -- created during Compile

@@ -15,7 +15,7 @@ import (
 // parse.State is the state maintained for parsing
 type State struct {
 
-	// source and lexed version of source we're parsing
+	// [view: no-inline] source and lexed version of source we're parsing
 	Src *lex.File `view:"no-inline" desc:"source and lexed version of source we're parsing"`
 
 	// tracing for this parser
@@ -33,16 +33,16 @@ type State struct {
 	// the current lex token position
 	Pos lex.Pos `desc:"the current lex token position"`
 
-	// any error messages accumulated during parsing specifically
+	// [view: no-inline] any error messages accumulated during parsing specifically
 	Errs lex.ErrorList `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
 
-	// rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims
+	// [view: no-inline] rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims
 	Matches [][]MatchStack `view:"no-inline" desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
 
-	// rules that did NOT match -- represented as a map by scope of a RuleSet
+	// [view: no-inline] rules that did NOT match -- represented as a map by scope of a RuleSet
 	NonMatches ScopeRuleSet `view:"no-inline" desc:"rules that did NOT match -- represented as a map by scope of a RuleSet"`
 
-	// stack for context-sensitive rules
+	// [view: no-inline] stack for context-sensitive rules
 	Stack lex.Stack `view:"no-inline" desc:"stack for context-sensitive rules"`
 }
 

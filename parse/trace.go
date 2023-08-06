@@ -43,13 +43,13 @@ type TraceOpts struct {
 	// for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one
 	FullStackOut bool `desc:"for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one"`
 
-	// list of rules
+	// [view: -] list of rules
 	RulesList []string `view:"-" json:"-" xml:"-" desc:"list of rules"`
 
-	// trace output is written here, connected via os.Pipe to OutRead
+	// [view: -] trace output is written here, connected via os.Pipe to OutRead
 	OutWrite *os.File `view:"-" json:"-" xml:"-" desc:"trace output is written here, connected via os.Pipe to OutRead"`
 
-	// trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output
+	// [view: -] trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output
 	OutRead *os.File `view:"-" json:"-" xml:"-" desc:"trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output"`
 }
 
