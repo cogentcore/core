@@ -95,10 +95,10 @@ type RecvFunc func(recv, send Ki, sig int64, data any)
 // converting as such is fine)
 type Signal struct {
 
-	// map of receivers and their functions
+	// [view: -] map of receivers and their functions
 	Cons map[Ki]RecvFunc `view:"-" json:"-" xml:"-" desc:"map of receivers and their functions"`
 
-	// read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes
+	// [view: -] read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes
 	Mu sync.RWMutex `view:"-" json:"-" xml:"-" desc:"read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes"`
 }
 
