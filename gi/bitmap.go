@@ -46,7 +46,7 @@ type Bitmap struct {
 	// size of the image
 	Size image.Point `desc:"size of the image"`
 
-	// the bitmap image
+	// [view: -] the bitmap image
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"`
 }
 

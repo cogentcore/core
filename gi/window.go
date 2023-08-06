@@ -175,7 +175,7 @@ type Window struct {
 	// displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc
 	Title string `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
 
-	// the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows
+	// [view: -] the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows
 	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 
 	// OS-specific window interface -- handles all the os-specific functions, including delivering events etc
@@ -199,7 +199,7 @@ type Window struct {
 	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
 	SpriteDragging string `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
 
-	// mutex that protects all updating / uploading of Textures
+	// [view: -] mutex that protects all updating / uploading of Textures
 	UpMu sync.Mutex `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
 
 	// currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)
@@ -220,7 +220,7 @@ type Window struct {
 	// this popup will be popped at the end of the current event cycle -- use SetDelPopup
 	DelPopup ki.Ki `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 
-	// read-write mutex that protects popup updating and access
+	// [view: -] read-write mutex that protects popup updating and access
 	PopMu             sync.RWMutex `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
 	lastWinMenuUpdate time.Time
 	// below are internal vars used during the event loop
@@ -233,10 +233,10 @@ type Window struct {
 	PopDraws WindowDrawers // popup regions
 	UpdtRegs WindowUpdates // misc vp update regions
 
-	// this popup will be popped at the end of the current event cycle -- use SetDelPopup
+	// [view: -] this popup will be popped at the end of the current event cycle -- use SetDelPopup
 	Phongs []*vphong.Phong `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 
-	// this popup will be popped at the end of the current event cycle -- use SetDelPopup
+	// [view: -] this popup will be popped at the end of the current event cycle -- use SetDelPopup
 	Frames []*vgpu.RenderFrame `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 }
 

@@ -44,10 +44,10 @@ type Text2D struct {
 	// position offset of start of text rendering relative to upper-left corner
 	TxtPos mat32.Vec2 `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
 
-	// render data for text label
+	// [view: -] render data for text label
 	TxtRender girl.Text `view:"-" xml:"-" json:"-" desc:"render data for text label"`
 
-	// render state for rendering text
+	// [view: -] render state for rendering text
 	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
 }
 

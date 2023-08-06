@@ -38,7 +38,7 @@ type NodeBase struct {
 	// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
 	CSS ki.Props `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"`
 
-	// aggregated css properties from all higher nodes down to me
+	// [view: no-inline] aggregated css properties from all higher nodes down to me
 	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" desc:"aggregated css properties from all higher nodes down to me"`
 
 	// raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are
@@ -53,7 +53,7 @@ type NodeBase struct {
 	// 2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window
 	WinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
 
-	// mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread
+	// [view: -] mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread
 	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread"`
 }
 

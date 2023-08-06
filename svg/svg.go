@@ -58,10 +58,10 @@ type SVG struct {
 	// the description of the svg
 	Desc string `xml:"desc" desc:"the description of the svg"`
 
-	// map of def names to index -- uses starting index to find element -- always updated after each search
+	// [view: -] map of def names to index -- uses starting index to find element -- always updated after each search
 	DefIdxs map[string]int `view:"-" json:"-" xml:"-" desc:"map of def names to index -- uses starting index to find element -- always updated after each search"`
 
-	// map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds
+	// [view: -] map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds
 	UniqueIds map[int]struct{} `view:"-" json:"-" xml:"-" desc:"map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds"`
 }
 

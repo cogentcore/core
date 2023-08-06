@@ -27,7 +27,7 @@ type Editor struct {
 	// view scaling (from zooming)
 	Scale float32 `desc:"view scaling (from zooming)"`
 
-	// has dragging cursor been set yet?
+	// [view: -] has dragging cursor been set yet?
 	SetDragCursor bool `view:"-" desc:"has dragging cursor been set yet?"`
 }
 

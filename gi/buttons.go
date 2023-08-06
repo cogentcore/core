@@ -33,10 +33,10 @@ type ButtonBase struct {
 	// label for the button -- if blank then no label is presented
 	Text string `xml:"text" desc:"label for the button -- if blank then no label is presented"`
 
-	// optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
+	// [view: show-name] optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
 	Icon icons.Icon `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 
-	// name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
+	// [view: show-name] name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
 	Indicator icons.Icon `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 
 	// optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
@@ -48,16 +48,16 @@ type ButtonBase struct {
 	// current state of the button based on gui interaction
 	State ButtonStates `copy:"-" json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
 
-	// signal for button -- see ButtonSignals for the types
+	// [view: -] signal for button -- see ButtonSignals for the types
 	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
 
 	// the menu items for this menu -- typically add Action elements for menus, along with separators
 	Menu Menu `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
 
-	// set this to make a menu on demand -- if set then this button acts like a menu button
+	// [view: -] set this to make a menu on demand -- if set then this button acts like a menu button
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 
-	// button state mutex
+	// [view: -] button state mutex
 	ButStateMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"button state mutex"`
 }
 
@@ -962,7 +962,7 @@ func (bt *Button) ConfigStyles() {
 type CheckBox struct {
 	ButtonBase
 
-	// icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property
+	// [view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property
 	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 

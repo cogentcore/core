@@ -34,7 +34,7 @@ type ColorMapView struct {
 	// the colormap that we view
 	Map *colormap.Map `desc:"the colormap that we view"`
 
-	// signal for color map -- triggers when new color map is set via chooser
+	// [view: -] signal for color map -- triggers when new color map is set via chooser
 	ColorMapSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
 }
 

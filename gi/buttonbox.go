@@ -35,7 +35,7 @@ type ButtonBox struct {
 	// make the items mutually exclusive -- checking one turns off all the others
 	Mutex bool `desc:"make the items mutually exclusive -- checking one turns off all the others"`
 
-	// signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label
+	// [view: -] signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label
 	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
 }
 

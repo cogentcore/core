@@ -43,7 +43,7 @@ type TabView struct {
 	// type of widget to create in a new tab via new tab button -- Frame by default
 	NewTabType reflect.Type `desc:"type of widget to create in a new tab via new tab button -- Frame by default"`
 
-	// mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
+	// [view: -] mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
 }
 

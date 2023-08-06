@@ -34,7 +34,7 @@ type Image struct {
 	// file name of image loaded -- set by OpenImage
 	Filename gi.FileName `desc:"file name of image loaded -- set by OpenImage"`
 
-	// the image pixels
+	// [view: -] the image pixels
 	Pixels *image.RGBA `copy:"-" xml:"-" json:"-" view:"-" desc:"the image pixels"`
 }
 

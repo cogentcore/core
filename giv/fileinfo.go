@@ -28,7 +28,7 @@ import (
 // including icon, mimetype, etc
 type FileInfo struct {
 
-	// icon for file
+	// [tableview: no-header] icon for file
 	Ic icons.Icon `tableview:"no-header" desc:"icon for file"`
 
 	// name of the file, without any path
@@ -40,13 +40,13 @@ type FileInfo struct {
 	// type of file / directory -- shorter, more user-friendly version of mime type, based on category
 	Kind string `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`
 
-	// full official mime type of the contents
+	// [tableview: -] full official mime type of the contents
 	Mime string `tableview:"-" desc:"full official mime type of the contents"`
 
-	// functional category of the file, based on mime data etc
+	// [tableview: -] functional category of the file, based on mime data etc
 	Cat filecat.Cat `tableview:"-" desc:"functional category of the file, based on mime data etc"`
 
-	// supported file type
+	// [tableview: -] supported file type
 	Sup filecat.Supported `tableview:"-" desc:"supported file type"`
 
 	// file mode bits
@@ -55,10 +55,10 @@ type FileInfo struct {
 	// time that contents (only) were last modified
 	ModTime FileTime `desc:"time that contents (only) were last modified"`
 
-	// version control system status, when enabled
+	// [tableview: -] version control system status, when enabled
 	Vcs vci.FileStatus `tableview:"-" desc:"version control system status, when enabled"`
 
-	// full path to file, including name -- for file functions
+	// [tableview: -] full path to file, including name -- for file functions
 	Path string `tableview:"-" desc:"full path to file, including name -- for file functions"`
 }
 

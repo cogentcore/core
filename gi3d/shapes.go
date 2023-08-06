@@ -122,22 +122,22 @@ type Sphere struct {
 	// radius of the sphere
 	Radius float32 `desc:"radius of the sphere"`
 
-	// number of segments around the width of the sphere (32 is reasonable default for full circle)
+	// [min: 3] number of segments around the width of the sphere (32 is reasonable default for full circle)
 	WidthSegs int `min:"3" desc:"number of segments around the width of the sphere (32 is reasonable default for full circle)"`
 
-	// number of height segments (32 is reasonable default for full height)
+	// [min: 3] number of height segments (32 is reasonable default for full height)
 	HeightSegs int `min:"3" desc:"number of height segments (32 is reasonable default for full height)"`
 
-	// starting radial angle in degrees, relative to -1,0,0 left side starting point
+	// [min: 0] [max: 360] [step: 5] starting radial angle in degrees, relative to -1,0,0 left side starting point
 	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees, relative to -1,0,0 left side starting point"`
 
-	// total radial angle to generate in degrees (max = 360)
+	// [min: 0] [max: 360] [step: 5] total radial angle to generate in degrees (max = 360)
 	AngLen float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
 
-	// starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom
+	// [min: 0] [max: 180] [step: 5] starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom
 	ElevStart float32 `min:"0" max:"180" step:"5" desc:"starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"`
 
-	// total angle to generate in degrees (max = 180)
+	// [min: 0] [max: 180] [step: 5] total angle to generate in degrees (max = 180)
 	ElevLen float32 `min:"0" max:"180" step:"5" desc:"total angle to generate in degrees (max = 180)"`
 }
 
@@ -201,7 +201,7 @@ type Cylinder struct {
 	// radius of the bottom
 	BotRad float32 `desc:"radius of the bottom"`
 
-	// number of radial segments (32 is a reasonable default for full circle)
+	// [min: 1] number of radial segments (32 is a reasonable default for full circle)
 	RadialSegs int `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
 
 	// number of height segments
@@ -213,10 +213,10 @@ type Cylinder struct {
 	// render the bottom disc
 	Bottom bool `desc:"render the bottom disc"`
 
-	// starting angle in degrees, relative to -1,0,0 left side starting point
+	// [min: 0] [max: 360] [step: 5] starting angle in degrees, relative to -1,0,0 left side starting point
 	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
 
-	// total angle to generate in degrees (max 360)
+	// [min: 0] [max: 360] [step: 5] total angle to generate in degrees (max 360)
 	AngLen float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 
@@ -302,7 +302,7 @@ type Capsule struct {
 	// radius of the bottom
 	BotRad float32 `desc:"radius of the bottom"`
 
-	// number of radial segments (32 is a reasonable default for full circle)
+	// [min: 1] number of radial segments (32 is a reasonable default for full circle)
 	RadialSegs int `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
 
 	// number of height segments
@@ -311,10 +311,10 @@ type Capsule struct {
 	// number of segments in the hemisphere cap ends (16 is a reasonable default)
 	CapSegs int `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`
 
-	// starting angle in degrees, relative to -1,0,0 left side starting point
+	// [min: 0] [max: 360] [step: 5] starting angle in degrees, relative to -1,0,0 left side starting point
 	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
 
-	// total angle to generate in degrees (max 360)
+	// [min: 0] [max: 360] [step: 5] total angle to generate in degrees (max 360)
 	AngLen float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 
@@ -408,16 +408,16 @@ type Torus struct {
 	// radius of the solid tube
 	TubeRadius float32 `desc:"radius of the solid tube"`
 
-	// number of segments around the radius of the torus (32 is reasonable default for full circle)
+	// [min: 1] number of segments around the radius of the torus (32 is reasonable default for full circle)
 	RadialSegs int `min:"1" desc:"number of segments around the radius of the torus (32 is reasonable default for full circle)"`
 
-	// number of segments for the tube itself (32 is reasonable default for full height)
+	// [min: 1] number of segments for the tube itself (32 is reasonable default for full height)
 	TubeSegs int `min:"1" desc:"number of segments for the tube itself (32 is reasonable default for full height)"`
 
-	// starting radial angle in degrees relative to 1,0,0 starting point
+	// [min: 0] [max: 360] [step: 5] starting radial angle in degrees relative to 1,0,0 starting point
 	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees relative to 1,0,0 starting point"`
 
-	// total radial angle to generate in degrees (max = 360)
+	// [min: 0] [max: 360] [step: 5] total radial angle to generate in degrees (max = 360)
 	AngLen float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
 }
 

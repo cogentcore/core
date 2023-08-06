@@ -57,13 +57,13 @@ type SpinBox struct {
 	// prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
 	Format string `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
 
-	// icon to use for up button -- defaults to icons.KeyboardArrowUp
+	// [view: show-name] icon to use for up button -- defaults to icons.KeyboardArrowUp
 	UpIcon icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to icons.KeyboardArrowUp"`
 
-	// icon to use for down button -- defaults to icons.KeyboardArrowDown
+	// [view: show-name] icon to use for down button -- defaults to icons.KeyboardArrowDown
 	DownIcon icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to icons.KeyboardArrowDown"`
 
-	// signal for spin box -- has no signal types, just emitted when the value changes
+	// [view: -] signal for spin box -- has no signal types, just emitted when the value changes
 	SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 

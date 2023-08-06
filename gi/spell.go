@@ -122,7 +122,7 @@ type Spell struct {
 	// last word learned -- can be undone -- stored in lowercase format
 	LastLearned string `desc:"last word learned -- can be undone -- stored in lowercase format"`
 
-	// signal for Spell -- see SpellSignals for the types
+	// [view: -] signal for Spell -- see SpellSignals for the types
 	SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
 
 	// the user's correction selection'

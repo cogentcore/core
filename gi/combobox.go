@@ -50,7 +50,7 @@ type ComboBox struct {
 	// the type of combo box
 	Type ComboBoxTypes `desc:"the type of combo box"`
 
-	// signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value
+	// [view: -] signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value
 	ComboSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
 
 	// maximum label length (in runes)

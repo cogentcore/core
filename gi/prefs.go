@@ -30,7 +30,7 @@ import (
 // the GoGi user preferences directory -- see oswin/App for further info.
 type Preferences struct {
 
-	// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc
+	// [min: 0.1] [step: 0.1] overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc
 	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
 
 	// screen-specific preferences -- will override overall defaults if set
@@ -48,10 +48,10 @@ type Preferences struct {
 	// named color schemes -- has Light and Dark schemes by default
 	ColorSchemes map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`
 
-	// parameters controlling GUI behavior
+	// [view: inline] parameters controlling GUI behavior
 	Params ParamPrefs `view:"inline" desc:"parameters controlling GUI behavior"`
 
-	// editor preferences -- for TextView etc
+	// [view: inline] editor preferences -- for TextView etc
 	Editor EditorPrefs `view:"inline" desc:"editor preferences -- for TextView etc"`
 
 	// select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list
@@ -84,13 +84,13 @@ type Preferences struct {
 	// favorite paths, shown in FileViewer and also editable there
 	FavPaths FavPaths `desc:"favorite paths, shown in FileViewer and also editable there"`
 
-	// column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
+	// [view: -] column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
 	FileViewSort string `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
 
-	// filename for saving / loading colors
+	// [view: -] filename for saving / loading colors
 	ColorFilename FileName `view:"-" ext:".json" desc:"filename for saving / loading colors"`
 
-	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
+	// [view: -] flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
@@ -705,29 +705,29 @@ var ColorPrefsProps = ki.Props{
 // -- settings here override those in the global preferences.
 type ScreenPrefs struct {
 
-	// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.
+	// [min: 0.1] [step: 0.1] overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.
 	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient."`
 }
 
 // ParamPrefs contains misc parameters controlling GUI behavior.
 type ParamPrefs struct {
 
-	// the maximum time interval in msec between button press events to count as a double-click
+	// [min: 100] [step: 50] the maximum time interval in msec between button press events to count as a double-click
 	DoubleClickMSec int `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
 
-	// how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.
+	// [min: 0.01] [step: 1] how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.
 	ScrollWheelSpeed float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
 
 	// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
 	LocalMainMenu bool `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
 
-	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
+	// [def: false] only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
 	OnlyCloseActiveTab bool `def:"false" desc:"only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it"`
 
-	// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
+	// [def: 0] [min: 0] [max: 100] [step: 1] the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
 	ZebraStripeWeight float32 `def:"0" min:"0" max:"100" step:"1" desc:"the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)"`
 
-	// the limit of file size, above which user will be prompted before opening / copying, etc.
+	// [def: 10000000] the limit of file size, above which user will be prompted before opening / copying, etc.
 	BigFileSize int `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`
 
 	// maximum number of saved paths to save in FileView
@@ -866,6 +866,8 @@ type FavPathItem struct {
 
 	// name of the favorite item
 	Name string `width:"20" desc:"name of the favorite item"`
+
+	// [tableview: -select]
 	Path string `tableview:"-select"`
 }
 
@@ -981,82 +983,82 @@ func OpenPaths() {
 // available for those who really care..
 type PrefsDetailed struct {
 
-	// the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
+	// [def: 30] [min: 5] [step: 1] the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
 	MenuMaxHeight int `def:"30" min:"5" step:"1" desc:"the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size."`
 
-	// the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped
+	// [def: 50] [min: 5] [max: 1000] [step: 5] the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped
 	EventSkipLagMSec int `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped"`
 
-	// set to true to apply laggy filter to KeyEvents (normally excluded)
+	// [def: false] set to true to apply laggy filter to KeyEvents (normally excluded)
 	FilterLaggyKeyEvents bool `def:"false" desc:"set to true to apply laggy filter to KeyEvents (normally excluded)"`
 
-	// the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)
+	// [def: 50] [min: 5] [max: 1000] [step: 5] the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)
 	DragStartMSec int `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
 
-	// the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)
+	// [def: 4] [min: 0] [max: 100] [step: 1] the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)
 	DragStartPix int `def:"4" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
 
-	// the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it
+	// [def: 200] [min: 5] [max: 1000] [step: 5] the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it
 	DNDStartMSec int `def:"200" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
 
-	// the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it
+	// [def: 20] [min: 0] [max: 100] [step: 1] the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it
 	DNDStartPix int `def:"20" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
 
-	// the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)
+	// [def: 500] [min: 10] [max: 10000] [step: 10] the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)
 	HoverStartMSec int `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
 
-	// the maximum number of pixels that mouse can move and still register a Hover event
+	// [def: 50] [min: 0] [max: 1000] [step: 1] the maximum number of pixels that mouse can move and still register a Hover event
 	HoverMaxPix int `def:"50" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`
 
-	// the number of milliseconds to wait before offering completions
+	// [def: 500] [min: 10] [max: 10000] [step: 10] the number of milliseconds to wait before offering completions
 	CompleteWaitMSec int `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before offering completions"`
 
-	// the maximum number of completions offered in popup
+	// [def: 25] [min: 5] [step: 1] the maximum number of completions offered in popup
 	CompleteMaxItems int `def:"25" min:"5" step:"1" desc:"the maximum number of completions offered in popup"`
 
-	// number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking
+	// [def: 500] [min: 0] [max: 1000] [step: 5] number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking
 	CursorBlinkMSec int `def:"500" min:"0" max:"1000" step:"5" desc:"number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`
 
-	// is amount of time to wait (in Milliseconds) before trying to autoscroll again
+	// [def: 25] [min: 1] [step: 5] is amount of time to wait (in Milliseconds) before trying to autoscroll again
 	LayoutAutoScrollDelayMSec int `def:"25" min:"1" step:"5" desc:"is amount of time to wait (in Milliseconds) before trying to autoscroll again"`
 
-	// number of steps to take in PageUp / Down events in terms of number of items
+	// [def: 10] [min: 1] [step: 1] number of steps to take in PageUp / Down events in terms of number of items
 	LayoutPageSteps int `def:"10" min:"1" step:"1" desc:"number of steps to take in PageUp / Down events in terms of number of items"`
 
-	// the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay
+	// [def: 500] [min: 0] [max: 5000] [step: 20] the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay
 	LayoutFocusNameTimeoutMSec int `def:"500" min:"0" max:"5000" step:"20" desc:"the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay"`
 
-	// the number of milliseconds since last focus name event to allow tab to focus on next element with same name.
+	// [def: 2000] [min: 10] [max: 10000] [step: 100] the number of milliseconds since last focus name event to allow tab to focus on next element with same name.
 	LayoutFocusNameTabMSec int `def:"2000" min:"10" max:"10000" step:"100" desc:"the number of milliseconds since last focus name event to allow tab to focus on next element with same name."`
 
-	// open dialogs in separate windows -- else do as popups in main window
+	// [def: true] open dialogs in separate windows -- else do as popups in main window
 	DialogsSepWindow bool `def:"true" desc:"open dialogs in separate windows -- else do as popups in main window"`
 
-	// Maximum amount of clipboard history to retain
+	// [def: 100] [min: 0] [max: 1000] [step: 5] Maximum amount of clipboard history to retain
 	TextViewClipHistMax int `def:"100" min:"0" max:"1000" step:"5" desc:"Maximum amount of clipboard history to retain"`
 
-	// maximum number of lines to look for matching scope syntax (parens, brackets)
+	// [def: 100] [min: 10] [step: 10] maximum number of lines to look for matching scope syntax (parens, brackets)
 	TextBufMaxScopeLines int `def:"100" min:"10" step:"10" desc:"maximum number of lines to look for matching scope syntax (parens, brackets)"`
 
-	// text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
+	// [def: 10000] [min: 0] [step: 1000] text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
 	TextBufDiffRevertLines int `def:"10000" min:"0" step:"1000" desc:"text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted"`
 
-	// text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
+	// [def: 20] [min: 0] [step: 1] text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
 	TextBufDiffRevertDiffs int `def:"20" min:"0" step:"1" desc:"text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert"`
 
-	// number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
+	// [def: 1000] [min: 100] [step: 100] number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
 	TextBufMarkupDelayMSec int `def:"1000" min:"100" step:"100" desc:"number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)"`
 
-	// the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props
+	// [def: 3] [min: 2] [step: 1] the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props
 	MapInlineLen int `def:"3" min:"2" step:"1" desc:"the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props"`
 
-	// the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs
+	// [def: 6] [min: 2] [step: 1] the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs
 	StructInlineLen int `def:"6" min:"2" step:"1" desc:"the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs"`
 
-	// the number of slice elements below which inline will be used
+	// [def: 6] [min: 2] [step: 1] the number of slice elements below which inline will be used
 	SliceInlineLen int `def:"6" min:"2" step:"1" desc:"the number of slice elements below which inline will be used"`
 
-	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
+	// [view: -] flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
@@ -1241,7 +1243,7 @@ type PrefsDebug struct {
 	// reports errors for viewif directives in struct field tags, for giv.StructView
 	StructViewIfDebug *bool `desc:"reports errors for viewif directives in struct field tags, for giv.StructView"`
 
-	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
+	// [view: -] flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 

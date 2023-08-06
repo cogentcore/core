@@ -25,10 +25,10 @@ type TestNodeA struct {
 	// a string
 	StrField string `desc:"a string"`
 
-	// an int
+	// [min: 5] [max: 25] [step: 5] an int
 	IntField int `min:"5" max:"25" step:"5" desc:"an int"`
 
-	// a float
+	// [min: -1] [max: 1] [step: .25] a float
 	FloatField float64 `min:"-1" max:"1" step:".25" desc:"a float"`
 
 	// a bool
@@ -50,10 +50,10 @@ type TestNodeB struct {
 	// a string
 	StrField string `desc:"a string"`
 
-	// an int
+	// [min: 5] [max: 25] [step: 5] an int
 	IntField int `min:"5" max:"25" step:"5" desc:"an int"`
 
-	// a float
+	// [min: -1] [max: 1] [step: .25] a float
 	FloatField float64 `min:"-1" max:"1" step:".25" desc:"a float"`
 
 	// a bool

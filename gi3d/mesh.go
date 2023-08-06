@@ -90,7 +90,7 @@ type MeshBase struct {
 	// computed bounding-box and other gross solid properties
 	BBox BBox `desc:"computed bounding-box and other gross solid properties"`
 
-	// mutex on bbox access
+	// [view: -] mutex on bbox access
 	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on bbox access"`
 }
 

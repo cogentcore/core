@@ -56,7 +56,7 @@ type Complete struct {
 	// current completion seed
 	Seed string `desc:"current completion seed"`
 
-	// signal for complete -- see CompleteSignals for the types
+	// [view: -] signal for complete -- see CompleteSignals for the types
 	CompleteSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
 
 	// the user's completion selection'

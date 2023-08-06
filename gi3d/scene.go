@@ -75,10 +75,10 @@ type Scene struct {
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom gi.Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport2D"`
 
-	// number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
+	// [def: 4] number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
 	MultiSample int `def:"4" desc:"number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"`
 
-	// render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)
+	// [def: false] render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)
 	Wireframe bool `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"`
 
 	// camera determines view onto scene
@@ -108,19 +108,19 @@ type Scene struct {
 	// our parent window that we render into
 	Win *gi.Window `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 
-	// has dragging cursor been set yet?
+	// [view: -] has dragging cursor been set yet?
 	SetDragCursor bool `view:"-" desc:"has dragging cursor been set yet?"`
 
 	// how to deal with selection / manipulation events
 	SelMode SelModes `desc:"how to deal with selection / manipulation events"`
 
-	// currently selected node
+	// [view: -] currently selected node
 	CurSel Node3D `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected node"`
 
-	// currently selected manipulation control point
+	// [view: -] currently selected manipulation control point
 	CurManipPt *ManipPt `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected manipulation control point"`
 
-	// parameters for selection / manipulation box
+	// [view: inline] parameters for selection / manipulation box
 	SelParams SelParams `view:"inline" desc:"parameters for selection / manipulation box"`
 
 	// the vphong rendering system
@@ -132,7 +132,7 @@ type Scene struct {
 	// index in list of window direct uploading images
 	DirUpIdx int `desc:"index in list of window direct uploading images"`
 
-	// mutex on rendering
+	// [view: -] mutex on rendering
 	RenderMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on rendering"`
 }
 

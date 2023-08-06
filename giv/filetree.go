@@ -78,28 +78,28 @@ type FileTree struct {
 	// if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed
 	DirsOnTop bool `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed"`
 
-	// type of node to create -- defaults to giv.FileNode but can use custom node types
+	// [view: -] type of node to create -- defaults to giv.FileNode but can use custom node types
 	NodeType reflect.Type `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
 
 	// if true, we are in midst of an OpenAll call -- nodes should open all dirs
 	InOpenAll bool `desc:"if true, we are in midst of an OpenAll call -- nodes should open all dirs"`
 
-	// change notify for all dirs
+	// [view: -] change notify for all dirs
 	Watcher *fsnotify.Watcher `view:"-" desc:"change notify for all dirs"`
 
-	// channel to close watcher watcher
+	// [view: -] channel to close watcher watcher
 	DoneWatcher chan bool `view:"-" desc:"channel to close watcher watcher"`
 
-	// map of paths that have been added to watcher -- only active if bool = true
+	// [view: -] map of paths that have been added to watcher -- only active if bool = true
 	WatchedPaths map[string]bool `view:"-" desc:"map of paths that have been added to watcher -- only active if bool = true"`
 
-	// last path updated by watcher
+	// [view: -] last path updated by watcher
 	LastWatchUpdt string `view:"-" desc:"last path updated by watcher"`
 
-	// timestamp of last update
+	// [view: -] timestamp of last update
 	LastWatchTime time.Time `view:"-" desc:"timestamp of last update"`
 
-	// Update mutex
+	// [view: -] Update mutex
 	UpdtMu sync.Mutex `view:"-" desc:"Update mutex"`
 }
 
@@ -1642,7 +1642,7 @@ type DirFlagMap struct {
 	// map of paths and associated flags
 	Map map[string]DirFlags `desc:"map of paths and associated flags"`
 
-	// mutex for accessing map
+	// [view: -] mutex for accessing map
 	Mu sync.Mutex `view:"-" json:"-" xml:"-" desc:"mutex for accessing map"`
 }
 

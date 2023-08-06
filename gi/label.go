@@ -44,7 +44,7 @@ type Label struct {
 	// the current state of the label (active, inactive, selected, etc)
 	State LabelStates `desc:"the current state of the label (active, inactive, selected, etc)"`
 
-	// signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
+	// [view: -] signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
 	LinkSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 
 	// styles for different states of label

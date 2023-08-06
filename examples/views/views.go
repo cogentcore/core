@@ -50,16 +50,16 @@ type ILStruct struct {
 	// click to show next
 	On bool `desc:"click to show next"`
 
-	// can u see me?
+	// [viewif: On] can u see me?
 	ShowMe string `viewif:"On" desc:"can u see me?"`
 
-	// a conditional
+	// [viewif: On] a conditional
 	Cond int `viewif:"On" desc:"a conditional"`
 
-	// On and Cond=0 -- note that slbool as bool cannot be used directly..
+	// [viewif: On&&Cond==0] On and Cond=0 -- note that slbool as bool cannot be used directly..
 	Cond1 string `viewif:"On&&Cond==0" desc:"On and Cond=0 -- note that slbool as bool cannot be used directly.."`
 
-	// if Cond=0
+	// [viewif: On&&Cond<=1] if Cond=0
 	Cond2 TableStruct `viewif:"On&&Cond<=1" desc:"if Cond=0"`
 
 	// a value
@@ -71,25 +71,25 @@ type Struct struct {
 	// an enum
 	Stripes gi.Stripes `desc:"an enum"`
 
-	// a string
+	// [viewif: !(Stripes==[RowStripes,ColStripes])] a string
 	Name string `viewif:"!(Stripes==[RowStripes,ColStripes])" desc:"a string"`
 
 	// click to show next
 	ShowNext bool `desc:"click to show next"`
 
-	// can u see me?
+	// [viewif: ShowNext] can u see me?
 	ShowMe string `viewif:"ShowNext" desc:"can u see me?"`
 
-	// how about that
+	// [view: inline] how about that
 	Inline ILStruct `view:"inline" desc:"how about that"`
 
 	// a conditional
 	Cond int `desc:"a conditional"`
 
-	// if Cond=0
+	// [viewif: Cond==0] if Cond=0
 	Cond1 string `viewif:"Cond==0" desc:"if Cond=0"`
 
-	// if Cond=0
+	// [viewif: Cond>=0] if Cond=0
 	Cond2 TableStruct `viewif:"Cond>=0" desc:"if Cond=0"`
 
 	// a value

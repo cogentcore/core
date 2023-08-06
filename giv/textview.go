@@ -121,10 +121,10 @@ type TextView struct {
 	// query replace data
 	QReplace QReplace `json:"-" xml:"-" desc:"query replace data"`
 
-	// signal for text view -- see TextViewSignals for the types
+	// [view: -] signal for text view -- see TextViewSignals for the types
 	TextViewSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
 
-	// signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
+	// [view: -] signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
 	LinkSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 
 	// normal style and focus style
@@ -142,7 +142,7 @@ type TextView struct {
 	// oscillates between on and off for blinking
 	BlinkOn bool `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
 
-	// mutex protecting cursor rendering -- shared between blink and main code
+	// [view: -] mutex protecting cursor rendering -- shared between blink and main code
 	CursorMu sync.Mutex `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
 
 	// at least one of the renders has links -- determines if we set the cursor for hand movements

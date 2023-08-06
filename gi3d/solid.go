@@ -24,10 +24,10 @@ type Solid struct {
 	// name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene
 	Mesh MeshName `desc:"name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"`
 
-	// material properties of the surface (color, shininess, texture, etc)
+	// [view: add-fields] material properties of the surface (color, shininess, texture, etc)
 	Mat Material `view:"add-fields" desc:"material properties of the surface (color, shininess, texture, etc)"`
 
-	// cached pointer to mesh
+	// [view: -] cached pointer to mesh
 	MeshPtr Mesh `view:"-" desc:"cached pointer to mesh"`
 }
 

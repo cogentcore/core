@@ -44,19 +44,19 @@ type Camera struct {
 	// far plane z coordinate
 	Far float32 `desc:"far plane z coordinate"`
 
-	// view matrix (inverse of the Pose.Matrix)
+	// [view: -] view matrix (inverse of the Pose.Matrix)
 	ViewMatrix mat32.Mat4 `view:"-" desc:"view matrix (inverse of the Pose.Matrix)"`
 
-	// projection matrix, defining the camera perspective / ortho transform
+	// [view: -] projection matrix, defining the camera perspective / ortho transform
 	PrjnMatrix mat32.Mat4 `view:"-" desc:"projection matrix, defining the camera perspective / ortho transform"`
 
-	// vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math
+	// [view: -] vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math
 	VkPrjnMatrix mat32.Mat4 `view:"-" desc:"vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math"`
 
-	// inverse of the projection matrix
+	// [view: -] inverse of the projection matrix
 	InvPrjnMatrix mat32.Mat4 `view:"-" desc:"inverse of the projection matrix"`
 
-	// frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
+	// [view: -] frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
 	Frustum *mat32.Frustum `view:"-" desc:"frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"`
 }
 

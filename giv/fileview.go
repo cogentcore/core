@@ -50,7 +50,7 @@ type FileView struct {
 	// target extension(s) (comma separated if multiple, including initial .), if any
 	Ext string `desc:"target extension(s) (comma separated if multiple, including initial .), if any"`
 
-	// optional styling function
+	// [view: -] optional styling function
 	FilterFunc FileViewFilterFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
 
 	// map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value
@@ -65,16 +65,16 @@ type FileView struct {
 	// signal for file actions
 	FileSig ki.Signal `desc:"signal for file actions"`
 
-	// change notify for current dir
+	// [view: -] change notify for current dir
 	Watcher *fsnotify.Watcher `view:"-" desc:"change notify for current dir"`
 
-	// channel to close watcher watcher
+	// [view: -] channel to close watcher watcher
 	DoneWatcher chan bool `view:"-" desc:"channel to close watcher watcher"`
 
-	// UpdateFiles mutex
+	// [view: -] UpdateFiles mutex
 	UpdtMu sync.Mutex `view:"-" desc:"UpdateFiles mutex"`
 
-	// Previous path that was processed via UpdateFiles
+	// [view: -] Previous path that was processed via UpdateFiles
 	PrevPath string `view:"-" desc:"Previous path that was processed via UpdateFiles"`
 }
 

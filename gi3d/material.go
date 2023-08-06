@@ -54,7 +54,7 @@ type Material struct {
 	// prop: texture = texture to provide color for the surface
 	Texture TexName `xml:"texture" desc:"prop: texture = texture to provide color for the surface"`
 
-	// texture tiling parameters -- repeat and offset
+	// [view: inline] [viewif: Texture!=''] texture tiling parameters -- repeat and offset
 	Tiling Tiling `view:"inline" viewif:"Texture!=''" desc:"texture tiling parameters -- repeat and offset"`
 
 	// prop: cull-back = cull the back-facing surfaces
@@ -63,7 +63,7 @@ type Material struct {
 	// prop: cull-front = cull the front-facing surfaces
 	CullFront bool `xml:"cull-front" desc:"prop: cull-front = cull the front-facing surfaces"`
 
-	// pointer to texture
+	// [view: -] pointer to texture
 	TexPtr Texture `view:"-" desc:"pointer to texture"`
 }
 

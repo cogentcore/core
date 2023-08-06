@@ -86,34 +86,34 @@ type Viewport2D struct {
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport2D"`
 
-	// render state for rendering
+	// [view: -] render state for rendering
 	Render girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
 
-	// live pixels that we render into
+	// [view: -] live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
 
 	// our parent window that we render into
 	Win *Window `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 
-	// CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass
+	// [view: -] CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass
 	CurStyleNode Node2D `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
 
-	// CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access
+	// [view: -] CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access
 	CurColor gist.Color `copy:"-" json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"`
 
-	// UpdtMu is mutex for viewport updates
+	// [view: -] UpdtMu is mutex for viewport updates
 	UpdtMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"UpdtMu is mutex for viewport updates"`
 
-	// stack of nodes requring basic updating
+	// [view: -] stack of nodes requring basic updating
 	UpdtStack []Node2D `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requring basic updating"`
 
-	// stack of nodes requiring a ReRender (i.e., anchors)
+	// [view: -] stack of nodes requiring a ReRender (i.e., anchors)
 	ReStack []Node2D `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requiring a ReRender (i.e., anchors)"`
 
-	// StackMu is mutex for adding to UpdtStack
+	// [view: -] StackMu is mutex for adding to UpdtStack
 	StackMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StackMu is mutex for adding to UpdtStack"`
 
-	// StyleMu is RW mutex protecting access to Style-related global vars
+	// [view: -] StyleMu is RW mutex protecting access to Style-related global vars
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
 }
 

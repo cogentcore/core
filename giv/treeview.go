@@ -68,7 +68,7 @@ type TreeView struct {
 	// just the size of our widget -- our alloc includes all of our children, but we only draw us
 	WidgetSize mat32.Vec2 `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
 
-	// optional icon, displayed to the the left of the text label
+	// [view: show-name] optional icon, displayed to the the left of the text label
 	Icon icons.Icon `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
 
 	// cached root of the view

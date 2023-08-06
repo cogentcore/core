@@ -330,7 +330,7 @@ type Stroke struct {
 	// prop: stroke-linejoin = how to join line segments
 	Join LineJoins `xml:"stroke-linejoin" desc:"prop: stroke-linejoin = how to join line segments"`
 
-	// prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger
+	// [min: 1] prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger
 	MiterLimit float32 `xml:"stroke-miterlimit" min:"1" desc:"prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger"`
 }
 

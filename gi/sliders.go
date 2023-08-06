@@ -73,7 +73,7 @@ type SliderBase struct {
 	// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
 	Prec int `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 
-	// optional icon for the dragging knob
+	// [view: show-name] optional icon for the dragging knob
 	Icon icons.Icon `view:"show-name" desc:"optional icon for the dragging knob"`
 
 	// if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed
@@ -118,7 +118,7 @@ type SliderBase struct {
 	// styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that
 	StateStyles [SliderStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 
-	// signal for slider -- see SliderSignals for the types
+	// [view: -] signal for slider -- see SliderSignals for the types
 	SliderSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
 }
 

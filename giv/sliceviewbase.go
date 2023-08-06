@@ -130,19 +130,19 @@ type SliceViewer interface {
 type SliceViewBase struct {
 	gi.Frame
 
-	// the slice that we are a view onto -- must be a pointer to that slice
+	// [view: -] the slice that we are a view onto -- must be a pointer to that slice
 	Slice any `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 
-	// optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex
+	// [view: -] optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex
 	ViewMu *sync.Mutex `copy:"-" view:"-" json:"-" xml:"-" desc:"optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex"`
 
-	// non-ptr reflect.Value of the slice
+	// [view: -] non-ptr reflect.Value of the slice
 	SliceNPVal reflect.Value `copy:"-" view:"-" json:"-" xml:"-" desc:"non-ptr reflect.Value of the slice"`
 
-	// ValueView for the slice itself, if this was created within value view framework -- otherwise nil
+	// [view: -] ValueView for the slice itself, if this was created within value view framework -- otherwise nil
 	SliceValView ValueView `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 
-	// whether the slice is actually an array -- no modifications -- set by SetSlice
+	// [view: -] whether the slice is actually an array -- no modifications -- set by SetSlice
 	isArray bool `copy:"-" view:"-" json:"-" xml:"-" desc:"whether the slice is actually an array -- no modifications -- set by SetSlice"`
 
 	// if true, user cannot add elements to the slice
@@ -157,7 +157,7 @@ type SliceViewBase struct {
 	// has the slice been edited?
 	Changed bool `desc:"has the slice been edited?"`
 
-	// ValueView representations of the slice values
+	// [view: -] ValueView representations of the slice values
 	Values []ValueView `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView representations of the slice values"`
 
 	// whether to show index or not -- updated from 'index' property (bool)
@@ -166,7 +166,7 @@ type SliceViewBase struct {
 	// support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events
 	InactKeyNav bool `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
 
-	// current selection value -- initially select this value if set
+	// [view: -] current selection value -- initially select this value if set
 	SelVal any `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
 
 	// index of currently-selected item, in Inactive mode only
@@ -196,7 +196,7 @@ type SliceViewBase struct {
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
-	// the slice that we successfully set a toolbar for
+	// [view: -] the slice that we successfully set a toolbar for
 	ToolbarSlice any `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`
 
 	// size of slice
@@ -214,19 +214,19 @@ type SliceViewBase struct {
 	// total number of rows visible in allocated display size
 	VisRows int `inactive:"+" copy:"-" json:"-" xml:"-" desc:"total number of rows visible in allocated display size"`
 
-	// the height of grid from last layout -- determines when update needed
+	// [view: -] the height of grid from last layout -- determines when update needed
 	LayoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"`
 
-	// the number of rows rendered -- determines update
+	// [view: -] the number of rows rendered -- determines update
 	RenderedRows int `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`
 
-	// guard for recursive focus grabbing
+	// [view: -] guard for recursive focus grabbing
 	InFocusGrab bool `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive focus grabbing"`
 
-	// guard for recursive rebuild
+	// [view: -] guard for recursive rebuild
 	InFullRebuild bool `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive rebuild"`
 
-	// temp idx state for e.g., dnd
+	// [view: -] temp idx state for e.g., dnd
 	CurIdx int `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`
 }
 

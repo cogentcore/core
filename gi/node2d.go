@@ -66,7 +66,7 @@ For Widget / Layout nodes, rendering is done in 5 separate passes:
 type Node2DBase struct {
 	NodeBase
 
-	// our viewport -- set in Init2D (Base typically) and used thereafter -- use ViewportSafe() method to access under BBoxMu read lock
+	// [view: -] our viewport -- set in Init2D (Base typically) and used thereafter -- use ViewportSafe() method to access under BBoxMu read lock
 	Viewport *Viewport2D `copy:"-" json:"-" xml:"-" view:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter -- use ViewportSafe() method to access under BBoxMu read lock"`
 }
 

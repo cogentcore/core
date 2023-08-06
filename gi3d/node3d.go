@@ -130,7 +130,7 @@ type Node3DBase struct {
 	// complete specification of position and orientation
 	Pose Pose `desc:"complete specification of position and orientation"`
 
-	// mutex on pose access -- needed for parallel updating
+	// [view: -] mutex on pose access -- needed for parallel updating
 	PoseMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on pose access -- needed for parallel updating"`
 
 	// mesh-based local bounding box (aggregated for groups)

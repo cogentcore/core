@@ -23,7 +23,7 @@ import (
 type SliceView struct {
 	SliceViewBase
 
-	// optional styling function
+	// [view: -] optional styling function
 	StyleFunc SliceViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
 }
 

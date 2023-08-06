@@ -129,7 +129,7 @@ type TextBuf struct {
 	// mutex for updating markup delay timer
 	MarkupDelayMu sync.Mutex `json:"-" xml:"-" desc:"mutex for updating markup delay timer"`
 
-	// signal for buffer -- see TextBufSignals for the types
+	// [view: -] signal for buffer -- see TextBufSignals for the types
 	TextBufSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 
 	// the TextViews that are currently viewing this buffer

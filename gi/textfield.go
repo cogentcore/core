@@ -104,7 +104,7 @@ type TextField struct {
 	// if true, select text as cursor moves
 	SelectMode bool `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`
 
-	// signal for line edit -- see TextFieldSignals for the types
+	// [view: -] signal for line edit -- see TextFieldSignals for the types
 	TextFieldSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 
 	// render version of entire text, for sizing
@@ -122,7 +122,7 @@ type TextField struct {
 	// oscillates between on and off for blinking
 	BlinkOn bool `copy:"-" json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
 
-	// mutex for updating cursor between blinker and field
+	// [view: -] mutex for updating cursor between blinker and field
 	CursorMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
 
 	// functions and data for textfield completion

@@ -35,7 +35,7 @@ type Anim struct {
 	// run the animation
 	On bool `desc:"run the animation"`
 
-	// angular speed (in radians)
+	// [min: 0.01] [step: 0.01] angular speed (in radians)
 	Speed float32 `min:"0.01" step:"0.01" desc:"angular speed (in radians)"`
 
 	// animate the torus
@@ -47,7 +47,7 @@ type Anim struct {
 	// current angle
 	Ang float32 `inactive:"+" desc:"current angle"`
 
-	// the time.Ticker for animating the scene
+	// [view: -] the time.Ticker for animating the scene
 	Ticker *time.Ticker `view:"-" desc:"the time.Ticker for animating the scene"`
 
 	// the scene

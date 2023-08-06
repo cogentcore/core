@@ -60,7 +60,7 @@ type StyleEntry struct {
 	// background color
 	Background gist.Color `desc:"background color"`
 
-	// border color? not sure what this is -- not really used
+	// [view: -] border color? not sure what this is -- not really used
 	Border gist.Color `view:"-" desc:"border color? not sure what this is -- not really used"`
 
 	// bold font

@@ -32,7 +32,7 @@ type LightBase struct {
 	// whether light is on or off
 	On bool `desc:"whether light is on or off"`
 
-	// brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness
+	// [min: 0] [step: 0.1] brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness
 	Lumns float32 `min:"0" step:"0.1" desc:"brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"`
 
 	// color of light a full intensity
@@ -155,7 +155,7 @@ type SpotLight struct {
 	// Angular decay factor -- defaults to 15
 	AngDecay float32 `desc:"Angular decay factor -- defaults to 15"`
 
-	// Cut off angle (in degrees) -- defaults to 45 -- max of 90
+	// [min: 1] [max: 90] Cut off angle (in degrees) -- defaults to 45 -- max of 90
 	CutoffAngle float32 `max:"90" min:"1" desc:"Cut off angle (in degrees) -- defaults to 45 -- max of 90"`
 
 	// Distance linear decay factor -- defaults to .01

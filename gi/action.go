@@ -23,13 +23,13 @@ import (
 type Action struct {
 	ButtonBase
 
-	// optional data that is sent with the ActionSig when it is emitted
+	// [view: -] optional data that is sent with the ActionSig when it is emitted
 	Data any `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
 
-	// signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action
+	// [view: -] signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action
 	ActionSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
 
-	// optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing
+	// [view: -] optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing
 	UpdateFunc func(act *Action) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing"`
 
 	// the type of action

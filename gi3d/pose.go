@@ -24,22 +24,22 @@ type Pose struct {
 	// Node rotation specified as a Quat (relative to parent)
 	Quat mat32.Quat `desc:"Node rotation specified as a Quat (relative to parent)"`
 
-	// Local matrix. Contains all position/rotation/scale information (relative to parent)
+	// [view: -] Local matrix. Contains all position/rotation/scale information (relative to parent)
 	Matrix mat32.Mat4 `view:"-" desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`
 
-	// Parent's world matrix -- we cache this so that we can independently update our own matrix
+	// [view: -] Parent's world matrix -- we cache this so that we can independently update our own matrix
 	ParMatrix mat32.Mat4 `view:"-" desc:"Parent's world matrix -- we cache this so that we can independently update our own matrix"`
 
-	// World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)
+	// [view: -] World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)
 	WorldMatrix mat32.Mat4 `view:"-" desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"`
 
-	// model * view matrix -- tranforms into camera-centered coords
+	// [view: -] model * view matrix -- tranforms into camera-centered coords
 	MVMatrix mat32.Mat4 `view:"-" desc:"model * view matrix -- tranforms into camera-centered coords"`
 
-	// model * view * projection matrix -- full final render matrix
+	// [view: -] model * view * projection matrix -- full final render matrix
 	MVPMatrix mat32.Mat4 `view:"-" desc:"model * view * projection matrix -- full final render matrix"`
 
-	// normal matrix has no offsets, for normal vector rotation only, based on MVMatrix
+	// [view: -] normal matrix has no offsets, for normal vector rotation only, based on MVMatrix
 	NormMatrix mat32.Mat3 `view:"-" desc:"normal matrix has no offsets, for normal vector rotation only, based on MVMatrix"`
 }
 

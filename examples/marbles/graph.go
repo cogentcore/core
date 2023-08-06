@@ -34,7 +34,7 @@ type Graph struct {
 	// the parameters for updating the marbles
 	Params Params `desc:"the parameters for updating the marbles"`
 
-	// the lines of the graph -- can have any number
+	// [view: -] the lines of the graph -- can have any number
 	Lines Lines `view:"-" desc:"the lines of the graph -- can have any number"`
 }
 
@@ -159,22 +159,22 @@ type Line struct {
 	// equation: use 'x' for the x value, and must use * for multiplication, and start with 0 for decimal numbers (0.01 instead of .01)
 	Eq string `width:"60" desc:"equation: use 'x' for the x value, and must use * for multiplication, and start with 0 for decimal numbers (0.01 instead of .01)"`
 
-	// Minimum x value for this line.
+	// [step: 1] Minimum x value for this line.
 	MinX float32 `step:"1" desc:"Minimum x value for this line."`
 
-	// Maximum x value for this line.
+	// [step: 1] Maximum x value for this line.
 	MaxX float32 `step:"1" desc:"Maximum x value for this line."`
 
 	// color to draw the line in
 	Color string `desc:"color to draw the line in"`
 
-	// how bouncy the line is -- 1 = perfectly bouncy, 0 = no bounce at all
+	// [min: 0] [max: 2] [step: .05] how bouncy the line is -- 1 = perfectly bouncy, 0 = no bounce at all
 	Bounce float32 `min:"0" max:"2" step:".05" desc:"how bouncy the line is -- 1 = perfectly bouncy, 0 = no bounce at all"`
 
-	// the expression evaluator
+	// [tableview: -] the expression evaluator
 	expr *govaluate.EvaluableExpression `tableview:"-" desc:"the expression evaluator"`
 
-	// the eval params
+	// [tableview: -] the eval params
 	params map[string]any `tableview:"-" desc:"the eval params"`
 }
 
@@ -358,19 +358,19 @@ var Marbles []*Marble
 // Params holds our parameters
 type Params struct {
 
-	// number of marbles
+	// [min: 1] [max: 10000] [step: 10] number of marbles
 	NMarbles int `min:"1" max:"10000" step:"10" desc:"number of marbles"`
 
-	// number of steps to take when running
+	// [min: 100] [max: 10000] [step: 10] number of steps to take when running
 	NSteps int `min:"100" max:"10000" step:"10" desc:"number of steps to take when running"`
 
-	// Coordinates per unit of time
+	// [min: 0] [max: 2] [step: .05] Coordinates per unit of time
 	StartSpeed float32 `min:"0" max:"2" step:".05" desc:"Coordinates per unit of time"`
 
-	// how fast to move along velocity vector -- lower = smoother, more slow-mo
+	// [min: 0.001] [max: 1] [step: .01] how fast to move along velocity vector -- lower = smoother, more slow-mo
 	UpdtRate float32 `min:"0.001" max:"1" step:".01" desc:"how fast to move along velocity vector -- lower = smoother, more slow-mo"`
 
-	// how fast it accelerates down
+	// [min: 0] [max: 2] [step: .01] how fast it accelerates down
 	Gravity float32 `min:"0" max:"2" step:".01" desc:"how fast it accelerates down"`
 	Width   float32 `length of spawning zone for marbles, set to 0 for all spawn in a column`
 }

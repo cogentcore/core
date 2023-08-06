@@ -48,7 +48,7 @@ type Font struct {
 	// prop: baseline-shift = super / sub script -- not inherited
 	Shift BaselineShifts `xml:"baseline-shift" desc:"prop: baseline-shift = super / sub script -- not inherited"`
 
-	// full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts
+	// [view: -] full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts
 	Face *FontFace `view:"-" desc:"full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts"`
 
 	// Rem size of font -- 12pt converted to same effective DPI as above measurements

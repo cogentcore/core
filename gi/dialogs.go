@@ -79,10 +79,10 @@ type Dialog struct {
 	// signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)
 	SigVal int64 `desc:"signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)"`
 
-	// signal for dialog -- sends a signal when opened, accepted, or canceled
+	// [view: -] signal for dialog -- sends a signal when opened, accepted, or canceled
 	DialogSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
 
-	// the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows
+	// [view: -] the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows
 	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 }
 
