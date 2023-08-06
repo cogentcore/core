@@ -39,19 +39,19 @@ type Surface struct {
 	// Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames
 	Frames []*Framebuffer `desc:"Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames"`
 
-	// vulkan handle for surface
+	// [view: -] vulkan handle for surface
 	Surface vk.Surface `view:"-" desc:"vulkan handle for surface"`
 
-	// vulkan handle for swapchain
+	// [view: -] vulkan handle for swapchain
 	Swapchain vk.Swapchain `view:"-" desc:"vulkan handle for swapchain"`
 
-	// semaphore used internally for waiting on acquisition of next frame
+	// [view: -] semaphore used internally for waiting on acquisition of next frame
 	ImageAcquired vk.Semaphore `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
 
-	// semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
+	// [view: -] semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
 	RenderDone vk.Semaphore `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
 
-	// fence for rendering command running
+	// [view: -] fence for rendering command running
 	RenderFence vk.Fence `view:"-" desc:"fence for rendering command running"`
 }
 

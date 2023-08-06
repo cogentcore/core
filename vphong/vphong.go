@@ -47,7 +47,7 @@ type Phong struct {
 	// spot lights
 	Spot [MaxLights]SpotLight `desc:"spot lights"`
 
-	// render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system
+	// [def: false] render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system
 	Wireframe bool `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system"`
 
 	// state for current rendering
@@ -65,7 +65,7 @@ type Phong struct {
 	// rendering system
 	Sys vgpu.System `desc:"rendering system"`
 
-	// mutex on updating
+	// [view: -] mutex on updating
 	UpdtMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on updating"`
 }
 

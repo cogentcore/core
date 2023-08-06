@@ -33,7 +33,7 @@ type Drawer struct {
 	// implementation state -- ignore
 	Impl DrawerImpl `desc:"implementation state -- ignore"`
 
-	// mutex on updating
+	// [view: -] mutex on updating
 	UpdtMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on updating"`
 }
 

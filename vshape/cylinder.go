@@ -23,7 +23,7 @@ type Cylinder struct {
 	// radius of the bottom
 	BotRad float32 `desc:"radius of the bottom"`
 
-	// number of radial segments (32 is a reasonable default for full circle)
+	// [min: 1] number of radial segments (32 is a reasonable default for full circle)
 	RadialSegs int `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
 
 	// number of height segments
@@ -35,10 +35,10 @@ type Cylinder struct {
 	// render the bottom disc
 	Bottom bool `desc:"render the bottom disc"`
 
-	// starting angle in degrees, relative to -1,0,0 left side starting point
+	// [min: 0] [max: 360] [step: 5] starting angle in degrees, relative to -1,0,0 left side starting point
 	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
 
-	// total angle to generate in degrees (max 360)
+	// [min: 0] [max: 360] [step: 5] total angle to generate in degrees (max 360)
 	AngLen float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 

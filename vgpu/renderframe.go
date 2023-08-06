@@ -32,13 +32,13 @@ type RenderFrame struct {
 	// Framebuffers representing the Image owned by the RenderFrame -- we iterate through these in rendering subsequent frames
 	Frames []*Framebuffer `desc:"Framebuffers representing the Image owned by the RenderFrame -- we iterate through these in rendering subsequent frames"`
 
-	// semaphore used internally for waiting on acquisition of next frame
+	// [view: -] semaphore used internally for waiting on acquisition of next frame
 	ImageAcquired vk.Semaphore `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
 
-	// semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
+	// [view: -] semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
 	RenderDone vk.Semaphore `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
 
-	// fence for rendering command running
+	// [view: -] fence for rendering command running
 	RenderFence vk.Fence `view:"-" desc:"fence for rendering command running"`
 
 	// do we own the device?

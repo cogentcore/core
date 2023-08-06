@@ -37,22 +37,22 @@ type Vars struct {
 	// number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased.
 	NDescs int `desc:"number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased."`
 
-	// our parent memory manager
+	// [view: -] our parent memory manager
 	Mem *Memory `view:"-" desc:"our parent memory manager"`
 
 	// if true, variables are statically bound to specific offsets in memory buffers, vs. dynamically bound offsets.  Typically a compute shader operating on fixed data variables can use static binding, while graphics (e.g., vphong) requires dynamic binding to efficiently use the same shader code for multiple different values of the same variable type
 	StaticVars bool `inactive:"+" desc:"if true, variables are statically bound to specific offsets in memory buffers, vs. dynamically bound offsets.  Typically a compute shader operating on fixed data variables can use static binding, while graphics (e.g., vphong) requires dynamic binding to efficiently use the same shader code for multiple different values of the same variable type"`
 
-	// vulkan descriptor layout based on vars
+	// [view: -] vulkan descriptor layout based on vars
 	VkDescLayout vk.PipelineLayout `view:"-" desc:"vulkan descriptor layout based on vars"`
 
-	// vulkan descriptor pool, allocated for NDescs and the different descriptor pools
+	// [view: -] vulkan descriptor pool, allocated for NDescs and the different descriptor pools
 	VkDescPool vk.DescriptorPool `view:"-" desc:"vulkan descriptor pool, allocated for NDescs and the different descriptor pools"`
 
 	// allocated descriptor sets -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time.  The inner dimension is per VarSet to cover the different sets of variable updated at different times or with different numbers of items.  This variable is used for whole-pipline binding at start of rendering.
 	VkDescSets [][]vk.DescriptorSet `desc:"allocated descriptor sets -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time.  The inner dimension is per VarSet to cover the different sets of variable updated at different times or with different numbers of items.  This variable is used for whole-pipline binding at start of rendering."`
 
-	// currently accumulating set of vals to write to update bindings -- initiated by BindValsStart, executed by BindValsEnd
+	// [view: -] currently accumulating set of vals to write to update bindings -- initiated by BindValsStart, executed by BindValsEnd
 	VkWriteVals []vk.WriteDescriptorSet `view:"-" desc:"currently accumulating set of vals to write to update bindings -- initiated by BindValsStart, executed by BindValsEnd"`
 
 	// current descriptor collection index, set in BindValsStart

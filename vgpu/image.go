@@ -294,16 +294,16 @@ type Image struct {
 	// format & size of image
 	Format ImageFormat `desc:"format & size of image"`
 
-	// vulkan image handle, in device memory
+	// [view: -] vulkan image handle, in device memory
 	Image vk.Image `view:"-" desc:"vulkan image handle, in device memory"`
 
-	// vulkan image view
+	// [view: -] vulkan image view
 	View vk.ImageView `view:"-" desc:"vulkan image view"`
 
-	// memory for image when we allocate it
+	// [view: -] memory for image when we allocate it
 	Mem vk.DeviceMemory `view:"-" desc:"memory for image when we allocate it"`
 
-	// keep track of device for destroying view
+	// [view: -] keep track of device for destroying view
 	Dev vk.Device `view:"-" desc:"keep track of device for destroying view"`
 
 	// host memory buffer representation of the image
@@ -919,16 +919,16 @@ type HostImage struct {
 	// size in bytes allocated for host representation of image
 	Size int `desc:"size in bytes allocated for host representation of image"`
 
-	// buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)
+	// [view: -] buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)
 	Buff vk.Buffer `view:"-" desc:"buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)"`
 
 	// offset into host buffer, when Buff is Memory managed
 	Offset int `desc:"offset into host buffer, when Buff is Memory managed"`
 
-	// host CPU-visible memory, for staging, when we manage our own memory
+	// [view: -] host CPU-visible memory, for staging, when we manage our own memory
 	Mem vk.DeviceMemory `view:"-" desc:"host CPU-visible memory, for staging, when we manage our own memory"`
 
-	// memory mapped pointer into host memory -- remains mapped
+	// [view: -] memory mapped pointer into host memory -- remains mapped
 	Ptr unsafe.Pointer `view:"-" desc:"memory mapped pointer into host memory -- remains mapped"`
 }
 

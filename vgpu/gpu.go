@@ -89,7 +89,7 @@ type GPU struct {
 	// maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup[0], which allows for the [1] and [2] maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroup[0] value is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.
 	MaxComputeWorkGroupCount1D int `desc:"maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup[0], which allows for the [1] and [2] maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroup[0] value is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values."`
 
-	// platform-specific PNext for CreateDevice call
+	// [view: -] platform-specific PNext for CreateDevice call
 	PlatformDeviceNext unsafe.Pointer `view:"-" desc:"platform-specific PNext for CreateDevice call"`
 }
 

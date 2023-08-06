@@ -49,7 +49,7 @@ type Val struct {
 	// for Texture Var roles, this is the Texture
 	Texture *Texture `desc:"for Texture Var roles, this is the Texture"`
 
-	// pointer to the start of the staging memory for this value
+	// [view: -] pointer to the start of the staging memory for this value
 	MemPtr unsafe.Pointer `view:"-" desc:"pointer to the start of the staging memory for this value"`
 }
 
