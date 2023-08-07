@@ -70,6 +70,9 @@ type Node struct {
 // some of these base Node flags.
 var KiT_Node = kit.Types.AddType(&Node{}, Props{"EnumType:Flag": KiT_Flags})
 
+// check implementation of [Ki] interface
+var _ = Ki(&Node{})
+
 //////////////////////////////////////////////////////////////////////////
 //  fmt.Stringer
 
@@ -1610,3 +1613,11 @@ func GenCopyFieldsFrom(to any, frm any) {
 
 	}
 }
+
+// OnInit is a placeholder implementation of
+// [Ki.OnInit] that does nothing.
+func (n *Node) OnInit() {}
+
+// OnAdd is a placeholder implementation of
+// [Ki.OnAdd] that does nothing.
+func (n *Node) OnAdd() {}

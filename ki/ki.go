@@ -63,7 +63,7 @@ type Ki interface {
 	// Even though this is a method and gets the method receiver, it needs
 	// an "external" version of itself passed as the first arg, from which
 	// the proper Ki interface pointer will be obtained.  This is the only
-	// way to get virtual functional calling to work within the Go framework.
+	// way to get virtual functional calling to work within the Go language.
 	InitName(this Ki, name string)
 
 	// This returns the Ki interface that guarantees access to the Ki
@@ -614,6 +614,26 @@ type Ki interface {
 	// ReadXML reads the tree from an XML-encoded byte string over io.Reader, calls
 	// UnmarshalPost to recover pointers from paths.
 	ReadXML(reader io.Reader) error
+
+	//////////////////////////////////////////////////////////////////////////
+	// Init events
+
+	// OnInit is called when the object is
+	// initialized (ie: through InitName).
+	// It is called before the object is added to the tree,
+	// so it will not have any parents or siblings.
+	// It will be called only once in the lifetime of the object.
+	// It does nothing by default, but it can be implemented
+	// by higher-level types that want to do something.
+	OnInit()
+
+	// OnAdd is called when the object is added to a parent.
+	// It will be called only oncein the lifetime of the object,
+	// unless the object is moved. It will not be called on root
+	// nodes, as they are never added to a parent.
+	// It does nothing by default, but it can be implemented
+	// by higher-level types that want to do something.
+	OnAdd()
 }
 
 // see node.go for struct implementing this interface

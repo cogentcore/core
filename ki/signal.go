@@ -79,7 +79,7 @@ type RecvFunc func(recv, send Ki, sig int64, data any)
 //
 // The Signal uses a map indexed by the receiver pointer to hold the
 // connections -- this means that there can only be one such connection per
-// receiver, and the order of signal emission to different receiveres will be random.
+// receiver, and the order of signal emission to different receivers will be random.
 //
 // Typically an inline anonymous closure receiver function is used to keep all
 // the relevant code in one place.  Due to the typically long-standing nature
