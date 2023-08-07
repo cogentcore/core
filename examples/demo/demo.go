@@ -338,23 +338,16 @@ func makeInputs(tv *gi.TabView) {
 	cvvw := inputs.AddNewChild(colorvv.WidgetType(), "cvvw").(gi.Node2D)
 	colorvv.ConfigWidget(cvvw)
 
-	irow := gi.AddNewLayout(inputs, "irow", gi.LayoutVert)
-	irow.AddStyleFunc(gi.StyleFuncFinal, func() {
-		irow.Spacing.SetEx(1)
-		irow.Style.MaxWidth.SetPx(-1)
-		irow.Style.MaxHeight.SetPx(500)
-	})
-
-	sliderx := gi.AddNewSlider(irow, "sliderx")
+	sliderx := gi.AddNewSlider(inputs, "sliderx")
 	sliderx.Dim = mat32.X
 	sliderx.Value = 0.5
 
-	sliderxi := gi.AddNewSlider(irow, "sliderxi")
+	sliderxi := gi.AddNewSlider(inputs, "sliderxi")
 	sliderxi.Dim = mat32.X
 	sliderxi.Value = 0.7
 	sliderxi.SetInactive()
 
-	sliderys := gi.AddNewLayout(irow, "sliderys", gi.LayoutHorizFlow)
+	sliderys := gi.AddNewLayout(inputs, "sliderys", gi.LayoutHorizFlow)
 
 	slidery := gi.AddNewSlider(sliderys, "slidery")
 	slidery.Dim = mat32.Y
@@ -365,28 +358,25 @@ func makeInputs(tv *gi.TabView) {
 	slideryi.Value = 0.2
 	slideryi.SetInactive()
 
-	check := gi.AddNewCheckBox(irow, "check")
-	check.Text = "Checkbox"
-
-	sbox := gi.AddNewSpinBox(irow, "sbox")
+	sbox := gi.AddNewSpinBox(inputs, "sbox")
 	sbox.Value = 0.5
 
-	cbox := gi.AddNewComboBox(irow, "cbox")
+	cbox := gi.AddNewComboBox(inputs, "cbox")
 	cbox.Text = "Select an option"
 	cbox.Items = []any{"Option 1", "Option 2", "Option 3"}
 	cbox.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
 
-	cboxe := gi.AddNewComboBox(irow, "cboxe")
+	cboxe := gi.AddNewComboBox(inputs, "cboxe")
 	cboxe.Editable = true
 	cboxe.Text = "Select or type an option"
 	cboxe.Items = []any{"Option 1", "Option 2", "Option 3"}
 	cboxe.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
 
-	bbox := gi.AddNewButtonBox(irow, "bbox")
+	bbox := gi.AddNewButtonBox(inputs, "bbox")
 	bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
 	bbox.Tooltips = []string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"}
 
-	bboxr := gi.AddNewButtonBox(irow, "bboxr")
+	bboxr := gi.AddNewButtonBox(inputs, "bboxr")
 	bboxr.Items = []string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}
 	bboxr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
 	bboxr.Mutex = true

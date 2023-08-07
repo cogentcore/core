@@ -1058,10 +1058,10 @@ func (cb *CheckBox) ButtonRelease() {
 
 // SetIcons sets the Icons (by name) for the On (checked) and Off (unchecked)
 // states, and updates button
-func (cb *CheckBox) SetIcons(icOn, icOff string) {
+func (cb *CheckBox) SetIcons(icOn, icOff icons.Icon) {
 	updt := cb.UpdateStart()
-	cb.Icon = icons.Icon(icOn)
-	cb.IconOff = icons.Icon(icOff)
+	cb.Icon = icOn
+	cb.IconOff = icOff
 	cb.This().(ButtonWidget).ConfigParts()
 	cb.UpdateEnd(updt)
 }
