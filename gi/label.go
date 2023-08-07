@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
@@ -132,8 +131,8 @@ func AddNewLabel(parent ki.Ki, name string, text string) *Label {
 	return lb
 }
 
-func (lb *Label) OnInit() {
-	lb.Selectable = true
+func (lb *Label) OnAdd() {
+	lb.Selectable = lb.ParentByType(TypeButtonBase, ki.Embeds) == nil
 }
 
 func (lb *Label) CopyFieldsFrom(frm any) {
@@ -268,6 +267,7 @@ func (lb *Label) SetText(txt string) {
 // SetStateStyle sets the style based on the inactive, selected flags
 func (lb *Label) SetStateStyle() {
 	lb.StyMu.Lock()
+	prev := lb.State
 	if lb.IsInactive() {
 		lb.State = LabelInactive
 		lb.Style = lb.StateStyles[LabelInactive]
@@ -283,6 +283,11 @@ func (lb *Label) SetStateStyle() {
 		if (lb.Selectable || lb.Redrawable) && !lb.CurBackgroundColor.IsNil() {
 			lb.Style.BackgroundColor.SetColor(lb.CurBackgroundColor)
 		}
+	}
+	if prev != lb.State {
+		lb.Style2DWidget()
+		// TODO: stop doing full re render here
+		lb.SetFullReRender()
 	}
 	lb.StyMu.Unlock()
 }
@@ -310,7 +315,6 @@ func (lb *Label) OpenLink(tl *girl.TextLink) {
 func (lb *Label) HoverEvent() {
 	lb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
-		fmt.Println("hov", lb.Selectable, me)
 		llb := recv.Embed(TypeLabel).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
 		if hasLinks {
@@ -354,9 +358,11 @@ func (lb *Label) MouseEvent() {
 			}
 		}
 		if me.Action == mouse.DoubleClick && me.Button == mouse.Left && llb.Selectable {
+			updt := llb.UpdateStart()
 			llb.SetSelectedState(!llb.IsSelected())
 			llb.EmitSelectedSignal()
-			llb.UpdateSig()
+			llb.SetStateStyle()
+			llb.UpdateEnd(updt)
 		}
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
@@ -374,10 +380,6 @@ func (lb *Label) MouseMoveEvent() {
 	lb.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
-		fmt.Println(lb.Selectable, me)
-		if lb.Selectable {
-			oswin.TheApp.Cursor(lb.ParentWindow().OSWin).Push(cursor.IBeam)
-		}
 		llb := recv.Embed(TypeLabel).(*Label)
 		pos := llb.RenderPos
 		inLink := false
@@ -396,10 +398,29 @@ func (lb *Label) MouseMoveEvent() {
 	})
 }
 
+func (lb *Label) MouseFocusEvent() {
+	if !lb.Selectable {
+		return
+	}
+	lb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		me := data.(*mouse.FocusEvent)
+		me.SetProcessed()
+
+		updt := lb.UpdateStart()
+		if me.Action == mouse.Enter {
+			oswin.TheApp.Cursor(lb.ParentWindow().OSWin).Push(cursor.IBeam)
+		} else {
+			oswin.TheApp.Cursor(lb.ParentWindow().OSWin).PopIf(cursor.IBeam)
+		}
+		lb.UpdateEnd(updt)
+	})
+}
+
 func (lb *Label) LabelEvents() {
 	lb.HoverEvent()
 	lb.MouseEvent()
 	lb.MouseMoveEvent()
+	lb.MouseFocusEvent()
 }
 
 func (lb *Label) GrabCurBackgroundColor() {

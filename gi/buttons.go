@@ -412,7 +412,7 @@ func (bb *ButtonBase) OpenMenu() bool {
 	}
 	bb.BBoxMu.RUnlock()
 	if bb.Viewport != nil {
-		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).Pop()
+		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).PopIf(cursor.HandPointing)
 		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Viewport, bb.Text)
 		return true
 	}
@@ -471,7 +471,7 @@ func (bb *ButtonBase) ButtonExitHover() {
 	if bb.State == ButtonHover {
 		updt := bb.UpdateStart()
 		bb.SetButtonState(ButtonActive)
-		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).Pop()
+		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).PopIf(cursor.HandPointing)
 		bb.UpdateEnd(updt)
 	}
 }
