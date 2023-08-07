@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/goki/gi/gi"
@@ -17,6 +18,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
+	"github.com/iancoleman/strcase"
 )
 
 func main() {
@@ -41,6 +43,7 @@ func mainrun() {
 	tv.NewTabButton = true
 
 	makeHome(tv)
+	makeText(tv)
 	makeButtons(win, tv)
 	makeInputs(tv)
 	makeLayouts(tv)
@@ -83,6 +86,32 @@ func makeHome(tv *gi.TabView) {
 	if err != nil {
 		fmt.Println("error loading gopher image:", err)
 	}
+}
+
+func makeText(tv *gi.TabView) {
+	text := tv.AddNewTab(gi.TypeFrame, "Text").(*gi.Frame)
+	text.Lay = gi.LayoutVert
+	text.AddStyleFunc(gi.StyleFuncFinal, func() {
+		text.Spacing.SetEx(1)
+		text.Style.Padding.Set(units.Px(8))
+		text.Style.MaxWidth.SetPx(-1)
+		text.Style.MaxHeight.SetPx(-1)
+	})
+
+	ttitle := gi.AddNewLabel(text, "ttitle", "Text")
+	ttitle.Type = gi.LabelHeadlineLarge
+
+	tdesc := gi.AddNewLabel(text, "tdesc",
+		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`,
+	)
+	tdesc.Type = gi.LabelBodyLarge
+
+	for typ := gi.LabelTypes(0); typ < gi.LabelTypesN; typ++ {
+		s := strcase.ToCamel(strings.TrimPrefix(typ.String(), "Label"))
+		label := gi.AddNewLabel(text, "label"+s, s)
+		label.Type = typ
+	}
+
 }
 
 func makeButtons(win *gi.Window, tv *gi.TabView) {
