@@ -68,10 +68,16 @@ type Node struct {
 // Nodes can also use type properties e.g., StructViewFields key with props
 // inside that to set view properties for types, e.g., to hide or show
 // some of these base Node flags.
-var KiT_Node = kit.Types.AddType(&Node{}, Props{"EnumType:Flag": KiT_Flags})
+var KiT_Node = kit.Types.AddType(&Node{}, Props{EnumTypeFlag: KiT_Flags})
 
 // check implementation of [Ki] interface
 var _ = Ki(&Node{})
+
+// EnumTypeFlag is a [Props] property name that
+// indicates what enum type to use as the type for
+// the flags field in GUI views. Its value should be
+// of the type [reflect.Type]
+const EnumTypeFlag string = "EnumType:Flag"
 
 //////////////////////////////////////////////////////////////////////////
 //  fmt.Stringer
