@@ -31,6 +31,7 @@ func InitNode(this Ki) {
 	this.ClearFlagMask(int64(UpdateFlagsMask))
 	if n.Ths != this {
 		n.Ths = this
+		n.Ths.OnInit()
 		if !KiHasKiFields(n) {
 			return
 		}
@@ -64,6 +65,7 @@ func ThisCheck(k Ki) error {
 func SetParent(kid Ki, parent Ki) {
 	n := kid.AsNode()
 	n.Par = parent
+	kid.OnAdd()
 	if parent != nil && !parent.OnlySelfUpdate() {
 		parup := parent.IsUpdating()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
