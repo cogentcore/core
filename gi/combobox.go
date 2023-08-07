@@ -19,6 +19,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/complete"
 )
 
 // ComboBox is for selecting items from a dropdown list, with an optional
@@ -645,6 +646,22 @@ func (cb *ComboBox) KeyChordEvent() {
 			}
 		}
 	})
+}
+
+// Complete is a [complete.MatchFunc] used for the
+// editable textfield part of the ComboBox.
+func (cb *ComboBox) Complete(data any, text string, posLn, posCh int) (md complete.Matches) {
+	md.Seed = text
+	is := []string{}
+	for _, i := range cb.Items {
+		is = append(is, fmt.Sprint(i))
+	}
+	possibles := complete.MatchSeedString(is, md.Seed)
+	for _, p := range possibles {
+		m := complete.Completion{Text: p, Icon: ""}
+		md.Matches = append(md.Matches, m)
+	}
+	return md
 }
 
 func (cb *ComboBox) Init2D() {
