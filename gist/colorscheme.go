@@ -126,8 +126,8 @@ type ColorScheme struct {
 	// SurfaceContainerHigh is the color applied to surface container elements that have higher emphasis (see SurfaceContainer for more information)
 	SurfaceContainerHigh Color `desc:"SurfaceContainerHigh is the color applied to surface container elements that have higher emphasis (see SurfaceContainer for more information)"`
 
-	// SurfaceContainerHigher is the color applied to surface container elements that have the highest emphasis (see SurfaceContainer for more information)
-	SurfaceContainerHigher Color `desc:"SurfaceContainerHigher is the color applied to surface container elements that have the highest emphasis (see SurfaceContainer for more information)"`
+	// SurfaceContainerHighest is the color applied to surface container elements that have the highest emphasis (see SurfaceContainer for more information)
+	SurfaceContainerHighest Color `desc:"SurfaceContainerHighest is the color applied to surface container elements that have the highest emphasis (see SurfaceContainer for more information)"`
 
 	// InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect
 	InverseSurface Color `desc:"InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect"`
