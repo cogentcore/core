@@ -176,7 +176,7 @@ func (tv *TextView) Disconnect() {
 }
 
 var TextViewProps = ki.Props{
-	"EnumType:Flag":    TypeTextViewFlags,
+	ki.EnumTypeFlag:    TypeTextViewFlags,
 	"white-space":      gist.WhiteSpacePreWrap,
 	"border-width":     0, // don't render our own border
 	"cursor-width":     units.Px(3),

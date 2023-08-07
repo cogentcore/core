@@ -102,7 +102,7 @@ func (ac *Action) Disconnect() {
 // }
 
 var ActionProps = ki.Props{
-	"EnumType:Flag": TypeButtonFlags,
+	ki.EnumTypeFlag: TypeButtonFlags,
 	// "border-width":     units.Px(0), // todo: should be default
 	// "border-radius":    units.Px(0),
 	// "border-color":     &Prefs.Colors.Border,

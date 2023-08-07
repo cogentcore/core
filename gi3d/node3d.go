@@ -147,7 +147,7 @@ var TypeNode3DBase = kit.Types.AddType(&Node3DBase{}, Node3DBaseProps)
 
 var Node3DBaseProps = ki.Props{
 	"base-type":     true, // excludes type from user selections
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 // NodeFlags extend gi.NodeFlags to hold 3D node state

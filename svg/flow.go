@@ -16,7 +16,7 @@ type Flow struct {
 	FlowType string
 }
 
-var TypeFlow = kit.Types.AddType(&Flow{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
+var TypeFlow = kit.Types.AddType(&Flow{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewFlow adds a new flow to given parent node, with given name.
 func AddNewFlow(parent ki.Ki, name string) *Flow {

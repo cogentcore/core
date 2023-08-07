@@ -187,7 +187,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 
 // VCSLogViewProps are style properties for DebugView
 var VCSLogViewProps = ki.Props{
-	"EnumType:Flag": gi.TypeNodeFlags,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"max-width":     -1,
 	"max-height":    -1,
 }

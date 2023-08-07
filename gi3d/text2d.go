@@ -228,5 +228,5 @@ func (txt *Text2D) RenderClass() RenderClasses {
 }
 
 var Text2DProps = ki.Props{
-	"EnumType:Flag": gi.TypeNodeFlags,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }

@@ -65,7 +65,7 @@ var TypeButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
 
 var ButtonBaseProps = ki.Props{
 	"base-type":     true, // excludes type from user selections
-	"EnumType:Flag": TypeButtonFlags,
+	ki.EnumTypeFlag: TypeButtonFlags,
 }
 
 func (bb *ButtonBase) CopyFieldsFrom(frm any) {
@@ -882,7 +882,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 // }
 
 var ButtonProps = ki.Props{
-	"EnumType:Flag": TypeButtonFlags,
+	ki.EnumTypeFlag: TypeButtonFlags,
 }
 
 func (bt *Button) Init2D() {
@@ -979,7 +979,7 @@ func (cb *CheckBox) CopyFieldsFrom(frm any) {
 }
 
 var CheckBoxProps = ki.Props{
-	"EnumType:Flag": TypeButtonFlags,
+	ki.EnumTypeFlag: TypeButtonFlags,
 	// "icon":             icons.CheckBox,
 	// "icon-off":         icons.CheckBoxOutlineBlank,
 	// "text-align":       gist.AlignLeft,

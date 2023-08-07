@@ -16,7 +16,7 @@ type Filter struct {
 	FilterType string
 }
 
-var TypeFilter = kit.Types.AddType(&Filter{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
+var TypeFilter = kit.Types.AddType(&Filter{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewFilter adds a new filter to given parent node, with given name.
 func AddNewFilter(parent ki.Ki, name string) *Filter {

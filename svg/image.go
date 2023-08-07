@@ -231,7 +231,7 @@ func (g *Image) ReadGeom(dat []float32) {
 
 // ImageProps define the ToolBar for images
 var ImageProps = ki.Props{
-	"EnumType:Flag": gi.TypeNodeFlags,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open image file for this image node, rescaling to given size -- use 0, 0 to use native image size.",

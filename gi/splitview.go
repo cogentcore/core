@@ -67,7 +67,7 @@ func (sv *SplitView) CopyFieldsFrom(frm any) {
 }
 
 var SplitViewProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "handle-size":   units.Px(10),
 	// "max-width":     -1.0,
 	// "max-height":    -1.0,
@@ -468,7 +468,7 @@ type Splitter struct {
 var TypeSplitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "padding":          units.Px(6),
 	// "margin":           units.Px(0),
 	// "background-color": &Prefs.Colors.Background,

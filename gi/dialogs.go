@@ -276,7 +276,7 @@ func (dlg *Dialog) Cancel() {
 //  Configuration functions construct standard types of dialogs but anything can be done
 
 var DialogProps = ki.Props{
-	"EnumType:Flag": TypeVpFlags,
+	ki.EnumTypeFlag: TypeVpFlags,
 	// "color":         &Prefs.Colors.Font,
 	// "#frame": ki.Props{
 	// 	"border-width":        units.Px(2),

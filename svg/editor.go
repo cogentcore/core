@@ -34,7 +34,7 @@ type Editor struct {
 var TypeEditor = kit.Types.AddType(&Editor{}, EditorProps)
 
 var EditorProps = ki.Props{
-	"EnumType:Flag": gi.TypeVpFlags,
+	ki.EnumTypeFlag: gi.TypeVpFlags,
 }
 
 // AddNewEditor adds a new editor to given parent node, with given name.

@@ -22,7 +22,7 @@ type Circle struct {
 	Radius float32 `xml:"r" desc:"radius of the circle"`
 }
 
-var TypeCircle = kit.Types.AddType(&Circle{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
+var TypeCircle = kit.Types.AddType(&Circle{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewCircle adds a new button to given parent node, with given name, x,y pos, and radius.
 func AddNewCircle(parent ki.Ki, name string, x, y, radius float32) *Circle {

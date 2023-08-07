@@ -17,7 +17,7 @@ type ClipPath struct {
 	NodeBase
 }
 
-var TypeClipPath = kit.Types.AddType(&ClipPath{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
+var TypeClipPath = kit.Types.AddType(&ClipPath{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewClipPath adds a new clippath to given parent node, with given name.
 func AddNewClipPath(parent ki.Ki, name string) *ClipPath {

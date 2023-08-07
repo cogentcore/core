@@ -120,7 +120,7 @@ type Viewport2D struct {
 var TypeViewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
 
 var Viewport2DProps = ki.Props{
-	"EnumType:Flag":    TypeVpFlags,
+	ki.EnumTypeFlag:    TypeVpFlags,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Background,
 }

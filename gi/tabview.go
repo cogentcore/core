@@ -68,7 +68,7 @@ func (tv *TabView) Disconnect() {
 }
 
 var TabViewProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "border-color":     &Prefs.Colors.Border,
 	// "border-width":     units.Px(2),
 	// "background-color": &Prefs.Colors.Background,
@@ -614,7 +614,7 @@ type TabButton struct {
 var TypeTabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
 
 var TabButtonProps = ki.Props{
-	"EnumType:Flag": TypeButtonFlags,
+	ki.EnumTypeFlag: TypeButtonFlags,
 	// "min-width":        units.Ch(TabButtonMinWidth),
 	// "min-height":       units.Em(1.6),
 	// "border-width":     units.Px(0),

@@ -62,7 +62,7 @@ type Text struct {
 	LastBBox mat32.Box2 `xml:"-" json:"-" desc:"last actual bounding box in display units (dots)"`
 }
 
-var TypeText = kit.Types.AddType(&Text{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
+var TypeText = kit.Types.AddType(&Text{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewText adds a new text to given parent node, with given name, pos and text.
 func AddNewText(parent ki.Ki, name string, x, y float32, text string) *Text {

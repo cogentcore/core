@@ -210,5 +210,5 @@ func (sld *Solid) Render3D(sc *Scene) {
 }
 
 var SolidProps = ki.Props{
-	"EnumType:Flag": gi.TypeNodeFlags,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }

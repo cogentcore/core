@@ -401,7 +401,7 @@ const (
 )
 
 var SVGProps = ki.Props{
-	"EnumType:Flag": TypeSVGFlags,
+	ki.EnumTypeFlag: TypeSVGFlags,
 	"ToolBar": ki.PropSlice{
 		{"OpenXML", ki.Props{
 			"label": "Open...",

@@ -82,7 +82,7 @@ func (sv *StructViewInline) SetStruct(st any) {
 }
 
 var StructViewInlineProps = ki.Props{
-	"EnumType:Flag": gi.TypeNodeFlags,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // ConfigParts configures Parts for the current struct

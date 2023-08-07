@@ -63,7 +63,7 @@ var TypeWidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
 
 var WidgetBaseProps = ki.Props{
 	"base-type":     true,
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 // StyleFuncName is the name of
@@ -1105,7 +1105,7 @@ var TypePartsWidgetBase = kit.Types.AddType(&PartsWidgetBase{}, PartsWidgetBaseP
 
 var PartsWidgetBaseProps = ki.Props{
 	"base-type":     true,
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (wb *PartsWidgetBase) CopyFieldsFrom(frm any) {

@@ -49,7 +49,7 @@ type Marker struct {
 	EffSize mat32.Vec2 `desc:"effective size for actual rendering"`
 }
 
-var TypeMarker = kit.Types.AddType(&Marker{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
+var TypeMarker = kit.Types.AddType(&Marker{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewMarker adds a new marker to given parent node, with given name.
 func AddNewMarker(parent ki.Ki, name string) *Marker {

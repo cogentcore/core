@@ -86,7 +86,7 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 }
 
 var SliceViewInlineProps = ki.Props{
-	"EnumType:Flag": gi.TypeNodeFlags,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"min-width":     units.Ch(20),
 }
 

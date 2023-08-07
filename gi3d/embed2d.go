@@ -210,7 +210,7 @@ func (em *Embed2D) RenderClass() RenderClasses {
 }
 
 var Embed2DProps = ki.Props{
-	"EnumType:Flag": gi.TypeNodeFlags,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
@@ -378,7 +378,7 @@ type EmbedViewport struct {
 var TypeEmbedViewport = kit.Types.AddType(&EmbedViewport{}, EmbedViewportProps)
 
 var EmbedViewportProps = ki.Props{
-	"EnumType:Flag":    gi.TypeVpFlags,
+	ki.EnumTypeFlag:    gi.TypeVpFlags,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Background,
 }

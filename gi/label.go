@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 
@@ -178,7 +179,7 @@ func (lb *Label) Disconnect() {
 // }
 
 var LabelProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "white-space":      gist.WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
 	// "padding":          units.Px(2),
 	// "margin":           units.Px(2),
@@ -309,6 +310,7 @@ func (lb *Label) OpenLink(tl *girl.TextLink) {
 func (lb *Label) HoverEvent() {
 	lb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
+		fmt.Println("hov", lb.Selectable, me)
 		llb := recv.Embed(TypeLabel).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
 		if hasLinks {
@@ -340,25 +342,21 @@ func (lb *Label) MouseEvent() {
 		llb := recv.Embed(TypeLabel).(*Label)
 		hasLinks := len(llb.Render.Links) > 0
 		pos := llb.RenderPos
-		if llb.Selectable || hasLinks {
-			if me.Action == mouse.Press && me.Button == mouse.Left {
-				if hasLinks {
-					for ti := range llb.Render.Links {
-						tl := &llb.Render.Links[ti]
-						tlb := tl.Bounds(&llb.Render, pos)
-						if me.Where.In(tlb) {
-							llb.OpenLink(tl)
-							me.SetProcessed()
-							return
-						}
-					}
-				}
-				if llb.Selectable {
-					llb.SetSelectedState(!llb.IsSelected())
-					llb.EmitSelectedSignal()
-					llb.UpdateSig()
+		if me.Action == mouse.Press && me.Button == mouse.Left && hasLinks {
+			for ti := range llb.Render.Links {
+				tl := &llb.Render.Links[ti]
+				tlb := tl.Bounds(&llb.Render, pos)
+				if me.Where.In(tlb) {
+					llb.OpenLink(tl)
+					me.SetProcessed()
+					return
 				}
 			}
+		}
+		if me.Action == mouse.DoubleClick && me.Button == mouse.Left && llb.Selectable {
+			llb.SetSelectedState(!llb.IsSelected())
+			llb.EmitSelectedSignal()
+			llb.UpdateSig()
 		}
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
@@ -376,6 +374,10 @@ func (lb *Label) MouseMoveEvent() {
 	lb.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
+		fmt.Println(lb.Selectable, me)
+		if lb.Selectable {
+			oswin.TheApp.Cursor(lb.ParentWindow().OSWin).Push(cursor.IBeam)
+		}
 		llb := recv.Embed(TypeLabel).(*Label)
 		pos := llb.RenderPos
 		inLink := false

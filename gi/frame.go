@@ -57,7 +57,7 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 // }
 
 var FrameProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "border-width":     units.Px(2),
 	// "border-radius":    units.Px(0),
 	// "border-color":     &Prefs.Colors.Border,

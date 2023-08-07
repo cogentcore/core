@@ -637,7 +637,7 @@ func (mb *MenuButton) CopyFieldsFrom(frm any) {
 // }
 
 var MenuButtonProps = ki.Props{
-	"EnumType:Flag": TypeButtonFlags,
+	ki.EnumTypeFlag: TypeButtonFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,
@@ -820,7 +820,7 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 // }
 
 var SeparatorProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "padding":          units.Px(0),
 	// "margin":           units.Px(0),
 	// "vertical-align":   gist.AlignCenter,

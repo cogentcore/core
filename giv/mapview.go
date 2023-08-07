@@ -81,7 +81,7 @@ func (mv *MapView) SetMap(mp any) {
 }
 
 var MapViewProps = ki.Props{
-	"EnumType:Flag":    gi.TypeNodeFlags,
+	ki.EnumTypeFlag:    gi.TypeNodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"max-width":        -1,
 	"max-height":       -1,

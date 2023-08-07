@@ -106,7 +106,7 @@ type FileTree struct {
 var TypeFileTree = kit.Types.AddType(&FileTree{}, FileTreeProps)
 
 var FileTreeProps = ki.Props{
-	"EnumType:Flag": TypeFileNodeFlags,
+	ki.EnumTypeFlag: TypeFileNodeFlags,
 }
 
 func (ft *FileTree) CopyFieldsFrom(frm any) {
@@ -1529,7 +1529,7 @@ func (fn *FileNode) UpdateAllVcs() {
 }
 
 var FileNodeProps = ki.Props{
-	"EnumType:Flag": TypeFileNodeFlags,
+	ki.EnumTypeFlag: TypeFileNodeFlags,
 	"CallMethods": ki.PropSlice{
 		{"RenameFile", ki.Props{
 			"label": "Rename...",
@@ -2637,7 +2637,7 @@ var VcsLabelFunc = LabelFunc(func(fni any, act *gi.Action) string {
 })
 
 var FileTreeViewProps = ki.Props{
-	"EnumType:Flag":    TypeTreeViewFlags,
+	ki.EnumTypeFlag:    TypeTreeViewFlags,
 	"indent":           units.Ch(2),
 	"spacing":          units.Ch(.5),
 	"border-width":     units.Px(0),

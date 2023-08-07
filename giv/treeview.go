@@ -1958,7 +1958,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 }
 
 var TreeViewProps = ki.Props{
-	"EnumType:Flag":    TypeTreeViewFlags,
+	ki.EnumTypeFlag:    TypeTreeViewFlags,
 	"indent":           units.Ch(4),
 	"spacing":          units.Ch(.5),
 	"border-width":     units.Px(0),

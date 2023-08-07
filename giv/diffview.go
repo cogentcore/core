@@ -774,7 +774,7 @@ func (dv *DiffView) IsConfiged() bool {
 
 // DiffViewProps are style properties for DiffView
 var DiffViewProps = ki.Props{
-	"EnumType:Flag":    gi.TypeNodeFlags,
+	ki.EnumTypeFlag:    gi.TypeNodeFlags,
 	"max-width":        -1,
 	"max-height":       -1,
 	"background-color": &gi.Prefs.Colors.Background,

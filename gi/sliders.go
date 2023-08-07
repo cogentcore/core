@@ -126,7 +126,7 @@ var TypeSliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
 
 var SliderBaseProps = ki.Props{
 	"base-type":     true,
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (sb *SliderBase) CopyFieldsFrom(frm any) {
@@ -741,7 +741,7 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 }
 
 var SliderProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,
@@ -991,7 +991,7 @@ func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 }
 
 var ScrollBarProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,
@@ -1234,7 +1234,7 @@ func (pb *ProgressBar) ProgStep() {
 }
 
 var ProgressBarProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,

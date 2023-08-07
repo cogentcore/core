@@ -70,7 +70,7 @@ func (ic *Icon) Init2D() {
 }
 
 var IconProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "background-color": color.Transparent,
 }
 

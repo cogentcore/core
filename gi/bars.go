@@ -44,7 +44,7 @@ func (mb *MenuBar) CopyFieldsFrom(frm any) {
 }
 
 var MenuBarProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 // MenuBarStdRender does the standard rendering of the bar
@@ -337,7 +337,7 @@ func (tb *ToolBar) CopyFieldsFrom(frm any) {
 }
 
 var ToolBarProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "padding":          units.Px(2),
 	// "margin":           units.Px(0),
 	// "spacing":          units.Px(4),

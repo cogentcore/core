@@ -74,7 +74,7 @@ var TypeNode2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
 
 var Node2DBaseProps = ki.Props{
 	"base-type":     true, // excludes type from user selections
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (nb *Node2DBase) CopyFieldsFrom(frm any) {

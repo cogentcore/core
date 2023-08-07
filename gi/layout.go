@@ -204,7 +204,7 @@ type Layout struct {
 var TypeLayout = kit.Types.AddType(&Layout{}, LayoutProps)
 
 var LayoutProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 // AddNewLayout adds a new layout to given parent node, with given name and layout
@@ -1341,7 +1341,7 @@ func (st *Stretch) CopyFieldsFrom(frm any) {
 }
 
 var StretchProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "max-width":     -1.0,
 	// "max-height":    -1.0,
 }
@@ -1396,7 +1396,7 @@ func (sp *Space) CopyFieldsFrom(frm any) {
 }
 
 var SpaceProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "width":         units.Ch(1),
 	// "height":        units.Em(1),
 }

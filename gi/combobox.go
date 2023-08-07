@@ -115,7 +115,7 @@ func (cb *ComboBox) Disconnect() {
 // }
 
 var ComboBoxProps = ki.Props{
-	"EnumType:Flag": TypeButtonFlags,
+	ki.EnumTypeFlag: TypeButtonFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(4),
 	// "border-color":     &Prefs.Colors.Border,

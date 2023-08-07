@@ -105,5 +105,5 @@ func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 var _ Node3D = &Group{}
 
 var GroupProps = ki.Props{
-	"EnumType:Flag": gi.TypeNodeFlags,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }

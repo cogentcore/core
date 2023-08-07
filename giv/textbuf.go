@@ -161,7 +161,7 @@ func (tb *TextBuf) Disconnect() {
 }
 
 var TextBufProps = ki.Props{
-	"EnumType:Flag": TypeTextBufFlags,
+	ki.EnumTypeFlag: TypeTextBufFlags,
 	"CallMethods": ki.PropSlice{
 		{"SaveAs", ki.Props{
 			"Args": ki.PropSlice{

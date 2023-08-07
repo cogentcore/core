@@ -439,7 +439,7 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 //  Props
 
 var BitmapProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "background-color": &Prefs.Colors.Background,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{

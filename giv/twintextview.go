@@ -116,7 +116,7 @@ func (tv *TwinTextViews) TextViews() (*TextView, *TextView) {
 
 // TwinTextViewsProps are style properties for TwinTextViews
 var TwinTextViewsProps = ki.Props{
-	"EnumType:Flag":    gi.TypeNodeFlags,
+	ki.EnumTypeFlag:    gi.TypeNodeFlags,
 	"max-width":        -1,
 	"max-height":       -1,
 	"background-color": &gi.Prefs.Colors.Background,

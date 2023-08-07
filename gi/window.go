@@ -243,7 +243,7 @@ type Window struct {
 var TypeWindow = kit.Types.AddType(&Window{}, WindowProps)
 
 var WindowProps = ki.Props{
-	"EnumType:Flag": TypeWinFlags,
+	ki.EnumTypeFlag: TypeWinFlags,
 }
 
 // WinFlags extend NodeBase NodeFlags to hold Window state

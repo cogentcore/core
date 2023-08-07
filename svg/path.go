@@ -30,7 +30,7 @@ type Path struct {
 	DataStr string `xml:"d" desc:"string version of the path data"`
 }
 
-var TypePath = kit.Types.AddType(&Path{}, ki.Props{"EnumType:Flag": gi.TypeNodeFlags})
+var TypePath = kit.Types.AddType(&Path{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewPath adds a new button to given parent node, with given name and path data.
 func AddNewPath(parent ki.Ki, name string, data string) *Path {

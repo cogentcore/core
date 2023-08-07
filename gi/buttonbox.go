@@ -72,7 +72,7 @@ func (bb *ButtonBox) Disconnect() {
 // }
 
 var ButtonBoxProps = ki.Props{
-	"EnumType:Flag": TypeNodeFlags,
+	ki.EnumTypeFlag: TypeNodeFlags,
 	// "border-width":     units.Px(1),
 	// "border-radius":    units.Px(2),
 	// "border-color":     &Prefs.Colors.Border,

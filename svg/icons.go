@@ -70,7 +70,7 @@ func AddNewIcon(parent ki.Ki, name string) *Icon {
 // }
 
 var IconProps = ki.Props{
-	"EnumType:Flag":    gi.TypeVpFlags,
+	ki.EnumTypeFlag:    gi.TypeVpFlags,
 	"background-color": color.Transparent,
 }
 

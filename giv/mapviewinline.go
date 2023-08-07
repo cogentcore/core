@@ -55,7 +55,7 @@ func (mv *MapViewInline) Disconnect() {
 }
 
 var MapViewInlineProps = ki.Props{
-	"EnumType:Flag": gi.TypeNodeFlags,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"min-width":     units.Ex(60),
 }
 
