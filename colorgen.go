@@ -105,13 +105,55 @@ var colorDataTmpl = template.Must(template.New("colorData").Parse(
 // added to the material theme builder
 // (see https://github.com/material-foundation/material-theme-builder/issues/187).
 var tempCustomColors = []ColorSchemeColor{
-	{Name: "Light surface dim", Color: "#DED8E1"},
-	{Name: "Light surface bright", Color: "#FEF7FF"},
-	{Name: "Light surface container lowest", Color: "#FFFFFF"},
-	{Name: "Light surface container low", Color: "#F7F2FA"},
-	{Name: "Light surface container", Color: "#F3EDF7"},
-	{Name: "Light surface container high", Color: "#ECE6F0"},
-	{Name: "Light surface container highest", Color: "#E6E0E9"},
+	{Name: "LightSurfaceDim", Color: "#DED8E1"},
+	{Name: "LightSurfaceBright", Color: "#FEF7FF"},
+	{Name: "LightSurfaceContainerLowest", Color: "#FFFFFF"},
+	{Name: "LightSurfaceContainerLow", Color: "#F7F2FA"},
+	{Name: "LightSurfaceContainer", Color: "#F3EDF7"},
+	{Name: "LightSurfaceContainerHigh", Color: "#ECE6F0"},
+	{Name: "LightSurfaceContainerHighest", Color: "#E6E0E9"},
+
+	{Name: "DarkSurfaceDim", Color: "#141218"},
+	{Name: "DarkSurfaceBright", Color: "#3B383E"},
+	{Name: "DarkSurfaceContainerLowest", Color: "#0F0D13"},
+	{Name: "DarkSurfaceContainerLow", Color: "#1D1B20"},
+	{Name: "DarkSurfaceContainer", Color: "#211F26"},
+	{Name: "DarkSurfaceContainerHigh", Color: "#2B2930"},
+	{Name: "DarkSurfaceContainerHighest", Color: "#36343B"},
+}
+
+// addTempCustomColors is a TEMPORARY function that returns
+// the combination of [tempCustomColors] and the given colors
+// in the correct order. See the documentation of [tempCustomColors]
+// for more information. TODO: remove this once the rest of the
+// colors are added to the material theme builder
+func addTempCustomColors(colors []ColorSchemeColor) []ColorSchemeColor {
+	// whether we have switched over to dark colors yet
+	onDark := false
+	res := []ColorSchemeColor{}
+	for _, color := range colors {
+		if !color.IsValid() {
+			continue
+		}
+		color.FixName()
+		if strings.HasPrefix(color.Name, "Dark") && !onDark {
+			onDark = true
+			for _, tcolor := range tempCustomColors {
+				if strings.HasPrefix(tcolor.Name, "Dark") {
+					break
+				}
+				res = append(res, tcolor)
+			}
+		}
+		res = append(res, color)
+	}
+	for _, tcolor := range tempCustomColors {
+		if strings.HasPrefix(tcolor.Name, "Light") {
+			continue
+		}
+		res = append(res, tcolor)
+	}
+	return res
 }
 
 // GenerateColorScheme generates a Go color scheme
@@ -134,6 +176,7 @@ func GenerateColorScheme(src, dst, pkg, comment string) error {
 	}
 	// whether we have switched over to dark colors yet
 	onDark := false
+	d.Colors = addTempCustomColors(d.Colors)
 	for _, c := range d.Colors {
 		if !c.IsValid() {
 			continue
