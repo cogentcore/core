@@ -906,8 +906,7 @@ func (bt *Button) ConfigStyles() {
 			bt.Style.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
 			bt.Style.Color = ColorScheme.OnSecondaryContainer
 		case ButtonElevated:
-			// MTBTODO: replace with SurfaceContainerLow
-			bt.Style.BackgroundColor.SetColor(ColorScheme.SurfaceVariant)
+			bt.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
 			bt.Style.Color = ColorScheme.Primary
 		case ButtonOutlined:
 			bt.Style.BackgroundColor.SetColor(ColorScheme.Surface)

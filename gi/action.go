@@ -404,7 +404,7 @@ func (ac *Action) ConfigStyles() {
 	ac.AddStyleFunc(StyleFuncDefault, func() {
 		ac.Style.Border.Style.Set(gist.BorderNone)
 		ac.Style.Text.Align = gist.AlignCenter
-		ac.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+		ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
 		ac.Style.Color = ColorScheme.OnSurface
 		switch ac.Type {
 		case ActionStandalone:

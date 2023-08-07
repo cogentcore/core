@@ -310,7 +310,7 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 func (mb *MenuBar) ConfigStyles() {
 	mb.AddStyleFunc(StyleFuncDefault, func() {
 		mb.Style.MaxWidth.SetPx(-1)
-		mb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+		mb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
 		mb.Style.Color = ColorScheme.OnSurface
 	})
 }

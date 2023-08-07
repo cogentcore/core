@@ -33,8 +33,7 @@ type ColorScheme struct {
 	// documentation but not actually used by their theme builder.
 	// They will be added later once they are added to the theme builder
 	// (see https://github.com/material-foundation/material-theme-builder/issues/187).
-	// Mark any colors that should be changed to use the new colors with
-	// MTBTODO:
+	// Mark any colors that should be changed to use the new colors with MTBTODO:
 
 	// Primary is the base primary color applied to important elements
 	Primary Color `desc:"Primary is the base primary color applied to important elements"`
