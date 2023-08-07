@@ -161,14 +161,3 @@ type ColorScheme struct {
 	// OnTertiaryFixed        Color `desc:"OnTertiaryFixed is the color applied to high-emphasis content on top of TertiaryFixed"`
 	// OnTertiaryFixedVariant Color `desc:"OnTertiaryFixedVariant is the color applied to low-emphasis content on top of TertiaryFixed"`
 }
-
-// Defaults applies the default values to the color keys
-func (cs *ColorScheme) Defaults() {
-
-}
-
-// Init sets all of the color scheme values based on the
-// values of the color key values
-func (cs *ColorScheme) Init() {
-
-}
