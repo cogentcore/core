@@ -131,6 +131,10 @@ func AddNewLabel(parent ki.Ki, name string, text string) *Label {
 	return lb
 }
 
+func (lb *Label) OnInit() {
+	lb.Selectable = true
+}
+
 func (lb *Label) CopyFieldsFrom(frm any) {
 	fr := frm.(*Label)
 	lb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
