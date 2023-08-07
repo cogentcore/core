@@ -338,6 +338,13 @@ func makeInputs(tv *gi.TabView) {
 	cvvw := inputs.AddNewChild(colorvv.WidgetType(), "cvvw").(gi.Node2D)
 	colorvv.ConfigWidget(cvvw)
 
+	svi := giv.AddNewStructView(inputs, "svi")
+	svi.Struct = &gi.ColorScheme
+	svi.AddStyleFunc(gi.StyleFuncDefault, func() {
+		svi.Style.MaxWidth.SetPx(-1)
+		svi.Style.MaxHeight.SetPx(-1)
+	})
+
 	sliderx := gi.AddNewSlider(inputs, "sliderx")
 	sliderx.Dim = mat32.X
 	sliderx.Value = 0.5

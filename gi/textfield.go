@@ -1699,7 +1699,7 @@ func (tf *TextField) ConfigStyles() {
 		switch tf.Type {
 		case TextFieldFilled:
 			tf.Style.Border.Style.Set(gist.BorderNone)
-			tf.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
+			tf.Style.BackgroundColor.SetColor(ColorScheme.Background)
 		case TextFieldOutlined:
 			tf.Style.Border.Style.Set(gist.BorderSolid)
 			tf.Style.Border.Width.Set(units.Px(1))
