@@ -14,6 +14,7 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
@@ -190,6 +191,7 @@ func (cb *ComboBox) ButtonRelease() {
 	if len(cb.ItemsMenu) == 0 {
 		return
 	}
+	oswin.TheApp.Cursor(cb.ParentWindow().OSWin).PopIf(cursor.HandPointing)
 	updt := cb.UpdateStart()
 	cb.SetButtonState(ButtonActive)
 	cb.ButtonSig.Emit(cb.This(), int64(ButtonReleased), nil)
