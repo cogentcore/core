@@ -468,7 +468,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	mb.AddStyleFunc(gi.StyleFuncParts(vv), func() {
 		mb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
 		mb.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		mb.Style.Border.Radius.Set(gist.BorderRadiusFull)
+		mb.Style.Border.Radius = gist.BorderRadiusFull
 	})
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},

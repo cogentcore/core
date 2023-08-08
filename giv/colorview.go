@@ -251,7 +251,7 @@ func (cv *ColorView) Config() {
 	v.AddStyleFunc(gi.StyleFuncParts(cv), func() {
 		v.Style.MinWidth.SetEm(6)
 		v.Style.MinHeight.SetEm(6)
-		v.Style.Border.Radius.Set(gist.BorderRadiusFull)
+		v.Style.Border.Radius = gist.BorderRadiusFull
 		v.Style.BackgroundColor.SetColor(cv.Color)
 	})
 
@@ -747,7 +747,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
-		ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
+		ac.Style.Border.Radius = gist.BorderRadiusFull
 	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeColorNameValueView).(*ColorNameValueView)

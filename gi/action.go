@@ -241,7 +241,7 @@ func (ac *Action) ConfigStyles() {
 		ac.Style.Color = ColorScheme.OnSurface
 		switch ac.Type {
 		case ActionStandalone:
-			ac.Style.Border.Radius.Set(gist.BorderRadiusFull)
+			ac.Style.Border.Radius = gist.BorderRadiusFull
 			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
 			ac.Style.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
