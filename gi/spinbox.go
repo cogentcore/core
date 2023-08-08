@@ -237,7 +237,7 @@ func (sb *SpinBox) ConfigParts() {
 		tf.SetFlagState(sb.IsInactive(), int(Inactive))
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
-		tf.SetProp("clear-act", false)
+		tf.ClearAct = false
 		if sb.Style.Template != "" {
 			tf.Style.Template = sb.Style.Template + ".text"
 		}
@@ -507,7 +507,6 @@ func (sb *SpinBox) ConfigStyles() {
 		tf.Style.Width.SetCh(8)
 		tf.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		tf.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		tf.ClearAct = false
 	})
 	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(space *WidgetBase) {
 		space.Style.Width.SetCh(0.1)

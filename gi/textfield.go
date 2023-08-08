@@ -139,6 +139,10 @@ func AddNewTextField(parent ki.Ki, name string) *TextField {
 	return parent.AddNewChild(TypeTextField, name).(*TextField)
 }
 
+func (tf *TextField) OnInit() {
+	tf.ClearAct = true
+}
+
 func (tf *TextField) CopyFieldsFrom(frm any) {
 	fr := frm.(*TextField)
 	tf.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
@@ -1440,7 +1444,6 @@ func (tf *TextField) Init2D() {
 	tf.Init2DWidget()
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
-	tf.ClearAct = true
 	tf.ConfigParts()
 	tf.ConfigStyles()
 }
@@ -1666,7 +1669,6 @@ func (tf *TextField) ConfigStyles() {
 		tf.Style.Text.Align = gist.AlignLeft
 		tf.Style.Color = ColorScheme.OnBackground
 		tf.SelectColor.SetColor(ColorScheme.Tertiary)
-		tf.ClearAct = true
 		switch tf.Type {
 		case TextFieldFilled:
 			tf.Style.Border.Style.Set(gist.BorderNone)
