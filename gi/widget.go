@@ -319,11 +319,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	wb.Viewport.SetCurStyleNode(gii)
 	defer wb.Viewport.SetCurStyleNode(nil)
 
-	// if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
-	// wb.Style.CopyFrom(wb.DefStyle)
-	// } else {
 	wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
-	// }
 	wb.Style.IsSet = false  // this is always first call, restart
 	if wb.Viewport == nil { // robust
 		wb.StyMu.Unlock()
@@ -364,62 +360,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	AggCSS(&wb.CSSAgg, wb.CSS)
 	StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
 
-	// csf := []func(w *WidgetBase){}
-	// esf := []func(w *WidgetBase){}
-
-	// cf := strings.Fields(wb.Class)
-	// en := strings.ToLower(ki.Type(wb).Name())
-
-	// // fmt.Println(cf, en)
-
-	// wb.FuncUp(0, nil, func(k ki.Ki, level int, data any) bool {
-	// 	kwbki := k.Embed(TypeWidgetBase)
-	// 	ok := kwbki != nil
-	// 	// fmt.Println(ok, level, ki.Type(k).Name())
-	// 	if ok {
-	// 		kwb := kwbki.(*WidgetBase)
-	// 		if kwb.ClassStyleFuncs != nil {
-	// 			for c, f := range kwb.ClassStyleFuncs {
-	// 				for _, field := range cf {
-	// 					if field == c {
-	// 						csf = append(csf, f)
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 		if kwb.ElementStyleFuncs != nil {
-	// 			for e, f := range kwb.ElementStyleFuncs {
-	// 				if e == en {
-	// 					esf = append(esf, f)
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// 	return true
-	// })
-
-	// fmt.Println(wb.Nm, len(esf), len(csf))
-
-	// if len(esf) != 0 {
-	// 	for i := len(esf) - 1; i >= 0; i-- {
-	// 		esf[i](wb)
-	// 	}
-	// }
-	// if len(csf) != 0 {
-	// 	for i := len(csf) - 1; i >= 0; i-- {
-	// 		csf[i](wb)
-	// 	}
-	// }
-
 	wb.RunStyleFuncs()
-
-	// if CustomStyleFunc != nil {
-	// 	CustomStyleFunc(wb)
-	// }
-
-	// if wb.FinalStyleFunc != nil {
-	// 	wb.FinalStyleFunc()
-	// }
 
 	SetUnitContext(&wb.Style, wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
 	if wb.Style.Inactive {                                 // inactive can only set, not clear
