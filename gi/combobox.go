@@ -240,6 +240,7 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 	if txIdx >= 0 {
 		tx := cb.Parts.Child(txIdx).(*TextField)
 		tx.SetText(txt)
+		tx.SetCompleter(tx, cb.CompleteMatch, cb.CompleteEdit)
 		if _, err := tx.PropTry("__comboInit"); err != nil {
 			cb.StylePart(Node2D(tx))
 			if icIdx >= 0 {
@@ -650,13 +651,13 @@ func (cb *ComboBox) KeyChordEvent() {
 	})
 }
 
-// Complete is a [complete.MatchFunc] used for the
-// editable textfield part of the ComboBox.
-func (cb *ComboBox) Complete(data any, text string, posLn, posCh int) (md complete.Matches) {
+// CompleteMatch is the [complete.MatchFunc] used for the
+// editable textfield part of the ComboBox (if it exists).
+func (cb *ComboBox) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = text
 	is := []string{}
 	for _, i := range cb.Items {
-		is = append(is, fmt.Sprint(i))
+		is = append(is, kit.ToString(i))
 	}
 	possibles := complete.MatchSeedString(is, md.Seed)
 	for _, p := range possibles {
@@ -664,6 +665,15 @@ func (cb *ComboBox) Complete(data any, text string, posLn, posCh int) (md comple
 		md.Matches = append(md.Matches, m)
 	}
 	return md
+}
+
+// CompleteEdit is the [complete.EditFunc] used for the
+// editable textfield part of the ComboBox (if it exists).
+func (cb *ComboBox) CompleteEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
+	return complete.Edit{
+		NewText:       completion.Text,
+		ForwardDelete: len([]rune(text)),
+	}
 }
 
 func (cb *ComboBox) Init2D() {
