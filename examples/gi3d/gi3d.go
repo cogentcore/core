@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/icons"
+	"github.com/goki/vgpu/vgpu"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -147,7 +148,7 @@ func mainrun() {
 	// gi.WinEventTrace = true
 	// gi3d.Update3DTrace = true
 	// gi.Update2DTrace = true
-	// vgpu.Debug = true
+	vgpu.Debug = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
