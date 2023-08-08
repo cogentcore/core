@@ -53,8 +53,8 @@ github.com/goki/freetype v1.0.1/go.mod h1:ni9Dgz8vA6o+13u1Ke0q3kJcCJ9GuXb1dtlfKh
 github.com/goki/go-difflib v1.2.1 h1:zqSi9rTf0vYFia92PaZeKrTfofGVqku2WYOtfsUYqxU=
 github.com/goki/go-difflib v1.2.1/go.mod h1:uZuY072AYTnMjRxCn6IkpZQKRVcTj4SIpHHXOUGOxrg=
 github.com/goki/ki v1.0.0/go.mod h1:X+gmVeAym3JDSbbiA7iF1qkgAlTVWl1JV9sRsGDzxOA=
-github.com/goki/ki v1.1.16-0.20230801050600-c0a14a69499e h1:7fxI5iGa9jzB155UhRouHWI2oEhlM91/GFr59JRrCDo=
-github.com/goki/ki v1.1.16-0.20230801050600-c0a14a69499e/go.mod h1:E+kCXzhA/chnUfo7ecneVn0A4n35KkXpJmFlRSkXhIY=
+github.com/goki/ki v1.1.16-0.20230807034719-6d928f976f6d h1:csppSWt5VmF7Cm9UZ4vSvGIpWqKxcuTaeiFk1bPrHho=
+github.com/goki/ki v1.1.16-0.20230807034719-6d928f976f6d/go.mod h1:E+kCXzhA/chnUfo7ecneVn0A4n35KkXpJmFlRSkXhIY=
 github.com/goki/kigen v1.0.2 h1:I/s/ce84wiP99CYKdju/MVjY6jzvAL3d4XobERsK1JY=
 github.com/goki/kigen v1.0.2/go.mod h1:ib29cR7secYGaGXWv68WDq83y5tfRMh7dOXi4XRsPOM=
 github.com/goki/mat32 v1.0.15 h1:aPegF2QkpUO+T85n5F9ZvuVWRwPDDKY9URCJafTav0o=
