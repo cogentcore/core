@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"image/draw"
 	"strings"
 	"sync"
@@ -50,6 +49,12 @@ type TextField struct {
 
 	// text that is displayed when the field is empty, in a lower-contrast manner
 	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+
+	// if specified, an action will be added at tbe start of the text field with this icon; its signal is exposed through LeadingIconSig
+	LeadingIcon icons.Icon `desc:"if specified, an action will be added at tbe start of the text field with this icon; its signal is exposed through LeadingIconSig"`
+
+	// [view: -] if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal
+	LeadingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal"`
 
 	// add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default
 	ClearAct bool `xml:"clear-act" desc:"add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default"`
@@ -1661,36 +1666,47 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 }
 
 func (tf *TextField) ConfigStyles() {
+	// TOOD: figure out how to have primary cursor color
 	tf.AddStyleFunc(StyleFuncDefault, func() {
 		tf.Style.MinWidth.SetEm(20)
-		tf.Style.Border.Radius.Set(units.Px(4))
 		tf.CursorWidth.SetPx(1)
 		tf.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
-		tf.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
+		tf.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
 		tf.Style.Text.Align = gist.AlignLeft
-		tf.SelectColor.SetColor(ColorScheme.Tertiary)
+		tf.SelectColor.SetColor(ColorScheme.TertiaryContainer)
 		tf.Style.Color = ColorScheme.OnSurface
 		tf.PlaceholderColor = ColorScheme.OnSurfaceVariant
 		switch tf.Type {
 		case TextFieldFilled:
 			tf.Style.Border.Style.Set(gist.BorderNone)
+			tf.Style.Border.Style.Bottom = gist.BorderSolid
+			tf.Style.Border.Width.Set()
+			tf.Style.Border.Color.Set()
+			tf.Style.Border.Radius = gist.BorderRadiusExtraSmallTop
 			tf.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+			switch tf.State {
+			case TextFieldActive:
+				tf.Style.Border.Width.Bottom = units.Px(1)
+				tf.Style.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
+			case TextFieldFocus:
+				tf.Style.Border.Width.Bottom = units.Px(2)
+				tf.Style.Border.Color.Bottom = ColorScheme.Primary
+			}
 		case TextFieldOutlined:
 			tf.Style.Border.Style.Set(gist.BorderSolid)
-			tf.Style.Border.Width.Set(units.Px(1))
-			tf.Style.Border.Color.Set(ColorScheme.Outline)
-			tf.Style.BackgroundColor.SetColor(color.Transparent)
+			tf.Style.Border.Radius = gist.BorderRadiusExtraSmall
+			tf.Style.BackgroundColor = tf.ParentBackgroundColor()
+			switch tf.State {
+			case TextFieldActive:
+				tf.Style.Border.Width.Set(units.Px(1))
+				tf.Style.Border.Color.Set(ColorScheme.Outline)
+			case TextFieldFocus:
+				tf.Style.Border.Width.Set(units.Px(2))
+				tf.Style.Border.Color.Set(ColorScheme.Primary)
+			}
 		}
-		switch tf.State {
-		case TextFieldActive:
-			// use background as already specified above
-		case TextFieldInactive:
-			tf.Style.BackgroundColor.SetColor(tf.Style.BackgroundColor.Color.Highlight(20))
-			tf.Style.Color = ColorScheme.OnBackground.Highlight(20)
-		case TextFieldFocus:
-			tf.Style.BackgroundColor.SetColor(tf.Style.BackgroundColor.Color.Highlight(10))
-		case TextFieldSel:
-			tf.Style.BackgroundColor.SetColor(ColorScheme.Tertiary)
+		if tf.State == TextFieldSel {
+			tf.Style.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
 		}
 	})
 	tf.Parts.AddChildStyleFunc("clear", 1, StyleFuncParts(tf), func(clr *WidgetBase) {

@@ -179,6 +179,67 @@ func (wb *WidgetBase) AddChildStyleFunc(childName string, startIdx int, funcName
 	}
 }
 
+// ParentWidget returns the nearest widget parent
+// of the widget. It returns nil if no such parent
+// is found; see [ParentWidgetTry] for a version with an error.
+func (wb *WidgetBase) ParentWidget() *WidgetBase {
+	par, _ := wb.ParentWidgetTry()
+	return par
+}
+
+// ParentWidgetTry returns the nearest widget parent
+// of the widget. It returns an error if no such parent
+// is found; see [ParentWidget] for a version without an error.
+func (wb *WidgetBase) ParentWidgetTry() (*WidgetBase, error) {
+	par, ok := wb.ParentByType(TypeWidgetBase, ki.Embeds).(*WidgetBase)
+	if !ok {
+		return nil, fmt.Errorf("(*gi.WidgetBase).ParentWidgetTry: widget %v has no parent widget base", wb)
+	}
+	return par, nil
+}
+
+// ParentWidgetIf returns the nearest widget parent
+// of the widget for which the given function returns true.
+// It returns nil if no such parent is found;
+// see [ParentWidgetIfTry] for a version with an error.
+func (wb *WidgetBase) ParentWidgetIf(fun func(wb *WidgetBase) bool) *WidgetBase {
+	par, _ := wb.ParentWidgetIfTry(fun)
+	return par
+}
+
+// ParentWidgetIfTry returns the nearest widget parent
+// of the widget for which the given function returns true.
+// It returns an error if no such parent is found; see
+// [ParentWidgetIf] for a version without an error.
+func (wb *WidgetBase) ParentWidgetIfTry(fun func(wb *WidgetBase) bool) (*WidgetBase, error) {
+	for {
+		par, ok := wb.ParentByType(TypeWidgetBase, ki.Embeds).(*WidgetBase)
+		if !ok {
+			return nil, fmt.Errorf("(*gi.WidgetBase).ParentWidgetIfTry: widget %v has no parent widget base", wb)
+		}
+		if fun(par) {
+			return par, nil
+		}
+	}
+}
+
+// ParentBackgroundColor returns the background color
+// of the nearest widget parent of the widget that
+// has a defined background color. If no such parent is found,
+// it returns a new [gist.ColorSpec] with a solid
+// color of [ColorScheme.Background].
+func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
+	par := wb.ParentWidgetIf(func(wb *WidgetBase) bool {
+		return !wb.Style.BackgroundColor.IsNil()
+	})
+	if par == nil {
+		cs := gist.ColorSpec{}
+		cs.SetColor(ColorScheme.Background)
+		return cs
+	}
+	return wb.Style.BackgroundColor
+}
+
 // TODO: use these instead of those on NodeBase2D
 // // Style helper methods
 
