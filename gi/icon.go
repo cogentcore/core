@@ -71,7 +71,6 @@ func (ic *Icon) Init2D() {
 
 var IconProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "background-color": color.Transparent,
 }
 
 // SetIcon sets the icon by name into given Icon wrapper, returning error

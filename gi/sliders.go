@@ -742,46 +742,6 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 
 var SliderProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "border-width":     units.Px(1),
-	// "border-radius":    units.Px(4),
-	// "border-color":     &Prefs.Colors.Border,
-	// "padding":          units.Px(6),
-	// "margin":           units.Px(4),
-	// "background-color": &Prefs.Colors.Control,
-	// "color":            &Prefs.Colors.Font,
-	// "#icon": ki.Props{
-	// 	"width":   units.Em(1),
-	// 	"height":  units.Em(1),
-	// 	"margin":  units.Px(0),
-	// 	"padding": units.Px(0),
-	// 	"fill":    &Prefs.Colors.Icon,
-	// 	"stroke":  &Prefs.Colors.Font,
-	// },
-	// SliderSelectors[SliderActive]: ki.Props{
-	// 	"background-color": "lighter-0",
-	// },
-	// SliderSelectors[SliderInactive]: ki.Props{
-	// 	"border-color": "highlight-50",
-	// 	"color":        "highlight-50",
-	// },
-	// SliderSelectors[SliderHover]: ki.Props{
-	// 	"background-color": "highlight-10",
-	// },
-	// SliderSelectors[SliderFocus]: ki.Props{
-	// 	"border-width":     units.Px(2),
-	// 	"background-color": "samelight-50",
-	// },
-	// SliderSelectors[SliderDown]: ki.Props{
-	// 	"background-color": "highlight-20",
-	// },
-	// SliderSelectors[SliderValue]: ki.Props{
-	// 	"border-color":     &Prefs.Colors.Icon,
-	// 	"background-color": &Prefs.Colors.Icon,
-	// },
-	// SliderSelectors[SliderBox]: ki.Props{
-	// 	"border-color":     &Prefs.Colors.Background,
-	// 	"background-color": &Prefs.Colors.Background,
-	// },
 }
 
 func (sr *Slider) Defaults() {
@@ -992,38 +952,6 @@ func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 
 var ScrollBarProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "border-width":     units.Px(1),
-	// "border-radius":    units.Px(4),
-	// "border-color":     &Prefs.Colors.Border,
-	// "padding":          units.Px(0),
-	// "margin":           units.Px(2),
-	// "background-color": &Prefs.Colors.Control,
-	// "color":            &Prefs.Colors.Font,
-	// SliderSelectors[SliderActive]: ki.Props{
-	// 	"background-color": "lighter-0",
-	// },
-	// SliderSelectors[SliderInactive]: ki.Props{
-	// 	"border-color": "highlight-50",
-	// 	"color":        "highlight-50",
-	// },
-	// SliderSelectors[SliderHover]: ki.Props{
-	// 	"background-color": "highlight-10",
-	// },
-	// SliderSelectors[SliderFocus]: ki.Props{
-	// 	"border-width":     units.Px(2),
-	// 	"background-color": "samelight-50",
-	// },
-	// SliderSelectors[SliderDown]: ki.Props{
-	// 	"background-color": "highlight-20",
-	// },
-	// SliderSelectors[SliderValue]: ki.Props{
-	// "border-color":     &Prefs.Colors.Icon,
-	// 	"background-color": &Prefs.Colors.Icon,
-	// },
-	// SliderSelectors[SliderBox]: ki.Props{
-	// 	"border-color":     &Prefs.Colors.Background,
-	// 	"background-color": &Prefs.Colors.Background,
-	// },
 }
 
 func (sb *ScrollBar) Defaults() { // todo: should just get these from props
@@ -1235,38 +1163,6 @@ func (pb *ProgressBar) ProgStep() {
 
 var ProgressBarProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "border-width":     units.Px(1),
-	// "border-radius":    units.Px(4),
-	// "border-color":     &Prefs.Colors.Border,
-	// "padding":          units.Px(0),
-	// "margin":           units.Px(2),
-	// "background-color": &Prefs.Colors.Control,
-	// "color":            &Prefs.Colors.Font,
-	// SliderSelectors[SliderActive]: ki.Props{
-	// 	"background-color": "lighter-0",
-	// },
-	// SliderSelectors[SliderInactive]: ki.Props{
-	// 	"border-color": "highlight-50",
-	// 	"color":        "highlight-50",
-	// },
-	// SliderSelectors[SliderHover]: ki.Props{
-	// 	"background-color": "highlight-10",
-	// },
-	// SliderSelectors[SliderFocus]: ki.Props{
-	// 	"border-width":     units.Px(2),
-	// 	"background-color": "samelight-50",
-	// },
-	// SliderSelectors[SliderDown]: ki.Props{
-	// 	"background-color": "highlight-20",
-	// },
-	// SliderSelectors[SliderValue]: ki.Props{
-	// 	"border-color":     &Prefs.Colors.Icon,
-	// 	"background-color": &Prefs.Colors.Icon,
-	// },
-	// SliderSelectors[SliderBox]: ki.Props{
-	// 	"border-color":     &Prefs.Colors.Background,
-	// 	"background-color": &Prefs.Colors.Background,
-	// },
 }
 
 func (pb *ProgressBar) Defaults() {

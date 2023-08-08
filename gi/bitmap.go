@@ -64,13 +64,6 @@ func (bm *Bitmap) CopyFieldsFrom(frm any) {
 	bm.Filename = fr.Filename
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (bm *Bitmap) DefaultStyle() {
-// 	s := &bm.Style
-
-// 	s.BackgroundColor.SetColor(TheColorScheme.Background)
-// }
-
 // SetSize sets size of the bitmap image.
 // This does not resize any existing image, just makes a new image
 // if the size is different
@@ -440,7 +433,6 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 
 var BitmapProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "background-color": &Prefs.Colors.Background,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",

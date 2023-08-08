@@ -43,28 +43,8 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 	fr.Stripes = cp.Stripes
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (fr *Frame) DefaultStyle() {
-// 	cs := CurrentColorScheme()
-// 	s := &fr.Style
-
-// 	s.Border.Style.Set(gist.BorderNone)
-// 	s.Border.Radius.Set()
-// 	s.Padding.Set(units.Px(2))
-// 	s.Margin.Set(units.Px(2))
-// 	s.Color.SetColor(cs.Font)
-// 	s.BackgroundColor.SetColor(cs.Background)
-// }
-
 var FrameProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "border-width":     units.Px(2),
-	// "border-radius":    units.Px(0),
-	// "border-color":     &Prefs.Colors.Border,
-	// "padding":          units.Px(2),
-	// "margin":           units.Px(2),
-	// "color":            &Prefs.Colors.Font,
-	// "background-color": &Prefs.Colors.Background,
 }
 
 // Stripes defines stripes options for elements that can render striped backgrounds

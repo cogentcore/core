@@ -94,62 +94,8 @@ func (sb *SpinBox) Disconnect() {
 	sb.SpinBoxSig.DisconnectAll()
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (sb *SpinBox) DefaultStyle() {
-// 	// fmt.Println("spin box children", sb.Parts.Kids)
-// 	bts, ok := sb.Parts.ChildByName("buttons", 2).(*WidgetBase)
-// 	if ok {
-// 		bts.AddChildStyleFunc("up", 0, StyleFuncParts(sb), func(up *WidgetBase) {
-// 			up.Style.MaxWidth.SetEm(1)
-// 			up.Style.MaxHeight.SetEm(1)
-// 			up.Style.Margin.Set()
-// 			up.Style.Padding.Set()
-// 			up.Style.BackgroundColor.SetColor(color.Transparent)
-// 		})
-// 		bts.AddChildStyleFunc("down", 1, StyleFuncParts(sb), func(down *WidgetBase) {
-// 			down.Style.MaxWidth.SetEm(1)
-// 			down.Style.MaxHeight.SetEm(1)
-// 			down.Style.Margin.Set()
-// 			down.Style.Padding.Set()
-// 			down.Style.BackgroundColor.SetColor(color.Transparent)
-// 		})
-// 	}
-// 	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(spc *WidgetBase) {
-// 		spc.Style.Width.SetEx(0)
-// 	})
-// }
-
 var SpinBoxProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "#buttons": ki.Props{
-	// 	"vertical-align": gist.AlignMiddle,
-	// },
-	// "#up": ki.Props{
-	// 	"max-width":  units.Ex(1.5),
-	// 	"max-height": units.Ex(1.5),
-	// 	"margin":     units.Px(1),
-	// 	"padding":    units.Px(0),
-	// 	"fill":       &Prefs.Colors.Icon,
-	// 	"stroke":     &Prefs.Colors.Font,
-	// },
-	// "#down": ki.Props{
-	// 	"max-width":  units.Ex(1.5),
-	// 	"max-height": units.Ex(1.5),
-	// 	"margin":     units.Px(1),
-	// 	"padding":    units.Px(0),
-	// 	"fill":       &Prefs.Colors.Icon,
-	// 	"stroke":     &Prefs.Colors.Font,
-	// },
-	// "#space": ki.Props{
-	// 	"width": units.Ch(.1),
-	// },
-	// "#text-field": ki.Props{
-	// 	"min-width": units.Ch(4),
-	// 	"width":     units.Ch(8),
-	// 	"margin":    units.Px(2),
-	// 	"padding":   units.Px(2),
-	// 	"clear-act": false,
-	// },
 }
 
 func (sb *SpinBox) Defaults() { // todo: should just get these from props

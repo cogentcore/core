@@ -57,30 +57,8 @@ func (bb *ButtonBox) Disconnect() {
 	bb.ButtonSig.DisconnectAll()
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (bb *ButtonBox) DefaultStyle() {
-// 	s := &bb.Style
-
-// 	s.Border.Style.Set(gist.BorderNone)
-// 	s.Border.Radius.Set(units.Px(2))
-// 	s.Border.Color.Set()
-// 	s.Padding.Set(units.Px(2))
-// 	s.Margin.Set(units.Px(2))
-// 	s.Text.Align = gist.AlignCenter
-// 	s.BackgroundColor.SetColor(TheColorScheme.Secondary)
-// 	s.Color.SetColor(TheColorScheme.Secondary.ContrastColor())
-// }
-
 var ButtonBoxProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "border-width":     units.Px(1),
-	// "border-radius":    units.Px(2),
-	// "border-color":     &Prefs.Colors.Border,
-	// "padding":          units.Px(2),
-	// "margin":           units.Px(2),
-	// "text-align":       gist.AlignCenter,
-	// "background-color": &Prefs.Colors.Control,
-	// "color":            &Prefs.Colors.Font,
 }
 
 // SelectItem activates a given item but does NOT emit the ButtonSig signal.

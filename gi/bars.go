@@ -338,11 +338,6 @@ func (tb *ToolBar) CopyFieldsFrom(frm any) {
 
 var ToolBarProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "padding":          units.Px(2),
-	// "margin":           units.Px(0),
-	// "spacing":          units.Px(4),
-	// "color":            &Prefs.Colors.Font,
-	// "background-color": "linear-gradient(pref(Control), highlight-10)",
 }
 
 // AddAction adds an action to the toolbar using given options, and connects

@@ -1342,8 +1342,6 @@ func (st *Stretch) CopyFieldsFrom(frm any) {
 
 var StretchProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "max-width":     -1.0,
-	// "max-height":    -1.0,
 }
 
 func (st *Stretch) Style2D() {
@@ -1397,8 +1395,6 @@ func (sp *Space) CopyFieldsFrom(frm any) {
 
 var SpaceProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "width":         units.Ch(1),
-	// "height":        units.Em(1),
 }
 
 func (sp *Space) Style2D() {

@@ -148,52 +148,8 @@ func (lb *Label) Disconnect() {
 	lb.LinkSig.DisconnectAll()
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (lb *Label) DefaultStyle() {
-// 	cs := CurrentColorScheme()
-// 	s := &lb.Style
-
-// 	s.Text.WhiteSpace = gist.WhiteSpacePre
-// 	s.Padding.Set(units.Px(2))
-// 	s.Margin.Set(units.Px(2))
-// 	s.AlignV = gist.AlignTop
-// 	s.Color.SetColor(cs.Font)
-// 	s.BackgroundColor.SetColor(color.Transparent)
-
-// 	switch lb.Type {
-// 	case LabelP:
-// 		s.Font.Size.SetRem(1)
-// 	case LabelLabel:
-// 		s.Font.Size.SetRem(0.75)
-// 	case LabelH1:
-// 		s.Font.Size.SetRem(2)
-// 		s.Font.Weight = gist.WeightBold
-// 	case LabelH2:
-// 		s.Font.Size.SetRem(1.5)
-// 		s.Font.Weight = gist.WeightBold
-// 	case LabelH3:
-// 		s.Font.Size.SetRem(1.25)
-// 		s.Font.Weight = gist.WeightBold
-// 	}
-// }
-
 var LabelProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "white-space":      gist.WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
-	// "padding":          units.Px(2),
-	// "margin":           units.Px(2),
-	// "vertical-align":   gist.AlignTop,
-	// "color":            &Prefs.Colors.Font,
-	// "background-color": color.Transparent,
-	// LabelSelectors[LabelActive]: ki.Props{
-	// 	"background-color": color.Transparent,
-	// },
-	// LabelSelectors[LabelInactive]: ki.Props{
-	// 	"color": "lighter-50",
-	// },
-	// LabelSelectors[LabelSelected]: ki.Props{
-	// 	"background-color": &Prefs.Colors.Select,
-	// },
 }
 
 // LabelStates are mutually-exclusive label states -- determines appearance

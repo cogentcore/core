@@ -120,9 +120,7 @@ type Viewport2D struct {
 var TypeViewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
 
 var Viewport2DProps = ki.Props{
-	ki.EnumTypeFlag:    TypeVpFlags,
-	"color":            &Prefs.Colors.Font,
-	"background-color": &Prefs.Colors.Background,
+	ki.EnumTypeFlag: TypeVpFlags,
 }
 
 func (vp *Viewport2D) CopyFieldsFrom(frm any) {
@@ -499,6 +497,7 @@ func (vp *Viewport2D) AsViewport2D() *Viewport2D {
 
 func (vp *Viewport2D) Init2D() {
 	vp.Init2DWidget()
+	vp.ConfigStyles()
 	vp.SetCurWin()
 	// note: used to have a NodeSig update here but was redundant -- already handled.
 	// also note that SVG viewports require SetNeedsFullRender to repaint!
@@ -1010,4 +1009,11 @@ func (vp *Viewport2D) SavePNG(path string) error {
 // EncodePNG encodes the image as a PNG and writes it to the provided io.Writer.
 func (vp *Viewport2D) EncodePNG(w io.Writer) error {
 	return png.Encode(w, vp.Pixels)
+}
+
+func (vp *Viewport2D) ConfigStyles() {
+	vp.AddStyleFunc(StyleFuncDefault, func() {
+		vp.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		vp.Style.Color = ColorScheme.OnBackground
+	})
 }

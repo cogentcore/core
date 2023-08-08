@@ -93,14 +93,6 @@ func (dlg *Dialog) Disconnect() {
 	dlg.DialogSig.DisconnectAll()
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (dlg *Dialog) DefaultStyle() {
-// 	cs := CurrentColorScheme()
-// 	s := &dlg.Style
-
-// 	s.Color.SetColor(cs.Font)
-// }
-
 // ValidViewport finds a non-nil viewport, either using the provided one, or
 // using the first main window's viewport
 func ValidViewport(avp *Viewport2D) *Viewport2D {
@@ -277,32 +269,6 @@ func (dlg *Dialog) Cancel() {
 
 var DialogProps = ki.Props{
 	ki.EnumTypeFlag: TypeVpFlags,
-	// "color":         &Prefs.Colors.Font,
-	// "#frame": ki.Props{
-	// 	"border-width":        units.Px(2),
-	// 	"margin":              units.Px(8),
-	// 	"padding":             units.Px(4),
-	// 	"box-shadow.h-offset": units.Px(4),
-	// 	"box-shadow.v-offset": units.Px(4),
-	// 	"box-shadow.blur":     units.Px(4),
-	// 	"box-shadow.color":    &Prefs.Colors.Shadow,
-	// },
-	// "#title": ki.Props{
-	// 	// todo: add "bigger" font
-	// 	"max-width":        units.Px(-1),
-	// 	"horizontal-align": gist.AlignCenter,
-	// 	"vertical-align":   gist.AlignTop,
-	// 	"background-color": "none",
-	// 	"font-size":        "large",
-	// },
-	// "#prompt": ki.Props{
-	// 	"white-space":      gist.WhiteSpaceNormal, // wrap etc
-	// 	"max-width":        -1,
-	// 	"width":            units.Ch(30),
-	// 	"text-align":       gist.AlignLeft,
-	// 	"vertical-align":   gist.AlignTop,
-	// 	"background-color": "none",
-	// },
 }
 
 // SetFrame creates a standard vertical column frame layout as first element of the dialog, named "frame"

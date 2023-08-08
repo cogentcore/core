@@ -68,11 +68,6 @@ func (sv *SplitView) CopyFieldsFrom(frm any) {
 
 var SplitViewProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "handle-size":   units.Px(10),
-	// "max-width":     -1.0,
-	// "max-height":    -1.0,
-	// "margin":        0,
-	// "padding":       0,
 }
 
 // UpdateSplits updates the splits to be same length as number of children,
@@ -469,42 +464,6 @@ var TypeSplitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "padding":          units.Px(6),
-	// "margin":           units.Px(0),
-	// "background-color": &Prefs.Colors.Background,
-	// "color":            &Prefs.Colors.Font,
-	// "#icon": ki.Props{
-	// 	"max-width":      units.Em(1),
-	// 	"max-height":     units.Em(5),
-	// 	"min-width":      units.Em(1),
-	// 	"min-height":     units.Em(5),
-	// 	"margin":         units.Px(0),
-	// 	"padding":        units.Px(0),
-	// 	"vertical-align": gist.AlignMiddle,
-	// 	"fill":           &Prefs.Colors.Icon,
-	// 	"stroke":         &Prefs.Colors.Font,
-	// },
-	// SliderSelectors[SliderActive]: ki.Props{},
-	// SliderSelectors[SliderInactive]: ki.Props{
-	// 	"border-color": "highlight-50",
-	// 	"color":        "highlight-50",
-	// },
-	// SliderSelectors[SliderHover]: ki.Props{
-	// 	"background-color": "highlight-10",
-	// },
-	// SliderSelectors[SliderFocus]: ki.Props{
-	// 	"border-width":     units.Px(2),
-	// 	"background-color": "samelight-50",
-	// },
-	// SliderSelectors[SliderDown]: ki.Props{},
-	// SliderSelectors[SliderValue]: ki.Props{
-	// 	"border-color":     &Prefs.Colors.Icon,
-	// 	"background-color": &Prefs.Colors.Icon,
-	// },
-	// SliderSelectors[SliderBox]: ki.Props{
-	// 	"border-color":     &Prefs.Colors.Background,
-	// 	"background-color": &Prefs.Colors.Background,
-	// },
 }
 
 func (sr *Splitter) Defaults() {

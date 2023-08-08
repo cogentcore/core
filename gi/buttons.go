@@ -830,57 +830,6 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (bt *Button) DefaultStyle() {
-// 	s := &bt.Style
-
-// 	s.Border.Style.Set(gist.BorderNone)
-// 	s.Border.Width.Set()
-// 	s.Border.Color.Set()
-// 	s.Border.Radius.Set(units.Px(4))
-// 	s.Padding.Set(units.Px(4))
-// 	s.Margin.Set(units.Px(2))
-// 	s.MinWidth.SetEm(1)
-// 	s.MinHeight.SetEm(1)
-// 	s.Text.Align = gist.AlignCenter
-
-// 	switch bt.Type {
-// 	case ButtonDefault:
-// 		c := TheColorScheme.Secondary
-// 		switch bt.State {
-// 		case ButtonHover:
-// 			c = c.Highlight(10)
-// 		case ButtonDown:
-// 			c = c.Highlight(20)
-// 		}
-// 		s.BackgroundColor.SetColor(c)
-// 		s.Color.SetColor(c.ContrastColor())
-// 	case ButtonPrimary:
-// 		c := TheColorScheme.Primary
-// 		switch bt.State {
-// 		case ButtonHover:
-// 			c = c.Highlight(20)
-// 		case ButtonDown:
-// 			c = c.Highlight(30)
-// 		}
-// 		s.BackgroundColor.SetColor(c)
-// 		s.Color.SetColor(c.ContrastColor())
-// 	case ButtonSecondary:
-// 		c := TheColorScheme.Background
-// 		switch bt.State {
-// 		case ButtonHover:
-// 			c = c.Highlight(20)
-// 		case ButtonDown:
-// 			c = c.Highlight(30)
-// 		}
-// 		s.BackgroundColor.SetColor(c)
-// 		s.Color.SetColor(TheColorScheme.Primary)
-// 		s.Border.Style.Set(gist.BorderSolid)
-// 		s.Border.Width.Set(units.Px(1))
-// 		s.Border.Color.Set(TheColorScheme.Primary)
-// 	}
-// }
-
 var ButtonProps = ki.Props{
 	ki.EnumTypeFlag: TypeButtonFlags,
 }
@@ -980,60 +929,6 @@ func (cb *CheckBox) CopyFieldsFrom(frm any) {
 
 var CheckBoxProps = ki.Props{
 	ki.EnumTypeFlag: TypeButtonFlags,
-	// "icon":             icons.CheckBox,
-	// "icon-off":         icons.CheckBoxOutlineBlank,
-	// "text-align":       gist.AlignLeft,
-	// "color":            &Prefs.Colors.Font,
-	// "background-color": &Prefs.Colors.Control,
-	// "margin":           units.Px(1),
-	// "padding":          units.Px(1),
-	// "border-width":     units.Px(0),
-	// "#icon0": ki.Props{
-	// 	"width":            units.Em(1),
-	// 	"height":           units.Em(1),
-	// 	"margin":           units.Px(0),
-	// 	"padding":          units.Px(0),
-	// 	"background-color": color.Transparent,
-	// 	"fill":             &Prefs.Colors.Control,
-	// 	"stroke":           &Prefs.Colors.Font,
-	// },
-	// "#icon1": ki.Props{
-	// 	"width":            units.Em(1),
-	// 	"height":           units.Em(1),
-	// 	"margin":           units.Px(0),
-	// 	"padding":          units.Px(0),
-	// 	"background-color": color.Transparent,
-	// 	"fill":             &Prefs.Colors.Control,
-	// 	"stroke":           &Prefs.Colors.Font,
-	// },
-	// "#space": ki.Props{
-	// 	"width": units.Ch(0.1),
-	// },
-	// "#label": ki.Props{
-	// 	"margin":  units.Px(0),
-	// 	"padding": units.Px(0),
-	// },
-	// ButtonSelectors[ButtonActive]: ki.Props{
-	// 	"background-color": "lighter-0",
-	// },
-	// ButtonSelectors[ButtonInactive]: ki.Props{
-	// 	"border-color": "highlight-50",
-	// 	"color":        "highlight-50",
-	// },
-	// ButtonSelectors[ButtonHover]: ki.Props{
-	// 	"background-color": "highlight-10",
-	// },
-	// ButtonSelectors[ButtonFocus]: ki.Props{
-	// 	"border-width":     units.Px(2),
-	// 	"background-color": "samelight-50",
-	// },
-	// ButtonSelectors[ButtonDown]: ki.Props{
-	// 	"color":            "highlight-90",
-	// 	"background-color": "highlight-30",
-	// },
-	// ButtonSelectors[ButtonSelected]: ki.Props{
-	// 	"background-color": &Prefs.Colors.Select,
-	// },
 }
 
 // CheckBoxWidget interface

@@ -59,16 +59,6 @@ func AddNewIcon(parent ki.Ki, name string) *Icon {
 	return parent.AddNewChild(TypeIcon, name).(*Icon)
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (ic *Icon) DefaultStyle() {
-// 	s := &ic.Style
-// 	cs := gi.CurrentColorScheme()
-
-// 	s.BackgroundColor.SetColor(color.Transparent)
-// 	ic.Pnt.FillStyle.Color.SetColor(cs.Font)
-// 	ic.Pnt.StrokeStyle.Color.SetColor(cs.Font)
-// }
-
 var IconProps = ki.Props{
 	ki.EnumTypeFlag:    gi.TypeVpFlags,
 	"background-color": color.Transparent,

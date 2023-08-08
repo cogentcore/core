@@ -622,77 +622,8 @@ func (mb *MenuButton) CopyFieldsFrom(frm any) {
 	mb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (mb *MenuButton) DefaultStyle() {
-// 	cs := CurrentColorScheme()
-// 	s := &mb.Style
-
-// 	s.Border.Style.Set(gist.BorderNone)
-// 	s.Border.Width.Set()
-// 	s.Margin.Set(units.Px(4))
-// 	s.Padding.Set(units.Px(4))
-// 	s.Text.Align = gist.AlignCenter
-// 	s.BackgroundColor.SetColor(cs.Background.Highlight(10))
-// 	s.Color.SetColor(cs.Font)
-// }
-
 var MenuButtonProps = ki.Props{
 	ki.EnumTypeFlag: TypeButtonFlags,
-	// "border-width":     units.Px(1),
-	// "border-radius":    units.Px(4),
-	// "border-color":     &Prefs.Colors.Border,
-	// "border-style":     gist.BorderSolid,
-	// "padding":          units.Px(4),
-	// "margin":           units.Px(4),
-	// "box-shadow.color": &Prefs.Colors.Shadow,
-	// "text-align":       gist.AlignCenter,
-	// "background-color": &Prefs.Colors.Control,
-	// "color":            &Prefs.Colors.Font,
-	// "#icon": ki.Props{
-	// 	"width":   units.Em(1),
-	// 	"height":  units.Em(1),
-	// 	"margin":  units.Px(0),
-	// 	"padding": units.Px(0),
-	// 	"fill":    &Prefs.Colors.Icon,
-	// 	"stroke":  &Prefs.Colors.Font,
-	// },
-	// "#label": ki.Props{
-	// 	"margin":  units.Px(0),
-	// 	"padding": units.Px(0),
-	// },
-	// "#indicator": ki.Props{
-	// 	"width":          units.Ex(1.5),
-	// 	"height":         units.Ex(1.5),
-	// 	"margin":         units.Px(0),
-	// 	"padding":        units.Px(0),
-	// 	"vertical-align": gist.AlignBottom,
-	// 	"fill":           &Prefs.Colors.Icon,
-	// 	"stroke":         &Prefs.Colors.Font,
-	// },
-	// "#ind-stretch": ki.Props{
-	// 	"width": units.Em(1),
-	// },
-	// ButtonSelectors[ButtonActive]: ki.Props{
-	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonInactive]: ki.Props{
-	// 	"border-color": "highlight-50",
-	// 	"color":        "highlight-50",
-	// },
-	// ButtonSelectors[ButtonHover]: ki.Props{
-	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonFocus]: ki.Props{
-	// 	"border-width":     units.Px(2),
-	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonDown]: ki.Props{
-	// 	"color":            "highlight-90",
-	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonSelected]: ki.Props{
-	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
-	// },
 }
 
 func (mb *MenuButton) ConfigParts() {
@@ -805,42 +736,11 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 	sp.Horiz = fr.Horiz
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (sp *Separator) DefaultStyle() {
-// 	cs := CurrentColorScheme()
-// 	s := &sp.Style
-
-// 	s.Padding.Set()
-// 	s.Margin.Set()
-// 	s.AlignV = gist.AlignCenter
-// 	s.AlignH = gist.AlignCenter
-// 	s.Border.Color.Set(cs.Background.Highlight(30))
-// 	s.Border.Width.Set(units.Px(2))
-// 	s.BackgroundColor.SetColor(cs.Background.Highlight(10))
-// }
-
 var SeparatorProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-	// "padding":          units.Px(0),
-	// "margin":           units.Px(0),
-	// "vertical-align":   gist.AlignCenter,
-	// "horizontal-align": gist.AlignCenter,
-	// "border-color":     &Prefs.Colors.Border,
-	// "border-width":     units.Px(2),
-	// "background-color": &Prefs.Colors.Control,
-	// todo: dotted
 }
 
 func (sp *Separator) Style2D() {
-	// sp.StyMu.Lock()
-	// if sp.Horiz {
-	// 	sp.SetProp("max-width", -1)
-	// 	sp.SetProp("min-height", units.Ex(0.5))
-	// } else {
-	// 	sp.SetProp("max-height", -1)
-	// 	sp.SetProp("min-width", units.Ch(0.5))
-	// }
-	// sp.StyMu.Unlock()
 	sp.WidgetBase.Style2D()
 }
 

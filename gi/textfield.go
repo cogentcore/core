@@ -156,36 +156,7 @@ func (tf *TextField) Disconnect() {
 }
 
 var TextFieldProps = ki.Props{
-	// ki.EnumTypeFlag:    TypeNodeFlags,
-	// "border-width":     units.Px(1),
-	// "cursor-width":     units.Px(3),
-	// "border-color":     &Prefs.Colors.Border,
-	// "padding":          units.Px(4),
-	// "margin":           units.Px(1),
-	// "text-align":       gist.AlignLeft,
-	// "color":            &Prefs.Colors.Font,
-	// "background-color": &Prefs.Colors.Control,
-	// "clear-act":        true,
-	// "#clear": ki.Props{
-	// 	"width":          units.Ex(0.5),
-	// 	"height":         units.Ex(0.5),
-	// 	"margin":         units.Px(0),
-	// 	"padding":        units.Px(0),
-	// 	"vertical-align": gist.AlignMiddle,
-	// },
-	// TextFieldSelectors[TextFieldActive]: ki.Props{
-	// 	"background-color": "lighter-0",
-	// },
-	// TextFieldSelectors[TextFieldFocus]: ki.Props{
-	// 	"border-width":     units.Px(2),
-	// 	"background-color": "samelight-80",
-	// },
-	// TextFieldSelectors[TextFieldInactive]: ki.Props{
-	// 	"background-color": "highlight-10",
-	// },
-	// TextFieldSelectors[TextFieldSel]: ki.Props{
-	// 	"background-color": &Prefs.Colors.Select,
-	// },
+	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 // TextFieldTypes is an enum containing the

@@ -103,81 +103,8 @@ func (cb *ComboBox) Disconnect() {
 	cb.ComboSig.DisconnectAll()
 }
 
-// // DefaultStyle implements the [DefaultStyler] interface
-// func (cb *ComboBox) DefaultStyle() {
-// 	s := &cb.Style
-
-// 	s.Border.Style.Set(gist.BorderNone)
-// 	s.Border.Radius.Set(units.Px(4))
-// 	s.Padding.Set(units.Px(4))
-// 	s.Margin.Set(units.Px(4))
-// 	s.Text.Align = gist.AlignCenter
-// 	s.BackgroundColor.SetColor(TheColorScheme.Background)
-// 	s.Color.SetColor(TheColorScheme.Font)
-// }
-
 var ComboBoxProps = ki.Props{
 	ki.EnumTypeFlag: TypeButtonFlags,
-	// "border-width":     units.Px(1),
-	// "border-radius":    units.Px(4),
-	// "border-color":     &Prefs.Colors.Border,
-	// "padding":          units.Px(4),
-	// "margin":           units.Px(4),
-	// "text-align":       gist.AlignCenter,
-	// "background-color": &Prefs.Colors.Control,
-	// "color":            &Prefs.Colors.Font,
-	// "#icon": ki.Props{
-	// 	"width":   units.Em(1),
-	// 	"height":  units.Em(1),
-	// 	"margin":  units.Px(0),
-	// 	"padding": units.Px(0),
-	// 	"fill":    &Prefs.Colors.Icon,
-	// 	"stroke":  &Prefs.Colors.Font,
-	// },
-	// "#label": ki.Props{
-	// 	"margin":  units.Px(0),
-	// 	"padding": units.Px(0),
-	// },
-	// "#text": ki.Props{
-	// 	"margin":    units.Px(1),
-	// 	"padding":   units.Px(1),
-	// 	"max-width": -1,
-	// 	"width":     units.Ch(12),
-	// },
-	// "#indicator": ki.Props{
-	// 	"width":          units.Ex(1.5),
-	// 	"height":         units.Ex(1.5),
-	// 	"margin":         units.Px(0),
-	// 	"padding":        units.Px(0),
-	// 	"vertical-align": gist.AlignBottom,
-	// 	"fill":           &Prefs.Colors.Icon,
-	// 	"stroke":         &Prefs.Colors.Font,
-	// },
-	// "#ind-stretch": ki.Props{
-	// 	"width": units.Em(1),
-	// },
-	// ButtonSelectors[ButtonActive]: ki.Props{
-	// 	"background-color": "linear-gradient(lighter-0, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonInactive]: ki.Props{
-	// 	"border-color": "highlight-50",
-	// 	"color":        "highlight-50",
-	// },
-	// ButtonSelectors[ButtonHover]: ki.Props{
-	// 	"background-color": "linear-gradient(highlight-10, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonFocus]: ki.Props{
-	// 	"border-width":     units.Px(2),
-	// 	"background-color": "linear-gradient(samelight-50, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonDown]: ki.Props{
-	// 	"color":            "highlight-90",
-	// 	"background-color": "linear-gradient(highlight-30, highlight-10)",
-	// },
-	// ButtonSelectors[ButtonSelected]: ki.Props{
-	// 	"background-color": "linear-gradient(pref(Select), highlight-10)",
-	// 	"color":            "highlight-90",
-	// },
 }
 
 // ButtonWidget interface
