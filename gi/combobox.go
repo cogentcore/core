@@ -46,6 +46,9 @@ type ComboBox struct {
 	// an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items
 	Tooltips []string `json:"-" xml:"-" desc:"an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items"`
 
+	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
+	Placeholder string `desc:"if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"`
+
 	// the menu of actions for selecting items -- automatically generated from Items
 	ItemsMenu Menu `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
 
@@ -166,7 +169,8 @@ func (cb *ComboBox) ConfigPartsIconText(config *kit.TypeAndNameList, icnm icons.
 func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 	if txIdx >= 0 {
 		tx := cb.Parts.Child(txIdx).(*TextField)
-		tx.Placeholder = txt
+		tx.SetText(txt)
+		tx.Placeholder = cb.Placeholder
 		if cb.Type == ComboBoxFilled {
 			tx.Type = TextFieldFilled
 		} else {

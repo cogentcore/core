@@ -401,13 +401,13 @@ func makeInputs(tv *gi.TabView) {
 
 	cbef := gi.AddNewComboBox(inputs, "cbef")
 	cbef.Editable = true
-	cbef.Text = "Select or type a fruit"
+	cbef.Placeholder = "Select or type a fruit"
 	cbef.Items = fruits
 	cbef.Tooltips = fruitDescs
 
 	cbeo := gi.AddNewComboBox(inputs, "cbeo")
 	cbeo.Editable = true
-	cbeo.Text = "Select or type a fruit"
+	cbeo.Placeholder = "Select or type a fruit"
 	cbeo.Items = fruits
 	cbeo.Tooltips = fruitDescs
 	cbeo.Type = gi.ComboBoxOutlined
