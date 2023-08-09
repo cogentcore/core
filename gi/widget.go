@@ -37,11 +37,14 @@ type WidgetBase struct {
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
 
+	// the bitflags for the state of the widget (see the WidgetStates type)
+	WidgetState int64 `json:"-" xml:"-" copy:"-" desc:"the bitflags for the state of the widget (see the WidgetStates type)"`
+
 	// a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code
-	StyleFuncs *ordmap.Map[StyleFuncName, func()] `desc:"a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
+	StyleFuncs *ordmap.Map[StyleFuncName, func()] `json:"-" xml:"-" copy:"-" desc:"a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
 
 	// override the computed styles and allow directly editing Style
-	OverrideStyle bool `desc:"override the computed styles and allow directly editing Style"`
+	OverrideStyle bool `json:"-" xml:"-" desc:"override the computed styles and allow directly editing Style"`
 
 	// styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
 	Style gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
@@ -62,9 +65,127 @@ type WidgetBase struct {
 var TypeWidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
 
 var WidgetBaseProps = ki.Props{
-	"base-type":     true,
-	ki.EnumTypeFlag: TypeNodeFlags,
+	"base-type":            true,
+	ki.EnumTypeFlag:        TypeNodeFlags,
+	"EnumType:WidgetState": TypeWidgetStates,
 }
+
+// WidgetStates contains the all of bitflags
+// for [Widget] states
+type WidgetStates int32
+
+//go:generate stringer -type=WidgetStates
+
+var TypeWidgetStates = kit.Enums.AddEnumAltLower(WidgetStatesN, kit.BitFlag, nil, "Widget")
+
+// Based on https://www.w3schools.com/css/css_pseudo_classes.asp
+const (
+	// WidgetActive is applied to widgets
+	// that are currently being interacted
+	// with (pressed down) by the user
+	WidgetActive WidgetStates = iota
+	// WidgetChecked is applied to widgets
+	// that are currently checked
+	// (only applies to checkboxes)
+	WidgetChecked
+	// WidgetDisabled is applied to widgets
+	// that are disabled
+	WidgetDisabled
+	// WidgetEmpty is applied to widgets
+	// that have no children
+	WidgetEmpty
+	// WidgetEnabled is applied to widgets
+	// that are enabled
+	WidgetEnabled
+	// WidgetFirstChild is applied to widgets
+	// that are the first child of their parent
+	WidgetFirstChild
+	// WidgetFirstOfType is applied to widgets
+	// that are the first child of their parent
+	// with their type
+	WidgetFirstOfType
+	// WidgetFocus is applied to widgets that
+	// have focus (ie: by keyboard navigation)
+	WidgetFocus
+	// WidgetHover is applied to widgets that
+	// are being hovered over by a mouse cursor
+	// or have been long-pressed on mobile
+	WidgetHover
+	// WidgetInRange is applied to widgets
+	// with a value that is in the range
+	// specified by the Min and Max fields
+	// (only applies to inputs)
+	WidgetInRange
+	// WidgetInvalid is applied to widgets
+	// with an invalid value
+	// (only applies to inputs)
+	WidgetInvalid
+
+	// TODO: lang
+
+	// WidgetLastChild is applied to widgets
+	// that are the last child of their parent
+	WidgetLastChild
+	// WidgetLastOfType is applied to widgets
+	// that are the last child of their parent
+	// with their type
+	WidgetLastOfType
+	// WidgetLink is applied to widgets
+	// that are previously unvisited links
+	WidgetLink
+
+	// TODO: not, nth-child, nth-last-child,
+	// nth-last-of-type, nth-of-type
+
+	// WidgetOnlyOfType is applied to widgets
+	// that are the only child of their parent
+	// with their type
+	WidgetOnlyOfType
+	// WidgetOnlyChild is applied to widgets
+	// that are the only child of their parent
+	WidgetOnlyChild
+	// WidgetOptional is applied to widgets
+	// that have a false Required field
+	// (only applies to inputs)
+	WidgetOptional
+	// WidgetOutOfRange is applied to widgets
+	// with a value that is not in the range
+	// specified by the Min and Max fields
+	// (only applies to inputs)
+	WidgetOutOfRange
+	// WidgetReadOnly is applied to widgets
+	// that are read-only; applies to inputs
+	// that have a true ReadOnly field and
+	// other read-only elements like text
+	// and buttons
+	WidgetReadOnly
+	// WidgetReadWrite is applied to widgets
+	// that are both readable and writeable;
+	// only applies to inputs that have a false
+	// ReadOnly field and aren't disabled
+	WidgetReadWrite
+	// WidgetRequired is applied to widgets
+	// that a true Required field
+	// (only applies to inputs)
+	WidgetRequired
+	// WidgetRoot is applied to widgets
+	// that are the root element of the GUI
+	WidgetRoot
+	// WidgetTarget is applied to widgets
+	// that have been navigated to by
+	// a URL containing their anchor name
+	// (ie: a targeted heading)
+	WidgetTarget
+	// WidgetValid is applied to widgets
+	// with a valid value
+	// (only applies to inputs)
+	WidgetValid
+	// WidgetVisited is applied to widgets
+	// that are previously visited links
+	WidgetVisited
+
+	WidgetStatesN
+)
 
 // StyleFuncName is the name of
 // a style function
