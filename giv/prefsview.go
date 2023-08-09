@@ -52,15 +52,15 @@ func PrefsView(pf *gi.Preferences) *gi.Window {
 			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				switch sig {
 				case 0:
-					pf.Save()
-					fmt.Println("Preferences Saved to prefs.json")
-					win.Close()
+					inClosePrompt = false
+					// default is to do nothing, i.e., cancel
 				case 1:
 					pf.Open() // if we don't do this, then it actually remains in edited state
 					win.Close()
 				case 2:
-					inClosePrompt = false
-					// default is to do nothing, i.e., cancel
+					pf.Save()
+					fmt.Println("Preferences Saved to prefs.json")
+					win.Close()
 				}
 			})
 	})
