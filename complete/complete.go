@@ -30,8 +30,8 @@ type Completion struct {
 	// icon name
 	Icon string `desc:"icon name"`
 
-	// possible extra information, e.g. type, arguments, etc. - not currently used
-	Desc string `desc:"possible extra information, e.g. type, arguments, etc. - not currently used"`
+	// extra information, e.g. detailed description, type, arguments, etc; not currently used in Pi, but is used for tooltips in GUI
+	Desc string `desc:"extra information, e.g. detailed description, type, arguments, etc; not currently used in Pi, but is used for tooltips in GUI"`
 
 	// lang specific or other, e.g. class or type
 	Extra map[string]string `desc:"lang specific or other, e.g. class or type"`
