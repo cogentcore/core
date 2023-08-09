@@ -570,11 +570,7 @@ func (tv *TabView) ConfigStyles() {
 		tv.Style.MaxHeight.SetPx(-1)
 	})
 	tv.AddChildStyleFunc("tabs", 0, StyleFuncParts(tv), func(tabsw *WidgetBase) {
-		tabs, ok := tabsw.This().(*Frame)
-		if !ok {
-			log.Println("(*gi.TabView).ConfigStyles: expected child named tabs to be of type *gi.Frame, not", reflect.TypeOf(tabsw.This()))
-			return
-		}
+		tabs := tabsw.This().(*Frame)
 		tabs.Style.MaxWidth.SetPx(-1)
 		tabs.Style.Height.SetEm(1.8)
 		tabs.Style.Overflow = gist.OverflowHidden // no scrollbars!

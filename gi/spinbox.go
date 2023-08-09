@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"reflect"
 	"strconv"
 
 	"github.com/goki/gi/gist"
@@ -16,7 +15,6 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -196,6 +194,7 @@ func (sb *SpinBox) ConfigParts() {
 			// up
 			up := buts.Child(0).(*Action)
 			up.SetName("up")
+			up.Type = ActionParts
 			up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
 			// not compiled into style prop
 			// up.SetFlagState(sb.IsInactive(), int(Inactive))
@@ -212,6 +211,7 @@ func (sb *SpinBox) ConfigParts() {
 			dn := buts.Child(1).(*Action)
 			// dn.SetFlagState(sb.IsInactive(), int(Inactive))
 			dn.SetName("down")
+			dn.Type = ActionParts
 			dn.SetProp("no-focus", true)
 			dn.Icon = sb.DownIcon
 			sb.StylePart(Node2D(dn))
@@ -491,15 +491,8 @@ func (sb *SpinBox) HasFocus2D() bool {
 
 func (sb *SpinBox) ConfigStyles() {
 	sb.Parts.AddChildStyleFunc("text-field", 0, StyleFuncParts(sb), func(tfw *WidgetBase) {
-		tf, ok := tfw.This().(*TextField)
-		if !ok {
-			log.Println("(*gi.SpinBox).ConfigStyles: expected child named text-field to be of type *gi.TextField, not", reflect.TypeOf(tfw.This()))
-			return
-		}
-		tf.Style.MinWidth.SetCh(4)
-		tf.Style.Width.SetCh(8)
-		tf.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-		tf.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		tf := tfw.This().(*TextField)
+		tf.Style.MinWidth.SetEm(6)
 	})
 	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(space *WidgetBase) {
 		space.Style.Width.SetCh(0.1)
@@ -508,31 +501,10 @@ func (sb *SpinBox) ConfigStyles() {
 		buttons.AddStyleFunc(StyleFuncParts(sb), func() {
 			buttons.Style.AlignV = gist.AlignMiddle
 		})
-		// same style function for both button up and down
-		btsf := func(buttonw *WidgetBase) {
-			button, ok := buttonw.This().(*Action)
-			if !ok {
-				log.Println("(*gi.SpinBox).ConfigStyles: expected child of Parts/buttons to be of type *gi.Action, not", reflect.TypeOf(buttonw.This()))
-				return
-			}
-			button.Style.MaxWidth.SetEx(2)
-			button.Style.MaxHeight.SetEx(2)
-			button.Style.Padding.Set()
-			button.Style.Margin.Set()
-			button.Style.Color = ColorScheme.OnBackground
-			switch button.State {
-			case ButtonActive:
-				button.Style.BackgroundColor.SetColor(ColorScheme.Background)
-			case ButtonInactive:
-				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-				button.Style.Color = ColorScheme.OnBackground.Highlight(20)
-			case ButtonFocus, ButtonSelected:
-				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
-			case ButtonHover:
-				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
-			case ButtonDown:
-				button.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			}
+		// same style function for both action up and down
+		btsf := func(actw *WidgetBase) {
+			act := actw.This().(*Action)
+			act.Style.Font.Size.SetPx(20)
 		}
 		buttons.AddChildStyleFunc("up", 0, StyleFuncParts(sb), btsf)
 		buttons.AddChildStyleFunc("down", 1, StyleFuncParts(sb), btsf)

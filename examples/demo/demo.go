@@ -365,6 +365,12 @@ func makeInputs(tv *gi.TabView) {
 	sbox.SetMin(-5)
 	sbox.SetMax(10)
 
+	sboxh := gi.AddNewSpinBox(inputs, "sboxh")
+	sboxh.Format = "%#X"
+	sboxh.Value = 44
+	sboxh.Step = 1
+	sboxh.SetMax(255)
+
 	clr := colors.Blue
 
 	colorvv := giv.ToValueView(&clr, "")
