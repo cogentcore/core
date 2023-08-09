@@ -779,7 +779,7 @@ type Button struct {
 	Type ButtonTypes `desc:"the type of button (default, primary, secondary, etc)"`
 }
 
-var TypeButton = kit.Types.AddType(&Button{}, nil)
+var TypeButton = kit.Types.AddType(&Button{}, ButtonProps)
 
 // ButtonTypes is an enum containing the
 // different possible types of buttons
@@ -914,7 +914,7 @@ type CheckBox struct {
 	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
-var TypeCheckBox = kit.Types.AddType(&CheckBox{}, nil)
+var TypeCheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
 
 // AddNewCheckBox adds a new button to given parent node, with given name.
 func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {

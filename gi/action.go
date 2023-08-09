@@ -36,7 +36,7 @@ type Action struct {
 	Type ActionTypes `desc:"the type of action"`
 }
 
-var TypeAction = kit.Types.AddType(&Action{}, nil)
+var TypeAction = kit.Types.AddType(&Action{}, ActionProps)
 
 // ActionTypes is an enum representing
 // the different possible types of actions
