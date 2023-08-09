@@ -949,20 +949,14 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 // It should be called on tooltips when they are created.
 func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
 	tooltip.AddStyleFunc(StyleFuncParts(par), func() {
-		tooltip.Style.BackgroundColor.SetColor(ColorScheme.Tertiary)
-		tooltip.Style.Color = ColorScheme.Tertiary.ContrastColor()
 		tooltip.Style.Border.Style.Set(gist.BorderNone)
-		tooltip.Style.Margin.Set()
-		tooltip.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		// TODO: maybe add box shadow
-		// tooltip.Style.BoxShadow.HOffset.SetPx(2)
-		// tooltip.Style.BoxShadow.VOffset.SetPx(2)
-		// tooltip.Style.BoxShadow.Blur.SetPx(2)
-		// tooltip.Style.BoxShadow.Color = Colors.Accent.Highlight(20)
+		tooltip.Style.Border.Radius = gist.BorderRadiusExtraSmall
+		tooltip.Style.Padding.Set(units.Px(8 * Prefs.DensityMul()))
+		tooltip.Style.BackgroundColor.SetColor(ColorScheme.InverseSurface)
+		tooltip.Style.Color = ColorScheme.InverseOnSurface
 	})
-	tooltip.AddChildStyleFunc("ttlbl", 0, StyleFuncParts(par), func(label *WidgetBase) {
-		label.Style.Text.WhiteSpace = gist.WhiteSpaceNormal // wrap
-	})
+	// tooltip.AddChildStyleFunc("ttlbl", 0, StyleFuncParts(par), func(label *WidgetBase) {
+	// })
 }
 
 // PopupTooltip pops up a viewport displaying the tooltip text
@@ -973,26 +967,31 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.InitName(&pvp, name+"Tooltip")
 	pvp.Win = win
 	updt := pvp.UpdateStart()
-	pvp.SetProp("color", &Prefs.Colors.Font)
-	pvp.Fill = false
+	pvp.Fill = true
 	pvp.SetFlag(int(VpFlagPopup))
 	pvp.SetFlag(int(VpFlagTooltip))
+	pvp.AddStyleFunc(StyleFuncParts(parVp), func() {
+		// TOOD: get border radius actually working
+		// without having parent background color workaround
+		pvp.Style.Border.Radius = gist.BorderRadiusExtraSmall
+		pvp.Style.BackgroundColor = pvp.ParentBackgroundColor()
+	})
 
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.SetFlag(int(VpFlagPopupDestroyAll)) // nuke it all
-	frame := pvp.AddNewChild(TypeFrame, "Frame").(*Frame)
-	frame.Lay = LayoutVert
-	// frame.Properties().CopyFrom(TooltipFrameProps, ki.DeepCopy)
-	lbl := frame.AddNewChild(TypeLabel, "ttlbl").(*Label)
-	// lbl.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
+	frame := AddNewFrame(&pvp, "Frame", LayoutVert)
+	lbl := AddNewLabel(frame, "ttlbl", tooltip)
+	lbl.Type = LabelBodyMedium
 
 	TooltipConfigStyles(&pvp.WidgetBase, frame)
 
-	mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
-	mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
+	lbl.AddStyleFunc(StyleFuncParts(&pvp), func() {
+		mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
+		mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 
-	lbl.SetProp("max-width", units.Dot(mwdots))
-	lbl.Text = tooltip
+		lbl.Style.MaxWidth.SetDot(mwdots)
+	})
+
 	frame.Init2DTree()
 	frame.Style2DTree()                                    // sufficient to get sizes
 	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
