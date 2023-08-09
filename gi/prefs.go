@@ -1010,8 +1010,8 @@ type PrefsDetailed struct {
 	// [def: 50] [min: 0] [max: 1000] [step: 1] the maximum number of pixels that mouse can move and still register a Hover event
 	HoverMaxPix int `def:"50" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`
 
-	// [def: 500] [min: 10] [max: 10000] [step: 10] the number of milliseconds to wait before offering completions
-	CompleteWaitMSec int `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before offering completions"`
+	// [def: 0] [min: 0] [max: 10000] [step: 10] the number of milliseconds to wait before offering completions
+	CompleteWaitMSec int `def:"0" min:"0" max:"10000" step:"10" desc:"the number of milliseconds to wait before offering completions"`
 
 	// [def: 25] [min: 5] [step: 1] the maximum number of completions offered in popup
 	CompleteMaxItems int `def:"25" min:"5" step:"1" desc:"the maximum number of completions offered in popup"`

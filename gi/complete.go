@@ -92,7 +92,7 @@ const (
 
 // CompleteWaitMSec is the number of milliseconds to wait before
 // showing the completion menu
-var CompleteWaitMSec = 500
+var CompleteWaitMSec = 0
 
 // CompleteMaxItems is the max number of items to display in completer popup
 var CompleteMaxItems = 25
