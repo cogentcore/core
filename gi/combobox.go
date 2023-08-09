@@ -166,7 +166,12 @@ func (cb *ComboBox) ConfigPartsIconText(config *kit.TypeAndNameList, icnm icons.
 func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 	if txIdx >= 0 {
 		tx := cb.Parts.Child(txIdx).(*TextField)
-		tx.SetText(txt)
+		tx.Placeholder = txt
+		if cb.Type == ComboBoxFilled {
+			tx.Type = TextFieldFilled
+		} else {
+			tx.Type = TextFieldOutlined
+		}
 		tx.SetCompleter(tx, cb.CompleteMatch, cb.CompleteEdit)
 		tx.AddClearAction()
 		if _, err := tx.PropTry("__comboInit"); err != nil {
@@ -611,43 +616,38 @@ func (cb *ComboBox) Init2D() {
 
 func (cb *ComboBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
-		cb.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
 		cb.Style.Text.Align = gist.AlignCenter
-		cb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceVariant)
-		cb.Style.Color = ColorScheme.OnSurfaceVariant
 		if cb.Editable {
 			cb.Style.Padding.Set()
-		} else {
-			cb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul()))
 		}
 		cb.Style.Border.Radius.Set(units.Px(10))
-		// switch cb.Type {
-		// case ComboBoxFilled:
-		// 	cb.Style.Border.Style.Set(gist.BorderNone)
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
-		// case ComboBoxOutlined:
-		// 	cb.Style.Border.Style.Set(gist.BorderSolid)
-		// 	cb.Style.Border.Width.Set(units.Px(1))
-		// 	cb.Style.Border.Color.Set(ColorScheme.OnBackground)
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		// }
-		// switch cb.State {
-		// case ButtonActive:
-		// 	// use background as already specified above
-		// case ButtonInactive:
-		// 	cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(20))
-		// 	cb.Style.Color = ColorScheme.OnBackground.Highlight(20)
-		// case ButtonFocus, ButtonSelected:
-		// 	cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(10))
-		// case ButtonHover:
-		// 	cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(15))
-		// case ButtonDown:
-		// 	cb.Style.BackgroundColor.SetColor(cb.Style.BackgroundColor.Color.Highlight(20))
-		// }
+		switch cb.Type {
+		case ComboBoxFilled:
+			cb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+			cb.Style.Color = ColorScheme.OnSurface
+			if cb.Editable {
+				cb.Style.Border.Style.Set(gist.BorderNone)
+				cb.Style.Border.Style.Bottom = gist.BorderSolid
+				cb.Style.Border.Width.Set()
+				cb.Style.Border.Width.Bottom = units.Px(1)
+				cb.Style.Border.Color.Set()
+				cb.Style.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
+				cb.Style.Border.Radius = gist.BorderRadiusExtraSmallTop
+				if tf, ok := cb.Parts.ChildByName("text", 1).(*TextField); ok {
+					switch tf.State {
+					case TextFieldFocus:
+						cb.Style.Border.Width.Bottom = units.Px(2)
+						cb.Style.Border.Color.Bottom = ColorScheme.Primary
+					}
+				}
+
+			} else {
+				cb.Style.Border.Radius = gist.BorderRadiusSmall
+				cb.Style.Padding.Set(units.Px(8 * Prefs.DensityMul()))
+			}
+		}
 	})
 	cb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(cb), func(icon *WidgetBase) {
-		icon.Style.Width.SetEm(1)
-		icon.Style.Height.SetEm(1)
 		icon.Style.Margin.Set()
 		icon.Style.Padding.Set()
 	})
@@ -657,21 +657,17 @@ func (cb *ComboBox) ConfigStyles() {
 		label.Style.AlignV = gist.AlignMiddle
 	})
 	cb.Parts.AddChildStyleFunc("text", 1, StyleFuncParts(cb), func(text *WidgetBase) {
-		text.Style.Margin.Set()
-		text.Style.Padding.Set()
-		text.Style.MaxWidth.SetPx(-1)
-		text.Style.Width.SetCh(12)
 		text.Style.Border.Style.Set(gist.BorderNone)
+		text.Style.Border.Width.Set()
 	})
 	cb.Parts.AddChildStyleFunc("ind-stretch", 2, StyleFuncParts(cb), func(ins *WidgetBase) {
-		ins.Style.Width.SetEm(1)
+		// ins.Style.Width.SetEm(1)
+		// ins.Style.Width.SetPx(8 * Prefs.DensityMul())
 	})
 	cb.Parts.AddChildStyleFunc("indicator", 3, StyleFuncParts(cb), func(ind *WidgetBase) {
-		ind.Style.Width.SetEx(1.5)
-		ind.Style.Height.SetEx(1.5)
+		ind.Style.Font.Size.SetPx(20)
 		ind.Style.Margin.Set()
-		ind.Style.Padding.Set()
+		// ind.Style.Margin.Right.SetPx(8 * Prefs.DensityMul())
 		ind.Style.AlignV = gist.AlignMiddle
-		ind.Style.AlignH = gist.AlignCenter
 	})
 }

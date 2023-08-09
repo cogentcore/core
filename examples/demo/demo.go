@@ -359,17 +359,30 @@ func makeInputs(tv *gi.TabView) {
 	tfop.Type = gi.TextFieldOutlined
 	tfop.SetTypePassword()
 
-	sbox := gi.AddNewSpinBox(inputs, "sbox")
-	sbox.Value = 2
-	sbox.Step = 0.5
-	sbox.SetMin(-5)
-	sbox.SetMax(10)
+	sboxes := gi.AddNewLayout(inputs, "sboxes", gi.LayoutHoriz)
 
-	sboxh := gi.AddNewSpinBox(inputs, "sboxh")
+	sbox := gi.AddNewSpinBox(sboxes, "sbox")
+	sbox.Value = 15
+	sbox.Step = 5
+	sbox.SetMin(-50)
+	sbox.SetMax(100)
+
+	sboxh := gi.AddNewSpinBox(sboxes, "sboxh")
 	sboxh.Format = "%#X"
 	sboxh.Value = 44
 	sboxh.Step = 1
 	sboxh.SetMax(255)
+
+	cbox := gi.AddNewComboBox(inputs, "cbox")
+	cbox.Text = "Select an option"
+	cbox.Items = []any{"Option 1", "Option 2", "Option 3"}
+	cbox.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
+
+	cboxe := gi.AddNewComboBox(inputs, "cboxe")
+	cboxe.Editable = true
+	cboxe.Text = "Select or type an option"
+	cboxe.Items = []any{"Option 1", "Option 2", "Option 3"}
+	cboxe.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
 
 	clr := colors.Blue
 
@@ -404,17 +417,6 @@ func makeInputs(tv *gi.TabView) {
 	slideryi.Dim = mat32.Y
 	slideryi.Value = 0.2
 	slideryi.SetInactive()
-
-	cbox := gi.AddNewComboBox(inputs, "cbox")
-	cbox.Text = "Select an option"
-	cbox.Items = []any{"Option 1", "Option 2", "Option 3"}
-	cbox.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
-
-	cboxe := gi.AddNewComboBox(inputs, "cboxe")
-	cboxe.Editable = true
-	cboxe.Text = "Select or type an option"
-	cboxe.Items = []any{"Option 1", "Option 2", "Option 3"}
-	cboxe.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
 
 	bbox := gi.AddNewButtonBox(inputs, "bbox")
 	bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
