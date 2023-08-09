@@ -619,12 +619,15 @@ func (cb *ComboBox) ConfigStyles() {
 		cb.Style.Text.Align = gist.AlignCenter
 		if cb.Editable {
 			cb.Style.Padding.Set()
+			cb.Style.Padding.Right.SetPx(16 * Prefs.DensityMul())
+		} else {
+			cb.Style.Border.Radius = gist.BorderRadiusExtraSmall
+			cb.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
 		}
-		cb.Style.Border.Radius.Set(units.Px(10))
+		cb.Style.Color = ColorScheme.OnSurface
 		switch cb.Type {
 		case ComboBoxFilled:
 			cb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
-			cb.Style.Color = ColorScheme.OnSurface
 			if cb.Editable {
 				cb.Style.Border.Style.Set(gist.BorderNone)
 				cb.Style.Border.Style.Bottom = gist.BorderSolid
@@ -641,9 +644,21 @@ func (cb *ComboBox) ConfigStyles() {
 					}
 				}
 
-			} else {
-				cb.Style.Border.Radius = gist.BorderRadiusSmall
-				cb.Style.Padding.Set(units.Px(8 * Prefs.DensityMul()))
+			}
+		case ComboBoxOutlined:
+			cb.Style.Border.Style.Set(gist.BorderSolid)
+			cb.Style.Border.Width.Set(units.Px(1))
+			cb.Style.Border.Color.Set(ColorScheme.OnSurfaceVariant)
+			cb.Style.BackgroundColor = cb.ParentBackgroundColor()
+			if cb.Editable {
+				cb.Style.Border.Radius = gist.BorderRadiusExtraSmall
+				if tf, ok := cb.Parts.ChildByName("text", 1).(*TextField); ok {
+					switch tf.State {
+					case TextFieldFocus:
+						cb.Style.Border.Width.Set(units.Px(2))
+						cb.Style.Border.Color.Set(ColorScheme.Primary)
+					}
+				}
 			}
 		}
 	})
@@ -661,13 +676,10 @@ func (cb *ComboBox) ConfigStyles() {
 		text.Style.Border.Width.Set()
 	})
 	cb.Parts.AddChildStyleFunc("ind-stretch", 2, StyleFuncParts(cb), func(ins *WidgetBase) {
-		// ins.Style.Width.SetEm(1)
-		// ins.Style.Width.SetPx(8 * Prefs.DensityMul())
+		ins.Style.Width.SetPx(16 * Prefs.DensityMul())
 	})
 	cb.Parts.AddChildStyleFunc("indicator", 3, StyleFuncParts(cb), func(ind *WidgetBase) {
-		ind.Style.Font.Size.SetPx(20)
-		ind.Style.Margin.Set()
-		// ind.Style.Margin.Right.SetPx(8 * Prefs.DensityMul())
+		ind.Style.Font.Size.SetEm(1.5)
 		ind.Style.AlignV = gist.AlignMiddle
 	})
 }

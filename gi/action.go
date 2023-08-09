@@ -253,7 +253,7 @@ func (ac *Action) ConfigStyles() {
 			ac.Style.BackgroundColor = ac.ParentBackgroundColor()
 		case ActionMenu:
 			ac.Style.Margin.Set()
-			ac.Style.Padding.Set(units.Px(14*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
+			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
 			ac.Style.MaxWidth.SetPx(-1)
 			ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
 			ac.Indicator = icons.KeyboardArrowRight

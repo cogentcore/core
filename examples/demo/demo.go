@@ -373,16 +373,44 @@ func makeInputs(tv *gi.TabView) {
 	sboxh.Step = 1
 	sboxh.SetMax(255)
 
-	cbox := gi.AddNewComboBox(inputs, "cbox")
-	cbox.Text = "Select an option"
-	cbox.Items = []any{"Option 1", "Option 2", "Option 3"}
-	cbox.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
+	cboxes := gi.AddNewLayout(inputs, "cboxes", gi.LayoutHoriz)
+	cboxes.AddStyleFunc(gi.StyleFuncFinal, func() {
+		cboxes.Spacing.SetEm(0.5)
+	})
 
-	cboxe := gi.AddNewComboBox(inputs, "cboxe")
-	cboxe.Editable = true
-	cboxe.Text = "Select or type an option"
-	cboxe.Items = []any{"Option 1", "Option 2", "Option 3"}
-	cboxe.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
+	fruits := []any{"Apple", "Apricot", "Blueberry", "Blackberry", "Peach", "Strawberry"}
+	fruitDescs := []string{
+		"A round, edible fruit that typically has red skin",
+		"A stonefruit with a yellow or orange color",
+		"A small blue or purple berry",
+		"A small, edible, dark fruit",
+		"A fruit with yellow or white flesh and a large seed",
+		"A widely consumed small, red fruit",
+	}
+
+	cbf := gi.AddNewComboBox(cboxes, "cbf")
+	cbf.Text = "Select a fruit"
+	cbf.Items = fruits
+	cbf.Tooltips = fruitDescs
+
+	cbo := gi.AddNewComboBox(cboxes, "cbo")
+	cbo.Text = "Select a fruit"
+	cbo.Items = fruits
+	cbo.Tooltips = fruitDescs
+	cbo.Type = gi.ComboBoxOutlined
+
+	cbef := gi.AddNewComboBox(inputs, "cbef")
+	cbef.Editable = true
+	cbef.Text = "Select or type a fruit"
+	cbef.Items = fruits
+	cbef.Tooltips = fruitDescs
+
+	cbeo := gi.AddNewComboBox(inputs, "cbeo")
+	cbeo.Editable = true
+	cbeo.Text = "Select or type a fruit"
+	cbeo.Items = fruits
+	cbeo.Tooltips = fruitDescs
+	cbeo.Type = gi.ComboBoxOutlined
 
 	sliderx := gi.AddNewSlider(inputs, "sliderx")
 	sliderx.Dim = mat32.X
