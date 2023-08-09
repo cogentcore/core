@@ -384,6 +384,10 @@ func makeInputs(tv *gi.TabView) {
 	cboxe.Items = []any{"Option 1", "Option 2", "Option 3"}
 	cboxe.Tooltips = []string{"A description for Option 1", "A description for Option 2", "A description for Option 3"}
 
+	sliderx := gi.AddNewSlider(inputs, "sliderx")
+	sliderx.Dim = mat32.X
+	sliderx.Value = 0.5
+
 	clr := colors.Blue
 
 	colorvv := giv.ToValueView(&clr, "")
@@ -397,10 +401,6 @@ func makeInputs(tv *gi.TabView) {
 		svi.Style.MaxWidth.SetPx(-1)
 		svi.Style.MaxHeight.SetPx(-1)
 	})
-
-	sliderx := gi.AddNewSlider(inputs, "sliderx")
-	sliderx.Dim = mat32.X
-	sliderx.Value = 0.5
 
 	sliderxi := gi.AddNewSlider(inputs, "sliderxi")
 	sliderxi.Dim = mat32.X
