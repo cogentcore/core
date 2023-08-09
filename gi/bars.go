@@ -506,7 +506,6 @@ func (tb *ToolBar) FindActionByName(name string) (*Action, bool) {
 func (tb *ToolBar) ConfigStyles() {
 	tb.AddStyleFunc(StyleFuncDefault, func() {
 		tb.Style.MaxWidth.SetPx(-1)
-		tb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
-		tb.Style.Color.SetColor(ColorScheme.OnSurface)
+		tb.Style.BackgroundColor = tb.ParentBackgroundColor()
 	})
 }

@@ -892,37 +892,20 @@ func (sr *Slider) ConfigStyles() {
 		sr.StyleBox.Border.Style.Set(gist.BorderNone)
 
 		sr.Style.Border.Style.Set(gist.BorderNone)
-		sr.Style.Border.Radius.Set(units.Px(4))
-		sr.Style.Margin.Set(units.Px(4 * Prefs.DensityMul()))
-		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
+		sr.Style.Border.Radius = gist.BorderRadiusFull
+		sr.Style.Padding.Set(units.Px(8))
 		if sr.Dim == mat32.X {
-			sr.Style.MinWidth.SetEm(20)
-			sr.Style.MinHeight.SetPx(4)
+			sr.Style.Width.SetEm(20)
+			sr.Style.Height.SetPx(4)
 		} else {
-			sr.Style.MinHeight.SetEm(20)
-			sr.Style.MinWidth.SetPx(4)
+			sr.Style.Height.SetEm(20)
+			sr.Style.Width.SetPx(4)
 		}
 		sr.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
-		sr.Style.Color = ColorScheme.OnBackground
+		sr.Style.Color = ColorScheme.OnPrimary
 		sr.ValueColor.SetColor(ColorScheme.Primary)
 		sr.ThumbColor.SetColor(ColorScheme.Primary)
-		// switch sr.State {
-		// case SliderActive:
-		// 	sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
-		// 	sr.ValueColor.SetColor(ColorScheme.Primary)
-		// case SliderInactive:
-		// 	sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
-		// 	sr.ValueColor.SetColor(ColorScheme.Primary.Pastel(100))
-		// case SliderFocus, SliderSelected:
-		// 	sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(25))
-		// 	sr.ValueColor.SetColor(ColorScheme.Primary.Highlight(10))
-		// case SliderHover:
-		// 	sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
-		// 	sr.ValueColor.SetColor(ColorScheme.Primary.Highlight(15))
-		// case SliderDown:
-		// 	sr.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(35))
-		// 	sr.ValueColor.SetColor(ColorScheme.Primary.Highlight(20))
-		// }
+		// STYTODO: state styles
 	})
 	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(sr), func(icon *WidgetBase) {
 		icon.Style.Width.SetEm(1)
@@ -1055,37 +1038,23 @@ func (sb *ScrollBar) FocusChanged2D(change FocusChanges) {
 
 func (sb *ScrollBar) ConfigStyles() {
 	sb.AddStyleFunc(StyleFuncDefault, func() {
-		sb.ThumbSize = units.Px(20)
-
 		sb.StyleBox.Border.Style.Set(gist.BorderNone)
-		sb.StyleBox.BackgroundColor.SetColor(ColorScheme.Background)
+		sb.StyleBox.BackgroundColor = sb.ParentBackgroundColor()
 
 		sb.Style.Border.Style.Set(gist.BorderNone)
-		sb.Style.Border.Radius.Set(units.Px(4))
-		sb.Style.Color = ColorScheme.OnBackground
+		sb.Style.Border.Radius = gist.BorderRadiusFull
 		if sb.Dim == mat32.X {
 			sb.Style.MinHeight.SetEm(2)
+			sb.Style.MaxWidth.SetPx(-1)
 		} else {
 			sb.Style.MinWidth.SetEm(2)
+			sb.Style.MaxHeight.SetPx(-1)
 		}
-		switch sb.State {
-		case SliderActive:
-			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
-			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(30))
-		case SliderInactive:
-			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
-			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(50))
-		case SliderFocus, SliderSelected:
-			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(40))
-		case SliderHover:
-			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(25))
-			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(45))
-		case SliderDown:
-			sb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(30))
-			sb.ValueColor.SetColor(ColorScheme.Background.Highlight(50))
-		}
-		// sb.ThumbColor = sb.ValueColor
+		sb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+		sb.Style.Color = ColorScheme.OnPrimary
+		sb.ValueColor.SetColor(ColorScheme.Primary)
+		sb.ThumbColor.SetColor(ColorScheme.Primary)
+		// STYTODO: state styles
 	})
 }
 
