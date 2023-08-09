@@ -888,7 +888,7 @@ var TextFieldBlinker *time.Ticker
 var BlinkingTextField *TextField
 
 // TextFieldSpriteName is the name of the window sprite used for the cursor
-const TextFieldSpriteName = "gi.TextField.Cursor"
+var TextFieldSpriteName = "gi.TextField.Cursor"
 
 // TextFieldBlink is function that blinks text field cursor
 func TextFieldBlink() {

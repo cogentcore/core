@@ -174,7 +174,7 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt ima
 			text = cmp.Label
 		}
 		icon := cmp.Icon
-		m.AddAction(ActOpts{Icon: icons.Icon(icon), Label: text, Data: cmp.Text},
+		m.AddAction(ActOpts{Icon: icons.Icon(icon), Label: text, Tooltip: cmp.Desc, Data: cmp.Text},
 			c, func(recv, send ki.Ki, sig int64, data any) {
 				cc := recv.Embed(TypeComplete).(*Complete)
 				cc.Complete(data.(string))

@@ -588,15 +588,18 @@ func (cb *ComboBox) KeyChordEvent() {
 // editable textfield part of the ComboBox (if it exists).
 func (cb *ComboBox) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = text
-	is := []string{}
-	for _, i := range cb.Items {
-		is = append(is, kit.ToString(i))
+	comps := make(complete.Completions, len(cb.Items))
+	for idx, item := range cb.Items {
+		tooltip := ""
+		if len(cb.Tooltips) > idx {
+			tooltip = cb.Tooltips[idx]
+		}
+		comps[idx] = complete.Completion{
+			Text: kit.ToString(item),
+			Desc: tooltip,
+		}
 	}
-	possibles := complete.MatchSeedString(is, md.Seed)
-	for _, p := range possibles {
-		m := complete.Completion{Text: p, Icon: ""}
-		md.Matches = append(md.Matches, m)
-	}
+	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)
 	return md
 }
 
