@@ -253,8 +253,9 @@ func (ac *Action) ConfigStyles() {
 			ac.Style.BackgroundColor = ac.ParentBackgroundColor()
 		case ActionMenu:
 			ac.Style.Margin.Set()
-			ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+			ac.Style.Padding.Set(units.Px(14*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
 			ac.Style.MaxWidth.SetPx(-1)
+			ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
 			ac.Indicator = icons.KeyboardArrowRight
 		case ActionMenuBar:
 			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
@@ -280,8 +281,9 @@ func (ac *Action) ConfigStyles() {
 		// }
 	})
 	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, StyleFuncParts(ac), func(icon *WidgetBase) {
-		icon.Style.Width.SetEm(1)
-		icon.Style.Height.SetEm(1)
+		if ac.Type == ActionMenu {
+			icon.Style.Font.Size.SetEm(1.5)
+		}
 		icon.Style.Margin.Set()
 		icon.Style.Padding.Set()
 	})
@@ -294,8 +296,9 @@ func (ac *Action) ConfigStyles() {
 		label.Style.Padding.Set()
 	})
 	ac.Parts.AddChildStyleFunc("indicator", ki.StartMiddle, StyleFuncParts(ac), func(ind *WidgetBase) {
-		ind.Style.Width.SetEx(1.5)
-		ind.Style.Height.SetEx(1.5)
+		if ac.Type == ActionMenu {
+			ind.Style.Font.Size.SetEm(1.5)
+		}
 		ind.Style.Margin.Set()
 		ind.Style.Padding.Set()
 		ind.Style.AlignV = gist.AlignBottom

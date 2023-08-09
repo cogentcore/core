@@ -149,6 +149,5 @@ func (fr *Frame) ConfigStyles() {
 		fr.Style.Border.Radius.Set()
 		fr.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		fr.Style.BackgroundColor = fr.ParentBackgroundColor()
-		fr.Style.Color = ColorScheme.OnBackground
 	})
 }

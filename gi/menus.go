@@ -348,8 +348,8 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
 	frame.AddStyleFunc(StyleFuncParts(par), func() {
 		frame.Style.Border.Style.Set(gist.BorderNone)
-		frame.Style.Padding.Set()
-		frame.Style.Margin.Set()
+		frame.Style.Border.Radius = gist.BorderRadiusExtraSmall
+		frame.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
 		// doesn't seem to work; TODO: fix box shadow here
 		// frame.Style.BoxShadow.HOffset.SetPx(2)
 		// frame.Style.BoxShadow.VOffset.SetPx(2)
@@ -379,7 +379,6 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.InitName(pvp, name+"Menu")
 	pvp.Win = win
 	updt := pvp.UpdateStart()
-	pvp.SetProp("color", &Prefs.Colors.Font)
 	pvp.Fill = true
 	pvp.SetFlag(int(VpFlagPopup))
 	pvp.SetFlag(int(VpFlagMenu))
@@ -406,7 +405,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Win = nil
 	scextra := frame.Style.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
-	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
+	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(2)).ToPoint()
 	maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
 	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
 	x = ints.MaxInt(0, x)
@@ -782,13 +781,13 @@ func (sp *Separator) ConfigStyles() {
 	// TODO: fix disappearing separator in menu
 	sp.AddStyleFunc(StyleFuncDefault, func() {
 		sp.Style.Margin.Set()
-		sp.Style.Padding.Set()
+		sp.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(0))
 		sp.Style.AlignV = gist.AlignCenter
 		sp.Style.AlignH = gist.AlignCenter
 		sp.Style.Border.Style.Set(gist.BorderSolid)
-		sp.Style.Border.Width.Set(units.Px(0))
-		sp.Style.Border.Color.Set(ColorScheme.OnBackground.Highlight(20))
-		sp.Style.BackgroundColor.SetColor(ColorScheme.OnBackground.Highlight(20))
+		sp.Style.Border.Width.Set(units.Px(1))
+		sp.Style.Border.Color.Set(ColorScheme.Outline)
+		sp.Style.BackgroundColor.SetColor(ColorScheme.Outline)
 		if sp.Horiz {
 			sp.Style.MaxWidth.SetPx(-1)
 			sp.Style.MinHeight.SetPx(1)
