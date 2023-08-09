@@ -67,35 +67,15 @@ var TypeLabel = kit.Types.AddType(&Label{}, LabelProps)
 type LabelTypes int
 
 const (
-	// LabelLabelLarge is a large label used for label text (like a caption
-	// or the text inside a button) with a default font size of 14px.
-	LabelLabelLarge LabelTypes = iota
-	// LabelLabelMedium is a medium-sized label used for label text (like a caption
-	// or the text inside a button) with a default font size of 12px.
-	LabelLabelMedium
-	// LabelLabelSmall is a small label used for label text (like a caption
-	// or the text inside a button) with a default font size of 11px.
-	LabelLabelSmall
-
-	// LabelBodyLarge is a large body label used for longer
-	// passages of text with a default font size of 16px.
-	LabelBodyLarge
-	// LabelBodyMedium is a medium-sized body label used for longer
-	// passages of text with a default font size of 14px.
-	LabelBodyMedium
-	// LabelBodySmall is a small body label used for longer
-	// passages of text with a default font size of 12px.
-	LabelBodySmall
-
-	// LabelTitleLarge is a large, medium-emphasis
-	// title label with a default font size of 22px.
-	LabelTitleLarge
-	// LabelTitleMedium is a medium-sized, medium-emphasis
-	// title label with a default font size of 16px.
-	LabelTitleMedium
-	// LabelTitleSmall is a small, medium-emphasis
-	// title label with a default font size of 14px.
-	LabelTitleSmall
+	// LabelDisplayLarge is a large, short, and important
+	// display label with a default font size of 57px.
+	LabelDisplayLarge LabelTypes = iota
+	// LabelDisplayMedium is a medium-sized, short, and important
+	// display label with a default font size of 45px.
+	LabelDisplayMedium
+	// LabelDisplaySmall is a small, short, and important
+	// display label with a default font size of 36px.
+	LabelDisplaySmall
 
 	// LabelHeadlineLarge is a large, high-emphasis
 	// headline label with a default font size of 32px.
@@ -107,15 +87,35 @@ const (
 	// headline label with a default font size of 24px.
 	LabelHeadlineSmall
 
-	// LabelDisplayLarge is a large, short, and important
-	// display label with a default font size of 57px.
-	LabelDisplayLarge
-	// LabelDisplayMedium is a medium-sized, short, and important
-	// display label with a default font size of 45px.
-	LabelDisplayMedium
-	// LabelDisplaySmall is a small, short, and important
-	// display label with a default font size of 36px.
-	LabelDisplaySmall
+	// LabelTitleLarge is a large, medium-emphasis
+	// title label with a default font size of 22px.
+	LabelTitleLarge
+	// LabelTitleMedium is a medium-sized, medium-emphasis
+	// title label with a default font size of 16px.
+	LabelTitleMedium
+	// LabelTitleSmall is a small, medium-emphasis
+	// title label with a default font size of 14px.
+	LabelTitleSmall
+
+	// LabelBodyLarge is a large body label used for longer
+	// passages of text with a default font size of 16px.
+	LabelBodyLarge
+	// LabelBodyMedium is a medium-sized body label used for longer
+	// passages of text with a default font size of 14px.
+	LabelBodyMedium
+	// LabelBodySmall is a small body label used for longer
+	// passages of text with a default font size of 12px.
+	LabelBodySmall
+
+	// LabelLabelLarge is a large label used for label text (like a caption
+	// or the text inside a button) with a default font size of 14px.
+	LabelLabelLarge
+	// LabelLabelMedium is a medium-sized label used for label text (like a caption
+	// or the text inside a button) with a default font size of 12px.
+	LabelLabelMedium
+	// LabelLabelSmall is a small label used for label text (like a caption
+	// or the text inside a button) with a default font size of 11px.
+	LabelLabelSmall
 
 	LabelTypesN
 )
@@ -133,6 +133,7 @@ func AddNewLabel(parent ki.Ki, name string, text string) *Label {
 
 func (lb *Label) OnAdd() {
 	lb.Selectable = lb.ParentByType(TypeButtonBase, ki.Embeds) == nil
+	lb.Type = LabelLabelLarge
 }
 
 func (lb *Label) CopyFieldsFrom(frm any) {
