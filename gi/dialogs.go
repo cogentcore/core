@@ -289,7 +289,7 @@ func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	dlg.Title = title
 	if frame != nil {
 		lab := AddNewLabel(frame, "title", title)
-		lab.Type = LabelHeadlineLarge
+		lab.Type = LabelHeadlineSmall
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}
@@ -311,6 +311,7 @@ func (dlg *Dialog) SetPrompt(prompt string, frame *Frame) *Label {
 	dlg.Prompt = prompt
 	if frame != nil {
 		lab := AddNewLabel(frame, "prompt", prompt)
+		lab.Type = LabelBodyMedium
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}
@@ -373,14 +374,11 @@ func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList
 	if stretch {
 		config.Add(TypeStretch, "stretch")
 	}
+	if cancel {
+		config.Add(TypeButton, "cancel")
+	}
 	if ok {
 		config.Add(TypeButton, "ok")
-	}
-	if cancel {
-		if ok {
-			config.Add(TypeSpace, "space")
-		}
-		config.Add(TypeButton, "cancel")
 	}
 	return config
 }
@@ -391,7 +389,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
 		okb := bb.ChildByName("ok", 0).Embed(TypeButton).(*Button)
 		okb.SetText("Ok")
-		okb.Type = ButtonFilled
+		okb.Type = ButtonText
 		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(TypeDialog).(*Dialog)
@@ -402,7 +400,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if cancel {
 		canb := bb.ChildByName("cancel", 0).Embed(TypeButton).(*Button)
 		canb.SetText("Cancel")
-		canb.Type = ButtonOutlined
+		canb.Type = ButtonText
 		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(TypeDialog).(*Dialog)
@@ -418,14 +416,14 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	dlg.SigVal = -1
 	frame := dlg.SetFrame()
 	if title != "" {
-		dlg.SetTitle(title, nil) // frame) // don't set title element
+		dlg.SetTitle(title, frame)
 	}
 	if prompt != "" {
 		dlg.SetPrompt(prompt, frame)
 	}
 	if ok || cancel {
 		bb := dlg.AddButtonBox(frame)
-		bbc := dlg.StdButtonConfig(false, ok, cancel) // no stretch -- left better
+		bbc := dlg.StdButtonConfig(true, ok, cancel)
 		mods, updt := bb.ConfigChildren(bbc)
 		dlg.StdButtonConnect(ok, cancel, bb)
 		if mods {
@@ -650,16 +648,17 @@ func StringPromptDialogValue(dlg *Dialog) string {
 
 func (dlg *Dialog) ConfigStyles() {
 	dlg.AddStyleFunc(StyleFuncDefault, func() {
-		dlg.Style.BackgroundColor.SetColor(ColorScheme.SurfaceVariant)
-		dlg.Style.Color = ColorScheme.OnSurfaceVariant
+		dlg.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHigh)
+		dlg.Style.Color = ColorScheme.OnSurface
+		dlg.Style.Border.Radius = gist.BorderRadiusExtraLarge
 	})
 	frame, ok := dlg.ChildByName("frame", 0).(*Frame)
 	if ok {
 		frame.AddStyleFunc(StyleFuncParts(dlg), func() {
 			frame.Style.Border.Style.Set(gist.BorderNone)
-			frame.Style.Margin.Set(units.Px(8))
-			frame.Style.Padding.Set(units.Px(4))
-			frame.Style.BackgroundColor.SetColor(ColorScheme.Background)
+			frame.Style.Padding.Set(units.Px(24 * Prefs.DensityMul()))
+			frame.Style.BackgroundColor.SetColor(dlg.Style.BackgroundColor.Color)
+			// TODO: add box shadow
 			// frame.Style.BoxShadow.HOffset.SetPx(4)
 			// frame.Style.BoxShadow.VOffset.SetPx(4)
 			// frame.Style.BoxShadow.Blur.SetPx(4)
@@ -677,7 +676,12 @@ func (dlg *Dialog) ConfigStyles() {
 			prompt.Style.Width.SetCh(30)
 			prompt.Style.Text.Align = gist.AlignLeft
 			prompt.Style.AlignV = gist.AlignTop
+			prompt.Style.Color = ColorScheme.OnSurfaceVariant
 			prompt.Style.BackgroundColor.SetColor(color.Transparent)
+		})
+		frame.AddChildStyleFunc("buttons", 1, StyleFuncParts(dlg), func(btsw *WidgetBase) {
+			bts := btsw.This().(*Layout)
+			bts.Spacing.SetPx(8 * Prefs.DensityMul())
 		})
 	}
 }

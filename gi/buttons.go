@@ -864,7 +864,7 @@ func (bt *Button) ConfigStyles() {
 			bt.Style.Border.Color.Set(ColorScheme.Outline)
 			bt.Style.Border.Width.Set(units.Px(1))
 		case ButtonText:
-			bt.Style.BackgroundColor.SetColor(ColorScheme.Background)
+			bt.Style.BackgroundColor = bt.ParentBackgroundColor()
 			bt.Style.Color = ColorScheme.Primary
 			bt.Style.Padding.SetHoriz(units.Em(0.75 * Prefs.DensityMul()))
 			if !bt.Icon.IsNil() {
