@@ -50,7 +50,7 @@ gopath-update:
 	cd cmd/pi; go get -u ./...
 
 # NOTE: MUST update version number here prior to running 'make release'
-VERS=v1.0.15
+VERS=v1.0.16
 PACKAGE=mat32
 GIT_COMMIT=`git rev-parse --short HEAD`
 VERS_DATE=`date -u +%Y-%m-%d\ %H:%M`
