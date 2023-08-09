@@ -248,8 +248,8 @@ func (ac *Action) ConfigStyles() {
 			ac.Style.Color = ColorScheme.OnSecondaryContainer
 		case ActionParts:
 			ac.Style.Border.Radius.Set()
-			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-			ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+			// ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+			// ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 			ac.Style.BackgroundColor = ac.ParentBackgroundColor()
 		case ActionMenu:
 			ac.Style.Margin.Set()

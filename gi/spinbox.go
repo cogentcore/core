@@ -237,7 +237,6 @@ func (sb *SpinBox) ConfigParts() {
 		tf.SetFlagState(sb.IsInactive(), int(Inactive))
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
-		tf.ClearAct = false
 		if sb.Style.Template != "" {
 			tf.Style.Template = sb.Style.Template + ".text"
 		}

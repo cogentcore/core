@@ -319,18 +319,45 @@ func makeInputs(tv *gi.TabView) {
 	)
 	idesc.Type = gi.LabelBodyLarge
 
-	tfieldf := gi.AddNewTextField(inputs, "tfieldf")
-	tfieldf.Placeholder = "Filled Text Field"
-	tfieldf.Type = gi.TextFieldFilled
+	tff := gi.AddNewTextField(inputs, "tff")
+	tff.Placeholder = "Filled Text Field"
+	tff.Type = gi.TextFieldFilled
 
-	tfieldo := gi.AddNewTextField(inputs, "tfieldo")
-	tfieldo.Placeholder = "Outlined Text Field"
-	tfieldo.Type = gi.TextFieldOutlined
-	tfieldo.AddClearAction()
+	tfo := gi.AddNewTextField(inputs, "tfo")
+	tfo.Placeholder = "Outlined Text Field"
+	tfo.Type = gi.TextFieldOutlined
 
-	tfieldp := gi.AddNewTextField(inputs, "tfieldp")
-	tfieldp.Placeholder = "Password Text Field"
-	tfieldp.SetTypePassword()
+	tffc := gi.AddNewTextField(inputs, "tffc")
+	tffc.Placeholder = "Filled Text Field"
+	tffc.Type = gi.TextFieldFilled
+	tffc.AddClearAction()
+
+	tfoc := gi.AddNewTextField(inputs, "tfoc")
+	tfoc.Placeholder = "Outlined Text Field"
+	tfoc.Type = gi.TextFieldOutlined
+	tfoc.AddClearAction()
+
+	tffcs := gi.AddNewTextField(inputs, "tffcs")
+	tffcs.Placeholder = "Filled Text Field"
+	tffcs.Type = gi.TextFieldFilled
+	tffcs.AddClearAction()
+	tffcs.LeadingIcon = icons.Search
+
+	tfocs := gi.AddNewTextField(inputs, "tfocs")
+	tfocs.Placeholder = "Outlined Text Field"
+	tfocs.Type = gi.TextFieldOutlined
+	tfocs.AddClearAction()
+	tfocs.LeadingIcon = icons.Search
+
+	tffp := gi.AddNewTextField(inputs, "tffp")
+	tffp.Placeholder = "Password Text Field"
+	tffp.Type = gi.TextFieldFilled
+	tffp.SetTypePassword()
+
+	tfop := gi.AddNewTextField(inputs, "tfop")
+	tfop.Placeholder = "Password Text Field"
+	tfop.Type = gi.TextFieldOutlined
+	tfop.SetTypePassword()
 
 	clr := colors.Blue
 

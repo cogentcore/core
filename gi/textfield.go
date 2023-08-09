@@ -63,7 +63,7 @@ type TextField struct {
 	TrailingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal"`
 
 	// add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default
-	ClearAct bool `xml:"clear-act" desc:"add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default"`
+	// ClearAct bool `xml:"clear-act" desc:"add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default"`
 
 	// width of cursor -- set from cursor-width property (inherited)
 	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
@@ -89,8 +89,11 @@ type TextField struct {
 	// maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
 	MaxWidthReq int `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
 
-	// effective size, subtracting the close widget
-	EffSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting the close widget"`
+	// effective size, subtracting any leading and trailing icon space
+	EffSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting any leading and trailing icon space"`
+
+	// effective position with any leading icon space added
+	EffPos mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective position with any leading icon space added"`
 
 	// starting display position in the string
 	StartPos int `copy:"-" json:"-" xml:"-" desc:"starting display position in the string"`
@@ -151,16 +154,13 @@ func AddNewTextField(parent ki.Ki, name string) *TextField {
 	return parent.AddNewChild(TypeTextField, name).(*TextField)
 }
 
-func (tf *TextField) OnInit() {
-	tf.ClearAct = true
-}
-
 func (tf *TextField) CopyFieldsFrom(frm any) {
 	fr := frm.(*TextField)
 	tf.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
 	tf.Txt = fr.Txt
 	tf.Placeholder = fr.Placeholder
-	tf.ClearAct = fr.ClearAct
+	tf.LeadingIcon = fr.LeadingIcon
+	tf.TrailingIcon = fr.TrailingIcon
 	tf.CursorWidth = fr.CursorWidth
 	tf.Edited = fr.Edited
 	tf.MaxWidthReq = fr.MaxWidthReq
@@ -869,7 +869,7 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	st := &tf.Style
 	spc := st.BoxSpace()
-	pos := tf.LayState.Alloc.Pos.Add(spc.Pos())
+	pos := tf.EffPos.Add(spc.Pos())
 	if wincoords {
 		mvp := tf.ViewportSafe()
 		mvp.BBoxMu.RLock()
@@ -1471,26 +1471,26 @@ func (tf *TextField) ConfigParts() {
 		return
 	}
 	config := kit.TypeAndNameList{}
-	var leadIconIdx, trailIconIdx int
+	leadIconIdx, trailIconIdx := -1, -1
 	if !tf.LeadingIcon.IsNil() {
-		config.Add(TypeStretch, "lead-icon-str")
+		// config.Add(TypeStretch, "lead-icon-str")
 		config.Add(TypeAction, "lead-icon")
-		leadIconIdx = 1
+		leadIconIdx = 0
 	}
 	if !tf.TrailingIcon.IsNil() {
 		config.Add(TypeStretch, "trail-icon-str")
 		config.Add(TypeAction, "trail-icon")
-		if leadIconIdx == 0 {
+		if leadIconIdx == -1 {
 			trailIconIdx = 1
 		} else {
-			trailIconIdx = 3
+			trailIconIdx = 2
 		}
 	}
 
 	mods, updt := tf.Parts.ConfigChildren(config)
 	// fmt.Println("configured children")
 	if mods || gist.RebuildDefaultStyles {
-		if leadIconIdx != 0 {
+		if leadIconIdx != -1 {
 			leadIcon := tf.Parts.Child(leadIconIdx).(*Action)
 			leadIcon.Type = ActionParts
 			tf.StylePart(Node2D(leadIcon))
@@ -1501,7 +1501,7 @@ func (tf *TextField) ConfigParts() {
 			leadIcon.ActionSig.Mu.Unlock()
 			tf.LeadingIconSig.Mu.RUnlock()
 		}
-		if trailIconIdx != 0 {
+		if trailIconIdx != -1 {
 			trailIcon := tf.Parts.Child(trailIconIdx).(*Action)
 			trailIcon.Type = ActionParts
 			tf.StylePart(Node2D(trailIcon))
@@ -1562,9 +1562,6 @@ func (tf *TextField) StyleTextField() {
 	}
 	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), ki.Inherit, ki.TypeProps) // get type defaults
 	tf.CursorWidth.ToDots(&tf.Style.UnContext)
-	if pv, ok := tf.PropInherit("clear-act", ki.Inherit, ki.TypeProps); ok {
-		tf.ClearAct, _ = kit.ToBool(pv)
-	}
 	tf.StyMu.Unlock()
 	tf.ConfigParts()
 }
@@ -1618,11 +1615,16 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 	redo := tf.Layout2DChildren(iter)
 	sz := tf.LayState.Alloc.Size
-	if tf.ClearAct && len(*tf.Parts.Children()) == 2 {
-		clr := tf.Parts.Child(1).(*Action)
-		sz.X -= clr.LayState.Alloc.Size.X
+	pos := tf.LayState.Alloc.Pos
+	if lead, ok := tf.Parts.ChildByName("lead-icon", 0).(*Action); ok {
+		pos.X += lead.LayState.Alloc.Size.X
+		sz.X -= lead.LayState.Alloc.Size.X
+	}
+	if trail, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
+		sz.X -= trail.LayState.Alloc.Size.X
 	}
 	tf.EffSize = sz
+	tf.EffPos = pos
 	return redo
 }
 
@@ -1658,7 +1660,7 @@ func (tf *TextField) RenderTextField() {
 	tf.RenderStdBox(st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect()
-	pos := tf.LayState.Alloc.Pos.Add(st.BoxSpace().Pos())
+	pos := tf.EffPos.Add(st.BoxSpace().Pos())
 	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 		prevColor := st.Color
 		st.Color = tf.PlaceholderColor
@@ -1745,6 +1747,12 @@ func (tf *TextField) ConfigStyles() {
 		tf.CursorWidth.SetPx(1)
 		tf.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
 		tf.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
+		if !tf.LeadingIcon.IsNil() {
+			tf.Style.Padding.Left.SetPx(12)
+		}
+		if !tf.TrailingIcon.IsNil() {
+			tf.Style.Padding.Right.SetPx(12)
+		}
 		tf.Style.Text.Align = gist.AlignLeft
 		tf.SelectColor.SetColor(ColorScheme.TertiaryContainer)
 		tf.Style.Color = ColorScheme.OnSurface
@@ -1782,16 +1790,18 @@ func (tf *TextField) ConfigStyles() {
 			tf.Style.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
 		}
 	})
-	// same style function for both actions
-	asf := func(act *WidgetBase) {
-		act.Style.Font.Size.SetPx(20)
-		act.Style.Margin.Set()
-		act.Style.Padding.Set()
-		act.Style.Color = ColorScheme.OnSurfaceVariant
-		act.Style.AlignV = gist.AlignMiddle
-	}
-	tf.Parts.AddChildStyleFunc("lead-icon", 1, StyleFuncParts(tf), asf)
-	tf.Parts.AddChildStyleFunc("trail-icon", 1, StyleFuncParts(tf), asf)
+	tf.Parts.AddChildStyleFunc("lead-icon", 0, StyleFuncParts(tf), func(lead *WidgetBase) {
+		lead.Style.Font.Size.SetPx(20)
+		lead.Style.Margin.Right.SetPx(16 * Prefs.DensityMul())
+		lead.Style.Color = ColorScheme.OnSurfaceVariant
+		lead.Style.AlignV = gist.AlignMiddle
+	})
+	tf.Parts.AddChildStyleFunc("trail-icon", 1, StyleFuncParts(tf), func(trail *WidgetBase) {
+		trail.Style.Font.Size.SetPx(20)
+		trail.Style.Margin.Left.SetPx(16 * Prefs.DensityMul())
+		trail.Style.Color = ColorScheme.OnSurfaceVariant
+		trail.Style.AlignV = gist.AlignMiddle
+	})
 }
 
 // concealDots creates an n-length []rune of bullet characters.

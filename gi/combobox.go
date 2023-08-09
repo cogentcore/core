@@ -168,7 +168,7 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 		tx := cb.Parts.Child(txIdx).(*TextField)
 		tx.SetText(txt)
 		tx.SetCompleter(tx, cb.CompleteMatch, cb.CompleteEdit)
-		tx.ClearAct = false
+		tx.AddClearAction()
 		if _, err := tx.PropTry("__comboInit"); err != nil {
 			cb.StylePart(Node2D(tx))
 			if icIdx >= 0 {
