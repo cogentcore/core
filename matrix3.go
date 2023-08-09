@@ -228,7 +228,7 @@ func (m *Mat3) SetTranspose() {
 // Transpose returns the transpose of this matrix.
 func (m *Mat3) Transpose() *Mat3 {
 	nm := *m
-	nm.Transpose()
+	nm.SetTranspose()
 	return &nm
 }
 

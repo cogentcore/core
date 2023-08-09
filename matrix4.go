@@ -323,7 +323,7 @@ func (m *Mat4) SetTranspose() {
 // Transpose returns the transpose of this matrix.
 func (m *Mat4) Transpose() *Mat4 {
 	nm := *m
-	nm.Transpose()
+	nm.SetTranspose()
 	return &nm
 }
 
