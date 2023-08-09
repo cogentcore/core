@@ -250,7 +250,7 @@ func (ac *Action) ConfigStyles() {
 			ac.Style.Border.Radius.Set()
 			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-			ac.Style.BackgroundColor.SetColor(ColorScheme.Background)
+			ac.Style.BackgroundColor = ac.ParentBackgroundColor()
 		case ActionMenu:
 			ac.Style.Margin.Set()
 			ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))

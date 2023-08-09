@@ -50,11 +50,17 @@ type TextField struct {
 	// text that is displayed when the field is empty, in a lower-contrast manner
 	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 
-	// if specified, an action will be added at tbe start of the text field with this icon; its signal is exposed through LeadingIconSig
-	LeadingIcon icons.Icon `desc:"if specified, an action will be added at tbe start of the text field with this icon; its signal is exposed through LeadingIconSig"`
+	// if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig
+	LeadingIcon icons.Icon `desc:"if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig"`
 
 	// [view: -] if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal
 	LeadingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal"`
+
+	// if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig
+	TrailingIcon icons.Icon `desc:"if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig"`
+
+	// [view: -] if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal
+	TrailingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal"`
 
 	// add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default
 	ClearAct bool `xml:"clear-act" desc:"add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default"`
@@ -284,6 +290,41 @@ func (tf *TextField) SetText(txt string) {
 	}
 	tf.Txt = txt
 	tf.Revert()
+}
+
+// AddClearAction adds a trailing icon action at the end
+// of the textfield that clears the text in the textfield when pressed
+func (tf *TextField) AddClearAction() {
+	tf.TrailingIcon = icons.Close
+	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+		tff := recv.Embed(TypeTextField).(*TextField)
+		if tff != nil {
+			tff.Clear()
+		}
+	})
+}
+
+// SetTypePassword enables [TextField.NoEcho] and adds a trailing
+// icon action at the end of the textfield that toggles [TextField.NoEcho]
+func (tf *TextField) SetTypePassword() {
+	tf.NoEcho = true
+	tf.TrailingIcon = icons.Visibility
+	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+		tff := recv.Embed(TypeTextField).(*TextField)
+		if tff != nil {
+			updt := tff.UpdateStart()
+			tff.NoEcho = !tff.NoEcho
+			if tff.NoEcho {
+				tf.TrailingIcon = icons.Visibility
+			} else {
+				tf.TrailingIcon = icons.VisibilityOff
+			}
+			if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
+				icon.SetIcon(tf.TrailingIcon)
+			}
+			tff.UpdateEnd(updt)
+		}
+	})
 }
 
 // EditDone completes editing and copies the active edited text to the text --
@@ -600,6 +641,9 @@ func (tf *TextField) SelectUpdate() {
 
 // Cut cuts any selected text and adds it to the clipboard
 func (tf *TextField) Cut() {
+	if tf.NoEcho {
+		return
+	}
 	wupdt := tf.TopUpdateStart()
 	defer tf.TopUpdateEnd(wupdt)
 	cut := tf.DeleteSelection()
@@ -642,6 +686,9 @@ func (tf *TextField) MimeData(md *mimedata.Mimes) {
 // Satisfies Clipper interface -- can be extended in subtypes.
 // optionally resetting the current selection
 func (tf *TextField) Copy(reset bool) {
+	if tf.NoEcho {
+		return
+	}
 	wupdt := tf.TopUpdateStart()
 	defer tf.TopUpdateEnd(wupdt)
 	tf.SelectUpdate()
@@ -699,7 +746,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 			tff := recv.Embed(TypeTextField).(*TextField)
 			tff.This().(Clipper).Copy(true)
 		})
-	ac.SetActiveState(tf.HasSelection())
+	ac.SetActiveState(!tf.NoEcho && tf.HasSelection())
 	if !tf.IsInactive() {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
@@ -708,7 +755,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 				tff := recv.Embed(TypeTextField).(*TextField)
 				tff.This().(Clipper).Cut()
 			})
-		ac.SetActiveState(tf.HasSelection())
+		ac.SetActiveState(!tf.NoEcho && tf.HasSelection())
 		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
 			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tff := recv.Embed(TypeTextField).(*TextField)
@@ -1419,26 +1466,52 @@ func (tf *TextField) TextFieldEvents() {
 func (tf *TextField) ConfigParts() {
 	// fmt.Println("tf config parts")
 	tf.Parts.Lay = LayoutHoriz
-	if !tf.ClearAct || tf.IsInactive() {
+	if tf.IsInactive() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
 		tf.Parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
 	config := kit.TypeAndNameList{}
-	config.Add(TypeStretch, "clr-str")
-	config.Add(TypeAction, "clear")
+	var leadIconIdx, trailIconIdx int
+	if !tf.LeadingIcon.IsNil() {
+		config.Add(TypeStretch, "lead-icon-str")
+		config.Add(TypeAction, "lead-icon")
+		leadIconIdx = 1
+	}
+	if !tf.TrailingIcon.IsNil() {
+		config.Add(TypeStretch, "trail-icon-str")
+		config.Add(TypeAction, "trail-icon")
+		if leadIconIdx == 0 {
+			trailIconIdx = 1
+		} else {
+			trailIconIdx = 3
+		}
+	}
+
 	mods, updt := tf.Parts.ConfigChildren(config)
 	// fmt.Println("configured children")
 	if mods || gist.RebuildDefaultStyles {
-		clr := tf.Parts.Child(1).(*Action)
-		tf.StylePart(Node2D(clr))
-		clr.SetIcon(icons.Close)
-		clr.SetProp("no-focus", true)
-		clr.ActionSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tff := recv.Embed(TypeTextField).(*TextField)
-			if tff != nil {
-				tff.Clear()
-			}
-		})
+		if leadIconIdx != 0 {
+			leadIcon := tf.Parts.Child(leadIconIdx).(*Action)
+			leadIcon.Type = ActionParts
+			tf.StylePart(Node2D(leadIcon))
+			leadIcon.SetIcon(tf.LeadingIcon)
+			tf.LeadingIconSig.Mu.RLock()
+			leadIcon.ActionSig.Mu.Lock()
+			leadIcon.ActionSig.Cons = tf.LeadingIconSig.Cons
+			leadIcon.ActionSig.Mu.Unlock()
+			tf.LeadingIconSig.Mu.RUnlock()
+		}
+		if trailIconIdx != 0 {
+			trailIcon := tf.Parts.Child(trailIconIdx).(*Action)
+			trailIcon.Type = ActionParts
+			tf.StylePart(Node2D(trailIcon))
+			trailIcon.SetIcon(tf.TrailingIcon)
+			tf.TrailingIconSig.Mu.RLock()
+			trailIcon.ActionSig.Mu.Lock()
+			trailIcon.ActionSig.Cons = tf.TrailingIconSig.Cons
+			trailIcon.ActionSig.Mu.Unlock()
+			tf.TrailingIconSig.Mu.RUnlock()
+		}
 		tf.UpdateEnd(updt)
 	}
 }
@@ -1709,14 +1782,16 @@ func (tf *TextField) ConfigStyles() {
 			tf.Style.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
 		}
 	})
-	tf.Parts.AddChildStyleFunc("clear", 1, StyleFuncParts(tf), func(clr *WidgetBase) {
-		clr.Style.Width.SetEx(0.5)
-		clr.Style.Height.SetEx(0.5)
-		clr.Style.Margin.Set()
-		clr.Style.Padding.Set()
-		clr.Style.AlignV = gist.AlignMiddle
-		clr.Style.BackgroundColor = tf.Style.BackgroundColor
-	})
+	// same style function for both actions
+	asf := func(act *WidgetBase) {
+		act.Style.Font.Size.SetPx(20)
+		act.Style.Margin.Set()
+		act.Style.Padding.Set()
+		act.Style.Color = ColorScheme.OnSurfaceVariant
+		act.Style.AlignV = gist.AlignMiddle
+	}
+	tf.Parts.AddChildStyleFunc("lead-icon", 1, StyleFuncParts(tf), asf)
+	tf.Parts.AddChildStyleFunc("trail-icon", 1, StyleFuncParts(tf), asf)
 }
 
 // concealDots creates an n-length []rune of bullet characters.

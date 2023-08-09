@@ -326,10 +326,11 @@ func makeInputs(tv *gi.TabView) {
 	tfieldo := gi.AddNewTextField(inputs, "tfieldo")
 	tfieldo.Placeholder = "Outlined Text Field"
 	tfieldo.Type = gi.TextFieldOutlined
+	tfieldo.AddClearAction()
 
 	tfieldp := gi.AddNewTextField(inputs, "tfieldp")
 	tfieldp.Placeholder = "Password Text Field"
-	tfieldp.NoEcho = true
+	tfieldp.SetTypePassword()
 
 	clr := colors.Blue
 

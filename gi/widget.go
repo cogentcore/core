@@ -191,11 +191,12 @@ func (wb *WidgetBase) ParentWidget() *WidgetBase {
 // of the widget. It returns an error if no such parent
 // is found; see [ParentWidget] for a version without an error.
 func (wb *WidgetBase) ParentWidgetTry() (*WidgetBase, error) {
-	par, ok := wb.ParentByType(TypeWidgetBase, ki.Embeds).(*WidgetBase)
-	if !ok {
+	par := wb.ParentByType(TypeWidgetBase, ki.Embeds)
+	if par == nil {
 		return nil, fmt.Errorf("(*gi.WidgetBase).ParentWidgetTry: widget %v has no parent widget base", wb)
 	}
-	return par, nil
+	pwb := par.Embed(TypeWidgetBase).(*WidgetBase)
+	return pwb, nil
 }
 
 // ParentWidgetIf returns the nearest widget parent
@@ -212,14 +213,17 @@ func (wb *WidgetBase) ParentWidgetIf(fun func(wb *WidgetBase) bool) *WidgetBase 
 // It returns an error if no such parent is found; see
 // [ParentWidgetIf] for a version without an error.
 func (wb *WidgetBase) ParentWidgetIfTry(fun func(wb *WidgetBase) bool) (*WidgetBase, error) {
+	cur := wb
 	for {
-		par, ok := wb.ParentByType(TypeWidgetBase, ki.Embeds).(*WidgetBase)
-		if !ok {
+		par := cur.ParentByType(TypeWidgetBase, ki.Embeds)
+		if par == nil {
 			return nil, fmt.Errorf("(*gi.WidgetBase).ParentWidgetIfTry: widget %v has no parent widget base", wb)
 		}
-		if fun(par) {
-			return par, nil
+		pwb := par.Embed(TypeWidgetBase).(*WidgetBase)
+		if fun(pwb) {
+			return pwb, nil
 		}
+		cur = pwb
 	}
 }
 
@@ -229,15 +233,15 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(wb *WidgetBase) bool) (*WidgetB
 // it returns a new [gist.ColorSpec] with a solid
 // color of [ColorScheme.Background].
 func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
-	par := wb.ParentWidgetIf(func(wb *WidgetBase) bool {
-		return !wb.Style.BackgroundColor.IsNil()
+	par := wb.ParentWidgetIf(func(p *WidgetBase) bool {
+		return !p.Style.BackgroundColor.IsNil()
 	})
 	if par == nil {
 		cs := gist.ColorSpec{}
 		cs.SetColor(ColorScheme.Background)
 		return cs
 	}
-	return wb.Style.BackgroundColor
+	return par.Style.BackgroundColor
 }
 
 // TODO: use these instead of those on NodeBase2D
