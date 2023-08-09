@@ -56,6 +56,7 @@ GIT_COMMIT=`git rev-parse --short HEAD`
 VERS_DATE=`date -u +%Y-%m-%d\ %H:%M`
 VERS_FILE=version.go
 
+#
 release: export GO111MODULE = on
 release:
 	/bin/rm -f $(VERS_FILE)
