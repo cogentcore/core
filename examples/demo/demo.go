@@ -359,6 +359,12 @@ func makeInputs(tv *gi.TabView) {
 	tfop.Type = gi.TextFieldOutlined
 	tfop.SetTypePassword()
 
+	sbox := gi.AddNewSpinBox(inputs, "sbox")
+	sbox.Value = 2
+	sbox.Step = 0.5
+	sbox.SetMin(-5)
+	sbox.SetMax(10)
+
 	clr := colors.Blue
 
 	colorvv := giv.ToValueView(&clr, "")
@@ -392,9 +398,6 @@ func makeInputs(tv *gi.TabView) {
 	slideryi.Dim = mat32.Y
 	slideryi.Value = 0.2
 	slideryi.SetInactive()
-
-	sbox := gi.AddNewSpinBox(inputs, "sbox")
-	sbox.Value = 0.5
 
 	cbox := gi.AddNewComboBox(inputs, "cbox")
 	cbox.Text = "Select an option"

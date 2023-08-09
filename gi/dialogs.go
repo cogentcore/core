@@ -577,7 +577,6 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	AddNewLabel(nrow, "n-label", "Number:  ")
 
 	nsb := AddNewSpinBox(nrow, "n-field")
-	nsb.Defaults()
 	nsb.SetMin(1)
 	nsb.Value = 1
 	nsb.Step = 1

@@ -586,7 +586,6 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
 	sb.SetInactiveState(vv.This().(ValueView).IsInactive())
-	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	sb.Parts.AddChildStyleFunc("textfield", 0, gi.StyleFuncParts(vv), func(tf *gi.WidgetBase) {
@@ -660,7 +659,6 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
 	sb.SetInactiveState(vv.This().(ValueView).IsInactive())
-	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {

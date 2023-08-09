@@ -98,7 +98,7 @@ var SpinBoxProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-func (sb *SpinBox) Defaults() { // todo: should just get these from props
+func (sb *SpinBox) OnInit() {
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0
@@ -134,9 +134,6 @@ func (sb *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32)
 func (sb *SpinBox) SetValue(val float32) {
 	updt := sb.UpdateStart()
 	defer sb.UpdateEnd(updt)
-	if sb.Prec == 0 {
-		sb.Defaults()
-	}
 	sb.Value = val
 	if sb.HasMax {
 		sb.Value = mat32.Min(sb.Value, sb.Max)
@@ -433,9 +430,6 @@ func (sb *SpinBox) StyleSpinBox() {
 	sb.StyMu.Lock()
 	defer sb.StyMu.Unlock()
 
-	if sb.Step == 0 {
-		sb.Defaults()
-	}
 	hasTempl, saveTempl := sb.Style.FromTemplate()
 	if !hasTempl || saveTempl {
 		sb.Style2DWidget()

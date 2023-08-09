@@ -370,9 +370,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sprw := gi.AddNewLayout(evlay, "speed-lay", gi.LayoutHoriz)
 	gi.AddNewLabel(sprw, "speed-lbl", "Speed: ")
 	sb := gi.AddNewSpinBox(sprw, "anim-speed")
-	sb.Defaults()
-	sb.HasMin = true
-	sb.Min = 0.01
+	sb.SetMin(0.01)
 	sb.Step = 0.01
 	sb.SetValue(anim.Speed)
 	sb.Tooltip = "determines the speed of rotation (step size)"
