@@ -86,11 +86,11 @@ type TextField struct {
 	// maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
 	MaxWidthReq int `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
 
-	// effective size, subtracting any leading and trailing icon space
-	EffSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting any leading and trailing icon space"`
-
 	// effective position with any leading icon space added
 	EffPos mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective position with any leading icon space added"`
+
+	// effective size, subtracting any leading and trailing icon space
+	EffSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting any leading and trailing icon space"`
 
 	// starting display position in the string
 	StartPos int `copy:"-" json:"-" xml:"-" desc:"starting display position in the string"`
@@ -888,7 +888,7 @@ var TextFieldBlinker *time.Ticker
 var BlinkingTextField *TextField
 
 // TextFieldSpriteName is the name of the window sprite used for the cursor
-var TextFieldSpriteName = "gi.TextField.Cursor"
+const TextFieldSpriteName = "gi.TextField.Cursor"
 
 // TextFieldBlink is function that blinks text field cursor
 func TextFieldBlink() {
@@ -1611,6 +1611,14 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
 	}
 	redo := tf.Layout2DChildren(iter)
+	tf.SetEffPosAndSize()
+	return redo
+}
+
+// SetEffPosAndSize sets the effective position and size of
+// the textfield based on its base position and size
+// and its icons or lack thereof
+func (tf *TextField) SetEffPosAndSize() {
 	sz := tf.LayState.Alloc.Size
 	pos := tf.LayState.Alloc.Pos
 	if lead, ok := tf.Parts.ChildByName("lead-icon", 0).(*Action); ok {
@@ -1622,12 +1630,13 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 	tf.EffSize = sz
 	tf.EffPos = pos
-	return redo
 }
 
 func (tf *TextField) RenderTextField() {
 	rs, _, _ := tf.RenderLock()
 	defer tf.RenderUnlock(rs)
+
+	tf.SetEffPosAndSize()
 
 	tf.AutoScroll() // inits paint with our style
 	prevState := tf.State
