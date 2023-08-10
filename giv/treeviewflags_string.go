@@ -11,11 +11,11 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[TreeViewFlagClosed-24]
-	_ = x[TreeViewFlagChanged-25]
-	_ = x[TreeViewFlagNoTemplate-26]
-	_ = x[TreeViewFlagUpdtRoot-27]
-	_ = x[TreeViewFlagsN-28]
+	_ = x[TreeViewFlagClosed-26]
+	_ = x[TreeViewFlagChanged-27]
+	_ = x[TreeViewFlagNoTemplate-28]
+	_ = x[TreeViewFlagUpdtRoot-29]
+	_ = x[TreeViewFlagsN-30]
 }
 
 const _TreeViewFlags_name = "TreeViewFlagClosedTreeViewFlagChangedTreeViewFlagNoTemplateTreeViewFlagUpdtRootTreeViewFlagsN"
@@ -23,9 +23,9 @@ const _TreeViewFlags_name = "TreeViewFlagClosedTreeViewFlagChangedTreeViewFlagNo
 var _TreeViewFlags_index = [...]uint8{0, 18, 37, 59, 79, 93}
 
 func (i TreeViewFlags) String() string {
-	i -= 24
+	i -= 26
 	if i < 0 || i >= TreeViewFlags(len(_TreeViewFlags_index)-1) {
-		return "TreeViewFlags(" + strconv.FormatInt(int64(i+24), 10) + ")"
+		return "TreeViewFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
 	}
 	return _TreeViewFlags_name[_TreeViewFlags_index[i]:_TreeViewFlags_index[i+1]]
 }
@@ -33,18 +33,18 @@ func (i TreeViewFlags) String() string {
 func StringToTreeViewFlags(s string) (TreeViewFlags, error) {
 	for i := 0; i < len(_TreeViewFlags_index)-1; i++ {
 		if s == _TreeViewFlags_name[_TreeViewFlags_index[i]:_TreeViewFlags_index[i+1]] {
-			return TreeViewFlags(i + 24), nil
+			return TreeViewFlags(i + 26), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: TreeViewFlags")
 }
 
 var _TreeViewFlags_descMap = map[TreeViewFlags]string{
-	24: `TreeViewFlagClosed means node is toggled closed (children not visible)`,
-	25: `TreeViewFlagChanged is updated on the root node whenever a gui edit is made through the tree view on the tree -- this does not track any other changes that might have occurred in the tree itself. Also emits a TreeViewChanged signal on the root node.`,
-	26: `TreeViewFlagNoTemplate -- this node is not using a style template -- should be restyled on any full re-render change`,
-	27: `TreeViewFlagUpdtRoot -- for any update signal that comes from the source root node, do a full update of the treeview. This increases responsiveness of the updating and makes it easy to trigger a full update by updating the root node, but can be slower when not needed`,
-	28: ``,
+	26: `TreeViewFlagClosed means node is toggled closed (children not visible)`,
+	27: `TreeViewFlagChanged is updated on the root node whenever a gui edit is made through the tree view on the tree -- this does not track any other changes that might have occurred in the tree itself. Also emits a TreeViewChanged signal on the root node.`,
+	28: `TreeViewFlagNoTemplate -- this node is not using a style template -- should be restyled on any full re-render change`,
+	29: `TreeViewFlagUpdtRoot -- for any update signal that comes from the source root node, do a full update of the treeview. This increases responsiveness of the updating and makes it easy to trigger a full update by updating the root node, but can be slower when not needed`,
+	30: ``,
 }
 
 func (i TreeViewFlags) Desc() string {

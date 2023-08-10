@@ -130,13 +130,20 @@ const (
 	// Disabled disables all interaction with the user or other nodes;
 	// nodes should indicate this disabled state in an
 	// appropriate way, and each node should interpret events appropriately
-	// based on this state (select and context menu events should still be
-	// generated)
+	// based on this state
 	Disabled
 
 	// Selected indicates that this node has been selected by the user --
 	// widely supported across different nodes
 	Selected
+
+	// Hovered indicates that the node is being hovered over by a mouse
+	// cursor or has been long-pressed on mobile
+	Hovered
+
+	// Active indicates that this node is currently being interacted
+	// with (typically pressed down) by the user
+	Active
 
 	// MouseHasEntered indicates that the MouseFocusEvent Enter was previously
 	// registered on this node
@@ -178,6 +185,34 @@ func (nb *NodeBase) HasFocus() bool {
 // SetFocusState sets current HasFocus state
 func (nb *NodeBase) SetFocusState(focus bool) {
 	nb.SetFlagState(focus, int(HasFocus))
+}
+
+// CanFocusWithin returns whether the current node or any
+// of its children can accept keyboard focus
+func (nb *NodeBase) CanFocusWithin() bool {
+	return nb.HasFlagWithin(int(CanFocus))
+}
+
+// HasFocusWithin returns whether the current node or any
+// of its children are flagged as having keyboard focus
+func (nb *NodeBase) HasFocusWithin() bool {
+	return nb.HasFlagWithin(int(HasFocus))
+}
+
+// HasFlagWithin returns whether the current node or any
+// of its children have the given flag.
+func (nb *NodeBase) HasFlagWithin(flag int) bool {
+	got := false
+	nb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, data any) bool {
+		if cnb, ok := k.Embed(TypeNodeBase).(*NodeBase); ok {
+			if cnb.HasFlag(flag) {
+				got = true
+				return ki.Break
+			}
+		}
+		return ki.Continue
+	})
+	return got
 }
 
 // IsDragging tests if the current node is currently flagged as receiving
@@ -275,24 +310,64 @@ func (nb *NodeBase) SetCanFocus() {
 	nb.SetFlag(int(CanFocus))
 }
 
-// IsSelected tests if this node is flagged as Selected
+// IsSelected tests if this node is flagged as [Selected]
 func (nb *NodeBase) IsSelected() bool {
 	return nb.HasFlag(int(Selected))
 }
 
-// SetSelected sets the node as selected
+// SetSelected sets the node as [Selected]
 func (nb *NodeBase) SetSelected() {
 	nb.SetFlag(int(Selected))
 }
 
-// ClearSelected sets the node as not selected
+// ClearSelected sets the node as not [Selected]
 func (nb *NodeBase) ClearSelected() {
 	nb.ClearFlag(int(Selected))
 }
 
-// SetSelectedState set flag as selected or not based on sel arg
+// SetSelectedState sets the node as [Selected] or not based on sel arg
 func (nb *NodeBase) SetSelectedState(sel bool) {
 	nb.SetFlagState(sel, int(Selected))
+}
+
+// IsHovered returns whether this node is flagged as [Hovered]
+func (nb *NodeBase) IsHovered() bool {
+	return nb.HasFlag(int(Hovered))
+}
+
+// SetHovered sets the node as [Hovered]
+func (nb *NodeBase) SetHovered() {
+	nb.SetFlag(int(Hovered))
+}
+
+// ClearHovered sets the node as not [Hovered]
+func (nb *NodeBase) ClearHovered() {
+	nb.ClearFlag(int(Hovered))
+}
+
+// SetHoveredState sets the node as [Hovered] or not based on hov arg
+func (nb *NodeBase) SetHoveredState(hov bool) {
+	nb.SetFlagState(hov, int(Hovered))
+}
+
+// IsActive returns whether this node is flagged as [Active]
+func (nb *NodeBase) IsActive() bool {
+	return nb.HasFlag(int(Active))
+}
+
+// SetActive sets the node as [Active]
+func (nb *NodeBase) SetActive() {
+	nb.SetFlag(int(Active))
+}
+
+// ClearActive sets the node as not [Active]
+func (nb *NodeBase) ClearActive() {
+	nb.ClearFlag(int(Active))
+}
+
+// SetActiveState sets the node as [Active] or not based on act arg
+func (nb *NodeBase) SetActiveState(act bool) {
+	nb.SetFlagState(act, int(Active))
 }
 
 // NeedsFullReRender checks if node has said it needs full re-render

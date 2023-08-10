@@ -20,17 +20,19 @@ func _() {
 	_ = x[Invisible-17]
 	_ = x[Disabled-18]
 	_ = x[Selected-19]
-	_ = x[MouseHasEntered-20]
-	_ = x[DNDHasEntered-21]
-	_ = x[NodeDragging-22]
-	_ = x[InstaDrag-23]
-	_ = x[NodeFlagsN-24]
-	_ = x[TextFieldFocusActive-24]
+	_ = x[Hovered-20]
+	_ = x[Active-21]
+	_ = x[MouseHasEntered-22]
+	_ = x[DNDHasEntered-23]
+	_ = x[NodeDragging-24]
+	_ = x[InstaDrag-25]
+	_ = x[NodeFlagsN-26]
+	_ = x[TextFieldFocusActive-26]
 }
 
-const _NodeFlags_name = "NoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInvisibleInactiveSelectedMouseHasEnteredDNDHasEnteredNodeDraggingInstaDragNodeFlagsN"
+const _NodeFlags_name = "NoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInvisibleDisabledSelectedHoveredActiveMouseHasEnteredDNDHasEnteredNodeDraggingInstaDragNodeFlagsN"
 
-var _NodeFlags_index = [...]uint8{0, 8, 23, 31, 39, 51, 65, 74, 82, 90, 105, 118, 130, 139, 149}
+var _NodeFlags_index = [...]uint8{0, 8, 23, 31, 39, 51, 65, 74, 82, 90, 97, 103, 118, 131, 143, 152, 162}
 
 func (i NodeFlags) String() string {
 	i -= 11
@@ -57,13 +59,15 @@ var _NodeFlags_descMap = map[NodeFlags]string{
 	15: `FullReRender indicates that a full re-render is required due to nature of update event -- otherwise default is local re-render -- used internally for nodes to determine what to do on the ReRender step`,
 	16: `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
 	17: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
-	18: `Inactive disables interaction with widgets or other nodes (i.e., they are read-only) -- they should indicate this inactive state in an appropriate way, and each node should interpret events appropriately based on this state (select and context menu events should still be generated)`,
+	18: `Disabled disables all interaction with the user or other nodes; nodes should indicate this disabled state in an appropriate way, and each node should interpret events appropriately based on this state`,
 	19: `Selected indicates that this node has been selected by the user -- widely supported across different nodes`,
-	20: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
-	21: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
-	22: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
-	23: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
-	24: `can extend node flags from here`,
+	20: `Hovered indicates that the node is being hovered over by a mouse cursor or has been long-pressed on mobile`,
+	21: `Active indicates that this node is currently being interacted with (typically pressed down) by the user`,
+	22: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
+	23: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
+	24: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
+	25: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
+	26: `can extend node flags from here`,
 }
 
 func (i NodeFlags) Desc() string {

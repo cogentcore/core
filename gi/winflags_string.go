@@ -11,18 +11,18 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[WinFlagHasGeomPrefs-24]
-	_ = x[WinFlagUpdating-25]
-	_ = x[WinFlagIsClosing-26]
-	_ = x[WinFlagIsResizing-27]
-	_ = x[WinFlagGotPaint-28]
-	_ = x[WinFlagGotFocus-29]
-	_ = x[WinFlagSentShow-30]
-	_ = x[WinFlagGoLoop-31]
-	_ = x[WinFlagStopEventLoop-32]
-	_ = x[WinFlagDoFullRender-33]
-	_ = x[WinFlagFocusActive-34]
-	_ = x[WinFlagsN-35]
+	_ = x[WinFlagHasGeomPrefs-26]
+	_ = x[WinFlagUpdating-27]
+	_ = x[WinFlagIsClosing-28]
+	_ = x[WinFlagIsResizing-29]
+	_ = x[WinFlagGotPaint-30]
+	_ = x[WinFlagGotFocus-31]
+	_ = x[WinFlagSentShow-32]
+	_ = x[WinFlagGoLoop-33]
+	_ = x[WinFlagStopEventLoop-34]
+	_ = x[WinFlagDoFullRender-35]
+	_ = x[WinFlagFocusActive-36]
+	_ = x[WinFlagsN-37]
 }
 
 const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFlagIsResizingWinFlagGotPaintWinFlagGotFocusWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagFocusActiveWinFlagsN"
@@ -30,9 +30,9 @@ const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFla
 var _WinFlags_index = [...]uint8{0, 19, 34, 50, 67, 82, 97, 112, 125, 145, 164, 182, 191}
 
 func (i WinFlags) String() string {
-	i -= 24
+	i -= 26
 	if i < 0 || i >= WinFlags(len(_WinFlags_index)-1) {
-		return "WinFlags(" + strconv.FormatInt(int64(i+24), 10) + ")"
+		return "WinFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
 	}
 	return _WinFlags_name[_WinFlags_index[i]:_WinFlags_index[i+1]]
 }
@@ -40,25 +40,25 @@ func (i WinFlags) String() string {
 func StringToWinFlags(s string) (WinFlags, error) {
 	for i := 0; i < len(_WinFlags_index)-1; i++ {
 		if s == _WinFlags_name[_WinFlags_index[i]:_WinFlags_index[i+1]] {
-			return WinFlags(i + 24), nil
+			return WinFlags(i + 26), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: WinFlags")
 }
 
 var _WinFlags_descMap = map[WinFlags]string{
-	24: `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
-	25: `WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail`,
-	26: `WinFlagIsClosing is atomic flag indicating window is closing`,
-	27: `WinFlagIsResizing is atomic flag indicating window is resizing`,
-	28: `WinFlagGotPaint have we received our first paint event yet? ignore other window events before this point`,
-	29: `WinFlagGotFocus indicates that have we received OSWin focus`,
-	30: `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
-	31: `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
-	32: `WinFlagStopEventLoop is set when event loop stop is requested`,
-	33: `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
-	34: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
-	35: ``,
+	26: `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
+	27: `WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail`,
+	28: `WinFlagIsClosing is atomic flag indicating window is closing`,
+	29: `WinFlagIsResizing is atomic flag indicating window is resizing`,
+	30: `WinFlagGotPaint have we received our first paint event yet? ignore other window events before this point`,
+	31: `WinFlagGotFocus indicates that have we received OSWin focus`,
+	32: `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
+	33: `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
+	34: `WinFlagStopEventLoop is set when event loop stop is requested`,
+	35: `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
+	36: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
+	37: ``,
 }
 
 func (i WinFlags) Desc() string {

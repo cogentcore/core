@@ -11,10 +11,10 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[ButtonFlagCheckable-24]
-	_ = x[ButtonFlagChecked-25]
-	_ = x[ButtonFlagMenu-26]
-	_ = x[ButtonFlagsN-27]
+	_ = x[ButtonFlagCheckable-26]
+	_ = x[ButtonFlagChecked-27]
+	_ = x[ButtonFlagMenu-28]
+	_ = x[ButtonFlagsN-29]
 }
 
 const _ButtonFlags_name = "ButtonFlagCheckableButtonFlagCheckedButtonFlagMenuButtonFlagsN"
@@ -22,9 +22,9 @@ const _ButtonFlags_name = "ButtonFlagCheckableButtonFlagCheckedButtonFlagMenuBut
 var _ButtonFlags_index = [...]uint8{0, 19, 36, 50, 62}
 
 func (i ButtonFlags) String() string {
-	i -= 24
+	i -= 26
 	if i < 0 || i >= ButtonFlags(len(_ButtonFlags_index)-1) {
-		return "ButtonFlags(" + strconv.FormatInt(int64(i+24), 10) + ")"
+		return "ButtonFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
 	}
 	return _ButtonFlags_name[_ButtonFlags_index[i]:_ButtonFlags_index[i+1]]
 }
@@ -32,17 +32,17 @@ func (i ButtonFlags) String() string {
 func StringToButtonFlags(s string) (ButtonFlags, error) {
 	for i := 0; i < len(_ButtonFlags_index)-1; i++ {
 		if s == _ButtonFlags_name[_ButtonFlags_index[i]:_ButtonFlags_index[i+1]] {
-			return ButtonFlags(i + 24), nil
+			return ButtonFlags(i + 26), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: ButtonFlags")
 }
 
 var _ButtonFlags_descMap = map[ButtonFlags]string{
-	24: `button is checkable -- enables display of check control`,
-	25: `button is checked`,
-	26: `Menu flag means that the button is a menu item`,
-	27: ``,
+	26: `button is checkable -- enables display of check control`,
+	27: `button is checked`,
+	28: `Menu flag means that the button is a menu item`,
+	29: ``,
 }
 
 func (i ButtonFlags) Desc() string {

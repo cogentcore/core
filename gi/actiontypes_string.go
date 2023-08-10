@@ -41,7 +41,7 @@ func (i *ActionTypes) FromString(s string) error {
 }
 
 var _ActionTypes_descMap = map[ActionTypes]string{
-	0: `ActionStandalone is a default, standalone action that is not part of a menu, menubar, or toolbar`,
+	0: `ActionStandalone is a default, standalone action that is not part of a menu, menubar, toolbar, or other element`,
 	1: `ActionParts is an action that is part of another element (like a clear button in a textfield)`,
 	2: `ActionMenu is an action contained within a popup menu`,
 	3: `ActionMenuBar is an action contained within a menu bar`,

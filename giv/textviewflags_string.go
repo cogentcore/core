@@ -11,14 +11,14 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[TextViewNeedsRefresh-24]
-	_ = x[TextViewInReLayout-25]
-	_ = x[TextViewRenderScrolls-26]
-	_ = x[TextViewFocusActive-27]
-	_ = x[TextViewHasLineNos-28]
-	_ = x[TextViewLastWasTabAI-29]
-	_ = x[TextViewLastWasUndo-30]
-	_ = x[TextViewFlagsN-31]
+	_ = x[TextViewNeedsRefresh-26]
+	_ = x[TextViewInReLayout-27]
+	_ = x[TextViewRenderScrolls-28]
+	_ = x[TextViewFocusActive-29]
+	_ = x[TextViewHasLineNos-30]
+	_ = x[TextViewLastWasTabAI-31]
+	_ = x[TextViewLastWasUndo-32]
+	_ = x[TextViewFlagsN-33]
 }
 
 const _TextViewFlags_name = "TextViewNeedsRefreshTextViewInReLayoutTextViewRenderScrollsTextViewFocusActiveTextViewHasLineNosTextViewLastWasTabAITextViewLastWasUndoTextViewFlagsN"
@@ -26,9 +26,9 @@ const _TextViewFlags_name = "TextViewNeedsRefreshTextViewInReLayoutTextViewRende
 var _TextViewFlags_index = [...]uint8{0, 20, 38, 59, 78, 96, 116, 135, 149}
 
 func (i TextViewFlags) String() string {
-	i -= 24
+	i -= 26
 	if i < 0 || i >= TextViewFlags(len(_TextViewFlags_index)-1) {
-		return "TextViewFlags(" + strconv.FormatInt(int64(i+24), 10) + ")"
+		return "TextViewFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
 	}
 	return _TextViewFlags_name[_TextViewFlags_index[i]:_TextViewFlags_index[i+1]]
 }
@@ -36,21 +36,21 @@ func (i TextViewFlags) String() string {
 func StringToTextViewFlags(s string) (TextViewFlags, error) {
 	for i := 0; i < len(_TextViewFlags_index)-1; i++ {
 		if s == _TextViewFlags_name[_TextViewFlags_index[i]:_TextViewFlags_index[i+1]] {
-			return TextViewFlags(i + 24), nil
+			return TextViewFlags(i + 26), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: TextViewFlags")
 }
 
 var _TextViewFlags_descMap = map[TextViewFlags]string{
-	24: `TextViewNeedsRefresh indicates when refresh is required`,
-	25: `TextViewInReLayout indicates that we are currently resizing ourselves via parent layout`,
-	26: `TextViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender`,
-	27: `TextViewFocusActive is set if the keyboard focus is active -- when we lose active focus we apply changes`,
-	28: `TextViewHasLineNos indicates that this view has line numbers (per TextBuf option)`,
-	29: `TextViewLastWasTabAI indicates that last key was a Tab auto-indent`,
-	30: `TextViewLastWasUndo indicates that last key was an undo`,
-	31: ``,
+	26: `TextViewNeedsRefresh indicates when refresh is required`,
+	27: `TextViewInReLayout indicates that we are currently resizing ourselves via parent layout`,
+	28: `TextViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender`,
+	29: `TextViewFocusActive is set if the keyboard focus is active -- when we lose active focus we apply changes`,
+	30: `TextViewHasLineNos indicates that this view has line numbers (per TextBuf option)`,
+	31: `TextViewLastWasTabAI indicates that last key was a Tab auto-indent`,
+	32: `TextViewLastWasUndo indicates that last key was an undo`,
+	33: ``,
 }
 
 func (i TextViewFlags) Desc() string {

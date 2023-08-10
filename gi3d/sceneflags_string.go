@@ -11,8 +11,8 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[Rendering-24]
-	_ = x[SceneFlagsN-25]
+	_ = x[Rendering-26]
+	_ = x[SceneFlagsN-27]
 }
 
 const _SceneFlags_name = "RenderingSceneFlagsN"
@@ -20,9 +20,9 @@ const _SceneFlags_name = "RenderingSceneFlagsN"
 var _SceneFlags_index = [...]uint8{0, 9, 20}
 
 func (i SceneFlags) String() string {
-	i -= 24
+	i -= 26
 	if i < 0 || i >= SceneFlags(len(_SceneFlags_index)-1) {
-		return "SceneFlags(" + strconv.FormatInt(int64(i+24), 10) + ")"
+		return "SceneFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
 	}
 	return _SceneFlags_name[_SceneFlags_index[i]:_SceneFlags_index[i+1]]
 }
@@ -30,15 +30,15 @@ func (i SceneFlags) String() string {
 func StringToSceneFlags(s string) (SceneFlags, error) {
 	for i := 0; i < len(_SceneFlags_index)-1; i++ {
 		if s == _SceneFlags_name[_SceneFlags_index[i]:_SceneFlags_index[i+1]] {
-			return SceneFlags(i + 24), nil
+			return SceneFlags(i + 26), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: SceneFlags")
 }
 
 var _SceneFlags_descMap = map[SceneFlags]string{
-	24: `Rendering means that the scene is currently rendering`,
-	25: ``,
+	26: `Rendering means that the scene is currently rendering`,
+	27: ``,
 }
 
 func (i SceneFlags) Desc() string {
