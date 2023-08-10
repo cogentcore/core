@@ -391,26 +391,33 @@ func (wb *WidgetBase) WidgetMouseFocusEvent() {
 		me := data.(*mouse.FocusEvent)
 		me.SetProcessed()
 
-		var pwin oswin.Window
-		pwingi := wb.ParentWindow()
-		if pwingi == nil {
-			pwin = oswin.TheApp.ContextWindow()
-		} else {
-			pwin = pwingi.OSWin
-		}
-
-		if me.Action == mouse.Enter {
-			wb.SetHovered()
-			if wb.Style.Cursor != cursor.Nil {
-				oswin.TheApp.Cursor(pwin).Push(wb.Style.Cursor)
-			}
-		} else {
-			wb.ClearHovered()
-			if wb.Style.Cursor != cursor.Nil {
-				oswin.TheApp.Cursor(pwin).PopIf(wb.Style.Cursor)
-			}
-		}
+		wb.OnWidgetMouseFocusEvent(me)
 	})
+}
+
+// OnWidgetMouseFocusEvent is called when there is a [mouse.FocusEvent]
+// on a widget. If you are defining a custom connection for mouse focus events,
+// you should call this function in your code.
+func (wb *WidgetBase) OnWidgetMouseFocusEvent(me *mouse.FocusEvent) {
+	var pwin oswin.Window
+	pwingi := wb.ParentWindow()
+	if pwingi == nil {
+		pwin = oswin.TheApp.ContextWindow()
+	} else {
+		pwin = pwingi.OSWin
+	}
+
+	if me.Action == mouse.Enter {
+		wb.SetHovered()
+		if wb.Style.Cursor != cursor.Nil {
+			oswin.TheApp.Cursor(pwin).Push(wb.Style.Cursor)
+		}
+	} else {
+		wb.ClearHovered()
+		if wb.Style.Cursor != cursor.Nil {
+			oswin.TheApp.Cursor(pwin).PopIf(wb.Style.Cursor)
+		}
+	}
 }
 
 // TODO: use these instead of those on NodeBase2D

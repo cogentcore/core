@@ -461,7 +461,6 @@ func (bb *ButtonBase) ButtonEnterHover() {
 	if bb.State != ButtonHover {
 		updt := bb.UpdateStart()
 		bb.SetButtonState(ButtonHover)
-		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).Push(cursor.HandPointing)
 		bb.UpdateEnd(updt)
 	}
 }
@@ -471,7 +470,6 @@ func (bb *ButtonBase) ButtonExitHover() {
 	if bb.State == ButtonHover {
 		updt := bb.UpdateStart()
 		bb.SetButtonState(ButtonActive)
-		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).PopIf(cursor.HandPointing)
 		bb.UpdateEnd(updt)
 	}
 }
@@ -507,6 +505,7 @@ func (bb *ButtonBase) MouseFocusEvent() {
 		}
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
+		bb.OnWidgetMouseFocusEvent(me)
 		if me.Action == mouse.Enter {
 			if EventTrace {
 				fmt.Printf("bb focus enter: %v\n", bbb.Name())
@@ -842,6 +841,7 @@ func (bt *Button) Init2D() {
 
 func (bt *Button) ConfigStyles() {
 	bt.AddStyleFunc(StyleFuncDefault, func() {
+		bt.Style.Cursor = cursor.HandPointing
 		bt.Style.Border.Radius = gist.BorderRadiusFull
 		bt.Style.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
 		if !bt.Icon.IsNil() {
@@ -885,6 +885,7 @@ func (bt *Button) ConfigStyles() {
 		space.Style.MinWidth.SetEm(0.5)
 	})
 	bt.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(bt), func(label *WidgetBase) {
+		label.Style.Cursor = cursor.Nil
 		// need to override so label's default color
 		// doesn't take control on state changes
 		label.Style.Color = bt.Style.Color
