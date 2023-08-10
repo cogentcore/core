@@ -175,21 +175,21 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 
 	menu := gi.Menu{}
 
-	menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
+	menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Icon: icons.Save, Shortcut: "Shift+Control+1", Tooltip: "Description for Menu Item 1", Data: 1},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
-	mi2 := menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
+	mi2 := menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Icon: icons.FileOpen, Tooltip: "Description for Menu Item 2", Data: 2}, nil, nil)
 
-	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
+	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Icon: icons.InstallDesktop, Tooltip: "Description for Sub Menu Item 2", Data: 2.1},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
 	menu.AddSeparator("sep1")
 
-	menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
+	menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Icon: icons.Favorite, Shortcut: "Control+3", Tooltip: "Description for Menu Item 3", Data: 3},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
@@ -208,6 +208,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 		b.Text = s
 		b.Icon = ics[typ]
 		b.Type = typ
+		b.Tooltip = "Description for " + b.Nm
 		b.OnClicked(func() {
 			fmt.Println("Got click event on", b.Nm)
 		})
@@ -215,6 +216,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 		bt := gi.AddNewButton(browt, "buttonText"+s)
 		bt.Text = s
 		bt.Type = typ
+		bt.Tooltip = "Description for " + bt.Nm
 		bt.OnClicked(func() {
 			fmt.Println("Got click event on", bt.Nm)
 		})
@@ -222,6 +224,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 		bi := gi.AddNewButton(browi, "buttonIcon"+s)
 		bi.Type = typ
 		bi.Icon = ics[typ+5]
+		bi.Tooltip = "Description for " + bi.Nm
 		bi.OnClicked(func() {
 			fmt.Println("Got click event on", bi.Nm)
 		})
@@ -231,16 +234,19 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 		mb.Icon = ics[typ+10]
 		mb.Type = typ
 		mb.Menu = menu
+		mb.Tooltip = "Description for " + mb.Nm
 
 		mbt := gi.AddNewButton(mbrowt, "menuButtonText"+s)
 		mbt.Text = s
 		mbt.Type = typ
 		mbt.Menu = menu
+		mbt.Tooltip = "Description for " + mbt.Nm
 
 		mbi := gi.AddNewButton(mbrowi, "menuButtonIcon"+s)
 		mbi.Icon = ics[typ+15]
 		mbi.Type = typ
 		mbi.Menu = menu
+		mbi.Tooltip = "Description for " + mbi.Nm
 	}
 }
 
