@@ -742,6 +742,7 @@ func (bb *ButtonBase) Render2D() {
 }
 
 func (bb *ButtonBase) ConnectEvents2D() {
+	bb.WidgetEvents()
 	bb.ButtonEvents()
 }
 

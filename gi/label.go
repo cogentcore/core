@@ -377,7 +377,7 @@ func (lb *Label) LabelEvents() {
 	lb.HoverEvent()
 	lb.MouseEvent()
 	lb.MouseMoveEvent()
-	lb.MouseFocusEvent()
+	// lb.MouseFocusEvent()
 }
 
 func (lb *Label) GrabCurBackgroundColor() {
@@ -514,6 +514,7 @@ func (lb *Label) Render2D() {
 }
 
 func (lb *Label) ConnectEvents2D() {
+	lb.WidgetEvents()
 	lb.LabelEvents()
 }
 
@@ -524,6 +525,7 @@ func (lb *Label) Init2D() {
 
 func (lb *Label) ConfigStyles() {
 	lb.AddStyleFunc(StyleFuncDefault, func() {
+		lb.Style.Cursor = cursor.IBeam
 		lb.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
 		lb.Style.AlignV = gist.AlignMiddle
 		lb.Style.BackgroundColor.SetColor(color.Transparent)

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -49,6 +50,9 @@ type Style struct {
 
 	// make a control inactive so it does not respond to input
 	Inactive bool `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
+
+	// the cursor to switch to upon hovering over the element
+	Cursor cursor.Shapes `desc:"the cursor to switch to upon hovering over the element"`
 
 	// prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor
 	ZIndex int `xml:"z-index" desc:"prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`

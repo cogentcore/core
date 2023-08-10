@@ -365,6 +365,41 @@ func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
 	return par.Style.BackgroundColor
 }
 
+// ConnectEvents2D is the default event connection function
+// for widgets. It calls [WidgetEvents], so any widget
+// implementing a custom ConnectEvents2D function should
+// first call [WidgetEvents].
+func (wb *WidgetBase) ConnectEvents2D() {
+	wb.WidgetEvents()
+}
+
+// WidgetEvents connects the default events for widgets.
+// Any widget implementing a custom ConnectEvents2D function
+// should first call this function.
+func (wb *WidgetBase) WidgetEvents() {
+	wb.WidgetMouseFocusEvent()
+}
+
+// WidgetFocusEvent handles mouse focus events for the widget
+func (wb *WidgetBase) WidgetMouseFocusEvent() {
+	wb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		if wb.IsDisabled() {
+			return
+		}
+
+		me := data.(*mouse.FocusEvent)
+		me.SetProcessed()
+
+		if me.Action == mouse.Enter {
+			wb.SetHovered()
+			oswin.TheApp.Cursor(wb.ParentWindow().OSWin).Push(wb.Style.Cursor)
+		} else {
+			wb.ClearHovered()
+			oswin.TheApp.Cursor(wb.ParentWindow().OSWin).PopIf(wb.Style.Cursor)
+		}
+	})
+}
+
 // TODO: use these instead of those on NodeBase2D
 // // Style helper methods
 
