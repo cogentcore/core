@@ -19,14 +19,8 @@ import (
 type Shapes int32
 
 const (
-	// Nil is an unspecified cursor that can be set on an element
-	// to indicate that it should not result in the change of the cursor.
-	// In practice, if there are no other cursors in the stack, it results
-	// in an [Arrow] cursor.
-	Nil Shapes = iota
-
 	// Arrow is the standard arrow pointer
-	Arrow
+	Arrow Shapes = iota
 
 	// Cross is a crosshair plus-like cursor -- typically used for precise actions.
 	Cross
@@ -148,9 +142,6 @@ type CursorBase struct {
 }
 
 func (c *CursorBase) Current() Shapes {
-	if c.Cur == Nil {
-		return Arrow
-	}
 	return c.Cur
 }
 
