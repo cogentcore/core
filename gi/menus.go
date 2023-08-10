@@ -419,6 +419,73 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	return pvp
 }
 
+// TODO: not working; need to get working.
+// RecyclePopupMenu reuses the already existing popup to display
+// a viewport with a layout that draws the supplied actions
+// positions are relative to given viewport -- name is relevant base name to
+// which Menu is appended
+func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D {
+	win := parVp.Win
+	mainVp := win.Viewport
+	if len(menu) == 0 {
+		log.Printf("GoGi PopupMenu: empty menu given\n")
+		return nil
+	}
+
+	menu.UpdateActions()
+
+	pvp, ok := win.CurPopup().(*Viewport2D)
+	if !ok {
+		return PopupMenu(menu, x, y, parVp, name)
+	}
+	// pvp.InitName(pvp, name+"Menu")
+	pvp.Win = win
+	updt := pvp.UpdateStart()
+	pvp.Fill = true
+	pvp.SetFlag(int(VpFlagPopup))
+	pvp.SetFlag(int(VpFlagMenu))
+
+	pvp.Geom.Pos = image.Point{x, y}
+	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
+	frame, ok := pvp.ChildByName("Frame", 0).(*Frame)
+	if !ok {
+		return PopupMenu(menu, x, y, parVp, name)
+	}
+	frame.DeleteChildren(ki.NoDestroyKids)
+	// frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
+	var focus ki.Ki
+	_ = focus
+	for _, ac := range menu {
+		acn, ac := KiToNode2D(ac)
+		if acn != nil {
+			frame.AddChild(acn)
+			if ac.IsSelected() {
+				focus = acn
+			}
+		}
+	}
+	frame.Init2DTree()
+	frame.Style2DTree()                                    // sufficient to get sizes
+	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
+	frame.Size2DTree(0)                                    // collect sizes
+	pvp.Win = nil
+	scextra := frame.Style.ScrollBarWidth.Dots
+	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
+	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(2)).ToPoint()
+	maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
+	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
+	x = ints.MaxInt(0, x)
+	y = ints.MaxInt(0, y)
+	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
+	y = ints.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
+	pvp.Resize(vpsz)
+	pvp.Geom.Pos = image.Point{x, y}
+	pvp.SetFullReRender()
+	pvp.UpdateEnd(updt)
+	win.SetNextPopup(pvp.This(), focus)
+	return pvp
+}
+
 // StringsChooserPopup creates a menu of the strings in the given string
 // slice, and calls the given function on receiver when the user selects --
 // this is the ActionSig signal, coming from the Action for the given menu

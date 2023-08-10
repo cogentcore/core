@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"sync"
 	"time"
@@ -112,19 +111,18 @@ func (c *Complete) IsAboutToShow() bool {
 // After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
 func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport2D, pt image.Point, force bool) {
-	fmt.Println("show comp")
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
 	cpop := vp.Win.CurPopup()
-	// TODO: preserve popup and just move it
+	// TODO: maybe preserve popup and just move it
 	// onif there is no delay set in CompleteWaitMSec
 	// (should reduce annoying flashing)
 	waitMSec := CompleteWaitMSec
 	if force {
 		waitMSec = 0
 	}
-	if PopupIsCompleter(cpop) && waitMSec != 0 {
+	if PopupIsCompleter(cpop) {
 		vp.Win.SetDelPopup(cpop)
 	}
 	c.DelayMu.Lock()
@@ -151,7 +149,6 @@ func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport2D, pt image.
 // will be kept and reused (if it exists), which reduces flashing if there is no
 // delay between popups.
 func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt image.Point, force bool, keep bool) {
-	fmt.Println("show now comp")
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
@@ -189,30 +186,20 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt ima
 				cc.Complete(data.(string))
 			})
 	}
-	fmt.Println(keep, vp == c.Vp, vp, c.Vp)
-	if keep && vp.Win.CurPopup() != nil {
-		fmt.Println("updating through keep")
-		pvp := vp.Win.CurPopup().(*Viewport2D)
-		updt := pvp.UpdateStart()
-		pvp.Geom.Pos = pt
-		frame := pvp.ChildByName("Frame", 0).(*Frame)
-		fupdt := frame.UpdateStart()
-		frame.DeleteChildren(ki.DestroyKids)
-		for _, ac := range m {
-			acn, _ := KiToNode2D(ac)
-			if acn != nil {
-				frame.AddChild(acn)
-			}
-		}
-		frame.SetFullReRender()
-		frame.UpdateEnd(fupdt)
-		pvp.UpdateEnd(updt)
-	} else {
-		pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-		pvp.SetFlag(int(VpFlagCompleter))
-		pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-		vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
-	}
+	// TODO: maybe get this working with RecyclePopup
+	// fmt.Println(keep, vp == c.Vp, vp, c.Vp)
+	// if keep && vp.Win.CurPopup() != nil {
+	// 	fmt.Println("updating through keep")
+	// 	pvp := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
+	// 	pvp.SetFlag(int(VpFlagCompleter))
+	// 	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	// 	vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
+	// } else {
+	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
+	pvp.SetFlag(int(VpFlagCompleter))
+	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
+	// }
 	c.Vp = vp
 }
 
