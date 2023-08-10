@@ -131,16 +131,46 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 	)
 	bdesc.Type = gi.LabelBodyLarge
 
+	sbtitle := gi.AddNewLabel(buttons, "sbtitle", "Standard Buttons")
+	sbtitle.Type = gi.LabelHeadlineSmall
+
 	brow := gi.AddNewLayout(buttons, "brow", gi.LayoutHorizFlow)
 	brow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		brow.Spacing.SetEm(1)
 		brow.Style.MaxWidth.SetPx(-1)
 	})
 
+	browt := gi.AddNewLayout(buttons, "browt", gi.LayoutHorizFlow)
+	browt.AddStyleFunc(gi.StyleFuncFinal, func() {
+		browt.Spacing.SetEm(1)
+		browt.Style.MaxWidth.SetPx(-1)
+	})
+
+	browi := gi.AddNewLayout(buttons, "browi", gi.LayoutHorizFlow)
+	browi.AddStyleFunc(gi.StyleFuncFinal, func() {
+		browi.Spacing.SetEm(1)
+		browi.Style.MaxWidth.SetPx(-1)
+	})
+
+	mbtitle := gi.AddNewLabel(buttons, "mbtitle", "Menu Buttons")
+	mbtitle.Type = gi.LabelHeadlineSmall
+
 	mbrow := gi.AddNewLayout(buttons, "mbrow", gi.LayoutHorizFlow)
 	mbrow.AddStyleFunc(gi.StyleFuncFinal, func() {
 		mbrow.Spacing.SetEm(1)
 		mbrow.Style.MaxWidth.SetPx(-1)
+	})
+
+	mbrowt := gi.AddNewLayout(buttons, "mbrowt", gi.LayoutHorizFlow)
+	mbrowt.AddStyleFunc(gi.StyleFuncFinal, func() {
+		mbrowt.Spacing.SetEm(1)
+		mbrowt.Style.MaxWidth.SetPx(-1)
+	})
+
+	mbrowi := gi.AddNewLayout(buttons, "mbrowi", gi.LayoutHorizFlow)
+	mbrowi.AddStyleFunc(gi.StyleFuncFinal, func() {
+		mbrowi.Spacing.SetEm(1)
+		mbrowi.Style.MaxWidth.SetPx(-1)
 	})
 
 	menu := gi.Menu{}
@@ -164,16 +194,44 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
+	ics := []icons.Icon{
+		icons.Search, icons.Home, icons.Close, icons.Done, icons.Favorite,
+		icons.Add, icons.Delete, icons.ArrowBack, icons.Info, icons.Refresh,
+		icons.Menu, icons.Settings, icons.AccountCircle, icons.Download, icons.Sort,
+		icons.Undo, icons.OpenInFull, icons.IosShare, icons.LibraryAdd, icons.OpenWith,
+	}
+
 	for typ := gi.ButtonTypes(0); typ < gi.ButtonTypesN; typ++ {
 		s := strings.TrimPrefix(typ.String(), "Button")
-		eb := gi.AddNewButton(brow, "button"+s)
-		eb.Text = s
-		eb.Type = typ
+
+		b := gi.AddNewButton(brow, "button"+s)
+		b.Text = s
+		b.Icon = ics[typ]
+		b.Type = typ
+
+		bt := gi.AddNewButton(browt, "buttonText"+s)
+		bt.Text = s
+		bt.Type = typ
+
+		bi := gi.AddNewButton(browi, "buttonIcon"+s)
+		bi.Type = typ
+		bi.Icon = ics[typ+5]
 
 		mb := gi.AddNewButton(mbrow, "menuButton"+s)
-		mb.Text = "Menu"
+		mb.Text = s
+		mb.Icon = ics[typ+10]
 		mb.Type = typ
 		mb.Menu = menu
+
+		mbt := gi.AddNewButton(mbrowt, "menuButtonText"+s)
+		mbt.Text = s
+		mbt.Type = typ
+		mbt.Menu = menu
+
+		mbi := gi.AddNewButton(mbrowi, "menuButtonIcon"+s)
+		mbi.Icon = ics[typ+15]
+		mbi.Type = typ
+		mbi.Menu = menu
 	}
 }
 
