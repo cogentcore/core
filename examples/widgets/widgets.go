@@ -199,7 +199,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	})
 
 	// note: receiver for menu items with shortcuts must be a Node2D or Window
-	mb1 := gi.AddNewMenuButton(brow, "menubutton1")
+	mb1 := gi.AddNewButton(brow, "menubutton1")
 	mb1.SetText("Menu Button")
 	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {

@@ -215,7 +215,7 @@ func (ac *Action) ConfigParts() {
 		if ac.Class == "" {
 			ac.Class = "menu-action"
 		}
-		if ac.Indicator == "" {
+		if ac.Indicator == "" && ac.HasMenu() {
 			ac.Indicator = icons.KeyboardArrowRight
 		}
 		ac.ConfigPartsMenuItem()
@@ -258,7 +258,6 @@ func (ac *Action) ConfigStyles() {
 			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
 			ac.Style.MaxWidth.SetPx(-1)
 			ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
-			ac.Indicator = icons.KeyboardArrowRight
 		case ActionMenuBar:
 			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			ac.Style.Margin.Set()

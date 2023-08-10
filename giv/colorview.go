@@ -115,7 +115,7 @@ func (cv *ColorView) Config() {
 		cvv.UpdateEnd(updt)
 	})
 
-	rgbacopy := gi.AddNewMenuButton(rgbalay, "rgbacopy")
+	rgbacopy := gi.AddNewButton(rgbalay, "rgbacopy")
 	rgbacopy.Icon = icons.ContentCopy
 	rgbacopy.Tooltip = "Copy RGBA Color"
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGB(r, g, b)"},
@@ -155,7 +155,7 @@ func (cv *ColorView) Config() {
 		cvv.UpdateEnd(updt)
 	})
 
-	hslacopy := gi.AddNewMenuButton(hslalay, "hslacopy")
+	hslacopy := gi.AddNewButton(hslalay, "hslacopy")
 	hslacopy.Icon = icons.ContentCopy
 	hslacopy.Tooltip = "Copy HSLA Color"
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSL(h, s, l)"},
@@ -210,7 +210,7 @@ func (cv *ColorView) Config() {
 		hex.Style.MinWidth.SetCh(20)
 	})
 
-	hexcopy := gi.AddNewMenuButton(hexlay, "hexcopy")
+	hexcopy := gi.AddNewButton(hexlay, "hexcopy")
 	hexcopy.Icon = icons.ContentCopy
 	hexcopy.Tooltip = "Copy Hex Color"
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBB")`},

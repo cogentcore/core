@@ -415,7 +415,7 @@ func (wb *WidgetBase) WidgetMouseFocusEvent() {
 // on a widget. If you are defining a custom connection for mouse focus events,
 // you should call this function in your code.
 func (wb *WidgetBase) OnWidgetMouseFocusEvent(me *mouse.FocusEvent) {
-	fmt.Println("mouse focus event on", wb)
+	// fmt.Println("mouse focus event on", wb)
 
 	var cur cursor.Cursor
 	pwin := wb.ParentWindow()

@@ -419,7 +419,7 @@ type KiPtrValueView struct {
 var TypeKiPtrValueView = kit.Types.AddType(&KiPtrValueView{}, nil)
 
 func (vv *KiPtrValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeMenuButton
+	vv.WidgetTyp = gi.TypeButton
 	return vv.WidgetTyp
 }
 
@@ -451,7 +451,7 @@ func (vv *KiPtrValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	mb := vv.Widget.(*gi.MenuButton)
+	mb := vv.Widget.(*gi.Button)
 	path := "nil"
 	k := vv.KiStruct()
 	if k != nil {
@@ -463,7 +463,8 @@ func (vv *KiPtrValueView) UpdateWidget() {
 func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	mb := vv.Widget.(*gi.MenuButton)
+	mb := vv.Widget.(*gi.Button)
+	mb.Icon = icons.Menu
 	mb.Tooltip, _ = vv.Tag("desc")
 	mb.AddStyleFunc(gi.StyleFuncParts(vv), func() {
 		mb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
@@ -476,7 +477,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 			vvv, _ := recv.Embed(TypeKiPtrValueView).(*KiPtrValueView)
 			k := vvv.KiStruct()
 			if k != nil {
-				mb := vvv.Widget.(*gi.MenuButton)
+				mb := vvv.Widget.(*gi.Button)
 				vvv.Activate(mb.Viewport, nil, nil)
 			}
 		})
