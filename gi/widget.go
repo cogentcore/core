@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
@@ -390,12 +391,24 @@ func (wb *WidgetBase) WidgetMouseFocusEvent() {
 		me := data.(*mouse.FocusEvent)
 		me.SetProcessed()
 
+		var pwin oswin.Window
+		pwingi := wb.ParentWindow()
+		if pwingi == nil {
+			pwin = oswin.TheApp.ContextWindow()
+		} else {
+			pwin = pwingi.OSWin
+		}
+
 		if me.Action == mouse.Enter {
 			wb.SetHovered()
-			oswin.TheApp.Cursor(wb.ParentWindow().OSWin).Push(wb.Style.Cursor)
+			if wb.Style.Cursor != cursor.Nil {
+				oswin.TheApp.Cursor(pwin).Push(wb.Style.Cursor)
+			}
 		} else {
 			wb.ClearHovered()
-			oswin.TheApp.Cursor(wb.ParentWindow().OSWin).PopIf(wb.Style.Cursor)
+			if wb.Style.Cursor != cursor.Nil {
+				oswin.TheApp.Cursor(pwin).PopIf(wb.Style.Cursor)
+			}
 		}
 	})
 }
