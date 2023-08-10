@@ -261,7 +261,7 @@ func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
 	bb.ButStateMu.Lock()
 	defer bb.ButStateMu.Unlock()
 	prev := bb.State
-	if bb.IsInactive() {
+	if bb.IsDisabled() {
 		if bb.IsSelected() {
 			state = ButtonSelected
 		} else {
@@ -291,7 +291,7 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 	bb.ButStateMu.Lock()
 	defer bb.ButStateMu.Unlock()
 	prev := bb.State
-	if bb.IsInactive() {
+	if bb.IsDisabled() {
 		if bb.IsSelected() {
 			bb.State = ButtonSelected
 		} else {
@@ -336,7 +336,7 @@ func (bb *ButtonBase) OnClicked(fun func()) {
 // ButtonClicked is down and up
 func (bb *ButtonBase) ButtonPress() {
 	updt := bb.UpdateStart()
-	if bb.IsInactive() {
+	if bb.IsDisabled() {
 		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
 			bb.SetSelectedState(!bb.IsSelected())
 			bb.EmitSelectedSignal()
@@ -353,7 +353,7 @@ func (bb *ButtonBase) ButtonPress() {
 // signal and returns state to normal, and emits clicked signal if if it was
 // previously in pressed state
 func (bb *ButtonBase) BaseButtonRelease() {
-	if bb.IsInactive() {
+	if bb.IsDisabled() {
 		return
 	}
 	wasPressed := (bb.State == ButtonDown)
@@ -502,7 +502,7 @@ func (bb *ButtonBase) MouseFocusEvent() {
 	bb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
-		if bbb.IsInactive() {
+		if bbb.IsDisabled() {
 			return
 		}
 		me := d.(*mouse.FocusEvent)
@@ -526,7 +526,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 	bb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
-		if bbb.IsInactive() {
+		if bbb.IsDisabled() {
 			return
 		}
 		kt := d.(*key.ChordEvent)
@@ -656,9 +656,9 @@ func (bb *ButtonBase) StyleButton() {
 	}
 	bb.This().(ButtonWidget).StyleParts()
 	if nf, err := bb.PropTry("no-focus"); err == nil {
-		bb.SetFlagState(!bb.IsInactive() && !nf.(bool), int(CanFocus))
+		bb.SetFlagState(!bb.IsDisabled() && !nf.(bool), int(CanFocus))
 	} else {
-		bb.SetFlagState(!bb.IsInactive(), int(CanFocus))
+		bb.SetFlagState(!bb.IsDisabled(), int(CanFocus))
 	}
 	parSty := bb.ParentActiveStyle()
 	clsty := "." + bb.Class

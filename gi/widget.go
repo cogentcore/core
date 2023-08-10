@@ -550,7 +550,7 @@ func (wb *WidgetBase) Style2DWidget() {
 
 	SetUnitContext(&wb.Style, wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
 	if wb.Style.Inactive {                                 // inactive can only set, not clear
-		wb.SetInactive()
+		wb.SetDisabled()
 	}
 
 	wb.Viewport.SetCurrentColor(wb.Style.Color)
@@ -929,7 +929,7 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 		wb.CtxtMenuFunc(wb.This().(Node2D), m)
 	}
 	mvp := wb.ViewportSafe()
-	TheViewIFace.CtxtMenuView(wb.This(), wb.IsInactive(), mvp, m)
+	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
 }
 
 // var TooltipFrameProps = ki.Props{

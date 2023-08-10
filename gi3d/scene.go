@@ -514,7 +514,7 @@ func (sc *Scene) NavEvents() {
 		if me.Action != mouse.Press {
 			return
 		}
-		if !ssc.IsInactive() && !ssc.HasFocus() {
+		if !ssc.IsDisabled() && !ssc.HasFocus() {
 			ssc.GrabFocus()
 		}
 		// if ssc.CurManipPt == nil {

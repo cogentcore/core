@@ -225,7 +225,7 @@ func (lb *Label) SetText(txt string) {
 func (lb *Label) SetStateStyle() {
 	lb.StyMu.Lock()
 	prev := lb.State
-	if lb.IsInactive() {
+	if lb.IsDisabled() {
 		lb.State = LabelInactive
 		lb.Style = lb.StateStyles[LabelInactive]
 		if lb.Redrawable && !lb.CurBackgroundColor.IsNil() {

@@ -391,7 +391,7 @@ func (tv *TextView) ResetState() {
 		tv.CursorPos = lex.Pos{}
 	}
 	if tv.Buf != nil {
-		tv.Buf.SetInactive(tv.IsInactive())
+		tv.Buf.SetInactive(tv.IsDisabled())
 	}
 }
 
@@ -2642,20 +2642,20 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 			txf := recv.Embed(TypeTextView).(*TextView)
 			txf.Copy(true)
 		})
-	ac.SetActiveState(tv.HasSelection())
-	if !tv.IsInactive() {
+	ac.SetEnabledState(tv.HasSelection())
+	if !tv.IsDisabled() {
 		ac = m.AddAction(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				txf := recv.Embed(TypeTextView).(*TextView)
 				txf.Cut()
 			})
-		ac.SetActiveState(tv.HasSelection())
+		ac.SetEnabledState(tv.HasSelection())
 		ac = m.AddAction(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				txf := recv.Embed(TypeTextView).(*TextView)
 				txf.Paste()
 			})
-		ac.SetInactiveState(oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).IsEmpty())
+		ac.SetDisabledState(oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).IsEmpty())
 	} else {
 		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -2670,7 +2670,7 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 
 // OfferComplete pops up a menu of possible completions
 func (tv *TextView) OfferComplete() {
-	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
+	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsDisabled() {
 		return
 	}
 	tv.Buf.Complete.Cancel()
@@ -2719,7 +2719,7 @@ func (tv *TextView) CancelComplete() {
 // Lookup attempts to lookup symbol at current location, popping up a window
 // if something is found
 func (tv *TextView) Lookup() {
-	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
+	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsDisabled() {
 		return
 	}
 
@@ -2882,7 +2882,7 @@ func (tv *TextView) SpellCheck(reg *textbuf.Edit) bool {
 // current CursorPos -- if no misspelling there or not in spellcorrect mode
 // returns false
 func (tv *TextView) OfferCorrect() bool {
-	if tv.Buf.Spell == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
+	if tv.Buf.Spell == nil || tv.ISearch.On || tv.QReplace.On || tv.IsDisabled() {
 		return false
 	}
 	sel := tv.SelectReg
@@ -3341,7 +3341,7 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	if tv.Buf == nil {
 		return
 	}
-	if !tv.Buf.Opts.DepthColor || tv.IsInactive() || !tv.HasFocus() || !tv.IsFocusActive() {
+	if !tv.Buf.Opts.DepthColor || tv.IsDisabled() || !tv.HasFocus() || !tv.IsFocusActive() {
 		return
 	}
 	tv.Buf.MarkupMu.RLock() // needed for HiTags access
@@ -4310,7 +4310,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.Lookup()
 	}
-	if tv.IsInactive() {
+	if tv.IsDisabled() {
 		switch {
 		case kf == gi.KeyFunFocusNext: // tab
 			kt.SetProcessed()
@@ -4690,7 +4690,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 			tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 		}
 	case mouse.Middle:
-		if !tv.IsInactive() && me.Action == mouse.Press {
+		if !tv.IsDisabled() && me.Action == mouse.Press {
 			me.SetProcessed()
 			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			tv.SavePosHistory(tv.CursorPos)
@@ -4758,7 +4758,7 @@ func (tv *TextView) MouseDragEvent() {
 func (tv *TextView) MouseFocusEvent() {
 	tv.ConnectEvent(oswin.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
-		if txf.IsInactive() {
+		if txf.IsDisabled() {
 			return
 		}
 		me := d.(*mouse.FocusEvent)
@@ -4909,7 +4909,7 @@ func (tv *TextView) Render2D() {
 	}
 	if tv.PushBounds() {
 		tv.This().(gi.Node2D).ConnectEvents2D()
-		if tv.IsInactive() {
+		if tv.IsDisabled() {
 			if tv.IsSelected() {
 				tv.Style = tv.StateStyles[TextViewSel]
 			} else {

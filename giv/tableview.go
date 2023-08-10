@@ -89,7 +89,7 @@ func (tv *TableView) SetSlice(sl any) {
 		tv.Update()
 		return
 	}
-	if !tv.IsInactive() {
+	if !tv.IsDisabled() {
 		tv.SelectedIdx = -1
 	}
 	tv.StartIdx = 0
@@ -157,9 +157,9 @@ func (tv *TableView) CacheVisFields() {
 		if tvtag != "" {
 			if tvtag == "-" {
 				add = false
-			} else if tvtag == "-select" && tv.IsInactive() {
+			} else if tvtag == "-select" && tv.IsDisabled() {
 				add = false
-			} else if tvtag == "-edit" && !tv.IsInactive() {
+			} else if tvtag == "-edit" && !tv.IsDisabled() {
 				add = false
 			}
 		}
@@ -253,7 +253,7 @@ func (tv *TableView) ToolBar() *gi.ToolBar {
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 1 + tv.NVisFields
-	if !tv.IsInactive() {
+	if !tv.IsDisabled() {
 		if !tv.NoAdd {
 			nWidgPerRow += 1
 		}
@@ -341,7 +341,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		labnm := fmt.Sprintf("head-%v", fld.Name)
 		hcfg.Add(gi.TypeAction, labnm)
 	}
-	if !tv.IsInactive() {
+	if !tv.IsDisabled() {
 		hcfg.Add(gi.TypeLabel, "head-add")
 		hcfg.Add(gi.TypeLabel, "head-del")
 	}
@@ -403,7 +403,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		vv.ConfigWidget(widg)
 	}
 
-	if !tv.IsInactive() {
+	if !tv.IsDisabled() {
 		cidx := tv.NVisFields + idxOff
 		if !tv.NoAdd {
 			lbl := sgh.Child(cidx).(*gi.Label)
@@ -516,7 +516,7 @@ func (tv *TableView) LayoutHeader() {
 		lbl.SetProp("max-width", units.NewValue(wd, units.UnitDot))
 		sumwd += wd
 	}
-	if !tv.IsInactive() {
+	if !tv.IsDisabled() {
 		mx := len(sgf.GridData[gi.Col])
 		for fli := nfld; fli < mx; fli++ {
 			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
@@ -642,8 +642,8 @@ func (tv *TableView) UpdateSliceGrid() {
 			if sg.Kids[cidx] != nil {
 				widg = sg.Kids[cidx].(gi.Node2D)
 				vv.UpdateWidget()
-				if tv.IsInactive() {
-					widg.AsNode2D().SetInactive()
+				if tv.IsDisabled() {
+					widg.AsNode2D().SetDisabled()
 				}
 				widg.AsNode2D().SetSelectedState(issel)
 			} else {
@@ -667,8 +667,8 @@ func (tv *TableView) UpdateSliceGrid() {
 						}
 					})
 				}
-				if tv.IsInactive() {
-					widg.AsNode2D().SetInactive()
+				if tv.IsDisabled() {
+					widg.AsNode2D().SetDisabled()
 				} else {
 					vvb := vv.AsValueViewBase()
 					vvb.ViewSig.ConnectOnly(tv.This(), // todo: do we need this?
@@ -681,7 +681,7 @@ func (tv *TableView) UpdateSliceGrid() {
 			tv.This().(SliceViewer).StyleRow(tv.SliceNPVal, widg, si, fli, vv)
 		}
 
-		if !tv.IsInactive() {
+		if !tv.IsDisabled() {
 			cidx := ridx + tv.NVisFields + idxOff
 			if !tv.NoAdd {
 				if sg.Kids[cidx] == nil {
@@ -723,7 +723,7 @@ func (tv *TableView) UpdateSliceGrid() {
 	if tv.SelField != "" && tv.SelVal != nil {
 		tv.SelectedIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
 	}
-	if tv.IsInactive() && tv.SelectedIdx >= 0 {
+	if tv.IsDisabled() && tv.SelectedIdx >= 0 {
 		tv.SelectIdx(tv.SelectedIdx)
 	}
 	tv.UpdateScroll()
@@ -863,7 +863,7 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	tb := tv.ToolBar()
 	ndef := 2 // number of default actions
-	if tv.isArray || tv.IsInactive() || tv.NoAdd {
+	if tv.isArray || tv.IsDisabled() || tv.NoAdd {
 		ndef = 1
 	}
 	if len(*tb.Children()) < ndef {

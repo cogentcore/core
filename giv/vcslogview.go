@@ -81,7 +81,7 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 		updt = lv.UpdateStart()
 	}
 	tv.SetStretchMax()
-	tv.SetInactive()
+	tv.SetDisabled()
 	tv.SetSlice(&lv.Log)
 	lv.UpdateEnd(updt)
 }

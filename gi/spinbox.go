@@ -180,13 +180,13 @@ func (sb *SpinBox) ConfigParts() {
 	}
 	config := kit.TypeAndNameList{}
 	config.Add(TypeTextField, "text-field")
-	if !sb.IsInactive() {
+	if !sb.IsDisabled() {
 		config.Add(TypeSpace, "space")
 		config.Add(TypeLayout, "buttons")
 	}
 	mods, updt := sb.Parts.ConfigChildren(config)
 	if mods || gist.RebuildDefaultStyles {
-		if !sb.IsInactive() {
+		if !sb.IsDisabled() {
 			buts := sb.Parts.ChildByName("buttons", 1).(*Layout)
 			buts.Lay = LayoutVert
 			sb.StylePart(Node2D(buts))
@@ -231,7 +231,7 @@ func (sb *SpinBox) ConfigParts() {
 		}
 		// text-field
 		tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
-		tf.SetFlagState(sb.IsInactive(), int(Inactive))
+		tf.SetFlagState(sb.IsDisabled(), int(Disabled))
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
 		if sb.Style.Template != "" {
@@ -239,7 +239,7 @@ func (sb *SpinBox) ConfigParts() {
 		}
 		sb.StylePart(Node2D(tf))
 		tf.Txt = sb.ValToString(sb.Value)
-		if !sb.IsInactive() {
+		if !sb.IsDisabled() {
 			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
 					sbb := recv.Embed(TypeSpinBox).(*SpinBox)
@@ -312,7 +312,7 @@ func (sb *SpinBox) ConfigPartsIfNeeded() {
 func (sb *SpinBox) MouseScrollEvent() {
 	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSpinBox).(*SpinBox)
-		if sbb.IsInactive() || !sbb.HasFocus2D() {
+		if sbb.IsDisabled() || !sbb.HasFocus2D() {
 			return
 		}
 		me := d.(*mouse.ScrollEvent)
@@ -335,7 +335,7 @@ func (sb *SpinBox) TextFieldEvent() {
 func (sb *SpinBox) KeyChordEvent() {
 	sb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.(*SpinBox)
-		if sbb.IsInactive() {
+		if sbb.IsDisabled() {
 			return
 		}
 		kt := d.(*key.ChordEvent)
@@ -483,7 +483,7 @@ func (sb *SpinBox) ConnectEvents2D() {
 }
 
 func (sb *SpinBox) HasFocus2D() bool {
-	if sb.IsInactive() {
+	if sb.IsDisabled() {
 		return false
 	}
 	return sb.ContainsFocus() // needed for getting key events

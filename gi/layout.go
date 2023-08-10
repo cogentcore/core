@@ -1312,7 +1312,7 @@ func (ly *Layout) ConnectEvents2D() {
 }
 
 func (ly *Layout) HasFocus2D() bool {
-	if ly.IsInactive() {
+	if ly.IsDisabled() {
 		return false
 	}
 	return ly.ContainsFocus() // needed for getting key events

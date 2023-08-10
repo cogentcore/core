@@ -274,7 +274,7 @@ func (mb *MenuBar) SetMainMenuSub(osmm oswin.MainMenu, subm oswin.Menu, am *Acti
 				ssubm := osmm.AddSubMenu(subm, ac.Text)
 				mb.SetMainMenuSub(osmm, ssubm, ac)
 			} else {
-				mid := osmm.AddItem(subm, ac.Text, string(ac.Shortcut), i, ac.IsActive())
+				mid := osmm.AddItem(subm, ac.Text, string(ac.Shortcut), i, ac.IsEnabled())
 				mb.OSMainMenus[ac.Text] = ac
 				ac.SetProp("__OSMainMenuItemID", mid)
 			}
@@ -303,7 +303,7 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 		if err != nil {
 			continue
 		}
-		osmm.SetItemActive(mid.(oswin.MenuItem), ma.IsActive()) // assuming this is threadsafe
+		osmm.SetItemActive(mid.(oswin.MenuItem), ma.IsEnabled()) // assuming this is threadsafe
 	}
 }
 

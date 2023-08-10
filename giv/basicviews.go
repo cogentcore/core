@@ -282,7 +282,7 @@ func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetInactiveState(vv.This().(ValueView).IsInactive())
+	sv.SetDisabledState(vv.This().(ValueView).IsInactive())
 	sv.SetSlice(vv.Value.Interface())
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeSliceInlineValueView).(*SliceInlineValueView)
@@ -399,7 +399,7 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetInactiveState(vv.This().(ValueView).IsInactive())
+	sv.SetDisabledState(vv.This().(ValueView).IsInactive())
 	sv.SetMap(vv.Value.Interface())
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeMapInlineValueView).(*MapInlineValueView)
@@ -540,7 +540,7 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.CheckBox)
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
+	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
 	cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonToggled) {
 			vvv, _ := recv.Embed(TypeBoolValueView).(*BoolValueView)
@@ -585,7 +585,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
-	sb.SetInactiveState(vv.This().(ValueView).IsInactive())
+	sb.SetDisabledState(vv.This().(ValueView).IsInactive())
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	sb.Parts.AddChildStyleFunc("textfield", 0, gi.StyleFuncParts(vv), func(tf *gi.WidgetBase) {
@@ -658,7 +658,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
-	sb.SetInactiveState(vv.This().(ValueView).IsInactive())
+	sb.SetDisabledState(vv.This().(ValueView).IsInactive())
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
@@ -745,7 +745,7 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
+	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
 	cb.AddStyleFunc(gi.StyleFuncParts(vv), func() {
 		cb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
 		cb.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
@@ -815,7 +815,7 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(&cb.Parts)
 	cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
+	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
 	cb.AddStyleFunc(gi.StyleFuncParts(vv), func() {
 		cb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
 		cb.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
@@ -867,7 +867,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
+	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
 
 	typEmbeds := ki.KiT_Node
 	if kiv, ok := vv.Owner.(ki.Ki); ok {
@@ -930,7 +930,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
+	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
 	tf.AddStyleFunc(gi.StyleFuncParts(vv), func() {
 		tf.Style.MinWidth.SetCh(16)
 		tf.Style.MaxWidth.SetPx(-1)
@@ -980,7 +980,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
+	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
 	tf.AddStyleFunc(gi.StyleFuncParts(vv), func() {
 		tf.Style.MinWidth.SetCh(16)
 		tf.Style.MaxWidth.SetPx(-1)
@@ -1080,7 +1080,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
+	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
 	tf.AddStyleFunc(gi.StyleFuncParts(vv), func() {
 		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})

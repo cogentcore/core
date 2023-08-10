@@ -239,7 +239,7 @@ func (sb *SliderBase) SnapValue() {
 // SetSliderState sets the slider state to given state, updates style
 func (sb *SliderBase) SetSliderState(state SliderStates) {
 	prev := sb.State
-	if sb.IsInactive() {
+	if sb.IsDisabled() {
 		if sb.IsSelected() {
 			state = SliderSelected
 		} else {
@@ -488,7 +488,7 @@ func (sb *SliderBase) MouseDragEvent() {
 	sb.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
-		if sbb.IsInactive() {
+		if sbb.IsDisabled() {
 			return
 		}
 		me.SetProcessed()
@@ -506,7 +506,7 @@ func (sb *SliderBase) MouseEvent() {
 	sb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
-		if sbb.IsInactive() {
+		if sbb.IsDisabled() {
 			me.SetProcessed()
 			sbb.SetSelectedState(!sbb.IsSelected())
 			sbb.EmitSelectedSignal()
@@ -535,7 +535,7 @@ func (sb *SliderBase) MouseEvent() {
 func (sb *SliderBase) MouseFocusEvent() {
 	sb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
-		if sbb.IsInactive() {
+		if sbb.IsDisabled() {
 			return
 		}
 		me := d.(*mouse.FocusEvent)
@@ -551,7 +551,7 @@ func (sb *SliderBase) MouseFocusEvent() {
 func (sb *SliderBase) MouseScrollEvent() {
 	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
-		if sbb.IsInactive() {
+		if sbb.IsDisabled() {
 			return
 		}
 		me := d.(*mouse.ScrollEvent)
@@ -568,7 +568,7 @@ func (sb *SliderBase) MouseScrollEvent() {
 func (sb *SliderBase) KeyChordEvent() {
 	sb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
-		if sbb.IsInactive() {
+		if sbb.IsDisabled() {
 			return
 		}
 		sbb.KeyInput(d.(*key.ChordEvent))
@@ -586,7 +586,7 @@ func (sb *SliderBase) SliderEvents() {
 func (sb *SliderBase) Init2DSlider() {
 	sb.Init2DWidget()
 	sb.State = SliderActive
-	if sb.IsInactive() {
+	if sb.IsDisabled() {
 		sb.State = SliderInactive
 	}
 }
@@ -1146,7 +1146,7 @@ func (pb *ProgressBar) Defaults() {
 	pb.PageStep = 0.2
 	pb.Max = 1.0
 	pb.Prec = 9
-	pb.SetInactive()
+	pb.SetDisabled()
 	pb.SetMinPrefWidth(units.Em(20))
 	pb.SetMinPrefHeight(units.Em(1))
 }

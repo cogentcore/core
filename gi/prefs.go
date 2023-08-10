@@ -402,7 +402,7 @@ var PreferencesProps = ki.Props{
 				"shortcut": KeyFunMenuSave,
 				"updtfunc": func(pfi any, act *Action) {
 					pf := pfi.(*Preferences)
-					act.SetActiveState(pf.Changed)
+					act.SetEnabledState(pf.Changed)
 				},
 			}},
 			{"sep-color", ki.BlankProp{}},
@@ -438,7 +438,7 @@ var PreferencesProps = ki.Props{
 			"icon": icons.Save,
 			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*Preferences)
-				act.SetActiveStateUpdt(pf.Changed)
+				act.SetEnabledStateUpdt(pf.Changed)
 			},
 		}},
 		{"sep-color", ki.BlankProp{}},
@@ -1169,7 +1169,7 @@ var PrefsDetailedProps = ki.Props{
 				"shortcut": KeyFunMenuSave,
 				"updtfunc": func(pfi any, act *Action) {
 					pf := pfi.(*PrefsDetailed)
-					act.SetActiveState(pf.Changed)
+					act.SetEnabledState(pf.Changed)
 				},
 			}},
 			{"Close Window", ki.BlankProp{}},
@@ -1188,7 +1188,7 @@ var PrefsDetailedProps = ki.Props{
 			"icon": icons.Save,
 			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*PrefsDetailed)
-				act.SetActiveStateUpdt(pf.Changed)
+				act.SetEnabledStateUpdt(pf.Changed)
 			},
 		}},
 	},

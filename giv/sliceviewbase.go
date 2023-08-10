@@ -281,7 +281,7 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 			val.Set(reflect.New(kit.NonPtrType(val.Type())))
 		}
 	}
-	if !sv.IsInactive() {
+	if !sv.IsDisabled() {
 		sv.SelectedIdx = -1
 	}
 	sv.ResetSelectedIdxs()
@@ -405,7 +405,7 @@ func (sv *SliceViewBase) ToolBar() *gi.ToolBar {
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (sv *SliceViewBase) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 2
-	if !sv.IsInactive() && !sv.isArray {
+	if !sv.IsDisabled() && !sv.isArray {
 		if !sv.NoAdd {
 			nWidgPerRow += 1
 		}
@@ -505,7 +505,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	sg.SetChild(widg, idxOff, valnm)
 	vv.ConfigWidget(widg)
 
-	if !sv.IsInactive() && !sv.isArray {
+	if !sv.IsDisabled() && !sv.isArray {
 		cidx := idxOff
 		if !sv.NoAdd {
 			cidx++
@@ -755,8 +755,8 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		if sg.Kids[ridx+idxOff] != nil {
 			widg = sg.Kids[ridx+idxOff].(gi.Node2D)
 			vv.UpdateWidget()
-			if sv.IsInactive() {
-				widg.AsNode2D().SetInactive()
+			if sv.IsDisabled() {
+				widg.AsNode2D().SetDisabled()
 			}
 			widg.AsNode2D().SetSelectedState(issel)
 		} else {
@@ -766,8 +766,8 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 			wb := widg.AsWidget()
 			// wb.Sty.Template = "giv.SliceViewBase.ItemWidget." + vtyp.Name()
 
-			if sv.IsInactive() {
-				widg.AsNode2D().SetInactive()
+			if sv.IsDisabled() {
+				widg.AsNode2D().SetDisabled()
 				if wb != nil {
 					wb.SetProp("slv-row", i)
 					wb.ClearSelected()
@@ -829,7 +829,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	if sv.SelVal != nil {
 		sv.SelectedIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
 	}
-	if sv.IsInactive() && sv.SelectedIdx >= 0 {
+	if sv.IsDisabled() && sv.SelectedIdx >= 0 {
 		sv.SelectIdxWidgets(sv.SelectedIdx, true)
 	}
 	sv.UpdateScroll()
@@ -1024,7 +1024,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	tb := sv.ToolBar()
 	ndef := 2 // number of default actions
-	if sv.isArray || sv.IsInactive() || sv.NoAdd {
+	if sv.isArray || sv.IsDisabled() || sv.NoAdd {
 		ndef = 1
 	}
 	if len(*tb.Children()) < ndef {
@@ -1068,7 +1068,7 @@ func (sv *SliceViewBase) Style2D() {
 			sv.This().(SliceViewer).UpdateSliceGrid()
 		}
 	}
-	if sv.IsInactive() {
+	if sv.IsDisabled() {
 		sv.SetCanFocus()
 	}
 	// sg := sv.This().(SliceViewer).SliceGrid()
@@ -1138,7 +1138,7 @@ func (sv *SliceViewBase) HasFocus2D() bool {
 	if !sv.ContainsFocus() {
 		return false
 	}
-	if sv.IsInactive() {
+	if sv.IsDisabled() {
 		return sv.InactKeyNav
 	}
 	return true
@@ -1457,7 +1457,7 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, sel bool) {
 
 // UpdateSelectIdx updates the selection for the given index
 func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
-	if sv.IsInactive() && !sv.InactMultiSel {
+	if sv.IsDisabled() && !sv.InactMultiSel {
 		wupdt := sv.TopUpdateStart()
 		defer sv.TopUpdateEnd(wupdt)
 		sv.UnselectAllIdxs()
@@ -2087,7 +2087,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	}
 	var men gi.Menu
 
-	if CtxtMenuView(val, sv.IsInactive(), sv.ViewportSafe(), &men) {
+	if CtxtMenuView(val, sv.IsDisabled(), sv.ViewportSafe(), &men) {
 		if sv.ShowViewCtxtMenu {
 			men.AddSeparator("sep-svmenu")
 			sv.This().(SliceViewer).StdCtxtMenu(&men, idx)
@@ -2263,7 +2263,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 			me.SetProcessed()
 		}
 	})
-	if sv.IsInactive() {
+	if sv.IsDisabled() {
 		if sv.InactKeyNav {
 			sv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)

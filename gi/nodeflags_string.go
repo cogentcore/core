@@ -18,7 +18,7 @@ func _() {
 	_ = x[FullReRender-15]
 	_ = x[ReRenderAnchor-16]
 	_ = x[Invisible-17]
-	_ = x[Inactive-18]
+	_ = x[Disabled-18]
 	_ = x[Selected-19]
 	_ = x[MouseHasEntered-20]
 	_ = x[DNDHasEntered-21]

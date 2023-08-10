@@ -92,7 +92,7 @@ var ActionProps = ki.Props{
 // Trigger triggers the action signal -- for external activation of action --
 // only works if action is not inactive
 func (ac *Action) Trigger() {
-	if ac.IsInactive() {
+	if ac.IsDisabled() {
 		return
 	}
 	ac.ActionSig.Emit(ac.This(), 0, ac.Data)
@@ -100,7 +100,7 @@ func (ac *Action) Trigger() {
 
 // ButtonRelease triggers action signal
 func (ac *Action) ButtonRelease() {
-	if ac.IsInactive() {
+	if ac.IsDisabled() {
 		// fmt.Printf("action: %v inactive\n", ac.Nm)
 		return
 	}

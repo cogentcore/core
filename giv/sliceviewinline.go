@@ -138,8 +138,8 @@ func (sv *SliceViewInline) ConfigParts() {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}
 		vv.ConfigWidget(widg)
-		if sv.IsInactive() {
-			widg.AsNode2D().SetInactive()
+		if sv.IsDisabled() {
+			widg.AsNode2D().SetDisabled()
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {

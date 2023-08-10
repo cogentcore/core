@@ -137,12 +137,12 @@ func (sv *StructViewInline) ConfigParts() {
 		lbl.Redrawable = true
 		lbl.SetProp("horizontal-align", gist.AlignLeft)
 		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
-		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsInactive()) // in structview.go
+		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled()) // in structview.go
 		if hasDef {
 			sv.HasDefs = true
 		}
 		vv.ConfigWidget(widg)
-		if !sv.IsInactive() && !inactTag {
+		if !sv.IsDisabled() && !inactTag {
 			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv, _ := recv.Embed(TypeStructViewInline).(*StructViewInline)
 				svv.UpdateFieldAction()

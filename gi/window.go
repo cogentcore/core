@@ -881,7 +881,7 @@ func (w *Window) Closed() {
 		w.UpMu.Unlock()
 		return
 	}
-	w.SetInactive() // marks as closed
+	w.SetDisabled() // marks as closed
 	w.FocusInactivate()
 	WindowGlobalMu.Lock()
 	if len(FocusWindows) > 0 {
@@ -908,7 +908,7 @@ func (w *Window) Closed() {
 
 // IsClosed reports if the window has been closed
 func (w *Window) IsClosed() bool {
-	if w.IsInactive() || w.Viewport == nil {
+	if w.IsDisabled() || w.Viewport == nil {
 		return true
 	}
 	return false
@@ -2072,7 +2072,7 @@ func (w *Window) TriggerShortcut(chord key.Chord) bool {
 		delete(w.Shortcuts, chord)
 		return false
 	}
-	if sa.IsInactive() {
+	if sa.IsDisabled() {
 		if KeyEventTrace {
 			fmt.Printf("Shortcut chord: %v, action: %v -- is inactive, not fired\n", chord, sa.Text)
 		}

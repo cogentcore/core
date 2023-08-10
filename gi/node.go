@@ -127,12 +127,12 @@ const (
 	// proceed directly.
 	Invisible
 
-	// Inactive disables interaction with widgets or other nodes (i.e., they
-	// are read-only) -- they should indicate this inactive state in an
+	// Disabled disables all interaction with the user or other nodes;
+	// nodes should indicate this disabled state in an
 	// appropriate way, and each node should interpret events appropriately
 	// based on this state (select and context menu events should still be
 	// generated)
-	Inactive
+	Disabled
 
 	// Selected indicates that this node has been selected by the user --
 	// widely supported across different nodes
@@ -191,54 +191,54 @@ func (nb *NodeBase) IsInstaDrag() bool {
 	return nb.HasFlag(int(InstaDrag))
 }
 
-// IsInactive tests if this node is flagged as Inactive.  if so, behave (e.g.,
-// ignore events except select, context menu) and style appropriately
-func (nb *NodeBase) IsInactive() bool {
-	return nb.HasFlag(int(Inactive))
+// IsDisabled tests if this node is flagged as [Disabled].
+// If so, behave and style appropriately.
+func (nb *NodeBase) IsDisabled() bool {
+	return nb.HasFlag(int(Disabled))
 }
 
-// IsActive tests if this node is NOT flagged as Inactive.
-func (nb *NodeBase) IsActive() bool {
-	return !nb.IsInactive()
+// IsEnabled tests if this node is NOT flagged as [Disabled].
+func (nb *NodeBase) IsEnabled() bool {
+	return !nb.IsDisabled()
 }
 
-// SetInactive sets the node as inactive
-func (nb *NodeBase) SetInactive() {
-	nb.SetFlag(int(Inactive))
+// SetDisabled sets the node as [Disabled].
+func (nb *NodeBase) SetDisabled() {
+	nb.SetFlag(int(Disabled))
 }
 
-// ClearInactive clears the node as inactive
-func (nb *NodeBase) ClearInactive() {
-	nb.ClearFlag(int(Inactive))
+// ClearDisabled clears the node as [Disabled].
+func (nb *NodeBase) ClearDisabled() {
+	nb.ClearFlag(int(Disabled))
 }
 
-// SetInactiveState sets flag as inactive or not based on inact arg
-func (nb *NodeBase) SetInactiveState(inact bool) {
-	nb.SetFlagState(inact, int(Inactive))
+// SetDisabledState sets flag as [Disabled] or not based on disabled arg
+func (nb *NodeBase) SetDisabledState(disabled bool) {
+	nb.SetFlagState(disabled, int(Disabled))
 }
 
-// SetActiveState sets flag as active or not based on act arg -- positive logic
+// SetEnabledState sets flag as enabled or not based on enabled arg -- positive logic
 // is easier to understand.
-func (nb *NodeBase) SetActiveState(act bool) {
-	nb.SetFlagState(!act, int(Inactive))
+func (nb *NodeBase) SetEnabledState(enabled bool) {
+	nb.SetFlagState(!enabled, int(Disabled))
 }
 
-// SetInactiveStateUpdt sets flag as inactive or not based on inact arg, and
+// SetDisabledStateUpdt sets flag as [Disabled] or not based on disabled arg, and
 // does UpdateSig if state changed.
-func (nb *NodeBase) SetInactiveStateUpdt(inact bool) {
-	cur := nb.IsInactive()
-	nb.SetFlagState(inact, int(Inactive))
-	if inact != cur {
+func (nb *NodeBase) SetDisabledStateUpdt(disabled bool) {
+	cur := nb.IsDisabled()
+	nb.SetFlagState(disabled, int(Disabled))
+	if disabled != cur {
 		nb.UpdateSig()
 	}
 }
 
-// SetActiveStateUpdt sets flag as active or not based on act arg -- positive logic
+// SetEnabledStateUpdt sets flag as enabled or not based on act arg -- positive logic
 // is easier to understand -- does UpdateSig if state changed.
-func (nb *NodeBase) SetActiveStateUpdt(act bool) {
-	cur := nb.IsActive()
-	nb.SetFlagState(!act, int(Inactive))
-	if act != cur {
+func (nb *NodeBase) SetEnabledStateUpdt(enabled bool) {
+	cur := nb.IsEnabled()
+	nb.SetFlagState(!enabled, int(Disabled))
+	if enabled != cur {
 		nb.UpdateSig()
 	}
 }
@@ -267,7 +267,7 @@ func (nb *NodeBase) SetInvisibleState(invis bool) {
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
 // nodes don't need focus typically)
 func (nb *NodeBase) SetCanFocusIfActive() {
-	nb.SetFlagState(!nb.IsInactive(), int(CanFocus))
+	nb.SetFlagState(!nb.IsDisabled(), int(CanFocus))
 }
 
 // SetCanFocus sets CanFocus flag to true
@@ -318,6 +318,36 @@ func (nb *NodeBase) IsReRenderAnchor() bool {
 // SetReRenderAnchor sets node as a ReRenderAnchor
 func (nb *NodeBase) SetReRenderAnchor() {
 	nb.SetFlag(int(ReRenderAnchor))
+}
+
+// TODO: add type-based child functions (first child of type, etc)
+
+// IsNthChild returns whether the node is nth-child of its parent
+func (nb *NodeBase) IsNthChild(n int) bool {
+	idx, ok := nb.IndexInParent()
+	return ok && idx == n
+}
+
+// IsFirstChild returns whether the node is the first child of its parent
+func (nb *NodeBase) IsFirstChild() bool {
+	idx, ok := nb.IndexInParent()
+	return ok && idx == 0
+}
+
+// IsLastChild returns whether the node is the last child of its parent
+func (nb *NodeBase) IsLastChild() bool {
+	idx, ok := nb.IndexInParent()
+	return ok && idx == nb.Par.NumChildren()-1
+}
+
+// IsOnlyChild returns whether the node is the only child of its parent
+func (nb *NodeBase) IsOnlyChild() bool {
+	return nb.Par != nil && nb.Par.NumChildren() == 1
+}
+
+// IsRoot returns whether the node is the root element of the GUI
+func (nb *NodeBase) IsRoot() bool {
+	return nb.Par == nil
 }
 
 // PointToRelPos translates a point in global pixel coords

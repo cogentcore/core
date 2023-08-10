@@ -317,17 +317,17 @@ func (tv *TreeView) Label() string {
 // inactivity of the root node (i.e, make the root inactive to make entire tree
 // read-only and non-modifiable)
 func (tv *TreeView) UpdateInactive() bool {
-	tv.ClearInactive()
+	tv.ClearDisabled()
 	if tv.SrcNode == nil {
-		tv.SetInactive()
+		tv.SetDisabled()
 	} else {
 		if inact, err := tv.SrcNode.PropTry("inactive"); err == nil {
 			if bo, ok := kit.ToBool(inact); bo && ok {
-				tv.SetInactive()
+				tv.SetDisabled()
 			}
 		}
 	}
-	return tv.IsInactive()
+	return tv.IsDisabled()
 }
 
 // RootIsInactive returns the inactive status of the root node, which is what
@@ -337,7 +337,7 @@ func (tv *TreeView) RootIsInactive() bool {
 	if tv.RootView == nil {
 		return true
 	}
-	return tv.RootView.IsInactive()
+	return tv.RootView.IsDisabled()
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2016,7 +2016,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunInsert,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetInactiveState(tv.IsRootOrField(""))
+				act.SetDisabledState(tv.IsRootOrField(""))
 			}),
 		}},
 		{"SrcInsertAfter", ki.Props{
@@ -2024,7 +2024,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunInsertAfter,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetInactiveState(tv.IsRootOrField(""))
+				act.SetDisabledState(tv.IsRootOrField(""))
 			}),
 		}},
 		{"SrcDuplicate", ki.Props{
@@ -2032,7 +2032,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunDuplicate,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetInactiveState(tv.IsRootOrField(""))
+				act.SetDisabledState(tv.IsRootOrField(""))
 			}),
 		}},
 		{"SrcDelete", ki.Props{
@@ -2040,7 +2040,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunDelete,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetInactiveState(tv.IsRootOrField(""))
+				act.SetDisabledState(tv.IsRootOrField(""))
 			}),
 		}},
 		{"sep-edit", ki.BlankProp{}},
@@ -2056,7 +2056,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunCut,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetInactiveState(tv.IsRootOrField(""))
+				act.SetDisabledState(tv.IsRootOrField(""))
 			}),
 		}},
 		{"Paste", ki.Props{
@@ -2323,7 +2323,7 @@ func (tv *TreeView) Render2D() {
 				tv.Style = tv.StateStyles[TreeViewSel]
 			} else if tv.HasFocus() {
 				tv.Style = tv.StateStyles[TreeViewFocus]
-			} else if tv.IsInactive() {
+			} else if tv.IsDisabled() {
 				tv.Style = tv.StateStyles[TreeViewInactive]
 			} else {
 				tv.Style = tv.StateStyles[TreeViewActive]

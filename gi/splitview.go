@@ -601,7 +601,7 @@ func (sr *Splitter) MouseEvent() {
 	sr.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		srr := recv.Embed(TypeSplitter).(*Splitter)
-		if srr.IsInactive() {
+		if srr.IsDisabled() {
 			me.SetProcessed()
 			srr.SetSelectedState(!srr.IsSelected())
 			srr.EmitSelectedSignal()

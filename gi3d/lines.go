@@ -249,11 +249,11 @@ func AddNewLineBox(sc *Scene, parent ki.Ki, meshNm, boxNm string, bbox mat32.Box
 	fs.Pose.Pos.Set(0, 0, hSz.Z)
 
 	if inactive {
-		bgp.SetInactive()
-		bs.SetInactive()
-		ls.SetInactive()
-		rs.SetInactive()
-		fs.SetInactive()
+		bgp.SetDisabled()
+		bs.SetDisabled()
+		ls.SetDisabled()
+		rs.SetDisabled()
+		fs.SetDisabled()
 	}
 
 	return bgp

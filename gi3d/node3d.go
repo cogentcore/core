@@ -394,7 +394,7 @@ func (nb *Node3DBase) SetPoseQuat(quat mat32.Quat) {
 func (nb *Node3DBase) ConnectEvents3D(sc *Scene) {
 	nb.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		if me.Action != mouse.Press || !nb.IsVisible() || nb.IsInactive() {
+		if me.Action != mouse.Press || !nb.IsVisible() || nb.IsDisabled() {
 			return
 		}
 		sci, err := recv.ParentByTypeTry(TypeScene, ki.Embeds)

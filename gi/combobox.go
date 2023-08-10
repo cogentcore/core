@@ -113,7 +113,7 @@ var ComboBoxProps = ki.Props{
 // ButtonWidget interface
 
 func (cb *ComboBox) ButtonRelease() {
-	if cb.IsInactive() {
+	if cb.IsDisabled() {
 		return
 	}
 	wasPressed := (cb.State == ButtonDown)
@@ -519,7 +519,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 }
 
 func (cb *ComboBox) HasFocus2D() bool {
-	if cb.IsInactive() {
+	if cb.IsDisabled() {
 		return false
 	}
 	return cb.ContainsFocus() // needed for getting key events
@@ -533,7 +533,7 @@ func (cb *ComboBox) ConnectEvents2D() {
 func (cb *ComboBox) KeyChordEvent() {
 	cb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		cbb := recv.(*ComboBox)
-		if cbb.IsInactive() {
+		if cbb.IsDisabled() {
 			return
 		}
 		kt := d.(*key.ChordEvent)

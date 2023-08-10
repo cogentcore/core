@@ -240,7 +240,7 @@ var GiEditorProps = ki.Props{
 			"icon": icons.Refresh,
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
-				act.SetActiveStateUpdt(ge.Changed)
+				act.SetEnabledStateUpdt(ge.Changed)
 			}),
 		}},
 		{"sep-file", ki.BlankProp{}},
@@ -260,7 +260,7 @@ var GiEditorProps = ki.Props{
 			"desc": "Save json-formatted Ki tree structure to existing filename",
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
-				act.SetActiveStateUpdt(ge.Changed && ge.Filename != "")
+				act.SetEnabledStateUpdt(ge.Changed && ge.Filename != "")
 			}),
 		}},
 		{"SaveAs", ki.Props{
@@ -281,7 +281,7 @@ var GiEditorProps = ki.Props{
 			{"Update", ki.Props{
 				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 					ge := gei.(*GiEditor)
-					act.SetActiveState(ge.Changed)
+					act.SetEnabledState(ge.Changed)
 				}),
 			}},
 			{"sep-file", ki.BlankProp{}},
@@ -300,7 +300,7 @@ var GiEditorProps = ki.Props{
 				"desc":     "Save json-formatted Ki tree structure to existing filename",
 				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 					ge := gei.(*GiEditor)
-					act.SetActiveState(ge.Changed && ge.Filename != "")
+					act.SetEnabledState(ge.Changed && ge.Filename != "")
 				}),
 			}},
 			{"SaveAs", ki.Props{

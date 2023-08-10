@@ -433,7 +433,7 @@ func makeInputs(tv *gi.TabView) {
 	sliderxi := gi.AddNewSlider(inputs, "sliderxi")
 	sliderxi.Dim = mat32.X
 	sliderxi.Value = 0.7
-	sliderxi.SetInactive()
+	sliderxi.SetDisabled()
 
 	sliderys := gi.AddNewLayout(inputs, "sliderys", gi.LayoutHorizFlow)
 
@@ -444,7 +444,7 @@ func makeInputs(tv *gi.TabView) {
 	slideryi := gi.AddNewSlider(sliderys, "slideryi")
 	slideryi.Dim = mat32.Y
 	slideryi.Value = 0.2
-	slideryi.SetInactive()
+	slideryi.SetDisabled()
 
 	bbox := gi.AddNewButtonBox(inputs, "bbox")
 	bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}

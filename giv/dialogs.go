@@ -97,7 +97,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tlv.SetStretchMax()
 	tv := AddNewTextView(tlv, "text-view")
 	tv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
-	tv.SetInactive()
+	tv.SetDisabled()
 	tv.SetProp("font-family", gi.Prefs.MonoFont)
 	tv.SetBuf(tb)
 
@@ -146,7 +146,7 @@ func StructViewDialog(avp *gi.Viewport2D, stru any, opts DlgOpts, recv ki.Ki, dl
 	sv := frame.InsertNewChild(TypeStructView, prIdx+1, "struct-view").(*StructView)
 	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	if opts.Inactive {
-		sv.SetInactive()
+		sv.SetDisabled()
 	}
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
@@ -210,7 +210,7 @@ func SliceViewDialog(avp *gi.Viewport2D, slice any, opts DlgOpts, styleFunc Slic
 
 	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
 	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
-	sv.SetInactiveState(false)
+	sv.SetDisabledState(false)
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
@@ -244,7 +244,7 @@ func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice any, opts DlgOpts, recv ki
 
 	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
 	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
-	sv.SetInactiveState(false)
+	sv.SetDisabledState(false)
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
 	sv.ViewPath = opts.ViewPath
@@ -287,7 +287,7 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal any, opts DlgOpts, 
 
 	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
 	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
-	sv.SetInactiveState(true)
+	sv.SetDisabledState(true)
 	sv.StyleFunc = styleFunc
 	sv.SelVal = curVal
 	sv.ViewPath = opts.ViewPath
@@ -336,14 +336,14 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru any, opts DlgOpts, styleFunc 
 
 	sv := frame.InsertNewChild(TypeTableView, prIdx+1, "tableview").(*TableView)
 	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
-	sv.SetInactiveState(false)
+	sv.SetDisabledState(false)
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	if opts.Inactive {
-		sv.SetInactive()
+		sv.SetDisabled()
 	}
 	sv.SetSlice(slcOfStru)
 
@@ -384,7 +384,7 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru any, opts DlgOpts, init
 
 	sv := frame.InsertNewChild(TypeTableView, prIdx+1, "tableview").(*TableView)
 	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
-	sv.SetInactiveState(true)
+	sv.SetDisabledState(true)
 	sv.StyleFunc = styleFunc
 	sv.SelectedIdx = initRow
 	sv.ViewPath = opts.ViewPath
@@ -564,7 +564,7 @@ func ArgViewDialog(avp *gi.Viewport2D, args []ArgData, opts DlgOpts, recv ki.Ki,
 
 	sv := frame.InsertNewChild(TypeArgView, prIdx+1, "arg-view").(*ArgView)
 	sv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
-	sv.SetInactiveState(false)
+	sv.SetDisabledState(false)
 	sv.SetArgs(args)
 
 	if recv != nil && dlgFunc != nil {

@@ -127,9 +127,9 @@ func (mv *MapViewInline) ConfigParts() {
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
-		if mv.IsInactive() {
-			widg.AsNode2D().SetInactive()
-			keyw.AsNode2D().SetInactive()
+		if mv.IsDisabled() {
+			widg.AsNode2D().SetDisabled()
+			keyw.AsNode2D().SetDisabled()
 		}
 	}
 	adack, err := mv.Parts.Children().ElemFromEndTry(1)

@@ -1880,7 +1880,7 @@ func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 	}
 
 	// first all the keys that work for inactive and active
-	if !ftv.IsInactive() && !kt.IsProcessed() {
+	if !ftv.IsDisabled() && !kt.IsProcessed() {
 		switch kf {
 		case gi.KeyFunDelete:
 			ftv.DeleteFiles()
@@ -2548,7 +2548,7 @@ var FileTreeInactiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Action) 
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetInactiveState(fn.IsExternal())
+		act.SetDisabledState(fn.IsExternal())
 	}
 })
 
@@ -2557,7 +2557,7 @@ var FileTreeActiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetActiveState(fn.IsExternal() && !fn.IsIrregular())
+		act.SetEnabledState(fn.IsExternal() && !fn.IsIrregular())
 	}
 })
 
@@ -2566,7 +2566,7 @@ var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetInactiveState(fn.IsDir() || fn.IsExternal())
+		act.SetDisabledState(fn.IsDir() || fn.IsExternal())
 	}
 })
 
@@ -2575,7 +2575,7 @@ var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetActiveState(fn.IsDir() && !fn.IsExternal())
+		act.SetEnabledState(fn.IsDir() && !fn.IsExternal())
 	}
 })
 
@@ -2586,10 +2586,10 @@ var FileTreeActiveNotInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Action) 
 	if fn != nil {
 		repo, _ := fn.Repo()
 		if repo == nil || fn.IsDir() {
-			act.SetActiveState((false))
+			act.SetEnabledState((false))
 			return
 		}
-		act.SetActiveState((fn.Info.Vcs == vci.Untracked))
+		act.SetEnabledState((fn.Info.Vcs == vci.Untracked))
 	}
 })
 
@@ -2600,10 +2600,10 @@ var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	if fn != nil {
 		repo, _ := fn.Repo()
 		if repo == nil || fn.IsDir() {
-			act.SetActiveState((false))
+			act.SetEnabledState((false))
 			return
 		}
-		act.SetActiveState((fn.Info.Vcs >= vci.Stored))
+		act.SetEnabledState((fn.Info.Vcs >= vci.Stored))
 	}
 })
 
@@ -2615,10 +2615,10 @@ var FileTreeActiveInVcsModifiedFunc = ActionUpdateFunc(func(fni any, act *gi.Act
 	if fn != nil {
 		repo, _ := fn.Repo()
 		if repo == nil || fn.IsDir() {
-			act.SetActiveState((false))
+			act.SetEnabledState((false))
 			return
 		}
-		act.SetActiveState((fn.Info.Vcs == vci.Modified || fn.Info.Vcs == vci.Added))
+		act.SetEnabledState((fn.Info.Vcs == vci.Modified || fn.Info.Vcs == vci.Added))
 	}
 })
 

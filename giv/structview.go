@@ -342,12 +342,12 @@ func (sv *StructView) ConfigStructGrid() {
 		lbl.Redrawable = true
 		widg := sg.Child((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gist.AlignLeft)
-		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsInactive())
+		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled())
 		if hasDef {
 			sv.HasDefs = true
 		}
 		vv.ConfigWidget(widg)
-		if !sv.IsInactive() && !inactTag {
+		if !sv.IsDisabled() && !inactTag {
 			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(TypeStructView).(*StructView)
 				svv.UpdateFieldAction()
@@ -428,10 +428,10 @@ func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Node2D, isInact bo
 	}
 	if _, has := vv.Tag("inactive"); has {
 		inactTag = true
-		widg.AsNode2D().SetInactive()
+		widg.AsNode2D().SetDisabled()
 	} else {
 		if isInact {
-			widg.AsNode2D().SetInactive()
+			widg.AsNode2D().SetDisabled()
 			vv.SetTag("inactive", "true")
 		}
 	}

@@ -310,7 +310,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floor.Mat.Bright = 2 // .5 for wood / brown
 	floor.Mat.SetTexture(sc, grtx)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
-	floor.SetInactive() // not selectable
+	floor.SetDisabled() // not selectable
 
 	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default

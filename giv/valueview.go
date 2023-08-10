@@ -929,7 +929,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	}
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
+	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
 	tf.SetProp("min-width", units.Ch(16))
 	if completetag, ok := vv.Tag("complete"); ok {
 		// todo: this does not seem to be up-to-date and should use Completer interface..

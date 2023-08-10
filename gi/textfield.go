@@ -743,8 +743,8 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 			tff := recv.Embed(TypeTextField).(*TextField)
 			tff.This().(Clipper).Copy(true)
 		})
-	ac.SetActiveState(!tf.NoEcho && tf.HasSelection())
-	if !tf.IsInactive() {
+	ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
+	if !tf.IsDisabled() {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
 		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
@@ -752,13 +752,13 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 				tff := recv.Embed(TypeTextField).(*TextField)
 				tff.This().(Clipper).Cut()
 			})
-		ac.SetActiveState(!tf.NoEcho && tf.HasSelection())
+		ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
 		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
 			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tff := recv.Embed(TypeTextField).(*TextField)
 				tff.This().(Clipper).Paste()
 			})
-		ac.SetInactiveState(oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).IsEmpty())
+		ac.SetDisabledState(oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).IsEmpty())
 	}
 }
 
@@ -960,7 +960,7 @@ func (tf *TextField) StartCursor() {
 
 // ClearCursor turns off cursor and stops it from blinking
 func (tf *TextField) ClearCursor() {
-	if tf.IsInactive() {
+	if tf.IsDisabled() {
 		return
 	}
 	tf.StopCursor()
@@ -1291,7 +1291,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		tf.CancelComplete()
 		tf.This().(Clipper).Copy(true) // reset
 	}
-	if tf.IsInactive() || kt.IsProcessed() {
+	if tf.IsDisabled() || kt.IsProcessed() {
 		return
 	}
 	switch kf {
@@ -1356,14 +1356,14 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 	if tf.ParentWindow() == nil {
 		return
 	}
-	if !tf.IsInactive() && !tf.HasFocus() {
+	if !tf.IsDisabled() && !tf.HasFocus() {
 		tf.GrabFocus()
 	}
 	me.SetProcessed()
 	switch me.Button {
 	case mouse.Left:
 		if me.Action == mouse.Press {
-			if tf.IsInactive() {
+			if tf.IsDisabled() {
 				tf.SetSelectedState(!tf.IsSelected())
 				tf.EmitSelectedSignal()
 				tf.UpdateSig()
@@ -1384,7 +1384,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 			}
 		}
 	case mouse.Middle:
-		if !tf.IsInactive() && me.Action == mouse.Press {
+		if !tf.IsDisabled() && me.Action == mouse.Press {
 			me.SetProcessed()
 			pt := tf.PointToRelPos(me.Pos())
 			tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
@@ -1423,7 +1423,7 @@ func (tf *TextField) MouseEvent() {
 func (tf *TextField) MouseFocusEvent() {
 	tf.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := recv.Embed(TypeTextField).(*TextField)
-		if tff.IsInactive() {
+		if tff.IsDisabled() {
 			return
 		}
 		me := d.(*mouse.FocusEvent)
@@ -1463,7 +1463,7 @@ func (tf *TextField) TextFieldEvents() {
 func (tf *TextField) ConfigParts() {
 	// fmt.Println("tf config parts")
 	tf.Parts.Lay = LayoutHoriz
-	if tf.IsInactive() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
+	if tf.IsDisabled() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
 		tf.Parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
@@ -1640,7 +1640,7 @@ func (tf *TextField) RenderTextField() {
 
 	tf.AutoScroll() // inits paint with our style
 	prevState := tf.State
-	if tf.IsInactive() {
+	if tf.IsDisabled() {
 		if tf.IsSelected() {
 			tf.State = TextFieldSel
 		} else {
@@ -1692,7 +1692,7 @@ func (tf *TextField) Render2D() {
 	if tf.PushBounds() {
 		tf.This().(Node2D).ConnectEvents2D()
 		tf.RenderTextField()
-		if tf.IsActive() {
+		if tf.IsEnabled() {
 			if tf.HasFocus() && tf.IsFocusActive() {
 				tf.StartCursor()
 			} else {

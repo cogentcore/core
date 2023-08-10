@@ -398,7 +398,7 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	tb := mv.ToolBar()
 	ndef := 3 // number of default actions
-	if mv.IsInactive() {
+	if mv.IsDisabled() {
 		ndef = 2
 	}
 	if len(*tb.Children()) == 0 {
