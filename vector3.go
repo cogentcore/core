@@ -597,8 +597,25 @@ func (v Vec3) CosTo(other Vec3) float32 {
 }
 
 // AngleTo returns the angle between this vector and other.
+// Returns angles in range of -PI to PI (not 0 to 2 PI).
 func (v Vec3) AngleTo(other Vec3) float32 {
-	return Acos(Clamp(v.CosTo(other), -1, 1))
+	ang := Acos(Clamp(v.CosTo(other), -1, 1))
+	cross := v.Cross(other)
+	switch {
+	case Abs(cross.Z) >= Abs(cross.Y) && Abs(cross.Z) >= Abs(cross.X):
+		if cross.Z > 0 {
+			ang = -ang
+		}
+	case Abs(cross.Y) >= Abs(cross.Z) && Abs(cross.Y) >= Abs(cross.X):
+		if cross.Y > 0 {
+			ang = -ang
+		}
+	case Abs(cross.X) >= Abs(cross.Z) && Abs(cross.X) >= Abs(cross.Y):
+		if cross.X > 0 {
+			ang = -ang
+		}
+	}
+	return ang
 }
 
 // SetFromMatrixPos set this vector from the translation coordinates

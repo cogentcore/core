@@ -535,6 +535,28 @@ func (v *Vec2) SetLength(l float32) {
 	}
 }
 
+// Cross returns the cross product of this vector with other
+// which is a scalar, equivalent to the Z coord in 3D: X1 * Y2 - X2 Y1
+func (v Vec2) Cross(other Vec2) float32 {
+	return v.X*other.Y - v.Y*other.X
+}
+
+// CosTo returns the cosine (normalized dot product) between this vector and other.
+func (v Vec2) CosTo(other Vec2) float32 {
+	return v.Dot(other) / (v.Length() * other.Length())
+}
+
+// AngleTo returns the angle between this vector and other.
+// Returns angles in range of -PI to PI (not 0 to 2 PI).
+func (v Vec2) AngleTo(other Vec2) float32 {
+	ang := Acos(Clamp(v.CosTo(other), -1, 1))
+	cross := v.Cross(other)
+	if cross > 0 {
+		ang = -ang
+	}
+	return ang
+}
+
 // Lerp returns vector with each components as the linear interpolated value of
 // alpha between itself and the corresponding other component.
 func (v Vec2) Lerp(other Vec2, alpha float32) Vec2 {
