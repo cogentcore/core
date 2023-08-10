@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -235,6 +236,7 @@ func (ac *Action) UpdateActions() {
 
 func (ac *Action) ConfigStyles() {
 	ac.AddStyleFunc(StyleFuncDefault, func() {
+		ac.Style.Cursor = cursor.HandPointing
 		ac.Style.Border.Style.Set(gist.BorderNone)
 		ac.Style.Text.Align = gist.AlignCenter
 		ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)

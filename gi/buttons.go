@@ -885,7 +885,6 @@ func (bt *Button) ConfigStyles() {
 		space.Style.MinWidth.SetEm(0.5)
 	})
 	bt.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(bt), func(label *WidgetBase) {
-		label.Style.Cursor = cursor.Nil
 		// need to override so label's default color
 		// doesn't take control on state changes
 		label.Style.Color = bt.Style.Color
@@ -1069,6 +1068,7 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 
 func (cb *CheckBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
+		cb.Style.Cursor = cursor.HandPointing
 		cb.Style.Text.Align = gist.AlignLeft
 		cb.Style.Color = ColorScheme.OnBackground
 		cb.Style.BackgroundColor.SetColor(ColorScheme.Background)

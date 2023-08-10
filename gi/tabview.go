@@ -13,6 +13,7 @@ import (
 
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -666,6 +667,7 @@ func (tb *TabButton) Init2D() {
 
 func (tb *TabButton) ConfigStyles() {
 	tb.AddStyleFunc(StyleFuncDefault, func() {
+		tb.Style.Cursor = cursor.HandPointing
 		tb.Style.MinWidth.SetCh(8)
 		tb.Style.MaxWidth.SetPx(500)
 		tb.Style.MinHeight.SetEm(1.6)

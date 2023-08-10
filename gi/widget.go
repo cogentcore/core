@@ -366,6 +366,22 @@ func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
 	return par.Style.BackgroundColor
 }
 
+// ParentCursor returns the cursor of the nearest
+// widget parent of the widget that has a a non-default
+// cursor. If no such parent is found, it returns the given
+// cursor. This function can be used for elements like labels
+// that have a default cursor ([cursor.IBeam]) but should
+// not override the cursor of a parent.
+func (wb *WidgetBase) ParentCursor(cur cursor.Shapes) cursor.Shapes {
+	par := wb.ParentWidgetIf(func(p *WidgetBase) bool {
+		return p.Style.Cursor != cursor.Arrow
+	})
+	if par == nil {
+		return cur
+	}
+	return par.Style.Cursor
+}
+
 // ConnectEvents2D is the default event connection function
 // for widgets. It calls [WidgetEvents], so any widget
 // implementing a custom ConnectEvents2D function should
@@ -399,23 +415,25 @@ func (wb *WidgetBase) WidgetMouseFocusEvent() {
 // on a widget. If you are defining a custom connection for mouse focus events,
 // you should call this function in your code.
 func (wb *WidgetBase) OnWidgetMouseFocusEvent(me *mouse.FocusEvent) {
-	var pwin oswin.Window
-	pwingi := wb.ParentWindow()
-	if pwingi == nil {
-		pwin = oswin.TheApp.ContextWindow()
+	fmt.Println("mouse focus event on", wb)
+
+	var cur cursor.Cursor
+	pwin := wb.ParentWindow()
+	if pwin == nil {
+		cur = oswin.TheApp.Cursor(oswin.TheApp.ContextWindow())
 	} else {
-		pwin = pwingi.OSWin
+		cur = oswin.TheApp.Cursor(pwin.OSWin)
 	}
 
 	if me.Action == mouse.Enter {
 		wb.SetHovered()
-		if wb.Style.Cursor != cursor.Nil {
-			oswin.TheApp.Cursor(pwin).Push(wb.Style.Cursor)
+		if cur.Current() != wb.Style.Cursor {
+			cur.Set(wb.Style.Cursor)
 		}
 	} else {
 		wb.ClearHovered()
-		if wb.Style.Cursor != cursor.Nil {
-			oswin.TheApp.Cursor(pwin).PopIf(wb.Style.Cursor)
+		if cur.Current() == wb.Style.Cursor {
+			cur.Set(wb.ParentCursor(cursor.Arrow))
 		}
 	}
 }

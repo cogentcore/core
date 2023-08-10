@@ -1305,6 +1305,7 @@ func (ly *Layout) Render2D() {
 }
 
 func (ly *Layout) ConnectEvents2D() {
+	ly.WidgetEvents()
 	if ly.HasAnyScroll() {
 		ly.LayoutScrollEvents()
 	}

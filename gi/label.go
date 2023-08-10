@@ -525,7 +525,7 @@ func (lb *Label) Init2D() {
 
 func (lb *Label) ConfigStyles() {
 	lb.AddStyleFunc(StyleFuncDefault, func() {
-		lb.Style.Cursor = cursor.IBeam
+		lb.Style.Cursor = lb.ParentCursor(cursor.IBeam)
 		lb.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
 		lb.Style.AlignV = gist.AlignMiddle
 		lb.Style.BackgroundColor.SetColor(color.Transparent)
