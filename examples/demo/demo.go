@@ -208,14 +208,23 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 		b.Text = s
 		b.Icon = ics[typ]
 		b.Type = typ
+		b.OnClicked(func() {
+			fmt.Println("Got click event on", b.Nm)
+		})
 
 		bt := gi.AddNewButton(browt, "buttonText"+s)
 		bt.Text = s
 		bt.Type = typ
+		bt.OnClicked(func() {
+			fmt.Println("Got click event on", bt.Nm)
+		})
 
 		bi := gi.AddNewButton(browi, "buttonIcon"+s)
 		bi.Type = typ
 		bi.Icon = ics[typ+5]
+		bi.OnClicked(func() {
+			fmt.Println("Got click event on", bi.Nm)
+		})
 
 		mb := gi.AddNewButton(mbrow, "menuButton"+s)
 		mb.Text = s

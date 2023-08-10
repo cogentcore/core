@@ -847,6 +847,9 @@ func (bt *Button) ConfigStyles() {
 		if !bt.Icon.IsNil() {
 			bt.Style.Padding.Left.SetEm(1 * Prefs.DensityMul())
 		}
+		if bt.Text == "" {
+			bt.Style.Padding.Right.SetEm(1 * Prefs.DensityMul())
+		}
 		bt.Style.Text.Align = gist.AlignCenter
 		switch bt.Type {
 		case ButtonFilled:
