@@ -46,6 +46,18 @@ func AddNewButtonBox(parent ki.Ki, name string) *ButtonBox {
 	return parent.AddNewChild(TypeButtonBox, name).(*ButtonBox)
 }
 
+func (bb *ButtonBox) OnInit() {
+	bb.AddStyleFunc(StyleFuncDefault, func() {
+		bb.Style.Border.Style.Set(gist.BorderNone)
+		bb.Style.Border.Radius.Set(units.Px(2))
+		bb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		bb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		bb.Style.Text.Align = gist.AlignCenter
+		bb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+		bb.Style.Color = ColorScheme.OnSurface
+	})
+}
+
 func (bb *ButtonBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*ButtonBox)
 	bb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
@@ -237,7 +249,6 @@ func (bb *ButtonBox) ConfigPartsIfNeeded() {
 func (bb *ButtonBox) Init2D() {
 	bb.Init2DWidget()
 	bb.ConfigParts()
-	bb.ConfigStyles()
 }
 
 func (bb *ButtonBox) Style2D() {
@@ -274,16 +285,4 @@ func (bb *ButtonBox) Render2D() {
 	} else {
 		bb.DisconnectAllEvents(RegPri)
 	}
-}
-
-func (bb *ButtonBox) ConfigStyles() {
-	bb.AddStyleFunc(StyleFuncDefault, func() {
-		bb.Style.Border.Style.Set(gist.BorderNone)
-		bb.Style.Border.Radius.Set(units.Px(2))
-		bb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		bb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-		bb.Style.Text.Align = gist.AlignCenter
-		bb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
-		bb.Style.Color = ColorScheme.OnSurface
-	})
 }

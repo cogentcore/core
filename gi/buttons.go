@@ -934,6 +934,58 @@ func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
 	return parent.AddNewChild(TypeCheckBox, name).(*CheckBox)
 }
 
+func (cb *CheckBox) OnInit() {
+	cb.AddStyleFunc(StyleFuncDefault, func() {
+		cb.Style.Cursor = cursor.HandPointing
+		cb.Style.Text.Align = gist.AlignLeft
+		cb.Style.Color = ColorScheme.OnBackground
+		cb.Style.BackgroundColor = cb.ParentBackgroundColor()
+		cb.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
+		cb.Style.Padding.Set(units.Px(1 * Prefs.DensityMul()))
+		cb.Style.Border.Style.Set(gist.BorderNone)
+		// switch cb.State {
+		// case ButtonActive:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		// case ButtonInactive:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		// 	cb.Style.Color.SetColor(ColorScheme.OnBackground.Highlight(30))
+		// case ButtonFocus, ButtonSelected:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
+		// case ButtonHover:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
+		// case ButtonDown:
+		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+		// }
+	})
+}
+
+func (cb *CheckBox) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "icon0", "icon1":
+		icon := child.Embed(TypeWidgetBase).(*WidgetBase) // is svg icon so can't access directly
+		icon.AddStyleFunc(StyleFuncParent(cb), func() {
+			icon.Style.Width.SetEm(1.5)
+			icon.Style.Height.SetEm(1.5)
+			icon.Style.Margin.Set()
+			icon.Style.Padding.Set()
+			icon.Style.BackgroundColor.SetColor(color.Transparent)
+		})
+	case "space":
+		space := child.(*Space)
+		space.AddStyleFunc(StyleFuncParent(cb), func() {
+			space.Style.Width.SetCh(0.1)
+
+		})
+	case "label":
+		label := child.(*Label)
+		label.AddStyleFunc(StyleFuncParent(cb), func() {
+			label.Style.Margin.Set()
+			label.Style.Padding.Set()
+			label.Style.AlignV = gist.AlignMiddle
+		})
+	}
+}
+
 func (cb *CheckBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*CheckBox)
 	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
@@ -989,7 +1041,6 @@ func (cb *CheckBox) Init2D() {
 	cb.SetCheckable(true)
 	cb.Init2DWidget()
 	cb.This().(ButtonWidget).ConfigParts()
-	cb.ConfigStyles()
 }
 
 func (cb *CheckBox) StyleParts() {
@@ -1076,49 +1127,4 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 	} else {
 		ist.StackTop = 1
 	}
-}
-
-func (cb *CheckBox) ConfigStyles() {
-	cb.AddStyleFunc(StyleFuncDefault, func() {
-		cb.Style.Cursor = cursor.HandPointing
-		cb.Style.Text.Align = gist.AlignLeft
-		cb.Style.Color = ColorScheme.OnBackground
-		cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		cb.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
-		cb.Style.Padding.Set(units.Px(1 * Prefs.DensityMul()))
-		cb.Style.Border.Style.Set(gist.BorderNone)
-		// switch cb.State {
-		// case ButtonActive:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		// case ButtonInactive:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		// 	cb.Style.Color.SetColor(ColorScheme.OnBackground.Highlight(30))
-		// case ButtonFocus, ButtonSelected:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
-		// case ButtonHover:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
-		// case ButtonDown:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
-		// }
-	})
-	if stack, ok := cb.Parts.ChildByName("stack", 0).(*Layout); ok {
-		// same style function for both icon on and off
-		icsf := func(icon *WidgetBase) {
-			icon.Style.Width.SetEm(1.5)
-			icon.Style.Height.SetEm(1.5)
-			icon.Style.Margin.Set()
-			icon.Style.Padding.Set()
-			icon.Style.BackgroundColor.SetColor(color.Transparent)
-		}
-		stack.AddChildStyleFunc("icon0", 0, StyleFuncParent(cb), icsf)
-		stack.AddChildStyleFunc("icon1", 1, StyleFuncParent(cb), icsf)
-	}
-	cb.Parts.AddChildStyleFunc("space", 1, StyleFuncParent(cb), func(space *WidgetBase) {
-		space.Style.Width.SetCh(0.1)
-	})
-	cb.Parts.AddChildStyleFunc("label", 2, StyleFuncParent(cb), func(label *WidgetBase) {
-		label.Style.Margin.Set()
-		label.Style.Padding.Set()
-		label.Style.AlignV = gist.AlignMiddle
-	})
 }

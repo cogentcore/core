@@ -57,6 +57,14 @@ func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
 	return parent.AddNewChild(TypeBitmap, name).(*Bitmap)
 }
 
+func (bm *Bitmap) OnInit() {
+	bm.AddStyleFunc(StyleFuncDefault, func() {
+		bm.Style.MinWidth.SetPx(float32(bm.Size.X))
+		bm.Style.MinHeight.SetPx(float32(bm.Size.Y))
+		bm.Style.BackgroundColor.SetColor(ColorScheme.Background)
+	})
+}
+
 func (bm *Bitmap) CopyFieldsFrom(frm any) {
 	fr := frm.(*Bitmap)
 	bm.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
@@ -186,11 +194,6 @@ func (bm *Bitmap) Render2D() {
 	} else {
 		bm.DisconnectAllEvents(AllPris)
 	}
-}
-
-func (bm *Bitmap) Init2D() {
-	bm.Init2DWidget()
-	bm.ConfigStyles()
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -451,12 +454,4 @@ var BitmapProps = ki.Props{
 			},
 		}},
 	},
-}
-
-func (bm *Bitmap) ConfigStyles() {
-	bm.AddStyleFunc(StyleFuncDefault, func() {
-		bm.Style.MinWidth.SetPx(float32(bm.Size.X))
-		bm.Style.MinHeight.SetPx(float32(bm.Size.Y))
-		bm.Style.BackgroundColor.SetColor(ColorScheme.Background)
-	})
 }
