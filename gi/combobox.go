@@ -668,27 +668,27 @@ func (cb *ComboBox) ConfigStyles() {
 			}
 		}
 	})
-	cb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(cb), func(icon *WidgetBase) {
+	cb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParent(cb), func(icon *WidgetBase) {
 		icon.Style.Margin.Set()
 		icon.Style.Padding.Set()
 	})
-	cb.Parts.AddChildStyleFunc("label", 1, StyleFuncParts(cb), func(label *WidgetBase) {
+	cb.Parts.AddChildStyleFunc("label", 1, StyleFuncParent(cb), func(label *WidgetBase) {
 		label.Style.Margin.Set()
 		label.Style.Padding.Set()
 		label.Style.AlignV = gist.AlignMiddle
 	})
-	cb.Parts.AddChildStyleFunc("text", 1, StyleFuncParts(cb), func(text *WidgetBase) {
+	cb.Parts.AddChildStyleFunc("text", 1, StyleFuncParent(cb), func(text *WidgetBase) {
 		text.Style.Border.Style.Set(gist.BorderNone)
 		text.Style.Border.Width.Set()
 	})
-	cb.Parts.AddChildStyleFunc("ind-stretch", 2, StyleFuncParts(cb), func(ins *WidgetBase) {
+	cb.Parts.AddChildStyleFunc("ind-stretch", 2, StyleFuncParent(cb), func(ins *WidgetBase) {
 		if cb.Editable {
 			ins.Style.Width.SetPx(0)
 		} else {
 			ins.Style.Width.SetPx(16 * Prefs.DensityMul())
 		}
 	})
-	cb.Parts.AddChildStyleFunc("indicator", 3, StyleFuncParts(cb), func(ind *WidgetBase) {
+	cb.Parts.AddChildStyleFunc("indicator", 3, StyleFuncParent(cb), func(ind *WidgetBase) {
 		ind.Style.Font.Size.SetEm(1.5)
 		ind.Style.AlignV = gist.AlignMiddle
 	})

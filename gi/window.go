@@ -444,7 +444,7 @@ func NewMainWindow(name, title string, width, height int) *Window {
 	vp := NewViewport2D(width, height)
 	vp.SetName("WinVp")
 	vp.Fill = true
-	vp.AddStyleFunc(StyleFuncParts(win), func() {
+	vp.AddStyleFunc(StyleFuncParent(win), func() {
 		vp.Style.BackgroundColor.SetColor(ColorScheme.Background)
 		vp.Style.Color = ColorScheme.OnBackground // everything inherits this
 	})
@@ -555,7 +555,7 @@ func (w *Window) ConfigInsets() {
 	mainVlay, ok := w.Viewport.ChildByName("main-vlay", 0).(*Layout)
 	if ok {
 		insets := w.OSWin.Insets()
-		mainVlay.AddStyleFunc(StyleFuncParts(w), func() {
+		mainVlay.AddStyleFunc(StyleFuncParent(w), func() {
 			mainVlay.Style.Padding.Set(
 				units.Dot(insets.Top),
 				units.Dot(insets.Right),

@@ -346,7 +346,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
 func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
-	frame.AddStyleFunc(StyleFuncParts(par), func() {
+	frame.AddStyleFunc(StyleFuncParent(par), func() {
 		frame.Style.Border.Style.Set(gist.BorderNone)
 		frame.Style.Border.Radius = gist.BorderRadiusExtraSmall
 		frame.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)

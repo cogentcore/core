@@ -656,7 +656,7 @@ func (dlg *Dialog) ConfigStyles() {
 	})
 	frame, ok := dlg.ChildByName("frame", 0).(*Frame)
 	if ok {
-		frame.AddStyleFunc(StyleFuncParts(dlg), func() {
+		frame.AddStyleFunc(StyleFuncParent(dlg), func() {
 			frame.Style.Border.Style.Set(gist.BorderNone)
 			frame.Style.Padding.Set(units.Px(24 * Prefs.DensityMul()))
 			frame.Style.BackgroundColor.SetColor(dlg.Style.BackgroundColor.Color)
@@ -666,13 +666,13 @@ func (dlg *Dialog) ConfigStyles() {
 			// frame.Style.BoxShadow.Blur.SetPx(4)
 			// frame.Style.BoxShadow.Color = Colors.Background.Highlight(30)
 		})
-		frame.AddChildStyleFunc("title", 0, StyleFuncParts(dlg), func(title *WidgetBase) {
+		frame.AddChildStyleFunc("title", 0, StyleFuncParent(dlg), func(title *WidgetBase) {
 			title.Style.MaxWidth.SetPx(-1)
 			title.Style.AlignH = gist.AlignCenter
 			title.Style.AlignV = gist.AlignTop
 			title.Style.BackgroundColor.SetColor(color.Transparent)
 		})
-		frame.AddChildStyleFunc("prompt", 0, StyleFuncParts(dlg), func(prompt *WidgetBase) {
+		frame.AddChildStyleFunc("prompt", 0, StyleFuncParent(dlg), func(prompt *WidgetBase) {
 			prompt.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
 			prompt.Style.MaxWidth.SetPx(-1)
 			prompt.Style.Width.SetCh(30)
@@ -681,7 +681,7 @@ func (dlg *Dialog) ConfigStyles() {
 			prompt.Style.Color = ColorScheme.OnSurfaceVariant
 			prompt.Style.BackgroundColor.SetColor(color.Transparent)
 		})
-		frame.AddChildStyleFunc("buttons", 1, StyleFuncParts(dlg), func(btsw *WidgetBase) {
+		frame.AddChildStyleFunc("buttons", 1, StyleFuncParent(dlg), func(btsw *WidgetBase) {
 			bts := btsw.This().(*Layout)
 			bts.Spacing.SetPx(8 * Prefs.DensityMul())
 		})

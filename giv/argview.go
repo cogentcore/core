@@ -141,7 +141,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl.Text = ad.Name
 		lbl.Tooltip = ad.Desc
 		widg := sg.Child((i * 2) + 1).(*gi.WidgetBase)
-		widg.AddStyleFunc(gi.StyleFuncParts(av), func() {
+		widg.AddStyleFunc(gi.StyleFuncParent(av), func() {
 			av.Style.AlignH = gist.AlignCenter
 		})
 		ad.View.ConfigWidget(widg)
@@ -171,12 +171,12 @@ func (av *ArgView) ConfigStyles() {
 		av.Style.MaxWidth.SetPx(-1)
 		av.Style.MaxHeight.SetPx(-1)
 	})
-	av.AddChildStyleFunc("title", 0, gi.StyleFuncParts(av), func(title *gi.WidgetBase) {
+	av.AddChildStyleFunc("title", 0, gi.StyleFuncParent(av), func(title *gi.WidgetBase) {
 		title.Style.MaxWidth.SetPx(-1)
 		title.Style.Text.Align = gist.AlignCenter
 		title.Style.AlignV = gist.AlignTop
 	})
-	av.AddChildStyleFunc("args-grid", 1, gi.StyleFuncParts(av), func(grid *gi.WidgetBase) {
+	av.AddChildStyleFunc("args-grid", 1, gi.StyleFuncParent(av), func(grid *gi.WidgetBase) {
 		// setting a pref here is key for giving it a scrollbar in larger context
 		grid.Style.MinWidth.SetEm(1.5)
 		grid.Style.Width.SetEm(1.5)

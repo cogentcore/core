@@ -490,15 +490,15 @@ func (sb *SpinBox) HasFocus2D() bool {
 }
 
 func (sb *SpinBox) ConfigStyles() {
-	sb.Parts.AddChildStyleFunc("text-field", 0, StyleFuncParts(sb), func(tfw *WidgetBase) {
+	sb.Parts.AddChildStyleFunc("text-field", 0, StyleFuncParent(sb), func(tfw *WidgetBase) {
 		tf := tfw.This().(*TextField)
 		tf.Style.MinWidth.SetEm(6)
 	})
-	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(sb), func(space *WidgetBase) {
+	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParent(sb), func(space *WidgetBase) {
 		space.Style.Width.SetCh(0.1)
 	})
 	if buttons, ok := sb.Parts.ChildByName("buttons", 2).(*Layout); ok {
-		buttons.AddStyleFunc(StyleFuncParts(sb), func() {
+		buttons.AddStyleFunc(StyleFuncParent(sb), func() {
 			buttons.Style.AlignV = gist.AlignMiddle
 		})
 		// same style function for both action up and down
@@ -506,7 +506,7 @@ func (sb *SpinBox) ConfigStyles() {
 			act := actw.This().(*Action)
 			act.Style.Font.Size.SetPx(20)
 		}
-		buttons.AddChildStyleFunc("up", 0, StyleFuncParts(sb), btsf)
-		buttons.AddChildStyleFunc("down", 1, StyleFuncParts(sb), btsf)
+		buttons.AddChildStyleFunc("up", 0, StyleFuncParent(sb), btsf)
+		buttons.AddChildStyleFunc("down", 1, StyleFuncParent(sb), btsf)
 	}
 }

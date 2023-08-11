@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"reflect"
 	"strings"
 	"sync"
 
@@ -205,12 +204,12 @@ const (
 	StyleFuncFinal StyleFuncName = "final"
 )
 
-// StyleFuncParts returns a style function name
+// StyleFuncParent returns a style function name
 // that indicates that a style function was set
-// on a part by the given parent in ConfigStyles
+// on a node by the given parent in ConfigStyles
 // as its default style function
-func StyleFuncParts(parent ki.Ki) StyleFuncName {
-	return "parts/" + StyleFuncName(reflect.TypeOf(parent.This()).String())
+func StyleFuncParent(parent ki.Ki) StyleFuncName {
+	return StyleFuncName("parent-" + parent.Path())
 }
 
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
@@ -1021,7 +1020,7 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 // for the given tooltip frame with the given parent.
 // It should be called on tooltips when they are created.
 func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
-	tooltip.AddStyleFunc(StyleFuncParts(par), func() {
+	tooltip.AddStyleFunc(StyleFuncParent(par), func() {
 		tooltip.Style.Border.Style.Set(gist.BorderNone)
 		tooltip.Style.Border.Radius = gist.BorderRadiusExtraSmall
 		tooltip.Style.Padding.Set(units.Px(8 * Prefs.DensityMul()))
@@ -1043,7 +1042,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.Fill = true
 	pvp.SetFlag(int(VpFlagPopup))
 	pvp.SetFlag(int(VpFlagTooltip))
-	pvp.AddStyleFunc(StyleFuncParts(parVp), func() {
+	pvp.AddStyleFunc(StyleFuncParent(parVp), func() {
 		// TOOD: get border radius actually working
 		// without having parent background color workaround
 		pvp.Style.Border.Radius = gist.BorderRadiusExtraSmall
@@ -1058,7 +1057,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 
 	TooltipConfigStyles(&pvp.WidgetBase, frame)
 
-	lbl.AddStyleFunc(StyleFuncParts(&pvp), func() {
+	lbl.AddStyleFunc(StyleFuncParent(&pvp), func() {
 		mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
 		mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 

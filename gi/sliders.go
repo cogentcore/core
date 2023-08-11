@@ -909,7 +909,7 @@ func (sr *Slider) ConfigStyles() {
 		sr.ThumbColor.SetColor(ColorScheme.Primary)
 		// STYTODO: state styles
 	})
-	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(sr), func(icon *WidgetBase) {
+	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParent(sr), func(icon *WidgetBase) {
 		icon.Style.Width.SetEm(1)
 		icon.Style.Height.SetEm(1)
 		icon.Style.Margin.Set()

@@ -281,22 +281,22 @@ func (ac *Action) ConfigStyles() {
 		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(25))
 		// }
 	})
-	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, StyleFuncParts(ac), func(icon *WidgetBase) {
+	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, StyleFuncParent(ac), func(icon *WidgetBase) {
 		if ac.Type == ActionMenu {
 			icon.Style.Font.Size.SetEm(1.5)
 		}
 		icon.Style.Margin.Set()
 		icon.Style.Padding.Set()
 	})
-	ac.Parts.AddChildStyleFunc("space", ki.StartMiddle, StyleFuncParts(ac), func(space *WidgetBase) {
+	ac.Parts.AddChildStyleFunc("space", ki.StartMiddle, StyleFuncParent(ac), func(space *WidgetBase) {
 		space.Style.Width.SetCh(0.5)
 		space.Style.MinWidth.SetCh(0.5)
 	})
-	ac.Parts.AddChildStyleFunc("label", ki.StartMiddle, StyleFuncParts(ac), func(label *WidgetBase) {
+	ac.Parts.AddChildStyleFunc("label", ki.StartMiddle, StyleFuncParent(ac), func(label *WidgetBase) {
 		label.Style.Margin.Set()
 		label.Style.Padding.Set()
 	})
-	ac.Parts.AddChildStyleFunc("indicator", ki.StartMiddle, StyleFuncParts(ac), func(ind *WidgetBase) {
+	ac.Parts.AddChildStyleFunc("indicator", ki.StartMiddle, StyleFuncParent(ac), func(ind *WidgetBase) {
 		if ac.Type == ActionMenu {
 			ind.Style.Font.Size.SetEm(1.5)
 		}
@@ -304,14 +304,14 @@ func (ac *Action) ConfigStyles() {
 		ind.Style.Padding.Set()
 		ind.Style.AlignV = gist.AlignBottom
 	})
-	ac.Parts.AddChildStyleFunc("ind-stretch", ki.StartMiddle, StyleFuncParts(ac), func(ins *WidgetBase) {
+	ac.Parts.AddChildStyleFunc("ind-stretch", ki.StartMiddle, StyleFuncParent(ac), func(ins *WidgetBase) {
 		ins.Style.Width.SetEm(1)
 	})
-	ac.Parts.AddChildStyleFunc("shortcut", ki.StartMiddle, StyleFuncParts(ac), func(short *WidgetBase) {
+	ac.Parts.AddChildStyleFunc("shortcut", ki.StartMiddle, StyleFuncParent(ac), func(short *WidgetBase) {
 		short.Style.Margin.Set()
 		short.Style.Padding.Set()
 	})
-	ac.Parts.AddChildStyleFunc("sc-stretch", ki.StartMiddle, StyleFuncParts(ac), func(scs *WidgetBase) {
+	ac.Parts.AddChildStyleFunc("sc-stretch", ki.StartMiddle, StyleFuncParent(ac), func(scs *WidgetBase) {
 		scs.Style.MinWidth.SetCh(2)
 	})
 }

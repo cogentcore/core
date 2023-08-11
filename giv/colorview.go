@@ -83,7 +83,7 @@ func (cv *ColorView) Config() {
 	}
 	updt := cv.UpdateStart()
 	cv.Lay = gi.LayoutVert
-	cv.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+	cv.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 		cv.Spacing = gi.StdDialogVSpaceUnits
 	})
 	vl := gi.AddNewLayout(cv, "slider-lay", gi.LayoutHoriz)
@@ -186,7 +186,7 @@ func (cv *ColorView) Config() {
 	hexlay := gi.AddNewLayout(nl, "nums-hex-lay", gi.LayoutHoriz)
 
 	hexlbl := gi.AddNewLabel(hexlay, "hexlbl", "Hex")
-	hexlbl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+	hexlbl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 		hexlbl.Style.AlignV = gist.AlignMiddle
 	})
 
@@ -206,7 +206,7 @@ func (cv *ColorView) Config() {
 			cvv.UpdateEnd(updt)
 		}
 	})
-	hex.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+	hex.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 		hex.Style.MinWidth.SetCh(20)
 	})
 
@@ -242,20 +242,20 @@ func (cv *ColorView) Config() {
 		})
 
 	// slider layer
-	vl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+	vl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 		vl.Spacing = gi.StdDialogVSpaceUnits
 	})
 	v := gi.AddNewFrame(vl, "value", gi.LayoutHoriz)
 	sg := gi.AddNewLayout(vl, "slider-grid", gi.LayoutGrid)
 
-	v.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+	v.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 		v.Style.MinWidth.SetEm(6)
 		v.Style.MinHeight.SetEm(6)
 		v.Style.Border.Radius = gist.BorderRadiusFull
 		v.Style.BackgroundColor.SetColor(cv.Color)
 	})
 
-	sg.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+	sg.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 		sg.Style.Columns = 4
 	})
 	rl := gi.AddNewLabel(sg, "rlab", "Red:")
@@ -349,7 +349,7 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+	sl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 		sl.Style.MinWidth.SetCh(20)
 		sl.Style.Width.SetCh(20)
 		sl.Style.MinHeight.SetEm(1)
@@ -414,7 +414,7 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+	sl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 		sl.Style.MinWidth.SetCh(20)
 		sl.Style.Width.SetCh(20)
 		sl.Style.MinHeight.SetEm(1)
@@ -466,14 +466,14 @@ func (cv *ColorView) ConfigPalette() {
 
 	nms := gist.HSLSortedColorNames()
 
-	pg.AddStyleFunc(gi.StyleFuncParts(pg), func() {
+	pg.AddStyleFunc(gi.StyleFuncParent(pg), func() {
 		pg.Style.Columns = 25
 	})
 
 	for _, cn := range nms {
 		c := colornames.Map[cn]
 		cbt := gi.AddNewButton(pg, cn)
-		cbt.AddStyleFunc(gi.StyleFuncParts(cv), func() {
+		cbt.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 			cbt.Style.BackgroundColor.SetColor(c)
 			cbt.Style.MaxHeight.SetEm(1.3)
 			cbt.Style.MaxWidth.SetEm(1.3)
@@ -639,7 +639,7 @@ func (vv *ColorValueView) UpdateWidget() {
 		edack, err := sv.Parts.Children().ElemFromEndTry(0) // action at end, from AddAction above
 		if err == nil {
 			edac := edack.(*gi.Action)
-			edac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+			edac.AddStyleFunc(gi.StyleFuncParent(vv), func() {
 				// we need to display button as non-transparent
 				// so that it can be seen
 				dclr := *clr
@@ -746,7 +746,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.AddStyleFunc(gi.StyleFuncParts(vv), func() {
+	ac.AddStyleFunc(gi.StyleFuncParent(vv), func() {
 		ac.Style.Border.Radius = gist.BorderRadiusFull
 	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {

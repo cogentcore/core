@@ -570,7 +570,7 @@ func (tv *TabView) ConfigStyles() {
 		tv.Style.MaxWidth.SetPx(-1)
 		tv.Style.MaxHeight.SetPx(-1)
 	})
-	tv.AddChildStyleFunc("tabs", 0, StyleFuncParts(tv), func(tabsw *WidgetBase) {
+	tv.AddChildStyleFunc("tabs", 0, StyleFuncParent(tv), func(tabsw *WidgetBase) {
 		tabs := tabsw.This().(*Frame)
 		tabs.Style.MaxWidth.SetPx(-1)
 		tabs.Style.Height.SetEm(1.8)
@@ -585,7 +585,7 @@ func (tv *TabView) ConfigStyles() {
 		tabs.Style.Border.Width.Bottom.SetPx(1)
 		tabs.Style.Border.Color.Bottom = ColorScheme.OutlineVariant
 	})
-	tv.AddChildStyleFunc("frame", 1, StyleFuncParts(tv), func(frame *WidgetBase) {
+	tv.AddChildStyleFunc("frame", 1, StyleFuncParent(tv), func(frame *WidgetBase) {
 		frame.Style.Width.SetEm(10)
 		frame.Style.MinWidth.SetEm(10)
 		frame.Style.MaxWidth.SetPx(-1)
@@ -698,20 +698,20 @@ func (tb *TabButton) ConfigStyles() {
 			tb.Style.Border.Color.Bottom = ColorScheme.Primary
 		}
 	})
-	tb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(tb), func(icon *WidgetBase) {
+	tb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParent(tb), func(icon *WidgetBase) {
 		icon.Style.Width.SetEm(1)
 		icon.Style.Height.SetEm(1)
 		icon.Style.Margin.Set()
 		icon.Style.Padding.Set()
 	})
-	tb.Parts.AddChildStyleFunc("label", 1, StyleFuncParts(tb), func(label *WidgetBase) {
+	tb.Parts.AddChildStyleFunc("label", 1, StyleFuncParent(tb), func(label *WidgetBase) {
 		label.Style.Margin.Set()
 		label.Style.Padding.Set()
 	})
-	tb.Parts.AddChildStyleFunc("close-stretch", 2, StyleFuncParts(tb), func(cls *WidgetBase) {
+	tb.Parts.AddChildStyleFunc("close-stretch", 2, StyleFuncParent(tb), func(cls *WidgetBase) {
 		cls.Style.Width.SetCh(1)
 	})
-	tb.Parts.AddChildStyleFunc("close", 3, StyleFuncParts(tb), func(close *WidgetBase) {
+	tb.Parts.AddChildStyleFunc("close", 3, StyleFuncParent(tb), func(close *WidgetBase) {
 		close.Style.Width.SetEx(0.5)
 		close.Style.Height.SetEx(0.5)
 		close.Style.Margin.Set()
@@ -720,10 +720,10 @@ func (tb *TabButton) ConfigStyles() {
 		close.Style.Border.Radius = gist.BorderRadiusFull
 		close.Style.BackgroundColor.SetColor(color.Transparent)
 	})
-	tb.Parts.AddChildStyleFunc("sc-stretch", 4, StyleFuncParts(tb), func(scs *WidgetBase) {
+	tb.Parts.AddChildStyleFunc("sc-stretch", 4, StyleFuncParent(tb), func(scs *WidgetBase) {
 		scs.Style.MinWidth.SetCh(2)
 	})
-	tb.Parts.AddChildStyleFunc("shortcut", 5, StyleFuncParts(tb), func(shortcut *WidgetBase) {
+	tb.Parts.AddChildStyleFunc("shortcut", 5, StyleFuncParent(tb), func(shortcut *WidgetBase) {
 		shortcut.Style.Margin.Set()
 		shortcut.Style.Padding.Set()
 	})

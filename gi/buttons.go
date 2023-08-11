@@ -780,6 +780,10 @@ type Button struct {
 
 var TypeButton = kit.Types.AddType(&Button{}, ButtonProps)
 
+var ButtonProps = ki.Props{
+	ki.EnumTypeFlag: TypeButtonFlags,
+}
+
 // ButtonTypes is an enum containing the
 // different possible types of buttons
 type ButtonTypes int
@@ -824,21 +828,7 @@ func AddNewButton(parent ki.Ki, name string) *Button {
 	return parent.AddNewChild(TypeButton, name).(*Button)
 }
 
-func (bt *Button) CopyFieldsFrom(frm any) {
-	fr := frm.(*Button)
-	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
-}
-
-var ButtonProps = ki.Props{
-	ki.EnumTypeFlag: TypeButtonFlags,
-}
-
-func (bt *Button) Init2D() {
-	bt.ButtonBase.Init2D()
-	bt.ConfigStyles()
-}
-
-func (bt *Button) ConfigStyles() {
+func (bt *Button) OnInit() {
 	bt.AddStyleFunc(StyleFuncDefault, func() {
 		bt.Style.Cursor = cursor.HandPointing
 		bt.Style.Border.Radius = gist.BorderRadiusFull
@@ -876,34 +866,54 @@ func (bt *Button) ConfigStyles() {
 		}
 		// STYTODO: add state styles for buttons
 	})
-	bt.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(bt), func(icon *WidgetBase) {
-		icon.Style.Width.SetEm(1.125)
-		icon.Style.Height.SetEm(1.125)
-		icon.Style.Margin.Set()
-		icon.Style.Padding.Set()
-	})
-	bt.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(bt), func(space *WidgetBase) {
-		space.Style.Width.SetEm(0.5)
-		space.Style.MinWidth.SetEm(0.5)
-	})
-	bt.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(bt), func(label *WidgetBase) {
-		// need to override so label's default color
-		// doesn't take control on state changes
-		label.Style.Color = bt.Style.Color
-		label.Style.Margin.Set()
-		label.Style.Padding.Set()
-		label.Style.AlignV = gist.AlignMiddle
-	})
-	bt.Parts.AddChildStyleFunc("ind-stretch", 3, StyleFuncParts(bt), func(ins *WidgetBase) {
-		ins.Style.Width.SetEm(0.5)
-	})
-	bt.Parts.AddChildStyleFunc("indicator", 4, StyleFuncParts(bt), func(ind *WidgetBase) {
-		ind.Style.Width.SetEm(1.125)
-		ind.Style.Height.SetEm(1.125)
-		ind.Style.Margin.Set()
-		ind.Style.Padding.Set()
-		ind.Style.AlignV = gist.AlignBottom
-	})
+}
+
+func (bt *Button) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "icon":
+		icon := child.(*Icon)
+		icon.AddStyleFunc(StyleFuncParent(bt), func() {
+			icon.Style.Width.SetEm(1.125)
+			icon.Style.Height.SetEm(1.125)
+			icon.Style.Margin.Set()
+			icon.Style.Padding.Set()
+		})
+	case "space":
+		space := child.(*Space)
+		space.AddStyleFunc(StyleFuncParent(bt), func() {
+			space.Style.Width.SetEm(0.5)
+			space.Style.MinWidth.SetEm(0.5)
+		})
+	case "label":
+		label := child.(*Label)
+		label.AddStyleFunc(StyleFuncParent(bt), func() {
+			// need to override so label's default color
+			// doesn't take control on state changes
+			label.Style.Color = bt.Style.Color
+			label.Style.Margin.Set()
+			label.Style.Padding.Set()
+			label.Style.AlignV = gist.AlignMiddle
+		})
+	case "ind-stretch":
+		ins := child.(*Stretch)
+		ins.AddStyleFunc(StyleFuncParent(bt), func() {
+			ins.Style.Width.SetEm(0.5)
+		})
+	case "indicator":
+		ind := child.(*Icon)
+		ind.AddStyleFunc(StyleFuncParent(bt), func() {
+			ind.Style.Width.SetEm(1.125)
+			ind.Style.Height.SetEm(1.125)
+			ind.Style.Margin.Set()
+			ind.Style.Padding.Set()
+			ind.Style.AlignV = gist.AlignBottom
+		})
+	}
+}
+
+func (bt *Button) CopyFieldsFrom(frm any) {
+	fr := frm.(*Button)
+	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
 ///////////////////////////////////////////////////////////
@@ -1100,13 +1110,13 @@ func (cb *CheckBox) ConfigStyles() {
 			icon.Style.Padding.Set()
 			icon.Style.BackgroundColor.SetColor(color.Transparent)
 		}
-		stack.AddChildStyleFunc("icon0", 0, StyleFuncParts(cb), icsf)
-		stack.AddChildStyleFunc("icon1", 1, StyleFuncParts(cb), icsf)
+		stack.AddChildStyleFunc("icon0", 0, StyleFuncParent(cb), icsf)
+		stack.AddChildStyleFunc("icon1", 1, StyleFuncParent(cb), icsf)
 	}
-	cb.Parts.AddChildStyleFunc("space", 1, StyleFuncParts(cb), func(space *WidgetBase) {
+	cb.Parts.AddChildStyleFunc("space", 1, StyleFuncParent(cb), func(space *WidgetBase) {
 		space.Style.Width.SetCh(0.1)
 	})
-	cb.Parts.AddChildStyleFunc("label", 2, StyleFuncParts(cb), func(label *WidgetBase) {
+	cb.Parts.AddChildStyleFunc("label", 2, StyleFuncParent(cb), func(label *WidgetBase) {
 		label.Style.Margin.Set()
 		label.Style.Padding.Set()
 		label.Style.AlignV = gist.AlignMiddle

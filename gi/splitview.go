@@ -762,7 +762,7 @@ func (sr *Splitter) ConfigStyles() {
 			sr.Style.MinWidth.SetPx(100)
 		}
 	})
-	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(sr), func(icon *WidgetBase) {
+	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParent(sr), func(icon *WidgetBase) {
 		icon.Style.MaxWidth.SetEm(1)
 		icon.Style.MaxHeight.SetEm(5)
 		icon.Style.MinWidth.SetEm(1)

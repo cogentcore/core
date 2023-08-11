@@ -1781,13 +1781,13 @@ func (tf *TextField) ConfigStyles() {
 			tf.Style.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
 		}
 	})
-	tf.Parts.AddChildStyleFunc("lead-icon", 0, StyleFuncParts(tf), func(lead *WidgetBase) {
+	tf.Parts.AddChildStyleFunc("lead-icon", 0, StyleFuncParent(tf), func(lead *WidgetBase) {
 		lead.Style.Font.Size.SetPx(20)
 		lead.Style.Margin.Right.SetPx(16 * Prefs.DensityMul())
 		lead.Style.Color = ColorScheme.OnSurfaceVariant
 		lead.Style.AlignV = gist.AlignMiddle
 	})
-	tf.Parts.AddChildStyleFunc("trail-icon", 1, StyleFuncParts(tf), func(trail *WidgetBase) {
+	tf.Parts.AddChildStyleFunc("trail-icon", 1, StyleFuncParent(tf), func(trail *WidgetBase) {
 		trail.Style.Font.Size.SetPx(20)
 		trail.Style.Margin.Left.SetPx(16 * Prefs.DensityMul())
 		trail.Style.Color = ColorScheme.OnSurfaceVariant
