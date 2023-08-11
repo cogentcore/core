@@ -1504,7 +1504,7 @@ func (n *Node) SetField(field string, val any) error {
 //////////////////////////////////////////////////////////////////////////
 //  Deep Copy / Clone
 
-// note: we use the copy from direction as the receiver is modifed whereas the
+// note: we use the copy from direction as the receiver is modified whereas the
 // from is not and assignment is typically in same direction
 
 // CopyFrom another Ki node.  It is essential that source has Unique names!
