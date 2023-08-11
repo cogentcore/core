@@ -1704,8 +1704,9 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 		}
 		hasFocus = true // doesn't need focus!
 	}
-	if _, ok := evi.(*mouse.MoveEvent); ok {
+	if me, ok := evi.(*mouse.MoveEvent); ok {
 		hasFocus = true // also doesn't need focus (there can be hover events while not focused)
+		w.SetCursor(me.Event.Pos())
 	}
 
 	if (hasFocus || !evi.OnWinFocus()) && !evi.IsProcessed() {
@@ -1788,6 +1789,40 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 	if npop != nil {
 		w.PushPopup(npop)
 	}
+}
+
+// SetCursor sets the cursor based on the given mouse position
+func (w *Window) SetCursor(pos image.Point) {
+	// TODO: need to handle invisible elements
+	maxLevel := 0
+	maxLevelCursor := cursor.Arrow
+	maxLevelElem := &WidgetBase{}
+	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, data any) bool {
+		_, ni := KiToNode2D(k)
+		if ni == nil {
+			// could have nodes further down (eg with menu which is ki.Slice), so continue
+			return ki.Continue
+		}
+		if !ni.PosInWinBBox(pos) {
+			// however, if we are out of bbox, there is no way to get back in
+			return ki.Break
+		}
+		if level < maxLevel {
+			// could have higher level ones further down
+			return ki.Continue
+		}
+		wb, ok := ni.This().Embed(TypeWidgetBase).(*WidgetBase)
+		if !ok {
+			// same logic as with Node2D
+			return ki.Continue
+		}
+		maxLevel = level
+		maxLevelCursor = wb.Style.Cursor
+		maxLevelElem = wb
+		return ki.Continue
+	})
+	fmt.Println("window set cursor to", maxLevelCursor, "with depth", maxLevel, "and elem", maxLevelElem)
+	oswin.TheApp.Cursor(w.OSWin).Set(maxLevelCursor)
 }
 
 // FilterEvent filters repeated laggy events -- key for responsive resize, scroll, etc

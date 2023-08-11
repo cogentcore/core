@@ -1456,7 +1456,7 @@ func (tf *TextField) TextFieldEvents() {
 	tf.HoverTooltipEvent()
 	tf.MouseDragEvent()
 	tf.MouseEvent()
-	tf.MouseFocusEvent()
+	// tf.MouseFocusEvent()
 	tf.KeyChordEvent()
 }
 
@@ -1708,6 +1708,7 @@ func (tf *TextField) Render2D() {
 }
 
 func (tf *TextField) ConnectEvents2D() {
+	tf.WidgetEvents()
 	tf.TextFieldEvents()
 }
 
@@ -1749,6 +1750,7 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 func (tf *TextField) ConfigStyles() {
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyleFunc(StyleFuncDefault, func() {
+		tf.Style.Cursor = cursor.IBeam
 		tf.Style.MinWidth.SetEm(20)
 		tf.CursorWidth.SetPx(1)
 		tf.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))

@@ -428,12 +428,12 @@ func (wb *WidgetBase) OnWidgetMouseFocusEvent(me *mouse.FocusEvent) {
 	if me.Action == mouse.Enter {
 		wb.SetHovered()
 		if cur.Current() != wb.Style.Cursor {
-			cur.Set(wb.Style.Cursor)
+			// cur.Set(wb.Style.Cursor)
 		}
 	} else {
 		wb.ClearHovered()
 		if cur.Current() == wb.Style.Cursor {
-			cur.Set(wb.ParentCursor(cursor.Arrow))
+			// cur.Set(wb.ParentCursor(cursor.Arrow))
 		}
 	}
 }
