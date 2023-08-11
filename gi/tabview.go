@@ -564,7 +564,7 @@ func (tv *TabView) ConfigStyles() {
 		// need border for separators (see RenderTabSeps)
 		tv.Style.Border.Style.Set(gist.BorderSolid)
 		tv.Style.Border.Width.Set(units.Px(1))
-		tv.Style.Border.Color.Set(ColorScheme.Background.Highlight(50))
+		tv.Style.Border.Color.Set(ColorScheme.OutlineVariant)
 		tv.Style.BackgroundColor.SetColor(ColorScheme.Background)
 		tv.Style.Color = ColorScheme.OnBackground
 		tv.Style.MaxWidth.SetPx(-1)
@@ -578,7 +578,12 @@ func (tv *TabView) ConfigStyles() {
 		tabs.Style.Margin.Set()
 		tabs.Style.Padding.Set()
 		// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
-		tabs.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(7))
+		tabs.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+
+		tabs.Style.Border.Style.Set(gist.BorderNone)
+		tabs.Style.Border.Style.Bottom = gist.BorderSolid
+		tabs.Style.Border.Width.Bottom.SetPx(1)
+		tabs.Style.Border.Color.Bottom = ColorScheme.OutlineVariant
 	})
 	tv.AddChildStyleFunc("frame", 1, StyleFuncParts(tv), func(frame *WidgetBase) {
 		frame.Style.Width.SetEm(10)
@@ -623,6 +628,9 @@ func (tb *TabButton) ConfigParts() {
 		return
 	}
 	tb.Action.ConfigParts() // regular
+	if label, ok := tb.Parts.ChildByName("label", 0).(*Label); ok {
+		label.Type = LabelTitleSmall
+	}
 }
 
 func (tb *TabButton) ConfigPartsDeleteButton() {
@@ -636,7 +644,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 	if mods {
 		cls := tb.Parts.Child(clsIdx).(*Action)
 		if tb.Indicator.IsNil() {
-			tb.Indicator = "close"
+			tb.Indicator = icons.Close
 		}
 		tb.StylePart(Node2D(cls))
 
@@ -671,37 +679,23 @@ func (tb *TabButton) ConfigStyles() {
 		tb.Style.MinWidth.SetCh(8)
 		tb.Style.MaxWidth.SetPx(500)
 		tb.Style.MinHeight.SetEm(1.6)
-		tb.Style.Border.Style.Set(gist.BorderNone)
+
 		// tb.Style.Border.Style.Right = gist.BorderSolid
 		// tb.Style.Border.Width.Right.SetPx(1)
 
+		tb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+		tb.Style.Color = ColorScheme.OnSurface
+
 		tb.Style.Border.Radius.Set()
-		tb.Style.Text.Align = gist.AlignLeft
-		tb.Style.Color = ColorScheme.OnBackground
+		tb.Style.Text.Align = gist.AlignCenter
 		tb.Style.Margin.Set()
-		tb.Style.Padding.Set(units.Px(4 * Prefs.DensityMul())) // we go to edge of bar
-		tb.Indicator = icons.Close
-		// need to do selected as a separate thing at the start
-		// so that we can apply additional styles based on state
-		// while selected
-		baseColor := ColorScheme.Background
+		tb.Style.Padding.Set(units.Px(8 * Prefs.DensityMul()))
+
+		tb.Style.Border.Style.Set(gist.BorderNone)
 		if tb.IsSelected() {
-			baseColor = ColorScheme.Tertiary
-		}
-		switch tb.State {
-		case ButtonActive:
-			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(7))
-		case ButtonInactive:
-			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(20))
-			tb.Style.Color = ColorScheme.OnBackground.Highlight(20)
-		case ButtonFocus:
-			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(15))
-		case ButtonHover:
-			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(20))
-		case ButtonDown:
-			tb.Style.BackgroundColor.SetColor(baseColor.Highlight(25))
-		case ButtonSelected:
-			tb.Style.BackgroundColor.SetColor(baseColor)
+			tb.Style.Border.Style.Bottom = gist.BorderSolid
+			tb.Style.Border.Width.Bottom.SetPx(2)
+			tb.Style.Border.Color.Bottom = ColorScheme.Primary
 		}
 	})
 	tb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParts(tb), func(icon *WidgetBase) {

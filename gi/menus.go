@@ -721,8 +721,8 @@ func (sp *Separator) ConfigStyles() {
 		sp.Style.AlignH = gist.AlignCenter
 		sp.Style.Border.Style.Set(gist.BorderSolid)
 		sp.Style.Border.Width.Set(units.Px(1))
-		sp.Style.Border.Color.Set(ColorScheme.Outline)
-		sp.Style.BackgroundColor.SetColor(ColorScheme.Outline)
+		sp.Style.Border.Color.Set(ColorScheme.OutlineVariant)
+		sp.Style.BackgroundColor.SetColor(ColorScheme.OutlineVariant)
 		if sp.Horiz {
 			sp.Style.MaxWidth.SetPx(-1)
 			sp.Style.MinHeight.SetPx(1)
