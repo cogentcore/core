@@ -32,18 +32,7 @@ func InitNode(this Ki) {
 	if n.Ths != this {
 		n.Ths = this
 		n.Ths.OnInit()
-		if !KiHasKiFields(n) {
-			return
-		}
-		fnms := KiFieldNames(n)
-		val := reflect.ValueOf(this).Elem()
-		for _, fnm := range fnms {
-			fldval := val.FieldByName(fnm)
-			fk := kit.PtrValue(fldval).Interface().(Ki)
-			fk.SetFlag(int(IsField))
-			fk.InitName(fk, fnm)
-			SetParent(fk, this)
-		}
+		KiInitKiFields(this)
 	}
 }
 
@@ -134,6 +123,24 @@ func UpdateReset(kn Ki) {
 
 //////////////////////////////////////////////////////////////////
 // Fields
+
+// KiInitKiFields calls Init on all Ki fields
+// within the struct, sets their names to the field name,
+// and sets us as their parent.
+func KiInitKiFields(this Ki) {
+	n := this.AsNode()
+	if KiHasKiFields(n) {
+		fnms := KiFieldNames(n)
+		val := reflect.ValueOf(this).Elem()
+		for _, fnm := range fnms {
+			fldval := val.FieldByName(fnm)
+			fk := kit.PtrValue(fldval).Interface().(Ki)
+			fk.SetFlag(int(IsField))
+			fk.InitName(fk, fnm)
+			SetParent(fk, this)
+		}
+	}
+}
 
 // FieldRoot returns the field root object for this node -- the node that
 // owns the branch of the tree rooted in one of its fields -- i.e., the
