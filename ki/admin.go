@@ -66,7 +66,7 @@ func SetParent(kid Ki, parent Ki) {
 	n := kid.AsNode()
 	n.Par = parent
 	kid.OnAdd()
-	n.FuncUp(0, nil, func(k Ki, level int, data any) bool {
+	n.FuncUpParent(0, nil, func(k Ki, level int, data any) bool {
 		k.OnChildAdded(kid)
 		return Continue
 	})
