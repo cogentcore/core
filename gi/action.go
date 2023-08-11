@@ -73,6 +73,107 @@ func AddNewAction(parent ki.Ki, name string) *Action {
 	return parent.AddNewChild(TypeAction, name).(*Action)
 }
 
+func (ac *Action) OnInit() {
+	ac.AddStyleFunc(StyleFuncDefault, func() {
+		ac.Style.Cursor = cursor.HandPointing
+		ac.Style.Border.Style.Set(gist.BorderNone)
+		ac.Style.Text.Align = gist.AlignCenter
+		ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
+		ac.Style.Color = ColorScheme.OnSurface
+		switch ac.Type {
+		case ActionStandalone:
+			ac.Style.Border.Radius = gist.BorderRadiusFull
+			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
+			ac.Style.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
+			ac.Style.Color = ColorScheme.OnSecondaryContainer
+		case ActionParts:
+			ac.Style.Border.Radius.Set()
+			// ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+			// ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+			ac.Style.BackgroundColor = ac.ParentBackgroundColor()
+		case ActionMenu:
+			ac.Style.Margin.Set()
+			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
+			ac.Style.MaxWidth.SetPx(-1)
+			ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
+		case ActionMenuBar:
+			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
+			ac.Style.Margin.Set()
+			ac.Indicator = icons.None
+		case ActionToolBar:
+			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
+			ac.Style.Margin.Set()
+			ac.Indicator = icons.None
+		}
+		// switch ac.State {
+		// case ButtonActive:
+		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(7))
+		// case ButtonInactive:
+		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(20))
+		// 	ac.Style.Color = ColorScheme.OnBackground.Highlight(20)
+		// case ButtonFocus, ButtonSelected:
+		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(15))
+		// case ButtonHover:
+		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(20))
+		// case ButtonDown:
+		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(25))
+		// }
+	})
+}
+
+func (ac *Action) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "icon":
+		icon := child.(*Icon)
+		icon.AddStyleFunc(StyleFuncParent(ac), func() {
+			if ac.Type == ActionMenu {
+				icon.Style.Font.Size.SetEm(1.5)
+			}
+			icon.Style.Margin.Set()
+			icon.Style.Padding.Set()
+		})
+	case "space":
+		space := child.(*Space)
+		space.AddStyleFunc(StyleFuncParent(ac), func() {
+			space.Style.Width.SetCh(0.5)
+			space.Style.MinWidth.SetCh(0.5)
+		})
+	case "label":
+		label := child.(*Label)
+		label.AddStyleFunc(StyleFuncParent(ac), func() {
+			label.Style.Margin.Set()
+			label.Style.Padding.Set()
+		})
+	case "indicator":
+		ind := child.(*Icon)
+		ind.AddStyleFunc(StyleFuncParent(ac), func() {
+			if ac.Type == ActionMenu {
+				ind.Style.Font.Size.SetEm(1.5)
+			}
+			ind.Style.Margin.Set()
+			ind.Style.Padding.Set()
+			ind.Style.AlignV = gist.AlignBottom
+		})
+	case "ind-stretch":
+		ins := child.(*Stretch)
+		ins.AddStyleFunc(StyleFuncParent(ac), func() {
+			ins.Style.Width.SetEm(1)
+		})
+	case "shortcut":
+		short := child.(*Label)
+		short.AddStyleFunc(StyleFuncParent(ac), func() {
+			short.Style.Margin.Set()
+			short.Style.Padding.Set()
+		})
+	case "sc-stretch":
+		scs := child.(*Stretch)
+		scs.AddStyleFunc(StyleFuncParent(ac), func() {
+			scs.Style.MinWidth.SetCh(2)
+		})
+	}
+}
+
 func (ac *Action) CopyFieldsFrom(frm any) {
 	fr := frm.(*Action)
 	ac.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
@@ -130,7 +231,6 @@ func (ac *Action) ButtonRelease() {
 func (ac *Action) Init2D() {
 	ac.Init2DWidget()
 	ac.ConfigParts()
-	ac.ConfigStyles()
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
@@ -232,86 +332,4 @@ func (ac *Action) UpdateActions() {
 	if ac.Menu != nil {
 		ac.Menu.UpdateActions()
 	}
-}
-
-func (ac *Action) ConfigStyles() {
-	ac.AddStyleFunc(StyleFuncDefault, func() {
-		ac.Style.Cursor = cursor.HandPointing
-		ac.Style.Border.Style.Set(gist.BorderNone)
-		ac.Style.Text.Align = gist.AlignCenter
-		ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
-		ac.Style.Color = ColorScheme.OnSurface
-		switch ac.Type {
-		case ActionStandalone:
-			ac.Style.Border.Radius = gist.BorderRadiusFull
-			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			ac.Style.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
-			ac.Style.Color = ColorScheme.OnSecondaryContainer
-		case ActionParts:
-			ac.Style.Border.Radius.Set()
-			// ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-			// ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-			ac.Style.BackgroundColor = ac.ParentBackgroundColor()
-		case ActionMenu:
-			ac.Style.Margin.Set()
-			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			ac.Style.MaxWidth.SetPx(-1)
-			ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
-		case ActionMenuBar:
-			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
-			ac.Style.Margin.Set()
-			ac.Indicator = icons.None
-		case ActionToolBar:
-			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
-			ac.Style.Margin.Set()
-			ac.Indicator = icons.None
-		}
-		// switch ac.State {
-		// case ButtonActive:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(7))
-		// case ButtonInactive:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(20))
-		// 	ac.Style.Color = ColorScheme.OnBackground.Highlight(20)
-		// case ButtonFocus, ButtonSelected:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(15))
-		// case ButtonHover:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(20))
-		// case ButtonDown:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(25))
-		// }
-	})
-	ac.Parts.AddChildStyleFunc("icon", ki.StartMiddle, StyleFuncParent(ac), func(icon *WidgetBase) {
-		if ac.Type == ActionMenu {
-			icon.Style.Font.Size.SetEm(1.5)
-		}
-		icon.Style.Margin.Set()
-		icon.Style.Padding.Set()
-	})
-	ac.Parts.AddChildStyleFunc("space", ki.StartMiddle, StyleFuncParent(ac), func(space *WidgetBase) {
-		space.Style.Width.SetCh(0.5)
-		space.Style.MinWidth.SetCh(0.5)
-	})
-	ac.Parts.AddChildStyleFunc("label", ki.StartMiddle, StyleFuncParent(ac), func(label *WidgetBase) {
-		label.Style.Margin.Set()
-		label.Style.Padding.Set()
-	})
-	ac.Parts.AddChildStyleFunc("indicator", ki.StartMiddle, StyleFuncParent(ac), func(ind *WidgetBase) {
-		if ac.Type == ActionMenu {
-			ind.Style.Font.Size.SetEm(1.5)
-		}
-		ind.Style.Margin.Set()
-		ind.Style.Padding.Set()
-		ind.Style.AlignV = gist.AlignBottom
-	})
-	ac.Parts.AddChildStyleFunc("ind-stretch", ki.StartMiddle, StyleFuncParent(ac), func(ins *WidgetBase) {
-		ins.Style.Width.SetEm(1)
-	})
-	ac.Parts.AddChildStyleFunc("shortcut", ki.StartMiddle, StyleFuncParent(ac), func(short *WidgetBase) {
-		short.Style.Margin.Set()
-		short.Style.Padding.Set()
-	})
-	ac.Parts.AddChildStyleFunc("sc-stretch", ki.StartMiddle, StyleFuncParent(ac), func(scs *WidgetBase) {
-		scs.Style.MinWidth.SetCh(2)
-	})
 }
