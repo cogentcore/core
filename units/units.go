@@ -290,54 +290,99 @@ var ValueProps = ki.Props{
 	"style-prop": true,
 }
 
-// NewValue creates a new value with given units
+// NewValue creates a new value with given unit type
 func NewValue(val float32, un Units) Value {
-	return Value{val, un, 0.0}
+	return Value{val, un, 0}
 }
 
-// Px creates a new Px value
+// Px creates a new value of type [UnitPx]
 func Px(val float32) Value {
-	return Value{val, UnitPx, 0.0}
+	return Value{val, UnitPx, 0}
 }
 
-// Rem creates a new Rem value
-func Rem(val float32) Value {
-	return Value{val, UnitRem, 0.0}
-}
-
-// Em creates a new Em value
-func Em(val float32) Value {
-	return Value{val, UnitEm, 0.0}
-}
-
-// Ex creates a new Ex value
-func Ex(val float32) Value {
-	return Value{val, UnitEx, 0.0}
-}
-
-// Ch creates a new Ch value
-func Ch(val float32) Value {
-	return Value{val, UnitCh, 0.0}
-}
-
-// Pt creates a new Pt value
-func Pt(val float32) Value {
-	return Value{val, UnitPt, 0.0}
-}
-
-// Pct creates a new Pct value
-func Pct(val float32) Value {
-	return Value{val, UnitPct, 0.0}
-}
-
-// Dp creates a new Dp value
+// Dp creates a new value of type [UnitDp]
 func Dp(val float32) Value {
-	return Value{val, UnitDp, 0.0}
+	return Value{val, UnitDp, 0}
 }
 
-// Dot creates a new Dot value
+// Pct creates a new value of type [UnitPct]
+func Pct(val float32) Value {
+	return Value{val, UnitPct, 0}
+}
+
+// Rem creates a new value of type [UnitRem]
+func Rem(val float32) Value {
+	return Value{val, UnitRem, 0}
+}
+
+// Em creates a new value of type [UnitEm]
+func Em(val float32) Value {
+	return Value{val, UnitEm, 0}
+}
+
+// Ex creates a new value of type [UnitEx]
+func Ex(val float32) Value {
+	return Value{val, UnitEx, 0}
+}
+
+// Ch creates a new value of type [UnitCh]
+func Ch(val float32) Value {
+	return Value{val, UnitCh, 0}
+}
+
+// Vw creates a new value of type [UnitVw]
+func Vw(val float32) Value {
+	return Value{val, UnitVw, 0}
+}
+
+// Vh creates a new value of type [UnitVh]
+func Vh(val float32) Value {
+	return Value{val, UnitVh, 0}
+}
+
+// Vmin creates a new value of type [UnitVmin]
+func Vmin(val float32) Value {
+	return Value{val, UnitVmin, 0}
+}
+
+// Vmax creates a new value of type [UnitVmax]
+func Vmax(val float32) Value {
+	return Value{val, UnitVmax, 0}
+}
+
+// Cm creates a new value of type [UnitCm]
+func Cm(val float32) Value {
+	return Value{val, UnitCm, 0}
+}
+
+// Mm creates a new value of type [UnitMm]
+func Mm(val float32) Value {
+	return Value{val, UnitMm, 0}
+}
+
+// Q creates a new value of type [UnitQ]
+func Q(val float32) Value {
+	return Value{val, UnitQ, 0}
+}
+
+// In creates a new value of type [UnitIn]
+func In(val float32) Value {
+	return Value{val, UnitIn, 0}
+}
+
+// Pc creates a new value of type [UnitPc]
+func Pc(val float32) Value {
+	return Value{val, UnitPc, 0}
+}
+
+// Pt creates a new value of type [UnitPt]
+func Pt(val float32) Value {
+	return Value{val, UnitPt, 0}
+}
+
+// Pc creates a new value of type [UnitDot]
 func Dot(val float32) Value {
-	return Value{val, UnitDot, 0.0}
+	return Value{val, UnitDot, 0}
 }
 
 // Set sets value and units of an existing value

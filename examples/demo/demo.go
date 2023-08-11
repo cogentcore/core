@@ -431,18 +431,24 @@ func makeLayouts(tv *gi.TabView) {
 		layouts.Style.MaxHeight.SetPx(-1)
 	})
 
-	sv := gi.AddNewSplitView(layouts, "sv")
-	sv.Dim = mat32.X
+	vw := gi.AddNewFrame(layouts, "vw", gi.LayoutHoriz)
+	vw.AddStyleFunc(gi.StyleFuncFinal, func() {
+		vw.Style.Width = units.Vw(50)
+		vw.Style.BackgroundColor.SetColor(colors.Red)
+	})
 
-	left := gi.AddNewFrame(sv, "left", gi.LayoutVert)
+	// sv := gi.AddNewSplitView(layouts, "sv")
+	// sv.Dim = mat32.X
 
-	leftTitle := gi.AddNewLabel(left, "leftTitle", "Left")
-	leftTitle.Type = gi.LabelHeadlineMedium
+	// left := gi.AddNewFrame(sv, "left", gi.LayoutVert)
 
-	right := gi.AddNewFrame(sv, "right", gi.LayoutVert)
+	// leftTitle := gi.AddNewLabel(left, "leftTitle", "Left")
+	// leftTitle.Type = gi.LabelHeadlineMedium
 
-	rightTitle := gi.AddNewLabel(right, "rightTitle", "Right")
-	rightTitle.Type = gi.LabelHeadlineMedium
+	// right := gi.AddNewFrame(sv, "right", gi.LayoutVert)
+
+	// rightTitle := gi.AddNewLabel(right, "rightTitle", "Right")
+	// rightTitle.Type = gi.LabelHeadlineMedium
 
 }
 
