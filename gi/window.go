@@ -1793,11 +1793,10 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 
 // SetCursor sets the cursor based on the given mouse position
 func (w *Window) SetCursor(pos image.Point) {
-	// TODO: need to handle invisible elements
 	maxLevel := 0
 	maxLevelCursor := cursor.Arrow
-	maxLevelElem := &WidgetBase{}
-	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, data any) bool {
+
+	fun := func(k ki.Ki, level int, data any) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil {
 			// could have nodes further down (eg with menu which is ki.Slice), so continue
@@ -1807,10 +1806,11 @@ func (w *Window) SetCursor(pos image.Point) {
 			// however, if we are out of bbox, there is no way to get back in
 			return ki.Break
 		}
-		if level < maxLevel {
-			// could have higher level ones further down
+		if !ni.IsVisible() || level < maxLevel {
+			// could have visible or higher level ones further down
 			return ki.Continue
 		}
+
 		wb, ok := ni.This().Embed(TypeWidgetBase).(*WidgetBase)
 		if !ok {
 			// same logic as with Node2D
@@ -1818,10 +1818,24 @@ func (w *Window) SetCursor(pos image.Point) {
 		}
 		maxLevel = level
 		maxLevelCursor = wb.Style.Cursor
-		maxLevelElem = wb
 		return ki.Continue
-	})
-	fmt.Println("window set cursor to", maxLevelCursor, "with depth", maxLevel, "and elem", maxLevelElem)
+	}
+
+	pop := w.CurPopup()
+	if pop == nil {
+		// if no popup, just do on window
+		w.FuncDownMeFirst(0, nil, fun)
+	} else {
+		_, popni := KiToNode2D(pop)
+		if popni == nil || !popni.PosInWinBBox(pos) || PopupIsTooltip(pop) {
+			// if not in popup (or it is a tooltip), do on window
+			w.FuncDownMeFirst(0, nil, fun)
+		} else {
+			// if in popup, do on popup
+			popni.FuncDownMeFirst(0, nil, fun)
+		}
+
+	}
 	oswin.TheApp.Cursor(w.OSWin).Set(maxLevelCursor)
 }
 
