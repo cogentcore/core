@@ -121,7 +121,6 @@ func (cb *ComboBox) ButtonRelease() {
 	if len(cb.ItemsMenu) == 0 {
 		return
 	}
-	oswin.TheApp.Cursor(cb.ParentWindow().OSWin).PopIf(cursor.HandPointing)
 	updt := cb.UpdateStart()
 	cb.SetButtonState(ButtonActive)
 	cb.ButtonSig.Emit(cb.This(), int64(ButtonReleased), nil)
@@ -177,7 +176,6 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 			tx.Type = TextFieldOutlined
 		}
 		tx.SetCompleter(tx, cb.CompleteMatch, cb.CompleteEdit)
-		tx.AddClearAction()
 		if _, err := tx.PropTry("__comboInit"); err != nil {
 			cb.StylePart(Node2D(tx))
 			if icIdx >= 0 {
@@ -623,6 +621,7 @@ func (cb *ComboBox) Init2D() {
 
 func (cb *ComboBox) ConfigStyles() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
+		cb.Style.Cursor = cursor.HandPointing
 		cb.Style.Text.Align = gist.AlignCenter
 		if cb.Editable {
 			cb.Style.Padding.Set()
@@ -683,7 +682,11 @@ func (cb *ComboBox) ConfigStyles() {
 		text.Style.Border.Width.Set()
 	})
 	cb.Parts.AddChildStyleFunc("ind-stretch", 2, StyleFuncParts(cb), func(ins *WidgetBase) {
-		ins.Style.Width.SetPx(16 * Prefs.DensityMul())
+		if cb.Editable {
+			ins.Style.Width.SetPx(0)
+		} else {
+			ins.Style.Width.SetPx(16 * Prefs.DensityMul())
+		}
 	})
 	cb.Parts.AddChildStyleFunc("indicator", 3, StyleFuncParts(cb), func(ind *WidgetBase) {
 		ind.Style.Font.Size.SetEm(1.5)

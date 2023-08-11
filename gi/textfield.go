@@ -1420,22 +1420,6 @@ func (tf *TextField) MouseEvent() {
 	})
 }
 
-func (tf *TextField) MouseFocusEvent() {
-	tf.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tff := recv.Embed(TypeTextField).(*TextField)
-		if tff.IsDisabled() {
-			return
-		}
-		me := d.(*mouse.FocusEvent)
-		me.SetProcessed()
-		if me.Action == mouse.Enter {
-			oswin.TheApp.Cursor(tf.ParentWindow().OSWin).PushIfNot(cursor.IBeam)
-		} else {
-			oswin.TheApp.Cursor(tf.ParentWindow().OSWin).PopIf(cursor.IBeam)
-		}
-	})
-}
-
 func (tf *TextField) KeyChordEvent() {
 	tf.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := recv.Embed(TypeTextField).(*TextField)
@@ -1456,7 +1440,6 @@ func (tf *TextField) TextFieldEvents() {
 	tf.HoverTooltipEvent()
 	tf.MouseDragEvent()
 	tf.MouseEvent()
-	// tf.MouseFocusEvent()
 	tf.KeyChordEvent()
 }
 

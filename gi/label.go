@@ -347,6 +347,7 @@ func (lb *Label) MouseMoveEvent() {
 				break
 			}
 		}
+		// TODO: figure out how to get links to work with new cursor setup
 		if inLink {
 			oswin.TheApp.Cursor(lb.ParentWindow().OSWin).PushIfNot(cursor.HandPointing)
 		} else {
@@ -355,29 +356,10 @@ func (lb *Label) MouseMoveEvent() {
 	})
 }
 
-func (lb *Label) MouseFocusEvent() {
-	if !lb.Selectable {
-		return
-	}
-	lb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		me := data.(*mouse.FocusEvent)
-		me.SetProcessed()
-
-		updt := lb.UpdateStart()
-		if me.Action == mouse.Enter {
-			oswin.TheApp.Cursor(lb.ParentWindow().OSWin).Push(cursor.IBeam)
-		} else {
-			oswin.TheApp.Cursor(lb.ParentWindow().OSWin).PopIf(cursor.IBeam)
-		}
-		lb.UpdateEnd(updt)
-	})
-}
-
 func (lb *Label) LabelEvents() {
 	lb.HoverEvent()
 	lb.MouseEvent()
 	lb.MouseMoveEvent()
-	// lb.MouseFocusEvent()
 }
 
 func (lb *Label) GrabCurBackgroundColor() {

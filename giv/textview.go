@@ -4732,6 +4732,7 @@ func (tv *TextView) MouseMoveEvent() {
 				break
 			}
 		}
+		// TODO: figure out how to handle links with new cursor setup
 		if inLink {
 			oswin.TheApp.Cursor(tv.ParentWindow().OSWin).PushIfNot(cursor.HandPointing)
 		} else {
@@ -4763,12 +4764,8 @@ func (tv *TextView) MouseFocusEvent() {
 		}
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
+		// TODO: is this needed?
 		txf.RefreshIfNeeded()
-		if me.Action == mouse.Enter {
-			oswin.TheApp.Cursor(txf.ParentWindow().OSWin).PushIfNot(cursor.IBeam)
-		} else {
-			oswin.TheApp.Cursor(txf.ParentWindow().OSWin).PopIf(cursor.IBeam)
-		}
 	})
 }
 

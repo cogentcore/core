@@ -412,7 +412,6 @@ func (bb *ButtonBase) OpenMenu() bool {
 	}
 	bb.BBoxMu.RUnlock()
 	if bb.Viewport != nil {
-		oswin.TheApp.Cursor(bb.ParentWindow().OSWin).PopIf(cursor.HandPointing)
 		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Viewport, bb.Text)
 		return true
 	}

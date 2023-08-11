@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -886,6 +887,7 @@ func (sr *Slider) FocusChanged2D(change FocusChanges) {
 
 func (sr *Slider) ConfigStyles() {
 	sr.AddStyleFunc(StyleFuncDefault, func() {
+		sr.Style.Cursor = cursor.HandPointing
 		sr.ThumbSize = units.Px(20)
 
 		sr.StyleBox.BackgroundColor = sr.ParentBackgroundColor()
