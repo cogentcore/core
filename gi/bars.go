@@ -37,6 +37,14 @@ func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
 	return parent.AddNewChild(TypeMenuBar, name).(*MenuBar)
 }
 
+func (mb *MenuBar) OnInit() {
+	mb.AddStyleFunc(StyleFuncDefault, func() {
+		mb.Style.MaxWidth.SetPx(-1)
+		mb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
+		mb.Style.Color = ColorScheme.OnSurface
+	})
+}
+
 func (mb *MenuBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*MenuBar)
 	mb.Layout.CopyFieldsFrom(&fr.Layout)
@@ -66,11 +74,6 @@ func (mb *MenuBar) ShowMenuBar() bool {
 		}
 	}
 	return true
-}
-
-func (mb *MenuBar) Init2D() {
-	mb.Init2DWidget()
-	mb.ConfigStyles()
 }
 
 func (mb *MenuBar) Size2D(iter int) {
@@ -307,14 +310,6 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 	}
 }
 
-func (mb *MenuBar) ConfigStyles() {
-	mb.AddStyleFunc(StyleFuncDefault, func() {
-		mb.Style.MaxWidth.SetPx(-1)
-		mb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
-		mb.Style.Color = ColorScheme.OnSurface
-	})
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // ToolBar
 
@@ -329,6 +324,13 @@ var TypeToolBar = kit.Types.AddType(&ToolBar{}, ToolBarProps)
 // AddNewToolBar adds a new toolbar to given parent node, with given name.
 func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
 	return parent.AddNewChild(TypeToolBar, name).(*ToolBar)
+}
+
+func (tb *ToolBar) OnInit() {
+	tb.AddStyleFunc(StyleFuncDefault, func() {
+		tb.Style.MaxWidth.SetPx(-1)
+		tb.Style.BackgroundColor = tb.ParentBackgroundColor()
+	})
 }
 
 func (tb *ToolBar) CopyFieldsFrom(frm any) {
@@ -388,11 +390,6 @@ func (tb *ToolBar) ToolBarStdRender() {
 	sz := tb.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 	tb.RenderUnlock(rs)
-}
-
-func (tb *ToolBar) Init2D() {
-	tb.Init2DWidget()
-	tb.ConfigStyles()
 }
 
 func (tb *ToolBar) Render2D() {
@@ -501,11 +498,4 @@ func (tb *ToolBar) FindActionByName(name string) (*Action, bool) {
 		}
 	}
 	return nil, false
-}
-
-func (tb *ToolBar) ConfigStyles() {
-	tb.AddStyleFunc(StyleFuncDefault, func() {
-		tb.Style.MaxWidth.SetPx(-1)
-		tb.Style.BackgroundColor = tb.ParentBackgroundColor()
-	})
 }
