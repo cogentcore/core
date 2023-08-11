@@ -66,6 +66,10 @@ func SetParent(kid Ki, parent Ki) {
 	n := kid.AsNode()
 	n.Par = parent
 	kid.OnAdd()
+	n.FuncUp(0, nil, func(k Ki, level int, data any) bool {
+		k.OnChildAdded(kid)
+		return Continue
+	})
 	if parent != nil && !parent.OnlySelfUpdate() {
 		parup := parent.IsUpdating()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {

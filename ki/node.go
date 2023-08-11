@@ -1627,3 +1627,7 @@ func (n *Node) OnInit() {}
 // OnAdd is a placeholder implementation of
 // [Ki.OnAdd] that does nothing.
 func (n *Node) OnAdd() {}
+
+// OnChildAdded is a placeholder implementation of
+// [Ki.OnChildAdded] that does nothing.
+func (n *Node) OnChildAdded(child Ki) {}

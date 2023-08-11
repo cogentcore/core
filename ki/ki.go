@@ -618,22 +618,30 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	// Init events
 
-	// OnInit is called when the object is
+	// OnInit is called when the node is
 	// initialized (ie: through InitName).
-	// It is called before the object is added to the tree,
+	// It is called before the node is added to the tree,
 	// so it will not have any parents or siblings.
-	// It will be called only once in the lifetime of the object.
+	// It will be called only once in the lifetime of the node.
 	// It does nothing by default, but it can be implemented
 	// by higher-level types that want to do something.
 	OnInit()
 
-	// OnAdd is called when the object is added to a parent.
-	// It will be called only oncein the lifetime of the object,
-	// unless the object is moved. It will not be called on root
+	// OnAdd is called when the node is added to a parent.
+	// It will be called only once in the lifetime of the node,
+	// unless the node is moved. It will not be called on root
 	// nodes, as they are never added to a parent.
 	// It does nothing by default, but it can be implemented
 	// by higher-level types that want to do something.
 	OnAdd()
+
+	// OnChildAdded is called when a node is added to
+	// this node or any of its children. When a node is added to
+	// a tree, it calls [OnAdd] and then this function on each of its parents,
+	// going in order from the closest parent to the furthest parent.
+	// This function does nothing by default, but it can be
+	// implemented by higher-level types that want to do something.
+	OnChildAdded(child Ki)
 }
 
 // see node.go for struct implementing this interface
