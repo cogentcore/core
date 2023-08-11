@@ -356,13 +356,13 @@ func (sl *Slice) Config(n Ki, config kit.TypeAndNameList) (mods, updt bool) {
 		if !ok {
 			setMods(n, &mods, &updt)
 			nkid := NewOfType(tn.Type)
+			nkid.SetName(tn.Name)
 			InitNode(nkid)
 			sl.Insert(nkid, i)
 			if n != nil {
 				SetParent(nkid, n)
 				n.SetChildAdded()
 			}
-			nkid.SetName(tn.Name)
 		} else {
 			if kidx != i {
 				setMods(n, &mods, &updt)
