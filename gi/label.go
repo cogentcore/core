@@ -596,8 +596,8 @@ func (lb *Label) ConfigStyles() {
 		case LabelInactive:
 			lb.Style.Font.Opacity = 0.7
 		case LabelSelected:
-			lb.Style.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
-			lb.Style.Color = ColorScheme.OnSecondaryContainer
+			lb.Style.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
+			lb.Style.Color = ColorScheme.OnTertiaryContainer
 		}
 	})
 }
