@@ -740,26 +740,27 @@ func (sr *Slider) OnInit() {
 	sr.Prec = 9
 
 	sr.AddStyleFunc(StyleFuncDefault, func() {
-		sr.Style.Cursor = cursor.HandPointing
 		sr.ThumbSize = units.Px(20)
+		sr.ValueColor.SetColor(ColorScheme.Primary)
+		sr.ThumbColor.SetColor(ColorScheme.Primary)
 
 		sr.StyleBox.BackgroundColor = sr.ParentBackgroundColor()
 		sr.StyleBox.Border.Style.Set(gist.BorderNone)
 
-		sr.Style.Border.Style.Set(gist.BorderNone)
-		sr.Style.Border.Radius = gist.BorderRadiusFull
-		sr.Style.Padding.Set(units.Px(8))
+		s := &sr.Style
+		s.Cursor = cursor.HandPointing
+		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Radius = gist.BorderRadiusFull
+		s.Padding.Set(units.Px(8))
 		if sr.Dim == mat32.X {
-			sr.Style.Width.SetEm(20)
-			sr.Style.Height.SetPx(4)
+			s.Width.SetEm(20)
+			s.Height.SetPx(4)
 		} else {
-			sr.Style.Height.SetEm(20)
-			sr.Style.Width.SetPx(4)
+			s.Height.SetEm(20)
+			s.Width.SetPx(4)
 		}
-		sr.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
-		sr.Style.Color = ColorScheme.OnPrimary
-		sr.ValueColor.SetColor(ColorScheme.Primary)
-		sr.ThumbColor.SetColor(ColorScheme.Primary)
+		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+		s.Color = ColorScheme.OnPrimary
 		// STYTODO: state styles
 	})
 }
@@ -769,10 +770,11 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	case "icon":
 		icon := child.(*Icon)
 		icon.AddStyleFunc(StyleFuncParent(sr), func() {
-			icon.Style.Width.SetEm(1)
-			icon.Style.Height.SetEm(1)
-			icon.Style.Margin.Set()
-			icon.Style.Padding.Set()
+			s := &icon.Style
+			s.Width.SetEm(1)
+			s.Height.SetEm(1)
+			s.Margin.Set()
+			s.Padding.Set()
 		})
 	}
 }
@@ -941,19 +943,21 @@ func (sb *ScrollBar) OnInit() {
 		sb.StyleBox.Border.Style.Set(gist.BorderNone)
 		sb.StyleBox.BackgroundColor = sb.ParentBackgroundColor()
 
-		sb.Style.Border.Style.Set(gist.BorderNone)
-		sb.Style.Border.Radius = gist.BorderRadiusFull
-		if sb.Dim == mat32.X {
-			sb.Style.MinHeight.SetEm(2)
-			sb.Style.MaxWidth.SetPx(-1)
-		} else {
-			sb.Style.MinWidth.SetEm(2)
-			sb.Style.MaxHeight.SetPx(-1)
-		}
-		sb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
-		sb.Style.Color = ColorScheme.OnPrimary
 		sb.ValueColor.SetColor(ColorScheme.Primary)
 		sb.ThumbColor.SetColor(ColorScheme.Primary)
+
+		s := &sb.Style
+		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Radius = gist.BorderRadiusFull
+		if sb.Dim == mat32.X {
+			s.MinHeight.SetEm(2)
+			s.MaxWidth.SetPx(-1)
+		} else {
+			s.MinWidth.SetEm(2)
+			s.MaxHeight.SetPx(-1)
+		}
+		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+		s.Color = ColorScheme.OnPrimary
 		// STYTODO: state styles
 	})
 }

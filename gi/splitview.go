@@ -60,10 +60,12 @@ func AddNewSplitView(parent ki.Ki, name string) *SplitView {
 func (sv *SplitView) OnInit() {
 	sv.AddStyleFunc(StyleFuncDefault, func() {
 		sv.HandleSize.SetPx(10)
-		sv.Style.MaxWidth.SetPx(-1)
-		sv.Style.MaxHeight.SetPx(-1)
-		sv.Style.Margin.Set()
-		sv.Style.Padding.Set()
+
+		s := &sv.Style
+		s.MaxWidth.SetPx(-1)
+		s.MaxHeight.SetPx(-1)
+		s.Margin.Set()
+		s.Padding.Set()
 	})
 }
 
@@ -477,20 +479,21 @@ func (sr *Splitter) OnInit() {
 	sr.AddStyleFunc(StyleFuncDefault, func() {
 		// sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
 
-		sr.Style.Margin.Set()
-		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
-		// sr.Style.BackgroundColor.SetColor(Colors.Accent)
-		sr.Style.Color = ColorScheme.OnBackground
-		// sr.Style.Border.Width.Set(units.Px(1))
-		// sr.Style.Border.Color.Set(Colors.Text)
+		s := &sr.Style
+		s.Margin.Set()
+		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
+		// s.BackgroundColor.SetColor(Colors.Accent)
+		s.Color = ColorScheme.OnBackground
+		// s.Border.Width.Set(units.Px(1))
+		// s.Border.Color.Set(Colors.Text)
 		if sr.Dim == mat32.X {
-			sr.Style.MinWidth.SetPx(2)
-			sr.Style.MinHeight.SetPx(100)
-			sr.Style.Height.SetPx(100)
-			sr.Style.MaxHeight.SetPx(100)
+			s.MinWidth.SetPx(2)
+			s.MinHeight.SetPx(100)
+			s.Height.SetPx(100)
+			s.MaxHeight.SetPx(100)
 		} else {
-			sr.Style.MinHeight.SetPx(2)
-			sr.Style.MinWidth.SetPx(100)
+			s.MinHeight.SetPx(2)
+			s.MinWidth.SetPx(100)
 		}
 	})
 
@@ -501,13 +504,14 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	case "icon":
 		icon := child.(*Icon)
 		icon.AddStyleFunc(StyleFuncParent(sr), func() {
-			icon.Style.MaxWidth.SetEm(1)
-			icon.Style.MaxHeight.SetEm(5)
-			icon.Style.MinWidth.SetEm(1)
-			icon.Style.MinHeight.SetEm(5)
-			icon.Style.Margin.Set()
-			icon.Style.Padding.Set()
-			icon.Style.AlignV = gist.AlignMiddle
+			s := &icon.Style
+			s.MaxWidth.SetEm(1)
+			s.MaxHeight.SetEm(5)
+			s.MinWidth.SetEm(1)
+			s.MinHeight.SetEm(5)
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = gist.AlignMiddle
 		})
 	}
 }

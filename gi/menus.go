@@ -336,14 +336,15 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 // It should be called on menu frames when they are created.
 func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
 	frame.AddStyleFunc(StyleFuncParent(par), func() {
-		frame.Style.Border.Style.Set(gist.BorderNone)
-		frame.Style.Border.Radius = gist.BorderRadiusExtraSmall
-		frame.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
+		s := &frame.Style
+		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Radius = gist.BorderRadiusExtraSmall
+		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
 		// doesn't seem to work; TODO: fix box shadow here
-		// frame.Style.BoxShadow.HOffset.SetPx(2)
-		// frame.Style.BoxShadow.VOffset.SetPx(2)
-		// frame.Style.BoxShadow.Blur.SetPx(2)
-		// frame.Style.BoxShadow.Color = Colors.Background.Highlight(30)
+		// s.BoxShadow.HOffset.SetPx(2)
+		// s.BoxShadow.VOffset.SetPx(2)
+		// s.BoxShadow.Blur.SetPx(2)
+		// s.BoxShadow.Color = Colors.Background.Highlight(30)
 	})
 }
 
@@ -655,20 +656,21 @@ func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
 func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
 	sp.AddStyleFunc(StyleFuncDefault, func() {
-		sp.Style.Margin.Set()
-		sp.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(0))
-		sp.Style.AlignV = gist.AlignCenter
-		sp.Style.AlignH = gist.AlignCenter
-		sp.Style.Border.Style.Set(gist.BorderSolid)
-		sp.Style.Border.Width.Set(units.Px(1))
-		sp.Style.Border.Color.Set(ColorScheme.OutlineVariant)
-		sp.Style.BackgroundColor.SetColor(ColorScheme.OutlineVariant)
+		s := &sp.Style
+		s.Margin.Set()
+		s.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(0))
+		s.AlignV = gist.AlignCenter
+		s.AlignH = gist.AlignCenter
+		s.Border.Style.Set(gist.BorderSolid)
+		s.Border.Width.Set(units.Px(1))
+		s.Border.Color.Set(ColorScheme.OutlineVariant)
+		s.BackgroundColor.SetColor(ColorScheme.OutlineVariant)
 		if sp.Horiz {
-			sp.Style.MaxWidth.SetPx(-1)
-			sp.Style.MinHeight.SetPx(1)
+			s.MaxWidth.SetPx(-1)
+			s.MinHeight.SetPx(1)
 		} else {
-			sp.Style.MaxHeight.SetPx(-1)
-			sp.Style.MinWidth.SetPx(1)
+			s.MaxHeight.SetPx(-1)
+			s.MinWidth.SetPx(1)
 		}
 	})
 }
