@@ -90,6 +90,102 @@ func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
 	return parent.AddNewChild(TypeComboBox, name).(*ComboBox)
 }
 
+func (cb *ComboBox) OnInit() {
+	cb.AddStyleFunc(StyleFuncDefault, func() {
+		cb.Style.Cursor = cursor.HandPointing
+		cb.Style.Text.Align = gist.AlignCenter
+		if cb.Editable {
+			cb.Style.Padding.Set()
+			cb.Style.Padding.Right.SetPx(16 * Prefs.DensityMul())
+		} else {
+			cb.Style.Border.Radius = gist.BorderRadiusExtraSmall
+			cb.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
+		}
+		cb.Style.Color = ColorScheme.OnSurface
+		switch cb.Type {
+		case ComboBoxFilled:
+			cb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+			if cb.Editable {
+				cb.Style.Border.Style.Set(gist.BorderNone)
+				cb.Style.Border.Style.Bottom = gist.BorderSolid
+				cb.Style.Border.Width.Set()
+				cb.Style.Border.Width.Bottom = units.Px(1)
+				cb.Style.Border.Color.Set()
+				cb.Style.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
+				cb.Style.Border.Radius = gist.BorderRadiusExtraSmallTop
+				if tf, ok := cb.Parts.ChildByName("text", 1).(*TextField); ok {
+					switch tf.State {
+					case TextFieldFocus:
+						cb.Style.Border.Width.Bottom = units.Px(2)
+						cb.Style.Border.Color.Bottom = ColorScheme.Primary
+					}
+				}
+
+			}
+		case ComboBoxOutlined:
+			cb.Style.Border.Style.Set(gist.BorderSolid)
+			cb.Style.Border.Width.Set(units.Px(1))
+			cb.Style.Border.Color.Set(ColorScheme.OnSurfaceVariant)
+			cb.Style.BackgroundColor = cb.ParentBackgroundColor()
+			if cb.Editable {
+				cb.Style.Border.Radius = gist.BorderRadiusExtraSmall
+				if tf, ok := cb.Parts.ChildByName("text", 1).(*TextField); ok {
+					switch tf.State {
+					case TextFieldFocus:
+						cb.Style.Border.Width.Set(units.Px(2))
+						cb.Style.Border.Color.Set(ColorScheme.Primary)
+					}
+				}
+			}
+		}
+	})
+}
+
+func (cb *ComboBox) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "icon":
+		icon := child.(*Icon)
+		icon.AddStyleFunc(StyleFuncParent(cb), func() {
+			icon.Style.Margin.Set()
+			icon.Style.Padding.Set()
+		})
+	case "label":
+		label := child.(*Label)
+		label.AddStyleFunc(StyleFuncParent(cb), func() {
+			label.Style.Margin.Set()
+			label.Style.Padding.Set()
+			label.Style.AlignV = gist.AlignMiddle
+		})
+	case "text":
+		text := child.(*TextField)
+		text.Placeholder = cb.Placeholder
+		if cb.Type == ComboBoxFilled {
+			text.Type = TextFieldFilled
+		} else {
+			text.Type = TextFieldOutlined
+		}
+		text.AddStyleFunc(StyleFuncParent(cb), func() {
+			text.Style.Border.Style.Set(gist.BorderNone)
+			text.Style.Border.Width.Set()
+		})
+	case "ind-stretch":
+		ins := child.Embed(TypeWidgetBase).(*WidgetBase) // can be Space or Stretch, so just use WidgetBase
+		ins.AddStyleFunc(StyleFuncParent(cb), func() {
+			if cb.Editable {
+				ins.Style.Width.SetPx(0)
+			} else {
+				ins.Style.Width.SetPx(16 * Prefs.DensityMul())
+			}
+		})
+	case "indicator":
+		ind := child.(*Icon)
+		ind.AddStyleFunc(StyleFuncParent(cb), func() {
+			ind.Style.Font.Size.SetEm(1.5)
+			ind.Style.AlignV = gist.AlignMiddle
+		})
+	}
+}
+
 func (cb *ComboBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*ComboBox)
 	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
@@ -169,12 +265,6 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 	if txIdx >= 0 {
 		tx := cb.Parts.Child(txIdx).(*TextField)
 		tx.SetText(txt)
-		tx.Placeholder = cb.Placeholder
-		if cb.Type == ComboBoxFilled {
-			tx.Type = TextFieldFilled
-		} else {
-			tx.Type = TextFieldOutlined
-		}
 		tx.SetCompleter(tx, cb.CompleteMatch, cb.CompleteEdit)
 		if _, err := tx.PropTry("__comboInit"); err != nil {
 			cb.StylePart(Node2D(tx))
@@ -612,84 +702,4 @@ func (cb *ComboBox) CompleteEdit(data any, text string, cursorPos int, completio
 		NewText:       completion.Text,
 		ForwardDelete: len([]rune(text)),
 	}
-}
-
-func (cb *ComboBox) Init2D() {
-	cb.ButtonBase.Init2D()
-	cb.ConfigStyles()
-}
-
-func (cb *ComboBox) ConfigStyles() {
-	cb.AddStyleFunc(StyleFuncDefault, func() {
-		cb.Style.Cursor = cursor.HandPointing
-		cb.Style.Text.Align = gist.AlignCenter
-		if cb.Editable {
-			cb.Style.Padding.Set()
-			cb.Style.Padding.Right.SetPx(16 * Prefs.DensityMul())
-		} else {
-			cb.Style.Border.Radius = gist.BorderRadiusExtraSmall
-			cb.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
-		}
-		cb.Style.Color = ColorScheme.OnSurface
-		switch cb.Type {
-		case ComboBoxFilled:
-			cb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
-			if cb.Editable {
-				cb.Style.Border.Style.Set(gist.BorderNone)
-				cb.Style.Border.Style.Bottom = gist.BorderSolid
-				cb.Style.Border.Width.Set()
-				cb.Style.Border.Width.Bottom = units.Px(1)
-				cb.Style.Border.Color.Set()
-				cb.Style.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
-				cb.Style.Border.Radius = gist.BorderRadiusExtraSmallTop
-				if tf, ok := cb.Parts.ChildByName("text", 1).(*TextField); ok {
-					switch tf.State {
-					case TextFieldFocus:
-						cb.Style.Border.Width.Bottom = units.Px(2)
-						cb.Style.Border.Color.Bottom = ColorScheme.Primary
-					}
-				}
-
-			}
-		case ComboBoxOutlined:
-			cb.Style.Border.Style.Set(gist.BorderSolid)
-			cb.Style.Border.Width.Set(units.Px(1))
-			cb.Style.Border.Color.Set(ColorScheme.OnSurfaceVariant)
-			cb.Style.BackgroundColor = cb.ParentBackgroundColor()
-			if cb.Editable {
-				cb.Style.Border.Radius = gist.BorderRadiusExtraSmall
-				if tf, ok := cb.Parts.ChildByName("text", 1).(*TextField); ok {
-					switch tf.State {
-					case TextFieldFocus:
-						cb.Style.Border.Width.Set(units.Px(2))
-						cb.Style.Border.Color.Set(ColorScheme.Primary)
-					}
-				}
-			}
-		}
-	})
-	cb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParent(cb), func(icon *WidgetBase) {
-		icon.Style.Margin.Set()
-		icon.Style.Padding.Set()
-	})
-	cb.Parts.AddChildStyleFunc("label", 1, StyleFuncParent(cb), func(label *WidgetBase) {
-		label.Style.Margin.Set()
-		label.Style.Padding.Set()
-		label.Style.AlignV = gist.AlignMiddle
-	})
-	cb.Parts.AddChildStyleFunc("text", 1, StyleFuncParent(cb), func(text *WidgetBase) {
-		text.Style.Border.Style.Set(gist.BorderNone)
-		text.Style.Border.Width.Set()
-	})
-	cb.Parts.AddChildStyleFunc("ind-stretch", 2, StyleFuncParent(cb), func(ins *WidgetBase) {
-		if cb.Editable {
-			ins.Style.Width.SetPx(0)
-		} else {
-			ins.Style.Width.SetPx(16 * Prefs.DensityMul())
-		}
-	})
-	cb.Parts.AddChildStyleFunc("indicator", 3, StyleFuncParent(cb), func(ind *WidgetBase) {
-		ind.Style.Font.Size.SetEm(1.5)
-		ind.Style.AlignV = gist.AlignMiddle
-	})
 }
