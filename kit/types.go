@@ -293,7 +293,7 @@ func (tr *TypeRegistry) SetProps(typ reflect.Type, props map[string]any) {
 
 // AllImplementersOf returns a list of all registered types that implement the
 // given interface type at any level of embedding -- must pass a type
-// constructed like this: reflect.TypeOf((*gi.Node2D)(nil)).Elem() --
+// constructed like this: kit.TypeFor[gi.Node2D]() --
 // includeBases indicates whether to include types marked with property of
 // base-type -- typically not useful for user-facing type selection
 func (tr *TypeRegistry) AllImplementersOf(iface reflect.Type, includeBases bool) []reflect.Type {

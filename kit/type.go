@@ -144,3 +144,10 @@ func StringJSON(it any) string {
 	b, _ := json.MarshalIndent(it, "", "  ")
 	return string(b)
 }
+
+// TypeFor returns the [reflect.Type] that represents the type argument T.
+// It is a copy of [reflect.TypeFor], which will likely be added in Go 1.22
+// (see https://github.com/golang/go/issues/60088)
+func TypeFor[T any]() reflect.Type {
+	return reflect.TypeOf((*T)(nil)).Elem()
+}
