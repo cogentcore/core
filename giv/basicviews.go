@@ -11,9 +11,7 @@ import (
 	"time"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -466,11 +464,6 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	mb := vv.Widget.(*gi.Button)
 	mb.Icon = icons.Menu
 	mb.Tooltip, _ = vv.Tag("desc")
-	mb.AddStyleFunc(gi.StyleFuncParent(vv), func() {
-		mb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		mb.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		mb.Style.Border.Radius = gist.BorderRadiusFull
-	})
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -747,10 +740,6 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
-	cb.AddStyleFunc(gi.StyleFuncParent(vv), func() {
-		cb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		cb.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
-	})
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ, false, 50)
@@ -817,10 +806,6 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Node2D) {
 	cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
-	cb.AddStyleFunc(gi.StyleFuncParent(vv), func() {
-		cb.Style.Margin.Set(units.Px(2 * gi.Prefs.DensityMul()))
-		cb.Style.Padding.Set(units.Px(2 * gi.Prefs.DensityMul()))
-	})
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ)
