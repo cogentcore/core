@@ -35,6 +35,41 @@ type ArgView struct {
 
 var TypeArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
 
+func (av *ArgView) OnInit() {
+	av.AddStyleFunc(gi.StyleFuncDefault, func() {
+		av.Style.BackgroundColor.SetColor(gi.ColorScheme.Background)
+		av.Style.Color = gi.ColorScheme.OnBackground
+		av.Style.MaxWidth.SetPx(-1)
+		av.Style.MaxHeight.SetPx(-1)
+	})
+}
+
+func (av *ArgView) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "title":
+		title := child.(*gi.Label)
+		title.Type = gi.LabelTitleLarge
+		av.AddStyleFunc(gi.StyleFuncParent(av), func() {
+			title.Style.MaxWidth.SetPx(-1)
+			title.Style.Text.Align = gist.AlignCenter
+			title.Style.AlignV = gist.AlignTop
+		})
+	case "args-grid":
+		grid := child.(*gi.Layout)
+		grid.AddStyleFunc(gi.StyleFuncParent(av), func() {
+			// setting a pref here is key for giving it a scrollbar in larger context
+			grid.Style.MinWidth.SetEm(1.5)
+			grid.Style.Width.SetEm(1.5)
+			grid.Style.MaxWidth.SetPx(-1) // for this to work, ALL layers above need it too
+			grid.Style.MinHeight.SetEm(10)
+			grid.Style.Height.SetEm(10)
+			grid.Style.MaxHeight.SetPx(-1)            // for this to work, ALL layers above need it too
+			grid.Style.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+			grid.Style.Columns = 2
+		})
+	}
+}
+
 func (av *ArgView) Disconnect() {
 	av.Frame.Disconnect()
 	av.ViewSig.DisconnectAll()
@@ -42,15 +77,6 @@ func (av *ArgView) Disconnect() {
 
 var ArgViewProps = ki.Props{
 	ki.EnumTypeFlag: gi.TypeNodeFlags,
-	// "background-color": &gi.Prefs.Colors.Background,
-	// "color":            &gi.Prefs.Colors.Font,
-	// "max-width":        -1,
-	// "max-height":       -1,
-	// "#title": ki.Props{
-	// 	"max-width":      -1,
-	// 	"text-align":     gist.AlignCenter,
-	// 	"vertical-align": gist.AlignTop,
-	// },
 }
 
 // SetArgs sets the source args that we are viewing -- rebuilds the children
@@ -157,34 +183,4 @@ func (av *ArgView) UpdateArgs() {
 		ad.View.UpdateWidget()
 	}
 	av.UpdateEnd(updt)
-}
-
-func (av *ArgView) Init2D() {
-	av.Init2DWidget()
-	av.ConfigStyles()
-}
-
-func (av *ArgView) ConfigStyles() {
-	av.AddStyleFunc(gi.StyleFuncDefault, func() {
-		av.Style.BackgroundColor.SetColor(gi.ColorScheme.Background)
-		av.Style.Color = gi.ColorScheme.OnBackground
-		av.Style.MaxWidth.SetPx(-1)
-		av.Style.MaxHeight.SetPx(-1)
-	})
-	av.AddChildStyleFunc("title", 0, gi.StyleFuncParent(av), func(title *gi.WidgetBase) {
-		title.Style.MaxWidth.SetPx(-1)
-		title.Style.Text.Align = gist.AlignCenter
-		title.Style.AlignV = gist.AlignTop
-	})
-	av.AddChildStyleFunc("args-grid", 1, gi.StyleFuncParent(av), func(grid *gi.WidgetBase) {
-		// setting a pref here is key for giving it a scrollbar in larger context
-		grid.Style.MinWidth.SetEm(1.5)
-		grid.Style.Width.SetEm(1.5)
-		grid.Style.MaxWidth.SetPx(-1) // for this to work, ALL layers above need it too
-		grid.Style.MinHeight.SetEm(10)
-		grid.Style.Height.SetEm(10)
-		grid.Style.MaxHeight.SetPx(-1)            // for this to work, ALL layers above need it too
-		grid.Style.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
-		grid.Style.Columns = 2
-	})
 }
