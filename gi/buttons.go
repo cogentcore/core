@@ -822,38 +822,39 @@ func AddNewButton(parent ki.Ki, name string) *Button {
 
 func (bt *Button) OnInit() {
 	bt.AddStyleFunc(StyleFuncDefault, func() {
-		bt.Style.Cursor = cursor.HandPointing
-		bt.Style.Border.Radius = gist.BorderRadiusFull
-		bt.Style.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
+		s := &bt.Style
+		s.Cursor = cursor.HandPointing
+		s.Border.Radius = gist.BorderRadiusFull
+		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
 		if !bt.Icon.IsNil() {
-			bt.Style.Padding.Left.SetEm(1 * Prefs.DensityMul())
+			s.Padding.Left.SetEm(1 * Prefs.DensityMul())
 		}
 		if bt.Text == "" {
-			bt.Style.Padding.Right.SetEm(1 * Prefs.DensityMul())
+			s.Padding.Right.SetEm(1 * Prefs.DensityMul())
 		}
-		bt.Style.Text.Align = gist.AlignCenter
+		s.Text.Align = gist.AlignCenter
 		switch bt.Type {
 		case ButtonFilled:
-			bt.Style.BackgroundColor.SetColor(ColorScheme.Primary)
-			bt.Style.Color = ColorScheme.OnPrimary
+			s.BackgroundColor.SetColor(ColorScheme.Primary)
+			s.Color = ColorScheme.OnPrimary
 		case ButtonTonal:
-			bt.Style.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
-			bt.Style.Color = ColorScheme.OnSecondaryContainer
+			s.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
+			s.Color = ColorScheme.OnSecondaryContainer
 		case ButtonElevated:
-			bt.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
-			bt.Style.Color = ColorScheme.Primary
+			s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
+			s.Color = ColorScheme.Primary
 		case ButtonOutlined:
-			bt.Style.BackgroundColor.SetColor(ColorScheme.Surface)
-			bt.Style.Color = ColorScheme.Primary
-			bt.Style.Border.Style.Set(gist.BorderSolid)
-			bt.Style.Border.Color.Set(ColorScheme.Outline)
-			bt.Style.Border.Width.Set(units.Px(1))
+			s.BackgroundColor.SetColor(ColorScheme.Surface)
+			s.Color = ColorScheme.Primary
+			s.Border.Style.Set(gist.BorderSolid)
+			s.Border.Color.Set(ColorScheme.Outline)
+			s.Border.Width.Set(units.Px(1))
 		case ButtonText:
-			bt.Style.BackgroundColor = bt.ParentBackgroundColor()
-			bt.Style.Color = ColorScheme.Primary
-			bt.Style.Padding.SetHoriz(units.Em(0.75 * Prefs.DensityMul()))
+			s.BackgroundColor = bt.ParentBackgroundColor()
+			s.Color = ColorScheme.Primary
+			s.Padding.SetHoriz(units.Em(0.75 * Prefs.DensityMul()))
 			if !bt.Icon.IsNil() {
-				bt.Style.Padding.Right.SetPx(1 * Prefs.DensityMul())
+				s.Padding.Right.SetPx(1 * Prefs.DensityMul())
 			}
 		}
 		// STYTODO: add state styles for buttons
@@ -865,40 +866,45 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 	case "icon":
 		icon := child.(*Icon)
 		icon.AddStyleFunc(StyleFuncParent(bt), func() {
-			icon.Style.Width.SetEm(1.125)
-			icon.Style.Height.SetEm(1.125)
-			icon.Style.Margin.Set()
-			icon.Style.Padding.Set()
+			s := &icon.Style
+			s.Width.SetEm(1.125)
+			s.Height.SetEm(1.125)
+			s.Margin.Set()
+			s.Padding.Set()
 		})
 	case "space":
 		space := child.(*Space)
 		space.AddStyleFunc(StyleFuncParent(bt), func() {
-			space.Style.Width.SetEm(0.5)
-			space.Style.MinWidth.SetEm(0.5)
+			s := &space.Style
+			s.Width.SetEm(0.5)
+			s.MinWidth.SetEm(0.5)
 		})
 	case "label":
 		label := child.(*Label)
 		label.AddStyleFunc(StyleFuncParent(bt), func() {
+			s := &label.Style
 			// need to override so label's default color
 			// doesn't take control on state changes
-			label.Style.Color = bt.Style.Color
-			label.Style.Margin.Set()
-			label.Style.Padding.Set()
-			label.Style.AlignV = gist.AlignMiddle
+			s.Color = bt.Style.Color
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = gist.AlignMiddle
 		})
 	case "ind-stretch":
 		ins := child.(*Stretch)
 		ins.AddStyleFunc(StyleFuncParent(bt), func() {
-			ins.Style.Width.SetEm(0.5)
+			s := &ins.Style
+			s.Width.SetEm(0.5)
 		})
 	case "indicator":
 		ind := child.(*Icon)
 		ind.AddStyleFunc(StyleFuncParent(bt), func() {
-			ind.Style.Width.SetEm(1.125)
-			ind.Style.Height.SetEm(1.125)
-			ind.Style.Margin.Set()
-			ind.Style.Padding.Set()
-			ind.Style.AlignV = gist.AlignBottom
+			s := &ind.Style
+			s.Width.SetEm(1.125)
+			s.Height.SetEm(1.125)
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = gist.AlignBottom
 		})
 	}
 }
@@ -928,25 +934,26 @@ func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
 
 func (cb *CheckBox) OnInit() {
 	cb.AddStyleFunc(StyleFuncDefault, func() {
-		cb.Style.Cursor = cursor.HandPointing
-		cb.Style.Text.Align = gist.AlignLeft
-		cb.Style.Color = ColorScheme.OnBackground
-		cb.Style.BackgroundColor = cb.ParentBackgroundColor()
-		cb.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
-		cb.Style.Padding.Set(units.Px(1 * Prefs.DensityMul()))
-		cb.Style.Border.Style.Set(gist.BorderNone)
+		s := &cb.Style
+		s.Cursor = cursor.HandPointing
+		s.Text.Align = gist.AlignLeft
+		s.Color = ColorScheme.OnBackground
+		s.BackgroundColor = cb.ParentBackgroundColor()
+		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
+		s.Padding.Set(units.Px(1 * Prefs.DensityMul()))
+		s.Border.Style.Set(gist.BorderNone)
 		// switch cb.State {
 		// case ButtonActive:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		// 	s.BackgroundColor.SetColor(ColorScheme.Background)
 		// case ButtonInactive:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		// 	cb.Style.Color.SetColor(ColorScheme.OnBackground.Highlight(30))
+		// 	s.BackgroundColor.SetColor(ColorScheme.Background)
+		// 	s.Color.SetColor(ColorScheme.OnBackground.Highlight(30))
 		// case ButtonFocus, ButtonSelected:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
+		// 	s.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
 		// case ButtonHover:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
+		// 	s.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
 		// case ButtonDown:
-		// 	cb.Style.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+		// 	s.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
 		// }
 	})
 }
@@ -956,24 +963,26 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	case "icon0", "icon1":
 		icon := child.Embed(TypeWidgetBase).(*WidgetBase) // is svg icon so can't access directly
 		icon.AddStyleFunc(StyleFuncParent(cb), func() {
-			icon.Style.Width.SetEm(1.5)
-			icon.Style.Height.SetEm(1.5)
-			icon.Style.Margin.Set()
-			icon.Style.Padding.Set()
-			icon.Style.BackgroundColor.SetColor(color.Transparent)
+			s := &icon.Style
+			s.Width.SetEm(1.5)
+			s.Height.SetEm(1.5)
+			s.Margin.Set()
+			s.Padding.Set()
+			s.BackgroundColor.SetColor(color.Transparent)
 		})
 	case "space":
 		space := child.(*Space)
 		space.AddStyleFunc(StyleFuncParent(cb), func() {
-			space.Style.Width.SetCh(0.1)
-
+			s := &space.Style
+			s.Width.SetCh(0.1)
 		})
 	case "label":
 		label := child.(*Label)
 		label.AddStyleFunc(StyleFuncParent(cb), func() {
-			label.Style.Margin.Set()
-			label.Style.Padding.Set()
-			label.Style.AlignV = gist.AlignMiddle
+			s := &label.Style
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = gist.AlignMiddle
 		})
 	}
 }

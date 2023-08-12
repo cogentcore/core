@@ -59,9 +59,10 @@ func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
 
 func (bm *Bitmap) OnInit() {
 	bm.AddStyleFunc(StyleFuncDefault, func() {
-		bm.Style.MinWidth.SetPx(float32(bm.Size.X))
-		bm.Style.MinHeight.SetPx(float32(bm.Size.Y))
-		bm.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		s := &bm.Style
+		s.MinWidth.SetPx(float32(bm.Size.X))
+		s.MinHeight.SetPx(float32(bm.Size.Y))
+		s.BackgroundColor.SetColor(ColorScheme.Background)
 	})
 }
 

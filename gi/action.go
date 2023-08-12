@@ -73,49 +73,50 @@ func AddNewAction(parent ki.Ki, name string) *Action {
 
 func (ac *Action) OnInit() {
 	ac.AddStyleFunc(StyleFuncDefault, func() {
-		ac.Style.Cursor = cursor.HandPointing
-		ac.Style.Border.Style.Set(gist.BorderNone)
-		ac.Style.Text.Align = gist.AlignCenter
-		ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
-		ac.Style.Color = ColorScheme.OnSurface
+		s := &ac.Style
+		s.Cursor = cursor.HandPointing
+		s.Border.Style.Set(gist.BorderNone)
+		s.Text.Align = gist.AlignCenter
+		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
+		s.Color = ColorScheme.OnSurface
 		switch ac.Type {
 		case ActionStandalone:
-			ac.Style.Border.Radius = gist.BorderRadiusFull
-			ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			ac.Style.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
-			ac.Style.Color = ColorScheme.OnSecondaryContainer
+			s.Border.Radius = gist.BorderRadiusFull
+			s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
+			s.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
+			s.Color = ColorScheme.OnSecondaryContainer
 		case ActionParts:
-			ac.Style.Border.Radius.Set()
-			// ac.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-			// ac.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-			ac.Style.BackgroundColor = ac.ParentBackgroundColor()
+			s.Border.Radius.Set()
+			// s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+			// s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+			s.BackgroundColor = ac.ParentBackgroundColor()
 		case ActionMenu:
-			ac.Style.Margin.Set()
-			ac.Style.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			ac.Style.MaxWidth.SetPx(-1)
-			ac.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
+			s.Margin.Set()
+			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
+			s.MaxWidth.SetPx(-1)
+			s.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
 		case ActionMenuBar:
-			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
-			ac.Style.Margin.Set()
+			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
+			s.Margin.Set()
 			ac.Indicator = icons.None
 		case ActionToolBar:
-			ac.Style.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
-			ac.Style.Margin.Set()
+			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
+			s.Margin.Set()
 			ac.Indicator = icons.None
 		}
 		// switch ac.State {
 		// case ButtonActive:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(7))
+		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(7))
 		// case ButtonInactive:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(20))
-		// 	ac.Style.Color = ColorScheme.OnBackground.Highlight(20)
+		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(20))
+		// 	s.Color = ColorScheme.OnBackground.Highlight(20)
 		// case ButtonFocus, ButtonSelected:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(15))
+		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(15))
 		// case ButtonHover:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(20))
+		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(20))
 		// case ButtonDown:
-		// 	ac.Style.BackgroundColor.SetColor(ac.Style.BackgroundColor.Color.Highlight(25))
+		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(25))
 		// }
 	})
 }

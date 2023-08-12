@@ -48,13 +48,14 @@ func AddNewButtonBox(parent ki.Ki, name string) *ButtonBox {
 
 func (bb *ButtonBox) OnInit() {
 	bb.AddStyleFunc(StyleFuncDefault, func() {
-		bb.Style.Border.Style.Set(gist.BorderNone)
-		bb.Style.Border.Radius.Set(units.Px(2))
-		bb.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		bb.Style.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-		bb.Style.Text.Align = gist.AlignCenter
-		bb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
-		bb.Style.Color = ColorScheme.OnSurface
+		s := &bb.Style
+		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Radius.Set(units.Px(2))
+		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
+		s.Text.Align = gist.AlignCenter
+		s.BackgroundColor.SetColor(ColorScheme.Surface)
+		s.Color = ColorScheme.OnSurface
 	})
 }
 
