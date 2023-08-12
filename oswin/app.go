@@ -192,8 +192,6 @@ const (
 	PlatformsN
 )
 
-//go:generate stringer -type=Platforms
-
 var TypePlatforms = kit.Enums.AddEnum(PlatformsN, kit.NotBitFlag, nil)
 
 // IsMobile returns whether the platform is a mobile platform (iOS or Android)
@@ -215,4 +213,3 @@ const (
 	VirtualKeyboardTypesN
 )
 
-//go:generate stringer -type=VirtualKeyboardTypes

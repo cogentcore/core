@@ -70,7 +70,7 @@ const (
 	ActionsN
 )
 
-//go:generate stringer -type=Actions
+//go:generate stringer -output stringer.go -type=Actions
 
 var TypeActions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 

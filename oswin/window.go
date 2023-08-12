@@ -334,7 +334,6 @@ const (
 	WindowFlagsN
 )
 
-//go:generate stringer -type=WindowFlags
 
 var TypeWindowFlags = kit.Enums.AddEnum(WindowFlagsN, kit.BitFlag, nil)
 

@@ -132,7 +132,6 @@ const (
 	EventTypeN
 )
 
-//go:generate stringer -type=EventType
 
 var TypeEventType = kit.Enums.AddEnum(EventTypeN, kit.NotBitFlag, nil)
 

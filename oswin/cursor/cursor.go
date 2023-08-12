@@ -77,7 +77,7 @@ const (
 	ShapesN
 )
 
-//go:generate stringer -type=Shapes
+//go:generate stringer -output stringer.go -type=Shapes
 
 var TypeShapes = kit.Enums.AddEnum(ShapesN, kit.NotBitFlag, nil)
 

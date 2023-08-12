@@ -211,8 +211,6 @@ const (
 	ActionsN
 )
 
-//go:generate stringer -type=Actions
-
 var TypeActions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 
 // Modifiers are used as bitflags representing a set of modifier keys -- see
@@ -228,9 +226,9 @@ const (
 	ModifiersN
 )
 
-//go:generate stringer -type=Modifiers
-
 var TypeModifiers = kit.Enums.AddEnum(ModifiersN, kit.BitFlag, nil)
+
+//go:generate stringer -output stringer.go -type=Actions,Modifiers
 
 // ModsString returns the string representation of the modifiers
 func ModsString(mods int32) string {
@@ -408,8 +406,8 @@ const (
 	CodeCompose Codes = 0x10000
 )
 
-// note: have to use official go stringer for this, not custom one, which doesn't currently
-// handle discontinuities
+// TODO: currently have to use official go stringer for this,
+// not custom one, which doesn't currently handle discontinuities
 // // go: generate stringer -type=Codes
 
 // TODO: Given we use runes outside the unicode space, should we provide a

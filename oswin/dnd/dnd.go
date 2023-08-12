@@ -148,8 +148,6 @@ const (
 	ActionsN
 )
 
-//go:generate stringer -type=Actions
-
 var TypeActions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 
 // DropMods indicates the modifier associated with the drop action (affected by
@@ -181,7 +179,7 @@ const (
 	DropModsN
 )
 
-//go:generate stringer -type=DropMods
+//go:generate stringer -output stringer.go -type=Actions,DropMods
 
 var TypeDropMods = kit.Enums.AddEnum(DropModsN, kit.NotBitFlag, nil)
 

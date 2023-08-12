@@ -120,7 +120,6 @@ const (
 	ScreenOrientationN
 )
 
-//go:generate stringer -type=ScreenOrientation
 
 var TypeScreenOrientation = kit.Enums.AddEnum(ScreenOrientationN, kit.NotBitFlag, nil)
 

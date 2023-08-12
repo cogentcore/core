@@ -186,8 +186,6 @@ const (
 	ButtonsN
 )
 
-//go:generate stringer -type=Buttons
-
 var TypeButtons = kit.Enums.AddEnum(ButtonsN, kit.NotBitFlag, nil)
 
 // Actions taken with the mouse button -- different ones are applicable to
@@ -208,8 +206,6 @@ const (
 
 	ActionsN
 )
-
-//go:generate stringer -type=Actions
 
 var TypeActions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 
@@ -252,7 +248,7 @@ const (
 	SelectModesN
 )
 
-//go:generate stringer -type=SelectModes
+//go:generate stringer -output stringer.go -type=Buttons,Actions,SelectModes
 
 var TypeSelectModes = kit.Enums.AddEnum(SelectModesN, kit.NotBitFlag, nil)
 
