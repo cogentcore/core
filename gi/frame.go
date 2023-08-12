@@ -32,6 +32,15 @@ func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
 	return fr
 }
 
+func (fr *Frame) OnInit() {
+	fr.AddStyleFunc(StyleFuncDefault, func() {
+		fr.Style.Border.Style.Set(gist.BorderNone)
+		fr.Style.Border.Radius.Set()
+		fr.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		fr.Style.BackgroundColor = fr.ParentBackgroundColor()
+	})
+}
+
 func (fr *Frame) CopyFieldsFrom(frm any) {
 	cp, ok := frm.(*Frame)
 	if !ok {
@@ -136,18 +145,4 @@ func (fr *Frame) Render2D() {
 		fr.SetScrollsOff()
 		fr.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
-}
-
-func (fr *Frame) Init2D() {
-	fr.Init2DWidget()
-	fr.ConfigStyles()
-}
-
-func (fr *Frame) ConfigStyles() {
-	fr.AddStyleFunc(StyleFuncDefault, func() {
-		fr.Style.Border.Style.Set(gist.BorderNone)
-		fr.Style.Border.Radius.Set()
-		fr.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		fr.Style.BackgroundColor = fr.ParentBackgroundColor()
-	})
 }
