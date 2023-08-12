@@ -334,7 +334,6 @@ const (
 	WindowFlagsN
 )
 
-
 var TypeWindowFlags = kit.Enums.AddEnum(WindowFlagsN, kit.BitFlag, nil)
 
 // NewWindowOptions are optional arguments to NewWindow.

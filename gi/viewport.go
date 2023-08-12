@@ -192,7 +192,6 @@ func (vp *Viewport2D) ResizeRect(nwrc image.Rectangle) {
 // VpFlags extend NodeBase NodeFlags to hold viewport state
 type VpFlags int
 
-
 var TypeVpFlags = kit.Enums.AddEnumExt(TypeNodeFlags, VpFlagsN, kit.BitFlag, nil)
 
 const (

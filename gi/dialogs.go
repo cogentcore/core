@@ -50,7 +50,6 @@ const (
 	DialogStateN
 )
 
-
 // standard vertical space between elements in a dialog, in Ex units
 var StdDialogVSpace = float32(1)
 var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.UnitEx, Dots: 0}

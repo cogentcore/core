@@ -322,7 +322,6 @@ const (
 	TextFieldStatesN
 )
 
-
 // Style selector names for the different states
 var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}
 

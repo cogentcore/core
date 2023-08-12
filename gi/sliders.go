@@ -215,7 +215,6 @@ const (
 	SliderStatesN
 )
 
-
 // SliderSelectors are Style selector names for the different states
 var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected", ":value", ":box"}
 

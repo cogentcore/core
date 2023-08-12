@@ -263,7 +263,6 @@ const (
 	LightColorsN
 )
 
-
 var TypeLightColors = kit.Enums.AddEnum(LightColorsN, kit.NotBitFlag, nil)
 
 // LightColorMap provides a map of named light colors

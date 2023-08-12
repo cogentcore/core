@@ -106,7 +106,6 @@ const (
 	KeyFunsN
 )
 
-
 var TypeKeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, kit.NotBitFlag, gist.StylePropProps, "KeyFun")
 
 func (kf KeyFuns) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }

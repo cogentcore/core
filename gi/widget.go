@@ -1103,7 +1103,6 @@ const (
 	WidgetSignalsN
 )
 
-
 // EmitSelectedSignal emits the WidgetSelected signal for this widget
 func (wb *WidgetBase) EmitSelectedSignal() {
 	wb.WidgetSig.Emit(wb.This(), int64(WidgetSelected), nil)

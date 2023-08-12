@@ -476,7 +476,6 @@ const (
 	TabViewSignalsN
 )
 
-
 // Config initializes the tab widget children if it hasn't been done yet
 func (tv *TabView) Config() {
 	if len(tv.Kids) != 0 {

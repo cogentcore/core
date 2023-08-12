@@ -690,7 +690,6 @@ func (em *EventMgr) SendHoverEvent(he *mouse.HoverEvent) {
 //////////////////////////////////////////////////////////////////////
 //  Drag-n-Drop = DND
 
-
 // DNDStages indicates stage of DND process
 type DNDStages int32
 

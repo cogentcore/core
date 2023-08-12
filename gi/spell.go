@@ -150,7 +150,6 @@ const (
 	SpellIgnore
 )
 
-
 // CheckWord checks the model to determine if the word is known.
 // automatically checks the Ignore list first.
 func (sc *Spell) CheckWord(word string) ([]string, bool) {

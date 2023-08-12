@@ -838,7 +838,6 @@ const (
 	ArgDataFlagsN
 )
 
-
 var TypeArgDataFlags = kit.Enums.AddEnumAltLower(ArgDataFlagsN, kit.BitFlag, nil, "ArgData")
 
 func (ad *ArgData) HasDef() bool {

@@ -387,7 +387,6 @@ func (sv *SVG) NewUniqueId() int {
 // SVGFlags extend gi.VpFlags to hold SVG node state
 type SVGFlags int
 
-
 var TypeSVGFlags = kit.Enums.AddEnumExt(gi.TypeVpFlags, SVGFlagsN, kit.BitFlag, nil)
 
 const (

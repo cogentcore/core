@@ -132,7 +132,6 @@ const (
 	EventTypeN
 )
 
-
 var TypeEventType = kit.Enums.AddEnum(EventTypeN, kit.NotBitFlag, nil)
 
 // Event is the interface for oswin GUI events.  also includes Stringer

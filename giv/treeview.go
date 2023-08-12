@@ -430,7 +430,6 @@ const (
 	TreeViewStatesN
 )
 
-
 // TreeViewSelectors are Style selector names for the different states:
 var TreeViewSelectors = []string{":active", ":selected", ":focus", ":inactive"}
 

@@ -120,7 +120,6 @@ const (
 	ScreenOrientationN
 )
 
-
 var TypeScreenOrientation = kit.Enums.AddEnum(ScreenOrientationN, kit.NotBitFlag, nil)
 
 // LogicalFmPhysicalDPI computes the logical DPI used in actual screen scaling

@@ -815,7 +815,6 @@ const (
 
 var TypeButtonTypes = kit.Enums.AddEnumAltLower(ButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "Button")
 
-
 // AddNewButton adds a new button to given parent node, with given name.
 func AddNewButton(parent ki.Ki, name string) *Button {
 	return parent.AddNewChild(TypeButton, name).(*Button)

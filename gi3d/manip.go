@@ -36,7 +36,6 @@ const (
 	SelModesN
 )
 
-
 var TypeSelModes = kit.Enums.AddEnum(SelModesN, kit.NotBitFlag, nil)
 
 // SelParams are parameters for selection / manipulation box

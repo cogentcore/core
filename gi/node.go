@@ -80,7 +80,6 @@ func (nb *NodeBase) CopyFieldsFrom(frm any) {
 // less frequently used information -- uses ki Flags field (64 bit capacity)
 type NodeFlags int
 
-
 var TypeNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, NodeFlagsN, kit.BitFlag, nil)
 
 const (

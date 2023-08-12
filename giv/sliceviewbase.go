@@ -333,7 +333,6 @@ const (
 	SliceViewSignalsN
 )
 
-
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (sv *SliceViewBase) UpdateValues() {
 	updt := sv.UpdateStart()

@@ -209,7 +209,6 @@ const (
 // TextBufFlags extend NodeBase NodeFlags to hold TextBuf state
 type TextBufFlags int
 
-
 var TypeTextBufFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, TextBufFlagsN, kit.BitFlag, nil)
 
 const (

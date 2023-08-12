@@ -509,7 +509,6 @@ const (
 	DensitiesN
 )
 
-
 var TypeDensities = kit.Enums.AddEnumAltLower(DensitiesN, kit.NotBitFlag, gist.StylePropProps, "Density")
 
 // DensityMul returns a multiplier centered

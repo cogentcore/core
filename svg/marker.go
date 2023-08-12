@@ -84,7 +84,6 @@ const (
 	MarkerUnitsN
 )
 
-
 var TypeMarkerUnits = kit.Enums.AddEnumAltLower(MarkerUnitsN, kit.NotBitFlag, gist.StylePropProps, "")
 
 func (ev MarkerUnits) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }

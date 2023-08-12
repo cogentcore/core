@@ -83,7 +83,6 @@ const (
 
 var TypeComboBoxTypes = kit.Enums.AddEnumAltLower(ComboBoxTypesN, kit.NotBitFlag, gist.StylePropProps, "ComboBox")
 
-
 // AddNewComboBox adds a new button to given parent node, with given name.
 func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
 	return parent.AddNewChild(TypeComboBox, name).(*ComboBox)

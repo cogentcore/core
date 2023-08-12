@@ -88,7 +88,6 @@ const (
 	CompleteExtend
 )
 
-
 // CompleteWaitMSec is the number of milliseconds to wait before
 // showing the completion menu
 var CompleteWaitMSec = 0

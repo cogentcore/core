@@ -66,7 +66,6 @@ const (
 	StripesN
 )
 
-
 var TypeStripes = kit.Enums.AddEnumAltLower(StripesN, kit.NotBitFlag, gist.StylePropProps, "Stripes")
 
 func (ev Stripes) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }

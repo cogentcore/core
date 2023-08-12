@@ -74,7 +74,6 @@ const (
 	ViewBoxMeetOrSliceN
 )
 
-
 // ViewBoxPreserveAspectRatio determines how to scale the view box within parent Viewport2D
 type ViewBoxPreserveAspectRatio struct {
 

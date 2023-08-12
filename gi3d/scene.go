@@ -684,7 +684,6 @@ var SceneProps = ki.Props{
 // SceneFlags extend gi.NodeFlags to hold 3D node state
 type SceneFlags int
 
-
 var TypeSceneFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, SceneFlagsN, kit.BitFlag, nil)
 
 const (

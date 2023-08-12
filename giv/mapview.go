@@ -106,7 +106,6 @@ const (
 	MapViewSignalsN
 )
 
-
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (mv *MapView) UpdateValues() {
 	// maps have to re-read their values -- can't get pointers

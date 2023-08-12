@@ -153,7 +153,6 @@ var Node3DBaseProps = ki.Props{
 // NodeFlags extend gi.NodeFlags to hold 3D node state
 type NodeFlags int
 
-
 var TypeNodeFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, NodeFlagsN, kit.BitFlag, nil)
 
 const (

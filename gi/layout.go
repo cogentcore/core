@@ -284,7 +284,6 @@ var TypeRowCol = kit.Enums.AddEnumAltLower(RowColN, kit.NotBitFlag, gist.StylePr
 func (ev RowCol) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-
 // LayoutDefault is default obj that can be used when property specifies "default"
 var LayoutDefault Layout
 

@@ -66,7 +66,6 @@ const (
 
 var TypeActionTypes = kit.Enums.AddEnumAltLower(ActionTypesN, kit.NotBitFlag, gist.StylePropProps, "Action")
 
-
 // AddNewAction adds a new action to given parent node, with given name.
 func AddNewAction(parent ki.Ki, name string) *Action {
 	return parent.AddNewChild(TypeAction, name).(*Action)

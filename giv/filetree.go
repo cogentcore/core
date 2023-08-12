@@ -1610,7 +1610,6 @@ const (
 // These flags are stored in the DirFlagMap for persistence.
 type DirFlags int32
 
-
 var TypeDirFlags = kit.Enums.AddEnum(DirFlagsN, kit.BitFlag, nil)
 
 const (

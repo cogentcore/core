@@ -226,8 +226,6 @@ const (
 	WhiteSpacesN
 )
 
-
-
 var TypeWhiteSpaces = kit.Enums.AddEnumAltLower(WhiteSpacesN, kit.NotBitFlag, StylePropProps, "WhiteSpace")
 
 func (ev WhiteSpaces) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }

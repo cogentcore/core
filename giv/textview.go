@@ -260,7 +260,6 @@ var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", 
 // TextViewFlags extend NodeBase NodeFlags to hold TextView state
 type TextViewFlags int
 
-
 var TypeTextViewFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, TextViewFlagsN, kit.BitFlag, nil)
 
 const (

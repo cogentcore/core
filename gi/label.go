@@ -265,7 +265,6 @@ const (
 	LabelStatesN
 )
 
-
 var TypeLabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, kit.NotBitFlag, gist.StylePropProps, "Label")
 
 func (ev LabelStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }

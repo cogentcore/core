@@ -179,7 +179,6 @@ const (
 	PcErr
 )
 
-
 var TypePathCmds = kit.Enums.AddEnumAltLower(PcErr, kit.NotBitFlag, nil, "Pc")
 
 func (ev PathCmds) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
