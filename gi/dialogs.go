@@ -88,6 +88,60 @@ type Dialog struct {
 
 var TypeDialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
+func (dlg *Dialog) OnInit() {
+	dlg.AddStyleFunc(StyleFuncDefault, func() {
+		dlg.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHigh)
+		dlg.Style.Color = ColorScheme.OnSurface
+		dlg.Style.Border.Radius = gist.BorderRadiusExtraLarge
+	})
+}
+
+func (dlg *Dialog) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "frame":
+		frame := child.(*Frame)
+		frame.AddStyleFunc(StyleFuncParent(dlg), func() {
+			frame.Style.Border.Style.Set(gist.BorderNone)
+			frame.Style.Padding.Set(units.Px(24 * Prefs.DensityMul()))
+			frame.Style.BackgroundColor.SetColor(dlg.Style.BackgroundColor.Color)
+			// TODO: add box shadow
+			// frame.Style.BoxShadow.HOffset.SetPx(4)
+			// frame.Style.BoxShadow.VOffset.SetPx(4)
+			// frame.Style.BoxShadow.Blur.SetPx(4)
+			// frame.Style.BoxShadow.Color = Colors.Background.Highlight(30)
+		})
+	case "title":
+		title := child.(*Label)
+		title.Type = LabelHeadlineSmall
+		title.AddStyleFunc(StyleFuncParent(dlg), func() {
+			title.Style.MaxWidth.SetPx(-1)
+			title.Style.AlignH = gist.AlignCenter
+			title.Style.AlignV = gist.AlignTop
+			title.Style.BackgroundColor.SetColor(color.Transparent)
+		})
+	case "prompt":
+		prompt := child.(*Label)
+		prompt.Type = LabelBodyMedium
+		prompt.AddStyleFunc(StyleFuncParent(dlg), func() {
+			prompt.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
+			prompt.Style.MaxWidth.SetPx(-1)
+			prompt.Style.Width.SetCh(30)
+			prompt.Style.Text.Align = gist.AlignLeft
+			prompt.Style.AlignV = gist.AlignTop
+			prompt.Style.Color = ColorScheme.OnSurfaceVariant
+			prompt.Style.BackgroundColor.SetColor(color.Transparent)
+		})
+	case "buttons":
+		bts := child.(*Layout)
+		bts.AddStyleFunc(StyleFuncParent(dlg), func() {
+			bts.Spacing.SetPx(8 * Prefs.DensityMul())
+		})
+	}
+	if button, ok := child.(*Button); ok {
+		button.Type = ButtonText
+	}
+}
+
 func (dlg *Dialog) Disconnect() {
 	dlg.Viewport2D.Disconnect()
 	dlg.DialogSig.DisconnectAll()
@@ -289,7 +343,6 @@ func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	dlg.Title = title
 	if frame != nil {
 		lab := AddNewLabel(frame, "title", title)
-		lab.Type = LabelHeadlineSmall
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}
@@ -311,7 +364,6 @@ func (dlg *Dialog) SetPrompt(prompt string, frame *Frame) *Label {
 	dlg.Prompt = prompt
 	if frame != nil {
 		lab := AddNewLabel(frame, "prompt", prompt)
-		lab.Type = LabelBodyMedium
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}
@@ -389,7 +441,6 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
 		okb := bb.ChildByName("ok", 0).Embed(TypeButton).(*Button)
 		okb.SetText("Ok")
-		okb.Type = ButtonText
 		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(TypeDialog).(*Dialog)
@@ -400,7 +451,6 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if cancel {
 		canb := bb.ChildByName("cancel", 0).Embed(TypeButton).(*Button)
 		canb.SetText("Cancel")
-		canb.Type = ButtonText
 		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(TypeDialog).(*Dialog)
@@ -489,7 +539,6 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 
 func (dlg *Dialog) Init2D() {
 	dlg.Viewport2D.Init2D()
-	dlg.ConfigStyles()
 }
 
 func (dlg *Dialog) HasFocus2D() bool {
@@ -533,7 +582,6 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 		b := AddNewButton(bb, chnm)
 		b.SetProp("__cdSigVal", int64(i))
 		b.SetText(ch)
-		b.Type = ButtonText
 		if chnm == "cancel" {
 			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(ButtonClicked) {
@@ -646,44 +694,4 @@ func StringPromptDialogValue(dlg *Dialog) string {
 	frame := dlg.Frame()
 	tf := frame.ChildByName("str-field", 0).(*TextField)
 	return tf.Text()
-}
-
-func (dlg *Dialog) ConfigStyles() {
-	dlg.AddStyleFunc(StyleFuncDefault, func() {
-		dlg.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHigh)
-		dlg.Style.Color = ColorScheme.OnSurface
-		dlg.Style.Border.Radius = gist.BorderRadiusExtraLarge
-	})
-	frame, ok := dlg.ChildByName("frame", 0).(*Frame)
-	if ok {
-		frame.AddStyleFunc(StyleFuncParent(dlg), func() {
-			frame.Style.Border.Style.Set(gist.BorderNone)
-			frame.Style.Padding.Set(units.Px(24 * Prefs.DensityMul()))
-			frame.Style.BackgroundColor.SetColor(dlg.Style.BackgroundColor.Color)
-			// TODO: add box shadow
-			// frame.Style.BoxShadow.HOffset.SetPx(4)
-			// frame.Style.BoxShadow.VOffset.SetPx(4)
-			// frame.Style.BoxShadow.Blur.SetPx(4)
-			// frame.Style.BoxShadow.Color = Colors.Background.Highlight(30)
-		})
-		frame.AddChildStyleFunc("title", 0, StyleFuncParent(dlg), func(title *WidgetBase) {
-			title.Style.MaxWidth.SetPx(-1)
-			title.Style.AlignH = gist.AlignCenter
-			title.Style.AlignV = gist.AlignTop
-			title.Style.BackgroundColor.SetColor(color.Transparent)
-		})
-		frame.AddChildStyleFunc("prompt", 0, StyleFuncParent(dlg), func(prompt *WidgetBase) {
-			prompt.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
-			prompt.Style.MaxWidth.SetPx(-1)
-			prompt.Style.Width.SetCh(30)
-			prompt.Style.Text.Align = gist.AlignLeft
-			prompt.Style.AlignV = gist.AlignTop
-			prompt.Style.Color = ColorScheme.OnSurfaceVariant
-			prompt.Style.BackgroundColor.SetColor(color.Transparent)
-		})
-		frame.AddChildStyleFunc("buttons", 1, StyleFuncParent(dlg), func(btsw *WidgetBase) {
-			bts := btsw.This().(*Layout)
-			bts.Spacing.SetPx(8 * Prefs.DensityMul())
-		})
-	}
 }
