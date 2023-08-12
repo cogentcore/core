@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mimedata"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -55,6 +56,72 @@ func AddNewColorView(parent ki.Ki, name string) *ColorView {
 	return parent.AddNewChild(TypeColorView, name).(*ColorView)
 }
 
+func (cv *ColorView) OnInit() {
+	cv.Lay = gi.LayoutVert
+	cv.AddStyleFunc(gi.StyleFuncDefault, func() {
+		cv.Style.BackgroundColor = cv.ParentBackgroundColor()
+		cv.Spacing = gi.StdDialogVSpaceUnits
+	})
+}
+
+func (cv *ColorView) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "value":
+		v := child.(*gi.Frame)
+		v.AddStyleFunc(gi.StyleFuncParent(cv), func() {
+			v.Style.MinWidth.SetEm(6)
+			v.Style.MinHeight.SetEm(6)
+			v.Style.Border.Radius = gist.BorderRadiusFull
+			v.Style.BackgroundColor.SetColor(cv.Color)
+		})
+	case "slider-grid":
+		sg := child.(*gi.Layout)
+		sg.AddStyleFunc(gi.StyleFuncParent(cv), func() {
+			sg.Style.Columns = 4
+		})
+	case "hexlbl":
+		hexlbl := child.(*gi.Label)
+		hexlbl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
+			hexlbl.Style.AlignV = gist.AlignMiddle
+		})
+	case "palette":
+		pg := child.(*gi.Layout)
+		pg.AddStyleFunc(gi.StyleFuncParent(pg), func() {
+			pg.Style.Columns = 25
+		})
+	case "nums-hex":
+		hex := child.(*gi.TextField)
+		hex.AddStyleFunc(gi.StyleFuncParent(cv), func() {
+			hex.Style.MinWidth.SetCh(20)
+		})
+	case "num-lay":
+		vl := child.(*gi.Layout)
+		vl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
+			vl.Spacing = gi.StdDialogVSpaceUnits
+		})
+	}
+	if sl, ok := child.(*gi.Slider); ok {
+		sl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
+			sl.Style.MinWidth.SetCh(20)
+			sl.Style.Width.SetCh(20)
+			sl.Style.MinHeight.SetEm(1)
+			sl.Style.Height.SetEm(1)
+			sl.Style.Margin.Set(units.Px(6 * gi.Prefs.DensityMul()))
+		})
+	}
+	if child.Parent().Name() == "palette" {
+		if cbt, ok := child.(*gi.Button); ok {
+			cbt.AddStyleFunc(gi.StyleFuncParent(cv), func() {
+				c := colornames.Map[cbt.Name()]
+				cbt.Style.BackgroundColor.SetColor(c)
+				cbt.Style.MaxHeight.SetEm(1.3)
+				cbt.Style.MaxWidth.SetEm(1.3)
+				cbt.Style.Margin.Set()
+			})
+		}
+	}
+}
+
 func (cv *ColorView) Disconnect() {
 	cv.Frame.Disconnect()
 	cv.ViewSig.DisconnectAll()
@@ -63,8 +130,6 @@ func (cv *ColorView) Disconnect() {
 
 var ColorViewProps = ki.Props{
 	ki.EnumTypeFlag: gi.TypeNodeFlags,
-	// "background-color": &gi.Prefs.Colors.Background,
-	// "color":            &gi.Prefs.Colors.Font,
 }
 
 // SetColor sets the source color
@@ -82,10 +147,6 @@ func (cv *ColorView) Config() {
 		return
 	}
 	updt := cv.UpdateStart()
-	cv.Lay = gi.LayoutVert
-	cv.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-		cv.Spacing = gi.StdDialogVSpaceUnits
-	})
 	vl := gi.AddNewLayout(cv, "slider-lay", gi.LayoutHoriz)
 	nl := gi.AddNewLayout(cv, "num-lay", gi.LayoutVert)
 
@@ -185,10 +246,7 @@ func (cv *ColorView) Config() {
 
 	hexlay := gi.AddNewLayout(nl, "nums-hex-lay", gi.LayoutHoriz)
 
-	hexlbl := gi.AddNewLabel(hexlay, "hexlbl", "Hex")
-	hexlbl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-		hexlbl.Style.AlignV = gist.AlignMiddle
-	})
+	gi.AddNewLabel(hexlay, "hexlbl", "Hex")
 
 	hex := gi.AddNewTextField(hexlay, "nums-hex")
 	hex.Tooltip = "The color in hexadecimal form"
@@ -205,9 +263,6 @@ func (cv *ColorView) Config() {
 			cvv.ViewSig.Emit(cvv.This(), 0, nil)
 			cvv.UpdateEnd(updt)
 		}
-	})
-	hex.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-		hex.Style.MinWidth.SetCh(20)
 	})
 
 	hexcopy := gi.AddNewButton(hexlay, "hexcopy")
@@ -241,23 +296,9 @@ func (cv *ColorView) Config() {
 			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 
-	// slider layer
-	vl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-		vl.Spacing = gi.StdDialogVSpaceUnits
-	})
-	v := gi.AddNewFrame(vl, "value", gi.LayoutHoriz)
+	gi.AddNewFrame(vl, "value", gi.LayoutHoriz)
 	sg := gi.AddNewLayout(vl, "slider-grid", gi.LayoutGrid)
 
-	v.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-		v.Style.MinWidth.SetEm(6)
-		v.Style.MinHeight.SetEm(6)
-		v.Style.Border.Radius = gist.BorderRadiusFull
-		v.Style.BackgroundColor.SetColor(cv.Color)
-	})
-
-	sg.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-		sg.Style.Columns = 4
-	})
 	rl := gi.AddNewLabel(sg, "rlab", "Red:")
 	rs := gi.AddNewSlider(sg, "red")
 	hl := gi.AddNewLabel(sg, "hlab", "Hue:")
@@ -348,12 +389,6 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-		sl.Style.MinWidth.SetCh(20)
-		sl.Style.Width.SetCh(20)
-		sl.Style.MinHeight.SetEm(1)
-		sl.Style.Height.SetEm(1)
-	})
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		slv := send.Embed(gi.TypeSlider).(*gi.Slider)
@@ -412,12 +447,6 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-		sl.Style.MinWidth.SetCh(20)
-		sl.Style.Width.SetCh(20)
-		sl.Style.MinHeight.SetEm(1)
-		sl.Style.Height.SetEm(1)
-	})
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		slv := send.Embed(gi.TypeSlider).(*gi.Slider)
@@ -464,19 +493,8 @@ func (cv *ColorView) ConfigPalette() {
 
 	nms := gist.HSLSortedColorNames()
 
-	pg.AddStyleFunc(gi.StyleFuncParent(pg), func() {
-		pg.Style.Columns = 25
-	})
-
 	for _, cn := range nms {
-		c := colornames.Map[cn]
 		cbt := gi.AddNewButton(pg, cn)
-		cbt.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-			cbt.Style.BackgroundColor.SetColor(c)
-			cbt.Style.MaxHeight.SetEm(1.3)
-			cbt.Style.MaxWidth.SetEm(1.3)
-			cbt.Style.Margin.Set()
-		})
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -541,18 +559,6 @@ func (cv *ColorView) Render2D() {
 		cv.PopBounds()
 	}
 	cv.Frame.Render2D()
-}
-
-func (cv *ColorView) Init2D() {
-	cv.Init2DWidget()
-	cv.ConfigStyles()
-}
-
-func (cv *ColorView) ConfigStyles() {
-	cv.AddStyleFunc(gi.StyleFuncDefault, func() {
-		cv.Style.BackgroundColor.SetColor(gi.ColorScheme.Background)
-		cv.Style.Color = gi.ColorScheme.OnBackground
-	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
