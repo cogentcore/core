@@ -38,7 +38,7 @@ const (
 	CasesN
 )
 
-//go:generate stringer -type=Cases
+//go:generate stringer -output stringer.go -type=Cases
 
 var TypeCases = kit.Enums.AddEnum(CasesN, kit.NotBitFlag, gist.StylePropProps)
 

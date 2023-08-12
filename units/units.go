@@ -102,7 +102,7 @@ const (
 	UnitsN
 )
 
-//go:generate stringer -type=Units
+//go:generate stringer -output stringer.go -type=Units
 
 var TypeUnits = kit.Enums.AddEnumAltLower(UnitsN, kit.NotBitFlag, nil, "Unit")
 

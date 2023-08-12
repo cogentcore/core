@@ -44,7 +44,7 @@ func (t Trilean) Prefix(s string) string {
 	return ""
 }
 
-//go:generate stringer -type=Trilean
+//go:generate stringer -output stringer.go -type=Trilean
 
 var TypeTrilean = kit.Enums.AddEnumAltLower(TrileanN, kit.NotBitFlag, nil, "")
 
