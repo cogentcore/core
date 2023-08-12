@@ -72,6 +72,15 @@ func AddNewSVG(parent ki.Ki, name string) *SVG {
 	return parent.AddNewChild(TypeSVG, name).(*SVG)
 }
 
+func (sv *SVG) OnInit() {
+	sv.AddStyleFunc(gi.StyleFuncDefault, func() {
+		if par := sv.ParentWidget(); par != nil {
+			sv.Pnt.FillStyle.Color.SetColor(par.Style.Color)
+			sv.Pnt.StrokeStyle.Color.SetColor(par.Style.Color)
+		}
+	})
+}
+
 func (sv *SVG) CopyFieldsFrom(frm any) {
 	fr := frm.(*SVG)
 	sv.Viewport2D.CopyFieldsFrom(&fr.Viewport2D)
@@ -133,7 +142,6 @@ func (sv *SVG) Init2D() {
 	sv.SetFlag(int(gi.VpFlagSVG)) // we are an svg type
 	sv.Pnt.Defaults()
 	// sv.Pnt.FontStyle.BackgroundColor.SetColor(gist.White)
-	sv.ConfigStyles()
 }
 
 func (sv *SVG) Size2D(iter int) {
@@ -422,13 +430,4 @@ var SVGProps = ki.Props{
 			},
 		}},
 	},
-}
-
-func (sv *SVG) ConfigStyles() {
-	sv.AddStyleFunc(gi.StyleFuncDefault, func() {
-		if par, ok := sv.Parent().Embed(gi.TypeWidgetBase).(*gi.WidgetBase); ok {
-			sv.Pnt.FillStyle.Color.SetColor(par.Style.Color)
-			sv.Pnt.StrokeStyle.Color.SetColor(par.Style.Color)
-		}
-	})
 }
