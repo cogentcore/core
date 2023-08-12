@@ -72,6 +72,38 @@ func AddNewSpinBox(parent ki.Ki, name string) *SpinBox {
 	return parent.AddNewChild(TypeSpinBox, name).(*SpinBox)
 }
 
+func (sb *SpinBox) OnInit() {
+	sb.Step = 0.1
+	sb.PageStep = 0.2
+	sb.Max = 1.0
+	sb.Prec = 6
+}
+
+func (sb *SpinBox) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "text-field":
+		tf := child.(*TextField)
+		tf.AddStyleFunc(StyleFuncParent(sb), func() {
+			tf.Style.MinWidth.SetEm(6)
+		})
+	case "space":
+		space := child.(*Space)
+		space.AddStyleFunc(StyleFuncParent(sb), func() {
+			space.Style.Width.SetCh(0.1)
+		})
+	case "buttons":
+		buttons := child.(*Layout)
+		buttons.AddStyleFunc(StyleFuncParent(sb), func() {
+			buttons.Style.AlignV = gist.AlignMiddle
+		})
+	case "up", "down":
+		act := child.(*Action)
+		act.AddStyleFunc(StyleFuncParent(sb), func() {
+			act.Style.Font.Size.SetPx(20)
+		})
+	}
+}
+
 func (sb *SpinBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*SpinBox)
 	sb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
@@ -94,13 +126,6 @@ func (sb *SpinBox) Disconnect() {
 
 var SpinBoxProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
-func (sb *SpinBox) OnInit() {
-	sb.Step = 0.1
-	sb.PageStep = 0.2
-	sb.Max = 1.0
-	sb.Prec = 6
 }
 
 // SetMin sets the min limits on the value
@@ -370,7 +395,6 @@ func (sb *SpinBox) SpinBoxEvents() {
 func (sb *SpinBox) Init2D() {
 	sb.Init2DWidget()
 	sb.ConfigParts()
-	sb.ConfigStyles()
 }
 
 // StyleFromProps styles SpinBox-specific fields from ki.Prop properties
@@ -487,26 +511,4 @@ func (sb *SpinBox) HasFocus2D() bool {
 		return false
 	}
 	return sb.ContainsFocus() // needed for getting key events
-}
-
-func (sb *SpinBox) ConfigStyles() {
-	sb.Parts.AddChildStyleFunc("text-field", 0, StyleFuncParent(sb), func(tfw *WidgetBase) {
-		tf := tfw.This().(*TextField)
-		tf.Style.MinWidth.SetEm(6)
-	})
-	sb.Parts.AddChildStyleFunc("space", 1, StyleFuncParent(sb), func(space *WidgetBase) {
-		space.Style.Width.SetCh(0.1)
-	})
-	if buttons, ok := sb.Parts.ChildByName("buttons", 2).(*Layout); ok {
-		buttons.AddStyleFunc(StyleFuncParent(sb), func() {
-			buttons.Style.AlignV = gist.AlignMiddle
-		})
-		// same style function for both action up and down
-		btsf := func(actw *WidgetBase) {
-			act := actw.This().(*Action)
-			act.Style.Font.Size.SetPx(20)
-		}
-		buttons.AddChildStyleFunc("up", 0, StyleFuncParent(sb), btsf)
-		buttons.AddChildStyleFunc("down", 1, StyleFuncParent(sb), btsf)
-	}
 }
