@@ -84,7 +84,6 @@ const (
 	MarkerUnitsN
 )
 
-//go:generate stringer -type=MarkerUnits
 
 var TypeMarkerUnits = kit.Enums.AddEnumAltLower(MarkerUnitsN, kit.NotBitFlag, gist.StylePropProps, "")
 

@@ -179,7 +179,6 @@ const (
 	PcErr
 )
 
-//go:generate stringer -type=PathCmds
 
 var TypePathCmds = kit.Enums.AddEnumAltLower(PcErr, kit.NotBitFlag, nil, "Pc")
 

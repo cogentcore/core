@@ -74,7 +74,6 @@ const (
 	ViewBoxMeetOrSliceN
 )
 
-//go:generate stringer -type=ViewBoxMeetOrSlice
 
 // ViewBoxPreserveAspectRatio determines how to scale the view box within parent Viewport2D
 type ViewBoxPreserveAspectRatio struct {
