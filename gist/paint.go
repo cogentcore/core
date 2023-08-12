@@ -169,8 +169,6 @@ const (
 	FillRulesN
 )
 
-//go:generate stringer -type=FillRules
-
 var TypeFillRules = kit.Enums.AddEnumAltLower(FillRulesN, kit.NotBitFlag, StylePropProps, "FillRules")
 
 func (ev FillRules) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -188,8 +186,6 @@ const (
 
 	VecEffN
 )
-
-//go:generate stringer -type=VectorEffects
 
 var TypeVectorEffects = kit.Enums.AddEnumAltLower(VecEffN, kit.NotBitFlag, StylePropProps, "VecEff")
 
@@ -273,8 +269,6 @@ const (
 	LineCapsN
 )
 
-//go:generate stringer -type=LineCaps
-
 var TypeLineCaps = kit.Enums.AddEnumAltLower(LineCapsN, kit.NotBitFlag, StylePropProps, "LineCaps")
 
 func (ev LineCaps) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -293,8 +287,6 @@ const (
 	LineJoinArcsClip
 	LineJoinsN
 )
-
-//go:generate stringer -type=LineJoins
 
 var TypeLineJoins = kit.Enums.AddEnumAltLower(LineJoinsN, kit.NotBitFlag, StylePropProps, "LineJoins")
 

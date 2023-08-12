@@ -46,8 +46,6 @@ const (
 	ColorSourcesN
 )
 
-//go:generate stringer -type=ColorSources
-
 var TypeColorSources = kit.Enums.AddEnumAltLower(ColorSourcesN, kit.NotBitFlag, StylePropProps, "")
 
 func (ev ColorSources) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }

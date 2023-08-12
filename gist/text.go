@@ -155,8 +155,6 @@ const (
 	UnicodeBidiN
 )
 
-//go:generate stringer -type=UnicodeBidi
-
 var TypeUnicodeBidi = kit.Enums.AddEnumAltLower(UnicodeBidiN, kit.NotBitFlag, StylePropProps, "Bidi")
 
 func (ev UnicodeBidi) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -177,8 +175,6 @@ const (
 	TextDirectionsN
 )
 
-//go:generate stringer -type=TextDirections
-
 var TypeTextDirections = kit.Enums.AddEnumAltLower(TextDirectionsN, kit.NotBitFlag, StylePropProps, "")
 
 func (ev TextDirections) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -193,8 +189,6 @@ const (
 	AnchorEnd
 	TextAnchorsN
 )
-
-//go:generate stringer -type=TextAnchors
 
 var TypeTextAnchors = kit.Enums.AddEnumAltLower(TextAnchorsN, kit.NotBitFlag, StylePropProps, "Anchor")
 
@@ -232,7 +226,7 @@ const (
 	WhiteSpacesN
 )
 
-//go:generate stringer -type=WhiteSpaces
+
 
 var TypeWhiteSpaces = kit.Enums.AddEnumAltLower(WhiteSpacesN, kit.NotBitFlag, StylePropProps, "WhiteSpace")
 

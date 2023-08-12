@@ -195,8 +195,6 @@ const (
 	FontStylesN
 )
 
-//go:generate stringer -type=FontStyles
-
 var TypeFontStyles = kit.Enums.AddEnumAltLower(FontStylesN, kit.NotBitFlag, StylePropProps, "Font")
 
 func (ev FontStyles) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -235,8 +233,6 @@ const (
 	WeightLighter
 	FontWeightsN
 )
-
-//go:generate stringer -type=FontWeights
 
 var TypeFontWeights = kit.Enums.AddEnumAltLower(FontWeightsN, kit.NotBitFlag, StylePropProps, "Weight")
 
@@ -298,8 +294,6 @@ const (
 	FontStretchN
 )
 
-//go:generate stringer -type=FontStretch
-
 var TypeFontStretch = kit.Enums.AddEnumAltLower(FontStretchN, kit.NotBitFlag, StylePropProps, "FontStr")
 
 func (ev FontStretch) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -344,8 +338,6 @@ const (
 	TextDecorationsN
 )
 
-//go:generate stringer -type=TextDecorations
-
 var TypeTextDecorations = kit.Enums.AddEnumAltLower(TextDecorationsN, kit.BitFlag, StylePropProps, "Deco")
 
 func (ev TextDecorations) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -361,8 +353,6 @@ const (
 	BaselineShiftsN
 )
 
-//go:generate stringer -type=BaselineShifts
-
 var TypeBaselineShifts = kit.Enums.AddEnumAltLower(BaselineShiftsN, kit.NotBitFlag, StylePropProps, "Shift")
 
 func (ev BaselineShifts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -376,8 +366,6 @@ const (
 	FontVarSmallCaps
 	FontVariantsN
 )
-
-//go:generate stringer -type=FontVariants
 
 var TypeFontVariants = kit.Enums.AddEnumAltLower(FontVariantsN, kit.NotBitFlag, StylePropProps, "FontVar")
 

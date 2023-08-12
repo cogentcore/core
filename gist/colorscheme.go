@@ -24,8 +24,6 @@ const (
 
 var TypeColorSchemeTypes = kit.Enums.AddEnumAltLower(ColorSchemesN, kit.NotBitFlag, StylePropProps, "ColorScheme")
 
-//go:generate stringer -type=ColorSchemeTypes
-
 // ColorScheme contains the colors for
 // one color scheme (ex: light or dark).
 type ColorScheme struct {

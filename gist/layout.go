@@ -143,8 +143,6 @@ const (
 	AlignN
 )
 
-//go:generate stringer -type=Align
-
 var TypeAlign = kit.Enums.AddEnumAltLower(AlignN, kit.NotBitFlag, StylePropProps, "Align")
 
 func (ev Align) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -199,8 +197,6 @@ var TypeOverflow = kit.Enums.AddEnumAltLower(OverflowN, kit.NotBitFlag, StylePro
 
 func (ev Overflow) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Overflow) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-//go:generate stringer -type=Overflow
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Layout Data for actually computing the layout
