@@ -55,6 +55,50 @@ func AddNewTabView(parent ki.Ki, name string) *TabView {
 	return parent.AddNewChild(TypeTabView, name).(*TabView)
 }
 
+func (tv *TabView) OnInit() {
+	tv.AddStyleFunc(StyleFuncDefault, func() {
+		// need border for separators (see RenderTabSeps)
+		tv.Style.Border.Style.Set(gist.BorderSolid)
+		tv.Style.Border.Width.Set(units.Px(1))
+		tv.Style.Border.Color.Set(ColorScheme.OutlineVariant)
+		tv.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		tv.Style.Color = ColorScheme.OnBackground
+		tv.Style.MaxWidth.SetPx(-1)
+		tv.Style.MaxHeight.SetPx(-1)
+	})
+}
+
+func (tv *TabView) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "tabs":
+		tabs := child.(*Frame)
+		tabs.AddStyleFunc(StyleFuncParent(tv), func() {
+			tabs.Style.MaxWidth.SetPx(-1)
+			tabs.Style.Height.SetEm(1.8)
+			tabs.Style.Overflow = gist.OverflowHidden // no scrollbars!
+			tabs.Style.Margin.Set()
+			tabs.Style.Padding.Set()
+			// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
+			tabs.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+
+			tabs.Style.Border.Style.Set(gist.BorderNone)
+			tabs.Style.Border.Style.Bottom = gist.BorderSolid
+			tabs.Style.Border.Width.Bottom.SetPx(1)
+			tabs.Style.Border.Color.Bottom = ColorScheme.OutlineVariant
+		})
+	case "frame":
+		frame := child.(*Frame)
+		frame.AddStyleFunc(StyleFuncParent(tv), func() {
+			frame.Style.Width.SetEm(10)
+			frame.Style.MinWidth.SetEm(10)
+			frame.Style.MaxWidth.SetPx(-1)
+			frame.Style.Height.SetEm(7)
+			frame.Style.MinHeight.SetEm(7)
+			frame.Style.MaxHeight.SetPx(-1)
+		})
+	}
+}
+
 func (tv *TabView) CopyFieldsFrom(frm any) {
 	fr := frm.(*TabView)
 	tv.Layout.CopyFieldsFrom(&fr.Layout)
@@ -554,47 +598,6 @@ func (tv *TabView) Render2D() {
 	}
 }
 
-func (tv *TabView) Init2D() {
-	tv.Init2DWidget()
-	tv.ConfigStyles()
-}
-
-func (tv *TabView) ConfigStyles() {
-	tv.AddStyleFunc(StyleFuncDefault, func() {
-		// need border for separators (see RenderTabSeps)
-		tv.Style.Border.Style.Set(gist.BorderSolid)
-		tv.Style.Border.Width.Set(units.Px(1))
-		tv.Style.Border.Color.Set(ColorScheme.OutlineVariant)
-		tv.Style.BackgroundColor.SetColor(ColorScheme.Background)
-		tv.Style.Color = ColorScheme.OnBackground
-		tv.Style.MaxWidth.SetPx(-1)
-		tv.Style.MaxHeight.SetPx(-1)
-	})
-	tv.AddChildStyleFunc("tabs", 0, StyleFuncParent(tv), func(tabsw *WidgetBase) {
-		tabs := tabsw.This().(*Frame)
-		tabs.Style.MaxWidth.SetPx(-1)
-		tabs.Style.Height.SetEm(1.8)
-		tabs.Style.Overflow = gist.OverflowHidden // no scrollbars!
-		tabs.Style.Margin.Set()
-		tabs.Style.Padding.Set()
-		// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
-		tabs.Style.BackgroundColor.SetColor(ColorScheme.Surface)
-
-		tabs.Style.Border.Style.Set(gist.BorderNone)
-		tabs.Style.Border.Style.Bottom = gist.BorderSolid
-		tabs.Style.Border.Width.Bottom.SetPx(1)
-		tabs.Style.Border.Color.Bottom = ColorScheme.OutlineVariant
-	})
-	tv.AddChildStyleFunc("frame", 1, StyleFuncParent(tv), func(frame *WidgetBase) {
-		frame.Style.Width.SetEm(10)
-		frame.Style.MinWidth.SetEm(10)
-		frame.Style.MaxWidth.SetPx(-1)
-		frame.Style.Height.SetEm(7)
-		frame.Style.MinHeight.SetEm(7)
-		frame.Style.MaxHeight.SetPx(-1)
-	})
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // TabButton
 
@@ -611,6 +614,79 @@ var TypeTabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
 
 var TabButtonProps = ki.Props{
 	ki.EnumTypeFlag: TypeButtonFlags,
+}
+
+func (tb *TabButton) OnInit() {
+	tb.AddStyleFunc(StyleFuncDefault, func() {
+		tb.Style.Cursor = cursor.HandPointing
+		tb.Style.MinWidth.SetCh(8)
+		tb.Style.MaxWidth.SetPx(500)
+		tb.Style.MinHeight.SetEm(1.6)
+
+		// tb.Style.Border.Style.Right = gist.BorderSolid
+		// tb.Style.Border.Width.Right.SetPx(1)
+
+		tb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
+		tb.Style.Color = ColorScheme.OnSurface
+
+		tb.Style.Border.Radius.Set()
+		tb.Style.Text.Align = gist.AlignCenter
+		tb.Style.Margin.Set()
+		tb.Style.Padding.Set(units.Px(8 * Prefs.DensityMul()))
+
+		tb.Style.Border.Style.Set(gist.BorderNone)
+		if tb.IsSelected() {
+			tb.Style.Border.Style.Bottom = gist.BorderSolid
+			tb.Style.Border.Width.Bottom.SetPx(2)
+			tb.Style.Border.Color.Bottom = ColorScheme.Primary
+		}
+	})
+}
+
+func (tb *TabButton) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "icon":
+		icon := child.(*Icon)
+		icon.AddStyleFunc(StyleFuncParent(tb), func() {
+			icon.Style.Width.SetEm(1)
+			icon.Style.Height.SetEm(1)
+			icon.Style.Margin.Set()
+			icon.Style.Padding.Set()
+		})
+	case "label":
+		label := child.(*Label)
+		label.AddStyleFunc(StyleFuncParent(tb), func() {
+			label.Style.Margin.Set()
+			label.Style.Padding.Set()
+		})
+	case "close-stretch":
+		cls := child.(*Stretch)
+		cls.AddStyleFunc(StyleFuncParent(tb), func() {
+			cls.Style.Width.SetCh(1)
+		})
+	case "close":
+		close := child.(*Action)
+		close.AddStyleFunc(StyleFuncParent(tb), func() {
+			close.Style.Width.SetEx(0.5)
+			close.Style.Height.SetEx(0.5)
+			close.Style.Margin.Set()
+			close.Style.Padding.Set()
+			close.Style.AlignV = gist.AlignMiddle
+			close.Style.Border.Radius = gist.BorderRadiusFull
+			close.Style.BackgroundColor.SetColor(color.Transparent)
+		})
+	case "sc-stretch":
+		scs := child.(*Stretch)
+		scs.AddStyleFunc(StyleFuncParent(tb), func() {
+			scs.Style.MinWidth.SetCh(2)
+		})
+	case "shortcut":
+		shortcut := child.(*Label)
+		shortcut.AddStyleFunc(StyleFuncParent(tb), func() {
+			shortcut.Style.Margin.Set()
+			shortcut.Style.Padding.Set()
+		})
+	}
 }
 
 func (tb *TabButton) TabView() *TabView {
@@ -670,61 +746,4 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 func (tb *TabButton) Init2D() {
 	tb.Init2DWidget()
 	tb.ConfigParts()
-	tb.ConfigStyles()
-}
-
-func (tb *TabButton) ConfigStyles() {
-	tb.AddStyleFunc(StyleFuncDefault, func() {
-		tb.Style.Cursor = cursor.HandPointing
-		tb.Style.MinWidth.SetCh(8)
-		tb.Style.MaxWidth.SetPx(500)
-		tb.Style.MinHeight.SetEm(1.6)
-
-		// tb.Style.Border.Style.Right = gist.BorderSolid
-		// tb.Style.Border.Width.Right.SetPx(1)
-
-		tb.Style.BackgroundColor.SetColor(ColorScheme.Surface)
-		tb.Style.Color = ColorScheme.OnSurface
-
-		tb.Style.Border.Radius.Set()
-		tb.Style.Text.Align = gist.AlignCenter
-		tb.Style.Margin.Set()
-		tb.Style.Padding.Set(units.Px(8 * Prefs.DensityMul()))
-
-		tb.Style.Border.Style.Set(gist.BorderNone)
-		if tb.IsSelected() {
-			tb.Style.Border.Style.Bottom = gist.BorderSolid
-			tb.Style.Border.Width.Bottom.SetPx(2)
-			tb.Style.Border.Color.Bottom = ColorScheme.Primary
-		}
-	})
-	tb.Parts.AddChildStyleFunc("icon", 0, StyleFuncParent(tb), func(icon *WidgetBase) {
-		icon.Style.Width.SetEm(1)
-		icon.Style.Height.SetEm(1)
-		icon.Style.Margin.Set()
-		icon.Style.Padding.Set()
-	})
-	tb.Parts.AddChildStyleFunc("label", 1, StyleFuncParent(tb), func(label *WidgetBase) {
-		label.Style.Margin.Set()
-		label.Style.Padding.Set()
-	})
-	tb.Parts.AddChildStyleFunc("close-stretch", 2, StyleFuncParent(tb), func(cls *WidgetBase) {
-		cls.Style.Width.SetCh(1)
-	})
-	tb.Parts.AddChildStyleFunc("close", 3, StyleFuncParent(tb), func(close *WidgetBase) {
-		close.Style.Width.SetEx(0.5)
-		close.Style.Height.SetEx(0.5)
-		close.Style.Margin.Set()
-		close.Style.Padding.Set()
-		close.Style.AlignV = gist.AlignMiddle
-		close.Style.Border.Radius = gist.BorderRadiusFull
-		close.Style.BackgroundColor.SetColor(color.Transparent)
-	})
-	tb.Parts.AddChildStyleFunc("sc-stretch", 4, StyleFuncParent(tb), func(scs *WidgetBase) {
-		scs.Style.MinWidth.SetCh(2)
-	})
-	tb.Parts.AddChildStyleFunc("shortcut", 5, StyleFuncParent(tb), func(shortcut *WidgetBase) {
-		shortcut.Style.Margin.Set()
-		shortcut.Style.Padding.Set()
-	})
 }
