@@ -476,7 +476,6 @@ const (
 	TabViewSignalsN
 )
 
-//go:generate stringer -type=TabViewSignals
 
 // Config initializes the tab widget children if it hasn't been done yet
 func (tv *TabView) Config() {

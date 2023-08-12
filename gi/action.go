@@ -66,7 +66,6 @@ const (
 
 var TypeActionTypes = kit.Enums.AddEnumAltLower(ActionTypesN, kit.NotBitFlag, gist.StylePropProps, "Action")
 
-//go:generate stringer -type=ActionTypes
 
 // AddNewAction adds a new action to given parent node, with given name.
 func AddNewAction(parent ki.Ki, name string) *Action {

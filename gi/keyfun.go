@@ -106,7 +106,6 @@ const (
 	KeyFunsN
 )
 
-//go:generate stringer -type=KeyFuns
 
 var TypeKeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, kit.NotBitFlag, gist.StylePropProps, "KeyFun")
 

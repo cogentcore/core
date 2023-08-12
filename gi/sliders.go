@@ -181,8 +181,6 @@ const (
 	SliderSignalsN
 )
 
-//go:generate stringer -type=SliderSignals
-
 // SliderStates are mutually-exclusive slider states -- determines appearance
 type SliderStates int32
 
@@ -217,7 +215,6 @@ const (
 	SliderStatesN
 )
 
-//go:generate stringer -type=SliderStates
 
 // SliderSelectors are Style selector names for the different states
 var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected", ":value", ":box"}

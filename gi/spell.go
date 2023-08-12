@@ -150,7 +150,6 @@ const (
 	SpellIgnore
 )
 
-//go:generate stringer -type=SpellSignals
 
 // CheckWord checks the model to determine if the word is known.
 // automatically checks the Ignore list first.

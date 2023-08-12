@@ -74,8 +74,7 @@ var WidgetBaseProps = ki.Props{
 // // for [Widget] states
 // type WidgetStates int32
 
-// //go:generate stringer -type=WidgetStates
-
+//
 // var TypeWidgetStates = kit.Enums.AddEnumAltLower(WidgetStatesN, kit.BitFlag, nil, "Widget")
 
 // // Based on https://www.w3schools.com/css/css_pseudo_classes.asp
@@ -1104,7 +1103,6 @@ const (
 	WidgetSignalsN
 )
 
-//go:generate stringer -type=WidgetSignals
 
 // EmitSelectedSignal emits the WidgetSelected signal for this widget
 func (wb *WidgetBase) EmitSelectedSignal() {

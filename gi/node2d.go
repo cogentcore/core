@@ -252,7 +252,6 @@ type Node2D interface {
 // FocusChanged2D method
 type FocusChanges int32
 
-//go:generate stringer -type=FocusChanges
 
 const (
 	// FocusLost means that keyboard focus is on a different widget

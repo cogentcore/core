@@ -88,7 +88,6 @@ const (
 	CompleteExtend
 )
 
-//go:generate stringer -type=CompleteSignals
 
 // CompleteWaitMSec is the number of milliseconds to wait before
 // showing the completion menu

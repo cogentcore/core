@@ -509,7 +509,6 @@ const (
 	DensitiesN
 )
 
-//go:generate stringer -type=Densities
 
 var TypeDensities = kit.Enums.AddEnumAltLower(DensitiesN, kit.NotBitFlag, gist.StylePropProps, "Density")
 

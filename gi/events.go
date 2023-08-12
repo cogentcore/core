@@ -21,8 +21,6 @@ import (
 	"github.com/goki/mat32"
 )
 
-//go:generate stringer -type=EventPris
-
 // EventPris for different queues of event signals, processed in priority order
 type EventPris int32
 
@@ -692,7 +690,6 @@ func (em *EventMgr) SendHoverEvent(he *mouse.HoverEvent) {
 //////////////////////////////////////////////////////////////////////
 //  Drag-n-Drop = DND
 
-//go:generate stringer -type=DNDStages
 
 // DNDStages indicates stage of DND process
 type DNDStages int32

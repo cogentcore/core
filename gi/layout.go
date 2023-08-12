@@ -265,8 +265,6 @@ const (
 	LayoutsN
 )
 
-//go:generate stringer -type=Layouts
-
 var TypeLayouts = kit.Enums.AddEnumAltLower(LayoutsN, kit.NotBitFlag, gist.StylePropProps, "Layout")
 
 func (ev Layouts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
@@ -286,7 +284,6 @@ var TypeRowCol = kit.Enums.AddEnumAltLower(RowColN, kit.NotBitFlag, gist.StylePr
 func (ev RowCol) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-//go:generate stringer -type=RowCol
 
 // LayoutDefault is default obj that can be used when property specifies "default"
 var LayoutDefault Layout

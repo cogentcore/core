@@ -249,7 +249,6 @@ var WindowProps = ki.Props{
 // WinFlags extend NodeBase NodeFlags to hold Window state
 type WinFlags int
 
-//go:generate stringer -type=WinFlags
 
 var TypeWinFlags = kit.Enums.AddEnumExt(TypeNodeFlags, WinFlagsN, kit.BitFlag, nil)
 

@@ -267,8 +267,6 @@ const (
 
 var TypeTextFieldTypes = kit.Enums.AddEnumAltLower(TextFieldTypesN, kit.NotBitFlag, gist.StylePropProps, "TextField")
 
-//go:generate stringer -type=TextFieldTypes
-
 // TextFieldSignals are signals that that textfield can send
 type TextFieldSignals int64
 
@@ -305,8 +303,6 @@ const (
 	TextFieldSignalsN
 )
 
-//go:generate stringer -type=TextFieldSignals
-
 // TextFieldStates are mutually-exclusive textfield states -- determines appearance
 type TextFieldStates int32
 
@@ -326,7 +322,6 @@ const (
 	TextFieldStatesN
 )
 
-//go:generate stringer -type=TextFieldStates
 
 // Style selector names for the different states
 var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}

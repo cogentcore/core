@@ -66,7 +66,6 @@ const (
 	StripesN
 )
 
-//go:generate stringer -type=Stripes
 
 var TypeStripes = kit.Enums.AddEnumAltLower(StripesN, kit.NotBitFlag, gist.StylePropProps, "Stripes")
 

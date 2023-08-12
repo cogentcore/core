@@ -91,8 +91,6 @@ func (bb *ButtonBase) Disconnect() {
 // ButtonFlags extend NodeBase NodeFlags to hold button state
 type ButtonFlags int
 
-//go:generate stringer -type=ButtonFlags
-
 var TypeButtonFlags = kit.Enums.AddEnumExt(TypeNodeFlags, ButtonFlagsN, kit.BitFlag, nil)
 
 const (
@@ -130,14 +128,10 @@ const (
 	ButtonSignalsN
 )
 
-//go:generate stringer -type=ButtonSignals
-
 // https://ux.stackexchange.com/questions/84872/what-is-the-buttons-unpressed-and-unhovered-state-called
 
 // mutually-exclusive button states -- determines appearance
 type ButtonStates int32
-
-//go:generate stringer -type=ButtonStates
 
 var TypeButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, kit.NotBitFlag, gist.StylePropProps, "Button")
 
@@ -821,7 +815,6 @@ const (
 
 var TypeButtonTypes = kit.Enums.AddEnumAltLower(ButtonTypesN, kit.NotBitFlag, gist.StylePropProps, "Button")
 
-//go:generate stringer -type=ButtonTypes
 
 // AddNewButton adds a new button to given parent node, with given name.
 func AddNewButton(parent ki.Ki, name string) *Button {

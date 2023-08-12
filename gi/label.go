@@ -122,8 +122,6 @@ const (
 
 var TypeLabelTypes = kit.Enums.AddEnumAltLower(LabelTypesN, kit.NotBitFlag, gist.StylePropProps, "Label")
 
-//go:generate stringer -type=LabelTypes
-
 // AddNewLabel adds a new label to given parent node, with given name and text.
 func AddNewLabel(parent ki.Ki, name string, text string) *Label {
 	lb := parent.AddNewChild(TypeLabel, name).(*Label)
@@ -267,7 +265,6 @@ const (
 	LabelStatesN
 )
 
-//go:generate stringer -type=LabelStates
 
 var TypeLabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, kit.NotBitFlag, gist.StylePropProps, "Label")
 
