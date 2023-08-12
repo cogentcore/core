@@ -1018,11 +1018,12 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 // It should be called on tooltips when they are created.
 func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
 	tooltip.AddStyleFunc(StyleFuncParent(par), func() {
-		tooltip.Style.Border.Style.Set(gist.BorderNone)
-		tooltip.Style.Border.Radius = gist.BorderRadiusExtraSmall
-		tooltip.Style.Padding.Set(units.Px(8 * Prefs.DensityMul()))
-		tooltip.Style.BackgroundColor.SetColor(ColorScheme.InverseSurface)
-		tooltip.Style.Color = ColorScheme.InverseOnSurface
+		s := &tooltip.Style
+		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Radius = gist.BorderRadiusExtraSmall
+		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
+		s.BackgroundColor.SetColor(ColorScheme.InverseSurface)
+		s.Color = ColorScheme.InverseOnSurface
 	})
 	// tooltip.AddChildStyleFunc("ttlbl", 0, StyleFuncParts(par), func(label *WidgetBase) {
 	// })
@@ -1042,8 +1043,9 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.AddStyleFunc(StyleFuncParent(parVp), func() {
 		// TOOD: get border radius actually working
 		// without having parent background color workaround
-		pvp.Style.Border.Radius = gist.BorderRadiusExtraSmall
-		pvp.Style.BackgroundColor = pvp.ParentBackgroundColor()
+		s := &pvp.Style
+		s.Border.Radius = gist.BorderRadiusExtraSmall
+		s.BackgroundColor = pvp.ParentBackgroundColor()
 	})
 
 	pvp.Geom.Pos = image.Point{x, y}
@@ -1058,7 +1060,8 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 		mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
 		mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 
-		lbl.Style.MaxWidth.SetDot(mwdots)
+		s := &lbl.Style
+		s.MaxWidth.SetDot(mwdots)
 	})
 
 	frame.Init2DTree()

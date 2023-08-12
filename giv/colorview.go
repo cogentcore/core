@@ -59,8 +59,10 @@ func AddNewColorView(parent ki.Ki, name string) *ColorView {
 func (cv *ColorView) OnInit() {
 	cv.Lay = gi.LayoutVert
 	cv.AddStyleFunc(gi.StyleFuncDefault, func() {
-		cv.Style.BackgroundColor = cv.ParentBackgroundColor()
 		cv.Spacing = gi.StdDialogVSpaceUnits
+
+		s := &cv.Style
+		s.BackgroundColor = cv.ParentBackgroundColor()
 	})
 }
 
@@ -69,30 +71,35 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	case "value":
 		v := child.(*gi.Frame)
 		v.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-			v.Style.MinWidth.SetEm(6)
-			v.Style.MinHeight.SetEm(6)
-			v.Style.Border.Radius = gist.BorderRadiusFull
-			v.Style.BackgroundColor.SetColor(cv.Color)
+			s := &v.Style
+			s.MinWidth.SetEm(6)
+			s.MinHeight.SetEm(6)
+			s.Border.Radius = gist.BorderRadiusFull
+			s.BackgroundColor.SetColor(cv.Color)
 		})
 	case "slider-grid":
 		sg := child.(*gi.Layout)
 		sg.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-			sg.Style.Columns = 4
+			s := &sg.Style
+			s.Columns = 4
 		})
 	case "hexlbl":
 		hexlbl := child.(*gi.Label)
 		hexlbl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-			hexlbl.Style.AlignV = gist.AlignMiddle
+			s := &hexlbl.Style
+			s.AlignV = gist.AlignMiddle
 		})
 	case "palette":
 		pg := child.(*gi.Layout)
 		pg.AddStyleFunc(gi.StyleFuncParent(pg), func() {
-			pg.Style.Columns = 25
+			s := &pg.Style
+			s.Columns = 25
 		})
 	case "nums-hex":
 		hex := child.(*gi.TextField)
 		hex.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-			hex.Style.MinWidth.SetCh(20)
+			s := &hex.Style
+			s.MinWidth.SetCh(20)
 		})
 	case "num-lay":
 		vl := child.(*gi.Layout)
@@ -102,21 +109,23 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	}
 	if sl, ok := child.(*gi.Slider); ok {
 		sl.AddStyleFunc(gi.StyleFuncParent(cv), func() {
-			sl.Style.MinWidth.SetCh(20)
-			sl.Style.Width.SetCh(20)
-			sl.Style.MinHeight.SetEm(1)
-			sl.Style.Height.SetEm(1)
-			sl.Style.Margin.Set(units.Px(6 * gi.Prefs.DensityMul()))
+			s := &sl.Style
+			s.MinWidth.SetCh(20)
+			s.Width.SetCh(20)
+			s.MinHeight.SetEm(1)
+			s.Height.SetEm(1)
+			s.Margin.Set(units.Px(6 * gi.Prefs.DensityMul()))
 		})
 	}
 	if child.Parent().Name() == "palette" {
 		if cbt, ok := child.(*gi.Button); ok {
 			cbt.AddStyleFunc(gi.StyleFuncParent(cv), func() {
 				c := colornames.Map[cbt.Name()]
-				cbt.Style.BackgroundColor.SetColor(c)
-				cbt.Style.MaxHeight.SetEm(1.3)
-				cbt.Style.MaxWidth.SetEm(1.3)
-				cbt.Style.Margin.Set()
+				s := &cbt.Style
+				s.BackgroundColor.SetColor(c)
+				s.MaxHeight.SetEm(1.3)
+				s.MaxWidth.SetEm(1.3)
+				s.Margin.Set()
 			})
 		}
 	}

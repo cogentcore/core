@@ -37,10 +37,11 @@ var TypeArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
 
 func (av *ArgView) OnInit() {
 	av.AddStyleFunc(gi.StyleFuncDefault, func() {
-		av.Style.BackgroundColor.SetColor(gi.ColorScheme.Background)
-		av.Style.Color = gi.ColorScheme.OnBackground
-		av.Style.MaxWidth.SetPx(-1)
-		av.Style.MaxHeight.SetPx(-1)
+		s := &av.Style
+		s.BackgroundColor.SetColor(gi.ColorScheme.Background)
+		s.Color = gi.ColorScheme.OnBackground
+		s.MaxWidth.SetPx(-1)
+		s.MaxHeight.SetPx(-1)
 	})
 }
 
@@ -50,23 +51,33 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 		title := child.(*gi.Label)
 		title.Type = gi.LabelTitleLarge
 		av.AddStyleFunc(gi.StyleFuncParent(av), func() {
-			title.Style.MaxWidth.SetPx(-1)
-			title.Style.Text.Align = gist.AlignCenter
-			title.Style.AlignV = gist.AlignTop
+			s := &title.Style
+			s.MaxWidth.SetPx(-1)
+			s.Text.Align = gist.AlignCenter
+			s.AlignV = gist.AlignTop
 		})
 	case "args-grid":
 		grid := child.(*gi.Layout)
 		grid.AddStyleFunc(gi.StyleFuncParent(av), func() {
+			s := &grid.Style
 			// setting a pref here is key for giving it a scrollbar in larger context
-			grid.Style.MinWidth.SetEm(1.5)
-			grid.Style.Width.SetEm(1.5)
-			grid.Style.MaxWidth.SetPx(-1) // for this to work, ALL layers above need it too
-			grid.Style.MinHeight.SetEm(10)
-			grid.Style.Height.SetEm(10)
-			grid.Style.MaxHeight.SetPx(-1)            // for this to work, ALL layers above need it too
-			grid.Style.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
-			grid.Style.Columns = 2
+			s.MinWidth.SetEm(1.5)
+			s.Width.SetEm(1.5)
+			s.MaxWidth.SetPx(-1) // for this to work, ALL layers above need it too
+			s.MinHeight.SetEm(10)
+			s.Height.SetEm(10)
+			s.MaxHeight.SetPx(-1)            // for this to work, ALL layers above need it too
+			s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+			s.Columns = 2
 		})
+	}
+	if child.Parent().Name() == "args-grid" {
+		if widg, ok := child.(*gi.WidgetBase); ok {
+			widg.AddStyleFunc(gi.StyleFuncParent(av), func() {
+				s := &widg.Style
+				s.AlignH = gist.AlignCenter
+			})
+		}
 	}
 }
 
@@ -167,9 +178,6 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl.Text = ad.Name
 		lbl.Tooltip = ad.Desc
 		widg := sg.Child((i * 2) + 1).(*gi.WidgetBase)
-		widg.AddStyleFunc(gi.StyleFuncParent(av), func() {
-			av.Style.AlignH = gist.AlignCenter
-		})
 		ad.View.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
