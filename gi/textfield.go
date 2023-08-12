@@ -151,6 +151,82 @@ func AddNewTextField(parent ki.Ki, name string) *TextField {
 	return parent.AddNewChild(TypeTextField, name).(*TextField)
 }
 
+func (tf *TextField) OnInit() {
+	// TOOD: figure out how to have primary cursor color
+	tf.AddStyleFunc(StyleFuncDefault, func() {
+		tf.Style.Cursor = cursor.IBeam
+		tf.Style.MinWidth.SetEm(20)
+		tf.CursorWidth.SetPx(1)
+		tf.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
+		tf.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
+		if !tf.LeadingIcon.IsNil() {
+			tf.Style.Padding.Left.SetPx(12)
+		}
+		if !tf.TrailingIcon.IsNil() {
+			tf.Style.Padding.Right.SetPx(12)
+		}
+		tf.Style.Text.Align = gist.AlignLeft
+		tf.SelectColor.SetColor(ColorScheme.TertiaryContainer)
+		tf.Style.Color = ColorScheme.OnSurface
+		tf.PlaceholderColor = ColorScheme.OnSurfaceVariant
+		switch tf.Type {
+		case TextFieldFilled:
+			tf.Style.Border.Style.Set(gist.BorderNone)
+			tf.Style.Border.Style.Bottom = gist.BorderSolid
+			tf.Style.Border.Width.Set()
+			tf.Style.Border.Color.Set()
+			tf.Style.Border.Radius = gist.BorderRadiusExtraSmallTop
+			tf.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+			switch tf.State {
+			case TextFieldActive:
+				tf.Style.Border.Width.Bottom = units.Px(1)
+				tf.Style.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
+			case TextFieldFocus:
+				tf.Style.Border.Width.Bottom = units.Px(2)
+				tf.Style.Border.Color.Bottom = ColorScheme.Primary
+			}
+		case TextFieldOutlined:
+			tf.Style.Border.Style.Set(gist.BorderSolid)
+			tf.Style.Border.Radius = gist.BorderRadiusExtraSmall
+			tf.Style.BackgroundColor = tf.ParentBackgroundColor()
+			switch tf.State {
+			case TextFieldActive:
+				tf.Style.Border.Width.Set(units.Px(1))
+				tf.Style.Border.Color.Set(ColorScheme.Outline)
+			case TextFieldFocus:
+				tf.Style.Border.Width.Set(units.Px(2))
+				tf.Style.Border.Color.Set(ColorScheme.Primary)
+			}
+		}
+		if tf.State == TextFieldSel {
+			tf.Style.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
+		}
+	})
+}
+
+func (tf *TextField) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "lead-icon":
+		lead := child.(*Action)
+		lead.Type = ActionParts
+		lead.AddStyleFunc(StyleFuncParent(tf), func() {
+			lead.Style.Font.Size.SetPx(20)
+			lead.Style.Margin.Right.SetPx(16 * Prefs.DensityMul())
+			lead.Style.Color = ColorScheme.OnSurfaceVariant
+			lead.Style.AlignV = gist.AlignMiddle
+		})
+	case "trail-icon":
+		trail := child.(*Action)
+		trail.Type = ActionParts
+		trail.AddStyleFunc(StyleFuncParent(tf), func() {
+			trail.Style.Font.Size.SetPx(20)
+			trail.Style.Margin.Left.SetPx(16 * Prefs.DensityMul())
+			trail.Style.Color = ColorScheme.OnSurfaceVariant
+			trail.Style.AlignV = gist.AlignMiddle
+		})
+	}
+}
+
 func (tf *TextField) CopyFieldsFrom(frm any) {
 	fr := frm.(*TextField)
 	tf.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
@@ -1472,7 +1548,6 @@ func (tf *TextField) ConfigParts() {
 	if mods || gist.RebuildDefaultStyles {
 		if leadIconIdx != -1 {
 			leadIcon := tf.Parts.Child(leadIconIdx).(*Action)
-			leadIcon.Type = ActionParts
 			tf.StylePart(Node2D(leadIcon))
 			leadIcon.SetIcon(tf.LeadingIcon)
 			tf.LeadingIconSig.Mu.RLock()
@@ -1483,7 +1558,6 @@ func (tf *TextField) ConfigParts() {
 		}
 		if trailIconIdx != -1 {
 			trailIcon := tf.Parts.Child(trailIconIdx).(*Action)
-			trailIcon.Type = ActionParts
 			tf.StylePart(Node2D(trailIcon))
 			trailIcon.SetIcon(tf.TrailingIcon)
 			tf.TrailingIconSig.Mu.RLock()
@@ -1504,7 +1578,6 @@ func (tf *TextField) Init2D() {
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 	tf.ConfigParts()
-	tf.ConfigStyles()
 }
 
 // StyleTextField does text field styling -- sets StyMu Lock
@@ -1728,71 +1801,6 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 		// tf.UpdateSig()
 		// todo: see about cursor
 	}
-}
-
-func (tf *TextField) ConfigStyles() {
-	// TOOD: figure out how to have primary cursor color
-	tf.AddStyleFunc(StyleFuncDefault, func() {
-		tf.Style.Cursor = cursor.IBeam
-		tf.Style.MinWidth.SetEm(20)
-		tf.CursorWidth.SetPx(1)
-		tf.Style.Margin.Set(units.Px(1 * Prefs.DensityMul()))
-		tf.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
-		if !tf.LeadingIcon.IsNil() {
-			tf.Style.Padding.Left.SetPx(12)
-		}
-		if !tf.TrailingIcon.IsNil() {
-			tf.Style.Padding.Right.SetPx(12)
-		}
-		tf.Style.Text.Align = gist.AlignLeft
-		tf.SelectColor.SetColor(ColorScheme.TertiaryContainer)
-		tf.Style.Color = ColorScheme.OnSurface
-		tf.PlaceholderColor = ColorScheme.OnSurfaceVariant
-		switch tf.Type {
-		case TextFieldFilled:
-			tf.Style.Border.Style.Set(gist.BorderNone)
-			tf.Style.Border.Style.Bottom = gist.BorderSolid
-			tf.Style.Border.Width.Set()
-			tf.Style.Border.Color.Set()
-			tf.Style.Border.Radius = gist.BorderRadiusExtraSmallTop
-			tf.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
-			switch tf.State {
-			case TextFieldActive:
-				tf.Style.Border.Width.Bottom = units.Px(1)
-				tf.Style.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
-			case TextFieldFocus:
-				tf.Style.Border.Width.Bottom = units.Px(2)
-				tf.Style.Border.Color.Bottom = ColorScheme.Primary
-			}
-		case TextFieldOutlined:
-			tf.Style.Border.Style.Set(gist.BorderSolid)
-			tf.Style.Border.Radius = gist.BorderRadiusExtraSmall
-			tf.Style.BackgroundColor = tf.ParentBackgroundColor()
-			switch tf.State {
-			case TextFieldActive:
-				tf.Style.Border.Width.Set(units.Px(1))
-				tf.Style.Border.Color.Set(ColorScheme.Outline)
-			case TextFieldFocus:
-				tf.Style.Border.Width.Set(units.Px(2))
-				tf.Style.Border.Color.Set(ColorScheme.Primary)
-			}
-		}
-		if tf.State == TextFieldSel {
-			tf.Style.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
-		}
-	})
-	tf.Parts.AddChildStyleFunc("lead-icon", 0, StyleFuncParent(tf), func(lead *WidgetBase) {
-		lead.Style.Font.Size.SetPx(20)
-		lead.Style.Margin.Right.SetPx(16 * Prefs.DensityMul())
-		lead.Style.Color = ColorScheme.OnSurfaceVariant
-		lead.Style.AlignV = gist.AlignMiddle
-	})
-	tf.Parts.AddChildStyleFunc("trail-icon", 1, StyleFuncParent(tf), func(trail *WidgetBase) {
-		trail.Style.Font.Size.SetPx(20)
-		trail.Style.Margin.Left.SetPx(16 * Prefs.DensityMul())
-		trail.Style.Color = ColorScheme.OnSurfaceVariant
-		trail.Style.AlignV = gist.AlignMiddle
-	})
 }
 
 // concealDots creates an n-length []rune of bullet characters.

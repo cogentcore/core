@@ -96,8 +96,9 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 		buttons.AddStyleFunc(StyleFuncParent(sb), func() {
 			buttons.Style.AlignV = gist.AlignMiddle
 		})
-	case "up", "down":
+	case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
 		act := child.(*Action)
+		act.Type = ActionParts
 		act.AddStyleFunc(StyleFuncParent(sb), func() {
 			act.Style.Font.Size.SetPx(20)
 		})
@@ -219,7 +220,6 @@ func (sb *SpinBox) ConfigParts() {
 			// up
 			up := buts.Child(0).(*Action)
 			up.SetName("up")
-			up.Type = ActionParts
 			up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
 			// not compiled into style prop
 			// up.SetFlagState(sb.IsInactive(), int(Inactive))
@@ -236,7 +236,6 @@ func (sb *SpinBox) ConfigParts() {
 			dn := buts.Child(1).(*Action)
 			// dn.SetFlagState(sb.IsInactive(), int(Inactive))
 			dn.SetName("down")
-			dn.Type = ActionParts
 			dn.SetProp("no-focus", true)
 			dn.Icon = sb.DownIcon
 			sb.StylePart(Node2D(dn))
