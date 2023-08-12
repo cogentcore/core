@@ -510,7 +510,7 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 
 // RecycleDialogWin looks for existing window with same Data --
 // if found brings that to the front, returns true for bool.
-// else (and if data is nil) calls NewDialogWin, and returns false.
+// else (and if data is nil) calls [NewDialogWin], and returns false.
 func RecycleDialogWin(data any, name, title string, width, height int, modal bool) (*Window, bool) {
 	if data == nil {
 		return NewDialogWin(name, title, width, height, modal), false

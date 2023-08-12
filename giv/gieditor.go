@@ -83,6 +83,36 @@ func (ge *GiEditor) Open(filename gi.FileName) {
 	ge.UpdateSig() // notify our editor
 }
 
+// EditColorScheme pulls up a window to edit the current color scheme
+func (ge *GiEditor) EditColorScheme() {
+	winm := "gogi-color-scheme"
+	width := 800
+	height := 800
+	win, recyc := gi.RecycleMainWindow(&gi.ColorScheme, winm, "GoGi Color Scheme", width, height)
+	if recyc {
+		return
+	}
+
+	vp := win.WinViewport2D()
+	updt := vp.UpdateStart()
+
+	mfr := win.SetMainFrame()
+	mfr.Lay = gi.LayoutVert
+
+	sv := AddNewStructView(mfr, "sv")
+	sv.Viewport = vp
+	sv.SetStruct(&gi.ColorScheme)
+	sv.SetStretchMax()
+
+	if !win.HasGeomPrefs() { // resize to contents
+		vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)
+		win.SetSize(vpsz)
+	}
+
+	vp.UpdateEndNoSig(updt)
+	win.GoStartEventLoop()
+}
+
 // SetRoot sets the source root and ensures everything is configured
 func (ge *GiEditor) SetRoot(root ki.Ki) {
 	updt := false
@@ -273,6 +303,12 @@ var GiEditorProps = ki.Props{
 					"ext":           ".json",
 				}},
 			},
+		}},
+		{"sep-color", ki.BlankProp{}},
+		{"EditColorScheme", ki.Props{
+			"label": "Edit Color Scheme",
+			"icon":  icons.Colors,
+			"desc":  "View and edit the current color scheme",
 		}},
 	},
 	"MainMenu": ki.PropSlice{
