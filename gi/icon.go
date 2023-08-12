@@ -58,15 +58,18 @@ func AddNewIcon(parent ki.Ki, name string, icon icons.Icon) *Icon {
 	return ic
 }
 
+func (ic *Icon) OnInit() {
+	ic.AddStyleFunc(StyleFuncDefault, func() {
+		ic.Style.Width.SetEm(1)
+		ic.Style.Height.SetEm(1)
+		ic.Style.BackgroundColor.SetColor(color.Transparent)
+	})
+}
+
 func (ic *Icon) CopyFieldsFrom(frm any) {
 	fr := frm.(*Icon)
 	ic.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	ic.Filename = fr.Filename
-}
-
-func (ic *Icon) Init2D() {
-	ic.Init2DWidget()
-	ic.ConfigStyles()
 }
 
 var IconProps = ki.Props{
@@ -158,14 +161,6 @@ func (ic *Icon) Render2D() {
 		ic.Render2DChildren()
 		ic.PopBounds()
 	}
-}
-
-func (ic *Icon) ConfigStyles() {
-	ic.AddStyleFunc(StyleFuncDefault, func() {
-		ic.Style.Width.SetEm(1)
-		ic.Style.Height.SetEm(1)
-		ic.Style.BackgroundColor.SetColor(color.Transparent)
-	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
