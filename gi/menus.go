@@ -331,17 +331,6 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // PopupMenu function
 
-//	var MenuFrameProps = ki.Props{
-//		"border-width":        units.Px(0),
-//		"border-color":        "none",
-//		"margin":              units.Px(4),
-//		"padding":             units.Px(2),
-//		"box-shadow.h-offset": units.Px(2),
-//		"box-shadow.v-offset": units.Px(2),
-//		"box-shadow.blur":     units.Px(2),
-//		"box-shadow.color":    &Prefs.Colors.Shadow,
-//	}
-//
 // MenuFrameConfigStyles configures the default styles
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
@@ -387,7 +376,6 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
 	frame := AddNewFrame(pvp, "Frame", LayoutVert)
 	MenuFrameConfigStyles(&parVp.WidgetBase, frame)
-	// frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
 	var focus ki.Ki
 	for _, ac := range menu {
 		acn, ac := KiToNode2D(ac)
@@ -664,6 +652,27 @@ func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
 	return sp
 }
 
+func (sp *Separator) OnInit() {
+	// TODO: fix disappearing separator in menu
+	sp.AddStyleFunc(StyleFuncDefault, func() {
+		sp.Style.Margin.Set()
+		sp.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(0))
+		sp.Style.AlignV = gist.AlignCenter
+		sp.Style.AlignH = gist.AlignCenter
+		sp.Style.Border.Style.Set(gist.BorderSolid)
+		sp.Style.Border.Width.Set(units.Px(1))
+		sp.Style.Border.Color.Set(ColorScheme.OutlineVariant)
+		sp.Style.BackgroundColor.SetColor(ColorScheme.OutlineVariant)
+		if sp.Horiz {
+			sp.Style.MaxWidth.SetPx(-1)
+			sp.Style.MinHeight.SetPx(1)
+		} else {
+			sp.Style.MaxHeight.SetPx(-1)
+			sp.Style.MinWidth.SetPx(1)
+		}
+	})
+}
+
 func (sp *Separator) CopyFieldsFrom(frm any) {
 	fr := frm.(*Separator)
 	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
@@ -705,30 +714,4 @@ func (sp *Separator) Render2D() {
 		sp.Render2DChildren()
 		sp.PopBounds()
 	}
-}
-
-func (sp *Separator) Init2D() {
-	sp.Init2DWidget()
-	sp.ConfigStyles()
-}
-
-func (sp *Separator) ConfigStyles() {
-	// TODO: fix disappearing separator in menu
-	sp.AddStyleFunc(StyleFuncDefault, func() {
-		sp.Style.Margin.Set()
-		sp.Style.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(0))
-		sp.Style.AlignV = gist.AlignCenter
-		sp.Style.AlignH = gist.AlignCenter
-		sp.Style.Border.Style.Set(gist.BorderSolid)
-		sp.Style.Border.Width.Set(units.Px(1))
-		sp.Style.Border.Color.Set(ColorScheme.OutlineVariant)
-		sp.Style.BackgroundColor.SetColor(ColorScheme.OutlineVariant)
-		if sp.Horiz {
-			sp.Style.MaxWidth.SetPx(-1)
-			sp.Style.MinHeight.SetPx(1)
-		} else {
-			sp.Style.MaxHeight.SetPx(-1)
-			sp.Style.MinWidth.SetPx(1)
-		}
-	})
 }

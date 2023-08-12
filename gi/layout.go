@@ -1336,6 +1336,13 @@ func AddNewStretch(parent ki.Ki, name string) *Stretch {
 	return parent.AddNewChild(TypeStretch, name).(*Stretch)
 }
 
+func (st *Stretch) OnInit() {
+	st.AddStyleFunc(StyleFuncDefault, func() {
+		st.Style.MaxWidth.SetPx(-1)
+		st.Style.MaxHeight.SetPx(-1)
+	})
+}
+
 func (st *Stretch) CopyFieldsFrom(frm any) {
 	fr := frm.(*Stretch)
 	st.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
@@ -1364,18 +1371,6 @@ func (st *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return st.Layout2DChildren(iter)
 }
 
-func (st *Stretch) Init2D() {
-	st.Init2DWidget()
-	st.ConfigStyles()
-}
-
-func (st *Stretch) ConfigStyles() {
-	st.AddStyleFunc(StyleFuncDefault, func() {
-		st.Style.MaxWidth.SetPx(-1)
-		st.Style.MaxHeight.SetPx(-1)
-	})
-}
-
 // Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set
 // width / height property to change
 type Space struct {
@@ -1387,6 +1382,13 @@ var TypeSpace = kit.Types.AddType(&Space{}, SpaceProps)
 // AddNewSpace adds a new space to given parent node, with given name.
 func AddNewSpace(parent ki.Ki, name string) *Space {
 	return parent.AddNewChild(TypeSpace, name).(*Space)
+}
+
+func (sp *Space) OnInit() {
+	sp.AddStyleFunc(StyleFuncDefault, func() {
+		sp.Style.Width.SetCh(1)
+		sp.Style.Height.SetEm(1)
+	})
 }
 
 func (sp *Space) CopyFieldsFrom(frm any) {
@@ -1415,16 +1417,4 @@ func (sp *Space) Style2D() {
 func (sp *Space) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sp.Layout2DBase(parBBox, true, iter) // init style
 	return sp.Layout2DChildren(iter)
-}
-
-func (sp *Space) Init2D() {
-	sp.Init2DWidget()
-	sp.ConfigStyles()
-}
-
-func (sp *Space) ConfigStyles() {
-	sp.AddStyleFunc(StyleFuncDefault, func() {
-		sp.Style.Width.SetCh(1)
-		sp.Style.Height.SetEm(1)
-	})
 }
