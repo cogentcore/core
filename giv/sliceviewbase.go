@@ -333,7 +333,6 @@ const (
 	SliceViewSignalsN
 )
 
-//go:generate stringer -type=SliceViewSignals
 
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (sv *SliceViewBase) UpdateValues() {

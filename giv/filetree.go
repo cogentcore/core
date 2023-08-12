@@ -1588,8 +1588,6 @@ var FileNodeProps = ki.Props{
 // and storage is an int64
 type FileNodeFlags int64
 
-//go:generate stringer -type=FileNodeFlags
-
 var TypeFileNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, FileNodeFlagsN, kit.BitFlag, nil)
 
 const (
@@ -1612,7 +1610,6 @@ const (
 // These flags are stored in the DirFlagMap for persistence.
 type DirFlags int32
 
-//go:generate stringer -type=DirFlags
 
 var TypeDirFlags = kit.Enums.AddEnum(DirFlagsN, kit.BitFlag, nil)
 

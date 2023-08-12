@@ -201,7 +201,6 @@ const (
 	FileViewSignalsN
 )
 
-//go:generate stringer -type=FileViewSignals
 
 func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView) {
 	finf, ok := slice.([]*FileInfo)

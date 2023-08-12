@@ -617,8 +617,6 @@ const (
 	MethViewFlagsN
 )
 
-//go:generate stringer -type=MethViewFlags
-
 var TypeMethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, kit.BitFlag, nil, "MethView")
 
 // SubMenuFunc is a function that returns a string slice of submenu items
@@ -840,7 +838,6 @@ const (
 	ArgDataFlagsN
 )
 
-//go:generate stringer -type=ArgDataFlags
 
 var TypeArgDataFlags = kit.Enums.AddEnumAltLower(ArgDataFlagsN, kit.BitFlag, nil, "ArgData")
 

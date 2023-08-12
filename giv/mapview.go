@@ -106,7 +106,6 @@ const (
 	MapViewSignalsN
 )
 
-//go:generate stringer -type=MapViewSignals
 
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (mv *MapView) UpdateValues() {

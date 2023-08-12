@@ -382,12 +382,8 @@ const (
 	TreeViewSignalsN
 )
 
-//go:generate stringer -type=TreeViewSignals
-
 // TreeViewFlags extend NodeBase NodeFlags to hold TreeView state
 type TreeViewFlags int
-
-//go:generate stringer -type=TreeViewFlags
 
 var TypeTreeViewFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, TreeViewFlagsN, kit.BitFlag, nil)
 
@@ -434,7 +430,6 @@ const (
 	TreeViewStatesN
 )
 
-//go:generate stringer -type=TreeViewStates
 
 // TreeViewSelectors are Style selector names for the different states:
 var TreeViewSelectors = []string{":active", ":selected", ":focus", ":inactive"}

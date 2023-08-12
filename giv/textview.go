@@ -231,8 +231,6 @@ const (
 	TextViewSignalsN
 )
 
-//go:generate stringer -type=TextViewSignals
-
 // TextViewStates are mutually-exclusive textfield states -- determines appearance
 type TextViewStates int32
 
@@ -256,15 +254,12 @@ const (
 	TextViewStatesN
 )
 
-//go:generate stringer -type=TextViewStates
-
 // Style selector names for the different states
 var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
 // TextViewFlags extend NodeBase NodeFlags to hold TextView state
 type TextViewFlags int
 
-//go:generate stringer -type=TextViewFlags
 
 var TypeTextViewFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, TextViewFlagsN, kit.BitFlag, nil)
 
