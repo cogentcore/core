@@ -60,9 +60,10 @@ func AddNewIcon(parent ki.Ki, name string, icon icons.Icon) *Icon {
 
 func (ic *Icon) OnInit() {
 	ic.AddStyleFunc(StyleFuncDefault, func() {
-		ic.Style.Width.SetEm(1)
-		ic.Style.Height.SetEm(1)
-		ic.Style.BackgroundColor.SetColor(color.Transparent)
+		s := &ic.Style
+		s.Width.SetEm(1)
+		s.Height.SetEm(1)
+		s.BackgroundColor.SetColor(color.Transparent)
 	})
 }
 

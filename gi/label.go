@@ -132,97 +132,98 @@ func AddNewLabel(parent ki.Ki, name string, text string) *Label {
 func (lb *Label) OnInit() {
 	lb.Type = LabelLabelLarge
 	lb.AddStyleFunc(StyleFuncDefault, func() {
-		lb.Style.Cursor = lb.ParentCursor(cursor.IBeam)
-		lb.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
-		lb.Style.AlignV = gist.AlignMiddle
-		lb.Style.BackgroundColor.SetColor(color.Transparent)
+		s := &lb.Style
+		s.Cursor = lb.ParentCursor(cursor.IBeam)
+		s.Text.WhiteSpace = gist.WhiteSpaceNormal
+		s.AlignV = gist.AlignMiddle
+		s.BackgroundColor.SetColor(color.Transparent)
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
 		switch lb.Type {
 		case LabelLabelLarge:
-			lb.Style.Text.LineHeight.SetPx(20)
-			lb.Style.Font.Size.SetPx(14)
-			lb.Style.Text.LetterSpacing.SetPx(0.1)
-			lb.Style.Font.Weight = gist.WeightMedium
+			s.Text.LineHeight.SetPx(20)
+			s.Font.Size.SetPx(14)
+			s.Text.LetterSpacing.SetPx(0.1)
+			s.Font.Weight = gist.WeightMedium
 		case LabelLabelMedium:
-			lb.Style.Text.LineHeight.SetPx(16)
-			lb.Style.Font.Size.SetPx(12)
-			lb.Style.Text.LetterSpacing.SetPx(0.5)
-			lb.Style.Font.Weight = gist.WeightMedium
+			s.Text.LineHeight.SetPx(16)
+			s.Font.Size.SetPx(12)
+			s.Text.LetterSpacing.SetPx(0.5)
+			s.Font.Weight = gist.WeightMedium
 		case LabelLabelSmall:
-			lb.Style.Text.LineHeight.SetPx(16)
-			lb.Style.Font.Size.SetPx(11)
-			lb.Style.Text.LetterSpacing.SetPx(0.5)
-			lb.Style.Font.Weight = gist.WeightMedium
+			s.Text.LineHeight.SetPx(16)
+			s.Font.Size.SetPx(11)
+			s.Text.LetterSpacing.SetPx(0.5)
+			s.Font.Weight = gist.WeightMedium
 		case LabelBodyLarge:
-			lb.Style.Text.LineHeight.SetPx(24)
-			lb.Style.Font.Size.SetPx(16)
-			lb.Style.Text.LetterSpacing.SetPx(0.5)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(24)
+			s.Font.Size.SetPx(16)
+			s.Text.LetterSpacing.SetPx(0.5)
+			s.Font.Weight = gist.WeightNormal
 		case LabelBodyMedium:
-			lb.Style.Text.LineHeight.SetPx(20)
-			lb.Style.Font.Size.SetPx(14)
-			lb.Style.Text.LetterSpacing.SetPx(0.25)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(20)
+			s.Font.Size.SetPx(14)
+			s.Text.LetterSpacing.SetPx(0.25)
+			s.Font.Weight = gist.WeightNormal
 		case LabelBodySmall:
-			lb.Style.Text.LineHeight.SetPx(16)
-			lb.Style.Font.Size.SetPx(12)
-			lb.Style.Text.LetterSpacing.SetPx(0.4)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(16)
+			s.Font.Size.SetPx(12)
+			s.Text.LetterSpacing.SetPx(0.4)
+			s.Font.Weight = gist.WeightNormal
 		case LabelTitleLarge:
-			lb.Style.Text.LineHeight.SetPx(28)
-			lb.Style.Font.Size.SetPx(22)
-			lb.Style.Text.LetterSpacing.SetPx(0)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(28)
+			s.Font.Size.SetPx(22)
+			s.Text.LetterSpacing.SetPx(0)
+			s.Font.Weight = gist.WeightNormal
 		case LabelTitleMedium:
-			lb.Style.Text.LineHeight.SetPx(24)
-			lb.Style.Font.Size.SetPx(16)
-			lb.Style.Text.LetterSpacing.SetPx(0.15)
-			lb.Style.Font.Weight = gist.WeightMedium
+			s.Text.LineHeight.SetPx(24)
+			s.Font.Size.SetPx(16)
+			s.Text.LetterSpacing.SetPx(0.15)
+			s.Font.Weight = gist.WeightMedium
 		case LabelTitleSmall:
-			lb.Style.Text.LineHeight.SetPx(20)
-			lb.Style.Font.Size.SetPx(14)
-			lb.Style.Text.LetterSpacing.SetPx(0.1)
-			lb.Style.Font.Weight = gist.WeightMedium
+			s.Text.LineHeight.SetPx(20)
+			s.Font.Size.SetPx(14)
+			s.Text.LetterSpacing.SetPx(0.1)
+			s.Font.Weight = gist.WeightMedium
 		case LabelHeadlineLarge:
-			lb.Style.Text.LineHeight.SetPx(40)
-			lb.Style.Font.Size.SetPx(32)
-			lb.Style.Text.LetterSpacing.SetPx(0)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(40)
+			s.Font.Size.SetPx(32)
+			s.Text.LetterSpacing.SetPx(0)
+			s.Font.Weight = gist.WeightNormal
 		case LabelHeadlineMedium:
-			lb.Style.Text.LineHeight.SetPx(36)
-			lb.Style.Font.Size.SetPx(28)
-			lb.Style.Text.LetterSpacing.SetPx(0)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(36)
+			s.Font.Size.SetPx(28)
+			s.Text.LetterSpacing.SetPx(0)
+			s.Font.Weight = gist.WeightNormal
 		case LabelHeadlineSmall:
-			lb.Style.Text.LineHeight.SetPx(32)
-			lb.Style.Font.Size.SetPx(24)
-			lb.Style.Text.LetterSpacing.SetPx(0)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(32)
+			s.Font.Size.SetPx(24)
+			s.Text.LetterSpacing.SetPx(0)
+			s.Font.Weight = gist.WeightNormal
 		case LabelDisplayLarge:
-			lb.Style.Text.LineHeight.SetPx(64)
-			lb.Style.Font.Size.SetPx(57)
-			lb.Style.Text.LetterSpacing.SetPx(-0.25)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(64)
+			s.Font.Size.SetPx(57)
+			s.Text.LetterSpacing.SetPx(-0.25)
+			s.Font.Weight = gist.WeightNormal
 		case LabelDisplayMedium:
-			lb.Style.Text.LineHeight.SetPx(52)
-			lb.Style.Font.Size.SetPx(45)
-			lb.Style.Text.LetterSpacing.SetPx(0)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(52)
+			s.Font.Size.SetPx(45)
+			s.Text.LetterSpacing.SetPx(0)
+			s.Font.Weight = gist.WeightNormal
 		case LabelDisplaySmall:
-			lb.Style.Text.LineHeight.SetPx(44)
-			lb.Style.Font.Size.SetPx(36)
-			lb.Style.Text.LetterSpacing.SetPx(0)
-			lb.Style.Font.Weight = gist.WeightNormal
+			s.Text.LineHeight.SetPx(44)
+			s.Font.Size.SetPx(36)
+			s.Text.LetterSpacing.SetPx(0)
+			s.Font.Weight = gist.WeightNormal
 		}
 		switch lb.State {
 		case LabelActive:
 			// use styles as above
 		case LabelInactive:
-			lb.Style.Font.Opacity = 0.7
+			s.Font.Opacity = 0.7
 		case LabelSelected:
-			lb.Style.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
-			lb.Style.Color = ColorScheme.OnTertiaryContainer
+			s.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
+			s.Color = ColorScheme.OnTertiaryContainer
 		}
 	})
 }

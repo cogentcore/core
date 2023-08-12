@@ -88,9 +88,10 @@ var TypeDialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
 func (dlg *Dialog) OnInit() {
 	dlg.AddStyleFunc(StyleFuncDefault, func() {
-		dlg.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHigh)
-		dlg.Style.Color = ColorScheme.OnSurface
-		dlg.Style.Border.Radius = gist.BorderRadiusExtraLarge
+		s := &dlg.Style
+		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHigh)
+		s.Color = ColorScheme.OnSurface
+		s.Border.Radius = gist.BorderRadiusExtraLarge
 	})
 }
 
@@ -99,35 +100,38 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 	case "frame":
 		frame := child.(*Frame)
 		frame.AddStyleFunc(StyleFuncParent(dlg), func() {
-			frame.Style.Border.Style.Set(gist.BorderNone)
-			frame.Style.Padding.Set(units.Px(24 * Prefs.DensityMul()))
-			frame.Style.BackgroundColor.SetColor(dlg.Style.BackgroundColor.Color)
+			s := &frame.Style
+			s.Border.Style.Set(gist.BorderNone)
+			s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
+			s.BackgroundColor.SetColor(dlg.Style.BackgroundColor.Color)
 			// TODO: add box shadow
-			// frame.Style.BoxShadow.HOffset.SetPx(4)
-			// frame.Style.BoxShadow.VOffset.SetPx(4)
-			// frame.Style.BoxShadow.Blur.SetPx(4)
-			// frame.Style.BoxShadow.Color = Colors.Background.Highlight(30)
+			// s.BoxShadow.HOffset.SetPx(4)
+			// s.BoxShadow.VOffset.SetPx(4)
+			// s.BoxShadow.Blur.SetPx(4)
+			// s.BoxShadow.Color = Colors.Background.Highlight(30)
 		})
 	case "title":
 		title := child.(*Label)
 		title.Type = LabelHeadlineSmall
 		title.AddStyleFunc(StyleFuncParent(dlg), func() {
-			title.Style.MaxWidth.SetPx(-1)
-			title.Style.AlignH = gist.AlignCenter
-			title.Style.AlignV = gist.AlignTop
-			title.Style.BackgroundColor.SetColor(color.Transparent)
+			s := &title.Style
+			s.MaxWidth.SetPx(-1)
+			s.AlignH = gist.AlignCenter
+			s.AlignV = gist.AlignTop
+			s.BackgroundColor.SetColor(color.Transparent)
 		})
 	case "prompt":
 		prompt := child.(*Label)
 		prompt.Type = LabelBodyMedium
 		prompt.AddStyleFunc(StyleFuncParent(dlg), func() {
-			prompt.Style.Text.WhiteSpace = gist.WhiteSpaceNormal
-			prompt.Style.MaxWidth.SetPx(-1)
-			prompt.Style.Width.SetCh(30)
-			prompt.Style.Text.Align = gist.AlignLeft
-			prompt.Style.AlignV = gist.AlignTop
-			prompt.Style.Color = ColorScheme.OnSurfaceVariant
-			prompt.Style.BackgroundColor.SetColor(color.Transparent)
+			s := &prompt.Style
+			s.Text.WhiteSpace = gist.WhiteSpaceNormal
+			s.MaxWidth.SetPx(-1)
+			s.Width.SetCh(30)
+			s.Text.Align = gist.AlignLeft
+			s.AlignV = gist.AlignTop
+			s.Color = ColorScheme.OnSurfaceVariant
+			s.BackgroundColor.SetColor(color.Transparent)
 		})
 	case "buttons":
 		bts := child.(*Layout)

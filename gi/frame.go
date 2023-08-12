@@ -34,10 +34,11 @@ func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
 
 func (fr *Frame) OnInit() {
 	fr.AddStyleFunc(StyleFuncDefault, func() {
-		fr.Style.Border.Style.Set(gist.BorderNone)
-		fr.Style.Border.Radius.Set()
-		fr.Style.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		fr.Style.BackgroundColor = fr.ParentBackgroundColor()
+		s := &fr.Style
+		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Radius.Set()
+		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+		s.BackgroundColor = fr.ParentBackgroundColor()
 	})
 }
 
