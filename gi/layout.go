@@ -363,7 +363,6 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		ki.SetParent(sc, ly.This())
 		sc.Dim = d
 		sc.Init2D()
-		sc.Defaults()
 		sc.Tracking = true
 		sc.Min = 0.0
 	}

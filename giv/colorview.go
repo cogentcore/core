@@ -341,7 +341,6 @@ func (cv *ColorView) SetRGBValue(val float32, rgb int) {
 }
 
 func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
-	sl.Defaults()
 	sl.Max = 255
 	sl.Step = 1
 	sl.PageStep = 16
@@ -406,7 +405,6 @@ func (cv *ColorView) SetHSLValue(val float32, hsl int) {
 }
 
 func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
-	sl.Defaults()
 	sl.Max = 360
 	sl.Step = 1
 	sl.PageStep = 15

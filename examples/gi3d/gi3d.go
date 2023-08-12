@@ -377,7 +377,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	spsld := gi.AddNewSlider(evlay, "speed-slider")
 	spsld.Dim = mat32.X
-	spsld.Defaults()
 	spsld.Min = 0.01
 	spsld.Max = 1
 	spsld.Step = 0.01

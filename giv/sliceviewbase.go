@@ -530,7 +530,6 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 func (sv *SliceViewBase) ConfigScroll() {
 	sb := sv.This().(SliceViewer).ScrollBar()
 	sb.Dim = mat32.Y
-	sb.Defaults()
 	sb.Tracking = true
 	if sv.Style.ScrollBarWidth.Dots == 0 {
 		sb.SetFixedWidth(units.Px(16))

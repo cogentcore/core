@@ -236,7 +236,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	slider1.Dim = mat32.X
 	// slider1.Class = "hslides"
 	slider1.SetProp(":value", ki.Props{"background-color": "red"})
-	slider1.Defaults()
 	slider1.SetMinPrefWidth(units.Em(20))
 	slider1.SetMinPrefHeight(units.Em(2))
 	slider1.SetValue(0.5)
@@ -246,7 +245,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	slider2 := gi.AddNewSlider(srow, "slider2")
 	slider2.Dim = mat32.Y
-	slider2.Defaults()
 	slider2.SetMinPrefHeight(units.Em(10))
 	slider2.SetMinPrefWidth(units.Em(1))
 	slider2.SetStretchMaxHeight()
@@ -267,7 +265,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	scrollbar1 := gi.AddNewScrollBar(srow, "scrollbar1")
 	scrollbar1.Dim = mat32.X
 	scrollbar1.Class = "hslides"
-	scrollbar1.Defaults()
 	scrollbar1.SetMinPrefWidth(units.Em(20))
 	scrollbar1.SetMinPrefHeight(units.Em(1))
 	scrollbar1.SetThumbValue(0.25)
@@ -282,7 +279,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	scrollbar2 := gi.AddNewScrollBar(srow, "scrollbar2")
 	scrollbar2.Dim = mat32.Y
-	scrollbar2.Defaults()
 	scrollbar2.SetMinPrefHeight(units.Em(10))
 	scrollbar2.SetMinPrefWidth(units.Em(1))
 	scrollbar2.SetStretchMaxHeight()

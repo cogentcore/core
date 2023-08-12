@@ -734,6 +734,52 @@ func AddNewSlider(parent ki.Ki, name string) *Slider {
 	return parent.AddNewChild(TypeSlider, name).(*Slider)
 }
 
+func (sr *Slider) OnInit() {
+	sr.ThumbSize = units.Em(1.5)
+	sr.ThSize = 25.0
+	sr.ThSizeReal = sr.ThSize
+	sr.Step = 0.1
+	sr.PageStep = 0.2
+	sr.Max = 1.0
+	sr.Prec = 9
+
+	sr.AddStyleFunc(StyleFuncDefault, func() {
+		sr.Style.Cursor = cursor.HandPointing
+		sr.ThumbSize = units.Px(20)
+
+		sr.StyleBox.BackgroundColor = sr.ParentBackgroundColor()
+		sr.StyleBox.Border.Style.Set(gist.BorderNone)
+
+		sr.Style.Border.Style.Set(gist.BorderNone)
+		sr.Style.Border.Radius = gist.BorderRadiusFull
+		sr.Style.Padding.Set(units.Px(8))
+		if sr.Dim == mat32.X {
+			sr.Style.Width.SetEm(20)
+			sr.Style.Height.SetPx(4)
+		} else {
+			sr.Style.Height.SetEm(20)
+			sr.Style.Width.SetPx(4)
+		}
+		sr.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+		sr.Style.Color = ColorScheme.OnPrimary
+		sr.ValueColor.SetColor(ColorScheme.Primary)
+		sr.ThumbColor.SetColor(ColorScheme.Primary)
+		// STYTODO: state styles
+	})
+}
+
+func (sr *Slider) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "icon":
+		icon := child.(*Icon)
+		icon.AddStyleFunc(StyleFuncParent(sr), func() {
+			icon.Style.Width.SetEm(1)
+			icon.Style.Height.SetEm(1)
+			icon.Style.Margin.Set()
+			icon.Style.Padding.Set()
+		})
+	}
+}
 func (sr *Slider) CopyFieldsFrom(frm any) {
 	fr := frm.(*Slider)
 	sr.SliderBase.CopyFieldsFrom(&fr.SliderBase)
@@ -743,20 +789,9 @@ var SliderProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-func (sr *Slider) Defaults() {
-	sr.ThumbSize = units.Em(1.5)
-	sr.ThSize = 25.0
-	sr.ThSizeReal = sr.ThSize
-	sr.Step = 0.1
-	sr.PageStep = 0.2
-	sr.Max = 1.0
-	sr.Prec = 9
-}
-
 func (sr *Slider) Init2D() {
 	sr.Init2DSlider()
 	sr.ConfigParts()
-	sr.ConfigStyles()
 }
 
 func (sr *Slider) Style2D() {
@@ -770,9 +805,6 @@ func (sr *Slider) Style2D() {
 
 func (sr *Slider) Size2D(iter int) {
 	sr.InitLayout2D()
-	if sr.ThSize == 0.0 {
-		sr.Defaults()
-	}
 	st := &sr.Style
 	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
@@ -885,38 +917,6 @@ func (sr *Slider) FocusChanged2D(change FocusChanges) {
 	}
 }
 
-func (sr *Slider) ConfigStyles() {
-	sr.AddStyleFunc(StyleFuncDefault, func() {
-		sr.Style.Cursor = cursor.HandPointing
-		sr.ThumbSize = units.Px(20)
-
-		sr.StyleBox.BackgroundColor = sr.ParentBackgroundColor()
-		sr.StyleBox.Border.Style.Set(gist.BorderNone)
-
-		sr.Style.Border.Style.Set(gist.BorderNone)
-		sr.Style.Border.Radius = gist.BorderRadiusFull
-		sr.Style.Padding.Set(units.Px(8))
-		if sr.Dim == mat32.X {
-			sr.Style.Width.SetEm(20)
-			sr.Style.Height.SetPx(4)
-		} else {
-			sr.Style.Height.SetEm(20)
-			sr.Style.Width.SetPx(4)
-		}
-		sr.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
-		sr.Style.Color = ColorScheme.OnPrimary
-		sr.ValueColor.SetColor(ColorScheme.Primary)
-		sr.ThumbColor.SetColor(ColorScheme.Primary)
-		// STYTODO: state styles
-	})
-	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParent(sr), func(icon *WidgetBase) {
-		icon.Style.Width.SetEm(1)
-		icon.Style.Height.SetEm(1)
-		icon.Style.Margin.Set()
-		icon.Style.Padding.Set()
-	})
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ScrollBar
 
@@ -932,6 +932,36 @@ func AddNewScrollBar(parent ki.Ki, name string) *ScrollBar {
 	return parent.AddNewChild(TypeScrollBar, name).(*ScrollBar)
 }
 
+func (sb *ScrollBar) OnInit() {
+	sb.SliderBase.OnInit()
+	sb.ValThumb = true
+	sb.ThumbSize = units.Ex(1)
+	sb.Step = 0.1
+	sb.PageStep = 0.2
+	sb.Max = 1.0
+	sb.Prec = 9
+
+	sb.AddStyleFunc(StyleFuncDefault, func() {
+		sb.StyleBox.Border.Style.Set(gist.BorderNone)
+		sb.StyleBox.BackgroundColor = sb.ParentBackgroundColor()
+
+		sb.Style.Border.Style.Set(gist.BorderNone)
+		sb.Style.Border.Radius = gist.BorderRadiusFull
+		if sb.Dim == mat32.X {
+			sb.Style.MinHeight.SetEm(2)
+			sb.Style.MaxWidth.SetPx(-1)
+		} else {
+			sb.Style.MinWidth.SetEm(2)
+			sb.Style.MaxHeight.SetPx(-1)
+		}
+		sb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+		sb.Style.Color = ColorScheme.OnPrimary
+		sb.ValueColor.SetColor(ColorScheme.Primary)
+		sb.ThumbColor.SetColor(ColorScheme.Primary)
+		// STYTODO: state styles
+	})
+}
+
 func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*ScrollBar)
 	sb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
@@ -941,18 +971,8 @@ var ScrollBarProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-func (sb *ScrollBar) Defaults() { // todo: should just get these from props
-	sb.ValThumb = true
-	sb.ThumbSize = units.Ex(1)
-	sb.Step = 0.1
-	sb.PageStep = 0.2
-	sb.Max = 1.0
-	sb.Prec = 9
-}
-
 func (sb *ScrollBar) Init2D() {
 	sb.Init2DSlider()
-	sb.ConfigStyles()
 }
 
 func (sb *ScrollBar) Style2D() {
@@ -1038,28 +1058,6 @@ func (sb *ScrollBar) FocusChanged2D(change FocusChanges) {
 	}
 }
 
-func (sb *ScrollBar) ConfigStyles() {
-	sb.AddStyleFunc(StyleFuncDefault, func() {
-		sb.StyleBox.Border.Style.Set(gist.BorderNone)
-		sb.StyleBox.BackgroundColor = sb.ParentBackgroundColor()
-
-		sb.Style.Border.Style.Set(gist.BorderNone)
-		sb.Style.Border.Radius = gist.BorderRadiusFull
-		if sb.Dim == mat32.X {
-			sb.Style.MinHeight.SetEm(2)
-			sb.Style.MaxWidth.SetPx(-1)
-		} else {
-			sb.Style.MinWidth.SetEm(2)
-			sb.Style.MaxHeight.SetPx(-1)
-		}
-		sb.Style.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
-		sb.Style.Color = ColorScheme.OnPrimary
-		sb.ValueColor.SetColor(ColorScheme.Primary)
-		sb.ThumbColor.SetColor(ColorScheme.Primary)
-		// STYTODO: state styles
-	})
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ProgressBar
 
@@ -1088,8 +1086,21 @@ var TypeProgressBar = kit.Types.AddType(&ProgressBar{}, ProgressBarProps)
 // AddNewProgressBar adds a new progress bar to given parent node, with given name.
 func AddNewProgressBar(parent ki.Ki, name string) *ProgressBar {
 	pb := parent.AddNewChild(TypeProgressBar, name).(*ProgressBar)
-	pb.Defaults()
 	return pb
+}
+
+func (pb *ProgressBar) OnInit() {
+	pb.ScrollBar.OnInit()
+	pb.Dim = mat32.X
+	pb.ValThumb = true
+	pb.ThumbVal = 1
+	pb.Value = 0
+	pb.ThumbSize = units.Ex(1)
+	pb.Step = 0.1
+	pb.PageStep = 0.2
+	pb.Max = 1.0
+	pb.Prec = 9
+	pb.SetDisabled() // TODO: this shouldn't be disabled, just read only
 }
 
 func (pb *ProgressBar) CopyFieldsFrom(frm any) {
@@ -1136,21 +1147,6 @@ func (pb *ProgressBar) ProgStep() {
 
 var ProgressBarProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
-func (pb *ProgressBar) Defaults() {
-	pb.Dim = mat32.X
-	pb.ValThumb = true
-	pb.ThumbVal = 1
-	pb.Value = 0
-	pb.ThumbSize = units.Ex(1)
-	pb.Step = 0.1
-	pb.PageStep = 0.2
-	pb.Max = 1.0
-	pb.Prec = 9
-	pb.SetDisabled()
-	pb.SetMinPrefWidth(units.Em(20))
-	pb.SetMinPrefHeight(units.Em(1))
 }
 
 func (pb *ProgressBar) Init2D() {
