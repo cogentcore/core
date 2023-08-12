@@ -57,6 +57,16 @@ func AddNewSplitView(parent ki.Ki, name string) *SplitView {
 	return parent.AddNewChild(TypeSplitView, name).(*SplitView)
 }
 
+func (sv *SplitView) OnInit() {
+	sv.AddStyleFunc(StyleFuncDefault, func() {
+		sv.HandleSize.SetPx(10)
+		sv.Style.MaxWidth.SetPx(-1)
+		sv.Style.MaxHeight.SetPx(-1)
+		sv.Style.Margin.Set()
+		sv.Style.Padding.Set()
+	})
+}
+
 func (sv *SplitView) CopyFieldsFrom(frm any) {
 	fr := frm.(*SplitView)
 	sv.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
@@ -247,7 +257,6 @@ func (sv *SplitView) Init2D() {
 	sv.Init2DWidget()
 	sv.UpdateSplits()
 	sv.ConfigSplitters()
-	sv.ConfigStyles()
 }
 
 func (sv *SplitView) ConfigSplitters() {
@@ -264,7 +273,6 @@ func (sv *SplitView) ConfigSplitters() {
 	}
 	for i, spk := range *sv.Parts.Children() {
 		sp := spk.(*Splitter)
-		sp.Defaults()
 		sp.SplitterNo = i
 		sp.Icon = spicon
 		sp.Dim = sv.Dim
@@ -434,16 +442,6 @@ func (sv *SplitView) HasFocus2D() bool {
 	return sv.ContainsFocus() // anyone within us gives us focus..
 }
 
-func (sv *SplitView) ConfigStyles() {
-	sv.AddStyleFunc(StyleFuncDefault, func() {
-		sv.HandleSize.SetPx(10)
-		sv.Style.MaxWidth.SetPx(-1)
-		sv.Style.MaxHeight.SetPx(-1)
-		sv.Style.Margin.Set()
-		sv.Style.Padding.Set()
-	})
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //    Splitter
 
@@ -466,7 +464,7 @@ var SplitterProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-func (sr *Splitter) Defaults() {
+func (sr *Splitter) OnInit() {
 	sr.ValThumb = false
 	sr.ThumbSize = units.Px(10) // will be replaced by parent HandleSize
 	sr.Step = 0.01
@@ -475,13 +473,48 @@ func (sr *Splitter) Defaults() {
 	sr.Snap = false
 	sr.Prec = 4
 	sr.SetFlag(int(InstaDrag))
+
+	sr.AddStyleFunc(StyleFuncDefault, func() {
+		// sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
+
+		sr.Style.Margin.Set()
+		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
+		// sr.Style.BackgroundColor.SetColor(Colors.Accent)
+		sr.Style.Color = ColorScheme.OnBackground
+		// sr.Style.Border.Width.Set(units.Px(1))
+		// sr.Style.Border.Color.Set(Colors.Text)
+		if sr.Dim == mat32.X {
+			sr.Style.MinWidth.SetPx(2)
+			sr.Style.MinHeight.SetPx(100)
+			sr.Style.Height.SetPx(100)
+			sr.Style.MaxHeight.SetPx(100)
+		} else {
+			sr.Style.MinHeight.SetPx(2)
+			sr.Style.MinWidth.SetPx(100)
+		}
+	})
+
+}
+
+func (sr *Splitter) OnChildAdded(child ki.Ki) {
+	switch child.Name() {
+	case "icon":
+		icon := child.(*Icon)
+		icon.AddStyleFunc(StyleFuncParent(sr), func() {
+			icon.Style.MaxWidth.SetEm(1)
+			icon.Style.MaxHeight.SetEm(5)
+			icon.Style.MinWidth.SetEm(1)
+			icon.Style.MinHeight.SetEm(5)
+			icon.Style.Margin.Set()
+			icon.Style.Padding.Set()
+			icon.Style.AlignV = gist.AlignMiddle
+		})
+	}
 }
 
 func (sr *Splitter) Init2D() {
 	sr.Init2DSlider()
-	sr.Defaults()
 	sr.ConfigParts()
-	sr.ConfigStyles()
 }
 
 func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
@@ -522,9 +555,6 @@ func (sr *Splitter) Style2D() {
 
 func (sr *Splitter) Size2D(iter int) {
 	sr.InitLayout2D()
-	if sr.ThSize == 0.0 {
-		sr.Defaults()
-	}
 }
 
 func (sr *Splitter) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -740,35 +770,4 @@ func (sr *Splitter) FocusChanged2D(change FocusChanges) {
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
-}
-
-func (sr *Splitter) ConfigStyles() {
-	sr.AddStyleFunc(StyleFuncDefault, func() {
-		// sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
-
-		sr.Style.Margin.Set()
-		sr.Style.Padding.Set(units.Px(6 * Prefs.DensityMul()))
-		// sr.Style.BackgroundColor.SetColor(Colors.Accent)
-		sr.Style.Color = ColorScheme.OnBackground
-		// sr.Style.Border.Width.Set(units.Px(1))
-		// sr.Style.Border.Color.Set(Colors.Text)
-		if sr.Dim == mat32.X {
-			sr.Style.MinWidth.SetPx(2)
-			sr.Style.MinHeight.SetPx(100)
-			sr.Style.Height.SetPx(100)
-			sr.Style.MaxHeight.SetPx(100)
-		} else {
-			sr.Style.MinHeight.SetPx(2)
-			sr.Style.MinWidth.SetPx(100)
-		}
-	})
-	sr.Parts.AddChildStyleFunc("icon", 0, StyleFuncParent(sr), func(icon *WidgetBase) {
-		icon.Style.MaxWidth.SetEm(1)
-		icon.Style.MaxHeight.SetEm(5)
-		icon.Style.MinWidth.SetEm(1)
-		icon.Style.MinHeight.SetEm(5)
-		icon.Style.Margin.Set()
-		icon.Style.Padding.Set()
-		icon.Style.AlignV = gist.AlignMiddle
-	})
 }
