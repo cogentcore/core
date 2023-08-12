@@ -99,10 +99,18 @@ func (ge *GiEditor) EditColorScheme() {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	sv := AddNewStructView(mfr, "sv")
-	sv.Viewport = vp
-	sv.SetStruct(&gi.ColorScheme)
-	sv.SetStretchMax()
+	split := gi.AddNewSplitView(mfr, "split")
+	split.Dim = mat32.X
+
+	svl := AddNewStructView(split, "svl")
+	svl.Viewport = vp
+	svl.SetStruct(&gi.ColorSchemes.Light)
+	svl.SetStretchMax()
+
+	svd := AddNewStructView(split, "svd")
+	svd.Viewport = vp
+	svd.SetStruct(&gi.ColorSchemes.Dark)
+	svd.SetStretchMax()
 
 	if !win.HasGeomPrefs() { // resize to contents
 		vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)

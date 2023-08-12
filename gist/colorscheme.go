@@ -1,6 +1,8 @@
 package gist
 
-import "github.com/goki/ki/kit"
+import (
+	"github.com/goki/ki/kit"
+)
 
 // ColorSchemes contains the color schemes for an app.
 // It contains a light and a dark color scheme.
