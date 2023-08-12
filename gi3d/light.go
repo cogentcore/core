@@ -263,7 +263,6 @@ const (
 	LightColorsN
 )
 
-//go:generate stringer -type=LightColors
 
 var TypeLightColors = kit.Enums.AddEnum(LightColorsN, kit.NotBitFlag, nil)
 

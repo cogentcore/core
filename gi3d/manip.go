@@ -36,7 +36,6 @@ const (
 	SelModesN
 )
 
-//go:generate stringer -type=SelModes
 
 var TypeSelModes = kit.Enums.AddEnum(SelModesN, kit.NotBitFlag, nil)
 
