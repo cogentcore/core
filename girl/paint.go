@@ -10,8 +10,8 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/anthonynsimon/bild/blur"
 	"github.com/goki/gi/gist"
-	"github.com/goki/ki/ints"
 	"github.com/goki/ki/sliceclone"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
@@ -366,66 +366,12 @@ func (pc *Paint) FillBoxColor(rs *State, pos, size mat32.Vec2, clr color.Color) 
 	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.Point{}, draw.Src)
 }
 
-// BlurBox blurs region
-func (pc *Paint) BlurBox(rs *State, pos, size mat32.Vec2, blur float32) {
-	blurDim := mat32.X
-	longDim := mat32.Y
-	if size.X > size.Y {
-		blurDim = mat32.Y
-		longDim = mat32.X
-	}
-	blurSz := int(mat32.Floor(size.Dim(blurDim)))
-	longSz := int(mat32.Floor(size.Dim(longDim)))
-	tsz := int(mat32.Ceil(blur))*2 + 1
-	sz := ints.MinInt(blurSz, tsz)
-	// todo: make sure still odd
-	kernel := make([]float32, sz)
-	sum := float32(0)
-	ctr := float32(sz / 2)
-	ctrInt := int(ctr)
-	for i := range kernel {
-		x := float32(i) - ctr
-		v := mat32.FastExp(-0.5 * x * x)
-		sum += v
-		kernel[i] = v
-	}
-	for i, k := range kernel { // normalize
-		kernel[i] /= k / sum
-	}
-
-	ipos := pos.ToPoint()
-	for long := 0; long < longSz; long++ {
-		for blur := 0; blur < blurSz; blur++ {
-			sum := gist.RGBAf32{}
-			for k := -ctrInt; k <= ctrInt; k++ {
-				c := blur + k
-				if c < 0 || c >= blurSz {
-					continue
-				}
-				ic := ipos
-				if blurDim == mat32.X {
-					ic.X += c
-					ic.Y += long
-				} else {
-					ic.Y += c
-					ic.X += long
-				}
-				ival := rs.Image.RGBAAt(ic.X, ic.Y)
-				ival32 := gist.RGBAf32Model.Convert(ival).(gist.RGBAf32)
-				sum.R += ival32.R
-				sum.G += ival32.G
-				sum.B += ival32.B
-				sum.A += ival32.A
-				// sum adds each component from ival
-			}
-			sum.R /= float32(2 * ctrInt)
-			sum.G /= float32(2 * ctrInt)
-			sum.B /= float32(2 * ctrInt)
-			sum.A /= float32(2 * ctrInt)
-			// coordinate is long, blur
-			rs.Image.Set(ipos.X+long, ipos.Y+blur, sum)
-		}
-	}
+// BlurBox blurs the given already drawn region with the given blur radius.
+func (pc *Paint) BlurBox(rs *State, pos, size mat32.Vec2, blurRadius float32) {
+	rect := mat32.RectFromPosSizeMax(pos, size)
+	sub := rs.Image.SubImage(rect)
+	sub = blur.Gaussian(sub, float64(blurRadius))
+	draw.Draw(rs.Image, rect, sub, rect.Min, draw.Src)
 }
 
 // ClipPreserve updates the clipping region by intersecting the current

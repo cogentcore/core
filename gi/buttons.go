@@ -857,9 +857,9 @@ func (bt *Button) OnInit() {
 			s.BackgroundColor = bt.ParentBackgroundColor()
 			s.Color = ColorScheme.Primary
 			s.Padding.SetHoriz(units.Em(0.75 * Prefs.DensityMul()))
-			if !bt.Icon.IsNil() {
-				s.Padding.Right.SetPx(1 * Prefs.DensityMul())
-			}
+			// if !bt.Icon.IsNil() {
+			// 	s.Padding.Right.SetPx(1 * Prefs.DensityMul())
+			// }
 		}
 		// STYTODO: add state styles for buttons
 	})

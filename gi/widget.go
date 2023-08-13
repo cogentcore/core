@@ -1222,17 +1222,10 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	rad := st.Border.Radius.Dots()
 
 	// first do any shadow
-	if wb.Name() == "buttonTonal" {
-		fmt.Println(st.BoxShadow.HasShadow(), st.BoxShadow)
-	}
 	if st.BoxShadow.HasShadow() {
 		spos := pos.Add(mat32.Vec2{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColor(st.BoxShadow.Color)
-		if !st.BoxShadow.Color.IsNil() {
-			fmt.Println(pc.FillStyle)
-		}
-
 		// todo: this is not rendering a transparent gradient
 		// pc.FillStyle.Opacity = .5
 		// we only want radius for border, no actual border
