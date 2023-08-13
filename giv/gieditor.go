@@ -470,11 +470,17 @@ func (ge *GiEditor) SelectionLoop() {
 					log.Printf("GiEditor on %v: tree view source node missing for", sw)
 				} else {
 					// TODO: make quicker
+					wupdt := tv.RootView.TopUpdateStart()
+					updt := tv.RootView.UpdateStart()
+
 					tv.RootView.CloseAll()
 					tv.RootView.UnselectAll()
 					tv.OpenParents()
 					tv.SelectAction(mouse.SelectOne)
 					tv.ScrollToMe()
+
+					tv.RootView.UpdateEnd(updt)
+					tv.RootView.TopUpdateEnd(wupdt)
 				}
 			}
 		}()

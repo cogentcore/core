@@ -11,6 +11,7 @@ import (
 	"math"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/sliceclone"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
@@ -363,6 +364,54 @@ func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *gist.ColorSpec) {
 func (pc *Paint) FillBoxColor(rs *State, pos, size mat32.Vec2, clr color.Color) {
 	b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.Point{}, draw.Src)
+}
+
+// BlurBox blurs region
+func (pc *Paint) BlurBox(rs *State, pos, size mat32.Vec2, blur float32) {
+	blurDim := mat32.X
+	longDim := mat32.Y
+	if size.X > size.Y {
+		blurDim = mat32.Y
+		longDim = mat32.X
+	}
+	blurSz := int(mat32.Floor(size.Dim(blurDim)))
+	longSz := int(mat32.Floor(size.Dim(longDim)))
+	tsz := int(mat32.Ceil(blur))*2 + 1
+	sz := ints.Min(blurSz, tsz)
+	// todo: make sure still odd
+	kernel := make([]float32, sz)
+	sum := float32(0)
+	ctr := float32(sz / 2)
+	ctrInt := int(ctr)
+	for i := range sz {
+		x := float32(i) - ctr
+		v := mat32.FastExp(-0.5 * x * x)
+		sum += v
+		kernel[i] = v
+	}
+	for i := range sz { // normalize
+		kernel[i] /= kernel[i] / sum
+	}
+
+	ipos := pos.ToPoint()
+	for long := 0; long < longSz; long++ {
+		for blur := 0; blur < blurSz; blur++ {
+			sum := gist.RGBAf32{}
+			for k := -ctrInt; k <= ctrInt; k++ {
+				c := blur + k
+				if c < 0 || c >= blurSz {
+					continue
+				}
+				ic := ipos
+				ic.AddDim(blurDim, c)
+				ic.AddDim(longDim, long)
+				ival := rs.Image.Pix(ic.X, ic.Y)
+				// sum adds each component from ival
+			}
+			// coordinate is long, blur
+			rs.Image.Set(ic.X, ic.Y, sum)
+		}
+	}
 }
 
 // ClipPreserve updates the clipping region by intersecting the current
