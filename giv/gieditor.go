@@ -6,11 +6,13 @@ package giv
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -119,6 +121,16 @@ func (ge *GiEditor) EditColorScheme() {
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()
+}
+
+// ToggleSelectionMode toggles the editor between selection mode or not
+func (ge *GiEditor) ToggleSelectionMode() {
+	if win, ok := ge.KiRoot.(*gi.Window); ok {
+		if !win.IsInSelectionMode() && win.SelectedWidget == nil {
+			win.SelectedWidget = make(chan *gi.WidgetBase)
+		}
+		win.SetSelectionModeState(!win.IsInSelectionMode())
+	}
 }
 
 // SetRoot sets the source root and ensures everything is configured
@@ -281,6 +293,16 @@ var GiEditorProps = ki.Props{
 				act.SetEnabledStateUpdt(ge.Changed)
 			}),
 		}},
+		{"sep-sel", ki.BlankProp{}},
+		{"ToggleSelectionMode", ki.Props{
+			"icon": icons.ArrowSelectorTool,
+			"desc": "Select an element in the window to edit it",
+			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
+				ge := gei.(*GiEditor)
+				_, ok := ge.KiRoot.(*gi.Window)
+				act.SetEnabledStateUpdt(ok)
+			}),
+		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Open", ki.Props{
 			"label": "Open",
@@ -402,6 +424,8 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 	tb := ge.ToolBar()
 	tb.UpdateActions()
 
+	ge.SelectionLoop()
+
 	inClosePrompt := false
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
 		if !ge.Changed {
@@ -429,4 +453,30 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop() // in a separate goroutine
 	return ge
+}
+
+// SelectionLoop, if [KiRoot] is a [gi.Window], runs a loop in a separate goroutine
+// that listens to the [Window.SelectedWidget] channel and selects selected elements.
+func (ge *GiEditor) SelectionLoop() {
+	if win, ok := ge.KiRoot.(*gi.Window); ok {
+		go func() {
+			if win.SelectedWidget == nil {
+				win.SelectedWidget = make(chan *gi.WidgetBase)
+			}
+			for {
+				sw := <-win.SelectedWidget
+				tv := ge.TreeView().FindSrcNode(sw.This())
+				if tv == nil {
+					log.Printf("GiEditor on %v: tree view source node missing for", sw)
+				} else {
+					// TODO: make quicker
+					tv.RootView.CloseAll()
+					tv.RootView.UnselectAll()
+					tv.OpenParents()
+					tv.SelectAction(mouse.SelectOne)
+					tv.ScrollToMe()
+				}
+			}
+		}()
+	}
 }

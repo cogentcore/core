@@ -228,16 +228,18 @@ type Window struct {
 	skippedResize *window.Event
 	lastEt        oswin.EventType
 
+	SelectedWidget chan *WidgetBase
+
 	// dir draws are direct upload regions -- direct uploaders upload their images directly to an image here
 	DirDraws WindowDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
 	PopDraws WindowDrawers // popup regions
 	UpdtRegs WindowUpdates // misc vp update regions
 
-	// [view: -] this popup will be popped at the end of the current event cycle -- use SetDelPopup
-	Phongs []*vphong.Phong `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
+	// the phongs for the window
+	Phongs []*vphong.Phong ` json:"-" xml:"-" desc:"the phongs for the window"`
 
-	// [view: -] this popup will be popped at the end of the current event cycle -- use SetDelPopup
-	Frames []*vgpu.RenderFrame `view:"-" json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
+	// the render frames for the window
+	Frames []*vgpu.RenderFrame ` json:"-" xml:"-" desc:"the render frames for the window"`
 }
 
 var TypeWindow = kit.Types.AddType(&Window{}, WindowProps)
@@ -288,6 +290,9 @@ const (
 	// WinFlagFocusActive indicates if widget focus is currently in an active state or not
 	WinFlagFocusActive
 
+	// WinSelectionMode indicates that the window is in GoGi inspect editor edit mode
+	WinFlagSelectionMode
+
 	WinFlagsN
 )
 
@@ -310,6 +315,16 @@ func (w *Window) IsFocusActive() bool {
 // SetFocusActiveState sets focus active flag to given state
 func (w *Window) SetFocusActiveState(active bool) {
 	w.SetFlagState(active, int(WinFlagFocusActive))
+}
+
+// IsInSelectionMode returns true if window has selection mode set
+func (w *Window) IsInSelectionMode() bool {
+	return w.HasFlag(int(WinFlagSelectionMode))
+}
+
+// SetSelectionModeState sets selection mode to given state
+func (w *Window) SetSelectionModeState(selmode bool) {
+	w.SetFlagState(selmode, int(WinFlagSelectionMode))
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1793,6 +1808,7 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 func (w *Window) SetCursor(pos image.Point) {
 	maxLevel := 0
 	maxLevelCursor := cursor.Arrow
+	maxLevelWidget := &WidgetBase{}
 
 	fun := func(k ki.Ki, level int, data any) bool {
 		_, ni := KiToNode2D(k)
@@ -1816,6 +1832,7 @@ func (w *Window) SetCursor(pos image.Point) {
 		}
 		maxLevel = level
 		maxLevelCursor = wb.Style.Cursor
+		maxLevelWidget = wb
 		return ki.Continue
 	}
 
@@ -1835,6 +1852,12 @@ func (w *Window) SetCursor(pos image.Point) {
 
 	}
 	oswin.TheApp.Cursor(w.OSWin).Set(maxLevelCursor)
+
+	if w.IsInSelectionMode() {
+		if maxLevelWidget != nil {
+			w.SelectedWidget <- maxLevelWidget
+		}
+	}
 }
 
 // FilterEvent filters repeated laggy events -- key for responsive resize, scroll, etc

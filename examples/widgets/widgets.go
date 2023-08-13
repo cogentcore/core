@@ -168,7 +168,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) {
-			giv.GoGiEditorDialog(vp)
+			giv.GoGiEditorDialog(win)
 		}
 	})
 	// button2.StyleFunc = func() {

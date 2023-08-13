@@ -1489,12 +1489,13 @@ func _() {
 	_ = x[WinFlagStopEventLoop-34]
 	_ = x[WinFlagDoFullRender-35]
 	_ = x[WinFlagFocusActive-36]
-	_ = x[WinFlagsN-37]
+	_ = x[WinFlagSelectionMode-37]
+	_ = x[WinFlagsN-38]
 }
 
-const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFlagIsResizingWinFlagGotPaintWinFlagGotFocusWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagFocusActiveWinFlagsN"
+const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFlagIsResizingWinFlagGotPaintWinFlagGotFocusWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagFocusActiveWinFlagSelectionModeWinFlagsN"
 
-var _WinFlags_index = [...]uint8{0, 19, 34, 50, 67, 82, 97, 112, 125, 145, 164, 182, 191}
+var _WinFlags_index = [...]uint8{0, 19, 34, 50, 67, 82, 97, 112, 125, 145, 164, 182, 202, 211}
 
 func (i WinFlags) String() string {
 	i -= 26
@@ -1525,7 +1526,8 @@ var _WinFlags_descMap = map[WinFlags]string{
 	34: `WinFlagStopEventLoop is set when event loop stop is requested`,
 	35: `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
 	36: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
-	37: ``,
+	37: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
+	38: ``,
 }
 
 func (i WinFlags) Desc() string {

@@ -462,7 +462,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	mb := vv.Widget.(*gi.Button)
-	mb.Icon = icons.Menu
+	mb.Indicator = icons.KeyboardArrowDown
 	mb.Tooltip, _ = vv.Tag("desc")
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},

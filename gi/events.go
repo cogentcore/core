@@ -1290,7 +1290,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e *key.ChordEvent) {
 		em.FocusPrev(em.CurFocus())
 		e.SetProcessed()
 	case KeyFunGoGiEditor:
-		TheViewIFace.GoGiEditor(em.Master.FocusTopNode())
+		TheViewIFace.GoGiEditor(em.Master.EventTopNode())
 		e.SetProcessed()
 	case KeyFunPrefs:
 		TheViewIFace.PrefsView(&Prefs)
