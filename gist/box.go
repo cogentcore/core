@@ -7,6 +7,7 @@ package gist
 import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // note: background-color is in FontStyle as it is needed to make that the
@@ -162,4 +163,36 @@ func (s *Shadow) ToDots(uc *units.Context) {
 	s.VOffset.ToDots(uc)
 	s.Blur.ToDots(uc)
 	s.Spread.ToDots(uc)
+}
+
+// Pos returns the position at which the box shadow
+// should be rendered if the shadow is on an element
+// with the given starting position.
+func (s *Shadow) Pos(startPos mat32.Vec2) mat32.Vec2 {
+	// Offset directly affects position.
+	// We need to subtract spread to compensate
+	// for size changes and stay centered.
+	return startPos.Add(mat32.NewVec2(s.HOffset.Dots, s.VOffset.Dots)).SubScalar(s.Spread.Dots)
+}
+
+// Size returns the total size occupied by the box shadow
+// if the shadow is on an element with the given starting size.
+func (s *Shadow) Size(startSize mat32.Vec2) mat32.Vec2 {
+	// Spread goes on all sides, so need to count twice per dimension
+	return startSize.AddScalar(2 * s.Spread.Dots)
+}
+
+// Margin returns the effective margin created by the
+// shadow on each side in terms of raw display dots.
+// It should be added to margin for sizing considerations.
+func (s *Shadow) Margin() SideFloats {
+	// Offset goes either way, depending on side.
+	// Spread benefits every side.
+	// Every side must be positive.
+	return NewSideFloats(
+		mat32.Max(-s.VOffset.Dots+s.Spread.Dots, 0),
+		mat32.Max(s.HOffset.Dots+s.Spread.Dots, 0),
+		mat32.Max(s.VOffset.Dots+s.Spread.Dots, 0),
+		mat32.Max(-s.HOffset.Dots+s.Spread.Dots, 0),
+	)
 }

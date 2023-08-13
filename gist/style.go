@@ -370,6 +370,13 @@ func (s *Style) BoxSpace() SideFloats {
 	)
 }
 
+// EffMargin returns the effective margin of the element
+// holding the style, combining the actual margin and the
+// box shadow margin
+func (s *Style) EffMargin() SideFloats {
+	return s.Margin.Dots().Add(s.BoxShadow.Margin())
+}
+
 // SubProps returns a sub-property map from given prop map for a given styling
 // selector (property name) -- e.g., :normal :active :hover etc -- returns
 // false if not found

@@ -259,6 +259,28 @@ func NewSideFloatsTry(vals ...float32) (SideFloats, error) {
 	return SideFloats{Sides: sides}, err
 }
 
+// Add adds the side floats to the
+// other side floats and returns the result
+func (sf SideFloats) Add(other SideFloats) SideFloats {
+	return NewSideFloats(
+		sf.Top+other.Top,
+		sf.Right+other.Right,
+		sf.Bottom+other.Bottom,
+		sf.Left+other.Left,
+	)
+}
+
+// Sub subtracts the other side floats from
+// the side floats and returns the result
+func (sf SideFloats) Sub(other SideFloats) SideFloats {
+	return NewSideFloats(
+		sf.Top-other.Top,
+		sf.Right-other.Right,
+		sf.Bottom-other.Bottom,
+		sf.Left-other.Left,
+	)
+}
+
 // Pos returns the position offset casued by the side/corner values (Left, Top)
 func (sf SideFloats) Pos() mat32.Vec2 {
 	return mat32.NewVec2(sf.Left, sf.Top)

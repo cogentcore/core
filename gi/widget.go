@@ -1223,21 +1223,25 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 
 	// first do any shadow
 	if st.BoxShadow.HasShadow() {
-		spos := pos.Add(mat32.Vec2{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
+		spos := st.BoxShadow.Pos(pos)
+		ssz := st.BoxShadow.Size(sz)
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColor(st.BoxShadow.Color)
-		// todo: this is not rendering a transparent gradient
-		// pc.FillStyle.Opacity = .5
+
+		// TODO: better handling of opacity?
+		prevOpacity := pc.FillStyle.Opacity
+		pc.FillStyle.Opacity = gist.RGBAf32Model.Convert(st.BoxShadow.Color).(gist.RGBAf32).A
 		// we only want radius for border, no actual border
-		wb.RenderBoxImpl(spos, sz, gist.Border{Radius: st.Border.Radius})
+		wb.RenderBoxImpl(spos, ssz, gist.Border{Radius: st.Border.Radius})
 		// pc.FillStyle.Opacity = 1.0
 		if st.BoxShadow.Blur.Dots != 0 {
-			pc.BlurBox(rs, spos, sz, st.BoxShadow.Blur.Dots)
+			pc.BlurBox(rs, spos, ssz, st.BoxShadow.Blur.Dots)
 		}
+		pc.FillStyle.Opacity = prevOpacity
 	}
 
 	// then draw the box over top of that -- note: won't work well for
-	// transparent! need to set clipping to box first..
+	// transparent! need to se  clipping to box first..
 	// we need to draw things twice here because we need to clear
 	// the whole area with the background color first so the border
 	// doesn't render weirdly

@@ -837,6 +837,7 @@ func (bt *Button) OnInit() {
 		s.BoxShadow.HOffset.SetPx(0)
 		s.BoxShadow.VOffset.SetPx(3)
 		s.BoxShadow.Blur.SetPx(1)
+		s.BoxShadow.Spread.SetPx(-1)
 		switch bt.Type {
 		case ButtonFilled:
 			s.BackgroundColor.SetColor(ColorScheme.Primary)
