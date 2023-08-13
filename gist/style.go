@@ -362,19 +362,14 @@ func (s *Style) CopyUnitContext(ctxt *units.Context) {
 // in dots -- todo: must complicate this if we want different spacing on
 // different sides box outside-in: margin | border | padding | content
 func (s *Style) BoxSpace() SideFloats {
-	return NewSideFloats(
-		s.Margin.Top.Dots+s.Border.Width.Top.Dots+s.Padding.Top.Dots,
-		s.Margin.Right.Dots+s.Border.Width.Right.Dots+s.Padding.Right.Dots,
-		s.Margin.Bottom.Dots+s.Border.Width.Bottom.Dots+s.Padding.Bottom.Dots,
-		s.Margin.Left.Dots+s.Border.Width.Left.Dots+s.Padding.Left.Dots,
-	)
+	return s.EffMargin().Add(s.Border.Width.Dots()).Add(s.Padding.Dots())
 }
 
 // EffMargin returns the effective margin of the element
-// holding the style, combining the actual margin and the
-// box shadow margin
+// holding the style, using the maximum of the actual
+// margin and the box shadow margin.
 func (s *Style) EffMargin() SideFloats {
-	return s.Margin.Dots().Add(s.BoxShadow.Margin())
+	return s.Margin.Dots().Max(s.BoxShadow.Margin())
 }
 
 // SubProps returns a sub-property map from given prop map for a given styling

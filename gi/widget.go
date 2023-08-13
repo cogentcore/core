@@ -1217,8 +1217,8 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	// 	}
 	// }
 
-	pos := wb.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
-	sz := wb.LayState.Alloc.Size.Sub(st.Margin.Dots().Size())
+	pos := wb.LayState.Alloc.Pos.Add(st.EffMargin().Pos())
+	sz := wb.LayState.Alloc.Size.Sub(st.EffMargin().Size())
 	rad := st.Border.Radius.Dots()
 
 	// first do any shadow

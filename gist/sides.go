@@ -281,6 +281,28 @@ func (sf SideFloats) Sub(other SideFloats) SideFloats {
 	)
 }
 
+// Min returns a new side floats containing the
+// minimum values of the two side floats
+func (sf SideFloats) Min(other SideFloats) SideFloats {
+	return NewSideFloats(
+		mat32.Min(sf.Top, other.Top),
+		mat32.Min(sf.Right, other.Right),
+		mat32.Min(sf.Bottom, other.Bottom),
+		mat32.Min(sf.Left, other.Left),
+	)
+}
+
+// Max returns a new side floats containing the
+// maximum values of the two side floats
+func (sf SideFloats) Max(other SideFloats) SideFloats {
+	return NewSideFloats(
+		mat32.Max(sf.Top, other.Top),
+		mat32.Max(sf.Right, other.Right),
+		mat32.Max(sf.Bottom, other.Bottom),
+		mat32.Max(sf.Left, other.Left),
+	)
+}
+
 // Pos returns the position offset casued by the side/corner values (Left, Top)
 func (sf SideFloats) Pos() mat32.Vec2 {
 	return mat32.NewVec2(sf.Left, sf.Top)
