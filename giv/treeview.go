@@ -2333,8 +2333,8 @@ func (tv *TreeView) Render2D() {
 			// pc.StrokeStyle.Width = st.Border.Width
 			pc.FillStyle.SetColorSpec(&st.BackgroundColor)
 			// tv.RenderStdBox()
-			pos := tv.LayState.Alloc.Pos.Add(st.Margin.Dots().Pos())
-			sz := tv.WidgetSize.Sub(st.Margin.Dots().Size())
+			pos := tv.LayState.Alloc.Pos.Add(st.EffMargin().Pos())
+			sz := tv.WidgetSize.Sub(st.EffMargin().Size())
 			tv.RenderBoxImpl(pos, sz, st.Border)
 			tv.RenderUnlock(rs)
 			tv.Render2DParts()
