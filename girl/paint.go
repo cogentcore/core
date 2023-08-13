@@ -418,8 +418,12 @@ func (pc *Paint) BlurBox(rs *State, pos, size mat32.Vec2, blur float32) {
 				sum.A += ival32.A
 				// sum adds each component from ival
 			}
+			sum.R /= float32(2 * ctrInt)
+			sum.G /= float32(2 * ctrInt)
+			sum.B /= float32(2 * ctrInt)
+			sum.A /= float32(2 * ctrInt)
 			// coordinate is long, blur
-			rs.Image.Set(long, blur, sum)
+			rs.Image.Set(ipos.X+long, ipos.Y+blur, sum)
 		}
 	}
 }

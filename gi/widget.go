@@ -1222,15 +1222,27 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	rad := st.Border.Radius.Dots()
 
 	// first do any shadow
+	if wb.Name() == "buttonTonal" {
+		fmt.Println(st.BoxShadow.HasShadow(), st.BoxShadow)
+	}
 	if st.BoxShadow.HasShadow() {
 		spos := pos.Add(mat32.Vec2{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
 		pc.StrokeStyle.SetColor(nil)
-		pc.FillStyle.Color.SetShadowGradient(st.BoxShadow.Color, "")
+		pc.FillStyle.SetColor(st.BoxShadow.Color)
+		if !st.BoxShadow.Color.IsNil() {
+			fmt.Println(pc.FillStyle)
+		}
+
 		// todo: this is not rendering a transparent gradient
 		// pc.FillStyle.Opacity = .5
-		wb.RenderBoxImpl(spos, sz, st.Border)
+		// we only want radius for border, no actual border
+		wb.RenderBoxImpl(spos, sz, gist.Border{Radius: st.Border.Radius})
 		// pc.FillStyle.Opacity = 1.0
+		if st.BoxShadow.Blur.Dots != 0 {
+			pc.BlurBox(rs, spos, sz, st.BoxShadow.Blur.Dots)
+		}
 	}
+
 	// then draw the box over top of that -- note: won't work well for
 	// transparent! need to set clipping to box first..
 	// we need to draw things twice here because we need to clear
