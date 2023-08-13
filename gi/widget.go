@@ -1221,11 +1221,27 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	sz := wb.LayState.Alloc.Size.Sub(st.EffMargin().Size())
 	rad := st.Border.Radius.Dots()
 
+	// the background color we actually use
+	bg := st.BackgroundColor
+	// the surrounding background color
+	sbg := wb.ParentBackgroundColor()
+	if bg.IsNil() {
+		// we need to do this to prevent
+		// elements from rendering over themselves
+		// (see https://github.com/goki/gi/issues/565)
+		bg = sbg
+	}
+
 	// first do any shadow
 	if st.BoxShadow.HasShadow() {
 		spos := st.BoxShadow.Pos(pos)
 		ssz := st.BoxShadow.Size(sz)
 		pc.StrokeStyle.SetColor(nil)
+
+		// we need to fill the whole box where the
+		// box shadow can go to prevent growing box shadows
+		pc.FillBox(rs, spos, ssz, &sbg)
+
 		pc.FillStyle.SetColor(st.BoxShadow.Color)
 
 		// TODO: better handling of opacity?
@@ -1240,20 +1256,18 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 		pc.FillStyle.Opacity = prevOpacity
 	}
 
-	// then draw the box over top of that -- note: won't work well for
-	// transparent! need to se  clipping to box first..
+	// then draw the box over top of that.
+	// need to set clipping to box first.. (?)
 	// we need to draw things twice here because we need to clear
 	// the whole area with the background color first so the border
 	// doesn't render weirdly
-	if !st.BackgroundColor.IsNil() {
-		if rad.IsZero() {
-			pc.FillBox(rs, pos, sz, &st.BackgroundColor)
-		} else {
-			pc.FillStyle.SetColorSpec(&st.BackgroundColor)
-			// no border -- fill only
-			pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
-			pc.Fill(rs)
-		}
+	if rad.IsZero() {
+		pc.FillBox(rs, pos, sz, &bg)
+	} else {
+		pc.FillStyle.SetColorSpec(&bg)
+		// no border -- fill only
+		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+		pc.Fill(rs)
 	}
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)

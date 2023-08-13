@@ -369,6 +369,10 @@ func (s *Style) BoxSpace() SideFloats {
 // holding the style, using the maximum of the actual
 // margin and the box shadow margin.
 func (s *Style) EffMargin() SideFloats {
+	// TODO: this does not follow the CSS spec
+	// (shadow is supposed to be outside of the box model),
+	// but that is incompatible with the way we position things.
+	// Maybe we could come up with a better way to do this at some point.
 	return s.Margin.Dots().Max(s.BoxShadow.Margin())
 }
 
