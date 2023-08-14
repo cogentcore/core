@@ -12,6 +12,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/icons"
@@ -79,6 +80,18 @@ func makeHome(tv *gi.TabView) {
 			pbar.ProgStep()
 		}
 	}()
+
+	bt := gi.AddNewButton(home, "bt")
+	bt.Text = "Big Shadow"
+	bt.AddStyleFunc(gi.StyleFuncFinal, func() {
+		bt.Style.AddBoxShadow(gist.Shadow{
+			HOffset: units.Px(20),
+			VOffset: units.Px(10),
+			Blur:    units.Px(100),
+			Spread:  units.Px(50),
+			Color:   colors.Red,
+		})
+	})
 
 	bmap := gi.AddNewBitmap(home, "bmap")
 	err := bmap.OpenImage("gopher.png", 300, 300)

@@ -186,14 +186,16 @@ func (s *Shadow) Size(startSize mat32.Vec2) mat32.Vec2 {
 // shadow on each side in terms of raw display dots.
 // It should be added to margin for sizing considerations.
 func (s *Shadow) Margin() SideFloats {
-	// Offset goes either way, depending on side.
 	// Spread benefits every side.
+	// Offset goes either way, depending on side.
 	// Every side must be positive.
+	// TODO: add s.Blur.Dots here without breaking
+	// clear area
 	return NewSideFloats(
-		mat32.Max(-s.VOffset.Dots+s.Spread.Dots, 0),
-		mat32.Max(s.HOffset.Dots+s.Spread.Dots, 0),
-		mat32.Max(s.VOffset.Dots+s.Spread.Dots, 0),
-		mat32.Max(-s.HOffset.Dots+s.Spread.Dots, 0),
+		mat32.Max(s.Spread.Dots-s.VOffset.Dots, 0),
+		mat32.Max(s.Spread.Dots+s.HOffset.Dots, 0),
+		mat32.Max(s.Spread.Dots+s.VOffset.Dots, 0),
+		mat32.Max(s.Spread.Dots-s.HOffset.Dots, 0),
 	)
 }
 
