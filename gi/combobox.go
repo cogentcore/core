@@ -89,7 +89,7 @@ func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
 }
 
 func (cb *ComboBox) OnInit() {
-	cb.AddStyleFunc(StyleFuncDefault, func() {
+	cb.AddStyler(StylerDefault, func() {
 		s := &cb.Style
 		s.Cursor = cursor.HandPointing
 		s.Text.Align = gist.AlignCenter
@@ -144,14 +144,14 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "icon":
 		icon := child.(*Icon)
-		icon.AddStyleFunc(StyleFuncParent(cb), func() {
+		icon.AddStyler(StylerParent(cb), func() {
 			s := &icon.Style
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "label":
 		label := child.(*Label)
-		label.AddStyleFunc(StyleFuncParent(cb), func() {
+		label.AddStyler(StylerParent(cb), func() {
 			s := &label.Style
 			s.Margin.Set()
 			s.Padding.Set()
@@ -165,14 +165,14 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 		} else {
 			text.Type = TextFieldOutlined
 		}
-		text.AddStyleFunc(StyleFuncParent(cb), func() {
+		text.AddStyler(StylerParent(cb), func() {
 			s := &text.Style
 			s.Border.Style.Set(gist.BorderNone)
 			s.Border.Width.Set()
 		})
 	case "ind-stretch":
 		ins := child.Embed(TypeWidgetBase).(*WidgetBase) // can be Space or Stretch, so just use WidgetBase
-		ins.AddStyleFunc(StyleFuncParent(cb), func() {
+		ins.AddStyler(StylerParent(cb), func() {
 			s := &ins.Style
 			if cb.Editable {
 				s.Width.SetPx(0)
@@ -182,7 +182,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 		})
 	case "indicator":
 		ind := child.(*Icon)
-		ind.AddStyleFunc(StyleFuncParent(cb), func() {
+		ind.AddStyler(StylerParent(cb), func() {
 			s := &ind.Style
 			s.Font.Size.SetEm(1.5)
 			s.AlignV = gist.AlignMiddle

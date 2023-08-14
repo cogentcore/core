@@ -59,7 +59,7 @@ func AddNewIcon(parent ki.Ki, name string, icon icons.Icon) *Icon {
 }
 
 func (ic *Icon) OnInit() {
-	ic.AddStyleFunc(StyleFuncDefault, func() {
+	ic.AddStyler(StylerDefault, func() {
 		s := &ic.Style
 		s.Width.SetEm(1)
 		s.Height.SetEm(1)

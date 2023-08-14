@@ -1332,7 +1332,7 @@ func AddNewStretch(parent ki.Ki, name string) *Stretch {
 }
 
 func (st *Stretch) OnInit() {
-	st.AddStyleFunc(StyleFuncDefault, func() {
+	st.AddStyler(StylerDefault, func() {
 		s := &st.Style
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)
@@ -1381,7 +1381,7 @@ func AddNewSpace(parent ki.Ki, name string) *Space {
 }
 
 func (sp *Space) OnInit() {
-	sp.AddStyleFunc(StyleFuncDefault, func() {
+	sp.AddStyler(StylerDefault, func() {
 		s := &sp.Style
 		s.Width.SetCh(1)
 		s.Height.SetEm(1)

@@ -739,7 +739,7 @@ func (sr *Slider) OnInit() {
 	sr.Max = 1.0
 	sr.Prec = 9
 
-	sr.AddStyleFunc(StyleFuncDefault, func() {
+	sr.AddStyler(StylerDefault, func() {
 		sr.ThumbSize = units.Px(20)
 		sr.ValueColor.SetColor(ColorScheme.Primary)
 		sr.ThumbColor.SetColor(ColorScheme.Primary)
@@ -769,7 +769,7 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "icon":
 		icon := child.(*Icon)
-		icon.AddStyleFunc(StyleFuncParent(sr), func() {
+		icon.AddStyler(StylerParent(sr), func() {
 			s := &icon.Style
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
@@ -939,7 +939,7 @@ func (sb *ScrollBar) OnInit() {
 	sb.Max = 1.0
 	sb.Prec = 9
 
-	sb.AddStyleFunc(StyleFuncDefault, func() {
+	sb.AddStyler(StylerDefault, func() {
 		sb.StyleBox.Border.Style.Set(gist.BorderNone)
 		sb.StyleBox.BackgroundColor = sb.ParentBackgroundColor()
 

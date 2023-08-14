@@ -87,7 +87,7 @@ type Dialog struct {
 var TypeDialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
 func (dlg *Dialog) OnInit() {
-	dlg.AddStyleFunc(StyleFuncDefault, func() {
+	dlg.AddStyler(StylerDefault, func() {
 		s := &dlg.Style
 		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHigh)
 		s.Color = ColorScheme.OnSurface
@@ -99,7 +99,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "frame":
 		frame := child.(*Frame)
-		frame.AddStyleFunc(StyleFuncParent(dlg), func() {
+		frame.AddStyler(StylerParent(dlg), func() {
 			s := &frame.Style
 			s.Border.Style.Set(gist.BorderNone)
 			s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
@@ -113,7 +113,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 	case "title":
 		title := child.(*Label)
 		title.Type = LabelHeadlineSmall
-		title.AddStyleFunc(StyleFuncParent(dlg), func() {
+		title.AddStyler(StylerParent(dlg), func() {
 			s := &title.Style
 			s.MaxWidth.SetPx(-1)
 			s.AlignH = gist.AlignCenter
@@ -123,7 +123,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 	case "prompt":
 		prompt := child.(*Label)
 		prompt.Type = LabelBodyMedium
-		prompt.AddStyleFunc(StyleFuncParent(dlg), func() {
+		prompt.AddStyler(StylerParent(dlg), func() {
 			s := &prompt.Style
 			s.Text.WhiteSpace = gist.WhiteSpaceNormal
 			s.MaxWidth.SetPx(-1)
@@ -135,7 +135,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 		})
 	case "buttons":
 		bts := child.(*Layout)
-		bts.AddStyleFunc(StyleFuncParent(dlg), func() {
+		bts.AddStyler(StylerParent(dlg), func() {
 			bts.Spacing.SetPx(8 * Prefs.DensityMul())
 		})
 	}

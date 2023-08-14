@@ -33,7 +33,7 @@ func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
 }
 
 func (fr *Frame) OnInit() {
-	fr.AddStyleFunc(StyleFuncDefault, func() {
+	fr.AddStyler(StylerDefault, func() {
 		s := &fr.Style
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius.Set()

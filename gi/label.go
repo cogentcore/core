@@ -131,7 +131,7 @@ func AddNewLabel(parent ki.Ki, name string, text string) *Label {
 
 func (lb *Label) OnInit() {
 	lb.Type = LabelLabelLarge
-	lb.AddStyleFunc(StyleFuncDefault, func() {
+	lb.AddStyler(StylerDefault, func() {
 		s := &lb.Style
 		s.Cursor = lb.ParentCursor(cursor.IBeam)
 		s.Text.WhiteSpace = gist.WhiteSpaceNormal

@@ -153,7 +153,7 @@ func AddNewTextField(parent ki.Ki, name string) *TextField {
 
 func (tf *TextField) OnInit() {
 	// TOOD: figure out how to have primary cursor color
-	tf.AddStyleFunc(StyleFuncDefault, func() {
+	tf.AddStyler(StylerDefault, func() {
 		tf.CursorWidth.SetPx(1)
 		tf.SelectColor.SetColor(ColorScheme.TertiaryContainer)
 		tf.PlaceholderColor = ColorScheme.OnSurfaceVariant
@@ -211,7 +211,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 	case "lead-icon":
 		lead := child.(*Action)
 		lead.Type = ActionParts
-		lead.AddStyleFunc(StyleFuncParent(tf), func() {
+		lead.AddStyler(StylerParent(tf), func() {
 			s := &lead.Style
 			s.Font.Size.SetPx(20)
 			s.Margin.Right.SetPx(16 * Prefs.DensityMul())
@@ -221,7 +221,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 	case "trail-icon":
 		trail := child.(*Action)
 		trail.Type = ActionParts
-		trail.AddStyleFunc(StyleFuncParent(tf), func() {
+		trail.AddStyler(StylerParent(tf), func() {
 			s := &trail.Style
 			s.Font.Size.SetPx(20)
 			s.Margin.Left.SetPx(16 * Prefs.DensityMul())

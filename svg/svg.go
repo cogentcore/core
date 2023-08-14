@@ -73,7 +73,7 @@ func AddNewSVG(parent ki.Ki, name string) *SVG {
 }
 
 func (sv *SVG) OnInit() {
-	sv.AddStyleFunc(gi.StyleFuncDefault, func() {
+	sv.AddStyler(gi.StylerDefault, func() {
 		if par := sv.ParentWidget(); par != nil {
 			sv.Pnt.FillStyle.Color.SetColor(par.Style.Color)
 			sv.Pnt.StrokeStyle.Color.SetColor(par.Style.Color)

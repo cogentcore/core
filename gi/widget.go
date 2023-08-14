@@ -37,8 +37,8 @@ type WidgetBase struct {
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
 
-	// a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code
-	StyleFuncs *ordmap.Map[StyleFuncName, func()] `json:"-" xml:"-" copy:"-" desc:"a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyleFunc, which can be called by end-user and internal code"`
+	// a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code
+	Stylers *ordmap.Map[StylerName, func()] `json:"-" xml:"-" copy:"-" desc:"a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code"`
 
 	// override the computed styles and allow directly editing Style
 	OverrideStyle bool `json:"-" xml:"-" desc:"override the computed styles and allow directly editing Style"`
@@ -186,29 +186,29 @@ var WidgetBaseProps = ki.Props{
 // 	WidgetStatesN
 // )
 
-// StyleFuncName is the name of
-// a style function
-type StyleFuncName string
+// StylerName is the name of
+// a styler (style function)
+type StylerName string
 
 const (
-	// StyleFuncDefault is the style function name
-	// that indicates that a style function was set
-	// on an element by itself in ConfigStyles
-	// as its default style function
-	StyleFuncDefault StyleFuncName = "default"
-	// StyleFuncFinal is the style function name
-	// that indicates that a style function was set
+	// StylerDefault is the styler name
+	// that indicates that a styler was set
+	// on an element by itself
+	// as its default styler
+	StylerDefault StylerName = "default"
+	// StylerFinal is the styler name
+	// that indicates that a styler was set
 	// on an element by end-user code as a final,
-	// overriding style function
-	StyleFuncFinal StyleFuncName = "final"
+	// overriding styler
+	StylerFinal StylerName = "final"
 )
 
-// StyleFuncParent returns a style function name
-// that indicates that a style function was set
-// on a node by the given parent in ConfigStyles
+// StylerParent returns a styler name
+// that indicates that a styler was set
+// on a node by the given parent
 // as its default style function
-func StyleFuncParent(parent ki.Ki) StyleFuncName {
-	return StyleFuncName("parent-" + parent.Path())
+func StylerParent(parent ki.Ki) StylerName {
+	return StylerName("parent-" + parent.Path())
 }
 
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
@@ -273,26 +273,26 @@ func (wb *WidgetBase) Init2D() {
 	wb.Init2DWidget()
 }
 
-// AddStyleFunc adds the given style function to the
-// widget's style functions, initializing them if necessary.
-// This function should typically be called by parents
-// on children, and not by end-user code.
-func (wb *WidgetBase) AddStyleFunc(name StyleFuncName, f func()) {
-	if wb.StyleFuncs == nil {
-		wb.StyleFuncs = ordmap.New[StyleFuncName, func()]()
+// AddStyler adds the given styler to the
+// widget's stylers, initializing them if necessary.
+// This function should be called by both internal
+// and end-user code.
+func (wb *WidgetBase) AddStyler(name StylerName, f func()) {
+	if wb.Stylers == nil {
+		wb.Stylers = ordmap.New[StylerName, func()]()
 	}
-	wb.StyleFuncs.Add(name, f)
+	wb.Stylers.Add(name, f)
 }
 
-// AddChildStyleFunc is a helper function that adds the
-// given style function to the child of the given name
+// AddChildStyler is a helper function that adds the
+// given styler to the child of the given name
 // if it exists, starting searching at the given start index.
-func (wb *WidgetBase) AddChildStyleFunc(childName string, startIdx int, funcName StyleFuncName, f func(w *WidgetBase)) {
+func (wb *WidgetBase) AddChildStyler(childName string, startIdx int, funcName StylerName, f func(w *WidgetBase)) {
 	child := wb.ChildByName(childName, startIdx)
 	if child != nil {
 		wb, ok := child.Embed(TypeWidgetBase).(*WidgetBase)
 		if ok {
-			wb.AddStyleFunc(funcName, func() {
+			wb.AddStyler(funcName, func() {
 				f(wb)
 			})
 		}
@@ -630,8 +630,8 @@ func (wb *WidgetBase) Style2DWidget() {
 // RunStyleFuncs runs the style functions specified in
 // the StyleFuncs field in sequential ascending order.
 func (wb *WidgetBase) RunStyleFuncs() {
-	if wb.StyleFuncs != nil {
-		vals := wb.StyleFuncs.Vals()
+	if wb.Stylers != nil {
+		vals := wb.Stylers.Vals()
 		for _, fun := range vals {
 			fun()
 		}
@@ -1017,7 +1017,7 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 // for the given tooltip frame with the given parent.
 // It should be called on tooltips when they are created.
 func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
-	tooltip.AddStyleFunc(StyleFuncParent(par), func() {
+	tooltip.AddStyler(StylerParent(par), func() {
 		s := &tooltip.Style
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
@@ -1040,7 +1040,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.Fill = true
 	pvp.SetFlag(int(VpFlagPopup))
 	pvp.SetFlag(int(VpFlagTooltip))
-	pvp.AddStyleFunc(StyleFuncParent(parVp), func() {
+	pvp.AddStyler(StylerParent(parVp), func() {
 		// TOOD: get border radius actually working
 		// without having parent background color workaround
 		s := &pvp.Style
@@ -1056,7 +1056,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 
 	TooltipConfigStyles(&pvp.WidgetBase, frame)
 
-	lbl.AddStyleFunc(StyleFuncParent(&pvp), func() {
+	lbl.AddStyler(StylerParent(&pvp), func() {
 		mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
 		mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 

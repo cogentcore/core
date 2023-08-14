@@ -582,7 +582,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	sb.SetDisabledState(vv.This().(ValueView).IsInactive())
 	sb.Step = 1.0
 	sb.PageStep = 10.0
-	sb.Parts.AddChildStyleFunc("textfield", 0, gi.StyleFuncParent(vv), func(tf *gi.WidgetBase) {
+	sb.Parts.AddChildStyler("textfield", 0, gi.StylerParent(vv), func(tf *gi.WidgetBase) {
 		tf.Style.Width.SetCh(5)
 	})
 	vk := vv.Value.Kind()
@@ -917,7 +917,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyleFunc(gi.StyleFuncParent(vv), func() {
+	tf.AddStyler(gi.StylerParent(vv), func() {
 		tf.Style.MinWidth.SetCh(16)
 		tf.Style.MaxWidth.SetPx(-1)
 	})
@@ -967,7 +967,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyleFunc(gi.StyleFuncParent(vv), func() {
+	tf.AddStyler(gi.StylerParent(vv), func() {
 		tf.Style.MinWidth.SetCh(16)
 		tf.Style.MaxWidth.SetPx(-1)
 	})
@@ -1067,7 +1067,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyleFunc(gi.StyleFuncParent(vv), func() {
+	tf.AddStyler(gi.StylerParent(vv), func() {
 		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {

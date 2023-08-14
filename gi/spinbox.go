@@ -83,26 +83,26 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "text-field":
 		tf := child.(*TextField)
-		tf.AddStyleFunc(StyleFuncParent(sb), func() {
+		tf.AddStyler(StylerParent(sb), func() {
 			s := &tf.Style
 			s.MinWidth.SetEm(6)
 		})
 	case "space":
 		space := child.(*Space)
-		space.AddStyleFunc(StyleFuncParent(sb), func() {
+		space.AddStyler(StylerParent(sb), func() {
 			s := &space.Style
 			s.Width.SetCh(0.1)
 		})
 	case "buttons":
 		buttons := child.(*Layout)
-		buttons.AddStyleFunc(StyleFuncParent(sb), func() {
+		buttons.AddStyler(StylerParent(sb), func() {
 			s := &buttons.Style
 			s.AlignV = gist.AlignMiddle
 		})
 	case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
 		act := child.(*Action)
 		act.Type = ActionParts
-		act.AddStyleFunc(StyleFuncParent(sb), func() {
+		act.AddStyler(StylerParent(sb), func() {
 			s := &act.Style
 			s.Font.Size.SetPx(20)
 		})

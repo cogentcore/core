@@ -821,7 +821,7 @@ func AddNewButton(parent ki.Ki, name string) *Button {
 }
 
 func (bt *Button) OnInit() {
-	bt.AddStyleFunc(StyleFuncDefault, func() {
+	bt.AddStyler(StylerDefault, func() {
 		s := &bt.Style
 		s.Cursor = cursor.HandPointing
 		s.Border.Radius = gist.BorderRadiusFull
@@ -875,7 +875,7 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "icon":
 		icon := child.(*Icon)
-		icon.AddStyleFunc(StyleFuncParent(bt), func() {
+		icon.AddStyler(StylerParent(bt), func() {
 			s := &icon.Style
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
@@ -884,14 +884,14 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 		})
 	case "space":
 		space := child.(*Space)
-		space.AddStyleFunc(StyleFuncParent(bt), func() {
+		space.AddStyler(StylerParent(bt), func() {
 			s := &space.Style
 			s.Width.SetEm(0.5)
 			s.MinWidth.SetEm(0.5)
 		})
 	case "label":
 		label := child.(*Label)
-		label.AddStyleFunc(StyleFuncParent(bt), func() {
+		label.AddStyler(StylerParent(bt), func() {
 			s := &label.Style
 			// need to override so label's default color
 			// doesn't take control on state changes
@@ -902,13 +902,13 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 		})
 	case "ind-stretch":
 		ins := child.(*Stretch)
-		ins.AddStyleFunc(StyleFuncParent(bt), func() {
+		ins.AddStyler(StylerParent(bt), func() {
 			s := &ins.Style
 			s.Width.SetEm(0.5)
 		})
 	case "indicator":
 		ind := child.(*Icon)
-		ind.AddStyleFunc(StyleFuncParent(bt), func() {
+		ind.AddStyler(StylerParent(bt), func() {
 			s := &ind.Style
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
@@ -943,7 +943,7 @@ func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
 }
 
 func (cb *CheckBox) OnInit() {
-	cb.AddStyleFunc(StyleFuncDefault, func() {
+	cb.AddStyler(StylerDefault, func() {
 		s := &cb.Style
 		s.Cursor = cursor.HandPointing
 		s.Text.Align = gist.AlignLeft
@@ -972,7 +972,7 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "icon0", "icon1":
 		icon := child.Embed(TypeWidgetBase).(*WidgetBase) // is svg icon so can't access directly
-		icon.AddStyleFunc(StyleFuncParent(cb), func() {
+		icon.AddStyler(StylerParent(cb), func() {
 			s := &icon.Style
 			s.Width.SetEm(1.5)
 			s.Height.SetEm(1.5)
@@ -982,13 +982,13 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 		})
 	case "space":
 		space := child.(*Space)
-		space.AddStyleFunc(StyleFuncParent(cb), func() {
+		space.AddStyler(StylerParent(cb), func() {
 			s := &space.Style
 			s.Width.SetCh(0.1)
 		})
 	case "label":
 		label := child.(*Label)
-		label.AddStyleFunc(StyleFuncParent(cb), func() {
+		label.AddStyler(StylerParent(cb), func() {
 			s := &label.Style
 			s.Margin.Set()
 			s.Padding.Set()

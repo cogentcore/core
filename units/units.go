@@ -283,8 +283,8 @@ type Value struct {
 	// the computed value in raw pixels (dots in DPI)
 	Dots float32 `inactive:"+" desc:"the computed value in raw pixels (dots in DPI)"`
 
-	// function to compute dots from units, using arbitrary expressions -- if nil, standard ToDots is used
-	DotsFunc *func(uc *Context) float32 `desc:"function to compute dots from units, using arbitrary expressions -- if nil, standard ToDots is used"`
+	// function to compute dots from units, using arbitrary expressions; if nil, standard ToDots is used; it is stored as a pointer so that it is comparable
+	DotsFunc *func(uc *Context) float32 `desc:"function to compute dots from units, using arbitrary expressions; if nil, standard ToDots is used; it is stored as a pointer so that it is comparable"`
 }
 
 var TypeValue = kit.Types.AddType(&Value{}, ValueProps)

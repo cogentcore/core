@@ -36,7 +36,7 @@ type ArgView struct {
 var TypeArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
 
 func (av *ArgView) OnInit() {
-	av.AddStyleFunc(gi.StyleFuncDefault, func() {
+	av.AddStyler(gi.StylerDefault, func() {
 		s := &av.Style
 		s.BackgroundColor.SetColor(gi.ColorScheme.Background)
 		s.Color = gi.ColorScheme.OnBackground
@@ -50,7 +50,7 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 	case "title":
 		title := child.(*gi.Label)
 		title.Type = gi.LabelTitleLarge
-		av.AddStyleFunc(gi.StyleFuncParent(av), func() {
+		av.AddStyler(gi.StylerParent(av), func() {
 			s := &title.Style
 			s.MaxWidth.SetPx(-1)
 			s.Text.Align = gist.AlignCenter
@@ -58,7 +58,7 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 		})
 	case "args-grid":
 		grid := child.(*gi.Layout)
-		grid.AddStyleFunc(gi.StyleFuncParent(av), func() {
+		grid.AddStyler(gi.StylerParent(av), func() {
 			s := &grid.Style
 			// setting a pref here is key for giving it a scrollbar in larger context
 			s.MinWidth.SetEm(1.5)
@@ -73,7 +73,7 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 	}
 	if child.Parent().Name() == "args-grid" {
 		if widg, ok := child.(*gi.WidgetBase); ok {
-			widg.AddStyleFunc(gi.StyleFuncParent(av), func() {
+			widg.AddStyler(gi.StylerParent(av), func() {
 				s := &widg.Style
 				s.AlignH = gist.AlignCenter
 			})

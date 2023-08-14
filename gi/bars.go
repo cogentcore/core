@@ -38,7 +38,7 @@ func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
 }
 
 func (mb *MenuBar) OnInit() {
-	mb.AddStyleFunc(StyleFuncDefault, func() {
+	mb.AddStyler(StylerDefault, func() {
 		s := &mb.Style
 		s.MaxWidth.SetPx(-1)
 		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
@@ -328,7 +328,7 @@ func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
 }
 
 func (tb *ToolBar) OnInit() {
-	tb.AddStyleFunc(StyleFuncDefault, func() {
+	tb.AddStyler(StylerDefault, func() {
 		s := &tb.Style
 		s.MaxWidth.SetPx(-1)
 		s.BackgroundColor = tb.ParentBackgroundColor()

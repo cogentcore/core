@@ -205,7 +205,7 @@ func (vv *ColorMapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.AddStyleFunc(gi.StyleFuncParent(vv), func() {
+	ac.AddStyler(gi.StylerParent(vv), func() {
 		ac.Style.Border.Radius = gist.BorderRadiusFull
 	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {

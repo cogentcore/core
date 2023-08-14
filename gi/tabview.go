@@ -56,7 +56,7 @@ func AddNewTabView(parent ki.Ki, name string) *TabView {
 }
 
 func (tv *TabView) OnInit() {
-	tv.AddStyleFunc(StyleFuncDefault, func() {
+	tv.AddStyler(StylerDefault, func() {
 		s := &tv.Style
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
@@ -74,7 +74,7 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "tabs":
 		tabs := child.(*Frame)
-		tabs.AddStyleFunc(StyleFuncParent(tv), func() {
+		tabs.AddStyler(StylerParent(tv), func() {
 			s := &tabs.Style
 			s.MaxWidth.SetPx(-1)
 			s.Height.SetEm(1.8)
@@ -91,7 +91,7 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 		})
 	case "frame":
 		frame := child.(*Frame)
-		frame.AddStyleFunc(StyleFuncParent(tv), func() {
+		frame.AddStyler(StylerParent(tv), func() {
 			s := &frame.Style
 			s.Width.SetEm(10)
 			s.MinWidth.SetEm(10)
@@ -619,7 +619,7 @@ var TabButtonProps = ki.Props{
 }
 
 func (tb *TabButton) OnInit() {
-	tb.AddStyleFunc(StyleFuncDefault, func() {
+	tb.AddStyler(StylerDefault, func() {
 		s := &tb.Style
 		s.Cursor = cursor.HandPointing
 		s.MinWidth.SetCh(8)
@@ -650,7 +650,7 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "icon":
 		icon := child.(*Icon)
-		icon.AddStyleFunc(StyleFuncParent(tb), func() {
+		icon.AddStyler(StylerParent(tb), func() {
 			s := &icon.Style
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
@@ -659,20 +659,20 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 		})
 	case "label":
 		label := child.(*Label)
-		label.AddStyleFunc(StyleFuncParent(tb), func() {
+		label.AddStyler(StylerParent(tb), func() {
 			s := &label.Style
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "close-stretch":
 		cls := child.(*Stretch)
-		cls.AddStyleFunc(StyleFuncParent(tb), func() {
+		cls.AddStyler(StylerParent(tb), func() {
 			s := &cls.Style
 			s.Width.SetCh(1)
 		})
 	case "close":
 		close := child.(*Action)
-		close.AddStyleFunc(StyleFuncParent(tb), func() {
+		close.AddStyler(StylerParent(tb), func() {
 			s := &close.Style
 			s.Width.SetEx(0.5)
 			s.Height.SetEx(0.5)
@@ -684,13 +684,13 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 		})
 	case "sc-stretch":
 		scs := child.(*Stretch)
-		scs.AddStyleFunc(StyleFuncParent(tb), func() {
+		scs.AddStyler(StylerParent(tb), func() {
 			s := &scs.Style
 			s.MinWidth.SetCh(2)
 		})
 	case "shortcut":
 		shortcut := child.(*Label)
-		shortcut.AddStyleFunc(StyleFuncParent(tb), func() {
+		shortcut.AddStyler(StylerParent(tb), func() {
 			s := &shortcut.Style
 			s.Margin.Set()
 			s.Padding.Set()

@@ -335,7 +335,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
 func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
-	frame.AddStyleFunc(StyleFuncParent(par), func() {
+	frame.AddStyler(StylerParent(par), func() {
 		s := &frame.Style
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
@@ -655,7 +655,7 @@ func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
 
 func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
-	sp.AddStyleFunc(StyleFuncDefault, func() {
+	sp.AddStyler(StylerDefault, func() {
 		s := &sp.Style
 		s.Margin.Set()
 		s.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(0))

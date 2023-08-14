@@ -124,7 +124,7 @@ var Viewport2DProps = ki.Props{
 }
 
 func (vp *Viewport2D) OnInit() {
-	vp.AddStyleFunc(StyleFuncDefault, func() {
+	vp.AddStyler(StylerDefault, func() {
 		s := &vp.Style
 		s.BackgroundColor.SetColor(ColorScheme.Background)
 		s.Color = ColorScheme.OnBackground

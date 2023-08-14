@@ -72,7 +72,7 @@ func AddNewAction(parent ki.Ki, name string) *Action {
 }
 
 func (ac *Action) OnInit() {
-	ac.AddStyleFunc(StyleFuncDefault, func() {
+	ac.AddStyler(StylerDefault, func() {
 		s := &ac.Style
 		s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(gist.BorderNone)
@@ -125,7 +125,7 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "icon":
 		icon := child.(*Icon)
-		icon.AddStyleFunc(StyleFuncParent(ac), func() {
+		icon.AddStyler(StylerParent(ac), func() {
 			if ac.Type == ActionMenu {
 				icon.Style.Font.Size.SetEm(1.5)
 			}
@@ -134,19 +134,19 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 		})
 	case "space":
 		space := child.(*Space)
-		space.AddStyleFunc(StyleFuncParent(ac), func() {
+		space.AddStyler(StylerParent(ac), func() {
 			space.Style.Width.SetCh(0.5)
 			space.Style.MinWidth.SetCh(0.5)
 		})
 	case "label":
 		label := child.(*Label)
-		label.AddStyleFunc(StyleFuncParent(ac), func() {
+		label.AddStyler(StylerParent(ac), func() {
 			label.Style.Margin.Set()
 			label.Style.Padding.Set()
 		})
 	case "indicator":
 		ind := child.(*Icon)
-		ind.AddStyleFunc(StyleFuncParent(ac), func() {
+		ind.AddStyler(StylerParent(ac), func() {
 			if ac.Type == ActionMenu {
 				ind.Style.Font.Size.SetEm(1.5)
 			}
@@ -156,18 +156,18 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 		})
 	case "ind-stretch":
 		ins := child.(*Stretch)
-		ins.AddStyleFunc(StyleFuncParent(ac), func() {
+		ins.AddStyler(StylerParent(ac), func() {
 			ins.Style.Width.SetEm(1)
 		})
 	case "shortcut":
 		short := child.(*Label)
-		short.AddStyleFunc(StyleFuncParent(ac), func() {
+		short.AddStyler(StylerParent(ac), func() {
 			short.Style.Margin.Set()
 			short.Style.Padding.Set()
 		})
 	case "sc-stretch":
 		scs := child.(*Stretch)
-		scs.AddStyleFunc(StyleFuncParent(ac), func() {
+		scs.AddStyler(StylerParent(ac), func() {
 			scs.Style.MinWidth.SetCh(2)
 		})
 	}
