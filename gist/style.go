@@ -87,11 +87,11 @@ type Style struct {
 	// prop: min-height = specified minimum size of element -- 0 if not specified
 	MinHeight units.Value `xml:"min-height" desc:"prop: min-height = specified minimum size of element -- 0 if not specified"`
 
-	// prop: margin = outer-most transparent space around box element -- todo: can be specified per side
-	Margin SideValues `xml:"margin" desc:"prop: margin = outer-most transparent space around box element -- todo: can be specified per side"`
+	// prop: margin = outer-most transparent space around box element
+	Margin SideValues `xml:"margin" desc:"prop: margin = outer-most transparent space around box element"`
 
-	// prop: padding = transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left
-	Padding SideValues `xml:"padding" desc:"prop: padding = transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
+	// prop: padding = transparent space around central content of box
+	Padding SideValues `xml:"padding" desc:"prop: padding = transparent space around central content of box"`
 
 	// prop: overflow = what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values
 	Overflow Overflow `xml:"overflow" desc:"prop: overflow = what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
@@ -120,11 +120,11 @@ type Style struct {
 	// prop: background-color = background color -- not inherited, transparent by default
 	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
 
-	// border around the box element -- todo: can have separate ones for different sides
-	Border Border `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
+	// border around the box element
+	Border Border `xml:"border" desc:"border around the box element"`
 
-	// prop: box-shadow = type of shadow to render around box
-	BoxShadow Shadow `xml:"box-shadow" desc:"prop: box-shadow = type of shadow to render around box"`
+	// prop: box-shadow = the box shadows to render around box (can have multiple)
+	BoxShadow []Shadow `xml:"box-shadow" desc:"prop: box-shadow = the box shadows to render around box (can have multiple)"`
 
 	// font parameters -- no xml prefix -- also has color, background-color
 	Font Font `desc:"font parameters -- no xml prefix -- also has color, background-color"`
@@ -337,7 +337,7 @@ func (s *Style) ToDotsImpl(uc *units.Context) {
 	s.Text.ToDots(uc)
 	s.Border.ToDots(uc)
 	s.Outline.ToDots(uc)
-	s.BoxShadow.ToDots(uc)
+	s.BoxShadowToDots(uc)
 }
 
 // ToDots caches all style elements in terms of raw pixel
@@ -373,7 +373,7 @@ func (s *Style) EffMargin() SideFloats {
 	// (shadow is supposed to be outside of the box model),
 	// but that is incompatible with the way we position things.
 	// Maybe we could come up with a better way to do this at some point.
-	return s.Margin.Dots().Max(s.BoxShadow.Margin())
+	return s.Margin.Dots().Max(s.BoxShadowMargin())
 }
 
 // SubProps returns a sub-property map from given prop map for a given styling

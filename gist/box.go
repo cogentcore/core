@@ -154,7 +154,7 @@ type Shadow struct {
 }
 
 func (s *Shadow) HasShadow() bool {
-	return (s.HOffset.Dots > 0 || s.VOffset.Dots > 0)
+	return s.HOffset.Dots != 0 || s.VOffset.Dots != 0 || s.Blur.Dots != 0 || s.Spread.Dots != 0
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -195,4 +195,41 @@ func (s *Shadow) Margin() SideFloats {
 		mat32.Max(s.VOffset.Dots+s.Spread.Dots, 0),
 		mat32.Max(-s.HOffset.Dots+s.Spread.Dots, 0),
 	)
+}
+
+// AddBoxShadow adds the given box shadows to the style
+func (s *Style) AddBoxShadow(shadow ...Shadow) {
+	if s.BoxShadow == nil {
+		s.BoxShadow = []Shadow{}
+	}
+	s.BoxShadow = append(s.BoxShadow, shadow...)
+}
+
+// BoxShadowMargin returns the total box shadow margin
+// of the style, calculated through [Shadow.Margin]
+func (s *Style) BoxShadowMargin() SideFloats {
+	sum := SideFloats{}
+	for _, sh := range s.BoxShadow {
+		sum = sum.Add(sh.Margin())
+	}
+	return sum
+}
+
+// BoxShadowToDots runs ToDots on all box shadow
+// unit values to compile down to raw pixels
+func (s *Style) BoxShadowToDots(uc *units.Context) {
+	for i := range s.BoxShadow {
+		s.BoxShadow[i].ToDots(uc)
+	}
+}
+
+// HasBoxShadow returns whether the style has
+// any box shadows
+func (s *Style) HasBoxShadow() bool {
+	for _, sh := range s.BoxShadow {
+		if sh.HasShadow() {
+			return true
+		}
+	}
+	return false
 }

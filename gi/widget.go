@@ -585,7 +585,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	}
 	sty := gist.Style{}
 	sty.Defaults()
-	if parSty := wb.ParentActiveStyle(); parSty != nil && *parSty != sty {
+	if parSty := wb.ParentActiveStyle(); parSty != nil {
 		wb.Style.InheritFields(parSty)
 		wb.ParentStyleRUnlock()
 	}
@@ -1233,27 +1233,29 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	}
 
 	// first do any shadow
-	if st.BoxShadow.HasShadow() {
-		spos := st.BoxShadow.Pos(pos)
-		ssz := st.BoxShadow.Size(sz)
-		pc.StrokeStyle.SetColor(nil)
+	if st.HasBoxShadow() {
+		for _, shadow := range st.BoxShadow {
+			spos := shadow.Pos(pos)
+			ssz := shadow.Size(sz)
+			pc.StrokeStyle.SetColor(nil)
 
-		// we need to fill the whole box where the
-		// box shadow can go to prevent growing box shadows
-		pc.FillBox(rs, spos, ssz, &sbg)
+			// we need to fill the whole box where the
+			// box shadow can go to prevent growing box shadows
+			pc.FillBox(rs, spos, ssz, &sbg)
 
-		pc.FillStyle.SetColor(st.BoxShadow.Color)
+			pc.FillStyle.SetColor(shadow.Color)
 
-		// TODO: better handling of opacity?
-		prevOpacity := pc.FillStyle.Opacity
-		pc.FillStyle.Opacity = gist.RGBAf32Model.Convert(st.BoxShadow.Color).(gist.RGBAf32).A
-		// we only want radius for border, no actual border
-		wb.RenderBoxImpl(spos, ssz, gist.Border{Radius: st.Border.Radius})
-		// pc.FillStyle.Opacity = 1.0
-		if st.BoxShadow.Blur.Dots != 0 {
-			pc.BlurBox(rs, spos, ssz, st.BoxShadow.Blur.Dots)
+			// TODO: better handling of opacity?
+			prevOpacity := pc.FillStyle.Opacity
+			pc.FillStyle.Opacity = gist.RGBAf32Model.Convert(shadow.Color).(gist.RGBAf32).A
+			// we only want radius for border, no actual border
+			wb.RenderBoxImpl(spos, ssz, gist.Border{Radius: st.Border.Radius})
+			// pc.FillStyle.Opacity = 1.0
+			if shadow.Blur.Dots != 0 {
+				pc.BlurBox(rs, spos, ssz, shadow.Blur.Dots)
+			}
+			pc.FillStyle.Opacity = prevOpacity
 		}
-		pc.FillStyle.Opacity = prevOpacity
 	}
 
 	// then draw the box over top of that.
