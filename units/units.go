@@ -161,17 +161,23 @@ type Context struct {
 	// FontRem is rem-size of font in points -- root Em size -- typically 12 point
 	FontRem float32
 
-	// VpW is viewport width in dots
-	VpW float32
+	// Vw is viewport width in dots
+	Vw float32
 
-	// VpH is viewport height in dots
-	VpH float32
+	// Vh is viewport height in dots
+	Vh float32
 
-	// ElW is width of surrounding contextual element in dots
-	ElW float32
+	// Ew is width of element in dots
+	Ew float32
 
-	// ElH is height of surrounding contextual element in dots
-	ElH float32
+	// Eh is height of element in dots
+	Eh float32
+
+	// Pw is width of parent in dots
+	Pw float32
+
+	// Ph is height of parent in dots
+	Ph float32
 }
 
 // Defaults are generic defaults
@@ -181,31 +187,40 @@ func (uc *Context) Defaults() {
 	uc.FontEx = 6.0
 	uc.FontCh = 6.0
 	uc.FontRem = 12.0
-	uc.VpW = 800.0
-	uc.VpH = 600.0
-	uc.ElW = uc.VpW
-	uc.ElH = uc.VpH
+	uc.Vw = 800.0
+	uc.Vh = 600.0
+	uc.Ew = uc.Vw
+	uc.Eh = uc.Vh
+	uc.Pw = uc.Vw
+	uc.Ph = uc.Vh
 }
 
-// Set sets the context values
-func (uc *Context) Set(em, ex, ch, rem, vpw, vph, elw, elh float32) {
-	uc.SetSizes(vpw, vph, elw, elh)
+// Set sets the context values to the given values
+func (uc *Context) Set(em, ex, ch, rem, vw, vh, ew, eh, pw, ph float32) {
+	uc.SetSizes(vw, vh, ew, eh, pw, ph)
 	uc.SetFont(em, ex, ch, rem)
 }
 
-// SetSizes sets the context values for non-font sizes -- el is ignored if zero
-func (uc *Context) SetSizes(vpw, vph, elw, elh float32) {
-	if vpw != 0 {
-		uc.VpW = vpw
+// SetSizes sets the context values for the non-font sizes
+// to the given values; the values are ignored if they are zero.
+func (uc *Context) SetSizes(vw, vh, ew, eh, pw, ph float32) {
+	if vw != 0 {
+		uc.Vw = vw
 	}
-	if vph != 0 {
-		uc.VpH = vph
+	if vh != 0 {
+		uc.Vh = vh
 	}
-	if elw != 0 {
-		uc.ElW = elw
+	if ew != 0 {
+		uc.Ew = ew
 	}
-	if elh != 0 {
-		uc.ElH = elh
+	if eh != 0 {
+		uc.Eh = eh
+	}
+	if pw != 0 {
+		uc.Pw = pw
+	}
+	if ph != 0 {
+		uc.Ph = ph
 	}
 }
 
@@ -226,9 +241,9 @@ func (uc *Context) Dots(un Units) float32 {
 	}
 	switch un {
 	case UnitEw:
-		return 0.01 * uc.ElW
+		return 0.01 * uc.Ew
 	case UnitEh:
-		return 0.01 * uc.ElH
+		return 0.01 * uc.Eh
 	case UnitEm:
 		return uc.FontEm
 	case UnitEx:
@@ -238,13 +253,13 @@ func (uc *Context) Dots(un Units) float32 {
 	case UnitRem:
 		return uc.FontRem
 	case UnitVw:
-		return 0.01 * uc.VpW
+		return 0.01 * uc.Vw
 	case UnitVh:
-		return 0.01 * uc.VpH
+		return 0.01 * uc.Vh
 	case UnitVmin:
-		return kit.Min32(uc.VpW, uc.VpH)
+		return kit.Min32(uc.Vw, uc.Vh)
 	case UnitVmax:
-		return kit.Max32(uc.VpW, uc.VpH)
+		return kit.Max32(uc.Vw, uc.Vh)
 	case UnitCm:
 		return uc.DPI / CmPerInch
 	case UnitMm:
