@@ -19,7 +19,7 @@ import (
 // If Sides contains corners, the struct field names correspond
 // to the corners as follows: Top = top left, Right = top right,
 // Bottom = bottom right, Left = bottom left.
-type Sides[T comparable] struct {
+type Sides[T any] struct {
 
 	// top/top-left value
 	Top T `xml:"top" desc:"top/top-left value"`
@@ -37,7 +37,7 @@ type Sides[T comparable] struct {
 // NewSides is a helper that creates new sides/corners of the given type
 // and calls Set on them with the given values.
 // It does not return any error values and just logs them.
-func NewSides[T comparable](vals ...T) Sides[T] {
+func NewSides[T any](vals ...T) Sides[T] {
 	sides, _ := NewSidesTry[T](vals...)
 	return sides
 }
@@ -45,7 +45,7 @@ func NewSides[T comparable](vals ...T) Sides[T] {
 // NewSidesTry is a helper that creates new sides/corners of the given type
 // and calls Set on them with the given values.
 // It returns an error value if there is one.
-func NewSidesTry[T comparable](vals ...T) (Sides[T], error) {
+func NewSidesTry[T any](vals ...T) (Sides[T], error) {
 	sides := Sides[T]{}
 	err := sides.Set(vals...)
 	return sides, err
@@ -123,24 +123,6 @@ func (s *Sides[T]) SetAll(val T) {
 	s.Right = val
 	s.Bottom = val
 	s.Left = val
-}
-
-// This returns the sides/corners as a Sides value
-// (instead of some higher-level value in which
-// the sides/corners are embedded)
-func (s Sides[T]) This() Sides[T] {
-	return s
-}
-
-// AllSame returns whether all of the sides/corners are the same
-func (s Sides[T]) AllSame() bool {
-	return s.Right == s.Top && s.Bottom == s.Top && s.Left == s.Top
-}
-
-// IsZero returns whether all of the sides/corners are equal to zero
-func (s Sides[T]) IsZero() bool {
-	var zval T
-	return s.Top == zval && s.Right == zval && s.Bottom == zval && s.Left == zval
 }
 
 // SetStringer is a type that can be set from a string
@@ -324,6 +306,16 @@ func (sf SideFloats) ToValues() SideValues {
 	)
 }
 
+// AllSame returns whether all of the sides/corners are the same
+func (s SideFloats) AllSame() bool {
+	return s.Right == s.Top && s.Bottom == s.Top && s.Left == s.Top
+}
+
+// IsZero returns whether all of the sides/corners are equal to zero
+func (s SideFloats) IsZero() bool {
+	return s.Top == 0 && s.Right == 0 && s.Bottom == 0 && s.Left == 0
+}
+
 // SideColors contains color values for each side/corner of a box
 type SideColors struct {
 	Sides[Color]
@@ -382,4 +374,14 @@ func (s *SideColors) SetString(str string, ctxt Context) error {
 		}
 	}
 	return s.Set(vals...)
+}
+
+// AllSame returns whether all of the sides/corners are the same
+func (s SideColors) AllSame() bool {
+	return s.Right == s.Top && s.Bottom == s.Top && s.Left == s.Top
+}
+
+// IsZero returns whether all of the sides/corners are equal to zero
+func (s SideColors) IsZero() bool {
+	return s.Top.IsNil() && s.Right.IsNil() && s.Bottom.IsNil() && s.Left.IsNil()
 }
