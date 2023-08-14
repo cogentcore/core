@@ -855,10 +855,6 @@ func (bt *Button) OnInit() {
 		case ButtonText:
 			s.BackgroundColor = bt.ParentBackgroundColor()
 			s.Color = ColorScheme.Primary
-			s.Padding.SetHoriz(units.Em(0.75 * Prefs.DensityMul()))
-			// if !bt.Icon.IsNil() {
-			// 	s.Padding.Right.SetPx(1 * Prefs.DensityMul())
-			// }
 		}
 		if bt.IsHovered() {
 			if bt.Type == ButtonElevated {
