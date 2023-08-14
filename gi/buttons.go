@@ -833,29 +833,6 @@ func (bt *Button) OnInit() {
 			s.Padding.Right.SetEm(1 * Prefs.DensityMul())
 		}
 		s.Text.Align = gist.AlignCenter
-		s.AddBoxShadow(
-			gist.Shadow{
-				HOffset: units.Px(0),
-				VOffset: units.Px(3),
-				Blur:    units.Px(1),
-				Spread:  units.Px(-2),
-				Color:   ColorScheme.Shadow.WithA(0.2),
-			},
-			gist.Shadow{
-				HOffset: units.Px(0),
-				VOffset: units.Px(2),
-				Blur:    units.Px(2),
-				Spread:  units.Px(0),
-				Color:   ColorScheme.Shadow.WithA(0.14),
-			},
-			gist.Shadow{
-				HOffset: units.Px(0),
-				VOffset: units.Px(1),
-				Blur:    units.Px(5),
-				Spread:  units.Px(0),
-				Color:   ColorScheme.Shadow.WithA(0.12),
-			},
-		)
 		switch bt.Type {
 		case ButtonFilled:
 			s.BackgroundColor.SetColor(ColorScheme.Primary)
@@ -866,6 +843,7 @@ func (bt *Button) OnInit() {
 		case ButtonElevated:
 			s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
 			s.Color = ColorScheme.Primary
+			s.BoxShadow = ShadowElevation1
 		case ButtonOutlined:
 			s.BackgroundColor.SetColor(ColorScheme.Surface)
 			s.Color = ColorScheme.Primary
@@ -879,6 +857,14 @@ func (bt *Button) OnInit() {
 			// if !bt.Icon.IsNil() {
 			// 	s.Padding.Right.SetPx(1 * Prefs.DensityMul())
 			// }
+		}
+		if bt.IsHovered() {
+			if bt.Type == ButtonElevated {
+				s.BoxShadow = ShadowElevation2
+			} else {
+				s.BoxShadow = ShadowElevation1
+			}
+
 		}
 		// STYTODO: add state styles for buttons
 	})
