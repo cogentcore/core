@@ -4,7 +4,11 @@
 
 package units
 
-import "github.com/goki/ki/kit"
+import (
+	"fmt"
+
+	"github.com/goki/ki/kit"
+)
 
 // Context specifies everything about the current context necessary for converting the number
 // into specific display-dependent pixels
@@ -109,6 +113,7 @@ func (uc *Context) Dots(un Units) float32 {
 	case UnitEh:
 		return 0.01 * uc.Eh
 	case UnitPw:
+		fmt.Println(uc.Pw)
 		return 0.01 * uc.Pw
 	case UnitPh:
 		return 0.01 * uc.Ph
