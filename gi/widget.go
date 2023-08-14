@@ -1234,15 +1234,16 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 
 	// first do any shadow
 	if st.HasBoxShadow() {
+		// we need to fill the whole box where the
+		// box shadows can go to prevent growing box shadows
+		mspos := st.BoxShadowPos(pos)
+		mssz := st.BoxShadowSize(sz)
+		pc.FillBox(rs, mspos, mssz, &sbg)
+
 		for _, shadow := range st.BoxShadow {
 			spos := shadow.Pos(pos)
 			ssz := shadow.Size(sz)
 			pc.StrokeStyle.SetColor(nil)
-
-			// we need to fill the whole box where the
-			// box shadow can go to prevent growing box shadows
-			pc.FillBox(rs, spos, ssz, &sbg)
-
 			pc.FillStyle.SetColor(shadow.Color)
 
 			// TODO: better handling of opacity?

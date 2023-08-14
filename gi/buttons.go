@@ -833,13 +833,22 @@ func (bt *Button) OnInit() {
 			s.Padding.Right.SetEm(1 * Prefs.DensityMul())
 		}
 		s.Text.Align = gist.AlignCenter
-		s.AddBoxShadow(gist.Shadow{
-			Color:   ColorScheme.Shadow.WithA(0.2),
-			HOffset: units.Px(0),
-			VOffset: units.Px(3),
-			Blur:    units.Px(1),
-			Spread:  units.Px(-2),
-		})
+		s.AddBoxShadow(
+			gist.Shadow{
+				Color:   ColorScheme.Shadow.WithA(0.2),
+				HOffset: units.Px(10),
+				VOffset: units.Px(10),
+				Blur:    units.Px(10),
+				Spread:  units.Px(10),
+			},
+			gist.Shadow{
+				Color:   ColorScheme.Shadow.WithA(0.14),
+				HOffset: units.Px(0),
+				VOffset: units.Px(2),
+				Blur:    units.Px(2),
+				Spread:  units.Px(0),
+			},
+		)
 		switch bt.Type {
 		case ButtonFilled:
 			s.BackgroundColor.SetColor(ColorScheme.Primary)

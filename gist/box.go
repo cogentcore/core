@@ -205,14 +205,36 @@ func (s *Style) AddBoxShadow(shadow ...Shadow) {
 	s.BoxShadow = append(s.BoxShadow, shadow...)
 }
 
-// BoxShadowMargin returns the total box shadow margin
+// BoxShadowStartPos returns the minimum position one of
+// the box shadows of the style should be rendered with
+// the given starting position, using [Shadow.Pos].
+func (s *Style) BoxShadowPos(startPos mat32.Vec2) mat32.Vec2 {
+	min := startPos
+	for _, sh := range s.BoxShadow {
+		min = min.Min(sh.Pos(startPos))
+	}
+	return min
+}
+
+// BoxShadowStartSize returns the maximum size one of
+// the box shadows of the style occupies with
+// the given starting size, using [Shadow.Size].
+func (s *Style) BoxShadowSize(startSize mat32.Vec2) mat32.Vec2 {
+	max := startSize
+	for _, sh := range s.BoxShadow {
+		max = max.Max(sh.Size(startSize))
+	}
+	return max
+}
+
+// BoxShadowMargin returns the maximum box shadow margin
 // of the style, calculated through [Shadow.Margin]
 func (s *Style) BoxShadowMargin() SideFloats {
-	sum := SideFloats{}
+	max := SideFloats{}
 	for _, sh := range s.BoxShadow {
-		sum = sum.Add(sh.Margin())
+		max = max.Max(sh.Margin())
 	}
-	return sum
+	return max
 }
 
 // BoxShadowToDots runs ToDots on all box shadow
