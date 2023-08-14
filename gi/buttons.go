@@ -833,11 +833,11 @@ func (bt *Button) OnInit() {
 			s.Padding.Right.SetEm(1 * Prefs.DensityMul())
 		}
 		s.Text.Align = gist.AlignCenter
-		s.BoxShadow.Color = ColorScheme.Shadow.Clearer(80)
-		s.BoxShadow.HOffset.SetPx(2)
-		s.BoxShadow.VOffset.SetPx(5)
-		s.BoxShadow.Blur.SetPx(10)
-		s.BoxShadow.Spread.SetPx(10)
+		s.BoxShadow.Color = ColorScheme.Shadow.WithA(0.2)
+		s.BoxShadow.HOffset.SetPx(0)
+		s.BoxShadow.VOffset.SetPx(3)
+		s.BoxShadow.Blur.SetPx(1)
+		s.BoxShadow.Spread.SetPx(-2)
 		switch bt.Type {
 		case ButtonFilled:
 			s.BackgroundColor.SetColor(ColorScheme.Primary)

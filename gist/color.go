@@ -731,6 +731,13 @@ func (c Color) Opaquer(pct float32) Color {
 	return ColorModel.Convert(f32).(Color)
 }
 
+// WithA returns the color with the given A
+// (transparency) value on a scale of 0 to 1
+func (c Color) WithA(a float32) Color {
+	c.A = uint8(a * 255)
+	return c
+}
+
 // Blend returns a color that is the given percent blend between current color
 // and given clr -- 10 = 10% of the clr and 90% of the current color, etc --
 // blending is done directly on non-pre-multiplied RGB values
