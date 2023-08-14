@@ -1240,14 +1240,14 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	// This also fixes https://github.com/goki/gi/issues/579.
 	// This isn't an ideal solution because of performance,
 	// so TODO: maybe come up with a better solution for this.
+	// We need to use raw LayState data because we need to clear
+	// any box shadow that may have gone in margin.
 	mspos, mssz := st.BoxShadowPosSize(wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size)
 	pc.FillBox(rs, mspos, mssz, &sbg)
 
 	// first do any shadow
 	if st.HasBoxShadow() {
 		for _, shadow := range st.BoxShadow {
-			spos := shadow.Pos(pos)
-			ssz := shadow.Size(sz)
 			pc.StrokeStyle.SetColor(nil)
 			pc.FillStyle.SetColor(shadow.Color)
 
@@ -1255,11 +1255,11 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 			prevOpacity := pc.FillStyle.Opacity
 			pc.FillStyle.Opacity = gist.RGBAf32Model.Convert(shadow.Color).(gist.RGBAf32).A
 			// we only want radius for border, no actual border
-			wb.RenderBoxImpl(spos, ssz, gist.Border{Radius: st.Border.Radius})
+			wb.RenderBoxImpl(shadow.BasePos(pos), shadow.BaseSize(sz), gist.Border{Radius: st.Border.Radius})
 			// pc.FillStyle.Opacity = 1.0
 			if shadow.Blur.Dots != 0 {
 				// must divide by 2 like CSS
-				pc.BlurBox(rs, spos, ssz, shadow.Blur.Dots/2)
+				pc.BlurBox(rs, shadow.Pos(pos), shadow.Size(sz), shadow.Blur.Dots/2)
 			}
 			pc.FillStyle.Opacity = prevOpacity
 		}

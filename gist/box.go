@@ -165,23 +165,39 @@ func (s *Shadow) ToDots(uc *units.Context) {
 	s.Spread.ToDots(uc)
 }
 
-// Pos returns the position at which the box shadow
-// should be rendered if the shadow is on an element
-// with the given starting position.
-func (s *Shadow) Pos(startPos mat32.Vec2) mat32.Vec2 {
+// BasePos returns the position at which the base box shadow
+// (the actual solid, unblurred box part) should be rendered
+// if the shadow is on an element with the given starting position.
+func (s *Shadow) BasePos(startPos mat32.Vec2) mat32.Vec2 {
 	// Offset directly affects position.
-	// We need to subtract spread and half of blur
+	// We need to subtract spread
 	// to compensate for size changes and stay centered.
-	return startPos.Add(mat32.NewVec2(s.HOffset.Dots, s.VOffset.Dots)).SubScalar(s.Spread.Dots + s.Blur.Dots/2)
+	return startPos.Add(mat32.NewVec2(s.HOffset.Dots, s.VOffset.Dots)).SubScalar(s.Spread.Dots)
 }
 
-// Size returns the total size occupied by the box shadow
+// BaseSize returns the total size the base box shadow
+// (the actual solid, unblurred part) should be if
+// the shadow is on an element with the given starting size.
+func (s *Shadow) BaseSize(startSize mat32.Vec2) mat32.Vec2 {
+	// Spread goes on all sides, so need to count twice per dimension.
+	return startSize.AddScalar(2 * s.Spread.Dots)
+}
+
+// Pos returns the position at which the blurred box shadow
+// should start if the shadow is on an element
+// with the given starting position.
+func (s *Shadow) Pos(startPos mat32.Vec2) mat32.Vec2 {
+	// We need to subtract half of blur
+	// to compensate for size changes and stay centered.
+	return s.BasePos(startPos).SubScalar(s.Blur.Dots / 2)
+}
+
+// Size returns the total size occupied by the blurred box shadow
 // if the shadow is on an element with the given starting size.
 func (s *Shadow) Size(startSize mat32.Vec2) mat32.Vec2 {
-	// Spread goes on all sides, so need to count twice per dimension.
-	// Blur also goes on all sides, but it is rendered as half of actual
+	// Blur goes on all sides, but it is rendered as half of actual
 	// because CSS does the same, so we only count it once.
-	return startSize.AddScalar(2*s.Spread.Dots + s.Blur.Dots)
+	return s.BaseSize(startSize).AddScalar(s.Blur.Dots)
 }
 
 // Margin returns the effective margin created by the
