@@ -126,8 +126,8 @@ func (ge *GiEditor) EditColorScheme() {
 // ToggleSelectionMode toggles the editor between selection mode or not
 func (ge *GiEditor) ToggleSelectionMode() {
 	if win, ok := ge.KiRoot.(*gi.Window); ok {
-		if !win.IsInSelectionMode() && win.SelectedWidget == nil {
-			win.SelectedWidget = make(chan *gi.WidgetBase)
+		if !win.IsInSelectionMode() && win.SelectedWidgetChan == nil {
+			win.SelectedWidgetChan = make(chan *gi.WidgetBase)
 		}
 		win.SetSelectionModeState(!win.IsInSelectionMode())
 	}
@@ -299,8 +299,15 @@ var GiEditorProps = ki.Props{
 			"desc": "Select an element in the window to edit it",
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
-				_, ok := ge.KiRoot.(*gi.Window)
+				win, ok := ge.KiRoot.(*gi.Window)
 				act.SetEnabledStateUpdt(ok)
+				if ok {
+					if win.IsInSelectionMode() {
+						act.SetText("Disable Selection")
+					} else {
+						act.SetText("Enable Selection")
+					}
+				}
 			}),
 		}},
 		{"sep-file", ki.BlankProp{}},
@@ -456,15 +463,15 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 }
 
 // SelectionLoop, if [KiRoot] is a [gi.Window], runs a loop in a separate goroutine
-// that listens to the [Window.SelectedWidget] channel and selects selected elements.
+// that listens to the [Window.SelectedWidgetChan] channel and selects selected elements.
 func (ge *GiEditor) SelectionLoop() {
 	if win, ok := ge.KiRoot.(*gi.Window); ok {
 		go func() {
-			if win.SelectedWidget == nil {
-				win.SelectedWidget = make(chan *gi.WidgetBase)
+			if win.SelectedWidgetChan == nil {
+				win.SelectedWidgetChan = make(chan *gi.WidgetBase)
 			}
 			for {
-				sw := <-win.SelectedWidget
+				sw := <-win.SelectedWidgetChan
 				tv := ge.TreeView().FindSrcNode(sw.This())
 				if tv == nil {
 					log.Printf("GiEditor on %v: tree view source node missing for", sw)

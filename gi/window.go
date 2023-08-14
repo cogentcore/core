@@ -228,7 +228,11 @@ type Window struct {
 	skippedResize *window.Event
 	lastEt        oswin.EventType
 
-	SelectedWidget chan *WidgetBase
+	// the currently selected widget through the inspect editor selection mode
+	SelectedWidget *WidgetBase `desc:"the currently selected widget through the inspect editor selection mode"`
+
+	// the channel on which the selected widget through the inspect editor selection mode is transmitted to the inspect editor after the user is done selecting
+	SelectedWidgetChan chan *WidgetBase `desc:"the channel on which the selected widget through the inspect editor selection mode is transmitted to the inspect editor after the user is done selecting"`
 
 	// dir draws are direct upload regions -- direct uploaders upload their images directly to an image here
 	DirDraws WindowDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
@@ -1723,8 +1727,10 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 	}
 	// if someone clicks while in selection mode, stop selection mode and stop the event
 	if me, ok := evi.(*mouse.Event); w.IsInSelectionMode() && ok {
-		w.SetSelectionModeState(false)
 		me.SetProcessed()
+		w.SetSelectionModeState(false)
+		w.DeleteSprite(WindowSelectionSpriteName)
+		w.SelectedWidgetChan <- w.SelectedWidget
 	}
 
 	if (hasFocus || !evi.OnWinFocus()) && !evi.IsProcessed() {
@@ -1858,15 +1864,33 @@ func (w *Window) SetCursor(me *mouse.MoveEvent) {
 
 	}
 
-	if w.IsInSelectionMode() {
-		if maxLevelWidget != nil {
-			me.SetProcessed()
-			w.SelectedWidget <- maxLevelWidget
-		}
+	if w.IsInSelectionMode() && maxLevelWidget != nil {
+		me.SetProcessed()
+		w.SelectionSprite(maxLevelWidget)
+		w.SelectedWidget = maxLevelWidget
+		oswin.TheApp.Cursor(w.OSWin).Set(cursor.Arrow) // always arrow in selection mode
 	} else {
 		// only set cursor if not in selection mode
 		oswin.TheApp.Cursor(w.OSWin).Set(maxLevelCursor)
 	}
+}
+
+// WindowSelectionSpriteName is the sprite name used for the semi-transparent
+// blue box rendered above elements selected in selection mode
+var WindowSelectionSpriteName = "gi.Window.SelectionBox"
+
+// SelectionSprite deletes any existing selection box sprite
+// and returns a new one for the given widget base. This should
+// only be used in inspect editor Selection Mode.
+func (w *Window) SelectionSprite(wb *WidgetBase) *Sprite {
+	w.DeleteSprite(WindowSelectionSpriteName)
+	sp := NewSprite(WindowSelectionSpriteName, wb.WinBBox.Size(), image.Point{})
+	draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{ColorScheme.Primary.WithA(0.5)}, image.Point{}, draw.Src)
+	sp.Geom.Pos = wb.WinBBox.Min
+	w.AddSprite(sp)
+	w.ActivateSprite(WindowSelectionSpriteName)
+	w.UpdateSig()
+	return sp
 }
 
 // FilterEvent filters repeated laggy events -- key for responsive resize, scroll, etc
