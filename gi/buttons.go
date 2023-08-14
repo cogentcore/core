@@ -835,18 +835,25 @@ func (bt *Button) OnInit() {
 		s.Text.Align = gist.AlignCenter
 		s.AddBoxShadow(
 			gist.Shadow{
+				HOffset: units.Px(0),
+				VOffset: units.Px(3),
+				Blur:    units.Px(1),
+				Spread:  units.Px(-2),
 				Color:   ColorScheme.Shadow.WithA(0.2),
-				HOffset: units.Px(50),
-				VOffset: units.Px(50),
-				Blur:    units.Px(10),
-				Spread:  units.Px(10),
 			},
 			gist.Shadow{
-				Color:   ColorScheme.Shadow.WithA(0.14),
 				HOffset: units.Px(0),
 				VOffset: units.Px(2),
 				Blur:    units.Px(2),
 				Spread:  units.Px(0),
+				Color:   ColorScheme.Shadow.WithA(0.14),
+			},
+			gist.Shadow{
+				HOffset: units.Px(0),
+				VOffset: units.Px(1),
+				Blur:    units.Px(5),
+				Spread:  units.Px(0),
+				Color:   ColorScheme.Shadow.WithA(0.12),
 			},
 		)
 		switch bt.Type {
