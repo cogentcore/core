@@ -1164,7 +1164,7 @@ func (tf *TextField) AutoScroll() {
 	}
 	spc := st.BoxSpace()
 	maxw := tf.EffSize.X - spc.Size().X
-	tf.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.UnitCh)) // rough guess in chars
+	tf.CharWidth = int(maxw / st.UnContext.Dots(units.UnitCh)) // rough guess in chars
 
 	// first rationalize all the values
 	if tf.EndPos == 0 || tf.EndPos > sz { // not init
@@ -1251,7 +1251,7 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 	// for selection to work correctly, we need this to be deterministic
 
 	sz := len(tf.EditTxt)
-	c := tf.StartPos + int(float64(px/st.UnContext.ToDotsFactor(units.UnitCh)))
+	c := tf.StartPos + int(float64(px/st.UnContext.Dots(units.UnitCh)))
 	c = ints.MinInt(c, sz)
 
 	w := tf.TextWidth(tf.StartPos, c)

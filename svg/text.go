@@ -210,7 +210,7 @@ func (g *Text) RenderText() {
 		pc.FontStyle.Color = pc.FillStyle.Color.Color
 	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
-	pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
+	pc.FontStyle.Size = units.Value{Val: orgsz.Val * scy, Un: orgsz.Un, Dots: orgsz.Dots * scy} // rescale by y
 	pc.FontStyle.Font = girl.OpenFont(&pc.FontStyle, &pc.UnContext)
 	sr := &(g.TextRender.Spans[0])
 	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale

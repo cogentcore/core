@@ -284,7 +284,7 @@ type Value struct {
 	Dots float32 `inactive:"+" desc:"the computed value in raw pixels (dots in DPI)"`
 
 	// function to compute dots from units, using arbitrary expressions -- if nil, standard ToDots is used
-	DotsFunc func(uc *Context) float32 `desc:"function to compute dots from units, using arbitrary expressions -- if nil, standard ToDots is used"`
+	DotsFunc *func(uc *Context) float32 `desc:"function to compute dots from units, using arbitrary expressions -- if nil, standard ToDots is used"`
 }
 
 var TypeValue = kit.Types.AddType(&Value{}, ValueProps)
@@ -295,97 +295,97 @@ var ValueProps = ki.Props{
 
 // NewValue creates a new value with given unit type
 func NewValue(val float32, un Units) Value {
-	return Value{val, un, 0}
+	return Value{Val: val, Un: un}
 }
 
 // Px creates a new value of type [UnitPx]
 func Px(val float32) Value {
-	return Value{val, UnitPx, 0}
+	return Value{Val: val, Un: UnitPx}
 }
 
 // Dp creates a new value of type [UnitDp]
 func Dp(val float32) Value {
-	return Value{val, UnitDp, 0}
+	return Value{Val: val, Un: UnitDp}
 }
 
 // Pct creates a new value of type [UnitPct]
 func Pct(val float32) Value {
-	return Value{val, UnitPct, 0}
+	return Value{Val: val, Un: UnitPct}
 }
 
 // Rem creates a new value of type [UnitRem]
 func Rem(val float32) Value {
-	return Value{val, UnitRem, 0}
+	return Value{Val: val, Un: UnitRem}
 }
 
 // Em creates a new value of type [UnitEm]
 func Em(val float32) Value {
-	return Value{val, UnitEm, 0}
+	return Value{Val: val, Un: UnitEm}
 }
 
 // Ex creates a new value of type [UnitEx]
 func Ex(val float32) Value {
-	return Value{val, UnitEx, 0}
+	return Value{Val: val, Un: UnitEx}
 }
 
 // Ch creates a new value of type [UnitCh]
 func Ch(val float32) Value {
-	return Value{val, UnitCh, 0}
+	return Value{Val: val, Un: UnitCh}
 }
 
 // Vw creates a new value of type [UnitVw]
 func Vw(val float32) Value {
-	return Value{val, UnitVw, 0}
+	return Value{Val: val, Un: UnitVw}
 }
 
 // Vh creates a new value of type [UnitVh]
 func Vh(val float32) Value {
-	return Value{val, UnitVh, 0}
+	return Value{Val: val, Un: UnitVh}
 }
 
 // Vmin creates a new value of type [UnitVmin]
 func Vmin(val float32) Value {
-	return Value{val, UnitVmin, 0}
+	return Value{Val: val, Un: UnitVmin}
 }
 
 // Vmax creates a new value of type [UnitVmax]
 func Vmax(val float32) Value {
-	return Value{val, UnitVmax, 0}
+	return Value{Val: val, Un: UnitVmax}
 }
 
 // Cm creates a new value of type [UnitCm]
 func Cm(val float32) Value {
-	return Value{val, UnitCm, 0}
+	return Value{Val: val, Un: UnitCm}
 }
 
 // Mm creates a new value of type [UnitMm]
 func Mm(val float32) Value {
-	return Value{val, UnitMm, 0}
+	return Value{Val: val, Un: UnitMm}
 }
 
 // Q creates a new value of type [UnitQ]
 func Q(val float32) Value {
-	return Value{val, UnitQ, 0}
+	return Value{Val: val, Un: UnitQ}
 }
 
 // In creates a new value of type [UnitIn]
 func In(val float32) Value {
-	return Value{val, UnitIn, 0}
+	return Value{Val: val, Un: UnitIn}
 }
 
 // Pc creates a new value of type [UnitPc]
 func Pc(val float32) Value {
-	return Value{val, UnitPc, 0}
+	return Value{Val: val, Un: UnitPc}
 }
 
 // Pt creates a new value of type [UnitPt]
 func Pt(val float32) Value {
-	return Value{val, UnitPt, 0}
+	return Value{Val: val, Un: UnitPt}
 }
 
 // Pc creates a new value of type [UnitDot]
 func Dot(val float32) Value {
-	return Value{val, UnitDot, 0}
+	return Value{Val: val, Un: UnitDot}
 }
 
 // Set sets value and units of an existing value
@@ -452,8 +452,8 @@ func (v *Value) SetDot(val float32) {
 // ToDots converts value to raw display pixels (dots as in DPI), setting also
 // the Dots field
 func (v *Value) ToDots(uc *Context) float32 {
-	if v.DotsFunc != nil {
-		v.Dots = v.DotsFunc(uc)
+	if v.DotsFunc != nil && *v.DotsFunc != nil {
+		v.Dots = (*v.DotsFunc)(uc)
 	} else {
 		v.Dots = uc.ToDots(v.Val, v.Un)
 	}
@@ -474,7 +474,7 @@ func (v *Value) ToDotsFixed(uc *Context) fixed.Int26_6 {
 // Convert converts value to the given units, given unit context
 func (v *Value) Convert(to Units, uc *Context) Value {
 	dots := v.ToDots(uc)
-	return Value{dots / uc.Dots(to), to, dots}
+	return Value{Val: dots / uc.Dots(to), Un: to, Dots: dots}
 }
 
 // String implements the fmt.Stringer interface.
