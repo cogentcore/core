@@ -101,14 +101,15 @@ func (s *Style) StyleFromProps(par *Style, props ki.Props, ctxt Context) {
 			}
 			continue
 		}
-		if sfunc, ok := StyleShadowFuncs[key]; ok {
-			if par != nil {
-				sfunc(&s.BoxShadow, key, val, &par.BoxShadow, ctxt)
-			} else {
-				sfunc(&s.BoxShadow, key, val, nil, ctxt)
-			}
-			continue
-		}
+		// doesn't work with multiple shadows
+		// if sfunc, ok := StyleShadowFuncs[key]; ok {
+		// 	if par != nil {
+		// 		sfunc(&s.BoxShadow, key, val, &par.BoxShadow, ctxt)
+		// 	} else {
+		// 		sfunc(&s.BoxShadow, key, val, nil, ctxt)
+		// 	}
+		// 	continue
+		// }
 	}
 }
 

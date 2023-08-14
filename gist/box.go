@@ -205,26 +205,24 @@ func (s *Style) AddBoxShadow(shadow ...Shadow) {
 	s.BoxShadow = append(s.BoxShadow, shadow...)
 }
 
-// BoxShadowStartPos returns the minimum position one of
-// the box shadows of the style should be rendered with
-// the given starting position, using [Shadow.Pos].
-func (s *Style) BoxShadowPos(startPos mat32.Vec2) mat32.Vec2 {
-	min := startPos
+// BoxShadowStartPos returns the position and size of the
+// area in which all of the box shadows are rendered, using
+// [Shadow.Pos] and [Shadow.Size]. It should be used as the
+// bounds to clear to prevent growing shadows.
+func (s *Style) BoxShadowPosSize(startPos, startSize mat32.Vec2) (pos mat32.Vec2, sz mat32.Vec2) {
+	// Need to think in terms of min/max bounds
+	// to get accurate pos and size if the shadow
+	// with the biggest size does not have the smallest pos
+	minPos := startPos
+	maxMax := startPos.Add(startSize) // max upper (max) bound
 	for _, sh := range s.BoxShadow {
-		min = min.Min(sh.Pos(startPos))
-	}
-	return min
-}
+		curPos := sh.Pos(startPos)
+		curSz := sh.Size(startSize)
 
-// BoxShadowStartSize returns the maximum size one of
-// the box shadows of the style occupies with
-// the given starting size, using [Shadow.Size].
-func (s *Style) BoxShadowSize(startSize mat32.Vec2) mat32.Vec2 {
-	max := startSize
-	for _, sh := range s.BoxShadow {
-		max = max.Max(sh.Size(startSize))
+		minPos = minPos.Min(curPos)
+		maxMax = maxMax.Max(curPos.Add(curSz))
 	}
-	return max
+	return minPos, maxMax.Sub(minPos)
 }
 
 // BoxShadowMargin returns the maximum box shadow margin

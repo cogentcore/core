@@ -1236,8 +1236,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	if st.HasBoxShadow() {
 		// we need to fill the whole box where the
 		// box shadows can go to prevent growing box shadows
-		mspos := st.BoxShadowPos(pos)
-		mssz := st.BoxShadowSize(sz)
+		mspos, mssz := st.BoxShadowPosSize(pos, sz)
 		pc.FillBox(rs, mspos, mssz, &sbg)
 
 		for _, shadow := range st.BoxShadow {

@@ -836,8 +836,8 @@ func (bt *Button) OnInit() {
 		s.AddBoxShadow(
 			gist.Shadow{
 				Color:   ColorScheme.Shadow.WithA(0.2),
-				HOffset: units.Px(10),
-				VOffset: units.Px(10),
+				HOffset: units.Px(50),
+				VOffset: units.Px(50),
 				Blur:    units.Px(10),
 				Spread:  units.Px(10),
 			},
