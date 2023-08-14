@@ -18,16 +18,17 @@ import (
 var CustomConfigStyles func(w *WidgetBase)
 
 // Pre-configured box shadow values, based on
-// those in Material 3
+// those in Material 3. They are in gi because
+// they need to access the color scheme.
 var (
-	// ShadowElevation0 contains the shadows
+	// BoxShadow0 contains the shadows
 	// to be used on Elevation 0 elements.
-	// There are no shadows part of ShadowElevation0,
+	// There are no shadows part of BoxShadow0,
 	// so applying it is purely semantic.
-	ShadowElevation0 = []gist.Shadow{}
-	// ShadowElevation1 contains the shadows
+	BoxShadow0 = []gist.Shadow{}
+	// BoxShadow1 contains the shadows
 	// to be used on Elevation 1 elements.
-	ShadowElevation1 = []gist.Shadow{
+	BoxShadow1 = []gist.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(3),
@@ -50,9 +51,9 @@ var (
 			Color:   ColorScheme.Shadow.WithA(0.12),
 		},
 	}
-	// ShadowElevation2 contains the shadows
+	// BoxShadow2 contains the shadows
 	// to be used on Elevation 2 elements.
-	ShadowElevation2 = []gist.Shadow{
+	BoxShadow2 = []gist.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(2),
@@ -77,9 +78,9 @@ var (
 	}
 	// TODO: figure out why 3 and 4 are the same
 
-	// ShadowElevation3 contains the shadows
+	// BoxShadow3 contains the shadows
 	// to be used on Elevation 3 elements.
-	ShadowElevation3 = []gist.Shadow{
+	BoxShadow3 = []gist.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(5),
@@ -102,9 +103,9 @@ var (
 			Color:   ColorScheme.Shadow.WithA(0.12),
 		},
 	}
-	// ShadowElevation4 contains the shadows
+	// BoxShadow4 contains the shadows
 	// to be used on Elevation 4 elements.
-	ShadowElevation4 = []gist.Shadow{
+	BoxShadow4 = []gist.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(5),
@@ -127,9 +128,9 @@ var (
 			Color:   ColorScheme.Shadow.WithA(0.12),
 		},
 	}
-	// ShadowElevation5 contains the shadows
+	// BoxShadow5 contains the shadows
 	// to be used on Elevation 5 elements.
-	ShadowElevation5 = []gist.Shadow{
+	BoxShadow5 = []gist.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(8),

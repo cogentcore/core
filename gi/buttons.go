@@ -825,7 +825,7 @@ func (bt *Button) OnInit() {
 		s := &bt.Style
 		s.Cursor = cursor.HandPointing
 		s.Border.Radius = gist.BorderRadiusFull
-		s.Margin = gist.BoxShadowMargin(ShadowElevation1).ToValues()
+		s.Margin = gist.BoxShadowMargin(BoxShadow1).ToValues()
 		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
 		if !bt.Icon.IsNil() {
 			s.Padding.Left.SetEm(1 * Prefs.DensityMul())
@@ -842,10 +842,10 @@ func (bt *Button) OnInit() {
 			s.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
 			s.Color = ColorScheme.OnSecondaryContainer
 		case ButtonElevated:
-			s.Margin = gist.BoxShadowMargin(ShadowElevation2).ToValues()
+			s.Margin = gist.BoxShadowMargin(BoxShadow2).ToValues()
 			s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
 			s.Color = ColorScheme.Primary
-			s.BoxShadow = ShadowElevation1
+			s.BoxShadow = BoxShadow1
 		case ButtonOutlined:
 			s.BackgroundColor.SetColor(ColorScheme.Surface)
 			s.Color = ColorScheme.Primary
@@ -858,9 +858,9 @@ func (bt *Button) OnInit() {
 		}
 		if bt.IsHovered() {
 			if bt.Type == ButtonElevated {
-				s.BoxShadow = ShadowElevation2
+				s.BoxShadow = BoxShadow2
 			} else {
-				s.BoxShadow = ShadowElevation1
+				s.BoxShadow = BoxShadow1
 			}
 		}
 		// STYTODO: add state styles for buttons
