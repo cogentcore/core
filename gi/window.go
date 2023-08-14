@@ -1719,7 +1719,12 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 	}
 	if me, ok := evi.(*mouse.MoveEvent); ok {
 		hasFocus = true // also doesn't need focus (there can be hover events while not focused)
-		w.SetCursor(me.Event.Pos())
+		w.SetCursor(me) // always set cursor on mouse move
+	}
+	// if someone clicks while in selection mode, stop selection mode and stop the event
+	if me, ok := evi.(*mouse.Event); w.IsInSelectionMode() && ok {
+		w.SetSelectionModeState(false)
+		me.SetProcessed()
 	}
 
 	if (hasFocus || !evi.OnWinFocus()) && !evi.IsProcessed() {
@@ -1804,8 +1809,9 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 	}
 }
 
-// SetCursor sets the cursor based on the given mouse position
-func (w *Window) SetCursor(pos image.Point) {
+// SetCursor sets the cursor based on the given mouse event.
+// Also handles sending widget selection events.
+func (w *Window) SetCursor(me *mouse.MoveEvent) {
 	maxLevel := 0
 	maxLevelCursor := cursor.Arrow
 	maxLevelWidget := &WidgetBase{}
@@ -1816,7 +1822,7 @@ func (w *Window) SetCursor(pos image.Point) {
 			// could have nodes further down (eg with menu which is ki.Slice), so continue
 			return ki.Continue
 		}
-		if !ni.PosInWinBBox(pos) {
+		if !ni.PosInWinBBox(me.Pos()) {
 			// however, if we are out of bbox, there is no way to get back in
 			return ki.Break
 		}
@@ -1842,7 +1848,7 @@ func (w *Window) SetCursor(pos image.Point) {
 		w.FuncDownMeFirst(0, nil, fun)
 	} else {
 		_, popni := KiToNode2D(pop)
-		if popni == nil || !popni.PosInWinBBox(pos) || PopupIsTooltip(pop) {
+		if popni == nil || !popni.PosInWinBBox(me.Pos()) || PopupIsTooltip(pop) {
 			// if not in popup (or it is a tooltip), do on window
 			w.FuncDownMeFirst(0, nil, fun)
 		} else {
@@ -1851,12 +1857,15 @@ func (w *Window) SetCursor(pos image.Point) {
 		}
 
 	}
-	oswin.TheApp.Cursor(w.OSWin).Set(maxLevelCursor)
 
 	if w.IsInSelectionMode() {
 		if maxLevelWidget != nil {
+			me.SetProcessed()
 			w.SelectedWidget <- maxLevelWidget
 		}
+	} else {
+		// only set cursor if not in selection mode
+		oswin.TheApp.Cursor(w.OSWin).Set(maxLevelCursor)
 	}
 }
 
