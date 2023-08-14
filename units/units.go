@@ -307,112 +307,133 @@ var ValueProps = ki.Props{
 	"style-prop": true,
 }
 
-// NewValue creates a new value with given unit type
-func NewValue(val float32, un Units) Value {
+// New creates a new value with the given unit type
+func New(val float32, un Units) Value {
 	return Value{Val: val, Un: un}
 }
 
 // Px creates a new value of type [UnitPx]
+// (1px = 1/96 of 1in; not raw display pixels)
 func Px(val float32) Value {
 	return Value{Val: val, Un: UnitPx}
 }
 
 // Dp creates a new value of type [UnitDp]
+// (density-independent pixels; 1dp = 1/160 of 1in)
 func Dp(val float32) Value {
 	return Value{Val: val, Un: UnitDp}
 }
 
 // Ew creates a new value of type [UnitEw]
+// (percentage of element width)
 func Ew(val float32) Value {
 	return Value{Val: val, Un: UnitEw}
 }
 
 // Eh creates a new value of type [UnitEh]
+// (percentage of element height)
 func Eh(val float32) Value {
 	return Value{Val: val, Un: UnitEh}
 }
 
 // Pw creates a new value of type [UnitPw]
+// (percentage of parent width)
 func Pw(val float32) Value {
 	return Value{Val: val, Un: UnitPw}
 }
 
 // Ph creates a new value of type [UnitPh]
+// (percentage of element height)
 func Ph(val float32) Value {
 	return Value{Val: val, Un: UnitPh}
 }
 
 // Rem creates a new value of type [UnitRem]
+// (font size of the root element)
 func Rem(val float32) Value {
 	return Value{Val: val, Un: UnitRem}
 }
 
 // Em creates a new value of type [UnitEm]
+// (font size of the element)
 func Em(val float32) Value {
 	return Value{Val: val, Un: UnitEm}
 }
 
 // Ex creates a new value of type [UnitEx]
+// (height of 'x' in the font of the element)
 func Ex(val float32) Value {
 	return Value{Val: val, Un: UnitEx}
 }
 
 // Ch creates a new value of type [UnitCh]
+// (width of '0' in the font of the element)
 func Ch(val float32) Value {
 	return Value{Val: val, Un: UnitCh}
 }
 
 // Vw creates a new value of type [UnitVw]
+// (percentage of viewport width)
 func Vw(val float32) Value {
 	return Value{Val: val, Un: UnitVw}
 }
 
 // Vh creates a new value of type [UnitVh]
+// (percentage of viewport height)
 func Vh(val float32) Value {
 	return Value{Val: val, Un: UnitVh}
 }
 
 // Vmin creates a new value of type [UnitVmin]
+// (percentage of viewport's smaller dimension)
 func Vmin(val float32) Value {
 	return Value{Val: val, Un: UnitVmin}
 }
 
 // Vmax creates a new value of type [UnitVmax]
+// (percentage of viewport's bigger dimension)
 func Vmax(val float32) Value {
 	return Value{Val: val, Un: UnitVmax}
 }
 
 // Cm creates a new value of type [UnitCm]
+// (centimeters; 1cm = 96px/2.54)
 func Cm(val float32) Value {
 	return Value{Val: val, Un: UnitCm}
 }
 
 // Mm creates a new value of type [UnitMm]
+// (millimeters; 1mm = 1/10 of 1cm)
 func Mm(val float32) Value {
 	return Value{Val: val, Un: UnitMm}
 }
 
 // Q creates a new value of type [UnitQ]
+// (quarter-millimeters; 1q = 1/40 of 1cm)
 func Q(val float32) Value {
 	return Value{Val: val, Un: UnitQ}
 }
 
 // In creates a new value of type [UnitIn]
+// (inches; 1in = 96px)
 func In(val float32) Value {
 	return Value{Val: val, Un: UnitIn}
 }
 
 // Pc creates a new value of type [UnitPc]
+// (picas; 1pc = 1/6 of 1in)
 func Pc(val float32) Value {
 	return Value{Val: val, Un: UnitPc}
 }
 
 // Pt creates a new value of type [UnitPt]
+// (points; 1pt = 1/72 of 1in)
 func Pt(val float32) Value {
 	return Value{Val: val, Un: UnitPt}
 }
 
-// Pc creates a new value of type [UnitDot]
+// Dot creates a new value of type [UnitDot]
+// (actual raw display pixels)
 func Dot(val float32) Value {
 	return Value{Val: val, Un: UnitDot}
 }

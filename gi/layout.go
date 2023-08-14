@@ -367,10 +367,10 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 	sc := ly.Scrolls[d]
 	if d == mat32.X {
 		sc.SetFixedHeight(ly.Style.ScrollBarWidth)
-		sc.SetFixedWidth(units.NewValue(avail.Dim(d), units.UnitDot))
+		sc.SetFixedWidth(units.Dot(avail.Dim(d)))
 	} else {
 		sc.SetFixedWidth(ly.Style.ScrollBarWidth)
-		sc.SetFixedHeight(units.NewValue(avail.Dim(d), units.UnitDot))
+		sc.SetFixedHeight(units.Dot(avail.Dim(d)))
 	}
 	sc.Style2D()
 	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar

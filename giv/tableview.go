@@ -512,8 +512,8 @@ func (tv *TableView) LayoutHeader() {
 		if fli == 0 {
 			wd += spc
 		}
-		lbl.SetMinPrefWidth(units.NewValue(wd, units.UnitDot))
-		lbl.SetProp("max-width", units.NewValue(wd, units.UnitDot))
+		lbl.SetMinPrefWidth(units.Dot(wd))
+		lbl.SetProp("max-width", units.Dot(wd))
 		sumwd += wd
 	}
 	if !tv.IsDisabled() {
@@ -521,12 +521,12 @@ func (tv *TableView) LayoutHeader() {
 		for fli := nfld; fli < mx; fli++ {
 			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 			wd := gd[fli].AllocSize - spc
-			lbl.SetMinPrefWidth(units.NewValue(wd, units.UnitDot))
-			lbl.SetProp("max-width", units.NewValue(wd, units.UnitDot))
+			lbl.SetMinPrefWidth(units.Dot(wd))
+			lbl.SetProp("max-width", units.Dot(wd))
 			sumwd += wd
 		}
 	}
-	sgh.SetMinPrefWidth(units.NewValue(sumwd+spc, units.UnitDot))
+	sgh.SetMinPrefWidth(units.Dot(sumwd + spc))
 }
 
 // UpdateSliceGrid updates grid display -- robust to any time calling
