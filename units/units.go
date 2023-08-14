@@ -51,8 +51,17 @@ const (
 	// UnitDp = density-independent pixels -- 1dp = 1/160th of 1in
 	UnitDp
 
-	// UnitPct = percentage of surrounding contextual element
-	UnitPct
+	// UnitEw = percentage of element width (equivalent to CSS % in some contexts)
+	UnitEw
+
+	// UnitEh = percentage of element height (equivalent to CSS % in some contexts)
+	UnitEh
+
+	// UnitPw = percentage of parent width (equivalent to CSS % in some contexts)
+	UnitPw
+
+	// UnitPh = percentage of parent height (equivalent to CSS % in some contexts)
+	UnitPh
 
 	// UnitRem = font size of the root element -- defaults to 12pt scaled by DPI factor
 	UnitRem
@@ -112,7 +121,10 @@ func (ev *Units) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev
 var UnitNames = [...]string{
 	UnitPx:   "px",
 	UnitDp:   "dp",
-	UnitPct:  "pct",
+	UnitEw:   "ew",
+	UnitEh:   "eh",
+	UnitPw:   "pw",
+	UnitPh:   "ph",
 	UnitRem:  "rem",
 	UnitEm:   "em",
 	UnitEx:   "ex",
@@ -213,8 +225,10 @@ func (uc *Context) Dots(un Units) float32 {
 		uc.Defaults()
 	}
 	switch un {
-	case UnitPct:
-		return 0.01 * uc.ElW // todo: height should be in terms of Elh.. but width is much more common
+	case UnitEw:
+		return 0.01 * uc.ElW
+	case UnitEh:
+		return 0.01 * uc.ElH
 	case UnitEm:
 		return uc.FontEm
 	case UnitEx:
@@ -308,9 +322,24 @@ func Dp(val float32) Value {
 	return Value{Val: val, Un: UnitDp}
 }
 
-// Pct creates a new value of type [UnitPct]
-func Pct(val float32) Value {
-	return Value{Val: val, Un: UnitPct}
+// Ew creates a new value of type [UnitEw]
+func Ew(val float32) Value {
+	return Value{Val: val, Un: UnitEw}
+}
+
+// Eh creates a new value of type [UnitEh]
+func Eh(val float32) Value {
+	return Value{Val: val, Un: UnitEh}
+}
+
+// Pw creates a new value of type [UnitPw]
+func Pw(val float32) Value {
+	return Value{Val: val, Un: UnitPw}
+}
+
+// Ph creates a new value of type [UnitPh]
+func Ph(val float32) Value {
+	return Value{Val: val, Un: UnitPh}
 }
 
 // Rem creates a new value of type [UnitRem]
@@ -430,11 +459,11 @@ func (v *Value) SetPt(val float32) {
 	v.Un = UnitPt
 }
 
-// SetPct sets value in Pct
-func (v *Value) SetPct(val float32) {
-	v.Val = val
-	v.Un = UnitPct
-}
+// // SetPct sets value in Pct
+// func (v *Value) SetPct(val float32) {
+// 	v.Val = val
+// 	v.Un = UnitPct
+// }
 
 // SetDp sets value in Dp
 func (v *Value) SetDp(val float32) {
