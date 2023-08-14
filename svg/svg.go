@@ -152,10 +152,10 @@ func (sv *SVG) Size2D(iter int) {
 	sv.Size2DAddSpace()
 }
 
-// SetUnitContext sets the unit context based on size of viewport and parent
-// element (from bbox) and then cache everything out in terms of raw pixel
+// SetUnitContext sets the unit context based on size of viewport, element,
+// and parent element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func SetUnitContext(pc *gist.Paint, vp *gi.Viewport2D, el mat32.Vec2) {
+func SetUnitContext(pc *gist.Paint, vp *gi.Viewport2D, el, par mat32.Vec2) {
 	pc.UnContext.Defaults()
 	if vp != nil {
 		pc.UnContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
@@ -164,9 +164,9 @@ func SetUnitContext(pc *gist.Paint, vp *gi.Viewport2D, el mat32.Vec2) {
 		// }
 		if vp.Render.Image != nil {
 			sz := vp.Render.Image.Bounds().Size()
-			pc.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
+			pc.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 		} else {
-			pc.UnContext.SetSizes(0, 0, el.X, el.Y)
+			pc.UnContext.SetSizes(0, 0, el.X, el.Y, par.X, par.Y)
 		}
 	}
 	pc.FontStyle.SetUnitContext(&pc.UnContext)
@@ -216,7 +216,7 @@ func (sv *SVG) StyleSVG() {
 	StyleSVG(sv.This().(gi.Node2D))
 	// TODO: cleaner svg styling from text color property
 	sv.RunStyleFuncs()
-	SetUnitContext(&sv.Pnt.Paint, sv.AsViewport2D(), sv.ViewBox.Size) // context is viewbox
+	SetUnitContext(&sv.Pnt.Paint, sv.AsViewport2D(), sv.NodeSize(), sv.ParentNodeSize()) // context is viewbox
 }
 
 func (sv *SVG) Style2D() {

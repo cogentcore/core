@@ -576,6 +576,22 @@ func (nb *NodeBase) AllWithinBBox(bbox image.Rectangle, leavesOnly bool) ki.Slic
 	return rval
 }
 
+// ElementAndParentSize returns the size
+// of this node as a [mat32.Vec2] object.
+func (nb *NodeBase) NodeSize() mat32.Vec2 {
+	return mat32.NewVec2FmPoint(nb.BBox.Size())
+}
+
+// ParentNodeSize returns the size of the nearest
+// node parent of this node as a [mat32.Vec2] object.
+func (nb *NodeBase) ParentNodeSize() mat32.Vec2 {
+	par, ok := nb.ParentByType(TypeNodeBase, ki.Embeds).(*NodeBase)
+	if !ok {
+		return nb.NodeSize()
+	}
+	return mat32.NewVec2FmPoint(par.BBox.Size())
+}
+
 // standard css properties on nodes apply, including visible, etc.
 
 // see node2d.go for 2d node

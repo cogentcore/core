@@ -2212,7 +2212,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
 
 	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
-	gi.SetUnitContext(&tv.Style, tv.Viewport, psize) // update units with final layout
+	gi.SetUnitContext(&tv.Style, tv.Viewport, tv.NodeSize(), psize) // update units with final layout
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}

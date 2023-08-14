@@ -461,7 +461,7 @@ func (sb *SpinBox) StyleSpinBox() {
 	if !hasTempl || saveTempl {
 		sb.Style2DWidget()
 	} else {
-		SetUnitContext(&sb.Style, sb.Viewport, mat32.Vec2Zero)
+		SetUnitContext(&sb.Style, sb.Viewport, sb.NodeSize(), sb.ParentNodeSize())
 	}
 	if hasTempl && saveTempl {
 		sb.Style.SaveTemplate()
