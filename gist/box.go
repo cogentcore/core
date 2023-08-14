@@ -170,16 +170,18 @@ func (s *Shadow) ToDots(uc *units.Context) {
 // with the given starting position.
 func (s *Shadow) Pos(startPos mat32.Vec2) mat32.Vec2 {
 	// Offset directly affects position.
-	// We need to subtract spread to compensate
-	// for size changes and stay centered.
-	return startPos.Add(mat32.NewVec2(s.HOffset.Dots, s.VOffset.Dots)).SubScalar(s.Spread.Dots)
+	// We need to subtract spread and half of blur
+	// to compensate for size changes and stay centered.
+	return startPos.Add(mat32.NewVec2(s.HOffset.Dots, s.VOffset.Dots)).SubScalar(s.Spread.Dots + s.Blur.Dots/2)
 }
 
 // Size returns the total size occupied by the box shadow
 // if the shadow is on an element with the given starting size.
 func (s *Shadow) Size(startSize mat32.Vec2) mat32.Vec2 {
-	// Spread goes on all sides, so need to count twice per dimension
-	return startSize.AddScalar(2 * s.Spread.Dots)
+	// Spread goes on all sides, so need to count twice per dimension.
+	// Blur also goes on all sides, but it is rendered as half of actual
+	// because CSS does the same, so we only count it once.
+	return startSize.AddScalar(2*s.Spread.Dots + s.Blur.Dots)
 }
 
 // Margin returns the effective margin created by the
@@ -192,10 +194,10 @@ func (s *Shadow) Margin() SideFloats {
 	// TODO: add s.Blur.Dots here without breaking
 	// clear area
 	return NewSideFloats(
-		mat32.Max(s.Spread.Dots-s.VOffset.Dots, 0),
-		mat32.Max(s.Spread.Dots+s.HOffset.Dots, 0),
-		mat32.Max(s.Spread.Dots+s.VOffset.Dots, 0),
-		mat32.Max(s.Spread.Dots-s.HOffset.Dots, 0),
+		mat32.Max(s.Spread.Dots-s.VOffset.Dots+s.Blur.Dots/2, 0),
+		mat32.Max(s.Spread.Dots+s.HOffset.Dots+s.Blur.Dots/2, 0),
+		mat32.Max(s.Spread.Dots+s.VOffset.Dots+s.Blur.Dots/2, 0),
+		mat32.Max(s.Spread.Dots-s.HOffset.Dots+s.Blur.Dots/2, 0),
 	)
 }
 
@@ -230,8 +232,14 @@ func (s *Style) BoxShadowPosSize(startPos, startSize mat32.Vec2) (pos mat32.Vec2
 // BoxShadowMargin returns the maximum box shadow margin
 // of the style, calculated through [Shadow.Margin]
 func (s *Style) BoxShadowMargin() SideFloats {
+	return BoxShadowMargin(s.BoxShadow)
+}
+
+// BoxShadowMargin returns the maximum box shadow margin
+// of the given box shadows, calculated through [Shadow.Margin].
+func BoxShadowMargin(shadows []Shadow) SideFloats {
 	max := SideFloats{}
-	for _, sh := range s.BoxShadow {
+	for _, sh := range shadows {
 		max = max.Max(sh.Margin())
 	}
 	return max

@@ -90,21 +90,21 @@ func makeHome(tv *gi.TabView) {
 				VOffset: units.Px(-10),
 				Blur:    units.Px(150),
 				Spread:  units.Px(150),
-				Color:   colors.Blue,
+				Color:   colors.Green,
 			},
 			gist.Shadow{
 				HOffset: units.Px(5),
 				VOffset: units.Px(30),
 				Blur:    units.Px(150),
 				Spread:  units.Px(100),
-				Color:   colors.Green,
+				Color:   colors.Blue,
 			},
 			gist.Shadow{
 				HOffset: units.Px(20),
 				VOffset: units.Px(10),
 				Blur:    units.Px(100),
 				Spread:  units.Px(50),
-				Color:   colors.Red,
+				Color:   colors.Purple,
 			},
 		)
 	})

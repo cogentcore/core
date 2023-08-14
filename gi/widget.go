@@ -1240,7 +1240,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	// This also fixes https://github.com/goki/gi/issues/579.
 	// This isn't an ideal solution because of performance,
 	// so TODO: maybe come up with a better solution for this.
-	mspos, mssz := st.BoxShadowPosSize(pos, sz)
+	mspos, mssz := st.BoxShadowPosSize(wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size)
 	pc.FillBox(rs, mspos, mssz, &sbg)
 
 	// first do any shadow
@@ -1258,7 +1258,8 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 			wb.RenderBoxImpl(spos, ssz, gist.Border{Radius: st.Border.Radius})
 			// pc.FillStyle.Opacity = 1.0
 			if shadow.Blur.Dots != 0 {
-				pc.BlurBox(rs, spos, ssz, shadow.Blur.Dots)
+				// must divide by 2 like CSS
+				pc.BlurBox(rs, spos, ssz, shadow.Blur.Dots/2)
 			}
 			pc.FillStyle.Opacity = prevOpacity
 		}

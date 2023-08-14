@@ -825,6 +825,7 @@ func (bt *Button) OnInit() {
 		s := &bt.Style
 		s.Cursor = cursor.HandPointing
 		s.Border.Radius = gist.BorderRadiusFull
+		s.Margin = gist.BoxShadowMargin(ShadowElevation1).ToValues()
 		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
 		if !bt.Icon.IsNil() {
 			s.Padding.Left.SetEm(1 * Prefs.DensityMul())
@@ -841,6 +842,7 @@ func (bt *Button) OnInit() {
 			s.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
 			s.Color = ColorScheme.OnSecondaryContainer
 		case ButtonElevated:
+			s.Margin = gist.BoxShadowMargin(ShadowElevation2).ToValues()
 			s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
 			s.Color = ColorScheme.Primary
 			s.BoxShadow = ShadowElevation1
@@ -864,7 +866,6 @@ func (bt *Button) OnInit() {
 			} else {
 				s.BoxShadow = ShadowElevation1
 			}
-
 		}
 		// STYTODO: add state styles for buttons
 	})

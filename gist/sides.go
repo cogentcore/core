@@ -313,6 +313,17 @@ func (sf SideFloats) Size() mat32.Vec2 {
 	return mat32.NewVec2(sf.Left+sf.Right, sf.Top+sf.Bottom)
 }
 
+// ToValues returns the side floats a
+// SideValues composed of [units.UnitDot] values
+func (sf SideFloats) ToValues() SideValues {
+	return NewSideValues(
+		units.Dot(sf.Top),
+		units.Dot(sf.Right),
+		units.Dot(sf.Bottom),
+		units.Dot(sf.Left),
+	)
+}
+
 // SideColors contains color values for each side/corner of a box
 type SideColors struct {
 	Sides[Color]
