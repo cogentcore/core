@@ -460,10 +460,18 @@ func makeLayouts(tv *gi.TabView) {
 		layouts.Style.MaxHeight.SetPx(-1)
 	})
 
-	vw := gi.AddNewFrame(layouts, "vw", gi.LayoutHoriz)
+	vw := gi.AddNewLabel(layouts, "vw", "50vw")
 	vw.AddStyler(gi.StylerFinal, func() {
 		vw.Style.Width = units.Vw(50)
-		vw.Style.BackgroundColor.SetColor(colors.Red)
+		vw.Style.BackgroundColor.SetColor(gi.ColorScheme.Primary)
+		vw.Style.Color = gi.ColorScheme.OnPrimary
+	})
+
+	pw := gi.AddNewLabel(layouts, "pw", "50pw")
+	pw.AddStyler(gi.StylerFinal, func() {
+		pw.Style.Width = units.Pw(50)
+		pw.Style.BackgroundColor.SetColor(gi.ColorScheme.PrimaryContainer)
+		pw.Style.Color = gi.ColorScheme.OnPrimaryContainer
 	})
 
 	// sv := gi.AddNewSplitView(layouts, "sv")

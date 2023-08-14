@@ -108,6 +108,10 @@ func (uc *Context) Dots(un Units) float32 {
 		return 0.01 * uc.Ew
 	case UnitEh:
 		return 0.01 * uc.Eh
+	case UnitPw:
+		return 0.01 * uc.Pw
+	case UnitPh:
+		return 0.01 * uc.Ph
 	case UnitEm:
 		return uc.FontEm
 	case UnitEx:
