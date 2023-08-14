@@ -207,7 +207,7 @@ func (uc *Context) SetFont(em, ex, ch, rem float32) {
 }
 
 // ToDotsFact returns factor needed to convert given unit into raw pixels (dots in DPI)
-func (uc *Context) ToDotsFactor(un Units) float32 {
+func (uc *Context) Dots(un Units) float32 {
 	if uc.DPI == 0 {
 		// log.Printf("gi/units Context was not initialized -- falling back on defaults\n")
 		uc.Defaults()
@@ -255,17 +255,17 @@ func (uc *Context) ToDotsFactor(un Units) float32 {
 
 // ToDots converts value in given units into raw display pixels (dots in DPI)
 func (uc *Context) ToDots(val float32, un Units) float32 {
-	return val * uc.ToDotsFactor(un)
+	return val * uc.Dots(un)
 }
 
 // PxToDots just converts a value from pixels to dots
 func (uc *Context) PxToDots(val float32) float32 {
-	return val * uc.ToDotsFactor(UnitPx)
+	return val * uc.Dots(UnitPx)
 }
 
 // DotsToPx just converts a value from dots to pixels
 func (uc *Context) DotsToPx(val float32) float32 {
-	return val / uc.ToDotsFactor(UnitPx)
+	return val / uc.Dots(UnitPx)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -282,6 +282,9 @@ type Value struct {
 
 	// the computed value in raw pixels (dots in DPI)
 	Dots float32 `inactive:"+" desc:"the computed value in raw pixels (dots in DPI)"`
+
+	// function to compute dots from units, using arbitrary expressions -- if nil, standard ToDots is used
+	DotsFunc func(uc *Context) float32 `desc:"function to compute dots from units, using arbitrary expressions -- if nil, standard ToDots is used"`
 }
 
 var TypeValue = kit.Types.AddType(&Value{}, ValueProps)
@@ -448,21 +451,30 @@ func (v *Value) SetDot(val float32) {
 
 // ToDots converts value to raw display pixels (dots as in DPI), setting also
 // the Dots field
-func (v *Value) ToDots(ctxt *Context) float32 {
-	v.Dots = ctxt.ToDots(v.Val, v.Un)
+func (v *Value) ToDots(uc *Context) float32 {
+	if v.DotsFunc != nil {
+		v.Dots = v.DotsFunc(uc)
+	} else {
+		v.Dots = uc.ToDots(v.Val, v.Un)
+	}
 	return v.Dots
 }
 
+// example todots func
+// v.DotsFunc = func(uc *Context) float32 {
+// 	return uc.Vw(50) - uc.Em(4)
+// }
+
 // ToDotsFixed converts value to raw display pixels (dots in DPI) in
 // fixed-point 26.6 format for rendering
-func (v *Value) ToDotsFixed(ctxt *Context) fixed.Int26_6 {
-	return fixed.Int26_6(v.ToDots(ctxt))
+func (v *Value) ToDotsFixed(uc *Context) fixed.Int26_6 {
+	return fixed.Int26_6(v.ToDots(uc))
 }
 
 // Convert converts value to the given units, given unit context
-func (v *Value) Convert(to Units, ctxt *Context) Value {
-	dots := v.ToDots(ctxt)
-	return Value{dots / ctxt.ToDotsFactor(to), to, dots}
+func (v *Value) Convert(to Units, uc *Context) Value {
+	dots := v.ToDots(uc)
+	return Value{dots / uc.Dots(to), to, dots}
 }
 
 // String implements the fmt.Stringer interface.
