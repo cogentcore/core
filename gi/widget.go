@@ -1232,13 +1232,19 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 		bg = sbg
 	}
 
+	// We need to fill the whole box where the
+	// box shadows / element can go to prevent growing
+	// box shadows and borders. We couldn't just
+	// do this when there are box shadows, as they
+	// may be removed and then need to be covered up.
+	// This also fixes https://github.com/goki/gi/issues/579.
+	// This isn't an ideal solution because of performance,
+	// so TODO: maybe come up with a better solution for this.
+	mspos, mssz := st.BoxShadowPosSize(pos, sz)
+	pc.FillBox(rs, mspos, mssz, &sbg)
+
 	// first do any shadow
 	if st.HasBoxShadow() {
-		// we need to fill the whole box where the
-		// box shadows can go to prevent growing box shadows
-		mspos, mssz := st.BoxShadowPosSize(pos, sz)
-		pc.FillBox(rs, mspos, mssz, &sbg)
-
 		for _, shadow := range st.BoxShadow {
 			spos := shadow.Pos(pos)
 			ssz := shadow.Size(sz)

@@ -84,10 +84,10 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 			// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
 			s.BackgroundColor.SetColor(ColorScheme.Surface)
 
-			s.Border.Style.Set(gist.BorderNone)
-			s.Border.Style.Bottom = gist.BorderSolid
-			s.Border.Width.Bottom.SetPx(1)
-			s.Border.Color.Bottom = ColorScheme.OutlineVariant
+			// s.Border.Style.Set(gist.BorderNone)
+			// s.Border.Style.Bottom = gist.BorderSolid
+			// s.Border.Width.Bottom.SetPx(1)
+			// s.Border.Color.Bottom = ColorScheme.OutlineVariant
 		})
 	case "frame":
 		frame := child.(*Frame)
@@ -637,12 +637,12 @@ func (tb *TabButton) OnInit() {
 		s.Margin.Set()
 		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
 
-		s.Border.Style.Set(gist.BorderNone)
-		if tb.IsSelected() {
-			s.Border.Style.Bottom = gist.BorderSolid
-			s.Border.Width.Bottom.SetPx(2)
-			s.Border.Color.Bottom = ColorScheme.Primary
-		}
+		// s.Border.Style.Set(gist.BorderNone)
+		// if tb.IsSelected() {
+		// 	s.Border.Style.Bottom = gist.BorderSolid
+		// 	s.Border.Width.Bottom.SetPx(2)
+		// 	s.Border.Color.Bottom = ColorScheme.Primary
+		// }
 	})
 }
 
