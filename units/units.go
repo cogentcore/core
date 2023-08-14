@@ -343,7 +343,7 @@ func Pw(val float32) Value {
 }
 
 // Ph creates a new value of type [UnitPh]
-// (percentage of element height)
+// (percentage of parent height)
 func Ph(val float32) Value {
 	return Value{Val: val, Un: UnitPh}
 }
@@ -438,61 +438,154 @@ func Dot(val float32) Value {
 	return Value{Val: val, Un: UnitDot}
 }
 
-// Set sets value and units of an existing value
+// Set sets the value and units of an existing value
 func (v *Value) Set(val float32, un Units) {
 	v.Val = val
 	v.Un = un
 }
 
-// SetPx sets value in Px
+// SetPx sets the value in terms of [UnitPx]
+// (1px = 1/96 of 1in; not raw display pixels)
 func (v *Value) SetPx(val float32) {
 	v.Val = val
 	v.Un = UnitPx
 }
 
-// SetRem sets value in Rem
+// SetDp sets the value in terms of [UnitDp]
+// (density-independent pixels; 1dp = 1/160 of 1in)
+func (v *Value) SetDp(val float32) {
+	v.Val = val
+	v.Un = UnitDp
+}
+
+// SetEw sets the value in terms of [UnitEw]
+// (percentage of element width)
+func (v *Value) SetEw(val float32) {
+	v.Val = val
+	v.Un = UnitEw
+}
+
+// SetEh sets the value in terms of [UnitEh]
+// (percentage of element height)
+func (v *Value) SetEh(val float32) {
+	v.Val = val
+	v.Un = UnitEh
+}
+
+// SetPw sets the value in terms of [UnitPw]
+// (percentage of parent width)
+func (v *Value) SetPw(val float32) {
+	v.Val = val
+	v.Un = UnitPw
+}
+
+// SetPh sets the value in terms of [UnitPh]
+// (percentage of parent height)
+func (v *Value) SetPh(val float32) {
+	v.Val = val
+	v.Un = UnitPh
+}
+
+// SetRem sets the value in terms of [UnitRem]
+// (font size of the root element)
 func (v *Value) SetRem(val float32) {
 	v.Val = val
 	v.Un = UnitRem
 }
 
-// SetEm sets value in Em
+// SetEm sets the value in terms of [UnitEm]
+// (font size of the element)
 func (v *Value) SetEm(val float32) {
 	v.Val = val
 	v.Un = UnitEm
 }
 
-// SetEx sets value in Ex
+// SetEx sets the value in terms of [UnitEx]
+// (height of 'x' in the font of the element)
 func (v *Value) SetEx(val float32) {
 	v.Val = val
 	v.Un = UnitEx
 }
 
-// SetCh sets value in Ch
+// SetCh sets the value in terms of [UnitCh]
+// (width of '0' in the font of the element)
 func (v *Value) SetCh(val float32) {
 	v.Val = val
 	v.Un = UnitCh
 }
 
-// SetPt sets value in Pt
+// SetVw sets the value in terms of [UnitVw]
+// (percentage of viewport width)
+func (v *Value) SetVw(val float32) {
+	v.Val = val
+	v.Un = UnitVw
+}
+
+// SetVh sets the value in terms of [UnitVh]
+// (percentage of viewport height)
+func (v *Value) SetVh(val float32) {
+	v.Val = val
+	v.Un = UnitVh
+}
+
+// SetVmin sets the value in terms of [UnitVmin]
+// (percentage of viewport's smaller dimension)
+func (v *Value) SetVmin(val float32) {
+	v.Val = val
+	v.Un = UnitVmin
+}
+
+// SetVmax sets the value in terms of [UnitVmax]
+// (percentage of viewport's bigger dimension)
+func (v *Value) SetVmax(val float32) {
+	v.Val = val
+	v.Un = UnitVmax
+}
+
+// SetCm sets the value in terms of [UnitCm]
+// (centimeters; 1cm = 96px/2.54)
+func (v *Value) SetCm(val float32) {
+	v.Val = val
+	v.Un = UnitCm
+}
+
+// SetMm sets the value in terms of [UnitMm]
+// (millimeters; 1mm = 1/10 of 1cm)
+func (v *Value) SetMm(val float32) {
+	v.Val = val
+	v.Un = UnitMm
+}
+
+// SetQ sets the value in terms of [UnitQ]
+// (quarter-millimeters; 1q = 1/40 of 1cm)
+func (v *Value) SetQ(val float32) {
+	v.Val = val
+	v.Un = UnitQ
+}
+
+// SetIn sets the value in terms of [UnitIn]
+// (inches; 1in = 96px)
+func (v *Value) SetIn(val float32) {
+	v.Val = val
+	v.Un = UnitIn
+}
+
+// SetPc sets the value in terms of [UnitPc]
+// (picas; 1pc = 1/6 of 1in)
+func (v *Value) SetPc(val float32) {
+	v.Val = val
+	v.Un = UnitPc
+}
+
+// SetPt sets the value in terms of [UnitPt]
+// (points; 1pt = 1/72 of 1in)
 func (v *Value) SetPt(val float32) {
 	v.Val = val
 	v.Un = UnitPt
 }
 
-// // SetPct sets value in Pct
-// func (v *Value) SetPct(val float32) {
-// 	v.Val = val
-// 	v.Un = UnitPct
-// }
-
-// SetDp sets value in Dp
-func (v *Value) SetDp(val float32) {
-	v.Val = val
-	v.Un = UnitPx
-}
-
-// SetDot sets value in Dots directly
+// SetDot sets the value in terms of [UnitDots] directly
+// (actual raw display pixels)
 func (v *Value) SetDot(val float32) {
 	v.Val = val
 	v.Un = UnitDot
