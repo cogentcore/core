@@ -13,7 +13,6 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -77,6 +76,12 @@ type TreeView struct {
 
 var TypeTreeView = kit.Types.AddType(&TreeView{}, nil)
 
+// We do this instead of direct setting in TypeTreeView declaration
+// because TreeViewProps references TypeTreeView, causing an init cycle.
+func init() {
+	kit.Types.SetProps(TypeTreeView, TreeViewProps)
+}
+
 // AddNewTreeView adds a new treeview to given parent node, with given name.
 func AddNewTreeView(parent ki.Ki, name string) *TreeView {
 	tv := parent.AddNewChild(TypeTreeView, name).(*TreeView)
@@ -84,14 +89,66 @@ func AddNewTreeView(parent ki.Ki, name string) *TreeView {
 	return tv
 }
 
+func (tv *TreeView) OnInit() {
+	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		tv.Indent.SetCh(4)
+		s.Border.Style.Set(gist.BorderNone)
+		s.Margin.Set()
+		s.Padding.Set()
+		s.Text.Align = gist.AlignLeft
+		s.AlignV = gist.AlignTop
+		if w.IsSelected() {
+			s.BackgroundColor.SetSolid(gi.ColorScheme.TertiaryContainer)
+		}
+	})
+}
+
+func (tv *TreeView) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "Parts":
+			parts := child.(*gi.Layout)
+			parts.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				parts.Spacing.SetCh(0.5)
+			})
+		case "icon":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Width.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "branch":
+			cb := child.(*gi.CheckBox)
+			cb.Icon = icons.KeyboardArrowDown
+			cb.IconOff = icons.KeyboardArrowRight
+			cb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+				s.MaxWidth.SetEm(1.25)
+				s.MaxHeight.SetEm(1.25)
+				s.AlignV = gist.AlignMiddle
+			})
+		case "space":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Width.SetEm(0.5)
+			})
+		case "label":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+				s.MinWidth.SetCh(16)
+			})
+		case "menu":
+			menu := child.(*gi.Button)
+			menu.Indicator = icons.None
+		}
+	}
+}
+
 func (tv *TreeView) Disconnect() {
 	tv.PartsWidgetBase.Disconnect()
 	tv.TreeViewSig.DisconnectAll()
-}
-
-// TODO: any reason for this instead of direct setting in TypeTreeView declaration?
-func init() {
-	kit.Types.SetProps(TypeTreeView, TreeViewProps)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1830,11 +1887,6 @@ func (tv *TreeView) TreeViewEvents() {
 // qt calls the open / close thing a "branch"
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
 
-var TVBranchProps = ki.Props{
-	"fill":   &gi.Prefs.Colors.Icon,
-	"stroke": &gi.Prefs.Colors.Font,
-}
-
 // BranchPart returns the branch in parts, if it exists
 func (tv *TreeView) BranchPart() (*gi.CheckBox, bool) {
 	if icc := tv.Parts.ChildByName("branch", 0); icc != nil {
@@ -1952,55 +2004,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 }
 
 var TreeViewProps = ki.Props{
-	ki.EnumTypeFlag:    TypeTreeViewFlags,
-	"indent":           units.Ch(4),
-	"spacing":          units.Ch(.5),
-	"border-width":     units.Px(0),
-	"border-radius":    units.Px(0),
-	"padding":          units.Px(0),
-	"margin":           units.Px(1),
-	"text-align":       gist.AlignLeft,
-	"vertical-align":   gist.AlignTop,
-	"color":            &gi.Prefs.Colors.Font,
-	"background-color": "inherit",
-	"#icon": ki.Props{
-		"width":   units.Em(1),
-		"height":  units.Em(1),
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-		"fill":    &gi.Prefs.Colors.Icon,
-		"stroke":  &gi.Prefs.Colors.Font,
-	},
-	"#branch": ki.Props{
-		"icon":             icons.KeyboardArrowDown,
-		"icon-off":         icons.KeyboardArrowRight,
-		"margin":           units.Px(0),
-		"padding":          units.Px(0),
-		"background-color": colors.Transparent,
-		"max-width":        units.Em(.8),
-		"max-height":       units.Em(.8),
-	},
-	"#space": ki.Props{
-		"width": units.Em(0.5),
-	},
-	"#label": ki.Props{
-		"margin":    units.Px(0),
-		"padding":   units.Px(0),
-		"min-width": units.Ch(16),
-	},
-	"#menu": ki.Props{
-		"indicator": icons.None,
-	},
-	TreeViewSelectors[TreeViewActive]: ki.Props{},
-	TreeViewSelectors[TreeViewSel]: ki.Props{
-		"background-color": &gi.Prefs.Colors.Select,
-	},
-	TreeViewSelectors[TreeViewFocus]: ki.Props{
-		"background-color": &gi.Prefs.Colors.Control,
-	},
-	TreeViewSelectors[TreeViewInactive]: ki.Props{
-		"background-color": "highlight-10",
-	},
+	ki.EnumTypeFlag: TypeTreeViewFlags,
 	"CtxtMenuActive": ki.PropSlice{
 		{"SrcAddChild", ki.Props{
 			"label": "Add Child",
