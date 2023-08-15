@@ -919,6 +919,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
+	// STYTODO: figure out how how to handle these kinds of styles
 	tf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetPx(-1)

@@ -91,15 +91,19 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb.Stat() // update markup
 
 	tlv := frame.InsertNewChild(gi.TypeLayout, prIdx+1, "text-lay").(*gi.Layout)
-	tlv.SetProp("width", units.Ch(80))
-	tlv.SetProp("height", units.Em(40))
 	tlv.SetProp("line-nos", opts.LineNos)
-	tlv.SetStretchMax()
+	tlv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.Width.SetCh(80)
+		s.Height.SetEm(40)
+		s.SetStretchMax()
+	})
 	tv := AddNewTextView(tlv, "text-view")
 	tv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	tv.SetDisabled()
-	tv.SetProp("font-family", gi.Prefs.MonoFont)
 	tv.SetBuf(tb)
+	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.Font.Family = string(gi.Prefs.MonoFont)
+	})
 
 	tb.SetText(text) // triggers remarkup
 

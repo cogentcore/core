@@ -36,7 +36,9 @@ type ArgView struct {
 var TypeArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
 
 func (av *ArgView) OnInit() {
+	av.Lay = gi.LayoutVert
 	av.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		av.Spacing = gi.StdDialogVSpaceUnits
 		s.BackgroundColor.SetSolid(gi.ColorScheme.Background)
 		s.Color = gi.ColorScheme.OnBackground
 		s.MaxWidth.SetPx(-1)
@@ -97,8 +99,6 @@ func (av *ArgView) SetArgs(arg []ArgData) {
 
 // Config configures the view
 func (av *ArgView) Config() {
-	av.Lay = gi.LayoutVert
-	av.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.TypeLabel, "title")
 	config.Add(gi.TypeFrame, "args-grid")
