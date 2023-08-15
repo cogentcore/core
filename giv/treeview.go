@@ -90,11 +90,11 @@ func AddNewTreeView(parent ki.Ki, name string) *TreeView {
 }
 
 func (tv *TreeView) OnInit() {
+	tv.Indent.SetEm(1)
 	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		tv.Indent.SetCh(4)
 		s.Border.Style.Set(gist.BorderNone)
 		s.Margin.Set()
-		s.Padding.Set()
+		s.Padding.Set(units.Px(4 * gi.Prefs.DensityMul()))
 		s.Text.Align = gist.AlignLeft
 		s.AlignV = gist.AlignTop
 		if w.IsSelected() {
@@ -125,8 +125,8 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			cb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
-				s.MaxWidth.SetEm(1.25)
-				s.MaxHeight.SetEm(1.25)
+				s.MaxWidth.SetEm(1.5)
+				s.MaxHeight.SetEm(1.5)
 				s.AlignV = gist.AlignMiddle
 			})
 		case "space":
@@ -2120,6 +2120,7 @@ func (tv *TreeView) StyleTreeView() {
 	if !noTempl {
 		hasTempl, saveTempl = tv.Style.FromTemplate()
 	}
+	// STYTODO: figure out better way to handle styling (we can't just cache with style funcs)
 	if !hasTempl || saveTempl {
 		tv.Style2DWidget()
 	}
@@ -2151,12 +2152,8 @@ func (tv *TreeView) StyleTreeView() {
 			tv.OpenDepth = int(iv)
 		}
 	}
-	tv.Indent.SetFmInheritProp("indent", tv.This(), ki.NoInherit, ki.TypeProps)
 	tv.Indent.ToDots(&tv.Style.UnContext)
 	tv.Parts.Style.InheritFields(&tv.Style)
-	if spc, ok := tv.PropInherit("spacing", ki.NoInherit, ki.TypeProps); ok {
-		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
-	}
 	tv.StyMu.Unlock()
 	tv.ConfigParts()
 }
