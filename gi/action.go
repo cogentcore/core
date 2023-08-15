@@ -89,7 +89,6 @@ func (ac *Action) OnInit() {
 			s.Border.Radius.Set()
 			// s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			// s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-			s.BackgroundColor = ac.ParentBackgroundColor()
 		case ActionMenu:
 			s.Margin.Set()
 			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))

@@ -330,7 +330,6 @@ func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
 func (tb *ToolBar) OnInit() {
 	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
-		s.BackgroundColor = tb.ParentBackgroundColor()
 	})
 }
 
@@ -389,7 +388,11 @@ func (tb *ToolBar) ToolBarStdRender() {
 	rs, pc, st := tb.RenderLock()
 	pos := tb.LayState.Alloc.Pos
 	sz := tb.LayState.Alloc.Size
-	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
+	bg := st.BackgroundColor
+	if st.BackgroundColor.IsNil() {
+		bg = tb.ParentBackgroundColor()
+	}
+	pc.FillBox(rs, pos, sz, &bg)
 	tb.RenderUnlock(rs)
 }
 

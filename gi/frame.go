@@ -37,7 +37,6 @@ func (fr *Frame) OnInit() {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius.Set()
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-		s.BackgroundColor = fr.ParentBackgroundColor()
 	})
 }
 

@@ -160,26 +160,17 @@ var (
 // IsNil checks if color is the nil initial default color -- a = 0 means fully
 // transparent black
 func (c Color) IsNil() bool {
-	if c.R == 0 && c.G == 0 && c.B == 0 && c.A == 0 {
-		return true
-	}
-	return false
+	return c.R == 0 && c.G == 0 && c.B == 0 && c.A == 0
 }
 
 // IsWhite checks if color is a full opaque white color
 func (c Color) IsWhite() bool {
-	if c.R == 255 && c.G == 255 && c.B == 255 && c.A == 255 {
-		return true
-	}
-	return false
+	return c.R == 255 && c.G == 255 && c.B == 255 && c.A == 255
 }
 
 // IsBlack checks if color is a full opaque black color
 func (c Color) IsBlack() bool {
-	if c.R == 0 && c.G == 0 && c.B == 0 && c.A == 255 {
-		return true
-	}
-	return false
+	return c.R == 0 && c.G == 0 && c.B == 0 && c.A == 255
 }
 
 // IsDark checks if HSL lightness value is < .6, which is a good

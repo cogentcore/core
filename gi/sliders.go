@@ -744,7 +744,6 @@ func (sr *Slider) OnInit() {
 		sr.ValueColor.SetColor(ColorScheme.Primary)
 		sr.ThumbColor.SetColor(ColorScheme.Primary)
 
-		sr.StyleBox.BackgroundColor = sr.ParentBackgroundColor()
 		sr.StyleBox.Border.Style.Set(gist.BorderNone)
 
 		s.Cursor = cursor.HandPointing
@@ -941,7 +940,6 @@ func (sb *ScrollBar) OnInit() {
 
 	sb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sb.StyleBox.Border.Style.Set(gist.BorderNone)
-		sb.StyleBox.BackgroundColor = sb.ParentBackgroundColor()
 
 		sb.ValueColor.SetColor(ColorScheme.Primary)
 		sb.ThumbColor.SetColor(ColorScheme.Primary)

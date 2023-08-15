@@ -853,7 +853,6 @@ func (bt *Button) OnInit() {
 			s.Border.Color.Set(ColorScheme.Outline)
 			s.Border.Width.Set(units.Px(1))
 		case ButtonText:
-			s.BackgroundColor = bt.ParentBackgroundColor()
 			s.Color = ColorScheme.Primary
 		}
 		if bt.IsHovered() {
@@ -935,7 +934,6 @@ func (cb *CheckBox) OnInit() {
 		s.Cursor = cursor.HandPointing
 		s.Text.Align = gist.AlignLeft
 		s.Color = ColorScheme.OnBackground
-		s.BackgroundColor = cb.ParentBackgroundColor()
 		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
 		s.Padding.Set(units.Px(1 * Prefs.DensityMul()))
 		s.Border.Style.Set(gist.BorderNone)

@@ -124,7 +124,6 @@ func (cb *ComboBox) OnInit() {
 			s.Border.Style.Set(gist.BorderSolid)
 			s.Border.Width.Set(units.Px(1))
 			s.Border.Color.Set(ColorScheme.OnSurfaceVariant)
-			s.BackgroundColor = cb.ParentBackgroundColor()
 			if cb.Editable {
 				s.Border.Radius = gist.BorderRadiusExtraSmall
 				if tf, ok := cb.Parts.ChildByName("text", 1).(*TextField); ok {

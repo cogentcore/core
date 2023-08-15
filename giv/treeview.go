@@ -2331,7 +2331,11 @@ func (tv *TreeView) Render2D() {
 			// SidesTODO: look here if tree view borders break
 			// pc.StrokeStyle.SetColor(&st.Border.Color)
 			// pc.StrokeStyle.Width = st.Border.Width
-			pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+			bg := st.BackgroundColor
+			if bg.IsNil() {
+				bg = tv.ParentBackgroundColor()
+			}
+			pc.FillStyle.SetColorSpec(&bg)
 			// tv.RenderStdBox()
 			pos := tv.LayState.Alloc.Pos.Add(st.EffMargin().Pos())
 			sz := tv.WidgetSize.Sub(st.EffMargin().Size())

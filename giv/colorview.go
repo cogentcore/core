@@ -60,8 +60,6 @@ func (cv *ColorView) OnInit() {
 	cv.Lay = gi.LayoutVert
 	cv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		cv.Spacing = gi.StdDialogVSpaceUnits
-
-		s.BackgroundColor = cv.ParentBackgroundColor()
 	})
 }
 

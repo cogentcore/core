@@ -189,7 +189,6 @@ func (tf *TextField) OnInit() {
 		case TextFieldOutlined:
 			s.Border.Style.Set(gist.BorderSolid)
 			s.Border.Radius = gist.BorderRadiusExtraSmall
-			s.BackgroundColor = tf.ParentBackgroundColor()
 			switch tf.State {
 			case TextFieldActive:
 				s.Border.Width.Set(units.Px(1))
