@@ -585,7 +585,7 @@ func (nb *NodeBase) NodeSize() mat32.Vec2 {
 // ParentNodeSize returns the size of the nearest
 // node parent of this node as a [mat32.Vec2] object.
 func (nb *NodeBase) ParentNodeSize() mat32.Vec2 {
-	par, ok := nb.ParentByType(TypeNodeBase, ki.Embeds).(*NodeBase)
+	par, ok := nb.ParentByType(TypeNodeBase, ki.Embeds).Embed(TypeNodeBase).(*NodeBase)
 	if !ok {
 		return nb.NodeSize()
 	}
