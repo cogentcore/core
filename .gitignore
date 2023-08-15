@@ -30,3 +30,6 @@ examples/girl/image.png
 # Go workspace files
 go.work
 go.work.sum
+
+# Performance profile files
+*.prof
