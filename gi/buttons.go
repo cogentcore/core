@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -473,6 +474,7 @@ func (bb *ButtonBase) MouseEvent() {
 		me := d.(*mouse.Event)
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
+		bbb.Node2DOnMouseEvent(me)
 		if me.Button == mouse.Left {
 			switch me.Action {
 			case mouse.DoubleClick: // we just count as a regular click
@@ -498,7 +500,7 @@ func (bb *ButtonBase) MouseFocusEvent() {
 		}
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
-		bb.Node2DOnMouseFocusEvent(me)
+		bbb.Node2DOnMouseFocusEvent(me)
 		if me.Action == mouse.Enter {
 			if EventTrace {
 				fmt.Printf("bb focus enter: %v\n", bbb.Name())
@@ -861,6 +863,9 @@ func (bt *Button) OnInit() {
 			} else {
 				s.BoxShadow = BoxShadow1
 			}
+		}
+		if bt.IsActive() {
+			s.BackgroundColor.SetColor(colors.Red)
 		}
 		// STYTODO: add state styles for buttons
 	})

@@ -343,10 +343,32 @@ func (nb *Node2DBase) ConnectEvents2D() {
 // Any Node2D implementing a custom ConnectEvents2D function
 // should first call this function.
 func (nb *Node2DBase) Node2DEvents() {
+	nb.Node2DMouseEvent()
 	nb.Node2DMouseFocusEvent()
 }
 
-// Node2DMouseFocusEvent handles mouse focus events for the Node2D
+// Node2DMouseFocusEvent does the default handling for mouse click events for the Node2D
+func (nb *Node2DBase) Node2DMouseEvent() {
+	nb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		if nb.IsDisabled() {
+			return
+		}
+
+		me := data.(*mouse.Event)
+		me.SetProcessed()
+
+		nb.Node2DOnMouseEvent(me)
+	})
+}
+
+// Node2DOnMouseEvent is the function called on Node2D objects
+// when they get a mouse click event. If you are declaring a custom
+// mouse event function, you should call this function first.
+func (nb *Node2DBase) Node2DOnMouseEvent(me *mouse.Event) {
+	nb.SetActiveState(me.Action == mouse.Press)
+}
+
+// Node2DMouseFocusEvent does the default handling for mouse focus events for the Node2D
 func (nb *Node2DBase) Node2DMouseFocusEvent() {
 	nb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
 		if nb.IsDisabled() {
@@ -364,7 +386,13 @@ func (nb *Node2DBase) Node2DMouseFocusEvent() {
 // when they get a mouse foucs event. If you are declaring a custom
 // mouse foucs event function, you should call this function first.
 func (nb *Node2DBase) Node2DOnMouseFocusEvent(me *mouse.FocusEvent) {
-	nb.SetHoveredState(me.Action == mouse.Enter)
+	enter := me.Action == mouse.Enter
+	nb.SetHoveredState(enter)
+	// TODO: trigger mouse focus exit after clicking down
+	// while leaving; then clear active here
+	// // if !enter {
+	// // 	nb.ClearActive()
+	// }
 }
 
 func (nb *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
