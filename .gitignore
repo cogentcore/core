@@ -23,8 +23,9 @@
 # GoKi stores binaries in bin directories
 bin
 
-# Generated as part of girl/girl_test.go
+# Generated as part of girl/girl_test.go and examples/girl/girl.go
 girl/test.png
+examples/girl/image.png
 
 # Go workspace files
 go.work
