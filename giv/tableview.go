@@ -78,6 +78,12 @@ var _ SliceViewer = (*TableView)(nil)
 // re-styling during re-render
 type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView)
 
+func (tv *TableView) OnInit() {
+	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.SetStretchMax()
+	})
+}
+
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice (does Update if already viewing).
 func (tv *TableView) SetSlice(sl any) {
@@ -129,11 +135,7 @@ func (tv *TableView) SetSlice(sl any) {
 }
 
 var TableViewProps = ki.Props{
-	ki.EnumTypeFlag:    gi.TypeNodeFlags,
-	"background-color": &gi.Prefs.Colors.Background,
-	"color":            &gi.Prefs.Colors.Font,
-	"max-width":        -1,
-	"max-height":       -1,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // StructType sets the StruType and returns the type of the struct within the

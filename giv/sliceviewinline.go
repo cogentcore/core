@@ -11,7 +11,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -53,6 +52,12 @@ type SliceViewInline struct {
 
 var TypeSliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
 
+func (sv *SliceViewInline) OnInit() {
+	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.MinWidth.SetCh(20)
+	})
+}
+
 func (sv *SliceViewInline) Disconnect() {
 	sv.PartsWidgetBase.Disconnect()
 	sv.ViewSig.DisconnectAll()
@@ -87,7 +92,6 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 
 var SliceViewInlineProps = ki.Props{
 	ki.EnumTypeFlag: gi.TypeNodeFlags,
-	"min-width":     units.Ch(20),
 }
 
 // ConfigParts configures Parts for the current slice

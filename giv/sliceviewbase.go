@@ -11,6 +11,7 @@ import (
 	"log"
 	"reflect"
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/goki/gi/gi"
@@ -237,6 +238,45 @@ func AddNewSliceViewBase(parent ki.Ki, name string) *SliceViewBase {
 	return parent.AddNewChild(TypeSliceViewBase, name).(*SliceViewBase)
 }
 
+func (sv *SliceViewBase) OnInit() {
+	sv.Lay = gi.LayoutVert
+	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		sv.Spacing = gi.StdDialogVSpaceUnits
+		s.SetStretchMax()
+	})
+}
+
+func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "grid-lay": // grid layout
+			gl := child.(*gi.Layout)
+			gl.Lay = gi.LayoutHoriz
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				gl.SetStretchMax() // for this to work, ALL layers above need it too
+			})
+		case "grid": // slice grid
+			sg := child.(*gi.Frame)
+			sg.Lay = gi.LayoutGrid
+			sg.Stripes = gi.RowStripes
+			sg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				nWidgPerRow, _ := sv.RowWidgetNs()
+				s.Columns = nWidgPerRow
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.SetMinPrefHeight(units.Em(6))
+				s.SetMinPrefWidth(units.Ch(20))
+				s.SetStretchMax()                // for this to work, ALL layers above need it too
+				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+			})
+		}
+		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Text.WhiteSpace = gist.WhiteSpacePre // need to show padding spaces at start of index
+			})
+		}
+	}
+}
+
 func (sv *SliceViewBase) Disconnect() {
 	sv.Frame.Disconnect()
 	sv.SliceViewSig.DisconnectAll()
@@ -344,16 +384,12 @@ func (sv *SliceViewBase) UpdateValues() {
 
 // Config configures a standard setup of the overall Frame
 func (sv *SliceViewBase) Config() {
-	sv.Lay = gi.LayoutVert
-	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeLayout, "grid-lay")
 	mods, updt := sv.ConfigChildren(config)
 
 	gl := sv.GridLayout()
-	gl.Lay = gi.LayoutHoriz
-	gl.SetStretchMax() // for this to work, ALL layers above need it too
 	gconfig := kit.TypeAndNameList{}
 	gconfig.Add(gi.TypeFrame, "grid")
 	gconfig.Add(gi.TypeScrollBar, "scrollbar")
@@ -459,15 +495,6 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	defer sg.UpdateEnd(updt)
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
-
-	sg.Lay = gi.LayoutGrid
-	sg.Stripes = gi.RowStripes
-	sg.SetProp("columns", nWidgPerRow)
-	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.Em(6))
-	sg.SetMinPrefWidth(units.Ch(20))
-	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
-	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 
 	sg.DeleteChildren(ki.DestroyKids)
 
@@ -719,9 +746,9 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 
 		vtyp := vv.WidgetType()
 		itxt := fmt.Sprintf("%05d", i)
-		sitxt := fmt.Sprintf("%05d", si)
-		labnm := fmt.Sprintf("index-%v", itxt)
-		valnm := fmt.Sprintf("value-%v", itxt)
+		sitxt := fmt.Sprintf("%5d", si)
+		labnm := "index-" + itxt
+		valnm := "value-" + itxt
 
 		if sv.ShowIndex {
 			var idxlab *gi.Label
@@ -743,7 +770,6 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 					}
 				})
 			}
-			idxlab.CurBackgroundColor = gi.Prefs.Colors.Background
 			idxlab.SetText(sitxt)
 			idxlab.SetSelectedState(issel)
 		}
