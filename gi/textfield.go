@@ -153,12 +153,12 @@ func AddNewTextField(parent ki.Ki, name string) *TextField {
 
 func (tf *TextField) OnInit() {
 	// TOOD: figure out how to have primary cursor color
-	tf.AddStyler(StylerDefault, func() {
+	tf.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		tf.CursorWidth.SetPx(1)
 		tf.SelectColor.SetColor(ColorScheme.TertiaryContainer)
 		tf.PlaceholderColor = ColorScheme.OnSurfaceVariant
 
-		s := &tf.Style
+	
 		s.Cursor = cursor.IBeam
 		s.MinWidth.SetEm(20)
 		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
@@ -211,8 +211,8 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 	case "lead-icon":
 		lead := child.(*Action)
 		lead.Type = ActionParts
-		lead.AddStyler(StylerParent(tf), func() {
-			s := &lead.Style
+		lead.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		
 			s.Font.Size.SetPx(20)
 			s.Margin.Right.SetPx(16 * Prefs.DensityMul())
 			s.Color = ColorScheme.OnSurfaceVariant
@@ -221,8 +221,8 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 	case "trail-icon":
 		trail := child.(*Action)
 		trail.Type = ActionParts
-		trail.AddStyler(StylerParent(tf), func() {
-			s := &trail.Style
+		trail.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		
 			s.Font.Size.SetPx(20)
 			s.Margin.Left.SetPx(16 * Prefs.DensityMul())
 			s.Color = ColorScheme.OnSurfaceVariant

@@ -58,10 +58,9 @@ func AddNewColorView(parent ki.Ki, name string) *ColorView {
 
 func (cv *ColorView) OnInit() {
 	cv.Lay = gi.LayoutVert
-	cv.AddStyler(gi.StylerDefault, func() {
+	cv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		cv.Spacing = gi.StdDialogVSpaceUnits
 
-		s := &cv.Style
 		s.BackgroundColor = cv.ParentBackgroundColor()
 	})
 }
@@ -70,8 +69,8 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "value":
 		v := child.(*gi.Frame)
-		v.AddStyler(gi.StylerParent(cv), func() {
-			s := &v.Style
+		v.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+
 			s.MinWidth.SetEm(6)
 			s.MinHeight.SetEm(6)
 			s.Border.Radius = gist.BorderRadiusFull
@@ -79,37 +78,37 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 		})
 	case "slider-grid":
 		sg := child.(*gi.Layout)
-		sg.AddStyler(gi.StylerParent(cv), func() {
-			s := &sg.Style
+		sg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+
 			s.Columns = 4
 		})
 	case "hexlbl":
 		hexlbl := child.(*gi.Label)
-		hexlbl.AddStyler(gi.StylerParent(cv), func() {
-			s := &hexlbl.Style
+		hexlbl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+
 			s.AlignV = gist.AlignMiddle
 		})
 	case "palette":
 		pg := child.(*gi.Layout)
-		pg.AddStyler(gi.StylerParent(pg), func() {
-			s := &pg.Style
+		pg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+
 			s.Columns = 25
 		})
 	case "nums-hex":
 		hex := child.(*gi.TextField)
-		hex.AddStyler(gi.StylerParent(cv), func() {
-			s := &hex.Style
+		hex.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+
 			s.MinWidth.SetCh(20)
 		})
 	case "num-lay":
 		vl := child.(*gi.Layout)
-		vl.AddStyler(gi.StylerParent(cv), func() {
+		vl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 			vl.Spacing = gi.StdDialogVSpaceUnits
 		})
 	}
 	if sl, ok := child.(*gi.Slider); ok {
-		sl.AddStyler(gi.StylerParent(cv), func() {
-			s := &sl.Style
+		sl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+
 			s.MinWidth.SetCh(20)
 			s.Width.SetCh(20)
 			s.MinHeight.SetEm(1)
@@ -119,9 +118,9 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	}
 	if child.Parent().Name() == "palette" {
 		if cbt, ok := child.(*gi.Button); ok {
-			cbt.AddStyler(gi.StylerParent(cv), func() {
+			cbt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				c := colornames.Map[cbt.Name()]
-				s := &cbt.Style
+
 				s.BackgroundColor.SetColor(c)
 				s.MaxHeight.SetEm(1.3)
 				s.MaxWidth.SetEm(1.3)
@@ -652,13 +651,12 @@ func (vv *ColorValueView) UpdateWidget() {
 		edack, err := sv.Parts.Children().ElemFromEndTry(0) // action at end, from AddAction above
 		if err == nil {
 			edac := edack.(*gi.Action)
-			edac.AddStyler(gi.StylerParent(vv), func() {
+			edac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				// we need to display button as non-transparent
 				// so that it can be seen
-				dclr := *clr
-				dclr.A = 255
-				edac.Style.BackgroundColor.SetColor(dclr)
-				edac.Style.Color = (dclr).ContrastColor()
+				dclr := clr.WithA(1)
+				s.BackgroundColor.SetColor(dclr)
+				s.Color = dclr.ContrastColor()
 			})
 			edac.SetFullReRender()
 		}
@@ -759,8 +757,8 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.AddStyler(gi.StylerParent(vv), func() {
-		ac.Style.Border.Radius = gist.BorderRadiusFull
+	ac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.Border.Radius = gist.BorderRadiusFull
 	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeColorNameValueView).(*ColorNameValueView)

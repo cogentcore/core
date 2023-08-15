@@ -5,8 +5,6 @@
 package units
 
 import (
-	"fmt"
-
 	"github.com/goki/ki/kit"
 )
 
@@ -113,7 +111,6 @@ func (uc *Context) Dots(un Units) float32 {
 	case UnitEh:
 		return 0.01 * uc.Eh
 	case UnitPw:
-		fmt.Println(uc.Pw)
 		return 0.01 * uc.Pw
 	case UnitPh:
 		return 0.01 * uc.Ph

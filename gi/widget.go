@@ -21,7 +21,6 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/kigen/ordmap"
 	"github.com/goki/mat32"
 )
 
@@ -37,8 +36,8 @@ type WidgetBase struct {
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
 
-	// a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code
-	Stylers *ordmap.Map[StylerName, func()] `json:"-" xml:"-" copy:"-" desc:"a slice of style functions that are called in sequential descending order (so the first added function is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code"`
+	// a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code
+	Stylers []Styler `json:"-" xml:"-" copy:"-" desc:"a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code"`
 
 	// override the computed styles and allow directly editing Style
 	OverrideStyle bool `json:"-" xml:"-" desc:"override the computed styles and allow directly editing Style"`
@@ -186,31 +185,6 @@ var WidgetBaseProps = ki.Props{
 // 	WidgetStatesN
 // )
 
-// StylerName is the name of
-// a styler (style function)
-type StylerName string
-
-const (
-	// StylerDefault is the styler name
-	// that indicates that a styler was set
-	// on an element by itself
-	// as its default styler
-	StylerDefault StylerName = "default"
-	// StylerFinal is the styler name
-	// that indicates that a styler was set
-	// on an element by end-user code as a final,
-	// overriding styler
-	StylerFinal StylerName = "final"
-)
-
-// StylerParent returns a styler name
-// that indicates that a styler was set
-// on a node by the given parent
-// as its default style function
-func StylerParent(parent ki.Ki) StylerName {
-	return StylerName("parent-" + parent.Path())
-}
-
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*WidgetBase)
 	if !ok {
@@ -275,29 +249,29 @@ func (wb *WidgetBase) Init2D() {
 
 // AddStyler adds the given styler to the
 // widget's stylers, initializing them if necessary.
-// This function should be called by both internal
+// This function can be called by both internal
 // and end-user code.
-func (wb *WidgetBase) AddStyler(name StylerName, f func()) {
+func (wb *WidgetBase) AddStyler(s Styler) {
 	if wb.Stylers == nil {
-		wb.Stylers = ordmap.New[StylerName, func()]()
+		wb.Stylers = []Styler{}
 	}
-	wb.Stylers.Add(name, f)
+	wb.Stylers = append(wb.Stylers, s)
 }
 
-// AddChildStyler is a helper function that adds the
-// given styler to the child of the given name
-// if it exists, starting searching at the given start index.
-func (wb *WidgetBase) AddChildStyler(childName string, startIdx int, funcName StylerName, f func(w *WidgetBase)) {
-	child := wb.ChildByName(childName, startIdx)
-	if child != nil {
-		wb, ok := child.Embed(TypeWidgetBase).(*WidgetBase)
-		if ok {
-			wb.AddStyler(funcName, func() {
-				f(wb)
-			})
-		}
-	}
-}
+// // AddChildStyler is a helper function that adds the
+// // given styler to the child of the given name
+// // if it exists, starting searching at the given start index.
+// func (wb *WidgetBase) AddChildStyler(childName string, startIdx int, s Styler) {
+// 	child := wb.ChildByName(childName, startIdx)
+// 	if child != nil {
+// 		wb, ok := child.Embed(TypeWidgetBase).(*WidgetBase)
+// 		if ok {
+// 			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+// 				f(wb)
+// 			})
+// 		}
+// 	}
+// }
 
 // ParentWidget returns the nearest widget parent
 // of the widget. It returns nil if no such parent
@@ -630,11 +604,8 @@ func (wb *WidgetBase) Style2DWidget() {
 // RunStyleFuncs runs the style functions specified in
 // the StyleFuncs field in sequential ascending order.
 func (wb *WidgetBase) RunStyleFuncs() {
-	if wb.Stylers != nil {
-		vals := wb.Stylers.Vals()
-		for _, fun := range vals {
-			fun()
-		}
+	for _, s := range wb.Stylers {
+		s(wb, &wb.Style)
 	}
 }
 
@@ -1017,8 +988,8 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 // for the given tooltip frame with the given parent.
 // It should be called on tooltips when they are created.
 func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
-	tooltip.AddStyler(StylerParent(par), func() {
-		s := &tooltip.Style
+	tooltip.AddStyler(func(w *WidgetBase, s *gist.Style) {
+
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
 		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
@@ -1040,10 +1011,10 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.Fill = true
 	pvp.SetFlag(int(VpFlagPopup))
 	pvp.SetFlag(int(VpFlagTooltip))
-	pvp.AddStyler(StylerParent(parVp), func() {
+	pvp.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// TOOD: get border radius actually working
 		// without having parent background color workaround
-		s := &pvp.Style
+
 		s.Border.Radius = gist.BorderRadiusExtraSmall
 		s.BackgroundColor = pvp.ParentBackgroundColor()
 	})
@@ -1056,11 +1027,10 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 
 	TooltipConfigStyles(&pvp.WidgetBase, frame)
 
-	lbl.AddStyler(StylerParent(&pvp), func() {
+	lbl.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
 		mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 
-		s := &lbl.Style
 		s.MaxWidth.SetDot(mwdots)
 	})
 

@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
@@ -38,8 +39,7 @@ func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
 }
 
 func (mb *MenuBar) OnInit() {
-	mb.AddStyler(StylerDefault, func() {
-		s := &mb.Style
+	mb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
 		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
 		s.Color = ColorScheme.OnSurface
@@ -328,8 +328,7 @@ func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
 }
 
 func (tb *ToolBar) OnInit() {
-	tb.AddStyler(StylerDefault, func() {
-		s := &tb.Style
+	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
 		s.BackgroundColor = tb.ParentBackgroundColor()
 	})

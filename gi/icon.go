@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -59,8 +60,8 @@ func AddNewIcon(parent ki.Ki, name string, icon icons.Icon) *Icon {
 }
 
 func (ic *Icon) OnInit() {
-	ic.AddStyler(StylerDefault, func() {
-		s := &ic.Style
+	ic.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	
 		s.Width.SetEm(1)
 		s.Height.SetEm(1)
 		s.BackgroundColor.SetColor(color.Transparent)

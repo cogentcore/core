@@ -58,10 +58,10 @@ func AddNewSplitView(parent ki.Ki, name string) *SplitView {
 }
 
 func (sv *SplitView) OnInit() {
-	sv.AddStyler(StylerDefault, func() {
+	sv.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sv.HandleSize.SetPx(10)
 
-		s := &sv.Style
+	
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)
 		s.Margin.Set()
@@ -476,10 +476,10 @@ func (sr *Splitter) OnInit() {
 	sr.Prec = 4
 	sr.SetFlag(int(InstaDrag))
 
-	sr.AddStyler(StylerDefault, func() {
+	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
 
-		s := &sr.Style
+	
 		s.Margin.Set()
 		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
 		// s.BackgroundColor.SetColor(Colors.Accent)
@@ -503,8 +503,8 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "icon":
 		icon := child.(*Icon)
-		icon.AddStyler(StylerParent(sr), func() {
-			s := &icon.Style
+		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		
 			s.MaxWidth.SetEm(1)
 			s.MaxHeight.SetEm(5)
 			s.MinWidth.SetEm(1)

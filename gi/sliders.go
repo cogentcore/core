@@ -739,7 +739,7 @@ func (sr *Slider) OnInit() {
 	sr.Max = 1.0
 	sr.Prec = 9
 
-	sr.AddStyler(StylerDefault, func() {
+	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sr.ThumbSize = units.Px(20)
 		sr.ValueColor.SetColor(ColorScheme.Primary)
 		sr.ThumbColor.SetColor(ColorScheme.Primary)
@@ -747,7 +747,7 @@ func (sr *Slider) OnInit() {
 		sr.StyleBox.BackgroundColor = sr.ParentBackgroundColor()
 		sr.StyleBox.Border.Style.Set(gist.BorderNone)
 
-		s := &sr.Style
+	
 		s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusFull
@@ -769,8 +769,8 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	switch child.Name() {
 	case "icon":
 		icon := child.(*Icon)
-		icon.AddStyler(StylerParent(sr), func() {
-			s := &icon.Style
+		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.Margin.Set()
@@ -939,14 +939,14 @@ func (sb *ScrollBar) OnInit() {
 	sb.Max = 1.0
 	sb.Prec = 9
 
-	sb.AddStyler(StylerDefault, func() {
+	sb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sb.StyleBox.Border.Style.Set(gist.BorderNone)
 		sb.StyleBox.BackgroundColor = sb.ParentBackgroundColor()
 
 		sb.ValueColor.SetColor(ColorScheme.Primary)
 		sb.ThumbColor.SetColor(ColorScheme.Primary)
 
-		s := &sb.Style
+	
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusFull
 		if sb.Dim == mat32.X {

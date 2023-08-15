@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -582,9 +583,9 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	sb.SetDisabledState(vv.This().(ValueView).IsInactive())
 	sb.Step = 1.0
 	sb.PageStep = 10.0
-	sb.Parts.AddChildStyler("textfield", 0, gi.StylerParent(vv), func(tf *gi.WidgetBase) {
-		tf.Style.Width.SetCh(5)
-	})
+	// sb.Parts.AddChildStyler("textfield", 0, gi.StylerParent(vv), func(tf *gi.WidgetBase) {
+	// 	s.Width.SetCh(5)
+	// })
 	vk := vv.Value.Kind()
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {
 		sb.SetMin(0)
@@ -917,9 +918,9 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyler(gi.StylerParent(vv), func() {
-		tf.Style.MinWidth.SetCh(16)
-		tf.Style.MaxWidth.SetPx(-1)
+	tf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.MinWidth.SetCh(16)
+		s.MaxWidth.SetPx(-1)
 	})
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -967,9 +968,9 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyler(gi.StylerParent(vv), func() {
-		tf.Style.MinWidth.SetCh(16)
-		tf.Style.MaxWidth.SetPx(-1)
+	tf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.MinWidth.SetCh(16)
+		s.MaxWidth.SetPx(-1)
 	})
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -1067,7 +1068,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyler(gi.StylerParent(vv), func() {
+	tf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {

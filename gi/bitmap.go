@@ -58,8 +58,7 @@ func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
 }
 
 func (bm *Bitmap) OnInit() {
-	bm.AddStyler(StylerDefault, func() {
-		s := &bm.Style
+	bm.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MinWidth.SetPx(float32(bm.Size.X))
 		s.MinHeight.SetPx(float32(bm.Size.Y))
 		s.BackgroundColor.SetColor(ColorScheme.Background)

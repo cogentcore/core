@@ -17,6 +17,17 @@ import (
 // should look at https://goki.dev/docs/gi/styling.
 var CustomConfigStyles func(w *WidgetBase)
 
+// Styler is a fuction that can be used to style an element.
+// They are the building blocks of the GoGi styling system.
+// They can be used as a closure and capture surrounding context,
+// but they are passed the widget base and style for convenience
+// and so that they can be used for multiple elements if desired;
+// you can get all of the information you need from the function.
+// A Styler should be added to a widget through the [WidgetBase.AddStyler]
+// method. We use stylers for styling because they give you complete
+// control and full programming logic without any CSS-selector magic.
+type Styler func(w *WidgetBase, s *gist.Style)
+
 // Pre-configured box shadow values, based on
 // those in Material 3. They are in gi because
 // they need to access the color scheme.
