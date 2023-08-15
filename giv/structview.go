@@ -75,17 +75,45 @@ func AddNewStructView(parent ki.Ki, name string) *StructView {
 	return parent.AddNewChild(TypeStructView, name).(*StructView)
 }
 
+func (sv *StructView) OnInit() {
+	sv.Lay = gi.LayoutVert
+	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		sv.Spacing = gi.StdDialogVSpaceUnits
+		s.SetStretchMax()
+	})
+}
+
+func (sv *StructView) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "struct-grid":
+			sg := child.(*gi.Frame)
+			sg.Lay = gi.LayoutGrid
+			sg.Stripes = gi.RowStripes
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.SetMinPrefHeight(units.Em(1.5))
+				s.SetMinPrefWidth(units.Em(10))
+				s.SetStretchMax()                // for this to work, ALL layers above need it too
+				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+				s.Columns = 2
+			})
+		}
+		if w.Parent().Name() == "struct-grid" {
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.AlignH = gist.AlignLeft
+			})
+		}
+	}
+}
+
 func (sv *StructView) Disconnect() {
 	sv.Frame.Disconnect()
 	sv.ViewSig.DisconnectAll()
 }
 
 var StructViewProps = ki.Props{
-	ki.EnumTypeFlag:    gi.TypeNodeFlags,
-	"background-color": &gi.Prefs.Colors.Background,
-	"color":            &gi.Prefs.Colors.Font,
-	"max-width":        -1,
-	"max-height":       -1,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
@@ -154,8 +182,6 @@ func (sv *StructView) Config() {
 			return
 		}
 	}
-	sv.Lay = gi.LayoutVert
-	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeFrame, "struct-grid")
@@ -248,14 +274,6 @@ func (sv *StructView) ConfigStructGrid() {
 		return
 	}
 	sg := sv.StructGrid()
-	sg.Lay = gi.LayoutGrid
-	sg.Stripes = gi.RowStripes
-	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.Em(1.5))
-	sg.SetMinPrefWidth(units.Em(10))
-	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
-	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
-	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
@@ -341,7 +359,6 @@ func (sv *StructView) ConfigStructGrid() {
 		vvb.ViewPath = sv.ViewPath
 		lbl.Redrawable = true
 		widg := sg.Child((i * 2) + 1).(gi.Node2D)
-		widg.SetProp("horizontal-align", gist.AlignLeft)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled())
 		if hasDef {
 			sv.HasDefs = true
