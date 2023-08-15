@@ -384,56 +384,54 @@ func (wb *WidgetBase) WidgetEvents() {
 
 // SetMinPrefWidth sets minimum and preferred width;
 // will get at least this amount; max unspecified.
-// This should only be called in a style function.
+// This adds a styler that calls [gist.Style.SetMinPrefWidth].
 func (wb *WidgetBase) SetMinPrefWidth(val units.Value) {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Width = val
-		s.MinWidth = val
+		s.SetMinPrefWidth(val)
 	})
 }
 
 // SetMinPrefHeight sets minimum and preferred height;
 // will get at least this amount; max unspecified.
-// This should only be called in a style function.
+// This adds a styler that calls [gist.Style.SetMinPrefHeight].
 func (wb *WidgetBase) SetMinPrefHeight(val units.Value) {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Height = val
-		s.MinHeight = val
+		s.SetMinPrefHeight(val)
 	})
 }
 
 // SetStretchMaxWidth sets stretchy max width (-1);
 // can grow to take up avail room.
-// This should only be called in a style function.
+// This adds a styler that calls [gist.Style.SetStretchMaxWidth].
 func (wb *WidgetBase) SetStretchMaxWidth() {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		wb.Style.MaxWidth.SetPx(-1)
+		s.SetStretchMaxWidth()
 	})
 }
 
 // SetStretchMaxHeight sets stretchy max height (-1);
 // can grow to take up avail room.
-// This should only be called in a style function.
+// This adds a styler that calls [gist.Style.SetStretchMaxHeight].
 func (wb *WidgetBase) SetStretchMaxHeight() {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		wb.Style.MaxHeight.SetPx(-1)
+		s.SetStretchMaxHeight()
 	})
 }
 
 // SetStretchMax sets stretchy max width and height (-1);
 // can grow to take up avail room.
-// This should only be called in a style function.
+// This adds a styler that calls [gist.Style.SetStretchMax].
 func (wb *WidgetBase) SetStretchMax() {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		wb.Style.MaxWidth.SetPx(-1)
-		wb.Style.MaxHeight.SetPx(-1)
+		s.SetStretchMaxWidth()
+		s.SetStretchMaxHeight()
 	})
 }
 
 // SetFixedWidth sets all width style options
 // (Width, MinWidth, and MaxWidth) to
 // the given fixed width unit value.
-// This should only be called in a style function.
+// This adds a styler that calls [gist.Style.SetFixedWidth].
 func (wb *WidgetBase) SetFixedWidth(val units.Value) {
 	wb.Style.Width = val
 	wb.Style.MinWidth = val
@@ -443,7 +441,7 @@ func (wb *WidgetBase) SetFixedWidth(val units.Value) {
 // SetFixedHeight sets all height style options
 // (Height, MinHeight, and MaxHeight) to
 // the given fixed height unit value.
-// This should only be called in a style function.
+// This adds a styler that calls [gist.Style.SetFixedHeight].
 func (wb *WidgetBase) SetFixedHeight(val units.Value) {
 	wb.Style.Height = val
 	wb.Style.MinHeight = val

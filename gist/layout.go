@@ -114,6 +114,57 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.ScrollBarWidth.ToDots(uc)
 }
 
+// SetMinPrefWidth sets minimum and preferred width;
+// will get at least this amount; max unspecified.
+func (s *Style) SetMinPrefWidth(val units.Value) {
+	s.Width = val
+	s.MinWidth = val
+}
+
+// SetMinPrefHeight sets minimum and preferred height;
+// will get at least this amount; max unspecified.
+func (s *Style) SetMinPrefHeight(val units.Value) {
+	s.Height = val
+	s.MinHeight = val
+}
+
+// SetStretchMaxWidth sets stretchy max width (-1);
+// can grow to take up avail room.
+func (s *Style) SetStretchMaxWidth() {
+	s.MaxWidth.SetPx(-1)
+}
+
+// SetStretchMaxHeight sets stretchy max height (-1);
+// can grow to take up avail room.
+func (s *Style) SetStretchMaxHeight() {
+	s.MaxHeight.SetPx(-1)
+}
+
+// SetStretchMax sets stretchy max width and height (-1);
+// can grow to take up avail room.
+func (s *Style) SetStretchMax() {
+	s.MaxWidth.SetPx(-1)
+	s.MaxHeight.SetPx(-1)
+}
+
+// SetFixedWidth sets all width style options
+// (Width, MinWidth, and MaxWidth) to
+// the given fixed width unit value.
+func (s *Style) SetFixedWidth(val units.Value) {
+	s.Width = val
+	s.MinWidth = val
+	s.MaxWidth = val
+}
+
+// SetFixedHeight sets all height style options
+// (Height, MinHeight, and MaxHeight) to
+// the given fixed height unit value.
+func (s *Style) SetFixedHeight(val units.Value) {
+	s.Height = val
+	s.MinHeight = val
+	s.MaxHeight = val
+}
+
 // Align has all different types of alignment -- only some are applicable to
 // different contexts, but there is also so much overlap that it makes sense
 // to have them all in one list -- some are not standard CSS and used by
