@@ -583,6 +583,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	sb.SetDisabledState(vv.This().(ValueView).IsInactive())
 	sb.Step = 1.0
 	sb.PageStep = 10.0
+	// STYTODO: figure out what to do about this
 	// sb.Parts.AddChildStyler("textfield", 0, gi.StylerParent(vv), func(tf *gi.WidgetBase) {
 	// 	s.Width.SetCh(5)
 	// })

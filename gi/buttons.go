@@ -498,7 +498,7 @@ func (bb *ButtonBase) MouseFocusEvent() {
 		}
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
-		bb.OnWidgetMouseFocusEvent(me)
+		bb.Node2DOnMouseFocusEvent(me)
 		if me.Action == mouse.Enter {
 			if EventTrace {
 				fmt.Printf("bb focus enter: %v\n", bbb.Name())

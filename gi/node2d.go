@@ -13,6 +13,7 @@ import (
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -330,7 +331,40 @@ func (nb *Node2DBase) ChildrenBBox2D() image.Rectangle {
 func (nb *Node2DBase) Render2D() {
 }
 
+// ConnectEvents2D is the default event connection function
+// for Node2D objects. It calls [Node2DEvents], so any Node2D
+// implementing a custom ConnectEvents2D function should
+// first call [Node2DEvents].
 func (nb *Node2DBase) ConnectEvents2D() {
+	nb.Node2DEvents()
+}
+
+// Node2DEvents connects the default events for Node2D objects.
+// Any Node2D implementing a custom ConnectEvents2D function
+// should first call this function.
+func (nb *Node2DBase) Node2DEvents() {
+	nb.Node2DMouseFocusEvent()
+}
+
+// Node2DMouseFocusEvent handles mouse focus events for the Node2D
+func (nb *Node2DBase) Node2DMouseFocusEvent() {
+	nb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		if nb.IsDisabled() {
+			return
+		}
+
+		me := data.(*mouse.FocusEvent)
+		me.SetProcessed()
+
+		nb.Node2DOnMouseFocusEvent(me)
+	})
+}
+
+// Node2DOnMouseFocusEvent is the function called on Node2D objects
+// when they get a mouse foucs event. If you are declaring a custom
+// mouse foucs event function, you should call this function first.
+func (nb *Node2DBase) Node2DOnMouseFocusEvent(me *mouse.FocusEvent) {
+	nb.SetHoveredState(me.Action == mouse.Enter)
 }
 
 func (nb *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {

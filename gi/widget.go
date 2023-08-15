@@ -369,6 +369,7 @@ func (wb *WidgetBase) ParentCursor(cur cursor.Shapes) cursor.Shapes {
 // implementing a custom ConnectEvents2D function should
 // first call [WidgetEvents].
 func (wb *WidgetBase) ConnectEvents2D() {
+	wb.Node2DEvents()
 	wb.WidgetEvents()
 }
 
@@ -376,48 +377,7 @@ func (wb *WidgetBase) ConnectEvents2D() {
 // Any widget implementing a custom ConnectEvents2D function
 // should first call this function.
 func (wb *WidgetBase) WidgetEvents() {
-	wb.WidgetMouseFocusEvent()
-}
-
-// WidgetFocusEvent handles mouse focus events for the widget
-func (wb *WidgetBase) WidgetMouseFocusEvent() {
-	wb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		if wb.IsDisabled() {
-			return
-		}
-
-		me := data.(*mouse.FocusEvent)
-		me.SetProcessed()
-
-		wb.OnWidgetMouseFocusEvent(me)
-	})
-}
-
-// OnWidgetMouseFocusEvent is called when there is a [mouse.FocusEvent]
-// on a widget. If you are defining a custom connection for mouse focus events,
-// you should call this function in your code.
-func (wb *WidgetBase) OnWidgetMouseFocusEvent(me *mouse.FocusEvent) {
-	// fmt.Println("mouse focus event on", wb)
-
-	var cur cursor.Cursor
-	pwin := wb.ParentWindow()
-	if pwin == nil {
-		cur = oswin.TheApp.Cursor(oswin.TheApp.ContextWindow())
-	} else {
-		cur = oswin.TheApp.Cursor(pwin.OSWin)
-	}
-
-	if me.Action == mouse.Enter {
-		wb.SetHovered()
-		if cur.Current() != wb.Style.Cursor {
-			// cur.Set(wb.Style.Cursor)
-		}
-	} else {
-		wb.ClearHovered()
-		if cur.Current() == wb.Style.Cursor {
-			// cur.Set(wb.ParentCursor(cursor.Arrow))
-		}
-	}
+	wb.HoverTooltipEvent()
 }
 
 // TODO: use these instead of those on NodeBase2D
@@ -1005,7 +965,7 @@ func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
 		s.BackgroundColor.SetColor(ColorScheme.InverseSurface)
 		s.Color = ColorScheme.InverseOnSurface
 	})
-	// tooltip.AddChildStyleFunc("ttlbl", 0, StyleFuncParts(par), func(label *WidgetBase) {
+	// tooltip.AddChildStyler("ttlbl", 0, StyleFuncParts(par), func(label *WidgetBase) {
 	// })
 }
 
