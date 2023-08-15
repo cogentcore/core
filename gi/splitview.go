@@ -471,6 +471,7 @@ var SplitterProps = ki.Props{
 }
 
 func (sr *Splitter) OnInit() {
+	// STYTODO: fix splitter styles
 	sr.ValThumb = false
 	sr.ThumbSize = units.Px(10) // will be replaced by parent HandleSize
 	sr.Step = 0.01
@@ -481,14 +482,10 @@ func (sr *Splitter) OnInit() {
 	sr.SetFlag(int(InstaDrag))
 
 	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		// sr.StyleBox.BackgroundColor.SetSolid(Colors.Text)
-
 		s.Margin.Set()
 		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
-		// s.BackgroundColor.SetSolid(Colors.Accent)
+		s.BackgroundColor.SetSolid(ColorScheme.TertiaryContainer)
 		s.Color = ColorScheme.OnBackground
-		// s.Border.Width.Set(units.Px(1))
-		// s.Border.Color.Set(Colors.Text)
 		if sr.Dim == mat32.X {
 			s.MinWidth.SetPx(2)
 			s.MinHeight.SetPx(100)
@@ -506,15 +503,15 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	if w := KiAsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.MaxWidth.SetEm(1)
-				s.MaxHeight.SetEm(5)
-				s.MinWidth.SetEm(1)
-				s.MinHeight.SetEm(5)
-				s.Margin.Set()
-				s.Padding.Set()
-				s.AlignV = gist.AlignMiddle
-			})
+			// w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			// 	s.MaxWidth.SetEm(1)
+			// 	s.MaxHeight.SetEm(5)
+			// 	s.MinWidth.SetEm(1)
+			// 	s.MinHeight.SetEm(5)
+			// 	s.Margin.Set()
+			// 	s.Padding.Set()
+			// 	s.AlignV = gist.AlignMiddle
+			// })
 		}
 	}
 }
@@ -756,10 +753,12 @@ func (sr *Splitter) RenderSplitter() {
 	pc.StrokeStyle.SetColor(nil)
 	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
 
-	pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
-	pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
-	sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
-	sr.RenderBoxImpl(pos, sz, st.Border)
+	// pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
+	// pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
+	// sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
+	// sr.RenderBoxImpl(pos, sz, st.Border)
+
+	sr.RenderStdBox(st)
 
 	sr.RenderUnlock(rs)
 	// }
