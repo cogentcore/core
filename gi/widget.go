@@ -962,7 +962,7 @@ func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
 		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
-		s.BackgroundColor.SetColor(ColorScheme.InverseSurface)
+		s.BackgroundColor.SetSolid(ColorScheme.InverseSurface)
 		s.Color = ColorScheme.InverseOnSurface
 	})
 	// tooltip.AddChildStyler("ttlbl", 0, StyleFuncParts(par), func(label *WidgetBase) {

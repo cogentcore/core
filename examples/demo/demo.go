@@ -463,14 +463,14 @@ func makeLayouts(tv *gi.TabView) {
 	vw := gi.AddNewLabel(layouts, "vw", "50vw")
 	vw.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.Width = units.Vw(50)
-		s.BackgroundColor.SetColor(gi.ColorScheme.Primary)
+		s.BackgroundColor.SetSolid(gi.ColorScheme.Primary)
 		s.Color = gi.ColorScheme.OnPrimary
 	})
 
 	pw := gi.AddNewLabel(layouts, "pw", "50pw")
 	pw.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.Width = units.Pw(50)
-		s.BackgroundColor.SetColor(gi.ColorScheme.PrimaryContainer)
+		s.BackgroundColor.SetSolid(gi.ColorScheme.PrimaryContainer)
 		s.Color = gi.ColorScheme.OnPrimaryContainer
 	})
 

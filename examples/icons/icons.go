@@ -5,11 +5,11 @@
 package main
 
 import (
-	"image/color"
 	"strings"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/units"
 )
 
@@ -72,7 +72,7 @@ func mainrun() {
 		smico := gi.AddNewIcon(vb, icnms, icnm)
 		smico.SetMinPrefWidth(units.Px(24))
 		smico.SetMinPrefHeight(units.Px(24))
-		smico.SetProp("background-color", color.Transparent)
+		smico.SetProp("background-color", colors.Transparent)
 		smico.SetProp("fill", gi.ColorScheme.OnBackground)
 		smico.SetProp("stroke", gi.ColorScheme.OnBackground)
 		// smico.SetProp("horizontal-align", gi.AlignLeft)
@@ -80,7 +80,7 @@ func mainrun() {
 		// ico := gi.AddNewIcon(vb, icnms+"_big", icnms)
 		// ico.SetMinPrefWidth(units.Px(100))
 		// ico.SetMinPrefHeight(units.Px(100))
-		// ico.SetProp("background-color", color.Transparent)
+		// ico.SetProp("background-color", colors.Transparent)
 		// ico.SetProp("fill", "#88F")
 		// ico.SetProp("stroke", "black")
 		// ico.SetProp("horizontal-align", gi.AlignLeft)

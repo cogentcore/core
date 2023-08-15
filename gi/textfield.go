@@ -177,7 +177,7 @@ func (tf *TextField) OnInit() {
 			s.Border.Width.Set()
 			s.Border.Color.Set()
 			s.Border.Radius = gist.BorderRadiusExtraSmallTop
-			s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
 			switch tf.State {
 			case TextFieldActive:
 				s.Border.Width.Bottom = units.Px(1)
@@ -200,7 +200,7 @@ func (tf *TextField) OnInit() {
 			}
 		}
 		if tf.State == TextFieldSel {
-			s.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
+			s.BackgroundColor.SetSolid(ColorScheme.TertiaryContainer)
 		}
 	})
 }

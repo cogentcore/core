@@ -127,6 +127,7 @@ var Map = map[string]gist.Color{
 	"plum":                 {0xdd, 0xa0, 0xdd, 0xff}, // rgb(221, 160, 221)
 	"powderblue":           {0xb0, 0xe0, 0xe6, 0xff}, // rgb(176, 224, 230)
 	"purple":               {0x80, 0x00, 0x80, 0xff}, // rgb(128, 0, 128)
+	"rebeccapurple":        {0x66, 0x33, 0x99, 0xff}, // rgb(102, 51, 153)
 	"red":                  {0xff, 0x00, 0x00, 0xff}, // rgb(255, 0, 0)
 	"rosybrown":            {0xbc, 0x8f, 0x8f, 0xff}, // rgb(188, 143, 143)
 	"royalblue":            {0x41, 0x69, 0xe1, 0xff}, // rgb(65, 105, 225)
@@ -155,6 +156,7 @@ var Map = map[string]gist.Color{
 	"whitesmoke":           {0xf5, 0xf5, 0xf5, 0xff}, // rgb(245, 245, 245)
 	"yellow":               {0xff, 0xff, 0x00, 0xff}, // rgb(255, 255, 0)
 	"yellowgreen":          {0x9a, 0xcd, 0x32, 0xff}, // rgb(154, 205, 50)
+	"transparent":          {0, 0, 0, 0},             // rgb(0, 0, 0, 0)
 }
 
 // Names contains the color names defined in the SVG 1.1 spec.
@@ -278,6 +280,7 @@ var Names = []string{
 	"plum",
 	"powderblue",
 	"purple",
+	"rebeccapurple",
 	"red",
 	"rosybrown",
 	"royalblue",
@@ -306,6 +309,7 @@ var Names = []string{
 	"whitesmoke",
 	"yellow",
 	"yellowgreen",
+	"transparent",
 }
 
 var (
@@ -428,6 +432,7 @@ var (
 	Plum                 = gist.Color{0xdd, 0xa0, 0xdd, 0xff} // rgb(221, 160, 221)
 	Powderblue           = gist.Color{0xb0, 0xe0, 0xe6, 0xff} // rgb(176, 224, 230)
 	Purple               = gist.Color{0x80, 0x00, 0x80, 0xff} // rgb(128, 0, 128)
+	Rebeccapurple        = gist.Color{0x66, 0x33, 0x99, 0xff} // rgb(102, 51, 153)
 	Red                  = gist.Color{0xff, 0x00, 0x00, 0xff} // rgb(255, 0, 0)
 	Rosybrown            = gist.Color{0xbc, 0x8f, 0x8f, 0xff} // rgb(188, 143, 143)
 	Royalblue            = gist.Color{0x41, 0x69, 0xe1, 0xff} // rgb(65, 105, 225)
@@ -456,4 +461,5 @@ var (
 	Whitesmoke           = gist.Color{0xf5, 0xf5, 0xf5, 0xff} // rgb(245, 245, 245)
 	Yellow               = gist.Color{0xff, 0xff, 0x00, 0xff} // rgb(255, 255, 0)
 	Yellowgreen          = gist.Color{0x9a, 0xcd, 0x32, 0xff} // rgb(154, 205, 50)
+	Transparent          = gist.Color{0, 0, 0, 0}             // rgb(0, 0, 0, 0)
 )

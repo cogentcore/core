@@ -41,7 +41,7 @@ func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
 func (mb *MenuBar) OnInit() {
 	mb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
-		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
+		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
 		s.Color = ColorScheme.OnSurface
 	})
 }

@@ -76,14 +76,14 @@ func (ac *Action) OnInit() {
 		s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(gist.BorderNone)
 		s.Text.Align = gist.AlignCenter
-		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
+		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
 		s.Color = ColorScheme.OnSurface
 		switch ac.Type {
 		case ActionStandalone:
 			s.Border.Radius = gist.BorderRadiusFull
 			s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			s.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
+			s.BackgroundColor.SetSolid(ColorScheme.SecondaryContainer)
 			s.Color = ColorScheme.OnSecondaryContainer
 		case ActionParts:
 			s.Border.Radius.Set()
@@ -94,7 +94,7 @@ func (ac *Action) OnInit() {
 			s.Margin.Set()
 			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
 			s.MaxWidth.SetPx(-1)
-			s.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
+			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
 		case ActionMenuBar:
 			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			s.Margin.Set()
@@ -104,18 +104,21 @@ func (ac *Action) OnInit() {
 			s.Margin.Set()
 			ac.Indicator = icons.None
 		}
+		if ac.IsHovered() {
+			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
+		}
 		// switch ac.State {
 		// case ButtonActive:
-		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(7))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(7))
 		// case ButtonInactive:
-		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(20))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(20))
 		// 	s.Color = ColorScheme.OnBackground.Highlight(20)
 		// case ButtonFocus, ButtonSelected:
-		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(15))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(15))
 		// case ButtonHover:
-		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(20))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(20))
 		// case ButtonDown:
-		// 	s.BackgroundColor.SetColor(s.BackgroundColor.Color.Highlight(25))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(25))
 		// }
 	})
 }

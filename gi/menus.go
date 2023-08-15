@@ -338,7 +338,7 @@ func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
 	frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
-		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
+		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
 		// doesn't seem to work; TODO: fix box shadow here
 		// s.BoxShadow.HOffset.SetPx(2)
 		// s.BoxShadow.VOffset.SetPx(2)
@@ -662,7 +662,7 @@ func (sp *Separator) OnInit() {
 		s.Border.Style.Set(gist.BorderSolid)
 		s.Border.Width.Set(units.Px(1))
 		s.Border.Color.Set(ColorScheme.OutlineVariant)
-		s.BackgroundColor.SetColor(ColorScheme.OutlineVariant)
+		s.BackgroundColor.SetSolid(ColorScheme.OutlineVariant)
 		if sp.Horiz {
 			s.MaxWidth.SetPx(-1)
 			s.MinHeight.SetPx(1)

@@ -85,11 +85,11 @@ func mainrun() {
 
 	// mfr.ElementStyleFuncs = map[string]func(w *gi.WidgetBase){}
 	// mfr.ElementStyleFuncs["button"] = func(w *gi.WidgetBase) {
-	// 	w.Style.BackgroundColor.SetColor(colors.Orange)
+	// 	w.Style.BackgroundColor.SetSolid(colors.Orange)
 	// 	w.Style.Color.SetColor(colors.Blue)
 	// }
 	// mfr.ElementStyleFuncs["slider"] = func(w *gi.WidgetBase) {
-	// 	w.Style.BackgroundColor.SetColor(colors.Maroon.Darker(40))
+	// 	w.Style.BackgroundColor.SetSolid(colors.Maroon.Darker(40))
 	// }
 	// mfr.ElementStyleFuncs["textfield"] = func(w *gi.WidgetBase) {
 	// 	w.Style.Padding.Set(units.Px(10), units.Px(5))
@@ -175,12 +175,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	// 	fmt.Println(button2.State)
 	// 	switch button2.State {
 	// 	case gi.ButtonHover:
-	// 		button2.Style.BackgroundColor.SetColor(gist.MustColorFromName("darkblue"))
+	// 		button2.Style.BackgroundColor.SetSolid(gist.MustColorFromName("darkblue"))
 	// 	default:
 	// 		button2.Style.Border.Color.Set(gist.Transparent)
 	// 		button2.Style.Border.Width.Set(units.Px(2))
 	// 		button2.Style.Border.Radius.Set(units.Px(10))
-	// 		button2.Style.BackgroundColor.SetColor(gist.MustColorFromName("blue"))
+	// 		button2.Style.BackgroundColor.SetSolid(gist.MustColorFromName("blue"))
 	// 		button2.Style.Color.SetColor(gist.MustColorFromName("white"))
 	// 		button2.Style.Padding.Set(units.Px(10), units.Px(5))
 	// 		button2.Style.Height = units.Px(50)

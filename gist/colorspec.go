@@ -79,7 +79,14 @@ func (cs *ColorSpec) ColorOrNil() color.Color {
 	return cs.Color
 }
 
-// SetColor sets a solid color
+// SetSolid sets a solid color
+func (cs *ColorSpec) SetSolid(cl Color) {
+	cs.Color = cl
+	cs.Source = SolidColor
+	cs.Gradient = nil
+}
+
+// SetColor sets a solid color from a standard [image/color.Color]
 func (cs *ColorSpec) SetColor(cl color.Color) {
 	cs.Color.SetColor(cl)
 	cs.Source = SolidColor

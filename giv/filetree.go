@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"image/color"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,6 +23,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/icons"
@@ -2682,7 +2682,7 @@ var FileTreeViewProps = ki.Props{
 		"icon-off":         "folder",
 		"margin":           units.Px(0),
 		"padding":          units.Px(0),
-		"background-color": color.Transparent,
+		"background-color": colors.Transparent,
 		"max-width":        units.Em(.8),
 		"max-height":       units.Em(.8),
 	},

@@ -476,11 +476,11 @@ func (sr *Splitter) OnInit() {
 	sr.SetFlag(int(InstaDrag))
 
 	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		// sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
+		// sr.StyleBox.BackgroundColor.SetSolid(Colors.Text)
 
 		s.Margin.Set()
 		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
-		// s.BackgroundColor.SetColor(Colors.Accent)
+		// s.BackgroundColor.SetSolid(Colors.Accent)
 		s.Color = ColorScheme.OnBackground
 		// s.Border.Width.Set(units.Px(1))
 		// s.Border.Color.Set(Colors.Text)

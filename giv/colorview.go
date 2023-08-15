@@ -73,7 +73,7 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 				s.MinWidth.SetEm(6)
 				s.MinHeight.SetEm(6)
 				s.Border.Radius = gist.BorderRadiusFull
-				s.BackgroundColor.SetColor(cv.Color)
+				s.BackgroundColor.SetSolid(cv.Color)
 			})
 		case "slider-grid":
 			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
@@ -646,7 +646,7 @@ func (vv *ColorValueView) UpdateWidget() {
 				// we need to display button as non-transparent
 				// so that it can be seen
 				dclr := clr.WithA(1)
-				s.BackgroundColor.SetColor(dclr)
+				s.BackgroundColor.SetSolid(dclr)
 				s.Color = dclr.ContrastColor()
 			})
 			edac.SetFullReRender()

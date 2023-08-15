@@ -758,7 +758,7 @@ func (sr *Slider) OnInit() {
 			s.Height.SetEm(20)
 			s.Width.SetPx(4)
 		}
-		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
 		s.Color = ColorScheme.OnPrimary
 		// STYTODO: state styles
 	})
@@ -955,7 +955,7 @@ func (sb *ScrollBar) OnInit() {
 			s.MinWidth.SetEm(2)
 			s.MaxHeight.SetPx(-1)
 		}
-		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
 		s.Color = ColorScheme.OnPrimary
 		// STYTODO: state styles
 	})

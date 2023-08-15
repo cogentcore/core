@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"log"
 	"strings"
 	"sync"
@@ -837,18 +836,18 @@ func (bt *Button) OnInit() {
 		s.Text.Align = gist.AlignCenter
 		switch bt.Type {
 		case ButtonFilled:
-			s.BackgroundColor.SetColor(ColorScheme.Primary)
+			s.BackgroundColor.SetSolid(ColorScheme.Primary)
 			s.Color = ColorScheme.OnPrimary
 		case ButtonTonal:
-			s.BackgroundColor.SetColor(ColorScheme.SecondaryContainer)
+			s.BackgroundColor.SetSolid(ColorScheme.SecondaryContainer)
 			s.Color = ColorScheme.OnSecondaryContainer
 		case ButtonElevated:
 			s.Margin = gist.BoxShadowMargin(BoxShadow2).ToValues()
-			s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerLow)
+			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
 			s.Color = ColorScheme.Primary
 			s.BoxShadow = BoxShadow1
 		case ButtonOutlined:
-			s.BackgroundColor.SetColor(ColorScheme.Surface)
+			s.BackgroundColor.SetSolid(ColorScheme.Surface)
 			s.Color = ColorScheme.Primary
 			s.Border.Style.Set(gist.BorderSolid)
 			s.Border.Color.Set(ColorScheme.Outline)
@@ -863,9 +862,6 @@ func (bt *Button) OnInit() {
 			} else {
 				s.BoxShadow = BoxShadow1
 			}
-		}
-		if bt.IsActive() {
-			s.BackgroundColor.SetColor(colors.Red)
 		}
 		// STYTODO: add state styles for buttons
 	})
@@ -945,16 +941,16 @@ func (cb *CheckBox) OnInit() {
 		s.Border.Style.Set(gist.BorderNone)
 		// switch cb.State {
 		// case ButtonActive:
-		// 	s.BackgroundColor.SetColor(ColorScheme.Background)
+		// 	s.BackgroundColor.SetSolid(ColorScheme.Background)
 		// case ButtonInactive:
-		// 	s.BackgroundColor.SetColor(ColorScheme.Background)
+		// 	s.BackgroundColor.SetSolid(ColorScheme.Background)
 		// 	s.Color.SetColor(ColorScheme.OnBackground.Highlight(30))
 		// case ButtonFocus, ButtonSelected:
-		// 	s.BackgroundColor.SetColor(ColorScheme.Background.Highlight(10))
+		// 	s.BackgroundColor.SetSolid(ColorScheme.Background.Highlight(10))
 		// case ButtonHover:
-		// 	s.BackgroundColor.SetColor(ColorScheme.Background.Highlight(15))
+		// 	s.BackgroundColor.SetSolid(ColorScheme.Background.Highlight(15))
 		// case ButtonDown:
-		// 	s.BackgroundColor.SetColor(ColorScheme.Background.Highlight(20))
+		// 	s.BackgroundColor.SetSolid(ColorScheme.Background.Highlight(20))
 		// }
 	})
 }
@@ -968,7 +964,7 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 				s.Height.SetEm(1.5)
 				s.Margin.Set()
 				s.Padding.Set()
-				s.BackgroundColor.SetColor(color.Transparent)
+				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "space":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {

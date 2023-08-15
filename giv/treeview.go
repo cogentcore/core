@@ -8,12 +8,12 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/color"
 	"log"
 	"strings"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -1976,7 +1976,7 @@ var TreeViewProps = ki.Props{
 		"icon-off":         icons.KeyboardArrowRight,
 		"margin":           units.Px(0),
 		"padding":          units.Px(0),
-		"background-color": color.Transparent,
+		"background-color": colors.Transparent,
 		"max-width":        units.Em(.8),
 		"max-height":       units.Em(.8),
 	},

@@ -304,7 +304,8 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "mark":
-		fs.BackgroundColor.SetColor(gist.ThePrefs.PrefColor("highlight"))
+		// TODO: use correct color
+		// fs.BackgroundColor.SetSolid(gist.ThePrefs.PrefColor("highlight"))
 		did = true
 	case "abbr", "acronym":
 		fs.SetDeco(gist.DecoDottedUnderline)

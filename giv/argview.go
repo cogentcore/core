@@ -37,7 +37,7 @@ var TypeArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
 
 func (av *ArgView) OnInit() {
 	av.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		s.BackgroundColor.SetColor(gi.ColorScheme.Background)
+		s.BackgroundColor.SetSolid(gi.ColorScheme.Background)
 		s.Color = gi.ColorScheme.OnBackground
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)

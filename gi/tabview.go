@@ -6,12 +6,12 @@ package gi
 
 import (
 	"fmt"
-	"image/color"
 	"log"
 	"reflect"
 	"sync"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"
@@ -62,7 +62,7 @@ func (tv *TabView) OnInit() {
 		s.Border.Style.Set(gist.BorderSolid)
 		s.Border.Width.Set(units.Px(1))
 		s.Border.Color.Set(ColorScheme.OutlineVariant)
-		s.BackgroundColor.SetColor(ColorScheme.Background)
+		s.BackgroundColor.SetSolid(ColorScheme.Background)
 		s.Color = ColorScheme.OnBackground
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)
@@ -80,7 +80,7 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 				s.Margin.Set()
 				s.Padding.Set()
 				// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
-				s.BackgroundColor.SetColor(ColorScheme.Surface)
+				s.BackgroundColor.SetSolid(ColorScheme.Surface)
 
 				// s.Border.Style.Set(gist.BorderNone)
 				// s.Border.Style.Bottom = gist.BorderSolid
@@ -625,7 +625,7 @@ func (tb *TabButton) OnInit() {
 		// s.Border.Style.Right = gist.BorderSolid
 		// s.Border.Width.Right.SetPx(1)
 
-		s.BackgroundColor.SetColor(ColorScheme.Surface)
+		s.BackgroundColor.SetSolid(ColorScheme.Surface)
 		s.Color = ColorScheme.OnSurface
 
 		s.Border.Radius.Set()
@@ -669,7 +669,7 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 				s.Padding.Set()
 				s.AlignV = gist.AlignMiddle
 				s.Border.Radius = gist.BorderRadiusFull
-				s.BackgroundColor.SetColor(color.Transparent)
+				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "sc-stretch":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {

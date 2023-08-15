@@ -462,7 +462,7 @@ func NewMainWindow(name, title string, width, height int) *Window {
 	vp.SetName("WinVp")
 	vp.Fill = true
 	vp.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		vp.Style.BackgroundColor.SetColor(ColorScheme.Background)
+		vp.Style.BackgroundColor.SetSolid(ColorScheme.Background)
 		vp.Style.Color = ColorScheme.OnBackground // everything inherits this
 	})
 

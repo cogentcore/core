@@ -9,7 +9,6 @@ import (
 	"embed"
 	"fmt"
 	"image"
-	"image/color"
 	"io"
 	"log"
 	"os"
@@ -18,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -61,7 +61,7 @@ func AddNewIcon(parent ki.Ki, name string) *Icon {
 
 var IconProps = ki.Props{
 	ki.EnumTypeFlag:    gi.TypeVpFlags,
-	"background-color": color.Transparent,
+	"background-color": colors.Transparent,
 }
 
 func (ic *Icon) CopyFieldsFrom(frm any) {

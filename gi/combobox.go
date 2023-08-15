@@ -102,7 +102,7 @@ func (cb *ComboBox) OnInit() {
 		s.Color = ColorScheme.OnSurface
 		switch cb.Type {
 		case ComboBoxFilled:
-			s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHighest)
+			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
 			if cb.Editable {
 				s.Border.Style.Set(gist.BorderNone)
 				s.Border.Style.Bottom = gist.BorderSolid

@@ -53,7 +53,7 @@ func (bb *ButtonBox) OnInit() {
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		s.Text.Align = gist.AlignCenter
-		s.BackgroundColor.SetColor(ColorScheme.Surface)
+		s.BackgroundColor.SetSolid(ColorScheme.Surface)
 		s.Color = ColorScheme.OnSurface
 	})
 }

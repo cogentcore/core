@@ -7,13 +7,13 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"log"
 	"reflect"
 
 	"github.com/iancoleman/strcase"
 
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
@@ -88,7 +88,7 @@ var TypeDialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
 func (dlg *Dialog) OnInit() {
 	dlg.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainerHigh)
+		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHigh)
 		s.Color = ColorScheme.OnSurface
 		s.Border.Radius = gist.BorderRadiusExtraLarge
 	})
@@ -101,7 +101,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Border.Style.Set(gist.BorderNone)
 				s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
-				s.BackgroundColor.SetColor(dlg.Style.BackgroundColor.Color)
+				s.BackgroundColor.SetSolid(dlg.Style.BackgroundColor.Color)
 				// TODO: add box shadow
 				// s.BoxShadow.HOffset.SetPx(4)
 				// s.BoxShadow.VOffset.SetPx(4)
@@ -115,7 +115,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 				s.MaxWidth.SetPx(-1)
 				s.AlignH = gist.AlignCenter
 				s.AlignV = gist.AlignTop
-				s.BackgroundColor.SetColor(color.Transparent)
+				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "prompt":
 			prompt := child.(*Label)
@@ -127,7 +127,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 				s.Text.Align = gist.AlignLeft
 				s.AlignV = gist.AlignTop
 				s.Color = ColorScheme.OnSurfaceVariant
-				s.BackgroundColor.SetColor(color.Transparent)
+				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "buttons":
 			bts := child.(*Layout)

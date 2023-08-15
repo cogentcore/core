@@ -6,10 +6,10 @@ package gi
 
 import (
 	"image"
-	"image/color"
 
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/mouse"
@@ -135,7 +135,7 @@ func (lb *Label) OnInit() {
 		s.Cursor = lb.ParentCursor(cursor.IBeam)
 		s.Text.WhiteSpace = gist.WhiteSpaceNormal
 		s.AlignV = gist.AlignMiddle
-		s.BackgroundColor.SetColor(color.Transparent)
+		s.BackgroundColor.SetSolid(colors.Transparent)
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
 		switch lb.Type {
@@ -221,7 +221,7 @@ func (lb *Label) OnInit() {
 		case LabelInactive:
 			s.Font.Opacity = 0.7
 		case LabelSelected:
-			s.BackgroundColor.SetColor(ColorScheme.TertiaryContainer)
+			s.BackgroundColor.SetSolid(ColorScheme.TertiaryContainer)
 			s.Color = ColorScheme.OnTertiaryContainer
 		}
 	})
@@ -322,7 +322,7 @@ func (lb *Label) SetStateStyle() {
 		lb.State = LabelInactive
 		lb.Style = lb.StateStyles[LabelInactive]
 		if lb.Redrawable && !lb.CurBackgroundColor.IsNil() {
-			lb.Style.BackgroundColor.SetColor(lb.CurBackgroundColor)
+			lb.Style.BackgroundColor.SetSolid(lb.CurBackgroundColor)
 		}
 	} else if lb.IsSelected() {
 		lb.State = LabelSelected
@@ -331,7 +331,7 @@ func (lb *Label) SetStateStyle() {
 		lb.State = LabelActive
 		lb.Style = lb.StateStyles[LabelActive]
 		if (lb.Selectable || lb.Redrawable) && !lb.CurBackgroundColor.IsNil() {
-			lb.Style.BackgroundColor.SetColor(lb.CurBackgroundColor)
+			lb.Style.BackgroundColor.SetSolid(lb.CurBackgroundColor)
 		}
 	}
 	if prev != lb.State {
