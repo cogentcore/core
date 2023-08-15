@@ -163,6 +163,9 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 			text.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Border.Style.Set(gist.BorderNone)
 				s.Border.Width.Set()
+				if cb.MaxLength > 0 {
+					s.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
+				}
 			})
 		case "ind-stretch":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -261,20 +264,6 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 		tx := cb.Parts.Child(txIdx).(*TextField)
 		tx.SetText(txt)
 		tx.SetCompleter(tx, cb.CompleteMatch, cb.CompleteEdit)
-		if _, err := tx.PropTry("__comboInit"); err != nil {
-			cb.StylePart(Node2D(tx))
-			if icIdx >= 0 {
-				cb.StylePart(cb.Parts.Child(txIdx - 1).(Node2D)) // also get the space
-			}
-			tx.SetProp("__comboInit", true)
-			if cb.MaxLength > 0 {
-				tx.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
-			}
-			if indIdx > 0 {
-				ispc := cb.Parts.Child(indIdx - 1).(Node2D)
-				ispc.SetProp("max-width", 0)
-			}
-		}
 	}
 }
 

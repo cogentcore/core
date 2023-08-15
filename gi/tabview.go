@@ -74,13 +74,13 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 		switch w.Name() {
 		case "tabs":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.MaxWidth.SetPx(-1)
+				s.SetStretchMaxWidth()
 				s.Height.SetEm(1.8)
 				s.Overflow = gist.OverflowHidden // no scrollbars!
 				s.Margin.Set()
 				s.Padding.Set()
 				// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
-				s.BackgroundColor.SetSolid(ColorScheme.Surface)
+				s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
 
 				// s.Border.Style.Set(gist.BorderNone)
 				// s.Border.Style.Bottom = gist.BorderSolid
@@ -88,13 +88,12 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 				// s.Border.Color.Bottom = ColorScheme.OutlineVariant
 			})
 		case "frame":
+			frame := child.(*Frame)
+			frame.StackTopOnly = true // key for allowing each tab to have its own size
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.Width.SetEm(10)
-				s.MinWidth.SetEm(10)
-				s.MaxWidth.SetPx(-1)
-				s.Height.SetEm(7)
-				s.MinHeight.SetEm(7)
-				s.MaxHeight.SetPx(-1)
+				s.SetMinPrefWidth(units.Em(10))
+				s.SetMinPrefHeight(units.Em(6))
+				s.SetStretchMax()
 			})
 		}
 	}
@@ -494,21 +493,8 @@ func (tv *TabView) Config() {
 	tv.SetReRenderAnchor()
 
 	AddNewFrame(tv, "tabs", LayoutHorizFlow)
-	// tabs.SetStretchMaxWidth()
-	// // tabs.SetStretchMaxHeight()
-	// // tabs.SetMinPrefWidth(units.NewEm(10))
-	// tabs.SetProp("height", units.Em(1.8))
-	// tabs.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
-	// tabs.SetProp("padding", units.Px(0))
-	// tabs.SetProp("margin", units.Px(0))
-	// tabs.SetProp("spacing", units.Px(4))
-	// tabs.SetProp("background-color", "linear-gradient(pref(Control), highlight-10)")
 
 	frame := AddNewFrame(tv, "frame", LayoutStacked)
-	// frame.SetMinPrefWidth(units.Em(10))
-	// frame.SetMinPrefHeight(units.Em(7))
-	frame.StackTopOnly = true // key for allowing each tab to have its own size
-	// frame.SetStretchMax()
 	frame.SetReRenderAnchor()
 
 	tv.ConfigNewTabButton()
@@ -645,6 +631,10 @@ func (tb *TabButton) OnInit() {
 func (tb *TabButton) OnChildAdded(child ki.Ki) {
 	if w := KiAsWidget(child); w != nil {
 		switch w.Name() {
+		case "Parts":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Overflow = gist.OverflowHidden // no scrollbars!
+			})
 		case "icon":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetEm(1)
@@ -653,6 +643,8 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 				s.Padding.Set()
 			})
 		case "label":
+			label := child.(*Label)
+			label.Type = LabelTitleSmall
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
@@ -693,15 +685,11 @@ func (tb *TabButton) TabView() *TabView {
 }
 
 func (tb *TabButton) ConfigParts() {
-	tb.Parts.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
 	if !tb.NoDelete {
 		tb.ConfigPartsDeleteButton()
 		return
 	}
 	tb.Action.ConfigParts() // regular
-	if label, ok := tb.Parts.ChildByName("label", 0).(*Label); ok {
-		label.Type = LabelTitleSmall
-	}
 }
 
 func (tb *TabButton) ConfigPartsDeleteButton() {

@@ -68,6 +68,12 @@ func (sv *SplitView) OnInit() {
 	})
 }
 
+func (sv *SplitView) OnChildAdded(child ki.Ki) {
+	if sp, ok := child.(*Splitter); ok {
+		sp.ThumbSize = sv.HandleSize
+	}
+}
+
 func (sv *SplitView) CopyFieldsFrom(frm any) {
 	fr := frm.(*SplitView)
 	sv.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
@@ -286,7 +292,6 @@ func (sv *SplitView) ConfigSplitters() {
 		sp.Min = 0.0
 		sp.Max = 1.0
 		sp.Snap = false
-		sp.SetProp("thumb-size", sv.HandleSize)
 		sp.ThumbSize = sv.HandleSize
 		if mods {
 			sp.SliderSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {

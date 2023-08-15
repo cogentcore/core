@@ -1065,6 +1065,8 @@ func (nb *Node2DBase) ScrollToMe() bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Props convenience methods
 
+// STYTODO: remove these
+
 // SetMinPrefWidth sets minimum and preferred width -- will get at least this
 // amount -- max unspecified
 func (nb *Node2DBase) SetMinPrefWidth(val units.Value) {

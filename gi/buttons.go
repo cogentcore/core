@@ -1018,29 +1018,10 @@ func (cb *CheckBox) SetIcons(icOn, icOff icons.Icon) {
 	cb.UpdateEnd(updt)
 }
 
-// SetIconProps sets the icon properties from given property list -- parent
-// types can use this to set different icon properties
-func (cb *CheckBox) SetIconProps(props ki.Props) {
-	if icp, has := props["icon"]; has {
-		cb.SetProp("icon", icp)
-	}
-	if icp, has := props["icon-off"]; has {
-		cb.SetProp("icon-off", icp)
-	}
-}
-
 func (cb *CheckBox) Init2D() {
 	cb.SetCheckable(true)
 	cb.Init2DWidget()
 	cb.This().(ButtonWidget).ConfigParts()
-}
-
-func (cb *CheckBox) StyleParts() {
-	cb.ButtonBase.StyleParts()
-	if pv, ok := cb.PropInherit("icon-off", false, true); ok { // no inh, yes type
-		pvs := kit.ToString(pv)
-		cb.IconOff = icons.Icon(pvs)
-	}
 }
 
 func (cb *CheckBox) ConfigParts() {

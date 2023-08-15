@@ -98,15 +98,15 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 	if w := KiAsWidget(child); w != nil {
 		switch w.Name() {
 		case "frame":
+			frame := child.(*Frame)
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				frame.Spacing = StdDialogVSpaceUnits
 				s.Border.Style.Set(gist.BorderNone)
 				s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
 				s.BackgroundColor.SetSolid(dlg.Style.BackgroundColor.Color)
-				// TODO: add box shadow
-				// s.BoxShadow.HOffset.SetPx(4)
-				// s.BoxShadow.VOffset.SetPx(4)
-				// s.BoxShadow.Blur.SetPx(4)
-				// s.BoxShadow.Color = Colors.Background.Highlight(30)
+				if !DialogsSepWindow {
+					s.BoxShadow = BoxShadow3
+				}
 			})
 		case "title":
 			title := child.(*Label)
@@ -133,6 +133,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 			bts := child.(*Layout)
 			bts.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				bts.Spacing.SetPx(8 * Prefs.DensityMul())
+				s.SetStretchMaxWidth()
 			})
 		}
 		if button, ok := child.(*Button); ok {
@@ -326,9 +327,7 @@ var DialogProps = ki.Props{
 
 // SetFrame creates a standard vertical column frame layout as first element of the dialog, named "frame"
 func (dlg *Dialog) SetFrame() *Frame {
-	dlg.SetProp("color", &Prefs.Colors.Font)
 	frame := AddNewFrame(dlg, "frame", LayoutVert)
-	frame.SetProp("spacing", StdDialogVSpaceUnits)
 	return frame
 }
 
@@ -394,7 +393,6 @@ func (dlg *Dialog) AddButtonBox(frame *Frame) *Layout {
 	}
 	AddNewSpace(frame, "button-space")
 	bb := AddNewLayout(frame, "buttons", LayoutHoriz)
-	bb.SetProp("max-width", -1)
 	return bb
 }
 

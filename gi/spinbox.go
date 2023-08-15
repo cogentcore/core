@@ -82,6 +82,10 @@ func (sb *SpinBox) OnInit() {
 func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 	if w := KiAsWidget(child); w != nil {
 		switch w.Name() {
+		case "Parts":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.AlignV = gist.AlignMiddle
+			})
 		case "text-field":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.MinWidth.SetEm(6)
@@ -200,7 +204,6 @@ func (sb *SpinBox) ConfigParts() {
 		sb.DownIcon = icons.KeyboardArrowDown
 	}
 	sb.Parts.Lay = LayoutHoriz
-	sb.Parts.SetProp("vertical-align", gist.AlignMiddle)
 	if sb.Style.Template != "" {
 		sb.Parts.Style.Template = sb.Style.Template + ".Parts"
 	}

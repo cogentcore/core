@@ -156,7 +156,6 @@ func (m *Menu) AddLabel(lbl string) *Label {
 	lb := &Label{}
 	lb.InitName(lb, lbl)
 	lb.SetText(lbl)
-	lb.SetProp("background-color", &Prefs.Colors.Control)
 	*m = append(*m, lb.This().(Node2D))
 	return lb
 }
@@ -339,11 +338,7 @@ func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
 		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
-		// doesn't seem to work; TODO: fix box shadow here
-		// s.BoxShadow.HOffset.SetPx(2)
-		// s.BoxShadow.VOffset.SetPx(2)
-		// s.BoxShadow.Blur.SetPx(2)
-		// s.BoxShadow.Color = Colors.Background.Highlight(30)
+		s.BoxShadow = BoxShadow2
 	})
 }
 
