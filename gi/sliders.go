@@ -747,7 +747,6 @@ func (sr *Slider) OnInit() {
 		sr.StyleBox.BackgroundColor = sr.ParentBackgroundColor()
 		sr.StyleBox.Border.Style.Set(gist.BorderNone)
 
-	
 		s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusFull
@@ -770,7 +769,6 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	case "icon":
 		icon := child.(*Icon)
 		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.Margin.Set()
@@ -946,7 +944,6 @@ func (sb *ScrollBar) OnInit() {
 		sb.ValueColor.SetColor(ColorScheme.Primary)
 		sb.ThumbColor.SetColor(ColorScheme.Primary)
 
-	
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusFull
 		if sb.Dim == mat32.X {

@@ -822,7 +822,6 @@ func AddNewButton(parent ki.Ki, name string) *Button {
 
 func (bt *Button) OnInit() {
 	bt.AddStyler(func(w *WidgetBase, s *gist.Style) {
-	
 		s.Cursor = cursor.HandPointing
 		s.Border.Radius = gist.BorderRadiusFull
 		s.Margin = gist.BoxShadowMargin(BoxShadow1).ToValues()
@@ -872,7 +871,6 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 	case "icon":
 		icon := child.(*Icon)
 		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
@@ -881,14 +879,12 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 	case "space":
 		space := child.(*Space)
 		space.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Width.SetEm(0.5)
 			s.MinWidth.SetEm(0.5)
 		})
 	case "label":
 		label := child.(*Label)
 		label.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			// need to override so label's default color
 			// doesn't take control on state changes
 			s.Color = bt.Style.Color
@@ -899,13 +895,11 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 	case "ind-stretch":
 		ins := child.(*Stretch)
 		ins.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Width.SetEm(0.5)
 		})
 	case "indicator":
 		ind := child.(*Icon)
 		ind.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
@@ -940,7 +934,6 @@ func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
 
 func (cb *CheckBox) OnInit() {
 	cb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-	
 		s.Cursor = cursor.HandPointing
 		s.Text.Align = gist.AlignLeft
 		s.Color = ColorScheme.OnBackground
@@ -969,7 +962,6 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	case "icon0", "icon1":
 		icon := child.Embed(TypeWidgetBase).(*WidgetBase) // is svg icon so can't access directly
 		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Width.SetEm(1.5)
 			s.Height.SetEm(1.5)
 			s.Margin.Set()
@@ -979,13 +971,11 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	case "space":
 		space := child.(*Space)
 		space.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Width.SetCh(0.1)
 		})
 	case "label":
 		label := child.(*Label)
 		label.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Margin.Set()
 			s.Padding.Set()
 			s.AlignV = gist.AlignMiddle

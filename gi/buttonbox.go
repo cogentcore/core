@@ -48,7 +48,6 @@ func AddNewButtonBox(parent ki.Ki, name string) *ButtonBox {
 
 func (bb *ButtonBox) OnInit() {
 	bb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-	
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius.Set(units.Px(2))
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))

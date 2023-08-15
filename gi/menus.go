@@ -336,7 +336,6 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 // It should be called on menu frames when they are created.
 func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
 	frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
-	
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
 		s.BackgroundColor.SetColor(ColorScheme.SurfaceContainer)
@@ -656,7 +655,6 @@ func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
 func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
 	sp.AddStyler(func(w *WidgetBase, s *gist.Style) {
-	
 		s.Margin.Set()
 		s.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(0))
 		s.AlignV = gist.AlignCenter

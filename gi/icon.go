@@ -61,7 +61,6 @@ func AddNewIcon(parent ki.Ki, name string, icon icons.Icon) *Icon {
 
 func (ic *Icon) OnInit() {
 	ic.AddStyler(func(w *WidgetBase, s *gist.Style) {
-	
 		s.Width.SetEm(1)
 		s.Height.SetEm(1)
 		s.BackgroundColor.SetColor(color.Transparent)

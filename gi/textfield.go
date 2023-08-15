@@ -158,7 +158,6 @@ func (tf *TextField) OnInit() {
 		tf.SelectColor.SetColor(ColorScheme.TertiaryContainer)
 		tf.PlaceholderColor = ColorScheme.OnSurfaceVariant
 
-	
 		s.Cursor = cursor.IBeam
 		s.MinWidth.SetEm(20)
 		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
@@ -212,7 +211,6 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 		lead := child.(*Action)
 		lead.Type = ActionParts
 		lead.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Font.Size.SetPx(20)
 			s.Margin.Right.SetPx(16 * Prefs.DensityMul())
 			s.Color = ColorScheme.OnSurfaceVariant
@@ -222,7 +220,6 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 		trail := child.(*Action)
 		trail.Type = ActionParts
 		trail.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.Font.Size.SetPx(20)
 			s.Margin.Left.SetPx(16 * Prefs.DensityMul())
 			s.Color = ColorScheme.OnSurfaceVariant

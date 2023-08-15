@@ -61,7 +61,6 @@ func (sv *SplitView) OnInit() {
 	sv.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sv.HandleSize.SetPx(10)
 
-	
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)
 		s.Margin.Set()
@@ -479,7 +478,6 @@ func (sr *Splitter) OnInit() {
 	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// sr.StyleBox.BackgroundColor.SetColor(Colors.Text)
 
-	
 		s.Margin.Set()
 		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
 		// s.BackgroundColor.SetColor(Colors.Accent)
@@ -504,7 +502,6 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	case "icon":
 		icon := child.(*Icon)
 		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		
 			s.MaxWidth.SetEm(1)
 			s.MaxHeight.SetEm(5)
 			s.MinWidth.SetEm(1)

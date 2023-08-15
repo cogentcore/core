@@ -989,7 +989,6 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 // It should be called on tooltips when they are created.
 func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
 	tooltip.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
 		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))

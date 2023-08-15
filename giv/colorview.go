@@ -70,7 +70,6 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	case "value":
 		v := child.(*gi.Frame)
 		v.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-
 			s.MinWidth.SetEm(6)
 			s.MinHeight.SetEm(6)
 			s.Border.Radius = gist.BorderRadiusFull
@@ -79,25 +78,21 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	case "slider-grid":
 		sg := child.(*gi.Layout)
 		sg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-
 			s.Columns = 4
 		})
 	case "hexlbl":
 		hexlbl := child.(*gi.Label)
 		hexlbl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-
 			s.AlignV = gist.AlignMiddle
 		})
 	case "palette":
 		pg := child.(*gi.Layout)
 		pg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-
 			s.Columns = 25
 		})
 	case "nums-hex":
 		hex := child.(*gi.TextField)
 		hex.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-
 			s.MinWidth.SetCh(20)
 		})
 	case "num-lay":
@@ -108,7 +103,6 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	}
 	if sl, ok := child.(*gi.Slider); ok {
 		sl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-
 			s.MinWidth.SetCh(20)
 			s.Width.SetCh(20)
 			s.MinHeight.SetEm(1)

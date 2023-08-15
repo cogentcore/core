@@ -57,7 +57,6 @@ func AddNewTabView(parent ki.Ki, name string) *TabView {
 
 func (tv *TabView) OnInit() {
 	tv.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
 		s.Border.Style.Set(gist.BorderSolid)
@@ -75,7 +74,6 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 	case "tabs":
 		tabs := child.(*Frame)
 		tabs.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 			s.MaxWidth.SetPx(-1)
 			s.Height.SetEm(1.8)
 			s.Overflow = gist.OverflowHidden // no scrollbars!
@@ -92,7 +90,6 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 	case "frame":
 		frame := child.(*Frame)
 		frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 			s.Width.SetEm(10)
 			s.MinWidth.SetEm(10)
 			s.MaxWidth.SetPx(-1)
@@ -620,7 +617,6 @@ var TabButtonProps = ki.Props{
 
 func (tb *TabButton) OnInit() {
 	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 		s.Cursor = cursor.HandPointing
 		s.MinWidth.SetCh(8)
 		s.MaxWidth.SetPx(500)
@@ -651,7 +647,6 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 	case "icon":
 		icon := child.(*Icon)
 		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.Margin.Set()
@@ -660,20 +655,17 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 	case "label":
 		label := child.(*Label)
 		label.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "close-stretch":
 		cls := child.(*Stretch)
 		cls.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 			s.Width.SetCh(1)
 		})
 	case "close":
 		close := child.(*Action)
 		close.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 			s.Width.SetEx(0.5)
 			s.Height.SetEx(0.5)
 			s.Margin.Set()
@@ -685,13 +677,11 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 	case "sc-stretch":
 		scs := child.(*Stretch)
 		scs.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 			s.MinWidth.SetCh(2)
 		})
 	case "shortcut":
 		shortcut := child.(*Label)
 		shortcut.AddStyler(func(w *WidgetBase, s *gist.Style) {
-
 			s.Margin.Set()
 			s.Padding.Set()
 		})

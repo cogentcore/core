@@ -34,7 +34,6 @@ func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
 
 func (fr *Frame) OnInit() {
 	fr.AddStyler(func(w *WidgetBase, s *gist.Style) {
-	
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius.Set()
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
