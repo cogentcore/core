@@ -22,7 +22,6 @@ import (
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -84,13 +83,6 @@ func (bm *Bitmap) SetSize(nwsz image.Point) {
 		return
 	}
 	bm.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-}
-
-// LayoutToImgSize sets the width, height properties to the current Size
-// so it will request that size during layout
-func (bm *Bitmap) LayoutToImgSize() {
-	bm.SetProp("width", units.Dot(float32(bm.Size.X)))
-	bm.SetProp("height", units.Dot(float32(bm.Size.Y)))
 }
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image

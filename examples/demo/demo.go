@@ -80,33 +80,33 @@ func makeHome(tv *gi.TabView) {
 	// 	}
 	// }()
 
-	bt := gi.AddNewButton(home, "bt")
-	bt.Text = "Big Shadow"
-	bt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		bt.Style.AddBoxShadow(
-			gist.Shadow{
-				HOffset: units.Px(20),
-				VOffset: units.Px(-10),
-				Blur:    units.Px(150),
-				Spread:  units.Px(150),
-				Color:   colors.Green,
-			},
-			gist.Shadow{
-				HOffset: units.Px(5),
-				VOffset: units.Px(30),
-				Blur:    units.Px(150),
-				Spread:  units.Px(100),
-				Color:   colors.Blue,
-			},
-			gist.Shadow{
-				HOffset: units.Px(20),
-				VOffset: units.Px(10),
-				Blur:    units.Px(100),
-				Spread:  units.Px(50),
-				Color:   colors.Purple,
-			},
-		)
-	})
+	// bt := gi.AddNewButton(home, "bt")
+	// bt.Text = "Big Shadow"
+	// bt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	// 	bt.Style.AddBoxShadow(
+	// 		gist.Shadow{
+	// 			HOffset: units.Px(20),
+	// 			VOffset: units.Px(-10),
+	// 			Blur:    units.Px(150),
+	// 			Spread:  units.Px(150),
+	// 			Color:   colors.Green,
+	// 		},
+	// 		gist.Shadow{
+	// 			HOffset: units.Px(5),
+	// 			VOffset: units.Px(30),
+	// 			Blur:    units.Px(150),
+	// 			Spread:  units.Px(100),
+	// 			Color:   colors.Blue,
+	// 		},
+	// 		gist.Shadow{
+	// 			HOffset: units.Px(20),
+	// 			VOffset: units.Px(10),
+	// 			Blur:    units.Px(100),
+	// 			Spread:  units.Px(50),
+	// 			Color:   colors.Purple,
+	// 		},
+	// 	)
+	// })
 
 	bmap := gi.AddNewBitmap(home, "bmap")
 	err := bmap.OpenImage("gopher.png", 300, 300)

@@ -380,66 +380,75 @@ func (wb *WidgetBase) WidgetEvents() {
 	wb.HoverTooltipEvent()
 }
 
-// TODO: use these instead of those on NodeBase2D
-// // Style helper methods
+// Style helper methods
 
-// // SetMinPrefWidth sets minimum and preferred width;
-// // will get at least this amount; max unspecified.
-// // This should only be called in a style function.
-// func (wb *WidgetBase) SetMinPrefWidth(val units.Value) {
-// 	wb.Style.Width = val
-// 	wb.Style.MinWidth = val
-// }
+// SetMinPrefWidth sets minimum and preferred width;
+// will get at least this amount; max unspecified.
+// This should only be called in a style function.
+func (wb *WidgetBase) SetMinPrefWidth(val units.Value) {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.Width = val
+		s.MinWidth = val
+	})
+}
 
-// // SetMinPrefHeight sets minimum and preferred height;
-// // will get at least this amount; max unspecified.
-// // This should only be called in a style function.
-// func (wb *WidgetBase) SetMinPrefHeight(val units.Value) {
-// 	wb.Style.Height = val
-// 	wb.Style.MinHeight = val
-// }
+// SetMinPrefHeight sets minimum and preferred height;
+// will get at least this amount; max unspecified.
+// This should only be called in a style function.
+func (wb *WidgetBase) SetMinPrefHeight(val units.Value) {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.Height = val
+		s.MinHeight = val
+	})
+}
 
-// // SetStretchMaxWidth sets stretchy max width (-1);
-// // can grow to take up avail room.
-// // This should only be called in a style function.
-// func (wb *WidgetBase) SetStretchMaxWidth() {
-// 	wb.Style.MaxWidth.SetPx(-1)
-// }
+// SetStretchMaxWidth sets stretchy max width (-1);
+// can grow to take up avail room.
+// This should only be called in a style function.
+func (wb *WidgetBase) SetStretchMaxWidth() {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		wb.Style.MaxWidth.SetPx(-1)
+	})
+}
 
-// // SetStretchMaxHeight sets stretchy max height (-1);
-// // can grow to take up avail room.
-// // This should only be called in a style function.
-// func (wb *WidgetBase) SetStretchMaxHeight() {
-// 	wb.Style.MaxHeight.SetPx(-1)
-// }
+// SetStretchMaxHeight sets stretchy max height (-1);
+// can grow to take up avail room.
+// This should only be called in a style function.
+func (wb *WidgetBase) SetStretchMaxHeight() {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		wb.Style.MaxHeight.SetPx(-1)
+	})
+}
 
-// // SetStretchMax sets stretchy max width and height (-1);
-// // can grow to take up avail room.
-// // This should only be called in a style function.
-// func (wb *WidgetBase) SetStretchMax() {
-// 	wb.SetStretchMaxWidth()
-// 	wb.SetStretchMaxHeight()
-// }
+// SetStretchMax sets stretchy max width and height (-1);
+// can grow to take up avail room.
+// This should only be called in a style function.
+func (wb *WidgetBase) SetStretchMax() {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		wb.Style.MaxWidth.SetPx(-1)
+		wb.Style.MaxHeight.SetPx(-1)
+	})
+}
 
-// // SetFixedWidth sets all width style options
-// // (Width, MinWidth, and MaxWidth) to
-// // the given fixed width unit value.
-// // This should only be called in a style function.
-// func (wb *WidgetBase) SetFixedWidth(val units.Value) {
-// 	wb.Style.Width = val
-// 	wb.Style.MinWidth = val
-// 	wb.Style.MaxWidth = val
-// }
+// SetFixedWidth sets all width style options
+// (Width, MinWidth, and MaxWidth) to
+// the given fixed width unit value.
+// This should only be called in a style function.
+func (wb *WidgetBase) SetFixedWidth(val units.Value) {
+	wb.Style.Width = val
+	wb.Style.MinWidth = val
+	wb.Style.MaxWidth = val
+}
 
-// // SetFixedHeight sets all height style options
-// // (Height, MinHeight, and MaxHeight) to
-// // the given fixed height unit value.
-// // This should only be called in a style function.
-// func (wb *WidgetBase) SetFixedHeight(val units.Value) {
-// 	wb.Style.Height = val
-// 	wb.Style.MinHeight = val
-// 	wb.Style.MaxHeight = val
-// }
+// SetFixedHeight sets all height style options
+// (Height, MinHeight, and MaxHeight) to
+// the given fixed height unit value.
+// This should only be called in a style function.
+func (wb *WidgetBase) SetFixedHeight(val units.Value) {
+	wb.Style.Height = val
+	wb.Style.MinHeight = val
+	wb.Style.MaxHeight = val
+}
 
 // WidgetDefStyleKey is the key for accessing the default style stored in the
 // type-properties for a given type -- also ones with sub-selectors for parts
@@ -516,50 +525,50 @@ func (wb *WidgetBase) Style2DWidget() {
 		return
 	}
 
-	gii, _ := wb.This().(Node2D)
-	wb.Viewport.SetCurStyleNode(gii)
-	defer wb.Viewport.SetCurStyleNode(nil)
+	// gii, _ := wb.This().(Node2D)
+	// wb.Viewport.SetCurStyleNode(gii)
+	// defer wb.Viewport.SetCurStyleNode(nil)
 
-	wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
-	wb.Style.IsSet = false  // this is always first call, restart
-	if wb.Viewport == nil { // robust
-		wb.StyMu.Unlock()
-		gii.Init2D()
-		wb.StyMu.Lock()
-	}
-	sty := gist.Style{}
-	sty.Defaults()
+	// wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
+	// wb.Style.IsSet = false  // this is always first call, restart
+	// if wb.Viewport == nil { // robust
+	// 	wb.StyMu.Unlock()
+	// 	gii.Init2D()
+	// 	wb.StyMu.Lock()
+	// }
+	// sty := gist.Style{}
+	// sty.Defaults()
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
 		wb.Style.InheritFields(parSty)
 		wb.ParentStyleRUnlock()
 	}
 
-	styprops := *wb.Properties()
-	parSty := wb.ParentActiveStyle()
-	wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
+	// styprops := *wb.Properties()
+	// parSty := wb.ParentActiveStyle()
+	// wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
 
-	// look for class-specific style sheets among defaults -- have to do these
-	// dynamically now -- cannot compile into default which is type-general
-	tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
-	kit.TypesMu.RLock()
-	classes := strings.Split(strings.ToLower(wb.Class), " ")
-	for _, cl := range classes {
-		clsty := "." + strings.TrimSpace(cl)
-		if sp, ok := ki.SubProps(tprops, clsty); ok {
-			wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
-		}
-	}
-	kit.TypesMu.RUnlock()
-	wb.ParentStyleRUnlock()
+	// // look for class-specific style sheets among defaults -- have to do these
+	// // dynamically now -- cannot compile into default which is type-general
+	// tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
+	// kit.TypesMu.RLock()
+	// classes := strings.Split(strings.ToLower(wb.Class), " ")
+	// for _, cl := range classes {
+	// 	clsty := "." + strings.TrimSpace(cl)
+	// 	if sp, ok := ki.SubProps(tprops, clsty); ok {
+	// 		wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
+	// 	}
+	// }
+	// kit.TypesMu.RUnlock()
+	// wb.ParentStyleRUnlock()
 
-	pagg := wb.ParentCSSAgg()
-	if pagg != nil {
-		AggCSS(&wb.CSSAgg, *pagg)
-	} else {
-		wb.CSSAgg = nil // restart
-	}
-	AggCSS(&wb.CSSAgg, wb.CSS)
-	StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
+	// pagg := wb.ParentCSSAgg()
+	// if pagg != nil {
+	// 	AggCSS(&wb.CSSAgg, *pagg)
+	// } else {
+	// 	wb.CSSAgg = nil // restart
+	// }
+	// AggCSS(&wb.CSSAgg, wb.CSS)
+	// StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
 
 	wb.RunStyleFuncs()
 
