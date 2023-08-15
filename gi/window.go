@@ -1819,8 +1819,8 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 // Also handles sending widget selection events.
 func (w *Window) SetCursor(me *mouse.MoveEvent) {
 	maxLevel := 0
-	maxLevelCursor := cursor.Arrow
 	maxLevelWidget := &WidgetBase{}
+	maxLevelCursor := cursor.Arrow
 
 	fun := func(k ki.Ki, level int, data any) bool {
 		_, ni := KiToNode2D(k)
@@ -1843,8 +1843,14 @@ func (w *Window) SetCursor(me *mouse.MoveEvent) {
 			return ki.Continue
 		}
 		maxLevel = level
-		maxLevelCursor = wb.Style.Cursor
 		maxLevelWidget = wb
+		maxLevelCursor = wb.Style.Cursor
+		if wb.IsDisabled() {
+			maxLevelCursor = cursor.Not
+			// once we get to a disabled element,
+			// we won't waste time going further
+			return ki.Break
+		}
 		return ki.Continue
 	}
 
