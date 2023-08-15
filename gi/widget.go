@@ -949,18 +949,6 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
 }
 
-// var TooltipFrameProps = ki.Props{
-// "background-color":    &Prefs.Colors.Highlight,
-// "border-width":        units.Px(0),
-// "border-color":        "none",
-// "margin":              units.Px(0),
-// "padding":             units.Px(2),
-// "box-shadow.h-offset": units.Px(0),
-// "box-shadow.v-offset": units.Px(0),
-// "box-shadow.blur":     units.Px(0),
-// "box-shadow.color":    &Prefs.Colors.Shadow,
-// }
-
 // TooltipConfigStyles configures the default styles
 // for the given tooltip frame with the given parent.
 // It should be called on tooltips when they are created.
@@ -971,9 +959,8 @@ func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
 		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(ColorScheme.InverseSurface)
 		s.Color = ColorScheme.InverseOnSurface
+		s.BoxShadow = BoxShadow1 // STYTODO: not sure whether we should have this
 	})
-	// tooltip.AddChildStyler("ttlbl", 0, StyleFuncParts(par), func(label *WidgetBase) {
-	// })
 }
 
 // PopupTooltip pops up a viewport displaying the tooltip text
