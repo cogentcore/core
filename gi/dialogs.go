@@ -95,7 +95,7 @@ func (dlg *Dialog) OnInit() {
 }
 
 func (dlg *Dialog) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(dlg); w != nil {
+	if w := KiAsWidget(child); w != nil {
 		switch w.Name() {
 		case "frame":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {

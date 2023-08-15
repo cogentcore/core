@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
@@ -69,17 +68,17 @@ func makeHome(tv *gi.TabView) {
 	desc := gi.AddNewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
 	desc.Type = gi.LabelBodyLarge
 
-	pbar := gi.AddNewProgressBar(home, "pbar")
-	pbar.Start(100)
-	go func() {
-		for {
-			if pbar.ProgCur >= pbar.ProgMax {
-				pbar.Start(100)
-			}
-			time.Sleep(100 * time.Millisecond)
-			pbar.ProgStep()
-		}
-	}()
+	// pbar := gi.AddNewProgressBar(home, "pbar")
+	// pbar.Start(100)
+	// go func() {
+	// 	for {
+	// 		if pbar.ProgCur >= pbar.ProgMax {
+	// 			pbar.Start(100)
+	// 		}
+	// 		time.Sleep(100 * time.Millisecond)
+	// 		pbar.ProgStep()
+	// 	}
+	// }()
 
 	bt := gi.AddNewButton(home, "bt")
 	bt.Text = "Big Shadow"

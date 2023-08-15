@@ -941,8 +941,8 @@ func (sb *ScrollBar) OnInit() {
 	sb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sb.StyleBox.Border.Style.Set(gist.BorderNone)
 
-		sb.ValueColor.SetColor(ColorScheme.Primary)
-		sb.ThumbColor.SetColor(ColorScheme.Primary)
+		sb.ValueColor.SetSolid(ColorScheme.SurfaceContainerHighest)
+		sb.ThumbColor.SetSolid(ColorScheme.SurfaceContainerHighest)
 
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusFull
@@ -953,7 +953,7 @@ func (sb *ScrollBar) OnInit() {
 			s.MinWidth.SetEm(2)
 			s.MaxHeight.SetPx(-1)
 		}
-		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
+		// s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
 		s.Color = ColorScheme.OnPrimary
 		// STYTODO: state styles
 	})
@@ -1023,7 +1023,11 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
-	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+	bg := st.BackgroundColor
+	if bg.IsNil() {
+		bg = sb.ParentBackgroundColor()
+	}
+	pc.FillStyle.SetColorSpec(&bg)
 
 	// scrollbar is basic box in content size
 	spc := st.BoxSpace()

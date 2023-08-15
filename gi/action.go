@@ -87,6 +87,7 @@ func (ac *Action) OnInit() {
 			s.Color = ColorScheme.OnSecondaryContainer
 		case ActionParts:
 			s.Border.Radius.Set()
+			s.BackgroundColor = w.ParentBackgroundColor()
 			// s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			// s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		case ActionMenu:
@@ -103,8 +104,13 @@ func (ac *Action) OnInit() {
 			s.Margin.Set()
 			ac.Indicator = icons.None
 		}
-		if ac.IsHovered() {
+		if w.IsHovered() {
 			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
+		}
+		if w.HasFocus() {
+			s.Border.Style.Set(gist.BorderSolid)
+			s.Border.Width.Set(units.Px(2))
+			s.Border.Color.Set(ColorScheme.Outline)
 		}
 		// switch ac.State {
 		// case ButtonActive:
