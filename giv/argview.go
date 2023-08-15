@@ -45,32 +45,31 @@ func (av *ArgView) OnInit() {
 }
 
 func (av *ArgView) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "title":
-		title := child.(*gi.Label)
-		title.Type = gi.LabelTitleLarge
-		av.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-			s.MaxWidth.SetPx(-1)
-			s.Text.Align = gist.AlignCenter
-			s.AlignV = gist.AlignTop
-		})
-	case "args-grid":
-		grid := child.(*gi.Layout)
-		grid.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-			// setting a pref here is key for giving it a scrollbar in larger context
-			s.MinWidth.SetEm(1.5)
-			s.Width.SetEm(1.5)
-			s.MaxWidth.SetPx(-1) // for this to work, ALL layers above need it too
-			s.MinHeight.SetEm(10)
-			s.Height.SetEm(10)
-			s.MaxHeight.SetPx(-1)            // for this to work, ALL layers above need it too
-			s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
-			s.Columns = 2
-		})
-	}
-	if child.Parent().Name() == "args-grid" {
-		if widg, ok := child.(*gi.WidgetBase); ok {
-			widg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "title":
+			title := child.(*gi.Label)
+			title.Type = gi.LabelTitleLarge
+			title.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.MaxWidth.SetPx(-1)
+				s.Text.Align = gist.AlignCenter
+				s.AlignV = gist.AlignTop
+			})
+		case "args-grid":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.MinWidth.SetEm(1.5)
+				s.Width.SetEm(1.5)
+				s.MaxWidth.SetPx(-1) // for this to work, ALL layers above need it too
+				s.MinHeight.SetEm(10)
+				s.Height.SetEm(10)
+				s.MaxHeight.SetPx(-1)            // for this to work, ALL layers above need it too
+				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+				s.Columns = 2
+			})
+		}
+		if w.Parent().Name() == "args-grid" {
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				s.AlignH = gist.AlignCenter
 			})
 		}

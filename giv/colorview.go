@@ -66,60 +66,57 @@ func (cv *ColorView) OnInit() {
 }
 
 func (cv *ColorView) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "value":
-		v := child.(*gi.Frame)
-		v.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-			s.MinWidth.SetEm(6)
-			s.MinHeight.SetEm(6)
-			s.Border.Radius = gist.BorderRadiusFull
-			s.BackgroundColor.SetColor(cv.Color)
-		})
-	case "slider-grid":
-		sg := child.(*gi.Layout)
-		sg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-			s.Columns = 4
-		})
-	case "hexlbl":
-		hexlbl := child.(*gi.Label)
-		hexlbl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-			s.AlignV = gist.AlignMiddle
-		})
-	case "palette":
-		pg := child.(*gi.Layout)
-		pg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-			s.Columns = 25
-		})
-	case "nums-hex":
-		hex := child.(*gi.TextField)
-		hex.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-			s.MinWidth.SetCh(20)
-		})
-	case "num-lay":
-		vl := child.(*gi.Layout)
-		vl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-			vl.Spacing = gi.StdDialogVSpaceUnits
-		})
-	}
-	if sl, ok := child.(*gi.Slider); ok {
-		sl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-			s.MinWidth.SetCh(20)
-			s.Width.SetCh(20)
-			s.MinHeight.SetEm(1)
-			s.Height.SetEm(1)
-			s.Margin.Set(units.Px(6 * gi.Prefs.DensityMul()))
-		})
-	}
-	if child.Parent().Name() == "palette" {
-		if cbt, ok := child.(*gi.Button); ok {
-			cbt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-				c := colornames.Map[cbt.Name()]
-
-				s.BackgroundColor.SetColor(c)
-				s.MaxHeight.SetEm(1.3)
-				s.MaxWidth.SetEm(1.3)
-				s.Margin.Set()
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "value":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.MinWidth.SetEm(6)
+				s.MinHeight.SetEm(6)
+				s.Border.Radius = gist.BorderRadiusFull
+				s.BackgroundColor.SetColor(cv.Color)
 			})
+		case "slider-grid":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Columns = 4
+			})
+		case "hexlbl":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.AlignV = gist.AlignMiddle
+			})
+		case "palette":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Columns = 25
+			})
+		case "nums-hex":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.MinWidth.SetCh(20)
+			})
+		case "num-lay":
+			vl := child.(*gi.Layout)
+			vl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				vl.Spacing = gi.StdDialogVSpaceUnits
+			})
+		}
+		if sl, ok := child.(*gi.Slider); ok {
+			sl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.MinWidth.SetCh(20)
+				s.Width.SetCh(20)
+				s.MinHeight.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set(units.Px(6 * gi.Prefs.DensityMul()))
+			})
+		}
+		if child.Parent().Name() == "palette" {
+			if cbt, ok := child.(*gi.Button); ok {
+				cbt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+					c := colornames.Map[cbt.Name()]
+
+					s.BackgroundColor.SetColor(c)
+					s.MaxHeight.SetEm(1.3)
+					s.MaxWidth.SetEm(1.3)
+					s.Margin.Set()
+				})
+			}
 		}
 	}
 }

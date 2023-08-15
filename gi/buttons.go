@@ -867,45 +867,42 @@ func (bt *Button) OnInit() {
 }
 
 func (bt *Button) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "icon":
-		icon := child.(*Icon)
-		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetEm(1.125)
-			s.Height.SetEm(1.125)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "space":
-		space := child.(*Space)
-		space.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetEm(0.5)
-			s.MinWidth.SetEm(0.5)
-		})
-	case "label":
-		label := child.(*Label)
-		label.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			// need to override so label's default color
-			// doesn't take control on state changes
-			s.Color = bt.Style.Color
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = gist.AlignMiddle
-		})
-	case "ind-stretch":
-		ins := child.(*Stretch)
-		ins.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetEm(0.5)
-		})
-	case "indicator":
-		ind := child.(*Icon)
-		ind.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetEm(1.125)
-			s.Height.SetEm(1.125)
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = gist.AlignBottom
-		})
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "icon":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEm(1.125)
+				s.Height.SetEm(1.125)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "space":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEm(0.5)
+				s.MinWidth.SetEm(0.5)
+			})
+		case "label":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				// need to override so label's default color
+				// doesn't take control on state changes
+				s.Color = bt.Style.Color
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = gist.AlignMiddle
+			})
+		case "ind-stretch":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEm(0.5)
+			})
+		case "indicator":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEm(1.125)
+				s.Height.SetEm(1.125)
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = gist.AlignBottom
+			})
+		}
 	}
 }
 
@@ -958,28 +955,27 @@ func (cb *CheckBox) OnInit() {
 }
 
 func (cb *CheckBox) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "icon0", "icon1":
-		icon := child.Embed(TypeWidgetBase).(*WidgetBase) // is svg icon so can't access directly
-		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetEm(1.5)
-			s.Height.SetEm(1.5)
-			s.Margin.Set()
-			s.Padding.Set()
-			s.BackgroundColor.SetColor(color.Transparent)
-		})
-	case "space":
-		space := child.(*Space)
-		space.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetCh(0.1)
-		})
-	case "label":
-		label := child.(*Label)
-		label.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = gist.AlignMiddle
-		})
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "icon0", "icon1":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEm(1.5)
+				s.Height.SetEm(1.5)
+				s.Margin.Set()
+				s.Padding.Set()
+				s.BackgroundColor.SetColor(color.Transparent)
+			})
+		case "space":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetCh(0.1)
+			})
+		case "label":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = gist.AlignMiddle
+			})
+		}
 	}
 }
 

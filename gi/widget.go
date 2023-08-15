@@ -182,8 +182,18 @@ var WidgetBaseProps = ki.Props{
 // 	// that are previously visited links
 // 	WidgetVisited
 
-// 	WidgetStatesN
+//	WidgetStatesN
 // )
+
+// KiAsWidget returns the given Ki object
+// as a widget base. It returns nil if it is not
+// derived from a widget base.
+func KiAsWidget(k ki.Ki) *WidgetBase {
+	if n, ok := k.(Node2D); ok {
+		return n.AsWidget()
+	}
+	return nil
+}
 
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*WidgetBase)

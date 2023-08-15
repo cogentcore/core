@@ -206,25 +206,27 @@ func (tf *TextField) OnInit() {
 }
 
 func (tf *TextField) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "lead-icon":
-		lead := child.(*Action)
-		lead.Type = ActionParts
-		lead.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Font.Size.SetPx(20)
-			s.Margin.Right.SetPx(16 * Prefs.DensityMul())
-			s.Color = ColorScheme.OnSurfaceVariant
-			s.AlignV = gist.AlignMiddle
-		})
-	case "trail-icon":
-		trail := child.(*Action)
-		trail.Type = ActionParts
-		trail.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Font.Size.SetPx(20)
-			s.Margin.Left.SetPx(16 * Prefs.DensityMul())
-			s.Color = ColorScheme.OnSurfaceVariant
-			s.AlignV = gist.AlignMiddle
-		})
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "lead-icon":
+			lead := child.(*Action)
+			lead.Type = ActionParts
+			lead.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Font.Size.SetPx(20)
+				s.Margin.Right.SetPx(16 * Prefs.DensityMul())
+				s.Color = ColorScheme.OnSurfaceVariant
+				s.AlignV = gist.AlignMiddle
+			})
+		case "trail-icon":
+			trail := child.(*Action)
+			trail.Type = ActionParts
+			trail.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Font.Size.SetPx(20)
+				s.Margin.Left.SetPx(16 * Prefs.DensityMul())
+				s.Color = ColorScheme.OnSurfaceVariant
+				s.AlignV = gist.AlignMiddle
+			})
+		}
 	}
 }
 

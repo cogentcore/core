@@ -498,18 +498,19 @@ func (sr *Splitter) OnInit() {
 }
 
 func (sr *Splitter) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "icon":
-		icon := child.(*Icon)
-		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.MaxWidth.SetEm(1)
-			s.MaxHeight.SetEm(5)
-			s.MinWidth.SetEm(1)
-			s.MinHeight.SetEm(5)
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = gist.AlignMiddle
-		})
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "icon":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.MaxWidth.SetEm(1)
+				s.MaxHeight.SetEm(5)
+				s.MinWidth.SetEm(1)
+				s.MinHeight.SetEm(5)
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = gist.AlignMiddle
+			})
+		}
 	}
 }
 

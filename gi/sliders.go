@@ -765,16 +765,18 @@ func (sr *Slider) OnInit() {
 }
 
 func (sr *Slider) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "icon":
-		icon := child.(*Icon)
-		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetEm(1)
-			s.Height.SetEm(1)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "icon":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		}
 	}
+
 }
 func (sr *Slider) CopyFieldsFrom(frm any) {
 	fr := frm.(*Slider)

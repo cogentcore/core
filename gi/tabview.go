@@ -70,33 +70,33 @@ func (tv *TabView) OnInit() {
 }
 
 func (tv *TabView) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "tabs":
-		tabs := child.(*Frame)
-		tabs.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.MaxWidth.SetPx(-1)
-			s.Height.SetEm(1.8)
-			s.Overflow = gist.OverflowHidden // no scrollbars!
-			s.Margin.Set()
-			s.Padding.Set()
-			// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
-			s.BackgroundColor.SetColor(ColorScheme.Surface)
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "tabs":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.MaxWidth.SetPx(-1)
+				s.Height.SetEm(1.8)
+				s.Overflow = gist.OverflowHidden // no scrollbars!
+				s.Margin.Set()
+				s.Padding.Set()
+				// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
+				s.BackgroundColor.SetColor(ColorScheme.Surface)
 
-			// s.Border.Style.Set(gist.BorderNone)
-			// s.Border.Style.Bottom = gist.BorderSolid
-			// s.Border.Width.Bottom.SetPx(1)
-			// s.Border.Color.Bottom = ColorScheme.OutlineVariant
-		})
-	case "frame":
-		frame := child.(*Frame)
-		frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetEm(10)
-			s.MinWidth.SetEm(10)
-			s.MaxWidth.SetPx(-1)
-			s.Height.SetEm(7)
-			s.MinHeight.SetEm(7)
-			s.MaxHeight.SetPx(-1)
-		})
+				// s.Border.Style.Set(gist.BorderNone)
+				// s.Border.Style.Bottom = gist.BorderSolid
+				// s.Border.Width.Bottom.SetPx(1)
+				// s.Border.Color.Bottom = ColorScheme.OutlineVariant
+			})
+		case "frame":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEm(10)
+				s.MinWidth.SetEm(10)
+				s.MaxWidth.SetPx(-1)
+				s.Height.SetEm(7)
+				s.MinHeight.SetEm(7)
+				s.MaxHeight.SetPx(-1)
+			})
+		}
 	}
 }
 
@@ -643,48 +643,44 @@ func (tb *TabButton) OnInit() {
 }
 
 func (tb *TabButton) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "icon":
-		icon := child.(*Icon)
-		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetEm(1)
-			s.Height.SetEm(1)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "label":
-		label := child.(*Label)
-		label.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "close-stretch":
-		cls := child.(*Stretch)
-		cls.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetCh(1)
-		})
-	case "close":
-		close := child.(*Action)
-		close.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetEx(0.5)
-			s.Height.SetEx(0.5)
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = gist.AlignMiddle
-			s.Border.Radius = gist.BorderRadiusFull
-			s.BackgroundColor.SetColor(color.Transparent)
-		})
-	case "sc-stretch":
-		scs := child.(*Stretch)
-		scs.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.MinWidth.SetCh(2)
-		})
-	case "shortcut":
-		shortcut := child.(*Label)
-		shortcut.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-		})
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "icon":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "label":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "close-stretch":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetCh(1)
+			})
+		case "close":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEx(0.5)
+				s.Height.SetEx(0.5)
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = gist.AlignMiddle
+				s.Border.Radius = gist.BorderRadiusFull
+				s.BackgroundColor.SetColor(color.Transparent)
+			})
+		case "sc-stretch":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.MinWidth.SetCh(2)
+			})
+		case "shortcut":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		}
 	}
 }
 

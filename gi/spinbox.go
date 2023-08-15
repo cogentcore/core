@@ -80,29 +80,29 @@ func (sb *SpinBox) OnInit() {
 }
 
 func (sb *SpinBox) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "text-field":
-		tf := child.(*TextField)
-		tf.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.MinWidth.SetEm(6)
-		})
-	case "space":
-		space := child.(*Space)
-		space.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Width.SetCh(0.1)
-		})
-	case "buttons":
-		buttons := child.(*Layout)
-		buttons.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.AlignV = gist.AlignMiddle
-		})
-	case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
-		act := child.(*Action)
-		act.Type = ActionParts
-		act.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Font.Size.SetPx(20)
-		})
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "text-field":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.MinWidth.SetEm(6)
+			})
+		case "space":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetCh(0.1)
+			})
+		case "buttons":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.AlignV = gist.AlignMiddle
+			})
+		case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
+			act := child.(*Action)
+			act.Type = ActionParts
+			act.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Font.Size.SetPx(20)
+			})
+		}
 	}
+
 }
 
 func (sb *SpinBox) CopyFieldsFrom(frm any) {

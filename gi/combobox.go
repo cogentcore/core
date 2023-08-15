@@ -140,47 +140,45 @@ func (cb *ComboBox) OnInit() {
 }
 
 func (cb *ComboBox) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "icon":
-		icon := child.(*Icon)
-		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "label":
-		label := child.(*Label)
-		label.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = gist.AlignMiddle
-		})
-	case "text":
-		text := child.(*TextField)
-		text.Placeholder = cb.Placeholder
-		if cb.Type == ComboBoxFilled {
-			text.Type = TextFieldFilled
-		} else {
-			text.Type = TextFieldOutlined
-		}
-		text.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Border.Style.Set(gist.BorderNone)
-			s.Border.Width.Set()
-		})
-	case "ind-stretch":
-		ins := child.Embed(TypeWidgetBase).(*WidgetBase) // can be Space or Stretch, so just use WidgetBase
-		ins.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			if cb.Editable {
-				s.Width.SetPx(0)
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "icon":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "label":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = gist.AlignMiddle
+			})
+		case "text":
+			text := child.(*TextField)
+			text.Placeholder = cb.Placeholder
+			if cb.Type == ComboBoxFilled {
+				text.Type = TextFieldFilled
 			} else {
-				s.Width.SetPx(16 * Prefs.DensityMul())
+				text.Type = TextFieldOutlined
 			}
-		})
-	case "indicator":
-		ind := child.(*Icon)
-		ind.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			s.Font.Size.SetEm(1.5)
-			s.AlignV = gist.AlignMiddle
-		})
+			text.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Border.Style.Set(gist.BorderNone)
+				s.Border.Width.Set()
+			})
+		case "ind-stretch":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				if cb.Editable {
+					s.Width.SetPx(0)
+				} else {
+					s.Width.SetPx(16 * Prefs.DensityMul())
+				}
+			})
+		case "indicator":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Font.Size.SetEm(1.5)
+				s.AlignV = gist.AlignMiddle
+			})
+		}
 	}
 }
 

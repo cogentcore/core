@@ -121,55 +121,51 @@ func (ac *Action) OnInit() {
 }
 
 func (ac *Action) OnChildAdded(child ki.Ki) {
-	switch child.Name() {
-	case "icon":
-		icon := child.(*Icon)
-		icon.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			if ac.Type == ActionMenu {
-				icon.Style.Font.Size.SetEm(1.5)
-			}
-			icon.Style.Margin.Set()
-			icon.Style.Padding.Set()
-		})
-	case "space":
-		space := child.(*Space)
-		space.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			space.Style.Width.SetCh(0.5)
-			space.Style.MinWidth.SetCh(0.5)
-		})
-	case "label":
-		label := child.(*Label)
-		label.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			label.Style.Margin.Set()
-			label.Style.Padding.Set()
-		})
-	case "indicator":
-		ind := child.(*Icon)
-		ind.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			if ac.Type == ActionMenu {
-				ind.Style.Font.Size.SetEm(1.5)
-			}
-			ind.Style.Margin.Set()
-			ind.Style.Padding.Set()
-			ind.Style.AlignV = gist.AlignBottom
-		})
-	case "ind-stretch":
-		ins := child.(*Stretch)
-		ins.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			ins.Style.Width.SetEm(1)
-		})
-	case "shortcut":
-		short := child.(*Label)
-		short.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			short.Style.Margin.Set()
-			short.Style.Padding.Set()
-		})
-	case "sc-stretch":
-		scs := child.(*Stretch)
-		scs.AddStyler(func(w *WidgetBase, s *gist.Style) {
-			scs.Style.MinWidth.SetCh(2)
-		})
+	if w := KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "icon":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				if ac.Type == ActionMenu {
+					s.Font.Size.SetEm(1.5)
+				}
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "space":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetCh(0.5)
+				s.MinWidth.SetCh(0.5)
+			})
+		case "label":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "indicator":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				if ac.Type == ActionMenu {
+					s.Font.Size.SetEm(1.5)
+				}
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = gist.AlignBottom
+			})
+		case "ind-stretch":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Width.SetEm(1)
+			})
+		case "shortcut":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "sc-stretch":
+			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.MinWidth.SetCh(2)
+			})
+		}
 	}
+
 }
 
 func (ac *Action) CopyFieldsFrom(frm any) {
