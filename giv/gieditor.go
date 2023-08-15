@@ -13,6 +13,7 @@ import (
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -40,6 +41,30 @@ var TypeGiEditor = kit.Types.AddType(&GiEditor{}, GiEditorProps)
 // AddNewGiEditor adds a new gieditor to given parent node, with given name.
 func AddNewGiEditor(parent ki.Ki, name string) *GiEditor {
 	return parent.AddNewChild(TypeGiEditor, name).(*GiEditor)
+}
+
+func (ge *GiEditor) OnInit() {
+	ge.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.BackgroundColor.SetSolid(gi.ColorScheme.Background)
+		s.Color = gi.ColorScheme.OnBackground
+		s.SetStretchMax()
+		s.Margin.Set(units.Px(8 * gi.Prefs.DensityMul()))
+	})
+}
+
+func (ge *GiEditor) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "title":
+			title := child.(*gi.Label)
+			title.Type = gi.LabelHeadlineSmall
+			title.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMaxWidth()
+				s.AlignH = gist.AlignCenter
+				s.AlignV = gist.AlignTop
+			})
+		}
+	}
 }
 
 // Update updates the objects being edited (e.g., updating display changes)
@@ -275,16 +300,7 @@ func (ge *GiEditor) Render2D() {
 }
 
 var GiEditorProps = ki.Props{
-	ki.EnumTypeFlag:    gi.TypeNodeFlags,
-	"background-color": &gi.Prefs.Colors.Background,
-	"color":            &gi.Prefs.Colors.Font,
-	"max-width":        -1,
-	"max-height":       -1,
-	"#title": ki.Props{
-		"max-width":        -1,
-		"horizontal-align": gist.AlignCenter,
-		"vertical-align":   gist.AlignTop,
-	},
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
 			"icon": icons.Refresh,
