@@ -88,7 +88,7 @@ var TypeDialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
 func (dlg *Dialog) OnInit() {
 	dlg.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
+		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer) // material likes SurfaceContainerHigh here, but that seems like too much
 		s.Color = ColorScheme.OnSurface
 		s.Border.Radius = gist.BorderRadiusExtraLarge
 	})

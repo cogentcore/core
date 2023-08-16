@@ -16,7 +16,7 @@ require (
 	github.com/go-gl/mathgl v1.0.0
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
-	github.com/goki/ki v1.1.16-0.20230807034719-6d928f976f6d
+	github.com/goki/ki v1.1.16-0.20230812185917-db9a8362d270
 	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.15
 	github.com/goki/mobile v0.0.0-20230626225100-3417752baaf2
