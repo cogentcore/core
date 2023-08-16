@@ -116,6 +116,22 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 			fv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				s.SetStretchMax()
 			})
+		case "sel-row":
+			sr := child.(*gi.Layout)
+			sr.Lay = gi.LayoutHoriz
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				sr.Spacing.SetPx(4 * gi.Prefs.DensityMul())
+				s.SetStretchMaxWidth()
+			})
+		case "sel": // sel field
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetMinPrefWidth(units.Ch(60))
+				s.SetStretchMaxWidth()
+			})
+		case "ext-label":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetMinPrefWidth(units.Ch(10))
+			})
 		}
 	}
 }
@@ -238,6 +254,7 @@ const (
 )
 
 func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView) {
+	// STYTODO: get rid of this and move to OnChildAdded
 	finf, ok := slice.([]*FileInfo)
 	if ok {
 		wi := widg.AsNode2D()
@@ -367,13 +384,6 @@ func (fv *FileView) ConfigFilesRow() {
 	fr.ConfigChildren(config) // already covered by parent update
 
 	sv := fv.FavsView()
-	sv.CSS = ki.Props{
-		"textfield": ki.Props{
-			":inactive": ki.Props{
-				"background-color": &gi.Prefs.Colors.Control,
-			},
-		},
-	}
 	sv.SelectedIdx = -1
 	sv.SetSlice(&gi.Prefs.FavPaths)
 	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -385,13 +395,6 @@ func (fv *FileView) ConfigFilesRow() {
 	})
 
 	sv = fv.FilesView()
-	sv.CSS = ki.Props{
-		"textfield": ki.Props{
-			":inactive": ki.Props{
-				"background-color": &gi.Prefs.Colors.Control,
-			},
-		},
-	}
 	sv.StyleFunc = FileViewStyleFunc
 	sv.SetSlice(&fv.Files)
 	if gi.Prefs.FileViewSort != "" {
@@ -414,9 +417,6 @@ func (fv *FileView) ConfigFilesRow() {
 
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.SelRow()
-	sr.Lay = gi.LayoutHoriz
-	sr.SetProp("spacing", units.Px(4))
-	sr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.TypeLabel, "sel-lbl")
 	config.Add(gi.TypeTextField, "sel")
@@ -430,8 +430,6 @@ func (fv *FileView) ConfigSelRow() {
 	sf := fv.SelField()
 	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", gi.ShortcutForFun(gi.KeyFunWordLeft), gi.ShortcutForFun(gi.KeyFunJump), gi.ShortcutForFun(gi.KeyFunSelectMode), gi.ShortcutForFun(gi.KeyFunInsert), gi.ShortcutForFun(gi.KeyFunInsertAfter), gi.ShortcutForFun(gi.KeyFunMenuOpen), gi.ShortcutForFun(gi.KeyFunHistPrev), gi.ShortcutForFun(gi.KeyFunHistNext), gi.ShortcutForFun(gi.KeyFunSearch))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
-	sf.SetMinPrefWidth(units.Ch(60))
-	sf.SetStretchMaxWidth()
 	sf.SetText(fv.SelFile)
 	sf.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -447,7 +445,6 @@ func (fv *FileView) ConfigSelRow() {
 	el.Tooltip = "target extension(s) to highlight -- if multiple, separate with commas, and do include the . at the start"
 	ef := fv.ExtField()
 	ef.SetText(fv.Ext)
-	ef.SetMinPrefWidth(units.Ch(10))
 	ef.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			fvv, _ := recv.Embed(TypeFileView).(*FileView)
