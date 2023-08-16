@@ -5,13 +5,11 @@
 package giv
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -49,6 +47,25 @@ type MapViewInline struct {
 
 var TypeMapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
 
+func (mv *MapViewInline) OnInit() {
+	mv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.MinWidth.SetEx(60)
+	})
+}
+
+func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "Parts":
+			parts := child.(*gi.Layout)
+			parts.Lay = gi.LayoutHoriz
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Overflow = gist.OverflowHidden // no scrollbars!
+			})
+		}
+	}
+}
+
 func (mv *MapViewInline) Disconnect() {
 	mv.PartsWidgetBase.Disconnect()
 	mv.ViewSig.DisconnectAll()
@@ -56,7 +73,6 @@ func (mv *MapViewInline) Disconnect() {
 
 var MapViewInlineProps = ki.Props{
 	ki.EnumTypeFlag: gi.TypeNodeFlags,
-	"min-width":     units.Ex(60),
 }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
@@ -72,8 +88,6 @@ func (mv *MapViewInline) ConfigParts() {
 	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
-	mv.Parts.Lay = gi.LayoutHoriz
-	mv.Parts.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
@@ -102,8 +116,8 @@ func (mv *MapViewInline) ConfigParts() {
 		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave, mv.ViewPath) // needs key value view to track updates
 
 		keytxt := kit.ToString(key.Interface())
-		keynm := fmt.Sprintf("key-%v", keytxt)
-		valnm := fmt.Sprintf("value-%v", keytxt)
+		keynm := "key-" + keytxt
+		valnm := "value-" + keytxt
 
 		config.Add(kv.WidgetType(), keynm)
 		config.Add(vv.WidgetType(), valnm)
