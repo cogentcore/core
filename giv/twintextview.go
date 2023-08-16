@@ -6,6 +6,7 @@ package giv
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -34,6 +35,32 @@ func AddNewTwinTextViews(parent ki.Ki, name string) *TwinTextViews {
 	return parent.AddNewChild(TypeTwinTextViews, name).(*TwinTextViews)
 }
 
+func (tv *TwinTextViews) OnInit() {
+	tv.Dim = mat32.X
+	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.BackgroundColor.SetSolid(gi.ColorScheme.Background)
+		s.Color = gi.ColorScheme.OnBackground
+		s.SetStretchMax()
+	})
+}
+
+func (tv *TwinTextViews) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "text-a-lay", "text-b-lay":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMax()
+				s.SetMinPrefWidth(units.Ch(80))
+				s.SetMinPrefHeight(units.Em(40))
+			})
+		case "text-a", "text-b":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Font.Family = string(gi.Prefs.MonoFont)
+			})
+		}
+	}
+}
+
 // MakeBufs ensures that the TextBufs are made, if nil
 func (tv *TwinTextViews) MakeBufs() {
 	if tv.BufA != nil {
@@ -58,8 +85,6 @@ func (tv *TwinTextViews) SetFiles(fileA, fileB string, lineNos bool) {
 
 func (tv *TwinTextViews) ConfigTexts() {
 	tv.MakeBufs()
-	tv.Dim = mat32.X
-	tv.SetStretchMax()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.TypeLayout, "text-a-lay")
 	config.Add(gi.TypeLayout, "text-b-lay")
@@ -68,17 +93,8 @@ func (tv *TwinTextViews) ConfigTexts() {
 	if !mods {
 		updt = tv.UpdateStart()
 	} else {
-		al.SetStretchMax()
-		al.SetMinPrefWidth(units.Ch(80))
-		al.SetMinPrefHeight(units.Em(40))
-		bl.SetStretchMax()
-		bl.SetMinPrefWidth(units.Ch(80))
-		bl.SetMinPrefHeight(units.Em(40))
-
 		av := AddNewTextView(al, "text-a")
 		bv := AddNewTextView(bl, "text-b")
-		av.SetProp("font-family", gi.Prefs.MonoFont)
-		bv.SetProp("font-family", gi.Prefs.MonoFont)
 		av.SetBuf(tv.BufA)
 		bv.SetBuf(tv.BufB)
 
@@ -116,9 +132,5 @@ func (tv *TwinTextViews) TextViews() (*TextView, *TextView) {
 
 // TwinTextViewsProps are style properties for TwinTextViews
 var TwinTextViewsProps = ki.Props{
-	ki.EnumTypeFlag:    gi.TypeNodeFlags,
-	"max-width":        -1,
-	"max-height":       -1,
-	"background-color": &gi.Prefs.Colors.Background,
-	"color":            &gi.Prefs.Colors.Font,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
