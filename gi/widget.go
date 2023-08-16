@@ -369,7 +369,8 @@ func (wb *WidgetBase) ParentCursor(cur cursor.Shapes) cursor.Shapes {
 // implementing a custom ConnectEvents2D function should
 // first call [WidgetEvents].
 func (wb *WidgetBase) ConnectEvents2D() {
-	wb.Node2DEvents()
+	// TODO: figure out connect events situation not working
+	// wb.Node2DEvents()
 	wb.WidgetEvents()
 }
 
