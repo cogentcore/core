@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/goki/gi/gi"
@@ -45,6 +44,9 @@ type MapView struct {
 	// whether to show the toolbar or not
 	ShowToolBar bool `desc:"whether to show the toolbar or not"`
 
+	// the number of columns in the map; do not set externally; generally only access internally
+	NCols int `desc:"the number of columns in the map; do not set externally; generally only access internally"`
+
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
@@ -68,6 +70,33 @@ func AddNewMapView(parent ki.Ki, name string) *MapView {
 	return parent.AddNewChild(TypeMapView, name).(*MapView)
 }
 
+func (mv *MapView) OnInit() {
+	mv.Lay = gi.LayoutVert
+	mv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		mv.Spacing = gi.StdDialogVSpaceUnits
+		s.SetStretchMax()
+	})
+}
+
+func (mv *MapView) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "map-grid":
+			mg := child.(*gi.Frame)
+			mg.Lay = gi.LayoutGrid
+			mg.Stripes = gi.RowStripes
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.SetMinPrefHeight(units.Em(1.5))
+				s.SetMinPrefWidth(units.Em(10))
+				s.SetStretchMax()                // for this to work, ALL layers above need it too
+				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+				s.Columns = mv.NCols
+			})
+		}
+	}
+}
+
 func (mv *MapView) Disconnect() {
 	mv.Frame.Disconnect()
 	mv.MapViewSig.DisconnectAll()
@@ -84,10 +113,7 @@ func (mv *MapView) SetMap(mp any) {
 }
 
 var MapViewProps = ki.Props{
-	ki.EnumTypeFlag:    gi.TypeNodeFlags,
-	"background-color": &gi.Prefs.Colors.Background,
-	"max-width":        -1,
-	"max-height":       -1,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // MapViewSignals are signals that mapview can send, mostly for editing
@@ -117,8 +143,6 @@ func (mv *MapView) UpdateValues() {
 
 // Config configures the view
 func (mv *MapView) Config() {
-	mv.Lay = gi.LayoutVert
-	mv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeFrame, "map-grid")
@@ -168,13 +192,6 @@ func (mv *MapView) ConfigMapGrid() {
 		return
 	}
 	sg := mv.MapGrid()
-	sg.Lay = gi.LayoutGrid
-	sg.Stripes = gi.RowStripes
-	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.Em(1.5))
-	sg.SetMinPrefWidth(units.Em(10))
-	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
-	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
@@ -202,9 +219,9 @@ func (mv *MapView) ConfigMapGrid() {
 
 	valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
 	valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
-	valtypes = append(valtypes, reflect.TypeOf((*reflect.Type)(nil)).Elem())
+	valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
 
-	sg.SetProp("columns", ncol)
+	mv.NCols = ncol
 
 	keys := kit.MapSort(mv.Map, !mv.SortVals, true) // note: this is a slice of reflect.Value!
 	for _, key := range keys {
@@ -222,14 +239,14 @@ func (mv *MapView) ConfigMapGrid() {
 		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave, mv.ViewPath) // needs key value view to track updates
 
 		keytxt := kit.ToString(key.Interface())
-		keynm := fmt.Sprintf("key-%v", keytxt)
-		valnm := fmt.Sprintf("value-%v", keytxt)
-		delnm := fmt.Sprintf("del-%v", keytxt)
+		keynm := "key-" + keytxt
+		valnm := "value-" + keytxt
+		delnm := "del-" + keytxt
 
 		config.Add(kv.WidgetType(), keynm)
 		config.Add(vv.WidgetType(), valnm)
 		if ifaceType {
-			typnm := fmt.Sprintf("type-%v", keytxt)
+			typnm := "type-" + keytxt
 			config.Add(gi.TypeComboBox, typnm)
 		}
 		config.Add(gi.TypeAction, delnm)

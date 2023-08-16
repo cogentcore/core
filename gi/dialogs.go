@@ -52,7 +52,7 @@ const (
 
 // standard vertical space between elements in a dialog, in Ex units
 var StdDialogVSpace = float32(1)
-var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.UnitEx, Dots: 0}
+var StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
 
 // Dialog supports dialog functionality -- based on a viewport that can either
 // be rendered in a separate window or on top of an existing one.
