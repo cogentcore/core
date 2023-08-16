@@ -16,6 +16,7 @@ import (
 
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
+	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin/cursor"
@@ -54,6 +55,18 @@ type TextView struct {
 
 	// width of cursor -- set from cursor-width property (inherited)
 	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+
+	// the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties
+	LineNumberColor gist.ColorSpec `desc:"the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties"`
+
+	// the color used for the user text selection background color; this should be set in Stylers like all other style properties
+	SelectColor gist.ColorSpec `desc:"the color used for the user text selection background color; this should be set in Stylers like all other style properties"`
+
+	// the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties
+	HighlightColor gist.ColorSpec `desc:"the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties"`
+
+	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
+	CursorColor gist.ColorSpec `desc:"the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"`
 
 	// number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc
 	NLines int `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
@@ -171,7 +184,11 @@ func AddNewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
 
 func (tv *TextView) OnInit() {
 	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		tv.CursorWidth.SetPx(3)
+		tv.CursorWidth.SetPx(1)
+		tv.LineNumberColor.SetSolid(gi.ColorScheme.SurfaceContainerHighest)
+		tv.SelectColor.SetSolid(gi.ColorScheme.TertiaryContainer)
+		tv.HighlightColor.SetSolid(colors.Orange)
+		tv.CursorColor.SetSolid(gi.ColorScheme.OnSurface)
 
 		if gi.Prefs.Editor.WordWrap {
 			s.Text.WhiteSpace = gist.WhiteSpacePreWrap
@@ -179,6 +196,7 @@ func (tv *TextView) OnInit() {
 			s.Text.WhiteSpace = gist.WhiteSpacePre
 		}
 		s.Border.Style.Set(gist.BorderNone) // don't render our own border
+		s.Border.Radius = gist.BorderRadiusLarge
 		s.Margin.Set()
 		s.Padding.Set(units.Px(4 * gi.Prefs.DensityMul()))
 		s.AlignV = gist.AlignTop
@@ -189,7 +207,7 @@ func (tv *TextView) OnInit() {
 		if w.HasFocus() {
 			s.BackgroundColor.SetSolid(gi.ColorScheme.Surface)
 		} else {
-			s.BackgroundColor.SetSolid(gi.ColorScheme.SurfaceContainer)
+			s.BackgroundColor.SetSolid(gi.ColorScheme.SurfaceContainerHigh)
 		}
 	})
 }
@@ -202,21 +220,6 @@ func (tv *TextView) Disconnect() {
 
 var TextViewProps = ki.Props{
 	ki.EnumTypeFlag: TypeTextViewFlags,
-	// TextViewSelectors[TextViewActive]: ki.Props{
-	// 	"background-color": "highlight-10",
-	// },
-	// TextViewSelectors[TextViewFocus]: ki.Props{
-	// 	"background-color": "lighter-0",
-	// },
-	// TextViewSelectors[TextViewInactive]: ki.Props{
-	// 	"background-color": "highlight-20",
-	// },
-	// TextViewSelectors[TextViewSel]: ki.Props{
-	// 	"background-color": &gi.Prefs.Colors.Select,
-	// },
-	// TextViewSelectors[TextViewHighlight]: ki.Props{
-	// 	"background-color": &gi.Prefs.Colors.Highlight,
-	// },
 }
 
 // TextViewSignals are signals that text view can send
@@ -3309,7 +3312,6 @@ func (tv *TextView) CursorSprite() *gi.Sprite {
 	if win == nil {
 		return nil
 	}
-	sty := &tv.StateStyles[TextViewActive]
 	spnm := tv.CursorSpriteName()
 	sp, ok := win.SpriteByName(spnm)
 	if !ok {
@@ -3317,13 +3319,9 @@ func (tv *TextView) CursorSprite() *gi.Sprite {
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
-		bbsz.X += 2 // inverse border
 		sp = gi.NewSprite(spnm, bbsz, image.Point{})
 		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Color.Inverse()}, image.Point{}, draw.Src)
-		ibox.Min.X++ // 1 pixel boundary
-		ibox.Max.X--
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Color}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{tv.CursorColor.Color}, image.Point{}, draw.Src)
 		win.AddSprite(sp)
 	}
 	return sp
@@ -3402,7 +3400,7 @@ func (tv *TextView) RenderSelect() {
 	if !tv.HasSelection() {
 		return
 	}
-	tv.RenderRegionBox(tv.SelectReg, TextViewSel)
+	tv.RenderRegionBox(tv.SelectReg, &tv.SelectColor)
 }
 
 // RenderHighlights renders the highlight regions as a highlighted background
@@ -3414,7 +3412,7 @@ func (tv *TextView) RenderHighlights(stln, edln int) {
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
-		tv.RenderRegionBox(reg, TextViewHighlight)
+		tv.RenderRegionBox(reg, &tv.HighlightColor)
 	}
 }
 
@@ -3427,7 +3425,7 @@ func (tv *TextView) RenderScopelights(stln, edln int) {
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
-		tv.RenderRegionBox(reg, TextViewHighlight)
+		tv.RenderRegionBox(reg, &tv.HighlightColor)
 	}
 }
 
@@ -3471,10 +3469,9 @@ func (tv *TextView) ClearScopelights() {
 	}
 }
 
-// RenderRegionBox renders a region in background color according to given state style
-func (tv *TextView) RenderRegionBox(reg textbuf.Region, state TextViewStates) {
-	sty := &tv.StateStyles[state]
-	tv.RenderRegionBoxSty(reg, sty, &sty.BackgroundColor)
+// RenderRegionBox renders a region in background color according to given background color
+func (tv *TextView) RenderRegionBox(reg textbuf.Region, bgclr *gist.ColorSpec) {
+	tv.RenderRegionBoxSty(reg, &tv.Style, bgclr)
 }
 
 // RenderRegionBoxSty renders a region in given style and background color
@@ -3670,7 +3667,7 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	}
 }
 
-// RenderLineNosBoxAll renders the background for the line numbers in a darker shade
+// RenderLineNosBoxAll renders the background for the line numbers in the LineNumberColor
 func (tv *TextView) RenderLineNosBoxAll() {
 	if !tv.HasLineNos() {
 		return
@@ -3679,15 +3676,14 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	pc := &rs.Paint
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	clr := sty.BackgroundColor.Color.Highlight(10)
 	spos := mat32.NewVec2FmPoint(tv.VpBBox.Min)
 	epos := mat32.NewVec2FmPoint(tv.VpBBox.Max)
 	// SidesTODO: this is sketchy
 	epos.X = spos.X + tv.LineNoOff - spc.Size().X/2
-	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
+	pc.FillBoxColor(rs, spos, epos.Sub(spos), tv.LineNumberColor.Color)
 }
 
-// RenderLineNosBox renders the background for the line numbers in given range, in a darker shade
+// RenderLineNosBox renders the background for the line numbers in given range, in the LineNumberColor
 func (tv *TextView) RenderLineNosBox(st, ed int) {
 	if !tv.HasLineNos() {
 		return
@@ -3696,7 +3692,6 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	pc := &rs.Paint
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	clr := sty.BackgroundColor.Color.Highlight(10)
 	spos := tv.CharStartPos(lex.Pos{Ln: st})
 	spos.X = float32(tv.VpBBox.Min.X)
 	epos := tv.CharEndPos(lex.Pos{Ln: ed + 1})
@@ -3704,7 +3699,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	// SidesTODO: this is sketchy
 	epos.X = spos.X + tv.LineNoOff - spc.Size().X/2
 	// fmt.Printf("line box: st %v ed: %v spos %v  epos %v\n", st, ed, spos, epos)
-	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
+	pc.FillBoxColor(rs, spos, epos.Sub(spos), tv.LineNumberColor.Color)
 }
 
 // RenderLineNo renders given line number -- called within context of other render
@@ -3741,15 +3736,14 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 			pc.FillBoxColor(rs, sbox, bszhlf, lclr)
 			nsp := sbox
 			nsp.X += bszhlf.X
-			pc.FillBoxColor(rs, nsp, bszhlf, gi.Prefs.Colors.Highlight)
+			pc.FillBoxColor(rs, nsp, bszhlf, tv.SelectColor.Color)
 		} else {
-			pc.FillBoxColor(rs, sbox, bsz, gi.Prefs.Colors.Highlight)
+			pc.FillBoxColor(rs, sbox, bsz, tv.SelectColor.Color)
 		}
 	} else if hasLClr {
 		pc.FillBoxColor(rs, sbox, bsz, lclr)
 	} else if defFill {
-		bgclr := fst.BackgroundColor.Color.Highlight(10)
-		pc.FillBoxColor(rs, sbox, bsz, bgclr)
+		pc.FillBoxColor(rs, sbox, bsz, tv.LineNumberColor.Color)
 	}
 
 	fst.BackgroundColor.SetColor(nil)

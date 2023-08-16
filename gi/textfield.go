@@ -71,11 +71,14 @@ type TextField struct {
 	// the current state of the text field
 	State TextFieldStates `desc:"the current state of the text field"`
 
-	// the color used for the placeholder text; this should be set in StyleFuncs like all other style properties; it is typically a highlighted version of the normal text color
-	PlaceholderColor gist.Color `desc:"the color used for the placeholder text; this should be set in StyleFuncs like all other style properties; it is typically a highlighted version of the normal text color"`
+	// the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color
+	PlaceholderColor gist.Color `desc:"the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color"`
 
-	// the color used for the text selection background color on active text fields; this should be set in StyleFuncs like all other style properties
-	SelectColor gist.ColorSpec `desc:"the color used for the text selection background color on active text fields; this should be set in StyleFuncs like all other style properties"`
+	// the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties
+	SelectColor gist.ColorSpec `desc:"the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties"`
+
+	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
+	CursorColor gist.ColorSpec `desc:"the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"`
 
 	// true if the text has been edited relative to the original
 	Edited bool `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
@@ -157,6 +160,7 @@ func (tf *TextField) OnInit() {
 		tf.CursorWidth.SetPx(1)
 		tf.SelectColor.SetColor(ColorScheme.TertiaryContainer)
 		tf.PlaceholderColor = ColorScheme.OnSurfaceVariant
+		tf.CursorColor.SetSolid(ColorScheme.Primary)
 
 		s.Cursor = cursor.IBeam
 		s.MinWidth.SetEm(20)
@@ -1097,7 +1101,6 @@ func (tf *TextField) CursorSprite() *Sprite {
 	if win == nil {
 		return nil
 	}
-	sty := &tf.Style
 	spnm := fmt.Sprintf("%v-%v", TextFieldSpriteName, tf.FontHeight)
 	sp, ok := win.SpriteByName(spnm)
 	// TODO: figure out how to update caret color on color scheme change
@@ -1106,13 +1109,9 @@ func (tf *TextField) CursorSprite() *Sprite {
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
-		// bbsz.X += 2 // inverse border
 		sp = NewSprite(spnm, bbsz, image.Point{})
 		ibox := sp.Pixels.Bounds()
-		// draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Color.Inverse()}, image.Point{}, draw.Src)
-		// ibox.Min.X++ // 1 pixel boundary
-		// ibox.Max.X--
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{sty.Color}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{tf.CursorColor.Color}, image.Point{}, draw.Src)
 		win.AddSprite(sp)
 	}
 	return sp
