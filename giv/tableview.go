@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/goki/gi/gi"
@@ -79,9 +80,71 @@ var _ SliceViewer = (*TableView)(nil)
 type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView)
 
 func (tv *TableView) OnInit() {
+	tv.Lay = gi.LayoutVert
 	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		tv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
+}
+
+func (tv *TableView) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "frame": // slice frame
+			sf := child.(*gi.Frame)
+			sf.Lay = gi.LayoutVert
+			sf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetMinPrefWidth(units.Ch(20))
+				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+				s.SetStretchMax()                // for this to work, ALL layers above need it too
+				s.Border.Style.Set(gist.BorderNone)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "header": // slice header
+			sh := child.(*gi.ToolBar)
+			sh.Lay = gi.LayoutHoriz
+			sh.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				sh.Spacing.SetPx(0)
+				s.Overflow = gist.OverflowHidden // no scrollbars!
+			})
+		case "grid-lay": // grid layout
+			gl := child.(*gi.Layout)
+			gl.Lay = gi.LayoutHoriz
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				gl.SetStretchMax() // for this to work, ALL layers above need it too
+			})
+		case "grid": // slice grid
+			sg := child.(*gi.Frame)
+			sg.Lay = gi.LayoutGrid
+			sg.Stripes = gi.RowStripes
+			sg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				// this causes everything to get off, especially resizing: not taking it into account presumably:
+				// sg.Spacing = gi.StdDialogVSpaceUnits
+
+				nWidgPerRow, _ := tv.RowWidgetNs()
+				s.Columns = nWidgPerRow
+				s.SetMinPrefHeight(units.Em(6))
+				s.SetStretchMax()                // for this to work, ALL layers above need it too
+				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+			})
+		}
+		// STYTODO: set header sizes here (see LayoutHeader)
+		// if _, ok := child.(*gi.Label); ok && w.Parent().Name() == "header" {
+		// 	w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		// 		spc := tv.SliceHeader().Spacing.Dots
+		// 		ip, _ := w.IndexInParent()
+		// 		s.SetMinPrefWidth(units.Dot())
+		// 	})
+		// }
+		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.MinWidth.SetEm(1.5)
+				s.Padding.Right.SetPx(4 * gi.Prefs.DensityMul())
+				s.Text.Align = gist.AlignRight
+			})
+		}
+	}
 }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
@@ -200,8 +263,6 @@ func (tv *TableView) IsConfiged() bool {
 
 // Config configures the view
 func (tv *TableView) Config() {
-	tv.Lay = gi.LayoutVert
-	tv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeFrame, "frame")
@@ -296,42 +357,20 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
-	sg.Lay = gi.LayoutVert
-	sg.SetMinPrefWidth(units.Ch(20))
-	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
-	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
-	sg.SetProp("border-width", 0)
-	sg.SetProp("margin", 0)
-	sg.SetProp("padding", 0)
-
 	sgcfg := kit.TypeAndNameList{}
 	sgcfg.Add(gi.TypeToolBar, "header")
 	sgcfg.Add(gi.TypeLayout, "grid-lay")
 	sg.ConfigChildren(sgcfg)
 
 	sgh := tv.SliceHeader()
-	sgh.Lay = gi.LayoutHoriz
-	sgh.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
-	sgh.SetProp("spacing", 0)
-	// sgh.SetStretchMaxWidth()
 
 	gl := tv.GridLayout()
-	gl.Lay = gi.LayoutHoriz
-	gl.SetStretchMax() // for this to work, ALL layers above need it too
 	gconfig := kit.TypeAndNameList{}
 	gconfig.Add(gi.TypeFrame, "grid")
 	gconfig.Add(gi.TypeScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
 
 	sgf = tv.This().(SliceViewer).SliceGrid()
-	sgf.Lay = gi.LayoutGrid
-	sgf.Stripes = gi.RowStripes
-	sgf.SetMinPrefHeight(units.Em(6))
-	sgf.SetStretchMax() // for this to work, ALL layers above need it too
-	sgf.SetProp("columns", nWidgPerRow)
-	sgf.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
-	// this causes everything to get off, especially resizing: not taking it into account presumably:
-	// sgf.SetProp("spacing", gi.StdDialogVSpaceUnits)
 
 	// Configure Header
 	hcfg := kit.TypeAndNameList{}
@@ -340,7 +379,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	}
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
-		labnm := fmt.Sprintf("head-%v", fld.Name)
+		labnm := "head-" + fld.Name
 		hcfg.Add(gi.TypeAction, labnm)
 	}
 	if !tv.IsDisabled() {
@@ -353,8 +392,8 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	sgf.Kids = make(ki.Slice, nWidgPerRow)
 
-	itxt := fmt.Sprintf("%05d", 0)
-	labnm := fmt.Sprintf("index-%v", itxt)
+	itxt := "0"
+	labnm := "index-" + itxt
 
 	if tv.ShowIndex {
 		lbl := sgh.Child(0).(*gi.Label)
@@ -411,7 +450,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "+"
 			lbl.Tooltip = "insert row"
-			addnm := fmt.Sprintf("add-%v", itxt)
+			addnm := "add-" + itxt
 			addact := gi.Action{}
 			sgf.SetChild(&addact, cidx, addnm)
 			addact.SetIcon(icons.Add)
@@ -421,7 +460,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "-"
 			lbl.Tooltip = "delete row"
-			delnm := fmt.Sprintf("del-%v", itxt)
+			delnm := "del-" + itxt
 			delact := gi.Action{}
 			sgf.SetChild(&delact, cidx, delnm)
 			delact.SetIcon(icons.Delete)
@@ -498,6 +537,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 
 // LayoutHeader updates the header layout based on field widths
 func (tv *TableView) LayoutHeader() {
+	// STYTODO: set these styles in stylers
 	_, idxOff := tv.RowWidgetNs()
 	nfld := tv.NVisFields + idxOff
 	sgh := tv.SliceHeader()
@@ -514,8 +554,7 @@ func (tv *TableView) LayoutHeader() {
 		if fli == 0 {
 			wd += spc
 		}
-		lbl.SetMinPrefWidth(units.Dot(wd))
-		lbl.SetProp("max-width", units.Dot(wd))
+		lbl.SetFixedWidth(units.Dot(wd))
 		sumwd += wd
 	}
 	if !tv.IsDisabled() {
@@ -523,8 +562,7 @@ func (tv *TableView) LayoutHeader() {
 		for fli := nfld; fli < mx; fli++ {
 			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 			wd := gd[fli].AllocSize - spc
-			lbl.SetMinPrefWidth(units.Dot(wd))
-			lbl.SetProp("max-width", units.Dot(wd))
+			lbl.SetFixedWidth(units.Dot(wd))
 			sumwd += wd
 		}
 	}
@@ -581,9 +619,9 @@ func (tv *TableView) UpdateSliceGrid() {
 		val := kit.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
 		stru := val.Interface()
 
-		itxt := fmt.Sprintf("%05d", i)
-		sitxt := fmt.Sprintf("%05d", si)
-		labnm := fmt.Sprintf("index-%v", itxt)
+		itxt := strconv.Itoa(i)
+		sitxt := strconv.Itoa(si)
+		labnm := "index-" + itxt
 		if tv.ShowIndex {
 			var idxlab *gi.Label
 			if sg.Kids[ridx] != nil {
@@ -604,7 +642,6 @@ func (tv *TableView) UpdateSliceGrid() {
 					}
 				})
 			}
-			idxlab.CurBackgroundColor = gi.Prefs.Colors.Background
 			idxlab.SetSelectedState(issel)
 			idxlab.SetText(sitxt)
 		}

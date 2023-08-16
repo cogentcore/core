@@ -433,9 +433,9 @@ func (wb *WidgetBase) SetStretchMax() {
 // the given fixed width unit value.
 // This adds a styler that calls [gist.Style.SetFixedWidth].
 func (wb *WidgetBase) SetFixedWidth(val units.Value) {
-	wb.Style.Width = val
-	wb.Style.MinWidth = val
-	wb.Style.MaxWidth = val
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.SetFixedWidth(val)
+	})
 }
 
 // SetFixedHeight sets all height style options
@@ -443,9 +443,9 @@ func (wb *WidgetBase) SetFixedWidth(val units.Value) {
 // the given fixed height unit value.
 // This adds a styler that calls [gist.Style.SetFixedHeight].
 func (wb *WidgetBase) SetFixedHeight(val units.Value) {
-	wb.Style.Height = val
-	wb.Style.MinHeight = val
-	wb.Style.MaxHeight = val
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.SetFixedHeight(val)
+	})
 }
 
 // WidgetDefStyleKey is the key for accessing the default style stored in the
