@@ -42,6 +42,9 @@ type MapView struct {
 	// sort by values instead of keys
 	SortVals bool `desc:"sort by values instead of keys"`
 
+	// whether to show the toolbar or not
+	ShowToolBar bool `desc:"whether to show the toolbar or not"`
+
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
@@ -387,12 +390,9 @@ func (mv *MapView) ConfigToolbar() {
 	if &mv.ToolbarMap == &mv.Map { // maps are not comparable
 		return
 	}
-	if pv, ok := mv.PropInherit("toolbar", ki.NoInherit, ki.TypeProps); ok {
-		pvb, _ := kit.ToBool(pv)
-		if !pvb {
-			mv.ToolbarMap = mv.Map
-			return
-		}
+	if !mv.ShowToolBar {
+		mv.ToolbarMap = mv.Map
+		return
 	}
 	tb := mv.ToolBar()
 	ndef := 3 // number of default actions

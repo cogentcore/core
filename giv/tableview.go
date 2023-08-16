@@ -185,14 +185,6 @@ func (tv *TableView) SetSlice(sl any) {
 	tv.SelectMode = false
 	tv.SetFullReRender()
 
-	tv.ShowIndex = true
-	if sidxp, err := tv.PropTry("index"); err == nil {
-		tv.ShowIndex, _ = kit.ToBool(sidxp)
-	}
-	tv.InactKeyNav = true
-	if siknp, err := tv.PropTry("inact-key-nav"); err == nil {
-		tv.InactKeyNav, _ = kit.ToBool(siknp)
-	}
 	tv.Config()
 	tv.UpdateEnd(updt)
 }
@@ -893,12 +885,9 @@ func (tv *TableView) ConfigToolbar() {
 	if tv.ToolbarSlice == tv.Slice {
 		return
 	}
-	if pv, ok := tv.PropInherit("toolbar", ki.NoInherit, ki.TypeProps); ok {
-		pvb, _ := kit.ToBool(pv)
-		if !pvb {
-			tv.ToolbarSlice = tv.Slice
-			return
-		}
+	if !tv.ShowToolBar {
+		tv.ToolbarSlice = tv.Slice
+		return
 	}
 	tb := tv.ToolBar()
 	ndef := 2 // number of default actions

@@ -89,6 +89,37 @@ func (fv *FileView) OnInit() {
 	})
 }
 
+func (fv *FileView) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "files-row":
+			fr := child.(*gi.Layout)
+			fr.Lay = gi.LayoutHoriz
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMax()
+			})
+		case "favs-view":
+			fv := child.(*TableView)
+			fv.ShowIndex = false
+			fv.InactKeyNav = false // can only have one active -- files..
+			fv.ShowToolBar = false
+			fv.SetDisabled() // select only
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMaxHeight()
+				s.MaxWidth.SetPx(0) // no stretch
+			})
+		case "files-view":
+			fv := child.(*TableView)
+			fv.ShowIndex = false // no index
+			fv.ShowToolBar = false
+			fv.SetDisabled() // select only
+			fv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMax()
+			})
+		}
+	}
+}
+
 func (fv *FileView) Disconnect() {
 	if fv.Watcher != nil {
 		fv.Watcher.Close()
@@ -330,8 +361,6 @@ func (fv *FileView) ConfigPathBar() {
 
 func (fv *FileView) ConfigFilesRow() {
 	fr := fv.FilesRow()
-	fr.SetStretchMax()
-	fr.Lay = gi.LayoutHoriz
 	config := kit.TypeAndNameList{}
 	config.Add(TypeTableView, "favs-view")
 	config.Add(TypeTableView, "files-view")
@@ -345,12 +374,6 @@ func (fv *FileView) ConfigFilesRow() {
 			},
 		},
 	}
-	sv.SetStretchMaxHeight()
-	sv.SetProp("max-width", 0) // no stretch
-	sv.SetProp("index", false)
-	sv.SetProp("inact-key-nav", false) // can only have one active -- files..
-	sv.SetProp("toolbar", false)
-	sv.SetDisabled() // select only
 	sv.SelectedIdx = -1
 	sv.SetSlice(&gi.Prefs.FavPaths)
 	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -369,10 +392,6 @@ func (fv *FileView) ConfigFilesRow() {
 			},
 		},
 	}
-	sv.SetProp("index", false) // no index
-	sv.SetProp("toolbar", false)
-	sv.SetStretchMax()
-	sv.SetDisabled() // select only
 	sv.StyleFunc = FileViewStyleFunc
 	sv.SetSlice(&fv.Files)
 	if gi.Prefs.FileViewSort != "" {

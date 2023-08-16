@@ -162,11 +162,14 @@ type SliceViewBase struct {
 	// [view: -] ValueView representations of the slice values
 	Values []ValueView `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView representations of the slice values"`
 
-	// whether to show index or not -- updated from 'index' property (bool)
-	ShowIndex bool `xml:"index" desc:"whether to show index or not -- updated from 'index' property (bool)"`
+	// whether to show index or not
+	ShowIndex bool `desc:"whether to show index or not"`
 
-	// support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events
-	InactKeyNav bool `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+	// whether to show the toolbar or not
+	ShowToolBar bool `desc:"whether to show the toolbar or not"`
+
+	// support key navigation when inactive (default true) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events
+	InactKeyNav bool `desc:"support key navigation when inactive (default true) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
 
 	// [view: -] current selection value -- initially select this value if set
 	SelVal any `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
@@ -240,6 +243,10 @@ func AddNewSliceViewBase(parent ki.Ki, name string) *SliceViewBase {
 }
 
 func (sv *SliceViewBase) OnInit() {
+	sv.SelectMode = false
+	sv.ShowIndex = true
+	sv.InactKeyNav = true
+
 	sv.Lay = gi.LayoutVert
 	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		sv.Spacing = gi.StdDialogVSpaceUnits
@@ -328,16 +335,7 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 		sv.SelectedIdx = -1
 	}
 	sv.ResetSelectedIdxs()
-	sv.SelectMode = false
 	sv.SetFullReRender()
-	sv.ShowIndex = true
-	if sidxp, err := sv.PropTry("index"); err == nil {
-		sv.ShowIndex, _ = kit.ToBool(sidxp)
-	}
-	sv.InactKeyNav = true
-	if siknp, err := sv.PropTry("inact-key-nav"); err == nil {
-		sv.InactKeyNav, _ = kit.ToBool(siknp)
-	}
 	sv.Config()
 	sv.UpdateEnd(updt)
 }
@@ -1041,12 +1039,9 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	if sv.ToolbarSlice == sv.Slice {
 		return
 	}
-	if pv, ok := sv.PropInherit("toolbar", ki.NoInherit, ki.TypeProps); ok {
-		pvb, _ := kit.ToBool(pv)
-		if !pvb {
-			sv.ToolbarSlice = sv.Slice
-			return
-		}
+	if !sv.ShowToolBar {
+		sv.ToolbarSlice = sv.Slice
+		return
 	}
 	tb := sv.ToolBar()
 	ndef := 2 // number of default actions

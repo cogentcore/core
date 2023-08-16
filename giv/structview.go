@@ -46,6 +46,9 @@ type StructView struct {
 	// ValueView representations of the fields
 	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 
+	// whether to show the toolbar or not
+	ShowToolBar bool `desc:"whether to show the toolbar or not"`
+
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
@@ -221,12 +224,9 @@ func (sv *StructView) ConfigToolbar() {
 	if sv.ToolbarStru == sv.Struct {
 		return
 	}
-	if pv, ok := sv.PropInherit("toolbar", ki.NoInherit, ki.TypeProps); ok {
-		pvb, _ := kit.ToBool(pv)
-		if !pvb {
-			sv.ToolbarStru = sv.Struct
-			return
-		}
+	if !sv.ShowToolBar {
+		sv.ToolbarStru = sv.Struct
+		return
 	}
 	tb := sv.ToolBar()
 	tb.SetStretchMaxWidth()
