@@ -219,6 +219,7 @@ var FileViewProps = ki.Props{
 	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
+// STYTODO: get rid of this or make it use actual color values
 // FileViewKindColorMap translates file Kinds into different colors for the file viewer
 var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",

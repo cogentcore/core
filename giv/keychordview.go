@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
@@ -79,34 +80,32 @@ type KeyChordEdit struct {
 
 var TypeKeyChordEdit = kit.Types.AddType(&KeyChordEdit{}, KeyChordEditProps)
 
+func (kc *KeyChordEdit) OnInit() {
+	kc.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.Cursor = cursor.HandPointing
+		s.AlignV = gist.AlignTop
+		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Radius = gist.BorderRadiusFull
+		s.Width.SetCh(20)
+		s.Padding.Set(units.Px(8 * gi.Prefs.DensityMul()))
+		s.SetStretchMaxWidth()
+		if w.IsSelected() {
+			s.BackgroundColor.SetSolid(gi.ColorScheme.TertiaryContainer)
+			s.Color = gi.ColorScheme.OnTertiaryContainer
+		} else {
+			s.BackgroundColor.SetSolid(gi.ColorScheme.SecondaryContainer)
+			s.Color = gi.ColorScheme.OnSecondaryContainer
+		}
+	})
+}
+
 func (kc *KeyChordEdit) Disconnect() {
 	kc.Label.Disconnect()
 	kc.KeyChordSig.DisconnectAll()
 }
 
 var KeyChordEditProps = ki.Props{
-	ki.EnumTypeFlag:    gi.TypeNodeFlags,
-	"padding":          units.Px(2),
-	"margin":           units.Px(2),
-	"vertical-align":   gist.AlignTop,
-	"color":            &gi.Prefs.Colors.Font,
-	"background-color": &gi.Prefs.Colors.Control,
-	"border-width":     units.Px(1),
-	"border-radius":    units.Px(4),
-	"border-color":     &gi.Prefs.Colors.Border,
-	"border-style":     gist.BorderSolid,
-	"height":           units.Em(1),
-	"width":            units.Ch(20),
-	"max-width":        -1,
-	gi.LabelSelectors[gi.LabelActive]: ki.Props{
-		"background-color": "lighter-0",
-	},
-	gi.LabelSelectors[gi.LabelInactive]: ki.Props{
-		"color": "lighter-50",
-	},
-	gi.LabelSelectors[gi.LabelSelected]: ki.Props{
-		"background-color": &gi.Prefs.Colors.Select,
-	},
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // ChordUpdated emits KeyChordSig when a new chord has been entered
