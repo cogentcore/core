@@ -2820,8 +2820,6 @@ var FileTreeViewProps = ki.Props{
 	},
 }
 
-var fnFolderProps = ki.Props{}
-
 func (ft *FileTreeView) Style2D() {
 	fn := ft.FileNode()
 	ft.Class = ""
