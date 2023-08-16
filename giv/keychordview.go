@@ -93,6 +93,7 @@ func (kc *KeyChordEdit) OnInit() {
 			s.BackgroundColor.SetSolid(gi.ColorScheme.TertiaryContainer)
 			s.Color = gi.ColorScheme.OnTertiaryContainer
 		} else {
+			// STYTODO: get state styles working
 			s.BackgroundColor.SetSolid(gi.ColorScheme.SecondaryContainer)
 			s.Color = gi.ColorScheme.OnSecondaryContainer
 		}

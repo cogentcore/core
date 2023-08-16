@@ -31,12 +31,17 @@ func KeyMapsView(km *gi.KeyMaps) {
 
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
+	mfr.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.Margin.Set(units.Px(8 * gi.Prefs.DensityMul()))
+	})
 
-	title := mfr.AddNewChild(gi.TypeLabel, "title").(*gi.Label)
-	title.SetText("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
-	title.SetProp("width", units.Ch(30)) // need for wrap
-	title.SetStretchMaxWidth()
-	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
+	title := gi.AddNewLabel(mfr, "title", "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
+	title.Type = gi.LabelHeadlineSmall
+	title.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.Width.SetCh(30) // need for wrap
+		s.SetStretchMaxWidth()
+		s.Text.WhiteSpace = gist.WhiteSpaceNormal // wrap
+	})
 
 	tv := mfr.AddNewChild(TypeTableView, "tv").(*TableView)
 	tv.Viewport = vp
@@ -123,7 +128,6 @@ func (vv *KeyMapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeKeyMapValueView).(*KeyMapValueView)
 		ac := vvv.Widget.(*gi.Action)
