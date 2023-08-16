@@ -31,7 +31,6 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -1470,13 +1469,16 @@ func BlameDialog(avp *gi.Viewport2D, fname string, blame, fbytes []byte) *TwinTe
 	tv.SetSplits(.2, .8)
 
 	tva, tvb := tv.TextViews()
-	// STYTODO: replace these styles with CustomOnChildAdded
-	tva.SetProp("white-space", gist.WhiteSpacePre)
-	tvb.SetProp("white-space", gist.WhiteSpacePre)
-	tva.SetProp("width", units.Ch(30))
-	tva.SetProp("height", units.Em(40))
-	tvb.SetProp("width", units.Ch(80))
-	tvb.SetProp("height", units.Em(40))
+	tva.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.Text.WhiteSpace = gist.WhiteSpacePre
+		s.Width.SetCh(30)
+		s.Height.SetEm(40)
+	})
+	tvb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.Text.WhiteSpace = gist.WhiteSpacePre
+		s.Width.SetCh(80)
+		s.Height.SetEm(40)
+	})
 
 	dlg.UpdateEndNoSig(true) // going to be shown
 	dlg.Open(0, 0, avp, nil)
