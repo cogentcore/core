@@ -190,6 +190,7 @@ func (tv *TextView) OnInit() {
 		tv.HighlightColor.SetSolid(colors.Orange)
 		tv.CursorColor.SetSolid(gi.ColorScheme.OnSurface)
 
+		s.Cursor = cursor.IBeam
 		if gi.Prefs.Editor.WordWrap {
 			s.Text.WhiteSpace = gist.WhiteSpacePreWrap
 		} else {
@@ -3567,9 +3568,6 @@ func (tv *TextView) VisSizes() {
 	lno := true
 	if tv.Buf != nil {
 		lno = tv.Buf.Opts.LineNos
-	}
-	if lp, has := tv.Props["line-nos"]; has {
-		lno, _ = kit.ToBool(lp)
 	}
 	if lno {
 		tv.SetFlag(int(TextViewHasLineNos))

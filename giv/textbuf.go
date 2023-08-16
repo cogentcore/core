@@ -153,6 +153,14 @@ type TextBuf struct {
 
 var TypeTextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
 
+func (tb *TextBuf) OnInit() {
+	if tb.Hi.Style != "" {
+		return
+	}
+	tb.SetHiStyle(histyle.StyleDefault)
+	tb.Opts.EditorPrefs = gi.Prefs.Editor
+}
+
 func (tb *TextBuf) Disconnect() {
 	tb.Node.Disconnect()
 	tb.TextBufSig.DisconnectAll()
@@ -247,7 +255,6 @@ func (tb *TextBuf) ClearChanged() {
 
 // SetText sets the text to given bytes
 func (tb *TextBuf) SetText(txt []byte) {
-	tb.Defaults()
 	tb.Txt = txt
 	tb.BytesToLines()
 	tb.InitialMarkup()
@@ -258,7 +265,6 @@ func (tb *TextBuf) SetText(txt []byte) {
 // SetTextLines sets the text to given lines of bytes
 // if cpy is true, make a copy of bytes -- otherwise use
 func (tb *TextBuf) SetTextLines(lns [][]byte, cpy bool) {
-	tb.Defaults()
 	tb.LinesMu.Lock()
 	tb.NLines = len(lns)
 	tb.LinesMu.Unlock()
@@ -357,16 +363,6 @@ func (tb *TextBuf) SetHiStyle(style gi.HiStyleName) {
 	tb.MarkupMu.Unlock()
 }
 
-// Defaults sets default parameters if they haven't been yet --
-// if Hi.Style is empty, then it considers it to not have been set
-func (tb *TextBuf) Defaults() {
-	if tb.Hi.Style != "" {
-		return
-	}
-	tb.SetHiStyle(histyle.StyleDefault)
-	tb.Opts.EditorPrefs = gi.Prefs.Editor
-}
-
 // Refresh signals any views to refresh views
 func (tb *TextBuf) Refresh() {
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
@@ -383,7 +379,6 @@ func (tb *TextBuf) SetInactive(inactive bool) {
 
 // New initializes a new buffer with n blank lines
 func (tb *TextBuf) New(nlines int) {
-	tb.Defaults()
 	nlines = ints.MaxInt(nlines, 1)
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
@@ -476,7 +471,6 @@ func (tb *TextBuf) FileModCheck() bool {
 
 // Open loads text from a file into the buffer
 func (tb *TextBuf) Open(filename gi.FileName) error {
-	tb.Defaults()
 	err := tb.OpenFile(filename)
 	if err != nil {
 		vp := tb.ViewportFromView()
