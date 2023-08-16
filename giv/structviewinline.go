@@ -5,8 +5,8 @@
 package giv
 
 import (
-	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
@@ -54,6 +54,18 @@ var TypeStructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInli
 // AddNewStructViewInline adds a new inline structview to given parent node, with given name.
 func AddNewStructViewInline(parent ki.Ki, name string) *StructViewInline {
 	return parent.AddNewChild(TypeStructViewInline, name).(*StructViewInline)
+}
+
+func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		if w.Parent().Name() == "Parts" && strings.HasPrefix(w.Name(), "label-") {
+			label := child.(*gi.Label)
+			label.Redrawable = true
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.AlignH = gist.AlignLeft
+			})
+		}
+	}
 }
 
 func (sv *StructViewInline) Disconnect() {
@@ -115,8 +127,8 @@ func (sv *StructViewInline) ConfigParts() {
 		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave, sv.ViewPath)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
-		labnm := fmt.Sprintf("label-%v", field.Name)
-		valnm := fmt.Sprintf("value-%v", field.Name)
+		labnm := "label-" + field.Name
+		valnm := "value-" + field.Name
 		config.Add(gi.TypeLabel, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.FieldViews = append(sv.FieldViews, vv)
@@ -134,8 +146,6 @@ func (sv *StructViewInline) ConfigParts() {
 		lbl := sv.Parts.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewPath = sv.ViewPath
-		lbl.Redrawable = true
-		lbl.SetProp("horizontal-align", gist.AlignLeft)
 		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled()) // in structview.go
 		if hasDef {
