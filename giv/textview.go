@@ -3751,7 +3751,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	tv.LineNoRender.SetString(lnstr, fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := mat32.Vec2{}
 	lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
-	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - +mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
+	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
 	pos.X = float32(tv.VpBBox.Min.X) + spc.Pos().X
 
 	tv.LineNoRender.Render(rs, pos)

@@ -46,6 +46,7 @@ func mainrun() {
 	makeButtons(win, tv)
 	makeInputs(tv)
 	makeLayouts(tv)
+	makeFileTree(tv)
 	doWindowSetup(win, vp)
 
 	vp.UpdateEndNoSig(updt)
@@ -440,7 +441,6 @@ func makeInputs(tv *gi.TabView) {
 	tbuf := &giv.TextBuf{}
 	tbuf.InitName(tbuf, "tbuf")
 	tbuf.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
-	tbuf.Opts.LineNos = false
 
 	tview := giv.AddNewTextView(inputs, "tview")
 	tview.SetBuf(tbuf)
@@ -487,6 +487,11 @@ func makeLayouts(tv *gi.TabView) {
 	// rightTitle := gi.AddNewLabel(right, "rightTitle", "Right")
 	// rightTitle.Type = gi.LabelHeadlineMedium
 
+}
+
+func makeFileTree(tv *gi.TabView) {
+	filetree := tv.AddNewTab(gi.TypeFrame, "File Tree").(*gi.Frame)
+	filetree.Lay = gi.LayoutVert
 }
 
 func doWindowSetup(win *gi.Window, vp *gi.Viewport2D) {

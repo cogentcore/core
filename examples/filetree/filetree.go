@@ -57,6 +57,30 @@ func AddNewFileBrowse(parent ki.Ki, name string) *FileBrowse {
 	return parent.AddNewChild(TypeFileBrowse, name).(*FileBrowse)
 }
 
+func (fb *FileBrowse) OnInit() {
+	fb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.BackgroundColor.SetColor(gi.ColorScheme.Background)
+		s.Color = gi.ColorScheme.OnBackground
+		s.SetStretchMax()
+		s.Margin.Set(units.Px(8 * gi.Prefs.DensityMul()))
+	})
+}
+
+func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "title":
+			title := child.(*gi.Label)
+			title.Type = gi.LabelHeadlineSmall
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMaxWidth()
+				s.AlignH = gist.AlignCenter
+				s.AlignV = gist.AlignTop
+			})
+		}
+	}
+}
+
 // UpdateFiles updates the list of files saved in project
 func (fb *FileBrowse) UpdateFiles() {
 	if fb.FilesView == nil {
@@ -417,15 +441,6 @@ func (fb *FileBrowse) Render2D() {
 }
 
 var FileBrowseProps = ki.Props{
-	"background-color": &gi.Prefs.Colors.Background,
-	"color":            &gi.Prefs.Colors.Font,
-	"max-width":        -1,
-	"max-height":       -1,
-	"#title": ki.Props{
-		"max-width":        -1,
-		"horizontal-align": gist.AlignCenter,
-		"vertical-align":   gist.AlignTop,
-	},
 	"ToolBar": ki.PropSlice{
 		{"UpdateFiles", ki.Props{
 			"shortcut": "Command+U",

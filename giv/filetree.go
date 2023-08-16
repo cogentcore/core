@@ -1749,13 +1749,41 @@ var TypeFileTreeView = kit.Types.AddType(&FileTreeView{}, nil)
 // AddNewFileTreeView adds a new filetreeview to given parent node, with given name.
 func AddNewFileTreeView(parent ki.Ki, name string) *FileTreeView {
 	tv := parent.AddNewChild(TypeFileTreeView, name).(*FileTreeView)
-	tv.SetFlag(int(TreeViewFlagUpdtRoot)) // filetree needs this
-	tv.OpenDepth = 4
 	return tv
 }
 
+// exists for same reason as TreeView one (init cycle)
 func init() {
 	kit.Types.SetProps(TypeFileTreeView, FileTreeViewProps)
+}
+
+func (ftv *FileTreeView) OnInit() {
+	ftv.SetFlag(int(TreeViewFlagUpdtRoot)) // filetree needs this
+	ftv.OpenDepth = 4
+	ftv.Indent.SetEm(1)
+	ftv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Radius.Set()
+		s.Margin.Set()
+		s.Padding.Set()
+		s.Text.Align = gist.AlignLeft
+		s.AlignV = gist.AlignTop
+		if w.IsSelected() {
+			s.BackgroundColor.SetColor(gi.ColorScheme.TertiaryContainer)
+		}
+	})
+}
+
+func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "Parts":
+			parts := child.(*gi.Layout)
+			parts.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				parts.Spacing.SetCh(0.5)
+			})
+		}
+	}
 }
 
 // FileNode returns the SrcNode as a FileNode
@@ -2633,18 +2661,7 @@ var VcsLabelFunc = LabelFunc(func(fni any, act *gi.Action) string {
 })
 
 var FileTreeViewProps = ki.Props{
-	ki.EnumTypeFlag:    TypeTreeViewFlags,
-	"indent":           units.Ch(2),
-	"spacing":          units.Ch(.5),
-	"border-width":     units.Px(0),
-	"border-radius":    units.Px(0),
-	"padding":          units.Px(0),
-	"margin":           units.Px(1),
-	"text-align":       gist.AlignLeft,
-	"vertical-align":   gist.AlignTop,
-	"color":            &gi.Prefs.Colors.Font,
-	"background-color": "inherit",
-	"no-templates":     true,
+	ki.EnumTypeFlag: TypeTreeViewFlags,
 	".exec": ki.Props{
 		"font-weight": gist.WeightBold,
 	},
