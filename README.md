@@ -28,7 +28,7 @@ In
 
 ## CIELAB
 
-L*a*b* is defined in the CIELAB color space: https://en.wikipedia.org/wiki/CIELAB_color_space
+L\*a\*b\* is defined in the CIELAB color space: https://en.wikipedia.org/wiki/CIELAB_color_space
 
 
 
