@@ -20,7 +20,6 @@ import (
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -2166,8 +2165,10 @@ func (tb *TextBuf) SetLineIcon(ln int, icon icons.Icon) {
 		ic = &gi.Icon{}
 		ic.InitName(ic, string(icon))
 		ic.SetIcon(icon)
-		ic.SetProp("width", units.Em(1))
-		ic.SetProp("height", units.Em(1))
+		ic.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			s.Width.SetEm(1)
+			s.Height.SetEm(1)
+		})
 		tb.Icons[icon] = ic
 	}
 }
