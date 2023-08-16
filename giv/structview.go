@@ -90,6 +90,10 @@ func (sv *StructView) OnInit() {
 func (sv *StructView) OnChildAdded(child ki.Ki) {
 	if w := gi.KiAsWidget(child); w != nil {
 		switch w.Name() {
+		case "toolbar":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMaxWidth()
+			})
 		case "struct-grid":
 			sg := child.(*gi.Frame)
 			sg.Lay = gi.LayoutGrid
@@ -230,7 +234,6 @@ func (sv *StructView) ConfigToolbar() {
 		return
 	}
 	tb := sv.ToolBar()
-	tb.SetStretchMaxWidth()
 	svtp := kit.NonPtrType(reflect.TypeOf(sv.Struct))
 	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
