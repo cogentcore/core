@@ -17,6 +17,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -79,6 +80,14 @@ type FileView struct {
 }
 
 var TypeFileView = kit.Types.AddType(&FileView{}, FileViewProps)
+
+func (fv *FileView) OnInit() {
+	fv.Lay = gi.LayoutVert
+	fv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		fv.Spacing = gi.StdDialogVSpaceUnits
+		s.SetStretchMax()
+	})
+}
 
 func (fv *FileView) Disconnect() {
 	if fv.Watcher != nil {
@@ -160,11 +169,7 @@ func (fv *FileView) SelectFile() {
 }
 
 var FileViewProps = ki.Props{
-	ki.EnumTypeFlag:    gi.TypeNodeFlags,
-	"color":            &gi.Prefs.Colors.Font,
-	"background-color": &gi.Prefs.Colors.Background,
-	"max-width":        -1,
-	"max-height":       -1,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // FileViewKindColorMap translates file Kinds into different colors for the file viewer
@@ -233,8 +238,6 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 
 // Config configures the view
 func (fv *FileView) Config() {
-	fv.Lay = gi.LayoutVert
-	fv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "path-tbar")
 	config.Add(gi.TypeLayout, "files-row")
