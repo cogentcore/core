@@ -11,6 +11,7 @@ import (
 	"log"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -271,7 +272,9 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 		}
 		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
 			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-				s.Text.WhiteSpace = gist.WhiteSpacePre // need to show padding spaces at start of index
+				s.MinWidth.SetEm(1.5)
+				s.Padding.Right.SetPx(4 * gi.Prefs.DensityMul())
+				s.Text.Align = gist.AlignRight
 			})
 		}
 	}
@@ -745,8 +748,8 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
 
 		vtyp := vv.WidgetType()
-		itxt := fmt.Sprintf("%05d", i)
-		sitxt := fmt.Sprintf("%5d", si)
+		itxt := strconv.Itoa(i)
+		sitxt := strconv.Itoa(si)
 		labnm := "index-" + itxt
 		valnm := "value-" + itxt
 
