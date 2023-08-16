@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
@@ -76,6 +77,20 @@ func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
 				s.SetStretchMaxWidth()
 				s.AlignH = gist.AlignCenter
 				s.AlignV = gist.AlignTop
+			})
+		case "splitview":
+			split := child.(*gi.SplitView)
+			split.Dim = mat32.X
+		}
+		ip, _ := w.IndexInParent()
+		if w.Parent().Name() == "splitview" && ip > 0 {
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMax()
+				s.SetMinPrefWidth(units.Ch(20))
+				s.SetMinPrefHeight(units.Ch(10))
+				s.Font.Family = string(gi.Prefs.MonoFont)
+				s.Text.WhiteSpace = gist.WhiteSpacePreWrap
+				s.Text.TabSize = 4
 			})
 		}
 	}
@@ -359,12 +374,6 @@ func (fb *FileBrowse) ConfigSplitView() {
 	if split == nil {
 		return
 	}
-	split.Dim = mat32.X
-	//	split.Dim = mat32.Y
-
-	split.SetProp("white-space", gist.WhiteSpacePreWrap)
-	split.SetProp("tab-size", 4)
-	split.SetProp("font-family", "Go Mono")
 
 	config := fb.SplitViewConfig()
 	mods, updt := split.ConfigChildren(config)
@@ -376,12 +385,8 @@ func (fb *FileBrowse) ConfigSplitView() {
 
 		for i := 0; i < fb.NTextViews; i++ {
 			txly := split.Child(1 + i).(*gi.Layout)
-			txly.SetStretchMaxWidth()
-			txly.SetStretchMaxHeight()
-			txly.SetMinPrefWidth(units.Ch(20))
-			txly.SetMinPrefHeight(units.Ch(10))
 
-			txed := giv.AddNewTextView(txly, fmt.Sprintf("textview-%v", i))
+			txed := giv.AddNewTextView(txly, "textview-"+strconv.Itoa(i))
 			txed.Viewport = fb.Viewport
 		}
 

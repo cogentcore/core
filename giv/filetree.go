@@ -1470,6 +1470,7 @@ func BlameDialog(avp *gi.Viewport2D, fname string, blame, fbytes []byte) *TwinTe
 	tv.SetSplits(.2, .8)
 
 	tva, tvb := tv.TextViews()
+	// STYTODO: replace these styles with CustomOnChildAdded
 	tva.SetProp("white-space", gist.WhiteSpacePre)
 	tvb.SetProp("white-space", gist.WhiteSpacePre)
 	tva.SetProp("width", units.Ch(30))
