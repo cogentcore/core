@@ -161,7 +161,6 @@ func PrefsDbgView(pf *gi.PrefsDebug) *gi.Window {
 	sv := AddNewStructView(mfr, "sv")
 	sv.Viewport = vp
 	sv.SetStruct(pf)
-	sv.SetStretchMaxWidth()
 	sv.SetStretchMax()
 
 	// mmen := win.MainMenu
