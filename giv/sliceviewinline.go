@@ -7,6 +7,7 @@ package giv
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
@@ -58,6 +59,19 @@ func (sv *SliceViewInline) OnInit() {
 	})
 }
 
+func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "Parts":
+			parts := child.(*gi.Layout)
+			parts.Lay = gi.LayoutHoriz
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Overflow = gist.OverflowHidden // no scrollbars!
+			})
+		}
+	}
+}
+
 func (sv *SliceViewInline) Disconnect() {
 	sv.PartsWidgetBase.Disconnect()
 	sv.ViewSig.DisconnectAll()
@@ -99,8 +113,6 @@ func (sv *SliceViewInline) ConfigParts() {
 	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
-	sv.Parts.Lay = gi.LayoutHoriz
-	sv.Parts.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.Values = make([]ValueView, 0)
@@ -118,8 +130,8 @@ func (sv *SliceViewInline) ConfigParts() {
 		}
 		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave, sv.ViewPath)
 		vtyp := vv.WidgetType()
-		idxtxt := fmt.Sprintf("%05d", i)
-		valnm := fmt.Sprintf("value-%v", idxtxt)
+		idxtxt := strconv.Itoa(i)
+		valnm := "value-" + idxtxt
 		config.Add(vtyp, valnm)
 		sv.Values = append(sv.Values, vv)
 	}

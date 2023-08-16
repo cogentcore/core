@@ -12,6 +12,8 @@ import (
 	"github.com/goki/ki/ki"
 )
 
+// TODO: make base simplified preferences view, improve organization of information, and maybe add titles
+
 // PrefsView opens a view of user preferences
 func PrefsView(pf *gi.Preferences) *gi.Window {
 	winm := "gogi-prefs"
