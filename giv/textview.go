@@ -576,6 +576,7 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 
 // HiStyle applies the highlighting styles from buffer markup style
 func (tv *TextView) HiStyle() {
+	// STYTODO: need to figure out what to do with histyle
 	if !tv.Buf.Hi.HasHi() {
 		return
 	}

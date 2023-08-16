@@ -5,8 +5,6 @@
 package giv
 
 import (
-	"fmt"
-
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
@@ -147,8 +145,8 @@ func (av *ArgView) ConfigArgsGrid() {
 		}
 		vtyp := ad.View.WidgetType()
 		knm := strcase.ToKebab(ad.Name)
-		labnm := fmt.Sprintf("label-%v", knm)
-		valnm := fmt.Sprintf("value-%v", knm)
+		labnm := "label-" + knm
+		valnm := "value-" + knm
 		config.Add(gi.TypeLabel, labnm)
 		config.Add(vtyp, valnm)
 	}
@@ -172,7 +170,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		})
 		lbl.Text = ad.Name
 		lbl.Tooltip = ad.Desc
-		widg := sg.Child((i * 2) + 1).(*gi.WidgetBase)
+		widg := sg.Child((i * 2) + 1).(gi.Node2D)
 		ad.View.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
