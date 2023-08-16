@@ -1818,6 +1818,9 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 // SetCursor sets the cursor based on the given mouse event.
 // Also handles sending widget selection events.
 func (w *Window) SetCursor(me *mouse.MoveEvent) {
+	if w.IsClosing() {
+		return
+	}
 	maxLevel := 0
 	maxLevelWidget := &WidgetBase{}
 	maxLevelCursor := cursor.Arrow
