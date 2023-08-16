@@ -91,7 +91,6 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb.Stat() // update markup
 
 	tlv := frame.InsertNewChild(gi.TypeLayout, prIdx+1, "text-lay").(*gi.Layout)
-	tlv.SetProp("line-nos", opts.LineNos)
 	tlv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.Width.SetCh(80)
 		s.Height.SetEm(40)

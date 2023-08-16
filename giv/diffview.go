@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
@@ -87,8 +88,6 @@ func DiffViewDialog(avp *gi.Viewport2D, astr, bstr []string, afile, bfile, arev,
 	_, prIdx := dlg.PromptWidget(frame)
 
 	dv := frame.InsertNewChild(TypeDiffView, prIdx+1, "diff-view").(*DiffView)
-	// dv.SetProp("width", units.NewEm(20))
-	// dv.SetProp("height", units.NewEm(10))
 	dv.SetStretchMax()
 	dv.FileA = afile
 	dv.FileB = bfile
@@ -151,6 +150,41 @@ var TypeDiffView = kit.Types.AddType(&DiffView{}, DiffViewProps)
 // AddNewDiffView adds a new diffview to given parent node, with given name.
 func AddNewDiffView(parent ki.Ki, name string) *DiffView {
 	return parent.AddNewChild(TypeDiffView, name).(*DiffView)
+}
+
+func (dv *DiffView) OnInit() {
+	dv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.BackgroundColor.SetSolid(gi.ColorScheme.Background)
+		s.Color = gi.ColorScheme.OnBackground
+		s.SetStretchMax()
+	})
+}
+
+func (dv *DiffView) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "text-a-lay", "text-b-lay":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMax()
+				s.SetMinPrefWidth(units.Ch(80))
+				s.SetMinPrefHeight(units.Em(40))
+			})
+		case "text-a", "text-b":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Font.Family = string(gi.Prefs.MonoFont)
+			})
+		case "toolbar":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMaxWidth()
+			})
+		case "diff-lay":
+			df := child.(*gi.Layout)
+			df.Lay = gi.LayoutHoriz
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.SetStretchMax()
+			})
+		}
+	}
 }
 
 // NextDiff moves to next diff region
@@ -602,7 +636,6 @@ func (dv *DiffView) HasDiffsUpdate(act *gi.Action) {
 
 func (dv *DiffView) ConfigToolBar() {
 	tb := dv.ToolBar()
-	tb.SetStretchMaxWidth()
 	txta := "A: " + DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
@@ -728,8 +761,6 @@ func (dv *DiffView) ConfigTexts() {
 	dv.BufB.Filename = gi.FileName(dv.FileB)
 	dv.BufB.Opts.LineNos = true
 	dv.BufB.Stat() // update markup
-	lay.Lay = gi.LayoutHoriz
-	lay.SetStretchMax()
 	config := kit.TypeAndNameList{}
 	config.Add(gi.TypeLayout, "text-a-lay")
 	config.Add(gi.TypeLayout, "text-b-lay")
@@ -738,17 +769,8 @@ func (dv *DiffView) ConfigTexts() {
 	if !mods {
 		updt = lay.UpdateStart()
 	} else {
-		al.SetStretchMax()
-		al.SetMinPrefWidth(units.Ch(80))
-		al.SetMinPrefHeight(units.Em(40))
-		bl.SetStretchMax()
-		bl.SetMinPrefWidth(units.Ch(80))
-		bl.SetMinPrefHeight(units.Em(40))
-
 		av := AddNewDiffTextView(al, "text-a")
 		bv := AddNewDiffTextView(bl, "text-b")
-		av.SetProp("font-family", gi.Prefs.MonoFont)
-		bv.SetProp("font-family", gi.Prefs.MonoFont)
 		// av.SetInactive()
 		// bv.SetInactive()
 		av.SetBuf(dv.BufA)
@@ -774,11 +796,7 @@ func (dv *DiffView) IsConfiged() bool {
 
 // DiffViewProps are style properties for DiffView
 var DiffViewProps = ki.Props{
-	ki.EnumTypeFlag:    gi.TypeNodeFlags,
-	"max-width":        -1,
-	"max-height":       -1,
-	"background-color": &gi.Prefs.Colors.Background,
-	"color":            &gi.Prefs.Colors.Font,
+	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"CallMethods": ki.PropSlice{
 		{"SaveFileA", ki.Props{
 			"Args": ki.PropSlice{
