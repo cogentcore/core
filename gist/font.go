@@ -24,17 +24,17 @@ type Font struct {
 	// prop: opacity = alpha value to apply to all elements
 	Opacity float32 `xml:"opacity" desc:"prop: opacity = alpha value to apply to all elements"`
 
-	// prop: font-size (inherited)= size of font to render -- convert to points when getting font to use
-	Size units.Value `xml:"font-size" inherit:"true" desc:"prop: font-size (inherited)= size of font to render -- convert to points when getting font to use"`
+	// prop: font-size (inherited) = size of font to render -- convert to points when getting font to use
+	Size units.Value `xml:"font-size" inherit:"true" desc:"prop: font-size (inherited) = size of font to render -- convert to points when getting font to use"`
 
 	// prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse
 	Family string `xml:"font-family" inherit:"true" desc:"prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse"`
 
-	// prop: font-style = style -- normal, italic, etc
-	Style FontStyles `xml:"font-style" inherit:"true" desc:"prop: font-style = style -- normal, italic, etc"`
+	// prop: font-style (inherited) = style -- normal, italic, etc
+	Style FontStyles `xml:"font-style" inherit:"true" desc:"prop: font-style (inherited) = style -- normal, italic, etc"`
 
-	// prop: font-weight = weight: normal, bold, etc
-	Weight FontWeights `xml:"font-weight" inherit:"true" desc:"prop: font-weight = weight: normal, bold, etc"`
+	// prop: font-weight (inherited) = weight: normal, bold, etc
+	Weight FontWeights `xml:"font-weight" inherit:"true" desc:"prop: font-weight (inherited) = weight: normal, bold, etc"`
 
 	// prop: font-stretch = font stretch / condense options
 	Stretch FontStretch `xml:"font-stretch" inherit:"true" desc:"prop: font-stretch = font stretch / condense options"`

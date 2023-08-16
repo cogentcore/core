@@ -23,7 +23,6 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/icons"
@@ -1771,6 +1770,24 @@ func (ftv *FileTreeView) OnInit() {
 		if w.IsSelected() {
 			s.BackgroundColor.SetColor(gi.ColorScheme.TertiaryContainer)
 		}
+		switch w.Class {
+		case "exec":
+			s.Font.Weight = gist.WeightBold
+		case "open":
+			s.Font.Style = gist.FontItalic
+		case "untracked":
+			s.Color = gist.MustColorFromHex("#808080")
+		case "modified":
+			s.Color = gist.MustColorFromHex("#4b7fd1")
+		case "added":
+			s.Color = gist.MustColorFromHex("#008800")
+		case "deleted":
+			s.Color = gist.MustColorFromHex("#ff4252")
+		case "conflicted":
+			s.Color = gist.MustColorFromHex("#ce8020")
+		case "updated":
+			s.Color = gist.MustColorFromHex("#008060")
+		}
 	})
 }
 
@@ -1782,6 +1799,37 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 			parts.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				parts.Spacing.SetCh(0.5)
 			})
+		case "icon":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Width.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "branch":
+			cb := child.(*gi.CheckBox)
+			cb.Icon = icons.FolderOpen
+			cb.IconOff = icons.Folder
+			cb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+				s.MaxWidth.SetEm(1.5)
+				s.MaxHeight.SetEm(1.5)
+				s.AlignV = gist.AlignMiddle
+			})
+		case "space":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Width.SetEm(0.5)
+			})
+		case "label":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+				s.MinWidth.SetCh(16)
+			})
+		case "menu":
+			menu := child.(*gi.Button)
+			menu.Indicator = icons.None
 		}
 	}
 }
@@ -2662,65 +2710,6 @@ var VcsLabelFunc = LabelFunc(func(fni any, act *gi.Action) string {
 
 var FileTreeViewProps = ki.Props{
 	ki.EnumTypeFlag: TypeTreeViewFlags,
-	".exec": ki.Props{
-		"font-weight": gist.WeightBold,
-	},
-	".open": ki.Props{
-		"font-style": gist.FontItalic,
-	},
-	".untracked": ki.Props{
-		"color": "#808080",
-	},
-	".modified": ki.Props{
-		"color": "#4b7fd1",
-	},
-	".added": ki.Props{
-		"color": "#008800",
-	},
-	".deleted": ki.Props{
-		"color": "#ff4252",
-	},
-	".conflicted": ki.Props{
-		"color": "#ce8020",
-	},
-	".updated": ki.Props{
-		"color": "#008060",
-	},
-	"#icon": ki.Props{
-		"width":   units.Em(1),
-		"height":  units.Em(1),
-		"margin":  units.Px(0),
-		"padding": units.Px(0),
-		"fill":    &gi.Prefs.Colors.Icon,
-		"stroke":  &gi.Prefs.Colors.Font,
-	},
-	"#branch": ki.Props{
-		"icon":             icons.FolderOpen,
-		"icon-off":         "folder",
-		"margin":           units.Px(0),
-		"padding":          units.Px(0),
-		"background-color": colors.Transparent,
-		"max-width":        units.Em(.8),
-		"max-height":       units.Em(.8),
-	},
-	"#space": ki.Props{
-		"width": units.Em(.5),
-	},
-	"#label": ki.Props{
-		"margin":    units.Px(0),
-		"padding":   units.Px(0),
-		"min-width": units.Ch(16),
-	},
-	"#menu": ki.Props{
-		"indicator": icons.None,
-	},
-	TreeViewSelectors[TreeViewActive]: ki.Props{},
-	TreeViewSelectors[TreeViewSel]: ki.Props{
-		"background-color": &gi.Prefs.Colors.Select,
-	},
-	TreeViewSelectors[TreeViewFocus]: ki.Props{
-		"background-color": &gi.Prefs.Colors.Control,
-	},
 	"CtxtMenuActive": ki.PropSlice{
 		{"ShowFileInfo", ki.Props{
 			"label": "File Info",
