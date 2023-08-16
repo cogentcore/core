@@ -79,6 +79,7 @@ func AddNewStructView(parent ki.Ki, name string) *StructView {
 }
 
 func (sv *StructView) OnInit() {
+	sv.ShowToolBar = true
 	sv.Lay = gi.LayoutVert
 	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		sv.Spacing = gi.StdDialogVSpaceUnits

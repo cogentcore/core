@@ -71,6 +71,7 @@ func AddNewMapView(parent ki.Ki, name string) *MapView {
 }
 
 func (mv *MapView) OnInit() {
+	mv.ShowToolBar = true
 	mv.Lay = gi.LayoutVert
 	mv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		mv.Spacing = gi.StdDialogVSpaceUnits

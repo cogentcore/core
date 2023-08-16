@@ -245,6 +245,7 @@ func AddNewSliceViewBase(parent ki.Ki, name string) *SliceViewBase {
 func (sv *SliceViewBase) OnInit() {
 	sv.SelectMode = false
 	sv.ShowIndex = true
+	sv.ShowToolBar = true
 	sv.InactKeyNav = true
 
 	sv.Lay = gi.LayoutVert
