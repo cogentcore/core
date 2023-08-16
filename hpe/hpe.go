@@ -42,5 +42,5 @@ func SRGBToLMS(r, g, b float32) (l, m, s float32) {
     Y = -0.7036f * X + 1.6975f * Y + 0.0061f * Z;
     Z = 0.0030f * X + 0.0136f * Y + 0.9834 * Z;
   }
-  // #CAT_ColorSpace convert Long, Medium, Short cone-based responses to XYZ, using the Hunt-Pointer-Estevez transform -- this is closer to the actual response functions of the L,M,S cones apparently
+  // convert Long, Medium, Short cone-based responses to XYZ, using the Hunt-Pointer-Estevez transform -- this is closer to the actual response functions of the L,M,S cones apparently
 */
