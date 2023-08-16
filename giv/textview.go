@@ -169,6 +169,31 @@ func AddNewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
 	return tv, ly
 }
 
+func (tv *TextView) OnInit() {
+	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		tv.CursorWidth.SetPx(3)
+
+		if gi.Prefs.Editor.WordWrap {
+			s.Text.WhiteSpace = gist.WhiteSpacePreWrap
+		} else {
+			s.Text.WhiteSpace = gist.WhiteSpacePre
+		}
+		s.Border.Style.Set(gist.BorderNone) // don't render our own border
+		s.Margin.Set()
+		s.Padding.Set(units.Px(4 * gi.Prefs.DensityMul()))
+		s.AlignV = gist.AlignTop
+		s.Text.Align = gist.AlignLeft
+		s.Text.TabSize = 4
+		s.Color = gi.ColorScheme.OnSurface
+
+		if w.HasFocus() {
+			s.BackgroundColor.SetSolid(gi.ColorScheme.Surface)
+		} else {
+			s.BackgroundColor.SetSolid(gi.ColorScheme.SurfaceContainer)
+		}
+	})
+}
+
 func (tv *TextView) Disconnect() {
 	tv.WidgetBase.Disconnect()
 	tv.TextViewSig.DisconnectAll()
@@ -176,34 +201,22 @@ func (tv *TextView) Disconnect() {
 }
 
 var TextViewProps = ki.Props{
-	ki.EnumTypeFlag:    TypeTextViewFlags,
-	"white-space":      gist.WhiteSpacePreWrap,
-	"border-width":     0, // don't render our own border
-	"cursor-width":     units.Px(3),
-	"border-color":     &gi.Prefs.Colors.Border,
-	"border-style":     gist.BorderSolid,
-	"padding":          units.Px(2),
-	"margin":           units.Px(2),
-	"vertical-align":   gist.AlignTop,
-	"text-align":       gist.AlignLeft,
-	"tab-size":         4,
-	"color":            &gi.Prefs.Colors.Font,
-	"background-color": &gi.Prefs.Colors.Background,
-	TextViewSelectors[TextViewActive]: ki.Props{
-		"background-color": "highlight-10",
-	},
-	TextViewSelectors[TextViewFocus]: ki.Props{
-		"background-color": "lighter-0",
-	},
-	TextViewSelectors[TextViewInactive]: ki.Props{
-		"background-color": "highlight-20",
-	},
-	TextViewSelectors[TextViewSel]: ki.Props{
-		"background-color": &gi.Prefs.Colors.Select,
-	},
-	TextViewSelectors[TextViewHighlight]: ki.Props{
-		"background-color": &gi.Prefs.Colors.Highlight,
-	},
+	ki.EnumTypeFlag: TypeTextViewFlags,
+	// TextViewSelectors[TextViewActive]: ki.Props{
+	// 	"background-color": "highlight-10",
+	// },
+	// TextViewSelectors[TextViewFocus]: ki.Props{
+	// 	"background-color": "lighter-0",
+	// },
+	// TextViewSelectors[TextViewInactive]: ki.Props{
+	// 	"background-color": "highlight-20",
+	// },
+	// TextViewSelectors[TextViewSel]: ki.Props{
+	// 	"background-color": &gi.Prefs.Colors.Select,
+	// },
+	// TextViewSelectors[TextViewHighlight]: ki.Props{
+	// 	"background-color": &gi.Prefs.Colors.Highlight,
+	// },
 }
 
 // TextViewSignals are signals that text view can send
@@ -4802,13 +4815,6 @@ func (tv *TextView) StyleTextView() {
 	tv.StyMu.Lock()
 	defer tv.StyMu.Unlock()
 
-	if _, has := tv.Props["white-space"]; !has {
-		if gi.Prefs.Editor.WordWrap {
-			tv.SetProp("white-space", gist.WhiteSpacePreWrap)
-		} else {
-			tv.SetProp("white-space", gist.WhiteSpacePre)
-		}
-	}
 	if gist.RebuildDefaultStyles {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)
