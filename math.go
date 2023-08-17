@@ -204,6 +204,11 @@ func Ldexp(frac float32, exp int) float32 {
 	return float32(math.Ldexp(float64(frac), exp))
 }
 
+// Lerp is linear interpolation between start and stop in proportion to amount
+func Lerp(start, stop, amount float32) float32 {
+	return (1-amount)*start + amount*stop
+}
+
 func Lgamma(x float32) (lgamma float32, sign int) {
 	var l float64
 	l, sign = math.Lgamma(float64(x))
