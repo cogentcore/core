@@ -449,70 +449,6 @@ func (wb *WidgetBase) SetFixedHeight(val units.Value) {
 	})
 }
 
-// WidgetDefStyleKey is the key for accessing the default style stored in the
-// type-properties for a given type -- also ones with sub-selectors for parts
-// in there with selector appended to this key
-var WidgetDefStyleKey = "__DefStyle"
-
-// WidgetDefPropsKey is the key for accessing the default style properties
-// stored in the type-properties for a given type -- also ones with
-// sub-selectors for parts in there with selector appended to this key
-var WidgetDefPropsKey = "__DefProps"
-
-// DefaultStyle2DWidget retrieves default style object for the type, from type
-// properties -- selector is optional selector for state etc.  Property key is
-// "__DefStyle" + selector -- if part != nil, then use that obj for getting
-// the default style starting point when creating a new style.  Also stores a
-// "__DefProps"+selector type property of the props used for styling here, for
-// accessing properties that are not compiled into standard Style object.
-func DefaultStyle2DWidget(wb *WidgetBase, selector string, part *WidgetBase) *gist.Style {
-	tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
-	styprops := tprops
-	if selector != "" {
-		sp, ok := kit.TypeProp(tprops, selector)
-		if !ok {
-			// log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, ki.Type(wb).Name())
-		} else {
-			spm, ok := sp.(ki.Props)
-			if !ok {
-				log.Printf("gi.DefaultStyle2DWidget: looking for a ki.Props for style selector: %v, instead got type: %T, for node type: %v\n", selector, spm, ki.Type(wb).Name())
-			} else {
-				styprops = spm
-			}
-		}
-	}
-
-	parSty := wb.ParentActiveStyle()
-
-	var dsty *gist.Style
-	stKey := WidgetDefStyleKey + selector
-	prKey := WidgetDefPropsKey + selector
-	dstyi, ok := kit.TypeProp(tprops, stKey)
-	if !ok || gist.RebuildDefaultStyles {
-		dsty = &gist.Style{}
-		dsty.Defaults()
-		if selector != "" {
-			var baseStyle *gist.Style
-			if part != nil {
-				baseStyle = DefaultStyle2DWidget(part, "", nil)
-			} else {
-				baseStyle = DefaultStyle2DWidget(wb, "", nil)
-			}
-			*dsty = *baseStyle
-		}
-		kit.TypesMu.Lock() // write lock
-		dsty.SetStyleProps(parSty, styprops, wb.Viewport)
-		dsty.IsSet = false // keep as non-set
-		tprops[stKey] = dsty
-		tprops[prKey] = styprops
-		kit.TypesMu.Unlock()
-	} else {
-		dsty, _ = dstyi.(*gist.Style)
-	}
-	wb.ParentStyleRUnlock()
-	return dsty
-}
-
 // Style2DWidget styles the Style values from node properties and optional
 // base-level defaults -- for Widget-style nodes.
 // must be called under a StyMu Lock
@@ -524,50 +460,15 @@ func (wb *WidgetBase) Style2DWidget() {
 		return
 	}
 
-	// gii, _ := wb.This().(Node2D)
-	// wb.Viewport.SetCurStyleNode(gii)
-	// defer wb.Viewport.SetCurStyleNode(nil)
+	// STYTODO: there should be a better way to do this
+	gii, _ := wb.This().(Node2D)
+	wb.Viewport.SetCurStyleNode(gii)
+	defer wb.Viewport.SetCurStyleNode(nil)
 
-	// wb.Style.CopyFrom(DefaultStyle2DWidget(wb, "", nil))
-	// wb.Style.IsSet = false  // this is always first call, restart
-	// if wb.Viewport == nil { // robust
-	// 	wb.StyMu.Unlock()
-	// 	gii.Init2D()
-	// 	wb.StyMu.Lock()
-	// }
-	// sty := gist.Style{}
-	// sty.Defaults()
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
 		wb.Style.InheritFields(parSty)
 		wb.ParentStyleRUnlock()
 	}
-
-	// styprops := *wb.Properties()
-	// parSty := wb.ParentActiveStyle()
-	// wb.Style.SetStyleProps(parSty, styprops, wb.Viewport)
-
-	// // look for class-specific style sheets among defaults -- have to do these
-	// // dynamically now -- cannot compile into default which is type-general
-	// tprops := *kit.Types.Properties(ki.Type(wb), true) // true = makeNew
-	// kit.TypesMu.RLock()
-	// classes := strings.Split(strings.ToLower(wb.Class), " ")
-	// for _, cl := range classes {
-	// 	clsty := "." + strings.TrimSpace(cl)
-	// 	if sp, ok := ki.SubProps(tprops, clsty); ok {
-	// 		wb.Style.SetStyleProps(parSty, sp, wb.Viewport)
-	// 	}
-	// }
-	// kit.TypesMu.RUnlock()
-	// wb.ParentStyleRUnlock()
-
-	// pagg := wb.ParentCSSAgg()
-	// if pagg != nil {
-	// 	AggCSS(&wb.CSSAgg, *pagg)
-	// } else {
-	// 	wb.CSSAgg = nil // restart
-	// }
-	// AggCSS(&wb.CSSAgg, wb.CSS)
-	// StyleCSS(gii, wb.Viewport, &wb.Style, wb.CSSAgg, "")
 
 	wb.RunStyleFuncs()
 
