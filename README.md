@@ -50,6 +50,8 @@ See [hct](hct) for implementation.
 * Chroma is CAM16.Chroma
 * Tone is LAB Lstar (L\*)
 
+![hct colorspace](examples/hctspace/hctspace.png)
+
 # Color in V1
 
 Two effective populations of cells in V1: double-opponent and single-opponent
