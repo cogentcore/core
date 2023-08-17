@@ -697,19 +697,6 @@ func (sr *SliderBase) StyleSlider() {
 	defer sr.StyMu.Unlock()
 
 	sr.Style2DWidget()
-	pst := &(sr.Par.(Node2D).AsWidget().Style)
-	for i := 0; i < int(SliderStatesN); i++ {
-		sr.StateStyles[i].CopyFrom(&sr.Style)
-		sr.StateStyles[i].SetStyleProps(pst, sr.StyleProps(SliderSelectors[i]), sr.Viewport)
-		sr.StateStyles[i].CopyUnitContext(&sr.Style.UnContext)
-	}
-	sr.StyleFromProps(sr.Props, sr.Viewport)           // does all the min / max / step etc
-	tprops := *kit.Types.Properties(ki.Type(sr), true) // true = makeNew
-	if len(tprops) > 0 {
-		kit.TypesMu.RLock()
-		sr.StyleFromProps(tprops, sr.Viewport)
-		kit.TypesMu.RUnlock()
-	}
 	sr.StyleToDots(&sr.Style.UnContext)
 	sr.ThSize = sr.ThumbSize.Dots
 }

@@ -1586,26 +1586,6 @@ func (tf *TextField) StyleTextField() {
 	if hasTempl && saveTempl {
 		tf.Style.SaveTemplate()
 	}
-	pst := &(tf.Par.(Node2D).AsWidget().Style)
-	if hasTempl && !saveTempl {
-		for i := 0; i < int(TextFieldStatesN); i++ {
-			tf.StateStyles[i].Template = tf.Style.Template + TextFieldSelectors[i]
-			tf.StateStyles[i].FromTemplate()
-		}
-	} else {
-		for i := 0; i < int(TextFieldStatesN); i++ {
-			tf.StateStyles[i].CopyFrom(&tf.Style)
-			tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]), tf.Viewport)
-			tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
-		}
-	}
-	if hasTempl && saveTempl {
-		for i := 0; i < int(TextFieldStatesN); i++ {
-			tf.StateStyles[i].Template = tf.Style.Template + TextFieldSelectors[i]
-			tf.StateStyles[i].SaveTemplate()
-		}
-	}
-	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), ki.Inherit, ki.TypeProps) // get type defaults
 	tf.CursorWidth.ToDots(&tf.Style.UnContext)
 	tf.StyMu.Unlock()
 	tf.ConfigParts()

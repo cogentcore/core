@@ -2099,31 +2099,6 @@ func (tv *TreeView) StyleTreeView() {
 	if hasTempl && saveTempl {
 		tv.Style.SaveTemplate()
 	}
-	pst := &(tv.Par.(gi.Node2D).AsWidget().Style)
-	if hasTempl && !saveTempl {
-		for i := 0; i < int(TreeViewStatesN); i++ {
-			tv.StateStyles[i].Template = tv.Style.Template + TreeViewSelectors[i]
-			tv.StateStyles[i].FromTemplate()
-		}
-	} else {
-		for i := 0; i < int(TreeViewStatesN); i++ {
-			tv.StateStyles[i].CopyFrom(&tv.Style)
-			tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]), tv.Viewport)
-			tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
-		}
-	}
-	if hasTempl && saveTempl {
-		for i := 0; i < int(TreeViewStatesN); i++ {
-			tv.StateStyles[i].Template = tv.Style.Template + TreeViewSelectors[i]
-			tv.StateStyles[i].SaveTemplate()
-		}
-	}
-	val, has := tv.Props["open-depth"]
-	if has {
-		if iv, ok := kit.ToInt(val); ok {
-			tv.OpenDepth = int(iv)
-		}
-	}
 	tv.Indent.ToDots(&tv.Style.UnContext)
 	tv.Parts.Style.InheritFields(&tv.Style)
 	tv.StyMu.Unlock()

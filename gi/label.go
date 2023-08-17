@@ -479,29 +479,9 @@ func (lb *Label) StyleLabel() {
 	if hasTempl && saveTempl {
 		lb.Style.SaveTemplate()
 	}
-	parSty := lb.ParentActiveStyle()
-	if hasTempl && !saveTempl {
-		for i := 0; i < int(LabelStatesN); i++ {
-			lb.StateStyles[i].Template = lb.Style.Template + LabelSelectors[i]
-			lb.StateStyles[i].FromTemplate()
-		}
-	} else {
-		for i := 0; i < int(LabelStatesN); i++ {
-			lb.StateStyles[i].CopyFrom(&lb.Style)
-			lb.StateStyles[i].SetStyleProps(parSty, lb.StyleProps(LabelSelectors[i]), lb.Viewport)
-			lb.StateStyles[i].CopyUnitContext(&lb.Style.UnContext)
-		}
-	}
-	if hasTempl && saveTempl {
-		for i := 0; i < int(LabelStatesN); i++ {
-			lb.StateStyles[i].Template = lb.Style.Template + LabelSelectors[i]
-			lb.StateStyles[i].SaveTemplate()
-		}
-	}
 	if lb.CurBackgroundColor.IsNil() && !lb.Style.BackgroundColor.Color.IsNil() {
 		lb.CurBackgroundColor = lb.Style.BackgroundColor.Color
 	}
-	lb.ParentStyleRUnlock()
 }
 
 func (lb *Label) LayoutLabel() {

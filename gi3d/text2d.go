@@ -109,13 +109,6 @@ func (txt *Text2D) Init3D(sc *Scene) {
 // StyleText does basic 2D styling
 func (txt *Text2D) StyleText(sc *Scene) {
 	txt.Sty.Defaults()
-	txt.Sty.SetStyleProps(nil, *txt.Properties(), sc.Viewport)
-	pagg := txt.ParentCSSAgg()
-	if pagg != nil {
-		gi.AggCSS(&txt.CSSAgg, *pagg)
-	} else {
-		txt.CSSAgg = nil // restart
-	}
 	// css stuff only works for node2d
 	// gi.AggCSS(&txt.CSSAgg, txt.CSS)
 	// txt.Sty.StyleCSS(txt.This().(gi.Node2D), txt.CSSAgg, "", sc.Viewport)

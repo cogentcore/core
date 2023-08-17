@@ -306,23 +306,6 @@ func (s *Style) InheritFields(par *Style) {
 	s.Text.InheritFields(&par.Text)
 }
 
-// SetStyleProps sets style values based on given property map (name: value pairs),
-// inheriting elements as appropriate from parent
-func (s *Style) SetStyleProps(par *Style, props ki.Props, ctxt Context) {
-	if !s.IsSet && par != nil { // first time
-		s.InheritFields(par)
-	}
-	s.StyleFromProps(par, props, ctxt)
-	if s.Margin.Bottom.Dots > 0 && s.Text.ParaSpacing.Val == 0 {
-		s.Text.ParaSpacing = s.Margin.Bottom
-	}
-	s.LayoutSetStylePost(props)
-	s.Font.SetStylePost(props)
-	s.Text.SetStylePost(props)
-	s.PropsNil = (len(props) == 0)
-	s.IsSet = true
-}
-
 // StyleToDots runs ToDots on unit values, to compile down to raw pixels
 func (s *Style) StyleToDots(uc *units.Context) {
 	// none

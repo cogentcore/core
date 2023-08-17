@@ -4819,13 +4819,6 @@ func (tv *TextView) StyleTextView() {
 		}
 	}
 	tv.Style2DWidget()
-	pst := &(tv.Par.(gi.Node2D).AsWidget().Style)
-	for i := 0; i < int(TextViewStatesN); i++ {
-		tv.StateStyles[i].CopyFrom(&tv.Style)
-		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TextViewSelectors[i]), tv.Viewport)
-		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
-	}
-	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This(), ki.Inherit, ki.TypeProps)
 	tv.CursorWidth.ToDots(&tv.Style.UnContext)
 	if tv.Buf != nil {
 		tv.Buf.Opts.StyleFromProps(tv.Props)

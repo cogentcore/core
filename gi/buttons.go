@@ -650,39 +650,6 @@ func (bb *ButtonBase) StyleButton() {
 	} else {
 		bb.SetFlagState(!bb.IsDisabled(), int(CanFocus))
 	}
-	parSty := bb.ParentActiveStyle()
-	clsty := "." + bb.Class
-	var clsp ki.Props
-	if clspi, ok := bb.PropInherit(clsty, ki.NoInherit, ki.TypeProps); ok {
-		clsp, ok = clspi.(ki.Props)
-	}
-	if hasTempl && saveTempl {
-		bb.Style.SaveTemplate()
-	}
-	if hasTempl && !saveTempl {
-		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].Template = bb.Style.Template + ButtonSelectors[i]
-			bb.StateStyles[i].FromTemplate()
-		}
-	} else {
-		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].CopyFrom(&bb.Style)
-			bb.StateStyles[i].SetStyleProps(parSty, bb.StyleProps(ButtonSelectors[i]), bb.Viewport)
-			if clsp != nil {
-				if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
-					bb.StateStyles[i].SetStyleProps(parSty, stclsp, bb.Viewport)
-				}
-			}
-			bb.StateStyles[i].CopyUnitContext(&bb.Style.UnContext)
-		}
-	}
-	if hasTempl && saveTempl {
-		for i := 0; i < int(ButtonStatesN); i++ {
-			bb.StateStyles[i].Template = bb.Style.Template + ButtonSelectors[i]
-			bb.StateStyles[i].SaveTemplate()
-		}
-	}
-	bb.ParentStyleRUnlock()
 }
 
 func (bb *ButtonBase) Style2D() {
