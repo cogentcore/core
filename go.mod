@@ -18,7 +18,8 @@ require (
 	github.com/goki/go-difflib v1.2.1
 	github.com/goki/ki v1.1.16-0.20230812185917-db9a8362d270
 	github.com/goki/kigen v1.0.2
-	github.com/goki/mat32 v1.0.15
+	github.com/goki/mat32 v1.0.18
+	github.com/goki/matcolor v0.0.0-20230817233749-59b66dffda0f
 	github.com/goki/mobile v0.0.0-20230626225100-3417752baaf2
 	github.com/goki/pi v1.0.27
 	github.com/goki/prof v1.0.0
@@ -30,7 +31,7 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
-	golang.org/x/image v0.6.0
+	golang.org/x/image v0.11.0
 	golang.org/x/net v0.8.0
 )
 
@@ -42,6 +43,7 @@ require (
 	github.com/akutz/sortfold v0.2.1 // indirect
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/goki/cam v0.0.0-20230817230211-1cb2fe99d34e // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
@@ -51,6 +53,6 @@ require (
 	golang.org/x/mobile v0.0.0-20201217150744-e6ae53a27f4f // indirect
 	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
 )

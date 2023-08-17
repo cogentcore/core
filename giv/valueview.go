@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"reflect"
 	"strings"
@@ -308,7 +309,7 @@ func ToValueView(it any, tags string) ValueView {
 		}
 	case vk == reflect.Struct:
 		// note: we need to handle these here b/c cannot define new methods for gi types
-		if nptyp == gist.TypeColor {
+		if nptyp == gist.TypeColor || nptyp == kit.TypeFor[color.RGBA]() {
 			vv := &ColorValueView{}
 			ki.InitNode(vv)
 			return vv
@@ -328,7 +329,7 @@ func ToValueView(it any, tags string) ValueView {
 		// apparently (because the non-ptr vk indirection does that I guess?)
 		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
 		switch {
-		case nptyp == reflect.TypeOf((*reflect.Type)(nil)).Elem():
+		case nptyp == kit.TypeFor[reflect.Type]():
 			vv := &TypeValueView{}
 			ki.InitNode(vv)
 			return vv
