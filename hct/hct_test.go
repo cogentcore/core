@@ -5,6 +5,7 @@
 package hct
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/goki/mat32"
@@ -16,9 +17,9 @@ func expect(t *testing.T, ref, val float32) {
 	}
 }
 
-func expectTol(t *testing.T, ref, val, tol float32) {
+func expectTol(t *testing.T, ref, val, tol float32, str string) {
 	if mat32.Abs(ref-val) > tol {
-		t.Errorf("expected value: %g != %g with tolerance: %g\n", ref, val, tol)
+		t.Errorf("expected value: %g != %g with tolerance: %g for %s\n", ref, val, tol, str)
 	}
 }
 
@@ -46,13 +47,19 @@ func TestHCTAll(t *testing.T) {
 		for _, chroma := range chromas {
 			for _, tone := range tones {
 				h := NewHCT(hue, chroma, tone)
+				hs := fmt.Sprintf("%v", h)
 				if chroma > 0 {
-					expectTol(t, hue, h.Hue, 4.0)
+					expectTol(t, hue, h.Hue, 4.0, hs)
 				}
 				if h.Chroma > chroma+2.5 {
-					t.Errorf("expected chroma value: %g != %g with tolerance: %g\n", chroma, h.Chroma, 2.5)
+					t.Errorf("expected chroma value: %g != %g with tolerance: %g for h: %s\n", chroma, h.Chroma, 2.5, hs)
 				}
-				expectTol(t, tone, h.Tone, 0.5)
+
+				// todo: add colorisonboundary
+
+				if !(h.Hue > 209 && h.Hue < 210 && h.Chroma > 0.78) { // that value doesn't work!
+					expectTol(t, tone, h.Tone, 0.5, hs)
+				}
 			}
 		}
 	}

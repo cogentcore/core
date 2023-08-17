@@ -30,15 +30,25 @@ Robert W.G. Hunt established many of the key principles of color appearance mode
 
 See [cam02](cam02) for implementation, and [Moroney et al, 2002](#references) for description, along with this [wikipedia](https://en.wikipedia.org/wiki/CIECAM02) page.
 
-We implement the functions that transform RGB or XYZ directly into LMS, and 
- 
+We implement the functions that transform RGB or XYZ directly into LMS and color opponents.
+
+## CAM16
+
+See [cam16](cam16) for implementation, and [Li, Li, Wang et al, 2017](#references) for description.
 
 ## CIELAB
 
 L\*a\*b\* is defined in the CIELAB color space: https://en.wikipedia.org/wiki/CIELAB_color_space
 
+# HCT
 
+See [hct](hct) for implementation.
 
+[material design](https://material.io/blog/science-of-color-design) uses components of CAM16 and LAB to create an HCT (hue, chroma, tone) space that works well for automatically creating different color shades for GUIs.  The implementation in a variety of languages (excluding Go) is on github at: https://github.com/material-foundation/material-color-utilities -- we leveraged this code for our HCT implementation in Go.
+
+* Hue is CAM16.Hue
+* Chroma is CAM16.Chroma
+* Tone is LAB Lstar (L\*)
 
 # Color in V1
 
