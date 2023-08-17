@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package srgb
+package cie
 
 // SRGBLinToXYZ converts sRGB linear into XYZ CIE standard color space
 func SRGBLinToXYZ(rl, gl, bl float32) (x, y, z float32) {
@@ -34,10 +34,18 @@ func XYZToSRGB(x, y, z float32) (r, g, b float32) {
 	return
 }
 
-// XYZRenormD65 renormalizes XZY values relative to the D65 outdoor white light values
-func XYZRenormD65(x, y, z float32) (xr, yr, zr float32) {
+// XYZNormD65 normalizes XZY values relative to the D65 outdoor white light values
+func XYZNormD65(x, y, z float32) (xr, yr, zr float32) {
 	xr = x * (1 / 0.95047)
 	zr = z * (1 / 1.08883)
+	yr = y
+	return
+}
+
+// XYZDenormD65 de-normalizes XZY values relative to the D65 outdoor white light values
+func XYZDenormD65(x, y, z float32) (xr, yr, zr float32) {
+	xr = x * 0.95047
+	zr = z * 1.08883
 	yr = y
 	return
 }

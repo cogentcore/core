@@ -1,22 +1,24 @@
-The color axes in the human brain are R-G and B-Y. In color speak L = R, M = G, S = B (long, med, short wavelength) –- it is very clear that this is how color is coded in the LGN thalamus.
+# cam: Color Appearance Models
 
-# Color spaces and computational color
+The color axes in the human brain are Red-Green and Blue-Yellow. In color speak Red = Long, Green = Medium, Blue = Short wavelengths, or the [lms](lms) space, corresponding to the color absorption profile of cones in the fovea of the retina.
 
-i.e., how to quickly approximate color vision..
+# cie: International Commission on Illumination
 
-* using float32 components throughout
+See [cie](cie) for standard color spaces and values defined by the International Commission on Illumination (CIE), including [XYZ](https://en.wikipedia.org/wiki/CIE_1931_color_space) and [LAB](https://en.wikipedia.org/wiki/CIELAB_color_space) (L*a*b*) which can be easily computed from corresponding standard RGB (sRGB) values.
 
-* Here’s what is implemented: https://en.wikipedia.org/wiki/CIECAM02 – transforms RGB -> XYZ -> LMS -> color opponents which are the L, a, b values used in CIECAM0
+RGB as displayed on a computer monitor is typically "gamma corrected" to compensate for the luminance properties of the display, so this gamma correction must be removed before using RGB values to covert into other CIE spaces.
+
+* Here’s what is implemented: 
 
 * paper for this: Moroney et al., 2002
 
 * Color spaces based on LMS cones: https://en.wikipedia.org/wiki/LMS_color_space
 
-* Standard CIE 1931 XYZ color space: https://en.wikipedia.org/wiki/CIE_1931_color_space
+* Standard CIE 1931 XYZ color space: 
 
 * Standard color checker: https://en.wikipedia.org/wiki/ColorChecker
 
-# CAM02, CAM16, and CIELAB
+# CAM02, CAM16
 
 Robert W.G. Hunt established many of the key principles of color appearance models, as attested by the many references in [Helwig & Fairchild (2022)](#references) (HF22), which is a particularly good reference for actually explaining things in plain English.  [Moroney, N., Fairchild, M. D., Hunt, R. W. G., Li, C., Luo, M. R., & Newman, T. (2002)](#references) established the CIE CAM02 reference model, which set the standard for many years, until being revised in the CAM16 model.  Here's the HF22 explanation of the key factors in CAM02 and CAM16:
 
@@ -24,7 +26,12 @@ Robert W.G. Hunt established many of the key principles of color appearance mode
 
 > The perceptual attribute **colorfulness** describes the absolute chromatic intensity of a visual stimulus. Chroma and saturation are relative measures of colorfulness; **chroma** is defined as the colorfulness of a stimulus relative to the brightness of similarly illuminated white and **saturation** is defined as the colorfulness of a stimulus relative to its own brightness.
 
-In 
+## CAM02
+
+See [cam02](cam02) for implementation, and [Moroney et al, 2002](#references) for description, along with this [wikipedia](https://en.wikipedia.org/wiki/CIECAM02) page.
+
+We implement the functions that transform RGB or XYZ directly into LMS, and 
+ 
 
 ## CIELAB
 

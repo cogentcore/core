@@ -5,7 +5,7 @@
 package cam02
 
 import (
-	"github.com/goki/cam/srgb"
+	"github.com/goki/cam/cie"
 	"github.com/goki/mat32"
 )
 
@@ -35,20 +35,8 @@ func SRGBLinToLMS(rl, gl, bl float32) (l, m, s float32) {
 // using the CAT02 transform from CIECAM02 color appearance model
 // (MoroneyFairchildHuntEtAl02)
 func SRGBToLMS(r, g, b float32) (l, m, s float32) {
-	rl, gl, bl := srgb.SRGBToLinear(r, g, b)
+	rl, gl, bl := cie.SRGBToLinear(r, g, b)
 	l, m, s = SRGBLinToLMS(rl, gl, bl)
-	return
-}
-
-// SRGBToLMSComps converts sRGB to LMS components including opponents
-// using the HPE cone values: Red - Green (LvM) and Blue - Yellow (SvLM).
-// Includes the separate components in these subtractions as well.
-// Uses the CIECAM02 color appearance model (MoroneyFairchildHuntEtAl02)
-// https://en.wikipedia.org/wiki/CIECAM02
-// using the Hunt-Pointer-Estevez transform.
-func SRGBToLMSComps(r, g, b float32) (lc, mc, sc, lmc, lvm, svlm, grey float32) {
-	l, m, s := SRGBToLMS(r, g, b) // note: HPE
-	lc, mc, sc, lmc, lvm, svlm, grey = LMSToComps(l, m, s)
 	return
 }
 
@@ -64,10 +52,10 @@ func LMSToXYZ(l, m, s float32) (x, y, z float32) {
 ///////////////////////////////////
 // HPE versions
 
-// LuminanceAdaptation implements the luminance adaptation function
+// LuminanceAdapt implements the luminance adaptation function
 // equals 1 at background luminance of 200 so we generally ignore it..
 // bgLum is background luminance -- 200 default.
-func LuminanceAdaptation(bgLum float32) float32 {
+func LuminanceAdapt(bgLum float32) float32 {
 	lum5 := 5.0 * bgLum
 	k := 1.0 / (lum5 + 1)
 	k4 := k * k * k * k
@@ -88,23 +76,32 @@ func ResponseCompression(val float32) float32 {
 	return rc
 }
 
-// LMSToComps converts Long, Medium, Short cone-based responses
-// to components incl opponents: Red - Green (LvM) and Blue - Yellow (SvLM).
-// Includes the separate components in these subtractions as well
+// LMSToResp converts Long, Medium, Short cone-based values to
+// values that more closely reflect neural responses,
+// including a combined long-medium (yellow) channel (lmc).
 // Uses the CIECAM02 color appearance model (MoroneyFairchildHuntEtAl02)
 // https://en.wikipedia.org/wiki/CIECAM02
-func LMSToComps(l, m, s float32) (lc, mc, sc, lmc, lvm, svlm, grey float32) {
-	lrc := ResponseCompression(l)
-	mrc := ResponseCompression(m)
-	src := ResponseCompression(s)
+func LMSToResp(l, m, s float32) (lc, mc, sc, lmc, grey float32) {
+	lA := ResponseCompression(l)
+	mA := ResponseCompression(m)
+	sA := ResponseCompression(s)
 	// subtract min and mult by 6 gets values roughly into 1-0 range for L,M
-	lc = 6.0 * ((lrc + (1.0/11.0)*src) - 0.109091)
-	mc = 6.0 * (((12.0 / 11.0) * mrc) - 0.109091)
-	lvm = lc - mc // red-green subtracting "criterion for unique yellow"
-	lmc = 6.0 * (((1.0 / 9.0) * (lrc + mrc)) - 0.0222222)
-	sc = 6.0 * (((2.0 / 9.0) * src) - 0.0222222)
-	svlm = sc - lmc // blue-yellow contrast
-	grey = (1.0 / 0.431787) * (2.0*lrc + mrc + .05*src - 0.305)
+	lc = 6 * ((lA + (1/11)*sA) - 0.109091)
+	mc = 6 * (((12 / 11) * mA) - 0.109091)
+	sc = 6 * (((2 / 9) * sA) - 0.0222222)
+	lmc = 6 * (((1 / 9) * (lA + mA)) - 0.0222222)
+	grey = (1 / 0.431787) * (2*lA + mA + .05*sA - 0.305)
 	// note: last term should be: 0.725 * (1/5)^-0.2 = grey background assumption (Yb/Yw = 1/5) = 1
+	return
+}
+
+// SRGBToLMSResp converts sRGB to LMS neural response cone values,
+// that more closely reflect neural responses,
+// including a combined long-medium (yellow) channel (lmc).
+// Uses the CIECAM02 color appearance model (MoroneyFairchildHuntEtAl02)
+// https://en.wikipedia.org/wiki/CIECAM02
+func SRGBToLMSResp(r, g, b float32) (lc, mc, sc, lmc, grey float32) {
+	l, m, s := SRGBToLMS(r, g, b)
+	lc, mc, sc, lmc, grey = LMSToResp(l, m, s)
 	return
 }
