@@ -34,6 +34,15 @@ func SRGBToLinear(r, g, b float32) (rl, gl, bl float32) {
 	return
 }
 
+// SRGB100ToLinear converts set of sRGB components to linear values,
+// removing gamma correction.  returns 100-base RGB values
+func SRGB100ToLinear(r, g, b float32) (rl, gl, bl float32) {
+	rl = 100 * SRGBToLinearComp(r)
+	gl = 100 * SRGBToLinearComp(g)
+	bl = 100 * SRGBToLinearComp(b)
+	return
+}
+
 // SRGBFmLinear converts set of sRGB components from linear values,
 // adding gamma correction.
 func SRGBFmLinear(rl, gl, bl float32) (r, g, b float32) {

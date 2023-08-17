@@ -54,12 +54,6 @@ type View struct {
 	// [view: -] chromatic induction factor
 	NC float32 `view:"-" desc:"chromatic induction factor"`
 
-	// [view: -]
-	DRGBInverse mat32.Vec3 `view:"-" desc:"inverse of the RGBD factors`
-
-	// [view: -] cone responses to white point, adjusted for discounting
-	RGBD mat32.Vec3 `view:"-" desc:"cone responses to white point, adjusted for discounting"`
-
 	// [view: -] luminance-level adaptation factor, based on the HuntLiLuo03 equations
 	FL float32 `view:"-" desc:"luminance-level adaptation factor, based on the HuntLiLuo03 equations"`
 
@@ -68,6 +62,12 @@ type View struct {
 
 	// [view: -]
 	Z float32 `view:"-" desc:"base exponential nonlinearity`
+
+	// [view: -]
+	DRGBInverse mat32.Vec3 `view:"-" desc:"inverse of the RGBD factors`
+
+	// [view: -] cone responses to white point, adjusted for discounting
+	RGBD mat32.Vec3 `view:"-" desc:"cone responses to white point, adjusted for discounting"`
 }
 
 // NewView returns a new view with all parameters initialized based on given major params
@@ -102,18 +102,18 @@ func (vw *View) Update() {
 	rW, gW, bW := XYZToLMS(vw.WhitePoint.X, vw.WhitePoint.Y, vw.WhitePoint.Z)
 
 	// Scale input surround, domain (0, 2), to CAM16 surround, domain (0.8, 1.0)
-	vw.Surround = mat32.Clamp(vw.Surround, 0, 2.0)
-	f := 0.8 + (vw.Surround / 10.0)
+	vw.Surround = mat32.Clamp(vw.Surround, 0, 2)
+	f := 0.8 + (vw.Surround / 10)
 	// "Exponential non-linearity"
 	if f >= 0.9 {
-		vw.C = mat32.Lerp(0.59, 0.69, ((f - 0.9) * 10.0))
+		vw.C = mat32.Lerp(0.59, 0.69, ((f - 0.9) * 10))
 	} else {
-		vw.C = mat32.Lerp(0.525, 0.59, ((f - 0.8) * 10.0))
+		vw.C = mat32.Lerp(0.525, 0.59, ((f - 0.8) * 10))
 	}
 	// Calculate degree of adaptation to illuminant
 	d := float32(1)
 	if !vw.Adapted {
-		d = f * (1.0 - ((1.0 / 3.6) * mat32.Exp((-vw.AdaptingLuminance-42.0)/92.0)))
+		d = f * (1 - ((1 / 3.6) * mat32.Exp((-vw.AdaptingLuminance-42)/92)))
 	}
 
 	// Per Li et al, if D is greater than 1 or less than 0, set it to 1 or 0.
@@ -124,7 +124,7 @@ func (vw *View) Update() {
 
 	// Cone responses to the whitePoint, r/g/b/W, adjusted for discounting.
 	//
-	// Why use 100.0 instead of the white point's relative luminance?
+	// Why use 100 instead of the white point's relative luminance?
 	//
 	// Some papers and implementations, for both CAM02 and CAM16, use the Y
 	// value of the reference white instead of 100. Fairchild's Color Appearance
@@ -132,14 +132,14 @@ func (vw *View) Update() {
 	// CIE 2004a report on CIECAM02, but, later parts of the conversion process
 	// account for scaling of appearance relative to the white point relative
 	// luminance. This part should simply use 100 as luminance.
-	vw.RGBD.X = d*(100.0/rW) + 1.0 - d
-	vw.RGBD.Y = d*(100.0/gW) + 1.0 - d
-	vw.RGBD.Z = d*(100.0/bW) + 1.0 - d
+	vw.RGBD.X = d*(100/rW) + 1 - d
+	vw.RGBD.Y = d*(100/gW) + 1 - d
+	vw.RGBD.Z = d*(100/bW) + 1 - d
 
 	// Factor used in calculating meaningful factors
-	k := 1.0 / (5.0*vw.AdaptingLuminance + 1.0)
+	k := 1 / (5*vw.AdaptingLuminance + 1)
 	k4 := k * k * k * k
-	k4F := 1.0 - k4
+	k4F := 1 - k4
 
 	// Luminance-level adaptation factor
 	vw.FL = (k4 * vw.AdaptingLuminance) +
@@ -163,5 +163,5 @@ func (vw *View) Update() {
 	// adaptation perceptual nonlinearities.
 	rA, gA, bA := LuminanceAdapt(rW, gW, bW, vw)
 
-	vw.AW = (40.0*rA + 20.0*gA + bA) / (20.0 * vw.NBB)
+	vw.AW = ((40*rA + 20*gA + bA) / 20) * vw.NBB
 }

@@ -6,9 +6,9 @@ package cie
 
 // SRGBLinToXYZ converts sRGB linear into XYZ CIE standard color space
 func SRGBLinToXYZ(rl, gl, bl float32) (x, y, z float32) {
-	x = 0.4124*rl + 0.3576*gl + 0.1805*bl
+	x = 0.41233895*rl + 0.35762064*gl + 0.18051042*bl
 	y = 0.2126*rl + 0.7152*gl + 0.0722*bl
-	z = 0.0193*rl + 0.1192*gl + 0.9505*bl
+	z = 0.01932141*rl + 0.11916382*gl + 0.95034478*bl
 	return
 }
 
@@ -23,6 +23,14 @@ func XYZToSRGBLin(x, y, z float32) (rl, gl, bl float32) {
 // SRGBToXYZ converts sRGB into XYZ CIE standard color space
 func SRGBToXYZ(r, g, b float32) (x, y, z float32) {
 	rl, gl, bl := SRGBToLinear(r, g, b)
+	x, y, z = SRGBLinToXYZ(rl, gl, bl)
+	return
+}
+
+// SRGB100ToXYZ converts sRGB into XYZ CIE standard color space
+// with 100-base sRGB values -- used for CAM16 but not CAM02
+func SRGB100ToXYZ(r, g, b float32) (x, y, z float32) {
+	rl, gl, bl := SRGB100ToLinear(r, g, b)
 	x, y, z = SRGBLinToXYZ(rl, gl, bl)
 	return
 }

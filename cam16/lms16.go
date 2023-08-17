@@ -4,7 +4,9 @@
 
 package cam16
 
-import "github.com/goki/mat32"
+import (
+	"github.com/goki/mat32"
+)
 
 // XYZToLMS converts XYZ to Long, Medium, Short cone-based responses,
 // using the CAT16 transform from CIECAM16 color appearance model
@@ -52,6 +54,7 @@ func LuminanceAdapt(l, m, s float32, vw *View) (lA, mA, sA float32) {
 // opponent redVgreen (a) and yellowVblue (b), and grey (achromatic) values,
 // that more closely reflect neural responses.
 // greyNorm is a normalizing grey factor used in the CAM16 model.
+// l, m, s values must be in 100-base units.
 // Uses the CIECAM16 color appearance model.
 func LMSToOps(l, m, s float32, vw *View) (redVgreen, yellowVblue, grey, greyNorm float32) {
 	// Discount illuminant and adapt
@@ -59,7 +62,7 @@ func LMSToOps(l, m, s float32, vw *View) (redVgreen, yellowVblue, grey, greyNorm
 	redVgreen = (11*lA + -12*mA + sA) / 11
 	yellowVblue = (lA + mA - 2*sA) / 9
 	// auxiliary components
-	grey = (40.0*lA + 20.0*mA + sA) / 20.0          // achromatic response, multiplied * view.NBB
-	greyNorm = (20.0*lA + 20.0*mA + 21.0*sA) / 20.0 // normalizing factor
+	grey = (40*lA + 20*mA + sA) / 20        // achromatic response, multiplied * view.NBB
+	greyNorm = (20*lA + 20*mA + 21*sA) / 20 // normalizing factor
 	return
 }

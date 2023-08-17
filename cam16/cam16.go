@@ -8,7 +8,9 @@
 
 package cam16
 
-import "github.com/goki/mat32"
+import (
+	"github.com/goki/mat32"
+)
 
 // CAM represents a point in the cam16 color model along 6 dimensions
 // representing the perceived hue, colorfulness, and brightness,
@@ -51,13 +53,13 @@ func XYZToCAM(x, y, z float32) *CAM {
 }
 
 // XYZToCAMView returns CAM values from given XYZ color coordinate,
-// under given viewing conditions
+// under given viewing conditions.  Requires 100-base XYZ coordinates.
 func XYZToCAMView(x, y, z float32, vw *View) *CAM {
 	l, m, s := XYZToLMS(x, y, z)
 	redVgreen, yellowVblue, grey, greyNorm := LMSToOps(l, m, s, vw)
 
 	hue := mat32.RadToDeg(mat32.Atan2(yellowVblue, redVgreen))
-	if hue > 360 {
+	if hue >= 360 {
 		hue -= 360
 	}
 	if hue < 0 {
