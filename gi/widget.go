@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"strings"
 	"sync"
 
 	"github.com/goki/gi/girl"
@@ -486,45 +485,6 @@ func (wb *WidgetBase) RunStyleFuncs() {
 	for _, s := range wb.Stylers {
 		s(wb, &wb.Style)
 	}
-}
-
-// ApplyCSS applies css styles for given node, using key to select sub-props
-// from overall properties list, and optional selector to select a further
-// :name selector within that key
-func ApplyCSS(node Node2D, vp *Viewport2D, st *gist.Style, css ki.Props, key, selector string) bool {
-	pp, got := css[key]
-	if !got {
-		return false
-	}
-	pmap, ok := pp.(ki.Props) // must be a props map
-	if !ok {
-		return false
-	}
-	if selector != "" {
-		pmap, ok = gist.SubProps(pmap, selector)
-		if !ok {
-			return false
-		}
-	}
-	parSty := node.AsNode2D().ParentActiveStyle()
-	st.SetStyleProps(parSty, pmap, vp)
-	node.AsNode2D().ParentStyleRUnlock()
-	return true
-}
-
-// StyleCSS applies css style properties to given Widget node, parsing out
-// type, .class, and #name selectors, along with optional sub-selector
-// (:hover, :active etc)
-func StyleCSS(node Node2D, vp *Viewport2D, st *gist.Style, css ki.Props, selector string) {
-	tyn := strings.ToLower(ki.Type(node).Name()) // type is most general, first
-	ApplyCSS(node, vp, st, css, tyn, selector)
-	classes := strings.Split(strings.ToLower(node.AsNode2D().Class), " ")
-	for _, cl := range classes {
-		cln := "." + strings.TrimSpace(cl)
-		ApplyCSS(node, vp, st, css, cln, selector)
-	}
-	idnm := "#" + strings.ToLower(node.Name()) // then name
-	ApplyCSS(node, vp, st, css, idnm, selector)
 }
 
 func (wb *WidgetBase) Style2D() {

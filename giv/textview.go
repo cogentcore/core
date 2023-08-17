@@ -4823,7 +4823,6 @@ func (tv *TextView) StyleTextView() {
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Style)
 		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TextViewSelectors[i]), tv.Viewport)
-		gi.StyleCSS(tv.This().(gi.Node2D), tv.Viewport, &tv.StateStyles[i], tv.CSSAgg, TextViewSelectors[i])
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
 	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This(), ki.Inherit, ki.TypeProps)
