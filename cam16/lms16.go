@@ -39,6 +39,12 @@ func LuminanceAdaptComp(v, d, fl float32) float32 {
 	return (mat32.Sign(vd) * 400 * f) / (f + 27.13)
 }
 
+func InverseChromaticAdapt(adapted float32) float32 {
+	adapted_abs := mat32.Abs(adapted)
+	base := mat32.Max(0, 27.13*adapted_abs/(400.0-adapted_abs))
+	return mat32.Sign(adapted) * mat32.Pow(base, 1.0/0.42)
+}
+
 // LuminanceAdapt performs luminance adaptation
 // and response compression according to the CAM16 model,
 // on given r,g,b components, using equations from HuntLiLuo03

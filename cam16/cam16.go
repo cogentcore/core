@@ -9,6 +9,7 @@
 package cam16
 
 import (
+	"github.com/goki/cam/cie"
 	"github.com/goki/mat32"
 )
 
@@ -46,6 +47,13 @@ func (cam *CAM) UCS() (j, m, a, b float32) {
 	return
 }
 
+// SRGBToCAM returns CAM values from given SRGB color coordinates,
+// under standard viewing conditions.  The RGB value range is 0-1,
+// and RGB values have gamma correction.
+func SRGBToCAM(r, g, b float32) *CAM {
+	return XYZToCAM(cie.SRGB100ToXYZ(r, g, b))
+}
+
 // XYZToCAM returns CAM values from given XYZ color coordinate,
 // under standard viewing conditions
 func XYZToCAM(x, y, z float32) *CAM {
@@ -58,13 +66,7 @@ func XYZToCAMView(x, y, z float32, vw *View) *CAM {
 	l, m, s := XYZToLMS(x, y, z)
 	redVgreen, yellowVblue, grey, greyNorm := LMSToOps(l, m, s, vw)
 
-	hue := mat32.RadToDeg(mat32.Atan2(yellowVblue, redVgreen))
-	if hue >= 360 {
-		hue -= 360
-	}
-	if hue < 0 {
-		hue += 360
-	}
+	hue := SanitizeDeg(mat32.RadToDeg(mat32.Atan2(yellowVblue, redVgreen)))
 	// achromatic response to color
 	ac := grey * vw.NBB
 

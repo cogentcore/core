@@ -7,7 +7,6 @@ package cam16
 import (
 	"testing"
 
-	"github.com/goki/cam/cie"
 	"github.com/goki/mat32"
 )
 
@@ -39,13 +38,36 @@ func TestView(t *testing.T) {
 }
 
 func TestCAM(t *testing.T) {
-	// vw := NewStdView()
-	camw := XYZToCAM(cie.SRGB100ToXYZ(1, 1, 1))
-	// fmt.Printf("%#v\n", camw)
-	expect(t, 100, camw.Lightness)
-	expect(t, 2.869, camw.Chroma)
+	camw := SRGBToCAM(1, 1, 1)
 	expect(t, 209.492, camw.Hue)
+	expect(t, 2.869, camw.Chroma)
+	expect(t, 100, camw.Lightness)
 	expect(t, 2.265, camw.Colorfulness)
 	expect(t, 12.068, camw.Saturation)
 	expect(t, 155.521, camw.Brightness)
+
+	camr := SRGBToCAM(1, 0, 0)
+	expect(t, 27.408, camr.Hue)
+	expect(t, 113.354, camr.Chroma)
+	expect(t, 46.445, camr.Lightness)
+	expect(t, 89.490, camr.Colorfulness)
+	expect(t, 91.889, camr.Saturation)
+	expect(t, 105.988, camr.Brightness)
+
+	camg := SRGBToCAM(0, 1, 0)
+	expect(t, 142.139, camg.Hue)
+	expect(t, 108.406, camg.Chroma)
+	expect(t, 79.331, camg.Lightness)
+	expect(t, 85.584, camg.Colorfulness)
+	expect(t, 78.604, camg.Saturation)
+	expect(t, 138.520, camg.Brightness)
+
+	camb := SRGBToCAM(0, 0, 1)
+	expect(t, 282.788, camb.Hue)
+	expect(t, 87.227, camb.Chroma)
+	expect(t, 25.465, camb.Lightness)
+	expect(t, 68.864, camb.Colorfulness)
+	expect(t, 93.674, camb.Saturation)
+	expect(t, 78.481, camb.Brightness)
+
 }
