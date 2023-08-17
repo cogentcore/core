@@ -9,7 +9,6 @@ import (
 	"image"
 	"log"
 	"strings"
-	"sync"
 
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/gist/colors"
@@ -53,9 +52,6 @@ type ButtonBase struct {
 
 	// [view: -] set this to make a menu on demand -- if set then this button acts like a menu button
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
-
-	// [view: -] button state mutex
-	ButStateMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"button state mutex"`
 }
 
 var TypeButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
@@ -490,10 +486,7 @@ func (bb *ButtonBase) StyleButton() {
 	bb.StyMu.Lock()
 	defer bb.StyMu.Unlock()
 
-	hasTempl, saveTempl := bb.Style.FromTemplate()
-	if !hasTempl || saveTempl {
-		bb.Style2DWidget()
-	}
+	bb.Style2DWidget()
 	bb.This().(ButtonWidget).StyleParts()
 	if nf, err := bb.PropTry("no-focus"); err == nil {
 		bb.SetFlagState(!bb.IsDisabled() && !nf.(bool), int(CanFocus))
