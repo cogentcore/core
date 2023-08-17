@@ -488,52 +488,6 @@ func (wb *WidgetBase) RunStyleFuncs() {
 	}
 }
 
-// StylePart sets the style properties for a child in parts (or any other
-// child) based on its name -- only call this when new parts were created --
-// name of properties is #partname (lower cased) and it should contain a
-// ki.Props which is then added to the part's props -- this provides built-in
-// defaults for parts, so it is separate from the CSS process
-func (wb *WidgetBase) StylePart(pk Node2D) {
-	if pk == nil {
-		return
-	}
-	pg := pk.AsWidget()
-	if pg == nil {
-		return
-	}
-	// pr := prof.Start("StylePart")
-	// defer pr.End()
-	// if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
-	// 	return
-	// }
-	stynm := "#" + strings.ToLower(pk.Name())
-	// this is called on US (the parent object) so we store the #partname
-	// default style within our type properties..  that's good -- HOWEVER we
-	// cannot put any sub-selector properties within these part styles -- must
-	// all be in the base-level.. hopefully that works..
-	// pdst := DefaultStyle2DWidget(wb, stynm, pg)
-	// pg.DefStyle = pdst // will use this as starting point for all styles now..
-
-	if ics := pk.Embed(TypeIcon); ics != nil {
-		ic := ics.(*Icon)
-		styprops := kit.Types.Properties(ki.Type(wb), true)
-		if sp, ok := ki.SubProps(*styprops, stynm); ok {
-			if fill, ok := sp["fill"]; ok {
-				ic.SetProp("fill", fill)
-			}
-			if stroke, ok := sp["stroke"]; ok {
-				ic.SetProp("stroke", stroke)
-			}
-		}
-		if sp, ok := ki.SubProps(*wb.Properties(), stynm); ok {
-			for k, v := range sp {
-				ic.SetProp(k, v)
-			}
-		}
-		ic.SetFullReRender()
-	}
-}
-
 // ApplyCSS applies css styles for given node, using key to select sub-props
 // from overall properties list, and optional selector to select a further
 // :name selector within that key
@@ -1269,9 +1223,7 @@ func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, 
 		if wb.Style.Template != "" {
 			ic.Style.Template = wb.Style.Template + ".icon"
 		}
-		if set, _ := ic.SetIcon(icnm); set || wb.NeedsFullReRender() {
-			wb.StylePart(Node2D(ic))
-		}
+		ic.SetIcon(icnm)
 	}
 	if lbIdx >= 0 {
 		lbl := wb.Parts.Child(lbIdx).(*Label)
@@ -1279,10 +1231,6 @@ func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, 
 			lbl.Style.Template = wb.Style.Template + ".icon"
 		}
 		if lbl.Text != txt {
-			wb.StylePart(Node2D(lbl))
-			if icIdx >= 0 {
-				wb.StylePart(wb.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
-			}
 			// avoiding SetText here makes it so label default
 			// styles don't end up first, which is needed for
 			// parent styles to override. However, there might have

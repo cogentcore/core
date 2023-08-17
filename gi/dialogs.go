@@ -265,8 +265,6 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		}
 		x = ints.MinInt(x, win.Viewport.Geom.Size.X-vpsz.X) // fit
 		y = ints.MinInt(y, win.Viewport.Geom.Size.Y-vpsz.Y) // fit
-		frame := dlg.Child(0).(*Frame)
-		dlg.StylePart(Node2D(frame)) // use special styles
 		dlg.SetFlag(int(VpFlagPopup))
 		dlg.Resize(vpsz)
 		dlg.Geom.Pos = image.Point{x, y}
@@ -342,7 +340,6 @@ func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	dlg.Title = title
 	if frame != nil {
 		lab := AddNewLabel(frame, "title", title)
-		dlg.StylePart(Node2D(lab))
 		return lab
 	}
 	return nil
@@ -363,7 +360,6 @@ func (dlg *Dialog) SetPrompt(prompt string, frame *Frame) *Label {
 	dlg.Prompt = prompt
 	if frame != nil {
 		lab := AddNewLabel(frame, "prompt", prompt)
-		dlg.StylePart(Node2D(lab))
 		return lab
 	}
 	return nil

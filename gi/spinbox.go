@@ -216,9 +216,9 @@ func (sb *SpinBox) ConfigParts() {
 	mods, updt := sb.Parts.ConfigChildren(config)
 	if mods || gist.RebuildDefaultStyles {
 		if !sb.IsDisabled() {
+			// STYTODO: maybe do some of this config in OnChildAdded?
 			buts := sb.Parts.ChildByName("buttons", 1).(*Layout)
 			buts.Lay = LayoutVert
-			sb.StylePart(Node2D(buts))
 			buts.SetNChildren(2, TypeAction, "but")
 			// up
 			up := buts.Child(0).(*Action)
@@ -230,7 +230,6 @@ func (sb *SpinBox) ConfigParts() {
 			if sb.Style.Template != "" {
 				up.Style.Template = sb.Style.Template + ".up"
 			}
-			sb.StylePart(Node2D(up))
 			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				sbb := recv.Embed(TypeSpinBox).(*SpinBox)
 				sbb.IncrValue(1.0)
@@ -241,7 +240,6 @@ func (sb *SpinBox) ConfigParts() {
 			dn.SetName("down")
 			dn.SetProp("no-focus", true)
 			dn.Icon = sb.DownIcon
-			sb.StylePart(Node2D(dn))
 			if sb.Style.Template != "" {
 				dn.Style.Template = sb.Style.Template + ".dn"
 			}
@@ -254,7 +252,6 @@ func (sb *SpinBox) ConfigParts() {
 			if sb.Style.Template != "" {
 				sp.Style.Template = sb.Style.Template + ".space"
 			}
-			sb.StylePart(sp) // also get the space
 		}
 		// text-field
 		tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
@@ -264,7 +261,6 @@ func (sb *SpinBox) ConfigParts() {
 		if sb.Style.Template != "" {
 			tf.Style.Template = sb.Style.Template + ".text"
 		}
-		sb.StylePart(Node2D(tf))
 		tf.Txt = sb.ValToString(sb.Value)
 		if !sb.IsDisabled() {
 			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {

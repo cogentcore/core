@@ -252,8 +252,6 @@ func (ac *Action) ConfigPartsShortcut(scIdx int) {
 	sclbl := ac.Shortcut.Shortcut()
 	if sc.Text != sclbl {
 		sc.Text = sclbl
-		ac.StylePart(Node2D(sc))
-		ac.StylePart(ac.Parts.Child(scIdx - 1).(Node2D)) // also get the stretch
 	}
 }
 

@@ -1543,7 +1543,6 @@ func (tf *TextField) ConfigParts() {
 	if mods || gist.RebuildDefaultStyles {
 		if leadIconIdx != -1 {
 			leadIcon := tf.Parts.Child(leadIconIdx).(*Action)
-			tf.StylePart(Node2D(leadIcon))
 			leadIcon.SetIcon(tf.LeadingIcon)
 			tf.LeadingIconSig.Mu.RLock()
 			leadIcon.ActionSig.Mu.Lock()
@@ -1553,7 +1552,6 @@ func (tf *TextField) ConfigParts() {
 		}
 		if trailIconIdx != -1 {
 			trailIcon := tf.Parts.Child(trailIconIdx).(*Action)
-			tf.StylePart(Node2D(trailIcon))
 			trailIcon.SetIcon(tf.TrailingIcon)
 			tf.TrailingIconSig.Mu.RLock()
 			trailIcon.ActionSig.Mu.Lock()

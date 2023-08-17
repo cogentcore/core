@@ -1922,35 +1922,13 @@ func (tv *TreeView) ConfigParts() {
 		config.Add(gi.TypeIcon, "icon")
 	}
 	config.Add(gi.TypeLabel, "label")
-	mods, updt := tv.Parts.ConfigChildren(config)
+	_, updt := tv.Parts.ConfigChildren(config)
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
 			if wb.Style.Template != "giv.TreeView.Branch" {
-				// wb.SetProp("#icon0", TVBranchProps)
-				// wb.SetProp("#icon1", TVBranchProps)
 				wb.SetProp("no-focus", true) // note: cannot be in compiled props
 				wb.Style.Template = "giv.TreeView.Branch"
-				// unfortunately StylePart only handles default Style obj -- not
-				// these special styles.. todo: fix this somehow
-				// if bprpi, err := tv.PropTry("#branch"); err == nil {
-				// 	switch pr := bprpi.(type) {
-				// 	case map[string]any:
-				// 		wb.SetIconProps(ki.Props(pr))
-				// 	case ki.Props:
-				// 		wb.SetIconProps(pr)
-				// 	}
-				// } else {
-				// 	tprops := *kit.Types.Properties(ki.Type(tv), true) // true = makeNew
-				// 	if bprpi, ok := kit.TypeProp(tprops, gi.WidgetDefPropsKey+"#branch"); ok {
-				// 		switch pr := bprpi.(type) {
-				// 		case map[string]any:
-				// 			wb.SetIconProps(ki.Props(pr))
-				// 		case ki.Props:
-				// 			wb.SetIconProps(pr)
-				// 		}
-				// 	}
-				// }
-				tv.StylePart(gi.Node2D(wb))
+				// STYTODO: do we really need this?
 				wb.Style2D() // this is key for getting styling to take effect on first try
 			}
 		}
@@ -1959,10 +1937,7 @@ func (tv *TreeView) ConfigParts() {
 		if ic, ok := tv.IconPart(); ok {
 			// this only works after a second redraw..
 			// ic.Sty.Template = "giv.TreeView.Icon"
-			set, _ := ic.SetIcon(tv.Icon)
-			if set || tv.NeedsFullReRender() || tv.RootView.NeedsFullReRender() || mods {
-				tv.StylePart(gi.Node2D(ic))
-			}
+			ic.SetIcon(tv.Icon)
 		}
 	}
 	if lbl, ok := tv.LabelPart(); ok {
@@ -1974,9 +1949,6 @@ func (tv *TreeView) ConfigParts() {
 		// }
 		tv.Style.Font.CopyNonDefaultProps(lbl.This()) // copy our properties to label
 		lbl.SetText(tv.Label())
-		if mods {
-			tv.StylePart(gi.Node2D(lbl))
-		}
 	}
 	tv.Parts.UpdateEnd(updt)
 }

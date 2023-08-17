@@ -705,7 +705,6 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 		if tb.Indicator.IsNil() {
 			tb.Indicator = icons.Close
 		}
-		tb.StylePart(Node2D(cls))
 
 		icnm := tb.Indicator
 		cls.SetIcon(icnm)

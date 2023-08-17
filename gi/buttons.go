@@ -443,10 +443,7 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	if icnm.IsNil() {
 		icnm = icons.KeyboardArrowDown
 	}
-	if set, _ := ic.SetIcon(icnm); set {
-		bb.StylePart(bb.Parts.Child(indIdx - 1).(Node2D)) // also get the stretch
-		bb.StylePart(Node2D(ic))
-	}
+	ic.SetIcon(icnm)
 }
 
 // ButtonEnterHover called when button starting hover
@@ -1047,13 +1044,9 @@ func (cb *CheckBox) ConfigParts() {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, TypeIcon, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
-		if set, _ := icon.SetIcon(cb.Icon); set {
-			cb.StylePart(Node2D(icon))
-		}
+		icon.SetIcon(cb.Icon)
 		icoff := ist.Child(1).(*Icon)
-		if set, _ := icoff.SetIcon(cb.IconOff); set {
-			cb.StylePart(Node2D(icoff))
-		}
+		icoff.SetIcon(cb.IconOff)
 	}
 	if cb.IsChecked() {
 		ist.StackTop = 0
@@ -1063,8 +1056,6 @@ func (cb *CheckBox) ConfigParts() {
 	if lbIdx >= 0 {
 		lbl := cb.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != cb.Text {
-			cb.StylePart(cb.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
-			cb.StylePart(Node2D(lbl))
 			lbl.SetText(cb.Text)
 		}
 	}
@@ -1082,17 +1073,13 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 	if TheIconMgr.IsValid(cb.Icon) {
 		icon := ist.Child(0).(*Icon)
 		if !icon.HasChildren() || icon.Nm != string(cb.Icon) || cb.NeedsFullReRender() {
-			if set, _ := icon.SetIcon(cb.Icon); set {
-				cb.StylePart(Node2D(icon))
-			}
+			icon.SetIcon(cb.Icon)
 		}
 	}
 	if TheIconMgr.IsValid(cb.IconOff) {
 		icoff := ist.Child(1).(*Icon)
 		if !icoff.HasChildren() || icoff.Nm != string(cb.IconOff) || cb.NeedsFullReRender() {
-			if set, _ := icoff.SetIcon(cb.IconOff); set {
-				cb.StylePart(Node2D(icoff))
-			}
+			icoff.SetIcon(cb.IconOff)
 		}
 	}
 	if cb.IsChecked() {
