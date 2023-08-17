@@ -4,7 +4,7 @@
 
 package hpe
 
-import "github.com/goki/cam/srgb"
+import "github.com/goki/cam/cie"
 
 // XYZToLMS convert XYZ to Long, Medium, Short cone-based responses,
 // using the Hunt-Pointer-Estevez transform.
@@ -30,7 +30,7 @@ func SRGBLinToLMS(rl, gl, bl float32) (l, m, s float32) {
 // using the Hunt-Pointer-Estevez transform.
 // This is closer to the actual response functions of the L,M,S cones apparently.
 func SRGBToLMS(r, g, b float32) (l, m, s float32) {
-	rl, gl, bl := srgb.SRGBToLinear(r, g, b)
+	rl, gl, bl := cie.SRGBToLinear(r, g, b)
 	l, m, s = SRGBLinToLMS(rl, gl, bl)
 	return
 }

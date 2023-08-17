@@ -62,10 +62,12 @@ func (h *HCT) AsRGBA() color.RGBA {
 
 // SetUint32 sets components from unsigned 32bit integers (alpha-premultiplied)
 func (h *HCT) SetUint32(r, g, b, a uint32) {
-	h.A = float32(a) / 65535.0
-	h.R = (float32(r) / 65535.0) / h.A
-	h.G = (float32(g) / 65535.0) / h.A
-	h.B = (float32(b) / 65535.0) / h.A
+	fa := float32(a) / 65535.0
+	fr := (float32(r) / 65535.0) / fa
+	fg := (float32(g) / 65535.0) / fa
+	fb := (float32(b) / 65535.0) / fa
+	*h = SRGBToHCT(fr, fg, fb)
+	h.A = fa
 }
 
 // SetColor sets from a standard color.Color

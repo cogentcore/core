@@ -1,6 +1,14 @@
 # cam: Color Appearance Models
 
-The color axes in the human brain are Red-Green and Blue-Yellow. In color speak Red = Long, Green = Medium, Blue = Short wavelengths, or the [lms](lms) space, corresponding to the color absorption profile of cones in the fovea of the retina.
+Color appearance models (CAM) provide a way of organizing colors, with the overall goal of better fitting the way that people actually perceive color.  The basic RGB color model is useful for controlling the pixels on a color monitor, but it does not define a useful metric for generating colors relative to each other in ways that match our perceptions.  For example, making each of the RGB components 10% lower does not consistently produce the same perceptual effect of darkening the color by 10%.
+
+The widely-used HSL (hue, saturation, lightness) or HSV (hue, saturation, value) systems are basic examples of CAMs that do a better job than RGB, but they are designed more for computational simplicity and efficiency than perceptual accuracy.
+
+Our color perception starts with the cones in the foveal region of the retina, which loosely correspond to the R,G,B color components, but in fact the Red and Green (Long and Medium wavelength) cones overlap considerably in their responses, while Blue (Short) cones are more separated in their response to different light frequencies.  Thus, one first pass step in a CAM is to map the RGB components into something that more closely matches the LMS (long, medium, short) cone responses.
+
+At higher levels in the visual processing pathway (in the visual cortex), the basic cone responses from the retina get organized into *color opponent* responses, reflecting the *difference* between the amount of Red vs. Green and Blue vs. Yellow (where Yellow is roughly an average of RG). In color speak Red = Long, Green = Medium, Blue = Short wavelengths, corresponding to the color absorption profile of cones in the fovea of the retina.
+
+The current best CAM in terms of the ability to predict human perceptual judgments is CAM16, which is implemented in the [cam16](cam16) package.
 
 # cie: International Commission on Illumination
 
@@ -64,22 +72,14 @@ Two effective populations of cells in V1: double-opponent and single-opponent
 
 # References
 
-* Conway, 2001: double-opponent color sensitivity – respond to spatial changes in color, not just raw color contrast – this is key for color constancy and making the color pathway much more efficient – a single-opponent dynamic causes entire color regions to be activated, instead of just activating for changes in color, which is the key point about efficient retinal coding in the luminance domain – just code for local changes, not broad regions. BUT this type of cell is not typically found and other mechanisms exist..
+All references can be obtained via the CCNLab group on https://zotero.org if you can't find them elsewhere -- just ask to join.
 
-* Gegenfurtner, 2003: nature neuroscience review of color highly recommended – lots of key excerpts on page
+* Gegenfurtner, K. R. (2003). Cortical mechanisms of colour vision. Nature Reviews Neuroscience, 4(7), 563–572. https://doi.org/10.1038/nrn1138.  (highly recommended scientific overview)
 
-* Hellwig, L., & Fairchild, M. D. (2022). Brightness, lightness, colorfulness, and chroma in CIECAM02 and CAM16. Color Research & Application, 47(5), 1083–1095. https://doi.org/10.1002/col.22792
+* Hellwig, L., & Fairchild, M. D. (2022). Brightness, lightness, colorfulness, and chroma in CIECAM02 and CAM16. Color Research & Application, 47(5), 1083–1095. https://doi.org/10.1002/col.22792  (accessible overview of CAM16 terminology)
 
-* Solomon & Lennie, 2007: lower-level paper with some nice diagrams and generally consistent conclusions.
+* Li, C., Li, Z., Wang, Z., Xu, Y., Luo, M. R., Cui, G., Melgosa, M., Brill, M. H., & Pointer, M. (2017). Comprehensive color solutions: CAM16, CAT16, and CAM16-UCS. Color Research & Application, 42(6), 703–718. https://doi.org/10.1002/col.22131
 
-* Moroney, N., Fairchild, M. D., Hunt, R. W. G., Li, C., Luo, M. R., & Newman, T. (2002). The CIECAM02 Color Appearance Model. Color and Imaging Conference, 2002(1), 23–27.
-
-* Field et al., 2010: recording in the retina – wow! but not sure of implications.
-
-* Shapley & Hawken, 2011: review – lots of good stuff in here and some strong key conclusions
-
-* Zhang et al., 2012: implements single and double opponent mechs in various models and shows that they work well! – though they do add a R-Cyan channel, and don’t seem to actually use the single opponent channel?? not too clear about that..
-
-* Yang et al., 2013: uses SO and DO but not sure again about SO usage.. maybe just along way to DO.
+* Moroney, N., Fairchild, M. D., Hunt, R. W. G., Li, C., Luo, M. R., & Newman, T. (2002). The CIECAM02 Color Appearance Model. Color and Imaging Conference, 2002(1), 23–27.  (definition of CAM02)
 
 
