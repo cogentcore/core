@@ -930,7 +930,10 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.SetProp("min-width", units.Ch(16))
+	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
+	tf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.MinWidth.SetCh(16)
+	})
 	if completetag, ok := vv.Tag("complete"); ok {
 		// todo: this does not seem to be up-to-date and should use Completer interface..
 		in := []reflect.Value{reflect.ValueOf(tf)}
@@ -957,6 +960,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 
 // StdConfigWidget does all of the standard widget configuration tag options
 func (vv *ValueViewBase) StdConfigWidget(widg gi.Node2D) {
+	// STYTODO: get rid of this
 	nb := widg.AsNode2D()
 	if widthtag, ok := vv.Tag("width"); ok {
 		width, ok := kit.ToFloat32(widthtag)
@@ -1122,7 +1126,6 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 func (vv *VersCtrlValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeVersCtrlValueView).(*VersCtrlValueView)
 		ac := vvv.Widget.(*gi.Action)
