@@ -23,6 +23,7 @@ func SolveToRGBLin(hue, chroma, tone float32) mat32.Vec3 {
 		y := cie.SRGBFmLinearComp(tone)
 		return mat32.Vec3{y, y, y}
 	}
+	tone = mat32.Clamp(tone, 0, 100)
 	hue_deg := cam16.SanitizeDeg(hue)
 	hue_rad := mat32.DegToRad(hue_deg)
 	y := cie.LToY(tone)

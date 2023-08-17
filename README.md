@@ -4,7 +4,7 @@ The color axes in the human brain are Red-Green and Blue-Yellow. In color speak 
 
 # cie: International Commission on Illumination
 
-See [cie](cie) for standard color spaces and values defined by the International Commission on Illumination (CIE), including [XYZ](https://en.wikipedia.org/wiki/CIE_1931_color_space) and [LAB](https://en.wikipedia.org/wiki/CIELAB_color_space) (L*a*b*) which can be easily computed from corresponding standard RGB (sRGB) values.
+See [cie](cie) for standard color spaces and values defined by the International Commission on Illumination (CIE), including [XYZ](https://en.wikipedia.org/wiki/CIE_1931_color_space) and [LAB](https://en.wikipedia.org/wiki/CIELAB_color_space) (L\*a\*b\*) which can be easily computed from corresponding standard RGB (sRGB) values.
 
 RGB as displayed on a computer monitor is typically "gamma corrected" to compensate for the luminance properties of the display, so this gamma correction must be removed before using RGB values to covert into other CIE spaces.
 
