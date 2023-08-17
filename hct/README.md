@@ -8,5 +8,9 @@ Unlike Y, L* is linear to human perception, allowing trivial creation of accurat
 
 Unlike contrast ratio, measuring contrast in L* is linear, and simple to calculate. A difference of 40 in HCT tone guarantees a contrast ratio >= 3.0, and a difference of 50 guarantees a contrast ratio >= 4.5.
 
+## HCT Colorspace
+
+![hct colorspace](../examples/hctspace/hctspace.png)
+
 
 
