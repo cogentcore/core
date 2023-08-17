@@ -123,19 +123,11 @@ func (ic *Icon) Style2D() {
 	ic.StyMu.Lock()
 	defer ic.StyMu.Unlock()
 
-	hasTempl, saveTempl := ic.Style.FromTemplate()
-	if !hasTempl || saveTempl {
-		ic.Style2DWidget()
-	}
-	if hasTempl && saveTempl {
-		ic.Style.SaveTemplate()
-	}
+	ic.Style2DWidget()
 	ic.LayState.SetFromStyle(&ic.Style) // also does reset
 	sic := ic.SVGIcon()
 	if sic != nil {
 		sic.Nm = ic.Nm
-		sic.Props = ic.Props
-		sic.CSS = ic.CSS
 		sic.Style = ic.Style
 		// sic.DefStyle = ic.DefStyle
 		if ic.NeedsFullReRender() {

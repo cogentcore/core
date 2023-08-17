@@ -21,6 +21,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"github.com/goki/prof"
 )
 
 // WidgetBase is the base type for all Widget Node2D elements, which are
@@ -332,31 +333,50 @@ func (wb *WidgetBase) SetFixedHeight(val units.Value) {
 // base-level defaults -- for Widget-style nodes.
 // must be called under a StyMu Lock
 func (wb *WidgetBase) Style2DWidget() {
-	// pr := prof.Start("Style2DWidget")
-	// defer pr.End()
+	pr := prof.Start("Style2DWidget")
+	defer pr.End()
 
 	if wb.OverrideStyle {
 		return
 	}
+
+	pcsn := prof.Start("Style2DWidget-SetCurStyleNode")
 
 	// STYTODO: there should be a better way to do this
 	gii, _ := wb.This().(Node2D)
 	wb.Viewport.SetCurStyleNode(gii)
 	defer wb.Viewport.SetCurStyleNode(nil)
 
+	pcsn.End()
+
+	pin := prof.Start("Style2DWidget-Inherit")
+
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
 		wb.Style.InheritFields(parSty)
 		wb.ParentStyleRUnlock()
 	}
+	pin.End()
+
+	prun := prof.Start("Style2DWidget-RunStyleFuncs")
 
 	wb.RunStyleFuncs()
 
+	prun.End()
+
+	puc := prof.Start("Style2DWidget-SetUnitContext")
+
 	SetUnitContext(&wb.Style, wb.Viewport, wb.NodeSize(), wb.ParentNodeSize())
+	puc.End()
+
+	psc := prof.Start("Style2DWidget-SetCurrentColor")
+
 	if wb.Style.Inactive { // inactive can only set, not clear
 		wb.SetDisabled()
 	}
 
 	wb.Viewport.SetCurrentColor(wb.Style.Color)
+
+	psc.End()
 }
 
 // RunStyleFuncs runs the style functions specified in
@@ -388,8 +408,12 @@ func SetUnitContext(st *gist.Style, vp *Viewport2D, el, par mat32.Vec2) {
 			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 		}
 	}
+	pr := prof.Start("SetUnitContext-OpenFont")
 	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
+	pr.End()
+	ptd := prof.Start("SetUnitContext-ToDots")
 	st.ToDots()
+	ptd.End()
 }
 
 func (wb *WidgetBase) InitLayout2D() bool {
