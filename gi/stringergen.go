@@ -4,4 +4,4 @@
 
 package gi
 
-//go:generate stringer -output stringer.go -type=ActionTypes,ButtonFlags,ButtonSignals,ButtonStates,ButtonTypes,ComboBoxTypes,CompleteSignals,DialogState,EventPris,DNDStages,Stripes,KeyFuns,LabelTypes,LabelStates,Layouts,RowCol,NodeFlags,FocusChanges,Densities,SliderSignals,SliderStates,SpellSignals,TabViewSignals,TextFieldTypes,TextFieldSignals,TextFieldStates,VpFlags,WidgetSignals,WinFlags
+//go:generate stringer -output stringer.go -type=ActionTypes,ButtonFlags,ButtonSignals,ButtonStates,ButtonTypes,ComboBoxTypes,CompleteSignals,DialogState,EventPris,DNDStages,Stripes,KeyFuns,LabelTypes,Layouts,RowCol,NodeFlags,FocusChanges,Densities,SliderSignals,SliderStates,SpellSignals,TabViewSignals,TextFieldTypes,TextFieldSignals,TextFieldStates,VpFlags,WidgetSignals,WinFlags

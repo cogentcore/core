@@ -41,14 +41,8 @@ type Label struct {
 	// the type of label
 	Type LabelTypes `desc:"the type of label"`
 
-	// the current state of the label (active, inactive, selected, etc)
-	State LabelStates `desc:"the current state of the label (active, inactive, selected, etc)"`
-
 	// [view: -] signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
 	LinkSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
-
-	// styles for different states of label
-	StateStyles [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
 
 	// render data for text label
 	Render girl.Text `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
@@ -215,12 +209,10 @@ func (lb *Label) OnInit() {
 			s.Text.LetterSpacing.SetPx(0)
 			s.Font.Weight = gist.WeightNormal
 		}
-		switch lb.State {
-		case LabelActive:
-			// use styles as above
-		case LabelInactive:
+		if w.IsDisabled() {
 			s.Font.Opacity = 0.7
-		case LabelSelected:
+		}
+		if w.IsSelected() {
 			s.BackgroundColor.SetSolid(ColorScheme.TertiaryContainer)
 			s.Color = ColorScheme.OnTertiaryContainer
 		}
@@ -248,31 +240,6 @@ var LabelProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-// LabelStates are mutually-exclusive label states -- determines appearance
-type LabelStates int32
-
-const (
-	// normal active state
-	LabelActive LabelStates = iota
-
-	// inactive -- font is dimmed
-	LabelInactive
-
-	// selected -- background is selected color
-	LabelSelected
-
-	// total number of button states
-	LabelStatesN
-)
-
-var TypeLabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, kit.NotBitFlag, gist.StylePropProps, "Label")
-
-func (ev LabelStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *LabelStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// LabelSelectors are Style selector names for the different states:
-var LabelSelectors = []string{":active", ":inactive", ":selected"}
-
 // SetText sets the text and updates the rendered version.
 // Note: if there is already a label set, and no other
 // larger updates are taking place, the new label may just
@@ -291,7 +258,6 @@ func (lb *Label) SetText(txt string) {
 	if needSty {
 		lb.StyleLabel()
 	}
-	lb.SetStateStyle()
 	lb.StyMu.RLock()
 	lb.Text = txt
 	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
@@ -312,34 +278,6 @@ func (lb *Label) SetText(txt string) {
 	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	lb.StyMu.RUnlock()
 	lb.UpdateEnd(updt)
-}
-
-// SetStateStyle sets the style based on the inactive, selected flags
-func (lb *Label) SetStateStyle() {
-	lb.StyMu.Lock()
-	prev := lb.State
-	if lb.IsDisabled() {
-		lb.State = LabelInactive
-		lb.Style = lb.StateStyles[LabelInactive]
-		if lb.Redrawable && !lb.CurBackgroundColor.IsNil() {
-			lb.Style.BackgroundColor.SetSolid(lb.CurBackgroundColor)
-		}
-	} else if lb.IsSelected() {
-		lb.State = LabelSelected
-		lb.Style = lb.StateStyles[LabelSelected]
-	} else {
-		lb.State = LabelActive
-		lb.Style = lb.StateStyles[LabelActive]
-		if (lb.Selectable || lb.Redrawable) && !lb.CurBackgroundColor.IsNil() {
-			lb.Style.BackgroundColor.SetSolid(lb.CurBackgroundColor)
-		}
-	}
-	if prev != lb.State {
-		lb.Style2DWidget()
-		// TODO: stop doing full re render here
-		lb.SetFullReRender()
-	}
-	lb.StyMu.Unlock()
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are
@@ -411,7 +349,6 @@ func (lb *Label) MouseEvent() {
 			updt := llb.UpdateStart()
 			llb.SetSelectedState(!llb.IsSelected())
 			llb.EmitSelectedSignal()
-			llb.SetStateStyle()
 			llb.UpdateEnd(updt)
 		}
 		if me.Action == mouse.Release && me.Button == mouse.Right {
@@ -472,16 +409,7 @@ func (lb *Label) StyleLabel() {
 	lb.StyMu.Lock()
 	defer lb.StyMu.Unlock()
 
-	hasTempl, saveTempl := lb.Style.FromTemplate()
-	if !hasTempl || saveTempl {
-		lb.Style2DWidget()
-	}
-	if hasTempl && saveTempl {
-		lb.Style.SaveTemplate()
-	}
-	if lb.CurBackgroundColor.IsNil() && !lb.Style.BackgroundColor.Color.IsNil() {
-		lb.CurBackgroundColor = lb.Style.BackgroundColor.Color
-	}
+	lb.Style2DWidget()
 }
 
 func (lb *Label) LayoutLabel() {
@@ -519,9 +447,6 @@ func (lb *Label) Size2D(iter int) {
 
 func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	lb.Layout2DBase(parBBox, true, iter)
-	for i := 0; i < int(LabelStatesN); i++ {
-		lb.StateStyles[i].CopyUnitContext(&lb.Style.UnContext)
-	}
 	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
 	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
@@ -546,7 +471,6 @@ func (lb *Label) TextPos() mat32.Vec2 {
 
 func (lb *Label) RenderLabel() {
 	lb.GrabCurBackgroundColor()
-	lb.SetStateStyle()
 	rs, _, st := lb.RenderLock()
 	defer lb.RenderUnlock(rs)
 	lb.RenderPos = lb.TextPos()

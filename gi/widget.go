@@ -64,126 +64,6 @@ var WidgetBaseProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-// Not using; using [NodeFlags] instead
-// keeping for now for reference
-// TODO: remove old WidgetStates code
-
-// // WidgetStates contains the all of bitflags
-// // for [Widget] states
-// type WidgetStates int32
-
-//
-// var TypeWidgetStates = kit.Enums.AddEnumAltLower(WidgetStatesN, kit.BitFlag, nil, "Widget")
-
-// // Based on https://www.w3schools.com/css/css_pseudo_classes.asp
-// const (
-// 	// WidgetActive is applied to widgets
-// 	// that are currently being interacted
-// 	// with (pressed down) by the user
-// 	WidgetActive WidgetStates = iota
-// 	// WidgetChecked is applied to widgets
-// 	// that are currently checked
-// 	// (only applies to checkboxes)
-// 	WidgetChecked
-// 	// WidgetDisabled is applied to widgets
-// 	// that are disabled
-// 	WidgetDisabled
-// 	// WidgetEmpty is applied to widgets
-// 	// that have no children
-// 	WidgetEmpty
-// 	// WidgetEnabled is applied to widgets
-// 	// that are enabled
-// 	WidgetEnabled
-// 	// WidgetFirstChild is applied to widgets
-// 	// that are the first child of their parent
-// 	WidgetFirstChild
-// 	// WidgetFirstOfType is applied to widgets
-// 	// that are the first child of their parent
-// 	// with their type
-// 	WidgetFirstOfType
-// 	// WidgetFocus is applied to widgets that
-// 	// have focus (ie: by keyboard navigation)
-// 	WidgetFocus
-// 	// WidgetHover is applied to widgets that
-// 	// are being hovered over by a mouse cursor
-// 	// or have been long-pressed on mobile
-// 	WidgetHover
-// 	// WidgetInRange is applied to widgets
-// 	// with a value that is in the range
-// 	// specified by the Min and Max fields
-// 	// (only applies to inputs)
-// 	WidgetInRange
-// 	// WidgetInvalid is applied to widgets
-// 	// with an invalid value
-// 	// (only applies to inputs)
-// 	WidgetInvalid
-
-// 	// TODO: lang
-
-// 	// WidgetLastChild is applied to widgets
-// 	// that are the last child of their parent
-// 	WidgetLastChild
-// 	// WidgetLastOfType is applied to widgets
-// 	// that are the last child of their parent
-// 	// with their type
-// 	WidgetLastOfType
-// 	// WidgetLink is applied to widgets
-// 	// that are previously unvisited links
-// 	WidgetLink
-
-// 	// TODO: not, nth-child, nth-last-child,
-// 	// nth-last-of-type, nth-of-type
-
-// 	// WidgetOnlyOfType is applied to widgets
-// 	// that are the only child of their parent
-// 	// with their type
-// 	WidgetOnlyOfType
-// 	// WidgetOnlyChild is applied to widgets
-// 	// that are the only child of their parent
-// 	WidgetOnlyChild
-// 	// WidgetOptional is applied to widgets
-// 	// that have a false Required field
-// 	// (only applies to inputs)
-// 	WidgetOptional
-// 	// WidgetOutOfRange is applied to widgets
-// 	// with a value that is not in the range
-// 	// specified by the Min and Max fields
-// 	// (only applies to inputs)
-// 	WidgetOutOfRange
-// 	// WidgetReadOnly is applied to widgets
-// 	// that are read-only; applies to inputs
-// 	// that have a true ReadOnly field and
-// 	// other read-only elements like text
-// 	// and buttons
-// 	WidgetReadOnly
-// 	// WidgetReadWrite is applied to widgets
-// 	// that are both readable and writeable;
-// 	// only applies to inputs that have a false
-// 	// ReadOnly field and aren't disabled
-// 	WidgetReadWrite
-// 	// WidgetRequired is applied to widgets
-// 	// that a true Required field
-// 	// (only applies to inputs)
-// 	WidgetRequired
-// 	// WidgetRoot is applied to widgets
-// 	// that are the root element of the GUI
-// 	WidgetRoot
-// 	// WidgetTarget is applied to widgets
-// 	// that have been navigated to by
-// 	// a URL containing their anchor name
-// 	// (ie: a targeted heading)
-// 	WidgetTarget
-// 	// WidgetValid is applied to widgets
-// 	// with a valid value
-// 	// (only applies to inputs)
-// 	WidgetValid
-// 	// WidgetVisited is applied to widgets
-// 	// that are previously visited links
-// 	WidgetVisited
-
-//	WidgetStatesN
-// )
-
 // KiAsWidget returns the given Ki object
 // as a widget base. It returns nil if it is not
 // derived from a widget base.
@@ -267,6 +147,7 @@ func (wb *WidgetBase) AddStyler(s Styler) {
 	wb.Stylers = append(wb.Stylers, s)
 }
 
+// STYTODO: figure out what to do with this
 // // AddChildStyler is a helper function that adds the
 // // given styler to the child of the given name
 // // if it exists, starting searching at the given start index.
@@ -491,13 +372,7 @@ func (wb *WidgetBase) Style2D() {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
 
-	hasTempl, saveTempl := wb.Style.FromTemplate()
-	if !hasTempl || saveTempl {
-		wb.Style2DWidget()
-	}
-	if hasTempl && saveTempl {
-		wb.Style.SaveTemplate()
-	}
+	wb.Style2DWidget()
 	wb.LayState.SetFromStyle(&wb.Style) // also does reset
 }
 
