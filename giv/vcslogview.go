@@ -6,6 +6,7 @@ package giv
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -39,6 +40,23 @@ type VCSLogView struct {
 }
 
 var TypeVCSLogView = kit.Types.AddType(&VCSLogView{}, VCSLogViewProps)
+
+func (lv *VCSLogView) OnInit() {
+	lv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		s.SetStretchMax()
+	})
+}
+
+func (lv *VCSLogView) OnChildAdded(child ki.Ki) {
+	if w := gi.KiAsWidget(child); w != nil {
+		switch w.Name() {
+		case "a-tf", "b-tf":
+			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				s.Width.SetEm(12)
+			})
+		}
+	}
+}
 
 // Config configures to given repo, log and file (file could be empty)
 func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
@@ -80,7 +98,6 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 	} else {
 		updt = lv.UpdateStart()
 	}
-	tv.SetStretchMax()
 	tv.SetDisabled()
 	tv.SetSlice(&lv.Log)
 	lv.UpdateEnd(updt)
@@ -141,7 +158,6 @@ func (lv *VCSLogView) ConfigToolBar() {
 		cba.Tooltip = "If selected, double-clicking in log will set this A Revision to use for Diff"
 		cba.SetChecked(true)
 		tfa := gi.AddNewTextField(tb, "a-tf")
-		tfa.SetProp("width", "12em")
 		tfa.SetText(lv.RevA)
 		tfa.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -153,7 +169,6 @@ func (lv *VCSLogView) ConfigToolBar() {
 		cbb.SetText("B Rev: ")
 		cbb.Tooltip = "If selected, double-clicking in log will set this B Revision to use for Diff"
 		tfb := gi.AddNewTextField(tb, "b-tf")
-		tfb.SetProp("width", "12em")
 		tfb.SetText(lv.RevB)
 		tfb.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -188,8 +203,6 @@ func (lv *VCSLogView) ConfigToolBar() {
 // VCSLogViewProps are style properties for DebugView
 var VCSLogViewProps = ki.Props{
 	ki.EnumTypeFlag: gi.TypeNodeFlags,
-	"max-width":     -1,
-	"max-height":    -1,
 }
 
 // VCSLogViewDialog opens a VCS Log View for given repo, log and file (file could be empty)
