@@ -55,8 +55,8 @@ func (h *HCT) RGBA() (r, g, b, a uint32) {
 	return
 }
 
-// ColorRGBA returns a standard color.RGBA type
-func (h *HCT) ColorRGBA() color.RGBA {
+// AsRGBA returns a standard color.RGBA type
+func (h *HCT) AsRGBA() color.RGBA {
 	return color.RGBA{uint8(h.R*h.A*255.0 + 0.5), uint8(h.G*h.A*255.0 + 0.5), uint8(h.B*h.A*255.0 + 0.5), uint8(h.A*255.0 + 0.5)}
 }
 

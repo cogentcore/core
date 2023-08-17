@@ -20,7 +20,7 @@ import (
 // sufficiently close, and chroma will be maximized.
 func SolveToRGBLin(hue, chroma, tone float32) mat32.Vec3 {
 	if chroma < 0.0001 || tone < 0.0001 || tone > 99.9999 {
-		y := cie.SRGBFmLinearComp(tone)
+		y := cie.LToY(tone)
 		return mat32.Vec3{y, y, y}
 	}
 	tone = mat32.Clamp(tone, 0, 100)

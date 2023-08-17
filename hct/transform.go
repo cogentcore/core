@@ -13,7 +13,7 @@ import (
 func Lighten(c color.Color, amount float32) color.RGBA {
 	h := Uint32ToHCT(c.RGBA())
 	h.SetTone(h.Tone + amount)
-	return h.ColorRGBA()
+	return h.AsRGBA()
 }
 
 // Darken returns a color that is darker by the
@@ -21,7 +21,7 @@ func Lighten(c color.Color, amount float32) color.RGBA {
 func Darken(c color.Color, amount float32) color.RGBA {
 	h := Uint32ToHCT(c.RGBA())
 	h.SetTone(h.Tone - amount)
-	return h.ColorRGBA()
+	return h.AsRGBA()
 }
 
 /*
