@@ -208,12 +208,10 @@ func (ac *Action) ButtonRelease() {
 		// fmt.Printf("action: %v inactive\n", ac.Nm)
 		return
 	}
-	wasPressed := (ac.State == ButtonDown)
 	updt := ac.UpdateStart()
-	ac.SetButtonState(ButtonHover)
 	ac.ButtonSig.Emit(ac.This(), int64(ButtonReleased), nil)
 	menOpen := false
-	if wasPressed {
+	if ac.WasPressed {
 		ac.ActionSig.Emit(ac.This(), 0, ac.Data)
 		ac.ButtonSig.Emit(ac.This(), int64(ButtonClicked), ac.Data)
 		menOpen = ac.OpenMenu()

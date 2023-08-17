@@ -210,15 +210,13 @@ func (cb *ComboBox) ButtonRelease() {
 	if cb.IsDisabled() {
 		return
 	}
-	wasPressed := (cb.State == ButtonDown)
 	cb.MakeItemsMenu()
 	if len(cb.ItemsMenu) == 0 {
 		return
 	}
 	updt := cb.UpdateStart()
-	cb.SetButtonState(ButtonActive)
 	cb.ButtonSig.Emit(cb.This(), int64(ButtonReleased), nil)
-	if wasPressed {
+	if cb.WasPressed {
 		cb.ButtonSig.Emit(cb.This(), int64(ButtonClicked), nil)
 	}
 	cb.UpdateEnd(updt)

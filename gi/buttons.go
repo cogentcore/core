@@ -42,11 +42,8 @@ type ButtonBase struct {
 	// optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
 	Shortcut key.Chord `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
 
-	// styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that
-	StateStyles [ButtonStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-
-	// current state of the button based on gui interaction
-	State ButtonStates `copy:"-" json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
+	// whether the button has been pressed (typically accessed in an ButtonRelease event)
+	WasPressed bool `desc:"whether the button has been pressed (typically accessed in an ButtonRelease event)"`
 
 	// [view: -] signal for button -- see ButtonSignals for the types
 	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
@@ -127,43 +124,6 @@ const (
 
 	ButtonSignalsN
 )
-
-// https://ux.stackexchange.com/questions/84872/what-is-the-buttons-unpressed-and-unhovered-state-called
-
-// mutually-exclusive button states -- determines appearance
-type ButtonStates int32
-
-var TypeButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, kit.NotBitFlag, gist.StylePropProps, "Button")
-
-func (ev ButtonStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *ButtonStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-const (
-	// normal active state -- there but not being interacted with
-	ButtonActive ButtonStates = iota
-
-	// inactive -- not pressable -- no events
-	ButtonInactive
-
-	// mouse is hovering over the button
-	ButtonHover
-
-	// button is the focus -- will respond to keyboard input
-	ButtonFocus
-
-	// button is currently being pressed down
-	ButtonDown
-
-	// button has been selected -- selection is a general widget property used
-	// by views and other complex widgets -- checked state is independent of this
-	ButtonSelected
-
-	// total number of button states
-	ButtonStatesN
-)
-
-// Style selector names for the different states: https://www.w3schools.com/cssref/css_selectors.asp
-var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected"}
 
 // see menus.go for MakeMenuFunc, etc
 
@@ -250,71 +210,6 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) {
 	bb.This().(ButtonWidget).ConfigParts()
 }
 
-// SetButtonState sets the button state -- returns true if state changed
-func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
-	bb.ButStateMu.Lock()
-	defer bb.ButStateMu.Unlock()
-	prev := bb.State
-	if bb.IsDisabled() {
-		if bb.IsSelected() {
-			state = ButtonSelected
-		} else {
-			state = ButtonInactive
-		}
-	} else {
-		if state == ButtonActive && bb.IsSelected() {
-			state = ButtonSelected
-		} else if state == ButtonActive && bb.HasFocus() {
-			state = ButtonFocus
-		}
-	}
-	bb.State = state
-	bb.StyMu.Lock()
-	bb.Style = bb.StateStyles[state]
-	bb.StyMu.Unlock()
-	if prev != bb.State {
-		bb.SetFullReRenderIconLabel() // needs full rerender to update text, icon
-		return true
-	}
-	return false
-}
-
-// UpdateButtonStyle sets the button style based on current state info --
-// returns true if changed -- restyles parts if so
-func (bb *ButtonBase) UpdateButtonStyle() bool {
-	bb.ButStateMu.Lock()
-	defer bb.ButStateMu.Unlock()
-	prev := bb.State
-	if bb.IsDisabled() {
-		if bb.IsSelected() {
-			bb.State = ButtonSelected
-		} else {
-			bb.State = ButtonInactive
-		}
-	} else {
-		if bb.State == ButtonSelected && !bb.IsSelected() {
-			bb.State = ButtonActive
-		} else if bb.State == ButtonActive && bb.IsSelected() {
-			bb.State = ButtonSelected
-		} else if bb.State == ButtonActive && bb.HasFocus() {
-			bb.State = ButtonFocus
-		} else if bb.State == ButtonInactive {
-			bb.State = ButtonActive
-		}
-	}
-	bb.Style = bb.StateStyles[bb.State]
-	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
-	bb.StyMu.Lock()
-	bb.Style2DWidget()
-	bb.StyMu.Unlock()
-	if prev != bb.State {
-		bb.SetFullReRenderIconLabel() // needs full rerender
-		return true
-	}
-	// fmt.Printf("but style updt: %v to %v\n", bb.Path(), bb.State)
-	return false
-}
-
 // OnClicked calls the given function when the button is clicked,
 // which is the default / standard way of activating the button
 func (bb *ButtonBase) OnClicked(fun func()) {
@@ -337,7 +232,7 @@ func (bb *ButtonBase) ButtonPress() {
 			bb.UpdateSig()
 		}
 	} else {
-		bb.SetButtonState(ButtonDown)
+		bb.WasPressed = true
 		bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
 	}
 	bb.UpdateEnd(updt)
@@ -350,12 +245,10 @@ func (bb *ButtonBase) BaseButtonRelease() {
 	if bb.IsDisabled() {
 		return
 	}
-	wasPressed := (bb.State == ButtonDown)
 	updt := bb.UpdateStart()
 
-	bb.SetButtonState(ButtonHover)
 	bb.ButtonSig.Emit(bb.This(), int64(ButtonReleased), nil)
-	if wasPressed {
+	if bb.WasPressed {
 		bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)
 		bb.OpenMenu()
 
@@ -446,24 +339,6 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	ic.SetIcon(icnm)
 }
 
-// ButtonEnterHover called when button starting hover
-func (bb *ButtonBase) ButtonEnterHover() {
-	if bb.State != ButtonHover {
-		updt := bb.UpdateStart()
-		bb.SetButtonState(ButtonHover)
-		bb.UpdateEnd(updt)
-	}
-}
-
-// ButtonExitHover called when button exiting hover
-func (bb *ButtonBase) ButtonExitHover() {
-	if bb.State == ButtonHover {
-		updt := bb.UpdateStart()
-		bb.SetButtonState(ButtonActive)
-		bb.UpdateEnd(updt)
-	}
-}
-
 // MouseEvents handles button MouseEvent
 func (bb *ButtonBase) MouseEvent() {
 	bb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
@@ -482,31 +357,6 @@ func (bb *ButtonBase) MouseEvent() {
 				me.SetProcessed()
 				bw.ButtonRelease()
 			}
-		}
-	})
-}
-
-// MouseFocusEvents handles button MouseFocusEvent
-func (bb *ButtonBase) MouseFocusEvent() {
-	bb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		bw := recv.(ButtonWidget)
-		bbb := bw.AsButtonBase()
-		if bbb.IsDisabled() {
-			return
-		}
-		me := d.(*mouse.FocusEvent)
-		me.SetProcessed()
-		bbb.Node2DOnMouseFocusEvent(me)
-		if me.Action == mouse.Enter {
-			if EventTrace {
-				fmt.Printf("bb focus enter: %v\n", bbb.Name())
-			}
-			bbb.ButtonEnterHover()
-		} else {
-			if EventTrace {
-				fmt.Printf("bb focus exit: %v\n", bbb.Name())
-			}
-			bbb.ButtonExitHover()
 		}
 	})
 }
@@ -554,9 +404,9 @@ func (bb *ButtonBase) HoverTooltipEvent() {
 }
 
 func (bb *ButtonBase) ButtonEvents() {
+	bb.WidgetEvents()
 	bb.HoverTooltipEvent()
 	bb.MouseEvent()
-	bb.MouseFocusEvent()
 	bb.KeyChordEvent()
 }
 
@@ -668,11 +518,6 @@ func (bb *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
 	bb.Layout2DBase(parBBox, true, iter) // init style
 	bb.Layout2DParts(parBBox, iter)
-	bb.StyMu.Lock()
-	for i := 0; i < int(ButtonStatesN); i++ {
-		bb.StateStyles[i].CopyUnitContext(&bb.Style.UnContext)
-	}
-	bb.StyMu.Unlock()
 	return bb.Layout2DChildren(iter)
 }
 
@@ -688,7 +533,6 @@ func (bb *ButtonBase) Render2D() {
 	}
 	if bb.PushBounds() {
 		bb.This().(Node2D).ConnectEvents2D()
-		bb.UpdateButtonStyle()
 		bb.RenderButton()
 		bb.Render2DParts()
 		bb.Render2DChildren()
@@ -699,18 +543,15 @@ func (bb *ButtonBase) Render2D() {
 }
 
 func (bb *ButtonBase) ConnectEvents2D() {
-	bb.WidgetEvents()
 	bb.ButtonEvents()
 }
 
 func (bb *ButtonBase) FocusChanged2D(change FocusChanges) {
 	switch change {
 	case FocusLost:
-		bb.SetButtonState(ButtonActive) // lose any hover state but whatever..
 		bb.UpdateSig()
 	case FocusGot:
 		bb.ScrollToMe()
-		bb.SetButtonState(ButtonFocus)
 		bb.EmitFocusedSignal()
 		bb.UpdateSig()
 	case FocusInactive: // don't care..

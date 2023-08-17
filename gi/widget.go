@@ -249,8 +249,6 @@ func (wb *WidgetBase) ParentCursor(cur cursor.Shapes) cursor.Shapes {
 // implementing a custom ConnectEvents2D function should
 // first call [WidgetEvents].
 func (wb *WidgetBase) ConnectEvents2D() {
-	// TODO: figure out connect events situation not working
-	// wb.Node2DEvents()
 	wb.WidgetEvents()
 }
 
@@ -258,6 +256,7 @@ func (wb *WidgetBase) ConnectEvents2D() {
 // Any widget implementing a custom ConnectEvents2D function
 // should first call this function.
 func (wb *WidgetBase) WidgetEvents() {
+	wb.Node2DEvents()
 	wb.HoverTooltipEvent()
 }
 

@@ -343,7 +343,8 @@ func (nb *Node2DBase) ConnectEvents2D() {
 // Any Node2D implementing a custom ConnectEvents2D function
 // should first call this function.
 func (nb *Node2DBase) Node2DEvents() {
-	nb.Node2DMouseEvent()
+	// TODO: figure out connect events situation not working
+	// nb.Node2DMouseEvent()
 	nb.Node2DMouseFocusEvent()
 }
 
