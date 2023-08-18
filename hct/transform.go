@@ -24,6 +24,14 @@ func Darken(c color.Color, amount float32) color.RGBA {
 	return h.AsRGBA()
 }
 
+// Saturate returns a color that is more saturated by the
+// given absolute HCT chroma amount (0-100, ranges enforced)
+func Saturate(c color.Color, amount float32) color.RGBA {
+	h := Uint32ToHCT(c.RGBA())
+	h.SetChroma(h.Chroma + amount)
+	return h.AsRGBA()
+}
+
 /*
 
 // Highlight returns a color that is lighter or darker by the

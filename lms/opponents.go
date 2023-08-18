@@ -32,7 +32,7 @@ func NewOpVals(l, m, s, lm, grey float32) OpVals {
 // using colloquial "everyday" terms.
 type Opponents int
 
-//go:generate stringer -type=Opponents
+//go:generate stringer -output stringer.go -type=Opponents
 
 var TypeOpponents = kit.Enums.AddEnum(OpponentsN, kit.NotBitFlag, nil)
 
