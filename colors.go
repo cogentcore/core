@@ -10,6 +10,8 @@ import (
 	"image/color"
 	"log"
 	"strings"
+
+	"github.com/goki/mat32"
 )
 
 // IsNil returns whether the color is the nil initial default color
@@ -24,6 +26,9 @@ func SetToNil(c *color.Color) {
 
 // AsRGBA returns the given color as an RGBA color
 func AsRGBA(c color.Color) color.RGBA {
+	if c == nil {
+		return color.RGBA{}
+	}
 	return color.RGBAModel.Convert(c).(color.RGBA)
 }
 
@@ -343,4 +348,79 @@ func SetA(c color.Color, a uint8) color.RGBA {
 	rc := AsRGBA(c)
 	rc.A = a
 	return rc
+}
+
+// SetAF32 returns the given color with the
+// transparency (A) set to the given float32 value
+// between 0 and 1
+func SetAF32(c color.Color, a float32) color.RGBA {
+	rc := AsRGBA(c)
+	a = mat32.Clamp(a, 0, 1)
+	rc.A = uint8(a * 255)
+	return rc
+}
+
+// Add adds the two given colors together, safely avoiding overflow > 255
+func Add(x, y color.Color) color.RGBA {
+	xr, xg, xb, xa := x.RGBA()
+	yr, yg, yb, ya := y.RGBA()
+	r := xr + yr
+	g := xg + yg
+	b := xb + yb
+	a := xa + ya
+	if r > 255 {
+		r = 255
+	}
+	if g > 255 {
+		g = 255
+	}
+	if b > 255 {
+		b = 255
+	}
+	if a > 255 {
+		a = 255
+	}
+	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+}
+
+// Sub subtracts the second color from the first color,
+// safely avoiding underflow < 0
+func Sub(x, y color.Color) color.RGBA {
+	xr, xg, xb, xa := x.RGBA()
+	yr, yg, yb, ya := y.RGBA()
+	r := xr - yr
+	g := xg - yg
+	b := xb - yb
+	a := xa - ya
+	if r > 255 {
+		r = 255
+	}
+	if g > 255 {
+		g = 255
+	}
+	if b > 255 {
+		b = 255
+	}
+	if a > 255 {
+		a = 255
+	}
+	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+}
+
+// Blend returns a color that is the given percent blend between the first
+// and second color -- 10 = 10% of the second and 90% of the first, etc --
+// blending is done directly on non-pre-multiplied RGB values
+func Blend(pct float32, x, y color.Color) color.RGBA {
+	// TODO: add blend
+	return color.RGBA{}
+	// f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
+	// othc := NRGBAf32Model.Convert(clr).(NRGBAf32)
+	// pct = mat32.Clamp(pct, 0, 100.0)
+	// oth := pct / 100.0
+	// me := 1.0 - pct/100.0
+	// f32.R = me*f32.R + oth*othc.R
+	// f32.G = me*f32.G + oth*othc.G
+	// f32.B = me*f32.B + oth*othc.B
+	// f32.A = me*f32.A + oth*othc.A
+	// return ColorModel.Convert(f32).(Color)
 }
