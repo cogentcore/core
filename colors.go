@@ -26,6 +26,30 @@ func AsRGBA(c color.Color) color.RGBA {
 	return color.RGBAModel.Convert(c).(color.RGBA)
 }
 
+// ColorFromName returns the color value specified
+// by the given CSS standard color name. It returns
+// an error if the name is not found; see [MustColorFromName]
+// for a version that does not return an error.
+func ColorFromName(name string) (color.RGBA, error) {
+	c, ok := Map[name]
+	if !ok {
+		return color.RGBA{}, errors.New("colors.ColorFromName: name not found: " + name)
+	}
+	return c, nil
+}
+
+// ColorFromName returns the color value specified
+// by the given CSS standard color name. It panics
+// if the name is not found; see [ColorFromName]
+// for a version that returns an error.
+func MustColorFromName(name string) color.RGBA {
+	c, err := ColorFromName(name)
+	if err != nil {
+		panic("colors.MustColorFromName: " + err.Error())
+	}
+	return c
+}
+
 // SetString sets color value from string, including # hex specs, standard
 // color names, "none" or "off", or the following transformations (which
 // use a non-nil base color as the starting point, if it is provided):
