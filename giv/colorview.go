@@ -614,6 +614,12 @@ func (vv *ColorValueView) SetColor(clr gist.Color) {
 		vv.SetValue(clr)
 	case **gist.Color:
 		vv.SetValue(clr)
+	case color.RGBA:
+		vv.SetValue(color.RGBAModel.Convert(clr).(color.RGBA))
+	case *color.RGBA:
+		vv.SetValue(color.RGBAModel.Convert(clr).(color.RGBA))
+	case **color.RGBA:
+		vv.SetValue(color.RGBAModel.Convert(clr).(color.RGBA))
 	case color.Color:
 		vv.SetValue((color.Color)(clr))
 	case *color.Color:

@@ -136,10 +136,13 @@ func (ge *GiEditor) EditColorScheme() {
 		Neutral:        color.RGBA{133, 131, 121, 255},
 		NeutralVariant: color.RGBA{107, 106, 101, 255},
 	}
-
 	p := matcolor.NewPalette(key)
-
 	schemes := matcolor.NewSchemes(p)
+
+	kv := AddNewStructView(mfr, "kv")
+	kv.Viewport = vp
+	kv.SetStruct(&key)
+	kv.SetStretchMax()
 
 	split := gi.AddNewSplitView(mfr, "split")
 	split.Dim = mat32.X
@@ -153,6 +156,13 @@ func (ge *GiEditor) EditColorScheme() {
 	svd.Viewport = vp
 	svd.SetStruct(&schemes.Dark)
 	svd.SetStretchMax()
+
+	kv.ViewSig.Connect(kv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		p = matcolor.NewPalette(key)
+		schemes = matcolor.NewSchemes(p)
+		svl.UpdateFields()
+		svd.UpdateFields()
+	})
 
 	if !win.HasGeomPrefs() { // resize to contents
 		vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)
