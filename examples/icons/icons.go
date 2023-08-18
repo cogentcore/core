@@ -7,9 +7,9 @@ package main
 import (
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/units"
 )
 

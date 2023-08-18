@@ -18,6 +18,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/colormap"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
@@ -1894,7 +1895,7 @@ var WindowSelectionSpriteName = "gi.Window.SelectionBox"
 func (w *Window) SelectionSprite(wb *WidgetBase) *Sprite {
 	w.DeleteSprite(WindowSelectionSpriteName)
 	sp := NewSprite(WindowSelectionSpriteName, wb.WinBBox.Size(), image.Point{})
-	draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{ColorScheme.Primary.WithA(0.5)}, image.Point{}, draw.Src)
+	draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{colors.SetAF32(ColorScheme.Primary, 0.5)}, image.Point{}, draw.Src)
 	sp.Geom.Pos = wb.WinBBox.Min
 	w.AddSprite(sp)
 	w.ActivateSprite(WindowSelectionSpriteName)

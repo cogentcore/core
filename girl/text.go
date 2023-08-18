@@ -16,6 +16,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
@@ -395,7 +396,8 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 			if !SetHTMLSimpleTag(nm, &fs, ctxt, cssAgg) {
 				switch nm {
 				case "a":
-					fs.Color.SetColor(gist.ThePrefs.PrefColor("link"))
+					// STYTODO: use correct color source instead of prefs
+					fs.Color = colors.AsRGBA(gist.ThePrefs.PrefColor("link"))
 					fs.SetDeco(gist.DecoUnderline)
 					curLinkIdx = len(tr.Links)
 					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
@@ -607,7 +609,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 				if !SetHTMLSimpleTag(stag, &fs, ctxt, cssAgg) {
 					switch stag {
 					case "a":
-						fs.Color.SetColor(gist.ThePrefs.PrefColor("link"))
+						fs.Color = colors.AsRGBA(gist.ThePrefs.PrefColor("link"))
 						fs.SetDeco(gist.DecoUnderline)
 						curLinkIdx = len(tr.Links)
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}

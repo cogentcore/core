@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/units"

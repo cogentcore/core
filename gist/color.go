@@ -574,7 +574,7 @@ func (c *Color) SetStringStyle(str string, base color.Color, ctxt Context) error
 	switch lstr {
 	case "currentcolor":
 		if ctxt != nil {
-			*c = ctxt.ContextColor() // current style.Color value
+			// *c = ctxt.ContextColor() // current style.Color value
 			return nil
 		} else {
 			err := fmt.Errorf("gist.Color.SetStringStyle -- attempt to use currentcolor with nil context")

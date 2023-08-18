@@ -11,6 +11,7 @@ import (
 	"math"
 
 	"github.com/anthonynsimon/bild/blur"
+	"github.com/goki/colors"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/sliceclone"
 	"github.com/goki/mat32"
@@ -501,7 +502,7 @@ func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
 	r := bs.Radius.Dots()
 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 		// set the color if it is not nil and the stroke style is not on and set to the correct color
-		if !bs.Color.Top.IsNil() && (!pc.StrokeStyle.On || pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color) {
+		if !colors.IsNil(bs.Color.Top) && (!pc.StrokeStyle.On || pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color) {
 			pc.StrokeStyle.SetColor(bs.Color.Top)
 		}
 		pc.StrokeStyle.Width = bs.Width.Top

@@ -4,12 +4,14 @@
 
 package gist
 
+import "image/color"
+
 // Context provides external contextual information needed for styles
 type Context interface {
 	// ContextColor returns the current Color activated in the context.
 	// Color has support for special color names that are relative to
 	// this current color.
-	ContextColor() Color
+	ContextColor() color.RGBA
 
 	// ContextColorSpecByURL returns a ColorSpec from given URL expression
 	// used in color specifications: url(#name) is typical, where name
