@@ -68,9 +68,6 @@ type TextField struct {
 	// the type of the text field
 	Type TextFieldTypes `desc:"the type of the text field"`
 
-	// the current state of the text field
-	State TextFieldStates `desc:"the current state of the text field"`
-
 	// the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color
 	PlaceholderColor gist.Color `desc:"the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color"`
 
@@ -128,9 +125,6 @@ type TextField struct {
 	// render version of just visible text
 	RenderVis girl.Text `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
 
-	// normal style and focus style
-	StateStyles [TextFieldStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"normal style and focus style"`
-
 	// font height, cached during styling
 	FontHeight float32 `copy:"-" json:"-" xml:"-" desc:"font height, cached during styling"`
 
@@ -182,27 +176,25 @@ func (tf *TextField) OnInit() {
 			s.Border.Color.Set()
 			s.Border.Radius = gist.BorderRadiusExtraSmallTop
 			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
-			switch tf.State {
-			case TextFieldActive:
-				s.Border.Width.Bottom = units.Px(1)
-				s.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
-			case TextFieldFocus:
+			if tf.IsFocusActive() {
 				s.Border.Width.Bottom = units.Px(2)
 				s.Border.Color.Bottom = ColorScheme.Primary
+			} else {
+				s.Border.Width.Bottom = units.Px(1)
+				s.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
 			}
 		case TextFieldOutlined:
 			s.Border.Style.Set(gist.BorderSolid)
 			s.Border.Radius = gist.BorderRadiusExtraSmall
-			switch tf.State {
-			case TextFieldActive:
-				s.Border.Width.Set(units.Px(1))
-				s.Border.Color.Set(ColorScheme.Outline)
-			case TextFieldFocus:
+			if tf.IsFocusActive() {
 				s.Border.Width.Set(units.Px(2))
 				s.Border.Color.Set(ColorScheme.Primary)
+			} else {
+				s.Border.Width.Set(units.Px(1))
+				s.Border.Color.Set(ColorScheme.Outline)
 			}
 		}
-		if tf.State == TextFieldSel {
+		if tf.IsSelected() {
 			s.BackgroundColor.SetSolid(ColorScheme.TertiaryContainer)
 		}
 	})
@@ -308,28 +300,6 @@ const (
 
 	TextFieldSignalsN
 )
-
-// TextFieldStates are mutually-exclusive textfield states -- determines appearance
-type TextFieldStates int32
-
-const (
-	// normal state -- there but not being interacted with
-	TextFieldActive TextFieldStates = iota
-
-	// inactive -- not editable
-	TextFieldInactive
-
-	// textfield is the focus -- will respond to keyboard input
-	TextFieldFocus
-
-	// selected -- for inactive state, can select entire element
-	TextFieldSel
-
-	TextFieldStatesN
-)
-
-// Style selector names for the different states
-var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}
 
 // these extend NodeBase NodeFlags to hold TextField state
 const (
@@ -1508,7 +1478,6 @@ func (tf *TextField) KeyChordEvent() {
 }
 
 func (tf *TextField) TextFieldEvents() {
-	tf.HoverTooltipEvent()
 	tf.MouseDragEvent()
 	tf.MouseEvent()
 	tf.KeyChordEvent()
@@ -1635,9 +1604,6 @@ func (tf *TextField) Size2D(iter int) {
 func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tf.Layout2DBase(parBBox, true, iter) // init style
 	tf.Layout2DParts(parBBox, iter)
-	for i := 0; i < int(TextFieldStatesN); i++ {
-		tf.StateStyles[i].CopyUnitContext(&tf.Style.UnContext)
-	}
 	redo := tf.Layout2DChildren(iter)
 	tf.SetEffPosAndSize()
 	return redo
@@ -1667,28 +1633,6 @@ func (tf *TextField) RenderTextField() {
 	tf.SetEffPosAndSize()
 
 	tf.AutoScroll() // inits paint with our style
-	prevState := tf.State
-	if tf.IsDisabled() {
-		if tf.IsSelected() {
-			tf.State = TextFieldSel
-		} else {
-			tf.State = TextFieldInactive
-		}
-	} else if tf.HasFocus() {
-		if tf.IsFocusActive() {
-			tf.State = TextFieldFocus
-		} else {
-			tf.State = TextFieldActive
-		}
-	} else if tf.IsSelected() {
-		tf.State = TextFieldSel
-	} else {
-		tf.State = TextFieldActive
-	}
-	if tf.State != prevState {
-		tf.Style = tf.StateStyles[tf.State]
-		tf.Style2DWidget()
-	}
 	st := &tf.Style
 	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext)
 	tf.RenderStdBox(st)
@@ -1719,6 +1663,10 @@ func (tf *TextField) Render2D() {
 	}
 	if tf.PushBounds() {
 		tf.This().(Node2D).ConnectEvents2D()
+		if tf.NeedsStyle() {
+			tf.StyleTextField()
+			tf.ClearNeedsStyle()
+		}
 		tf.RenderTextField()
 		if tf.IsEnabled() {
 			if tf.HasFocus() && tf.IsFocusActive() {
@@ -1741,16 +1689,19 @@ func (tf *TextField) ConnectEvents2D() {
 }
 
 func (tf *TextField) FocusChanged2D(change FocusChanges) {
+	fmt.Println(change)
 	switch change {
 	case FocusLost:
 		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDone()
+		tf.SetNeedsStyle()
 		tf.UpdateSig()
 	case FocusGot:
 		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
 		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
+		tf.SetNeedsStyle()
 		tf.UpdateSig()
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			oswin.TheApp.ShowVirtualKeyboard(oswin.NumberKeyboard)
@@ -1760,17 +1711,19 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	case FocusInactive:
 		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDeFocused()
+		tf.SetNeedsStyle()
 		tf.UpdateSig()
 		oswin.TheApp.HideVirtualKeyboard()
 	case FocusActive:
 		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
+		tf.SetNeedsStyle()
+		tf.UpdateSig()
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			oswin.TheApp.ShowVirtualKeyboard(oswin.NumberKeyboard)
 		} else {
 			oswin.TheApp.ShowVirtualKeyboard(oswin.SingleLineKeyboard)
 		}
-		// tf.UpdateSig()
 		// todo: see about cursor
 	}
 }

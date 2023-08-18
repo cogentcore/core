@@ -111,12 +111,9 @@ func (cb *ComboBox) OnInit() {
 				s.Border.Color.Set()
 				s.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
 				s.Border.Radius = gist.BorderRadiusExtraSmallTop
-				if tf, ok := cb.Parts.ChildByName("text", 1).(*TextField); ok {
-					switch tf.State {
-					case TextFieldFocus:
-						s.Border.Width.Bottom = units.Px(2)
-						s.Border.Color.Bottom = ColorScheme.Primary
-					}
+				if cb.HasFocusWithin() {
+					s.Border.Width.Bottom = units.Px(2)
+					s.Border.Color.Bottom = ColorScheme.Primary
 				}
 
 			}
@@ -126,12 +123,9 @@ func (cb *ComboBox) OnInit() {
 			s.Border.Color.Set(ColorScheme.OnSurfaceVariant)
 			if cb.Editable {
 				s.Border.Radius = gist.BorderRadiusExtraSmall
-				if tf, ok := cb.Parts.ChildByName("text", 1).(*TextField); ok {
-					switch tf.State {
-					case TextFieldFocus:
-						s.Border.Width.Set(units.Px(2))
-						s.Border.Color.Set(ColorScheme.Primary)
-					}
+				if cb.HasFocusWithin() {
+					s.Border.Width.Set(units.Px(2))
+					s.Border.Color.Set(ColorScheme.Primary)
 				}
 			}
 		}
