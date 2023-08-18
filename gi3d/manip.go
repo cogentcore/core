@@ -5,8 +5,10 @@
 package gi3d
 
 import (
+	"image/color"
+
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -103,7 +105,7 @@ func (sc *Scene) SelectBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
-	clr, _ := gist.ColorFromName(string(sc.SelParams.Color))
+	clr := colors.LogFromName(string(sc.SelParams.Color))
 	AddNewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sc.SelParams.Width, clr, Inactive)
 
 	sc.ReconfigMeshes()
@@ -124,7 +126,7 @@ func (sc *Scene) ManipBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
-	clr, _ := gist.ColorFromName(string(sc.SelParams.Color))
+	clr := colors.LogFromName(string(sc.SelParams.Color))
 
 	bbox := nb.WorldBBox.BBox
 	mb := AddNewLineBox(sc, sc, nm, nm, bbox, sc.SelParams.Width, clr, Inactive)
@@ -163,7 +165,7 @@ type ManipPt struct {
 var TypeManipPt = kit.Types.AddType(&ManipPt{}, ManipPtProps)
 
 // AddNewManipPt adds a new manipulation point
-func AddNewManipPt(sc *Scene, parent ki.Ki, name string, meshName string, clr gist.Color, pos mat32.Vec3) *ManipPt {
+func AddNewManipPt(sc *Scene, parent ki.Ki, name string, meshName string, clr color.RGBA, pos mat32.Vec3) *ManipPt {
 	mpt := parent.AddNewChild(TypeManipPt, name).(*ManipPt)
 	mpt.SetMeshName(sc, meshName)
 	mpt.Defaults()

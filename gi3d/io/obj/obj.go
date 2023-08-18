@@ -16,6 +16,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"image/color"
 	"io"
 	"io/fs"
 	"math"
@@ -24,8 +25,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi3d"
-	"github.com/goki/gi/gist"
 	"github.com/goki/ki/dirs"
 	"github.com/goki/mat32"
 )
@@ -179,19 +180,19 @@ type Material struct {
 	Opacity    float32     // Opacity factor
 	Refraction float32     // Refraction factor
 	Shininess  float32     // Shininess (specular exponent)
-	Ambient    gist.Color  // Ambient color reflectivity
-	Diffuse    gist.Color  // Diffuse color reflectivity
-	Specular   gist.Color  // Specular color reflectivity
-	Emissive   gist.Color  // Emissive color
+	Ambient    color.RGBA  // Ambient color reflectivity
+	Diffuse    color.RGBA  // Diffuse color reflectivity
+	Specular   color.RGBA  // Specular color reflectivity
+	Emissive   color.RGBA  // Emissive color
 	MapKd      string      // Texture file linked to diffuse color
 	Tiling     gi3d.Tiling // Tiling parameters: repeat and offset
 }
 
 // Light gray default material used as when other materials cannot be loaded.
 var defaultMat = &Material{
-	Diffuse:   gist.Color{R: 0xA0, G: 0xA0, B: 0xA0, A: 0xFF},
-	Ambient:   gist.Color{R: 0xA0, G: 0xA0, B: 0xA0, A: 0xFF},
-	Specular:  gist.Color{R: 0x80, G: 0x80, B: 0x80, A: 0xFF},
+	Diffuse:   color.RGBA{R: 0xA0, G: 0xA0, B: 0xA0, A: 0xFF},
+	Ambient:   color.RGBA{R: 0xA0, G: 0xA0, B: 0xA0, A: 0xFF},
+	Specular:  color.RGBA{R: 0x80, G: 0x80, B: 0x80, A: 0xFF},
 	Shininess: 30.0,
 }
 
@@ -747,15 +748,15 @@ func (dec *Decoder) parseKa(fields []string) error {
 	if len(fields) < 3 {
 		return dec.formatError("'Ka' with less than 3 fields")
 	}
-	var colors [3]float32
+	var clrs [3]float32
 	for pos, f := range fields[:3] {
 		val, err := strconv.ParseFloat(f, 32)
 		if err != nil {
 			return err
 		}
-		colors[pos] = float32(val)
+		clrs[pos] = float32(val)
 	}
-	dec.matCurrent.Ambient.SetFloat32(colors[0], colors[1], colors[2], 1)
+	dec.matCurrent.Ambient = colors.FromF32(clrs[0], clrs[1], clrs[2], 1)
 	return nil
 }
 
@@ -765,15 +766,15 @@ func (dec *Decoder) parseKd(fields []string) error {
 	if len(fields) < 3 {
 		return dec.formatError("'Kd' with less than 3 fields")
 	}
-	var colors [3]float32
+	var clrs [3]float32
 	for pos, f := range fields[:3] {
 		val, err := strconv.ParseFloat(f, 32)
 		if err != nil {
 			return err
 		}
-		colors[pos] = float32(val)
+		clrs[pos] = float32(val)
 	}
-	dec.matCurrent.Diffuse.SetFloat32(colors[0], colors[1], colors[2], 1)
+	dec.matCurrent.Diffuse = colors.FromF32(clrs[0], clrs[1], clrs[2], 1)
 	return nil
 }
 
@@ -783,15 +784,15 @@ func (dec *Decoder) parseKe(fields []string) error {
 	if len(fields) < 3 {
 		return dec.formatError("'Ke' with less than 3 fields")
 	}
-	var colors [3]float32
+	var clrs [3]float32
 	for pos, f := range fields[:3] {
 		val, err := strconv.ParseFloat(f, 32)
 		if err != nil {
 			return err
 		}
-		colors[pos] = float32(val)
+		clrs[pos] = float32(val)
 	}
-	dec.matCurrent.Emissive.SetFloat32(colors[0], colors[1], colors[2], 1)
+	dec.matCurrent.Emissive = colors.FromF32(clrs[0], clrs[1], clrs[2], 1)
 	return nil
 }
 
@@ -801,15 +802,15 @@ func (dec *Decoder) parseKs(fields []string) error {
 	if len(fields) < 3 {
 		return dec.formatError("'Ks' with less than 3 fields")
 	}
-	var colors [3]float32
+	var clrs [3]float32
 	for pos, f := range fields[:3] {
 		val, err := strconv.ParseFloat(f, 32)
 		if err != nil {
 			return err
 		}
-		colors[pos] = float32(val)
+		clrs[pos] = float32(val)
 	}
-	dec.matCurrent.Specular.SetFloat32(colors[0], colors[1], colors[2], 1)
+	dec.matCurrent.Specular = colors.FromF32(clrs[0], clrs[1], clrs[2], 1)
 	return nil
 }
 

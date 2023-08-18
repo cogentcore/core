@@ -7,6 +7,7 @@ package gi3d
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 
 	"github.com/goki/gi/gi"
@@ -69,7 +70,7 @@ func (txt *Text2D) Defaults(sc *Scene) {
 	txt.SetProp("font-size", units.Pt(36))
 	txt.SetProp("margin", units.Px(2))
 	txt.SetProp("color", &gi.Prefs.Colors.Font)
-	txt.SetProp("background-color", gist.Color{0, 0, 0, 0})
+	txt.SetProp("background-color", color.RGBA{0, 0, 0, 0})
 	txt.Mat.Bright = 4 // this is key for making e.g., a white background show up as white..
 }
 

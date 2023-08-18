@@ -5,9 +5,9 @@
 package gi3d
 
 import (
+	"image/color"
 	"log"
 
-	"github.com/goki/gi/gist"
 	"github.com/goki/mat32"
 )
 
@@ -37,10 +37,10 @@ func (tl *Tiling) Defaults() {
 type Material struct {
 
 	// prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
-	Color gist.Color `xml:"color" desc:"prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
+	Color color.RGBA `xml:"color" desc:"prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
 
 	// prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
-	Emissive gist.Color `xml:"emissive" desc:"prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
+	Emissive color.RGBA `xml:"emissive" desc:"prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
 
 	// prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
 	Shiny float32 `xml:"shiny" desc:"prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect."`
@@ -69,8 +69,8 @@ type Material struct {
 
 // Defaults sets default surface parameters
 func (mt *Material) Defaults() {
-	mt.Color.SetUInt8(128, 128, 128, 255)
-	mt.Emissive.SetUInt8(0, 0, 0, 0)
+	mt.Color = color.RGBA{128, 128, 128, 255}
+	mt.Emissive = color.RGBA{0, 0, 0, 0}
 	mt.Shiny = 30
 	mt.Reflective = 1
 	mt.Bright = 1

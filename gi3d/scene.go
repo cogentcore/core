@@ -7,11 +7,12 @@ package gi3d
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"strings"
 	"sync"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -85,7 +86,7 @@ type Scene struct {
 	Camera Camera `desc:"camera determines view onto scene"`
 
 	// background color
-	BackgroundColor gist.Color `desc:"background color"`
+	BackgroundColor color.RGBA `desc:"background color"`
 
 	// all lights used in the scene
 	Lights ordmap.Map[string, Light] `desc:"all lights used in the scene"`
@@ -149,7 +150,7 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 func (sc *Scene) Defaults() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
-	sc.BackgroundColor.SetUInt8(255, 255, 255, 255)
+	sc.BackgroundColor = colors.White
 	sc.SelParams.Defaults()
 }
 

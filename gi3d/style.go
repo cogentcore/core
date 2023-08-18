@@ -5,8 +5,10 @@
 package gi3d
 
 import (
+	"image/color"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
@@ -76,11 +78,11 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 			if inh {
 				mt.Color = par.(*Material).Color
 			} else if init {
-				mt.Color.SetUInt8(128, 128, 128, 255)
+				mt.Color = color.RGBA{128, 128, 128, 255}
 			}
 			return
 		}
-		mt.Color.SetIFace(val, ctxt, key)
+		mt.Color = colors.LogFromAny(val, ctxt.ContextColor())
 	},
 	"emissive": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
@@ -88,11 +90,11 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 			if inh {
 				mt.Emissive = par.(*Material).Emissive
 			} else if init {
-				mt.Emissive.SetUInt8(0, 0, 0, 0)
+				mt.Emissive = color.RGBA{}
 			}
 			return
 		}
-		mt.Emissive.SetIFace(val, ctxt, key)
+		mt.Emissive = colors.LogFromAny(val, ctxt.ContextColor())
 	},
 	"shiny": func(obj any, key string, val any, par any, ctxt gist.Context) {
 		mt := obj.(*Material)
