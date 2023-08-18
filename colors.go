@@ -8,10 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
+	"log"
 	"strings"
 )
 
-// IsNil returns if the color is the nil initial default color
+// IsNil returns whether the color is the nil initial default color
 func IsNil(c color.Color) bool {
 	return c == color.RGBA{}
 }
@@ -33,19 +34,31 @@ func AsRGBA(c color.Color) color.RGBA {
 func FromName(name string) (color.RGBA, error) {
 	c, ok := Map[name]
 	if !ok {
-		return color.RGBA{}, errors.New("colors.ColorFromName: name not found: " + name)
+		return color.RGBA{}, errors.New("colors.FromName: name not found: " + name)
 	}
 	return c, nil
 }
 
-// ColorFromName returns the color value specified
+// MustFromName returns the color value specified
 // by the given CSS standard color name. It panics
 // if the name is not found; see [FromName]
 // for a version that returns an error.
 func MustFromName(name string) color.RGBA {
 	c, err := FromName(name)
 	if err != nil {
-		panic("colors.MustColorFromName: " + err.Error())
+		panic("colors.MustFromName: " + err.Error())
+	}
+	return c
+}
+
+// LogFromName returns the color value specified
+// by the given CSS standard color name. It logs an error
+// if the name is not found; see [FromName]
+// for a version that returns an error.
+func LogFromName(name string) color.RGBA {
+	c, err := FromName(name)
+	if err != nil {
+		log.Println("error: colors.LogFromName: " + err.Error())
 	}
 	return c
 }
@@ -205,7 +218,38 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 }
 
 func MustFromString(str string, base color.Color) color.RGBA {
-	c, _ := FromString(str, base)
+	c, err := FromString(str, base)
+	if err != nil {
+		panic("colors.MustFromString: " + err.Error())
+	}
+	return c
+}
+
+func LogFromString(str string, base color.Color) color.RGBA {
+	c, err := FromString(str, base)
+	if err != nil {
+		log.Println("error: colors.LogFromString: " + err.Error())
+	}
+	return c
+}
+
+func FromAny(val any, base color.Color) (color.RGBA, error) {
+	return color.RGBA{}, nil
+}
+
+func MustFromAny(val any, base color.Color) color.RGBA {
+	c, err := FromAny(val, base)
+	if err != nil {
+		panic("colors.MustFromAny: " + err.Error())
+	}
+	return c
+}
+
+func LogFromAny(val any, base color.Color) color.RGBA {
+	c, err := FromAny(val, base)
+	if err != nil {
+		log.Println("error: colors.LogFromAny: " + err.Error())
+	}
 	return c
 }
 
@@ -230,7 +274,7 @@ func FromHex(hex string) (color.RGBA, error) {
 		format := "%02x%02x%02x%02x"
 		fmt.Sscanf(hex, format, &r, &g, &b, &a)
 	} else {
-		return color.RGBA{}, errors.New("colors.ColorFromHex: could not process: " + hex)
+		return color.RGBA{}, errors.New("colors.FromHex: could not process: " + hex)
 	}
 	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}, nil
 }
@@ -242,7 +286,19 @@ func FromHex(hex string) (color.RGBA, error) {
 func MustFromHex(hex string) color.RGBA {
 	c, err := FromHex(hex)
 	if err != nil {
-		panic("colors.MustColorFromHex: " + err.Error())
+		panic("colors.MustFromHex: " + err.Error())
+	}
+	return c
+}
+
+// LogFromHex parses the given hex color string
+// and returns the resulting color. It logs any
+// resulting error; see [FromHex] for a version
+// that returns an error.
+func LogFromHex(hex string) color.RGBA {
+	c, err := FromHex(hex)
+	if err != nil {
+		log.Println("error: colors.LogFromHex: " + err.Error())
 	}
 	return c
 }
@@ -255,4 +311,36 @@ func AsHex(c color.Color) string {
 	}
 	r := AsRGBA(c)
 	return fmt.Sprintf("#%02X%02X%02X%02X", r.R, r.G, r.B, r.A)
+}
+
+// SetR returns the given color with the red
+// component (R) set to the given value
+func SetR(c color.Color, r uint8) color.RGBA {
+	rc := AsRGBA(c)
+	rc.R = r
+	return rc
+}
+
+// SetG returns the given color with the green
+// component (G) set to the given value
+func SetG(c color.Color, g uint8) color.RGBA {
+	rc := AsRGBA(c)
+	rc.G = g
+	return rc
+}
+
+// SetB returns the given color with the blue
+// component (B) set to the given value
+func SetB(c color.Color, b uint8) color.RGBA {
+	rc := AsRGBA(c)
+	rc.B = b
+	return rc
+}
+
+// SetA returns the given color with the
+// transparency (A) set to the given value
+func SetA(c color.Color, a uint8) color.RGBA {
+	rc := AsRGBA(c)
+	rc.A = a
+	return rc
 }
