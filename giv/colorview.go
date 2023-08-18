@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
@@ -31,7 +32,7 @@ type ColorView struct {
 	gi.Frame
 
 	// the color that we view
-	Color gist.Color `desc:"the color that we view"`
+	Color color.RGBA `desc:"the color that we view"`
 
 	// the color that we view, in HSLA form
 	ColorHSLA gist.HSLA `desc:"the color that we view, in HSLA form"`
@@ -131,7 +132,7 @@ var ColorViewProps = ki.Props{
 
 // SetColor sets the source color
 func (cv *ColorView) SetColor(clr color.Color) {
-	cv.Color.SetColor(clr)
+	cv.Color = colors.AsRGBA(clr)
 	cv.ColorHSLA = gist.HSLAModel.Convert(clr).(gist.HSLA)
 	cv.ColorHSLA.Round()
 	cv.Config()
@@ -208,7 +209,8 @@ func (cv *ColorView) Config() {
 	nhsla.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		updt := cvv.UpdateStart()
-		cvv.Color = gist.ColorModel.Convert(cv.ColorHSLA).(gist.Color)
+		// STYTODO: better color conversion
+		cvv.Color = colors.AsRGBA(cv.ColorHSLA)
 		cvv.ViewSig.Emit(cvv.This(), 0, nil)
 		cvv.UpdateEnd(updt)
 	})
@@ -251,10 +253,11 @@ func (cv *ColorView) Config() {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 			updt := cvv.UpdateStart()
-			err := cvv.Color.ParseHex(hex.Text())
+			clr, err := colors.FromHex(hex.Text())
 			if err != nil {
 				log.Println("color view: error parsing hex '"+hex.Text()+"':", err)
 			}
+			cvv.Color = clr
 			cvv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
 			cvv.ColorHSLA.Round()
 			cvv.ViewSig.Emit(cvv.This(), 0, nil)
@@ -268,7 +271,7 @@ func (cv *ColorView) Config() {
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBB")`},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
-			hs := cvv.Color.HexString()
+			hs := colors.AsHex(cvv.Color)
 			// get rid of transparency because this is just RRGGBB
 			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, hs[:len(hs)-2])
 			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
@@ -276,20 +279,20 @@ func (cv *ColorView) Config() {
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBBAA")`},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
-			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, cvv.Color.HexString())
+			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, colors.AsHex(cvv.Color))
 			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBB"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
-			hs := cvv.Color.HexString()
+			hs := colors.AsHex(cvv.Color)
 			text := hs[:len(hs)-2]
 			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBBAA"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
-			text := cvv.Color.HexString()
+			text := colors.AsHex(cvv.Color)
 			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 
@@ -358,7 +361,7 @@ func (cv *ColorView) SliderGrid() *gi.Layout {
 }
 
 func (cv *ColorView) SetRGBValue(val float32, rgb int) {
-	if val > 0 && cv.Color.IsNil() { // starting out with dummy color
+	if val > 0 && colors.IsNil(cv.Color) { // starting out with dummy color
 		cv.Color.A = 255
 	}
 	switch rgb {
@@ -417,23 +420,24 @@ func (cv *ColorView) UpdateRGBSlider(sl *gi.Slider, rgb int) {
 }
 
 func (cv *ColorView) SetHSLValue(val float32, hsl int) {
-	h, s, l, _ := cv.Color.ToHSLA()
-	switch hsl {
-	case 0:
-		h = val
-		cv.ColorHSLA.H = h
-	case 1:
-		s = val / 360.0
-		cv.ColorHSLA.S = s
-	case 2:
-		l = val / 360.0
-		cv.ColorHSLA.L = l
-	}
-	cv.ColorHSLA.Round()
-	cv.Color.SetHSL(h, s, l)
-	if cv.TmpSave != nil {
-		cv.TmpSave.SaveTmp()
-	}
+	// STYTODO: fix
+	// h, s, l, _ := cv.Color.ToHSLA()
+	// switch hsl {
+	// case 0:
+	// 	h = val
+	// 	cv.ColorHSLA.H = h
+	// case 1:
+	// 	s = val / 360.0
+	// 	cv.ColorHSLA.S = s
+	// case 2:
+	// 	l = val / 360.0
+	// 	cv.ColorHSLA.L = l
+	// }
+	// cv.ColorHSLA.Round()
+	// cv.Color.SetHSL(h, s, l)
+	// if cv.TmpSave != nil {
+	// 	cv.TmpSave.SaveTmp()
+	// }
 }
 
 func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
@@ -498,7 +502,7 @@ func (cv *ColorView) ConfigPalette() {
 			cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 			if sig == int64(gi.ButtonPressed) {
 				but := send.Embed(gi.TypeButton).(*gi.Button)
-				cvv.Color.SetName(but.Nm)
+				cvv.Color = colors.LogFromName(but.Nm)
 				cvv.ColorHSLA = gist.HSLAModel.Convert(cvv.Color).(gist.HSLA)
 				cvv.ColorHSLA.Round()
 				cvv.ViewSig.Emit(cvv.This(), 0, nil)
@@ -536,7 +540,7 @@ func (cv *ColorView) UpdateValueFrame() {
 func (cv *ColorView) UpdateNums() {
 	cv.NumLay().ChildByName("nums-rgba-lay", 0).ChildByName("nums-rgba", 0).(*StructViewInline).UpdateFields()
 	cv.NumLay().ChildByName("nums-hsla-lay", 1).ChildByName("nums-hsla", 0).(*StructViewInline).UpdateFields()
-	hs := cv.Color.HexString()
+	hs := colors.AsHex(cv.Color)
 	// if we are fully opaque, which is typical,
 	// then we can skip displaying transparency in hex
 	if cv.Color.A == 255 {
@@ -650,8 +654,8 @@ func (vv *ColorValueView) UpdateWidget() {
 				// we need to display button as non-transparent
 				// so that it can be seen
 				dclr := clr.WithA(1)
-				s.BackgroundColor.SetSolid(dclr)
-				s.Color = dclr.ContrastColor()
+				s.BackgroundColor.SetColor(dclr)
+				s.Color = colors.AsRGBA(dclr.ContrastColor())
 			})
 			edac.SetFullReRender()
 		}

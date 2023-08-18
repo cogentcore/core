@@ -21,6 +21,7 @@ import (
 
 	"github.com/Masterminds/vcs"
 	"github.com/fsnotify/fsnotify"
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv/textbuf"
@@ -1779,17 +1780,17 @@ func (ftv *FileTreeView) OnInit() {
 		case "open":
 			s.Font.Style = gist.FontItalic
 		case "untracked":
-			s.Color = gist.MustColorFromHex("#808080")
+			s.Color = colors.MustFromHex("#808080")
 		case "modified":
-			s.Color = gist.MustColorFromHex("#4b7fd1")
+			s.Color = colors.MustFromHex("#4b7fd1")
 		case "added":
-			s.Color = gist.MustColorFromHex("#008800")
+			s.Color = colors.MustFromHex("#008800")
 		case "deleted":
-			s.Color = gist.MustColorFromHex("#ff4252")
+			s.Color = colors.MustFromHex("#ff4252")
 		case "conflicted":
-			s.Color = gist.MustColorFromHex("#ce8020")
+			s.Color = colors.MustFromHex("#ce8020")
 		case "updated":
-			s.Color = gist.MustColorFromHex("#008060")
+			s.Color = colors.MustFromHex("#008060")
 		}
 	})
 }

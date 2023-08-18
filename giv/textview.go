@@ -14,9 +14,9 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin/cursor"
@@ -3356,8 +3356,9 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	sty := &tv.Style
 	cspec := sty.BackgroundColor
 	bg := cspec.Color
-	isDark := bg.IsDark()
-	nclrs := len(TextViewDepthColors)
+	// STYTODO: fix textview colors
+	// isDark := bg.IsDark()
+	// nclrs := len(TextViewDepthColors)
 	lstdp := 0
 	for ln := stln; ln <= edln; ln++ {
 		lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
@@ -3377,12 +3378,12 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 			lx := &ht[ti]
 			if lx.Tok.Depth > 0 {
 				cspec.Color = bg
-				if isDark {
-					// reverse order too
-					cspec.Color.Add(TextViewDepthColors[nclrs-1-lx.Tok.Depth%nclrs])
-				} else {
-					cspec.Color.Sub(TextViewDepthColors[lx.Tok.Depth%nclrs])
-				}
+				// if isDark {
+				// 	// reverse order too
+				// 	cspec.Color.Add(TextViewDepthColors[nclrs-1-lx.Tok.Depth%nclrs])
+				// } else {
+				// 	cspec.Color.Sub(TextViewDepthColors[lx.Tok.Depth%nclrs])
+				// }
 				st := ints.MinInt(lsted, lx.St)
 				reg := textbuf.Region{Start: lex.Pos{Ln: ln, Ch: st}, End: lex.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed

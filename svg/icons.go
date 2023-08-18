@@ -16,8 +16,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"

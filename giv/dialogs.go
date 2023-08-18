@@ -506,7 +506,7 @@ func ColorViewDialogValue(dlg *gi.Dialog) gist.Color {
 	cvvvk := frame.ChildByType(TypeColorView, ki.Embeds, 2)
 	if cvvvk != nil {
 		cvvv := cvvvk.(*ColorView)
-		return cvvv.Color
+		return gist.ColorModel.Convert(cvvv.Color).(gist.Color)
 	}
 	return gist.Color{}
 }
