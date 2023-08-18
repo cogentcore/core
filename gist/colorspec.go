@@ -96,7 +96,7 @@ func (cs *ColorSpec) SetColor(cl color.Color) {
 
 // SetName sets a solid color by name
 func (cs *ColorSpec) SetName(name string) {
-	cs.Color, _ = colors.FromName(name)
+	cs.Color = colors.LogFromName(name)
 	cs.Source = SolidColor
 	cs.Gradient = nil
 }

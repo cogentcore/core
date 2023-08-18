@@ -7,6 +7,7 @@ package gist
 import (
 	"log"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -184,11 +185,11 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = par.(*Style).Color
 			} else if init {
-				fs.Color = Black
+				fs.Color = colors.Black
 			}
 			return
 		}
-		fs.Color.SetIFace(val, ctxt, key)
+		fs.Color = colors.LogFromAny(val, ctxt.ContextColor())
 	},
 	"background-color": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Style)

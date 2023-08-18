@@ -6,10 +6,12 @@ package gist
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"strings"
 	"sync"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -115,7 +117,7 @@ type Style struct {
 	ScrollBarWidth units.Value `xml:"scrollbar-width" desc:"prop: scrollbar-width = width of a layout scrollbar"`
 
 	// prop: color (inherited) = text color -- also defines the currentColor variable value
-	Color Color `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
+	Color color.RGBA `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
 
 	// prop: background-color = background color -- not inherited, transparent by default
 	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
@@ -159,7 +161,7 @@ func (s *Style) Defaults() {
 	s.PointerEvents = true
 
 	s.LayoutDefaults()
-	s.Color = Black
+	s.Color = colors.Black
 	s.Font.Defaults()
 	s.Text.Defaults()
 }

@@ -111,7 +111,7 @@ func (cs *ColorSpec) SetString(clrstr string, ctxt Context) bool {
 	} else {
 		cs.Gradient = nil
 		cs.Source = SolidColor
-		cs.Color, _ = colors.FromString(clrstr, nil)
+		cs.Color = colors.LogFromString(clrstr, nil)
 	}
 	return true
 }
@@ -412,7 +412,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 					cs.Gradient.Points[3] = cs.Gradient.Points[1]
 				}
 			case "stop":
-				stop := rasterx.GradStop{Opacity: 1.0, StopColor: color.Black}
+				stop := rasterx.GradStop{Opacity: 1.0, StopColor: colors.Black}
 				ats := se.Attr
 				sty := XMLAttr("style", ats)
 				if sty != "" {

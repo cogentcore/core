@@ -5,8 +5,10 @@
 package gist
 
 import (
+	"image/color"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
@@ -472,7 +474,7 @@ type FontRender struct {
 	Font
 
 	// prop: color (inherited) = text color -- also defines the currentColor variable value
-	Color Color `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
+	Color color.RGBA `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
 
 	// prop: background-color = background color -- not inherited, transparent by default
 	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
@@ -489,7 +491,7 @@ func (s *Style) FontRender() *FontRender {
 }
 
 func (fr *FontRender) Defaults() {
-	fr.Color = Black
+	fr.Color = colors.Black
 	fr.Font.Defaults()
 }
 
