@@ -5,6 +5,7 @@
 package hsl
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/goki/mat32"
@@ -178,4 +179,8 @@ func RGBtoHSLf32(r, g, b float32) (h, s, l float32) {
 		}
 	}
 	return
+}
+
+func (h *HSL) String() string {
+	return fmt.Sprintf("hsl(%g, %g, %g)", h.H, h.S, h.L)
 }

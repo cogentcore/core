@@ -20,6 +20,7 @@
 package hct
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/goki/cam/cam16"
@@ -142,6 +143,10 @@ func Uint32ToHCT(r, g, b, a uint32) HCT {
 	h := HCT{}
 	h.SetUint32(r, g, b, a)
 	return h
+}
+
+func (h *HCT) String() string {
+	return fmt.Sprintf("hct(%g, %g, %g)", h.Hue, h.Chroma, h.Tone)
 }
 
 /*

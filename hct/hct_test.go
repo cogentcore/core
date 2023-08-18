@@ -5,7 +5,6 @@
 package hct
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/goki/mat32"
@@ -47,7 +46,7 @@ func TestHCTAll(t *testing.T) {
 		for _, chroma := range chromas {
 			for _, tone := range tones {
 				h := NewHCT(hue, chroma, tone)
-				hs := fmt.Sprintf("%v", h)
+				hs := h.String()
 				if chroma > 0 {
 					expectTol(t, hue, h.Hue, 4.0, hs)
 				}
