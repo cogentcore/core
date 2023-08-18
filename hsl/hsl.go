@@ -39,7 +39,14 @@ func NewHSL(hue, saturation, lightness float32) HSL {
 	return HSL{hue, saturation, lightness, 1}
 }
 
-// NewHSLFromRGBA constructs a new HSL color from a standard color.RGBA
+// NewHSLFromColor constructs a new HSL color from a standard [color.Color]
+func NewHSLFromColor(c color.Color) HSL {
+	h := HSL{}
+	h.SetColor(c)
+	return h
+}
+
+// NewHSLFromRGBA constructs a new HSL color from a standard [color.RGBA]
 func NewHSLFromRGBA(c color.RGBA) HSL {
 	h := HSL{}
 	h.SetUint32(c.RGBA())
