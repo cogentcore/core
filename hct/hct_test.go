@@ -64,3 +64,9 @@ func TestHCTAll(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkHCT(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		NewHCT(120, 45, 56)
+	}
+}
