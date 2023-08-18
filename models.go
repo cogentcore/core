@@ -21,6 +21,12 @@ func (c RGBAf32) RGBA() (r, g, b, a uint32) {
 	return
 }
 
+// FromF32 returns the color specified by the given float32
+// alpha-premultiplied RGBA values in the range 0 to 1
+func FromF32(r, g, b, a float32) color.RGBA {
+	return AsRGBA(RGBAf32{r, g, b, a})
+}
+
 // NRGBAf32 stores non-alpha-premultiplied RGBA values in float32 0..1
 // normalized format -- more useful for converting to other spaces
 type NRGBAf32 struct {
@@ -34,6 +40,12 @@ func (c NRGBAf32) RGBA() (r, g, b, a uint32) {
 	b = uint32(c.B*c.A*65535.0 + 0.5)
 	a = uint32(c.A*65535.0 + 0.5)
 	return
+}
+
+// FromNF32 returns the color specified by the given float32
+// non alpha-premultiplied RGBA values in the range 0 to 1
+func FromNF32(r, g, b, a float32) color.RGBA {
+	return AsRGBA(NRGBAf32{r, g, b, a})
 }
 
 var (
