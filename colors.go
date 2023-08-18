@@ -32,6 +32,17 @@ func AsRGBA(c color.Color) color.RGBA {
 	return color.RGBAModel.Convert(c).(color.RGBA)
 }
 
+// AsString returns the given color as a string,
+// using its String method if it exists, and formatting
+// it as rgba(r, g, b, a) otherwise.
+func AsString(c color.Color) string {
+	if s, ok := c.(fmt.Stringer); ok {
+		return s.String()
+	}
+	r, g, b, a := c.RGBA()
+	return fmt.Sprintf("rgba(%d, %d, %d, %d)", r, g, b, a)
+}
+
 // FromName returns the color value specified
 // by the given CSS standard color name. It returns
 // an error if the name is not found; see [ColorFromName]
