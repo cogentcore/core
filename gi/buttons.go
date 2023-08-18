@@ -546,10 +546,12 @@ func (bb *ButtonBase) ConnectEvents2D() {
 func (bb *ButtonBase) FocusChanged2D(change FocusChanges) {
 	switch change {
 	case FocusLost:
+		bb.SetNeedsStyle()
 		bb.UpdateSig()
 	case FocusGot:
 		bb.ScrollToMe()
 		bb.EmitFocusedSignal()
+		bb.SetNeedsStyle()
 		bb.UpdateSig()
 	case FocusInactive: // don't care..
 	case FocusActive:

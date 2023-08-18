@@ -367,6 +367,8 @@ func (nb *Node2DBase) Node2DMouseEvent() {
 // mouse event function, you should call this function first.
 func (nb *Node2DBase) Node2DOnMouseEvent(me *mouse.Event) {
 	nb.SetActiveState(me.Action == mouse.Press)
+	nb.SetNeedsStyle()
+	nb.UpdateSig()
 }
 
 // Node2DMouseFocusEvent does the default handling for mouse focus events for the Node2D
@@ -401,7 +403,11 @@ func (nb *Node2DBase) Node2DOnMouseFocusEvent(me *mouse.FocusEvent) {
 func (nb *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
+// FocusChanged2D handles the default behavior for node focus changes
+// by calling [NodeBase.SetNeedsStyle] and sending an update signal.
 func (nb *Node2DBase) FocusChanged2D(change FocusChanges) {
+	nb.SetNeedsStyle()
+	nb.UpdateSig()
 }
 
 func (nb *Node2DBase) HasFocus2D() bool {
