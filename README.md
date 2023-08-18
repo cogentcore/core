@@ -8,7 +8,7 @@ Our color perception starts with the cones in the foveal region of the retina, w
 
 At higher levels in the visual processing pathway (in the visual cortex), the basic cone responses from the retina get organized into *color opponent* responses, reflecting the *difference* between the amount of Red vs. Green and Blue vs. Yellow (where Yellow is roughly an average of RG). In color speak Red = Long, Green = Medium, Blue = Short wavelengths, corresponding to the color absorption profile of cones in the fovea of the retina.
 
-The current best CAM in terms of the ability to predict human perceptual judgments is CAM16, which is implemented in the [cam16](cam16) package.
+The current best CAM in terms of the ability to predict human perceptual judgments is CAM16, which is implemented in the [cam16](cam16) package.  This is used in the latest version of [material design](https://material.io/blog/science-of-color-design) to provide algorithmically-generated color schemes with good overall psychophysical properties.
 
 # cie: International Commission on Illumination
 
