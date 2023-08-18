@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/units"

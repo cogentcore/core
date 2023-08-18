@@ -7,8 +7,8 @@ package gi
 import (
 	"image"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"

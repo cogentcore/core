@@ -7,9 +7,9 @@ package gi
 import (
 	"image"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/mouse"
@@ -260,7 +260,7 @@ func (lb *Label) SetText(txt string) {
 	}
 	lb.StyMu.RLock()
 	lb.Text = txt
-	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
 	// this makes it easier for it to update with dynamic bgs
 	if lb.Text == "" {
 		lb.Render.SetHTML(" ", lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
@@ -416,7 +416,7 @@ func (lb *Label) LayoutLabel() {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
-	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
 	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
@@ -449,7 +449,7 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	lb.Layout2DBase(parBBox, true, iter)
 	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
-	lb.Style.BackgroundColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
 	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	if lb.Style.Text.HasWordWrap() {

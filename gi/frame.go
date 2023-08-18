@@ -92,7 +92,9 @@ func (fr *Frame) RenderStripes() {
 
 	delta := fr.Move2DDelta(image.Point{})
 
-	hic := st.BackgroundColor.Color.Highlight(Prefs.Params.ZebraStripeWeight)
+	// TODO: fix stripes
+	// hic := st.BackgroundColor.Color.Highlight(Prefs.Params.ZebraStripeWeight)
+	hic := st.BackgroundColor.Color
 	if fr.Stripes == RowStripes {
 		for r, gd := range fr.GridData[Row] {
 			if r%2 == 0 {

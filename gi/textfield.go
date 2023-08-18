@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"strings"
 	"sync"
@@ -69,7 +70,7 @@ type TextField struct {
 	Type TextFieldTypes `desc:"the type of the text field"`
 
 	// the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color
-	PlaceholderColor gist.Color `desc:"the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color"`
+	PlaceholderColor color.RGBA `desc:"the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color"`
 
 	// the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties
 	SelectColor gist.ColorSpec `desc:"the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties"`

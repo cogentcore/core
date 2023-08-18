@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"image/png"
 	"io"
@@ -99,7 +100,7 @@ type Viewport2D struct {
 	CurStyleNode Node2D `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
 
 	// [view: -] CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access
-	CurColor gist.Color `copy:"-" json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"`
+	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"`
 
 	// [view: -] UpdtMu is mutex for viewport updates
 	UpdtMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"UpdtMu is mutex for viewport updates"`
@@ -959,7 +960,7 @@ func (vp *Viewport2D) SetCurStyleNode(node Node2D) {
 }
 
 // SetCurrentColor sets the current color in concurrent-safe way
-func (vp *Viewport2D) SetCurrentColor(clr gist.Color) {
+func (vp *Viewport2D) SetCurrentColor(clr color.RGBA) {
 	if vp == nil {
 		return
 	}
@@ -970,9 +971,9 @@ func (vp *Viewport2D) SetCurrentColor(clr gist.Color) {
 
 // ContextColor gets the current color in concurrent-safe way.
 // Implements the gist.Context interface
-func (vp *Viewport2D) ContextColor() gist.Color {
+func (vp *Viewport2D) ContextColor() color.RGBA {
 	if vp == nil {
-		return gist.Color{}
+		return color.RGBA{}
 	}
 	vp.StyleMu.RLock()
 	clr := vp.CurColor

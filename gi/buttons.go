@@ -10,8 +10,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gist"
-	"github.com/goki/gi/gist/colors"
 	"github.com/goki/gi/icons"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
