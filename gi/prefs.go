@@ -21,6 +21,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"github.com/goki/matcolor"
 	"github.com/goki/pi/langs/golang"
 )
 
@@ -41,6 +42,9 @@ type Preferences struct {
 
 	// the density (compactness) of content
 	Density Densities `desc:"the density (compactness) of content"`
+
+	// the color key used to generate the color scheme
+	ColorKey matcolor.Key `desc:"the color key used to generate the color scheme"`
 
 	// active color preferences
 	Colors ColorPrefs `desc:"active color preferences"`
