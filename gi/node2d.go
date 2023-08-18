@@ -381,7 +381,6 @@ func (nb *Node2DBase) Node2DMouseFocusEvent() {
 		me := data.(*mouse.FocusEvent)
 		me.SetProcessed()
 
-		fmt.Println("mouse focus event", nb)
 		nb.Node2DOnMouseFocusEvent(me)
 	})
 }

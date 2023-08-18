@@ -329,7 +329,6 @@ func (tf *TextField) SetText(txt string) {
 	needSty := tf.Style.Font.Size.Val == 0
 	tf.StyMu.RUnlock()
 	if needSty {
-		fmt.Println("tf settext style", tf)
 		tf.StyleTextField()
 	}
 	tf.Txt = txt
@@ -1485,7 +1484,6 @@ func (tf *TextField) TextFieldEvents() {
 }
 
 func (tf *TextField) ConfigParts() {
-	// fmt.Println("tf config parts")
 	tf.Parts.Lay = LayoutHoriz
 	if tf.IsDisabled() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
 		tf.Parts.DeleteChildren(ki.DestroyKids)
@@ -1509,7 +1507,6 @@ func (tf *TextField) ConfigParts() {
 	}
 
 	mods, updt := tf.Parts.ConfigChildren(config)
-	// fmt.Println("configured children")
 	if mods || gist.RebuildDefaultStyles {
 		if leadIconIdx != -1 {
 			leadIcon := tf.Parts.Child(leadIconIdx).(*Action)
@@ -1545,7 +1542,6 @@ func (tf *TextField) Init2D() {
 
 // StyleTextField does text field styling -- sets StyMu Lock
 func (tf *TextField) StyleTextField() {
-	fmt.Println("tf style", tf)
 	tf.StyMu.Lock()
 
 	tf.SetCanFocusIfActive()
@@ -1556,7 +1552,6 @@ func (tf *TextField) StyleTextField() {
 }
 
 func (tf *TextField) Style2D() {
-	fmt.Println("tf style style2d", tf)
 	tf.StyleTextField()
 	tf.StyMu.Lock()
 	tf.LayState.SetFromStyle(&tf.Style) // also does reset
@@ -1660,7 +1655,6 @@ func (tf *TextField) Render2D() {
 	if tf.PushBounds() {
 		tf.This().(Node2D).ConnectEvents2D()
 		if tf.NeedsStyle() {
-			fmt.Println("tf style needsstlye", tf)
 			tf.StyleTextField()
 			tf.ClearNeedsStyle()
 		}
@@ -1686,7 +1680,6 @@ func (tf *TextField) ConnectEvents2D() {
 }
 
 func (tf *TextField) FocusChanged2D(change FocusChanges) {
-	fmt.Println(change)
 	switch change {
 	case FocusLost:
 		tf.ClearFlag(int(TextFieldFocusActive))
@@ -1708,14 +1701,14 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	case FocusInactive:
 		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDeFocused()
-		// tf.SetNeedsStyle()
+		tf.SetNeedsStyle()
 		tf.UpdateSig()
 		oswin.TheApp.HideVirtualKeyboard()
 	case FocusActive:
 		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
-		// tf.SetNeedsStyle()
-		// tf.UpdateSig()
+		tf.SetNeedsStyle()
+		tf.UpdateSig()
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			oswin.TheApp.ShowVirtualKeyboard(oswin.NumberKeyboard)
 		} else {
