@@ -45,26 +45,36 @@ type HCT struct {
 	R, G, B, A float32 `desc:"sRGB standard gamma-corrected 0-1 normalized RGB representation of the color.  Critically, components are not premultiplied by alpha"`
 }
 
-// NewHCT returns a new HCT representation for given parameters:
+// New returns a new HCT representation for given parameters:
 // hue = 0..360
 // chroma = 0..? depends on other params
 // tone = 0..100
 // also computes and sets the sRGB normalized, gamma corrected R,G,B values
 // while keeping the sRGB representation within its gamut,
 // which may cause the chroma to decrease until it is inside the gamut.
-func NewHCT(hue, chroma, tone float32) HCT {
+func New(hue, chroma, tone float32) HCT {
 	r, g, b := SolveToRGB(hue, chroma, tone)
 	return SRGBToHCT(r, g, b)
 }
 
-// NewHCTFromColor constructs a new HCT color from a standard [color.Color]
-func NewHCTFromColor(c color.Color) HCT {
+// FromColor constructs a new HCT color from a standard [color.Color]
+func FromColor(c color.Color) HCT {
 	return Uint32ToHCT(c.RGBA())
+}
+
+// Model is the standard [color.Model] that converts colors to HCT.
+var Model = color.ModelFunc(model)
+
+func model(c color.Color) color.Color {
+	if h, ok := c.(HCT); ok {
+		return h
+	}
+	return FromColor(c)
 }
 
 // RGBA implements the color.Color interface.
 // Performs the premultiplication of the RGB components by alpha at this point.
-func (h *HCT) RGBA() (r, g, b, a uint32) {
+func (h HCT) RGBA() (r, g, b, a uint32) {
 	r = uint32(h.R*h.A*65535.0 + 0.5)
 	g = uint32(h.G*h.A*65535.0 + 0.5)
 	b = uint32(h.B*h.A*65535.0 + 0.5)
@@ -73,7 +83,7 @@ func (h *HCT) RGBA() (r, g, b, a uint32) {
 }
 
 // AsRGBA returns a standard color.RGBA type
-func (h *HCT) AsRGBA() color.RGBA {
+func (h HCT) AsRGBA() color.RGBA {
 	return color.RGBA{uint8(h.R*h.A*255.0 + 0.5), uint8(h.G*h.A*255.0 + 0.5), uint8(h.B*h.A*255.0 + 0.5), uint8(h.A*255.0 + 0.5)}
 }
 
@@ -145,7 +155,7 @@ func Uint32ToHCT(r, g, b, a uint32) HCT {
 	return h
 }
 
-func (h *HCT) String() string {
+func (h HCT) String() string {
 	return fmt.Sprintf("hct(%g, %g, %g)", h.Hue, h.Chroma, h.Tone)
 }
 

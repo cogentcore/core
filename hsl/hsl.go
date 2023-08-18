@@ -31,20 +31,30 @@ type HSL struct {
 	A float32 `min:"0" max:"1" step:"0.05" desc:"the transparency of the color"`
 }
 
-// NewHSL returns a new HSL representation for given parameters:
+// New returns a new HSL representation for given parameters:
 // hue = 0..360
 // saturation = 0..1
 // lightness = 0..1
 // A is automatically set to 1
-func NewHSL(hue, saturation, lightness float32) HSL {
+func New(hue, saturation, lightness float32) HSL {
 	return HSL{hue, saturation, lightness, 1}
 }
 
-// NewHSLFromColor constructs a new HSL color from a standard [color.Color]
-func NewHSLFromColor(c color.Color) HSL {
+// FromColor constructs a new HSL color from a standard [color.Color]
+func FromColor(c color.Color) HSL {
 	h := HSL{}
 	h.SetColor(c)
 	return h
+}
+
+// Model is the standard [color.Model] that converts colors to HSL.
+var Model = color.ModelFunc(model)
+
+func model(c color.Color) color.Color {
+	if h, ok := c.(HSL); ok {
+		return h
+	}
+	return FromColor(c)
 }
 
 // Implements the [color.Color] interface

@@ -45,7 +45,7 @@ func TestHCTAll(t *testing.T) {
 	for _, hue := range hues {
 		for _, chroma := range chromas {
 			for _, tone := range tones {
-				h := NewHCT(hue, chroma, tone)
+				h := New(hue, chroma, tone)
 				hs := h.String()
 				if chroma > 0 {
 					expectTol(t, hue, h.Hue, 4.0, hs)
@@ -66,6 +66,6 @@ func TestHCTAll(t *testing.T) {
 
 func BenchmarkHCT(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		NewHCT(120, 45, 56)
+		New(120, 45, 56)
 	}
 }

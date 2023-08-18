@@ -52,7 +52,7 @@ func main() {
 		for chroma := 0; chroma <= chromaMax; chroma += chromaInc {
 			ci := chroma / chromaInc
 			for ti, tone := range tones {
-				h := hct.NewHCT(float32(hue), float32(chroma), tone)
+				h := hct.New(float32(hue), float32(chroma), tone)
 				c := h.AsRGBA()
 				ys := (yp + ci) * sqSz
 				xs := (xp + ti) * sqSz
