@@ -131,8 +131,8 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[Rendering-37]
-	_ = x[SVGFlagsN-38]
+	_ = x[Rendering-38]
+	_ = x[SVGFlagsN-39]
 }
 
 const _SVGFlags_name = "RenderingSVGFlagsN"
@@ -140,9 +140,9 @@ const _SVGFlags_name = "RenderingSVGFlagsN"
 var _SVGFlags_index = [...]uint8{0, 9, 18}
 
 func (i SVGFlags) String() string {
-	i -= 37
+	i -= 38
 	if i < 0 || i >= SVGFlags(len(_SVGFlags_index)-1) {
-		return "SVGFlags(" + strconv.FormatInt(int64(i+37), 10) + ")"
+		return "SVGFlags(" + strconv.FormatInt(int64(i+38), 10) + ")"
 	}
 	return _SVGFlags_name[_SVGFlags_index[i]:_SVGFlags_index[i+1]]
 }
@@ -150,15 +150,15 @@ func (i SVGFlags) String() string {
 func StringToSVGFlags(s string) (SVGFlags, error) {
 	for i := 0; i < len(_SVGFlags_index)-1; i++ {
 		if s == _SVGFlags_name[_SVGFlags_index[i]:_SVGFlags_index[i+1]] {
-			return SVGFlags(i + 37), nil
+			return SVGFlags(i + 38), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: SVGFlags")
 }
 
 var _SVGFlags_descMap = map[SVGFlags]string{
-	37: `Rendering means that the SVG is currently redrawing Can be useful to check for animations etc to decide whether to drive another update`,
-	38: ``,
+	38: `Rendering means that the SVG is currently redrawing Can be useful to check for animations etc to decide whether to drive another update`,
+	39: ``,
 }
 
 func (i SVGFlags) Desc() string {

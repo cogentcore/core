@@ -109,6 +109,9 @@ const (
 	// internally for nodes to determine what to do on the ReRender step
 	FullReRender
 
+	// NeedsStyle indicates that a node needs to be styled again before being rendered.
+	NeedsStyle
+
 	// ReRenderAnchor: this node has a static size, and repaints its
 	// background -- any children under it that need to dynamically resize on
 	// a ReRender (Update) can refer the update up to rerendering this node,
@@ -212,6 +215,30 @@ func (nb *NodeBase) HasFlagWithin(flag int) bool {
 		return ki.Continue
 	})
 	return got
+}
+
+// NeedsStyle returns whether the node needs to be
+// styled before being rendered.
+func (nb *NodeBase) NeedsStyle() bool {
+	return nb.HasFlag(int(NeedsStyle))
+}
+
+// SetNeedsStyle sets the node as needing to be
+// styled before being rendered.
+func (nb *NodeBase) SetNeedsStyle() {
+	nb.SetFlag(int(NeedsStyle))
+}
+
+// ClearNeedsStyle clears the node as needing to be
+// styled before being rendered.
+func (nb *NodeBase) ClearNeedsStyle() {
+	nb.ClearFlag(int(NeedsStyle))
+}
+
+// SetNeedsStyle sets the node as either needing to be styled
+// before being rendered or not depending on the given value.
+func (nb *NodeBase) SetNeedsStyleState(needs bool) {
+	nb.SetFlagState(needs, int(NeedsStyle))
 }
 
 // IsDragging tests if the current node is currently flagged as receiving

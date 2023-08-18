@@ -389,6 +389,8 @@ func (nb *Node2DBase) Node2DMouseFocusEvent() {
 func (nb *Node2DBase) Node2DOnMouseFocusEvent(me *mouse.FocusEvent) {
 	enter := me.Action == mouse.Enter
 	nb.SetHoveredState(enter)
+	nb.SetNeedsStyle()
+	nb.UpdateSig()
 	// TODO: trigger mouse focus exit after clicking down
 	// while leaving; then clear active here
 	// // if !enter {

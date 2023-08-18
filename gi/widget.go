@@ -349,6 +349,9 @@ func (wb *WidgetBase) Style2DWidget() {
 
 	pcsn.End()
 
+	wb.Style = gist.Style{}
+	wb.Style.Defaults()
+
 	pin := prof.Start("Style2DWidget-Inherit")
 
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
@@ -575,6 +578,10 @@ func (wb *WidgetBase) Render2D() {
 	}
 	if wb.PushBounds() {
 		wb.This().(Node2D).ConnectEvents2D()
+		if wb.NeedsStyle() {
+			wb.This().(Node2D).Style2D()
+			wb.ClearNeedsStyle()
+		}
 		wb.Render2DChildren()
 		wb.PopBounds()
 	} else {

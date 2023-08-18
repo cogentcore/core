@@ -377,11 +377,11 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[TextBufAutoSaving-26]
-	_ = x[TextBufMarkingUp-27]
-	_ = x[TextBufChanged-28]
-	_ = x[TextBufFileModOk-29]
-	_ = x[TextBufFlagsN-30]
+	_ = x[TextBufAutoSaving-27]
+	_ = x[TextBufMarkingUp-28]
+	_ = x[TextBufChanged-29]
+	_ = x[TextBufFileModOk-30]
+	_ = x[TextBufFlagsN-31]
 }
 
 const _TextBufFlags_name = "TextBufAutoSavingTextBufMarkingUpTextBufChangedTextBufFileModOkTextBufFlagsN"
@@ -389,9 +389,9 @@ const _TextBufFlags_name = "TextBufAutoSavingTextBufMarkingUpTextBufChangedTextB
 var _TextBufFlags_index = [...]uint8{0, 17, 33, 47, 63, 76}
 
 func (i TextBufFlags) String() string {
-	i -= 26
+	i -= 27
 	if i < 0 || i >= TextBufFlags(len(_TextBufFlags_index)-1) {
-		return "TextBufFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
+		return "TextBufFlags(" + strconv.FormatInt(int64(i+27), 10) + ")"
 	}
 	return _TextBufFlags_name[_TextBufFlags_index[i]:_TextBufFlags_index[i+1]]
 }
@@ -399,18 +399,18 @@ func (i TextBufFlags) String() string {
 func StringToTextBufFlags(s string) (TextBufFlags, error) {
 	for i := 0; i < len(_TextBufFlags_index)-1; i++ {
 		if s == _TextBufFlags_name[_TextBufFlags_index[i]:_TextBufFlags_index[i+1]] {
-			return TextBufFlags(i + 26), nil
+			return TextBufFlags(i + 27), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: TextBufFlags")
 }
 
 var _TextBufFlags_descMap = map[TextBufFlags]string{
-	26: `TextBufAutoSaving is used in atomically safe way to protect autosaving`,
-	27: `TextBufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
-	28: `TextBufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
-	29: `TextBufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
-	30: ``,
+	27: `TextBufAutoSaving is used in atomically safe way to protect autosaving`,
+	28: `TextBufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
+	29: `TextBufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
+	30: `TextBufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
+	31: ``,
 }
 
 func (i TextBufFlags) Desc() string {
@@ -519,14 +519,14 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[TextViewNeedsRefresh-26]
-	_ = x[TextViewInReLayout-27]
-	_ = x[TextViewRenderScrolls-28]
-	_ = x[TextViewFocusActive-29]
-	_ = x[TextViewHasLineNos-30]
-	_ = x[TextViewLastWasTabAI-31]
-	_ = x[TextViewLastWasUndo-32]
-	_ = x[TextViewFlagsN-33]
+	_ = x[TextViewNeedsRefresh-27]
+	_ = x[TextViewInReLayout-28]
+	_ = x[TextViewRenderScrolls-29]
+	_ = x[TextViewFocusActive-30]
+	_ = x[TextViewHasLineNos-31]
+	_ = x[TextViewLastWasTabAI-32]
+	_ = x[TextViewLastWasUndo-33]
+	_ = x[TextViewFlagsN-34]
 }
 
 const _TextViewFlags_name = "TextViewNeedsRefreshTextViewInReLayoutTextViewRenderScrollsTextViewFocusActiveTextViewHasLineNosTextViewLastWasTabAITextViewLastWasUndoTextViewFlagsN"
@@ -534,9 +534,9 @@ const _TextViewFlags_name = "TextViewNeedsRefreshTextViewInReLayoutTextViewRende
 var _TextViewFlags_index = [...]uint8{0, 20, 38, 59, 78, 96, 116, 135, 149}
 
 func (i TextViewFlags) String() string {
-	i -= 26
+	i -= 27
 	if i < 0 || i >= TextViewFlags(len(_TextViewFlags_index)-1) {
-		return "TextViewFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
+		return "TextViewFlags(" + strconv.FormatInt(int64(i+27), 10) + ")"
 	}
 	return _TextViewFlags_name[_TextViewFlags_index[i]:_TextViewFlags_index[i+1]]
 }
@@ -544,21 +544,21 @@ func (i TextViewFlags) String() string {
 func StringToTextViewFlags(s string) (TextViewFlags, error) {
 	for i := 0; i < len(_TextViewFlags_index)-1; i++ {
 		if s == _TextViewFlags_name[_TextViewFlags_index[i]:_TextViewFlags_index[i+1]] {
-			return TextViewFlags(i + 26), nil
+			return TextViewFlags(i + 27), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: TextViewFlags")
 }
 
 var _TextViewFlags_descMap = map[TextViewFlags]string{
-	26: `TextViewNeedsRefresh indicates when refresh is required`,
-	27: `TextViewInReLayout indicates that we are currently resizing ourselves via parent layout`,
-	28: `TextViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender`,
-	29: `TextViewFocusActive is set if the keyboard focus is active -- when we lose active focus we apply changes`,
-	30: `TextViewHasLineNos indicates that this view has line numbers (per TextBuf option)`,
-	31: `TextViewLastWasTabAI indicates that last key was a Tab auto-indent`,
-	32: `TextViewLastWasUndo indicates that last key was an undo`,
-	33: ``,
+	27: `TextViewNeedsRefresh indicates when refresh is required`,
+	28: `TextViewInReLayout indicates that we are currently resizing ourselves via parent layout`,
+	29: `TextViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender`,
+	30: `TextViewFocusActive is set if the keyboard focus is active -- when we lose active focus we apply changes`,
+	31: `TextViewHasLineNos indicates that this view has line numbers (per TextBuf option)`,
+	32: `TextViewLastWasTabAI indicates that last key was a Tab auto-indent`,
+	33: `TextViewLastWasUndo indicates that last key was an undo`,
+	34: ``,
 }
 
 func (i TextViewFlags) Desc() string {
@@ -627,11 +627,11 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[TreeViewFlagClosed-26]
-	_ = x[TreeViewFlagChanged-27]
-	_ = x[TreeViewFlagNoTemplate-28]
-	_ = x[TreeViewFlagUpdtRoot-29]
-	_ = x[TreeViewFlagsN-30]
+	_ = x[TreeViewFlagClosed-27]
+	_ = x[TreeViewFlagChanged-28]
+	_ = x[TreeViewFlagNoTemplate-29]
+	_ = x[TreeViewFlagUpdtRoot-30]
+	_ = x[TreeViewFlagsN-31]
 }
 
 const _TreeViewFlags_name = "TreeViewFlagClosedTreeViewFlagChangedTreeViewFlagNoTemplateTreeViewFlagUpdtRootTreeViewFlagsN"
@@ -639,9 +639,9 @@ const _TreeViewFlags_name = "TreeViewFlagClosedTreeViewFlagChangedTreeViewFlagNo
 var _TreeViewFlags_index = [...]uint8{0, 18, 37, 59, 79, 93}
 
 func (i TreeViewFlags) String() string {
-	i -= 26
+	i -= 27
 	if i < 0 || i >= TreeViewFlags(len(_TreeViewFlags_index)-1) {
-		return "TreeViewFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
+		return "TreeViewFlags(" + strconv.FormatInt(int64(i+27), 10) + ")"
 	}
 	return _TreeViewFlags_name[_TreeViewFlags_index[i]:_TreeViewFlags_index[i+1]]
 }
@@ -649,18 +649,18 @@ func (i TreeViewFlags) String() string {
 func StringToTreeViewFlags(s string) (TreeViewFlags, error) {
 	for i := 0; i < len(_TreeViewFlags_index)-1; i++ {
 		if s == _TreeViewFlags_name[_TreeViewFlags_index[i]:_TreeViewFlags_index[i+1]] {
-			return TreeViewFlags(i + 26), nil
+			return TreeViewFlags(i + 27), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: TreeViewFlags")
 }
 
 var _TreeViewFlags_descMap = map[TreeViewFlags]string{
-	26: `TreeViewFlagClosed means node is toggled closed (children not visible)`,
-	27: `TreeViewFlagChanged is updated on the root node whenever a gui edit is made through the tree view on the tree -- this does not track any other changes that might have occurred in the tree itself. Also emits a TreeViewChanged signal on the root node.`,
-	28: `TreeViewFlagNoTemplate -- this node is not using a style template -- should be restyled on any full re-render change`,
-	29: `TreeViewFlagUpdtRoot -- for any update signal that comes from the source root node, do a full update of the treeview. This increases responsiveness of the updating and makes it easy to trigger a full update by updating the root node, but can be slower when not needed`,
-	30: ``,
+	27: `TreeViewFlagClosed means node is toggled closed (children not visible)`,
+	28: `TreeViewFlagChanged is updated on the root node whenever a gui edit is made through the tree view on the tree -- this does not track any other changes that might have occurred in the tree itself. Also emits a TreeViewChanged signal on the root node.`,
+	29: `TreeViewFlagNoTemplate -- this node is not using a style template -- should be restyled on any full re-render change`,
+	30: `TreeViewFlagUpdtRoot -- for any update signal that comes from the source root node, do a full update of the treeview. This increases responsiveness of the updating and makes it easy to trigger a full update by updating the root node, but can be slower when not needed`,
+	31: ``,
 }
 
 func (i TreeViewFlags) Desc() string {

@@ -928,12 +928,11 @@ func (sb *ScrollBar) OnInit() {
 	sb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sb.StyleBox.Border.Style.Set(gist.BorderNone)
 
-		sb.ValueColor.SetSolid(ColorScheme.Secondary)
-		sb.ThumbColor.SetSolid(ColorScheme.Secondary)
+		sb.ValueColor.SetSolid(ColorScheme.OutlineVariant)
+		sb.ThumbColor.SetSolid(ColorScheme.OutlineVariant)
 
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusFull
-		s.Color = ColorScheme.OnSecondary
 		// STYTODO: state styles
 	})
 }

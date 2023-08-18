@@ -59,10 +59,10 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[ButtonFlagCheckable-26]
-	_ = x[ButtonFlagChecked-27]
-	_ = x[ButtonFlagMenu-28]
-	_ = x[ButtonFlagsN-29]
+	_ = x[ButtonFlagCheckable-27]
+	_ = x[ButtonFlagChecked-28]
+	_ = x[ButtonFlagMenu-29]
+	_ = x[ButtonFlagsN-30]
 }
 
 const _ButtonFlags_name = "ButtonFlagCheckableButtonFlagCheckedButtonFlagMenuButtonFlagsN"
@@ -70,9 +70,9 @@ const _ButtonFlags_name = "ButtonFlagCheckableButtonFlagCheckedButtonFlagMenuBut
 var _ButtonFlags_index = [...]uint8{0, 19, 36, 50, 62}
 
 func (i ButtonFlags) String() string {
-	i -= 26
+	i -= 27
 	if i < 0 || i >= ButtonFlags(len(_ButtonFlags_index)-1) {
-		return "ButtonFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
+		return "ButtonFlags(" + strconv.FormatInt(int64(i+27), 10) + ")"
 	}
 	return _ButtonFlags_name[_ButtonFlags_index[i]:_ButtonFlags_index[i+1]]
 }
@@ -80,17 +80,17 @@ func (i ButtonFlags) String() string {
 func StringToButtonFlags(s string) (ButtonFlags, error) {
 	for i := 0; i < len(_ButtonFlags_index)-1; i++ {
 		if s == _ButtonFlags_name[_ButtonFlags_index[i]:_ButtonFlags_index[i+1]] {
-			return ButtonFlags(i + 26), nil
+			return ButtonFlags(i + 27), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: ButtonFlags")
 }
 
 var _ButtonFlags_descMap = map[ButtonFlags]string{
-	26: `button is checkable -- enables display of check control`,
-	27: `button is checked`,
-	28: `Menu flag means that the button is a menu item`,
-	29: ``,
+	27: `button is checkable -- enables display of check control`,
+	28: `button is checked`,
+	29: `Menu flag means that the button is a menu item`,
+	30: ``,
 }
 
 func (i ButtonFlags) Desc() string {
@@ -802,23 +802,24 @@ func _() {
 	_ = x[CanFocus-13]
 	_ = x[HasFocus-14]
 	_ = x[FullReRender-15]
-	_ = x[ReRenderAnchor-16]
-	_ = x[Invisible-17]
-	_ = x[Disabled-18]
-	_ = x[Selected-19]
-	_ = x[Hovered-20]
-	_ = x[Active-21]
-	_ = x[MouseHasEntered-22]
-	_ = x[DNDHasEntered-23]
-	_ = x[NodeDragging-24]
-	_ = x[InstaDrag-25]
-	_ = x[NodeFlagsN-26]
-	_ = x[TextFieldFocusActive-26]
+	_ = x[NeedsStyle-16]
+	_ = x[ReRenderAnchor-17]
+	_ = x[Invisible-18]
+	_ = x[Disabled-19]
+	_ = x[Selected-20]
+	_ = x[Hovered-21]
+	_ = x[Active-22]
+	_ = x[MouseHasEntered-23]
+	_ = x[DNDHasEntered-24]
+	_ = x[NodeDragging-25]
+	_ = x[InstaDrag-26]
+	_ = x[NodeFlagsN-27]
+	_ = x[TextFieldFocusActive-27]
 }
 
-const _NodeFlags_name = "NoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInvisibleDisabledSelectedHoveredActiveMouseHasEnteredDNDHasEnteredNodeDraggingInstaDragNodeFlagsN"
+const _NodeFlags_name = "NoLayoutEventsConnectedCanFocusHasFocusFullReRenderNeedsStyleReRenderAnchorInvisibleDisabledSelectedHoveredActiveMouseHasEnteredDNDHasEnteredNodeDraggingInstaDragNodeFlagsN"
 
-var _NodeFlags_index = [...]uint8{0, 8, 23, 31, 39, 51, 65, 74, 82, 90, 97, 103, 118, 131, 143, 152, 162}
+var _NodeFlags_index = [...]uint8{0, 8, 23, 31, 39, 51, 61, 75, 84, 92, 100, 107, 113, 128, 141, 153, 162, 172}
 
 func (i NodeFlags) String() string {
 	i -= 11
@@ -843,17 +844,18 @@ var _NodeFlags_descMap = map[NodeFlags]string{
 	13: `CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style &#39;can-focus&#39; property`,
 	14: `HasFocus: does this node currently have the focus for keyboard input events? use tab / alt tab and clicking events to update focus -- see interface on Window`,
 	15: `FullReRender indicates that a full re-render is required due to nature of update event -- otherwise default is local re-render -- used internally for nodes to determine what to do on the ReRender step`,
-	16: `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
-	17: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
-	18: `Disabled disables all interaction with the user or other nodes; nodes should indicate this disabled state in an appropriate way, and each node should interpret events appropriately based on this state`,
-	19: `Selected indicates that this node has been selected by the user -- widely supported across different nodes`,
-	20: `Hovered indicates that the node is being hovered over by a mouse cursor or has been long-pressed on mobile`,
-	21: `Active indicates that this node is currently being interacted with (typically pressed down) by the user`,
-	22: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
-	23: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
-	24: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
-	25: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
-	26: `can extend node flags from here`,
+	16: `NeedsStyle indicates that a node needs to be styled again before being rendered.`,
+	17: `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
+	18: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
+	19: `Disabled disables all interaction with the user or other nodes; nodes should indicate this disabled state in an appropriate way, and each node should interpret events appropriately based on this state`,
+	20: `Selected indicates that this node has been selected by the user -- widely supported across different nodes`,
+	21: `Hovered indicates that the node is being hovered over by a mouse cursor or has been long-pressed on mobile`,
+	22: `Active indicates that this node is currently being interacted with (typically pressed down) by the user`,
+	23: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
+	24: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
+	25: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
+	26: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
+	27: `can extend node flags from here`,
 }
 
 func (i NodeFlags) Desc() string {
@@ -1280,18 +1282,18 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[VpFlagPopup-26]
-	_ = x[VpFlagMenu-27]
-	_ = x[VpFlagCompleter-28]
-	_ = x[VpFlagCorrector-29]
-	_ = x[VpFlagTooltip-30]
-	_ = x[VpFlagPopupDestroyAll-31]
-	_ = x[VpFlagSVG-32]
-	_ = x[VpFlagUpdatingNode-33]
-	_ = x[VpFlagNeedsFullRender-34]
-	_ = x[VpFlagDoingFullRender-35]
-	_ = x[VpFlagPrefSizing-36]
-	_ = x[VpFlagsN-37]
+	_ = x[VpFlagPopup-27]
+	_ = x[VpFlagMenu-28]
+	_ = x[VpFlagCompleter-29]
+	_ = x[VpFlagCorrector-30]
+	_ = x[VpFlagTooltip-31]
+	_ = x[VpFlagPopupDestroyAll-32]
+	_ = x[VpFlagSVG-33]
+	_ = x[VpFlagUpdatingNode-34]
+	_ = x[VpFlagNeedsFullRender-35]
+	_ = x[VpFlagDoingFullRender-36]
+	_ = x[VpFlagPrefSizing-37]
+	_ = x[VpFlagsN-38]
 }
 
 const _VpFlags_name = "VpFlagPopupVpFlagMenuVpFlagCompleterVpFlagCorrectorVpFlagTooltipVpFlagPopupDestroyAllVpFlagSVGVpFlagUpdatingNodeVpFlagNeedsFullRenderVpFlagDoingFullRenderVpFlagPrefSizingVpFlagsN"
@@ -1299,9 +1301,9 @@ const _VpFlags_name = "VpFlagPopupVpFlagMenuVpFlagCompleterVpFlagCorrectorVpFlag
 var _VpFlags_index = [...]uint8{0, 11, 21, 36, 51, 64, 85, 94, 112, 133, 154, 170, 178}
 
 func (i VpFlags) String() string {
-	i -= 26
+	i -= 27
 	if i < 0 || i >= VpFlags(len(_VpFlags_index)-1) {
-		return "VpFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
+		return "VpFlags(" + strconv.FormatInt(int64(i+27), 10) + ")"
 	}
 	return _VpFlags_name[_VpFlags_index[i]:_VpFlags_index[i+1]]
 }
@@ -1309,25 +1311,25 @@ func (i VpFlags) String() string {
 func StringToVpFlags(s string) (VpFlags, error) {
 	for i := 0; i < len(_VpFlags_index)-1; i++ {
 		if s == _VpFlags_name[_VpFlags_index[i]:_VpFlags_index[i+1]] {
-			return VpFlags(i + 26), nil
+			return VpFlags(i + 27), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: VpFlags")
 }
 
 var _VpFlags_descMap = map[VpFlags]string{
-	26: `VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey parent bounds (otherwise does)`,
-	27: `VpFlagMenu means viewport is serving as a popup menu -- affects how window processes clicks`,
-	28: `VpFlagCompleter means viewport is serving as a popup menu for code completion -- only applies if the VpFlagMenu is also set`,
-	29: `VpFlagCorrector means viewport is serving as a popup menu for spelling correction -- only applies if the VpFlagMenu is also set`,
-	30: `VpFlagTooltip means viewport is serving as a tooltip`,
-	31: `VpFlagPopupDestroyAll means that if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)`,
-	32: `VpFlagSVG means that this viewport is an SVG viewport -- SVG elements look for this for re-rendering`,
-	33: `VpFlagUpdatingNode means that this viewport is currently handling the update of a node, and is under the UpdtMu mutex lock. This can be checked to see about whether to add another update or not.`,
-	34: `VpFlagNeedsFullRender means that this viewport needs to do a full render -- this is set during signal processing and will preempt other lower-level updates etc.`,
-	35: `VpFlagDoingFullRender means that this viewport is currently doing a full render -- can be used by elements to drive deep rebuild in case underlying data has changed.`,
-	36: `VpFlagPrefSizing means that this viewport is currently doing a PrefSize computation to compute the size of the viewport (for sizing window for example) -- affects layout size computation only for Over`,
-	37: ``,
+	27: `VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey parent bounds (otherwise does)`,
+	28: `VpFlagMenu means viewport is serving as a popup menu -- affects how window processes clicks`,
+	29: `VpFlagCompleter means viewport is serving as a popup menu for code completion -- only applies if the VpFlagMenu is also set`,
+	30: `VpFlagCorrector means viewport is serving as a popup menu for spelling correction -- only applies if the VpFlagMenu is also set`,
+	31: `VpFlagTooltip means viewport is serving as a tooltip`,
+	32: `VpFlagPopupDestroyAll means that if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)`,
+	33: `VpFlagSVG means that this viewport is an SVG viewport -- SVG elements look for this for re-rendering`,
+	34: `VpFlagUpdatingNode means that this viewport is currently handling the update of a node, and is under the UpdtMu mutex lock. This can be checked to see about whether to add another update or not.`,
+	35: `VpFlagNeedsFullRender means that this viewport needs to do a full render -- this is set during signal processing and will preempt other lower-level updates etc.`,
+	36: `VpFlagDoingFullRender means that this viewport is currently doing a full render -- can be used by elements to drive deep rebuild in case underlying data has changed.`,
+	37: `VpFlagPrefSizing means that this viewport is currently doing a PrefSize computation to compute the size of the viewport (for sizing window for example) -- affects layout size computation only for Over`,
+	38: ``,
 }
 
 func (i VpFlags) Desc() string {
@@ -1384,19 +1386,19 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[WinFlagHasGeomPrefs-26]
-	_ = x[WinFlagUpdating-27]
-	_ = x[WinFlagIsClosing-28]
-	_ = x[WinFlagIsResizing-29]
-	_ = x[WinFlagGotPaint-30]
-	_ = x[WinFlagGotFocus-31]
-	_ = x[WinFlagSentShow-32]
-	_ = x[WinFlagGoLoop-33]
-	_ = x[WinFlagStopEventLoop-34]
-	_ = x[WinFlagDoFullRender-35]
-	_ = x[WinFlagFocusActive-36]
-	_ = x[WinFlagSelectionMode-37]
-	_ = x[WinFlagsN-38]
+	_ = x[WinFlagHasGeomPrefs-27]
+	_ = x[WinFlagUpdating-28]
+	_ = x[WinFlagIsClosing-29]
+	_ = x[WinFlagIsResizing-30]
+	_ = x[WinFlagGotPaint-31]
+	_ = x[WinFlagGotFocus-32]
+	_ = x[WinFlagSentShow-33]
+	_ = x[WinFlagGoLoop-34]
+	_ = x[WinFlagStopEventLoop-35]
+	_ = x[WinFlagDoFullRender-36]
+	_ = x[WinFlagFocusActive-37]
+	_ = x[WinFlagSelectionMode-38]
+	_ = x[WinFlagsN-39]
 }
 
 const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFlagIsResizingWinFlagGotPaintWinFlagGotFocusWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagFocusActiveWinFlagSelectionModeWinFlagsN"
@@ -1404,9 +1406,9 @@ const _WinFlags_name = "WinFlagHasGeomPrefsWinFlagUpdatingWinFlagIsClosingWinFla
 var _WinFlags_index = [...]uint8{0, 19, 34, 50, 67, 82, 97, 112, 125, 145, 164, 182, 202, 211}
 
 func (i WinFlags) String() string {
-	i -= 26
+	i -= 27
 	if i < 0 || i >= WinFlags(len(_WinFlags_index)-1) {
-		return "WinFlags(" + strconv.FormatInt(int64(i+26), 10) + ")"
+		return "WinFlags(" + strconv.FormatInt(int64(i+27), 10) + ")"
 	}
 	return _WinFlags_name[_WinFlags_index[i]:_WinFlags_index[i+1]]
 }
@@ -1414,26 +1416,26 @@ func (i WinFlags) String() string {
 func StringToWinFlags(s string) (WinFlags, error) {
 	for i := 0; i < len(_WinFlags_index)-1; i++ {
 		if s == _WinFlags_name[_WinFlags_index[i]:_WinFlags_index[i+1]] {
-			return WinFlags(i + 26), nil
+			return WinFlags(i + 27), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: WinFlags")
 }
 
 var _WinFlags_descMap = map[WinFlags]string{
-	26: `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
-	27: `WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail`,
-	28: `WinFlagIsClosing is atomic flag indicating window is closing`,
-	29: `WinFlagIsResizing is atomic flag indicating window is resizing`,
-	30: `WinFlagGotPaint have we received our first paint event yet? ignore other window events before this point`,
-	31: `WinFlagGotFocus indicates that have we received OSWin focus`,
-	32: `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
-	33: `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
-	34: `WinFlagStopEventLoop is set when event loop stop is requested`,
-	35: `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
-	36: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
-	37: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
-	38: ``,
+	27: `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
+	28: `WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail`,
+	29: `WinFlagIsClosing is atomic flag indicating window is closing`,
+	30: `WinFlagIsResizing is atomic flag indicating window is resizing`,
+	31: `WinFlagGotPaint have we received our first paint event yet? ignore other window events before this point`,
+	32: `WinFlagGotFocus indicates that have we received OSWin focus`,
+	33: `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
+	34: `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
+	35: `WinFlagStopEventLoop is set when event loop stop is requested`,
+	36: `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
+	37: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
+	38: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
+	39: ``,
 }
 
 func (i WinFlags) Desc() string {

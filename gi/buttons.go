@@ -526,6 +526,10 @@ func (bb *ButtonBase) Render2D() {
 	}
 	if bb.PushBounds() {
 		bb.This().(Node2D).ConnectEvents2D()
+		if bb.NeedsStyle() {
+			bb.StyleButton()
+			bb.ClearNeedsStyle()
+		}
 		bb.RenderButton()
 		bb.Render2DParts()
 		bb.Render2DChildren()
