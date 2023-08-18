@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/cam/hct"
+	"github.com/goki/cam/hsl"
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	huePages := 4
 	huePerPage := nHue / huePages
 	chromaInc := 10
-	chromaMax := 150
+	chromaMax := 100
 	nChroma := (chromaMax / chromaInc) + 1
 
 	// y axis is hue then chroma within that
@@ -52,7 +52,7 @@ func main() {
 		for chroma := 0; chroma <= chromaMax; chroma += chromaInc {
 			ci := chroma / chromaInc
 			for ti, tone := range tones {
-				h := hct.NewHCT(float32(hue), float32(chroma), tone)
+				h := hsl.NewHSL(float32(hue), float32(chroma)/100, tone/100)
 				c := h.AsRGBA()
 				ys := (yp + ci) * sqSz
 				xs := (xp + ti) * sqSz
@@ -66,7 +66,7 @@ func main() {
 		xp += nTones
 	}
 
-	SaveImage("hctspace.png", img)
+	SaveImage("hslspace.png", img)
 }
 
 // SaveImage saves image to file, with format inferred from filename -- JPEG and PNG
