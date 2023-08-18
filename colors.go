@@ -26,11 +26,11 @@ func AsRGBA(c color.Color) color.RGBA {
 	return color.RGBAModel.Convert(c).(color.RGBA)
 }
 
-// ColorFromName returns the color value specified
+// FromName returns the color value specified
 // by the given CSS standard color name. It returns
-// an error if the name is not found; see [MustColorFromName]
+// an error if the name is not found; see [ColorFromName]
 // for a version that does not return an error.
-func ColorFromName(name string) (color.RGBA, error) {
+func FromName(name string) (color.RGBA, error) {
 	c, ok := Map[name]
 	if !ok {
 		return color.RGBA{}, errors.New("colors.ColorFromName: name not found: " + name)
@@ -40,10 +40,10 @@ func ColorFromName(name string) (color.RGBA, error) {
 
 // ColorFromName returns the color value specified
 // by the given CSS standard color name. It panics
-// if the name is not found; see [ColorFromName]
+// if the name is not found; see [FromName]
 // for a version that returns an error.
-func MustColorFromName(name string) color.RGBA {
-	c, err := ColorFromName(name)
+func MustFromName(name string) color.RGBA {
+	c, err := FromName(name)
 	if err != nil {
 		panic("colors.MustColorFromName: " + err.Error())
 	}
@@ -59,7 +59,7 @@ func MustColorFromName(name string) color.RGBA {
 // * saturate-PCT or pastel-PCT: manipulates the saturation level in HSL by PCT
 // * clearer-PCT or opaquer-PCT: manipulates the alpha level by PCT
 // * blend-PCT-color: blends given percent of given color name relative to base (or current)
-func ColorFromString(str string, base color.Color) (color.RGBA, error) {
+func FromString(str string, base color.Color) (color.RGBA, error) {
 	return color.RGBA{}, nil
 	// if len(str) == 0 { // consider it null
 	// 	return color.RGBA{}, nil
@@ -204,16 +204,16 @@ func ColorFromString(str string, base color.Color) (color.RGBA, error) {
 	// return nil
 }
 
-func MustColorFromString(str string, base color.Color) color.RGBA {
-	c, _ := ColorFromString(str, base)
+func MustFromString(str string, base color.Color) color.RGBA {
+	c, _ := FromString(str, base)
 	return c
 }
 
-// ColorFromHex parses the given hex color string
+// FromHex parses the given hex color string
 // and returns the resulting color. It returns any
-// resulting error; see [MustColorFromHex] for a
+// resulting error; see [MustFromHex] for a
 // version that does not return an error.
-func ColorFromHex(hex string) (color.RGBA, error) {
+func FromHex(hex string) (color.RGBA, error) {
 	hex = strings.TrimPrefix(hex, "#")
 	var r, g, b, a int
 	a = 255
@@ -235,12 +235,12 @@ func ColorFromHex(hex string) (color.RGBA, error) {
 	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}, nil
 }
 
-// MustColorFromHex parses the given hex color string
+// MustFromHex parses the given hex color string
 // and returns the resulting color. It panics on any
-// resultinge rror; see [ColorFromHex] for a version
+// resulting error; see [FromHex] for a version
 // that returns an error.
-func MustColorFromHex(hex string) color.RGBA {
-	c, err := ColorFromHex(hex)
+func MustFromHex(hex string) color.RGBA {
+	c, err := FromHex(hex)
 	if err != nil {
 		panic("colors.MustColorFromHex: " + err.Error())
 	}
