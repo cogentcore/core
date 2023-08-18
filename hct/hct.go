@@ -61,11 +61,6 @@ func NewHCTFromColor(c color.Color) HCT {
 	return Uint32ToHCT(c.RGBA())
 }
 
-// NewHCTFromRGBA constructs a new HCT color from a standard [color.RGBA]
-func NewHCTFromRGBA(c color.RGBA) HCT {
-	return Uint32ToHCT(c.RGBA())
-}
-
 // RGBA implements the color.Color interface.
 // Performs the premultiplication of the RGB components by alpha at this point.
 func (h *HCT) RGBA() (r, g, b, a uint32) {

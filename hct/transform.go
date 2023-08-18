@@ -77,3 +77,17 @@ func Spin(c color.Color, amount float32) color.RGBA {
 	h.SetHue(h.Hue + amount)
 	return h.AsRGBA()
 }
+
+// IsLight returns whether the given color is light
+// (has an HCT tone greater than or equal to 50)
+func IsLight(c color.Color) bool {
+	h := NewHCTFromColor(c)
+	return h.Tone >= 50
+}
+
+// IsDark returns whether the given color is dark
+// (has an HCT tone less than 50)
+func IsDark(c color.Color) bool {
+	h := NewHCTFromColor(c)
+	return h.Tone < 50
+}

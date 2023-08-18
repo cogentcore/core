@@ -84,3 +84,17 @@ func Spin(c color.Color, amount float32) color.RGBA {
 	h.H = mat32.Clamp(h.H, 0, 360)
 	return h.AsRGBA()
 }
+
+// IsLight returns whether the given color is light
+// (has an HSL lightness greater than or equal to 0.5)
+func IsLight(c color.Color) bool {
+	h := NewHSLFromColor(c)
+	return h.L >= 0.5
+}
+
+// IsDark returns whether the given color is dark
+// (has an HSL lightness less than 0.5)
+func IsDark(c color.Color) bool {
+	h := NewHSLFromColor(c)
+	return h.L < 0.5
+}

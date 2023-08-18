@@ -46,13 +46,6 @@ func NewHSLFromColor(c color.Color) HSL {
 	return h
 }
 
-// NewHSLFromRGBA constructs a new HSL color from a standard [color.RGBA]
-func NewHSLFromRGBA(c color.RGBA) HSL {
-	h := HSL{}
-	h.SetUint32(c.RGBA())
-	return h
-}
-
 // Implements the [color.Color] interface
 // Performs the premultiplication of the RGB components by alpha at this point.
 func (h HSL) RGBA() (r, g, b, a uint32) {
