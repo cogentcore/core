@@ -5,6 +5,9 @@
 package main
 
 import (
+	"image/color"
+
+	"github.com/goki/cam/hsl"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
@@ -59,7 +62,7 @@ func mainrun() {
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
 			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
-			fr.SetProp("background-color", gist.HSLA{hu, sat, lt, 1.0})
+			fr.SetProp("background-color", hsl.HSL{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}
@@ -68,7 +71,7 @@ func mainrun() {
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
 			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
-			fr.SetProp("background-color", gist.HSLA{hu, sat, lt, 0.5})
+			fr.SetProp("background-color", hsl.HSL{hu, sat, lt, 0.5})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}
@@ -78,18 +81,18 @@ func mainrun() {
 	for _, hu := range hues {
 		for sat := float32(0.0); sat <= 1.01; sat += 0.1 {
 			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
-			fr.SetProp("background-color", gist.HSLA{hu, sat, lt, 1.0})
+			fr.SetProp("background-color", hsl.HSL{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}
 	}
 	// then doing it with colors -- tests the "there and back again" round trip..
 	for _, hu := range hues {
-		clr := gist.Color{}
-		clr.SetHSLA(hu, 1.0, 0.2, 1)
+		clr := color.RGBA{}
+		clr = hsl.HSL{hu, 1.0, 0.2, 1}.AsRGBA()
 		for lt := float32(0.0); lt <= 100.01; lt += 10 {
 			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
-			fr.SetProp("background-color", clr.Lighter(lt))
+			fr.SetProp("background-color", hsl.Lighten(clr, lt))
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}

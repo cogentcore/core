@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/goki/gi/gist"
+	"github.com/goki/colors"
 )
 
 // Prefs are needed for setting gist.ThePrefs, for any text-based
@@ -20,49 +20,49 @@ type Prefs struct {
 	FontFamily string `desc:"font family name"`
 
 	// default font / pen color
-	Font gist.Color `desc:"default font / pen color"`
+	Font color.RGBA `desc:"default font / pen color"`
 
 	// default background color
-	Background gist.Color `desc:"default background color"`
+	Background color.RGBA `desc:"default background color"`
 
 	// color for shadows -- should generally be a darker shade of the background color
-	Shadow gist.Color `desc:"color for shadows -- should generally be a darker shade of the background color"`
+	Shadow color.RGBA `desc:"color for shadows -- should generally be a darker shade of the background color"`
 
 	// default border color, for button, frame borders, etc
-	Border gist.Color `desc:"default border color, for button, frame borders, etc"`
+	Border color.RGBA `desc:"default border color, for button, frame borders, etc"`
 
 	// default main color for controls: buttons, etc
-	Control gist.Color `desc:"default main color for controls: buttons, etc"`
+	Control color.RGBA `desc:"default main color for controls: buttons, etc"`
 
 	// color for icons or other solidly-colored, small elements
-	Icon gist.Color `desc:"color for icons or other solidly-colored, small elements"`
+	Icon color.RGBA `desc:"color for icons or other solidly-colored, small elements"`
 
 	// color for selected elements
-	Select gist.Color `desc:"color for selected elements"`
+	Select color.RGBA `desc:"color for selected elements"`
 
 	// color for highlight background
-	Highlight gist.Color `desc:"color for highlight background"`
+	Highlight color.RGBA `desc:"color for highlight background"`
 
 	// color for links in text etc
-	Link gist.Color `desc:"color for links in text etc"`
+	Link color.RGBA `desc:"color for links in text etc"`
 }
 
 func (pf *Prefs) Defaults() {
 	pf.FontFamily = "Go"
-	pf.Font.SetColor(color.Black)
-	pf.Border.SetString("#666", nil)
-	pf.Background.SetColor(color.White)
-	pf.Shadow.SetString("darker-10", &pf.Background)
-	pf.Control.SetString("#F8F8F8", nil)
-	pf.Icon.SetString("highlight-30", pf.Control)
-	pf.Select.SetString("#CFC", nil)
-	pf.Highlight.SetString("#FFA", nil)
-	pf.Link.SetString("#00F", nil)
+	pf.Font = colors.Black
+	pf.Border = colors.MustFromHex("#666")
+	pf.Background = colors.White
+	pf.Shadow = colors.MustFromString("darker-10", &pf.Background)
+	pf.Control = colors.MustFromHex("#F8F8F8")
+	pf.Icon = colors.MustFromString("highlight-30", pf.Control)
+	pf.Select = colors.MustFromHex("#CFC")
+	pf.Highlight = colors.MustFromHex("#FFA")
+	pf.Link = colors.MustFromHex("#00F")
 }
 
 // PrefColor returns preference color of given name (case insensitive)
 // std names are: font, background, shadow, border, control, icon, select, highlight, link
-func (pf *Prefs) PrefColor(clrName string) *gist.Color {
+func (pf *Prefs) PrefColor(clrName string) *color.RGBA {
 	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
 	switch lc {
 	case "font":

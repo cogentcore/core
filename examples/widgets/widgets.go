@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"reflect"
 
 	"github.com/goki/gi/gi"
@@ -64,10 +65,10 @@ func mainrun() {
 		// 	"font-size": "x-large",
 		// },
 		"#combo": ki.Props{
-			"background-color": gist.Color{240, 255, 240, 255},
+			"background-color": color.RGBA{240, 255, 240, 255},
 		},
 		".hslides": ki.Props{
-			"background-color": gist.Color{240, 225, 255, 255},
+			"background-color": color.RGBA{240, 225, 255, 255},
 		},
 		"kbd": ki.Props{
 			"color": "blue",

@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
 	"github.com/goki/mat32"
@@ -44,13 +45,9 @@ func main() {
 	rs.PushBounds(szrec)
 	rs.Lock()
 
-	blk, _ := gist.ColorFromName("black")
-	wht, _ := gist.ColorFromName("white")
-	blu, _ := gist.ColorFromName("blue")
-
 	// first, draw a frame around the entire image
-	pc.StrokeStyle.SetColor(blk)
-	pc.FillStyle.SetColor(wht)
+	pc.StrokeStyle.SetColor(colors.Black)
+	pc.FillStyle.SetColor(colors.White)
 	pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
 	pc.DrawRectangle(rs, 0, 0, float32(imgsz.X), float32(imgsz.Y))
 	pc.FillStrokeClear(rs) // actually render path that has been setup
@@ -62,7 +59,7 @@ func main() {
 	pc.FillStrokeClear(rs)
 
 	// use units-based styling instead of dots:
-	pc.StrokeStyle.SetColor(blu)
+	pc.StrokeStyle.SetColor(colors.Blue)
 	pc.StrokeStyle.Width.SetEw(2) // percent of total image (width)
 	pc.ToDots()                   // convert pct -> dots based on units context
 	// fmt.Printf("pct dots: %g\n", pc.StrokeStyle.Width.Dots) // 6.4
