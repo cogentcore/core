@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 
@@ -51,7 +52,7 @@ func (cs *ColorSpec) SetString(clrstr string, ctxt Context) bool {
 	if ColorSpecCache == nil {
 		ColorSpecCache = make(map[string]*ColorSpec)
 	}
-	fullnm := cs.Color.HexString() + clrstr
+	fullnm := colors.AsHex(cs.Color) + clrstr
 	if ccg, ok := ColorSpecCache[fullnm]; ok {
 		cs.CopyFrom(ccg)
 		return true
@@ -69,7 +70,7 @@ func (cs *ColorSpec) SetString(clrstr string, ctxt Context) bool {
 		fmt.Printf("gi.Color Warning: Not able to find url: %v\n", clrstr)
 		cs.Gradient = nil
 		cs.Source = SolidColor
-		cs.Color = Black
+		cs.Color = colors.Black
 		return false
 	}
 	clrstr = strings.ToLower(clrstr)
@@ -110,7 +111,7 @@ func (cs *ColorSpec) SetString(clrstr string, ctxt Context) bool {
 	} else {
 		cs.Gradient = nil
 		cs.Source = SolidColor
-		cs.Color.SetString(clrstr, nil)
+		cs.Color, _ = colors.FromString(clrstr, nil)
 	}
 	return true
 }
@@ -189,7 +190,7 @@ func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 					cs.Gradient.Stops = append(cs.Gradient.Stops, *stop)
 				}
 				if stopIdx == 0 {
-					cs.Color.SetColor(stop.StopColor) // keep first one
+					cs.Color = colors.AsRGBA(stop.StopColor) // keep first one
 				}
 				prevColor = stop.StopColor
 				stopIdx++
@@ -250,7 +251,7 @@ func (cs *ColorSpec) parseRadialGrad(pars string) bool {
 					cs.Gradient.Stops = append(cs.Gradient.Stops, *stop)
 				}
 				if stopIdx == 0 {
-					cs.Color.SetColor(stop.StopColor) // keep first one
+					cs.Color = colors.AsRGBA(stop.StopColor) // keep first one
 				}
 				prevColor = stop.StopColor
 				stopIdx++

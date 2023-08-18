@@ -10,6 +10,7 @@ import (
 
 	"image/color"
 
+	"github.com/goki/colors"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
@@ -26,7 +27,7 @@ type ColorSpec struct {
 	Source ColorSources `desc:"source of color (solid, gradient)"`
 
 	// color for solid color source
-	Color Color `desc:"color for solid color source"`
+	Color color.RGBA `desc:"color for solid color source"`
 
 	// gradient parameters for gradient color source
 	Gradient *rasterx.Gradient `desc:"gradient parameters for gradient color source"`
@@ -65,7 +66,7 @@ const (
 // IsNil tests for nil solid or gradient colors
 func (cs *ColorSpec) IsNil() bool {
 	if cs.Source == SolidColor {
-		return cs.Color.IsNil()
+		return colors.IsNil(cs.Color)
 	}
 	return cs.Gradient == nil
 }
@@ -73,14 +74,14 @@ func (cs *ColorSpec) IsNil() bool {
 // ColorOrNil returns the solid color if non-nil, or nil otherwise -- for
 // consumers that handle nil colors
 func (cs *ColorSpec) ColorOrNil() color.Color {
-	if cs.Color.IsNil() {
+	if colors.IsNil(cs.Color) {
 		return nil
 	}
 	return cs.Color
 }
 
 // SetSolid sets a solid color
-func (cs *ColorSpec) SetSolid(cl Color) {
+func (cs *ColorSpec) SetSolid(cl color.RGBA) {
 	cs.Color = cl
 	cs.Source = SolidColor
 	cs.Gradient = nil
@@ -88,14 +89,14 @@ func (cs *ColorSpec) SetSolid(cl Color) {
 
 // SetColor sets a solid color from a standard [image/color.Color]
 func (cs *ColorSpec) SetColor(cl color.Color) {
-	cs.Color.SetColor(cl)
+	cs.Color = colors.AsRGBA(cl)
 	cs.Source = SolidColor
 	cs.Gradient = nil
 }
 
 // SetName sets a solid color by name
 func (cs *ColorSpec) SetName(name string) {
-	cs.Color.SetName(name)
+	cs.Color, _ = colors.FromName(name)
 	cs.Source = SolidColor
 	cs.Gradient = nil
 }
@@ -166,7 +167,7 @@ func (cs *ColorSpec) SetGradientPoints(bbox mat32.Box2) {
 // down to transparent based on given color and direction spec (defaults to
 // "to down")
 func (cs *ColorSpec) SetShadowGradient(cl color.Color, dir string) {
-	cs.Color.SetColor(cl)
+	cs.Color = colors.AsRGBA(cl)
 	if dir == "" {
 		dir = "to down"
 	}

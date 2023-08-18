@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -233,7 +234,7 @@ func (pf *Fill) SetColor(cl color.Color) {
 		pf.On = false
 	} else {
 		pf.On = true
-		pf.Color.Color.SetColor(cl)
+		pf.Color.Color = colors.AsRGBA(cl)
 		pf.Color.Source = SolidColor
 	}
 }
@@ -353,7 +354,7 @@ func (ps *Stroke) SetColor(cl color.Color) {
 		ps.On = false
 	} else {
 		ps.On = true
-		ps.Color.Color.SetColor(cl)
+		ps.Color.Color = colors.AsRGBA(cl)
 		ps.Color.Source = SolidColor
 	}
 }
