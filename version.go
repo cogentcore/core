@@ -3,8 +3,8 @@
 package cam
 
 const (
-	Version = "v0.9.3"
-	GitCommit = "f97aaa3" // the commit JUST BEFORE the release
-	VersionDate = "2023-08-18 00:48" // UTC
+	Version = "v0.9.4"
+	GitCommit = "1ae0233" // the commit JUST BEFORE the release
+	VersionDate = "2023-08-18 20:24" // UTC
 )
 
