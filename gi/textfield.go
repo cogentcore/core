@@ -329,6 +329,7 @@ func (tf *TextField) SetText(txt string) {
 	needSty := tf.Style.Font.Size.Val == 0
 	tf.StyMu.RUnlock()
 	if needSty {
+		fmt.Println("tf settext style", tf)
 		tf.StyleTextField()
 	}
 	tf.Txt = txt
@@ -1544,23 +1545,18 @@ func (tf *TextField) Init2D() {
 
 // StyleTextField does text field styling -- sets StyMu Lock
 func (tf *TextField) StyleTextField() {
-	// fmt.Println("tf style")
+	fmt.Println("tf style", tf)
 	tf.StyMu.Lock()
 
 	tf.SetCanFocusIfActive()
-	hasTempl, saveTempl := tf.Style.FromTemplate()
-	if !hasTempl || saveTempl {
-		tf.Style2DWidget()
-	}
-	if hasTempl && saveTempl {
-		tf.Style.SaveTemplate()
-	}
+	tf.Style2DWidget()
 	tf.CursorWidth.ToDots(&tf.Style.UnContext)
 	tf.StyMu.Unlock()
 	tf.ConfigParts()
 }
 
 func (tf *TextField) Style2D() {
+	fmt.Println("tf style style2d", tf)
 	tf.StyleTextField()
 	tf.StyMu.Lock()
 	tf.LayState.SetFromStyle(&tf.Style) // also does reset
@@ -1664,6 +1660,7 @@ func (tf *TextField) Render2D() {
 	if tf.PushBounds() {
 		tf.This().(Node2D).ConnectEvents2D()
 		if tf.NeedsStyle() {
+			fmt.Println("tf style needsstlye", tf)
 			tf.StyleTextField()
 			tf.ClearNeedsStyle()
 		}
@@ -1711,14 +1708,14 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	case FocusInactive:
 		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDeFocused()
-		tf.SetNeedsStyle()
+		// tf.SetNeedsStyle()
 		tf.UpdateSig()
 		oswin.TheApp.HideVirtualKeyboard()
 	case FocusActive:
 		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
-		tf.SetNeedsStyle()
-		tf.UpdateSig()
+		// tf.SetNeedsStyle()
+		// tf.UpdateSig()
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			oswin.TheApp.ShowVirtualKeyboard(oswin.NumberKeyboard)
 		} else {

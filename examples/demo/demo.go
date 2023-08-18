@@ -399,24 +399,17 @@ func makeInputs(tv *gi.TabView) {
 	sliderx.Dim = mat32.X
 	sliderx.Value = 0.5
 
+	sliderxi := gi.AddNewSlider(inputs, "sliderxi")
+	sliderxi.Dim = mat32.X
+	sliderxi.Value = 0.7
+	sliderxi.SetDisabled()
+
 	clr := colors.Blue
 
 	colorvv := giv.ToValueView(&clr, "")
 	colorvv.SetSoloValue(reflect.ValueOf(&clr))
 	cvvw := inputs.AddNewChild(colorvv.WidgetType(), "cvvw").(gi.Node2D)
 	colorvv.ConfigWidget(cvvw)
-
-	svi := giv.AddNewStructView(inputs, "svi")
-	svi.Struct = &gi.ColorScheme
-	svi.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		s.MaxWidth.SetPx(-1)
-		s.MaxHeight.SetPx(-1)
-	})
-
-	sliderxi := gi.AddNewSlider(inputs, "sliderxi")
-	sliderxi.Dim = mat32.X
-	sliderxi.Value = 0.7
-	sliderxi.SetDisabled()
 
 	sliderys := gi.AddNewLayout(inputs, "sliderys", gi.LayoutHorizFlow)
 
