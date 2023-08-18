@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"image/color"
 
 	"github.com/goki/colors"
 	"github.com/goki/gi/girl"
@@ -51,7 +52,7 @@ type Label struct {
 	RenderPos mat32.Vec2 `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
 
 	// current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg
-	CurBackgroundColor gist.Color `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
+	CurBackgroundColor color.RGBA `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
 var TypeLabel = kit.Types.AddType(&Label{}, LabelProps)
@@ -396,12 +397,12 @@ func (lb *Label) GrabCurBackgroundColor() {
 	if lb.Viewport == nil || lb.IsSelected() {
 		return
 	}
-	if !gist.RebuildDefaultStyles && !lb.CurBackgroundColor.IsNil() {
+	if !gist.RebuildDefaultStyles && !colors.IsNil(lb.CurBackgroundColor) {
 		return
 	}
 	pos := lb.ContextMenuPos()
 	clr := lb.Viewport.Pixels.At(pos.X, pos.Y)
-	lb.CurBackgroundColor.SetColor(clr)
+	lb.CurBackgroundColor = colors.AsRGBA(clr)
 }
 
 // StyleLabel does label styling -- it sets the StyMu Lock

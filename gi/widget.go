@@ -907,7 +907,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 
 			// TODO: better handling of opacity?
 			prevOpacity := pc.FillStyle.Opacity
-			pc.FillStyle.Opacity = gist.RGBAf32Model.Convert(shadow.Color).(gist.RGBAf32).A
+			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
 			// we only want radius for border, no actual border
 			wb.RenderBoxImpl(shadow.BasePos(pos), shadow.BaseSize(sz), gist.Border{Radius: st.Border.Radius})
 			// pc.FillStyle.Opacity = 1.0

@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"log"
 	"os"
@@ -1344,7 +1345,7 @@ func (w *Window) Publish() {
 	drw.EndDraw()
 
 	if WinDrawTrace { // debugging color overlay
-		var clrs [16]gist.Color
+		var clrs [16]color.RGBA
 		cmap := colormap.AvailMaps["ROYGBIV"]
 		for i := 0; i < 16; i++ {
 			clrs[i] = cmap.Map(float64(i) / 16.0)

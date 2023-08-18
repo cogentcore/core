@@ -7,12 +7,14 @@ package gi
 import (
 	"encoding/json"
 	"fmt"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"os/user"
 	"path/filepath"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
@@ -176,7 +178,7 @@ func (pf *Preferences) Save() error {
 
 // IsDarkMode returns true if the current background color preference is dark
 func (pf *Preferences) IsDarkMode() bool {
-	return pf.Colors.Background.IsDark()
+	return pf.ColorSchemeType == gist.ColorSchemeDark
 }
 
 // OpenColors colors from a JSON-formatted file.
@@ -384,7 +386,7 @@ func (pf *Preferences) UpdateUser() {
 
 // PrefColor returns preference color of given name (case insensitive)
 // std names are: font, background, shadow, border, control, icon, select, highlight, link
-func (pf *Preferences) PrefColor(clrName string) *gist.Color {
+func (pf *Preferences) PrefColor(clrName string) *color.RGBA {
 	return pf.Colors.PrefColor(clrName)
 }
 
@@ -542,59 +544,59 @@ type ColorPrefs struct {
 	HiStyle HiStyleName `desc:"text highilighting style / theme"`
 
 	// default font / pen color
-	Font gist.Color `desc:"default font / pen color"`
+	Font color.RGBA `desc:"default font / pen color"`
 
 	// default background color
-	Background gist.Color `desc:"default background color"`
+	Background color.RGBA `desc:"default background color"`
 
 	// color for shadows -- should generally be a darker shade of the background color
-	Shadow gist.Color `desc:"color for shadows -- should generally be a darker shade of the background color"`
+	Shadow color.RGBA `desc:"color for shadows -- should generally be a darker shade of the background color"`
 
 	// default border color, for button, frame borders, etc
-	Border gist.Color `desc:"default border color, for button, frame borders, etc"`
+	Border color.RGBA `desc:"default border color, for button, frame borders, etc"`
 
 	// default main color for controls: buttons, etc
-	Control gist.Color `desc:"default main color for controls: buttons, etc"`
+	Control color.RGBA `desc:"default main color for controls: buttons, etc"`
 
 	// color for icons or other solidly-colored, small elements
-	Icon gist.Color `desc:"color for icons or other solidly-colored, small elements"`
+	Icon color.RGBA `desc:"color for icons or other solidly-colored, small elements"`
 
 	// color for selected elements
-	Select gist.Color `desc:"color for selected elements"`
+	Select color.RGBA `desc:"color for selected elements"`
 
 	// color for highlight background
-	Highlight gist.Color `desc:"color for highlight background"`
+	Highlight color.RGBA `desc:"color for highlight background"`
 
 	// color for links in text etc
-	Link gist.Color `desc:"color for links in text etc"`
+	Link color.RGBA `desc:"color for links in text etc"`
 }
 
 var TypeColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
 
 func (pf *ColorPrefs) Defaults() {
 	pf.HiStyle = "emacs"
-	pf.Font.SetColor(gist.Black)
-	pf.Border.SetString("#e6e6e6", nil)
-	pf.Background.SetColor(gist.White)
-	pf.Shadow.SetString("darker-10", &pf.Background)
-	pf.Control.SetString("#F8F8F8", nil)
-	pf.Icon.SetString("highlight-30", pf.Control)
-	pf.Select.SetString("#CFC", nil)
-	pf.Highlight.SetString("#FFA", nil)
-	pf.Link.SetString("#00F", nil)
+	pf.Font = colors.Black
+	pf.Border = colors.MustFromHex("#e6e6e6")
+	pf.Background = colors.White
+	pf.Shadow = colors.MustFromString("darker-10", &pf.Background)
+	pf.Control = colors.MustFromHex("#F8F8F8")
+	pf.Icon = colors.MustFromString("highlight-30", pf.Control)
+	pf.Select = colors.MustFromHex("#CFC")
+	pf.Highlight = colors.MustFromHex("#FFA")
+	pf.Link = colors.MustFromHex("#00F")
 }
 
 func (pf *ColorPrefs) DarkDefaults() {
 	pf.HiStyle = "monokai"
-	pf.Font.SetUInt8(175, 175, 175, 255)
-	pf.Background.SetUInt8(0, 0, 0, 255)
-	pf.Shadow.SetUInt8(64, 64, 64, 255)
-	pf.Border.SetUInt8(102, 102, 102, 255)
-	pf.Control.SetUInt8(17, 57, 57, 255)
-	pf.Icon.SetUInt8(70, 70, 192, 255)
-	pf.Select.SetUInt8(17, 100, 100, 255)
-	pf.Highlight.SetUInt8(66, 82, 0, 255)
-	pf.Link.SetUInt8(117, 117, 249, 255)
+	pf.Font = color.RGBA{175, 175, 175, 255}
+	pf.Background = color.RGBA{0, 0, 0, 255}
+	pf.Shadow = color.RGBA{64, 64, 64, 255}
+	pf.Border = color.RGBA{102, 102, 102, 255}
+	pf.Control = color.RGBA{17, 57, 57, 255}
+	pf.Icon = color.RGBA{70, 70, 192, 255}
+	pf.Select = color.RGBA{17, 100, 100, 255}
+	pf.Highlight = color.RGBA{66, 82, 0, 255}
+	pf.Link = color.RGBA{117, 117, 249, 255}
 }
 
 func DefaultColorSchemes() map[string]*ColorPrefs {
@@ -610,7 +612,7 @@ func DefaultColorSchemes() map[string]*ColorPrefs {
 
 // PrefColor returns preference color of given name (case insensitive)
 // std names are: font, background, shadow, border, control, icon, select, highlight, link
-func (pf *ColorPrefs) PrefColor(clrName string) *gist.Color {
+func (pf *ColorPrefs) PrefColor(clrName string) *color.RGBA {
 	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
 	switch lc {
 	case "font":

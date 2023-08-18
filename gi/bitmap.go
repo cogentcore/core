@@ -20,6 +20,7 @@ import (
 
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
+	"github.com/goki/colors"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
 	"github.com/goki/ki/ki"
@@ -387,7 +388,7 @@ func ImageClearer(im *image.RGBA, pct float32) {
 	sz := im.Bounds().Size()
 	for y := 0; y < sz.Y; y++ {
 		for x := 0; x < sz.X; x++ {
-			f32 := gist.NRGBAf32Model.Convert(im.At(x, y)).(gist.NRGBAf32)
+			f32 := colors.NRGBAf32Model.Convert(im.At(x, y)).(colors.NRGBAf32)
 			f32.A -= f32.A * fact
 			im.Set(x, y, f32)
 		}
