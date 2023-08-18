@@ -10,6 +10,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv/textbuf"
@@ -326,9 +327,9 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	bupdt := bv.UpdateStart()
 	dv.BufA.LineColors = nil
 	dv.BufB.LineColors = nil
-	del := "red"
-	ins := "green"
-	chg := "blue"
+	del := colors.Red
+	ins := colors.Green
+	chg := colors.Blue
 	dv.Diffs = textbuf.DiffLines(astr, bstr)
 	nd := len(dv.Diffs)
 	dv.AlignD = make(textbuf.Diffs, nd)

@@ -309,7 +309,7 @@ func ToValueView(it any, tags string) ValueView {
 		}
 	case vk == reflect.Struct:
 		// note: we need to handle these here b/c cannot define new methods for gi types
-		if nptyp == gist.TypeColor || nptyp == kit.TypeFor[color.RGBA]() {
+		if nptyp == kit.TypeFor[color.RGBA]() {
 			vv := &ColorValueView{}
 			ki.InitNode(vv)
 			return vv

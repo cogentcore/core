@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/goki/cam/hsl"
 	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
@@ -35,7 +36,7 @@ type ColorView struct {
 	Color color.RGBA `desc:"the color that we view"`
 
 	// the color that we view, in HSLA form
-	ColorHSLA gist.HSLA `desc:"the color that we view, in HSLA form"`
+	ColorHSLA hsl.HSL `desc:"the color that we view, in HSLA form"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
@@ -133,7 +134,7 @@ var ColorViewProps = ki.Props{
 // SetColor sets the source color
 func (cv *ColorView) SetColor(clr color.Color) {
 	cv.Color = colors.AsRGBA(clr)
-	cv.ColorHSLA = gist.HSLAModel.Convert(clr).(gist.HSLA)
+	cv.ColorHSLA = hsl.FromColor(clr)
 	cv.ColorHSLA.Round()
 	cv.Config()
 	cv.Update()
@@ -168,7 +169,7 @@ func (cv *ColorView) Config() {
 	nrgba.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		updt := cvv.UpdateStart()
-		cvv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
+		cvv.ColorHSLA = hsl.FromColor(cvv.Color)
 		cvv.ColorHSLA.Round()
 		cvv.ViewSig.Emit(cvv.This(), 0, nil)
 		cvv.UpdateEnd(updt)
@@ -209,8 +210,7 @@ func (cv *ColorView) Config() {
 	nhsla.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 		updt := cvv.UpdateStart()
-		// STYTODO: better color conversion
-		cvv.Color = colors.AsRGBA(cv.ColorHSLA)
+		cvv.Color = cv.ColorHSLA.AsRGBA()
 		cvv.ViewSig.Emit(cvv.This(), 0, nil)
 		cvv.UpdateEnd(updt)
 	})
@@ -258,7 +258,7 @@ func (cv *ColorView) Config() {
 				log.Println("color view: error parsing hex '"+hex.Text()+"':", err)
 			}
 			cvv.Color = clr
-			cvv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
+			cvv.ColorHSLA = hsl.FromColor(cvv.Color)
 			cvv.ColorHSLA.Round()
 			cvv.ViewSig.Emit(cvv.This(), 0, nil)
 			cvv.UpdateEnd(updt)
@@ -374,7 +374,7 @@ func (cv *ColorView) SetRGBValue(val float32, rgb int) {
 	case 3:
 		cv.Color.A = uint8(val)
 	}
-	cv.ColorHSLA = gist.HSLAModel.Convert(cv.Color).(gist.HSLA)
+	cv.ColorHSLA = hsl.FromColor(cv.Color)
 	cv.ColorHSLA.Round()
 	if cv.TmpSave != nil {
 		cv.TmpSave.SaveTmp()
@@ -492,7 +492,8 @@ func (cv *ColorView) UpdateSliderGrid() {
 func (cv *ColorView) ConfigPalette() {
 	pg := gi.AddNewLayout(cv, "palette", gi.LayoutGrid)
 
-	nms := gist.HSLSortedColorNames()
+	// STYTOOD: use hct sorted names here (see https://github.com/goki/gi/issues/619)
+	nms := colors.Names
 
 	for _, cn := range nms {
 		cbt := gi.AddNewButton(pg, cn)
@@ -503,7 +504,7 @@ func (cv *ColorView) ConfigPalette() {
 			if sig == int64(gi.ButtonPressed) {
 				but := send.Embed(gi.TypeButton).(*gi.Button)
 				cvv.Color = colors.LogFromName(but.Nm)
-				cvv.ColorHSLA = gist.HSLAModel.Convert(cvv.Color).(gist.HSLA)
+				cvv.ColorHSLA = hsl.FromColor(cvv.Color)
 				cvv.ColorHSLA.Round()
 				cvv.ViewSig.Emit(cvv.This(), 0, nil)
 				cvv.Update()
@@ -568,7 +569,7 @@ func (cv *ColorView) Render2D() {
 // ColorValueView presents a StructViewInline for a struct plus a ColorView button..
 type ColorValueView struct {
 	ValueViewBase
-	TmpColor gist.Color
+	TmpColor color.RGBA
 }
 
 var TypeColorValueView = kit.Types.AddType(&ColorValueView{}, nil)
@@ -580,25 +581,25 @@ func AddNewColorValueView(parent ki.Ki, name string) *ColorValueView {
 
 // Color returns a standardized color value from whatever value is represented
 // internally
-func (vv *ColorValueView) Color() (*gist.Color, bool) {
+func (vv *ColorValueView) Color() (*color.RGBA, bool) {
 	ok := true
 	clri := vv.Value.Interface()
 	clr := &vv.TmpColor
 	switch c := clri.(type) {
-	case gist.Color:
+	case color.RGBA:
 		vv.TmpColor = c
-	case *gist.Color:
+	case *color.RGBA:
 		clr = c
-	case **gist.Color:
+	case **color.RGBA:
 		if c != nil {
 			// todo: not clear this ever works
 			clr = *c
 		}
 	case color.Color:
-		vv.TmpColor.SetColor(c)
+		vv.TmpColor = colors.AsRGBA(c)
 	case *color.Color:
 		if c != nil {
-			vv.TmpColor.SetColor(*c)
+			vv.TmpColor = colors.AsRGBA(*c)
 		}
 	default:
 		ok = false
@@ -609,15 +610,9 @@ func (vv *ColorValueView) Color() (*gist.Color, bool) {
 
 // SetColor sets color value from a standard color value -- more robust than
 // plain SetValue
-func (vv *ColorValueView) SetColor(clr gist.Color) {
+func (vv *ColorValueView) SetColor(clr color.RGBA) {
 	clri := vv.Value.Interface()
 	switch c := clri.(type) {
-	case gist.Color:
-		vv.SetValue(clr)
-	case *gist.Color:
-		vv.SetValue(clr)
-	case **gist.Color:
-		vv.SetValue(clr)
 	case color.RGBA:
 		vv.SetValue(color.RGBAModel.Convert(clr).(color.RGBA))
 	case *color.RGBA:
@@ -653,9 +648,9 @@ func (vv *ColorValueView) UpdateWidget() {
 			edac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				// we need to display button as non-transparent
 				// so that it can be seen
-				dclr := clr.WithA(1)
+				dclr := colors.SetAF32(clr, 1)
 				s.BackgroundColor.SetColor(dclr)
-				s.Color = colors.AsRGBA(dclr.ContrastColor())
+				s.Color = colors.AsRGBA(hsl.ContrastColor(dclr))
 			})
 			edac.SetFullReRender()
 		}
@@ -705,7 +700,7 @@ func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.
 		return
 	}
 	desc, _ := vv.Tag("desc")
-	dclr := gist.Color{}
+	dclr := color.RGBA{}
 	clr, ok := vv.Color()
 	if ok && clr != nil {
 		dclr = *clr
@@ -778,12 +773,12 @@ func (vv *ColorNameValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc
 	cur := kit.ToString(vv.Value.Interface())
 	sl := make([]struct {
 		Name  string
-		Color gist.Color
+		Color color.RGBA
 	}, len(colornames.Map))
 	ctr := 0
 	for k, v := range colornames.Map {
 		sl[ctr].Name = k
-		sl[ctr].Color.SetColor(v)
+		sl[ctr].Color = colors.AsRGBA(v)
 		ctr++
 	}
 	sort.Slice(sl, func(i, j int) bool {

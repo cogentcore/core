@@ -7,6 +7,7 @@ package giv
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"log"
 	"strings"
@@ -3331,7 +3332,7 @@ func (tv *TextView) CursorSprite() *gi.Sprite {
 
 // TextViewDepthOffsets are changes in color values from default background for different
 // depths.  For dark mode, these are increments, for light mode they are decrements.
-var TextViewDepthColors = []gist.Color{
+var TextViewDepthColors = []color.RGBA{
 	{0, 0, 0, 0},
 	{5, 5, 0, 0},
 	{15, 15, 0, 0},

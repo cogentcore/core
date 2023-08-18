@@ -7,6 +7,7 @@ package giv
 import (
 	"bytes"
 	"fmt"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"os"
@@ -91,7 +92,7 @@ type TextBuf struct {
 	LineIcons map[int]icons.Icon `desc:"icons for given lines -- use SetLineIcon and DeleteLineIcon"`
 
 	// special line number colors given lines -- use SetLineColor and DeleteLineColor
-	LineColors map[int]gist.Color `desc:"special line number colors given lines -- use SetLineColor and DeleteLineColor"`
+	LineColors map[int]color.RGBA `desc:"special line number colors given lines -- use SetLineColor and DeleteLineColor"`
 
 	// icons for each LineIcons being used
 	Icons map[icons.Icon]*gi.Icon `json:"-" xml:"-" desc:"icons for each LineIcons being used"`
@@ -2188,14 +2189,13 @@ func (tb *TextBuf) DeleteLineIcon(ln int) {
 	delete(tb.LineIcons, ln)
 }
 
-// SetLineColor sets given color (name or hex string) at given line (0 starting)
-func (tb *TextBuf) SetLineColor(ln int, color string) {
+// SetLineColor sets given color at given line (0 starting)
+func (tb *TextBuf) SetLineColor(ln int, clr color.RGBA) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()
 	if tb.LineColors == nil {
-		tb.LineColors = make(map[int]gist.Color)
+		tb.LineColors = make(map[int]color.RGBA)
 	}
-	clr, _ := gist.ColorFromString(color, nil)
 	tb.LineColors[ln] = clr
 }
 
