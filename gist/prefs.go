@@ -4,12 +4,14 @@
 
 package gist
 
+import "image/color"
+
 // Prefs defines the interface to preferences for style-relevant prefs
 type Prefs interface {
 	// PrefColor returns preference color of given name
 	// std names are: font, background, shadow, border, control, icon, select, highlight, link
 	// nil if not found
-	PrefColor(name string) *Color
+	PrefColor(name string) *color.RGBA
 
 	// PrefFontFamily returns the default FontFamily
 	PrefFontFamily() string

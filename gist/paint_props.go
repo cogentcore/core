@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -98,7 +99,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = par.(*Stroke).Color
 			} else if init {
-				fs.SetColor(Black)
+				fs.SetColor(colors.Black)
 			}
 			return
 		}
@@ -234,7 +235,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = par.(*Fill).Color
 			} else if init {
-				fs.SetColor(Black)
+				fs.SetColor(colors.Black)
 			}
 			return
 		}

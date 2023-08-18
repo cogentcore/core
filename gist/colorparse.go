@@ -286,7 +286,7 @@ func parseColorStop(stop *rasterx.GradStop, prevColor color.Color, par string) b
 		stop.Opacity = 0
 		stop.StopColor = prevColor
 	} else {
-		clr, err := ColorFromString(cnm, prevColor)
+		clr, err := colors.FromString(cnm, prevColor)
 		if err != nil {
 			log.Printf("gi.ColorSpec.Parse invalid color string: %v\n", err)
 			return false
@@ -434,7 +434,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 					case "offset":
 						stop.Offset, err = readFraction(attr.Value)
 					case "stop-color":
-						clr, err := ColorFromString(attr.Value, nil)
+						clr, err := colors.FromString(attr.Value, nil)
 						if err != nil {
 							log.Printf("gi.ColorSpec.UnmarshalXML invalid color string: %v\n", err)
 							return err
