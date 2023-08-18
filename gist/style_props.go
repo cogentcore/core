@@ -1027,7 +1027,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Color = par.(*Border).Color
 			} else if init {
-				bs.Color.Set(Black)
+				bs.Color.Set(colors.Black)
 			}
 			return
 		}
@@ -1095,7 +1095,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Color = par.(*Border).Color
 			} else if init {
-				bs.Color.Set(Black)
+				bs.Color.Set(colors.Black)
 			}
 			return
 		}
@@ -1162,11 +1162,11 @@ var StyleShadowFuncs = map[string]StyleFunc{
 			if inh {
 				ss.Color = par.(*Shadow).Color
 			} else if init {
-				ss.Color = Black
+				ss.Color = colors.Black
 			}
 			return
 		}
-		ss.Color.SetIFace(val, ctxt, key)
+		ss.Color = colors.LogFromAny(val, ctxt.ContextColor())
 	},
 	"box-shadow.inset": func(obj any, key string, val any, par any, ctxt Context) {
 		ss := obj.(*Shadow)

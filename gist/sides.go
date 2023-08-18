@@ -6,9 +6,11 @@ package gist
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/units"
 	"github.com/goki/mat32"
 )
@@ -318,13 +320,13 @@ func (s SideFloats) IsZero() bool {
 
 // SideColors contains color values for each side/corner of a box
 type SideColors struct {
-	Sides[Color]
+	Sides[color.RGBA]
 }
 
 // NewSideColors is a helper that creates new side/corner colors
 // and calls Set on them with the given values.
 // It does not return any error values and just logs them.
-func NewSideColors(vals ...Color) SideColors {
+func NewSideColors(vals ...color.RGBA) SideColors {
 	sides, _ := NewSideColorsTry(vals...)
 	return sides
 }
@@ -332,8 +334,8 @@ func NewSideColors(vals ...Color) SideColors {
 // NewSideColorsTry is a helper that creates new side/corner colors
 // and calls Set on them with the given values.
 // It returns an error value if there is one.
-func NewSideColorsTry(vals ...Color) (SideColors, error) {
-	sides := Sides[Color]{}
+func NewSideColorsTry(vals ...color.RGBA) (SideColors, error) {
+	sides := Sides[color.RGBA]{}
 	err := sides.Set(vals...)
 	return SideColors{Sides: sides}, err
 }
@@ -341,17 +343,17 @@ func NewSideColorsTry(vals ...Color) (SideColors, error) {
 // SetAny sets the sides/corners from the given value of any type
 func (s *SideColors) SetAny(a any, ctxt Context) error {
 	switch val := a.(type) {
-	case Sides[Color]:
+	case Sides[color.RGBA]:
 		s.Sides = val
-	case *Sides[Color]:
+	case *Sides[color.RGBA]:
 		s.Sides = *val
-	case Color:
+	case color.RGBA:
 		s.SetAll(val)
-	case *Color:
+	case *color.RGBA:
 		s.SetAll(*val)
-	case []Color:
+	case []color.RGBA:
 		s.Set(val...)
-	case *[]Color:
+	case *[]color.RGBA:
 		s.Set(*val...)
 	case string:
 		return s.SetString(val, ctxt)
@@ -364,14 +366,15 @@ func (s *SideColors) SetAny(a any, ctxt Context) error {
 // SetString sets the sides/corners from the given string value
 func (s *SideColors) SetString(str string, ctxt Context) error {
 	fields := strings.Fields(str)
-	vals := make([]Color, len(fields))
+	vals := make([]color.RGBA, len(fields))
 	for i, field := range fields {
-		err := (&vals[i]).SetStringStyle(field, nil, ctxt)
+		clr, err := colors.FromString(field, ctxt.ContextColor())
 		if err != nil {
 			nerr := fmt.Errorf("(SideColors).SetString('%s'): error setting sides of type %T from string: %w", str, s, err)
 			log.Println(nerr)
 			return nerr
 		}
+		vals[i] = clr
 	}
 	return s.Set(vals...)
 }
@@ -383,5 +386,5 @@ func (s SideColors) AllSame() bool {
 
 // IsZero returns whether all of the sides/corners are equal to zero
 func (s SideColors) IsZero() bool {
-	return s.Top.IsNil() && s.Right.IsNil() && s.Bottom.IsNil() && s.Left.IsNil()
+	return colors.IsNil(s.Top) && colors.IsNil(s.Right) && colors.IsNil(s.Bottom) && colors.IsNil(s.Left)
 }

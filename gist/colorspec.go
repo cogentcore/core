@@ -223,7 +223,7 @@ func (c *ColorSpec) SetIFace(val any, ctxt Context, key string) error {
 	switch valv := val.(type) {
 	case string:
 		c.SetString(valv, ctxt)
-	case *Color:
+	case *color.RGBA:
 		c.SetColor(*valv)
 	case *ColorSpec:
 		*c = *valv

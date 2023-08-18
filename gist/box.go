@@ -5,6 +5,8 @@
 package gist
 
 import (
+	"image/color"
+
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -147,7 +149,7 @@ type Shadow struct {
 	Spread units.Value `xml:".spread" desc:"prop: .spread = spread radius -- positive number increases size of shadow, negative decreases size"`
 
 	// prop: .color = color of the shadow
-	Color Color `xml:".color" desc:"prop: .color = color of the shadow"`
+	Color color.RGBA `xml:".color" desc:"prop: .color = color of the shadow"`
 
 	// prop: .inset = shadow is inset within box instead of outset outside of box
 	Inset bool `xml:".inset" desc:"prop: .inset = shadow is inset within box instead of outset outside of box"`
