@@ -3,8 +3,8 @@
 package colors
 
 const (
-	Version = "v0.8.2"
-	GitCommit = "0b5b0cf" // the commit JUST BEFORE the release
-	VersionDate = "2023-08-19 01:03" // UTC
+	Version = "v0.8.3"
+	GitCommit = "c46dd7c" // the commit JUST BEFORE the release
+	VersionDate = "2023-08-19 02:21" // UTC
 )
 
