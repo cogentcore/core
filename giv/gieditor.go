@@ -160,6 +160,8 @@ func (ge *GiEditor) EditColorScheme() {
 	kv.ViewSig.Connect(kv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		p = matcolor.NewPalette(key)
 		schemes = matcolor.NewSchemes(p)
+		gi.ColorSchemes = *schemes
+		gi.Prefs.UpdateAll()
 		svl.UpdateFields()
 		svd.UpdateFields()
 	})
