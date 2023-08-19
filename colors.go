@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"strconv"
 	"strings"
 
+	"github.com/goki/cam/hsl"
 	"github.com/goki/mat32"
 )
 
@@ -45,8 +47,8 @@ func AsString(c color.Color) string {
 
 // FromName returns the color value specified
 // by the given CSS standard color name. It returns
-// an error if the name is not found; see [ColorFromName]
-// for a version that does not return an error.
+// an error if the name is not found; see [MustFromName]
+// and [LogFromName] for versions that do not return an error.
 func FromName(name string) (color.RGBA, error) {
 	c, ok := Map[name]
 	if !ok {
@@ -79,162 +81,116 @@ func LogFromName(name string) color.RGBA {
 	return c
 }
 
-// TODO: add FromString and FromAny
-
-// SetString sets color value from string, including # hex specs, standard
-// color names, "none" or "off", or the following transformations (which
-// use a non-nil base color as the starting point, if it is provided):
-// inverse = inverse of base color
-//
-// * lighter-PCT or darker-PCT: PCT is amount to lighten or darken (using HSL), e.g., 10=10%
-// * saturate-PCT or pastel-PCT: manipulates the saturation level in HSL by PCT
+// FromString returns a color value from the given string.
+// It returns any resulting error; see [MustFromString] and
+// [LogFromString] for versions that do not return an error.
+// FromString accepts the following types of strings: hex values,
+// standard color names, "none" or "off", or
+// any of the following transformations (which
+// use the base color as the starting point):
+// * inverse = inverse of base color
+// * lighten-PCT or darken-PCT: PCT is amount to lighten or darken (using HSL), e.g., 10=10%
+// * saturate-PCT or desaturate-PCT: manipulates the saturation level in HSL by PCT
 // * clearer-PCT or opaquer-PCT: manipulates the alpha level by PCT
-// * blend-PCT-color: blends given percent of given color name relative to base (or current)
+// * blend-PCT-color: blends given percent of given color name relative to base
 func FromString(str string, base color.Color) (color.RGBA, error) {
-	return color.RGBA{}, nil
-	// if len(str) == 0 { // consider it null
-	// 	return color.RGBA{}, nil
-	// }
-	// lstr := strings.ToLower(str)
-	// switch {
-	// case lstr[0] == '#':
-	// 	return ColorFromHex(str)
-	// case strings.HasPrefix(lstr, "hsl("):
-	// 	val := lstr[4:]
-	// 	val = strings.TrimRight(val, ")")
-	// 	format := "%d,%d,%d"
-	// 	var h, s, l int
-	// 	fmt.Sscanf(val, format, &h, &s, &l)
-	// 	return hsl.NewHSL(float32(h), float32(s)/100.0, float32(l)/100.0).AsRGBA(), nil
-	// case strings.HasPrefix(lstr, "rgb("):
-	// 	val := lstr[4:]
-	// 	val = strings.TrimRight(val, ")")
-	// 	val = strings.Trim(val, "%")
-	// 	var r, g, b, a int
-	// 	a = 255
-	// 	format := "%d,%d,%d"
-	// 	if strings.Count(val, ",") == 4 {
-	// 		format = "%d,%d,%d,%d"
-	// 		fmt.Sscanf(val, format, &r, &g, &b, &a)
-	// 	} else {
-	// 		fmt.Sscanf(val, format, &r, &g, &b)
-	// 	}
-	// 	c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
-	// case strings.HasPrefix(lstr, "rgba("):
-	// 	val := lstr[5:]
-	// 	val = strings.TrimRight(val, ")")
-	// 	val = strings.Trim(val, "%")
-	// 	var r, g, b, a int
-	// 	format := "%d,%d,%d,%d"
-	// 	fmt.Sscanf(val, format, &r, &g, &b, &a)
-	// 	c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
-	// case strings.HasPrefix(lstr, "pref("):
-	// 	val := lstr[5:]
-	// 	val = strings.TrimRight(val, ")")
-	// 	clr := ThePrefs.PrefColor(val)
-	// 	if clr != nil {
-	// 		*c = *clr
-	// 	}
-	// default:
-	// 	if hidx := strings.Index(lstr, "-"); hidx > 0 {
-	// 		cmd := lstr[:hidx]
-	// 		pctstr := lstr[hidx+1:]
-	// 		pct, gotpct := kit.ToFloat32(pctstr)
-	// 		switch cmd {
-	// 		case "lighter":
-	// 			cvtPctStringErr(gotpct, pctstr)
-	// 			if base != nil {
-	// 				c.SetColor(base)
-	// 			}
-	// 			c.SetColor(c.Lighter(pct))
-	// 			return nil
-	// 		case "darker":
-	// 			cvtPctStringErr(gotpct, pctstr)
-	// 			if base != nil {
-	// 				c.SetColor(base)
-	// 			}
-	// 			c.SetColor(c.Darker(pct))
-	// 			return nil
-	// 		case "highlight":
-	// 			cvtPctStringErr(gotpct, pctstr)
-	// 			if base != nil {
-	// 				c.SetColor(base)
-	// 			}
-	// 			c.SetColor(c.Highlight(pct))
-	// 			return nil
-	// 		case "samelight":
-	// 			cvtPctStringErr(gotpct, pctstr)
-	// 			if base != nil {
-	// 				c.SetColor(base)
-	// 			}
-	// 			c.SetColor(c.Samelight(pct))
-	// 			return nil
-	// 		case "saturate":
-	// 			cvtPctStringErr(gotpct, pctstr)
-	// 			if base != nil {
-	// 				c.SetColor(base)
-	// 			}
-	// 			c.SetColor(c.Saturate(pct))
-	// 			return nil
-	// 		case "pastel":
-	// 			cvtPctStringErr(gotpct, pctstr)
-	// 			if base != nil {
-	// 				c.SetColor(base)
-	// 			}
-	// 			c.SetColor(c.Pastel(pct))
-	// 			return nil
-	// 		case "clearer":
-	// 			cvtPctStringErr(gotpct, pctstr)
-	// 			if base != nil {
-	// 				c.SetColor(base)
-	// 			}
-	// 			c.SetColor(c.Clearer(pct))
-	// 			return nil
-	// 		case "opaquer":
-	// 			cvtPctStringErr(gotpct, pctstr)
-	// 			if base != nil {
-	// 				c.SetColor(base)
-	// 			}
-	// 			c.SetColor(c.Opaquer(pct))
-	// 			return nil
-	// 		case "blend":
-	// 			if base != nil {
-	// 				c.SetColor(base)
-	// 			}
-	// 			clridx := strings.Index(pctstr, "-")
-	// 			if clridx < 0 {
-	// 				err := fmt.Errorf("gi.Color.SetString -- blend color spec not found -- format is: blend-PCT-color, got: %v -- PCT-color is: %v", lstr, pctstr)
-	// 				return err
-	// 			}
-	// 			pctstr = lstr[hidx+1 : clridx]
-	// 			pct, gotpct = kit.ToFloat32(pctstr)
-	// 			cvtPctStringErr(gotpct, pctstr)
-	// 			clrstr := lstr[clridx+1:]
-	// 			othc, err := ColorFromString(clrstr, base)
-	// 			c.SetColor(c.Blend(pct, &othc))
-	// 			return err
-	// 		}
-	// 	}
-	// 	switch lstr {
-	// 	case "none", "off":
-	// 		c.SetToNil()
-	// 		return nil
-	// 	case "transparent":
-	// 		c.SetUInt8(0xFF, 0xFF, 0xFF, 0)
-	// 		return nil
-	// 	case "inverse":
-	// 		if base != nil {
-	// 			c.SetColor(base)
-	// 		}
-	// 		c.SetColor(c.Inverse())
-	// 		return nil
-	// 	default:
-	// 		return c.SetName(lstr)
-	// 	}
-	// }
-	// return nil
+	if len(str) == 0 { // consider it null
+		return color.RGBA{}, nil
+	}
+	lstr := strings.ToLower(str)
+	switch {
+	case lstr[0] == '#':
+		return FromHex(str)
+	case strings.HasPrefix(lstr, "hsl("):
+		val := lstr[4:]
+		val = strings.TrimRight(val, ")")
+		format := "%d,%d,%d"
+		var h, s, l int
+		fmt.Sscanf(val, format, &h, &s, &l)
+		return hsl.New(float32(h), float32(s)/100.0, float32(l)/100.0).AsRGBA(), nil
+	case strings.HasPrefix(lstr, "rgb("):
+		val := lstr[4:]
+		val = strings.TrimRight(val, ")")
+		val = strings.Trim(val, "%")
+		var r, g, b, a int
+		a = 255
+		format := "%d,%d,%d"
+		if strings.Count(val, ",") == 4 {
+			format = "%d,%d,%d,%d"
+			fmt.Sscanf(val, format, &r, &g, &b, &a)
+		} else {
+			fmt.Sscanf(val, format, &r, &g, &b)
+		}
+		return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}, nil
+	case strings.HasPrefix(lstr, "rgba("):
+		val := lstr[5:]
+		val = strings.TrimRight(val, ")")
+		val = strings.Trim(val, "%")
+		var r, g, b, a int
+		format := "%d,%d,%d,%d"
+		fmt.Sscanf(val, format, &r, &g, &b, &a)
+		return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}, nil
+	default:
+		if hidx := strings.Index(lstr, "-"); hidx > 0 {
+			cmd := lstr[:hidx]
+			pctstr := lstr[hidx+1:]
+			pct64, err := strconv.ParseFloat(pctstr, 32)
+			if err != nil && cmd != "blend" { // blend handles separately
+				return color.RGBA{}, fmt.Errorf("colors.FromString: error getting percent from '%s': %w", pctstr, err)
+			}
+			pct := float32(pct64)
+			switch cmd {
+			case "lighten":
+				return hsl.Lighten(base, pct), nil
+			case "darken":
+				return hsl.Darken(base, pct), nil
+			case "highlight":
+				return hsl.Highlight(base, pct), nil
+			case "samelight":
+				return hsl.Samelight(base, pct), nil
+			case "saturate":
+				return hsl.Saturate(base, pct), nil
+			case "desaturate":
+				return hsl.Desaturate(base, pct), nil
+			case "clearer":
+				return Clearer(base, pct), nil
+			case "opaquer":
+				return Opaquer(base, pct), nil
+			case "blend":
+				clridx := strings.Index(pctstr, "-")
+				if clridx < 0 {
+					return color.RGBA{}, fmt.Errorf("colors.FromString: blend color spec not found; format is: blend-PCT-color, got: %v; PCT-color is: %v", lstr, pctstr)
+				}
+				pctstr = lstr[hidx+1 : clridx]
+				pct64, err := strconv.ParseFloat(pctstr, 32)
+				if err != nil {
+					return color.RGBA{}, fmt.Errorf("colors.FromString: error getting percent from '%s': %w", pctstr, err)
+				}
+				pct := float32(pct64)
+				clrstr := lstr[clridx+1:]
+				othc, err := FromString(clrstr, base)
+				return Blend(pct, base, othc), err
+			}
+		}
+		switch lstr {
+		case "none", "off":
+			return color.RGBA{}, nil
+		case "transparent":
+			return Transparent, nil
+		case "inverse":
+			if base != nil {
+				return Inverse(base), nil
+			}
+			return color.RGBA{}, errors.New("colors.FromString: base color must be provided for inverse color transformation")
+		default:
+			return FromName(lstr)
+		}
+	}
 }
 
+// MustFromString returns a color value from the given string.
+// It panics on any resulting error; see [FromString] for
+// more information and a version that returns an error.
 func MustFromString(str string, base color.Color) color.RGBA {
 	c, err := FromString(str, base)
 	if err != nil {
@@ -243,6 +199,9 @@ func MustFromString(str string, base color.Color) color.RGBA {
 	return c
 }
 
+// LogFromString returns a color value from the given string.
+// It logs any resulting error; see [FromString] for
+// more information and a version that returns an error.
 func LogFromString(str string, base color.Color) color.RGBA {
 	c, err := FromString(str, base)
 	if err != nil {
@@ -251,10 +210,24 @@ func LogFromString(str string, base color.Color) color.RGBA {
 	return c
 }
 
+// FromAny returns a color from the given value of any type.
+// It handles values of types string and [color.Color].
+// It returns any error; see [MustFromAny] and [LogFromAny]
+// for versions that do not return an error.
 func FromAny(val any, base color.Color) (color.RGBA, error) {
-	return color.RGBA{}, nil
+	switch valv := val.(type) {
+	case string:
+		return FromString(valv, base)
+	case color.Color:
+		return AsRGBA(valv), nil
+	default:
+		return color.RGBA{}, fmt.Errorf("colors.FromAny: could not set color from value %v of type %T", val, val)
+	}
 }
 
+// MustFromAny returns a color value from the given value.
+// of any type. It panics on any resulting error; see [FromAny]
+// for more information and a version that returns an error.
 func MustFromAny(val any, base color.Color) color.RGBA {
 	c, err := FromAny(val, base)
 	if err != nil {
@@ -263,6 +236,9 @@ func MustFromAny(val any, base color.Color) color.RGBA {
 	return c
 }
 
+// LogFromAny returns a color value from the given value.
+// of any type. It logs any resulting error; see [FromAny]
+// for more information and a version that returns an error.
 func LogFromAny(val any, base color.Color) color.RGBA {
 	c, err := FromAny(val, base)
 	if err != nil {
@@ -373,6 +349,26 @@ func SetAF32(c color.Color, a float32) color.RGBA {
 	return rc
 }
 
+// Clearer returns a color that is the given amount
+// more transparent (lower alpha value) in terms of
+// RGBA absolute alpha from 0 to 100.
+func Clearer(c color.Color, amount float32) color.RGBA {
+	f32 := NRGBAf32Model.Convert(c).(NRGBAf32)
+	f32.A -= amount / 100
+	f32.A = mat32.Clamp(f32.A, 0, 1)
+	return AsRGBA(f32)
+}
+
+// Opaquer returns a color that is the given amount
+// more opaque (higher alpha value) in terms of
+// RGBA absolute alpha from 0 to 100.
+func Opaquer(c color.Color, amount float32) color.RGBA {
+	f32 := NRGBAf32Model.Convert(c).(NRGBAf32)
+	f32.A += amount / 100
+	f32.A = mat32.Clamp(f32.A, 0, 1)
+	return AsRGBA(f32)
+}
+
 // Add adds the two given colors together, safely avoiding overflow > 255
 func Add(x, y color.Color) color.RGBA {
 	xr, xg, xb, xa := x.RGBA()
@@ -434,4 +430,12 @@ func Blend(pct float32, x, y color.Color) color.RGBA {
 	f32.B = me*f32.B + oth*othc.B
 	f32.A = me*f32.A + oth*othc.A
 	return AsRGBA(f32)
+}
+
+// Inverse returns the inverse of the given color
+// (255 - each component);
+// does not change the alpha channel.
+func Inverse(c color.Color) color.RGBA {
+	r := AsRGBA(c)
+	return color.RGBA{255 - r.R, 255 - r.G, 255 - r.B, r.A}
 }
