@@ -102,7 +102,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			act := child.(*Action)
 			act.Type = ActionParts
 			act.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.Font.Size.SetPx(20)
+				s.Font.Size.SetPx(18)
 			})
 		}
 	}

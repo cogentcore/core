@@ -629,6 +629,11 @@ func (tb *TabButton) OnInit() {
 		if tb.IsHovered() {
 			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
 		}
+		if w.HasFocus() {
+			s.Border.Style.Set(gist.BorderSolid)
+			s.Border.Width.Set(units.Px(2))
+			s.Border.Color.Set(ColorScheme.Outline)
+		}
 	})
 }
 
