@@ -11,6 +11,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
@@ -198,7 +199,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// sc.NoNav = true
 
 	// first, add lights, set camera
-	sc.BackgroundColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
+	sc.BackgroundColor = color.RGBA{230, 230, 255, 255} // sky blue-ish
 	gi3d.AddNewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
 	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
@@ -228,25 +229,25 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	rcb.Pose.Pos.Set(-1, 0, 0)
 	rcb.SetProp("color", "red")
 	rcb.SetProp("shiny", 500) // note: this will be overridden by the css sheet
-	rcb.Mat.Color.SetName("red")
+	rcb.Mat.Color = colors.Red
 
 	bcb := gi3d.AddNewSolid(sc, rbgp, "blue-cube", cbm.Name())
 	bcb.Class = "cube"
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2
-	bcb.Mat.Color.SetName("blue")
+	bcb.Mat.Color = colors.Blue
 	bcb.Mat.Shiny = 10       // note: this will be overridden by the css sheet
 	bcb.Mat.Reflective = 0.2 // not very shiny
 
 	gcb := gi3d.AddNewSolid(sc, sc, "green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)
-	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
+	gcb.Mat.Color = color.RGBA{0, 255, 0, 128} // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 	gcb.Class = "cube"
 
 	lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
 	lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())
 	lns.Pose.Pos.Set(0, 0, 1)
-	lns.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
+	lns.Mat.Color = color.RGBA{255, 255, 0, 128} // alpha = .5
 	// sc.Wireframe = true                      // debugging
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
@@ -264,12 +265,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	capm := gi3d.AddNewCapsule(sc, "capsule", 1.5, .5, 32, 1)
 	caps := gi3d.AddNewSolid(sc, sc, "capsule", capm.Name())
 	caps.Pose.Pos.Set(3.25, 0, 0)
-	caps.Mat.Color.SetName("tan")
+	caps.Mat.Color = colors.Tan
 
 	sphm := gi3d.AddNewSphere(sc, "sphere", .75, 32)
 	sph := gi3d.AddNewSolid(sc, sc, "sphere", sphm.Name())
 	sph.Pose.Pos.Set(0, -2, 0)
-	sph.Mat.Color.SetName("orange")
+	sph.Mat.Color = colors.Orange
 	sph.Mat.Color.A = 200
 
 	// Good strategy for objects if used in multiple places is to load
@@ -295,7 +296,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
 	trs.Pose.Pos.Set(-1.6, -1.6, -.2)
 	trs.Pose.SetAxisRotation(1, 0, 0, 90)
-	trs.Mat.Color.SetName("white")
+	trs.Mat.Color = colors.White
 	trs.Mat.Color.A = 200
 
 	grtx := gi3d.AddNewTextureFileFS(content, sc, "ground", "ground.png")
@@ -305,7 +306,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
 	floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, -5, 0)
-	floor.Mat.Color.SetName("tan")
+	floor.Mat.Color = colors.Tan
 	// floor.Mat.Emissive.SetName("brown")
 	floor.Mat.Bright = 2 // .5 for wood / brown
 	floor.Mat.SetTexture(sc, grtx)
@@ -325,8 +326,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	tcg := gi3d.AddNewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
 	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
 	fpgun.Pose.Scale.Set(.1, .1, 1)
-	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
-	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
+	fpgun.Pose.Pos.Set(.5, -.5, -2.5)              // in front of camera
+	fpgun.Mat.Color = color.RGBA{255, 0, 255, 128} // alpha = .5
 
 	sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin

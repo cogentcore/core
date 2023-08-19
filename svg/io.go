@@ -20,6 +20,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
@@ -1038,8 +1039,8 @@ func SVGNodeXMLGrad(nd *gi.Gradient, name string, enc *XMLEncoder) {
 		for _, gs := range gr.Stops {
 			se := xml.StartElement{}
 			se.Name.Local = "stop"
-			clr := gist.ColorFromColor(gs.StopColor)
-			hs := clr.HexString()[:7]
+			clr := colors.AsRGBA(gs.StopColor)
+			hs := colors.AsHex(clr)[:7] // get rid of transparency
 			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, gs.Opacity))
 			XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Offset))
 			enc.EncodeToken(se)
