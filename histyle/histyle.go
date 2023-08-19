@@ -12,10 +12,12 @@ package histyle
 
 import (
 	"encoding/json"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"strings"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
@@ -55,13 +57,13 @@ func (ev *Trilean) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 type StyleEntry struct {
 
 	// text color
-	Color gist.Color `desc:"text color"`
+	Color color.RGBA `desc:"text color"`
 
 	// background color
-	Background gist.Color `desc:"background color"`
+	Background color.RGBA `desc:"background color"`
 
 	// [view: -] border color? not sure what this is -- not really used
-	Border gist.Color `view:"-" desc:"border color? not sure what this is -- not really used"`
+	Border color.RGBA `view:"-" desc:"border color? not sure what this is -- not really used"`
 
 	// bold font
 	Bold Trilean `desc:"bold font"`
@@ -127,14 +129,14 @@ func (se StyleEntry) String() string {
 	if se.NoInherit {
 		out = append(out, "noinherit")
 	}
-	if !se.Color.IsNil() {
-		out = append(out, se.Color.String())
+	if !colors.IsNil(se.Color) {
+		out = append(out, colors.AsString(se.Color))
 	}
-	if !se.Background.IsNil() {
-		out = append(out, "bg:"+se.Background.String())
+	if !colors.IsNil(se.Background) {
+		out = append(out, "bg:"+colors.AsString(se.Background))
 	}
-	if !se.Border.IsNil() {
-		out = append(out, "border:"+se.Border.String())
+	if !colors.IsNil(se.Border) {
+		out = append(out, "border:"+colors.AsString(se.Border))
 	}
 	return strings.Join(out, " ")
 }
@@ -142,11 +144,11 @@ func (se StyleEntry) String() string {
 // ToCSS converts StyleEntry to CSS attributes.
 func (se StyleEntry) ToCSS() string {
 	styles := []string{}
-	if !se.Color.IsNil() {
-		styles = append(styles, "color: "+se.Color.String())
+	if !colors.IsNil(se.Color) {
+		styles = append(styles, "color: "+colors.AsString(se.Color))
 	}
-	if !se.Background.IsNil() {
-		styles = append(styles, "background-color: "+se.Background.String())
+	if !colors.IsNil(se.Background) {
+		styles = append(styles, "background-color: "+colors.AsString(se.Background))
 	}
 	if se.Bold == Yes {
 		styles = append(styles, "font-weight: bold")
@@ -163,10 +165,10 @@ func (se StyleEntry) ToCSS() string {
 // ToProps converts StyleEntry to ki.Props attributes.
 func (se StyleEntry) ToProps() ki.Props {
 	pr := ki.Props{}
-	if !se.Color.IsNil() {
+	if !colors.IsNil(se.Color) {
 		pr["color"] = se.Color
 	}
-	if !se.Background.IsNil() {
+	if !colors.IsNil(se.Background) {
 		pr["background-color"] = se.Background
 	}
 	if se.Bold == Yes {
@@ -215,13 +217,13 @@ func (s StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
 			return out
 		}
 		ancestor := ancestors[i]
-		if out.Color.IsNil() {
+		if colors.IsNil(out.Color) {
 			out.Color = ancestor.Color
 		}
-		if out.Background.IsNil() {
+		if colors.IsNil(out.Background) {
 			out.Background = ancestor.Background
 		}
-		if out.Border.IsNil() {
+		if colors.IsNil(out.Border) {
 			out.Border = ancestor.Border
 		}
 		if out.Bold == Pass {
@@ -238,7 +240,7 @@ func (s StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
 }
 
 func (s StyleEntry) IsZero() bool {
-	return s.Color.IsNil() && s.Background.IsNil() && s.Border.IsNil() && s.Bold == Pass && s.Italic == Pass &&
+	return colors.IsNil(s.Color) && colors.IsNil(s.Background) && colors.IsNil(s.Border) && s.Bold == Pass && s.Italic == Pass &&
 		s.Underline == Pass && !s.NoInherit
 }
 
