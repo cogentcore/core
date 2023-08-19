@@ -419,25 +419,22 @@ func (cv *ColorView) UpdateRGBSlider(sl *gi.Slider, rgb int) {
 	}
 }
 
-func (cv *ColorView) SetHSLValue(val float32, hsl int) {
-	// STYTODO: fix
-	// h, s, l, _ := cv.Color.ToHSLA()
-	// switch hsl {
-	// case 0:
-	// 	h = val
-	// 	cv.ColorHSLA.H = h
-	// case 1:
-	// 	s = val / 360.0
-	// 	cv.ColorHSLA.S = s
-	// case 2:
-	// 	l = val / 360.0
-	// 	cv.ColorHSLA.L = l
-	// }
-	// cv.ColorHSLA.Round()
-	// cv.Color.SetHSL(h, s, l)
-	// if cv.TmpSave != nil {
-	// 	cv.TmpSave.SaveTmp()
-	// }
+func (cv *ColorView) SetHSLValue(val float32, hsln int) {
+	hsla := hsl.FromColor(cv.Color)
+	switch hsln {
+	case 0:
+		hsla.H = val
+	case 1:
+		hsla.S = val / 360.0
+	case 2:
+		hsla.L = val / 360.0
+	}
+	hsla.Round()
+	cv.ColorHSLA = hsla
+	cv.Color = hsla.AsRGBA()
+	if cv.TmpSave != nil {
+		cv.TmpSave.SaveTmp()
+	}
 }
 
 func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
