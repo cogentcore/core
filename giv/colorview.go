@@ -611,11 +611,11 @@ func (vv *ColorValueView) SetColor(clr color.RGBA) {
 	clri := vv.Value.Interface()
 	switch c := clri.(type) {
 	case color.RGBA:
-		vv.SetValue(color.RGBAModel.Convert(clr).(color.RGBA))
+		vv.SetValue(clr)
 	case *color.RGBA:
-		vv.SetValue(color.RGBAModel.Convert(clr).(color.RGBA))
+		vv.SetValue(clr)
 	case **color.RGBA:
-		vv.SetValue(color.RGBAModel.Convert(clr).(color.RGBA))
+		vv.SetValue(clr)
 	case color.Color:
 		vv.SetValue((color.Color)(clr))
 	case *color.Color:
@@ -628,7 +628,7 @@ func (vv *ColorValueView) SetColor(clr color.RGBA) {
 }
 
 func (vv *ColorValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = TypeStructViewInline
+	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
 }
 
@@ -636,51 +636,31 @@ func (vv *ColorValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sv := vv.Widget.(*StructViewInline)
-	clr, ok := vv.Color()
-	if ok && clr != nil {
-		edack, err := sv.Parts.Children().ElemFromEndTry(0) // action at end, from AddAction above
-		if err == nil {
-			edac := edack.(*gi.Action)
-			edac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-				// we need to display button as non-transparent
-				// so that it can be seen
-				dclr := colors.SetAF32(clr, 1)
-				s.BackgroundColor.SetColor(dclr)
-				s.Color = colors.AsRGBA(hsl.ContrastColor(dclr))
-			})
-			edac.SetFullReRender()
-		}
-	}
-	sv.UpdateFields()
+	ac := vv.Widget.(*gi.Action)
+	ac.SetFullReRender()
+	ac.UpdateSig()
 }
 
 func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	sv := vv.Widget.(*StructViewInline)
-	// fmt.Println(reflect.TypeOf(sv.Parent()))
-	// sv.AddAction = reflect.TypeOf(sv.Parent().Parent()) != TypeColorView
-	sv.AddAction = true
-	sv.ViewPath = vv.ViewPath
-	sv.TmpSave = vv.TmpSave
+	ac := vv.Widget.(*gi.Action)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	sv.SetStruct(vv.Value.Interface())
 
-	edack, err := sv.Parts.Children().ElemFromEndTry(0) // action at end, from AddAction above
-	if err == nil {
-		edac := edack.(*gi.Action)
-		edac.SetIcon(icons.Colors)
-		edac.Tooltip = "color selection dialog"
-		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv, _ := recv.Embed(TypeStructViewInline).(*StructViewInline)
-			vv.Activate(svv.ViewportSafe(), nil, nil)
-		})
-	}
-	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeColorValueView).(*ColorValueView)
-		vvv.UpdateWidget() // necessary in this case!
-		vvv.ViewSig.Emit(vvv.This(), 0, nil)
+	ac.SetText("Edit Color")
+	ac.SetIcon(icons.Colors)
+	ac.Tooltip = "Open color picker dialog"
+	ac.ActionSig.ConnectOnly(ac.This(), func(recv, send ki.Ki, sig int64, data any) {
+		svv, _ := recv.Embed(gi.TypeAction).(*gi.Action)
+		vv.Activate(svv.ViewportSafe(), nil, nil)
+	})
+	ac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		clr, _ := vv.Color()
+		// we need to display button as non-transparent
+		// so that it can be seen
+		dclr := colors.SetAF32(clr, 1)
+		s.BackgroundColor.SetColor(dclr)
+		s.Color = colors.AsRGBA(hsl.ContrastColor(dclr))
 	})
 	vv.UpdateWidget()
 }

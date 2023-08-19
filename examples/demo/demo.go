@@ -404,7 +404,7 @@ func makeInputs(tv *gi.TabView) {
 	sliderxi.Value = 0.7
 	sliderxi.SetDisabled()
 
-	clr := colors.Blue
+	clr := colors.Tan
 
 	colorvv := giv.ToValueView(&clr, "")
 	colorvv.SetSoloValue(reflect.ValueOf(&clr))
