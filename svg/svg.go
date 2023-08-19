@@ -216,7 +216,7 @@ func (sv *SVG) StyleSVG() {
 	StyleSVG(sv.This().(gi.Node2D))
 	// TODO: cleaner svg styling from text color property
 	sv.RunStyleFuncs()
-	SetUnitContext(&sv.Pnt.Paint, sv.AsViewport2D(), sv.NodeSize(), sv.ParentNodeSize()) // context is viewbox
+	SetUnitContext(&sv.Pnt.Paint, sv.AsViewport2D(), mat32.Vec2{}, mat32.Vec2{}) // STYTODO: maybe pass something in here using viewbox as context?
 }
 
 func (sv *SVG) Style2D() {

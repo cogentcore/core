@@ -368,7 +368,7 @@ func (wb *WidgetBase) Style2DWidget() {
 
 	puc := prof.Start("Style2DWidget-SetUnitContext")
 
-	SetUnitContext(&wb.Style, wb.Viewport, wb.NodeSize(), wb.ParentNodeSize())
+	SetUnitContext(&wb.Style, wb.Viewport, mat32.Vec2{}, mat32.Vec2{})
 	puc.End()
 
 	psc := prof.Start("Style2DWidget-SetCurrentColor")
@@ -400,7 +400,7 @@ func (wb *WidgetBase) Style2D() {
 
 // SetUnitContext sets the unit context based on size of viewport, element, and parent
 // element (from bbox) and then caches everything out in terms of raw pixel
-// dots for rendering -- call at start of render
+// dots for rendering -- call at start of render. Zero values for element and parent size are ignored.
 func SetUnitContext(st *gist.Style, vp *Viewport2D, el, par mat32.Vec2) {
 	if vp != nil {
 		if vp.Win != nil {

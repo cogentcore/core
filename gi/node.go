@@ -14,7 +14,6 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"github.com/goki/prof"
 )
 
 // Node is the interface for all GoGi nodes (2D and 3D), for accessing as NodeBase
@@ -608,19 +607,6 @@ func (nb *NodeBase) AllWithinBBox(bbox image.Rectangle, leavesOnly bool) ki.Slic
 // of this node as a [mat32.Vec2] object.
 func (nb *NodeBase) NodeSize() mat32.Vec2 {
 	return mat32.NewVec2FmPoint(nb.BBox.Size())
-}
-
-// ParentNodeSize returns the size of the nearest
-// node parent of this node as a [mat32.Vec2] object.
-func (nb *NodeBase) ParentNodeSize() mat32.Vec2 {
-	// STYTODO: improve this (and cache size); or just don't use it
-	pr := prof.Start("ParentNodeSize")
-	defer pr.End()
-	par, ok := nb.ParentByType(TypeNodeBase, ki.Embeds).Embed(TypeNodeBase).(*NodeBase)
-	if !ok {
-		return nb.NodeSize()
-	}
-	return mat32.NewVec2FmPoint(par.BBox.Size())
 }
 
 // standard css properties on nodes apply, including visible, etc.

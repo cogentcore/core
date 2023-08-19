@@ -113,7 +113,7 @@ func (txt *Text2D) StyleText(sc *Scene) {
 	// css stuff only works for node2d
 	// gi.AggCSS(&txt.CSSAgg, txt.CSS)
 	// txt.Sty.StyleCSS(txt.This().(gi.Node2D), txt.CSSAgg, "", sc.Viewport)
-	gi.SetUnitContext(&txt.Sty, sc.Viewport, txt.NodeSize(), txt.ParentNodeSize())
+	gi.SetUnitContext(&txt.Sty, sc.Viewport, mat32.Vec2{}, mat32.Vec2{})
 }
 
 func (txt *Text2D) RenderText(sc *Scene) {

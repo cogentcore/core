@@ -452,16 +452,7 @@ func (sb *SpinBox) StyleSpinBox() {
 	sb.StyMu.Lock()
 	defer sb.StyMu.Unlock()
 
-	hasTempl, saveTempl := sb.Style.FromTemplate()
-	if !hasTempl || saveTempl {
-		sb.Style2DWidget()
-	} else {
-		SetUnitContext(&sb.Style, sb.Viewport, sb.NodeSize(), sb.ParentNodeSize())
-	}
-	if hasTempl && saveTempl {
-		sb.Style.SaveTemplate()
-	}
-	sb.StyleFromProps(sb.Props, sb.Viewport)
+	sb.Style2DWidget()
 }
 
 func (sb *SpinBox) Style2D() {
