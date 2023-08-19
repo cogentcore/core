@@ -50,8 +50,8 @@ gopath-update:
 	cd cmd/pi; go get -u ./...
 
 # NOTE: MUST update version number here prior to running 'make release'
-VERS=v0.8.0
-PACKAGE=matcolor
+VERS=v0.8.1
+PACKAGE=colors
 GIT_COMMIT=`git rev-parse --short HEAD`
 VERS_DATE=`date -u +%Y-%m-%d\ %H:%M`
 VERS_FILE=version.go
