@@ -14,13 +14,14 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-gl/mathgl v1.0.0
-	github.com/goki/colors v0.0.0-20230818210207-39fdb14d401c
+	github.com/goki/cam v0.9.7
+	github.com/goki/colors v0.8.2
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
 	github.com/goki/ki v1.1.16-0.20230812185917-db9a8362d270
 	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.18
-	github.com/goki/matcolor v0.0.0-20230817233749-59b66dffda0f
+	github.com/goki/matcolor v0.9.1
 	github.com/goki/mobile v0.0.0-20230626225100-3417752baaf2
 	github.com/goki/pi v1.0.27
 	github.com/goki/prof v1.0.0
@@ -44,7 +45,6 @@ require (
 	github.com/akutz/sortfold v0.2.1 // indirect
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
-	github.com/goki/cam v0.0.0-20230817230211-1cb2fe99d34e // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
