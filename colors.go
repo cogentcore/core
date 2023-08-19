@@ -79,6 +79,8 @@ func LogFromName(name string) color.RGBA {
 	return c
 }
 
+// TODO: add FromString and FromAny
+
 // SetString sets color value from string, including # hex specs, standard
 // color names, "none" or "off", or the following transformations (which
 // use a non-nil base color as the starting point, if it is provided):
@@ -422,16 +424,14 @@ func Sub(x, y color.Color) color.RGBA {
 // and second color -- 10 = 10% of the second and 90% of the first, etc --
 // blending is done directly on non-pre-multiplied RGB values
 func Blend(pct float32, x, y color.Color) color.RGBA {
-	// TODO: add blend
-	return color.RGBA{}
-	// f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
-	// othc := NRGBAf32Model.Convert(clr).(NRGBAf32)
-	// pct = mat32.Clamp(pct, 0, 100.0)
-	// oth := pct / 100.0
-	// me := 1.0 - pct/100.0
-	// f32.R = me*f32.R + oth*othc.R
-	// f32.G = me*f32.G + oth*othc.G
-	// f32.B = me*f32.B + oth*othc.B
-	// f32.A = me*f32.A + oth*othc.A
-	// return ColorModel.Convert(f32).(Color)
+	f32 := NRGBAf32Model.Convert(x).(NRGBAf32)
+	othc := NRGBAf32Model.Convert(y).(NRGBAf32)
+	pct = mat32.Clamp(pct, 0, 100.0)
+	oth := pct / 100.0
+	me := 1.0 - pct/100.0
+	f32.R = me*f32.R + oth*othc.R
+	f32.G = me*f32.G + oth*othc.G
+	f32.B = me*f32.B + oth*othc.B
+	f32.A = me*f32.A + oth*othc.A
+	return AsRGBA(f32)
 }
