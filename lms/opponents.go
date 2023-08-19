@@ -4,8 +4,6 @@
 
 package lms
 
-import "github.com/goki/ki/kit"
-
 // OpVals holds color opponent values based on cone-like L,M,S inputs
 // These values are useful for generating inputs to vision models that
 // simulate color opponency representations in the brain.
@@ -33,12 +31,6 @@ func NewOpVals(l, m, s, lm, grey float32) OpVals {
 type Opponents int
 
 //go:generate stringer -output stringer.go -type=Opponents
-
-var TypeOpponents = kit.Enums.AddEnum(OpponentsN, kit.NotBitFlag, nil)
-
-func (ev Opponents) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Opponents) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
 const (
 	// White vs. Black greyscale
 	WhiteBlack Opponents = iota

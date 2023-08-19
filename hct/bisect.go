@@ -21,7 +21,6 @@ package hct
 
 import (
 	"github.com/goki/cam/cam16"
-	"github.com/goki/ki/ints"
 	"github.com/goki/mat32"
 )
 
@@ -231,7 +230,7 @@ func BisectToLimit(y, target_hue float32) mat32.Vec3 {
 				r_plane = CriticalPlaneBelow(TrueDelinearized(GetAxis(right, axis)))
 			}
 			for i := 0; i < 8; i++ {
-				if ints.AbsInt(r_plane-l_plane) <= 1 {
+				if absInt(r_plane-l_plane) <= 1 {
 					break
 				} else {
 					m_plane := int(mat32.Floor(float32(l_plane+r_plane) / 2.0))
@@ -251,6 +250,14 @@ func BisectToLimit(y, target_hue float32) mat32.Vec3 {
 		}
 	}
 	return Midpoint(left, right)
+}
+
+// TODO: replace with stdlib function once we use go1.21
+func absInt(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }
 
 /////////////////////////////////////////////
