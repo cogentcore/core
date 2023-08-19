@@ -578,7 +578,7 @@ func (pf *ColorPrefs) Defaults() {
 	pf.Font = colors.Black
 	pf.Border = colors.MustFromHex("#e6e6e6")
 	pf.Background = colors.White
-	pf.Shadow = colors.MustFromString("darker-10", &pf.Background)
+	pf.Shadow = colors.MustFromString("darken-10", &pf.Background)
 	pf.Control = colors.MustFromHex("#F8F8F8")
 	pf.Icon = colors.MustFromString("highlight-30", pf.Control)
 	pf.Select = colors.MustFromHex("#CFC")

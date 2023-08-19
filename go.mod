@@ -15,7 +15,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-gl/mathgl v1.0.0
 	github.com/goki/cam v0.9.7
-	github.com/goki/colors v0.8.2
+	github.com/goki/colors v0.8.3
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
 	github.com/goki/ki v1.1.16-0.20230812185917-db9a8362d270
