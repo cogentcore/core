@@ -86,17 +86,17 @@ func Spin(c color.Color, amount float32) color.RGBA {
 }
 
 // IsLight returns whether the given color is light
-// (has an HSL lightness greater than or equal to 0.5)
+// (has an HSL lightness greater than or equal to 0.6)
 func IsLight(c color.Color) bool {
 	h := FromColor(c)
-	return h.L >= 0.5
+	return h.L >= 0.6
 }
 
 // IsDark returns whether the given color is dark
-// (has an HSL lightness less than 0.5)
+// (has an HSL lightness less than 0.6)
 func IsDark(c color.Color) bool {
 	h := FromColor(c)
-	return h.L < 0.5
+	return h.L < 0.6
 }
 
 // ContrastColor returns the color that should
