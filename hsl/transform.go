@@ -104,7 +104,7 @@ func IsDark(c color.Color) bool {
 // based on the result of [IsLight].
 func ContrastColor(c color.Color) color.RGBA {
 	if IsLight(c) {
-		return color.RGBA{0, 255, 255, 255}
+		return color.RGBA{0, 0, 0, 255}
 	}
 	return color.RGBA{255, 255, 255, 255}
 }
