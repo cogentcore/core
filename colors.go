@@ -88,6 +88,7 @@ func LogFromName(name string) color.RGBA {
 // standard color names, "none" or "off", or
 // any of the following transformations (which
 // use the base color as the starting point):
+// * currentcolor = base color
 // * inverse = inverse of base color
 // * lighten-PCT or darken-PCT: PCT is amount to lighten or darken (using HSL), e.g., 10=10%
 // * saturate-PCT or desaturate-PCT: manipulates the saturation level in HSL by PCT
@@ -177,6 +178,8 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 			return color.RGBA{}, nil
 		case "transparent":
 			return Transparent, nil
+		case "currentcolor":
+			return AsRGBA(base), nil
 		case "inverse":
 			if base != nil {
 				return Inverse(base), nil
