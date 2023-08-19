@@ -80,7 +80,7 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 				s.Margin.Set()
 				s.Padding.Set()
 				// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
-				s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
+				s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
 
 				// s.Border.Style.Set(gist.BorderNone)
 				// s.Border.Style.Bottom = gist.BorderSolid
@@ -611,7 +611,7 @@ func (tb *TabButton) OnInit() {
 		// s.Border.Style.Right = gist.BorderSolid
 		// s.Border.Width.Right.SetPx(1)
 
-		s.BackgroundColor.SetSolid(ColorScheme.Surface)
+		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
 		s.Color = ColorScheme.OnSurface
 
 		s.Border.Radius.Set()
@@ -625,6 +625,10 @@ func (tb *TabButton) OnInit() {
 		// 	s.Border.Width.Bottom.SetPx(2)
 		// 	s.Border.Color.Bottom = ColorScheme.Primary
 		// }
+
+		if tb.IsHovered() {
+			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
+		}
 	})
 }
 
