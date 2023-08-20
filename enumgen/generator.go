@@ -214,12 +214,12 @@ func (g *Generator) Generate() error {
 		if g.Config.YAML {
 			g.buildYAMLMethods(runs, typeName, runsThreshold)
 		}
-		// if g.Config.SQL {
-		// 	g.addValueAndScanMethod(typeName)
-		// }
-		// if g.Config.GQLGEN {
-		// 	g.buildGQLGenMethods(runs, typeName)
-		// }
+		if g.Config.SQL {
+			g.addValueAndScanMethod(typeName)
+		}
+		if g.Config.GQLGEN {
+			g.buildGQLGenMethods(runs, typeName)
+		}
 	}
 	return nil
 }
