@@ -6,11 +6,21 @@
 // enum methods for enum types.
 package enumgen
 
+import "fmt"
+
 // Generate generates enum methods using
 // the given configuration object. It reads
 // all Go files in the config source directory
 // and writes the result to the config output file.
 func Generate(config Config) error {
 	g := NewGenerator(config)
-	return g.ParsePackage()
+	err := g.ParsePackage()
+	if err != nil {
+		return fmt.Errorf("Generate: error parsing package: %w", err)
+	}
+	err = g.Generate()
+	if err != nil {
+		return fmt.Errorf("Generate: error generating code: %w", err)
+	}
+	return nil
 }

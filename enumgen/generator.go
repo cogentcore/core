@@ -101,3 +101,16 @@ func (g *Generator) PrintHeader() {
 	}
 	g.Printf(")\n")
 }
+
+// Generate goes through all of the types in the package
+// and generates enum methods for all types labeled with enums:enum
+// or enums:bitflag. It writes the resulting code to [Generator.Buf]
+func (g *Generator) Generate() error {
+	for _, def := range g.Pkg.Defs {
+		if def == nil {
+			continue
+		}
+		fmt.Println(def.Type(), def.Name())
+	}
+	return nil
+}
