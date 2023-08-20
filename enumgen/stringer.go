@@ -16,7 +16,6 @@ import (
 	"flag"
 	"fmt"
 	"go/ast"
-	exact "go/constant"
 	"go/format"
 	"go/importer"
 	"go/token"
@@ -135,8 +134,8 @@ func main() {
 	g.Printf(")\n")
 
 	// Run generate for each type.
-	for _, typeName := range typs {
-		g.generate(typeName, *json, *yaml, *sql, *text, *gqlgen, *transformMethod, *trimPrefix, *addPrefix, *linecomment, *altValuesFunc)
+	for _, _ = range typs {
+		g.Generate()
 	}
 
 	// Format the output.
@@ -176,17 +175,6 @@ func isDirectory(name string) bool {
 		log.Fatal(err)
 	}
 	return info.IsDir()
-}
-
-// File holds a single parsed file and associated data.
-type File struct {
-	pkg  *Package  // Package to which this file belongs.
-	file *ast.File // Parsed AST.
-	// These fields are reset for each type being generated.
-	typeName    string  // Name of the constant type.
-	values      []Value // Accumulator for constant values of that type.
-	trimPrefix  string
-	lineComment bool
 }
 
 // // parsePackageDir parses the package residing in the directory.
@@ -357,80 +345,6 @@ func (g *Generator) prefixValueNames(values []Value, prefix string) {
 	}
 }
 
-// generate produces the String method for the named type.
-func (g *Generator) generate(typeName string,
-	includeJSON, includeYAML, includeSQL, includeText, includeGQLGen bool,
-	transformMethod string, trimPrefix string, addPrefix string, lineComment bool, includeValuesMethod bool) {
-	values := make([]Value, 0, 100)
-	for _, file := range g.Pkg.Files {
-		file.lineComment = lineComment
-		// Set the state for this run of the walker.
-		file.typeName = typeName
-		file.values = nil
-		if file.file != nil {
-			ast.Inspect(file.file, file.genDecl)
-			values = append(values, file.values...)
-		}
-	}
-
-	if len(values) == 0 {
-		log.Fatalf("no values defined for type %s", typeName)
-	}
-
-	for _, prefix := range strings.Split(trimPrefix, ",") {
-		g.trimValueNames(values, prefix)
-	}
-
-	g.transformValueNames(values, transformMethod)
-
-	g.prefixValueNames(values, addPrefix)
-
-	runs := splitIntoRuns(values)
-	// The decision of which pattern to use depends on the number of
-	// runs in the numbers. If there's only one, it's easy. For more than
-	// one, there's a tradeoff between complexity and size of the data
-	// and code vs. the simplicity of a map. A map takes more space,
-	// but so does the code. The decision here (crossover at 10) is
-	// arbitrary, but considers that for large numbers of runs the cost
-	// of the linear scan in the switch might become important, and
-	// rather than use yet another algorithm such as binary search,
-	// we punt and use a map. In any case, the likelihood of a map
-	// being necessary for any realistic example other than bitmasks
-	// is very low. And bitmasks probably deserve their own analysis,
-	// to be done some other day.
-	const runsThreshold = 10
-	switch {
-	case len(runs) == 1:
-		g.buildOneRun(runs, typeName)
-	case len(runs) <= runsThreshold:
-		g.buildMultipleRuns(runs, typeName)
-	default:
-		g.buildMap(runs, typeName)
-	}
-	// if includeValuesMethod {
-	// 	g.buildAltStringValuesMethod(typeName)
-	// }
-
-	// g.buildNoOpOrderChangeDetect(runs, typeName)
-
-	// g.buildBasicExtras(runs, typeName, runsThreshold)
-	// if includeJSON {
-	// 	g.buildJSONMethods(runs, typeName, runsThreshold)
-	// }
-	// if includeText {
-	// 	g.buildTextMethods(runs, typeName, runsThreshold)
-	// }
-	// if includeYAML {
-	// 	g.buildYAMLMethods(runs, typeName, runsThreshold)
-	// }
-	// if includeSQL {
-	// 	g.addValueAndScanMethod(typeName)
-	// }
-	// if includeGQLGen {
-	// 	g.buildGQLGenMethods(runs, typeName)
-	// }
-}
-
 // splitIntoRuns breaks the values into runs of contiguous sequences.
 // For example, given 1,2,3,5,6,7 it returns {1,2,3},{5,6,7}.
 // The input slice is known to be non-empty.
@@ -506,87 +420,6 @@ func (b byValue) Less(i, j int) bool {
 		return int64(b[i].value) < int64(b[j].value)
 	}
 	return b[i].value < b[j].value
-}
-
-// genDecl processes one declaration clause.
-func (f *File) genDecl(node ast.Node) bool {
-	decl, ok := node.(*ast.GenDecl)
-	if !ok || decl.Tok != token.CONST {
-		// We only care about const declarations.
-		return true
-	}
-	// The name of the type of the constants we are declaring.
-	// Can change if this is a multi-element declaration.
-	typ := ""
-	// Loop over the elements of the declaration. Each element is a ValueSpec:
-	// a list of names possibly followed by a type, possibly followed by values.
-	// If the type and value are both missing, we carry down the type (and value,
-	// but the "go/types" package takes care of that).
-	for _, spec := range decl.Specs {
-		vspec := spec.(*ast.ValueSpec) // Guaranteed to succeed as this is CONST.
-		if vspec.Type == nil && len(vspec.Values) > 0 {
-			// "X = 1". With no type but a value, the constant is untyped.
-			// Skip this vspec and reset the remembered type.
-			typ = ""
-			continue
-		}
-		if vspec.Type != nil {
-			// "X T". We have a type. Remember it.
-			ident, ok := vspec.Type.(*ast.Ident)
-			if !ok {
-				continue
-			}
-			typ = ident.Name
-		}
-		if typ != f.typeName {
-			// This is not the type we're looking for.
-			continue
-		}
-		// We now have a list of names (from one line of source code) all being
-		// declared with the desired type.
-		// Grab their names and actual values and store them in f.values.
-		for _, n := range vspec.Names {
-			if n.Name == "_" {
-				continue
-			}
-			// This dance lets the type checker find the values for us. It's a
-			// bit tricky: look up the object declared by the n, find its
-			// types.Const, and extract its value.
-			obj, ok := f.pkg.Defs[n]
-			if !ok {
-				log.Fatalf("no value for constant %s", n)
-			}
-			info := obj.Type().Underlying().(*types.Basic).Info()
-			if info&types.IsInteger == 0 {
-				log.Fatalf("can't handle non-integer constant type %s", typ)
-			}
-			value := obj.(*types.Const).Val() // Guaranteed to succeed as this is CONST.
-			if value.Kind() != exact.Int {
-				log.Fatalf("can't happen: constant is not an integer %s", n)
-			}
-			i64, isInt := exact.Int64Val(value)
-			u64, isUint := exact.Uint64Val(value)
-			if !isInt && !isUint {
-				log.Fatalf("internal error: value of %s is not an integer: %s", n, value.String())
-			}
-			if !isInt {
-				u64 = uint64(i64)
-			}
-			v := Value{
-				originalName: n.Name,
-				name:         n.Name,
-				value:        u64,
-				signed:       info&types.IsUnsigned == 0,
-				str:          value.String(),
-			}
-			if c := vspec.Comment; f.lineComment && c != nil && len(c.List) == 1 {
-				v.name = strings.TrimSpace(c.Text())
-			}
-
-			f.values = append(f.values, v)
-		}
-	}
-	return false
 }
 
 // Helpers

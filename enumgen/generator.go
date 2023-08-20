@@ -26,9 +26,10 @@ import (
 // It is primarily used to buffer
 // the output for [format.Source].
 type Generator struct {
-	Config Config       // The configuration information
-	Buf    bytes.Buffer // The accumulated output.
-	Pkg    *Package     // The package we are scanning.
+	Config Config                 // The configuration information
+	Buf    bytes.Buffer           // The accumulated output.
+	Pkg    *Package               // The package we are scanning.
+	Types  map[*ast.TypeSpec]bool // The enum types; the value is whether they are a bit flag or not
 }
 
 // NewGenerator returns a new generator with the
@@ -66,8 +67,8 @@ func (g *Generator) AddPackage(pkg *packages.Package) {
 
 	for i, file := range pkg.Syntax {
 		g.Pkg.Files[i] = &File{
-			file: file,
-			pkg:  g.Pkg,
+			File: file,
+			Pkg:  g.Pkg,
 		}
 	}
 }
@@ -104,15 +105,14 @@ func (g *Generator) PrintHeader() {
 	g.Printf(")\n")
 }
 
-// Generate goes through all of the types in the package
-// and generates enum methods for all types labeled with enums:enum
-// or enums:bitflag. It writes the resulting code to [Generator.Buf]
-func (g *Generator) Generate() error {
-	enumTypes := []*ast.TypeSpec{}
-	bitFlagTypes := []*ast.TypeSpec{}
+// FindEnumTypes goes through all of the types in the package
+// and finds all integer (signed or unsigned) types labeled with enums:enum
+// or enums:bitflag. It stores the resulting types in [Generator.Types].
+func (g *Generator) FindEnumTypes() error {
+	g.Types = map[*ast.TypeSpec]bool{}
 	for _, file := range g.Pkg.Files {
 		var err error
-		ast.Inspect(file.file, func(n ast.Node) bool {
+		ast.Inspect(file.File, func(n ast.Node) bool {
 			if err != nil {
 				return false
 			}
@@ -131,9 +131,9 @@ func (g *Generator) Generate() error {
 					d := strings.TrimPrefix(c.Text, "//enums:")
 					switch d {
 					case "enum":
-						enumTypes = append(enumTypes, typ)
+						g.Types[typ] = false
 					case "bitflag":
-						bitFlagTypes = append(bitFlagTypes, typ)
+						g.Types[typ] = true
 					default:
 						err = errors.New("unrecognized enums directive: '" + c.Text + "'")
 						return false
@@ -146,6 +146,84 @@ func (g *Generator) Generate() error {
 			return err
 		}
 	}
-	fmt.Println(enumTypes, bitFlagTypes)
+	fmt.Println(g.Types)
+	return nil
+}
+
+// Generate produces the enum methods for the types
+// stored in [Generator.Types].
+func (g *Generator) Generate() error {
+	for typ, bitflag := range g.Types {
+		values := make([]Value, 0, 100)
+		typeName := typ.Name.String()
+		for _, file := range g.Pkg.Files {
+			file.Config = g.Config
+			// Set the state for this run of the walker.
+			file.TypeName = typeName
+			file.BitFlag = bitflag
+			file.Values = nil
+			if file.File != nil {
+				ast.Inspect(file.File, file.GenDecl)
+				values = append(values, file.Values...)
+			}
+		}
+
+		if len(values) == 0 {
+			return errors.New("no values defined for type " + typeName)
+		}
+
+		for _, prefix := range strings.Split(g.Config.TrimPrefix, ",") {
+			g.trimValueNames(values, prefix)
+		}
+
+		g.transformValueNames(values, g.Config.Transform)
+
+		g.prefixValueNames(values, g.Config.AddPrefix)
+
+		runs := splitIntoRuns(values)
+		// The decision of which pattern to use depends on the number of
+		// runs in the numbers. If there's only one, it's easy. For more than
+		// one, there's a tradeoff between complexity and size of the data
+		// and code vs. the simplicity of a map. A map takes more space,
+		// but so does the code. The decision here (crossover at 10) is
+		// arbitrary, but considers that for large numbers of runs the cost
+		// of the linear scan in the switch might become important, and
+		// rather than use yet another algorithm such as binary search,
+		// we punt and use a map. In any case, the likelihood of a map
+		// being necessary for any realistic example other than bitmasks
+		// is very low. And bitmasks probably deserve their own analysis,
+		// to be done some other day.
+		const runsThreshold = 10
+		switch {
+		case len(runs) == 1:
+			g.buildOneRun(runs, typeName)
+		case len(runs) <= runsThreshold:
+			g.buildMultipleRuns(runs, typeName)
+		default:
+			g.buildMap(runs, typeName)
+		}
+		// if includeValuesMethod {
+		// 	g.buildAltStringValuesMethod(typeName)
+		// }
+
+		// g.buildNoOpOrderChangeDetect(runs, typeName)
+
+		// g.buildBasicExtras(runs, typeName, runsThreshold)
+		// if includeJSON {
+		// 	g.buildJSONMethods(runs, typeName, runsThreshold)
+		// }
+		// if includeText {
+		// 	g.buildTextMethods(runs, typeName, runsThreshold)
+		// }
+		// if includeYAML {
+		// 	g.buildYAMLMethods(runs, typeName, runsThreshold)
+		// }
+		// if includeSQL {
+		// 	g.addValueAndScanMethod(typeName)
+		// }
+		// if includeGQLGen {
+		// 	g.buildGQLGenMethods(runs, typeName)
+		// }
+	}
 	return nil
 }

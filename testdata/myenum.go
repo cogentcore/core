@@ -15,3 +15,12 @@ const (
 
 // MyBitEnum is a bitflag enum
 type MyBitEnum int //enums:bitflag
+
+const (
+	Apple MyBitEnum = iota
+	Orange
+	Peach
+	Blueberry
+	Grapefruit
+	Strawberry
+)
