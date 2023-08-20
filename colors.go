@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goki/cam/hct"
 	"github.com/goki/cam/hsl"
 	"github.com/goki/mat32"
 )
@@ -24,6 +25,22 @@ func IsNil(c color.Color) bool {
 // SetToNil sets the given color to a nil initial default color
 func SetToNil(c *color.Color) {
 	*c = color.RGBA{}
+}
+
+// FromRGB makes a new color from the given RGB values, using 255 for A.
+func FromRGB(r, g, b uint8) color.RGBA {
+	return color.RGBA{r, g, b, 255}
+}
+
+// FromRGBA makes a new color from the given RGBA values
+func FromRGBA(r, g, b, a uint8) color.RGBA {
+	return color.RGBA{r, g, b, a}
+}
+
+// FromNRGBA makes a new color from the given
+// non-alpha-premultiplied RGBA values
+func FromNRGBA(r, g, b, a uint8) color.RGBA {
+	return AsRGBA(color.NRGBA{r, g, b, a})
 }
 
 // AsRGBA returns the given color as an RGBA color
@@ -90,10 +107,11 @@ func LogFromName(name string) color.RGBA {
 // use the base color as the starting point):
 // * currentcolor = base color
 // * inverse = inverse of base color
-// * lighten-PCT or darken-PCT: PCT is amount to lighten or darken (using HSL), e.g., 10=10%
-// * saturate-PCT or desaturate-PCT: manipulates the saturation level in HSL by PCT
-// * clearer-PCT or opaquer-PCT: manipulates the alpha level by PCT
-// * blend-PCT-color: blends given percent of given color name relative to base
+// * lighten-VAL or darken-VAL: VAL is amount to lighten or darken (using HCT), e.g., lighter-10 is 10 higher tone
+// * saturate-VAL or desaturate-VAL: manipulates the chroma level in HCT by VAL
+// * spin-VAL: manipulates the hue level in HCT by VAL
+// * clearer-VAL or opaquer-VAL: manipulates the alpha level by VAL
+// * blend-VAL-color: blends given percent of given color name relative to base
 func FromString(str string, base color.Color) (color.RGBA, error) {
 	if len(str) == 0 { // consider it null
 		return color.RGBA{}, nil
@@ -134,43 +152,45 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 	default:
 		if hidx := strings.Index(lstr, "-"); hidx > 0 {
 			cmd := lstr[:hidx]
-			pctstr := lstr[hidx+1:]
-			pct64, err := strconv.ParseFloat(pctstr, 32)
+			valstr := lstr[hidx+1:]
+			val64, err := strconv.ParseFloat(valstr, 32)
 			if err != nil && cmd != "blend" { // blend handles separately
-				return color.RGBA{}, fmt.Errorf("colors.FromString: error getting percent from '%s': %w", pctstr, err)
+				return color.RGBA{}, fmt.Errorf("colors.FromString: error getting numeric value from '%s': %w", valstr, err)
 			}
-			pct := float32(pct64)
+			val := float32(val64)
 			switch cmd {
 			case "lighten":
-				return hsl.Lighten(base, pct), nil
+				return hct.Lighten(base, val), nil
 			case "darken":
-				return hsl.Darken(base, pct), nil
+				return hct.Darken(base, val), nil
 			case "highlight":
-				return hsl.Highlight(base, pct), nil
+				return hct.Highlight(base, val), nil
 			case "samelight":
-				return hsl.Samelight(base, pct), nil
+				return hct.Samelight(base, val), nil
 			case "saturate":
-				return hsl.Saturate(base, pct), nil
+				return hct.Saturate(base, val), nil
 			case "desaturate":
-				return hsl.Desaturate(base, pct), nil
+				return hct.Desaturate(base, val), nil
+			case "spin":
+				return hct.Spin(base, val), nil
 			case "clearer":
-				return Clearer(base, pct), nil
+				return Clearer(base, val), nil
 			case "opaquer":
-				return Opaquer(base, pct), nil
+				return Opaquer(base, val), nil
 			case "blend":
-				clridx := strings.Index(pctstr, "-")
+				clridx := strings.Index(valstr, "-")
 				if clridx < 0 {
-					return color.RGBA{}, fmt.Errorf("colors.FromString: blend color spec not found; format is: blend-PCT-color, got: %v; PCT-color is: %v", lstr, pctstr)
+					return color.RGBA{}, fmt.Errorf("colors.FromString: blend color spec not found; format is: blend-PCT-color, got: %v; PCT-color is: %v", lstr, valstr)
 				}
-				pctstr = lstr[hidx+1 : clridx]
-				pct64, err := strconv.ParseFloat(pctstr, 32)
+				valstr = lstr[hidx+1 : clridx]
+				val64, err := strconv.ParseFloat(valstr, 32)
 				if err != nil {
-					return color.RGBA{}, fmt.Errorf("colors.FromString: error getting percent from '%s': %w", pctstr, err)
+					return color.RGBA{}, fmt.Errorf("colors.FromString: error getting numeric value from '%s': %w", valstr, err)
 				}
-				pct := float32(pct64)
+				val := float32(val64)
 				clrstr := lstr[clridx+1:]
 				othc, err := FromString(clrstr, base)
-				return Blend(pct, base, othc), err
+				return Blend(val, base, othc), err
 			}
 		}
 		switch lstr {
@@ -370,53 +390,6 @@ func Opaquer(c color.Color, amount float32) color.RGBA {
 	f32.A += amount / 100
 	f32.A = mat32.Clamp(f32.A, 0, 1)
 	return AsRGBA(f32)
-}
-
-// Add adds the two given colors together, safely avoiding overflow > 255
-func Add(x, y color.Color) color.RGBA {
-	xr, xg, xb, xa := x.RGBA()
-	yr, yg, yb, ya := y.RGBA()
-	r := xr + yr
-	g := xg + yg
-	b := xb + yb
-	a := xa + ya
-	if r > 255 {
-		r = 255
-	}
-	if g > 255 {
-		g = 255
-	}
-	if b > 255 {
-		b = 255
-	}
-	if a > 255 {
-		a = 255
-	}
-	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
-}
-
-// Sub subtracts the second color from the first color,
-// safely avoiding underflow < 0
-func Sub(x, y color.Color) color.RGBA {
-	xr, xg, xb, xa := x.RGBA()
-	yr, yg, yb, ya := y.RGBA()
-	r := xr - yr
-	g := xg - yg
-	b := xb - yb
-	a := xa - ya
-	if r > 255 {
-		r = 255
-	}
-	if g > 255 {
-		g = 255
-	}
-	if b > 255 {
-		b = 255
-	}
-	if a > 255 {
-		a = 255
-	}
-	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
 }
 
 // Blend returns a color that is the given percent blend between the first
