@@ -6,14 +6,14 @@ package colors
 
 import "image/color"
 
-// RGBAf32 stores alpha-premultiplied RGBA values in float32 0..1 normalized
-// format -- more useful for converting to other spaces
-type RGBAf32 struct {
+// RGBAF32 stores alpha-premultiplied RGBA values in a float32 0 to 1
+// normalized format, which is more useful for converting to other spaces
+type RGBAF32 struct {
 	R, G, B, A float32
 }
 
-// Implements the color.Color interface
-func (c RGBAf32) RGBA() (r, g, b, a uint32) {
+// RGBA implements the color.Color interface
+func (c RGBAF32) RGBA() (r, g, b, a uint32) {
 	r = uint32(c.R*65535.0 + 0.5)
 	g = uint32(c.G*65535.0 + 0.5)
 	b = uint32(c.B*65535.0 + 0.5)
@@ -21,20 +21,20 @@ func (c RGBAf32) RGBA() (r, g, b, a uint32) {
 	return
 }
 
-// FromF32 returns the color specified by the given float32
+// FromRGBAF32 returns the color specified by the given float32
 // alpha-premultiplied RGBA values in the range 0 to 1
-func FromF32(r, g, b, a float32) color.RGBA {
-	return AsRGBA(RGBAf32{r, g, b, a})
+func FromRGBAF32(r, g, b, a float32) color.RGBA {
+	return AsRGBA(RGBAF32{r, g, b, a})
 }
 
-// NRGBAf32 stores non-alpha-premultiplied RGBA values in float32 0..1
-// normalized format -- more useful for converting to other spaces
-type NRGBAf32 struct {
+// NRGBAF32 stores non-alpha-premultiplied RGBA values in a float32 0 to 1
+// normalized format, which is more useful for converting to other spaces
+type NRGBAF32 struct {
 	R, G, B, A float32
 }
 
-// Implements the color.Color interface
-func (c NRGBAf32) RGBA() (r, g, b, a uint32) {
+// RGBA implements the color.Color interface
+func (c NRGBAF32) RGBA() (r, g, b, a uint32) {
 	r = uint32(c.R*c.A*65535.0 + 0.5)
 	g = uint32(c.G*c.A*65535.0 + 0.5)
 	b = uint32(c.B*c.A*65535.0 + 0.5)
@@ -42,27 +42,29 @@ func (c NRGBAf32) RGBA() (r, g, b, a uint32) {
 	return
 }
 
-// FromNF32 returns the color specified by the given float32
+// FromNRGBAF32 returns the color specified by the given float32
 // non alpha-premultiplied RGBA values in the range 0 to 1
-func FromNF32(r, g, b, a float32) color.RGBA {
-	return AsRGBA(NRGBAf32{r, g, b, a})
+func FromNRGBAF32(r, g, b, a float32) color.RGBA {
+	return AsRGBA(NRGBAF32{r, g, b, a})
 }
 
 var (
-	RGBAf32Model  color.Model = color.ModelFunc(rgbaf32Model)
-	NRGBAf32Model color.Model = color.ModelFunc(nrgbaf32Model)
+	// RGBAF32Model is the model for converting colors to [RGBAF32] colors
+	RGBAF32Model color.Model = color.ModelFunc(rgbaf32Model)
+	// NRGBAF32Model is the model for converting colors to [NRGBAF32] colors
+	NRGBAF32Model color.Model = color.ModelFunc(nrgbaf32Model)
 )
 
 func rgbaf32Model(c color.Color) color.Color {
-	if _, ok := c.(RGBAf32); ok {
+	if _, ok := c.(RGBAF32); ok {
 		return c
 	}
 	r, g, b, a := c.RGBA()
-	return RGBAf32{float32(r) / 65535.0, float32(g) / 65535.0, float32(b) / 65535.0, float32(a) / 65535.0}
+	return RGBAF32{float32(r) / 65535.0, float32(g) / 65535.0, float32(b) / 65535.0, float32(a) / 65535.0}
 }
 
 func nrgbaf32Model(c color.Color) color.Color {
-	if _, ok := c.(NRGBAf32); ok {
+	if _, ok := c.(NRGBAF32); ok {
 		return c
 	}
 	r, g, b, a := c.RGBA()
@@ -76,5 +78,5 @@ func nrgbaf32Model(c color.Color) color.Color {
 		b *= 0xffff
 		b /= a
 	}
-	return NRGBAf32{float32(r) / 65535.0, float32(g) / 65535.0, float32(b) / 65535.0, float32(a) / 65535.0}
+	return NRGBAF32{float32(r) / 65535.0, float32(g) / 65535.0, float32(b) / 65535.0, float32(a) / 65535.0}
 }

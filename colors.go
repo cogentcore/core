@@ -27,18 +27,14 @@ func SetToNil(c *color.Color) {
 	*c = color.RGBA{}
 }
 
-// FromRGB makes a new color from the given RGB values, using 255 for A.
+// FromRGB makes a new RGBA color from the given
+// RGB uint8 values, using 255 for A.
 func FromRGB(r, g, b uint8) color.RGBA {
 	return color.RGBA{r, g, b, 255}
 }
 
-// FromRGBA makes a new color from the given RGBA values
-func FromRGBA(r, g, b, a uint8) color.RGBA {
-	return color.RGBA{r, g, b, a}
-}
-
-// FromNRGBA makes a new color from the given
-// non-alpha-premultiplied RGBA values
+// FromNRGBA makes a new RGBA color from the given
+// non-alpha-premultiplied RGBA uint8 values.
 func FromNRGBA(r, g, b, a uint8) color.RGBA {
 	return AsRGBA(color.NRGBA{r, g, b, a})
 }
@@ -331,7 +327,7 @@ func AsHex(c color.Color) string {
 }
 
 // SetR returns the given color with the red
-// component (R) set to the given value
+// component (R) set to the given alpha-premultiplied value
 func SetR(c color.Color, r uint8) color.RGBA {
 	rc := AsRGBA(c)
 	rc.R = r
@@ -339,7 +335,7 @@ func SetR(c color.Color, r uint8) color.RGBA {
 }
 
 // SetG returns the given color with the green
-// component (G) set to the given value
+// component (G) set to the given alpha-premultiplied value
 func SetG(c color.Color, g uint8) color.RGBA {
 	rc := AsRGBA(c)
 	rc.G = g
@@ -347,7 +343,7 @@ func SetG(c color.Color, g uint8) color.RGBA {
 }
 
 // SetB returns the given color with the blue
-// component (B) set to the given value
+// component (B) set to the given alpha-premultiplied value
 func SetB(c color.Color, b uint8) color.RGBA {
 	rc := AsRGBA(c)
 	rc.B = b
@@ -355,28 +351,30 @@ func SetB(c color.Color, b uint8) color.RGBA {
 }
 
 // SetA returns the given color with the
-// transparency (A) set to the given value
+// transparency (A) set to the given value,
+// with the color premultiplication updated.
 func SetA(c color.Color, a uint8) color.RGBA {
-	rc := AsRGBA(c)
-	rc.A = a
-	return rc
+	n := color.NRGBAModel.Convert(c).(color.NRGBA)
+	n.A = a
+	return AsRGBA(n)
 }
 
 // SetAF32 returns the given color with the
 // transparency (A) set to the given float32 value
-// between 0 and 1
+// between 0 and 1, with the color premultiplication updated.
 func SetAF32(c color.Color, a float32) color.RGBA {
-	rc := AsRGBA(c)
+	n := color.NRGBAModel.Convert(c).(color.NRGBA)
 	a = mat32.Clamp(a, 0, 1)
-	rc.A = uint8(a * 255)
-	return rc
+	n.A = uint8(a * 255)
+	return AsRGBA(n)
 }
 
 // Clearer returns a color that is the given amount
 // more transparent (lower alpha value) in terms of
-// RGBA absolute alpha from 0 to 100.
+// RGBA absolute alpha from 0 to 100, with the color
+// premultiplication updated.
 func Clearer(c color.Color, amount float32) color.RGBA {
-	f32 := NRGBAf32Model.Convert(c).(NRGBAf32)
+	f32 := NRGBAF32Model.Convert(c).(NRGBAF32)
 	f32.A -= amount / 100
 	f32.A = mat32.Clamp(f32.A, 0, 1)
 	return AsRGBA(f32)
@@ -384,20 +382,22 @@ func Clearer(c color.Color, amount float32) color.RGBA {
 
 // Opaquer returns a color that is the given amount
 // more opaque (higher alpha value) in terms of
-// RGBA absolute alpha from 0 to 100.
+// RGBA absolute alpha from 0 to 100,
+// with the color premultiplication updated.
 func Opaquer(c color.Color, amount float32) color.RGBA {
-	f32 := NRGBAf32Model.Convert(c).(NRGBAf32)
+	f32 := NRGBAF32Model.Convert(c).(NRGBAF32)
 	f32.A += amount / 100
 	f32.A = mat32.Clamp(f32.A, 0, 1)
 	return AsRGBA(f32)
 }
 
 // Blend returns a color that is the given percent blend between the first
-// and second color -- 10 = 10% of the second and 90% of the first, etc --
-// blending is done directly on non-pre-multiplied RGB values
+// and second color; 10 = 10% of the second and 90% of the first, etc;
+// blending is done directly on non-premultiplied RGB values, and
+// a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
-	f32 := NRGBAf32Model.Convert(x).(NRGBAf32)
-	othc := NRGBAf32Model.Convert(y).(NRGBAf32)
+	f32 := NRGBAF32Model.Convert(x).(NRGBAF32)
+	othc := NRGBAF32Model.Convert(y).(NRGBAF32)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	oth := pct / 100.0
 	me := 1.0 - pct/100.0
