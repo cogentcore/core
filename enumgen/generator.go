@@ -13,7 +13,9 @@ package enumgen
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"go/ast"
 	"os"
 	"strings"
 
@@ -106,11 +108,41 @@ func (g *Generator) PrintHeader() {
 // and generates enum methods for all types labeled with enums:enum
 // or enums:bitflag. It writes the resulting code to [Generator.Buf]
 func (g *Generator) Generate() error {
-	for _, def := range g.Pkg.Defs {
-		if def == nil {
-			continue
+	enumTypes := []*ast.TypeSpec{}
+	bitFlagTypes := []*ast.TypeSpec{}
+	for _, file := range g.Pkg.Files {
+		var err error
+		ast.Inspect(file.file, func(n ast.Node) bool {
+			if err != nil {
+				return false
+			}
+			typ, ok := n.(*ast.TypeSpec)
+			if !ok {
+				return true
+			}
+			if typ.Comment == nil {
+				return true
+			}
+			for _, c := range typ.Comment.List {
+				if strings.HasPrefix(c.Text, "//enums:") {
+					d := strings.TrimPrefix(c.Text, "//enums:")
+					switch d {
+					case "enum":
+						enumTypes = append(enumTypes, typ)
+					case "bitflag":
+						bitFlagTypes = append(bitFlagTypes, typ)
+					default:
+						err = errors.New("unrecognized enums directive: '" + c.Text + "'")
+						return false
+					}
+				}
+			}
+			return true
+		})
+		if err != nil {
+			return err
 		}
-		fmt.Println(def.Type(), def.Name())
 	}
+	fmt.Println(enumTypes, bitFlagTypes)
 	return nil
 }

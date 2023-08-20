@@ -12,3 +12,6 @@ const (
 	Friday
 	Saturday
 )
+
+// MyBitEnum is a bitflag enum
+type MyBitEnum int //enums:bitflag

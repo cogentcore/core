@@ -29,7 +29,7 @@ func main() {
 	flag.Parse()
 	err := enumgen.Generate(config)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error: " + err.Error())
 	}
 }
 

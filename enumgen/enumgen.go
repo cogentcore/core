@@ -16,11 +16,11 @@ func Generate(config Config) error {
 	g := NewGenerator(config)
 	err := g.ParsePackage()
 	if err != nil {
-		return fmt.Errorf("Generate: error parsing package: %w", err)
+		return fmt.Errorf("enumgen: Generate: error parsing package: %w", err)
 	}
 	err = g.Generate()
 	if err != nil {
-		return fmt.Errorf("Generate: error generating code: %w", err)
+		return fmt.Errorf("enumgen: Generate: error generating code: %w", err)
 	}
 	return nil
 }
