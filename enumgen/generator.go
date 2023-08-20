@@ -118,6 +118,9 @@ func (g *Generator) Generate() error {
 			}
 			typ, ok := n.(*ast.TypeSpec)
 			if !ok {
+				if val, ok := n.(*ast.ValueSpec); ok {
+					fmt.Println(val.Names)
+				}
 				return true
 			}
 			if typ.Comment == nil {
