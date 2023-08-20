@@ -6,9 +6,11 @@
 // enum methods for enum types.
 package enumgen
 
-// Generate generates enum methods for all enum types
-// in the directory specified by the given path, putting
-// the resulting files in the given output file.
-func Generate(dir string, output string) error {
-
+// Generate generates enum methods using
+// the given configuration object. It reads
+// all Go files in the config source directory
+// and writes the result to the config output file.
+func Generate(config Config) error {
+	g := NewGenerator(config)
+	return g.ParsePackage()
 }

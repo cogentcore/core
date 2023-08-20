@@ -15,16 +15,19 @@ import (
 	"github.com/goki/enums/enumgen"
 )
 
-var (
-	dir    = flag.String("dir", ".", "the directory to look for enums in")
-	output = flag.String("output", "enumgen.go", "the file name of the output file")
-)
+// the configuration object we use
+var config enumgen.Config
+
+var ()
 
 func main() {
+	flag.StringVar(&config.Dir, "dir", ".", "the directory to look for enums in")
+	flag.StringVar(&config.Output, "output", "enumgen.go", "the file name of the output file")
+
 	log.SetPrefix("enumgen")
 	flag.Usage = Usage
 	flag.Parse()
-	err := enumgen.Generate(*dir, *output)
+	err := enumgen.Generate(config)
 	if err != nil {
 		fmt.Println(err)
 	}
