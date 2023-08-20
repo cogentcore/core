@@ -6,9 +6,9 @@ package main
 
 import (
 	"fmt"
-	"image/color"
 	"reflect"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/gist"
@@ -65,10 +65,10 @@ func mainrun() {
 		// 	"font-size": "x-large",
 		// },
 		"#combo": ki.Props{
-			"background-color": color.RGBA{240, 255, 240, 255},
+			"background-color": colors.FromRGB(240, 255, 240),
 		},
 		".hslides": ki.Props{
-			"background-color": color.RGBA{240, 225, 255, 255},
+			"background-color": colors.FromRGB(240,  225,  255),
 		},
 		"kbd": ki.Props{
 			"color": "blue",

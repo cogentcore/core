@@ -588,15 +588,15 @@ func (pf *ColorPrefs) Defaults() {
 
 func (pf *ColorPrefs) DarkDefaults() {
 	pf.HiStyle = "monokai"
-	pf.Font = color.RGBA{175, 175, 175, 255}
-	pf.Background = color.RGBA{0, 0, 0, 255}
-	pf.Shadow = color.RGBA{64, 64, 64, 255}
-	pf.Border = color.RGBA{102, 102, 102, 255}
-	pf.Control = color.RGBA{17, 57, 57, 255}
-	pf.Icon = color.RGBA{70, 70, 192, 255}
-	pf.Select = color.RGBA{17, 100, 100, 255}
-	pf.Highlight = color.RGBA{66, 82, 0, 255}
-	pf.Link = color.RGBA{117, 117, 249, 255}
+	pf.Font = colors.FromRGB(175, 175, 175)
+	pf.Background = colors.FromRGB(0, 0, 0)
+	pf.Shadow = colors.FromRGB(64, 64, 64)
+	pf.Border = colors.FromRGB(102, 102, 102)
+	pf.Control = colors.FromRGB(17, 57, 57)
+	pf.Icon = colors.FromRGB(70, 70, 192)
+	pf.Select = colors.FromRGB(17, 100, 100)
+	pf.Highlight = colors.FromRGB(66, 82, 0)
+	pf.Link = colors.FromRGB(117,  117,  249)
 }
 
 func DefaultColorSchemes() map[string]*ColorPrefs {

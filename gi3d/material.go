@@ -8,6 +8,7 @@ import (
 	"image/color"
 	"log"
 
+	"github.com/goki/colors"
 	"github.com/goki/mat32"
 )
 
@@ -69,7 +70,7 @@ type Material struct {
 
 // Defaults sets default surface parameters
 func (mt *Material) Defaults() {
-	mt.Color = color.RGBA{128, 128, 128, 255}
+	mt.Color = colors.FromRGB(128,  128,  128)
 	mt.Emissive = color.RGBA{0, 0, 0, 0}
 	mt.Shiny = 30
 	mt.Reflective = 1

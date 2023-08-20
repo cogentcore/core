@@ -5,9 +5,9 @@
 package main
 
 import (
-	"image/color"
 	"log"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
@@ -58,7 +58,7 @@ func mainrun() {
 	sc := scvw.Scene()
 
 	// first, add lights, set camera
-	sc.BackgroundColor = color.RGBA{230, 230, 255, 255} // sky blue-ish
+	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
 	gi3d.AddNewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
 	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)

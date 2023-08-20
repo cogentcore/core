@@ -756,7 +756,7 @@ func (dec *Decoder) parseKa(fields []string) error {
 		}
 		clrs[pos] = float32(val)
 	}
-	dec.matCurrent.Ambient = colors.FromF32(clrs[0], clrs[1], clrs[2], 1)
+	dec.matCurrent.Ambient = colors.FromRGBAF32(clrs[0], clrs[1], clrs[2], 1)
 	return nil
 }
 
@@ -774,7 +774,7 @@ func (dec *Decoder) parseKd(fields []string) error {
 		}
 		clrs[pos] = float32(val)
 	}
-	dec.matCurrent.Diffuse = colors.FromF32(clrs[0], clrs[1], clrs[2], 1)
+	dec.matCurrent.Diffuse = colors.FromRGBAF32(clrs[0], clrs[1], clrs[2], 1)
 	return nil
 }
 
@@ -792,7 +792,7 @@ func (dec *Decoder) parseKe(fields []string) error {
 		}
 		clrs[pos] = float32(val)
 	}
-	dec.matCurrent.Emissive = colors.FromF32(clrs[0], clrs[1], clrs[2], 1)
+	dec.matCurrent.Emissive = colors.FromRGBAF32(clrs[0], clrs[1], clrs[2], 1)
 	return nil
 }
 
@@ -810,7 +810,7 @@ func (dec *Decoder) parseKs(fields []string) error {
 		}
 		clrs[pos] = float32(val)
 	}
-	dec.matCurrent.Specular = colors.FromF32(clrs[0], clrs[1], clrs[2], 1)
+	dec.matCurrent.Specular = colors.FromRGBAF32(clrs[0], clrs[1], clrs[2], 1)
 	return nil
 }
 

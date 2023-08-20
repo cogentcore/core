@@ -6,9 +6,9 @@ package giv
 
 import (
 	"fmt"
-	"image/color"
 	"log"
 
+	"github.com/goki/colors"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/icons"
@@ -129,12 +129,12 @@ func (ge *GiEditor) EditColorScheme() {
 	mfr.Lay = gi.LayoutVert
 
 	key := matcolor.Key{
-		Primary:        color.RGBA{52, 61, 235, 255},
-		Secondary:      color.RGBA{123, 135, 122, 255},
-		Tertiary:       color.RGBA{106, 196, 178, 255},
-		Error:          color.RGBA{219, 46, 37, 255},
-		Neutral:        color.RGBA{133, 131, 121, 255},
-		NeutralVariant: color.RGBA{107, 106, 101, 255},
+		Primary:        colors.FromRGB(123, 135, 122),
+		Secondary:      colors.FromRGB(106, 196, 178),
+		Tertiary:       colors.FromRGB(106, 196, 178),
+		Error:          colors.FromRGB(219, 46, 37),
+		Neutral:        colors.FromRGB(133, 131, 121),
+		NeutralVariant: colors.FromRGB(107, 106, 101),
 	}
 	p := matcolor.NewPalette(key)
 	schemes := matcolor.NewSchemes(p)

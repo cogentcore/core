@@ -78,7 +78,7 @@ var StyleMatFuncs = map[string]gist.StyleFunc{
 			if inh {
 				mt.Color = par.(*Material).Color
 			} else if init {
-				mt.Color = color.RGBA{128, 128, 128, 255}
+				mt.Color = colors.FromRGB(128, 128, 128)
 			}
 			return
 		}

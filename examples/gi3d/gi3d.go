@@ -199,7 +199,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// sc.NoNav = true
 
 	// first, add lights, set camera
-	sc.BackgroundColor = color.RGBA{230, 230, 255, 255} // sky blue-ish
+	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
 	gi3d.AddNewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
 	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
@@ -251,7 +251,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// sc.Wireframe = true                      // debugging
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
-	cyan := color.RGBA{0, 255, 255, 255}
+	cyan := colors.FromRGB(0,  255,  255)
 	gi3d.AddNewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
 
 	// bbclr := gist.Color{}

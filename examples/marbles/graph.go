@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Originally written by https://github.com/kplat1/marbles with some help..
+// Originally written by Kai O'Reilly (https://github.com/kkoreilly)
 
 package main
 
@@ -26,7 +26,7 @@ import (
 
 // todo: investigate "github.com/antonmedv/expr" instead of govaluate -- much better supported!
 
-var colors = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}
+var colornames = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}
 
 // Graph represents the overall graph parameters -- lines and params
 type Graph struct {
@@ -180,7 +180,7 @@ type Line struct {
 
 func (ln *Line) Defaults(lidx int) {
 	ln.Eq = "x"
-	ln.Color = colors[lidx%len(colors)]
+	ln.Color = colornames[lidx%len(colornames)]
 	ln.Bounce = 0.95
 	ln.MinX = -10
 	ln.MaxX = 10
@@ -278,7 +278,7 @@ func (ln *Line) Graph(lidx int) {
 		ln.Defaults(lidx)
 	}
 	if ln.Color == "" {
-		ln.Color = colors[lidx%len(colors)]
+		ln.Color = colornames[lidx%len(colornames)]
 	}
 	if ln.Bounce == 0 {
 		ln.Bounce = 0.95
@@ -397,7 +397,7 @@ func GraphMarblesInit() {
 	for i, m := range Marbles {
 		circle := svg.AddNewCircle(SvgMarbles, "circle", m.Pos.X, m.Pos.Y, float32(MarbleRadius))
 		circle.SetProp("stroke", "none")
-		circle.SetProp("fill", colors[i%len(colors)])
+		circle.SetProp("fill", colornames[i%len(colornames)])
 	}
 	SvgGraph.UpdateEnd(updt)
 }

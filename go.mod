@@ -14,14 +14,14 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-gl/mathgl v1.0.0
-	github.com/goki/cam v0.9.7
-	github.com/goki/colors v0.8.4
+	github.com/goki/cam v0.9.8
+	github.com/goki/colors v0.8.5
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
 	github.com/goki/ki v1.1.16-0.20230812185917-db9a8362d270
 	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.18
-	github.com/goki/matcolor v0.9.1
+	github.com/goki/matcolor v0.9.2
 	github.com/goki/mobile v0.0.0-20230626225100-3417752baaf2
 	github.com/goki/pi v1.0.27
 	github.com/goki/prof v1.0.0
