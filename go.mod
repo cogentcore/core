@@ -1,4 +1,4 @@
-module github.com/goki/packman
+module github.com/goki/tools
 
 go 1.19
 

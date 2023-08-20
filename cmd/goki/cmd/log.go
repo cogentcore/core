@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/goki/packman"
+	"github.com/goki/tools/packman"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/goki/packman"
+	"github.com/goki/tools/packman"
 	"github.com/spf13/cobra"
 )
 
