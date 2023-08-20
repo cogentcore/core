@@ -1112,3 +1112,17 @@ func BenchmarkFuncDownMeFirst_NodeField2(b *testing.B) {
 	TotNodes = nnodes
 	// fmt.Printf("tot nodes: %d\n", TotNodes)
 }
+
+func BenchmarkNewOfType(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		n := NewOfType(KiT_Node)
+		n.InitName(n, "")
+	}
+}
+
+func BenchmarkStdNew(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		n := new(Node)
+		n.InitName(n, "")
+	}
+}
