@@ -118,9 +118,6 @@ func (g *Generator) FindEnumTypes() error {
 			}
 			typ, ok := n.(*ast.TypeSpec)
 			if !ok {
-				if val, ok := n.(*ast.ValueSpec); ok {
-					fmt.Println(val.Names)
-				}
 				return true
 			}
 			if typ.Comment == nil {
@@ -146,7 +143,6 @@ func (g *Generator) FindEnumTypes() error {
 			return err
 		}
 	}
-	fmt.Println(g.Types)
 	return nil
 }
 
@@ -202,26 +198,26 @@ func (g *Generator) Generate() error {
 		default:
 			g.buildMap(runs, typeName)
 		}
-		// if includeValuesMethod {
-		// 	g.buildAltStringValuesMethod(typeName)
-		// }
+		if g.Config.AltValues {
+			g.buildAltStringValuesMethod(typeName)
+		}
 
-		// g.buildNoOpOrderChangeDetect(runs, typeName)
+		g.buildNoOpOrderChangeDetect(runs, typeName)
 
-		// g.buildBasicExtras(runs, typeName, runsThreshold)
-		// if includeJSON {
-		// 	g.buildJSONMethods(runs, typeName, runsThreshold)
-		// }
-		// if includeText {
-		// 	g.buildTextMethods(runs, typeName, runsThreshold)
-		// }
-		// if includeYAML {
-		// 	g.buildYAMLMethods(runs, typeName, runsThreshold)
-		// }
-		// if includeSQL {
+		g.buildBasicExtras(runs, typeName, runsThreshold)
+		if g.Config.JSON {
+			g.buildJSONMethods(runs, typeName, runsThreshold)
+		}
+		if g.Config.Text {
+			g.buildTextMethods(runs, typeName, runsThreshold)
+		}
+		if g.Config.YAML {
+			g.buildYAMLMethods(runs, typeName, runsThreshold)
+		}
+		// if g.Config.SQL {
 		// 	g.addValueAndScanMethod(typeName)
 		// }
-		// if includeGQLGen {
+		// if g.Config.GQLGEN {
 		// 	g.buildGQLGenMethods(runs, typeName)
 		// }
 	}
