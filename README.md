@@ -1,2 +1,2 @@
-# packman
-The package manger for GoKi that handles the installation, updating, creation, configuration, building, packaging, and releasing of packages, including the GoKi user and developer tools.
+# tools
+Command line and GUI tools for developing apps and libraries using the GoKi framework.
