@@ -21,8 +21,19 @@ var config enumgen.Config
 var ()
 
 func main() {
-	flag.StringVar(&config.Dir, "dir", ".", "the directory to look for enums in")
+	flag.StringVar(&config.Dir, "dir", ".", "the source directory to look for enums in")
 	flag.StringVar(&config.Output, "output", "enumgen.go", "the file name of the output file")
+	flag.BoolVar(&config.SQL, "sql", false, "whether to generate methods that implement the SQL Scanner and Valuer interfaces")
+	flag.BoolVar(&config.JSON, "json", true, "whether to generate JSON marshaling methods")
+	flag.BoolVar(&config.YAML, "yaml", false, "whether to generate YAML marshaling methods")
+	flag.BoolVar(&config.Text, "text", true, "whether to generate text marshaling methods")
+	flag.BoolVar(&config.GQLGEN, "gqlgen", false, "whether to generate GraphQL marshaling methods for gqlgen")
+	flag.BoolVar(&config.AltValues, "values", false, "whether to generate alternative string values methods")
+	flag.StringVar(&config.Transform, "transform", "noop", "if specified, the enum item transformation method (eg: snake_case)")
+	flag.StringVar(&config.TrimPrefix, "trimprefix", "", "if specified, the prefix to trim from each item")
+	flag.StringVar(&config.AddPrefix, "addprefix", "", "if specified, the prefix to add to each item")
+	flag.BoolVar(&config.LineComment, "linecomment", false, "whether to use line comment text as printed text when present")
+	flag.StringVar(&config.Comment, "comment", "", "a comment to include at the top of the generated code")
 
 	log.SetPrefix("enumgen")
 	flag.Usage = Usage
