@@ -6,186 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/goki/enums/enums"
 	"strconv"
 	"strings"
-
-	"github.com/goki/enums/enums"
+	"sync/atomic"
 )
-
-const _StatesName = "EnabledDisabledFocusedHoveredActiveSelected"
-
-var _StatesIndex = [...]uint8{0, 7, 15, 22, 29, 35, 43}
-
-const _StatesLowerName = "enableddisabledfocusedhoveredactiveselected"
-
-// String returns the string representation
-// of this States value.
-func (i States) String() string {
-	if i < 0 || i >= States(len(_StatesIndex)-1) {
-		return "States(" + strconv.FormatInt(int64(i), 10) + ")"
-	}
-	return _StatesName[_StatesIndex[i]:_StatesIndex[i+1]]
-}
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the stringer command to generate them again.
-func _StatesNoOp() {
-	var x [1]struct{}
-	_ = x[Enabled-(0)]
-	_ = x[Disabled-(1)]
-	_ = x[Focused-(2)]
-	_ = x[Hovered-(3)]
-	_ = x[Active-(4)]
-	_ = x[Selected-(5)]
-}
-
-var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, Selected}
-
-var _StatesNameToValueMap = map[string]States{
-	_StatesName[0:7]:        Enabled,
-	_StatesLowerName[0:7]:   Enabled,
-	_StatesName[7:15]:       Disabled,
-	_StatesLowerName[7:15]:  Disabled,
-	_StatesName[15:22]:      Focused,
-	_StatesLowerName[15:22]: Focused,
-	_StatesName[22:29]:      Hovered,
-	_StatesLowerName[22:29]: Hovered,
-	_StatesName[29:35]:      Active,
-	_StatesLowerName[29:35]: Active,
-	_StatesName[35:43]:      Selected,
-	_StatesLowerName[35:43]: Selected,
-}
-
-var _StatesNames = []string{
-	_StatesName[0:7],
-	_StatesName[7:15],
-	_StatesName[15:22],
-	_StatesName[22:29],
-	_StatesName[29:35],
-	_StatesName[35:43],
-}
-
-var _StatesDescMap = map[States]string{
-	0: _StatesDescs[0],
-	1: _StatesDescs[1],
-	2: _StatesDescs[2],
-	3: _StatesDescs[3],
-	4: _StatesDescs[4],
-	5: _StatesDescs[5],
-}
-
-var _StatesDescs = []string{
-	`Enabled indicates the widget is enabled`,
-	`Disabled indicates the widget is disabled`,
-	`Focused indicates the widget has keyboard focus`,
-	`Hovered indicates the widget is being hovered over`,
-	`Active indicates the widget is being interacted with`,
-	`Selected indicates the widget is selected`,
-}
-
-// SetString sets the States value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *States) SetString(s string) error {
-	if val, ok := _StatesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-
-	if val, ok := _StatesNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " does not belong to States values")
-}
-
-// Int64 returns the States value as an int64.
-func (i States) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the States value from an int64.
-func (i *States) SetInt64(in int64) {
-	*i = States(in)
-}
-
-// Desc returns the description of the States value.
-func (i States) Desc() string {
-	if str, ok := _StatesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// StatesValues returns all possible values of
-// the type States. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on States.
-func StatesValues() []States {
-	return _StatesValues
-}
-
-// Values returns all possible values of
-// type States. This slice will be in the
-// same order as those returned by Strings and Descs.
-func (i States) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_StatesValues))
-	for i, d := range _StatesValues {
-		res[i] = &d
-	}
-	return res
-}
-
-// Strings returns the string representations of
-// all possible values of type States.
-// This slice will be in the same order as
-// those returned by Values and Descs.
-func (i States) Strings() []string {
-	return _StatesNames
-}
-
-// Descs returns the descriptions of all
-// possible values of type States.
-// This slice will be in the same order as
-// those returned by Values and Strings.
-func (i States) Descs() []string {
-	return _StatesDescs
-}
-
-// IsValid returns whether the value is a
-// valid option for type States.
-func (i States) IsValid() bool {
-	for _, v := range _StatesValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
-}
-
-// MarshalJSON implements the json.Marshaler interface for States
-func (i States) MarshalJSON() ([]byte, error) {
-	return json.Marshal(i.String())
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface for States
-func (i *States) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return fmt.Errorf("States should be a string, got %s", data)
-	}
-	return i.SetString(s)
-}
-
-// MarshalText implements the encoding.TextMarshaler interface for States
-func (i States) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the encoding.TextUnmarshaler interface for States
-func (i *States) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
 
 const _DaysName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
 
@@ -365,5 +190,187 @@ func (i Days) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for Days
 func (i *Days) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+const _StatesName = "EnabledDisabledFocusedHoveredActiveSelected"
+
+var _StatesIndex = [...]uint8{0, 7, 15, 22, 29, 35, 43}
+
+const _StatesLowerName = "enableddisabledfocusedhoveredactiveselected"
+
+// String returns the string representation
+// of this States value.
+func (i States) String() string {
+	if i < 0 || i >= States(len(_StatesIndex)-1) {
+		return "States(" + strconv.FormatInt(int64(i), 10) + ")"
+	}
+	return _StatesName[_StatesIndex[i]:_StatesIndex[i+1]]
+}
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the stringer command to generate them again.
+func _StatesNoOp() {
+	var x [1]struct{}
+	_ = x[Enabled-(0)]
+	_ = x[Disabled-(1)]
+	_ = x[Focused-(2)]
+	_ = x[Hovered-(3)]
+	_ = x[Active-(4)]
+	_ = x[Selected-(5)]
+}
+
+var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, Selected}
+
+var _StatesNameToValueMap = map[string]States{
+	_StatesName[0:7]:        Enabled,
+	_StatesLowerName[0:7]:   Enabled,
+	_StatesName[7:15]:       Disabled,
+	_StatesLowerName[7:15]:  Disabled,
+	_StatesName[15:22]:      Focused,
+	_StatesLowerName[15:22]: Focused,
+	_StatesName[22:29]:      Hovered,
+	_StatesLowerName[22:29]: Hovered,
+	_StatesName[29:35]:      Active,
+	_StatesLowerName[29:35]: Active,
+	_StatesName[35:43]:      Selected,
+	_StatesLowerName[35:43]: Selected,
+}
+
+var _StatesNames = []string{
+	_StatesName[0:7],
+	_StatesName[7:15],
+	_StatesName[15:22],
+	_StatesName[22:29],
+	_StatesName[29:35],
+	_StatesName[35:43],
+}
+
+var _StatesDescMap = map[States]string{
+	0: _StatesDescs[0],
+	1: _StatesDescs[1],
+	2: _StatesDescs[2],
+	3: _StatesDescs[3],
+	4: _StatesDescs[4],
+	5: _StatesDescs[5],
+}
+
+var _StatesDescs = []string{
+	`Enabled indicates the widget is enabled`,
+	`Disabled indicates the widget is disabled`,
+	`Focused indicates the widget has keyboard focus`,
+	`Hovered indicates the widget is being hovered over`,
+	`Active indicates the widget is being interacted with`,
+	`Selected indicates the widget is selected`,
+}
+
+// SetString sets the States value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *States) SetString(s string) error {
+	if val, ok := _StatesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+
+	if val, ok := _StatesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " does not belong to States values")
+}
+
+// Int64 returns the States value as an int64.
+func (i States) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the States value from an int64.
+func (i *States) SetInt64(in int64) {
+	*i = States(in)
+}
+
+// Desc returns the description of the States value.
+func (i States) Desc() string {
+	if str, ok := _StatesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// StatesValues returns all possible values of
+// the type States. This slice will be in the
+// same order as those returned by the Values,
+// Strings, and Descs methods on States.
+func StatesValues() []States {
+	return _StatesValues
+}
+
+// Values returns all possible values of
+// type States. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i States) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_StatesValues))
+	for i, d := range _StatesValues {
+		res[i] = &d
+	}
+	return res
+}
+
+// Strings returns the string representations of
+// all possible values of type States.
+// This slice will be in the same order as
+// those returned by Values and Descs.
+func (i States) Strings() []string {
+	return _StatesNames
+}
+
+// Descs returns the descriptions of all
+// possible values of type States.
+// This slice will be in the same order as
+// those returned by Values and Strings.
+func (i States) Descs() []string {
+	return _StatesDescs
+}
+
+// IsValid returns whether the value is a
+// valid option for type States.
+func (i States) IsValid() bool {
+	for _, v := range _StatesValues {
+		if i == v {
+			return true
+		}
+	}
+	return false
+}
+
+// HasBitFlag returns whether these
+// bit flags have the given bit flag set.
+func (i States) HasBitFlag(f enums.BitFlag) bool {
+	in := int64(i)
+	return atomic.LoadInt64(&in)&(1<<uint32(f.Int64())) != 0
+}
+
+// MarshalJSON implements the json.Marshaler interface for States
+func (i States) MarshalJSON() ([]byte, error) {
+	return json.Marshal(i.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for States
+func (i *States) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return fmt.Errorf("States should be a string, got %s", data)
+	}
+	return i.SetString(s)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for States
+func (i States) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface for States
+func (i *States) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }

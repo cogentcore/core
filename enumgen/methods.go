@@ -379,6 +379,7 @@ func (i %[1]s) IsValid() bool {
 }
 `
 
+// BuildBasicExtras builds methods common to all types, like Desc and SetString.
 func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThreshold int) {
 	// At this moment, either "g.declareIndexAndNameVars()" or "g.declareNameVars()" has been called
 

@@ -95,6 +95,7 @@ func (g *Generator) PrintHeader() {
 	g.Printf("\t\"strings\"\n")
 	g.Printf("\t\"strconv\"\n")
 	g.Printf("\t\"errors\"\n")
+	g.Printf("\t\"sync/atomic\"\n")
 	if g.Config.SQL {
 		g.Printf("\t\"database/sql/driver\"\n")
 	}
@@ -228,6 +229,10 @@ func (g *Generator) Generate() error {
 		g.BuildNoOpOrderChangeDetect(runs, typeName)
 
 		g.BuildBasicExtras(runs, typeName, runsThreshold)
+		if bitflag {
+			g.BuildBitFlagMethods(runs, typeName)
+		}
+
 		if g.Config.JSON {
 			g.BuildJSONMethods(runs, typeName, runsThreshold)
 		}
