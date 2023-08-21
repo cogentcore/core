@@ -379,19 +379,6 @@ func (i %[1]s) IsValid() bool {
 }
 `
 
-// Arguments to format are:
-//
-//	[1]: type name
-const AltStringValuesMethod = `func (%[1]s) Values() []string {
-	return %[1]sStrings()
-}
-`
-
-func (g *Generator) BuildAltStringValuesMethod(typeName string) {
-	g.Printf("\n")
-	g.Printf(AltStringValuesMethod, typeName)
-}
-
 func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThreshold int) {
 	// At this moment, either "g.declareIndexAndNameVars()" or "g.declareNameVars()" has been called
 

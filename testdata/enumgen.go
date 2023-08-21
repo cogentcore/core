@@ -11,6 +11,188 @@ import (
 	"strings"
 )
 
+const _MyEnumName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
+
+var _MyEnumIndex = [...]uint8{0, 6, 12, 19, 28, 36, 42, 50}
+
+const _MyEnumLowerName = "sundaymondaytuesdaywednesdaythursdayfridaysaturday"
+
+// String returns the string representation
+// of this MyEnum value.
+func (i MyEnum) String() string {
+	i -= 1
+	if i < 0 || i >= MyEnum(len(_MyEnumIndex)-1) {
+		return "MyEnum(" + strconv.FormatInt(int64(i+1), 10) + ")"
+	}
+	return _MyEnumName[_MyEnumIndex[i]:_MyEnumIndex[i+1]]
+}
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the stringer command to generate them again.
+func _MyEnumNoOp() {
+	var x [1]struct{}
+	_ = x[Sunday-(1)]
+	_ = x[Monday-(2)]
+	_ = x[Tuesday-(3)]
+	_ = x[Wednesday-(4)]
+	_ = x[Thursday-(5)]
+	_ = x[Friday-(6)]
+	_ = x[Saturday-(7)]
+}
+
+var _MyEnumValues = []MyEnum{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
+
+var _MyEnumNameToValueMap = map[string]MyEnum{
+	_MyEnumName[0:6]:        Sunday,
+	_MyEnumLowerName[0:6]:   Sunday,
+	_MyEnumName[6:12]:       Monday,
+	_MyEnumLowerName[6:12]:  Monday,
+	_MyEnumName[12:19]:      Tuesday,
+	_MyEnumLowerName[12:19]: Tuesday,
+	_MyEnumName[19:28]:      Wednesday,
+	_MyEnumLowerName[19:28]: Wednesday,
+	_MyEnumName[28:36]:      Thursday,
+	_MyEnumLowerName[28:36]: Thursday,
+	_MyEnumName[36:42]:      Friday,
+	_MyEnumLowerName[36:42]: Friday,
+	_MyEnumName[42:50]:      Saturday,
+	_MyEnumLowerName[42:50]: Saturday,
+}
+
+var _MyEnumNames = []string{
+	_MyEnumName[0:6],
+	_MyEnumName[6:12],
+	_MyEnumName[12:19],
+	_MyEnumName[19:28],
+	_MyEnumName[28:36],
+	_MyEnumName[36:42],
+	_MyEnumName[42:50],
+}
+
+var _MyEnumDescMap = map[MyEnum]string{
+	1: _MyEnumDescs[0],
+	2: _MyEnumDescs[1],
+	3: _MyEnumDescs[2],
+	4: _MyEnumDescs[3],
+	5: _MyEnumDescs[4],
+	6: _MyEnumDescs[5],
+	7: _MyEnumDescs[6],
+}
+
+var _MyEnumDescs = []string{
+	`Sunday is the first day of the week`,
+	`Monday is the second day of the week`,
+	`Tuesday is the third day of the week`,
+	`Wednesday is the fourth day of the week`,
+	`Thursday is the fifth day of the week`,
+	`Friday is the sixth day of the week`,
+	`Saturday is the seventh day of the week`,
+}
+
+// SetString sets the MyEnum value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *MyEnum) SetString(s string) error {
+	if val, ok := _MyEnumNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+
+	if val, ok := _MyEnumNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " does not belong to MyEnum values")
+}
+
+// Int64 returns the MyEnum value as an int64.
+func (i MyEnum) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the MyEnum value from an int64.
+func (i *MyEnum) SetInt64(in int64) {
+	*i = MyEnum(in)
+}
+
+// Desc returns the description of the MyEnum value.
+func (i MyEnum) Desc() string {
+	if str, ok := _MyEnumDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// MyEnumValues returns all possible values of
+// the type MyEnum. This slice will be in the
+// same order as those returned by the Values,
+// Strings, and Descs methods on MyEnum.
+func MyEnumValues() []MyEnum {
+	return _MyEnumValues
+}
+
+// Values returns all possible values of
+// type MyEnum. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i MyEnum) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_MyEnumValues))
+	for i, d := range _MyEnumValues {
+		res[i] = &d
+	}
+	return res
+}
+
+// Strings returns the string representations of
+// all possible values of type MyEnum.
+// This slice will be in the same order as
+// those returned by Values and Descs.
+func (i MyEnum) Strings() []string {
+	return _MyEnumNames
+}
+
+// Descs returns the descriptions of all
+// possible values of type MyEnum.
+// This slice will be in the same order as
+// those returned by Values and Strings.
+func (i MyEnum) Descs() []string {
+	return _MyEnumDescs
+}
+
+// IsValid returns whether the value is a
+// valid option for type MyEnum.
+func (i MyEnum) IsValid() bool {
+	for _, v := range _MyEnumValues {
+		if i == v {
+			return true
+		}
+	}
+	return false
+}
+
+// MarshalJSON implements the json.Marshaler interface for MyEnum
+func (i MyEnum) MarshalJSON() ([]byte, error) {
+	return json.Marshal(i.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for MyEnum
+func (i *MyEnum) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return fmt.Errorf("MyEnum should be a string, got %s", data)
+	}
+	return i.SetString(s)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for MyEnum
+func (i MyEnum) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum
+func (i *MyEnum) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 const _MyBitEnumName = "AppleOrangePeachBlueberryGrapefruitStrawberry"
 
 var _MyBitEnumIndex = [...]uint8{0, 5, 11, 16, 25, 35, 45}
@@ -183,221 +365,5 @@ func (i MyBitEnum) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for MyBitEnum
 func (i *MyBitEnum) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-const (
-	_MyEnumName_0      = "Sunday"
-	_MyEnumLowerName_0 = "sunday"
-	_MyEnumName_1      = "Monday"
-	_MyEnumLowerName_1 = "monday"
-	_MyEnumName_2      = "Tuesday"
-	_MyEnumLowerName_2 = "tuesday"
-	_MyEnumName_3      = "Wednesday"
-	_MyEnumLowerName_3 = "wednesday"
-	_MyEnumName_4      = "Thursday"
-	_MyEnumLowerName_4 = "thursday"
-	_MyEnumName_5      = "Friday"
-	_MyEnumLowerName_5 = "friday"
-	_MyEnumName_6      = "Saturday"
-	_MyEnumLowerName_6 = "saturday"
-)
-
-var (
-	_MyEnumIndex_0 = [...]uint8{0, 6}
-	_MyEnumIndex_1 = [...]uint8{0, 6}
-	_MyEnumIndex_2 = [...]uint8{0, 7}
-	_MyEnumIndex_3 = [...]uint8{0, 9}
-	_MyEnumIndex_4 = [...]uint8{0, 8}
-	_MyEnumIndex_5 = [...]uint8{0, 6}
-	_MyEnumIndex_6 = [...]uint8{0, 8}
-)
-
-// String returns the string representation
-// of this MyEnum value.
-func (i MyEnum) String() string {
-	switch {
-	case i == 1:
-		return _MyEnumName_0
-	case i == 3:
-		return _MyEnumName_1
-	case i == 5:
-		return _MyEnumName_2
-	case i == 7:
-		return _MyEnumName_3
-	case i == 9:
-		return _MyEnumName_4
-	case i == 11:
-		return _MyEnumName_5
-	case i == 13:
-		return _MyEnumName_6
-	default:
-		return "MyEnum(" + strconv.FormatInt(int64(i), 10) + ")"
-	}
-}
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the stringer command to generate them again.
-func _MyEnumNoOp() {
-	var x [1]struct{}
-	_ = x[Sunday-(1)]
-	_ = x[Monday-(3)]
-	_ = x[Tuesday-(5)]
-	_ = x[Wednesday-(7)]
-	_ = x[Thursday-(9)]
-	_ = x[Friday-(11)]
-	_ = x[Saturday-(13)]
-}
-
-var _MyEnumValues = []MyEnum{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
-
-var _MyEnumNameToValueMap = map[string]MyEnum{
-	_MyEnumName_0[0:6]:      Sunday,
-	_MyEnumLowerName_0[0:6]: Sunday,
-	_MyEnumName_1[0:6]:      Monday,
-	_MyEnumLowerName_1[0:6]: Monday,
-	_MyEnumName_2[0:7]:      Tuesday,
-	_MyEnumLowerName_2[0:7]: Tuesday,
-	_MyEnumName_3[0:9]:      Wednesday,
-	_MyEnumLowerName_3[0:9]: Wednesday,
-	_MyEnumName_4[0:8]:      Thursday,
-	_MyEnumLowerName_4[0:8]: Thursday,
-	_MyEnumName_5[0:6]:      Friday,
-	_MyEnumLowerName_5[0:6]: Friday,
-	_MyEnumName_6[0:8]:      Saturday,
-	_MyEnumLowerName_6[0:8]: Saturday,
-}
-
-var _MyEnumNames = []string{
-	_MyEnumName_0[0:6],
-	_MyEnumName_1[0:6],
-	_MyEnumName_2[0:7],
-	_MyEnumName_3[0:9],
-	_MyEnumName_4[0:8],
-	_MyEnumName_5[0:6],
-	_MyEnumName_6[0:8],
-}
-
-var _MyEnumDescMap = map[MyEnum]string{
-	1:  _MyEnumDescs[0],
-	3:  _MyEnumDescs[1],
-	5:  _MyEnumDescs[2],
-	7:  _MyEnumDescs[3],
-	9:  _MyEnumDescs[4],
-	11: _MyEnumDescs[5],
-	13: _MyEnumDescs[6],
-}
-
-var _MyEnumDescs = []string{
-	`Sunday is the first day of the week`,
-	`Monday is the second day of the week`,
-	`Tuesday is the third day of the week`,
-	`Wednesday is the fourth day of the week`,
-	`Thursday is the fifth day of the week`,
-	`Friday is the sixth day of the week`,
-	`Saturday is the seventh day of the week`,
-}
-
-// SetString sets the MyEnum value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *MyEnum) SetString(s string) error {
-	if val, ok := _MyEnumNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-
-	if val, ok := _MyEnumNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " does not belong to MyEnum values")
-}
-
-// Int64 returns the MyEnum value as an int64.
-func (i MyEnum) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the MyEnum value from an int64.
-func (i *MyEnum) SetInt64(in int64) {
-	*i = MyEnum(in)
-}
-
-// Desc returns the description of the MyEnum value.
-func (i MyEnum) Desc() string {
-	if str, ok := _MyEnumDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// MyEnumValues returns all possible values of
-// the type MyEnum. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on MyEnum.
-func MyEnumValues() []MyEnum {
-	return _MyEnumValues
-}
-
-// Values returns all possible values of
-// type MyEnum. This slice will be in the
-// same order as those returned by Strings and Descs.
-func (i MyEnum) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_MyEnumValues))
-	for i, d := range _MyEnumValues {
-		res[i] = &d
-	}
-	return res
-}
-
-// Strings returns the string representations of
-// all possible values of type MyEnum.
-// This slice will be in the same order as
-// those returned by Values and Descs.
-func (i MyEnum) Strings() []string {
-	return _MyEnumNames
-}
-
-// Descs returns the descriptions of all
-// possible values of type MyEnum.
-// This slice will be in the same order as
-// those returned by Values and Strings.
-func (i MyEnum) Descs() []string {
-	return _MyEnumDescs
-}
-
-// IsValid returns whether the value is a
-// valid option for type MyEnum.
-func (i MyEnum) IsValid() bool {
-	for _, v := range _MyEnumValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
-}
-
-// MarshalJSON implements the json.Marshaler interface for MyEnum
-func (i MyEnum) MarshalJSON() ([]byte, error) {
-	return json.Marshal(i.String())
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface for MyEnum
-func (i *MyEnum) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return fmt.Errorf("MyEnum should be a string, got %s", data)
-	}
-	return i.SetString(s)
-}
-
-// MarshalText implements the encoding.TextMarshaler interface for MyEnum
-func (i MyEnum) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum
-func (i *MyEnum) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }

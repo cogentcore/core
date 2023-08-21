@@ -28,7 +28,6 @@ func main() {
 	flag.BoolVar(&config.YAML, "yaml", false, "whether to generate YAML marshaling methods")
 	flag.BoolVar(&config.Text, "text", true, "whether to generate text marshaling methods")
 	flag.BoolVar(&config.GQLGEN, "gqlgen", false, "whether to generate GraphQL marshaling methods for gqlgen")
-	flag.BoolVar(&config.AltValues, "values", false, "whether to generate alternative string values methods")
 	flag.StringVar(&config.Transform, "transform", "noop", "if specified, the enum item transformation method (eg: snake_case)")
 	flag.StringVar(&config.TrimPrefix, "trimprefix", "", "if specified, the prefix to trim from each item")
 	flag.StringVar(&config.AddPrefix, "addprefix", "", "if specified, the prefix to add to each item")

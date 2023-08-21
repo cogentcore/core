@@ -224,9 +224,6 @@ func (g *Generator) Generate() error {
 		default:
 			g.BuildMap(runs, typeName)
 		}
-		if g.Config.AltValues {
-			g.BuildAltStringValuesMethod(typeName)
-		}
 
 		g.BuildNoOpOrderChangeDetect(runs, typeName)
 
