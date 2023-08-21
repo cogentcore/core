@@ -245,7 +245,7 @@ const StringMap = `func (i %[1]s) String() string {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringNameToValueMethod = `// SetString sets the enum value from its
+const StringSetStringMethod = `// SetString sets the enum value from its
 // string representation, and returns an
 // error if the string is invalid.
 func (i *%[1]s) SetString(s string) error {
@@ -259,6 +259,24 @@ func (i *%[1]s) SetString(s string) error {
 		return nil
 	}
 	return errors.New(s+" does not belong to %[1]s values")
+}
+`
+
+// Arguments to format are:
+//
+//	[1]: type name
+const StringInt64Method = `// Int64 returns the %[1]s value as an int64.
+func (i %[1]s) Int64() int64 {
+	return int64(i)
+}
+`
+
+// Arguments to format are:
+//
+//	[1]: type name
+const StringSetInt64Method = `// SetInt64 sets the %[1]s value from an int64.
+func (i *%[1]s) SetInt64(in int64) {
+	*i = %[1]s(in)
 }
 `
 
@@ -307,7 +325,7 @@ const StringValuesMethod = `// Values returns all possible values this
 func (i %[1]s) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_%[1]sValues))
 	for i, d := range _%[1]sValues {
-		res[i] = d
+		res[i] = &d
 	}
 	return res 
 }
@@ -387,7 +405,9 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThresh
 	g.PrintDescSlice(runs, typeName)
 
 	// Print the basic extra methods
-	g.Printf(StringNameToValueMethod, typeName)
+	g.Printf(StringSetStringMethod, typeName)
+	g.Printf(StringInt64Method, typeName)
+	g.Printf(StringSetInt64Method, typeName)
 	g.Printf(StringDescMethod, typeName)
 	g.Printf(StringValuesGlobal, typeName)
 	g.Printf(StringValuesMethod, typeName)
