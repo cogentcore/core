@@ -66,6 +66,16 @@ var _MyEnumNames = []string{
 	_MyEnumName[42:50],
 }
 
+var _MyEnumDescMap = map[MyEnum]string{
+	0: `Sunday is the first day of the week`,
+	1: `Monday is the second day of the week`,
+	2: `Tuesday is the third day of the week`,
+	3: `Wednesday is the fourth day of the week`,
+	4: `Thursday is the fifth day of the week`,
+	5: `Friday is the sixth day of the week`,
+	6: `Saturday is the seventh day of the week`,
+}
+
 // SetString sets the enum value from its
 // string representation, and returns an
 // error if the string is invalid.
@@ -80,6 +90,14 @@ func (i *MyEnum) SetString(s string) error {
 		return nil
 	}
 	return errors.New(s + " does not belong to MyEnum values")
+}
+
+// Desc returns the description of the MyEnum value.
+func (i MyEnum) Desc() string {
+	if str, ok := _MyEnumDescMap[i]; ok {
+		return str
+	}
+	return i.String()
 }
 
 // MyEnumValues returns all possible values of
@@ -197,6 +215,15 @@ var _MyBitEnumNames = []string{
 	_MyBitEnumName[35:45],
 }
 
+var _MyBitEnumDescMap = map[MyBitEnum]string{
+	0: `An Apple is a red fruit`,
+	1: `An Orange is an orange fruit`,
+	2: `A Peach is a stonefruit`,
+	3: `A Blueberry is a blue berry`,
+	4: `A Grapefruit is large fruit`,
+	5: `A Strawberry is a small red fruit`,
+}
+
 // SetString sets the enum value from its
 // string representation, and returns an
 // error if the string is invalid.
@@ -211,6 +238,14 @@ func (i *MyBitEnum) SetString(s string) error {
 		return nil
 	}
 	return errors.New(s + " does not belong to MyBitEnum values")
+}
+
+// Desc returns the description of the MyBitEnum value.
+func (i MyBitEnum) Desc() string {
+	if str, ok := _MyBitEnumDescMap[i]; ok {
+		return str
+	}
+	return i.String()
 }
 
 // MyBitEnumValues returns all possible values of

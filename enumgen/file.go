@@ -17,6 +17,7 @@ import (
 	exact "go/constant"
 	"go/token"
 	"go/types"
+	"html"
 	"strings"
 )
 
@@ -101,6 +102,7 @@ func (f *File) GenDecl(node ast.Node) (bool, error) {
 			v := Value{
 				OriginalName: n.Name,
 				Name:         n.Name,
+				Desc:         html.EscapeString(strings.Join(strings.Fields(vspec.Doc.Text()), " ")), // need to collapse whitespace and escape
 				Value:        u64,
 				Signed:       info&types.IsUnsigned == 0,
 				Str:          value.String(),

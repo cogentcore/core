@@ -25,6 +25,7 @@ import (
 type Value struct {
 	OriginalName string // The name of the constant before transformation
 	Name         string // The name of the constant after transformation (i.e. camel case => snake case)
+	Desc         string // The comment description of the constant
 	// The Value is stored as a bit pattern alone. The boolean tells us
 	// whether to interpret it as an int64 or a uint64; the only place
 	// this matters is when sorting.

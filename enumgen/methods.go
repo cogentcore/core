@@ -265,6 +265,18 @@ func (i *%[1]s) SetString(s string) error {
 // Arguments to format are:
 //
 //	[1]: type name
+const StringDescMethod = `// Desc returns the description of the %[1]s value.
+func (i %[1]s) Desc() string {
+	if str, ok := _%[1]sDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+`
+
+// Arguments to format are:
+//
+//	[1]: type name
 const StringValuesGlobal = `// %[1]sValues returns all possible values of
 // the enum type %[1]s. This slice will be in the
 // same order as those returned by the Values,
@@ -360,8 +372,12 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThresh
 	// Print the slice of names
 	g.PrintNamesSlice(runs, typeName, runsThreshold)
 
+	// Print the map of values to descriptions
+	g.PrintDescMap(runs, typeName)
+
 	// Print the basic extra methods
 	g.Printf(StringNameToValueMethod, typeName)
+	g.Printf(StringDescMethod, typeName)
 	g.Printf(StringValuesGlobal, typeName)
 	g.Printf(StringValuesMethod, typeName)
 	g.Printf(StringsMethod, typeName)
@@ -372,6 +388,7 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThresh
 	}
 }
 
+// PrintValueMap prints the map between name and value
 func (g *Generator) PrintValueMap(runs [][]Value, typeName string, runsThreshold int) {
 	thereAreRuns := len(runs) > 1 && len(runs) <= runsThreshold
 	g.Printf("\nvar _%sNameToValueMap = map[string]%s{\n", typeName, typeName)
@@ -395,6 +412,7 @@ func (g *Generator) PrintValueMap(runs [][]Value, typeName string, runsThreshold
 	g.Printf("}\n\n")
 }
 
+// PrintNamesSlice prints the slice of names
 func (g *Generator) PrintNamesSlice(runs [][]Value, typeName string, runsThreshold int) {
 	thereAreRuns := len(runs) > 1 && len(runs) <= runsThreshold
 	g.Printf("\nvar _%sNames = []string{\n", typeName)
@@ -412,6 +430,18 @@ func (g *Generator) PrintNamesSlice(runs [][]Value, typeName string, runsThresho
 		for _, value := range values {
 			g.Printf("\t_%sName%s[%d:%d],\n", typeName, runID, n, n+len(value.Name))
 			n += len(value.Name)
+		}
+	}
+	g.Printf("}\n\n")
+}
+
+// PrintDescMap prints the map of values to descriptions
+func (g *Generator) PrintDescMap(runs [][]Value, typeName string) {
+	g.Printf("\n")
+	g.Printf("\nvar _%sDescMap = map[%s]string{\n", typeName, typeName)
+	for _, values := range runs {
+		for _, value := range values {
+			g.Printf("\t%s: `%s`,\n", &value, value.Desc)
 		}
 	}
 	g.Printf("}\n\n")
