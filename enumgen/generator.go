@@ -227,20 +227,20 @@ func (g *Generator) Generate() error {
 			g.BuildMap(runs, typeName)
 		}
 		if g.Config.AltValues {
-			g.buildAltStringValuesMethod(typeName)
+			g.BuildAltStringValuesMethod(typeName)
 		}
 
 		g.BuildNoOpOrderChangeDetect(runs, typeName)
 
-		g.buildBasicExtras(runs, typeName, runsThreshold)
+		g.BuildBasicExtras(runs, typeName, runsThreshold)
 		if g.Config.JSON {
-			g.buildJSONMethods(runs, typeName, runsThreshold)
+			g.BuildJSONMethods(runs, typeName, runsThreshold)
 		}
 		if g.Config.Text {
-			g.buildTextMethods(runs, typeName, runsThreshold)
+			g.BuildTextMethods(runs, typeName, runsThreshold)
 		}
 		if g.Config.YAML {
-			g.buildYAMLMethods(runs, typeName, runsThreshold)
+			g.BuildYAMLMethods(runs, typeName, runsThreshold)
 		}
 		if g.Config.SQL {
 			g.addValueAndScanMethod(typeName)
