@@ -8,11 +8,12 @@ package enums
 
 import "fmt"
 
-// Enumer is the interface that all enum types satisfy.
+// Enum is the interface that all enum types satisfy.
 // Enum types must be convertable to and from strings
-// and int64s, and must be able to return all possible
-// enum values and string representations.
-type Enumer interface {
+// and int64s, must be able to return a description of
+// their value, and must be able to return all possible
+// enum values and string and description representations.
+type Enum interface {
 	fmt.Stringer
 	// SetString sets the enum value from its
 	// string representation, and returns an
@@ -26,33 +27,33 @@ type Enumer interface {
 	Desc() string
 	// Values returns all possible values this
 	// enum type has. This slice will be in the
-	// same order as those returned by [Enumer.Strings]
-	// and [Enumer.Descs].
-	Values() []Enumer
+	// same order as those returned by [Enum.Strings]
+	// and [Enum.Descs].
+	Values() []Enum
 	// Strings returns the string encodings of
 	// all possible values this enum type has.
 	// This slice will be in the same order as
-	// those returned by [Enumer.Values]
-	// and [Enumer.Descs].
+	// those returned by [Enum.Values]
+	// and [Enum.Descs].
 	Strings() []string
 	// Descs returns the descriptions of all
 	// possible values this enum type has.
 	// This slice will be in the same order as
-	// those returned by [Enumer.Values]
-	// and [Enumer.Strings].
+	// those returned by [Enum.Values]
+	// and [Enum.Strings].
 	Descs() []string
 }
 
-// BitEnumer is the interface that all bit flag enum types
+// BitFlag is the interface that all bit flag enum types
 // satisfy. Bit flag enum types support all of the operations
 // that standard enums do, and additionally can get and set
 // bit flags.
-type BitEnumer interface {
-	Enumer
+type BitFlag interface {
+	Enum
 	// HasBitFlag returns whether these flags
 	// have the given flag set.
-	HasBitFlag(f BitEnumer) bool
+	HasBitFlag(f BitFlag) bool
 	// SetBitFlag sets the value of the given
 	// flag in these flags to the given value.
-	SetBitFlag(f BitEnumer, b bool)
+	SetBitFlag(f BitFlag, b bool)
 }
