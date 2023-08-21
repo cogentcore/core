@@ -12,8 +12,13 @@
 package enumgen
 
 import (
+	"log"
 	"sort"
 	"strings"
+	"unicode"
+	"unicode/utf8"
+
+	"github.com/iancoleman/strcase"
 )
 
 // Value represents a declared constant.
@@ -84,6 +89,68 @@ func (g *Generator) TrimValueNames(values []Value) {
 func (g *Generator) PrefixValueNames(values []Value) {
 	for i := range values {
 		values[i].Name = g.Config.AddPrefix + values[i].Name
+	}
+}
+
+// TransformValueNames transforms the names of the given values according
+// to the transform method specified in [Generator.Config.Transform]
+func (g *Generator) TransformValueNames(values []Value) {
+	var fn func(src string) string
+	switch g.Config.Transform {
+	case "snake":
+		fn = strcase.ToSnake
+	case "snake_upper", "snake-upper":
+		fn = strcase.ToScreamingSnake
+	case "kebab":
+		fn = strcase.ToKebab
+	case "kebab_upper", "kebab-upper":
+		fn = strcase.ToScreamingKebab
+	case "upper":
+		fn = strings.ToUpper
+	case "lower":
+		fn = strings.ToLower
+	case "title":
+		fn = strings.Title
+	case "title-lower":
+		fn = func(s string) string {
+			title := []rune(strings.Title(s))
+			title[0] = unicode.ToLower(title[0])
+			return string(title)
+		}
+	case "first":
+		fn = func(s string) string {
+			r, _ := utf8.DecodeRuneInString(s)
+			return string(r)
+		}
+	case "first_upper", "first-upper":
+		fn = func(s string) string {
+			r, _ := utf8.DecodeRuneInString(s)
+			return strings.ToUpper(string(r))
+		}
+	case "first_lower", "first-lower":
+		fn = func(s string) string {
+			r, _ := utf8.DecodeRuneInString(s)
+			return strings.ToLower(string(r))
+		}
+	case "whitespace":
+		fn = func(s string) string {
+			return strcase.ToDelimited(s, ' ')
+		}
+	default:
+		return
+	}
+
+	for i, v := range values {
+		after := fn(v.Name)
+		// If the original one was "" or the one before the transformation
+		// was "" (most commonly if linecomment defines it as empty) we
+		// do not care if it's empty.
+		// But if any of them was not empty before then it means that
+		// the transformed emptied the value
+		if v.OriginalName != "" && v.Name != "" && after == "" {
+			log.Fatalf("transformation of %q (%s) got an empty result", v.Name, v.OriginalName)
+		}
+		values[i].Name = after
 	}
 }
 
