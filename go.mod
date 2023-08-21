@@ -3,7 +3,7 @@ module github.com/goki/enums
 go 1.19
 
 require (
-	github.com/pascaldekloe/name v1.0.1
+	github.com/iancoleman/strcase v0.3.0
 	golang.org/x/tools v0.12.0
 )
 

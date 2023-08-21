@@ -8,121 +8,6 @@ import (
 	"strings"
 )
 
-const _MyBitEnumName = "AppleOrangePeachBlueberryGrapefruitStrawberry"
-
-var _MyBitEnumIndex = [...]uint8{0, 5, 11, 16, 25, 35, 45}
-
-const _MyBitEnumLowerName = "appleorangepeachblueberrygrapefruitstrawberry"
-
-func (i MyBitEnum) String() string {
-	if i < 0 || i >= MyBitEnum(len(_MyBitEnumIndex)-1) {
-		return fmt.Sprintf("MyBitEnum(%d)", i)
-	}
-	return _MyBitEnumName[_MyBitEnumIndex[i]:_MyBitEnumIndex[i+1]]
-}
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the stringer command to generate them again.
-func _MyBitEnumNoOp() {
-	var x [1]struct{}
-	_ = x[Apple-(0)]
-	_ = x[Orange-(1)]
-	_ = x[Peach-(2)]
-	_ = x[Blueberry-(3)]
-	_ = x[Grapefruit-(4)]
-	_ = x[Strawberry-(5)]
-}
-
-var _MyBitEnumValues = []MyBitEnum{Apple, Orange, Peach, Blueberry, Grapefruit, Strawberry}
-
-var _MyBitEnumNameToValueMap = map[string]MyBitEnum{
-	_MyBitEnumName[0:5]:        Apple,
-	_MyBitEnumLowerName[0:5]:   Apple,
-	_MyBitEnumName[5:11]:       Orange,
-	_MyBitEnumLowerName[5:11]:  Orange,
-	_MyBitEnumName[11:16]:      Peach,
-	_MyBitEnumLowerName[11:16]: Peach,
-	_MyBitEnumName[16:25]:      Blueberry,
-	_MyBitEnumLowerName[16:25]: Blueberry,
-	_MyBitEnumName[25:35]:      Grapefruit,
-	_MyBitEnumLowerName[25:35]: Grapefruit,
-	_MyBitEnumName[35:45]:      Strawberry,
-	_MyBitEnumLowerName[35:45]: Strawberry,
-}
-
-var _MyBitEnumNames = []string{
-	_MyBitEnumName[0:5],
-	_MyBitEnumName[5:11],
-	_MyBitEnumName[11:16],
-	_MyBitEnumName[16:25],
-	_MyBitEnumName[25:35],
-	_MyBitEnumName[35:45],
-}
-
-// MyBitEnumString retrieves an enum value from the enum constants string name.
-// Throws an error if the param is not part of the enum.
-func MyBitEnumString(s string) (MyBitEnum, error) {
-	if val, ok := _MyBitEnumNameToValueMap[s]; ok {
-		return val, nil
-	}
-
-	if val, ok := _MyBitEnumNameToValueMap[strings.ToLower(s)]; ok {
-		return val, nil
-	}
-	return 0, fmt.Errorf("%s does not belong to MyBitEnum values", s)
-}
-
-// MyBitEnumValues returns all values of the enum
-func MyBitEnumValues() []MyBitEnum {
-	return _MyBitEnumValues
-}
-
-// MyBitEnumStrings returns a slice of all String values of the enum
-func MyBitEnumStrings() []string {
-	strs := make([]string, len(_MyBitEnumNames))
-	copy(strs, _MyBitEnumNames)
-	return strs
-}
-
-// IsAMyBitEnum returns "true" if the value is listed in the enum definition. "false" otherwise
-func (i MyBitEnum) IsAMyBitEnum() bool {
-	for _, v := range _MyBitEnumValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
-}
-
-// MarshalJSON implements the json.Marshaler interface for MyBitEnum
-func (i MyBitEnum) MarshalJSON() ([]byte, error) {
-	return json.Marshal(i.String())
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface for MyBitEnum
-func (i *MyBitEnum) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return fmt.Errorf("MyBitEnum should be a string, got %s", data)
-	}
-
-	var err error
-	*i, err = MyBitEnumString(s)
-	return err
-}
-
-// MarshalText implements the encoding.TextMarshaler interface for MyBitEnum
-func (i MyBitEnum) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the encoding.TextUnmarshaler interface for MyBitEnum
-func (i *MyBitEnum) UnmarshalText(text []byte) error {
-	var err error
-	*i, err = MyBitEnumString(string(text))
-	return err
-}
-
 const _MyEnumName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
 
 var _MyEnumIndex = [...]uint8{0, 6, 12, 19, 28, 36, 42, 50}
@@ -239,5 +124,120 @@ func (i MyEnum) MarshalText() ([]byte, error) {
 func (i *MyEnum) UnmarshalText(text []byte) error {
 	var err error
 	*i, err = MyEnumString(string(text))
+	return err
+}
+
+const _MyBitEnumName = "AppleOrangePeachBlueberryGrapefruitStrawberry"
+
+var _MyBitEnumIndex = [...]uint8{0, 5, 11, 16, 25, 35, 45}
+
+const _MyBitEnumLowerName = "appleorangepeachblueberrygrapefruitstrawberry"
+
+func (i MyBitEnum) String() string {
+	if i < 0 || i >= MyBitEnum(len(_MyBitEnumIndex)-1) {
+		return fmt.Sprintf("MyBitEnum(%d)", i)
+	}
+	return _MyBitEnumName[_MyBitEnumIndex[i]:_MyBitEnumIndex[i+1]]
+}
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the stringer command to generate them again.
+func _MyBitEnumNoOp() {
+	var x [1]struct{}
+	_ = x[Apple-(0)]
+	_ = x[Orange-(1)]
+	_ = x[Peach-(2)]
+	_ = x[Blueberry-(3)]
+	_ = x[Grapefruit-(4)]
+	_ = x[Strawberry-(5)]
+}
+
+var _MyBitEnumValues = []MyBitEnum{Apple, Orange, Peach, Blueberry, Grapefruit, Strawberry}
+
+var _MyBitEnumNameToValueMap = map[string]MyBitEnum{
+	_MyBitEnumName[0:5]:        Apple,
+	_MyBitEnumLowerName[0:5]:   Apple,
+	_MyBitEnumName[5:11]:       Orange,
+	_MyBitEnumLowerName[5:11]:  Orange,
+	_MyBitEnumName[11:16]:      Peach,
+	_MyBitEnumLowerName[11:16]: Peach,
+	_MyBitEnumName[16:25]:      Blueberry,
+	_MyBitEnumLowerName[16:25]: Blueberry,
+	_MyBitEnumName[25:35]:      Grapefruit,
+	_MyBitEnumLowerName[25:35]: Grapefruit,
+	_MyBitEnumName[35:45]:      Strawberry,
+	_MyBitEnumLowerName[35:45]: Strawberry,
+}
+
+var _MyBitEnumNames = []string{
+	_MyBitEnumName[0:5],
+	_MyBitEnumName[5:11],
+	_MyBitEnumName[11:16],
+	_MyBitEnumName[16:25],
+	_MyBitEnumName[25:35],
+	_MyBitEnumName[35:45],
+}
+
+// MyBitEnumString retrieves an enum value from the enum constants string name.
+// Throws an error if the param is not part of the enum.
+func MyBitEnumString(s string) (MyBitEnum, error) {
+	if val, ok := _MyBitEnumNameToValueMap[s]; ok {
+		return val, nil
+	}
+
+	if val, ok := _MyBitEnumNameToValueMap[strings.ToLower(s)]; ok {
+		return val, nil
+	}
+	return 0, fmt.Errorf("%s does not belong to MyBitEnum values", s)
+}
+
+// MyBitEnumValues returns all values of the enum
+func MyBitEnumValues() []MyBitEnum {
+	return _MyBitEnumValues
+}
+
+// MyBitEnumStrings returns a slice of all String values of the enum
+func MyBitEnumStrings() []string {
+	strs := make([]string, len(_MyBitEnumNames))
+	copy(strs, _MyBitEnumNames)
+	return strs
+}
+
+// IsAMyBitEnum returns "true" if the value is listed in the enum definition. "false" otherwise
+func (i MyBitEnum) IsAMyBitEnum() bool {
+	for _, v := range _MyBitEnumValues {
+		if i == v {
+			return true
+		}
+	}
+	return false
+}
+
+// MarshalJSON implements the json.Marshaler interface for MyBitEnum
+func (i MyBitEnum) MarshalJSON() ([]byte, error) {
+	return json.Marshal(i.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for MyBitEnum
+func (i *MyBitEnum) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return fmt.Errorf("MyBitEnum should be a string, got %s", data)
+	}
+
+	var err error
+	*i, err = MyBitEnumString(s)
+	return err
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for MyBitEnum
+func (i MyBitEnum) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface for MyBitEnum
+func (i *MyBitEnum) UnmarshalText(text []byte) error {
+	var err error
+	*i, err = MyBitEnumString(string(text))
 	return err
 }

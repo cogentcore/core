@@ -173,7 +173,7 @@ func (g *Generator) Generate() error {
 			g.trimValueNames(values, prefix)
 		}
 
-		g.transformValueNames(values, g.Config.Transform)
+		g.TransformValueNames(values, g.Config.Transform)
 
 		g.prefixValueNames(values, g.Config.AddPrefix)
 

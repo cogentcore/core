@@ -24,7 +24,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/pascaldekloe/name"
+	"github.com/iancoleman/strcase"
 )
 
 // check type-checks the package. The package must be OK to proceed.
@@ -41,37 +41,23 @@ func (pkg *Package) check(fs *token.FileSet, astFiles []*ast.File) {
 	pkg.TypesPkg = typesPkg
 }
 
-func (g *Generator) transformValueNames(values []Value, transformMethod string) {
+func (g *Generator) TransformValueNames(values []Value, transformMethod string) {
 	var fn func(src string) string
 	switch transformMethod {
 	case "snake":
-		fn = func(s string) string {
-			return strings.ToLower(name.Delimit(s, '_'))
-		}
+		fn = strcase.ToSnake
 	case "snake_upper", "snake-upper":
-		fn = func(s string) string {
-			return strings.ToUpper(name.Delimit(s, '_'))
-		}
+		fn = strcase.ToScreamingSnake
 	case "kebab":
-		fn = func(s string) string {
-			return strings.ToLower(name.Delimit(s, '-'))
-		}
+		fn = strcase.ToKebab
 	case "kebab_upper", "kebab-upper":
-		fn = func(s string) string {
-			return strings.ToUpper(name.Delimit(s, '-'))
-		}
+		fn = strcase.ToScreamingKebab
 	case "upper":
-		fn = func(s string) string {
-			return strings.ToUpper(s)
-		}
+		fn = strings.ToUpper
 	case "lower":
-		fn = func(s string) string {
-			return strings.ToLower(s)
-		}
+		fn = strings.ToLower
 	case "title":
-		fn = func(s string) string {
-			return strings.Title(s)
-		}
+		fn = strings.Title
 	case "title-lower":
 		fn = func(s string) string {
 			title := []rune(strings.Title(s))
@@ -95,7 +81,7 @@ func (g *Generator) transformValueNames(values []Value, transformMethod string) 
 		}
 	case "whitespace":
 		fn = func(s string) string {
-			return strings.ToLower(name.Delimit(s, ' '))
+			return strcase.ToDelimited(s, ' ')
 		}
 	default:
 		return
