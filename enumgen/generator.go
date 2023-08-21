@@ -136,6 +136,11 @@ func (g *Generator) FindEnumTypes() error {
 	return nil
 }
 
+// AllowedEnumTypes are the types that can be used for enums
+// that are not bit flags (bit flags can only be int64s).
+// It is stored as a map for quick and convenient access.
+var AllowedEnumTypes = map[string]bool{"int": true, "int64": true, "int32": true, "int16": true, "int8": true, "uint": true, "uint64": true, "uint32": true, "uint16": true, "uint8": true}
+
 // InspectForType looks at the given AST node and adds it
 // to [Generator.Types] if it is marked with an appropriate
 // comment directive. It returns whether the AST inspector should
@@ -152,10 +157,20 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 	for _, c := range typ.Comment.List {
 		if strings.HasPrefix(c.Text, "//enums:") {
 			d := strings.TrimPrefix(c.Text, "//enums:")
+			ident, ok := typ.Type.(*ast.Ident)
+			if !ok {
+				return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", typ.Type, typ.Type)
+			}
 			switch d {
 			case "enum":
+				if !AllowedEnumTypes[ident.Name] {
+					return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)
+				}
 				g.Types = append(g.Types, Type{Type: typ, IsBitFlag: false})
 			case "bitflag":
+				if ident.Name != "int64" {
+					return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
+				}
 				g.Types = append(g.Types, Type{Type: typ, IsBitFlag: true})
 				g.HasBitFlag = true
 			default:
