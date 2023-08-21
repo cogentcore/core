@@ -18,6 +18,7 @@ func Generate(config Config) error {
 	if err != nil {
 		return fmt.Errorf("enumgen: Generate: error parsing package: %w", err)
 	}
+	g.PrintHeader()
 	err = g.FindEnumTypes()
 	if err != nil {
 		return fmt.Errorf("enumgen: Generate: error finding enum types: %w", err)
@@ -26,6 +27,9 @@ func Generate(config Config) error {
 	if err != nil {
 		return fmt.Errorf("enumgen: Generate: error generating code: %w", err)
 	}
-	fmt.Println(string(g.Buf.Bytes()))
+	err = g.Write()
+	if err != nil {
+		return fmt.Errorf("enumgen: Generate: error writing code: %w", err)
+	}
 	return nil
 }

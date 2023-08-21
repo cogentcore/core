@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"os"
 	"strings"
 
@@ -220,6 +221,33 @@ func (g *Generator) Generate() error {
 		if g.Config.GQLGEN {
 			g.buildGQLGenMethods(runs, typeName)
 		}
+	}
+	return nil
+}
+
+// Format returns the contents of the Generator's buffer
+// ([Generator.Buf]) with gofmt applied.
+func (g *Generator) Format() ([]byte, error) {
+	src, err := format.Source(g.Buf.Bytes())
+	if err != nil {
+		// Should never happen, but can arise when developing this code.
+		// The user can compile the output to see the error.
+		return g.Buf.Bytes(), errors.New("internal error: invalid Go generated: " + err.Error() + "; compile the package to analyze the error")
+	}
+	return src, nil
+}
+
+// Write formats the data in the the Generator's buffer
+// ([Generator.Buf]) and writes it to the file specified by
+// [Generator.Config.Output].
+func (g *Generator) Write() error {
+	b, err := g.Format()
+	if err != nil {
+		return fmt.Errorf("Generator.Write: error formatting code: %w", err)
+	}
+	err = os.WriteFile(g.Config.Output, b, 0666)
+	if err != nil {
+		return fmt.Errorf("Generator.Write: error writing file: %w", err)
 	}
 	return nil
 }
