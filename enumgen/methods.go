@@ -62,7 +62,7 @@ func (g *Generator) DeclareIndexAndNameVar(run []Value, typeName string) {
 	g.Printf("var %s\n", index)
 	index, n = g.CreateLowerIndexAndNameDecl(run, typeName, "")
 	g.Printf("const %s\n", n)
-	//g.Printf("var %s\n", index)
+	// g.Printf("var %s\n", index)
 }
 
 // createIndexAndNameDecl returns the pair of declarations for the run. The caller will add "const" and "var".
@@ -265,10 +265,11 @@ func (i *%[1]s) SetString(s string) error {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringValuesMethod = `// Values returns all possible values this
-// enum type has. This slice will be in the
-// same order as those returned by Strings and Descs.
-func (i %[1]s) Values() []enums.Enum {
+const StringValuesGlobal = `// %[1]sValues returns all possible values of
+// the enum type %[1]s. This slice will be in the
+// same order as those returned by the Values,
+// Strings, and Descs methods on %[1]s.
+func %[1]sValues() []%[1]s {
 	return _%[1]sValues
 }
 `
@@ -276,12 +277,15 @@ func (i %[1]s) Values() []enums.Enum {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringValuesGlobal = `// %[1]sValues returns all possible values of
-// the enum type %[1]s. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on %[1]s.
-func %[1]sValues() []%[1]s {
-	return _%[1]sValues
+const StringValuesMethod = `// Values returns all possible values this
+// enum type has. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i %[1]s) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_%[1]sValues))
+	for i, d := range _%[1]sValues {
+		res[i] = d
+	}
+	return res 
 }
 `
 
@@ -358,8 +362,8 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThresh
 
 	// Print the basic extra methods
 	g.Printf(StringNameToValueMethod, typeName)
-	g.Printf(StringValuesMethod, typeName)
 	g.Printf(StringValuesGlobal, typeName)
+	g.Printf(StringValuesMethod, typeName)
 	g.Printf(StringsMethod, typeName)
 	if len(runs) <= runsThreshold {
 		g.Printf(StringBelongsMethodLoop, typeName)

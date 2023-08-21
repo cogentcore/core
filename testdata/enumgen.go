@@ -82,19 +82,23 @@ func (i *MyEnum) SetString(s string) error {
 	return errors.New(s + " does not belong to MyEnum values")
 }
 
-// Values returns all possible values this
-// enum type has. This slice will be in the
-// same order as those returned by Strings and Descs.
-func (i MyEnum) Values() []enums.Enum {
-	return _MyEnumValues
-}
-
 // MyEnumValues returns all possible values of
 // the enum type MyEnum. This slice will be in the
 // same order as those returned by the Values,
 // Strings, and Descs methods on MyEnum.
 func MyEnumValues() []MyEnum {
 	return _MyEnumValues
+}
+
+// Values returns all possible values this
+// enum type has. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i MyEnum) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_MyEnumValues))
+	for i, d := range _MyEnumValues {
+		res[i] = d
+	}
+	return res
 }
 
 // Strings returns the string encodings of
@@ -209,19 +213,23 @@ func (i *MyBitEnum) SetString(s string) error {
 	return errors.New(s + " does not belong to MyBitEnum values")
 }
 
-// Values returns all possible values this
-// enum type has. This slice will be in the
-// same order as those returned by Strings and Descs.
-func (i MyBitEnum) Values() []enums.Enum {
-	return _MyBitEnumValues
-}
-
 // MyBitEnumValues returns all possible values of
 // the enum type MyBitEnum. This slice will be in the
 // same order as those returned by the Values,
 // Strings, and Descs methods on MyBitEnum.
 func MyBitEnumValues() []MyBitEnum {
 	return _MyBitEnumValues
+}
+
+// Values returns all possible values this
+// enum type has. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i MyBitEnum) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_MyBitEnumValues))
+	for i, d := range _MyBitEnumValues {
+		res[i] = d
+	}
+	return res
 }
 
 // Strings returns the string encodings of
