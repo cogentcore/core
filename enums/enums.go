@@ -11,8 +11,9 @@ import "fmt"
 // Enum is the interface that all enum types satisfy.
 // Enum types must be convertable to and from strings
 // and int64s, must be able to return a description of
-// their value, and must be able to return all possible
-// enum values and string and description representations.
+// their value, must be able to report if they are valid,
+// and must be able to return all possible enum values
+// and string and description representations.
 type Enum interface {
 	fmt.Stringer
 	// SetString sets the enum value from its
@@ -25,6 +26,9 @@ type Enum interface {
 	SetInt64(i int64)
 	// Desc returns the description of the enum value.
 	Desc() string
+	// IsValid returns whether the value is a
+	// valid option for its enum type.
+	IsValid() bool
 	// Values returns all possible values this
 	// enum type has. This slice will be in the
 	// same order as those returned by Strings and Descs.
