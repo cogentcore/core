@@ -33,7 +33,7 @@ type Enum interface {
 	// enum type has. This slice will be in the
 	// same order as those returned by Strings and Descs.
 	Values() []Enum
-	// Strings returns the string encodings of
+	// Strings returns the string representations of
 	// all possible values this enum type has.
 	// This slice will be in the same order as
 	// those returned by Values and Descs.

@@ -149,7 +149,9 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string) {
 //	[1]: type name
 //	[2]: size of index element (8 for uint8 etc.)
 //	[3]: less than zero check (for signed types)
-const StringOneRun = `func (i %[1]s) String() string {
+const StringOneRun = `// String returns the string representation
+// of this %[1]s value.
+func (i %[1]s) String() string {
 	if %[3]si >= %[1]s(len(_%[1]sIndex)-1) {
 		return "%[1]s(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
@@ -163,7 +165,9 @@ const StringOneRun = `func (i %[1]s) String() string {
 //	[2]: lowest defined value for type, as a string
 //	[3]: size of index element (8 for uint8 etc.)
 //	[4]: less than zero check (for signed types)
-const StringOneRunWithOffset = `func (i %[1]s) String() string {
+const StringOneRunWithOffset = `// String returns the string representation
+// of this %[1]s value.
+func (i %[1]s) String() string {
 	i -= %[2]s
 	if %[4]si >= %[1]s(len(_%[1]sIndex)-1) {
 		return "%[1]s(" + strconv.FormatInt(int64(i + %[2]s), 10) + ")"
@@ -177,6 +181,10 @@ const StringOneRunWithOffset = `func (i %[1]s) String() string {
 func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string) {
 	g.Printf("\n")
 	g.DeclareIndexAndNameVars(runs, typeName)
+	g.Printf(`
+	// String returns the string representation
+	// of this %[1]s value.
+	`, typeName)
 	g.Printf("func (i %s) String() string {\n", typeName)
 	g.Printf("\tswitch {\n")
 	for i, values := range runs {
@@ -234,7 +242,9 @@ func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) 
 }
 
 // Argument to format is the type name.
-const StringMap = `func (i %[1]s) String() string {
+const StringMap = `// String returns the string representation
+// of this %[1]s value.
+func (i %[1]s) String() string {
 	if str, ok := _%[1]sMap[i]; ok {
 		return str
 	}
@@ -245,7 +255,7 @@ const StringMap = `func (i %[1]s) String() string {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringSetStringMethod = `// SetString sets the enum value from its
+const StringSetStringMethod = `// SetString sets the %[1]s value from its
 // string representation, and returns an
 // error if the string is invalid.
 func (i *%[1]s) SetString(s string) error {
@@ -296,7 +306,7 @@ func (i %[1]s) Desc() string {
 //
 //	[1]: type name
 const StringDescsMethod = `	// Descs returns the descriptions of all
-// possible values this enum type has.
+// possible values of type %[1]s.
 // This slice will be in the same order as
 // those returned by Values and Strings.
 func (i %[1]s) Descs() []string {
@@ -308,7 +318,7 @@ func (i %[1]s) Descs() []string {
 //
 //	[1]: type name
 const StringValuesGlobal = `// %[1]sValues returns all possible values of
-// the enum type %[1]s. This slice will be in the
+// the type %[1]s. This slice will be in the
 // same order as those returned by the Values,
 // Strings, and Descs methods on %[1]s.
 func %[1]sValues() []%[1]s {
@@ -319,8 +329,8 @@ func %[1]sValues() []%[1]s {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringValuesMethod = `// Values returns all possible values this
-// enum type has. This slice will be in the
+const StringValuesMethod = `// Values returns all possible values of
+// type %[1]s. This slice will be in the
 // same order as those returned by Strings and Descs.
 func (i %[1]s) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_%[1]sValues))
@@ -334,8 +344,8 @@ func (i %[1]s) Values() []enums.Enum {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringStringsMethod = `// Strings returns the string encodings of
-// all possible values this enum type has.
+const StringStringsMethod = `// Strings returns the string representations of
+// all possible values of type %[1]s.
 // This slice will be in the same order as
 // those returned by Values and Descs.
 func (i %[1]s) Strings() []string {
@@ -347,7 +357,7 @@ func (i %[1]s) Strings() []string {
 //
 //	[1]: type name
 const StringBelongsMethodLoop = `// IsValid returns whether the value is a
-// valid option for its enum type.
+// valid option for type %[1]s.
 func (i %[1]s) IsValid() bool {
 	for _, v := range _%[1]sValues {
 		if i == v {
@@ -361,8 +371,8 @@ func (i %[1]s) IsValid() bool {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringBelongsMethodSet = `// IsValid returns whether the value is a
-// valid option for its enum type.
+const StringIsValidMethod = `// IsValid returns whether the value is a
+// valid option for type %[1]s.
 func (i %[1]s) IsValid() bool {
 	_, ok := _%[1]sMap[i] 
 	return ok
@@ -416,7 +426,7 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThresh
 	if len(runs) <= runsThreshold {
 		g.Printf(StringBelongsMethodLoop, typeName)
 	} else { // There is a map of values, the code is simpler then
-		g.Printf(StringBelongsMethodSet, typeName)
+		g.Printf(StringIsValidMethod, typeName)
 	}
 }
 

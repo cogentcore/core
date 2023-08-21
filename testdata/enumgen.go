@@ -17,6 +17,8 @@ var _MyBitEnumIndex = [...]uint8{0, 5, 11, 16, 25, 35, 45}
 
 const _MyBitEnumLowerName = "appleorangepeachblueberrygrapefruitstrawberry"
 
+// String returns the string representation
+// of this MyBitEnum value.
 func (i MyBitEnum) String() string {
 	if i < 0 || i >= MyBitEnum(len(_MyBitEnumIndex)-1) {
 		return "MyBitEnum(" + strconv.FormatInt(int64(i), 10) + ")"
@@ -80,7 +82,7 @@ var _MyBitEnumDescs = []string{
 	`A Strawberry is a small red fruit`,
 }
 
-// SetString sets the enum value from its
+// SetString sets the MyBitEnum value from its
 // string representation, and returns an
 // error if the string is invalid.
 func (i *MyBitEnum) SetString(s string) error {
@@ -115,15 +117,15 @@ func (i MyBitEnum) Desc() string {
 }
 
 // MyBitEnumValues returns all possible values of
-// the enum type MyBitEnum. This slice will be in the
+// the type MyBitEnum. This slice will be in the
 // same order as those returned by the Values,
 // Strings, and Descs methods on MyBitEnum.
 func MyBitEnumValues() []MyBitEnum {
 	return _MyBitEnumValues
 }
 
-// Values returns all possible values this
-// enum type has. This slice will be in the
+// Values returns all possible values of
+// type MyBitEnum. This slice will be in the
 // same order as those returned by Strings and Descs.
 func (i MyBitEnum) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_MyBitEnumValues))
@@ -133,8 +135,8 @@ func (i MyBitEnum) Values() []enums.Enum {
 	return res
 }
 
-// Strings returns the string encodings of
-// all possible values this enum type has.
+// Strings returns the string representations of
+// all possible values of type MyBitEnum.
 // This slice will be in the same order as
 // those returned by Values and Descs.
 func (i MyBitEnum) Strings() []string {
@@ -142,7 +144,7 @@ func (i MyBitEnum) Strings() []string {
 }
 
 // Descs returns the descriptions of all
-// possible values this enum type has.
+// possible values of type MyBitEnum.
 // This slice will be in the same order as
 // those returned by Values and Strings.
 func (i MyBitEnum) Descs() []string {
@@ -150,7 +152,7 @@ func (i MyBitEnum) Descs() []string {
 }
 
 // IsValid returns whether the value is a
-// valid option for its enum type.
+// valid option for type MyBitEnum.
 func (i MyBitEnum) IsValid() bool {
 	for _, v := range _MyBitEnumValues {
 		if i == v {
@@ -211,6 +213,8 @@ var (
 	_MyEnumIndex_6 = [...]uint8{0, 8}
 )
 
+// String returns the string representation
+// of this MyEnum value.
 func (i MyEnum) String() string {
 	switch {
 	case i == 1:
@@ -294,7 +298,7 @@ var _MyEnumDescs = []string{
 	`Saturday is the seventh day of the week`,
 }
 
-// SetString sets the enum value from its
+// SetString sets the MyEnum value from its
 // string representation, and returns an
 // error if the string is invalid.
 func (i *MyEnum) SetString(s string) error {
@@ -329,15 +333,15 @@ func (i MyEnum) Desc() string {
 }
 
 // MyEnumValues returns all possible values of
-// the enum type MyEnum. This slice will be in the
+// the type MyEnum. This slice will be in the
 // same order as those returned by the Values,
 // Strings, and Descs methods on MyEnum.
 func MyEnumValues() []MyEnum {
 	return _MyEnumValues
 }
 
-// Values returns all possible values this
-// enum type has. This slice will be in the
+// Values returns all possible values of
+// type MyEnum. This slice will be in the
 // same order as those returned by Strings and Descs.
 func (i MyEnum) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_MyEnumValues))
@@ -347,8 +351,8 @@ func (i MyEnum) Values() []enums.Enum {
 	return res
 }
 
-// Strings returns the string encodings of
-// all possible values this enum type has.
+// Strings returns the string representations of
+// all possible values of type MyEnum.
 // This slice will be in the same order as
 // those returned by Values and Descs.
 func (i MyEnum) Strings() []string {
@@ -356,7 +360,7 @@ func (i MyEnum) Strings() []string {
 }
 
 // Descs returns the descriptions of all
-// possible values this enum type has.
+// possible values of type MyEnum.
 // This slice will be in the same order as
 // those returned by Values and Strings.
 func (i MyEnum) Descs() []string {
@@ -364,7 +368,7 @@ func (i MyEnum) Descs() []string {
 }
 
 // IsValid returns whether the value is a
-// valid option for its enum type.
+// valid option for type MyEnum.
 func (i MyEnum) IsValid() bool {
 	for _, v := range _MyEnumValues {
 		if i == v {
