@@ -272,13 +272,15 @@ func (g *Generator) Format() ([]byte, error) {
 // ([Generator.Buf]) and writes it to the file specified by
 // [Generator.Config.Output].
 func (g *Generator) Write() error {
-	b, err := g.Format()
-	if err != nil {
-		return fmt.Errorf("Generator.Write: error formatting code: %w", err)
+	b, ferr := g.Format()
+	// we still write file even if formatting failed, as it is still useful
+	// then we handle error later
+	werr := os.WriteFile(g.Config.Output, b, 0666)
+	if werr != nil {
+		return fmt.Errorf("Generator.Write: error writing file: %w", werr)
 	}
-	err = os.WriteFile(g.Config.Output, b, 0666)
-	if err != nil {
-		return fmt.Errorf("Generator.Write: error writing file: %w", err)
+	if ferr != nil {
+		return fmt.Errorf("Generator.Write: error formatting code: %w", ferr)
 	}
 	return nil
 }
