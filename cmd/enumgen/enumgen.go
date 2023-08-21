@@ -24,9 +24,9 @@ func main() {
 	flag.StringVar(&config.Dir, "dir", ".", "the source directory to look for enums in")
 	flag.StringVar(&config.Output, "output", "enumgen.go", "the file name of the output file")
 	flag.BoolVar(&config.SQL, "sql", false, "whether to generate methods that implement the SQL Scanner and Valuer interfaces")
-	flag.BoolVar(&config.JSON, "json", true, "whether to generate JSON marshaling methods")
-	flag.BoolVar(&config.YAML, "yaml", false, "whether to generate YAML marshaling methods")
 	flag.BoolVar(&config.Text, "text", true, "whether to generate text marshaling methods")
+	flag.BoolVar(&config.JSON, "json", false, "whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)")
+	flag.BoolVar(&config.YAML, "yaml", false, "whether to generate YAML marshaling methods")
 	flag.BoolVar(&config.GQLGEN, "gqlgen", false, "whether to generate GraphQL marshaling methods for gqlgen")
 	flag.StringVar(&config.Transform, "transform", "noop", "if specified, the enum item transformation method (eg: snake_case)")
 	flag.StringVar(&config.TrimPrefix, "trimprefix", "", "if specified, the prefix to trim from each item")
@@ -37,6 +37,7 @@ func main() {
 	log.SetPrefix("enumgen")
 	flag.Usage = Usage
 	flag.Parse()
+	config.Defaults()
 	err := enumgen.Generate(config)
 	if err != nil {
 		fmt.Println("error: " + err.Error())

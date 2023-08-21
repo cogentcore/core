@@ -10,7 +10,11 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	err := Generate(Config{Dir: "./testdata", Output: "testdata/enumgen.go", JSON: true, Text: true, Transform: "noop"})
+	c := Config{}
+	c.Defaults()
+	c.Dir = "./testdata"
+	c.Output = "./testdata/enumgen.go"
+	err := Generate(c)
 	if err != nil {
 		t.Errorf("error while generating: %v", err)
 	}

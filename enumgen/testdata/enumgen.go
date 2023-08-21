@@ -3,7 +3,6 @@
 package testdata
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/goki/enums/enums"
@@ -167,20 +166,6 @@ func (i Days) IsValid() bool {
 		}
 	}
 	return false
-}
-
-// MarshalJSON implements the [json.Marshaler] interface.
-func (i Days) MarshalJSON() ([]byte, error) {
-	return json.Marshal(i.String())
-}
-
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *Days) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return fmt.Errorf("Days should be a string, got %s", data)
-	}
-	return i.SetString(s)
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -365,20 +350,6 @@ func (i *States) SetBitFlag(on bool, f ...enums.BitFlag) {
 		in &^= mask
 		atomic.StoreInt64((*int64)(i), in)
 	}
-}
-
-// MarshalJSON implements the [json.Marshaler] interface.
-func (i States) MarshalJSON() ([]byte, error) {
-	return json.Marshal(i.String())
-}
-
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *States) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return fmt.Errorf("States should be a string, got %s", data)
-	}
-	return i.SetString(s)
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
