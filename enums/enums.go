@@ -27,20 +27,17 @@ type Enum interface {
 	Desc() string
 	// Values returns all possible values this
 	// enum type has. This slice will be in the
-	// same order as those returned by [Enum.Strings]
-	// and [Enum.Descs].
+	// same order as those returned by Strings and Descs.
 	Values() []Enum
 	// Strings returns the string encodings of
 	// all possible values this enum type has.
 	// This slice will be in the same order as
-	// those returned by [Enum.Values]
-	// and [Enum.Descs].
+	// those returned by Values and Descs.
 	Strings() []string
 	// Descs returns the descriptions of all
 	// possible values this enum type has.
 	// This slice will be in the same order as
-	// those returned by [Enum.Values]
-	// and [Enum.Strings].
+	// those returned by Values and Strings
 	Descs() []string
 }
 

@@ -16,15 +16,18 @@ import "fmt"
 // Arguments to format are:
 //
 //	[1]: type name
-const stringNameToValueMethod = `// %[1]sString retrieves an enum value from the enum constants string name.
-// Throws an error if the param is not part of the enum.
-func %[1]sString(s string) (%[1]s, error) {
+const stringNameToValueMethod = `// SetString sets the enum value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *%[1]s) SetString(s string) error {
 	if val, ok := _%[1]sNameToValueMap[s]; ok {
-		return val, nil
+		*i = val
+		return nil
 	}
 
 	if val, ok := _%[1]sNameToValueMap[strings.ToLower(s)]; ok {
-		return val, nil
+		*i = val
+		return nil
 	}
 	return 0, fmt.Errorf("%%s does not belong to %[1]s values", s)
 }
@@ -33,8 +36,10 @@ func %[1]sString(s string) (%[1]s, error) {
 // Arguments to format are:
 //
 //	[1]: type name
-const stringValuesMethod = `// %[1]sValues returns all values of the enum
-func %[1]sValues() []%[1]s {
+const stringValuesMethod = `// Values returns all possible values this
+// enum type has. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i %[1]s) Values() []%[1]s {
 	return _%[1]sValues
 }
 `
@@ -42,8 +47,11 @@ func %[1]sValues() []%[1]s {
 // Arguments to format are:
 //
 //	[1]: type name
-const stringsMethod = `// %[1]sStrings returns a slice of all String values of the enum
-func %[1]sStrings() []string {
+const stringsMethod = `// Strings returns the string encodings of
+// all possible values this enum type has.
+// This slice will be in the same order as
+// those returned by Values and Descs.
+func (i %[1]s) Strings() []string {
 	strs := make([]string, len(_%[1]sNames))
 	copy(strs, _%[1]sNames)
 	return strs
@@ -53,8 +61,9 @@ func %[1]sStrings() []string {
 // Arguments to format are:
 //
 //	[1]: type name
-const stringBelongsMethodLoop = `// IsA%[1]s returns "true" if the value is listed in the enum definition. "false" otherwise
-func (i %[1]s) IsA%[1]s() bool {
+const stringBelongsMethodLoop = `// IsValid returns whether the value is a
+// valid option for its enum type.
+func (i %[1]s) IsValid() bool {
 	for _, v := range _%[1]sValues {
 		if i == v {
 			return true
@@ -67,8 +76,9 @@ func (i %[1]s) IsA%[1]s() bool {
 // Arguments to format are:
 //
 //	[1]: type name
-const stringBelongsMethodSet = `// IsA%[1]s returns "true" if the value is listed in the enum definition. "false" otherwise
-func (i %[1]s) IsA%[1]s() bool {
+const stringBelongsMethodSet = `// IsValid returns whether the value is a
+// valid option for its enum type.
+func (i %[1]s) IsValid() bool {
 	_, ok := _%[1]sMap[i] 
 	return ok
 }

@@ -16,7 +16,7 @@ const _MyEnumLowerName = "sundaymondaytuesdaywednesdaythursdayfridaysaturday"
 
 func (i MyEnum) String() string {
 	if i < 0 || i >= MyEnum(len(_MyEnumIndex)-1) {
-		return fmt.Sprintf("MyEnum(%d)", i)
+		return "MyEnum(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _MyEnumName[_MyEnumIndex[i]:_MyEnumIndex[i+1]]
 }
@@ -63,33 +63,42 @@ var _MyEnumNames = []string{
 	_MyEnumName[42:50],
 }
 
-// MyEnumString retrieves an enum value from the enum constants string name.
-// Throws an error if the param is not part of the enum.
-func MyEnumString(s string) (MyEnum, error) {
+// SetString sets the enum value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *MyEnum) SetString(s string) error {
 	if val, ok := _MyEnumNameToValueMap[s]; ok {
-		return val, nil
+		*i = val
+		return nil
 	}
 
 	if val, ok := _MyEnumNameToValueMap[strings.ToLower(s)]; ok {
-		return val, nil
+		*i = val
+		return nil
 	}
 	return 0, fmt.Errorf("%s does not belong to MyEnum values", s)
 }
 
-// MyEnumValues returns all values of the enum
-func MyEnumValues() []MyEnum {
+// Values returns all possible values this
+// enum type has. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i MyEnum) Values() []MyEnum {
 	return _MyEnumValues
 }
 
-// MyEnumStrings returns a slice of all String values of the enum
-func MyEnumStrings() []string {
+// Strings returns the string encodings of
+// all possible values this enum type has.
+// This slice will be in the same order as
+// those returned by Values and Descs.
+func (i MyEnum) Strings() []string {
 	strs := make([]string, len(_MyEnumNames))
 	copy(strs, _MyEnumNames)
 	return strs
 }
 
-// IsAMyEnum returns "true" if the value is listed in the enum definition. "false" otherwise
-func (i MyEnum) IsAMyEnum() bool {
+// IsValid returns whether the value is a
+// valid option for its enum type.
+func (i MyEnum) IsValid() bool {
 	for _, v := range _MyEnumValues {
 		if i == v {
 			return true
@@ -135,7 +144,7 @@ const _MyBitEnumLowerName = "appleorangepeachblueberrygrapefruitstrawberry"
 
 func (i MyBitEnum) String() string {
 	if i < 0 || i >= MyBitEnum(len(_MyBitEnumIndex)-1) {
-		return fmt.Sprintf("MyBitEnum(%d)", i)
+		return "MyBitEnum(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _MyBitEnumName[_MyBitEnumIndex[i]:_MyBitEnumIndex[i+1]]
 }
@@ -178,33 +187,42 @@ var _MyBitEnumNames = []string{
 	_MyBitEnumName[35:45],
 }
 
-// MyBitEnumString retrieves an enum value from the enum constants string name.
-// Throws an error if the param is not part of the enum.
-func MyBitEnumString(s string) (MyBitEnum, error) {
+// SetString sets the enum value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *MyBitEnum) SetString(s string) error {
 	if val, ok := _MyBitEnumNameToValueMap[s]; ok {
-		return val, nil
+		*i = val
+		return nil
 	}
 
 	if val, ok := _MyBitEnumNameToValueMap[strings.ToLower(s)]; ok {
-		return val, nil
+		*i = val
+		return nil
 	}
 	return 0, fmt.Errorf("%s does not belong to MyBitEnum values", s)
 }
 
-// MyBitEnumValues returns all values of the enum
-func MyBitEnumValues() []MyBitEnum {
+// Values returns all possible values this
+// enum type has. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i MyBitEnum) Values() []MyBitEnum {
 	return _MyBitEnumValues
 }
 
-// MyBitEnumStrings returns a slice of all String values of the enum
-func MyBitEnumStrings() []string {
+// Strings returns the string encodings of
+// all possible values this enum type has.
+// This slice will be in the same order as
+// those returned by Values and Descs.
+func (i MyBitEnum) Strings() []string {
 	strs := make([]string, len(_MyBitEnumNames))
 	copy(strs, _MyBitEnumNames)
 	return strs
 }
 
-// IsAMyBitEnum returns "true" if the value is listed in the enum definition. "false" otherwise
-func (i MyBitEnum) IsAMyBitEnum() bool {
+// IsValid returns whether the value is a
+// valid option for its enum type.
+func (i MyBitEnum) IsValid() bool {
 	for _, v := range _MyBitEnumValues {
 		if i == v {
 			return true
