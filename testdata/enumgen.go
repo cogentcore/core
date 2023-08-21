@@ -6,80 +6,255 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/goki/enums/enums"
 	"strconv"
 	"strings"
+
+	"github.com/goki/enums/enums"
 )
 
-const _MyEnumName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
+const _StatesName = "EnabledDisabledFocusedHoveredActiveSelected"
 
-var _MyEnumIndex = [...]uint8{0, 6, 12, 19, 28, 36, 42, 50}
+var _StatesIndex = [...]uint8{0, 7, 15, 22, 29, 35, 43}
 
-const _MyEnumLowerName = "sundaymondaytuesdaywednesdaythursdayfridaysaturday"
+const _StatesLowerName = "enableddisabledfocusedhoveredactiveselected"
 
 // String returns the string representation
-// of this MyEnum value.
-func (i MyEnum) String() string {
-	i -= 1
-	if i < 0 || i >= MyEnum(len(_MyEnumIndex)-1) {
-		return "MyEnum(" + strconv.FormatInt(int64(i+1), 10) + ")"
+// of this States value.
+func (i States) String() string {
+	if i < 0 || i >= States(len(_StatesIndex)-1) {
+		return "States(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _MyEnumName[_MyEnumIndex[i]:_MyEnumIndex[i+1]]
+	return _StatesName[_StatesIndex[i]:_StatesIndex[i+1]]
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the stringer command to generate them again.
-func _MyEnumNoOp() {
+func _StatesNoOp() {
 	var x [1]struct{}
-	_ = x[Sunday-(1)]
-	_ = x[Monday-(2)]
-	_ = x[Tuesday-(3)]
-	_ = x[Wednesday-(4)]
-	_ = x[Thursday-(5)]
-	_ = x[Friday-(6)]
-	_ = x[Saturday-(7)]
+	_ = x[Enabled-(0)]
+	_ = x[Disabled-(1)]
+	_ = x[Focused-(2)]
+	_ = x[Hovered-(3)]
+	_ = x[Active-(4)]
+	_ = x[Selected-(5)]
 }
 
-var _MyEnumValues = []MyEnum{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
+var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, Selected}
 
-var _MyEnumNameToValueMap = map[string]MyEnum{
-	_MyEnumName[0:6]:        Sunday,
-	_MyEnumLowerName[0:6]:   Sunday,
-	_MyEnumName[6:12]:       Monday,
-	_MyEnumLowerName[6:12]:  Monday,
-	_MyEnumName[12:19]:      Tuesday,
-	_MyEnumLowerName[12:19]: Tuesday,
-	_MyEnumName[19:28]:      Wednesday,
-	_MyEnumLowerName[19:28]: Wednesday,
-	_MyEnumName[28:36]:      Thursday,
-	_MyEnumLowerName[28:36]: Thursday,
-	_MyEnumName[36:42]:      Friday,
-	_MyEnumLowerName[36:42]: Friday,
-	_MyEnumName[42:50]:      Saturday,
-	_MyEnumLowerName[42:50]: Saturday,
+var _StatesNameToValueMap = map[string]States{
+	_StatesName[0:7]:        Enabled,
+	_StatesLowerName[0:7]:   Enabled,
+	_StatesName[7:15]:       Disabled,
+	_StatesLowerName[7:15]:  Disabled,
+	_StatesName[15:22]:      Focused,
+	_StatesLowerName[15:22]: Focused,
+	_StatesName[22:29]:      Hovered,
+	_StatesLowerName[22:29]: Hovered,
+	_StatesName[29:35]:      Active,
+	_StatesLowerName[29:35]: Active,
+	_StatesName[35:43]:      Selected,
+	_StatesLowerName[35:43]: Selected,
 }
 
-var _MyEnumNames = []string{
-	_MyEnumName[0:6],
-	_MyEnumName[6:12],
-	_MyEnumName[12:19],
-	_MyEnumName[19:28],
-	_MyEnumName[28:36],
-	_MyEnumName[36:42],
-	_MyEnumName[42:50],
+var _StatesNames = []string{
+	_StatesName[0:7],
+	_StatesName[7:15],
+	_StatesName[15:22],
+	_StatesName[22:29],
+	_StatesName[29:35],
+	_StatesName[35:43],
 }
 
-var _MyEnumDescMap = map[MyEnum]string{
-	1: _MyEnumDescs[0],
-	2: _MyEnumDescs[1],
-	3: _MyEnumDescs[2],
-	4: _MyEnumDescs[3],
-	5: _MyEnumDescs[4],
-	6: _MyEnumDescs[5],
-	7: _MyEnumDescs[6],
+var _StatesDescMap = map[States]string{
+	0: _StatesDescs[0],
+	1: _StatesDescs[1],
+	2: _StatesDescs[2],
+	3: _StatesDescs[3],
+	4: _StatesDescs[4],
+	5: _StatesDescs[5],
 }
 
-var _MyEnumDescs = []string{
+var _StatesDescs = []string{
+	`Enabled indicates the widget is enabled`,
+	`Disabled indicates the widget is disabled`,
+	`Focused indicates the widget has keyboard focus`,
+	`Hovered indicates the widget is being hovered over`,
+	`Active indicates the widget is being interacted with`,
+	`Selected indicates the widget is selected`,
+}
+
+// SetString sets the States value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *States) SetString(s string) error {
+	if val, ok := _StatesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+
+	if val, ok := _StatesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " does not belong to States values")
+}
+
+// Int64 returns the States value as an int64.
+func (i States) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the States value from an int64.
+func (i *States) SetInt64(in int64) {
+	*i = States(in)
+}
+
+// Desc returns the description of the States value.
+func (i States) Desc() string {
+	if str, ok := _StatesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// StatesValues returns all possible values of
+// the type States. This slice will be in the
+// same order as those returned by the Values,
+// Strings, and Descs methods on States.
+func StatesValues() []States {
+	return _StatesValues
+}
+
+// Values returns all possible values of
+// type States. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i States) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_StatesValues))
+	for i, d := range _StatesValues {
+		res[i] = &d
+	}
+	return res
+}
+
+// Strings returns the string representations of
+// all possible values of type States.
+// This slice will be in the same order as
+// those returned by Values and Descs.
+func (i States) Strings() []string {
+	return _StatesNames
+}
+
+// Descs returns the descriptions of all
+// possible values of type States.
+// This slice will be in the same order as
+// those returned by Values and Strings.
+func (i States) Descs() []string {
+	return _StatesDescs
+}
+
+// IsValid returns whether the value is a
+// valid option for type States.
+func (i States) IsValid() bool {
+	for _, v := range _StatesValues {
+		if i == v {
+			return true
+		}
+	}
+	return false
+}
+
+// MarshalJSON implements the json.Marshaler interface for States
+func (i States) MarshalJSON() ([]byte, error) {
+	return json.Marshal(i.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for States
+func (i *States) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return fmt.Errorf("States should be a string, got %s", data)
+	}
+	return i.SetString(s)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for States
+func (i States) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface for States
+func (i *States) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+const _DaysName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
+
+var _DaysIndex = [...]uint8{0, 6, 12, 19, 28, 36, 42, 50}
+
+const _DaysLowerName = "sundaymondaytuesdaywednesdaythursdayfridaysaturday"
+
+// String returns the string representation
+// of this Days value.
+func (i Days) String() string {
+	if i < 0 || i >= Days(len(_DaysIndex)-1) {
+		return "Days(" + strconv.FormatInt(int64(i), 10) + ")"
+	}
+	return _DaysName[_DaysIndex[i]:_DaysIndex[i+1]]
+}
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the stringer command to generate them again.
+func _DaysNoOp() {
+	var x [1]struct{}
+	_ = x[Sunday-(0)]
+	_ = x[Monday-(1)]
+	_ = x[Tuesday-(2)]
+	_ = x[Wednesday-(3)]
+	_ = x[Thursday-(4)]
+	_ = x[Friday-(5)]
+	_ = x[Saturday-(6)]
+}
+
+var _DaysValues = []Days{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
+
+var _DaysNameToValueMap = map[string]Days{
+	_DaysName[0:6]:        Sunday,
+	_DaysLowerName[0:6]:   Sunday,
+	_DaysName[6:12]:       Monday,
+	_DaysLowerName[6:12]:  Monday,
+	_DaysName[12:19]:      Tuesday,
+	_DaysLowerName[12:19]: Tuesday,
+	_DaysName[19:28]:      Wednesday,
+	_DaysLowerName[19:28]: Wednesday,
+	_DaysName[28:36]:      Thursday,
+	_DaysLowerName[28:36]: Thursday,
+	_DaysName[36:42]:      Friday,
+	_DaysLowerName[36:42]: Friday,
+	_DaysName[42:50]:      Saturday,
+	_DaysLowerName[42:50]: Saturday,
+}
+
+var _DaysNames = []string{
+	_DaysName[0:6],
+	_DaysName[6:12],
+	_DaysName[12:19],
+	_DaysName[19:28],
+	_DaysName[28:36],
+	_DaysName[36:42],
+	_DaysName[42:50],
+}
+
+var _DaysDescMap = map[Days]string{
+	0: _DaysDescs[0],
+	1: _DaysDescs[1],
+	2: _DaysDescs[2],
+	3: _DaysDescs[3],
+	4: _DaysDescs[4],
+	5: _DaysDescs[5],
+	6: _DaysDescs[6],
+}
+
+var _DaysDescs = []string{
 	`Sunday is the first day of the week`,
 	`Monday is the second day of the week`,
 	`Tuesday is the third day of the week`,
@@ -89,79 +264,79 @@ var _MyEnumDescs = []string{
 	`Saturday is the seventh day of the week`,
 }
 
-// SetString sets the MyEnum value from its
+// SetString sets the Days value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *MyEnum) SetString(s string) error {
-	if val, ok := _MyEnumNameToValueMap[s]; ok {
+func (i *Days) SetString(s string) error {
+	if val, ok := _DaysNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
 
-	if val, ok := _MyEnumNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _DaysNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " does not belong to MyEnum values")
+	return errors.New(s + " does not belong to Days values")
 }
 
-// Int64 returns the MyEnum value as an int64.
-func (i MyEnum) Int64() int64 {
+// Int64 returns the Days value as an int64.
+func (i Days) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the MyEnum value from an int64.
-func (i *MyEnum) SetInt64(in int64) {
-	*i = MyEnum(in)
+// SetInt64 sets the Days value from an int64.
+func (i *Days) SetInt64(in int64) {
+	*i = Days(in)
 }
 
-// Desc returns the description of the MyEnum value.
-func (i MyEnum) Desc() string {
-	if str, ok := _MyEnumDescMap[i]; ok {
+// Desc returns the description of the Days value.
+func (i Days) Desc() string {
+	if str, ok := _DaysDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// MyEnumValues returns all possible values of
-// the type MyEnum. This slice will be in the
+// DaysValues returns all possible values of
+// the type Days. This slice will be in the
 // same order as those returned by the Values,
-// Strings, and Descs methods on MyEnum.
-func MyEnumValues() []MyEnum {
-	return _MyEnumValues
+// Strings, and Descs methods on Days.
+func DaysValues() []Days {
+	return _DaysValues
 }
 
 // Values returns all possible values of
-// type MyEnum. This slice will be in the
+// type Days. This slice will be in the
 // same order as those returned by Strings and Descs.
-func (i MyEnum) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_MyEnumValues))
-	for i, d := range _MyEnumValues {
+func (i Days) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_DaysValues))
+	for i, d := range _DaysValues {
 		res[i] = &d
 	}
 	return res
 }
 
 // Strings returns the string representations of
-// all possible values of type MyEnum.
+// all possible values of type Days.
 // This slice will be in the same order as
 // those returned by Values and Descs.
-func (i MyEnum) Strings() []string {
-	return _MyEnumNames
+func (i Days) Strings() []string {
+	return _DaysNames
 }
 
 // Descs returns the descriptions of all
-// possible values of type MyEnum.
+// possible values of type Days.
 // This slice will be in the same order as
 // those returned by Values and Strings.
-func (i MyEnum) Descs() []string {
-	return _MyEnumDescs
+func (i Days) Descs() []string {
+	return _DaysDescs
 }
 
 // IsValid returns whether the value is a
-// valid option for type MyEnum.
-func (i MyEnum) IsValid() bool {
-	for _, v := range _MyEnumValues {
+// valid option for type Days.
+func (i Days) IsValid() bool {
+	for _, v := range _DaysValues {
 		if i == v {
 			return true
 		}
@@ -169,201 +344,26 @@ func (i MyEnum) IsValid() bool {
 	return false
 }
 
-// MarshalJSON implements the json.Marshaler interface for MyEnum
-func (i MyEnum) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements the json.Marshaler interface for Days
+func (i Days) MarshalJSON() ([]byte, error) {
 	return json.Marshal(i.String())
 }
 
-// UnmarshalJSON implements the json.Unmarshaler interface for MyEnum
-func (i *MyEnum) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON implements the json.Unmarshaler interface for Days
+func (i *Days) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return fmt.Errorf("MyEnum should be a string, got %s", data)
+		return fmt.Errorf("Days should be a string, got %s", data)
 	}
 	return i.SetString(s)
 }
 
-// MarshalText implements the encoding.TextMarshaler interface for MyEnum
-func (i MyEnum) MarshalText() ([]byte, error) {
+// MarshalText implements the encoding.TextMarshaler interface for Days
+func (i Days) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
-// UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum
-func (i *MyEnum) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-const _MyBitEnumName = "AppleOrangePeachBlueberryGrapefruitStrawberry"
-
-var _MyBitEnumIndex = [...]uint8{0, 5, 11, 16, 25, 35, 45}
-
-const _MyBitEnumLowerName = "appleorangepeachblueberrygrapefruitstrawberry"
-
-// String returns the string representation
-// of this MyBitEnum value.
-func (i MyBitEnum) String() string {
-	if i < 0 || i >= MyBitEnum(len(_MyBitEnumIndex)-1) {
-		return "MyBitEnum(" + strconv.FormatInt(int64(i), 10) + ")"
-	}
-	return _MyBitEnumName[_MyBitEnumIndex[i]:_MyBitEnumIndex[i+1]]
-}
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the stringer command to generate them again.
-func _MyBitEnumNoOp() {
-	var x [1]struct{}
-	_ = x[Apple-(0)]
-	_ = x[Orange-(1)]
-	_ = x[Peach-(2)]
-	_ = x[Blueberry-(3)]
-	_ = x[Grapefruit-(4)]
-	_ = x[Strawberry-(5)]
-}
-
-var _MyBitEnumValues = []MyBitEnum{Apple, Orange, Peach, Blueberry, Grapefruit, Strawberry}
-
-var _MyBitEnumNameToValueMap = map[string]MyBitEnum{
-	_MyBitEnumName[0:5]:        Apple,
-	_MyBitEnumLowerName[0:5]:   Apple,
-	_MyBitEnumName[5:11]:       Orange,
-	_MyBitEnumLowerName[5:11]:  Orange,
-	_MyBitEnumName[11:16]:      Peach,
-	_MyBitEnumLowerName[11:16]: Peach,
-	_MyBitEnumName[16:25]:      Blueberry,
-	_MyBitEnumLowerName[16:25]: Blueberry,
-	_MyBitEnumName[25:35]:      Grapefruit,
-	_MyBitEnumLowerName[25:35]: Grapefruit,
-	_MyBitEnumName[35:45]:      Strawberry,
-	_MyBitEnumLowerName[35:45]: Strawberry,
-}
-
-var _MyBitEnumNames = []string{
-	_MyBitEnumName[0:5],
-	_MyBitEnumName[5:11],
-	_MyBitEnumName[11:16],
-	_MyBitEnumName[16:25],
-	_MyBitEnumName[25:35],
-	_MyBitEnumName[35:45],
-}
-
-var _MyBitEnumDescMap = map[MyBitEnum]string{
-	0: _MyBitEnumDescs[0],
-	1: _MyBitEnumDescs[1],
-	2: _MyBitEnumDescs[2],
-	3: _MyBitEnumDescs[3],
-	4: _MyBitEnumDescs[4],
-	5: _MyBitEnumDescs[5],
-}
-
-var _MyBitEnumDescs = []string{
-	`An Apple is a red fruit`,
-	`An Orange is an orange fruit`,
-	`A Peach is a stonefruit`,
-	`A Blueberry is a blue berry`,
-	`A Grapefruit is large fruit`,
-	`A Strawberry is a small red fruit`,
-}
-
-// SetString sets the MyBitEnum value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *MyBitEnum) SetString(s string) error {
-	if val, ok := _MyBitEnumNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-
-	if val, ok := _MyBitEnumNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " does not belong to MyBitEnum values")
-}
-
-// Int64 returns the MyBitEnum value as an int64.
-func (i MyBitEnum) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the MyBitEnum value from an int64.
-func (i *MyBitEnum) SetInt64(in int64) {
-	*i = MyBitEnum(in)
-}
-
-// Desc returns the description of the MyBitEnum value.
-func (i MyBitEnum) Desc() string {
-	if str, ok := _MyBitEnumDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// MyBitEnumValues returns all possible values of
-// the type MyBitEnum. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on MyBitEnum.
-func MyBitEnumValues() []MyBitEnum {
-	return _MyBitEnumValues
-}
-
-// Values returns all possible values of
-// type MyBitEnum. This slice will be in the
-// same order as those returned by Strings and Descs.
-func (i MyBitEnum) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_MyBitEnumValues))
-	for i, d := range _MyBitEnumValues {
-		res[i] = &d
-	}
-	return res
-}
-
-// Strings returns the string representations of
-// all possible values of type MyBitEnum.
-// This slice will be in the same order as
-// those returned by Values and Descs.
-func (i MyBitEnum) Strings() []string {
-	return _MyBitEnumNames
-}
-
-// Descs returns the descriptions of all
-// possible values of type MyBitEnum.
-// This slice will be in the same order as
-// those returned by Values and Strings.
-func (i MyBitEnum) Descs() []string {
-	return _MyBitEnumDescs
-}
-
-// IsValid returns whether the value is a
-// valid option for type MyBitEnum.
-func (i MyBitEnum) IsValid() bool {
-	for _, v := range _MyBitEnumValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
-}
-
-// MarshalJSON implements the json.Marshaler interface for MyBitEnum
-func (i MyBitEnum) MarshalJSON() ([]byte, error) {
-	return json.Marshal(i.String())
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface for MyBitEnum
-func (i *MyBitEnum) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return fmt.Errorf("MyBitEnum should be a string, got %s", data)
-	}
-	return i.SetString(s)
-}
-
-// MarshalText implements the encoding.TextMarshaler interface for MyBitEnum
-func (i MyBitEnum) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the encoding.TextUnmarshaler interface for MyBitEnum
-func (i *MyBitEnum) UnmarshalText(text []byte) error {
+// UnmarshalText implements the encoding.TextUnmarshaler interface for Days
+func (i *Days) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
