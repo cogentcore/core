@@ -11,69 +11,114 @@ import (
 	"strings"
 )
 
-const _MyEnumName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
+const (
+	_MyEnumName_0      = "Sunday"
+	_MyEnumLowerName_0 = "sunday"
+	_MyEnumName_1      = "Monday"
+	_MyEnumLowerName_1 = "monday"
+	_MyEnumName_2      = "Tuesday"
+	_MyEnumLowerName_2 = "tuesday"
+	_MyEnumName_3      = "Wednesday"
+	_MyEnumLowerName_3 = "wednesday"
+	_MyEnumName_4      = "Thursday"
+	_MyEnumLowerName_4 = "thursday"
+	_MyEnumName_5      = "Friday"
+	_MyEnumLowerName_5 = "friday"
+	_MyEnumName_6      = "Saturday"
+	_MyEnumLowerName_6 = "saturday"
+)
 
-var _MyEnumIndex = [...]uint8{0, 6, 12, 19, 28, 36, 42, 50}
-
-const _MyEnumLowerName = "sundaymondaytuesdaywednesdaythursdayfridaysaturday"
+var (
+	_MyEnumIndex_0 = [...]uint8{0, 6}
+	_MyEnumIndex_1 = [...]uint8{0, 6}
+	_MyEnumIndex_2 = [...]uint8{0, 7}
+	_MyEnumIndex_3 = [...]uint8{0, 9}
+	_MyEnumIndex_4 = [...]uint8{0, 8}
+	_MyEnumIndex_5 = [...]uint8{0, 6}
+	_MyEnumIndex_6 = [...]uint8{0, 8}
+)
 
 func (i MyEnum) String() string {
-	if i < 0 || i >= MyEnum(len(_MyEnumIndex)-1) {
+	switch {
+	case i == 1:
+		return _MyEnumName_0
+	case i == 3:
+		return _MyEnumName_1
+	case i == 5:
+		return _MyEnumName_2
+	case i == 7:
+		return _MyEnumName_3
+	case i == 9:
+		return _MyEnumName_4
+	case i == 11:
+		return _MyEnumName_5
+	case i == 13:
+		return _MyEnumName_6
+	default:
 		return "MyEnum(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _MyEnumName[_MyEnumIndex[i]:_MyEnumIndex[i+1]]
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the stringer command to generate them again.
 func _MyEnumNoOp() {
 	var x [1]struct{}
-	_ = x[Sunday-(0)]
-	_ = x[Monday-(1)]
-	_ = x[Tuesday-(2)]
-	_ = x[Wednesday-(3)]
-	_ = x[Thursday-(4)]
-	_ = x[Friday-(5)]
-	_ = x[Saturday-(6)]
+	_ = x[Sunday-(1)]
+	_ = x[Monday-(3)]
+	_ = x[Tuesday-(5)]
+	_ = x[Wednesday-(7)]
+	_ = x[Thursday-(9)]
+	_ = x[Friday-(11)]
+	_ = x[Saturday-(13)]
 }
 
 var _MyEnumValues = []MyEnum{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
 
 var _MyEnumNameToValueMap = map[string]MyEnum{
-	_MyEnumName[0:6]:        Sunday,
-	_MyEnumLowerName[0:6]:   Sunday,
-	_MyEnumName[6:12]:       Monday,
-	_MyEnumLowerName[6:12]:  Monday,
-	_MyEnumName[12:19]:      Tuesday,
-	_MyEnumLowerName[12:19]: Tuesday,
-	_MyEnumName[19:28]:      Wednesday,
-	_MyEnumLowerName[19:28]: Wednesday,
-	_MyEnumName[28:36]:      Thursday,
-	_MyEnumLowerName[28:36]: Thursday,
-	_MyEnumName[36:42]:      Friday,
-	_MyEnumLowerName[36:42]: Friday,
-	_MyEnumName[42:50]:      Saturday,
-	_MyEnumLowerName[42:50]: Saturday,
+	_MyEnumName_0[0:6]:      Sunday,
+	_MyEnumLowerName_0[0:6]: Sunday,
+	_MyEnumName_1[0:6]:      Monday,
+	_MyEnumLowerName_1[0:6]: Monday,
+	_MyEnumName_2[0:7]:      Tuesday,
+	_MyEnumLowerName_2[0:7]: Tuesday,
+	_MyEnumName_3[0:9]:      Wednesday,
+	_MyEnumLowerName_3[0:9]: Wednesday,
+	_MyEnumName_4[0:8]:      Thursday,
+	_MyEnumLowerName_4[0:8]: Thursday,
+	_MyEnumName_5[0:6]:      Friday,
+	_MyEnumLowerName_5[0:6]: Friday,
+	_MyEnumName_6[0:8]:      Saturday,
+	_MyEnumLowerName_6[0:8]: Saturday,
 }
 
 var _MyEnumNames = []string{
-	_MyEnumName[0:6],
-	_MyEnumName[6:12],
-	_MyEnumName[12:19],
-	_MyEnumName[19:28],
-	_MyEnumName[28:36],
-	_MyEnumName[36:42],
-	_MyEnumName[42:50],
+	_MyEnumName_0[0:6],
+	_MyEnumName_1[0:6],
+	_MyEnumName_2[0:7],
+	_MyEnumName_3[0:9],
+	_MyEnumName_4[0:8],
+	_MyEnumName_5[0:6],
+	_MyEnumName_6[0:8],
 }
 
 var _MyEnumDescMap = map[MyEnum]string{
-	0: `Sunday is the first day of the week`,
-	1: `Monday is the second day of the week`,
-	2: `Tuesday is the third day of the week`,
-	3: `Wednesday is the fourth day of the week`,
-	4: `Thursday is the fifth day of the week`,
-	5: `Friday is the sixth day of the week`,
-	6: `Saturday is the seventh day of the week`,
+	1:  _MyEnumDescs[0],
+	3:  _MyEnumDescs[1],
+	5:  _MyEnumDescs[2],
+	7:  _MyEnumDescs[3],
+	9:  _MyEnumDescs[4],
+	11: _MyEnumDescs[5],
+	13: _MyEnumDescs[6],
+}
+
+var _MyEnumDescs = []string{
+	`Sunday is the first day of the week`,
+	`Monday is the second day of the week`,
+	`Tuesday is the third day of the week`,
+	`Wednesday is the fourth day of the week`,
+	`Thursday is the fifth day of the week`,
+	`Friday is the sixth day of the week`,
+	`Saturday is the seventh day of the week`,
 }
 
 // SetString sets the enum value from its
@@ -124,9 +169,15 @@ func (i MyEnum) Values() []enums.Enum {
 // This slice will be in the same order as
 // those returned by Values and Descs.
 func (i MyEnum) Strings() []string {
-	strs := make([]string, len(_MyEnumNames))
-	copy(strs, _MyEnumNames)
-	return strs
+	return _MyEnumNames
+}
+
+// Descs returns the descriptions of all
+// possible values this enum type has.
+// This slice will be in the same order as
+// those returned by Values and Strings.
+func (i MyEnum) Descs() []string {
+	return _MyEnumDescs
 }
 
 // IsValid returns whether the value is a
@@ -216,12 +267,21 @@ var _MyBitEnumNames = []string{
 }
 
 var _MyBitEnumDescMap = map[MyBitEnum]string{
-	0: `An Apple is a red fruit`,
-	1: `An Orange is an orange fruit`,
-	2: `A Peach is a stonefruit`,
-	3: `A Blueberry is a blue berry`,
-	4: `A Grapefruit is large fruit`,
-	5: `A Strawberry is a small red fruit`,
+	0: _MyBitEnumDescs[0],
+	1: _MyBitEnumDescs[1],
+	2: _MyBitEnumDescs[2],
+	3: _MyBitEnumDescs[3],
+	4: _MyBitEnumDescs[4],
+	5: _MyBitEnumDescs[5],
+}
+
+var _MyBitEnumDescs = []string{
+	`An Apple is a red fruit`,
+	`An Orange is an orange fruit`,
+	`A Peach is a stonefruit`,
+	`A Blueberry is a blue berry`,
+	`A Grapefruit is large fruit`,
+	`A Strawberry is a small red fruit`,
 }
 
 // SetString sets the enum value from its
@@ -272,9 +332,15 @@ func (i MyBitEnum) Values() []enums.Enum {
 // This slice will be in the same order as
 // those returned by Values and Descs.
 func (i MyBitEnum) Strings() []string {
-	strs := make([]string, len(_MyBitEnumNames))
-	copy(strs, _MyBitEnumNames)
-	return strs
+	return _MyBitEnumNames
+}
+
+// Descs returns the descriptions of all
+// possible values this enum type has.
+// This slice will be in the same order as
+// those returned by Values and Strings.
+func (i MyBitEnum) Descs() []string {
+	return _MyBitEnumDescs
 }
 
 // IsValid returns whether the value is a

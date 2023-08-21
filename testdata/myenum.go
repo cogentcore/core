@@ -5,7 +5,7 @@ type MyEnum int //enums:enum
 
 const (
 	// Sunday is the first day of the week
-	Sunday MyEnum = iota
+	Sunday MyEnum = 2*iota + 1
 	// Monday is the second day of the week
 	Monday
 	// Tuesday is the third day of the week

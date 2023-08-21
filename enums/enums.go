@@ -41,7 +41,7 @@ type Enum interface {
 	// Descs returns the descriptions of all
 	// possible values this enum type has.
 	// This slice will be in the same order as
-	// those returned by Values and Strings
+	// those returned by Values and Strings.
 	Descs() []string
 }
 
