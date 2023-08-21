@@ -27,7 +27,7 @@ func (i Days) String() string {
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the stringer command to generate them again.
+// Re-run the enumgen command to generate them again.
 func _DaysNoOp() {
 	var x [1]struct{}
 	_ = x[Sunday-(0)]
@@ -194,7 +194,7 @@ func (i States) String() string {
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the stringer command to generate them again.
+// Re-run the enumgen command to generate them again.
 func _StatesNoOp() {
 	var x [1]struct{}
 	_ = x[Enabled-(0)]

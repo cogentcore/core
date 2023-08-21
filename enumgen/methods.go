@@ -229,7 +229,7 @@ func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) 
 
 	g.Printf(`
 	// An "invalid array index" compiler error signifies that the constant values have changed.
-	// Re-run the stringer command to generate them again.
+	// Re-run the enumgen command to generate them again.
 	`)
 	g.Printf("func _%sNoOp (){ ", typeName)
 	g.Printf("\n var x [1]struct{}\n")
