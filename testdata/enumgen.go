@@ -346,9 +346,25 @@ func (i States) IsValid() bool {
 
 // HasBitFlag returns whether these
 // bit flags have the given bit flag set.
-func (i States) HasBitFlag(f enums.BitFlag) bool {
-	in := int64(i)
-	return atomic.LoadInt64(&in)&(1<<uint32(f.Int64())) != 0
+func (i *States) HasBitFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(i))&(1<<uint32(f.Int64())) != 0
+}
+
+// HasBitFlag returns whether these
+// bit flags have the given bit flag set.
+func (i *States) SetBitFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
 }
 
 // MarshalJSON implements the json.Marshaler interface for States

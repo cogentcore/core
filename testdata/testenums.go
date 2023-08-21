@@ -21,7 +21,7 @@ const (
 )
 
 // States is a bitflag enum containing widget states
-type States int //enums:bitflag
+type States int64 //enums:bitflag
 
 const (
 	// Enabled indicates the widget is enabled

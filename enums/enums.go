@@ -55,6 +55,6 @@ type BitFlag interface {
 	// have the given flag set.
 	HasBitFlag(f BitFlag) bool
 	// SetBitFlag sets the value of the given
-	// flag in these flags to the given value.
-	SetBitFlag(f BitFlag, b bool)
+	// flags in these flags to the given value.
+	SetBitFlag(on bool, f ...BitFlag)
 }
