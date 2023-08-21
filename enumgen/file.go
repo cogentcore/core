@@ -99,14 +99,14 @@ func (f *File) GenDecl(node ast.Node) (bool, error) {
 				u64 = uint64(i64)
 			}
 			v := Value{
-				originalName: n.Name,
-				name:         n.Name,
-				value:        u64,
-				signed:       info&types.IsUnsigned == 0,
-				str:          value.String(),
+				OriginalName: n.Name,
+				Name:         n.Name,
+				Value:        u64,
+				Signed:       info&types.IsUnsigned == 0,
+				Str:          value.String(),
 			}
 			if c := vspec.Comment; f.Config.LineComment && c != nil && len(c.List) == 1 {
-				v.name = strings.TrimSpace(c.Text())
+				v.Name = strings.TrimSpace(c.Text())
 			}
 
 			f.Values = append(f.Values, v)

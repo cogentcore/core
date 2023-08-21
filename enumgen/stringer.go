@@ -18,24 +18,31 @@ import (
 	"strings"
 )
 
-// trimValueNames removes a prefix from each name
-func (g *Generator) trimValueNames(values []Value, prefix string) {
+// TrimValueNames removes the prefixes specified in
+// [Generator.Config.TrimPrefix] from each name of
+// the given values.
+func (g *Generator) TrimValueNames(values []Value) {
+	for _, prefix := range strings.Split(g.Config.TrimPrefix, ",") {
+		for i := range values {
+			values[i].Name = strings.TrimPrefix(values[i].Name, prefix)
+		}
+	}
+
+}
+
+// PrefixValueNames adds the prefix specified in
+// [Generator.Config.AddPrefix] to each name of
+// the given values.
+func (g *Generator) PrefixValueNames(values []Value) {
 	for i := range values {
-		values[i].name = strings.TrimPrefix(values[i].name, prefix)
+		values[i].Name = g.Config.AddPrefix + values[i].Name
 	}
 }
 
-// prefixValueNames adds a prefix to each name
-func (g *Generator) prefixValueNames(values []Value, prefix string) {
-	for i := range values {
-		values[i].name = prefix + values[i].name
-	}
-}
-
-// splitIntoRuns breaks the values into runs of contiguous sequences.
+// SplitIntoRuns breaks the values into runs of contiguous sequences.
 // For example, given 1,2,3,5,6,7 it returns {1,2,3},{5,6,7}.
 // The input slice is known to be non-empty.
-func splitIntoRuns(values []Value) [][]Value {
+func SplitIntoRuns(values []Value) [][]Value {
 	// We use stable sort so the lexically first name is chosen for equal elements.
 	sort.Stable(ByValue(values))
 	// Remove duplicates. Stable sort has put the one we want to print first,
@@ -45,7 +52,7 @@ func splitIntoRuns(values []Value) [][]Value {
 	// to fail to compile.
 	j := 1
 	for i := 1; i < len(values); i++ {
-		if values[i].value != values[i-1].value {
+		if values[i].Value != values[i-1].Value {
 			values[j] = values[i]
 			j++
 		}
@@ -55,7 +62,7 @@ func splitIntoRuns(values []Value) [][]Value {
 	for len(values) > 0 {
 		// One contiguous sequence per outer loop.
 		i := 1
-		for i < len(values) && values[i].value == values[i-1].value+1 {
+		for i < len(values) && values[i].Value == values[i-1].Value+1 {
 			i++
 		}
 		runs = append(runs, values[:i])
@@ -66,10 +73,10 @@ func splitIntoRuns(values []Value) [][]Value {
 
 // Helpers
 
-// usize returns the number of bits of the smallest unsigned integer
+// Usize returns the number of bits of the smallest unsigned integer
 // type that will hold n. Used to create the smallest possible slice of
 // integers to use as indexes into the concatenated strings.
-func usize(n int) int {
+func Usize(n int) int {
 	switch {
 	case n < 1<<8:
 		return 8
@@ -81,15 +88,15 @@ func usize(n int) int {
 	}
 }
 
-// declareIndexAndNameVars declares the index slices and concatenated names
+// DeclareIndexAndNameVars declares the index slices and concatenated names
 // strings representing the runs of values.
-func (g *Generator) declareIndexAndNameVars(runs [][]Value, typeName string) {
+func (g *Generator) DeclareIndexAndNameVars(runs [][]Value, typeName string) {
 	var indexes, names []string
 	for i, run := range runs {
-		index, n := g.createIndexAndNameDecl(run, typeName, fmt.Sprintf("_%d", i))
+		index, n := g.CreateIndexAndNameDecl(run, typeName, fmt.Sprintf("_%d", i))
 		indexes = append(indexes, index)
 		names = append(names, n)
-		_, n = g.createLowerIndexAndNameDecl(run, typeName, fmt.Sprintf("_%d", i))
+		_, n = g.CreateLowerIndexAndNameDecl(run, typeName, fmt.Sprintf("_%d", i))
 		names = append(names, n)
 	}
 	g.Printf("const (\n")
@@ -104,28 +111,28 @@ func (g *Generator) declareIndexAndNameVars(runs [][]Value, typeName string) {
 	g.Printf(")\n\n")
 }
 
-// declareIndexAndNameVar is the single-run version of declareIndexAndNameVars
-func (g *Generator) declareIndexAndNameVar(run []Value, typeName string) {
-	index, n := g.createIndexAndNameDecl(run, typeName, "")
+// DeclareIndexAndNameVar is the single-run version of declareIndexAndNameVars
+func (g *Generator) DeclareIndexAndNameVar(run []Value, typeName string) {
+	index, n := g.CreateIndexAndNameDecl(run, typeName, "")
 	g.Printf("const %s\n", n)
 	g.Printf("var %s\n", index)
-	index, n = g.createLowerIndexAndNameDecl(run, typeName, "")
+	index, n = g.CreateLowerIndexAndNameDecl(run, typeName, "")
 	g.Printf("const %s\n", n)
 	//g.Printf("var %s\n", index)
 }
 
 // createIndexAndNameDecl returns the pair of declarations for the run. The caller will add "const" and "var".
-func (g *Generator) createLowerIndexAndNameDecl(run []Value, typeName string, suffix string) (string, string) {
+func (g *Generator) CreateLowerIndexAndNameDecl(run []Value, typeName string, suffix string) (string, string) {
 	b := new(bytes.Buffer)
 	indexes := make([]int, len(run))
 	for i := range run {
-		b.WriteString(strings.ToLower(run[i].name))
+		b.WriteString(strings.ToLower(run[i].Name))
 		indexes[i] = b.Len()
 	}
 	nameConst := fmt.Sprintf("_%sLowerName%s = %q", typeName, suffix, b.String())
 	nameLen := b.Len()
 	b.Reset()
-	_, _ = fmt.Fprintf(b, "_%sLowerIndex%s = [...]uint%d{0, ", typeName, suffix, usize(nameLen))
+	_, _ = fmt.Fprintf(b, "_%sLowerIndex%s = [...]uint%d{0, ", typeName, suffix, Usize(nameLen))
 	for i, v := range indexes {
 		if i > 0 {
 			_, _ = fmt.Fprintf(b, ", ")
@@ -136,18 +143,18 @@ func (g *Generator) createLowerIndexAndNameDecl(run []Value, typeName string, su
 	return b.String(), nameConst
 }
 
-// createIndexAndNameDecl returns the pair of declarations for the run. The caller will add "const" and "var".
-func (g *Generator) createIndexAndNameDecl(run []Value, typeName string, suffix string) (string, string) {
+// CreateIndexAndNameDecl returns the pair of declarations for the run. The caller will add "const" and "var".
+func (g *Generator) CreateIndexAndNameDecl(run []Value, typeName string, suffix string) (string, string) {
 	b := new(bytes.Buffer)
 	indexes := make([]int, len(run))
 	for i := range run {
-		b.WriteString(run[i].name)
+		b.WriteString(run[i].Name)
 		indexes[i] = b.Len()
 	}
 	nameConst := fmt.Sprintf("_%sName%s = %q", typeName, suffix, b.String())
 	nameLen := b.Len()
 	b.Reset()
-	_, _ = fmt.Fprintf(b, "_%sIndex%s = [...]uint%d{0, ", typeName, suffix, usize(nameLen))
+	_, _ = fmt.Fprintf(b, "_%sIndex%s = [...]uint%d{0, ", typeName, suffix, Usize(nameLen))
 	for i, v := range indexes {
 		if i > 0 {
 			_, _ = fmt.Fprintf(b, ", ")
@@ -158,38 +165,38 @@ func (g *Generator) createIndexAndNameDecl(run []Value, typeName string, suffix 
 	return b.String(), nameConst
 }
 
-// declareNameVars declares the concatenated names string representing all the values in the runs.
-func (g *Generator) declareNameVars(runs [][]Value, typeName string, suffix string) {
+// DeclareNameVars declares the concatenated names string representing all the values in the runs.
+func (g *Generator) DeclareNameVars(runs [][]Value, typeName string, suffix string) {
 	g.Printf("const _%sName%s = \"", typeName, suffix)
 	for _, run := range runs {
 		for i := range run {
-			g.Printf("%s", run[i].name)
+			g.Printf("%s", run[i].Name)
 		}
 	}
 	g.Printf("\"\n")
 	g.Printf("const _%sLowerName%s = \"", typeName, suffix)
 	for _, run := range runs {
 		for i := range run {
-			g.Printf("%s", strings.ToLower(run[i].name))
+			g.Printf("%s", strings.ToLower(run[i].Name))
 		}
 	}
 	g.Printf("\"\n")
 }
 
-// buildOneRun generates the variables and String method for a single run of contiguous values.
-func (g *Generator) buildOneRun(runs [][]Value, typeName string) {
+// BuildOneRun generates the variables and String method for a single run of contiguous values.
+func (g *Generator) BuildOneRun(runs [][]Value, typeName string) {
 	values := runs[0]
 	g.Printf("\n")
-	g.declareIndexAndNameVar(values, typeName)
+	g.DeclareIndexAndNameVar(values, typeName)
 	// The generated code is simple enough to write as a Printf format.
 	lessThanZero := ""
-	if values[0].signed {
+	if values[0].Signed {
 		lessThanZero = "i < 0 || "
 	}
-	if values[0].value == 0 { // Signed or unsigned, 0 is still 0.
-		g.Printf(stringOneRun, typeName, usize(len(values)), lessThanZero)
+	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
+		g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero)
 	} else {
-		g.Printf(stringOneRunWithOffset, typeName, values[0].String(), usize(len(values)), lessThanZero)
+		g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero)
 	}
 }
 
@@ -198,7 +205,7 @@ func (g *Generator) buildOneRun(runs [][]Value, typeName string) {
 //	[1]: type name
 //	[2]: size of index element (8 for uint8 etc.)
 //	[3]: less than zero check (for signed types)
-const stringOneRun = `func (i %[1]s) String() string {
+const StringOneRun = `func (i %[1]s) String() string {
 	if %[3]si >= %[1]s(len(_%[1]sIndex)-1) {
 		return "%[1]s(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
@@ -212,7 +219,7 @@ const stringOneRun = `func (i %[1]s) String() string {
 //	[2]: lowest defined value for type, as a string
 //	[3]: size of index element (8 for uint8 etc.)
 //	[4]: less than zero check (for signed types)
-const stringOneRunWithOffset = `func (i %[1]s) String() string {
+const StringOneRunWithOffset = `func (i %[1]s) String() string {
 	i -= %[2]s
 	if %[4]si >= %[1]s(len(_%[1]sIndex)-1) {
 		return "%[1]s(" + strconv.FormatInt(int64(i + %[2]s), 10) + ")"
@@ -221,11 +228,11 @@ const stringOneRunWithOffset = `func (i %[1]s) String() string {
 }
 `
 
-// buildMultipleRuns generates the variables and String method for multiple runs of contiguous values.
+// BuildMultipleRuns generates the variables and String method for multiple runs of contiguous values.
 // For this pattern, a single Printf format won't do.
-func (g *Generator) buildMultipleRuns(runs [][]Value, typeName string) {
+func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string) {
 	g.Printf("\n")
-	g.declareIndexAndNameVars(runs, typeName)
+	g.DeclareIndexAndNameVars(runs, typeName)
 	g.Printf("func (i %s) String() string {\n", typeName)
 	g.Printf("\tswitch {\n")
 	for i, values := range runs {
@@ -235,7 +242,7 @@ func (g *Generator) buildMultipleRuns(runs [][]Value, typeName string) {
 			continue
 		}
 		g.Printf("\tcase %s <= i && i <= %s:\n", &values[0], &values[len(values)-1])
-		if values[0].value != 0 {
+		if values[0].Value != 0 {
 			g.Printf("\t\ti -= %s\n", &values[0])
 		}
 		g.Printf("\t\treturn _%sName_%d[_%sIndex_%d[i]:_%sIndex_%d[i+1]]\n",
@@ -247,25 +254,25 @@ func (g *Generator) buildMultipleRuns(runs [][]Value, typeName string) {
 	g.Printf("}\n")
 }
 
-// buildMap handles the case where the space is so sparse a map is a reasonable fallback.
+// BuildMap handles the case where the space is so sparse a map is a reasonable fallback.
 // It's a rare situation but has simple code.
-func (g *Generator) buildMap(runs [][]Value, typeName string) {
+func (g *Generator) BuildMap(runs [][]Value, typeName string) {
 	g.Printf("\n")
-	g.declareNameVars(runs, typeName, "")
+	g.DeclareNameVars(runs, typeName, "")
 	g.Printf("\nvar _%sMap = map[%s]string{\n", typeName, typeName)
 	n := 0
 	for _, values := range runs {
 		for _, value := range values {
-			g.Printf("\t%s: _%sName[%d:%d],\n", &value, typeName, n, n+len(value.name))
-			n += len(value.name)
+			g.Printf("\t%s: _%sName[%d:%d],\n", &value, typeName, n, n+len(value.Name))
+			n += len(value.Name)
 		}
 	}
 	g.Printf("}\n\n")
-	g.Printf(stringMap, typeName)
+	g.Printf(StringMap, typeName)
 }
 
-// buildNoOpOrderChangeDetect try to let the compiler and the user know if the order/value of the ENUMS have changed.
-func (g *Generator) buildNoOpOrderChangeDetect(runs [][]Value, typeName string) {
+// BuildNoOpOrderChangeDetect try to let the compiler and the user know if the order/value of the ENUMS have changed.
+func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) {
 	g.Printf("\n")
 
 	g.Printf(`
@@ -276,14 +283,14 @@ func (g *Generator) buildNoOpOrderChangeDetect(runs [][]Value, typeName string) 
 	g.Printf("\n var x [1]struct{}\n")
 	for _, values := range runs {
 		for _, value := range values {
-			g.Printf("\t_ = x[%s-(%s)]\n", value.originalName, value.str)
+			g.Printf("\t_ = x[%s-(%s)]\n", value.OriginalName, value.Str)
 		}
 	}
 	g.Printf("}\n\n")
 }
 
 // Argument to format is the type name.
-const stringMap = `func (i %[1]s) String() string {
+const StringMap = `func (i %[1]s) String() string {
 	if str, ok := _%[1]sMap[i]; ok {
 		return str
 	}

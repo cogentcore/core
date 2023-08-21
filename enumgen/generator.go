@@ -198,15 +198,13 @@ func (g *Generator) Generate() error {
 			return errors.New("no values defined for type " + typeName)
 		}
 
-		for _, prefix := range strings.Split(g.Config.TrimPrefix, ",") {
-			g.trimValueNames(values, prefix)
-		}
+		g.TrimValueNames(values)
 
 		g.TransformValueNames(values)
 
-		g.prefixValueNames(values, g.Config.AddPrefix)
+		g.PrefixValueNames(values)
 
-		runs := splitIntoRuns(values)
+		runs := SplitIntoRuns(values)
 		// The decision of which pattern to use depends on the number of
 		// runs in the numbers. If there's only one, it's easy. For more than
 		// one, there's a tradeoff between complexity and size of the data
@@ -222,17 +220,17 @@ func (g *Generator) Generate() error {
 		const runsThreshold = 10
 		switch {
 		case len(runs) == 1:
-			g.buildOneRun(runs, typeName)
+			g.BuildOneRun(runs, typeName)
 		case len(runs) <= runsThreshold:
-			g.buildMultipleRuns(runs, typeName)
+			g.BuildMultipleRuns(runs, typeName)
 		default:
-			g.buildMap(runs, typeName)
+			g.BuildMap(runs, typeName)
 		}
 		if g.Config.AltValues {
 			g.buildAltStringValuesMethod(typeName)
 		}
 
-		g.buildNoOpOrderChangeDetect(runs, typeName)
+		g.BuildNoOpOrderChangeDetect(runs, typeName)
 
 		g.buildBasicExtras(runs, typeName, runsThreshold)
 		if g.Config.JSON {
@@ -303,16 +301,16 @@ func (g *Generator) TransformValueNames(values []Value) {
 	}
 
 	for i, v := range values {
-		after := fn(v.name)
+		after := fn(v.Name)
 		// If the original one was "" or the one before the transformation
 		// was "" (most commonly if linecomment defines it as empty) we
 		// do not care if it's empty.
 		// But if any of them was not empty before then it means that
 		// the transformed emptied the value
-		if v.originalName != "" && v.name != "" && after == "" {
-			log.Fatalf("transformation of %q (%s) got an empty result", v.name, v.originalName)
+		if v.OriginalName != "" && v.Name != "" && after == "" {
+			log.Fatalf("transformation of %q (%s) got an empty result", v.Name, v.OriginalName)
 		}
-		values[i].name = after
+		values[i].Name = after
 	}
 }
 
