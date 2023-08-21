@@ -12,6 +12,9 @@ import "fmt"
 // the given configuration object. It reads
 // all Go files in the config source directory
 // and writes the result to the config output file.
+// It is a simple entry point to enumgen that does all
+// of the steps; for more specific functionality, create
+// a new [Generator] with [NewGenerator] and call methods on it.
 func Generate(config Config) error {
 	g := NewGenerator(config)
 	err := g.ParsePackage()
