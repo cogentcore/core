@@ -169,12 +169,12 @@ func (i Days) IsValid() bool {
 	return false
 }
 
-// MarshalJSON implements the json.Marshaler interface for Days
+// MarshalJSON implements the [json.Marshaler] interface.
 func (i Days) MarshalJSON() ([]byte, error) {
 	return json.Marshal(i.String())
 }
 
-// UnmarshalJSON implements the json.Unmarshaler interface for Days
+// UnmarshalJSON implements the [json.Unmarshaler] interface.
 func (i *Days) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
@@ -183,12 +183,12 @@ func (i *Days) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-// MarshalText implements the encoding.TextMarshaler interface for Days
+// MarshalText implements the [encoding.TextMarshaler] interface.
 func (i Days) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
-// UnmarshalText implements the encoding.TextUnmarshaler interface for Days
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Days) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
@@ -367,12 +367,12 @@ func (i *States) SetBitFlag(on bool, f ...enums.BitFlag) {
 	}
 }
 
-// MarshalJSON implements the json.Marshaler interface for States
+// MarshalJSON implements the [json.Marshaler] interface.
 func (i States) MarshalJSON() ([]byte, error) {
 	return json.Marshal(i.String())
 }
 
-// UnmarshalJSON implements the json.Unmarshaler interface for States
+// UnmarshalJSON implements the [json.Unmarshaler] interface.
 func (i *States) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
@@ -381,12 +381,12 @@ func (i *States) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-// MarshalText implements the encoding.TextMarshaler interface for States
+// MarshalText implements the [encoding.TextMarshaler] interface.
 func (i States) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
-// UnmarshalText implements the encoding.TextUnmarshaler interface for States
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *States) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }

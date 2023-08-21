@@ -1,6 +1,6 @@
 module github.com/goki/enums
 
-go 1.19
+go 1.18
 
 require (
 	github.com/iancoleman/strcase v0.3.0

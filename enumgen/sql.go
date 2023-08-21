@@ -14,12 +14,14 @@ package enumgen
 // Arguments to format are:
 //
 //	[1]: type name
-const valueMethod = `func (i %[1]s) Value() (driver.Value, error) {
+const valueMethod = `// Scan implements the [driver.Valuer] interface.
+func (i %[1]s) Value() (driver.Value, error) {
 	return i.String(), nil
 }
 `
 
-const scanMethod = `func (i *%[1]s) Scan(value interface{}) error {
+const scanMethod = `// Value implements the [sql.Scanner] interface.
+func (i *%[1]s) Scan(value any) error {
 	if value == nil {
 		return nil
 	}

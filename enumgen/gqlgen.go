@@ -15,12 +15,12 @@ package enumgen
 //
 //	[1]: type name
 const gqlgenMethods = `
-// MarshalGQL implements the graphql.Marshaler interface for %[1]s
+// MarshalGQL implements the [graphql.Marshaler] interface.
 func (i %[1]s) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(i.String()))
 }
 
-// UnmarshalGQL implements the graphql.Unmarshaler interface for %[1]s
+// UnmarshalGQL implements the [graphql.Unmarshaler] interface.
 func (i *%[1]s) UnmarshalGQL(value interface{}) error {
 	str, ok := value.(string)
 	if !ok {

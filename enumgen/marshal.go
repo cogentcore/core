@@ -15,12 +15,12 @@ package enumgen
 //
 //	[1]: type name
 const JSONMethods = `
-// MarshalJSON implements the json.Marshaler interface for %[1]s
+// MarshalJSON implements the [json.Marshaler] interface.
 func (i %[1]s) MarshalJSON() ([]byte, error) {
 	return json.Marshal(i.String())
 }
 
-// UnmarshalJSON implements the json.Unmarshaler interface for %[1]s
+// UnmarshalJSON implements the [json.Unmarshaler] interface.
 func (i *%[1]s) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
@@ -38,12 +38,12 @@ func (g *Generator) BuildJSONMethods(runs [][]Value, typeName string, runsThresh
 //
 //	[1]: type name
 const TextMethods = `
-// MarshalText implements the encoding.TextMarshaler interface for %[1]s
+// MarshalText implements the [encoding.TextMarshaler] interface.
 func (i %[1]s) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
-// UnmarshalText implements the encoding.TextUnmarshaler interface for %[1]s
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *%[1]s) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
@@ -57,13 +57,13 @@ func (g *Generator) BuildTextMethods(runs [][]Value, typeName string, runsThresh
 //
 //	[1]: type name
 const YAMLMethods = `
-// MarshalYAML implements a YAML Marshaler for %[1]s
-func (i %[1]s) MarshalYAML() (interface{}, error) {
+// MarshalYAML implements a YAML Marshaler.
+func (i %[1]s) MarshalYAML() (any, error) {
 	return i.String(), nil
 }
 
-// UnmarshalYAML implements a YAML Unmarshaler for %[1]s
-func (i *%[1]s) UnmarshalYAML(unmarshal func(interface{}) error) error {
+// UnmarshalYAML implements a YAML Unmarshaler.
+func (i *%[1]s) UnmarshalYAML(unmarshal func(any) error) error {
 	var s string
 	if err := unmarshal(&s); err != nil {
 		return err
