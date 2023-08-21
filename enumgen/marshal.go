@@ -26,10 +26,7 @@ func (i *%[1]s) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &s); err != nil {
 		return fmt.Errorf("%[1]s should be a string, got %%s", data)
 	}
-
-	var err error
-	*i, err = %[1]sString(s)
-	return err
+	return i.SetString(s)
 }
 `
 
@@ -48,9 +45,7 @@ func (i %[1]s) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for %[1]s
 func (i *%[1]s) UnmarshalText(text []byte) error {
-	var err error
-	*i, err = %[1]sString(string(text))
-	return err
+	return i.SetString(string(text))
 }
 `
 
@@ -73,10 +68,7 @@ func (i *%[1]s) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&s); err != nil {
 		return err
 	}
-
-	var err error
-	*i, err = %[1]sString(s)
-	return err
+	return i.SetString(s)
 }
 `
 

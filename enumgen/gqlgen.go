@@ -26,10 +26,7 @@ func (i *%[1]s) UnmarshalGQL(value interface{}) error {
 	if !ok {
 		return fmt.Errorf("%[1]s should be a string, got %%T", value)
 	}
-
-	var err error
-	*i, err = %[1]sString(str)
-	return err
+	return i.SetString(str)
 }
 `
 

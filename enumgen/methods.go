@@ -258,7 +258,7 @@ func (i *%[1]s) SetString(s string) error {
 		*i = val
 		return nil
 	}
-	return 0, fmt.Errorf("%%s does not belong to %[1]s values", s)
+	return errors.New(s+" does not belong to %[1]s values")
 }
 `
 
@@ -268,7 +268,19 @@ func (i *%[1]s) SetString(s string) error {
 const StringValuesMethod = `// Values returns all possible values this
 // enum type has. This slice will be in the
 // same order as those returned by Strings and Descs.
-func (i %[1]s) Values() []%[1]s {
+func (i %[1]s) Values() []enums.Enum {
+	return _%[1]sValues
+}
+`
+
+// Arguments to format are:
+//
+//	[1]: type name
+const StringValuesGlobal = `// %[1]sValues returns all possible values of
+// the enum type %[1]s. This slice will be in the
+// same order as those returned by the Values,
+// Strings, and Descs methods on %[1]s.
+func %[1]sValues() []%[1]s {
 	return _%[1]sValues
 }
 `
@@ -347,6 +359,7 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThresh
 	// Print the basic extra methods
 	g.Printf(StringNameToValueMethod, typeName)
 	g.Printf(StringValuesMethod, typeName)
+	g.Printf(StringValuesGlobal, typeName)
 	g.Printf(StringsMethod, typeName)
 	if len(runs) <= runsThreshold {
 		g.Printf(StringBelongsMethodLoop, typeName)

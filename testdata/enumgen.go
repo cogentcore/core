@@ -4,7 +4,10 @@ package testdata
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/goki/enums/enums"
+	"strconv"
 	"strings"
 )
 
@@ -76,13 +79,21 @@ func (i *MyEnum) SetString(s string) error {
 		*i = val
 		return nil
 	}
-	return 0, fmt.Errorf("%s does not belong to MyEnum values", s)
+	return errors.New(s + " does not belong to MyEnum values")
 }
 
 // Values returns all possible values this
 // enum type has. This slice will be in the
 // same order as those returned by Strings and Descs.
-func (i MyEnum) Values() []MyEnum {
+func (i MyEnum) Values() []enums.Enum {
+	return _MyEnumValues
+}
+
+// MyEnumValues returns all possible values of
+// the enum type MyEnum. This slice will be in the
+// same order as those returned by the Values,
+// Strings, and Descs methods on MyEnum.
+func MyEnumValues() []MyEnum {
 	return _MyEnumValues
 }
 
@@ -118,10 +129,7 @@ func (i *MyEnum) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &s); err != nil {
 		return fmt.Errorf("MyEnum should be a string, got %s", data)
 	}
-
-	var err error
-	*i, err = MyEnumString(s)
-	return err
+	return i.SetString(s)
 }
 
 // MarshalText implements the encoding.TextMarshaler interface for MyEnum
@@ -131,9 +139,7 @@ func (i MyEnum) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum
 func (i *MyEnum) UnmarshalText(text []byte) error {
-	var err error
-	*i, err = MyEnumString(string(text))
-	return err
+	return i.SetString(string(text))
 }
 
 const _MyBitEnumName = "AppleOrangePeachBlueberryGrapefruitStrawberry"
@@ -200,13 +206,21 @@ func (i *MyBitEnum) SetString(s string) error {
 		*i = val
 		return nil
 	}
-	return 0, fmt.Errorf("%s does not belong to MyBitEnum values", s)
+	return errors.New(s + " does not belong to MyBitEnum values")
 }
 
 // Values returns all possible values this
 // enum type has. This slice will be in the
 // same order as those returned by Strings and Descs.
-func (i MyBitEnum) Values() []MyBitEnum {
+func (i MyBitEnum) Values() []enums.Enum {
+	return _MyBitEnumValues
+}
+
+// MyBitEnumValues returns all possible values of
+// the enum type MyBitEnum. This slice will be in the
+// same order as those returned by the Values,
+// Strings, and Descs methods on MyBitEnum.
+func MyBitEnumValues() []MyBitEnum {
 	return _MyBitEnumValues
 }
 
@@ -242,10 +256,7 @@ func (i *MyBitEnum) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &s); err != nil {
 		return fmt.Errorf("MyBitEnum should be a string, got %s", data)
 	}
-
-	var err error
-	*i, err = MyBitEnumString(s)
-	return err
+	return i.SetString(s)
 }
 
 // MarshalText implements the encoding.TextMarshaler interface for MyBitEnum
@@ -255,7 +266,5 @@ func (i MyBitEnum) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for MyBitEnum
 func (i *MyBitEnum) UnmarshalText(text []byte) error {
-	var err error
-	*i, err = MyBitEnumString(string(text))
-	return err
+	return i.SetString(string(text))
 }

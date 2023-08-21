@@ -36,13 +36,7 @@ const scanMethod = `func (i *%[1]s) Scan(value interface{}) error {
 		return fmt.Errorf("invalid value of %[1]s: %%[1]T(%%[1]v)", value)
 	}
 
-	val, err := %[1]sString(str)
-	if err != nil {
-		return err
-	}
-
-	*i = val
-	return nil
+	return i.SetString(str)
 }
 `
 

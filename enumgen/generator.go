@@ -93,6 +93,8 @@ func (g *Generator) PrintHeader() {
 	g.Printf("import (\n")
 	g.Printf("\t\"fmt\"\n")
 	g.Printf("\t\"strings\"\n")
+	g.Printf("\t\"strconv\"\n")
+	g.Printf("\t\"errors\"\n")
 	if g.Config.SQL {
 		g.Printf("\t\"database/sql/driver\"\n")
 	}
@@ -103,6 +105,7 @@ func (g *Generator) PrintHeader() {
 		g.Printf("\t\"io\"\n")
 		g.Printf("\t\"strconv\"\n")
 	}
+	g.Printf("\t\"github.com/goki/enums/enums\"\n")
 	g.Printf(")\n")
 }
 
