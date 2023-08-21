@@ -41,9 +41,11 @@ func (pkg *Package) check(fs *token.FileSet, astFiles []*ast.File) {
 	pkg.TypesPkg = typesPkg
 }
 
-func (g *Generator) TransformValueNames(values []Value, transformMethod string) {
+// TransformValueNames transforms the names of the given values according
+// to the transform method specified in [Generator.Config.Transform]
+func (g *Generator) TransformValueNames(values []Value) {
 	var fn func(src string) string
-	switch transformMethod {
+	switch g.Config.Transform {
 	case "snake":
 		fn = strcase.ToSnake
 	case "snake_upper", "snake-upper":
@@ -120,7 +122,7 @@ func (g *Generator) prefixValueNames(values []Value, prefix string) {
 // The input slice is known to be non-empty.
 func splitIntoRuns(values []Value) [][]Value {
 	// We use stable sort so the lexically first name is chosen for equal elements.
-	sort.Stable(byValue(values))
+	sort.Stable(ByValue(values))
 	// Remove duplicates. Stable sort has put the one we want to print first,
 	// so use that one. The String method won't care about which named constant
 	// was the argument, so the first name for the given value is the only one to keep.
@@ -145,38 +147,6 @@ func splitIntoRuns(values []Value) [][]Value {
 		values = values[i:]
 	}
 	return runs
-}
-
-// Value represents a declared constant.
-type Value struct {
-	originalName string // The name of the constant before transformation
-	name         string // The name of the constant after transformation (i.e. camel case => snake case)
-	// The value is stored as a bit pattern alone. The boolean tells us
-	// whether to interpret it as an int64 or a uint64; the only place
-	// this matters is when sorting.
-	// Much of the time the str field is all we need; it is printed
-	// by Value.String.
-	value  uint64 // Will be converted to int64 when needed.
-	signed bool   // Whether the constant is a signed type.
-	str    string // The string representation given by the "go/exact" package.
-}
-
-func (v *Value) String() string {
-	return v.str
-}
-
-// byValue lets us sort the constants into increasing order.
-// We take care in the Less method to sort in signed or unsigned order,
-// as appropriate.
-type byValue []Value
-
-func (b byValue) Len() int      { return len(b) }
-func (b byValue) Swap(i, j int) { b[i], b[j] = b[j], b[i] }
-func (b byValue) Less(i, j int) bool {
-	if b[i].signed {
-		return int64(b[i].value) < int64(b[j].value)
-	}
-	return b[i].value < b[j].value
 }
 
 // Helpers
