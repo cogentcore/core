@@ -14,94 +14,9 @@ package enumgen
 import (
 	"bytes"
 	"fmt"
-	"go/ast"
-	"go/importer"
-	"go/token"
-	"go/types"
-	"log"
 	"sort"
 	"strings"
-	"unicode"
-	"unicode/utf8"
-
-	"github.com/iancoleman/strcase"
 )
-
-// check type-checks the package. The package must be OK to proceed.
-func (pkg *Package) check(fs *token.FileSet, astFiles []*ast.File) {
-	pkg.Defs = make(map[*ast.Ident]types.Object)
-	config := types.Config{Importer: importer.Default(), FakeImportC: true}
-	info := &types.Info{
-		Defs: pkg.Defs,
-	}
-	typesPkg, err := config.Check(pkg.Dir, fs, astFiles, info)
-	if err != nil {
-		log.Fatalf("checking package: %s", err)
-	}
-	pkg.TypesPkg = typesPkg
-}
-
-// TransformValueNames transforms the names of the given values according
-// to the transform method specified in [Generator.Config.Transform]
-func (g *Generator) TransformValueNames(values []Value) {
-	var fn func(src string) string
-	switch g.Config.Transform {
-	case "snake":
-		fn = strcase.ToSnake
-	case "snake_upper", "snake-upper":
-		fn = strcase.ToScreamingSnake
-	case "kebab":
-		fn = strcase.ToKebab
-	case "kebab_upper", "kebab-upper":
-		fn = strcase.ToScreamingKebab
-	case "upper":
-		fn = strings.ToUpper
-	case "lower":
-		fn = strings.ToLower
-	case "title":
-		fn = strings.Title
-	case "title-lower":
-		fn = func(s string) string {
-			title := []rune(strings.Title(s))
-			title[0] = unicode.ToLower(title[0])
-			return string(title)
-		}
-	case "first":
-		fn = func(s string) string {
-			r, _ := utf8.DecodeRuneInString(s)
-			return string(r)
-		}
-	case "first_upper", "first-upper":
-		fn = func(s string) string {
-			r, _ := utf8.DecodeRuneInString(s)
-			return strings.ToUpper(string(r))
-		}
-	case "first_lower", "first-lower":
-		fn = func(s string) string {
-			r, _ := utf8.DecodeRuneInString(s)
-			return strings.ToLower(string(r))
-		}
-	case "whitespace":
-		fn = func(s string) string {
-			return strcase.ToDelimited(s, ' ')
-		}
-	default:
-		return
-	}
-
-	for i, v := range values {
-		after := fn(v.name)
-		// If the original one was "" or the one before the transformation
-		// was "" (most commonly if linecomment defines it as empty) we
-		// do not care if it's empty.
-		// But if any of them was not empty before then it means that
-		// the transformed emptied the value
-		if v.originalName != "" && v.name != "" && after == "" {
-			log.Fatalf("transformation of %q (%s) got an empty result", v.name, v.originalName)
-		}
-		values[i].name = after
-	}
-}
 
 // trimValueNames removes a prefix from each name
 func (g *Generator) trimValueNames(values []Value, prefix string) {

@@ -17,9 +17,13 @@ import (
 	"fmt"
 	"go/ast"
 	"go/format"
+	"log"
 	"os"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
+	"github.com/iancoleman/strcase"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -112,39 +116,51 @@ func (g *Generator) PrintHeader() {
 func (g *Generator) FindEnumTypes() error {
 	g.Types = map[*ast.TypeSpec]bool{}
 	for _, file := range g.Pkg.Files {
-		var err error
+		var terr error
 		ast.Inspect(file.File, func(n ast.Node) bool {
-			if err != nil {
+			if terr != nil {
 				return false
 			}
-			typ, ok := n.(*ast.TypeSpec)
-			if !ok {
-				return true
+			cont, err := g.InspectForType(n)
+			if err != nil {
+				terr = err
 			}
-			if typ.Comment == nil {
-				return true
-			}
-			for _, c := range typ.Comment.List {
-				if strings.HasPrefix(c.Text, "//enums:") {
-					d := strings.TrimPrefix(c.Text, "//enums:")
-					switch d {
-					case "enum":
-						g.Types[typ] = false
-					case "bitflag":
-						g.Types[typ] = true
-					default:
-						err = errors.New("unrecognized enums directive: '" + c.Text + "'")
-						return false
-					}
-				}
-			}
-			return true
+			return cont
 		})
-		if err != nil {
-			return err
+		if terr != nil {
+			return fmt.Errorf("FindEnumTypes: error finding enum types: %w", terr)
 		}
 	}
 	return nil
+}
+
+// InspectForType looks at the given AST node and adds it
+// to [Generator.Types] if it is marked with an appropriate
+// comment directive. It returns whether the AST inspector should
+// continue, and an error if there is one. It should only
+// be called in [ast.Inspect].
+func (g *Generator) InspectForType(n ast.Node) (bool, error) {
+	typ, ok := n.(*ast.TypeSpec)
+	if !ok {
+		return true, nil
+	}
+	if typ.Comment == nil {
+		return true, nil
+	}
+	for _, c := range typ.Comment.List {
+		if strings.HasPrefix(c.Text, "//enums:") {
+			d := strings.TrimPrefix(c.Text, "//enums:")
+			switch d {
+			case "enum":
+				g.Types[typ] = false
+			case "bitflag":
+				g.Types[typ] = true
+			default:
+				return false, errors.New("unrecognized enums directive: '" + c.Text + "'")
+			}
+		}
+	}
+	return true, nil
 }
 
 // Generate produces the enum methods for the types
@@ -160,7 +176,20 @@ func (g *Generator) Generate() error {
 			file.BitFlag = bitflag
 			file.Values = nil
 			if file.File != nil {
-				ast.Inspect(file.File, file.GenDecl)
+				var terr error
+				ast.Inspect(file.File, func(n ast.Node) bool {
+					if terr != nil {
+						return false
+					}
+					cont, err := file.GenDecl(n)
+					if err != nil {
+						terr = err
+					}
+					return cont
+				})
+				if terr != nil {
+					return fmt.Errorf("Generate: error parsing declaration clauses: %w", terr)
+				}
 				values = append(values, file.Values...)
 			}
 		}
@@ -223,6 +252,68 @@ func (g *Generator) Generate() error {
 		}
 	}
 	return nil
+}
+
+// TransformValueNames transforms the names of the given values according
+// to the transform method specified in [Generator.Config.Transform]
+func (g *Generator) TransformValueNames(values []Value) {
+	var fn func(src string) string
+	switch g.Config.Transform {
+	case "snake":
+		fn = strcase.ToSnake
+	case "snake_upper", "snake-upper":
+		fn = strcase.ToScreamingSnake
+	case "kebab":
+		fn = strcase.ToKebab
+	case "kebab_upper", "kebab-upper":
+		fn = strcase.ToScreamingKebab
+	case "upper":
+		fn = strings.ToUpper
+	case "lower":
+		fn = strings.ToLower
+	case "title":
+		fn = strings.Title
+	case "title-lower":
+		fn = func(s string) string {
+			title := []rune(strings.Title(s))
+			title[0] = unicode.ToLower(title[0])
+			return string(title)
+		}
+	case "first":
+		fn = func(s string) string {
+			r, _ := utf8.DecodeRuneInString(s)
+			return string(r)
+		}
+	case "first_upper", "first-upper":
+		fn = func(s string) string {
+			r, _ := utf8.DecodeRuneInString(s)
+			return strings.ToUpper(string(r))
+		}
+	case "first_lower", "first-lower":
+		fn = func(s string) string {
+			r, _ := utf8.DecodeRuneInString(s)
+			return strings.ToLower(string(r))
+		}
+	case "whitespace":
+		fn = func(s string) string {
+			return strcase.ToDelimited(s, ' ')
+		}
+	default:
+		return
+	}
+
+	for i, v := range values {
+		after := fn(v.name)
+		// If the original one was "" or the one before the transformation
+		// was "" (most commonly if linecomment defines it as empty) we
+		// do not care if it's empty.
+		// But if any of them was not empty before then it means that
+		// the transformed emptied the value
+		if v.originalName != "" && v.name != "" && after == "" {
+			log.Fatalf("transformation of %q (%s) got an empty result", v.name, v.originalName)
+		}
+		values[i].name = after
+	}
 }
 
 // Format returns the contents of the Generator's buffer

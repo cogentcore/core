@@ -12,11 +12,11 @@
 package enumgen
 
 import (
+	"errors"
 	"go/ast"
 	exact "go/constant"
 	"go/token"
 	"go/types"
-	"log"
 	"strings"
 )
 
@@ -32,11 +32,14 @@ type File struct {
 }
 
 // GenDecl processes one declaration clause.
-func (f *File) GenDecl(node ast.Node) bool {
+// It returns whether the AST inspector should continue,
+// and an error if there is one. It should only be
+// called in [ast.Inspect].
+func (f *File) GenDecl(node ast.Node) (bool, error) {
 	decl, ok := node.(*ast.GenDecl)
 	if !ok || decl.Tok != token.CONST {
 		// We only care about const declarations.
-		return true
+		return true, nil
 	}
 	// The name of the type of the constants we are declaring.
 	// Can change if this is a multi-element declaration.
@@ -77,20 +80,20 @@ func (f *File) GenDecl(node ast.Node) bool {
 			// types.Const, and extract its value.
 			obj, ok := f.Pkg.Defs[n]
 			if !ok {
-				log.Fatalf("no value for constant %s", n)
+				return false, errors.New("no value for constant " + n.String())
 			}
 			info := obj.Type().Underlying().(*types.Basic).Info()
 			if info&types.IsInteger == 0 {
-				log.Fatalf("can't handle non-integer constant type %s", typ)
+				return false, errors.New("can't handle non-integer constant type " + typ)
 			}
 			value := obj.(*types.Const).Val() // Guaranteed to succeed as this is CONST.
 			if value.Kind() != exact.Int {
-				log.Fatalf("can't happen: constant is not an integer %s", n)
+				return false, errors.New("can't happen: constant is not an integer " + n.String())
 			}
 			i64, isInt := exact.Int64Val(value)
 			u64, isUint := exact.Uint64Val(value)
 			if !isInt && !isUint {
-				log.Fatalf("internal error: value of %s is not an integer: %s", n, value.String())
+				return false, errors.New("internal error: value of " + n.String() + " is not an integer: " + value.String())
 			}
 			if !isInt {
 				u64 = uint64(i64)
@@ -109,5 +112,5 @@ func (f *File) GenDecl(node ast.Node) bool {
 			f.Values = append(f.Values, v)
 		}
 	}
-	return false
+	return false, nil
 }
