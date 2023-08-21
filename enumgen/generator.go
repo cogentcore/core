@@ -27,11 +27,11 @@ import (
 // It is primarily used to buffer
 // the output for [format.Source].
 type Generator struct {
-	Config     Config                 // The configuration information
-	Buf        bytes.Buffer           // The accumulated output.
-	Pkg        *Package               // The package we are scanning.
-	Types      map[*ast.TypeSpec]bool // The enum types; the value is whether they are a bit flag or not
-	HasBitFlag bool                   // Whether there is any bit flag enum type in the package (used for determining imports)
+	Config     Config       // The configuration information
+	Buf        bytes.Buffer // The accumulated output.
+	Pkg        *Package     // The package we are scanning.
+	Types      []Type       // The enum types
+	HasBitFlag bool         // Whether there is any bit flag enum type in the package (used for determining imports)
 }
 
 // NewGenerator returns a new generator with the
@@ -116,7 +116,7 @@ func (g *Generator) PrintHeader() {
 // and finds all integer (signed or unsigned) types labeled with enums:enum
 // or enums:bitflag. It stores the resulting types in [Generator.Types].
 func (g *Generator) FindEnumTypes() error {
-	g.Types = map[*ast.TypeSpec]bool{}
+	g.Types = []Type{}
 	for _, file := range g.Pkg.Files {
 		var terr error
 		ast.Inspect(file.File, func(n ast.Node) bool {
@@ -154,9 +154,9 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 			d := strings.TrimPrefix(c.Text, "//enums:")
 			switch d {
 			case "enum":
-				g.Types[typ] = false
+				g.Types = append(g.Types, Type{Type: typ, IsBitFlag: false})
 			case "bitflag":
-				g.Types[typ] = true
+				g.Types = append(g.Types, Type{Type: typ, IsBitFlag: true})
 				g.HasBitFlag = true
 			default:
 				return false, errors.New("unrecognized enums directive: '" + c.Text + "'")
@@ -169,14 +169,14 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 // Generate produces the enum methods for the types
 // stored in [Generator.Types].
 func (g *Generator) Generate() error {
-	for typ, bitflag := range g.Types {
+	for _, typ := range g.Types {
 		values := make([]Value, 0, 100)
-		typeName := typ.Name.String()
+		typeName := typ.Type.Name.String()
 		for _, file := range g.Pkg.Files {
 			file.Config = g.Config
 			// Set the state for this run of the walker.
 			file.TypeName = typeName
-			file.BitFlag = bitflag
+			file.BitFlag = typ.IsBitFlag
 			file.Values = nil
 			if file.File != nil {
 				var terr error
@@ -233,7 +233,7 @@ func (g *Generator) Generate() error {
 		g.BuildNoOpOrderChangeDetect(runs, typeName)
 
 		g.BuildBasicExtras(runs, typeName, runsThreshold)
-		if bitflag {
+		if typ.IsBitFlag {
 			g.BuildBitFlagMethods(runs, typeName)
 		}
 

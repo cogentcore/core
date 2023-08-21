@@ -12,6 +12,187 @@ import (
 	"sync/atomic"
 )
 
+const _DaysName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
+
+var _DaysIndex = [...]uint8{0, 6, 12, 19, 28, 36, 42, 50}
+
+const _DaysLowerName = "sundaymondaytuesdaywednesdaythursdayfridaysaturday"
+
+// String returns the string representation
+// of this Days value.
+func (i Days) String() string {
+	if i < 0 || i >= Days(len(_DaysIndex)-1) {
+		return "Days(" + strconv.FormatInt(int64(i), 10) + ")"
+	}
+	return _DaysName[_DaysIndex[i]:_DaysIndex[i+1]]
+}
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the stringer command to generate them again.
+func _DaysNoOp() {
+	var x [1]struct{}
+	_ = x[Sunday-(0)]
+	_ = x[Monday-(1)]
+	_ = x[Tuesday-(2)]
+	_ = x[Wednesday-(3)]
+	_ = x[Thursday-(4)]
+	_ = x[Friday-(5)]
+	_ = x[Saturday-(6)]
+}
+
+var _DaysValues = []Days{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
+
+var _DaysNameToValueMap = map[string]Days{
+	_DaysName[0:6]:        Sunday,
+	_DaysLowerName[0:6]:   Sunday,
+	_DaysName[6:12]:       Monday,
+	_DaysLowerName[6:12]:  Monday,
+	_DaysName[12:19]:      Tuesday,
+	_DaysLowerName[12:19]: Tuesday,
+	_DaysName[19:28]:      Wednesday,
+	_DaysLowerName[19:28]: Wednesday,
+	_DaysName[28:36]:      Thursday,
+	_DaysLowerName[28:36]: Thursday,
+	_DaysName[36:42]:      Friday,
+	_DaysLowerName[36:42]: Friday,
+	_DaysName[42:50]:      Saturday,
+	_DaysLowerName[42:50]: Saturday,
+}
+
+var _DaysNames = []string{
+	_DaysName[0:6],
+	_DaysName[6:12],
+	_DaysName[12:19],
+	_DaysName[19:28],
+	_DaysName[28:36],
+	_DaysName[36:42],
+	_DaysName[42:50],
+}
+
+var _DaysDescMap = map[Days]string{
+	0: _DaysDescs[0],
+	1: _DaysDescs[1],
+	2: _DaysDescs[2],
+	3: _DaysDescs[3],
+	4: _DaysDescs[4],
+	5: _DaysDescs[5],
+	6: _DaysDescs[6],
+}
+
+var _DaysDescs = []string{
+	`Sunday is the first day of the week`,
+	`Monday is the second day of the week`,
+	`Tuesday is the third day of the week`,
+	`Wednesday is the fourth day of the week`,
+	`Thursday is the fifth day of the week`,
+	`Friday is the sixth day of the week`,
+	`Saturday is the seventh day of the week`,
+}
+
+// SetString sets the Days value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *Days) SetString(s string) error {
+	if val, ok := _DaysNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+
+	if val, ok := _DaysNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " does not belong to Days values")
+}
+
+// Int64 returns the Days value as an int64.
+func (i Days) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the Days value from an int64.
+func (i *Days) SetInt64(in int64) {
+	*i = Days(in)
+}
+
+// Desc returns the description of the Days value.
+func (i Days) Desc() string {
+	if str, ok := _DaysDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// DaysValues returns all possible values of
+// the type Days. This slice will be in the
+// same order as those returned by the Values,
+// Strings, and Descs methods on Days.
+func DaysValues() []Days {
+	return _DaysValues
+}
+
+// Values returns all possible values of
+// type Days. This slice will be in the
+// same order as those returned by Strings and Descs.
+func (i Days) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_DaysValues))
+	for i, d := range _DaysValues {
+		res[i] = &d
+	}
+	return res
+}
+
+// Strings returns the string representations of
+// all possible values of type Days.
+// This slice will be in the same order as
+// those returned by Values and Descs.
+func (i Days) Strings() []string {
+	return _DaysNames
+}
+
+// Descs returns the descriptions of all
+// possible values of type Days.
+// This slice will be in the same order as
+// those returned by Values and Strings.
+func (i Days) Descs() []string {
+	return _DaysDescs
+}
+
+// IsValid returns whether the value is a
+// valid option for type Days.
+func (i Days) IsValid() bool {
+	for _, v := range _DaysValues {
+		if i == v {
+			return true
+		}
+	}
+	return false
+}
+
+// MarshalJSON implements the json.Marshaler interface for Days
+func (i Days) MarshalJSON() ([]byte, error) {
+	return json.Marshal(i.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for Days
+func (i *Days) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return fmt.Errorf("Days should be a string, got %s", data)
+	}
+	return i.SetString(s)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for Days
+func (i Days) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface for Days
+func (i *Days) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 const _StatesName = "EnabledDisabledFocusedHoveredActiveSelected"
 
 var _StatesIndex = [...]uint8{0, 7, 15, 22, 29, 35, 43}
@@ -207,186 +388,5 @@ func (i States) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for States
 func (i *States) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-const _DaysName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
-
-var _DaysIndex = [...]uint8{0, 6, 12, 19, 28, 36, 42, 50}
-
-const _DaysLowerName = "sundaymondaytuesdaywednesdaythursdayfridaysaturday"
-
-// String returns the string representation
-// of this Days value.
-func (i Days) String() string {
-	if i < 0 || i >= Days(len(_DaysIndex)-1) {
-		return "Days(" + strconv.FormatInt(int64(i), 10) + ")"
-	}
-	return _DaysName[_DaysIndex[i]:_DaysIndex[i+1]]
-}
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the stringer command to generate them again.
-func _DaysNoOp() {
-	var x [1]struct{}
-	_ = x[Sunday-(0)]
-	_ = x[Monday-(1)]
-	_ = x[Tuesday-(2)]
-	_ = x[Wednesday-(3)]
-	_ = x[Thursday-(4)]
-	_ = x[Friday-(5)]
-	_ = x[Saturday-(6)]
-}
-
-var _DaysValues = []Days{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
-
-var _DaysNameToValueMap = map[string]Days{
-	_DaysName[0:6]:        Sunday,
-	_DaysLowerName[0:6]:   Sunday,
-	_DaysName[6:12]:       Monday,
-	_DaysLowerName[6:12]:  Monday,
-	_DaysName[12:19]:      Tuesday,
-	_DaysLowerName[12:19]: Tuesday,
-	_DaysName[19:28]:      Wednesday,
-	_DaysLowerName[19:28]: Wednesday,
-	_DaysName[28:36]:      Thursday,
-	_DaysLowerName[28:36]: Thursday,
-	_DaysName[36:42]:      Friday,
-	_DaysLowerName[36:42]: Friday,
-	_DaysName[42:50]:      Saturday,
-	_DaysLowerName[42:50]: Saturday,
-}
-
-var _DaysNames = []string{
-	_DaysName[0:6],
-	_DaysName[6:12],
-	_DaysName[12:19],
-	_DaysName[19:28],
-	_DaysName[28:36],
-	_DaysName[36:42],
-	_DaysName[42:50],
-}
-
-var _DaysDescMap = map[Days]string{
-	0: _DaysDescs[0],
-	1: _DaysDescs[1],
-	2: _DaysDescs[2],
-	3: _DaysDescs[3],
-	4: _DaysDescs[4],
-	5: _DaysDescs[5],
-	6: _DaysDescs[6],
-}
-
-var _DaysDescs = []string{
-	`Sunday is the first day of the week`,
-	`Monday is the second day of the week`,
-	`Tuesday is the third day of the week`,
-	`Wednesday is the fourth day of the week`,
-	`Thursday is the fifth day of the week`,
-	`Friday is the sixth day of the week`,
-	`Saturday is the seventh day of the week`,
-}
-
-// SetString sets the Days value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *Days) SetString(s string) error {
-	if val, ok := _DaysNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-
-	if val, ok := _DaysNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " does not belong to Days values")
-}
-
-// Int64 returns the Days value as an int64.
-func (i Days) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the Days value from an int64.
-func (i *Days) SetInt64(in int64) {
-	*i = Days(in)
-}
-
-// Desc returns the description of the Days value.
-func (i Days) Desc() string {
-	if str, ok := _DaysDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// DaysValues returns all possible values of
-// the type Days. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on Days.
-func DaysValues() []Days {
-	return _DaysValues
-}
-
-// Values returns all possible values of
-// type Days. This slice will be in the
-// same order as those returned by Strings and Descs.
-func (i Days) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_DaysValues))
-	for i, d := range _DaysValues {
-		res[i] = &d
-	}
-	return res
-}
-
-// Strings returns the string representations of
-// all possible values of type Days.
-// This slice will be in the same order as
-// those returned by Values and Descs.
-func (i Days) Strings() []string {
-	return _DaysNames
-}
-
-// Descs returns the descriptions of all
-// possible values of type Days.
-// This slice will be in the same order as
-// those returned by Values and Strings.
-func (i Days) Descs() []string {
-	return _DaysDescs
-}
-
-// IsValid returns whether the value is a
-// valid option for type Days.
-func (i Days) IsValid() bool {
-	for _, v := range _DaysValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
-}
-
-// MarshalJSON implements the json.Marshaler interface for Days
-func (i Days) MarshalJSON() ([]byte, error) {
-	return json.Marshal(i.String())
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface for Days
-func (i *Days) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return fmt.Errorf("Days should be a string, got %s", data)
-	}
-	return i.SetString(s)
-}
-
-// MarshalText implements the encoding.TextMarshaler interface for Days
-func (i Days) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the encoding.TextUnmarshaler interface for Days
-func (i *Days) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
