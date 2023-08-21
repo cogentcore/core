@@ -27,10 +27,11 @@ import (
 // It is primarily used to buffer
 // the output for [format.Source].
 type Generator struct {
-	Config Config                 // The configuration information
-	Buf    bytes.Buffer           // The accumulated output.
-	Pkg    *Package               // The package we are scanning.
-	Types  map[*ast.TypeSpec]bool // The enum types; the value is whether they are a bit flag or not
+	Config     Config                 // The configuration information
+	Buf        bytes.Buffer           // The accumulated output.
+	Pkg        *Package               // The package we are scanning.
+	Types      map[*ast.TypeSpec]bool // The enum types; the value is whether they are a bit flag or not
+	HasBitFlag bool                   // Whether there is any bit flag enum type in the package (used for determining imports)
 }
 
 // NewGenerator returns a new generator with the
@@ -95,7 +96,9 @@ func (g *Generator) PrintHeader() {
 	g.Printf("\t\"strings\"\n")
 	g.Printf("\t\"strconv\"\n")
 	g.Printf("\t\"errors\"\n")
-	g.Printf("\t\"sync/atomic\"\n")
+	if g.HasBitFlag {
+		g.Printf("\t\"sync/atomic\"\n")
+	}
 	if g.Config.SQL {
 		g.Printf("\t\"database/sql/driver\"\n")
 	}
@@ -154,6 +157,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 				g.Types[typ] = false
 			case "bitflag":
 				g.Types[typ] = true
+				g.HasBitFlag = true
 			default:
 				return false, errors.New("unrecognized enums directive: '" + c.Text + "'")
 			}
