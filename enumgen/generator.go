@@ -92,7 +92,9 @@ func (g *Generator) PrintHeader() {
 	g.Printf("package %s", g.Pkg.Name)
 	g.Printf("\n")
 	g.Printf("import (\n")
-	g.Printf("\t\"fmt\"\n")
+	if g.Config.SQL || g.Config.GQLGEN { // sql and gql are the only ones that use fmt
+		g.Printf("\t\"fmt\"\n")
+	}
 	g.Printf("\t\"strings\"\n")
 	g.Printf("\t\"strconv\"\n")
 	g.Printf("\t\"errors\"\n")

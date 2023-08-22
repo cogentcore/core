@@ -4,7 +4,6 @@ package testdata
 
 import (
 	"errors"
-	"fmt"
 	"github.com/goki/enums/enums"
 	"strconv"
 	"strings"

@@ -35,7 +35,7 @@ func (i *%[1]s) Scan(value any) error {
 	case fmt.Stringer:
 		str = v.String()
 	default:
-		return fmt.Errorf("invalid value of %[1]s: %%[1]T(%%[1]v)", value)
+		return fmt.Errorf("invalid value for type %[1]s: %%[1]T(%%[1]v)", value)
 	}
 
 	return i.SetString(str)
