@@ -241,7 +241,9 @@ func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) 
 	g.Printf("}\n\n")
 }
 
-// Argument to format is the type name.
+// Arguments to format are:
+//
+//	[1]: type name
 const StringMap = `// String returns the string representation
 // of this %[1]s value.
 func (i %[1]s) String() string {
@@ -250,6 +252,15 @@ func (i %[1]s) String() string {
 	}
 	return "%[1]s(" + strconv.FormatInt(int64(i), 10) + ")"
 }
+`
+
+// Arguments to format are:
+//
+//	[1]: type name
+//	[2]: number of constants for type
+const StringNConstant = `//%[1]sN is the total number of
+// enum values for type %[1]s.
+const %[1]sN %[1]s = %[2]d
 `
 
 // Arguments to format are:
@@ -384,13 +395,17 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThresh
 	// At this moment, either "g.declareIndexAndNameVars()" or "g.declareNameVars()" has been called
 
 	// Print the slice of values
+	total := 0
 	g.Printf("\nvar _%sValues = []%s{", typeName, typeName)
 	for _, values := range runs {
 		for _, value := range values {
 			g.Printf("\t%s, ", value.OriginalName)
+			total++
 		}
 	}
 	g.Printf("}\n\n")
+
+	g.Printf(StringNConstant, typeName, total)
 
 	// Print the map between name and value
 	g.PrintValueMap(runs, typeName, runsThreshold)

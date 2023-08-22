@@ -64,14 +64,27 @@ func (g *Generator) AddPackage(pkg *packages.Package) {
 	g.Pkg = &Package{
 		Name:  pkg.Name,
 		Defs:  pkg.TypesInfo.Defs,
-		Files: make([]*File, len(pkg.Syntax)),
+		Files: make([]*File, 0),
 	}
 
-	for i, file := range pkg.Syntax {
-		g.Pkg.Files[i] = &File{
+	for _, file := range pkg.Syntax {
+		// ignore generated code
+		isGen := false
+		for _, c := range file.Comments {
+			if strings.Contains(c.Text(), "; DO NOT EDIT.") {
+				isGen = true
+				break
+			}
+		}
+		if isGen {
+			continue
+		}
+		// need to use append and 0 initial length
+		// because we don't know if it has generated code
+		g.Pkg.Files = append(g.Pkg.Files, &File{
 			File: file,
 			Pkg:  g.Pkg,
-		}
+		})
 	}
 }
 

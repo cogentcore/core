@@ -41,6 +41,10 @@ func _DaysNoOp() {
 
 var _DaysValues = []Days{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
 
+// DaysN is the total number of
+// enum values for type Days.
+const DaysN Days = 7
+
 var _DaysNameToValueMap = map[string]Days{
 	_DaysName[0:6]:        Sunday,
 	_DaysLowerName[0:6]:   Sunday,
@@ -206,6 +210,10 @@ func _StatesNoOp() {
 }
 
 var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, Selected}
+
+// StatesN is the total number of
+// enum values for type States.
+const StatesN States = 6
 
 var _StatesNameToValueMap = map[string]States{
 	_StatesName[0:7]:        Enabled,
