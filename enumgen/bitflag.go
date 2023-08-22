@@ -22,9 +22,9 @@ func (g *Generator) BuildBitFlagMethods(runs [][]Value, typeName string) {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringHasBitFlagMethod = `// HasBitFlag returns whether these
+const StringHasBitFlagMethod = `// HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i *%[1]s) HasBitFlag(f enums.BitFlag) bool {
+func (i *%[1]s) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(i))&(1<<uint32(f.Int64())) != 0
 }
 `
@@ -32,9 +32,9 @@ func (i *%[1]s) HasBitFlag(f enums.BitFlag) bool {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringSetBitFlagMethod = `// HasBitFlag returns whether these
-// bit flags have the given bit flag set.
-func (i *%[1]s) SetBitFlag(on bool, f ...enums.BitFlag) {
+const StringSetBitFlagMethod = `// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *%[1]s) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()

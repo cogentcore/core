@@ -329,15 +329,15 @@ func (i States) IsValid() bool {
 	return false
 }
 
-// HasBitFlag returns whether these
+// HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i *States) HasBitFlag(f enums.BitFlag) bool {
+func (i *States) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(i))&(1<<uint32(f.Int64())) != 0
 }
 
-// HasBitFlag returns whether these
-// bit flags have the given bit flag set.
-func (i *States) SetBitFlag(on bool, f ...enums.BitFlag) {
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *States) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()

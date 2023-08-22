@@ -51,10 +51,10 @@ type Enum interface {
 // bit flags.
 type BitFlag interface {
 	Enum
-	// HasBitFlag returns whether these flags
+	// HasFlag returns whether these flags
 	// have the given flag set.
-	HasBitFlag(f BitFlag) bool
-	// SetBitFlag sets the value of the given
+	HasFlag(f BitFlag) bool
+	// SetFlag sets the value of the given
 	// flags in these flags to the given value.
-	SetBitFlag(on bool, f ...BitFlag)
+	SetFlag(on bool, f ...BitFlag)
 }
