@@ -1,3 +1,5 @@
+github.com/goki/enums v0.9.1 h1:vbNWEttf//vL78iO6est7AInANLvpD+j1TlerDczsRg=
+github.com/goki/enums v0.9.1/go.mod h1:1m6NiH3zn01BTjArWZ+mCruIvhbGjZqyefOtFdo0RB0=
 github.com/goki/mat32 v1.0.18 h1:LS53De0LEJAfHZrZwdTvAOfIDzav/PDaDZMpEiyP9w8=
 github.com/goki/mat32 v1.0.18/go.mod h1:S3pnfo7ye7yb8GvqE9If4tMel5UxTzhfCGZWCFiRyvI=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
