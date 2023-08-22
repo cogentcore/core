@@ -16,11 +16,11 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
-	"go/format"
 	"os"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
+	"golang.org/x/tools/imports"
 )
 
 // Generator holds the state of the generator.
@@ -276,13 +276,13 @@ func (g *Generator) Generate() error {
 // Format returns the contents of the Generator's buffer
 // ([Generator.Buf]) with gofmt applied.
 func (g *Generator) Format() ([]byte, error) {
-	src, err := format.Source(g.Buf.Bytes())
+	b, err := imports.Process(g.Config.Dir, g.Buf.Bytes(), nil)
 	if err != nil {
 		// Should never happen, but can arise when developing this code.
 		// The user can compile the output to see the error.
 		return g.Buf.Bytes(), errors.New("internal error: invalid Go generated: " + err.Error() + "; compile the package to analyze the error")
 	}
-	return src, nil
+	return b, nil
 }
 
 // Write formats the data in the the Generator's buffer

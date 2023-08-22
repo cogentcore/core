@@ -4,10 +4,11 @@ package testdata
 
 import (
 	"errors"
-	"github.com/goki/enums/enums"
 	"strconv"
 	"strings"
 	"sync/atomic"
+
+	"github.com/goki/enums/enums"
 )
 
 const _DaysName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
