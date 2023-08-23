@@ -10,11 +10,11 @@ import (
 	"github.com/goki/enums/enums"
 )
 
-const _OpponentsName = "WhiteBlackRedGreenBlueYellowOpponentsN"
+const _OpponentsName = "WhiteBlackRedGreenBlueYellow"
 
-var _OpponentsIndex = [...]uint8{0, 10, 18, 28, 38}
+var _OpponentsIndex = [...]uint8{0, 10, 18, 28}
 
-const _OpponentsLowerName = "whiteblackredgreenblueyellowopponentsn"
+const _OpponentsLowerName = "whiteblackredgreenblueyellow"
 
 // String returns the string representation
 // of this Opponents value.
@@ -32,10 +32,13 @@ func _OpponentsNoOp() {
 	_ = x[WhiteBlack-(0)]
 	_ = x[RedGreen-(1)]
 	_ = x[BlueYellow-(2)]
-	_ = x[OpponentsN-(3)]
 }
 
-var _OpponentsValues = []Opponents{WhiteBlack, RedGreen, BlueYellow, OpponentsN}
+var _OpponentsValues = []Opponents{WhiteBlack, RedGreen, BlueYellow}
+
+// OpponentsN is the total number of
+// enum values for type Opponents.
+const OpponentsN Opponents = 3
 
 var _OpponentsNameToValueMap = map[string]Opponents{
 	_OpponentsName[0:10]:       WhiteBlack,
@@ -44,29 +47,24 @@ var _OpponentsNameToValueMap = map[string]Opponents{
 	_OpponentsLowerName[10:18]: RedGreen,
 	_OpponentsName[18:28]:      BlueYellow,
 	_OpponentsLowerName[18:28]: BlueYellow,
-	_OpponentsName[28:38]:      OpponentsN,
-	_OpponentsLowerName[28:38]: OpponentsN,
 }
 
 var _OpponentsNames = []string{
 	_OpponentsName[0:10],
 	_OpponentsName[10:18],
 	_OpponentsName[18:28],
-	_OpponentsName[28:38],
 }
 
 var _OpponentsDescMap = map[Opponents]string{
 	0: _OpponentsDescs[0],
 	1: _OpponentsDescs[1],
 	2: _OpponentsDescs[2],
-	3: _OpponentsDescs[3],
 }
 
 var _OpponentsDescs = []string{
 	`White vs. Black greyscale`,
 	`Red vs. Green`,
 	`Blue vs. Yellow`,
-	`number of opponents`,
 }
 
 // SetString sets the Opponents value from its

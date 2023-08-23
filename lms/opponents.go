@@ -41,7 +41,4 @@ const (
 
 	// Blue vs. Yellow
 	BlueYellow
-
-	// number of opponents
-	OpponentsN
 )
