@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/goki/enums/enums"
+	"goki.dev/enums"
 )
 
 const _DaysName = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"

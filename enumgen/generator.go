@@ -123,7 +123,7 @@ func (g *Generator) PrintHeader() {
 	if g.Config.GQLGEN {
 		g.Printf("\t\"io\"\n")
 	}
-	g.Printf("\t\"github.com/goki/enums/enums\"\n")
+	g.Printf("\t\"goki.dev/enums\"\n")
 	g.Printf(")\n")
 }
 

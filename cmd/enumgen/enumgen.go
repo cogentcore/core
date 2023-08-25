@@ -12,7 +12,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/goki/enums/enumgen"
+	"goki.dev/enums/enumgen"
 )
 
 // the configuration object we use
@@ -50,7 +50,7 @@ func Usage() {
 	_, _ = fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
 	_, _ = fmt.Fprintf(os.Stderr, "\tenumgen [flags]\n")
 	_, _ = fmt.Fprintf(os.Stderr, "For more information, see:\n")
-	_, _ = fmt.Fprintf(os.Stderr, "\thttps://github.com/goki/enums\n")
+	_, _ = fmt.Fprintf(os.Stderr, "\thttps://goki.dev/enums\n")
 	_, _ = fmt.Fprintf(os.Stderr, "Flags:\n")
 	flag.PrintDefaults()
 }

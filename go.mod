@@ -1,4 +1,4 @@
-module github.com/goki/enums
+module goki.dev/enums
 
 go 1.18
 
