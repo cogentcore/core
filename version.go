@@ -3,8 +3,8 @@
 package enums
 
 const (
-	Version = "v0.9.1"
-	GitCommit = "1c2535d" // the commit JUST BEFORE the release
-	VersionDate = "2023-08-22 03:06" // UTC
+	Version = "v0.9.2"
+	GitCommit = "efe8562" // the commit JUST BEFORE the release
+	VersionDate = "2023-08-25 00:21" // UTC
 )
 
