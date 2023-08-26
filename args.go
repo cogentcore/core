@@ -71,7 +71,7 @@ func ParseArg(s string, args []string, allArgs map[string]reflect.Value, errNotF
 		name = name[1:]
 	}
 	if len(name) == 0 || name[0] == '-' || name[0] == '=' {
-		err = fmt.Errorf("econfig.ParseArgs: bad flag syntax: %s", s)
+		err = fmt.Errorf("gear.ParseArgs: bad flag syntax: %s", s)
 		fmt.Println(err)
 		return
 	}
@@ -85,7 +85,7 @@ func ParseArg(s string, args []string, allArgs map[string]reflect.Value, errNotF
 	fval, exists := allArgs[name]
 	if !exists {
 		if errNotFound {
-			err = fmt.Errorf("econfig.ParseArgs: flag name not recognized: %s", name)
+			err = fmt.Errorf("gear.ParseArgs: flag name not recognized: %s", name)
 			fmt.Println(err)
 		}
 		return
@@ -122,7 +122,7 @@ func ParseArg(s string, args []string, allArgs map[string]reflect.Value, errNotF
 		a = a[1:]
 	default:
 		// '--flag' (arg was required)
-		err = fmt.Errorf("econfig.ParseArgs: flag needs an argument: %s", s)
+		err = fmt.Errorf("gear.ParseArgs: flag needs an argument: %s", s)
 		fmt.Println(err)
 		return
 	}
@@ -148,7 +148,7 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 		err = kit.CopyMapRobust(fval.Interface(), mval["tmp"])
 		if err != nil {
 			fmt.Println(err)
-			err = fmt.Errorf("econfig.ParseArgs: not able to set map field from arg: %s val: %s", name, value)
+			err = fmt.Errorf("gear.ParseArgs: not able to set map field from arg: %s val: %s", name, value)
 			fmt.Println(err)
 			return err
 		}
@@ -162,14 +162,14 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 		err = kit.CopySliceRobust(fval.Interface(), mval["tmp"])
 		if err != nil {
 			fmt.Println(err)
-			err = fmt.Errorf("econfig.ParseArgs: not able to set slice field from arg: %s val: %s", name, value)
+			err = fmt.Errorf("gear.ParseArgs: not able to set slice field from arg: %s val: %s", name, value)
 			fmt.Println(err)
 			return err
 		}
 	default:
 		ok := kit.SetRobust(fval.Interface(), value) // overkill but whatever
 		if !ok {
-			err := fmt.Errorf("econfig.ParseArgs: not able to set field from arg: %s val: %s", name, value)
+			err := fmt.Errorf("gear.ParseArgs: not able to set field from arg: %s val: %s", name, value)
 			fmt.Println(err)
 			return err
 		}
@@ -241,7 +241,7 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 			continue
 		}
 		if _, has := allArgs[f.Name]; has {
-			fmt.Printf("econfig Field: %s.%s cannot be added as a non-nested %s arg because it has already been registered -- add 'nest:'+'' field tag to the one you want to keep only as a nested arg with path, to eliminate this message\n", path, f.Name, f.Name)
+			fmt.Printf("gear Field: %s.%s cannot be added as a non-nested %s arg because it has already been registered -- add 'nest:'+'' field tag to the one you want to keep only as a nested arg with path, to eliminate this message\n", path, f.Name, f.Name)
 			continue
 		}
 		addAllCases(f.Name, "", pval, allArgs)
