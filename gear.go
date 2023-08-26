@@ -52,7 +52,23 @@ func RunCommand(app any, cmd string) error {
 	if !meth.IsValid() {
 		return fmt.Errorf("command %q not found", cmd)
 	}
+
 	res := meth.Call(nil)
-	fmt.Println(res)
+
+	if len(res) != 1 {
+		return fmt.Errorf("programmer error: expected 1 return value (of type error) from %q but got %d instead", name, len(res))
+	}
+	r := res[0]
+	if !r.IsValid() || !r.CanInterface() {
+		return fmt.Errorf("programmer error: expected valid return value (of type error) from %q but got %v instead", name, r)
+	}
+	i := r.Interface()
+	err, ok := i.(error)
+	if !ok && i != nil { // if i is nil, then it won't be an error, even if it returns one
+		return fmt.Errorf("programmer error: expected return value of type error from %q but got value '%v' of type %T instead", name, i, i)
+	}
+	if err != nil {
+		return err
+	}
 	return nil
 }

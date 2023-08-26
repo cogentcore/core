@@ -38,7 +38,6 @@ func main() {
 }
 
 func (a *App) BuildCmd() error {
-	fmt.Println(*a)
 	fmt.Println("Building")
 	return nil
 }
