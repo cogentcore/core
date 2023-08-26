@@ -17,23 +17,18 @@ import (
 // GUI starts the GUI for the given
 // Gear app, which must be passed as
 // a pointer.
-func GUI(app any, appName, appAbout string) {
+func GUI(app any) {
 	gimain.Main(func() {
-		mainrun(app, appName, appAbout)
+		mainrun(app)
 	})
 }
 
-func mainrun(app any, appName, appAbout string) {
-	if appName == "" {
-		appName = "gear"
-	}
-	if appAbout == "" {
-		appAbout = "Gear allows you to edit configuration information and run commands in a nice GUI interface."
-	}
-	gi.SetAppName(appName)
-	gi.SetAppAbout(appAbout)
+func mainrun(app any) {
+	kebab := strcase.ToKebab(AppName)
+	gi.SetAppName(kebab)
+	gi.SetAppAbout(AppAbout)
 
-	win := gi.NewMainWindow(appName, strcase.ToCamel(appName), 1024, 768)
+	win := gi.NewMainWindow(kebab, AppName, 1024, 768)
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 	mfr := win.SetMainFrame()

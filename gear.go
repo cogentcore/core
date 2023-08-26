@@ -11,6 +11,13 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
+var (
+	// AppName is the name of the Gear app
+	AppName string = "Gear"
+	// AppAbout is the description of the Gear app
+	AppAbout string = "Gear allows you to edit configuration information and run commands through a CLI and a GUI interface."
+)
+
 // Run runs the given app with the given default
 // configuration file paths. The app should be
 // a pointer, and configuration options should
@@ -23,13 +30,13 @@ import (
 //	func (a *App) BuildCmd() error
 //
 // Run uses [os.Args] for its arguments.
-func Run(app any, appName, appAbout string, defaultFile ...string) error {
+func Run(app any, defaultFile ...string) error {
 	leftovers, err := Config(app, defaultFile...)
 	if err != nil {
 		return fmt.Errorf("error configuring app: %w", err)
 	}
 	if len(leftovers) == 0 {
-		GUI(app, appName, appAbout)
+		GUI(app)
 		return nil
 	}
 	err = RunCommand(app, leftovers[0])

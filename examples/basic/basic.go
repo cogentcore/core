@@ -41,7 +41,9 @@ var AppProps = ki.Props{
 }
 
 func main() {
-	err := gear.Run(&TheApp, "basic", "Basic is an example app made with Gear", "config.toml")
+	gear.AppName = "Basic"
+	gear.AppAbout = "Basic is a basic example application made with Gear"
+	err := gear.Run(&TheApp, "config.toml")
 	if err != nil {
 		fmt.Println(err)
 	}
