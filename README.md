@@ -1,3 +1,7 @@
+# gear
+
+Package gear generates powerful CLIs and GUIs from simple struct types. If an acronym is required, how about: "Gogi-based Easy Arrangement of Requirements."
+
 Docs: [GoDoc](https://pkg.go.dev/github.com/emer/emergent/econfig)
 
 `econfig` provides methods to set values on a `Config` struct through a (TOML) config file or command-line args (`flags` in Go terminology), with support for setting Network params and values on any other struct as well (e.g., an Env to be constructed later in a ConfigEnv method).
