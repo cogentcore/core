@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
-
-import (
-	"github.com/goki/tools/cmd/goki/cmd"
-)
-
-func main() {
-	cmd.Execute()
-}
+// Package tools provides general functions
+// for developing apps and libraries using
+// the GoKi framework.
+package tools
