@@ -5,7 +5,7 @@
 // Package goki provides general functions
 // for developing apps and libraries using
 // the GoKi framework.
-package tools
+package goki
 
 import (
 	"fmt"
