@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package tools provides general functions
+// Package goki provides general functions
 // for developing apps and libraries using
 // the GoKi framework.
 package tools
@@ -19,7 +19,7 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("error creating %q directory: %w", ".goki", err)
 	}
-	err = os.WriteFile(".goki/config.toml", []byte(`name = "goki"`), 0666)
+	err = os.WriteFile(".goki/config.toml", []byte(`version = "v0.0.0"`), 0666)
 	if err != nil {
 		return fmt.Errorf("error writing to configuration file: %w", err)
 	}
