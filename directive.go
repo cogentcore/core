@@ -5,7 +5,10 @@
 // Package directive implements simple, standardized, and scalable parsing of Go comment directives.
 package directive
 
-import "strings"
+import (
+	"sort"
+	"strings"
+)
 
 // Directive represents a comment directive
 // that has been parsed or created in code.
@@ -74,8 +77,8 @@ func Parse(comment string) (Directive, bool) {
 // includes two slashes (`//`) at the start.
 // If the directive has an empty tool or
 // directive, String returns "(invalid directive)".
-// The output of String is not deterministic
-// because the name-value map is not ordered.
+// The output of String is deterministic
+// because it sorts the name-value map.
 func (d Directive) String() string {
 	if d.Tool == "" || d.Directive == "" {
 		return "(invalid directive)"
@@ -84,8 +87,13 @@ func (d Directive) String() string {
 	for _, arg := range d.Args {
 		res += " " + arg
 	}
-	for key, value := range d.NameValue {
-		res += " " + key + "=" + value
+	keys := make([]string, 0, len(d.NameValue))
+	for key := range d.NameValue {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		res += " " + key + "=" + d.NameValue[key]
 	}
 	return res
 }
