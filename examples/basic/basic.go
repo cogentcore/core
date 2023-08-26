@@ -4,7 +4,12 @@
 
 package main
 
-import "github.com/goki/gear"
+import (
+	"fmt"
+	"os"
+
+	"github.com/goki/gear"
+)
 
 type App struct {
 	Name string
@@ -14,5 +19,6 @@ type App struct {
 var TheApp App
 
 func main() {
-	gear.Config(&TheApp, "config.toml")
+	gear.Config(&TheApp, os.Args[1:]...)
+	fmt.Println(TheApp)
 }
