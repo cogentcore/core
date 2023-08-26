@@ -23,17 +23,36 @@ import (
 //	func (a *App) BuildCmd() error
 //
 // Run uses [os.Args] for its arguments.
-func Run(app any, defaultFile ...string) {
+func Run(app any, defaultFile ...string) error {
 	leftovers, err := Config(app, defaultFile...)
-	_ = err
+	if err != nil {
+		return fmt.Errorf("error configuring app: %w", err)
+	}
 	if len(leftovers) == 0 {
 		GUI(app)
-		return
+		return nil
 	}
-	cmd := strcase.ToCamel(leftovers[0]) + "Cmd"
-	fmt.Printf("running command: %s\n", cmd)
+	err = RunCommand(app, leftovers[0])
+	if err != nil {
+		return fmt.Errorf("error running command %q: %w", leftovers[0], err)
+	}
+	return nil
+}
+
+// RunCommand runs the command with the given
+// name on the given app. It looks for the
+// method with the name of the command converted
+// to camel case suffixed with "Cmd"; for example,
+// for a command named "build", it will look for a
+// method named "BuildCmd".
+func RunCommand(app any, cmd string) error {
+	name := strcase.ToCamel(cmd) + "Cmd"
 	val := reflect.ValueOf(app)
-	meth := val.MethodByName(cmd)
-	// todo: check for bad
-	meth.Call(nil) // no args!!
+	meth := val.MethodByName(name)
+	if !meth.IsValid() {
+		return fmt.Errorf("command %q not found", cmd)
+	}
+	res := meth.Call(nil)
+	fmt.Println(res)
+	return nil
 }

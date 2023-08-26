@@ -31,7 +31,10 @@ var AppProps = ki.Props{
 }
 
 func main() {
-	gear.Run(&TheApp, "config.toml")
+	err := gear.Run(&TheApp, "config.toml")
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func (a *App) BuildCmd() error {
