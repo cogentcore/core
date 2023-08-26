@@ -9,61 +9,87 @@ import (
 	"testing"
 )
 
-var testDirs = []Directive{
+type test struct {
+	Dir    Directive // the expected/input directive (also used to get source when used as expected value)
+	Has    bool      // whether it is expected to contain a directive when parsing
+	String string    // the expected string representation
+}
+
+var tests = []test{
 	{
-		Source:    "//tool:directive arg0 key0=value0 arg1 key1=value1",
-		Tool:      "tool",
-		Directive: "directive",
-		Args:      []string{"arg0", "arg1"},
-		Props:     map[string]string{"key0": "value0", "key1": "value1"},
+		Dir: Directive{
+			Source:    "//tool:directive arg0 key0=value0 arg1 key1=value1",
+			Tool:      "tool",
+			Directive: "directive",
+			Args:      []string{"arg0", "arg1"},
+			Props:     map[string]string{"key0": "value0", "key1": "value1"},
+		},
+		Has:    true,
+		String: "//tool:directive arg0 arg1 key0=value0 key1=value1",
 	},
 	{
-		Source:    "//enums:enum trimprefix=Button",
-		Tool:      "enums",
-		Directive: "enum",
-		Args:      []string{},
-		Props:     map[string]string{"trimprefix": "Button"},
+		Dir: Directive{
+			Source:    "//enums:enum trimprefix=Button",
+			Tool:      "enums",
+			Directive: "enum",
+			Args:      []string{},
+			Props:     map[string]string{"trimprefix": "Button"},
+		},
+		Has:    true,
+		String: "//enums:enum trimprefix=Button",
 	},
 	{
-		Source:    "//enums:structflag NodeFlags field=Flag",
-		Tool:      "enums",
-		Directive: "structflag",
-		Args:      []string{"NodeFlags"},
-		Props:     map[string]string{"field": "Flag"},
+		Dir: Directive{
+			Source:    "//enums:structflag field=Flag NodeFlags",
+			Tool:      "enums",
+			Directive: "structflag",
+			Args:      []string{"NodeFlags"},
+			Props:     map[string]string{"field": "Flag"},
+		},
+		Has:    true,
+		String: "//enums:structflag NodeFlags field=Flag",
 	},
 	{
-		Source:    "//goki:ki",
-		Tool:      "goki",
-		Directive: "ki",
-		Args:      []string{},
-		Props:     map[string]string{},
+		Dir: Directive{
+			Source:    "//goki:ki",
+			Tool:      "goki",
+			Directive: "ki",
+			Args:      []string{},
+			Props:     map[string]string{},
+		},
+		Has:    true,
+		String: "//goki:ki",
 	},
 	{
-		Source:    "//goki:ki noNew",
-		Tool:      "goki",
-		Directive: "ki",
-		Args:      []string{"noNew"},
-		Props:     map[string]string{},
+		Dir: Directive{
+			Source:    "//goki:ki noNew",
+			Tool:      "goki",
+			Directive: "ki",
+			Args:      []string{"noNew"},
+			Props:     map[string]string{},
+		},
+		Has:    true,
+		String: "//goki:ki noNew",
 	},
 }
 
 func TestParse(t *testing.T) {
-	for _, dir := range testDirs {
-		have, has := Parse(dir.Source)
-		if !has {
-			t.Errorf("expected comment string %q to have a directive, but Parse returned false", dir.Source)
+	for _, test := range tests {
+		have, has := Parse(test.Dir.Source)
+		if has != test.Has {
+			t.Errorf("expected comment string %q to have a has value of %v, but Parse returned %v", test.Dir.Source, test.Has, has)
 		}
-		if !reflect.DeepEqual(have, dir) {
-			t.Errorf("expected directive for \n%q \n\tto be \n%v \n\tbut got \n%v \n\tinstead", dir.Source, dir, have)
+		if !reflect.DeepEqual(have, test.Dir) {
+			t.Errorf("expected directive for \n%q \n\tto be \n%v \n\tbut got \n%v \n\tinstead", test.Dir.Source, test.Dir, have)
 		}
 	}
 }
 
 func TestString(t *testing.T) {
-	for _, dir := range testDirs {
-		str := dir.String()
-		if str != dir.Source {
-			t.Errorf("expected formatted string for \n%q \n\tto be\n%q \n\tbut got \n%q \n\tinstead", dir.Source, dir.Source, str)
+	for _, test := range tests {
+		str := test.Dir.String()
+		if str != test.String {
+			t.Errorf("expected formatted string for \n%q \n\tto be\n%q \n\tbut got \n%q \n\tinstead", test.Dir.Source, test.String, str)
 		}
 	}
 }
