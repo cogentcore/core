@@ -10,7 +10,6 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/emer/empi/mpi"
 	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
 )
@@ -66,7 +65,7 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 	_, err = ParseArgs(cfg, args, allArgs, false) // false = ignore non-matches
 
 	if Help {
-		mpi.Println(Usage(cfg))
+		fmt.Println(Usage(cfg))
 		os.Exit(0)
 	}
 

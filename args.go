@@ -13,7 +13,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/emer/empi/mpi"
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/toml"
 	"github.com/iancoleman/strcase"
@@ -32,7 +31,7 @@ func SetFromArgs(cfg any, args []string) (nonFlags []string, err error) {
 	FieldArgNames(cfg, allArgs)
 	nonFlags, err = ParseArgs(cfg, args, allArgs, true)
 	if err != nil {
-		mpi.Println(Usage(cfg))
+		fmt.Println(Usage(cfg))
 	}
 	return
 }
@@ -73,7 +72,7 @@ func ParseArg(s string, args []string, allArgs map[string]reflect.Value, errNotF
 	}
 	if len(name) == 0 || name[0] == '-' || name[0] == '=' {
 		err = fmt.Errorf("econfig.ParseArgs: bad flag syntax: %s", s)
-		mpi.Println(err)
+		fmt.Println(err)
 		return
 	}
 
@@ -87,7 +86,7 @@ func ParseArg(s string, args []string, allArgs map[string]reflect.Value, errNotF
 	if !exists {
 		if errNotFound {
 			err = fmt.Errorf("econfig.ParseArgs: flag name not recognized: %s", name)
-			mpi.Println(err)
+			fmt.Println(err)
 		}
 		return
 	}
@@ -124,7 +123,7 @@ func ParseArg(s string, args []string, allArgs map[string]reflect.Value, errNotF
 	default:
 		// '--flag' (arg was required)
 		err = fmt.Errorf("econfig.ParseArgs: flag needs an argument: %s", s)
-		mpi.Println(err)
+		fmt.Println(err)
 		return
 	}
 
@@ -143,35 +142,35 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 		mval := make(map[string]any)
 		err := toml.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
 		if err != nil {
-			mpi.Println(err)
+			fmt.Println(err)
 			return err
 		}
 		err = kit.CopyMapRobust(fval.Interface(), mval["tmp"])
 		if err != nil {
-			mpi.Println(err)
+			fmt.Println(err)
 			err = fmt.Errorf("econfig.ParseArgs: not able to set map field from arg: %s val: %s", name, value)
-			mpi.Println(err)
+			fmt.Println(err)
 			return err
 		}
 	case vk == reflect.Slice:
 		mval := make(map[string]any)
 		err := toml.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
 		if err != nil {
-			mpi.Println(err)
+			fmt.Println(err)
 			return err
 		}
 		err = kit.CopySliceRobust(fval.Interface(), mval["tmp"])
 		if err != nil {
-			mpi.Println(err)
+			fmt.Println(err)
 			err = fmt.Errorf("econfig.ParseArgs: not able to set slice field from arg: %s val: %s", name, value)
-			mpi.Println(err)
+			fmt.Println(err)
 			return err
 		}
 	default:
 		ok := kit.SetRobust(fval.Interface(), value) // overkill but whatever
 		if !ok {
 			err := fmt.Errorf("econfig.ParseArgs: not able to set field from arg: %s val: %s", name, value)
-			mpi.Println(err)
+			fmt.Println(err)
 			return err
 		}
 	}
@@ -242,7 +241,7 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 			continue
 		}
 		if _, has := allArgs[f.Name]; has {
-			mpi.Printf("econfig Field: %s.%s cannot be added as a non-nested %s arg because it has already been registered -- add 'nest:'+'' field tag to the one you want to keep only as a nested arg with path, to eliminate this message\n", path, f.Name, f.Name)
+			fmt.Printf("econfig Field: %s.%s cannot be added as a non-nested %s arg because it has already been registered -- add 'nest:'+'' field tag to the one you want to keep only as a nested arg with path, to eliminate this message\n", path, f.Name, f.Name)
 			continue
 		}
 		addAllCases(f.Name, "", pval, allArgs)

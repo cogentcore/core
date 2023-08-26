@@ -5,9 +5,9 @@
 package econfig
 
 import (
+	"fmt"
 	"io/fs"
 
-	"github.com/emer/empi/mpi"
 	"github.com/goki/ki/toml"
 )
 
@@ -35,7 +35,7 @@ func OpenWithIncludes(cfg any, file string) error {
 		inc := incs[i]
 		err = toml.OpenFromPaths(cfg, inc, IncludePaths)
 		if err != nil {
-			mpi.Println(err)
+			fmt.Println(err)
 		}
 	}
 	// reopen original
