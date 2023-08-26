@@ -27,13 +27,20 @@ var AppProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"BuildCmd", ki.Props{
 			"label": "Build",
+			"Args": ki.PropSlice{
+				{"output", ki.Props{
+					"desc": "whatever output is",
+				}},
+			},
 		}},
 	},
 }
 
 func main() {
 	gear.Config(&TheApp, os.Args[1:]...)
-	gear.GUI(&TheApp)
+	if len(os.Args) <= 1 {
+		gear.GUI(&TheApp)
+	}
 }
 
 func (a *App) BuildCmd(output string) error {

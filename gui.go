@@ -32,6 +32,7 @@ func mainrun(app any) {
 	mfr := win.SetMainFrame()
 
 	sv := giv.AddNewStructView(mfr, "sv")
+	sv.Viewport = vp
 	sv.SetStruct(app)
 
 	// Main Menu
