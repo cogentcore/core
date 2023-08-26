@@ -5,7 +5,7 @@
 // note: FindFileOnPaths adapted from viper package https://github.com/spf13/viper
 // Copyright (c) 2014 Steve Francia
 
-package econfig
+package gear
 
 import (
 	"reflect"

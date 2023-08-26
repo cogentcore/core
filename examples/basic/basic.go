@@ -4,7 +4,7 @@
 
 package main
 
-import econfig "github.com/goki/gear"
+import "github.com/goki/gear"
 
 type App struct {
 	Name string
@@ -14,5 +14,5 @@ type App struct {
 var TheApp App
 
 func main() {
-	econfig.Config(&TheApp, "config.toml")
+	gear.Config(&TheApp, "config.toml")
 }
