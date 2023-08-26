@@ -13,8 +13,8 @@ import (
 )
 
 func init() {
-	viper.SetConfigName("goki")
-	viper.AddConfigPath(".")
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".goki")
 	viper.SetEnvPrefix("goki")
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()

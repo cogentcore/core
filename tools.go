@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package goki provides general functions
-// for developing apps and libraries using
-// the GoKi framework.
-package goki
+package tools
 
 import (
 	"fmt"
