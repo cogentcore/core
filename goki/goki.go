@@ -10,6 +10,7 @@ package goki
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 // Init initializes the ".goki" directory
@@ -19,7 +20,14 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("error creating %q directory: %w", ".goki", err)
 	}
-	err = os.WriteFile(".goki/config.toml", []byte(`version = "v0.0.0"`), 0666)
+	cdir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("error finding current directory: %w", err)
+	}
+	base := filepath.Base(cdir)
+	err = os.WriteFile(".goki/config.toml", []byte(`name = "`+base+`"
+version = "v0.0.0"
+`), 0666)
 	if err != nil {
 		return fmt.Errorf("error writing to configuration file: %w", err)
 	}
