@@ -6,6 +6,7 @@ package gear
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/iancoleman/strcase"
@@ -39,9 +40,10 @@ func Run(app any, defaultFile ...string) error {
 		GUI(app)
 		return nil
 	}
-	err = RunCommand(app, leftovers[0])
+	cmd := leftovers[0]
+	err = RunCommand(app, cmd)
 	if err != nil {
-		return fmt.Errorf("error running command %q: %w", leftovers[0], err)
+		return fmt.Errorf("error running command %q: %w", cmd, err)
 	}
 	return nil
 }
@@ -57,6 +59,10 @@ func RunCommand(app any, cmd string) error {
 	val := reflect.ValueOf(app)
 	meth := val.MethodByName(name)
 	if !meth.IsValid() {
+		if cmd == "help" { // handle help here so that people can still override help function if they want
+			fmt.Println(Usage(app))
+			os.Exit(0)
+		}
 		return fmt.Errorf("command %q not found", cmd)
 	}
 
