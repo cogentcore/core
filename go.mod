@@ -1,3 +1,3 @@
 module goki.dev/directive
 
-go 1.19
+go 1.18

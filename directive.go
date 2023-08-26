@@ -28,10 +28,10 @@ type Directive struct {
 	// passed to the directive
 	Args []string
 
-	// Props are a map of key-value
-	// properties given in the
-	// form `key=value`.
-	Props map[string]string
+	// NameValue are a map of name-value
+	// arguments given in the
+	// form `name=value`.
+	NameValue map[string]string
 }
 
 // Parse parses the given comment string and returns
@@ -50,7 +50,7 @@ func Parse(comment string) (Directive, bool) {
 	before = strings.TrimPrefix(before, "//")
 	dir.Tool = before
 	dir.Args = []string{}
-	dir.Props = map[string]string{}
+	dir.NameValue = map[string]string{}
 	fields := strings.Fields(after)
 	for i, field := range fields {
 		if i == 0 {
@@ -59,7 +59,7 @@ func Parse(comment string) (Directive, bool) {
 		}
 		before, after, found := strings.Cut(field, "=")
 		if found {
-			dir.Props[before] = after
+			dir.NameValue[before] = after
 		} else {
 			dir.Args = append(dir.Args, before)
 		}
@@ -70,12 +70,12 @@ func Parse(comment string) (Directive, bool) {
 // String returns the directive as a
 // formatted string suitable for use in
 // code. It puts the positional arguments
-// before the key-value arguments, and it
+// before the name-value arguments, and it
 // includes two slashes (`//`) at the start.
 // If the directive has an empty tool or
 // directive, String returns "(invalid directive)".
 // The output of String is not deterministic
-// because the key-value map is not ordered.
+// because the name-value map is not ordered.
 func (d Directive) String() string {
 	if d.Tool == "" || d.Directive == "" {
 		return "(invalid directive)"
@@ -84,7 +84,7 @@ func (d Directive) String() string {
 	for _, arg := range d.Args {
 		res += " " + arg
 	}
-	for key, value := range d.Props {
+	for key, value := range d.NameValue {
 		res += " " + key + "=" + value
 	}
 	return res
