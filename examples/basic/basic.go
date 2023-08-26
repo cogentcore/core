@@ -21,4 +21,5 @@ var TheApp App
 func main() {
 	gear.Config(&TheApp, os.Args[1:]...)
 	fmt.Println(TheApp)
+	gear.GUI(&TheApp)
 }
