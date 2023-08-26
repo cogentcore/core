@@ -34,10 +34,11 @@ type Directive struct {
 // any [Directive] inside it. It also returns whether
 // it found such a directive. Directives are of the form:
 // `//tool:directive arg0 key0=value0 arg1 key1=value1`
-// (the positional arguments and key-value arguments can
-// be in any order).
+// (the two slashes are optional, and the positional
+// and key-value arguments can be in any order).
 func Parse(comment string) (Directive, bool) {
 	dir := Directive{}
+	comment = strings.TrimPrefix(comment, "//")
 	before, after, found := strings.Cut(comment, ":")
 	if !found {
 		return dir, false
