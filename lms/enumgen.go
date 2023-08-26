@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/enums/enums"
+	"goki.dev/enums"
 )
 
 const _OpponentsName = "WhiteBlackRedGreenBlueYellow"
