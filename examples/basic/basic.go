@@ -11,8 +11,9 @@ import (
 )
 
 type App struct {
-	Name string
-	On   bool
+	Name    string
+	Age     int
+	LikesGo bool
 }
 
 var TheApp App

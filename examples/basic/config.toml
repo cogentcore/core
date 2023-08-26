@@ -1,2 +1,3 @@
-Name = "I like GoGi; don't you too?"
-On = true
+Name = "Go Gopher"
+Age = 13
+LikesGo = true
