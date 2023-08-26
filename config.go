@@ -78,9 +78,7 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 	CommandArgs(allArgs)
 
 	args := os.Args[1:]
-	leftovers, err := ParseArgs(cfg, args, allArgs, false) // false = ignore non-matches
-
-	fmt.Println(leftovers)
+	_, err := ParseArgs(cfg, args, allArgs, false) // false = ignore non-matches
 
 	if Help {
 		fmt.Println(Usage(cfg))
@@ -113,5 +111,5 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 	if err != nil {
 		errs = append(errs, err)
 	}
-	return leftovers, kit.AllErrors(errs, 10)
+	return NonFlagArgs, kit.AllErrors(errs, 10)
 }
