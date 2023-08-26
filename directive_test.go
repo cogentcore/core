@@ -25,7 +25,7 @@ func TestParse(t *testing.T) {
 			t.Errorf("expected comment string %q to have a directive, but Parse returned false", dir.Source)
 		}
 		if !reflect.DeepEqual(have, dir) {
-			t.Errorf("expected directive for %q to be %v, but got %v instead", dir.Source, dir, have)
+			t.Errorf("expected directive for \n%q \n\tto be \n%v \n\tbut got \n%v \n\tinstead", dir.Source, dir, have)
 		}
 	}
 }

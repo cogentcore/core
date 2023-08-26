@@ -42,17 +42,21 @@ type Directive struct {
 // and key-value arguments can be in any order).
 func Parse(comment string) (Directive, bool) {
 	dir := Directive{}
-	comment = strings.TrimPrefix(comment, "//")
 	before, after, found := strings.Cut(comment, ":")
 	if !found {
 		return dir, false
 	}
 	dir.Source = comment
+	before = strings.TrimPrefix(before, "//")
 	dir.Tool = before
 	dir.Args = []string{}
 	dir.Props = map[string]string{}
 	fields := strings.Fields(after)
-	for _, field := range fields {
+	for i, field := range fields {
+		if i == 0 {
+			dir.Directive = field
+			continue
+		}
 		before, after, found := strings.Cut(field, "=")
 		if found {
 			dir.Props[before] = after
