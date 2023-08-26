@@ -38,16 +38,16 @@ type Directive struct {
 }
 
 // Parse parses the given comment string and returns
-// any [Directive] inside it. It also returns whether
-// it found such a directive. Directives are of the form:
+// any [Directive] inside it. If no such directive is
+// found, it returns nil. Directives are of the form:
 // `//tool:directive arg0 key0=value0 arg1 key1=value1`
 // (the two slashes are optional, and the positional
 // and key-value arguments can be in any order).
-func Parse(comment string) (Directive, bool) {
-	dir := Directive{}
+func Parse(comment string) *Directive {
+	dir := &Directive{}
 	before, after, found := strings.Cut(comment, ":")
 	if !found {
-		return dir, false
+		return nil
 	}
 	dir.Source = comment
 	before = strings.TrimPrefix(before, "//")
@@ -67,7 +67,7 @@ func Parse(comment string) (Directive, bool) {
 			dir.Args = append(dir.Args, before)
 		}
 	}
-	return dir, true
+	return dir
 }
 
 // String returns the directive as a
@@ -75,13 +75,11 @@ func Parse(comment string) (Directive, bool) {
 // code. It puts the positional arguments
 // before the name-value arguments, and it
 // includes two slashes (`//`) at the start.
-// If the directive has an empty tool or
-// directive, String returns "(invalid directive)".
 // The output of String is deterministic
 // because it sorts the name-value map.
-func (d Directive) String() string {
-	if d.Tool == "" || d.Directive == "" {
-		return "(invalid directive)"
+func (d *Directive) String() string {
+	if d == nil {
+		return "<nil>"
 	}
 	res := "//" + d.Tool + ":" + d.Directive
 	for _, arg := range d.Args {

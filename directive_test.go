@@ -10,93 +10,91 @@ import (
 )
 
 type test struct {
-	Dir    Directive // the expected/input directive (also used to get source when used as expected value)
-	Has    bool      // whether it is expected to contain a directive when parsing
-	String string    // the expected string representation
+	Dir    *Directive // the expected/input directive
+	Source string     // the input source string (defaults to test.Dir.Source if unset)
+	String string     // the expected output string representation
 }
 
 var tests = []test{
 	{
-		Dir: Directive{
+		Dir: &Directive{
 			Source:    "//tool:directive arg0 key0=value0 arg1 key1=value1",
 			Tool:      "tool",
 			Directive: "directive",
 			Args:      []string{"arg0", "arg1"},
 			NameValue: map[string]string{"key0": "value0", "key1": "value1"},
 		},
-		Has:    true,
 		String: "//tool:directive arg0 arg1 key0=value0 key1=value1",
 	},
 	{
-		Dir: Directive{
+		Dir: &Directive{
 			Source:    "//enums:enum trimprefix=Button",
 			Tool:      "enums",
 			Directive: "enum",
 			Args:      []string{},
 			NameValue: map[string]string{"trimprefix": "Button"},
 		},
-		Has:    true,
 		String: "//enums:enum trimprefix=Button",
 	},
 	{
-		Dir: Directive{
+		Dir: &Directive{
 			Source:    "//enums:structflag field=Flag NodeFlags",
 			Tool:      "enums",
 			Directive: "structflag",
 			Args:      []string{"NodeFlags"},
 			NameValue: map[string]string{"field": "Flag"},
 		},
-		Has:    true,
 		String: "//enums:structflag NodeFlags field=Flag",
 	},
 	{
-		Dir: Directive{
+		Dir: &Directive{
 			Source:    "//goki:ki",
 			Tool:      "goki",
 			Directive: "ki",
 			Args:      []string{},
 			NameValue: map[string]string{},
 		},
-		Has:    true,
 		String: "//goki:ki",
 	},
 	{
-		Dir: Directive{
+		Dir: &Directive{
 			Source:    "//goki:ki noNew",
 			Tool:      "goki",
 			Directive: "ki",
 			Args:      []string{"noNew"},
 			NameValue: map[string]string{},
 		},
-		Has:    true,
 		String: "//goki:ki noNew",
 	},
 	{
-		Dir: Directive{
+		Dir: &Directive{
 			Source:    "goki:ki embeds=false",
 			Tool:      "goki",
 			Directive: "ki",
 			Args:      []string{},
 			NameValue: map[string]string{"embeds": "false"},
 		},
-		Has:    true,
 		String: "//goki:ki embeds=false",
 	},
 	{
-		Dir:    Directive{},
-		Has:    false,
-		String: "(invalid directive)",
+		Dir:    nil,
+		String: "<nil>",
+	},
+	{
+		Dir:    nil,
+		Source: "//goki",
+		String: "<nil>",
 	},
 }
 
 func TestParse(t *testing.T) {
 	for _, test := range tests {
-		have, has := Parse(test.Dir.Source)
-		if has != test.Has {
-			t.Errorf("expected comment string %q to have a has value of %v, but Parse returned %v", test.Dir.Source, test.Has, has)
+		if test.Source == "" && test.Dir != nil {
+			test.Source = test.Dir.Source
 		}
+		have := Parse(test.Source)
 		if !reflect.DeepEqual(have, test.Dir) {
-			t.Errorf("expected directive for \n%q \n\tto be \n%#v \n\tbut got \n%#v \n\tinstead", test.Dir.Source, test.Dir, have)
+			t.Errorf("expected directive for \n%q \n\tto be \n%#v \n\tbut got \n%#v \n\tinstead", test.Source, test.Dir, have)
 		}
 	}
 }
