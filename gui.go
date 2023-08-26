@@ -11,22 +11,29 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/ki/ki"
+	"github.com/iancoleman/strcase"
 )
 
 // GUI starts the GUI for the given
 // Gear app, which must be passed as
 // a pointer.
-func GUI(app any) {
+func GUI(app any, appName, appAbout string) {
 	gimain.Main(func() {
-		mainrun(app)
+		mainrun(app, appName, appAbout)
 	})
 }
 
-func mainrun(app any) {
-	gi.SetAppName("gear")
-	gi.SetAppAbout("Gear allows you to edit configuration information and run commands in a nice GUI interface.")
+func mainrun(app any, appName, appAbout string) {
+	if appName == "" {
+		appName = "gear"
+	}
+	if appAbout == "" {
+		appAbout = "Gear allows you to edit configuration information and run commands in a nice GUI interface."
+	}
+	gi.SetAppName(appName)
+	gi.SetAppAbout(appAbout)
 
-	win := gi.NewMainWindow("gear", "Gear", 1024, 768)
+	win := gi.NewMainWindow(appName, strcase.ToCamel(appName), 1024, 768)
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 	mfr := win.SetMainFrame()

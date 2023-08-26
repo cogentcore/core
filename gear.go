@@ -23,13 +23,13 @@ import (
 //	func (a *App) BuildCmd() error
 //
 // Run uses [os.Args] for its arguments.
-func Run(app any, defaultFile ...string) error {
+func Run(app any, appName, appAbout string, defaultFile ...string) error {
 	leftovers, err := Config(app, defaultFile...)
 	if err != nil {
 		return fmt.Errorf("error configuring app: %w", err)
 	}
 	if len(leftovers) == 0 {
-		GUI(app)
+		GUI(app, appName, appAbout)
 		return nil
 	}
 	err = RunCommand(app, leftovers[0])
