@@ -1,0 +1,21 @@
+Includes=["testinc.toml"]
+gui = true
+Tag = "testing"
+NData = 12
+Enum = 'TestValue2'  # can use string here instead of number
+
+# inline form:
+# PatParams.Sparseness = 0.22
+
+# better multi-line form:
+[PatParams]
+  NPats = 14
+  Sparseness = 0.22
+
+# inline form:
+# Network = {'.PFCLayer:Layer.Inhib.Layer.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' =  '0.01'}
+
+# better multi-line form:
+[Network]
+  "#VSPatchPrjn:Prjn.Learn.LRate" = "0.01"
+  ".PFCLayer:Layer.Inhib.Layer.Gi" = "2.4"

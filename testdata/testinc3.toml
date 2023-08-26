@@ -1,0 +1,3 @@
+NData=32 # overwritten in testcfg
+Runs=8  # this overwrites testinc2
+Note="something else"
