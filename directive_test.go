@@ -9,51 +9,61 @@ import (
 	"testing"
 )
 
+var testDirs = []Directive{
+	{
+		Source:    "//tool:directive arg0 key0=value0 arg1 key1=value1",
+		Tool:      "tool",
+		Directive: "directive",
+		Args:      []string{"arg0", "arg1"},
+		Props:     map[string]string{"key0": "value0", "key1": "value1"},
+	},
+	{
+		Source:    "//enums:enum trimprefix=Button",
+		Tool:      "enums",
+		Directive: "enum",
+		Args:      []string{},
+		Props:     map[string]string{"trimprefix": "Button"},
+	},
+	{
+		Source:    "//enums:structflag NodeFlags field=Flag",
+		Tool:      "enums",
+		Directive: "structflag",
+		Args:      []string{"NodeFlags"},
+		Props:     map[string]string{"field": "Flag"},
+	},
+	{
+		Source:    "//goki:ki",
+		Tool:      "goki",
+		Directive: "ki",
+		Args:      []string{},
+		Props:     map[string]string{},
+	},
+	{
+		Source:    "//goki:ki noNew",
+		Tool:      "goki",
+		Directive: "ki",
+		Args:      []string{"noNew"},
+		Props:     map[string]string{},
+	},
+}
+
 func TestParse(t *testing.T) {
-	dirs := []Directive{
-		{
-			Source:    "//tool:directive arg0 key0=value0 arg1 key1=value1",
-			Tool:      "tool",
-			Directive: "directive",
-			Args:      []string{"arg0", "arg1"},
-			Props:     map[string]string{"key0": "value0", "key1": "value1"},
-		},
-		{
-			Source:    "//enums:enum trimprefix=Button",
-			Tool:      "enums",
-			Directive: "enum",
-			Args:      []string{},
-			Props:     map[string]string{"trimprefix": "Button"},
-		},
-		{
-			Source:    "//enums:structflag NodeFlags field=Flag",
-			Tool:      "enums",
-			Directive: "structflag",
-			Args:      []string{"NodeFlags"},
-			Props:     map[string]string{"field": "Flag"},
-		},
-		{
-			Source:    "//goki:ki",
-			Tool:      "goki",
-			Directive: "ki",
-			Args:      []string{},
-			Props:     map[string]string{},
-		},
-		{
-			Source:    "//goki:ki noNew",
-			Tool:      "goki",
-			Directive: "ki",
-			Args:      []string{"noNew"},
-			Props:     map[string]string{},
-		},
-	}
-	for _, dir := range dirs {
+	for _, dir := range testDirs {
 		have, has := Parse(dir.Source)
 		if !has {
 			t.Errorf("expected comment string %q to have a directive, but Parse returned false", dir.Source)
 		}
 		if !reflect.DeepEqual(have, dir) {
 			t.Errorf("expected directive for \n%q \n\tto be \n%v \n\tbut got \n%v \n\tinstead", dir.Source, dir, have)
+		}
+	}
+}
+
+func TestString(t *testing.T) {
+	for _, dir := range testDirs {
+		str := dir.String()
+		if str != dir.Source {
+			t.Errorf("expected formatted string for \n%q \n\tto be\n%q \n\tbut got \n%q \n\tinstead", dir.Source, dir.Source, str)
 		}
 	}
 }
