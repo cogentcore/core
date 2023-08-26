@@ -85,7 +85,7 @@ var tests = []test{
 	{
 		Dir:    Directive{},
 		Has:    false,
-		String: "//:",
+		String: "(invalid directive)",
 	},
 }
 
@@ -105,7 +105,7 @@ func TestString(t *testing.T) {
 	for _, test := range tests {
 		str := test.Dir.String()
 		if str != test.String {
-			t.Errorf("expected formatted string for \n%q \n\tto be\n%q \n\tbut got \n%q \n\tinstead", test.Dir.Source, test.String, str)
+			t.Errorf("expected formatted string for \n%#v \n\tto be\n%q \n\tbut got \n%q \n\tinstead", test.Dir, test.String, str)
 		}
 	}
 }

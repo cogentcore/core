@@ -72,7 +72,14 @@ func Parse(comment string) (Directive, bool) {
 // code. It puts the positional arguments
 // before the key-value arguments, and it
 // includes two slashes (`//`) at the start.
+// If the directive has an empty tool or
+// directive, String returns "(invalid directive)".
+// The output of String is not deterministic
+// because the key-value map is not ordered.
 func (d Directive) String() string {
+	if d.Tool == "" || d.Directive == "" {
+		return "(invalid directive)"
+	}
 	res := "//" + d.Tool + ":" + d.Directive
 	for _, arg := range d.Args {
 		res += " " + arg
