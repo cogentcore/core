@@ -500,19 +500,19 @@ func doWindowSetup(win *gi.Window, vp *gi.Viewport2D) {
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:New menu action triggered\n")
+			fmt.Println("File:New menu action triggered")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:Open menu action triggered\n")
+			fmt.Println("File:Open menu action triggered")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:Save menu action triggered\n")
+			fmt.Println("File:Save menu action triggered")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:SaveAs menu action triggered\n")
+			fmt.Println("File:SaveAs menu action triggered")
 		})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunWinClose},
