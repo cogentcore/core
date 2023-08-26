@@ -66,3 +66,19 @@ func Parse(comment string) (Directive, bool) {
 	}
 	return dir, true
 }
+
+// String returns the directive as a
+// formatted string suitable for use in
+// code. It puts the positional arguments
+// before the key-value arguments, and it
+// includes two slashes (`//`) at the start.
+func (d Directive) String() string {
+	res := "//" + d.Tool + ":" + d.Directive
+	for _, arg := range d.Args {
+		res += " " + arg
+	}
+	for key, value := range d.Props {
+		res += " " + key + "=" + value
+	}
+	return res
+}
