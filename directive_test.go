@@ -71,6 +71,22 @@ var tests = []test{
 		Has:    true,
 		String: "//goki:ki noNew",
 	},
+	{
+		Dir: Directive{
+			Source:    "goki:ki embeds=false",
+			Tool:      "goki",
+			Directive: "ki",
+			Args:      []string{},
+			Props:     map[string]string{"embeds": "false"},
+		},
+		Has:    true,
+		String: "//goki:ki embeds=false",
+	},
+	{
+		Dir:    Directive{},
+		Has:    false,
+		String: "//:",
+	},
 }
 
 func TestParse(t *testing.T) {
@@ -80,7 +96,7 @@ func TestParse(t *testing.T) {
 			t.Errorf("expected comment string %q to have a has value of %v, but Parse returned %v", test.Dir.Source, test.Has, has)
 		}
 		if !reflect.DeepEqual(have, test.Dir) {
-			t.Errorf("expected directive for \n%q \n\tto be \n%v \n\tbut got \n%v \n\tinstead", test.Dir.Source, test.Dir, have)
+			t.Errorf("expected directive for \n%q \n\tto be \n%#v \n\tbut got \n%#v \n\tinstead", test.Dir.Source, test.Dir, have)
 		}
 	}
 }
