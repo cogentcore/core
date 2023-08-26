@@ -18,6 +18,34 @@ func TestParse(t *testing.T) {
 			Args:      []string{"arg0", "arg1"},
 			Props:     map[string]string{"key0": "value0", "key1": "value1"},
 		},
+		{
+			Source:    "//enums:enum trimprefix=Button",
+			Tool:      "enums",
+			Directive: "enum",
+			Args:      []string{},
+			Props:     map[string]string{"trimprefix": "Button"},
+		},
+		{
+			Source:    "//enums:structflag NodeFlags field=Flag",
+			Tool:      "enums",
+			Directive: "structflag",
+			Args:      []string{"NodeFlags"},
+			Props:     map[string]string{"field": "Flag"},
+		},
+		{
+			Source:    "//goki:ki",
+			Tool:      "goki",
+			Directive: "ki",
+			Args:      []string{},
+			Props:     map[string]string{},
+		},
+		{
+			Source:    "//goki:ki noNew",
+			Tool:      "goki",
+			Directive: "ki",
+			Args:      []string{"noNew"},
+			Props:     map[string]string{},
+		},
 	}
 	for _, dir := range dirs {
 		have, has := Parse(dir.Source)
