@@ -32,22 +32,28 @@ type Directive struct {
 
 // Parse parses the given comment string and returns
 // any [Directive] inside it. It also returns whether
-// it found such a directive (has), and any error that
-// occurred while parsing the directive (err). A lack of a
-// directive does not result in an error, just a false
-// has value. Directives are of the form:
+// it found such a directive. Directives are of the form:
 // `//tool:directive arg0 key0=value0 arg1 key1=value1`
 // (the positional arguments and key-value arguments can
 // be in any order).
-func Parse(comment string) (dir Directive, has bool, err error) {
+func Parse(comment string) (Directive, bool) {
+	dir := Directive{}
 	before, after, found := strings.Cut(comment, ":")
 	if !found {
-		return Directive{}, false, nil
+		return dir, false
 	}
 	dir.Source = comment
 	dir.Tool = before
+	dir.Args = []string{}
+	dir.Props = map[string]string{}
 	fields := strings.Fields(after)
 	for _, field := range fields {
-
+		before, after, found := strings.Cut(field, "=")
+		if found {
+			dir.Props[before] = after
+		} else {
+			dir.Args = append(dir.Args, before)
+		}
 	}
+	return dir, true
 }
