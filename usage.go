@@ -15,13 +15,14 @@ import (
 // Usage returns the usage string for args based on given Config object
 func Usage(cfg any) string {
 	var b strings.Builder
-	b.WriteString("The following command-line arguments set fields on the Config struct.\n")
-	b.WriteString("args are case insensitive and kebab-case or snake_case also works\n")
-	b.WriteString("most can be used without nesting path (e.g. -nepochs instead of -run.nepochs)\n")
-	b.WriteString("\n")
-	b.WriteString("-help or -h\tshow available command-line arguments and exit\n")
-	b.WriteString("-config or -cfg\tspecify filename for loading Config settings\n")
-	b.WriteString("\n")
+	b.WriteString(AppAbout)
+	b.WriteString("\n\n")
+	b.WriteString("The following flags are supported. Flags are case-insensitive and\n")
+	b.WriteString("can be in CamelCase, snake_case, or kebab-case. Also, there can be\n")
+	b.WriteString("one or two leading dashes. Most flags can be used without nesting\n")
+	b.WriteString("paths (e.g. -target instead of -build.target)\n\n")
+	b.WriteString("-help or -h\n\tshow this usage message and exit\n")
+	b.WriteString("-config or -cfg\n\tthe filename to load configuration options from\n")
 	usageStruct(cfg, "", &b)
 	return b.String()
 }
