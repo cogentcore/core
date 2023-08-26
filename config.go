@@ -12,6 +12,7 @@ import (
 
 	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
+	"github.com/iancoleman/strcase"
 )
 
 var (
@@ -36,6 +37,21 @@ var (
 	// Help is variable target for -help or -h args
 	Help bool
 )
+
+func Run(app any, defaultFile ...string) {
+	leftovers, err := Config(app, defaultFile...)
+	_ = err
+	if len(leftovers) == 0 {
+		GUI(app)
+		return
+	}
+	cmd := strcase.ToCamel(leftovers[0]) + "Cmd"
+	fmt.Printf("running command: %s\n", cmd)
+	val := reflect.ValueOf(app)
+	meth := val.MethodByName(cmd)
+	// todo: check for bad
+	meth.Call(nil) // no args!!
+}
 
 // Config is the overall config setting function, processing config files
 // and command-line arguments, in the following order:
@@ -62,7 +78,9 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 	CommandArgs(allArgs)
 
 	args := os.Args[1:]
-	_, err = ParseArgs(cfg, args, allArgs, false) // false = ignore non-matches
+	leftovers, err := ParseArgs(cfg, args, allArgs, false) // false = ignore non-matches
+
+	fmt.Println(leftovers)
 
 	if Help {
 		fmt.Println(Usage(cfg))
@@ -95,5 +113,5 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 	if err != nil {
 		errs = append(errs, err)
 	}
-	return args, kit.AllErrors(errs, 10)
+	return leftovers, kit.AllErrors(errs, 10)
 }

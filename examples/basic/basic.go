@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/goki/gear"
 	"github.com/goki/ki/ki"
@@ -27,23 +26,16 @@ var AppProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"BuildCmd", ki.Props{
 			"label": "Build",
-			"Args": ki.PropSlice{
-				{"output", ki.Props{
-					"desc": "whatever output is",
-				}},
-			},
 		}},
 	},
 }
 
 func main() {
-	gear.Config(&TheApp, os.Args[1:]...)
-	if len(os.Args) <= 1 {
-		gear.GUI(&TheApp)
-	}
+	gear.Run(&TheApp, "config.toml")
 }
 
-func (a *App) BuildCmd(output string) error {
+func (a *App) BuildCmd() error {
+	fmt.Println(*a)
 	fmt.Println("Building")
 	return nil
 }
