@@ -61,7 +61,7 @@ func main() {
 			return nil
 		}
 		camel := strcase.ToCamel(name)
-		// identifier names can not start with a digit
+		// identifier names can't start with a digit
 		if unicode.IsDigit([]rune(camel)[0]) {
 			camel = "X" + camel
 		}
