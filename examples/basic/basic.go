@@ -5,6 +5,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/goki/gear"
@@ -13,9 +14,18 @@ import (
 )
 
 type App struct {
-	Name    string
-	Age     int
-	LikesGo bool
+
+	// the name of the user
+	Name string `desc:"the name of the user"`
+
+	// the age of the user
+	Age int `desc:"the age of the user"`
+
+	// whether the user likes Go
+	LikesGo bool `desc:"whether the user likes Go"`
+
+	// the target platform to build for
+	BuildTarget string `desc:"the target platform to build for"`
 }
 
 var TheApp App
@@ -38,6 +48,9 @@ func main() {
 }
 
 func (a *App) BuildCmd() error {
-	fmt.Println("Building")
+	if a.BuildTarget == "" {
+		return errors.New("missing build target")
+	}
+	fmt.Println("Building for platform", a.BuildTarget)
 	return nil
 }

@@ -1,3 +1,4 @@
 Name = "Go Gopher"
 Age = 13
 LikesGo = true
+BuildTarget = "darwin/arm64"
