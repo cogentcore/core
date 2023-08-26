@@ -10,27 +10,50 @@ import (
 	"strings"
 
 	"github.com/goki/ki/kit"
+	"github.com/iancoleman/strcase"
 )
 
-// Usage returns the usage string for args based on given Config object
-func Usage(cfg any) string {
+// Usage returns the usage string for the given app
+func Usage(app any) string {
 	var b strings.Builder
 	b.WriteString(AppAbout)
 	b.WriteString("\n\n")
-	b.WriteString("The following flags are supported. Flags are case-insensitive and\n")
+	b.WriteString("The following commands are available:\n\n")
+
+	b.WriteString("help\n\tshow this usage message and exit\n")
+	CommandUsage(app, &b)
+	b.WriteString("\n")
+
+	b.WriteString("The following flags are available. Flags are case-insensitive and\n")
 	b.WriteString("can be in CamelCase, snake_case, or kebab-case. Also, there can be\n")
 	b.WriteString("one or two leading dashes. Most flags can be used without nesting\n")
 	b.WriteString("paths (e.g. -target instead of -build.target)\n\n")
+
 	b.WriteString("-help or -h\n\tshow this usage message and exit\n")
 	b.WriteString("-config or -cfg\n\tthe filename to load configuration options from\n")
-	usageStruct(cfg, "", &b)
+	FlagUsage(app, "", &b)
 	return b.String()
 }
 
-// usageStruct adds usage info to given strings.Builder
-func usageStruct(obj any, path string, b *strings.Builder) {
-	typ := kit.NonPtrType(reflect.TypeOf(obj))
-	val := kit.NonPtrValue(reflect.ValueOf(obj))
+// CommandUsage adds the command usage info for
+// the given app to the given [strings.Builder]
+func CommandUsage(app any, b *strings.Builder) {
+	typ := reflect.TypeOf(app)
+	for i := 0; i < typ.NumMethod(); i++ {
+		m := typ.Method(i)
+		if strings.HasSuffix(m.Name, "Cmd") {
+			cmd := strcase.ToKebab(strings.TrimSuffix(m.Name, "Cmd"))
+			b.WriteString(cmd)
+			b.WriteString("\n")
+		}
+	}
+}
+
+// FlagUsage adds the flag usage info for the
+// given app to the given [strings.Builder]
+func FlagUsage(app any, path string, b *strings.Builder) {
+	typ := kit.NonPtrType(reflect.TypeOf(app))
+	val := kit.NonPtrValue(reflect.ValueOf(app))
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
@@ -39,7 +62,7 @@ func usageStruct(obj any, path string, b *strings.Builder) {
 			if path != "" {
 				nwPath = path + "." + nwPath
 			}
-			usageStruct(kit.PtrValue(fv).Interface(), nwPath, b)
+			FlagUsage(kit.PtrValue(fv).Interface(), nwPath, b)
 			continue
 		}
 		nm := f.Name
