@@ -6,6 +6,7 @@
 package directive
 
 import (
+	"go/ast"
 	"sort"
 	"strings"
 )
@@ -35,6 +36,32 @@ type Directive struct {
 	// arguments given in the
 	// form `name=value`.
 	NameValue map[string]string
+}
+
+// String returns the directive as a
+// formatted string suitable for use in
+// code. It puts the positional arguments
+// before the name-value arguments, and it
+// includes two slashes (`//`) at the start.
+// The output of String is deterministic
+// because it sorts the name-value map.
+func (d *Directive) String() string {
+	if d == nil {
+		return "<nil>"
+	}
+	res := "//" + d.Tool + ":" + d.Directive
+	for _, arg := range d.Args {
+		res += " " + arg
+	}
+	keys := make([]string, 0, len(d.NameValue))
+	for key := range d.NameValue {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		res += " " + key + "=" + d.NameValue[key]
+	}
+	return res
 }
 
 // Parse parses the given comment string and returns
@@ -70,28 +97,25 @@ func Parse(comment string) *Directive {
 	return dir
 }
 
-// String returns the directive as a
-// formatted string suitable for use in
-// code. It puts the positional arguments
-// before the name-value arguments, and it
-// includes two slashes (`//`) at the start.
-// The output of String is deterministic
-// because it sorts the name-value map.
-func (d *Directive) String() string {
-	if d == nil {
-		return "<nil>"
-	}
-	res := "//" + d.Tool + ":" + d.Directive
-	for _, arg := range d.Args {
-		res += " " + arg
-	}
-	keys := make([]string, 0, len(d.NameValue))
-	for key := range d.NameValue {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	for _, key := range keys {
-		res += " " + key + "=" + d.NameValue[key]
+// ParseComment parses the given AST comment
+// and returns any [Directive] inside it.
+// It is a helper function that calls [Parse]
+// on the text of the comment.
+func ParseComment(comment *ast.Comment) *Directive {
+	return Parse(comment.Text)
+}
+
+// ParseCommentGroup parses the given AST comment
+// group and returns a slice of all [Directive]s
+// inside it. It is a helper function that calls
+// [ParseComment] on each comment in the group.
+func ParseCommentGroup(group *ast.CommentGroup) []*Directive {
+	res := []*Directive{}
+	for _, comment := range group.List {
+		dir := ParseComment(comment)
+		if dir != nil {
+			res = append(res, dir)
+		}
 	}
 	return res
 }
