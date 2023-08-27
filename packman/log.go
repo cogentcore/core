@@ -9,14 +9,16 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+
+	"goki.dev/goki/config"
 )
 
 // Log prints the logs from your app running on the given operating system (android or ios) to the terminal
-func Log(osName string, keep bool, allLevel string) error {
-	if osName == "ios" {
+func Log(c *config.Config) error {
+	if c.Log.Target == "ios" {
 		return errors.New("ios not supported yet")
 	}
-	if !keep {
+	if !c.Log.Keep {
 		cmd := exec.Command("adb", "logcat", "-c")
 		fmt.Println(CmdString(cmd))
 		output, err := cmd.CombinedOutput()
@@ -25,7 +27,7 @@ func Log(osName string, keep bool, allLevel string) error {
 		}
 		fmt.Println(string(output))
 	}
-	cmd := exec.Command("adb", "logcat", "*:"+allLevel, "Go:I", "GoLog:I")
+	cmd := exec.Command("adb", "logcat", "*:"+c.Log.All, "Go:I", "GoLog:I")
 	fmt.Println(CmdString(cmd))
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

@@ -11,20 +11,22 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+
+	"goki.dev/goki/config"
 )
 
 // Install installs the package with the given ID by looking for it in the list of supported packages
-func Install(pkgID string) error {
+func Install(c *config.Config) error {
 	packages, err := LoadPackages()
 	if err != nil {
 		return fmt.Errorf("error loading packages: %w", err)
 	}
 	for _, pkg := range packages {
-		if pkg.ID == pkgID {
+		if pkg.ID == c.Install.Package {
 			return InstallPackage(pkg)
 		}
 	}
-	return fmt.Errorf("error: could not find package %s", pkgID)
+	return fmt.Errorf("error: could not find package %s", c.Install.Package)
 }
 
 // InstallPackage installs the given package
@@ -47,14 +49,14 @@ func InstallPackage(pkg Package) error {
 }
 
 // InstallLocal installs a local package from the filesystem on the user's device for the given operating systems
-func InstallLocal(pkgPath string, oss ...string) error {
-	for _, os := range oss {
-		err := OSSupported(os)
+func InstallLocal(c *config.Config) error {
+	for _, os := range c.Install.Target {
+		err := config.OSSupported(os)
 		if err != nil {
 			return fmt.Errorf("install: %w", err)
 		}
 		if os == "android" || os == "ios" {
-			err := installLocalMobile(pkgPath, os)
+			err := installLocalMobile(c, os)
 			if err != nil {
 				return fmt.Errorf("install: %w", err)
 			}
@@ -64,7 +66,7 @@ func InstallLocal(pkgPath string, oss ...string) error {
 			// TODO: implement js
 			continue
 		}
-		err = installLocalDesktop(pkgPath, os)
+		err = installLocalDesktop(c.Install.Package, os)
 		if err != nil {
 			return fmt.Errorf("install: %w", err)
 		}
@@ -88,15 +90,16 @@ func installLocalDesktop(pkgPath string, osName string) error {
 
 // buildMobile builds and installs an executable for the package at the given path for the given mobile operating system.
 // buildMobile does not check whether operating systems are valid, so it should be called through Install in almost all cases.
-func installLocalMobile(pkgPath string, osName string) error {
+func installLocalMobile(c *config.Config, osName string) error {
 	if osName == "ios" {
 		return errors.New("ios is not yet supported")
 	}
-	err := Build(pkgPath, Platform{osName, runtime.GOARCH})
+	c.Build.Platform = []config.Platform{{osName, runtime.GOARCH}}
+	err := Build(c)
 	if err != nil {
 		return fmt.Errorf("install: %w", err)
 	}
-	cmd := exec.Command("adb", "install", filepath.Join(BuildPath(pkgPath), AppName(pkgPath)+".apk"))
+	cmd := exec.Command("adb", "install", filepath.Join(BuildPath(c.Install.Package), AppName(c.Install.Package)+".apk"))
 	fmt.Println(CmdString(cmd))
 	output, err := cmd.CombinedOutput()
 	if err != nil {
