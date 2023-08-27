@@ -10,7 +10,7 @@ package config
 // [Main] configuration object
 var The = &Main{}
 
-// TODO: make all of the targets enums
+// TODO: make all of the target fields enums
 
 // Main is the main config struct
 // that contains all of the configuration

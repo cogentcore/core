@@ -10,36 +10,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"goki.dev/goki/config"
 )
 
-// packman imports this:
-// goki/tools/goki:
-// type Config struct
-// var TheConfig *Config
-
-// goki/tools/gokicmd:
-// type App struct {
-// 	goki.Config
-// 	Build  packman.BuildConfig
-//     ...
-// }
-// packman.TheBuildConfig = &TheApp.Build // set packman to use our build config
-
-type BuildConfig struct {
-	// everthing is here
-	// pkgPath string, platforms ...Platform
-}
-
-var TheBuildConfig *BuildConfig
-
-// Build builds an executable for the package at the given path for the given platforms
-// all info is now in BuildConfig
-// except for any global config -- that goes in as args
+// Build builds an executable for the package
+// at the given path for the given platforms
 func Build() error {
-	// goki.TheConfig.Version // example access of global config param
-	// TheBuildConfig.Target  // local build config
-
-	if len(platforms) == 0 {
+	if len(config.The.Build.Target) == 0 {
 		return errors.New("build: expected at least 1 platform")
 	}
 	err := os.MkdirAll(filepath.Join(".", "bin", "build"), 0700)
@@ -47,7 +25,7 @@ func Build() error {
 		return fmt.Errorf("build: failed to create bin/build directory: %w", err)
 	}
 	androidArchs := []string{}
-	for _, platform := range platforms {
+	for _, platform := range config.The.Build.Target {
 		err := OSSupported(platform.OS)
 		if err != nil {
 			return err
@@ -70,13 +48,13 @@ func Build() error {
 			// TODO: implement js
 			continue
 		}
-		err = buildDesktop(pkgPath, platform)
+		err = buildDesktop(config.The.Build.Package, platform)
 		if err != nil {
 			return fmt.Errorf("build: %w", err)
 		}
 	}
 	if len(androidArchs) != 0 {
-		return buildMobile(pkgPath, "android", androidArchs)
+		return buildMobile(config.The.Build.Package, "android", androidArchs)
 	}
 	return nil
 }
