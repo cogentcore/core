@@ -6,16 +6,12 @@
 // structs for the GoKi tool.
 package config
 
-// The is the singular instance of the
-// [Main] configuration object
-var The = &Main{}
-
 // TODO: make all of the target fields enums
 
-// Main is the main config struct
+// Config is the main config struct
 // that contains all of the configuration
 // options for the GoKi tool
-type Main struct {
+type Config struct {
 
 	// the name of the app/library
 	Name string `desc:"the name of the app/library"`
@@ -46,8 +42,8 @@ type Build struct {
 	// the path of the package to build
 	Package string `desc:"the path of the package to build"`
 
-	// the target platforms to build executables for, in os[/arch] format
-	Target []string `desc:"the target platforms to build executables for, in os[/arch] format"`
+	// the target platforms to build executables for
+	Platform []Platform `desc:"the target platforms to build executables for"`
 }
 
 // Colorgen contains the configuration options

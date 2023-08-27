@@ -16,8 +16,8 @@ import (
 
 // Build builds an executable for the package
 // at the given path for the given platforms
-func Build() error {
-	if len(config.The.Build.Target) == 0 {
+func Build(c *config.Config) error {
+	if len(c.Build.Platform) == 0 {
 		return errors.New("build: expected at least 1 platform")
 	}
 	err := os.MkdirAll(filepath.Join(".", "bin", "build"), 0700)
@@ -25,13 +25,13 @@ func Build() error {
 		return fmt.Errorf("build: failed to create bin/build directory: %w", err)
 	}
 	androidArchs := []string{}
-	for _, platform := range config.The.Build.Target {
-		err := OSSupported(platform.OS)
+	for _, platform := range c.Build.Platform {
+		err := config.OSSupported(platform.OS)
 		if err != nil {
 			return err
 		}
 		if platform.Arch != "all" {
-			err := ArchSupported(platform.Arch)
+			err := config.ArchSupported(platform.Arch)
 			if err != nil {
 				return err
 			}
@@ -48,20 +48,20 @@ func Build() error {
 			// TODO: implement js
 			continue
 		}
-		err = buildDesktop(config.The.Build.Package, platform)
+		err = buildDesktop(c.Build.Package, platform)
 		if err != nil {
 			return fmt.Errorf("build: %w", err)
 		}
 	}
 	if len(androidArchs) != 0 {
-		return buildMobile(config.The.Build.Package, "android", androidArchs)
+		return buildMobile(c.Build.Package, "android", androidArchs)
 	}
 	return nil
 }
 
 // buildDesktop builds an executable for the package at the given path for the given desktop platform.
 // buildDesktop does not check whether platforms are valid, so it should be called through Build in almost all cases.
-func buildDesktop(pkgPath string, platform Platform) error {
+func buildDesktop(pkgPath string, platform config.Platform) error {
 	cmd := exec.Command("go", "build", "-o", BuildPath(pkgPath), pkgPath)
 	cmd.Env = append(os.Environ(), "GOOS="+platform.OS, "GOARCH="+platform.Arch)
 	fmt.Println(CmdString(cmd))

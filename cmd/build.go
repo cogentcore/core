@@ -11,7 +11,7 @@ import (
 // BuildCmd builds executables for a local
 // package for one or more platforms.
 func (a *App) BuildCmd() error {
-	return packman.Build()
+	return packman.Build(&a.Config)
 }
 
 // var buildTarget []string
