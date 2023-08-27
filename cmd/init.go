@@ -4,26 +4,26 @@
 
 package cmd
 
-import (
-	"errors"
-	"strconv"
+import "goki.dev/goki/goki"
 
-	"github.com/spf13/cobra"
-	"goki.dev/goki/goki"
-)
-
-func init() {
-	rootCmd.AddCommand(initCmd)
+// InitCmd initializes the ".goki" directory
+// and the configuration file in the current directory
+func (a *App) InitCmd() error {
+	return goki.Init()
 }
 
-var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: `Initialize the ".goki" directory`,
-	Long:  `Initialize the ".goki" directory and the configuration file in the current directory`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) > 0 {
-			return errors.New("expected 0 arguments to init, but got " + strconv.Itoa(len(args)))
-		}
-		return goki.Init()
-	},
-}
+// func init() {
+// 	rootCmd.AddCommand(initCmd)
+// }
+
+// var initCmd = &cobra.Command{
+// 	Use:   "init",
+// 	Short: `Initialize the ".goki" directory`,
+// 	Long:  `Initialize the ".goki" directory and the configuration file in the current directory`,
+// 	RunE: func(cmd *cobra.Command, args []string) error {
+// 		if len(args) > 0 {
+// 			return errors.New("expected 0 arguments to init, but got " + strconv.Itoa(len(args)))
+// 		}
+// 		return goki.Init()
+// 	},
+// }

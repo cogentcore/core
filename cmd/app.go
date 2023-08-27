@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package cmd contains the actual command defintions
+// for the commands in the GoKi tool.
 package cmd
+
+import "goki.dev/goki/config"
 
 // App is the main app type that handles
 // the logic for the GoKi tool
 type App struct {
-
-	// the name of the app
-	Name string `desc:"the name of the app"`
-
-	// the version of the app
-	Version string `desc:"the version of the app"`
+	*config.Main
 }
 
 // TheApp is the singular instance of [App]
-var TheApp = &App{}
+var TheApp = &App{config.The}
