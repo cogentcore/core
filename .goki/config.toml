@@ -5,6 +5,10 @@ Version = "v0.0.0"
 [Build]
   Package = "."
 
+  [[Build.Platform]]
+    OS = ""
+    Arch = ""
+
 [Colorgen]
   Source = "colors.xml"
   Output = "colorgen.go"
