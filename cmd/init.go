@@ -8,8 +8,8 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/goki/tools"
 	"github.com/spf13/cobra"
+	"goki.dev/goki/goki"
 )
 
 func init() {
@@ -24,6 +24,6 @@ var initCmd = &cobra.Command{
 		if len(args) > 0 {
 			return errors.New("expected 0 arguments to init, but got " + strconv.Itoa(len(args)))
 		}
-		return tools.Init()
+		return goki.Init()
 	},
 }

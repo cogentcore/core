@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/goki/tools/packman"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"goki.dev/goki/packman"
 )
 
 var buildTarget []string

@@ -7,8 +7,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/goki/tools/packman"
 	"github.com/spf13/cobra"
+	"goki.dev/goki/packman"
 )
 
 var colorgenPackage string
