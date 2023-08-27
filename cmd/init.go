@@ -4,7 +4,7 @@
 
 package cmd
 
-import "goki.dev/goki/goki"
+import goki "goki.dev/goki/tools"
 
 // InitCmd initializes the ".goki" directory
 // and the configuration file in the current directory

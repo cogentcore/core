@@ -5,17 +5,12 @@
 package cmd
 
 import (
-	"strings"
-
 	"goki.dev/goki/packman"
 )
 
 // InstallCmd installs a local or global GoKi
 // package to your device or mobile emulator
 func (a *App) InstallCmd() error {
-	if a.Install.Package == "." || a.Install.Package == ".." || strings.Contains(a.Install.Package, "/") {
-		return packman.InstallLocal(a.Config())
-	}
 	return packman.Install(a.Config())
 }
 

@@ -11,12 +11,16 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"goki.dev/goki/config"
 )
 
 // Install installs the package with the given ID by looking for it in the list of supported packages
 func Install(c *config.Config) error {
+	if c.Install.Package == "." || c.Install.Package == ".." || strings.Contains(c.Install.Package, "/") {
+		return InstallLocal(c)
+	}
 	packages, err := LoadPackages()
 	if err != nil {
 		return fmt.Errorf("error loading packages: %w", err)
