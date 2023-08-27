@@ -10,9 +10,12 @@ import "goki.dev/goki/config"
 
 // App is the main app type that handles
 // the logic for the GoKi tool
-type App struct {
-	config.Config
-}
+type App config.Config
 
 // TheApp is the singular instance of [App]
 var TheApp = &App{}
+
+// Config returns the app as a config object
+func (a *App) Config() *config.Config {
+	return (*config.Config)(a)
+}

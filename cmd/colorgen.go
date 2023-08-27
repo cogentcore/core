@@ -12,7 +12,7 @@ import (
 // declaration file from a Material Theme
 // Builder Android Views XML file.
 func (a *App) ColorgenCmd() error {
-	return packman.GenerateColorScheme(&a.Config)
+	return packman.GenerateColorScheme(a.Config())
 }
 
 // var colorgenPackage string

@@ -1,20 +1,21 @@
-Name = "tools"
-Desc = ""
+Name = "goki"
+Desc = "Command line and GUI tools for developing apps and libraries using the GoKi framework."
 Version = "v0.0.0"
 
 [Build]
-  Package = ""
+  Package = "."
 
 [Colorgen]
-  Source = ""
-  Output = ""
-  Package = ""
-  Comment = ""
+  Source = "colors.xml"
+  Output = "colorgen.go"
+  Package = "goki"
+  Comment = "These are the color schemes"
 
 [Install]
-  Package = ""
+  Package = "."
+  Target = [""]
 
 [Log]
-  Target = ""
+  Target = "android"
   Keep = false
   All = ""
