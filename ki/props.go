@@ -12,7 +12,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/kit"
 )
 
 // Props is the type used for holding generic properties -- the actual Go type

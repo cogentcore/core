@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/kit"
 )
 
 var PropsTest = Props{

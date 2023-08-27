@@ -14,7 +14,7 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
-	"github.com/goki/ki/dirs"
+	"goki.dev/ki/dirs"
 )
 
 // OpenFromPaths reads object from given TOML file,

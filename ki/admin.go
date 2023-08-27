@@ -12,7 +12,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/kit"
 )
 
 // admin has infrastructure level code, outside of ki interface

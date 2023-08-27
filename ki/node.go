@@ -17,9 +17,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/kit"
 	"github.com/jinzhu/copier"
+	"goki.dev/ki/bitflag"
+	"goki.dev/ki/kit"
 )
 
 // The Node implements the Ki interface and provides the core functionality

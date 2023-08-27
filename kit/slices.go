@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goki/ki/floats"
-	"github.com/goki/ki/ints"
+	"goki.dev/ki/floats"
+	"goki.dev/ki/ints"
 )
 
 // This file contains helpful functions for dealing with slices, in the reflect

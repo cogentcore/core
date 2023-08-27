@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/kit"
 )
 
 // Slice is just a slice of ki elements: []Ki, providing methods for accessing

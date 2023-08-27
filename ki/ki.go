@@ -9,7 +9,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/kit"
 )
 
 // The Ki interface provides the core functionality for a GoKi tree.
@@ -585,7 +585,7 @@ type Ki interface {
 
 	//////////////////////////////////////////////////////////////////////////
 	//  IO: for JSON and XML formats -- see also Slice
-	//  see https://github.com/goki/ki/wiki/Naming for IO naming conventions
+	//  see https://goki.dev/ki/wiki/Naming for IO naming conventions
 
 	// WriteJSON writes the tree to an io.Writer, using MarshalJSON -- also
 	// saves a critical starting record that allows file to be loaded de-novo

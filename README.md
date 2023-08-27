@@ -2,16 +2,16 @@
 
 Go language (golang) tree structure (ki = 木 = tree in Japanese)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/goki/ki)](https://goreportcard.com/report/github.com/goki/ki)
-[![Go Reference](https://pkg.go.dev/badge/github.com/goki/ki.svg)](https://pkg.go.dev/github.com/goki/ki)
-[![CI](https://github.com/goki/ki/actions/workflows/ci.yml/badge.svg)](https://github.com/goki/ki/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/goki.dev/ki)](https://goreportcard.com/report/goki.dev/ki)
+[![Go Reference](https://pkg.go.dev/badge/goki.dev/ki.svg)](https://pkg.go.dev/goki.dev/ki)
+[![CI](https://goki.dev/ki/actions/workflows/ci.yml/badge.svg)](https://goki.dev/ki/actions/workflows/ci.yml)
 [![Codecov](https://codecov.io/gh/goki/ki/branch/master/graph/badge.svg?token=Hw5cInAxY3)](https://codecov.io/gh/goki/ki)
 
-**NOTE:** A new version of Ki is being developed on this branch, so there may be breaking changes and unstable code. For the last stable version of Ki, import v1.1.16 and see the [v1 branch](https://github.com/goki/ki/tree/v1).
+**NOTE:** A new version of Ki is being developed on this branch, so there may be breaking changes and unstable code. For the last stable version of Ki, import v1.1.16 and see the [v1 branch](https://goki.dev/ki/tree/v1).
 
 # Overview
 
-See the [Wiki](https://github.com/goki/ki/wiki) for more docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
+See the [Wiki](https://goki.dev/ki/wiki) for more docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
 The **Tree** is one of the most flexible, widely-used data structures in programming, including the DOM structure at the core of a web browser, scene graphs for 3D and 2D graphics systems, JSON, XML, SVG, filesystems, programs themselves, etc.  This is because trees can capture most relevant forms of *structure* (hierarchical groupings, categories, relationships, etc) and are most powerful when they are fully *generative* -- arbitrary new types can be inserted flexibly.
 

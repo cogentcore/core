@@ -10,7 +10,7 @@ defined in ki package, these are for more dynamic, piecemeal processing.
 package walki
 
 import (
-	"github.com/goki/ki/ki"
+	"goki.dev/ki/ki"
 )
 
 // Last returns the last node in the tree

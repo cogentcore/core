@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"unicode"
 
-	"github.com/goki/ki/floats"
-	"github.com/goki/ki/ints"
+	"goki.dev/ki/floats"
+	"goki.dev/ki/ints"
 )
 
 // Sel implements the "mute" function from here
