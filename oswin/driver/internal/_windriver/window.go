@@ -20,10 +20,10 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/internal/drawer"
-	"github.com/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/gi/oswin/window"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/driver/internal/drawer"
+	"goki.dev/gi/oswin/driver/internal/event"
+	"goki.dev/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
 	"golang.org/x/image/math/f64"
 )

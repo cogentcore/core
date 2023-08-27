@@ -12,12 +12,12 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/giv"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gimain"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/giv"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -577,7 +577,7 @@ func main() {
 
 func mainrun() {
 	gi.SetAppName("file-browser")
-	gi.SetAppAbout(`<code>FileBrowser</code> is a demo / test of the FileTree / FileNode browser in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki/gide">gide on GitHub</a>`)
+	gi.SetAppAbout(`<code>FileBrowser</code> is a demo / test of the FileTree / FileNode browser in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://goki.dev/gide">gide on GitHub</a>`)
 
 	// gi.SetQuitCleanFunc(func() {
 	// 	fmt.Printf("Doing final Quit cleanup here..\n")

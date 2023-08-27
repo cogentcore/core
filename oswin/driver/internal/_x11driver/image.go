@@ -26,7 +26,7 @@ import (
 	"github.com/BurntSushi/xgb/shm"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"github.com/goki/gi/oswin/driver/internal/swizzle"
+	"goki.dev/gi/oswin/driver/internal/swizzle"
 )
 
 type imageImpl struct {

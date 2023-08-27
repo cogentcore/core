@@ -12,8 +12,8 @@
 package driver
 
 import (
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/vkos"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/driver/vkos"
 )
 
 func driverMain(f func(oswin.App)) {

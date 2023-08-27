@@ -7,7 +7,7 @@ package girl
 import (
 	"image"
 
-	"github.com/goki/gi/oswin"
+	"goki.dev/gi/oswin"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 )

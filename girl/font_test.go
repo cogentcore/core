@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/gist"
 )
 
 // note: the responses to the following two tests depend on what is installed on the system

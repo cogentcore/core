@@ -8,7 +8,7 @@ Currently, this is just:
 
 ## Installation
 
-The usual Go install procedure will work -- see [Install](https://github.com/goki/gi/wiki/Install) for details.
+The usual Go install procedure will work -- see [Install](https://goki.dev/gi/wiki/Install) for details.
 
 ## Camera Navigation
 

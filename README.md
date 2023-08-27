@@ -5,14 +5,14 @@
 </h1>
 
 <p align="center">
-    <a href="https://goreportcard.com/report/github.com/goki/gi"><img src="https://goreportcard.com/badge/github.com/goki/gi" alt="Go Report Card"></a>
-    <a href="https://pkg.go.dev/github.com/goki/gi"><img src="https://img.shields.io/badge/dev-reference-007d9c?logo=go&logoColor=white&style=flat" alt="pkg.go.dev docs"></a>
-    <a href="https://github.com/goki/gi/actions/workflows/ci.yml"><img src="https://github.com/goki/gi/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-    <a href="https://www.tickgit.com/browse?repo=github.com/goki/gi"><img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/goki/gi" alt="TODOs"></a>
-    <a href="https://github.com/goki/gi/releases/"><img src="https://img.shields.io/github/release/goki/gi?include_prereleases=&sort=semver&color=blue" alt="GitHub release"></a>
+    <a href="https://goreportcard.com/report/goki.dev/gi"><img src="https://goreportcard.com/badge/goki.dev/gi" alt="Go Report Card"></a>
+    <a href="https://pkg.go.dev/goki.dev/gi"><img src="https://img.shields.io/badge/dev-reference-007d9c?logo=go&logoColor=white&style=flat" alt="pkg.go.dev docs"></a>
+    <a href="https://goki.dev/gi/actions/workflows/ci.yml"><img src="https://goki.dev/gi/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://www.tickgit.com/browse?repo=goki.dev/gi"><img src="https://badgen.net/https/api.tickgit.com/badgen/goki.dev/gi" alt="TODOs"></a>
+    <a href="https://goki.dev/gi/releases/"><img src="https://img.shields.io/github/release/goki/gi?include_prereleases=&sort=semver&color=blue" alt="GitHub release"></a>
 </p>
 
-**NOTE:** GoKi is currently undergoing a period of significant developement to make it easier to make useful, fast, and beautiful apps and support running apps on mobile. As such, some of the information in this repository and on the [GoKi website](https://GoKi.dev) may be incorrect. Furthermore, there may be breaking changes soon, so starting new apps with this framework is not recommended at this time; if you do, please be ready to adjust to any breaking changes. If you want to accelerate the improvement of GoKi, please contribute by following the [Contribution Guidelines](https://goki.dev/docs/general/contributionguidelines/). Developement of Gi is currently happening on this branch. For the latest stable version of Gi, import version 1.3.19 and see the [v1 branch](https://github.com/goki/gi/tree/v1).
+**NOTE:** GoKi is currently undergoing a period of significant developement to make it easier to make useful, fast, and beautiful apps and support running apps on mobile. As such, some of the information in this repository and on the [GoKi website](https://GoKi.dev) may be incorrect. Furthermore, there may be breaking changes soon, so starting new apps with this framework is not recommended at this time; if you do, please be ready to adjust to any breaking changes. If you want to accelerate the improvement of GoKi, please contribute by following the [Contribution Guidelines](https://goki.dev/docs/general/contributionguidelines/). Developement of Gi is currently happening on this branch. For the latest stable version of Gi, import version 1.3.19 and see the [v1 branch](https://goki.dev/gi/tree/v1).
 
 GoGi is part of the [GoKi](https://GoKi.dev) Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese)
 
@@ -20,13 +20,13 @@ GoGi is part of the [GoKi](https://GoKi.dev) Go language (golang) full strength 
 
 NOTE: Requires Go version `1.18+` -- now using the new generics.
 
-See the [Wiki](https://github.com/goki/gi/wiki) for more docs (increasingly extensive), [Install](https://github.com/goki/gi/wiki/Install) instructions (mostly basic `go build` procedure, but does now depend on `cgo` on all platforms due to `glfw`, so see details for each platform -- for mac you must now install the [Vulkan SDK](https://vulkan.lunarg.com), and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) email list, and the new github [Discussions](https://github.com/goki/gi/discussions) tool.
+See the [Wiki](https://goki.dev/gi/wiki) for more docs (increasingly extensive), [Install](https://goki.dev/gi/wiki/Install) instructions (mostly basic `go build` procedure, but does now depend on `cgo` on all platforms due to `glfw`, so see details for each platform -- for mac you must now install the [Vulkan SDK](https://vulkan.lunarg.com), and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) email list, and the new github [Discussions](https://goki.dev/gi/discussions) tool.
 
 GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a scenegraph-based GUI framework in full native idiomatic Go, with minimal OS-specific backend interfaces based originally on the [Shiny](https://github.com/golang/exp/tree/master/shiny) drivers, now using [go-gl/glfw](https://github.com/go-gl/glfw) and vulkan-based [vgpu](https://github.com/goki/vgpu), and supporting MacOS, Linux, and Windows.
 
-The overall design integrates existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  The core `Layout` object automates most of the complexity associated with GUI construction (including scrolling), so the programmer mainly just needs to add the elements, and set their style properties -- similar to HTML.  The main 2D framework also integrates with a 3D scenegraph, supporting interesting combinations of these frameworks (see `gi3d` package and [examples/gi3d](https://github.com/goki/gi/tree/master/examples/gi3d)).  Currently GoGi is focused on desktop systems, but nothing should prevent adaptation to mobile. 
+The overall design integrates existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  The core `Layout` object automates most of the complexity associated with GUI construction (including scrolling), so the programmer mainly just needs to add the elements, and set their style properties -- similar to HTML.  The main 2D framework also integrates with a 3D scenegraph, supporting interesting combinations of these frameworks (see `gi3d` package and [examples/gi3d](https://goki.dev/gi/tree/master/examples/gi3d)).  Currently GoGi is focused on desktop systems, but nothing should prevent adaptation to mobile. 
 
-See [Gide](https://github.com/goki/gide) for a complete, complex application written in GoGi (an IDE), and likewise the [Emergent](https://github.com/emer/emergent) neural network simulation environment (the prime motivator for the whole project), along with the various examples in this repository for lots of useful demonstrations -- start with the  [Widgets](https://github.com/goki/gi/tree/master/examples/widgets) example which has a bit of a tutorial introduction.
+See [Gide](https://goki.dev/gide) for a complete, complex application written in GoGi (an IDE), and likewise the [Emergent](https://github.com/emer/emergent) neural network simulation environment (the prime motivator for the whole project), along with the various examples in this repository for lots of useful demonstrations -- start with the  [Widgets](https://goki.dev/gi/tree/master/examples/widgets) example which has a bit of a tutorial introduction.
 
 # Main Features
 
@@ -76,7 +76,7 @@ The best way to see how the system works are in the `examples` directory, and by
 
 The `oswin` and `oswin/driver/vkos` packages provide interface abstractions for hardware-level implementations, now using [vgpu](https://github.com/goki/vgpu) and [glfw](https://github.com/go-gl/glfw) (version 3.3) provides the basic platform-specific details along with a few other bits of platform-specific code.
 
-All of the main "front end" code just deals with `image.RGBA` through the [girl](https://github.com/goki/gi/tree/master/girl) rendering library, using `girl.Paint` methods, which was adapted from [fogleman/gg](https://github.com/fogleman/gg), and we use [srwiley/rasterx](https://github.com/srwiley/rasterx) for CPU-based rasterization to the image, which is fast and SVG performant.   The [vgpu/vdraw](https://github.com/goki/vgpu/vdraw) package performs optimized GPU texture-based compositing to assemble the final display in a way that minimizes the copying of image data up to the GPU, and supports overlays such as popups and sprites.  Any 3D scene elements are accessed directly within the GPU.
+All of the main "front end" code just deals with `image.RGBA` through the [girl](https://goki.dev/gi/tree/master/girl) rendering library, using `girl.Paint` methods, which was adapted from [fogleman/gg](https://github.com/fogleman/gg), and we use [srwiley/rasterx](https://github.com/srwiley/rasterx) for CPU-based rasterization to the image, which is fast and SVG performant.   The [vgpu/vdraw](https://github.com/goki/vgpu/vdraw) package performs optimized GPU texture-based compositing to assemble the final display in a way that minimizes the copying of image data up to the GPU, and supports overlays such as popups and sprites.  Any 3D scene elements are accessed directly within the GPU.
 
 # Status / News
 
@@ -84,14 +84,14 @@ All of the main "front end" code just deals with `image.RGBA` through the [girl]
 
 * Version 1.2 released Feb, 2021, had lots of bug fixes.
 
-* Version 1.1 released Nov, 2020, has the styling parameters and code broken out in the [gist](https://github.com/goki/gi/tree/master/gist) style package, and basic rendering code, including a complete text layout and rendering system, in the [girl](https://github.com/goki/gi/tree/master/girl) render library.
+* Version 1.1 released Nov, 2020, has the styling parameters and code broken out in the [gist](https://goki.dev/gi/tree/master/gist) style package, and basic rendering code, including a complete text layout and rendering system, in the [girl](https://goki.dev/gi/tree/master/girl) render library.
 
 * Version 1.0 released April, 2020!  The 3D `gi3d` component is ready for use, and the code has been widely tested by students and researchers, including extensive testing under `gide`.  The API will remain stable at this point.
 
 * Active users should join [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list to receive more detailed status updates.
 
-* Please file [Issues](https://github.com/goki/gi/issues) for anything that does not work.
+* Please file [Issues](https://goki.dev/gi/issues) for anything that does not work.
 
-* 3/2019: `python` wrapper is now available!  you can do most of GoGi from python now.  See [README.md](https://github.com/goki/gi/tree/master/python/README.md) file there for more details.
+* 3/2019: `python` wrapper is now available!  you can do most of GoGi from python now.  See [README.md](https://goki.dev/gi/tree/master/python/README.md) file there for more details.
 
 

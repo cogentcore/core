@@ -7,7 +7,7 @@ package gi
 import (
 	"fmt"
 
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/gist"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"

@@ -8,7 +8,7 @@ import (
 	"errors"
 	"image/color"
 
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/gist"
 	"github.com/goki/mat32"
 	"golang.org/x/image/font"
 )

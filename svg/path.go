@@ -12,8 +12,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/girl"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/girl"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

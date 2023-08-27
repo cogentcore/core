@@ -19,7 +19,7 @@ package touch
 import (
 	"image"
 
-	"github.com/goki/gi/oswin"
+	"goki.dev/gi/oswin"
 	"github.com/goki/ki/kit"
 )
 

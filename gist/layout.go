@@ -5,7 +5,7 @@
 package gist
 
 import (
-	"github.com/goki/gi/units"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

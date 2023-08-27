@@ -7,10 +7,10 @@ package gi3d
 import (
 	"fmt"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/giv"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/oswin/key"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/giv"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/oswin/key"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )

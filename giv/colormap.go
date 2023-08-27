@@ -7,11 +7,11 @@ package giv
 import (
 	"reflect"
 
-	"github.com/goki/gi/colormap"
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/mouse"
+	"goki.dev/gi/colormap"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

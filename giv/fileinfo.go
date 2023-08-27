@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/c2h5oh/datasize"
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/icons"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"

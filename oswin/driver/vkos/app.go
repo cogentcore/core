@@ -19,10 +19,10 @@ import (
 	"sync"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/clip"
-	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/window"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/clip"
+	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/vgpu/vgpu"
 

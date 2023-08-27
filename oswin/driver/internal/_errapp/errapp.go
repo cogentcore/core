@@ -13,9 +13,9 @@ package errapp
 import (
 	"image"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/clip"
-	"github.com/goki/gi/oswin/cursor"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/clip"
+	"goki.dev/gi/oswin/cursor"
 )
 
 // Stub returns an App whose methods all return the given error.

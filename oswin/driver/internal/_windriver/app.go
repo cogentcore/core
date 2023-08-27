@@ -21,9 +21,9 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/clip"
-	"github.com/goki/gi/oswin/cursor"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/clip"
+	"goki.dev/gi/oswin/cursor"
 )
 
 var theApp = &appImpl{

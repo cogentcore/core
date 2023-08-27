@@ -9,12 +9,12 @@ import (
 	"reflect"
 
 	"github.com/goki/colors"
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/giv"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gimain"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/giv"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -44,7 +44,7 @@ func mainrun() {
 
 	gi.SetAppName("widgets")
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
-<p>The <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
+<p>The <a href="https://goki.dev/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
 	win := gi.NewMainWindow("gogi-widgets-demo", "GoGi Widgets Demo", width, height)
 
@@ -109,10 +109,10 @@ func mainrun() {
 	prsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPrefs)
 
 	title := gi.AddNewLabel(trow, "title", `This is a <b>demonstration</b> of the
-<span style="color:red">various</span> <a href="https://github.com/goki/gi">GoGi</a> <i>Widgets</i><br>
+<span style="color:red">various</span> <a href="https://goki.dev/gi">GoGi</a> <i>Widgets</i><br>
 <large>Shortcuts: <kbd>`+string(prsc)+`</kbd> = Preferences,
 <kbd>`+string(giedsc)+`</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
-See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`)
+See <a href="https://goki.dev/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`)
 	// title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
 	title.SetProp("white-space", "normal")        // wrap
 	title.SetProp("text-align", gist.AlignCenter) // see align example for more details on how to use aligns

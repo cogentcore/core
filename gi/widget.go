@@ -10,13 +10,13 @@ import (
 	"log"
 	"sync"
 
-	"github.com/goki/gi/girl"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/girl"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/oswin/mouse"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -882,7 +882,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	if bg.IsNil() {
 		// we need to do this to prevent
 		// elements from rendering over themselves
-		// (see https://github.com/goki/gi/issues/565)
+		// (see https://goki.dev/gi/issues/565)
 		bg = sbg
 	}
 
@@ -891,7 +891,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	// box shadows and borders. We couldn't just
 	// do this when there are box shadows, as they
 	// may be removed and then need to be covered up.
-	// This also fixes https://github.com/goki/gi/issues/579.
+	// This also fixes https://goki.dev/gi/issues/579.
 	// This isn't an ideal solution because of performance,
 	// so TODO: maybe come up with a better solution for this.
 	// We need to use raw LayState data because we need to clear

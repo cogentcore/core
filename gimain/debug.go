@@ -10,7 +10,7 @@ package gimain
 import (
 	"fmt"
 
-	"github.com/goki/gi/gi"
+	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 )
 

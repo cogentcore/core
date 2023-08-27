@@ -28,8 +28,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goki/gi/giv"
-	"github.com/goki/gi/giv/textbuf"
+	"goki.dev/gi/giv"
+	"goki.dev/gi/giv/textbuf"
 )
 
 // DefaultRawInterval is interval for saving raw state -- need to do this

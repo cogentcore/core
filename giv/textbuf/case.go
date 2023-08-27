@@ -7,7 +7,7 @@ package textbuf
 import (
 	"strings"
 
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/gist"
 	"github.com/goki/ki/kit"
 	"github.com/iancoleman/strcase"
 )

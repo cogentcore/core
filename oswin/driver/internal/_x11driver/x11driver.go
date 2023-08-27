@@ -26,8 +26,8 @@ import (
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/shm"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/internal/errapp"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/driver/internal/errapp"
 )
 
 // Main is called by the program's main function to run the graphical

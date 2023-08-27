@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/goki/gi/gi"
+	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )

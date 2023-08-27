@@ -15,8 +15,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goki/gi/girl"
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/girl"
+	"goki.dev/gi/gist"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"

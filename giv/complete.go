@@ -3,8 +3,8 @@ package giv
 import (
 	"fmt"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/giv/textbuf"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/giv/textbuf"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"

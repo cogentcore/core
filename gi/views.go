@@ -13,7 +13,7 @@ type ViewIFace interface {
 	// CtxtMenuView configures a popup context menu according to the
 	// "CtxtMenu" properties registered on the type for given value element,
 	// through the kit.AddType method.  See
-	// https://github.com/goki/gi/wiki/Views for full details on formats and
+	// https://goki.dev/gi/wiki/Views for full details on formats and
 	// options for configuring the menu.  It looks first for "CtxtMenuActive"
 	// or "CtxtMenuInactive" depending on inactive flag (which applies to the
 	// gui view), so you can have different menus in those cases, and then

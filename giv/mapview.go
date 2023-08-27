@@ -7,10 +7,10 @@ package giv
 import (
 	"reflect"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )

@@ -13,7 +13,7 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/gist"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"github.com/goki/vgpu/vdraw"

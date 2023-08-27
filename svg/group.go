@@ -7,7 +7,7 @@ package svg
 import (
 	"image"
 
-	"github.com/goki/gi/gi"
+	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

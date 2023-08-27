@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gimain"
+	"goki.dev/gi/units"
 )
 
 func main() {

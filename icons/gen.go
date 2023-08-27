@@ -18,7 +18,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/goki/gi/icons"
+	"goki.dev/gi/icons"
 	"github.com/iancoleman/strcase"
 )
 
@@ -42,7 +42,7 @@ type iconData struct {
 var iconTmpl = template.Must(template.New("icon").Parse(
 	`
 	// {{.Camel}} is the "{{.Snake}}" icon from Material Design Symbols,
-	// defined at https://github.com/goki/gi/blob/master/icons/{{.Dir}}{{.Snake}}.svg
+	// defined at https://goki.dev/gi/blob/master/icons/{{.Dir}}{{.Snake}}.svg
 	{{.Camel}} Icon = "{{.Snake}}"
 	`,
 ))

@@ -7,7 +7,7 @@ package gi3d
 import (
 	"sort"
 
-	"github.com/goki/gi/gi"
+	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

@@ -4,7 +4,7 @@ This demo shows all the main widgets in GoGi.  You can try each of the widgets. 
 
 ## Installation
 
-The usual Go install procedure will work -- see [Install](https://github.com/goki/gi/wiki/Install) for details.
+The usual Go install procedure will work -- see [Install](https://goki.dev/gi/wiki/Install) for details.
 
 ## GoGi Editor
 

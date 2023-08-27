@@ -30,12 +30,12 @@ import (
 	"github.com/BurntSushi/xgb/shm"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/clip"
-	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/key"
-	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/oswin/window"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/clip"
+	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/oswin/key"
+	"goki.dev/gi/oswin/mouse"
+	"goki.dev/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
 	"golang.org/x/image/math/f64"
 )

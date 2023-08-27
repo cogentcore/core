@@ -13,10 +13,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/key"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/key"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )

@@ -23,11 +23,11 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/key"
-	"github.com/goki/gi/oswin/mouse"
-	"github.com/goki/gi/oswin/paint"
-	"github.com/goki/gi/oswin/window"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/key"
+	"goki.dev/gi/oswin/mouse"
+	"goki.dev/gi/oswin/paint"
+	"goki.dev/gi/oswin/window"
 	"golang.org/x/mobile/gl"
 )
 

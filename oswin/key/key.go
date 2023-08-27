@@ -20,7 +20,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/goki/gi/oswin"
+	"goki.dev/gi/oswin"
 	"github.com/goki/ki/kit"
 )
 

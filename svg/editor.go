@@ -7,11 +7,11 @@ package svg
 import (
 	"fmt"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/giv"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/mouse"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/giv"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

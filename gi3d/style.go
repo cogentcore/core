@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )

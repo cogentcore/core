@@ -9,9 +9,9 @@ import (
 	"image"
 	"reflect"
 
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"

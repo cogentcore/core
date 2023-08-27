@@ -9,7 +9,7 @@ import (
 	"image"
 	"reflect"
 
-	"github.com/goki/gi/oswin"
+	"goki.dev/gi/oswin"
 	"github.com/goki/ki/kit"
 	"github.com/goki/kigen/ordmap"
 	"github.com/goki/vgpu/vdraw"

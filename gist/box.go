@@ -7,7 +7,7 @@ package gist
 import (
 	"image/color"
 
-	"github.com/goki/gi/units"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 )

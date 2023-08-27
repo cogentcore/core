@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/gi/icons"
+	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/complete"

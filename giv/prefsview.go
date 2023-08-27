@@ -7,8 +7,8 @@ package giv
 import (
 	"fmt"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/oswin"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/oswin"
 	"github.com/goki/ki/ki"
 )
 

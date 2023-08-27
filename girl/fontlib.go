@@ -15,7 +15,7 @@ import (
 
 	"github.com/fatih/camelcase"
 	"github.com/goki/freetype/truetype"
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/gist"
 	"github.com/iancoleman/strcase"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/gobolditalic"

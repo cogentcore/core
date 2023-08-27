@@ -7,8 +7,8 @@ package gi
 import (
 	"reflect"
 
-	"github.com/goki/gi/oswin/dnd"
-	"github.com/goki/gi/oswin/mimedata"
+	"goki.dev/gi/oswin/dnd"
+	"goki.dev/gi/oswin/mimedata"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )

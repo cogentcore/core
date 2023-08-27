@@ -9,8 +9,8 @@ import (
 	"image"
 	"sort"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/oswin"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/oswin"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"

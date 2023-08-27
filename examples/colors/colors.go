@@ -8,10 +8,10 @@ import (
 	"image/color"
 
 	"github.com/goki/cam/hsl"
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gimain"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/units"
 )
 
 func main() {

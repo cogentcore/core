@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/goki/gi/oswin"
+	"goki.dev/gi/oswin"
 	"github.com/goki/ki/kit"
 )
 

@@ -9,8 +9,8 @@ This example has an additional dependency beyond those of GoGi: [govaluate](http
 The usual Go install procedure will work -- this is the easiest way to install GoGi and get all of its various dependencies:
 
 ``` bash
-$ go get github.com/goki/gi
-$ cd ~/go/src/github.com/goki/gi/examples/marbles
+$ go get goki.dev/gi
+$ cd ~/go/src/goki.dev/gi/examples/marbles
 $ go get ./...
 $ go build
 $ ./marbles
@@ -34,6 +34,6 @@ Extra points to anyone who can figure out what is causing the balls to occasiona
 
 All drawing is done using SVG nodes -- look in `graph.go` for details, e.g., `UpdateMarbles` is the main update for the marbles -- just wraps the SvgGraph in `UpdateStart` and `UpdateEnd` calls and updates the positions of the marble `svg.Circle` nodes.
 
-The app takes good advantage of the `ValueView` elements so the GUI code in `main.go` is really minimal -- everything is handled by the `giv.StructView` and `giv.TableView` view elements.  The main toolbar for the app generated from the type properties on `Graph` object: `GraphProps` in `graph.go`.  See  [Views](https://github.com/goki/gi/wiki/Views) for more details.
+The app takes good advantage of the `ValueView` elements so the GUI code in `main.go` is really minimal -- everything is handled by the `giv.StructView` and `giv.TableView` view elements.  The main toolbar for the app generated from the type properties on `Graph` object: `GraphProps` in `graph.go`.  See  [Views](https://goki.dev/gi/wiki/Views) for more details.
 
 

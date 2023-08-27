@@ -12,10 +12,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver/internal/event"
-	"github.com/goki/gi/oswin/window"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/driver/internal/event"
+	"goki.dev/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/vgpu/vdraw"
 )

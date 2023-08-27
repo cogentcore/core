@@ -14,7 +14,7 @@
 package x11driver
 
 import (
-	"github.com/goki/gi/oswin/key"
+	"goki.dev/gi/oswin/key"
 )
 
 // These constants come from /usr/include/X11/X.h

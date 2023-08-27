@@ -11,9 +11,9 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/mouse"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/goki/gi/oswin"
+	"goki.dev/gi/oswin"
 )
 
 type textureImpl struct {

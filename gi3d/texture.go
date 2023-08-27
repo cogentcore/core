@@ -10,7 +10,7 @@ import (
 	"io/fs"
 	"log"
 
-	"github.com/goki/gi/gi"
+	"goki.dev/gi/gi"
 	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
 	"github.com/goki/vgpu/vgpu"

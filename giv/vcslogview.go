@@ -5,9 +5,9 @@
 package giv
 
 import (
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/icons"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/vci"

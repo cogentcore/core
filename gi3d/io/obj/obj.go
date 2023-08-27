@@ -26,12 +26,12 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"github.com/goki/gi/gi3d"
+	"goki.dev/gi/gi3d"
 	"github.com/goki/ki/dirs"
 	"github.com/goki/mat32"
 )
 
-// note: gimain imports "github.com/goki/gi/gi3d/io/obj" to get this code
+// note: gimain imports "goki.dev/gi/gi3d/io/obj" to get this code
 func init() {
 	gi3d.Decoders[".obj"] = &Decoder{}
 }

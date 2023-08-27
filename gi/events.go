@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/dnd"
-	"github.com/goki/gi/oswin/key"
-	"github.com/goki/gi/oswin/mimedata"
-	"github.com/goki/gi/oswin/mouse"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/dnd"
+	"goki.dev/gi/oswin/key"
+	"goki.dev/gi/oswin/mimedata"
+	"goki.dev/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 )

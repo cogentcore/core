@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/histyle"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/oswin/key"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/histyle"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/oswin/key"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -468,13 +468,13 @@ type ValueView interface {
 
 	// SetTags sets tags for this valueview, for non-struct values, to
 	// influence interface for this value -- see
-	// https://github.com/goki/gi/wiki/Tags for valid options.  Adds to
+	// https://goki.dev/gi/wiki/Tags for valid options.  Adds to
 	// existing tags if some are already set.
 	SetTags(tags map[string]string)
 
 	// SetTag sets given tag to given value for this valueview, for non-struct
 	// values, to influence interface for this value -- see
-	// https://github.com/goki/gi/wiki/Tags for valid options.
+	// https://goki.dev/gi/wiki/Tags for valid options.
 	SetTag(tag, value string)
 
 	// Tag returns value for given tag -- looks first at tags set by

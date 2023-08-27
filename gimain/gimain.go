@@ -10,12 +10,12 @@ package gimain
 import (
 	"sync/atomic"
 
-	"github.com/goki/gi/gi"
-	_ "github.com/goki/gi/gi3d/io/obj"
-	"github.com/goki/gi/giv"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/driver"
-	"github.com/goki/gi/svg"
+	"goki.dev/gi/gi"
+	_ "goki.dev/gi/gi3d/io/obj"
+	"goki.dev/gi/giv"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/driver"
+	"goki.dev/gi/svg"
 	_ "github.com/goki/vgpu/vphong"
 )
 

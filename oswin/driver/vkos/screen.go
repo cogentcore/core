@@ -9,8 +9,8 @@ import (
 	"log"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/window"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/window"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 )

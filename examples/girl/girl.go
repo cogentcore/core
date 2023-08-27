@@ -12,8 +12,8 @@ import (
 	"os"
 
 	"github.com/goki/colors"
-	"github.com/goki/gi/girl"
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/girl"
+	"goki.dev/gi/gist"
 	"github.com/goki/mat32"
 )
 

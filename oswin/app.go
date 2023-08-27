@@ -10,8 +10,8 @@
 package oswin
 
 import (
-	"github.com/goki/gi/oswin/clip"
-	"github.com/goki/gi/oswin/cursor"
+	"goki.dev/gi/oswin/clip"
+	"goki.dev/gi/oswin/cursor"
 	"github.com/goki/ki/kit"
 )
 

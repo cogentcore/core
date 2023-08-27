@@ -13,12 +13,12 @@ import (
 
 	"github.com/goki/cam/hsl"
 	"github.com/goki/colors"
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/mimedata"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/mimedata"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -489,7 +489,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 func (cv *ColorView) ConfigPalette() {
 	pg := gi.AddNewLayout(cv, "palette", gi.LayoutGrid)
 
-	// STYTOOD: use hct sorted names here (see https://github.com/goki/gi/issues/619)
+	// STYTOOD: use hct sorted names here (see https://goki.dev/gi/issues/619)
 	nms := colors.Names
 
 	for _, cn := range nms {

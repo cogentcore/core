@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

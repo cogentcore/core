@@ -17,7 +17,7 @@ customization and extension of the GUI representation, based on the classic Go
 any type, returning giv.ValueView that manages the interface between data
 structures and GUI representations.
 
-See the wiki at: https://github.com/goki/gi/wiki/Views for more extensive docs.
+See the wiki at: https://goki.dev/gi/wiki/Views for more extensive docs.
 
 Some of the most important view elements are:
 

@@ -19,8 +19,8 @@ import (
 	"image"
 	"time"
 
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/key"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/key"
 	"github.com/goki/ki/kit"
 )
 

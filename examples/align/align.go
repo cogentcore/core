@@ -5,8 +5,8 @@
 package main
 
 import (
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gimain"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gimain"
 )
 
 func main() {

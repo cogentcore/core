@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"github.com/goki/freetype/truetype"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"golang.org/x/image/font/opentype"
 )

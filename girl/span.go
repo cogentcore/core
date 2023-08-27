@@ -11,9 +11,9 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/mat32"
 	"golang.org/x/image/font"

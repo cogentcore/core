@@ -7,7 +7,7 @@
 
 package gimain
 
-import "github.com/goki/gi/gi"
+import "goki.dev/gi/gi"
 
 func init() {
 	gi.DefaultKeyMap = gi.KeyMapName("WindowsStd")

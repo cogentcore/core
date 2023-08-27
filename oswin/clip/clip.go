@@ -10,7 +10,7 @@
 package clip
 
 import (
-	"github.com/goki/gi/oswin/mimedata"
+	"goki.dev/gi/oswin/mimedata"
 )
 
 // clip.Board interface defines the methods for reading and writing data to

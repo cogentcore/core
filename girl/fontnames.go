@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goki/gi/gist"
+	"goki.dev/gi/gist"
 )
 
 var (

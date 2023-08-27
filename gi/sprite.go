@@ -7,7 +7,7 @@ package gi
 import (
 	"image"
 
-	"github.com/goki/gi/oswin"
+	"goki.dev/gi/oswin"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/kigen/ordmap"

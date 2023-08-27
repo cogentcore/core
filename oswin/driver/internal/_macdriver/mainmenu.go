@@ -7,7 +7,7 @@
 
 package macdriver
 
-import "github.com/goki/gi/oswin"
+import "goki.dev/gi/oswin"
 
 type mainMenuImpl struct {
 	win      *windowImpl

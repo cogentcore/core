@@ -16,9 +16,9 @@ import (
 	"math/rand"
 
 	"github.com/Knetic/govaluate"
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/icons"
-	"github.com/goki/gi/svg"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/svg"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

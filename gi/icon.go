@@ -8,8 +8,8 @@ import (
 	"image"
 
 	"github.com/goki/colors"
-	"github.com/goki/gi/gist"
-	"github.com/goki/gi/icons"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"

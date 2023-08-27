@@ -12,8 +12,8 @@ import (
 	"sync"
 
 	"github.com/goki/colors"
-	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/units"
+	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
