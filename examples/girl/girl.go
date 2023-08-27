@@ -12,9 +12,9 @@ import (
 	"os"
 
 	"github.com/goki/colors"
+	"github.com/goki/mat32"
 	"goki.dev/gi/girl"
 	"goki.dev/gi/gist"
-	"github.com/goki/mat32"
 )
 
 func main() {

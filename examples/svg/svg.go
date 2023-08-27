@@ -7,6 +7,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/goki/ki/ki"
+	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gimain"
 	"goki.dev/gi/gist"
@@ -14,8 +16,6 @@ import (
 	"goki.dev/gi/icons"
 	"goki.dev/gi/svg"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/mitchellh/go-homedir"
 )
 
 func main() {

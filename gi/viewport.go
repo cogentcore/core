@@ -15,13 +15,13 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/gi/girl"
-	"goki.dev/gi/gist"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/girl"
+	"goki.dev/gi/gist"
 )
 
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)

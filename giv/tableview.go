@@ -12,6 +12,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/girl"
 	"goki.dev/gi/gist"
@@ -19,10 +23,6 @@ import (
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/cursor"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
 )
 
 // todo:

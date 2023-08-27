@@ -7,10 +7,10 @@ package gi3d
 import (
 	"sort"
 
-	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi"
 )
 
 // Group collects individual elements in a scene but does not have a Mesh or Material of

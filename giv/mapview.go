@@ -7,12 +7,12 @@ package giv
 import (
 	"reflect"
 
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 // MapView represents a map, creating a property editor of the values --

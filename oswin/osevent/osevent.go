@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/gi/oswin"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/oswin"
 )
 
 // osevent.Event reports an OS level event

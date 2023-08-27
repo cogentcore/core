@@ -5,9 +5,9 @@
 package gi
 
 import (
-	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/gist"
 )
 
 /////////////////////////////////////////////////////////////////////////////

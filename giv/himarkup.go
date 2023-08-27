@@ -12,8 +12,6 @@ import (
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/histyle"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/pi/filecat"
@@ -21,6 +19,8 @@ import (
 	"github.com/goki/pi/pi"
 	_ "github.com/goki/pi/suplangs"
 	"github.com/goki/pi/token"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/histyle"
 )
 
 // HiMarkup manages the syntax highlighting state for TextBuf

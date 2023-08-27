@@ -8,14 +8,14 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/key"
-	"goki.dev/gi/oswin/mouse"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/key"
+	"goki.dev/gi/oswin/mouse"
 )
 
 // Embed2D embeds a 2D Viewport on a vertically-oriented plane, using a texture.

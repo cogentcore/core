@@ -8,11 +8,11 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

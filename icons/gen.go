@@ -18,8 +18,8 @@ import (
 	"text/template"
 	"unicode"
 
-	"goki.dev/gi/icons"
 	"github.com/iancoleman/strcase"
+	"goki.dev/gi/icons"
 )
 
 const preamble = `// Copyright (c) 2023, The GoKi Authors. All rights reserved.

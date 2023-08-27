@@ -8,6 +8,8 @@ import (
 	"log"
 
 	"github.com/goki/colors"
+	"github.com/goki/ki/ki"
+	"github.com/goki/mat32"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gi3d"
 	"goki.dev/gi/gimain"
@@ -15,8 +17,6 @@ import (
 	"goki.dev/gi/icons"
 	"goki.dev/gi/oswin/driver/vkos"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/mat32"
 )
 
 func main() {

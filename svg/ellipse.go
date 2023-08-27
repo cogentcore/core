@@ -5,10 +5,10 @@
 package svg
 
 import (
-	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi"
 )
 
 // Ellipse is a SVG ellipse

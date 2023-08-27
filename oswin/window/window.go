@@ -17,8 +17,8 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/gi/oswin"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/oswin"
 )
 
 // window.Event reports on actions taken on a window.  The oswin.Window Flags

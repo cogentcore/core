@@ -7,13 +7,13 @@ package main
 import (
 	"image"
 
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gimain"
 	"goki.dev/gi/giv"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
 )
 
 // todo: enum field, etc

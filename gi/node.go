@@ -10,10 +10,10 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gist"
 )
 
 // Node is the interface for all GoGi nodes (2D and 3D), for accessing as NodeBase

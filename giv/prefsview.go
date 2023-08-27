@@ -7,9 +7,9 @@ package giv
 import (
 	"fmt"
 
+	"github.com/goki/ki/ki"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/oswin"
-	"github.com/goki/ki/ki"
 )
 
 // TODO: make base simplified preferences view, improve organization of information, and maybe add titles

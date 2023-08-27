@@ -16,13 +16,13 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/vgpu/vdraw"
+	"github.com/goki/vgpu/vgpu"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/driver/internal/event"
 	"goki.dev/gi/oswin/window"
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/vgpu/vdraw"
-	"github.com/goki/vgpu/vgpu"
 
 	vk "github.com/goki/vulkan"
 )

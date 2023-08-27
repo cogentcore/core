@@ -8,9 +8,9 @@ import (
 	"log"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/units"
 )
 
 // is:

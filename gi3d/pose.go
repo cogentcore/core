@@ -5,10 +5,10 @@
 package gi3d
 
 import (
-	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/icons"
 )
 
 // Pose contains the full specification of position and orientation,

@@ -9,12 +9,12 @@ import (
 	"log"
 	"strings"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
 )
 
 // FindDefByName finds Defs item by name, using cached indexes for speed

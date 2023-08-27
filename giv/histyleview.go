@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/histyle"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

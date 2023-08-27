@@ -7,14 +7,14 @@ package giv
 import (
 	"reflect"
 
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"goki.dev/gi/colormap"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/mouse"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
 )
 
 // ColorMapName provides a gui chooser of maps in AvailColorMaps

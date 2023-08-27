@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/units"
 )
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleFontFuncs

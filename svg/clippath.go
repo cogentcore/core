@@ -5,9 +5,9 @@
 package svg
 
 import (
-	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/gi"
 )
 
 // todo: needs to be impl

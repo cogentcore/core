@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"strings"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
 )
 
 // StructViewInline represents a struct as a single line widget, for smaller

@@ -8,11 +8,11 @@ import (
 	"image"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
 )
 
 // // SetIcon sets the icon by name into given Icon wrapper, returning error

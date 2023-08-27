@@ -9,10 +9,10 @@ import (
 	"image/color"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/units"
 )
 
 // Painter defines an interface for anything that has a Paint style on it

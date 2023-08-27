@@ -26,9 +26,9 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/gi3d"
 	"github.com/goki/ki/dirs"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi3d"
 )
 
 // note: gimain imports "goki.dev/gi/gi3d/io/obj" to get this code

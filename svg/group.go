@@ -7,10 +7,10 @@ package svg
 import (
 	"image"
 
-	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi"
 )
 
 // Group groups together SVG elements -- doesn't do much but provide a

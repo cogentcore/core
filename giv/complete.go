@@ -3,12 +3,12 @@ package giv
 import (
 	"fmt"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/giv/textbuf"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/giv/textbuf"
 )
 
 // CompletePi uses GoPi symbols and language -- the string is a line of text

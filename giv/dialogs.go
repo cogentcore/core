@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/goki/colors"
+	"github.com/goki/ki/ki"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/girl"
 	"goki.dev/gi/gist"
@@ -16,7 +17,6 @@ import (
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/mimedata"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
 )
 
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --

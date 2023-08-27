@@ -12,11 +12,11 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/girl"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/girl"
 )
 
 // Path renders SVG data sequences that can render just about anything

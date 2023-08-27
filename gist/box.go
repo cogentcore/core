@@ -7,9 +7,9 @@ package gist
 import (
 	"image/color"
 
-	"goki.dev/gi/units"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/units"
 )
 
 // note: background-color is in FontStyle as it is needed to make that the

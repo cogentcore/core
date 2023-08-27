@@ -16,17 +16,17 @@ import (
 	"path/filepath"
 	"sync"
 
+	mapp "github.com/goki/mobile/app"
+	"github.com/goki/mobile/event/size"
+	"github.com/goki/vgpu/vdraw"
+	"github.com/goki/vgpu/vgpu"
+	vk "github.com/goki/vulkan"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/clip"
 	"goki.dev/gi/oswin/cursor"
 	"goki.dev/gi/oswin/window"
 	"goki.dev/gi/units"
-	mapp "github.com/goki/mobile/app"
-	"github.com/goki/mobile/event/size"
-	"github.com/goki/vgpu/vdraw"
-	"github.com/goki/vgpu/vgpu"
-	vk "github.com/goki/vulkan"
 )
 
 // TODO: actually implement things for mobile app

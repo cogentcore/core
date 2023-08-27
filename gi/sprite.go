@@ -7,12 +7,12 @@ package gi
 import (
 	"image"
 
-	"goki.dev/gi/oswin"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/kigen/ordmap"
 	"github.com/goki/vgpu/szalloc"
 	"github.com/goki/vgpu/vgpu"
+	"goki.dev/gi/oswin"
 )
 
 // A Sprite is just an image (with optional background) that can be drawn onto

@@ -12,10 +12,10 @@ import (
 	"sync"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/oswin/cursor"
-	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/units"
 )
 
 // style implements CSS-based styling using ki.Props to hold name / vals

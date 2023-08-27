@@ -11,12 +11,12 @@ import (
 	"sync"
 
 	"github.com/goki/colors"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/oswin/cursor"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 // TabView switches among child widgets via tabs.  The selected widget gets

@@ -8,10 +8,10 @@ import (
 	"image"
 	"sync"
 
-	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/icons"
 )
 
 // Camera defines the properties of the camera

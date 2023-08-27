@@ -17,10 +17,10 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/icons"
 )
 
 func init() {

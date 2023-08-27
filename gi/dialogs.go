@@ -13,13 +13,13 @@ import (
 	"github.com/iancoleman/strcase"
 
 	"github.com/goki/colors"
+	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/key"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 // DialogsSepWindow determines if dialog windows open in a separate OS-level

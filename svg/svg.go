@@ -12,14 +12,14 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/girl"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
 )
 
 // see io.go for IO input / output methods

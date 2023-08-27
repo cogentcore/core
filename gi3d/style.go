@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
 )
 
 // SetMatProps sets Material values based on ki.Props properties

@@ -10,12 +10,12 @@ import (
 	"reflect"
 	"strings"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/girl"
-	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/girl"
+	"goki.dev/gi/gist"
 )
 
 // NodeSVG is the interface for all SVG nodes, based on gi.Node2D

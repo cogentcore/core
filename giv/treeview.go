@@ -11,6 +11,12 @@ import (
 	"log"
 	"strings"
 
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
+	"github.com/goki/pi/filecat"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
@@ -20,12 +26,6 @@ import (
 	"goki.dev/gi/oswin/mimedata"
 	"goki.dev/gi/oswin/mouse"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
-	"github.com/goki/pi/filecat"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

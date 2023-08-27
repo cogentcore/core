@@ -21,11 +21,11 @@ import (
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/goki/colors"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

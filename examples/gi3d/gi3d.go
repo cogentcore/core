@@ -12,17 +12,17 @@ import (
 	"time"
 
 	"github.com/goki/colors"
+	"github.com/goki/vgpu/vgpu"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gi3d"
 	"goki.dev/gi/gimain"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/giv"
 	"goki.dev/gi/icons"
-	"github.com/goki/vgpu/vgpu"
 
-	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
+	"goki.dev/gi/units"
 )
 
 func main() {
@@ -251,7 +251,7 @@ See <a href="https://goki.dev/gi/blob/master/examples/gi3d/README.md">README</a>
 	// sc.Wireframe = true                      // debugging
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
-	cyan := colors.FromRGB(0,  255,  255)
+	cyan := colors.FromRGB(0, 255, 255)
 	gi3d.AddNewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
 
 	// bbclr := gist.Color{}

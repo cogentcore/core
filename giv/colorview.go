@@ -13,15 +13,15 @@ import (
 
 	"github.com/goki/cam/hsl"
 	"github.com/goki/colors"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/mimedata"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
 	"golang.org/x/image/colornames"
 )
 

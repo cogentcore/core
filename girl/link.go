@@ -7,9 +7,9 @@ package girl
 import (
 	"image"
 
-	"goki.dev/gi/oswin"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
+	"goki.dev/gi/oswin"
 )
 
 // TextLink represents a hyperlink within rendered text

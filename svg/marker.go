@@ -7,11 +7,11 @@ package svg
 import (
 	"fmt"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
 )
 
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)

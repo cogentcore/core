@@ -7,10 +7,10 @@ package main
 import (
 	"fmt"
 
+	"github.com/goki/mat32"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gimain"
 	"goki.dev/gi/units"
-	"github.com/goki/mat32"
 )
 
 func main() {

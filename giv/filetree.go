@@ -22,6 +22,12 @@ import (
 	"github.com/Masterminds/vcs"
 	"github.com/fsnotify/fsnotify"
 	"github.com/goki/colors"
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/pi/filecat"
+	"github.com/goki/vci"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/giv/textbuf"
@@ -32,12 +38,6 @@ import (
 	"goki.dev/gi/oswin/key"
 	"goki.dev/gi/oswin/mimedata"
 	"goki.dev/gi/oswin/mouse"
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/pi/filecat"
-	"github.com/goki/vci"
 )
 
 // DirAndFile returns the final dir and file name.

@@ -21,12 +21,12 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/gist"
 	"golang.org/x/net/html/charset"
 )
 

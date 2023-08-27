@@ -9,11 +9,11 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/icons"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

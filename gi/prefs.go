@@ -15,16 +15,16 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/girl"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/goki/matcolor"
 	"github.com/goki/pi/langs/golang"
+	"goki.dev/gi/girl"
+	"goki.dev/gi/gist"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/mouse"
 )
 
 // Preferences are the overall user preferences for GoGi, providing some basic
@@ -596,7 +596,7 @@ func (pf *ColorPrefs) DarkDefaults() {
 	pf.Icon = colors.FromRGB(70, 70, 192)
 	pf.Select = colors.FromRGB(17, 100, 100)
 	pf.Highlight = colors.FromRGB(66, 82, 0)
-	pf.Link = colors.FromRGB(117,  117,  249)
+	pf.Link = colors.FromRGB(117, 117, 249)
 }
 
 func DefaultColorSchemes() map[string]*ColorPrefs {

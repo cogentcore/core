@@ -10,10 +10,10 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/units"
 )
 
 ////////////////////////////////////////////////////////////////////////////

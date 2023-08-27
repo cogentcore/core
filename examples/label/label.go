@@ -5,11 +5,11 @@
 package main
 
 import (
+	"github.com/goki/ki/ki"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gimain"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
 )
 
 func main() {

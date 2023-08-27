@@ -13,12 +13,12 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/key"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 // https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts

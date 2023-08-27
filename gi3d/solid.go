@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"log"
 
-	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/gi"
 )
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices

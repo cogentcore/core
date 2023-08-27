@@ -16,12 +16,12 @@ import (
 	"math/rand"
 
 	"github.com/Knetic/govaluate"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/svg"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/svg"
 )
 
 // todo: investigate "github.com/antonmedv/expr" instead of govaluate -- much better supported!

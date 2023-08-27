@@ -8,14 +8,14 @@ import (
 	"image/color"
 
 	"github.com/goki/colors"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/cursor"
 	"goki.dev/gi/oswin/key"
 	"goki.dev/gi/oswin/mouse"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
 )
 
 // SelModes are selection modes for Scene

@@ -7,9 +7,9 @@ package giv
 import (
 	"reflect"
 
-	"goki.dev/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/gi"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

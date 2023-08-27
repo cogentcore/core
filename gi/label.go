@@ -9,14 +9,14 @@ import (
 	"image/color"
 
 	"github.com/goki/colors"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"goki.dev/gi/girl"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/cursor"
 	"goki.dev/gi/oswin/mouse"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

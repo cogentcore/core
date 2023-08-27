@@ -11,6 +11,8 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/oswin"
@@ -18,8 +20,6 @@ import (
 	"goki.dev/gi/oswin/key"
 	"goki.dev/gi/oswin/mouse"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay

@@ -9,11 +9,11 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/giv"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

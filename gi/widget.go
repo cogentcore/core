@@ -10,6 +10,11 @@ import (
 	"log"
 	"sync"
 
+	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
+	"github.com/goki/prof"
 	"goki.dev/gi/girl"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
@@ -17,11 +22,6 @@ import (
 	"goki.dev/gi/oswin/cursor"
 	"goki.dev/gi/oswin/mouse"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
-	"github.com/goki/prof"
 )
 
 // WidgetBase is the base type for all Widget Node2D elements, which are

@@ -8,12 +8,12 @@ package main
 
 import (
 	"github.com/goki/colors"
+	"github.com/goki/ki/ki"
+	"github.com/goki/mat32"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gimain"
 	"goki.dev/gi/giv"
 	"goki.dev/gi/svg"
-	"github.com/goki/ki/ki"
-	"github.com/goki/mat32"
 )
 
 var Vp *gi.Viewport2D

@@ -13,12 +13,12 @@ import (
 	"path/filepath"
 	"sort"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/pi"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/oswin"
 )
 
 //go:embed defaults.histys

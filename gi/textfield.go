@@ -14,6 +14,12 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
+	"github.com/goki/pi/complete"
+	"github.com/goki/pi/filecat"
 	"goki.dev/gi/girl"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
@@ -23,12 +29,6 @@ import (
 	"goki.dev/gi/oswin/mimedata"
 	"goki.dev/gi/oswin/mouse"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
-	"github.com/goki/pi/complete"
-	"github.com/goki/pi/filecat"
 )
 
 const force = true

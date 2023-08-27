@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/vgpu/vdraw"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/driver/internal/event"
 	"goki.dev/gi/oswin/window"
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/vgpu/vdraw"
 )
 
 // TODO: actually implement things for mobile window

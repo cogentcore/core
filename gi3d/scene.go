@@ -12,18 +12,18 @@ import (
 	"sync"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/cursor"
-	"goki.dev/gi/oswin/key"
-	"goki.dev/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/kigen/ordmap"
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
 	"github.com/goki/vgpu/vphong"
+	"goki.dev/gi/gi"
+	"goki.dev/gi/icons"
+	"goki.dev/gi/oswin"
+	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/oswin/key"
+	"goki.dev/gi/oswin/mouse"
 )
 
 const (

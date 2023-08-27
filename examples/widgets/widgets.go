@@ -9,16 +9,16 @@ import (
 	"reflect"
 
 	"github.com/goki/colors"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
+	"github.com/goki/pi/complete"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/gimain"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/giv"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/mat32"
-	"github.com/goki/pi/complete"
 )
 
 func main() {
@@ -68,7 +68,7 @@ func mainrun() {
 			"background-color": colors.FromRGB(240, 255, 240),
 		},
 		".hslides": ki.Props{
-			"background-color": colors.FromRGB(240,  225,  255),
+			"background-color": colors.FromRGB(240, 225, 255),
 		},
 		"kbd": ki.Props{
 			"color": "blue",

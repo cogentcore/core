@@ -75,14 +75,14 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/pi/filecat"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/cursor"
 	"goki.dev/gi/oswin/key"
 	"goki.dev/gi/oswin/mimedata"
 	"goki.dev/gi/oswin/mouse"
 	"goki.dev/gi/oswin/window"
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/pi/filecat"
 	"golang.org/x/mobile/gl"
 )
 

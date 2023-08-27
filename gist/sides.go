@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/goki/colors"
-	"goki.dev/gi/units"
 	"github.com/goki/mat32"
+	"goki.dev/gi/units"
 )
 
 // Sides contains values for each side or corner of a box.

@@ -7,10 +7,10 @@ package gi
 import (
 	"reflect"
 
-	"goki.dev/gi/oswin/dnd"
-	"goki.dev/gi/oswin/mimedata"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"goki.dev/gi/oswin/dnd"
+	"goki.dev/gi/oswin/mimedata"
 )
 
 // This file contains all the special-purpose interfaces

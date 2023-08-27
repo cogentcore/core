@@ -8,14 +8,14 @@ import (
 	"image"
 	"log"
 
+	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/key"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 // Menu is a slice list of Node2D actions, which can contain sub-actions

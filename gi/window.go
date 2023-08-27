@@ -20,6 +20,12 @@ import (
 	"time"
 
 	"github.com/goki/colors"
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+	"github.com/goki/prof"
+	"github.com/goki/vgpu/vgpu"
+	"github.com/goki/vgpu/vphong"
 	"goki.dev/gi/colormap"
 	"goki.dev/gi/gist"
 	"goki.dev/gi/oswin"
@@ -30,12 +36,6 @@ import (
 	"goki.dev/gi/oswin/mouse"
 	"goki.dev/gi/oswin/window"
 	"goki.dev/gi/units"
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
-	"github.com/goki/vgpu/vgpu"
-	"github.com/goki/vgpu/vphong"
 )
 
 var (

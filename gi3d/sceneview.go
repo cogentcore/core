@@ -7,12 +7,12 @@ package gi3d
 import (
 	"fmt"
 
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/giv"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/oswin/key"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 // SceneView provides a toolbar controller for a gi3d.Scene

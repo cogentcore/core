@@ -12,13 +12,13 @@ import (
 
 	"github.com/fatih/camelcase"
 
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"goki.dev/gi/gi"
 	"goki.dev/gi/icons"
 	"goki.dev/gi/oswin"
 	"goki.dev/gi/oswin/key"
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 )
 
 // these are special menus that we ignore
