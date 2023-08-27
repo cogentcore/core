@@ -12,8 +12,33 @@ import (
 	"path/filepath"
 )
 
+// packman imports this:
+// goki/tools/goki:
+// type Config struct
+// var TheConfig *Config
+
+// goki/tools/gokicmd:
+// type App struct {
+// 	goki.Config
+// 	Build  packman.BuildConfig
+//     ...
+// }
+// packman.TheBuildConfig = &TheApp.Build // set packman to use our build config
+
+type BuildConfig struct {
+	// everthing is here
+	// pkgPath string, platforms ...Platform
+}
+
+var TheBuildConfig *BuildConfig
+
 // Build builds an executable for the package at the given path for the given platforms
-func Build(pkgPath string, platforms ...Platform) error {
+// all info is now in BuildConfig
+// except for any global config -- that goes in as args
+func Build() error {
+	// goki.TheConfig.Version // example access of global config param
+	// TheBuildConfig.Target  // local build config
+
 	if len(platforms) == 0 {
 		return errors.New("build: expected at least 1 platform")
 	}
