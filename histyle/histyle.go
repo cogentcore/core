@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/*
-package histyle provides syntax highlighting styles -- it is based on
-github.com/alecthomas/chroma which in turn was based on the python
-pygments package.  Note that this package depends on goki/gi and goki /pi
-and cannot be imported there -- is imported into goki/gi/giv
-*/
+// Package histyle provides syntax highlighting styles; it is based on
+// github.com/alecthomas/chroma, which in turn was based on the python
+// pygments package.  Note that this package depends on goki/gi and goki/pi
+// and cannot be imported there; is imported into goki/gi/giv.
 package histyle
 
 import (
