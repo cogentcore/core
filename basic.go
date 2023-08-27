@@ -8,10 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math"
 	"reflect"
 	"strconv"
-	"unicode"
 )
 
 // Has convenience functions for converting any (e.g. properties) to given
@@ -612,59 +610,6 @@ func SetRobust(to, frm any) bool {
 	if fv.Type().AssignableTo(typ) {
 		vp.Elem().Set(fv)
 		return true
-	}
-	return false
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  Min / Max for other types..
-
-// math provides Max/Min for 64bit -- these are for specific subtypes
-
-func Max32(a, b float32) float32 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func Min32(a, b float32) float32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// minimum excluding 0
-func MinPos(a, b float64) float64 {
-	if a > 0.0 && b > 0.0 {
-		return math.Min(a, b)
-	} else if a > 0.0 {
-		return a
-	} else if b > 0.0 {
-		return b
-	}
-	return a
-}
-
-// minimum excluding 0
-func MinPos32(a, b float32) float32 {
-	if a > 0.0 && b > 0.0 {
-		return Min32(a, b)
-	} else if a > 0.0 {
-		return a
-	} else if b > 0.0 {
-		return b
-	}
-	return a
-}
-
-// HasUpperCase returns true if string has an upper-case letter
-func HasUpperCase(str string) bool {
-	for _, r := range str {
-		if unicode.IsUpper(r) {
-			return true
-		}
 	}
 	return false
 }
