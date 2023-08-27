@@ -13,6 +13,7 @@ import (
 	"text/template"
 
 	"github.com/iancoleman/strcase"
+	"goki.dev/goki/config"
 )
 
 // ColorSchemeData contains the data of a color scheme
@@ -167,14 +168,14 @@ func addTempCustomColors(colors []ColorSchemeColor) []ColorSchemeColor {
 // at the given destination file path. The generated
 // file is part of the given package and puts the
 // given comment as the comment for the ColorSchemes variable.
-func GenerateColorScheme(src, dst, pkg, comment string) error {
-	d, err := GetColorSchemeData(src)
+func GenerateColorScheme(c *config.Config) error {
+	d, err := GetColorSchemeData(c.Colorgen.Source)
 	if err != nil {
 		return fmt.Errorf("GenerateColorScheme: error getting color scheme data: %w", err)
 	}
 
 	buf := &bytes.Buffer{}
-	err = colorSchemesPreamble.Execute(buf, colorSchemesPreambleData{pkg, comment})
+	err = colorSchemesPreamble.Execute(buf, colorSchemesPreambleData{c.Colorgen.Package, c.Colorgen.Comment})
 	if err != nil {
 		return fmt.Errorf("GenerateColorScheme: error executing preamble template: %w", err)
 	}
@@ -196,7 +197,7 @@ func GenerateColorScheme(src, dst, pkg, comment string) error {
 		}
 	}
 	buf.WriteString(colorSchemesEnd)
-	err = os.WriteFile(dst, buf.Bytes(), 0666)
+	err = os.WriteFile(c.Colorgen.Output, buf.Bytes(), 0666)
 	if err != nil {
 		return fmt.Errorf("GenerateColorSchemes: error writing result to file: %w", err)
 	}

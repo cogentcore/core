@@ -50,6 +50,12 @@ type Build struct {
 // for the colorgen command.
 type Colorgen struct {
 
+	// the source file path to generate the color schemes from
+	Source string `desc:"the source file path to generate the color schemes from"`
+
+	// the output file to store the resulting Go file in
+	Output string `desc:"the output file to store the resulting Go file in"`
+
 	// the package in which the color schemes will be used
 	Package string `desc:"the package in which the color schemes will be used"`
 
