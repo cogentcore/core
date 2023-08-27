@@ -20,9 +20,9 @@
 package hct
 
 import (
-	"github.com/goki/cam/cam16"
-	"github.com/goki/cam/cie"
 	"github.com/goki/mat32"
+	"goki.dev/cam/cam16"
+	"goki.dev/cam/cie"
 )
 
 // SolveToRGBLin Finds an sRGB linear color (represented by mat32.Vec3, 0-100 range)

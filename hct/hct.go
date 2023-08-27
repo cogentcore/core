@@ -23,8 +23,8 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/goki/cam/cam16"
-	"github.com/goki/cam/cie"
+	"goki.dev/cam/cam16"
+	"goki.dev/cam/cie"
 )
 
 // HCT, hue, chroma, and tone. A color system that provides a perceptually

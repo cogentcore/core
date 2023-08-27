@@ -20,8 +20,8 @@
 package cam16
 
 import (
-	"github.com/goki/cam/cie"
 	"github.com/goki/mat32"
+	"goki.dev/cam/cie"
 )
 
 // CAM represents a point in the cam16 color model along 6 dimensions

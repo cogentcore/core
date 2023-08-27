@@ -5,8 +5,8 @@
 package cam02
 
 import (
-	"github.com/goki/cam/cie"
 	"github.com/goki/mat32"
+	"goki.dev/cam/cie"
 )
 
 // XYZToLMS converts XYZ to Long, Medium, Short cone-based responses,

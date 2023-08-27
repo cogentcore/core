@@ -1,4 +1,4 @@
-module github.com/goki/cam
+module goki.dev/cam
 
 go 1.18
 

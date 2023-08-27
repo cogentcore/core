@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/cam/hct"
+	"goki.dev/cam/hct"
 )
 
 func main() {
