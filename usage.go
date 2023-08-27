@@ -13,7 +13,10 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-// Usage returns the usage string for the given app
+// Usage returns the usage string for the given app.
+// It contains [AppAbout], a list of commands and
+// their descriptions, and a list of flags and their
+// descriptions.
 func Usage(app any) string {
 	var b strings.Builder
 	b.WriteString(AppAbout)
@@ -36,7 +39,8 @@ func Usage(app any) string {
 }
 
 // CommandUsage adds the command usage info for
-// the given app to the given [strings.Builder]
+// the given app to the given [strings.Builder].
+// Typically, you should use [Usage] instead.
 func CommandUsage(app any, b *strings.Builder) {
 	typ := reflect.TypeOf(app)
 	for i := 0; i < typ.NumMethod(); i++ {
@@ -50,7 +54,12 @@ func CommandUsage(app any, b *strings.Builder) {
 }
 
 // FlagUsage adds the flag usage info for the
-// given app to the given [strings.Builder]
+// given app to the given [strings.Builder].
+// Typically, you should use [Usage] instead.
+// Pass an empty string for path unless you are
+// already in a nested context, which should only
+// happen internally (if you don't know whether
+// you're in a nested context, you're not).
 func FlagUsage(app any, path string, b *strings.Builder) {
 	typ := kit.NonPtrType(reflect.TypeOf(app))
 	val := kit.NonPtrValue(reflect.ValueOf(app))
