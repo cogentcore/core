@@ -13,7 +13,7 @@ import (
 	"github.com/goki/kigen/ordmap"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/oswin"
 	"golang.org/x/exp/slices"
 	"golang.org/x/image/draw"
 )

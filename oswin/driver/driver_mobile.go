@@ -9,8 +9,8 @@ package driver
 import "C"
 
 import (
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/driver/mobile"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/driver/mobile"
 )
 
 func driverMain(f func(oswin.App)) {

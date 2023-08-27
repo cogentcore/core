@@ -9,7 +9,7 @@ import (
 	"image/color"
 
 	"github.com/goki/mat32"
-	"goki.dev/gi/gist"
+	"goki.dev/gi/v2/gist"
 	"golang.org/x/image/font"
 )
 

@@ -18,12 +18,12 @@ import (
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
 	"github.com/goki/vgpu/vphong"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/cursor"
-	"goki.dev/gi/oswin/key"
-	"goki.dev/gi/oswin/mouse"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/gi/v2/oswin/key"
+	"goki.dev/gi/v2/oswin/mouse"
 )
 
 const (

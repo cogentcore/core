@@ -6,10 +6,10 @@ package main
 
 import (
 	"github.com/goki/ki/ki"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gimain"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/units"
 )
 
 func main() {

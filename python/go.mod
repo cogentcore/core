@@ -1,4 +1,4 @@
-module goki.dev/gi/python
+module goki.dev/gi/v2/python
 
 go 1.18
 
@@ -8,7 +8,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-gl/mathgl v1.0.0
 	github.com/go-python/gopy v0.4.5
-	goki.dev/gi v1.3.12
+	goki.dev/gi/v2 v1.3.12
 	github.com/goki/go-difflib v1.2.1
 	github.com/goki/ki v1.1.11
 	github.com/goki/kigen v1.0.2

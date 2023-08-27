@@ -20,11 +20,11 @@ import (
 	"github.com/goki/mat32"
 	"github.com/goki/matcolor"
 	"github.com/goki/pi/langs/golang"
-	"goki.dev/gi/girl"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/mouse"
+	"goki.dev/gi/v2/girl"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/mouse"
 )
 
 // Preferences are the overall user preferences for GoGi, providing some basic

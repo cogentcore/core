@@ -17,10 +17,10 @@ import (
 	"github.com/goki/mobile/event/paint"
 	"github.com/goki/mobile/event/size"
 	"github.com/goki/mobile/event/touch"
-	"goki.dev/gi/oswin"
-	okey "goki.dev/gi/oswin/key"
-	omouse "goki.dev/gi/oswin/mouse"
-	"goki.dev/gi/oswin/window"
+	"goki.dev/gi/v2/oswin"
+	okey "goki.dev/gi/v2/oswin/key"
+	omouse "goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/gi/v2/oswin/window"
 )
 
 // eventLoop starts running the mobile app event loop

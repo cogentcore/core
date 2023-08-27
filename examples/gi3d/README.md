@@ -6,7 +6,7 @@ The gopher object that is imported is borrowed from: https://github.com/g3n/engi
 
 ## Installation
 
-The usual Go install procedure will work -- see [Install](https://goki.dev/gi/wiki/Install) for details.
+The usual Go install procedure will work -- see [Install](https://goki.dev/gi/v2/wiki/Install) for details.
 
 ## Animation and embedded 2D GUI
 

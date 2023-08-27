@@ -9,13 +9,13 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/mitchellh/go-homedir"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gimain"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/giv"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/svg"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/svg"
+	"goki.dev/gi/v2/units"
 )
 
 func main() {

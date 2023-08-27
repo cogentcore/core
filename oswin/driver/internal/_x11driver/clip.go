@@ -14,7 +14,7 @@ import (
 
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
-	"goki.dev/gi/oswin/mimedata"
+	"goki.dev/gi/v2/oswin/mimedata"
 )
 
 // implements clipboard support for X11

@@ -13,11 +13,11 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
-	"goki.dev/gi/girl"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/mouse"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/girl"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/gi/v2/units"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

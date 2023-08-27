@@ -9,9 +9,9 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/icons"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/icons"
 )
 
 // MapViewInline represents a map as a single line widget, for smaller maps

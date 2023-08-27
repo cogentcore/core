@@ -14,11 +14,11 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/dnd"
-	"goki.dev/gi/oswin/key"
-	"goki.dev/gi/oswin/mimedata"
-	"goki.dev/gi/oswin/mouse"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/dnd"
+	"goki.dev/gi/v2/oswin/key"
+	"goki.dev/gi/v2/oswin/mimedata"
+	"goki.dev/gi/v2/oswin/mouse"
 )
 
 // EventPris for different queues of event signals, processed in priority order

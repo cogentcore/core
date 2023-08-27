@@ -83,7 +83,7 @@ def mainrun():
     # ki.SignalTrace = True
 
     gi.SetAppName("widgets")
-    gi.SetAppAbout('This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>. <p>The <a href="https://goki.dev/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>')
+    gi.SetAppAbout('This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>. <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>')
 
     win = gi.NewMainWindow("gogi-widgets-demo", "GoGi Widgets Demo", width, height)
     
@@ -124,7 +124,7 @@ def mainrun():
     giedsc = "Ctrl+Alt+I"
     prsc = "Alt+P"
     
-    title = gi.AddNewLabel(trow, "title", 'This is a <b>demonstration</b> of the <span style="color:red">various</span> <a href="https://goki.dev/gi/gi">GoGi</a> <i>Widgets</i><br> <large>Shortcuts: <kbd>' + prsc + '</kbd> = Preferences, <kbd>' + giedsc + '</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br> See <a href="https://goki.dev/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.')
+    title = gi.AddNewLabel(trow, "title", 'This is a <b>demonstration</b> of the <span style="color:red">various</span> <a href="https://goki.dev/gi/v2/gi">GoGi</a> <i>Widgets</i><br> <large>Shortcuts: <kbd>' + prsc + '</kbd> = Preferences, <kbd>' + giedsc + '</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br> See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.')
     title.SetProp("white-space", "normal") # wrap
     title.SetProp("text-align", "center")       # note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
     title.SetProp("vertical-align", "center")

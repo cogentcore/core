@@ -15,13 +15,13 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/goki/prof"
-	"goki.dev/gi/girl"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/cursor"
-	"goki.dev/gi/oswin/mouse"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/girl"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/gi/v2/units"
 )
 
 // WidgetBase is the base type for all Widget Node2D elements, which are
@@ -882,7 +882,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	if bg.IsNil() {
 		// we need to do this to prevent
 		// elements from rendering over themselves
-		// (see https://goki.dev/gi/issues/565)
+		// (see https://goki.dev/gi/v2/issues/565)
 		bg = sbg
 	}
 
@@ -891,7 +891,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	// box shadows and borders. We couldn't just
 	// do this when there are box shadows, as they
 	// may be removed and then need to be covered up.
-	// This also fixes https://goki.dev/gi/issues/579.
+	// This also fixes https://goki.dev/gi/v2/issues/579.
 	// This isn't an ideal solution because of performance,
 	// so TODO: maybe come up with a better solution for this.
 	// We need to use raw LayState data because we need to clear

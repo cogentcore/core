@@ -13,13 +13,13 @@ import (
 	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/cursor"
-	"goki.dev/gi/oswin/key"
-	"goki.dev/gi/oswin/mouse"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/gi/v2/oswin/key"
+	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/gi/v2/units"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay

@@ -17,11 +17,11 @@ import (
 
 	"github.com/goki/colors"
 	"github.com/goki/mat32"
-	"goki.dev/gi/girl"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/giv/textbuf"
-	"goki.dev/gi/histyle"
-	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/v2/girl"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/giv/textbuf"
+	"goki.dev/gi/v2/histyle"
+	"goki.dev/gi/v2/oswin/cursor"
 
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ints"
@@ -31,12 +31,12 @@ import (
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/token"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/key"
-	"goki.dev/gi/oswin/mimedata"
-	"goki.dev/gi/oswin/mouse"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/key"
+	"goki.dev/gi/v2/oswin/mimedata"
+	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/gi/v2/units"
 )
 
 // TextView is a widget for editing multiple lines of text (as compared to

@@ -14,9 +14,9 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/mouse"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/mouse"
 )
 
 // Node3D is the common interface for all gi3d scenegraph nodes

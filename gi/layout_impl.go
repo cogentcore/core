@@ -10,7 +10,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gist"
+	"goki.dev/gi/v2/gist"
 )
 
 // This file contains all the hairy implementation logic of layout

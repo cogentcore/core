@@ -50,11 +50,11 @@ import (
 	"unsafe"
 
 	"github.com/goki/pi/filecat"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/cursor"
-	"goki.dev/gi/oswin/key"
-	"goki.dev/gi/oswin/mimedata"
-	"goki.dev/gi/oswin/osevent"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/gi/v2/oswin/key"
+	"goki.dev/gi/v2/oswin/mimedata"
+	"goki.dev/gi/v2/oswin/osevent"
 )
 
 /////////////////////////////////////////////////////////////////

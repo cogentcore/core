@@ -16,8 +16,8 @@ import (
 
 	"github.com/goki/colors"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/units"
 )
 
 // TestPrefs are needed for setting gist.ThePrefs, for any text-based

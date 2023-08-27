@@ -9,8 +9,8 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/oswin/dnd"
-	"goki.dev/gi/oswin/mimedata"
+	"goki.dev/gi/v2/oswin/dnd"
+	"goki.dev/gi/v2/oswin/mimedata"
 )
 
 // This file contains all the special-purpose interfaces

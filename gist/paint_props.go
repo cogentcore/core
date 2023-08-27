@@ -13,7 +13,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/units"
 )
 
 ////////////////////////////////////////////////////////////////////////////

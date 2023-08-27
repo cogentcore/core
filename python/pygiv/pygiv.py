@@ -50,7 +50,7 @@ class ClassViewInline(object):
     python class objects under GoGi.
     Due to limitations on calling python callbacks across threads, you must pass a unique
     name to the constructor.  The object must be a ClassViewObj, with tags using same
-    syntax as the struct field tags in Go: https://goki.dev/gi/wiki/Tags
+    syntax as the struct field tags in Go: https://goki.dev/gi/v2/wiki/Tags
     for customizing the view properties (space separated, name:"value")
     """
     def __init__(self, obj, name):
@@ -128,7 +128,7 @@ class ClassView(object):
     ClassView provides GoGi giv.StructView like editor for python class objects under GoGi.
     Due to limitations on calling python callbacks across threads, you must pass a unique
     name to the constructor.  The object must be a ClassViewObj, with tags using same
-    syntax as the struct field tags in Go: https://goki.dev/gi/wiki/Tags
+    syntax as the struct field tags in Go: https://goki.dev/gi/v2/wiki/Tags
     for customizing the view properties (space separated, name:"value")
     """
     def __init__(self, obj, name):

@@ -11,7 +11,7 @@ import (
 	"image"
 
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/oswin"
 )
 
 // osevent.Event reports an OS level event

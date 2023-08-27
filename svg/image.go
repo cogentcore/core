@@ -12,8 +12,8 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/icons"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

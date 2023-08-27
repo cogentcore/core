@@ -1,6 +1,6 @@
 # Gi3D
 
-[![Go Reference](https://pkg.go.dev/badge/goki.dev/gi/gi3d/gi3d.svg)](https://pkg.go.dev/goki.dev/gi/gi3d)
+[![Go Reference](https://pkg.go.dev/badge/goki.dev/gi/v2/gi3d/gi3d.svg)](https://pkg.go.dev/goki.dev/gi/v2/gi3d)
 
 `gi3d` is the package for the 3D scenegraph in GoGi.
 

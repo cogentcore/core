@@ -10,13 +10,13 @@ import (
 
 	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/girl"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/mimedata"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/girl"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/mimedata"
+	"goki.dev/gi/v2/units"
 )
 
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --

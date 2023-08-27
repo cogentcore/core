@@ -10,7 +10,7 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/gi"
+	"goki.dev/gi/v2/gi"
 )
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices

@@ -14,9 +14,9 @@ import (
 	"sync"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/cursor"
-	"goki.dev/gi/oswin/mimedata"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/gi/v2/oswin/mimedata"
 )
 
 // Notes on intermixing glfw and xgb: bottom line, can't do:

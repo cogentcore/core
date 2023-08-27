@@ -15,12 +15,12 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gimain"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/giv"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/units"
 )
 
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
@@ -577,7 +577,7 @@ func main() {
 
 func mainrun() {
 	gi.SetAppName("file-browser")
-	gi.SetAppAbout(`<code>FileBrowser</code> is a demo / test of the FileTree / FileNode browser in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://goki.dev/gide">gide on GitHub</a>`)
+	gi.SetAppAbout(`<code>FileBrowser</code> is a demo / test of the FileTree / FileNode browser in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://goki.dev/gi/v2de">gide on GitHub</a>`)
 
 	// gi.SetQuitCleanFunc(func() {
 	// 	fmt.Printf("Doing final Quit cleanup here..\n")

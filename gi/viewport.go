@@ -20,8 +20,8 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/girl"
-	"goki.dev/gi/gist"
+	"goki.dev/gi/v2/girl"
+	"goki.dev/gi/v2/gist"
 )
 
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)

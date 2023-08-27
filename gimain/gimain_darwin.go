@@ -7,7 +7,7 @@
 
 package gimain
 
-import "goki.dev/gi/gi"
+import "goki.dev/gi/v2/gi"
 
 func init() {
 	gi.DefaultKeyMap = gi.KeyMapName("MacStd")

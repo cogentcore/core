@@ -7,8 +7,8 @@ import (
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/giv/textbuf"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/giv/textbuf"
 )
 
 // CompletePi uses GoPi symbols and language -- the string is a line of text

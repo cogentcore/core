@@ -21,12 +21,12 @@ import (
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 	vk "github.com/goki/vulkan"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/clip"
-	"goki.dev/gi/oswin/cursor"
-	"goki.dev/gi/oswin/window"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/clip"
+	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/gi/v2/oswin/window"
+	"goki.dev/gi/v2/units"
 )
 
 // TODO: actually implement things for mobile app

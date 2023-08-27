@@ -11,12 +11,12 @@ import (
 	"sync/atomic"
 
 	_ "github.com/goki/vgpu/vphong"
-	"goki.dev/gi/gi"
-	_ "goki.dev/gi/gi3d/io/obj"
-	"goki.dev/gi/giv"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/driver"
-	"goki.dev/gi/svg"
+	"goki.dev/gi/v2/gi"
+	_ "goki.dev/gi/v2/gi3d/io/obj"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/driver"
+	"goki.dev/gi/v2/svg"
 )
 
 // these dummy variables force inclusion of relevant packages

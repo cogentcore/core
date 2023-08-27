@@ -13,7 +13,7 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/spell"
-	"goki.dev/gi/icons"
+	"goki.dev/gi/v2/icons"
 )
 
 // Completer interface supports the SetCompleter method for setting completer parameters

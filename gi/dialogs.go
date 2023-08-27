@@ -16,10 +16,10 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/key"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/key"
+	"goki.dev/gi/v2/units"
 )
 
 // DialogsSepWindow determines if dialog windows open in a separate OS-level

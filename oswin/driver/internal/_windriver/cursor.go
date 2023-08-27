@@ -11,7 +11,7 @@ import (
 	"sync"
 	"syscall"
 
-	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/v2/oswin/cursor"
 )
 
 var cursorMap = map[cursor.Shapes]int{

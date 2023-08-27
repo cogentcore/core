@@ -18,7 +18,7 @@ import (
 	"image/color"
 	"image/draw"
 
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/oswin"
 	"golang.org/x/mobile/gl"
 )
 

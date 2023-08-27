@@ -15,7 +15,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/spell"
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/oswin"
 )
 
 // InitSpell tries to load the saved fuzzy.spell model.

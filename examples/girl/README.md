@@ -1,6 +1,6 @@
 # GiRl
 
-This is a simple demo of how to use the Gi Render library outside of GoGi: [girl](https://goki.dev/gi/tree/master/girl).
+This is a simple demo of how to use the Gi Render library outside of GoGi: [girl](https://goki.dev/gi/v2/tree/master/girl).
 
 Compared to the widely-used https://github.com/fogleman/gg upon which GiRl is based, the primary advantages include:
 

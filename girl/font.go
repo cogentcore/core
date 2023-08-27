@@ -13,8 +13,8 @@ import (
 
 	"github.com/goki/freetype/truetype"
 	"github.com/goki/ki/ki"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/units"
 	"golang.org/x/image/font/opentype"
 )
 

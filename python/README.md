@@ -6,7 +6,7 @@ Go incorporates many features found in Python, and provides a really natural "ba
 
 # Installation
 
-Python version 3 (3.6-3.9 have been well tested) is recommended, and the instructions assume that version (you can probably get version 2 to work but it has not been tested).  Also pip must be installed, as is typical.  This assumes you have already installed GoGi per the [Wiki Install](https://goki.dev/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
+Python version 3 (3.6-3.9 have been well tested) is recommended, and the instructions assume that version (you can probably get version 2 to work but it has not been tested).  Also pip must be installed, as is typical.  This assumes you have already installed GoGi per the [Wiki Install](https://goki.dev/gi/v2/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
 
 On linux, you must ensure that the linker `ld` will look in the current directory for library files -- add this to your `.bashrc` file (and `source` that file after editing, or enter command locally):
 
@@ -14,7 +14,7 @@ On linux, you must ensure that the linker `ld` will look in the current director
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 ```
 
-This assumes that you are using go modules, as discussed in the wiki install page, and *that you are in the `gi` directory where you installed gi* (e.g., `git clone https://goki.dev/gi` and then `cd gi`)
+This assumes that you are using go modules, as discussed in the wiki install page, and *that you are in the `gi` directory where you installed gi* (e.g., `git clone https://goki.dev/gi/v2` and then `cd gi`)
 
 NOTE: only a modules version of the build is supported, but it has some weirdness about updating the `go.mod` and `go.sum` files across the gopy and rest of the build.  Pay attention to the output of the `make` command and if anything is downloaded during the `gopy` part of the build, it is a good idea to interrupt the `go build` process (hit Ctrl-C) and start over again, until there are no downloading messages -- then everything should be included properly.
 

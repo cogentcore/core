@@ -11,8 +11,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/window"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/window"
 )
 
 // monitorDebug turns on various debugging statements about monitor changes

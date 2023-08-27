@@ -21,10 +21,10 @@ import (
 	"unsafe"
 
 	"github.com/goki/ki/bitflag"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/driver/internal/drawer"
-	"goki.dev/gi/oswin/driver/internal/event"
-	"goki.dev/gi/oswin/window"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/driver/internal/drawer"
+	"goki.dev/gi/v2/oswin/driver/internal/event"
+	"goki.dev/gi/v2/oswin/window"
 	"golang.org/x/image/math/f64"
 )
 

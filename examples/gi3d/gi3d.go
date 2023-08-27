@@ -13,16 +13,16 @@ import (
 
 	"github.com/goki/colors"
 	"github.com/goki/vgpu/vgpu"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gi3d"
-	"goki.dev/gi/gimain"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/giv"
-	"goki.dev/gi/icons"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gi3d"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/icons"
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/units"
 )
 
 func main() {
@@ -157,7 +157,7 @@ func mainrun() {
 
 	gi.SetAppName("gi3d")
 	gi.SetAppAbout(`This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
-<p>The <a href="https://goki.dev/gi/blob/master/examples/gi3d/README.md">README</a> page for this example app has further info.</p>`)
+<p>The <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README</a> page for this example app has further info.</p>`)
 
 	win := gi.NewMainWindow("gogi-gi3d-demo", "GoGi 3D Demo", width, height)
 
@@ -171,8 +171,8 @@ func mainrun() {
 	trow.SetStretchMaxWidth()
 
 	title := gi.AddNewLabel(trow, "title", `This is a demonstration of the
-<a href="https://goki.dev/gi">GoGi</a> <i>3D</i> Framework<br>
-See <a href="https://goki.dev/gi/blob/master/examples/gi3d/README.md">README</a> for detailed info and things to try.`)
+<a href="https://goki.dev/gi/v2">GoGi</a> <i>3D</i> Framework<br>
+See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README</a> for detailed info and things to try.`)
 	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 	title.SetProp("text-align", gist.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
 	title.SetProp("vertical-align", gist.AlignCenter)

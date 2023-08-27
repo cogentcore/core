@@ -7,8 +7,8 @@ package main
 import (
 	"log"
 
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gimain"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
 )
 
 func main() {

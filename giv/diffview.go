@@ -18,14 +18,14 @@ import (
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 	"github.com/goki/vci"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/giv/textbuf"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/key"
-	"goki.dev/gi/oswin/mouse"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/giv/textbuf"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/key"
+	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/gi/v2/units"
 )
 
 // DiffFiles shows the diffs between this file as the A file, and other file as B file,

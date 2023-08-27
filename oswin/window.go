@@ -16,7 +16,7 @@ import (
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 	"github.com/goki/vgpu/vdraw"
-	"goki.dev/gi/gist"
+	"goki.dev/gi/v2/gist"
 )
 
 // Window is a double-buffered OS-specific hardware window.

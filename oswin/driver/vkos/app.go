@@ -21,10 +21,10 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/vgpu/vgpu"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/clip"
-	"goki.dev/gi/oswin/cursor"
-	"goki.dev/gi/oswin/window"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/clip"
+	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/gi/v2/oswin/window"
 
 	vk "github.com/goki/vulkan"
 )

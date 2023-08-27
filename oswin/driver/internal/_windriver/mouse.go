@@ -12,8 +12,8 @@ import (
 	"syscall"
 	"time"
 
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/mouse"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/mouse"
 )
 
 var lastMouseClickTime time.Time

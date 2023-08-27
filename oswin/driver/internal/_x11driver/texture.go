@@ -23,7 +23,7 @@ import (
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/oswin"
 	"golang.org/x/image/math/f64"
 )
 

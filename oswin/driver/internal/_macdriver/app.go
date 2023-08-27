@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/clip"
-	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/clip"
+	"goki.dev/gi/v2/oswin/cursor"
 	"golang.org/x/mobile/gl"
 )
 

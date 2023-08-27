@@ -10,10 +10,10 @@ import (
 	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gimain"
-	"goki.dev/gi/giv"
-	"goki.dev/gi/svg"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/svg"
 )
 
 var Vp *gi.Viewport2D

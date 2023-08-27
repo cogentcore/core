@@ -12,8 +12,8 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/oswin"
 
 	vk "github.com/goki/vulkan"
 )

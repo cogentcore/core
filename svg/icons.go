@@ -19,8 +19,8 @@ import (
 	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/icons"
 )
 
 func init() {
@@ -147,7 +147,7 @@ type IconMgr struct {
 
 func (im *IconMgr) IsValid(iconName icons.Icon) bool {
 	if im == nil {
-		fmt.Println("TheIconMgr is nil -- you MUST import gi/svg as e.g., import \"_ goki.dev/gi/svg\" to properly initialize the SVG icon manager")
+		fmt.Println("TheIconMgr is nil -- you MUST import gi/svg as e.g., import \"_ goki.dev/gi/v2/svg\" to properly initialize the SVG icon manager")
 		return false
 	}
 	if iconName.IsNil() {

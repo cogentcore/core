@@ -8,9 +8,9 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/vci"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/icons"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/icons"
 )
 
 // VCSLogView is a view of the variables

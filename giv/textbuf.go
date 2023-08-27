@@ -27,11 +27,11 @@ import (
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/spell"
 	"github.com/goki/pi/token"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/giv/textbuf"
-	"goki.dev/gi/histyle"
-	"goki.dev/gi/icons"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/giv/textbuf"
+	"goki.dev/gi/v2/histyle"
+	"goki.dev/gi/v2/icons"
 )
 
 // TextBufMaxScopeLines is the maximum lines to search for a scope marker, e.g. '}'

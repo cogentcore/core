@@ -15,10 +15,10 @@ import (
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/key"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/key"
 )
 
 // these are special menus that we ignore
@@ -28,7 +28,7 @@ var specialMenus = map[string]struct{}{
 
 // MainMenuView configures the given MenuBar according to the "MainMenu"
 // properties registered on the type for given value element, through the
-// kit.AddType method.  See https://goki.dev/gi/wiki/Views for full
+// kit.AddType method.  See https://goki.dev/gi/v2/wiki/Views for full
 // details on formats and options for configuring the menu.  Returns false if
 // there is no main menu defined for this type, or on errors (which are
 // programmer errors sent to log).
@@ -110,7 +110,7 @@ func HasToolBarView(val any) bool {
 
 // ToolBarView configures ToolBar according to the "ToolBar" properties
 // registered on the type for given value element, through the kit.AddType
-// method.  See https://goki.dev/gi/wiki/Views for full details on
+// method.  See https://goki.dev/gi/v2/wiki/Views for full details on
 // formats and options for configuring the menu.  Returns false if there is no
 // toolbar defined for this type, or on errors (which are programmer errors
 // sent to log).
@@ -157,7 +157,7 @@ func ToolBarView(val any, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 
 // CtxtMenuView configures a popup context menu according to the "CtxtMenu"
 // properties registered on the type for given value element, through the
-// kit.AddType method.  See https://goki.dev/gi/wiki/Views for full
+// kit.AddType method.  See https://goki.dev/gi/v2/wiki/Views for full
 // details on formats and options for configuring the menu.  It looks first
 // for "CtxtMenuActive" or "CtxtMenuInactive" depending on inactive flag
 // (which applies to the gui view), so you can have different menus in those

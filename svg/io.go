@@ -25,8 +25,8 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gist"
 	"golang.org/x/net/html/charset"
 )
 

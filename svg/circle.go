@@ -8,7 +8,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gi"
+	"goki.dev/gi/v2/gi"
 )
 
 // Circle is a SVG circle

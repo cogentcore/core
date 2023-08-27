@@ -9,7 +9,7 @@ import (
 
 	"github.com/goki/ki/kit"
 	"github.com/iancoleman/strcase"
-	"goki.dev/gi/gist"
+	"goki.dev/gi/v2/gist"
 )
 
 // Cases are different cases -- Lower, Upper, Camel, etc

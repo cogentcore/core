@@ -7,7 +7,7 @@ package svg
 import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/gi"
+	"goki.dev/gi/v2/gi"
 )
 
 // Flow represents SVG flow* elements

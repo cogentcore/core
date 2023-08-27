@@ -12,7 +12,7 @@ import (
 	"github.com/goki/kigen/ordmap"
 	"github.com/goki/vgpu/szalloc"
 	"github.com/goki/vgpu/vgpu"
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/oswin"
 )
 
 // A Sprite is just an image (with optional background) that can be drawn onto

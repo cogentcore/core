@@ -13,9 +13,9 @@ import (
 
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/units"
 	"golang.org/x/image/font"
 )
 

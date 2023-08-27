@@ -11,8 +11,8 @@ package oswin
 
 import (
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/oswin/clip"
-	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/v2/oswin/clip"
+	"goki.dev/gi/v2/oswin/cursor"
 )
 
 // TheApp is the current oswin App -- only ever one in effect

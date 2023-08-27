@@ -8,7 +8,7 @@ import (
 	"github.com/goki/ki/indent"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/pi"
-	"goki.dev/gi/gi"
+	"goki.dev/gi/v2/gi"
 )
 
 // Opts contains options for TextBufs -- contains everything necessary to

@@ -11,7 +11,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/icons"
+	"goki.dev/gi/v2/icons"
 )
 
 // Camera defines the properties of the camera

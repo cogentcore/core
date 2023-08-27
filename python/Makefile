@@ -26,7 +26,7 @@ install: install-pkg install-exe
 # note: it is important that gi3d come after giv, otherwise gi3dcaptures all the common types
 # unfortunately this means that all sub-packages need to be explicitly listed.
 gen:
-	gopy exe -name=gi -vm=python3 -no-warn -exclude=driver,oswin -main="runtime.LockOSThread(); gimain.Main(func() {  GoPyMainRun() })" github.com/goki/ki/ki github.com/goki/ki/kit github.com/goki/mat32 goki.dev/gi/units goki.dev/gi/gist goki.dev/gi/girl  goki.dev/gi/gi goki.dev/gi/svg goki.dev/gi/giv goki.dev/gi/gi3d goki.dev/gi/gimain
+	gopy exe -name=gi -vm=python3 -no-warn -exclude=driver,oswin -main="runtime.LockOSThread(); gimain.Main(func() {  GoPyMainRun() })" github.com/goki/ki/ki github.com/goki/ki/kit github.com/goki/mat32 goki.dev/gi/v2/units goki.dev/gi/v2/gist goki.dev/gi/v2/girl  goki.dev/gi/v2/gi goki.dev/gi/v2/svg goki.dev/gi/v2/giv goki.dev/gi/v2/gi3d goki.dev/gi/v2/gimain
 
 build:
 	$(MAKE) -C gi build

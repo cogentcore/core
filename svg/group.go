@@ -10,7 +10,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gi"
+	"goki.dev/gi/v2/gi"
 )
 
 // Group groups together SVG elements -- doesn't do much but provide a

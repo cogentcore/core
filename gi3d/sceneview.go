@@ -9,10 +9,10 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/giv"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin/key"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/oswin/key"
 )
 
 // SceneView provides a toolbar controller for a gi3d.Scene

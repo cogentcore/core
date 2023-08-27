@@ -11,7 +11,7 @@ import (
 	"log"
 	"runtime"
 
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/oswin"
 )
 
 // Main is called by the program's main function to run the graphical

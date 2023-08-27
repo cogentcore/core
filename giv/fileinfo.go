@@ -20,8 +20,8 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/vci"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/icons"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/icons"
 )
 
 // FileInfo represents the information about a given file / directory,

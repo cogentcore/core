@@ -8,9 +8,9 @@ import (
 	"fmt"
 
 	"github.com/goki/mat32"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gimain"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/units"
 )
 
 func main() {

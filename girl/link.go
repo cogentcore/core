@@ -9,7 +9,7 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/oswin"
 )
 
 // TextLink represents a hyperlink within rendered text

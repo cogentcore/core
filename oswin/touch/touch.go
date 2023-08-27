@@ -20,7 +20,7 @@ import (
 	"image"
 
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/oswin"
+	"goki.dev/gi/v2/oswin"
 )
 
 // touch.Event is a touch event.

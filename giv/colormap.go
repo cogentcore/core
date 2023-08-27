@@ -10,11 +10,11 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/colormap"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/oswin"
-	"goki.dev/gi/oswin/mouse"
+	"goki.dev/gi/v2/colormap"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/gi/v2/oswin/mouse"
 )
 
 // ColorMapName provides a gui chooser of maps in AvailColorMaps

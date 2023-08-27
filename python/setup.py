@@ -11,7 +11,7 @@ setuptools.setup(
     description="Python wrapper around GoGi GUI framework in Go (golang)",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://goki.dev/gi",
+    url="https://goki.dev/gi/v2",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

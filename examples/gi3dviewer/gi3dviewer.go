@@ -10,13 +10,13 @@ import (
 	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gi3d"
-	"goki.dev/gi/gimain"
-	"goki.dev/gi/giv"
-	"goki.dev/gi/icons"
-	"goki.dev/gi/oswin/driver/vkos"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gi3d"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/icons"
+	"goki.dev/gi/v2/oswin/driver/vkos"
+	"goki.dev/gi/v2/units"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func mainrun() {
 
 	gi.SetAppName("gi3dview")
 	gi.SetAppAbout(`This is a viewer for the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
-<p>The <a href="https://goki.dev/gi/blob/master/examples/gi3dviewer/README.md">README</a> page for this example app has further info.</p>`)
+<p>The <a href="https://goki.dev/gi/v2/blob/master/examples/gi3dviewer/README.md">README</a> page for this example app has further info.</p>`)
 
 	win := gi.NewMainWindow("gi3d-viewer", "GoGi 3D Viewer", width, height)
 

@@ -6,8 +6,8 @@ package gi
 
 import (
 	"github.com/goki/colors"
-	"goki.dev/gi/gist"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/gist"
+	"goki.dev/gi/v2/units"
 )
 
 // CustomConfigStyles is the custom, global style configuration function

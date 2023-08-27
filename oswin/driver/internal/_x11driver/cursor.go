@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"github.com/BurntSushi/xgb/xproto"
-	"goki.dev/gi/oswin/cursor"
+	"goki.dev/gi/v2/oswin/cursor"
 )
 
 // https://xcb.freedesktop.org/tutorial/mousecursors/

@@ -19,8 +19,8 @@ import (
 	"github.com/goki/pi/pi"
 	_ "github.com/goki/pi/suplangs"
 	"github.com/goki/pi/token"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/histyle"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/histyle"
 )
 
 // HiMarkup manages the syntax highlighting state for TextBuf

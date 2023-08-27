@@ -14,7 +14,7 @@ import (
 	"time"
 	"unsafe"
 
-	"goki.dev/gi/oswin/mimedata"
+	"goki.dev/gi/v2/oswin/mimedata"
 )
 
 // implements clipboard support for Windows

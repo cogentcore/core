@@ -8,8 +8,8 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/iancoleman/strcase"
-	"goki.dev/gi/gi"
-	"goki.dev/gi/gist"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gist"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the

@@ -10,7 +10,7 @@ import (
 	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gi/units"
+	"goki.dev/gi/v2/units"
 )
 
 // is:

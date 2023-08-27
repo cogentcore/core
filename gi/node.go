@@ -13,7 +13,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"goki.dev/gi/gist"
+	"goki.dev/gi/v2/gist"
 )
 
 // Node is the interface for all GoGi nodes (2D and 3D), for accessing as NodeBase

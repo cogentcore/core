@@ -15,7 +15,7 @@ import (
 	"github.com/goki/ki/sliceclone"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
-	"goki.dev/gi/gist"
+	"goki.dev/gi/v2/gist"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )
