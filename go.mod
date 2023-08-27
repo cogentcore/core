@@ -1,4 +1,4 @@
-module github.com/goki/colors
+module goki.dev/colors
 
 go 1.19
 
