@@ -10,6 +10,8 @@ package config
 // [Main] configuration object
 var The = &Main{}
 
+// TODO: make all of the targets enums
+
 // Main is the main config struct
 // that contains all of the configuration
 // options for the GoKi tool
@@ -29,6 +31,12 @@ type Main struct {
 
 	// the configuration options for the colorgen command
 	Colorgen Colorgen `desc:"the configuration options for the colorgen command"`
+
+	// the configuration options for the install command
+	Install Install `desc:"the configuration options for the install command"`
+
+	// the configuration options for the log command
+	Log Log `desc:"the configuration options for the log command"`
 }
 
 // Build contains the configuration options
@@ -36,7 +44,7 @@ type Main struct {
 type Build struct {
 
 	// the path of the package to build
-	Path string `desc:"the path of the package to build"`
+	Package string `desc:"the path of the package to build"`
 
 	// the target platforms to build executables for, in os[/arch] format
 	Target []string `desc:"the target platforms to build executables for, in os[/arch] format"`
@@ -51,4 +59,29 @@ type Colorgen struct {
 
 	// the comment for the color schemes variable
 	Comment string `desc:"the comment for the color schemes variable"`
+}
+
+// Install contains the configuration options
+// for the install command.
+type Install struct {
+
+	// the name/path of the package to install
+	Package string `desc:"the name/path of the package to install"`
+
+	// the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)
+	Target []string `desc:"the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)"`
+}
+
+// Log contains the configuration options
+// for the log command.
+type Log struct {
+
+	// the target platform to view the logs for (ios or android)
+	Target string `desc:"the target platform to view the logs for (ios or android)"`
+
+	// whether to keep the previous log messages or clear them
+	Keep bool `desc:"whether to keep the previous log messages or clear them"`
+
+	// messages not generated from your app equal to or above this log level will be shown
+	All string `desc:"messages not generated from your app equal to or above this log level will be shown"`
 }
