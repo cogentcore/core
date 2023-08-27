@@ -1,2 +1,20 @@
-name = "tools"
-version = "v0.0.0"
+Name = "tools"
+Desc = ""
+Version = "v0.0.0"
+
+[Build]
+  Package = ""
+
+[Colorgen]
+  Source = ""
+  Output = ""
+  Package = ""
+  Comment = ""
+
+[Install]
+  Package = ""
+
+[Log]
+  Target = ""
+  Keep = false
+  All = ""
