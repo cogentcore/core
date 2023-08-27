@@ -1,4 +1,4 @@
-module github.com/goki/tools
+module goki.dev/goki
 
 go 1.19
 
