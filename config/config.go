@@ -22,6 +22,9 @@ type Config struct {
 	// the version of the app/library
 	Version string `desc:"the version of the app/library"`
 
+	// the type of the package (app/library)
+	Type Types `desc:"the type of the package (app/library)"`
+
 	// the configuration options for the build command
 	Build Build `desc:"the configuration options for the build command"`
 

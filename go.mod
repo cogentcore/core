@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/iancoleman/strcase v0.3.0
+	goki.dev/enums v0.9.2
 	goki.dev/gear v0.8.0
 )
 
@@ -45,7 +46,6 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	github.com/stretchr/testify v1.8.3 // indirect
-	goki.dev/enums v0.9.2 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/image v0.6.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
