@@ -20,9 +20,9 @@ import (
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/syms"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/syms"
+	"goki.dev/pi/v2/token"
 )
 
 // Set GuiActive to true if the gui (piview) is active -- ensures that the

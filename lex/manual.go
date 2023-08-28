@@ -10,7 +10,7 @@ import (
 	"unicode"
 
 	"github.com/goki/ki/ints"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/token"
 )
 
 // these functions provide "manual" lexing support for specific cases

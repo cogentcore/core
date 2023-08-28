@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/goki/ki/nptime"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/token"
 )
 
 // Lex represents a single lexical element, with a token, and start and end rune positions

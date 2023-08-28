@@ -6,12 +6,12 @@ The `pi` package supports a simple and robust form of lexing and parsing based o
 
 We call it `Pi` (or `GoPi`) because Ip is not as easy to pronounce, and also because it makes parsing as easy as pi!  You can think of it as a French acronym, which are typically the reverse of English ones -- "parseur interactif".  Also, it matches GoKi and GoGi. 
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/goki/pi)](https://goreportcard.com/report/github.com/goki/pi)
-[![Go Reference](https://pkg.go.dev/badge/github.com/goki/pi.svg)](https://pkg.go.dev/github.com/goki/pi)
-[![CI](https://github.com/goki/pi/actions/workflows/ci.yml/badge.svg)](https://github.com/goki/pi/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/goki.dev/pi/v2)](https://goreportcard.com/report/goki.dev/pi/v2)
+[![Go Reference](https://pkg.go.dev/badge/goki.dev/pi/v2.svg)](https://pkg.go.dev/goki.dev/pi/v2)
+[![CI](https://goki.dev/pi/v2/actions/workflows/ci.yml/badge.svg)](https://goki.dev/pi/v2/actions/workflows/ci.yml)
 [![Codecov](https://codecov.io/gh/goki/pi/branch/master/graph/badge.svg?token=Hw5cInAxY3)](https://codecov.io/gh/goki/pi)
 
-See the [Wiki](https://github.com/goki/pi/wiki) for more detailed docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
+See the [Wiki](https://goki.dev/pi/v2/wiki) for more detailed docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
 The `pi` repository is also home to various other basic file-level packages including:
 
@@ -64,7 +64,7 @@ and here are some of the more complicated statements (in Go):
     }
 ```
 
-See the [complete grammar for Go](https://github.com/goki/pi/blob/master/langs/golang/go.pig) for everything, including the lexer rules (at the top).
+See the [complete grammar for Go](https://goki.dev/pi/v2/blob/master/langs/golang/go.pig) for everything, including the lexer rules (at the top).
 
 While GoPi is likely to be a lot easier to use than `yacc` and `bison`, the latest version 4 of [ANTLR](https://en.wikipedia.org/wiki/ANTLR) with its `ALL(*)` algorithm sounds like it offers similar abilities to robustly handle intuitive grammars, and is likely more generalizable to a wider range of languages, and is probably faster overall than GoPi.  *But* GoPi is much simpler and more transparent in terms of how it actually works (disclaimer: I have no idea whatsoever how ANTLR V4 actually works!  And that's kind of the point..).  Anyone should be able to understand how GoPi works, and tweak it as needed, etc.  And it operates directly in AST-order, creating the corresponding AST on the fly as it parses, so you can interactively understand what it is doing as it goes along, making it relatively easy to create your grammar (although this process is, in truth, always a bit complicated and never as easy as one might hope).  And GoPi is fast enough for most uses, taking just a few hundred msec for even relatively large and complex source code, and it processes the entire Go standard library in around 40 sec (on a 2016 Macbook laptop).
 
@@ -159,5 +159,5 @@ Overall, processing these kinds of expressions takes most of the time in the par
 
 There remain a few low-frequency expressions that the current Go parsing rules in GoPi don't handle (e.g., see the `make test` target in `cmd/pi` directory for the results of parsing the entire Go std library).  One potential approach would be to do a further level of more bottom-up, lexer-level chunking of expressions at the same depth level, e.g., the `a.b` selector pattern, and the `[]slice` vs. `array[ab]` and func(params) kinds of patterns, and then the parser can operate on top of those.  Thus, the purely top-down approach seems to struggle a bit with some of these kinds of complex path-level expressions.  By contrast, it really easily deals with standard arithmetic expressions, which are much more regular and have a clear precedence order.
 
-Please see the [Wiki](https://github.com/goki/pi/wiki) for more detailed docs, discussion, etc.
+Please see the [Wiki](https://goki.dev/pi/v2/wiki) for more detailed docs, discussion, etc.
 

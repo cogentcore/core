@@ -7,7 +7,7 @@ package langs
 import (
 	"fmt"
 
-	"github.com/goki/pi/filecat"
+	"goki.dev/pi/v2/filecat"
 )
 
 var ParserBytes map[filecat.Supported][]byte = make(map[filecat.Supported][]byte)

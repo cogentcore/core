@@ -7,8 +7,8 @@ package spell
 import (
 	"strings"
 
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/token"
 )
 
 // CheckLexLine returns the Lex regions for any words that are misspelled

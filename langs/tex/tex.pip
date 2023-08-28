@@ -1,5 +1,5 @@
 {
-  "ProjFile": "/Users/oreilly/go/src/github.com/goki/pi/langs/tex/tex.pip",
+  "ProjFile": "/Users/oreilly/go/src/goki.dev/pi/v2/langs/tex/tex.pip",
   "ParserFile": "/Users/oreilly/goki/pi/langs/tex/tex.pi",
   "TestFile": "/Users/oreilly/goki/pi/langs/tex/testdata/tex_test.tex",
   "TraceOpts": {

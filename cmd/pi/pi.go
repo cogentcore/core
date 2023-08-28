@@ -12,10 +12,10 @@ import (
 	"strings"
 
 	"github.com/goki/ki/dirs"
-	"github.com/goki/pi/filecat"
-	_ "github.com/goki/pi/langs"
-	"github.com/goki/pi/pi"
-	"github.com/goki/pi/syms"
+	"goki.dev/pi/v2/filecat"
+	_ "goki.dev/pi/v2/langs"
+	"goki.dev/pi/v2/pi"
+	"goki.dev/pi/v2/syms"
 )
 
 var Excludes []string

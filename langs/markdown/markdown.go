@@ -10,14 +10,14 @@ import (
 	"unicode"
 
 	"github.com/goki/ki/indent"
-	"github.com/goki/pi/complete"
-	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/langs"
-	"github.com/goki/pi/langs/bibtex"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/pi"
-	"github.com/goki/pi/syms"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/complete"
+	"goki.dev/pi/v2/filecat"
+	"goki.dev/pi/v2/langs"
+	"goki.dev/pi/v2/langs/bibtex"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/pi"
+	"goki.dev/pi/v2/syms"
+	"goki.dev/pi/v2/token"
 )
 
 //go:embed markdown.pi

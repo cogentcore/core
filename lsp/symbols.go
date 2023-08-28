@@ -10,7 +10,7 @@ package lsp
 
 import (
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/token"
 )
 
 // SymbolKind is the Language Server Protocol (LSP) SymbolKind, which

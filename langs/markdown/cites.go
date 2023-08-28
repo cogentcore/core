@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/goki/ki/ints"
-	"github.com/goki/pi/complete"
-	"github.com/goki/pi/langs/bibtex"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/pi"
+	"goki.dev/pi/v2/complete"
+	"goki.dev/pi/v2/langs/bibtex"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/pi"
 )
 
 // CompleteCite does completion on citation

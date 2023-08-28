@@ -6,9 +6,9 @@ package pi
 
 import (
 	"github.com/goki/ki/indent"
-	"github.com/goki/pi/complete"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/syms"
+	"goki.dev/pi/v2/complete"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/syms"
 )
 
 // Lang provides a general interface for language-specific management

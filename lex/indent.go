@@ -6,7 +6,7 @@ package lex
 
 import (
 	"github.com/goki/ki/indent"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/token"
 )
 
 // these functions support indentation algorithms,

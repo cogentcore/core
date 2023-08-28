@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/langs"
-	"github.com/goki/pi/lex"
+	"goki.dev/pi/v2/filecat"
+	"goki.dev/pi/v2/langs"
+	"goki.dev/pi/v2/lex"
 )
 
 // LangFlags are special properties of a given language

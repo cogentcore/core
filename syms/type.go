@@ -12,7 +12,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/sliceclone"
-	"github.com/goki/pi/lex"
+	"goki.dev/pi/v2/lex"
 )
 
 // Type contains all the information about types.  Types can be builtin

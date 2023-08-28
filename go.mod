@@ -1,4 +1,4 @@
-module github.com/goki/pi
+module goki.dev/pi/v2
 
 go 1.18
 

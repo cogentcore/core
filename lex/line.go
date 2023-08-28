@@ -9,7 +9,7 @@ import (
 	"unicode"
 
 	"github.com/goki/ki/sliceclone"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/token"
 )
 
 // Line is one line of Lex'd text

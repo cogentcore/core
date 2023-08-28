@@ -10,7 +10,7 @@ import (
 	"unicode"
 
 	"github.com/goki/ki/nptime"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/token"
 )
 
 // LangLexer looks up lexer for given language -- impl in parent pi package

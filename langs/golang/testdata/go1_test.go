@@ -628,8 +628,8 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
 	gogide "github.com/goki/gide/gide"
-	"github.com/goki/pi"
-	"github.com/goki/pi/piv"
+	"goki.dev/pi/v2"
+	"goki.dev/pi/v2/piv"
 )
 
 var av1, av2 int
@@ -1035,7 +1035,7 @@ func main() {
 
 func mainrun() {
 	oswin.TheApp.SetName("pie")
-	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki/pi">Gide on GitHub</a> and <a href="https://github.com/goki/pi/wiki">Gide wiki</a> for documentation.<br>
+	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://goki.dev/pi/v2">Gide on GitHub</a> and <a href="https://goki.dev/pi/v2/wiki">Gide wiki</a> for documentation.<br>
 <br>
 Version: ` + pi.VersionInfo())
 	if peas++; this > that {

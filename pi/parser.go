@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/goki/ki/ki"
-	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/parse"
+	"goki.dev/pi/v2/filecat"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/parse"
 )
 
 // Parser is the overall parser for managing the parsing

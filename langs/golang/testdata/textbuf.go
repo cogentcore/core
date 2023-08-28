@@ -24,12 +24,12 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/nptime"
 	"github.com/goki/ki/runes"
-	"github.com/goki/pi/complete"
-	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/pi"
-	"github.com/goki/pi/token"
 	"github.com/pmezard/go-difflib/difflib"
+	"goki.dev/pi/v2/complete"
+	"goki.dev/pi/v2/filecat"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/pi"
+	"goki.dev/pi/v2/token"
 )
 
 // TextBufOpts contains options for TextBufs -- contains everything necessary to

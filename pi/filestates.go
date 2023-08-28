@@ -7,7 +7,7 @@ package pi
 import (
 	"sync"
 
-	"github.com/goki/pi/filecat"
+	"goki.dev/pi/v2/filecat"
 )
 
 // FileStates contains two FileState's: one is being processed while the

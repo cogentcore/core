@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/token"
 )
 
 // Actions are parsing actions to perform

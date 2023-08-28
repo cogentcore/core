@@ -9,10 +9,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/goki/pi/parse"
-	"github.com/goki/pi/pi"
-	"github.com/goki/pi/syms"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/parse"
+	"goki.dev/pi/v2/pi"
+	"goki.dev/pi/v2/syms"
+	"goki.dev/pi/v2/token"
 )
 
 // TypeErr indicates is the type name we use to indicate that the type could not be inferred

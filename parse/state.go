@@ -7,9 +7,9 @@ package parse
 import (
 	"fmt"
 
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/syms"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/syms"
+	"goki.dev/pi/v2/token"
 )
 
 // parse.State is the state maintained for parsing

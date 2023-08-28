@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goki/pi/filecat"
+	"goki.dev/pi/v2/filecat"
 )
 
 // GoPiCacheDir returns the GoPi cache directory for given language, and ensures that it exists

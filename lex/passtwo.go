@@ -5,7 +5,7 @@
 package lex
 
 import (
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/token"
 )
 
 // PassTwo performs second pass(s) through the lexicalized version of the source,

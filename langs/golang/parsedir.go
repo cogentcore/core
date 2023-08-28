@@ -15,10 +15,10 @@ import (
 	"unicode/utf8"
 
 	"github.com/goki/ki/dirs"
-	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/pi"
-	"github.com/goki/pi/syms"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/filecat"
+	"goki.dev/pi/v2/pi"
+	"goki.dev/pi/v2/syms"
+	"goki.dev/pi/v2/token"
 	"golang.org/x/tools/go/packages"
 )
 

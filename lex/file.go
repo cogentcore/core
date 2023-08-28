@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"github.com/goki/ki/sliceclone"
-	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/filecat"
+	"goki.dev/pi/v2/token"
 )
 
 // File contains the contents of the file being parsed -- all kept in

@@ -10,12 +10,12 @@ import (
 	"unicode"
 
 	"github.com/goki/ki/indent"
-	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/langs"
-	"github.com/goki/pi/langs/bibtex"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/pi"
-	"github.com/goki/pi/syms"
+	"goki.dev/pi/v2/filecat"
+	"goki.dev/pi/v2/langs"
+	"goki.dev/pi/v2/langs/bibtex"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/pi"
+	"goki.dev/pi/v2/syms"
 )
 
 //go:embed tex.pi

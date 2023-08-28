@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi/lex"
+	"goki.dev/pi/v2/lex"
 )
 
 // TraceOpts provides options for debugging / monitoring the rule matching and execution process

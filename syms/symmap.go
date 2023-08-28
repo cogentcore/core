@@ -13,8 +13,8 @@ import (
 	"strings"
 
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/token"
 )
 
 // SymMap is a map between symbol names and their full information.

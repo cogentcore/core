@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/goki/ki/nptime"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/token"
 )
 
 func TestLineMerge(t *testing.T) {

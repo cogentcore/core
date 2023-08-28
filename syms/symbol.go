@@ -38,8 +38,8 @@ import (
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/token"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/token"
 )
 
 // Symbol contains the information for everything about a given
