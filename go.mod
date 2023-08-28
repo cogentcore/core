@@ -1,4 +1,4 @@
-module github.com/goki/mat32
+module goki.dev/mat32
 
 go 1.18
 
