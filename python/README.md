@@ -14,7 +14,7 @@ On linux, you must ensure that the linker `ld` will look in the current director
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 ```
 
-This assumes that you are using go modules, as discussed in the wiki install page, and *that you are in the `gi` directory where you installed gi* (e.g., `git clone https://goki.dev/gi/v2` and then `cd gi`)
+This assumes that you are using go modules, as discussed in the wiki install page, and *that you are in the `gi` directory where you installed gi* (e.g., `git clone https://goki.dev/goki/gi` and then `cd gi`)
 
 NOTE: only a modules version of the build is supported, but it has some weirdness about updating the `go.mod` and `go.sum` files across the gopy and rest of the build.  Pay attention to the output of the `make` command and if anything is downloaded during the `gopy` part of the build, it is a good idea to interrupt the `go build` process (hit Ctrl-C) and start over again, until there are no downloading messages -- then everything should be included properly.
 
