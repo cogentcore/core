@@ -13,17 +13,17 @@ package config
 // options for the GoKi tool
 type Config struct {
 
-	// the name of the app/library
-	Name string `desc:"the name of the app/library"`
+	// the name of the project
+	Name string `desc:"the name of the project"`
 
-	// the description of the app/library
-	Desc string `desc:"the description of the app/library"`
+	// the description of the project
+	Desc string `desc:"the description of the project"`
 
-	// the version of the app/library
-	Version string `desc:"the version of the app/library"`
+	// the version of the project
+	Version string `desc:"the version of the project"`
 
-	// the type of the package (app/library)
-	Type Types `desc:"the type of the package (app/library)"`
+	// the type of the project (app/library)
+	Type Types `desc:"the type of the project (app/library)"`
 
 	// the configuration options for the build command
 	Build Build `desc:"the configuration options for the build command"`
