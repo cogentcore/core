@@ -13,7 +13,8 @@ import (
 	"goki.dev/goki/config"
 )
 
-// Log prints the logs from your app running on the given operating system (android or ios) to the terminal
+// Log prints the logs from your app running on the
+// config operating system (android or ios) to the terminal
 func Log(c *config.Config) error {
 	if c.Log.Target == "ios" {
 		return errors.New("ios not supported yet")

@@ -4,6 +4,11 @@
 
 package packman
 
+import (
+	"os/exec"
+	"strings"
+)
+
 // Command is a command that can be used for installing and updating a package
 type Command struct {
 	Name string
@@ -12,3 +17,11 @@ type Command struct {
 
 // Commands contains a set of commands for each operating system
 type Commands map[string][]*Command
+
+// CmdString returns a string representation of the given command.
+func CmdString(cmd *exec.Cmd) string {
+	if cmd.Args == nil {
+		return "<nil>"
+	}
+	return strings.Join(cmd.Args, " ")
+}

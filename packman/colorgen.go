@@ -163,11 +163,11 @@ func addTempCustomColors(colors []ColorSchemeColor) []ColorSchemeColor {
 
 // GenerateColorScheme generates a Go color scheme
 // declaration file from a Material Theme Builder
-// Android Views XML file located at the given source
+// Android Views XML file located at the config source
 // file path. It stores the resulting Go file
-// at the given destination file path. The generated
-// file is part of the given package and puts the
-// given comment as the comment for the ColorSchemes variable.
+// at the config destination file path. The generated
+// file is part of the config package and puts the
+// config comment as the comment for the ColorSchemes variable.
 func GenerateColorScheme(c *config.Config) error {
 	d, err := GetColorSchemeData(c.Colorgen.Source)
 	if err != nil {

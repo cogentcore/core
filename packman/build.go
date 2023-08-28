@@ -15,7 +15,7 @@ import (
 )
 
 // Build builds an executable for the package
-// at the given path for the given platforms
+// at the config path for the config platforms.
 func Build(c *config.Config) error {
 	if len(c.Build.Platform) == 0 {
 		return errors.New("build: expected at least 1 platform")
@@ -91,19 +91,4 @@ func buildMobile(pkgPath string, osName string, archs []string) error {
 	}
 	fmt.Println(string(output))
 	return nil
-}
-
-// CmdString returns a string representation of the given command.
-func CmdString(cmd *exec.Cmd) string {
-	if cmd.Args == nil {
-		return "nil"
-	}
-	res := ""
-	for i, arg := range cmd.Args {
-		res += arg
-		if i != len(cmd.Args)-1 {
-			res += " "
-		}
-	}
-	return res
 }

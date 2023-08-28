@@ -16,7 +16,9 @@ import (
 	"goki.dev/goki/config"
 )
 
-// Install installs the package with the given ID by looking for it in the list of supported packages
+// Install installs the package the config ID
+// by looking for it in the list of supported packages.
+// If the config ID is a filepath, it calls [InstallLocal] instead.
 func Install(c *config.Config) error {
 	if c.Install.Package == "." || c.Install.Package == ".." || strings.Contains(c.Install.Package, "/") {
 		return InstallLocal(c)
@@ -33,7 +35,7 @@ func Install(c *config.Config) error {
 	return fmt.Errorf("error: could not find package %s", c.Install.Package)
 }
 
-// InstallPackage installs the given package
+// InstallPackage installs the given package object.
 func InstallPackage(pkg Package) error {
 	fmt.Println("Installing", pkg.Name)
 	commands, ok := pkg.InstallCommands[runtime.GOOS]
@@ -52,7 +54,8 @@ func InstallPackage(pkg Package) error {
 	return nil
 }
 
-// InstallLocal installs a local package from the filesystem on the user's device for the given operating systems
+// InstallLocal installs a local package from the filesystem
+// on the user's device for the config target operating systems.
 func InstallLocal(c *config.Config) error {
 	for _, os := range c.Install.Target {
 		err := config.OSSupported(os)
