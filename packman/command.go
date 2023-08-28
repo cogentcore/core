@@ -25,3 +25,12 @@ func CmdString(cmd *exec.Cmd) string {
 	}
 	return strings.Join(cmd.Args, " ")
 }
+
+// ArgsString returns a string representation of the given
+// command arguments.
+func ArgsString(args []string) string {
+	if args == nil {
+		return "<nil>"
+	}
+	return strings.Join(args, " ")
+}

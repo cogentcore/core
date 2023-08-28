@@ -36,6 +36,9 @@ type Config struct {
 
 	// the configuration options for the log command
 	Log Log `desc:"the configuration options for the log command"`
+
+	// the configuration options for the release command
+	Release Release `desc:"the configuration options for the release command"`
 }
 
 // Build contains the configuration options
@@ -89,4 +92,10 @@ type Log struct {
 
 	// messages not generated from your app equal to or above this log level will be shown
 	All string `desc:"messages not generated from your app equal to or above this log level will be shown"`
+}
+
+type Release struct {
+
+	// the Go file to store version information in
+	VersionFile string `desc:"the Go file to store version information in"`
 }
