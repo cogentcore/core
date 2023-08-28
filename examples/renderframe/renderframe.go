@@ -16,7 +16,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/goki/gi/gi"
 	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
 
@@ -202,7 +201,7 @@ func main() {
 			sy.MemCmdEndSubmitWaitFree()
 			gimg, err := fr.Render.Grab.DevGoImage()
 			if err == nil {
-				gi.SaveImage("render.png", gimg)
+				vgpu.SaveImage("render.png", gimg)
 			} else {
 				fmt.Printf("image grab err: %s\n", err)
 			}

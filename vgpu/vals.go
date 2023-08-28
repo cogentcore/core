@@ -230,7 +230,7 @@ func SaveImage(path string, im image.Image) error {
 	} else if ext == ".jpg" || ext == ".jpeg" {
 		return jpeg.Encode(file, im, &jpeg.Options{Quality: 90})
 	} else {
-		return fmt.Errorf("gi.SaveImage: extension: %s not recognized -- only .png and .jpg / jpeg supported", ext)
+		return fmt.Errorf("vgpu.SaveImage: extension: %s not recognized -- only .png and .jpg / jpeg supported", ext)
 	}
 }
 
