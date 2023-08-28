@@ -8,7 +8,7 @@ import (
 	"errors"
 	"strings"
 
-	"goki.dev/ki/ints"
+	"goki.dev/ki/v2/ints"
 )
 
 // AllErrors returns an err as a concatenation of errors (nil if none).

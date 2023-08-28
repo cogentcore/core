@@ -1,7 +1,7 @@
 # kit
 
-[![Go Report Card](https://goreportcard.com/badge/goki.dev/ki/kit)](https://goreportcard.com/report/goki.dev/ki/kit)
-[![GoDoc](https://godoc.org/goki.dev/ki/kit?status.svg)](http://godoc.org/goki.dev/ki/kit)
+[![Go Report Card](https://goreportcard.com/badge/goki.dev/ki/v2/kit)](https://goreportcard.com/report/goki.dev/ki/v2/kit)
+[![GoDoc](https://godoc.org/goki.dev/ki/v2/kit?status.svg)](http://godoc.org/goki.dev/ki/v2/kit)
 
 Package `kit` provides various reflect type functions for GoKi system (KiType = KiT = kit -- also a bit of a "kit" collection of low-level system functions), including:
 

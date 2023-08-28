@@ -19,10 +19,10 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
-// see https://goki.dev/ki/wiki/Naming for IO naming conventions
+// see https://goki.dev/ki/v2/wiki/Naming for IO naming conventions
 
 // TODO: switch to using Decode / Encode instead of
 // [Un]MarshalJSON which uses byte[] instead of io.Reader / Writer..

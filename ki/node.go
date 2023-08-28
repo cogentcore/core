@@ -18,8 +18,8 @@ import (
 	"strings"
 
 	"github.com/jinzhu/copier"
-	"goki.dev/ki/bitflag"
-	"goki.dev/ki/kit"
+	"goki.dev/ki/v2/bitflag"
+	"goki.dev/ki/v2/kit"
 )
 
 // The Node implements the Ki interface and provides the core functionality

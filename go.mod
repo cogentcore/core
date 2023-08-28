@@ -1,4 +1,4 @@
-module goki.dev/ki
+module goki.dev/ki/v2
 
 go 1.18
 

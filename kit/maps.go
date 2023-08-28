@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/ki/floats"
-	"goki.dev/ki/ints"
+	"goki.dev/ki/v2/floats"
+	"goki.dev/ki/v2/ints"
 )
 
 // This file contains helpful functions for dealing with maps, in the reflect

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"goki.dev/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 type NodeEmbed struct {

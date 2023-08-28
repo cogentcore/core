@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sync"
 
-	"goki.dev/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // note: Started this code based on: github.com/tucnak/meta/

@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"goki.dev/ki/bitflag"
+	"goki.dev/ki/v2/bitflag"
 )
 
 func TestEnums(t *testing.T) {

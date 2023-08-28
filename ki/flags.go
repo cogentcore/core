@@ -4,7 +4,7 @@
 
 package ki
 
-import "goki.dev/ki/kit"
+import "goki.dev/ki/v2/kit"
 
 // Flags are bit flags for efficient core state of nodes -- see bitflag
 // package for using these ordinal values to manipulate bit flag field.

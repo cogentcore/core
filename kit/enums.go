@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"strings"
 
-	"goki.dev/ki/bitflag"
+	"goki.dev/ki/v2/bitflag"
 )
 
 // design notes: for methods that return string, not passing error b/c you can
