@@ -1,4 +1,4 @@
-module github.com/goki/vgpu
+module goki.dev/vgpu
 
 go 1.18
 

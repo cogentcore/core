@@ -10,7 +10,7 @@ import (
 	"runtime"
 
 	"github.com/goki/ki/ints"
-	"github.com/goki/vgpu/vgpu"
+	"goki.dev/vgpu/vgpu"
 )
 
 func init() {

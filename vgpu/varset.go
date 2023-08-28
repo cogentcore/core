@@ -10,8 +10,8 @@ import (
 	"unsafe"
 
 	"github.com/goki/ki/ints"
-	"github.com/goki/vgpu/szalloc"
 	vk "github.com/goki/vulkan"
+	"goki.dev/vgpu/szalloc"
 )
 
 // maxPerStageDescriptorSamplers is only 16 on mac -- this is the relevant limit on textures!

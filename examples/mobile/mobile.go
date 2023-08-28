@@ -10,8 +10,8 @@ import (
 	"github.com/goki/mobile/event/paint"
 	"github.com/goki/mobile/event/size"
 	"github.com/goki/mobile/event/touch"
-	"github.com/goki/vgpu/vgpu"
 	vk "github.com/goki/vulkan"
+	"goki.dev/vgpu/vgpu"
 )
 
 //go:embed *.spv

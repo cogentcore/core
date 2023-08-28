@@ -1,6 +1,6 @@
 # vGPU: Vulkan GPU Framework for Graphics and Compute, in Go
 
-[![GoDocs for vGPU](https://pkg.go.dev/badge/github.com/goki/vgpu.svg)](https://pkg.go.dev/github.com/goki/vgpu)
+[![GoDocs for vGPU](https://pkg.go.dev/badge/goki.dev/vgpu.svg)](https://pkg.go.dev/goki.dev/vgpu)
 
 **Mac Installation prerequisite:** https://vulkan.lunarg.com/sdk/home -- download the Vulkan SDK installer for the mac.  Unfortunately there does not appear to be a full version of this on homebrew -- the `molten-vk` package is not enough by itself.
 
@@ -28,9 +28,9 @@ The following environment variables can be set to specifically select a particul
 
 # vPhong and vShape
 
-The [vPhong](https://github.com/goki/vgpu/tree/main/vphong) package provides a complete rendering implementation with different pipelines for different materials, and support for 4 different types of light sources based on the classic Blinn-Phong lighting model.  See the `examples/phong` example for how to use it.  It does not assume any kind of organization of the rendering elements, and just provides name and index-based access to all the resources needed to render a scene.
+The [vPhong](https://goki.dev/vgpu/tree/main/vphong) package provides a complete rendering implementation with different pipelines for different materials, and support for 4 different types of light sources based on the classic Blinn-Phong lighting model.  See the `examples/phong` example for how to use it.  It does not assume any kind of organization of the rendering elements, and just provides name and index-based access to all the resources needed to render a scene.
 
-[vShape](https://github.com/goki/vgpu/tree/main/vshape) generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by vgpu.  It only has a dependency on the [mat32](https://github.com/goki/mat32) package and could be used for anything.
+[vShape](https://goki.dev/vgpu/tree/main/vshape) generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by vgpu.  It only has a dependency on the [mat32](https://github.com/goki/mat32) package and could be used for anything.
 
 # Basic Elements and Organization
 

@@ -18,8 +18,8 @@ import (
 	"unsafe"
 
 	"github.com/goki/ki/kit"
-	"github.com/goki/vgpu/vkinit"
 	vk "github.com/goki/vulkan"
+	"goki.dev/vgpu/vkinit"
 )
 
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/

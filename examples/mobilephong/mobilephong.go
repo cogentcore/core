@@ -17,10 +17,10 @@ import (
 	"github.com/goki/mobile/event/paint"
 	"github.com/goki/mobile/event/size"
 	"github.com/goki/mobile/event/touch"
-	"github.com/goki/vgpu/vgpu"
-	"github.com/goki/vgpu/vphong"
-	"github.com/goki/vgpu/vshape"
 	vk "github.com/goki/vulkan"
+	"goki.dev/vgpu/vgpu"
+	"goki.dev/vgpu/vphong"
+	"goki.dev/vgpu/vshape"
 )
 
 //go:embed images/*.png

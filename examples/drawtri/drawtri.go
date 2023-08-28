@@ -13,7 +13,7 @@ import (
 	vk "github.com/goki/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/goki/vgpu/vgpu"
+	"goki.dev/vgpu/vgpu"
 )
 
 func init() {

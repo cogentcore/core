@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/mat32"
-	"github.com/goki/vgpu/vgpu"
+	"goki.dev/vgpu/vgpu"
 )
 
 func init() {

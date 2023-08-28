@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/goki/kigen/ordmap"
-	"github.com/goki/vgpu/vgpu"
+	"goki.dev/vgpu/vgpu"
 )
 
 // MaxLights is upper limit on number of any given type of light

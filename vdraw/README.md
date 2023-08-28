@@ -1,6 +1,6 @@
 # vDraw: vGPU version of Go image/draw compositing functionality
 
-[![GoDocs for ReComp](https://pkg.go.dev/badge/github.com/goki/vgpu.svg)](https://pkg.go.dev/github.com/goki/vgpu/vdraw)
+[![GoDocs for ReComp](https://pkg.go.dev/badge/goki.dev/vgpu.svg)](https://pkg.go.dev/goki.dev/vgpu/vdraw)
 
 This package uses [Alpha Compositing](https://en.wikipedia.org/wiki/Alpha_compositing) to render rectangular regions onto a render target, using vGPU, consistent with the [image/draw](https://pkg.go.dev/image/draw) package in Go.  Although "draw" is not a great name for this functionality, it is hard to come up with a better one that isn't crazy long, so we're adopting it -- at least it is familiar.
 
