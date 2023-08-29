@@ -68,7 +68,7 @@ func VersionFileString(c *config.Config) (string, error) {
 	date := time.Now().UTC().Format("2006-01-02 15:04")
 	b.WriteString("\t// VersionDate is the date-time of the release in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')\n")
 	b.WriteString("\tVersionDate = \"" + date + "\"\n")
-	b.WriteString(")\n\n")
+	b.WriteString(")\n")
 	return b.String(), nil
 }
 
