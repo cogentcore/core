@@ -98,4 +98,7 @@ type Release struct {
 
 	// the Go file to store version information in
 	VersionFile string `desc:"the Go file to store version information in"`
+
+	// the Go package in which the version file will be stored
+	Package string `desc:"the Go package in which the version file will be stored"`
 }
