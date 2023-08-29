@@ -27,3 +27,4 @@ Type = "TypeLibrary"
 
 [Release]
   VersionFile = "version.go"
+  Package = "main"

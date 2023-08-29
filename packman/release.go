@@ -63,7 +63,7 @@ func VersionFileString(c *config.Config) (string, error) {
 	}
 	b.WriteString("\tGitCommit = \"" + strings.TrimSuffix(string(res), "\n") + "\" // the commit just before the release\n")
 
-	date := time.Now().Format("2006-01-02 15:04")
+	date := time.Now().UTC().Format("2006-01-02 15:04")
 	b.WriteString("\tVersionDate = \"" + date + "\" // the date-time of the release in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')\n")
 	b.WriteString(")\n\n")
 	return b.String(), nil
@@ -73,13 +73,13 @@ func VersionFileString(c *config.Config) (string, error) {
 // adds a version tag, and pushes the code and tags
 // based on the given config info.
 func PushGitRelease(c *config.Config) error {
-	cc := exec.Command("git", "commit", "-am", `"`+c.Version+"release; "+c.Release.VersionFile+` updated"`)
+	cc := exec.Command("git", "commit", "-am", c.Version+" release; "+c.Release.VersionFile+" updated")
 	out, err := cc.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("error commiting release commit: %w (%s)", err, out)
 	}
 
-	tc := exec.Command("git", "tag", "-a", c.Version, "-m", `"`+c.Version+` release"`)
+	tc := exec.Command("git", "tag", "-a", c.Version, "-m", c.Version+" release")
 	out, err = tc.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("error tagging release: %w (%s)", err, out)
