@@ -14,7 +14,7 @@ import (
 	"goki.dev/goki/config"
 )
 
-// Release releases the config app/library
+// Release releases the config project
 // by calling [ReleaseApp] if it is an app
 // and [ReleaseLibrary] if it is a library.
 func Release(c *config.Config) error {
