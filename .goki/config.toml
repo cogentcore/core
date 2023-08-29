@@ -1,6 +1,7 @@
 Name = "goki"
 Desc = "Command line and GUI tools for developing apps and libraries using the GoKi framework."
-Version = "v0.0.0"
+Version = "v0.1.0"
+Type = "TypeLibrary"
 
 [Build]
   Package = "."
@@ -23,3 +24,6 @@ Version = "v0.0.0"
   Target = "android"
   Keep = false
   All = ""
+
+[Release]
+  VersionFile = "version.go"
