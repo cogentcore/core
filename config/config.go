@@ -63,7 +63,7 @@ type Colorgen struct {
 	Output string `desc:"the output file to store the resulting Go file in"`
 
 	// the package in which the color schemes will be used
-	Package string `desc:"the package in which the color schemes will be used"`
+	Package string `nest:"+" desc:"the package in which the color schemes will be used"`
 
 	// the comment for the color schemes variable
 	Comment string `desc:"the comment for the color schemes variable"`
@@ -74,7 +74,7 @@ type Colorgen struct {
 type Install struct {
 
 	// the name/path of the package to install
-	Package string `desc:"the name/path of the package to install"`
+	Package string `nest:"+" desc:"the name/path of the package to install"`
 
 	// the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)
 	Target []string `desc:"the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)"`
@@ -85,7 +85,7 @@ type Install struct {
 type Log struct {
 
 	// the target platform to view the logs for (ios or android)
-	Target string `desc:"the target platform to view the logs for (ios or android)"`
+	Target string `nest:"+" desc:"the target platform to view the logs for (ios or android)"`
 
 	// whether to keep the previous log messages or clear them
 	Keep bool `desc:"whether to keep the previous log messages or clear them"`
@@ -100,5 +100,5 @@ type Release struct {
 	VersionFile string `desc:"the Go file to store version information in"`
 
 	// the Go package in which the version file will be stored
-	Package string `desc:"the Go package in which the version file will be stored"`
+	Package string `nest:"+" desc:"the Go package in which the version file will be stored"`
 }
