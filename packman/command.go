@@ -26,7 +26,7 @@ type Commands map[string][]*Command
 func RunCmd(cmd *exec.Cmd) ([]byte, error) {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("error running command: %w; command returned output: %s", err, out)
+		return nil, fmt.Errorf("error running command: %w; command returned output:\n%s", err, out)
 	}
 	return out, nil
 }

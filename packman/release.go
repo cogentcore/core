@@ -73,8 +73,14 @@ func VersionFileString(c *config.Config) (string, error) {
 // adds a version tag, and pushes the code and tags
 // based on the given config info.
 func PushGitRelease(c *config.Config) error {
+	ac := exec.Command("git", "add", c.Release.VersionFile)
+	_, err := RunCmd(ac)
+	if err != nil {
+		return fmt.Errorf("error adding version file: %w", err)
+	}
+
 	cc := exec.Command("git", "commit", "-am", c.Version+" release; "+c.Release.VersionFile+" updated")
-	_, err := RunCmd(cc)
+	_, err = RunCmd(cc)
 	if err != nil {
 		return fmt.Errorf("error commiting release commit: %w", err)
 	}
