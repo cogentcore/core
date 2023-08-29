@@ -4,10 +4,10 @@ package main
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.1.7"
+	Version = "v0.1.8"
 	// GitCommit is the commit just before the release
-	GitCommit = "daba6b8"
+	GitCommit = "f51d765"
 	// VersionDate is the date-time of the release in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-08-29 00:57"
+	VersionDate = "2023-08-29 01:01"
 )
 
