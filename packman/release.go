@@ -74,27 +74,27 @@ func VersionFileString(c *config.Config) (string, error) {
 // based on the given config info.
 func PushGitRelease(c *config.Config) error {
 	cc := exec.Command("git", "commit", "-am", c.Version+" release; "+c.Release.VersionFile+" updated")
-	out, err := cc.CombinedOutput()
+	_, err := RunCmd(cc)
 	if err != nil {
-		return fmt.Errorf("error commiting release commit: %w (%s)", err, out)
+		return fmt.Errorf("error commiting release commit: %w", err)
 	}
 
 	tc := exec.Command("git", "tag", "-a", c.Version, "-m", c.Version+" release")
-	out, err = tc.CombinedOutput()
+	_, err = RunCmd(tc)
 	if err != nil {
-		return fmt.Errorf("error tagging release: %w (%s)", err, out)
+		return fmt.Errorf("error tagging release: %w", err)
 	}
 
 	pc := exec.Command("git", "push")
-	out, err = pc.CombinedOutput()
+	_, err = RunCmd(pc)
 	if err != nil {
-		return fmt.Errorf("error pushing commit: %w (%s)", err, out)
+		return fmt.Errorf("error pushing commit: %w", err)
 	}
 
 	ptc := exec.Command("git", "push", "origin", "--tags")
-	out, err = ptc.CombinedOutput()
+	_, err = RunCmd(ptc)
 	if err != nil {
-		return fmt.Errorf("error pushing tags: %w (%s)", err, out)
+		return fmt.Errorf("error pushing tags: %w", err)
 	}
 
 	return nil

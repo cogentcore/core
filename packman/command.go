@@ -5,6 +5,7 @@
 package packman
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -17,6 +18,18 @@ type Command struct {
 
 // Commands contains a set of commands for each operating system
 type Commands map[string][]*Command
+
+// RunCmd runs the given command and returns the combined output
+// and any error encountered. If there is an error running the
+// command, RunCmd wraps it and includes the output of the command
+// in the resulting error message.
+func RunCmd(cmd *exec.Cmd) ([]byte, error) {
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("error running command: %w; command returned output: %s", err, out)
+	}
+	return out, nil
+}
 
 // CmdString returns a string representation of the given command.
 func CmdString(cmd *exec.Cmd) string {

@@ -22,9 +22,9 @@ func Log(c *config.Config) error {
 	if !c.Log.Keep {
 		cmd := exec.Command("adb", "logcat", "-c")
 		fmt.Println(CmdString(cmd))
-		output, err := cmd.CombinedOutput()
+		output, err := RunCmd(cmd)
 		if err != nil {
-			return fmt.Errorf("error clearing logs: %w, %s", err, string(output))
+			return fmt.Errorf("error clearing logs: %w", err)
 		}
 		fmt.Println(string(output))
 	}

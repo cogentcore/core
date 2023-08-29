@@ -65,9 +65,9 @@ func buildDesktop(pkgPath string, platform config.Platform) error {
 	cmd := exec.Command("go", "build", "-o", BuildPath(pkgPath), pkgPath)
 	cmd.Env = append(os.Environ(), "GOOS="+platform.OS, "GOARCH="+platform.Arch)
 	fmt.Println(CmdString(cmd))
-	output, err := cmd.CombinedOutput()
+	output, err := RunCmd(cmd)
 	if err != nil {
-		return fmt.Errorf("error building for platform %s/%s: %w, %s", platform.OS, platform.Arch, err, string(output))
+		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}
 	fmt.Println(string(output))
 	return nil
@@ -85,9 +85,9 @@ func buildMobile(pkgPath string, osName string, archs []string) error {
 	}
 	cmd := exec.Command("gomobile", "build", "-o", filepath.Join(BuildPath(pkgPath), AppName(pkgPath)+".apk"), "-target", target, pkgPath)
 	fmt.Println(CmdString(cmd))
-	output, err := cmd.CombinedOutput()
+	output, err := RunCmd(cmd)
 	if err != nil {
-		return fmt.Errorf("error building for platform %s/%v: %w, %s", osName, archs, err, string(output))
+		return fmt.Errorf("error building for platform %s/%v: %w", osName, archs, err)
 	}
 	fmt.Println(string(output))
 	return nil

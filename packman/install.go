@@ -44,7 +44,7 @@ func InstallPackage(pkg Package) error {
 	}
 	for _, command := range commands {
 		cmd := exec.Command(command.Name, command.Args...)
-		b, err := cmd.Output()
+		b, err := RunCmd(cmd)
 		if err != nil {
 			return fmt.Errorf("error installing %s: %w", pkg.Name, err)
 		}
@@ -87,9 +87,9 @@ func installLocalDesktop(pkgPath string, osName string) error {
 	cmd := exec.Command("go", "install", pkgPath)
 	cmd.Env = append(os.Environ(), "GOOS="+osName, "GOARCH="+runtime.GOARCH)
 	fmt.Println(CmdString(cmd))
-	output, err := cmd.CombinedOutput()
+	output, err := RunCmd(cmd)
 	if err != nil {
-		return fmt.Errorf("error installing on platform %s/%s: %w, %s", osName, runtime.GOARCH, err, string(output))
+		return fmt.Errorf("error installing on platform %s/%s: %w", osName, runtime.GOARCH, err)
 	}
 	fmt.Println(string(output))
 	return nil
@@ -108,9 +108,9 @@ func installLocalMobile(c *config.Config, osName string) error {
 	}
 	cmd := exec.Command("adb", "install", filepath.Join(BuildPath(c.Install.Package), AppName(c.Install.Package)+".apk"))
 	fmt.Println(CmdString(cmd))
-	output, err := cmd.CombinedOutput()
+	output, err := RunCmd(cmd)
 	if err != nil {
-		return fmt.Errorf("error installing on platform %s: %w, %s", osName, err, string(output))
+		return fmt.Errorf("error installing on platform %s: %w", osName, err)
 	}
 	fmt.Println(string(output))
 	return nil
