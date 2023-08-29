@@ -36,9 +36,13 @@ func ReleaseLibrary(c *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("error generating version file string: %w", err)
 	}
-	os.WriteFile(c.Release.VersionFile, []byte(str), 0666)
+	err = os.WriteFile(c.Release.VersionFile, []byte(str), 0666)
 	if err != nil {
 		return fmt.Errorf("error writing version string to version file: %w", err)
+	}
+	err = PushGitRelease(c)
+	if err != nil {
+		return fmt.Errorf("error pushing git release: %w", err)
 	}
 	return nil
 }
@@ -60,7 +64,38 @@ func VersionFileString(c *config.Config) (string, error) {
 	b.WriteString("\tGitCommit = \"" + string(res) + "\" // the commit just before the release\n")
 
 	date := time.Now().Format("2006-01-02 15:04")
-	b.WriteString("\tVersionDate = \"" + date + "\" // the date-time of the release in UTC (YYYY-MM-DD HH:MM)\n")
+	b.WriteString("\tVersionDate = \"" + date + "\" // the date-time of the release in UTC and the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04'\n")
 	b.WriteString(")\n\n")
 	return b.String(), nil
+}
+
+// PushGitRelease commits a release commit using Git,
+// adds a version tag, and pushes the code and tags
+// based on the given config info.
+func PushGitRelease(c *config.Config) error {
+	cc := exec.Command("git", "commit", "-am", `"`+c.Version+"release; "+c.Release.VersionFile+` updated"`)
+	err := cc.Run()
+	if err != nil {
+		return fmt.Errorf("error commiting release commit: %w", err)
+	}
+
+	tc := exec.Command("git", "tag", "-a", c.Version, "-m", `"`+c.Version+` release"`)
+	err = tc.Run()
+	if err != nil {
+		return fmt.Errorf("error tagging release: %w", err)
+	}
+
+	pc := exec.Command("git", "push")
+	err = pc.Run()
+	if err != nil {
+		return fmt.Errorf("error pushing commit: %w", err)
+	}
+
+	ptc := exec.Command("git", "push", "origin", "--tags")
+	err = ptc.Run()
+	if err != nil {
+		return fmt.Errorf("error pushing tags: %w", err)
+	}
+
+	return nil
 }
