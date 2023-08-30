@@ -41,7 +41,8 @@ var AppProps = ki.Props{
 }
 
 func main() {
-	grease.AppName = "Basic"
+	grease.AppName = "basic"
+	grease.AppTitle = "Basic"
 	grease.AppAbout = "Basic is a basic example application made with Grease."
 	err := grease.Run(&TheApp, "config.toml")
 	if err != nil {

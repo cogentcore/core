@@ -11,7 +11,6 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/ki/ki"
-	"github.com/iancoleman/strcase"
 	"goki.dev/grease"
 )
 
@@ -25,11 +24,10 @@ func GUI(app any) {
 }
 
 func mainrun(app any) {
-	kebab := strcase.ToKebab(grease.AppName)
-	gi.SetAppName(kebab)
+	gi.SetAppName(grease.AppName)
 	gi.SetAppAbout(grease.AppAbout)
 
-	win := gi.NewMainWindow(kebab, grease.AppName, 1024, 768)
+	win := gi.NewMainWindow(grease.AppName, grease.AppTitle, 1024, 768)
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 	mfr := win.SetMainFrame()

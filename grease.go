@@ -13,8 +13,12 @@ import (
 )
 
 var (
-	// AppName is the name of the Grease app
-	AppName string = "Grease"
+	// AppName is the internal name of the Grease app
+	// (typically in kebab-case) (see also [AppTitle])
+	AppName string = "grease"
+	// AppTitle is the user-visible name of the Grease app
+	// (typically in Title Case) (see also [AppName])
+	AppTitle string = "Grease"
 	// AppAbout is the description of the Grease app
 	AppAbout string = "Grease allows you to edit configuration information and run commands through a CLI and a GUI interface."
 )
