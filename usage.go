@@ -28,9 +28,9 @@ func Usage(app any) string {
 	b.WriteString("\n")
 
 	b.WriteString("The following flags are available. Flags are case-insensitive and\n")
-	b.WriteString("can be in CamelCase, snake_case, or kebab-case. Also, there can be\n")
+	b.WriteString("can be in kebab-case, snake_case, or CamelCase. Also, there can be\n")
 	b.WriteString("one or two leading dashes. Most flags can be used without nesting\n")
-	b.WriteString("paths (e.g. -target instead of -build.target)\n\n")
+	b.WriteString("paths (e.g. -target instead of -build-target)\n\n")
 
 	b.WriteString("-help or -h\n\tshow this usage message and exit\n")
 	b.WriteString("-config or -cfg\n\tthe filename to load configuration options from\n")
@@ -81,7 +81,7 @@ func FlagUsage(app any, path string, b *strings.Builder) {
 		if path != "" {
 			nm = path + "." + nm
 		}
-		b.WriteString(fmt.Sprintf("-%s\n", nm))
+		b.WriteString("-" + strcase.ToKebab(nm) + "\n")
 		desc, ok := f.Tag.Lookup("desc")
 		if ok && desc != "" {
 			b.WriteString("\t")
