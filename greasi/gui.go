@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package grease
+package greasi
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/giv"
 	"github.com/goki/ki/ki"
 	"github.com/iancoleman/strcase"
+	"goki.dev/grease"
 )
 
 // GUI starts the GUI for the given
@@ -24,11 +25,11 @@ func GUI(app any) {
 }
 
 func mainrun(app any) {
-	kebab := strcase.ToKebab(AppName)
+	kebab := strcase.ToKebab(grease.AppName)
 	gi.SetAppName(kebab)
-	gi.SetAppAbout(AppAbout)
+	gi.SetAppAbout(grease.AppAbout)
 
-	win := gi.NewMainWindow(kebab, AppName, 1024, 768)
+	win := gi.NewMainWindow(kebab, grease.AppName, 1024, 768)
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 	mfr := win.SetMainFrame()
@@ -58,7 +59,7 @@ func mainrun(app any) {
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Println("File:Save menu action triggered")
-			Save(app, ConfigFile)
+			grease.Save(app, grease.ConfigFile)
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {

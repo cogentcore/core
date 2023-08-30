@@ -20,7 +20,8 @@ var (
 )
 
 // Run runs the given app with the given default
-// configuration file paths. The app should be
+// configuration file paths. It does not run the
+// GUI; see [greasi.Run] for that. The app should be
 // a pointer, and configuration options should
 // be defined as fields on the app type. Also,
 // commands should be defined as methods on the
@@ -35,10 +36,6 @@ func Run(app any, defaultFile ...string) error {
 	leftovers, err := Config(app, defaultFile...)
 	if err != nil {
 		return fmt.Errorf("error configuring app: %w", err)
-	}
-	if len(leftovers) == 0 {
-		GUI(app)
-		return nil
 	}
 	cmd := leftovers[0]
 	err = RunCommand(app, cmd)
