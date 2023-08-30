@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gear
+package grease
 
 import (
 	"fmt"
@@ -13,10 +13,10 @@ import (
 )
 
 var (
-	// AppName is the name of the Gear app
-	AppName string = "Gear"
-	// AppAbout is the description of the Gear app
-	AppAbout string = "Gear allows you to edit configuration information and run commands through a CLI and a GUI interface."
+	// AppName is the name of the Grease app
+	AppName string = "Grease"
+	// AppAbout is the description of the Grease app
+	AppAbout string = "Grease allows you to edit configuration information and run commands through a CLI and a GUI interface."
 )
 
 // Run runs the given app with the given default

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gear
+package grease
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 )
 
 // GUI starts the GUI for the given
-// Gear app, which must be passed as
+// Grease app, which must be passed as
 // a pointer.
 func GUI(app any) {
 	gimain.Main(func() {

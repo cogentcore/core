@@ -1,4 +1,4 @@
-module goki.dev/gear
+module goki.dev/grease
 
 go 1.18
 

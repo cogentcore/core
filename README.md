@@ -1,20 +1,20 @@
-# gear
+# grease
 
-Package gear generates powerful CLIs and GUIs from simple struct types. If an acronym is required, how about: "Gogi-based Easy Arrangement of Requirements."
+Package grease generates powerful CLIs and GUIs from simple struct types. If an acronym is required, how about: "Gogi-based Easy Arrangement of Requirements."
 
-Docs: [GoDoc](https://pkg.go.dev/github.com/emer/emergent/gear)
+Docs: [GoDoc](https://pkg.go.dev/github.com/emer/emergent/grease)
 
-`gear` provides methods to set values on a `Config` struct through a (TOML) config file or command-line args (`flags` in Go terminology), with support for setting Network params and values on any other struct as well (e.g., an Env to be constructed later in a ConfigEnv method).
+`grease` provides methods to set values on a `Config` struct through a (TOML) config file or command-line args (`flags` in Go terminology), with support for setting Network params and values on any other struct as well (e.g., an Env to be constructed later in a ConfigEnv method).
 
 * Standard usage:
     + `cfg := &ss.Config`
     + `cfg.Defaults()` -- sets hard-coded defaults -- user should define and call this method first.
     + It is better to use the `def:` field tag however because it then shows in `-h` or `--help` usage and in the [GoGi](https://github.com/goki/gi) GUI.  See [Default Tags](#def_default_tags) for how to specify def values for more complex types.
-    + `gear.Config(cfg, "config.toml")` -- sets config values according to the standard order, with given file name specifying the default config file name.
+    + `grease.Config(cfg, "config.toml")` -- sets config values according to the standard order, with given file name specifying the default config file name.
 
 * Has support for nested `Include` paths, which are processed in the natural deepest-first order. The processed `Config` struct field will contain a list of all such files processed.  Config must implement the `IncludesPtr() *[]string` method which satisfies the `Includer` interface, and returns a pointer to an `Includes []string` field containing a list of config files to include.  The default `IncludePaths` includes current dir (`.`) and `configs` directory, which is recommended location to store different configs.
 
-* Order of setting in `gear.Config`:
+* Order of setting in `grease.Config`:
     + Apply any `def:` field tag default values.
     + Look for `--config`, `--cfg` arg, specifying config file(s) on the command line (comma separated if multiple, with no spaces).
     + Fall back on default config file name passed to `Config` function, if arg not found.
@@ -45,7 +45,7 @@ Docs: [GoDoc](https://pkg.go.dev/github.com/emer/emergent/gear)
 
 # `def` Default Tags
 
-The [GoGi](https://github.com/goki/gi) GUI processes `def:"value"` struct tags to highlight values that are not at their defaults.  gear uses these same tags to auto-initialize fields as well, ensuring that the tag and the actual initial value are the same.  The value for strings or numbers is just the string representation.  For more complex types, here ar some examples:
+The [GoGi](https://github.com/goki/gi) GUI processes `def:"value"` struct tags to highlight values that are not at their defaults.  grease uses these same tags to auto-initialize fields as well, ensuring that the tag and the actual initial value are the same.  The value for strings or numbers is just the string representation.  For more complex types, here ar some examples:
 
 * `struct`: specify using standard Go literal expression as a string, with single-quotes `'` used instead of double-quotes around strings, such as the name of the fields:
     + `evec.Vec2i`: `def:"{'X':10,'Y':10}"`

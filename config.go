@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gear
+package grease
 
 import (
 	"errors"
@@ -76,7 +76,7 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 	if ConfigFile == "" {
 		nd := len(defaultFile)
 		if nd == 0 {
-			err = errors.New("gear.Config: no config file or defaultFile specified")
+			err = errors.New("grease.Config: no config file or defaultFile specified")
 			return nil, err
 		}
 		for _, fn := range defaultFile {
@@ -87,7 +87,7 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 			}
 		}
 		if ConfigFile == "" {
-			err = fmt.Errorf("gear.Config: none of the specified default config files exist: %v", defaultFile)
+			err = fmt.Errorf("grease.Config: none of the specified default config files exist: %v", defaultFile)
 			return nil, err
 		}
 	}

@@ -10,7 +10,7 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"goki.dev/gear"
+	"goki.dev/grease"
 )
 
 type App struct {
@@ -41,9 +41,9 @@ var AppProps = ki.Props{
 }
 
 func main() {
-	gear.AppName = "Basic"
-	gear.AppAbout = "Basic is a basic example application made with Gear."
-	err := gear.Run(&TheApp, "config.toml")
+	grease.AppName = "Basic"
+	grease.AppAbout = "Basic is a basic example application made with Grease."
+	err := grease.Run(&TheApp, "config.toml")
 	if err != nil {
 		fmt.Println(err)
 	}
