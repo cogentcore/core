@@ -1,6 +1,6 @@
 # grease
 
-Package grease generates powerful CLIs and GUIs from simple struct types. If an acronym is required, how about: "Gogi-based Easy Arrangement of Requirements."
+Package grease generates powerful CLIs and GUIs from simple struct types. It makes everything run smoothly; it is Go Run with EASE (GREASE).
 
 Docs: [GoDoc](https://pkg.go.dev/github.com/emer/emergent/grease)
 
