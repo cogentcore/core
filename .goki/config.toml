@@ -1,6 +1,6 @@
 Name = "grease"
 Desc = "Package grease generates powerful CLIs and GUIs from simple struct types. It makes everything run smoothly; it is Go Run with EASE (GREASE)."
-Version = "v0.1.0"
+Version = "v0.1.1"
 Type = "TypeLibrary"
 
 [Build]
@@ -27,4 +27,4 @@ Type = "TypeLibrary"
 
 [Release]
   VersionFile = "version.go"
-  Package = "main"
+  Package = "grease"
