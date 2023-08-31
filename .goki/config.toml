@@ -1,0 +1,30 @@
+Name = "grease"
+Desc = "Package grease generates powerful CLIs and GUIs from simple struct types. It makes everything run smoothly; it is Go Run with EASE (GREASE)."
+Version = "v0.1.0"
+Type = "TypeLibrary"
+
+[Build]
+  Package = "."
+
+  [[Build.Platform]]
+    OS = ""
+    Arch = ""
+
+[Colorgen]
+  Source = "colors.xml"
+  Output = "colorgen.go"
+  Package = "goki"
+  Comment = "These are the color schemes"
+
+[Install]
+  Package = "."
+  Target = [""]
+
+[Log]
+  Target = "android"
+  Keep = false
+  All = ""
+
+[Release]
+  VersionFile = "version.go"
+  Package = "main"
