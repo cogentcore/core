@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/goki/gi v1.3.22
 	github.com/goki/ki v1.1.16
-	goki.dev/grease v0.8.1
+	goki.dev/grease v0.8.2
 )
 
 require (
