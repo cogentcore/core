@@ -1,4 +1,4 @@
-module goki.dev/grease/geasi
+module goki.dev/grease/greasi
 
 go 1.20
 
