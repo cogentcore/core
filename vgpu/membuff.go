@@ -8,8 +8,8 @@ import (
 	"log"
 	"unsafe"
 
-	"github.com/goki/ki/kit"
 	vk "github.com/goki/vulkan"
+	"goki.dev/ki/v2/kit"
 )
 
 // MemBuff is a memory buffer holding a particular type of memory

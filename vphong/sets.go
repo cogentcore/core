@@ -4,7 +4,7 @@
 
 package vphong
 
-import "github.com/goki/ki/kit"
+import "goki.dev/ki/v2/kit"
 
 // Sets are variable set numbers - must coordinate with System sets!
 type Sets int

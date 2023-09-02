@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/goki/ki/ints"
 	vk "github.com/goki/vulkan"
+	"goki.dev/ki/v2/ints"
 )
 
 // Var specifies a variable used in a pipeline, accessed in shader programs.

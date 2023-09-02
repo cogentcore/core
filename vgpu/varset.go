@@ -9,8 +9,8 @@ import (
 	"log"
 	"unsafe"
 
-	"github.com/goki/ki/ints"
 	vk "github.com/goki/vulkan"
+	"goki.dev/ki/v2/ints"
 	"goki.dev/vgpu/v2/szalloc"
 )
 

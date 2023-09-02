@@ -17,8 +17,8 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/goki/ki/kit"
 	vk "github.com/goki/vulkan"
+	"goki.dev/ki/v2/kit"
 	"goki.dev/vgpu/v2/vkinit"
 )
 

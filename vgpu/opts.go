@@ -7,8 +7,8 @@ package vgpu
 import (
 	"log"
 
-	"github.com/goki/ki/kit"
 	vk "github.com/goki/vulkan"
+	"goki.dev/ki/v2/kit"
 )
 
 // OptionStates are options for the physical device features

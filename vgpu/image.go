@@ -14,11 +14,11 @@ import (
 	"unsafe"
 
 	"github.com/anthonynsimon/bild/clone"
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
+	"goki.dev/ki/v2/bitflag"
+	"goki.dev/ki/v2/ints"
+	"goki.dev/ki/v2/kit"
 )
 
 // SRGBToLinearComp converts an sRGB rgb component to linear space (removes gamma).

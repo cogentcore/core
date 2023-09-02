@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"unsafe"
 
-	"github.com/goki/ki/ints"
+	"goki.dev/ki/v2/ints"
 	"goki.dev/vgpu/v2/vgpu"
 )
 

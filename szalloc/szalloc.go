@@ -9,8 +9,8 @@ import (
 	"image"
 	"math/rand"
 
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/sliceclone"
+	"goki.dev/ki/v2/ints"
+	"goki.dev/ki/v2/sliceclone"
 )
 
 // MaxIters is maximum number of iterations for adapting sizes to fit constraints
