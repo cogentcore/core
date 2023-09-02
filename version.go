@@ -4,9 +4,9 @@ package greasi
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.8.0"
-	// GitCommit is the commit just before the release
-	GitCommit = "1230023"
-	// VersionDate is the date-time of the release in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-09-02 17:23"
+	Version = "v0.8.1"
+	// GitCommit is the commit just before the latest version commit
+	GitCommit = "6c1a9fa"
+	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
+	VersionDate = "2023-09-02 22:49"
 )
