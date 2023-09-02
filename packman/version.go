@@ -49,11 +49,11 @@ func VersionFileString(c *config.Config) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error getting previous git commit: %w (%s)", err, res)
 	}
-	b.WriteString("\t// GitCommit is the commit just before the version commit\n")
+	b.WriteString("\t// GitCommit is the commit just before the latest version commit\n")
 	b.WriteString("\tGitCommit = \"" + strings.TrimSuffix(string(res), "\n") + "\"\n")
 
 	date := time.Now().UTC().Format("2006-01-02 15:04")
-	b.WriteString("\t// VersionDate is the date-time of the release in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')\n")
+	b.WriteString("\t// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')\n")
 	b.WriteString("\tVersionDate = \"" + date + "\"\n")
 	b.WriteString(")\n")
 	return b.String(), nil
