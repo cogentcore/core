@@ -1,5 +1,6 @@
+github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/Masterminds/vcs v1.13.3 h1:IIA2aBdXvfbIM+yl/eTnL4hb1XwdpvuQLglAix1gweE=
 github.com/Masterminds/vcs v1.13.3/go.mod h1:TiE7xuEjl1N4j016moRd6vezp6e6Lz23gypeXfzXeW8=
-github.com/goki/ki v1.1.5 h1:rna/vojrgCkpXt71bL6x9j8g4VtQEyTPwFwmWREPo2k=
-github.com/goki/ki v1.1.5/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
-github.com/jinzhu/copier v0.3.2/go.mod h1:24xnZezI2Yqac9J61UC6/dG/k76ttpq0DdJI3QmUvro=
+github.com/jinzhu/copier v0.4.0/go.mod h1:DfbEm0FYsaqBcKcFuvmOZb218JkPGtvSHsKg8S8hyyg=
+goki.dev/ki/v2 v2.0.0-dev0.0.3 h1:kKjKGimERUmSKTprPaU0B1uU0QkHJ87vKlEY5JchhZw=
+goki.dev/ki/v2 v2.0.0-dev0.0.3/go.mod h1:PQh0iX2Z3BFFcJrOtykJVfFmjM5h4qZLpCP9AKZboy0=

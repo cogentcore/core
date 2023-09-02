@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // Files is a map used for storing files in a repository along with their status

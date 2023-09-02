@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/Masterminds/vcs"
-	"github.com/goki/ki/dirs"
+	"goki.dev/ki/v2/dirs"
 )
 
 var (

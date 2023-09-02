@@ -4,5 +4,5 @@ go 1.13
 
 require (
 	github.com/Masterminds/vcs v1.13.3
-	github.com/goki/ki v1.1.5
+	goki.dev/ki/v2 v2.0.0-dev0.0.3
 )
