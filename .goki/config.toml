@@ -1,0 +1,25 @@
+Name = "ordmap"
+Desc = ""
+Version = "v0.5.0"
+Type = "TypeLibrary"
+
+[Build]
+  Package = "."
+
+[Colorgen]
+  Source = "colors.xml"
+  Output = "colorgen.go"
+  Package = "main"
+  Comment = ""
+
+[Install]
+  Package = "."
+
+[Log]
+  Target = "android"
+  Keep = false
+  All = "F"
+
+[Release]
+  VersionFile = "version.go"
+  Package = "ordmap"
