@@ -3,7 +3,8 @@
 package vci
 
 const (
-	Version     = "v1.0.1"
-	GitCommit   = "4bd82e3"          // the commit JUST BEFORE the release
-	VersionDate = "2022-04-03 21:36" // UTC
+	Version = "v1.0.2"
+	GitCommit = "351b5ae" // the commit JUST BEFORE the release
+	VersionDate = "2023-09-02 22:28" // UTC
 )
+
