@@ -3,8 +3,8 @@
 package gi
 
 import (
-	"goki.dev/colors"
 	"github.com/goki/matcolor"
+	"goki.dev/colors"
 )
 
 // ColorSchemes contains the color schemes used to style
