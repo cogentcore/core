@@ -25,10 +25,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/mat32"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi3d"
 	"goki.dev/ki/v2/dirs"
+	"goki.dev/mat32/v2"
 )
 
 // note: gimain imports "goki.dev/gi/v2/gi3d/io/obj" to get this code

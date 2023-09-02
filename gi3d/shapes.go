@@ -5,9 +5,9 @@
 package gi3d
 
 import (
-	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vshape"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 )
 
 // shapes define different standard mesh shapes

@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/goki/mat32"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/gist"
@@ -21,6 +20,7 @@ import (
 	"goki.dev/gi/v2/units"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 )
 
 // FileBrowse is a simple file browser / viewer / editor with a file tree and

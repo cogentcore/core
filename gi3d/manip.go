@@ -7,7 +7,6 @@ package gi3d
 import (
 	"image/color"
 
-	"github.com/goki/mat32"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/oswin"
@@ -16,6 +15,7 @@ import (
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 )
 
 // SelModes are selection modes for Scene

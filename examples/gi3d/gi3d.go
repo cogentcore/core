@@ -20,9 +20,9 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/icons"
 
-	"github.com/goki/mat32"
 	"goki.dev/gi/v2/units"
 	"goki.dev/ki/v2/ki"
+	"goki.dev/mat32/v2"
 )
 
 func main() {

@@ -19,9 +19,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/mat32"
 	"goki.dev/colors"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 
 	// "github.com/rcoreilly/rasterx"
 	"github.com/srwiley/rasterx"

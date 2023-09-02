@@ -7,7 +7,7 @@ package gi
 import (
 	"image"
 
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
 )
 
 const (

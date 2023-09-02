@@ -9,9 +9,9 @@ import (
 	"log"
 	"sync"
 
-	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
 	"github.com/srwiley/scanx"
+	"goki.dev/mat32/v2"
 )
 
 // The State holds all the current rendering state information used

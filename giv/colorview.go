@@ -11,7 +11,6 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/goki/mat32"
 	"goki.dev/cam/hsl"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
@@ -22,6 +21,7 @@ import (
 	"goki.dev/gi/v2/units"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 	"golang.org/x/image/colornames"
 )
 

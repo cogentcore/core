@@ -11,11 +11,11 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/goki/mat32"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/units"
 	"goki.dev/ki/v2/bitflag"
+	"goki.dev/mat32/v2"
 	"golang.org/x/image/font"
 )
 

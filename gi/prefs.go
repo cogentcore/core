@@ -14,7 +14,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/mat32"
 	"github.com/goki/matcolor"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/girl"
@@ -24,6 +23,7 @@ import (
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/langs/golang"
 )
 

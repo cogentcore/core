@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goki/mat32"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
@@ -18,6 +17,7 @@ import (
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/units"
 	"goki.dev/ki/v2/ki"
+	"goki.dev/mat32/v2"
 )
 
 func main() {

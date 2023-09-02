@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/mat32"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
@@ -19,6 +18,7 @@ import (
 	"goki.dev/ki/v2/ints"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

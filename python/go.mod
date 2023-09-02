@@ -12,7 +12,7 @@ require (
 	github.com/goki/go-difflib v1.2.1
 	goki.dev/ki/v2 v1.1.11
 	github.com/goki/kigen v1.0.2
-	github.com/goki/mat32 v1.0.14
+	goki.dev/mat32/v2 v1.0.14
 	goki.dev/pi/v2 v1.0.23
 	github.com/goki/vci v1.0.1
 	github.com/goki/vgpu v1.0.20

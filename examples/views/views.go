@@ -14,8 +14,8 @@ import (
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/units"
 
-	"github.com/goki/mat32"
 	"goki.dev/ki/v2/ki"
+	"goki.dev/mat32/v2"
 )
 
 var (

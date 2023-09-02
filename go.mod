@@ -16,7 +16,6 @@ require (
 	github.com/go-gl/mathgl v1.1.0
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
-	github.com/goki/mat32 v1.0.18
 	github.com/goki/matcolor v0.9.2
 	github.com/goki/mobile v0.0.0-20230707090321-193544ec5700
 	github.com/goki/prof v1.0.0
@@ -30,6 +29,7 @@ require (
 	goki.dev/cam v0.9.10
 	goki.dev/colors v0.8.7
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
+	goki.dev/mat32/v2 v2.0.0-dev0.0.0
 	goki.dev/ordmap v0.5.0
 	goki.dev/pi/v2 v2.0.0-dev0.0.1
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
@@ -48,12 +48,12 @@ require (
 	github.com/goki/cam v0.9.8 // indirect
 	github.com/goki/ki v1.1.11 // indirect
 	github.com/goki/kigen v1.0.2 // indirect
+	github.com/goki/mat32 v1.0.18 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44 // indirect
 	github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f // indirect
-	goki.dev/mat32/v2 v2.0.0-dev0.0.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect

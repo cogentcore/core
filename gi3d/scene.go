@@ -11,7 +11,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vgpu"
 	"github.com/goki/vgpu/vphong"
 	"goki.dev/colors"
@@ -23,6 +22,7 @@ import (
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 )
 

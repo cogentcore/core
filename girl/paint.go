@@ -11,11 +11,11 @@ import (
 	"math"
 
 	"github.com/anthonynsimon/bild/blur"
-	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/ki/v2/sliceclone"
+	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

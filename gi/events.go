@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/mat32"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/dnd"
 	"goki.dev/gi/v2/oswin/key"
 	"goki.dev/gi/v2/oswin/mimedata"
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/ki/v2/ki"
+	"goki.dev/mat32/v2"
 )
 
 // EventPris for different queues of event signals, processed in priority order

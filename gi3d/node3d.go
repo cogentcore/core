@@ -11,12 +11,12 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/goki/mat32"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 )
 
 // Node3D is the common interface for all gi3d scenegraph nodes

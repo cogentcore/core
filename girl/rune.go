@@ -8,8 +8,8 @@ import (
 	"errors"
 	"image/color"
 
-	"github.com/goki/mat32"
 	"goki.dev/gi/v2/gist"
+	"goki.dev/mat32/v2"
 	"golang.org/x/image/font"
 )
 

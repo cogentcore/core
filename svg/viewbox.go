@@ -5,9 +5,9 @@
 package svg
 
 import (
-	"github.com/goki/mat32"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

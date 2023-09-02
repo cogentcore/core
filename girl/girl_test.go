@@ -14,10 +14,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/goki/mat32"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/units"
+	"goki.dev/mat32/v2"
 )
 
 // TestPrefs are needed for setting gist.ThePrefs, for any text-based
