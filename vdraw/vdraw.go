@@ -8,7 +8,7 @@ import (
 	"image"
 	"sync"
 
-	"goki.dev/vgpu/vgpu"
+	"goki.dev/vgpu/v2/vgpu"
 )
 
 // Drawer is the vDraw implementation, which draws Textures

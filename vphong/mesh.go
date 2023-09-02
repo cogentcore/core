@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"github.com/goki/mat32"
-	"goki.dev/vgpu/vgpu"
+	"goki.dev/vgpu/v2/vgpu"
 )
 
 // Mesh records the number of elements in an indexed triangle mesh,

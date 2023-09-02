@@ -20,9 +20,9 @@ import (
 	vk "github.com/goki/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/vgpu/vgpu"
-	"goki.dev/vgpu/vphong"
-	"goki.dev/vgpu/vshape"
+	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/vgpu/v2/vphong"
+	"goki.dev/vgpu/v2/vshape"
 )
 
 func init() {

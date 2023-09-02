@@ -11,7 +11,7 @@ import (
 	"github.com/goki/mobile/event/size"
 	"github.com/goki/mobile/event/touch"
 	vk "github.com/goki/vulkan"
-	"goki.dev/vgpu/vgpu"
+	"goki.dev/vgpu/v2/vgpu"
 )
 
 //go:embed *.spv

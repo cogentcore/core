@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/goki/ki/indent"
-	"goki.dev/vgpu/szalloc"
+	"goki.dev/vgpu/v2/szalloc"
 
 	vk "github.com/goki/vulkan"
 )

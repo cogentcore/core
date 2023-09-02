@@ -13,7 +13,7 @@ import (
 
 	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
-	"goki.dev/vgpu/vgpu"
+	"goki.dev/vgpu/v2/vgpu"
 )
 
 // These draw.Op constants are provided so that users of this package don't

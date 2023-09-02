@@ -19,7 +19,7 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
-	"goki.dev/vgpu/szalloc"
+	"goki.dev/vgpu/v2/szalloc"
 )
 
 // Val represents a specific value of a Var variable.

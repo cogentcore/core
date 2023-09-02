@@ -18,9 +18,9 @@ import (
 	"github.com/goki/mobile/event/size"
 	"github.com/goki/mobile/event/touch"
 	vk "github.com/goki/vulkan"
-	"goki.dev/vgpu/vgpu"
-	"goki.dev/vgpu/vphong"
-	"goki.dev/vgpu/vshape"
+	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/vgpu/v2/vphong"
+	"goki.dev/vgpu/v2/vshape"
 )
 
 //go:embed images/*.png

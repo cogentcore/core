@@ -10,7 +10,7 @@ import (
 	"unsafe"
 
 	"github.com/goki/ki/ints"
-	"goki.dev/vgpu/vgpu"
+	"goki.dev/vgpu/v2/vgpu"
 )
 
 func init() {

@@ -19,7 +19,7 @@ import (
 
 	"github.com/goki/ki/kit"
 	vk "github.com/goki/vulkan"
-	"goki.dev/vgpu/vkinit"
+	"goki.dev/vgpu/v2/vkinit"
 )
 
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/

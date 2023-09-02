@@ -1,6 +1,6 @@
 # vGPU: emergent GPU hardware support
 
-[![GoDocs for vGPU](https://pkg.go.dev/badge/goki.dev/vgpu.svg)](https://pkg.go.dev/goki.dev/vgpu/vgpu)
+[![GoDocs for vGPU](https://pkg.go.dev/badge/goki.dev/vgpu/v2.svg)](https://pkg.go.dev/goki.dev/vgpu/v2/vgpu)
 
 
 Note: this is the sub-readme docs for the vgpu library itself, whereas overall repo project README can provide higher-level intro -- this is more for the "tech nitty-gritty".
