@@ -10,10 +10,10 @@ import (
 	"reflect"
 
 	"github.com/goki/ki/kit"
-	"github.com/goki/kigen/ordmap"
 	"github.com/goki/vgpu/vdraw"
 	"github.com/goki/vgpu/vgpu"
 	"goki.dev/gi/v2/oswin"
+	"goki.dev/ordmap"
 	"golang.org/x/exp/slices"
 	"golang.org/x/image/draw"
 )

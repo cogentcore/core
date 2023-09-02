@@ -1,6 +1,6 @@
 module goki.dev/gi/v2
 
-go 1.18
+go 1.21.0
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
@@ -17,7 +17,6 @@ require (
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
 	github.com/goki/ki v1.1.16
-	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.18
 	github.com/goki/matcolor v0.9.2
 	github.com/goki/mobile v0.0.0-20230707090321-193544ec5700
@@ -32,6 +31,7 @@ require (
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
 	goki.dev/cam v0.9.10
 	goki.dev/colors v0.8.7
+	goki.dev/ordmap v0.5.0
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 	golang.org/x/image v0.11.0
 	golang.org/x/net v0.14.0
@@ -46,6 +46,7 @@ require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/goki/cam v0.9.8 // indirect
+	github.com/goki/kigen v1.0.2 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
