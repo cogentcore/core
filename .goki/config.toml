@@ -1,0 +1,25 @@
+Name = "vgpu"
+Desc = ""
+Version = "v2.0.0-dev0.0.0"
+Type = "TypeLibrary"
+
+[Build]
+  Package = "."
+
+[Colorgen]
+  Source = "colors.xml"
+  Output = "colorgen.go"
+  Package = "main"
+  Comment = ""
+
+[Install]
+  Package = "."
+
+[Log]
+  Target = "android"
+  Keep = false
+  All = "F"
+
+[Release]
+  VersionFile = "vgpu/version.go"
+  Package = "vgpu"
