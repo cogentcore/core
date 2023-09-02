@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"unsafe"
 
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vgpu"
 )
 

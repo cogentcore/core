@@ -7,7 +7,7 @@ package szalloc
 import (
 	"image"
 
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
 )
 
 // Idxs contains the indexes where a given item image size is allocated

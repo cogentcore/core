@@ -7,7 +7,7 @@ package vphong
 import (
 	"unsafe"
 
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
 )
 
 // Number of different lights active

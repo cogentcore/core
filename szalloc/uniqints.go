@@ -8,8 +8,8 @@ import (
 	"image"
 	"sort"
 
-	"github.com/goki/mat32"
 	"goki.dev/ki/v2/ints"
+	"goki.dev/mat32/v2"
 )
 
 // UniqSortedInts returns the ints in sorted order with only unique vals

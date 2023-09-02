@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
+	"goki.dev/mat32/v2"
 	"goki.dev/mobile/app"
 	"goki.dev/mobile/event/lifecycle"
 	"goki.dev/mobile/event/paint"

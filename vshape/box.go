@@ -4,7 +4,7 @@
 
 package vshape
 
-import "github.com/goki/mat32"
+import "goki.dev/mat32/v2"
 
 // Box is a rectangular-shaped solid (cuboid)
 type Box struct {

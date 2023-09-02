@@ -15,10 +15,10 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
 	"goki.dev/ki/v2/bitflag"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/szalloc"
 )
 

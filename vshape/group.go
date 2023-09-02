@@ -4,7 +4,7 @@
 
 package vshape
 
-import "github.com/goki/mat32"
+import "goki.dev/mat32/v2"
 
 // ShapeGroup is a group of shapes -- returns summary data for shape elements
 type ShapeGroup struct {

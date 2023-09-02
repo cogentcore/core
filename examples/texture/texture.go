@@ -19,7 +19,7 @@ import (
 	vk "github.com/goki/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vgpu"
 )
 

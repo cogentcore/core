@@ -16,8 +16,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/goki/mat32"
 	vk "github.com/goki/vulkan"
+	"goki.dev/mat32/v2"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/vgpu/v2/vgpu"

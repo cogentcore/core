@@ -5,8 +5,8 @@
 package vshape
 
 import (
-	"github.com/goki/mat32"
 	"goki.dev/ki/v2/ints"
+	"goki.dev/mat32/v2"
 )
 
 // Plane is a flat 2D plane, which can be oriented along any

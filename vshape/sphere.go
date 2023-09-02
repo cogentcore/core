@@ -7,7 +7,7 @@ package vshape
 import (
 	"math"
 
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
 )
 
 // Sphere is a sphere shape (can be a partial sphere too)

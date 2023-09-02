@@ -5,7 +5,7 @@
 package vshape
 
 import (
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
 )
 
 ////////////////////////////////////////////////////////////////

@@ -4,7 +4,7 @@
 
 package vshape
 
-import "github.com/goki/mat32"
+import "goki.dev/mat32/v2"
 
 // Shape is an interface for all shape-constructing elements
 type Shape interface {

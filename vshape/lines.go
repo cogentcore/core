@@ -9,7 +9,7 @@ import (
 	"log"
 	"math"
 
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
 )
 
 // Lines are lines rendered as long thin boxes defined by points
