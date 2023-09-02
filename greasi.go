@@ -35,7 +35,7 @@ func Run(app any, defaultFile ...string) error {
 	}
 	cmd := leftovers[0]
 
-	err = grease.RunCommand(app, cmd)
+	err = grease.RunCmd(app, cmd)
 	if err != nil {
 		return fmt.Errorf("error running command %q: %w", cmd, err)
 	}

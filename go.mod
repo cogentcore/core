@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/goki/gi v1.3.22
 	github.com/goki/ki v1.1.16
-	goki.dev/grease v0.8.2
+	goki.dev/grease v0.8.6
 )
 
 require (
@@ -40,11 +40,13 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
-	github.com/jinzhu/copier v0.3.5 // indirect
+	github.com/jinzhu/copier v0.4.0 // indirect
+	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	goki.dev/enums v0.9.2 // indirect
+	goki.dev/ki/v2 v2.0.0-dev0.0.3 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/image v0.6.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
