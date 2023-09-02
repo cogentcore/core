@@ -41,6 +41,10 @@ var (
 	// for the default config file by checking the provided default
 	// config file location relative to each directory up the tree
 	SearchUp bool
+
+	// NeedConfigFile indicates whether a configuration file
+	// must be provided for the command to run
+	NeedConfigFile bool
 )
 
 // Config is the overall config setting function, processing config files
@@ -107,14 +111,16 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 				break
 			}
 		}
-		if ConfigFile == "" {
+		if NeedConfigFile && ConfigFile == "" {
 			err = fmt.Errorf("grease.Config: none of the specified default config files exist: %v", defaultFile)
 			return nil, err
 		}
 	}
-	err = OpenWithIncludes(cfg, ConfigFile)
-	if err != nil {
-		errs = append(errs, err)
+	if ConfigFile != "" {
+		err = OpenWithIncludes(cfg, ConfigFile)
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
 	NonFlagArgs, err = SetFromArgs(cfg, args)
 	if err != nil {
