@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/ki/dirs"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/pi/spell"
 	"goki.dev/gi/v2/oswin"
+	"goki.dev/ki/v2/dirs"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // InitSpell tries to load the saved fuzzy.spell model.

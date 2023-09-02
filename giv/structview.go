@@ -14,13 +14,13 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/ast"
-	"github.com/goki/ki/bools"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/bools"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // StructView represents a struct, creating a property editor of the fields --

@@ -13,9 +13,9 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/runes"
 	"github.com/goki/pi/lex"
+	"goki.dev/ki/v2/ints"
+	"goki.dev/ki/v2/runes"
 )
 
 // Match records one match for search within file, positions in runes

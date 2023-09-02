@@ -11,8 +11,8 @@ import (
 	"github.com/aymerick/douceur/parser"
 
 	// 	"github.com/benbjohnson/css" // this was too low-level
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // StyleSheet is a Node2D node that contains a stylesheet -- property values

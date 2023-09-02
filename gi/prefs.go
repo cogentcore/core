@@ -14,8 +14,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/goki/matcolor"
 	"github.com/goki/pi/langs/golang"
@@ -25,6 +23,8 @@ import (
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // Preferences are the overall user preferences for GoGi, providing some basic

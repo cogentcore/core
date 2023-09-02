@@ -5,10 +5,10 @@
 package textbuf
 
 import (
-	"github.com/goki/ki/indent"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/pi"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/ki/v2/indent"
 )
 
 // Opts contains options for TextBufs -- contains everything necessary to

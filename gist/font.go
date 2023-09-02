@@ -8,11 +8,11 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/bitflag"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleFontFuncs

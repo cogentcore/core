@@ -7,12 +7,12 @@ package gi
 import (
 	"log"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin/cursor"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // Action is a button widget that can display a text label and / or an icon

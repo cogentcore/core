@@ -12,9 +12,9 @@ import (
 	"strings"
 
 	"github.com/goki/freetype/truetype"
-	"github.com/goki/ki/ki"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/ki"
 	"golang.org/x/image/font/opentype"
 )
 

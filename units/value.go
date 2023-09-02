@@ -9,8 +9,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 	"golang.org/x/image/math/fixed"
 )
 

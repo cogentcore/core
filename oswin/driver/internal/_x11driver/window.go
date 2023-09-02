@@ -27,13 +27,13 @@ import (
 	"github.com/BurntSushi/xgb/render"
 	"github.com/BurntSushi/xgb/xproto"
 
-	"github.com/goki/ki/bitflag"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/driver/internal/drawer"
 	"goki.dev/gi/v2/oswin/driver/internal/event"
 	"goki.dev/gi/v2/oswin/key"
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/gi/v2/oswin/window"
+	"goki.dev/ki/v2/bitflag"
 	"golang.org/x/image/math/f64"
 )
 

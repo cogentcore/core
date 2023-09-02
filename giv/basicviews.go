@@ -10,11 +10,11 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // basicviews contains all the ValueView's for basic builtin types

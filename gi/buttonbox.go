@@ -9,14 +9,14 @@ import (
 	"image"
 	"reflect"
 
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/ki/sliceclone"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/bitflag"
+	"goki.dev/ki/v2/ints"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2/sliceclone"
 )
 
 // ButtonBox is a widget for containing a set of CheckBox buttons.

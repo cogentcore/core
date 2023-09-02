@@ -10,11 +10,11 @@ import (
 	"io/fs"
 	"log"
 
-	"github.com/goki/ki/dirs"
-	"github.com/goki/ki/kit"
 	"github.com/goki/vgpu/vgpu"
 	"github.com/goki/vgpu/vphong"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/ki/v2/dirs"
+	"goki.dev/ki/v2/kit"
 )
 
 // TexName provides a GUI interface for choosing textures

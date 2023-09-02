@@ -16,12 +16,12 @@ import (
 	"time"
 
 	"github.com/c2h5oh/datasize"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/vci"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/icons"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // FileInfo represents the information about a given file / directory,

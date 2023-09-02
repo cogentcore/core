@@ -9,10 +9,10 @@ import (
 	"log"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/window"
+	"goki.dev/ki/v2/kit"
 )
 
 // monitorDebug turns on various debugging statements about monitor changes

@@ -44,7 +44,7 @@ tidy:
 master: export GO111MODULE = on
 master:
 	@echo "GO111MODULE = $(value GO111MODULE)"
-	go get -u github.com/goki/ki@master
+	go get -u goki.dev/ki/v2@master
 	go get -u github.com/goki/pi@master
 	go list -m all | grep goki
 	go mod tidy

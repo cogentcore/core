@@ -20,8 +20,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/goki/ki/kit"
 	"goki.dev/gi/v2/oswin"
+	"goki.dev/ki/v2/kit"
 )
 
 // key.Event is a low-level immediately-generated key event, tracking press

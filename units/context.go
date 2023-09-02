@@ -5,7 +5,7 @@
 package units
 
 import (
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // Context specifies everything about the current context necessary for converting the number

@@ -7,8 +7,8 @@ package gi3d
 import (
 	"image/color"
 
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/ki/v2/kit"
 )
 
 // Light represents a light that illuminates a scene

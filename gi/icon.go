@@ -7,12 +7,12 @@ package gi
 import (
 	"image"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // // SetIcon sets the icon by name into given Icon wrapper, returning error

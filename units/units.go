@@ -19,7 +19,7 @@ Also supporting dp = density-independent pixel = 1/160 in
 package units
 
 import (
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // borrows from golang.org/x/exp/shiny/unit/ but extends with full range of

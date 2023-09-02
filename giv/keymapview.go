@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // KeyMapsView opens a view of a key maps table

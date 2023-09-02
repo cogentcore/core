@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/spell"
 	"goki.dev/gi/v2/icons"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // Completer interface supports the SetCompleter method for setting completer parameters

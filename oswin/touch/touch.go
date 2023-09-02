@@ -19,8 +19,8 @@ package touch
 import (
 	"image"
 
-	"github.com/goki/ki/kit"
 	"goki.dev/gi/v2/oswin"
+	"goki.dev/ki/v2/kit"
 )
 
 // touch.Event is a touch event.

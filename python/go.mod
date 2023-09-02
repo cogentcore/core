@@ -10,7 +10,7 @@ require (
 	github.com/go-python/gopy v0.4.5
 	goki.dev/gi/v2 v1.3.12
 	github.com/goki/go-difflib v1.2.1
-	github.com/goki/ki v1.1.11
+	goki.dev/ki/v2 v1.1.11
 	github.com/goki/kigen v1.0.2
 	github.com/goki/mat32 v1.0.14
 	github.com/goki/pi v1.0.23

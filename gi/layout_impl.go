@@ -7,10 +7,10 @@ package gi
 import (
 	"fmt"
 
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	"goki.dev/gi/v2/gist"
+	"goki.dev/ki/v2/ints"
+	"goki.dev/ki/v2/ki"
 )
 
 // This file contains all the hairy implementation logic of layout

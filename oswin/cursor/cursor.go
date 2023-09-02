@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // todo: apps can add new named shapes starting at ShapesN

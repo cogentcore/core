@@ -109,11 +109,11 @@ github.com/goki/go-difflib v1.2.1 h1:zqSi9rTf0vYFia92PaZeKrTfofGVqku2WYOtfsUYqxU
 github.com/goki/go-difflib v1.2.1/go.mod h1:uZuY072AYTnMjRxCn6IkpZQKRVcTj4SIpHHXOUGOxrg=
 github.com/goki/gosl v1.0.6 h1:eK6UE3DyBfcVdcVEG0ZPnqE14/dxElpfZ3qjgCULBbk=
 github.com/goki/gosl v1.0.6/go.mod h1:ip8oWaCQ9NZSLqb7ZZ55Aa0BGomEPB+i4OPHgWqxlGk=
-github.com/goki/ki v1.0.0/go.mod h1:X+gmVeAym3JDSbbiA7iF1qkgAlTVWl1JV9sRsGDzxOA=
-github.com/goki/ki v1.1.8/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
-github.com/goki/ki v1.1.9/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
-github.com/goki/ki v1.1.11 h1:AjyHwgRtA734bROWb3bB/3fB/h1K5HZEoKfiitZpa8A=
-github.com/goki/ki v1.1.11/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
+goki.dev/ki/v2 v1.0.0/go.mod h1:X+gmVeAym3JDSbbiA7iF1qkgAlTVWl1JV9sRsGDzxOA=
+goki.dev/ki/v2 v1.1.8/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
+goki.dev/ki/v2 v1.1.9/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
+goki.dev/ki/v2 v1.1.11 h1:AjyHwgRtA734bROWb3bB/3fB/h1K5HZEoKfiitZpa8A=
+goki.dev/ki/v2 v1.1.11/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
 github.com/goki/kigen v1.0.0/go.mod h1:w8km7SXtEcXXiAs0HbJyIrLq05THTIc1SdFyce3cNdw=
 github.com/goki/kigen v1.0.2 h1:I/s/ce84wiP99CYKdju/MVjY6jzvAL3d4XobERsK1JY=
 github.com/goki/kigen v1.0.2/go.mod h1:ib29cR7secYGaGXWv68WDq83y5tfRMh7dOXi4XRsPOM=

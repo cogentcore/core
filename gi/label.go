@@ -8,8 +8,6 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/girl"
@@ -17,6 +15,8 @@ import (
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/cursor"
 	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

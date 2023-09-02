@@ -7,14 +7,14 @@ package svg
 import (
 	"fmt"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/cursor"
 	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // Editor supports editing of SVG elements

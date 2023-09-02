@@ -9,10 +9,10 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/goki/vgpu/vshape"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // Note: Raw line rendering via OpenGL is not very effective

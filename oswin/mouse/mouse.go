@@ -19,9 +19,9 @@ import (
 	"image"
 	"time"
 
-	"github.com/goki/ki/kit"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/key"
+	"goki.dev/ki/v2/kit"
 )
 
 // DoubleClickMSec is the maximum time interval in msec between button press

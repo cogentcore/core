@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/goki/matcolor"
 	"goki.dev/colors"
@@ -19,6 +17,8 @@ import (
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // GiEditor represents a struct, creating a property editor of the fields --

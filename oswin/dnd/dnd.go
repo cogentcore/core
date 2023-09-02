@@ -12,11 +12,11 @@ import (
 	"image"
 	"time"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/key"
 	"goki.dev/gi/v2/oswin/mimedata"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // dnd.Event represents the drag-and-drop event, specifically the drop

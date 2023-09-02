@@ -20,19 +20,19 @@ import (
 	"os"
 	"strings"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 	"golang.org/x/net/html/charset"
 )
 
 // this file contains all the IO-related parsing etc routines
 
-// see https://github.com/goki/ki/wiki/Naming for IO naming conventions
+// see https://goki.dev/ki/v2/wiki/Naming for IO naming conventions
 // using standard XML marshal / unmarshal
 
 var (

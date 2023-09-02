@@ -1,7 +1,7 @@
 package gist
 
 import (
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // ColorSchemeTypes is an enum that contains

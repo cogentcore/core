@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/goki/ki/kit"
-	"github.com/goki/ki/nptime"
+	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2/nptime"
 )
 
 // GoGi event structure is derived from go.wde and golang/x/mobile/event

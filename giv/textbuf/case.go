@@ -7,9 +7,9 @@ package textbuf
 import (
 	"strings"
 
-	"github.com/goki/ki/kit"
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gist"
+	"goki.dev/ki/v2/kit"
 )
 
 // Cases are different cases -- Lower, Upper, Camel, etc

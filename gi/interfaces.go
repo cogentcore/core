@@ -7,10 +7,10 @@ package gi
 import (
 	"reflect"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"goki.dev/gi/v2/oswin/dnd"
 	"goki.dev/gi/v2/oswin/mimedata"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // This file contains all the special-purpose interfaces

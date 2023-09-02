@@ -19,9 +19,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	"github.com/goki/vgpu/vgpu"
 	"github.com/goki/vgpu/vphong"
@@ -36,6 +33,9 @@ import (
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/gi/v2/oswin/window"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/bitflag"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 var (

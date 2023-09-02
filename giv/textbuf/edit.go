@@ -7,8 +7,8 @@ package textbuf
 import (
 	"time"
 
-	"github.com/goki/ki/sliceclone"
 	"github.com/goki/pi/lex"
+	"goki.dev/ki/v2/sliceclone"
 )
 
 // Edit describes an edit action to a buffer -- this is the data passed

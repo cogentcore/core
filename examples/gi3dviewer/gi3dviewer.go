@@ -7,7 +7,6 @@ package main
 import (
 	"log"
 
-	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
@@ -17,6 +16,7 @@ import (
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin/driver/vkos"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/ki"
 )
 
 func main() {

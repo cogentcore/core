@@ -13,7 +13,7 @@ import (
 	"image"
 	"math"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 var (

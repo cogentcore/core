@@ -5,11 +5,11 @@
 package giv
 
 import (
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the

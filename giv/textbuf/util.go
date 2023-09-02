@@ -13,7 +13,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/goki/ki/ints"
+	"goki.dev/ki/v2/ints"
 )
 
 // BytesToLineStrings returns []string lines

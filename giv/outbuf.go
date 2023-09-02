@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/ki/sliceclone"
+	"goki.dev/ki/v2/sliceclone"
 )
 
 // OutBufMarkupFunc is a function that returns a marked-up version of a given line of

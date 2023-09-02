@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goki/ki/nptime"
 	"github.com/goki/pi/lex"
+	"goki.dev/ki/v2/nptime"
 )
 
 // Region represents a text region as a start / end position, and includes

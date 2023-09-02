@@ -5,9 +5,9 @@
 package svg
 
 import (
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // Polyline is a SVG multi-line shape

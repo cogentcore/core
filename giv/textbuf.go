@@ -16,11 +16,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/ki/indent"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/ki/runes"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
@@ -32,6 +27,11 @@ import (
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
 	"goki.dev/gi/v2/icons"
+	"goki.dev/ki/v2/indent"
+	"goki.dev/ki/v2/ints"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2/runes"
 )
 
 // TextBufMaxScopeLines is the maximum lines to search for a scope marker, e.g. '}'

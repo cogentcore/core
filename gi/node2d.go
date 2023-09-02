@@ -10,14 +10,14 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	"goki.dev/gi/v2/girl"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

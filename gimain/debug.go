@@ -10,8 +10,8 @@ package gimain
 import (
 	"fmt"
 
-	"github.com/goki/ki/ki"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/ki/v2/ki"
 )
 
 // DebugEnumSizes is a startup function that reports current sizes of some big

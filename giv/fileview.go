@@ -16,8 +16,6 @@ import (
 	"unicode"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"github.com/goki/pi/complete"
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/v2/gi"
@@ -27,6 +25,8 @@ import (
 	"goki.dev/gi/v2/oswin/cursor"
 	"goki.dev/gi/v2/oswin/key"
 	"goki.dev/gi/v2/units"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 //////////////////////////////////////////////////////////////////////////
