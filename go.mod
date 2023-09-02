@@ -1,4 +1,4 @@
-module goki.dev/mat32
+module goki.dev/mat32/v2
 
 go 1.18
 
