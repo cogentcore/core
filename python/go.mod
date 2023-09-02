@@ -38,7 +38,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b // indirect
 	github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c // indirect
 	github.com/goki/gosl v1.0.6 // indirect
-	github.com/goki/prof v1.0.0 // indirect
+	goki.dev/prof/v2 v1.0.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect

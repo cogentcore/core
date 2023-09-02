@@ -10,17 +10,17 @@ import (
 	"image"
 	"log"
 
-	mapp "github.com/goki/mobile/app"
-	"github.com/goki/mobile/event/key"
-	"github.com/goki/mobile/event/lifecycle"
-	"github.com/goki/mobile/event/mouse"
-	"github.com/goki/mobile/event/paint"
-	"github.com/goki/mobile/event/size"
-	"github.com/goki/mobile/event/touch"
 	"goki.dev/gi/v2/oswin"
 	okey "goki.dev/gi/v2/oswin/key"
 	omouse "goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/gi/v2/oswin/window"
+	mapp "goki.dev/mobile/app"
+	"goki.dev/mobile/event/key"
+	"goki.dev/mobile/event/lifecycle"
+	"goki.dev/mobile/event/mouse"
+	"goki.dev/mobile/event/paint"
+	"goki.dev/mobile/event/size"
+	"goki.dev/mobile/event/touch"
 )
 
 // eventLoop starts running the mobile app event loop

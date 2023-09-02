@@ -16,8 +16,6 @@ import (
 	"path/filepath"
 	"sync"
 
-	mapp "github.com/goki/mobile/app"
-	"github.com/goki/mobile/event/size"
 	vk "github.com/goki/vulkan"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/oswin"
@@ -25,6 +23,8 @@ import (
 	"goki.dev/gi/v2/oswin/cursor"
 	"goki.dev/gi/v2/oswin/window"
 	"goki.dev/gi/v2/units"
+	mapp "goki.dev/mobile/app"
+	"goki.dev/mobile/event/size"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 )

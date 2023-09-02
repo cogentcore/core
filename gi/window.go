@@ -19,7 +19,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/prof"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/colormap"
 	"goki.dev/gi/v2/gist"
@@ -34,6 +33,7 @@ import (
 	"goki.dev/ki/v2/bitflag"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/prof/v2"
 	"goki.dev/vgpu/v2/vgpu"
 	"goki.dev/vgpu/v2/vphong"
 )

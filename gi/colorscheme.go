@@ -4,7 +4,7 @@
 
 package gi
 
-import "github.com/goki/matcolor"
+import "goki.dev/matcolor"
 
 // ColorScheme is the current color scheme
 // that is used to style the app. It should
