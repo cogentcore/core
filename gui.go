@@ -7,9 +7,9 @@ package greasi
 import (
 	"fmt"
 
-	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/giv"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/grease"
 )
