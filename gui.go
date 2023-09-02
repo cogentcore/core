@@ -10,7 +10,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
-	"github.com/goki/ki/ki"
+	"goki.dev/ki/v2/ki"
 	"goki.dev/grease"
 )
 

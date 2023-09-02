@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/goki/gi v1.3.22
-	github.com/goki/ki v1.1.16
 	goki.dev/grease v0.8.6
+	goki.dev/ki/v2 v2.0.0-dev0.0.3
 )
 
 require (
@@ -30,6 +30,7 @@ require (
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/goki/go-difflib v1.2.1 // indirect
 	github.com/goki/gosl v1.0.13 // indirect
+	github.com/goki/ki v1.1.15 // indirect
 	github.com/goki/kigen v1.0.2 // indirect
 	github.com/goki/mat32 v1.0.15 // indirect
 	github.com/goki/pi v1.0.27 // indirect
@@ -46,7 +47,6 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	goki.dev/enums v0.9.2 // indirect
-	goki.dev/ki/v2 v2.0.0-dev0.0.3 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/image v0.6.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
