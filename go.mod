@@ -1,4 +1,4 @@
-module github.com/goki/vci
+module goki.dev/vci/v2
 
 go 1.13
 
