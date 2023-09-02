@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io/fs"
 
-	"github.com/goki/ki/toml"
+	"goki.dev/ki/v2/toml"
 )
 
 // OpenWithIncludes reads config from given config file,

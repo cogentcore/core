@@ -10,8 +10,8 @@ package grease
 import (
 	"reflect"
 
-	"github.com/goki/ki/kit"
-	"github.com/goki/ki/toml"
+	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2/toml"
 )
 
 // Includer facilitates processing include files in Config objects.

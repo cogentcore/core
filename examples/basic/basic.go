@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
 	"goki.dev/grease"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 type App struct {

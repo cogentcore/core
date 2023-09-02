@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goki/ki/kit"
 	"github.com/iancoleman/strcase"
+	"goki.dev/ki/v2/kit"
 )
 
 // Usage returns the usage string for the given app.

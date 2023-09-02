@@ -13,9 +13,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goki/ki/kit"
-	"github.com/goki/ki/toml"
 	"github.com/iancoleman/strcase"
+	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2/toml"
 )
 
 // SetFromArgs sets Config values from command-line args,

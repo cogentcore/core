@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/goki/ki/dirs"
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/dirs"
+	"goki.dev/ki/v2/kit"
 )
 
 var (

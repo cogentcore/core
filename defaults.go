@@ -4,7 +4,7 @@
 
 package grease
 
-import "github.com/goki/ki/kit"
+import "goki.dev/ki/v2/kit"
 
 // SetFromDefaults sets Config values from field tag `def:` values.
 // Parsing errors are automatically logged.
