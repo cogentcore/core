@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/gist"

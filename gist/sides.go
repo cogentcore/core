@@ -10,8 +10,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/goki/colors"
 	"github.com/goki/mat32"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/units"
 )
 

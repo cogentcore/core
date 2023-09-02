@@ -10,7 +10,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/goki/colors"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -18,6 +17,7 @@ import (
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 	"github.com/goki/vci"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/giv/textbuf"

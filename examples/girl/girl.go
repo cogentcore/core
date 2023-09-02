@@ -11,8 +11,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/goki/colors"
 	"github.com/goki/mat32"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/girl"
 	"goki.dev/gi/v2/gist"
 )

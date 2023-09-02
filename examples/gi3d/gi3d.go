@@ -11,8 +11,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/goki/colors"
 	"github.com/goki/vgpu/vgpu"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gi3d"
 	"goki.dev/gi/v2/gimain"

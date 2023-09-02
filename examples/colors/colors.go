@@ -7,7 +7,7 @@ package main
 import (
 	"image/color"
 
-	"github.com/goki/cam/hsl"
+	"goki.dev/cam/hsl"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/gist"

@@ -10,10 +10,10 @@ import (
 
 	"image/color"
 
-	"github.com/goki/colors"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
+	"goki.dev/colors"
 )
 
 // Color defines a standard color object for GUI use, with RGBA values, and

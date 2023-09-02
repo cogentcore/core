@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"github.com/goki/colors"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/units"
 )

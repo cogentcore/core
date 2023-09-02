@@ -3,7 +3,7 @@
 package gi
 
 import (
-	"github.com/goki/colors"
+	"goki.dev/colors"
 	"github.com/goki/matcolor"
 )
 

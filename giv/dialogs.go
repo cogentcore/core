@@ -8,8 +8,8 @@ import (
 	"image/color"
 	"reflect"
 
-	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/girl"
 	"goki.dev/gi/v2/gist"

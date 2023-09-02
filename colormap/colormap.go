@@ -9,7 +9,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/goki/colors"
+	"goki.dev/colors"
 )
 
 // Map maps a value onto a color by interpolating between a list of colors

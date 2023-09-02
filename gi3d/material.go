@@ -8,8 +8,8 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/goki/colors"
 	"github.com/goki/mat32"
+	"goki.dev/colors"
 )
 
 // Tiling are the texture tiling parameters

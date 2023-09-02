@@ -16,11 +16,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/goki/colors"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/units"
 	"golang.org/x/image/draw"

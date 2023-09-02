@@ -20,10 +20,10 @@ import (
 
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
-	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
 	"golang.org/x/image/draw"

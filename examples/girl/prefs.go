@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/goki/colors"
+	"goki.dev/colors"
 )
 
 // Prefs are needed for setting gist.ThePrefs, for any text-based

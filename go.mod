@@ -14,8 +14,6 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-gl/mathgl v1.1.0
-	github.com/goki/cam v0.9.8
-	github.com/goki/colors v0.8.5
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
 	github.com/goki/ki v1.1.16
@@ -32,6 +30,8 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
+	goki.dev/cam v0.9.10
+	goki.dev/colors v0.8.7
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 	golang.org/x/image v0.11.0
 	golang.org/x/net v0.14.0
@@ -45,11 +45,13 @@ require (
 	github.com/akutz/sortfold v0.2.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/goki/cam v0.9.8 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44 // indirect
 	github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f // indirect
+	goki.dev/mat32/v2 v2.0.0-dev0.0.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect

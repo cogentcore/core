@@ -14,12 +14,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/goki/matcolor"
 	"github.com/goki/pi/langs/golang"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/girl"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"

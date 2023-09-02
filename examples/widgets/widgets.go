@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/goki/colors"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"github.com/goki/pi/complete"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/gist"

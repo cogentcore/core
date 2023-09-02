@@ -25,9 +25,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/colors"
 	"github.com/goki/ki/dirs"
 	"github.com/goki/mat32"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi3d"
 )
 
