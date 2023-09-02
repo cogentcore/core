@@ -49,7 +49,7 @@ func VersionFileString(c *config.Config) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error getting previous git commit: %w (%s)", err, res)
 	}
-	b.WriteString("\t// GitCommit is the commit just before the release\n")
+	b.WriteString("\t// GitCommit is the commit just before the version commit\n")
 	b.WriteString("\tGitCommit = \"" + strings.TrimSuffix(string(res), "\n") + "\"\n")
 
 	date := time.Now().UTC().Format("2006-01-02 15:04")
