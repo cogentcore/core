@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/goki/prof"
+	"goki.dev/prof/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"

@@ -6,9 +6,9 @@ require (
 	github.com/akutz/sortfold v0.2.1
 	github.com/alecthomas/chroma/v2 v2.5.0
 	github.com/gabriel-vasile/mimetype v1.4.1
-	github.com/goki/prof v1.0.0
 	github.com/h2non/filetype v1.1.3
 	goki.dev/ki/v2 v2.0.0-dev0.0.2
+	goki.dev/prof/v2 v2.0.0-dev0.0.2
 	golang.org/x/tools v0.6.0
 )
 
