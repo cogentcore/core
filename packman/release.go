@@ -23,8 +23,8 @@ func Release(c *config.Config) error {
 
 // ReleaseApp releases the config app.
 func ReleaseApp(c *config.Config) error {
-	// TODO: implement
-	return nil
+	// TODO: actually implement instead of just calling ReleaseLibrary
+	return ReleaseLibrary(c)
 }
 
 // ReleaseLibrary releases the config library.
