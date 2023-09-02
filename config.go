@@ -38,8 +38,8 @@ var (
 	Help bool
 
 	// SearchUp indicates whether to search up the filesystem
-	// for the default config file (checking the provided default
-	// config file location relative to each directory up the tree)
+	// for the default config file by checking the provided default
+	// config file location relative to each directory up the tree
 	SearchUp bool
 )
 
@@ -90,13 +90,14 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 			if err != nil {
 				return nil, fmt.Errorf("error getting current directory: %w", err)
 			}
+			pwd := wd
 			for {
-				wd = filepath.Dir(wd)
-				fmt.Println(wd)
-				IncludePaths = append(IncludePaths, wd)
-				if wd == filepath.Dir(wd) {
+				pwd = wd
+				wd = filepath.Dir(pwd)
+				if wd == pwd { // if there is no change, we have reached the root of the filesystem
 					break
 				}
+				IncludePaths = append(IncludePaths, wd)
 			}
 		}
 		for _, fn := range defaultFile {
