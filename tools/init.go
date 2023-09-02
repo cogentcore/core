@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/goki/ki/toml"
 	"goki.dev/goki/config"
+	"goki.dev/ki/v2/toml"
 )
 
 // Init initializes the ".goki" directory

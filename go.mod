@@ -3,11 +3,11 @@ module goki.dev/goki
 go 1.21.0
 
 require (
-	github.com/goki/ki v1.1.16
 	github.com/iancoleman/strcase v0.3.0
 	goki.dev/enums v0.9.4
 	goki.dev/grease v0.8.7
 	goki.dev/greasi v0.8.1
+	goki.dev/ki/v2 v2.0.0-dev0.0.3
 )
 
 require (
@@ -42,7 +42,6 @@ require (
 	goki.dev/cam v0.9.10 // indirect
 	goki.dev/colors v0.8.7 // indirect
 	goki.dev/gi/v2 v2.0.0-dev0.0.1 // indirect
-	goki.dev/ki/v2 v2.0.0-dev0.0.3 // indirect
 	goki.dev/mat32/v2 v2.0.0-dev0.0.0 // indirect
 	goki.dev/matcolor v0.9.5 // indirect
 	goki.dev/mobile v0.5.0 // indirect
