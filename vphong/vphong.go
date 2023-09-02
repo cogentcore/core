@@ -7,7 +7,7 @@ package vphong
 import (
 	"sync"
 
-	"github.com/goki/kigen/ordmap"
+	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/vgpu"
 )
 

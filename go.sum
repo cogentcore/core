@@ -13,8 +13,6 @@ github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b h1:GgabKamyOY
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/goki/ki v1.1.11 h1:AjyHwgRtA734bROWb3bB/3fB/h1K5HZEoKfiitZpa8A=
 github.com/goki/ki v1.1.11/go.mod h1:8CF/Hl5lI5x09rlPLfJtw9w2XW/K6FK9eodjpeAKmNU=
-github.com/goki/kigen v1.0.2 h1:I/s/ce84wiP99CYKdju/MVjY6jzvAL3d4XobERsK1JY=
-github.com/goki/kigen v1.0.2/go.mod h1:ib29cR7secYGaGXWv68WDq83y5tfRMh7dOXi4XRsPOM=
 github.com/goki/mat32 v1.0.14 h1:GUigODaCiGuYv7ZWmymjoZD9Z7sckLAutqxa2LIX2Xw=
 github.com/goki/mat32 v1.0.14/go.mod h1:6tOY3oXQLGItoMcA6nhKwbO3EFXZOo8l+4eIotDFG/k=
 github.com/goki/mobile v0.0.0-20230629041755-2875892944e8 h1:g+/8wDDPycAC8d0c4h85I/cyLen0BeNZFLWstIOa03k=
@@ -40,14 +38,14 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
+goki.dev/ordmap v0.5.0 h1:mcJ+mZTqri636Q5fxq78vwleBC9+yCpKj5bH1ScHOf4=
+goki.dev/ordmap v0.5.0/go.mod h1:0w8tBn0d3KTc1gax89DGmRNmBWpZCXnXwQSzcdJ9Ayg=
 golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56/go.mod h1:JhuoJpWY28nO4Vef9tZUw9qufEGTyX1+7lmHxV5q5G4=
-golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb h1:PaBZQdo+iSDyHT053FjUCgZQ/9uqVwPOcl7KSWhKn6w=
-golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=
 golang.org/x/exp/shiny v0.0.0-20230626212559-97b1e661b5df h1:7zAHkMgkQ1g1ht8jDVb6GhmbEmoEzICA0tr0Yu76kKk=
 golang.org/x/exp/shiny v0.0.0-20230626212559-97b1e661b5df/go.mod h1:UH99kUObWAZkDnWqppdQe5ZhPYESUw8I0zVV1uWBR+0=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=
