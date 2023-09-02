@@ -5,12 +5,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/goki/mobile/app"
-	"github.com/goki/mobile/event/lifecycle"
-	"github.com/goki/mobile/event/paint"
-	"github.com/goki/mobile/event/size"
-	"github.com/goki/mobile/event/touch"
 	vk "github.com/goki/vulkan"
+	"goki.dev/mobile/app"
+	"goki.dev/mobile/event/lifecycle"
+	"goki.dev/mobile/event/paint"
+	"goki.dev/mobile/event/size"
+	"goki.dev/mobile/event/touch"
 	"goki.dev/vgpu/v2/vgpu"
 )
 
