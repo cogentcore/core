@@ -9,7 +9,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/langs"
 	"goki.dev/pi/v2/lex"

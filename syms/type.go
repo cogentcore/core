@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/goki/ki/indent"
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/sliceclone"
+	"goki.dev/ki/v2/indent"
+	"goki.dev/ki/v2/ints"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/sliceclone"
 	"goki.dev/pi/v2/lex"
 )
 

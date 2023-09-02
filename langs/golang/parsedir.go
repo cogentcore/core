@@ -14,7 +14,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/goki/ki/dirs"
+	"goki.dev/ki/v2/dirs"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/pi"
 	"goki.dev/pi/v2/syms"

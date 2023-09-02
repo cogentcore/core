@@ -7,7 +7,7 @@ package syms
 import (
 	"reflect"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // Kinds is a complete set of basic type categories and sub(sub..) categories -- these

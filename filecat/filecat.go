@@ -24,7 +24,7 @@
 package filecat
 
 import (
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // filecat.Cat is a functional category for files -- a broad functional

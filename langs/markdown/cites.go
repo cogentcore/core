@@ -8,7 +8,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/goki/ki/ints"
+	"goki.dev/ki/v2/ints"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/langs/bibtex"
 	"goki.dev/pi/v2/lex"

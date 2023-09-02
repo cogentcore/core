@@ -5,7 +5,7 @@
 package lex
 
 import (
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // Actions are lexing actions to perform

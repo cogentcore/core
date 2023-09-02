@@ -13,7 +13,7 @@ import (
 	"unicode"
 
 	"github.com/akutz/sortfold"
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/syms"
 	"goki.dev/pi/v2/token"
 )

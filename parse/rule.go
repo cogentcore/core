@@ -17,9 +17,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/goki/ki/indent"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/indent"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/syms"
 	"goki.dev/pi/v2/token"
@@ -1476,7 +1476,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 		// have two children, named identically (e.g., Expr, Expr) and it will not update
 		// after our swap.  If we could use UniqNames then it would be ok, but that doesn't
 		// work for treeview names.. really need an option that supports uniqname AND reg names
-		// https://github.com/goki/ki/issues/2
+		// https://goki.dev/ki/v2/issues/2
 		// ourAst.AddNewChild(KiT_Ast, "Dummy")
 		// ourAst.DeleteChildAtIndex(2, true)
 		// }

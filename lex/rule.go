@@ -12,9 +12,9 @@ import (
 	"text/tabwriter"
 	"unicode"
 
-	"github.com/goki/ki/indent"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/indent"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/token"
 )
 

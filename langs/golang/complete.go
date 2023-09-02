@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/goki/ki/walki"
+	"goki.dev/ki/v2/walki"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/parse"

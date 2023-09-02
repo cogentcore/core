@@ -16,9 +16,9 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/goki/ki/ints"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/ints"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
 )
 
 // In an ErrorList, an error is represented by an *Error.

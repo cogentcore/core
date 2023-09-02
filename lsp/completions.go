@@ -5,7 +5,7 @@
 package lsp
 
 import (
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // CompletionKind is the Language Server Protocol (LSP) CompletionKind, which

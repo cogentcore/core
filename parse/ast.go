@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/goki/ki/indent"
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"github.com/goki/ki/walki"
+	"goki.dev/ki/v2/indent"
+	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2/walki"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/syms"
 )

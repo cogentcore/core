@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/goki/ki/sliceclone"
+	"goki.dev/ki/v2/sliceclone"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/token"
 )

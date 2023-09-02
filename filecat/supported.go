@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2/kit"
 )
 
 // filecat.Supported are file types that are specifically supported by GoGi

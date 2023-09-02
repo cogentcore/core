@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/goki/ki/nptime"
+	"goki.dev/ki/v2/nptime"
 	"goki.dev/pi/v2/token"
 )
 

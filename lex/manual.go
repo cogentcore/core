@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/goki/ki/ints"
+	"goki.dev/ki/v2/ints"
 	"goki.dev/pi/v2/token"
 )
 

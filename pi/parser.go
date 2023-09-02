@@ -12,7 +12,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/goki/ki/ki"
+	"goki.dev/ki/v2/ki"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/parse"
