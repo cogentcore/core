@@ -42,20 +42,20 @@ func Run(app any, defaultFile ...string) error {
 		return fmt.Errorf("error configuring app: %w", err)
 	}
 	cmd := leftovers[0]
-	err = RunCommand(app, cmd)
+	err = RunCmd(app, cmd)
 	if err != nil {
 		return fmt.Errorf("error running command %q: %w", cmd, err)
 	}
 	return nil
 }
 
-// RunCommand runs the command with the given
+// RunCmd runs the command with the given
 // name on the given app. It looks for the
 // method with the name of the command converted
 // to camel case suffixed with "Cmd"; for example,
 // for a command named "build", it will look for a
 // method named "BuildCmd".
-func RunCommand(app any, cmd string) error {
+func RunCmd(app any, cmd string) error {
 	name := strcase.ToCamel(cmd) + "Cmd"
 	val := reflect.ValueOf(app)
 	meth := val.MethodByName(name)
