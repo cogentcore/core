@@ -1,6 +1,6 @@
 Name = "vgpu"
 Desc = ""
-Version = "v2.0.0-dev0.0.1"
+Version = "v2.0.0-dev0.0.2"
 Type = "TypeLibrary"
 
 [Build]
