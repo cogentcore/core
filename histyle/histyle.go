@@ -15,13 +15,13 @@ import (
 	"log"
 	"strings"
 
-	"github.com/goki/pi/token"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/pi/v2/token"
 )
 
 // Trilean value for StyleEntry value inheritance.

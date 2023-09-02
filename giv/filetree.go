@@ -21,7 +21,6 @@ import (
 
 	"github.com/Masterminds/vcs"
 	"github.com/fsnotify/fsnotify"
-	"github.com/goki/pi/filecat"
 	"github.com/goki/vci"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
@@ -38,6 +37,7 @@ import (
 	"goki.dev/ki/v2/ints"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/pi/v2/filecat"
 )
 
 // DirAndFile returns the final dir and file name.

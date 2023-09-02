@@ -49,12 +49,12 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/goki/pi/filecat"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/cursor"
 	"goki.dev/gi/v2/oswin/key"
 	"goki.dev/gi/v2/oswin/mimedata"
 	"goki.dev/gi/v2/oswin/osevent"
+	"goki.dev/pi/v2/filecat"
 )
 
 /////////////////////////////////////////////////////////////////

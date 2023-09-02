@@ -15,8 +15,6 @@ import (
 	"unicode"
 
 	"github.com/goki/mat32"
-	"github.com/goki/pi/complete"
-	"github.com/goki/pi/filecat"
 	"goki.dev/gi/v2/girl"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
@@ -29,6 +27,8 @@ import (
 	"goki.dev/ki/v2/ints"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/pi/v2/complete"
+	"goki.dev/pi/v2/filecat"
 )
 
 const force = true

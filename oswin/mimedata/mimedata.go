@@ -23,7 +23,7 @@ import (
 	"net/textproto"
 	"strings"
 
-	"github.com/goki/pi/filecat"
+	"goki.dev/pi/v2/filecat"
 )
 
 const (

@@ -16,7 +16,6 @@ import (
 	"unicode"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/goki/pi/complete"
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
@@ -27,6 +26,7 @@ import (
 	"goki.dev/gi/v2/units"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/pi/v2/complete"
 )
 
 //////////////////////////////////////////////////////////////////////////

@@ -11,8 +11,6 @@ import (
 	"strings"
 
 	"github.com/goki/mat32"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/token"
 	"github.com/goki/vci"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
@@ -26,6 +24,8 @@ import (
 	"goki.dev/ki/v2/ints"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/token"
 )
 
 // DiffFiles shows the diffs between this file as the A file, and other file as B file,

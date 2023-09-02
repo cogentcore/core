@@ -23,10 +23,6 @@ import (
 	"goki.dev/gi/v2/histyle"
 	"goki.dev/gi/v2/oswin/cursor"
 
-	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/lex"
-	"github.com/goki/pi/pi"
-	"github.com/goki/pi/token"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/key"
@@ -37,6 +33,10 @@ import (
 	"goki.dev/ki/v2/ints"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/pi/v2/filecat"
+	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/pi"
+	"goki.dev/pi/v2/token"
 )
 
 // TextView is a widget for editing multiple lines of text (as compared to

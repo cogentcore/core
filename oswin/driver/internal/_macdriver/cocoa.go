@@ -75,7 +75,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/goki/pi/filecat"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/cursor"
 	"goki.dev/gi/v2/oswin/key"
@@ -83,6 +82,7 @@ import (
 	"goki.dev/gi/v2/oswin/mouse"
 	"goki.dev/gi/v2/oswin/window"
 	"goki.dev/ki/v2/bitflag"
+	"goki.dev/pi/v2/filecat"
 	"golang.org/x/mobile/gl"
 )
 

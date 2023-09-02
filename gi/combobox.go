@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"github.com/goki/pi/complete"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
@@ -21,6 +20,7 @@ import (
 	"goki.dev/ki/v2/ints"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/pi/v2/complete"
 )
 
 // ComboBox is for selecting items from a dropdown list, with an optional

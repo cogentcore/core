@@ -19,7 +19,6 @@ require (
 	github.com/goki/mat32 v1.0.18
 	github.com/goki/matcolor v0.9.2
 	github.com/goki/mobile v0.0.0-20230707090321-193544ec5700
-	github.com/goki/pi v1.0.28
 	github.com/goki/prof v1.0.0
 	github.com/goki/vci v1.0.1
 	github.com/goki/vgpu v1.0.33
@@ -32,6 +31,7 @@ require (
 	goki.dev/colors v0.8.7
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
 	goki.dev/ordmap v0.5.0
+	goki.dev/pi/v2 v2.0.0-dev0.0.1
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 	golang.org/x/image v0.11.0
 	golang.org/x/net v0.14.0

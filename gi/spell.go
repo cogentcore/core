@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/pi/spell"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/ki/v2/dirs"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/pi/v2/spell"
 )
 
 // InitSpell tries to load the saved fuzzy.spell model.
@@ -47,7 +47,7 @@ func OpenSpellModel() error {
 
 // NewSpellModelFromText builds a NEW spelling model from text
 func NewSpellModelFromText() error {
-	bigdatapath, err := dirs.GoSrcDir("github.com/goki/pi/spell")
+	bigdatapath, err := dirs.GoSrcDir("goki.dev/pi/v2/spell")
 	if err != nil {
 		log.Printf("Error getting path to corpus directory: %v.\n", err)
 		return err
