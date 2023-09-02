@@ -1,6 +1,6 @@
 Name = "ki"
 Desc = ""
-Version = "v2.0.0-dev0.0.2"
+Version = "v2.0.0-dev0.0.3"
 Type = "TypeLibrary"
 
 [Build]
