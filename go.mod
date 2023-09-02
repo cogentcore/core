@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mattn/go-shellwords v1.0.12
-	goki.dev/enums v0.9.2
+	goki.dev/enums v0.9.4
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 )
