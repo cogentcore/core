@@ -40,7 +40,7 @@ require (
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	goki.dev/cam v0.9.10 // indirect
 	goki.dev/colors v0.8.7 // indirect
-	goki.dev/enums v0.9.2 // indirect
+	goki.dev/enums v0.9.4 // indirect
 	goki.dev/mat32/v2 v2.0.0-dev0.0.0 // indirect
 	goki.dev/matcolor v0.9.5 // indirect
 	goki.dev/mobile v0.5.0 // indirect
