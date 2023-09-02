@@ -11,8 +11,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goki/vgpu/vgpu"
-	"github.com/goki/vgpu/vphong"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/icons"
@@ -24,6 +22,8 @@ import (
 	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
+	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/vgpu/v2/vphong"
 )
 
 const (

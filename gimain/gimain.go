@@ -10,13 +10,13 @@ package gimain
 import (
 	"sync/atomic"
 
-	_ "github.com/goki/vgpu/vphong"
 	"goki.dev/gi/v2/gi"
 	_ "goki.dev/gi/v2/gi3d/io/obj"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/gi/v2/oswin/driver"
 	"goki.dev/gi/v2/svg"
+	_ "goki.dev/vgpu/v2/vphong"
 )
 
 // these dummy variables force inclusion of relevant packages

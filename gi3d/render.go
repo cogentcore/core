@@ -9,11 +9,11 @@ import (
 	"image"
 	"sort"
 
-	"github.com/goki/vgpu/vgpu"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/mat32/v2"
+	"goki.dev/vgpu/v2/vgpu"
 
 	vk "github.com/goki/vulkan"
 )

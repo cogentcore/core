@@ -15,7 +15,7 @@ require (
 	goki.dev/mat32/v2 v1.0.14
 	goki.dev/pi/v2 v1.0.23
 	github.com/goki/vci v1.0.1
-	github.com/goki/vgpu v1.0.20
+	goki.dev/vgpu/v2 v1.0.20
 	github.com/goki/vulkan v1.0.5
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388

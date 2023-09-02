@@ -9,11 +9,11 @@ import (
 	"image"
 	"reflect"
 
-	"github.com/goki/vgpu/vdraw"
-	"github.com/goki/vgpu/vgpu"
 	"goki.dev/gi/v2/oswin"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/ordmap"
+	"goki.dev/vgpu/v2/vdraw"
+	"goki.dev/vgpu/v2/vgpu"
 	"golang.org/x/exp/slices"
 	"golang.org/x/image/draw"
 )

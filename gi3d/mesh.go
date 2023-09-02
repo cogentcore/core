@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/goki/vgpu/vshape"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
+	"goki.dev/vgpu/v2/vshape"
 )
 
 // MeshName is a mesh name -- provides an automatic gui chooser for meshes.

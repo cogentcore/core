@@ -18,8 +18,6 @@ import (
 
 	mapp "github.com/goki/mobile/app"
 	"github.com/goki/mobile/event/size"
-	"github.com/goki/vgpu/vdraw"
-	"github.com/goki/vgpu/vgpu"
 	vk "github.com/goki/vulkan"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/oswin"
@@ -27,6 +25,8 @@ import (
 	"goki.dev/gi/v2/oswin/cursor"
 	"goki.dev/gi/v2/oswin/window"
 	"goki.dev/gi/v2/units"
+	"goki.dev/vgpu/v2/vdraw"
+	"goki.dev/vgpu/v2/vgpu"
 )
 
 // TODO: actually implement things for mobile app

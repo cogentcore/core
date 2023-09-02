@@ -20,8 +20,6 @@ import (
 	"time"
 
 	"github.com/goki/prof"
-	"github.com/goki/vgpu/vgpu"
-	"github.com/goki/vgpu/vphong"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/colormap"
 	"goki.dev/gi/v2/gist"
@@ -36,6 +34,8 @@ import (
 	"goki.dev/ki/v2/bitflag"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/vgpu/v2/vphong"
 )
 
 var (

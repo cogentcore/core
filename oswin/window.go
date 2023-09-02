@@ -13,10 +13,10 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"github.com/goki/vgpu/vdraw"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/ki/v2/bitflag"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/vgpu/v2/vdraw"
 )
 
 // Window is a double-buffered OS-specific hardware window.
