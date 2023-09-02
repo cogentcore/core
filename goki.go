@@ -9,7 +9,7 @@ import (
 
 	"goki.dev/goki/cmd"
 	"goki.dev/grease"
-	"goki.dev/grease/greasi"
+	"goki.dev/greasi"
 )
 
 func main() {
