@@ -4,7 +4,7 @@
 
 package cie
 
-import "github.com/goki/mat32"
+import "goki.dev/mat32/v2"
 
 // SRGBToLinearComp converts an sRGB rgb component to linear space (removes gamma).
 // Used in converting from sRGB to XYZ colors.

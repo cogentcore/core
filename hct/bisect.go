@@ -20,8 +20,8 @@
 package hct
 
 import (
-	"github.com/goki/mat32"
 	"goki.dev/cam/cam16"
+	"goki.dev/mat32/v2"
 )
 
 // double ChromaticAdaptation(double component) {

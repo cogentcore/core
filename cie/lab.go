@@ -4,7 +4,7 @@
 
 package cie
 
-import "github.com/goki/mat32"
+import "goki.dev/mat32/v2"
 
 // LABCompress does cube-root compression of the X, Y, Z components
 // prior to performing the LAB conversion

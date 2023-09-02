@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
 )
 
 // HSL represents the Hue [0..360], Saturation [0..1], and Luminance
