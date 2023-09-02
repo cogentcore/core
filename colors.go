@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/cam/hct"
-	"github.com/goki/cam/hsl"
-	"github.com/goki/mat32"
+	"goki.dev/mat32/v2"
+	"goki.dev/cam/hct"
+	"goki.dev/cam/hsl"
 )
 
 // IsNil returns whether the color is the nil initial default color

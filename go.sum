@@ -1,8 +1,8 @@
-github.com/goki/cam v0.9.8 h1:M0Gu0EfJ9mCUmkkWIyjMZJJ0AF0jmct2V6UNTHXHp7M=
-github.com/goki/cam v0.9.8/go.mod h1:V5MnobLqdqtH+OO6ZjtjGbHgMMzWivBwCLuQwmuM46Y=
-github.com/goki/mat32 v1.0.18 h1:LS53De0LEJAfHZrZwdTvAOfIDzav/PDaDZMpEiyP9w8=
-github.com/goki/mat32 v1.0.18/go.mod h1:S3pnfo7ye7yb8GvqE9If4tMel5UxTzhfCGZWCFiRyvI=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
+goki.dev/cam v0.9.10 h1:99gpw2lqRyCnc9CAPs7WK6DUZvxETHz0kIET1WFb3Ig=
+goki.dev/cam v0.9.10/go.mod h1:lc+iHUmlktsA6FmHxU4JGVB6bZrqsw53DGOqfSRbC8A=
+goki.dev/mat32/v2 v2.0.0-dev0.0.0 h1:7FOCMazItpTSwEyVjuwBGp9j1y1xOyiNHMXvUAXaOjs=
+goki.dev/mat32/v2 v2.0.0-dev0.0.0/go.mod h1:AUbsBba0wfzN5XrHOuinIAv2D+n6CAPVW90pzrJY2ME=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/image v0.11.0 h1:ds2RoQvBvYTiJkwpSFDwCcDFNX7DqjL2WsUgTNk0Ooo=
