@@ -22,7 +22,7 @@ package ordmap
 import (
 	"fmt"
 
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 // KeyVal represents the Key and Value
