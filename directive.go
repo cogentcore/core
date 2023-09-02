@@ -4,25 +4,25 @@
 
 package grease
 
-import (
-	"fmt"
-	"reflect"
-)
+import "strings"
 
-// SetFromDirective sets Config values from a comment directive,
-// based on the field names in the Config struct.
-// Returns any args that did not start with a `-` flag indicator.
-// For more robust error processing, it is assumed that all flagged args (-)
-// must refer to fields in the config, so any that fail to match trigger
-// an error.  Errors can also result from parsing.
-// Errors are automatically logged because these are user-facing.
-func SetFromDirective(cfg any, args []string) (nonFlags []string, err error) {
-	allArgs := make(map[string]reflect.Value)
-	CommandArgs(allArgs) // need these to not trigger not-found errors
-	FieldArgNames(cfg, allArgs)
-	nonFlags, err = ParseArgs(cfg, args, allArgs, true)
-	if err != nil {
-		fmt.Println(Usage(cfg))
+// ParseDirective parses a comment directive and returns
+// the tool, the directive, and true if the comment is
+// a directive, and "", "", false if it is not. Directives
+// are of the following form (the slashes are optional):
+//
+//	//tool:directive...
+func ParseDirective(comment string) (tool, directive string, has bool) {
+	comment = strings.TrimPrefix(comment, "//")
+	before, after, found := strings.Cut(comment, ":")
+	if !found {
+		return
+	}
+	has = true
+	tool = before
+	fields := strings.Fields(after)
+	if len(fields) != 0 {
+		directive = fields[0]
 	}
 	return
 }
