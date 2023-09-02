@@ -4,12 +4,12 @@
 
 package cmd
 
-import goki "goki.dev/goki/tools"
+import "goki.dev/goki/tools"
 
 // InitCmd initializes the ".goki" directory
 // and the configuration file in the current directory
 func (a *App) InitCmd() error {
-	return goki.Init()
+	return tools.Init(a.Config())
 }
 
 // func init() {

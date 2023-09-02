@@ -19,8 +19,10 @@ type Config struct {
 	// the description of the project
 	Desc string `desc:"the description of the project"`
 
-	// the version of the project
-	Version string `desc:"the version of the project"`
+	// [def: v0.0.0] the version of the project
+	Version string `def:"v0.0.0" desc:"the version of the project"`
+
+	// TODO: add def TypeApp for type once fix SetString
 
 	// the type of the project (app/library)
 	Type Types `desc:"the type of the project (app/library)"`
@@ -45,8 +47,8 @@ type Config struct {
 // for the build command.
 type Build struct {
 
-	// the path of the package to build
-	Package string `desc:"the path of the package to build"`
+	// [def: .] the path of the package to build
+	Package string `def:"." desc:"the path of the package to build"`
 
 	// the target platforms to build executables for
 	Platform []Platform `desc:"the target platforms to build executables for"`
@@ -56,14 +58,14 @@ type Build struct {
 // for the colorgen command.
 type Colorgen struct {
 
-	// the source file path to generate the color schemes from
-	Source string `desc:"the source file path to generate the color schemes from"`
+	// [def: colors.xml] the source file path to generate the color schemes from
+	Source string `def:"colors.xml" desc:"the source file path to generate the color schemes from"`
 
-	// the output file to store the resulting Go file in
-	Output string `desc:"the output file to store the resulting Go file in"`
+	// [def: colorgen.go] the output file to store the resulting Go file in
+	Output string `def:"colorgen.go" desc:"the output file to store the resulting Go file in"`
 
-	// the package in which the color schemes will be used
-	Package string `nest:"+" desc:"the package in which the color schemes will be used"`
+	// [def: main] the package in which the color schemes will be used
+	Package string `def:"main" nest:"+" desc:"the package in which the color schemes will be used"`
 
 	// the comment for the color schemes variable
 	Comment string `desc:"the comment for the color schemes variable"`
@@ -73,8 +75,8 @@ type Colorgen struct {
 // for the install command.
 type Install struct {
 
-	// the name/path of the package to install
-	Package string `nest:"+" desc:"the name/path of the package to install"`
+	// [def: .] the name/path of the package to install
+	Package string `def:"." nest:"+" desc:"the name/path of the package to install"`
 
 	// the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)
 	Target []string `desc:"the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)"`
@@ -84,21 +86,21 @@ type Install struct {
 // for the log command.
 type Log struct {
 
-	// the target platform to view the logs for (ios or android)
-	Target string `nest:"+" desc:"the target platform to view the logs for (ios or android)"`
+	// [def: android] the target platform to view the logs for (ios or android)
+	Target string `def:"android" nest:"+" desc:"the target platform to view the logs for (ios or android)"`
 
-	// whether to keep the previous log messages or clear them
-	Keep bool `desc:"whether to keep the previous log messages or clear them"`
+	// [def: false] whether to keep the previous log messages or clear them
+	Keep bool `def:"false" desc:"whether to keep the previous log messages or clear them"`
 
-	// messages not generated from your app equal to or above this log level will be shown
-	All string `desc:"messages not generated from your app equal to or above this log level will be shown"`
+	// [def: F] messages not generated from your app equal to or above this log level will be shown
+	All string `def:"F" desc:"messages not generated from your app equal to or above this log level will be shown"`
 }
 
 type Release struct {
 
-	// the Go file to store version information in
-	VersionFile string `desc:"the Go file to store version information in"`
+	// [def: version.go] the Go file to store version information in
+	VersionFile string `def:"version.go" desc:"the Go file to store version information in"`
 
-	// the Go package in which the version file will be stored
-	Package string `nest:"+" desc:"the Go package in which the version file will be stored"`
+	// [def: main] the Go package in which the version file will be stored
+	Package string `def:"main" nest:"+" desc:"the Go package in which the version file will be stored"`
 }
