@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 
 	"github.com/goki/ki/dirs"
@@ -35,6 +36,11 @@ var (
 
 	// Help is variable target for -help or -h args
 	Help bool
+
+	// SearchUp indicates whether to search up the filesystem
+	// for the default config file (checking the provided default
+	// config file location relative to each directory up the tree)
+	SearchUp bool
 )
 
 // Config is the overall config setting function, processing config files
@@ -78,6 +84,20 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 		if nd == 0 {
 			err = errors.New("grease.Config: no config file or defaultFile specified")
 			return nil, err
+		}
+		if SearchUp {
+			wd, err := os.Getwd()
+			if err != nil {
+				return nil, fmt.Errorf("error getting current directory: %w", err)
+			}
+			for {
+				wd = filepath.Dir(wd)
+				fmt.Println(wd)
+				IncludePaths = append(IncludePaths, wd)
+				if wd == filepath.Dir(wd) {
+					break
+				}
+			}
 		}
 		for _, fn := range defaultFile {
 			_, err := dirs.FindFileOnPaths(IncludePaths, fn)
