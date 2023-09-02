@@ -7,7 +7,7 @@ require (
 	github.com/alecthomas/chroma/v2 v2.8.0
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/h2non/filetype v1.1.3
-	goki.dev/ki/v2 v2.0.0-dev0.0.2
+	goki.dev/ki/v2 v2.0.0-dev0.0.3
 	goki.dev/prof/v2 v2.0.0-dev0.0.2
 	golang.org/x/tools v0.12.0
 )
