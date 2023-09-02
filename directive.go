@@ -12,8 +12,8 @@ import (
 )
 
 // ParseDirective parses a comment directive and returns
-// the tool, the directive, and true if the comment is
-// a directive, and "", "", false if it is not. Directives
+// the tool, the directive, and the arguments if the comment is
+// a directive, and zero values for everything if not. Directives
 // are of the following form (the slashes are optional):
 //
 //	//tool:directive arg0 -arg1=go ...
