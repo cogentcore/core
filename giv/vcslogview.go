@@ -5,12 +5,12 @@
 package giv
 
 import (
-	"github.com/goki/vci"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/icons"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
+	"goki.dev/vci/v2"
 )
 
 // VCSLogView is a view of the variables

@@ -14,7 +14,7 @@ require (
 	github.com/goki/kigen v1.0.2
 	goki.dev/mat32/v2 v1.0.14
 	goki.dev/pi/v2 v1.0.23
-	github.com/goki/vci v1.0.1
+	goki.dev/vci/v2 v1.0.1
 	goki.dev/vgpu/v2 v1.0.20
 	github.com/goki/vulkan v1.0.5
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef

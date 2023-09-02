@@ -16,7 +16,6 @@ require (
 	github.com/go-gl/mathgl v1.1.0
 	github.com/goki/freetype v1.0.1
 	github.com/goki/go-difflib v1.2.1
-	github.com/goki/vci v1.0.1
 	github.com/goki/vulkan v1.0.6
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -31,6 +30,7 @@ require (
 	goki.dev/ordmap v0.5.0
 	goki.dev/pi/v2 v2.0.0-dev0.0.1
 	goki.dev/prof/v2 v2.0.0-dev0.0.2
+	goki.dev/vci/v2 v2.0.0-dev0.0.0
 	goki.dev/vgpu/v2 v2.0.0-dev0.0.2
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 	golang.org/x/image v0.11.0
@@ -45,7 +45,6 @@ require (
 	github.com/akutz/sortfold v0.2.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
-	github.com/goki/ki v1.1.11 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect

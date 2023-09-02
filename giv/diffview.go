@@ -10,7 +10,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/goki/vci"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gist"
@@ -26,6 +25,7 @@ import (
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/token"
+	"goki.dev/vci/v2"
 )
 
 // DiffFiles shows the diffs between this file as the A file, and other file as B file,
