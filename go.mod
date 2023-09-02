@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	goki.dev/gi/v2 v2.0.0-dev0.0.1
-	goki.dev/grease v0.8.6
+	goki.dev/grease v0.8.7
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
 )
 
