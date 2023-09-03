@@ -40,11 +40,11 @@ jobs:
 
     - name: Build
       run: |
-        make build
+        go build -v ./...
 
     - name: Test
       run: |
-        make test
+        go test ./...
 
     - name: Upload-Coverage
       if: matrix.platform == 'ubuntu-latest'
