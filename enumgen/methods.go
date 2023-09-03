@@ -351,6 +351,28 @@ func (i *%[1]s) SetString(s string) error {
 // Arguments to format are:
 //
 //	[1]: type name
+const StringSetStringBitFlagMethod = `// SetString sets the %[1]s value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *%[1]s) SetString(s string) error {
+	*i = 0
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _%[1]sNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _%[1]sNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg+" is not a valid value for type %[1]s")
+		}
+	}
+	return nil
+}
+`
+
+// Arguments to format are:
+//
+//	[1]: type name
 const StringInt64Method = `// Int64 returns the %[1]s value as an int64.
 func (i %[1]s) Int64() int64 {
 	return int64(i)
@@ -456,7 +478,7 @@ func (i %[1]s) IsValid() bool {
 `
 
 // BuildBasicExtras builds methods common to all types, like Desc and SetString.
-func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThreshold int) {
+func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag bool, runsThreshold int) {
 	// At this moment, either "g.declareIndexAndNameVars()" or "g.declareNameVars()" has been called
 
 	// Print the slice of values
@@ -483,7 +505,11 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, runsThresh
 	g.PrintDescSlice(runs, typeName)
 
 	// Print the basic extra methods
-	g.Printf(StringSetStringMethod, typeName)
+	if isBitFlag {
+		g.Printf(StringSetStringBitFlagMethod, typeName)
+	} else {
+		g.Printf(StringSetStringMethod, typeName)
+	}
 	g.Printf(StringInt64Method, typeName)
 	g.Printf(StringSetInt64Method, typeName)
 	g.Printf(StringDescMethod, typeName)

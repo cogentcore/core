@@ -50,13 +50,40 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
-func TestGeneratedCode(t *testing.T) {
+func TestStringSetString(t *testing.T) {
 	val := testdata.States(0)
 	a, h, f := testdata.Active, testdata.Focused, testdata.Hovered
 	val.SetFlag(true, &a, &h, &f)
+	orig := val
 	want := "focused|vered|currently-being-pressed-by-user"
 	have := val.String()
 	if have != want {
 		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
+	}
+	err := val.SetString(have)
+	if err != nil {
+		t.Errorf("error setting value from string %q: %v", have, err)
+	}
+	if val != orig {
+		t.Errorf("new value %v after going to and from string not the same as old value %v", val, orig)
+	}
+}
+
+func TestSetStringString(t *testing.T) {
+	src := "enabled|focused|selected"
+	want := testdata.States(0)
+	e, f, s := testdata.Enabled, testdata.Focused, testdata.Selected
+	want.SetFlag(true, &e, &f, &s)
+	have := testdata.States(0)
+	err := have.SetString(src)
+	if err != nil {
+		t.Errorf("error setting value from string %q: %v", src, err)
+	}
+	if have != want {
+		t.Errorf("expected value %v from string %q, not %v", want, src, have)
+	}
+	str := have.String()
+	if str != src {
+		t.Errorf("expected string value for %d to be %q but got %q", have, src, str)
 	}
 }

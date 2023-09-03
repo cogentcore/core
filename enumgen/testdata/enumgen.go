@@ -334,16 +334,18 @@ var _StatesDescs = []string{
 // string representation, and returns an
 // error if the string is invalid.
 func (i *States) SetString(s string) error {
-	if val, ok := _StatesNameToValueMap[s]; ok {
-		*i = val
-		return nil
+	*i = 0
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _StatesNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _StatesNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type States")
+		}
 	}
-
-	if val, ok := _StatesNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " does not belong to States values")
+	return nil
 }
 
 // Int64 returns the States value as an int64.

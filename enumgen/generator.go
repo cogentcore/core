@@ -297,7 +297,7 @@ func (g *Generator) Generate() error {
 
 		g.BuildNoOpOrderChangeDetect(runs, typeName)
 
-		g.BuildBasicExtras(runs, typeName, runsThreshold)
+		g.BuildBasicExtras(runs, typeName, typ.IsBitFlag, runsThreshold)
 		if typ.IsBitFlag {
 			g.BuildBitFlagMethods(runs, typeName)
 		}
