@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"go/ast"
 	"os"
 	"path/filepath"
 	"strings"
@@ -65,15 +66,8 @@ func (g *Generator) AddPackage(pkg *packages.Package) {
 
 	for _, file := range pkg.Syntax {
 		// ignore generated code
-		isGen := false
-		for _, c := range file.Comments {
-			if strings.Contains(c.Text(), "; DO NOT EDIT.") {
-				isGen = true
-				break
-			}
-		}
-		if isGen {
-			continue
+		if ast.IsGenerated(file) {
+			break
 		}
 		// need to use append and 0 initial length
 		// because we don't know if it has generated code
