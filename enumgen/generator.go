@@ -290,7 +290,7 @@ func (g *Generator) Generate() error {
 		case len(runs) == 1:
 			g.BuildOneRun(runs, typeName, typ.IsBitFlag)
 		case len(runs) <= runsThreshold:
-			g.BuildMultipleRuns(runs, typeName)
+			g.BuildMultipleRuns(runs, typeName, typ.IsBitFlag)
 		default:
 			g.BuildMap(runs, typeName)
 		}

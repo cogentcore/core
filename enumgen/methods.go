@@ -239,9 +239,31 @@ func (i %[1]s) String() string {
 }
 `
 
+// The switch statement default case
+// for bit flags with multiple runs.
+// Arguments to format are:
+//
+//	[1]: type name
+const StringMultipleRunsBitFlagDefault = `	default:
+		str := ""
+		for _, ie := range _%[1]sValues {
+			if i.HasFlag(&ie) {
+				ies := ie.String()
+				if str == "" {
+					str = ies
+				} else {
+					str += "|" + ies
+				}
+			}
+		}
+		return str
+	}
+}
+`
+
 // BuildMultipleRuns generates the variables and String method for multiple runs of contiguous values.
 // For this pattern, a single Printf format won't do.
-func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string) {
+func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string, isBitFlag bool) {
 	g.Printf("\n")
 	g.DeclareIndexAndNameVars(runs, typeName)
 	g.Printf(`
@@ -263,10 +285,14 @@ func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string) {
 		g.Printf("\t\treturn _%sName_%d[_%sIndex_%d[i]:_%sIndex_%d[i+1]]\n",
 			typeName, i, typeName, i, typeName, i)
 	}
-	g.Printf("\tdefault:\n")
-	g.Printf("\t\treturn \"%s(\" + strconv.FormatInt(int64(i), 10) + \")\"\n", typeName)
-	g.Printf("\t}\n")
-	g.Printf("}\n")
+	if isBitFlag {
+		g.Printf(StringMultipleRunsBitFlagDefault, typeName)
+	} else {
+		g.Printf("\tdefault:\n")
+		g.Printf("\t\treturn \"%s(\" + strconv.FormatInt(int64(i), 10) + \")\"\n", typeName)
+		g.Printf("\t}\n")
+		g.Printf("}\n")
+	}
 }
 
 // BuildMap handles the case where the space is so sparse a map is a reasonable fallback.

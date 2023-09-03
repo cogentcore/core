@@ -25,7 +25,7 @@ type States int64 //enums:bitflag -no-text -line-comment -transform kebab -sql -
 
 const (
 	// Enabled indicates the widget is enabled
-	Enabled States = iota + 1
+	Enabled States = 2*iota + 1
 	// Disabled indicates the widget is disabled
 	Disabled //NotEnabled
 	// Focused indicates the widget has keyboard focus

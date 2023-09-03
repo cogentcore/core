@@ -235,32 +235,65 @@ func (i *Days) UnmarshalGQL(value any) error {
 	return i.SetString(str)
 }
 
-const _StatesName = "enablednot-enabledfocusedveredcurrently-being-pressed-by-useractively-focusedselected"
+const (
+	_StatesName_0      = "enabled"
+	_StatesLowerName_0 = "enabled"
+	_StatesName_1      = "not-enabled"
+	_StatesLowerName_1 = "not-enabled"
+	_StatesName_2      = "focused"
+	_StatesLowerName_2 = "focused"
+	_StatesName_3      = "vered"
+	_StatesLowerName_3 = "vered"
+	_StatesName_4      = "currently-being-pressed-by-user"
+	_StatesLowerName_4 = "currently-being-pressed-by-user"
+	_StatesName_5      = "actively-focused"
+	_StatesLowerName_5 = "actively-focused"
+	_StatesName_6      = "selected"
+	_StatesLowerName_6 = "selected"
+)
 
-var _StatesIndex = [...]uint8{0, 7, 18, 25, 30, 61, 77, 85}
-
-const _StatesLowerName = "enablednot-enabledfocusedveredcurrently-being-pressed-by-useractively-focusedselected"
+var (
+	_StatesIndex_0 = [...]uint8{0, 7}
+	_StatesIndex_1 = [...]uint8{0, 11}
+	_StatesIndex_2 = [...]uint8{0, 7}
+	_StatesIndex_3 = [...]uint8{0, 5}
+	_StatesIndex_4 = [...]uint8{0, 31}
+	_StatesIndex_5 = [...]uint8{0, 16}
+	_StatesIndex_6 = [...]uint8{0, 8}
+)
 
 // String returns the string representation
 // of this States value.
 func (i States) String() string {
-	oi := i
-	i -= 1
-	if !(i < 0 || i >= States(len(_StatesIndex)-1)) {
-		return _StatesName[_StatesIndex[i]:_StatesIndex[i+1]]
-	}
-	str := ""
-	for _, ie := range _StatesValues {
-		if oi.HasFlag(&ie) {
-			ies := ie.String()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
+	switch {
+	case i == 1:
+		return _StatesName_0
+	case i == 3:
+		return _StatesName_1
+	case i == 5:
+		return _StatesName_2
+	case i == 7:
+		return _StatesName_3
+	case i == 9:
+		return _StatesName_4
+	case i == 11:
+		return _StatesName_5
+	case i == 13:
+		return _StatesName_6
+	default:
+		str := ""
+		for _, ie := range _StatesValues {
+			if i.HasFlag(&ie) {
+				ies := ie.String()
+				if str == "" {
+					str = ies
+				} else {
+					str += "|" + ies
+				}
 			}
 		}
+		return str
 	}
-	return str
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
@@ -268,55 +301,55 @@ func (i States) String() string {
 func _StatesNoOp() {
 	var x [1]struct{}
 	_ = x[Enabled-(1)]
-	_ = x[Disabled-(2)]
-	_ = x[Focused-(3)]
-	_ = x[Hovered-(4)]
-	_ = x[Active-(5)]
-	_ = x[ActivelyFocused-(6)]
-	_ = x[Selected-(7)]
+	_ = x[Disabled-(3)]
+	_ = x[Focused-(5)]
+	_ = x[Hovered-(7)]
+	_ = x[Active-(9)]
+	_ = x[ActivelyFocused-(11)]
+	_ = x[Selected-(13)]
 }
 
 var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, ActivelyFocused, Selected}
 
 // StatesN is the highest valid value
 // for type States, plus one.
-const StatesN States = 8
+const StatesN States = 14
 
 var _StatesNameToValueMap = map[string]States{
-	_StatesName[0:7]:        Enabled,
-	_StatesLowerName[0:7]:   Enabled,
-	_StatesName[7:18]:       Disabled,
-	_StatesLowerName[7:18]:  Disabled,
-	_StatesName[18:25]:      Focused,
-	_StatesLowerName[18:25]: Focused,
-	_StatesName[25:30]:      Hovered,
-	_StatesLowerName[25:30]: Hovered,
-	_StatesName[30:61]:      Active,
-	_StatesLowerName[30:61]: Active,
-	_StatesName[61:77]:      ActivelyFocused,
-	_StatesLowerName[61:77]: ActivelyFocused,
-	_StatesName[77:85]:      Selected,
-	_StatesLowerName[77:85]: Selected,
+	_StatesName_0[0:7]:       Enabled,
+	_StatesLowerName_0[0:7]:  Enabled,
+	_StatesName_1[0:11]:      Disabled,
+	_StatesLowerName_1[0:11]: Disabled,
+	_StatesName_2[0:7]:       Focused,
+	_StatesLowerName_2[0:7]:  Focused,
+	_StatesName_3[0:5]:       Hovered,
+	_StatesLowerName_3[0:5]:  Hovered,
+	_StatesName_4[0:31]:      Active,
+	_StatesLowerName_4[0:31]: Active,
+	_StatesName_5[0:16]:      ActivelyFocused,
+	_StatesLowerName_5[0:16]: ActivelyFocused,
+	_StatesName_6[0:8]:       Selected,
+	_StatesLowerName_6[0:8]:  Selected,
 }
 
 var _StatesNames = []string{
-	_StatesName[0:7],
-	_StatesName[7:18],
-	_StatesName[18:25],
-	_StatesName[25:30],
-	_StatesName[30:61],
-	_StatesName[61:77],
-	_StatesName[77:85],
+	_StatesName_0[0:7],
+	_StatesName_1[0:11],
+	_StatesName_2[0:7],
+	_StatesName_3[0:5],
+	_StatesName_4[0:31],
+	_StatesName_5[0:16],
+	_StatesName_6[0:8],
 }
 
 var _StatesDescMap = map[States]string{
-	1: _StatesDescs[0],
-	2: _StatesDescs[1],
-	3: _StatesDescs[2],
-	4: _StatesDescs[3],
-	5: _StatesDescs[4],
-	6: _StatesDescs[5],
-	7: _StatesDescs[6],
+	1:  _StatesDescs[0],
+	3:  _StatesDescs[1],
+	5:  _StatesDescs[2],
+	7:  _StatesDescs[3],
+	9:  _StatesDescs[4],
+	11: _StatesDescs[5],
+	13: _StatesDescs[6],
 }
 
 var _StatesDescs = []string{
