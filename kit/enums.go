@@ -763,18 +763,12 @@ func EnumUnmarshalText(eval any, b []byte) error {
 // Following is for testing..
 
 // TestFlags are for testing -- need the generated string code, so putting in here
-type TestFlags int32
+type TestFlags int64 //enums:enum -trimprefix Test
 
 const (
 	TestFlagsNil TestFlags = iota
 	TestFlag1
 	TestFlag2
-	TestFlagsN
 )
 
-//go:generate stringer -type=TestFlags
-
-var TypeTestFlags = Enums.AddEnumAltLower(TestFlagsN, NotBitFlag, nil, "Test")
-
-func (ev TestFlags) MarshalJSON() ([]byte, error)  { return EnumMarshalJSON(ev) }
-func (ev *TestFlags) UnmarshalJSON(b []byte) error { return EnumUnmarshalJSON(ev, b) }
+//go:generate goki generate
