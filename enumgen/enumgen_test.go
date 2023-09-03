@@ -21,6 +21,7 @@ func TestGenerate(t *testing.T) {
 	}
 	c.Dir = "./testdata"
 	c.Output = "./testdata/enumgen.go"
+	c.JSON = true
 	err = Generate(c)
 	if err != nil {
 		t.Errorf("error while generating: %v", err)

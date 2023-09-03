@@ -4,6 +4,7 @@ package testdata
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -416,6 +417,20 @@ func (i *States) SetFlag(on bool, f ...enums.BitFlag) {
 		in &^= mask
 		atomic.StoreInt64((*int64)(i), in)
 	}
+}
+
+// MarshalJSON implements the [json.Marshaler] interface.
+func (i States) MarshalJSON() ([]byte, error) {
+	return json.Marshal(i.String())
+}
+
+// UnmarshalJSON implements the [json.Unmarshaler] interface.
+func (i *States) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return errors.New("States should be a string, but got " + string(data) + "instead")
+	}
+	return i.SetString(s)
 }
 
 // Scan implements the [driver.Valuer] interface.
