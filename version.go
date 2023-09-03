@@ -4,9 +4,9 @@ package grease
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.8.7"
+	Version = "v0.8.8"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "7896416"
+	GitCommit = "f785b8b"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-09-02 22:47"
+	VersionDate = "2023-09-03 02:33"
 )
