@@ -68,7 +68,7 @@ type Node struct {
 // Nodes can also use type properties e.g., StructViewFields key with props
 // inside that to set view properties for types, e.g., to hide or show
 // some of these base Node flags.
-var TypeNode = kit.Types.AddType(&Node{}, Props{EnumTypeFlag: TypeFlags})
+var TypeNode = kit.Types.AddType(&Node{}, nil) // , Props{EnumTypeFlag: TypeFlags}) // ReorgTODO: figure out EnumTypeFlag prop
 
 // check implementation of [Ki] interface
 var _ = Ki(&Node{})
