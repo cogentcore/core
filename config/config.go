@@ -106,4 +106,7 @@ type Generate struct {
 
 	// the enum generation configuration options passed to enumgen
 	Enumgen econfig.Config `nest:"+" desc:"the enum generation configuration options passed to enumgen"`
+
+	// [def: .] the source directory
+	Dir string `def:"." desc:"the source directory"`
 }

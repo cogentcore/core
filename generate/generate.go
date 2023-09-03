@@ -8,6 +8,8 @@
 package generate
 
 import (
+	"fmt"
+
 	"goki.dev/enums/enumgen"
 	"goki.dev/goki/config"
 )
@@ -16,5 +18,8 @@ import (
 // that does all of the generation according to the
 // given config info.
 func Generate(c *config.Config) error {
-	return enumgen.Generate(&c.Generate.Enumgen)
+	err := enumgen.Generate(&c.Generate.Enumgen)
+	if err != nil {
+		return fmt.Errorf("error running enumgen: %w", err)
+	}
 }
