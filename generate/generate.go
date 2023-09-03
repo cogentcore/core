@@ -7,11 +7,14 @@
 // for GoKi code.
 package generate
 
-import "goki.dev/goki/config"
+import (
+	"goki.dev/enums/enumgen"
+	"goki.dev/goki/config"
+)
 
 // Generate is the main entry point to code generation
 // that does all of the generation according to the
 // given config info.
 func Generate(c *config.Config) error {
-	return nil
+	return enumgen.Generate(&c.Generate.Enumgen)
 }

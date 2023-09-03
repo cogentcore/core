@@ -6,6 +6,8 @@
 // structs for the GoKi tool.
 package config
 
+import econfig "goki.dev/enums/enumgen/config"
+
 // TODO: make all of the target fields enums
 
 // Config is the main config struct
@@ -41,10 +43,11 @@ type Config struct {
 
 	// the configuration options for the release command
 	Release Release `desc:"the configuration options for the release command"`
+
+	// the configuration options for the generate command
+	Generate Generate `desc:"the configuration options for the generate command"`
 }
 
-// Build contains the configuration options
-// for the build command.
 type Build struct {
 
 	// [def: .] the path of the package to build
@@ -54,8 +57,6 @@ type Build struct {
 	Platform []Platform `desc:"the target platforms to build executables for"`
 }
 
-// Colorgen contains the configuration options
-// for the colorgen command.
 type Colorgen struct {
 
 	// [def: colors.xml] the source file path to generate the color schemes from
@@ -71,8 +72,6 @@ type Colorgen struct {
 	Comment string `desc:"the comment for the color schemes variable"`
 }
 
-// Install contains the configuration options
-// for the install command.
 type Install struct {
 
 	// [def: .] the name/path of the package to install
@@ -82,8 +81,6 @@ type Install struct {
 	Target []string `desc:"the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)"`
 }
 
-// Log contains the configuration options
-// for the log command.
 type Log struct {
 
 	// [def: android] the target platform to view the logs for (ios or android)
@@ -103,4 +100,10 @@ type Release struct {
 
 	// [def: main] the Go package in which the version file will be stored
 	Package string `def:"main" nest:"+" desc:"the Go package in which the version file will be stored"`
+}
+
+type Generate struct {
+
+	// the enum generation configuration options passed to enumgen
+	Enumgen econfig.Config `desc:"the enum generation configuration options passed to enumgen"`
 }
