@@ -44,8 +44,10 @@ const (
 type Languages int64 //enums:bitflag
 
 const (
+	// Go is the best programming language
 	Go Languages = 4*iota + 6
 	Python
+	// JavaScript is the worst programming language
 	JavaScript
 	Dart
 	Rust

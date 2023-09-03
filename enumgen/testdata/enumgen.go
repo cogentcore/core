@@ -633,9 +633,9 @@ var _LanguagesDescMap = map[Languages]string{
 }
 
 var _LanguagesDescs = []string{
+	`Go is the best programming language`,
 	``,
-	``,
-	``,
+	`JavaScript is the worst programming language`,
 	``,
 	``,
 	``,
