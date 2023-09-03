@@ -431,7 +431,7 @@ const StringValuesMethod = `// Values returns all possible values of
 func (i %[1]s) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_%[1]sValues))
 	for i, d := range _%[1]sValues {
-		res[i] = &d
+		res[i] = d
 	}
 	return res 
 }
