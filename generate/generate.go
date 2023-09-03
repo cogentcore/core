@@ -23,4 +23,10 @@ func Generate(c *config.Config) error {
 		return fmt.Errorf("error running enumgen: %w", err)
 	}
 
+	g := NewGenerator(c)
+	err = g.ParsePackage()
+	if err != nil {
+		return fmt.Errorf("goki generate: Generate: error parsing package: %w", err)
+	}
+	return nil
 }
