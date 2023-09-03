@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"goki.dev/enums/enumgen/config"
+	"goki.dev/grease"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/imports"
 )
@@ -171,28 +172,45 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		return true, nil
 	}
 	for _, c := range typ.Comment.List {
-		if strings.HasPrefix(c.Text, "//enums:") {
-			d := strings.TrimPrefix(c.Text, "//enums:")
-			ident, ok := typ.Type.(*ast.Ident)
-			if !ok {
-				return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", typ.Type, typ.Type)
-			}
-			switch d {
-			case "enum":
-				if !AllowedEnumTypes[ident.Name] {
-					return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)
-				}
-				g.Types = append(g.Types, Type{Type: typ, IsBitFlag: false})
-			case "bitflag":
-				if ident.Name != "int64" {
-					return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
-				}
-				g.Types = append(g.Types, Type{Type: typ, IsBitFlag: true})
-				g.HasBitFlag = true
-			default:
-				return false, errors.New("unrecognized enums directive: '" + c.Text + "'")
-			}
+		tool, directive, args, has, err := grease.ParseDirective(c.Text)
+		if err != nil {
+			return false, fmt.Errorf("error parsing comment directive %q: %w", c.Text, err)
 		}
+		if !has {
+			continue
+		}
+		if tool != "enums" {
+			continue
+		}
+		if directive != "enum" && directive != "bitflag" {
+			return false, fmt.Errorf("unrecognized enums directive %q (from %q)", directive, c.Text)
+		}
+
+		ident, ok := typ.Type.(*ast.Ident)
+		if !ok {
+			return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", typ.Type, typ.Type)
+		}
+		cfg := &config.Config{}
+		*cfg = *g.Config
+		_, err = grease.SetFromArgs(cfg, args)
+		if err != nil {
+			return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
+		}
+
+		switch directive {
+		case "enum":
+			if !AllowedEnumTypes[ident.Name] {
+				return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)
+			}
+			g.Types = append(g.Types, Type{Type: typ, IsBitFlag: false, Config: cfg})
+		case "bitflag":
+			if ident.Name != "int64" {
+				return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
+			}
+			g.Types = append(g.Types, Type{Type: typ, IsBitFlag: true, Config: cfg})
+			g.HasBitFlag = true
+		}
+
 	}
 	return true, nil
 }

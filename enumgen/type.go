@@ -11,10 +11,15 @@
 
 package enumgen
 
-import "go/ast"
+import (
+	"go/ast"
+
+	"goki.dev/enums/enumgen/config"
+)
 
 // Type represents a parsed enum type.
 type Type struct {
-	Type      *ast.TypeSpec // The standard AST type value
-	IsBitFlag bool          // Whether the type is a bit flag type
+	Type      *ast.TypeSpec  // The standard AST type value
+	IsBitFlag bool           // Whether the type is a bit flag type
+	Config    *config.Config // Configuration information set in the comment directive for the type; is initialized to generator config info first
 }
