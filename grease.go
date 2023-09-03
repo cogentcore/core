@@ -25,7 +25,7 @@ var (
 
 // Run runs the given app with the given default
 // configuration file paths. It does not run the
-// GUI; see [greasi.Run] for that. The app should be
+// GUI; see [goki.dev/greasi.Run] for that. The app should be
 // a pointer, and configuration options should
 // be defined as fields on the app type. Also,
 // commands should be defined as methods on the
@@ -35,13 +35,22 @@ var (
 //
 //	func (a *App) BuildCmd() error
 //
+// If no command is provided, Run calls the
+// method "RootCmd" if it exists. If it does
+// not exist, or the command provided is "help"
+// and "HelpCmd" does not exist, Run prints
+// the result of [Usage].
 // Run uses [os.Args] for its arguments.
 func Run(app any, defaultFile ...string) error {
 	leftovers, err := Config(app, defaultFile...)
 	if err != nil {
 		return fmt.Errorf("error configuring app: %w", err)
 	}
-	cmd := leftovers[0]
+	// root command if no other command is specified
+	cmd := "root"
+	if len(leftovers) > 0 {
+		cmd = leftovers[0]
+	}
 	err = RunCmd(app, cmd)
 	if err != nil {
 		return fmt.Errorf("error running command %q: %w", cmd, err)
@@ -60,7 +69,7 @@ func RunCmd(app any, cmd string) error {
 	val := reflect.ValueOf(app)
 	meth := val.MethodByName(name)
 	if !meth.IsValid() {
-		if cmd == "help" { // handle help here so that people can still override help function if they want
+		if cmd == "root" || cmd == "help" { // handle root and help here so that people can still override them if they want to
 			fmt.Println(Usage(app))
 			os.Exit(0)
 		}

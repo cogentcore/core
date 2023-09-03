@@ -47,6 +47,9 @@ func CommandUsage(app any, b *strings.Builder) {
 		m := typ.Method(i)
 		if strings.HasSuffix(m.Name, "Cmd") {
 			cmd := strcase.ToKebab(strings.TrimSuffix(m.Name, "Cmd"))
+			if cmd == "root" { // ignore the root command, as it is a special case if no command is specified
+				continue
+			}
 			b.WriteString(cmd)
 			b.WriteString("\n")
 		}
@@ -88,7 +91,7 @@ func FlagUsage(app any, path string, b *strings.Builder) {
 			b.WriteString(desc)
 			def, ok := f.Tag.Lookup("def")
 			if ok && def != "" {
-				b.WriteString(fmt.Sprintf(" (default %s)", def))
+				b.WriteString(fmt.Sprintf(" (default: %s)", def))
 			}
 		}
 		b.WriteString("\n")
