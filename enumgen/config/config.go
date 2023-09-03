@@ -38,8 +38,8 @@ type Config struct {
 	// whether to generate GraphQL marshaling methods for gqlgen
 	GQLGEN bool `desc:"whether to generate GraphQL marshaling methods for gqlgen"`
 
-	// if specified, the enum item transformation method (eg: snake_case)
-	Transform string `desc:"if specified, the enum item transformation method (eg: snake_case)"`
+	// if specified, the enum item transformation method (eg: snake, kebab, lower)
+	Transform string `desc:"if specified, the enum item transformation method (eg: snake, kebab, lower)"`
 
 	// if specified, a comma-separated list of prefixes to trim from each item
 	TrimPrefix string `desc:"if specified, a comma-separated list of prefixes to trim from each item"`

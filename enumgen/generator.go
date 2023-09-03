@@ -192,9 +192,12 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		}
 		cfg := &config.Config{}
 		*cfg = *g.Config
-		_, err = grease.SetFromArgs(cfg, args)
+		leftovers, err := grease.SetFromArgs(cfg, args)
 		if err != nil {
 			return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
+		}
+		if len(leftovers) > 0 {
+			return false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
 		}
 
 		switch directive {
