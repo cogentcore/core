@@ -19,6 +19,7 @@ import (
 	"os"
 	"strings"
 
+	"goki.dev/enums/enumgen/config"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/imports"
 )
@@ -27,16 +28,16 @@ import (
 // It is primarily used to buffer
 // the output for [format.Source].
 type Generator struct {
-	Config     Config       // The configuration information
-	Buf        bytes.Buffer // The accumulated output.
-	Pkg        *Package     // The package we are scanning.
-	Types      []Type       // The enum types
-	HasBitFlag bool         // Whether there is any bit flag enum type in the package (used for determining imports)
+	Config     *config.Config // The configuration information
+	Buf        bytes.Buffer   // The accumulated output.
+	Pkg        *Package       // The package we are scanning.
+	Types      []Type         // The enum types
+	HasBitFlag bool           // Whether there is any bit flag enum type in the package (used for determining imports)
 }
 
 // NewGenerator returns a new generator with the
 // given configuration information.
-func NewGenerator(config Config) *Generator {
+func NewGenerator(config *config.Config) *Generator {
 	return &Generator{Config: config}
 }
 

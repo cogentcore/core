@@ -19,6 +19,8 @@ import (
 	"go/types"
 	"html"
 	"strings"
+
+	"goki.dev/enums/enumgen/config"
 )
 
 // File holds a single parsed file and associated data.
@@ -26,10 +28,10 @@ type File struct {
 	Pkg  *Package  // Package to which this file belongs.
 	File *ast.File // Parsed AST.
 	// These fields are reset for each type being generated.
-	TypeName string  // The name of the constant type we are currently looking for.
-	BitFlag  bool    // Whether the constant type we are currently looking for is a bitflag.
-	Values   []Value // Accumulator for constant values of that type.
-	Config   Config  // The configuration information
+	TypeName string         // The name of the constant type we are currently looking for.
+	BitFlag  bool           // Whether the constant type we are currently looking for is a bitflag.
+	Values   []Value        // Accumulator for constant values of that type.
+	Config   *config.Config // The configuration information
 }
 
 // GenDecl processes one declaration clause.

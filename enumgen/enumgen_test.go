@@ -7,11 +7,12 @@ package enumgen
 import (
 	"os"
 	"testing"
+
+	"goki.dev/enums/enumgen/config"
 )
 
 func TestGenerate(t *testing.T) {
-	c := Config{}
-	c.Defaults()
+	c := &config.Config{}
 	c.Dir = "./testdata"
 	c.Output = "./testdata/enumgen.go"
 	err := Generate(c)
