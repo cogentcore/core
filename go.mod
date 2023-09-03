@@ -8,6 +8,7 @@ require (
 	goki.dev/grease v0.8.8
 	goki.dev/greasi v0.8.1
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
+	golang.org/x/tools v0.12.1-0.20230818130535-1517d1a3ba60
 )
 
 require (
@@ -56,5 +57,4 @@ require (
 	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
-	golang.org/x/tools v0.12.1-0.20230818130535-1517d1a3ba60 // indirect
 )

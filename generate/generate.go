@@ -28,5 +28,10 @@ func Generate(c *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("goki generate: Generate: error parsing package: %w", err)
 	}
+	for _, pkg := range g.Pkgs {
+		g.Pkg = pkg
+		g.PrintHeader()
+		fmt.Println(g.Buf.String())
+	}
 	return nil
 }
