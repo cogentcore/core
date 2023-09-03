@@ -244,13 +244,15 @@ const _StatesLowerName = "enablednot-enabledfocusedveredcurrently-being-pressed-
 // String returns the string representation
 // of this States value.
 func (i States) String() string {
+	oi := i
+	i -= 1
 	if !(i < 0 || i >= States(len(_StatesIndex)-1)) {
 		return _StatesName[_StatesIndex[i]:_StatesIndex[i+1]]
 	}
 	str := ""
 	for idx := int64(0); idx < int64(StatesN); idx++ {
 		ie := States(idx)
-		if i.HasFlag(&ie) {
+		if oi.HasFlag(&ie) {
 			ies := ie.String()
 			if str == "" {
 				str = ies
@@ -266,13 +268,13 @@ func (i States) String() string {
 // Re-run the enumgen command to generate them again.
 func _StatesNoOp() {
 	var x [1]struct{}
-	_ = x[Enabled-(0)]
-	_ = x[Disabled-(1)]
-	_ = x[Focused-(2)]
-	_ = x[Hovered-(3)]
-	_ = x[Active-(4)]
-	_ = x[ActivelyFocused-(5)]
-	_ = x[Selected-(6)]
+	_ = x[Enabled-(1)]
+	_ = x[Disabled-(2)]
+	_ = x[Focused-(3)]
+	_ = x[Hovered-(4)]
+	_ = x[Active-(5)]
+	_ = x[ActivelyFocused-(6)]
+	_ = x[Selected-(7)]
 }
 
 var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, ActivelyFocused, Selected}
@@ -309,13 +311,13 @@ var _StatesNames = []string{
 }
 
 var _StatesDescMap = map[States]string{
-	0: _StatesDescs[0],
-	1: _StatesDescs[1],
-	2: _StatesDescs[2],
-	3: _StatesDescs[3],
-	4: _StatesDescs[4],
-	5: _StatesDescs[5],
-	6: _StatesDescs[6],
+	1: _StatesDescs[0],
+	2: _StatesDescs[1],
+	3: _StatesDescs[2],
+	4: _StatesDescs[3],
+	5: _StatesDescs[4],
+	6: _StatesDescs[5],
+	7: _StatesDescs[6],
 }
 
 var _StatesDescs = []string{
