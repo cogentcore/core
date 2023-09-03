@@ -9,7 +9,7 @@ package main
 import (
 	"fmt"
 
-	"goki.dev/enums/enumgen"
+	"goki.dev/enums/enumgen/cmd"
 	"goki.dev/grease"
 )
 
@@ -17,7 +17,7 @@ func main() {
 	grease.AppName = "enumgen"
 	grease.AppTitle = "Enumgen"
 	grease.AppAbout = "Enumgen is a tool that generates helpful methods for Go enums."
-	err := grease.Run(enumgen.TheApp, "enumgen.toml")
+	err := grease.Run(cmd.TheApp, "enumgen.toml")
 	if err != nil {
 		fmt.Println(err)
 	}
