@@ -321,8 +321,8 @@ func (i %[1]s) String() string {
 //
 //	[1]: type name
 //	[2]: number of constants for type
-const StringNConstant = `//%[1]sN is the total number of
-// enum values for type %[1]s.
+const StringNConstant = `//%[1]sN is the highest valid value
+// for type %[1]s, plus one.
 const %[1]sN %[1]s = %[2]d
 `
 

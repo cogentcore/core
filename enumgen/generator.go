@@ -114,7 +114,7 @@ func (g *Generator) PrintHeader() {
 	// what packages are being used.
 	// TODO: maybe remove these import statements
 	g.Printf("import (\n")
-	if g.Config.SQL || g.Config.GQLGEN { // sql and gql are the only ones that use fmt
+	if g.Config.SQL || g.Config.GQL { // sql and gql are the only ones that use fmt
 		g.Printf("\t\"fmt\"\n")
 	}
 	g.Printf("\t\"strings\"\n")
@@ -129,7 +129,7 @@ func (g *Generator) PrintHeader() {
 	if g.Config.JSON {
 		g.Printf("\t\"encoding/json\"\n")
 	}
-	if g.Config.GQLGEN {
+	if g.Config.GQL {
 		g.Printf("\t\"io\"\n")
 	}
 	g.Printf("\t\"goki.dev/enums\"\n")
@@ -314,7 +314,7 @@ func (g *Generator) Generate() error {
 		if typ.Config.SQL {
 			g.addValueAndScanMethod(typeName)
 		}
-		if typ.Config.GQLGEN {
+		if typ.Config.GQL {
 			g.buildGQLGenMethods(runs, typeName)
 		}
 	}
