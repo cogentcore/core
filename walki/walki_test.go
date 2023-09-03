@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 )
 
 var testTree *ki.Node
