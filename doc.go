@@ -65,3 +65,5 @@ on that interface instead of directly on the receiver Node itself.
 This requires proper initialization via Init method of the Ki interface.
 */
 package ki
+
+//go:generate goki generate

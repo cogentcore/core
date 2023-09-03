@@ -16,7 +16,7 @@ import (
 // NodeSignals are signals that a Ki node sends about updates to the tree
 // structure using the NodeSignal (convert sig int64 to NodeSignals to get the
 // stringer name).
-type NodeSignals int64
+type NodeSignals int64 //enums:bitflag
 
 // Standard signal types sent by ki.Node on its NodeSig for tree state changes
 const (
@@ -35,11 +35,7 @@ const (
 	// delivered immediately.  No further notifications are sent -- assume
 	// it will be destroyed unless you hear from it again.
 	NodeSignalDeleting
-
-	NodeSignalsN
 )
-
-//go:generate stringer -type=NodeSignals
 
 // SignalTrace can be set to true to automatically print out a trace of the
 // signals as they are sent

@@ -4,15 +4,9 @@
 
 package ki
 
-import "goki.dev/ki/v2/kit"
-
 // Flags are bit flags for efficient core state of nodes -- see bitflag
 // package for using these ordinal values to manipulate bit flag field.
-type Flags int32
-
-//go:generate stringer -type=Flags
-
-var TypeFlags = kit.Enums.AddEnum(FlagsN, kit.BitFlag, nil)
+type Flags int64 //enums:bitflag
 
 const (
 	// IsField indicates a node is a field in its parent node, not a child in children.
@@ -59,11 +53,9 @@ const (
 
 	// ValUpdated means a value was updated (Field, Prop, any kind of value)
 	ValUpdated
+)
 
-	// FlagsN is total number of flags used by base Ki Node -- can extend from
-	// here up to 64 bits.
-	FlagsN
-
+const (
 	// ChildUpdateFlagsMask is a mask for all child updates.
 	ChildUpdateFlagsMask = (1 << uint32(ChildAdded)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
 
