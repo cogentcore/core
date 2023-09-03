@@ -26,13 +26,16 @@ func Generate(c *config.Config) error {
 	g := NewGenerator(c)
 	err := g.ParsePackage()
 	if err != nil {
-		return fmt.Errorf("goki generate: Generate: error parsing package: %w", err)
+		return fmt.Errorf("Generate: error parsing package: %w", err)
 	}
 	for _, pkg := range g.Pkgs {
 		g.Pkg = pkg
 		g.Buf = bytes.Buffer{}
 		g.PrintHeader()
-		fmt.Println(g.Buf.String())
+		err := g.Write()
+		if err != nil {
+			return fmt.Errorf("Generate: error writing code: %w", err)
+		}
 	}
 	return nil
 }

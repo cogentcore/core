@@ -63,7 +63,7 @@ type Colorgen struct {
 	Source string `def:"colors.xml" desc:"the source file path to generate the color schemes from"`
 
 	// [def: colorgen.go] the output file to store the resulting Go file in
-	Output string `def:"colorgen.go" desc:"the output file to store the resulting Go file in"`
+	Output string `nest:"+" def:"colorgen.go" desc:"the output file to store the resulting Go file in"`
 
 	// [def: main] the package in which the color schemes will be used
 	Package string `def:"main" nest:"+" desc:"the package in which the color schemes will be used"`
@@ -109,4 +109,7 @@ type Generate struct {
 
 	// [def: .] the source directory
 	Dir string `def:"." desc:"the source directory"`
+
+	// [def: gokigen.go] the output file
+	Output string `def:"gokigen.go" desc:"the output file"`
 }

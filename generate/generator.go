@@ -6,6 +6,7 @@ package generate
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,6 +14,7 @@ import (
 
 	"goki.dev/goki/config"
 	"golang.org/x/tools/go/packages"
+	"golang.org/x/tools/imports"
 )
 
 // Generator holds the state of the generator.
@@ -100,4 +102,33 @@ func (g *Generator) PrintHeader() {
 	g.Printf("\n")
 	g.Printf("package %s", g.Pkg.Name)
 	g.Printf("\n")
+}
+
+// Format returns the contents of the Generator's buffer
+// ([Generator.Buf]) with goimports applied.
+func (g *Generator) Format() ([]byte, error) {
+	b, err := imports.Process(g.Config.Generate.Dir, g.Buf.Bytes(), nil)
+	if err != nil {
+		// Should never happen, but can arise when developing this code.
+		// The user can compile the output to see the error.
+		return g.Buf.Bytes(), errors.New("internal error: invalid Go generated: " + err.Error() + "; compile the package to analyze the error")
+	}
+	return b, nil
+}
+
+// Write formats the data in the the Generator's buffer
+// ([Generator.Buf]) and writes it to the file specified by
+// [Generator.Config.Output].
+func (g *Generator) Write() error {
+	b, ferr := g.Format()
+	// we still write file even if formatting failed, as it is still useful
+	// then we handle error later
+	werr := os.WriteFile(g.Config.Generate.Output, b, 0666)
+	if werr != nil {
+		return fmt.Errorf("Generator.Write: error writing file: %w", werr)
+	}
+	if ferr != nil {
+		return fmt.Errorf("Generator.Write: error formatting code: %w", ferr)
+	}
+	return nil
 }
