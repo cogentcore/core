@@ -106,6 +106,13 @@ func (g *Generator) PrintHeader() {
 	}
 	g.Printf("package %s", g.Pkg.Name)
 	g.Printf("\n")
+	// these import statements don't serve
+	// much purpose, as goimports should handle it
+	// anyway, but if goimports fails because the
+	// code is invalid, it may make it easier to debug.
+	// also, they don't serve much harm and make it clear
+	// what packages are being used.
+	// TODO: maybe remove these import statements
 	g.Printf("import (\n")
 	if g.Config.SQL || g.Config.GQLGEN { // sql and gql are the only ones that use fmt
 		g.Printf("\t\"fmt\"\n")
