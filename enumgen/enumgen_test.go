@@ -51,9 +51,8 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestStringSetString(t *testing.T) {
-	val := testdata.States(0)
-	a, h, f := testdata.Active, testdata.Focused, testdata.Hovered
-	val.SetFlag(true, &a, &h, &f)
+	var val testdata.States
+	val.SetFlag(true, testdata.Active, testdata.Hovered, testdata.Focused)
 	orig := val
 	want := "focused|vered|currently-being-pressed-by-user"
 	have := val.String()
@@ -71,10 +70,9 @@ func TestStringSetString(t *testing.T) {
 
 func TestSetStringString(t *testing.T) {
 	src := "enabled|focused|selected"
-	want := testdata.States(0)
-	e, f, s := testdata.Enabled, testdata.Focused, testdata.Selected
-	want.SetFlag(true, &e, &f, &s)
-	have := testdata.States(0)
+	var want testdata.States
+	want.SetFlag(true, testdata.Enabled, testdata.Focused, testdata.Selected)
+	var have testdata.States
 	err := have.SetString(src)
 	if err != nil {
 		t.Errorf("error setting value from string %q: %v", src, err)

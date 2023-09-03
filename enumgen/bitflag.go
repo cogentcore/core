@@ -24,8 +24,8 @@ func (g *Generator) BuildBitFlagMethods(runs [][]Value, typeName string) {
 //	[1]: type name
 const StringHasBitFlagMethod = `// HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i *%[1]s) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(i))&(1<<uint32(f.Int64())) != 0
+func (i %[1]s) HasFlag(f enums.BitFlag) bool {
+	return i&(1<<uint32(f.Int64())) != 0
 }
 `
 
