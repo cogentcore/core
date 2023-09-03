@@ -241,7 +241,7 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 			continue
 		}
 		if _, has := allArgs[f.Name]; has {
-			fmt.Printf("grease Field: %s.%s cannot be added as a non-nested %s arg because it has already been registered -- add 'nest:'+'' field tag to the one you want to keep only as a nested arg with path, to eliminate this message\n", path, f.Name, f.Name)
+			fmt.Printf("warning: programmer error: grease config field \"%s.%s\" cannot be added as a non-nested flag with the name %q because that name has already been registered by another field; add the field tag 'nest:\"+\"' to the field you want to require nested access for (ie: \"Path.Field\" instead of \"Field\") to remove this warning\n", path, f.Name, f.Name)
 			continue
 		}
 		addAllCases(f.Name, "", pval, allArgs)
