@@ -288,7 +288,7 @@ func (g *Generator) Generate() error {
 		const runsThreshold = 10
 		switch {
 		case len(runs) == 1:
-			g.BuildOneRun(runs, typeName)
+			g.BuildOneRun(runs, typeName, typ.IsBitFlag)
 		case len(runs) <= runsThreshold:
 			g.BuildMultipleRuns(runs, typeName)
 		default:

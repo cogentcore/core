@@ -128,7 +128,7 @@ func (g *Generator) DeclareNameVars(runs [][]Value, typeName string, suffix stri
 }
 
 // BuildOneRun generates the variables and String method for a single run of contiguous values.
-func (g *Generator) BuildOneRun(runs [][]Value, typeName string) {
+func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool) {
 	values := runs[0]
 	g.Printf("\n")
 	g.DeclareIndexAndNameVar(values, typeName)
@@ -138,7 +138,11 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string) {
 		lessThanZero = "i < 0 || "
 	}
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
-		g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero)
+		if isBitFlag {
+			g.Printf(StringOneRunBitFlag, typeName, Usize(len(values)), lessThanZero)
+		} else {
+			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero)
+		}
 	} else {
 		g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero)
 	}
@@ -156,6 +160,33 @@ func (i %[1]s) String() string {
 		return "%[1]s(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _%[1]sName[_%[1]sIndex[i]:_%[1]sIndex[i+1]]
+}
+`
+
+// Arguments to format are:
+//
+//	[1]: type name
+//	[2]: size of index element (8 for uint8 etc.)
+//	[3]: less than zero check (for signed types)
+const StringOneRunBitFlag = `// String returns the string representation
+// of this %[1]s value.
+func (i %[1]s) String() string {
+	if !(%[3]si >= %[1]s(len(_%[1]sIndex)-1)) {
+		return _%[1]sName[_%[1]sIndex[i]:_%[1]sIndex[i+1]]
+	}
+	str := ""
+	for idx := int64(0); idx < int64(%[1]sN); idx++ {
+		ie := %[1]s(idx)
+		if i.HasFlag(&ie) {
+			ies := ie.String()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
 }
 `
 
