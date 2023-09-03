@@ -179,8 +179,7 @@ func (i %[1]s) String() string {
 		return _%[1]sName[_%[1]sIndex[i]:_%[1]sIndex[i+1]]
 	}
 	str := ""
-	for idx := int64(0); idx < int64(%[1]sN); idx++ {
-		ie := %[1]s(idx)
+	for _, ie := range _%[1]sValues {
 		if i.HasFlag(&ie) {
 			ies := ie.String()
 			if str == "" {
@@ -226,8 +225,7 @@ func (i %[1]s) String() string {
 		return _%[1]sName[_%[1]sIndex[i]:_%[1]sIndex[i+1]]
 	}
 	str := ""
-	for idx := int64(0); idx < int64(%[1]sN); idx++ {
-		ie := %[1]s(idx)
+	for _, ie := range _%[1]sValues {
 		if oi.HasFlag(&ie) {
 			ies := ie.String()
 			if str == "" {
