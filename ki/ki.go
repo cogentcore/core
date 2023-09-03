@@ -648,7 +648,7 @@ type Ki interface {
 
 // IMPORTANT: all types should initialize entry in package kit Types Registry
 
-// var KiT_TypeName = kit.Types.AddType(&TypeName{})
+// var TypeTypeName = kit.Types.AddType(&TypeName{})
 
 // Func is a function to call on ki objects walking the tree -- return Break
 // = false means don't continue processing this branch of the tree, but other

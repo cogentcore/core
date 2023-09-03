@@ -19,7 +19,7 @@ import (
 // is a mouthful and not very gui-friendly, and we need some special json methods
 type Props map[string]any
 
-var KiT_Props = kit.Types.AddType(&Props{}, PropsProps)
+var TypeProps = kit.Types.AddType(&Props{}, PropsProps)
 
 var PropsProps = Props{
 	"basic-type": true, // registers props as a basic type avail for type selection in creating property values -- many cases call for nested properties

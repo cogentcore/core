@@ -64,11 +64,11 @@ type Node struct {
 }
 
 // must register all new types so type names can be looked up by name -- also props
-// EnumType:Flags registers KiT_Flags as type for Flags field for GUI views
+// EnumType:Flags registers TypeFlags as type for Flags field for GUI views
 // Nodes can also use type properties e.g., StructViewFields key with props
 // inside that to set view properties for types, e.g., to hide or show
 // some of these base Node flags.
-var KiT_Node = kit.Types.AddType(&Node{}, Props{EnumTypeFlag: KiT_Flags})
+var TypeNode = kit.Types.AddType(&Node{}, Props{EnumTypeFlag: TypeFlags})
 
 // check implementation of [Ki] interface
 var _ = Ki(&Node{})
@@ -1000,7 +1000,7 @@ func (n *Node) PropTag() string {
 func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	v := kit.NonPtrValue(reflect.ValueOf(stru))
 	typ := v.Type()
-	if typ == nil || typ == KiT_Node { // this is only diff from embeds.go version -- prevent processing of any Node fields
+	if typ == nil || typ == TypeNode { // this is only diff from embeds.go version -- prevent processing of any Node fields
 		return true
 	}
 	rval := true
@@ -1014,7 +1014,7 @@ func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field re
 		if vfi == nil || vfi == stru {
 			continue
 		}
-		if f.Type.Kind() == reflect.Struct && f.Anonymous && kit.PtrType(f.Type) != KiT_Node {
+		if f.Type.Kind() == reflect.Struct && f.Anonymous && kit.PtrType(f.Type) != TypeNode {
 			rval = FlatFieldsValueFunc(kit.PtrValue(vf).Interface(), fun)
 			if !rval {
 				break
@@ -1605,7 +1605,7 @@ func GenCopyFieldsFrom(to any, frm any) {
 				if tfk != nil && sfk != nil {
 					tfk.CopyFrom(sfk)
 				}
-			case f.Type == KiT_Signal: // note: don't copy signals by default
+			case f.Type == TypeSignal: // note: don't copy signals by default
 			case sf.Type().AssignableTo(tf.Type()):
 				tf.Set(sf)
 				// kit.PtrValue(tf).Set(sf)

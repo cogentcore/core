@@ -87,7 +87,7 @@ type RecvFunc func(recv, send Ki, sig int64, data any)
 // variables, and rely instead on appropriately interpreting the sent argument
 // values.  e.g.:
 //
-// send := sender.EmbeddedStruct(KiT_SendType).(*SendType)
+// send := sender.EmbeddedStruct(TypeSendType).(*SendType)
 //
 // is guaranteed to result in a usable pointer to the sender of known type at
 // least SendType, in a case where that sender might actually embed that
@@ -102,7 +102,7 @@ type Signal struct {
 	Mu sync.RWMutex `view:"-" json:"-" xml:"-" desc:"read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes"`
 }
 
-var KiT_Signal = kit.Types.AddType(&Signal{}, nil)
+var TypeSignal = kit.Types.AddType(&Signal{}, nil)
 
 // ConnectOnly first deletes any existing connections and then attaches a new
 // receiver to the signal

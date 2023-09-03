@@ -11,12 +11,12 @@
 //
 // To register a new type, add:
 //
-// var KiT_TypeName = kit.Types.AddType(&TypeName{}, [props|nil])
+// var TypeTypeName = kit.Types.AddType(&TypeName{}, [props|nil])
 //
 // where the props is a map[string]interface{} of optional properties that can
 // be associated with the type -- this is used in the GoGi graphical interface
 // system for example to color objects of different types using the
-// background-color property.  KiT_TypeName variable can be conveniently used
+// background-color property.  TypeTypeName variable can be conveniently used
 // wherever a reflect.Type of that type is needed.
 //
 // * kit.EnumRegistry (enums.go) that registers constant int iota (aka enum) types, and
@@ -56,7 +56,7 @@ import (
 // that is then useful whenever you need to specify that type,
 // e.g., when adding a new Node in the Ki system.
 //
-// var KiT_MyType = ki.Types.AddType(&MyType{}, [props|nil])
+// var TypeMyType = ki.Types.AddType(&MyType{}, [props|nil])
 //
 // where MyType is the type -- note that it is ESSENTIAL to pass a pointer
 // so that the type is considered addressable, even after we get Elem() of it.

@@ -27,14 +27,14 @@ var NodeEmbedProps = Props{
 	"stringprop": "type string",
 }
 
-var KiT_NodeEmbed = kit.Types.AddType(&NodeEmbed{}, NodeEmbedProps)
+var TypeNodeEmbed = kit.Types.AddType(&NodeEmbed{}, NodeEmbedProps)
 
 type NodeField struct {
 	NodeEmbed
 	Field1 NodeEmbed
 }
 
-var KiT_NodeField = kit.Types.AddType(&NodeField{}, nil)
+var TypeNodeField = kit.Types.AddType(&NodeField{}, nil)
 
 type NodeField2 struct {
 	NodeField
@@ -42,7 +42,7 @@ type NodeField2 struct {
 	PtrIgnore *NodeEmbed
 }
 
-var KiT_NodeField2 = kit.Types.AddType(&NodeField2{}, nil)
+var TypeNodeField2 = kit.Types.AddType(&NodeField2{}, nil)
 
 func TestNodeAddChild(t *testing.T) {
 	parent := NodeEmbed{}
@@ -240,17 +240,17 @@ func TestNodeFindNameUnique(t *testing.T) {
 func TestNodeFindType(t *testing.T) {
 	parent := Node{}
 	parent.InitName(&parent, "par")
-	parent.AddNewChild(KiT_NodeEmbed, "child1")
-	parent.AddNewChild(KiT_Node, "child2")
-	idx, ok := parent.Children().IndexByType(KiT_NodeEmbed, NoEmbeds, 0)
+	parent.AddNewChild(TypeNodeEmbed, "child1")
+	parent.AddNewChild(TypeNode, "child2")
+	idx, ok := parent.Children().IndexByType(TypeNodeEmbed, NoEmbeds, 0)
 	if !ok || idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
-	idx, ok = parent.Children().IndexByType(KiT_Node, NoEmbeds, 0)
+	idx, ok = parent.Children().IndexByType(TypeNode, NoEmbeds, 0)
 	if !ok || idx != 1 {
 		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
 	}
-	_, err := parent.Children().ElemByTypeTry(KiT_Node, NoEmbeds, 0)
+	_, err := parent.Children().ElemByTypeTry(TypeNode, NoEmbeds, 0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -323,9 +323,9 @@ func TestNodeConfig(t *testing.T) {
 	parent.AddNewChild(typ, "child3")
 
 	config1 := kit.TypeAndNameList{
-		{Type: KiT_NodeEmbed, Name: "child2"},
-		{Type: KiT_NodeEmbed, Name: "child3"},
-		{Type: KiT_NodeEmbed, Name: "child1"},
+		{Type: TypeNodeEmbed, Name: "child2"},
+		{Type: TypeNodeEmbed, Name: "child3"},
+		{Type: TypeNodeEmbed, Name: "child1"},
 	}
 
 	// bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
@@ -338,17 +338,17 @@ func TestNodeConfig(t *testing.T) {
 	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Kids)
 
 	// config2 := kit.TypeAndNameList{
-	// 	{KiT_NodeEmbed, "child4"},
-	// 	{KiT_Node, "child1"}, // note: changing this to Node type removes child1.subchild1
-	// 	{KiT_NodeEmbed, "child5"},
-	// 	{KiT_NodeEmbed, "child3"},
-	// 	{KiT_NodeEmbed, "child6"},
+	// 	{TypeNodeEmbed, "child4"},
+	// 	{TypeNode, "child1"}, // note: changing this to Node type removes child1.subchild1
+	// 	{TypeNodeEmbed, "child5"},
+	// 	{TypeNodeEmbed, "child3"},
+	// 	{TypeNodeEmbed, "child6"},
 	// }
 
 	config3 := kit.TypeAndNameList{}
-	// fmt.Printf("NodeEmbed type name: %v\n", kit.FullTypeName(KiT_NodeEmbed))
-	netn := kit.Types.TypeName(KiT_NodeEmbed)
-	ntn := kit.Types.TypeName(KiT_Node)
+	// fmt.Printf("NodeEmbed type name: %v\n", kit.FullTypeName(TypeNodeEmbed))
+	netn := kit.Types.TypeName(TypeNodeEmbed)
+	ntn := kit.Types.TypeName(TypeNode)
 	err := config3.SetFromString("{" + netn + ", child4}, {" + ntn + ", child1}, {" + netn + ", child5}, {" + netn + ", child3}, {" + netn + ", child6}")
 	if err != nil {
 		t.Errorf("%v", err)
@@ -735,7 +735,7 @@ func TestProps(t *testing.T) {
 		t.Errorf("TestProps error -- floatprop should be gone\n")
 	}
 
-	sprop, ok = parent.PropInherit("floatprop", Inherit, TypeProps)
+	sprop, ok = parent.PropInherit("floatprop", Inherit, CheckTypeProps)
 	if !ok {
 		t.Errorf("TestProps error -- floatprop on type not found\n")
 	}
@@ -1041,21 +1041,21 @@ var NParts = 5
 
 func BenchmarkBuildGuiTree_NodeEmbed(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		wt := BuildGuiTree(NWidgets, NParts, KiT_NodeEmbed)
+		wt := BuildGuiTree(NWidgets, NParts, TypeNodeEmbed)
 		TestGUITree_NodeEmbed = wt
 	}
 }
 
 func BenchmarkBuildGuiTree_NodeField(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		wt := BuildGuiTree(NWidgets, NParts, KiT_NodeField)
+		wt := BuildGuiTree(NWidgets, NParts, TypeNodeField)
 		TestGUITree_NodeField = wt
 	}
 }
 
 func BenchmarkBuildGuiTree_NodeField2(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		wt := BuildGuiTree(NWidgets, NParts, KiT_NodeField2)
+		wt := BuildGuiTree(NWidgets, NParts, TypeNodeField2)
 		TestGUITree_NodeField2 = wt
 	}
 }
@@ -1064,7 +1064,7 @@ func BenchmarkBuildGuiTreeSlow_NodeEmbed(b *testing.B) {
 	// prof.Reset()
 	// prof.Profiling = true
 	for n := 0; n < b.N; n++ {
-		wt := BuildGuiTreeSlow(NWidgets, NParts, KiT_NodeEmbed)
+		wt := BuildGuiTreeSlow(NWidgets, NParts, TypeNodeEmbed)
 		TestGUITree_NodeEmbed = wt
 	}
 	// prof.Report(time.Millisecond)
@@ -1115,7 +1115,7 @@ func BenchmarkFuncDownMeFirst_NodeField2(b *testing.B) {
 
 func BenchmarkNewOfType(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		n := NewOfType(KiT_Node)
+		n := NewOfType(TypeNode)
 		n.InitName(n, "")
 	}
 }

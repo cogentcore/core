@@ -31,7 +31,7 @@ import (
 // in an expression that also initializes a new global variable
 // that is then useful whenever you need to specify that type:
 //
-//	var KiT_MyEnum = kit.Enums.AddEnum(MyEnumN, bitFlag true/false,
+//	var TypeMyEnum = kit.Enums.AddEnum(MyEnumN, bitFlag true/false,
 //	   TypeNameProps (or nil))
 //
 // where MyEnum is the name of the type, MyEnumN is the enum value
@@ -39,7 +39,7 @@ import (
 // this value, for ease of extension by others), and TypeNameProps is nil or a
 // map[string]interface{} of properties, OR:
 //
-//	var KiT_MyEnum = kit.Enums.AddEnumAltLower(MyEnumN, bitFlag true/false,
+//	var TypeMyEnum = kit.Enums.AddEnumAltLower(MyEnumN, bitFlag true/false,
 //	   TypeNameProps, "Prefix")
 //
 // which automatically registers alternative names as lower-case versions of
@@ -774,7 +774,7 @@ const (
 
 //go:generate stringer -type=TestFlags
 
-var KiT_TestFlags = Enums.AddEnumAltLower(TestFlagsN, NotBitFlag, nil, "Test")
+var TypeTestFlags = Enums.AddEnumAltLower(TestFlagsN, NotBitFlag, nil, "Test")
 
 func (ev TestFlags) MarshalJSON() ([]byte, error)  { return EnumMarshalJSON(ev) }
 func (ev *TestFlags) UnmarshalJSON(b []byte) error { return EnumUnmarshalJSON(ev, b) }

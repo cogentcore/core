@@ -48,7 +48,7 @@ const (
 
 	// TypeProps is used for PropInherit to indicate that properties
 	// set on the type should be checked.
-	TypeProps = true
+	CheckTypeProps = true
 
 	// NoTypeProps is used for PropInherit to indicate that properties
 	// set on the type should NOT be checked.

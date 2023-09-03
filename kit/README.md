@@ -13,13 +13,13 @@ by the GoKi ki system, hence the kit (ki types) name.
 To register a new type, add:
 
 ```Go
-var KiT_TypeName = kit.Types.AddType(&TypeName{}, [props|nil])
+var TypeTypeName = kit.Types.AddType(&TypeName{}, [props|nil])
 ```
 
 where the props is a `map[string]interface{}` of optional properties that can
 be associated with the type -- this is used in the GoGi graphical interface
 system for example to color objects of different types using the
-background-color property.  KiT_TypeName variable can be conveniently used
+background-color property.  TypeTypeName variable can be conveniently used
 wherever a reflect.Type of that type is needed.
 
 * `kit.EnumRegistry (enums.go)` that registers constant int iota (aka enum) types, and
