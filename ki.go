@@ -679,8 +679,8 @@ func NewOfType(typ reflect.Type) Ki {
 	return kid
 }
 
-// Type returns the underlying struct type of given node
-func Type(k Ki) reflect.Type {
+// StructType returns the underlying struct type of given node
+func StructType(k Ki) reflect.Type {
 	return reflect.TypeOf(k.This()).Elem()
 }
 
