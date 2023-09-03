@@ -225,7 +225,7 @@ func (g *Generator) Generate() error {
 		values := make([]Value, 0, 100)
 		typeName := typ.Type.Name.String()
 		for _, file := range g.Pkg.Files {
-			file.Config = g.Config
+			file.Config = typ.Config
 			// Set the state for this run of the walker.
 			file.TypeName = typeName
 			file.BitFlag = typ.IsBitFlag
@@ -253,11 +253,11 @@ func (g *Generator) Generate() error {
 			return errors.New("no values defined for type " + typeName)
 		}
 
-		g.TrimValueNames(values)
+		g.TrimValueNames(values, typ.Config)
 
-		g.TransformValueNames(values)
+		g.TransformValueNames(values, typ.Config)
 
-		g.PrefixValueNames(values)
+		g.PrefixValueNames(values, typ.Config)
 
 		runs := SplitIntoRuns(values)
 		// The decision of which pattern to use depends on the number of
@@ -289,19 +289,19 @@ func (g *Generator) Generate() error {
 			g.BuildBitFlagMethods(runs, typeName)
 		}
 
-		if g.Config.JSON {
+		if typ.Config.JSON {
 			g.BuildJSONMethods(runs, typeName, runsThreshold)
 		}
-		if g.Config.Text {
+		if typ.Config.Text {
 			g.BuildTextMethods(runs, typeName, runsThreshold)
 		}
-		if g.Config.YAML {
+		if typ.Config.YAML {
 			g.BuildYAMLMethods(runs, typeName, runsThreshold)
 		}
-		if g.Config.SQL {
+		if typ.Config.SQL {
 			g.addValueAndScanMethod(typeName)
 		}
-		if g.Config.GQLGEN {
+		if typ.Config.GQLGEN {
 			g.buildGQLGenMethods(runs, typeName)
 		}
 	}
