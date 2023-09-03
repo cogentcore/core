@@ -482,17 +482,19 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 	// At this moment, either "g.declareIndexAndNameVars()" or "g.declareNameVars()" has been called
 
 	// Print the slice of values
-	total := 0
+	max := uint64(0)
 	g.Printf("\nvar _%sValues = []%s{", typeName, typeName)
 	for _, values := range runs {
 		for _, value := range values {
 			g.Printf("\t%s, ", value.OriginalName)
-			total++
+			if value.Value > max {
+				max = value.Value
+			}
 		}
 	}
 	g.Printf("}\n\n")
 
-	g.Printf(StringNConstant, typeName, total)
+	g.Printf(StringNConstant, typeName, max+1)
 
 	// Print the map between name and value
 	g.PrintValueMap(runs, typeName, runsThreshold)

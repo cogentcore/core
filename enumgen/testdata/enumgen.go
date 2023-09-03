@@ -82,7 +82,7 @@ var _DaysValues = []Days{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, S
 
 // DaysN is the total number of
 // enum values for type Days.
-const DaysN Days = 7
+const DaysN Days = 14
 
 var _DaysNameToValueMap = map[string]Days{
 	_DaysName_0[0:10]:      Sunday,
@@ -281,7 +281,7 @@ var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, Active
 
 // StatesN is the total number of
 // enum values for type States.
-const StatesN States = 7
+const StatesN States = 8
 
 var _StatesNameToValueMap = map[string]States{
 	_StatesName[0:7]:        Enabled,
