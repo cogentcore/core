@@ -4,7 +4,10 @@
 
 package cmd
 
-import "goki.dev/enums/enumgen/config"
+import (
+	"goki.dev/enums/enumgen"
+	"goki.dev/enums/enumgen/config"
+)
 
 // App is the main app type that handles
 // the logic for the enumgen tool
@@ -16,4 +19,10 @@ var TheApp = &App{}
 // Config returns the app as a config object
 func (a *App) Config() *config.Config {
 	return (*config.Config)(a)
+}
+
+// RootCmd is the root command of enumgen
+// that generates the enum methods
+func (a *App) RootCmd() error {
+	return enumgen.Generate(a.Config())
 }
