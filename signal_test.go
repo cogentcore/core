@@ -52,8 +52,7 @@ func TestSignalConnect(t *testing.T) {
 
 func TestSignalNameToInt(t *testing.T) {
 	for i := NodeSignalNil; i < NodeSignalsN; i++ {
-		st := NodeSignals(i)
-		str := st.String()
+		str := i.String()
 		stc := NodeSignalNil
 		err := stc.SetString(str)
 		if err != nil {
@@ -61,7 +60,7 @@ func TestSignalNameToInt(t *testing.T) {
 		}
 		stnm := stc.String()
 		if stnm != str {
-			t.Errorf("could not convert from signal type name %v -- got: %v -- maybe need to run go generate?", str, stnm)
+			t.Errorf("could not convert from signal name %q; got: %q; maybe need to run go generate?", str, stnm)
 		}
 	}
 
