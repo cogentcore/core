@@ -27,8 +27,7 @@ import (
 )
 
 // Generator holds the state of the generator.
-// It is primarily used to buffer
-// the output for [format.Source].
+// It is primarily used to buffer the output.
 type Generator struct {
 	Config     *config.Config // The configuration information
 	Buf        bytes.Buffer   // The accumulated output.
@@ -72,15 +71,8 @@ func (g *Generator) AddPackage(pkg *packages.Package) {
 
 	for _, file := range pkg.Syntax {
 		// ignore generated code
-		isGen := false
-		for _, c := range file.Comments {
-			if strings.Contains(c.Text(), "; DO NOT EDIT.") {
-				isGen = true
-				break
-			}
-		}
-		if isGen {
-			continue
+		if ast.IsGenerated(file) {
+			break
 		}
 		// need to use append and 0 initial length
 		// because we don't know if it has generated code
@@ -327,7 +319,7 @@ func (g *Generator) Generate() error {
 }
 
 // Format returns the contents of the Generator's buffer
-// ([Generator.Buf]) with gofmt applied.
+// ([Generator.Buf]) with goimports applied.
 func (g *Generator) Format() ([]byte, error) {
 	b, err := imports.Process(g.Config.Dir, g.Buf.Bytes(), nil)
 	if err != nil {
