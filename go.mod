@@ -4,8 +4,8 @@ go 1.21.0
 
 require (
 	github.com/iancoleman/strcase v0.3.0
-	goki.dev/enums v0.9.4
-	goki.dev/grease v0.8.7
+	goki.dev/enums v0.9.7
+	goki.dev/grease v0.8.8
 	goki.dev/greasi v0.8.1
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
 )
@@ -51,7 +51,7 @@ require (
 	goki.dev/vci/v2 v2.0.0-dev0.0.0 // indirect
 	goki.dev/vgpu/v2 v2.0.0-dev0.0.2 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
-	golang.org/x/image v0.11.0 // indirect
+	golang.org/x/image v0.12.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect

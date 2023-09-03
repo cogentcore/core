@@ -35,8 +35,8 @@ func _TypesNoOp() {
 
 var _TypesValues = []Types{TypeApp, TypeLibrary}
 
-// TypesN is the total number of
-// enum values for type Types.
+// TypesN is the highest valid value
+// for type Types, plus one.
 const TypesN Types = 2
 
 var _TypesNameToValueMap = map[string]Types{
@@ -109,7 +109,7 @@ func TypesValues() []Types {
 func (i Types) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_TypesValues))
 	for i, d := range _TypesValues {
-		res[i] = &d
+		res[i] = d
 	}
 	return res
 }
