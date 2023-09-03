@@ -39,3 +39,22 @@ const (
 	// Selected indicates the widget is selected
 	Selected
 )
+
+// Languages is a bitflag enum containing programming languages
+type Languages int64 //enums:bitflag
+
+const (
+	Go Languages = 4*iota + 6
+	Python
+	JavaScript
+	Dart
+	Rust
+	Ruby
+	C
+	CPP
+	ObjectiveC
+	Java
+	TypeScript
+	Kotlin
+	Swift
+)
