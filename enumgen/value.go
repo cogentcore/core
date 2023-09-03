@@ -12,7 +12,7 @@
 package enumgen
 
 import (
-	"log"
+	"fmt"
 	"sort"
 	"strings"
 	"unicode"
@@ -96,7 +96,7 @@ func (g *Generator) PrefixValueNames(values []Value, c *config.Config) {
 
 // TransformValueNames transforms the names of the given values according
 // to the transform method specified in [config.Config.Transform]
-func (g *Generator) TransformValueNames(values []Value, c *config.Config) {
+func (g *Generator) TransformValueNames(values []Value, c *config.Config) error {
 	var fn func(src string) string
 	switch c.Transform {
 	case "snake":
@@ -138,8 +138,10 @@ func (g *Generator) TransformValueNames(values []Value, c *config.Config) {
 		fn = func(s string) string {
 			return strcase.ToDelimited(s, ' ')
 		}
+	case "":
+		return nil
 	default:
-		return
+		return fmt.Errorf("unknown transformation method: %q", c.Transform)
 	}
 
 	for i, v := range values {
@@ -150,10 +152,11 @@ func (g *Generator) TransformValueNames(values []Value, c *config.Config) {
 		// But if any of them was not empty before then it means that
 		// the transformed emptied the value
 		if v.OriginalName != "" && v.Name != "" && after == "" {
-			log.Fatalf("transformation of %q (%s) got an empty result", v.Name, v.OriginalName)
+			return fmt.Errorf("transformation of %q (%s) got an empty result", v.Name, v.OriginalName)
 		}
 		values[i].Name = after
 	}
+	return nil
 }
 
 // ByValue is a sorting method that sorts the constants into increasing order.

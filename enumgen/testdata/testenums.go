@@ -1,7 +1,7 @@
 package testdata
 
 // Days is an enum containing the days of the week
-type Days int //enums:enum
+type Days int //enums:enum -transform=snake_case -addprefix=Day
 
 const (
 	// Sunday is the first day of the week

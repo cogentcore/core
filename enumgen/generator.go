@@ -255,7 +255,10 @@ func (g *Generator) Generate() error {
 
 		g.TrimValueNames(values, typ.Config)
 
-		g.TransformValueNames(values, typ.Config)
+		err := g.TransformValueNames(values, typ.Config)
+		if err != nil {
+			return fmt.Errorf("error transforming value names: %w", err)
+		}
 
 		g.PrefixValueNames(values, typ.Config)
 
