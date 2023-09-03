@@ -57,7 +57,7 @@ func (n *Node) WriteJSON(writer io.Writer, indent bool) error {
 		log.Println(err)
 		return err
 	}
-	knm := kit.Types.TypeName(Type(n.This()))
+	knm := TypeOf(n.This()).Name
 	tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
 	nwb := make([]byte, len(b)+len(tstr))
 	copy(nwb, []byte(tstr))

@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"reflect"
 	"sync/atomic"
+
+	"goki.dev/laser"
 )
 
 var (
@@ -56,7 +58,24 @@ func (tp *Type) ReflectType() reflect.Type {
 func TypeByName(nm string) (*Type, error) {
 	tp, ok := TypeRegistry[nm]
 	if !ok {
-		return nil, fmt.Errorf("Ki Type: %s not found", nm)
+		return nil, fmt.Errorf("Ki type %q not found", nm)
 	}
 	return tp, nil
+}
+
+// TypeOf returns the type of the given value
+func TypeOf(k Ki) *Type {
+	return TypeRegistry[laser.ShortTypeName(reflect.TypeOf(k))]
+}
+
+// TypeFor returns the [Type] for the given
+// type. It returns nil if the type is not found
+// in the [TypeRegistry].
+func TypeFor[T any]() *Type {
+	for _, typ := range TypeRegistry {
+		if _, ok := typ.Instance.(T); ok {
+			return typ
+		}
+	}
+	return nil
 }
