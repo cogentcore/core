@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"goki.dev/enums/enumgen/config"
+	"goki.dev/enums/enumgen/testdata"
 	"goki.dev/grease"
 )
 
@@ -46,5 +47,16 @@ func TestGenerate(t *testing.T) {
 	}
 	if shave != swant {
 		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/enumgen.go and ./testdata/enumgen.golden to see the difference)")
+	}
+}
+
+func TestGeneratedCode(t *testing.T) {
+	val := testdata.States(0)
+	a, h, f := testdata.Active, testdata.Focused, testdata.Hovered
+	val.SetFlag(true, &a, &h, &f)
+	want := "focused|vered|currently-being-pressed-by-user"
+	have := val.String()
+	if have != want {
+		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
 	}
 }
