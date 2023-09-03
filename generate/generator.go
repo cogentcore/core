@@ -52,11 +52,11 @@ func (g *Generator) ParsePackage() error {
 
 // AddPackage adds a type-checked Package and its syntax files to the generator.
 func (g *Generator) AddPackage(pkg *packages.Package) {
-	g.Pkg = append(g.Pkg, &Package{
+	p := &Package{
 		Name:  pkg.Name,
 		Defs:  pkg.TypesInfo.Defs,
 		Files: make([]*File, 0),
-	})
+	}
 
 	for _, file := range pkg.Syntax {
 		// ignore generated code
@@ -72,11 +72,12 @@ func (g *Generator) AddPackage(pkg *packages.Package) {
 		}
 		// need to use append and 0 initial length
 		// because we don't know if it has generated code
-		g.Pkg.Files = append(g.Pkg.Files, &File{
+		p.Files = append(p.Files, &File{
 			File: file,
-			Pkg:  g.Pkg,
+			Pkg:  p,
 		})
 	}
+	g.Pkg = append(g.Pkg, p)
 }
 
 // Printf prints the formatted string to the

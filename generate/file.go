@@ -16,7 +16,5 @@ type File struct {
 	File *ast.File // Parsed AST.
 	// These fields are reset for each type being generated.
 	TypeName string         // The name of the constant type we are currently looking for.
-	BitFlag  bool           // Whether the constant type we are currently looking for is a bitflag.
-	Values   []Value        // Accumulator for constant values of that type.
 	Config   *config.Config // The configuration information
 }

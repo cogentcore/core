@@ -22,4 +22,5 @@ func Generate(c *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("error running enumgen: %w", err)
 	}
+
 }
