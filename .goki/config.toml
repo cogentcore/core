@@ -1,0 +1,40 @@
+Name = "laser"
+Desc = ""
+Version = "v0.1.0"
+Type = "TypeLibrary"
+
+[Build]
+  Package = "."
+
+[Colorgen]
+  Source = "colors.xml"
+  Output = "colorgen.go"
+  Package = "main"
+  Comment = ""
+
+[Install]
+  Package = "."
+
+[Log]
+  Target = "android"
+  Keep = false
+  All = "F"
+
+[Release]
+  VersionFile = "version.go"
+  Package = "laser"
+
+[Generate]
+  [Generate.Enumgen]
+    Dir = "."
+    Output = "enumgen.go"
+    SQL = false
+    Text = true
+    JSON = false
+    YAML = false
+    GQL = false
+    Transform = ""
+    TrimPrefix = ""
+    AddPrefix = ""
+    LineComment = false
+    Comment = ""
