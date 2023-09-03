@@ -297,7 +297,7 @@ func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string, isBitFlag
 
 // BuildMap handles the case where the space is so sparse a map is a reasonable fallback.
 // It's a rare situation but has simple code.
-func (g *Generator) BuildMap(runs [][]Value, typeName string) {
+func (g *Generator) BuildMap(runs [][]Value, typeName string, isBitFlag bool) {
 	g.Printf("\n")
 	g.DeclareNameVars(runs, typeName, "")
 	g.Printf("\nvar _%sMap = map[%s]string{\n", typeName, typeName)
@@ -309,10 +309,14 @@ func (g *Generator) BuildMap(runs [][]Value, typeName string) {
 		}
 	}
 	g.Printf("}\n\n")
-	g.Printf(StringMap, typeName)
+	if isBitFlag {
+		g.Printf(StringMapBitFlag, typeName)
+	} else {
+		g.Printf(StringMap, typeName)
+	}
 }
 
-// BuildNoOpOrderChangeDetect try to let the compiler and the user know if the order/value of the ENUMS have changed.
+// BuildNoOpOrderChangeDetect lets the compiler and the user know if the order/value of the enum values has changed.
 func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) {
 	g.Printf("\n")
 
@@ -340,6 +344,30 @@ func (i %[1]s) String() string {
 		return str
 	}
 	return "%[1]s(" + strconv.FormatInt(int64(i), 10) + ")"
+}
+`
+
+// Arguments to format are:
+//
+//	[1]: type name
+const StringMapBitFlag = `// String returns the string representation
+// of this %[1]s value.
+func (i %[1]s) String() string {
+	if str, ok := _%[1]sMap[i]; ok {
+		return str
+	}
+	str := ""
+	for _, ie := range _%[1]sValues {
+		if i.HasFlag(&ie) {
+			ies := ie.String()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
 }
 `
 

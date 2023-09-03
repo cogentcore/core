@@ -292,7 +292,7 @@ func (g *Generator) Generate() error {
 		case len(runs) <= runsThreshold:
 			g.BuildMultipleRuns(runs, typeName, typ.IsBitFlag)
 		default:
-			g.BuildMap(runs, typeName)
+			g.BuildMap(runs, typeName, typ.IsBitFlag)
 		}
 
 		g.BuildNoOpOrderChangeDetect(runs, typeName)

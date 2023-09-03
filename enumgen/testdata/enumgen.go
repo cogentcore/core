@@ -532,7 +532,18 @@ func (i Languages) String() string {
 	if str, ok := _LanguagesMap[i]; ok {
 		return str
 	}
-	return "Languages(" + strconv.FormatInt(int64(i), 10) + ")"
+	str := ""
+	for _, ie := range _LanguagesValues {
+		if i.HasFlag(&ie) {
+			ies := ie.String()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
