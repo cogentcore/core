@@ -200,6 +200,9 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 // Generate produces the enum methods for the types
 // stored in [Generator.Types].
 func (g *Generator) Generate() error {
+	if len(g.Types) == 0 {
+		return fmt.Errorf("no enum types found in package %q", g.Pkg.Name)
+	}
 	for _, typ := range g.Types {
 		values := make([]Value, 0, 100)
 		typeName := typ.Type.Name.String()

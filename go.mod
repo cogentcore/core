@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/iancoleman/strcase v0.3.0
-	goki.dev/grease v0.8.7
+	goki.dev/grease v0.8.8
 	golang.org/x/tools v0.12.1-0.20230818130535-1517d1a3ba60
 )
 
