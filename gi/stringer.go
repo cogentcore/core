@@ -1142,14 +1142,14 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[TextFieldFilled-0]
-	_ = x[TextFieldOutlined-1]
+	_ = x[TextFieldOutlined-0]
+	_ = x[TextFieldFilled-1]
 	_ = x[TextFieldTypesN-2]
 }
 
-const _TextFieldTypes_name = "TextFieldFilledTextFieldOutlinedTextFieldTypesN"
+const _TextFieldTypes_name = "TextFieldOutlinedTextFieldFilledTextFieldTypesN"
 
-var _TextFieldTypes_index = [...]uint8{0, 15, 32, 47}
+var _TextFieldTypes_index = [...]uint8{0, 17, 32, 47}
 
 func (i TextFieldTypes) String() string {
 	if i < 0 || i >= TextFieldTypes(len(_TextFieldTypes_index)-1) {
@@ -1169,8 +1169,8 @@ func (i *TextFieldTypes) FromString(s string) error {
 }
 
 var _TextFieldTypes_descMap = map[TextFieldTypes]string{
-	0: `TextFieldFilled represents a filled TextField with a background color and a bottom border`,
-	1: `TextFieldOutlined represents an outlined TextField with a border on all sides and no background color`,
+	0: `TextFieldOutlined represents an outlined TextField with a border on all sides and no background color`,
+	1: `TextFieldFilled represents a filled TextField with a background color and a bottom border`,
 	2: ``,
 }
 

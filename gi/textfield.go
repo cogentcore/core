@@ -252,14 +252,14 @@ var TextFieldProps = ki.Props{
 type TextFieldTypes int
 
 const (
-	// TextFieldFilled represents a filled
-	// TextField with a background color
-	// and a bottom border
-	TextFieldFilled TextFieldTypes = iota
 	// TextFieldOutlined represents an outlined
 	// TextField with a border on all sides
 	// and no background color
-	TextFieldOutlined
+	TextFieldOutlined TextFieldTypes = iota
+	// TextFieldFilled represents a filled
+	// TextField with a background color
+	// and a bottom border
+	TextFieldFilled
 
 	TextFieldTypesN
 )
