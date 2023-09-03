@@ -234,11 +234,11 @@ func (i *Days) UnmarshalGQL(value any) error {
 	return i.SetString(str)
 }
 
-const _StatesName = "enablednot-enabledfocusedveredcurrently-being-pressed-by-userselected"
+const _StatesName = "enablednot-enabledfocusedveredcurrently-being-pressed-by-useractively-focusedselected"
 
-var _StatesIndex = [...]uint8{0, 7, 18, 25, 30, 61, 69}
+var _StatesIndex = [...]uint8{0, 7, 18, 25, 30, 61, 77, 85}
 
-const _StatesLowerName = "enablednot-enabledfocusedveredcurrently-being-pressed-by-userselected"
+const _StatesLowerName = "enablednot-enabledfocusedveredcurrently-being-pressed-by-useractively-focusedselected"
 
 // String returns the string representation
 // of this States value.
@@ -258,14 +258,15 @@ func _StatesNoOp() {
 	_ = x[Focused-(2)]
 	_ = x[Hovered-(3)]
 	_ = x[Active-(4)]
-	_ = x[Selected-(5)]
+	_ = x[ActivelyFocused-(5)]
+	_ = x[Selected-(6)]
 }
 
-var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, Selected}
+var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, ActivelyFocused, Selected}
 
 // StatesN is the total number of
 // enum values for type States.
-const StatesN States = 6
+const StatesN States = 7
 
 var _StatesNameToValueMap = map[string]States{
 	_StatesName[0:7]:        Enabled,
@@ -278,8 +279,10 @@ var _StatesNameToValueMap = map[string]States{
 	_StatesLowerName[25:30]: Hovered,
 	_StatesName[30:61]:      Active,
 	_StatesLowerName[30:61]: Active,
-	_StatesName[61:69]:      Selected,
-	_StatesLowerName[61:69]: Selected,
+	_StatesName[61:77]:      ActivelyFocused,
+	_StatesLowerName[61:77]: ActivelyFocused,
+	_StatesName[77:85]:      Selected,
+	_StatesLowerName[77:85]: Selected,
 }
 
 var _StatesNames = []string{
@@ -288,7 +291,8 @@ var _StatesNames = []string{
 	_StatesName[18:25],
 	_StatesName[25:30],
 	_StatesName[30:61],
-	_StatesName[61:69],
+	_StatesName[61:77],
+	_StatesName[77:85],
 }
 
 var _StatesDescMap = map[States]string{
@@ -298,6 +302,7 @@ var _StatesDescMap = map[States]string{
 	3: _StatesDescs[3],
 	4: _StatesDescs[4],
 	5: _StatesDescs[5],
+	6: _StatesDescs[6],
 }
 
 var _StatesDescs = []string{
@@ -306,6 +311,7 @@ var _StatesDescs = []string{
 	`Focused indicates the widget has keyboard focus`,
 	`Hovered indicates the widget is being hovered over`,
 	`Active indicates the widget is being interacted with`,
+	`ActivelyFocused indicates the widget has active keyboard focus`,
 	`Selected indicates the widget is selected`,
 }
 

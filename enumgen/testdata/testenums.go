@@ -34,6 +34,8 @@ const (
 	Hovered
 	// Active indicates the widget is being interacted with
 	Active //CurrentlyBeingPressedByUser
+	// ActivelyFocused indicates the widget has active keyboard focus
+	ActivelyFocused
 	// Selected indicates the widget is selected
 	Selected
 )
