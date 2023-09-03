@@ -7,3 +7,5 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	goki.dev/enums v0.9.7
 )
+
+require goki.dev/laser v0.1.0 // indirect

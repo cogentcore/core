@@ -7,12 +7,10 @@ package ki
 import (
 	"fmt"
 	"log"
-	"reflect"
 	"strings"
 	"sync"
-	"unsafe"
 
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 )
 
 // admin has infrastructure level code, outside of ki interface
@@ -32,7 +30,6 @@ func InitNode(this Ki) {
 	if n.Ths != this {
 		n.Ths = this
 		n.Ths.OnInit()
-		KiInitKiFields(this)
 	}
 }
 
@@ -83,7 +80,7 @@ func MoveToParent(kid Ki, parent Ki) {
 // with the given name to the given parent.
 // It is a helper function that calls [Ki.NewChild].
 func New[T Ki](par Ki, name string) {
-	par.NewChild(kit.TypeFor[T](), name)
+	par.NewChild(laser.TypeFor[T](), name)
 }
 
 // IsRoot tests if this node is the root node -- checks Parent = nil.
@@ -131,159 +128,10 @@ func UpdateReset(kn Ki) {
 //////////////////////////////////////////////////////////////////
 // Fields
 
-// KiInitKiFields calls Init on all Ki fields
-// within the struct, sets their names to the field name,
-// and sets us as their parent.
-func KiInitKiFields(this Ki) {
-	n := this.AsNode()
-	if KiHasKiFields(n) {
-		fnms := KiFieldNames(n)
-		val := reflect.ValueOf(this).Elem()
-		for _, fnm := range fnms {
-			fldval := val.FieldByName(fnm)
-			fk := kit.PtrValue(fldval).Interface().(Ki)
-			fk.SetFlag(int(IsField))
-			fk.InitName(fk, fnm)
-			SetParent(fk, this)
-		}
-	}
-}
-
-// FieldRoot returns the field root object for this node -- the node that
-// owns the branch of the tree rooted in one of its fields -- i.e., the
-// first non-Field parent node after the first Field parent node -- can be
-// nil if no such thing exists for this node.
-func FieldRoot(kn Ki) Ki {
-	var root Ki
-	gotField := false
-	kn.FuncUpParent(0, kn, func(k Ki, level int, d any) bool {
-		if !gotField {
-			if k.IsField() {
-				gotField = true
-			}
-			return Continue
-		}
-		if !k.IsField() {
-			root = k
-			return Break
-		}
-		return Continue
-	})
-	return root
-}
-
-// KiFieldOffs returns the uintptr offsets for Ki fields of this Node.
-// Cached for fast access, but use HasKiFields for even faster checking.
-func KiFieldOffs(n *Node) []uintptr {
-	if n.fieldOffs != nil {
-		return n.fieldOffs
-	}
-	// we store the offsets for the fields in type properties
-	tprops := *kit.Types.Properties(Type(n.This()), true) // true = makeNew
-	if foff, ok := kit.TypeProp(tprops, "__FieldOffs"); ok {
-		n.fieldOffs = foff.([]uintptr)
-		return n.fieldOffs
-	}
-	foff, _ := KiFieldsInit(n)
-	return foff
-}
-
-// KiHasKiFields returns true if this node has Ki Node fields that are
-// included in recursive descent traversal of the tree.  This is very
-// efficient compared to accessing the field information on the type
-// so it should be checked first -- caches the info on the node in flags.
-func KiHasKiFields(n *Node) bool {
-	if n.HasFlag(int(HasKiFields)) {
-		return true
-	}
-	if n.HasFlag(int(HasNoKiFields)) {
-		return false
-	}
-	foffs := KiFieldOffs(n)
-	if len(foffs) == 0 {
-		n.SetFlag(int(HasNoKiFields))
-		return false
-	}
-	n.SetFlag(int(HasKiFields))
-	return true
-}
-
-// NumKiFields returns the number of Ki Node fields on this node.
-// This calls HasKiFields first so it is also efficient.
-func NumKiFields(n *Node) int {
-	if !KiHasKiFields(n) {
-		return 0
-	}
-	foffs := KiFieldOffs(n)
-	return len(foffs)
-}
-
-// KiField returns the Ki Node field at given index, from KiFieldOffs list.
-// Returns nil if index is out of range.  This is generally used for
-// generic traversal methods and thus does not have a Try version.
-func KiField(n *Node, idx int) Ki {
-	if !KiHasKiFields(n) {
-		return nil
-	}
-	foffs := KiFieldOffs(n)
-	if idx >= len(foffs) || idx < 0 {
-		return nil
-	}
-	fn := (*Node)(unsafe.Pointer(uintptr(unsafe.Pointer(n)) + foffs[idx]))
-	return fn.This()
-}
-
-// KiFieldByName returns field Ki element by name -- returns false if not found.
-func KiFieldByName(n *Node, name string) Ki {
-	if !KiHasKiFields(n) {
-		return nil
-	}
-	foffs := KiFieldOffs(n)
-	op := uintptr(unsafe.Pointer(n))
-	for _, fo := range foffs {
-		fn := (*Node)(unsafe.Pointer(op + fo))
-		if fn.Nm == name {
-			return fn.This()
-		}
-	}
-	return nil
-}
-
-// KiFieldNames returns the field names for Ki fields of this Node. Cached for fast access.
-func KiFieldNames(n *Node) []string {
-	// we store the offsets for the fields in type properties
-	tprops := *kit.Types.Properties(Type(n.This()), true) // true = makeNew
-	if fnms, ok := kit.TypeProp(tprops, "__FieldNames"); ok {
-		return fnms.([]string)
-	}
-	_, fnm := KiFieldsInit(n)
-	return fnm
-}
-
-// KiFieldsInit initializes cached data about the KiFields in this node
-// offsets and names -- returns them
-func KiFieldsInit(n *Node) (foff []uintptr, fnm []string) {
-	foff = make([]uintptr, 0)
-	fnm = make([]string, 0)
-	kitype := KiType
-	FlatFieldsValueFunc(n.This(), func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
-			foff = append(foff, field.Offset)
-			fnm = append(fnm, field.Name)
-		}
-		return true
-	})
-	tprops := *kit.Types.Properties(Type(n), true) // true = makeNew
-	kit.SetTypeProp(tprops, "__FieldOffs", foff)
-	n.fieldOffs = foff
-	kit.SetTypeProp(tprops, "__FieldNames", fnm)
-	return
-}
-
 // FieldByName returns field value by name (can be any type of field --
 // see KiFieldByName for Ki fields) -- returns nil if not found.
 func FieldByName(kn Ki, field string) any {
-	return kit.FlatFieldInterfaceByName(kn.This(), field)
+	return laser.FlatFieldInterfaceByName(kn.This(), field)
 }
 
 // FieldByNameTry returns field value by name (can be any type of field --
@@ -298,7 +146,7 @@ func FieldByNameTry(kn Ki, field string) (any, error) {
 
 // FieldTag returns given field tag for that field, or empty string if not set.
 func FieldTag(kn Ki, field, tag string) string {
-	return kit.FlatFieldTag(Type(kn.This()), field, tag)
+	return laser.FlatFieldTag(StructType(kn.This()), field, tag)
 }
 
 //////////////////////////////////////////////////
