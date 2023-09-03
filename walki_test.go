@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package walki
+package ki
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"goki.dev/ki/v2"
 )
 
-var testTree *ki.Node
+var testTree *Node
 
 func init() {
-	testTree = &ki.Node{}
+	testTree = &Node{}
 	typ := reflect.TypeOf(testTree).Elem()
 	testTree.InitName(testTree, "root")
 	// child1 :=
@@ -38,7 +36,7 @@ func TestDown(t *testing.T) {
 		if curi == nil {
 			break
 		}
-		cur = curi.(*ki.Node)
+		cur = curi.(*Node)
 	}
 }
 
@@ -50,6 +48,6 @@ func TestUp(t *testing.T) {
 		if curi == nil {
 			break
 		}
-		cur = curi.(*ki.Node)
+		cur = curi.(*Node)
 	}
 }
