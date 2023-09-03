@@ -9,13 +9,18 @@ import (
 	"testing"
 
 	"goki.dev/enums/enumgen/config"
+	"goki.dev/ki/v2/kit"
 )
 
 func TestGenerate(t *testing.T) {
 	c := &config.Config{}
+	err := kit.SetFromDefaultTags(c)
+	if err != nil {
+		t.Errorf("programmer error: error setting config from default tags: %v", err)
+	}
 	c.Dir = "./testdata"
 	c.Output = "./testdata/enumgen.go"
-	err := Generate(c)
+	err = Generate(c)
 	if err != nil {
 		t.Errorf("error while generating: %v", err)
 	}
