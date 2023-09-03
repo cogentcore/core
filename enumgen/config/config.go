@@ -16,27 +16,40 @@ package config
 // Config contains the configuration information
 // used by enumgen
 type Config struct {
-	Dir         string // the source directory
-	Output      string // the output file
-	SQL         bool   // whether to generate methods that implement the SQL Scanner and Valuer interfaces
-	Text        bool   // whether to generate text marshaling methods
-	JSON        bool   // whether to generate JSON marshaling methods  (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see [Config.Text])
-	YAML        bool   // whether to generate YAML marshaling methods
-	GQLGEN      bool   // whether to generate GraphQL marshaling methods for gqlgen
-	Transform   string // if specified, the enum item transformation method (eg: snake_case)
-	TrimPrefix  string // if specified, a comma-separated list of prefixes to trim from each item
-	AddPrefix   string // if specified, the prefix to add to each item
-	LineComment bool   // whether to use line comment text as printed text when present
-	Comment     string // a comment to include at the top of the generated code
-}
 
-// Defaults applies the default configuration values
-// to the configuration object. It only sets some
-// values; if you want to reset the configuration object,
-// you should do that manually first.
-func (c *Config) Defaults() {
-	c.Dir = "."
-	c.Output = "enumgen.go"
-	c.Text = true
-	c.Transform = "noop"
+	// [def: .] the source directory
+	Dir string `def:"." desc:"the source directory"`
+
+	// [def: enumgen.go] the output file
+	Output string `def:"enumgen.go" desc:"the output file"`
+
+	// whether to generate methods that implement the SQL Scanner and Valuer interfaces
+	SQL bool `desc:"whether to generate methods that implement the SQL Scanner and Valuer interfaces"`
+
+	// [def: true] whether to generate text marshaling methods
+	Text bool `def:"true" desc:"whether to generate text marshaling methods"`
+
+	// whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)
+	JSON bool `desc:"whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)"`
+
+	// whether to generate YAML marshaling methods
+	YAML bool `desc:"whether to generate YAML marshaling methods"`
+
+	// whether to generate GraphQL marshaling methods for gqlgen
+	GQLGEN bool `desc:"whether to generate GraphQL marshaling methods for gqlgen"`
+
+	// [def: noop] if specified, the enum item transformation method (eg: snake_case)
+	Transform string `def:"noop" desc:"if specified, the enum item transformation method (eg: snake_case)"`
+
+	// if specified, a comma-separated list of prefixes to trim from each item
+	TrimPrefix string `desc:"if specified, a comma-separated list of prefixes to trim from each item"`
+
+	// if specified, the prefix to add to each item
+	AddPrefix string `desc:"if specified, the prefix to add to each item"`
+
+	// whether to use line comment text as printed text when present
+	LineComment bool `desc:"whether to use line comment text as printed text when present"`
+
+	// a comment to include at the top of the generated code
+	Comment string `desc:"a comment to include at the top of the generated code"`
 }
