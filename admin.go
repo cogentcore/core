@@ -79,11 +79,11 @@ func MoveToParent(kid Ki, parent Ki) {
 	parent.AddChild(kid)
 }
 
-// AddNew adds a new child of the given the type
+// New adds a new child of the given the type
 // with the given name to the given parent.
-// It is a helper function that calls [Ki.AddNewChild].
-func AddNew[T Ki](par Ki, name string) {
-	par.AddNewChild(kit.TypeFor[T](), name)
+// It is a helper function that calls [Ki.NewChild].
+func New[T Ki](par Ki, name string) {
+	par.NewChild(kit.TypeFor[T](), name)
 }
 
 // IsRoot tests if this node is the root node -- checks Parent = nil.

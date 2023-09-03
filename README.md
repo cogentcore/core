@@ -84,8 +84,8 @@ See `ki/node_test.go` for lots of simple usage examples.  Here's some code from 
 parent := NodeEmbed{}
 parent.InitName(&parent, "par1") // root must be initialized -- this also names it.
 typ := reflect.TypeOf(parent)
-parent.AddNewChild(typ, "child1") // Add etc methods auto-initialize children
-parent.AddNewChild(typ, "child2")
+parent.NewChild(typ, "child1") // Add etc methods auto-initialize children
+parent.NewChild(typ, "child2")
 
 // traverse the tree calling the parent node first and then its children, recursively
 // "natural" order

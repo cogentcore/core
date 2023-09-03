@@ -24,8 +24,8 @@ func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}
 	parent.InitName(&parent, "par1")
 	typ := reflect.TypeOf(parent)
-	child1 := parent.AddNewChild(typ, "child1")
-	// child2 := parent.AddNewChild(nil, "child2")
+	child1 := parent.NewChild(typ, "child1")
+	// child2 := parent.NewChild(nil, "child2")
 
 	// note: now that signal is a map, cannot test reliably due to ordering
 	res := make([]string, 0, 10)

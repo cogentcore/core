@@ -81,12 +81,12 @@ func TestNodeEmbedAddChild(t *testing.T) {
 	}
 }
 
-func TestNodeEmbedAddNewChild(t *testing.T) {
+func TestNodeEmbedNewChild(t *testing.T) {
 	// nod := Node{}
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
 	typ := reflect.TypeOf(parent)
-	child := parent.AddNewChild(typ, "child1")
+	child := parent.NewChild(typ, "child1")
 	if len(parent.Kids) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.Kids))
 	}
@@ -102,9 +102,9 @@ func TestNodeUniqueNames(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
 	typ := reflect.TypeOf(parent)
-	child := parent.AddNewChild(typ, "child1")
-	child2 := parent.AddNewChild(typ, "child1")
-	child3 := parent.AddNewChild(typ, "child1")
+	child := parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child1")
+	child3 := parent.NewChild(typ, "child1")
 	if len(parent.Kids) != 3 {
 		t.Errorf("Children length != 3, was %d", len(parent.Kids))
 	}
@@ -125,10 +125,10 @@ func TestNodeEscapePaths(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
 	typ := reflect.TypeOf(parent)
-	child := parent.AddNewChild(typ, "child1.go")
-	child2 := parent.AddNewChild(typ, "child1/child1")
-	child3 := parent.AddNewChild(typ, "child1/child1.go")
-	schild2 := child2.AddNewChild(typ, "subchild1")
+	child := parent.NewChild(typ, "child1.go")
+	child2 := parent.NewChild(typ, "child1/child1")
+	child3 := parent.NewChild(typ, "child1/child1.go")
+	schild2 := child2.NewChild(typ, "subchild1")
 	if len(parent.Kids) != 3 {
 		t.Errorf("Children length != 3, was %d", len(parent.Kids))
 	}
@@ -167,7 +167,7 @@ func TestNodeDeleteChild(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
 	typ := reflect.TypeOf(parent)
-	child := parent.AddNewChild(typ, "child1")
+	child := parent.NewChild(typ, "child1")
 	parent.DeleteChild(child, true)
 	if len(parent.Kids) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.Kids))
@@ -181,7 +181,7 @@ func TestNodeDeleteChildName(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
 	typ := reflect.TypeOf(parent)
-	parent.AddNewChild(typ, "child1")
+	parent.NewChild(typ, "child1")
 	parent.DeleteChildByName("child1", true)
 	if len(parent.Kids) != 0 {
 		t.Errorf("Children length != 0, was %d", len(parent.Kids))
@@ -197,7 +197,7 @@ func TestNodeFindName(t *testing.T) {
 	parent.InitName(&parent, "par")
 	typ := reflect.TypeOf(parent)
 	for _, nm := range names {
-		parent.AddNewChild(typ, nm)
+		parent.NewChild(typ, nm)
 	}
 	if len(parent.Kids) != len(names) {
 		t.Errorf("Children length != n, was %d", len(parent.Kids))
@@ -218,7 +218,7 @@ func TestNodeFindNameUnique(t *testing.T) {
 	parent.InitName(&parent, "par")
 	typ := reflect.TypeOf(parent)
 	for range names {
-		parent.AddNewChild(typ, "child")
+		parent.NewChild(typ, "child")
 	}
 	if len(parent.Kids) != len(names) {
 		t.Errorf("Children length != n, was %d", len(parent.Kids))
@@ -240,8 +240,8 @@ func TestNodeFindNameUnique(t *testing.T) {
 func TestNodeFindType(t *testing.T) {
 	parent := Node{}
 	parent.InitName(&parent, "par")
-	parent.AddNewChild(TypeNodeEmbed, "child1")
-	parent.AddNewChild(TypeNode, "child2")
+	parent.NewChild(TypeNodeEmbed, "child1")
+	parent.NewChild(TypeNode, "child2")
 	idx, ok := parent.Children().IndexByType(TypeNodeEmbed, NoEmbeds, 0)
 	if !ok || idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
@@ -263,14 +263,14 @@ func TestNodeMove(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChild(typ, "child0")
-	var child2 = parent.AddNewChild(typ, "child1").(*NodeEmbed)
+	parent.NewChild(typ, "child0")
+	var child2 = parent.NewChild(typ, "child1").(*NodeEmbed)
 	// child3 :=
-	parent.AddNewChild(typ, "child2")
+	parent.NewChild(typ, "child2")
 	//schild2 :=
-	child2.AddNewChild(typ, "subchild1")
+	child2.NewChild(typ, "subchild1")
 	// child4 :=
-	parent.AddNewChild(typ, "child3")
+	parent.NewChild(typ, "child3")
 
 	bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
 	parent.Children().Move(3, 1)
@@ -313,14 +313,14 @@ func TestNodeConfig(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChild(typ, "child0")
-	var child2 = parent.AddNewChild(typ, "child1").(*NodeEmbed)
+	parent.NewChild(typ, "child0")
+	var child2 = parent.NewChild(typ, "child1").(*NodeEmbed)
 	// child3 :=
-	parent.AddNewChild(typ, "child2")
+	parent.NewChild(typ, "child2")
 	//schild2 :=
-	child2.AddNewChild(typ, "subchild1")
+	child2.NewChild(typ, "subchild1")
 	// child4 :=
-	parent.AddNewChild(typ, "child3")
+	parent.NewChild(typ, "child3")
 
 	config1 := kit.TypeAndNameList{
 		{Type: TypeNodeEmbed, Name: "child2"},
@@ -386,11 +386,11 @@ func TestNodeJSONSave(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChild(typ, "child1")
-	var child2 = parent.AddNewChild(typ, "child1").(*NodeEmbed)
+	parent.NewChild(typ, "child1")
+	var child2 = parent.NewChild(typ, "child1").(*NodeEmbed)
 	// child3 :=
-	parent.AddNewChild(typ, "child1")
-	child2.AddNewChild(typ, "subchild1")
+	parent.NewChild(typ, "child1")
+	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
 	err := parent.WriteJSON(&buf, true)
@@ -443,11 +443,11 @@ func TestNodeXMLSave(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChild(typ, "child1")
-	var child2 = parent.AddNewChild(typ, "child1").(*NodeEmbed)
+	parent.NewChild(typ, "child1")
+	var child2 = parent.NewChild(typ, "child1").(*NodeEmbed)
 	// child3 :=
-	parent.AddNewChild(typ, "child1")
-	child2.AddNewChild(typ, "subchild1")
+	parent.NewChild(typ, "child1")
+	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
 	err := parent.WriteXML(&buf, true)
@@ -490,11 +490,11 @@ func TestNodeCallFun(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChild(typ, "child1")
-	child2 := parent.AddNewChild(typ, "child1")
+	parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child1")
 	// child3 :=
-	parent.AddNewChild(typ, "child1")
-	schild2 := child2.AddNewChild(typ, "subchild1")
+	parent.NewChild(typ, "child1")
+	schild2 := child2.NewChild(typ, "subchild1")
 	UniquifyNames(parent.This())
 
 	res := make([]string, 0, 10)
@@ -613,15 +613,15 @@ func TestNodeUpdate(t *testing.T) {
 	// child1 :=
 	updt := parent.UpdateStart()
 	parent.SetChildAdded()
-	parent.AddNewChild(typ, "child1")
-	child2 := parent.AddNewChild(typ, "child1")
+	parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child1")
 	// child3 :=
 	parent.UpdateEnd(updt)
 	updt = parent.UpdateStart()
 	parent.SetChildAdded()
-	parent.AddNewChild(typ, "child1")
+	parent.NewChild(typ, "child1")
 	parent.UpdateEnd(updt)
-	schild2 := child2.AddNewChild(typ, "subchild1")
+	schild2 := child2.NewChild(typ, "subchild1")
 	child2.SetChildAdded()
 	parent.UpdateEnd(updt)
 
@@ -682,13 +682,13 @@ func TestProps(t *testing.T) {
 		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), sig))
 	})
 	// child1 :=
-	parent.AddNewChild(typ, "child1")
-	child2 := parent.AddNewChild(typ, "child1")
+	parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child1")
 	// child3 :=
 	updt := parent.UpdateStart()
-	parent.AddNewChild(typ, "child1")
+	parent.NewChild(typ, "child1")
 	parent.UpdateEnd(updt)
-	schild2 := child2.AddNewChild(typ, "subchild1")
+	schild2 := child2.NewChild(typ, "subchild1")
 
 	parent.SetProp("intprop", 42)
 	pprop, ok := kit.ToInt(parent.Prop("intprop"))
@@ -754,22 +754,22 @@ func TestTreeMod(t *testing.T) {
 	typ := reflect.TypeOf(tree1)
 	tree1.InitName(&tree1, "tree1")
 	// child11 :=
-	tree1.AddNewChild(typ, "child11")
-	child12 := tree1.AddNewChild(typ, "child12")
+	tree1.NewChild(typ, "child11")
+	child12 := tree1.NewChild(typ, "child12")
 	// child13 :=
-	tree1.AddNewChild(typ, "child13")
+	tree1.NewChild(typ, "child13")
 	// schild12 :=
-	child12.AddNewChild(typ, "subchild12")
+	child12.NewChild(typ, "subchild12")
 
 	tree2 := Node{}
 	tree2.InitName(&tree2, "tree2")
 	// child21 :=
-	tree2.AddNewChild(typ, "child21")
-	child22 := tree2.AddNewChild(typ, "child22")
+	tree2.NewChild(typ, "child21")
+	child22 := tree2.NewChild(typ, "child22")
 	// child23 :=
-	tree2.AddNewChild(typ, "child23")
+	tree2.NewChild(typ, "child23")
 	// schild22 :=
-	child22.AddNewChild(typ, "subchild22")
+	child22.NewChild(typ, "subchild22")
 
 	// fmt.Printf("Setup Signals:\n%v", sigs)
 	sigs = ""
@@ -867,11 +867,11 @@ func TestNodeFieldJSONSave(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChild(typ, "child1")
-	child2 := parent.AddNewChild(typ, "child1").(*NodeField2)
+	parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child1").(*NodeField2)
 	// child3 :=
-	parent.AddNewChild(typ, "child1")
-	child2.AddNewChild(typ, "subchild1")
+	parent.NewChild(typ, "child1")
+	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
 	err := parent.WriteJSON(&buf, true)
@@ -926,11 +926,11 @@ func TestNodeFieldSet(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChild(typ, "child1")
-	child2 := parent.AddNewChild(typ, "child1").(*NodeField2)
+	parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child1").(*NodeField2)
 	// child3 :=
-	parent.AddNewChild(typ, "child1")
-	child2.AddNewChild(typ, "subchild1")
+	parent.NewChild(typ, "child1")
+	child2.NewChild(typ, "subchild1")
 
 	ts := "child2 is nice"
 	err := child2.SetField("Mbr1", ts)
@@ -960,11 +960,11 @@ func TestClone(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
-	parent.AddNewChild(typ, "child1")
-	child2 := parent.AddNewChild(typ, "child1").(*NodeField2)
+	parent.NewChild(typ, "child1")
+	child2 := parent.NewChild(typ, "child1").(*NodeField2)
 	// child3 :=
-	parent.AddNewChild(typ, "child1")
-	child2.AddNewChild(typ, "subchild1")
+	parent.NewChild(typ, "child1")
+	child2.NewChild(typ, "subchild1")
 
 	var buf bytes.Buffer
 	err := parent.WriteJSON(&buf, true)
@@ -998,13 +998,13 @@ func BuildGuiTreeSlow(widgets, parts int, typ reflect.Type) Ki {
 	win.InitName(win, "window")
 	updt := win.UpdateStart()
 
-	vp := win.AddNewChild(typ, "vp")
-	frame := vp.AddNewChild(typ, "frame")
+	vp := win.NewChild(typ, "vp")
+	frame := vp.NewChild(typ, "frame")
 	for wi := 0; wi < widgets; wi++ {
-		widg := frame.AddNewChild(typ, fmt.Sprintf("widg_%d", wi))
+		widg := frame.NewChild(typ, fmt.Sprintf("widg_%d", wi))
 
 		for pi := 0; pi < parts; pi++ {
-			widg.AddNewChild(typ, fmt.Sprintf("part_%d", pi))
+			widg.NewChild(typ, fmt.Sprintf("part_%d", pi))
 		}
 	}
 	win.UpdateEnd(updt)
@@ -1018,13 +1018,13 @@ func BuildGuiTree(widgets, parts int, typ reflect.Type) Ki {
 	win.InitName(win, "window")
 	updt := win.UpdateStart()
 
-	vp := win.AddNewChild(typ, "vp")
-	frame := vp.AddNewChild(typ, "frame")
+	vp := win.NewChild(typ, "vp")
+	frame := vp.NewChild(typ, "frame")
 	for wi := 0; wi < widgets; wi++ {
-		widg := frame.AddNewChild(typ, fmt.Sprintf("widg_%d", wi))
+		widg := frame.NewChild(typ, fmt.Sprintf("widg_%d", wi))
 
 		for pi := 0; pi < parts; pi++ {
-			widg.AddNewChild(typ, fmt.Sprintf("part_%d", pi))
+			widg.NewChild(typ, fmt.Sprintf("part_%d", pi))
 		}
 	}
 	win.UpdateEnd(updt)

@@ -233,12 +233,12 @@ type Ki interface {
 	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	AddChild(kid Ki) error
 
-	// AddNewChild creates a new child of given type and
+	// NewChild creates a new child of given type and
 	// add at end of children list.
 	// The name should be unique among children.
 	// No UpdateStart / End wrapping is done: do that externally as needed.
 	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
-	AddNewChild(typ reflect.Type, name string) Ki
+	NewChild(typ reflect.Type, name string) Ki
 
 	// SetChild sets child at given index to be the given item -- if name is
 	// non-empty then it sets the name of the child as well -- just calls Init
@@ -263,7 +263,7 @@ type Ki interface {
 	InsertNewChild(typ reflect.Type, at int, name string) Ki
 
 	// SetNChildren ensures that there are exactly n children, deleting any
-	// extra, and creating any new ones, using AddNewChild with given type and
+	// extra, and creating any new ones, using NewChild with given type and
 	// naming according to nameStubX where X is the index of the child.
 	//
 	// IMPORTANT: returns whether any modifications were made (mods) AND if

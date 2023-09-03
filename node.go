@@ -495,12 +495,12 @@ func (n *Node) AddChild(kid Ki) error {
 	return nil
 }
 
-// AddNewChild creates a new child of given type and
+// NewChild creates a new child of given type and
 // add at end of children list.
 // The name should be unique among children.
 // No UpdateStart / End wrapping is done: do that externally as needed.
 // Can also call SetChildAdded() if notification is needed.
-func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
+func (n *Node) NewChild(typ reflect.Type, name string) Ki {
 	if err := ThisCheck(n); err != nil {
 		return nil
 	}
@@ -565,7 +565,7 @@ func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
 }
 
 // SetNChildren ensures that there are exactly n children, deleting any
-// extra, and creating any new ones, using AddNewChild with given type and
+// extra, and creating any new ones, using NewChild with given type and
 // naming according to nameStubX where X is the index of the child.
 //
 // IMPORTANT: returns whether any modifications were made (mods) AND if

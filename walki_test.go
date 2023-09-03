@@ -17,15 +17,15 @@ func init() {
 	typ := reflect.TypeOf(testTree).Elem()
 	testTree.InitName(testTree, "root")
 	// child1 :=
-	testTree.AddNewChild(typ, "child0")
-	var child2 = testTree.AddNewChild(typ, "child1")
+	testTree.NewChild(typ, "child0")
+	var child2 = testTree.NewChild(typ, "child1")
 	// child3 :=
-	testTree.AddNewChild(typ, "child2")
-	schild2 := child2.AddNewChild(typ, "subchild1")
+	testTree.NewChild(typ, "child2")
+	schild2 := child2.NewChild(typ, "subchild1")
 	// sschild2 :=
-	schild2.AddNewChild(typ, "subsubchild1")
+	schild2.NewChild(typ, "subsubchild1")
 	// child4 :=
-	testTree.AddNewChild(typ, "child3")
+	testTree.NewChild(typ, "child3")
 }
 
 func TestDown(t *testing.T) {
