@@ -139,15 +139,15 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 	}
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
 		if isBitFlag {
-			g.Printf(StringOneRunBitFlag, typeName, Usize(len(values)), lessThanZero)
+			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero, BitIndexStringMethodName, BitIndexStringMethodComment)
 		} else {
-			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero)
+			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero, StringMethodName, StringMethodComment)
 		}
 	} else {
 		if isBitFlag {
-			g.Printf(StringOneRunWithOffsetBitFlag, typeName, values[0].String(), Usize(len(values)), lessThanZero)
+			g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero, BitIndexStringMethodName, BitIndexStringMethodComment)
 		} else {
-			g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero)
+			g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero, StringMethodName, StringMethodComment)
 		}
 	}
 }
@@ -155,15 +155,21 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 const (
 	// StringMethodName is the name of the String method
 	StringMethodName = `String`
-	// StringMethodComment is the comment for the String method
+	// StringMethodComment is the comment for the String method.
+	// Arguments to format are:
+	//
+	//	[1]: type name
 	StringMethodComment = `// String returns the string representation
 // of this %[1]s value.`
 	// BitIndexStringMethodName is the name of the BitIndexString method
 	BitIndexStringMethodName = `BitIndexString`
-	// BitIndexStringMethodComment is the comment for the BitIndexString method
+	// BitIndexStringMethodComment is the comment for the BitIndexString method.
+	// Arguments to format are:
+	//
+	//	[1]: type name
 	BitIndexStringMethodComment = `// BitIndexString returns the string
-// representation of the bit flag if
-// the bit flag is a bit index value
+// representation of this %[1]s value
+// if it is a bit index value
 // (typically an enum constant), and
 // not an actual bit flag value.`
 )
@@ -207,11 +213,17 @@ func (i %[1]s) %[5]s() string {
 func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string, isBitFlag bool) {
 	g.Printf("\n")
 	g.DeclareIndexAndNameVars(runs, typeName)
-	g.Printf(`
-	// String returns the string representation
-	// of this %[1]s value.
-	`, typeName)
-	g.Printf("func (i %s) String() string {\n", typeName)
+	if isBitFlag {
+		g.Printf(BitIndexStringMethodComment, typeName)
+	} else {
+		g.Printf(StringMethodComment, typeName)
+	}
+	g.Printf("\n")
+	if isBitFlag {
+		g.Printf("func (i %s) BitIndexString() string {\n", typeName)
+	} else {
+		g.Printf("func (i %s) String() string {\n", typeName)
+	}
 	g.Printf("\tswitch {\n")
 	for i, values := range runs {
 		if len(values) == 1 {
@@ -226,14 +238,11 @@ func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string, isBitFlag
 		g.Printf("\t\treturn _%sName_%d[_%sIndex_%d[i]:_%sIndex_%d[i+1]]\n",
 			typeName, i, typeName, i, typeName, i)
 	}
-	if isBitFlag {
-		g.Printf(StringMultipleRunsBitFlagDefault, typeName)
-	} else {
-		g.Printf("\tdefault:\n")
-		g.Printf("\t\treturn \"%s(\" + strconv.FormatInt(int64(i), 10) + \")\"\n", typeName)
-		g.Printf("\t}\n")
-		g.Printf("}\n")
-	}
+
+	g.Printf("\tdefault:\n")
+	g.Printf("\t\treturn \"%s(\" + strconv.FormatInt(int64(i), 10) + \")\"\n", typeName)
+	g.Printf("\t}\n")
+	g.Printf("}\n")
 }
 
 // BuildMap handles the case where the space is so sparse a map is a reasonable fallback.
@@ -251,9 +260,9 @@ func (g *Generator) BuildMap(runs [][]Value, typeName string, isBitFlag bool) {
 	}
 	g.Printf("}\n\n")
 	if isBitFlag {
-		g.Printf(StringMapBitFlag, typeName)
+		g.Printf(StringMap, typeName, BitIndexStringMethodName, BitIndexStringMethodComment)
 	} else {
-		g.Printf(StringMap, typeName)
+		g.Printf(StringMap, typeName, StringMethodName, StringMethodComment)
 	}
 }
 
