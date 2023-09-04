@@ -103,6 +103,31 @@ func (g *Generator) PrintHeader() {
 	g.Printf("\n")
 }
 
+// Find goes through all of the declarations in the package
+// and finds all types, functions, variables, and constants
+// with a comment directive of ki:, gi:, or grease: labeled with enums:enum
+// or enums:bitflag. It stores the resulting types in [Generator.Types].
+func (g *Generator) Find() error {
+	g.Types = []Type{}
+	for _, file := range g.Pkg.Files {
+		var terr error
+		ast.Inspect(file.File, func(n ast.Node) bool {
+			if terr != nil {
+				return false
+			}
+			cont, err := g.Inspect(n)
+			if err != nil {
+				terr = err
+			}
+			return cont
+		})
+		if terr != nil {
+			return fmt.Errorf("Find: error finding: %w", terr)
+		}
+	}
+	return nil
+}
+
 // Format returns the contents of the Generator's buffer
 // ([Generator.Buf]) with goimports applied.
 func (g *Generator) Format() ([]byte, error) {
