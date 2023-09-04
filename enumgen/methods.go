@@ -190,9 +190,10 @@ func (i %[1]s) %[4]s() string {
 //	[2]: lowest defined value for type, as a string
 //	[3]: size of index element (8 for uint8 etc.)
 //	[4]: less than zero check (for signed types)
-const StringOneRunWithOffset = `// String returns the string representation
-// of this %[1]s value.
-func (i %[1]s) String() string {
+//	[5]: method name (String or BitIndexString)
+//	[6]: method comment
+const StringOneRunWithOffset = `%[6]s
+func (i %[1]s) %[5]s() string {
 	i -= %[2]s
 	if %[4]si >= %[1]s(len(_%[1]sIndex)-1) {
 		return "%[1]s(" + strconv.FormatInt(int64(i + %[2]s), 10) + ")"
@@ -277,9 +278,10 @@ func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) 
 // Arguments to format are:
 //
 //	[1]: type name
-const StringMap = `// String returns the string representation
-// of this %[1]s value.
-func (i %[1]s) String() string {
+//	[2]: method name (String or BitIndexString)
+//	[3]: method comment
+const StringMap = `%[3]s
+func (i %[1]s) %[2]s() string {
 	if str, ok := _%[1]sMap[i]; ok {
 		return str
 	}
