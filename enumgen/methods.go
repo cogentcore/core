@@ -139,15 +139,15 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 	}
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
 		if isBitFlag {
-			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero, BitIndexStringMethodName, BitIndexStringMethodComment)
+			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero, BitIndexStringMethodName, fmt.Sprintf(BitIndexStringMethodComment, typeName))
 		} else {
-			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero, StringMethodName, StringMethodComment)
+			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero, StringMethodName, fmt.Sprintf(StringMethodComment, typeName))
 		}
 	} else {
 		if isBitFlag {
-			g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero, BitIndexStringMethodName, BitIndexStringMethodComment)
+			g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero, BitIndexStringMethodName, fmt.Sprintf(BitIndexStringMethodComment, typeName))
 		} else {
-			g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero, StringMethodName, StringMethodComment)
+			g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero, StringMethodName, fmt.Sprintf(StringMethodComment, typeName))
 		}
 	}
 }
@@ -260,9 +260,9 @@ func (g *Generator) BuildMap(runs [][]Value, typeName string, isBitFlag bool) {
 	}
 	g.Printf("}\n\n")
 	if isBitFlag {
-		g.Printf(StringMap, typeName, BitIndexStringMethodName, BitIndexStringMethodComment)
+		g.Printf(StringMap, typeName, BitIndexStringMethodName, fmt.Sprintf(BitIndexStringMethodComment, typeName))
 	} else {
-		g.Printf(StringMap, typeName, StringMethodName, StringMethodComment)
+		g.Printf(StringMap, typeName, StringMethodName, fmt.Sprintf(StringMethodComment, typeName))
 	}
 }
 

@@ -261,9 +261,12 @@ var (
 	_StatesIndex_6 = [...]uint8{0, 8}
 )
 
-// String returns the string representation
-// of this States value.
-func (i States) String() string {
+// BitIndexString returns the string
+// representation of this States value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i States) BitIndexString() string {
 	switch {
 	case i == 1:
 		return _StatesName_0
@@ -280,18 +283,7 @@ func (i States) String() string {
 	case i == 13:
 		return _StatesName_6
 	default:
-		str := ""
-		for _, ie := range _StatesValues {
-			if i.HasFlag(ie) {
-				ies := ie.String()
-				if str == "" {
-					str = ies
-				} else {
-					str += "|" + ies
-				}
-			}
-		}
-		return str
+		return "States(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 }
 
@@ -511,24 +503,16 @@ var _LanguagesMap = map[Languages]string{
 	54: _LanguagesName[64:69],
 }
 
-// String returns the string representation
-// of this Languages value.
-func (i Languages) String() string {
+// BitIndexString returns the string
+// representation of this Languages value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i Languages) BitIndexString() string {
 	if str, ok := _LanguagesMap[i]; ok {
 		return str
 	}
-	str := ""
-	for _, ie := range _LanguagesValues {
-		if i.HasFlag(ie) {
-			ies := ie.String()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
+	return "Languages(" + strconv.FormatInt(int64(i), 10) + ")"
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
