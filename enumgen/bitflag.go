@@ -70,3 +70,25 @@ func (i %[1]s) String() string {
 	return str
 }
 `
+
+// Arguments to format are:
+//
+//	[1]: type name
+const StringSetStringBitFlagMethod = `// SetString sets the %[1]s value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *%[1]s) SetString(s string) error {
+	*i = 0
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _%[1]sNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _%[1]sNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg+" is not a valid value for type %[1]s")
+		}
+	}
+	return nil
+}
+`

@@ -187,32 +187,6 @@ func (i %[1]s) %[4]s() string {
 // Arguments to format are:
 //
 //	[1]: type name
-//	[2]: size of index element (8 for uint8 etc.)
-//	[3]: less than zero check (for signed types)
-const StringOneRunBitFlag = `// String returns the string representation
-// of this %[1]s value.
-func (i %[1]s) String() string {
-	if !(%[3]si >= %[1]s(len(_%[1]sIndex)-1)) {
-		return _%[1]sName[_%[1]sIndex[i]:_%[1]sIndex[i+1]]
-	}
-	str := ""
-	for _, ie := range _%[1]sValues {
-		if i.HasFlag(ie) {
-			ies := ie.String()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
-`
-
-// Arguments to format are:
-//
-//	[1]: type name
 //	[2]: lowest defined value for type, as a string
 //	[3]: size of index element (8 for uint8 etc.)
 //	[4]: less than zero check (for signed types)
@@ -224,57 +198,6 @@ func (i %[1]s) String() string {
 		return "%[1]s(" + strconv.FormatInt(int64(i + %[2]s), 10) + ")"
 	}
 	return _%[1]sName[_%[1]sIndex[i] : _%[1]sIndex[i+1]]
-}
-`
-
-// Arguments to format are:
-//
-//	[1]: type name
-//	[2]: lowest defined value for type, as a string
-//	[3]: size of index element (8 for uint8 etc.)
-//	[4]: less than zero check (for signed types)
-const StringOneRunWithOffsetBitFlag = `// String returns the string representation
-// of this %[1]s value.
-func (i %[1]s) String() string {
-	oi := i
-	i -= %[2]s
-	if !(%[4]si >= %[1]s(len(_%[1]sIndex)-1)) {
-		return _%[1]sName[_%[1]sIndex[i]:_%[1]sIndex[i+1]]
-	}
-	str := ""
-	for _, ie := range _%[1]sValues {
-		if oi.HasFlag(ie) {
-			ies := ie.String()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
-`
-
-// The switch statement default case
-// for bit flags with multiple runs.
-// Arguments to format are:
-//
-//	[1]: type name
-const StringMultipleRunsBitFlagDefault = `	default:
-		str := ""
-		for _, ie := range _%[1]sValues {
-			if i.HasFlag(ie) {
-				ies := ie.String()
-				if str == "" {
-					str = ies
-				} else {
-					str += "|" + ies
-				}
-			}
-		}
-		return str
-	}
 }
 `
 
@@ -367,30 +290,6 @@ func (i %[1]s) String() string {
 // Arguments to format are:
 //
 //	[1]: type name
-const StringMapBitFlag = `// String returns the string representation
-// of this %[1]s value.
-func (i %[1]s) String() string {
-	if str, ok := _%[1]sMap[i]; ok {
-		return str
-	}
-	str := ""
-	for _, ie := range _%[1]sValues {
-		if i.HasFlag(ie) {
-			ies := ie.String()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
-`
-
-// Arguments to format are:
-//
-//	[1]: type name
 //	[2]: number of constants for type
 const StringNConstant = `//%[1]sN is the highest valid value
 // for type %[1]s, plus one.
@@ -414,28 +313,6 @@ func (i *%[1]s) SetString(s string) error {
 		return nil
 	}
 	return errors.New(s+" does not belong to %[1]s values")
-}
-`
-
-// Arguments to format are:
-//
-//	[1]: type name
-const StringSetStringBitFlagMethod = `// SetString sets the %[1]s value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *%[1]s) SetString(s string) error {
-	*i = 0
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _%[1]sNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _%[1]sNameToValueMap[strings.ToLower(flg)]; ok {
-			i.SetFlag(true, &val)
-		} else {
-			return errors.New(flg+" is not a valid value for type %[1]s")
-		}
-	}
-	return nil
 }
 `
 
