@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -58,9 +57,9 @@ func OpenFS(obj any, fsys fs.FS, file string) error {
 	return Read(obj, bufio.NewReader(fp))
 }
 
-// Read reads object TOML encoding from given reader,
+// Read reads object TOML encoding from given reader.
 func Read(obj any, reader io.Reader) error {
-	b, err := ioutil.ReadAll(reader)
+	b, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -68,7 +67,7 @@ func Read(obj any, reader io.Reader) error {
 	return ReadBytes(obj, b)
 }
 
-// ReadBytes reads TOML from given bytes,
+// ReadBytes reads TOML from given bytes.
 func ReadBytes(obj any, b []byte) error {
 	err := toml.Unmarshal(b, obj)
 	if err != nil {
