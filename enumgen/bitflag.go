@@ -15,6 +15,7 @@ package enumgen
 func (g *Generator) BuildBitFlagMethods(runs [][]Value, typeName string) {
 	g.Printf("\n")
 
+	g.Printf(StringBitFlag, typeName)
 	g.Printf(StringHasBitFlagMethod, typeName)
 	g.Printf(StringSetBitFlagMethod, typeName)
 }
