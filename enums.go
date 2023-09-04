@@ -61,7 +61,7 @@ type BitFlag interface {
 	Enum
 	// Has returns whether these flags
 	// have the given flag set.
-	Has(f BitFlag) bool
+	HasFlag(f BitFlag) bool
 }
 
 // BitFlagSetter is an expanded interface that all pointers
@@ -73,5 +73,5 @@ type BitFlagSetter interface {
 	BitFlag
 	// Set sets the value of the given
 	// flags in these flags to the given value.
-	Set(on bool, f ...BitFlag)
+	SetFlag(on bool, f ...BitFlag)
 }
