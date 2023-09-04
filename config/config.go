@@ -107,9 +107,9 @@ type Generate struct {
 	// the enum generation configuration options passed to enumgen
 	Enumgen econfig.Config `nest:"+" desc:"the enum generation configuration options passed to enumgen"`
 
-	// [def: .] the source directory
-	Dir string `def:"." desc:"the source directory"`
+	// [def: .] the source directory to run generate on (can be multiple through ./...)
+	Dir string `def:"." desc:"the source directory to run generate on (can be multiple through ./...)"`
 
-	// [def: gokigen.go] the output file
-	Output string `def:"gokigen.go" desc:"the output file"`
+	// [def: gokigen.go] the output file location relative to the package on which generate is being called
+	Output string `def:"gokigen.go" desc:"the output file location relative to the package on which generate is being called"`
 }
