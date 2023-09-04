@@ -52,26 +52,3 @@ type EnumSetter interface {
 	// SetInt64 sets the enum value from an int64.
 	SetInt64(i int64)
 }
-
-// BitFlag is the interface that all bit flag enum types
-// satisfy. Bit flag enum types support all of the operations
-// that standard enums do, and additionally can check if they
-// have a given bit flag.
-type BitFlag interface {
-	Enum
-	// Has returns whether these flags
-	// have the given flag set.
-	HasFlag(f BitFlag) bool
-}
-
-// BitFlagSetter is an expanded interface that all pointers
-// to bit flag enum types satisfy. Pointers to bit flag
-// enum types must  satisfy all of the methods of [EnumSetter]
-// and [BitFlag], and must also be able to set a given bit flag.
-type BitFlagSetter interface {
-	EnumSetter
-	BitFlag
-	// Set sets the value of the given
-	// flags in these flags to the given value.
-	SetFlag(on bool, f ...BitFlag)
-}
