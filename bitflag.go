@@ -15,6 +15,12 @@ type BitFlag interface {
 	// Has returns whether these flags
 	// have the given flag set.
 	HasFlag(f BitFlag) bool
+	// BitIndexString returns the string
+	// representation of the bit flag if
+	// the bit flag is a bit index value
+	// (typically an enum constant), and
+	// not an actual bit flag value.
+	BitIndexString() string
 }
 
 // BitFlagSetter is an expanded interface that all pointers

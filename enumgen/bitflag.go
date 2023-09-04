@@ -49,3 +49,24 @@ func (i *%[1]s) SetFlag(on bool, f ...enums.BitFlag) {
 	}
 }
 `
+
+// Arguments to format are:
+//
+//	[1]: type name
+const StringBitFlag = `// String returns the string representation
+// of this %[1]s value.
+func (i %[1]s) String() string {
+	str := ""
+	for _, ie := range _%[1]sValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+`

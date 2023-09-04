@@ -152,14 +152,31 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 	}
 }
 
+const (
+	// StringMethodName is the name of the String method
+	StringMethodName = `String`
+	// StringMethodComment is the comment for the String method
+	StringMethodComment = `// String returns the string representation
+// of this %[1]s value.`
+	// BitIndexStringMethodName is the name of the BitIndexString method
+	BitIndexStringMethodName = `BitIndexString`
+	// BitIndexStringMethodComment is the comment for the BitIndexString method
+	BitIndexStringMethodComment = `// BitIndexString returns the string
+// representation of the bit flag if
+// the bit flag is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.`
+)
+
 // Arguments to format are:
 //
 //	[1]: type name
 //	[2]: size of index element (8 for uint8 etc.)
 //	[3]: less than zero check (for signed types)
-const StringOneRun = `// String returns the string representation
-// of this %[1]s value.
-func (i %[1]s) String() string {
+//	[4]: method name (String or BitIndexString)
+//	[5]: method comment
+const StringOneRun = `%[5]s
+func (i %[1]s) %[4]s() string {
 	if %[3]si >= %[1]s(len(_%[1]sIndex)-1) {
 		return "%[1]s(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
