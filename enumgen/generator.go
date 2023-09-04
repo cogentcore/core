@@ -72,7 +72,7 @@ func (g *Generator) AddPackage(pkg *packages.Package) {
 	for _, file := range pkg.Syntax {
 		// ignore generated code
 		if ast.IsGenerated(file) {
-			break
+			continue
 		}
 		// need to use append and 0 initial length
 		// because we don't know if it has generated code

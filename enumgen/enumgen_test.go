@@ -52,7 +52,7 @@ func TestGenerate(t *testing.T) {
 
 func TestStringSetString(t *testing.T) {
 	var val testdata.States
-	val.SetFlag(true, testdata.Active, testdata.Hovered, testdata.Focused)
+	val.Set(true, testdata.Active, testdata.Hovered, testdata.Focused)
 	orig := val
 	want := "focused|vered|currently-being-pressed-by-user"
 	have := val.String()
@@ -71,7 +71,7 @@ func TestStringSetString(t *testing.T) {
 func TestSetStringString(t *testing.T) {
 	src := "enabled|focused|selected"
 	var want testdata.States
-	want.SetFlag(true, testdata.Enabled, testdata.Focused, testdata.Selected)
+	want.Set(true, testdata.Enabled, testdata.Focused, testdata.Selected)
 	var have testdata.States
 	err := have.SetString(src)
 	if err != nil {
@@ -88,7 +88,7 @@ func TestSetStringString(t *testing.T) {
 
 func TestLanguagesString(t *testing.T) {
 	var val testdata.Languages
-	val.SetFlag(true, testdata.Dart, testdata.Go, testdata.Kotlin, testdata.JavaScript)
+	val.Set(true, testdata.Dart, testdata.Go, testdata.Kotlin, testdata.JavaScript)
 	want := "Go|JavaScript|Dart|Kotlin"
 	have := val.String()
 	if have != want {

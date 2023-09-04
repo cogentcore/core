@@ -180,7 +180,7 @@ func (i %[1]s) String() string {
 	}
 	str := ""
 	for _, ie := range _%[1]sValues {
-		if i.HasFlag(&ie) {
+		if i.Has(ie) {
 			ies := ie.String()
 			if str == "" {
 				str = ies
@@ -226,7 +226,7 @@ func (i %[1]s) String() string {
 	}
 	str := ""
 	for _, ie := range _%[1]sValues {
-		if oi.HasFlag(&ie) {
+		if oi.Has(ie) {
 			ies := ie.String()
 			if str == "" {
 				str = ies
@@ -247,7 +247,7 @@ func (i %[1]s) String() string {
 const StringMultipleRunsBitFlagDefault = `	default:
 		str := ""
 		for _, ie := range _%[1]sValues {
-			if i.HasFlag(&ie) {
+			if i.Has(ie) {
 				ies := ie.String()
 				if str == "" {
 					str = ies
@@ -358,7 +358,7 @@ func (i %[1]s) String() string {
 	}
 	str := ""
 	for _, ie := range _%[1]sValues {
-		if i.HasFlag(&ie) {
+		if i.Has(ie) {
 			ies := ie.String()
 			if str == "" {
 				str = ies
@@ -411,9 +411,9 @@ func (i *%[1]s) SetString(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _%[1]sNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
+			i.Set(true, &val)
 		} else if val, ok := _%[1]sNameToValueMap[strings.ToLower(flg)]; ok {
-			i.SetFlag(true, &val)
+			i.Set(true, &val)
 		} else {
 			return errors.New(flg+" is not a valid value for type %[1]s")
 		}
