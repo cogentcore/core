@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
@@ -58,12 +59,17 @@ func (g *Generator) ParsePackage() error {
 
 // AddPackage adds a type-checked Package and its syntax files to the generator.
 func (g *Generator) AddPackage(pkg *packages.Package) {
+	// fmt.Println(pkg.Name, pkg.Fset, pkg.Fset.Position), pkg.Fset.Position(0).Filename)
 	p := &Package{
+		Dir:   filepath.Dir(pkg.Fset.Position(token.Pos(pkg.Fset.Base())).Filename),
 		Name:  pkg.Name,
 		Defs:  pkg.TypesInfo.Defs,
 		Files: make([]*File, 0),
 	}
 
+	if len(pkg.Syntax) > 0 {
+		p.Dir = filepath.Dir(pkg.Fset.Position(pkg.Syntax[0].FileStart).Filename)
+	}
 	for _, file := range pkg.Syntax {
 		// ignore generated code
 		if ast.IsGenerated(file) {
@@ -101,7 +107,7 @@ func (g *Generator) PrintHeader() {
 // Format returns the contents of the Generator's buffer
 // ([Generator.Buf]) with goimports applied.
 func (g *Generator) Format() ([]byte, error) {
-	b, err := imports.Process(g.Config.Generate.Dir, g.Buf.Bytes(), nil)
+	b, err := imports.Process(filepath.Join(g.Pkg.Dir, g.Config.Generate.Dir), g.Buf.Bytes(), nil)
 	if err != nil {
 		// Should never happen, but can arise when developing this code.
 		// The user can compile the output to see the error.
@@ -117,7 +123,8 @@ func (g *Generator) Write() error {
 	b, ferr := g.Format()
 	// we still write file even if formatting failed, as it is still useful
 	// then we handle error later
-	werr := os.WriteFile(g.Config.Generate.Output, b, 0666)
+	fmt.Println(filepath.Join(g.Pkg.Dir, g.Config.Generate.Output))
+	werr := os.WriteFile(filepath.Join(g.Pkg.Dir, g.Config.Generate.Output), b, 0666)
 	if werr != nil {
 		return fmt.Errorf("Generator.Write: error writing file: %w", werr)
 	}
