@@ -63,6 +63,7 @@ func (g *Generator) ParsePackage() error {
 
 // AddPackage adds a type-checked Package and its syntax files to the generator.
 func (g *Generator) AddPackage(pkg *packages.Package) {
+	// fmt.Println(pkg.TypesInfo.Defs)
 	g.Pkg = &Package{
 		Name:  pkg.Name,
 		Defs:  pkg.TypesInfo.Defs,
@@ -168,14 +169,14 @@ var AllowedEnumTypes = map[string]bool{"int": true, "int64": true, "int32": true
 // continue, and an error if there is one. It should only
 // be called in [ast.Inspect].
 func (g *Generator) InspectForType(n ast.Node) (bool, error) {
-	typ, ok := n.(*ast.TypeSpec)
+	ts, ok := n.(*ast.TypeSpec)
 	if !ok {
 		return true, nil
 	}
-	if typ.Comment == nil {
+	if ts.Comment == nil {
 		return true, nil
 	}
-	for _, c := range typ.Comment.List {
+	for _, c := range ts.Comment.List {
 		tool, directive, args, has, err := grease.ParseDirective(c.Text)
 		if err != nil {
 			return false, fmt.Errorf("error parsing comment directive %q: %w", c.Text, err)
@@ -190,9 +191,9 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 			return false, fmt.Errorf("unrecognized enums directive %q (from %q)", directive, c.Text)
 		}
 
-		ident, ok := typ.Type.(*ast.Ident)
+		ident, ok := ts.Type.(*ast.Ident)
 		if !ok {
-			return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", typ.Type, typ.Type)
+			return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", ts.Type, ts.Type)
 		}
 		cfg := &config.Config{}
 		*cfg = *g.Config
@@ -204,17 +205,19 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 			return false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
 		}
 
+		typ := g.Pkg.Defs[ts.Name].Type()
+		utyp := typ.Underlying()
 		switch directive {
 		case "enum":
-			if !AllowedEnumTypes[ident.Name] {
+			if !AllowedEnumTypes[utyp.String()] {
 				return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)
 			}
-			g.Types = append(g.Types, Type{Type: typ, IsBitFlag: false, Config: cfg})
+			g.Types = append(g.Types, Type{Type: ts, IsBitFlag: false, Config: cfg})
 		case "bitflag":
-			if ident.Name != "int64" {
+			if utyp.String() != "int64" {
 				return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
 			}
-			g.Types = append(g.Types, Type{Type: typ, IsBitFlag: true, Config: cfg})
+			g.Types = append(g.Types, Type{Type: ts, IsBitFlag: true, Config: cfg})
 			g.HasBitFlag = true
 		}
 

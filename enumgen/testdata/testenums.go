@@ -60,3 +60,10 @@ const (
 	Kotlin
 	Swift
 )
+
+// MoreLanguages contains more programming languages
+type MoreLanguages Languages //enums:bitflag
+
+const (
+	Perl MoreLanguages = MoreLanguages(LanguagesN) + iota
+)
