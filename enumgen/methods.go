@@ -15,6 +15,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"text/template"
 )
 
 // Usize returns the number of bits of the smallest unsigned integer
@@ -190,6 +191,16 @@ func (i %[1]s) %[4]s() string {
 }
 `
 
+var StringOneRunTmpl = template.Must(template.New("StringOneRun").Parse(
+	`{{.MethodComment}}
+func (i {{.TypeName}}) {{.MethodName}}() string {
+	if {{.LessThanZeroCheck}}i >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
+		return "{{.TypeName}}(" + strconv.FormatInt(int64(i), 10) + ")"
+	}
+	return _{{.TypeName}}Name[_{{.TypeName}}Index[i]:_{{.TypeName}}Index[i+1]]
+}
+`))
+
 // Arguments to format are:
 //
 //	[1]: type name
@@ -208,9 +219,21 @@ func (i %[1]s) %[5]s() string {
 }
 `
 
+var StringOnRunWithOffsetTmpl = template.Must(template.New("StringOneRunWithOffset").Parse(
+	`{{.MethodComment}}
+func (i {{.TypeName}}) {{.MethodName}}() string {
+	i -= {{.MinValue}}
+	if {{.LessThanZeroCheck}}si >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
+		return "{{.TypeName}}(" + strconv.FormatInt(int64(i + {{.MinValue}}), 10) + ")"
+	}
+	return _{{.TypeName}}Name[_{{.TypeName}}Index[i] : _{{.TypeName}}Index[i+1]]
+}
+`))
+
 // BuildMultipleRuns generates the variables and String method for multiple runs of contiguous values.
 // For this pattern, a single Printf format won't do.
 func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string, isBitFlag bool) {
+	g.ExecTmpl(StringOneRunTmpl, nil)
 	g.Printf("\n")
 	g.DeclareIndexAndNameVars(runs, typeName)
 	if isBitFlag {
