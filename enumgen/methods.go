@@ -233,7 +233,6 @@ func (i {{.TypeName}}) {{.MethodName}}() string {
 // BuildMultipleRuns generates the variables and String method for multiple runs of contiguous values.
 // For this pattern, a single Printf format won't do.
 func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string, isBitFlag bool) {
-	g.ExecTmpl(StringOneRunTmpl, nil)
 	g.Printf("\n")
 	g.DeclareIndexAndNameVars(runs, typeName)
 	if isBitFlag {
