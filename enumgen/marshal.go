@@ -13,7 +13,8 @@ package enumgen
 
 import "text/template"
 
-var JSONMethodsTmpl = template.Must(template.New("JSONMethods").Parse(`
+var JSONMethodsTmpl = template.Must(template.New("JSONMethods").Parse(
+	`
 // MarshalJSON implements the [json.Marshaler] interface.
 func (i {{.TypeName}}) MarshalJSON() ([]byte, error) {
 	return json.Marshal(i.String())
@@ -36,10 +37,8 @@ func (g *Generator) BuildJSONMethods(runs [][]Value, typeName string, runsThresh
 	g.ExecTmpl(JSONMethodsTmpl, d)
 }
 
-// Arguments to format are:
-//
-//	[1]: type name
-const TextMethods = `
+var TextMethods = template.Must(template.New("TextMethods").Parse(
+	`
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i {{.TypeName}}) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
@@ -49,16 +48,17 @@ func (i {{.TypeName}}) MarshalText() ([]byte, error) {
 func (i *{{.TypeName}}) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
-`
+`))
 
 func (g *Generator) BuildTextMethods(runs [][]Value, typeName string, runsThreshold int) {
-	g.Printf(TextMethods, typeName)
+	d := &TmplData{
+		TypeName: typeName,
+	}
+	g.ExecTmpl(TextMethods, d)
 }
 
-// Arguments to format are:
-//
-//	[1]: type name
-const YAMLMethods = `
+var YAMLMethods = template.Must(template.New("YAMLMethods").Parse(
+	`
 // MarshalYAML implements a YAML Marshaler.
 func (i {{.TypeName}}) MarshalYAML() (any, error) {
 	return i.String(), nil
@@ -72,8 +72,11 @@ func (i *{{.TypeName}}) UnmarshalYAML(unmarshal func(any) error) error {
 	}
 	return i.SetString(s)
 }
-`
+`))
 
 func (g *Generator) BuildYAMLMethods(runs [][]Value, typeName string, runsThreshold int) {
-	g.Printf(YAMLMethods, typeName)
+	d := &TmplData{
+		TypeName: typeName,
+	}
+	g.ExecTmpl(YAMLMethods, d)
 }
