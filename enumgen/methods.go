@@ -285,114 +285,97 @@ var StringNConstant = template.Must(template.New("StringNConstant").Parse(
 const {{.TypeName}}N {{.TypeName}} = {{.MaxValueP1}}
 `))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringSetStringMethod = `// SetString sets the %[1]s value from its
+var StringSetStringMethod = template.Must(template.New("SetStringMethod").Parse(
+	`// SetString sets the {{.TypeName}} value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *%[1]s) SetString(s string) error {
-	if val, ok := _%[1]sNameToValueMap[s]; ok {
+func (i *{{.TypeName}}) SetString(s string) error {
+	if val, ok := _{{.TypeName}}NameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
 
-	if val, ok := _%[1]sNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _{{.TypeName}}NameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s+" does not belong to %[1]s values")
+	return errors.New(s+" does not belong to {{.TypeName}} values")
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringInt64Method = `// Int64 returns the %[1]s value as an int64.
-func (i %[1]s) Int64() int64 {
+var StringInt64Method = template.Must(template.New("Int64Method").Parse(
+	`// Int64 returns the {{.TypeName}} value as an int64.
+func (i {{.TypeName}}) Int64() int64 {
 	return int64(i)
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringSetInt64Method = `// SetInt64 sets the %[1]s value from an int64.
-func (i *%[1]s) SetInt64(in int64) {
-	*i = %[1]s(in)
+var StringSetInt64Method = template.Must(template.New("SetInt64Method").Parse(
+	`// SetInt64 sets the {{.TypeName}} value from an int64.
+func (i *{{.TypeName}}) SetInt64(in int64) {
+	*i = {{.TypeName}}(in)
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringDescMethod = `// Desc returns the description of the %[1]s value.
-func (i %[1]s) Desc() string {
-	if str, ok := _%[1]sDescMap[i]; ok {
+var StringDescMethod = template.Must(template.New("DescMethod").Parse(`// Desc returns the description of the {{.TypeName}} value.
+func (i {{.TypeName}}) Desc() string {
+	if str, ok := _{{.TypeName}}DescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringDescsMethod = `	// Descs returns the descriptions of all
-// possible values of type %[1]s.
+var StringDescsMethod = template.Must(template.New("Int64Method").Parse(
+	`// Descs returns the descriptions of all
+// possible values of type {{.TypeName}}.
 // This slice will be in the same order as
 // those returned by Values and Strings.
-func (i %[1]s) Descs() []string {
-	return _%[1]sDescs
+func (i {{.TypeName}}) Descs() []string {
+	return _{{.TypeName}}Descs
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringValuesGlobal = `// %[1]sValues returns all possible values of
-// the type %[1]s. This slice will be in the
+var StringValuesGlobal = template.Must(template.New("ValuesGlobal").Parse(
+	`// {{.TypeName}}Values returns all possible values of
+// the type {{.TypeName}}. This slice will be in the
 // same order as those returned by the Values,
-// Strings, and Descs methods on %[1]s.
-func %[1]sValues() []%[1]s {
-	return _%[1]sValues
+// Strings, and Descs methods on {{.TypeName}}.
+func {{.TypeName}}Values() []{{.TypeName}} {
+	return _{{.TypeName}}Values
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringValuesMethod = `// Values returns all possible values of
-// type %[1]s. This slice will be in the
+var StringValuesMethod = template.Must(template.New("ValuesMethod").Parse(
+	`// Values returns all possible values of
+// type {{.TypeName}}. This slice will be in the
 // same order as those returned by Strings and Descs.
-func (i %[1]s) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_%[1]sValues))
-	for i, d := range _%[1]sValues {
+func (i {{.TypeName}}) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_{{.TypeName}}Values))
+	for i, d := range _{{.TypeName}}Values {
 		res[i] = d
 	}
 	return res 
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringStringsMethod = `// Strings returns the string representations of
-// all possible values of type %[1]s.
+var StringStringsMethod = template.Must(template.New("StringsMethod").Parse(
+	`// Strings returns the string representations of
+// all possible values of type {{.TypeName}}.
 // This slice will be in the same order as
 // those returned by Values and Descs.
-func (i %[1]s) Strings() []string {
-	return _%[1]sNames
+func (i {{.TypeName}}) Strings() []string {
+	return _{{.TypeName}}Names
 }
-`
+`))
 
 // Arguments to format are:
 //
 //	[1]: type name
 const StringBelongsMethodLoop = `// IsValid returns whether the value is a
-// valid option for type %[1]s.
-func (i %[1]s) IsValid() bool {
-	for _, v := range _%[1]sValues {
+// valid option for type {{.TypeName}}.
+func (i {{.TypeName}}) IsValid() bool {
+	for _, v := range _{{.TypeName}}Values {
 		if i == v {
 			return true
 		}
@@ -405,9 +388,9 @@ func (i %[1]s) IsValid() bool {
 //
 //	[1]: type name
 const StringIsValidMethod = `// IsValid returns whether the value is a
-// valid option for type %[1]s.
-func (i %[1]s) IsValid() bool {
-	_, ok := _%[1]sMap[i] 
+// valid option for type {{.TypeName}}.
+func (i {{.TypeName}}) IsValid() bool {
+	_, ok := _{{.TypeName}}Map[i] 
 	return ok
 }
 `
