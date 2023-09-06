@@ -154,19 +154,15 @@ const (
 	// StringMethodName is the name of the String method
 	StringMethodName = `String`
 	// StringMethodComment is the comment for the String method.
-	// Arguments to format are:
-	//
-	//	[1]: type name
+	// Argument to format is type name
 	StringMethodComment = `// String returns the string representation
-// of this %[1]s value.`
+// of this %s value.`
 	// BitIndexStringMethodName is the name of the BitIndexString method
 	BitIndexStringMethodName = `BitIndexString`
 	// BitIndexStringMethodComment is the comment for the BitIndexString method.
-	// Arguments to format are:
-	//
-	//	[1]: type name
+	// Arguments to format is type name
 	BitIndexStringMethodComment = `// BitIndexString returns the string
-// representation of this %[1]s value
+// representation of this %s value
 // if it is a bit index value
 // (typically an enum constant), and
 // not an actual bit flag value.`
@@ -369,10 +365,8 @@ func (i {{.TypeName}}) Strings() []string {
 }
 `))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringBelongsMethodLoop = `// IsValid returns whether the value is a
+var StringIsValidMethodLoop = template.Must(template.New("IsValidMethodLoop").Parse(
+	`// IsValid returns whether the value is a
 // valid option for type {{.TypeName}}.
 func (i {{.TypeName}}) IsValid() bool {
 	for _, v := range _{{.TypeName}}Values {
@@ -382,18 +376,16 @@ func (i {{.TypeName}}) IsValid() bool {
 	}
 	return false
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringIsValidMethod = `// IsValid returns whether the value is a
+var StringIsValidMethodMap = template.Must(template.New("IsValidMethodMap").Parse(
+	`// IsValid returns whether the value is a
 // valid option for type {{.TypeName}}.
 func (i {{.TypeName}}) IsValid() bool {
 	_, ok := _{{.TypeName}}Map[i] 
 	return ok
 }
-`
+`))
 
 // BuildBasicExtras builds methods common to all types, like Desc and SetString.
 func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag bool, runsThreshold int) {
@@ -438,9 +430,9 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 	g.Printf(StringStringsMethod, typeName)
 	g.Printf(StringDescsMethod, typeName)
 	if len(runs) <= runsThreshold {
-		g.Printf(StringBelongsMethodLoop, typeName)
+		g.Printf(StringIsValidMethodLoop, typeName)
 	} else { // There is a map of values, the code is simpler then
-		g.Printf(StringIsValidMethod, typeName)
+		g.Printf(StringIsValidMethodMap, typeName)
 	}
 }
 
