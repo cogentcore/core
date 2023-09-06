@@ -240,11 +240,10 @@ func (g *Generator) BuildMap(runs [][]Value, typeName string, isBitFlag bool) {
 		}
 	}
 	g.Printf("}\n\n")
-	if isBitFlag {
-		g.Printf(StringMethodMapTmpl, typeName, BitIndexStringMethodName, fmt.Sprintf(BitIndexStringMethodComment, typeName))
-	} else {
-		g.Printf(StringMethodMapTmpl, typeName, StringMethodName, fmt.Sprintf(StringMethodComment, typeName))
-	}
+	d := &TmplData{}
+	d.TypeName = typeName
+	d.SetMethod(isBitFlag)
+	g.ExecTmpl(StringMethodMapTmpl, d)
 }
 
 // BuildNoOpOrderChangeDetect lets the compiler and the user know if the order/value of the enum values has changed.
@@ -404,7 +403,11 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 	}
 	g.Printf("}\n\n")
 
-	g.Printf(NConstantTmpl, typeName, max+1)
+	d := &TmplData{}
+	d.TypeName = typeName
+	d.MaxValueP1 = fmt.Sprintf("%d", max+1)
+
+	g.ExecTmpl(NConstantTmpl, d)
 
 	// Print the map between name and value
 	g.PrintValueMap(runs, typeName, runsThreshold)
@@ -420,19 +423,19 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 	if isBitFlag {
 		g.Printf(StringSetStringBitFlagMethod, typeName)
 	} else {
-		g.Printf(SetStringMethodTmpl, typeName)
+		g.ExecTmpl(SetStringMethodTmpl, d)
 	}
-	g.Printf(Int64MethodTmpl, typeName)
-	g.Printf(SetInt64MethodTmpl, typeName)
-	g.Printf(DescMethodTmpl, typeName)
-	g.Printf(ValuesGlobalTmpl, typeName)
-	g.Printf(ValuesMethodTmpl, typeName)
-	g.Printf(StringsMethodTmpl, typeName)
-	g.Printf(DescsMethodTmpl, typeName)
+	g.ExecTmpl(Int64MethodTmpl, d)
+	g.ExecTmpl(SetInt64MethodTmpl, d)
+	g.ExecTmpl(DescMethodTmpl, d)
+	g.ExecTmpl(ValuesGlobalTmpl, d)
+	g.ExecTmpl(ValuesMethodTmpl, d)
+	g.ExecTmpl(StringsMethodTmpl, d)
+	g.ExecTmpl(DescsMethodTmpl, d)
 	if len(runs) <= runsThreshold {
-		g.Printf(IsValidMethodLoopTmpl, typeName)
+		g.ExecTmpl(IsValidMethodLoopTmpl, d)
 	} else { // There is a map of values, the code is simpler then
-		g.Printf(IsValidMethodMapTmpl, typeName)
+		g.ExecTmpl(IsValidMethodMapTmpl, d)
 	}
 }
 
