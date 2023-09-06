@@ -29,16 +29,12 @@ type TmplData struct {
 }
 
 // ExecTmpl executes the given template with the given data and
-// writes the result to [Generator.Buf]. It logs any error in
-// addition to returning it, so callers do not have to handle tbe error.
-func (g *Generator) ExecTmpl(t *template.Template, data *TmplData) error {
+// writes the result to [Generator.Buf]. It fatally logs any error.
+func (g *Generator) ExecTmpl(t *template.Template, data *TmplData) {
 	err := t.Execute(&g.Buf, data)
 	if err != nil {
-		werr := fmt.Errorf("error executing template: %w", err)
-		log.Println(werr)
-		return werr
+		log.Fatalf("programmer error: internal error: error executing template: %v", err)
 	}
-	return nil
 }
 
 // SetMethod sets [TmplData.MethodName] and [TmplData.MethodComment]
