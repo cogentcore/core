@@ -11,17 +11,18 @@
 
 package enumgen
 
-// Arguments to format are:
-//
-//	[1]: type name
-const valueMethod = `// Scan implements the [driver.Valuer] interface.
-func (i %[1]s) Value() (driver.Value, error) {
+import "text/template"
+
+var ValueMethodTmpl = template.Must(template.New("ValueMethod").Parse(
+	`// Scan implements the [driver.Valuer] interface.
+func (i {{.TypeName}}) Value() (driver.Value, error) {
 	return i.String(), nil
 }
-`
+`))
 
-const scanMethod = `// Value implements the [sql.Scanner] interface.
-func (i *%[1]s) Scan(value any) error {
+var ScanMethodTmpl = template.Must(template.New("ScanMethod").Parse(
+	`// Value implements the [sql.Scanner] interface.
+func (i *{{.TypeName}}) Scan(value any) error {
 	if value == nil {
 		return nil
 	}
@@ -35,16 +36,19 @@ func (i *%[1]s) Scan(value any) error {
 	case fmt.Stringer:
 		str = v.String()
 	default:
-		return fmt.Errorf("invalid value for type %[1]s: %%[1]T(%%[1]v)", value)
+		return fmt.Errorf("invalid value for type {{.TypeName}}: %[1]T(%[1]v)", value)
 	}
 
 	return i.SetString(str)
 }
-`
+`))
 
-func (g *Generator) addValueAndScanMethod(typeName string) {
+func (g *Generator) AddValueAndScanMethod(typeName string) {
+	d := &TmplData{
+		TypeName: typeName,
+	}
 	g.Printf("\n")
-	g.Printf(valueMethod, typeName)
+	g.ExecTmpl(ValueMethodTmpl, d)
 	g.Printf("\n\n")
-	g.Printf(scanMethod, typeName)
+	g.ExecTmpl(ScanMethodTmpl, d)
 }

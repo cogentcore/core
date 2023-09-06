@@ -312,7 +312,7 @@ func (g *Generator) Generate() error {
 			g.BuildYAMLMethods(runs, typeName, runsThreshold)
 		}
 		if typ.Config.SQL {
-			g.addValueAndScanMethod(typeName)
+			g.AddValueAndScanMethod(typeName)
 		}
 		if typ.Config.GQL {
 			g.BuildGQLMethods(runs, typeName)
