@@ -805,7 +805,7 @@ const _MoreLanguagesLowerName = "perl"
 func (i MoreLanguages) BitIndexString() string {
 	i -= 55
 	if i < 0 || i >= MoreLanguages(len(_MoreLanguagesIndex)-1) {
-		return "MoreLanguages(" + strconv.FormatInt(int64(i+55), 10) + ")"
+		return strconv.FormatInt(int64(i+55), 10)
 	}
 	return _MoreLanguagesName[_MoreLanguagesIndex[i]:_MoreLanguagesIndex[i+1]]
 }

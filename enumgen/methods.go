@@ -144,8 +144,10 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 	}
 	d.SetMethod(isBitFlag)
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
+		d.IfInvalid = StandardIfInvalid
 		g.ExecTmpl(StringMethodOneRunTmpl, d)
 	} else {
+		d.IfInvalid = fmt.Sprintf(OffsetIfInvalid, d.MinValue)
 		g.ExecTmpl(StringMethodOneRunWithOffsetTmpl, d)
 	}
 }
@@ -154,25 +156,31 @@ const (
 	// StringMethodName is the name of the String method.
 	StringMethodName = `String`
 	// StringMethodComment is the comment for the String method.
-	// Argument to format is type name.
+	// It is a format that takes an argument of type name.
 	StringMethodComment = `// String returns the string representation
 // of this %s value.`
 	// BitIndexStringMethodName is the name of the BitIndexString method.
 	BitIndexStringMethodName = `BitIndexString`
 	// BitIndexStringMethodComment is the comment for the BitIndexString method.
-	// Arguments to format is type name.
+	// It is a format that takes an argument of type name.
 	BitIndexStringMethodComment = `// BitIndexString returns the string
 // representation of this %s value
 // if it is a bit index value
 // (typically an enum constant), and
 // not an actual bit flag value.`
+	// StandardIfInvalid is the standard code to run if the value is invalid
+	// ([TmplData.IfInvalid] should be set to this in most cases)
+	StandardIfInvalid = `return strconv.FormatInt(int64(i), 10)`
+	// OffsetIfInvalid is the standard code to run if the value is invalid
+	// if the values are offset by the value passed to the format as a string
+	OffsetIfInvalid = `return strconv.FormatInt(int64(i+%s), 10)`
 )
 
 var StringMethodOneRunTmpl = template.Must(template.New("StringMethodOneRun").Parse(
 	`{{.MethodComment}}
 func (i {{.TypeName}}) {{.MethodName}}() string {
 	if {{.LessThanZeroCheck}}i >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
-		return "{{.TypeName}}(" + strconv.FormatInt(int64(i), 10) + ")"
+		{{.IfInvalid}}
 	}
 	return _{{.TypeName}}Name[_{{.TypeName}}Index[i]:_{{.TypeName}}Index[i+1]]
 }
@@ -183,7 +191,7 @@ var StringMethodOneRunWithOffsetTmpl = template.Must(template.New("StringMethodO
 func (i {{.TypeName}}) {{.MethodName}}() string {
 	i -= {{.MinValue}}
 	if {{.LessThanZeroCheck}}i >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
-		return "{{.TypeName}}(" + strconv.FormatInt(int64(i + {{.MinValue}}), 10) + ")"
+		{{.IfInvalid}}
 	}
 	return _{{.TypeName}}Name[_{{.TypeName}}Index[i] : _{{.TypeName}}Index[i+1]]
 }
