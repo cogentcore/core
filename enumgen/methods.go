@@ -151,16 +151,16 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 }
 
 const (
-	// StringMethodName is the name of the String method
+	// StringMethodName is the name of the String method.
 	StringMethodName = `String`
 	// StringMethodComment is the comment for the String method.
-	// Argument to format is type name
+	// Argument to format is type name.
 	StringMethodComment = `// String returns the string representation
 // of this %s value.`
-	// BitIndexStringMethodName is the name of the BitIndexString method
+	// BitIndexStringMethodName is the name of the BitIndexString method.
 	BitIndexStringMethodName = `BitIndexString`
 	// BitIndexStringMethodComment is the comment for the BitIndexString method.
-	// Arguments to format is type name
+	// Arguments to format is type name.
 	BitIndexStringMethodComment = `// BitIndexString returns the string
 // representation of this %s value
 // if it is a bit index value
