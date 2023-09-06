@@ -266,7 +266,7 @@ func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) 
 
 var StringMethodMapTmpl = template.Must(template.New("StringMethodMap").Parse(
 	`{{.MethodComment}}
-func (i {{.TypeName}}) {{.MethodComment}}() string {
+func (i {{.TypeName}}) {{.MethodName}}() string {
 	if str, ok := _{{.TypeName}}Map[i]; ok {
 		return str
 	}
