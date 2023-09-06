@@ -39,3 +39,16 @@ func (g *Generator) ExecTmpl(t *template.Template, data *TmplData) error {
 	}
 	return nil
 }
+
+// SetMethod sets [TmplData.MethodName] and [TmplData.MethodComment]
+// based on whether the type is a bit flag type. It is assumed
+// that [TmplData.TypeName] is already set.
+func (td *TmplData) SetMethod(isBitFlag bool) {
+	if isBitFlag {
+		td.MethodName = BitIndexStringMethodName
+		td.MethodComment = fmt.Sprintf(BitIndexStringMethodComment, td.TypeName)
+	} else {
+		td.MethodName = StringMethodName
+		td.MethodComment = fmt.Sprintf(StringMethodComment, td.TypeName)
+	}
+}

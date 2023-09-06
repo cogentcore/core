@@ -133,23 +133,20 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 	values := runs[0]
 	g.Printf("\n")
 	g.DeclareIndexAndNameVar(values, typeName)
-	// The generated code is simple enough to write as a Printf format.
-	lessThanZero := ""
+	// The generated code is simple enough to write as a template.
+	d := &TmplData{}
+	d.TypeName = typeName
+	d.MinValue = values[0].String()
+	d.IndexElementSize = Usize(len(values))
+	d.LessThanZeroCheck = ""
 	if values[0].Signed {
-		lessThanZero = "i < 0 || "
+		d.LessThanZeroCheck = "i < 0 || "
 	}
+	d.SetMethod(isBitFlag)
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
-		if isBitFlag {
-			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero, BitIndexStringMethodName, fmt.Sprintf(BitIndexStringMethodComment, typeName))
-		} else {
-			g.Printf(StringOneRun, typeName, Usize(len(values)), lessThanZero, StringMethodName, fmt.Sprintf(StringMethodComment, typeName))
-		}
+		g.ExecTmpl(StringOneRunTmpl, d)
 	} else {
-		if isBitFlag {
-			g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero, BitIndexStringMethodName, fmt.Sprintf(BitIndexStringMethodComment, typeName))
-		} else {
-			g.Printf(StringOneRunWithOffset, typeName, values[0].String(), Usize(len(values)), lessThanZero, StringMethodName, fmt.Sprintf(StringMethodComment, typeName))
-		}
+		g.ExecTmpl(StringOneRunWithOffsetTmpl, d)
 	}
 }
 
@@ -175,22 +172,6 @@ const (
 // not an actual bit flag value.`
 )
 
-// Arguments to format are:
-//
-//	[1]: type name
-//	[2]: size of index element (8 for uint8 etc.)
-//	[3]: less than zero check (for signed types)
-//	[4]: method name (String or BitIndexString)
-//	[5]: method comment
-const StringOneRun = `%[5]s
-func (i %[1]s) %[4]s() string {
-	if %[3]si >= %[1]s(len(_%[1]sIndex)-1) {
-		return "%[1]s(" + strconv.FormatInt(int64(i), 10) + ")"
-	}
-	return _%[1]sName[_%[1]sIndex[i]:_%[1]sIndex[i+1]]
-}
-`
-
 var StringOneRunTmpl = template.Must(template.New("StringOneRun").Parse(
 	`{{.MethodComment}}
 func (i {{.TypeName}}) {{.MethodName}}() string {
@@ -201,29 +182,11 @@ func (i {{.TypeName}}) {{.MethodName}}() string {
 }
 `))
 
-// Arguments to format are:
-//
-//	[1]: type name
-//	[2]: lowest defined value for type, as a string
-//	[3]: size of index element (8 for uint8 etc.)
-//	[4]: less than zero check (for signed types)
-//	[5]: method name (String or BitIndexString)
-//	[6]: method comment
-const StringOneRunWithOffset = `%[6]s
-func (i %[1]s) %[5]s() string {
-	i -= %[2]s
-	if %[4]si >= %[1]s(len(_%[1]sIndex)-1) {
-		return "%[1]s(" + strconv.FormatInt(int64(i + %[2]s), 10) + ")"
-	}
-	return _%[1]sName[_%[1]sIndex[i] : _%[1]sIndex[i+1]]
-}
-`
-
-var StringOnRunWithOffsetTmpl = template.Must(template.New("StringOneRunWithOffset").Parse(
+var StringOneRunWithOffsetTmpl = template.Must(template.New("StringOneRunWithOffset").Parse(
 	`{{.MethodComment}}
 func (i {{.TypeName}}) {{.MethodName}}() string {
 	i -= {{.MinValue}}
-	if {{.LessThanZeroCheck}}si >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
+	if {{.LessThanZeroCheck}}i >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
 		return "{{.TypeName}}(" + strconv.FormatInt(int64(i + {{.MinValue}}), 10) + ")"
 	}
 	return _{{.TypeName}}Name[_{{.TypeName}}Index[i] : _{{.TypeName}}Index[i+1]]
