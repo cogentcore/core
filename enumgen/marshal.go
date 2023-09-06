@@ -13,6 +13,26 @@ package enumgen
 
 import "text/template"
 
+var TextMethodsTmpl = template.Must(template.New("TextMethods").Parse(
+	`
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i {{.TypeName}}) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *{{.TypeName}}) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+`))
+
+func (g *Generator) BuildTextMethods(runs [][]Value, typeName string, runsThreshold int) {
+	d := &TmplData{
+		TypeName: typeName,
+	}
+	g.ExecTmpl(TextMethodsTmpl, d)
+}
+
 var JSONMethodsTmpl = template.Must(template.New("JSONMethods").Parse(
 	`
 // MarshalJSON implements the [json.Marshaler] interface.
@@ -37,27 +57,7 @@ func (g *Generator) BuildJSONMethods(runs [][]Value, typeName string, runsThresh
 	g.ExecTmpl(JSONMethodsTmpl, d)
 }
 
-var TextMethods = template.Must(template.New("TextMethods").Parse(
-	`
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i {{.TypeName}}) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *{{.TypeName}}) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-`))
-
-func (g *Generator) BuildTextMethods(runs [][]Value, typeName string, runsThreshold int) {
-	d := &TmplData{
-		TypeName: typeName,
-	}
-	g.ExecTmpl(TextMethods, d)
-}
-
-var YAMLMethods = template.Must(template.New("YAMLMethods").Parse(
+var YAMLMethodsTmpl = template.Must(template.New("YAMLMethods").Parse(
 	`
 // MarshalYAML implements a YAML Marshaler.
 func (i {{.TypeName}}) MarshalYAML() (any, error) {
@@ -78,5 +78,5 @@ func (g *Generator) BuildYAMLMethods(runs [][]Value, typeName string, runsThresh
 	d := &TmplData{
 		TypeName: typeName,
 	}
-	g.ExecTmpl(YAMLMethods, d)
+	g.ExecTmpl(YAMLMethodsTmpl, d)
 }
