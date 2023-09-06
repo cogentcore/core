@@ -23,7 +23,7 @@ func (i {{.TypeName}}) MarshalGQL(w io.Writer) {
 func (i *{{.TypeName}}) UnmarshalGQL(value any) error {
 	str, ok := value.(string)
 	if !ok {
-		return fmt.Errorf("{{.TypeName}} should be a string, but got a value of type %%T instead", value)
+		return fmt.Errorf("{{.TypeName}} should be a string, but got a value of type %T instead", value)
 	}
 	return i.SetString(str)
 }
