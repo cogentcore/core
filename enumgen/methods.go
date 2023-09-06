@@ -423,7 +423,7 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 
 	// Print the basic extra methods
 	if isBitFlag {
-		g.Printf(StringSetStringBitFlagMethod, typeName)
+		g.ExecTmpl(SetStringMethodBitFlagTmpl, d)
 	} else {
 		g.ExecTmpl(SetStringMethodTmpl, d)
 	}

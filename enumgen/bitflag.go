@@ -11,31 +11,33 @@
 
 package enumgen
 
+import "text/template"
+
 // BuildBitFlagMethods builds methods specific to bit flag types.
 func (g *Generator) BuildBitFlagMethods(runs [][]Value, typeName string) {
+	d := &TmplData{
+		TypeName: typeName,
+	}
+
 	g.Printf("\n")
 
-	g.Printf(StringBitFlag, typeName)
-	g.Printf(StringHasBitFlagMethod, typeName)
-	g.Printf(StringSetBitFlagMethod, typeName)
+	g.ExecTmpl(StringMethodBitFlagTmpl, d)
+	g.ExecTmpl(HasFlagMethodTmpl, d)
+	g.ExecTmpl(SetFlagMethodTmpl, d)
 }
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringHasBitFlagMethod = `// Has returns whether these
+var HasFlagMethodTmpl = template.Must(template.New("HasFlagMethod").Parse(
+	`// HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i %[1]s) HasFlag(f enums.BitFlag) bool {
+func (i {{.TypeName}}) HasFlag(f enums.BitFlag) bool {
 	return i&(1<<uint32(f.Int64())) != 0
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringSetBitFlagMethod = `// Set sets the value of the given
+var SetFlagMethodTmpl = template.Must(template.New("SetFlagMethod").Parse(
+	`// SetFlag sets the value of the given
 // flags in these flags to the given value.
-func (i *%[1]s) SetFlag(on bool, f ...enums.BitFlag) {
+func (i *{{.TypeName}}) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()
@@ -49,16 +51,14 @@ func (i *%[1]s) SetFlag(on bool, f ...enums.BitFlag) {
 		atomic.StoreInt64((*int64)(i), in)
 	}
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringBitFlag = `// String returns the string representation
-// of this %[1]s value.
-func (i %[1]s) String() string {
+var StringMethodBitFlagTmpl = template.Must(template.New("StringMethodBitFlag").Parse(
+	`// String returns the string representation
+// of this {{.TypeName}} value.
+func (i {{.TypeName}}) String() string {
 	str := ""
-	for _, ie := range _%[1]sValues {
+	for _, ie := range _{{.TypeName}}Values {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -70,26 +70,24 @@ func (i %[1]s) String() string {
 	}
 	return str
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-const StringSetStringBitFlagMethod = `// SetString sets the %[1]s value from its
+var SetStringMethodBitFlagTmpl = template.Must(template.New("SetStringMethodBitFlag").Parse(
+	`// SetString sets the {{.TypeName}} value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *%[1]s) SetString(s string) error {
+func (i *{{.TypeName}}) SetString(s string) error {
 	*i = 0
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _%[1]sNameToValueMap[flg]; ok {
+		if val, ok := _{{.TypeName}}NameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		} else if val, ok := _%[1]sNameToValueMap[strings.ToLower(flg)]; ok {
+		} else if val, ok := _{{.TypeName}}NameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg+" is not a valid value for type %[1]s")
+			return errors.New(flg+" is not a valid value for type {{.TypeName}}")
 		}
 	}
 	return nil
 }
-`
+`))
