@@ -144,9 +144,9 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 	}
 	d.SetMethod(isBitFlag)
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
-		g.ExecTmpl(StringOneRun, d)
+		g.ExecTmpl(StringMethodOneRunTmpl, d)
 	} else {
-		g.ExecTmpl(StringOneRunWithOffset, d)
+		g.ExecTmpl(StringMethodOneRunWithOffsetTmpl, d)
 	}
 }
 
@@ -168,7 +168,7 @@ const (
 // not an actual bit flag value.`
 )
 
-var StringOneRun = template.Must(template.New("StringOneRun").Parse(
+var StringMethodOneRunTmpl = template.Must(template.New("StringMethodOneRun").Parse(
 	`{{.MethodComment}}
 func (i {{.TypeName}}) {{.MethodName}}() string {
 	if {{.LessThanZeroCheck}}i >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
@@ -178,7 +178,7 @@ func (i {{.TypeName}}) {{.MethodName}}() string {
 }
 `))
 
-var StringOneRunWithOffset = template.Must(template.New("StringOneRunWithOffset").Parse(
+var StringMethodOneRunWithOffsetTmpl = template.Must(template.New("StringMethodOneRunWithOffset").Parse(
 	`{{.MethodComment}}
 func (i {{.TypeName}}) {{.MethodName}}() string {
 	i -= {{.MinValue}}
@@ -241,9 +241,9 @@ func (g *Generator) BuildMap(runs [][]Value, typeName string, isBitFlag bool) {
 	}
 	g.Printf("}\n\n")
 	if isBitFlag {
-		g.Printf(StringMap, typeName, BitIndexStringMethodName, fmt.Sprintf(BitIndexStringMethodComment, typeName))
+		g.Printf(StringMethodMapTmpl, typeName, BitIndexStringMethodName, fmt.Sprintf(BitIndexStringMethodComment, typeName))
 	} else {
-		g.Printf(StringMap, typeName, StringMethodName, fmt.Sprintf(StringMethodComment, typeName))
+		g.Printf(StringMethodMapTmpl, typeName, StringMethodName, fmt.Sprintf(StringMethodComment, typeName))
 	}
 }
 
@@ -265,7 +265,7 @@ func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) 
 	g.Printf("}\n\n")
 }
 
-var StringMap = template.Must(template.New("StringMap").Parse(
+var StringMethodMapTmpl = template.Must(template.New("StringMethodMap").Parse(
 	`{{.MethodComment}}
 func (i {{.TypeName}}) {{.MethodComment}}() string {
 	if str, ok := _{{.TypeName}}Map[i]; ok {
@@ -275,13 +275,13 @@ func (i {{.TypeName}}) {{.MethodComment}}() string {
 }
 `))
 
-var StringNConstant = template.Must(template.New("StringNConstant").Parse(
+var NConstantTmpl = template.Must(template.New("StringNConstant").Parse(
 	`//{{.TypeName}}N is the highest valid value
 // for type {{.TypeName}}, plus one.
 const {{.TypeName}}N {{.TypeName}} = {{.MaxValueP1}}
 `))
 
-var StringSetStringMethod = template.Must(template.New("SetStringMethod").Parse(
+var SetStringMethodTmpl = template.Must(template.New("SetStringMethod").Parse(
 	`// SetString sets the {{.TypeName}} value from its
 // string representation, and returns an
 // error if the string is invalid.
@@ -299,21 +299,21 @@ func (i *{{.TypeName}}) SetString(s string) error {
 }
 `))
 
-var StringInt64Method = template.Must(template.New("Int64Method").Parse(
+var Int64MethodTmpl = template.Must(template.New("Int64Method").Parse(
 	`// Int64 returns the {{.TypeName}} value as an int64.
 func (i {{.TypeName}}) Int64() int64 {
 	return int64(i)
 }
 `))
 
-var StringSetInt64Method = template.Must(template.New("SetInt64Method").Parse(
+var SetInt64MethodTmpl = template.Must(template.New("SetInt64Method").Parse(
 	`// SetInt64 sets the {{.TypeName}} value from an int64.
 func (i *{{.TypeName}}) SetInt64(in int64) {
 	*i = {{.TypeName}}(in)
 }
 `))
 
-var StringDescMethod = template.Must(template.New("DescMethod").Parse(`// Desc returns the description of the {{.TypeName}} value.
+var DescMethodTmpl = template.Must(template.New("DescMethod").Parse(`// Desc returns the description of the {{.TypeName}} value.
 func (i {{.TypeName}}) Desc() string {
 	if str, ok := _{{.TypeName}}DescMap[i]; ok {
 		return str
@@ -322,7 +322,7 @@ func (i {{.TypeName}}) Desc() string {
 }
 `))
 
-var StringDescsMethod = template.Must(template.New("Int64Method").Parse(
+var DescsMethodTmpl = template.Must(template.New("DescsMethod").Parse(
 	`// Descs returns the descriptions of all
 // possible values of type {{.TypeName}}.
 // This slice will be in the same order as
@@ -332,7 +332,7 @@ func (i {{.TypeName}}) Descs() []string {
 }
 `))
 
-var StringValuesGlobal = template.Must(template.New("ValuesGlobal").Parse(
+var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(
 	`// {{.TypeName}}Values returns all possible values of
 // the type {{.TypeName}}. This slice will be in the
 // same order as those returned by the Values,
@@ -342,7 +342,7 @@ func {{.TypeName}}Values() []{{.TypeName}} {
 }
 `))
 
-var StringValuesMethod = template.Must(template.New("ValuesMethod").Parse(
+var ValuesMethodTmpl = template.Must(template.New("ValuesMethod").Parse(
 	`// Values returns all possible values of
 // type {{.TypeName}}. This slice will be in the
 // same order as those returned by Strings and Descs.
@@ -355,7 +355,7 @@ func (i {{.TypeName}}) Values() []enums.Enum {
 }
 `))
 
-var StringStringsMethod = template.Must(template.New("StringsMethod").Parse(
+var StringsMethodTmpl = template.Must(template.New("StringsMethod").Parse(
 	`// Strings returns the string representations of
 // all possible values of type {{.TypeName}}.
 // This slice will be in the same order as
@@ -365,7 +365,7 @@ func (i {{.TypeName}}) Strings() []string {
 }
 `))
 
-var StringIsValidMethodLoop = template.Must(template.New("IsValidMethodLoop").Parse(
+var IsValidMethodLoopTmpl = template.Must(template.New("IsValidMethodLoop").Parse(
 	`// IsValid returns whether the value is a
 // valid option for type {{.TypeName}}.
 func (i {{.TypeName}}) IsValid() bool {
@@ -378,7 +378,7 @@ func (i {{.TypeName}}) IsValid() bool {
 }
 `))
 
-var StringIsValidMethodMap = template.Must(template.New("IsValidMethodMap").Parse(
+var IsValidMethodMapTmpl = template.Must(template.New("IsValidMethodMap").Parse(
 	`// IsValid returns whether the value is a
 // valid option for type {{.TypeName}}.
 func (i {{.TypeName}}) IsValid() bool {
@@ -404,7 +404,7 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 	}
 	g.Printf("}\n\n")
 
-	g.Printf(StringNConstant, typeName, max+1)
+	g.Printf(NConstantTmpl, typeName, max+1)
 
 	// Print the map between name and value
 	g.PrintValueMap(runs, typeName, runsThreshold)
@@ -420,19 +420,19 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 	if isBitFlag {
 		g.Printf(StringSetStringBitFlagMethod, typeName)
 	} else {
-		g.Printf(StringSetStringMethod, typeName)
+		g.Printf(SetStringMethodTmpl, typeName)
 	}
-	g.Printf(StringInt64Method, typeName)
-	g.Printf(StringSetInt64Method, typeName)
-	g.Printf(StringDescMethod, typeName)
-	g.Printf(StringValuesGlobal, typeName)
-	g.Printf(StringValuesMethod, typeName)
-	g.Printf(StringStringsMethod, typeName)
-	g.Printf(StringDescsMethod, typeName)
+	g.Printf(Int64MethodTmpl, typeName)
+	g.Printf(SetInt64MethodTmpl, typeName)
+	g.Printf(DescMethodTmpl, typeName)
+	g.Printf(ValuesGlobalTmpl, typeName)
+	g.Printf(ValuesMethodTmpl, typeName)
+	g.Printf(StringsMethodTmpl, typeName)
+	g.Printf(DescsMethodTmpl, typeName)
 	if len(runs) <= runsThreshold {
-		g.Printf(StringIsValidMethodLoop, typeName)
+		g.Printf(IsValidMethodLoopTmpl, typeName)
 	} else { // There is a map of values, the code is simpler then
-		g.Printf(StringIsValidMethodMap, typeName)
+		g.Printf(IsValidMethodMapTmpl, typeName)
 	}
 }
 
