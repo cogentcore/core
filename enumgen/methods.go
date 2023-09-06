@@ -134,11 +134,11 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 	g.Printf("\n")
 	g.DeclareIndexAndNameVar(values, typeName)
 	// The generated code is simple enough to write as a template.
-	d := &TmplData{}
-	d.TypeName = typeName
-	d.MinValue = values[0].String()
-	d.IndexElementSize = Usize(len(values))
-	d.LessThanZeroCheck = ""
+	d := &TmplData{
+		TypeName:         typeName,
+		MinValue:         values[0].String(),
+		IndexElementSize: Usize(len(values)),
+	}
 	if values[0].Signed {
 		d.LessThanZeroCheck = "i < 0 || "
 	}
@@ -240,8 +240,9 @@ func (g *Generator) BuildMap(runs [][]Value, typeName string, isBitFlag bool) {
 		}
 	}
 	g.Printf("}\n\n")
-	d := &TmplData{}
-	d.TypeName = typeName
+	d := &TmplData{
+		TypeName: typeName,
+	}
 	d.SetMethod(isBitFlag)
 	g.ExecTmpl(StringMethodMapTmpl, d)
 }
@@ -403,9 +404,10 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 	}
 	g.Printf("}\n\n")
 
-	d := &TmplData{}
-	d.TypeName = typeName
-	d.MaxValueP1 = fmt.Sprintf("%d", max+1)
+	d := &TmplData{
+		TypeName:   typeName,
+		MaxValueP1: fmt.Sprintf("%d", max+1),
+	}
 
 	g.ExecTmpl(NConstantTmpl, d)
 

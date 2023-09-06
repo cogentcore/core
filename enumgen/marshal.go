@@ -11,27 +11,29 @@
 
 package enumgen
 
-// Arguments to format are:
-//
-//	[1]: type name
-const JSONMethods = `
+import "text/template"
+
+var JSONMethodsTmpl = template.Must(template.New("JSONMethods").Parse(`
 // MarshalJSON implements the [json.Marshaler] interface.
-func (i %[1]s) MarshalJSON() ([]byte, error) {
+func (i {{.TypeName}}) MarshalJSON() ([]byte, error) {
 	return json.Marshal(i.String())
 }
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *%[1]s) UnmarshalJSON(data []byte) error {
+func (i *{{.TypeName}}) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return errors.New("%[1]s should be a string, but got " + string(data) + "instead")
+		return errors.New("{{.TypeName}} should be a string, but got " + string(data) + "instead")
 	}
 	return i.SetString(s)
 }
-`
+`))
 
 func (g *Generator) BuildJSONMethods(runs [][]Value, typeName string, runsThreshold int) {
-	g.Printf(JSONMethods, typeName)
+	d := &TmplData{
+		TypeName: typeName,
+	}
+	g.ExecTmpl(JSONMethodsTmpl, d)
 }
 
 // Arguments to format are:
@@ -39,12 +41,12 @@ func (g *Generator) BuildJSONMethods(runs [][]Value, typeName string, runsThresh
 //	[1]: type name
 const TextMethods = `
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i %[1]s) MarshalText() ([]byte, error) {
+func (i {{.TypeName}}) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *%[1]s) UnmarshalText(text []byte) error {
+func (i *{{.TypeName}}) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 `
@@ -58,12 +60,12 @@ func (g *Generator) BuildTextMethods(runs [][]Value, typeName string, runsThresh
 //	[1]: type name
 const YAMLMethods = `
 // MarshalYAML implements a YAML Marshaler.
-func (i %[1]s) MarshalYAML() (any, error) {
+func (i {{.TypeName}}) MarshalYAML() (any, error) {
 	return i.String(), nil
 }
 
 // UnmarshalYAML implements a YAML Unmarshaler.
-func (i *%[1]s) UnmarshalYAML(unmarshal func(any) error) error {
+func (i *{{.TypeName}}) UnmarshalYAML(unmarshal func(any) error) error {
 	var s string
 	if err := unmarshal(&s); err != nil {
 		return err
