@@ -21,6 +21,7 @@ import (
 type TmplData struct {
 	TypeName          string // the name of the enum type
 	MinValue          string // the lowest defined value for the type as a string
+	MaxValueP1        string // the highest defined value for the type, plus one, as a string
 	IndexElementSize  int    // the size of the index element (8 for uint8, etc.)
 	LessThanZeroCheck string // less than zero check (for signed types)
 	MethodName        string // method name (String or BitIndexString)

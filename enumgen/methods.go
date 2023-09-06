@@ -144,9 +144,9 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 	}
 	d.SetMethod(isBitFlag)
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
-		g.ExecTmpl(StringOneRunTmpl, d)
+		g.ExecTmpl(StringOneRun, d)
 	} else {
-		g.ExecTmpl(StringOneRunWithOffsetTmpl, d)
+		g.ExecTmpl(StringOneRunWithOffset, d)
 	}
 }
 
@@ -172,7 +172,7 @@ const (
 // not an actual bit flag value.`
 )
 
-var StringOneRunTmpl = template.Must(template.New("StringOneRun").Parse(
+var StringOneRun = template.Must(template.New("StringOneRun").Parse(
 	`{{.MethodComment}}
 func (i {{.TypeName}}) {{.MethodName}}() string {
 	if {{.LessThanZeroCheck}}i >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
@@ -182,7 +182,7 @@ func (i {{.TypeName}}) {{.MethodName}}() string {
 }
 `))
 
-var StringOneRunWithOffsetTmpl = template.Must(template.New("StringOneRunWithOffset").Parse(
+var StringOneRunWithOffset = template.Must(template.New("StringOneRunWithOffset").Parse(
 	`{{.MethodComment}}
 func (i {{.TypeName}}) {{.MethodName}}() string {
 	i -= {{.MinValue}}
@@ -269,28 +269,21 @@ func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) 
 	g.Printf("}\n\n")
 }
 
-// Arguments to format are:
-//
-//	[1]: type name
-//	[2]: method name (String or BitIndexString)
-//	[3]: method comment
-const StringMap = `%[3]s
-func (i %[1]s) %[2]s() string {
-	if str, ok := _%[1]sMap[i]; ok {
+var StringMap = template.Must(template.New("StringMap").Parse(
+	`{{.MethodComment}}
+func (i {{.TypeName}}) {{.MethodComment}}() string {
+	if str, ok := _{{.TypeName}}Map[i]; ok {
 		return str
 	}
-	return "%[1]s(" + strconv.FormatInt(int64(i), 10) + ")"
+	return "{{.TypeName}}(" + strconv.FormatInt(int64(i), 10) + ")"
 }
-`
+`))
 
-// Arguments to format are:
-//
-//	[1]: type name
-//	[2]: number of constants for type
-const StringNConstant = `//%[1]sN is the highest valid value
-// for type %[1]s, plus one.
-const %[1]sN %[1]s = %[2]d
-`
+var StringNConstant = template.Must(template.New("StringNConstant").Parse(
+	`//{{.TypeName}}N is the highest valid value
+// for type {{.TypeName}}, plus one.
+const {{.TypeName}}N {{.TypeName}} = {{.MaxValueP1}}
+`))
 
 // Arguments to format are:
 //
