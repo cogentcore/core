@@ -315,7 +315,7 @@ func (g *Generator) Generate() error {
 			g.addValueAndScanMethod(typeName)
 		}
 		if typ.Config.GQL {
-			g.buildGQLGenMethods(runs, typeName)
+			g.BuildGQLMethods(runs, typeName)
 		}
 	}
 	return nil

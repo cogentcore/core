@@ -11,25 +11,26 @@
 
 package enumgen
 
-// Arguments to format are:
-//
-//	[1]: type name
-const gqlgenMethods = `
+import "text/template"
+
+var GQLMethodsTmpl = template.Must(template.New("GQLMethods").Parse(`
 // MarshalGQL implements the [graphql.Marshaler] interface.
-func (i %[1]s) MarshalGQL(w io.Writer) {
+func (i {{.TypeName}}) MarshalGQL(w io.Writer) {
 	w.Write([]byte(strconv.Quote(i.String())))
 }
 
 // UnmarshalGQL implements the [graphql.Unmarshaler] interface.
-func (i *%[1]s) UnmarshalGQL(value any) error {
+func (i *{{.TypeName}}) UnmarshalGQL(value any) error {
 	str, ok := value.(string)
 	if !ok {
-		return fmt.Errorf("%[1]s should be a string, but got a value of type %%T instead", value)
+		return fmt.Errorf("{{.TypeName}} should be a string, but got a value of type %%T instead", value)
 	}
 	return i.SetString(str)
 }
-`
+`))
 
-func (g *Generator) buildGQLGenMethods(runs [][]Value, typeName string) {
-	g.Printf(gqlgenMethods, typeName)
+func (g *Generator) BuildGQLMethods(runs [][]Value, typeName string) {
+	d := &TmplData{}
+	d.TypeName = typeName
+	g.ExecTmpl(GQLMethodsTmpl, d)
 }
