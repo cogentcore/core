@@ -186,17 +186,20 @@ func SplitExt(fname string) (fbase, ext string) {
 	return
 }
 
-// FindFileOnPaths attempts to locate given file on given list of paths,
-// returning the full Abs path to file if found, else error
-func FindFileOnPaths(paths []string, file string) (string, error) {
+// FindFilesOnPaths attempts to locate given file(s) on given list of paths,
+// returning the full Abs path to each file found (nil if none)
+func FindFilesOnPaths(paths []string, files ...string) []string {
+	var res []string
 	for _, path := range paths {
-		filePath := filepath.Join(path, file)
-		ok, _ := FileExists(filePath)
-		if ok {
-			return filePath, nil
+		for _, fn := range files {
+			fp := filepath.Join(path, fn)
+			ok, _ := FileExists(fp)
+			if ok {
+				res = append(res, fp)
+			}
 		}
 	}
-	return "", fmt.Errorf("FindFileOnPaths: unable to find file: %s on paths: %v\n", file, paths)
+	return res
 }
 
 // FileExists checks whether given file exists, returning true if so,
