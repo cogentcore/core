@@ -208,7 +208,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		typ := g.Pkg.Defs[ts.Name].Type()
 		utyp := typ.Underlying()
 
-		tt := Type{Type: ts, Config: cfg}
+		tt := Type{Name: ts.Name.Name, Type: ts, Config: cfg}
 		if ident.String() != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
 			tt.Extends = ident.String()
 		}
@@ -292,6 +292,7 @@ func (g *Generator) Generate() error {
 		// is very low. And bitmasks probably deserve their own analysis,
 		// to be done some other day.
 		const runsThreshold = 10
+		typ.RunsThreshold = runsThreshold
 		switch {
 		case len(runs) == 1:
 			g.BuildOneRun(runs, typ)
