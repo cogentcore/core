@@ -129,7 +129,7 @@ func (g *Generator) DeclareNameVars(runs [][]Value, typeName string, suffix stri
 }
 
 // BuildOneRun generates the variables and String method for a single run of contiguous values.
-func (g *Generator) BuildOneRun(runs [][]Value, typ Type) {
+func (g *Generator) BuildOneRun(runs [][]Value, typ *Type) {
 	values := runs[0]
 	g.Printf("\n")
 	g.DeclareIndexAndNameVar(values, typ.Name)

@@ -32,7 +32,7 @@ type Generator struct {
 	Config     *config.Config // The configuration information
 	Buf        bytes.Buffer   // The accumulated output.
 	Pkg        *Package       // The package we are scanning.
-	Types      []Type         // The enum types
+	Types      []*Type        // The enum types
 	HasBitFlag bool           // Whether there is any bit flag enum type in the package (used for determining imports)
 }
 
@@ -138,7 +138,7 @@ func (g *Generator) PrintHeader() {
 // and finds all integer (signed or unsigned) types labeled with enums:enum
 // or enums:bitflag. It stores the resulting types in [Generator.Types].
 func (g *Generator) FindEnumTypes() error {
-	g.Types = []Type{}
+	g.Types = []*Type{}
 	for _, file := range g.Pkg.Files {
 		var terr error
 		ast.Inspect(file.File, func(n ast.Node) bool {
@@ -208,7 +208,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		typ := g.Pkg.Defs[ts.Name].Type()
 		utyp := typ.Underlying()
 
-		tt := Type{Name: ts.Name.Name, Type: ts, Config: cfg}
+		tt := &Type{Name: ts.Name.Name, Type: ts, Config: cfg}
 		if ident.String() != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
 			tt.Extends = ident.String()
 		}
