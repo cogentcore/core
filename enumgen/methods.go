@@ -212,22 +212,23 @@ func (g *Generator) BuildMultipleRuns(runs [][]Value, typ *Type) {
 
 // BuildMap handles the case where the space is so sparse a map is a reasonable fallback.
 // It's a rare situation but has simple code.
-func (g *Generator) BuildMap(runs [][]Value, typeName string, isBitFlag bool) {
+func (g *Generator) BuildMap(runs [][]Value, typ *Type) {
 	g.Printf("\n")
-	g.DeclareNameVars(runs, typeName, "")
-	g.Printf("\nvar _%sMap = map[%s]string{\n", typeName, typeName)
+	g.DeclareNameVars(runs, typ.Name, "")
+	g.Printf("\nvar _%sMap = map[%s]string{\n", typ.Name, typ.Name)
 	n := 0
 	for _, values := range runs {
 		for _, value := range values {
-			g.Printf("\t%s: _%sName[%d:%d],\n", &value, typeName, n, n+len(value.Name))
+			g.Printf("\t%s: _%sName[%d:%d],\n", &value, typ.Name, n, n+len(value.Name))
 			n += len(value.Name)
 		}
 	}
 	g.Printf("}\n\n")
 	d := &TmplData{
-		TypeName: typeName,
+		TypeName: typ.Name,
 	}
-	d.SetMethod(isBitFlag)
+	d.SetMethod(typ.IsBitFlag)
+	d.SetIfInvalid(typ.Extends, "")
 	g.ExecTmpl(StringMethodMapTmpl, d)
 }
 
@@ -255,7 +256,7 @@ func (i {{.TypeName}}) {{.MethodName}}() string {
 	if str, ok := _{{.TypeName}}Map[i]; ok {
 		return str
 	}
-	return "{{.TypeName}}(" + strconv.FormatInt(int64(i), 10) + ")"
+	{{.IfInvalid}}
 }
 `))
 
