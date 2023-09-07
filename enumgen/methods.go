@@ -174,25 +174,26 @@ func (i {{.TypeName}}) {{.MethodName}}() string {
 
 // BuildMultipleRuns generates the variables and String method for multiple runs of contiguous values.
 // For this pattern, a single Printf format won't do.
-func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string, isBitFlag bool) {
+func (g *Generator) BuildMultipleRuns(runs [][]Value, typ *Type) {
 	g.Printf("\n")
-	g.DeclareIndexAndNameVars(runs, typeName)
+	g.DeclareIndexAndNameVars(runs, typ.Name)
 	d := &TmplData{
-		TypeName: typeName,
+		TypeName: typ.Name,
 	}
-	d.SetMethod(isBitFlag)
+	d.SetMethod(typ.IsBitFlag)
+	d.SetIfInvalid(typ.Extends, "")
 	g.Printf(d.MethodComment)
 	g.Printf("\n")
-	if isBitFlag {
-		g.Printf("func (i %s) BitIndexString() string {\n", typeName)
+	if typ.IsBitFlag {
+		g.Printf("func (i %s) BitIndexString() string {\n", typ.Name)
 	} else {
-		g.Printf("func (i %s) String() string {\n", typeName)
+		g.Printf("func (i %s) String() string {\n", typ.Name)
 	}
 	g.Printf("\tswitch {\n")
 	for i, values := range runs {
 		if len(values) == 1 {
 			g.Printf("\tcase i == %s:\n", &values[0])
-			g.Printf("\t\treturn _%sName_%d\n", typeName, i)
+			g.Printf("\t\treturn _%sName_%d\n", typ.Name, i)
 			continue
 		}
 		g.Printf("\tcase %s <= i && i <= %s:\n", &values[0], &values[len(values)-1])
@@ -200,11 +201,11 @@ func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string, isBitFlag
 			g.Printf("\t\ti -= %s\n", &values[0])
 		}
 		g.Printf("\t\treturn _%sName_%d[_%sIndex_%d[i]:_%sIndex_%d[i+1]]\n",
-			typeName, i, typeName, i, typeName, i)
+			typ.Name, i, typ.Name, i, typ.Name, i)
 	}
 
 	g.Printf("\tdefault:\n")
-	g.Printf("\t\treturn \"%s(\" + strconv.FormatInt(int64(i), 10) + \")\"\n", typeName)
+	g.Printf(d.IfInvalid)
 	g.Printf("\t}\n")
 	g.Printf("}\n")
 }
