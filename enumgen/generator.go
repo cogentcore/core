@@ -209,8 +209,8 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		utyp := typ.Underlying()
 
 		tt := Type{Type: ts, Config: cfg}
-		if typ.String() != utyp.String() {
-			tt.Extends = typ.String()
+		if ident.String() != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
+			tt.Extends = ident.String()
 		}
 		switch directive {
 		case "enum":
