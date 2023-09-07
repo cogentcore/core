@@ -95,3 +95,14 @@ func TestLanguagesString(t *testing.T) {
 		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
 	}
 }
+
+func TestMoreLanguages(t *testing.T) {
+	var val testdata.MoreLanguages
+	val.SetFlag(true, testdata.Go, testdata.Perl, testdata.Python, testdata.Dart)
+	val.SetFlag(false, testdata.Python)
+	want := "Go|Dart|Perl"
+	have := val.String()
+	if have != want {
+		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
+	}
+}
