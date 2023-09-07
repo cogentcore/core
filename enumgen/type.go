@@ -19,6 +19,7 @@ import (
 
 // Type represents a parsed enum type.
 type Type struct {
+	Name      string         // The name of the type
 	Type      *ast.TypeSpec  // The standard AST type value
 	IsBitFlag bool           // Whether the type is a bit flag type
 	Extends   string         // The type that this type extends, if any ("" if it doesn't extend)

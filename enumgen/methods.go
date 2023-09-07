@@ -129,20 +129,20 @@ func (g *Generator) DeclareNameVars(runs [][]Value, typeName string, suffix stri
 }
 
 // BuildOneRun generates the variables and String method for a single run of contiguous values.
-func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool) {
+func (g *Generator) BuildOneRun(runs [][]Value, typ Type) {
 	values := runs[0]
 	g.Printf("\n")
-	g.DeclareIndexAndNameVar(values, typeName)
+	g.DeclareIndexAndNameVar(values, typ.Name)
 	// The generated code is simple enough to write as a template.
 	d := &TmplData{
-		TypeName:         typeName,
+		TypeName:         typ.Name,
 		MinValue:         values[0].String(),
 		IndexElementSize: Usize(len(values)),
 	}
 	if values[0].Signed {
 		d.LessThanZeroCheck = "i < 0 || "
 	}
-	d.SetMethod(isBitFlag)
+	d.SetMethod(typ.IsBitFlag)
 	d.SetIfInvalid("", d.MinValue)
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
 		g.ExecTmpl(StringMethodOneRunTmpl, d)
