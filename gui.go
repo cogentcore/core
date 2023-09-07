@@ -10,8 +10,8 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/ki/v2/ki"
 	"goki.dev/grease"
+	"goki.dev/ki/v2/ki"
 )
 
 // GUI starts the GUI for the given
