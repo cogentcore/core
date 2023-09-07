@@ -43,10 +43,30 @@ func (g *Generator) ExecTmpl(t *template.Template, data *TmplData) {
 // that [TmplData.TypeName] is already set.
 func (td *TmplData) SetMethod(isBitFlag bool) {
 	if isBitFlag {
-		td.MethodName = BitIndexStringMethodName
-		td.MethodComment = fmt.Sprintf(BitIndexStringMethodComment, td.TypeName)
+		td.MethodName = "BitIndexString"
+		td.MethodComment = fmt.Sprintf(`// BitIndexString returns the string
+		// representation of this %s value
+		// if it is a bit index value
+		// (typically an enum constant), and
+		// not an actual bit flag value.`, td.TypeName)
 	} else {
-		td.MethodName = StringMethodName
-		td.MethodComment = fmt.Sprintf(StringMethodComment, td.TypeName)
+		td.MethodName = "String"
+		td.MethodComment = fmt.Sprintf(`// String returns the string representation
+		// of this %s value.`, td.TypeName)
+	}
+}
+
+// SetIfInvalid sets [TmplData.IfInvalid] based on what type the type
+// extends (if any), and how much the values of the type are offset (if at all).
+// Empty strings ("") indicate that the type does not extend another type/has no offset.
+func (td *TmplData) SetIfInvalid(extends string, offset string) {
+	if extends == "" {
+		if offset == "" {
+			td.IfInvalid = `return strconv.FormatInt(int64(i), 10)`
+		} else {
+			td.IfInvalid = fmt.Sprintf(`return strconv.FormatInt(int64(i+%s), 10)`, offset)
+		}
+	} else {
+		td.IfInvalid = fmt.Sprintf(`return %s(i).String()`, extends)
 	}
 }

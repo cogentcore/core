@@ -143,38 +143,13 @@ func (g *Generator) BuildOneRun(runs [][]Value, typeName string, isBitFlag bool)
 		d.LessThanZeroCheck = "i < 0 || "
 	}
 	d.SetMethod(isBitFlag)
+	d.SetIfInvalid("", d.MinValue)
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
-		d.IfInvalid = StandardIfInvalid
 		g.ExecTmpl(StringMethodOneRunTmpl, d)
 	} else {
-		d.IfInvalid = fmt.Sprintf(OffsetIfInvalid, d.MinValue)
 		g.ExecTmpl(StringMethodOneRunWithOffsetTmpl, d)
 	}
 }
-
-const (
-	// StringMethodName is the name of the String method.
-	StringMethodName = `String`
-	// StringMethodComment is the comment for the String method.
-	// It is a format that takes an argument of type name.
-	StringMethodComment = `// String returns the string representation
-// of this %s value.`
-	// BitIndexStringMethodName is the name of the BitIndexString method.
-	BitIndexStringMethodName = `BitIndexString`
-	// BitIndexStringMethodComment is the comment for the BitIndexString method.
-	// It is a format that takes an argument of type name.
-	BitIndexStringMethodComment = `// BitIndexString returns the string
-// representation of this %s value
-// if it is a bit index value
-// (typically an enum constant), and
-// not an actual bit flag value.`
-	// StandardIfInvalid is the standard code to run if the value is invalid
-	// ([TmplData.IfInvalid] should be set to this in most cases)
-	StandardIfInvalid = `return strconv.FormatInt(int64(i), 10)`
-	// OffsetIfInvalid is the standard code to run if the value is invalid
-	// if the values are offset by the value passed to the format as a string
-	OffsetIfInvalid = `return strconv.FormatInt(int64(i+%s), 10)`
-)
 
 var StringMethodOneRunTmpl = template.Must(template.New("StringMethodOneRun").Parse(
 	`{{.MethodComment}}
@@ -202,11 +177,11 @@ func (i {{.TypeName}}) {{.MethodName}}() string {
 func (g *Generator) BuildMultipleRuns(runs [][]Value, typeName string, isBitFlag bool) {
 	g.Printf("\n")
 	g.DeclareIndexAndNameVars(runs, typeName)
-	if isBitFlag {
-		g.Printf(BitIndexStringMethodComment, typeName)
-	} else {
-		g.Printf(StringMethodComment, typeName)
+	d := &TmplData{
+		TypeName: typeName,
 	}
+	d.SetMethod(isBitFlag)
+	g.Printf(d.MethodComment)
 	g.Printf("\n")
 	if isBitFlag {
 		g.Printf("func (i %s) BitIndexString() string {\n", typeName)
