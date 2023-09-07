@@ -105,4 +105,9 @@ func TestMoreLanguages(t *testing.T) {
 	if have != want {
 		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
 	}
+	str := "Perl|JavaScript|Kotlin"
+	err := val.SetString(str)
+	if err != nil {
+		t.Errorf("error setting value from string %q: %v", str, err)
+	}
 }

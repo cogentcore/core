@@ -280,7 +280,7 @@ func (i *{{.TypeName}}) SetString(s string) error {
 		*i = val
 		return nil
 	}
-	return errors.New(s+" does not belong to {{.TypeName}} values")
+	return errors.New(s+" is not a valid value for type {{.TypeName}}")
 }
 `))
 
