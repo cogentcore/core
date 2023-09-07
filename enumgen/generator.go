@@ -239,7 +239,6 @@ func (g *Generator) Generate() error {
 	}
 	for _, typ := range g.Types {
 		values := make([]Value, 0, 100)
-		typeName := typ.Type.Name.String()
 		for _, file := range g.Pkg.Files {
 			file.Config = typ.Config
 			// Set the state for this run of the walker.
@@ -266,7 +265,7 @@ func (g *Generator) Generate() error {
 		}
 
 		if len(values) == 0 {
-			return errors.New("no values defined for type " + typeName)
+			return errors.New("no values defined for type " + typ.Name)
 		}
 
 		g.TrimValueNames(values, typ.Config)
