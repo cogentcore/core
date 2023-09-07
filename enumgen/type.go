@@ -21,5 +21,6 @@ import (
 type Type struct {
 	Type      *ast.TypeSpec  // The standard AST type value
 	IsBitFlag bool           // Whether the type is a bit flag type
+	Extends   string         // The type that this type extends, if any ("" if it doesn't extend)
 	Config    *config.Config // Configuration information set in the comment directive for the type; is initialized to generator config info first
 }

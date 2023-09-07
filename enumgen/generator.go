@@ -207,19 +207,25 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 
 		typ := g.Pkg.Defs[ts.Name].Type()
 		utyp := typ.Underlying()
+
+		tt := Type{Type: ts, Config: cfg}
+		if typ.String() != utyp.String() {
+			tt.Extends = typ.String()
+		}
 		switch directive {
 		case "enum":
 			if !AllowedEnumTypes[utyp.String()] {
 				return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)
 			}
-			g.Types = append(g.Types, Type{Type: ts, IsBitFlag: false, Config: cfg})
+			tt.IsBitFlag = false
 		case "bitflag":
 			if utyp.String() != "int64" {
 				return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
 			}
-			g.Types = append(g.Types, Type{Type: ts, IsBitFlag: true, Config: cfg})
+			tt.IsBitFlag = true
 			g.HasBitFlag = true
 		}
+		g.Types = append(g.Types, tt)
 
 	}
 	return true, nil
