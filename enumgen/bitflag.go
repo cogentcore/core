@@ -14,9 +14,9 @@ package enumgen
 import "text/template"
 
 // BuildBitFlagMethods builds methods specific to bit flag types.
-func (g *Generator) BuildBitFlagMethods(runs [][]Value, typeName string) {
+func (g *Generator) BuildBitFlagMethods(runs [][]Value, typ *Type) {
 	d := &TmplData{
-		TypeName: typeName,
+		TypeName: typ.Name,
 	}
 
 	g.Printf("\n")

@@ -26,9 +26,9 @@ func (i *{{.TypeName}}) UnmarshalText(text []byte) error {
 }
 `))
 
-func (g *Generator) BuildTextMethods(runs [][]Value, typeName string, runsThreshold int) {
+func (g *Generator) BuildTextMethods(runs [][]Value, typ *Type) {
 	d := &TmplData{
-		TypeName: typeName,
+		TypeName: typ.Name,
 	}
 	g.ExecTmpl(TextMethodsTmpl, d)
 }
@@ -50,9 +50,9 @@ func (i *{{.TypeName}}) UnmarshalJSON(data []byte) error {
 }
 `))
 
-func (g *Generator) BuildJSONMethods(runs [][]Value, typeName string, runsThreshold int) {
+func (g *Generator) BuildJSONMethods(runs [][]Value, typ *Type) {
 	d := &TmplData{
-		TypeName: typeName,
+		TypeName: typ.Name,
 	}
 	g.ExecTmpl(JSONMethodsTmpl, d)
 }
@@ -74,9 +74,9 @@ func (i *{{.TypeName}}) UnmarshalYAML(unmarshal func(any) error) error {
 }
 `))
 
-func (g *Generator) BuildYAMLMethods(runs [][]Value, typeName string, runsThreshold int) {
+func (g *Generator) BuildYAMLMethods(runs [][]Value, typ *Type) {
 	d := &TmplData{
-		TypeName: typeName,
+		TypeName: typ.Name,
 	}
 	g.ExecTmpl(YAMLMethodsTmpl, d)
 }

@@ -373,12 +373,12 @@ func (i {{.TypeName}}) IsValid() bool {
 `))
 
 // BuildBasicExtras builds methods common to all types, like Desc and SetString.
-func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag bool, runsThreshold int) {
+func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
 	// At this moment, either "g.declareIndexAndNameVars()" or "g.declareNameVars()" has been called
 
 	// Print the slice of values
 	max := uint64(0)
-	g.Printf("\nvar _%sValues = []%s{", typeName, typeName)
+	g.Printf("\nvar _%sValues = []%s{", typ.Name, typ.Name)
 	for _, values := range runs {
 		for _, value := range values {
 			g.Printf("\t%s, ", value.OriginalName)
@@ -390,24 +390,24 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 	g.Printf("}\n\n")
 
 	d := &TmplData{
-		TypeName:   typeName,
+		TypeName:   typ.Name,
 		MaxValueP1: fmt.Sprintf("%d", max+1),
 	}
 
 	g.ExecTmpl(NConstantTmpl, d)
 
 	// Print the map between name and value
-	g.PrintValueMap(runs, typeName, runsThreshold)
+	g.PrintValueMap(runs, typ.Name, typ.RunsThreshold)
 
 	// Print the slice of names
-	g.PrintNamesSlice(runs, typeName, runsThreshold)
+	g.PrintNamesSlice(runs, typ.Name, typ.RunsThreshold)
 
 	// Print the map of values to descriptions
-	g.PrintDescMap(runs, typeName)
-	g.PrintDescSlice(runs, typeName)
+	g.PrintDescMap(runs, typ.Name)
+	g.PrintDescSlice(runs, typ.Name)
 
 	// Print the basic extra methods
-	if isBitFlag {
+	if typ.IsBitFlag {
 		g.ExecTmpl(SetStringMethodBitFlagTmpl, d)
 	} else {
 		g.ExecTmpl(SetStringMethodTmpl, d)
@@ -419,7 +419,7 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typeName string, isBitFlag 
 	g.ExecTmpl(ValuesMethodTmpl, d)
 	g.ExecTmpl(StringsMethodTmpl, d)
 	g.ExecTmpl(DescsMethodTmpl, d)
-	if len(runs) <= runsThreshold {
+	if len(runs) <= typ.RunsThreshold {
 		g.ExecTmpl(IsValidMethodLoopTmpl, d)
 	} else { // There is a map of values, the code is simpler then
 		g.ExecTmpl(IsValidMethodMapTmpl, d)

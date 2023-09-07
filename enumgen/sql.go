@@ -43,9 +43,9 @@ func (i *{{.TypeName}}) Scan(value any) error {
 }
 `))
 
-func (g *Generator) AddValueAndScanMethod(typeName string) {
+func (g *Generator) AddValueAndScanMethod(typ *Type) {
 	d := &TmplData{
-		TypeName: typeName,
+		TypeName: typ.Name,
 	}
 	g.Printf("\n")
 	g.ExecTmpl(ValueMethodTmpl, d)

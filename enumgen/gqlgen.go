@@ -29,8 +29,9 @@ func (i *{{.TypeName}}) UnmarshalGQL(value any) error {
 }
 `))
 
-func (g *Generator) BuildGQLMethods(runs [][]Value, typeName string) {
-	d := &TmplData{}
-	d.TypeName = typeName
+func (g *Generator) BuildGQLMethods(runs [][]Value, typ *Type) {
+	d := &TmplData{
+		TypeName: typ.Name,
+	}
 	g.ExecTmpl(GQLMethodsTmpl, d)
 }

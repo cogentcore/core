@@ -304,25 +304,25 @@ func (g *Generator) Generate() error {
 
 		g.BuildNoOpOrderChangeDetect(runs, typeName)
 
-		g.BuildBasicExtras(runs, typeName, typ.IsBitFlag, runsThreshold)
+		g.BuildBasicExtras(runs, typ)
 		if typ.IsBitFlag {
-			g.BuildBitFlagMethods(runs, typeName)
+			g.BuildBitFlagMethods(runs, typ)
 		}
 
-		if typ.Config.JSON {
-			g.BuildJSONMethods(runs, typeName, runsThreshold)
-		}
 		if typ.Config.Text {
-			g.BuildTextMethods(runs, typeName, runsThreshold)
+			g.BuildTextMethods(runs, typ)
+		}
+		if typ.Config.JSON {
+			g.BuildJSONMethods(runs, typ)
 		}
 		if typ.Config.YAML {
-			g.BuildYAMLMethods(runs, typeName, runsThreshold)
+			g.BuildYAMLMethods(runs, typ)
 		}
 		if typ.Config.SQL {
-			g.AddValueAndScanMethod(typeName)
+			g.AddValueAndScanMethod(typ)
 		}
 		if typ.Config.GQL {
-			g.BuildGQLMethods(runs, typeName)
+			g.BuildGQLMethods(runs, typ)
 		}
 	}
 	return nil
