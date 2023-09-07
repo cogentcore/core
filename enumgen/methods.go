@@ -143,7 +143,7 @@ func (g *Generator) BuildOneRun(runs [][]Value, typ *Type) {
 		d.LessThanZeroCheck = "i < 0 || "
 	}
 	d.SetMethod(typ.IsBitFlag)
-	d.SetIfInvalid("", d.MinValue)
+	d.SetIfInvalid(typ.Extends, d.MinValue)
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
 		g.ExecTmpl(StringMethodOneRunTmpl, d)
 	} else {
