@@ -57,11 +57,11 @@ func (td *TmplData) SetMethod(isBitFlag bool) {
 }
 
 // SetIfInvalid sets [TmplData.IfInvalid] based on what type the type
-// extends (if any), and how much the values of the type are offset (if at all).
-// Empty strings ("") indicate that the type does not extend another type/has no offset.
+// extends (none if passed ""), and how much the values of the type are
+// offset (not at all if passed "" or "0").
 func (td *TmplData) SetIfInvalid(extends string, offset string) {
 	if extends == "" {
-		if offset == "" {
+		if offset == "" || offset == "0" {
 			td.IfInvalid = `return strconv.FormatInt(int64(i), 10)`
 		} else {
 			td.IfInvalid = fmt.Sprintf(`return strconv.FormatInt(int64(i+%s), 10)`, offset)
