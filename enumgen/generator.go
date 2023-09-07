@@ -243,7 +243,7 @@ func (g *Generator) Generate() error {
 		for _, file := range g.Pkg.Files {
 			file.Config = typ.Config
 			// Set the state for this run of the walker.
-			file.TypeName = typeName
+			file.Type = typ
 			file.BitFlag = typ.IsBitFlag
 			file.Values = nil
 			if file.File != nil {

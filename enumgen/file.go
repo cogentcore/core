@@ -28,10 +28,10 @@ type File struct {
 	Pkg  *Package  // Package to which this file belongs.
 	File *ast.File // Parsed AST.
 	// These fields are reset for each type being generated.
-	TypeName string         // The name of the constant type we are currently looking for.
-	BitFlag  bool           // Whether the constant type we are currently looking for is a bitflag.
-	Values   []Value        // Accumulator for constant values of that type.
-	Config   *config.Config // The configuration information
+	Type    *Type          // The constant type we are currently looking for.
+	BitFlag bool           // Whether the constant type we are currently looking for is a bitflag.
+	Values  []Value        // Accumulator for constant values of that type.
+	Config  *config.Config // The configuration information
 }
 
 // GenDecl processes one declaration clause.
@@ -67,7 +67,7 @@ func (f *File) GenDecl(node ast.Node) (bool, error) {
 			}
 			typ = ident.Name
 		}
-		if typ != f.TypeName {
+		if typ != f.Type.Name {
 			// This is not the type we're looking for.
 			continue
 		}
