@@ -35,13 +35,13 @@ func Usize(n int) int {
 
 // DeclareIndexAndNameVars declares the index slices and concatenated names
 // strings representing the runs of values.
-func (g *Generator) DeclareIndexAndNameVars(runs [][]Value, typeName string) {
+func (g *Generator) DeclareIndexAndNameVars(runs [][]Value, typ *Type) {
 	var indexes, names []string
 	for i, run := range runs {
-		index, n := g.CreateIndexAndNameDecl(run, typeName, fmt.Sprintf("_%d", i))
+		index, n := g.CreateIndexAndNameDecl(run, typ, fmt.Sprintf("_%d", i))
 		indexes = append(indexes, index)
 		names = append(names, n)
-		_, n = g.CreateLowerIndexAndNameDecl(run, typeName, fmt.Sprintf("_%d", i))
+		_, n = g.CreateLowerIndexAndNameDecl(run, typ, fmt.Sprintf("_%d", i))
 		names = append(names, n)
 	}
 	g.Printf("const (\n")
@@ -57,27 +57,27 @@ func (g *Generator) DeclareIndexAndNameVars(runs [][]Value, typeName string) {
 }
 
 // DeclareIndexAndNameVar is the single-run version of declareIndexAndNameVars
-func (g *Generator) DeclareIndexAndNameVar(run []Value, typeName string) {
-	index, n := g.CreateIndexAndNameDecl(run, typeName, "")
+func (g *Generator) DeclareIndexAndNameVar(run []Value, typ *Type) {
+	index, n := g.CreateIndexAndNameDecl(run, typ, "")
 	g.Printf("const %s\n", n)
 	g.Printf("var %s\n", index)
-	index, n = g.CreateLowerIndexAndNameDecl(run, typeName, "")
+	index, n = g.CreateLowerIndexAndNameDecl(run, typ, "")
 	g.Printf("const %s\n", n)
 	// g.Printf("var %s\n", index)
 }
 
 // createIndexAndNameDecl returns the pair of declarations for the run. The caller will add "const" and "var".
-func (g *Generator) CreateLowerIndexAndNameDecl(run []Value, typeName string, suffix string) (string, string) {
+func (g *Generator) CreateLowerIndexAndNameDecl(run []Value, typ *Type, suffix string) (string, string) {
 	b := new(bytes.Buffer)
 	indexes := make([]int, len(run))
 	for i := range run {
 		b.WriteString(strings.ToLower(run[i].Name))
 		indexes[i] = b.Len()
 	}
-	nameConst := fmt.Sprintf("_%sLowerName%s = %q", typeName, suffix, b.String())
+	nameConst := fmt.Sprintf("_%sLowerName%s = %q", typ.Name, suffix, b.String())
 	nameLen := b.Len()
 	b.Reset()
-	_, _ = fmt.Fprintf(b, "_%sLowerIndex%s = [...]uint%d{0, ", typeName, suffix, Usize(nameLen))
+	_, _ = fmt.Fprintf(b, "_%sLowerIndex%s = [...]uint%d{0, ", typ.Name, suffix, Usize(nameLen))
 	for i, v := range indexes {
 		if i > 0 {
 			_, _ = fmt.Fprintf(b, ", ")
@@ -89,17 +89,17 @@ func (g *Generator) CreateLowerIndexAndNameDecl(run []Value, typeName string, su
 }
 
 // CreateIndexAndNameDecl returns the pair of declarations for the run. The caller will add "const" and "var".
-func (g *Generator) CreateIndexAndNameDecl(run []Value, typeName string, suffix string) (string, string) {
+func (g *Generator) CreateIndexAndNameDecl(run []Value, typ *Type, suffix string) (string, string) {
 	b := new(bytes.Buffer)
 	indexes := make([]int, len(run))
 	for i := range run {
 		b.WriteString(run[i].Name)
 		indexes[i] = b.Len()
 	}
-	nameConst := fmt.Sprintf("_%sName%s = %q", typeName, suffix, b.String())
+	nameConst := fmt.Sprintf("_%sName%s = %q", typ.Name, suffix, b.String())
 	nameLen := b.Len()
 	b.Reset()
-	_, _ = fmt.Fprintf(b, "_%sIndex%s = [...]uint%d{0, ", typeName, suffix, Usize(nameLen))
+	_, _ = fmt.Fprintf(b, "_%sIndex%s = [...]uint%d{0, ", typ.Name, suffix, Usize(nameLen))
 	for i, v := range indexes {
 		if i > 0 {
 			_, _ = fmt.Fprintf(b, ", ")
@@ -111,15 +111,15 @@ func (g *Generator) CreateIndexAndNameDecl(run []Value, typeName string, suffix 
 }
 
 // DeclareNameVars declares the concatenated names string representing all the values in the runs.
-func (g *Generator) DeclareNameVars(runs [][]Value, typeName string, suffix string) {
-	g.Printf("const _%sName%s = \"", typeName, suffix)
+func (g *Generator) DeclareNameVars(runs [][]Value, typ *Type, suffix string) {
+	g.Printf("const _%sName%s = \"", typ.Name, suffix)
 	for _, run := range runs {
 		for i := range run {
 			g.Printf("%s", run[i].Name)
 		}
 	}
 	g.Printf("\"\n")
-	g.Printf("const _%sLowerName%s = \"", typeName, suffix)
+	g.Printf("const _%sLowerName%s = \"", typ.Name, suffix)
 	for _, run := range runs {
 		for i := range run {
 			g.Printf("%s", strings.ToLower(run[i].Name))
@@ -132,7 +132,7 @@ func (g *Generator) DeclareNameVars(runs [][]Value, typeName string, suffix stri
 func (g *Generator) BuildOneRun(runs [][]Value, typ *Type) {
 	values := runs[0]
 	g.Printf("\n")
-	g.DeclareIndexAndNameVar(values, typ.Name)
+	g.DeclareIndexAndNameVar(values, typ)
 	// The generated code is simple enough to write as a template.
 	d := &TmplData{
 		TypeName:         typ.Name,
@@ -176,7 +176,7 @@ func (i {{.TypeName}}) {{.MethodName}}() string {
 // For this pattern, a single Printf format won't do.
 func (g *Generator) BuildMultipleRuns(runs [][]Value, typ *Type) {
 	g.Printf("\n")
-	g.DeclareIndexAndNameVars(runs, typ.Name)
+	g.DeclareIndexAndNameVars(runs, typ)
 	d := &TmplData{
 		TypeName: typ.Name,
 	}
@@ -214,7 +214,7 @@ func (g *Generator) BuildMultipleRuns(runs [][]Value, typ *Type) {
 // It's a rare situation but has simple code.
 func (g *Generator) BuildMap(runs [][]Value, typ *Type) {
 	g.Printf("\n")
-	g.DeclareNameVars(runs, typ.Name, "")
+	g.DeclareNameVars(runs, typ, "")
 	g.Printf("\nvar _%sMap = map[%s]string{\n", typ.Name, typ.Name)
 	n := 0
 	for _, values := range runs {
@@ -233,14 +233,14 @@ func (g *Generator) BuildMap(runs [][]Value, typ *Type) {
 }
 
 // BuildNoOpOrderChangeDetect lets the compiler and the user know if the order/value of the enum values has changed.
-func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typeName string) {
+func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typ *Type) {
 	g.Printf("\n")
 
 	g.Printf(`
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the enumgen command to generate them again.
 	`)
-	g.Printf("func _%sNoOp (){ ", typeName)
+	g.Printf("func _%sNoOp (){ ", typ.Name)
 	g.Printf("\n var x [1]struct{}\n")
 	for _, values := range runs {
 		for _, value := range values {
@@ -397,14 +397,14 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
 	g.ExecTmpl(NConstantTmpl, d)
 
 	// Print the map between name and value
-	g.PrintValueMap(runs, typ.Name, typ.RunsThreshold)
+	g.PrintValueMap(runs, typ)
 
 	// Print the slice of names
-	g.PrintNamesSlice(runs, typ.Name, typ.RunsThreshold)
+	g.PrintNamesSlice(runs, typ)
 
 	// Print the map of values to descriptions
-	g.PrintDescMap(runs, typ.Name)
-	g.PrintDescSlice(runs, typ.Name)
+	g.PrintDescMap(runs, typ)
+	g.PrintDescSlice(runs, typ)
 
 	// Print the basic extra methods
 	if typ.IsBitFlag {
@@ -427,9 +427,9 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
 }
 
 // PrintValueMap prints the map between name and value
-func (g *Generator) PrintValueMap(runs [][]Value, typeName string, runsThreshold int) {
-	thereAreRuns := len(runs) > 1 && len(runs) <= runsThreshold
-	g.Printf("\nvar _%sNameToValueMap = map[string]%s{\n", typeName, typeName)
+func (g *Generator) PrintValueMap(runs [][]Value, typ *Type) {
+	thereAreRuns := len(runs) > 1 && len(runs) <= typ.RunsThreshold
+	g.Printf("\nvar _%sNameToValueMap = map[string]%s{\n", typ.Name, typ.Name)
 
 	var n int
 	var runID string
@@ -442,8 +442,8 @@ func (g *Generator) PrintValueMap(runs [][]Value, typeName string, runsThreshold
 		}
 
 		for _, value := range values {
-			g.Printf("\t_%sName%s[%d:%d]: %s,\n", typeName, runID, n, n+len(value.Name), value.OriginalName)
-			g.Printf("\t_%sLowerName%s[%d:%d]: %s,\n", typeName, runID, n, n+len(value.Name), value.OriginalName)
+			g.Printf("\t_%sName%s[%d:%d]: %s,\n", typ.Name, runID, n, n+len(value.Name), value.OriginalName)
+			g.Printf("\t_%sLowerName%s[%d:%d]: %s,\n", typ.Name, runID, n, n+len(value.Name), value.OriginalName)
 			n += len(value.Name)
 		}
 	}
@@ -451,9 +451,9 @@ func (g *Generator) PrintValueMap(runs [][]Value, typeName string, runsThreshold
 }
 
 // PrintNamesSlice prints the slice of names
-func (g *Generator) PrintNamesSlice(runs [][]Value, typeName string, runsThreshold int) {
-	thereAreRuns := len(runs) > 1 && len(runs) <= runsThreshold
-	g.Printf("\nvar _%sNames = []string{\n", typeName)
+func (g *Generator) PrintNamesSlice(runs [][]Value, typ *Type) {
+	thereAreRuns := len(runs) > 1 && len(runs) <= typ.RunsThreshold
+	g.Printf("\nvar _%sNames = []string{\n", typ.Name)
 
 	var n int
 	var runID string
@@ -466,7 +466,7 @@ func (g *Generator) PrintNamesSlice(runs [][]Value, typeName string, runsThresho
 		}
 
 		for _, value := range values {
-			g.Printf("\t_%sName%s[%d:%d],\n", typeName, runID, n, n+len(value.Name))
+			g.Printf("\t_%sName%s[%d:%d],\n", typ.Name, runID, n, n+len(value.Name))
 			n += len(value.Name)
 		}
 	}
@@ -474,13 +474,13 @@ func (g *Generator) PrintNamesSlice(runs [][]Value, typeName string, runsThresho
 }
 
 // PrintDescMap prints the map of values to descriptions
-func (g *Generator) PrintDescMap(runs [][]Value, typeName string) {
+func (g *Generator) PrintDescMap(runs [][]Value, typ *Type) {
 	g.Printf("\n")
-	g.Printf("\nvar _%sDescMap = map[%s]string{\n", typeName, typeName)
+	g.Printf("\nvar _%sDescMap = map[%s]string{\n", typ.Name, typ.Name)
 	i := 0
 	for _, values := range runs {
 		for _, value := range values {
-			g.Printf("\t%s: _%sDescs[%d],\n", &value, typeName, i)
+			g.Printf("\t%s: _%sDescs[%d],\n", &value, typ.Name, i)
 			i++
 		}
 	}
@@ -488,9 +488,9 @@ func (g *Generator) PrintDescMap(runs [][]Value, typeName string) {
 }
 
 // PrintDescSlice prints the slice of descriptions
-func (g *Generator) PrintDescSlice(runs [][]Value, typeName string) {
+func (g *Generator) PrintDescSlice(runs [][]Value, typ *Type) {
 	g.Printf("\n")
-	g.Printf("\nvar _%sDescs = []string{\n", typeName)
+	g.Printf("\nvar _%sDescs = []string{\n", typ.Name)
 	for _, values := range runs {
 		for _, value := range values {
 			g.Printf("\t`%s`,\n", value.Desc)

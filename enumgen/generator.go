@@ -302,7 +302,7 @@ func (g *Generator) Generate() error {
 			g.BuildMap(runs, typ)
 		}
 
-		g.BuildNoOpOrderChangeDetect(runs, typeName)
+		g.BuildNoOpOrderChangeDetect(runs, typ)
 
 		g.BuildBasicExtras(runs, typ)
 		if typ.IsBitFlag {
