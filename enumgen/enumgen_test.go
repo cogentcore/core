@@ -73,8 +73,8 @@ func TestFruitsSetString(t *testing.T) {
 }
 
 func TestFoodsString(t *testing.T) {
-	val := testdata.Lettuce
-	want := "Lettuce"
+	val := testdata.Foods(testdata.Blackberry)
+	want := "Blackberry"
 	have := val.String()
 	if have != want {
 		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
