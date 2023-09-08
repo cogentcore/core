@@ -307,16 +307,6 @@ func (i {{.TypeName}}) Desc() string {
 }
 `))
 
-var DescsMethodTmpl = template.Must(template.New("DescsMethod").Parse(
-	`// Descs returns the descriptions of all
-// possible values of type {{.TypeName}}.
-// This slice will be in the same order as
-// those returned by Values and Strings.
-func (i {{.TypeName}}) Descs() []string {
-	return _{{.TypeName}}Descs
-}
-`))
-
 var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(
 	`// {{.TypeName}}Values returns all possible values of
 // the type {{.TypeName}}. This slice will be in the
@@ -337,16 +327,6 @@ func (i {{.TypeName}}) Values() []enums.Enum {
 		res[i] = d
 	}
 	return res 
-}
-`))
-
-var StringsMethodTmpl = template.Must(template.New("StringsMethod").Parse(
-	`// Strings returns the string representations of
-// all possible values of type {{.TypeName}}.
-// This slice will be in the same order as
-// those returned by Values and Descs.
-func (i {{.TypeName}}) Strings() []string {
-	return _{{.TypeName}}Names
 }
 `))
 
@@ -418,8 +398,6 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
 	g.ExecTmpl(DescMethodTmpl, d)
 	g.ExecTmpl(ValuesGlobalTmpl, d)
 	g.ExecTmpl(ValuesMethodTmpl, d)
-	g.ExecTmpl(StringsMethodTmpl, d)
-	g.ExecTmpl(DescsMethodTmpl, d)
 	if len(runs) <= typ.RunsThreshold {
 		g.ExecTmpl(IsValidMethodLoopTmpl, d)
 	} else { // There is a map of values, the code is simpler then

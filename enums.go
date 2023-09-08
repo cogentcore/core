@@ -12,8 +12,7 @@ import "fmt"
 // Enum types must be convertable to strings and int64s,
 // must be able to return a description of their value,
 // must be able to report if they are valid, and must
-// be able to return all possible enum values
-// and string and description representations.
+// be able to return all possible enum values for their type.
 type Enum interface {
 	fmt.Stringer
 	// Int64 returns the enum value as an int64.
@@ -24,19 +23,8 @@ type Enum interface {
 	// valid option for its enum type.
 	IsValid() bool
 	// Values returns all possible values this
-	// enum type has. This slice will be in the
-	// same order as those returned by Strings and Descs.
+	// enum type has.
 	Values() []Enum
-	// Strings returns the string representations of
-	// all possible values this enum type has.
-	// This slice will be in the same order as
-	// those returned by Values and Descs.
-	Strings() []string
-	// Descs returns the descriptions of all
-	// possible values this enum type has.
-	// This slice will be in the same order as
-	// those returned by Values and Strings.
-	Descs() []string
 }
 
 // EnumSetter is an expanded interface that all pointers
