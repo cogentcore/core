@@ -50,7 +50,51 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
-func TestStringSetString(t *testing.T) {
+func TestFruitsString(t *testing.T) {
+	val := testdata.Peach
+	want := "Peach"
+	have := val.String()
+	if have != want {
+		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
+	}
+}
+
+func TestFruitsSetString(t *testing.T) {
+	src := "strawberry"
+	want := testdata.Strawberry
+	var have testdata.Fruits
+	err := have.SetString(src)
+	if err != nil {
+		t.Errorf("error setting from string %q: %v", src, err)
+	}
+	if have != want {
+		t.Errorf("expected value %v from string %q, but got %v", want, src, have)
+	}
+}
+
+func TestFoodsString(t *testing.T) {
+	val := testdata.Lettuce
+	want := "Lettuce"
+	have := val.String()
+	if have != want {
+		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
+	}
+}
+
+func TestFoodsSetString(t *testing.T) {
+	src := "apricot"
+	want := testdata.Foods(testdata.Apricot)
+	var have testdata.Foods
+	err := have.SetString(src)
+	if err != nil {
+		t.Errorf("error setting from string %q: %v", src, err)
+	}
+	if have != want {
+		t.Errorf("expected value %v from string %q, but got %v", want, src, have)
+	}
+}
+
+func TestStatesStringSetString(t *testing.T) {
 	var val testdata.States
 	val.SetFlag(true, testdata.Active, testdata.Hovered, testdata.Focused)
 	orig := val
@@ -68,7 +112,7 @@ func TestStringSetString(t *testing.T) {
 	}
 }
 
-func TestSetStringString(t *testing.T) {
+func TestStatesSetStringString(t *testing.T) {
 	src := "enabled|focused|selected"
 	var want testdata.States
 	want.SetFlag(true, testdata.Enabled, testdata.Focused, testdata.Selected)
