@@ -77,23 +77,13 @@ var _FruitsNames = []string{
 }
 
 var _FruitsDescMap = map[Fruits]string{
-	0: _FruitsDescs[0],
-	1: _FruitsDescs[1],
-	2: _FruitsDescs[2],
-	3: _FruitsDescs[3],
-	4: _FruitsDescs[4],
-	5: _FruitsDescs[5],
-	6: _FruitsDescs[6],
-}
-
-var _FruitsDescs = []string{
-	``,
-	``,
-	``,
-	``,
-	``,
-	``,
-	``,
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+	4: ``,
+	5: ``,
+	6: ``,
 }
 
 // SetString sets the Fruits value from its
@@ -130,17 +120,14 @@ func (i Fruits) Desc() string {
 	return i.String()
 }
 
-// FruitsValues returns all possible values of
-// the type Fruits. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on Fruits.
+// FruitsValues returns all possible values for
+// the type Fruits.
 func FruitsValues() []Fruits {
 	return _FruitsValues
 }
 
-// Values returns all possible values of
-// type Fruits. This slice will be in the
-// same order as those returned by Strings and Descs.
+// Values returns all possible values for
+// the type Fruits.
 func (i Fruits) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FruitsValues))
 	for i, d := range _FruitsValues {
@@ -235,17 +222,10 @@ var _FoodsNames = []string{
 }
 
 var _FoodsDescMap = map[Foods]string{
-	7:  _FoodsDescs[0],
-	8:  _FoodsDescs[1],
-	9:  _FoodsDescs[2],
-	10: _FoodsDescs[3],
-}
-
-var _FoodsDescs = []string{
-	``,
-	``,
-	``,
-	``,
+	7:  ``,
+	8:  ``,
+	9:  ``,
+	10: ``,
 }
 
 // SetString sets the Foods value from its
@@ -282,17 +262,14 @@ func (i Foods) Desc() string {
 	return i.String()
 }
 
-// FoodsValues returns all possible values of
-// the type Foods. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on Foods.
+// FoodsValues returns all possible values for
+// the type Foods.
 func FoodsValues() []Foods {
 	return _FoodsValues
 }
 
-// Values returns all possible values of
-// type Foods. This slice will be in the
-// same order as those returned by Strings and Descs.
+// Values returns all possible values for
+// the type Foods.
 func (i Foods) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FoodsValues))
 	for i, d := range _FoodsValues {
@@ -433,23 +410,13 @@ var _DaysNames = []string{
 }
 
 var _DaysDescMap = map[Days]string{
-	1:  _DaysDescs[0],
-	3:  _DaysDescs[1],
-	5:  _DaysDescs[2],
-	7:  _DaysDescs[3],
-	9:  _DaysDescs[4],
-	11: _DaysDescs[5],
-	13: _DaysDescs[6],
-}
-
-var _DaysDescs = []string{
-	`Sunday is the first day of the week`,
-	`Monday is the second day of the week`,
-	`Tuesday is the third day of the week`,
-	`Wednesday is the fourth day of the week`,
-	`Thursday is the fifth day of the week`,
-	`Friday is the sixth day of the week`,
-	`Saturday is the seventh day of the week`,
+	1:  `Sunday is the first day of the week`,
+	3:  `Monday is the second day of the week`,
+	5:  `Tuesday is the third day of the week`,
+	7:  `Wednesday is the fourth day of the week`,
+	9:  `Thursday is the fifth day of the week`,
+	11: `Friday is the sixth day of the week`,
+	13: `Saturday is the seventh day of the week`,
 }
 
 // SetString sets the Days value from its
@@ -486,17 +453,14 @@ func (i Days) Desc() string {
 	return i.String()
 }
 
-// DaysValues returns all possible values of
-// the type Days. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on Days.
+// DaysValues returns all possible values for
+// the type Days.
 func DaysValues() []Days {
 	return _DaysValues
 }
 
-// Values returns all possible values of
-// type Days. This slice will be in the
-// same order as those returned by Strings and Descs.
+// Values returns all possible values for
+// the type Days.
 func (i Days) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_DaysValues))
 	for i, d := range _DaysValues {
@@ -640,23 +604,13 @@ var _StatesNames = []string{
 }
 
 var _StatesDescMap = map[States]string{
-	1:  _StatesDescs[0],
-	3:  _StatesDescs[1],
-	5:  _StatesDescs[2],
-	7:  _StatesDescs[3],
-	9:  _StatesDescs[4],
-	11: _StatesDescs[5],
-	13: _StatesDescs[6],
-}
-
-var _StatesDescs = []string{
-	`Enabled indicates the widget is enabled`,
-	`Disabled indicates the widget is disabled`,
-	`Focused indicates the widget has keyboard focus`,
-	`Hovered indicates the widget is being hovered over`,
-	`Active indicates the widget is being interacted with`,
-	`ActivelyFocused indicates the widget has active keyboard focus`,
-	`Selected indicates the widget is selected`,
+	1:  `Enabled indicates the widget is enabled`,
+	3:  `Disabled indicates the widget is disabled`,
+	5:  `Focused indicates the widget has keyboard focus`,
+	7:  `Hovered indicates the widget is being hovered over`,
+	9:  `Active indicates the widget is being interacted with`,
+	11: `ActivelyFocused indicates the widget has active keyboard focus`,
+	13: `Selected indicates the widget is selected`,
 }
 
 // SetString sets the States value from its
@@ -695,17 +649,14 @@ func (i States) Desc() string {
 	return i.String()
 }
 
-// StatesValues returns all possible values of
-// the type States. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on States.
+// StatesValues returns all possible values for
+// the type States.
 func StatesValues() []States {
 	return _StatesValues
 }
 
-// Values returns all possible values of
-// type States. This slice will be in the
-// same order as those returned by Strings and Descs.
+// Values returns all possible values for
+// the type States.
 func (i States) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_StatesValues))
 	for i, d := range _StatesValues {
@@ -907,35 +858,19 @@ var _LanguagesNames = []string{
 }
 
 var _LanguagesDescMap = map[Languages]string{
-	6:  _LanguagesDescs[0],
-	10: _LanguagesDescs[1],
-	14: _LanguagesDescs[2],
-	18: _LanguagesDescs[3],
-	22: _LanguagesDescs[4],
-	26: _LanguagesDescs[5],
-	30: _LanguagesDescs[6],
-	34: _LanguagesDescs[7],
-	38: _LanguagesDescs[8],
-	42: _LanguagesDescs[9],
-	46: _LanguagesDescs[10],
-	50: _LanguagesDescs[11],
-	54: _LanguagesDescs[12],
-}
-
-var _LanguagesDescs = []string{
-	`Go is the best programming language`,
-	``,
-	`JavaScript is the worst programming language`,
-	``,
-	``,
-	``,
-	``,
-	``,
-	``,
-	``,
-	``,
-	``,
-	``,
+	6:  `Go is the best programming language`,
+	10: ``,
+	14: `JavaScript is the worst programming language`,
+	18: ``,
+	22: ``,
+	26: ``,
+	30: ``,
+	34: ``,
+	38: ``,
+	42: ``,
+	46: ``,
+	50: ``,
+	54: ``,
 }
 
 // SetString sets the Languages value from its
@@ -974,17 +909,14 @@ func (i Languages) Desc() string {
 	return i.String()
 }
 
-// LanguagesValues returns all possible values of
-// the type Languages. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on Languages.
+// LanguagesValues returns all possible values for
+// the type Languages.
 func LanguagesValues() []Languages {
 	return _LanguagesValues
 }
 
-// Values returns all possible values of
-// type Languages. This slice will be in the
-// same order as those returned by Strings and Descs.
+// Values returns all possible values for
+// the type Languages.
 func (i Languages) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_LanguagesValues))
 	for i, d := range _LanguagesValues {
@@ -1106,11 +1038,7 @@ var _MoreLanguagesNames = []string{
 }
 
 var _MoreLanguagesDescMap = map[MoreLanguages]string{
-	55: _MoreLanguagesDescs[0],
-}
-
-var _MoreLanguagesDescs = []string{
-	``,
+	55: ``,
 }
 
 // SetString sets the MoreLanguages value from its
@@ -1152,17 +1080,14 @@ func (i MoreLanguages) Desc() string {
 	return i.String()
 }
 
-// MoreLanguagesValues returns all possible values of
-// the type MoreLanguages. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on MoreLanguages.
+// MoreLanguagesValues returns all possible values for
+// the type MoreLanguages.
 func MoreLanguagesValues() []MoreLanguages {
 	return _MoreLanguagesValues
 }
 
-// Values returns all possible values of
-// type MoreLanguages. This slice will be in the
-// same order as those returned by Strings and Descs.
+// Values returns all possible values for
+// the type MoreLanguages.
 func (i MoreLanguages) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_MoreLanguagesValues))
 	for i, d := range _MoreLanguagesValues {

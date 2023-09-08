@@ -308,19 +308,16 @@ func (i {{.TypeName}}) Desc() string {
 `))
 
 var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(
-	`// {{.TypeName}}Values returns all possible values of
-// the type {{.TypeName}}. This slice will be in the
-// same order as those returned by the Values,
-// Strings, and Descs methods on {{.TypeName}}.
+	`// {{.TypeName}}Values returns all possible values for
+// the type {{.TypeName}}.
 func {{.TypeName}}Values() []{{.TypeName}} {
 	return _{{.TypeName}}Values
 }
 `))
 
 var ValuesMethodTmpl = template.Must(template.New("ValuesMethod").Parse(
-	`// Values returns all possible values of
-// type {{.TypeName}}. This slice will be in the
-// same order as those returned by Strings and Descs.
+	`// Values returns all possible values for
+// the type {{.TypeName}}.
 func (i {{.TypeName}}) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_{{.TypeName}}Values))
 	for i, d := range _{{.TypeName}}Values {
@@ -384,7 +381,6 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
 
 	// Print the map of values to descriptions
 	g.PrintDescMap(runs, typ)
-	g.PrintDescSlice(runs, typ)
 
 	// Print the basic extra methods
 	d.SetIfInvalidForSetString(typ.Extends, typ.IsBitFlag)
@@ -459,20 +455,8 @@ func (g *Generator) PrintDescMap(runs [][]Value, typ *Type) {
 	i := 0
 	for _, values := range runs {
 		for _, value := range values {
-			g.Printf("\t%s: _%sDescs[%d],\n", &value, typ.Name, i)
+			g.Printf("\t%s: `%s`,\n", &value, value.Desc)
 			i++
-		}
-	}
-	g.Printf("}\n\n")
-}
-
-// PrintDescSlice prints the slice of descriptions
-func (g *Generator) PrintDescSlice(runs [][]Value, typ *Type) {
-	g.Printf("\n")
-	g.Printf("\nvar _%sDescs = []string{\n", typ.Name)
-	for _, values := range runs {
-		for _, value := range values {
-			g.Printf("\t`%s`,\n", value.Desc)
 		}
 	}
 	g.Printf("}\n\n")
