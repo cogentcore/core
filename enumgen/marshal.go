@@ -26,7 +26,7 @@ func (i *{{.TypeName}}) UnmarshalText(text []byte) error {
 }
 `))
 
-func (g *Generator) BuildTextMethods(runs [][]Value, typ *Type) {
+func (g *Generator) BuildTextMethods(runs []Value, typ *Type) {
 	d := &TmplData{
 		TypeName: typ.Name,
 	}
@@ -50,7 +50,7 @@ func (i *{{.TypeName}}) UnmarshalJSON(data []byte) error {
 }
 `))
 
-func (g *Generator) BuildJSONMethods(runs [][]Value, typ *Type) {
+func (g *Generator) BuildJSONMethods(runs []Value, typ *Type) {
 	d := &TmplData{
 		TypeName: typ.Name,
 	}
@@ -74,7 +74,7 @@ func (i *{{.TypeName}}) UnmarshalYAML(unmarshal func(any) error) error {
 }
 `))
 
-func (g *Generator) BuildYAMLMethods(runs [][]Value, typ *Type) {
+func (g *Generator) BuildYAMLMethods(runs []Value, typ *Type) {
 	d := &TmplData{
 		TypeName: typ.Name,
 	}

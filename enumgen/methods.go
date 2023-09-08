@@ -33,15 +33,13 @@ func Usize(n int) int {
 
 // BuildMap handles the case where the space is so sparse a map is a reasonable fallback.
 // It's a rare situation but has simple code.
-func (g *Generator) BuildMap(runs [][]Value, typ *Type) {
+func (g *Generator) BuildMap(values []Value, typ *Type) {
 	g.Printf("\n")
 	g.Printf("\nvar _%sMap = map[%s]string{\n", typ.Name, typ.Name)
 	n := 0
-	for _, values := range runs {
-		for _, value := range values {
-			g.Printf("\t%s: `%s`,\n", &value, value.Name)
-			n += len(value.Name)
-		}
+	for _, value := range values {
+		g.Printf("\t%s: `%s`,\n", &value, value.Name)
+		n += len(value.Name)
 	}
 	g.Printf("}\n\n")
 	d := &TmplData{
@@ -53,7 +51,7 @@ func (g *Generator) BuildMap(runs [][]Value, typ *Type) {
 }
 
 // BuildNoOpOrderChangeDetect lets the compiler and the user know if the order/value of the enum values has changed.
-func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typ *Type) {
+func (g *Generator) BuildNoOpOrderChangeDetect(values []Value, typ *Type) {
 	g.Printf("\n")
 
 	g.Printf(`
@@ -62,10 +60,8 @@ func (g *Generator) BuildNoOpOrderChangeDetect(runs [][]Value, typ *Type) {
 	`)
 	g.Printf("func _%sNoOp (){ ", typ.Name)
 	g.Printf("\n var x [1]struct{}\n")
-	for _, values := range runs {
-		for _, value := range values {
-			g.Printf("\t_ = x[%s-(%s)]\n", value.OriginalName, value.Str)
-		}
+	for _, value := range values {
+		g.Printf("\t_ = x[%s-(%s)]\n", value.OriginalName, value.Str)
 	}
 	g.Printf("}\n\n")
 }
@@ -170,18 +166,16 @@ func (i {{.TypeName}}) IsValid() bool {
 `))
 
 // BuildBasicExtras builds methods common to all types, like Desc and SetString.
-func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
+func (g *Generator) BuildBasicExtras(values []Value, typ *Type) {
 	// At this moment, either "g.declareIndexAndNameVars()" or "g.declareNameVars()" has been called
 
 	// Print the slice of values
 	max := uint64(0)
 	g.Printf("\nvar _%sValues = []%s{", typ.Name, typ.Name)
-	for _, values := range runs {
-		for _, value := range values {
-			g.Printf("\t%s, ", value.OriginalName)
-			if value.Value > max {
-				max = value.Value
-			}
+	for _, value := range values {
+		g.Printf("\t%s, ", value.OriginalName)
+		if value.Value > max {
+			max = value.Value
 		}
 	}
 	g.Printf("}\n\n")
@@ -194,13 +188,13 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
 	g.ExecTmpl(NConstantTmpl, d)
 
 	// Print the map between name and value
-	g.PrintValueMap(runs, typ)
+	g.PrintValueMap(values, typ)
 
 	// Print the slice of names
-	g.PrintNamesSlice(runs, typ)
+	g.PrintNamesSlice(values, typ)
 
 	// Print the map of values to descriptions
-	g.PrintDescMap(runs, typ)
+	g.PrintDescMap(values, typ)
 
 	// Print the basic extra methods
 	d.SetIfInvalidForSetString(typ.Extends, typ.IsBitFlag)
@@ -214,7 +208,7 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
 	g.ExecTmpl(DescMethodTmpl, d)
 	g.ExecTmpl(ValuesGlobalTmpl, d)
 	g.ExecTmpl(ValuesMethodTmpl, d)
-	if len(runs) <= typ.RunsThreshold {
+	if len(values) <= typ.RunsThreshold {
 		g.ExecTmpl(IsValidMethodLoopTmpl, d)
 	} else { // There is a map of values, the code is simpler then
 		g.ExecTmpl(IsValidMethodMapTmpl, d)
@@ -222,13 +216,13 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
 }
 
 // PrintValueMap prints the map between name and value
-func (g *Generator) PrintValueMap(runs [][]Value, typ *Type) {
-	thereAreRuns := len(runs) > 1 && len(runs) <= typ.RunsThreshold
+func (g *Generator) PrintValueMap(values []Value, typ *Type) {
+	thereAreRuns := len(values) > 1 && len(values) <= typ.RunsThreshold
 	g.Printf("\nvar _%sNameToValueMap = map[string]%s{\n", typ.Name, typ.Name)
 
 	var n int
 	var runID string
-	for i, values := range runs {
+	for i, values := range values {
 		if thereAreRuns {
 			runID = "_" + fmt.Sprintf("%d", i)
 			n = 0
@@ -246,7 +240,7 @@ func (g *Generator) PrintValueMap(runs [][]Value, typ *Type) {
 }
 
 // PrintNamesSlice prints the slice of names
-func (g *Generator) PrintNamesSlice(runs [][]Value, typ *Type) {
+func (g *Generator) PrintNamesSlice(runs []Value, typ *Type) {
 	thereAreRuns := len(runs) > 1 && len(runs) <= typ.RunsThreshold
 	g.Printf("\nvar _%sNames = []string{\n", typ.Name)
 
@@ -269,7 +263,7 @@ func (g *Generator) PrintNamesSlice(runs [][]Value, typ *Type) {
 }
 
 // PrintDescMap prints the map of values to descriptions
-func (g *Generator) PrintDescMap(runs [][]Value, typ *Type) {
+func (g *Generator) PrintDescMap(runs []Value, typ *Type) {
 	g.Printf("\n")
 	g.Printf("\nvar _%sDescMap = map[%s]string{\n", typ.Name, typ.Name)
 	i := 0
