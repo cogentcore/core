@@ -1,5 +1,28 @@
 package testdata
 
+// Fruits is an enum containing fruits
+type Fruits uint8 //enums:enum
+
+const (
+	Apple Fruits = iota
+	Orange
+	Peach
+	Strawberry
+	Blackberry
+	Blueberry
+	Apricot
+)
+
+// Foods is an enum containing foods
+type Foods Fruits //enums:enum
+
+const (
+	Bread Foods = iota
+	Lettuce
+	Cheese
+	Meat
+)
+
 // Days is an enum containing the days of the week
 type Days int //enums:enum -transform=snake_upper -addprefix=DAY_ -gql -no-json
 
