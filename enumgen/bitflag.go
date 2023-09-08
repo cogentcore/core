@@ -85,7 +85,7 @@ func (i *{{.TypeName}}) SetString(s string) error {
 		} else if val, ok := _{{.TypeName}}NameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg+" is not a valid value for type {{.TypeName}}")
+			{{.IfInvalid}}
 		}
 	}
 	return nil
