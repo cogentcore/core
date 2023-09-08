@@ -96,7 +96,7 @@ func TestLanguagesString(t *testing.T) {
 	}
 }
 
-func TestMoreLanguages(t *testing.T) {
+func TestMoreLanguagesString(t *testing.T) {
 	var val testdata.MoreLanguages
 	val.SetFlag(true, testdata.Go, testdata.Perl, testdata.Python, testdata.Dart)
 	val.SetFlag(false, testdata.Python)
@@ -105,9 +105,18 @@ func TestMoreLanguages(t *testing.T) {
 	if have != want {
 		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
 	}
-	str := "Perl|JavaScript|Kotlin"
-	err := val.SetString(str)
+}
+
+func TestMoreLanguagesSetString(t *testing.T) {
+	src := "Perl|JavaScript|Kotlin"
+	var have testdata.MoreLanguages
+	var want testdata.MoreLanguages
+	want.SetFlag(true, testdata.Perl, testdata.JavaScript, testdata.Kotlin)
+	err := have.SetString(src)
 	if err != nil {
-		t.Errorf("error setting value from string %q: %v", str, err)
+		t.Errorf("error setting value from string %q: %v", src, err)
+	}
+	if have != want {
+		t.Errorf("expected value %v from string %q, not %v", want, src, have)
 	}
 }
