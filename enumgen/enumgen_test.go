@@ -78,7 +78,7 @@ func TestSetStringString(t *testing.T) {
 		t.Errorf("error setting value from string %q: %v", src, err)
 	}
 	if have != want {
-		t.Errorf("expected value %v from string %q, not %v", want, src, have)
+		t.Errorf("expected value %v from string %q, but got %v", want, src, have)
 	}
 	str := have.String()
 	if str != src {
@@ -117,6 +117,6 @@ func TestMoreLanguagesSetString(t *testing.T) {
 		t.Errorf("error setting value from string %q: %v", src, err)
 	}
 	if have != want {
-		t.Errorf("expected value %v from string %q, not %v", want, src, have)
+		t.Errorf("expected value %v from string %q, but got %v", want, src, have)
 	}
 }
