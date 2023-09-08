@@ -91,7 +91,7 @@ func (td *TmplData) SetIfInvalidForSetString(extends string, isBitFlag bool) {
 					return err
 				}`, extends)
 		} else {
-			td.IfInvalid = fmt.Sprintf(`return (*%s)(i).SetString()`, extends)
+			td.IfInvalid = fmt.Sprintf(`return (*%s)(i).SetString(s)`, extends)
 
 		}
 	}
