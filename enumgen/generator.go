@@ -252,29 +252,7 @@ func (g *Generator) Generate() error {
 
 		g.PrefixValueNames(values, typ.Config)
 
-		runs := SplitIntoRuns(values)
-		// The decision of which pattern to use depends on the number of
-		// runs in the numbers. If there's only one, it's easy. For more than
-		// one, there's a tradeoff between complexity and size of the data
-		// and code vs. the simplicity of a map. A map takes more space,
-		// but so does the code. The decision here (crossover at 10) is
-		// arbitrary, but considers that for large numbers of runs the cost
-		// of the linear scan in the switch might become important, and
-		// rather than use yet another algorithm such as binary search,
-		// we punt and use a map. In any case, the likelihood of a map
-		// being necessary for any realistic example other than bitmasks
-		// is very low. And bitmasks probably deserve their own analysis,
-		// to be done some other day.
-		const runsThreshold = 10
-		typ.RunsThreshold = runsThreshold
-		switch {
-		case len(runs) == 1:
-			g.BuildOneRun(runs, typ)
-		case len(runs) <= runsThreshold:
-			g.BuildMultipleRuns(runs, typ)
-		default:
-			g.BuildMap(runs, typ)
-		}
+		g.BuildMap(runs, typ)
 
 		g.BuildNoOpOrderChangeDetect(runs, typ)
 

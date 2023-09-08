@@ -12,9 +12,7 @@
 package enumgen
 
 import (
-	"bytes"
 	"fmt"
-	"strings"
 	"text/template"
 )
 
@@ -33,193 +31,15 @@ func Usize(n int) int {
 	}
 }
 
-// DeclareIndexAndNameVars declares the index slices and concatenated names
-// strings representing the runs of values.
-func (g *Generator) DeclareIndexAndNameVars(runs [][]Value, typ *Type) {
-	var indexes, names []string
-	for i, run := range runs {
-		index, n := g.CreateIndexAndNameDecl(run, typ, fmt.Sprintf("_%d", i))
-		indexes = append(indexes, index)
-		names = append(names, n)
-		_, n = g.CreateLowerIndexAndNameDecl(run, typ, fmt.Sprintf("_%d", i))
-		names = append(names, n)
-	}
-	g.Printf("const (\n")
-	for _, n := range names {
-		g.Printf("\t%s\n", n)
-	}
-	g.Printf(")\n\n")
-	g.Printf("var (")
-	for _, index := range indexes {
-		g.Printf("\t%s\n", index)
-	}
-	g.Printf(")\n\n")
-}
-
-// DeclareIndexAndNameVar is the single-run version of declareIndexAndNameVars
-func (g *Generator) DeclareIndexAndNameVar(run []Value, typ *Type) {
-	index, n := g.CreateIndexAndNameDecl(run, typ, "")
-	g.Printf("const %s\n", n)
-	g.Printf("var %s\n", index)
-	index, n = g.CreateLowerIndexAndNameDecl(run, typ, "")
-	g.Printf("const %s\n", n)
-	// g.Printf("var %s\n", index)
-}
-
-// createIndexAndNameDecl returns the pair of declarations for the run. The caller will add "const" and "var".
-func (g *Generator) CreateLowerIndexAndNameDecl(run []Value, typ *Type, suffix string) (string, string) {
-	b := new(bytes.Buffer)
-	indexes := make([]int, len(run))
-	for i := range run {
-		b.WriteString(strings.ToLower(run[i].Name))
-		indexes[i] = b.Len()
-	}
-	nameConst := fmt.Sprintf("_%sLowerName%s = %q", typ.Name, suffix, b.String())
-	nameLen := b.Len()
-	b.Reset()
-	_, _ = fmt.Fprintf(b, "_%sLowerIndex%s = [...]uint%d{0, ", typ.Name, suffix, Usize(nameLen))
-	for i, v := range indexes {
-		if i > 0 {
-			_, _ = fmt.Fprintf(b, ", ")
-		}
-		_, _ = fmt.Fprintf(b, "%d", v)
-	}
-	_, _ = fmt.Fprintf(b, "}")
-	return b.String(), nameConst
-}
-
-// CreateIndexAndNameDecl returns the pair of declarations for the run. The caller will add "const" and "var".
-func (g *Generator) CreateIndexAndNameDecl(run []Value, typ *Type, suffix string) (string, string) {
-	b := new(bytes.Buffer)
-	indexes := make([]int, len(run))
-	for i := range run {
-		b.WriteString(run[i].Name)
-		indexes[i] = b.Len()
-	}
-	nameConst := fmt.Sprintf("_%sName%s = %q", typ.Name, suffix, b.String())
-	nameLen := b.Len()
-	b.Reset()
-	_, _ = fmt.Fprintf(b, "_%sIndex%s = [...]uint%d{0, ", typ.Name, suffix, Usize(nameLen))
-	for i, v := range indexes {
-		if i > 0 {
-			_, _ = fmt.Fprintf(b, ", ")
-		}
-		_, _ = fmt.Fprintf(b, "%d", v)
-	}
-	_, _ = fmt.Fprintf(b, "}")
-	return b.String(), nameConst
-}
-
-// DeclareNameVars declares the concatenated names string representing all the values in the runs.
-func (g *Generator) DeclareNameVars(runs [][]Value, typ *Type, suffix string) {
-	g.Printf("const _%sName%s = \"", typ.Name, suffix)
-	for _, run := range runs {
-		for i := range run {
-			g.Printf("%s", run[i].Name)
-		}
-	}
-	g.Printf("\"\n")
-	g.Printf("const _%sLowerName%s = \"", typ.Name, suffix)
-	for _, run := range runs {
-		for i := range run {
-			g.Printf("%s", strings.ToLower(run[i].Name))
-		}
-	}
-	g.Printf("\"\n")
-}
-
-// BuildOneRun generates the variables and String method for a single run of contiguous values.
-func (g *Generator) BuildOneRun(runs [][]Value, typ *Type) {
-	values := runs[0]
-	g.Printf("\n")
-	g.DeclareIndexAndNameVar(values, typ)
-	// The generated code is simple enough to write as a template.
-	d := &TmplData{
-		TypeName:         typ.Name,
-		MinValue:         values[0].String(),
-		IndexElementSize: Usize(len(values)),
-	}
-	if values[0].Signed {
-		d.LessThanZeroCheck = "i < 0 || "
-	}
-	d.SetMethod(typ.IsBitFlag)
-	d.SetIfInvalidForString(typ.Extends, d.MinValue)
-	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
-		g.ExecTmpl(StringMethodOneRunTmpl, d)
-	} else {
-		g.ExecTmpl(StringMethodOneRunWithOffsetTmpl, d)
-	}
-}
-
-var StringMethodOneRunTmpl = template.Must(template.New("StringMethodOneRun").Parse(
-	`{{.MethodComment}}
-func (i {{.TypeName}}) {{.MethodName}}() string {
-	if {{.LessThanZeroCheck}}i >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
-		{{.IfInvalid}}
-	}
-	return _{{.TypeName}}Name[_{{.TypeName}}Index[i]:_{{.TypeName}}Index[i+1]]
-}
-`))
-
-var StringMethodOneRunWithOffsetTmpl = template.Must(template.New("StringMethodOneRunWithOffset").Parse(
-	`{{.MethodComment}}
-func (i {{.TypeName}}) {{.MethodName}}() string {
-	i -= {{.MinValue}}
-	if {{.LessThanZeroCheck}}i >= {{.TypeName}}(len(_{{.TypeName}}Index)-1) {
-		{{.IfInvalid}}
-	}
-	return _{{.TypeName}}Name[_{{.TypeName}}Index[i] : _{{.TypeName}}Index[i+1]]
-}
-`))
-
-// BuildMultipleRuns generates the variables and String method for multiple runs of contiguous values.
-// For this pattern, a single Printf format won't do.
-func (g *Generator) BuildMultipleRuns(runs [][]Value, typ *Type) {
-	g.Printf("\n")
-	g.DeclareIndexAndNameVars(runs, typ)
-	d := &TmplData{
-		TypeName: typ.Name,
-	}
-	d.SetMethod(typ.IsBitFlag)
-	d.SetIfInvalidForString(typ.Extends, "")
-	g.Printf(d.MethodComment)
-	g.Printf("\n")
-	if typ.IsBitFlag {
-		g.Printf("func (i %s) BitIndexString() string {\n", typ.Name)
-	} else {
-		g.Printf("func (i %s) String() string {\n", typ.Name)
-	}
-	g.Printf("\tswitch {\n")
-	for i, values := range runs {
-		if len(values) == 1 {
-			g.Printf("\tcase i == %s:\n", &values[0])
-			g.Printf("\t\treturn _%sName_%d\n", typ.Name, i)
-			continue
-		}
-		g.Printf("\tcase %s <= i && i <= %s:\n", &values[0], &values[len(values)-1])
-		if values[0].Value != 0 {
-			g.Printf("\t\ti -= %s\n", &values[0])
-		}
-		g.Printf("\t\treturn _%sName_%d[_%sIndex_%d[i]:_%sIndex_%d[i+1]]\n",
-			typ.Name, i, typ.Name, i, typ.Name, i)
-	}
-
-	g.Printf("\tdefault:\n")
-	g.Printf(d.IfInvalid)
-	g.Printf("\t}\n")
-	g.Printf("}\n")
-}
-
 // BuildMap handles the case where the space is so sparse a map is a reasonable fallback.
 // It's a rare situation but has simple code.
 func (g *Generator) BuildMap(runs [][]Value, typ *Type) {
 	g.Printf("\n")
-	g.DeclareNameVars(runs, typ, "")
 	g.Printf("\nvar _%sMap = map[%s]string{\n", typ.Name, typ.Name)
 	n := 0
 	for _, values := range runs {
 		for _, value := range values {
-			g.Printf("\t%s: _%sName[%d:%d],\n", &value, typ.Name, n, n+len(value.Name))
+			g.Printf("\t%s: `%s`,\n", &value, value.Name)
 			n += len(value.Name)
 		}
 	}
