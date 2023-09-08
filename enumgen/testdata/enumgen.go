@@ -120,14 +120,14 @@ func (i Fruits) Desc() string {
 	return i.String()
 }
 
-// FruitsValues returns all possible values for
-// the type Fruits.
+// FruitsValues returns all possible values
+// for the type Fruits.
 func FruitsValues() []Fruits {
 	return _FruitsValues
 }
 
-// Values returns all possible values for
-// the type Fruits.
+// Values returns all possible values
+// for the type Fruits.
 func (i Fruits) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FruitsValues))
 	for i, d := range _FruitsValues {
@@ -262,14 +262,14 @@ func (i Foods) Desc() string {
 	return i.String()
 }
 
-// FoodsValues returns all possible values for
-// the type Foods.
+// FoodsValues returns all possible values
+// for the type Foods.
 func FoodsValues() []Foods {
 	return _FoodsValues
 }
 
-// Values returns all possible values for
-// the type Foods.
+// Values returns all possible values
+// for the type Foods.
 func (i Foods) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_FoodsValues))
 	for i, d := range _FoodsValues {
@@ -453,14 +453,14 @@ func (i Days) Desc() string {
 	return i.String()
 }
 
-// DaysValues returns all possible values for
-// the type Days.
+// DaysValues returns all possible values
+// for the type Days.
 func DaysValues() []Days {
 	return _DaysValues
 }
 
-// Values returns all possible values for
-// the type Days.
+// Values returns all possible values
+// for the type Days.
 func (i Days) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_DaysValues))
 	for i, d := range _DaysValues {
@@ -649,14 +649,14 @@ func (i States) Desc() string {
 	return i.String()
 }
 
-// StatesValues returns all possible values for
-// the type States.
+// StatesValues returns all possible values
+// for the type States.
 func StatesValues() []States {
 	return _StatesValues
 }
 
-// Values returns all possible values for
-// the type States.
+// Values returns all possible values
+// for the type States.
 func (i States) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_StatesValues))
 	for i, d := range _StatesValues {
@@ -909,14 +909,14 @@ func (i Languages) Desc() string {
 	return i.String()
 }
 
-// LanguagesValues returns all possible values for
-// the type Languages.
+// LanguagesValues returns all possible values
+// for the type Languages.
 func LanguagesValues() []Languages {
 	return _LanguagesValues
 }
 
-// Values returns all possible values for
-// the type Languages.
+// Values returns all possible values
+// for the type Languages.
 func (i Languages) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_LanguagesValues))
 	for i, d := range _LanguagesValues {
@@ -1080,14 +1080,14 @@ func (i MoreLanguages) Desc() string {
 	return i.String()
 }
 
-// MoreLanguagesValues returns all possible values for
-// the type MoreLanguages.
+// MoreLanguagesValues returns all possible values
+// for the type MoreLanguages.
 func MoreLanguagesValues() []MoreLanguages {
 	return _MoreLanguagesValues
 }
 
-// Values returns all possible values for
-// the type MoreLanguages.
+// Values returns all possible values
+// for the type MoreLanguages.
 func (i MoreLanguages) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_MoreLanguagesValues))
 	for i, d := range _MoreLanguagesValues {

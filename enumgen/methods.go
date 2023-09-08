@@ -308,16 +308,16 @@ func (i {{.TypeName}}) Desc() string {
 `))
 
 var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(
-	`// {{.TypeName}}Values returns all possible values for
-// the type {{.TypeName}}.
+	`// {{.TypeName}}Values returns all possible values
+// for the type {{.TypeName}}.
 func {{.TypeName}}Values() []{{.TypeName}} {
 	return _{{.TypeName}}Values
 }
 `))
 
 var ValuesMethodTmpl = template.Must(template.New("ValuesMethod").Parse(
-	`// Values returns all possible values for
-// the type {{.TypeName}}.
+	`// Values returns all possible values
+// for the type {{.TypeName}}.
 func (i {{.TypeName}}) Values() []enums.Enum {
 	res := make([]enums.Enum, len(_{{.TypeName}}Values))
 	for i, d := range _{{.TypeName}}Values {
