@@ -29,11 +29,10 @@ import (
 // Generator holds the state of the generator.
 // It is primarily used to buffer the output.
 type Generator struct {
-	Config     *config.Config // The configuration information
-	Buf        bytes.Buffer   // The accumulated output.
-	Pkg        *Package       // The package we are scanning.
-	Types      []*Type        // The enum types
-	HasBitFlag bool           // Whether there is any bit flag enum type in the package (used for determining imports)
+	Config *config.Config // The configuration information
+	Buf    bytes.Buffer   // The accumulated output.
+	Pkg    *Package       // The package we are scanning.
+	Types  []*Type        // The enum types
 }
 
 // NewGenerator returns a new generator with the
@@ -104,34 +103,11 @@ func (g *Generator) PrintHeader() {
 	}
 	g.Printf("package %s", g.Pkg.Name)
 	g.Printf("\n")
-	// these import statements don't serve
-	// much purpose, as goimports should handle it
-	// anyway, but if goimports fails because the
-	// code is invalid, it may make it easier to debug.
-	// also, they don't serve much harm and make it clear
-	// what packages are being used.
-	// TODO: maybe remove these import statements
-	g.Printf("import (\n")
-	if g.Config.SQL || g.Config.GQL { // sql and gql are the only ones that use fmt
-		g.Printf("\t\"fmt\"\n")
-	}
-	g.Printf("\t\"strings\"\n")
-	g.Printf("\t\"strconv\"\n")
-	g.Printf("\t\"errors\"\n")
-	if g.HasBitFlag {
-		g.Printf("\t\"sync/atomic\"\n")
-	}
-	if g.Config.SQL {
-		g.Printf("\t\"database/sql/driver\"\n")
-	}
-	if g.Config.JSON {
-		g.Printf("\t\"encoding/json\"\n")
-	}
-	if g.Config.GQL {
-		g.Printf("\t\"io\"\n")
-	}
-	g.Printf("\t\"goki.dev/enums\"\n")
-	g.Printf(")\n")
+	// we need this manual import statement so it
+	// gets the right enums package, but goimports
+	// will handle everything else
+	g.Printf(`import "goki.dev/enums"`)
+	g.Printf("\n")
 }
 
 // FindEnumTypes goes through all of the types in the package
@@ -223,7 +199,6 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 				return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
 			}
 			tt.IsBitFlag = true
-			g.HasBitFlag = true
 		}
 		g.Types = append(g.Types, tt)
 
