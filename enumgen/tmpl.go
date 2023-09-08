@@ -73,12 +73,25 @@ func (td *TmplData) SetIfInvalidForString(extends string, offset string) {
 }
 
 // SetIfInvalidForSetString sets [TmplData.IfInvalid] for a "SetString" method
-// based on what type the type extends (none if passed ""). It assumes
-// [TmplData.TypeName] and [TmplData.MethodName] are already set.
-func (td *TmplData) SetIfInvalidForSetString(extends string) {
+// based on what type the type extends (none if passed "") and whether it is a
+// bitflag. It assumes [TmplData.TypeName] is are already set.
+func (td *TmplData) SetIfInvalidForSetString(extends string, isBitFlag bool) {
 	if extends == "" {
-		td.IfInvalid = fmt.Sprintf(`return errors.New(s+" is not a valid value for type %s")`, td.TypeName)
+		if isBitFlag {
+			td.IfInvalid = fmt.Sprintf(`return errors.New(flg+" is not a valid value for type %s")`, td.TypeName)
+		} else {
+			td.IfInvalid = fmt.Sprintf(`return errors.New(s+" is not a valid value for type %s")`, td.TypeName)
+		}
 	} else {
-		td.IfInvalid = fmt.Sprintf(`return (*%s)(i).%s()`, extends, td.MethodName)
+		if isBitFlag {
+			td.IfInvalid = fmt.Sprintf(
+				`err := (*%s)(i).SetString(flg)
+				if err != nil {
+					return err
+				}`, extends)
+		} else {
+			td.IfInvalid = fmt.Sprintf(`return (*%s)(i).SetString()`, extends)
+
+		}
 	}
 }

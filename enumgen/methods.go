@@ -407,8 +407,7 @@ func (g *Generator) BuildBasicExtras(runs [][]Value, typ *Type) {
 	g.PrintDescSlice(runs, typ)
 
 	// Print the basic extra methods
-	d.MethodName = "SetString"
-	d.SetIfInvalidForSetString(typ.Extends)
+	d.SetIfInvalidForSetString(typ.Extends, typ.IsBitFlag)
 	if typ.IsBitFlag {
 		g.ExecTmpl(SetStringMethodBitFlagTmpl, d)
 	} else {
