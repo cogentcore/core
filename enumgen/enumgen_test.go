@@ -60,8 +60,8 @@ func TestFruitsString(t *testing.T) {
 }
 
 func TestFruitsSetString(t *testing.T) {
-	src := "strawberry"
-	want := testdata.Strawberry
+	src := "apricot"
+	want := testdata.Apricot
 	var have testdata.Fruits
 	err := have.SetString(src)
 	if err != nil {
