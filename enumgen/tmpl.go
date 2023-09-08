@@ -26,7 +26,8 @@ type TmplData struct {
 	LessThanZeroCheck string // less than zero check (for signed types)
 	MethodName        string // method name (String or BitIndexString)
 	MethodComment     string // doc comment for the method
-	IfInvalid         string // the code for what to do if the value is invalid
+	IfInvalid         string // the code for what to do if the value is invalid (used in String and SetString)
+	ReturnSlice       string // the code for the slice to return (used in Values, Strings, and Descs)
 }
 
 // ExecTmpl executes the given template with the given data and
