@@ -56,11 +56,11 @@ func (td *TmplData) SetMethod(isBitFlag bool) {
 	}
 }
 
-// SetIfInvalid sets [TmplData.IfInvalid] based on what type the type
-// extends (none if passed ""), and how much the values of the type are
-// offset (not at all if passed "" or "0"). It assumes [TmplData.MethodName]
-// is already set.
-func (td *TmplData) SetIfInvalid(extends string, offset string) {
+// SetIfInvalidForString sets [TmplData.IfInvalid] for a "String" method
+// based on what type the type extends (none if passed ""), and how
+// much the values of the type are offset (not at all if passed "" or "0").
+// It assumes [TmplData.MethodName] is already set.
+func (td *TmplData) SetIfInvalidForString(extends string, offset string) {
 	if extends == "" {
 		if offset == "" || offset == "0" {
 			td.IfInvalid = `return strconv.FormatInt(int64(i), 10)`
@@ -69,5 +69,16 @@ func (td *TmplData) SetIfInvalid(extends string, offset string) {
 		}
 	} else {
 		td.IfInvalid = fmt.Sprintf(`return %s(i).%s()`, extends, td.MethodName)
+	}
+}
+
+// SetIfInvalidForSetString sets [TmplData.IfInvalid] for a "SetString" method
+// based on what type the type extends (none if passed ""). It assumes
+// [TmplData.TypeName] and [TmplData.MethodName] are already set.
+func (td *TmplData) SetIfInvalidForSetString(extends string) {
+	if extends == "" {
+		td.IfInvalid = fmt.Sprintf(`return errors.New(s+" is not a valid value for type %s")`, td.TypeName)
+	} else {
+		td.IfInvalid = fmt.Sprintf(`return (*%s)(i).%s()`, extends, td.MethodName)
 	}
 }

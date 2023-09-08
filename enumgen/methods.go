@@ -143,7 +143,7 @@ func (g *Generator) BuildOneRun(runs [][]Value, typ *Type) {
 		d.LessThanZeroCheck = "i < 0 || "
 	}
 	d.SetMethod(typ.IsBitFlag)
-	d.SetIfInvalid(typ.Extends, d.MinValue)
+	d.SetIfInvalidForString(typ.Extends, d.MinValue)
 	if values[0].Value == 0 { // Signed or unsigned, 0 is still 0.
 		g.ExecTmpl(StringMethodOneRunTmpl, d)
 	} else {
@@ -181,7 +181,7 @@ func (g *Generator) BuildMultipleRuns(runs [][]Value, typ *Type) {
 		TypeName: typ.Name,
 	}
 	d.SetMethod(typ.IsBitFlag)
-	d.SetIfInvalid(typ.Extends, "")
+	d.SetIfInvalidForString(typ.Extends, "")
 	g.Printf(d.MethodComment)
 	g.Printf("\n")
 	if typ.IsBitFlag {
@@ -228,7 +228,7 @@ func (g *Generator) BuildMap(runs [][]Value, typ *Type) {
 		TypeName: typ.Name,
 	}
 	d.SetMethod(typ.IsBitFlag)
-	d.SetIfInvalid(typ.Extends, "")
+	d.SetIfInvalidForString(typ.Extends, "")
 	g.ExecTmpl(StringMethodMapTmpl, d)
 }
 
