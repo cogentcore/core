@@ -83,9 +83,31 @@ func TestFoodsString(t *testing.T) {
 	}
 }
 
+func TestFoodsString1(t *testing.T) {
+	val := testdata.Cheese
+	want := "Cheese"
+	have := val.String()
+	if have != want {
+		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)
+	}
+}
+
 func TestFoodsSetString(t *testing.T) {
 	src := "apricot"
 	want := testdata.Foods(testdata.Apricot)
+	var have testdata.Foods
+	err := have.SetString(src)
+	if err != nil {
+		t.Errorf("error setting from string %q: %v", src, err)
+	}
+	if have != want {
+		t.Errorf("expected value %v from string %q, but got %v", want, src, have)
+	}
+}
+
+func TestFoodsSetString1(t *testing.T) {
+	src := "Bread"
+	want := testdata.Bread
 	var have testdata.Foods
 	err := have.SetString(src)
 	if err != nil {
