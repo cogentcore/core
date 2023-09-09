@@ -23,21 +23,6 @@ type Config struct {
 	// [def: enumgen.go] the output file location relative to the package on which enumgen is being called
 	Output string `def:"enumgen.go" desc:"the output file location relative to the package on which enumgen is being called"`
 
-	// whether to generate methods that implement the SQL Scanner and Valuer interfaces
-	SQL bool `desc:"whether to generate methods that implement the SQL Scanner and Valuer interfaces"`
-
-	// [def: true] whether to generate text marshaling methods
-	Text bool `def:"true" desc:"whether to generate text marshaling methods"`
-
-	// whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)
-	JSON bool `desc:"whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)"`
-
-	// whether to generate YAML marshaling methods
-	YAML bool `desc:"whether to generate YAML marshaling methods"`
-
-	// whether to generate GraphQL marshaling methods for gqlgen
-	GQL bool `desc:"whether to generate GraphQL marshaling methods for gqlgen"`
-
 	// if specified, the enum item transformation method (eg: snake, kebab, lower)
 	Transform string `desc:"if specified, the enum item transformation method (eg: snake, kebab, lower)"`
 
@@ -49,6 +34,24 @@ type Config struct {
 
 	// whether to use line comment text as printed text when present
 	LineComment bool `desc:"whether to use line comment text as printed text when present"`
+
+	// [def: true] whether to accept lowercase versions of enum names in SetString
+	AcceptLower bool `def:"true" desc:"whether to accept lowercase versions of enum names in SetString"`
+
+	// [def: true] whether to generate text marshaling methods
+	Text bool `def:"true" desc:"whether to generate text marshaling methods"`
+
+	// whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)
+	JSON bool `desc:"whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)"`
+
+	// whether to generate YAML marshaling methods
+	YAML bool `desc:"whether to generate YAML marshaling methods"`
+
+	// whether to generate methods that implement the SQL Scanner and Valuer interfaces
+	SQL bool `desc:"whether to generate methods that implement the SQL Scanner and Valuer interfaces"`
+
+	// whether to generate GraphQL marshaling methods for gqlgen
+	GQL bool `desc:"whether to generate GraphQL marshaling methods for gqlgen"`
 
 	// a comment to include at the top of the generated code
 	Comment string `desc:"a comment to include at the top of the generated code"`

@@ -25,7 +25,7 @@ const (
 )
 
 // Days is an enum containing the days of the week
-type Days int //enums:enum -transform=snake_upper -addprefix=DAY_ -gql -no-json
+type Days int //enums:enum -transform=snake_upper -addprefix=DAY_ -gql -no-json -no-accept-lower
 
 const (
 	// Sunday is the first day of the week
