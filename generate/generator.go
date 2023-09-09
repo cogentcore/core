@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/types"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,7 +39,7 @@ func NewGenerator(config *config.Config) *Generator {
 // ParsePackage parses the single package located in the configuration directory.
 func (g *Generator) ParsePackage() error {
 	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesSizes | packages.NeedSyntax | packages.NeedTypesInfo,
+		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedDeps | packages.NeedTypes | packages.NeedTypesSizes | packages.NeedSyntax | packages.NeedTypesInfo,
 		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
 		// in a separate pass? For later.
 		Tests: false,
@@ -53,15 +55,20 @@ func (g *Generator) ParsePackage() error {
 	for _, pkg := range pkgs {
 		g.AddPackage(pkg)
 	}
+	if KiInterface == nil {
+		return errors.New("error parsing package: no packages or their imports import package ki")
+	}
+	fmt.Println(KiInterface)
 	return nil
 }
 
 // AddPackage adds a package and its syntax files to the generator.
 func (g *Generator) AddPackage(pkg *packages.Package) {
 	p := &Package{
-		Name:  pkg.Name,
-		Defs:  pkg.TypesInfo.Defs,
-		Files: make([]*File, 0),
+		Name:     pkg.Name,
+		Defs:     pkg.TypesInfo.Defs,
+		Files:    make([]*File, 0),
+		TypesPkg: pkg.Types,
 	}
 	// set the directory to the directory of the package
 	if len(pkg.Syntax) > 0 {
@@ -79,7 +86,13 @@ func (g *Generator) AddPackage(pkg *packages.Package) {
 			Pkg:  p,
 		})
 	}
+
+	if KiInterface == nil {
+		KiInterface = FindKiInterface([]*types.Package{p.TypesPkg})
+	}
+
 	g.Pkgs = append(g.Pkgs, p)
+
 }
 
 // Printf prints the formatted string to the
@@ -99,6 +112,36 @@ func (g *Generator) PrintHeader() {
 	g.Printf("\n")
 	g.Printf("package %s", g.Pkg.Name)
 	g.Printf("\n")
+}
+
+// KiInterface is the [*types.Interface] value
+// for the `ki.Ki` interface.
+var KiInterface *types.Interface
+
+func FindKiInterface(p []*types.Package) *types.Interface {
+	res := []*types.Package{}
+	for _, pkg := range p {
+		if pkg.Name() == "ki" {
+			k := pkg.Scope().Lookup("Ki")
+			if k == nil {
+				log.Fatalln("programmer error: internal error: could not find type Ki in package ki")
+			}
+			kn, ok := k.Type().(*types.Named)
+			if !ok {
+				log.Fatalf("programmer error: internal error: type ki.Ki is not a *types.Named but a %T (type value %v)", k.Type(), k.Type())
+			}
+			kint, ok := kn.Underlying().(*types.Interface)
+			if !ok {
+				log.Fatalf("programmer error: internal error: underlying type of type ki.Ki is not a *types.Interface but a %T (type value %v)", kn.Underlying(), kn.Underlying())
+			}
+			return kint
+		}
+		res = append(res, pkg.Imports()...)
+	}
+	if len(res) > 0 {
+		return FindKiInterface(res)
+	}
+	return nil
 }
 
 // Find goes through all of the declarations in the package
@@ -161,12 +204,14 @@ func (g *Generator) Write() error {
 // continue, and an error if there is one. It should only
 // be called in [ast.Inspect].
 func (g *Generator) Inspect(n ast.Node) (bool, error) {
-	ts, ok := n.(*ast.TypeSpec)
-	if !ok {
-		return true, nil
-	}
-	typ := g.Pkg.Defs[ts.Name].Type()
-	utyp := typ.Underlying()
-	fmt.Println(utyp)
+	// ts, ok := n.(*ast.TypeSpec)
+	// if !ok {
+	// 	return true, nil
+	// }
+	// typ := g.Pkg.Defs[ts.Name].Type()
+	// utyp := typ.Underlying()
+	// str := typ.(*types.Struct)
+	// fmt.Println(g.Pkg.TypesPkg.Scope().Lookup("Config"))
+	// fmt.Println(typ, types.Implements(typ, types.NewInterfaceType()))
 	return true, nil
 }
