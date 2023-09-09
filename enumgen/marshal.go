@@ -59,15 +59,15 @@ func (g *Generator) BuildJSONMethods(runs []Value, typ *Type) {
 
 var YAMLMethodsTmpl = template.Must(template.New("YAMLMethods").Parse(
 	`
-// MarshalYAML implements a YAML Marshaler.
+// MarshalYAML implements the [yaml.Marshaler] interface.
 func (i {{.TypeName}}) MarshalYAML() (any, error) {
 	return i.String(), nil
 }
 
-// UnmarshalYAML implements a YAML Unmarshaler.
-func (i *{{.TypeName}}) UnmarshalYAML(unmarshal func(any) error) error {
+// UnmarshalYAML implements the [yaml.Unmarshaler] interface.
+func (i *{{.TypeName}}) UnmarshalYAML(value *yaml.Node) error {
 	var s string
-	if err := unmarshal(&s); err != nil {
+	if err := n.Decode(&s); err != nil {
 		return err
 	}
 	return i.SetString(s)
