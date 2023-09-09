@@ -41,10 +41,10 @@ func (v *Value) String() string {
 	return v.Str
 }
 
-// SplitIntoRuns breaks the values into runs of contiguous sequences.
-// For example, given 1,2,3,5,6,7 it returns {1,2,3},{5,6,7}.
-// The input slice is known to be non-empty.
-func SplitIntoRuns(values []Value) [][]Value {
+// SortValues sorts the values and ensures there
+// are no duplicates. The input slice is known
+// to be non-empty.
+func SortValues(values []Value) []Value {
 	// We use stable sort so the lexically first name is chosen for equal elements.
 	sort.Stable(ByValue(values))
 	// Remove duplicates. Stable sort has put the one we want to print first,
@@ -59,18 +59,7 @@ func SplitIntoRuns(values []Value) [][]Value {
 			j++
 		}
 	}
-	values = values[:j]
-	runs := make([][]Value, 0, 10)
-	for len(values) > 0 {
-		// One contiguous sequence per outer loop.
-		i := 1
-		for i < len(values) && values[i].Value == values[i-1].Value+1 {
-			i++
-		}
-		runs = append(runs, values[:i])
-		values = values[i:]
-	}
-	return runs
+	return values[:j]
 }
 
 // TrimValueNames removes the prefixes specified
