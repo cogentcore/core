@@ -527,6 +527,15 @@ func (i States) BitIndexString() string {
 // string representation, and returns an
 // error if the string is invalid.
 func (i *States) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the States value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *States) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _StatesNameToValueMap[flg]; ok {
@@ -763,6 +772,15 @@ func (i Languages) BitIndexString() string {
 // string representation, and returns an
 // error if the string is invalid.
 func (i *Languages) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the Languages value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *Languages) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _LanguagesNameToValueMap[flg]; ok {
@@ -933,6 +951,15 @@ func (i MoreLanguages) BitIndexString() string {
 // string representation, and returns an
 // error if the string is invalid.
 func (i *MoreLanguages) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the MoreLanguages value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *MoreLanguages) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _MoreLanguagesNameToValueMap[flg]; ok {
@@ -940,7 +967,7 @@ func (i *MoreLanguages) SetString(s string) error {
 		} else if val, ok := _MoreLanguagesNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			err := (*Languages)(i).SetString(flg)
+			err := (*Languages)(i).SetStringOr(flg)
 			if err != nil {
 				return err
 			}

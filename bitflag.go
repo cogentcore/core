@@ -33,4 +33,9 @@ type BitFlagSetter interface {
 	// Set sets the value of the given
 	// flags in these flags to the given value.
 	SetFlag(on bool, f ...BitFlag)
+	// SetStringOr sets the bit flag from its
+	// string representation while preserving any
+	// bit flags already set, and returns an
+	// error if the string is invalid.
+	SetStringOr(s string) error
 }

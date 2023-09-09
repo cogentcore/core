@@ -206,6 +206,7 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 	// Print the basic extra methods
 	if typ.IsBitFlag {
 		g.ExecTmpl(SetStringMethodBitFlagTmpl, d)
+		g.ExecTmpl(SetStringOrMethodBitFlagTmpl, d)
 	} else {
 		g.ExecTmpl(SetStringMethodTmpl, d)
 	}
