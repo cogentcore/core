@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
-	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
@@ -57,10 +56,9 @@ func (g *Generator) ParsePackage() error {
 	return nil
 }
 
-// AddPackage adds a type-checked Package and its syntax files to the generator.
+// AddPackage adds a package and its syntax files to the generator.
 func (g *Generator) AddPackage(pkg *packages.Package) {
 	p := &Package{
-		Dir:   filepath.Dir(pkg.Fset.Position(token.Pos(pkg.Fset.Base())).Filename),
 		Name:  pkg.Name,
 		Defs:  pkg.TypesInfo.Defs,
 		Files: make([]*File, 0),
@@ -72,7 +70,7 @@ func (g *Generator) AddPackage(pkg *packages.Package) {
 	for _, file := range pkg.Syntax {
 		// ignore generated code
 		if ast.IsGenerated(file) {
-			break
+			continue
 		}
 		// need to use append and 0 initial length
 		// because we don't know if it has generated code
@@ -147,7 +145,6 @@ func (g *Generator) Write() error {
 	b, ferr := g.Format()
 	// we still write file even if formatting failed, as it is still useful
 	// then we handle error later
-	fmt.Println(filepath.Join(g.Pkg.Dir, g.Config.Generate.Output))
 	werr := os.WriteFile(filepath.Join(g.Pkg.Dir, g.Config.Generate.Output), b, 0666)
 	if werr != nil {
 		return fmt.Errorf("Generator.Write: error writing file: %w", werr)

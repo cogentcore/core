@@ -8,7 +8,6 @@
 package generate
 
 import (
-	"bytes"
 	"fmt"
 
 	"goki.dev/goki/config"
@@ -30,7 +29,7 @@ func Generate(c *config.Config) error {
 	}
 	for _, pkg := range g.Pkgs {
 		g.Pkg = pkg
-		g.Buf = bytes.Buffer{}
+		g.Buf.Reset()
 		g.PrintHeader()
 		err := g.Write()
 		if err != nil {
