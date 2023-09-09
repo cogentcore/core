@@ -80,8 +80,9 @@ var StringMethodMapTmpl = template.Must(template.New("StringMethodMap").Parse(
 func (i {{.TypeName}}) {{.MethodName}}() string {
 	if str, ok := _{{.TypeName}}Map[i]; ok {
 		return str
-	}
-	{{.IfInvalid}}
+	}{{if .Extends eq ""}}
+	return strconv.FormatInt(int64(i), 10){{else}}
+	return {{.Extends}}(i).{{.MethodName}}(){{end}}
 }
 `))
 
@@ -104,8 +105,9 @@ func (i *{{.TypeName}}) SetString(s string) error {
 	if val, ok := _{{.TypeName}}NameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
-	}
-	{{.IfInvalid}}
+	}{{if eq .Extends ""}}
+	return errors.New(s+" is not a valid value for type {{.TypeName}}"){{else}}
+	return (*{{.Extends}})(i).SetString(s){{end}}
 }
 `))
 
