@@ -13,6 +13,7 @@ package enumgen
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -42,17 +43,13 @@ func (g *Generator) BuildString(values []Value, typ *Type) {
 		n += len(value.Name)
 	}
 	g.Printf("}\n\n")
-	d := &TmplData{
-		TypeName: typ.Name,
-		Extends:  typ.Extends,
-	}
-	d.SetMethod(typ.IsBitFlag)
-	d.SetIfInvalidForString(typ.Extends, "")
-	if typ.IsBitFlag {
-		if typ.Extends == "" {
+	d := NewTmplData(typ)
+	d.SetMethod()
+	if d.IsBitFlag {
+		if d.Extends == "" {
 			d.Slice = fmt.Sprintf("_%sValues", d.TypeName)
 		} else {
-			d.Slice = fmt.Sprintf("append(i.Values(), %s(i).Values()...)", typ.Extends)
+			d.Slice = fmt.Sprintf("append(i.Values(), %s(i).Values()...)", d.Extends)
 		}
 		g.ExecTmpl(StringMethodBitFlagTmpl, d)
 	}
@@ -80,7 +77,7 @@ var StringMethodMapTmpl = template.Must(template.New("StringMethodMap").Parse(
 func (i {{.TypeName}}) {{.MethodName}}() string {
 	if str, ok := _{{.TypeName}}Map[i]; ok {
 		return str
-	}{{if .Extends eq ""}}
+	}{{if eq .Extends ""}}
 	return strconv.FormatInt(int64(i), 10){{else}}
 	return {{.Extends}}(i).{{.MethodName}}(){{end}}
 }
@@ -190,10 +187,8 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 	}
 	g.Printf("}\n\n")
 
-	d := &TmplData{
-		TypeName:   typ.Name,
-		MaxValueP1: fmt.Sprintf("%d", max+1),
-	}
+	d := NewTmplData(typ)
+	d.MaxValueP1 = strconv.FormatUint(max+1, 10)
 
 	g.ExecTmpl(NConstantTmpl, d)
 
@@ -208,7 +203,6 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 	g.BuildString(values, typ)
 
 	// Print the basic extra methods
-	d.SetIfInvalidForSetString(typ.Extends, typ.IsBitFlag)
 	if typ.IsBitFlag {
 		g.ExecTmpl(SetStringMethodBitFlagTmpl, d)
 	} else {

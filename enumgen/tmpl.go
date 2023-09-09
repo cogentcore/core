@@ -21,12 +21,21 @@ import (
 type TmplData struct {
 	TypeName      string // the name of the enum type
 	IsBitFlag     bool   // whether the type is a bit flag
+	Extends       string // the type this type extends, if any
 	MaxValueP1    string // the highest defined value for the type, plus one, as a string
 	MethodName    string // method name (String or BitIndexString)
 	MethodComment string // doc comment for the method
 	IfInvalid     string // the code for what to do if the value is invalid (used in String and SetString)
 	Slice         string // the code for the slice to use/return (used in Values and bit flag String)
-	Extends       string // the type this type extends, if any
+}
+
+// NewTmplData creates a new [TmplData] from the given type.
+func NewTmplData(typ *Type) *TmplData {
+	return &TmplData{
+		TypeName:  typ.Name,
+		IsBitFlag: typ.IsBitFlag,
+		Extends:   typ.Extends,
+	}
 }
 
 // ExecTmpl executes the given template with the given data and

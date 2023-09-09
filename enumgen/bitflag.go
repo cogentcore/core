@@ -93,7 +93,7 @@ func (i *{{.TypeName}}) SetString(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _{{.TypeName}}NameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
-		} else {{{if .Extends eq ""}}
+		} else { {{if eq .Extends ""}}
 			return errors.New(flg+" is not a valid value for type {{.TypeName}}"){{else}}
 			err := (*{{.Extends}})(i).SetString(flg)
 			if err != nil {
