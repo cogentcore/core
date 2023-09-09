@@ -97,12 +97,11 @@ func (i *{{.Name}}) SetString(s string) error {
 	if val, ok := _{{.Name}}NameToValueMap[s]; ok {
 		*i = val
 		return nil
-	}
-
+	} {{if .Config.AcceptLower}}
 	if val, ok := _{{.Name}}NameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
-	} {{if eq .Extends ""}}
+	} {{end}} {{if eq .Extends ""}}
 	return errors.New(s+" is not a valid value for type {{.Name}}") {{else}}
 	return (*{{.Extends}})(i).SetString(s) {{end}}
 }

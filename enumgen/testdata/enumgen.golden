@@ -88,7 +88,6 @@ func (i *Fruits) SetString(s string) error {
 		*i = val
 		return nil
 	}
-
 	if val, ok := _FruitsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
@@ -219,7 +218,6 @@ func (i *Foods) SetString(s string) error {
 		*i = val
 		return nil
 	}
-
 	if val, ok := _FoodsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
@@ -369,11 +367,6 @@ func (i Days) String() string {
 // error if the string is invalid.
 func (i *Days) SetString(s string) error {
 	if val, ok := _DaysNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-
-	if val, ok := _DaysNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
