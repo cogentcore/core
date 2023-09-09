@@ -149,12 +149,13 @@ func (i {{.TypeName}}) Values() []enums.Enum { {{if eq .Extends ""}}
 		res[i] = d
 	} {{else}}
 	es := {{.Extends}}Values()
-	res := make([]enums.Enum, len(es) + len(_{{.TypeName}}Values))
+	les := len(es)
+	res := make([]enums.Enum, les + len(_{{.TypeName}}Values))
 	for i, d := range es {
 		res[i] = d
 	}
 	for i, d := range _{{.TypeName}}Values {
-		res[i + len(es)] = d
+		res[i + les] = d
 	} {{end}}
 	return res 
 }

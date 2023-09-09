@@ -261,12 +261,13 @@ func FoodsValues() []Foods {
 // for the type Foods.
 func (i Foods) Values() []enums.Enum {
 	es := FruitsValues()
-	res := make([]enums.Enum, len(es)+len(_FoodsValues))
+	les := len(es)
+	res := make([]enums.Enum, les+len(_FoodsValues))
 	for i, d := range es {
 		res[i] = d
 	}
 	for i, d := range _FoodsValues {
-		res[i+len(es)] = d
+		res[i+les] = d
 	}
 	return res
 }
@@ -986,12 +987,13 @@ func MoreLanguagesValues() []MoreLanguages {
 // for the type MoreLanguages.
 func (i MoreLanguages) Values() []enums.Enum {
 	es := LanguagesValues()
-	res := make([]enums.Enum, len(es)+len(_MoreLanguagesValues))
+	les := len(es)
+	res := make([]enums.Enum, les+len(_MoreLanguagesValues))
 	for i, d := range es {
 		res[i] = d
 	}
 	for i, d := range _MoreLanguagesValues {
-		res[i+len(es)] = d
+		res[i+les] = d
 	}
 	return res
 }
