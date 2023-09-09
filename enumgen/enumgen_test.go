@@ -96,6 +96,15 @@ func TestFoodsSetString(t *testing.T) {
 	}
 }
 
+func TestFoodsIsValid(t *testing.T) {
+	if !testdata.Foods(testdata.Blueberry).IsValid() {
+		t.Errorf("expected value Blueberry to be a valid food, but it is not")
+	}
+	if !testdata.Meat.IsValid() {
+		t.Errorf("expected value Meat to be a valid food, but it is not")
+	}
+}
+
 func TestMoreLanguagesDesc(t *testing.T) {
 	val := testdata.MoreLanguages(testdata.JavaScript)
 	want := "JavaScript is the worst programming language"

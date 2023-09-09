@@ -276,6 +276,9 @@ func (i Foods) Values() []enums.Enum {
 // valid option for type Foods.
 func (i Foods) IsValid() bool {
 	_, ok := _FoodsMap[i]
+	if !ok {
+		return Fruits(i).IsValid()
+	}
 	return ok
 }
 
@@ -1002,6 +1005,9 @@ func (i MoreLanguages) Values() []enums.Enum {
 // valid option for type MoreLanguages.
 func (i MoreLanguages) IsValid() bool {
 	_, ok := _MoreLanguagesMap[i]
+	if !ok {
+		return Languages(i).IsValid()
+	}
 	return ok
 }
 

@@ -166,7 +166,10 @@ var IsValidMethodMapTmpl = template.Must(template.New("IsValidMethodMap").Parse(
 	`// IsValid returns whether the value is a
 // valid option for type {{.TypeName}}.
 func (i {{.TypeName}}) IsValid() bool {
-	_, ok := _{{.TypeName}}Map[i] 
+	_, ok := _{{.TypeName}}Map[i] {{if ne .Extends ""}}
+	if !ok {
+		return {{.Extends}}(i).IsValid()
+	} {{end}}
 	return ok
 }
 `))
