@@ -288,7 +288,7 @@ func (g *Generator) Generate() error {
 // Format returns the contents of the Generator's buffer
 // ([Generator.Buf]) with goimports applied.
 func (g *Generator) Format() ([]byte, error) {
-	b, err := imports.Process(filepath.Join(g.Pkg.Dir, g.Config.Dir), g.Buf.Bytes(), nil)
+	b, err := imports.Process(filepath.Join(g.Pkg.Dir, g.Config.Output), g.Buf.Bytes(), nil)
 	if err != nil {
 		// Should never happen, but can arise when developing this code.
 		// The user can compile the output to see the error.

@@ -20,8 +20,8 @@ type Config struct {
 	// [def: .] the source directory to run enumgen on (can be set to multiple through paths like ./...)
 	Dir string `def:"." desc:"the source directory to run enumgen on (can be set to multiple through paths like ./...)"`
 
-	// [def: enumgen.go] the output file
-	Output string `def:"enumgen.go" desc:"the output file"`
+	// [def: enumgen.go] the output file location relative to the package on which enumgen is being called
+	Output string `def:"enumgen.go" desc:"the output file location relative to the package on which enumgen is being called"`
 
 	// whether to generate methods that implement the SQL Scanner and Valuer interfaces
 	SQL bool `desc:"whether to generate methods that implement the SQL Scanner and Valuer interfaces"`

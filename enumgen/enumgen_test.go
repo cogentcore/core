@@ -23,7 +23,6 @@ func TestGenerate(t *testing.T) {
 		t.Errorf("programmer error: error setting config from default tags: %v", err)
 	}
 	c.Dir = "./testdata"
-	c.Output = "./testdata/enumgen.go"
 	c.JSON = true
 	err = Generate(c)
 	if err != nil {
