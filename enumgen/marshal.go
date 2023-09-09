@@ -44,7 +44,7 @@ func (i {{.TypeName}}) MarshalJSON() ([]byte, error) {
 func (i *{{.TypeName}}) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return errors.New("{{.TypeName}} should be a string, but got " + string(data) + "instead")
+		return err
 	}
 	return i.SetString(s)
 }

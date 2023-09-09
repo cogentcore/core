@@ -156,7 +156,7 @@ func (i Fruits) MarshalJSON() ([]byte, error) {
 func (i *Fruits) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return errors.New("Fruits should be a string, but got " + string(data) + "instead")
+		return err
 	}
 	return i.SetString(s)
 }
@@ -287,7 +287,7 @@ func (i Foods) MarshalJSON() ([]byte, error) {
 func (i *Foods) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return errors.New("Foods should be a string, but got " + string(data) + "instead")
+		return err
 	}
 	return i.SetString(s)
 }
@@ -607,7 +607,7 @@ func (i States) MarshalJSON() ([]byte, error) {
 func (i *States) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return errors.New("States should be a string, but got " + string(data) + "instead")
+		return err
 	}
 	return i.SetString(s)
 }
@@ -854,7 +854,7 @@ func (i Languages) MarshalJSON() ([]byte, error) {
 func (i *Languages) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return errors.New("Languages should be a string, but got " + string(data) + "instead")
+		return err
 	}
 	return i.SetString(s)
 }
@@ -1018,7 +1018,7 @@ func (i MoreLanguages) MarshalJSON() ([]byte, error) {
 func (i *MoreLanguages) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return errors.New("MoreLanguages should be a string, but got " + string(data) + "instead")
+		return err
 	}
 	return i.SetString(s)
 }
