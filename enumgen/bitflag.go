@@ -21,7 +21,6 @@ func (g *Generator) BuildBitFlagMethods(runs []Value, typ *Type) {
 
 	g.Printf("\n")
 
-	g.ExecTmpl(StringMethodBitFlagTmpl, d)
 	g.ExecTmpl(HasFlagMethodTmpl, d)
 	g.ExecTmpl(SetFlagMethodTmpl, d)
 }
@@ -58,7 +57,7 @@ var StringMethodBitFlagTmpl = template.Must(template.New("StringMethodBitFlag").
 // of this {{.TypeName}} value.
 func (i {{.TypeName}}) String() string {
 	str := ""
-	for _, ie := range _{{.TypeName}}Values {
+	for _, ie := range {{.Slice}} {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {

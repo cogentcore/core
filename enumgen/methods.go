@@ -47,6 +47,14 @@ func (g *Generator) BuildString(values []Value, typ *Type) {
 	}
 	d.SetMethod(typ.IsBitFlag)
 	d.SetIfInvalidForString(typ.Extends, "")
+	if typ.IsBitFlag {
+		if typ.Extends == "" {
+			d.Slice = fmt.Sprintf("_%sValues", d.TypeName)
+		} else {
+			d.Slice = fmt.Sprintf("append(i.Values(), %s(i).Values()...)", typ.Extends)
+		}
+		g.ExecTmpl(StringMethodBitFlagTmpl, d)
+	}
 	g.ExecTmpl(StringMethodMapTmpl, d)
 }
 
