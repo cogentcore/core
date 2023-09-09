@@ -86,7 +86,6 @@ var SetStringMethodBitFlagTmpl = template.Must(template.New("SetStringMethodBitF
 // string representation, and returns an
 // error if the string is invalid.
 func (i *{{.TypeName}}) SetString(s string) error {
-	*i = 0
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _{{.TypeName}}NameToValueMap[flg]; ok {
