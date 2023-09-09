@@ -67,9 +67,10 @@ func (g *Generator) ParsePackage() error {
 // AddPackage adds a package and its syntax files to the generator.
 func (g *Generator) AddPackage(pkg *packages.Package) {
 	p := &Package{
-		Name:  pkg.Name,
-		Defs:  pkg.TypesInfo.Defs,
-		Files: make([]*File, 0),
+		Name:     pkg.Name,
+		Defs:     pkg.TypesInfo.Defs,
+		Files:    make([]*File, 0),
+		TypesPkg: pkg.Types,
 	}
 	// set the directory to the directory of the package
 	if len(pkg.Syntax) > 0 {
