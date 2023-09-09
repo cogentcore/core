@@ -11,6 +11,7 @@ const (
 	Blackberry
 	Blueberry
 	Apricot
+	OrangeFruit = Orange
 )
 
 // Foods is an enum containing foods
