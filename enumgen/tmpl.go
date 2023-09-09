@@ -28,6 +28,7 @@ type TmplData struct {
 	MethodComment     string // doc comment for the method
 	IfInvalid         string // the code for what to do if the value is invalid (used in String and SetString)
 	Slice             string // the code for the slice to use/return (used in Values and bit flag String)
+	Extends           string // the type this type extends, if any
 }
 
 // ExecTmpl executes the given template with the given data and

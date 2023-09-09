@@ -44,6 +44,7 @@ func (g *Generator) BuildString(values []Value, typ *Type) {
 	g.Printf("}\n\n")
 	d := &TmplData{
 		TypeName: typ.Name,
+		Extends:  typ.Extends,
 	}
 	d.SetMethod(typ.IsBitFlag)
 	d.SetIfInvalidForString(typ.Extends, "")

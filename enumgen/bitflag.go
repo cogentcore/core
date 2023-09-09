@@ -57,7 +57,7 @@ var StringMethodBitFlagTmpl = template.Must(template.New("StringMethodBitFlag").
 // of this {{.TypeName}} value.
 func (i {{.TypeName}}) String() string {
 	str := ""
-	for _, ie := range {{.Slice}} {
+	for _, ie := range _{{.TypeName}}Values {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -66,7 +66,17 @@ func (i {{.TypeName}}) String() string {
 				str += "|" + ies
 			}
 		}
-	}
+	}{{if ne .Extends ""}}
+	for _, ie := range _{{.Extends}}Values {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}{{end}}
 	return str
 }
 `))
