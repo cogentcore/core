@@ -26,7 +26,6 @@ type TmplData struct {
 	MethodName    string // method name (String or BitIndexString)
 	MethodComment string // doc comment for the method
 	IfInvalid     string // the code for what to do if the value is invalid (used in String and SetString)
-	Slice         string // the code for the slice to use/return (used in Values and bit flag String)
 }
 
 // NewTmplData creates a new [TmplData] from the given type.

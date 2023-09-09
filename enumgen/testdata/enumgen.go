@@ -889,7 +889,7 @@ var _MoreLanguagesMap = map[MoreLanguages]string{
 // of this MoreLanguages value.
 func (i MoreLanguages) String() string {
 	str := ""
-	for _, ie := range _MoreLanguagesValues {
+	for _, ie := range _LanguagesValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -899,7 +899,7 @@ func (i MoreLanguages) String() string {
 			}
 		}
 	}
-	for _, ie := range _LanguagesValues {
+	for _, ie := range _MoreLanguagesValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {

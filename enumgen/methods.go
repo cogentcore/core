@@ -12,7 +12,6 @@
 package enumgen
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"text/template"
@@ -46,11 +45,6 @@ func (g *Generator) BuildString(values []Value, typ *Type) {
 	d := NewTmplData(typ)
 	d.SetMethod()
 	if d.IsBitFlag {
-		if d.Extends == "" {
-			d.Slice = fmt.Sprintf("_%sValues", d.TypeName)
-		} else {
-			d.Slice = fmt.Sprintf("append(i.Values(), %s(i).Values()...)", d.Extends)
-		}
 		g.ExecTmpl(StringMethodBitFlagTmpl, d)
 	}
 	g.ExecTmpl(StringMethodMapTmpl, d)
