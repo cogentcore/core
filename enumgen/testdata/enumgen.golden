@@ -248,9 +248,10 @@ func (i Foods) Desc() string {
 // FoodsValues returns all possible values
 // for the type Foods.
 func FoodsValues() []Foods {
-	res := make([]Foods, 0)
-	for _, e := range FruitsValues() {
-		res = append(res, Foods(e))
+	es := FruitsValues()
+	res := make([]Foods, len(es))
+	for i, e := range es {
+		res[i] = Foods(e)
 	}
 	res = append(res, _FoodsValues...)
 	return res
@@ -968,9 +969,10 @@ func (i MoreLanguages) Desc() string {
 // MoreLanguagesValues returns all possible values
 // for the type MoreLanguages.
 func MoreLanguagesValues() []MoreLanguages {
-	res := make([]MoreLanguages, 0)
-	for _, e := range LanguagesValues() {
-		res = append(res, MoreLanguages(e))
+	es := LanguagesValues()
+	res := make([]MoreLanguages, len(es))
+	for i, e := range es {
+		res[i] = MoreLanguages(e)
 	}
 	res = append(res, _MoreLanguagesValues...)
 	return res

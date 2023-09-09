@@ -130,9 +130,10 @@ var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(
 // for the type {{.TypeName}}.
 func {{.TypeName}}Values() []{{.TypeName}} { {{if eq .Extends ""}}
 	return _{{.TypeName}}Values {{else}}
-	res := make([]{{.TypeName}}, 0)
-	for _, e := range {{.Extends}}Values() {
-		res = append(res, {{.TypeName}}(e))
+	es := {{.Extends}}Values()
+	res := make([]{{.TypeName}}, len(es))
+	for i, e := range es {
+		res[i] = {{.TypeName}}(e)
 	}
 	res = append(res, _{{.TypeName}}Values...)
 	return res {{end}}
