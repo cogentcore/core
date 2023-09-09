@@ -4,8 +4,6 @@
 
 package lms
 
-//go:generate enumgen
-
 // OpVals holds color opponent values based on cone-like L,M,S inputs
 // These values are useful for generating inputs to vision models that
 // simulate color opponency representations in the brain.

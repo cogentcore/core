@@ -6,3 +6,5 @@
 Package cam has suport for widely-used color appearance models
 */
 package cam
+
+//go:generate enumgen -dir ./...
