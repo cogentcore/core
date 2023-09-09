@@ -5,6 +5,7 @@
 package enumgen
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -91,6 +92,14 @@ func TestFoodsSetString(t *testing.T) {
 	}
 	if have != want {
 		t.Errorf("expected value %v from string %q, but got %v", want, src, have)
+	}
+}
+
+func TestFoodsValues(t *testing.T) {
+	want := []testdata.Foods{0x7, 0x8, 0x9, 0xa, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6}
+	have := testdata.FoodsValues()
+	if fmt.Sprintf("%v", want) != fmt.Sprintf("%v", have) {
+		t.Errorf("expected foods values to be %#v, but got %#v", want, have)
 	}
 }
 
