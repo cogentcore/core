@@ -15,7 +15,7 @@ import (
 	"goki.dev/enums"
 )
 
-var _FruitsValues = []Fruits{Apple, Orange, Peach, Strawberry, Blackberry, Blueberry, Apricot}
+var _FruitsValues = []Fruits{0, 1, 2, 3, 4, 5, 6}
 
 // FruitsN is the highest valid value
 // for type Fruits, plus one.
@@ -161,7 +161,7 @@ func (i *Fruits) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-var _FoodsValues = []Foods{Bread, Lettuce, Cheese, Meat}
+var _FoodsValues = []Foods{7, 8, 9, 10}
 
 // FoodsN is the highest valid value
 // for type Foods, plus one.
@@ -292,7 +292,7 @@ func (i *Foods) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-var _DaysValues = []Days{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
+var _DaysValues = []Days{1, 3, 5, 7, 9, 11, 13}
 
 // DaysN is the highest valid value
 // for type Days, plus one.
@@ -438,7 +438,7 @@ func (i *Days) UnmarshalGQL(value any) error {
 	return i.SetString(str)
 }
 
-var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, ActivelyFocused, Selected}
+var _StatesValues = []States{1, 3, 5, 7, 9, 11, 13}
 
 // StatesN is the highest valid value
 // for type States, plus one.
@@ -638,7 +638,7 @@ func (i *States) Scan(value any) error {
 	return i.SetString(str)
 }
 
-var _LanguagesValues = []Languages{Go, Python, JavaScript, Dart, Rust, Ruby, C, CPP, ObjectiveC, Java, TypeScript, Kotlin, Swift}
+var _LanguagesValues = []Languages{6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54}
 
 // LanguagesN is the highest valid value
 // for type Languages, plus one.
@@ -859,7 +859,7 @@ func (i *Languages) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-var _MoreLanguagesValues = []MoreLanguages{Perl}
+var _MoreLanguagesValues = []MoreLanguages{55}
 
 // MoreLanguagesN is the highest valid value
 // for type MoreLanguages, plus one.

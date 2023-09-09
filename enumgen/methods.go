@@ -172,7 +172,7 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 	max := uint64(0)
 	g.Printf("\nvar _%sValues = []%s{", typ.Name, typ.Name)
 	for _, value := range values {
-		g.Printf("\t%s, ", value.OriginalName)
+		g.Printf("\t%s, ", &value)
 		if value.Value > max {
 			max = value.Value
 		}
