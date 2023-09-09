@@ -15,24 +15,11 @@ import (
 	"goki.dev/enums"
 )
 
-var _FruitsMap = map[Fruits]string{
-	0: `Apple`,
-	1: `Orange`,
-	2: `Peach`,
-	3: `Strawberry`,
-	4: `Blackberry`,
-	5: `Blueberry`,
-	6: `Apricot`,
-}
+var _FruitsValues = []Fruits{Apple, Orange, Peach, Strawberry, Blackberry, Blueberry, Apricot}
 
-// String returns the string representation
-// of this Fruits value.
-func (i Fruits) String() string {
-	if str, ok := _FruitsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+// FruitsN is the highest valid value
+// for type Fruits, plus one.
+const FruitsN Fruits = 7
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -46,12 +33,6 @@ func _FruitsNoOp() {
 	_ = x[Blueberry-(5)]
 	_ = x[Apricot-(6)]
 }
-
-var _FruitsValues = []Fruits{Apple, Orange, Peach, Strawberry, Blackberry, Blueberry, Apricot}
-
-// FruitsN is the highest valid value
-// for type Fruits, plus one.
-const FruitsN Fruits = 7
 
 var _FruitsNameToValueMap = map[string]Fruits{
 	`Apple`:      0,
@@ -78,6 +59,25 @@ var _FruitsDescMap = map[Fruits]string{
 	4: ``,
 	5: ``,
 	6: ``,
+}
+
+var _FruitsMap = map[Fruits]string{
+	0: `Apple`,
+	1: `Orange`,
+	2: `Peach`,
+	3: `Strawberry`,
+	4: `Blackberry`,
+	5: `Blueberry`,
+	6: `Apricot`,
+}
+
+// String returns the string representation
+// of this Fruits value.
+func (i Fruits) String() string {
+	if str, ok := _FruitsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
 }
 
 // SetString sets the Fruits value from its
@@ -161,21 +161,11 @@ func (i *Fruits) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-var _FoodsMap = map[Foods]string{
-	7:  `Bread`,
-	8:  `Lettuce`,
-	9:  `Cheese`,
-	10: `Meat`,
-}
+var _FoodsValues = []Foods{Bread, Lettuce, Cheese, Meat}
 
-// String returns the string representation
-// of this Foods value.
-func (i Foods) String() string {
-	if str, ok := _FoodsMap[i]; ok {
-		return str
-	}
-	return Fruits(i).String()
-}
+// FoodsN is the highest valid value
+// for type Foods, plus one.
+const FoodsN Foods = 11
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -186,12 +176,6 @@ func _FoodsNoOp() {
 	_ = x[Cheese-(9)]
 	_ = x[Meat-(10)]
 }
-
-var _FoodsValues = []Foods{Bread, Lettuce, Cheese, Meat}
-
-// FoodsN is the highest valid value
-// for type Foods, plus one.
-const FoodsN Foods = 11
 
 var _FoodsNameToValueMap = map[string]Foods{
 	`Bread`:   7,
@@ -209,6 +193,22 @@ var _FoodsDescMap = map[Foods]string{
 	8:  ``,
 	9:  ``,
 	10: ``,
+}
+
+var _FoodsMap = map[Foods]string{
+	7:  `Bread`,
+	8:  `Lettuce`,
+	9:  `Cheese`,
+	10: `Meat`,
+}
+
+// String returns the string representation
+// of this Foods value.
+func (i Foods) String() string {
+	if str, ok := _FoodsMap[i]; ok {
+		return str
+	}
+	return Fruits(i).String()
 }
 
 // SetString sets the Foods value from its
@@ -292,24 +292,11 @@ func (i *Foods) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-var _DaysMap = map[Days]string{
-	1:  `DAY_SUNDAY`,
-	3:  `DAY_MONDAY`,
-	5:  `DAY_TUESDAY`,
-	7:  `DAY_WEDNESDAY`,
-	9:  `DAY_THURSDAY`,
-	11: `DAY_FRIDAY`,
-	13: `DAY_SATURDAY`,
-}
+var _DaysValues = []Days{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
 
-// String returns the string representation
-// of this Days value.
-func (i Days) String() string {
-	if str, ok := _DaysMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+// DaysN is the highest valid value
+// for type Days, plus one.
+const DaysN Days = 14
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -323,12 +310,6 @@ func _DaysNoOp() {
 	_ = x[Friday-(11)]
 	_ = x[Saturday-(13)]
 }
-
-var _DaysValues = []Days{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
-
-// DaysN is the highest valid value
-// for type Days, plus one.
-const DaysN Days = 14
 
 var _DaysNameToValueMap = map[string]Days{
 	`DAY_SUNDAY`:    1,
@@ -355,6 +336,25 @@ var _DaysDescMap = map[Days]string{
 	9:  `Thursday is the fifth day of the week`,
 	11: `Friday is the sixth day of the week`,
 	13: `Saturday is the seventh day of the week`,
+}
+
+var _DaysMap = map[Days]string{
+	1:  `DAY_SUNDAY`,
+	3:  `DAY_MONDAY`,
+	5:  `DAY_TUESDAY`,
+	7:  `DAY_WEDNESDAY`,
+	9:  `DAY_THURSDAY`,
+	11: `DAY_FRIDAY`,
+	13: `DAY_SATURDAY`,
+}
+
+// String returns the string representation
+// of this Days value.
+func (i Days) String() string {
+	if str, ok := _DaysMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
 }
 
 // SetString sets the Days value from its
@@ -438,6 +438,45 @@ func (i *Days) UnmarshalGQL(value any) error {
 	return i.SetString(str)
 }
 
+var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, ActivelyFocused, Selected}
+
+// StatesN is the highest valid value
+// for type States, plus one.
+const StatesN States = 14
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _StatesNoOp() {
+	var x [1]struct{}
+	_ = x[Enabled-(1)]
+	_ = x[Disabled-(3)]
+	_ = x[Focused-(5)]
+	_ = x[Hovered-(7)]
+	_ = x[Active-(9)]
+	_ = x[ActivelyFocused-(11)]
+	_ = x[Selected-(13)]
+}
+
+var _StatesNameToValueMap = map[string]States{
+	`enabled`:                         1,
+	`not-enabled`:                     3,
+	`focused`:                         5,
+	`vered`:                           7,
+	`currently-being-pressed-by-user`: 9,
+	`actively-focused`:                11,
+	`selected`:                        13,
+}
+
+var _StatesDescMap = map[States]string{
+	1:  `Enabled indicates the widget is enabled`,
+	3:  `Disabled indicates the widget is disabled`,
+	5:  `Focused indicates the widget has keyboard focus`,
+	7:  `Hovered indicates the widget is being hovered over`,
+	9:  `Active indicates the widget is being interacted with`,
+	11: `ActivelyFocused indicates the widget has active keyboard focus`,
+	13: `Selected indicates the widget is selected`,
+}
+
 var _StatesMap = map[States]string{
 	1:  `enabled`,
 	3:  `not-enabled`,
@@ -458,45 +497,6 @@ func (i States) BitIndexString() string {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
-}
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _StatesNoOp() {
-	var x [1]struct{}
-	_ = x[Enabled-(1)]
-	_ = x[Disabled-(3)]
-	_ = x[Focused-(5)]
-	_ = x[Hovered-(7)]
-	_ = x[Active-(9)]
-	_ = x[ActivelyFocused-(11)]
-	_ = x[Selected-(13)]
-}
-
-var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, ActivelyFocused, Selected}
-
-// StatesN is the highest valid value
-// for type States, plus one.
-const StatesN States = 14
-
-var _StatesNameToValueMap = map[string]States{
-	`enabled`:                         1,
-	`not-enabled`:                     3,
-	`focused`:                         5,
-	`vered`:                           7,
-	`currently-being-pressed-by-user`: 9,
-	`actively-focused`:                11,
-	`selected`:                        13,
-}
-
-var _StatesDescMap = map[States]string{
-	1:  `Enabled indicates the widget is enabled`,
-	3:  `Disabled indicates the widget is disabled`,
-	5:  `Focused indicates the widget has keyboard focus`,
-	7:  `Hovered indicates the widget is being hovered over`,
-	9:  `Active indicates the widget is being interacted with`,
-	11: `ActivelyFocused indicates the widget has active keyboard focus`,
-	13: `Selected indicates the widget is selected`,
 }
 
 // SetString sets the States value from its
@@ -638,33 +638,11 @@ func (i *States) Scan(value any) error {
 	return i.SetString(str)
 }
 
-var _LanguagesMap = map[Languages]string{
-	6:  `Go`,
-	10: `Python`,
-	14: `JavaScript`,
-	18: `Dart`,
-	22: `Rust`,
-	26: `Ruby`,
-	30: `C`,
-	34: `CPP`,
-	38: `ObjectiveC`,
-	42: `Java`,
-	46: `TypeScript`,
-	50: `Kotlin`,
-	54: `Swift`,
-}
+var _LanguagesValues = []Languages{Go, Python, JavaScript, Dart, Rust, Ruby, C, CPP, ObjectiveC, Java, TypeScript, Kotlin, Swift}
 
-// BitIndexString returns the string
-// representation of this Languages value
-// if it is a bit index value
-// (typically an enum constant), and
-// not an actual bit flag value.
-func (i Languages) BitIndexString() string {
-	if str, ok := _LanguagesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
+// LanguagesN is the highest valid value
+// for type Languages, plus one.
+const LanguagesN Languages = 55
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -684,12 +662,6 @@ func _LanguagesNoOp() {
 	_ = x[Kotlin-(50)]
 	_ = x[Swift-(54)]
 }
-
-var _LanguagesValues = []Languages{Go, Python, JavaScript, Dart, Rust, Ruby, C, CPP, ObjectiveC, Java, TypeScript, Kotlin, Swift}
-
-// LanguagesN is the highest valid value
-// for type Languages, plus one.
-const LanguagesN Languages = 55
 
 var _LanguagesNameToValueMap = map[string]Languages{
 	`Go`:         6,
@@ -734,6 +706,34 @@ var _LanguagesDescMap = map[Languages]string{
 	46: ``,
 	50: ``,
 	54: ``,
+}
+
+var _LanguagesMap = map[Languages]string{
+	6:  `Go`,
+	10: `Python`,
+	14: `JavaScript`,
+	18: `Dart`,
+	22: `Rust`,
+	26: `Ruby`,
+	30: `C`,
+	34: `CPP`,
+	38: `ObjectiveC`,
+	42: `Java`,
+	46: `TypeScript`,
+	50: `Kotlin`,
+	54: `Swift`,
+}
+
+// BitIndexString returns the string
+// representation of this Languages value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i Languages) BitIndexString() string {
+	if str, ok := _LanguagesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
 }
 
 // SetString sets the Languages value from its
@@ -859,6 +859,28 @@ func (i *Languages) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
+var _MoreLanguagesValues = []MoreLanguages{Perl}
+
+// MoreLanguagesN is the highest valid value
+// for type MoreLanguages, plus one.
+const MoreLanguagesN MoreLanguages = 56
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _MoreLanguagesNoOp() {
+	var x [1]struct{}
+	_ = x[Perl-(55)]
+}
+
+var _MoreLanguagesNameToValueMap = map[string]MoreLanguages{
+	`Perl`: 55,
+	`perl`: 55,
+}
+
+var _MoreLanguagesDescMap = map[MoreLanguages]string{
+	55: ``,
+}
+
 var _MoreLanguagesMap = map[MoreLanguages]string{
 	55: `Perl`,
 }
@@ -873,28 +895,6 @@ func (i MoreLanguages) BitIndexString() string {
 		return str
 	}
 	return Languages(i).BitIndexString()
-}
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _MoreLanguagesNoOp() {
-	var x [1]struct{}
-	_ = x[Perl-(55)]
-}
-
-var _MoreLanguagesValues = []MoreLanguages{Perl}
-
-// MoreLanguagesN is the highest valid value
-// for type MoreLanguages, plus one.
-const MoreLanguagesN MoreLanguages = 56
-
-var _MoreLanguagesNameToValueMap = map[string]MoreLanguages{
-	`Perl`: 55,
-	`perl`: 55,
-}
-
-var _MoreLanguagesDescMap = map[MoreLanguages]string{
-	55: ``,
 }
 
 // SetString sets the MoreLanguages value from its

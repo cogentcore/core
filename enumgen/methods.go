@@ -32,9 +32,8 @@ func Usize(n int) int {
 	}
 }
 
-// BuildMap handles the case where the space is so sparse a map is a reasonable fallback.
-// It's a rare situation but has simple code.
-func (g *Generator) BuildMap(values []Value, typ *Type) {
+// BuildString builds the string function using a map access approach.
+func (g *Generator) BuildString(values []Value, typ *Type) {
 	g.Printf("\n")
 	g.Printf("\nvar _%sMap = map[%s]string{\n", typ.Name, typ.Name)
 	n := 0
@@ -166,9 +165,8 @@ func (i {{.TypeName}}) IsValid() bool {
 }
 `))
 
-// BuildBasicExtras builds methods common to all types, like Desc and SetString.
-func (g *Generator) BuildBasicExtras(values []Value, typ *Type) {
-	// At this moment, either "g.declareIndexAndNameVars()" or "g.declareNameVars()" has been called
+// BuildBasicMethods builds methods common to all types, like Desc and SetString.
+func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 
 	// Print the slice of values
 	max := uint64(0)
@@ -188,11 +186,15 @@ func (g *Generator) BuildBasicExtras(values []Value, typ *Type) {
 
 	g.ExecTmpl(NConstantTmpl, d)
 
+	g.BuildNoOpOrderChangeDetect(values, typ)
+
 	// Print the map between name and value
 	g.PrintValueMap(values, typ)
 
 	// Print the map of values to descriptions
 	g.PrintDescMap(values, typ)
+
+	g.BuildString(values, typ)
 
 	// Print the basic extra methods
 	d.SetIfInvalidForSetString(typ.Extends, typ.IsBitFlag)

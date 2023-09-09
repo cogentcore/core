@@ -252,11 +252,7 @@ func (g *Generator) Generate() error {
 
 		g.PrefixValueNames(values, typ.Config)
 
-		g.BuildMap(values, typ)
-
-		g.BuildNoOpOrderChangeDetect(values, typ)
-
-		g.BuildBasicExtras(values, typ)
+		g.BuildBasicMethods(values, typ)
 		if typ.IsBitFlag {
 			g.BuildBitFlagMethods(values, typ)
 		}
