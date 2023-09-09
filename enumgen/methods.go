@@ -190,9 +190,6 @@ func (g *Generator) BuildBasicExtras(values []Value, typ *Type) {
 	// Print the map between name and value
 	g.PrintValueMap(values, typ)
 
-	// Print the slice of names
-	g.PrintNamesSlice(values, typ)
-
 	// Print the map of values to descriptions
 	g.PrintDescMap(values, typ)
 
@@ -217,61 +214,22 @@ func (g *Generator) BuildBasicExtras(values []Value, typ *Type) {
 
 // PrintValueMap prints the map between name and value
 func (g *Generator) PrintValueMap(values []Value, typ *Type) {
-	thereAreRuns := len(values) > 1 && len(values) <= typ.RunsThreshold
 	g.Printf("\nvar _%sNameToValueMap = map[string]%s{\n", typ.Name, typ.Name)
-
-	var n int
-	var runID string
-	for i, values := range values {
-		if thereAreRuns {
-			runID = "_" + fmt.Sprintf("%d", i)
-			n = 0
-		} else {
-			runID = ""
-		}
-
-		for _, value := range values {
-			g.Printf("\t_%sName%s[%d:%d]: %s,\n", typ.Name, runID, n, n+len(value.Name), value.OriginalName)
-			g.Printf("\t_%sLowerName%s[%d:%d]: %s,\n", typ.Name, runID, n, n+len(value.Name), value.OriginalName)
-			n += len(value.Name)
-		}
-	}
-	g.Printf("}\n\n")
-}
-
-// PrintNamesSlice prints the slice of names
-func (g *Generator) PrintNamesSlice(runs []Value, typ *Type) {
-	thereAreRuns := len(runs) > 1 && len(runs) <= typ.RunsThreshold
-	g.Printf("\nvar _%sNames = []string{\n", typ.Name)
-
-	var n int
-	var runID string
-	for i, values := range runs {
-		if thereAreRuns {
-			runID = "_" + fmt.Sprintf("%d", i)
-			n = 0
-		} else {
-			runID = ""
-		}
-
-		for _, value := range values {
-			g.Printf("\t_%sName%s[%d:%d],\n", typ.Name, runID, n, n+len(value.Name))
-			n += len(value.Name)
-		}
+	for _, value := range values {
+		g.Printf("\t`%s`: %s,\n", value.Name, &value)
+		g.Printf("\t`%s`: %s,\n", value.Name, &value)
 	}
 	g.Printf("}\n\n")
 }
 
 // PrintDescMap prints the map of values to descriptions
-func (g *Generator) PrintDescMap(runs []Value, typ *Type) {
+func (g *Generator) PrintDescMap(values []Value, typ *Type) {
 	g.Printf("\n")
 	g.Printf("\nvar _%sDescMap = map[%s]string{\n", typ.Name, typ.Name)
 	i := 0
-	for _, values := range runs {
-		for _, value := range values {
-			g.Printf("\t%s: `%s`,\n", &value, value.Desc)
-			i++
-		}
+	for _, value := range values {
+		g.Printf("\t%s: `%s`,\n", &value, value.Desc)
+		i++
 	}
 	g.Printf("}\n\n")
 }
