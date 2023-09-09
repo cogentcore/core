@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,7 +32,8 @@ import (
 type Generator struct {
 	Config *config.Config // The configuration information
 	Buf    bytes.Buffer   // The accumulated output.
-	Pkg    *Package       // The package we are scanning.
+	Pkgs   []*Package     // The packages we are scanning.
+	Pkg    *Package       // The packages we are currently on.
 	Types  []*Type        // The enum types
 }
 
@@ -41,7 +43,7 @@ func NewGenerator(config *config.Config) *Generator {
 	return &Generator{Config: config}
 }
 
-// ParsePackage parses the single package located in the configuration directory.
+// ParsePackage parses the package(s) located in the configuration source directory.
 func (g *Generator) ParsePackage() error {
 	cfg := &packages.Config{
 		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesSizes | packages.NeedSyntax | packages.NeedTypesInfo,
@@ -53,34 +55,41 @@ func (g *Generator) ParsePackage() error {
 	if err != nil {
 		return err
 	}
-	if len(pkgs) != 1 {
-		return fmt.Errorf("expected 1 package, but found %d packages", len(pkgs))
+	if len(pkgs) == 0 {
+		return fmt.Errorf("expected at least 1 package, but found 0")
 	}
-	g.AddPackage(pkgs[0])
+	g.Pkgs = []*Package{}
+	for _, pkg := range pkgs {
+		g.AddPackage(pkg)
+	}
 	return nil
 }
 
 // AddPackage adds a type-checked Package and its syntax files to the generator.
 func (g *Generator) AddPackage(pkg *packages.Package) {
-	// fmt.Println(pkg.TypesInfo.Defs)
-	g.Pkg = &Package{
+	p := &Package{
+		Dir:   filepath.Dir(pkg.Fset.Position(token.Pos(pkg.Fset.Base())).Filename),
 		Name:  pkg.Name,
 		Defs:  pkg.TypesInfo.Defs,
 		Files: make([]*File, 0),
 	}
-
+	// set the directory to the directory of the package
+	if len(pkg.Syntax) > 0 {
+		p.Dir = filepath.Dir(pkg.Fset.Position(pkg.Syntax[0].FileStart).Filename)
+	}
 	for _, file := range pkg.Syntax {
 		// ignore generated code
 		if ast.IsGenerated(file) {
-			continue
+			break
 		}
 		// need to use append and 0 initial length
 		// because we don't know if it has generated code
-		g.Pkg.Files = append(g.Pkg.Files, &File{
+		p.Files = append(p.Files, &File{
 			File: file,
-			Pkg:  g.Pkg,
+			Pkg:  p,
 		})
 	}
+	g.Pkgs = append(g.Pkgs, p)
 }
 
 // Printf prints the formatted string to the
@@ -281,7 +290,7 @@ func (g *Generator) Generate() error {
 // Format returns the contents of the Generator's buffer
 // ([Generator.Buf]) with goimports applied.
 func (g *Generator) Format() ([]byte, error) {
-	b, err := imports.Process(g.Config.Dir, g.Buf.Bytes(), nil)
+	b, err := imports.Process(filepath.Join(g.Pkg.Dir, g.Config.Dir), g.Buf.Bytes(), nil)
 	if err != nil {
 		// Should never happen, but can arise when developing this code.
 		// The user can compile the output to see the error.
@@ -297,7 +306,7 @@ func (g *Generator) Write() error {
 	b, ferr := g.Format()
 	// we still write file even if formatting failed, as it is still useful
 	// then we handle error later
-	werr := os.WriteFile(g.Config.Output, b, 0666)
+	werr := os.WriteFile(filepath.Join(g.Pkg.Dir, g.Config.Output), b, 0666)
 	if werr != nil {
 		return fmt.Errorf("Generator.Write: error writing file: %w", werr)
 	}

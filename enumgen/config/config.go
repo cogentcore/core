@@ -17,8 +17,8 @@ package config
 // used by enumgen
 type Config struct {
 
-	// [def: .] the source directory
-	Dir string `def:"." desc:"the source directory"`
+	// [def: .] the source directory to run enumgen on (can be set to multiple through paths like ./...)
+	Dir string `def:"." desc:"the source directory to run enumgen on (can be set to multiple through paths like ./...)"`
 
 	// [def: enumgen.go] the output file
 	Output string `def:"enumgen.go" desc:"the output file"`

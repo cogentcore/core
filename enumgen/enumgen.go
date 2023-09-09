@@ -25,18 +25,22 @@ func Generate(config *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("enumgen: Generate: error parsing package: %w", err)
 	}
-	err = g.FindEnumTypes()
-	if err != nil {
-		return fmt.Errorf("enumgen: Generate: error finding enum types: %w", err)
-	}
-	g.PrintHeader()
-	err = g.Generate()
-	if err != nil {
-		return fmt.Errorf("enumgen: Generate: error generating code: %w", err)
-	}
-	err = g.Write()
-	if err != nil {
-		return fmt.Errorf("enumgen: Generate: error writing code: %w", err)
+	for _, pkg := range g.Pkgs {
+		g.Pkg = pkg
+		g.Buf.Reset()
+		err = g.FindEnumTypes()
+		if err != nil {
+			return fmt.Errorf("enumgen: Generate: error finding enum types for package %q: %w", pkg.Name, err)
+		}
+		g.PrintHeader()
+		err = g.Generate()
+		if err != nil {
+			return fmt.Errorf("enumgen: Generate: error generating code for package %q: %w", pkg.Name, err)
+		}
+		err = g.Write()
+		if err != nil {
+			return fmt.Errorf("enumgen: Generate: error writing code for package %q: %w", pkg.Name, err)
+		}
 	}
 	return nil
 }
