@@ -55,19 +55,19 @@ const FruitsN Fruits = 7
 
 var _FruitsNameToValueMap = map[string]Fruits{
 	`Apple`:      0,
-	`Apple`:      0,
+	`apple`:      0,
 	`Orange`:     1,
-	`Orange`:     1,
+	`orange`:     1,
 	`Peach`:      2,
-	`Peach`:      2,
+	`peach`:      2,
 	`Strawberry`: 3,
-	`Strawberry`: 3,
+	`strawberry`: 3,
 	`Blackberry`: 4,
-	`Blackberry`: 4,
+	`blackberry`: 4,
 	`Blueberry`:  5,
-	`Blueberry`:  5,
+	`blueberry`:  5,
 	`Apricot`:    6,
-	`Apricot`:    6,
+	`apricot`:    6,
 }
 
 var _FruitsDescMap = map[Fruits]string{
@@ -195,13 +195,13 @@ const FoodsN Foods = 11
 
 var _FoodsNameToValueMap = map[string]Foods{
 	`Bread`:   7,
-	`Bread`:   7,
+	`bread`:   7,
 	`Lettuce`: 8,
-	`Lettuce`: 8,
+	`lettuce`: 8,
 	`Cheese`:  9,
-	`Cheese`:  9,
+	`cheese`:  9,
 	`Meat`:    10,
-	`Meat`:    10,
+	`meat`:    10,
 }
 
 var _FoodsDescMap = map[Foods]string{
@@ -332,19 +332,19 @@ const DaysN Days = 14
 
 var _DaysNameToValueMap = map[string]Days{
 	`DAY_SUNDAY`:    1,
-	`DAY_SUNDAY`:    1,
+	`day_sunday`:    1,
 	`DAY_MONDAY`:    3,
-	`DAY_MONDAY`:    3,
+	`day_monday`:    3,
 	`DAY_TUESDAY`:   5,
-	`DAY_TUESDAY`:   5,
+	`day_tuesday`:   5,
 	`DAY_WEDNESDAY`: 7,
-	`DAY_WEDNESDAY`: 7,
+	`day_wednesday`: 7,
 	`DAY_THURSDAY`:  9,
-	`DAY_THURSDAY`:  9,
+	`day_thursday`:  9,
 	`DAY_FRIDAY`:    11,
-	`DAY_FRIDAY`:    11,
+	`day_friday`:    11,
 	`DAY_SATURDAY`:  13,
-	`DAY_SATURDAY`:  13,
+	`day_saturday`:  13,
 }
 
 var _DaysDescMap = map[Days]string{
@@ -481,18 +481,11 @@ const StatesN States = 14
 
 var _StatesNameToValueMap = map[string]States{
 	`enabled`:                         1,
-	`enabled`:                         1,
-	`not-enabled`:                     3,
 	`not-enabled`:                     3,
 	`focused`:                         5,
-	`focused`:                         5,
-	`vered`:                           7,
 	`vered`:                           7,
 	`currently-being-pressed-by-user`: 9,
-	`currently-being-pressed-by-user`: 9,
 	`actively-focused`:                11,
-	`actively-focused`:                11,
-	`selected`:                        13,
 	`selected`:                        13,
 }
 
@@ -700,31 +693,31 @@ const LanguagesN Languages = 55
 
 var _LanguagesNameToValueMap = map[string]Languages{
 	`Go`:         6,
-	`Go`:         6,
+	`go`:         6,
 	`Python`:     10,
-	`Python`:     10,
+	`python`:     10,
 	`JavaScript`: 14,
-	`JavaScript`: 14,
+	`javascript`: 14,
 	`Dart`:       18,
-	`Dart`:       18,
+	`dart`:       18,
 	`Rust`:       22,
-	`Rust`:       22,
+	`rust`:       22,
 	`Ruby`:       26,
-	`Ruby`:       26,
+	`ruby`:       26,
 	`C`:          30,
-	`C`:          30,
+	`c`:          30,
 	`CPP`:        34,
-	`CPP`:        34,
+	`cpp`:        34,
 	`ObjectiveC`: 38,
-	`ObjectiveC`: 38,
+	`objectivec`: 38,
 	`Java`:       42,
-	`Java`:       42,
+	`java`:       42,
 	`TypeScript`: 46,
-	`TypeScript`: 46,
+	`typescript`: 46,
 	`Kotlin`:     50,
-	`Kotlin`:     50,
+	`kotlin`:     50,
 	`Swift`:      54,
-	`Swift`:      54,
+	`swift`:      54,
 }
 
 var _LanguagesDescMap = map[Languages]string{
@@ -897,7 +890,7 @@ const MoreLanguagesN MoreLanguages = 56
 
 var _MoreLanguagesNameToValueMap = map[string]MoreLanguages{
 	`Perl`: 55,
-	`Perl`: 55,
+	`perl`: 55,
 }
 
 var _MoreLanguagesDescMap = map[MoreLanguages]string{

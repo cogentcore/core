@@ -13,6 +13,7 @@ package enumgen
 
 import (
 	"fmt"
+	"strings"
 	"text/template"
 )
 
@@ -217,7 +218,10 @@ func (g *Generator) PrintValueMap(values []Value, typ *Type) {
 	g.Printf("\nvar _%sNameToValueMap = map[string]%s{\n", typ.Name, typ.Name)
 	for _, value := range values {
 		g.Printf("\t`%s`: %s,\n", value.Name, &value)
-		g.Printf("\t`%s`: %s,\n", value.Name, &value)
+		l := strings.ToLower(value.Name)
+		if l != value.Name { // avoid duplicate keys
+			g.Printf("\t`%s`: %s,\n", l, &value)
+		}
 	}
 	g.Printf("}\n\n")
 }
