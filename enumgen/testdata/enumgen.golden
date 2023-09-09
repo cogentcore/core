@@ -327,19 +327,12 @@ func _DaysNoOp() {
 
 var _DaysNameToValueMap = map[string]Days{
 	`DAY_SUNDAY`:    1,
-	`day_sunday`:    1,
 	`DAY_MONDAY`:    3,
-	`day_monday`:    3,
 	`DAY_TUESDAY`:   5,
-	`day_tuesday`:   5,
 	`DAY_WEDNESDAY`: 7,
-	`day_wednesday`: 7,
 	`DAY_THURSDAY`:  9,
-	`day_thursday`:  9,
 	`DAY_FRIDAY`:    11,
-	`day_friday`:    11,
 	`DAY_SATURDAY`:  13,
-	`day_saturday`:  13,
 }
 
 var _DaysDescMap = map[Days]string{
