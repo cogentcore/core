@@ -120,8 +120,9 @@ var DescMethodTmpl = template.Must(template.New("DescMethod").Parse(`// Desc ret
 func (i {{.TypeName}}) Desc() string {
 	if str, ok := _{{.TypeName}}DescMap[i]; ok {
 		return str
-	}
-	return i.String()
+	} {{if eq .Extends ""}}
+	return i.String() {{else}}
+	return {{.Extends}}(i).Desc() {{end}}
 }
 `))
 

@@ -25,7 +25,6 @@ type TmplData struct {
 	MaxValueP1    string // the highest defined value for the type, plus one, as a string
 	MethodName    string // method name (String or BitIndexString)
 	MethodComment string // doc comment for the method
-	IfInvalid     string // the code for what to do if the value is invalid (used in String and SetString)
 }
 
 // NewTmplData creates a new [TmplData] from the given type.

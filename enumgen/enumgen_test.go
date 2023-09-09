@@ -96,6 +96,15 @@ func TestFoodsSetString(t *testing.T) {
 	}
 }
 
+func TestMoreLanguagesDesc(t *testing.T) {
+	val := testdata.MoreLanguages(testdata.JavaScript)
+	want := "JavaScript is the worst programming language"
+	have := val.Desc()
+	if have != want {
+		t.Errorf("expected description for value %s to be %q, but got %q", val.BitIndexString(), want, have)
+	}
+}
+
 func TestFoodsValuesMethod(t *testing.T) {
 	want := []testdata.Foods{0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa}
 	have := testdata.FoodsValues()

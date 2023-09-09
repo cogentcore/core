@@ -242,7 +242,7 @@ func (i Foods) Desc() string {
 	if str, ok := _FoodsDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return Fruits(i).Desc()
 }
 
 // FoodsValues returns all possible values
@@ -968,7 +968,7 @@ func (i MoreLanguages) Desc() string {
 	if str, ok := _MoreLanguagesDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return Languages(i).Desc()
 }
 
 // MoreLanguagesValues returns all possible values
