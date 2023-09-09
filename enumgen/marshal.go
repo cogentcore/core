@@ -16,32 +16,29 @@ import "text/template"
 var TextMethodsTmpl = template.Must(template.New("TextMethods").Parse(
 	`
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i {{.TypeName}}) MarshalText() ([]byte, error) {
+func (i {{.Name}}) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *{{.TypeName}}) UnmarshalText(text []byte) error {
+func (i *{{.Name}}) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 `))
 
 func (g *Generator) BuildTextMethods(runs []Value, typ *Type) {
-	d := &TmplData{
-		TypeName: typ.Name,
-	}
-	g.ExecTmpl(TextMethodsTmpl, d)
+	g.ExecTmpl(TextMethodsTmpl, typ)
 }
 
 var JSONMethodsTmpl = template.Must(template.New("JSONMethods").Parse(
 	`
 // MarshalJSON implements the [json.Marshaler] interface.
-func (i {{.TypeName}}) MarshalJSON() ([]byte, error) {
+func (i {{.Name}}) MarshalJSON() ([]byte, error) {
 	return json.Marshal(i.String())
 }
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *{{.TypeName}}) UnmarshalJSON(data []byte) error {
+func (i *{{.Name}}) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
 		return err
@@ -51,21 +48,18 @@ func (i *{{.TypeName}}) UnmarshalJSON(data []byte) error {
 `))
 
 func (g *Generator) BuildJSONMethods(runs []Value, typ *Type) {
-	d := &TmplData{
-		TypeName: typ.Name,
-	}
-	g.ExecTmpl(JSONMethodsTmpl, d)
+	g.ExecTmpl(JSONMethodsTmpl, typ)
 }
 
 var YAMLMethodsTmpl = template.Must(template.New("YAMLMethods").Parse(
 	`
 // MarshalYAML implements the [yaml.Marshaler] interface.
-func (i {{.TypeName}}) MarshalYAML() (any, error) {
+func (i {{.Name}}) MarshalYAML() (any, error) {
 	return i.String(), nil
 }
 
 // UnmarshalYAML implements the [yaml.Unmarshaler] interface.
-func (i *{{.TypeName}}) UnmarshalYAML(value *yaml.Node) error {
+func (i *{{.Name}}) UnmarshalYAML(value *yaml.Node) error {
 	var s string
 	if err := n.Decode(&s); err != nil {
 		return err
@@ -75,8 +69,5 @@ func (i *{{.TypeName}}) UnmarshalYAML(value *yaml.Node) error {
 `))
 
 func (g *Generator) BuildYAMLMethods(runs []Value, typ *Type) {
-	d := &TmplData{
-		TypeName: typ.Name,
-	}
-	g.ExecTmpl(YAMLMethodsTmpl, d)
+	g.ExecTmpl(YAMLMethodsTmpl, typ)
 }

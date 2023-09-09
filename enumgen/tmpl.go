@@ -16,27 +16,11 @@ import (
 	"text/template"
 )
 
-// TmplData contains the data passed to a generation template
-type TmplData struct {
-	TypeName   string // the name of the enum type
-	IsBitFlag  bool   // whether the type is a bit flag
-	Extends    string // the type this type extends, if any
-	MaxValueP1 string // the highest defined value for the type, plus one, as a string
-}
-
-// NewTmplData creates a new [TmplData] from the given type.
-func NewTmplData(typ *Type) *TmplData {
-	return &TmplData{
-		TypeName:  typ.Name,
-		IsBitFlag: typ.IsBitFlag,
-		Extends:   typ.Extends,
-	}
-}
-
-// ExecTmpl executes the given template with the given data and
+// ExecTmpl executes the given template with the given type and
 // writes the result to [Generator.Buf]. It fatally logs any error.
-func (g *Generator) ExecTmpl(t *template.Template, data *TmplData) {
-	err := t.Execute(&g.Buf, data)
+// All enumgen templates take a [Type] as their data.
+func (g *Generator) ExecTmpl(t *template.Template, typ *Type) {
+	err := t.Execute(&g.Buf, typ)
 	if err != nil {
 		log.Fatalf("programmer error: internal error: error executing template: %v", err)
 	}

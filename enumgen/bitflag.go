@@ -15,20 +15,16 @@ import "text/template"
 
 // BuildBitFlagMethods builds methods specific to bit flag types.
 func (g *Generator) BuildBitFlagMethods(runs []Value, typ *Type) {
-	d := &TmplData{
-		TypeName: typ.Name,
-	}
-
 	g.Printf("\n")
 
-	g.ExecTmpl(HasFlagMethodTmpl, d)
-	g.ExecTmpl(SetFlagMethodTmpl, d)
+	g.ExecTmpl(HasFlagMethodTmpl, typ)
+	g.ExecTmpl(SetFlagMethodTmpl, typ)
 }
 
 var HasFlagMethodTmpl = template.Must(template.New("HasFlagMethod").Parse(
 	`// HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i {{.TypeName}}) HasFlag(f enums.BitFlag) bool {
+func (i {{.Name}}) HasFlag(f enums.BitFlag) bool {
 	return i&(1<<uint32(f.Int64())) != 0
 }
 `))
@@ -36,7 +32,7 @@ func (i {{.TypeName}}) HasFlag(f enums.BitFlag) bool {
 var SetFlagMethodTmpl = template.Must(template.New("SetFlagMethod").Parse(
 	`// SetFlag sets the value of the given
 // flags in these flags to the given value.
-func (i *{{.TypeName}}) SetFlag(on bool, f ...enums.BitFlag) {
+func (i *{{.Name}}) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()
@@ -54,8 +50,8 @@ func (i *{{.TypeName}}) SetFlag(on bool, f ...enums.BitFlag) {
 
 var StringMethodBitFlagTmpl = template.Must(template.New("StringMethodBitFlag").Parse(
 	`// String returns the string representation
-// of this {{.TypeName}} value.
-func (i {{.TypeName}}) String() string {
+// of this {{.Name}} value.
+func (i {{.Name}}) String() string {
 	str := "" {{if ne .Extends ""}}
 	for _, ie := range _{{.Extends}}Values {
 		if i.HasFlag(ie) {
@@ -67,7 +63,7 @@ func (i {{.TypeName}}) String() string {
 			}
 		}
 	}{{end}}
-	for _, ie := range _{{.TypeName}}Values {
+	for _, ie := range _{{.Name}}Values {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -82,29 +78,29 @@ func (i {{.TypeName}}) String() string {
 `))
 
 var SetStringMethodBitFlagTmpl = template.Must(template.New("SetStringMethodBitFlag").Parse(
-	`// SetString sets the {{.TypeName}} value from its
+	`// SetString sets the {{.Name}} value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *{{.TypeName}}) SetString(s string) error {
+func (i *{{.Name}}) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 `))
 
 var SetStringOrMethodBitFlagTmpl = template.Must(template.New("SetStringOrMethodBitFlag").Parse(
-	`// SetStringOr sets the {{.TypeName}} value from its
+	`// SetStringOr sets the {{.Name}} value from its
 // string representation while preserving any
 // bit flags already set, and returns an
 // error if the string is invalid.
-func (i *{{.TypeName}}) SetStringOr(s string) error {
+func (i *{{.Name}}) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _{{.TypeName}}NameToValueMap[flg]; ok {
+		if val, ok := _{{.Name}}NameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		} else if val, ok := _{{.TypeName}}NameToValueMap[strings.ToLower(flg)]; ok {
+		} else if val, ok := _{{.Name}}NameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else { {{if eq .Extends ""}}
-			return errors.New(flg+" is not a valid value for type {{.TypeName}}"){{else}}
+			return errors.New(flg+" is not a valid value for type {{.Name}}"){{else}}
 			err := (*{{.Extends}})(i).SetStringOr(flg)
 			if err != nil {
 				return err

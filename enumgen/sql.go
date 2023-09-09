@@ -15,14 +15,14 @@ import "text/template"
 
 var ValueMethodTmpl = template.Must(template.New("ValueMethod").Parse(
 	`// Scan implements the [driver.Valuer] interface.
-func (i {{.TypeName}}) Value() (driver.Value, error) {
+func (i {{.Name}}) Value() (driver.Value, error) {
 	return i.String(), nil
 }
 `))
 
 var ScanMethodTmpl = template.Must(template.New("ScanMethod").Parse(
 	`// Value implements the [sql.Scanner] interface.
-func (i *{{.TypeName}}) Scan(value any) error {
+func (i *{{.Name}}) Scan(value any) error {
 	if value == nil {
 		return nil
 	}
@@ -36,7 +36,7 @@ func (i *{{.TypeName}}) Scan(value any) error {
 	case fmt.Stringer:
 		str = v.String()
 	default:
-		return fmt.Errorf("invalid value for type {{.TypeName}}: %[1]T(%[1]v)", value)
+		return fmt.Errorf("invalid value for type {{.Name}}: %[1]T(%[1]v)", value)
 	}
 
 	return i.SetString(str)
@@ -44,11 +44,8 @@ func (i *{{.TypeName}}) Scan(value any) error {
 `))
 
 func (g *Generator) AddValueAndScanMethod(typ *Type) {
-	d := &TmplData{
-		TypeName: typ.Name,
-	}
 	g.Printf("\n")
-	g.ExecTmpl(ValueMethodTmpl, d)
+	g.ExecTmpl(ValueMethodTmpl, typ)
 	g.Printf("\n\n")
-	g.ExecTmpl(ScanMethodTmpl, d)
+	g.ExecTmpl(ScanMethodTmpl, typ)
 }

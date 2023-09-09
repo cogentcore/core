@@ -12,7 +12,6 @@
 package enumgen
 
 import (
-	"strconv"
 	"strings"
 	"text/template"
 )
@@ -42,11 +41,10 @@ func (g *Generator) BuildString(values []Value, typ *Type) {
 		n += len(value.Name)
 	}
 	g.Printf("}\n\n")
-	d := NewTmplData(typ)
-	if d.IsBitFlag {
-		g.ExecTmpl(StringMethodBitFlagTmpl, d)
+	if typ.IsBitFlag {
+		g.ExecTmpl(StringMethodBitFlagTmpl, typ)
 	}
-	g.ExecTmpl(StringMethodMapTmpl, d)
+	g.ExecTmpl(StringMethodMapTmpl, typ)
 }
 
 // BuildNoOpOrderChangeDetect lets the compiler and the user know if the order/value of the enum values has changed.
@@ -68,16 +66,16 @@ func (g *Generator) BuildNoOpOrderChangeDetect(values []Value, typ *Type) {
 var StringMethodMapTmpl = template.Must(template.New("StringMethodMap").Parse(
 	`{{if .IsBitFlag}}
 	// BitIndexString returns the string
-	// representation of this {{.TypeName}} value
+	// representation of this {{.Name}} value
 	// if it is a bit index value
 	// (typically an enum constant), and
 	// not an actual bit flag value.
 	{{- else}}
 	// String returns the string representation
-	// of this {{.TypeName}} value.
+	// of this {{.Name}} value.
 	{{- end}}
-func (i {{.TypeName}}) {{if .IsBitFlag}} BitIndexString {{else}} String {{end}} () string {
-	if str, ok := _{{.TypeName}}Map[i]; ok {
+func (i {{.Name}}) {{if .IsBitFlag}} BitIndexString {{else}} String {{end}} () string {
+	if str, ok := _{{.Name}}Map[i]; ok {
 		return str
 	} {{if eq .Extends ""}}
 	return strconv.FormatInt(int64(i), 10) {{else}}
@@ -86,47 +84,47 @@ func (i {{.TypeName}}) {{if .IsBitFlag}} BitIndexString {{else}} String {{end}} 
 `))
 
 var NConstantTmpl = template.Must(template.New("StringNConstant").Parse(
-	`//{{.TypeName}}N is the highest valid value
-// for type {{.TypeName}}, plus one.
-const {{.TypeName}}N {{.TypeName}} = {{.MaxValueP1}}
+	`//{{.Name}}N is the highest valid value
+// for type {{.Name}}, plus one.
+const {{.Name}}N {{.Name}} = {{.MaxValueP1}}
 `))
 
 var SetStringMethodTmpl = template.Must(template.New("SetStringMethod").Parse(
-	`// SetString sets the {{.TypeName}} value from its
+	`// SetString sets the {{.Name}} value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *{{.TypeName}}) SetString(s string) error {
-	if val, ok := _{{.TypeName}}NameToValueMap[s]; ok {
+func (i *{{.Name}}) SetString(s string) error {
+	if val, ok := _{{.Name}}NameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
 
-	if val, ok := _{{.TypeName}}NameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _{{.Name}}NameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	} {{if eq .Extends ""}}
-	return errors.New(s+" is not a valid value for type {{.TypeName}}") {{else}}
+	return errors.New(s+" is not a valid value for type {{.Name}}") {{else}}
 	return (*{{.Extends}})(i).SetString(s) {{end}}
 }
 `))
 
 var Int64MethodTmpl = template.Must(template.New("Int64Method").Parse(
-	`// Int64 returns the {{.TypeName}} value as an int64.
-func (i {{.TypeName}}) Int64() int64 {
+	`// Int64 returns the {{.Name}} value as an int64.
+func (i {{.Name}}) Int64() int64 {
 	return int64(i)
 }
 `))
 
 var SetInt64MethodTmpl = template.Must(template.New("SetInt64Method").Parse(
-	`// SetInt64 sets the {{.TypeName}} value from an int64.
-func (i *{{.TypeName}}) SetInt64(in int64) {
-	*i = {{.TypeName}}(in)
+	`// SetInt64 sets the {{.Name}} value from an int64.
+func (i *{{.Name}}) SetInt64(in int64) {
+	*i = {{.Name}}(in)
 }
 `))
 
-var DescMethodTmpl = template.Must(template.New("DescMethod").Parse(`// Desc returns the description of the {{.TypeName}} value.
-func (i {{.TypeName}}) Desc() string {
-	if str, ok := _{{.TypeName}}DescMap[i]; ok {
+var DescMethodTmpl = template.Must(template.New("DescMethod").Parse(`// Desc returns the description of the {{.Name}} value.
+func (i {{.Name}}) Desc() string {
+	if str, ok := _{{.Name}}DescMap[i]; ok {
 		return str
 	} {{if eq .Extends ""}}
 	return i.String() {{else}}
@@ -135,35 +133,35 @@ func (i {{.TypeName}}) Desc() string {
 `))
 
 var ValuesGlobalTmpl = template.Must(template.New("ValuesGlobal").Parse(
-	`// {{.TypeName}}Values returns all possible values
-// for the type {{.TypeName}}.
-func {{.TypeName}}Values() []{{.TypeName}} { {{if eq .Extends ""}}
-	return _{{.TypeName}}Values {{else}}
+	`// {{.Name}}Values returns all possible values
+// for the type {{.Name}}.
+func {{.Name}}Values() []{{.Name}} { {{if eq .Extends ""}}
+	return _{{.Name}}Values {{else}}
 	es := {{.Extends}}Values()
-	res := make([]{{.TypeName}}, len(es))
+	res := make([]{{.Name}}, len(es))
 	for i, e := range es {
-		res[i] = {{.TypeName}}(e)
+		res[i] = {{.Name}}(e)
 	}
-	res = append(res, _{{.TypeName}}Values...)
+	res = append(res, _{{.Name}}Values...)
 	return res {{end}}
 }
 `))
 
 var ValuesMethodTmpl = template.Must(template.New("ValuesMethod").Parse(
 	`// Values returns all possible values
-// for the type {{.TypeName}}.
-func (i {{.TypeName}}) Values() []enums.Enum { {{if eq .Extends ""}}
-	res := make([]enums.Enum, len(_{{.TypeName}}Values))
-	for i, d := range _{{.TypeName}}Values {
+// for the type {{.Name}}.
+func (i {{.Name}}) Values() []enums.Enum { {{if eq .Extends ""}}
+	res := make([]enums.Enum, len(_{{.Name}}Values))
+	for i, d := range _{{.Name}}Values {
 		res[i] = d
 	} {{else}}
 	es := {{.Extends}}Values()
 	les := len(es)
-	res := make([]enums.Enum, les + len(_{{.TypeName}}Values))
+	res := make([]enums.Enum, les + len(_{{.Name}}Values))
 	for i, d := range es {
 		res[i] = d
 	}
-	for i, d := range _{{.TypeName}}Values {
+	for i, d := range _{{.Name}}Values {
 		res[i + les] = d
 	} {{end}}
 	return res 
@@ -172,9 +170,9 @@ func (i {{.TypeName}}) Values() []enums.Enum { {{if eq .Extends ""}}
 
 var IsValidMethodMapTmpl = template.Must(template.New("IsValidMethodMap").Parse(
 	`// IsValid returns whether the value is a
-// valid option for type {{.TypeName}}.
-func (i {{.TypeName}}) IsValid() bool {
-	_, ok := _{{.TypeName}}Map[i] {{if ne .Extends ""}}
+// valid option for type {{.Name}}.
+func (i {{.Name}}) IsValid() bool {
+	_, ok := _{{.Name}}Map[i] {{if ne .Extends ""}}
 	if !ok {
 		return {{.Extends}}(i).IsValid()
 	} {{end}}
@@ -196,10 +194,9 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 	}
 	g.Printf("}\n\n")
 
-	d := NewTmplData(typ)
-	d.MaxValueP1 = strconv.FormatUint(max+1, 10)
+	typ.MaxValueP1 = max + 1
 
-	g.ExecTmpl(NConstantTmpl, d)
+	g.ExecTmpl(NConstantTmpl, typ)
 
 	g.BuildNoOpOrderChangeDetect(values, typ)
 
@@ -213,17 +210,17 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 
 	// Print the basic extra methods
 	if typ.IsBitFlag {
-		g.ExecTmpl(SetStringMethodBitFlagTmpl, d)
-		g.ExecTmpl(SetStringOrMethodBitFlagTmpl, d)
+		g.ExecTmpl(SetStringMethodBitFlagTmpl, typ)
+		g.ExecTmpl(SetStringOrMethodBitFlagTmpl, typ)
 	} else {
-		g.ExecTmpl(SetStringMethodTmpl, d)
+		g.ExecTmpl(SetStringMethodTmpl, typ)
 	}
-	g.ExecTmpl(Int64MethodTmpl, d)
-	g.ExecTmpl(SetInt64MethodTmpl, d)
-	g.ExecTmpl(DescMethodTmpl, d)
-	g.ExecTmpl(ValuesGlobalTmpl, d)
-	g.ExecTmpl(ValuesMethodTmpl, d)
-	g.ExecTmpl(IsValidMethodMapTmpl, d)
+	g.ExecTmpl(Int64MethodTmpl, typ)
+	g.ExecTmpl(SetInt64MethodTmpl, typ)
+	g.ExecTmpl(DescMethodTmpl, typ)
+	g.ExecTmpl(ValuesGlobalTmpl, typ)
+	g.ExecTmpl(ValuesMethodTmpl, typ)
+	g.ExecTmpl(IsValidMethodMapTmpl, typ)
 }
 
 // PrintValueMap prints the map between name and value

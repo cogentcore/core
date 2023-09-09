@@ -19,9 +19,10 @@ import (
 
 // Type represents a parsed enum type.
 type Type struct {
-	Name      string         // The name of the type
-	Type      *ast.TypeSpec  // The standard AST type value
-	IsBitFlag bool           // Whether the type is a bit flag type
-	Extends   string         // The type that this type extends, if any ("" if it doesn't extend)
-	Config    *config.Config // Configuration information set in the comment directive for the type; is initialized to generator config info first
+	Name       string         // The name of the type
+	Type       *ast.TypeSpec  // The standard AST type value
+	IsBitFlag  bool           // Whether the type is a bit flag type
+	Extends    string         // The type that this type extends, if any ("" if it doesn't extend)
+	MaxValueP1 uint64         // the highest defined value for the type, plus one
+	Config     *config.Config // Configuration information set in the comment directive for the type; is initialized to generator config info first
 }
