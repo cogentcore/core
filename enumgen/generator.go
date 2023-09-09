@@ -252,29 +252,29 @@ func (g *Generator) Generate() error {
 
 		g.PrefixValueNames(values, typ.Config)
 
-		g.BuildMap(runs, typ)
+		g.BuildMap(values, typ)
 
-		g.BuildNoOpOrderChangeDetect(runs, typ)
+		g.BuildNoOpOrderChangeDetect(values, typ)
 
-		g.BuildBasicExtras(runs, typ)
+		g.BuildBasicExtras(values, typ)
 		if typ.IsBitFlag {
-			g.BuildBitFlagMethods(runs, typ)
+			g.BuildBitFlagMethods(values, typ)
 		}
 
 		if typ.Config.Text {
-			g.BuildTextMethods(runs, typ)
+			g.BuildTextMethods(values, typ)
 		}
 		if typ.Config.JSON {
-			g.BuildJSONMethods(runs, typ)
+			g.BuildJSONMethods(values, typ)
 		}
 		if typ.Config.YAML {
-			g.BuildYAMLMethods(runs, typ)
+			g.BuildYAMLMethods(values, typ)
 		}
 		if typ.Config.SQL {
 			g.AddValueAndScanMethod(typ)
 		}
 		if typ.Config.GQL {
-			g.BuildGQLMethods(runs, typ)
+			g.BuildGQLMethods(values, typ)
 		}
 	}
 	return nil

@@ -15,19 +15,23 @@ import (
 	"goki.dev/enums"
 )
 
-const _FruitsName = "AppleOrangePeachStrawberryBlackberryBlueberryApricot"
-
-var _FruitsIndex = [...]uint8{0, 5, 11, 16, 26, 36, 45, 52}
-
-const _FruitsLowerName = "appleorangepeachstrawberryblackberryblueberryapricot"
+var _FruitsMap = map[Fruits]string{
+	0: `Apple`,
+	1: `Orange`,
+	2: `Peach`,
+	3: `Strawberry`,
+	4: `Blackberry`,
+	5: `Blueberry`,
+	6: `Apricot`,
+}
 
 // String returns the string representation
 // of this Fruits value.
 func (i Fruits) String() string {
-	if i >= Fruits(len(_FruitsIndex)-1) {
-		return strconv.FormatInt(int64(i), 10)
+	if str, ok := _FruitsMap[i]; ok {
+		return str
 	}
-	return _FruitsName[_FruitsIndex[i]:_FruitsIndex[i+1]]
+	return strconv.FormatInt(int64(i), 10)
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
@@ -50,30 +54,20 @@ var _FruitsValues = []Fruits{Apple, Orange, Peach, Strawberry, Blackberry, Blueb
 const FruitsN Fruits = 7
 
 var _FruitsNameToValueMap = map[string]Fruits{
-	_FruitsName[0:5]:        Apple,
-	_FruitsLowerName[0:5]:   Apple,
-	_FruitsName[5:11]:       Orange,
-	_FruitsLowerName[5:11]:  Orange,
-	_FruitsName[11:16]:      Peach,
-	_FruitsLowerName[11:16]: Peach,
-	_FruitsName[16:26]:      Strawberry,
-	_FruitsLowerName[16:26]: Strawberry,
-	_FruitsName[26:36]:      Blackberry,
-	_FruitsLowerName[26:36]: Blackberry,
-	_FruitsName[36:45]:      Blueberry,
-	_FruitsLowerName[36:45]: Blueberry,
-	_FruitsName[45:52]:      Apricot,
-	_FruitsLowerName[45:52]: Apricot,
-}
-
-var _FruitsNames = []string{
-	_FruitsName[0:5],
-	_FruitsName[5:11],
-	_FruitsName[11:16],
-	_FruitsName[16:26],
-	_FruitsName[26:36],
-	_FruitsName[36:45],
-	_FruitsName[45:52],
+	`Apple`:      0,
+	`Apple`:      0,
+	`Orange`:     1,
+	`Orange`:     1,
+	`Peach`:      2,
+	`Peach`:      2,
+	`Strawberry`: 3,
+	`Strawberry`: 3,
+	`Blackberry`: 4,
+	`Blackberry`: 4,
+	`Blueberry`:  5,
+	`Blueberry`:  5,
+	`Apricot`:    6,
+	`Apricot`:    6,
 }
 
 var _FruitsDescMap = map[Fruits]string{
@@ -139,12 +133,8 @@ func (i Fruits) Values() []enums.Enum {
 // IsValid returns whether the value is a
 // valid option for type Fruits.
 func (i Fruits) IsValid() bool {
-	for _, v := range _FruitsValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
+	_, ok := _FruitsMap[i]
+	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -171,20 +161,20 @@ func (i *Fruits) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-const _FoodsName = "BreadLettuceCheeseMeat"
-
-var _FoodsIndex = [...]uint8{0, 5, 12, 18, 22}
-
-const _FoodsLowerName = "breadlettucecheesemeat"
+var _FoodsMap = map[Foods]string{
+	7:  `Bread`,
+	8:  `Lettuce`,
+	9:  `Cheese`,
+	10: `Meat`,
+}
 
 // String returns the string representation
 // of this Foods value.
 func (i Foods) String() string {
-	i -= 7
-	if i >= Foods(len(_FoodsIndex)-1) {
-		return Fruits(i).String()
+	if str, ok := _FoodsMap[i]; ok {
+		return str
 	}
-	return _FoodsName[_FoodsIndex[i]:_FoodsIndex[i+1]]
+	return Fruits(i).String()
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
@@ -204,21 +194,14 @@ var _FoodsValues = []Foods{Bread, Lettuce, Cheese, Meat}
 const FoodsN Foods = 11
 
 var _FoodsNameToValueMap = map[string]Foods{
-	_FoodsName[0:5]:        Bread,
-	_FoodsLowerName[0:5]:   Bread,
-	_FoodsName[5:12]:       Lettuce,
-	_FoodsLowerName[5:12]:  Lettuce,
-	_FoodsName[12:18]:      Cheese,
-	_FoodsLowerName[12:18]: Cheese,
-	_FoodsName[18:22]:      Meat,
-	_FoodsLowerName[18:22]: Meat,
-}
-
-var _FoodsNames = []string{
-	_FoodsName[0:5],
-	_FoodsName[5:12],
-	_FoodsName[12:18],
-	_FoodsName[18:22],
+	`Bread`:   7,
+	`Bread`:   7,
+	`Lettuce`: 8,
+	`Lettuce`: 8,
+	`Cheese`:  9,
+	`Cheese`:  9,
+	`Meat`:    10,
+	`Meat`:    10,
 }
 
 var _FoodsDescMap = map[Foods]string{
@@ -281,12 +264,8 @@ func (i Foods) Values() []enums.Enum {
 // IsValid returns whether the value is a
 // valid option for type Foods.
 func (i Foods) IsValid() bool {
-	for _, v := range _FoodsValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
+	_, ok := _FoodsMap[i]
+	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -313,54 +292,23 @@ func (i *Foods) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-const (
-	_DaysName_0      = "DAY_SUNDAY"
-	_DaysLowerName_0 = "day_sunday"
-	_DaysName_1      = "DAY_MONDAY"
-	_DaysLowerName_1 = "day_monday"
-	_DaysName_2      = "DAY_TUESDAY"
-	_DaysLowerName_2 = "day_tuesday"
-	_DaysName_3      = "DAY_WEDNESDAY"
-	_DaysLowerName_3 = "day_wednesday"
-	_DaysName_4      = "DAY_THURSDAY"
-	_DaysLowerName_4 = "day_thursday"
-	_DaysName_5      = "DAY_FRIDAY"
-	_DaysLowerName_5 = "day_friday"
-	_DaysName_6      = "DAY_SATURDAY"
-	_DaysLowerName_6 = "day_saturday"
-)
-
-var (
-	_DaysIndex_0 = [...]uint8{0, 10}
-	_DaysIndex_1 = [...]uint8{0, 10}
-	_DaysIndex_2 = [...]uint8{0, 11}
-	_DaysIndex_3 = [...]uint8{0, 13}
-	_DaysIndex_4 = [...]uint8{0, 12}
-	_DaysIndex_5 = [...]uint8{0, 10}
-	_DaysIndex_6 = [...]uint8{0, 12}
-)
+var _DaysMap = map[Days]string{
+	1:  `DAY_SUNDAY`,
+	3:  `DAY_MONDAY`,
+	5:  `DAY_TUESDAY`,
+	7:  `DAY_WEDNESDAY`,
+	9:  `DAY_THURSDAY`,
+	11: `DAY_FRIDAY`,
+	13: `DAY_SATURDAY`,
+}
 
 // String returns the string representation
 // of this Days value.
 func (i Days) String() string {
-	switch {
-	case i == 1:
-		return _DaysName_0
-	case i == 3:
-		return _DaysName_1
-	case i == 5:
-		return _DaysName_2
-	case i == 7:
-		return _DaysName_3
-	case i == 9:
-		return _DaysName_4
-	case i == 11:
-		return _DaysName_5
-	case i == 13:
-		return _DaysName_6
-	default:
-		return strconv.FormatInt(int64(i), 10)
+	if str, ok := _DaysMap[i]; ok {
+		return str
 	}
+	return strconv.FormatInt(int64(i), 10)
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
@@ -383,30 +331,20 @@ var _DaysValues = []Days{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, S
 const DaysN Days = 14
 
 var _DaysNameToValueMap = map[string]Days{
-	_DaysName_0[0:10]:      Sunday,
-	_DaysLowerName_0[0:10]: Sunday,
-	_DaysName_1[0:10]:      Monday,
-	_DaysLowerName_1[0:10]: Monday,
-	_DaysName_2[0:11]:      Tuesday,
-	_DaysLowerName_2[0:11]: Tuesday,
-	_DaysName_3[0:13]:      Wednesday,
-	_DaysLowerName_3[0:13]: Wednesday,
-	_DaysName_4[0:12]:      Thursday,
-	_DaysLowerName_4[0:12]: Thursday,
-	_DaysName_5[0:10]:      Friday,
-	_DaysLowerName_5[0:10]: Friday,
-	_DaysName_6[0:12]:      Saturday,
-	_DaysLowerName_6[0:12]: Saturday,
-}
-
-var _DaysNames = []string{
-	_DaysName_0[0:10],
-	_DaysName_1[0:10],
-	_DaysName_2[0:11],
-	_DaysName_3[0:13],
-	_DaysName_4[0:12],
-	_DaysName_5[0:10],
-	_DaysName_6[0:12],
+	`DAY_SUNDAY`:    1,
+	`DAY_SUNDAY`:    1,
+	`DAY_MONDAY`:    3,
+	`DAY_MONDAY`:    3,
+	`DAY_TUESDAY`:   5,
+	`DAY_TUESDAY`:   5,
+	`DAY_WEDNESDAY`: 7,
+	`DAY_WEDNESDAY`: 7,
+	`DAY_THURSDAY`:  9,
+	`DAY_THURSDAY`:  9,
+	`DAY_FRIDAY`:    11,
+	`DAY_FRIDAY`:    11,
+	`DAY_SATURDAY`:  13,
+	`DAY_SATURDAY`:  13,
 }
 
 var _DaysDescMap = map[Days]string{
@@ -472,12 +410,8 @@ func (i Days) Values() []enums.Enum {
 // IsValid returns whether the value is a
 // valid option for type Days.
 func (i Days) IsValid() bool {
-	for _, v := range _DaysValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
+	_, ok := _DaysMap[i]
+	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
@@ -504,32 +438,15 @@ func (i *Days) UnmarshalGQL(value any) error {
 	return i.SetString(str)
 }
 
-const (
-	_StatesName_0      = "enabled"
-	_StatesLowerName_0 = "enabled"
-	_StatesName_1      = "not-enabled"
-	_StatesLowerName_1 = "not-enabled"
-	_StatesName_2      = "focused"
-	_StatesLowerName_2 = "focused"
-	_StatesName_3      = "vered"
-	_StatesLowerName_3 = "vered"
-	_StatesName_4      = "currently-being-pressed-by-user"
-	_StatesLowerName_4 = "currently-being-pressed-by-user"
-	_StatesName_5      = "actively-focused"
-	_StatesLowerName_5 = "actively-focused"
-	_StatesName_6      = "selected"
-	_StatesLowerName_6 = "selected"
-)
-
-var (
-	_StatesIndex_0 = [...]uint8{0, 7}
-	_StatesIndex_1 = [...]uint8{0, 11}
-	_StatesIndex_2 = [...]uint8{0, 7}
-	_StatesIndex_3 = [...]uint8{0, 5}
-	_StatesIndex_4 = [...]uint8{0, 31}
-	_StatesIndex_5 = [...]uint8{0, 16}
-	_StatesIndex_6 = [...]uint8{0, 8}
-)
+var _StatesMap = map[States]string{
+	1:  `enabled`,
+	3:  `not-enabled`,
+	5:  `focused`,
+	7:  `vered`,
+	9:  `currently-being-pressed-by-user`,
+	11: `actively-focused`,
+	13: `selected`,
+}
 
 // BitIndexString returns the string
 // representation of this States value
@@ -537,24 +454,10 @@ var (
 // (typically an enum constant), and
 // not an actual bit flag value.
 func (i States) BitIndexString() string {
-	switch {
-	case i == 1:
-		return _StatesName_0
-	case i == 3:
-		return _StatesName_1
-	case i == 5:
-		return _StatesName_2
-	case i == 7:
-		return _StatesName_3
-	case i == 9:
-		return _StatesName_4
-	case i == 11:
-		return _StatesName_5
-	case i == 13:
-		return _StatesName_6
-	default:
-		return strconv.FormatInt(int64(i), 10)
+	if str, ok := _StatesMap[i]; ok {
+		return str
 	}
+	return strconv.FormatInt(int64(i), 10)
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
@@ -577,30 +480,20 @@ var _StatesValues = []States{Enabled, Disabled, Focused, Hovered, Active, Active
 const StatesN States = 14
 
 var _StatesNameToValueMap = map[string]States{
-	_StatesName_0[0:7]:       Enabled,
-	_StatesLowerName_0[0:7]:  Enabled,
-	_StatesName_1[0:11]:      Disabled,
-	_StatesLowerName_1[0:11]: Disabled,
-	_StatesName_2[0:7]:       Focused,
-	_StatesLowerName_2[0:7]:  Focused,
-	_StatesName_3[0:5]:       Hovered,
-	_StatesLowerName_3[0:5]:  Hovered,
-	_StatesName_4[0:31]:      Active,
-	_StatesLowerName_4[0:31]: Active,
-	_StatesName_5[0:16]:      ActivelyFocused,
-	_StatesLowerName_5[0:16]: ActivelyFocused,
-	_StatesName_6[0:8]:       Selected,
-	_StatesLowerName_6[0:8]:  Selected,
-}
-
-var _StatesNames = []string{
-	_StatesName_0[0:7],
-	_StatesName_1[0:11],
-	_StatesName_2[0:7],
-	_StatesName_3[0:5],
-	_StatesName_4[0:31],
-	_StatesName_5[0:16],
-	_StatesName_6[0:8],
+	`enabled`:                         1,
+	`enabled`:                         1,
+	`not-enabled`:                     3,
+	`not-enabled`:                     3,
+	`focused`:                         5,
+	`focused`:                         5,
+	`vered`:                           7,
+	`vered`:                           7,
+	`currently-being-pressed-by-user`: 9,
+	`currently-being-pressed-by-user`: 9,
+	`actively-focused`:                11,
+	`actively-focused`:                11,
+	`selected`:                        13,
+	`selected`:                        13,
 }
 
 var _StatesDescMap = map[States]string{
@@ -668,12 +561,8 @@ func (i States) Values() []enums.Enum {
 // IsValid returns whether the value is a
 // valid option for type States.
 func (i States) IsValid() bool {
-	for _, v := range _StatesValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
+	_, ok := _StatesMap[i]
+	return ok
 }
 
 // String returns the string representation
@@ -756,23 +645,20 @@ func (i *States) Scan(value any) error {
 	return i.SetString(str)
 }
 
-const _LanguagesName = "GoPythonJavaScriptDartRustRubyCCPPObjectiveCJavaTypeScriptKotlinSwift"
-const _LanguagesLowerName = "gopythonjavascriptdartrustrubyccppobjectivecjavatypescriptkotlinswift"
-
 var _LanguagesMap = map[Languages]string{
-	6:  _LanguagesName[0:2],
-	10: _LanguagesName[2:8],
-	14: _LanguagesName[8:18],
-	18: _LanguagesName[18:22],
-	22: _LanguagesName[22:26],
-	26: _LanguagesName[26:30],
-	30: _LanguagesName[30:31],
-	34: _LanguagesName[31:34],
-	38: _LanguagesName[34:44],
-	42: _LanguagesName[44:48],
-	46: _LanguagesName[48:58],
-	50: _LanguagesName[58:64],
-	54: _LanguagesName[64:69],
+	6:  `Go`,
+	10: `Python`,
+	14: `JavaScript`,
+	18: `Dart`,
+	22: `Rust`,
+	26: `Ruby`,
+	30: `C`,
+	34: `CPP`,
+	38: `ObjectiveC`,
+	42: `Java`,
+	46: `TypeScript`,
+	50: `Kotlin`,
+	54: `Swift`,
 }
 
 // BitIndexString returns the string
@@ -813,48 +699,32 @@ var _LanguagesValues = []Languages{Go, Python, JavaScript, Dart, Rust, Ruby, C, 
 const LanguagesN Languages = 55
 
 var _LanguagesNameToValueMap = map[string]Languages{
-	_LanguagesName[0:2]:        Go,
-	_LanguagesLowerName[0:2]:   Go,
-	_LanguagesName[2:8]:        Python,
-	_LanguagesLowerName[2:8]:   Python,
-	_LanguagesName[8:18]:       JavaScript,
-	_LanguagesLowerName[8:18]:  JavaScript,
-	_LanguagesName[18:22]:      Dart,
-	_LanguagesLowerName[18:22]: Dart,
-	_LanguagesName[22:26]:      Rust,
-	_LanguagesLowerName[22:26]: Rust,
-	_LanguagesName[26:30]:      Ruby,
-	_LanguagesLowerName[26:30]: Ruby,
-	_LanguagesName[30:31]:      C,
-	_LanguagesLowerName[30:31]: C,
-	_LanguagesName[31:34]:      CPP,
-	_LanguagesLowerName[31:34]: CPP,
-	_LanguagesName[34:44]:      ObjectiveC,
-	_LanguagesLowerName[34:44]: ObjectiveC,
-	_LanguagesName[44:48]:      Java,
-	_LanguagesLowerName[44:48]: Java,
-	_LanguagesName[48:58]:      TypeScript,
-	_LanguagesLowerName[48:58]: TypeScript,
-	_LanguagesName[58:64]:      Kotlin,
-	_LanguagesLowerName[58:64]: Kotlin,
-	_LanguagesName[64:69]:      Swift,
-	_LanguagesLowerName[64:69]: Swift,
-}
-
-var _LanguagesNames = []string{
-	_LanguagesName[0:2],
-	_LanguagesName[2:8],
-	_LanguagesName[8:18],
-	_LanguagesName[18:22],
-	_LanguagesName[22:26],
-	_LanguagesName[26:30],
-	_LanguagesName[30:31],
-	_LanguagesName[31:34],
-	_LanguagesName[34:44],
-	_LanguagesName[44:48],
-	_LanguagesName[48:58],
-	_LanguagesName[58:64],
-	_LanguagesName[64:69],
+	`Go`:         6,
+	`Go`:         6,
+	`Python`:     10,
+	`Python`:     10,
+	`JavaScript`: 14,
+	`JavaScript`: 14,
+	`Dart`:       18,
+	`Dart`:       18,
+	`Rust`:       22,
+	`Rust`:       22,
+	`Ruby`:       26,
+	`Ruby`:       26,
+	`C`:          30,
+	`C`:          30,
+	`CPP`:        34,
+	`CPP`:        34,
+	`ObjectiveC`: 38,
+	`ObjectiveC`: 38,
+	`Java`:       42,
+	`Java`:       42,
+	`TypeScript`: 46,
+	`TypeScript`: 46,
+	`Kotlin`:     50,
+	`Kotlin`:     50,
+	`Swift`:      54,
+	`Swift`:      54,
 }
 
 var _LanguagesDescMap = map[Languages]string{
@@ -996,11 +866,9 @@ func (i *Languages) UnmarshalJSON(data []byte) error {
 	return i.SetString(s)
 }
 
-const _MoreLanguagesName = "Perl"
-
-var _MoreLanguagesIndex = [...]uint8{0, 4}
-
-const _MoreLanguagesLowerName = "perl"
+var _MoreLanguagesMap = map[MoreLanguages]string{
+	55: `Perl`,
+}
 
 // BitIndexString returns the string
 // representation of this MoreLanguages value
@@ -1008,11 +876,10 @@ const _MoreLanguagesLowerName = "perl"
 // (typically an enum constant), and
 // not an actual bit flag value.
 func (i MoreLanguages) BitIndexString() string {
-	i -= 55
-	if i < 0 || i >= MoreLanguages(len(_MoreLanguagesIndex)-1) {
-		return Languages(i).BitIndexString()
+	if str, ok := _MoreLanguagesMap[i]; ok {
+		return str
 	}
-	return _MoreLanguagesName[_MoreLanguagesIndex[i]:_MoreLanguagesIndex[i+1]]
+	return Languages(i).BitIndexString()
 }
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
@@ -1029,12 +896,8 @@ var _MoreLanguagesValues = []MoreLanguages{Perl}
 const MoreLanguagesN MoreLanguages = 56
 
 var _MoreLanguagesNameToValueMap = map[string]MoreLanguages{
-	_MoreLanguagesName[0:4]:      Perl,
-	_MoreLanguagesLowerName[0:4]: Perl,
-}
-
-var _MoreLanguagesNames = []string{
-	_MoreLanguagesName[0:4],
+	`Perl`: 55,
+	`Perl`: 55,
 }
 
 var _MoreLanguagesDescMap = map[MoreLanguages]string{
@@ -1099,12 +962,8 @@ func (i MoreLanguages) Values() []enums.Enum {
 // IsValid returns whether the value is a
 // valid option for type MoreLanguages.
 func (i MoreLanguages) IsValid() bool {
-	for _, v := range _MoreLanguagesValues {
-		if i == v {
-			return true
-		}
-	}
-	return false
+	_, ok := _MoreLanguagesMap[i]
+	return ok
 }
 
 // String returns the string representation
