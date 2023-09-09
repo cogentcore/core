@@ -487,6 +487,23 @@ var _StatesMap = map[States]string{
 	13: `selected`,
 }
 
+// String returns the string representation
+// of this States value.
+func (i States) String() string {
+	str := ""
+	for _, ie := range _StatesValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
 // BitIndexString returns the string
 // representation of this States value
 // if it is a bit index value
@@ -556,23 +573,6 @@ func (i States) Values() []enums.Enum {
 func (i States) IsValid() bool {
 	_, ok := _StatesMap[i]
 	return ok
-}
-
-// String returns the string representation
-// of this States value.
-func (i States) String() string {
-	str := ""
-	for _, ie := range _StatesValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
 }
 
 // HasFlag returns whether these
@@ -724,6 +724,23 @@ var _LanguagesMap = map[Languages]string{
 	54: `Swift`,
 }
 
+// String returns the string representation
+// of this Languages value.
+func (i Languages) String() string {
+	str := ""
+	for _, ie := range _LanguagesValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
 // BitIndexString returns the string
 // representation of this Languages value
 // if it is a bit index value
@@ -793,23 +810,6 @@ func (i Languages) Values() []enums.Enum {
 func (i Languages) IsValid() bool {
 	_, ok := _LanguagesMap[i]
 	return ok
-}
-
-// String returns the string representation
-// of this Languages value.
-func (i Languages) String() string {
-	str := ""
-	for _, ie := range _LanguagesValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
 }
 
 // HasFlag returns whether these
@@ -885,6 +885,33 @@ var _MoreLanguagesMap = map[MoreLanguages]string{
 	55: `Perl`,
 }
 
+// String returns the string representation
+// of this MoreLanguages value.
+func (i MoreLanguages) String() string {
+	str := ""
+	for _, ie := range _LanguagesValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	for _, ie := range _MoreLanguagesValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
 // BitIndexString returns the string
 // representation of this MoreLanguages value
 // if it is a bit index value
@@ -957,23 +984,6 @@ func (i MoreLanguages) Values() []enums.Enum {
 func (i MoreLanguages) IsValid() bool {
 	_, ok := _MoreLanguagesMap[i]
 	return ok
-}
-
-// String returns the string representation
-// of this MoreLanguages value.
-func (i MoreLanguages) String() string {
-	str := ""
-	for _, ie := range _MoreLanguagesValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
 }
 
 // HasFlag returns whether these
