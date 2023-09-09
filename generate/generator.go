@@ -154,3 +154,19 @@ func (g *Generator) Write() error {
 	}
 	return nil
 }
+
+// Inspect looks at the given AST node and adds it
+// to [Generator.Types] if it is marked with an appropriate
+// comment directive. It returns whether the AST inspector should
+// continue, and an error if there is one. It should only
+// be called in [ast.Inspect].
+func (g *Generator) Inspect(n ast.Node) (bool, error) {
+	ts, ok := n.(*ast.TypeSpec)
+	if !ok {
+		return true, nil
+	}
+	typ := g.Pkg.Defs[ts.Name].Type()
+	utyp := typ.Underlying()
+	fmt.Println(utyp)
+	return true, nil
+}
