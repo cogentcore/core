@@ -162,19 +162,6 @@ func (i {{.TypeName}}) Values() []enums.Enum { {{if eq .Extends ""}}
 }
 `))
 
-var IsValidMethodLoopTmpl = template.Must(template.New("IsValidMethodLoop").Parse(
-	`// IsValid returns whether the value is a
-// valid option for type {{.TypeName}}.
-func (i {{.TypeName}}) IsValid() bool {
-	for _, v := range _{{.TypeName}}Values {
-		if i == v {
-			return true
-		}
-	}
-	return false
-}
-`))
-
 var IsValidMethodMapTmpl = template.Must(template.New("IsValidMethodMap").Parse(
 	`// IsValid returns whether the value is a
 // valid option for type {{.TypeName}}.
@@ -224,11 +211,7 @@ func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 	g.ExecTmpl(DescMethodTmpl, d)
 	g.ExecTmpl(ValuesGlobalTmpl, d)
 	g.ExecTmpl(ValuesMethodTmpl, d)
-	if len(values) <= typ.RunsThreshold {
-		g.ExecTmpl(IsValidMethodLoopTmpl, d)
-	} else { // There is a map of values, the code is simpler then
-		g.ExecTmpl(IsValidMethodMapTmpl, d)
-	}
+	g.ExecTmpl(IsValidMethodMapTmpl, d)
 }
 
 // PrintValueMap prints the map between name and value
