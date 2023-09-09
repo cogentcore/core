@@ -86,7 +86,7 @@ const (
 )
 
 // MoreLanguages contains more programming languages
-type MoreLanguages Languages //enums:bitflag
+type MoreLanguages Languages //enums:bitflag -no-accept-lower
 
 const (
 	Perl MoreLanguages = MoreLanguages(LanguagesN) + iota

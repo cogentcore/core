@@ -97,9 +97,9 @@ func (i *{{.Name}}) SetStringOr(s string) error {
 	for _, flg := range flgs {
 		if val, ok := _{{.Name}}NameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		} else if val, ok := _{{.Name}}NameToValueMap[strings.ToLower(flg)]; ok {
+		{{if .Config.AcceptLower}} } else if val, ok := _{{.Name}}NameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
-		} else { {{if eq .Extends ""}}
+		{{end}} } else { {{if eq .Extends ""}}
 			return errors.New(flg+" is not a valid value for type {{.Name}}"){{else}}
 			err := (*{{.Extends}})(i).SetStringOr(flg)
 			if err != nil {

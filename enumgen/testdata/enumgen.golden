@@ -890,7 +890,6 @@ func _MoreLanguagesNoOp() {
 
 var _MoreLanguagesNameToValueMap = map[string]MoreLanguages{
 	`Perl`: 55,
-	`perl`: 55,
 }
 
 var _MoreLanguagesDescMap = map[MoreLanguages]string{
@@ -956,8 +955,6 @@ func (i *MoreLanguages) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _MoreLanguagesNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _MoreLanguagesNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
 			err := (*Languages)(i).SetStringOr(flg)
