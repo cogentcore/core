@@ -43,7 +43,6 @@ func (g *Generator) BuildString(values []Value, typ *Type) {
 	}
 	g.Printf("}\n\n")
 	d := NewTmplData(typ)
-	d.SetMethod()
 	if d.IsBitFlag {
 		g.ExecTmpl(StringMethodBitFlagTmpl, d)
 	}
@@ -67,13 +66,22 @@ func (g *Generator) BuildNoOpOrderChangeDetect(values []Value, typ *Type) {
 }
 
 var StringMethodMapTmpl = template.Must(template.New("StringMethodMap").Parse(
-	`{{.MethodComment}}
-func (i {{.TypeName}}) {{.MethodName}}() string {
+	`{{if .IsBitFlag}}
+	// BitIndexString returns the string
+	// representation of this {{.TypeName}} value
+	// if it is a bit index value
+	// (typically an enum constant), and
+	// not an actual bit flag value.
+	{{- else}}
+	// String returns the string representation
+	// of this {{.TypeName}} value.
+	{{- end}}
+func (i {{.TypeName}}) {{if .IsBitFlag}} BitIndexString {{else}} String {{end}} () string {
 	if str, ok := _{{.TypeName}}Map[i]; ok {
 		return str
-	}{{if eq .Extends ""}}
-	return strconv.FormatInt(int64(i), 10){{else}}
-	return {{.Extends}}(i).{{.MethodName}}(){{end}}
+	} {{if eq .Extends ""}}
+	return strconv.FormatInt(int64(i), 10) {{else}}
+	return {{.Extends}}(i).{{if .IsBitFlag}} BitIndexString {{else}} String {{end}}() {{end}}
 }
 `))
 
@@ -96,9 +104,9 @@ func (i *{{.TypeName}}) SetString(s string) error {
 	if val, ok := _{{.TypeName}}NameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
-	}{{if eq .Extends ""}}
-	return errors.New(s+" is not a valid value for type {{.TypeName}}"){{else}}
-	return (*{{.Extends}})(i).SetString(s){{end}}
+	} {{if eq .Extends ""}}
+	return errors.New(s+" is not a valid value for type {{.TypeName}}") {{else}}
+	return (*{{.Extends}})(i).SetString(s) {{end}}
 }
 `))
 
