@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"goki.dev/enums"
 	"goki.dev/enums/enumgen/config"
 	"goki.dev/enums/enumgen/testdata"
 	"goki.dev/grease"
@@ -95,7 +96,7 @@ func TestFoodsSetString(t *testing.T) {
 	}
 }
 
-func TestFoodsValues(t *testing.T) {
+func TestFoodsValuesMethod(t *testing.T) {
 	want := []testdata.Foods{0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa}
 	have := testdata.FoodsValues()
 	if fmt.Sprintf("%v", want) != fmt.Sprintf("%v", have) {
@@ -171,5 +172,18 @@ func TestMoreLanguagesSetString(t *testing.T) {
 	}
 	if have != want {
 		t.Errorf("expected value %v from string %q, but got %v", want, src, have)
+	}
+}
+
+func TestMoreLanguagesValuesGlobal(t *testing.T) {
+	// need to use loop to get slice of enums.Enum without typing in constant name for everything
+	wantl := []testdata.MoreLanguages{6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 55}
+	want := []enums.Enum{}
+	for _, i := range wantl {
+		want = append(want, i)
+	}
+	have := testdata.MoreLanguagesN.Values()
+	if fmt.Sprintf("%#v", want) != fmt.Sprintf("%#v", have) {
+		t.Errorf("expected more languages values to be %#v, but got %#v", want, have)
 	}
 }

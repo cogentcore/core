@@ -143,11 +143,19 @@ func {{.TypeName}}Values() []{{.TypeName}} { {{if eq .Extends ""}}
 var ValuesMethodTmpl = template.Must(template.New("ValuesMethod").Parse(
 	`// Values returns all possible values
 // for the type {{.TypeName}}.
-func (i {{.TypeName}}) Values() []enums.Enum {
+func (i {{.TypeName}}) Values() []enums.Enum { {{if eq .Extends ""}}
 	res := make([]enums.Enum, len(_{{.TypeName}}Values))
 	for i, d := range _{{.TypeName}}Values {
 		res[i] = d
+	} {{else}}
+	es := {{.Extends}}Values()
+	res := make([]enums.Enum, len(es) + len(_{{.TypeName}}Values))
+	for i, d := range es {
+		res[i] = d
 	}
+	for i, d := range _{{.TypeName}}Values {
+		res[i + len(es)] = d
+	} {{end}}
 	return res 
 }
 `))
