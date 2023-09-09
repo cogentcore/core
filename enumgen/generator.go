@@ -214,10 +214,13 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 }
 
 // Generate produces the enum methods for the types
-// stored in [Generator.Types].
-func (g *Generator) Generate() error {
+// stored in [Generator.Types] and stores them in
+// [Generator.Buf]. It returns whether there were
+// any enum types to generate methods for, and
+// any error that occurred.
+func (g *Generator) Generate() (bool, error) {
 	if len(g.Types) == 0 {
-		return fmt.Errorf("no enum types found in package %q", g.Pkg.Name)
+		return false, nil
 	}
 	for _, typ := range g.Types {
 		values := make([]Value, 0, 100)
@@ -240,21 +243,21 @@ func (g *Generator) Generate() error {
 					return cont
 				})
 				if terr != nil {
-					return fmt.Errorf("Generate: error parsing declaration clauses: %w", terr)
+					return true, fmt.Errorf("Generate: error parsing declaration clauses: %w", terr)
 				}
 				values = append(values, file.Values...)
 			}
 		}
 
 		if len(values) == 0 {
-			return errors.New("no values defined for type " + typ.Name)
+			return true, errors.New("no values defined for type " + typ.Name)
 		}
 
 		g.TrimValueNames(values, typ.Config)
 
 		err := g.TransformValueNames(values, typ.Config)
 		if err != nil {
-			return fmt.Errorf("error transforming value names: %w", err)
+			return true, fmt.Errorf("error transforming value names: %w", err)
 		}
 
 		g.PrefixValueNames(values, typ.Config)
@@ -282,7 +285,7 @@ func (g *Generator) Generate() error {
 			g.BuildGQLMethods(values, typ)
 		}
 	}
-	return nil
+	return true, nil
 }
 
 // Format returns the contents of the Generator's buffer

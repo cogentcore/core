@@ -33,7 +33,10 @@ func Generate(config *config.Config) error {
 			return fmt.Errorf("enumgen: Generate: error finding enum types for package %q: %w", pkg.Name, err)
 		}
 		g.PrintHeader()
-		err = g.Generate()
+		has, err := g.Generate()
+		if !has {
+			continue
+		}
 		if err != nil {
 			return fmt.Errorf("enumgen: Generate: error generating code for package %q: %w", pkg.Name, err)
 		}
