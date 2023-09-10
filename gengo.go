@@ -38,7 +38,7 @@ func Load(cfg *packages.Config, patterns ...string) ([]*packages.Package, error)
 // but they should be set for any external packages that many not
 // be found correctly by goimports.
 func PrintHeader(w io.Writer, pkg string, imports ...string) {
-	cmdstr := filepath.Base(os.Args[0])
+	cmdstr := strings.TrimSuffix(filepath.Base(os.Args[0]), ".exe")
 	if len(os.Args) > 1 {
 		cmdstr += " " + strings.Join(os.Args[1:], " ")
 	}
