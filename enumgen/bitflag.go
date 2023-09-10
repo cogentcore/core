@@ -25,7 +25,7 @@ var HasFlagMethodTmpl = template.Must(template.New("HasFlagMethod").Parse(
 	`// HasFlag returns whether these
 // bit flags have the given bit flag set.
 func (i {{.Name}}) HasFlag(f enums.BitFlag) bool {
-	return i&(1<<uint32(f.Int64())) != 0
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 `))
 

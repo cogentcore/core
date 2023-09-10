@@ -586,7 +586,7 @@ func (i States) IsValid() bool {
 // HasFlag returns whether these
 // bit flags have the given bit flag set.
 func (i States) HasFlag(f enums.BitFlag) bool {
-	return i&(1<<uint32(f.Int64())) != 0
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given
@@ -831,7 +831,7 @@ func (i Languages) IsValid() bool {
 // HasFlag returns whether these
 // bit flags have the given bit flag set.
 func (i Languages) HasFlag(f enums.BitFlag) bool {
-	return i&(1<<uint32(f.Int64())) != 0
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given
@@ -1024,7 +1024,7 @@ func (i MoreLanguages) IsValid() bool {
 // HasFlag returns whether these
 // bit flags have the given bit flag set.
 func (i MoreLanguages) HasFlag(f enums.BitFlag) bool {
-	return i&(1<<uint32(f.Int64())) != 0
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given
