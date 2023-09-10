@@ -8,13 +8,13 @@ import (
 	"fmt"
 )
 
-// TypeRegistry provides a way to look up types from string long names
-// (package_url.Type, e.g., goki.dev/gi/v2/gi.Button)
-var TypeRegistry = map[string]*Type{}
+// Types records all types (i.e., a type registry)
+// key is long type name: package_url.Type, e.g., goki.dev/gi/v2/gi.Button
+var Types = map[string]*Type{}
 
 // TypeByName returns a Type by name (package.Type, e,g. gi.Button), or error if not found
 func TypeByName(nm string) (*Type, error) {
-	tp, ok := TypeRegistry[nm]
+	tp, ok := Types[nm]
 	if !ok {
 		return nil, fmt.Errorf("type %q not found", nm)
 	}

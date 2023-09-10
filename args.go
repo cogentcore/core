@@ -6,7 +6,5 @@ package gti
 
 // Args represents an arg
 type Arg struct {
-	Name       string
-	Comment    string
-	Directives Directives
+	Info
 }

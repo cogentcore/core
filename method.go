@@ -8,8 +8,6 @@ import "goki.dev/ordmap"
 
 // Method represents a method on a type
 type Method struct {
-	Name       string
-	Comment    string
-	Directives Directives
-	Args       ordmap.Map[string, *Arg]
+	Info
+	Args ordmap.Map[string, *Arg]
 }

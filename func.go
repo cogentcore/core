@@ -8,8 +8,6 @@ import "goki.dev/ordmap"
 
 // Func represents a global function
 type Func struct {
-	Name       string
-	Comment    string
-	Directives Directives
-	Args       ordmap.Map[string, *Arg]
+	Info
+	Args ordmap.Map[string, *Arg]
 }

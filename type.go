@@ -6,7 +6,6 @@ package gti
 
 import (
 	"reflect"
-	"sync/atomic"
 
 	"goki.dev/ordmap"
 )
@@ -19,9 +18,7 @@ var (
 
 // Type represents a type
 type Type struct {
-
-	// type name, using the short form (e.g., gi.Button)
-	Name string `desc:"type name, using the short form (e.g., gi.Button)"`
+	Info
 
 	// unique type ID number
 	ID uint64 `desc:"unique type ID number"`
@@ -39,6 +36,7 @@ type Type struct {
 	Instance any `desc:"instance of the type"`
 }
 
+/*
 // NewType creates a new Type for given instance. This call is auto-generated for each Ki type.
 func NewType(nm string, inst Ki) *Type {
 	inst.InitName(inst, nm)
@@ -53,6 +51,7 @@ func NewType(nm string, inst Ki) *Type {
 func (tp *Type) NewInstance() Ki {
 	return tp.Instance.NewInstance()
 }
+*/
 
 // ReflectType returns the [reflect.Type] of a given Ki Type
 func (tp *Type) ReflectType() reflect.Type {
