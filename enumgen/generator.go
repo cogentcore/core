@@ -160,35 +160,25 @@ func (g *Generator) Generate() (bool, error) {
 	}
 	for _, typ := range g.Types {
 		values := make([]Value, 0, 100)
-		for _, s := range g.Pkg.Syntax {
-			if ast.IsGenerated(s) {
+		for _, file := range g.Pkg.Syntax {
+			if ast.IsGenerated(file) {
 				continue
 			}
-			// Set the state for this run of the walker.
-			file := &File{
-				Pkg:     g.Pkg,
-				File:    s,
-				Type:    typ,
-				BitFlag: typ.IsBitFlag,
-				Values:  nil,
-				Config:  typ.Config,
-			}
-			if file.File != nil {
-				var terr error
-				ast.Inspect(file.File, func(n ast.Node) bool {
-					if terr != nil {
-						return false
-					}
-					cont, err := file.GenDecl(n)
-					if err != nil {
-						terr = err
-					}
-					return cont
-				})
+			var terr error
+			ast.Inspect(file, func(n ast.Node) bool {
 				if terr != nil {
-					return true, fmt.Errorf("Generate: error parsing declaration clauses: %w", terr)
+					return false
 				}
-				values = append(values, file.Values...)
+				vals, cont, err := g.GenDecl(n, file, typ)
+				if err != nil {
+					terr = err
+				} else {
+					values = append(values, vals...)
+				}
+				return cont
+			})
+			if terr != nil {
+				return true, fmt.Errorf("Generate: error parsing declaration clauses: %w", terr)
 			}
 		}
 

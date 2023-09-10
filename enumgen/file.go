@@ -19,34 +19,22 @@ import (
 	"go/types"
 	"html"
 	"strings"
-
-	"golang.org/x/tools/go/packages"
 )
-
-// File holds a single parsed file and associated data.
-type File struct {
-	Pkg  *packages.Package // Package to which this file belongs.
-	File *ast.File         // Parsed AST.
-	// These fields are reset for each type being generated.
-	Type    *Type   // The constant type we are currently looking for.
-	BitFlag bool    // Whether the constant type we are currently looking for is a bitflag.
-	Values  []Value // Accumulator for constant values of that type.
-	Config  *Config // The configuration information
-}
 
 // GenDecl processes one declaration clause.
 // It returns whether the AST inspector should continue,
 // and an error if there is one. It should only be
 // called in [ast.Inspect].
-func (f *File) GenDecl(node ast.Node) (bool, error) {
+func (g *Generator) GenDecl(node ast.Node, file *ast.File, typ *Type) ([]Value, bool, error) {
 	decl, ok := node.(*ast.GenDecl)
 	if !ok || decl.Tok != token.CONST {
 		// We only care about const declarations.
-		return true, nil
+		return nil, true, nil
 	}
+	vals := []Value{}
 	// The name of the type of the constants we are declaring.
 	// Can change if this is a multi-element declaration.
-	typ := ""
+	typName := ""
 	// Loop over the elements of the declaration. Each element is a ValueSpec:
 	// a list of names possibly followed by a type, possibly followed by values.
 	// If the type and value are both missing, we carry down the type (and value,
@@ -56,7 +44,7 @@ func (f *File) GenDecl(node ast.Node) (bool, error) {
 		if vspec.Type == nil && len(vspec.Values) > 0 {
 			// "X = 1". With no type but a value, the constant is untyped.
 			// Skip this vspec and reset the remembered type.
-			typ = ""
+			typName = ""
 			continue
 		}
 		if vspec.Type != nil {
@@ -65,9 +53,9 @@ func (f *File) GenDecl(node ast.Node) (bool, error) {
 			if !ok {
 				continue
 			}
-			typ = ident.Name
+			typName = ident.Name
 		}
-		if typ != f.Type.Name {
+		if typName != typ.Name {
 			// This is not the type we're looking for.
 			continue
 		}
@@ -81,22 +69,22 @@ func (f *File) GenDecl(node ast.Node) (bool, error) {
 			// This dance lets the type checker find the values for us. It's a
 			// bit tricky: look up the object declared by the n, find its
 			// types.Const, and extract its value.
-			obj, ok := f.Pkg.TypesInfo.Defs[n]
+			obj, ok := g.Pkg.TypesInfo.Defs[n]
 			if !ok {
-				return false, errors.New("no value for constant " + n.String())
+				return nil, false, errors.New("no value for constant " + n.String())
 			}
 			info := obj.Type().Underlying().(*types.Basic).Info()
 			if info&types.IsInteger == 0 {
-				return false, errors.New("can't handle non-integer constant type " + typ)
+				return nil, false, errors.New("can't handle non-integer constant type " + typName)
 			}
 			value := obj.(*types.Const).Val() // Guaranteed to succeed as this is CONST.
 			if value.Kind() != exact.Int {
-				return false, errors.New("can't happen: constant is not an integer " + n.String())
+				return nil, false, errors.New("can't happen: constant is not an integer " + n.String())
 			}
 			i64, isInt := exact.Int64Val(value)
 			u64, isUint := exact.Uint64Val(value)
 			if !isInt && !isUint {
-				return false, errors.New("internal error: value of " + n.String() + " is not an integer: " + value.String())
+				return nil, false, errors.New("internal error: value of " + n.String() + " is not an integer: " + value.String())
 			}
 			if !isInt {
 				u64 = uint64(i64)
@@ -109,12 +97,12 @@ func (f *File) GenDecl(node ast.Node) (bool, error) {
 				Signed:       info&types.IsUnsigned == 0,
 				Str:          value.String(),
 			}
-			if c := vspec.Comment; f.Config.LineComment && c != nil && len(c.List) == 1 {
+			if c := vspec.Comment; typ.Config.LineComment && c != nil && len(c.List) == 1 {
 				v.Name = strings.TrimSpace(c.Text())
 			}
 
-			f.Values = append(f.Values, v)
+			vals = append(vals, v)
 		}
 	}
-	return false, nil
+	return vals, false, nil
 }
