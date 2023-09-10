@@ -92,18 +92,18 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		return true, nil
 	}
 	for _, c := range ts.Comment.List {
-		tool, directive, args, has, err := grease.ParseDirective(c.Text)
+		dir, has, err := grease.ParseDirective(c.Text)
 		if err != nil {
 			return false, fmt.Errorf("error parsing comment directive %q: %w", c.Text, err)
 		}
 		if !has {
 			continue
 		}
-		if tool != "enums" {
+		if dir.Tool != "enums" {
 			continue
 		}
-		if directive != "enum" && directive != "bitflag" {
-			return false, fmt.Errorf("unrecognized enums directive %q (from %q)", directive, c.Text)
+		if dir.Directive != "enum" && dir.Directive != "bitflag" {
+			return false, fmt.Errorf("unrecognized enums directive %q (from %q)", dir.Directive, c.Text)
 		}
 
 		ident, ok := ts.Type.(*ast.Ident)
@@ -112,7 +112,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		}
 		cfg := &Config{}
 		*cfg = *g.Config
-		leftovers, err := grease.SetFromArgs(cfg, args)
+		leftovers, err := grease.SetFromArgs(cfg, dir.Args)
 		if err != nil {
 			return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
 		}
@@ -127,7 +127,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		if ident.String() != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
 			tt.Extends = ident.String()
 		}
-		switch directive {
+		switch dir.Directive {
 		case "enum":
 			if !AllowedEnumTypes[utyp.String()] {
 				return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)

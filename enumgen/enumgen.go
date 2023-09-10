@@ -8,13 +8,15 @@ package enumgen
 
 import (
 	"fmt"
-)
 
+	"goki.dev/gengo"
+	"golang.org/x/tools/go/packages"
+)
 
 // ParsePackage parses the package(s) located in the configuration source directory.
 func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 	pcfg := &packages.Config{
-		Mode: PackageModes()
+		Mode: PackageModes(),
 		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
 		// in a separate pass? For later.
 		Tests: false,
@@ -26,19 +28,34 @@ func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 	return pkgs, err
 }
 
-// Generate generates enum methods using
+// Generate generates enum methods, using the given
+// configuration object, loading the packages from the
+// configuration source directory,
+// and writes the result to the config output file.
+// It is a simple entry point to enumgen that does all
+// of the steps; for more specific functionality, create
+// a new [Generator] with [NewGenerator] and call methods on it.
+func Generate(cfg *Config) error {
+	pkgs, err := ParsePackage(cfg)
+	if err != nil {
+		return err
+	}
+	return GeneratePkgs(cfg, pkgs)
+}
+
+// GeneratePkgs generates enum methods using
 // the given configuration object and packages parsed
 // from the configuration source directory,
 // and writes the result to the config output file.
 // It is a simple entry point to enumgen that does all
 // of the steps; for more specific functionality, create
 // a new [Generator] with [NewGenerator] and call methods on it.
-func Generate(config *Config, pkgs []*packages.Package) error {
-	g := NewGenerator(config, pkgs)
+func GeneratePkgs(cfg *Config, pkgs []*packages.Package) error {
+	g := NewGenerator(cfg, pkgs)
 	for _, pkg := range g.Pkgs {
 		g.Pkg = pkg
 		g.Buf.Reset()
-		err = g.FindEnumTypes()
+		err := g.FindEnumTypes()
 		if err != nil {
 			return fmt.Errorf("enumgen: Generate: error finding enum types for package %q: %w", pkg.Name, err)
 		}
