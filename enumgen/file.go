@@ -21,12 +21,13 @@ import (
 	"strings"
 
 	"goki.dev/enums/enumgen/config"
+	"golang.org/x/tools/go/packages"
 )
 
 // File holds a single parsed file and associated data.
 type File struct {
-	Pkg  *Package  // Package to which this file belongs.
-	File *ast.File // Parsed AST.
+	Pkg  *packages.Package // Package to which this file belongs.
+	File *ast.File         // Parsed AST.
 	// These fields are reset for each type being generated.
 	Type    *Type          // The constant type we are currently looking for.
 	BitFlag bool           // Whether the constant type we are currently looking for is a bitflag.
@@ -81,7 +82,7 @@ func (f *File) GenDecl(node ast.Node) (bool, error) {
 			// This dance lets the type checker find the values for us. It's a
 			// bit tricky: look up the object declared by the n, find its
 			// types.Const, and extract its value.
-			obj, ok := f.Pkg.Defs[n]
+			obj, ok := f.Pkg.TypesInfo.Defs[n]
 			if !ok {
 				return false, errors.New("no value for constant " + n.String())
 			}
