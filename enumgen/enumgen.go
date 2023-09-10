@@ -10,19 +10,31 @@ import (
 	"fmt"
 )
 
+
+// ParsePackage parses the package(s) located in the configuration source directory.
+func ParsePackage(cfg *Config) ([]*packages.Package, error) {
+	pcfg := &packages.Config{
+		Mode: PackageModes()
+		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
+		// in a separate pass? For later.
+		Tests: false,
+	}
+	pkgs, err := gengo.Load(pcfg, cfg.Dir)
+	if err != nil {
+		return nil, fmt.Errorf("enumgen: Generate: error parsing package: %w", err)
+	}
+	return pkgs, err
+}
+
 // Generate generates enum methods using
-// the given configuration object. It reads
-// all Go files in the config source directory
+// the given configuration object and packages parsed
+// from the configuration source directory,
 // and writes the result to the config output file.
 // It is a simple entry point to enumgen that does all
 // of the steps; for more specific functionality, create
 // a new [Generator] with [NewGenerator] and call methods on it.
-func Generate(config *Config) error {
-	g := NewGenerator(config)
-	err := g.ParsePackage()
-	if err != nil {
-		return fmt.Errorf("enumgen: Generate: error parsing package: %w", err)
-	}
+func Generate(config *Config, pkgs []*packages.Package) error {
+	g := NewGenerator(config, pkgs)
 	for _, pkg := range g.Pkgs {
 		g.Pkg = pkg
 		g.Buf.Reset()

@@ -40,25 +40,14 @@ type Generator struct {
 }
 
 // NewGenerator returns a new generator with the
-// given configuration information.
-func NewGenerator(config *Config) *Generator {
-	return &Generator{Config: config}
+// given configuration information and parsed packages.
+func NewGenerator(config *Config, pkgs []*packages.Package) *Generator {
+	return &Generator{Config: config, Pkgs: pkgs}
 }
 
-// ParsePackage parses the package(s) located in the configuration source directory.
-func (g *Generator) ParsePackage() error {
-	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesSizes | packages.NeedSyntax | packages.NeedTypesInfo,
-		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
-		// in a separate pass? For later.
-		Tests: false,
-	}
-	pkgs, err := gengo.Load(cfg, g.Config.Dir)
-	if err != nil {
-		return err
-	}
-	g.Pkgs = pkgs
-	return nil
+// PackageModes returns the package load modes needed for this generator
+func PackageModes() packages.LoadMode {
+	return packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesSizes | packages.NeedSyntax | packages.NeedTypesInfo
 }
 
 // Printf prints the formatted string to the
