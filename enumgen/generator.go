@@ -20,7 +20,9 @@ import (
 	"go/token"
 	"go/types"
 	"html"
+	"log"
 	"strings"
+	"text/template"
 
 	"goki.dev/gengo"
 	"goki.dev/grease"
@@ -310,6 +312,16 @@ func (g *Generator) GenDecl(node ast.Node, file *ast.File, typ *Type) ([]Value, 
 		}
 	}
 	return vals, false, nil
+}
+
+// ExecTmpl executes the given template with the given type and
+// writes the result to [Generator.Buf]. It fatally logs any error.
+// All enumgen templates take a [Type] as their data.
+func (g *Generator) ExecTmpl(t *template.Template, typ *Type) {
+	err := t.Execute(&g.Buf, typ)
+	if err != nil {
+		log.Fatalf("programmer error: internal error: error executing template: %v", err)
+	}
 }
 
 // Write formats the data in the the Generator's buffer
