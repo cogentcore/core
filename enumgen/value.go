@@ -19,7 +19,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/enums/enumgen/config"
 )
 
 // Value represents a declared constant.
@@ -63,9 +62,9 @@ func SortValues(values []Value) []Value {
 }
 
 // TrimValueNames removes the prefixes specified
-// in [config.Config.TrimPrefix] from each name
+// in [Config.TrimPrefix] from each name
 // of the given values.
-func (g *Generator) TrimValueNames(values []Value, c *config.Config) {
+func (g *Generator) TrimValueNames(values []Value, c *Config) {
 	for _, prefix := range strings.Split(c.TrimPrefix, ",") {
 		for i := range values {
 			values[i].Name = strings.TrimPrefix(values[i].Name, prefix)
@@ -75,17 +74,17 @@ func (g *Generator) TrimValueNames(values []Value, c *config.Config) {
 }
 
 // PrefixValueNames adds the prefix specified in
-// [config.Config.AddPrefix] to each name of
+// [Config.AddPrefix] to each name of
 // the given values.
-func (g *Generator) PrefixValueNames(values []Value, c *config.Config) {
+func (g *Generator) PrefixValueNames(values []Value, c *Config) {
 	for i := range values {
 		values[i].Name = c.AddPrefix + values[i].Name
 	}
 }
 
 // TransformValueNames transforms the names of the given values according
-// to the transform method specified in [config.Config.Transform]
-func (g *Generator) TransformValueNames(values []Value, c *config.Config) error {
+// to the transform method specified in [Config.Transform]
+func (g *Generator) TransformValueNames(values []Value, c *Config) error {
 	var fn func(src string) string
 	switch c.Transform {
 	case "snake":

@@ -20,7 +20,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/enums/enumgen/config"
 	"goki.dev/grease"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/imports"
@@ -29,16 +28,16 @@ import (
 // Generator holds the state of the generator.
 // It is primarily used to buffer the output.
 type Generator struct {
-	Config *config.Config // The configuration information
-	Buf    bytes.Buffer   // The accumulated output.
-	Pkgs   []*Package     // The packages we are scanning.
-	Pkg    *Package       // The packages we are currently on.
-	Types  []*Type        // The enum types
+	Config *Config      // The configuration information
+	Buf    bytes.Buffer // The accumulated output.
+	Pkgs   []*Package   // The packages we are scanning.
+	Pkg    *Package     // The packages we are currently on.
+	Types  []*Type      // The enum types
 }
 
 // NewGenerator returns a new generator with the
 // given configuration information.
-func NewGenerator(config *config.Config) *Generator {
+func NewGenerator(config *Config) *Generator {
 	return &Generator{Config: config}
 }
 
@@ -179,7 +178,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		if !ok {
 			return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", ts.Type, ts.Type)
 		}
-		cfg := &config.Config{}
+		cfg := &Config{}
 		*cfg = *g.Config
 		leftovers, err := grease.SetFromArgs(cfg, args)
 		if err != nil {
