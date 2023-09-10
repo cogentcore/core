@@ -50,8 +50,8 @@ func New[K comparable, V any]() *Map[K, V] {
 	}
 }
 
-// Constr constructs a new ordered map with the given key, value pairs
-func Constr[K comparable, V any](vals ...KeyVal[K, V]) *Map[K, V] {
+// Make constructs a new ordered map with the given key, value pairs
+func Make[K comparable, V any](vals []KeyVal[K, V]) *Map[K, V] {
 	om := &Map[K, V]{
 		Order: vals,
 		Map:   make(map[K]int, len(vals)),
@@ -116,9 +116,20 @@ func (om *Map[K, V]) InsertAtIdx(idx int, key K, val V) {
 	om.Order = slices.Insert(om.Order, idx, KeyVal[K, V]{Key: key, Val: val})
 }
 
-// ValByKey returns value based on Key, along with bool reflecting
+// ValByKey returns value based on Key, with a zero value returned for missing key.
+// See [Map.ValByKeyTry] for one that returns a bool for missing keys.
+func (om *Map[K, V]) ValByKey(key K) V {
+	idx, ok := om.Map[key]
+	if ok {
+		return om.Order[idx].Val
+	}
+	var zv V
+	return zv
+}
+
+// ValByKeyTry returns value based on Key, along with bool reflecting
 // presence of key.
-func (om *Map[K, V]) ValByKey(key K) (V, bool) {
+func (om *Map[K, V]) ValByKeyTry(key K) (V, bool) {
 	idx, ok := om.Map[key]
 	if ok {
 		return om.Order[idx].Val, ok
@@ -135,9 +146,19 @@ func (om *Map[K, V]) IdxIsValid(idx int) error {
 	return nil
 }
 
-// IdxByKey returns index of given Key, along with bool reflecting
+// IdxByKey returns index of given Key, with a -1 for missing key.
+// See [Map.IdxByKeyTry] for a version returning a bool for missing key.
+func (om *Map[K, V]) IdxByKey(key K) int {
+	idx, ok := om.Map[key]
+	if !ok {
+		return -1
+	}
+	return idx
+}
+
+// IdxByKeyTry returns index of given Key, along with bool reflecting
 // presence of key.
-func (om *Map[K, V]) IdxByKey(key K) (int, bool) {
+func (om *Map[K, V]) IdxByKeyTry(key K) (int, bool) {
 	idx, ok := om.Map[key]
 	return idx, ok
 }
