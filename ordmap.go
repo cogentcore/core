@@ -37,7 +37,7 @@ type KeyVal[K comparable, V any] struct {
 type Map[K comparable, V any] struct {
 
 	// ordered list of values and associated keys -- in order added
-	Order []*KeyVal[K, V] `desc:"ordered list of values and associated keys -- in order added"`
+	Order []KeyVal[K, V] `desc:"ordered list of values and associated keys -- in order added"`
 
 	// key to index mapping
 	Map map[K]int `desc:"key to index mapping"`
@@ -48,6 +48,18 @@ func New[K comparable, V any]() *Map[K, V] {
 	return &Map[K, V]{
 		Map: make(map[K]int),
 	}
+}
+
+// Constr constructs a new ordered map with the given key, value pairs
+func Constr[K comparable, V any](vals ...KeyVal[K, V]) *Map[K, V] {
+	om := &Map[K, V]{
+		Order: vals,
+		Map:   make(map[K]int, len(vals)),
+	}
+	for i, v := range om.Order {
+		om.Map[v.Key] = i
+	}
+	return om
 }
 
 // Init initializes the map if not done yet
@@ -70,10 +82,10 @@ func (om *Map[K, V]) Add(key K, val V) {
 	om.Init()
 	if idx, has := om.Map[key]; has {
 		om.Map[key] = idx
-		om.Order[idx] = &KeyVal[K, V]{Key: key, Val: val}
+		om.Order[idx] = KeyVal[K, V]{Key: key, Val: val}
 	} else {
 		om.Map[key] = len(om.Order)
-		om.Order = append(om.Order, &KeyVal[K, V]{Key: key, Val: val})
+		om.Order = append(om.Order, KeyVal[K, V]{Key: key, Val: val})
 	}
 }
 
@@ -84,7 +96,7 @@ func (om *Map[K, V]) ReplaceIdx(idx int, key K, val V) {
 		delete(om.Map, old.Key)
 		om.Map[key] = idx
 	}
-	om.Order[idx] = &KeyVal[K, V]{Key: key, Val: val}
+	om.Order[idx] = KeyVal[K, V]{Key: key, Val: val}
 }
 
 // InsertAtIdx inserts value with key at given index
@@ -101,7 +113,7 @@ func (om *Map[K, V]) InsertAtIdx(idx int, key K, val V) {
 		om.Map[om.Order[o].Key] = o + 1
 	}
 	om.Map[key] = idx
-	om.Order = slices.Insert(om.Order, idx, &KeyVal[K, V]{Key: key, Val: val})
+	om.Order = slices.Insert(om.Order, idx, KeyVal[K, V]{Key: key, Val: val})
 }
 
 // ValByKey returns value based on Key, along with bool reflecting

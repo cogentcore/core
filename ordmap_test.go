@@ -58,4 +58,14 @@ func TestOrdMap(t *testing.T) {
 		t.Errorf("InsertAtIdx IdxByKey: %d != 2", i)
 	}
 
+	// constr
+
+	nm := Constr[string, int]([]KeyVal[string, int]{{"one", 1}, {"two", 2}, {"three", 3}}...)
+	if nm.ValByIdx(2) != 3 {
+		t.Error("Constr ValByIdx 2")
+	}
+	if nm.ValByIdx(1) != 2 {
+		t.Error("Constr ValByIdx 1")
+	}
+
 }
