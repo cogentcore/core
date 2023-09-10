@@ -50,7 +50,4 @@ type Config struct {
 
 	// whether to generate GraphQL marshaling methods for gqlgen
 	GQL bool `desc:"whether to generate GraphQL marshaling methods for gqlgen"`
-
-	// a comment to include at the top of the generated code
-	Comment string `desc:"a comment to include at the top of the generated code"`
 }
