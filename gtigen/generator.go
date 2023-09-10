@@ -52,17 +52,17 @@ func (g *Generator) Printf(format string, args ...any) {
 // PrintHeader prints the header and package clause
 // to the accumulated output
 func (g *Generator) PrintHeader() {
-	// we need a manual import of enums because it is
+	// we need a manual import of gti because it is
 	// external, but goimports will handle everything else
-	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "goki.dev/enums")
+	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "goki.dev/gti")
 }
 
-// FindEnumTypes goes through all of the types in the package
-// and finds all integer (signed or unsigned) types labeled with enums:enum
-// or enums:bitflag. It stores the resulting types in [Generator.Types].
-func (g *Generator) FindEnumTypes() error {
+// Find goes through all of the types, functions, variables,
+// and constants in the package, finds those marked with gti:add,
+// and adds them to [Generator.Types] and [Generator.Funcs]
+func (g *Generator) Find() error {
 	g.Types = []*Type{}
-	gengo.Inspect(g.Pkg, g.InspectForType)
+	gengo.Inspect(g.Pkg, g.Inspect)
 	return nil
 }
 
@@ -71,12 +71,12 @@ func (g *Generator) FindEnumTypes() error {
 // It is stored as a map for quick and convenient access.
 var AllowedEnumTypes = map[string]bool{"int": true, "int64": true, "int32": true, "int16": true, "int8": true, "uint": true, "uint64": true, "uint32": true, "uint16": true, "uint8": true}
 
-// InspectForType looks at the given AST node and adds it
+// Inspect looks at the given AST node and adds it
 // to [Generator.Types] if it is marked with an appropriate
 // comment directive. It returns whether the AST inspector should
 // continue, and an error if there is one. It should only
 // be called in [ast.Inspect].
-func (g *Generator) InspectForType(n ast.Node) (bool, error) {
+func (g *Generator) Inspect(n ast.Node) (bool, error) {
 	ts, ok := n.(*ast.TypeSpec)
 	if !ok {
 		return true, nil
@@ -92,47 +92,49 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		if !has {
 			continue
 		}
-		if dir.Tool != "enums" {
+		if dir.Tool != "gti" {
 			continue
 		}
-		if dir.Directive != "enum" && dir.Directive != "bitflag" {
+		if dir.Directive != "add" {
 			return false, fmt.Errorf("unrecognized enums directive %q (from %q)", dir.Directive, c.Text)
 		}
 
-		ident, ok := ts.Type.(*ast.Ident)
-		if !ok {
-			return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", ts.Type, ts.Type)
-		}
-		cfg := &Config{}
-		*cfg = *g.Config
-		leftovers, err := grease.SetFromArgs(cfg, dir.Args)
-		if err != nil {
-			return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
-		}
-		if len(leftovers) > 0 {
-			return false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
-		}
+		fmt.Println("got type", ts)
 
-		typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
-		utyp := typ.Underlying()
+		// ident, ok := ts.Type.(*ast.Ident)
+		// if !ok {
+		// 	return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", ts.Type, ts.Type)
+		// }
+		// cfg := &Config{}
+		// *cfg = *g.Config
+		// leftovers, err := grease.SetFromArgs(cfg, dir.Args)
+		// if err != nil {
+		// 	return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
+		// }
+		// if len(leftovers) > 0 {
+		// 	return false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
+		// }
 
-		tt := &Type{Name: ts.Name.Name, Type: ts, Config: cfg}
-		if ident.String() != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
-			tt.Extends = ident.String()
-		}
-		switch dir.Directive {
-		case "enum":
-			if !AllowedEnumTypes[utyp.String()] {
-				return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)
-			}
-			tt.IsBitFlag = false
-		case "bitflag":
-			if utyp.String() != "int64" {
-				return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
-			}
-			tt.IsBitFlag = true
-		}
-		g.Types = append(g.Types, tt)
+		// typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
+		// utyp := typ.Underlying()
+
+		// tt := &Type{Name: ts.Name.Name, Type: ts, Config: cfg}
+		// if ident.String() != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
+		// 	tt.Extends = ident.String()
+		// }
+		// switch dir.Directive {
+		// case "enum":
+		// 	if !AllowedEnumTypes[utyp.String()] {
+		// 		return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)
+		// 	}
+		// 	tt.IsBitFlag = false
+		// case "bitflag":
+		// 	if utyp.String() != "int64" {
+		// 		return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
+		// 	}
+		// 	tt.IsBitFlag = true
+		// }
+		// g.Types = append(g.Types, tt)
 
 	}
 	return true, nil

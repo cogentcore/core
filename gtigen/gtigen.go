@@ -55,7 +55,7 @@ func GeneratePkgs(cfg *Config, pkgs []*packages.Package) error {
 	for _, pkg := range g.Pkgs {
 		g.Pkg = pkg
 		g.Buf.Reset()
-		err := g.FindEnumTypes()
+		err := g.Find()
 		if err != nil {
 			return fmt.Errorf("enumgen: Generate: error finding enum types for package %q: %w", pkg.Name, err)
 		}

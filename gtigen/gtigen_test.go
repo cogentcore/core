@@ -23,11 +23,11 @@ func TestGenerate(t *testing.T) {
 	if err != nil {
 		t.Errorf("error while generating: %v", err)
 	}
-	have, err := os.ReadFile("testdata/enumgen.go")
+	have, err := os.ReadFile("testdata/gtigen.go")
 	if err != nil {
 		t.Errorf("error while reading generated file: %v", err)
 	}
-	want, err := os.ReadFile("testdata/enumgen.golden")
+	want, err := os.ReadFile("testdata/gtigen.golden")
 	if err != nil {
 		t.Errorf("error while reading golden file: %v", err)
 	}
@@ -35,13 +35,13 @@ func TestGenerate(t *testing.T) {
 	// that can change based on where go test is ran.
 	_, shave, got := strings.Cut(string(have), "\n")
 	if !got {
-		t.Errorf("expected string with newline in testdata/enumgen.go, but got %q", have)
+		t.Errorf("expected string with newline in testdata/gtigen.go, but got %q", have)
 	}
 	_, swant, got := strings.Cut(string(want), "\n")
 	if !got {
-		t.Errorf("expected string with newline in testdata/enumgen.golden, but got %q", want)
+		t.Errorf("expected string with newline in testdata/gtigen.golden, but got %q", want)
 	}
 	if shave != swant {
-		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/enumgen.go and ./testdata/enumgen.golden to see the difference)")
+		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/gtigen.go and ./testdata/gtigen.golden to see the difference)")
 	}
 }
