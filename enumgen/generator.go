@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"go/ast"
 
-	"goki.dev/enums/enumgen/config"
 	"goki.dev/gengo"
 	"goki.dev/grease"
 	"golang.org/x/tools/go/packages"
@@ -26,7 +25,7 @@ import (
 // Generator holds the state of the generator.
 // It is primarily used to buffer the output.
 type Generator struct {
-	Config *config.Config      // The configuration information
+	Config *Config             // The configuration information
 	Buf    bytes.Buffer        // The accumulated output.
 	Pkgs   []*packages.Package // The packages we are scanning.
 	Pkg    *packages.Package   // The packages we are currently on.
