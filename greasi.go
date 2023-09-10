@@ -24,18 +24,18 @@ import (
 //	func (a *App) BuildCmd() error
 //
 // Run uses [os.Args] for its arguments.
-func Run(app any, defaultFile ...string) error {
-	leftovers, err := grease.Config(app, defaultFile...)
+func Run(app, cfg any) error {
+	leftovers, err := grease.Config(cfg)
 	if err != nil {
 		return fmt.Errorf("error configuring app: %w", err)
 	}
 	if len(leftovers) == 0 {
-		GUI(app)
+		GUI(app, cfg)
 		return nil
 	}
 	cmd := leftovers[0]
 
-	err = grease.RunCmd(app, cmd)
+	err = grease.RunCmd(app, cfg, cmd)
 	if err != nil {
 		return fmt.Errorf("error running command %q: %w", cmd, err)
 	}

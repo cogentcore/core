@@ -17,13 +17,14 @@ import (
 // GUI starts the GUI for the given
 // Grease app, which must be passed as
 // a pointer.
-func GUI(app any) {
+func GUI(app, cfg any) {
 	gimain.Main(func() {
-		mainrun(app)
+		MainRun(app, cfg)
 	})
 }
 
-func mainrun(app any) {
+// MainRun does GUI running on main thread
+func MainRun(app, cfg any) {
 	gi.SetAppName(grease.AppName)
 	gi.SetAppAbout(grease.AppAbout)
 
@@ -32,9 +33,12 @@ func mainrun(app any) {
 	updt := vp.UpdateStart()
 	mfr := win.SetMainFrame()
 
-	sv := giv.AddNewStructView(mfr, "sv")
-	sv.Viewport = vp
-	sv.SetStruct(app)
+	// todo: lame first fix: separate structviews of app and cfg
+	// later, once gti is working, then custom toolbar from gti info
+
+	svc := giv.AddNewStructView(mfr, "sv-cfg")
+	svc.Viewport = vp
+	svc.SetStruct(cfg)
 
 	// Main Menu
 
