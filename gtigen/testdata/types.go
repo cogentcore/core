@@ -6,8 +6,11 @@ package testdata
 
 // MyType is awesome
 //
-//git:add
-type MyType struct {
+//gti:add
+type MyType struct { // MyType is awesome
 	Name string
 	Age  int
 }
+
+// MyOtherType is awesome
+type MyOtherType int

@@ -11,6 +11,6 @@ type Config struct {
 	// [def: .] the source directory to run enumgen on (can be set to multiple through paths like ./...)
 	Dir string `def:"." desc:"the source directory to run enumgen on (can be set to multiple through paths like ./...)"`
 
-	// [def: enumgen.go] the output file location relative to the package on which enumgen is being called
-	Output string `def:"enumgen.go" desc:"the output file location relative to the package on which enumgen is being called"`
+	// [def: gtigen.go] the output file location relative to the package on which enumgen is being called
+	Output string `def:"gtigen.go" desc:"the output file location relative to the package on which enumgen is being called"`
 }

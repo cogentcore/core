@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/constant"
+	"go/doc"
 	"go/token"
 	"go/types"
 	"html"
@@ -62,7 +63,18 @@ func (g *Generator) PrintHeader() {
 // and adds them to [Generator.Types] and [Generator.Funcs]
 func (g *Generator) Find() error {
 	g.Types = []*Type{}
-	gengo.Inspect(g.Pkg, g.Inspect)
+	d, err := doc.NewFromFiles(g.Pkg.Fset, g.Pkg.Syntax, g.Pkg.PkgPath)
+	if err != nil {
+		return fmt.Errorf("error loading doc: %w", err)
+	}
+	for _, typ := range d.Types {
+		fmt.Println(typ.Name, typ.Doc, typ.Decl.Doc.Text())
+		if typ.Decl.Doc != nil {
+			for _, c := range typ.Decl.Doc.List {
+				fmt.Println(c.Text)
+			}
+		}
+	}
 	return nil
 }
 
@@ -77,14 +89,20 @@ var AllowedEnumTypes = map[string]bool{"int": true, "int64": true, "int32": true
 // continue, and an error if there is one. It should only
 // be called in [ast.Inspect].
 func (g *Generator) Inspect(n ast.Node) (bool, error) {
+	// fmt.Println(n, reflect.TypeOf(n))
 	ts, ok := n.(*ast.TypeSpec)
 	if !ok {
+		gd, ok := n.(*ast.GenDecl)
+		if ok {
+			fmt.Println(gd, gd.Doc.Text())
+		}
 		return true, nil
 	}
-	if ts.Comment == nil {
+	fmt.Println(ts.Name, ts.Doc, ts.Comment)
+	if ts.Doc == nil {
 		return true, nil
 	}
-	for _, c := range ts.Comment.List {
+	for _, c := range ts.Doc.List {
 		dir, has, err := grease.ParseDirective(c.Text)
 		if err != nil {
 			return false, fmt.Errorf("error parsing comment directive %q: %w", c.Text, err)
