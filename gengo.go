@@ -83,9 +83,9 @@ func Inspect(pkg *packages.Package, f func(n ast.Node) (bool, error)) error {
 	return nil
 }
 
-// Filename returns the filename of a file in the given
+// Filepath returns the filepath of a file in the given
 // package with the given filename relative to the package.
-func Filename(pkg *packages.Package, filename string) string {
+func Filepath(pkg *packages.Package, filename string) string {
 	dir := "."
 	if len(pkg.Syntax) > 0 {
 		dir = filepath.Dir(pkg.Fset.Position(pkg.Syntax[0].FileStart).Filename)
