@@ -16,21 +16,6 @@ import (
 	"text/template"
 )
 
-// Usize returns the number of bits of the smallest unsigned integer
-// type that will hold n. Used to create the smallest possible slice of
-// integers to use as indexes into the concatenated strings.
-func Usize(n int) int {
-	switch {
-	case n < 1<<8:
-		return 8
-	case n < 1<<16:
-		return 16
-	default:
-		// 2^32 is enough constants for anyone.
-		return 32
-	}
-}
-
 // BuildString builds the string function using a map access approach.
 func (g *Generator) BuildString(values []Value, typ *Type) {
 	g.Printf("\n")
