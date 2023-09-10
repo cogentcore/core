@@ -11,13 +11,12 @@ import (
 	"testing"
 
 	"goki.dev/enums"
-	"goki.dev/enums/enumgen/config"
 	"goki.dev/enums/enumgen/testdata"
 	"goki.dev/grease"
 )
 
 func TestGenerate(t *testing.T) {
-	c := &config.Config{}
+	c := &Config{}
 	err := grease.SetFromDefaults(c)
 	if err != nil {
 		t.Errorf("programmer error: error setting config from default tags: %v", err)

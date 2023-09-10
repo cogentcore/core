@@ -8,8 +8,6 @@ package enumgen
 
 import (
 	"fmt"
-
-	"goki.dev/enums/enumgen/config"
 )
 
 // Generate generates enum methods using
@@ -19,7 +17,7 @@ import (
 // It is a simple entry point to enumgen that does all
 // of the steps; for more specific functionality, create
 // a new [Generator] with [NewGenerator] and call methods on it.
-func Generate(config *config.Config) error {
+func Generate(config *Config) error {
 	g := NewGenerator(config)
 	err := g.ParsePackage()
 	if err != nil {

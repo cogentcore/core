@@ -35,7 +35,7 @@ type Generator struct {
 
 // NewGenerator returns a new generator with the
 // given configuration information.
-func NewGenerator(config *config.Config) *Generator {
+func NewGenerator(config *Config) *Generator {
 	return &Generator{Config: config}
 }
 
@@ -115,7 +115,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		if !ok {
 			return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", ts.Type, ts.Type)
 		}
-		cfg := &config.Config{}
+		cfg := &Config{}
 		*cfg = *g.Config
 		leftovers, err := grease.SetFromArgs(cfg, args)
 		if err != nil {
