@@ -21,6 +21,9 @@ var (
 	// if needed.
 	DefaultEncoding = "toml"
 
+	// DefaultFiles are the default configuration file paths
+	DefaultFiles []string = []string{"config.toml"}
+
 	// IncludePaths is a list of file paths to try for finding config files
 	// specified in Include field or via the command line --config --cfg or -c args.
 	// Set this prior to calling Config -- default is current directory '.' and 'configs'
@@ -62,7 +65,7 @@ var (
 //
 // Also processes -help or -h and prints usage and quits immediately.
 // Config uses [os.Args] for its arguments.
-func Config(cfg any, defaultFile ...string) ([]string, error) {
+func Config(cfg any) ([]string, error) {
 	var errs []error
 	err := SetFromDefaults(cfg)
 	if err != nil {
@@ -83,12 +86,13 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 		os.Exit(0)
 	}
 
-	if ConfigFile == "" {
-		nd := len(defaultFile)
-		if nd == 0 {
-			err = errors.New("grease.Config: no config file or defaultFile specified")
-			return nil, err
+	var cfgFiles []string
+	if ConfigFile != "" {
+		_, err := dirs.FindFileOnPaths(IncludePaths, ConfigFile)
+		if err == nil {
+			cfgFiles = append(cfgFiles, ConfigFile)
 		}
+	} else {
 		if SearchUp {
 			wd, err := os.Getwd()
 			if err != nil {
@@ -104,24 +108,26 @@ func Config(cfg any, defaultFile ...string) ([]string, error) {
 				IncludePaths = append(IncludePaths, wd)
 			}
 		}
-		for _, fn := range defaultFile {
+		for _, fn := range DefaultFiles {
 			_, err := dirs.FindFileOnPaths(IncludePaths, fn)
 			if err == nil {
-				ConfigFile = fn
-				break
+				cfgFiles = append(cfgFiles, fn)
 			}
 		}
-		if NeedConfigFile && ConfigFile == "" {
-			err = fmt.Errorf("grease.Config: none of the specified default config files exist: %v", defaultFile)
-			return nil, err
-		}
 	}
-	if ConfigFile != "" {
-		err = OpenWithIncludes(cfg, ConfigFile)
+
+	if NeedConfigFile && len(cfgFiles) == 0 {
+		err = errors.New("grease.Config: no config file or default files specified")
+		return nil, err
+	}
+
+	for _, fn := range cfgFiles {
+		err = OpenWithIncludes(cfg, fn)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
+
 	NonFlagArgs, err = SetFromArgs(cfg, args)
 	if err != nil {
 		errs = append(errs, err)

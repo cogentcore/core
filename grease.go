@@ -16,9 +16,11 @@ var (
 	// AppName is the internal name of the Grease app
 	// (typically in kebab-case) (see also [AppTitle])
 	AppName string = "grease"
+
 	// AppTitle is the user-visible name of the Grease app
 	// (typically in Title Case) (see also [AppName])
 	AppTitle string = "Grease"
+
 	// AppAbout is the description of the Grease app
 	AppAbout string = "Grease allows you to edit configuration information and run commands through a CLI and a GUI interface."
 )
@@ -41,17 +43,17 @@ var (
 // and "HelpCmd" does not exist, Run prints
 // the result of [Usage].
 // Run uses [os.Args] for its arguments.
-func Run(app any, defaultFile ...string) error {
-	leftovers, err := Config(app, defaultFile...)
+func Run(app, cfg any) error {
+	leftovers, err := Config(cfg)
 	if err != nil {
 		return fmt.Errorf("error configuring app: %w", err)
 	}
 	// root command if no other command is specified
-	cmd := "root"
+	cmd := ""
 	if len(leftovers) > 0 {
 		cmd = leftovers[0]
 	}
-	err = RunCmd(app, cmd)
+	err = RunCmd(app, cfg, cmd)
 	if err != nil {
 		return fmt.Errorf("error running command %q: %w", cmd, err)
 	}
@@ -64,19 +66,19 @@ func Run(app any, defaultFile ...string) error {
 // to camel case suffixed with "Cmd"; for example,
 // for a command named "build", it will look for a
 // method named "BuildCmd".
-func RunCmd(app any, cmd string) error {
+func RunCmd(app, cfg any, cmd string) error {
 	name := strcase.ToCamel(cmd) + "Cmd"
 	val := reflect.ValueOf(app)
 	meth := val.MethodByName(name)
 	if !meth.IsValid() {
-		if cmd == "root" || cmd == "help" { // handle root and help here so that people can still override them if they want to
+		if cmd == "" || cmd == "help" { // handle root and help here so that people can still override them if they want to
 			fmt.Println(Usage(app))
 			os.Exit(0)
 		}
 		return fmt.Errorf("command %q not found", cmd)
 	}
 
-	res := meth.Call(nil)
+	res := meth.Call([]reflect.Value{reflect.ValueOf(cfg)})
 
 	if len(res) != 1 {
 		return fmt.Errorf("programmer error: expected 1 return value (of type error) from %q but got %d instead", name, len(res))
