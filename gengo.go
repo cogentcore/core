@@ -83,6 +83,16 @@ func Inspect(pkg *packages.Package, f func(n ast.Node) (bool, error)) error {
 	return nil
 }
 
+// Filename returns the filename of a file in the given
+// package with the given filename relative to the package.
+func Filename(pkg *packages.Package, filename string) string {
+	dir := "."
+	if len(pkg.Syntax) > 0 {
+		dir = filepath.Dir(pkg.Fset.Position(pkg.Syntax[0].FileStart).Filename)
+	}
+	return filepath.Join(dir, filename)
+}
+
 // Write writes the given bytes to the given filename after
 // applying goimports using the given options.
 func Write(filename string, src []byte, opt *imports.Options) error {
