@@ -6,5 +6,12 @@ package gti
 
 // Field represents a field in a struct
 type Field struct {
-	Info
+	Name string
+
+	// Comment has all of the comment info as one string
+	// with directives removed.
+	Comment string
+
+	// Directives has the parsed comment directives
+	Directives Directives
 }

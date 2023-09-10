@@ -2,6 +2,26 @@
 
 Package GTI provides general purpose type information for Go types, methods, functions and variables
 
+# Syntax for function / method arg comments and directives
+
+This extra syntax is recognized for generating toolbar methodview actions in gi.
+
+```Go
+// MyFunc does some stuff
+//    @name: name of the person
+//    @age: age of the person
+//    @return official name of person, whether they are over 50, and an error.. 
+//
+//gi:toolbar -shortcut "Ctrl+M" -confirm -show-return
+//gti:add 
+//gti:arg @name -def "Gopher Blue"
+//gti:arg @age -def 42]
+//gti:ret [@0|@string|@name] -hide
+func MyFunc(name string, age int) (string, bool, error) {
+}
+```
+
+
 # key questions:
 
 * separate registries?  YES -- keeps it type specific

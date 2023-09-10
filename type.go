@@ -10,27 +10,28 @@ import (
 	"goki.dev/ordmap"
 )
 
-var (
-	// TypeIDCounter is an atomically incremented uint64 used
-	// for assigning new [Type.ID] numbers
-	TypeIDCounter uint64
-)
-
 // Type represents a type
 type Type struct {
-	Info
+	Name string
+
+	// Comment has all of the comment info as one string
+	// with directives removed.
+	Comment string
+
+	// Directives has the parsed comment directives
+	Directives Directives
 
 	// unique type ID number
 	ID uint64 `desc:"unique type ID number"`
 
 	// Methods are available for all types
-	Methods ordmap.Map[string, *Method]
+	Methods *ordmap.Map[string, *Method]
 
 	// Embeded fields for struct types
-	Embeds ordmap.Map[string, *Field]
+	Embeds *ordmap.Map[string, *Field]
 
 	// Fields for struct types
-	Fields ordmap.Map[string, *Field]
+	Fields *ordmap.Map[string, *Field]
 
 	// instance of the type
 	Instance any `desc:"instance of the type"`

@@ -6,5 +6,12 @@ package gti
 
 // Args represents an arg
 type Arg struct {
-	Info
+	Name string
+
+	// Comment has all of the comment info as one string
+	// with directives removed.
+	Comment string
+
+	// Directives has the parsed comment directives
+	Directives Directives
 }

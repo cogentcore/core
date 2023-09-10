@@ -13,6 +13,8 @@ type Directive struct {
 	Args      []string
 }
 
-// todo: decide if helper type needed
+// this is helpful for literals
 
 type Directives []*Directive
+
+// todo: methods for returning all directives for given tool name
