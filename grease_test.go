@@ -229,6 +229,7 @@ func TestSave(t *testing.T) {
 func TestConfigOpen(t *testing.T) {
 	// t.Skip("prints usage string")
 	IncludePaths = []string{".", "testdata"}
+	NeedConfigFile = true
 	cfg := &TestConfig{}
 	_, err := Config(cfg)
 	if err == nil {
@@ -236,13 +237,15 @@ func TestConfigOpen(t *testing.T) {
 		// } else {
 		// 	fmt.Println(err)
 	}
-	_, err = Config(cfg, "aldfkj.toml")
+	DefaultFiles = []string{"aldfkj.toml"}
+	_, err = Config(cfg)
 	if err == nil {
 		t.Errorf("should have Config error")
 		// } else {
 		// 	fmt.Println(err)
 	}
-	_, err = Config(cfg, "aldfkj.toml", "testcfg.toml")
+	DefaultFiles = []string{"aldfkj.toml", "testcfg.toml"}
+	_, err = Config(cfg)
 	if err != nil {
 		t.Error(err)
 	}
