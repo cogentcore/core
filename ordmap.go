@@ -223,3 +223,20 @@ func (om *Map[K, V]) Vals() []V {
 	}
 	return vl
 }
+
+// String returns the map as a string
+func (om *Map[K, V]) String() string {
+	return fmt.Sprintf("%v", om.Order)
+}
+
+// GoString returns the map as Go code
+func (om *Map[K, V]) GoString() string {
+	var zk K
+	var zv V
+	res := fmt.Sprintf("ordmap.Make([]ordmap.KeyVal[%T, %T]{\n", zk, zv)
+	for _, kv := range om.Order {
+		res += fmt.Sprintf("{%#v, %#v},\n", kv.Key, kv.Val)
+	}
+	res += "})"
+	return res
+}
