@@ -28,11 +28,22 @@ func (d *Directive) String() string {
 
 // GoString returns the directive as Go code.
 func (d *Directive) GoString() string {
-	return fmt.Sprintf("\n&%#v", *d)
+	return fmt.Sprintf("&%#v", *d)
 }
 
 // this is helpful for literals
 
 type Directives []*Directive
+
+// GoString returns the directives as Go code.
+func (d Directives) GoString() string {
+	res := "gti.Directives{\n"
+	for _, dir := range d {
+		res += dir.GoString()
+		res += ",\n"
+	}
+	res += "}"
+	return res
+}
 
 // todo: methods for returning all directives for given tool name
