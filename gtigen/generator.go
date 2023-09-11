@@ -193,9 +193,14 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 
 // GetFields creates and returns a new [gti.Fields] object
 // from the given [ast.FieldList], in the context of the
-// given surrounding config.
+// given surrounding config. If the given field list is
+// nil, GetFields still returns an empty but valid
+// [gti.Fields] value and no error.
 func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 	res := &gti.Fields{}
+	if list == nil {
+		return res, nil
+	}
 	for _, field := range list.List {
 		// if we have no name, fall back on type name
 		name := fmt.Sprintf("%v", field.Type)
