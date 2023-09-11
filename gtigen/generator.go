@@ -90,6 +90,7 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 		return true, nil
 	}
 	doc := gd.Doc.Text()
+	doc = strings.TrimSuffix(doc, "\n")
 	dirs := gti.Directives{}
 	hasAdd := false
 	cfg := &Config{}
