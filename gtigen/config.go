@@ -20,7 +20,7 @@ type Config struct {
 	ConstReg bool
 
 	// whether to generate an instance of the type(s)
-	Instances bool `desc:"whether to generate an instance of the type(s)"`
+	Instance bool `desc:"whether to generate an instance of the type(s)"`
 
 	// whether to generate a global type variable of the form 'TypeNameType'
 	TypeVar bool `desc:"whether to generate a global type variable of the form 'TypeNameType'"`

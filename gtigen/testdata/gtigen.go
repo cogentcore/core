@@ -8,5 +8,6 @@ import (
 
 var MyTypeType = &gti.Type{
 	Name:       "MyType",
-	Directives: gti.Directives{&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-type-var"}}, &gti.Directive{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}},
+	Directives: gti.Directives{&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-type-var", "-instance"}}, &gti.Directive{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}},
+	Instance:   &MyType{},
 }
