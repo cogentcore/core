@@ -166,6 +166,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 			return false, fmt.Errorf("error getting function return values: %w", err)
 		}
 		fun.Returns = rets
+		g.Funcs.Add(fun.Name, fun)
 	} else {
 		method := &gti.Method{
 			Name:       fd.Name.Name,
@@ -277,14 +278,17 @@ func (g *Generator) Generate() (bool, error) {
 		}
 		g.ExecTmpl(TypeTmpl, typ)
 	}
+	for _, fun := range g.Funcs.Order {
+		g.ExecTmpl(FuncTmpl, fun.Val)
+	}
 	return true, nil
 }
 
-// ExecTmpl executes the given template with the given type and
+// ExecTmpl executes the given template with the given data and
 // writes the result to [Generator.Buf]. It fatally logs any error.
-// All enumgen templates take a [Type] as their data.
-func (g *Generator) ExecTmpl(t *template.Template, typ *Type) {
-	err := t.Execute(&g.Buf, typ)
+// All gtigen templates take a [*Type] or [*gti.Func] as their data.
+func (g *Generator) ExecTmpl(t *template.Template, data any) {
+	err := t.Execute(&g.Buf, data)
 	if err != nil {
 		log.Fatalf("programmer error: internal error: error executing template: %v", err)
 	}

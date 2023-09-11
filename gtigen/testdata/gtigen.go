@@ -32,3 +32,8 @@ var PersonType = &gti.Type{
 	}),
 	Instance: &Person{},
 }
+
+var _ = &gti.Func{
+	Name: "Alert",
+	Doc:  "Alert prints an alert with the given message",
+}
