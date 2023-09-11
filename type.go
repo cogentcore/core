@@ -12,6 +12,7 @@ import (
 
 // Type represents a type
 type Type struct {
+	// Name is the fully-package-path-qualified name of the type (eg: goki.dev/gi/v2/gi.Button)
 	Name string
 
 	// Doc has all of the comment documentation

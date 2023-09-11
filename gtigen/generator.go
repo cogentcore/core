@@ -129,6 +129,7 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 		}
 		typ := &Type{
 			Name:       ts.Name.Name,
+			FullName:   g.Pkg.PkgPath + "." + ts.Name.Name,
 			Type:       ts,
 			Doc:        doc,
 			Directives: dirs,

@@ -8,7 +8,7 @@ import "text/template"
 
 var TypeTmpl = template.Must(template.New("Type").Parse(
 	`var {{if .Config.TypeVar}} {{.Name}}Type {{else}} _ {{end}} = &gti.Type{
-		Name: "{{.Name}}",
+		Name: "{{.FullName}}",
 		Doc: ` + "`" + `{{.Doc}}` + "`" + `,
 		Directives: gti.Directives{ {{range .Directives}} {{printf "%#v" .}}, {{end}} },
 		{{if .Config.Instance}} Instance: &{{.Name}}{}, {{end}}

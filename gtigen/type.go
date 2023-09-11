@@ -13,7 +13,8 @@ import (
 
 // Type represents a parsed enum type.
 type Type struct {
-	Name       string         // The name of the type
+	Name       string         // The name of the type in its package (eg: MyType)
+	FullName   string         // The fully-package-path-qualified name of the type (eg: goki.dev/ki/v2.MyType)
 	Type       *ast.TypeSpec  // The standard AST type value
 	Doc        string         // The documentation for the type
 	Directives gti.Directives // The directives for the type; guaranteed to be non-nil

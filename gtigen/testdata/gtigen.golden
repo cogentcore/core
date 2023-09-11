@@ -7,7 +7,7 @@ import (
 )
 
 var MyTypeType = &gti.Type{
-	Name:       "MyType",
+	Name:       "goki.dev/gti/gtigen/testdata.MyType",
 	Doc:        `MyType is awesome`,
 	Directives: gti.Directives{&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-type-var", "-instance"}}, &gti.Directive{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}},
 	Instance:   &MyType{},
