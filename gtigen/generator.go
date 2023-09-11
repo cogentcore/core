@@ -152,7 +152,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 
 	if fd.Recv == nil {
 		fun := &gti.Func{
-			Name:       fd.Name.Name,
+			Name:       g.Pkg.PkgPath + "." + fd.Name.Name,
 			Doc:        doc,
 			Directives: dirs,
 		}

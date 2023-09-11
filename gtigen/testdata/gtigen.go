@@ -34,7 +34,7 @@ var PersonType = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "Alert",
+	Name: "goki.dev/gti/gtigen/testdata.Alert",
 	Doc:  "Alert prints an alert with the given message",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
