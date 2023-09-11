@@ -6,7 +6,8 @@ package gti
 
 import "goki.dev/ordmap"
 
-// Field represents a field in a struct
+// Field represents a field or embed in a struct,
+// or an argument or return value of a function.
 type Field struct {
 	Name string
 
@@ -18,5 +19,5 @@ type Field struct {
 	Directives Directives
 }
 
-// Fields represents multiple fields in a struct
+// Fields represents a set of multiple [Field] objects
 type Fields = ordmap.Map[string, *Field]

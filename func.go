@@ -18,10 +18,10 @@ type Func struct {
 	Directives Directives
 
 	// Args are arguments to the method
-	Args *Args
+	Args *Fields
 
-	// Returns are return values of the function
-	Returns *Args
+	// Returns are return values of the method
+	Returns *Fields
 
 	// unique type ID number
 	ID uint64 `desc:"unique type ID number"`
@@ -38,12 +38,12 @@ type Method struct {
 	// Directives has the parsed comment directives
 	Directives Directives
 
-	// Args are arguments to the method
-	Args *Args
+	// Args are arguments to the function
+	Args *Fields
 
 	// Returns are return values of the function
-	Returns *Args
+	Returns *Fields
 }
 
-// Methods represents multiple methods on a type
-type Methods ordmap.Map[string, *Method]
+// Methods represents a set of multiple [Method] objects
+type Methods = ordmap.Map[string, *Method]
