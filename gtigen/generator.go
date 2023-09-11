@@ -148,7 +148,6 @@ func (g *Generator) Generate() (bool, error) {
 		return false, nil
 	}
 	for _, typ := range g.Types {
-		fmt.Println(typ)
 		g.ExecTmpl(TypeTmpl, typ)
 		// values := make([]Value, 0, 100)
 		// // for _, file := range g.Pkg.Syntax {
