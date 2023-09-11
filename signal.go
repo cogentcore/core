@@ -7,8 +7,6 @@ package ki
 import (
 	"fmt"
 	"sync"
-
-	"goki.dev/ki/v2/kit"
 )
 
 // note: Started this code based on: github.com/tucnak/meta/
@@ -97,8 +95,6 @@ type Signal struct {
 	// [view: -] read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes
 	Mu sync.RWMutex `view:"-" json:"-" xml:"-" desc:"read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes"`
 }
-
-var TypeSignal = kit.Types.AddType(&Signal{}, nil)
 
 // ConnectOnly first deletes any existing connections and then attaches a new
 // receiver to the signal

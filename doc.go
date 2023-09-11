@@ -28,7 +28,7 @@ functionality, including:
     cached-out after loading -- enums also bidirectionally convertable to
     strings using enum type registry in kit package.
 
-  - Robust deep copy, clone, move of nodes, with automatic pointer updating.
+  - Robust deep copy, clone, move of nodes.
 
   - Signal sending and receiving between Nodes (simlar to Qt Signals /
     Slots) -- setup connections once and then emit signals to all receivers
@@ -65,5 +65,3 @@ on that interface instead of directly on the receiver Node itself.
 This requires proper initialization via Init method of the Ki interface.
 */
 package ki
-
-//go:generate goki generate

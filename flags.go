@@ -4,6 +4,8 @@
 
 package ki
 
+//go:generate enumgen
+
 // Flags are bit flags for efficient core state of nodes -- see bitflag
 // package for using these ordinal values to manipulate bit flag field.
 type Flags int64 //enums:bitflag
@@ -11,16 +13,6 @@ type Flags int64 //enums:bitflag
 const (
 	// IsField indicates a node is a field in its parent node, not a child in children.
 	IsField Flags = iota
-
-	// HasKiFields indicates a node has Ki Node fields that will be processed in recursive descent.
-	// Use the HasFields() method to check as it will establish validity of flags on first call.
-	// If neither HasFields nor HasNoFields are set, then it knows to update flags.
-	HasKiFields
-
-	// HasNoKiFields indicates a node has NO Ki Node fields that will be processed in recursive descent.
-	// Use the HasFields() method to check as it will establish validity of flags on first call.
-	// If neither HasFields nor HasNoFields are set, then it knows to update flags.
-	HasNoKiFields
 
 	// Updating flag is set at UpdateStart and cleared if we were the first
 	// updater at UpdateEnd.
@@ -55,17 +47,19 @@ const (
 	ValUpdated
 )
 
+/*
 const (
 	// ChildUpdateFlagsMask is a mask for all child updates.
-	ChildUpdateFlagsMask = (1 << uint32(ChildAdded)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
+	ChildUpdateFlagsMask = (1 << int64(ChildAdded)) | (1 << int64(ChildDeleted)) | (1 << int64(ChildrenDeleted))
 
 	// StruUpdateFlagsMask is a mask for all structural changes update flags.
-	StruUpdateFlagsMask = ChildUpdateFlagsMask | (1 << uint32(NodeDeleted))
+	StruUpdateFlagsMask = ChildUpdateFlagsMask | (1 << int64(NodeDeleted))
 
 	// ValUpdateFlagsMask is a mask for all non-structural, value-only changes update flags.
-	ValUpdateFlagsMask = (1 << uint32(ValUpdated))
+	ValUpdateFlagsMask = (1 << int64(ValUpdated))
 
 	// UpdateFlagsMask is a Mask for all the update flags -- destroyed is
 	// excluded b/c otherwise it would get cleared.
 	UpdateFlagsMask = StruUpdateFlagsMask | ValUpdateFlagsMask
 )
+*/

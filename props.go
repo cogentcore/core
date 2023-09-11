@@ -9,17 +9,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"reflect"
 	"strings"
-
-	"goki.dev/ki/v2/kit"
 )
 
 // Props is the type used for holding generic properties -- the actual Go type
 // is a mouthful and not very gui-friendly, and we need some special json methods
 type Props map[string]any
-
-var TypeProps = kit.Types.AddType(&Props{}, PropsProps)
 
 var PropsProps = Props{
 	"basic-type": true, // registers props as a basic type avail for type selection in creating property values -- many cases call for nested properties
@@ -57,6 +52,10 @@ func SubProps(pr map[string]any, key string) (Props, bool) {
 	return nil, false
 }
 
+/*
+
+todo: replace with GTI
+
 // SubTypeProps returns a value that contains another props, or nil and false if
 // it doesn't exist or isn't a Props -- for TypeProps, uses locking
 func SubTypeProps(pr map[string]any, key string) (Props, bool) {
@@ -70,6 +69,7 @@ func SubTypeProps(pr map[string]any, key string) (Props, bool) {
 	}
 	return nil, false
 }
+*/
 
 // SetPropStr is a convenience method for e.g., python wrapper that avoids need to deal
 // directly with props interface{} type
@@ -123,6 +123,10 @@ func SliceProps(pr map[string]any, key string) (PropSlice, bool) {
 	return nil, false
 }
 
+/*
+
+todo: replace with GTI
+
 // SliceTypeProps returns a value that contains a PropSlice, or nil and false if it doesn't
 // exist or isn't a PropSlice -- for TypeProps, uses locking
 func SliceTypeProps(pr map[string]any, key string) (PropSlice, bool) {
@@ -136,6 +140,7 @@ func SliceTypeProps(pr map[string]any, key string) (PropSlice, bool) {
 	}
 	return nil, false
 }
+*/
 
 // CopyProps copies properties from source to destination map.  If deepCopy
 // is true, then any values that are Props or PropSlice are copied too
@@ -218,30 +223,24 @@ func (p Props) MarshalJSON() ([]byte, error) {
 	cnt := 0
 	var err error
 	for key, val := range p {
-		vt := kit.NonPtrType(reflect.TypeOf(val))
-		vk := vt.Kind()
-		if vk == reflect.Struct {
-			knm := kit.Types.TypeName(vt)
-			tstr := fmt.Sprintf("\"%v%v\": \"%v\",", struTypeKey, key, knm)
-			b = append(b, []byte(tstr)...)
-		}
+		// vt := kit.NonPtrType(reflect.TypeOf(val)) // todo
+		// vt := reflect.TypeOf(val)
+		// vk := vt.Kind()
+		// if vk == reflect.Struct { // todo:  GTI if needed
+		// 	knm := kit.Types.TypeName(vt)
+		// 	tstr := fmt.Sprintf("\"%v%v\": \"%v\",", struTypeKey, key, knm)
+		// 	b = append(b, []byte(tstr)...)
+		// }
 		kstr := fmt.Sprintf("\"%v\": ", key)
 		b = append(b, []byte(kstr)...)
 
 		var kb []byte
 		kb, err = json.Marshal(val)
 		if err != nil {
-			log.Printf("error doing json.Marshall from val: %v\n%v\n", val, err)
+			log.Printf("error doing json.Marshal from val: %v\n%v\n", val, err)
 			log.Printf("output to point of error: %v\n", string(b))
 		} else {
-			if vk >= reflect.Int && vk <= reflect.Uint64 && kit.Enums.TypeRegistered(vt) {
-				knm := kit.Types.TypeName(vt)
-				kb, _ = json.Marshal(val)
-				estr := fmt.Sprintf("\"%v(%v)%v\"", enumTypeKey, knm, string(bytes.Trim(kb, "\"")))
-				b = append(b, []byte(estr)...)
-			} else {
-				b = append(b, kb...)
-			}
+			b = append(b, kb...)
 		}
 		if cnt < nk-1 {
 			b = append(b, []byte(",")...)
@@ -274,40 +273,40 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 
 	// create all the structure objects from the list -- have to do this first to get all
 	// the structs made b/c the order is random..
-	for key, val := range tmp {
-		if strings.HasPrefix(key, struTypeKey) {
-			pkey := strings.TrimPrefix(key, struTypeKey)
-			rval := tmp[pkey]
-			tn := val.(string)
-			typ := kit.Types.Type(tn)
-			if typ == nil {
-				log.Printf("ki.Props: cannot load struct of type %v -- not registered in kit.Types\n", tn)
-				continue
-			}
-			if IsKi(typ) { // note: not really a good idea to store ki's in maps, but..
-				kival := NewOfType(typ)
-				InitNode(kival)
-				if kival != nil {
-					// fmt.Printf("stored new ki of type %v in key: %v\n", typ.String(), pkey)
-					tmpb, _ := json.Marshal(rval) // string rep of this
-					err = kival.ReadJSON(bytes.NewReader(tmpb))
-					if err != nil {
-						log.Printf("ki.Props failed to load Ki struct of type %v with error: %v\n", typ.String(), err)
-					}
-					(*p)[pkey] = kival
-				}
-			} else {
-				stval := reflect.New(typ).Interface()
-				// fmt.Printf("stored new struct of type %v in key: %v\n", typ.String(), pkey)
-				tmpb, _ := json.Marshal(rval) // string rep of this
-				err = json.Unmarshal(tmpb, stval)
-				if err != nil {
-					log.Printf("ki.Props failed to load struct of type %v with error: %v\n", typ.String(), err)
-				}
-				(*p)[pkey] = reflect.ValueOf(stval).Elem().Interface()
-			}
-		}
-	}
+	// for key, val := range tmp {
+	// if strings.HasPrefix(key, struTypeKey) {
+	// 	pkey := strings.TrimPrefix(key, struTypeKey)
+	// 	rval := tmp[pkey]
+	// 	tn := val.(string)
+	// 	typ := kit.Types.Type(tn)
+	// 	if typ == nil {
+	// 		log.Printf("ki.Props: cannot load struct of type %v -- not registered in kit.Types\n", tn)
+	// 		continue
+	// 	}
+	// 	if IsKi(typ) { // note: not really a good idea to store ki's in maps, but..
+	// 		kival := NewOfType(typ)
+	// 		InitNode(kival)
+	// 		if kival != nil {
+	// 			// fmt.Printf("stored new ki of type %v in key: %v\n", typ.String(), pkey)
+	// 			tmpb, _ := json.Marshal(rval) // string rep of this
+	// 			err = kival.ReadJSON(bytes.NewReader(tmpb))
+	// 			if err != nil {
+	// 				log.Printf("ki.Props failed to load Ki struct of type %v with error: %v\n", typ.String(), err)
+	// 			}
+	// 			(*p)[pkey] = kival
+	// 		}
+	// 	} else {
+	// 		stval := reflect.New(typ).Interface()
+	// 		// fmt.Printf("stored new struct of type %v in key: %v\n", typ.String(), pkey)
+	// 		tmpb, _ := json.Marshal(rval) // string rep of this
+	// 		err = json.Unmarshal(tmpb, stval)
+	// 		if err != nil {
+	// 			log.Printf("ki.Props failed to load struct of type %v with error: %v\n", typ.String(), err)
+	// 		}
+	// 		(*p)[pkey] = reflect.ValueOf(stval).Elem().Interface()
+	// 	}
+	//   }
+	// }
 
 	// now can re-iterate
 	for key, val := range tmp {
@@ -328,23 +327,6 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 			}
 			(*p)[key] = subp
 		} else { // straight copy
-			if sval, ok := val.(string); ok {
-				if strings.HasPrefix(sval, enumTypeKey) {
-					tn := strings.TrimPrefix(sval, enumTypeKey)
-					rpi := strings.Index(tn, ")")
-					str := tn[rpi+1:]
-					tn = tn[1:rpi]
-					etyp := kit.Enums.Enum(tn)
-					if etyp != nil {
-						eval := kit.EnumIfaceFromString(str, etyp)
-						(*p)[key] = eval
-						// fmt.Printf("decoded enum typ %v into actual value: %v from %v\n", etyp.String(), eval, str)
-					} else {
-						(*p)[key] = str
-					}
-					continue
-				}
-			}
 			(*p)[key] = val
 		}
 	}

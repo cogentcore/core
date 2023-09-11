@@ -11,8 +11,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-
-	"goki.dev/ki/v2/kit"
 )
 
 type NodeEmbed struct {
@@ -27,22 +25,16 @@ var NodeEmbedProps = Props{
 	"stringprop": "type string",
 }
 
-var TypeNodeEmbed = kit.Types.AddType(&NodeEmbed{}, NodeEmbedProps)
-
 type NodeField struct {
 	NodeEmbed
 	Field1 NodeEmbed
 }
-
-var TypeNodeField = kit.Types.AddType(&NodeField{}, nil)
 
 type NodeField2 struct {
 	NodeField
 	Field2    NodeEmbed
 	PtrIgnore *NodeEmbed
 }
-
-var TypeNodeField2 = kit.Types.AddType(&NodeField2{}, nil)
 
 func TestNodeAddChild(t *testing.T) {
 	parent := NodeEmbed{}
@@ -322,7 +314,7 @@ func TestNodeConfig(t *testing.T) {
 	// child4 :=
 	parent.NewChild(typ, "child3")
 
-	config1 := kit.TypeAndNameList{
+	config1 := TypeAndNameList{
 		{Type: TypeNodeEmbed, Name: "child2"},
 		{Type: TypeNodeEmbed, Name: "child3"},
 		{Type: TypeNodeEmbed, Name: "child1"},
@@ -337,27 +329,13 @@ func TestNodeConfig(t *testing.T) {
 
 	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Kids)
 
-	// config2 := kit.TypeAndNameList{
+	// config2 := TypeAndNameList{
 	// 	{TypeNodeEmbed, "child4"},
 	// 	{TypeNode, "child1"}, // note: changing this to Node type removes child1.subchild1
 	// 	{TypeNodeEmbed, "child5"},
 	// 	{TypeNodeEmbed, "child3"},
 	// 	{TypeNodeEmbed, "child6"},
 	// }
-
-	config3 := kit.TypeAndNameList{}
-	// fmt.Printf("NodeEmbed type name: %v\n", kit.FullTypeName(TypeNodeEmbed))
-	netn := kit.Types.TypeName(TypeNodeEmbed)
-	ntn := kit.Types.TypeName(TypeNode)
-	err := config3.SetFromString("{" + netn + ", child4}, {" + ntn + ", child1}, {" + netn + ", child5}, {" + netn + ", child3}, {" + netn + ", child6}")
-	if err != nil {
-		t.Errorf("%v", err)
-	}
-
-	mods, updt = parent.ConfigChildren(config3)
-	if mods {
-		parent.UpdateEnd(updt)
-	}
 
 	cf2 := fmt.Sprintf("config2:\n%v\n", parent.Kids)
 
@@ -607,8 +585,7 @@ func TestNodeUpdate(t *testing.T) {
 
 	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
-		res = append(res, fmt.Sprintf("%v sig %v flags %v", s.Name(), NodeSignals(sig),
-			kit.BitFlagsToString((s.Flags()), FlagsN)))
+		res = append(res, fmt.Sprintf("%v sig %v flags %v", s.Name(), NodeSignals(sig), s.Flags.String()))
 	})
 	// child1 :=
 	updt := parent.UpdateStart()
@@ -691,7 +668,7 @@ func TestProps(t *testing.T) {
 	schild2 := child2.NewChild(typ, "subchild1")
 
 	parent.SetProp("intprop", 42)
-	pprop, ok := kit.ToInt(parent.Prop("intprop"))
+	pprop, ok := parent.Prop("intprop").(int)
 	if !ok || pprop != 42 {
 		t.Errorf("TestProps error -- pprop %v != %v\n", pprop, 42)
 	}
@@ -699,7 +676,7 @@ func TestProps(t *testing.T) {
 	if !ok {
 		t.Errorf("TestProps error -- intprop inherited not found\n")
 	}
-	sint, ok := kit.ToInt(sprop)
+	sint, ok := sprop.(int)
 	if !ok || sprop != 42 {
 		t.Errorf("TestProps error -- intprop inherited %v != %v\n", sint, 42)
 	}
@@ -713,7 +690,7 @@ func TestProps(t *testing.T) {
 	if !ok {
 		t.Errorf("TestProps error -- floatprop inherited not found\n")
 	}
-	spropf, ok := kit.ToFloat(sprop)
+	spropf, ok := sprop(float64)
 	if !ok || spropf != 42.0 {
 		t.Errorf("TestProps error -- floatprop inherited %v != %v\n", spropf, 42.0)
 	}
@@ -724,7 +701,7 @@ func TestProps(t *testing.T) {
 	if !ok {
 		t.Errorf("TestProps error -- stringprop not found\n")
 	}
-	sprops := kit.ToString(sprop)
+	sprops := sprop.(string)
 	if sprops != tstr {
 		t.Errorf("TestProps error -- sprops inherited %v != %v\n", sprops, tstr)
 	}
@@ -739,7 +716,7 @@ func TestProps(t *testing.T) {
 	if !ok {
 		t.Errorf("TestProps error -- floatprop on type not found\n")
 	}
-	spropf, ok = kit.ToFloat(sprop)
+	spropf, ok = sprop.(float64)
 	if !ok || spropf != 3.1415 {
 		t.Errorf("TestProps error -- floatprop from type %v != %v\n", spropf, 3.1415)
 	}
@@ -916,40 +893,6 @@ func TestNodeFieldJSONSave(t *testing.T) {
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
 		}
-	}
-}
-
-func TestNodeFieldSet(t *testing.T) {
-	parent := NodeField2{}
-	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
-	parent.Mbr1 = "bloop"
-	parent.Mbr2 = 32
-	// child1 :=
-	parent.NewChild(typ, "child1")
-	child2 := parent.NewChild(typ, "child1").(*NodeField2)
-	// child3 :=
-	parent.NewChild(typ, "child1")
-	child2.NewChild(typ, "subchild1")
-
-	ts := "child2 is nice"
-	err := child2.SetField("Mbr1", ts)
-	if err != nil {
-		t.Error(err)
-	}
-	fs := kit.NonPtrInterface(FieldByName(child2.This(), "Mbr1"))
-	if fs != ts {
-		t.Errorf("Set field error: %+v != %+v\n", fs, ts)
-	}
-
-	ts = "45.21"
-	err = child2.SetField("Mbr1", 45.21)
-	if err != nil {
-		t.Error(err)
-	}
-	fs = kit.NonPtrInterface(FieldByName(child2.This(), "Mbr1"))
-	if fs != ts {
-		t.Errorf("Set field error: %+v != %+v\n", fs, ts)
 	}
 }
 

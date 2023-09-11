@@ -6,9 +6,6 @@ package ki
 
 import (
 	"fmt"
-	"reflect"
-
-	"goki.dev/ki/v2/kit"
 )
 
 // Slice is just a slice of ki elements: []Ki, providing methods for accessing
@@ -159,23 +156,16 @@ func (sl *Slice) IndexByName(name string, startIdx int) (int, bool) {
 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Name() == name })
 }
 
-// SliceIndexByType returns index of element that either is that type or embeds
-// that type, false if not found. See IndexOf for info on startIdx.
-func SliceIndexByType(sl *[]Ki, t reflect.Type, embeds bool, startIdx int) (int, bool) {
-	if embeds {
-		return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return TypeEmbeds(ch, t) })
-	}
-	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return Type(ch) == t })
-}
+// todo: gti
 
-// IndexByType returns index of element that either is that type or embeds
-// that type, false if not found. See IndexOf for info on startIdx.
-func (sl *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) (int, bool) {
-	if embeds {
-		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return TypeEmbeds(ch, t) })
-	}
-	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return Type(ch) == t })
-}
+// // IndexByType returns index of element that either is that type or embeds
+// // that type, false if not found. See IndexOf for info on startIdx.
+// func (sl *Slice) IndexByType(t *gti.Type, embeds bool, startIdx int) (int, bool) {
+// 	if embeds {
+// 		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return TypeEmbeds(ch, t) })
+// 	}
+// 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return Type(ch) == t })
+// }
 
 // ElemByName returns first element that has given name, nil if not found.
 // See IndexOf for info on startIdx.
@@ -197,25 +187,27 @@ func (sl *Slice) ElemByNameTry(name string, startIdx int) (Ki, error) {
 	return (*sl)[idx], nil
 }
 
-// ElemByType returns index of element that either is that type or embeds
-// that type, nil if not found. See IndexOf for info on startIdx.
-func (sl *Slice) ElemByType(t reflect.Type, embeds bool, startIdx int) Ki {
-	idx, ok := sl.IndexByType(t, embeds, startIdx)
-	if !ok {
-		return nil
-	}
-	return (*sl)[idx]
-}
+// todo: gti
 
-// ElemByTypeTry returns index of element that either is that type or embeds
-// that type, error if not found. See IndexOf for info on startIdx.
-func (sl *Slice) ElemByTypeTry(t reflect.Type, embeds bool, startIdx int) (Ki, error) {
-	idx, ok := sl.IndexByType(t, embeds, startIdx)
-	if !ok {
-		return nil, fmt.Errorf("ki.Slice: element of type: %v not found", t)
-	}
-	return (*sl)[idx], nil
-}
+// // ElemByType returns index of element that either is that type or embeds
+// // that type, nil if not found. See IndexOf for info on startIdx.
+// func (sl *Slice) ElemByType(t *gti.Type, embeds bool, startIdx int) Ki {
+// 	idx, ok := sl.IndexByType(t, embeds, startIdx)
+// 	if !ok {
+// 		return nil
+// 	}
+// 	return (*sl)[idx]
+// }
+//
+// // ElemByTypeTry returns index of element that either is that type or embeds
+// // that type, error if not found. See IndexOf for info on startIdx.
+// func (sl *Slice) ElemByTypeTry(t *gti.Type, embeds bool, startIdx int) (Ki, error) {
+// 	idx, ok := sl.IndexByType(t, embeds, startIdx)
+// 	if !ok {
+// 		return nil, fmt.Errorf("ki.Slice: element of type: %v not found", t)
+// 	}
+// 	return (*sl)[idx], nil
+// }
 
 // SliceInsert item at index -- does not do any parent updating etc -- use Ki/Node
 // method unless you know what you are doing.
@@ -310,19 +302,6 @@ func (sl *Slice) Swap(i, j int) error {
 	return SliceSwap((*[]Ki)(sl), i, j)
 }
 
-// TypeAndNames returns a kit.TypeAndNameList of elements in the slice --
-// useful for Ki ConfigChildren.
-func (sl *Slice) TypeAndNames() kit.TypeAndNameList {
-	if len(*sl) == 0 {
-		return nil
-	}
-	tn := make(kit.TypeAndNameList, len(*sl))
-	for _, kid := range *sl {
-		tn.Add(Type(kid), kid.Name())
-	}
-	return tn
-}
-
 ///////////////////////////////////////////////////////////////////////////
 // Config
 
@@ -331,7 +310,7 @@ func (sl *Slice) TypeAndNames() kit.TypeAndNameList {
 // type-and-name list.  If the node is != nil, then it has UpdateStart / End
 // logic applied to it, only if necessary, as indicated by mods, updt return
 // values.
-func (sl *Slice) Config(n Ki, config kit.TypeAndNameList) (mods, updt bool) {
+func (sl *Slice) Config(n Ki, config TypeAndNameList) (mods, updt bool) {
 	mods, updt = false, false
 	// first make a map for looking up the indexes of the names
 	nm := make(map[string]int)
@@ -346,7 +325,7 @@ func (sl *Slice) Config(n Ki, config kit.TypeAndNameList) (mods, updt bool) {
 		ti, ok := nm[knm]
 		if !ok {
 			sl.configDeleteKid(kid, i, n, &mods, &updt)
-		} else if Type(kid) != config[ti].Type {
+		} else if kid.Type() != config[ti].Type {
 			sl.configDeleteKid(kid, i, n, &mods, &updt)
 		}
 	}
@@ -388,10 +367,10 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 		*mods = true
 		if n != nil {
 			*updt = n.UpdateStart()
-			n.SetFlag(int(ChildDeleted))
+			n.SetFlag(true, ChildDeleted)
 		}
 	}
-	kid.SetFlag(int(NodeDeleted))
+	kid.SetFlag(true, NodeDeleted)
 	kid.NodeSignal().Emit(kid, int64(NodeSignalDeleting), nil)
 	SetParent(kid, nil)
 	DelMgr.Add(kid)
@@ -418,9 +397,9 @@ func (sl *Slice) CopyFrom(frm Slice) {
 func (sl *Slice) ConfigCopy(n Ki, frm Slice) {
 	sz := len(frm)
 	if sz > 0 || n == nil {
-		cfg := make(kit.TypeAndNameList, sz)
+		cfg := make(TypeAndNameList, sz)
 		for i, kid := range frm {
-			cfg[i].Type = Type(kid)
+			cfg[i].Type = kid.Type()
 			cfg[i].Name = kid.Name()
 		}
 		mods, updt := sl.Config(n, cfg)

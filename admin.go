@@ -9,8 +9,6 @@ import (
 	"log"
 	"strings"
 	"sync"
-
-	"goki.dev/laser"
 )
 
 // admin has infrastructure level code, outside of ki interface
@@ -26,7 +24,7 @@ import (
 // parent.
 func InitNode(this Ki) {
 	n := this.AsNode()
-	this.ClearFlagMask(int64(UpdateFlagsMask))
+	this.ClearUpdateFlags()
 	if n.Ths != this {
 		n.Ths = this
 		n.Ths.OnInit()
@@ -59,8 +57,8 @@ func SetParent(kid Ki, parent Ki) {
 	if parent != nil && !parent.OnlySelfUpdate() {
 		parup := parent.IsUpdating()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
-			k.SetFlagState(parup, int(Updating))
-			return true
+			k.SetFlag(parup, Updating)
+			return Continue
 		})
 	}
 }
@@ -79,8 +77,9 @@ func MoveToParent(kid Ki, parent Ki) {
 // New adds a new child of the given the type
 // with the given name to the given parent.
 // It is a helper function that calls [Ki.NewChild].
-func New[T Ki](par Ki, name string) {
-	par.NewChild(laser.TypeFor[T](), name)
+func New(par Ki, name string) {
+	// todo: use gti type, not laser
+	// par.NewChild(laser.TypeFor[T](), name)
 }
 
 // IsRoot tests if this node is the root node -- checks Parent = nil.
@@ -116,37 +115,13 @@ func SetDepth(kn Ki, depth int) {
 // only call at a known point of non-updating.
 func UpdateReset(kn Ki) {
 	if kn.OnlySelfUpdate() {
-		kn.ClearFlag(int(Updating))
+		kn.SetFlag(false, Updating)
 	} else {
 		kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
-			k.ClearFlag(int(Updating))
+			k.SetFlag(false, Updating)
 			return true
 		})
 	}
-}
-
-//////////////////////////////////////////////////////////////////
-// Fields
-
-// FieldByName returns field value by name (can be any type of field --
-// see KiFieldByName for Ki fields) -- returns nil if not found.
-func FieldByName(kn Ki, field string) any {
-	return laser.FlatFieldInterfaceByName(kn.This(), field)
-}
-
-// FieldByNameTry returns field value by name (can be any type of field --
-// see KiFieldByName for Ki fields) -- returns error if not found.
-func FieldByNameTry(kn Ki, field string) (any, error) {
-	fld := FieldByName(kn, field)
-	if fld != nil {
-		return fld, nil
-	}
-	return nil, fmt.Errorf("ki %v: field named: %v not found", kn.Path(), field)
-}
-
-// FieldTag returns given field tag for that field, or empty string if not set.
-func FieldTag(kn Ki, field, tag string) string {
-	return laser.FlatFieldTag(StructType(kn.This()), field, tag)
 }
 
 //////////////////////////////////////////////////

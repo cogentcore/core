@@ -7,8 +7,6 @@ package ki
 import (
 	"encoding/json"
 	"testing"
-
-	"goki.dev/ki/v2/kit"
 )
 
 var PropsTest = Props{
@@ -23,7 +21,6 @@ var PropsTest = Props{
 		Mbr1: "smbr",
 		Mbr2: 17,
 	},
-	"testenum": kit.TestFlag2,
 }
 
 func TestPropsJSonSave(t *testing.T) {

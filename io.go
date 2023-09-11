@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build kio
+
+// note: only build when type-aware io is enabled via gti
+// todo: use grows package for basic io stack,
+// and make these global functions and not methods
+
 package ki
 
 import (
@@ -17,9 +23,8 @@ import (
 	"os"
 	"reflect"
 	"strconv"
-	"strings"
 
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gti"
 )
 
 // see https://goki.dev/ki/v2/wiki/Naming for IO naming conventions
@@ -140,25 +145,25 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 		log.Println(err)
 		return nil, err
 	}
-	if bytes.HasPrefix(b, JSONTypePrefix) {
-		stidx := len(JSONTypePrefix) + 1
-		eidx := bytes.Index(b, JSONTypeSuffix)
-		bodyidx := eidx + len(JSONTypeSuffix)
-		tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
-		typ := kit.Types.Type(tn)
-		if typ == nil {
-			return nil, fmt.Errorf("ki.OpenNewJSON: kit.Types type name not found: %v", tn)
-		}
-		root := NewOfType(typ)
-		InitNode(root)
-
-		updt := root.UpdateStart()
-		err = json.Unmarshal(b[bodyidx:], root)
-		UnmarshalPost(root)
-		root.SetChildAdded() // this might not be set..
-		root.UpdateEnd(updt)
-		return root, nil
-	}
+	// if bytes.HasPrefix(b, JSONTypePrefix) {
+	// 	stidx := len(JSONTypePrefix) + 1
+	// 	eidx := bytes.Index(b, JSONTypeSuffix)
+	// 	bodyidx := eidx + len(JSONTypeSuffix)
+	// 	tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
+	// 	typ := kit.Types.Type(tn)
+	// 	if typ == nil {
+	// 		return nil, fmt.Errorf("ki.OpenNewJSON: kit.Types type name not found: %v", tn)
+	// 	}
+	// 	root := NewOfType(typ)
+	// 	InitNode(root)
+	//
+	// 	updt := root.UpdateStart()
+	// 	err = json.Unmarshal(b[bodyidx:], root)
+	// 	UnmarshalPost(root)
+	// 	root.SetChildAdded() // this might not be set..
+	// 	root.UpdateEnd(updt)
+	// 	return root, nil
+	// }
 	return nil, fmt.Errorf("ki.OpenNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
 }
 
@@ -256,7 +261,7 @@ func (sl Slice) MarshalJSON() ([]byte, error) {
 	b = append(b, []byte(nstr)...)
 	for i, kid := range sl {
 		// fmt.Printf("json out of %v\n", kid.Path())
-		knm := kit.Types.TypeName(reflect.TypeOf(kid).Elem())
+		knm := gti.TypeName(reflect.TypeOf(kid).Elem())
 		tstr := fmt.Sprintf("\"type\":\"%v\", \"name\": \"%v\"", knm, kid.Name()) // todo: escape names!
 		b = append(b, []byte(tstr)...)
 		if i < nk-1 {
@@ -322,7 +327,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 	}
 	// fmt.Printf("n parsed: %d from %v\n", n, string(bn))
 
-	tnl := make(kit.TypeAndNameList, n)
+	tnl := make(TypeAndNameList, n)
 
 	for i := 0; i < n; i++ {
 		fld := flds[2*i+1]
@@ -333,11 +338,12 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 		ni := bytes.Index(fld, []byte("\"name\":"))
 		nm := string(bytes.Trim(bytes.TrimSpace(fld[ni+7:]), "\""))
 		// fmt.Printf("making type: %v", tn)
-		typ := kit.Types.Type(tn)
-		if typ == nil {
-			return fmt.Errorf("ki.Slice UnmarshalJSON: kit.Types type name not found: %v", tn)
-		}
-		tnl[i].Type = typ
+		// todo:
+		// typ := kit.Types.Type(tn)
+		// if typ == nil {
+		// 	return fmt.Errorf("ki.Slice UnmarshalJSON: kit.Types type name not found: %v", tn)
+		// }
+		// tnl[i].Type = typ
 		tnl[i].Name = nm
 	}
 
@@ -373,11 +379,12 @@ func (sl Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	nk := len(sl)
 	nt := xml.StartElement{Name: xml.Name{Space: "", Local: "N"}}
 	tokens = append(tokens, nt, xml.CharData(fmt.Sprintf("%d", nk)), xml.EndElement{Name: nt.Name})
-	for _, kid := range sl {
-		knm := kit.Types.TypeName(reflect.TypeOf(kid).Elem())
-		t := xml.StartElement{Name: xml.Name{Space: "", Local: "Type"}}
-		tokens = append(tokens, t, xml.CharData(knm), xml.EndElement{Name: t.Name})
-	}
+	// todo:
+	// for _, kid := range sl {
+	// 	knm := kit.Types.TypeName(reflect.TypeOf(kid).Elem())
+	// 	t := xml.StartElement{Name: xml.Name{Space: "", Local: "Type"}}
+	// 	tokens = append(tokens, t, xml.CharData(knm), xml.EndElement{Name: t.Name})
+	// }
 	for _, t := range tokens {
 		err := e.EncodeToken(t)
 		if err != nil {
@@ -529,22 +536,23 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 		for i := 0; i < n; i++ {
 			name, val, err = DecodeXMLCharEl(d)
-			if name == "Type" {
-				tn := strings.TrimSpace(val)
-				// fmt.Printf("making type: %v\n", tn)
-				typ := kit.Types.Type(tn)
-				if typ == nil {
-					return fmt.Errorf("ki.Slice UnmarshalXML: kit.Types type name not found: %v", tn)
-				}
-				nkid := reflect.New(typ).Interface()
-				// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
-				kid, ok := nkid.(Ki)
-				if !ok {
-					return fmt.Errorf("ki.Slice UnmarshalXML: New child of type %v cannot convert to Ki", tn)
-				}
-				InitNode(kid)
-				nwk = append(nwk, kid)
-			}
+			// todo:
+			// if name == "Type" {
+			// 	tn := strings.TrimSpace(val)
+			// 	// fmt.Printf("making type: %v\n", tn)
+			// 	typ := kit.Types.Type(tn)
+			// 	if typ == nil {
+			// 		return fmt.Errorf("ki.Slice UnmarshalXML: kit.Types type name not found: %v", tn)
+			// 	}
+			// 	nkid := reflect.New(typ).Interface()
+			// 	// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
+			// 	kid, ok := nkid.(Ki)
+			// 	if !ok {
+			// 		return fmt.Errorf("ki.Slice UnmarshalXML: New child of type %v cannot convert to Ki", tn)
+			// 	}
+			// 	InitNode(kid)
+			// 	nwk = append(nwk, kid)
+			// }
 		}
 
 		for i := 0; i < n; i++ {
