@@ -155,9 +155,18 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 			Name:       fd.Name.Name,
 			Doc:        doc,
 			Directives: dirs,
-			Args:       &gti.Fields{},
-			Returns:    &gti.Fields{},
 		}
+		args, err := GetFields(fd.Type.Params, cfg)
+		if err != nil {
+			return false, fmt.Errorf("error getting func args: %w", err)
+		}
+		method.Args = args
+		rets, err := GetFields(fd.Type.Results, cfg)
+		if err != nil {
+			return false, fmt.Errorf("error getting func return values: %w", err)
+		}
+		method.Returns = rets
+
 		typ := fd.Recv.List[0].Type
 		typnm := fmt.Sprintf("%s.%v", g.Pkg.PkgPath, typ)
 		g.Methods.Add(typnm, append(g.Methods.ValByKey(typnm), method))
@@ -172,8 +181,10 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 	res := &gti.Fields{}
 	for _, field := range list.List {
-		if len(field.Names) == 0 {
-			return nil, fmt.Errorf("got unnamed struct field %v", field)
+		// if we have no name, fall back on type name
+		name := fmt.Sprintf("%v", field.Type)
+		if len(field.Names) > 0 {
+			name = field.Names[0].Name
 		}
 		dirs := gti.Directives{}
 		if field.Doc != nil {
@@ -186,11 +197,11 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 			dirs = sdirs
 		}
 		fo := &gti.Field{
-			Name:       field.Names[0].Name,
+			Name:       name,
 			Doc:        strings.TrimSuffix(field.Doc.Text(), "\n"),
 			Directives: dirs,
 		}
-		res.Add(fo.Name, fo)
+		res.Add(name, fo)
 	}
 	return res, nil
 }
