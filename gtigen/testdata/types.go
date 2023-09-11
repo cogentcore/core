@@ -20,6 +20,11 @@ type Person struct {
 	Age int
 }
 
+// Introduction returns an introduction for the person.
+// It contains the name of the person and their age.
+//
+//gti:add
+//gi:toolbar -name ShowIntroduction -icon play -show-result -confirm
 func (p Person) Introduction() string {
 	return fmt.Sprintf("%s is %d years old", p.Name, p.Age)
 }

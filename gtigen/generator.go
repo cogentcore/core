@@ -148,6 +148,37 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 	return true, nil
 }
 
+// GetFields creates and returns a new [gti.Fields] object
+// from the given [ast.FieldList].
+func GetFields(list *ast.FieldList) (*gti.Fields, error) {
+	res := &gti.Fields{}
+	for _, field := range list.List {
+		if len(field.Names) == 0 {
+			return nil, fmt.Errorf("got unnamed struct field %v", field)
+		}
+		dirs := gti.Directives{}
+		if field.Doc != nil {
+			for _, c := range field.Doc.List {
+				dir, err := grease.ParseDirective(c.Text)
+				if err != nil {
+					return nil, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
+				}
+				if dir == nil {
+					continue
+				}
+				dirs = append(dirs, dir)
+			}
+		}
+		fo := &gti.Field{
+			Name:       field.Names[0].Name,
+			Doc:        strings.TrimSuffix(field.Doc.Text(), "\n"),
+			Directives: dirs,
+		}
+		res.Add(fo.Name, fo)
+	}
+	return res, nil
+}
+
 // Generate produces the code for the types
 // stored in [Generator.Types] and stores them in
 // [Generator.Buf]. It returns whether there were
