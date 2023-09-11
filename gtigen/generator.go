@@ -22,12 +22,12 @@ import (
 // Generator holds the state of the generator.
 // It is primarily used to buffer the output.
 type Generator struct {
-	Config  *Config                        // The configuration information
-	Buf     bytes.Buffer                   // The accumulated output.
-	Pkgs    []*packages.Package            // The packages we are scanning.
-	Pkg     *packages.Package              // The packages we are currently on.
-	Types   []*Type                        // The types
-	Methods *ordmap.Map[ast.Expr, *Method] // The methods, keyed by their receiver types
+	Config  *Config                            // The configuration information
+	Buf     bytes.Buffer                       // The accumulated output.
+	Pkgs    []*packages.Package                // The packages we are scanning.
+	Pkg     *packages.Package                  // The packages we are currently on.
+	Types   []*Type                            // The types
+	Methods *ordmap.Map[string, []*gti.Method] // The methods, keyed by the the full package name of the type of the receiver
 }
 
 // NewGenerator returns a new generator with the
@@ -60,7 +60,7 @@ func (g *Generator) PrintHeader() {
 // and adds them to [Generator.Types] and [Generator.Funcs]
 func (g *Generator) Find() error {
 	g.Types = []*Type{}
-	g.Methods = &ordmap.Map[ast.Expr, *Method]{}
+	g.Methods = &ordmap.Map[string, []*gti.Method]{}
 	err := gengo.Inspect(g.Pkg, g.Inspect)
 	if err != nil {
 		return fmt.Errorf("error while inspecting: %w", err)
@@ -151,13 +151,14 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 	if fd.Recv == nil {
 		fmt.Println("func", fd)
 	} else {
-		method := &Method{
+		method := &gti.Method{
 			Name:       fd.Name.Name,
 			Doc:        doc,
 			Directives: dirs,
-			Config:     cfg,
 		}
-		g.Methods.Add(fd.Recv.List[0].Type, method)
+		typ := fd.Recv.List[0].Type
+		typnm := fmt.Sprintf("%s.%v", g.Pkg.PkgPath, typ)
+		g.Methods.Add(typnm, append(g.Methods.ValByKey(typnm), method))
 	}
 
 	return true, nil
@@ -235,12 +236,12 @@ func (g *Generator) Generate() (bool, error) {
 	if len(g.Types) == 0 {
 		return false, nil
 	}
-	// for _, kv := range g.Methods.Order {
-	// 	for _, typ := range g.Types {
-	// 		typ.Type.Type
-	// 	}
-	// }
 	for _, typ := range g.Types {
+		typ.Methods = &gti.Methods{}
+		for _, meth := range g.Methods.ValByKey(typ.FullName) {
+			typ.Methods.Add(meth.Name, meth)
+		}
+		fmt.Println(typ.Methods)
 		g.ExecTmpl(TypeTmpl, typ)
 	}
 	return true, nil

@@ -17,14 +17,7 @@ type Type struct {
 	Type       *ast.TypeSpec  // The standard AST type value
 	Doc        string         // The documentation for the type
 	Directives gti.Directives // The directives for the type; guaranteed to be non-nil
-	Fields     *gti.Fields
-	Config     *Config // Configuration information set in the comment directive for the type; is initialized to generator config info first
-}
-
-// Method represents a parsed method.
-type Method struct {
-	Name       string         // The name of the method
-	Doc        string         // The documentation for the method
-	Directives gti.Directives // The directives for the method; guaranteed to be non-nil
-	Config     *Config        // Configuration information set in the comment directive for the method; is initialized to generator config info first
+	Fields     *gti.Fields    // The fields of the struct type; nil if not a struct
+	Methods    *gti.Methods   // The methods of the type; guaranteed to be non-nil
+	Config     *Config        // Configuration information set in the comment directive for the type; is initialized to generator config info first
 }
