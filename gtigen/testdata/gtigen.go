@@ -8,7 +8,7 @@ var  MyTypeType  = &gti.Type{
 		Name: "goki.dev/gti/gtigen/testdata.MyType",
 		Doc: `MyType is awesome`,
 		Directives: gti.Directives{  &gti.Directive{Tool:"gti", Directive:"add", Args:[]string{"-type-var", "-instance"}},  &gti.Directive{Tool:"ki", Directive:"flagtype", Args:[]string{"NodeFlags", "-field", "Flag"}},  },
-		 Fields: %#v&{[0xc000134048 0xc000134060] map[Age:1 Name:0]}, 
+		 Fields: %#v&{[0xc00060e120 0xc00060e138] map[Age:1 Name:0]}, 
 		 Instance: &MyType{}, 
 	}
 	

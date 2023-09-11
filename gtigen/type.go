@@ -5,9 +5,11 @@
 package gtigen
 
 import (
+	"fmt"
 	"go/ast"
 	"sort"
 
+	"goki.dev/grease"
 	"goki.dev/gti"
 )
 
@@ -20,6 +22,37 @@ type Type struct {
 	Directives gti.Directives // The directives for the type; guaranteed to be non-nil
 	Fields     *gti.Fields
 	Config     *Config // Configuration information set in the comment directive for the type; is initialized to generator config info first
+}
+
+// GetFields creates and returns a new [gti.Fields] object
+// from the given [ast.FieldList].
+func GetFields(list *ast.FieldList) (*gti.Fields, error) {
+	res := &gti.Fields{}
+	for _, field := range list.List {
+		if len(field.Names) == 0 {
+			return nil, fmt.Errorf("got unnamed struct field %v", field)
+		}
+		dirs := gti.Directives{}
+		if field.Doc != nil {
+			for _, c := range field.Doc.List {
+				dir, err := grease.ParseDirective(c.Text)
+				if err != nil {
+					return nil, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
+				}
+				if dir == nil {
+					continue
+				}
+				dirs = append(dirs, dir)
+			}
+		}
+		fo := &gti.Field{
+			Name:       field.Names[0].Name,
+			Doc:        field.Doc.Text(),
+			Directives: dirs,
+		}
+		res.Add(fo.Name, fo)
+	}
+	return res, nil
 }
 
 // Value represents a declared constant.
