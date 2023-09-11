@@ -9,6 +9,6 @@ import "text/template"
 var TypeTmpl = template.Must(template.New("Type").Parse(
 	`var {{if .Config.TypeVar}} {{.Name}}Type {{else}} _ {{end}} = &gti.Type{
 		Name: "{{.Name}}",
-		Directives: {{printf "%#v" .Directives}},
+		Directives: gti.Directives{ {{range .Directives}} {{printf "%#v" .}}, {{end}} },
 	}
 	`))

@@ -6,7 +6,7 @@ import (
 	"goki.dev/gti"
 )
 
-var _ = &gti.Type{
+var MyTypeType = &gti.Type{
 	Name:       "MyType",
-	Directives: gti.Directives{(*gti.Directive)(0xc0003e2280)},
+	Directives: gti.Directives{&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-type-var"}}, &gti.Directive{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}},
 }

@@ -6,7 +6,8 @@ package testdata
 
 // MyType is awesome
 //
-//gti:add
+//gti:add -type-var
+//ki:flagtype NodeFlags -field Flag
 type MyType struct {
 	Name string
 	Age  int

@@ -91,6 +91,9 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 	}
 	doc := gd.Doc.Text()
 	dirs := gti.Directives{}
+	hasAdd := false
+	cfg := &Config{}
+	*cfg = *g.Config
 	for _, c := range gd.Doc.List {
 		dir, err := grease.ParseDirective(c.Text)
 		if err != nil {
@@ -99,7 +102,24 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 		if dir == nil {
 			continue
 		}
+		if dir.Tool == "gti" {
+			if dir.Directive == "add" {
+				hasAdd = true
+				leftovers, err := grease.SetFromArgs(cfg, dir.Args)
+				if err != nil {
+					return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
+				}
+				if len(leftovers) > 0 {
+					return false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
+				}
+			} else {
+				return false, fmt.Errorf("unrecognized gti directive %q (from %q)", dir.Directive, c.Text)
+			}
+		}
 		dirs = append(dirs, dir)
+	}
+	if !hasAdd { // we must be told to add or we will not add
+		return true, nil
 	}
 	for _, spec := range gd.Specs {
 		ts, ok := spec.(*ast.TypeSpec)
@@ -111,7 +131,7 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 			Type:       ts,
 			Doc:        doc,
 			Directives: dirs,
-			Config:     g.Config,
+			Config:     cfg,
 		}
 		g.Types = append(g.Types, typ)
 	}
