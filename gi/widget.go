@@ -1055,6 +1055,11 @@ func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 	wb.Move2DChildren(delta)
 }
 
+func (wb *PartsWidgetBase) Disconnect() {
+	wb.WidgetBase.Disconnect()
+	wb.Parts.DisconnectAll()
+}
+
 ///////////////////////////////////////////////////////////////////
 // ConfigParts building-blocks
 
