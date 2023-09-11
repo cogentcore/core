@@ -96,39 +96,17 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 	if gd.Doc == nil {
 		return true, nil
 	}
-	doc := gd.Doc.Text()
-	doc = strings.TrimSuffix(doc, "\n")
-	dirs := gti.Directives{}
 	hasAdd := false
 	cfg := &Config{}
 	*cfg = *g.Config
-	for _, c := range gd.Doc.List {
-		dir, err := grease.ParseDirective(c.Text)
-		if err != nil {
-			return false, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
-		}
-		if dir == nil {
-			continue
-		}
-		if dir.Tool == "gti" {
-			if dir.Directive == "add" {
-				hasAdd = true
-				leftovers, err := grease.SetFromArgs(cfg, dir.Args)
-				if err != nil {
-					return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
-				}
-				if len(leftovers) > 0 {
-					return false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
-				}
-			} else {
-				return false, fmt.Errorf("unrecognized gti directive %q (from %q)", dir.Directive, c.Text)
-			}
-		}
-		dirs = append(dirs, dir)
+	dirs, hasAdd, err := LoadFromComment(gd.Doc, cfg)
+	if err != nil {
+		return false, err
 	}
 	if !hasAdd { // we must be told to add or we will not add
 		return true, nil
 	}
+	doc := strings.TrimSuffix(gd.Doc.Text(), "\n")
 	for _, spec := range gd.Specs {
 		ts, ok := spec.(*ast.TypeSpec)
 		if !ok {
@@ -144,7 +122,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		}
 		st, ok := ts.Type.(*ast.StructType)
 		if ok {
-			fields, err := GetFields(st.Fields)
+			fields, err := GetFields(st.Fields, cfg)
 			if err != nil {
 				return false, err
 			}
@@ -158,13 +136,29 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 // InspectFuncDecl is the implementation of [Generator.Inspect]
 // for [ast.FuncDecl] nodes.
 func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
-	fmt.Println(fd)
+	if fd.Doc == nil {
+		return true, nil
+	}
+	cfg := &Config{}
+	*cfg = *g.Config
+	dirs, hasAdd, err := LoadFromComment(fd.Doc, cfg)
+	if err != nil {
+		return false, err
+	}
+	if !hasAdd { // we must be told to add or we will not add
+		return true, nil
+	}
+	doc := strings.TrimSuffix(fd.Doc.Text(), "\n")
+
+	fmt.Println(dirs, doc)
+
 	return true, nil
 }
 
 // GetFields creates and returns a new [gti.Fields] object
-// from the given [ast.FieldList].
-func GetFields(list *ast.FieldList) (*gti.Fields, error) {
+// from the given [ast.FieldList], in the context of the
+// given surrounding config.
+func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 	res := &gti.Fields{}
 	for _, field := range list.List {
 		if len(field.Names) == 0 {
@@ -172,16 +166,13 @@ func GetFields(list *ast.FieldList) (*gti.Fields, error) {
 		}
 		dirs := gti.Directives{}
 		if field.Doc != nil {
-			for _, c := range field.Doc.List {
-				dir, err := grease.ParseDirective(c.Text)
-				if err != nil {
-					return nil, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
-				}
-				if dir == nil {
-					continue
-				}
-				dirs = append(dirs, dir)
+			lcfg := &Config{}
+			*lcfg = *cfg
+			sdirs, _, err := LoadFromComment(field.Doc, lcfg)
+			if err != nil {
+				return nil, err
 			}
+			dirs = sdirs
 		}
 		fo := &gti.Field{
 			Name:       field.Names[0].Name,
@@ -191,6 +182,40 @@ func GetFields(list *ast.FieldList) (*gti.Fields, error) {
 		res.Add(fo.Name, fo)
 	}
 	return res, nil
+}
+
+// LoadFromComment processes the given comment group, setting the
+// values of the given config object based on any gti directives
+// in the comment group, and returning all directives found, whether
+// there was a gti:add directive, and any error.
+func LoadFromComment(c *ast.CommentGroup, cfg *Config) (gti.Directives, bool, error) {
+	dirs := gti.Directives{}
+	hasAdd := false
+	for _, c := range c.List {
+		dir, err := grease.ParseDirective(c.Text)
+		if err != nil {
+			return nil, false, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
+		}
+		if dir == nil {
+			continue
+		}
+		if dir.Tool == "gti" {
+			if dir.Directive == "add" {
+				hasAdd = true
+				leftovers, err := grease.SetFromArgs(cfg, dir.Args)
+				if err != nil {
+					return nil, false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
+				}
+				if len(leftovers) > 0 {
+					return nil, false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
+				}
+			} else {
+				return nil, false, fmt.Errorf("unrecognized gti directive %q (from %q)", dir.Directive, c.Text)
+			}
+		}
+		dirs = append(dirs, dir)
+	}
+	return dirs, hasAdd, nil
 }
 
 // Generate produces the code for the types
