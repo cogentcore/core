@@ -36,4 +36,11 @@ var PersonType = &gti.Type{
 var _ = &gti.Func{
 	Name: "Alert",
 	Doc:  "Alert prints an alert with the given message",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"msg", &gti.Field{Name: "msg", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 }

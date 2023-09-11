@@ -29,5 +29,8 @@ var FuncTmpl = template.Must(template.New("Func").Parse(
 	var _ = &gti.Func{
 		Name: "{{.Name}}",
 		Doc: {{printf "%q" .Doc}},
+		Directives: {{printf "%#v" .Directives}},
+		Args: {{printf "%#v" .Args}},
+		Returns: {{printf "%#v" .Returns}},
 	}
 	`))
