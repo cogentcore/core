@@ -4,6 +4,8 @@
 
 package gti
 
+import "goki.dev/ordmap"
+
 // Field represents a field in a struct
 type Field struct {
 	Name string
@@ -15,3 +17,6 @@ type Field struct {
 	// Directives has the parsed comment directives
 	Directives Directives
 }
+
+// Fields represents multiple fields in a struct
+type Fields ordmap.Map[string, *Field]

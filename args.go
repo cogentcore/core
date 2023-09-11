@@ -4,6 +4,8 @@
 
 package gti
 
+import "goki.dev/ordmap"
+
 // Args represents an arg
 type Arg struct {
 	Name string
@@ -15,3 +17,6 @@ type Arg struct {
 	// Directives has the parsed comment directives
 	Directives Directives
 }
+
+// Args represents multiple args to a function/method
+type Args ordmap.Map[string, *Arg]

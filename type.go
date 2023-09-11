@@ -6,8 +6,6 @@ package gti
 
 import (
 	"reflect"
-
-	"goki.dev/ordmap"
 )
 
 // Type represents a type
@@ -26,13 +24,13 @@ type Type struct {
 	ID uint64 `desc:"unique type ID number"`
 
 	// Methods are available for all types
-	Methods *ordmap.Map[string, *Method]
+	Methods *Methods
 
 	// Embeded fields for struct types
-	Embeds *ordmap.Map[string, *Field]
+	Embeds *Fields
 
 	// Fields for struct types
-	Fields *ordmap.Map[string, *Field]
+	Fields *Fields
 
 	// instance of the type
 	Instance any `desc:"instance of the type"`

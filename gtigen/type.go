@@ -18,7 +18,8 @@ type Type struct {
 	Type       *ast.TypeSpec  // The standard AST type value
 	Doc        string         // The documentation for the type
 	Directives gti.Directives // The directives for the type; guaranteed to be non-nil
-	Config     *Config        // Configuration information set in the comment directive for the type; is initialized to generator config info first
+	Fields     *gti.Fields
+	Config     *Config // Configuration information set in the comment directive for the type; is initialized to generator config info first
 }
 
 // Value represents a declared constant.

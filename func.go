@@ -18,10 +18,10 @@ type Func struct {
 	Directives Directives
 
 	// Args are arguments to the method
-	Args *ordmap.Map[string, *Arg]
+	Args *Args
 
 	// Returns are return values of the function
-	Returns *ordmap.Map[string, *Arg]
+	Returns *Args
 
 	// unique type ID number
 	ID uint64 `desc:"unique type ID number"`
@@ -39,8 +39,11 @@ type Method struct {
 	Directives Directives
 
 	// Args are arguments to the method
-	Args *ordmap.Map[string, *Arg]
+	Args *Args
 
 	// Returns are return values of the function
-	Returns *ordmap.Map[string, *Arg]
+	Returns *Args
 }
+
+// Methods represents multiple methods on a type
+type Methods ordmap.Map[string, *Method]
