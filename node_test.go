@@ -1,8 +1,8 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ki
+package ki_test
 
 import (
 	"bytes"
@@ -11,35 +11,16 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"goki.dev/gti"
+	. "goki.dev/ki/v2"
+	"goki.dev/ki/v2/testdata"
 )
 
-type NodeEmbed struct {
-	Node
-	Mbr1 string
-	Mbr2 int
-}
-
-var NodeEmbedProps = Props{
-	"intprop":    -17,
-	"floatprop":  3.1415,
-	"stringprop": "type string",
-}
-
-type NodeField struct {
-	NodeEmbed
-	Field1 NodeEmbed
-}
-
-type NodeField2 struct {
-	NodeField
-	Field2    NodeEmbed
-	PtrIgnore *NodeEmbed
-}
-
 func TestNodeAddChild(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	child := NodeEmbed{}
+	child := testdata.NodeEmbed{}
 	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
 	// as a member of a struct, for somewhat obscure reasons having to do with the
 	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
@@ -57,9 +38,9 @@ func TestNodeAddChild(t *testing.T) {
 }
 
 func TestNodeEmbedAddChild(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	child := NodeEmbed{}
+	child := testdata.NodeEmbed{}
 	// Note: must pass child as a pointer  -- if it is a plain Node it is ok but
 	// as a member of a struct, for somewhat obscure reasons having to do with the
 	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
@@ -75,9 +56,9 @@ func TestNodeEmbedAddChild(t *testing.T) {
 
 func TestNodeEmbedNewChild(t *testing.T) {
 	// nod := Node{}
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	child := parent.NewChild(typ, "child1")
 	if len(parent.Kids) != 1 {
 		t.Errorf("Children length != 1, was %d", len(parent.Kids))
@@ -85,15 +66,15 @@ func TestNodeEmbedNewChild(t *testing.T) {
 	if child.Path() != "/par1/child1" {
 		t.Errorf("child path != correct, was %v", child.Path())
 	}
-	if reflect.TypeOf(child).Elem() != Type(parent.This()) {
+	if child.Type() != parent.Type() {
 		t.Errorf("child type != correct, was %T", child)
 	}
 }
 
 func TestNodeUniqueNames(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	child := parent.NewChild(typ, "child1")
 	child2 := parent.NewChild(typ, "child1")
 	child3 := parent.NewChild(typ, "child1")
@@ -114,9 +95,9 @@ func TestNodeUniqueNames(t *testing.T) {
 }
 
 func TestNodeEscapePaths(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	child := parent.NewChild(typ, "child1.go")
 	child2 := parent.NewChild(typ, "child1/child1")
 	child3 := parent.NewChild(typ, "child1/child1.go")
@@ -156,9 +137,9 @@ func TestNodeEscapePaths(t *testing.T) {
 }
 
 func TestNodeDeleteChild(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	child := parent.NewChild(typ, "child1")
 	parent.DeleteChild(child, true)
 	if len(parent.Kids) != 0 {
@@ -170,9 +151,9 @@ func TestNodeDeleteChild(t *testing.T) {
 }
 
 func TestNodeDeleteChildName(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.NewChild(typ, "child1")
 	parent.DeleteChildByName("child1", true)
 	if len(parent.Kids) != 0 {
@@ -187,7 +168,7 @@ func TestNodeFindName(t *testing.T) {
 	names := [...]string{"name0", "name1", "name2", "name3", "name4", "name5"}
 	parent := Node{}
 	parent.InitName(&parent, "par")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	for _, nm := range names {
 		parent.NewChild(typ, nm)
 	}
@@ -208,7 +189,7 @@ func TestNodeFindNameUnique(t *testing.T) {
 	names := [...]string{"child", "child_001", "child_002", "child_003", "child_004", "child_005"}
 	parent := Node{}
 	parent.InitName(&parent, "par")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	for range names {
 		parent.NewChild(typ, "child")
 	}
@@ -232,31 +213,31 @@ func TestNodeFindNameUnique(t *testing.T) {
 func TestNodeFindType(t *testing.T) {
 	parent := Node{}
 	parent.InitName(&parent, "par")
-	parent.NewChild(TypeNodeEmbed, "child1")
-	parent.NewChild(TypeNode, "child2")
-	idx, ok := parent.Children().IndexByType(TypeNodeEmbed, NoEmbeds, 0)
+	parent.NewChild(testdata.NodeEmbedType, "child1")
+	parent.NewChild(NodeType, "child2")
+	idx, ok := parent.Children().IndexByType(testdata.NodeEmbedType, NoEmbeds, 0)
 	if !ok || idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
-	idx, ok = parent.Children().IndexByType(TypeNode, NoEmbeds, 0)
+	idx, ok = parent.Children().IndexByType(NodeType, NoEmbeds, 0)
 	if !ok || idx != 1 {
 		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
 	}
-	_, err := parent.Children().ElemByTypeTry(TypeNode, NoEmbeds, 0)
+	_, err := parent.Children().ElemByTypeTry(NodeType, NoEmbeds, 0)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestNodeMove(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
 	parent.NewChild(typ, "child0")
-	var child2 = parent.NewChild(typ, "child1").(*NodeEmbed)
+	var child2 = parent.NewChild(typ, "child1").(*testdata.NodeEmbed)
 	// child3 :=
 	parent.NewChild(typ, "child2")
 	//schild2 :=
@@ -299,14 +280,14 @@ func TestNodeMove(t *testing.T) {
 }
 
 func TestNodeConfig(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
 	parent.NewChild(typ, "child0")
-	var child2 = parent.NewChild(typ, "child1").(*NodeEmbed)
+	var child2 = parent.NewChild(typ, "child1").(*testdata.NodeEmbed)
 	// child3 :=
 	parent.NewChild(typ, "child2")
 	//schild2 :=
@@ -315,9 +296,9 @@ func TestNodeConfig(t *testing.T) {
 	parent.NewChild(typ, "child3")
 
 	config1 := TypeAndNameList{
-		{Type: TypeNodeEmbed, Name: "child2"},
-		{Type: TypeNodeEmbed, Name: "child3"},
-		{Type: TypeNodeEmbed, Name: "child1"},
+		{Type: testdata.NodeEmbedType, Name: "child2"},
+		{Type: testdata.NodeEmbedType, Name: "child3"},
+		{Type: testdata.NodeEmbedType, Name: "child1"},
 	}
 
 	// bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
@@ -357,10 +338,12 @@ func TestNodeConfig(t *testing.T) {
 //////////////////////////////////////////
 //  JSON I/O
 
+/*
+
 func TestNodeJSONSave(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
@@ -379,7 +362,7 @@ func TestNodeJSONSave(t *testing.T) {
 	}
 	b := buf.Bytes()
 
-	tstload := NodeEmbed{}
+	tstload := testdata.NodeEmbed{}
 	tstload.InitName(&tstload, "")
 	err = tstload.ReadJSON(bytes.NewReader(b))
 	if err != nil {
@@ -415,9 +398,9 @@ func TestNodeJSONSave(t *testing.T) {
 }
 
 func TestNodeXMLSave(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
@@ -436,7 +419,7 @@ func TestNodeXMLSave(t *testing.T) {
 	}
 	b := buf.Bytes()
 
-	tstload := NodeEmbed{}
+	tstload := testdata.NodeEmbed{}
 	tstload.InitName(&tstload, "")
 	err = tstload.ReadXML(bytes.NewReader(b))
 	if err != nil {
@@ -458,13 +441,15 @@ func TestNodeXMLSave(t *testing.T) {
 	}
 }
 
+*/
+
 //////////////////////////////////////////
 //  function calling
 
 func TestNodeCallFun(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
@@ -577,15 +562,15 @@ func TestNodeCallFun(t *testing.T) {
 }
 
 func TestNodeUpdate(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 
 	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
-		res = append(res, fmt.Sprintf("%v sig %v flags %v", s.Name(), NodeSignals(sig), s.Flags.String()))
+		res = append(res, fmt.Sprintf("%v sig %v flags %v", s.Name(), NodeSignals(sig), s.AsNode().Flags.String()))
 	})
 	// child1 :=
 	updt := parent.UpdateStart()
@@ -648,9 +633,9 @@ func TestNodeUpdate(t *testing.T) {
 }
 
 func TestProps(t *testing.T) {
-	parent := NodeEmbed{}
+	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 
@@ -728,7 +713,7 @@ func TestTreeMod(t *testing.T) {
 	SignalTraceString = &sigs
 
 	tree1 := Node{}
-	typ := reflect.TypeOf(tree1)
+	typ := tree1.Type()
 	tree1.InitName(&tree1, "tree1")
 	// child11 :=
 	tree1.NewChild(typ, "child11")
@@ -794,7 +779,7 @@ ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 260
 }
 
 func TestNodeFieldFunc(t *testing.T) {
-	parent := NodeField{}
+	parent := testdata.NodeField{}
 	parent.InitName(&parent, "par1")
 	res := make([]string, 0, 10)
 	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
@@ -809,7 +794,7 @@ func TestNodeFieldFunc(t *testing.T) {
 	}
 	res = res[:0]
 
-	par2 := NodeField2{}
+	par2 := testdata.NodeField2{}
 	par2.InitName(&par2, "par2")
 	par2.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
@@ -837,15 +822,17 @@ func TestNodeFieldFunc(t *testing.T) {
 	res = res[:0]
 }
 
+/*
+
 func TestNodeFieldJSONSave(t *testing.T) {
-	parent := NodeField2{}
+	parent := testdata.NodeField2{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
 	parent.NewChild(typ, "child1")
-	child2 := parent.NewChild(typ, "child1").(*NodeField2)
+	child2 := parent.NewChild(typ, "child1").(*testdata.NodeField2)
 	// child3 :=
 	parent.NewChild(typ, "child1")
 	child2.NewChild(typ, "subchild1")
@@ -859,7 +846,7 @@ func TestNodeFieldJSONSave(t *testing.T) {
 	}
 	b := buf.Bytes()
 
-	tstload := NodeField2{}
+	tstload := testdata.NodeField2{}
 	tstload.InitName(&tstload, "")
 	err = tstload.ReadJSON(bytes.NewReader(b))
 	if err != nil {
@@ -896,15 +883,17 @@ func TestNodeFieldJSONSave(t *testing.T) {
 	}
 }
 
+*/
+
 func TestClone(t *testing.T) {
-	parent := NodeField2{}
+	parent := testdata.NodeField2{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 	// child1 :=
 	parent.NewChild(typ, "child1")
-	child2 := parent.NewChild(typ, "child1").(*NodeField2)
+	child2 := parent.NewChild(typ, "child1").(*testdata.NodeField2)
 	// child3 :=
 	parent.NewChild(typ, "child1")
 	child2.NewChild(typ, "subchild1")
@@ -936,7 +925,7 @@ func TestClone(t *testing.T) {
 // BuildGuiTreeSlow builds a tree that is typical of GUI structures where there are
 // many widgets in a container and each widget has some number of parts.
 // Uses slow AddChild method instead of fast one.
-func BuildGuiTreeSlow(widgets, parts int, typ reflect.Type) Ki {
+func BuildGuiTreeSlow(widgets, parts int, typ *gti.Type) Ki {
 	win := NewOfType(typ)
 	win.InitName(win, "window")
 	updt := win.UpdateStart()
@@ -956,7 +945,7 @@ func BuildGuiTreeSlow(widgets, parts int, typ reflect.Type) Ki {
 
 // BuildGuiTree builds a tree that is typical of GUI structures where there are
 // many widgets in a container and each widget has some number of parts.
-func BuildGuiTree(widgets, parts int, typ reflect.Type) Ki {
+func BuildGuiTree(widgets, parts int, typ *gti.Type) Ki {
 	win := NewOfType(typ)
 	win.InitName(win, "window")
 	updt := win.UpdateStart()

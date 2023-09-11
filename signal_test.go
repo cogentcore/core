@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ki
+package ki_test
 
 import (
 	"fmt"
@@ -10,16 +10,10 @@ import (
 	"testing"
 )
 
-type TestNode struct {
-	Node
-	sig1 Signal
-	sig2 Signal
-}
-
 func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}
 	parent.InitName(&parent, "par1")
-	typ := reflect.TypeOf(parent)
+	typ := parent.Type()
 	child1 := parent.NewChild(typ, "child1")
 	// child2 := parent.NewChild(nil, "child2")
 

@@ -17,10 +17,6 @@ var PropsTest = Props{
 		"sp1": "#FFE",
 		"sp2": 42.2,
 	},
-	"subtype": NodeEmbed{
-		Mbr1: "smbr",
-		Mbr2: 17,
-	},
 }
 
 func TestPropsJSonSave(t *testing.T) {

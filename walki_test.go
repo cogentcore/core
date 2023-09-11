@@ -6,7 +6,6 @@ package ki
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 )
 
@@ -14,7 +13,7 @@ var testTree *Node
 
 func init() {
 	testTree = &Node{}
-	typ := reflect.TypeOf(testTree).Elem()
+	typ := testTree.Type()
 	testTree.InitName(testTree, "root")
 	// child1 :=
 	testTree.NewChild(typ, "child0")

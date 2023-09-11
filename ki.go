@@ -540,15 +540,9 @@ type Ki interface {
 	// CopyFieldsFrom is the base-level copy method that any copy-intensive
 	// nodes should implement directly to explicitly copy relevant fields
 	// that should be copied, avoiding any internal pointers etc.
-	// This is the performance bottleneck in copying -- the Node version
-	// uses generic GenCopyFieldsFrom method using reflection etc
-	// which is very slow.  It can be ~10x faster overall to use custom
-	// method that explicitly copies each field.  When doing so, you
-	// must explicitly call the CopyFieldsFrom method on any embedded
+	// Must explicitly call the CopyFieldsFrom method on any embedded
 	// Ki types that you inherit from, and, critically, NONE of those
-	// can rely on the generic Node-level version.  Furthermore, if the
-	// actual end type itself does not define a custom version of this method
-	// then the generic one will be called for everything.
+	// can rely on the generic Node-level version.
 	CopyFieldsFrom(frm any)
 
 	//////////////////////////////////////////////////////////////////////////
@@ -605,6 +599,16 @@ func IsKi(typ reflect.Type) bool {
 		return true
 	}
 	return false
+}
+
+// AsKi returns the Ki interface and Node base type for
+// any given object -- if not a Ki, return values are nil.
+func AsKi(v any) (Ki, *Node) {
+	k, ok := v.(Ki)
+	if !ok {
+		return nil, nil
+	}
+	return k, k.AsNode()
 }
 
 // NewOfType makes a new Ki struct of given type -- must be a Ki type -- will
