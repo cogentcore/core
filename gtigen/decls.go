@@ -5,31 +5,15 @@
 package gtigen
 
 import (
-	"fmt"
 	"text/template"
-
-	"goki.dev/gti"
 )
 
-var TypeTmpl = template.Must(template.New("Type").Funcs(template.FuncMap{"FieldsCodeString": OrdmapCodeString[string, *gti.Field]}).Parse(
+var TypeTmpl = template.Must(template.New("Type").Parse(
 	`var {{if .Config.TypeVar}} {{.Name}}Type {{else}} _ {{end}} = &gti.Type{
 		Name: "{{.FullName}}",
 		Doc: {{printf "%q" .Doc}},
 		Directives: {{printf "%#v" .Directives}},
-		{{if ne .Fields nil}} Fields: {{FieldsCodeString .Fields}}, {{end}}
+		{{if ne .Fields nil}} Fields: {{printf "%#v" .Fields}}, {{end}}
 		{{if .Config.Instance}} Instance: &{{.Name}}{}, {{end}}
 	}
 	`))
-
-// OrdmapCodeString returns the given ordered map as a string
-// of valid Go code that constructs the ordered map
-func OrdmapCodeString[K comparable, V any](omp *gti.Fields) string {
-	var zk K
-	var zv V
-	res := fmt.Sprintf("ordmap.Make([]ordmap.KeyVal[%T, %T]{\n", zk, zv)
-	for _, kv := range omp.Order {
-		res += fmt.Sprintf("{%#v, %#v},\n", kv.Key, kv.Val)
-	}
-	res += "})"
-	return res
-}
