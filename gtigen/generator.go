@@ -81,11 +81,18 @@ var AllowedEnumTypes = map[string]bool{"int": true, "int64": true, "int32": true
 // continue, and an error if there is one. It should only
 // be called in [ast.Inspect].
 func (g *Generator) Inspect(n ast.Node) (bool, error) {
-	// fmt.Println(n, reflect.TypeOf(n))
-	gd, ok := n.(*ast.GenDecl)
-	if !ok {
-		return true, nil
+	switch v := n.(type) {
+	case *ast.GenDecl:
+		return g.InspectGenDecl(v)
+	case *ast.FuncDecl:
+		return g.InspectFuncDecl(v)
 	}
+	return true, nil
+}
+
+// InspectGenDecl is the implementation of [Generator.Inspect]
+// for [ast.GenDecl] nodes.
+func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 	if gd.Doc == nil {
 		return true, nil
 	}
@@ -145,6 +152,13 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 		}
 		g.Types = append(g.Types, typ)
 	}
+	return true, nil
+}
+
+// InspectFuncDecl is the implementation of [Generator.Inspect]
+// for [ast.FuncDecl] nodes.
+func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
+	fmt.Println(fd)
 	return true, nil
 }
 
