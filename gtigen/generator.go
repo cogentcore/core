@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/constant"
-	"go/doc"
 	"go/token"
 	"go/types"
 	"html"
@@ -20,6 +19,7 @@ import (
 
 	"goki.dev/gengo"
 	"goki.dev/grease"
+	"goki.dev/gti"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -63,17 +63,9 @@ func (g *Generator) PrintHeader() {
 // and adds them to [Generator.Types] and [Generator.Funcs]
 func (g *Generator) Find() error {
 	g.Types = []*Type{}
-	d, err := doc.NewFromFiles(g.Pkg.Fset, g.Pkg.Syntax, g.Pkg.PkgPath)
+	err := gengo.Inspect(g.Pkg, g.Inspect)
 	if err != nil {
-		return fmt.Errorf("error loading doc: %w", err)
-	}
-	for _, typ := range d.Types {
-		fmt.Println(typ.Name, typ.Doc, typ.Decl.Doc.Text())
-		if typ.Decl.Doc != nil {
-			for _, c := range typ.Decl.Doc.List {
-				fmt.Println(c.Text)
-			}
-		}
+		return fmt.Errorf("error while inspecting: %w", err)
 	}
 	return nil
 }
@@ -90,110 +82,80 @@ var AllowedEnumTypes = map[string]bool{"int": true, "int64": true, "int32": true
 // be called in [ast.Inspect].
 func (g *Generator) Inspect(n ast.Node) (bool, error) {
 	// fmt.Println(n, reflect.TypeOf(n))
-	ts, ok := n.(*ast.TypeSpec)
+	gd, ok := n.(*ast.GenDecl)
 	if !ok {
-		gd, ok := n.(*ast.GenDecl)
-		if ok {
-			fmt.Println(gd, gd.Doc.Text())
-		}
 		return true, nil
 	}
-	fmt.Println(ts.Name, ts.Doc, ts.Comment)
-	if ts.Doc == nil {
+	if gd.Doc == nil {
 		return true, nil
 	}
-	for _, c := range ts.Doc.List {
-		dir, has, err := grease.ParseDirective(c.Text)
+	doc := gd.Doc.Text()
+	dirs := gti.Directives{}
+	for _, c := range gd.Doc.List {
+		dir, err := grease.ParseDirective(c.Text)
 		if err != nil {
-			return false, fmt.Errorf("error parsing comment directive %q: %w", c.Text, err)
+			return false, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
 		}
-		if !has {
+		if dir == nil {
 			continue
 		}
-		if dir.Tool != "gti" {
-			continue
+		dirs = append(dirs, dir)
+	}
+	for _, spec := range gd.Specs {
+		ts, ok := spec.(*ast.TypeSpec)
+		if !ok {
+			return true, nil
 		}
-		if dir.Directive != "add" {
-			return false, fmt.Errorf("unrecognized enums directive %q (from %q)", dir.Directive, c.Text)
+		typ := &Type{
+			Name:       ts.Name.Name,
+			Type:       ts,
+			Doc:        doc,
+			Directives: dirs,
+			Config:     g.Config,
 		}
-
-		fmt.Println("got type", ts)
-
-		// ident, ok := ts.Type.(*ast.Ident)
-		// if !ok {
-		// 	return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", ts.Type, ts.Type)
-		// }
-		// cfg := &Config{}
-		// *cfg = *g.Config
-		// leftovers, err := grease.SetFromArgs(cfg, dir.Args)
-		// if err != nil {
-		// 	return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
-		// }
-		// if len(leftovers) > 0 {
-		// 	return false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
-		// }
-
-		// typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
-		// utyp := typ.Underlying()
-
-		// tt := &Type{Name: ts.Name.Name, Type: ts, Config: cfg}
-		// if ident.String() != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
-		// 	tt.Extends = ident.String()
-		// }
-		// switch dir.Directive {
-		// case "enum":
-		// 	if !AllowedEnumTypes[utyp.String()] {
-		// 		return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)
-		// 	}
-		// 	tt.IsBitFlag = false
-		// case "bitflag":
-		// 	if utyp.String() != "int64" {
-		// 		return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
-		// 	}
-		// 	tt.IsBitFlag = true
-		// }
-		// g.Types = append(g.Types, tt)
-
+		g.Types = append(g.Types, typ)
 	}
 	return true, nil
 }
 
-// Generate produces the enum methods for the types
+// Generate produces the code for the types
 // stored in [Generator.Types] and stores them in
 // [Generator.Buf]. It returns whether there were
-// any enum types to generate methods for, and
+// any types to generate methods for, and
 // any error that occurred.
 func (g *Generator) Generate() (bool, error) {
 	if len(g.Types) == 0 {
 		return false, nil
 	}
 	for _, typ := range g.Types {
-		values := make([]Value, 0, 100)
-		for _, file := range g.Pkg.Syntax {
-			if ast.IsGenerated(file) {
-				continue
-			}
-			var terr error
-			ast.Inspect(file, func(n ast.Node) bool {
-				if terr != nil {
-					return false
-				}
-				vals, cont, err := g.GenDecl(n, file, typ)
-				if err != nil {
-					terr = err
-				} else {
-					values = append(values, vals...)
-				}
-				return cont
-			})
-			if terr != nil {
-				return true, fmt.Errorf("Generate: error parsing declaration clauses: %w", terr)
-			}
-		}
+		fmt.Println(typ)
+		g.ExecTmpl(TypeTmpl, typ)
+		// values := make([]Value, 0, 100)
+		// // for _, file := range g.Pkg.Syntax {
+		// // 	if ast.IsGenerated(file) {
+		// // 		continue
+		// // 	}
+		// // 	var terr error
+		// // 	ast.Inspect(file, func(n ast.Node) bool {
+		// // 		if terr != nil {
+		// // 			return false
+		// // 		}
+		// // 		vals, cont, err := g.GenDecl(n, file, typ)
+		// // 		if err != nil {
+		// // 			terr = err
+		// // 		} else {
+		// // 			values = append(values, vals...)
+		// // 		}
+		// // 		return cont
+		// // 	})
+		// // 	if terr != nil {
+		// // 		return true, fmt.Errorf("Generate: error parsing declaration clauses: %w", terr)
+		// // 	}
+		// }
 
-		if len(values) == 0 {
-			return true, errors.New("no values defined for type " + typ.Name)
-		}
+		// if len(values) == 0 {
+		// 	return true, errors.New("no values defined for type " + typ.Name)
+		// }
 
 		// TODO: build stuff
 	}

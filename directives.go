@@ -4,6 +4,8 @@
 
 package gti
 
+import "strings"
+
 // Directive represents a comment directive in the format:
 //
 //	//tool:directive args...
@@ -11,6 +13,14 @@ type Directive struct {
 	Tool      string
 	Directive string
 	Args      []string
+}
+
+// String returns a string representation of the directive
+// in the format:
+//
+//	//tool:directive args...
+func (d *Directive) String() string {
+	return "//" + d.Tool + ":" + d.Directive + " " + strings.Join(d.Args, " ")
 }
 
 // this is helpful for literals

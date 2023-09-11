@@ -13,4 +13,15 @@ type Config struct {
 
 	// [def: gtigen.go] the output file location relative to the package on which enumgen is being called
 	Output string `def:"gtigen.go" desc:"the output file location relative to the package on which enumgen is being called"`
+
+	TypeReg  bool
+	FuncReg  bool
+	VarReg   bool
+	ConstReg bool
+
+	// whether to generate an instance of the type(s)
+	Instances bool `desc:"whether to generate an instance of the type(s)"`
+
+	// whether to generate a global type variable of the form 'TypeNameType'
+	TypeVar bool `desc:"whether to generate a global type variable of the form 'TypeNameType'"`
 }

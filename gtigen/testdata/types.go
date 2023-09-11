@@ -7,10 +7,7 @@ package testdata
 // MyType is awesome
 //
 //gti:add
-type MyType struct { // MyType is awesome
+type MyType struct {
 	Name string
 	Age  int
 }
-
-// MyOtherType is awesome
-type MyOtherType int
