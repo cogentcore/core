@@ -10,9 +10,9 @@ import "goki.dev/ordmap"
 type Func struct {
 	Name string
 
-	// Comment has all of the comment info as one string
-	// with directives removed.
-	Comment string
+	// Doc has all of the comment documentation
+	// info as one string with directives removed.
+	Doc string
 
 	// Directives has the parsed comment directives
 	Directives Directives
@@ -31,9 +31,9 @@ type Func struct {
 type Method struct {
 	Name string
 
-	// Comment has all of the comment info as one string
-	// with directives removed.
-	Comment string
+	// Doc has all of the comment documentation
+	// info as one string with directives removed.
+	Doc string
 
 	// Directives has the parsed comment directives
 	Directives Directives

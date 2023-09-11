@@ -14,9 +14,9 @@ import (
 type Type struct {
 	Name string
 
-	// Comment has all of the comment info as one string
-	// with directives removed.
-	Comment string
+	// Doc has all of the comment documentation
+	// info as one string with directives removed.
+	Doc string
 
 	// Directives has the parsed comment directives
 	Directives Directives
