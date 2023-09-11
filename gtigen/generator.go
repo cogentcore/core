@@ -53,9 +53,9 @@ func (g *Generator) Printf(format string, args ...any) {
 // PrintHeader prints the header and package clause
 // to the accumulated output
 func (g *Generator) PrintHeader() {
-	// we need a manual import of gti because it is
+	// we need a manual import of gti and ordmap because they are
 	// external, but goimports will handle everything else
-	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "goki.dev/gti")
+	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "goki.dev/gti", "goki.dev/ordmap")
 }
 
 // Find goes through all of the types, functions, variables,

@@ -4,6 +4,7 @@ package testdata
 
 import (
 	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 var MyTypeType = &gti.Type{
