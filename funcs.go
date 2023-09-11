@@ -51,8 +51,8 @@ func FuncInfoTry(f any) (*Func, error) {
 	return FuncByNameTry(FuncName(f))
 }
 
-// AddFunc adds a constructed Func to the registry
-// This sets the ID.
+// AddFunc adds a constructed [Func] to the registry
+// and returns it. This sets the ID.
 func AddFunc(fun *Func) *Func {
 	if _, has := Funcs[fun.Name]; has {
 		slog.Debug("gti.AddFunc: Func already exists", "Func.Name", fun.Name)

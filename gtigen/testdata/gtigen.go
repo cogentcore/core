@@ -7,7 +7,7 @@ import (
 	"goki.dev/ordmap"
 )
 
-var PersonType = &gti.Type{
+var PersonType = gti.AddType(&gti.Type{
 	Name: "goki.dev/gti/gtigen/testdata.Person",
 	Doc:  "Person represents a person and their attributes.\nThe zero value of a Person is not valid.",
 	Directives: gti.Directives{
@@ -31,9 +31,9 @@ var PersonType = &gti.Type{
 		})}},
 	}),
 	Instance: &Person{},
-}
+})
 
-var _ = &gti.Func{
+var _ = gti.AddFunc(&gti.Func{
 	Name: "Alert",
 	Doc:  "Alert prints an alert with the given message",
 	Directives: gti.Directives{
@@ -43,4 +43,4 @@ var _ = &gti.Func{
 		{"msg", &gti.Field{Name: "msg", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-}
+})

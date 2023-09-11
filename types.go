@@ -40,8 +40,8 @@ func TypeByNameTry(nm string) (*Type, error) {
 	return tp, nil
 }
 
-// AddType adds a constructed Type to the registry
-// This sets the ID.
+// AddType adds a constructed [Type] to the registry
+// and returns it. This sets the ID.
 func AddType(typ *Type) *Type {
 	if _, has := Types[typ.Name]; has {
 		slog.Debug("gti.AddType: Type already exists", "Type.Name", typ.Name)
