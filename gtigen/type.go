@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"go/ast"
 	"sort"
+	"strings"
 
 	"goki.dev/grease"
 	"goki.dev/gti"
@@ -47,7 +48,7 @@ func GetFields(list *ast.FieldList) (*gti.Fields, error) {
 		}
 		fo := &gti.Field{
 			Name:       field.Names[0].Name,
-			Doc:        field.Doc.Text(),
+			Doc:        strings.TrimSuffix(field.Doc.Text(), "\n"),
 			Directives: dirs,
 		}
 		res.Add(fo.Name, fo)

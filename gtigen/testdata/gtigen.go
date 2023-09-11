@@ -7,10 +7,10 @@ import (
 	"goki.dev/ordmap"
 )
 
-var MyTypeType = &gti.Type{
-	Name:       "goki.dev/gti/gtigen/testdata.MyType",
-	Doc:        `MyType is awesome`,
+var PersonType = &gti.Type{
+	Name:       "goki.dev/gti/gtigen/testdata.Person",
+	Doc:        `Person represents a person and their attributes`,
 	Directives: gti.Directives{&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-type-var", "-instance"}}, &gti.Directive{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{{"Name", &gti.Field{Name: "Name", Doc: "", Directives: gti.Directives{}}}, {"Age", &gti.Field{Name: "Age", Doc: "", Directives: gti.Directives{}}}}),
-	Instance:   &MyType{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{{"Name", &gti.Field{Name: "Name", Doc: "Name is the name of the person", Directives: gti.Directives{(*gti.Directive)(0xc0000903c0)}}}, {"Age", &gti.Field{Name: "Age", Doc: "Age is the age of the person", Directives: gti.Directives{(*gti.Directive)(0xc000090440)}}}}),
+	Instance:   &Person{},
 }

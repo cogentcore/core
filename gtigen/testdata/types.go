@@ -4,11 +4,15 @@
 
 package testdata
 
-// MyType is awesome
+// Person represents a person and their attributes
 //
 //gti:add -type-var -instance
 //ki:flagtype NodeFlags -field Flag
-type MyType struct {
+type Person struct {
+	// Name is the name of the person
+	//gi:toolbar -hide
 	Name string
-	Age  int
+	// Age is the age of the person
+	//gi:view inline
+	Age int
 }
