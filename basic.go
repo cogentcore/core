@@ -577,7 +577,7 @@ func SetRobust(to, frm any) bool {
 			err := json.Unmarshal([]byte(ToString(frm)), to) // todo: this is not working -- see what marshal says, etc
 			if err != nil {
 				marsh, _ := json.Marshal(to)
-				log.Println("kit.SetRobust, struct from string:", err, "for example:", string(marsh))
+				log.Println("laser.SetRobust, struct from string:", err, "for example:", string(marsh))
 			}
 			return err == nil
 		}
@@ -586,7 +586,7 @@ func SetRobust(to, frm any) bool {
 			err := json.Unmarshal([]byte(ToString(frm)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
-				log.Println("kit.SetRobust, slice from string:", err, "for example:", string(marsh))
+				log.Println("laser.SetRobust, slice from string:", err, "for example:", string(marsh))
 			}
 			return err == nil
 		}
@@ -597,7 +597,7 @@ func SetRobust(to, frm any) bool {
 			err := json.Unmarshal([]byte(ToString(frm)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
-				log.Println("kit.SetRobust, map from string:", err, "for example:", string(marsh))
+				log.Println("laser.SetRobust, map from string:", err, "for example:", string(marsh))
 			}
 			return err == nil
 		}

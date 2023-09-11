@@ -41,7 +41,7 @@ func MapKeyType(mp any) reflect.Type {
 func MapElsValueFun(mp any, fun func(mp any, typ reflect.Type, key, val reflect.Value) bool) bool {
 	vv := reflect.ValueOf(mp)
 	if mp == nil {
-		log.Printf("kit.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
+		log.Printf("laser.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
 		return false
 	}
 	v := NonPtrValue(vv)
@@ -50,7 +50,7 @@ func MapElsValueFun(mp any, fun func(mp any, typ reflect.Type, key, val reflect.
 	}
 	typ := v.Type()
 	if typ.Kind() != reflect.Map {
-		log.Printf("kit.MapElsValueFun: non-pointer type is not a map: %v\n", typ.String())
+		log.Printf("laser.MapElsValueFun: non-pointer type is not a map: %v\n", typ.String())
 		return false
 	}
 	rval := true
@@ -99,7 +99,7 @@ func MapElsN(mp any) int {
 func MapStructElsValueFun(mp any, fun func(mp any, typ reflect.Type, val reflect.Value) bool) bool {
 	vv := reflect.ValueOf(mp)
 	if mp == nil {
-		log.Printf("kit.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
+		log.Printf("laser.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
 		return false
 	}
 	v := NonPtrValue(vv)
@@ -172,7 +172,7 @@ func MapStructElsValueFun(mp any, fun func(mp any, typ reflect.Type, val reflect
 			}
 		}
 	default:
-		log.Printf("kit.MapStructElsValueFun: non-pointer type is not a map or struct: %v\n", typ.String())
+		log.Printf("laser.MapStructElsValueFun: non-pointer type is not a map or struct: %v\n", typ.String())
 		return false
 	}
 	return rval

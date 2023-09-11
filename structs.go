@@ -21,7 +21,7 @@ import (
 func FlatFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
 	typ = NonPtrType(typ)
 	if typ.Kind() != reflect.Struct {
-		log.Printf("kit.FlatFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
+		log.Printf("laser.FlatFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
 		return false
 	}
 	rval := true
@@ -49,7 +49,7 @@ func FlatFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field refle
 func AllFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
 	typ = NonPtrType(typ)
 	if typ.Kind() != reflect.Struct {
-		log.Printf("kit.AllFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
+		log.Printf("laser.AllFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
 		return false
 	}
 	rval := true
@@ -78,7 +78,7 @@ func AllFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflec
 func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	vv := reflect.ValueOf(stru)
 	if stru == nil || vv.Kind() != reflect.Ptr {
-		log.Printf("kit.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
+		log.Printf("laser.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
 		return false
 	}
 	v := NonPtrValue(vv)
@@ -87,7 +87,7 @@ func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field re
 	}
 	typ := v.Type()
 	if typ.Kind() != reflect.Struct {
-		// log.Printf("kit.FlatFieldsValueFunc: non-pointer type is not a struct: %v\n", typ.String())
+		// log.Printf("laser.FlatFieldsValueFunc: non-pointer type is not a struct: %v\n", typ.String())
 		return false
 	}
 	rval := true
@@ -208,7 +208,7 @@ func FieldByPath(typ reflect.Type, path string) (reflect.StructField, bool) {
 	for i, pe := range pels {
 		fld, ok := ctyp.FieldByName(pe)
 		if !ok {
-			log.Printf("kit.FieldByPath: field: %v not found in type: %v, starting from path: %v, in type: %v\n", pe, ctyp.String(), path, typ.String())
+			log.Printf("laser.FieldByPath: field: %v not found in type: %v, starting from path: %v, in type: %v\n", pe, ctyp.String(), path, typ.String())
 			return fld, false
 		}
 		if i == plen-1 {
@@ -232,7 +232,7 @@ func FieldValueByPath(stru any, path string) (reflect.Value, bool) {
 	for i, pe := range pels {
 		_, ok := ctyp.FieldByName(pe)
 		if !ok {
-			log.Printf("kit.FieldValueByPath: field: %v not found in type: %v, starting from path: %v, in type: %v\n", pe, cval.Type().String(), path, typ.String())
+			log.Printf("laser.FieldValueByPath: field: %v not found in type: %v, starting from path: %v, in type: %v\n", pe, cval.Type().String(), path, typ.String())
 			return cval, false
 		}
 		fval := cval.FieldByName(pe)
@@ -261,7 +261,7 @@ func FlatFieldTag(typ reflect.Type, nm, tag string) string {
 func FlatFieldValueByName(stru any, nm string) reflect.Value {
 	vv := reflect.ValueOf(stru)
 	if stru == nil || vv.Kind() != reflect.Ptr {
-		log.Printf("kit.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
+		log.Printf("laser.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
 		return reflect.Value{}
 	}
 	v := NonPtrValue(vv)
@@ -331,7 +331,7 @@ func Embed(stru any, embed reflect.Type) any {
 // reflect.TypeOf((*gi.Node2D)(nil)).Elem() or just reflect.TypeOf(ki.BaseIface())
 func EmbedImplements(typ, iface reflect.Type) bool {
 	if iface.Kind() != reflect.Interface {
-		log.Printf("kit.TypeRegistry EmbedImplements -- type is not an interface: %v\n", iface)
+		log.Printf("laser.EmbedImplements -- type is not an interface: %v\n", iface)
 		return false
 	}
 	if typ.Implements(iface) {
@@ -424,4 +424,20 @@ func StructTags(tags reflect.StructTag) map[string]string {
 func StringJSON(it any) string {
 	b, _ := json.MarshalIndent(it, "", "  ")
 	return string(b)
+}
+
+// SetField sets given field name on given struct object to given value,
+// using very robust conversion routines to e.g., convert from strings to numbers, and
+// vice-versa, automatically.  Returns error if not successfully set.
+// wrapped in UpdateStart / End and sets the ValUpdated flag.
+func SetField(obj any, field string, val any) error {
+	fv := FlatFieldValueByName(obj, field)
+	if !fv.IsValid() {
+		return fmt.Errorf("laser.SetField, could not find field %v", field)
+	}
+	var err error
+	if !SetRobust(PtrValue(fv).Interface(), val) {
+		err = fmt.Errorf("laser.SetField, SetRobust failed to set field %v to value: %v", field, val)
+	}
+	return err
 }
