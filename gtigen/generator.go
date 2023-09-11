@@ -150,7 +150,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 	}
 	doc := strings.TrimSuffix(fd.Doc.Text(), "\n")
 
-	fmt.Println(dirs, doc)
+	fmt.Println(dirs, doc, fd.Recv.List[0])
 
 	return true, nil
 }
