@@ -4,9 +4,9 @@ package ordmap
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.5.1"
+	Version = "v0.5.2"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "d3d2c26"
+	GitCommit = "8775285"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-09-10 17:32"
+	VersionDate = "2023-09-11 04:42"
 )
