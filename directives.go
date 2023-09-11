@@ -28,7 +28,7 @@ func (d *Directive) String() string {
 
 // GoString returns the directive as Go code.
 func (d *Directive) GoString() string {
-	return fmt.Sprintf("&%#v", *d)
+	return fmt.Sprintf("\n&%#v", *d)
 }
 
 // this is helpful for literals

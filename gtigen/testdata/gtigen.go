@@ -8,9 +8,16 @@ import (
 )
 
 var PersonType = &gti.Type{
-	Name:       "goki.dev/gti/gtigen/testdata.Person",
-	Doc:        "Person represents a person and their attributes.\nThe zero value of a Person is not valid.",
-	Directives: gti.Directives{&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-type-var", "-instance"}}, &gti.Directive{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{{"Name", &gti.Field{Name: "Name", Doc: "Name is the name of the person", Directives: gti.Directives{&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-hide"}}}}}, {"Age", &gti.Field{Name: "Age", Doc: "Age is the age of the person", Directives: gti.Directives{&gti.Directive{Tool: "gi", Directive: "view", Args: []string{"inline"}}}}}}),
-	Instance:   &Person{},
+	Name: "goki.dev/gti/gtigen/testdata.Person",
+	Doc:  "Person represents a person and their attributes.\nThe zero value of a Person is not valid.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-type-var", "-instance"}},
+		&gti.Directive{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Name", &gti.Field{Name: "Name", Doc: "Name is the name of the person", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-hide"}}}}},
+		{"Age", &gti.Field{Name: "Age", Doc: "Age is the age of the person", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "view", Args: []string{"inline"}}}}},
+	}),
+	Instance: &Person{},
 }

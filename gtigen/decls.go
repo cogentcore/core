@@ -26,9 +26,9 @@ var TypeTmpl = template.Must(template.New("Type").Funcs(template.FuncMap{"Fields
 func OrdmapCodeString[K comparable, V any](omp *gti.Fields) string {
 	var zk K
 	var zv V
-	res := fmt.Sprintf("ordmap.Make([]ordmap.KeyVal[%T, %T]{", zk, zv)
+	res := fmt.Sprintf("ordmap.Make([]ordmap.KeyVal[%T, %T]{\n", zk, zv)
 	for _, kv := range omp.Order {
-		res += fmt.Sprintf("{%#v, %#v},", kv.Key, kv.Val)
+		res += fmt.Sprintf("{%#v, %#v},\n", kv.Key, kv.Val)
 	}
 	res += "})"
 	return res
