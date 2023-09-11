@@ -12,28 +12,28 @@ import (
 	"goki.dev/gti"
 )
 
-// ParseDirective parses a comment directive and returns
-// the tool, the directive, and the arguments if the comment is
-// a directive, and zero values for everything if not. Directives
-// are of the following form (the slashes are optional):
+// ParseDirective parses and returns a comment directive.
+// The returned directive will be nil if there is no direcive
+// contained in the given comment. Directives are of the
+// following form (the slashes are optional):
 //
-//	//tool:directive arg0 -arg1=go ...
-func ParseDirective(comment string) (directive gti.Directive, has bool, err error) {
+//	//tool:directive args...
+func ParseDirective(comment string) (*gti.Directive, error) {
 	comment = strings.TrimPrefix(comment, "//")
 	before, after, found := strings.Cut(comment, ":")
 	if !found {
-		return
+		return nil, nil
 	}
-	has = true
+	directive := &gti.Directive{}
 	directive.Tool = before
-	directive.Args, err = shellwords.Parse(after)
+	args, err := shellwords.Parse(after)
 	if err != nil {
-		err = fmt.Errorf("error parsing args %w", err)
-		return
+		return nil, fmt.Errorf("error parsing args %w", err)
 	}
-	if len(directive.Args) > 0 {
+	directive.Args = args
+	if len(args) > 0 {
 		directive.Directive = directive.Args[0]
 		directive.Args = directive.Args[1:]
 	}
-	return
+	return directive, nil
 }
