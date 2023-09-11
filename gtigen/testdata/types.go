@@ -28,3 +28,10 @@ type Person struct {
 func (p Person) Introduction() string {
 	return fmt.Sprintf("%s is %d years old", p.Name, p.Age)
 }
+
+// Alert prints an alert with the given message
+//
+//gti:add
+func Alert(msg string) {
+	fmt.Println("Alert:", msg)
+}

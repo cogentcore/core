@@ -28,6 +28,7 @@ type Generator struct {
 	Pkg     *packages.Package                  // The packages we are currently on.
 	Types   []*Type                            // The types
 	Methods *ordmap.Map[string, []*gti.Method] // The methods, keyed by the the full package name of the type of the receiver
+	Funcs   *ordmap.Map[string, *gti.Func]     // The functions
 }
 
 // NewGenerator returns a new generator with the
@@ -61,6 +62,7 @@ func (g *Generator) PrintHeader() {
 func (g *Generator) Find() error {
 	g.Types = []*Type{}
 	g.Methods = &ordmap.Map[string, []*gti.Method]{}
+	g.Funcs = &ordmap.Map[string, *gti.Func]{}
 	err := gengo.Inspect(g.Pkg, g.Inspect)
 	if err != nil {
 		return fmt.Errorf("error while inspecting: %w", err)
@@ -149,7 +151,21 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 	doc := strings.TrimSuffix(fd.Doc.Text(), "\n")
 
 	if fd.Recv == nil {
-		fmt.Println("func", fd)
+		fun := &gti.Func{
+			Name:       fd.Name.Name,
+			Doc:        doc,
+			Directives: dirs,
+		}
+		args, err := GetFields(fd.Type.Params, cfg)
+		if err != nil {
+			return false, fmt.Errorf("error getting function args: %w", err)
+		}
+		fun.Args = args
+		rets, err := GetFields(fd.Type.Results, cfg)
+		if err != nil {
+			return false, fmt.Errorf("error getting function return values: %w", err)
+		}
+		fun.Returns = rets
 	} else {
 		method := &gti.Method{
 			Name:       fd.Name.Name,
@@ -158,12 +174,12 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		}
 		args, err := GetFields(fd.Type.Params, cfg)
 		if err != nil {
-			return false, fmt.Errorf("error getting func args: %w", err)
+			return false, fmt.Errorf("error getting method args: %w", err)
 		}
 		method.Args = args
 		rets, err := GetFields(fd.Type.Results, cfg)
 		if err != nil {
-			return false, fmt.Errorf("error getting func return values: %w", err)
+			return false, fmt.Errorf("error getting method return values: %w", err)
 		}
 		method.Returns = rets
 
