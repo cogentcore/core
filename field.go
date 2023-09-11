@@ -19,4 +19,4 @@ type Field struct {
 }
 
 // Fields represents multiple fields in a struct
-type Fields ordmap.Map[string, *Field]
+type Fields = ordmap.Map[string, *Field]

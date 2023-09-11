@@ -11,6 +11,7 @@ var TypeTmpl = template.Must(template.New("Type").Parse(
 		Name: "{{.FullName}}",
 		Doc: ` + "`" + `{{.Doc}}` + "`" + `,
 		Directives: gti.Directives{ {{range .Directives}} {{printf "%#v" .}}, {{end}} },
+		{{if ne .Fields nil}} Fields: {{print "%#v" .Fields}}, {{end}}
 		{{if .Config.Instance}} Instance: &{{.Name}}{}, {{end}}
 	}
 	`))

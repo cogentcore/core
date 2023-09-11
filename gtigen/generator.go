@@ -135,6 +135,34 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 			Directives: dirs,
 			Config:     cfg,
 		}
+		st, ok := ts.Type.(*ast.StructType)
+		if ok {
+			typ.Fields = &gti.Fields{}
+			for _, field := range st.Fields.List {
+				if len(field.Names) == 0 {
+					return false, fmt.Errorf("got unnamed struct field %v", field)
+				}
+				dirs := gti.Directives{}
+				if field.Doc != nil {
+					for _, c := range field.Doc.List {
+						dir, err := grease.ParseDirective(c.Text)
+						if err != nil {
+							return false, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
+						}
+						if dir == nil {
+							continue
+						}
+						dirs = append(dirs, dir)
+					}
+				}
+				fo := &gti.Field{
+					Name:       field.Names[0].Name,
+					Doc:        field.Doc.Text(),
+					Directives: dirs,
+				}
+				typ.Fields.Add(fo.Name, fo)
+			}
+		}
 		g.Types = append(g.Types, typ)
 	}
 	return true, nil
