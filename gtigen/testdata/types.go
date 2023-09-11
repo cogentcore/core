@@ -4,7 +4,8 @@
 
 package testdata
 
-// Person represents a person and their attributes
+// Person represents a person and their attributes.
+// The zero value of a Person is not valid.
 //
 //gti:add -type-var -instance
 //ki:flagtype NodeFlags -field Flag

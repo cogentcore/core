@@ -14,8 +14,8 @@ import (
 var TypeTmpl = template.Must(template.New("Type").Funcs(template.FuncMap{"FieldsCodeString": OrdmapCodeString[string, *gti.Field]}).Parse(
 	`var {{if .Config.TypeVar}} {{.Name}}Type {{else}} _ {{end}} = &gti.Type{
 		Name: "{{.FullName}}",
-		Doc: ` + "`" + `{{.Doc}}` + "`" + `,
-		Directives: gti.Directives{ {{range .Directives}} {{printf "%#v" .}}, {{end}} },
+		Doc: {{printf "%q" .Doc}},
+		Directives: {{printf "%#v" .Directives}},
 		{{if ne .Fields nil}} Fields: {{FieldsCodeString .Fields}}, {{end}}
 		{{if .Config.Instance}} Instance: &{{.Name}}{}, {{end}}
 	}

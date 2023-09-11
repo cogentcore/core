@@ -4,7 +4,10 @@
 
 package gti
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // Directive represents a comment directive in the format:
 //
@@ -21,6 +24,11 @@ type Directive struct {
 //	//tool:directive args...
 func (d *Directive) String() string {
 	return "//" + d.Tool + ":" + d.Directive + " " + strings.Join(d.Args, " ")
+}
+
+// GoString returns the directive as Go code.
+func (d *Directive) GoString() string {
+	return fmt.Sprintf("&%#v", *d)
 }
 
 // this is helpful for literals
