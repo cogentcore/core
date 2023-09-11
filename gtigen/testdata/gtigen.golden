@@ -22,5 +22,11 @@ var PersonType = &gti.Type{
 			&gti.Directive{Tool: "gi", Directive: "view", Args: []string{"inline"}},
 		}}},
 	}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"Introduction", &gti.Method{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
 	Instance: &Person{},
 }

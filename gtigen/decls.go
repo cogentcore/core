@@ -14,6 +14,7 @@ var TypeTmpl = template.Must(template.New("Type").Parse(
 		Doc: {{printf "%q" .Doc}},
 		Directives: {{printf "%#v" .Directives}},
 		{{if ne .Fields nil}} Fields: {{printf "%#v" .Fields}}, {{end}}
+		Methods: {{printf "%#v" .Methods}},
 		{{if .Config.Instance}} Instance: &{{.Name}}{}, {{end}}
 	}
 	`))

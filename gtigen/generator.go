@@ -155,6 +155,8 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 			Name:       fd.Name.Name,
 			Doc:        doc,
 			Directives: dirs,
+			Args:       &gti.Fields{},
+			Returns:    &gti.Fields{},
 		}
 		typ := fd.Recv.List[0].Type
 		typnm := fmt.Sprintf("%s.%v", g.Pkg.PkgPath, typ)
@@ -241,7 +243,6 @@ func (g *Generator) Generate() (bool, error) {
 		for _, meth := range g.Methods.ValByKey(typ.FullName) {
 			typ.Methods.Add(meth.Name, meth)
 		}
-		fmt.Println(typ.Methods)
 		g.ExecTmpl(TypeTmpl, typ)
 	}
 	return true, nil
