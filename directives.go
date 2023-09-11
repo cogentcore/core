@@ -46,4 +46,16 @@ func (d Directives) GoString() string {
 	return res
 }
 
-// todo: methods for returning all directives for given tool name
+// TODO: do we need this?
+
+// ForTool returns all of the directives in these
+// directives that have the given tool name.
+func (d Directives) ForTool(tool string) Directives {
+	res := Directives{}
+	for _, dir := range d {
+		if dir.Tool == tool {
+			res = append(res, dir)
+		}
+	}
+	return res
+}

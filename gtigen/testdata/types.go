@@ -4,6 +4,8 @@
 
 package testdata
 
+import "fmt"
+
 // Person represents a person and their attributes.
 // The zero value of a Person is not valid.
 //
@@ -16,4 +18,8 @@ type Person struct {
 	// Age is the age of the person
 	//gi:view inline
 	Age int
+}
+
+func (p Person) Introduction() string {
+	return fmt.Sprintf("%s is %d years old", p.Name, p.Age)
 }
