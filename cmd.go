@@ -6,6 +6,7 @@ package grease
 
 import (
 	"fmt"
+	"strings"
 
 	"goki.dev/gti"
 )
@@ -56,6 +57,11 @@ func CmdFromFunc[T any](fun func(T) error) (Cmd[T], error) {
 			}
 		}
 	}
+	if strings.Contains(cmd.Name, ".") {
+		strs := strings.Split(cmd.Name, ".")
+		cmd.Name = strs[len(strs)-1]
+	}
+	cmd.Name = strings.ToLower(cmd.Name)
 	return cmd, nil
 }
 
@@ -75,7 +81,7 @@ func CmdFromCmdOrFunc[T any, C CmdOrFunc[T]](cmd C) (Cmd[T], error) {
 // CmdsFromFuncs is a helper function that returns a slice
 // of command objects from the given slice of command functions,
 // using [CmdFromFunc].
-func CmdsFromFuncs[T any](funcs ...func(T) error) ([]Cmd[T], error) {
+func CmdsFromFuncs[T any](funcs []func(T) error) ([]Cmd[T], error) {
 	res := make([]Cmd[T], len(funcs))
 	for i, fun := range funcs {
 		cmd, err := CmdFromFunc(fun)
@@ -90,7 +96,7 @@ func CmdsFromFuncs[T any](funcs ...func(T) error) ([]Cmd[T], error) {
 // CmdsFromFuncs is a helper function that returns a slice
 // of command objects from the given slice of [CmdOrFunc] objects,
 // using [CmdFromFuncOrFunc].
-func CmdsFromCmdOrFuncs[T any, C CmdOrFunc[T]](cmds ...C) ([]Cmd[T], error) {
+func CmdsFromCmdOrFuncs[T any, C CmdOrFunc[T]](cmds []C) ([]Cmd[T], error) {
 	res := make([]Cmd[T], len(cmds))
 	for i, cmd := range cmds {
 		cmd, err := CmdFromCmdOrFunc[T, C](cmd)

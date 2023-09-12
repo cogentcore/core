@@ -63,5 +63,10 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 // for a command named "build", it will look for a
 // method named "BuildCmd".
 func RunCmd[T any, C CmdOrFunc[T]](cfg T, cmd string, cmds ...C) error {
+	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
+	if err != nil {
+		return fmt.Errorf("error getting commands from given commands: %w", err)
+	}
+	fmt.Println(cs)
 	return nil
 }

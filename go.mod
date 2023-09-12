@@ -13,6 +13,5 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
-	github.com/jinzhu/copier v0.4.0 // indirect
 	goki.dev/ordmap v0.5.0 // indirect
 )

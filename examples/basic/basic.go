@@ -9,11 +9,9 @@ import (
 	"fmt"
 
 	"goki.dev/grease"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 )
 
-type App struct {
+type Config struct {
 
 	// the name of the user
 	Name string `desc:"the name of the user"`
@@ -28,32 +26,21 @@ type App struct {
 	BuildTarget string `desc:"the target platform to build for"`
 }
 
-var TheApp App
-
-var TypeApp = kit.Types.AddType(&App{}, AppProps)
-
-var AppProps = ki.Props{
-	"ToolBar": ki.PropSlice{
-		{"BuildCmd", ki.Props{
-			"label": "Build",
-		}},
-	},
-}
-
 func main() {
 	grease.AppName = "basic"
 	grease.AppTitle = "Basic"
 	grease.AppAbout = "Basic is a basic example application made with Grease."
-	err := grease.Run(&TheApp, "config.toml")
+	grease.DefaultFiles = []string{"config.toml"}
+	err := grease.Run(&Config{}, Build)
 	if err != nil {
 		fmt.Println(err)
 	}
 }
 
-func (a *App) BuildCmd() error {
-	if a.BuildTarget == "" {
+func Build(c *Config) error {
+	if c.BuildTarget == "" {
 		return errors.New("missing build target")
 	}
-	fmt.Println("Building for platform", a.BuildTarget)
+	fmt.Println("Building for platform", c.BuildTarget)
 	return nil
 }
