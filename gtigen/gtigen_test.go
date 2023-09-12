@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"goki.dev/grease"
+	"goki.dev/gti"
+	"goki.dev/gti/gtigen/testdata"
 )
 
 func TestGenerate(t *testing.T) {
@@ -43,5 +45,35 @@ func TestGenerate(t *testing.T) {
 	}
 	if shave != swant {
 		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/gtigen.go and ./testdata/gtigen.golden to see the difference)")
+	}
+}
+
+func TestPerson(t *testing.T) {
+	want := testdata.PersonType
+	have := gti.TypeByName("goki.dev/gti/gtigen/testdata.Person")
+	if have != want {
+		t.Errorf("expected TypeByName to return %v, but got %v", want, have)
+	}
+	have = gti.TypeByValue(testdata.Person{})
+	if have != want {
+		t.Errorf("expected TypeByValue to return %v, but got %v", want, have)
+	}
+	if _, ok := have.Instance.(*testdata.Person); !ok {
+		t.Errorf("expected instance to be a Person, but it is a %T (value %v)", have.Instance, have.Instance)
+	}
+	if have.Name != "goki.dev/gti/gtigen/testdata.Person" {
+		t.Errorf("expected name to be 'goki.dev/gti/gtigen/testdata.Person', but got %s", have.Name)
+	}
+	if len(have.Directives) != 2 {
+		t.Errorf("expected 2 directives, but got %d", len(have.Directives))
+	}
+	if have.Fields.Len() != 2 {
+		t.Errorf("expected 2 fields, but got %d", have.Fields.Len())
+	}
+	if have.Embeds != nil {
+		t.Errorf("expected nil embeds, but got %v", have.Embeds)
+	}
+	if have.Methods.Len() != 1 {
+		t.Errorf("expected 1 method, but got %d", have.Methods.Len())
 	}
 }

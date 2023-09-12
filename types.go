@@ -40,6 +40,17 @@ func TypeByNameTry(nm string) (*Type, error) {
 	return tp, nil
 }
 
+// TypeByValue returns the [Type] of the given value
+func TypeByValue(val any) *Type {
+	return TypeByName(TypeNameObj(val))
+}
+
+// TypeByValueTry returns the [Type] of the given value,
+// or an error if it is not found
+func TypeByValueTry(val any) (*Type, error) {
+	return TypeByNameTry(TypeNameObj(val))
+}
+
 // AddType adds a constructed [Type] to the registry
 // and returns it. This sets the ID.
 func AddType(typ *Type) *Type {
