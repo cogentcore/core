@@ -77,7 +77,7 @@ func RunCmd[T any, C CmdOrFunc[T]](cfg T, cmd string, cmds ...C) error {
 		}
 	}
 	if cmd == "" || cmd == "help" {
-		fmt.Println(Usage(cfg))
+		fmt.Println(Usage(cfg, cs...))
 		return nil
 	}
 	return nil

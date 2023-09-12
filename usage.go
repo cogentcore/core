@@ -13,18 +13,18 @@ import (
 	"goki.dev/ki/v2/kit"
 )
 
-// Usage returns the usage string for the given app.
-// It contains [AppAbout], a list of commands and
-// their descriptions, and a list of flags and their
-// descriptions.
-func Usage(app any) string {
+// Usage returns a usage string based on the given
+// configuration struct and commands. It contains [AppAbout],
+// a list of commands and their descriptions, and a list of
+// flags and their descriptions.
+func Usage[T any](cfg T, cmds ...Cmd[T]) string {
 	var b strings.Builder
 	b.WriteString(AppAbout)
 	b.WriteString("\n\n")
 	b.WriteString("The following commands are available:\n\n")
 
 	b.WriteString("help\n\tshow this usage message and exit\n")
-	CommandUsage(app, &b)
+	CommandUsage(&b, cmds...)
 	b.WriteString("\n")
 
 	b.WriteString("The following flags are available. Flags are case-insensitive and\n")
@@ -34,25 +34,20 @@ func Usage(app any) string {
 
 	b.WriteString("-help or -h\n\tshow this usage message and exit\n")
 	b.WriteString("-config or -cfg\n\tthe filename to load configuration options from\n")
-	FlagUsage(app, "", &b)
+	FlagUsage(cfg, "", &b)
 	return b.String()
 }
 
 // CommandUsage adds the command usage info for
-// the given app to the given [strings.Builder].
+// the given commands to the given [strings.Builder].
 // Typically, you should use [Usage] instead.
-func CommandUsage(app any, b *strings.Builder) {
-	typ := reflect.TypeOf(app)
-	for i := 0; i < typ.NumMethod(); i++ {
-		m := typ.Method(i)
-		if strings.HasSuffix(m.Name, "Cmd") {
-			cmd := strcase.ToKebab(strings.TrimSuffix(m.Name, "Cmd"))
-			if cmd == "root" { // ignore the root command, as it is a special case if no command is specified
-				continue
-			}
-			b.WriteString(cmd)
-			b.WriteString("\n")
+func CommandUsage[T any](b *strings.Builder, cmds ...Cmd[T]) {
+	for _, cmd := range cmds {
+		b.WriteString(cmd.Name)
+		if cmd.Doc != "" {
+			b.WriteString("\n\t" + cmd.Doc)
 		}
+		b.WriteString("\n")
 	}
 }
 
