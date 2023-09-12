@@ -26,6 +26,14 @@ type Config struct {
 	BuildTarget string `desc:"the target platform to build for"`
 }
 
+func Build(c *Config) error {
+	if c.BuildTarget == "" {
+		return errors.New("missing build target")
+	}
+	fmt.Println("Building for platform", c.BuildTarget)
+	return nil
+}
+
 func main() {
 	grease.AppName = "basic"
 	grease.AppTitle = "Basic"
@@ -35,12 +43,4 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-func Build(c *Config) error {
-	if c.BuildTarget == "" {
-		return errors.New("missing build target")
-	}
-	fmt.Println("Building for platform", c.BuildTarget)
-	return nil
 }

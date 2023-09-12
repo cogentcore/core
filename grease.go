@@ -67,6 +67,18 @@ func RunCmd[T any, C CmdOrFunc[T]](cfg T, cmd string, cmds ...C) error {
 	if err != nil {
 		return fmt.Errorf("error getting commands from given commands: %w", err)
 	}
-	fmt.Println(cs)
+	for _, c := range cs {
+		if c.Name == cmd {
+			err := c.Func(cfg)
+			if err != nil {
+				return fmt.Errorf("error running command %q: %w", c.Name, err)
+			}
+			return nil
+		}
+	}
+	if cmd == "" || cmd == "help" {
+		fmt.Println(Usage(cfg))
+		return nil
+	}
 	return nil
 }
