@@ -48,8 +48,8 @@ func Run[T any, C grease.CmdOrFunc[T]](cfg T, cmds ...C) error {
 			GUI(t, cs...)
 			return nil
 		},
-		Name: "gui",
-		Doc:  "",
+		Name: "app",
+		Doc:  "App runs the app (GUI) version of the " + grease.AppTitle + " tool",
 		Root: hasRoot,
 	})
 	return grease.Run(cfg, cs...)

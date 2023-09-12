@@ -7,6 +7,7 @@ package greasi
 import (
 	"fmt"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
@@ -33,12 +34,27 @@ func MainRun[T any](cfg T, cmds ...grease.Cmd[T]) {
 	updt := vp.UpdateStart()
 	mfr := win.SetMainFrame()
 
-	// todo: lame first fix: separate structviews of app and cfg
-	// later, once gti is working, then custom toolbar from gti info
+	tb := gi.AddNewToolBar(mfr, "tb")
+	for _, cmd := range cmds {
+		cmd := cmd
+		if cmd.Name == "app" { // we are already in GUI so that command is irrelevant
+			continue
+		}
+		tb.AddAction(gi.ActOpts{
+			Name:    cmd.Name,
+			Label:   strcase.ToCamel(cmd.Name),
+			Tooltip: cmd.Doc,
+		}, win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			err := cmd.Func(cfg)
+			if err != nil {
+				fmt.Println(err)
+			}
+		})
+	}
 
-	svc := giv.AddNewStructView(mfr, "sv-cfg")
-	svc.Viewport = vp
-	svc.SetStruct(cfg)
+	sv := giv.AddNewStructView(mfr, "sv")
+	sv.Viewport = vp
+	sv.SetStruct(cfg)
 
 	// Main Menu
 
