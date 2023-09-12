@@ -268,7 +268,7 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (gti.Directives, bool, er
 // any types to generate methods for, and
 // any error that occurred.
 func (g *Generator) Generate() (bool, error) {
-	if len(g.Types) == 0 {
+	if len(g.Types) == 0 && g.Funcs.Len() == 0 {
 		return false, nil
 	}
 	for _, typ := range g.Types {
