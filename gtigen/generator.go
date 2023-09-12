@@ -114,7 +114,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		}
 		typ := &Type{
 			Name:       ts.Name.Name,
-			FullName:   g.Pkg.PkgPath + "." + ts.Name.Name,
+			FullName:   FullName(g.Pkg, ts.Name.Name),
 			Type:       ts,
 			Doc:        doc,
 			Directives: dirs,
@@ -152,7 +152,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 
 	if fd.Recv == nil {
 		fun := &gti.Func{
-			Name:       g.Pkg.PkgPath + "." + fd.Name.Name,
+			Name:       FullName(g.Pkg, fd.Name.Name),
 			Doc:        doc,
 			Directives: dirs,
 		}
@@ -185,11 +185,21 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		method.Returns = rets
 
 		typ := fd.Recv.List[0].Type
-		typnm := fmt.Sprintf("%s.%v", g.Pkg.PkgPath, typ)
+		typnm := FullName(g.Pkg, fmt.Sprintf("%v", typ))
 		g.Methods.Add(typnm, append(g.Methods.ValByKey(typnm), method))
 	}
 
 	return true, nil
+}
+
+// FullName returns the fully qualified name of an identifier
+// in the given package with the given name.
+func FullName(pkg *packages.Package, name string) string {
+	// idents in main packages are just "main.IdentName"
+	if pkg.Name == "main" {
+		return "main." + name
+	}
+	return pkg.PkgPath + "." + name
 }
 
 // GetFields creates and returns a new [gti.Fields] object
