@@ -41,6 +41,7 @@ func CmdFromFunc[T any](fun func(T) error) (Cmd[T], error) {
 		Name: gti.FuncName(fun),
 	}
 	if f := gti.FuncByName(cmd.Name); f != nil {
+		cmd.Doc = f.Doc
 		for _, dir := range f.Directives {
 			if dir.Tool != "grease" {
 				continue

@@ -26,6 +26,9 @@ type Config struct {
 	BuildTarget string `desc:"the target platform to build for"`
 }
 
+// Build builds the app for the given platform.
+//
+//gti:add
 func Build(c *Config) error {
 	if c.BuildTarget == "" {
 		return errors.New("missing build target")
