@@ -84,7 +84,7 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 		}
 		return err
 	}
-	if PrintSuccess {
+	if PrintSuccess && !Help { // help command will always succeed
 		color.Green("command %q succeeded", cmd)
 	}
 	return nil
@@ -107,6 +107,7 @@ func RunCmd[T any](cfg T, cmd string, cmds ...Cmd[T]) error {
 		}
 	}
 	if cmd == "" || cmd == "help" {
+		Help = true
 		fmt.Println(Usage(cfg, cmds...))
 		return nil
 	}
