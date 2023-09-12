@@ -65,7 +65,7 @@ var (
 //
 // Also processes -help or -h and prints usage and quits immediately.
 // Config uses [os.Args] for its arguments.
-func Config(cfg any) ([]string, error) {
+func Config[T any](cfg T, cmd string, cmds ...Cmd[T]) ([]string, error) {
 	var errs []error
 	err := SetFromDefaults(cfg)
 	if err != nil {
@@ -82,7 +82,7 @@ func Config(cfg any) ([]string, error) {
 	}
 
 	if Help {
-		fmt.Println(Usage(cfg))
+		fmt.Println(Usage(cfg, cmds...))
 		os.Exit(0)
 	}
 

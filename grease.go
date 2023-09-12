@@ -40,7 +40,11 @@ var (
 // the result of [Usage].
 // Run uses [os.Args] for its arguments.
 func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
-	leftovers, err := Config(cfg)
+	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
+	if err != nil {
+		return fmt.Errorf("error getting commands from given commands: %w", err)
+	}
+	leftovers, err := Config(cfg, "", cs...)
 	if err != nil {
 		return fmt.Errorf("error configuring app: %w", err)
 	}
@@ -49,7 +53,7 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	if len(leftovers) > 0 {
 		cmd = leftovers[0]
 	}
-	err = RunCmd(cfg, cmd, cmds...)
+	err = RunCmd(cfg, cmd, cs...)
 	if err != nil {
 		return fmt.Errorf("error running command %q: %w", cmd, err)
 	}
@@ -62,12 +66,8 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 // to camel case suffixed with "Cmd"; for example,
 // for a command named "build", it will look for a
 // method named "BuildCmd".
-func RunCmd[T any, C CmdOrFunc[T]](cfg T, cmd string, cmds ...C) error {
-	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
-	if err != nil {
-		return fmt.Errorf("error getting commands from given commands: %w", err)
-	}
-	for _, c := range cs {
+func RunCmd[T any](cfg T, cmd string, cmds ...Cmd[T]) error {
+	for _, c := range cmds {
 		if c.Name == cmd {
 			err := c.Func(cfg)
 			if err != nil {
@@ -77,7 +77,7 @@ func RunCmd[T any, C CmdOrFunc[T]](cfg T, cmd string, cmds ...C) error {
 		}
 	}
 	if cmd == "" || cmd == "help" {
-		fmt.Println(Usage(cfg, cs...))
+		fmt.Println(Usage(cfg, cmds...))
 		return nil
 	}
 	return nil

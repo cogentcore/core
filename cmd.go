@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/gti"
 )
 
@@ -62,7 +63,7 @@ func CmdFromFunc[T any](fun func(T) error) (Cmd[T], error) {
 		strs := strings.Split(cmd.Name, ".")
 		cmd.Name = strs[len(strs)-1]
 	}
-	cmd.Name = strings.ToLower(cmd.Name)
+	cmd.Name = strcase.ToKebab(cmd.Name)
 	return cmd, nil
 }
 

@@ -231,21 +231,21 @@ func TestConfigOpen(t *testing.T) {
 	IncludePaths = []string{".", "testdata"}
 	NeedConfigFile = true
 	cfg := &TestConfig{}
-	_, err := Config(cfg)
+	_, err := Config(cfg, "")
 	if err == nil {
 		t.Errorf("should have Config error")
 		// } else {
 		// 	fmt.Println(err)
 	}
 	DefaultFiles = []string{"aldfkj.toml"}
-	_, err = Config(cfg)
+	_, err = Config(cfg, "")
 	if err == nil {
 		t.Errorf("should have Config error")
 		// } else {
 		// 	fmt.Println(err)
 	}
 	DefaultFiles = []string{"aldfkj.toml", "testcfg.toml"}
-	_, err = Config(cfg)
+	_, err = Config(cfg, "")
 	if err != nil {
 		t.Error(err)
 	}
