@@ -98,7 +98,7 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 // method named "BuildCmd".
 func RunCmd[T any](cfg T, cmd string, cmds ...Cmd[T]) error {
 	for _, c := range cmds {
-		if c.Name == cmd {
+		if c.Name == cmd || c.Root && cmd == "" {
 			err := c.Func(cfg)
 			if err != nil {
 				return err
