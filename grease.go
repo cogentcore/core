@@ -6,19 +6,25 @@ package grease
 
 import (
 	"fmt"
+	"os"
 )
 
 var (
 	// AppName is the internal name of the Grease app
 	// (typically in kebab-case) (see also [AppTitle])
-	AppName string = "grease"
+	AppName = "grease"
 
 	// AppTitle is the user-visible name of the Grease app
 	// (typically in Title Case) (see also [AppName])
-	AppTitle string = "Grease"
+	AppTitle = "Grease"
 
 	// AppAbout is the description of the Grease app
-	AppAbout string = "Grease allows you to edit configuration information and run commands through a CLI and a GUI interface."
+	AppAbout = "Grease allows you to edit configuration information and run commands through a CLI and a GUI interface."
+
+	// Fatal is whether to, if there is an error in [Run],
+	// print it and fatally exit the program with [os.Exit]
+	// and an exit code of 1.
+	Fatal = true
 )
 
 // Run runs the given app with the given default
@@ -42,11 +48,21 @@ var (
 func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
 	if err != nil {
-		return fmt.Errorf("error getting commands from given commands: %w", err)
+		err := fmt.Errorf("error getting commands from given commands: %w", err)
+		if Fatal {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		return err
 	}
 	leftovers, err := Config(cfg, "", cs...)
 	if err != nil {
-		return fmt.Errorf("error configuring app: %w", err)
+		err := fmt.Errorf("error configuring app: %w", err)
+		if Fatal {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		return err
 	}
 	// root command if no other command is specified
 	cmd := ""
@@ -55,7 +71,12 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	}
 	err = RunCmd(cfg, cmd, cs...)
 	if err != nil {
-		return fmt.Errorf("error running command %q: %w", cmd, err)
+		err := fmt.Errorf("error running command %q: %w", cmd, err)
+		if Fatal {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		return err
 	}
 	return nil
 }
@@ -71,7 +92,7 @@ func RunCmd[T any](cfg T, cmd string, cmds ...Cmd[T]) error {
 		if c.Name == cmd {
 			err := c.Func(cfg)
 			if err != nil {
-				return fmt.Errorf("error running command %q: %w", c.Name, err)
+				return err
 			}
 			return nil
 		}
@@ -80,5 +101,5 @@ func RunCmd[T any](cfg T, cmd string, cmds ...Cmd[T]) error {
 		fmt.Println(Usage(cfg, cmds...))
 		return nil
 	}
-	return nil
+	return fmt.Errorf("command %q not found", cmd)
 }

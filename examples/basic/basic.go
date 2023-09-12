@@ -5,7 +5,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 
 	"goki.dev/grease"
@@ -30,9 +29,6 @@ type Config struct {
 //
 //gti:add
 func Build(c *Config) error {
-	if c.BuildTarget == "" {
-		return errors.New("missing build target")
-	}
 	fmt.Println("Building for platform", c.BuildTarget)
 	return nil
 }
@@ -42,8 +38,5 @@ func main() {
 	grease.AppTitle = "Basic"
 	grease.AppAbout = "Basic is a basic example application made with Grease."
 	grease.DefaultFiles = []string{"config.toml"}
-	err := grease.Run(&Config{}, Build)
-	if err != nil {
-		fmt.Println(err)
-	}
+	grease.Run(&Config{}, Build)
 }
