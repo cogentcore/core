@@ -17,7 +17,7 @@ import (
 // GUI starts the GUI for the given
 // Grease app, which must be passed as
 // a pointer.
-func GUI(app, cfg any) {
+func GUI[T any, C grease.CmdOrFunc[T]](cfg T, cmds ...C) {
 	gimain.Main(func() {
 		MainRun(app, cfg)
 	})

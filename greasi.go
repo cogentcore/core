@@ -24,7 +24,7 @@ import (
 //	func (a *App) BuildCmd() error
 //
 // Run uses [os.Args] for its arguments.
-func Run(app, cfg any) error {
+func Run[T any, C grease.CmdOrFunc[T]](cfg T, cmds ...C) error {
 	leftovers, err := grease.Config(cfg)
 	if err != nil {
 		return fmt.Errorf("error configuring app: %w", err)
@@ -35,7 +35,7 @@ func Run(app, cfg any) error {
 	}
 	cmd := leftovers[0]
 
-	err = grease.RunCmd(app, cfg, cmd)
+	err = grease.RunCmd[T, C](cfg, cmd, cmds...)
 	if err != nil {
 		return fmt.Errorf("error running command %q: %w", cmd, err)
 	}
