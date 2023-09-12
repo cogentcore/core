@@ -24,6 +24,9 @@ type Cmd[T any] struct {
 	Name string
 	// Doc is the documentation for the command.
 	Doc string
+	// Root is whether the command is the root command
+	// (what is called when no subcommands are passed)
+	Root bool
 }
 
 // CmdOrFunc is a generic type constraint that represents either
