@@ -7,6 +7,8 @@ package grease
 import (
 	"fmt"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 var (
@@ -22,9 +24,13 @@ var (
 	AppAbout = "Grease allows you to edit configuration information and run commands through a CLI and a GUI interface."
 
 	// Fatal is whether to, if there is an error in [Run],
-	// print it and fatally exit the program with [os.Exit]
-	// and an exit code of 1.
+	// print it and fatally exit the program through [os.Exit]
+	// with an exit code of 1.
 	Fatal = true
+
+	// PrintSuccess is whether to print a message indicating
+	// that a command was successful after it is run.
+	PrintSuccess = true
 )
 
 // Run runs the given app with the given default
@@ -50,7 +56,7 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
 		if Fatal {
-			fmt.Println(err)
+			color.Red("%v", err)
 			os.Exit(1)
 		}
 		return err
@@ -59,7 +65,7 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	if err != nil {
 		err := fmt.Errorf("error configuring app: %w", err)
 		if Fatal {
-			fmt.Println(err)
+			color.Red("%v", err)
 			os.Exit(1)
 		}
 		return err
@@ -73,10 +79,13 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	if err != nil {
 		err := fmt.Errorf("error running command %q: %w", cmd, err)
 		if Fatal {
-			fmt.Println(err)
+			color.Red("%v", err)
 			os.Exit(1)
 		}
 		return err
+	}
+	if PrintSuccess {
+		color.Green("command %q succeeded", cmd)
 	}
 	return nil
 }
