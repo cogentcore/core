@@ -6,10 +6,6 @@ package grease
 
 import (
 	"fmt"
-	"os"
-	"reflect"
-
-	"github.com/iancoleman/strcase"
 )
 
 var (
@@ -43,7 +39,7 @@ var (
 // and "HelpCmd" does not exist, Run prints
 // the result of [Usage].
 // Run uses [os.Args] for its arguments.
-func Run(app, cfg any) error {
+func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	leftovers, err := Config(cfg)
 	if err != nil {
 		return fmt.Errorf("error configuring app: %w", err)
@@ -53,7 +49,7 @@ func Run(app, cfg any) error {
 	if len(leftovers) > 0 {
 		cmd = leftovers[0]
 	}
-	err = RunCmd(app, cfg, cmd)
+	err = RunCmd(cfg, cmd, cmds...)
 	if err != nil {
 		return fmt.Errorf("error running command %q: %w", cmd, err)
 	}
@@ -66,34 +62,6 @@ func Run(app, cfg any) error {
 // to camel case suffixed with "Cmd"; for example,
 // for a command named "build", it will look for a
 // method named "BuildCmd".
-func RunCmd(app, cfg any, cmd string) error {
-	name := strcase.ToCamel(cmd) + "Cmd"
-	val := reflect.ValueOf(app)
-	meth := val.MethodByName(name)
-	if !meth.IsValid() {
-		if cmd == "" || cmd == "help" { // handle root and help here so that people can still override them if they want to
-			fmt.Println(Usage(app))
-			os.Exit(0)
-		}
-		return fmt.Errorf("command %q not found", cmd)
-	}
-
-	res := meth.Call([]reflect.Value{reflect.ValueOf(cfg)})
-
-	if len(res) != 1 {
-		return fmt.Errorf("programmer error: expected 1 return value (of type error) from %q but got %d instead", name, len(res))
-	}
-	r := res[0]
-	if !r.IsValid() || !r.CanInterface() {
-		return fmt.Errorf("programmer error: expected valid return value (of type error) from %q but got %v instead", name, r)
-	}
-	i := r.Interface()
-	err, ok := i.(error)
-	if !ok && i != nil { // if i is nil, then it won't be an error, even if it returns one
-		return fmt.Errorf("programmer error: expected return value of type error from %q but got value '%v' of type %T instead", name, i, i)
-	}
-	if err != nil {
-		return err
-	}
+func RunCmd[T any, C CmdOrFunc[T]](cfg T, cmd string, cmds ...C) error {
 	return nil
 }
