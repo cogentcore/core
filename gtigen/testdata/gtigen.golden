@@ -7,6 +7,7 @@ import (
 	"goki.dev/ordmap"
 )
 
+// PersonType is the [gti.Type] for [Person]
 var PersonType = gti.AddType(&gti.Type{
 	Name: "goki.dev/gti/gtigen/testdata.Person",
 	Doc:  "Person represents a person and their attributes.\nThe zero value of a Person is not valid.",

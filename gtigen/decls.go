@@ -12,7 +12,8 @@ import (
 // It takes a [*Type] as its value
 var TypeTmpl = template.Must(template.New("Type").Parse(
 	`
-	var {{if .Config.TypeVar}} {{.Name}}Type {{else}} _ {{end}} = gti.AddType(&gti.Type{
+	{{if .Config.TypeVar}} // {{.Name}}Type is the [gti.Type] for [{{.Name}}]
+	var {{.Name}}Type {{else}} _ {{end}} = gti.AddType(&gti.Type{
 		Name: "{{.FullName}}",
 		Doc: {{printf "%q" .Doc}},
 		Directives: {{printf "%#v" .Directives}},
