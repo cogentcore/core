@@ -17,14 +17,14 @@ import (
 // GUI starts the GUI for the given
 // Grease app, which must be passed as
 // a pointer.
-func GUI[T any, C grease.CmdOrFunc[T]](cfg T, cmds ...C) {
+func GUI[T any](cfg T, cmds ...grease.Cmd[T]) {
 	gimain.Main(func() {
-		MainRun(app, cfg)
+		MainRun(cfg, cmds...)
 	})
 }
 
 // MainRun does GUI running on main thread
-func MainRun(app, cfg any) {
+func MainRun[T any](cfg T, cmds ...grease.Cmd[T]) {
 	gi.SetAppName(grease.AppName)
 	gi.SetAppAbout(grease.AppAbout)
 
@@ -61,7 +61,7 @@ func MainRun(app, cfg any) {
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Println("File:Save menu action triggered")
-			grease.Save(app, grease.ConfigFile)
+			grease.Save(cfg, grease.ConfigFile)
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {

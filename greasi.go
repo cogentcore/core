@@ -6,7 +6,9 @@ package greasi
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/fatih/color"
 	"goki.dev/grease"
 )
 
@@ -25,19 +27,30 @@ import (
 //
 // Run uses [os.Args] for its arguments.
 func Run[T any, C grease.CmdOrFunc[T]](cfg T, cmds ...C) error {
-	leftovers, err := grease.Config(cfg)
+	cs, err := grease.CmdsFromCmdOrFuncs[T, C](cmds)
 	if err != nil {
-		return fmt.Errorf("error configuring app: %w", err)
+		err := fmt.Errorf("error getting commands from given commands: %w", err)
+		if grease.Fatal {
+			color.Red("%v", err)
+			os.Exit(1)
+		}
+		return err
 	}
-	if len(leftovers) == 0 {
-		GUI(app, cfg)
-		return nil
+	hasRoot := false
+	for _, cmd := range cs {
+		if cmd.Root {
+			hasRoot = true
+			break
+		}
 	}
-	cmd := leftovers[0]
-
-	err = grease.RunCmd[T, C](cfg, cmd, cmds...)
-	if err != nil {
-		return fmt.Errorf("error running command %q: %w", cmd, err)
-	}
-	return nil
+	cs = append(cs, grease.Cmd[T]{
+		Func: func(t T) error {
+			GUI(t, cs...)
+			return nil
+		},
+		Name: "gui",
+		Doc:  "",
+		Root: hasRoot,
+	})
+	return grease.Run(cfg, cs...)
 }
