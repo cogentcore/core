@@ -53,7 +53,7 @@ func CmdFromFunc[T any](fun func(T) error) (Cmd[T], error) {
 			if dir.Directive != "cmd" {
 				return cmd, fmt.Errorf("unrecognized comment directive %q (from comment %q)", dir.Directive, dir.String())
 			}
-			leftovers, err := SetFromArgs(cmd, dir.Args)
+			leftovers, err := SetFromArgs(&cmd, dir.Args)
 			if err != nil {
 				return cmd, fmt.Errorf("error setting command from directive arguments (from comment %q): %w", dir.String(), err)
 			}
