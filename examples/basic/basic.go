@@ -33,10 +33,19 @@ func Build(c *Config) error {
 	return nil
 }
 
+// Run runs the app for the given user.
+//
+//gti:add
+//grease:cmd -root
+func Run(c *Config) error {
+	fmt.Println("Running for user", c.Name)
+	return nil
+}
+
 func main() {
 	grease.AppName = "basic"
 	grease.AppTitle = "Basic"
 	grease.AppAbout = "Basic is a basic example application made with Grease."
 	grease.DefaultFiles = []string{"config.toml"}
-	grease.Run(&Config{}, Build)
+	grease.Run(&Config{}, Build, Run)
 }

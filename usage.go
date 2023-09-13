@@ -22,8 +22,15 @@ func Usage[T any](cfg T, cmds ...Cmd[T]) string {
 	var b strings.Builder
 	b.WriteString(AppAbout)
 	b.WriteString("\n\n")
+	b.WriteString("Usage: " + cmdColor(AppName+" <command> [arguments] [flags]\n\n"))
 	b.WriteString("The following commands are available:\n\n")
 
+	for _, cmd := range cmds {
+		if cmd.Root {
+			b.WriteString(cmdColor("<default command>") + "\n\t" + cmd.Doc + "\n")
+			break
+		}
+	}
 	b.WriteString(cmdColor("help") + "\n\tshow this usage message and exit\n")
 	CommandUsage(&b, cmds...)
 	b.WriteString("\n")
