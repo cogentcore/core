@@ -16,14 +16,15 @@ import (
 // Usage returns a usage string based on the given
 // configuration struct and commands. It contains [AppAbout],
 // a list of commands and their descriptions, and a list of
-// flags and their descriptions.
+// flags and their descriptions. The resulting string uses
+// color escape codes.
 func Usage[T any](cfg T, cmds ...Cmd[T]) string {
 	var b strings.Builder
 	b.WriteString(AppAbout)
 	b.WriteString("\n\n")
 	b.WriteString("The following commands are available:\n\n")
 
-	b.WriteString("help\n\tshow this usage message and exit\n")
+	b.WriteString(cmdColor("help") + "\n\tshow this usage message and exit\n")
 	CommandUsage(&b, cmds...)
 	b.WriteString("\n")
 
@@ -32,8 +33,8 @@ func Usage[T any](cfg T, cmds ...Cmd[T]) string {
 	b.WriteString("one or two leading dashes. Most flags can be used without nesting\n")
 	b.WriteString("paths (e.g. -target instead of -build-target)\n\n")
 
-	b.WriteString("-help or -h\n\tshow this usage message and exit\n")
-	b.WriteString("-config or -cfg\n\tthe filename to load configuration options from\n")
+	b.WriteString(cmdColor("-help") + " or " + cmdColor("-h") + "\n\tshow this usage message and exit\n")
+	b.WriteString(cmdColor("-config") + " or " + cmdColor("-cfg") + "\n\tthe filename to load configuration options from\n")
 	FlagUsage(cfg, "", &b)
 	return b.String()
 }
@@ -43,7 +44,7 @@ func Usage[T any](cfg T, cmds ...Cmd[T]) string {
 // Typically, you should use [Usage] instead.
 func CommandUsage[T any](b *strings.Builder, cmds ...Cmd[T]) {
 	for _, cmd := range cmds {
-		b.WriteString(cmd.Name)
+		b.WriteString(cmdColor(cmd.Name))
 		if cmd.Doc != "" {
 			b.WriteString("\n\t" + cmd.Doc)
 		}
@@ -79,7 +80,7 @@ func FlagUsage(app any, path string, b *strings.Builder) {
 		if path != "" {
 			nm = path + "." + nm
 		}
-		b.WriteString("-" + strcase.ToKebab(nm) + "\n")
+		b.WriteString(cmdColor("-" + strcase.ToKebab(nm) + "\n"))
 		desc, ok := f.Tag.Lookup("desc")
 		if ok && desc != "" {
 			b.WriteString("\t")
