@@ -63,7 +63,7 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
 		if Fatal {
-			color.Red("%v", err)
+			fmt.Println(errorColor("%v", err))
 			os.Exit(1)
 		}
 		return err
@@ -72,7 +72,7 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	if err != nil {
 		err := fmt.Errorf("error configuring app: %w", err)
 		if Fatal {
-			color.Red("%v", err)
+			fmt.Println(errorColor("%v", err))
 			os.Exit(1)
 		}
 		return err
@@ -85,19 +85,25 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	err = RunCmd(cfg, cmd, cs...)
 	if err != nil {
 		if Fatal {
-			fmt.Println(cmdColor(AppName+" "+cmd) + errorColor(" failed: %v", err))
+			fmt.Println(cmdColor(cmdString(cmd)) + errorColor(" failed: %v", err))
 			os.Exit(1)
 		}
 		return fmt.Errorf("%s failed: %w", AppName+" "+cmd, err)
 	}
 	if PrintSuccess && !Help { // help command will always succeed
-		if cmd == "" {
-			color.Green("command succeeded")
-		} else {
-			color.Green("%s succeeded", cmd)
-		}
+		fmt.Println(cmdColor(cmdString(cmd)) + successColor(" succeeded"))
 	}
 	return nil
+}
+
+// cmdString is a simple helper function that
+// returns a string with [AppName] and the given
+// command name string.
+func cmdString(cmd string) string {
+	if cmd == "" {
+		return AppName
+	}
+	return AppName + " " + cmd
 }
 
 // RunCmd runs the command with the given
