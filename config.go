@@ -43,7 +43,7 @@ var (
 //
 // Also processes -help or -h and prints usage and quits immediately.
 // Config uses [os.Args] for its arguments.
-func Config[T any](cfg T, cmd string, cmds ...Cmd[T]) ([]string, error) {
+func Config[T any](opts *Options, cfg T, cmd string, cmds ...Cmd[T]) ([]string, error) {
 	var errs []error
 	err := SetFromDefaults(cfg)
 	if err != nil {
@@ -60,18 +60,18 @@ func Config[T any](cfg T, cmd string, cmds ...Cmd[T]) ([]string, error) {
 	}
 
 	if Help {
-		fmt.Println(Usage(cfg, cmds...))
+		fmt.Println(Usage(opts, cfg, cmds...))
 		os.Exit(0)
 	}
 
 	var cfgFiles []string
 	if ConfigFile != "" {
-		_, err := dirs.FindFileOnPaths(IncludePaths, ConfigFile)
+		_, err := dirs.FindFileOnPaths(opts.IncludePaths, ConfigFile)
 		if err == nil {
 			cfgFiles = append(cfgFiles, ConfigFile)
 		}
 	} else {
-		if SearchUp {
+		if opts.SearchUp {
 			wd, err := os.Getwd()
 			if err != nil {
 				return nil, fmt.Errorf("error getting current directory: %w", err)
@@ -83,30 +83,30 @@ func Config[T any](cfg T, cmd string, cmds ...Cmd[T]) ([]string, error) {
 				if wd == pwd { // if there is no change, we have reached the root of the filesystem
 					break
 				}
-				IncludePaths = append(IncludePaths, wd)
+				opts.IncludePaths = append(opts.IncludePaths, wd)
 			}
 		}
-		for _, fn := range DefaultFiles {
-			_, err := dirs.FindFileOnPaths(IncludePaths, fn)
+		for _, fn := range opts.DefaultFiles {
+			_, err := dirs.FindFileOnPaths(opts.IncludePaths, fn)
 			if err == nil {
 				cfgFiles = append(cfgFiles, fn)
 			}
 		}
 	}
 
-	if NeedConfigFile && len(cfgFiles) == 0 {
+	if opts.NeedConfigFile && len(cfgFiles) == 0 {
 		err = errors.New("grease.Config: no config file or default files specified")
 		return nil, err
 	}
 
 	for _, fn := range cfgFiles {
-		err = OpenWithIncludes(cfg, fn)
+		err = OpenWithIncludes(opts, cfg, fn)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	NonFlagArgs, err = SetFromArgs(cfg, args)
+	NonFlagArgs, err = SetFromArgs(opts, cfg, args)
 	if err != nil {
 		errs = append(errs, err)
 	}

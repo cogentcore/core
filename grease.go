@@ -37,7 +37,7 @@ var (
 // the result of [Usage].
 // Run uses [os.Args] for its arguments.
 func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
-	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
+	cs, err := CmdsFromCmdOrFuncs[T, C](opts, cmds)
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
 		if opts.Fatal {
@@ -46,7 +46,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 		}
 		return err
 	}
-	leftovers, err := Config(cfg, "", cs...)
+	leftovers, err := Config(opts, cfg, "", cs...)
 	if err != nil {
 		err := fmt.Errorf("error configuring app: %w", err)
 		if opts.Fatal {

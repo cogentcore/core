@@ -48,5 +48,5 @@ func main() {
 	opts.AppTitle = "Basic"
 	opts.AppAbout = "Basic is a basic example application made with Grease."
 	opts.DefaultFiles = []string{"config.toml"}
-	grease.Run(&Config{}, Build, Run)
+	grease.Run(opts, &Config{}, Build, Run)
 }

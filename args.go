@@ -25,13 +25,13 @@ import (
 // must refer to fields in the config, so any that fail to match trigger
 // an error.  Errors can also result from parsing.
 // Errors are automatically logged because these are user-facing.
-func SetFromArgs(cfg any, args []string) (nonFlags []string, err error) {
+func SetFromArgs(opts *Options, cfg any, args []string) (nonFlags []string, err error) {
 	allArgs := make(map[string]reflect.Value)
 	CommandArgs(allArgs) // need these to not trigger not-found errors
 	FieldArgNames(cfg, allArgs)
 	nonFlags, err = ParseArgs(cfg, args, allArgs, true)
 	if err != nil {
-		fmt.Println(Usage(cfg))
+		fmt.Println(Usage(opts, cfg))
 	}
 	return
 }
