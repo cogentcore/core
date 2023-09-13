@@ -11,28 +11,6 @@ import (
 	"github.com/fatih/color"
 )
 
-var (
-	// AppName is the internal name of the Grease app
-	// (typically in kebab-case) (see also [AppTitle])
-	AppName = "grease"
-
-	// AppTitle is the user-visible name of the Grease app
-	// (typically in Title Case) (see also [AppName])
-	AppTitle = "Grease"
-
-	// AppAbout is the description of the Grease app
-	AppAbout = "Grease allows you to edit configuration information and run commands through a CLI and a GUI interface."
-
-	// Fatal is whether to, if there is an error in [Run],
-	// print it and fatally exit the program through [os.Exit]
-	// with an exit code of 1.
-	Fatal = true
-
-	// PrintSuccess is whether to print a message indicating
-	// that a command was successful after it is run.
-	PrintSuccess = true
-)
-
 // color functions for internal use
 var (
 	errorColor   = color.New(color.FgRed, color.Bold).SprintfFunc()
