@@ -13,6 +13,8 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+//go:generate gtigen -output gtigen_gen.go
+
 // ParsePackage parses the package(s) located in the configuration source directory.
 func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 	pcfg := &packages.Config{
@@ -32,9 +34,12 @@ func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 // configuration object, loading the packages from the
 // configuration source directory,
 // and writes the result to the config output file.
-// It is a simple entry point to enumgen that does all
+// It is a simple entry point to gtigen that does all
 // of the steps; for more specific functionality, create
 // a new [Generator] with [NewGenerator] and call methods on it.
+//
+//gti:add
+//grease:cmd -root
 func Generate(cfg *Config) error {
 	pkgs, err := ParsePackage(cfg)
 	if err != nil {
