@@ -14,6 +14,15 @@ type Config struct {
 	// [def: gtigen.go] the output file location relative to the package on which enumgen is being called
 	Output string `def:"gtigen.go" desc:"the output file location relative to the package on which enumgen is being called"`
 
+	// whether to add types to gtigen by default
+	AddTypes bool `desc:"whether to add types to gtigen by default"`
+
+	// whether to add methods to gtigen by default
+	AddMethods bool `desc:"whether to add methods to gtigen by default"`
+
+	// whether to add functions to gtigen by default
+	AddFuncs bool `desc:"whether to add functions to gtigen by default"`
+
 	// a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it
 	InterfaceConfigs map[string]*Config `desc:"a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it"`
 

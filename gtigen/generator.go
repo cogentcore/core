@@ -37,9 +37,15 @@ func NewGenerator(config *Config, pkgs []*packages.Package) *Generator {
 	return &Generator{Config: config, Pkgs: pkgs}
 }
 
-// PackageModes returns the package load modes needed for this generator
-func PackageModes() packages.LoadMode {
-	return packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesSizes | packages.NeedSyntax | packages.NeedTypesInfo
+// PackageModes returns the package load modes needed for gtigen,
+// based on the given config information.
+func PackageModes(cfg *Config) packages.LoadMode {
+	res := packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesSizes | packages.NeedSyntax | packages.NeedTypesInfo
+	// we only need deps if we are checking for interface impls
+	if len(cfg.InterfaceConfigs) > 0 {
+		res |= packages.NeedDeps
+	}
+	return res
 }
 
 // Printf prints the formatted string to the
@@ -106,7 +112,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if !hasAdd { // we must be told to add or we will not add
+	if !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
 		return true, nil
 	}
 	doc := strings.TrimSuffix(gd.Doc.Text(), "\n")
@@ -148,12 +154,12 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if !hasAdd { // we must be told to add or we will not add
-		return true, nil
-	}
 	doc := strings.TrimSuffix(fd.Doc.Text(), "\n")
 
 	if fd.Recv == nil {
+		if !hasAdd && !cfg.AddFuncs { // we must be told to add or we will not add
+			return true, nil
+		}
 		fun := &gti.Func{
 			Name:       FullName(g.Pkg, fd.Name.Name),
 			Doc:        doc,
@@ -171,6 +177,9 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		fun.Returns = rets
 		g.Funcs.Add(fun.Name, fun)
 	} else {
+		if !hasAdd && !cfg.AddMethods { // we must be told to add or we will not add
+			return true, nil
+		}
 		method := &gti.Method{
 			Name:       fd.Name.Name,
 			Doc:        doc,

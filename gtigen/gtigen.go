@@ -18,7 +18,7 @@ import (
 // ParsePackage parses the package(s) located in the configuration source directory.
 func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 	pcfg := &packages.Config{
-		Mode: PackageModes(),
+		Mode: PackageModes(cfg),
 		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
 		// in a separate pass? For later.
 		Tests: false,
