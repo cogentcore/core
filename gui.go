@@ -65,23 +65,25 @@ func MainRun[T any](cfg T, cmds ...grease.Cmd[T]) {
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu.AddAppMenu(win)
 
+	// TODO: finish these functions
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Println("File:New menu action triggered")
+
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Println("File:Open menu action triggered")
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Println("File:Save menu action triggered")
-			grease.Save(cfg, grease.ConfigFile)
+			if grease.ConfigFile != "" {
+				grease.Save(cfg, grease.ConfigFile)
+			} else {
+			}
+
 		})
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Println("File:SaveAs menu action triggered")
 		})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunWinClose},
