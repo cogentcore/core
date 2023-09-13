@@ -111,7 +111,7 @@ func (ph *Phong) UseTextureIdx(idx int) error {
 
 // UseTextureName selects texture by name for current render step
 func (ph *Phong) UseTextureName(name string) error {
-	idx, ok := ph.Textures.IdxByKey(name)
+	idx, ok := ph.Textures.IdxByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseTextureName -- name not found: %s", name)
 		if vgpu.Debug {
@@ -140,7 +140,7 @@ func (ph *Phong) UpdateTextureIdx(idx int) error {
 
 // UpdateTextureName updates texture by name
 func (ph *Phong) UpdateTextureName(name string) error {
-	idx, ok := ph.Textures.IdxByKey(name)
+	idx, ok := ph.Textures.IdxByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UpdateTextureName -- name not found: %s", name)
 		if vgpu.Debug {

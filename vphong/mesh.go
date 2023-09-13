@@ -74,7 +74,7 @@ func (ph *Phong) DeleteMesh(name string) {
 // If mesh has per-vertex colors, these are selected for rendering,
 // and texture is turned off.  UseTexture* after this to override.
 func (ph *Phong) UseMeshName(name string) error {
-	idx, ok := ph.Meshes.IdxByKey(name)
+	idx, ok := ph.Meshes.IdxByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseMeshName -- name not found: %s", name)
 		if vgpu.Debug {
@@ -106,7 +106,7 @@ func (ph *Phong) UseMeshIdx(idx int) error {
 // for assigning values to the mesh.
 // Must call ModMeshByName after setting these values to mark as modified.
 func (ph *Phong) MeshFloatsByName(name string) (pos, norm, tex, clr mat32.ArrayF32, idx mat32.ArrayU32) {
-	i, ok := ph.Meshes.IdxByKey(name)
+	i, ok := ph.Meshes.IdxByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseMeshName -- name not found: %s", name)
 		if vgpu.Debug {
@@ -133,7 +133,7 @@ func (ph *Phong) MeshFloatsByIdx(i int) (pos, norm, tex, clr mat32.ArrayF32, idx
 // ModMeshByName marks given mesh by name as modified.
 // Must call after modifying mesh values, to mark for syncing
 func (ph *Phong) ModMeshByName(name string) {
-	i, ok := ph.Meshes.IdxByKey(name)
+	i, ok := ph.Meshes.IdxByKeyTry(name)
 	if !ok { // may not have been configed yet
 		return
 	}

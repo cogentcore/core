@@ -59,7 +59,7 @@ func (ph *Phong) UseColorIdx(idx int) error {
 
 // UseColorName selects color by name for current render step
 func (ph *Phong) UseColorName(name string) error {
-	idx, ok := ph.Colors.IdxByKey(name)
+	idx, ok := ph.Colors.IdxByKeyTry(name)
 	if !ok {
 		err := fmt.Errorf("vphong:UseColorName -- name not found: %s", name)
 		log.Println(err)
