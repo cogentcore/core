@@ -36,11 +36,11 @@ var (
 // and "HelpCmd" does not exist, Run prints
 // the result of [Usage].
 // Run uses [os.Args] for its arguments.
-func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
+func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
-		if Fatal {
+		if opts.Fatal {
 			fmt.Println(errorColor("%v", err))
 			os.Exit(1)
 		}
@@ -49,7 +49,7 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	leftovers, err := Config(cfg, "", cs...)
 	if err != nil {
 		err := fmt.Errorf("error configuring app: %w", err)
-		if Fatal {
+		if opts.Fatal {
 			fmt.Println(errorColor("%v", err))
 			os.Exit(1)
 		}
@@ -60,28 +60,28 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	if len(leftovers) > 0 {
 		cmd = leftovers[0]
 	}
-	err = RunCmd(cfg, cmd, cs...)
+	err = RunCmd(opts, cfg, cmd, cs...)
 	if err != nil {
-		if Fatal {
-			fmt.Println(cmdColor(cmdString(cmd)) + errorColor(" failed: %v", err))
+		if opts.Fatal {
+			fmt.Println(cmdColor(cmdString(opts, cmd)) + errorColor(" failed: %v", err))
 			os.Exit(1)
 		}
-		return fmt.Errorf("%s failed: %w", AppName+" "+cmd, err)
+		return fmt.Errorf("%s failed: %w", opts.AppName+" "+cmd, err)
 	}
-	if PrintSuccess && !Help { // help command will always succeed
-		fmt.Println(cmdColor(cmdString(cmd)) + successColor(" succeeded"))
+	if opts.PrintSuccess && !Help { // help command will always succeed
+		fmt.Println(cmdColor(cmdString(opts, cmd)) + successColor(" succeeded"))
 	}
 	return nil
 }
 
 // cmdString is a simple helper function that
-// returns a string with [AppName] and the given
-// command name string.
-func cmdString(cmd string) string {
+// returns a string with [Options.AppName]
+// and the given command name string.
+func cmdString(opts *Options, cmd string) string {
 	if cmd == "" {
-		return AppName
+		return opts.AppName
 	}
-	return AppName + " " + cmd
+	return opts.AppName + " " + cmd
 }
 
 // RunCmd runs the command with the given
@@ -90,7 +90,7 @@ func cmdString(cmd string) string {
 // to camel case suffixed with "Cmd"; for example,
 // for a command named "build", it will look for a
 // method named "BuildCmd".
-func RunCmd[T any](cfg T, cmd string, cmds ...Cmd[T]) error {
+func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...Cmd[T]) error {
 	for _, c := range cmds {
 		if c.Name == cmd || c.Root && cmd == "" {
 			err := c.Func(cfg)
@@ -102,7 +102,7 @@ func RunCmd[T any](cfg T, cmd string, cmds ...Cmd[T]) error {
 	}
 	if cmd == "" || cmd == "help" {
 		Help = true
-		fmt.Println(Usage(cfg, cmds...))
+		fmt.Println(Usage(opts, cfg, cmds...))
 		return nil
 	}
 	return fmt.Errorf("command %q not found", cmd)

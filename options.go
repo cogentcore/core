@@ -40,17 +40,6 @@ type Options struct {
 	// Set this prior to calling Config -- default is current directory '.' and 'configs'
 	IncludePaths []string
 
-	// NonFlagArgs are the command-line args that remain after all the flags have
-	// been processed.  This is set after the call to Config.
-	NonFlagArgs []string
-
-	// ConfigFile is the name of the config file actually loaded, specified by the
-	// -config or -cfg command-line arg or the default file given in Config
-	ConfigFile string
-
-	// Help is variable target for -help or -h args
-	Help bool
-
 	// SearchUp indicates whether to search up the filesystem
 	// for the default config file by checking the provided default
 	// config file location relative to each directory up the tree

@@ -18,11 +18,12 @@ import (
 // a list of commands and their descriptions, and a list of
 // flags and their descriptions. The resulting string uses
 // color escape codes.
-func Usage[T any](cfg T, cmds ...Cmd[T]) string {
+func Usage[T any](opts *Options, cfg T, cmds ...Cmd[T]) string {
 	var b strings.Builder
-	b.WriteString(AppAbout)
+	b.WriteString(opts.AppTitle)
+	b.WriteString("\n\t" + opts.AppAbout)
 	b.WriteString("\n\n")
-	b.WriteString("Usage: " + cmdColor(AppName+" <command> [arguments] [flags]\n\n"))
+	b.WriteString("Usage: " + cmdColor(opts.AppName+" <command> [arguments] [flags]\n\n"))
 	b.WriteString("The following commands are available:\n\n")
 
 	for _, cmd := range cmds {

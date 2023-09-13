@@ -26,15 +26,15 @@ type Includer interface {
 // Files should then be read in reverse order of the slice.
 // Returns an error if any of the include files cannot be found on IncludePath.
 // Does not alter cfg.
-func IncludeStack(cfg Includer) ([]string, error) {
+func IncludeStack(opts *Options, cfg Includer) ([]string, error) {
 	clone := reflect.New(kit.NonPtrType(reflect.TypeOf(cfg))).Interface().(Includer)
 	*clone.IncludesPtr() = *cfg.IncludesPtr()
-	return includeStackImpl(clone, nil)
+	return includeStackImpl(opts, clone, nil)
 }
 
 // includeStackImpl implements IncludeStack, operating on cloned cfg
 // todo: could use a more efficient method to just extract the include field..
-func includeStackImpl(clone Includer, includes []string) ([]string, error) {
+func includeStackImpl(opts *Options, clone Includer, includes []string) ([]string, error) {
 	incs := *clone.IncludesPtr()
 	ni := len(incs)
 	if ni == 0 {
@@ -46,9 +46,9 @@ func includeStackImpl(clone Includer, includes []string) ([]string, error) {
 	var errs []error
 	for _, inc := range incs {
 		*clone.IncludesPtr() = nil
-		err := toml.OpenFromPaths(clone, inc, IncludePaths)
+		err := toml.OpenFromPaths(clone, inc, opts.IncludePaths)
 		if err == nil {
-			includes, err = includeStackImpl(clone, includes)
+			includes, err = includeStackImpl(opts, clone, includes)
 			if err != nil {
 				errs = append(errs, err)
 			}

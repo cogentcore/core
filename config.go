@@ -16,19 +16,6 @@ import (
 )
 
 var (
-	// DefaultEncoding is the default encoding format for config files.
-	// currently toml is the only supported format, but others could be added
-	// if needed.
-	DefaultEncoding = "toml"
-
-	// DefaultFiles are the default configuration file paths
-	DefaultFiles []string = []string{"config.toml"}
-
-	// IncludePaths is a list of file paths to try for finding config files
-	// specified in Include field or via the command line --config --cfg or -c args.
-	// Set this prior to calling Config -- default is current directory '.' and 'configs'
-	IncludePaths = []string{".", "configs"}
-
 	// NonFlagArgs are the command-line args that remain after all the flags have
 	// been processed.  This is set after the call to Config.
 	NonFlagArgs = []string{}
@@ -39,15 +26,6 @@ var (
 
 	// Help is variable target for -help or -h args
 	Help bool
-
-	// SearchUp indicates whether to search up the filesystem
-	// for the default config file by checking the provided default
-	// config file location relative to each directory up the tree
-	SearchUp bool
-
-	// NeedConfigFile indicates whether a configuration file
-	// must be provided for the command to run
-	NeedConfigFile bool
 )
 
 // Config is the overall config setting function, processing config files

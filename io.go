@@ -17,8 +17,8 @@ import (
 // in the natural include order so includee overwrites included settings.
 // Is equivalent to Open if there are no Includes.
 // Returns an error if any of the include files cannot be found on IncludePath.
-func OpenWithIncludes(cfg any, file string) error {
-	err := toml.OpenFromPaths(cfg, file, IncludePaths)
+func OpenWithIncludes(opts *Options, cfg any, file string) error {
+	err := toml.OpenFromPaths(cfg, file, opts.IncludePaths)
 	if err != nil {
 		return err
 	}
@@ -26,20 +26,20 @@ func OpenWithIncludes(cfg any, file string) error {
 	if !ok {
 		return err
 	}
-	incs, err := IncludeStack(incfg)
+	incs, err := IncludeStack(opts, incfg)
 	ni := len(incs)
 	if ni == 0 {
 		return err
 	}
 	for i := ni - 1; i >= 0; i-- {
 		inc := incs[i]
-		err = toml.OpenFromPaths(cfg, inc, IncludePaths)
+		err = toml.OpenFromPaths(cfg, inc, opts.IncludePaths)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	// reopen original
-	toml.OpenFromPaths(cfg, file, IncludePaths)
+	toml.OpenFromPaths(cfg, file, opts.IncludePaths)
 	*incfg.IncludesPtr() = incs
 	return err
 }

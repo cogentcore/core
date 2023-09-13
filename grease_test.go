@@ -172,9 +172,10 @@ func TestArgs(t *testing.T) {
 }
 
 func TestOpen(t *testing.T) {
-	IncludePaths = []string{".", "testdata"}
+	opts := DefaultOptions()
+	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
-	err := OpenWithIncludes(cfg, "testcfg.toml")
+	err := OpenWithIncludes(opts, cfg, "testcfg.toml")
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -214,22 +215,24 @@ func TestOpen(t *testing.T) {
 func TestUsage(t *testing.T) {
 	t.Skip("prints usage string")
 	cfg := &TestConfig{}
-	us := Usage(cfg)
+	us := Usage(DefaultOptions(), cfg)
 	fmt.Println(us)
 }
 
 func TestSave(t *testing.T) {
 	// t.Skip("prints usage string")
-	IncludePaths = []string{".", "testdata"}
+	opts := DefaultOptions()
+	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
-	OpenWithIncludes(cfg, "testcfg.toml")
+	OpenWithIncludes(opts, cfg, "testcfg.toml")
 	Save(cfg, "testdata/testwrite.toml")
 }
 
 func TestConfigOpen(t *testing.T) {
 	// t.Skip("prints usage string")
-	IncludePaths = []string{".", "testdata"}
-	NeedConfigFile = true
+	opts := DefaultOptions()
+	opts.IncludePaths = []string{".", "testdata"}
+	opts.NeedConfigFile = true
 	cfg := &TestConfig{}
 	_, err := Config(cfg, "")
 	if err == nil {
@@ -237,14 +240,14 @@ func TestConfigOpen(t *testing.T) {
 		// } else {
 		// 	fmt.Println(err)
 	}
-	DefaultFiles = []string{"aldfkj.toml"}
+	opts.DefaultFiles = []string{"aldfkj.toml"}
 	_, err = Config(cfg, "")
 	if err == nil {
 		t.Errorf("should have Config error")
 		// } else {
 		// 	fmt.Println(err)
 	}
-	DefaultFiles = []string{"aldfkj.toml", "testcfg.toml"}
+	opts.DefaultFiles = []string{"aldfkj.toml", "testcfg.toml"}
 	_, err = Config(cfg, "")
 	if err != nil {
 		t.Error(err)
