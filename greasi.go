@@ -50,7 +50,7 @@ func Run[T any, C grease.CmdOrFunc[T]](cfg T, cmds ...C) error {
 		},
 		Name: "app",
 		Doc:  "App runs the app (GUI) version of the " + grease.AppTitle + " tool",
-		Root: hasRoot,
+		Root: !hasRoot, // if root isn't already taken, we take it
 	})
 	return grease.Run(cfg, cs...)
 }
