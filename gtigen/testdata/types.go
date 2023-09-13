@@ -20,6 +20,8 @@ type Person struct {
 	Age int
 }
 
+func (p Person) String() string { return p.Name }
+
 // Introduction returns an introduction for the person.
 // It contains the name of the person and their age.
 //

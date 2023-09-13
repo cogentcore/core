@@ -83,7 +83,7 @@ func TestPerson(t *testing.T) {
 	if have.Embeds != nil {
 		t.Errorf("expected nil embeds, but got %v", have.Embeds)
 	}
-	if have.Methods.Len() != 1 {
+	if have.Methods.Len() != 2 {
 		t.Errorf("expected 1 method, but got %d", have.Methods.Len())
 	}
 

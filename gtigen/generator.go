@@ -76,7 +76,6 @@ func (g *Generator) Find() error {
 			return fmt.Errorf("error getting interface objects from interface configs: %w", err)
 		}
 	}
-	fmt.Println(g.Interfaces)
 	g.Types = []*Type{}
 	g.Methods = &ordmap.Map[string, []*gti.Method]{}
 	g.Funcs = &ordmap.Map[string, *gti.Func]{}
@@ -148,9 +147,6 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 // InspectGenDecl is the implementation of [Generator.Inspect]
 // for [ast.GenDecl] nodes.
 func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
-	if gd.Doc == nil {
-		return true, nil
-	}
 	hasAdd := false
 	cfg := &Config{}
 	*cfg = *g.Config
@@ -166,6 +162,19 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		ts, ok := spec.(*ast.TypeSpec)
 		if !ok {
 			return true, nil
+		}
+		if len(cfg.InterfaceConfigs) > 0 {
+			typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
+			for in, ic := range cfg.InterfaceConfigs {
+				iface := g.Interfaces.ValByKey(in)
+				if iface == nil {
+					return false, fmt.Errorf("programmer error: internal error: missing interface object for interface %q", in)
+				}
+				if !types.Implements(typ, iface) {
+					continue
+				}
+				fmt.Printf("applying configuration %v to %q\n", ic, ts.Name.Name)
+			}
 		}
 		typ := &Type{
 			Name:       ts.Name.Name,
@@ -191,9 +200,6 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 // InspectFuncDecl is the implementation of [Generator.Inspect]
 // for [ast.FuncDecl] nodes.
 func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
-	if fd.Doc == nil {
-		return true, nil
-	}
 	cfg := &Config{}
 	*cfg = *g.Config
 	dirs, hasAdd, err := LoadFromComment(fd.Doc, cfg)
@@ -299,10 +305,15 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 // LoadFromComment processes the given comment group, setting the
 // values of the given config object based on any gti directives
 // in the comment group, and returning all directives found, whether
-// there was a gti:add directive, and any error.
+// there was a gti:add directive, and any error. If the given
+// documentation is nil, LoadFromComment still returns an empty but valid
+// [gti.Directives] value, false, and no error.
 func LoadFromComment(c *ast.CommentGroup, cfg *Config) (gti.Directives, bool, error) {
 	dirs := gti.Directives{}
 	hasAdd := false
+	if c == nil {
+		return dirs, false, nil
+	}
 	for _, c := range c.List {
 		dir, err := grease.ParseDirective(c.Text)
 		if err != nil {
