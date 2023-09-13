@@ -24,4 +24,10 @@ type Config struct {
 
 	// whether to generate a global type variable of the form 'TypeNameType'
 	TypeVar bool `desc:"whether to generate a global type variable of the form 'TypeNameType'"`
+
+	// whether to generate a 'Type' method on the type that returns the [git.Type] of the type
+	TypeMethod bool `desc:"whether to generate a 'Type' method on the type that returns the [git.Type] of the type"`
+
+	// whether to generate a 'New' method on the type that returns a new value of the same type as an any
+	NewMethod bool `desc:"whether to generate a 'New' method on the type that returns a new value of the same type as an any"`
 }
