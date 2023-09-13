@@ -199,7 +199,7 @@ func (ss *Sprites) HasSizeChanged() bool {
 
 // SpriteByName returns the sprite by name
 func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
-	return ss.Names.ValByKey(name)
+	return ss.Names.ValByKeyTry(name)
 }
 
 // Reset removes all sprites

@@ -226,7 +226,7 @@ func regPixCnt(r image.Rectangle) int {
 // If it is an exact match for an existing bbox, then that is returned.
 func (wu *WindowUpdates) Add(winBBox image.Rectangle, vp *Viewport2D) (int, bool) {
 	wu.Init()
-	idx, has := wu.Updates.IdxByKey(winBBox)
+	idx, has := wu.Updates.IdxByKeyTry(winBBox)
 	if has {
 		wu.MoveIdxToTop(idx)
 		return wu.Idx(idx), false
@@ -330,7 +330,7 @@ func (wu *WindowDrawers) Reset() {
 func (wu *WindowDrawers) Add(node Node, winBBox image.Rectangle) (int, bool) {
 	nb := node.AsGiNode()
 	wu.Init()
-	idx, has := wu.Nodes.IdxByKey(nb)
+	idx, has := wu.Nodes.IdxByKeyTry(nb)
 	if has {
 		return wu.Idx(idx), false
 	}

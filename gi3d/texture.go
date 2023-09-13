@@ -160,7 +160,7 @@ func (sc *Scene) AddTexture(tx Texture) {
 
 // TextureByName looks for texture by name -- returns nil if not found
 func (sc *Scene) TextureByName(nm string) Texture {
-	tx, ok := sc.Textures.ValByKey(nm)
+	tx, ok := sc.Textures.ValByKeyTry(nm)
 	if ok {
 		return tx
 	}
@@ -169,7 +169,7 @@ func (sc *Scene) TextureByName(nm string) Texture {
 
 // TextureByNameTry looks for texture by name -- returns error if not found
 func (sc *Scene) TextureByNameTry(nm string) (Texture, error) {
-	tx, ok := sc.Textures.ValByKey(nm)
+	tx, ok := sc.Textures.ValByKeyTry(nm)
 	if ok {
 		return tx, nil
 	}

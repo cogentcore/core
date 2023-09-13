@@ -452,7 +452,7 @@ func (nb *Node3DBase) TrackCamera(sc *Scene) {
 func (nb *Node3DBase) TrackLight(sc *Scene, lightName string) error {
 	nb.PoseMu.Lock()
 	defer nb.PoseMu.Unlock()
-	lt, ok := sc.Lights.ValByKey(lightName)
+	lt, ok := sc.Lights.ValByKeyTry(lightName)
 	if !ok {
 		return fmt.Errorf("gi3d Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}

@@ -146,7 +146,7 @@ func (sc *Scene) AddMeshUnique(ms Mesh) {
 
 // MeshByName looks for mesh by name -- returns nil if not found
 func (sc *Scene) MeshByName(nm string) Mesh {
-	ms, ok := sc.Meshes.ValByKey(nm)
+	ms, ok := sc.Meshes.ValByKeyTry(nm)
 	if ok {
 		return ms
 	}
@@ -155,7 +155,7 @@ func (sc *Scene) MeshByName(nm string) Mesh {
 
 // MeshByNameTry looks for mesh by name -- returns error if not found
 func (sc *Scene) MeshByNameTry(nm string) (Mesh, error) {
-	ms, ok := sc.Meshes.ValByKey(nm)
+	ms, ok := sc.Meshes.ValByKeyTry(nm)
 	if ok {
 		return ms, nil
 	}
