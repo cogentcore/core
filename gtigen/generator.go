@@ -70,11 +70,13 @@ func (g *Generator) PrintHeader() {
 // and adds them to [Generator.Types] and [Generator.Funcs]
 func (g *Generator) Find() error {
 	if len(g.Config.InterfaceConfigs) > 0 {
+		g.Interfaces = &ordmap.Map[string, *types.Interface]{}
 		err := g.GetInterfaces([]*types.Package{g.Pkg.Types})
 		if err != nil {
 			return fmt.Errorf("error getting interface objects from interface configs: %w", err)
 		}
 	}
+	fmt.Println(g.Interfaces)
 	g.Types = []*Type{}
 	g.Methods = &ordmap.Map[string, []*gti.Method]{}
 	g.Funcs = &ordmap.Map[string, *gti.Func]{}
@@ -85,11 +87,14 @@ func (g *Generator) Find() error {
 	return nil
 }
 
+// GetInterfaces sets [Generator.Interfaces] based on
+// [Generator.Config.InterfaceConfigs], looking in the
+// given packages. It is a recursive function that should
+// not typically be called by end-user code.
 func (g *Generator) GetInterfaces(pkgs []*types.Package) error {
-	g.Interfaces = &ordmap.Map[string, *types.Interface]{}
 	rpkgs := []*types.Package{}
 	for _, pkg := range pkgs {
-		for in, ic := range g.Config.InterfaceConfigs {
+		for in := range g.Config.InterfaceConfigs {
 			strs := strings.Split(in, ".")
 			if len(strs) < 2 {
 				return errors.New("expected something before and after dot in fully-qualified type name")
@@ -98,24 +103,20 @@ func (g *Generator) GetInterfaces(pkgs []*types.Package) error {
 			if pkg.Name() == pkgnm {
 				typnm := strs[len(strs)-1]
 				typ := pkg.Scope().Lookup(typnm)
-				fmt.Println("typ", typ, "in", in, "ic", ic)
+				if typ == nil {
+					return fmt.Errorf("programmer error: internal error: could not find type %q in package %q (from interface config %q)", typnm, pkgnm, in)
+				}
+				tn, ok := typ.Type().(*types.Named)
+				if !ok {
+					return fmt.Errorf("programmer error: internal error: type %q is not a *types.Named but a %T (type value %v)", in, typ.Type(), typ.Type())
+				}
+				tint, ok := tn.Underlying().(*types.Interface)
+				if !ok {
+					return fmt.Errorf("programmer error: internal error: underlying type of type %q is not a *types.Interface but a %T (type value %v)", in, tn.Underlying(), tn.Underlying())
+				}
+				g.Interfaces.Add(in, tint)
 			}
 		}
-		// if pkg.Name() == "ki" {
-		// 	k := pkg.Scope().Lookup("Ki")
-		// 	if k == nil {
-		// 		log.Fatalln("programmer error: internal error: could not find type Ki in package ki")
-		// 	}
-		// 	kn, ok := k.Type().(*types.Named)
-		// 	if !ok {
-		// 		log.Fatalf("programmer error: internal error: type ki.Ki is not a *types.Named but a %T (type value %v)", k.Type(), k.Type())
-		// 	}
-		// 	kint, ok := kn.Underlying().(*types.Interface)
-		// 	if !ok {
-		// 		log.Fatalf("programmer error: internal error: underlying type of type ki.Ki is not a *types.Interface but a %T (type value %v)", kn.Underlying(), kn.Underlying())
-		// 	}
-		// 	return kint
-		// }
 		rpkgs = append(rpkgs, pkg.Imports()...)
 	}
 	if len(pkgs) > 0 {
