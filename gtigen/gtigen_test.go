@@ -15,7 +15,7 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	c := &Config{}
+	c := &Config{AddMethods: true, AddFuncs: true}
 	err := grease.SetFromDefaults(c)
 	if err != nil {
 		t.Errorf("programmer error: error setting config from default tags: %v", err)
