@@ -106,7 +106,7 @@ func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string,
 		}
 	}
 
-	NonFlagArgs, err = SetFromArgs(opts, cfg, args)
+	NonFlagArgs, err = SetFromArgs(cfg, args)
 	if err != nil {
 		errs = append(errs, err)
 	}
