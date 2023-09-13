@@ -48,6 +48,10 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
+// ensure compliance with interfaces
+var _ = gti.Typer(&testdata.Person{})
+var _ = gti.Newer(&testdata.Person{})
+
 func TestPerson(t *testing.T) {
 	want := testdata.PersonType
 	have := gti.TypeByName("goki.dev/gti/gtigen/testdata.Person")
@@ -76,4 +80,5 @@ func TestPerson(t *testing.T) {
 	if have.Methods.Len() != 1 {
 		t.Errorf("expected 1 method, but got %d", have.Methods.Len())
 	}
+
 }
