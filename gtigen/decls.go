@@ -22,9 +22,14 @@ var TypeTmpl = template.Must(template.New("Type").Parse(
 		{{if .Config.Instance}} Instance: &{{.Name}}{}, {{end}}
 	})
 	{{if .Config.TypeMethod}}
-	// Type returns the [gti.Type] of [{{.Name}}]
+	// Type returns the [*gti.Type] of [{{.Name}}]
 	func (t *{{.Name}}) Type() *gti.Type {
 		return {{.Name}}Type
+	} {{end}}
+	{{if .Config.NewMethod}}
+	// New returns a new [*{{.Name}}] value
+	func (t *{{.Name}}) New() any {
+		return &{{.Name}}{}
 	} {{end}}
 	`))
 

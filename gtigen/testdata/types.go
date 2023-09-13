@@ -9,7 +9,7 @@ import "fmt"
 // Person represents a person and their attributes.
 // The zero value of a Person is not valid.
 //
-//gti:add -type-var -instance -type-method
+//gti:add -type-var -instance -type-method -new-method
 //ki:flagtype NodeFlags -field Flag
 type Person struct {
 	// Name is the name of the person
