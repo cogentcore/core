@@ -10,9 +10,10 @@ import (
 )
 
 func main() {
-	grease.AppName = "gtigen"
-	grease.AppTitle = "GTIGen"
-	grease.AppAbout = "GTIGen provides the generation of general purpose type information for Go types, methods, functions and variables"
-	grease.DefaultFiles = []string{"gtigen.toml"}
-	grease.Run(&gtigen.Config{}, gtigen.Generate)
+	opts := grease.DefaultOptions()
+	opts.AppName = "gtigen"
+	opts.AppTitle = "GTIGen"
+	opts.AppAbout = "GTIGen provides the generation of general purpose type information for Go types, methods, functions and variables"
+	opts.DefaultFiles = []string{"gtigen.toml"}
+	grease.Run(opts, &gtigen.Config{}, gtigen.Generate)
 }
