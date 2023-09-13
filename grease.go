@@ -90,7 +90,7 @@ func cmdString(opts *Options, cmd string) string {
 // to camel case suffixed with "Cmd"; for example,
 // for a command named "build", it will look for a
 // method named "BuildCmd".
-func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...Cmd[T]) error {
+func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) error {
 	for _, c := range cmds {
 		if c.Name == cmd || c.Root && cmd == "" {
 			err := c.Func(cfg)

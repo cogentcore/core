@@ -43,7 +43,7 @@ var (
 //
 // Also processes -help or -h and prints usage and quits immediately.
 // Config uses [os.Args] for its arguments.
-func Config[T any](opts *Options, cfg T, cmd string, cmds ...Cmd[T]) ([]string, error) {
+func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string, error) {
 	var errs []error
 	err := SetFromDefaults(cfg)
 	if err != nil {

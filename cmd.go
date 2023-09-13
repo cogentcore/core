@@ -27,20 +27,29 @@ type Cmd[T any] struct {
 	// Root is whether the command is the root command
 	// (what is called when no subcommands are passed)
 	Root bool
+	// Icon is the icon of the command in the tool bar
+	// when running in the GUI via greasi
+	Icon string
+	// SepBefore is whether to add a separator before the
+	// command in the tool bar when running in the GUI via greasi
+	SepBefore bool
+	// SepAfter is whether to add a separator after the
+	// command in the tool bar when running in the GUI via greasi
+	SepAfter bool
 }
 
 // CmdOrFunc is a generic type constraint that represents either
 // a [Cmd] with the given config type or a command function that
 // takes the given config type and returns an error.
 type CmdOrFunc[T any] interface {
-	Cmd[T] | func(T) error
+	*Cmd[T] | func(T) error
 }
 
 // CmdFromFunc returns a new [Cmd] object from the given function
 // and any information specified on it using comment directives,
 // which requires the use of gti.
-func CmdFromFunc[T any](opts *Options, fun func(T) error) (Cmd[T], error) {
-	cmd := Cmd[T]{
+func CmdFromFunc[T any](opts *Options, fun func(T) error) (*Cmd[T], error) {
+	cmd := &Cmd[T]{
 		Func: fun,
 		Name: gti.FuncName(fun),
 	}
@@ -72,9 +81,9 @@ func CmdFromFunc[T any](opts *Options, fun func(T) error) (Cmd[T], error) {
 
 // CmdFromCmdOrFunc returns a new [Cmd] object from the given
 // [CmdOrFunc] object, using [CmdFromFunc] if it is a function.
-func CmdFromCmdOrFunc[T any, C CmdOrFunc[T]](opts *Options, cmd C) (Cmd[T], error) {
+func CmdFromCmdOrFunc[T any, C CmdOrFunc[T]](opts *Options, cmd C) (*Cmd[T], error) {
 	switch c := any(cmd).(type) {
-	case Cmd[T]:
+	case *Cmd[T]:
 		return c, nil
 	case func(T) error:
 		return CmdFromFunc(opts, c)
@@ -86,8 +95,8 @@ func CmdFromCmdOrFunc[T any, C CmdOrFunc[T]](opts *Options, cmd C) (Cmd[T], erro
 // CmdsFromFuncs is a helper function that returns a slice
 // of command objects from the given slice of command functions,
 // using [CmdFromFunc].
-func CmdsFromFuncs[T any](opts *Options, funcs []func(T) error) ([]Cmd[T], error) {
-	res := make([]Cmd[T], len(funcs))
+func CmdsFromFuncs[T any](opts *Options, funcs []func(T) error) ([]*Cmd[T], error) {
+	res := make([]*Cmd[T], len(funcs))
 	for i, fun := range funcs {
 		cmd, err := CmdFromFunc(opts, fun)
 		if err != nil {
@@ -101,8 +110,8 @@ func CmdsFromFuncs[T any](opts *Options, funcs []func(T) error) ([]Cmd[T], error
 // CmdsFromFuncs is a helper function that returns a slice
 // of command objects from the given slice of [CmdOrFunc] objects,
 // using [CmdFromFuncOrFunc].
-func CmdsFromCmdOrFuncs[T any, C CmdOrFunc[T]](opts *Options, cmds []C) ([]Cmd[T], error) {
-	res := make([]Cmd[T], len(cmds))
+func CmdsFromCmdOrFuncs[T any, C CmdOrFunc[T]](opts *Options, cmds []C) ([]*Cmd[T], error) {
+	res := make([]*Cmd[T], len(cmds))
 	for i, cmd := range cmds {
 		cmd, err := CmdFromCmdOrFunc[T, C](opts, cmd)
 		if err != nil {

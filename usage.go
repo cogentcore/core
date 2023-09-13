@@ -18,7 +18,7 @@ import (
 // a list of commands and their descriptions, and a list of
 // flags and their descriptions. The resulting string uses
 // color escape codes.
-func Usage[T any](opts *Options, cfg T, cmds ...Cmd[T]) string {
+func Usage[T any](opts *Options, cfg T, cmds ...*Cmd[T]) string {
 	var b strings.Builder
 	b.WriteString(opts.AppTitle)
 	b.WriteString("\n\t" + opts.AppAbout)
@@ -50,7 +50,7 @@ func Usage[T any](opts *Options, cfg T, cmds ...Cmd[T]) string {
 // CommandUsage adds the command usage info for
 // the given commands to the given [strings.Builder].
 // Typically, you should use [Usage] instead.
-func CommandUsage[T any](b *strings.Builder, cmds ...Cmd[T]) {
+func CommandUsage[T any](b *strings.Builder, cmds ...*Cmd[T]) {
 	for _, cmd := range cmds {
 		b.WriteString(cmdColor(cmd.Name))
 		if cmd.Doc != "" {
