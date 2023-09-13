@@ -33,6 +33,13 @@ var (
 	PrintSuccess = true
 )
 
+// color functions for internal use
+var (
+	errorColor   = color.New(color.FgRed, color.Bold).SprintfFunc()
+	successColor = color.New(color.FgGreen, color.Bold).SprintfFunc()
+	cmdColor     = color.New(color.FgBlue, color.Bold).SprintfFunc()
+)
+
 // Run runs the given app with the given default
 // configuration file paths. It does not run the
 // GUI; see [goki.dev/greasi.Run] for that. The app should be
@@ -77,12 +84,11 @@ func Run[T any, C CmdOrFunc[T]](cfg T, cmds ...C) error {
 	}
 	err = RunCmd(cfg, cmd, cs...)
 	if err != nil {
-		err := fmt.Errorf("error running command %q: %w", cmd, err)
 		if Fatal {
-			color.Red("%v", err)
+			fmt.Println(cmdColor(AppName+" "+cmd) + errorColor(" failed: %v", err))
 			os.Exit(1)
 		}
-		return err
+		return fmt.Errorf("%s failed: %w", AppName+" "+cmd, err)
 	}
 	if PrintSuccess && !Help { // help command will always succeed
 		if cmd == "" {
