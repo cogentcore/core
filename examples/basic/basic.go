@@ -11,6 +11,8 @@ import (
 	"goki.dev/greasi"
 )
 
+//go:generate gtigen
+
 type Config struct {
 
 	// the name of the user
