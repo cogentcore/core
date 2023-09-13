@@ -102,7 +102,7 @@ func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) error {
 	}
 	if cmd == "" || cmd == "help" {
 		Help = true
-		fmt.Println(Usage(opts, cfg, cmds...))
+		fmt.Println(Usage(opts, cfg, cmd, cmds...))
 		return nil
 	}
 	return fmt.Errorf("command %q not found", cmd)

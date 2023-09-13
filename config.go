@@ -60,7 +60,7 @@ func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string,
 	}
 
 	if Help {
-		fmt.Println(Usage(opts, cfg, cmds...))
+		fmt.Println(Usage(opts, cfg, cmd, cmds...))
 		os.Exit(0)
 	}
 

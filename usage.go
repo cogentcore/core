@@ -18,7 +18,7 @@ import (
 // a list of commands and their descriptions, and a list of
 // flags and their descriptions. The resulting string uses
 // color escape codes.
-func Usage[T any](opts *Options, cfg T, cmds ...*Cmd[T]) string {
+func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	var b strings.Builder
 	b.WriteString(opts.AppTitle)
 	b.WriteString("\n\t" + opts.AppAbout)

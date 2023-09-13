@@ -30,9 +30,6 @@ func SetFromArgs(opts *Options, cfg any, args []string) (nonFlags []string, err 
 	CommandArgs(allArgs) // need these to not trigger not-found errors
 	FieldArgNames(cfg, allArgs)
 	nonFlags, err = ParseArgs(cfg, args, allArgs, true)
-	if err != nil {
-		fmt.Println(Usage(opts, cfg))
-	}
 	return
 }
 

@@ -215,7 +215,7 @@ func TestOpen(t *testing.T) {
 func TestUsage(t *testing.T) {
 	t.Skip("prints usage string")
 	cfg := &TestConfig{}
-	us := Usage(DefaultOptions(), cfg)
+	us := Usage(DefaultOptions(), cfg, "")
 	fmt.Println(us)
 }
 
