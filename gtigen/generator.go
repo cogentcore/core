@@ -6,8 +6,10 @@ package gtigen
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/ast"
+	"go/types"
 	"log"
 	"strings"
 	"text/template"
@@ -22,13 +24,14 @@ import (
 // Generator holds the state of the generator.
 // It is primarily used to buffer the output.
 type Generator struct {
-	Config  *Config                            // The configuration information
-	Buf     bytes.Buffer                       // The accumulated output.
-	Pkgs    []*packages.Package                // The packages we are scanning.
-	Pkg     *packages.Package                  // The packages we are currently on.
-	Types   []*Type                            // The types
-	Methods *ordmap.Map[string, []*gti.Method] // The methods, keyed by the the full package name of the type of the receiver
-	Funcs   *ordmap.Map[string, *gti.Func]     // The functions
+	Config     *Config                               // The configuration information
+	Buf        bytes.Buffer                          // The accumulated output.
+	Pkgs       []*packages.Package                   // The packages we are scanning.
+	Pkg        *packages.Package                     // The packages we are currently on.
+	Types      []*Type                               // The types
+	Methods    *ordmap.Map[string, []*gti.Method]    // The methods, keyed by the the full package name of the type of the receiver
+	Funcs      *ordmap.Map[string, *gti.Func]        // The functions
+	Interfaces *ordmap.Map[string, *types.Interface] // The cached interfaces, created from [Config.InterfaceConfigs]
 }
 
 // NewGenerator returns a new generator with the
@@ -66,8 +69,11 @@ func (g *Generator) PrintHeader() {
 // and constants in the package, finds those marked with gti:add,
 // and adds them to [Generator.Types] and [Generator.Funcs]
 func (g *Generator) Find() error {
-	if len(g.Config.InterfaceConfigs) != 0 {
-		// TODO: interface configs
+	if len(g.Config.InterfaceConfigs) > 0 {
+		err := g.GetInterfaces([]*types.Package{g.Pkg.Types})
+		if err != nil {
+			return fmt.Errorf("error getting interface objects from interface configs: %w", err)
+		}
 	}
 	g.Types = []*Type{}
 	g.Methods = &ordmap.Map[string, []*gti.Method]{}
@@ -75,6 +81,45 @@ func (g *Generator) Find() error {
 	err := gengo.Inspect(g.Pkg, g.Inspect)
 	if err != nil {
 		return fmt.Errorf("error while inspecting: %w", err)
+	}
+	return nil
+}
+
+func (g *Generator) GetInterfaces(pkgs []*types.Package) error {
+	g.Interfaces = &ordmap.Map[string, *types.Interface]{}
+	rpkgs := []*types.Package{}
+	for _, pkg := range pkgs {
+		for in, ic := range g.Config.InterfaceConfigs {
+			strs := strings.Split(in, ".")
+			if len(strs) < 2 {
+				return errors.New("expected something before and after dot in fully-qualified type name")
+			}
+			pkgnm := strs[len(strs)-2]
+			if pkg.Name() == pkgnm {
+				typnm := strs[len(strs)-1]
+				typ := pkg.Scope().Lookup(typnm)
+				fmt.Println("typ", typ, "in", in, "ic", ic)
+			}
+		}
+		// if pkg.Name() == "ki" {
+		// 	k := pkg.Scope().Lookup("Ki")
+		// 	if k == nil {
+		// 		log.Fatalln("programmer error: internal error: could not find type Ki in package ki")
+		// 	}
+		// 	kn, ok := k.Type().(*types.Named)
+		// 	if !ok {
+		// 		log.Fatalf("programmer error: internal error: type ki.Ki is not a *types.Named but a %T (type value %v)", k.Type(), k.Type())
+		// 	}
+		// 	kint, ok := kn.Underlying().(*types.Interface)
+		// 	if !ok {
+		// 		log.Fatalf("programmer error: internal error: underlying type of type ki.Ki is not a *types.Interface but a %T (type value %v)", kn.Underlying(), kn.Underlying())
+		// 	}
+		// 	return kint
+		// }
+		rpkgs = append(rpkgs, pkg.Imports()...)
+	}
+	if len(pkgs) > 0 {
+		return g.GetInterfaces(rpkgs)
 	}
 	return nil
 }
