@@ -330,6 +330,7 @@ func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
 func (tb *ToolBar) OnInit() {
 	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
+		s.Border.Radius = gist.BorderRadiusFull
 	})
 }
 
