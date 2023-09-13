@@ -60,6 +60,9 @@ func (g *Generator) PrintHeader() {
 // and constants in the package, finds those marked with gti:add,
 // and adds them to [Generator.Types] and [Generator.Funcs]
 func (g *Generator) Find() error {
+	if len(g.Config.InterfaceConfigs) != 0 {
+		// TODO: interface configs
+	}
 	g.Types = []*Type{}
 	g.Methods = &ordmap.Map[string, []*gti.Method]{}
 	g.Funcs = &ordmap.Map[string, *gti.Func]{}

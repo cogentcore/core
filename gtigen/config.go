@@ -14,10 +14,8 @@ type Config struct {
 	// [def: gtigen.go] the output file location relative to the package on which enumgen is being called
 	Output string `def:"gtigen.go" desc:"the output file location relative to the package on which enumgen is being called"`
 
-	TypeReg  bool
-	FuncReg  bool
-	VarReg   bool
-	ConstReg bool
+	// a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it
+	InterfaceConfigs map[string]*Config `desc:"a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it"`
 
 	// whether to generate an instance of the type(s)
 	Instance bool `desc:"whether to generate an instance of the type(s)"`
