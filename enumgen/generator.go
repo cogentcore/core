@@ -92,11 +92,11 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		return true, nil
 	}
 	for _, c := range ts.Comment.List {
-		dir, has, err := grease.ParseDirective(c.Text)
+		dir, err := grease.ParseDirective(c.Text)
 		if err != nil {
 			return false, fmt.Errorf("error parsing comment directive %q: %w", c.Text, err)
 		}
-		if !has {
+		if dir == nil {
 			continue
 		}
 		if dir.Tool != "enums" {
