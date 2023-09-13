@@ -125,6 +125,16 @@ type Ki interface {
 	// given name -- Try version returns error on failure.
 	ParentByNameTry(name string) (Ki, error)
 
+	// ParentByType finds parent recursively up hierarchy, by type, and
+	// returns nil if not found. If embeds is true, then it looks for any
+	// type that embeds the given type at any level of anonymous embedding.
+	ParentByType(t *gti.Type, embeds bool) Ki
+
+	// ParentByTypeTry finds parent recursively up hierarchy, by type, and
+	// returns error if not found. If embeds is true, then it looks for any
+	// type that embeds the given type at any level of anonymous embedding.
+	ParentByTypeTry(t *gti.Type, embeds bool) (Ki, error)
+
 	//////////////////////////////////////////////////////////////////////////
 	//  Children
 
@@ -162,15 +172,13 @@ type Ki interface {
 	// [ki.StartMiddle] to start in the middle (good default).
 	ChildByNameTry(name string, startIdx int) (Ki, error)
 
-	// todo: gti
-
 	// ChildByType returns first element that has given type, nil if not found.
 	// If embeds is true, then it looks for any type that embeds the given type
 	// at any level of anonymous embedding.
 	// startIdx arg allows for optimized bidirectional find if you have
 	// an idea where it might be -- can be key speedup for large lists -- pass
 	// [ki.StartMiddle] to start in the middle (good default).
-	// ChildByType(t *gti.Type, embeds bool, startIdx int) Ki
+	ChildByType(t *gti.Type, embeds bool, startIdx int) Ki
 
 	// ChildByTypeTry returns first element that has given name -- Try version
 	// returns error message if not found.
@@ -179,7 +187,7 @@ type Ki interface {
 	// startIdx arg allows for optimized bidirectional find if you have
 	// an idea where it might be -- can be key speedup for large lists -- pass
 	// [ki.StartMiddle] to start in the middle (good default).
-	// ChildByTypeTry(t *gti.Type, embeds bool, startIdx int) (Ki, error)
+	ChildByTypeTry(t *gti.Type, embeds bool, startIdx int) (Ki, error)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Paths

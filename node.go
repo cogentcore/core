@@ -219,12 +219,6 @@ func (n *Node) ParentByNameTry(name string) (Ki, error) {
 	return nil, fmt.Errorf("ki %v: Parent name: %v not found", n.Nm, name)
 }
 
-/*
-
-todo: these are not available generically, but are used in several
-places in gi -- need to write a Gi-specific version for different
-types using the embed logic.
-
 // ParentByType finds parent recursively up hierarchy, by type, and
 // returns nil if not found. If embeds is true, then it looks for any
 // type that embeds the given type at any level of anonymous embedding.
@@ -232,15 +226,16 @@ func (n *Node) ParentByType(t *gti.Type, embeds bool) Ki {
 	if IsRoot(n) {
 		return nil
 	}
-	if embeds {
-		if TypeEmbeds(n.Par, t) {
-			return n.Par
-		}
-	} else {
-		if n.Par.Type() == t {
-			return n.Par
-		}
+	// todo: gti
+	// if embeds {
+	// 	if TypeEmbeds(n.Par, t) {
+	// 		return n.Par
+	// 	}
+	// } else {
+	if n.Par.Type() == t {
+		return n.Par
 	}
+	// }
 	return n.Par.ParentByType(t, embeds)
 }
 
@@ -254,7 +249,6 @@ func (n *Node) ParentByTypeTry(t *gti.Type, embeds bool) (Ki, error) {
 	}
 	return nil, fmt.Errorf("ki %v: Parent of type: %v not found", n.Nm, t)
 }
-*/
 
 //////////////////////////////////////////////////////////////////////////
 //  Children
@@ -322,10 +316,6 @@ func (n *Node) ChildByNameTry(name string, startIdx int) (Ki, error) {
 	return n.Kids[idx], nil
 }
 
-/*
-
-todo: gti
-
 // ChildByType returns first element that has given type, nil if not found.
 // If embeds is true, then it looks for any type that embeds the given type
 // at any level of anonymous embedding.
@@ -346,11 +336,10 @@ func (n *Node) ChildByType(t *gti.Type, embeds bool, startIdx int) Ki {
 func (n *Node) ChildByTypeTry(t *gti.Type, embeds bool, startIdx int) (Ki, error) {
 	idx, ok := n.Kids.IndexByType(t, embeds, startIdx)
 	if !ok {
-		return nil, fmt.Errorf("ki %v: child of type: %t not found", n.Nm, t)
+		return nil, fmt.Errorf("ki %v: child of type: %s not found", n.Nm, t.Name)
 	}
 	return n.Kids[idx], nil
 }
-*/
 
 //////////////////////////////////////////////////////////////////////////
 //  Paths

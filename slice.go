@@ -6,6 +6,8 @@ package ki
 
 import (
 	"fmt"
+
+	"goki.dev/gti"
 )
 
 // Slice is just a slice of ki elements: []Ki, providing methods for accessing
@@ -156,16 +158,15 @@ func (sl *Slice) IndexByName(name string, startIdx int) (int, bool) {
 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Name() == name })
 }
 
-// todo: gti
-
-// // IndexByType returns index of element that either is that type or embeds
-// // that type, false if not found. See IndexOf for info on startIdx.
-// func (sl *Slice) IndexByType(t *gti.Type, embeds bool, startIdx int) (int, bool) {
-// 	if embeds {
-// 		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return TypeEmbeds(ch, t) })
-// 	}
-// 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return Type(ch) == t })
-// }
+// IndexByType returns index of element that either is that type or embeds
+// that type, false if not found. See IndexOf for info on startIdx.
+func (sl *Slice) IndexByType(t *gti.Type, embeds bool, startIdx int) (int, bool) {
+	// todo: gti
+	// if embeds {
+	// 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return TypeEmbeds(ch, t) })
+	// }
+	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type() == t })
+}
 
 // ElemByName returns first element that has given name, nil if not found.
 // See IndexOf for info on startIdx.
@@ -187,27 +188,25 @@ func (sl *Slice) ElemByNameTry(name string, startIdx int) (Ki, error) {
 	return (*sl)[idx], nil
 }
 
-// todo: gti
+// ElemByType returns index of element that either is that type or embeds
+// that type, nil if not found. See IndexOf for info on startIdx.
+func (sl *Slice) ElemByType(t *gti.Type, embeds bool, startIdx int) Ki {
+	idx, ok := sl.IndexByType(t, embeds, startIdx)
+	if !ok {
+		return nil
+	}
+	return (*sl)[idx]
+}
 
-// // ElemByType returns index of element that either is that type or embeds
-// // that type, nil if not found. See IndexOf for info on startIdx.
-// func (sl *Slice) ElemByType(t *gti.Type, embeds bool, startIdx int) Ki {
-// 	idx, ok := sl.IndexByType(t, embeds, startIdx)
-// 	if !ok {
-// 		return nil
-// 	}
-// 	return (*sl)[idx]
-// }
-//
-// // ElemByTypeTry returns index of element that either is that type or embeds
-// // that type, error if not found. See IndexOf for info on startIdx.
-// func (sl *Slice) ElemByTypeTry(t *gti.Type, embeds bool, startIdx int) (Ki, error) {
-// 	idx, ok := sl.IndexByType(t, embeds, startIdx)
-// 	if !ok {
-// 		return nil, fmt.Errorf("ki.Slice: element of type: %v not found", t)
-// 	}
-// 	return (*sl)[idx], nil
-// }
+// ElemByTypeTry returns index of element that either is that type or embeds
+// that type, error if not found. See IndexOf for info on startIdx.
+func (sl *Slice) ElemByTypeTry(t *gti.Type, embeds bool, startIdx int) (Ki, error) {
+	idx, ok := sl.IndexByType(t, embeds, startIdx)
+	if !ok {
+		return nil, fmt.Errorf("ki.Slice: element of type: %v not found", t)
+	}
+	return (*sl)[idx], nil
+}
 
 // SliceInsert item at index -- does not do any parent updating etc -- use Ki/Node
 // method unless you know what you are doing.

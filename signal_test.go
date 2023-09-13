@@ -8,10 +8,13 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	. "goki.dev/ki/v2"
+	"goki.dev/ki/v2/testdata"
 )
 
 func TestSignalConnect(t *testing.T) {
-	parent := TestNode{}
+	parent := testdata.TestNode{}
 	parent.InitName(&parent, "par1")
 	typ := parent.Type()
 	child1 := parent.NewChild(typ, "child1")
@@ -19,7 +22,7 @@ func TestSignalConnect(t *testing.T) {
 
 	// note: now that signal is a map, cannot test reliably due to ordering
 	res := make([]string, 0, 10)
-	parent.sig1.Connect(child1, func(receiver, sender Ki, sig int64, data any) {
+	parent.Sig1.Connect(child1, func(receiver, sender Ki, sig int64, data any) {
 		res = append(res, fmt.Sprintf("recv: %v, sender: %v sig: %v data: %v",
 			receiver.Name(), sender.Name(), NodeSignals(sig), data))
 	})
@@ -28,7 +31,7 @@ func TestSignalConnect(t *testing.T) {
 	// 		receiver.Name(), sender.Name(), NodeSignals(sig), data))
 	// })
 
-	parent.sig1.Emit(&parent, int64(NodeSignalNil), 1234)
+	parent.Sig1.Emit(&parent, int64(NodeSignalNil), 1234)
 
 	// fmt.Printf("res: %v\n", res)
 	trg := []string{"recv: child1, sender: par1 sig: NodeSignalNil data: 1234"}
