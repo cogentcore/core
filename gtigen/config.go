@@ -4,6 +4,8 @@
 
 package gtigen
 
+import "text/template"
+
 // Config contains the configuration information
 // used by gtigen
 type Config struct {
@@ -37,4 +39,9 @@ type Config struct {
 
 	// whether to generate a 'New' method on the type that returns a new value of the same type as an any
 	NewMethod bool `desc:"whether to generate a 'New' method on the type that returns a new value of the same type as an any"`
+
+	// TODO: should this be called TypeTemplates and should there be a Func/Method Templates?
+
+	// a slice of templates to execute on each type being added; the template data is of the type gtigen.Type
+	Templates []*template.Template `desc:"a slice of templates to execute on each type being added; the template data is of the type gtigen.Type"`
 }

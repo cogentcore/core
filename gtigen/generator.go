@@ -368,6 +368,9 @@ func (g *Generator) Generate() (bool, error) {
 			typ.Methods.Add(meth.Name, meth)
 		}
 		g.ExecTmpl(TypeTmpl, typ)
+		for _, tmpl := range typ.Config.Templates {
+			g.ExecTmpl(tmpl, typ)
+		}
 	}
 	for _, fun := range g.Funcs.Order {
 		g.ExecTmpl(FuncTmpl, fun.Val)
