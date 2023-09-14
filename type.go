@@ -22,7 +22,7 @@ type Type struct {
 	Directives Directives
 
 	// unique type ID number
-	ID uint64 `desc:"unique type ID number"`
+	ID uint64
 
 	// Methods are available for all types
 	Methods *Methods
@@ -34,7 +34,7 @@ type Type struct {
 	Fields *Fields
 
 	// instance of the type
-	Instance any `desc:"instance of the type"`
+	Instance any
 
 	// All embedded fields (including nested ones) for struct types;
 	// not set by gtigen -- HasEmbed automatically compiles it as needed.
