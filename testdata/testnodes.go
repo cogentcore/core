@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate gtigen -type-var -type-method -new-method -instance
+//go:generate goki generate
 
 package testdata
 
 import "goki.dev/ki/v2"
 
-//gti:add
 type TestNode struct {
 	ki.Node
 	Sig1 ki.Signal
@@ -18,7 +17,6 @@ type TestNode struct {
 // func (tn *TestNode) CopyFieldsFrom(frm any) { // note nothing to copy here
 // }
 
-//gti:add
 type NodeEmbed struct {
 	ki.Node
 	Mbr1 string
@@ -45,7 +43,6 @@ var NodeEmbedProps = ki.Props{
 	"stringprop": "type string",
 }
 
-//gti:add
 type NodeField struct {
 	NodeEmbed
 	Field1 NodeEmbed
@@ -72,7 +69,6 @@ func (nf *NodeField) Disconnect() {
 	nf.NodeEmbed.Disconnect()
 }
 
-//gti:add
 type NodeField2 struct {
 	NodeField
 	Field2 NodeEmbed
