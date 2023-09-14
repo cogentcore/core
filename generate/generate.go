@@ -21,13 +21,7 @@ import (
 // that does all of the generation according to the
 // given config info.
 func Generate(cfg *config.Config) error {
-	pcfg := &packages.Config{
-		Mode: enumgen.PackageModes() | gtigen.PackageModes(&cfg.Generate.Gtigen),
-		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
-		// in a separate pass? For later.
-		Tests: false,
-	}
-	pkgs, err := gengo.Load(pcfg, cfg.Generate.Dir)
+	pkgs, err := ParsePackage(cfg)
 	if err != nil {
 		return fmt.Errorf("Generate: error parsing package: %w", err)
 	}
@@ -41,4 +35,15 @@ func Generate(cfg *config.Config) error {
 		return fmt.Errorf("error running gtigen: %w", err)
 	}
 	return nil
+}
+
+// ParsePackage parses the package(s) based on the given config info.
+func ParsePackage(cfg *config.Config) ([]*packages.Package, error) {
+	pcfg := &packages.Config{
+		Mode: enumgen.PackageModes() | gtigen.PackageModes(&cfg.Generate.Gtigen),
+		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
+		// in a separate pass? For later.
+		Tests: false,
+	}
+	return gengo.Load(pcfg, cfg.Generate.Dir)
 }
