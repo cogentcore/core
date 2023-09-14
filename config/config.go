@@ -6,7 +6,10 @@
 // structs for the GoKi tool.
 package config
 
-import econfig "goki.dev/enums/enumgen/config"
+import (
+	"goki.dev/enums/enumgen"
+	"goki.dev/gti/gtigen"
+)
 
 // TODO: make all of the target fields enums
 
@@ -105,7 +108,10 @@ type Release struct {
 type Generate struct {
 
 	// the enum generation configuration options passed to enumgen
-	Enumgen econfig.Config `nest:"+" desc:"the enum generation configuration options passed to enumgen"`
+	Enumgen enumgen.Config `nest:"+" desc:"the enum generation configuration options passed to enumgen"`
+
+	// the generation configuration options passed to gtigen
+	Gtigen gtigen.Config `desc:"the generation configuration options passed to gtigen"`
 
 	// [def: .] the source directory to run generate on (can be multiple through ./...)
 	Dir string `def:"." desc:"the source directory to run generate on (can be multiple through ./...)"`

@@ -11,35 +11,34 @@ import (
 	"fmt"
 
 	"goki.dev/enums/enumgen"
+	"goki.dev/gengo"
 	"goki.dev/goki/config"
+	"goki.dev/gti/gtigen"
+	"golang.org/x/tools/go/packages"
 )
 
 // Generate is the main entry point to code generation
 // that does all of the generation according to the
 // given config info.
-func Generate(c *config.Config) error {
-	err := enumgen.Generate(&c.Generate.Enumgen)
-	if err != nil {
-		return fmt.Errorf("error running enumgen: %w", err)
+func Generate(cfg *config.Config) error {
+	pcfg := &packages.Config{
+		Mode: enumgen.PackageModes() | gtigen.PackageModes(&cfg.Generate.Gtigen),
+		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
+		// in a separate pass? For later.
+		Tests: false,
 	}
-
-	g := NewGenerator(c)
-	err = g.ParsePackage()
+	pkgs, err := gengo.Load(pcfg, cfg.Generate.Dir)
 	if err != nil {
 		return fmt.Errorf("Generate: error parsing package: %w", err)
 	}
-	for _, pkg := range g.Pkgs {
-		g.Pkg = pkg
-		g.Buf.Reset()
-		err = g.Find()
-		if err != nil {
-			return fmt.Errorf("Generate: error finding declarations for package %q: %w", pkg.Name, err)
-		}
-		g.PrintHeader()
-		err := g.Write()
-		if err != nil {
-			return fmt.Errorf("Generate: error writing code: %w", err)
-		}
+
+	err = enumgen.GeneratePkgs(&cfg.Generate.Enumgen, pkgs)
+	if err != nil {
+		return fmt.Errorf("error running enumgen: %w", err)
+	}
+	err = gtigen.GeneratePkgs(&cfg.Generate.Gtigen, pkgs)
+	if err != nil {
+		return fmt.Errorf("error running gtigen: %w", err)
 	}
 	return nil
 }

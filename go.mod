@@ -5,8 +5,10 @@ go 1.21.0
 require (
 	github.com/iancoleman/strcase v0.3.0
 	goki.dev/enums v0.9.12
+	goki.dev/gengo v0.3.2
 	goki.dev/grease v0.8.8
 	goki.dev/greasi v0.8.1
+	goki.dev/gti v0.0.0-20230914001823-0d63dbfb3acf
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
 	golang.org/x/tools v0.13.0
 )
