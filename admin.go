@@ -79,8 +79,8 @@ func MoveToParent(kid Ki, parent Ki) {
 // New adds a new child of the given the type
 // with the given name to the given parent.
 // It is a helper function that calls [Ki.NewChild].
-func New[T Ki](par Ki, name string) {
-	par.NewChild(gti.TypeByValue((*T)(nil)), name)
+func New[T Ki](par Ki, name string) T {
+	return par.NewChild(gti.TypeByValue((*T)(nil)), name).(T)
 }
 
 // IsRoot tests if this node is the root node -- checks Parent = nil.
