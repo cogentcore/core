@@ -12,10 +12,7 @@ import (
 )
 
 func main() {
-	opts := grease.DefaultOptions()
-	opts.AppName = "enumgen"
-	opts.AppTitle = "Enumgen"
-	opts.AppAbout = "Enumgen is a tool that generates helpful methods for Go enums."
+	opts := grease.DefaultOptions("enumgen", "Enumgen", "Enumgen generates helpful methods for Go enums.")
 	opts.DefaultFiles = []string{"enumgen.toml"}
 	grease.Run(opts, &enumgen.Config{}, enumgen.Generate)
 }
