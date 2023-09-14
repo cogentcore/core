@@ -154,7 +154,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
+	if !hasAdd && !cfg.AddTypes && len(cfg.InterfaceConfigs) == 0 { // we must be told to add or we will not add, and if we have interface configs we will handle adding later
 		return true, nil
 	}
 	doc := strings.TrimSuffix(gd.Doc.Text(), "\n")
@@ -173,7 +173,14 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				if !types.Implements(typ, iface) {
 					continue
 				}
-				fmt.Printf("applying configuration %v to %q\n", ic, ts.Name.Name)
+				*cfg = *ic
+				dirs, hasAdd, err = LoadFromComment(gd.Doc, cfg)
+				if err != nil {
+					return false, err
+				}
+				if !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
+					return true, nil
+				}
 			}
 		}
 		typ := &Type{

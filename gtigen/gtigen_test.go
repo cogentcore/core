@@ -19,7 +19,13 @@ func TestGenerate(t *testing.T) {
 		AddMethods: true,
 		AddFuncs:   true,
 		InterfaceConfigs: map[string]*Config{
-			"fmt.Stringer": {},
+			"fmt.Stringer": {
+				AddTypes:   true,
+				TypeVar:    true,
+				Instance:   true,
+				TypeMethod: true,
+				NewMethod:  true,
+			},
 		},
 	}
 	err := grease.SetFromDefaults(c)
