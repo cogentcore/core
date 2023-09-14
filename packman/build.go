@@ -16,6 +16,8 @@ import (
 
 // Build builds an executable for the package
 // at the config path for the config platforms.
+//
+//gti:add
 func Build(c *config.Config) error {
 	if len(c.Build.Platform) == 0 {
 		return errors.New("build: expected at least 1 platform")

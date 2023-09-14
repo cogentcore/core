@@ -14,7 +14,9 @@ import (
 )
 
 // Log prints the logs from your app running on the
-// config operating system (android or ios) to the terminal
+// config operating system (android or ios) to the terminal.
+//
+//gti:add
 func Log(c *config.Config) error {
 	if c.Log.Target == "ios" {
 		return errors.New("ios not supported yet")

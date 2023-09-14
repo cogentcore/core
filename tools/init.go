@@ -18,6 +18,8 @@ import (
 // The "config.toml" file has the given
 // config info. Init also sets the config name
 // to the current directory if it is unset.
+//
+//gti:add
 func Init(c *config.Config) error {
 	err := os.Mkdir(".goki", 0750)
 	if err != nil {

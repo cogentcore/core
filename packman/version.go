@@ -18,6 +18,9 @@ import (
 // file of the config project based
 // on the given config info and commits
 // and pushes the changes.
+//
+//gti:add
+//grease:cmd -name set-version
 func UpdateVersion(c *config.Config) error {
 	str, err := VersionFileString(c)
 	if err != nil {

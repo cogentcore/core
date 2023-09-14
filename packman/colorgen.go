@@ -168,6 +168,9 @@ func addTempCustomColors(colors []ColorSchemeColor) []ColorSchemeColor {
 // at the config destination file path. The generated
 // file is part of the config package and puts the
 // config comment as the comment for the ColorSchemes variable.
+//
+//gti:add
+//grease:cmd -name colorgen
 func GenerateColorScheme(c *config.Config) error {
 	d, err := GetColorSchemeData(c.Colorgen.Source)
 	if err != nil {

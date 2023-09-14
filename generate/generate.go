@@ -20,6 +20,8 @@ import (
 // Generate is the main entry point to code generation
 // that does all of the generation according to the
 // given config info.
+//
+//gti:add
 func Generate(cfg *config.Config) error {
 	pkgs, err := ParsePackage(cfg)
 	if err != nil {

@@ -19,6 +19,8 @@ import (
 // Install installs the package the config ID
 // by looking for it in the list of supported packages.
 // If the config ID is a filepath, it calls [InstallLocal] instead.
+//
+//gti:add
 func Install(c *config.Config) error {
 	if c.Install.Package == "." || c.Install.Package == ".." || strings.Contains(c.Install.Package, "/") {
 		return InstallLocal(c)
