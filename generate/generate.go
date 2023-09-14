@@ -32,16 +32,16 @@ func Generate(cfg *config.Config) error {
 		TypeVar:  true,
 		Templates: []*template.Template{
 			template.Must(template.New("KiMethods").Parse(
-				`{{if .Config.TypeMethod}}
+				`
 				// Type returns the [*gti.Type] of [{{.Name}}]
 				func (t *{{.Name}}) Type() *gti.Type {
 					return {{.Name}}Type
-				} {{end}}
-				{{if .Config.NewMethod}}
+				}
+
 				// New returns a new [*{{.Name}}] value
 				func (t *{{.Name}}) New() ki.Ki {
 					return &{{.Name}}{}
-				} {{end}}`,
+				}`,
 			)),
 		},
 	}
