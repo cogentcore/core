@@ -42,7 +42,7 @@ func Generate(cfg *config.Config) error {
 // ParsePackage parses the package(s) based on the given config info.
 func ParsePackage(cfg *config.Config) ([]*packages.Package, error) {
 	pcfg := &packages.Config{
-		Mode: enumgen.PackageModes() | gtigen.PackageModes(&cfg.Generate.Gtigen),
+		Mode: enumgen.PackageModes() | gtigen.PackageModes(&cfg.Generate.Gtigen), // need superset of both
 		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
 		// in a separate pass? For later.
 		Tests: false,
