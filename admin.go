@@ -9,6 +9,8 @@ import (
 	"log"
 	"strings"
 	"sync"
+
+	"goki.dev/gti"
 )
 
 // admin has infrastructure level code, outside of ki interface
@@ -77,9 +79,8 @@ func MoveToParent(kid Ki, parent Ki) {
 // New adds a new child of the given the type
 // with the given name to the given parent.
 // It is a helper function that calls [Ki.NewChild].
-func New(par Ki, name string) {
-	// todo: use gti type, not laser
-	// par.NewChild(laser.TypeFor[T](), name)
+func New[T Ki](par Ki, name string) {
+	par.NewChild(gti.TypeByValue((*T)(nil)), name)
 }
 
 // IsRoot tests if this node is the root node -- checks Parent = nil.
