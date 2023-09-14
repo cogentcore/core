@@ -177,22 +177,24 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		if len(cfg.InterfaceConfigs) > 0 {
 			hasInt := false
 			typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
-			for in, ic := range cfg.InterfaceConfigs {
-				iface := g.Interfaces.ValByKey(in)
-				if iface == nil {
-					return false, fmt.Errorf("programmer error: internal error: missing interface object for interface %q", in)
-				}
-				if !types.Implements(typ, iface) && !types.Implements(types.NewPointer(typ), iface) { // either base type or pointer can implement
-					continue
-				}
-				*cfg = *ic
-				dirs, hasAdd, err = LoadFromComment(gd.Doc, cfg)
-				hasInt = true
-				if err != nil {
-					return false, err
-				}
-				if !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
-					return true, nil
+			if !types.IsInterface(typ) {
+				for in, ic := range cfg.InterfaceConfigs {
+					iface := g.Interfaces.ValByKey(in)
+					if iface == nil {
+						return false, fmt.Errorf("programmer error: internal error: missing interface object for interface %q", in)
+					}
+					if !types.Implements(typ, iface) && !types.Implements(types.NewPointer(typ), iface) { // either base type or pointer can implement
+						continue
+					}
+					*cfg = *ic
+					dirs, hasAdd, err = LoadFromComment(gd.Doc, cfg)
+					hasInt = true
+					if err != nil {
+						return false, err
+					}
+					if !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
+						return true, nil
+					}
 				}
 			}
 			if !hasInt && !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
@@ -214,7 +216,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				// if we have no names, we are embed, so add to embeds and remove from fields
 				if len(field.Names) == 0 {
 					emblist.List = append(emblist.List, field)
-					st.Fields.List = slices.Delete(st.Fields.List, i, i)
+					st.Fields.List = slices.Delete(st.Fields.List, i, i+1)
 
 					// TODO: better handling of name determination
 					nm := fmt.Sprintf("%v", field.Type)
