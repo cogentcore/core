@@ -14,7 +14,7 @@ import (
 // NodeSignals are signals that a Ki node sends about updates to the tree
 // structure using the NodeSignal (convert sig int64 to NodeSignals to get the
 // stringer name).
-type NodeSignals int64 //enums:bitflag
+type NodeSignals int64 //enums:enum
 
 // Standard signal types sent by ki.Node on its NodeSig for tree state changes
 const (

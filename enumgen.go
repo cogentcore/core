@@ -245,26 +245,6 @@ var _NodeSignalsMap = map[NodeSignals]string{
 // String returns the string representation
 // of this NodeSignals value.
 func (i NodeSignals) String() string {
-	str := ""
-	for _, ie := range _NodeSignalsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
-
-// BitIndexString returns the string
-// representation of this NodeSignals value
-// if it is a bit index value
-// (typically an enum constant), and
-// not an actual bit flag value.
-func (i NodeSignals) BitIndexString() string {
 	if str, ok := _NodeSignalsMap[i]; ok {
 		return str
 	}
@@ -275,26 +255,15 @@ func (i NodeSignals) BitIndexString() string {
 // string representation, and returns an
 // error if the string is invalid.
 func (i *NodeSignals) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
-
-// SetStringOr sets the NodeSignals value from its
-// string representation while preserving any
-// bit flags already set, and returns an
-// error if the string is invalid.
-func (i *NodeSignals) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _NodeSignalsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _NodeSignalsNameToValueMap[strings.ToLower(flg)]; ok {
-			i.SetFlag(true, &val)
-		} else {
-			return errors.New(flg + " is not a valid value for type NodeSignals")
-		}
+	if val, ok := _NodeSignalsNameToValueMap[s]; ok {
+		*i = val
+		return nil
 	}
-	return nil
+	if val, ok := _NodeSignalsNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type NodeSignals")
 }
 
 // Int64 returns the NodeSignals value as an int64.
@@ -336,29 +305,6 @@ func (i NodeSignals) Values() []enums.Enum {
 func (i NodeSignals) IsValid() bool {
 	_, ok := _NodeSignalsMap[i]
 	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
-func (i NodeSignals) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
-
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
-func (i *NodeSignals) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

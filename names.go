@@ -46,14 +46,6 @@ const (
 	// from parent objects should NOT be checked.
 	NoInherit = false
 
-	// TypeProps is used for PropInherit to indicate that properties
-	// set on the type should be checked.
-	CheckTypeProps = true
-
-	// NoTypeProps is used for PropInherit to indicate that properties
-	// set on the type should NOT be checked.
-	NoTypeProps = false
-
 	// Indent is used for Write methods to indicate that indenting should be done.
 	Indent = true
 

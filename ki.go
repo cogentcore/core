@@ -408,10 +408,9 @@ type Ki interface {
 	PropTry(key string) (any, error)
 
 	// PropInherit gets property value from key with options for inheriting
-	// property from parents and / or type-level properties.  If inherit, then
-	// checks all parents.  If typ then checks property on type as well
-	// (registered via KiT type registry).  Returns false if not set anywhere.
-	PropInherit(key string, inherit, typ bool) (any, bool)
+	// property from parents.  If inherit, then checks all parents.
+	// Returns false if not set anywhere.
+	PropInherit(key string, inherit bool) (any, bool)
 
 	// DeleteProp deletes property key on this node.
 	DeleteProp(key string)

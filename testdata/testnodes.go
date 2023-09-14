@@ -17,15 +17,17 @@ type TestNode struct {
 // func (tn *TestNode) CopyFieldsFrom(frm any) { // note nothing to copy here
 // }
 
+// NodeEmbed embeds ki.Node and adds a couple of fields.
+// Also has a directive processed by gti
+//
+//direct:value
 type NodeEmbed struct {
 	ki.Node
 	Mbr1 string
 	Mbr2 int
 }
 
-// note: one _could_ do a direct literal bit copy, but children should not be overwritten etc.
-
-// todo: gti auto-generates this method:
+// note: probably not worth auto-generating this method b/c it may require specific logic.
 
 func (ne *NodeEmbed) CopyFieldsFrom(frm any) {
 	ne.Node.CopyFieldsFrom(frm)
@@ -35,12 +37,6 @@ func (ne *NodeEmbed) CopyFieldsFrom(frm any) {
 	}
 	ne.Mbr1 = fm.Mbr1
 	ne.Mbr2 = fm.Mbr2
-}
-
-var NodeEmbedProps = ki.Props{
-	"intprop":    -17,
-	"floatprop":  3.1415,
-	"stringprop": "type string",
 }
 
 type NodeField struct {

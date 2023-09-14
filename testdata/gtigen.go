@@ -36,9 +36,11 @@ func (t *TestNode) New() ki.Ki {
 
 // NodeEmbedType is the [gti.Type] for [NodeEmbed]
 var NodeEmbedType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/ki/v2/testdata.NodeEmbed",
-	Doc:        "",
-	Directives: gti.Directives{},
+	Name: "goki.dev/ki/v2/testdata.NodeEmbed",
+	Doc:  "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "direct", Directive: "value", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Mbr1", &gti.Field{Name: "Mbr1", Doc: "", Directives: gti.Directives{}}},
 		{"Mbr2", &gti.Field{Name: "Mbr2", Doc: "", Directives: gti.Directives{}}},

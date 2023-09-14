@@ -845,10 +845,9 @@ func (n *Node) PropTry(key string) (any, error) {
 }
 
 // PropInherit gets property value from key with options for inheriting
-// property from parents and / or type-level properties.  If inherit, then
-// checks all parents.  If typ then checks property on type as well
-// (registered via KiT type registry).  Returns false if not set anywhere.
-func (n *Node) PropInherit(key string, inherit, typ bool) (any, bool) {
+// property from parents.  If inherit, then checks all parents.
+// Returns false if not set anywhere.
+func (n *Node) PropInherit(key string, inherit bool) (any, bool) {
 	// pr := prof.Start("PropInherit")
 	// defer pr.End()
 	v, ok := n.Props[key]
@@ -856,15 +855,11 @@ func (n *Node) PropInherit(key string, inherit, typ bool) (any, bool) {
 		return v, ok
 	}
 	if inherit && n.Par != nil {
-		v, ok = n.Par.PropInherit(key, inherit, typ)
+		v, ok = n.Par.PropInherit(key, inherit)
 		if ok {
 			return v, ok
 		}
 	}
-	// todo: use gti type registry here instead
-	// if typ {
-	// 	return kit.Types.Prop(Type(n.This()), key)
-	// }
 	return nil, false
 }
 

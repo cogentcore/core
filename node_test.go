@@ -670,7 +670,7 @@ func TestProps(t *testing.T) {
 	if !ok || pprop != 42 {
 		t.Errorf("TestProps error -- pprop %v != %v\n", pprop, 42)
 	}
-	sprop, ok := schild2.PropInherit("intprop", Inherit, NoTypeProps)
+	sprop, ok := schild2.PropInherit("intprop", Inherit)
 	if !ok {
 		t.Errorf("TestProps error -- intprop inherited not found\n")
 	}
@@ -678,13 +678,13 @@ func TestProps(t *testing.T) {
 	if !ok || sprop != 42 {
 		t.Errorf("TestProps error -- intprop inherited %v != %v\n", sint, 42)
 	}
-	sprop, ok = schild2.PropInherit("intprop", NoInherit, NoTypeProps)
+	sprop, ok = schild2.PropInherit("intprop", NoInherit)
 	if ok {
 		t.Errorf("TestProps error -- intprop should not be found!  was: %v\n", sprop)
 	}
 
 	parent.SetProp("floatprop", 42.0)
-	sprop, ok = schild2.PropInherit("floatprop", Inherit, NoTypeProps)
+	sprop, ok = schild2.PropInherit("floatprop", Inherit)
 	if !ok {
 		t.Errorf("TestProps error -- floatprop inherited not found\n")
 	}
@@ -695,7 +695,7 @@ func TestProps(t *testing.T) {
 
 	tstr := "test string"
 	parent.SetProp("stringprop", tstr)
-	sprop, ok = schild2.PropInherit("stringprop", Inherit, NoTypeProps)
+	sprop, ok = schild2.PropInherit("stringprop", Inherit)
 	if !ok {
 		t.Errorf("TestProps error -- stringprop not found\n")
 	}
@@ -705,18 +705,18 @@ func TestProps(t *testing.T) {
 	}
 
 	parent.DeleteProp("floatprop")
-	sprop, ok = schild2.PropInherit("floatprop", Inherit, NoTypeProps)
+	sprop, ok = schild2.PropInherit("floatprop", Inherit)
 	if ok {
 		t.Errorf("TestProps error -- floatprop should be gone\n")
 	}
 
-	sprop, ok = parent.PropInherit("floatprop", Inherit, CheckTypeProps)
-	if !ok {
-		t.Errorf("TestProps error -- floatprop on type not found\n")
+	// test type directives: replacement for type props
+	tdirs := typ.Directives.ForTool("direct")
+	if len(tdirs) == 0 {
+		t.Errorf("Type directives error: tool 'direct' not found\n")
 	}
-	spropf, ok = sprop.(float64)
-	if !ok || spropf != 3.1415 {
-		t.Errorf("TestProps error -- floatprop from type %v != %v\n", spropf, 3.1415)
+	if tdirs[0].Directive != "value" {
+		t.Errorf("Type directives error: directive should be `value`, got: %s\n", tdirs[0].Directive)
 	}
 }
 
@@ -760,8 +760,8 @@ func TestTreeMod(t *testing.T) {
 	// fmt.Printf("#################################\n")
 	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
 
-	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: 260
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 132
+	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: ChildDeleted
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: ChildAdded
 `
 
 	_ = mvsigs
@@ -779,7 +779,7 @@ ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 132
 
 	delsigs := `ki.Signal Emit from: child12 sig: NodeSignalDeleting data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalDeleting data: <nil>
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 260
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: ChildDeleted
 `
 
 	_ = delsigs
@@ -789,50 +789,6 @@ ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 260
 	}
 	sigs = ""
 
-}
-
-func TestNodeFieldFunc(t *testing.T) {
-	parent := testdata.NodeField{}
-	parent.InitName(&parent, "par1")
-	res := make([]string, 0, 10)
-	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
-		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
-		return Continue
-	})
-	// fmt.Printf("node field fun result: %v\n", res)
-
-	trg := []string{"[par1, fun_down, lev 0]", "[Field1, fun_down, lev 1]"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDown error -- results: %v != target: %v\n", res, trg)
-	}
-	res = res[:0]
-
-	par2 := testdata.NodeField2{}
-	par2.InitName(&par2, "par2")
-	par2.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
-		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
-		return Continue
-	})
-	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[par2, fun_down, lev 0]", "[Field1, fun_down, lev 1]", "[Field2, fun_down, lev 1]"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDown error -- results: %v != target: %v\n", res, trg)
-	}
-	res = res[:0]
-
-	par2.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d any) bool {
-		return Continue
-	},
-		func(k Ki, level int, d any) bool {
-			res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
-			return Continue
-		})
-	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[Field1, fun_down_me_last, lev 1]", "[Field2, fun_down_me_last, lev 1]", "[par2, fun_down_me_last, lev 0]"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDownMeLast error -- results:\n%v\n!= target:\n%v\n", res, trg)
-	}
-	res = res[:0]
 }
 
 /*
