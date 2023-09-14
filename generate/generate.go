@@ -9,6 +9,7 @@ package generate
 
 import (
 	"fmt"
+	"text/template"
 
 	"goki.dev/enums/enumgen"
 	"goki.dev/gengo"
@@ -19,10 +20,31 @@ import (
 
 // Generate is the main entry point to code generation
 // that does all of the generation according to the
-// given config info.
+// given config info. It overrides the
+// [config.Config.Generate.Gtigen.InterfaceConfigs] info.
 //
 //gti:add
 func Generate(cfg *config.Config) error {
+	cfg.Generate.Gtigen.InterfaceConfigs = make(map[string]*gtigen.Config)
+	cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &gtigen.Config{
+		AddTypes: true,
+		Instance: true,
+		TypeVar:  true,
+		Templates: []*template.Template{
+			template.Must(template.New("KiMethods").Parse(
+				`{{if .Config.TypeMethod}}
+				// Type returns the [*gti.Type] of [{{.Name}}]
+				func (t *{{.Name}}) Type() *gti.Type {
+					return {{.Name}}Type
+				} {{end}}
+				{{if .Config.NewMethod}}
+				// New returns a new [*{{.Name}}] value
+				func (t *{{.Name}}) New() ki.Ki {
+					return &{{.Name}}{}
+				} {{end}}`,
+			)),
+		},
+	}
 	pkgs, err := ParsePackage(cfg)
 	if err != nil {
 		return fmt.Errorf("Generate: error parsing package: %w", err)
