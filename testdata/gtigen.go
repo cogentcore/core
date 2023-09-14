@@ -14,7 +14,6 @@ var TestNodeType = gti.AddType(&gti.Type{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 		{"Sig1", &gti.Field{Name: "Sig1", Doc: "", Directives: gti.Directives{}}},
 		{"Sig2", &gti.Field{Name: "Sig2", Doc: "", Directives: gti.Directives{}}},
 	}),
@@ -41,7 +40,6 @@ var NodeEmbedType = gti.AddType(&gti.Type{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 		{"Mbr1", &gti.Field{Name: "Mbr1", Doc: "", Directives: gti.Directives{}}},
 		{"Mbr2", &gti.Field{Name: "Mbr2", Doc: "", Directives: gti.Directives{}}},
 	}),
@@ -68,7 +66,6 @@ var NodeFieldType = gti.AddType(&gti.Type{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeEmbed", &gti.Field{Name: "NodeEmbed", Doc: "", Directives: gti.Directives{}}},
 		{"Field1", &gti.Field{Name: "Field1", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -94,7 +91,6 @@ var NodeField2Type = gti.AddType(&gti.Type{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeField", &gti.Field{Name: "NodeField", Doc: "", Directives: gti.Directives{}}},
 		{"Field2", &gti.Field{Name: "Field2", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
