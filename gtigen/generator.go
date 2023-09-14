@@ -11,6 +11,7 @@ import (
 	"go/ast"
 	"go/types"
 	"log"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -182,7 +183,6 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 					return false, fmt.Errorf("programmer error: internal error: missing interface object for interface %q", in)
 				}
 				if !types.Implements(typ, iface) && !types.Implements(types.NewPointer(typ), iface) { // either base type or pointer can implement
-					fmt.Println(typ, "does not implement", iface)
 					continue
 				}
 				*cfg = *ic
@@ -208,7 +208,28 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			Config:     cfg,
 		}
 		st, ok := ts.Type.(*ast.StructType)
-		if ok {
+		if ok && st.Fields != nil {
+			emblist := &ast.FieldList{}
+			for i, field := range st.Fields.List {
+				// if we have no names, we are embed, so add to embeds and remove from fields
+				if len(field.Names) == 0 {
+					emblist.List = append(emblist.List, field)
+					st.Fields.List = slices.Delete(st.Fields.List, i, i)
+
+					nm := fmt.Sprintf("%v", field.Type)
+					if se, ok := field.Type.(*ast.SelectorExpr); ok {
+						nm = fmt.Sprintf("%v.%v", se.X, se.Sel)
+					}
+					field.Names = append(field.Names, ast.NewIdent(nm))
+				}
+			}
+
+			embeds, err := GetFields(emblist, cfg)
+			if err != nil {
+				return false, err
+			}
+			typ.Embeds = embeds
+
 			fields, err := GetFields(st.Fields, cfg)
 			if err != nil {
 				return false, err

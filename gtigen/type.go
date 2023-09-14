@@ -18,6 +18,7 @@ type Type struct {
 	Doc        string         // The documentation for the type
 	Directives gti.Directives // The directives for the type; guaranteed to be non-nil
 	Fields     *gti.Fields    // The fields of the struct type; nil if not a struct
+	Embeds     *gti.Fields    // The embeds of the struct type; nil if not a struct
 	Methods    *gti.Methods   // The methods of the type; guaranteed to be non-nil
 	Config     *Config        // Configuration information set in the comment directive for the type; is initialized to generator config info first
 }
