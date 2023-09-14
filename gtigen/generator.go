@@ -206,6 +206,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			FullName:   FullName(g.Pkg, ts.Name.Name),
 			Type:       ts,
 			Doc:        doc,
+			Pkg:        g.Pkg.Name,
 			Directives: dirs,
 			Config:     cfg,
 		}
