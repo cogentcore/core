@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"text/template"
 
 	"goki.dev/grease"
 	"goki.dev/gti"
@@ -25,6 +26,12 @@ func TestGenerate(t *testing.T) {
 				Instance:   true,
 				TypeMethod: true,
 				NewMethod:  true,
+				Templates: []*template.Template{
+					template.Must(template.New("Stringer").Parse(`
+					func (t *{{.Name}}) MyCustomFuncForStringers(a any) error {
+						return nil
+					}`)),
+				},
 			},
 		},
 	}

@@ -45,6 +45,10 @@ func (t *Person) New() any {
 	return &Person{}
 }
 
+func (t *Person) MyCustomFuncForStringers(a any) error {
+	return nil
+}
+
 var _ = gti.AddFunc(&gti.Func{
 	Name:       "goki.dev/gti/gtigen/testdata.Alert",
 	Doc:        "Alert prints an alert with the given message",
