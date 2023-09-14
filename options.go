@@ -51,12 +51,13 @@ type Options struct {
 }
 
 // DefaultOptions returns a new [Options] value
-// with standard default values.
-func DefaultOptions() *Options {
+// with standard default values, based on the given
+// app name, app title, and app about.
+func DefaultOptions(appName, appTitle, appAbout string) *Options {
 	return &Options{
-		AppName:         "<app name not specified; see grease.AppName>",
-		AppTitle:        "<app title not specified; see grease.AppTitle>",
-		AppAbout:        "<app about not specified; see grease.AppAbout>",
+		AppName:         appName,
+		AppTitle:        appTitle,
+		AppAbout:        appAbout,
 		Fatal:           true,
 		PrintSuccess:    true,
 		DefaultEncoding: "toml",

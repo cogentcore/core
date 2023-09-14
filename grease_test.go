@@ -172,7 +172,7 @@ func TestArgs(t *testing.T) {
 }
 
 func TestOpen(t *testing.T) {
-	opts := DefaultOptions()
+	opts := DefaultOptions("test", "Test", "")
 	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
 	err := OpenWithIncludes(opts, cfg, "testcfg.toml")
@@ -215,13 +215,13 @@ func TestOpen(t *testing.T) {
 func TestUsage(t *testing.T) {
 	t.Skip("prints usage string")
 	cfg := &TestConfig{}
-	us := Usage(DefaultOptions(), cfg, "")
+	us := Usage(DefaultOptions("test", "Test", ""), cfg, "")
 	fmt.Println(us)
 }
 
 func TestSave(t *testing.T) {
 	// t.Skip("prints usage string")
-	opts := DefaultOptions()
+	opts := DefaultOptions("test", "Test", "")
 	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
 	OpenWithIncludes(opts, cfg, "testcfg.toml")
@@ -230,7 +230,7 @@ func TestSave(t *testing.T) {
 
 func TestConfigOpen(t *testing.T) {
 	// t.Skip("prints usage string")
-	opts := DefaultOptions()
+	opts := DefaultOptions("test", "Test", "")
 	opts.IncludePaths = []string{".", "testdata"}
 	opts.NeedConfigFile = true
 	cfg := &TestConfig{}
