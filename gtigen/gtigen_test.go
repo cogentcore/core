@@ -80,8 +80,8 @@ func TestPerson(t *testing.T) {
 	if have.Name != "goki.dev/gti/gtigen/testdata.Person" {
 		t.Errorf("expected name to be 'goki.dev/gti/gtigen/testdata.Person', but got %s", have.Name)
 	}
-	if len(have.Directives) != 2 {
-		t.Errorf("expected 2 directives, but got %d", len(have.Directives))
+	if len(have.Directives) != 1 {
+		t.Errorf("expected 1 directives, but got %d", len(have.Directives))
 	}
 	if have.Fields.Len() != 2 {
 		t.Errorf("expected 2 fields, but got %d", have.Fields.Len())
@@ -90,7 +90,7 @@ func TestPerson(t *testing.T) {
 		t.Errorf("expected nil embeds, but got %v", have.Embeds)
 	}
 	if have.Methods.Len() != 2 {
-		t.Errorf("expected 1 method, but got %d", have.Methods.Len())
+		t.Errorf("expected 2 methods, but got %d", have.Methods.Len())
 	}
 
 }

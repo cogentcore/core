@@ -164,6 +164,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			return true, nil
 		}
 		if len(cfg.InterfaceConfigs) > 0 {
+			hasInt := false
 			typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
 			for in, ic := range cfg.InterfaceConfigs {
 				iface := g.Interfaces.ValByKey(in)
@@ -175,12 +176,16 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				}
 				*cfg = *ic
 				dirs, hasAdd, err = LoadFromComment(gd.Doc, cfg)
+				hasInt = true
 				if err != nil {
 					return false, err
 				}
 				if !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
 					return true, nil
 				}
+			}
+			if !hasInt && !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
+				return true, nil
 			}
 		}
 		typ := &Type{
