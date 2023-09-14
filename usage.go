@@ -54,7 +54,7 @@ func CommandUsage[T any](b *strings.Builder, cmds ...*Cmd[T]) {
 	for _, cmd := range cmds {
 		b.WriteString(cmdColor(cmd.Name))
 		if cmd.Doc != "" {
-			b.WriteString("\n\t" + cmd.Doc)
+			b.WriteString("\n\t" + strings.ReplaceAll(cmd.Doc, "\n", "\n\t")) // need to put a tab on every newline for formatting
 		}
 		b.WriteString("\n")
 	}
@@ -91,8 +91,7 @@ func FlagUsage(app any, path string, b *strings.Builder) {
 		b.WriteString(cmdColor("-" + strcase.ToKebab(nm) + "\n"))
 		desc, ok := f.Tag.Lookup("desc")
 		if ok && desc != "" {
-			b.WriteString("\t")
-			b.WriteString(desc)
+			b.WriteString("\t" + strings.ReplaceAll(desc, "\n", "\n\t")) // need to put a tab on every newline for formatting
 			def, ok := f.Tag.Lookup("def")
 			if ok && def != "" {
 				b.WriteString(fmt.Sprintf(" (default: %s)", def))
