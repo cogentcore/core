@@ -94,7 +94,17 @@ func (g *Generator) GetInterfaces(pkgs []*types.Package) error {
 	rpkgs := []*types.Package{}
 	for _, pkg := range pkgs {
 		for in := range g.Config.InterfaceConfigs {
-			strs := strings.Split(in, ".")
+			// ignore ones we already have
+			if _, has := g.Interfaces.IdxByKeyTry(in); has {
+				continue
+			}
+			// TODO: better solution to major version suffixes
+			nin := strings.ReplaceAll(in, "/v2", "")
+			sstrs := strings.Split(nin, "/")
+			if len(sstrs) == 0 {
+				return fmt.Errorf("programmer error: internal error: expected at least one string from strings.Split(%q, %q)", nin, `\n`)
+			}
+			strs := strings.Split(sstrs[len(sstrs)-1], ".")
 			if len(strs) < 2 {
 				return errors.New("expected something before and after dot in fully-qualified type name")
 			}
@@ -171,7 +181,8 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				if iface == nil {
 					return false, fmt.Errorf("programmer error: internal error: missing interface object for interface %q", in)
 				}
-				if !types.Implements(typ, iface) {
+				if !types.Implements(typ, iface) && !types.Implements(types.NewPointer(typ), iface) { // either base type or pointer can implement
+					fmt.Println(typ, "does not implement", iface)
 					continue
 				}
 				*cfg = *ic
