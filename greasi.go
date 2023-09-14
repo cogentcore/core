@@ -26,11 +26,11 @@ import (
 //	func (a *App) BuildCmd() error
 //
 // Run uses [os.Args] for its arguments.
-func Run[T any, C grease.CmdOrFunc[T]](cfg T, cmds ...C) error {
+func Run[T any, C grease.CmdOrFunc[T]](opts *grease.Options, cfg T, cmds ...C) error {
 	cs, err := grease.CmdsFromCmdOrFuncs[T, C](cmds)
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
-		if grease.Fatal {
+		if opts.Fatal {
 			color.Red("%v", err)
 			os.Exit(1)
 		}
@@ -43,14 +43,14 @@ func Run[T any, C grease.CmdOrFunc[T]](cfg T, cmds ...C) error {
 			break
 		}
 	}
-	cs = append(cs, grease.Cmd[T]{
+	cs = append(cs, &grease.Cmd[T]{
 		Func: func(t T) error {
-			GUI(t, cs...)
+			GUI(opts, t, cs...)
 			return nil
 		},
-		Name: "app",
-		Doc:  "App runs the app (GUI) version of the " + grease.AppTitle + " tool",
+		Name: "gui",
+		Doc:  "GUI runs the GUI version of the " + opts.AppTitle + " tool",
 		Root: !hasRoot, // if root isn't already taken, we take it
 	})
-	return grease.Run(cfg, cs...)
+	return grease.Run(opts, cfg, cs...)
 }
