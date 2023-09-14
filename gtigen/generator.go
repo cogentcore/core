@@ -216,6 +216,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 					emblist.List = append(emblist.List, field)
 					st.Fields.List = slices.Delete(st.Fields.List, i, i)
 
+					// TODO: better handling of name determination
 					nm := fmt.Sprintf("%v", field.Type)
 					if se, ok := field.Type.(*ast.SelectorExpr); ok {
 						nm = fmt.Sprintf("%v.%v", se.X, se.Sel)

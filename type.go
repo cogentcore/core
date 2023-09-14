@@ -29,6 +29,10 @@ type Type struct {
 	// Embeded fields for struct types
 	Embeds *Fields
 
+	// All embedded fields (including nested ones) for struct types;
+	// not set by gtigen but can be set manually by outside packages
+	AllEmbeds *Field
+
 	// Fields for struct types
 	Fields *Fields
 
