@@ -18,6 +18,27 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+// KiMethodsTmpl is a template that contains the methods
+// and functions specific to Ki types
+var KiMethodsTmpl = template.Must(template.New("KiMethods").Parse(
+	`
+	// New{{.Name}} adds a new [{{.Name}}] with
+	// the given name to the given parent.
+	func New{{.Name}}(par {{if eq .Pkg "ki"}} {{else}} .Pkg {{end}}.Ki, name string) *{{.Name}} {
+		return par.NewChild({{.Name}}Type, name).(*{{.Name}})
+	}
+
+	// Type returns the [*gti.Type] of [{{.Name}}]
+	func (t *{{.Name}}) Type() *gti.Type {
+		return {{.Name}}Type
+	}
+
+	// New returns a new [*{{.Name}}] value
+	func (t *{{.Name}}) New() {{if eq .Pkg "ki"}} {{else}} .Pkg {{end}}.Ki {
+		return &{{.Name}}{}
+	}`,
+))
+
 // Generate is the main entry point to code generation
 // that does all of the generation according to the
 // given config info. It overrides the
@@ -27,23 +48,10 @@ import (
 func Generate(cfg *config.Config) error {
 	cfg.Generate.Gtigen.InterfaceConfigs = make(map[string]*gtigen.Config)
 	cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &gtigen.Config{
-		AddTypes: true,
-		Instance: true,
-		TypeVar:  true,
-		Templates: []*template.Template{
-			template.Must(template.New("KiMethods").Parse(
-				`
-				// Type returns the [*gti.Type] of [{{.Name}}]
-				func (t *{{.Name}}) Type() *gti.Type {
-					return {{.Name}}Type
-				}
-
-				// New returns a new [*{{.Name}}] value
-				func (t *{{.Name}}) New() ki.Ki {
-					return &{{.Name}}{}
-				}`,
-			)),
-		},
+		AddTypes:  true,
+		Instance:  true,
+		TypeVar:   true,
+		Templates: []*template.Template{KiMethodsTmpl},
 	}
 	pkgs, err := ParsePackage(cfg)
 	if err != nil {
