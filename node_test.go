@@ -211,8 +211,14 @@ func TestNodeFindNameUnique(t *testing.T) {
 func TestNodeFindType(t *testing.T) {
 	parent := Node{}
 	parent.InitName(&parent, "par")
-	parent.NewChild(testdata.NodeEmbedType, "child1")
+	ne := parent.NewChild(testdata.NodeEmbedType, "child1")
 	parent.NewChild(NodeType, "child2")
+
+	emb := ne.Type().HasEmbed(NodeType)
+	if !emb {
+		t.Errorf("HasEmbed of NodeEmbedType failed")
+	}
+
 	idx, ok := parent.Children().IndexByType(testdata.NodeEmbedType, NoEmbeds, 0)
 	if !ok || idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
@@ -224,6 +230,10 @@ func TestNodeFindType(t *testing.T) {
 	_, err := parent.Children().ElemByTypeTry(NodeType, NoEmbeds, 0)
 	if err != nil {
 		t.Error(err)
+	}
+	idx, ok = parent.Children().IndexByType(NodeType, Embeds, 0)
+	if !ok || idx != 0 {
+		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
 }
 
@@ -308,13 +318,18 @@ func TestNodeConfig(t *testing.T) {
 
 	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Kids)
 
-	// config2 := TypeAndNameList{
-	// 	{TypeNodeEmbed, "child4"},
-	// 	{TypeNode, "child1"}, // note: changing this to Node type removes child1.subchild1
-	// 	{TypeNodeEmbed, "child5"},
-	// 	{TypeNodeEmbed, "child3"},
-	// 	{TypeNodeEmbed, "child6"},
-	// }
+	config2 := TypeAndNameList{
+		{testdata.NodeEmbedType, "child4"},
+		{NodeType, "child1"}, // note: changing this to Node type removes child1.subchild1
+		{testdata.NodeEmbedType, "child5"},
+		{testdata.NodeEmbedType, "child3"},
+		{testdata.NodeEmbedType, "child6"},
+	}
+
+	mods, updt = parent.ConfigChildren(config2)
+	if mods {
+		parent.UpdateEnd(updt)
+	}
 
 	cf2 := fmt.Sprintf("config2:\n%v\n", parent.Kids)
 

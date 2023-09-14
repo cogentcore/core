@@ -161,10 +161,9 @@ func (sl *Slice) IndexByName(name string, startIdx int) (int, bool) {
 // IndexByType returns index of element that either is that type or embeds
 // that type, false if not found. See IndexOf for info on startIdx.
 func (sl *Slice) IndexByType(t *gti.Type, embeds bool, startIdx int) (int, bool) {
-	// todo: gti
-	// if embeds {
-	// 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return TypeEmbeds(ch, t) })
-	// }
+	if embeds {
+		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type().HasEmbed(t) })
+	}
 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type() == t })
 }
 

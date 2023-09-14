@@ -212,16 +212,15 @@ func (n *Node) ParentByType(t *gti.Type, embeds bool) Ki {
 	if IsRoot(n) {
 		return nil
 	}
-	// todo: gti
-	// if embeds {
-	// 	if TypeEmbeds(n.Par, t) {
-	// 		return n.Par
-	// 	}
-	// } else {
-	if n.Par.Type() == t {
-		return n.Par
+	if embeds {
+		if n.Par.Type().HasEmbed(t) {
+			return n.Par
+		}
+	} else {
+		if n.Par.Type() == t {
+			return n.Par
+		}
 	}
-	// }
 	return n.Par.ParentByType(t, embeds)
 }
 
