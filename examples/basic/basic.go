@@ -45,9 +45,6 @@ func Run(c *Config) error {
 }
 
 func main() {
-	grease.AppName = "basic"
-	grease.AppTitle = "Basic"
-	grease.AppAbout = "Basic is a basic example application made with Grease."
-	grease.DefaultFiles = []string{"config.toml"}
-	greasi.Run(&Config{}, Build, Run)
+	opts := grease.DefaultOptions("basic", "Basic", "Basic is a basic example application made with Greasi.")
+	greasi.Run(opts, &Config{}, Build, Run)
 }

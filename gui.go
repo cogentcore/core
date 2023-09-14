@@ -37,7 +37,7 @@ func MainRun[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 	tb := gi.AddNewToolBar(mfr, "tb")
 	for _, cmd := range cmds {
 		cmd := cmd
-		if cmd.Name == "app" { // we are already in GUI so that command is irrelevant
+		if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 			continue
 		}
 		tb.AddAction(gi.ActOpts{
