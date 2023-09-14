@@ -7,6 +7,7 @@ package grease
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/mattn/go-shellwords"
 	"goki.dev/gti"
@@ -20,6 +21,10 @@ import (
 //	//tool:directive args...
 func ParseDirective(comment string) (*gti.Directive, error) {
 	comment = strings.TrimPrefix(comment, "//")
+	rs := []rune(comment)
+	if len(rs) == 0 || unicode.IsSpace(rs[0]) { // directives must not have whitespace as their first character
+		return nil, nil
+	}
 	before, after, found := strings.Cut(comment, ":")
 	if !found {
 		return nil, nil
