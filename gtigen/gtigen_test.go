@@ -21,11 +21,9 @@ func TestGenerate(t *testing.T) {
 		AddFuncs:   true,
 		InterfaceConfigs: map[string]*Config{
 			"fmt.Stringer": {
-				AddTypes:   true,
-				TypeVar:    true,
-				Instance:   true,
-				TypeMethod: true,
-				NewMethod:  true,
+				AddTypes: true,
+				TypeVar:  true,
+				Instance: true,
 				Templates: []*template.Template{
 					template.Must(template.New("Stringer").Parse(`
 					func (t *{{.Name}}) MyCustomFuncForStringers(a any) error {
@@ -66,10 +64,6 @@ func TestGenerate(t *testing.T) {
 		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/gtigen.go and ./testdata/gtigen.golden to see the difference)")
 	}
 }
-
-// ensure compliance with interfaces
-var _ = gti.Typer(&testdata.Person{})
-var _ = gti.Newer(&testdata.Person{})
 
 func TestPerson(t *testing.T) {
 	want := testdata.PersonType

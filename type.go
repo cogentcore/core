@@ -40,13 +40,3 @@ type Type struct {
 func (tp *Type) ReflectType() reflect.Type {
 	return reflect.TypeOf(tp.Instance).Elem()
 }
-
-// Typer represents a type that can return itself as a [*Type]
-type Typer interface {
-	Type() *Type
-}
-
-// Newer represents a type that can create a new instance of itself.
-type Newer interface {
-	New() any
-}

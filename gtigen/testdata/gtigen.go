@@ -35,16 +35,6 @@ var PersonType = gti.AddType(&gti.Type{
 	Instance: &Person{},
 })
 
-// Type returns the [*gti.Type] of [Person]
-func (t *Person) Type() *gti.Type {
-	return PersonType
-}
-
-// New returns a new [*Person] value
-func (t *Person) New() any {
-	return &Person{}
-}
-
 func (t *Person) MyCustomFuncForStringers(a any) error {
 	return nil
 }
