@@ -21,6 +21,29 @@ import (
 // properties, and deal with most common-sense cases, e.g., string <-> number,
 // etc.  nil values return !ok
 
+type Signed interface {
+	int | int8 | int16 | int32 | int64
+}
+
+type Unsigned interface {
+	uint | uint8 | uint16 | uint32 | uint64
+}
+
+type Integer interface {
+	Signed | Unsigned
+}
+
+type Float interface {
+	float32 | float64
+}
+
+type Number interface {
+	Signed | Unsigned | Float
+}
+
+// ConvertNumber converts any number to any other, using generics
+func ConvertNumber[T1 Number, T2 Number](dst *T1, v T2) { *dst = T1(v) }
+
 // AnyIsNil checks if an interface value is nil -- the interface itself could be
 // nil, or the value pointed to by the interface could be nil -- this checks
 // both, safely
