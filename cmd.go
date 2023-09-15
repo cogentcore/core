@@ -121,3 +121,28 @@ func CmdsFromCmdOrFuncs[T any, C CmdOrFunc[T]](cmds []C) ([]*Cmd[T], error) {
 	}
 	return res, nil
 }
+
+// AddCmd adds the given command to the given set of commands
+// if there is not already a command with the same name in the
+// set of commands. Also, if [Cmd.Root] is set to true on the
+// passed command, and there are no other root commands in the
+// given set of commands, the passed command will be made the
+// root command; otherwise, it will be made not the root command.
+func AddCmd[T any](cmd *Cmd[T], cmds ...*Cmd[T]) []*Cmd[T] {
+	hasCmd := false
+	hasRoot := false
+	for _, c := range cmds {
+		if c.Name == cmd.Name {
+			hasCmd = true
+		}
+		if c.Root {
+			hasRoot = true
+		}
+	}
+	if hasCmd {
+		return cmds
+	}
+	cmd.Root = cmd.Root && !hasRoot // we must both want root and be able to take root
+	cmds = append(cmds, cmd)
+	return cmds
+}
