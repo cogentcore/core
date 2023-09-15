@@ -14,15 +14,21 @@ var TestNodeType = gti.AddType(&gti.Type{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Sig1", &gti.Field{Name: "Sig1", Doc: "", Directives: gti.Directives{}}},
-		{"Sig2", &gti.Field{Name: "Sig2", Doc: "", Directives: gti.Directives{}}},
+		{"Sig1", &gti.Field{Name: "Sig1", Type: "ki.Signal", Doc: "", Directives: gti.Directives{}}},
+		{"Sig2", &gti.Field{Name: "Sig2", Type: "ki.Signal", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TestNode{},
 })
+
+// NewTestNode adds a new [TestNode] with
+// the given name to the given parent.
+func NewTestNode(par ki.Ki, name string) *TestNode {
+	return par.NewChild(TestNodeType, name).(*TestNode)
+}
 
 // Type returns the [*gti.Type] of [TestNode]
 func (t *TestNode) Type() *gti.Type {
@@ -42,15 +48,21 @@ var NodeEmbedType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "direct", Directive: "value", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Mbr1", &gti.Field{Name: "Mbr1", Doc: "", Directives: gti.Directives{}}},
-		{"Mbr2", &gti.Field{Name: "Mbr2", Doc: "", Directives: gti.Directives{}}},
+		{"Mbr1", &gti.Field{Name: "Mbr1", Type: "string", Doc: "", Directives: gti.Directives{}}},
+		{"Mbr2", &gti.Field{Name: "Mbr2", Type: "int", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &NodeEmbed{},
 })
+
+// NewNodeEmbed adds a new [NodeEmbed] with
+// the given name to the given parent.
+func NewNodeEmbed(par ki.Ki, name string) *NodeEmbed {
+	return par.NewChild(NodeEmbedType, name).(*NodeEmbed)
+}
 
 // Type returns the [*gti.Type] of [NodeEmbed]
 func (t *NodeEmbed) Type() *gti.Type {
@@ -68,14 +80,20 @@ var NodeFieldType = gti.AddType(&gti.Type{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Field1", &gti.Field{Name: "Field1", Doc: "", Directives: gti.Directives{}}},
+		{"Field1", &gti.Field{Name: "Field1", Type: "NodeEmbed", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeEmbed", &gti.Field{Name: "NodeEmbed", Doc: "", Directives: gti.Directives{}}},
+		{"NodeEmbed", &gti.Field{Name: "NodeEmbed", Type: "NodeEmbed", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &NodeField{},
 })
+
+// NewNodeField adds a new [NodeField] with
+// the given name to the given parent.
+func NewNodeField(par ki.Ki, name string) *NodeField {
+	return par.NewChild(NodeFieldType, name).(*NodeField)
+}
 
 // Type returns the [*gti.Type] of [NodeField]
 func (t *NodeField) Type() *gti.Type {
@@ -93,14 +111,20 @@ var NodeField2Type = gti.AddType(&gti.Type{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Field2", &gti.Field{Name: "Field2", Doc: "", Directives: gti.Directives{}}},
+		{"Field2", &gti.Field{Name: "Field2", Type: "NodeEmbed", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeField", &gti.Field{Name: "NodeField", Doc: "", Directives: gti.Directives{}}},
+		{"NodeField", &gti.Field{Name: "NodeField", Type: "NodeField", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &NodeField2{},
 })
+
+// NewNodeField2 adds a new [NodeField2] with
+// the given name to the given parent.
+func NewNodeField2(par ki.Ki, name string) *NodeField2 {
+	return par.NewChild(NodeField2Type, name).(*NodeField2)
+}
 
 // Type returns the [*gti.Type] of [NodeField2]
 func (t *NodeField2) Type() *gti.Type {
