@@ -621,5 +621,5 @@ func AsKi(v any) (Ki, *Node) {
 // NewOfType makes a new Ki struct of given type -- must be a Ki type -- will
 // return nil if not.
 func NewOfType(typ *gti.Type) Ki {
-	return typ.Instance.(Ki).New().(Ki)
+	return typ.Instance.(Ki).New()
 }
