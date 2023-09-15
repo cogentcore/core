@@ -31,7 +31,7 @@ func SetFromArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	cmd, allFlags, err := ParseArgs(cfg, nfargs, cmds...)
+	cmd, allFlags, err := ParseArgs(cfg, nfargs, "", cmds...)
 	if err != nil {
 		return "", err
 	}
@@ -122,37 +122,65 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 // ParseArgs parses the given non-flag arguments in the context of the given
 // configuration information and commands. The non-flag arguments should be
 // gotten through [GetArgs] first.
-func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFlags map[string]reflect.Value, err error) {
+func ParseArgs[T any](cfg T, args []string, cmd string, cmds ...*Cmd[T]) (newcmd string, allFlags map[string]reflect.Value, err error) {
 	allFlags = map[string]reflect.Value{}
 	CommandFlags(allFlags)
 	if len(args) != 0 {
 		arg := args[0]
+		cmdstrs := strings.Fields(cmd)
 		for _, c := range cmds {
-			if arg == c.Name {
-				cmd = arg
-				args = args[1:]
-				ocmd, oallFlags, err := ParseArgs(cfg, args, cmds...)
-				if err != nil {
-					return "", nil, err
+			cstrs := strings.Fields(c.Name)
+			gotTo := 0
+			hasMismatch := false
+			for i, cstr := range cstrs {
+				if i >= len(cmdstrs) {
+					gotTo = i - 1
+					break
 				}
-				if ocmd != "" {
-					cmd += " " + ocmd
+				if cmdstrs[i] != cstr {
+					hasMismatch = true
+					break
 				}
-				for ofn, ofv := range oallFlags {
-					allFlags[ofn] = ofv
-				}
-				break
 			}
+			if hasMismatch {
+				continue
+			}
+			if gotTo != -1 && arg != cstrs[gotTo] {
+				continue
+			}
+			newcmd = arg
+			if cmd != "" {
+				newcmd = cmd + " " + arg
+			}
+			args = args[1:]
+			ocmd, oallFlags, err := ParseArgs(cfg, args, newcmd, cmds...)
+			if err != nil {
+				return "", nil, err
+			}
+			fmt.Println(newcmd, ocmd, args)
+			if ocmd != "" {
+				if newcmd == "" {
+					newcmd = ocmd
+				} else {
+					newcmd += " " + ocmd
+				}
+			}
+			for ofn, ofv := range oallFlags {
+				allFlags[ofn] = ofv
+			}
+			break
+
 		}
 	}
-	args, err = FieldFlagNames(cfg, allFlags, cmd, args)
+	fmt.Println(newcmd, args)
+	args, err = FieldFlagNames(cfg, allFlags, newcmd, args)
 	if err != nil {
-		return cmd, allFlags, fmt.Errorf("error getting field flag names: %w", err)
+		return newcmd, allFlags, fmt.Errorf("error getting field flag names: %w", err)
 	}
 	if len(args) > 0 {
-		return cmd, allFlags, fmt.Errorf("got unused arguments: %v", args)
+		return newcmd, allFlags, fmt.Errorf("got unused arguments: %v", args)
 	}
-	return cmd, allFlags, nil
+	return newcmd, allFlags, nil
 }
 
 // ParseFlags parses the given flags using the given map of all of the
