@@ -24,21 +24,20 @@ import (
 // For more robust error processing, it is assumed that all flagged args (-)
 // must refer to fields in the config, so any that fail to match trigger
 // an error. Errors can also result from parsing.
-func SetFromArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) ([]string, error) {
+func SetFromArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (string, error) {
 	nfargs, flags, err := GetArgs(args)
 	if err != nil {
-		return nfargs, nil
+		return "", nil
 	}
-	cmd, allFlags, err := ParseArgs(cfg, args, cmds...)
+	cmd, allFlags, err := ParseArgs(cfg, nfargs, cmds...)
 	if err != nil {
-		return nfargs, nil
+		return "", nil
 	}
 	err = ParseFlags(flags, allFlags, true)
 	if err != nil {
-		return nfargs, nil
+		return "", nil
 	}
-	fmt.Println("command", cmd)
-	return nfargs, nil
+	return cmd, nil
 }
 
 // GetArgs processes the given args using map of all available args,

@@ -46,7 +46,8 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 		}
 		return err
 	}
-	leftovers, err := Config(opts, cfg, "", cs...)
+	cmd, err := Config(opts, cfg, cs...)
+	fmt.Println("cmd", cmd)
 	if err != nil {
 		err := fmt.Errorf("error configuring app: %w", err)
 		if opts.Fatal {
@@ -54,11 +55,6 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 			os.Exit(1)
 		}
 		return err
-	}
-	// root command if no other command is specified
-	cmd := ""
-	if len(leftovers) > 0 {
-		cmd = leftovers[0]
 	}
 	err = RunCmd(opts, cfg, cmd, cs...)
 	if err != nil {

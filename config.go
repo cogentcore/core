@@ -43,7 +43,7 @@ var (
 //
 // Also processes -help or -h and prints usage and quits immediately.
 // Config uses [os.Args] for its arguments.
-func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string, error) {
+func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	var errs []error
 	err := SetFromDefaults(cfg)
 	if err != nil {
@@ -67,7 +67,7 @@ func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string,
 	}
 
 	if Help {
-		fmt.Println(Usage(opts, cfg, cmd, cmds...))
+		fmt.Println(Usage(opts, cfg, "", cmds...)) // TODO: pass command
 		os.Exit(0)
 	}
 
@@ -81,7 +81,7 @@ func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string,
 		if opts.SearchUp {
 			wd, err := os.Getwd()
 			if err != nil {
-				return nil, fmt.Errorf("error getting current directory: %w", err)
+				return "", fmt.Errorf("error getting current directory: %w", err)
 			}
 			pwd := wd
 			for {
@@ -103,7 +103,7 @@ func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string,
 
 	if opts.NeedConfigFile && len(cfgFiles) == 0 {
 		err = errors.New("grease.Config: no config file or default files specified")
-		return nil, err
+		return "", err
 	}
 
 	for _, fn := range cfgFiles {
@@ -113,9 +113,9 @@ func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string,
 		}
 	}
 
-	NonFlagArgs, err = SetFromArgs(cfg, args)
+	cmd, err := SetFromArgs(cfg, args, cmds...)
 	if err != nil {
 		errs = append(errs, err)
 	}
-	return NonFlagArgs, kit.AllErrors(errs, 10)
+	return cmd, kit.AllErrors(errs, 10)
 }
