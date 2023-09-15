@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package atomctr implements basic atomic int64 counter, used e.g., for
-// update counter on Ki Node
+// Package atomctr implements basic atomic int64 counter
 package atomctr
 
 import (
 	"sync/atomic"
 )
 
-// Ctr implements basic atomic int64 counter, used e.g., for update counter on Ki Node
+// Ctr implements basic atomic int64 counter
 type Ctr int64
 
 // increment counter

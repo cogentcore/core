@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"go/build"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -48,7 +47,7 @@ func GoSrcDir(dir string) (absDir string, err error) {
 // in sorted order (if exts is empty then all files are returned).
 // In case of error, returns nil.
 func ExtFiles(path string, exts []string) []os.FileInfo {
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil
 	}
@@ -116,7 +115,7 @@ func ExtFileNames(path string, exts []string) []string {
 
 // Dirs returns a slice of all the directories within a given directory
 func Dirs(path string) []string {
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil
 	}
@@ -164,7 +163,7 @@ func AllFiles(path string) ([]string, error) {
 
 // HasFile returns true if given directory has given file (exact match)
 func HasFile(path, file string) bool {
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return false
 	}

@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package abs provides a generic absolute value function.
-package abs
-
-import "golang.org/x/exp/constraints"
+package num
 
 // Abs returns the absolute value of the given value.
-func Abs[T constraints.Integer | constraints.Float](x T) T {
+func Abs[T Signed | Float](x T) T {
 	if x < 0 {
 		return -x
 	}
