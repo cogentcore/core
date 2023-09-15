@@ -175,6 +175,9 @@ func (om *Map[K, V]) KeyByIdx(idx int) K {
 
 // Len returns the number of items in the map
 func (om *Map[K, V]) Len() int {
+	if om == nil {
+		return 0
+	}
 	return len(om.Order)
 }
 
