@@ -138,7 +138,7 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 				for ofn, ofv := range oallFlags {
 					allFlags[ofn] = ofv
 				}
-				return cmd, allFlags, nil
+				break
 			}
 		}
 	}

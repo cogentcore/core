@@ -22,7 +22,7 @@ type Config struct {
 	LikesGo bool `desc:"whether the user likes Go"`
 
 	// the target platform to build for
-	BuildTarget string `desc:"the target platform to build for"`
+	BuildTarget string `cmd:"build" desc:"the target platform to build for"`
 }
 
 // Build builds the app for the given platform.

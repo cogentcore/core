@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 
 	"goki.dev/ki/v2/dirs"
 	"goki.dev/ki/v2/kit"
@@ -50,24 +49,18 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		errs = append(errs, err)
 	}
 
+	args := os.Args[1:]
+
 	// first, we do a simplified pass to get the meta
 	// command flags (help and config), which we need
 	// to know before we can do other configuration.
-	allArgs := make(map[string]reflect.Value)
-	CommandFlags(allArgs)
-
-	args := os.Args[1:]
-	_, flags, err := GetArgs(args)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	err = ParseFlags(flags, allArgs, false) // false = ignore non-matches, because we are only handling meta flags, not all of them
+	cmd, err := SetFromArgs(cfg, args, cmds...)
 	if err != nil {
 		errs = append(errs, err)
 	}
 
 	if Help {
-		fmt.Println(Usage(opts, cfg, "", cmds...)) // TODO: pass command
+		fmt.Println(Usage(opts, cfg, cmd, cmds...))
 		os.Exit(0)
 	}
 
@@ -113,7 +106,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		}
 	}
 
-	cmd, err := SetFromArgs(cfg, args, cmds...)
+	cmd, err = SetFromArgs(cfg, args, cmds...)
 	if err != nil {
 		errs = append(errs, err)
 	}

@@ -43,7 +43,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 	b.WriteString(cmdColor("-help") + " or " + cmdColor("-h") + "\n\tshow this usage message and exit\n")
 	b.WriteString(cmdColor("-config") + " or " + cmdColor("-cfg") + "\n\tthe filename to load configuration options from\n")
-	FlagUsage(cfg, "", &b)
+	FlagUsage(cfg, "", &b, cmd)
 	return b.String()
 }
 
@@ -67,18 +67,22 @@ func CommandUsage[T any](b *strings.Builder, cmds ...*Cmd[T]) {
 // already in a nested context, which should only
 // happen internally (if you don't know whether
 // you're in a nested context, you're not).
-func FlagUsage(app any, path string, b *strings.Builder) {
+func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
 	typ := kit.NonPtrType(reflect.TypeOf(app))
 	val := kit.NonPtrValue(reflect.ValueOf(app))
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
+		cmdtag, ok := f.Tag.Lookup("cmd")
+		if ok && cmdtag != cmd { // if we are associated with a different command, skip
+			continue
+		}
 		if kit.NonPtrType(f.Type).Kind() == reflect.Struct {
 			nwPath := f.Name
 			if path != "" {
 				nwPath = path + "." + nwPath
 			}
-			FlagUsage(kit.PtrValue(fv).Interface(), nwPath, b)
+			FlagUsage(kit.PtrValue(fv).Interface(), nwPath, b, cmd)
 			continue
 		}
 		nm := f.Name
