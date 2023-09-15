@@ -21,29 +21,6 @@ import (
 // properties, and deal with most common-sense cases, e.g., string <-> number,
 // etc.  nil values return !ok
 
-type Signed interface {
-	int | int8 | int16 | int32 | int64
-}
-
-type Unsigned interface {
-	uint | uint8 | uint16 | uint32 | uint64
-}
-
-type Integer interface {
-	Signed | Unsigned
-}
-
-type Float interface {
-	float32 | float64
-}
-
-type Number interface {
-	Signed | Unsigned | Float
-}
-
-// ConvertNumber converts any number to any other, using generics
-func ConvertNumber[T1 Number, T2 Number](dst *T1, v T2) { *dst = T1(v) }
-
 // AnyIsNil checks if an interface value is nil -- the interface itself could be
 // nil, or the value pointed to by the interface could be nil -- this checks
 // both, safely
@@ -95,8 +72,11 @@ func ValueIsZero(v reflect.Value) bool {
 	return false
 }
 
-// ToBool robustly converts anything to a bool
-// gopy:interface=handle
+// ToBool robustly converts anything to a bool,
+// using a big type switch organized for greatest efficiency,
+// only falling back on reflection when all else fails.
+//
+//gopy:interface=handle
 func ToBool(it any) (bool, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch bt := it.(type) {
@@ -165,20 +145,13 @@ func ToBool(it any) (bool, bool) {
 }
 
 // ToInt robustly converts anything to an int64
-// gopy:interface=handle
+// using a big type switch organized for greatest efficiency,
+// only falling back on reflection when all else fails.
+//
+//gopy:interface=handle
 func ToInt(it any) (int64, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
-	case bool:
-		if it {
-			return 1, true
-		}
-		return 0, true
-	case *bool:
-		if *it {
-			return 1, true
-		}
-		return 0, true
 	case int:
 		return int64(it), true
 	case *int:
@@ -203,6 +176,16 @@ func ToInt(it any) (int64, bool) {
 		return int64(it), true
 	case *float32:
 		return int64(*it), true
+	case bool:
+		if it {
+			return 1, true
+		}
+		return 0, true
+	case *bool:
+		if *it {
+			return 1, true
+		}
+		return 0, true
 	case string:
 		r, err := strconv.ParseInt(it, 0, 64)
 		if err != nil {
@@ -248,21 +231,22 @@ func ToInt(it any) (int64, bool) {
 	}
 }
 
-// ToFloat robustly converts anything to a Float64
-// gopy:interface=handle
+// ToFloat robustly converts anything to a Float64,
+// using a big type switch organized for greatest efficiency,
+// only falling back on reflection when all else fails.
+//
+//gopy:interface=handle
 func ToFloat(it any) (float64, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
-	case bool:
-		if it {
-			return 1, true
-		}
-		return 0, true
-	case *bool:
-		if *it {
-			return 1, true
-		}
-		return 0, true
+	case float64:
+		return it, true
+	case *float64:
+		return *it, true
+	case float32:
+		return float64(it), true
+	case *float32:
+		return float64(*it), true
 	case int:
 		return float64(it), true
 	case *int:
@@ -279,14 +263,16 @@ func ToFloat(it any) (float64, bool) {
 		return float64(it), true
 	case *byte:
 		return float64(*it), true
-	case float64:
-		return it, true
-	case *float64:
-		return *it, true
-	case float32:
-		return float64(it), true
-	case *float32:
-		return float64(*it), true
+	case bool:
+		if it {
+			return 1, true
+		}
+		return 0, true
+	case *bool:
+		if *it {
+			return 1, true
+		}
+		return 0, true
 	case string:
 		r, err := strconv.ParseFloat(it, 64)
 		if err != nil {
@@ -333,20 +319,21 @@ func ToFloat(it any) (float64, bool) {
 }
 
 // ToFloat32 robustly converts anything to a Float32
-// gopy:interface=handle
+// using a big type switch organized for greatest efficiency,
+// only falling back on reflection when all else fails.
+//
+//gopy:interface=handle
 func ToFloat32(it any) (float32, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
-	case bool:
-		if it {
-			return 1, true
-		}
-		return 0, true
-	case *bool:
-		if *it {
-			return 1, true
-		}
-		return 0, true
+	case float64:
+		return float32(it), true
+	case *float64:
+		return float32(*it), true
+	case float32:
+		return it, true
+	case *float32:
+		return *it, true
 	case int:
 		return float32(it), true
 	case *int:
@@ -363,14 +350,16 @@ func ToFloat32(it any) (float32, bool) {
 		return float32(it), true
 	case *byte:
 		return float32(*it), true
-	case float64:
-		return float32(it), true
-	case *float64:
-		return float32(*it), true
-	case float32:
-		return it, true
-	case *float32:
-		return *it, true
+	case bool:
+		if it {
+			return 1, true
+		}
+		return 0, true
+	case *bool:
+		if *it {
+			return 1, true
+		}
+		return 0, true
 	case string:
 		r, err := strconv.ParseFloat(it, 32)
 		if err != nil {
@@ -416,10 +405,13 @@ func ToFloat32(it any) (float32, bool) {
 	}
 }
 
-// ToString robustly converts anything to a String -- because Stringer is so
-// ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should
-// definitely work in all cases, so there is no bool return value
-// gopy:interface=handle
+// ToString robustly converts anything to a String
+// using a big type switch organized for greatest efficiency,
+// using strconv calls for numeric types, and
+// falling back on the Stringer interface, which is so
+// ubiquitous that there is no failure case and thus no bool return.
+//
+//gopy:interface=handle
 func ToString(it any) string {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
@@ -506,7 +498,8 @@ func ToString(it any) string {
 // nuisance random imprecision of actual floating point values due to the
 // fact that they are represented with binary bits.  See ToString
 // for more info.
-// gopy:interface=handle
+//
+//gopy:interface=handle
 func ToStringPrec(it any, prec int) string {
 	if AnyIsNil(it) {
 		return "nil"
@@ -545,7 +538,8 @@ func ToStringPrec(it any, prec int) string {
 // SetRobust robustly sets the 'to' value from the 'from' value.
 // destination must be a pointer-to. Copies slices and maps robustly,
 // and can set a struct, slice or map from a JSON-formatted string from value.
-// gopy:interface=handle
+//
+//gopy:interface=handle
 func SetRobust(to, frm any) bool {
 	if AnyIsNil(to) {
 		return false
