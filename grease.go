@@ -49,6 +49,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	cmd := ""
 	cs = AddCmd(&Cmd[T]{
 		Func: func(t T) error {
+			Help = true                              // need to set here also so that we get no command succeeded message
 			fmt.Println(Usage(opts, cfg, "", cs...)) // TODO: set command here (probably need to use global variable or something)
 			return nil
 		},
