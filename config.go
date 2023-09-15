@@ -54,7 +54,7 @@ func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string,
 	CommandArgs(allArgs)
 
 	args := os.Args[1:]
-	_, err = ParseArgs(cfg, args, allArgs, false) // false = ignore non-matches
+	_, err = ParseFlags(cfg, args, allArgs, false) // false = ignore non-matches
 	if err != nil {
 		errs = append(errs, err)
 	}

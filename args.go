@@ -29,7 +29,7 @@ func SetFromArgs(cfg any, args []string) (nonFlags []string, err error) {
 	allArgs := make(map[string]reflect.Value)
 	CommandArgs(allArgs) // need these to not trigger not-found errors
 	FieldArgNames(cfg, allArgs)
-	nonFlags, err = ParseArgs(cfg, args, allArgs, true)
+	nonFlags, err = ParseFlags(cfg, args, allArgs, true)
 	return
 }
 
@@ -109,35 +109,63 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 	return
 }
 
-// ParseArgs parses given args using map of all available args
-// setting the value accordingly, and returning any leftover args.
-// setting errNotFound = true causes args that are not in allArgs to
-// trigger an error.  Otherwise, it just skips those.
-func ParseArgs(cfg any, args []string, allArgs map[string]reflect.Value, errNotFound bool) ([]string, error) {
-	var nonFlags []string
-	var err error
-	for len(args) > 0 {
-		s := args[0]
-		args = args[1:]
-		if len(s) == 0 || s[0] != '-' || len(s) == 1 {
-			nonFlags = append(nonFlags, s)
-			continue
-		}
-
-		if s[1] == '-' && len(s) == 2 { // "--" terminates the flags
-			// f.argsLenAtDash = len(f.args)
-			nonFlags = append(nonFlags, args...)
-			break
-		}
-		args, err = ParseArg(s, args, allArgs, errNotFound)
+// ParseFlags parses the given flags using the given map of all of the
+// available flags, setting the values from that map accordingly.
+// Setting errNotFound = true causes flags that are not in allFlags to
+// trigger an error; otherwise, it just skips those.
+func ParseFlags(flags map[string]string, allFlags map[string]reflect.Value, errNotFound bool) error {
+	for name, value := range flags {
+		err := ParseFlag(name, value, allFlags, errNotFound)
 		if err != nil {
-			return nonFlags, err
+			return err
 		}
 	}
-	return nonFlags, nil
+	return nil
 }
 
-func ParseArg(s string, args []string, allArgs map[string]reflect.Value, errNotFound bool) (a []string, err error) {
+// ParseFlag parses the flag with the given name and the given value
+// using the given map of all of the available flags, setting the value
+// in that map corresponding to the flag name accordingly. Setting
+// errNotFound = true causes passing a flag name that is not in allFlags
+// to trigger an error; otherwise, it just does nothing and returns no error.
+func ParseFlag(name string, value string, allFlags map[string]reflect.Value, errNotFound bool) error {
+	fval, exists := allFlags[name]
+	if !exists {
+		if errNotFound {
+			return fmt.Errorf("flag name not recognized: %q", name)
+		}
+		return nil
+	}
+
+	isBool := kit.NonPtrValue(fval).Kind() == reflect.Bool
+
+	if isBool {
+		lcnm := strings.ToLower(name)
+		negate := false
+		if len(lcnm) > 3 {
+			if lcnm[:3] == "no_" || lcnm[:3] == "no-" {
+				negate = true
+			} else if lcnm[:2] == "no" {
+				if _, has := allFlags[lcnm[2:]]; has { // e.g., nogui and gui is on list
+					negate = true
+				}
+			}
+		}
+		if negate {
+			value = "false"
+		} else {
+			value = "true"
+		}
+	}
+	if value == "" {
+		// got '--flag' but arg was required
+		return fmt.Errorf("flag needs an argument: %q", name)
+	}
+
+	return SetArgValue(name, fval, value)
+}
+
+func ParseArgOld(s string, args []string, allArgs map[string]reflect.Value, errNotFound bool) (a []string, err error) {
 	a = args
 	name := s[1:]
 	if name[0] == '-' {
