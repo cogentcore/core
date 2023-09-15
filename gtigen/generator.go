@@ -98,13 +98,13 @@ func (g *Generator) GetInterfaces(pkgs []*types.Package) error {
 			if _, has := g.Interfaces.IdxByKeyTry(in); has {
 				continue
 			}
-			li := strings.LastIndex(in, ".")
-			if li == -1 {
-				return fmt.Errorf("expected a dot (%q) in the interface config fully-qualified type name (%q)", ".", in)
+			strs := strings.SplitN(in, ".", 2)
+			if len(strs) != 2 {
+				return fmt.Errorf("expected two strings from strings.SplitN(%q, %q, 2) (using the interface config fully-qualified type name)", in, ".")
 			}
-			pkgpath := in[:li]
+			pkgpath := strs[0]
 			if pkg.Path() == pkgpath {
-				typnm := in[li+1:] // need to get rid of the dot
+				typnm := strs[1]
 				typ := pkg.Scope().Lookup(typnm)
 				if typ == nil {
 					return fmt.Errorf("programmer error: internal error: could not find type %q in package %q (from interface config %q)", typnm, pkgpath, in)
