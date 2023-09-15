@@ -140,7 +140,7 @@ func TestArgsPrint(t *testing.T) {
 
 	cfg := &TestConfig{}
 	allArgs := make(map[string]reflect.Value)
-	FieldArgNames(cfg, allArgs, "")
+	FieldFlagNames(cfg, allArgs, "", []string{})
 
 	keys := maps.Keys(allArgs)
 	sort.Slice(keys, func(i, j int) bool {

@@ -11,6 +11,7 @@ package grease
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/iancoleman/strcase"
@@ -146,7 +147,10 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 			return cmd, allFlags, fmt.Errorf("got unused arguments: %v", args)
 		}
 	}
-	FieldArgNames(cfg, allFlags, cmd)
+	err = FieldFlagNames(cfg, allFlags, cmd, args)
+	if err != nil {
+		return cmd, allFlags, fmt.Errorf("error getting field flag names: %w", err)
+	}
 	return cmd, allFlags, nil
 }
 
@@ -312,35 +316,38 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 	return nil
 }
 
-// FieldArgNames adds to given args map all the different ways the field names
-// can be specified as arg flags, mapping to the reflect.Value
-func FieldArgNames(obj any, allArgs map[string]reflect.Value, cmd string) {
-	fieldArgNamesStruct(obj, "", false, allArgs, cmd)
+// FieldFlagNames adds to given flags map all the different ways the field names
+// can be specified as arg flags, mapping to the reflect.Value. It also uses
+// the given positional arguments to set the values of the object based on any
+// posarg struct tags that fields have. The posarg struct tag must be either
+// "all" or a valid uint.
+func FieldFlagNames(obj any, allFlags map[string]reflect.Value, cmd string, args []string) error {
+	return fieldFlagNamesStruct(obj, "", false, allFlags, cmd, args)
 }
 
-func addAllCases(nm, path string, pval reflect.Value, allArgs map[string]reflect.Value, cmd string) {
+func addAllCases(nm, path string, pval reflect.Value, allFlags map[string]reflect.Value, cmd string) {
 	if nm == "Includes" {
 		return // skip
 	}
 	if path != "" {
 		nm = path + "." + nm
 	}
-	allArgs[nm] = pval
-	allArgs[strings.ToLower(nm)] = pval
-	allArgs[strcase.ToKebab(nm)] = pval
-	allArgs[strcase.ToSnake(nm)] = pval
-	allArgs[strcase.ToScreamingSnake(nm)] = pval
+	allFlags[nm] = pval
+	allFlags[strings.ToLower(nm)] = pval
+	allFlags[strcase.ToKebab(nm)] = pval
+	allFlags[strcase.ToSnake(nm)] = pval
+	allFlags[strcase.ToScreamingSnake(nm)] = pval
 }
 
-// fieldArgNamesStruct returns map of all the different ways the field names
+// fieldFlagNamesStruct returns map of all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value
-func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]reflect.Value, cmd string) {
+func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]reflect.Value, cmd string, args []string) error {
 	if kit.IfaceIsNil(obj) {
-		return
+		return nil
 	}
 	ov := reflect.ValueOf(obj)
 	if ov.Kind() == reflect.Pointer && ov.IsNil() {
-		return
+		return nil
 	}
 	val := kit.NonPtrValue(ov)
 	typ := val.Type()
@@ -350,6 +357,28 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 		cmdtag, ok := f.Tag.Lookup("cmd")
 		if ok && cmdtag != cmd { // if we are associated with a different command, skip
 			continue
+		}
+		posargtag, ok := f.Tag.Lookup("posarg")
+		if ok {
+			if posargtag == "all" {
+				ok := kit.SetRobust(fv.Interface(), args)
+				if !ok {
+					return fmt.Errorf("not able to set field %q to all positional arguments: %v", f.Name, args)
+				}
+			} else {
+				ui, err := strconv.ParseUint(posargtag, 10, 64)
+				if err != nil {
+					return fmt.Errorf("invalid value %q for posarg struct tag on field %q: %w", posargtag, f.Name, err)
+				}
+				if ui >= uint64(len(args)) {
+					return fmt.Errorf("invalid uint value %d for posarg struct tag: out of range of arguments with length %d: %v", ui, len(args), args)
+				}
+				err = SetArgValue(f.Name, fv, args[ui])
+				if err != nil {
+					return fmt.Errorf("error setting field %q to positional argument %d (%q): %w", f.Name, ui, args[ui], err)
+				}
+			}
+
 		}
 		if kit.NonPtrType(f.Type).Kind() == reflect.Struct {
 			nwPath := f.Name
@@ -363,13 +392,13 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 					nwNest = true
 				}
 			}
-			fieldArgNamesStruct(kit.PtrValue(fv).Interface(), nwPath, nwNest, allArgs, cmd)
+			fieldFlagNamesStruct(kit.PtrValue(fv).Interface(), nwPath, nwNest, allFlags, cmd, args)
 			continue
 		}
 		pval := kit.PtrValue(fv)
-		addAllCases(f.Name, path, pval, allArgs, cmd)
+		addAllCases(f.Name, path, pval, allFlags, cmd)
 		if f.Type.Kind() == reflect.Bool {
-			addAllCases("No"+f.Name, path, pval, allArgs, cmd)
+			addAllCases("No"+f.Name, path, pval, allFlags, cmd)
 		}
 		// now process adding non-nested version of field
 		if path == "" || nest {
@@ -379,15 +408,16 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 		if ok && (neststr == "+" || neststr == "true") {
 			continue
 		}
-		if _, has := allArgs[f.Name]; has {
+		if _, has := allFlags[f.Name]; has {
 			fmt.Printf("warning: programmer error: grease config field \"%s.%s\" cannot be added as a non-nested flag with the name %q because that name has already been registered by another field; add the field tag 'nest:\"+\"' to the field you want to require nested access for (ie: \"Path.Field\" instead of \"Field\") to remove this warning\n", path, f.Name, f.Name)
 			continue
 		}
-		addAllCases(f.Name, "", pval, allArgs, cmd)
+		addAllCases(f.Name, "", pval, allFlags, cmd)
 		if f.Type.Kind() == reflect.Bool {
-			addAllCases("No"+f.Name, "", pval, allArgs, cmd)
+			addAllCases("No"+f.Name, "", pval, allFlags, cmd)
 		}
 	}
+	return nil
 }
 
 // CommandFlags adds non-field flags that control the config process
