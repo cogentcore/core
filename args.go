@@ -371,7 +371,7 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 					return fmt.Errorf("invalid value %q for posarg struct tag on field %q: %w", posargtag, f.Name, err)
 				}
 				if ui >= uint64(len(args)) {
-					return fmt.Errorf("invalid uint value %d for posarg struct tag: out of range of arguments with length %d: %v", ui, len(args), args)
+					return fmt.Errorf("positional argument %d used for field %q missing (only got %d positional argument(s))", ui, f.Name, len(args))
 				}
 				err = SetArgValue(f.Name, fv, args[ui])
 				if err != nil {

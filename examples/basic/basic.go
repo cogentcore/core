@@ -13,7 +13,7 @@ import (
 type Config struct {
 
 	// the name of the user
-	Name string `desc:"the name of the user"`
+	Name string `posarg:"0" desc:"the name of the user"`
 
 	// the age of the user
 	Age int `desc:"the age of the user"`
@@ -22,7 +22,7 @@ type Config struct {
 	LikesGo bool `desc:"whether the user likes Go"`
 
 	// the target platform to build for
-	BuildTarget string `cmd:"build" posarg:"0" desc:"the target platform to build for"`
+	BuildTarget string `cmd:"build" desc:"the target platform to build for"`
 }
 
 // Build builds the app for the given platform.
