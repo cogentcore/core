@@ -24,7 +24,7 @@ import (
 // the case in which goki generate is ran in the ki package itself.
 var KiMethodsTmpl = template.Must(template.New("KiMethods").Parse(
 	`
-	{{define "KiPkg"}} {{if eq .Pkg "ki"}} {{else}} {{.Pkg}}. {{end}} {{end}}
+	{{define "KiPkg"}} {{if eq .Pkg "ki"}} {{else}} ki. {{end}} {{end}}
 
 	// New{{.Name}} adds a new [{{.Name}}] with
 	// the given name to the given parent.
