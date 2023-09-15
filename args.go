@@ -128,7 +128,8 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 		for _, c := range cmds {
 			if arg == c.Name {
 				cmd = arg
-				ocmd, oallFlags, err := ParseArgs(cfg, args[1:], cmds...)
+				args = args[1:]
+				ocmd, oallFlags, err := ParseArgs(cfg, args, cmds...)
 				if err != nil {
 					return "", nil, err
 				}
@@ -140,6 +141,9 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 				}
 				break
 			}
+		}
+		if len(args) > 0 {
+			return cmd, allFlags, fmt.Errorf("got unused arguments: %v", args)
 		}
 	}
 	FieldArgNames(cfg, allFlags, cmd)

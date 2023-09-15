@@ -51,9 +51,9 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 
 	args := os.Args[1:]
 
-	// first, we do a simplified pass to get the meta
-	// command flags (help and config), which we need
-	// to know before we can do other configuration.
+	// first, we do a pass to get the meta command flags
+	// (help and config), which we need to know before
+	// we can do other configuration.
 	cmd, err := SetFromArgs(cfg, args, cmds...)
 	if err != nil {
 		errs = append(errs, err)
