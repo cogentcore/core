@@ -5,16 +5,15 @@
 package girl
 
 import (
-	"io/ioutil"
 	"log"
 	"math"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/goki/freetype/truetype"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 	"golang.org/x/image/font/opentype"
 )
 
@@ -59,7 +58,7 @@ func OpenFontFace(name, path string, size int, strokeWidth int) (*gist.FontFace,
 	if strings.HasPrefix(path, "gofont") {
 		return OpenGoFont(name, path, size, strokeWidth)
 	}
-	fontBytes, err := ioutil.ReadFile(path)
+	fontBytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +94,7 @@ func OpenFontFace(name, path string, size int, strokeWidth int) (*gist.FontFace,
 
 // FontStyleCSS looks for "tag" name props in cssAgg props, and applies those to
 // style if found, and returns true -- false if no such tag found
-func FontStyleCSS(fs *gist.FontRender, tag string, cssAgg ki.Props, unit *units.Context, ctxt gist.Context) bool {
+func FontStyleCSS(fs *gist.FontRender, tag string, cssAgg map[string]any, unit *units.Context, ctxt gist.Context) bool {
 	if cssAgg == nil {
 		return false
 	}
@@ -103,7 +102,7 @@ func FontStyleCSS(fs *gist.FontRender, tag string, cssAgg ki.Props, unit *units.
 	if !ok {
 		return false
 	}
-	pmap, ok := tp.(ki.Props) // must be a props map
+	pmap, ok := tp.(map[string]any) // must be a props map
 	if !ok {
 		return false
 	}

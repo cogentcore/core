@@ -10,7 +10,6 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 )
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleFontFuncs
@@ -93,7 +92,7 @@ func (fs *Font) SetUnitContext(ctxt *units.Context) {
 	}
 }
 
-func (fs *Font) StyleFromProps(par *Font, props ki.Props, ctxt Context) {
+func (fs *Font) StyleFromProps(par *Font, props map[string]any, ctxt Context) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -110,7 +109,7 @@ func (fs *Font) StyleFromProps(par *Font, props ki.Props, ctxt Context) {
 // SetStyleProps sets font style values based on given property map (name:
 // value pairs), inheriting elements as appropriate from parent, and also
 // having a default style for the "initial" setting.
-func (fs *Font) SetStyleProps(parent *Font, props ki.Props, ctxt Context) {
+func (fs *Font) SetStyleProps(parent *Font, props map[string]any, ctxt Context) {
 	// direct font styling is used only for special cases -- don't do this:
 	// if !fs.StyleSet && parent != nil { // first time
 	// 	fs.InheritFields(parent)
@@ -119,10 +118,11 @@ func (fs *Font) SetStyleProps(parent *Font, props ki.Props, ctxt Context) {
 	fs.SetStylePost(props)
 }
 
-func (fs *Font) SetStylePost(props ki.Props) {
+func (fs *Font) SetStylePost(props map[string]any) {
 
 }
 
+/*
 // CopyNonDefaultProps does SetProp on given node for all of the style settings
 // that are not at their default values.
 func (fs *Font) CopyNonDefaultProps(node ki.Ki) {
@@ -159,6 +159,7 @@ func (fs *Font) CopyNonDefaultProps(node ki.Ki) {
 		node.SetProp("baseline-shift", fs.Shift)
 	}
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////////////
 // Font Style enums

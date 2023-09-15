@@ -9,17 +9,15 @@ package gist
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"strings"
 	"sync"
 
 	"goki.dev/colors"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
 
-// style implements CSS-based styling using ki.Props to hold name / vals
+// style implements CSS-based styling using map[string]any to hold name / vals
 // CSS style reference: https://www.w3schools.com/cssref/default.asp
 // list of inherited: https://stackoverflow.com/questions/5612302/which-css-properties-are-inherited
 
@@ -201,7 +199,7 @@ type ActiveStyler interface {
 
 // SetStylePropsXML sets style props from XML style string, which contains ';'
 // separated name: value pairs
-func SetStylePropsXML(style string, props *ki.Props) {
+func SetStylePropsXML(style string, props *map[string]any) {
 	st := strings.Split(style, ";")
 	for _, s := range st {
 		kv := strings.Split(s, ":")
@@ -209,7 +207,7 @@ func SetStylePropsXML(style string, props *ki.Props) {
 			k := strings.TrimSpace(strings.ToLower(kv[0]))
 			v := strings.TrimSpace(kv[1])
 			if *props == nil {
-				*props = make(ki.Props)
+				*props = make(map[string]any)
 			}
 			(*props)[k] = v
 		}
@@ -218,7 +216,7 @@ func SetStylePropsXML(style string, props *ki.Props) {
 
 // StylePropsXML returns style props for XML style string, which contains ';'
 // separated name: value pairs
-func StylePropsXML(props ki.Props) string {
+func StylePropsXML(props map[string]any) string {
 	var sb strings.Builder
 	for k, v := range props {
 		if k == "transform" {
@@ -358,16 +356,15 @@ func (s *Style) EffMargin() SideFloats {
 // SubProps returns a sub-property map from given prop map for a given styling
 // selector (property name) -- e.g., :normal :active :hover etc -- returns
 // false if not found
-func SubProps(prp ki.Props, selector string) (ki.Props, bool) {
+func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 	sp, ok := prp[selector]
 	if !ok {
 		return nil, false
 	}
-	spm, ok := sp.(ki.Props)
+	spm, ok := sp.(map[string]any)
 	if ok {
 		return spm, true
 	}
-	log.Printf("gi.SubProps: looking for a ki.Props for style selector: %v, instead got type: %T\n", selector, spm)
 	return nil, false
 }
 

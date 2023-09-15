@@ -207,7 +207,7 @@ func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform 
 	}
 }
 
-// SetIFace sets the color spec from given interface value, e.g., for ki.Props
+// SetIFace sets the color spec from given interface value, e.g., for map[string]any
 // key is an optional property key for error -- always logs errors
 func (c *ColorSpec) SetIFace(val any, ctxt Context, key string) error {
 	switch valv := val.(type) {

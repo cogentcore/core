@@ -6,7 +6,6 @@ package gist
 
 import (
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 )
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleTextFuncs
@@ -103,7 +102,7 @@ func (ts *Text) InheritFields(par *Text) {
 	ts.TabSize = par.TabSize
 }
 
-func (ts *Text) SetStylePost(props ki.Props) {
+func (ts *Text) SetStylePost(props map[string]any) {
 
 }
 

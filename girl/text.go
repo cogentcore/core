@@ -19,7 +19,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
@@ -253,7 +252,7 @@ func (tr *Text) SetRunes(str []rune, fontSty *gist.FontRender, ctxt *units.Conte
 // SetHTMLSimpleTag sets the styling parameters for simple html style tags
 // that only require updating the given font spec values -- returns true if handled
 // https://www.w3schools.com/cssref/css_default_values.asp
-func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssAgg ki.Props) bool {
+func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssAgg map[string]any) bool {
 	did := false
 	switch tag {
 	case "b", "strong":
@@ -327,7 +326,7 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 // -- result can then be processed by different layout algorithms as needed.
 // cssAgg, if non-nil, should contain CSSAgg properties -- will be tested for
 // special css styling of each element.
-func (tr *Text) SetHTML(str string, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *Text) SetHTML(str string, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg map[string]any) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre([]byte(str), font, txtSty, ctxt, cssAgg)
 	} else {
@@ -337,7 +336,7 @@ func (tr *Text) SetHTML(str string, font *gist.FontRender, txtSty *gist.Text, ct
 
 // SetHTMLBytes does SetHTML with bytes as input -- more efficient -- use this
 // if already in bytes
-func (tr *Text) SetHTMLBytes(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *Text) SetHTMLBytes(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg map[string]any) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre(str, font, txtSty, ctxt, cssAgg)
 	} else {
@@ -347,7 +346,7 @@ func (tr *Text) SetHTMLBytes(str []byte, font *gist.FontRender, txtSty *gist.Tex
 
 // This is the No-Pre parser that uses the golang XML decoder system, which
 // strips all whitespace and is thus unsuitable for any Pre case
-func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg map[string]any) {
 	//	errstr := "gi.Text SetHTML"
 	sz := len(str)
 	if sz == 0 {
@@ -399,7 +398,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 					fs.SetDeco(gist.DecoUnderline)
 					curLinkIdx = len(tr.Links)
 					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
-					sprop := make(ki.Props, len(se.Attr))
+					sprop := make(map[string]any, len(se.Attr))
 					tl.Props = sprop
 					for _, attr := range se.Attr {
 						if attr.Name.Local == "href" {
@@ -435,7 +434,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 				}
 			}
 			if len(se.Attr) > 0 {
-				sprop := make(ki.Props, len(se.Attr))
+				sprop := make(map[string]any, len(se.Attr))
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					case "style":
@@ -443,7 +442,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 					case "class":
 						if cssAgg != nil {
 							clnm := "." + attr.Value
-							if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
+							if aggp, ok := gist.SubProps(cssAgg, clnm); ok {
 								fs.SetStyleProps(nil, aggp, nil)
 								fs.Font = OpenFont(&fs, ctxt)
 							}
@@ -513,7 +512,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 // Only basic styling tags, including <span> elements with style parameters
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's
-func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg map[string]any) {
 	// errstr := "gi.Text SetHTMLPre"
 
 	sz := len(str)
@@ -612,7 +611,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 						curLinkIdx = len(tr.Links)
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
 						if nattr > 0 {
-							sprop := make(ki.Props, len(parts)-1)
+							sprop := make(map[string]any, len(parts)-1)
 							tl.Props = sprop
 							for ai := 0; ai < nattr; ai++ {
 								nm := strings.TrimSpace(attr[ai*2])
@@ -655,7 +654,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 					}
 				}
 				if nattr > 0 { // attr
-					sprop := make(ki.Props, nattr)
+					sprop := make(map[string]any, nattr)
 					for ai := 0; ai < nattr; ai++ {
 						nm := strings.TrimSpace(attr[ai*2])
 						vl := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(attr[ai*2+1]), `"`), `"`)
@@ -666,7 +665,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 						case "class":
 							if cssAgg != nil {
 								clnm := "." + vl
-								if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
+								if aggp, ok := gist.SubProps(cssAgg, clnm); ok {
 									fs.SetStyleProps(nil, aggp, nil)
 									fs.Font = OpenFont(&fs, ctxt)
 								}

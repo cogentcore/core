@@ -96,7 +96,7 @@ func TestStyle(t *testing.T) {
 }
 
 // func TestStyle(t *testing.T) {
-// 	props := make(ki.Props)
+// 	props := make(map[string]any)
 // 	props["color"] = "red"
 // 	props["width"] = "24.7em"
 // 	props["box-shadow.h-offset"] = "10px"

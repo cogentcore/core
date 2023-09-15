@@ -10,7 +10,6 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -91,7 +90,7 @@ func (pc *Paint) InheritFields(par *Paint) {
 // SetStyleProps sets paint values based on given property map (name: value
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
-func (pc *Paint) SetStyleProps(par *Paint, props ki.Props, ctxt Context) {
+func (pc *Paint) SetStyleProps(par *Paint, props map[string]any, ctxt Context) {
 	if !pc.StyleSet && par != nil { // first time
 		pc.InheritFields(par)
 	}
@@ -206,7 +205,7 @@ func (pf *Fill) Defaults() {
 }
 
 // SetStylePost does some updating after setting the style from user properties
-func (pf *Fill) SetStylePost(props ki.Props) {
+func (pf *Fill) SetStylePost(props map[string]any) {
 	if pf.Color.IsNil() {
 		pf.On = false
 	} else {
@@ -314,7 +313,7 @@ func (ps *Stroke) Defaults() {
 }
 
 // SetStylePost does some updating after setting the style from user properties
-func (ps *Stroke) SetStylePost(props ki.Props) {
+func (ps *Stroke) SetStylePost(props map[string]any) {
 	if ps.Color.IsNil() {
 		ps.On = false
 	} else {

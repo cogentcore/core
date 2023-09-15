@@ -403,7 +403,7 @@ func StringToValue(str string) Value {
 	return v
 }
 
-// SetIFace sets value from an interface value representation as from ki.Props
+// SetIFace sets value from an interface value representation as from map[string]any
 // key is optional property key for error message -- always logs the error
 func (v *Value) SetIFace(iface any, key string) error {
 	switch val := iface.(type) {
@@ -431,7 +431,7 @@ func (v *Value) SetIFace(iface any, key string) error {
 // SetFmProp sets value from property of given key name in given list of properties
 // -- returns true if property found and set, error for any errors in setting
 // property
-func (v *Value) SetFmProp(key string, props ki.Props) (bool, error) {
+func (v *Value) SetFmProp(key string, props map[string]any) (bool, error) {
 	pv, ok := props[key]
 	if !ok {
 		return false, nil

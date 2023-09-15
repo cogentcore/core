@@ -10,7 +10,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/enums"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
+	"goki.dev/glop/num"
 	"goki.dev/laser"
 )
 
@@ -31,7 +31,7 @@ func StyleInhInit(val, par any) (inh, init bool) {
 }
 
 // StyleFuncInt returns a style function for any numerical value
-func StyleFuncInt[T any, F laser.Integer](initVal F, getField func(obj *T) *F) StyleFunc {
+func StyleFuncInt[T any, F num.Integer](initVal F, getField func(obj *T) *F) StyleFunc {
 	return func(obj any, key string, val any, par any, ctxt Context) {
 		fp := getField(obj.(*T))
 		if inh, init := StyleInhInit(val, par); inh || init {
@@ -43,12 +43,12 @@ func StyleFuncInt[T any, F laser.Integer](initVal F, getField func(obj *T) *F) S
 			return
 		}
 		fv, _ := laser.ToInt(val)
-		laser.ConvertNumber(fp, fv)
+		num.SetNumber(fp, fv)
 	}
 }
 
 // StyleFuncFloat returns a style function for any numerical value
-func StyleFuncFloat[T any, F laser.Float](initVal F, getField func(obj *T) *F) StyleFunc {
+func StyleFuncFloat[T any, F num.Float](initVal F, getField func(obj *T) *F) StyleFunc {
 	return func(obj any, key string, val any, par any, ctxt Context) {
 		fp := getField(obj.(*T))
 		if inh, init := StyleInhInit(val, par); inh || init {
@@ -60,7 +60,7 @@ func StyleFuncFloat[T any, F laser.Float](initVal F, getField func(obj *T) *F) S
 			return
 		}
 		fv, _ := laser.ToFloat(val) // can represent any number, ToFloat is fast type switch
-		laser.ConvertNumber(fp, fv)
+		num.SetNumber(fp, fv)
 	}
 }
 
@@ -131,7 +131,7 @@ func StyleFuncEnum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSe
 // have been set via CSS or SetProp, and those set in Style which serves as the starting
 // point for styling.
 
-// These functions set styles from ki.Props which are used for styling
+// These functions set styles from map[string]any which are used for styling
 
 // StyleSetError reports that cannot set property of given key with given value
 func StyleSetError(key string, val any) {
@@ -140,8 +140,8 @@ func StyleSetError(key string, val any) {
 
 type StyleFunc func(obj any, key string, val any, par any, ctxt Context)
 
-// StyleFromProps sets style field values based on ki.Props properties
-func (s *Style) StyleFromProps(par *Style, props ki.Props, ctxt Context) {
+// StyleFromProps sets style field values based on map[string]any properties
+func (s *Style) StyleFromProps(par *Style, props map[string]any, ctxt Context) {
 	// pr := prof.Start("StyleFromProps")
 	// defer pr.End()
 	for key, val := range props {

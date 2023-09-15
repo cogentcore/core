@@ -12,7 +12,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/enums"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
@@ -21,8 +20,8 @@ import (
 //   Styling functions for setting from properties
 //     see style_props.go for master version
 
-// StyleFromProps sets style field values based on ki.Props properties
-func (pc *Paint) StyleFromProps(par *Paint, props ki.Props, ctxt Context) {
+// StyleFromProps sets style field values based on map[string]any properties
+func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt Context) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue

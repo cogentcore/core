@@ -7,7 +7,6 @@ package girl
 import (
 	"image"
 
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -21,7 +20,7 @@ type TextLink struct {
 	URL string `desc:"full URL for the link"`
 
 	// properties defined for the link
-	Props ki.Props `desc:"properties defined for the link"`
+	Props map[string]any `desc:"properties defined for the link"`
 
 	// span index where link starts
 	StartSpan int `desc:"span index where link starts"`
@@ -36,7 +35,7 @@ type TextLink struct {
 	EndIdx int `desc:"index in EndSpan where link ends (index of last rune in label)"`
 
 	// the widget that owns this text link -- only set prior to passing off to handler function
-	Widget ki.Ki `desc:"the widget that owns this text link -- only set prior to passing off to handler function"`
+	// Widget ki.Ki `desc:"the widget that owns this text link -- only set prior to passing off to handler function"`
 }
 
 // Bounds returns the bounds of the link
