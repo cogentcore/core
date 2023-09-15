@@ -61,7 +61,7 @@ func DefaultOptions(appName, appTitle, appAbout string) *Options {
 		Fatal:           true,
 		PrintSuccess:    true,
 		DefaultEncoding: "toml",
-		DefaultFiles:    []string{"config.toml"},
+		DefaultFiles:    []string{appName + ".toml"},
 		IncludePaths:    []string{".", "configs"},
 	}
 }
