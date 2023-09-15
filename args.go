@@ -43,8 +43,7 @@ func GetArgs(args []string) ([]string, map[string]string, error) {
 	for len(args) > 0 {
 		s := args[0]
 		args = args[1:]
-		fmt.Println(s, args)
-		if len(s) == 0 || s[0] != '-' || len(s) == 1 {
+		if len(s) == 0 || s[0] != '-' || len(s) == 1 { // if we are not a flag, just add to non-flags
 			nonFlags = append(nonFlags, s)
 			continue
 		}
@@ -58,40 +57,52 @@ func GetArgs(args []string) ([]string, map[string]string, error) {
 		if err != nil {
 			return nonFlags, flags, err
 		}
+		// we need to updated remaining args with latest
 		args = nargs
 		flags[name] = value
 	}
 	return nonFlags, flags, nil
 }
 
-// GetFlag parses the given flag arg string and returns the
-// name of the flag, the value of the flag, and any error.
+// GetFlag parses the given flag arg string in the context
+// of the given remaining arguments, and returns the
+// name of the flag, the value of the flag, the remaining
+// arguments updated with any changes caused by getting
+// this flag, and any error.
 func GetFlag(s string, args []string) (name, value string, a []string, err error) {
+	// we start out with the remaining args we were passed
 	a = args
+	// we know the first character is a dash, so we can trim it directly
 	name = s[1:]
-	if name[0] == '-' {
-		name = name[1:]
-	}
+	// then we trim double dash if there is one
+	name = strings.TrimPrefix(name, "-")
+
+	// we can't start with a dash or equal, as those are reserved characters
 	if len(name) == 0 || name[0] == '-' || name[0] == '=' {
 		err = fmt.Errorf("bad flag syntax: %q", s)
 		return
 	}
 
-	if strings.HasPrefix(name, "test.") { // go test passes args..
+	// go test passes args, so we ignore them
+	if strings.HasPrefix(name, "test.") {
 		return
 	}
 
+	// split on equal (we could be in the form flag=value)
 	split := strings.SplitN(name, "=", 2)
 	name = split[0]
 	if len(split) == 2 {
+		// if we are in the form flag=value, we are done
 		value = split[1]
-	} else if len(a) > 0 {
+	} else if len(a) > 0 { // otherwise, if we still have more remaining args, our value could be the next arg (if we have no remaining args, we are a terminating bool arg)
 		value = a[0]
-		if value[0] != '-' {
-			a = a[1:]
+		// if the next arg starts with a dash, it can't be our value, so we are just a bool arg and we exit with an empty value
+		if strings.HasPrefix(value, "-") {
+			value = ""
 			return
 		} else {
-			value = ""
+			// if it doesn't start with a dash, it is our value, so we remove it from the remaining args (we have already set value to it above)
+			a = a[1:]
 			return
 		}
 	}
