@@ -123,28 +123,27 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFlags map[string]reflect.Value, err error) {
 	allFlags = map[string]reflect.Value{}
 	CommandFlags(allFlags)
-	FieldArgNames(cfg, allFlags)
-	if len(args) == 0 {
-		return "", allFlags, nil
-	}
-	arg := args[0]
-	for _, c := range cmds {
-		if arg == c.Name {
-			cmd = arg
-			ocmd, oallFlags, err := ParseArgs(cfg, args[1:], cmds...)
-			if err != nil {
-				return "", nil, err
+	if len(args) != 0 {
+		arg := args[0]
+		for _, c := range cmds {
+			if arg == c.Name {
+				cmd = arg
+				ocmd, oallFlags, err := ParseArgs(cfg, args[1:], cmds...)
+				if err != nil {
+					return "", nil, err
+				}
+				if ocmd != "" {
+					cmd += " " + ocmd
+				}
+				for ofn, ofv := range oallFlags {
+					allFlags[ofn] = ofv
+				}
+				return cmd, allFlags, nil
 			}
-			if ocmd != "" {
-				cmd += " " + ocmd
-			}
-			for ofn, ofv := range oallFlags {
-				allFlags[ofn] = ofv
-			}
-			return cmd, allFlags, nil
 		}
 	}
-	return "", nil, nil
+	FieldArgNames(cfg, allFlags, cmd)
+	return cmd, allFlags, nil
 }
 
 // ParseFlags parses the given flags using the given map of all of the
@@ -311,11 +310,11 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 
 // FieldArgNames adds to given args map all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value
-func FieldArgNames(obj any, allArgs map[string]reflect.Value) {
-	fieldArgNamesStruct(obj, "", false, allArgs)
+func FieldArgNames(obj any, allArgs map[string]reflect.Value, cmd string) {
+	fieldArgNamesStruct(obj, "", false, allArgs, cmd)
 }
 
-func addAllCases(nm, path string, pval reflect.Value, allArgs map[string]reflect.Value) {
+func addAllCases(nm, path string, pval reflect.Value, allArgs map[string]reflect.Value, cmd string) {
 	if nm == "Includes" {
 		return // skip
 	}
@@ -331,7 +330,7 @@ func addAllCases(nm, path string, pval reflect.Value, allArgs map[string]reflect
 
 // fieldArgNamesStruct returns map of all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value
-func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]reflect.Value) {
+func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]reflect.Value, cmd string) {
 	if kit.IfaceIsNil(obj) {
 		return
 	}
@@ -344,6 +343,10 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
+		cmdtag, ok := f.Tag.Lookup("cmd")
+		if ok && cmdtag != cmd { // if we are associated with a different command, skip
+			continue
+		}
 		if kit.NonPtrType(f.Type).Kind() == reflect.Struct {
 			nwPath := f.Name
 			if path != "" {
@@ -356,13 +359,13 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 					nwNest = true
 				}
 			}
-			fieldArgNamesStruct(kit.PtrValue(fv).Interface(), nwPath, nwNest, allArgs)
+			fieldArgNamesStruct(kit.PtrValue(fv).Interface(), nwPath, nwNest, allArgs, cmd)
 			continue
 		}
 		pval := kit.PtrValue(fv)
-		addAllCases(f.Name, path, pval, allArgs)
+		addAllCases(f.Name, path, pval, allArgs, cmd)
 		if f.Type.Kind() == reflect.Bool {
-			addAllCases("No"+f.Name, path, pval, allArgs)
+			addAllCases("No"+f.Name, path, pval, allArgs, cmd)
 		}
 		// now process adding non-nested version of field
 		if path == "" || nest {
@@ -376,9 +379,9 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 			fmt.Printf("warning: programmer error: grease config field \"%s.%s\" cannot be added as a non-nested flag with the name %q because that name has already been registered by another field; add the field tag 'nest:\"+\"' to the field you want to require nested access for (ie: \"Path.Field\" instead of \"Field\") to remove this warning\n", path, f.Name, f.Name)
 			continue
 		}
-		addAllCases(f.Name, "", pval, allArgs)
+		addAllCases(f.Name, "", pval, allArgs, cmd)
 		if f.Type.Kind() == reflect.Bool {
-			addAllCases("No"+f.Name, "", pval, allArgs)
+			addAllCases("No"+f.Name, "", pval, allArgs, cmd)
 		}
 	}
 }
