@@ -87,8 +87,8 @@ func TestPerson(t *testing.T) {
 	if have.Fields.Len() != 2 {
 		t.Errorf("expected 2 fields, but got %d", have.Fields.Len())
 	}
-	if have.Embeds != nil {
-		t.Errorf("expected nil embeds, but got %v", have.Embeds)
+	if have.Embeds.Len() != 0 {
+		t.Errorf("expected 0 embeds, but got %v", have.Embeds.Len())
 	}
 	if have.Methods.Len() != 2 {
 		t.Errorf("expected 2 methods, but got %d", have.Methods.Len())

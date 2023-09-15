@@ -99,22 +99,16 @@ func (g *Generator) GetInterfaces(pkgs []*types.Package) error {
 			if _, has := g.Interfaces.IdxByKeyTry(in); has {
 				continue
 			}
-			// TODO: better solution to major version suffixes
-			nin := strings.ReplaceAll(in, "/v2", "")
-			sstrs := strings.Split(nin, "/")
-			if len(sstrs) == 0 {
-				return fmt.Errorf("programmer error: internal error: expected at least one string from strings.Split(%q, %q)", nin, `\n`)
-			}
-			strs := strings.Split(sstrs[len(sstrs)-1], ".")
+			strs := strings.Split(in, ".")
 			if len(strs) < 2 {
 				return errors.New("expected something before and after dot in fully-qualified type name")
 			}
-			pkgnm := strs[len(strs)-2]
-			if pkg.Name() == pkgnm {
+			pkgpath := strs[len(strs)-2]
+			if pkg.Path() == pkgpath {
 				typnm := strs[len(strs)-1]
 				typ := pkg.Scope().Lookup(typnm)
 				if typ == nil {
-					return fmt.Errorf("programmer error: internal error: could not find type %q in package %q (from interface config %q)", typnm, pkgnm, in)
+					return fmt.Errorf("programmer error: internal error: could not find type %q in package %q (from interface config %q)", typnm, pkgpath, in)
 				}
 				tn, ok := typ.Type().(*types.Named)
 				if !ok {
@@ -218,13 +212,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				if len(field.Names) == 0 {
 					emblist.List = append(emblist.List, field)
 					st.Fields.List = slices.Delete(st.Fields.List, i, i+1)
-
-					// TODO: better handling of name determination
-					nm := fmt.Sprintf("%v", field.Type)
-					if se, ok := field.Type.(*ast.SelectorExpr); ok {
-						nm = fmt.Sprintf("%v.%v", se.X, se.Sel)
-					}
-					field.Names = append(field.Names, ast.NewIdent(nm))
+					field.Names = append(field.Names, ast.NewIdent(types.ExprString(field.Type)))
 				}
 			}
 
