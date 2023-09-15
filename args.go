@@ -17,6 +17,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/ki/v2/toml"
+	"golang.org/x/exp/slices"
 )
 
 // SetFromArgs sets Config values from command-line args,
@@ -143,13 +144,13 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 				break
 			}
 		}
-		if len(args) > 0 {
-			return cmd, allFlags, fmt.Errorf("got unused arguments: %v", args)
-		}
 	}
-	err = FieldFlagNames(cfg, allFlags, cmd, args)
+	args, err = FieldFlagNames(cfg, allFlags, cmd, args)
 	if err != nil {
 		return cmd, allFlags, fmt.Errorf("error getting field flag names: %w", err)
+	}
+	if len(args) > 0 {
+		return cmd, allFlags, fmt.Errorf("got unused arguments: %v", args)
 	}
 	return cmd, allFlags, nil
 }
@@ -321,7 +322,7 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 // the given positional arguments to set the values of the object based on any
 // posarg struct tags that fields have. The posarg struct tag must be either
 // "all" or a valid uint.
-func FieldFlagNames(obj any, allFlags map[string]reflect.Value, cmd string, args []string) error {
+func FieldFlagNames(obj any, allFlags map[string]reflect.Value, cmd string, args []string) ([]string, error) {
 	return fieldFlagNamesStruct(obj, "", false, allFlags, cmd, args)
 }
 
@@ -341,14 +342,15 @@ func addAllCases(nm, path string, pval reflect.Value, allFlags map[string]reflec
 
 // fieldFlagNamesStruct returns map of all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value
-func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]reflect.Value, cmd string, args []string) error {
+func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]reflect.Value, cmd string, args []string) ([]string, error) {
 	if kit.IfaceIsNil(obj) {
-		return nil
+		return nil, nil
 	}
 	ov := reflect.ValueOf(obj)
 	if ov.Kind() == reflect.Pointer && ov.IsNil() {
-		return nil
+		return nil, nil
 	}
+	leftovers := args
 	val := kit.NonPtrValue(ov)
 	typ := val.Type()
 	for i := 0; i < typ.NumField(); i++ {
@@ -363,20 +365,22 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 			if posargtag == "all" {
 				ok := kit.SetRobust(fv.Interface(), args)
 				if !ok {
-					return fmt.Errorf("not able to set field %q to all positional arguments: %v", f.Name, args)
+					return nil, fmt.Errorf("not able to set field %q to all positional arguments: %v", f.Name, args)
 				}
+				leftovers = []string{} // everybody has been consumed
 			} else {
 				ui, err := strconv.ParseUint(posargtag, 10, 64)
 				if err != nil {
-					return fmt.Errorf("invalid value %q for posarg struct tag on field %q: %w", posargtag, f.Name, err)
+					return nil, fmt.Errorf("invalid value %q for posarg struct tag on field %q: %w", posargtag, f.Name, err)
 				}
 				if ui >= uint64(len(args)) {
-					return fmt.Errorf("positional argument %d used for field %q missing (only got %d positional argument(s))", ui, f.Name, len(args))
+					return nil, fmt.Errorf("missing positional argument %d used for field %q", ui, f.Name)
 				}
-				err = SetArgValue(f.Name, fv, args[ui])
+				err = SetArgValue(f.Name, kit.PtrValue(fv), args[ui]) // must be pointer to be settable
 				if err != nil {
-					return fmt.Errorf("error setting field %q to positional argument %d (%q): %w", f.Name, ui, args[ui], err)
+					return nil, fmt.Errorf("error setting field %q to positional argument %d (%q): %w", f.Name, ui, args[ui], err)
 				}
+				leftovers = slices.Delete(leftovers, int(ui), int(ui+1)) // we have consumed this argument
 			}
 
 		}
@@ -417,7 +421,7 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 			addAllCases("No"+f.Name, "", pval, allFlags, cmd)
 		}
 	}
-	return nil
+	return leftovers, nil
 }
 
 // CommandFlags adds non-field flags that control the config process
