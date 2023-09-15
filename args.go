@@ -27,15 +27,15 @@ import (
 func SetFromArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (string, error) {
 	nfargs, flags, err := GetArgs(args)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	cmd, allFlags, err := ParseArgs(cfg, nfargs, cmds...)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	err = ParseFlags(flags, allFlags, true)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	return cmd, nil
 }
@@ -121,12 +121,13 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 // configuration information and commands. The non-flag arguments should be
 // gotten through [GetArgs] first.
 func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFlags map[string]reflect.Value, err error) {
-	if len(args) == 0 {
-		return "", nil, nil
-	}
-	arg := args[0]
 	allFlags = map[string]reflect.Value{}
 	CommandFlags(allFlags)
+	FieldArgNames(cfg, allFlags)
+	if len(args) == 0 {
+		return "", allFlags, nil
+	}
+	arg := args[0]
 	for _, c := range cmds {
 		if arg == c.Name {
 			cmd = arg

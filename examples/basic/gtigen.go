@@ -41,7 +41,7 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:  "",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-name", "abc-tidy"}},
+		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-name", "mod tidy"}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"c", &gti.Field{Name: "c", Doc: "", Directives: gti.Directives{}}},
