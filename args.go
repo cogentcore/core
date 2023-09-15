@@ -68,7 +68,8 @@ func GetArgs(args []string) ([]string, map[string]string, error) {
 // of the given remaining arguments, and returns the
 // name of the flag, the value of the flag, the remaining
 // arguments updated with any changes caused by getting
-// this flag, and any error.
+// this flag, and any error. It is designed for use in [GetArgs]
+// and should typically not be used by end-user code.
 func GetFlag(s string, args []string) (name, value string, a []string, err error) {
 	// we start out with the remaining args we were passed
 	a = args
@@ -109,10 +110,36 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 	return
 }
 
+// ParseArgs parses the given non-flag arguments in the context of the given
+// configuration information and commands. The non-flag arguments should be
+// gotten through [GetArgs] first.
+func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (string, error) {
+	if len(args) == 0 {
+		return "", nil
+	}
+	arg := args[0]
+	actcmd := ""
+	for _, cmd := range cmds {
+		if arg == cmd.Name {
+			actcmd = arg
+			ocmd, err := ParseArgs(cfg, args[1:], cmds...)
+			if err != nil {
+				return "", err
+			}
+			if ocmd != "" {
+				actcmd += " " + ocmd
+			}
+			return actcmd, nil
+		}
+	}
+	return "", nil
+}
+
 // ParseFlags parses the given flags using the given map of all of the
 // available flags, setting the values from that map accordingly.
 // Setting errNotFound = true causes flags that are not in allFlags to
-// trigger an error; otherwise, it just skips those.
+// trigger an error; otherwise, it just skips those. The flags should be
+// gotten through [GetArgs] first.
 func ParseFlags(flags map[string]string, allFlags map[string]reflect.Value, errNotFound bool) error {
 	for name, value := range flags {
 		err := ParseFlag(name, value, allFlags, errNotFound)
@@ -128,6 +155,8 @@ func ParseFlags(flags map[string]string, allFlags map[string]reflect.Value, errN
 // in that map corresponding to the flag name accordingly. Setting
 // errNotFound = true causes passing a flag name that is not in allFlags
 // to trigger an error; otherwise, it just does nothing and returns no error.
+// It is designed for use in [ParseFlags] and should typically not be used by
+// end-user code.
 func ParseFlag(name string, value string, allFlags map[string]reflect.Value, errNotFound bool) error {
 	fval, exists := allFlags[name]
 	if !exists {
