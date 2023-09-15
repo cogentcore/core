@@ -42,7 +42,14 @@ func Run(c *Config) error {
 	return nil
 }
 
+//gti:add
+//grease:cmd -name "mod tidy"
+func ModTidy(c *Config) error {
+	fmt.Println("running mod tidy")
+	return nil
+}
+
 func main() {
 	opts := grease.DefaultOptions("basic", "Basic", "Basic is a basic example application made with Grease.")
-	grease.Run(opts, &Config{}, Build, Run)
+	grease.Run(opts, &Config{}, Build, Run, ModTidy)
 }

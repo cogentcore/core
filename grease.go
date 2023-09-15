@@ -47,7 +47,6 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 		return err
 	}
 	cmd, err := Config(opts, cfg, cs...)
-	fmt.Println("cmd", cmd)
 	if err != nil {
 		err := fmt.Errorf("error configuring app: %w", err)
 		if opts.Fatal {
