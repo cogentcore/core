@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
+	"goki.dev/enums"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -105,44 +106,12 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		}
 		fs.Color.SetIFace(val, ctxt, key)
 	},
-	"stroke-opacity": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Stroke)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.Opacity = par.(*Stroke).Opacity
-			} else if init {
-				fs.Opacity = 1
-			}
-			return
-		}
-		if iv, ok := laser.ToFloat32(val); ok {
-			fs.Opacity = iv
-		}
-	},
-	"stroke-width": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Stroke)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.Width = par.(*Stroke).Width
-			} else if init {
-				fs.Width.Set(1, units.UnitPx)
-			}
-			return
-		}
-		fs.Width.SetIFace(val, key)
-	},
-	"stroke-min-width": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Stroke)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.MinWidth = par.(*Stroke).MinWidth
-			} else if init {
-				fs.MinWidth.Set(1, units.UnitPx)
-			}
-			return
-		}
-		fs.MinWidth.SetIFace(val, key)
-	},
+	"stroke-opacity": StyleFuncFloat(float32(1),
+		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
+	"stroke-width": StyleFuncUnits(units.Px(1),
+		func(obj *Stroke) *units.Value { return &(obj.Width) }),
+	"stroke-min-width": StyleFuncUnits(units.Px(1),
+		func(obj *Stroke) *units.Value { return &(obj.MinWidth) }),
 	"stroke-dasharray": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
@@ -162,66 +131,12 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			mat32.CopyFloat64s(&fs.Dashes, *vt)
 		}
 	},
-	"stroke-linecap": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Stroke)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.Cap = par.(*Stroke).Cap
-			} else if init {
-				fs.Cap = LineCapButt
-			}
-			return
-		}
-		switch vt := val.(type) {
-		case string:
-			fs.Cap.SetString(vt)
-		case LineCaps:
-			fs.Cap = vt
-		default:
-			if iv, ok := laser.ToInt(val); ok {
-				fs.Cap = LineCaps(iv)
-			} else {
-				StyleSetError(key, val)
-			}
-		}
-	},
-	"stroke-linejoin": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Stroke)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.Join = par.(*Stroke).Join
-			} else if init {
-				fs.Join = LineJoinMiter
-			}
-			return
-		}
-		switch vt := val.(type) {
-		case string:
-			fs.Join.SetString(vt)
-		case LineJoins:
-			fs.Join = vt
-		default:
-			if iv, ok := laser.ToInt(val); ok {
-				fs.Join = LineJoins(iv)
-			} else {
-				StyleSetError(key, val)
-			}
-		}
-	},
-	"stroke-miterlimit": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Stroke)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.MiterLimit = par.(*Stroke).MiterLimit
-			} else if init {
-				fs.MiterLimit = 1
-			}
-			return
-		}
-		if iv, ok := laser.ToFloat32(val); ok {
-			fs.MiterLimit = iv
-		}
-	},
+	"stroke-linecap": StyleFuncEnum(LineCapButt,
+		func(obj *Stroke) enums.EnumSetter { return &(obj.Cap) }),
+	"stroke-linejoin": StyleFuncEnum(LineJoinMiter,
+		func(obj *Stroke) enums.EnumSetter { return &(obj.Join) }),
+	"stroke-miterlimit": StyleFuncFloat(float32(1),
+		func(obj *Stroke) *float32 { return &(obj.MiterLimit) }),
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -241,43 +156,10 @@ var StyleFillFuncs = map[string]StyleFunc{
 		}
 		fs.Color.SetIFace(val, ctxt, key)
 	},
-	"fill-opacity": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Fill)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.Opacity = par.(*Fill).Opacity
-			} else if init {
-				fs.Opacity = 1
-			}
-			return
-		}
-		if iv, ok := laser.ToFloat32(val); ok {
-			fs.Opacity = iv
-		}
-	},
-	"fill-rule": func(obj any, key string, val any, par any, ctxt Context) {
-		fs := obj.(*Fill)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.Rule = par.(*Fill).Rule
-			} else if init {
-				fs.Rule = FillRuleNonZero
-			}
-			return
-		}
-		switch vt := val.(type) {
-		case string:
-			fs.Rule.SetString(vt)
-		case FillRules:
-			fs.Rule = vt
-		default:
-			if iv, ok := laser.ToInt(val); ok {
-				fs.Rule = FillRules(iv)
-			} else {
-				StyleSetError(key, val)
-			}
-		}
-	},
+	"fill-opacity": StyleFuncFloat(float32(1),
+		func(obj *Fill) *float32 { return &(obj.Opacity) }),
+	"fill-rule": StyleFuncEnum(FillRuleNonZero,
+		func(obj *Fill) enums.EnumSetter { return &(obj.Rule) }),
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -285,29 +167,8 @@ var StyleFillFuncs = map[string]StyleFunc{
 
 // StylePaintFuncs are functions for styling the Stroke object
 var StylePaintFuncs = map[string]StyleFunc{
-	"vector-effect": func(obj any, key string, val any, par any, ctxt Context) {
-		pc := obj.(*Paint)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				pc.VecEff = par.(*Paint).VecEff
-			} else if init {
-				pc.VecEff = VecEffNone
-			}
-			return
-		}
-		switch vt := val.(type) {
-		case string:
-			pc.VecEff.SetString(vt)
-		case VectorEffects:
-			pc.VecEff = vt
-		default:
-			if iv, ok := laser.ToInt(val); ok {
-				pc.VecEff = VectorEffects(iv)
-			} else {
-				StyleSetError(key, val)
-			}
-		}
-	},
+	"vector-effect": StyleFuncEnum(VecEffNone,
+		func(obj *Paint) enums.EnumSetter { return &(obj.VecEff) }),
 	"transform": func(obj any, key string, val any, par any, ctxt Context) {
 		pc := obj.(*Paint)
 		if inh, init := StyleInhInit(val, par); inh || init {

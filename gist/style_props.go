@@ -30,15 +30,25 @@ func StyleInhInit(val, par any) (inh, init bool) {
 	return false, false
 }
 
-type Number interface {
-	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64
+// StyleFuncInt returns a style function for any numerical value
+func StyleFuncInt[T any, F laser.Integer](initVal F, getField func(obj *T) *F) StyleFunc {
+	return func(obj any, key string, val any, par any, ctxt Context) {
+		fp := getField(obj.(*T))
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				*fp = *getField(par.(*T))
+			} else if init {
+				*fp = initVal
+			}
+			return
+		}
+		fv, _ := laser.ToInt(val)
+		laser.ConvertNumber(fp, fv)
+	}
 }
 
-// ConvertNumber converts any number to any other, using generics
-func ConvertNumber[T1 Number, T2 Number](dst *T1, v T2) { *dst = T1(v) }
-
-// StyleFuncNum returns a style function for any numerical value
-func StyleFuncNum[T any, F Number](initVal F, getField func(obj *T) *F) StyleFunc {
+// StyleFuncFloat returns a style function for any numerical value
+func StyleFuncFloat[T any, F laser.Float](initVal F, getField func(obj *T) *F) StyleFunc {
 	return func(obj any, key string, val any, par any, ctxt Context) {
 		fp := getField(obj.(*T))
 		if inh, init := StyleInhInit(val, par); inh || init {
@@ -50,7 +60,24 @@ func StyleFuncNum[T any, F Number](initVal F, getField func(obj *T) *F) StyleFun
 			return
 		}
 		fv, _ := laser.ToFloat(val) // can represent any number, ToFloat is fast type switch
-		ConvertNumber(fp, fv)
+		laser.ConvertNumber(fp, fv)
+	}
+}
+
+// StyleFuncBool returns a style function for a bool value
+func StyleFuncBool[T any](initVal bool, getField func(obj *T) *bool) StyleFunc {
+	return func(obj any, key string, val any, par any, ctxt Context) {
+		fp := getField(obj.(*T))
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				*fp = *getField(par.(*T))
+			} else if init {
+				*fp = initVal
+			}
+			return
+		}
+		fv, _ := laser.ToBool(val)
+		*fp = fv
 	}
 }
 
@@ -203,48 +230,12 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"visible": func(obj any, key string, val any, par any, ctxt Context) {
-		s := obj.(*Style)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				s.Visible = par.(*Style).Visible
-			} else if init {
-				s.Visible = false
-			}
-			return
-		}
-		if bv, ok := laser.ToBool(val); ok {
-			s.Visible = bv
-		}
-	},
-	"inactive": func(obj any, key string, val any, par any, ctxt Context) {
-		s := obj.(*Style)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				s.Inactive = par.(*Style).Inactive
-			} else if init {
-				s.Inactive = false
-			}
-			return
-		}
-		if bv, ok := laser.ToBool(val); ok {
-			s.Inactive = bv
-		}
-	},
-	"pointer-events": func(obj any, key string, val any, par any, ctxt Context) {
-		s := obj.(*Style)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				s.PointerEvents = par.(*Style).PointerEvents
-			} else if init {
-				s.PointerEvents = true
-			}
-			return
-		}
-		if bv, ok := laser.ToBool(val); ok {
-			s.PointerEvents = bv
-		}
-	},
+	"visible": StyleFuncBool(false,
+		func(obj *Style) *bool { return &(obj.Visible) }),
+	"inactive": StyleFuncBool(false,
+		func(obj *Style) *bool { return &(obj.Inactive) }),
+	"pointer-events": StyleFuncBool(false,
+		func(obj *Style) *bool { return &(obj.PointerEvents) }),
 	"color": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
@@ -278,7 +269,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 // style properties; they are still stored on the main style object,
 // but they are done separately to improve clarity
 var StyleLayoutFuncs = map[string]StyleFunc{
-	"z-index": StyleFuncNum(int(0),
+	"z-index": StyleFuncInt(int(0),
 		func(obj *Style) *int { return &(obj.ZIndex) }),
 	"horizontal-align": StyleFuncEnum(AlignLeft,
 		func(obj *Style) enums.EnumSetter { return &(obj.AlignH) }),
@@ -326,15 +317,15 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 	},
 	"overflow": StyleFuncEnum(OverflowAuto,
 		func(obj *Style) enums.EnumSetter { return &(obj.Overflow) }),
-	"columns": StyleFuncNum(int(0),
+	"columns": StyleFuncInt(int(0),
 		func(obj *Style) *int { return &(obj.Columns) }),
-	"row": StyleFuncNum(int(0),
+	"row": StyleFuncInt(int(0),
 		func(obj *Style) *int { return &(obj.Row) }),
-	"col": StyleFuncNum(int(0),
+	"col": StyleFuncInt(int(0),
 		func(obj *Style) *int { return &(obj.Col) }),
-	"row-span": StyleFuncNum(int(0),
+	"row-span": StyleFuncInt(int(0),
 		func(obj *Style) *int { return &(obj.RowSpan) }),
-	"col-span": StyleFuncNum(int(0),
+	"col-span": StyleFuncInt(int(0),
 		func(obj *Style) *int { return &(obj.ColSpan) }),
 	"scrollbar-width": StyleFuncUnits(units.Value{},
 		func(obj *Style) *units.Value { return &(obj.ScrollBarWidth) }),
@@ -345,7 +336,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 
 // StyleFontFuncs are functions for styling the Font object
 var StyleFontFuncs = map[string]StyleFunc{
-	"opacity": StyleFuncNum(float32(1),
+	"opacity": StyleFuncFloat(float32(1),
 		func(obj *Font) *float32 { return &(obj.Opacity) }),
 	"font-size": func(obj any, key string, val any, par any, ctxt Context) {
 		fs := obj.(*Font)
@@ -444,15 +435,15 @@ var StyleTextFuncs = map[string]StyleFunc{
 		func(obj *Text) enums.EnumSetter { return &(obj.Direction) }),
 	"writing-mode": StyleFuncEnum(LRTB,
 		func(obj *Text) enums.EnumSetter { return &(obj.WritingMode) }),
-	"glyph-orientation-vertical": StyleFuncNum(float32(1),
+	"glyph-orientation-vertical": StyleFuncFloat(float32(1),
 		func(obj *Text) *float32 { return &(obj.OrientationVert) }),
-	"glyph-orientation-horizontal": StyleFuncNum(float32(1),
+	"glyph-orientation-horizontal": StyleFuncFloat(float32(1),
 		func(obj *Text) *float32 { return &(obj.OrientationHoriz) }),
 	"text-indent": StyleFuncUnits(units.Value{},
 		func(obj *Text) *units.Value { return &(obj.Indent) }),
 	"para-spacing": StyleFuncUnits(units.Value{},
 		func(obj *Text) *units.Value { return &(obj.ParaSpacing) }),
-	"tab-size": StyleFuncNum(int(4),
+	"tab-size": StyleFuncInt(int(4),
 		func(obj *Text) *int { return &(obj.TabSize) }),
 }
 
@@ -619,18 +610,6 @@ var StyleShadowFuncs = map[string]StyleFunc{
 		}
 		ss.Color = colors.LogFromAny(val, ctxt.ContextColor())
 	},
-	"box-shadow.inset": func(obj any, key string, val any, par any, ctxt Context) {
-		ss := obj.(*Shadow)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				ss.Inset = par.(*Shadow).Inset
-			} else if init {
-				ss.Inset = false
-			}
-			return
-		}
-		if bv, ok := laser.ToBool(val); ok {
-			ss.Inset = bv
-		}
-	},
+	"box-shadow.inset": StyleFuncBool(false,
+		func(obj *Shadow) *bool { return &(obj.Inset) }),
 }
