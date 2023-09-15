@@ -33,6 +33,71 @@ func SetFromArgs(cfg any, args []string) (nonFlags []string, err error) {
 	return
 }
 
+// GetArgs processes the given args using map of all available args,
+// returning the leftover (positional) args, the flags, and any error.
+// setting errNotFound = true causes args that are not in allArgs to
+// trigger an error.  Otherwise, it just skips those.
+func GetArgs(args []string) ([]string, map[string]string, error) {
+	var nonFlags []string
+	flags := map[string]string{}
+	for len(args) > 0 {
+		s := args[0]
+		args = args[1:]
+		fmt.Println(s, args)
+		if len(s) == 0 || s[0] != '-' || len(s) == 1 {
+			nonFlags = append(nonFlags, s)
+			continue
+		}
+
+		if s[1] == '-' && len(s) == 2 { // "--" terminates the flags
+			// f.argsLenAtDash = len(f.args)
+			nonFlags = append(nonFlags, args...)
+			break
+		}
+		name, value, nargs, err := GetFlag(s, args)
+		if err != nil {
+			return nonFlags, flags, err
+		}
+		args = nargs
+		flags[name] = value
+	}
+	return nonFlags, flags, nil
+}
+
+// GetFlag parses the given flag arg string and returns the
+// name of the flag, the value of the flag, and any error.
+func GetFlag(s string, args []string) (name, value string, a []string, err error) {
+	a = args
+	name = s[1:]
+	if name[0] == '-' {
+		name = name[1:]
+	}
+	if len(name) == 0 || name[0] == '-' || name[0] == '=' {
+		err = fmt.Errorf("bad flag syntax: %q", s)
+		return
+	}
+
+	if strings.HasPrefix(name, "test.") { // go test passes args..
+		return
+	}
+
+	split := strings.SplitN(name, "=", 2)
+	name = split[0]
+	if len(split) == 2 {
+		value = split[1]
+	} else if len(a) > 0 {
+		value = a[0]
+		if value[0] != '-' {
+			a = a[1:]
+			return
+		} else {
+			value = ""
+			return
+		}
+	}
+	return
+}
+
 // ParseArgs parses given args using map of all available args
 // setting the value accordingly, and returning any leftover args.
 // setting errNotFound = true causes args that are not in allArgs to

@@ -126,6 +126,15 @@ func TestDefaults(t *testing.T) {
 	}
 }
 
+func TestGetArgs(t *testing.T) {
+	sargs := []string{"build", "main", "-o", "-dir", "../grease", "-v", "-platform", "windows/amd64"}
+	args, flags, err := GetArgs(sargs)
+	if err != nil {
+		t.Errorf("error getting args: %v", err)
+	}
+	fmt.Println(args, "\n", flags)
+}
+
 func TestArgsPrint(t *testing.T) {
 	t.Skip("prints all possible args")
 
