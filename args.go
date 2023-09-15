@@ -113,26 +113,29 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 // ParseArgs parses the given non-flag arguments in the context of the given
 // configuration information and commands. The non-flag arguments should be
 // gotten through [GetArgs] first.
-func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (string, error) {
+func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFlags map[string]reflect.Value, err error) {
 	if len(args) == 0 {
-		return "", nil
+		return "", nil, nil
 	}
 	arg := args[0]
-	actcmd := ""
-	for _, cmd := range cmds {
-		if arg == cmd.Name {
-			actcmd = arg
-			ocmd, err := ParseArgs(cfg, args[1:], cmds...)
+	allFlags = map[string]reflect.Value{}
+	for _, c := range cmds {
+		if arg == c.Name {
+			cmd = arg
+			ocmd, oallFlags, err := ParseArgs(cfg, args[1:], cmds...)
 			if err != nil {
-				return "", err
+				return "", nil, err
 			}
 			if ocmd != "" {
-				actcmd += " " + ocmd
+				cmd += " " + ocmd
 			}
-			return actcmd, nil
+			for ofn, ofv := range oallFlags {
+				allFlags[ofn] = ofv
+			}
+			return cmd, allFlags, nil
 		}
 	}
-	return "", nil
+	return "", nil, nil
 }
 
 // ParseFlags parses the given flags using the given map of all of the
