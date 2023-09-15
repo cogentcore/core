@@ -19,12 +19,16 @@ import (
 )
 
 // KiMethodsTmpl is a template that contains the methods
-// and functions specific to Ki types
+// and functions specific to Ki types.
+// Note: the KiPkg template in this template exists to handle
+// the case in which goki generate is ran in the ki package itself.
 var KiMethodsTmpl = template.Must(template.New("KiMethods").Parse(
 	`
+	{{define "KiPkg"}} {{if eq .Pkg "ki"}} {{else}} {{.Pkg}}. {{end}} {{end}}
+
 	// New{{.Name}} adds a new [{{.Name}}] with
 	// the given name to the given parent.
-	func New{{.Name}}(par {{if eq .Pkg "ki"}} {{else}} .Pkg {{end}}.Ki, name string) *{{.Name}} {
+	func New{{.Name}}(par {{template "KiPkg" .}}Ki, name string) *{{.Name}} {
 		return par.NewChild({{.Name}}Type, name).(*{{.Name}})
 	}
 
@@ -34,7 +38,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").Parse(
 	}
 
 	// New returns a new [*{{.Name}}] value
-	func (t *{{.Name}}) New() {{if eq .Pkg "ki"}} {{else}} .Pkg {{end}}.Ki {
+	func (t *{{.Name}}) New() {{template "KiPkg" .}}Ki {
 		return &{{.Name}}{}
 	}`,
 ))
