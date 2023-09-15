@@ -6,7 +6,6 @@ package gtigen
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"go/ast"
 	"go/types"
@@ -99,13 +98,13 @@ func (g *Generator) GetInterfaces(pkgs []*types.Package) error {
 			if _, has := g.Interfaces.IdxByKeyTry(in); has {
 				continue
 			}
-			strs := strings.Split(in, ".")
-			if len(strs) < 2 {
-				return errors.New("expected something before and after dot in fully-qualified type name")
+			li := strings.LastIndex(in, ".")
+			if li == -1 {
+				return fmt.Errorf("expected a dot (%q) in the interface config fully-qualified type name (%q)", ".", in)
 			}
-			pkgpath := strs[len(strs)-2]
+			pkgpath := in[:li]
 			if pkg.Path() == pkgpath {
-				typnm := strs[len(strs)-1]
+				typnm := in[li+1:] // need to get rid of the dot
 				typ := pkg.Scope().Lookup(typnm)
 				if typ == nil {
 					return fmt.Errorf("programmer error: internal error: could not find type %q in package %q (from interface config %q)", typnm, pkgpath, in)
