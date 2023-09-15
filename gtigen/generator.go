@@ -342,6 +342,7 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 		}
 		fo := &gti.Field{
 			Name:       name,
+			Type:       types.ExprString(field.Type),
 			Doc:        strings.TrimSuffix(field.Doc.Text(), "\n"),
 			Directives: dirs,
 		}

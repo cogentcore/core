@@ -4,7 +4,9 @@
 
 package testdata
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Person represents a person and their attributes.
 // The zero value of a Person is not valid.
