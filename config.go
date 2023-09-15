@@ -56,7 +56,8 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	// we can do other configuration.
 	cmd, err := SetFromArgs(cfg, args, cmds...)
 	if err != nil {
-		errs = append(errs, err)
+		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
+		return cmd, err
 	}
 
 	if Help {
