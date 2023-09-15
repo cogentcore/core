@@ -23,14 +23,22 @@ import (
 // Returns any args that did not start with a `-` flag indicator.
 // For more robust error processing, it is assumed that all flagged args (-)
 // must refer to fields in the config, so any that fail to match trigger
-// an error.  Errors can also result from parsing.
-// Errors are automatically logged because these are user-facing.
-func SetFromArgs(cfg any, args []string) (nonFlags []string, err error) {
-	allArgs := make(map[string]reflect.Value)
-	CommandArgs(allArgs) // need these to not trigger not-found errors
-	FieldArgNames(cfg, allArgs)
-	nonFlags, err = ParseFlags(cfg, args, allArgs, true)
-	return
+// an error. Errors can also result from parsing.
+func SetFromArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) ([]string, error) {
+	nfargs, flags, err := GetArgs(args)
+	if err != nil {
+		return nfargs, nil
+	}
+	cmd, allFlags, err := ParseArgs(cfg, args, cmds...)
+	if err != nil {
+		return nfargs, nil
+	}
+	err = ParseFlags(flags, allFlags, true)
+	if err != nil {
+		return nfargs, nil
+	}
+	fmt.Println("command", cmd)
+	return nfargs, nil
 }
 
 // GetArgs processes the given args using map of all available args,
@@ -119,6 +127,7 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 	}
 	arg := args[0]
 	allFlags = map[string]reflect.Value{}
+	CommandFlags(allFlags)
 	for _, c := range cmds {
 		if arg == c.Name {
 			cmd = arg
@@ -275,36 +284,26 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 		mval := make(map[string]any)
 		err := toml.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
 		if err != nil {
-			fmt.Println(err)
 			return err
 		}
 		err = kit.CopyMapRobust(fval.Interface(), mval["tmp"])
 		if err != nil {
-			fmt.Println(err)
-			err = fmt.Errorf("grease.ParseArgs: not able to set map field from arg: %s val: %s", name, value)
-			fmt.Println(err)
-			return err
+			return fmt.Errorf("not able to set map field from arg: %q val: %q: %w", name, value, err)
 		}
 	case vk == reflect.Slice:
 		mval := make(map[string]any)
 		err := toml.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
 		if err != nil {
-			fmt.Println(err)
 			return err
 		}
 		err = kit.CopySliceRobust(fval.Interface(), mval["tmp"])
 		if err != nil {
-			fmt.Println(err)
-			err = fmt.Errorf("grease.ParseArgs: not able to set slice field from arg: %s val: %s", name, value)
-			fmt.Println(err)
-			return err
+			return fmt.Errorf("not able to set slice field from arg: %q val: %q: %w", name, value, err)
 		}
 	default:
 		ok := kit.SetRobust(fval.Interface(), value) // overkill but whatever
 		if !ok {
-			err := fmt.Errorf("grease.ParseArgs: not able to set field from arg: %s val: %s", name, value)
-			fmt.Println(err)
-			return err
+			return fmt.Errorf("not able to set field from arg: %q val: %q", name, value)
 		}
 	}
 	return nil
@@ -384,11 +383,13 @@ func fieldArgNamesStruct(obj any, path string, nest bool, allArgs map[string]ref
 	}
 }
 
-// CommandArgs adds non-field args that control the config process:
-// -config -cfg -help -h
-func CommandArgs(allArgs map[string]reflect.Value) {
-	allArgs["config"] = reflect.ValueOf(&ConfigFile)
-	allArgs["cfg"] = reflect.ValueOf(&ConfigFile)
-	allArgs["help"] = reflect.ValueOf(&Help)
-	allArgs["h"] = reflect.ValueOf(&Help)
+// CommandFlags adds non-field flags that control the config process
+// to the given map of flags:
+//
+//	-config -cfg -help -h
+func CommandFlags(allFlags map[string]reflect.Value) {
+	allFlags["config"] = reflect.ValueOf(&ConfigFile)
+	allFlags["cfg"] = reflect.ValueOf(&ConfigFile)
+	allFlags["help"] = reflect.ValueOf(&Help)
+	allFlags["h"] = reflect.ValueOf(&Help)
 }

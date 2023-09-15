@@ -50,11 +50,18 @@ func Config[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) ([]string,
 		errs = append(errs, err)
 	}
 
+	// first, we do a simplified pass to get the meta
+	// command flags (help and config), which we need
+	// to know before we can do other configuration.
 	allArgs := make(map[string]reflect.Value)
-	CommandArgs(allArgs)
+	CommandFlags(allArgs)
 
 	args := os.Args[1:]
-	_, err = ParseFlags(cfg, args, allArgs, false) // false = ignore non-matches
+	_, flags, err := GetArgs(args)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	err = ParseFlags(flags, allArgs, false) // false = ignore non-matches, because we are only handling meta flags, not all of them
 	if err != nil {
 		errs = append(errs, err)
 	}
