@@ -9,11 +9,7 @@ package grease
 // TestEnum is an enum type for testing
 type TestEnum int32 //enums:enum
 
-// note: we need to add the Layer extension to avoid naming
-// conflicts between layer, projection and other things.
-
 const (
 	TestValue1 TestEnum = iota
-
 	TestValue2
 )
