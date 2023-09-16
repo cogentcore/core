@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"goki.dev/ki/v2/dirs"
 	"goki.dev/ki/v2/kit"
@@ -35,7 +36,7 @@ type MetaConfig struct {
 	// Help is variable target for -help or -h args
 	Help bool
 
-	HelpCmd string `cmd:"help" posarg:"0"`
+	HelpCmd string `cmd:"help" posarg:"all"`
 }
 
 func MetaCmds[T any](opts *Options, cfg T, cmds ...*Cmd[T]) []*Cmd[*MetaConfig] {
@@ -93,6 +94,8 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	}
 
 	if mc.Help || cmd == "help" {
+		// string version of args slice has [] on the side, so need to get rid of them
+		mc.HelpCmd = strings.TrimPrefix(strings.TrimSuffix(mc.HelpCmd, "]"), "[")
 		fmt.Println(Usage(opts, cfg, mc.HelpCmd, cmds...))
 		os.Exit(0)
 	}

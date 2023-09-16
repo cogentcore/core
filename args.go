@@ -407,6 +407,7 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
+		pval := kit.PtrValue(fv)
 		cmdtag, ok := f.Tag.Lookup("cmd")
 		if ok && cmdtag != cmd { // if we are associated with a different command, skip
 			continue
@@ -414,7 +415,7 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 		posargtag, ok := f.Tag.Lookup("posarg")
 		if ok {
 			if posargtag == "all" {
-				ok := kit.SetRobust(fv.Interface(), args)
+				ok := kit.SetRobust(pval.Interface(), args)
 				if !ok {
 					return nil, fmt.Errorf("not able to set field %q to all positional arguments: %v", f.Name, args)
 				}
@@ -427,7 +428,7 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 				if ui >= uint64(len(args)) {
 					return nil, fmt.Errorf("missing positional argument %d used for field %q", ui, f.Name)
 				}
-				err = SetArgValue(f.Name, kit.PtrValue(fv), args[ui]) // must be pointer to be settable
+				err = SetArgValue(f.Name, pval, args[ui]) // must be pointer to be settable
 				if err != nil {
 					return nil, fmt.Errorf("error setting field %q to positional argument %d (%q): %w", f.Name, ui, args[ui], err)
 				}
@@ -450,7 +451,6 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 			fieldFlagNamesStruct(kit.PtrValue(fv).Interface(), nwPath, nwNest, allFlags, cmd, args)
 			continue
 		}
-		pval := kit.PtrValue(fv)
 		addAllCases(f.Name, path, pval, allFlags, cmd)
 		if f.Type.Kind() == reflect.Bool {
 			addAllCases("No"+f.Name, path, pval, allFlags, cmd)
