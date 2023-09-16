@@ -36,21 +36,14 @@ func Run[T any, C grease.CmdOrFunc[T]](opts *grease.Options, cfg T, cmds ...C) e
 		}
 		return err
 	}
-	hasRoot := false
-	for _, cmd := range cs {
-		if cmd.Root {
-			hasRoot = true
-			break
-		}
-	}
-	cs = append(cs, &grease.Cmd[T]{
+	cs = grease.AddCmd(cs, &grease.Cmd[T]{
 		Func: func(t T) error {
 			GUI(opts, t, cs...)
 			return nil
 		},
 		Name: "gui",
-		Doc:  "GUI runs the GUI version of the " + opts.AppTitle + " tool",
-		Root: !hasRoot, // if root isn't already taken, we take it
+		Doc:  "runs the GUI version of the " + opts.AppTitle + " tool",
+		Root: true, // if root isn't already taken, we take it
 	})
 	return grease.Run(opts, cfg, cs...)
 }
