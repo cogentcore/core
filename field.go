@@ -6,6 +6,7 @@ package grease
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 
@@ -103,7 +104,32 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, usedNames
 			Nest:  nest,
 		}
 		for i, name := range names {
-			if of, has := usedNames[name]; has {
+			if of, has := usedNames[name]; has { // we have a conflict
+
+				// if we have a naming conflict between two fields with the same base
+				// (in the same parent struct), then there is no nesting and they have
+				// been directly given conflicting names, so there is a simple programmer error
+				nbase := ""
+				nli := strings.LastIndex(nf.Name, ".")
+				if nli >= 0 {
+					nbase = nf.Name[:nli]
+				}
+				obase := ""
+				oli := strings.LastIndex(of.Name, ".")
+				if oli >= 0 {
+					obase = of.Name[:oli]
+				}
+				if nbase == obase {
+					fmt.Printf(errorColor("programmer error:")+" fields %q and %q were both assigned the same name (%q)\n", of.Name, nf.Name, name)
+					os.Exit(1)
+				}
+
+				// if that isn't the case, they are in different parent structs and
+				// it is a nesting problem, so we use the nest tags to resolve the conflict.
+				// the basic rule is that whoever specifies the nest:"-" tag gets to
+				// be non-nested, and if no one specifies it, everyone is nested.
+				// if both want to be non-nested, that is a programmer error.
+
 				// nest field tag values for new and other
 				nfns := nf.Field.Tag.Get("nest")
 				ofns := of.Field.Tag.Get("nest")
@@ -113,7 +139,8 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, usedNames
 				ofn := ofns == "-" || ofns == "false"
 
 				if nfn && ofn {
-					fmt.Printf(errorColor("warning: programmer error:")+" %s specified on two config fields (%q and %q) with the same name (%q); keep %s on the field you want to be able to access without nesting (eg: %q instead of %q) and remove it from the other one\n", cmdColor(`nest:"-"`), of.Name, nf.Name, name, cmdColor(`nest:"-"`), "-"+name, "-"+strcase.ToKebab(nf.Name))
+					fmt.Printf(errorColor("programmer error:")+" %s specified on two config fields (%q and %q) with the same name (%q); keep %s on the field you want to be able to access without nesting (eg: %q instead of %q) and remove it from the other one\n", cmdColor(`nest:"-"`), of.Name, nf.Name, name, cmdColor(`nest:"-"`), "-"+name, "-"+strcase.ToKebab(nf.Name))
+					os.Exit(1)
 				} else if !nfn && !ofn {
 					// neither one gets it, so we replace both with fully qualified name
 					names[i] = strcase.ToKebab(nf.Name)
@@ -136,7 +163,7 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, usedNames
 					names[i] = strcase.ToKebab(nf.Name)
 				}
 			} else {
-				// if no conflict, we have it
+				// if no conflict, we get the name
 				usedNames[name] = nf
 			}
 		}

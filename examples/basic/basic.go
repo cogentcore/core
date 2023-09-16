@@ -28,12 +28,15 @@ type Config struct {
 
 	Server Server
 	Client Client
+
+	Directory string `grease:"dir" nest:"-"`
+	Dir       string `nest:"-"`
 }
 
 type Server struct {
 
 	// the server platform
-	Platform string `nest:"-" desc:"the server platform"`
+	Platform string `desc:"the server platform"`
 }
 
 type Client struct {
