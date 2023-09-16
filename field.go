@@ -113,7 +113,7 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, usedNames
 				ofn := ofns == "-" || ofns == "false"
 
 				if nfn && ofn {
-					fmt.Printf("warning: programmer error: %q specified on two config fields (%q and %q) with the same name (%q); keep %q on the field you want to be able to access without nesting (eg: -target instead of -build-target) and remove it from the other one", `nest:"-"`, of.Name, nf.Name, name, `nest:"-"`)
+					fmt.Printf(errorColor("warning: programmer error:")+" %s specified on two config fields (%q and %q) with the same name (%q); keep %s on the field you want to be able to access without nesting (eg: %q instead of %q) and remove it from the other one\n", cmdColor(`nest:"-"`), of.Name, nf.Name, name, cmdColor(`nest:"-"`), "-"+name, "-"+strcase.ToKebab(nf.Name))
 				} else if !nfn && !ofn {
 					// neither one gets it, so we replace both with fully qualified name
 					names[i] = strcase.ToKebab(nf.Name)

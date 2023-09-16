@@ -31,11 +31,15 @@ type Config struct {
 }
 
 type Server struct {
-	Platform string
+
+	// the server platform
+	Platform string `nest:"-" desc:"the server platform"`
 }
 
 type Client struct {
-	Platform string
+
+	// the client platform
+	Platform string `nest:"-" desc:"the client platform"`
 }
 
 // Build builds the app for the given platform.
