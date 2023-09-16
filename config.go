@@ -27,6 +27,37 @@ var (
 	Help bool
 )
 
+type MetaConfig struct {
+	// ConfigFile is the name of the config file actually loaded, specified by the
+	// -config or -cfg command-line arg or the default file given in Config
+	ConfigFile string
+
+	// Help is variable target for -help or -h args
+	Help bool
+
+	HelpCmd string `cmd:"help" posarg:"0"`
+}
+
+func MetaCmds[T any](opts *Options, cfg T, cmds ...*Cmd[T]) []*Cmd[*MetaConfig] {
+	res := []*Cmd[*MetaConfig]{
+		{
+			Func: func(mc *MetaConfig) error { return nil },
+			Name: "help",
+			Doc:  "show this usage message and exit",
+			Root: true,
+		},
+	}
+	for _, cmd := range cmds {
+		res = append(res, &Cmd[*MetaConfig]{
+			Func: func(mc *MetaConfig) error { return nil },
+			Name: cmd.Name,
+			Doc:  cmd.Doc,
+			Root: cmd.Root,
+		})
+	}
+	return res
+}
+
 // Config is the overall config setting function, processing config files
 // and command-line arguments, in the following order:
 //   - Apply any `def:` field tag default values.
@@ -54,14 +85,15 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	// first, we do a pass to get the meta command flags
 	// (help and config), which we need to know before
 	// we can do other configuration.
-	cmd, err := SetFromArgs(cfg, args, cmds...)
+	mc := &MetaConfig{}
+	cmd, err := SetFromArgs(mc, args, MetaCmds(opts, cfg, cmds...)...)
 	if err != nil {
 		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
-		return cmd, err
+		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
 	}
 
-	if Help {
-		fmt.Println(Usage(opts, cfg, cmd, cmds...))
+	if mc.Help || cmd == "help" {
+		fmt.Println(Usage(opts, cfg, mc.HelpCmd, cmds...))
 		os.Exit(0)
 	}
 
