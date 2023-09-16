@@ -31,8 +31,7 @@ func SetFromArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	allFlags := map[string]reflect.Value{}
-	_, cmd, err := ParseArgs(cfg, nfargs, allFlags, "", cmds...)
+	cmd, allFlags, err := ParseArgs(cfg, nfargs, cmds...)
 	if err != nil {
 		return "", err
 	}
@@ -120,11 +119,28 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 	return
 }
 
+func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFlags map[string]reflect.Value, err error) {
+	allFlags = map[string]reflect.Value{}
+	CommandFlags(allFlags)
+	newArgs, newCmd, err := parseArgsImpl(cfg, args, allFlags, "", cmds...)
+	if err != nil {
+		return newCmd, allFlags, err
+	}
+
+	newArgs, err = FieldFlagNames(cfg, allFlags, newCmd, newArgs)
+	if err != nil {
+		return newCmd, allFlags, fmt.Errorf("error getting field flag names: %w", err)
+	}
+	if len(newArgs) > 0 {
+		return newCmd, allFlags, fmt.Errorf("got unused arguments: %v", newArgs)
+	}
+	return newCmd, allFlags, nil
+}
+
 // ParseArgs parses the given non-flag arguments in the context of the given
 // configuration information and commands. The non-flag arguments should be
 // gotten through [GetArgs] first.
-func ParseArgs[T any](cfg T, args []string, allFlags map[string]reflect.Value, cmd string, cmds ...*Cmd[T]) (newArgs []string, newCmd string, err error) {
-	CommandFlags(allFlags)
+func parseArgsImpl[T any](cfg T, args []string, allFlags map[string]reflect.Value, cmd string, cmds ...*Cmd[T]) (newArgs []string, newCmd string, err error) {
 	// we start with the base args and command
 	newArgs = args
 	newCmd = cmd
@@ -165,7 +181,7 @@ func ParseArgs[T any](cfg T, args []string, allFlags map[string]reflect.Value, c
 			// we have consumed our next arg, so we get rid of it
 			newArgs = newArgs[1:]
 			// then, we recursively parse again with our new command as context
-			oargs, ocmd, err := ParseArgs(cfg, newArgs, allFlags, newCmd, cmds...)
+			oargs, ocmd, err := parseArgsImpl(cfg, newArgs, allFlags, newCmd, cmds...)
 			if err != nil {
 				return nil, "", err
 			}
@@ -178,14 +194,7 @@ func ParseArgs[T any](cfg T, args []string, allFlags map[string]reflect.Value, c
 
 		}
 	}
-	newArgs, err = FieldFlagNames(cfg, allFlags, newCmd, newArgs)
-	if err != nil {
-		return newArgs, newCmd, fmt.Errorf("error getting field flag names: %w", err)
-	}
-	if len(newArgs) > 0 {
-		return newArgs, newCmd, fmt.Errorf("got unused arguments: %v", newArgs)
-	}
-	return newArgs, newCmd, nil
+	return
 }
 
 // ParseFlags parses the given flags using the given map of all of the
