@@ -3,9 +3,13 @@ module goki.dev/greasi
 go 1.21.0
 
 require (
+	github.com/fatih/color v1.15.0
+	github.com/iancoleman/strcase v0.3.0
 	goki.dev/gi/v2 v2.0.0-dev0.0.1
-	goki.dev/grease v0.8.7
+	goki.dev/grease v0.8.8
+	goki.dev/gti v0.0.0-20230916184410-1ab14cf7627a
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
+	goki.dev/ordmap v0.5.0
 )
 
 require (
@@ -32,8 +36,9 @@ require (
 	github.com/goki/vulkan v1.0.6 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
-	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
@@ -44,7 +49,6 @@ require (
 	goki.dev/mat32/v2 v2.0.0-dev0.0.0 // indirect
 	goki.dev/matcolor v0.9.5 // indirect
 	goki.dev/mobile v0.5.0 // indirect
-	goki.dev/ordmap v0.5.0 // indirect
 	goki.dev/pi/v2 v2.0.0-dev0.0.1 // indirect
 	goki.dev/prof/v2 v2.0.0-dev0.0.2 // indirect
 	goki.dev/vci/v2 v2.0.0-dev0.0.0 // indirect
@@ -52,8 +56,8 @@ require (
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/image v0.11.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
-	golang.org/x/tools v0.12.1-0.20230818130535-1517d1a3ba60 // indirect
+	golang.org/x/tools v0.13.0 // indirect
 )
