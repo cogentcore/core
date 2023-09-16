@@ -29,8 +29,7 @@ type Config struct {
 	Server Server
 	Client Client
 
-	Directory string `grease:"dir" nest:"-"`
-	Dir       string `nest:"-"`
+	Dir string
 }
 
 type Server struct {
