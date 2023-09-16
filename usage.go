@@ -41,6 +41,10 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			os.Exit(1)
 		}
 	}
+
+	fields := &Fields{}
+	AddFields(cfg, fields, cmd)
+
 	cmdName := opts.AppName
 	if cmd != "" {
 		cmdName += " " + cmd
@@ -54,7 +58,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 	b.WriteString(cmdColor("-help") + " or " + cmdColor("-h") + "\n\tshow usage information for a command\n")
 	b.WriteString(cmdColor("-config") + " or " + cmdColor("-cfg") + "\n\tthe filename to load configuration options from\n")
-	FlagUsage(cfg, "", &b, cmd)
+	FlagUsage(fields, &b)
 	return b.String()
 }
 
@@ -119,15 +123,9 @@ outer:
 }
 
 // FlagUsage adds the flag usage info for the
-// given app to the given [strings.Builder].
+// given fields to the given [strings.Builder].
 // Typically, you should use [Usage] instead.
-// Pass an empty string for path unless you are
-// already in a nested context, which should only
-// happen internally (if you don't know whether
-// you're in a nested context, you're not).
-func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
-	fields := &Fields{}
-	AddFields(app, fields, cmd)
+func FlagUsage(fields *Fields, b *strings.Builder) {
 	for _, kv := range fields.Order {
 		f := kv.Val
 		for i, name := range f.Names {
