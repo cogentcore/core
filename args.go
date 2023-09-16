@@ -450,8 +450,8 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 		if path == "" || nest {
 			continue
 		}
-		neststr, ok := f.Tag.Lookup("nest")
-		if ok && (neststr == "+" || neststr == "true") {
+		nesttag, ok := f.Tag.Lookup("nest")
+		if ok && (nesttag == "+" || nesttag == "true") {
 			continue
 		}
 		for _, name := range names {
