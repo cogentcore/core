@@ -46,18 +46,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 		}
 		return err
 	}
-	cmd := ""
-	cs = AddCmd(&Cmd[T]{
-		Func: func(t T) error {
-			Help = true                              // need to set here also so that we get no command succeeded message
-			fmt.Println(Usage(opts, cfg, "", cs...)) // TODO: set command here (probably need to use global variable or something)
-			return nil
-		},
-		Name: "help",
-		Doc:  "show this usage message and exit",
-		Root: true,
-	}, cs...)
-	cmd, err = Config(opts, cfg, cs...)
+	cmd, err := Config(opts, cfg, cs...)
 	if err != nil {
 		err := fmt.Errorf("error configuring app: %w", err)
 		if opts.Fatal {
