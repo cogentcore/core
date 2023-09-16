@@ -184,7 +184,7 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 	AddFields(cfg, allFields, newCmd)
 
 	allFlags = &Fields{}
-	newArgs, err = FieldFlagNames(allFields, allFlags, newCmd, newArgs)
+	newArgs, err = AddFlags(allFields, allFlags, newCmd, newArgs)
 	if err != nil {
 		return newCmd, allFields, fmt.Errorf("error getting field flag names: %w", err)
 	}
@@ -365,18 +365,18 @@ func addAllCases(nm, path string, field *Field, allFlags *Fields, cmd string) {
 	allFlags.Add(strcase.ToScreamingSnake(nm), field)
 }
 
-// FieldFlagNames adds to given flags map all the different ways the field names
+// AddFlags adds to given flags map all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value. It also uses
 // the given positional arguments to set the values of the object based on any
 // posarg struct tags that fields have. The posarg struct tag must be either
 // "all" or a valid uint.
-func FieldFlagNames(allFields *Fields, allFlags *Fields, cmd string, args []string) ([]string, error) {
-	return fieldFlagNamesStruct(allFields, "", false, allFlags, cmd, args)
+func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string) ([]string, error) {
+	return addFlagsImpl(allFields, "", false, allFlags, cmd, args)
 }
 
-// fieldFlagNamesStruct returns map of all the different ways the field names
+// addFlagsImpl returns map of all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value
-func fieldFlagNamesStruct(allFields *Fields, path string, nest bool, allFlags *Fields, cmd string, args []string) ([]string, error) {
+func addFlagsImpl(allFields *Fields, path string, nest bool, allFlags *Fields, cmd string, args []string) ([]string, error) {
 	leftovers := args
 	for _, kv := range allFields.Order {
 		v := kv.Val
