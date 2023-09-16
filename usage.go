@@ -128,12 +128,17 @@ func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
-		cmdtag, ok := f.Tag.Lookup("cmd")
-		if ok && cmdtag != cmd { // if we are associated with a different command, skip
+		cmdtag, hast := f.Tag.Lookup("cmd")
+		if hast && cmdtag != cmd { // if we are associated with a different command, skip
 			continue
 		}
 		if kit.NonPtrType(f.Type).Kind() == reflect.Struct {
 			nwPath := f.Name
+			// if we are scoped by command, we don't need new path scope
+			// TODO: need a better approach to this; maybe use allFlags map
+			if hast {
+				nwPath = ""
+			}
 			if path != "" {
 				nwPath = path + "." + nwPath
 			}
@@ -144,8 +149,8 @@ func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
 			continue
 		}
 		names := []string{f.Name}
-		greasetag, ok := f.Tag.Lookup("grease")
-		if ok {
+		greasetag, hast := f.Tag.Lookup("grease")
+		if hast {
 			names = strings.Split(greasetag, ",")
 			if len(names) == 0 {
 				log.Fatalln("expected at least one name in grease struct tag, but got none")
@@ -170,8 +175,8 @@ func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
 			}
 		}
 		b.WriteString("\n")
-		desc, ok := f.Tag.Lookup("desc")
-		if ok && desc != "" {
+		desc, hast := f.Tag.Lookup("desc")
+		if hast && desc != "" {
 			b.WriteString("\t" + strings.ReplaceAll(desc, "\n", "\n\t")) // need to put a tab on every newline for formatting
 			def, ok := f.Tag.Lookup("def")
 			if ok && def != "" {
