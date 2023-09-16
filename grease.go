@@ -63,7 +63,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 		}
 		return fmt.Errorf("%s failed: %w", opts.AppName+" "+cmd, err)
 	}
-	if opts.PrintSuccess && !Help { // help command will always succeed
+	if opts.PrintSuccess {
 		fmt.Println(cmdColor(cmdString(opts, cmd)) + successColor(" succeeded"))
 	}
 	return nil
@@ -94,11 +94,6 @@ func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) error {
 			}
 			return nil
 		}
-	}
-	if cmd == "" || cmd == "help" {
-		Help = true
-		fmt.Println(Usage(opts, cfg, cmd, cmds...))
-		return nil
 	}
 	return fmt.Errorf("command %q not found", cmd)
 }

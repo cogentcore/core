@@ -476,12 +476,15 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 }
 
 // CommandFlags adds non-field flags that control the config process
-// to the given map of flags:
+// to the given map of flags. These flags have no actual effect and
+// map to a placeholder value because they are handled elsewhere, but
+// they must be set to prevent errors. The following flags are added:
 //
 //	-config -cfg -help -h
 func CommandFlags(allFlags map[string]reflect.Value) {
-	allFlags["config"] = reflect.ValueOf(&ConfigFile)
-	allFlags["cfg"] = reflect.ValueOf(&ConfigFile)
-	allFlags["help"] = reflect.ValueOf(&Help)
-	allFlags["h"] = reflect.ValueOf(&Help)
+	val := ""
+	allFlags["config"] = reflect.ValueOf(&val)
+	allFlags["cfg"] = reflect.ValueOf(&val)
+	allFlags["help"] = reflect.ValueOf(&val)
+	allFlags["h"] = reflect.ValueOf(&val)
 }

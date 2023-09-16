@@ -15,19 +15,6 @@ import (
 	"goki.dev/ki/v2/kit"
 )
 
-var (
-	// NonFlagArgs are the command-line args that remain after all the flags have
-	// been processed.  This is set after the call to Config.
-	NonFlagArgs = []string{}
-
-	// ConfigFile is the name of the config file actually loaded, specified by the
-	// -config or -cfg command-line arg or the default file given in Config
-	ConfigFile string
-
-	// Help is variable target for -help or -h args
-	Help bool
-)
-
 // MetaConfig contains meta configuration information specified
 // via command line arguments that controls the initial behavior
 // of grease for all apps before anything else is loaded. Its
@@ -110,10 +97,10 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	}
 
 	var cfgFiles []string
-	if ConfigFile != "" {
-		_, err := dirs.FindFileOnPaths(opts.IncludePaths, ConfigFile)
+	if mc.Config != "" {
+		_, err := dirs.FindFileOnPaths(opts.IncludePaths, mc.Config)
 		if err == nil {
-			cfgFiles = append(cfgFiles, ConfigFile)
+			cfgFiles = append(cfgFiles, mc.Config)
 		}
 	} else {
 		if opts.SearchUp {
