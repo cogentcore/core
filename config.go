@@ -101,6 +101,8 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		_, err := dirs.FindFileOnPaths(opts.IncludePaths, mc.Config)
 		if err == nil {
 			cfgFiles = append(cfgFiles, mc.Config)
+		} else {
+			return "", fmt.Errorf("error opening command line config file: %w", err)
 		}
 	} else {
 		if opts.SearchUp {
