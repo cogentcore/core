@@ -72,11 +72,14 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 			addFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, allFields, usedNames, cmd)
 			continue
 		}
+		// we add both unqualified and fully-qualified names
 		name := f.Name
+		names := []string{name}
 		if path != "" {
 			name = path + "." + name
+			names = append(names, name)
 		}
-		names := []string{strcase.ToKebab(f.Name)}
+
 		greasetag, ok := f.Tag.Lookup("grease")
 		if ok {
 			names = strings.Split(greasetag, ",")
@@ -92,6 +95,7 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 			Names: names,
 		}
 		for i, name := range names {
+			name := strcase.ToCamel(name)        // everybody is in camel for naming conflict check
 			if of, has := usedNames[name]; has { // we have a conflict
 
 				// if we have a naming conflict between two fields with the same base
@@ -167,18 +171,18 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 	}
 }
 
-// shortestUniqueName returns the shortest unique kebab-case name for
+// shortestUniqueName returns the shortest unique camel-case name for
 // the given fully-qualified nest name of a field, using the given
 // map of used names. It works backwards, so, for example, if given "A.B.C.D",
-// it would check "d", then "c-d", then "b-c-d", and finally "a-b-c-d".
+// it would check "D", then "C.D", then "B.C.D", and finally "A.B.C.D".
 func shortestUniqueName(name string, usedNames map[string]*Field) string {
 	strs := strings.Split(name, ".")
 	cur := ""
 	for i := len(strs) - 1; i >= 0; i-- {
 		if cur == "" {
-			cur = strcase.ToKebab(strs[i])
+			cur = strs[i]
 		} else {
-			cur = strcase.ToKebab(strs[i]) + "-" + cur
+			cur = strs[i] + cur
 		}
 		if _, has := usedNames[cur]; !has {
 			return cur
