@@ -35,6 +35,9 @@ func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 // It is a simple entry point to enumgen that does all
 // of the steps; for more specific functionality, create
 // a new [Generator] with [NewGenerator] and call methods on it.
+//
+//gti:add
+//grease:cmd -root
 func Generate(cfg *Config) error {
 	pkgs, err := ParsePackage(cfg)
 	if err != nil {
