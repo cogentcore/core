@@ -10,6 +10,7 @@ require (
 	goki.dev/greasi v0.8.1
 	goki.dev/gti v0.0.0-20230914001823-0d63dbfb3acf
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
+	goki.dev/ordmap v0.5.0
 	golang.org/x/tools v0.13.0
 )
 
@@ -48,7 +49,6 @@ require (
 	goki.dev/mat32/v2 v2.0.0-dev0.0.0 // indirect
 	goki.dev/matcolor v0.9.5 // indirect
 	goki.dev/mobile v0.5.0 // indirect
-	goki.dev/ordmap v0.5.0 // indirect
 	goki.dev/pi/v2 v2.0.0-dev0.0.1 // indirect
 	goki.dev/prof/v2 v2.0.0-dev0.0.2 // indirect
 	goki.dev/vci/v2 v2.0.0-dev0.0.0 // indirect
