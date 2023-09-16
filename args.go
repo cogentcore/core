@@ -174,28 +174,27 @@ func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value st
 // gotten through [GetArgs] first. It returns the (sub)command specified by
 // the arguments, a map from all of the flag names to their associated
 // settable values, and any error.
-func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFlags map[string]reflect.Value, err error) {
-	allFlags = map[string]reflect.Value{}
-	CommandFlags(allFlags)
-	newArgs, newCmd, err := parseArgsImpl(cfg, args, allFlags, "", cmds...)
+func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFields *Fields, err error) {
+	allFields = &Fields{}
+	newArgs, newCmd, err := parseArgsImpl(cfg, args, "", cmds...)
 	if err != nil {
-		return newCmd, allFlags, err
+		return newCmd, allFields, err
 	}
 
-	newArgs, err = FieldFlagNames(cfg, allFlags, newCmd, newArgs)
+	newArgs, err = AddFields(cfg, allFields, newCmd, newArgs)
 	if err != nil {
-		return newCmd, allFlags, fmt.Errorf("error getting field flag names: %w", err)
+		return newCmd, allFields, fmt.Errorf("error getting field flag names: %w", err)
 	}
 	if len(newArgs) > 0 {
-		return newCmd, allFlags, fmt.Errorf("got unused arguments: %v", newArgs)
+		return newCmd, allFields, fmt.Errorf("got unused arguments: %v", newArgs)
 	}
-	return newCmd, allFlags, nil
+	return newCmd, allFields, nil
 }
 
 // parseArgsImpl is the underlying implementation of [ParseArgs] that is called
 // recursively and takes everything [ParseArgs] does and the current flags and
 // command state, and returns everything [ParseArgs] does and the args state.
-func parseArgsImpl[T any](cfg T, baseArgs []string, allFlags map[string]reflect.Value, baseCmd string, cmds ...*Cmd[T]) (args []string, cmd string, err error) {
+func parseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd[T]) (args []string, cmd string, err error) {
 	// we start with our base args and command
 	args = baseArgs
 	cmd = baseCmd
@@ -243,7 +242,7 @@ func parseArgsImpl[T any](cfg T, baseArgs []string, allFlags map[string]reflect.
 		// we have consumed our next arg, so we get rid of it
 		args = args[1:]
 		// then, we recursively parse again with our new command as context
-		oargs, ocmd, err := parseArgsImpl(cfg, args, allFlags, cmd, cmds...)
+		oargs, ocmd, err := parseArgsImpl(cfg, args, cmd, cmds...)
 		if err != nil {
 			return nil, "", err
 		}
