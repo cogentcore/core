@@ -359,13 +359,13 @@ func CopySliceRobust(to, fm any) error {
 	totyp := tonp.Type()
 	// eltyp := SliceElType(tonp)
 	if totyp.Kind() != reflect.Slice {
-		err := fmt.Errorf("ki.CopySliceRobust: 'to' is not slice, is: %v", totyp.String())
+		err := fmt.Errorf("laser.CopySliceRobust: 'to' is not slice, is: %v", totyp.String())
 		log.Println(err)
 		return err
 	}
 	fmtyp := fmnp.Type()
 	if fmtyp.Kind() != reflect.Slice {
-		err := fmt.Errorf("ki.CopySliceRobust: 'from' is not slice, is: %v", fmtyp.String())
+		err := fmt.Errorf("laser.CopySliceRobust: 'from' is not slice, is: %v", fmtyp.String())
 		log.Println(err)
 		return err
 	}

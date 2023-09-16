@@ -328,7 +328,7 @@ func Embed(stru any, embed reflect.Type) any {
 
 // EmbedImplements checks if given type implements given interface, or
 // it embeds a type that does so -- must pass a type constructed like this:
-// reflect.TypeOf((*gi.Node2D)(nil)).Elem() or just reflect.TypeOf(ki.BaseIface())
+// reflect.TypeOf((*gi.Node2D)(nil)).Elem() or just reflect.TypeOf(laser.BaseIface())
 func EmbedImplements(typ, iface reflect.Type) bool {
 	if iface.Kind() != reflect.Interface {
 		log.Printf("laser.EmbedImplements -- type is not an interface: %v\n", iface)

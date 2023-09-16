@@ -10,6 +10,8 @@ import (
 	"log"
 	"reflect"
 	"strconv"
+
+	"goki.dev/enums"
 )
 
 // Has convenience functions for converting any (e.g. properties) to given
@@ -406,19 +408,31 @@ func ToFloat32(it any) (float32, bool) {
 }
 
 // ToString robustly converts anything to a String
-// using a big type switch organized for greatest efficiency,
-// using strconv calls for numeric types, and
-// falling back on the Stringer interface, which is so
-// ubiquitous that there is no failure case and thus no bool return.
+// using a big type switch organized for greatest efficiency.
+// First checks for string or []byte and returns that immediately,
+// then checks for the Stringer interface as the preferred conversion
+// (e.g., for enums), and then falls back on strconv calls for numeric types.
+// If everything else fails, it uses Sprintf("%v") which always works,
+// so there is no need for a bool = false return.
 //
 //gopy:interface=handle
 func ToString(it any) string {
-	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
 	case string:
 		return it
 	case *string:
 		return *it
+	case []byte:
+		return string(it)
+	case *[]byte:
+		return string(*it)
+	}
+
+	if stringer, ok := it.(fmt.Stringer); ok {
+		return stringer.String()
+	}
+
+	switch it := it.(type) {
 	case bool:
 		if it {
 			return "true"
@@ -459,9 +473,6 @@ func ToString(it any) string {
 		return fmt.Sprintf("%#x", uintptr(*it))
 	}
 
-	if stringer, ok := it.(fmt.Stringer); ok {
-		return stringer.String()
-	}
 	if AnyIsNil(it) {
 		return "nil"
 	}
@@ -538,6 +549,7 @@ func ToStringPrec(it any, prec int) string {
 // SetRobust robustly sets the 'to' value from the 'from' value.
 // destination must be a pointer-to. Copies slices and maps robustly,
 // and can set a struct, slice or map from a JSON-formatted string from value.
+// Note that a map
 //
 //gopy:interface=handle
 func SetRobust(to, frm any) bool {
@@ -553,8 +565,20 @@ func SetRobust(to, frm any) bool {
 	vp := OnePtrValue(vnp)
 	vk := vnp.Kind()
 	if !vp.Elem().CanSet() {
-		log.Printf("ki.SetRobust 'to' cannot be set -- must be a variable or field, not a const or tmp or other value that cannot be set.  Value info: %v\n", vp)
+		log.Printf("laser.SetRobust 'to' cannot be set -- must be a variable or field, not a const or tmp or other value that cannot be set.  Value info: %v\n", vp)
 		return false
+	}
+
+	if es, ok := to.(enums.EnumSetter); ok {
+		if str, ok := frm.(string); ok {
+			es.SetString(str)
+			return true
+		}
+		fm, ok := ToInt(frm)
+		if ok {
+			es.SetInt64(int64(fm))
+			return true
+		}
 	}
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -585,7 +609,7 @@ func SetRobust(to, frm any) bool {
 		// cv := v.Complex()
 		// rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
 		// return rv, true
-	case vk == reflect.String: // todo: what about []byte?
+	case vk == reflect.String:
 		fm := ToString(frm)
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return true
