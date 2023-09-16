@@ -158,6 +158,7 @@ func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
 		}
 		for i, name := range names {
 			b.WriteString(cmdColor("-" + strcase.ToKebab(name)))
+			// handle English sentence construction with or and commas
 			if i == len(names)-2 {
 				if len(names) > 2 {
 					b.WriteString(",")
