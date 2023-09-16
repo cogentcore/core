@@ -58,27 +58,27 @@ func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T])
 // flags can be properly set with their shorthand syntax.
 // It should only be needed for internal use and not end-user code.
 func BoolFlags(obj any) map[string]bool {
-	if laser.AnyIsNil(obj) {
-		return nil
-	}
-	ov := reflect.ValueOf(obj)
-	if ov.Kind() == reflect.Pointer && ov.IsNil() {
-		return nil
-	}
-	val := laser.NonPtrValue(ov)
-	typ := val.Type()
-	res := map[string]bool{}
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
-		if f.Type.Kind() == reflect.Bool {
-			// we need all cases of both normal and "no" version
-			res[f.Name] = true
-			res[strings.ToLower(f.Name)] = true
-			res[strcase.ToKebab(f.Name)] = true
-			res[strcase.ToSnake(f.Name)] = true
-			res[strcase.ToScreamingSnake(f.Name)] = true
+	fields := &Fields{}
+	AddFields(obj, fields, AddAllFields)
 
-			nnm := "No" + f.Name
+	res := map[string]bool{}
+
+	for _, kv := range fields.Order {
+		f := kv.Val
+
+		if f.Field.Type.Kind() != reflect.Bool { // we only care about bools here
+			continue
+		}
+
+		// we need all cases of both normal and "no" version for all names
+		for _, name := range f.Names {
+			res[name] = true
+			res[strings.ToLower(name)] = true
+			res[strcase.ToKebab(name)] = true
+			res[strcase.ToSnake(name)] = true
+			res[strcase.ToScreamingSnake(name)] = true
+
+			nnm := "No" + name
 			res[nnm] = true
 			res[strings.ToLower(nnm)] = true
 			res[strcase.ToKebab(nnm)] = true

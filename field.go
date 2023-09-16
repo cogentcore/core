@@ -38,8 +38,13 @@ type Field struct {
 // Fields is a simple type alias for an ordered map of [Field] objects.
 type Fields = ordmap.Map[string, *Field]
 
+// AddAllFields, when passed to [AddFields], indicates to add all fields,
+// regardless of their command association.
+const AddAllFields = "*"
+
 // AddFields adds to the given fields map all of the fields of the given
-// object, in the context of the given command name.
+// object, in the context of the given command name. A value of [AddAllFields]
+// for cmd indicates to add all fields, regardless of their command association.
 func AddFields(obj any, allFields *Fields, cmd string) {
 	addFieldsImpl(obj, "", allFields, map[string]*Field{}, cmd)
 }
@@ -63,7 +68,7 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 		fv := val.Field(i)
 		pval := laser.PtrValue(fv)
 		cmdtag, ok := f.Tag.Lookup("cmd")
-		if ok && cmdtag != cmd { // if we are associated with a different command, skip
+		if ok && cmdtag != cmd && cmd != AddAllFields { // if we are associated with a different command, skip
 			continue
 		}
 		if laser.NonPtrType(f.Type).Kind() == reflect.Struct {
