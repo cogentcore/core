@@ -129,7 +129,7 @@ func CmdsFromCmdOrFuncs[T any, C CmdOrFunc[T]](cmds []C) ([]*Cmd[T], error) {
 // passed command, and there are no other root commands in the
 // given set of commands, the passed command will be made the
 // root command; otherwise, it will be made not the root command.
-func AddCmd[T any](cmd *Cmd[T], cmds ...*Cmd[T]) []*Cmd[T] {
+func AddCmd[T any](cmds []*Cmd[T], cmd *Cmd[T]) []*Cmd[T] {
 	hasCmd := false
 	hasRoot := false
 	for _, c := range cmds {
