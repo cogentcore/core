@@ -33,22 +33,22 @@ type Config struct {
 	Type Types `desc:"the type of the project (app/library)"`
 
 	// [view: add-fields] the configuration options for the build command
-	Build Build `view:"add-fields" desc:"the configuration options for the build command"`
+	Build Build `cmd:"build" view:"add-fields" desc:"the configuration options for the build command"`
 
 	// [view: add-fields] the configuration options for the colorgen command
-	Colorgen Colorgen `view:"add-fields" desc:"the configuration options for the colorgen command"`
+	Colorgen Colorgen `cmd:"colorgen" view:"add-fields" desc:"the configuration options for the colorgen command"`
 
 	// [view: add-fields] the configuration options for the install command
-	Install Install `view:"add-fields" desc:"the configuration options for the install command"`
+	Install Install `cmd:"install" view:"add-fields" desc:"the configuration options for the install command"`
 
 	// [view: add-fields] the configuration options for the log command
-	Log Log `view:"add-fields" desc:"the configuration options for the log command"`
+	Log Log `cmd:"log" view:"add-fields" desc:"the configuration options for the log command"`
 
 	// [view: add-fields] the configuration options for the release command
-	Release Release `view:"add-fields" desc:"the configuration options for the release command"`
+	Release Release `cmd:"release" view:"add-fields" desc:"the configuration options for the release command"`
 
 	// [view: add-fields] the configuration options for the generate command
-	Generate Generate `view:"add-fields" desc:"the configuration options for the generate command"`
+	Generate Generate `cmd:"generate" view:"add-fields" desc:"the configuration options for the generate command"`
 }
 
 type Build struct {
