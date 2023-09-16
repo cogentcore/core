@@ -46,6 +46,7 @@ func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T])
 	if err != nil {
 		return "", err
 	}
+	fmt.Println(allFlags)
 	err = ParseFlags(flags, allFlags, errNotFound)
 	if err != nil {
 		return "", err

@@ -148,19 +148,13 @@ func TestArgs(t *testing.T) {
 	cfg := &TestConfig{}
 	SetFromDefaults(cfg)
 	// note: cannot use "-Includes=testcfg.toml",
-	args := []string{"-save-wts", "-nogui", "-no-epoch-log", "--NoRunLog", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "-Slice=[3.2, 2.4, 1.9]", "leftover1", "leftover2"}
-	allFlags := &Fields{}
-	CommandFlags(allFlags)
+	args := []string{"-save-wts", "-nogui", "-no-epoch-log", "--NoRunLog", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "-Slice=[3.2, 2.4, 1.9]"}
 
-	leftovers, flags, err := GetArgs(args, BoolFlags(cfg))
+	_, err := SetFromArgs(cfg, args, ErrNotFound)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	err = ParseFlags(flags, allFlags, false)
-	if err != nil {
-		t.Error(err)
-	}
-	fmt.Println(leftovers)
+
 	if cfg.Runs != 5 || cfg.Run != 1 || cfg.Tag != "nice" || cfg.PatParams.Sparseness != 0.1 || cfg.SaveWts != true || cfg.GUI != false || cfg.EpochLog != false || cfg.RunLog != false {
 		t.Errorf("args not set properly: %#v", cfg)
 	}
