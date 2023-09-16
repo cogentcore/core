@@ -23,10 +23,10 @@ import (
 // SetFromArgs sets Config values from command-line args,
 // based on the field names in the Config struct.
 // Returns any args that did not start with a `-` flag indicator.
-// For more robust error processing, it is assumed that all flagged args (-)
+// If errNotFound is set to true, it is assumed that all flagged args (-)
 // must refer to fields in the config, so any that fail to match trigger
 // an error. Errors can also result from parsing.
-func SetFromArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (string, error) {
+func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T]) (string, error) {
 	nfargs, flags, err := GetArgs(args)
 	if err != nil {
 		return "", err
@@ -35,7 +35,7 @@ func SetFromArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	err = ParseFlags(flags, allFlags, true)
+	err = ParseFlags(flags, allFlags, errNotFound)
 	if err != nil {
 		return "", err
 	}

@@ -6,6 +6,7 @@ package grease
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -138,14 +139,35 @@ func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
 			FlagUsage(kit.PtrValue(fv).Interface(), nwPath, b, cmd)
 			continue
 		}
-		nm := f.Name
-		if nm == "Includes" {
+		if f.Name == "Includes" {
 			continue
 		}
-		if path != "" {
-			nm = path + "." + nm
+		names := []string{f.Name}
+		greasetag, ok := f.Tag.Lookup("grease")
+		if ok {
+			names = strings.Split(greasetag, ",")
+			if len(names) == 0 {
+				log.Fatalln("expected at least one name in grease struct tag, but got none")
+			}
 		}
-		b.WriteString(cmdColor("-" + strcase.ToKebab(nm) + "\n"))
+
+		if path != "" {
+			for i, name := range names {
+				names[i] = path + "." + name
+			}
+		}
+		for i, name := range names {
+			b.WriteString(cmdColor("-" + strcase.ToKebab(name)))
+			if i == len(names)-2 {
+				if len(names) > 2 {
+					b.WriteString(",")
+				}
+				b.WriteString(" or ")
+			} else if i != len(names)-1 {
+				b.WriteString(", ")
+			}
+		}
+		b.WriteString("\n")
 		desc, ok := f.Tag.Lookup("desc")
 		if ok && desc != "" {
 			b.WriteString("\t" + strings.ReplaceAll(desc, "\n", "\n\t")) // need to put a tab on every newline for formatting

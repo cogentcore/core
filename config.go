@@ -78,7 +78,8 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	// (help and config), which we need to know before
 	// we can do other configuration.
 	mc := &MetaConfig{}
-	cmd, err := SetFromArgs(mc, args, MetaCmds...)
+	// we ignore not found flags in meta config, because we only care about meta config and not anything else being passed to the command
+	cmd, err := SetFromArgs(mc, args, false, MetaCmds...)
 	if err != nil {
 		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
@@ -140,7 +141,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		}
 	}
 
-	cmd, err = SetFromArgs(cfg, args, cmds...)
+	cmd, err = SetFromArgs(cfg, args, true, cmds...)
 	if err != nil {
 		errs = append(errs, err)
 	}
