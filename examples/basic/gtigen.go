@@ -50,3 +50,33 @@ var _ = gti.AddFunc(&gti.Func{
 		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
 	}),
 })
+
+var _ = gti.AddFunc(&gti.Func{
+	Name: "main.ModTidyRemote",
+	Doc:  "",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-name", "mod tidy remote"}},
+	},
+	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"c", &gti.Field{Name: "c", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
+	}),
+})
+
+var _ = gti.AddFunc(&gti.Func{
+	Name: "main.ModTidyRemoteSetURL",
+	Doc:  "",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-name", "mod tidy remote set-url"}},
+	},
+	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"c", &gti.Field{Name: "c", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
+	}),
+})

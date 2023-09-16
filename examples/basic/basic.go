@@ -54,7 +54,21 @@ func ModTidy(c *Config) error {
 	return nil
 }
 
+//gti:add
+//grease:cmd -name "mod tidy remote"
+func ModTidyRemote(c *Config) error {
+	fmt.Println("running mod tidy remote")
+	return nil
+}
+
+//gti:add
+//grease:cmd -name "mod tidy remote set-url"
+func ModTidyRemoteSetURL(c *Config) error {
+	fmt.Println("running mod tidy remote set-url")
+	return nil
+}
+
 func main() {
 	opts := grease.DefaultOptions("basic", "Basic", "Basic is a basic example application made with Grease.")
-	grease.Run(opts, &Config{}, Build, Run, Mod, ModTidy)
+	grease.Run(opts, &Config{}, Build, Run, Mod, ModTidy, ModTidyRemote, ModTidyRemoteSetURL)
 }
