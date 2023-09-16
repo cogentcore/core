@@ -13,7 +13,7 @@ Some example functions:
 
 * `ValueIsZero()` -- checks for any kind of zero, including `nil`.
 
-* `ToInt, ToFloat, ToString, ToBool` -- robustly converts any value to given type, using an efficient type switch for all basic types, including pointers, and using `strconv` parse from string.
+* `ToInt, ToFloat, ToString, ToBool` -- robustly converts any value to given type, using an efficient type switch for all basic types, including pointers, and using `strconv` parse from string.  See also [glop/num](https://github.com/goki/glop/tree/num) for generics-based conversion.  The key difference is that if you have an `any`, you can't use generics, so these type-switch methods are necessary in that case.
 
 * `SetRobust(to, frm any) bool` -- robustly sets the 'to' value from the 'from' value, for any case, using the To* functions and JSON format for maps and slices.
 
