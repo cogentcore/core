@@ -119,6 +119,11 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 	return
 }
 
+// ParseArgs parses the given non-flag arguments in the context of the given
+// configuration information and commands. The non-flag arguments should be
+// gotten through [GetArgs] first. It returns the (sub)command specified by
+// the arguments, a map from all of the flag names to their associated
+// settable values, and any error.
 func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFlags map[string]reflect.Value, err error) {
 	allFlags = map[string]reflect.Value{}
 	CommandFlags(allFlags)
@@ -137,9 +142,9 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 	return newCmd, allFlags, nil
 }
 
-// ParseArgs parses the given non-flag arguments in the context of the given
-// configuration information and commands. The non-flag arguments should be
-// gotten through [GetArgs] first.
+// parseArgsImpl is the underlying implementation of [ParseArgs] that is called
+// recursively and takes everything [ParseArgs] does and the current flags and
+// command state, and returns everything [ParseArgs] does and the args state.
 func parseArgsImpl[T any](cfg T, args []string, allFlags map[string]reflect.Value, cmd string, cmds ...*Cmd[T]) (newArgs []string, newCmd string, err error) {
 	// we start with the base args and command
 	newArgs = args
@@ -185,13 +190,10 @@ func parseArgsImpl[T any](cfg T, args []string, allFlags map[string]reflect.Valu
 			if err != nil {
 				return nil, "", err
 			}
-			fmt.Printf("newCmd: %q, ocmd: %q, args: %v, oargs: %q\n", newCmd, ocmd, newArgs, oargs)
 			// our new args and command are now whatever the recursive call returned, building upon what we passed it
 			newArgs = oargs
 			newCmd = ocmd
-			fmt.Printf("after: newCmd: %q\n", newCmd)
 			break
-
 		}
 	}
 	return
