@@ -24,10 +24,10 @@ import (
 // and not by end-user code.
 type MetaConfig struct {
 	// Config is the file name of the config file to load
-	Config string
+	Config string `grease:"config,cfg"`
 
 	// Help is whether to display a help message
-	Help bool
+	Help bool `grease:"help,h"`
 
 	// HelpCmd is the name of the command to display
 	// help information for. It is only applicable to the

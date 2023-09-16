@@ -436,8 +436,16 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 			}
 
 		}
+		names := []string{f.Name}
+		greasetag, ok := f.Tag.Lookup("grease")
+		if ok {
+			names = strings.Split(greasetag, ",")
+			if len(names) == 0 {
+				return nil, fmt.Errorf("expected at least one name in grease struct tag, but got none")
+			}
+		}
 		if kit.NonPtrType(f.Type).Kind() == reflect.Struct {
-			nwPath := f.Name
+			nwPath := names[0]
 			if path != "" {
 				nwPath = path + "." + nwPath
 			}
@@ -451,9 +459,11 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 			fieldFlagNamesStruct(kit.PtrValue(fv).Interface(), nwPath, nwNest, allFlags, cmd, args)
 			continue
 		}
-		addAllCases(f.Name, path, pval, allFlags, cmd)
-		if f.Type.Kind() == reflect.Bool {
-			addAllCases("No"+f.Name, path, pval, allFlags, cmd)
+		for _, name := range names {
+			addAllCases(name, path, pval, allFlags, cmd)
+			if f.Type.Kind() == reflect.Bool {
+				addAllCases("No"+name, path, pval, allFlags, cmd)
+			}
 		}
 		// now process adding non-nested version of field
 		if path == "" || nest {
@@ -463,14 +473,17 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 		if ok && (neststr == "+" || neststr == "true") {
 			continue
 		}
-		if _, has := allFlags[f.Name]; has {
-			fmt.Printf("warning: programmer error: grease config field \"%s.%s\" cannot be added as a non-nested flag with the name %q because that name has already been registered by another field; add the field tag 'nest:\"+\"' to the field you want to require nested access for (ie: \"Path.Field\" instead of \"Field\") to remove this warning\n", path, f.Name, f.Name)
-			continue
+		for _, name := range names {
+			if _, has := allFlags[name]; has {
+				fmt.Printf("warning: programmer error: grease config field \"%s.%s\" cannot be added as a non-nested flag with the name %q because that name has already been registered by another field; add the field tag 'nest:\"+\"' to the field you want to require nested access for (ie: \"Path.Field\" instead of \"Field\") to remove this warning\n", path, f.Name, name)
+				continue
+			}
+			addAllCases(name, "", pval, allFlags, cmd)
+			if f.Type.Kind() == reflect.Bool {
+				addAllCases("No"+name, "", pval, allFlags, cmd)
+			}
 		}
-		addAllCases(f.Name, "", pval, allFlags, cmd)
-		if f.Type.Kind() == reflect.Bool {
-			addAllCases("No"+f.Name, "", pval, allFlags, cmd)
-		}
+
 	}
 	return leftovers, nil
 }
@@ -482,9 +495,10 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 //
 //	-config -cfg -help -h
 func CommandFlags(allFlags map[string]reflect.Value) {
-	val := ""
-	allFlags["config"] = reflect.ValueOf(&val)
-	allFlags["cfg"] = reflect.ValueOf(&val)
-	allFlags["help"] = reflect.ValueOf(&val)
-	allFlags["h"] = reflect.ValueOf(&val)
+	cfg := ""
+	h := false
+	allFlags["config"] = reflect.ValueOf(&cfg)
+	allFlags["cfg"] = reflect.ValueOf(&cfg)
+	allFlags["help"] = reflect.ValueOf(&h)
+	allFlags["h"] = reflect.ValueOf(&h)
 }
