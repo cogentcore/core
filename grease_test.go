@@ -6,12 +6,8 @@ package grease
 
 import (
 	"fmt"
-	"reflect"
-	"sort"
 	"strings"
 	"testing"
-
-	"golang.org/x/exp/maps"
 )
 
 // TestSubConfig is a sub-struct with special params
@@ -139,15 +135,13 @@ func TestArgsPrint(t *testing.T) {
 	t.Skip("prints all possible args")
 
 	cfg := &TestConfig{}
-	allArgs := make(map[string]reflect.Value)
-	AddFields(cfg, allArgs, "", []string{})
+	allFields := &Fields{}
+	AddFields(cfg, allFields, "")
+	allFlags := &Fields{}
+	FieldFlagNames(allFields, allFlags, "", []string{})
 
-	keys := maps.Keys(allArgs)
-	sort.Slice(keys, func(i, j int) bool {
-		return strings.ToLower(keys[i]) < strings.ToLower(keys[j])
-	})
 	fmt.Println("Args:")
-	fmt.Println(strings.Join(keys, "\n"))
+	fmt.Println(strings.Join(allFlags.Keys(), "\n"))
 }
 
 func TestArgs(t *testing.T) {
@@ -155,14 +149,14 @@ func TestArgs(t *testing.T) {
 	SetFromDefaults(cfg)
 	// note: cannot use "-Includes=testcfg.toml",
 	args := []string{"-save-wts", "-nogui", "-no-epoch-log", "--NoRunLog", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "-Slice=[3.2, 2.4, 1.9]", "leftover1", "leftover2"}
-	allArgs := make(map[string]reflect.Value)
-	CommandFlags(allArgs)
+	allFlags := &Fields{}
+	CommandFlags(allFlags)
 
 	leftovers, flags, err := GetArgs(args, BoolFlags(cfg))
 	if err != nil {
 		t.Error(err)
 	}
-	err = ParseFlags(flags, allArgs, false)
+	err = ParseFlags(flags, allFlags, false)
 	if err != nil {
 		t.Error(err)
 	}

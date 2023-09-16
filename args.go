@@ -42,11 +42,11 @@ func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T])
 	if err != nil {
 		return "", err
 	}
-	cmd, allFlags, err := ParseArgs(cfg, nfargs, cmds...)
+	cmd, allFields, err := ParseArgs(cfg, nfargs, cmds...)
 	if err != nil {
 		return "", err
 	}
-	err = ParseFlags(flags, allFlags, errNotFound)
+	err = ParseFlags(flags, allFields, errNotFound)
 	if err != nil {
 		return "", err
 	}
@@ -175,13 +175,16 @@ func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value st
 // the arguments, a map from all of the flag names to their associated
 // settable values, and any error.
 func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFields *Fields, err error) {
-	allFields = &Fields{}
 	newArgs, newCmd, err := parseArgsImpl(cfg, args, "", cmds...)
 	if err != nil {
 		return newCmd, allFields, err
 	}
 
-	newArgs, err = AddFields(cfg, allFields, newCmd, newArgs)
+	allFields = &Fields{}
+	AddFields(cfg, allFields, newCmd)
+
+	allFlags := &Fields{}
+	newArgs, err = FieldFlagNames(allFields, allFlags, newCmd, newArgs)
 	if err != nil {
 		return newCmd, allFields, fmt.Errorf("error getting field flag names: %w", err)
 	}
@@ -260,7 +263,7 @@ func parseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd
 // Setting errNotFound = true causes flags that are not in allFlags to
 // trigger an error; otherwise, it just skips those. The flags should be
 // gotten through [GetArgs] first.
-func ParseFlags(flags map[string]string, allFlags map[string]reflect.Value, errNotFound bool) error {
+func ParseFlags(flags map[string]string, allFlags *Fields, errNotFound bool) error {
 	for name, value := range flags {
 		err := ParseFlag(name, value, allFlags, errNotFound)
 		if err != nil {
@@ -277,8 +280,8 @@ func ParseFlags(flags map[string]string, allFlags map[string]reflect.Value, errN
 // to trigger an error; otherwise, it just does nothing and returns no error.
 // It is designed for use in [ParseFlags] and should typically not be used by
 // end-user code.
-func ParseFlag(name string, value string, allFlags map[string]reflect.Value, errNotFound bool) error {
-	fval, exists := allFlags[name]
+func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) error {
+	f, exists := allFlags.ValByKeyTry(name)
 	if !exists {
 		if errNotFound {
 			return fmt.Errorf("flag name not recognized: %q", name)
@@ -286,7 +289,7 @@ func ParseFlag(name string, value string, allFlags map[string]reflect.Value, err
 		return nil
 	}
 
-	isBool := laser.NonPtrValue(fval).Kind() == reflect.Bool
+	isBool := laser.NonPtrValue(f.Value).Kind() == reflect.Bool
 
 	if isBool {
 		lcnm := strings.ToLower(name)
@@ -295,7 +298,7 @@ func ParseFlag(name string, value string, allFlags map[string]reflect.Value, err
 			if lcnm[:3] == "no_" || lcnm[:3] == "no-" {
 				negate = true
 			} else if lcnm[:2] == "no" {
-				if _, has := allFlags[lcnm[2:]]; has { // e.g., nogui and gui is on list
+				if _, has := allFlags.ValByKeyTry(lcnm[2:]); has { // e.g., nogui and gui is on list
 					negate = true
 				}
 			}
@@ -311,12 +314,12 @@ func ParseFlag(name string, value string, allFlags map[string]reflect.Value, err
 		return fmt.Errorf("flag needs an argument: %q", name)
 	}
 
-	return SetArgValue(name, fval, value)
+	return SetFieldValue(f, value)
 }
 
-// SetArgValue sets given arg name to given value, into settable reflect.Value
-func SetArgValue(name string, fval reflect.Value, value string) error {
-	nptyp := laser.NonPtrType(fval.Type())
+// SetFieldValue sets the value of the given field to the given value
+func SetFieldValue(f *Field, value string) error {
+	nptyp := laser.NonPtrType(f.Value.Type())
 	vk := nptyp.Kind()
 	switch {
 	case vk == reflect.Map:
@@ -325,9 +328,9 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 		if err != nil {
 			return err
 		}
-		err = laser.CopyMapRobust(fval.Interface(), mval["tmp"])
+		err = laser.CopyMapRobust(f.Value.Interface(), mval["tmp"])
 		if err != nil {
-			return fmt.Errorf("not able to set map field from arg: %q val: %q: %w", name, value, err)
+			return fmt.Errorf("not able to set map field from arg: %q val: %q: %w", f.Name, value, err)
 		}
 	case vk == reflect.Slice:
 		mval := make(map[string]any)
@@ -335,17 +338,31 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 		if err != nil {
 			return err
 		}
-		err = laser.CopySliceRobust(fval.Interface(), mval["tmp"])
+		err = laser.CopySliceRobust(f.Value.Interface(), mval["tmp"])
 		if err != nil {
-			return fmt.Errorf("not able to set slice field from arg: %q val: %q: %w", name, value, err)
+			return fmt.Errorf("not able to set slice field from arg: %q val: %q: %w", f.Name, value, err)
 		}
 	default:
-		ok := laser.SetRobust(fval.Interface(), value) // overkill but whatever
+		ok := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
 		if !ok {
-			return fmt.Errorf("not able to set field from arg: %q val: %q", name, value)
+			return fmt.Errorf("not able to set field from arg: %q val: %q", f.Name, value)
 		}
 	}
 	return nil
+}
+
+func addAllCases(nm, path string, field *Field, allFlags *Fields, cmd string) {
+	if nm == "Includes" {
+		return // skip
+	}
+	if path != "" {
+		nm = path + "." + nm
+	}
+	allFlags.Add(nm, field)
+	allFlags.Add(strings.ToLower(nm), field)
+	allFlags.Add(strcase.ToKebab(nm), field)
+	allFlags.Add(strcase.ToSnake(nm), field)
+	allFlags.Add(strcase.ToScreamingSnake(nm), field)
 }
 
 // FieldFlagNames adds to given flags map all the different ways the field names
@@ -353,49 +370,22 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 // the given positional arguments to set the values of the object based on any
 // posarg struct tags that fields have. The posarg struct tag must be either
 // "all" or a valid uint.
-func FieldFlagNames(obj any, allFlags map[string]reflect.Value, cmd string, args []string) ([]string, error) {
-	return fieldFlagNamesStruct(obj, "", false, allFlags, cmd, args)
-}
-
-func addAllCases(nm, path string, pval reflect.Value, allFlags map[string]reflect.Value, cmd string) {
-	if nm == "Includes" {
-		return // skip
-	}
-	if path != "" {
-		nm = path + "." + nm
-	}
-	allFlags[nm] = pval
-	allFlags[strings.ToLower(nm)] = pval
-	allFlags[strcase.ToKebab(nm)] = pval
-	allFlags[strcase.ToSnake(nm)] = pval
-	allFlags[strcase.ToScreamingSnake(nm)] = pval
+func FieldFlagNames(allFields *Fields, allFlags *Fields, cmd string, args []string) ([]string, error) {
+	return fieldFlagNamesStruct(allFields, "", false, allFlags, cmd, args)
 }
 
 // fieldFlagNamesStruct returns map of all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value
-func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]reflect.Value, cmd string, args []string) ([]string, error) {
-	if laser.AnyIsNil(obj) {
-		return nil, nil
-	}
-	ov := reflect.ValueOf(obj)
-	if ov.Kind() == reflect.Pointer && ov.IsNil() {
-		return nil, nil
-	}
+func fieldFlagNamesStruct(allFields *Fields, path string, nest bool, allFlags *Fields, cmd string, args []string) ([]string, error) {
 	leftovers := args
-	val := laser.NonPtrValue(ov)
-	typ := val.Type()
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
-		fv := val.Field(i)
-		pval := laser.PtrValue(fv)
-		cmdtag, ok := f.Tag.Lookup("cmd")
-		if ok && cmdtag != cmd { // if we are associated with a different command, skip
-			continue
-		}
+	for _, kv := range allFields.Order {
+		v := kv.Val
+		f := v.Field
+
 		posargtag, ok := f.Tag.Lookup("posarg")
 		if ok {
 			if posargtag == "all" {
-				ok := laser.SetRobust(pval.Interface(), args)
+				ok := laser.SetRobust(v.Value.Interface(), args)
 				if !ok {
 					return nil, fmt.Errorf("not able to set field %q to all positional arguments: %v", f.Name, args)
 				}
@@ -408,7 +398,7 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 				if ui >= uint64(len(args)) {
 					return nil, fmt.Errorf("missing positional argument %d used for field %q", ui, f.Name)
 				}
-				err = SetArgValue(f.Name, pval, args[ui]) // must be pointer to be settable
+				err = SetFieldValue(v, args[ui]) // must be pointer to be settable
 				if err != nil {
 					return nil, fmt.Errorf("error setting field %q to positional argument %d (%q): %w", f.Name, ui, args[ui], err)
 				}
@@ -424,25 +414,10 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 				return nil, fmt.Errorf("expected at least one name in grease struct tag, but got none")
 			}
 		}
-		if laser.NonPtrType(f.Type).Kind() == reflect.Struct {
-			nwPath := names[0]
-			if path != "" {
-				nwPath = path + "." + nwPath
-			}
-			nwNest := nest
-			if !nwNest {
-				neststr, ok := f.Tag.Lookup("nest")
-				if ok && (neststr == "+" || neststr == "true") {
-					nwNest = true
-				}
-			}
-			fieldFlagNamesStruct(laser.PtrValue(fv).Interface(), nwPath, nwNest, allFlags, cmd, args)
-			continue
-		}
 		for _, name := range names {
-			addAllCases(name, path, pval, allFlags, cmd)
+			addAllCases(name, path, v, allFlags, cmd)
 			if f.Type.Kind() == reflect.Bool {
-				addAllCases("No"+name, path, pval, allFlags, cmd)
+				addAllCases("No"+name, path, v, allFlags, cmd)
 			}
 		}
 		// now process adding non-nested version of field
@@ -454,16 +429,15 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 			continue
 		}
 		for _, name := range names {
-			if _, has := allFlags[name]; has {
+			if _, has := allFlags.ValByKeyTry(name); has {
 				fmt.Printf("warning: programmer error: grease config field \"%s.%s\" cannot be added as a non-nested flag with the name %q because that name has already been registered by another field; add the field tag 'nest:\"+\"' to the field you want to require nested access for (ie: \"Path.Field\" instead of \"Field\") to remove this warning\n", path, f.Name, name)
 				continue
 			}
-			addAllCases(name, "", pval, allFlags, cmd)
+			addAllCases(name, "", v, allFlags, cmd)
 			if f.Type.Kind() == reflect.Bool {
-				addAllCases("No"+name, "", pval, allFlags, cmd)
+				addAllCases("No"+name, "", v, allFlags, cmd)
 			}
 		}
-
 	}
 	return leftovers, nil
 }
@@ -474,11 +448,11 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 // they must be set to prevent errors. The following flags are added:
 //
 //	-config -cfg -help -h
-func CommandFlags(allFlags map[string]reflect.Value) {
-	cfg := ""
-	h := false
-	allFlags["config"] = reflect.ValueOf(&cfg)
-	allFlags["cfg"] = reflect.ValueOf(&cfg)
-	allFlags["help"] = reflect.ValueOf(&h)
-	allFlags["h"] = reflect.ValueOf(&h)
+func CommandFlags(allFlags *Fields) {
+	// cfg := ""
+	// h := false
+	// allFlags.Add("config", &Field{Field: reflect.ValueOf(&cfg)})
+	// allFlags.Add("cfg", reflect.ValueOf(&cfg))
+	// allFlags.Add("help", reflect.ValueOf(&h))
+	// allFlags.Add("h", reflect.ValueOf(&h))
 }
