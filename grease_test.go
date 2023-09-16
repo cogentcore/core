@@ -128,7 +128,7 @@ func TestDefaults(t *testing.T) {
 
 func TestGetArgs(t *testing.T) {
 	sargs := []string{"build", "main", "-o", "-dir", "../grease", "-v", "-platform", "windows/amd64"}
-	args, flags, err := GetArgs(sargs)
+	args, flags, err := GetArgs(sargs, map[string]bool{})
 	if err != nil {
 		t.Errorf("error getting args: %v", err)
 	}
@@ -158,7 +158,7 @@ func TestArgs(t *testing.T) {
 	allArgs := make(map[string]reflect.Value)
 	CommandFlags(allArgs)
 
-	leftovers, flags, err := GetArgs(args)
+	leftovers, flags, err := GetArgs(args, BoolFlags(cfg))
 	if err != nil {
 		t.Error(err)
 	}

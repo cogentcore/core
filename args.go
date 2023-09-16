@@ -38,7 +38,7 @@ var (
 // must refer to fields in the config, so any that fail to match trigger
 // an error. Errors can also result from parsing.
 func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T]) (string, error) {
-	nfargs, flags, err := GetArgs(args)
+	nfargs, flags, err := GetArgs(args, BoolFlags(cfg))
 	if err != nil {
 		return "", err
 	}
@@ -53,11 +53,47 @@ func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T])
 	return cmd, nil
 }
 
+// BoolFlags returns a map with a true value for every flag name
+// that maps to a boolean field. This is needed so that bool
+// flags can be properly set with their shorthand syntax.
+// It should only be needed for internal use and not end-user code.
+func BoolFlags(obj any) map[string]bool {
+	if kit.IfaceIsNil(obj) {
+		return nil
+	}
+	ov := reflect.ValueOf(obj)
+	if ov.Kind() == reflect.Pointer && ov.IsNil() {
+		return nil
+	}
+	val := kit.NonPtrValue(ov)
+	typ := val.Type()
+	res := map[string]bool{}
+	for i := 0; i < typ.NumField(); i++ {
+		f := typ.Field(i)
+		if f.Type.Kind() == reflect.Bool {
+			// we need all cases of both normal and "no" version
+			res[f.Name] = true
+			res[strings.ToLower(f.Name)] = true
+			res[strcase.ToKebab(f.Name)] = true
+			res[strcase.ToSnake(f.Name)] = true
+			res[strcase.ToScreamingSnake(f.Name)] = true
+
+			nnm := "No" + f.Name
+			res[nnm] = true
+			res[strings.ToLower(nnm)] = true
+			res[strcase.ToKebab(nnm)] = true
+			res[strcase.ToSnake(nnm)] = true
+			res[strcase.ToScreamingSnake(nnm)] = true
+		}
+	}
+	return res
+}
+
 // GetArgs processes the given args using map of all available args,
 // returning the leftover (positional) args, the flags, and any error.
 // setting errNotFound = true causes args that are not in allArgs to
 // trigger an error.  Otherwise, it just skips those.
-func GetArgs(args []string) ([]string, map[string]string, error) {
+func GetArgs(args []string, boolFlags map[string]bool) ([]string, map[string]string, error) {
 	var nonFlags []string
 	flags := map[string]string{}
 	for len(args) > 0 {
@@ -73,7 +109,7 @@ func GetArgs(args []string) ([]string, map[string]string, error) {
 			nonFlags = append(nonFlags, args...)
 			break
 		}
-		name, value, nargs, err := GetFlag(s, args)
+		name, value, nargs, err := GetFlag(s, args, boolFlags)
 		if err != nil {
 			return nonFlags, flags, err
 		}
@@ -90,7 +126,7 @@ func GetArgs(args []string) ([]string, map[string]string, error) {
 // arguments updated with any changes caused by getting
 // this flag, and any error. It is designed for use in [GetArgs]
 // and should typically not be used by end-user code.
-func GetFlag(s string, args []string) (name, value string, a []string, err error) {
+func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value string, a []string, err error) {
 	// we start out with the remaining args we were passed
 	a = args
 	// we know the first character is a dash, so we can trim it directly
@@ -115,7 +151,7 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 	if len(split) == 2 {
 		// if we are in the form flag=value, we are done
 		value = split[1]
-	} else if len(a) > 0 { // otherwise, if we still have more remaining args, our value could be the next arg (if we have no remaining args, we are a terminating bool arg)
+	} else if len(a) > 0 && !boolFlags[name] { // otherwise, if we still have more remaining args and are not a bool, our value could be the next arg (if we are a bool, we don't care about the next value)
 		value = a[0]
 		// if the next arg starts with a dash, it can't be our value, so we are just a bool arg and we exit with an empty value
 		if strings.HasPrefix(value, "-") {
