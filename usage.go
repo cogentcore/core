@@ -56,7 +56,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	b.WriteString("one or two leading dashes. Most flags can be used without nesting\n")
 	b.WriteString("paths (e.g. -target instead of -build-target)\n\n")
 
-	b.WriteString(cmdColor("-help") + " or " + cmdColor("-h") + "\n\tshow this usage message and exit\n")
+	b.WriteString(cmdColor("-help") + " or " + cmdColor("-h") + "\n\tshow usage information for a command\n")
 	b.WriteString(cmdColor("-config") + " or " + cmdColor("-cfg") + "\n\tthe filename to load configuration options from\n")
 	FlagUsage(cfg, "", &b, cmd)
 	return b.String()
@@ -80,8 +80,9 @@ func CommandUsage[T any](b *strings.Builder, cmd string, cmds ...*Cmd[T]) {
 			break
 		}
 	}
+	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString(cmdColor("help") + "\n\tshow this usage message and exit\n")
+		b.WriteString(cmdColor("help") + "\n\tshow usage information for a command\n")
 	}
 
 	cmdstrs := strings.Fields(cmd)

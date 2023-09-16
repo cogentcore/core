@@ -20,6 +20,17 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+var (
+	// ErrNotFound can be passed to [SetFromArgs] and [ParseFlags]
+	// to indicate that they should return an error for a flag that
+	// is set but not found in the configuration struct.
+	ErrNotFound = true
+	// ErrNotFound can be passed to [SetFromArgs] and [ParseFlags]
+	// to indicate that they should NOT return an error for a flag that
+	// is set but not found in the configuration struct.
+	NoErrNotFound = false
+)
+
 // SetFromArgs sets Config values from command-line args,
 // based on the field names in the Config struct.
 // Returns any args that did not start with a `-` flag indicator.

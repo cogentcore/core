@@ -51,7 +51,7 @@ var MetaCmds = []*Cmd[*MetaConfig]{
 	{
 		Func: func(mc *MetaConfig) error { return nil }, // this gets handled seperately in [Config], so we don't actually need to do anything here
 		Name: "help",
-		Doc:  "show this usage message and exit",
+		Doc:  "show usage information for a command",
 		Root: true,
 	},
 }
@@ -85,7 +85,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	// we can do other configuration.
 	mc := &MetaConfig{}
 	// we ignore not found flags in meta config, because we only care about meta config and not anything else being passed to the command
-	cmd, err := SetFromArgs(mc, args, false, MetaCmds...)
+	cmd, err := SetFromArgs(mc, args, NoErrNotFound, MetaCmds...)
 	if err != nil {
 		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
@@ -148,7 +148,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		}
 	}
 
-	cmd, err = SetFromArgs(cfg, args, true, cmds...)
+	cmd, err = SetFromArgs(cfg, args, ErrNotFound, cmds...)
 	if err != nil {
 		errs = append(errs, err)
 	}
