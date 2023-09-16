@@ -51,9 +51,16 @@ type CmdOrFunc[T any] interface {
 func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 	cmd := &Cmd[T]{
 		Func: fun,
-		Name: gti.FuncName(fun),
 	}
-	if f := gti.FuncByName(cmd.Name); f != nil {
+
+	fn := gti.FuncName(fun)
+
+	// we need to get rid of package name and then convert to kebab
+	strs := strings.Split(fn, ".")
+	cmd.Name = strs[len(strs)-1]
+	cmd.Name = strcase.ToKebab(cmd.Name)
+
+	if f := gti.FuncByName(fn); f != nil {
 		cmd.Doc = f.Doc
 		for _, dir := range f.Directives {
 			if dir.Tool != "grease" {
@@ -62,20 +69,12 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 			if dir.Directive != "cmd" {
 				return cmd, fmt.Errorf("unrecognized comment directive %q (from comment %q)", dir.Directive, dir.String())
 			}
-			leftovers, err := SetFromArgs(cmd, dir.Args)
+			_, err := SetFromArgs(cmd, dir.Args)
 			if err != nil {
 				return cmd, fmt.Errorf("error setting command from directive arguments (from comment %q): %w", dir.String(), err)
 			}
-			if len(leftovers) != 0 {
-				return cmd, fmt.Errorf("expected no leftover arguments, but got %d", len(leftovers))
-			}
 		}
 	}
-	if strings.Contains(cmd.Name, ".") {
-		strs := strings.Split(cmd.Name, ".")
-		cmd.Name = strs[len(strs)-1]
-	}
-	cmd.Name = strcase.ToKebab(cmd.Name)
 	return cmd, nil
 }
 
