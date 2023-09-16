@@ -10,6 +10,8 @@ import (
 	"reflect"
 	"strings"
 
+	"slices"
+
 	"github.com/iancoleman/strcase"
 	"goki.dev/laser"
 	"goki.dev/ordmap"
@@ -168,8 +170,13 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 // used names, at the given index.
 func applyShortestUniqueName(field *Field, idx int, usedNames map[string]*Field) {
 	nm := shortestUniqueName(field.Name, usedNames)
-	field.Names[idx] = nm
-	usedNames[nm] = field
+	// if we already have this name, we don't need to add it, so we just delete this entry
+	if slices.Contains(field.Names, nm) {
+		field.Names = slices.Delete(field.Names, idx, idx+1)
+	} else {
+		field.Names[idx] = nm
+		usedNames[nm] = field
+	}
 }
 
 // shortestUniqueName returns the shortest unique camel-case name for
