@@ -29,7 +29,8 @@ type Config struct {
 	Server Server
 	Client Client
 
-	Dir string
+	// the directory to build in
+	Dir string `desc:"the directory to build in"`
 }
 
 type Server struct {

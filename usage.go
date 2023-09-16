@@ -73,7 +73,7 @@ func CommandUsage[T any](b *strings.Builder, cmd string, cmds ...*Cmd[T]) {
 	b.WriteString("The following commands are available:\n\n")
 	for _, c := range cmds {
 		if (c.Root && cmd == "") || c.Name == cmd {
-			b.WriteString(cmdColor("<default command> ("+c.Name+")") + "\n\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t") + "\n") // need to put a tab on every newline for formatting
+			b.WriteString(cmdColor(c.Name+" (default)") + "\n\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t") + "\n") // need to put a tab on every newline for formatting
 			break
 		}
 	}
@@ -98,17 +98,12 @@ outer:
 				continue outer
 			}
 		}
-		if c.Root {
-			b.WriteString(cmdColor(c.Name + " (default command)"))
-		} else {
-			b.WriteString(cmdColor(c.Name))
-		}
+		b.WriteString(cmdColor(c.Name))
 		if c.Doc != "" {
 			b.WriteString("\n\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t")) // need to put a tab on every newline for formatting
 		}
 		b.WriteString("\n")
 	}
-
 	b.WriteString("\n")
 }
 

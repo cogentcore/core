@@ -38,8 +38,8 @@ type Field struct {
 // Fields is a simple type alias for an ordered map of [Field] objects.
 type Fields = ordmap.Map[string, *Field]
 
-// AddAllFields, when passed to [AddFields], indicates to add all fields,
-// regardless of their command association.
+// AddAllFields, when passed as the command to [AddFields], indicates
+// to add all fields, regardless of their command association.
 const AddAllFields = "*"
 
 // AddFields adds to the given fields map all of the fields of the given
