@@ -145,56 +145,63 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 // parseArgsImpl is the underlying implementation of [ParseArgs] that is called
 // recursively and takes everything [ParseArgs] does and the current flags and
 // command state, and returns everything [ParseArgs] does and the args state.
-func parseArgsImpl[T any](cfg T, args []string, allFlags map[string]reflect.Value, cmd string, cmds ...*Cmd[T]) (newArgs []string, newCmd string, err error) {
-	// we start with the base args and command
-	newArgs = args
-	newCmd = cmd
-	if len(newArgs) != 0 {
-		// we only care about one arg at a time
-		arg := newArgs[0]
-		// get all of the (sub)commands in our base command
-		cmdstrs := strings.Fields(cmd)
-		for _, c := range cmds {
-			// get all of the (sub)commands in this command
-			cstrs := strings.Fields(c.Name)
-			// find the commands that we share
-			gotTo := 0
-			hasMismatch := false
-			for i, cstr := range cstrs {
-				if i >= len(cmdstrs) {
-					gotTo = i
-					break
-				}
-				if cmdstrs[i] != cstr {
-					hasMismatch = true
-					break
-				}
+func parseArgsImpl[T any](cfg T, baseArgs []string, allFlags map[string]reflect.Value, baseCmd string, cmds ...*Cmd[T]) (args []string, cmd string, err error) {
+	// we start with our base args and command
+	args = baseArgs
+	cmd = baseCmd
+
+	// if we have no additional args, we have nothing to do
+	if len(args) == 0 {
+		return
+	}
+
+	// we only care about one arg at a time (everything else is handled recursively)
+	arg := args[0]
+	// get all of the (sub)commands in our base command
+	baseCmdStrs := strings.Fields(baseCmd)
+	for _, c := range cmds {
+		// get all of the (sub)commands in this command
+		cmdStrs := strings.Fields(c.Name)
+		// find the (sub)commands that our base command shares with the command we are checking
+		gotTo := 0
+		hasMismatch := false
+		for i, cstr := range cmdStrs {
+			// if we have no more (sub)commands on our base, mark our location and break
+			if i >= len(baseCmdStrs) {
+				gotTo = i
+				break
 			}
-			// if we have a different sub(command) for something, this isn't the right command
-			if hasMismatch {
-				continue
+			// if we have a different thing than our base, it is a mismatch
+			if baseCmdStrs[i] != cstr {
+				hasMismatch = true
+				break
 			}
-			// if the thing after we ran out of (sub)commands on our base isn't our next arg, this isn't the right command
-			if arg != cstrs[gotTo] {
-				continue
-			}
-			// otherwise, it is the right command, and our new command is our base plus our next arg
-			newCmd = arg
-			if cmd != "" {
-				newCmd = cmd + " " + arg
-			}
-			// we have consumed our next arg, so we get rid of it
-			newArgs = newArgs[1:]
-			// then, we recursively parse again with our new command as context
-			oargs, ocmd, err := parseArgsImpl(cfg, newArgs, allFlags, newCmd, cmds...)
-			if err != nil {
-				return nil, "", err
-			}
-			// our new args and command are now whatever the recursive call returned, building upon what we passed it
-			newArgs = oargs
-			newCmd = ocmd
-			break
 		}
+		// if we have a different sub(command) for something, this isn't the right command
+		if hasMismatch {
+			continue
+		}
+		// if the thing after we ran out of (sub)commands on our base isn't our next arg, this isn't the right command
+		if arg != cmdStrs[gotTo] {
+			continue
+		}
+		// otherwise, it is the right command, and our new command is our base plus our next arg
+		cmd = arg
+		if baseCmd != "" {
+			cmd = baseCmd + " " + arg
+		}
+		// we have consumed our next arg, so we get rid of it
+		args = args[1:]
+		// then, we recursively parse again with our new command as context
+		oargs, ocmd, err := parseArgsImpl(cfg, args, allFlags, cmd, cmds...)
+		if err != nil {
+			return nil, "", err
+		}
+		// our new args and command are now whatever the recursive call returned, building upon what we passed it
+		args = oargs
+		cmd = ocmd
+		// we got the command we wanted, so we can break
+		break
 	}
 	return
 }
