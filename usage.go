@@ -6,13 +6,10 @@ package grease
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/laser"
 )
 
 // Usage returns a usage string based on the given
@@ -123,62 +120,27 @@ outer:
 // happen internally (if you don't know whether
 // you're in a nested context, you're not).
 func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
-	typ := laser.NonPtrType(reflect.TypeOf(app))
-	val := laser.NonPtrValue(reflect.ValueOf(app))
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
-		fv := val.Field(i)
-		cmdtag, hast := f.Tag.Lookup("cmd")
-		if hast && cmdtag != cmd { // if we are associated with a different command, skip
-			continue
-		}
-		if laser.NonPtrType(f.Type).Kind() == reflect.Struct {
-			nwPath := f.Name
-			// if we are scoped by command, we don't need new path scope
-			// TODO: need a better approach to this; maybe use allFlags map
-			if hast {
-				nwPath = ""
-			}
-			if path != "" {
-				nwPath = path + "." + nwPath
-			}
-			FlagUsage(laser.PtrValue(fv).Interface(), nwPath, b, cmd)
-			continue
-		}
-		if f.Name == "Includes" {
-			continue
-		}
-		names := []string{f.Name}
-		greasetag, hast := f.Tag.Lookup("grease")
-		if hast {
-			names = strings.Split(greasetag, ",")
-			if len(names) == 0 {
-				log.Fatalln("expected at least one name in grease struct tag, but got none")
-			}
-		}
-
-		if path != "" {
-			for i, name := range names {
-				names[i] = path + "." + name
-			}
-		}
-		for i, name := range names {
+	fields := &Fields{}
+	AddFields(app, fields, cmd)
+	for _, kv := range fields.Order {
+		f := kv.Val
+		for i, name := range f.Names {
 			b.WriteString(cmdColor("-" + strcase.ToKebab(name)))
 			// handle English sentence construction with "or" and commas
-			if i == len(names)-2 {
-				if len(names) > 2 {
+			if i == len(f.Names)-2 {
+				if len(f.Names) > 2 {
 					b.WriteString(",")
 				}
 				b.WriteString(" or ")
-			} else if i != len(names)-1 {
+			} else if i != len(f.Names)-1 {
 				b.WriteString(", ")
 			}
 		}
 		b.WriteString("\n")
-		desc, hast := f.Tag.Lookup("desc")
+		desc, hast := f.Field.Tag.Lookup("desc")
 		if hast && desc != "" {
 			b.WriteString("\t" + strings.ReplaceAll(desc, "\n", "\n\t")) // need to put a tab on every newline for formatting
-			def, ok := f.Tag.Lookup("def")
+			def, ok := f.Field.Tag.Lookup("def")
 			if ok && def != "" {
 				b.WriteString(fmt.Sprintf(" (default: %s)", def))
 			}

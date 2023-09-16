@@ -5,7 +5,9 @@
 package grease
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 
 	"goki.dev/laser"
 	"goki.dev/ordmap"
@@ -23,6 +25,10 @@ type Field struct {
 	// Name is the fully qualified, nested name of this field (eg: A.B.C).
 	// It is as it appears in code, and is NOT transformed something like kebab-case.
 	Name string
+	// Names contains all of the possible end-user names for this field as a flag.
+	// It defaults to the name of the field, but custom names can be specified via
+	// the grease struct tag.
+	Names []string
 	// Nest is whether, if true, a nested version of this field should be the only
 	// way to access it (eg: A.B.C), or, if false, this field should be accessible
 	// through its non-nested version (eg: C).
@@ -76,13 +82,21 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, cmd strin
 		if path != "" {
 			name = path + "." + name
 		}
+		names := []string{f.Name}
+		greasetag, ok := f.Tag.Lookup("grease")
+		if ok {
+			names = strings.Split(greasetag, ",")
+			if len(names) == 0 {
+				fmt.Println("warning: programmer error: expected at least one name in grease struct tag, but got none")
+			}
+		}
 		allFields.Add(name, &Field{
 			Field: f,
 			Value: pval,
 			Name:  name,
+			Names: names,
 			Nest:  nest,
 		})
 
 	}
-	return
 }

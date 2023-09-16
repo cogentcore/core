@@ -406,15 +406,7 @@ func fieldFlagNamesStruct(allFields *Fields, path string, nest bool, allFlags *F
 			}
 
 		}
-		names := []string{f.Name}
-		greasetag, ok := f.Tag.Lookup("grease")
-		if ok {
-			names = strings.Split(greasetag, ",")
-			if len(names) == 0 {
-				return nil, fmt.Errorf("expected at least one name in grease struct tag, but got none")
-			}
-		}
-		for _, name := range names {
+		for _, name := range v.Names {
 			addAllCases(name, path, v, allFlags, cmd)
 			if f.Type.Kind() == reflect.Bool {
 				addAllCases("No"+name, path, v, allFlags, cmd)
@@ -428,7 +420,7 @@ func fieldFlagNamesStruct(allFields *Fields, path string, nest bool, allFlags *F
 		if ok && (nesttag == "+" || nesttag == "true") {
 			continue
 		}
-		for _, name := range names {
+		for _, name := range v.Names {
 			if _, has := allFlags.ValByKeyTry(name); has {
 				fmt.Printf("warning: programmer error: grease config field \"%s.%s\" cannot be added as a non-nested flag with the name %q because that name has already been registered by another field; add the field tag 'nest:\"+\"' to the field you want to require nested access for (ie: \"Path.Field\" instead of \"Field\") to remove this warning\n", path, f.Name, name)
 				continue
