@@ -57,11 +57,13 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 
 	// we need to get rid of package name and then convert to kebab
 	strs := strings.Split(fn, ".")
-	cmd.Name = strs[len(strs)-1]
-	cmd.Name = strcase.ToKebab(cmd.Name)
+	cfn := strs[len(strs)-1] // camel function name
+	cmd.Name = strcase.ToKebab(cfn)
 
 	if f := gti.FuncByName(fn); f != nil {
 		cmd.Doc = f.Doc
+		cmd.Doc = strings.TrimPrefix(cmd.Doc, cfn+" ") // get rid of "FuncName " at start of function documentation
+		cmd.Doc = strings.TrimSuffix(cmd.Doc, ".")     // we don't want trailing periods
 		for _, dir := range f.Directives {
 			if dir.Tool != "grease" {
 				continue

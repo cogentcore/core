@@ -105,7 +105,7 @@ outer:
 
 	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString("\t" + cmdColor("help") + "\tshow usage information for a command\n")
+		b.WriteString("\t" + cmdColor("help") + "\tshows usage information for a command\n")
 	}
 
 	for _, c := range acmds {
