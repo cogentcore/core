@@ -31,10 +31,6 @@ type Field struct {
 	// It defaults to the name of the field, but custom names can be specified via
 	// the grease struct tag.
 	Names []string
-	// Nest is whether, if true, a nested version of this field should be the only
-	// way to access it (eg: A.B.C), or, if false, this field should be accessible
-	// through its non-nested version (eg: C).
-	Nest bool
 }
 
 // Fields is a simple type alias for an ordered map of [Field] objects.
@@ -43,13 +39,13 @@ type Fields = ordmap.Map[string, *Field]
 // AddFields adds to the given fields map all of the fields of the given
 // object, in the context of the given command name.
 func AddFields(obj any, allFields *Fields, cmd string) {
-	addFieldsImpl(obj, "", false, allFields, map[string]*Field{}, cmd)
+	addFieldsImpl(obj, "", allFields, map[string]*Field{}, cmd)
 }
 
 // addFieldsImpl is the underlying implementation of [AddFields].
 // usedNames is a map keyed by used kebab-case names with values
 // of their associated fields, used to track naming conflicts.
-func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, usedNames map[string]*Field, cmd string) {
+func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string]*Field, cmd string) {
 	if laser.AnyIsNil(obj) {
 		return
 	}
@@ -73,14 +69,7 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, usedNames
 			if path != "" {
 				nwPath = path + "." + nwPath
 			}
-			nwNest := nest
-			if !nwNest {
-				neststr, ok := f.Tag.Lookup("nest")
-				if ok && (neststr == "+" || neststr == "true") {
-					nwNest = true
-				}
-			}
-			addFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, nwNest, allFields, usedNames, cmd)
+			addFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, allFields, usedNames, cmd)
 			continue
 		}
 		name := f.Name
@@ -101,7 +90,6 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, usedNames
 			Value: pval,
 			Name:  name,
 			Names: names,
-			Nest:  nest,
 		}
 		for i, name := range names {
 			if of, has := usedNames[name]; has { // we have a conflict
@@ -143,24 +131,32 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, usedNames
 					os.Exit(1)
 				} else if !nfn && !ofn {
 					// neither one gets it, so we replace both with fully qualified name
-					names[i] = strcase.ToKebab(nf.Name)
+					nm := shortestUniqueName(nf.Name, usedNames)
+					names[i] = nm
+					usedNames[nm] = nf
 					for i, on := range of.Names {
 						if on == name {
-							of.Names[i] = strcase.ToKebab(of.Name)
+							nm := shortestUniqueName(of.Name, usedNames)
+							of.Names[i] = nm
+							usedNames[nm] = of
 						}
 					}
 				} else if nfn && !ofn {
 					// we get it, so we keep ours as is and replace them with fully qualified name
 					for i, on := range of.Names {
 						if on == name {
-							of.Names[i] = strcase.ToKebab(of.Name)
+							nm := shortestUniqueName(of.Name, usedNames)
+							of.Names[i] = nm
+							usedNames[nm] = of
 						}
 					}
-					// we also need to update the comparison point to us
+					// we also need to update the field for our name to us
 					usedNames[name] = nf
 				} else if !nfn && ofn {
 					// they get it, so we replace ours with fully qualified name
-					names[i] = strcase.ToKebab(nf.Name)
+					nm := shortestUniqueName(nf.Name, usedNames)
+					names[i] = nm
+					usedNames[nm] = nf
 				}
 			} else {
 				// if no conflict, we get the name
@@ -169,4 +165,24 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, usedNames
 		}
 		allFields.Add(name, nf)
 	}
+}
+
+// shortestUniqueName returns the shortest unique kebab-case name for
+// the given fully-qualified nest name of a field, using the given
+// map of used names. It works backwards, so, for example, if given "A.B.C.D",
+// it would check "d", then "c-d", then "b-c-d", and finally "a-b-c-d".
+func shortestUniqueName(name string, usedNames map[string]*Field) string {
+	strs := strings.Split(name, ".")
+	cur := ""
+	for i := len(strs) - 1; i >= 0; i-- {
+		if cur == "" {
+			cur = strcase.ToKebab(strs[i])
+		} else {
+			cur = strcase.ToKebab(strs[i]) + "-" + cur
+		}
+		if _, has := usedNames[cur]; !has {
+			return cur
+		}
+	}
+	return cur // TODO: this should never happen, but if it does, we might want to print an error
 }
