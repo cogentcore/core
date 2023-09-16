@@ -37,7 +37,7 @@ func Build(c *Config) error {
 //
 //grease:cmd -root
 func Run(c *Config) error {
-	fmt.Println("Running for user", c.Name)
+	fmt.Println("Running for user", c.Name, "; likes go:", c.LikesGo)
 	return nil
 }
 
