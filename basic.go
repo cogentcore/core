@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"goki.dev/enums"
+	"goki.dev/glop/bools"
 )
 
 // Has convenience functions for converting any (e.g. properties) to given
@@ -74,337 +75,496 @@ func ValueIsZero(v reflect.Value) bool {
 	return false
 }
 
-// ToBool robustly converts anything to a bool,
-// using a big type switch organized for greatest efficiency,
-// only falling back on reflection when all else fails.
+// ToBool robustly converts to a bool any basic elemental type
+// (including pointers to such)
+// using a big type switch organized for greatest efficiency.
+// tries the glop/bools/.Booler interface if not a bool type.
 //
 //gopy:interface=handle
-func ToBool(it any) (bool, bool) {
-	// first check for most likely cases for greatest efficiency
-	switch bt := it.(type) {
+func ToBool(v any) (bool, bool) {
+	switch vt := v.(type) {
 	case bool:
-		return bt, true
+		return vt, true
 	case *bool:
-		return *bt, true
+		return *vt, true
+	}
+
+	if br, ok := v.(bools.Booler); ok {
+		return br.Bool(), true
+	}
+
+	switch vt := v.(type) {
 	case int:
-		return bt != 0, true
+		return vt != 0, true
 	case *int:
-		return *bt != 0, true
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
 	case int32:
-		return bt != 0, true
+		return vt != 0, true
+	case *int32:
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
 	case int64:
-		return bt != 0, true
-	case byte:
-		return bt != 0, true
+		return vt != 0, true
+	case *int64:
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
+	case uint8:
+		return vt != 0, true
+	case *uint8:
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
 	case float64:
-		return bt != 0, true
+		return vt != 0, true
 	case *float64:
-		return *bt != 0, true
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
 	case float32:
-		return bt != 0, true
+		return vt != 0, true
 	case *float32:
-		return *bt != 0, true
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
 	case string:
-		r, err := strconv.ParseBool(bt)
+		r, err := strconv.ParseBool(vt)
 		if err != nil {
 			return false, false
 		}
 		return r, true
 	case *string:
-		r, err := strconv.ParseBool(*bt)
+		if vt == nil {
+			return false, false
+		}
+		r, err := strconv.ParseBool(*vt)
 		if err != nil {
 			return false, false
 		}
 		return r, true
-	}
-
-	// then fall back on reflection
-	if AnyIsNil(it) {
-		return false, false
-	}
-	v := NonPtrValue(reflect.ValueOf(it))
-	vk := v.Kind()
-	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
-		return (v.Int() != 0), true
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return (v.Uint() != 0), true
-	case vk == reflect.Bool:
-		return v.Bool(), true
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return (v.Float() != 0.0), true
-	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return (real(v.Complex()) != 0.0), true
-	case vk == reflect.String:
-		r, err := strconv.ParseBool(v.String())
-		if err != nil {
+	case int8:
+		return vt != 0, true
+	case *int8:
+		if vt == nil {
 			return false, false
 		}
-		return r, true
-	default:
-		return false, false
+		return *vt != 0, true
+	case int16:
+		return vt != 0, true
+	case *int16:
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
+	case uint16:
+		return vt != 0, true
+	case *uint16:
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
+	case uint32:
+		return vt != 0, true
+	case *uint32:
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
+	case uint64:
+		return vt != 0, true
+	case *uint64:
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
+	case uintptr:
+		return vt != 0, true
+	case *uintptr:
+		if vt == nil {
+			return false, false
+		}
+		return *vt != 0, true
 	}
+
+	return false, false
 }
 
-// ToInt robustly converts anything to an int64
-// using a big type switch organized for greatest efficiency,
-// only falling back on reflection when all else fails.
+// ToInt robustly converts to an int64 any basic elemental type
+// (including pointers to such)
+// using a big type switch organized for greatest efficiency.
 //
 //gopy:interface=handle
-func ToInt(it any) (int64, bool) {
-	// first check for most likely cases for greatest efficiency
-	switch it := it.(type) {
+func ToInt(v any) (int64, bool) {
+	switch vt := v.(type) {
 	case int:
-		return int64(it), true
+		return int64(vt), true
 	case *int:
-		return int64(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
 	case int32:
-		return int64(it), true
+		return int64(vt), true
 	case *int32:
-		return int64(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
 	case int64:
-		return it, true
+		return vt, true
 	case *int64:
-		return *it, true
-	case byte:
-		return int64(it), true
-	case *byte:
-		return int64(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return *vt, true
+	case uint8:
+		return int64(vt), true
+	case *uint8:
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
 	case float64:
-		return int64(it), true
+		return int64(vt), true
 	case *float64:
-		return int64(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
 	case float32:
-		return int64(it), true
+		return int64(vt), true
 	case *float32:
-		return int64(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
 	case bool:
-		if it {
+		if vt {
 			return 1, true
 		}
 		return 0, true
 	case *bool:
-		if *it {
+		if vt == nil {
+			return 0, false
+		}
+		if *vt {
 			return 1, true
 		}
 		return 0, true
 	case string:
-		r, err := strconv.ParseInt(it, 0, 64)
+		r, err := strconv.ParseInt(vt, 0, 64)
 		if err != nil {
 			return 0, false
 		}
 		return r, true
 	case *string:
-		r, err := strconv.ParseInt(*it, 0, 64)
+		if vt == nil {
+			return 0, false
+		}
+		r, err := strconv.ParseInt(*vt, 0, 64)
 		if err != nil {
 			return 0, false
 		}
 		return r, true
-	}
-
-	// then fall back on reflection
-	if AnyIsNil(it) {
-		return 0, false
-	}
-	v := NonPtrValue(reflect.ValueOf(it))
-	vk := v.Kind()
-	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
-		return v.Int(), true
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return int64(v.Uint()), true
-	case vk == reflect.Bool:
-		if v.Bool() {
-			return 1, true
-		}
-		return 0, true
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return int64(v.Float()), true
-	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return int64(real(v.Complex())), true
-	case vk == reflect.String:
-		r, err := strconv.ParseInt(v.String(), 0, 64)
-		if err != nil {
+	case int8:
+		return int64(vt), true
+	case *int8:
+		if vt == nil {
 			return 0, false
 		}
-		return r, true
-	default:
-		return 0, false
+		return int64(*vt), true
+	case int16:
+		return int64(vt), true
+	case *int16:
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
+	case uint16:
+		return int64(vt), true
+	case *uint16:
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
+	case uint32:
+		return int64(vt), true
+	case *uint32:
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
+	case uint64:
+		return int64(vt), true
+	case *uint64:
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
+	case uintptr:
+		return int64(vt), true
+	case *uintptr:
+		if vt == nil {
+			return 0, false
+		}
+		return int64(*vt), true
 	}
+	return 0, false
 }
 
-// ToFloat robustly converts anything to a Float64,
-// using a big type switch organized for greatest efficiency,
-// only falling back on reflection when all else fails.
+// ToFloat robustly converts to a float64 any basic elemental type
+// (including pointers to such)
+// using a big type switch organized for greatest efficiency.
 //
 //gopy:interface=handle
-func ToFloat(it any) (float64, bool) {
-	// first check for most likely cases for greatest efficiency
-	switch it := it.(type) {
+func ToFloat(v any) (float64, bool) {
+	switch vt := v.(type) {
 	case float64:
-		return it, true
+		return vt, true
 	case *float64:
-		return *it, true
+		if vt == nil {
+			return 0, false
+		}
+		return *vt, true
 	case float32:
-		return float64(it), true
+		return float64(vt), true
 	case *float32:
-		return float64(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return float64(*vt), true
 	case int:
-		return float64(it), true
+		return float64(vt), true
 	case *int:
-		return float64(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return float64(*vt), true
 	case int32:
-		return float64(it), true
+		return float64(vt), true
 	case *int32:
-		return float64(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return float64(*vt), true
 	case int64:
-		return float64(it), true
+		return float64(vt), true
 	case *int64:
-		return float64(*it), true
-	case byte:
-		return float64(it), true
-	case *byte:
-		return float64(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return float64(*vt), true
+	case uint8:
+		return float64(vt), true
+	case *uint8:
+		if vt == nil {
+			return 0, false
+		}
+		return float64(*vt), true
 	case bool:
-		if it {
+		if vt {
 			return 1, true
 		}
 		return 0, true
 	case *bool:
-		if *it {
+		if vt == nil {
+			return 0, false
+		}
+		if *vt {
 			return 1, true
 		}
 		return 0, true
 	case string:
-		r, err := strconv.ParseFloat(it, 64)
+		r, err := strconv.ParseFloat(vt, 64)
 		if err != nil {
 			return 0.0, false
 		}
 		return r, true
 	case *string:
-		r, err := strconv.ParseFloat(*it, 64)
+		if vt == nil {
+			return 0, false
+		}
+		r, err := strconv.ParseFloat(*vt, 64)
 		if err != nil {
 			return 0.0, false
 		}
 		return r, true
-	}
-
-	// then fall back on reflection
-	if AnyIsNil(it) {
-		return 0.0, false
-	}
-	v := NonPtrValue(reflect.ValueOf(it))
-	vk := v.Kind()
-	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
-		return float64(v.Int()), true
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return float64(v.Uint()), true
-	case vk == reflect.Bool:
-		if v.Bool() {
-			return 1.0, true
+	case int8:
+		return float64(vt), true
+	case *int8:
+		if vt == nil {
+			return 0, false
 		}
-		return 0.0, true
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return v.Float(), true
-	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return real(v.Complex()), true
-	case vk == reflect.String:
-		r, err := strconv.ParseFloat(v.String(), 64)
-		if err != nil {
-			return 0.0, false
+		return float64(*vt), true
+	case int16:
+		return float64(vt), true
+	case *int16:
+		if vt == nil {
+			return 0, false
 		}
-		return r, true
-	default:
-		return 0.0, false
+		return float64(*vt), true
+	case uint16:
+		return float64(vt), true
+	case *uint16:
+		if vt == nil {
+			return 0, false
+		}
+		return float64(*vt), true
+	case uint32:
+		return float64(vt), true
+	case *uint32:
+		if vt == nil {
+			return 0, false
+		}
+		return float64(*vt), true
+	case uint64:
+		return float64(vt), true
+	case *uint64:
+		if vt == nil {
+			return 0, false
+		}
+		return float64(*vt), true
+	case uintptr:
+		return float64(vt), true
+	case *uintptr:
+		if vt == nil {
+			return 0, false
+		}
+		return float64(*vt), true
 	}
+	return 0, false
 }
 
-// ToFloat32 robustly converts anything to a Float32
-// using a big type switch organized for greatest efficiency,
-// only falling back on reflection when all else fails.
+// ToFloat32 robustly converts to a float32 any basic elemental type
+// (including pointers to such)
+// using a big type switch organized for greatest efficiency.
 //
 //gopy:interface=handle
-func ToFloat32(it any) (float32, bool) {
-	// first check for most likely cases for greatest efficiency
-	switch it := it.(type) {
-	case float64:
-		return float32(it), true
-	case *float64:
-		return float32(*it), true
+func ToFloat32(v any) (float32, bool) {
+	switch vt := v.(type) {
 	case float32:
-		return it, true
+		return vt, true
 	case *float32:
-		return *it, true
+		if vt == nil {
+			return 0, false
+		}
+		return *vt, true
+	case float64:
+		return float32(vt), true
+	case *float64:
+		if vt == nil {
+			return 0, false
+		}
+		return float32(*vt), true
 	case int:
-		return float32(it), true
+		return float32(vt), true
 	case *int:
-		return float32(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return float32(*vt), true
 	case int32:
-		return float32(it), true
+		return float32(vt), true
 	case *int32:
-		return float32(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return float32(*vt), true
 	case int64:
-		return float32(it), true
+		return float32(vt), true
 	case *int64:
-		return float32(*it), true
-	case byte:
-		return float32(it), true
-	case *byte:
-		return float32(*it), true
+		if vt == nil {
+			return 0, false
+		}
+		return float32(*vt), true
+	case uint8:
+		return float32(vt), true
+	case *uint8:
+		if vt == nil {
+			return 0, false
+		}
+		return float32(*vt), true
 	case bool:
-		if it {
+		if vt {
 			return 1, true
 		}
 		return 0, true
 	case *bool:
-		if *it {
+		if vt == nil {
+			return 0, false
+		}
+		if *vt {
 			return 1, true
 		}
 		return 0, true
 	case string:
-		r, err := strconv.ParseFloat(it, 32)
+		r, err := strconv.ParseFloat(vt, 32)
 		if err != nil {
 			return 0.0, false
 		}
 		return float32(r), true
 	case *string:
-		r, err := strconv.ParseFloat(*it, 32)
+		if vt == nil {
+			return 0, false
+		}
+		r, err := strconv.ParseFloat(*vt, 32)
 		if err != nil {
 			return 0.0, false
 		}
 		return float32(r), true
-	}
-
-	// then fall back on reflection
-	if AnyIsNil(it) {
-		return float32(0.0), false
-	}
-	v := NonPtrValue(reflect.ValueOf(it))
-	vk := v.Kind()
-	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
-		return float32(v.Int()), true
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return float32(v.Uint()), true
-	case vk == reflect.Bool:
-		if v.Bool() {
-			return 1.0, true
+	case int8:
+		return float32(vt), true
+	case *int8:
+		if vt == nil {
+			return 0, false
 		}
-		return 0.0, true
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return float32(v.Float()), true
-	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		return float32(real(v.Complex())), true
-	case vk == reflect.String:
-		r, err := strconv.ParseFloat(v.String(), 32)
-		if err != nil {
-			return float32(0.0), false
+		return float32(*vt), true
+	case int16:
+		return float32(vt), true
+	case *int16:
+		if vt == nil {
+			return 0, false
 		}
-		return float32(r), true
-	default:
-		return float32(0.0), false
+		return float32(*vt), true
+	case uint16:
+		return float32(vt), true
+	case *uint16:
+		if vt == nil {
+			return 0, false
+		}
+		return float32(*vt), true
+	case uint32:
+		return float32(vt), true
+	case *uint32:
+		if vt == nil {
+			return 0, false
+		}
+		return float32(*vt), true
+	case uint64:
+		return float32(vt), true
+	case *uint64:
+		if vt == nil {
+			return 0, false
+		}
+		return float32(*vt), true
+	case uintptr:
+		return float32(vt), true
+	case *uintptr:
+		if vt == nil {
+			return 0, false
+		}
+		return float32(*vt), true
 	}
+	return 0, false
 }
 
 // ToString robustly converts anything to a String
@@ -414,142 +574,222 @@ func ToFloat32(it any) (float32, bool) {
 // (e.g., for enums), and then falls back on strconv calls for numeric types.
 // If everything else fails, it uses Sprintf("%v") which always works,
 // so there is no need for a bool = false return.
+// * returns "nil" for any nil pointers
+// * byte is converted as string(byte) not the decimal representation
 //
 //gopy:interface=handle
-func ToString(it any) string {
-	switch it := it.(type) {
+func ToString(v any) string {
+	nilstr := "nil"
+	switch vt := v.(type) {
 	case string:
-		return it
+		return vt
 	case *string:
-		return *it
+		if vt == nil {
+			return nilstr
+		}
+		return *vt
 	case []byte:
-		return string(it)
+		return string(vt)
 	case *[]byte:
-		return string(*it)
+		if vt == nil {
+			return nilstr
+		}
+		return string(*vt)
 	}
 
-	if stringer, ok := it.(fmt.Stringer); ok {
+	if stringer, ok := v.(fmt.Stringer); ok {
 		return stringer.String()
 	}
 
-	switch it := it.(type) {
+	switch vt := v.(type) {
 	case bool:
-		if it {
+		if vt {
 			return "true"
 		}
 		return "false"
 	case *bool:
-		if *it {
+		if vt == nil {
+			return nilstr
+		}
+		if *vt {
 			return "true"
 		}
 		return "false"
 	case int:
-		return strconv.FormatInt(int64(it), 10)
+		return strconv.FormatInt(int64(vt), 10)
 	case *int:
-		return strconv.FormatInt(int64(*it), 10)
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatInt(int64(*vt), 10)
 	case int32:
-		return strconv.FormatInt(int64(it), 10)
+		return strconv.FormatInt(int64(vt), 10)
 	case *int32:
-		return strconv.FormatInt(int64(*it), 10)
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatInt(int64(*vt), 10)
 	case int64:
-		return strconv.FormatInt(it, 10)
+		return strconv.FormatInt(vt, 10)
 	case *int64:
-		return strconv.FormatInt(*it, 10)
-	case byte:
-		return strconv.FormatInt(int64(it), 10)
-	case *byte:
-		return strconv.FormatInt(int64(*it), 10)
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatInt(*vt, 10)
+	case uint8: // byte, converts as string char
+		return string(vt)
+	case *uint8:
+		if vt == nil {
+			return nilstr
+		}
+		return string(*vt)
 	case float64:
-		return strconv.FormatFloat(it, 'G', -1, 64)
+		return strconv.FormatFloat(vt, 'G', -1, 64)
 	case *float64:
-		return strconv.FormatFloat(*it, 'G', -1, 64)
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatFloat(*vt, 'G', -1, 64)
 	case float32:
-		return strconv.FormatFloat(float64(it), 'G', -1, 32)
+		return strconv.FormatFloat(float64(vt), 'G', -1, 32)
 	case *float32:
-		return strconv.FormatFloat(float64(*it), 'G', -1, 32)
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatFloat(float64(*vt), 'G', -1, 32)
 	case uintptr:
-		return fmt.Sprintf("%#x", uintptr(it))
+		return fmt.Sprintf("%#x", uintptr(vt))
 	case *uintptr:
-		return fmt.Sprintf("%#x", uintptr(*it))
+		if vt == nil {
+			return nilstr
+		}
+		return fmt.Sprintf("%#x", uintptr(*vt))
+
+	case int8:
+		return strconv.FormatInt(int64(vt), 10)
+	case *int8:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatInt(int64(*vt), 10)
+	case int16:
+		return strconv.FormatInt(int64(vt), 10)
+	case *int16:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatInt(int64(*vt), 10)
+	case uint16:
+		return strconv.FormatInt(int64(vt), 10)
+	case *uint16:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatInt(int64(*vt), 10)
+	case uint32:
+		return strconv.FormatInt(int64(vt), 10)
+	case *uint32:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatInt(int64(*vt), 10)
+	case uint64:
+		return strconv.FormatInt(int64(vt), 10)
+	case *uint64:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatInt(int64(*vt), 10)
+	case complex64:
+		return strconv.FormatFloat(float64(real(vt)), 'G', -1, 32) + "," + strconv.FormatFloat(float64(imag(vt)), 'G', -1, 32)
+	case *complex64:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatFloat(float64(real(*vt)), 'G', -1, 32) + "," + strconv.FormatFloat(float64(imag(*vt)), 'G', -1, 32)
+	case complex128:
+		return strconv.FormatFloat(real(vt), 'G', -1, 64) + "," + strconv.FormatFloat(imag(vt), 'G', -1, 64)
+	case *complex128:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatFloat(real(*vt), 'G', -1, 64) + "," + strconv.FormatFloat(imag(*vt), 'G', -1, 64)
 	}
 
-	if AnyIsNil(it) {
-		return "nil"
+	if AnyIsNil(v) {
+		return nilstr
 	}
-	v := NonPtrValue(reflect.ValueOf(it))
-	vk := v.Kind()
-	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
-		return strconv.FormatInt(v.Int(), 10)
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return strconv.FormatUint(v.Uint(), 10)
-	case vk == reflect.Bool:
-		return strconv.FormatBool(v.Bool())
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return strconv.FormatFloat(v.Float(), 'G', -1, 64)
-	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		cv := v.Complex()
-		rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
-		return rv
-	case vk == reflect.String:
-		return v.String()
-	case vk == reflect.Slice:
-		eltyp := SliceElType(it)
-		if eltyp.Kind() == reflect.Uint8 { // []byte
-			return string(it.([]byte))
-		}
-		fallthrough
-	default:
-		return fmt.Sprintf("%v", it)
-	}
+	return fmt.Sprintf("%v", v)
 }
 
 // ToStringPrec robustly converts anything to a String using given precision
 // for converting floating values -- using a value like 6 truncates the
 // nuisance random imprecision of actual floating point values due to the
-// fact that they are represented with binary bits.  See ToString
-// for more info.
+// fact that they are represented with binary bits.
+// Otherwise is identical to ToString for any other cases.
 //
 //gopy:interface=handle
-func ToStringPrec(it any, prec int) string {
-	if AnyIsNil(it) {
-		return "nil"
+func ToStringPrec(v any, prec int) string {
+	nilstr := "nil"
+	switch vt := v.(type) {
+	case string:
+		return vt
+	case *string:
+		if vt == nil {
+			return nilstr
+		}
+		return *vt
+	case []byte:
+		return string(vt)
+	case *[]byte:
+		if vt == nil {
+			return nilstr
+		}
+		return string(*vt)
 	}
-	if stringer, ok := it.(fmt.Stringer); ok {
+
+	if stringer, ok := v.(fmt.Stringer); ok {
 		return stringer.String()
 	}
-	v := NonPtrValue(reflect.ValueOf(it))
-	vk := v.Kind()
-	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
-		return strconv.FormatInt(v.Int(), 10)
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		return strconv.FormatUint(v.Uint(), 10)
-	case vk == reflect.Bool:
-		return strconv.FormatBool(v.Bool())
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		return strconv.FormatFloat(v.Float(), 'G', prec, 64)
-	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		cv := v.Complex()
-		rv := strconv.FormatFloat(real(cv), 'G', prec, 64) + "," + strconv.FormatFloat(imag(cv), 'G', prec, 64)
-		return rv
-	case vk == reflect.String:
-		return v.String()
-	case vk == reflect.Slice:
-		eltyp := SliceElType(it)
-		if eltyp.Kind() == reflect.Uint8 { // []byte
-			return string(it.([]byte))
+
+	switch vt := v.(type) {
+	case float64:
+		return strconv.FormatFloat(vt, 'G', prec, 64)
+	case *float64:
+		if vt == nil {
+			return nilstr
 		}
-		fallthrough
-	default:
-		return fmt.Sprintf("%v", it)
+		return strconv.FormatFloat(*vt, 'G', prec, 64)
+	case float32:
+		return strconv.FormatFloat(float64(vt), 'G', prec, 32)
+	case *float32:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatFloat(float64(*vt), 'G', prec, 32)
+	case complex64:
+		return strconv.FormatFloat(float64(real(vt)), 'G', prec, 32) + "," + strconv.FormatFloat(float64(imag(vt)), 'G', prec, 32)
+	case *complex64:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatFloat(float64(real(*vt)), 'G', prec, 32) + "," + strconv.FormatFloat(float64(imag(*vt)), 'G', prec, 32)
+	case complex128:
+		return strconv.FormatFloat(real(vt), 'G', prec, 64) + "," + strconv.FormatFloat(imag(vt), 'G', prec, 64)
+	case *complex128:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatFloat(real(*vt), 'G', prec, 64) + "," + strconv.FormatFloat(imag(*vt), 'G', prec, 64)
 	}
+	return ToString(v)
 }
 
 // SetRobust robustly sets the 'to' value from the 'from' value.
 // destination must be a pointer-to. Copies slices and maps robustly,
 // and can set a struct, slice or map from a JSON-formatted string from value.
-// Note that a map
+// Note that a map is _not_ reset prior to setting, whereas a slice length
+// is set to the source length and is thus equivalent to the source slice.
 //
 //gopy:interface=handle
 func SetRobust(to, frm any) bool {

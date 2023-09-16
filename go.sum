@@ -1,2 +1,4 @@
 goki.dev/enums v0.9.13 h1:bhQVdyW04KBpbvJfdmXP31hQd6dOfTvLMIXvOZIJFnM=
 goki.dev/enums v0.9.13/go.mod h1:QlXLA+1LTQmsQIn51+sg8eQ6pgiH+KLqMCydb/hmZbs=
+goki.dev/glop v0.0.0-20230915181013-dbed4cfcd46c h1:v281jawDG7JO6BbAQg58dvpemKGIX/RqNIDxI+/NhNw=
+goki.dev/glop v0.0.0-20230915181013-dbed4cfcd46c/go.mod h1:jvhuxIMPaQWDB/3pB7dFbOyMuxq1qTADVZPZhihbQA0=
