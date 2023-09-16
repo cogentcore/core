@@ -41,7 +41,7 @@ Docs: [GoDoc](https://pkg.go.dev/github.com/emer/emergent/grease)
 
 * Field tag `def:"value"`, used in the [GoGi](https://github.com/goki/gi) GUI, sets the initial default value and is shown for the `-h` or `--help` usage info.
 
-* [kit](https://goki.dev/ki/v2) registered "enum" `const` types, with names automatically parsed from string values (including bit flags).  Must use the [goki stringer](https://github.com/goki/stringer) version to generate `FromString()` method, and register the type like this: `var KitTestEnum = kit.Enums.AddEnum(TestEnumN, kit.NotBitFlag, nil)` -- see [enum.go](enum.go) file for example.
+* [kit](https://goki.dev/ki/v2) registered "enum" `const` types, with names automatically parsed from string values (including bit flags).  Must use the [goki stringer](https://github.com/goki/stringer) version to generate `FromString()` method, and register the type like this: `var KitTestEnum = laser.Enums.AddEnum(TestEnumN, laser.NotBitFlag, nil)` -- see [enum.go](enum.go) file for example.
 
 # `def` Default Tags
 

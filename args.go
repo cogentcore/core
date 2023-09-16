@@ -15,8 +15,8 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/ki/v2/toml"
+	"goki.dev/laser"
 	"golang.org/x/exp/slices"
 )
 
@@ -58,14 +58,14 @@ func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T])
 // flags can be properly set with their shorthand syntax.
 // It should only be needed for internal use and not end-user code.
 func BoolFlags(obj any) map[string]bool {
-	if kit.IfaceIsNil(obj) {
+	if laser.AnyIsNil(obj) {
 		return nil
 	}
 	ov := reflect.ValueOf(obj)
 	if ov.Kind() == reflect.Pointer && ov.IsNil() {
 		return nil
 	}
-	val := kit.NonPtrValue(ov)
+	val := laser.NonPtrValue(ov)
 	typ := val.Type()
 	res := map[string]bool{}
 	for i := 0; i < typ.NumField(); i++ {
@@ -287,7 +287,7 @@ func ParseFlag(name string, value string, allFlags map[string]reflect.Value, err
 		return nil
 	}
 
-	isBool := kit.NonPtrValue(fval).Kind() == reflect.Bool
+	isBool := laser.NonPtrValue(fval).Kind() == reflect.Bool
 
 	if isBool {
 		lcnm := strings.ToLower(name)
@@ -317,18 +317,16 @@ func ParseFlag(name string, value string, allFlags map[string]reflect.Value, err
 
 // SetArgValue sets given arg name to given value, into settable reflect.Value
 func SetArgValue(name string, fval reflect.Value, value string) error {
-	nptyp := kit.NonPtrType(fval.Type())
+	nptyp := laser.NonPtrType(fval.Type())
 	vk := nptyp.Kind()
 	switch {
-	case vk >= reflect.Int && vk <= reflect.Uint64 && kit.Enums.TypeRegistered(nptyp):
-		return kit.Enums.SetAnyEnumValueFromString(fval, value)
 	case vk == reflect.Map:
 		mval := make(map[string]any)
 		err := toml.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
 		if err != nil {
 			return err
 		}
-		err = kit.CopyMapRobust(fval.Interface(), mval["tmp"])
+		err = laser.CopyMapRobust(fval.Interface(), mval["tmp"])
 		if err != nil {
 			return fmt.Errorf("not able to set map field from arg: %q val: %q: %w", name, value, err)
 		}
@@ -338,12 +336,12 @@ func SetArgValue(name string, fval reflect.Value, value string) error {
 		if err != nil {
 			return err
 		}
-		err = kit.CopySliceRobust(fval.Interface(), mval["tmp"])
+		err = laser.CopySliceRobust(fval.Interface(), mval["tmp"])
 		if err != nil {
 			return fmt.Errorf("not able to set slice field from arg: %q val: %q: %w", name, value, err)
 		}
 	default:
-		ok := kit.SetRobust(fval.Interface(), value) // overkill but whatever
+		ok := laser.SetRobust(fval.Interface(), value) // overkill but whatever
 		if !ok {
 			return fmt.Errorf("not able to set field from arg: %q val: %q", name, value)
 		}
@@ -377,7 +375,7 @@ func addAllCases(nm, path string, pval reflect.Value, allFlags map[string]reflec
 // fieldFlagNamesStruct returns map of all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value
 func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]reflect.Value, cmd string, args []string) ([]string, error) {
-	if kit.IfaceIsNil(obj) {
+	if laser.AnyIsNil(obj) {
 		return nil, nil
 	}
 	ov := reflect.ValueOf(obj)
@@ -385,12 +383,12 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 		return nil, nil
 	}
 	leftovers := args
-	val := kit.NonPtrValue(ov)
+	val := laser.NonPtrValue(ov)
 	typ := val.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
-		pval := kit.PtrValue(fv)
+		pval := laser.PtrValue(fv)
 		cmdtag, ok := f.Tag.Lookup("cmd")
 		if ok && cmdtag != cmd { // if we are associated with a different command, skip
 			continue
@@ -398,7 +396,7 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 		posargtag, ok := f.Tag.Lookup("posarg")
 		if ok {
 			if posargtag == "all" {
-				ok := kit.SetRobust(pval.Interface(), args)
+				ok := laser.SetRobust(pval.Interface(), args)
 				if !ok {
 					return nil, fmt.Errorf("not able to set field %q to all positional arguments: %v", f.Name, args)
 				}
@@ -427,7 +425,7 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 				return nil, fmt.Errorf("expected at least one name in grease struct tag, but got none")
 			}
 		}
-		if kit.NonPtrType(f.Type).Kind() == reflect.Struct {
+		if laser.NonPtrType(f.Type).Kind() == reflect.Struct {
 			nwPath := names[0]
 			if path != "" {
 				nwPath = path + "." + nwPath
@@ -439,7 +437,7 @@ func fieldFlagNamesStruct(obj any, path string, nest bool, allFlags map[string]r
 					nwNest = true
 				}
 			}
-			fieldFlagNamesStruct(kit.PtrValue(fv).Interface(), nwPath, nwNest, allFlags, cmd, args)
+			fieldFlagNamesStruct(laser.PtrValue(fv).Interface(), nwPath, nwNest, allFlags, cmd, args)
 			continue
 		}
 		for _, name := range names {

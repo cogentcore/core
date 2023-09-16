@@ -12,6 +12,7 @@ import (
 
 	"goki.dev/ki/v2/kit"
 	"goki.dev/ki/v2/toml"
+	"goki.dev/laser"
 )
 
 // Includer facilitates processing include files in Config objects.
@@ -27,7 +28,7 @@ type Includer interface {
 // Returns an error if any of the include files cannot be found on IncludePath.
 // Does not alter cfg.
 func IncludeStack(opts *Options, cfg Includer) ([]string, error) {
-	clone := reflect.New(kit.NonPtrType(reflect.TypeOf(cfg))).Interface().(Includer)
+	clone := reflect.New(laser.NonPtrType(reflect.TypeOf(cfg))).Interface().(Includer)
 	*clone.IncludesPtr() = *cfg.IncludesPtr()
 	return includeStackImpl(opts, clone, nil)
 }

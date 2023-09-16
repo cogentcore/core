@@ -17,6 +17,8 @@ goki.dev/gti v0.0.0-20230910050553-9577e693612d h1:DwrDwSJGDfIy95wDUQX00oOS1WXWc
 goki.dev/gti v0.0.0-20230910050553-9577e693612d/go.mod h1:zBLZkvGDh3lafBTd0cpDILdJ+jy12S2tHXYP9gkLQSA=
 goki.dev/ki/v2 v2.0.0-dev0.0.3 h1:kKjKGimERUmSKTprPaU0B1uU0QkHJ87vKlEY5JchhZw=
 goki.dev/ki/v2 v2.0.0-dev0.0.3/go.mod h1:PQh0iX2Z3BFFcJrOtykJVfFmjM5h4qZLpCP9AKZboy0=
+goki.dev/laser v0.1.0 h1:4S7OsiUXNy1Zaraj4GACr090NQcDGrvl7jhPPysOwHo=
+goki.dev/laser v0.1.0/go.mod h1:QXqggxJsEB3B4fWrLAy+jvQ16OJ6Ay4S4EHzdN2Zz+4=
 goki.dev/ordmap v0.5.0 h1:mcJ+mZTqri636Q5fxq78vwleBC9+yCpKj5bH1ScHOf4=
 goki.dev/ordmap v0.5.0/go.mod h1:0w8tBn0d3KTc1gax89DGmRNmBWpZCXnXwQSzcdJ9Ayg=
 golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 h1:m64FZMko/V45gv0bNmrNYoDEq8U5YUhetc9cBWKS1TQ=

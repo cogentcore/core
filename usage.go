@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 )
 
 // Usage returns a usage string based on the given
@@ -123,8 +123,8 @@ outer:
 // happen internally (if you don't know whether
 // you're in a nested context, you're not).
 func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
-	typ := kit.NonPtrType(reflect.TypeOf(app))
-	val := kit.NonPtrValue(reflect.ValueOf(app))
+	typ := laser.NonPtrType(reflect.TypeOf(app))
+	val := laser.NonPtrValue(reflect.ValueOf(app))
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
@@ -132,7 +132,7 @@ func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
 		if hast && cmdtag != cmd { // if we are associated with a different command, skip
 			continue
 		}
-		if kit.NonPtrType(f.Type).Kind() == reflect.Struct {
+		if laser.NonPtrType(f.Type).Kind() == reflect.Struct {
 			nwPath := f.Name
 			// if we are scoped by command, we don't need new path scope
 			// TODO: need a better approach to this; maybe use allFlags map
@@ -142,7 +142,7 @@ func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
 			if path != "" {
 				nwPath = path + "." + nwPath
 			}
-			FlagUsage(kit.PtrValue(fv).Interface(), nwPath, b, cmd)
+			FlagUsage(laser.PtrValue(fv).Interface(), nwPath, b, cmd)
 			continue
 		}
 		if f.Name == "Includes" {
