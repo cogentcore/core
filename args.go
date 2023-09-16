@@ -31,7 +31,8 @@ func SetFromArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	cmd, allFlags, err := ParseArgs(cfg, nfargs, "", cmds...)
+	allFlags := map[string]reflect.Value{}
+	_, cmd, err := ParseArgs(cfg, nfargs, allFlags, "", cmds...)
 	if err != nil {
 		return "", err
 	}
@@ -122,19 +123,25 @@ func GetFlag(s string, args []string) (name, value string, a []string, err error
 // ParseArgs parses the given non-flag arguments in the context of the given
 // configuration information and commands. The non-flag arguments should be
 // gotten through [GetArgs] first.
-func ParseArgs[T any](cfg T, args []string, cmd string, cmds ...*Cmd[T]) (newcmd string, allFlags map[string]reflect.Value, err error) {
-	allFlags = map[string]reflect.Value{}
+func ParseArgs[T any](cfg T, args []string, allFlags map[string]reflect.Value, cmd string, cmds ...*Cmd[T]) (newArgs []string, newCmd string, err error) {
 	CommandFlags(allFlags)
-	if len(args) != 0 {
-		arg := args[0]
+	// we start with the base args and command
+	newArgs = args
+	newCmd = cmd
+	if len(newArgs) != 0 {
+		// we only care about one arg at a time
+		arg := newArgs[0]
+		// get all of the (sub)commands in our base command
 		cmdstrs := strings.Fields(cmd)
 		for _, c := range cmds {
+			// get all of the (sub)commands in this command
 			cstrs := strings.Fields(c.Name)
+			// find the commands that we share
 			gotTo := 0
 			hasMismatch := false
 			for i, cstr := range cstrs {
 				if i >= len(cmdstrs) {
-					gotTo = i - 1
+					gotTo = i
 					break
 				}
 				if cmdstrs[i] != cstr {
@@ -142,45 +149,43 @@ func ParseArgs[T any](cfg T, args []string, cmd string, cmds ...*Cmd[T]) (newcmd
 					break
 				}
 			}
+			// if we have a different sub(command) for something, this isn't the right command
 			if hasMismatch {
 				continue
 			}
-			if gotTo != -1 && arg != cstrs[gotTo] {
+			// if the thing after we ran out of (sub)commands on our base isn't our next arg, this isn't the right command
+			if arg != cstrs[gotTo] {
 				continue
 			}
-			newcmd = arg
+			// otherwise, it is the right command, and our new command is our base plus our next arg
+			newCmd = arg
 			if cmd != "" {
-				newcmd = cmd + " " + arg
+				newCmd = cmd + " " + arg
 			}
-			args = args[1:]
-			ocmd, oallFlags, err := ParseArgs(cfg, args, newcmd, cmds...)
+			// we have consumed our next arg, so we get rid of it
+			newArgs = newArgs[1:]
+			// then, we recursively parse again with our new command as context
+			oargs, ocmd, err := ParseArgs(cfg, newArgs, allFlags, newCmd, cmds...)
 			if err != nil {
-				return "", nil, err
+				return nil, "", err
 			}
-			fmt.Println(newcmd, ocmd, args)
-			if ocmd != "" {
-				if newcmd == "" {
-					newcmd = ocmd
-				} else {
-					newcmd += " " + ocmd
-				}
-			}
-			for ofn, ofv := range oallFlags {
-				allFlags[ofn] = ofv
-			}
+			fmt.Printf("newCmd: %q, ocmd: %q, args: %v, oargs: %q\n", newCmd, ocmd, newArgs, oargs)
+			// our new args and command are now whatever the recursive call returned, building upon what we passed it
+			newArgs = oargs
+			newCmd = ocmd
+			fmt.Printf("after: newCmd: %q\n", newCmd)
 			break
 
 		}
 	}
-	fmt.Println(newcmd, args)
-	args, err = FieldFlagNames(cfg, allFlags, newcmd, args)
+	newArgs, err = FieldFlagNames(cfg, allFlags, newCmd, newArgs)
 	if err != nil {
-		return newcmd, allFlags, fmt.Errorf("error getting field flag names: %w", err)
+		return newArgs, newCmd, fmt.Errorf("error getting field flag names: %w", err)
 	}
-	if len(args) > 0 {
-		return newcmd, allFlags, fmt.Errorf("got unused arguments: %v", args)
+	if len(newArgs) > 0 {
+		return newArgs, newCmd, fmt.Errorf("got unused arguments: %v", newArgs)
 	}
-	return newcmd, allFlags, nil
+	return newArgs, newCmd, nil
 }
 
 // ParseFlags parses the given flags using the given map of all of the
