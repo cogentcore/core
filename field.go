@@ -23,23 +23,22 @@ type Field struct {
 	// Name is the fully qualified, nested name of this field (eg: A.B.C).
 	// It is as it appears in code, and is NOT transformed something like kebab-case.
 	Name string
+	// Nest is whether, if true, a nested version of this field should be the only
+	// way to access it (eg: A.B.C), or, if false, this field should be accessible
+	// through its non-nested version (eg: C).
+	Nest bool
 }
 
 // Fields is a simple type alias for an ordered map of [Field] objects.
 type Fields = ordmap.Map[string, *Field]
 
-// AddFields adds to given fields map all the different ways the field names
-// can be specified as arg flags, mapping to the reflect.Value. It also uses
-// the given positional arguments to set the values of the object based on any
-// posarg struct tags that fields have. The posarg struct tag must be either
-// "all" or a valid uint.
+// AddFields adds to the given fields map all of the fields of the given
+// object, in the context of the given command name.
 func AddFields(obj any, allFields *Fields, cmd string) {
 	addFieldsImpl(obj, "", false, allFields, cmd)
 }
 
-// addFieldsImpl adds to given flags map of all the different ways the field names
-// can be specified as arg flags, mapping to the reflect.Value. It is the
-// underlying implementation of [FieldFlagNames].
+// addFieldsImpl is the underlying implementation of [AddFields].
 func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, cmd string) {
 	if laser.AnyIsNil(obj) {
 		return
@@ -81,6 +80,7 @@ func addFieldsImpl(obj any, path string, nest bool, allFields *Fields, cmd strin
 			Field: f,
 			Value: pval,
 			Name:  name,
+			Nest:  nest,
 		})
 
 	}
