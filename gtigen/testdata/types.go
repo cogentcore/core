@@ -21,6 +21,7 @@ type Person struct {
 	Age int
 }
 
+//gti:skip
 func (p Person) String() string { return p.Name }
 
 // Introduction returns an introduction for the person.

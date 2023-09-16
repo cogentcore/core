@@ -154,11 +154,11 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 	hasAdd := false
 	cfg := &Config{}
 	*cfg = *g.Config
-	dirs, hasAdd, err := LoadFromComment(gd.Doc, cfg)
+	dirs, hasAdd, hasSkip, err := LoadFromComment(gd.Doc, cfg)
 	if err != nil {
 		return false, err
 	}
-	if !hasAdd && !cfg.AddTypes && len(cfg.InterfaceConfigs) == 0 { // we must be told to add or we will not add, and if we have interface configs we will handle adding later
+	if len(cfg.InterfaceConfigs) == 0 && ((!hasAdd && !cfg.AddTypes) || hasSkip) { // we must be told to add or we will not add, and if we have interface configs we will handle adding later
 		return true, nil
 	}
 	doc := strings.TrimSuffix(gd.Doc.Text(), "\n")
@@ -180,17 +180,17 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 						continue
 					}
 					*cfg = *ic
-					dirs, hasAdd, err = LoadFromComment(gd.Doc, cfg)
+					dirs, hasAdd, hasSkip, err = LoadFromComment(gd.Doc, cfg)
 					hasInt = true
 					if err != nil {
 						return false, err
 					}
-					if !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
+					if (!hasAdd && !cfg.AddTypes) || hasSkip { // we must be told to add or we will not add
 						return true, nil
 					}
 				}
 			}
-			if !hasInt && !hasAdd && !cfg.AddTypes { // we must be told to add or we will not add
+			if (!hasInt && !hasAdd && !cfg.AddTypes) || hasSkip { // we must be told to add or we will not add
 				return true, nil
 			}
 		}
@@ -237,14 +237,14 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 	cfg := &Config{}
 	*cfg = *g.Config
-	dirs, hasAdd, err := LoadFromComment(fd.Doc, cfg)
+	dirs, hasAdd, hasSkip, err := LoadFromComment(fd.Doc, cfg)
 	if err != nil {
 		return false, err
 	}
 	doc := strings.TrimSuffix(fd.Doc.Text(), "\n")
 
 	if fd.Recv == nil {
-		if !hasAdd && !cfg.AddFuncs { // we must be told to add or we will not add
+		if (!hasAdd && !cfg.AddFuncs) || hasSkip { // we must be told to add or we will not add
 			return true, nil
 		}
 		fun := &gti.Func{
@@ -264,7 +264,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		fun.Returns = rets
 		g.Funcs.Add(fun.Name, fun)
 	} else {
-		if !hasAdd && !cfg.AddMethods { // we must be told to add or we will not add
+		if (!hasAdd && !cfg.AddMethods) || hasSkip { // we must be told to add or we will not add
 			return true, nil
 		}
 		method := &gti.Method{
@@ -321,7 +321,7 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 		if field.Doc != nil {
 			lcfg := &Config{}
 			*lcfg = *cfg
-			sdirs, _, err := LoadFromComment(field.Doc, lcfg)
+			sdirs, _, _, err := LoadFromComment(field.Doc, lcfg)
 			if err != nil {
 				return nil, err
 			}
@@ -344,16 +344,15 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 // there was a gti:add directive, and any error. If the given
 // documentation is nil, LoadFromComment still returns an empty but valid
 // [gti.Directives] value, false, and no error.
-func LoadFromComment(c *ast.CommentGroup, cfg *Config) (gti.Directives, bool, error) {
-	dirs := gti.Directives{}
-	hasAdd := false
+func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
+	dirs = gti.Directives{}
 	if c == nil {
-		return dirs, false, nil
+		return
 	}
 	for _, c := range c.List {
 		dir, err := grease.ParseDirective(c.Text)
 		if err != nil {
-			return nil, false, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
+			return nil, false, false, fmt.Errorf("error parsing comment directive from %q: %w", c.Text, err)
 		}
 		if dir == nil {
 			continue
@@ -361,20 +360,22 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (gti.Directives, bool, er
 		if dir.Tool == "gti" {
 			if dir.Directive == "add" {
 				hasAdd = true
-				leftovers, err := grease.SetFromArgs(cfg, dir.Args)
+				leftovers, err := grease.SetFromArgs(cfg, dir.Args, grease.ErrNotFound)
 				if err != nil {
-					return nil, false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
+					return nil, false, false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
 				}
 				if len(leftovers) > 0 {
-					return nil, false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
+					return nil, false, false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
 				}
+			} else if dir.Directive == "skip" {
+				hasSkip = true
 			} else {
-				return nil, false, fmt.Errorf("unrecognized gti directive %q (from %q)", dir.Directive, c.Text)
+				return nil, false, false, fmt.Errorf("unrecognized gti directive %q (from %q)", dir.Directive, c.Text)
 			}
 		}
 		dirs = append(dirs, dir)
 	}
-	return dirs, hasAdd, nil
+	return dirs, hasAdd, hasSkip, nil
 }
 
 // Generate produces the code for the types
