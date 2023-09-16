@@ -42,11 +42,11 @@ func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T])
 	if err != nil {
 		return "", err
 	}
-	cmd, allFields, err := ParseArgs(cfg, nfargs, cmds...)
+	cmd, allFlags, err := ParseArgs(cfg, nfargs, cmds...)
 	if err != nil {
 		return "", err
 	}
-	err = ParseFlags(flags, allFields, errNotFound)
+	err = ParseFlags(flags, allFlags, errNotFound)
 	if err != nil {
 		return "", err
 	}
@@ -174,16 +174,16 @@ func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value st
 // gotten through [GetArgs] first. It returns the (sub)command specified by
 // the arguments, a map from all of the flag names to their associated
 // settable values, and any error.
-func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFields *Fields, err error) {
+func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFlags *Fields, err error) {
 	newArgs, newCmd, err := parseArgsImpl(cfg, args, "", cmds...)
 	if err != nil {
-		return newCmd, allFields, err
+		return newCmd, allFlags, err
 	}
 
-	allFields = &Fields{}
+	allFields := &Fields{}
 	AddFields(cfg, allFields, newCmd)
 
-	allFlags := &Fields{}
+	allFlags = &Fields{}
 	newArgs, err = FieldFlagNames(allFields, allFlags, newCmd, newArgs)
 	if err != nil {
 		return newCmd, allFields, fmt.Errorf("error getting field flag names: %w", err)
@@ -191,7 +191,7 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFie
 	if len(newArgs) > 0 {
 		return newCmd, allFields, fmt.Errorf("got unused arguments: %v", newArgs)
 	}
-	return newCmd, allFields, nil
+	return newCmd, allFlags, nil
 }
 
 // parseArgsImpl is the underlying implementation of [ParseArgs] that is called
