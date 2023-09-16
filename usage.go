@@ -50,8 +50,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 	b.WriteString("The following flags are available. Flags are case-insensitive and\n")
 	b.WriteString("can be in kebab-case, snake_case, or CamelCase. Also, there can be\n")
-	b.WriteString("one or two leading dashes. Most flags can be used without nesting\n")
-	b.WriteString("paths (e.g. -target instead of -build-target)\n\n")
+	b.WriteString("one or two leading dashes.\n\n")
 
 	b.WriteString(cmdColor("-help") + " or " + cmdColor("-h") + "\n\tshow usage information for a command\n")
 	b.WriteString(cmdColor("-config") + " or " + cmdColor("-cfg") + "\n\tthe filename to load configuration options from\n")
@@ -70,37 +69,49 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 // generate usage for "mod init", "mod tidy", and "mod edit". This ensures
 // that only relevant commands are shown in the usage.
 func CommandUsage[T any](b *strings.Builder, cmd string, cmds ...*Cmd[T]) {
-	b.WriteString("The following commands are available:\n\n")
-	for _, c := range cmds {
-		if (c.Root && cmd == "") || c.Name == cmd {
-			b.WriteString(cmdColor(c.Name+" (default)") + "\n\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t") + "\n") // need to put a tab on every newline for formatting
-			break
-		}
-	}
-	// if we are in root, we also add help
-	if cmd == "" {
-		b.WriteString(cmdColor("help") + "\n\tshow usage information for a command\n")
-	}
+	acmds := []*Cmd[T]{}           // actual commands we care about
+	var rcmd *Cmd[T]               // root command
+	cmdstrs := strings.Fields(cmd) // subcommand strings in passed command
 
-	cmdstrs := strings.Fields(cmd)
 	// need this label so that we can continue outer loop when we have non-matching cmdstr
 outer:
 	for _, c := range cmds {
-		if (c.Root && cmd == "") || c.Name == cmd { // we already handled this case above, so skip
-			continue
-		}
-		cstrs := strings.Fields(c.Name)
-		if len(cstrs) != len(cmdstrs)+1 {
+		cstrs := strings.Fields(c.Name)   // subcommand strings in command we are checking
+		if len(cstrs) != len(cmdstrs)+1 { // we must be one deeper
 			continue
 		}
 		for i, cmdstr := range cmdstrs {
-			if cmdstr != cstrs[i] {
+			if cmdstr != cstrs[i] { // every subcommand so far must match
 				continue outer
 			}
 		}
-		b.WriteString(cmdColor(c.Name))
+		if c.Root {
+			rcmd = c
+		} else if c.Name != cmd { // if it is the same subcommand we are already on, we handle it above in main Usage
+			acmds = append(acmds, c)
+		}
+	}
+
+	if rcmd != nil {
+		b.WriteString("The default (root) command is:\n")
+		b.WriteString("\t" + cmdColor(rcmd.Name) + "\t" + strings.ReplaceAll(rcmd.Doc, "\n", "\n\t") + "\n\n") // need to put a tab on every newline for formatting
+	}
+
+	if len(acmds) == 0 && cmd != "" { // nothing to do
+		return
+	}
+
+	b.WriteString("The subcommands are:\n")
+
+	// if we are in root, we also add help
+	if cmd == "" {
+		b.WriteString("\t" + cmdColor("help") + "\tshow usage information for a command\n")
+	}
+
+	for _, c := range acmds {
+		b.WriteString("\t" + cmdColor(c.Name))
 		if c.Doc != "" {
-			b.WriteString("\n\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t")) // need to put a tab on every newline for formatting
+			b.WriteString("\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t")) // need to put a tab on every newline for formatting
 		}
 		b.WriteString("\n")
 	}
