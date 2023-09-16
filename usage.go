@@ -76,7 +76,7 @@ func CommandUsage[T any](b *strings.Builder, cmd string, cmds ...*Cmd[T]) {
 	b.WriteString("The following commands are available:\n\n")
 	for _, c := range cmds {
 		if (c.Root && cmd == "") || c.Name == cmd {
-			b.WriteString(cmdColor("<default command> ("+c.Name+")") + "\n\t" + c.Doc + "\n")
+			b.WriteString(cmdColor("<default command> ("+c.Name+")") + "\n\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t") + "\n") // need to put a tab on every newline for formatting
 			break
 		}
 	}
@@ -158,7 +158,7 @@ func FlagUsage(app any, path string, b *strings.Builder, cmd string) {
 		}
 		for i, name := range names {
 			b.WriteString(cmdColor("-" + strcase.ToKebab(name)))
-			// handle English sentence construction with or and commas
+			// handle English sentence construction with "or" and commas
 			if i == len(names)-2 {
 				if len(names) > 2 {
 					b.WriteString(",")

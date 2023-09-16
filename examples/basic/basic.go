@@ -10,6 +10,8 @@ import (
 	"goki.dev/grease"
 )
 
+//go:generate gtigen -add-funcs
+
 type Config struct {
 
 	// the name of the user
@@ -26,8 +28,6 @@ type Config struct {
 }
 
 // Build builds the app for the given platform.
-//
-//gti:add
 func Build(c *Config) error {
 	fmt.Println("Building for platform", c.BuildTarget)
 	return nil
@@ -35,33 +35,37 @@ func Build(c *Config) error {
 
 // Run runs the app for the given user.
 //
-//gti:add
 //grease:cmd -root
 func Run(c *Config) error {
 	fmt.Println("Running for user", c.Name)
 	return nil
 }
 
+// Mod configures module information.
 func Mod(c *Config) error {
 	fmt.Println("running mod")
 	return nil
 }
 
-//gti:add
+// ModTidy tidies module information.
+//
 //grease:cmd -name "mod tidy"
 func ModTidy(c *Config) error {
 	fmt.Println("running mod tidy")
 	return nil
 }
 
-//gti:add
+// ModTidyRemote tidies module information for the remote.
+//
 //grease:cmd -name "mod tidy remote"
 func ModTidyRemote(c *Config) error {
 	fmt.Println("running mod tidy remote")
 	return nil
 }
 
-//gti:add
+// ModTidyRemoteSetURL tidies module information for the remote
+// and sets its URL.
+//
 //grease:cmd -name "mod tidy remote set-url"
 func ModTidyRemoteSetURL(c *Config) error {
 	fmt.Println("running mod tidy remote set-url")
