@@ -112,7 +112,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		}
 		cfg := &Config{}
 		*cfg = *g.Config
-		leftovers, err := grease.SetFromArgs(cfg, dir.Args)
+		leftovers, err := grease.SetFromArgs(cfg, dir.Args, grease.ErrNotFound)
 		if err != nil {
 			return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
 		}
