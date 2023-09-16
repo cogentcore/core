@@ -25,11 +25,22 @@ type Config struct {
 
 	// the target platform to build for
 	BuildTarget string `grease:"build-target,target" cmd:"build" posarg:"0" desc:"the target platform to build for"`
+
+	Server Server
+	Client Client
+}
+
+type Server struct {
+	Platform string
+}
+
+type Client struct {
+	Platform string
 }
 
 // Build builds the app for the given platform.
 func Build(c *Config) error {
-	fmt.Println("Building for platform", c.BuildTarget, "-- likes go:", c.LikesGo)
+	fmt.Println("Building for platform", c.BuildTarget, "- likes go:", c.LikesGo)
 	return nil
 }
 
@@ -37,7 +48,7 @@ func Build(c *Config) error {
 //
 //grease:cmd -root
 func Run(c *Config) error {
-	fmt.Println("Running for user", c.Name, "-- likes go:", c.LikesGo)
+	fmt.Println("Running for user", c.Name, "- likes go:", c.LikesGo)
 	return nil
 }
 
