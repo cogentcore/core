@@ -6,6 +6,7 @@ package grease
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 
@@ -20,20 +21,38 @@ import (
 // color escape codes.
 func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	var b strings.Builder
-	b.WriteString(opts.AppTitle)
-	b.WriteString("\n\t" + opts.AppAbout)
-	b.WriteString("\n\n")
-	b.WriteString("Usage: " + cmdColor(opts.AppName+" <command> [arguments] [flags]\n\n"))
-	b.WriteString("The following commands are available:\n\n")
-
-	for _, cmd := range cmds {
-		if cmd.Root {
-			b.WriteString(cmdColor("<default command>") + "\n\t" + cmd.Doc + "\n")
-			break
+	if cmd == "" {
+		b.WriteString(opts.AppAbout)
+		b.WriteString("\n\n")
+	} else {
+		gotCmd := false
+		for _, c := range cmds {
+			if c.Name == cmd {
+				b.WriteString(c.Doc)
+				b.WriteString("\n\n")
+				gotCmd = true
+				break
+			}
+		}
+		if !gotCmd {
+			fmt.Println(cmdColor(opts.AppName+" help") + errorColor(" failed: command %s not found", cmd))
+			os.Exit(1)
 		}
 	}
+	cmdName := opts.AppName
+	if cmd != "" {
+		cmdName += " " + cmd
+	}
+	b.WriteString("Usage: " + cmdColor(cmdName+" [command] [arguments] [flags]\n\n"))
+	b.WriteString("The following commands are available:\n\n")
+	// for _, c := range cmds {
+	// 	if c.Root {
+	// 		b.WriteString(cmdColor("<default command>") + "\n\t" + c.Doc + "\n")
+	// 		break
+	// 	}
+	// }
 	b.WriteString(cmdColor("help") + "\n\tshow this usage message and exit\n")
-	CommandUsage(&b, cmds...)
+	CommandUsage(&b, cmd, cmds...)
 	b.WriteString("\n")
 
 	b.WriteString("The following flags are available. Flags are case-insensitive and\n")
@@ -50,11 +69,15 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 // CommandUsage adds the command usage info for
 // the given commands to the given [strings.Builder].
 // Typically, you should use [Usage] instead.
-func CommandUsage[T any](b *strings.Builder, cmds ...*Cmd[T]) {
-	for _, cmd := range cmds {
-		b.WriteString(cmdColor(cmd.Name))
-		if cmd.Doc != "" {
-			b.WriteString("\n\t" + strings.ReplaceAll(cmd.Doc, "\n", "\n\t")) // need to put a tab on every newline for formatting
+func CommandUsage[T any](b *strings.Builder, cmd string, cmds ...*Cmd[T]) {
+	for _, c := range cmds {
+		if c.Root {
+			b.WriteString(cmdColor(c.Name + " (default command)"))
+		} else {
+			b.WriteString(cmdColor(c.Name))
+		}
+		if c.Doc != "" {
+			b.WriteString("\n\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t")) // need to put a tab on every newline for formatting
 		}
 		b.WriteString("\n")
 	}
