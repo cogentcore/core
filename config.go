@@ -29,34 +29,27 @@ var (
 )
 
 type MetaConfig struct {
-	// ConfigFile is the name of the config file actually loaded, specified by the
-	// -config or -cfg command-line arg or the default file given in Config
+	// ConfigFile is the name of the config file to load
 	ConfigFile string
 
-	// Help is variable target for -help or -h args
+	// Help is whether to display a help message
 	Help bool
 
-	HelpCmd string `cmd:"help" posarg:"all"`
+	// HelpCmd is the name of the command to display
+	// help information for. It is only applicable to the
+	// help command, but it is enabled for all commands so
+	// that it can consume all positional arguments to prevent
+	// errors about unused arguments.
+	HelpCmd string `posarg:"all"`
 }
 
-func MetaCmds[T any](opts *Options, cfg T, cmds ...*Cmd[T]) []*Cmd[*MetaConfig] {
-	res := []*Cmd[*MetaConfig]{
-		{
-			Func: func(mc *MetaConfig) error { return nil },
-			Name: "help",
-			Doc:  "show this usage message and exit",
-			Root: true,
-		},
-	}
-	for _, cmd := range cmds {
-		res = append(res, &Cmd[*MetaConfig]{
-			Func: func(mc *MetaConfig) error { return nil },
-			Name: cmd.Name,
-			Doc:  cmd.Doc,
-			Root: cmd.Root,
-		})
-	}
-	return res
+var MetaCmds = []*Cmd[*MetaConfig]{
+	{
+		Func: func(mc *MetaConfig) error { return nil }, // this gets handled seperately, so we don't actually need to do anything here
+		Name: "help",
+		Doc:  "show this usage message and exit",
+		Root: true,
+	},
 }
 
 // Config is the overall config setting function, processing config files
@@ -87,7 +80,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	// (help and config), which we need to know before
 	// we can do other configuration.
 	mc := &MetaConfig{}
-	cmd, err := SetFromArgs(mc, args, MetaCmds(opts, cfg, cmds...)...)
+	cmd, err := SetFromArgs(mc, args, MetaCmds...)
 	if err != nil {
 		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
