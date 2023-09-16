@@ -135,32 +135,24 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 					os.Exit(1)
 				} else if !nfn && !ofn {
 					// neither one gets it, so we replace both with fully qualified name
-					nm := shortestUniqueName(nf.Name, usedNames)
-					names[i] = nm
-					usedNames[nm] = nf
+					applyShortestUniqueName(nf, i, usedNames)
 					for i, on := range of.Names {
 						if on == name {
-							nm := shortestUniqueName(of.Name, usedNames)
-							of.Names[i] = nm
-							usedNames[nm] = of
+							applyShortestUniqueName(of, i, usedNames)
 						}
 					}
 				} else if nfn && !ofn {
 					// we get it, so we keep ours as is and replace them with fully qualified name
 					for i, on := range of.Names {
 						if on == name {
-							nm := shortestUniqueName(of.Name, usedNames)
-							of.Names[i] = nm
-							usedNames[nm] = of
+							applyShortestUniqueName(of, i, usedNames)
 						}
 					}
 					// we also need to update the field for our name to us
 					usedNames[name] = nf
 				} else if !nfn && ofn {
 					// they get it, so we replace ours with fully qualified name
-					nm := shortestUniqueName(nf.Name, usedNames)
-					names[i] = nm
-					usedNames[nm] = nf
+					applyShortestUniqueName(nf, i, usedNames)
 				}
 			} else {
 				// if no conflict, we get the name
@@ -169,6 +161,15 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 		}
 		allFields.Add(name, nf)
 	}
+}
+
+// applyShortestUniqueName uses [shortestUniqueName] to apply the shortest
+// unique name for the given field, in the context of the given
+// used names, at the given index.
+func applyShortestUniqueName(field *Field, idx int, usedNames map[string]*Field) {
+	nm := shortestUniqueName(field.Name, usedNames)
+	field.Names[idx] = nm
+	usedNames[nm] = field
 }
 
 // shortestUniqueName returns the shortest unique camel-case name for
