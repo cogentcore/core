@@ -28,9 +28,16 @@ var (
 	Help bool
 )
 
+// MetaConfig contains meta configuration information specified
+// via command line arguments that controls the initial behavior
+// of grease for all apps before anything else is loaded. Its
+// main purpose is to support the help command and flag and
+// the specification of custom config files on the command line.
+// In almost all circumstances, it should only be used internally
+// and not by end-user code.
 type MetaConfig struct {
-	// ConfigFile is the name of the config file to load
-	ConfigFile string
+	// Config is the file name of the config file to load
+	Config string
 
 	// Help is whether to display a help message
 	Help bool
@@ -43,9 +50,13 @@ type MetaConfig struct {
 	HelpCmd string `posarg:"all"`
 }
 
+// MetaCmds is a set of commands based on [MetaConfig] that
+// contains a shell implementation of the help command. In
+// almost all circumstances, it should only be used internally
+// and not by end-user code.
 var MetaCmds = []*Cmd[*MetaConfig]{
 	{
-		Func: func(mc *MetaConfig) error { return nil }, // this gets handled seperately, so we don't actually need to do anything here
+		Func: func(mc *MetaConfig) error { return nil }, // this gets handled seperately in [Config], so we don't actually need to do anything here
 		Name: "help",
 		Doc:  "show this usage message and exit",
 		Root: true,
@@ -86,9 +97,14 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
 	}
 
+	// both flag and command trigger help
 	if mc.Help || cmd == "help" {
 		// string version of args slice has [] on the side, so need to get rid of them
 		mc.HelpCmd = strings.TrimPrefix(strings.TrimSuffix(mc.HelpCmd, "]"), "[")
+		// if flag and no posargs, will be nil
+		if mc.HelpCmd == "nil" {
+			mc.HelpCmd = ""
+		}
 		fmt.Println(Usage(opts, cfg, mc.HelpCmd, cmds...))
 		os.Exit(0)
 	}
