@@ -182,7 +182,7 @@ func shortestUniqueName(name string, usedNames map[string]*Field) string {
 		if cur == "" {
 			cur = strs[i]
 		} else {
-			cur = strs[i] + cur
+			cur = strs[i] + "." + cur
 		}
 		if _, has := usedNames[cur]; !has {
 			return cur
