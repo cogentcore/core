@@ -115,7 +115,9 @@ func GetArgs(args []string, boolFlags map[string]bool) ([]string, map[string]str
 		}
 		// we need to updated remaining args with latest
 		args = nargs
-		flags[name] = value
+		if name != "" { // we ignore no-names so that we can skip things like test args
+			flags[name] = value
+		}
 	}
 	return nonFlags, flags, nil
 }
@@ -142,6 +144,7 @@ func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value st
 
 	// go test passes args, so we ignore them
 	if strings.HasPrefix(name, "test.") {
+		name = ""
 		return
 	}
 

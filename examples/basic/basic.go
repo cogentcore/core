@@ -29,7 +29,7 @@ type Config struct {
 
 // Build builds the app for the given platform.
 func Build(c *Config) error {
-	fmt.Println("Building for platform", c.BuildTarget)
+	fmt.Println("Building for platform", c.BuildTarget, "-- likes go:", c.LikesGo)
 	return nil
 }
 
@@ -37,7 +37,7 @@ func Build(c *Config) error {
 //
 //grease:cmd -root
 func Run(c *Config) error {
-	fmt.Println("Running for user", c.Name, "; likes go:", c.LikesGo)
+	fmt.Println("Running for user", c.Name, "-- likes go:", c.LikesGo)
 	return nil
 }
 
