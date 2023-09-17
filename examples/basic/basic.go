@@ -23,14 +23,22 @@ type Config struct {
 	// whether the user likes Go
 	LikesGo bool `desc:"whether the user likes Go"`
 
-	// the target platform to build for
-	BuildTarget string `grease:"target,build-target" cmd:"build" posarg:"0" desc:"the target platform to build for"`
+	Build BuildConfig `cmd:"build"`
 
 	Server Server
 	Client Client
 
 	// the directory to build in
 	Dir string `desc:"the directory to build in"`
+}
+
+type BuildConfig struct {
+
+	// the target platform to build for
+	Target string `grease:"target,build-target" posarg:"0" desc:"the target platform to build for"`
+
+	// the platform to build the executable for
+	Platform string `posarg:"1" required:"-" desc:"the platform to build the executable for"`
 }
 
 type Server struct {
@@ -47,7 +55,7 @@ type Client struct {
 
 // Build builds the app for the given platform.
 func Build(c *Config) error {
-	fmt.Println("Building for platform", c.BuildTarget, "- likes go:", c.LikesGo)
+	fmt.Println("Building for platform", c.Build.Target, "- likes go:", c.LikesGo)
 	return nil
 }
 

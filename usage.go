@@ -70,7 +70,14 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 				posArgStrs = slices.Grow(posArgStrs, len(posArgStrs)-int(ui)+1) // increase capacity
 				posArgStrs = posArgStrs[:ui+1]                                  // extend to capacity
 			}
-			posArgStrs[ui] = "<" + v.Names[0] + ">"
+			nm := strcase.ToKebab(v.Names[0])
+			req, has := f.Tag.Lookup("required")
+			if req == "+" || req == "true" || !has { // default is required, so !has => required
+				posArgStrs[ui] = "<" + nm + ">"
+			} else {
+				posArgStrs[ui] = "[" + nm + "]"
+			}
+
 		}
 	}
 	b.WriteString(strings.Join(posArgStrs, " "))
