@@ -18,22 +18,29 @@ type Error struct {
 	Stack []string
 }
 
-// Wrap wraps the given error into an [Error] object.
-func Wrap(err error) *Error {
+// Wrap wraps the given error into an error object with
+// a stack trace. It returns nil if the given error is nil.
+// If it is not nil, the result is guaranteed to be of type [*Error].
+func Wrap(err error) error {
+	if err == nil {
+		return nil
+	}
 	return &Error{
 		Base: err,
 	}
 }
 
-// New returns a new [Error] with the given text.
-// It is equivalent to [errors.New].
-func New(text string) *Error {
+// New returns a new error with the given text, wrapped with
+// a stack trace via [Wrap]. The result guaranteed to be of
+// type [*Error]. It is the grr equivalent of [errors.New].
+func New(text string) error {
 	return Wrap(errors.New(text))
 }
 
-// Errorf returns a new [Error] from the given format
-// and arguments. It is equivalent to [fmt.Errorf].
-func Errorf(format string, a ...any) *Error {
+// Errorf returns a new error with the given format and arguments,
+// wrapped with a stack trace via [Wrap]. The result guaranteed to be of
+// type [*Error]. It is the grr equivalent of [fmt.Errorf].
+func Errorf(format string, a ...any) error {
 	return Wrap(fmt.Errorf(format, a...))
 }
 
