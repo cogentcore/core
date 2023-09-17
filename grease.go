@@ -15,9 +15,12 @@ import (
 // they can be used and modified externally to
 // achieve and maintain a good and consistent color scheme.
 var (
-	ErrorColor   = color.New(color.FgYellow).SprintfFunc()
+	// ErrorColor is the color printer function for errors
+	ErrorColor = color.New(color.FgYellow).SprintfFunc()
+	// SuccessColor is the color printer function for success messages
 	SuccessColor = color.New(color.FgGreen, color.Bold).SprintfFunc()
-	CmdColor     = color.New(color.FgCyan, color.Bold).SprintfFunc()
+	// CmdColor is the color printer function for commands, arguments, and flags
+	CmdColor = color.New(color.FgCyan, color.Bold).SprintfFunc()
 )
 
 // Run runs the given app with the given default
