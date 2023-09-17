@@ -56,6 +56,18 @@ type Client struct {
 // Build builds the app for the config platform and target. It builds apps
 // across platforms using the GOOS and GOARCH environment variables and a
 // suitable C compiler located on the system.
+//
+// It is the main command used during a local development workflow, and
+// it serves as a direct replacement for go build when building GoKi
+// apps. In addition to the basic capacities of go build, Build supports
+// cross-compiling CGO applications with ease. Also, it handles the
+// bundling of icons and fonts into the executable.
+//
+// Build also uses GoMobile to support the building of .apk and .app
+// files for Android and iOS mobile platforms, respectively. Its simple,
+// unified, and configurable API for building applications makes it
+// the best way to build applications, whether for local debug versions
+// or production releases.
 func Build(c *Config) error {
 	fmt.Println("Building for target", c.Build.Target, "and platform", c.Build.Platform, "- user likes go:", c.LikesGo)
 	return nil

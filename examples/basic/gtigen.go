@@ -9,7 +9,7 @@ import (
 
 var _ = gti.AddFunc(&gti.Func{
 	Name:       "main.Build",
-	Doc:        "Build builds the app for the config platform and target. It builds apps\nacross platforms using the GOOS and GOARCH environment variables and a\nsuitable C compiler located on the system.",
+	Doc:        "Build builds the app for the config platform and target. It builds apps\nacross platforms using the GOOS and GOARCH environment variables and a\nsuitable C compiler located on the system.\n\nIt is the main command used during a local development workflow, and\nit serves as a direct replacement for go build when building GoKi\napps. In addition to the basic capacities of go build, Build supports\ncross-compiling CGO applications with ease. Also, it handles the\nbundling of icons and fonts into the executable.\n\nBuild also uses GoMobile to support the building of .apk and .app\nfiles for Android and iOS mobile platforms, respectively. Its simple,\nunified, and configurable API for building applications makes it\nthe best way to build applications, whether for local debug versions\nor production releases.",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"c", &gti.Field{Name: "c", Type: "*Config", Doc: "", Directives: gti.Directives{}}},

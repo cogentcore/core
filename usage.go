@@ -158,7 +158,9 @@ outer:
 	for _, c := range acmds {
 		b.WriteString(Indent + CmdColor(c.Name))
 		if c.Doc != "" {
-			b.WriteString("\n" + Indent + Indent + strings.ReplaceAll(c.Doc, "\n", "\n"+Indent+Indent)) // need to put two indents on every newline for formatting
+			// we only want the first paragraph of text for subcommand usage; after that is where more specific details can go
+			doc, _, _ := strings.Cut(c.Doc, "\n\n")
+			b.WriteString("\n" + Indent + Indent + strings.ReplaceAll(doc, "\n", "\n"+Indent+Indent)) // need to put two indents on every newline for formatting
 		}
 		b.WriteString("\n")
 	}

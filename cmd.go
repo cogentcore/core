@@ -75,7 +75,6 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 			}
 		}
 		// we do these transformations afterward the directives so that we have the up-to-date documentation and name
-		cmd.Doc, _, _ = strings.Cut(cmd.Doc, "\n\n") // we only want the first paragraph of text; after that is where code-specific details can go
 
 		// get the command name in Title Case so we can replace "CmdName"
 		// with "Cmd Name" so it is fully accurate English and more consistent
