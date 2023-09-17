@@ -157,11 +157,14 @@ func TestArgsPrint(t *testing.T) {
 
 func TestSetFromArgs(t *testing.T) {
 	cfg := &TestConfig{}
-	SetFromDefaults(cfg)
+	err := SetFromDefaults(cfg)
+	if err != nil {
+		t.Error(err)
+	}
 	// note: cannot use "-Includes=testcfg.toml",
 	args := []string{"-save-wts", "goki", "-nogui", "-no-epoch-log", "--NoRunLog", "play", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "orange", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "apple", "-Slice=[3.2, 2.4, 1.9]"}
 
-	_, err := SetFromArgs(cfg, args, ErrNotFound)
+	_, err = SetFromArgs(cfg, args, ErrNotFound)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,6 +189,30 @@ func TestSetFromArgs(t *testing.T) {
 	// 		fmt.Println(k, " = ", v)
 	// 	}
 	// }
+}
+
+func TestSetFromArgsErr(t *testing.T) {
+	cfg := &TestConfig{}
+	err := SetFromDefaults(cfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	args := [][]string{
+		{"-save-wts", "goki", "---runs=5", "apple"},
+		{"--No RunLog", "-note", "hi"},
+		{"-sparsenes", "0.1"},
+		{"-runs={"},
+		{"--net-data=me"},
+	}
+
+	for i, a := range args {
+		_, err = SetFromArgs(cfg, a, ErrNotFound)
+		if err == nil {
+			t.Errorf("expected error but got none for args %v (index %d)", a, i)
+		}
+	}
+
 }
 
 func TestOpen(t *testing.T) {
