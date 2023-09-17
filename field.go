@@ -69,14 +69,17 @@ func AddFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 		f := typ.Field(i)
 		fv := val.Field(i)
 		pval := laser.PtrValue(fv)
-		cmdtag, ok := f.Tag.Lookup("cmd")
-		if ok && cmdtag != cmd && cmd != AddAllFields { // if we are associated with a different command, skip
+		cmdtag, hct := f.Tag.Lookup("cmd")
+		if hct && cmdtag != cmd && cmd != AddAllFields { // if we are associated with a different command, skip
 			continue
 		}
 		if laser.NonPtrType(f.Type).Kind() == reflect.Struct {
 			nwPath := f.Name
 			if path != "" {
 				nwPath = path + "." + nwPath
+			}
+			if hct { // if we have a command tag, we don't scope our path, as we already have that scope because we ran that command
+				nwPath = path
 			}
 			AddFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, allFields, usedNames, cmd)
 			continue
