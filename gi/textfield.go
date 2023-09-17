@@ -176,7 +176,7 @@ func (tf *TextField) OnInit() {
 			s.Border.Width.Set()
 			s.Border.Color.Set()
 			s.Border.Radius = gist.BorderRadiusExtraSmallTop
-			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
+			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
 			if tf.IsFocusActive() {
 				s.Border.Width.Bottom = units.Px(2)
 				s.Border.Color.Bottom = ColorScheme.Primary
@@ -252,14 +252,14 @@ var TextFieldProps = ki.Props{
 type TextFieldTypes int
 
 const (
-	// TextFieldOutlined represents an outlined
-	// TextField with a border on all sides
-	// and no background color
-	TextFieldOutlined TextFieldTypes = iota
 	// TextFieldFilled represents a filled
 	// TextField with a background color
 	// and a bottom border
-	TextFieldFilled
+	TextFieldFilled TextFieldTypes = iota
+	// TextFieldOutlined represents an outlined
+	// TextField with a border on all sides
+	// and no background color
+	TextFieldOutlined
 
 	TextFieldTypesN
 )
