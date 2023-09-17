@@ -9,15 +9,15 @@ import (
 
 var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/gti/gtigen.Generate",
-	Doc:  "Generate generates enum methods, using the given\nconfiguration object, loading the packages from the\nconfiguration source directory,\nand writes the result to the config output file.\nIt is a simple entry point to gtigen that does all\nof the steps; for more specific functionality, create\na new [Generator] with [NewGenerator] and call methods on it.",
+	Doc:  "Generate generates gti type info, using the\nconfiguration information, loading the packages from the\nconfiguration source directory, and writing the result\nto the config output file.\n\nIt is a simple entry point to gtigen that does all\nof the steps; for more specific functionality, create\na new [Generator] with [NewGenerator] and call methods on it.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-root"}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"cfg", &gti.Field{Name: "cfg", Doc: "", Directives: gti.Directives{}}},
+		{"cfg", &gti.Field{Name: "cfg", Type: "*Config", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
+		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 	}),
 })
