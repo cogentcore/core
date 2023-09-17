@@ -5,13 +5,36 @@
 // Package grr provides easy, context-wrapped error handling in Go.
 package grr
 
-import "strings"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 // Error is the main type of grr and represents an error with
 // a base error and a stack trace.
 type Error struct {
 	Base  error
 	Stack []string
+}
+
+// Wrap wraps the given error into an [Error] object.
+func Wrap(err error) *Error {
+	return &Error{
+		Base: err,
+	}
+}
+
+// New returns a new [Error] with the given text.
+// It is equivalent to [errors.New].
+func New(text string) *Error {
+	return Wrap(errors.New(text))
+}
+
+// Errorf returns a new [Error] from the given format
+// and arguments. It is equivalent to [fmt.Errorf].
+func Errorf(format string, a ...any) *Error {
+	return Wrap(fmt.Errorf(format, a...))
 }
 
 // Error returns the error as a string, wrapping the string of
