@@ -8,6 +8,7 @@ package grr
 import (
 	"errors"
 	"fmt"
+	"runtime"
 	"strings"
 )
 
@@ -15,7 +16,7 @@ import (
 // a base error and a stack trace.
 type Error struct {
 	Base  error
-	Stack []string
+	Stack []runtime.Frame
 }
 
 // Wrap wraps the given error into an error object with
@@ -25,8 +26,12 @@ func Wrap(err error) error {
 	if err == nil {
 		return nil
 	}
+	if g, ok := err.(*Error); ok {
+		return g
+	}
 	return &Error{
-		Base: err,
+		Base:  err,
+		Stack: Stack(),
 	}
 }
 
@@ -47,11 +52,21 @@ func Errorf(format string, a ...any) error {
 // Error returns the error as a string, wrapping the string of
 // the base error with the stack trace.
 func (e *Error) Error() string {
-	res := e.Base.Error()
-	if len(e.Stack) > 0 {
-		res += " (" + strings.Join(e.Stack, ": ") + ")"
+	res := ""
+	for i := len(e.Stack) - 1; i >= 0; i-- {
+		f := e.Stack[i]
+		nm := f.Function
+		if nm == "" {
+			nm = "unknown"
+		} else {
+			li := strings.LastIndex(nm, "/")
+			if li != -1 {
+				nm = nm[li+1:] // need to add 1 to get rid of slash
+			}
+		}
+		res += nm + ": "
 	}
-	return res
+	return res + e.Base.Error()
 }
 
 // String returns the error as a string, wrapping the string of
