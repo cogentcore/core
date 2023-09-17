@@ -11,11 +11,13 @@ import (
 	"github.com/fatih/color"
 )
 
-// color functions for internal use
+// The color functions that grease uses internally;
+// they can be used and modified externally to
+// achieve and maintain a good and consistent color scheme.
 var (
-	errorColor   = color.New(color.FgYellow).SprintfFunc()
-	successColor = color.New(color.FgGreen, color.Bold).SprintfFunc()
-	cmdColor     = color.New(color.FgCyan, color.Bold).SprintfFunc()
+	ErrorColor   = color.New(color.FgYellow).SprintfFunc()
+	SuccessColor = color.New(color.FgGreen, color.Bold).SprintfFunc()
+	CmdColor     = color.New(color.FgCyan, color.Bold).SprintfFunc()
 )
 
 // Run runs the given app with the given default
@@ -41,7 +43,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
 		if opts.Fatal {
-			fmt.Println(errorColor("%v", err))
+			fmt.Println(ErrorColor("%v", err))
 			os.Exit(1)
 		}
 		return err
@@ -50,7 +52,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	if err != nil {
 		err := fmt.Errorf("error configuring app: %w", err)
 		if opts.Fatal {
-			fmt.Println(errorColor("%v", err))
+			fmt.Println(ErrorColor("%v", err))
 			os.Exit(1)
 		}
 		return err
@@ -58,13 +60,13 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	err = RunCmd(opts, cfg, cmd, cs...)
 	if err != nil {
 		if opts.Fatal {
-			fmt.Println(cmdColor(cmdString(opts, cmd)) + errorColor(" failed: %v", err))
+			fmt.Println(CmdColor(cmdString(opts, cmd)) + ErrorColor(" failed: %v", err))
 			os.Exit(1)
 		}
 		return fmt.Errorf("%s failed: %w", opts.AppName+" "+cmd, err)
 	}
 	if opts.PrintSuccess {
-		fmt.Println(cmdColor(cmdString(opts, cmd)) + successColor(" succeeded"))
+		fmt.Println(CmdColor(cmdString(opts, cmd)) + SuccessColor(" succeeded"))
 	}
 	return nil
 }

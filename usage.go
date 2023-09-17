@@ -39,7 +39,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			}
 		}
 		if !gotCmd {
-			fmt.Println(cmdColor(opts.AppName+" help") + errorColor(" failed: command %s not found", cmd))
+			fmt.Println(CmdColor(opts.AppName+" help") + ErrorColor(" failed: command %s not found", cmd))
 			os.Exit(1)
 		}
 	}
@@ -51,7 +51,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if cmd != "" {
 		cmdName += " " + cmd
 	}
-	b.WriteString("Usage:\n\t" + cmdColor(cmdName+" "))
+	b.WriteString("Usage:\n\t" + CmdColor(cmdName+" "))
 
 	posArgStrs := []string{}
 
@@ -63,7 +63,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 		if ok {
 			ui, err := strconv.ParseUint(posArgTag, 10, 64)
 			if err != nil {
-				fmt.Printf(errorColor("programmer error:")+" invalid value %q for posarg struct tag on field %q: %v\n", posArgTag, f.Name, err)
+				fmt.Printf(ErrorColor("programmer error:")+" invalid value %q for posarg struct tag on field %q: %v\n", posArgTag, f.Name, err)
 			}
 			// if the slice isn't big enough, grow it to fit this posarg
 			if ui >= uint64(len(posArgStrs)) {
@@ -80,19 +80,19 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 		}
 	}
-	b.WriteString(cmdColor(strings.Join(posArgStrs, " ")))
+	b.WriteString(CmdColor(strings.Join(posArgStrs, " ")))
 	if len(posArgStrs) > 0 {
 		b.WriteString(" ")
 	}
-	b.WriteString(cmdColor("[flags]\n"))
+	b.WriteString(CmdColor("[flags]\n"))
 
 	CommandUsage(&b, cmdName, cmd, cmds...)
 
 	b.WriteString("\nThe flags are: (flags are case-insensitive, can be in kebab-case,\n")
 	b.WriteString("snake_case, or CamelCase, and can have one or two leading dashes)\n\n")
 
-	b.WriteString(cmdColor("-help") + " or " + cmdColor("-h") + "\n\tshow usage information for a command\n")
-	b.WriteString(cmdColor("-config") + " or " + cmdColor("-cfg") + "\n\tthe filename to load configuration options from\n")
+	b.WriteString(CmdColor("-help") + " or " + CmdColor("-h") + "\n\tshow usage information for a command\n")
+	b.WriteString(CmdColor("-config") + " or " + CmdColor("-cfg") + "\n\tthe filename to load configuration options from\n")
 	FlagUsage(fields, &b)
 	return b.String()
 }
@@ -134,12 +134,12 @@ outer:
 	}
 
 	if len(acmds) != 0 {
-		b.WriteString("\t" + cmdColor(cmdName+" <subcommand> [flags]\n"))
+		b.WriteString("\t" + CmdColor(cmdName+" <subcommand> [flags]\n"))
 	}
 
 	if rcmd != nil {
 		b.WriteString("\nThe default (root) command is:\n")
-		b.WriteString("\t" + cmdColor(rcmd.Name) + "\t" + strings.ReplaceAll(rcmd.Doc, "\n", "\n\t") + "\n") // need to put a tab on every newline for formatting
+		b.WriteString("\t" + CmdColor(rcmd.Name) + "\t" + strings.ReplaceAll(rcmd.Doc, "\n", "\n\t") + "\n") // need to put a tab on every newline for formatting
 	}
 
 	if len(acmds) == 0 && cmd != "" { // nothing to do
@@ -150,11 +150,11 @@ outer:
 
 	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString("\t" + cmdColor("help") + "\tshows usage information for a command\n")
+		b.WriteString("\t" + CmdColor("help") + "\tshows usage information for a command\n")
 	}
 
 	for _, c := range acmds {
-		b.WriteString("\t" + cmdColor(c.Name))
+		b.WriteString("\t" + CmdColor(c.Name))
 		if c.Doc != "" {
 			b.WriteString("\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t")) // need to put a tab on every newline for formatting
 		}
@@ -169,7 +169,7 @@ func FlagUsage(fields *Fields, b *strings.Builder) {
 	for _, kv := range fields.Order {
 		f := kv.Val
 		for i, name := range f.Names {
-			b.WriteString(cmdColor("-" + strcase.ToKebab(name)))
+			b.WriteString(CmdColor("-" + strcase.ToKebab(name)))
 			// handle English sentence construction with "or" and commas
 			if i == len(f.Names)-2 {
 				if len(f.Names) > 2 {

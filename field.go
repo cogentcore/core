@@ -91,7 +91,7 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 		if ok {
 			names = strings.Split(greasetag, ",")
 			if len(names) == 0 {
-				fmt.Println(errorColor("warning: programmer error:") + " expected at least one name in grease struct tag, but got none")
+				fmt.Println(ErrorColor("warning: programmer error:") + " expected at least one name in grease struct tag, but got none")
 			}
 		}
 
@@ -119,7 +119,7 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 					obase = of.Name[:oli]
 				}
 				if nbase == obase {
-					fmt.Printf(errorColor("programmer error:")+" fields %q and %q were both assigned the same name (%q)\n", of.Name, nf.Name, name)
+					fmt.Printf(ErrorColor("programmer error:")+" fields %q and %q were both assigned the same name (%q)\n", of.Name, nf.Name, name)
 					os.Exit(1)
 				}
 
@@ -138,7 +138,7 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 				ofn := ofns == "-" || ofns == "false"
 
 				if nfn && ofn {
-					fmt.Printf(errorColor("programmer error:")+" %s specified on two config fields (%q and %q) with the same name (%q); keep %s on the field you want to be able to access without nesting (eg: with %q instead of %q) and remove it from the other one\n", cmdColor(`nest:"-"`), of.Name, nf.Name, name, cmdColor(`nest:"-"`), "-"+name, "-"+strcase.ToKebab(nf.Name))
+					fmt.Printf(ErrorColor("programmer error:")+" %s specified on two config fields (%q and %q) with the same name (%q); keep %s on the field you want to be able to access without nesting (eg: with %q instead of %q) and remove it from the other one\n", CmdColor(`nest:"-"`), of.Name, nf.Name, name, CmdColor(`nest:"-"`), "-"+name, "-"+strcase.ToKebab(nf.Name))
 					os.Exit(1)
 				} else if !nfn && !ofn {
 					// neither one gets it, so we replace both with fully qualified name
