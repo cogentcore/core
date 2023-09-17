@@ -138,7 +138,7 @@ func TestArgsPrint(t *testing.T) {
 	allFields := &Fields{}
 	AddFields(cfg, allFields, "")
 	allFlags := &Fields{}
-	AddFlags(allFields, allFlags, "", []string{})
+	AddFlags(allFields, allFlags, "", []string{}, map[string]string{})
 
 	fmt.Println("Args:")
 	fmt.Println(strings.Join(allFlags.Keys(), "\n"))

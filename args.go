@@ -42,7 +42,7 @@ func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T])
 	if err != nil {
 		return "", err
 	}
-	cmd, allFlags, err := ParseArgs(cfg, nfargs, cmds...)
+	cmd, allFlags, err := ParseArgs(cfg, nfargs, flags, cmds...)
 	if err != nil {
 		return "", err
 	}
@@ -174,7 +174,7 @@ func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value st
 // gotten through [GetArgs] first. It returns the (sub)command specified by
 // the arguments, a map from all of the flag names to their associated
 // settable values, and any error.
-func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFlags *Fields, err error) {
+func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cmd[T]) (cmd string, allFlags *Fields, err error) {
 	newArgs, newCmd, err := parseArgsImpl(cfg, args, "", cmds...)
 	if err != nil {
 		return newCmd, allFlags, err
@@ -185,7 +185,7 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 	AddFields(cfg, allFields, newCmd)
 
 	allFlags = &Fields{}
-	newArgs, err = AddFlags(allFields, allFlags, newCmd, newArgs)
+	newArgs, err = AddFlags(allFields, allFlags, newCmd, newArgs, flags)
 	if err != nil {
 		return newCmd, allFields, fmt.Errorf("error getting field flag names: %w", err)
 	}
@@ -352,12 +352,11 @@ func SetFieldValue(f *Field, value string) error {
 	return nil
 }
 
-func addAllCases(nm, path string, field *Field, allFlags *Fields, cmd string) {
+// addAllCases adds all string cases of the given field with the
+// given name to the given set of flags.
+func addAllCases(nm string, field *Field, allFlags *Fields) {
 	if nm == "Includes" {
-		return // skip
-	}
-	if path != "" {
-		nm = path + "." + nm
+		return // skip Includes
 	}
 	allFlags.Add(nm, field)
 	allFlags.Add(strings.ToLower(nm), field)
@@ -371,18 +370,19 @@ func addAllCases(nm, path string, field *Field, allFlags *Fields, cmd string) {
 // the given positional arguments to set the values of the object based on any
 // posarg struct tags that fields have. The posarg struct tag must be either
 // "all" or a valid uint.
-func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string) ([]string, error) {
-	return addFlagsImpl(allFields, "", false, allFlags, cmd, args)
+func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, flags map[string]string) ([]string, error) {
+	return addFlagsImpl(allFields, allFlags, cmd, args, flags)
 }
 
 // addFlagsImpl returns map of all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value
-func addFlagsImpl(allFields *Fields, path string, nest bool, allFlags *Fields, cmd string, args []string) ([]string, error) {
+func addFlagsImpl(allFields *Fields, allFlags *Fields, cmd string, args []string, flags map[string]string) ([]string, error) {
 	leftovers := args
 	for _, kv := range allFields.Order {
 		v := kv.Val
 		f := v.Field
 
+		// set based on pos arg
 		posArgTag, ok := f.Tag.Lookup("posarg")
 		if ok {
 			if posArgTag == "all" {
@@ -397,7 +397,20 @@ func addFlagsImpl(allFields *Fields, path string, nest bool, allFlags *Fields, c
 					return nil, fmt.Errorf("programmer error: invalid value %q for posarg struct tag on field %q: %w", posArgTag, f.Name, err)
 				}
 				if ui >= uint64(len(args)) {
-					return nil, fmt.Errorf("missing positional argument %d used for field %q", ui, f.Name)
+					// check if we have set this pos arg as a flag; if we have, there is no error, but otherwise there is
+					got := false
+					for _, fnm := range v.Names {
+						_, ok := flags[fnm]
+						if ok {
+							got = true
+							break
+						}
+					}
+					if got {
+						return nil, nil
+					} else {
+						return nil, fmt.Errorf("missing positional argument %d used for field %q", ui, f.Name)
+					}
 				}
 				err = SetFieldValue(v, args[ui]) // must be pointer to be settable
 				if err != nil {
@@ -408,27 +421,9 @@ func addFlagsImpl(allFields *Fields, path string, nest bool, allFlags *Fields, c
 
 		}
 		for _, name := range v.Names {
-			addAllCases(name, path, v, allFlags, cmd)
+			addAllCases(name, v, allFlags)
 			if f.Type.Kind() == reflect.Bool {
-				addAllCases("No"+name, path, v, allFlags, cmd)
-			}
-		}
-		// now process adding non-nested version of field
-		if path == "" || nest {
-			continue
-		}
-		nestTag, ok := f.Tag.Lookup("nest")
-		if ok && (nestTag == "+" || nestTag == "true") {
-			continue
-		}
-		for _, name := range v.Names {
-			if _, has := allFlags.ValByKeyTry(name); has {
-				fmt.Printf("warning: programmer error: grease config field \"%s.%s\" cannot be added as a non-nested flag with the name %q because that name has already been registered by another field; add the field tag 'nest:\"+\"' to the field you want to require nested access for (ie: \"Path.Field\" instead of \"Field\") to remove this warning\n", path, f.Name, name)
-				continue
-			}
-			addAllCases(name, "", v, allFlags, cmd)
-			if f.Type.Kind() == reflect.Bool {
-				addAllCases("No"+name, "", v, allFlags, cmd)
+				addAllCases("No"+name, v, allFlags)
 			}
 		}
 	}
