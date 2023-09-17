@@ -14,11 +14,12 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-// Usage returns a usage string based on the given
-// configuration struct and commands. It contains [AppAbout],
-// a list of commands and their descriptions, and a list of
-// flags and their descriptions. The resulting string uses
-// color escape codes.
+// Usage returns a usage string based on the given options,
+// configuration struct, current command, and available commands.
+// It contains [AppAbout], a list of commands and their descriptions,
+// and a list of flags and their descriptions, scoped based on the
+// current command and its associated commands and configuration.
+// The resulting string contains color escape codes.
 func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	var b strings.Builder
 	if cmd == "" {
@@ -162,9 +163,9 @@ outer:
 	}
 }
 
-// FlagUsage adds the flag usage info for the
-// given fields to the given [strings.Builder].
-// Typically, you should use [Usage] instead.
+// FlagUsage adds the flag usage info for the given fields
+// to the given [strings.Builder]. Typically, end-user code
+// should use [Usage] instead.
 func FlagUsage(fields *Fields, b *strings.Builder) {
 	for _, kv := range fields.Order {
 		f := kv.Val
