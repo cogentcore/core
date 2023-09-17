@@ -108,6 +108,42 @@ type TestConfig struct {
 
 func (cfg *TestConfig) IncludesPtr() *[]string { return &cfg.Includes }
 
+func TestRun(t *testing.T) {
+	cfg := &TestConfig{}
+	os.Args = []string{"myapp", "-gui", "install", "-no-gpu=f", "windows", "-Note", "Hello, World", "-PAT_PARAMS_SPARSENESS=4", "-net-data", "darwin"}
+
+	// we test for correct config in and out of command through closure
+	var (
+		inCmd      bool
+		strSlice   []string
+		gpu        bool
+		sparseness float32
+	)
+	err := Run(DefaultOptions("myapp", "My App", "My App is an awesome app"), cfg, &Cmd[*TestConfig]{
+		Func: func(tc *TestConfig) error {
+			inCmd = true
+			strSlice = tc.StrSlice
+			gpu = tc.GPU
+			sparseness = tc.PatParams.Sparseness
+			if tc.Note != "Hello, World" {
+				t.Errorf("expeected note to be %q but got %q", "Hello, World", tc.Note)
+			}
+			return nil
+		},
+		Name: "install",
+		Doc:  "install installs stuff",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	if !inCmd {
+		t.Errorf("never got into command")
+	}
+	if !reflect.DeepEqual(strSlice, []string{"windows", "darwin"}) || !gpu || sparseness != 4 {
+		t.Errorf("got bad values for config (config: %#v)", cfg)
+	}
+}
+
 func TestConfigFunc(t *testing.T) {
 	cfg := &TestConfig{}
 	os.Args = []string{"myapp", "-no-net-data", "build", "-gpu", "../main", "-Note", "Hello, World", "-PAT_PARAMS_SPARSENESS=4"}
