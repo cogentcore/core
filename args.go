@@ -406,10 +406,13 @@ func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, fl
 				if err != nil {
 					return nil, fmt.Errorf("programmer error: invalid value %q for posarg struct tag on field %q: %w", posArgTag, f.Name, err)
 				}
+				// if this is true, the pos arg is missing
 				if ui >= uint64(len(args)) {
-					// check if we have set this pos arg as a flag; if we have, there is no error, but otherwise there is
+					// check if we have set this pos arg as a flag; if we have,
+					// it makes up for the missing pos arg and there is no error,
+					// but otherwise there is an error
 					got := false
-					for _, fnm := range v.Names {
+					for _, fnm := range v.Names { // TODO: is there a more efficient way to do this?
 						for _, cnm := range allCases(fnm) {
 							_, ok := flags[cnm]
 							if ok {
