@@ -21,6 +21,8 @@ var (
 	SuccessColor = color.New(color.FgGreen, color.Bold).SprintfFunc()
 	// CmdColor is the color printer function for commands, arguments, and flags
 	CmdColor = color.New(color.FgCyan, color.Bold).SprintfFunc()
+	// InfoColor is the color printer function for special usage information
+	InfoColor = color.New(color.Italic).SprintfFunc()
 )
 
 // Run runs an app with the given options, configuration struct,

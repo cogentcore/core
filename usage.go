@@ -14,6 +14,9 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
+// Indent is the value used for indentation in [Usage].
+var Indent = "    "
+
 // Usage returns a usage string based on the given options,
 // configuration struct, current command, and available commands.
 // It contains [AppAbout], a list of commands and their descriptions,
@@ -24,16 +27,14 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	var b strings.Builder
 	if cmd == "" {
 		if opts.AppAbout != "" {
-			b.WriteString(opts.AppAbout)
-			b.WriteString("\n\n")
+			b.WriteString("\n" + opts.AppAbout + "\n\n")
 		}
 	} else {
 		gotCmd := false
 		for _, c := range cmds {
 			if c.Name == cmd {
 				if c.Doc != "" {
-					b.WriteString(c.Doc)
-					b.WriteString("\n\n")
+					b.WriteString("\n" + c.Doc + "\n\n")
 				}
 				gotCmd = true
 				break
@@ -52,7 +53,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if cmd != "" {
 		cmdName += " " + cmd
 	}
-	b.WriteString("Usage:\n\t" + CmdColor(cmdName+" "))
+	b.WriteString("Usage:\n" + Indent + CmdColor(cmdName+" "))
 
 	posArgStrs := []string{}
 
@@ -74,26 +75,26 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			nm := strcase.ToKebab(v.Names[0])
 			req, has := f.Tag.Lookup("required")
 			if req == "+" || req == "true" || !has { // default is required, so !has => required
-				posArgStrs[ui] = "<" + nm + ">"
+				posArgStrs[ui] = CmdColor("<" + nm + ">")
 			} else {
-				posArgStrs[ui] = "[" + nm + "]"
+				posArgStrs[ui] = SuccessColor("[" + nm + "]")
 			}
 
 		}
 	}
-	b.WriteString(CmdColor(strings.Join(posArgStrs, " ")))
+	b.WriteString(strings.Join(posArgStrs, " "))
 	if len(posArgStrs) > 0 {
 		b.WriteString(" ")
 	}
-	b.WriteString(CmdColor("[flags]\n"))
+	b.WriteString(SuccessColor("[flags]\n"))
 
 	CommandUsage(&b, cmdName, cmd, cmds...)
 
-	b.WriteString("\nThe flags are: (flags are case-insensitive, can be in kebab-case,\n")
-	b.WriteString("snake_case, or CamelCase, and can have one or two leading dashes)\n\n")
+	b.WriteString("\nFlags:\n" + Indent + Indent + InfoColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
+	b.WriteString(Indent + Indent + InfoColor("or CamelCase, and can have one or two leading dashes.\n\n"))
 
-	b.WriteString("\t" + CmdColor("-help") + ", " + CmdColor("-h") + SuccessColor(" bool") + "\n\t\tshow usage information for a command\n")
-	b.WriteString("\t" + CmdColor("-config") + ", " + CmdColor("-cfg") + SuccessColor(" filename") + "\n\t\tthe filename to load configuration options from\n")
+	b.WriteString(Indent + CmdColor("-help") + ", " + CmdColor("-h") + SuccessColor(" bool") + "\n" + Indent + Indent + "show usage information for a command\n")
+	b.WriteString(Indent + CmdColor("-config") + ", " + CmdColor("-cfg") + SuccessColor(" filename") + "\n" + Indent + Indent + "the filename to load configuration options from\n")
 	FlagUsage(fields, &b)
 	return b.String()
 }
@@ -135,29 +136,29 @@ outer:
 	}
 
 	if len(acmds) != 0 {
-		b.WriteString("\t" + CmdColor(cmdName+" <subcommand> [flags]\n"))
+		b.WriteString(Indent + CmdColor(cmdName+" <subcommand> ") + SuccessColor("[flags]\n"))
 	}
 
 	if rcmd != nil {
-		b.WriteString("\nThe default (root) command is:\n\n")
-		b.WriteString("\t" + CmdColor(rcmd.Name) + "\n\t\t" + strings.ReplaceAll(rcmd.Doc, "\n", "\n\t\t") + "\n") // need to put two tabs on every newline for formatting
+		b.WriteString("\nDefault command:\n")
+		b.WriteString(Indent + CmdColor(rcmd.Name) + "\n" + Indent + Indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+Indent+Indent) + "\n") // need to put two indents on every newline for formatting
 	}
 
 	if len(acmds) == 0 && cmd != "" { // nothing to do
 		return
 	}
 
-	b.WriteString("\nThe subcommands are:\n\n")
+	b.WriteString("\nSubcommands:\n")
 
 	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString("\t" + CmdColor("help") + "\n\t\thelp shows usage information for a command\n")
+		b.WriteString(Indent + CmdColor("help") + "\n" + Indent + Indent + "help shows usage information for a command\n")
 	}
 
 	for _, c := range acmds {
-		b.WriteString("\t" + CmdColor(c.Name))
+		b.WriteString(Indent + CmdColor(c.Name))
 		if c.Doc != "" {
-			b.WriteString("\n\t\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t\t")) // need to put two tabs on every newline for formatting
+			b.WriteString("\n" + Indent + Indent + strings.ReplaceAll(c.Doc, "\n", "\n"+Indent+Indent)) // need to put two indents on every newline for formatting
 		}
 		b.WriteString("\n")
 	}
@@ -169,7 +170,7 @@ outer:
 func FlagUsage(fields *Fields, b *strings.Builder) {
 	for _, kv := range fields.Order {
 		f := kv.Val
-		b.WriteString("\t")
+		b.WriteString(Indent)
 		for i, name := range f.Names {
 			b.WriteString(CmdColor("-" + strcase.ToKebab(name)))
 			if i != len(f.Names)-1 {
@@ -180,7 +181,7 @@ func FlagUsage(fields *Fields, b *strings.Builder) {
 		b.WriteString("\n")
 		desc, hast := f.Field.Tag.Lookup("desc")
 		if hast && desc != "" {
-			b.WriteString("\t\t" + strings.ReplaceAll(desc, "\n", "\n\t\t")) // need to put two tabs on every newline for formatting
+			b.WriteString(Indent + Indent + strings.ReplaceAll(desc, "\n", "\n"+Indent+Indent)) // need to put two indents on every newline for formatting
 			def, ok := f.Field.Tag.Lookup("def")
 			if ok && def != "" {
 				b.WriteString(fmt.Sprintf(" (default: %s)", def))
