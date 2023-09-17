@@ -61,11 +61,6 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 
 	if f := gti.FuncByName(fn); f != nil {
 		cmd.Doc = f.Doc
-		cmd.Doc, _, _ = strings.Cut(cmd.Doc, "\n\n")         // we only want the first paragraph of text; after that is where code-specific details can go
-		cmd.Doc = strings.ReplaceAll(cmd.Doc, cfn, cmd.Name) // replace "CmdName" with "cmd-name" so it is more consistent with the rest of the app
-		if strings.Count(cmd.Doc, ".") == 1 {                // if we only have one period, get rid of it if it is at the end
-			cmd.Doc = strings.TrimSuffix(cmd.Doc, ".")
-		}
 		for _, dir := range f.Directives {
 			if dir.Tool != "grease" {
 				continue
@@ -77,6 +72,12 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 			if err != nil {
 				return cmd, fmt.Errorf("error setting command from directive arguments (from comment %q): %w", dir.String(), err)
 			}
+		}
+		// we do these transformations afterward the directives so that we have the up-to-date documentation and name
+		cmd.Doc, _, _ = strings.Cut(cmd.Doc, "\n\n")         // we only want the first paragraph of text; after that is where code-specific details can go
+		cmd.Doc = strings.ReplaceAll(cmd.Doc, cfn, cmd.Name) // replace "CmdName" with "cmd-name" so it is more consistent with the rest of the app
+		if strings.Count(cmd.Doc, ".") == 1 {                // if we only have one period, get rid of it if it is at the end
+			cmd.Doc = strings.TrimSuffix(cmd.Doc, ".")
 		}
 	}
 	return cmd, nil
