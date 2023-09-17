@@ -6,6 +6,7 @@ package grease
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -125,12 +126,20 @@ func TestDefaults(t *testing.T) {
 }
 
 func TestGetArgs(t *testing.T) {
-	sargs := []string{"build", "main", "-o", "-dir", "../grease", "-v", "-platform", "windows/amd64"}
-	args, flags, err := GetArgs(sargs, map[string]bool{})
+	sargs := []string{"-gui", "run", "-param-set", "std", "-no-net-data", "main", "-epochs=5", "-note", "hello", "-debug=0", "-enum", "TestEnum1", "-sparseness", "5.0", "-pat-params-n-pats", "28"}
+	bf := BoolFlags(&TestConfig{})
+	args, flags, err := GetArgs(sargs, bf)
 	if err != nil {
 		t.Errorf("error getting args: %v", err)
 	}
-	fmt.Println(args, "\n", flags)
+	wargs := []string{"run", "main"}
+	if !reflect.DeepEqual(args, wargs) {
+		t.Errorf("expected args to be \n%#v\n\tbut got \n%#v", wargs, args)
+	}
+	wflags := map[string]string{"debug": "0", "enum": "TestEnum1", "epochs": "5", "gui": "", "no-net-data": "", "note": "hello", "param-set": "std", "pat-params-n-pats": "28", "sparseness": "5.0"}
+	if !reflect.DeepEqual(flags, wflags) {
+		t.Errorf("expected flags to be \n%#v\n\tbut got \n%#v", wflags, flags)
+	}
 }
 
 func TestArgsPrint(t *testing.T) {
