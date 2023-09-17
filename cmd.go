@@ -62,6 +62,7 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 
 	if f := gti.FuncByName(fn); f != nil {
 		cmd.Doc = f.Doc
+		cmd.Doc, _, _ = strings.Cut(cmd.Doc, "\n\n")   // we only want the first paragraph of text; after that is where code-specific details can go
 		cmd.Doc = strings.TrimPrefix(cmd.Doc, cfn+" ") // get rid of "FuncName " at start of function documentation
 		cmd.Doc = strings.TrimSuffix(cmd.Doc, ".")     // we don't want trailing periods
 		for _, dir := range f.Directives {
