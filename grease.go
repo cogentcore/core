@@ -23,24 +23,18 @@ var (
 	CmdColor = color.New(color.FgCyan, color.Bold).SprintfFunc()
 )
 
-// Run runs the given app with the given default
-// configuration file paths. It does not run the
-// GUI; see [goki.dev/greasi.Run] for that. The app should be
-// a pointer, and configuration options should
-// be defined as fields on the app type. Also,
-// commands should be defined as methods on the
-// app type with the suffix "Cmd"; for example,
-// for a command named "build", there should be
-// the method:
-//
-//	func (a *App) BuildCmd() error
-//
-// If no command is provided, Run calls the
-// method "RootCmd" if it exists. If it does
-// not exist, or the command provided is "help"
-// and "HelpCmd" does not exist, Run prints
-// the result of [Usage].
-// Run uses [os.Args] for its arguments.
+// Run runs an app with the given options, configuration struct,
+// and commands. It does not run the GUI; see [goki.dev/greasi.Run]
+// for that. The configuration struct should be passed as a pointer, and
+// configuration options should be defined as fields on the configuration
+// struct. The commands can be specified as either functions or struct
+// objects; the functions are more concise but require using gti
+// (see https://goki.dev/gti). In addition to the given commands,
+// Run adds a "help" command that prints the result of [Usage], which
+// will also be the root command if no other root command is specified.
+// Also, it adds the fields in [MetaConfig] as configuration options.
+// If [Options.Fatal] is set to true, the error result of Run does
+// not need to be handled. Run uses [os.Args] for its arguments.
 func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
 	if err != nil {
@@ -74,22 +68,9 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	return nil
 }
 
-// cmdString is a simple helper function that
-// returns a string with [Options.AppName]
-// and the given command name string.
-func cmdString(opts *Options, cmd string) string {
-	if cmd == "" {
-		return opts.AppName
-	}
-	return opts.AppName + " " + cmd
-}
-
-// RunCmd runs the command with the given
-// name on the given app. It looks for the
-// method with the name of the command converted
-// to camel case suffixed with "Cmd"; for example,
-// for a command named "build", it will look for a
-// method named "BuildCmd".
+// RunCmd runs the command with the given name using the given options,
+// configuration information, and available commands. If the given
+// command name is "", it runs the root command.
 func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) error {
 	for _, c := range cmds {
 		if c.Name == cmd || c.Root && cmd == "" {
@@ -105,4 +86,14 @@ func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) error {
 		os.Exit(0)
 	}
 	return fmt.Errorf("command %q not found", cmd)
+}
+
+// cmdString is a simple helper function that returns a string
+// with [Options.AppName] and the given command name string combined
+// to form a string representing the complete command being run.
+func cmdString(opts *Options, cmd string) string {
+	if cmd == "" {
+		return opts.AppName
+	}
+	return opts.AppName + " " + cmd
 }
