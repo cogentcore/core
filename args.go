@@ -331,7 +331,7 @@ func SetFieldValue(f *Field, value string) error {
 		}
 		err = laser.CopyMapRobust(f.Value.Interface(), mval["tmp"])
 		if err != nil {
-			return fmt.Errorf("not able to set map field from arg: %q val: %q: %w", f.Name, value, err)
+			return fmt.Errorf("not able to set map field %q from flag value %q: %w", f.Name, value, err)
 		}
 	case vk == reflect.Slice:
 		mval := make(map[string]any)
@@ -341,12 +341,12 @@ func SetFieldValue(f *Field, value string) error {
 		}
 		err = laser.CopySliceRobust(f.Value.Interface(), mval["tmp"])
 		if err != nil {
-			return fmt.Errorf("not able to set slice field from arg: %q val: %q: %w", f.Name, value, err)
+			return fmt.Errorf("not able to set slice field %q from flag value %q: %w", f.Name, value, err)
 		}
 	default:
 		ok := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
 		if !ok {
-			return fmt.Errorf("not able to set field from arg: %q val: %q", f.Name, value)
+			return fmt.Errorf("not able to set field %q from flag value %q", f.Name, value)
 		}
 	}
 	return nil
