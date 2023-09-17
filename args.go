@@ -75,10 +75,10 @@ func BoolFlags(obj any) map[string]bool {
 
 		// we need all cases of both normal and "no" version for all names
 		for _, name := range f.Names {
-			for _, cnms := range allCases(name) {
+			for _, cnms := range AllCases(name) {
 				res[cnms] = true
 			}
-			for _, cnms := range allCases("No" + name) {
+			for _, cnms := range AllCases("No" + name) {
 				res[cnms] = true
 			}
 		}
@@ -180,7 +180,7 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 	AddFields(cfg, allFields, newCmd)
 
 	allFlags = &Fields{}
-	newArgs, err = AddFlags(allFields, allFlags, newCmd, newArgs, flags)
+	newArgs, err = AddFlags(allFields, allFlags, newArgs, flags)
 	if err != nil {
 		return newCmd, allFields, err
 	}
@@ -278,8 +278,10 @@ func ParseFlags(flags map[string]string, allFlags *Fields, errNotFound bool) err
 // in that map corresponding to the flag name accordingly. Setting
 // errNotFound = true causes passing a flag name that is not in allFlags
 // to trigger an error; otherwise, it just does nothing and returns no error.
-// It is designed for use in [ParseFlags] and should typically not be used by
-// end-user code.
+// It is recommended that the [ErrNotFound] and [NoErrNotFound]
+// constants be used for the value of errNotFound for clearer code.
+// ParseFlag is designed for use in [ParseFlags] and should typically
+// not be used by end-user code.
 func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) error {
 	f, exists := allFlags.ValByKeyTry(name)
 	if !exists {
@@ -330,7 +332,8 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 	return SetFieldValue(f, value)
 }
 
-// SetFieldValue sets the value of the given field to the given value
+// SetFieldValue sets the value of the given configuration field
+// to the given string argument value.
 func SetFieldValue(f *Field, value string) error {
 	nptyp := laser.NonPtrType(f.Value.Type())
 	vk := nptyp.Kind()
@@ -364,41 +367,37 @@ func SetFieldValue(f *Field, value string) error {
 	return nil
 }
 
-// addAllCases adds all string cases of the given field with the
-// given name to the given set of flags.
-func addAllCases(nm string, field *Field, allFlags *Fields) {
+// AddAllCases adds all string cases (kebab-case, snake_case, etc)
+// of the given field with the given name to the given set of flags.
+func AddAllCases(nm string, field *Field, allFlags *Fields) {
 	if nm == "Includes" {
 		return // skip Includes
 	}
-	allFlags.Add(nm, field)
-	allFlags.Add(strings.ToLower(nm), field)
-	allFlags.Add(strcase.ToKebab(nm), field)
-	allFlags.Add(strcase.ToSnake(nm), field)
-	allFlags.Add(strcase.ToScreamingSnake(nm), field)
-}
-
-// allCases returns all of the string cases of the given name
-func allCases(nm string) []string {
-	return []string{
-		nm, strings.ToLower(nm), strcase.ToKebab(nm), strcase.ToSnake(nm), strcase.ToScreamingSnake(nm),
+	for _, nm := range AllCases(nm) {
+		allFlags.Add(nm, field)
 	}
 }
 
-// AddFlags adds to given flags map all the different ways the field names
-// can be specified as arg flags, mapping to the reflect.Value. It also uses
-// the given positional arguments to set the values of the object based on any
-// posarg struct tags that fields have. The posarg struct tag must be either
-// "all" or a valid uint.
-func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, flags map[string]string) ([]string, error) {
+// AllCases returns all of the string cases (kebab-case,
+// snake_case, etc) of the given name.
+func AllCases(nm string) []string {
+	return []string{nm, strings.ToLower(nm), strcase.ToKebab(nm), strcase.ToSnake(nm), strcase.ToScreamingSnake(nm)}
+}
+
+// AddFlags adds to given the given ordered flags map all of the different ways
+// all of the given fields can can be specified as flags. It also uses the given
+// positional arguments to set the values of the object based on any posarg struct
+// tags that fields have. The posarg struct tag must either be "all" or a valid uint.
+func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[string]string) ([]string, error) {
 	consumed := map[int]bool{} // which args we have consumed via pos args
 	for _, kv := range allFields.Order {
 		v := kv.Val
 		f := v.Field
 
 		for _, name := range v.Names {
-			addAllCases(name, v, allFlags)
+			AddAllCases(name, v, allFlags)
 			if f.Type.Kind() == reflect.Bool {
-				addAllCases("No"+name, v, allFlags)
+				AddAllCases("No"+name, v, allFlags)
 			}
 		}
 
@@ -431,7 +430,7 @@ func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, fl
 					// but otherwise there is an error
 					got := false
 					for _, fnm := range v.Names { // TODO: is there a more efficient way to do this?
-						for _, cnm := range allCases(fnm) {
+						for _, cnm := range AllCases(fnm) {
 							_, ok := flags[cnm]
 							if ok {
 								got = true
@@ -466,12 +465,11 @@ func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, fl
 	return leftovers, nil
 }
 
-// CommandFields adds non-field flags that control the config process
-// to the given map of flags. These flags have no actual effect and
+// CommandFields adds meta fields that control the config process
+// to the given map of fields. These fields have no actual effect and
 // map to a placeholder value because they are handled elsewhere, but
-// they must be set to prevent errors. The following flags are added:
-//
-//	-config -cfg -help -h
+// they must be set to prevent errors about missing flags. The flags
+// that it adds are the [MetaConfig.Help] and [MetaConfig.Config] fields.
 func CommandFields(allFields *Fields) {
 	// NOTE: we could do this through AddFields, but that
 	// causes problems with the HelpCmd field capturing
