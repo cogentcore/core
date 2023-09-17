@@ -38,7 +38,7 @@ var (
 func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
 	if err != nil {
-		err := fmt.Errorf("error getting commands from given commands: %w", err)
+		err := fmt.Errorf("internal/programmer error: error getting commands from given commands: %w", err)
 		if opts.Fatal {
 			fmt.Println(ErrorColor("%v", err))
 			os.Exit(1)
@@ -47,7 +47,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	}
 	cmd, err := Config(opts, cfg, cs...)
 	if err != nil {
-		err := fmt.Errorf("error configuring app: %w", err)
+		err := fmt.Errorf("error: %w", err)
 		if opts.Fatal {
 			fmt.Println(ErrorColor("%v", err))
 			os.Exit(1)
