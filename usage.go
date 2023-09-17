@@ -80,11 +80,11 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 		}
 	}
-	b.WriteString(strings.Join(posArgStrs, " "))
+	b.WriteString(cmdColor(strings.Join(posArgStrs, " ")))
 	if len(posArgStrs) > 0 {
 		b.WriteString(" ")
 	}
-	b.WriteString("[flags]\n")
+	b.WriteString(cmdColor("[flags]\n"))
 
 	CommandUsage(&b, cmdName, cmd, cmds...)
 
@@ -134,7 +134,7 @@ outer:
 	}
 
 	if len(acmds) != 0 {
-		b.WriteString("\t" + cmdColor(cmdName+" <subcommand>") + " [flags]\n")
+		b.WriteString("\t" + cmdColor(cmdName+" <subcommand> [flags]\n"))
 	}
 
 	if rcmd != nil {
