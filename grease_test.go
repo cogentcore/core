@@ -6,6 +6,7 @@ package grease
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -106,6 +107,25 @@ type TestConfig struct {
 }
 
 func (cfg *TestConfig) IncludesPtr() *[]string { return &cfg.Includes }
+
+func TestConfigFunc(t *testing.T) {
+	cfg := &TestConfig{}
+	os.Args = []string{"myapp", "-no-net-data", "build", "-gpu", "../main", "-Note", "Hello, World", "-PAT_PARAMS_SPARSENESS=4"}
+	cmd, err := Config(DefaultOptions("myapp", "My App", "My App is an awesome app"), cfg, &Cmd[*TestConfig]{
+		Func: func(tc *TestConfig) error { return nil },
+		Name: "build",
+		Doc:  "build builds stuff",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cmd != "build" {
+		t.Errorf("expected command to be build but got %q", cmd)
+	}
+	if cfg.NetData || !cfg.GPU || cfg.Note != "Hello, World" || cfg.PatParams.Sparseness != 4 || !reflect.DeepEqual(cfg.StrSlice, []string{"../main"}) {
+		t.Errorf("error setting configuration info (config: %#v)", cfg)
+	}
+}
 
 func TestDefaults(t *testing.T) {
 	cfg := &TestConfig{}
