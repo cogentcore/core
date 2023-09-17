@@ -6,6 +6,8 @@
 // enum methods for enum types.
 package enumgen
 
+//go:generate gtigen
+
 import (
 	"fmt"
 
@@ -28,10 +30,11 @@ func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 	return pkgs, err
 }
 
-// Generate generates enum methods, using the given
-// configuration object, loading the packages from the
-// configuration source directory,
-// and writes the result to the config output file.
+// Generate generates enum methods, using the
+// configuration information, loading the packages from the
+// configuration source directory, and writing the result
+// to the configuration output file.
+//
 // It is a simple entry point to enumgen that does all
 // of the steps; for more specific functionality, create
 // a new [Generator] with [NewGenerator] and call methods on it.
