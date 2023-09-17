@@ -6,8 +6,8 @@ package grease
 
 import "goki.dev/laser"
 
-// SetFromDefaults sets Config values from field tag `def:` values.
-// Parsing errors are automatically logged.
+// SetFromDefaults sets the values of the given config object
+// from `def:` field tag values. Parsing errors are automatically logged.
 func SetFromDefaults(cfg any) error {
 	return laser.SetFromDefaultTags(cfg)
 }

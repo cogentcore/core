@@ -13,10 +13,10 @@ import (
 	"goki.dev/gti"
 )
 
-// ParseDirective parses and returns a comment directive.
-// The returned directive will be nil if there is no direcive
-// contained in the given comment. Directives are of the
-// following form (the slashes are optional):
+// ParseDirective parses and returns a comment directive from
+// the given comment string. The returned directive will be nil
+// if there is no directive contained in the given comment.
+// Directives are of the following form (the slashes are optional):
 //
 //	//tool:directive args...
 func ParseDirective(comment string) (*gti.Directive, error) {
