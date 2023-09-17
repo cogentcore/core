@@ -32,7 +32,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 		for _, c := range cmds {
 			if c.Name == cmd {
 				if c.Doc != "" {
-					b.WriteString(CmdColor(cmd) + " " + c.Doc)
+					b.WriteString(c.Doc)
 					b.WriteString("\n\n")
 				}
 				gotCmd = true
@@ -92,8 +92,8 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	b.WriteString("\nThe flags are: (flags are case-insensitive, can be in kebab-case,\n")
 	b.WriteString("snake_case, or CamelCase, and can have one or two leading dashes)\n\n")
 
-	b.WriteString(CmdColor("-help") + " or " + CmdColor("-h") + "\n\tshow usage information for a command\n")
-	b.WriteString(CmdColor("-config") + " or " + CmdColor("-cfg") + "\n\tthe filename to load configuration options from\n")
+	b.WriteString("\t" + CmdColor("-help") + ", " + CmdColor("-h") + SuccessColor(" bool") + "\n\t\tshow usage information for a command\n")
+	b.WriteString("\t" + CmdColor("-config") + ", " + CmdColor("-cfg") + SuccessColor(" filename") + "\n\t\tthe filename to load configuration options from\n")
 	FlagUsage(fields, &b)
 	return b.String()
 }
@@ -139,7 +139,7 @@ outer:
 	}
 
 	if rcmd != nil {
-		b.WriteString("\nThe default (root) command is:\n")
+		b.WriteString("\nThe default (root) command is:\n\n")
 		b.WriteString("\t" + CmdColor(rcmd.Name) + "\n\t\t" + strings.ReplaceAll(rcmd.Doc, "\n", "\n\t\t") + "\n") // need to put two tabs on every newline for formatting
 	}
 
@@ -147,7 +147,7 @@ outer:
 		return
 	}
 
-	b.WriteString("\nThe subcommands are:\n")
+	b.WriteString("\nThe subcommands are:\n\n")
 
 	// if we are in root, we also add help
 	if cmd == "" {
@@ -157,7 +157,7 @@ outer:
 	for _, c := range acmds {
 		b.WriteString("\t" + CmdColor(c.Name))
 		if c.Doc != "" {
-			b.WriteString("\n\t\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t\t")) // need to put a tab on every newline for formatting
+			b.WriteString("\n\t\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t\t")) // need to put two tabs on every newline for formatting
 		}
 		b.WriteString("\n")
 	}
@@ -169,22 +169,18 @@ outer:
 func FlagUsage(fields *Fields, b *strings.Builder) {
 	for _, kv := range fields.Order {
 		f := kv.Val
+		b.WriteString("\t")
 		for i, name := range f.Names {
 			b.WriteString(CmdColor("-" + strcase.ToKebab(name)))
-			// handle English sentence construction with "or" and commas
-			if i == len(f.Names)-2 {
-				if len(f.Names) > 2 {
-					b.WriteString(",")
-				}
-				b.WriteString(" or ")
-			} else if i != len(f.Names)-1 {
+			if i != len(f.Names)-1 {
 				b.WriteString(", ")
 			}
 		}
+		b.WriteString(" " + SuccessColor(f.Field.Type.String()))
 		b.WriteString("\n")
 		desc, hast := f.Field.Tag.Lookup("desc")
 		if hast && desc != "" {
-			b.WriteString("\t" + strings.ReplaceAll(desc, "\n", "\n\t")) // need to put a tab on every newline for formatting
+			b.WriteString("\t\t" + strings.ReplaceAll(desc, "\n", "\n\t\t")) // need to put two tabs on every newline for formatting
 			def, ok := f.Field.Tag.Lookup("def")
 			if ok && def != "" {
 				b.WriteString(fmt.Sprintf(" (default: %s)", def))
