@@ -268,7 +268,22 @@ func TestSetFromArgsErr(t *testing.T) {
 			t.Errorf("expected error but got none for args %v (index %d)", a, i)
 		}
 	}
+}
 
+// TestUnusedArg ensures we error correctly on an unused argument
+func TestUnusedArg(t *testing.T) {
+	type myType struct {
+		Name    string
+		Age     int
+		LikesGo bool
+	}
+
+	cfg := &myType{}
+	args := []string{"-name", "Go Gopher", "-likes-go", "main", "-age=13"}
+	_, err := SetFromArgs(cfg, args, ErrNotFound)
+	if err == nil || !strings.Contains(err.Error(), "unused arguments") { // hacky logic but fine for simple test
+		t.Errorf("expected to get unused arguments error, but got err = %v", err)
+	}
 }
 
 func TestOpen(t *testing.T) {
