@@ -19,7 +19,7 @@ import (
 	"goki.dev/laser"
 )
 
-var (
+const (
 	// ErrNotFound can be passed to [SetFromArgs] and [ParseFlags]
 	// to indicate that they should return an error for a flag that
 	// is set but not found in the configuration struct.
@@ -30,12 +30,16 @@ var (
 	NoErrNotFound = false
 )
 
-// SetFromArgs sets Config values from command-line args,
-// based on the field names in the Config struct.
-// Returns any args that did not start with a `-` flag indicator.
-// If errNotFound is set to true, it is assumed that all flagged args (-)
-// must refer to fields in the config, so any that fail to match trigger
-// an error. Errors can also result from parsing.
+// SetFromArgs sets config values on the given config object from
+// the given from command-line args, based on the field names in
+// the config struct and the given list of available commands.
+// It returns the command, if any, that was passed in the arguments,
+// and any error than occurs during the parsing and setting process.
+// If errNotFound is set to true, it is assumed that all flags
+// (arguments starting with a "-") must refer to fields in the
+// config struct, so any that fail to match trigger an error.
+// It is recommended that the [ErrNotFound] and [NoErrNotFound]
+// constants be used for the value of errNotFound for clearer code.
 func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T]) (string, error) {
 	nfargs, flags, err := GetArgs(args, BoolFlags(cfg))
 	if err != nil {
@@ -71,27 +75,20 @@ func BoolFlags(obj any) map[string]bool {
 
 		// we need all cases of both normal and "no" version for all names
 		for _, name := range f.Names {
-			res[name] = true
-			res[strings.ToLower(name)] = true
-			res[strcase.ToKebab(name)] = true
-			res[strcase.ToSnake(name)] = true
-			res[strcase.ToScreamingSnake(name)] = true
-
-			nnm := "No" + name
-			res[nnm] = true
-			res[strings.ToLower(nnm)] = true
-			res[strcase.ToKebab(nnm)] = true
-			res[strcase.ToSnake(nnm)] = true
-			res[strcase.ToScreamingSnake(nnm)] = true
+			for _, cnms := range allCases(name) {
+				res[cnms] = true
+			}
+			for _, cnms := range allCases("No" + name) {
+				res[cnms] = true
+			}
 		}
 	}
 	return res
 }
 
-// GetArgs processes the given args using map of all available args,
-// returning the leftover (positional) args, the flags, and any error.
-// setting errNotFound = true causes args that are not in allArgs to
-// trigger an error.  Otherwise, it just skips those.
+// GetArgs processes the given args using the given map of bool flags,
+// which should be obtained through [BoolFlags]. It returns the leftover
+// (positional) args, the flags, and any error.
 func GetArgs(args []string, boolFlags map[string]bool) ([]string, map[string]string, error) {
 	var nonFlags []string
 	flags := map[string]string{}
@@ -121,11 +118,10 @@ func GetArgs(args []string, boolFlags map[string]bool) ([]string, map[string]str
 	return nonFlags, flags, nil
 }
 
-// GetFlag parses the given flag arg string in the context
-// of the given remaining arguments, and returns the
-// name of the flag, the value of the flag, the remaining
-// arguments updated with any changes caused by getting
-// this flag, and any error. It is designed for use in [GetArgs]
+// GetFlag parses the given flag arg string in the context of the given
+// remaining arguments and bool flags. It returns the name of the flag,
+// the value of the flag, the remaining arguments updated with any changes
+// caused by getting this flag, and any error. It is designed for use in [GetArgs]
 // and should typically not be used by end-user code.
 func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value string, a []string, err error) {
 	// we start out with the remaining args we were passed
@@ -169,12 +165,12 @@ func GetFlag(s string, args []string, boolFlags map[string]bool) (name, value st
 }
 
 // ParseArgs parses the given non-flag arguments in the context of the given
-// configuration information and commands. The non-flag arguments should be
-// gotten through [GetArgs] first. It returns the (sub)command specified by
-// the arguments, a map from all of the flag names to their associated
-// settable values, and any error.
+// configuration struct, flags, and commands. The non-flag arguments and flags
+// should be gotten through [GetArgs] first. It returns the command specified by
+// the arguments, an ordered map of all of the flag names and their associated
+// field objects, and any error.
 func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cmd[T]) (cmd string, allFlags *Fields, err error) {
-	newArgs, newCmd, err := parseArgsImpl(cfg, args, "", cmds...)
+	newArgs, newCmd, err := ParseArgsImpl(cfg, args, "", cmds...)
 	if err != nil {
 		return newCmd, allFlags, err
 	}
@@ -194,10 +190,11 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 	return newCmd, allFlags, nil
 }
 
-// parseArgsImpl is the underlying implementation of [ParseArgs] that is called
-// recursively and takes everything [ParseArgs] does and the current flags and
-// command state, and returns everything [ParseArgs] does and the args state.
-func parseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd[T]) (args []string, cmd string, err error) {
+// ParseArgsImpl is the underlying implementation of [ParseArgs] that is called
+// recursively and takes most of what [ParseArgs] does, plus the current command state,
+// and returns most of what [ParseArgs] does, plus the args state. It should typically
+// not be used by end-user code.
+func ParseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd[T]) (args []string, cmd string, err error) {
 	// we start with our base args and command
 	args = baseArgs
 	cmd = baseCmd
@@ -245,7 +242,7 @@ func parseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd
 		// we have consumed our next arg, so we get rid of it
 		args = args[1:]
 		// then, we recursively parse again with our new command as context
-		oargs, ocmd, err := parseArgsImpl(cfg, args, cmd, cmds...)
+		oargs, ocmd, err := ParseArgsImpl(cfg, args, cmd, cmds...)
 		if err != nil {
 			return nil, "", err
 		}
@@ -258,11 +255,14 @@ func parseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd
 	return
 }
 
-// ParseFlags parses the given flags using the given map of all of the
+// ParseFlags parses the given flags using the given ordered map of all of the
 // available flags, setting the values from that map accordingly.
-// Setting errNotFound = true causes flags that are not in allFlags to
-// trigger an error; otherwise, it just skips those. The flags should be
-// gotten through [GetArgs] first.
+// Setting errNotFound to true causes flags that are not in allFlags to
+// trigger an error; otherwise, it just skips those. It is recommended
+// that the [ErrNotFound] and [NoErrNotFound] constants be used for the
+// value of errNotFound for clearer code. Also, the flags should be
+// gotten through [GetArgs] first, and the map of available flags should
+// be gotten through [ParseArgs] first.
 func ParseFlags(flags map[string]string, allFlags *Fields, errNotFound bool) error {
 	for name, value := range flags {
 		err := ParseFlag(name, value, allFlags, errNotFound)
