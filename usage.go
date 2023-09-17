@@ -53,7 +53,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if cmd != "" {
 		cmdName += " " + cmd
 	}
-	b.WriteString("Usage:\n" + Indent + CmdColor(cmdName+" "))
+	b.WriteString(HeaderColor("Usage:\n") + Indent + CmdColor(cmdName+" "))
 
 	posArgStrs := []string{}
 
@@ -90,8 +90,8 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 	CommandUsage(&b, cmdName, cmd, cmds...)
 
-	b.WriteString("\nFlags:\n" + Indent + Indent + InfoColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
-	b.WriteString(Indent + Indent + InfoColor("or CamelCase, and can have one or two leading dashes.\n\n"))
+	b.WriteString(HeaderColor("\nFlags:\n") + Indent + InfoColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
+	b.WriteString(Indent + InfoColor("or CamelCase, and can have one or two leading dashes.\n\n"))
 
 	b.WriteString(Indent + CmdColor("-help") + ", " + CmdColor("-h") + SuccessColor(" bool") + "\n" + Indent + Indent + "show usage information for a command\n")
 	b.WriteString(Indent + CmdColor("-config") + ", " + CmdColor("-cfg") + SuccessColor(" filename") + "\n" + Indent + Indent + "the filename to load configuration options from\n")
@@ -140,7 +140,7 @@ outer:
 	}
 
 	if rcmd != nil {
-		b.WriteString("\nDefault command:\n")
+		b.WriteString(HeaderColor("\nDefault command:\n"))
 		b.WriteString(Indent + CmdColor(rcmd.Name) + "\n" + Indent + Indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+Indent+Indent) + "\n") // need to put two indents on every newline for formatting
 	}
 
@@ -148,7 +148,7 @@ outer:
 		return
 	}
 
-	b.WriteString("\nSubcommands:\n")
+	b.WriteString(HeaderColor("\nSubcommands:\n"))
 
 	// if we are in root, we also add help
 	if cmd == "" {

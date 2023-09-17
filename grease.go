@@ -17,12 +17,15 @@ import (
 var (
 	// ErrorColor is the color printer function for errors
 	ErrorColor = color.New(color.FgYellow).SprintfFunc()
-	// SuccessColor is the color printer function for success messages
+	// SuccessColor is the color printer function for success messages,
+	// optional arguments, and types
 	SuccessColor = color.New(color.FgGreen, color.Bold).SprintfFunc()
 	// CmdColor is the color printer function for commands, arguments, and flags
 	CmdColor = color.New(color.FgCyan, color.Bold).SprintfFunc()
 	// InfoColor is the color printer function for special usage information
 	InfoColor = color.New(color.Italic).SprintfFunc()
+	// HeaderColor is the color printer function for section headers
+	HeaderColor = color.New(color.Bold).SprintfFunc()
 )
 
 // Run runs an app with the given options, configuration struct,
