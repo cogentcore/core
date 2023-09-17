@@ -17,7 +17,7 @@ import (
 	"goki.dev/ordmap"
 )
 
-// Field represents a struct field in a configuration object.
+// Field represents a struct field in a configuration struct.
 // It is passed around in flag parsing functions, but it should
 // not typically be used by end-user code going through the
 // standard Run/Config/SetFromArgs API.
@@ -46,13 +46,15 @@ const AddAllFields = "*"
 // object, in the context of the given command name. A value of [AddAllFields]
 // for cmd indicates to add all fields, regardless of their command association.
 func AddFields(obj any, allFields *Fields, cmd string) {
-	addFieldsImpl(obj, "", allFields, map[string]*Field{}, cmd)
+	AddFieldsImpl(obj, "", allFields, map[string]*Field{}, cmd)
 }
 
-// addFieldsImpl is the underlying implementation of [AddFields].
-// usedNames is a map keyed by used kebab-case names with values
-// of their associated fields, used to track naming conflicts.
-func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string]*Field, cmd string) {
+// AddFieldsImpl is the underlying implementation of [AddFields].
+// The path is the current path state, and usedNames is a map keyed
+// by used kebab-case names with values of their associated fields,
+// used to track naming conflicts. AddFieldsImpl should almost never
+// be called by end-user code; see [AddFields] instead.
+func AddFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string]*Field, cmd string) {
 	if laser.AnyIsNil(obj) {
 		return
 	}
@@ -76,7 +78,7 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 			if path != "" {
 				nwPath = path + "." + nwPath
 			}
-			addFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, allFields, usedNames, cmd)
+			AddFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, allFields, usedNames, cmd)
 			continue
 		}
 		// we add both unqualified and fully-qualified names
@@ -142,24 +144,24 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 					os.Exit(1)
 				} else if !nfn && !ofn {
 					// neither one gets it, so we replace both with fully qualified name
-					applyShortestUniqueName(nf, i, usedNames)
+					ApplyShortestUniqueName(nf, i, usedNames)
 					for i, on := range of.Names {
 						if on == name {
-							applyShortestUniqueName(of, i, usedNames)
+							ApplyShortestUniqueName(of, i, usedNames)
 						}
 					}
 				} else if nfn && !ofn {
 					// we get it, so we keep ours as is and replace them with fully qualified name
 					for i, on := range of.Names {
 						if on == name {
-							applyShortestUniqueName(of, i, usedNames)
+							ApplyShortestUniqueName(of, i, usedNames)
 						}
 					}
 					// we also need to update the field for our name to us
 					usedNames[name] = nf
 				} else if !nfn && ofn {
 					// they get it, so we replace ours with fully qualified name
-					applyShortestUniqueName(nf, i, usedNames)
+					ApplyShortestUniqueName(nf, i, usedNames)
 				}
 			} else {
 				// if no conflict, we get the name
@@ -170,11 +172,12 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 	}
 }
 
-// applyShortestUniqueName uses [shortestUniqueName] to apply the shortest
+// ApplyShortestUniqueName uses [ShortestUniqueName] to apply the shortest
 // unique name for the given field, in the context of the given
-// used names, at the given index.
-func applyShortestUniqueName(field *Field, idx int, usedNames map[string]*Field) {
-	nm := shortestUniqueName(field.Name, usedNames)
+// used names, at the given index. It should not typically be used by
+// end-user code.
+func ApplyShortestUniqueName(field *Field, idx int, usedNames map[string]*Field) {
+	nm := ShortestUniqueName(field.Name, usedNames)
 	// if we already have this name, we don't need to add it, so we just delete this entry
 	if slices.Contains(field.Names, nm) {
 		field.Names = slices.Delete(field.Names, idx, idx+1)
@@ -184,11 +187,12 @@ func applyShortestUniqueName(field *Field, idx int, usedNames map[string]*Field)
 	}
 }
 
-// shortestUniqueName returns the shortest unique camel-case name for
+// ShortestUniqueName returns the shortest unique camel-case name for
 // the given fully-qualified nest name of a field, using the given
 // map of used names. It works backwards, so, for example, if given "A.B.C.D",
 // it would check "D", then "C.D", then "B.C.D", and finally "A.B.C.D".
-func shortestUniqueName(name string, usedNames map[string]*Field) string {
+// It should not typically be used by end-user code.
+func ShortestUniqueName(name string, usedNames map[string]*Field) string {
 	strs := strings.Split(name, ".")
 	cur := ""
 	for i := len(strs) - 1; i >= 0; i-- {
