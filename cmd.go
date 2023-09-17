@@ -7,6 +7,7 @@ package grease
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gti"
@@ -74,9 +75,21 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 			}
 		}
 		// we do these transformations afterward the directives so that we have the up-to-date documentation and name
-		cmd.Doc, _, _ = strings.Cut(cmd.Doc, "\n\n")         // we only want the first paragraph of text; after that is where code-specific details can go
-		cmd.Doc = strings.ReplaceAll(cmd.Doc, cfn, cmd.Name) // replace "CmdName" with "cmd-name" so it is more consistent with the rest of the app
-		if strings.Count(cmd.Doc, ".") == 1 {                // if we only have one period, get rid of it if it is at the end
+		cmd.Doc, _, _ = strings.Cut(cmd.Doc, "\n\n") // we only want the first paragraph of text; after that is where code-specific details can go
+
+		// get the command name in Title Case so we can replace "CmdName"
+		// with "Cmd Name" so it is fully accurate English and more consistent
+		// with the rest of the app
+		rs := []rune(cmd.Name)
+		for i, r := range rs {
+			// if we are the first character or are after a space, we should be capitalized
+			if i == 0 || unicode.IsSpace(rs[i-1]) {
+				rs[i] = unicode.ToUpper(r)
+			}
+		}
+		cmd.Doc = strings.ReplaceAll(cmd.Doc, cfn, string(rs))
+
+		if strings.Count(cmd.Doc, ".") == 1 { // if we only have one period, get rid of it if it is at the end
 			cmd.Doc = strings.TrimSuffix(cmd.Doc, ".")
 		}
 	}
