@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fatih/color"
 	"goki.dev/grease"
 )
 
@@ -31,7 +30,7 @@ func Run[T any, C grease.CmdOrFunc[T]](opts *grease.Options, cfg T, cmds ...C) e
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
 		if opts.Fatal {
-			color.Red("%v", err)
+			fmt.Println(grease.ErrorColor("%v", err))
 			os.Exit(1)
 		}
 		return err

@@ -3,7 +3,6 @@ module goki.dev/greasi
 go 1.21.0
 
 require (
-	github.com/fatih/color v1.15.0
 	github.com/iancoleman/strcase v0.3.0
 	goki.dev/gi/v2 v2.0.0-dev0.0.1
 	goki.dev/grease v0.8.8
@@ -37,8 +36,6 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
