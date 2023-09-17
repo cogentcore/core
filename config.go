@@ -18,7 +18,7 @@ import (
 // TODO: can we get rid of ConfigFile somehow? we need it in greasi and probably other places too
 
 // ConfigFile is the name of the config file actually loaded, specified by the
-// -config or -cfg command-line arg or the default file given in Config
+// -config or -cfg command-line arg or the default file given in [Options.DefaultFiles]
 var ConfigFile string
 
 // MetaConfig contains meta configuration information specified
@@ -56,21 +56,23 @@ var MetaCmds = []*Cmd[*MetaConfig]{
 	},
 }
 
-// Config is the overall config setting function, processing config files
-// and command-line arguments, in the following order:
+// Config is the main, high-level configuration setting function,
+// processing config files and command-line arguments in the following order:
 //   - Apply any `def:` field tag default values.
 //   - Look for `--config`, `--cfg`, or `-c` arg, specifying a config file on the command line.
 //   - Fall back on default config file name passed to `Config` function, if arg not found.
 //   - Read any `Include[s]` files in config file in deepest-first (natural) order,
 //     then the specified config file last.
 //   - if multiple config files are listed, then the first one that exists is used
-//   - Process command-line args based on Config field names, with `.` separator
-//     for sub-fields.
+//   - Process command-line args based on Config field names.
 //   - Boolean flags are set on with plain -flag; use No prefix to turn off
 //     (or explicitly set values to true or false).
 //
-// Also processes -help or -h and prints usage and quits immediately.
-// Config uses [os.Args] for its arguments.
+// Config also processes -help and -h by printing the [Usage] and quitting immediately.
+// It takes [Options] that control its behavior, the configuration struct, which is
+// what it sets, and the commands, which it uses for context. Also, it uses [os.Args]
+// for its command-line arguments. It returns the command, if any, that was passed in
+// [os.Args], and any error that ocurred during the configuration process.
 func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	var errs []error
 	err := SetFromDefaults(cfg)
