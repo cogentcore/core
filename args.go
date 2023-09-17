@@ -382,6 +382,13 @@ func addFlagsImpl(allFields *Fields, allFlags *Fields, cmd string, args []string
 		v := kv.Val
 		f := v.Field
 
+		for _, name := range v.Names {
+			addAllCases(name, v, allFlags)
+			if f.Type.Kind() == reflect.Bool {
+				addAllCases("No"+name, v, allFlags)
+			}
+		}
+
 		// set based on pos arg
 		posArgTag, ok := f.Tag.Lookup("posarg")
 		if ok {
@@ -417,13 +424,6 @@ func addFlagsImpl(allFields *Fields, allFlags *Fields, cmd string, args []string
 					return nil, fmt.Errorf("error setting field %q to positional argument %d (%q): %w", f.Name, ui, args[ui], err)
 				}
 				leftovers = slices.Delete(leftovers, int(ui), int(ui+1)) // we have consumed this argument
-			}
-
-		}
-		for _, name := range v.Names {
-			addAllCases(name, v, allFlags)
-			if f.Type.Kind() == reflect.Bool {
-				addAllCases("No"+name, v, allFlags)
 			}
 		}
 	}
