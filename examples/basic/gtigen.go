@@ -12,24 +12,22 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:        "Build builds the app for the given platform.",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Doc: "", Directives: gti.Directives{}}},
+		{"c", &gti.Field{Name: "c", Type: "*Config", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
+		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 	}),
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "main.Run",
-	Doc:  "Run runs the app for the given user.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-root"}},
-	},
+	Name:       "main.Run",
+	Doc:        "Run runs the app for the given user.",
+	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Doc: "", Directives: gti.Directives{}}},
+		{"c", &gti.Field{Name: "c", Type: "*Config", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
+		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 	}),
 })
 
@@ -38,10 +36,10 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:        "Mod configures module information.",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Doc: "", Directives: gti.Directives{}}},
+		{"c", &gti.Field{Name: "c", Type: "*Config", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
+		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 	}),
 })
 
@@ -52,10 +50,10 @@ var _ = gti.AddFunc(&gti.Func{
 		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-name", "mod tidy"}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Doc: "", Directives: gti.Directives{}}},
+		{"c", &gti.Field{Name: "c", Type: "*Config", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
+		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 	}),
 })
 
@@ -66,10 +64,10 @@ var _ = gti.AddFunc(&gti.Func{
 		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-name", "mod tidy remote"}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Doc: "", Directives: gti.Directives{}}},
+		{"c", &gti.Field{Name: "c", Type: "*Config", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
+		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 	}),
 })
 
@@ -80,17 +78,9 @@ var _ = gti.AddFunc(&gti.Func{
 		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-name", "mod tidy remote set-url"}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Doc: "", Directives: gti.Directives{}}},
+		{"c", &gti.Field{Name: "c", Type: "*Config", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Doc: "", Directives: gti.Directives{}}},
+		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 	}),
-})
-
-var _ = gti.AddFunc(&gti.Func{
-	Name:       "main.main",
-	Doc:        "",
-	Directives: gti.Directives{},
-	Args:       ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Returns:    ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 })

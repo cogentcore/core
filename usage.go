@@ -39,7 +39,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			}
 		}
 		if !gotCmd {
-			fmt.Println(CmdColor(opts.AppName+" help") + ErrorColor(" failed: command %s not found", cmd))
+			fmt.Println(CmdColor(opts.AppName+" help") + ErrorColor(" failed: command %q not found", cmd))
 			os.Exit(1)
 		}
 	}

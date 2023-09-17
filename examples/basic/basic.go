@@ -60,8 +60,6 @@ func Build(c *Config) error {
 }
 
 // Run runs the app for the given user.
-//
-//grease:cmd -root
 func Run(c *Config) error {
 	fmt.Println("Running for user", c.Name, "- likes go:", c.LikesGo)
 	return nil
@@ -98,6 +96,7 @@ func ModTidyRemoteSetURL(c *Config) error {
 	return nil
 }
 
+//gti:skip
 func main() {
 	opts := grease.DefaultOptions("basic", "Basic", "Basic is a basic example application made with Grease.")
 	grease.Run(opts, &Config{}, Build, Run, Mod, ModTidy, ModTidyRemote, ModTidyRemoteSetURL)

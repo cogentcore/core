@@ -100,5 +100,9 @@ func RunCmd[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) error {
 			return nil
 		}
 	}
+	if cmd == "" { // if we couldn't find the command and we are looking for the root command, we fall back on help
+		fmt.Println(Usage(opts, cfg, cmd, cmds...))
+		os.Exit(0)
+	}
 	return fmt.Errorf("command %q not found", cmd)
 }
