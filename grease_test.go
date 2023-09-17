@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"goki.dev/grease/testdata"
 )
 
 // TestSubConfig is a sub-struct with special params
@@ -92,8 +94,8 @@ type TestConfig struct {
 	// if true, save network activation etc data from testing trials, for later viewing in netview
 	NetData bool `desc:"if true, save network activation etc data from testing trials, for later viewing in netview"`
 
-	// can set these values by string representation if stringer and registered as an enum with kit
-	Enum TestEnum `desc:"can set these values by string representation if stringer and registered as an enum with kit"`
+	// can set these values by string representation when using enumgen
+	Enum testdata.TestEnum `desc:"can set these values by string representation when using enumgen"`
 
 	// [def: [1, 2.14, 3.14]] test slice case
 	Slice []float32 `def:"[1, 2.14, 3.14]" desc:"test slice case"`
@@ -158,7 +160,7 @@ func TestArgs(t *testing.T) {
 	if cfg.Runs != 5 || cfg.Run != 1 || cfg.Tag != "nice" || cfg.PatParams.Sparseness != 0.1 || cfg.SaveWts != true || cfg.GUI != false || cfg.EpochLog != false || cfg.RunLog != false {
 		t.Errorf("args not set properly: %#v", cfg)
 	}
-	if cfg.Enum != TestValue2 {
+	if cfg.Enum != testdata.TestValue2 {
 		t.Errorf("args enum from string not set properly: %#v", cfg)
 	}
 	if len(cfg.Slice) != 3 || cfg.Slice[2] != 1.9 {
@@ -209,7 +211,7 @@ func TestOpen(t *testing.T) {
 	if cfg.NData != 12 {
 		t.Errorf("testcfg.toml didn't overwrite testinc3\n")
 	}
-	if cfg.Enum != TestValue2 {
+	if cfg.Enum != testdata.TestValue2 {
 		t.Errorf("testinc.toml Enum value not parsed\n")
 	}
 }

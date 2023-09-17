@@ -6,7 +6,7 @@ require (
 	github.com/fatih/color v1.15.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mattn/go-shellwords v1.0.12
-	goki.dev/enums v0.9.4
+	goki.dev/enums v0.9.13
 	goki.dev/gti v0.0.0-20230910050553-9577e693612d
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
 	goki.dev/laser v0.1.0

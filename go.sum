@@ -11,8 +11,8 @@ github.com/mattn/go-isatty v0.0.17 h1:BTarxUcIeDqL27Mc+vyvdWYSL28zpIhv3RoTdsLMPn
 github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-shellwords v1.0.12 h1:M2zGm7EW6UQJvDeQxo4T51eKPurbeFbe8WtebGE2xrk=
 github.com/mattn/go-shellwords v1.0.12/go.mod h1:EZzvwXDESEeg03EKmM+RmDnNOPKG4lLtQsUlTZDWQ8Y=
-goki.dev/enums v0.9.4 h1:SNUvgiqA9NcULjHr6OaIYwQZTeTeAcFODmJXyCHix+0=
-goki.dev/enums v0.9.4/go.mod h1:9JtVqZRTx8OWMrQGMvkbjriz5cZ0URMt9NetGbe+GNg=
+goki.dev/enums v0.9.13 h1:bhQVdyW04KBpbvJfdmXP31hQd6dOfTvLMIXvOZIJFnM=
+goki.dev/enums v0.9.13/go.mod h1:QlXLA+1LTQmsQIn51+sg8eQ6pgiH+KLqMCydb/hmZbs=
 goki.dev/gti v0.0.0-20230910050553-9577e693612d h1:DwrDwSJGDfIy95wDUQX00oOS1WXWcLdNpGEf2SRzIj8=
 goki.dev/gti v0.0.0-20230910050553-9577e693612d/go.mod h1:zBLZkvGDh3lafBTd0cpDILdJ+jy12S2tHXYP9gkLQSA=
 goki.dev/ki/v2 v2.0.0-dev0.0.3 h1:kKjKGimERUmSKTprPaU0B1uU0QkHJ87vKlEY5JchhZw=
