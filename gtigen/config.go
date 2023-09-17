@@ -11,7 +11,7 @@ import "text/template"
 type Config struct {
 
 	// [def: .] the source directory to run enumgen on (can be set to multiple through paths like ./...)
-	Dir string `def:"." desc:"the source directory to run enumgen on (can be set to multiple through paths like ./...)"`
+	Dir string `def:"." posarg:"0" required:"-" desc:"the source directory to run enumgen on (can be set to multiple through paths like ./...)"`
 
 	// [def: gtigen.go] the output file location relative to the package on which enumgen is being called
 	Output string `def:"gtigen.go" desc:"the output file location relative to the package on which enumgen is being called"`
