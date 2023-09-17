@@ -9,7 +9,7 @@ import (
 
 var _ = gti.AddFunc(&gti.Func{
 	Name:       "main.Build",
-	Doc:        "Build builds the app for the given platform.",
+	Doc:        "Build builds the app for the config platform and target. It builds apps\nacross platforms using the GOOS and GOARCH environment variables and a\nsuitable C compiler located on the system.",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"c", &gti.Field{Name: "c", Type: "*Config", Doc: "", Directives: gti.Directives{}}},

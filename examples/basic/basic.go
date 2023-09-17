@@ -53,7 +53,9 @@ type Client struct {
 	Platform string `nest:"-" desc:"the client platform"`
 }
 
-// Build builds the app for the given platform.
+// Build builds the app for the config platform and target. It builds apps
+// across platforms using the GOOS and GOARCH environment variables and a
+// suitable C compiler located on the system.
 func Build(c *Config) error {
 	fmt.Println("Building for target", c.Build.Target, "and platform", c.Build.Platform, "- user likes go:", c.LikesGo)
 	return nil

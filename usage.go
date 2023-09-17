@@ -140,7 +140,7 @@ outer:
 
 	if rcmd != nil {
 		b.WriteString("\nThe default (root) command is:\n")
-		b.WriteString("\t" + CmdColor(rcmd.Name) + "\t" + strings.ReplaceAll(rcmd.Doc, "\n", "\n\t\t") + "\n") // need to put two tabs on every newline for formatting
+		b.WriteString("\t" + CmdColor(rcmd.Name) + "\n\t\t" + strings.ReplaceAll(rcmd.Doc, "\n", "\n\t\t") + "\n") // need to put two tabs on every newline for formatting
 	}
 
 	if len(acmds) == 0 && cmd != "" { // nothing to do
@@ -151,13 +151,13 @@ outer:
 
 	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString("\t" + CmdColor("help") + "\tshows usage information for a command\n")
+		b.WriteString("\t" + CmdColor("help") + "\n\t\thelp shows usage information for a command\n")
 	}
 
 	for _, c := range acmds {
 		b.WriteString("\t" + CmdColor(c.Name))
 		if c.Doc != "" {
-			b.WriteString("\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t\t")) // need to put two tabs on every newline for formatting
+			b.WriteString("\n\t\t" + strings.ReplaceAll(c.Doc, "\n", "\n\t\t")) // need to put a tab on every newline for formatting
 		}
 		b.WriteString("\n")
 	}
