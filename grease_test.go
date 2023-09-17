@@ -102,7 +102,7 @@ type TestConfig struct {
 	Slice []float32 `def:"[1, 2.14, 3.14]" desc:"test slice case"`
 
 	// [def: ['cat','dog one','dog two']] test string slice case
-	StrSlice []string `def:"['cat','dog one','dog two']" desc:"test string slice case"`
+	StrSlice []string `posarg:"all" def:"['cat','dog one','dog two']" desc:"test string slice case"`
 }
 
 func (cfg *TestConfig) IncludesPtr() *[]string { return &cfg.Includes }
@@ -126,7 +126,7 @@ func TestDefaults(t *testing.T) {
 }
 
 func TestGetArgs(t *testing.T) {
-	sargs := []string{"-gui", "run", "-param-set", "std", "-no-net-data", "main", "-epochs=5", "-note", "hello", "-debug=0", "-enum", "TestEnum1", "-sparseness", "5.0", "-pat-params-n-pats", "28"}
+	sargs := []string{"-gui", "run", "-param-set", "std", "-no-net-data", "main", "-epochs=5", "-note", "hello", "-debug=0", "-enum", "TestValue1", "-sparseness", "5.0", "-pat-params-n-pats", "28"}
 	bf := BoolFlags(&TestConfig{})
 	args, flags, err := GetArgs(sargs, bf)
 	if err != nil {
@@ -136,7 +136,7 @@ func TestGetArgs(t *testing.T) {
 	if !reflect.DeepEqual(args, wargs) {
 		t.Errorf("expected args to be \n%#v\n\tbut got \n%#v", wargs, args)
 	}
-	wflags := map[string]string{"debug": "0", "enum": "TestEnum1", "epochs": "5", "gui": "", "no-net-data": "", "note": "hello", "param-set": "std", "pat-params-n-pats": "28", "sparseness": "5.0"}
+	wflags := map[string]string{"debug": "0", "enum": "TestValue1", "epochs": "5", "gui": "", "no-net-data": "", "note": "hello", "param-set": "std", "pat-params-n-pats": "28", "sparseness": "5.0"}
 	if !reflect.DeepEqual(flags, wflags) {
 		t.Errorf("expected flags to be \n%#v\n\tbut got \n%#v", wflags, flags)
 	}
@@ -155,11 +155,11 @@ func TestArgsPrint(t *testing.T) {
 	fmt.Println(strings.Join(allFlags.Keys(), "\n"))
 }
 
-func TestArgs(t *testing.T) {
+func TestSetFromArgs(t *testing.T) {
 	cfg := &TestConfig{}
 	SetFromDefaults(cfg)
 	// note: cannot use "-Includes=testcfg.toml",
-	args := []string{"-save-wts", "-nogui", "-no-epoch-log", "--NoRunLog", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "-Slice=[3.2, 2.4, 1.9]"}
+	args := []string{"-save-wts", "goki", "-nogui", "-no-epoch-log", "--NoRunLog", "play", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "orange", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "apple", "-Slice=[3.2, 2.4, 1.9]"}
 
 	_, err := SetFromArgs(cfg, args, ErrNotFound)
 	if err != nil {
@@ -167,15 +167,19 @@ func TestArgs(t *testing.T) {
 	}
 
 	if cfg.Runs != 5 || cfg.Run != 1 || cfg.Tag != "nice" || cfg.PatParams.Sparseness != 0.1 || cfg.SaveWts != true || cfg.GUI != false || cfg.EpochLog != false || cfg.RunLog != false {
-		t.Errorf("args not set properly: %#v", cfg)
+		t.Errorf("args not set properly (config: %#v)", cfg)
 	}
 	if cfg.Enum != testdata.TestValue2 {
-		t.Errorf("args enum from string not set properly: %#v", cfg)
+		t.Errorf("expected args enum from string to be \n%v\n\tbut got \n%v", testdata.TestValue2, cfg.Enum)
 	}
-	if len(cfg.Slice) != 3 || cfg.Slice[2] != 1.9 {
-		t.Errorf("args Slice not set properly: %#v", cfg)
+	wcs := []float32{3.2, 2.4, 1.9}
+	if !reflect.DeepEqual(cfg.Slice, wcs) {
+		t.Errorf("expected args slice to be \n%#v\n\tbut got \n%#v", wcs, cfg.Slice)
 	}
-
+	wcss := []string{"goki", "play", "orange", "apple"}
+	if !reflect.DeepEqual(cfg.StrSlice, wcss) {
+		t.Errorf("expected args string slice to be \n%#v\n\tbut got \n%#v", wcss, cfg.StrSlice)
+	}
 	// if cfg.Network != nil {
 	// 	mv := cfg.Network
 	// 	for k, v := range mv {
