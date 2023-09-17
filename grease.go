@@ -13,9 +13,9 @@ import (
 
 // color functions for internal use
 var (
-	errorColor   = color.New(color.FgRed).SprintfFunc()
-	successColor = color.New(color.FgGreen).SprintfFunc()
-	cmdColor     = color.New(color.FgCyan).SprintfFunc()
+	errorColor   = color.New(color.FgYellow).SprintfFunc()
+	successColor = color.New(color.FgGreen, color.Bold).SprintfFunc()
+	cmdColor     = color.New(color.FgCyan, color.Bold).SprintfFunc()
 )
 
 // Run runs the given app with the given default
