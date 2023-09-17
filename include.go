@@ -15,10 +15,13 @@ import (
 	"goki.dev/laser"
 )
 
-// Includer facilitates processing include files in Config objects.
+// Includer is an interface that facilitates processing
+// include files in configuration objects. It typically
+// should not be used by end-user code.
 type Includer interface {
-	// IncludesPtr returns a pointer to the Includes []string field containing file(s) to include
-	// before processing the current config file.
+	// IncludesPtr returns a pointer to the "Includes []string"
+	// field containing file(s) to include before processing
+	// the current config file.
 	IncludesPtr() *[]string
 }
 
@@ -26,7 +29,7 @@ type Includer interface {
 // order in which they are encountered (nil if none).
 // Files should then be read in reverse order of the slice.
 // Returns an error if any of the include files cannot be found on IncludePath.
-// Does not alter cfg.
+// Does not alter cfg. It typically should not be used by end-user code.
 func IncludeStack(opts *Options, cfg Includer) ([]string, error) {
 	clone := reflect.New(laser.NonPtrType(reflect.TypeOf(cfg))).Interface().(Includer)
 	*clone.IncludesPtr() = *cfg.IncludesPtr()
