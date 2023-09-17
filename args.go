@@ -292,6 +292,7 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 	isBool := laser.NonPtrValue(f.Value).Kind() == reflect.Bool
 
 	if isBool {
+		// check if we have a "no" prefix and set negate based on that
 		lcnm := strings.ToLower(name)
 		negate := false
 		if len(lcnm) > 3 {
@@ -303,9 +304,21 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 				}
 			}
 		}
-		if negate {
+		// the value could be explicitly set to a bool value,
+		// so we check that; if it is not set, it is true
+		b := true
+		if value != "" {
+			var err error
+			b, err = strconv.ParseBool(value)
+			if err != nil {
+				return fmt.Errorf("error parsing bool flag %q: %w", name, err)
+			}
+		}
+		// if we are negating and true (ex: -no-something), or not negating
+		// and false (ex: -something=false), we are false
+		if negate && b || !negate && !b {
 			value = "false"
-		} else {
+		} else { // otherwise, we are true
 			value = "true"
 		}
 	}
