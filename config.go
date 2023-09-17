@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"goki.dev/ki/v2/dirs"
-	"goki.dev/ki/v2/kit"
 )
 
 // TODO: can we get rid of ConfigFile somehow? we need it in greasi and probably other places too
@@ -154,5 +153,5 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	if err != nil {
 		errs = append(errs, err)
 	}
-	return cmd, kit.AllErrors(errs, 10)
+	return cmd, errors.Join(errs...)
 }

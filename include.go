@@ -8,9 +8,9 @@
 package grease
 
 import (
+	"errors"
 	"reflect"
 
-	"goki.dev/ki/v2/kit"
 	"goki.dev/ki/v2/toml"
 	"goki.dev/laser"
 )
@@ -57,5 +57,5 @@ func includeStackImpl(opts *Options, clone Includer, includes []string) ([]strin
 			errs = append(errs, err)
 		}
 	}
-	return includes, kit.AllErrors(errs, 10)
+	return includes, errors.Join(errs...)
 }
