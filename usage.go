@@ -31,7 +31,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 		for _, c := range cmds {
 			if c.Name == cmd {
 				if c.Doc != "" {
-					b.WriteString(c.Doc)
+					b.WriteString(CmdColor(cmd) + " " + c.Doc)
 					b.WriteString("\n\n")
 				}
 				gotCmd = true
