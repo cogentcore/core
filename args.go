@@ -421,6 +421,11 @@ func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, fl
 				}
 				// if this is true, the pos arg is missing
 				if ui >= uint64(len(args)) {
+					// if it isn't required, it doesn't matter if it's missing
+					req, has := f.Tag.Lookup("required")
+					if req != "+" && req != "true" && has { // default is required, so !has => required
+						continue
+					}
 					// check if we have set this pos arg as a flag; if we have,
 					// it makes up for the missing pos arg and there is no error,
 					// but otherwise there is an error
