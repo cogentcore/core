@@ -17,7 +17,6 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/ki/v2/toml"
 	"goki.dev/laser"
-	"golang.org/x/exp/slices"
 )
 
 var (
@@ -371,7 +370,7 @@ func addAllCases(nm string, field *Field, allFlags *Fields) {
 // posarg struct tags that fields have. The posarg struct tag must be either
 // "all" or a valid uint.
 func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, flags map[string]string) ([]string, error) {
-	leftovers := args
+	consumed := map[int]bool{} // which args we have consumed via pos args
 	for _, kv := range allFields.Order {
 		v := kv.Val
 		f := v.Field
@@ -391,7 +390,10 @@ func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, fl
 				if !ok {
 					return nil, fmt.Errorf("not able to set field %q to all positional arguments: %v", f.Name, args)
 				}
-				leftovers = []string{} // everybody has been consumed
+				// everybody has been consumed
+				for i := range args {
+					consumed[i] = true
+				}
 			} else {
 				ui, err := strconv.ParseUint(posArgTag, 10, 64)
 				if err != nil {
@@ -417,9 +419,17 @@ func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, fl
 				if err != nil {
 					return nil, fmt.Errorf("error setting field %q to positional argument %d (%q): %w", f.Name, ui, args[ui], err)
 				}
-				leftovers = slices.Delete(leftovers, int(ui), int(ui+1)) // we have consumed this argument
+				consumed[int(ui)] = true // we have consumed this argument
 			}
 		}
+	}
+	// get leftovers based on who was consumed
+	leftovers := []string{}
+	for i, con := range consumed {
+		if con {
+			continue
+		}
+		leftovers = append(leftovers, args[i])
 	}
 	return leftovers, nil
 }

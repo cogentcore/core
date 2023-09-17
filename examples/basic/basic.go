@@ -55,7 +55,7 @@ type Client struct {
 
 // Build builds the app for the given platform.
 func Build(c *Config) error {
-	fmt.Println("Building for platform", c.Build.Target, "- likes go:", c.LikesGo)
+	fmt.Println("Building for target", c.Build.Target, "and platform", c.Build.Platform, "- user likes go:", c.LikesGo)
 	return nil
 }
 
