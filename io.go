@@ -11,12 +11,14 @@ import (
 	"goki.dev/ki/v2/toml"
 )
 
-// OpenWithIncludes reads config from given config file,
-// looking on IncludePaths for the file,
-// and opens any Includes specified in the given config file
-// in the natural include order so includee overwrites included settings.
-// Is equivalent to Open if there are no Includes.
-// Returns an error if any of the include files cannot be found on IncludePath.
+// TODO: use glop/dirs and grows for these things
+
+// OpenWithIncludes reads the config struct from the given config file
+// using the given options, looking on [Options.IncludePaths] for the file.
+// It opens any Includes specified in the given config file in the natural
+// include order so that includers overwrite included settings.
+// Is equivalent to Open if there are no Includes. It returns an error if
+// any of the include files cannot be found on [Options.IncludePaths].
 func OpenWithIncludes(opts *Options, cfg any, file string) error {
 	err := toml.OpenFromPaths(cfg, file, opts.IncludePaths)
 	if err != nil {
@@ -45,12 +47,12 @@ func OpenWithIncludes(opts *Options, cfg any, file string) error {
 }
 
 // OpenFS reads config from given TOML file,
-// using the fs.FS filesystem -- e.g., for embed files.
+// using the fs.FS filesystem (e.g., for embed files).
 func OpenFS(cfg any, fsys fs.FS, file string) error {
 	return toml.OpenFS(cfg, fsys, file)
 }
 
-// Save writes TOML to given file.
+// Save writes TOML for the given config to the given file.
 func Save(cfg any, file string) error {
 	return toml.Save(cfg, file)
 }
