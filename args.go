@@ -364,6 +364,13 @@ func addAllCases(nm string, field *Field, allFlags *Fields) {
 	allFlags.Add(strcase.ToScreamingSnake(nm), field)
 }
 
+// allCases returns all of the string cases of the given name
+func allCases(nm string) []string {
+	return []string{
+		nm, strings.ToLower(nm), strcase.ToKebab(nm), strcase.ToSnake(nm), strcase.ToScreamingSnake(nm),
+	}
+}
+
 // AddFlags adds to given flags map all the different ways the field names
 // can be specified as arg flags, mapping to the reflect.Value. It also uses
 // the given positional arguments to set the values of the object based on any
@@ -403,14 +410,19 @@ func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, fl
 					// check if we have set this pos arg as a flag; if we have, there is no error, but otherwise there is
 					got := false
 					for _, fnm := range v.Names {
-						_, ok := flags[fnm]
-						if ok {
-							got = true
+						for _, cnm := range allCases(fnm) {
+							_, ok := flags[cnm]
+							if ok {
+								got = true
+								break
+							}
+						}
+						if got {
 							break
 						}
 					}
 					if got {
-						return nil, nil
+						continue // if we got the pos arg through the flag, we skip the rest of the pos arg stuff and go onto the next field
 					} else {
 						return nil, fmt.Errorf("missing positional argument %d used for field %q", ui, f.Name)
 					}
