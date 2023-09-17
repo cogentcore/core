@@ -92,6 +92,8 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 // CommandUsage adds the command usage info for the given commands to the
 // given [strings.Builder]. Typically, end-user code should use [Usage] instead.
+// It also takes the full name of our command as it appears in the terminal (cmdName),
+// (eg: "goki build"), and the name of the command we are running (eg: "build").
 //
 // To be a command that is included in the usage, we must be one command
 // nesting depth (subcommand) deeper than the current command (ie, if we
@@ -125,7 +127,7 @@ outer:
 	}
 
 	if len(acmds) != 0 {
-		b.WriteString("\t" + cmdColor(cmdName+" <subcommand>") + " [arguments] [flags]\n")
+		b.WriteString("\t" + cmdColor(cmdName+" <subcommand>") + " [flags]\n")
 	}
 
 	if rcmd != nil {

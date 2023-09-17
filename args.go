@@ -442,6 +442,11 @@ func addFlagsImpl(allFields *Fields, path string, nest bool, allFlags *Fields, c
 //
 //	-config -cfg -help -h
 func CommandFields(allFields *Fields) {
+	// NOTE: we could do this through AddFields, but that
+	// causes problems with the HelpCmd field capturing
+	// everything, so it easier to just add manually.
+	// TODO: maybe improve the structure of this
+
 	mc := reflect.TypeOf(&MetaConfig{}).Elem()
 
 	hf, ok := mc.FieldByName("Help")
