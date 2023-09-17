@@ -33,7 +33,7 @@ func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 // Generate generates gti type info, using the
 // configuration information, loading the packages from the
 // configuration source directory, and writing the result
-// to the config output file.
+// to the configuration output file.
 //
 // It is a simple entry point to gtigen that does all
 // of the steps; for more specific functionality, create
