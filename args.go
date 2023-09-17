@@ -388,6 +388,7 @@ func AllCases(nm string) []string {
 // all of the given fields can can be specified as flags. It also uses the given
 // positional arguments to set the values of the object based on any posarg struct
 // tags that fields have. The posarg struct tag must either be "all" or a valid uint.
+// Finally, it also uses the given map of flags passed to the command as context.
 func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[string]string) ([]string, error) {
 	consumed := map[int]bool{} // which args we have consumed via pos args
 	for _, kv := range allFields.Order {
