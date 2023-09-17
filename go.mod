@@ -11,7 +11,6 @@ require (
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
 	goki.dev/laser v0.1.0
 	goki.dev/ordmap v0.5.0
-	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 )
 
 require (

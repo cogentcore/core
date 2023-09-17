@@ -91,7 +91,7 @@ func addFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 		if ok {
 			names = strings.Split(greasetag, ",")
 			if len(names) == 0 {
-				fmt.Println("warning: programmer error: expected at least one name in grease struct tag, but got none")
+				fmt.Println(errorColor("warning: programmer error:") + " expected at least one name in grease struct tag, but got none")
 			}
 		}
 

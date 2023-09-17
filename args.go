@@ -186,7 +186,7 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 	allFlags = &Fields{}
 	newArgs, err = AddFlags(allFields, allFlags, newCmd, newArgs, flags)
 	if err != nil {
-		return newCmd, allFields, fmt.Errorf("error getting field flag names: %w", err)
+		return newCmd, allFields, err
 	}
 	if len(newArgs) > 0 {
 		return newCmd, allFields, fmt.Errorf("got unused arguments: %v", newArgs)
@@ -284,7 +284,7 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 	f, exists := allFlags.ValByKeyTry(name)
 	if !exists {
 		if errNotFound {
-			return fmt.Errorf("flag name not recognized: %q", name)
+			return fmt.Errorf("flag name %q not recognized", name)
 		}
 		return nil
 	}
@@ -311,7 +311,7 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 	}
 	if value == "" {
 		// got '--flag' but arg was required
-		return fmt.Errorf("flag needs an argument: %q", name)
+		return fmt.Errorf("flag %q needs an argument", name)
 	}
 
 	return SetFieldValue(f, value)
@@ -427,7 +427,7 @@ func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, fl
 					if got {
 						continue // if we got the pos arg through the flag, we skip the rest of the pos arg stuff and go onto the next field
 					} else {
-						return nil, fmt.Errorf("missing positional argument %d used for field %q", ui, f.Name)
+						return nil, fmt.Errorf("missing positional argument %d (%s)", ui, strcase.ToKebab(v.Names[0]))
 					}
 				}
 				err = SetFieldValue(v, args[ui]) // must be pointer to be settable
