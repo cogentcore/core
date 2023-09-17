@@ -12,8 +12,7 @@ import (
 	"goki.dev/gti"
 )
 
-// Cmd represents a runnable command with configuration options
-// that can be passed to [grease.Run] and/or [grease.RunCmd].
+// Cmd represents a runnable command with configuration options.
 // The type constraint is the type of the configuration
 // information passed to the command.
 type Cmd[T any] struct {
@@ -39,7 +38,7 @@ type Cmd[T any] struct {
 }
 
 // CmdOrFunc is a generic type constraint that represents either
-// a [Cmd] with the given config type or a command function that
+// a [*Cmd] with the given config type or a command function that
 // takes the given config type and returns an error.
 type CmdOrFunc[T any] interface {
 	*Cmd[T] | func(T) error
@@ -47,7 +46,7 @@ type CmdOrFunc[T any] interface {
 
 // CmdFromFunc returns a new [Cmd] object from the given function
 // and any information specified on it using comment directives,
-// which requires the use of gti.
+// which requires the use of gti (see https://goki.dev/gti)
 func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 	cmd := &Cmd[T]{
 		Func: fun,
@@ -109,9 +108,9 @@ func CmdsFromFuncs[T any](funcs []func(T) error) ([]*Cmd[T], error) {
 	return res, nil
 }
 
-// CmdsFromFuncs is a helper function that returns a slice
+// CmdsFromCmdOrFuncs is a helper function that returns a slice
 // of command objects from the given slice of [CmdOrFunc] objects,
-// using [CmdFromFuncOrFunc].
+// using [CmdFromCmdOrFunc].
 func CmdsFromCmdOrFuncs[T any, C CmdOrFunc[T]](cmds []C) ([]*Cmd[T], error) {
 	res := make([]*Cmd[T], len(cmds))
 	for i, cmd := range cmds {
