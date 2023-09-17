@@ -247,6 +247,7 @@ func TestSetFromArgs(t *testing.T) {
 	// }
 }
 
+// TestSetFromArgsErr ensures we get errors for various problems with arguments
 func TestSetFromArgsErr(t *testing.T) {
 	cfg := &TestConfig{}
 	err := SetFromDefaults(cfg)
@@ -283,6 +284,16 @@ func TestUnusedArg(t *testing.T) {
 	_, err := SetFromArgs(cfg, args, ErrNotFound)
 	if err == nil || !strings.Contains(err.Error(), "unused arguments") { // hacky logic but fine for simple test
 		t.Errorf("expected to get unused arguments error, but got err = %v", err)
+	}
+}
+
+// TestNoErrNotFound ensures we get no unrecognized flag name errors with NoErrNotFound
+func TestNoErrNotFound(t *testing.T) {
+	cfg := &TestConfig{}
+	args := []string{"-sparsenes", "0.1"}
+	_, err := SetFromArgs(cfg, args, NoErrNotFound)
+	if err != nil {
+		t.Errorf("expected to get no error with NoErrNotFound, but got err = %v", err)
 	}
 }
 
