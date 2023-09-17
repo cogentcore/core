@@ -24,7 +24,7 @@ type Config struct {
 	LikesGo bool `desc:"whether the user likes Go"`
 
 	// the target platform to build for
-	BuildTarget string `grease:"build-target,target" cmd:"build" posarg:"0" desc:"the target platform to build for"`
+	BuildTarget string `grease:"target,build-target" cmd:"build" posarg:"0" desc:"the target platform to build for"`
 
 	Server Server
 	Client Client

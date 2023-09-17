@@ -181,6 +181,7 @@ func ParseArgs[T any](cfg T, args []string, cmds ...*Cmd[T]) (cmd string, allFla
 	}
 
 	allFields := &Fields{}
+	CommandFields(allFields)
 	AddFields(cfg, allFields, newCmd)
 
 	allFlags = &Fields{}
@@ -382,18 +383,18 @@ func addFlagsImpl(allFields *Fields, path string, nest bool, allFlags *Fields, c
 		v := kv.Val
 		f := v.Field
 
-		posargtag, ok := f.Tag.Lookup("posarg")
+		posArgTag, ok := f.Tag.Lookup("posarg")
 		if ok {
-			if posargtag == "all" {
+			if posArgTag == "all" {
 				ok := laser.SetRobust(v.Value.Interface(), args)
 				if !ok {
 					return nil, fmt.Errorf("not able to set field %q to all positional arguments: %v", f.Name, args)
 				}
 				leftovers = []string{} // everybody has been consumed
 			} else {
-				ui, err := strconv.ParseUint(posargtag, 10, 64)
+				ui, err := strconv.ParseUint(posArgTag, 10, 64)
 				if err != nil {
-					return nil, fmt.Errorf("invalid value %q for posarg struct tag on field %q: %w", posargtag, f.Name, err)
+					return nil, fmt.Errorf("programmer error: invalid value %q for posarg struct tag on field %q: %w", posArgTag, f.Name, err)
 				}
 				if ui >= uint64(len(args)) {
 					return nil, fmt.Errorf("missing positional argument %d used for field %q", ui, f.Name)
@@ -416,8 +417,8 @@ func addFlagsImpl(allFields *Fields, path string, nest bool, allFlags *Fields, c
 		if path == "" || nest {
 			continue
 		}
-		nesttag, ok := f.Tag.Lookup("nest")
-		if ok && (nesttag == "+" || nesttag == "true") {
+		nestTag, ok := f.Tag.Lookup("nest")
+		if ok && (nestTag == "+" || nestTag == "true") {
 			continue
 		}
 		for _, name := range v.Names {
@@ -434,17 +435,36 @@ func addFlagsImpl(allFields *Fields, path string, nest bool, allFlags *Fields, c
 	return leftovers, nil
 }
 
-// CommandFlags adds non-field flags that control the config process
+// CommandFields adds non-field flags that control the config process
 // to the given map of flags. These flags have no actual effect and
 // map to a placeholder value because they are handled elsewhere, but
 // they must be set to prevent errors. The following flags are added:
 //
 //	-config -cfg -help -h
-func CommandFlags(allFlags *Fields) {
-	// cfg := ""
-	// h := false
-	// allFlags.Add("config", &Field{Field: reflect.ValueOf(&cfg)})
-	// allFlags.Add("cfg", reflect.ValueOf(&cfg))
-	// allFlags.Add("help", reflect.ValueOf(&h))
-	// allFlags.Add("h", reflect.ValueOf(&h))
+func CommandFields(allFields *Fields) {
+	mc := reflect.TypeOf(&MetaConfig{}).Elem()
+
+	hf, ok := mc.FieldByName("Help")
+	if !ok {
+		panic("programmer error: Help field not found in MetaConfig")
+	}
+	hv := false
+	allFields.Add("MetaConfig.Help", &Field{
+		Field: hf,
+		Value: reflect.ValueOf(&hv),
+		Name:  "MetaConfig.Help",
+		Names: []string{"help", "h"},
+	})
+
+	cf, ok := mc.FieldByName("Config")
+	if !ok {
+		panic("programmer error: Config field not found in MetaConfig")
+	}
+	cv := ""
+	allFields.Add("MetaConfig.Config", &Field{
+		Field: cf,
+		Value: reflect.ValueOf(&cv),
+		Name:  "MetaConfig.Config",
+		Names: []string{"config", "cfg"},
+	})
 }

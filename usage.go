@@ -7,6 +7,8 @@ package grease
 import (
 	"fmt"
 	"os"
+	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/iancoleman/strcase"
@@ -49,12 +51,38 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if cmd != "" {
 		cmdName += " " + cmd
 	}
-	b.WriteString("Usage: " + cmdColor(cmdName+" [command] [arguments] [flags]\n\n"))
-	CommandUsage(&b, cmd, cmds...)
+	b.WriteString("Usage:\n\t" + cmdColor(cmdName+" "))
 
-	b.WriteString("The following flags are available. Flags are case-insensitive and\n")
-	b.WriteString("can be in kebab-case, snake_case, or CamelCase. Also, there can be\n")
-	b.WriteString("one or two leading dashes.\n\n")
+	posArgStrs := []string{}
+
+	for _, kv := range fields.Order {
+		v := kv.Val
+		f := v.Field
+
+		posArgTag, ok := f.Tag.Lookup("posarg")
+		if ok {
+			ui, err := strconv.ParseUint(posArgTag, 10, 64)
+			if err != nil {
+				fmt.Printf(errorColor("programmer error:")+" invalid value %q for posarg struct tag on field %q: %v\n", posArgTag, f.Name, err)
+			}
+			// if the slice isn't big enough, grow it to fit this posarg
+			if ui >= uint64(len(posArgStrs)) {
+				posArgStrs = slices.Grow(posArgStrs, len(posArgStrs)-int(ui)+1) // increase capacity
+				posArgStrs = posArgStrs[:ui+1]                                  // extend to capacity
+			}
+			posArgStrs[ui] = "<" + v.Names[0] + ">"
+		}
+	}
+	b.WriteString(strings.Join(posArgStrs, " "))
+	if len(posArgStrs) > 0 {
+		b.WriteString(" ")
+	}
+	b.WriteString("[flags]\n")
+
+	CommandUsage(&b, cmdName, cmd, cmds...)
+
+	b.WriteString("\nThe flags are: (flags are case-insensitive, can be in kebab-case,\n")
+	b.WriteString("snake_case, or CamelCase, and can have one or two leading dashes)\n\n")
 
 	b.WriteString(cmdColor("-help") + " or " + cmdColor("-h") + "\n\tshow usage information for a command\n")
 	b.WriteString(cmdColor("-config") + " or " + cmdColor("-cfg") + "\n\tthe filename to load configuration options from\n")
@@ -72,7 +100,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 // "" could generate usage for "help", "build", and "run", and "mod" could
 // generate usage for "mod init", "mod tidy", and "mod edit". This ensures
 // that only relevant commands are shown in the usage.
-func CommandUsage[T any](b *strings.Builder, cmd string, cmds ...*Cmd[T]) {
+func CommandUsage[T any](b *strings.Builder, cmdName string, cmd string, cmds ...*Cmd[T]) {
 	acmds := []*Cmd[T]{}           // actual commands we care about
 	var rcmd *Cmd[T]               // root command
 	cmdstrs := strings.Fields(cmd) // subcommand strings in passed command
@@ -96,16 +124,20 @@ outer:
 		}
 	}
 
+	if len(acmds) != 0 {
+		b.WriteString("\t" + cmdColor(cmdName+" <subcommand>") + " [arguments] [flags]\n")
+	}
+
 	if rcmd != nil {
-		b.WriteString("The default (root) command is:\n")
-		b.WriteString("\t" + cmdColor(rcmd.Name) + "\t" + strings.ReplaceAll(rcmd.Doc, "\n", "\n\t") + "\n\n") // need to put a tab on every newline for formatting
+		b.WriteString("\nThe default (root) command is:\n")
+		b.WriteString("\t" + cmdColor(rcmd.Name) + "\t" + strings.ReplaceAll(rcmd.Doc, "\n", "\n\t") + "\n") // need to put a tab on every newline for formatting
 	}
 
 	if len(acmds) == 0 && cmd != "" { // nothing to do
 		return
 	}
 
-	b.WriteString("The subcommands are:\n")
+	b.WriteString("\nThe subcommands are:\n")
 
 	// if we are in root, we also add help
 	if cmd == "" {
@@ -119,7 +151,6 @@ outer:
 		}
 		b.WriteString("\n")
 	}
-	b.WriteString("\n")
 }
 
 // FlagUsage adds the flag usage info for the
