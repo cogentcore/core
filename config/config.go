@@ -66,10 +66,10 @@ type Colorgen struct {
 	Source string `def:"colors.xml" desc:"the source file path to generate the color schemes from"`
 
 	// [def: colorgen.go] the output file to store the resulting Go file in
-	Output string `nest:"+" def:"colorgen.go" desc:"the output file to store the resulting Go file in"`
+	Output string `def:"colorgen.go" desc:"the output file to store the resulting Go file in"`
 
 	// [def: main] the package in which the color schemes will be used
-	Package string `def:"main" nest:"+" desc:"the package in which the color schemes will be used"`
+	Package string `def:"main" desc:"the package in which the color schemes will be used"`
 
 	// the comment for the color schemes variable
 	Comment string `desc:"the comment for the color schemes variable"`
@@ -78,7 +78,7 @@ type Colorgen struct {
 type Install struct {
 
 	// [def: .] the name/path of the package to install
-	Package string `def:"." nest:"+" desc:"the name/path of the package to install"`
+	Package string `def:"." desc:"the name/path of the package to install"`
 
 	// the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)
 	Target []string `desc:"the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)"`
@@ -87,7 +87,7 @@ type Install struct {
 type Log struct {
 
 	// [def: android] the target platform to view the logs for (ios or android)
-	Target string `def:"android" nest:"+" desc:"the target platform to view the logs for (ios or android)"`
+	Target string `def:"android" desc:"the target platform to view the logs for (ios or android)"`
 
 	// [def: false] whether to keep the previous log messages or clear them
 	Keep bool `def:"false" desc:"whether to keep the previous log messages or clear them"`
@@ -102,19 +102,19 @@ type Release struct {
 	VersionFile string `def:"version.go" desc:"the Go file to store version information in"`
 
 	// [def: main] the Go package in which the version file will be stored
-	Package string `def:"main" nest:"+" desc:"the Go package in which the version file will be stored"`
+	Package string `def:"main" desc:"the Go package in which the version file will be stored"`
 }
 
 type Generate struct {
 
 	// the enum generation configuration options passed to enumgen
-	Enumgen enumgen.Config `nest:"+" desc:"the enum generation configuration options passed to enumgen"`
+	Enumgen enumgen.Config `desc:"the enum generation configuration options passed to enumgen"`
 
 	// the generation configuration options passed to gtigen
 	Gtigen gtigen.Config `desc:"the generation configuration options passed to gtigen"`
 
 	// [def: .] the source directory to run generate on (can be multiple through ./...)
-	Dir string `def:"." desc:"the source directory to run generate on (can be multiple through ./...)"`
+	Dir string `def:"." posarg:"0" nest:"-" desc:"the source directory to run generate on (can be multiple through ./...)"`
 
 	// [def: gokigen.go] the output file location relative to the package on which generate is being called
 	Output string `def:"gokigen.go" desc:"the output file location relative to the package on which generate is being called"`
