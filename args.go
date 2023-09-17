@@ -371,12 +371,6 @@ func addAllCases(nm string, field *Field, allFlags *Fields) {
 // posarg struct tags that fields have. The posarg struct tag must be either
 // "all" or a valid uint.
 func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, flags map[string]string) ([]string, error) {
-	return addFlagsImpl(allFields, allFlags, cmd, args, flags)
-}
-
-// addFlagsImpl returns map of all the different ways the field names
-// can be specified as arg flags, mapping to the reflect.Value
-func addFlagsImpl(allFields *Fields, allFlags *Fields, cmd string, args []string, flags map[string]string) ([]string, error) {
 	leftovers := args
 	for _, kv := range allFields.Order {
 		v := kv.Val
