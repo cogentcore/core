@@ -114,7 +114,7 @@ type Generate struct {
 	Gtigen gtigen.Config `desc:"the generation configuration options passed to gtigen"`
 
 	// [def: .] the source directory to run generate on (can be multiple through ./...)
-	Dir string `def:"." posarg:"0" nest:"-" desc:"the source directory to run generate on (can be multiple through ./...)"`
+	Dir string `def:"." posarg:"0" required:"-" nest:"-" desc:"the source directory to run generate on (can be multiple through ./...)"`
 
 	// [def: gokigen.go] the output file location relative to the package on which generate is being called
 	Output string `def:"gokigen.go" desc:"the output file location relative to the package on which generate is being called"`
