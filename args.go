@@ -440,11 +440,10 @@ func AddFlags(allFields *Fields, allFlags *Fields, cmd string, args []string, fl
 	}
 	// get leftovers based on who was consumed
 	leftovers := []string{}
-	for i, con := range consumed {
-		if con {
-			continue
+	for i, a := range args {
+		if !consumed[i] {
+			leftovers = append(leftovers, a)
 		}
-		leftovers = append(leftovers, args[i])
 	}
 	return leftovers, nil
 }
