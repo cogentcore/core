@@ -12,6 +12,8 @@ import (
 	"strings"
 )
 
+var ShowStack = false
+
 // Error is the main type of grr and represents an error with
 // a base error and a stack trace.
 type Error struct {
@@ -52,21 +54,31 @@ func Errorf(format string, a ...any) error {
 // Error returns the error as a string, wrapping the string of
 // the base error with the stack trace.
 func (e *Error) Error() string {
-	res := ""
+	if !ShowStack {
+		return e.Base.Error()
+	}
+	stack := ""
 	for i := len(e.Stack) - 1; i >= 0; i-- {
 		f := e.Stack[i]
 		nm := f.Function
-		if nm == "" {
-			nm = "unknown"
-		} else {
+		switch {
+		case nm == "":
+			continue
+		case nm == "main.main":
+			continue
+		default:
+			nm = strings.TrimSuffix(nm, "[...]")
 			li := strings.LastIndex(nm, "/")
 			if li != -1 {
 				nm = nm[li+1:] // need to add 1 to get rid of slash
 			}
 		}
-		res += nm + ": "
+		stack += nm
+		if i != 0 {
+			stack += " "
+		}
 	}
-	return res + e.Base.Error()
+	return e.Base.Error() + " {stack: " + stack + "}"
 }
 
 // String returns the error as a string, wrapping the string of
