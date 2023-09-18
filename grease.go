@@ -16,7 +16,7 @@ import (
 // achieve and maintain a good and consistent color scheme.
 var (
 	// ErrorColor is the color printer function for errors
-	ErrorColor = color.New(color.FgYellow).SprintfFunc()
+	ErrorColor = color.New(color.FgRed).SprintfFunc()
 	// SuccessColor is the color printer function for success messages,
 	// optional arguments, and types
 	SuccessColor = color.New(color.FgGreen, color.Bold).SprintfFunc()
@@ -52,9 +52,8 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	}
 	cmd, err := Config(opts, cfg, cs...)
 	if err != nil {
-		err := fmt.Errorf("error: %w", err)
 		if opts.Fatal {
-			fmt.Println(ErrorColor("%v", err))
+			fmt.Println(ErrorColor("error: %v", err))
 			os.Exit(1)
 		}
 		return err

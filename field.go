@@ -78,9 +78,9 @@ func AddFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 			if path != "" {
 				nwPath = path + "." + nwPath
 			}
-			if hct { // if we have a command tag, we don't scope our path, as we already have that scope because we ran that command
-				nwPath = path
-			}
+			// if hct { // if we have a command tag, we don't scope our path, as we already have that scope because we ran that command
+			// 	nwPath = path
+			// }
 			AddFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, allFields, usedNames, cmd)
 			continue
 		}
