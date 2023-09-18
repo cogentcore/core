@@ -8,5 +8,7 @@ import "testing"
 
 func TestRun(t *testing.T) {
 	cfg := DefaultConfig()
-	Run(cfg, "echo", "hello")
+	RunSh(cfg, "go version")
+	RunSh(cfg, "git version")
+	RunSh(cfg, "echo hello")
 }

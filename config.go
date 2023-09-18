@@ -7,6 +7,8 @@ package xe
 import (
 	"io"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 // Config contains the configuration information that
@@ -20,6 +22,8 @@ type Config struct {
 	// Stderr is the writer to write the standard error of called commands to.
 	// It can be set to nil to disable the writing of the standard error.
 	Stderr io.Writer
+	// Stdin is the reader to use as the standard input.
+	Stdin io.Reader
 	// Commands is the writer to write the string representation of the called commands to.
 	// It can be set to nil to disable the writing of the string representations of the called commands.
 	Commands io.Writer
@@ -31,6 +35,10 @@ type Config struct {
 	Fatal bool
 	// Env contains any additional environment variables specified.
 	Env map[string]string
+	// CmdColor is the color formatting function used on commands.
+	CmdColor func(format string, a ...any) string
+	// ErrColor is the color formatting function used on errors.
+	ErrColor func(format string, a ...any) string
 }
 
 // DefaultConfig returns the default [Config] object.
@@ -38,9 +46,12 @@ func DefaultConfig() *Config {
 	return &Config{
 		Stdout:   os.Stdout,
 		Stderr:   os.Stderr,
+		Stdin:    os.Stdin,
 		Commands: os.Stdout,
 		Errors:   os.Stderr,
 		Fatal:    true,
 		Env:      map[string]string{},
+		CmdColor: color.New(color.FgCyan, color.Bold).Sprintf,
+		ErrColor: color.New(color.FgRed).Sprintf,
 	}
 }

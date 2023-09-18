@@ -72,7 +72,7 @@ func RunSh(cfg *Config, cstr string) error {
 	}
 	if len(args) == 0 {
 		err := fmt.Errorf("command %q was not parsed correctly into content", cstr)
-		cfg.Errors.Write([]byte(err.Error()))
+		cfg.Errors.Write([]byte(cfg.ErrColor(err.Error())))
 		if cfg.Fatal {
 			os.Exit(1)
 		}

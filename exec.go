@@ -10,8 +10,6 @@ package xe
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -40,7 +38,7 @@ func Exec(cfg *Config, cmd string, args ...string) (ran bool, err error) {
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
 	}
-	ran, code, err := run(cfg.Env, cfg.Stdout, cfg.Stderr, cmd, args...)
+	ran, code, err := run(cfg, cmd, args...)
 	_ = code
 	if err == nil {
 		return true, nil
@@ -48,24 +46,17 @@ func Exec(cfg *Config, cmd string, args ...string) (ran bool, err error) {
 	return ran, fmt.Errorf(`failed to run "%s %s: %v"`, cmd, strings.Join(args, " "), err)
 }
 
-func run(env map[string]string, stdout, stderr io.Writer, cmd string, args ...string) (ran bool, code int, err error) {
+func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error) {
 	c := exec.Command(cmd, args...)
 	c.Env = os.Environ()
-	for k, v := range env {
+	for k, v := range cfg.Env {
 		c.Env = append(c.Env, k+"="+v)
 	}
-	c.Stderr = stderr
-	c.Stdout = stdout
-	c.Stdin = os.Stdin
+	c.Stderr = cfg.Stderr
+	c.Stdout = cfg.Stdout
+	c.Stdin = cfg.Stdin
 
-	var quoted []string
-	for i := range args {
-		quoted = append(quoted, fmt.Sprintf("%q", args[i]))
-	}
-	// To protect against logging from doing exec in global variables
-	// if mg.Verbose() {
-	log.Println("exec:", cmd, strings.Join(quoted, " "))
-	// }
+	cfg.Commands.Write([]byte(cfg.CmdColor(cmd + " " + strings.Join(args, " ") + "\n")))
 	err = c.Run()
 	return CmdRan(err), ExitStatus(err), err
 }
