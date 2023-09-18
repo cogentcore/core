@@ -8,4 +8,4 @@ package grr
 
 // Debug is whether to put the program in debug mode
 // and print the stack traces for errors.
-var Debug = true
+var Debug = false
