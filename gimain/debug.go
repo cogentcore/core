@@ -19,6 +19,6 @@ import (
 func DebugEnumSizes() {
 	fmt.Printf("ki.NodeFlagsN: %d\n", ki.FlagsN)
 	fmt.Printf("gi.NodeFlagsN: %d\n", gi.NodeFlagsN)
-	fmt.Printf("gi.WinFlagN: %d\n", gi.WinFlagN)
-	fmt.Printf("gi.VpFlagN: %d\n", gi.VpFlagN)
+	fmt.Printf("gi.WinFlagN: %d\n", gi.WinFlagsN)
+	fmt.Printf("gi.VpFlagN: %d\n", gi.VpFlagsN)
 }
