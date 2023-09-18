@@ -28,9 +28,9 @@ import (
 // Ran reports if the command ran (rather than was not found or not executable).
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
-func Exec(env map[string]string, stdout, stderr io.Writer, cmd string, args ...string) (ran bool, err error) {
+func Exec(cfg *Config, cmd string, args ...string) (ran bool, err error) {
 	expand := func(s string) string {
-		s2, ok := env[s]
+		s2, ok := cfg.Env[s]
 		if ok {
 			return s2
 		}
@@ -40,7 +40,7 @@ func Exec(env map[string]string, stdout, stderr io.Writer, cmd string, args ...s
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
 	}
-	ran, code, err := run(env, stdout, stderr, cmd, args...)
+	ran, code, err := run(cfg.Env, cfg.Stdout, cfg.Stderr, cmd, args...)
 	_ = code
 	if err == nil {
 		return true, nil

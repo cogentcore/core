@@ -23,6 +23,14 @@ type Config struct {
 	// Commands is the writer to write the string representation of the called commands to.
 	// It can be set to nil to disable the writing of the string representations of the called commands.
 	Commands io.Writer
+	// Errors is the writer to write program errors to.
+	// It can be set to nil to disable the writing of program errors.
+	Errors io.Writer
+	// Fatal is whether to fatally exit programs with [os.Exit] and an
+	// exit code of 1 when there is an error running a program.
+	Fatal bool
+	// Env contains any additional environment variables specified.
+	Env map[string]string
 }
 
 // DefaultConfig returns the default [Config] object.
@@ -31,5 +39,8 @@ func DefaultConfig() *Config {
 		Stdout:   os.Stdout,
 		Stderr:   os.Stderr,
 		Commands: os.Stdout,
+		Errors:   os.Stderr,
+		Fatal:    true,
+		Env:      map[string]string{},
 	}
 }
