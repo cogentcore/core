@@ -46,15 +46,22 @@ const AddAllFields = "*"
 // object, in the context of the given command name. A value of [AddAllFields]
 // for cmd indicates to add all fields, regardless of their command association.
 func AddFields(obj any, allFields *Fields, cmd string) {
-	AddFieldsImpl(obj, "", allFields, map[string]*Field{}, cmd)
+	AddFieldsImpl(obj, "", "", allFields, map[string]*Field{}, cmd)
 }
 
 // AddFieldsImpl is the underlying implementation of [AddFields].
-// The path is the current path state, and usedNames is a map keyed
-// by used kebab-case names with values of their associated fields,
-// used to track naming conflicts. AddFieldsImpl should almost never
-// be called by end-user code; see [AddFields] instead.
-func AddFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string]*Field, cmd string) {
+// AddFieldsImpl should almost never be called by end-user code;
+// see [AddFields] instead. The path is the current path state,
+// the cmdPath is the current path state without command-associated names,
+// and usedNames is a map keyed by used CamelCase names with values
+// of their associated fields, used to track naming conflicts. The
+// [Field.Name]s of the fields are set based on the path, whereas the
+// names of the flags are set based on the command path. The difference
+// between the two is that the path is always fully qualified, whereas the
+// command path omits the names of structs associated with commands via
+// the "cmd" struct tag, as the user already knows what command they are
+// running, so they do not need that duplicated specificity for every flag.
+func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, usedNames map[string]*Field, cmd string) {
 	if laser.AnyIsNil(obj) {
 		return
 	}
@@ -78,18 +85,29 @@ func AddFieldsImpl(obj any, path string, allFields *Fields, usedNames map[string
 			if path != "" {
 				nwPath = path + "." + nwPath
 			}
-			// if hct { // if we have a command tag, we don't scope our path, as we already have that scope because we ran that command
-			// 	nwPath = path
-			// }
-			AddFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, allFields, usedNames, cmd)
+			nwCmdPath := f.Name
+			// if we have a command tag, we don't scope our command path with our name,
+			// as we don't need it because we ran that command and know we are in it
+			if hct {
+				nwCmdPath = ""
+			}
+			if cmdPath != "" {
+				nwCmdPath = cmdPath + "." + nwCmdPath
+			}
+
+			AddFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, nwCmdPath, allFields, usedNames, cmd)
 			continue
 		}
-		// we add both unqualified and fully-qualified names
+		// we first add our unqualified command name, which is the best case scenario
 		name := f.Name
 		names := []string{name}
+		// then, we set our future [Field.Name] to the fully path scoped version (but we don't add it as a command name)
 		if path != "" {
 			name = path + "." + name
-			names = append(names, name)
+		}
+		// then, we set add our command path scoped name as a command name
+		if cmdPath != "" {
+			names = append(names, cmdPath+"."+f.Name)
 		}
 
 		greasetag, ok := f.Tag.Lookup("grease")
