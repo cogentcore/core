@@ -27,11 +27,8 @@ func TestMonitorTheme(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("before go")
 	go func() {
-		fmt.Println("sending")
 		time.Sleep(time.Second)
-		done <- struct{}{}
 		close(done)
 	}()
 	select {

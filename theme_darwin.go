@@ -84,11 +84,9 @@ func IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error)
 				}
 				ec <- fmt.Errorf("watcher error: %w", err)
 				return
-			case v, ok := <-done:
-				fmt.Println("done chan", v, ok)
+			case _, ok := <-done:
 				// if done is closed, we return
 				if !ok {
-					fmt.Println("done")
 					return
 				}
 			}
