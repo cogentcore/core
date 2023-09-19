@@ -20,6 +20,7 @@ func TestThemeIsDark(t *testing.T) {
 
 func TestMonitorTheme(t *testing.T) {
 	// t.Skip("comment this out to monitor theme changes (which uses a function that will never return)")
+	fmt.Println("monitoring IsDark for 10 seconds")
 	done := make(chan struct{})
 	ec, err := IsDarkMonitor(func(isDark bool) {
 		fmt.Println("IsDark changed to:", isDark)
@@ -28,7 +29,7 @@ func TestMonitorTheme(t *testing.T) {
 		t.Fatal(err)
 	}
 	go func() {
-		time.Sleep(time.Second)
+		time.Sleep(10 * time.Second)
 		close(done)
 	}()
 	select {
