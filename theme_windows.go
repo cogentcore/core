@@ -66,7 +66,8 @@ func MonitorTheme(fn func(isDark bool)) (chan error, error) {
 				ec <- fmt.Errorf("error opening theme registry key: %w", err)
 				return
 			}
-			var wasDark bool
+			// need haveSetWasDark to capture first change correctly
+			var wasDark, haveSetWasDark bool
 			for {
 				regNotifyChangeKeyValue.Call(uintptr(k), 0, 0x00000001|0x00000004, 0, 0)
 				val, _, err := k.GetIntegerValue(themeRegName)
@@ -77,9 +78,10 @@ func MonitorTheme(fn func(isDark bool)) (chan error, error) {
 				// dark mode is 0
 				isDark := val == 0
 
-				if isDark != wasDark {
+				if isDark != wasDark || !haveSetWasDark {
 					fn(isDark)
 					wasDark = isDark
+					haveSetWasDark = true
 				}
 			}
 		}()
