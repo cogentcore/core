@@ -67,6 +67,14 @@ func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt Context) 
 		}
 		if sfunc, ok := StyleFontFuncs[key]; ok {
 			if par != nil {
+				sfunc(&pc.FontStyle.Font, key, val, &par.FontStyle.Font, ctxt)
+			} else {
+				sfunc(&pc.FontStyle.Font, key, val, nil, ctxt)
+			}
+			continue
+		}
+		if sfunc, ok := StyleFontRenderFuncs[key]; ok {
+			if par != nil {
 				sfunc(&pc.FontStyle, key, val, &par.FontStyle, ctxt)
 			} else {
 				sfunc(&pc.FontStyle, key, val, nil, ctxt)
@@ -205,4 +213,32 @@ func ParseDashesString(str string) []float64 {
 		dl[i] = d
 	}
 	return dl
+}
+
+// StyleFontRenderFuncs are functions for styling the FontStyle fields beyond Font
+var StyleFontRenderFuncs = map[string]StyleFunc{
+	"color": func(obj any, key string, val any, par any, ctxt Context) {
+		fs := obj.(*FontRender)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				fs.Color = par.(*FontRender).Color
+			} else if init {
+				fs.Color = colors.Black
+			}
+			return
+		}
+		fs.Color = colors.LogFromAny(val, ctxt.ContextColor())
+	},
+	"background-color": func(obj any, key string, val any, par any, ctxt Context) {
+		fs := obj.(*FontRender)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				fs.BackgroundColor = par.(*FontRender).BackgroundColor
+			} else if init {
+				fs.BackgroundColor = ColorSpec{}
+			}
+			return
+		}
+		fs.BackgroundColor.SetIFace(val, ctxt, key)
+	},
 }
