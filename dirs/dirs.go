@@ -46,7 +46,7 @@ func GoSrcDir(dir string) (absDir string, err error) {
 // ExtFiles returns all the FileInfo's for files with given extension(s) in directory
 // in sorted order (if exts is empty then all files are returned).
 // In case of error, returns nil.
-func ExtFiles(path string, exts []string) []os.FileInfo {
+func ExtFiles(path string, exts []string) []fs.DirEntry {
 	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil
@@ -138,9 +138,12 @@ func LatestMod(path string, exts []string) time.Time {
 	if len(files) == 0 {
 		return tm
 	}
-	for _, fi := range files {
-		if fi.ModTime().After(tm) {
-			tm = fi.ModTime()
+	for _, de := range files {
+		fi, err := de.Info()
+		if err == nil {
+			if fi.ModTime().After(tm) {
+				tm = fi.ModTime()
+			}
 		}
 	}
 	return tm
