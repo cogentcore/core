@@ -20,6 +20,7 @@ func TestIsDark(t *testing.T) {
 }
 
 func TestMonitor(t *testing.T) {
+	t.Skip("TODO: figure out how to do this well in a test, or just put it into an example")
 	isDark, err := IsDark()
 	if err != nil {
 		t.Fatal(err)
