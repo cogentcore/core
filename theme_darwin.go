@@ -14,7 +14,6 @@
 package goosi
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -26,26 +25,9 @@ import (
 const plistPath = `/Library/Preferences/.GlobalPreferences.plist`
 
 var plist = filepath.Join(os.Getenv("HOME"), plistPath)
-var wasDark bool
 
-func main() {
-	// get initial state
-	wasDark = checkDarkMode()
-
-	// Start watcher and give it a function to call when the state changes
-	startWatcher(react)
-}
-
-// react to the change
-func react(isDark bool) {
-	if isDark {
-		fmt.Println("Dark Mode ON")
-	} else {
-		fmt.Println("Dark Mode OFF")
-	}
-}
-
-func checkDarkMode() bool {
+// IsDark returns whether the system color theme is dark (as opposed to light)
+func IsDark() bool {
 	cmd := exec.Command("defaults", "read", "-g", "AppleInterfaceStyle")
 	if err := cmd.Run(); err != nil {
 		if _, ok := err.(*exec.ExitError); ok {
@@ -55,7 +37,10 @@ func checkDarkMode() bool {
 	return true
 }
 
-func startWatcher(fn func(bool)) {
+// Monitor monitors the state of the dark mode and calls the given function
+// with the new value whenever it changes. It does not return, so it should
+// typically be called in a separate goroutine.
+func Monitor(fn func(bool)) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
@@ -64,6 +49,7 @@ func startWatcher(fn func(bool)) {
 
 	done := make(chan bool)
 	go func() {
+		wasDark := IsDark()
 		for {
 			select {
 			case event, ok := <-watcher.Events:
@@ -71,7 +57,7 @@ func startWatcher(fn func(bool)) {
 					return
 				}
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					isDark := checkDarkMode()
+					isDark := IsDark()
 					if isDark && !wasDark {
 						fn(isDark)
 						wasDark = isDark
