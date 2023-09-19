@@ -69,8 +69,7 @@ func (g *Generator) PrintHeader() {
 // or enums:bitflag. It stores the resulting types in [Generator.Types].
 func (g *Generator) FindEnumTypes() error {
 	g.Types = []*Type{}
-	gengo.Inspect(g.Pkg, g.InspectForType)
-	return nil
+	return gengo.Inspect(g.Pkg, g.InspectForType)
 }
 
 // AllowedEnumTypes are the types that can be used for enums
@@ -106,10 +105,11 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 			return false, fmt.Errorf("unrecognized enums directive %q (from %q)", dir.Directive, c.Text)
 		}
 
-		ident, ok := ts.Type.(*ast.Ident)
-		if !ok {
-			return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", ts.Type, ts.Type)
-		}
+		typnm := types.ExprString(ts.Type)
+		// ident, ok := ts.Type.(*ast.Ident)
+		// if !ok {
+		// 	return false, fmt.Errorf("type of enum type (%v) is %T, not *ast.Ident (try using a standard [un]signed integer type instead)", ts.Type, ts.Type)
+		// }
 		cfg := &Config{}
 		*cfg = *g.Config
 		leftovers, err := grease.SetFromArgs(cfg, dir.Args, grease.ErrNotFound)
@@ -124,18 +124,18 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		utyp := typ.Underlying()
 
 		tt := &Type{Name: ts.Name.Name, Type: ts, Config: cfg}
-		if ident.String() != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
-			tt.Extends = ident.String()
+		if typnm != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
+			tt.Extends = typnm
 		}
 		switch dir.Directive {
 		case "enum":
 			if !AllowedEnumTypes[utyp.String()] {
-				return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", ident.Name)
+				return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", typnm)
 			}
 			tt.IsBitFlag = false
 		case "bitflag":
 			if utyp.String() != "int64" {
-				return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", ident.Name)
+				return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", typnm)
 			}
 			tt.IsBitFlag = true
 		}
