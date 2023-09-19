@@ -91,5 +91,6 @@ func MonitorTheme(fn func(isDark bool)) (chan error, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error adding file watcher: %w", err)
 	}
+	<-ec // TODO: figure out a better approach to concurrency
 	return ec, nil
 }

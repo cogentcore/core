@@ -18,7 +18,7 @@ func TestThemeIsDark(t *testing.T) {
 }
 
 func TestMonitorTheme(t *testing.T) {
-	// t.Skip("TODO: figure out how to do this well in a test, or just put it into an example")
+	// t.Skip("comment this out to monitor theme changes (which uses a function that will never return)")
 	ec, err := MonitorTheme(func(isDark bool) {
 		fmt.Println("IsDark changed to:", isDark)
 	})
