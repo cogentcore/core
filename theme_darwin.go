@@ -14,6 +14,7 @@
 package goosi
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -40,10 +41,10 @@ func IsDark() bool {
 // Monitor monitors the state of the dark mode and calls the given function
 // with the new value whenever it changes. It does not return, so it should
 // typically be called in a separate goroutine.
-func Monitor(fn func(bool)) {
+func Monitor(fn func(bool)) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error creating file watcher: %w", err)
 	}
 	defer watcher.Close()
 
@@ -71,14 +72,15 @@ func Monitor(fn func(bool)) {
 				if !ok {
 					return
 				}
-				log.Println("error:", err)
+				log.Printf("goosi.Monitor: error while monitoring system color theme: error while watching: %w", err)
 			}
 		}
 	}()
 
 	err = watcher.Add(plist)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error adding file watcher: %w", err)
 	}
 	<-done
+	return nil
 }
