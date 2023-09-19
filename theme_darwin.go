@@ -15,7 +15,6 @@ package goosi
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,30 +26,39 @@ const plistPath = `/Library/Preferences/.GlobalPreferences.plist`
 
 var plist = filepath.Join(os.Getenv("HOME"), plistPath)
 
-// IsDark returns whether the system color theme is dark (as opposed to light)
-func IsDark() bool {
+// IsDark returns whether the system color theme is dark (as opposed to light),
+// and any error that occurred when getting that information.
+func IsDark() (bool, error) {
 	cmd := exec.Command("defaults", "read", "-g", "AppleInterfaceStyle")
 	if err := cmd.Run(); err != nil {
 		if _, ok := err.(*exec.ExitError); ok {
-			return false
+			return false, nil
+		} else {
+			return false, fmt.Errorf("unexpected error when running command to get system color theme: %w", err)
 		}
 	}
-	return true
+	return true, nil
 }
 
 // Monitor monitors the state of the dark mode and calls the given function
-// with the new value whenever it changes. It does not return, so it should
-// typically be called in a separate goroutine.
-func Monitor(fn func(bool)) error {
+// with the new value whenever it changes. It returns a channel that will
+// receive any errors that occur during the monitoring, as it happens in a
+// separate goroutine. It also returns any error that occurred during the
+// initial set up of the monitoring. If the error is non-nil, the error channel
+// will be nil.
+func Monitor(fn func(bool)) (chan error, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return fmt.Errorf("error creating file watcher: %w", err)
+		return nil, fmt.Errorf("error creating file watcher: %w", err)
 	}
 	defer watcher.Close()
 
-	done := make(chan bool)
+	ec := make(chan error)
 	go func() {
-		wasDark := IsDark()
+		wasDark, err := IsDark() // we need to store this so that we only update when it changes
+		if err != nil {
+			ec <- fmt.Errorf("error while getting theme: %w", err)
+		}
 		for {
 			select {
 			case event, ok := <-watcher.Events:
@@ -58,7 +66,10 @@ func Monitor(fn func(bool)) error {
 					return
 				}
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					isDark := IsDark()
+					isDark, err := IsDark()
+					if err != nil {
+						ec <- fmt.Errorf("error while getting theme: %w", err)
+					}
 					if isDark && !wasDark {
 						fn(isDark)
 						wasDark = isDark
@@ -72,15 +83,14 @@ func Monitor(fn func(bool)) error {
 				if !ok {
 					return
 				}
-				log.Printf("goosi.Monitor: error while monitoring system color theme: error while watching: %w", err)
+				ec <- fmt.Errorf("watcher error: %w", err)
 			}
 		}
 	}()
 
 	err = watcher.Add(plist)
 	if err != nil {
-		return fmt.Errorf("error adding file watcher: %w", err)
+		return nil, fmt.Errorf("error adding file watcher: %w", err)
 	}
-	<-done
-	return nil
+	return ec, nil
 }
