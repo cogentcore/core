@@ -45,8 +45,9 @@ func IsDark() (bool, error) {
 // receive any errors that occur during the monitoring, as it happens in a
 // separate goroutine. It also returns any error that occurred during the
 // initial set up of the monitoring. If the error is non-nil, the error channel
-// will be nil.
-func IsDarkMonitor(fn func(isDark bool)) (chan error, error) {
+// will be nil. It also takes a done channel, and it will stop monitoring when
+// that done channel is closed.
+func IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, fmt.Errorf("error creating file watcher: %w", err)
@@ -83,6 +84,12 @@ func IsDarkMonitor(fn func(isDark bool)) (chan error, error) {
 				}
 				ec <- fmt.Errorf("watcher error: %w", err)
 				return
+			case _, ok := <-done:
+				// if done is closed, we return
+				if !ok {
+					fmt.Println("done")
+					return
+				}
 			}
 		}
 	}()

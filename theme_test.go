@@ -7,6 +7,7 @@ package goosi
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestThemeIsDark(t *testing.T) {
@@ -19,12 +20,19 @@ func TestThemeIsDark(t *testing.T) {
 
 func TestMonitorTheme(t *testing.T) {
 	// t.Skip("comment this out to monitor theme changes (which uses a function that will never return)")
+	done := make(chan struct{})
 	ec, err := IsDarkMonitor(func(isDark bool) {
 		fmt.Println("IsDark changed to:", isDark)
-	})
+	}, done)
 	if err != nil {
 		t.Fatal(err)
 	}
+	go func() {
+		time.Sleep(time.Second * 10)
+		close(done)
+		done <- struct{}{}
+
+	}()
 	err = <-ec
 	if err != nil {
 		t.Fatal(err)
