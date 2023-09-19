@@ -9,17 +9,17 @@ import (
 	"testing"
 )
 
-func TestIsDark(t *testing.T) {
-	isDark, err := IsDark()
+func TestThemeIsDark(t *testing.T) {
+	isDark, err := ThemeIsDark()
 	if err != nil {
 		t.Fatal(err)
 	}
 	fmt.Println("IsDark:", isDark)
 }
 
-func TestMonitor(t *testing.T) {
+func TestMonitorTheme(t *testing.T) {
 	// t.Skip("TODO: figure out how to do this well in a test, or just put it into an example")
-	ec, err := Monitor(func(isDark bool) {
+	ec, err := MonitorTheme(func(isDark bool) {
 		fmt.Println("IsDark changed to:", isDark)
 	})
 	if err != nil {
