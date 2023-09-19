@@ -5,7 +5,6 @@
 package svg
 
 //go:generate goki generate
-//go:generate enumgen
 
 import (
 	"image"
@@ -174,7 +173,7 @@ func (sv *SVG) Style() {
 		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
-		// ni.SetFlag(true, IsDef)
+		ni.SetFlag(true, IsDef)
 		return ki.Continue
 	})
 

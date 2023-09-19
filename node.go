@@ -359,7 +359,7 @@ func (g *NodeBase) StyleCSS(sv *SVG, css ki.Props) {
 
 // IsDefs returns true if is in the Defs of parent SVG
 func (g *NodeBase) IsDefs() bool {
-	// return g.Flags.HasFlag(IsDef)
+	return g.Flags.HasFlag(IsDef)
 	return false
 }
 
