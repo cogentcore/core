@@ -26,9 +26,9 @@ const plistPath = `/Library/Preferences/.GlobalPreferences.plist`
 
 var plist = filepath.Join(os.Getenv("HOME"), plistPath)
 
-// ThemeIsDark returns whether the system color theme is dark (as opposed to light),
+// IsDark returns whether the system color theme is dark (as opposed to light),
 // and any error that occurred when getting that information.
-func ThemeIsDark() (bool, error) {
+func IsDark() (bool, error) {
 	cmd := exec.Command("defaults", "read", "-g", "AppleInterfaceStyle")
 	if err := cmd.Run(); err != nil {
 		if _, ok := err.(*exec.ExitError); ok {
@@ -40,13 +40,13 @@ func ThemeIsDark() (bool, error) {
 	return true, nil
 }
 
-// MonitorTheme monitors the state of the dark mode and calls the given function
+// IsDarkMonitor monitors the state of the dark mode and calls the given function
 // with the new value whenever it changes. It returns a channel that will
 // receive any errors that occur during the monitoring, as it happens in a
 // separate goroutine. It also returns any error that occurred during the
 // initial set up of the monitoring. If the error is non-nil, the error channel
 // will be nil.
-func MonitorTheme(fn func(isDark bool)) (chan error, error) {
+func IsDarkMonitor(fn func(isDark bool)) (chan error, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, fmt.Errorf("error creating file watcher: %w", err)
@@ -55,7 +55,7 @@ func MonitorTheme(fn func(isDark bool)) (chan error, error) {
 
 	ec := make(chan error)
 	go func() {
-		wasDark, err := ThemeIsDark() // we need to store this so that we only update when it changes
+		wasDark, err := IsDark() // we need to store this so that we only update when it changes
 		if err != nil {
 			ec <- fmt.Errorf("error while getting theme: %w", err)
 			return
@@ -67,7 +67,7 @@ func MonitorTheme(fn func(isDark bool)) (chan error, error) {
 					return
 				}
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					isDark, err := ThemeIsDark()
+					isDark, err := IsDark()
 					if err != nil {
 						ec <- fmt.Errorf("error while getting theme: %w", err)
 						return
