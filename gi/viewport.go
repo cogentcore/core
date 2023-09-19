@@ -173,30 +173,6 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }
 
-// Resize resizes the viewport, creating a new image -- updates Geom Size
-func (vp *Viewport2D) ResizeRect(nwrc image.Rectangle) {
-	// if nwsz.Max.X == 0 || nwsz.Max.Y == 0 {
-	// 	return
-	// }
-	// if vp.Pixels != nil {
-	// 	ib := vp.Pixels.Bounds().Size()
-	// 	if ib == nwsz {
-	// 		vp.BBoxMu.Lock()
-	// 		vp.Geom.Size = nwsz // make sure
-	// 		vp.BBoxMu.Unlock()
-	// 		return // already good
-	// 	}
-	// }
-	if vp.Pixels != nil {
-		vp.Pixels = nil
-	}
-	vp.Pixels = image.NewRGBA(nwrc)
-	vp.Render.Init(nwrc.Size().X, nwrc.Size().Y, vp.Pixels)
-	vp.Geom.Size = nwrc.Size() // make sure
-	vp.Geom.Pos = nwrc.Min
-	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
-}
-
 // VpFlags extend NodeBase NodeFlags to hold viewport state
 type VpFlags int
 
