@@ -55,7 +55,7 @@ func (g *Rect) SetSize(sz mat32.Vec2) {
 	g.Size = sz
 }
 
-func (g *Rect) SVGLocalBBox() mat32.Box2 {
+func (g *Rect) LocalBBox() mat32.Box2 {
 	bb := mat32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.SubScalar(hlw)
@@ -63,7 +63,7 @@ func (g *Rect) SVGLocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Rect) Render2D() {
+func (g *Rect) Render() {
 	vis, rs := g.PushXForm()
 	if !vis {
 		return
@@ -85,8 +85,8 @@ func (g *Rect) Render2D() {
 	}
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
-	g.ComputeBBoxSVG()
-	g.Render2DChildren()
+	g.ComputeBBox()
+	g.RenderChildren()
 	rs.PopXFormLock()
 }
 

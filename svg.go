@@ -34,8 +34,8 @@ type SVG struct {
 	// fill the viewport with background-color from style
 	Fill bool `desc:"fill the viewport with background-color from style"`
 
-	// Viewport-level viewbox within any parent Viewport2D
-	Geom Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	// Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image
+	Geom girl.Geom2DInt `desc:"Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image"`
 
 	// viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering
 	ViewBox ViewBox `desc:"viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering"`

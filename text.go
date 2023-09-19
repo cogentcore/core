@@ -283,14 +283,14 @@ func (g *Text) RenderText() {
 	g.LastBBox.Min.Y -= maxh * .8 // baseline adjust
 	g.LastBBox.Max = g.LastBBox.Min.Add(g.TextRender.Size)
 	g.TextRender.Render(rs, pos)
-	g.ComputeBBoxSVG()
+	g.ComputeBBox()
 }
 
-func (g *Text) SVGLocalBBox() mat32.Box2 {
+func (g *Text) LocalBBox() mat32.Box2 {
 	return g.TextBBox()
 }
 
-func (g *Text) Render2D() {
+func (g *Text) Render() {
 	if g.IsParText() {
 		if g.Viewport == nil {
 			g.This().(gi.Node2D).Init2D()
@@ -302,8 +302,8 @@ func (g *Text) Render2D() {
 		}
 		rs.PushXFormLock(pc.XForm)
 
-		g.Render2DChildren()
-		g.ComputeBBoxSVG() // must come after render
+		g.RenderChildren()
+		g.ComputeBBox() // must come after render
 
 		rs.PopXFormLock()
 	} else {
@@ -316,9 +316,9 @@ func (g *Text) Render2D() {
 			g.RenderText()
 			rs.Unlock()
 		}
-		g.Render2DChildren()
+		g.RenderChildren()
 		if g.IsParText() {
-			g.ComputeBBoxSVG() // after kids have rendered
+			g.ComputeBBox() // after kids have rendered
 		}
 		rs.PopXFormLock()
 	}

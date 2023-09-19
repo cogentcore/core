@@ -142,7 +142,7 @@ func (svg *Editor) SetTransform() {
 	svg.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", svg.Trans.X, svg.Trans.Y, svg.Scale, svg.Scale))
 }
 
-func (svg *Editor) Render2D() {
+func (svg *Editor) Render() {
 	if svg.PushBounds() {
 		rs := &svg.Render
 		svg.This().(gi.Node2D).ConnectEvents2D()
@@ -153,7 +153,7 @@ func (svg *Editor) Render2D() {
 			svg.SetNormXForm()
 		}
 		rs.PushXForm(svg.Pnt.XForm)
-		svg.Render2DChildren() // we must do children first, then us!
+		svg.RenderChildren() // we must do children first, then us!
 		svg.PopBounds()
 		rs.PopXForm()
 		// fmt.Printf("geom.bounds: %v  geom: %v\n", svg.Geom.Bounds(), svg.Geom)

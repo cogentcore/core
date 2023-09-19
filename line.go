@@ -49,7 +49,7 @@ func (g *Line) SetSize(sz mat32.Vec2) {
 	g.End = g.Start.Add(sz)
 }
 
-func (g *Line) SVGLocalBBox() mat32.Box2 {
+func (g *Line) LocalBBox() mat32.Box2 {
 	bb := mat32.NewEmptyBox2()
 	bb.ExpandByPoint(g.Start)
 	bb.ExpandByPoint(g.End)
@@ -59,7 +59,7 @@ func (g *Line) SVGLocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Line) Render2D() {
+func (g *Line) Render() {
 	vis, rs := g.PushXForm()
 	if !vis {
 		return
@@ -69,7 +69,7 @@ func (g *Line) Render2D() {
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Stroke(rs)
 	rs.Unlock()
-	g.ComputeBBoxSVG()
+	g.ComputeBBox()
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		ang := mat32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
@@ -80,7 +80,7 @@ func (g *Line) Render2D() {
 		mrk.RenderMarker(g.End, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
 
-	g.Render2DChildren()
+	g.RenderChildren()
 	rs.PopXFormLock()
 }
 

@@ -45,7 +45,7 @@ func (g *Circle) SetSize(sz mat32.Vec2) {
 	g.Radius = 0.25 * (sz.X + sz.Y)
 }
 
-func (g *Circle) SVGLocalBBox() mat32.Box2 {
+func (g *Circle) LocalBBox() mat32.Box2 {
 	bb := mat32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.SubScalar(g.Radius + hlw)
@@ -65,7 +65,7 @@ func (g *Circle) Render() {
 	rs.Unlock()
 
 	g.ComputeBBox()
-	g.Render2DChildren()
+	g.RenderChildren()
 
 	rs.PopXFormLock()
 }

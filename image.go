@@ -155,14 +155,14 @@ func (g *Image) BBox2D() image.Rectangle {
 	return image.Rectangle{posi, maxi}.Canon()
 }
 
-func (g *Image) SVGLocalBBox() mat32.Box2 {
+func (g *Image) LocalBBox() mat32.Box2 {
 	bb := mat32.Box2{}
 	bb.Min = g.Pos
 	bb.Max = g.Pos.Add(g.Size)
 	return bb
 }
 
-func (g *Image) Render2D() {
+func (g *Image) Render() {
 	vis, rs := g.PushXForm()
 	if !vis {
 		return
@@ -170,8 +170,8 @@ func (g *Image) Render2D() {
 	rs.Lock()
 	g.DrawImage()
 	rs.Unlock()
-	g.ComputeBBoxSVG()
-	g.Render2DChildren()
+	g.ComputeBBox()
+	g.RenderChildren()
 	rs.PopXFormLock()
 }
 

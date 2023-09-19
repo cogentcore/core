@@ -27,7 +27,7 @@ func AddNewPolygon(parent ki.Ki, name string, points []mat32.Vec2) *Polygon {
 
 func (g *Polygon) SVGName() string { return "polygon" }
 
-func (g *Polygon) Render2D() {
+func (g *Polygon) Render() {
 	sz := len(g.Points)
 	if sz < 2 {
 		return
@@ -41,7 +41,7 @@ func (g *Polygon) Render2D() {
 	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
-	g.ComputeBBoxSVG()
+	g.ComputeBBox()
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
@@ -65,6 +65,6 @@ func (g *Polygon) Render2D() {
 		}
 	}
 
-	g.Render2DChildren()
+	g.RenderChildren()
 	rs.PopXFormLock()
 }

@@ -44,7 +44,7 @@ func (g *Polyline) SetSize(sz mat32.Vec2) {
 	// todo: scale bbox
 }
 
-func (g *Polyline) SVGLocalBBox() mat32.Box2 {
+func (g *Polyline) LocalBBox() mat32.Box2 {
 	bb := mat32.NewEmptyBox2()
 	for _, pt := range g.Points {
 		bb.ExpandByPoint(pt)
@@ -55,7 +55,7 @@ func (g *Polyline) SVGLocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Polyline) Render2D() {
+func (g *Polyline) Render() {
 	sz := len(g.Points)
 	if sz < 2 {
 		return
@@ -69,7 +69,7 @@ func (g *Polyline) Render2D() {
 	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
-	g.ComputeBBoxSVG()
+	g.ComputeBBox()
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
@@ -93,7 +93,7 @@ func (g *Polyline) Render2D() {
 		}
 	}
 
-	g.Render2DChildren()
+	g.RenderChildren()
 	rs.PopXFormLock()
 }
 

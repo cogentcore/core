@@ -5,8 +5,6 @@
 package svg
 
 import (
-	"fmt"
-
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2/ki"
@@ -114,10 +112,10 @@ func (mrk *Marker) RenderMarker(vertexPos mat32.Vec2, vertexAng, strokeWidth flo
 
 	mrk.Pnt.XForm = mrk.XForm
 
-	mrk.Render2D()
+	mrk.Render()
 }
 
-func (g *Marker) Render2D() {
+func (g *Marker) Render() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()
 	}
@@ -128,13 +126,13 @@ func (g *Marker) Render2D() {
 	}
 	rs.PushXFormLock(pc.XForm)
 
-	g.Render2DChildren()
-	g.ComputeBBoxSVG() // must come after render
+	g.RenderChildren()
+	g.ComputeBBox() // must come after render
 
 	rs.PopXFormLock()
 }
 
-func (g *Marker) ComputeBBoxSVG() {
+func (g *Marker) ComputeBBox() {
 	if g.This() == nil {
 		return
 	}
@@ -146,8 +144,4 @@ func (g *Marker) ComputeBBoxSVG() {
 	g.VpBBox = pbbox.Intersect(g.ObjBBox)
 	g.BBoxMu.Unlock()
 	g.SetWinBBox()
-
-	if gi.Render2DTrace {
-		fmt.Printf("Render: %v at %v\n", g.Path(), g.VpBBox)
-	}
 }

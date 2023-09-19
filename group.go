@@ -56,7 +56,7 @@ func (g *Group) BBox2D() image.Rectangle {
 	return bb
 }
 
-func (g *Group) Render2D() {
+func (g *Group) Render() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()
 	}
@@ -67,8 +67,8 @@ func (g *Group) Render2D() {
 	}
 	rs.PushXFormLock(pc.XForm)
 
-	g.Render2DChildren()
-	g.ComputeBBoxSVG() // must come after render
+	g.RenderChildren()
+	g.ComputeBBox() // must come after render
 
 	rs.PopXFormLock()
 }

@@ -49,7 +49,7 @@ func (g *Ellipse) SetSize(sz mat32.Vec2) {
 	g.Radii = sz.MulScalar(0.5)
 }
 
-func (g *Ellipse) SVGLocalBBox() mat32.Box2 {
+func (g *Ellipse) LocalBBox() mat32.Box2 {
 	bb := mat32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.Sub(g.Radii.AddScalar(hlw))
@@ -57,7 +57,7 @@ func (g *Ellipse) SVGLocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Ellipse) Render2D() {
+func (g *Ellipse) Render() {
 	vis, rs := g.PushXForm()
 	if !vis {
 		return
@@ -68,8 +68,8 @@ func (g *Ellipse) Render2D() {
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
 
-	g.ComputeBBoxSVG()
-	g.Render2DChildren()
+	g.ComputeBBox()
+	g.RenderChildren()
 
 	rs.PopXFormLock()
 }

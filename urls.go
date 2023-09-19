@@ -317,7 +317,7 @@ func AddNewNodeGradient(gii gi.Node2D, radial bool, stops string) (*Gradient, st
 	}
 	gr, url := psvg.AddNewGradient(radial)
 	gr.StopsName = stops
-	bbox := gii.(Node).SVGLocalBBox()
+	bbox := gii.(Node).LocalBBox()
 	gr.Grad.SetGradientPoints(bbox)
 	UpdateGradientStops(gr)
 	return gr, url
@@ -392,7 +392,7 @@ func UpdateNodeGradientPoints(gii gi.Node2D, prop string) {
 	if gr == nil {
 		return
 	}
-	bbox := gii.(Node).SVGLocalBBox()
+	bbox := gii.(Node).LocalBBox()
 	gr.Grad.SetGradientPoints(bbox)
 	gr.Grad.Gradient.Matrix = rasterx.Identity
 }

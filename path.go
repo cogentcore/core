@@ -72,7 +72,7 @@ func (g *Path) SetData(data string) error {
 	return err
 }
 
-func (g *Path) SVGLocalBBox() mat32.Box2 {
+func (g *Path) LocalBBox() mat32.Box2 {
 	bb := PathDataBBox(g.Data)
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min.SetSubScalar(hlw)
@@ -80,7 +80,7 @@ func (g *Path) SVGLocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Path) Render2D() {
+func (g *Path) Render() {
 	sz := len(g.Data)
 	if sz < 2 {
 		return
@@ -95,7 +95,7 @@ func (g *Path) Render2D() {
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
 
-	g.ComputeBBoxSVG()
+	g.ComputeBBox()
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		// todo: could look for close-path at end and find angle from there..
@@ -127,7 +127,7 @@ func (g *Path) Render2D() {
 		})
 	}
 
-	g.Render2DChildren()
+	g.RenderChildren()
 	rs.PopXFormLock()
 }
 
