@@ -5,20 +5,18 @@
 package svg
 
 //go:generate goki generate
+//go:generate enumgen
 
 import (
-	"fmt"
 	"image"
-	"math/rand"
-	"strconv"
 	"strings"
 	"sync"
-	"unicode"
 
+	"goki.dev/colors"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -33,14 +31,14 @@ type SVG struct {
 	// the description of the svg
 	Desc string `xml:"desc" desc:"the description of the svg"`
 
-	// fill the viewport with background-color from style
-	Fill bool `desc:"fill the viewport with background-color from style"`
+	// fill the viewport with background-color
+	Fill bool `desc:"fill the viewport with background-color"`
+
+	// color to fill background if Fill set
+	BgColor gist.ColorSpec `desc:"color to fill background if Fill set"`
 
 	// Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image
 	Geom girl.Geom2DInt `desc:"Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image"`
-
-	// viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering
-	ViewBox ViewBox `desc:"viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering"`
 
 	// physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata
 	PhysWidth units.Value `desc:"physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata"`
@@ -60,11 +58,11 @@ type SVG struct {
 	// [view: -] live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
 
-	// default paint styles -- inherited by nodes
-	Pnt girl.Paint `json:"-" xml:"-" desc:"default paint styles -- inherited by nodes"`
-
 	// all defs defined elements go here (gradients, symbols, etc)
 	Defs Group `desc:"all defs defined elements go here (gradients, symbols, etc)"`
+
+	// root of the svg tree -- top-level viewbox and paint style here
+	Root SVGNode `desc:"root of the svg tree -- top-level viewbox and paint style here"`
 
 	// [view: -] map of def names to index -- uses starting index to find element -- always updated after each search
 	DefIdxs map[string]int `view:"-" json:"-" xml:"-" desc:"map of def names to index -- uses starting index to find element -- always updated after each search"`
@@ -76,25 +74,23 @@ type SVG struct {
 	RenderMu sync.Mutex `view:"-" json:"-" xml:"-" desc:"mutex for protecting rendering"`
 }
 
-// todo:
-// func (sv *SVG) OnInit() {
-// 	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-// 		if par := sv.ParentWidget(); par != nil {
-// 			sv.Pnt.FillStyle.Color.SetColor(par.Style.Color)
-// 			sv.Pnt.StrokeStyle.Color.SetColor(par.Style.Color)
-// 		}
-// 	})
-// }
-
 // NewSVG creates a SVG with Pixels Image of the specified width and height
 func NewSVG(width, height int) *SVG {
+	sv := &SVG{}
+	sv.Config(width, height)
+	return sv
+}
+
+// Config configures the SVG, setting image to given size
+// and initializing all relevant fields.
+func (sv *SVG) Config(width, height int) {
 	sz := image.Point{width, height}
-	vp := &SVG{
-		Geom: Geom2DInt{Size: sz},
-	}
-	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	vp.Render.Init(width, height, vp.Pixels)
-	return vp
+	sv.Geom.Size = sz
+	sv.BgColor.SetColor(colors.White)
+	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
+	sv.RenderState.Init(width, height, sv.Pixels)
+	sv.Root.InitName(&sv.Root, "svg")
+	sv.Defs.InitName(&sv.Defs, "defs")
 }
 
 // Resize resizes the viewport, creating a new image -- updates Geom Size
@@ -117,85 +113,28 @@ func (sv *SVG) Resize(nwsz image.Point) {
 	sv.Geom.Size = nwsz // make sure
 }
 
-func (sv *SVG) CopyFieldsFrom(frm any) {
-	fr := frm.(*SVG)
+func (sv *SVG) CopyFrom(fr *SVG) {
 	sv.Title = fr.Title
 	sv.Desc = fr.Desc
 	sv.Fill = fr.Fill
+	sv.BgColor = fr.BgColor
 	sv.Geom = fr.Geom
-	sv.ViewBox = fr.ViewBox
 	sv.Norm = fr.Norm
 	sv.InvertY = fr.InvertY
-	sv.Pnt = fr.Pnt
 	sv.Defs.CopyFrom(&fr.Defs)
+	sv.Root.CopyFrom(&fr.Root)
 	sv.UniqueIds = nil
 }
 
-// // Paint satisfies the painter interface
-// func (sv *SVG) Paint() *gist.Paint {
-// 	return &sv.Pnt.Paint
-// }
-
 // DeleteAll deletes any existing elements in this svg
 func (sv *SVG) DeleteAll() {
-	updt := sv.UpdateStart()
-	sv.DeleteChildren(ki.DestroyKids)
-	sv.ViewBox.Defaults()
-	sv.Pnt.Defaults()
+	updt := sv.Root.UpdateStart() // don't really need update logic here
+	sv.Root.Paint.Defaults()
+	sv.Root.DeleteChildren(ki.DestroyKids)
 	sv.Defs.DeleteChildren(ki.DestroyKids)
 	sv.Title = ""
 	sv.Desc = ""
-	sv.UpdateEnd(updt)
-}
-
-// SetNormXForm sets a scaling transform to make the entire viewbox to fit the viewport
-func (sv *SVG) SetNormXForm() {
-	pc := &sv.Pnt
-	pc.XForm = mat32.Identity2D()
-	if sv.ViewBox.Size != mat32.Vec2Zero {
-		// todo: deal with all the other options!
-		vpsX := float32(sv.Geom.Size.X) / sv.ViewBox.Size.X
-		vpsY := float32(sv.Geom.Size.Y) / sv.ViewBox.Size.Y
-		if sv.InvertY {
-			vpsY *= -1
-		}
-		sv.Pnt.XForm = sv.Pnt.XForm.Scale(vpsX, vpsY).Translate(-sv.ViewBox.Min.X, -sv.ViewBox.Min.Y)
-		if sv.InvertY {
-			sv.Pnt.XForm.Y0 = -sv.Pnt.XForm.Y0
-		}
-	}
-}
-
-// SetDPIXForm sets a scaling transform to compensate for the dpi -- svg
-// rendering is done within a 96 DPI context
-func (sv *SVG) SetDPIXForm() {
-	pc := &sv.Pnt
-	dpisc := sv.ParentWindow().LogicalDPI() / 96.0
-	pc.XForm = mat32.Scale2D(dpisc, dpisc)
-}
-
-func (sv *SVG) Init2D() {
-	sv.Viewport2D.Init2D()
-	sv.Pnt.Defaults()
-	// sv.Pnt.FontStyle.BackgroundColor.SetSolid(gist.White)
-}
-
-// SetUnitContext sets the unit context based on size of viewport, element,
-// and parent element (from bbox) and then caches everything out in terms of raw pixel
-// dots for rendering -- call at start of render
-func SetUnitContext(pc *gist.Paint, sv *SVG, el, par mat32.Vec2) {
-	pc.UnContext.Defaults()
-	if vp != nil {
-		pc.UnContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
-		if vp.Render.Image != nil {
-			sz := vp.Render.Image.Bounds().Size()
-			pc.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
-		} else {
-			pc.UnContext.SetSizes(0, 0, el.X, el.Y, par.X, par.Y)
-		}
-	}
-	pc.FontStyle.SetUnitContext(&pc.UnContext)
-	pc.ToDots()
+	sv.Root.UpdateEnd(updt)
 }
 
 // ContextColorSpecByURL finds a Node by an element name (URL-like path), and
@@ -213,10 +152,7 @@ func (sv *SVG) ContextColorSpecByURL(url string) *gist.ColorSpec {
 			return &grad.Grad
 		}
 	}
-	if sv.CurStyleNode == nil {
-		return nil
-	}
-	ne := sv.CurStyleNode.FindNamedElement(val)
+	ne := sv.FindNamedElement(val)
 	if grad, ok := ne.(*Gradient); ok {
 		return &grad.Grad
 	}
@@ -224,15 +160,21 @@ func (sv *SVG) ContextColorSpecByURL(url string) *gist.ColorSpec {
 }
 
 func (sv *SVG) Style() {
-	sv.Pnt.Defaults()
-	// TODO: cleaner svg styling from text color property
-	SetUnitContext(&sv.Pnt.Paint, sv, mat32.Vec2{}, mat32.Vec2{})
-	// STYTODO: maybe pass something in here using viewbox as context?
-
-	sv.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
-		if k == sv.This() {
-			return ki.Continue
+	// set the Defs flags
+	sv.Defs.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
+		ni := k.(Node)
+		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
+			return ki.Break
 		}
+		ni.SetFlag(true, IsDef)
+		return ki.Continue
+	})
+
+	sv.Root.Paint.Defaults()
+	// TODO: cleaner svg styling from text color property
+	sv.SetUnitContext(&sv.Root.Paint.Paint, mat32.Vec2{}, mat32.Vec2{})
+
+	sv.Root.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
 		ni := k.(Node)
 		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
@@ -240,8 +182,75 @@ func (sv *SVG) Style() {
 		ni.Style(sv)
 		return ki.Continue
 	})
-
 }
+
+func (sv *SVG) Render() {
+	sv.RenderMu.Lock()
+	defer sv.RenderMu.Unlock()
+
+	sv.Style()
+
+	if sv.Fill {
+		sv.FillViewport()
+	}
+	if sv.Norm {
+		sv.SetNormXForm()
+	}
+	sv.Root.Render(sv)
+	// rs.PushXForm(sv.Root.Paint.XForm)
+	// for _, kid := range sv.Root.Kids {
+	// 	ni := kid.(Node)
+	// 	ni.Render()
+	// }
+	// rs.PopXForm()
+}
+
+func (sv *SVG) FillViewport() {
+	rs := &sv.RenderState
+	rs.Lock()
+	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(sv.Geom.Size), &sv.BgColor)
+	rs.Unlock()
+}
+
+// SetNormXForm sets a scaling transform to make the entire viewbox to fit the viewport
+func (sv *SVG) SetNormXForm() {
+	pc := &sv.Root.Paint
+	pc.XForm = mat32.Identity2D()
+	vb := &sv.Root.ViewBox
+	if vb.Size != mat32.Vec2Zero {
+		// todo: deal with all the other options!
+		vpsX := float32(sv.Geom.Size.X) / vb.Size.X
+		vpsY := float32(sv.Geom.Size.Y) / vb.Size.Y
+		if sv.InvertY {
+			vpsY *= -1
+		}
+		pc.XForm = pc.XForm.Scale(vpsX, vpsY).Translate(-vb.Min.X, -vb.Min.Y)
+		if sv.InvertY {
+			pc.XForm.Y0 = -pc.XForm.Y0
+		}
+	}
+}
+
+// SetDPIXForm sets a scaling transform to compensate for
+// a given LogicalDPI factor.
+// svg rendering is done within a 96 DPI context.
+func (sv *SVG) SetDPIXForm(logicalDPI float32) {
+	pc := &sv.Root.Paint
+	dpisc := logicalDPI / 96.0
+	pc.XForm = mat32.Scale2D(dpisc, dpisc)
+}
+
+/*
+// todo:  for gi wrapper node:
+//
+// func (sv *SVG) OnInit() {
+// 	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+// 		if par := sv.ParentWidget(); par != nil {
+// 			sv.Paint.FillStyle.Color.SetColor(par.Style.Color)
+// 			sv.Paint.StrokeStyle.Color.SetColor(par.Style.Color)
+// 		}
+// 	})
+// }
 
 // func (sv *SVG) Style2D() {
 // 	if nv, err := sv.PropTry("norm"); err == nil {
@@ -251,167 +260,6 @@ func (sv *SVG) Style() {
 // 		sv.InvertY, _ = kit.ToBool(iv)
 // 	}
 // }
-
-func (sv *SVG) Render() {
-	sv.RenderMu.Lock()
-	defer sv.RenderMu.Unlock()
-
-	sv.Style()
-
-	rs := &sv.RenderState
-	if sv.Fill {
-		sv.FillViewport()
-	}
-	if sv.Norm {
-		sv.SetNormXForm()
-	}
-	rs.PushXForm(sv.Pnt.XForm)
-
-	for _, kid := range sv.Kids {
-		ni := kid.(Node)
-		ni.Render()
-	}
-
-	rs.PopXForm()
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//   Naming elements with unique id's
-
-// SplitNameIdDig splits name into numerical end part and preceding name,
-// based on string of digits from end of name.
-// If Id == 0 then it was not specified or didn't parse.
-// SVG object names are element names + numerical id
-func SplitNameIdDig(nm string) (string, int) {
-	sz := len(nm)
-
-	for i := sz - 1; i >= 0; i-- {
-		c := rune(nm[i])
-		if !unicode.IsDigit(c) {
-			if i == sz-1 {
-				return nm, 0
-			}
-			n := nm[:i+1]
-			id, _ := strconv.Atoi(nm[i+1:])
-			return n, id
-		}
-	}
-	return nm, 0
-}
-
-// SplitNameId splits name after the element name (e.g., 'rect')
-// returning true if it starts with element name,
-// and numerical id part after that element.
-// if numerical id part is 0, then it didn't parse.
-// SVG object names are element names + numerical id
-func SplitNameId(elnm, nm string) (bool, int) {
-	if !strings.HasPrefix(nm, elnm) {
-		// fmt.Printf("not elnm: %s  %s\n", nm, elnm)
-		return false, 0
-	}
-	idstr := nm[len(elnm):]
-	id, _ := strconv.Atoi(idstr)
-	return true, id
-}
-
-// NameId returns the name with given unique id.
-// returns plain name if id == 0
-func NameId(nm string, id int) string {
-	if id == 0 {
-		return nm
-	}
-	return fmt.Sprintf("%s%d", nm, id)
-}
-
-// GatherIds gathers all the numeric id suffixes currently in use.
-// It automatically renames any that are not unique or empty.
-func (sv *SVG) GatherIds() {
-	sv.UniqueIds = make(map[int]struct{})
-	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
-		sv.NodeEnsureUniqueId(k)
-		return ki.Continue
-	})
-}
-
-// NodeEnsureUniqueId ensures that the given node has a unique Id
-// Call this on any newly-created nodes.
-func (sv *SVG) NodeEnsureUniqueId(kn ki.Ki) {
-	elnm := ""
-	svi, issvi := kn.(Node)
-	if issvi {
-		elnm = svi.SVGName()
-		// } else if gr, ok := kn.(*Gradient); ok { // don't need gradients to be unique
-		// 	elnm = gr.GradientType()
-	}
-	if elnm == "" {
-		return
-	}
-	elpfx, id := SplitNameId(elnm, kn.Name())
-	if !elpfx {
-		if issvi {
-			if !svi.EnforceSVGName() { // if we end in a number, just register it anyway
-				_, id = SplitNameIdDig(kn.Name())
-				if id > 0 {
-					sv.UniqueIds[id] = struct{}{}
-				}
-				return
-			}
-		}
-		_, id = SplitNameIdDig(kn.Name())
-		if id > 0 {
-			kn.SetName(NameId(elnm, id))
-			kn.UpdateSig()
-		}
-	}
-	_, exists := sv.UniqueIds[id]
-	if id <= 0 || exists {
-		id = sv.NewUniqueId() // automatically registers it
-		kn.SetName(NameId(elnm, id))
-		kn.UpdateSig()
-	} else {
-		sv.UniqueIds[id] = struct{}{}
-	}
-}
-
-// NewUniqueId returns a new unique numerical id number, for naming an object
-func (sv *SVG) NewUniqueId() int {
-	if sv.UniqueIds == nil {
-		sv.GatherIds()
-	}
-	sz := len(sv.UniqueIds)
-	var nid int
-	for {
-		switch {
-		case sz >= 10000:
-			nid = rand.Intn(sz * 100)
-		case sz >= 1000:
-			nid = rand.Intn(10000)
-		default:
-			nid = rand.Intn(1000)
-		}
-		if _, has := sv.UniqueIds[nid]; has {
-			continue
-		}
-		break
-	}
-	sv.UniqueIds[nid] = struct{}{}
-	return nid
-}
-
-/*
-// SVGFlags extend gi.VpFlags to hold SVG node state
-type SVGFlags int
-
-var TypeSVGFlags = kit.Enums.AddEnumExt(gi.TypeVpFlags, SVGFlagsN, kit.BitFlag, nil)
-
-const (
-	// Rendering means that the SVG is currently redrawing
-	// Can be useful to check for animations etc to decide whether to
-	// drive another update
-	Rendering SVGFlags = SVGFlags(gi.VpFlagsN) + iota
-
-	SVGFlagsN
-)
 
 var SVGProps = ki.Props{
 	ki.EnumTypeFlag: TypeSVGFlags,
@@ -439,3 +287,45 @@ var SVGProps = ki.Props{
 	},
 }
 */
+
+//////////////////////////////////////////////////////////////
+// 	SVGNode
+
+// SVGNode represents the root of an SVG tree
+type SVGNode struct {
+	Group
+
+	// viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering
+	ViewBox ViewBox `desc:"viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering"`
+}
+
+func (g *SVGNode) CopyFieldsFrom(frm any) {
+	fr := frm.(*SVGNode)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.ViewBox = fr.ViewBox
+}
+
+func (g *SVGNode) SVGName() string { return "svg" }
+
+func (g *SVGNode) EnforceSVGName() bool { return false }
+
+func (g *SVGNode) NodeBBox(sv *SVG) image.Rectangle {
+	// todo: return viewbox
+	return sv.Geom.SizeRect()
+}
+
+// SetUnitContext sets the unit context based on size of viewport, element,
+// and parent element (from bbox) and then caches everything out in terms of raw pixel
+// dots for rendering -- call at start of render
+func (sv *SVG) SetUnitContext(pc *gist.Paint, el, par mat32.Vec2) {
+	pc.UnContext.Defaults()
+	pc.UnContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
+	if sv.RenderState.Image != nil {
+		sz := sv.RenderState.Image.Bounds().Size()
+		pc.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
+	} else {
+		pc.UnContext.SetSizes(0, 0, el.X, el.Y, par.X, par.Y)
+	}
+	pc.FontStyle.SetUnitContext(&pc.UnContext)
+	pc.ToDots()
+}

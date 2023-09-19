@@ -10,7 +10,7 @@ import (
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -61,7 +61,7 @@ type Text struct {
 
 // AddNewText adds a new text to given parent node, with given name, pos and text.
 func AddNewText(parent ki.Ki, name string, x, y float32, text string) *Text {
-	g := parent.AddNewChild(TypeText, name).(*Text)
+	g := parent.NewChild(TextType, name).(*Text)
 	g.Pos.Set(x, y)
 	g.Text = text
 	return g
@@ -100,13 +100,13 @@ func (g *Text) SetPos(pos mat32.Vec2) {
 	g.Pos = pos
 	for _, kii := range g.Kids {
 		kt := kii.(*Text)
-		kt.Pos = g.Pnt.XForm.MulVec2AsPt(pos)
+		kt.Pos = g.Paint.XForm.MulVec2AsPt(pos)
 	}
 }
 
 func (g *Text) SetSize(sz mat32.Vec2) {
 	g.Width = sz.X
-	scx, _ := g.Pnt.XForm.ExtractScale()
+	scx, _ := g.Paint.XForm.ExtractScale()
 	for _, kii := range g.Kids {
 		kt := kii.(*Text)
 		kt.Width = g.Width * scx
@@ -126,7 +126,7 @@ func (g *Text) TextBBox() mat32.Box2 {
 	if g.Text == "" {
 		return mat32.Box2{}
 	}
-	pc := &g.Pnt
+	pc := &g.Paint
 	pc.FontStyle.Font = girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, 0, 1)
 	sr := &(g.TextRender.Spans[0])
@@ -190,8 +190,8 @@ func (g *Text) TextBBox() mat32.Box2 {
 
 // RenderText renders the text in full coords
 func (g *Text) RenderText(sv *SVG) {
-	pc := &g.Pnt
-	rs := g.Render()
+	pc := &g.Paint
+	rs := &sv.RenderState
 	orgsz := pc.FontStyle.Size
 	pos := rs.XForm.MulVec2AsPt(mat32.Vec2{g.Pos.X, g.Pos.Y})
 	rot := rs.XForm.ExtractRot()
@@ -278,7 +278,7 @@ func (g *Text) RenderText(sv *SVG) {
 	g.LastBBox.Min.Y -= maxh * .8 // baseline adjust
 	g.LastBBox.Max = g.LastBBox.Min.Add(g.TextRender.Size)
 	g.TextRender.Render(rs, pos)
-	g.BBoxes()
+	g.BBoxes(sv)
 }
 
 func (g *Text) LocalBBox() mat32.Box2 {
@@ -287,7 +287,7 @@ func (g *Text) LocalBBox() mat32.Box2 {
 
 func (g *Text) Render(sv *SVG) {
 	if g.IsParText() {
-		pc := &g.Pnt
+		pc := &g.Paint
 		rs := &sv.RenderState
 		rs.PushXFormLock(pc.XForm)
 
@@ -315,22 +315,22 @@ func (g *Text) Render(sv *SVG) {
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Text) ApplyXForm(xf mat32.Mat2) {
+func (g *Text) ApplyXForm(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
-		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
-		g.SetProp("transform", g.Pnt.XForm.String())
+	if rot != 0 || !g.Paint.XForm.IsIdentity() {
+		g.Paint.XForm = g.Paint.XForm.Mul(xf)
+		g.SetProp("transform", g.Paint.XForm.String())
 	} else {
 		if g.IsParText() {
 			for _, kii := range g.Kids {
 				kt := kii.(*Text)
-				kt.ApplyXForm(xf)
+				kt.ApplyXForm(sv, xf)
 			}
 		} else {
 			g.Pos = xf.MulVec2AsPt(g.Pos)
 			scx, _ := xf.ExtractScale()
 			g.Width *= scx
-			g.GradientApplyXForm(xf)
+			g.GradientApplyXForm(sv, xf)
 		}
 	}
 }
@@ -340,13 +340,13 @@ func (g *Text) ApplyXForm(xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Text) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	crot := g.Pnt.XForm.ExtractRot()
+func (g *Text) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	crot := g.Paint.XForm.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		mat := g.Pnt.XForm.MulCtr(xf, lpt)
-		g.Pnt.XForm = mat
-		g.SetProp("transform", g.Pnt.XForm.String())
+		mat := g.Paint.XForm.MulCtr(xf, lpt)
+		g.Paint.XForm = mat
+		g.SetProp("transform", g.Paint.XForm.String())
 	} else {
 		if g.IsParText() {
 			// translation transform
@@ -355,9 +355,9 @@ func (g *Text) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, 
 			xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false)
 			xf.X0 = 0 // negate translation effects
 			xf.Y0 = 0
-			mat := g.Pnt.XForm.MulCtr(xf, lpt)
-			g.Pnt.XForm = mat
-			g.SetProp("transform", g.Pnt.XForm.String())
+			mat := g.Paint.XForm.MulCtr(xf, lpt)
+			g.Paint.XForm = mat
+			g.SetProp("transform", g.Paint.XForm.String())
 
 			g.Pos = xft.MulVec2AsPtCtr(g.Pos, lptt)
 			scx, _ := xft.ExtractScale()
@@ -379,7 +379,7 @@ func (g *Text) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
-func (g *Text) WriteGeom(dat *[]float32) {
+func (g *Text) WriteGeom(sv *SVG, dat *[]float32) {
 	if g.IsParText() {
 		npt := 9 + g.NumChildren()*3
 		SetFloat32SliceLen(dat, npt)
@@ -405,7 +405,7 @@ func (g *Text) WriteGeom(dat *[]float32) {
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
-func (g *Text) ReadGeom(dat []float32) {
+func (g *Text) ReadGeom(sv *SVG, dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Width = dat[2]

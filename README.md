@@ -1,2 +1,5 @@
 # svg
-SVG implements the Scalable Vector Graphics standard, rendering onto a Go standard image bitmap
+
+SVG implements the Scalable Vector Graphics standard, rendering onto a Go standard `image` bitmap.
+
+

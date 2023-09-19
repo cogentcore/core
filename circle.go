@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -22,7 +22,7 @@ type Circle struct {
 
 // AddNewCircle adds a new button to given parent node, with given name, x,y pos, and radius.
 func AddNewCircle(parent ki.Ki, name string, x, y, radius float32) *Circle {
-	g := parent.AddNewChild(CircleType, name).(*Circle)
+	g := parent.NewChild(CircleType, name).(*Circle)
 	g.Pos.Set(x, y)
 	g.Radius = radius
 	return g
@@ -58,7 +58,7 @@ func (g *Circle) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc := &g.Pnt
+	pc := &g.Paint
 	rs.Lock()
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 	pc.FillStrokeClear(rs)
@@ -72,16 +72,16 @@ func (g *Circle) Render(sv *SVG) {
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Circle) ApplyXForm(xf mat32.Mat2) {
+func (g *Circle) ApplyXForm(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
-		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
-		g.SetProp("transform", g.Pnt.XForm.String())
+	if rot != 0 || !g.Paint.XForm.IsIdentity() {
+		g.Paint.XForm = g.Paint.XForm.Mul(xf)
+		g.SetProp("transform", g.Paint.XForm.String())
 	} else {
 		g.Pos = xf.MulVec2AsPt(g.Pos)
 		scx, scy := xf.ExtractScale()
 		g.Radius *= 0.5 * (scx + scy)
-		g.GradientApplyXForm(xf)
+		g.GradientApplyXForm(sv, xf)
 	}
 }
 
@@ -90,40 +90,40 @@ func (g *Circle) ApplyXForm(xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Circle) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	crot := g.Pnt.XForm.ExtractRot()
+func (g *Circle) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	crot := g.Paint.XForm.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		mat := g.Pnt.XForm.MulCtr(xf, lpt)
-		g.Pnt.XForm = mat
-		g.SetProp("transform", g.Pnt.XForm.String())
+		mat := g.Paint.XForm.MulCtr(xf, lpt)
+		g.Paint.XForm = mat
+		g.SetProp("transform", g.Paint.XForm.String())
 	} else {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
 		g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
 		scx, scy := xf.ExtractScale()
 		g.Radius *= 0.5 * (scx + scy)
-		g.GradientApplyXFormPt(xf, lpt)
+		g.GradientApplyXFormPt(sv, xf, lpt)
 	}
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
-func (g *Circle) WriteGeom(dat *[]float32) {
+func (g *Circle) WriteGeom(sv *SVG, dat *[]float32) {
 	SetFloat32SliceLen(dat, 3+6)
 	(*dat)[0] = g.Pos.X
 	(*dat)[1] = g.Pos.Y
 	(*dat)[2] = g.Radius
 	g.WriteXForm(*dat, 3)
-	g.GradientWritePts(dat)
+	g.GradientWritePts(sv, dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
-func (g *Circle) ReadGeom(dat []float32) {
+func (g *Circle) ReadGeom(sv *SVG, dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Radius = dat[2]
 	g.ReadXForm(dat, 3)
-	g.GradientReadPts(dat)
+	g.GradientReadPts(sv, dat)
 }

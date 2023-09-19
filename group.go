@@ -7,29 +7,19 @@ package svg
 import (
 	"image"
 
-	"goki.dev/ki/v2/ki"
 	"goki.dev/mat32/v2"
 )
 
-// Group groups together SVG elements -- doesn't do much but provide a
-// locus for properties etc
+// Group groups together SVG elements.
+// Provides a common transform for all group elements
+// and shared style properties.
 type Group struct {
 	NodeBase
-}
-
-// AddNewGroup adds a new group to given parent node, with given name.
-func AddNewGroup(parent ki.Ki, name string) *Group {
-	return parent.AddNewChild(GroupType, name).(*Group)
 }
 
 func (g *Group) SVGName() string { return "g" }
 
 func (g *Group) EnforceSVGName() bool { return false }
-
-func (g *Group) CopyFieldsFrom(frm any) {
-	fr := frm.(*Group)
-	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-}
 
 // BBoxFromChildren sets the Group BBox from children
 func BBoxFromChildren(gi Node) image.Rectangle {
@@ -46,13 +36,13 @@ func BBoxFromChildren(gi Node) image.Rectangle {
 	return bb
 }
 
-func (g *Group) BBox2D() image.Rectangle {
+func (g *Group) NodeBBox(sv *SVG) image.Rectangle {
 	bb := BBoxFromChildren(g)
 	return bb
 }
 
 func (g *Group) Render(sv *SVG) {
-	pc := &g.Pnt
+	pc := &g.Paint
 	rs := &sv.RenderState
 	if pc.Off || rs == nil {
 		return
@@ -67,9 +57,9 @@ func (g *Group) Render(sv *SVG) {
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Group) ApplyXForm(xf mat32.Mat2) {
-	g.Pnt.XForm = xf.Mul(g.Pnt.XForm)
-	g.SetProp("transform", g.Pnt.XForm.String())
+func (g *Group) ApplyXForm(sv *SVG, xf mat32.Mat2) {
+	g.Paint.XForm = xf.Mul(g.Paint.XForm)
+	g.SetProp("transform", g.Paint.XForm.String())
 }
 
 // ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
@@ -77,23 +67,23 @@ func (g *Group) ApplyXForm(xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Group) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Group) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
 	xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // group does NOT include self
-	mat := g.Pnt.XForm.MulCtr(xf, lpt)
-	g.Pnt.XForm = mat
-	g.SetProp("transform", g.Pnt.XForm.String())
+	mat := g.Paint.XForm.MulCtr(xf, lpt)
+	g.Paint.XForm = mat
+	g.SetProp("transform", g.Paint.XForm.String())
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
-func (g *Group) WriteGeom(dat *[]float32) {
+func (g *Group) WriteGeom(sv *SVG, dat *[]float32) {
 	SetFloat32SliceLen(dat, 6)
 	g.WriteXForm(*dat, 0)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
-func (g *Group) ReadGeom(dat []float32) {
+func (g *Group) ReadGeom(sv *SVG, dat []float32) {
 	g.ReadXForm(dat, 0)
 }

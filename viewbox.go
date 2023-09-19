@@ -20,8 +20,8 @@ type ViewBox struct {
 	// size of viewbox within parent Viewport2D
 	Size mat32.Vec2 `desc:"size of viewbox within parent Viewport2D"`
 
-	// how to scale the view box within parent Viewport2D
-	PreserveAspectRatio ViewBoxPreserveAspectRatio `desc:"how to scale the view box within parent Viewport2D"`
+	// how to scale the view box within parent
+	PreserveAspectRatio ViewBoxPreserveAspectRatio `desc:"how to scale the view box within parent"`
 }
 
 // todo: need to implement the viewbox preserve aspect ratio logic!
@@ -52,7 +52,7 @@ const (
 )
 
 // ViewBoxMeetOrSlice defines values for the PreserveAspectRatio meet or slice factor
-type ViewBoxMeetOrSlice int32 //enum: enum
+type ViewBoxMeetOrSlice int32 //enums:enum
 
 const (
 	// Meet means the entire ViewBox is visible within Viewport, and it is
@@ -63,8 +63,6 @@ const (
 	// ViewBox is scaled down as much as possible, while still meeting the
 	// align constraints
 	Slice
-
-	ViewBoxMeetOrSliceN
 )
 
 // ViewBoxPreserveAspectRatio determines how to scale the view box within parent Viewport2D

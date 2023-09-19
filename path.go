@@ -13,8 +13,7 @@ import (
 	"unicode"
 
 	"goki.dev/girl/girl"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -31,7 +30,7 @@ type Path struct {
 
 // AddNewPath adds a new button to given parent node, with given name and path data.
 func AddNewPath(parent ki.Ki, name string, data string) *Path {
-	g := parent.AddNewChild(TypePath, name).(*Path)
+	g := parent.NewChild(PathType, name).(*Path)
 	if data != "" {
 		g.SetData(data)
 	}
@@ -65,7 +64,7 @@ func (g *Path) SetData(data string) error {
 	if err != nil {
 		return err
 	}
-	err = PathDataValidate(&g.Pnt, &g.Data, g.Path())
+	err = PathDataValidate(&g.Paint, &g.Data, g.Path())
 	return err
 }
 
@@ -87,23 +86,23 @@ func (g *Path) Render(sv *SVG) {
 		return
 	}
 	rs.Lock()
-	pc := &g.Pnt
+	pc := &g.Paint
 	PathDataRender(g.Data, pc, rs)
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
 
 	g.BBoxes(sv)
 
-	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
+	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		// todo: could look for close-path at end and find angle from there..
 		stv, ang := PathDataStart(g.Data)
-		mrk.RenderMarker(stv, ang, g.Pnt.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, stv, ang, g.Paint.StrokeStyle.Width.Dots)
 	}
-	if mrk := MarkerByName(g, "marker-end"); mrk != nil {
+	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
 		env, ang := PathDataEnd(g.Data)
-		mrk.RenderMarker(env, ang, g.Pnt.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, env, ang, g.Paint.StrokeStyle.Width.Dots)
 	}
-	if mrk := MarkerByName(g, "marker-mid"); mrk != nil {
+	if mrk := sv.MarkerByName(g, "marker-mid"); mrk != nil {
 		var ptm2, ptm1, pt mat32.Vec2
 		gotidx := 0
 		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
@@ -118,7 +117,7 @@ func (g *Path) Render(sv *SVG) {
 				return false
 			}
 			ang := 0.5 * (mat32.Atan2(pt.Y-ptm1.Y, pt.X-ptm1.X) + mat32.Atan2(ptm1.Y-ptm2.Y, ptm1.X-ptm2.X))
-			mrk.RenderMarker(ptm1, ang, g.Pnt.StrokeStyle.Width.Dots)
+			mrk.RenderMarker(sv, ptm1, ang, g.Paint.StrokeStyle.Width.Dots)
 			gotidx++
 			return true
 		})
@@ -129,7 +128,7 @@ func (g *Path) Render(sv *SVG) {
 }
 
 // PathCmds are the commands within the path SVG drawing data type
-type PathCmds byte
+type PathCmds byte //enum: enum
 
 const (
 	// move pen, abs coords
@@ -175,11 +174,6 @@ const (
 	// error -- invalid command
 	PcErr
 )
-
-var TypePathCmds = kit.Enums.AddEnumAltLower(PcErr, kit.NotBitFlag, nil, "Pc")
-
-func (ev PathCmds) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *PathCmds) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // PathData encodes the svg path data, using 32-bit floats which are converted
 // into uint32 for path commands, and contain the command as the first 5
@@ -769,7 +763,6 @@ func PathDataParse(d string) ([]PathData, error) {
 				p, err := strconv.ParseFloat(nstr, 32)
 				if err != nil {
 					log.Printf("gi.PathDataParse could not parse string: %v into float\n", nstr)
-					IconAutoOpen = false
 					return nil, err
 				}
 				pd = append(pd, PathData(p))
@@ -901,10 +894,10 @@ func PathDataString(data []PathData) string {
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Path) ApplyXForm(xf mat32.Mat2) {
+func (g *Path) ApplyXForm(sv *SVG, xf mat32.Mat2) {
 	// path may have horiz, vert elements -- only gen soln is to transform
-	g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
-	g.SetProp("transform", g.Pnt.XForm.String())
+	g.Paint.XForm = g.Paint.XForm.Mul(xf)
+	g.SetProp("transform", g.Paint.XForm.String())
 }
 
 // PathDataXFormAbs does the transform of next two data points as absolute coords
@@ -931,16 +924,16 @@ func PathDataXFormRel(data []PathData, i *int, xf mat32.Mat2, cp mat32.Vec2) mat
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Path) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	crot := g.Pnt.XForm.ExtractRot()
+func (g *Path) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	crot := g.Paint.XForm.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		g.Pnt.XForm = g.Pnt.XForm.MulCtr(xf, lpt)
-		g.SetProp("transform", g.Pnt.XForm.String())
+		g.Paint.XForm = g.Paint.XForm.MulCtr(xf, lpt)
+		g.SetProp("transform", g.Paint.XForm.String())
 	} else {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
 		g.ApplyXFormImpl(xf, lpt)
-		g.GradientApplyXFormPt(xf, lpt)
+		g.GradientApplyXFormPt(sv, xf, lpt)
 	}
 }
 
@@ -1100,23 +1093,23 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
-func (g *Path) WriteGeom(dat *[]float32) {
+func (g *Path) WriteGeom(sv *SVG, dat *[]float32) {
 	sz := len(g.Data)
 	SetFloat32SliceLen(dat, sz+6)
 	for i := range g.Data {
 		(*dat)[i] = float32(g.Data[i])
 	}
 	g.WriteXForm(*dat, sz)
-	g.GradientWritePts(dat)
+	g.GradientWritePts(sv, dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
-func (g *Path) ReadGeom(dat []float32) {
+func (g *Path) ReadGeom(sv *SVG, dat []float32) {
 	sz := len(g.Data)
 	for i := range g.Data {
 		g.Data[i] = PathData(dat[i])
 	}
 	g.ReadXForm(dat, sz)
-	g.GradientReadPts(dat)
+	g.GradientReadPts(sv, dat)
 }

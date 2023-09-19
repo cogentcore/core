@@ -17,7 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
@@ -45,7 +45,7 @@ type Image struct {
 
 // AddNewImage adds a new image to given parent node, with given name and pos
 func AddNewImage(parent ki.Ki, name string, x, y float32) *Image {
-	g := parent.AddNewChild(ImageType, name).(*Image)
+	g := parent.NewChild(ImageType, name).(*Image)
 	g.Pos.Set(x, y)
 	return g
 }
@@ -174,7 +174,7 @@ func (g *Image) DrawImage(sv *SVG) {
 	}
 
 	rs := &sv.RenderState
-	pc := &g.Pnt
+	pc := &g.Paint
 	pc.DrawImageScaled(rs, g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 }
 
@@ -209,11 +209,11 @@ func (g *Image) Render(sv *SVG) {
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Image) ApplyXForm(xf mat32.Mat2) {
+func (g *Image) ApplyXForm(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
-		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
-		g.SetProp("transform", g.Pnt.XForm.String())
+	if rot != 0 || !g.Paint.XForm.IsIdentity() {
+		g.Paint.XForm = g.Paint.XForm.Mul(xf)
+		g.SetProp("transform", g.Paint.XForm.String())
 	} else {
 		g.Pos = xf.MulVec2AsPt(g.Pos)
 		g.Size = xf.MulVec2AsVec(g.Size)
@@ -225,13 +225,13 @@ func (g *Image) ApplyXForm(xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Image) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	crot := g.Pnt.XForm.ExtractRot()
+func (g *Image) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	crot := g.Paint.XForm.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		mat := g.Pnt.XForm.MulCtr(xf, lpt)
-		g.Pnt.XForm = mat
-		g.SetProp("transform", g.Pnt.XForm.String())
+		mat := g.Paint.XForm.MulCtr(xf, lpt)
+		g.Paint.XForm = mat
+		g.SetProp("transform", g.Paint.XForm.String())
 	} else {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
 		g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
@@ -242,7 +242,7 @@ func (g *Image) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32,
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
-func (g *Image) WriteGeom(dat *[]float32) {
+func (g *Image) WriteGeom(sv *SVG, dat *[]float32) {
 	SetFloat32SliceLen(dat, 4+6)
 	(*dat)[0] = g.Pos.X
 	(*dat)[1] = g.Pos.Y
@@ -253,7 +253,7 @@ func (g *Image) WriteGeom(dat *[]float32) {
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
-func (g *Image) ReadGeom(dat []float32) {
+func (g *Image) ReadGeom(sv *SVG, dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Size.X = dat[2]

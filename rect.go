@@ -7,7 +7,7 @@ package svg
 import (
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -27,7 +27,7 @@ type Rect struct {
 
 // AddNewRect adds a new rectangle to given parent node, with given name, pos, and size.
 func AddNewRect(parent ki.Ki, name string, x, y, sx, sy float32) *Rect {
-	g := parent.AddNewChild(TypeRect, name).(*Rect)
+	g := parent.NewChild(RectType, name).(*Rect)
 	g.Pos.Set(x, y)
 	g.Size.Set(sx, sy)
 	return g
@@ -64,7 +64,7 @@ func (g *Rect) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc := &g.Pnt
+	pc := &g.Paint
 	rs.Lock()
 	// TODO: figure out a better way to do this
 	bs := gist.Border{}
@@ -88,15 +88,15 @@ func (g *Rect) Render(sv *SVG) {
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Rect) ApplyXForm(xf mat32.Mat2) {
+func (g *Rect) ApplyXForm(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Pnt.XForm.IsIdentity() {
-		g.Pnt.XForm = g.Pnt.XForm.Mul(xf)
-		g.SetProp("transform", g.Pnt.XForm.String())
+	if rot != 0 || !g.Paint.XForm.IsIdentity() {
+		g.Paint.XForm = g.Paint.XForm.Mul(xf)
+		g.SetProp("transform", g.Paint.XForm.String())
 	} else {
 		g.Pos = xf.MulVec2AsPt(g.Pos)
 		g.Size = xf.MulVec2AsVec(g.Size)
-		g.GradientApplyXForm(xf)
+		g.GradientApplyXForm(sv, xf)
 	}
 }
 
@@ -105,40 +105,40 @@ func (g *Rect) ApplyXForm(xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Rect) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	crot := g.Pnt.XForm.ExtractRot()
+func (g *Rect) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	crot := g.Paint.XForm.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		g.Pnt.XForm = g.Pnt.XForm.MulCtr(xf, lpt)
-		g.SetProp("transform", g.Pnt.XForm.String())
+		g.Paint.XForm = g.Paint.XForm.MulCtr(xf, lpt)
+		g.SetProp("transform", g.Paint.XForm.String())
 	} else {
 		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
 		g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
 		g.Size = xf.MulVec2AsVec(g.Size)
-		g.GradientApplyXFormPt(xf, lpt)
+		g.GradientApplyXFormPt(sv, xf, lpt)
 	}
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
-func (g *Rect) WriteGeom(dat *[]float32) {
+func (g *Rect) WriteGeom(sv *SVG, dat *[]float32) {
 	SetFloat32SliceLen(dat, 4+6)
 	(*dat)[0] = g.Pos.X
 	(*dat)[1] = g.Pos.Y
 	(*dat)[2] = g.Size.X
 	(*dat)[3] = g.Size.Y
 	g.WriteXForm(*dat, 4)
-	g.GradientWritePts(dat)
+	g.GradientWritePts(sv, dat)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
-func (g *Rect) ReadGeom(dat []float32) {
+func (g *Rect) ReadGeom(sv *SVG, dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Size.X = dat[2]
 	g.Size.Y = dat[3]
 	g.ReadXForm(dat, 4)
-	g.GradientReadPts(dat)
+	g.GradientReadPts(sv, dat)
 }

@@ -5,7 +5,8 @@
 package svg
 
 import (
-	"goki.dev/ki/v2/ki"
+	"log"
+
 	"goki.dev/mat32/v2"
 )
 
@@ -42,11 +43,6 @@ type Marker struct {
 
 	// effective size for actual rendering
 	EffSize mat32.Vec2 `desc:"effective size for actual rendering"`
-}
-
-// AddNewMarker adds a new marker to given parent node, with given name.
-func AddNewMarker(parent ki.Ki, name string) *Marker {
-	return parent.AddNewChild(TypeMarker, name).(*Marker)
 }
 
 func (g *Marker) SVGName() string { return "marker" }
@@ -100,13 +96,13 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos mat32.Vec2, vertexAng, stroke
 	mrk.XForm.X0 += vertexPos.X
 	mrk.XForm.Y0 += vertexPos.Y
 
-	mrk.Pnt.XForm = mrk.XForm
+	mrk.Paint.XForm = mrk.XForm
 
 	mrk.Render(sv)
 }
 
 func (g *Marker) Render(sv *SVG) {
-	pc := &g.Pnt
+	pc := &g.Paint
 	rs := &sv.RenderState
 	rs.PushXFormLock(pc.XForm)
 
@@ -124,4 +120,29 @@ func (g *Marker) BBoxes(sv *SVG) {
 	g.BBox = ni.NodeBBox(sv)
 	g.BBox.Canon()
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+}
+
+//////////////////////////////////////////////////////////
+// 	SVG marker management
+
+// MarkerByName finds marker property of given name, or generic "marker"
+// type, and if set, attempts to find that marker and return it
+func (sv *SVG) MarkerByName(gi Node, marker string) *Marker {
+	url := NodePropURL(gi, marker)
+	if url == "" {
+		url = NodePropURL(gi, "marker")
+	}
+	if url == "" {
+		return nil
+	}
+	mrkn := sv.NodeFindURL(gi, url)
+	if mrkn == nil {
+		return nil
+	}
+	mrk, ok := mrkn.(*Marker)
+	if !ok {
+		log.Printf("SVG Found element named: %v but isn't a Marker type, instead is: %T", url, mrkn)
+		return nil
+	}
+	return mrk
 }

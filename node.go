@@ -12,7 +12,7 @@ import (
 
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -25,8 +25,8 @@ type Node interface {
 	// interface methods.
 	AsNodeBase() *NodeBase
 
-	// Paint returns the SVG Paint style object for this node
-	Paint() *girl.Paint
+	// PaintStyle returns the SVG Paint style object for this node
+	PaintStyle() *girl.Paint
 
 	// Style updates the Paint style for this node
 	Style(sv *SVG)
@@ -40,6 +40,9 @@ type Node interface {
 	// LocalBBox returns the bounding box of node in local dimensions
 	LocalBBox() mat32.Box2
 
+	// NodeBBox returns the bounding box in image coordinates for this node
+	NodeBBox(sv *SVG) image.Rectangle
+
 	// SetPos sets the *upper left* position of this element, in local dimensions
 	SetPos(pos mat32.Vec2)
 
@@ -48,23 +51,23 @@ type Node interface {
 
 	// ApplyXForm applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
-	ApplyXForm(xf mat32.Mat2)
+	ApplyXForm(sv *SVG, xf mat32.Mat2)
 
 	// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
 	// relative to given point.  Trans translation and point are in top-level coordinates,
 	// so must be transformed into local coords first.
 	// Point is upper left corner of selection box that anchors the translation and scaling,
 	// and for rotation it is the center point around which to rotate
-	ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2)
+	ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2)
 
 	// WriteGeom writes the geometry of the node to a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
 	// Slice must be passed and will be resized if not the correct length.
-	WriteGeom(dat *[]float32)
+	WriteGeom(sv *SVG, dat *[]float32)
 
 	// ReadGeom reads the geometry of the node from a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
-	ReadGeom(dat []float32)
+	ReadGeom(sv *SVG, dat []float32)
 
 	// SVGName returns the SVG element name (e.g., "rect", "path" etc)
 	SVGName() string
@@ -95,12 +98,12 @@ type NodeBase struct {
 	VisBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"visible bounding box for the node intersected with the SVG image geometry"`
 
 	// paint style information for this node
-	Pnt girl.Paint `json:"-" xml:"-" desc:"paint style information for this node"`
+	Paint girl.Paint `json:"-" xml:"-" desc:"paint style information for this node"`
 }
 
 func (g *NodeBase) CopyFieldsFrom(frm any) {
 	fr := frm.(*NodeBase)
-	g.Pnt = fr.Pnt
+	g.Paint = fr.Paint
 }
 
 func (g *NodeBase) AsNodeBase() *NodeBase {
@@ -130,8 +133,8 @@ func (n *NodeBase) BaseIface() reflect.Type {
 	return reflect.TypeOf((*NodeBase)(nil)).Elem()
 }
 
-func (g *NodeBase) Paint() *girl.Paint {
-	return &g.Pnt.Paint
+func (g *NodeBase) PaintStyle() *girl.Paint {
+	return &g.Paint
 }
 
 // SetColorProps sets color property from a string representation.
@@ -153,34 +156,31 @@ func (g *NodeBase) SetColorProps(prop, color string) {
 func (g *NodeBase) ParXForm(self bool) mat32.Mat2 {
 	pars := []Node{}
 	xf := mat32.Identity2D()
-	nb := g
+	n := g.This().(Node)
 	for {
-		if nb.Par == nil {
+		if n.Parent() == nil {
 			break
 		}
-		if ki.TypeEmbeds(nb.Par, TypeSVG) {
-			top := nb.Par.Embed(TypeSVG).(*SVG)
-			xf = top.Pnt.XForm
-			break
-		}
-		psvg := nb.Par.(Node)
-		pars = append(pars, psvg)
-		nb = psvg.AsSVGNode()
+		n = n.Parent().(Node)
+		pars = append(pars, n)
 	}
 	np := len(pars)
-	for i := np - 1; i >= 0; i-- {
+	if np > 0 {
+		xf = pars[np-1].PaintStyle().XForm
+	}
+	for i := np - 2; i >= 0; i-- {
 		n := pars[i]
-		xf = n.AsSVGNode().Pnt.XForm.Mul(xf)
+		xf = n.PaintStyle().XForm.Mul(xf)
 	}
 	if self {
-		xf = g.Pnt.XForm.Mul(xf)
+		xf = g.Paint.XForm.Mul(xf)
 	}
 	return xf
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // this just does a direct transform multiplication on coordinates.
-func (g *NodeBase) ApplyXForm(xf mat32.Mat2) {
+func (g *NodeBase) ApplyXForm(sv *SVG, xf mat32.Mat2) {
 }
 
 // DeltaXForm computes the net transform matrix for given delta xform parameters
@@ -203,7 +203,7 @@ func (g *NodeBase) DeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, p
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *NodeBase) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *NodeBase) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
 }
 
 // SetFloat32SliceLen is a utility function to set given slice of float32 values
@@ -226,35 +226,35 @@ func SetFloat32SliceLen(dat *[]float32, sz int) {
 // WriteXForm writes the node transform to slice at starting index.
 // slice must already be allocated sufficiently.
 func (g *NodeBase) WriteXForm(dat []float32, idx int) {
-	dat[idx+0] = g.Pnt.XForm.XX
-	dat[idx+1] = g.Pnt.XForm.YX
-	dat[idx+2] = g.Pnt.XForm.XY
-	dat[idx+3] = g.Pnt.XForm.YY
-	dat[idx+4] = g.Pnt.XForm.X0
-	dat[idx+5] = g.Pnt.XForm.Y0
+	dat[idx+0] = g.Paint.XForm.XX
+	dat[idx+1] = g.Paint.XForm.YX
+	dat[idx+2] = g.Paint.XForm.XY
+	dat[idx+3] = g.Paint.XForm.YY
+	dat[idx+4] = g.Paint.XForm.X0
+	dat[idx+5] = g.Paint.XForm.Y0
 }
 
 // ReadXForm reads the node transform from slice at starting index.
 func (g *NodeBase) ReadXForm(dat []float32, idx int) {
-	g.Pnt.XForm.XX = dat[idx+0]
-	g.Pnt.XForm.YX = dat[idx+1]
-	g.Pnt.XForm.XY = dat[idx+2]
-	g.Pnt.XForm.YY = dat[idx+3]
-	g.Pnt.XForm.X0 = dat[idx+4]
-	g.Pnt.XForm.Y0 = dat[idx+5]
+	g.Paint.XForm.XX = dat[idx+0]
+	g.Paint.XForm.YX = dat[idx+1]
+	g.Paint.XForm.XY = dat[idx+2]
+	g.Paint.XForm.YY = dat[idx+3]
+	g.Paint.XForm.X0 = dat[idx+4]
+	g.Paint.XForm.Y0 = dat[idx+5]
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.
-func (g *NodeBase) WriteGeom(dat *[]float32) {
+func (g *NodeBase) WriteGeom(sv *SVG, dat *[]float32) {
 	SetFloat32SliceLen(dat, 6)
 	g.WriteXForm(*dat, 0)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
-func (g *NodeBase) ReadGeom(dat []float32) {
+func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 	g.ReadXForm(dat, 0)
 }
 
@@ -286,30 +286,30 @@ func (g *NodeBase) Init() {
 
 // Style styles the Paint values directly from node properties
 func (g *NodeBase) Style(sv *SVG) {
-	pc := &g.Pnt
+	pc := &g.Paint
 	pc.Defaults()
-	ctxt := sv.(gist.Context)
+	ctxt := any(sv).(gist.Context)
 	pc.StyleSet = false // this is always first call, restart
 
 	var parCSSAgg ki.Props
-	if g.Par != sv.This() {
+	if g.Par != sv.Root.This() {
 		pn := g.Par.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
-		pp := pn.Paint()
-		pc.CopyStyleFrom(pp)
-		pc.SetStyleProps(pp, *g.Properties(), ctxt)
+		pp := pn.PaintStyle()
+		pc.CopyStyleFrom(&pp.Paint)
+		pc.SetStyleProps(&pp.Paint, *g.Properties(), ctxt)
 	} else {
 		pc.SetStyleProps(nil, *g.Properties(), ctxt)
 	}
 	pc.ToDotsImpl(&pc.UnContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
-	if pagg != nil {
-		AggCSS(&g.CSSAgg, pagg)
+	if parCSSAgg != nil {
+		AggCSS(&g.CSSAgg, parCSSAgg)
 	} else {
 		g.CSSAgg = nil
 	}
 	AggCSS(&g.CSSAgg, g.CSS)
-	g.StyleCSS(gii, g.CSSAgg)
+	g.StyleCSS(sv, g.CSSAgg)
 
 	pc.Off = !pc.Display || pc.HasNoStrokeOrFill()
 }
@@ -335,11 +335,11 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
 	if !ok {
 		return false
 	}
-	pc := &g.Pnt
-	ctxt := sv.(gist.Context)
-	if g.Par != sv.This() {
-		pp := g.Par.(Node).Paint()
-		pc.SetStyleProps(pp, pmap, ctxt)
+	pc := &g.Paint
+	ctxt := any(sv).(gist.Context)
+	if g.Par != sv.Root.This() {
+		pp := g.Par.(Node).PaintStyle()
+		pc.SetStyleProps(&pp.Paint, pmap, ctxt)
 	} else {
 		pc.SetStyleProps(nil, pmap, ctxt)
 	}
@@ -349,43 +349,17 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
 // StyleCSS applies css style properties to given SVG node
 // parsing out type, .class, and #name selectors
 func (g *NodeBase) StyleCSS(sv *SVG, css ki.Props) {
-	tyn := strings.ToLower(g.Type.Name) // type is most general, first
+	tyn := strings.ToLower(g.Type().Name) // type is most general, first
 	g.ApplyCSS(sv, tyn, css)
 	cln := "." + strings.ToLower(g.Class) // then class
 	g.ApplyCSS(sv, cln, css)
 	idnm := "#" + strings.ToLower(g.Name()) // then name
-	ApplyCSS(sv, idnm, css)
+	g.ApplyCSS(sv, idnm, css)
 }
 
-// ParentSVG returns the parent SVG viewport
-func ParentSVG(g Node) *SVG {
-	return g.ParentByType(SVGType, ki.Embeds)
-}
-
-// todo: set a flag for this:
-
-// IsDefs returns true if is in the Defs of parent SVG viewport
-func IsDefs(g *NodeBase) bool {
-	sv := ParentSVG(g)
-	if sv == nil {
-		return false
-	}
-	rv := false
-	g.FuncUpParent(0, nil, func(k ki.Ki, level int, d any) bool {
-		if k == nil || k.This() == nil || k.IsDeleted() || k.IsDestroyed() {
-			return ki.Break
-		}
-		if k.Parent() == sv.This() {
-			return ki.Break
-		}
-		if k.Parent() == sv.Defs.This() {
-			rv = true
-			return ki.Break
-		}
-		return ki.Continue
-
-	})
-	return rv
+// IsDefs returns true if is in the Defs of parent SVG
+func (g *NodeBase) IsDefs() bool {
+	return g.Flags.HasFlag(IsDef)
 }
 
 // LocalBBoxToWin converts a local bounding box to SVG coordinates
@@ -401,7 +375,7 @@ func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
 
 // LocalLineWidth returns the line width in local coordinates
 func (g *NodeBase) LocalLineWidth() float32 {
-	pc := &g.Pnt
+	pc := &g.Paint
 	if !pc.StrokeStyle.On {
 		return 0
 	}
@@ -426,7 +400,7 @@ func (g *NodeBase) BBoxes(sv *SVG) {
 // Must be called as first step in Render.
 func (g *NodeBase) PushXForm(sv *SVG) (bool, *girl.State) {
 	g.BBox = image.Rectangle{}
-	if g.Pnt.Off || g == nil || g.This() == nil {
+	if g.Paint.Off || g == nil || g.This() == nil {
 		return false, nil
 	}
 	ni := g.This().(Node)
@@ -439,12 +413,12 @@ func (g *NodeBase) PushXForm(sv *SVG) (bool, *girl.State) {
 	nvis := g.VisBBox == image.Rectangle{}
 	// g.SetInvisibleState(nvis) // don't set
 
-	if nvis && !IsDefs(g.AsNode2D()) {
+	if nvis && !g.IsDefs() {
 		return false, nil
 	}
 
 	rs := &sv.RenderState
-	pc := &g.Pnt
+	pc := &g.Paint
 	rs.PushXFormLock(pc.XForm)
 
 	return true, rs
@@ -462,9 +436,19 @@ func (g *NodeBase) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	// pc := &g.Pnt
+	// pc := &g.Paint
 	// render path elements, then compute bbox, then fill / stroke
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
 	rs.PopXFormLock()
 }
+
+// NodeFlags extend ki.Flags to hold SVG node state
+type NodeFlags ki.Flags //enums:bitflag
+
+const (
+	// Rendering means that the SVG is currently redrawing
+	// Can be useful to check for animations etc to decide whether to
+	// drive another update
+	IsDef NodeFlags = NodeFlags(ki.FlagsN) + iota
+)
