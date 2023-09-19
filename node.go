@@ -292,7 +292,7 @@ func (g *NodeBase) Style(sv *SVG) {
 	pc.StyleSet = false // this is always first call, restart
 
 	var parCSSAgg ki.Props
-	if g.Par != sv.Root.This() {
+	if g.Par != nil && g.Par != sv.Root.This() {
 		pn := g.Par.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()
@@ -359,7 +359,8 @@ func (g *NodeBase) StyleCSS(sv *SVG, css ki.Props) {
 
 // IsDefs returns true if is in the Defs of parent SVG
 func (g *NodeBase) IsDefs() bool {
-	return g.Flags.HasFlag(IsDef)
+	// return g.Flags.HasFlag(IsDef)
+	return false
 }
 
 // LocalBBoxToWin converts a local bounding box to SVG coordinates

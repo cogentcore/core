@@ -9,6 +9,7 @@ package svg
 
 import (
 	"image"
+	"image/color"
 	"strings"
 	"sync"
 
@@ -137,6 +138,13 @@ func (sv *SVG) DeleteAll() {
 	sv.Root.UpdateEnd(updt)
 }
 
+// ContextColor returns the current Color activated in the context.
+// Color has support for special color names that are relative to
+// this current color.
+func (sv *SVG) ContextColor() color.RGBA {
+	return sv.BgColor.Color
+}
+
 // ContextColorSpecByURL finds a Node by an element name (URL-like path), and
 // attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
 // Used for colorspec styling based on url() value.
@@ -166,7 +174,7 @@ func (sv *SVG) Style() {
 		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
-		ni.SetFlag(true, IsDef)
+		// ni.SetFlag(true, IsDef)
 		return ki.Continue
 	})
 
