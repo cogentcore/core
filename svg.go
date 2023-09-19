@@ -198,6 +198,8 @@ func (sv *SVG) Render() {
 
 	sv.Style()
 
+	rs := &sv.RenderState
+	rs.PushBounds(sv.Pixels.Bounds())
 	if sv.Fill {
 		sv.FillViewport()
 	}
@@ -211,6 +213,7 @@ func (sv *SVG) Render() {
 	// 	ni.Render()
 	// }
 	// rs.PopXForm()
+	rs.PopBounds()
 }
 
 func (sv *SVG) FillViewport() {
