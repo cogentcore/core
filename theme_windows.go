@@ -14,6 +14,7 @@
 package goosi
 
 import (
+	"fmt"
 	"log"
 	"syscall"
 
@@ -26,17 +27,19 @@ const (
 )
 
 // IsDark returns whether the system color theme is dark (as opposed to light)
-func IsDark() bool {
+// and any error that occurred when getting that information.
+func IsDark() (bool, error) {
 	k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, registry.QUERY_VALUE)
 	if err != nil {
-		log.Fatal(err)
+		return false, fmt.Errorf("error opening theme registry key: %w", err)
 	}
 	defer k.Close()
 	val, _, err := k.GetIntegerValue(themeRegName)
 	if err != nil {
-		log.Fatal(err)
+		return false, fmt.Errorf("error getting theme registry value: %w", err)
 	}
-	return val == 0
+	// dark mode is 0
+	return val == 0, nil
 }
 
 // Monitor monitors the state of the dark mode and calls the given function
