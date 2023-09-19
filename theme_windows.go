@@ -25,9 +25,9 @@ const (
 	themeRegName = `AppsUseLightTheme`                                            // <- For apps. Use SystemUsesLightTheme for taskbar and tray
 )
 
-// ThemeIsDark returns whether the system color theme is dark (as opposed to light)
+// IsDark returns whether the system color theme is dark (as opposed to light)
 // and any error that occurred when getting that information.
-func ThemeIsDark() (bool, error) {
+func IsDark() (bool, error) {
 	k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, registry.QUERY_VALUE)
 	if err != nil {
 		return false, fmt.Errorf("error opening theme registry key: %w", err)
@@ -41,13 +41,13 @@ func ThemeIsDark() (bool, error) {
 	return val == 0, nil
 }
 
-// MonitorTheme monitors the state of the dark mode and calls the given function
+// IsDarkMonitor monitors the state of the dark mode and calls the given function
 // with the new value whenever it changes. It returns a channel that will
 // receive any errors that occur during the monitoring, as it happens in a
 // separate goroutine. It also returns any error that occurred during the
 // initial set up of the monitoring. If the error is non-nil, the error channel
 // will be nil.
-func MonitorTheme(fn func(isDark bool)) (chan error, error) {
+func IsDarkMonitor(fn func(isDark bool)) (chan error, error) {
 	var regNotifyChangeKeyValue *syscall.Proc
 
 	if advapi32, err := syscall.LoadDLL("Advapi32.dll"); err == nil {
