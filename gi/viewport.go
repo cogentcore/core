@@ -12,7 +12,6 @@ import (
 	"image/png"
 	"io"
 	"log"
-	"strings"
 	"sync"
 
 	"goki.dev/gi/v2/girl"
@@ -961,21 +960,23 @@ func (vp *Viewport2D) ContextColor() color.RGBA {
 // attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
 // Used for colorspec styling based on url() value.
 func (vp *Viewport2D) ContextColorSpecByURL(url string) *gist.ColorSpec {
-	if vp == nil {
-		return nil
-	}
-	vp.StyleMu.RLock()
-	defer vp.StyleMu.RUnlock()
+	/*
+		if vp == nil {
+			return nil
+		}
+		vp.StyleMu.RLock()
+		defer vp.StyleMu.RUnlock()
 
-	if vp.CurStyleNode == nil {
-		return nil
-	}
-	val := url[4:]
-	val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
-	ne := vp.CurStyleNode.FindNamedElement(val)
-	if grad, ok := ne.(*Gradient); ok {
-		return &grad.Grad
-	}
+		if vp.CurStyleNode == nil {
+			return nil
+		}
+		val := url[4:]
+		val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
+		ne := vp.CurStyleNode.FindNamedElement(val)
+		if grad, ok := ne.(*Gradient); ok {
+			return &grad.Grad
+		}
+	*/
 	return nil
 }
 

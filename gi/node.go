@@ -10,7 +10,6 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/gi/v2/gist"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
@@ -532,24 +531,6 @@ func (nb *NodeBase) ParentCSSAgg() *ki.Props {
 		return nil
 	}
 	return &pn.(*NodeBase).CSSAgg
-}
-
-// SetStdXMLAttr sets standard attributes of node given XML-style name /
-// attribute values (e.g., from parsing XML / SVG files) -- returns true if handled
-func SetStdXMLAttr(ni Node, name, val string) bool {
-	nb := ni.AsGiNode()
-	switch name {
-	case "id":
-		nb.SetName(val)
-		return true
-	case "class":
-		nb.Class = val
-		return true
-	case "style":
-		gist.SetStylePropsXML(val, &nb.Props)
-		return true
-	}
-	return false
 }
 
 // FirstContainingPoint finds the first node whose WinBBox contains the given

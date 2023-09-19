@@ -1120,20 +1120,3 @@ func (nb *Node2DBase) SetFixedHeight(val units.Value) {
 	nb.SetProp("min-height", val)
 	nb.SetProp("max-height", val)
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-// MetaData2D
-
-// MetaData2D is used for holding meta data info
-type MetaData2D struct {
-	Node2DBase
-	MetaData string
-}
-
-var TypeMetaData2D = kit.Types.AddType(&MetaData2D{}, nil)
-
-func (g *MetaData2D) CopyFieldsFrom(frm any) {
-	fr := frm.(*MetaData2D)
-	g.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
-	g.MetaData = fr.MetaData
-}
