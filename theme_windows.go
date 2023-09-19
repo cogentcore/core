@@ -20,27 +20,13 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// ThemeIsDark is whether the system color scheme is dark (as opposed to light)
-var ThemeIsDark bool
-
 const (
 	themeRegKey  = `Software\Microsoft\Windows\CurrentVersion\Themes\Personalize` // in HKCU
 	themeRegName = `AppsUseLightTheme`                                            // <- For apps. Use SystemUsesLightTheme for taskbar and tray
 )
 
-// set the state of the theme and then monitor it on startup
-func init() {
-	react(isDark())
-	monitor(react)
-}
-
-// react reacts to a change in the color scheme
-func react(isDark bool) {
-	ThemeIsDark = isDark
-}
-
-// isDark returns whether we are currently in dark mode
-func isDark() bool {
+// IsDark returns whether the system color theme is dark (as opposed to light)
+func IsDark() bool {
 	k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, registry.QUERY_VALUE)
 	if err != nil {
 		log.Fatal(err)
@@ -53,10 +39,10 @@ func isDark() bool {
 	return val == 0
 }
 
-// monitor monitors the state of the dark mode and
-// calls the given function with the new value whenver it changes.
-// it does not return, so it should be called in a separate goroutine.
-func monitor(fn func(bool)) {
+// Monitor monitors the state of the dark mode and calls the given function
+// with the new value whenever it changes. It does not return, so it should
+// typically be called in a separate goroutine.
+func Monitor(fn func(bool)) {
 	var regNotifyChangeKeyValue *syscall.Proc
 	changed := make(chan bool)
 
