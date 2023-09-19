@@ -46,7 +46,7 @@ func IsDark() (bool, error) {
 // separate goroutine. It also returns any error that occurred during the
 // initial set up of the monitoring. If the error is non-nil, the error channel
 // will be nil.
-func Monitor(fn func(bool)) (chan error, error) {
+func Monitor(fn func(isDark bool)) (chan error, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, fmt.Errorf("error creating file watcher: %w", err)
@@ -58,6 +58,7 @@ func Monitor(fn func(bool)) (chan error, error) {
 		wasDark, err := IsDark() // we need to store this so that we only update when it changes
 		if err != nil {
 			ec <- fmt.Errorf("error while getting theme: %w", err)
+			return
 		}
 		for {
 			select {
@@ -69,12 +70,9 @@ func Monitor(fn func(bool)) (chan error, error) {
 					isDark, err := IsDark()
 					if err != nil {
 						ec <- fmt.Errorf("error while getting theme: %w", err)
+						return
 					}
-					if isDark && !wasDark {
-						fn(isDark)
-						wasDark = isDark
-					}
-					if !isDark && wasDark {
+					if isDark != wasDark {
 						fn(isDark)
 						wasDark = isDark
 					}
@@ -84,6 +82,7 @@ func Monitor(fn func(bool)) (chan error, error) {
 					return
 				}
 				ec <- fmt.Errorf("watcher error: %w", err)
+				return
 			}
 		}
 	}()

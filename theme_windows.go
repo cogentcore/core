@@ -47,7 +47,7 @@ func IsDark() (bool, error) {
 // separate goroutine. It also returns any error that occurred during the
 // initial set up of the monitoring. If the error is non-nil, the error channel
 // will be nil.
-func Monitor(fn func(bool)) (chan error, error) {
+func Monitor(fn func(isDark bool)) (chan error, error) {
 	var regNotifyChangeKeyValue *syscall.Proc
 
 	if advapi32, err := syscall.LoadDLL("Advapi32.dll"); err == nil {
@@ -64,18 +64,22 @@ func Monitor(fn func(bool)) (chan error, error) {
 			k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, syscall.KEY_NOTIFY|registry.QUERY_VALUE)
 			if err != nil {
 				ec <- fmt.Errorf("error opening theme registry key: %w", err)
+				return
 			}
-			var wasDark uint64
+			var wasDark bool
 			for {
 				regNotifyChangeKeyValue.Call(uintptr(k), 0, 0x00000001|0x00000004, 0, 0)
 				val, _, err := k.GetIntegerValue(themeRegName)
 				if err != nil {
 					ec <- fmt.Errorf("error getting theme registry value: %w", err)
+					return
 				}
-				if val != wasDark {
-					wasDark = val
-					// dark mode is 0
-					fn(val == 0)
+				// dark mode is 0
+				isDark := val == 0
+
+				if isDark != wasDark {
+					fn(isDark)
+					wasDark = isDark
 				}
 			}
 		}()
