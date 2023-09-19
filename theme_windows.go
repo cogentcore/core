@@ -15,7 +15,6 @@ package goosi
 
 import (
 	"fmt"
-	"log"
 	"syscall"
 
 	"golang.org/x/sys/windows/registry"
@@ -43,42 +42,43 @@ func IsDark() (bool, error) {
 }
 
 // Monitor monitors the state of the dark mode and calls the given function
-// with the new value whenever it changes. It does not return, so it should
-// typically be called in a separate goroutine.
-func Monitor(fn func(bool)) {
+// with the new value whenever it changes. It returns a channel that will
+// receive any errors that occur during the monitoring, as it happens in a
+// separate goroutine. It also returns any error that occurred during the
+// initial set up of the monitoring. If the error is non-nil, the error channel
+// will be nil.
+func Monitor(fn func(bool)) (chan error, error) {
 	var regNotifyChangeKeyValue *syscall.Proc
-	changed := make(chan bool)
 
 	if advapi32, err := syscall.LoadDLL("Advapi32.dll"); err == nil {
 		if p, err := advapi32.FindProc("RegNotifyChangeKeyValue"); err == nil {
 			regNotifyChangeKeyValue = p
 		} else {
-			log.Fatal("Could not find function RegNotifyChangeKeyValue in Advapi32.dll")
+			return nil, fmt.Errorf("error finding function RegNotifyChangeKeyValue in Advapi32.dll: %w", err)
 		}
 	}
+
+	ec := make(chan error)
 	if regNotifyChangeKeyValue != nil {
 		go func() {
 			k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, syscall.KEY_NOTIFY|registry.QUERY_VALUE)
 			if err != nil {
-				log.Fatal(err)
+				ec <- fmt.Errorf("error opening theme registry key: %w", err)
 			}
 			var wasDark uint64
 			for {
 				regNotifyChangeKeyValue.Call(uintptr(k), 0, 0x00000001|0x00000004, 0, 0)
 				val, _, err := k.GetIntegerValue(themeRegName)
 				if err != nil {
-					log.Fatal(err)
+					ec <- fmt.Errorf("error getting theme registry value: %w", err)
 				}
 				if val != wasDark {
 					wasDark = val
-					changed <- val == 0
+					// dark mode is 0
+					fn(val == 0)
 				}
 			}
 		}()
 	}
-	for {
-		val := <-changed
-		fn(val)
-	}
-
+	return ec, nil
 }
