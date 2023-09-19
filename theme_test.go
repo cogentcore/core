@@ -32,10 +32,5 @@ func TestMonitorTheme(t *testing.T) {
 		time.Sleep(10 * time.Second)
 		close(done)
 	}()
-	select {
-	case <-done:
-		return
-	case <-ec:
-		t.Fatal(err)
-	}
+	LogIsDarkMonitor(ec, done)
 }
