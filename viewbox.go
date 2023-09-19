@@ -5,8 +5,6 @@
 package svg
 
 import (
-	"goki.dev/girl/gist"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -54,12 +52,7 @@ const (
 )
 
 // ViewBoxMeetOrSlice defines values for the PreserveAspectRatio meet or slice factor
-type ViewBoxMeetOrSlice int32
-
-var TypeViewBoxMeetOrSlice = kit.Enums.AddEnumAltLower(ViewBoxMeetOrSliceN, kit.NotBitFlag, gist.StylePropProps, "")
-
-func (ev ViewBoxMeetOrSlice) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *ViewBoxMeetOrSlice) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+type ViewBoxMeetOrSlice int32 //enum: enum
 
 const (
 	// Meet means the entire ViewBox is visible within Viewport, and it is

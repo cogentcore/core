@@ -5,11 +5,9 @@
 package svg
 
 import (
-	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -26,8 +24,6 @@ type Rect struct {
 	// radii for curved corners, as a proportion of width, height
 	Radius mat32.Vec2 `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`
 }
-
-var TypeRect = kit.Types.AddType(&Rect{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewRect adds a new rectangle to given parent node, with given name, pos, and size.
 func AddNewRect(parent ki.Ki, name string, x, y, sx, sy float32) *Rect {
@@ -63,8 +59,8 @@ func (g *Rect) LocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Rect) Render() {
-	vis, rs := g.PushXForm()
+func (g *Rect) Render(sv *SVG) {
+	vis, rs := g.PushXForm(sv)
 	if !vis {
 		return
 	}
@@ -85,8 +81,8 @@ func (g *Rect) Render() {
 	}
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
-	g.ComputeBBox()
-	g.RenderChildren()
+	g.BBoxes(sv)
+	g.RenderChildren(sv)
 	rs.PopXFormLock()
 }
 

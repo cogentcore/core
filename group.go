@@ -7,9 +7,7 @@ package svg
 import (
 	"image"
 
-	"goki.dev/gi/v2/gi"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -19,11 +17,9 @@ type Group struct {
 	NodeBase
 }
 
-var TypeGroup = kit.Types.AddType(&Group{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
-
 // AddNewGroup adds a new group to given parent node, with given name.
 func AddNewGroup(parent ki.Ki, name string) *Group {
-	return parent.AddNewChild(TypeGroup, name).(*Group)
+	return parent.AddNewChild(GroupType, name).(*Group)
 }
 
 func (g *Group) SVGName() string { return "g" }
@@ -36,16 +32,15 @@ func (g *Group) CopyFieldsFrom(frm any) {
 }
 
 // BBoxFromChildren sets the Group BBox from children
-func BBoxFromChildren(gii gi.Node2D) image.Rectangle {
+func BBoxFromChildren(gi Node) image.Rectangle {
 	bb := image.Rectangle{}
-	for i, kid := range *gii.Children() {
-		_, gi := gi.KiToNode2D(kid)
-		if gi != nil {
-			if i == 0 {
-				bb = gi.ObjBBox
-			} else {
-				bb = bb.Union(gi.ObjBBox)
-			}
+	for i, kid := range *gi.Children() {
+		kgi := kid.(Node)
+		kg := kgi.AsNodeBase()
+		if i == 0 {
+			bb = kg.BBox
+		} else {
+			bb = bb.Union(kg.BBox)
 		}
 	}
 	return bb
@@ -56,19 +51,16 @@ func (g *Group) BBox2D() image.Rectangle {
 	return bb
 }
 
-func (g *Group) Render() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
-	}
+func (g *Group) Render(sv *SVG) {
 	pc := &g.Pnt
-	rs := g.Render()
+	rs := &sv.RenderState
 	if pc.Off || rs == nil {
 		return
 	}
 	rs.PushXFormLock(pc.XForm)
 
-	g.RenderChildren()
-	g.ComputeBBox() // must come after render
+	g.RenderChildren(sv)
+	g.BBoxes(sv) // must come after render
 
 	rs.PopXFormLock()
 }

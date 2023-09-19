@@ -10,10 +10,9 @@ import (
 	"strings"
 
 	"github.com/srwiley/rasterx"
-	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -38,9 +37,6 @@ func (sv *SVG) FindDefByName(defnm string) Node {
 func (sv *SVG) FindNamedElement(name string) Node {
 	name = strings.TrimPrefix(name, "#")
 	def := sv.FindDefByName(name)
-	if def != nil {
-		return def.(gi.Node2D)
-	}
 	log.Printf("SVG FindNamedElement: could not find name: %v\n", name)
 	return nil
 }
@@ -70,11 +66,10 @@ func NameToURL(nm string) string {
 // NodeFindURL finds a url element in the parent SVG of given node.
 // Returns nil if not found.
 // Works with full 'url(#Name)' string or plain name or "none"
-func NodeFindURL(gii gi.Node2D, url string) gi.Node2D {
+func NodeFindURL(gi Node, url string) Node {
 	if url == "none" {
 		return nil
 	}
-	g := gii.AsNode2D()
 	ref := NameFromURL(url)
 	if ref == "" {
 		ref = url
@@ -83,7 +78,7 @@ func NodeFindURL(gii gi.Node2D, url string) gi.Node2D {
 		return nil
 	}
 	psvg := ParentSVG(g)
-	var rv gi.Node2D
+	var rv Node
 	if psvg != nil {
 		rv = psvg.FindNamedElement(ref)
 	} else {
@@ -112,7 +107,7 @@ func NodePropURL(kn ki.Ki, prop string) string {
 
 // MarkerByName finds marker property of given name, or generic "marker"
 // type, and if set, attempts to find that marker and return it
-func MarkerByName(gii gi.Node2D, marker string) *Marker {
+func MarkerByName(gii Node, marker string) *Marker {
 	url := NodePropURL(gii, marker)
 	if url == "" {
 		url = NodePropURL(gii, "marker")
@@ -136,14 +131,14 @@ func MarkerByName(gii gi.Node2D, marker string) *Marker {
 //  Gradient management utilities for updating geometry
 
 // GradientByName returns the gradient of given name, stored on SVG node
-func GradientByName(gii gi.Node2D, grnm string) *Gradient {
-	gri := NodeFindURL(gii, grnm)
+func GradientByName(gi Node, grnm string) *Gradient {
+	gri := NodeFindURL(gi, grnm)
 	if gri == nil {
 		return nil
 	}
 	gr, ok := gri.(*Gradient)
 	if !ok {
-		log.Printf("gi.svg Found element named: %v but isn't a Gradient type, instead is: %T", grnm, gri)
+		log.Printf("SVG Found element named: %v but isn't a Gradient type, instead is: %T", grnm, gri)
 		return nil
 	}
 	return gr
@@ -152,17 +147,17 @@ func GradientByName(gii gi.Node2D, grnm string) *Gradient {
 // GradientApplyXForm applies the given transform to any gradients for this node,
 // that are using specific coordinates (not bounding box which is automatic)
 func (g *NodeBase) GradientApplyXForm(xf mat32.Mat2) {
-	gii := g.This().(gi.Node2D)
-	gnm := NodePropURL(gii, "fill")
+	gi := g.This().(Node)
+	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
-		gr := GradientByName(gii, gnm)
+		gr := GradientByName(gi, gnm)
 		if gr != nil {
 			gr.Grad.ApplyXForm(xf)
 		}
 	}
-	gnm = NodePropURL(gii, "stroke")
+	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
-		gr := GradientByName(gii, gnm)
+		gr := GradientByName(gi, gnm)
 		if gr != nil {
 			gr.Grad.ApplyXForm(xf)
 		}
@@ -173,17 +168,17 @@ func (g *NodeBase) GradientApplyXForm(xf mat32.Mat2) {
 // to any gradients for this node, that are using specific coordinates
 // (not bounding box which is automatic)
 func (g *NodeBase) GradientApplyXFormPt(xf mat32.Mat2, pt mat32.Vec2) {
-	gii := g.This().(gi.Node2D)
-	gnm := NodePropURL(gii, "fill")
+	gi := g.This().(Node)
+	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
-		gr := GradientByName(gii, gnm)
+		gr := GradientByName(gi, gnm)
 		if gr != nil {
 			gr.Grad.ApplyXFormPt(xf, pt)
 		}
 	}
-	gnm = NodePropURL(gii, "stroke")
+	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
-		gr := GradientByName(gii, gnm)
+		gr := GradientByName(gi, gnm)
 		if gr != nil {
 			gr.Grad.ApplyXFormPt(xf, pt)
 		}
@@ -292,12 +287,12 @@ func UpdateGradientStops(gr *Gradient) {
 // DeleteNodeGradient deletes the node-specific gradient on given node
 // of given name, which can be a full url(# name or just the bare name.
 // Returns true if deleted.
-func DeleteNodeGradient(gii gi.Node2D, grnm string) bool {
-	gr := GradientByName(gii, grnm)
+func DeleteNodeGradient(gi Node, grnm string) bool {
+	gr := GradientByName(gi, grnm)
 	if gr == nil || gr.StopsName == "" {
 		return false
 	}
-	psvg := ParentSVG(gii.AsNode2D())
+	psvg := ParentSVG(gi)
 	if psvg == nil {
 		return false
 	}
@@ -310,14 +305,14 @@ func DeleteNodeGradient(gii gi.Node2D, grnm string) bool {
 // that points to given stops name.  returns the new gradient
 // and the url that points to it (nil if parent svg cannot be found).
 // Initializes gradient to use bounding box of object, but using userSpaceOnUse setting
-func AddNewNodeGradient(gii gi.Node2D, radial bool, stops string) (*Gradient, string) {
-	psvg := ParentSVG(gii.AsNode2D())
+func AddNewNodeGradient(gi Node, radial bool, stops string) (*Gradient, string) {
+	psvg := ParentSVG(gi)
 	if psvg == nil {
 		return nil, ""
 	}
 	gr, url := psvg.AddNewGradient(radial)
 	gr.StopsName = stops
-	bbox := gii.(Node).LocalBBox()
+	bbox := gi.(Node).LocalBBox()
 	gr.Grad.SetGradientPoints(bbox)
 	UpdateGradientStops(gr)
 	return gr, url
@@ -336,7 +331,7 @@ func (sv *SVG) AddNewGradient(radial bool) (*Gradient, string) {
 	id := sv.NewUniqueId()
 	gnm = NameId(gnm, id)
 	sv.SetChildAdded()
-	gr := sv.Defs.AddNewChild(gi.TypeGradient, gnm).(*Gradient)
+	gr := sv.Defs.AddNewChild(TypeGradient, gnm).(*Gradient)
 	url := NameToURL(gnm)
 	if radial {
 		gr.Grad.NewRadialGradient()
@@ -348,11 +343,11 @@ func (sv *SVG) AddNewGradient(radial bool) (*Gradient, string) {
 }
 
 // UpdateNodeGradientProp ensures that node has a gradient property of given type
-func UpdateNodeGradientProp(gii gi.Node2D, prop string, radial bool, stops string) (*Gradient, string) {
-	ps := gii.Prop(prop)
+func UpdateNodeGradientProp(gi Node, prop string, radial bool, stops string) (*Gradient, string) {
+	ps := gi.Prop(prop)
 	if ps == nil {
-		gr, url := AddNewNodeGradient(gii, radial, stops)
-		gii.SetProp(prop, url)
+		gr, url := AddNewNodeGradient(gi, radial, stops)
+		gi.SetProp(prop, url)
 		return gr, url
 	}
 	pstr := ps.(string)
@@ -364,22 +359,22 @@ func UpdateNodeGradientProp(gii gi.Node2D, prop string, radial bool, stops strin
 	}
 	url := "url(#" + trgst
 	if strings.HasPrefix(pstr, url) {
-		gr := GradientByName(gii, pstr)
+		gr := GradientByName(gi, pstr)
 		gr.StopsName = stops
 		UpdateGradientStops(gr)
 		return gr, NameToURL(gr.Nm)
 	}
 	if strings.HasPrefix(pstr, "url(#") { // wrong kind
-		DeleteNodeGradient(gii, pstr)
+		DeleteNodeGradient(gi, pstr)
 	}
-	gr, url := AddNewNodeGradient(gii, radial, stops)
-	gii.SetProp(prop, url)
+	gr, url := AddNewNodeGradient(gi, radial, stops)
+	gi.SetProp(prop, url)
 	return gr, url
 }
 
 // UpdateNodeGradientPoints updates the points for node based on current bbox
-func UpdateNodeGradientPoints(gii gi.Node2D, prop string) {
-	ps := gii.Prop(prop)
+func UpdateNodeGradientPoints(gi Node, prop string) {
+	ps := gi.Prop(prop)
 	if ps == nil {
 		return
 	}
@@ -388,11 +383,11 @@ func UpdateNodeGradientPoints(gii gi.Node2D, prop string) {
 	if !strings.HasPrefix(pstr, url) {
 		return
 	}
-	gr := GradientByName(gii, pstr)
+	gr := GradientByName(gi, pstr)
 	if gr == nil {
 		return
 	}
-	bbox := gii.(Node).LocalBBox()
+	bbox := gi.(Node).LocalBBox()
 	gr.Grad.SetGradientPoints(bbox)
 	gr.Grad.Gradient.Matrix = rasterx.Identity
 }
@@ -400,8 +395,8 @@ func UpdateNodeGradientPoints(gii gi.Node2D, prop string) {
 // CloneNodeGradientProp creates a new clone of the existing gradient for node
 // if set for given property key ("fill" or "stroke").
 // returns new gradient.
-func CloneNodeGradientProp(gii gi.Node2D, prop string) *Gradient {
-	ps := gii.Prop(prop)
+func CloneNodeGradientProp(gi Node, prop string) *Gradient {
+	ps := gi.Prop(prop)
 	if ps == nil {
 		return nil
 	}
@@ -412,12 +407,12 @@ func CloneNodeGradientProp(gii gi.Node2D, prop string) *Gradient {
 	} else if !strings.HasPrefix(pstr, "url(#linearGradient") {
 		return nil
 	}
-	gr := GradientByName(gii, pstr)
+	gr := GradientByName(gi, pstr)
 	if gr == nil {
 		return nil
 	}
-	ngr, url := AddNewNodeGradient(gii, radial, gr.StopsName)
-	gii.SetProp(prop, url)
+	ngr, url := AddNewNodeGradient(gi, radial, gr.StopsName)
+	gi.SetProp(prop, url)
 	ngr.Grad.CopyFrom(&gr.Grad)
 	return gr
 }
@@ -425,8 +420,8 @@ func CloneNodeGradientProp(gii gi.Node2D, prop string) *Gradient {
 // DeleteNodeGradientProp deletes any existing gradient for node
 // if set for given property key ("fill" or "stroke").
 // Returns true if deleted.
-func DeleteNodeGradientProp(gii gi.Node2D, prop string) bool {
-	ps := gii.Prop(prop)
+func DeleteNodeGradientProp(gi Node, prop string) bool {
+	ps := gi.Prop(prop)
 	if ps == nil {
 		return false
 	}
@@ -434,7 +429,7 @@ func DeleteNodeGradientProp(gii gi.Node2D, prop string) bool {
 	if !strings.HasPrefix(pstr, "url(#radialGradient") && !strings.HasPrefix(pstr, "url(#linearGradient") {
 		return false
 	}
-	return DeleteNodeGradient(gii, pstr)
+	return DeleteNodeGradient(gi, pstr)
 }
 
 // UpdateAllGradientStops removes any items from Defs that are not actually referred to
@@ -472,7 +467,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 	sv.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
 		pr := k.Properties()
 		for _, v := range *pr {
-			ps := kit.ToString(v)
+			ps := laser.ToString(v)
 			if !strings.HasPrefix(ps, "url(#") {
 				continue
 			}

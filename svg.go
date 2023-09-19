@@ -4,6 +4,8 @@
 
 package svg
 
+//go:generate goki generate
+
 import (
 	"fmt"
 	"image"
@@ -53,7 +55,7 @@ type SVG struct {
 	InvertY bool `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
 
 	// [view: -] render state for rendering
-	Render girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
 
 	// [view: -] live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
@@ -85,7 +87,7 @@ type SVG struct {
 // }
 
 // NewSVG creates a SVG with Pixels Image of the specified width and height
-func NewSVG(width, height int) *Viewport2D {
+func NewSVG(width, height int) *SVG {
 	sz := image.Point{width, height}
 	vp := &SVG{
 		Geom: Geom2DInt{Size: sz},
@@ -111,7 +113,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 		sv.Pixels = nil
 	}
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	sv.Render.Init(nwsz.X, nwsz.Y, sv.Pixels)
+	sv.RenderState.Init(nwsz.X, nwsz.Y, sv.Pixels)
 	sv.Geom.Size = nwsz // make sure
 }
 
@@ -256,7 +258,7 @@ func (sv *SVG) Render() {
 
 	sv.Style()
 
-	rs := &sv.Render
+	rs := &sv.RenderState
 	if sv.Fill {
 		sv.FillViewport()
 	}

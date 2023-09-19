@@ -55,12 +55,12 @@ func (g *Polyline) LocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Polyline) Render() {
+func (g *Polyline) Render(sv *SVG) {
 	sz := len(g.Points)
 	if sz < 2 {
 		return
 	}
-	vis, rs := g.PushXForm()
+	vis, rs := g.PushXForm(sv)
 	if !vis {
 		return
 	}
@@ -69,7 +69,7 @@ func (g *Polyline) Render() {
 	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
-	g.ComputeBBox()
+	g.BBoxes(sv)
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
@@ -93,7 +93,7 @@ func (g *Polyline) Render() {
 		}
 	}
 
-	g.RenderChildren()
+	g.RenderChildren(sv)
 	rs.PopXFormLock()
 }
 

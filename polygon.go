@@ -5,9 +5,7 @@
 package svg
 
 import (
-	"goki.dev/gi/v2/gi"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -15,8 +13,6 @@ import (
 type Polygon struct {
 	Polyline
 }
-
-var TypePolygon = kit.Types.AddType(&Polygon{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewPolygon adds a new polygon to given parent node, with given name and points.
 func AddNewPolygon(parent ki.Ki, name string, points []mat32.Vec2) *Polygon {
@@ -27,12 +23,12 @@ func AddNewPolygon(parent ki.Ki, name string, points []mat32.Vec2) *Polygon {
 
 func (g *Polygon) SVGName() string { return "polygon" }
 
-func (g *Polygon) Render() {
+func (g *Polygon) Render(sv *SVG) {
 	sz := len(g.Points)
 	if sz < 2 {
 		return
 	}
-	vis, rs := g.PushXForm()
+	vis, rs := g.PushXForm(sv)
 	if !vis {
 		return
 	}
@@ -41,7 +37,7 @@ func (g *Polygon) Render() {
 	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
-	g.ComputeBBox()
+	g.BBoxes(sv)
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
@@ -65,6 +61,6 @@ func (g *Polygon) Render() {
 		}
 	}
 
-	g.RenderChildren()
+	g.RenderChildren(sv)
 	rs.PopXFormLock()
 }

@@ -5,9 +5,7 @@
 package svg
 
 import (
-	"goki.dev/gi/v2/gi"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -21,8 +19,6 @@ type Line struct {
 	// position of the end of the line
 	End mat32.Vec2 `xml:"{x2,y2}" desc:"position of the end of the line"`
 }
-
-var TypeLine = kit.Types.AddType(&Line{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewLine adds a new line to given parent node, with given name, st and end.
 func AddNewLine(parent ki.Ki, name string, sx, sy, ex, ey float32) *Line {
@@ -59,8 +55,8 @@ func (g *Line) LocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Line) Render() {
-	vis, rs := g.PushXForm()
+func (g *Line) Render(sv *SVG) {
+	vis, rs := g.PushXForm(sv)
 	if !vis {
 		return
 	}
@@ -69,7 +65,7 @@ func (g *Line) Render() {
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Stroke(rs)
 	rs.Unlock()
-	g.ComputeBBox()
+	g.BBoxes(sv)
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		ang := mat32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
@@ -80,7 +76,7 @@ func (g *Line) Render() {
 		mrk.RenderMarker(g.End, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
 
-	g.RenderChildren()
+	g.RenderChildren(sv)
 	rs.PopXFormLock()
 }
 

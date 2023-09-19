@@ -7,13 +7,10 @@ package svg
 import (
 	"image"
 
-	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -61,8 +58,6 @@ type Text struct {
 	// last actual bounding box in display units (dots)
 	LastBBox mat32.Box2 `xml:"-" json:"-" desc:"last actual bounding box in display units (dots)"`
 }
-
-var TypeText = kit.Types.AddType(&Text{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewText adds a new text to given parent node, with given name, pos and text.
 func AddNewText(parent ki.Ki, name string, x, y float32, text string) *Text {
@@ -118,7 +113,7 @@ func (g *Text) SetSize(sz mat32.Vec2) {
 	}
 }
 
-func (g *Text) BBox2D() image.Rectangle {
+func (g *Text) NodeBBox(sv *SVG) image.Rectangle {
 	if g.IsParText() {
 		return BBoxFromChildren(g)
 	} else {
@@ -145,19 +140,19 @@ func (g *Text) TextBBox() mat32.Box2 {
 		pos.X -= g.TextRender.Size.X
 	}
 	if len(g.CharPosX) > 0 {
-		mx := ints.MinInt(len(g.CharPosX), len(sr.Render))
+		mx := min(len(g.CharPosX), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			sr.Render[i].RelPos.X = g.CharPosX[i]
 		}
 	}
 	if len(g.CharPosY) > 0 {
-		mx := ints.MinInt(len(g.CharPosY), len(sr.Render))
+		mx := min(len(g.CharPosY), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			sr.Render[i].RelPos.Y = g.CharPosY[i]
 		}
 	}
 	if len(g.CharPosDX) > 0 {
-		mx := ints.MinInt(len(g.CharPosDX), len(sr.Render))
+		mx := min(len(g.CharPosDX), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			if i > 0 {
 				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + g.CharPosDX[i]
@@ -167,7 +162,7 @@ func (g *Text) TextBBox() mat32.Box2 {
 		}
 	}
 	if len(g.CharPosDY) > 0 {
-		mx := ints.MinInt(len(g.CharPosDY), len(sr.Render))
+		mx := min(len(g.CharPosDY), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			if i > 0 {
 				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + g.CharPosDY[i]
@@ -194,7 +189,7 @@ func (g *Text) TextBBox() mat32.Box2 {
 }
 
 // RenderText renders the text in full coords
-func (g *Text) RenderText() {
+func (g *Text) RenderText(sv *SVG) {
 	pc := &g.Pnt
 	rs := g.Render()
 	orgsz := pc.FontStyle.Size
@@ -231,7 +226,7 @@ func (g *Text) RenderText() {
 	}
 	pc.FontStyle.Size = orgsz
 	if len(g.CharPosX) > 0 {
-		mx := ints.MinInt(len(g.CharPosX), len(sr.Render))
+		mx := min(len(g.CharPosX), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			// todo: this may not be fully correct, given relativity constraints
 			cpx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosX[i], 0})
@@ -239,14 +234,14 @@ func (g *Text) RenderText() {
 		}
 	}
 	if len(g.CharPosY) > 0 {
-		mx := ints.MinInt(len(g.CharPosY), len(sr.Render))
+		mx := min(len(g.CharPosY), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			cpy := rs.XForm.MulVec2AsPt(mat32.Vec2{g.CharPosY[i], 0})
 			sr.Render[i].RelPos.Y = cpy.Y
 		}
 	}
 	if len(g.CharPosDX) > 0 {
-		mx := ints.MinInt(len(g.CharPosDX), len(sr.Render))
+		mx := min(len(g.CharPosDX), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			dx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDX[i], 0})
 			if i > 0 {
@@ -257,7 +252,7 @@ func (g *Text) RenderText() {
 		}
 	}
 	if len(g.CharPosDY) > 0 {
-		mx := ints.MinInt(len(g.CharPosDY), len(sr.Render))
+		mx := min(len(g.CharPosDY), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			dy := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDY[i], 0})
 			if i > 0 {
@@ -283,42 +278,36 @@ func (g *Text) RenderText() {
 	g.LastBBox.Min.Y -= maxh * .8 // baseline adjust
 	g.LastBBox.Max = g.LastBBox.Min.Add(g.TextRender.Size)
 	g.TextRender.Render(rs, pos)
-	g.ComputeBBox()
+	g.BBoxes()
 }
 
 func (g *Text) LocalBBox() mat32.Box2 {
 	return g.TextBBox()
 }
 
-func (g *Text) Render() {
+func (g *Text) Render(sv *SVG) {
 	if g.IsParText() {
-		if g.Viewport == nil {
-			g.This().(gi.Node2D).Init2D()
-		}
 		pc := &g.Pnt
-		rs := g.Render()
-		if rs == nil {
-			return
-		}
+		rs := &sv.RenderState
 		rs.PushXFormLock(pc.XForm)
 
-		g.RenderChildren()
-		g.ComputeBBox() // must come after render
+		g.RenderChildren(sv)
+		g.BBoxes(sv) // must come after render
 
 		rs.PopXFormLock()
 	} else {
-		vis, rs := g.PushXForm()
+		vis, rs := g.PushXForm(sv)
 		if !vis {
 			return
 		}
 		if len(g.Text) > 0 {
 			rs.Lock()
-			g.RenderText()
+			g.RenderText(sv)
 			rs.Unlock()
 		}
-		g.RenderChildren()
+		g.RenderChildren(sv)
 		if g.IsParText() {
-			g.ComputeBBox() // after kids have rendered
+			g.BBoxes(sv) // after kids have rendered
 		}
 		rs.PopXFormLock()
 	}

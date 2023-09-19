@@ -22,10 +22,9 @@ import (
 
 	"github.com/srwiley/rasterx"
 	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"golang.org/x/net/html/charset"
 )
@@ -36,14 +35,14 @@ import (
 // using standard XML marshal / unmarshal
 
 var (
-	paramMismatchError  = errors.New("gi.SVG Parse: Param mismatch")
-	commandUnknownError = errors.New("gi.SVG Parse: Unknown command")
-	zeroLengthIdError   = errors.New("gi.SVG Parse: zero length id")
-	missingIdError      = errors.New("gi.SVG Parse: cannot find id")
+	paramMismatchError  = errors.New("SVG Parse: Param mismatch")
+	commandUnknownError = errors.New("SVG Parse: Unknown command")
+	zeroLengthIdError   = errors.New("SVG Parse: zero length id")
+	missingIdError      = errors.New("SVG Parse: cannot find id")
 )
 
 // OpenXML Opens XML-formatted SVG input from given file
-func (sv *SVG) OpenXML(fname gi.FileName) error {
+func (sv *SVG) OpenXML(fname string) error {
 	filename := string(fname)
 	fi, err := os.Stat(filename)
 	if err != nil {
@@ -72,8 +71,6 @@ func (sv *SVG) OpenXML(fname gi.FileName) error {
 //
 //	svg.FullInit2DTree() after to initialize it for rendering.
 func (sv *SVG) ReadXML(reader io.Reader) error {
-	updt := sv.UpdateStart()
-	sv.SetFullReRender()
 	decoder := xml.NewDecoder(reader)
 	decoder.Strict = false
 	decoder.AutoClose = xml.HTMLAutoClose
@@ -87,7 +84,7 @@ func (sv *SVG) ReadXML(reader io.Reader) error {
 			if err == io.EOF {
 				break
 			}
-			log.Printf("gi.SVG parsing error: %v\n", err)
+			log.Printf("SVG parsing error: %v\n", err)
 			break
 		}
 		switch se := t.(type) {
@@ -97,7 +94,6 @@ func (sv *SVG) ReadXML(reader io.Reader) error {
 			// todo: ignore rest?
 		}
 	}
-	sv.UpdateEnd(updt)
 	if err == io.EOF {
 		return nil
 	}
@@ -106,25 +102,22 @@ func (sv *SVG) ReadXML(reader io.Reader) error {
 
 // UnmarshalXML unmarshals the svg using xml.Decoder
 func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
-	updt := sv.UpdateStart()
-	defer sv.UpdateEnd(updt)
-
 	start := &se
 
 	sv.DeleteAll()
 
-	curPar := sv.This().(gi.Node2D) // current parent node into which elements are created
+	var curPar Node // current parent node into which elements are created
 	curSvg := sv
 	inTitle := false
 	inDesc := false
 	inDef := false
 	inCSS := false
-	var curCSS *gi.StyleSheet
+	var curCSS *StyleSheet
 	inTxt := false
 	var curTxt *Text
 	inTspn := false
 	var curTspn *Text
-	var defPrevPar gi.Node2D // previous parent before a def encountered
+	var defPrevPar Node // previous parent before a def encountered
 
 	for {
 		var t xml.Token
@@ -139,7 +132,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			if err == io.EOF {
 				break
 			}
-			log.Printf("gi.SVG parsing error: %v\n", err)
+			log.Printf("SVG parsing error: %v\n", err)
 			return err
 		}
 		switch se := t.(type) {
@@ -147,31 +140,29 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			nm := se.Name.Local
 			switch {
 			case nm == "svg":
-				if curPar != sv.This() {
-					curPar = curPar.AddNewChild(TypeSVG, "svg").(gi.Node2D)
-				}
-				csvg := curPar.Embed(TypeSVG).(*SVG)
-				curSvg = csvg
+				// if curPar != sv.This() {
+				// 	curPar = curPar.AddNewChild(TypeSVG, "svg").(Node)
+				// }
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(csvg, attr.Name.Local, attr.Value) {
-						continue
-					}
+					// if SetStdXMLAttr(curSvg, attr.Name.Local, attr.Value) {
+					// 	continue
+					// }
 					switch attr.Name.Local {
 					case "viewBox":
 						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) != 4 {
 							return paramMismatchError
 						}
-						csvg.ViewBox.Min.X = pts[0]
-						csvg.ViewBox.Min.Y = pts[1]
-						csvg.ViewBox.Size.X = pts[2]
-						csvg.ViewBox.Size.Y = pts[3]
+						curSvg.ViewBox.Min.X = pts[0]
+						curSvg.ViewBox.Min.Y = pts[1]
+						curSvg.ViewBox.Size.X = pts[2]
+						curSvg.ViewBox.Size.Y = pts[3]
 					case "width":
-						csvg.PhysWidth.SetString(attr.Value)
-						csvg.PhysWidth.ToDots(&csvg.Pnt.UnContext)
+						curSvg.PhysWidth.SetString(attr.Value)
+						curSvg.PhysWidth.ToDots(&curSvg.Pnt.UnContext)
 					case "height":
-						csvg.PhysHeight.SetString(attr.Value)
-						csvg.PhysHeight.ToDots(&csvg.Pnt.UnContext)
+						curSvg.PhysHeight.SetString(attr.Value)
+						curSvg.PhysHeight.ToDots(&curSvg.Pnt.UnContext)
 					default:
 						curPar.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -185,9 +176,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				defPrevPar = curPar
 				curPar = &curSvg.Defs
 			case nm == "g":
-				curPar = curPar.AddNewChild(TypeGroup, "g").(gi.Node2D)
+				curPar = curPar.AddNewChild(GroupType, "g").(Node)
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(curPar.AsNode2D(), attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -199,7 +190,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				rect := AddNewRect(curPar, "rect", 0, 0, 1, 1)
 				var x, y, w, h, rx, ry float32
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(rect, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(rect, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -229,7 +220,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				circle := AddNewCircle(curPar, "circle", 0, 0, 1)
 				var cx, cy, r float32
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(circle, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(circle, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -252,7 +243,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				ellipse := AddNewEllipse(curPar, "ellipse", 0, 0, 1, 1)
 				var cx, cy, rx, ry float32
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(ellipse, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(ellipse, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -277,7 +268,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				line := AddNewLine(curPar, "line", 0, 0, 1, 1)
 				var x1, x2, y1, y2 float32
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(line, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(line, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -301,7 +292,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "polygon":
 				polygon := AddNewPolygon(curPar, "polygon", nil)
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(polygon, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(polygon, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -310,7 +301,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if pts != nil {
 							sz := len(pts)
 							if sz%2 != 0 {
-								err = fmt.Errorf("gi.SVG polygon has an odd number of points: %v str: %v\n", sz, attr.Value)
+								err = fmt.Errorf("SVG polygon has an odd number of points: %v str: %v\n", sz, attr.Value)
 								log.Println(err)
 								return err
 							}
@@ -330,7 +321,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "polyline":
 				polyline := AddNewPolyline(curPar, "polyline", nil)
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(polyline, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(polyline, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -339,7 +330,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if pts != nil {
 							sz := len(pts)
 							if sz%2 != 0 {
-								err = fmt.Errorf("gi.SVG polyline has an odd number of points: %v str: %v\n", sz, attr.Value)
+								err = fmt.Errorf("SVG polyline has an odd number of points: %v str: %v\n", sz, attr.Value)
 								log.Println(err)
 								return err
 							}
@@ -362,7 +353,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					if attr.Name.Local == "original-d" {
 						continue
 					}
-					if gi.SetStdXMLAttr(path, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(path, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -380,7 +371,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				var x, y, w, h float32
 				b := false
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(img, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(img, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -393,7 +384,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "height":
 						h, err = mat32.ParseFloat32(attr.Value)
 					case "preserveAspectRatio":
-						b, _ = kit.ToBool(attr.Value)
+						b, _ = laser.ToBool(attr.Value)
 						img.PreserveAspectRatio = b
 					case "href":
 						if len(attr.Value) > 11 && attr.Value[:11] == "data:image/" {
@@ -405,7 +396,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Printf("image base64 encoding string not properly formatted: %s\n", bs64)
 							}
 							eb := []byte(es[fmti+8:])
-							im, err := gi.ImageFmBase64(fm, eb)
+							im, err := ImageFmBase64(fm, eb)
 							if err != nil {
 								log.Println(err)
 							} else {
@@ -442,7 +433,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					curTspn = txt
 				}
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(txt, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(txt, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -494,9 +485,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "linearGradient":
-				grad := gi.AddNewGradient(curPar, "lin-grad")
+				grad := AddNewGradient(curPar, "lin-grad")
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(grad, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(grad, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -520,9 +511,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					return err
 				}
 			case nm == "radialGradient":
-				grad := gi.AddNewGradient(curPar, "rad-grad")
+				grad := AddNewGradient(curPar, "rad-grad")
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(grad, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(grad, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -546,9 +537,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					return err
 				}
 			case nm == "style":
-				sty := gi.AddNewStyleSheet(curPar, "style")
+				sty := AddNewStyleSheet(curPar, "style")
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(sty, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(sty, attr.Name.Local, attr.Value) {
 						continue
 					}
 				}
@@ -556,10 +547,10 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				curCSS = sty
 				// style code shows up in CharData below
 			case nm == "clipPath":
-				curPar = curPar.AddNewChild(TypeClipPath, "clip-path").(gi.Node2D)
+				curPar = curPar.AddNewChild(TypeClipPath, "clip-path").(Node)
 				cp := curPar.(*ClipPath)
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(cp, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(cp, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -568,13 +559,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "marker":
-				curPar = curPar.AddNewChild(TypeMarker, "marker").(gi.Node2D)
+				curPar = curPar.AddNewChild(TypeMarker, "marker").(Node)
 				mrk := curPar.(*Marker)
 				var rx, ry float32
 				szx := float32(3)
 				szy := float32(3)
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(mrk, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(mrk, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -616,11 +607,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				link := gist.XMLAttr("href", se.Attr)
 				itm := curPar.FindNamedElement(link)
 				if itm != nil {
-					cln := itm.Clone().(gi.Node2D)
+					cln := itm.Clone().(Node)
 					if cln != nil {
 						curPar.AddChild(cln)
 						for _, attr := range se.Attr {
-							if gi.SetStdXMLAttr(cln.AsNode2D(), attr.Name.Local, attr.Value) {
+							if SetStdXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
 								continue
 							}
 							switch attr.Name.Local {
@@ -647,11 +638,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "guide":
 				fallthrough
 			case nm == "metadata":
-				curPar = curPar.AddNewChild(gi.TypeMetaData2D, nm).(gi.Node2D)
-				md := curPar.(*gi.MetaData2D)
+				curPar = curPar.AddNewChild(TypeMetaData, nm).(Node)
+				md := curPar.(*MetaData)
 				md.Class = nm
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(md, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(md, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -660,12 +651,12 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case strings.HasPrefix(nm, "flow"):
-				curPar = curPar.AddNewChild(TypeFlow, nm).(gi.Node2D)
+				curPar = curPar.AddNewChild(TypeFlow, nm).(Node)
 				md := curPar.(*Flow)
 				md.Class = nm
 				md.FlowType = nm
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(md, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(md, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -678,12 +669,12 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case strings.HasPrefix(nm, "path-effect"):
 				fallthrough
 			case strings.HasPrefix(nm, "filter"):
-				curPar = curPar.AddNewChild(TypeFilter, nm).(gi.Node2D)
+				curPar = curPar.AddNewChild(TypeFilter, nm).(Node)
 				md := curPar.(*Filter)
 				md.Class = nm
 				md.FilterType = nm
 				for _, attr := range se.Attr {
-					if gi.SetStdXMLAttr(md, attr.Name.Local, attr.Value) {
+					if SetStdXMLAttr(md, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -692,7 +683,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			default:
-				errStr := "gi.SVG Cannot process svg element " + se.Name.Local
+				errStr := "SVG Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
 				IconAutoOpen = false
 			}
@@ -733,7 +724,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar.Parent() == nil {
 					break
 				}
-				curPar = curPar.Parent().(gi.Node2D)
+				curPar = curPar.Parent().(Node)
 				if curPar == sv.This() {
 					break
 				}
@@ -743,7 +734,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				}
 			}
 		case xml.CharData:
-			// (ok, md := curPar.(*MetaData2D); ok)
+			// (ok, md := curPar.(*MetaData); ok)
 			trspc := strings.TrimSpace(string(se))
 			switch {
 			// case :
@@ -761,9 +752,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				cp := curCSS.CSSProps()
 				if cp != nil {
 					if inDef && defPrevPar != nil {
-						defPrevPar.AsNode2D().CSS = cp
+						defPrevPar.AsNodeBase().CSS = cp
 					} else {
-						curPar.AsNode2D().CSS = cp
+						curPar.AsNodeBase().CSS = cp
 					}
 				}
 			}
@@ -776,7 +767,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 //   Writing
 
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
-func (sv *SVG) SaveXML(fname gi.FileName) error {
+func (sv *SVG) SaveXML(fname string) error {
 	filename := string(fname)
 	fp, err := os.Create(filename)
 	defer fp.Close()
@@ -848,11 +839,11 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 				XMLAddAttr(&se.Attr, "style", sp)
 			}
 			if txp, has := props["transform"]; has {
-				XMLAddAttr(&se.Attr, "transform", kit.ToString(txp))
+				XMLAddAttr(&se.Attr, "transform", laser.ToString(txp))
 			}
 		} else {
 			for k, v := range props {
-				sv := kit.ToString(v)
+				sv := laser.ToString(v)
 				if _, has := InkscapeProps[k]; has {
 					k = "inkscape:" + k
 				} else if k == "overflow" {
@@ -875,14 +866,14 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		if strings.HasPrefix(strings.ToLower(itm.Name()), "layer") {
 		}
 		for k, v := range props {
-			sv := kit.ToString(v)
+			sv := laser.ToString(v)
 			switch k {
 			case "opacity", "transform":
 				XMLAddAttr(&se.Attr, k, sv)
 			case "groupmode":
 				XMLAddAttr(&se.Attr, "inkscape:groupmode", sv)
 				if st, has := props["style"]; has {
-					XMLAddAttr(&se.Attr, "style", kit.ToString(st))
+					XMLAddAttr(&se.Attr, "style", laser.ToString(st))
 				} else {
 					XMLAddAttr(&se.Attr, "style", "display:inline")
 				}
@@ -946,9 +937,9 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
 		XMLAddAttr(&se.Attr, "preserveAspectRatio", fmt.Sprintf("%v", nd.PreserveAspectRatio))
-		ib, fmt := gi.ImageToBase64PNG(nd.Pixels)
-		XMLAddAttr(&se.Attr, "xlink:href", "data:"+fmt+";base64,"+string(gi.Base64SplitLines(ib)))
-	case *gi.MetaData2D:
+		ib, fmt := ImageToBase64PNG(nd.Pixels)
+		XMLAddAttr(&se.Attr, "xlink:href", "data:"+fmt+";base64,"+string(Base64SplitLines(ib)))
+	case *MetaData:
 		if strings.HasPrefix(nd.Nm, "namedview") {
 			nm = "sodipodi:namedview"
 		} else if strings.HasPrefix(nd.Nm, "grid") {
@@ -964,7 +955,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "orient", nd.Orient)
 	case *Filter:
 		return "" // not yet supported
-	case *gi.StyleSheet:
+	case *StyleSheet:
 		nm = "style"
 	default:
 		nm = ki.Type(itm).String()
@@ -1054,7 +1045,7 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 // returns any error, and name of element that enc.WriteEnd() should be
 // called with -- allows for extra elements to be added at end of list.
 func SVGNodeTreeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) (string, error) {
-	_, g := gi.KiToNode2D(itm)
+	gi := itm.(Node)
 	name := SVGNodeMarshalXML(itm, enc, setName)
 	if name == "" {
 		return "", nil
@@ -1103,4 +1094,22 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	ed.Name = me.Name
 	enc.EncodeToken(ed)
 	return err
+}
+
+// SetStdXMLAttr sets standard attributes of node given XML-style name /
+// attribute values (e.g., from parsing XML / SVG files) -- returns true if handled
+func SetStdXMLAttr(ni Node, name, val string) bool {
+	nb := ni.AsGiNode()
+	switch name {
+	case "id":
+		nb.SetName(val)
+		return true
+	case "class":
+		nb.Class = val
+		return true
+	case "style":
+		gist.SetStylePropsXML(val, &nb.Props)
+		return true
+	}
+	return false
 }

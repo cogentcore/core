@@ -5,9 +5,7 @@
 package svg
 
 import (
-	"goki.dev/gi/v2/gi"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 )
 
 // Flow represents SVG flow* elements
@@ -16,11 +14,9 @@ type Flow struct {
 	FlowType string
 }
 
-var TypeFlow = kit.Types.AddType(&Flow{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
-
 // AddNewFlow adds a new flow to given parent node, with given name.
 func AddNewFlow(parent ki.Ki, name string) *Flow {
-	return parent.AddNewChild(TypeFlow, name).(*Flow)
+	return parent.AddNewChild(FlowType, name).(*Flow)
 }
 
 func (g *Flow) SVGName() string { return "flow" }

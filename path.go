@@ -12,7 +12,6 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/girl"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
@@ -29,8 +28,6 @@ type Path struct {
 	// string version of the path data
 	DataStr string `xml:"d" desc:"string version of the path data"`
 }
-
-var TypePath = kit.Types.AddType(&Path{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
 
 // AddNewPath adds a new button to given parent node, with given name and path data.
 func AddNewPath(parent ki.Ki, name string, data string) *Path {
@@ -80,12 +77,12 @@ func (g *Path) LocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Path) Render() {
+func (g *Path) Render(sv *SVG) {
 	sz := len(g.Data)
 	if sz < 2 {
 		return
 	}
-	vis, rs := g.PushXForm()
+	vis, rs := g.PushXForm(sv)
 	if !vis {
 		return
 	}
@@ -95,7 +92,7 @@ func (g *Path) Render() {
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
 
-	g.ComputeBBox()
+	g.BBoxes(sv)
 
 	if mrk := MarkerByName(g, "marker-start"); mrk != nil {
 		// todo: could look for close-path at end and find angle from there..
@@ -127,7 +124,7 @@ func (g *Path) Render() {
 		})
 	}
 
-	g.RenderChildren()
+	g.RenderChildren(sv)
 	rs.PopXFormLock()
 }
 

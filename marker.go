@@ -5,10 +5,7 @@
 package svg
 
 import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -47,8 +44,6 @@ type Marker struct {
 	EffSize mat32.Vec2 `desc:"effective size for actual rendering"`
 }
 
-var TypeMarker = kit.Types.AddType(&Marker{}, ki.Props{ki.EnumTypeFlag: gi.TypeNodeFlags})
-
 // AddNewMarker adds a new marker to given parent node, with given name.
 func AddNewMarker(parent ki.Ki, name string) *Marker {
 	return parent.AddNewChild(TypeMarker, name).(*Marker)
@@ -74,7 +69,7 @@ func (g *Marker) CopyFieldsFrom(frm any) {
 }
 
 // MarkerUnits specifies units to use for svg marker elements
-type MarkerUnits int32
+type MarkerUnits int32 //enum: enum
 
 const (
 	StrokeWidth MarkerUnits = iota
@@ -82,14 +77,9 @@ const (
 	MarkerUnitsN
 )
 
-var TypeMarkerUnits = kit.Enums.AddEnumAltLower(MarkerUnitsN, kit.NotBitFlag, gist.StylePropProps, "")
-
-func (ev MarkerUnits) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *MarkerUnits) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
 // RenderMarker renders the marker using given vertex position, angle (in
 // radians), and stroke width
-func (mrk *Marker) RenderMarker(vertexPos mat32.Vec2, vertexAng, strokeWidth float32) {
+func (mrk *Marker) RenderMarker(sv *SVG, vertexPos mat32.Vec2, vertexAng, strokeWidth float32) {
 	mrk.VertexPos = vertexPos
 	mrk.VertexAngle = vertexAng
 	mrk.StrokeWidth = strokeWidth
@@ -112,36 +102,26 @@ func (mrk *Marker) RenderMarker(vertexPos mat32.Vec2, vertexAng, strokeWidth flo
 
 	mrk.Pnt.XForm = mrk.XForm
 
-	mrk.Render()
+	mrk.Render(sv)
 }
 
-func (g *Marker) Render() {
-	if g.Viewport == nil {
-		g.This().(gi.Node2D).Init2D()
-	}
+func (g *Marker) Render(sv *SVG) {
 	pc := &g.Pnt
-	rs := g.Render()
-	if rs == nil {
-		return
-	}
+	rs := &sv.RenderState
 	rs.PushXFormLock(pc.XForm)
 
-	g.RenderChildren()
-	g.ComputeBBox() // must come after render
+	g.RenderChildren(sv)
+	g.BBoxes(sv) // must come after render
 
 	rs.PopXFormLock()
 }
 
-func (g *Marker) ComputeBBox() {
+func (g *Marker) BBoxes(sv *SVG) {
 	if g.This() == nil {
 		return
 	}
-	g.BBoxMu.Lock()
 	ni := g.This().(Node)
-	g.ObjBBox = ni.BBox2D()
-	g.ObjBBox.Canon()
-	pbbox := g.Viewport.This().(gi.Node2D).ChildrenBBox2D()
-	g.VpBBox = pbbox.Intersect(g.ObjBBox)
-	g.BBoxMu.Unlock()
-	g.SetWinBBox()
+	g.BBox = ni.NodeBBox(sv)
+	g.BBox.Canon()
+	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }

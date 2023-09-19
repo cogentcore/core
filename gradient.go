@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package svg
 
 import (
 	"goki.dev/girl/gist"
@@ -16,7 +16,7 @@ import (
 // Gradient is used for holding a specified color gradient (ColorSpec)
 // name is id for lookup in url
 type Gradient struct {
-	Node2DBase
+	NodeBase
 
 	// the color gradient
 	Grad gist.ColorSpec `desc:"the color gradient"`
@@ -34,7 +34,7 @@ func AddNewGradient(parent ki.Ki, name string) *Gradient {
 
 func (gr *Gradient) CopyFieldsFrom(frm any) {
 	fr := frm.(*Gradient)
-	gr.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
+	gr.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 	gr.Grad = fr.Grad
 	gr.StopsName = fr.StopsName
 }

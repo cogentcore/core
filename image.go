@@ -5,14 +5,19 @@
 package svg
 
 import (
+	"bytes"
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"image"
+	"image/jpeg"
+	"image/png"
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
@@ -32,17 +37,15 @@ type Image struct {
 	PreserveAspectRatio bool `xml:"preserveAspectRatio" desc:"directs resize operations to preserve aspect ratio"`
 
 	// file name of image loaded -- set by OpenImage
-	Filename gi.FileName `desc:"file name of image loaded -- set by OpenImage"`
+	Filename string `desc:"file name of image loaded -- set by OpenImage"`
 
 	// [view: -] the image pixels
 	Pixels *image.RGBA `copy:"-" xml:"-" json:"-" view:"-" desc:"the image pixels"`
 }
 
-var TypeImage = kit.Types.AddType(&Image{}, ImageProps)
-
 // AddNewImage adds a new image to given parent node, with given name and pos
 func AddNewImage(parent ki.Ki, name string, x, y float32) *Image {
-	g := parent.AddNewChild(TypeImage, name).(*Image)
+	g := parent.AddNewChild(ImageType, name).(*Image)
 	g.Pos.Set(x, y)
 	return g
 }
@@ -83,10 +86,10 @@ func (g *Image) SetImageSize(nwsz image.Point) {
 // OpenImage opens an image for the bitmap, and resizes to the size of the image
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
-func (g *Image) OpenImage(filename gi.FileName, width, height float32) error {
-	img, err := gi.OpenImage(string(filename))
+func (g *Image) OpenImage(filename string, width, height float32) error {
+	img, err := OpenImage(filename)
 	if err != nil {
-		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
+		log.Printf("svg.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
 	}
 	g.Filename = filename
@@ -95,11 +98,40 @@ func (g *Image) OpenImage(filename gi.FileName, width, height float32) error {
 }
 
 // SaveImage saves current image to a file
-func (g *Image) SaveImage(filename gi.FileName) error {
+func (g *Image) SaveImage(filename string) error {
 	if g.Pixels == nil {
-		return errors.New("svg.Images Pixels is nil")
+		return errors.New("svg.SaveImage Pixels is nil")
 	}
-	return gi.SaveImage(string(filename), g.Pixels)
+	return SaveImage(filename, g.Pixels)
+}
+
+// OpenImage opens an image from given path filename -- format is inferred automatically.
+func OpenImage(path string) (image.Image, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	im, _, err := image.Decode(file)
+	return im, err
+}
+
+// SaveImage saves image to file, with format inferred from filename -- JPEG and PNG
+// supported by default.
+func SaveImage(path string, im image.Image) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext == ".png" {
+		return png.Encode(file, im)
+	} else if ext == ".jpg" || ext == ".jpeg" {
+		return jpeg.Encode(file, im, &jpeg.Options{Quality: 90})
+	} else {
+		return fmt.Errorf("svg.SaveImage: extension: %s not recognized -- only .png and .jpg / jpeg supported", ext)
+	}
 }
 
 // SetImage sets an image for the bitmap , and resizes to the size of the image
@@ -136,18 +168,18 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 	}
 }
 
-func (g *Image) DrawImage() {
+func (g *Image) DrawImage(sv *SVG) {
 	if g.Pixels == nil {
 		return
 	}
 
-	rs := g.Render()
+	rs := &sv.RenderState
 	pc := &g.Pnt
 	pc.DrawImageScaled(rs, g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 }
 
-func (g *Image) BBox2D() image.Rectangle {
-	rs := &g.Viewport.Render
+func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
+	rs := &sv.RenderState
 	pos := rs.XForm.MulVec2AsPt(g.Pos)
 	max := rs.XForm.MulVec2AsPt(g.Pos.Add(g.Size))
 	posi := pos.ToPointCeil()
@@ -162,16 +194,16 @@ func (g *Image) LocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Image) Render() {
-	vis, rs := g.PushXForm()
+func (g *Image) Render(sv *SVG) {
+	vis, rs := g.PushXForm(sv)
 	if !vis {
 		return
 	}
 	rs.Lock()
-	g.DrawImage()
+	g.DrawImage(sv)
 	rs.Unlock()
-	g.ComputeBBox()
-	g.RenderChildren()
+	g.BBoxes(sv)
+	g.RenderChildren(sv)
 	rs.PopXFormLock()
 }
 
@@ -229,9 +261,9 @@ func (g *Image) ReadGeom(dat []float32) {
 	g.ReadXForm(dat, 4)
 }
 
+/*
 // ImageProps define the ToolBar for images
 var ImageProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open image file for this image node, rescaling to given size -- use 0, 0 to use native image size.",
@@ -256,4 +288,90 @@ var ImageProps = ki.Props{
 			},
 		}},
 	},
+}
+*/
+
+// ImageToBase64PNG returns bytes of image encoded as a PNG in Base64 format
+// with "image/png" mimetype returned
+func ImageToBase64PNG(img image.Image) ([]byte, string) {
+	ibuf := &bytes.Buffer{}
+	png.Encode(ibuf, img)
+	ib := ibuf.Bytes()
+	eb := make([]byte, base64.StdEncoding.EncodedLen(len(ib)))
+	base64.StdEncoding.Encode(eb, ib)
+	return eb, "image/png"
+}
+
+// ImageToBase64JPG returns bytes image encoded as a JPG in Base64 format
+// with "image/jpeg" mimetype returned
+func ImageToBase64JPG(img image.Image) ([]byte, string) {
+	ibuf := &bytes.Buffer{}
+	jpeg.Encode(ibuf, img, &jpeg.Options{Quality: 90})
+	ib := ibuf.Bytes()
+	eb := make([]byte, base64.StdEncoding.EncodedLen(len(ib)))
+	base64.StdEncoding.Encode(eb, ib)
+	return eb, "image/jpeg"
+}
+
+// Base64SplitLines splits the encoded Base64 bytes into standard lines of 76
+// chars each.  The last line also ends in a newline
+func Base64SplitLines(b []byte) []byte {
+	ll := 76
+	sz := len(b)
+	nl := (sz / ll)
+	rb := make([]byte, sz+nl+1)
+	for i := 0; i < nl; i++ {
+		st := ll * i
+		rst := ll*i + i
+		copy(rb[rst:rst+ll], b[st:st+ll])
+		rb[rst+ll] = '\n'
+	}
+	st := ll * nl
+	rst := ll*nl + nl
+	ln := sz - st
+	copy(rb[rst:rst+ln], b[st:st+ln])
+	rb[rst+ln] = '\n'
+	return rb
+}
+
+// ImageFmBase64PNG returns image from Base64-encoded bytes in PNG format
+func ImageFmBase64PNG(eb []byte) (image.Image, error) {
+	if eb[76] == ' ' {
+		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
+	}
+	db := make([]byte, base64.StdEncoding.DecodedLen(len(eb)))
+	_, err := base64.StdEncoding.Decode(db, eb)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	rb := bytes.NewReader(db)
+	return png.Decode(rb)
+}
+
+// ImageFmBase64PNG returns image from Base64-encoded bytes in PNG format
+func ImageFmBase64JPG(eb []byte) (image.Image, error) {
+	if eb[76] == ' ' {
+		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
+	}
+	db := make([]byte, base64.StdEncoding.DecodedLen(len(eb)))
+	_, err := base64.StdEncoding.Decode(db, eb)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	rb := bytes.NewReader(db)
+	return jpeg.Decode(rb)
+}
+
+// ImageFmBase64 returns image from Base64-encoded bytes in either PNG or JPEG format
+// based on fmt which must end in either png or jpeg
+func ImageFmBase64(fmt string, eb []byte) (image.Image, error) {
+	if strings.HasSuffix(fmt, "png") {
+		return ImageFmBase64PNG(eb)
+	}
+	if strings.HasSuffix(fmt, "jpeg") {
+		return ImageFmBase64JPG(eb)
+	}
+	return nil, errors.New("image format must be either png or jpeg")
 }

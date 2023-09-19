@@ -28,14 +28,23 @@ type Node interface {
 	// Paint returns the SVG Paint style object for this node
 	Paint() *girl.Paint
 
+	// Style updates the Paint style for this node
+	Style(sv *SVG)
+
+	// Render draws the node to the svg image
+	Render(sv *SVG)
+
+	// BBoxes computes BBox and VisBBox during Render
+	BBoxes(sv *SVG)
+
+	// LocalBBox returns the bounding box of node in local dimensions
+	LocalBBox() mat32.Box2
+
 	// SetPos sets the *upper left* position of this element, in local dimensions
 	SetPos(pos mat32.Vec2)
 
 	// SetSize sets the overall size of this element, in local dimensions
 	SetSize(sz mat32.Vec2)
-
-	// LocalBBox returns the bounding box of node in local dimensions
-	LocalBBox() mat32.Box2
 
 	// ApplyXForm applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
@@ -94,7 +103,7 @@ func (g *NodeBase) CopyFieldsFrom(frm any) {
 	g.Pnt = fr.Pnt
 }
 
-func (g *NodeBase) AsSVGNode() *NodeBase {
+func (g *NodeBase) AsNodeBase() *NodeBase {
 	return g
 }
 
@@ -121,7 +130,7 @@ func (n *NodeBase) BaseIface() reflect.Type {
 	return reflect.TypeOf((*NodeBase)(nil)).Elem()
 }
 
-func (g *NodeBase) Paint() *gist.Paint {
+func (g *NodeBase) Paint() *girl.Paint {
 	return &g.Pnt.Paint
 }
 
@@ -385,8 +394,8 @@ func (g *NodeBase) LocalBBoxToWin(bb mat32.Box2) image.Rectangle {
 	return bb.MulMat2(mxi).ToRect()
 }
 
-func (g *NodeBase) NodeBBox() image.Rectangle {
-	rs := &g.Viewport.Render
+func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
+	rs := &sv.RenderState
 	return rs.LastRenderBBox
 }
 
@@ -402,12 +411,12 @@ func (g *NodeBase) LocalLineWidth() float32 {
 // ComputeBBox is called by default in render to compute bounding boxes for
 // gui interaction -- can only be done in rendering because that is when all
 // the proper xforms are all in place -- VpBBox is intersected with parent SVG
-func (g *NodeBase) ComputeBBox(sv *SVG) {
+func (g *NodeBase) BBoxes(sv *SVG) {
 	if g.This() == nil {
 		return
 	}
 	ni := g.This().(Node)
-	g.BBox = ni.NodeBBox()
+	g.BBox = ni.NodeBBox(sv)
 	g.BBox.Canon()
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
@@ -434,28 +443,28 @@ func (g *NodeBase) PushXForm(sv *SVG) (bool, *girl.State) {
 		return false, nil
 	}
 
-	rs := &mvp.Render
+	rs := &sv.RenderState
 	pc := &g.Pnt
 	rs.PushXFormLock(pc.XForm)
 
 	return true, rs
 }
 
-func (g *NodeBase) RenderChildren() {
-	for _, kid := range sv.Kids {
+func (g *NodeBase) RenderChildren(sv *SVG) {
+	for _, kid := range g.Kids {
 		ni := kid.(Node)
-		ni.Render()
+		ni.Render(sv)
 	}
 }
 
-func (g *NodeBase) Render() {
-	vis, rs := g.PushXForm()
+func (g *NodeBase) Render(sv *SVG) {
+	vis, rs := g.PushXForm(sv)
 	if !vis {
 		return
 	}
 	// pc := &g.Pnt
 	// render path elements, then compute bbox, then fill / stroke
-	g.ComputeBBox()
-	g.RenderChildren()
+	g.BBoxes(sv)
+	g.RenderChildren(sv)
 	rs.PopXFormLock()
 }

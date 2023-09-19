@@ -22,7 +22,7 @@ type Circle struct {
 
 // AddNewCircle adds a new button to given parent node, with given name, x,y pos, and radius.
 func AddNewCircle(parent ki.Ki, name string, x, y, radius float32) *Circle {
-	g := parent.AddNewChild(TypeCircle, name).(*Circle)
+	g := parent.AddNewChild(CircleType, name).(*Circle)
 	g.Pos.Set(x, y)
 	g.Radius = radius
 	return g
@@ -53,8 +53,8 @@ func (g *Circle) LocalBBox() mat32.Box2 {
 	return bb
 }
 
-func (g *Circle) Render() {
-	vis, rs := g.PushXForm()
+func (g *Circle) Render(sv *SVG) {
+	vis, rs := g.PushXForm(sv)
 	if !vis {
 		return
 	}
@@ -64,8 +64,8 @@ func (g *Circle) Render() {
 	pc.FillStrokeClear(rs)
 	rs.Unlock()
 
-	g.ComputeBBox()
-	g.RenderChildren()
+	g.BBoxes(sv)
+	g.RenderChildren(sv)
 
 	rs.PopXFormLock()
 }
