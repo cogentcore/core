@@ -52,10 +52,10 @@ func IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error)
 	if err != nil {
 		return nil, fmt.Errorf("error creating file watcher: %w", err)
 	}
-	defer watcher.Close()
 
 	ec := make(chan error)
 	go func() {
+		defer watcher.Close()
 		wasDark, err := IsDark() // we need to store this so that we only update when it changes
 		if err != nil {
 			ec <- fmt.Errorf("error while getting theme: %w", err)
@@ -84,7 +84,8 @@ func IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error)
 				}
 				ec <- fmt.Errorf("watcher error: %w", err)
 				return
-			case _, ok := <-done:
+			case v, ok := <-done:
+				fmt.Println("done chan", v, ok)
 				// if done is closed, we return
 				if !ok {
 					fmt.Println("done")
@@ -98,6 +99,5 @@ func IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error)
 	if err != nil {
 		return nil, fmt.Errorf("error adding file watcher: %w", err)
 	}
-	<-ec // TODO: figure out a better approach to concurrency
 	return ec, nil
 }
