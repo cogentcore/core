@@ -12,16 +12,19 @@ import (
 	"time"
 
 	"goki.dev/goki/config"
+	"goki.dev/grease"
 )
 
-// UpdateVersion updates the version
-// file of the config project based
-// on the given config info and commits
-// and pushes the changes.
+// SetVersion updates the config and version file of the config project based
+// on the config version and commits and pushes the changes.
 //
 //gti:add
-//grease:cmd -name set-version
-func UpdateVersion(c *config.Config) error {
+func SetVersion(c *config.Config) error {
+	// we need to update the config file with the new version
+	err := grease.Save(c, grease.ConfigFile)
+	if err != nil {
+		return fmt.Errorf("error saving new version to config file: %w", err)
+	}
 	str, err := VersionFileString(c)
 	if err != nil {
 		return fmt.Errorf("error generating version file string: %w", err)
