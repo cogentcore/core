@@ -210,7 +210,6 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			for i, field := range st.Fields.List {
 				// if we have no names, we are embed, so add to embeds and remove from fields
 				if len(field.Names) == 0 {
-					fmt.Println(ts, field, st.Fields.List)
 					emblist.List = append(emblist.List, field)
 					st.Fields.List = slices.Delete(st.Fields.List, i+delOff, i+1+delOff) // we need to add delOff to correctly handle situations where we delete multiple times and our indices become inaccurate
 					delOff--                                                             // we have deleted so we need to update offset
