@@ -11,9 +11,9 @@ import (
 	"image/draw"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
