@@ -7,8 +7,6 @@
 
 package vgpu
 
-//go:generate goki generate
-
 import (
 	"bytes"
 	"errors"

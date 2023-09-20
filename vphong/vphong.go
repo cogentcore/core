@@ -4,8 +4,6 @@
 
 package vphong
 
-//go:generate enumgen
-
 import (
 	"sync"
 
