@@ -15,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/grr"
 	"goki.dev/ki/v2/toml"
 	"goki.dev/laser"
 )
@@ -186,7 +185,7 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 		return newCmd, allFields, err
 	}
 	if len(newArgs) > 0 {
-		return newCmd, allFields, grr.Errorf("got unused arguments: %v", newArgs)
+		return newCmd, allFields, fmt.Errorf("got unused arguments: %v", newArgs)
 	}
 	return newCmd, allFlags, nil
 }
