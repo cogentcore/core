@@ -350,34 +350,32 @@ type NewWindowOptions struct {
 	Title string
 
 	// Flags can be set using WindowFlags to request different types of windows
-	Flags int64
+	Flags WindowFlags
 }
 
-/*
 func (o *NewWindowOptions) SetDialog() {
-	bitflag.Set(&o.Flags, int(Dialog))
+	o.Flags.SetFlag(true, Dialog)
 }
 
 func (o *NewWindowOptions) SetModal() {
-	bitflag.Set(&o.Flags, int(Modal))
+	o.Flags.SetFlag(true, Modal)
 }
 
 func (o *NewWindowOptions) SetTool() {
-	bitflag.Set(&o.Flags, int(Tool))
+	o.Flags.SetFlag(true, Tool)
 }
 
 func (o *NewWindowOptions) SetFullscreen() {
-	bitflag.Set(&o.Flags, int(Fullscreen))
+	o.Flags.SetFlag(true, Fullscreen)
 }
 
-func WindowFlagsToBool(flags int64) (dialog, modal, tool, fullscreen bool) {
-	dialog = bitflag.Has(flags, int(Dialog))
-	modal = bitflag.Has(flags, int(Modal))
-	tool = bitflag.Has(flags, int(Tool))
-	fullscreen = bitflag.Has(flags, int(Fullscreen))
+func WindowFlagsToBool(flags WindowFlags) (dialog, modal, tool, fullscreen bool) {
+	dialog = flags.HasFlag(Dialog)
+	modal = flags.HasFlag(Modal)
+	tool = flags.HasFlag(Tool)
+	fullscreen = flags.HasFlag(Fullscreen)
 	return
 }
-*/
 
 // GetTitle returns a sanitized form of o.Title. In particular, its length will
 // not exceed 4096, and it may be further truncated so that it is valid UTF-8
