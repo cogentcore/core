@@ -8,7 +8,7 @@
 package vgpu
 
 //go:generate enumgen
-// note: not working: go:generate gtigen
+// note: not working go:generate gtigen -add-types
 
 import (
 	"bytes"
