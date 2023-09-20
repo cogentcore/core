@@ -7,10 +7,10 @@
 // plus all the more detailed tokens needed for actually parsing languages
 package token
 
+//go:generate enumgen
+
 import (
 	"fmt"
-
-	"github.com/goki/ki/kit"
 )
 
 // Tokens is a complete set of lexical tokens that encompasses all programming and text
@@ -23,18 +23,7 @@ import (
 // See http://pygments.org/docs/tokens/ for more docs on the different categories
 //
 // Anything missing should be added via a pull request etc
-type Tokens int
-
-//go:generate stringer -type=Tokens
-
-var KiT_Tokens = kit.Enums.AddEnum(TokensN, kit.NotBitFlag, nil)
-
-func (ev Tokens) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Tokens) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// map keys require text marshaling:
-func (ev Tokens) MarshalText() ([]byte, error)  { return kit.EnumMarshalText(ev) }
-func (ev *Tokens) UnmarshalText(b []byte) error { return kit.EnumUnmarshalText(ev, b) }
+type Tokens int //enums:enum
 
 // CatMap is the map into the category level for each token
 var CatMap map[Tokens]Tokens
@@ -517,8 +506,6 @@ const (
 	TextStyleTraceback
 	TextStyleUnderline
 	TextStyleLink
-
-	TokensN
 )
 
 // Categories

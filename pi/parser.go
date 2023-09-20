@@ -4,6 +4,8 @@
 
 package pi
 
+//go:generate goki generate
+
 import (
 	"encoding/json"
 	"fmt"
@@ -12,7 +14,6 @@ import (
 	"os"
 	"time"
 
-	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/parse"
@@ -285,12 +286,7 @@ func (pr *Parser) ParseString(str string, fname string, sup filecat.Supported) *
 
 // ReadJSON opens lexer and parser rules from Bytes, in a standard JSON-formatted file
 func (pr *Parser) ReadJSON(b []byte) error {
-	err := json.Unmarshal(b, pr)
-	if err == nil {
-		ki.UnmarshalPost(pr.Lexer.This())
-		ki.UnmarshalPost(pr.Parser.This())
-	}
-	return err
+	return json.Unmarshal(b, pr)
 }
 
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file

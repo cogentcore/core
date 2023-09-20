@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/ki/v2/walki"
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/parse"
@@ -370,7 +370,7 @@ func (gl *GoLang) LookupString(fs *pi.FileState, pkg *syms.Symbol, scopes syms.S
 // CompleteAstStart finds the best starting point in the given current-line Ast
 // to start completion process, which walks back down from that starting point
 func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, last *parse.Ast) {
-	curi := walki.Last(ast)
+	curi := ki.Last(ast)
 	if curi == nil {
 		return
 	}

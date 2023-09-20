@@ -6,8 +6,10 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"goki.dev/enums"
+	"goki.dev/ki/v2"
 )
 
 var _ActionsValues = []Actions{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
@@ -274,6 +276,218 @@ func (i AstActs) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *AstActs) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+var _RuleFlagsValues = []RuleFlags{9, 10, 11, 12, 13, 14, 15}
+
+// RuleFlagsN is the highest valid value
+// for type RuleFlags, plus one.
+const RuleFlagsN RuleFlags = 16
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _RuleFlagsNoOp() {
+	var x [1]struct{}
+	_ = x[SetsScope-(9)]
+	_ = x[Reverse-(10)]
+	_ = x[NoToks-(11)]
+	_ = x[OnlyToks-(12)]
+	_ = x[MatchEOS-(13)]
+	_ = x[MultiEOS-(14)]
+	_ = x[TokMatchGroup-(15)]
+}
+
+var _RuleFlagsNameToValueMap = map[string]RuleFlags{
+	`SetsScope`:     9,
+	`setsscope`:     9,
+	`Reverse`:       10,
+	`reverse`:       10,
+	`NoToks`:        11,
+	`notoks`:        11,
+	`OnlyToks`:      12,
+	`onlytoks`:      12,
+	`MatchEOS`:      13,
+	`matcheos`:      13,
+	`MultiEOS`:      14,
+	`multieos`:      14,
+	`TokMatchGroup`: 15,
+	`tokmatchgroup`: 15,
+}
+
+var _RuleFlagsDescMap = map[RuleFlags]string{
+	9:  `SetsScope means that this rule sets its own scope, because it ends with EOS`,
+	10: `Reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic binary expressions only: this is needed to produce proper associativity result for mathematical expressions in the recursive descent parser. Only for rules of form: Expr &#39;+&#39; Expr -- two sub-rules with a token operator in the middle.`,
+	11: `NoToks means that this rule doesn&#39;t have any explicit tokens -- only refers to other rules`,
+	12: `OnlyToks means that this rule only has explicit tokens for matching -- can be optimized`,
+	13: `MatchEOS means that the rule ends with a *matched* EOS with StInc = 1. SetsScope applies for optional and matching EOS rules alike.`,
+	14: `MultiEOS means that the rule has multiple EOS tokens within it -- changes some of the logic`,
+	15: `TokMatchGroup is a group node that also has a single token match, so it can be used in a FirstTokMap to optimize lookup of rules`,
+}
+
+var _RuleFlagsMap = map[RuleFlags]string{
+	9:  `SetsScope`,
+	10: `Reverse`,
+	11: `NoToks`,
+	12: `OnlyToks`,
+	13: `MatchEOS`,
+	14: `MultiEOS`,
+	15: `TokMatchGroup`,
+}
+
+// String returns the string representation
+// of this RuleFlags value.
+func (i RuleFlags) String() string {
+	str := ""
+	for _, ie := range ki.FlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	for _, ie := range _RuleFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this RuleFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i RuleFlags) BitIndexString() string {
+	if str, ok := _RuleFlagsMap[i]; ok {
+		return str
+	}
+	return ki.Flags(i).BitIndexString()
+}
+
+// SetString sets the RuleFlags value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *RuleFlags) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the RuleFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *RuleFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _RuleFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _RuleFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			err := (*ki.Flags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Int64 returns the RuleFlags value as an int64.
+func (i RuleFlags) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the RuleFlags value from an int64.
+func (i *RuleFlags) SetInt64(in int64) {
+	*i = RuleFlags(in)
+}
+
+// Desc returns the description of the RuleFlags value.
+func (i RuleFlags) Desc() string {
+	if str, ok := _RuleFlagsDescMap[i]; ok {
+		return str
+	}
+	return ki.Flags(i).Desc()
+}
+
+// RuleFlagsValues returns all possible values
+// for the type RuleFlags.
+func RuleFlagsValues() []RuleFlags {
+	es := ki.FlagsValues()
+	res := make([]RuleFlags, len(es))
+	for i, e := range es {
+		res[i] = RuleFlags(e)
+	}
+	res = append(res, _RuleFlagsValues...)
+	return res
+}
+
+// Values returns all possible values
+// for the type RuleFlags.
+func (i RuleFlags) Values() []enums.Enum {
+	es := ki.FlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_RuleFlagsValues))
+	for i, d := range es {
+		res[i] = d
+	}
+	for i, d := range _RuleFlagsValues {
+		res[i+les] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type RuleFlags.
+func (i RuleFlags) IsValid() bool {
+	_, ok := _RuleFlagsMap[i]
+	if !ok {
+		return ki.Flags(i).IsValid()
+	}
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i RuleFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *RuleFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i RuleFlags) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *RuleFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 

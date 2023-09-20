@@ -13,7 +13,6 @@ import (
 
 	"goki.dev/glop/indent"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/walki"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/syms"
 )
@@ -67,7 +66,7 @@ func (ast *Ast) ParAst() *Ast {
 
 // NextAst returns the next node in the Ast tree, or nil if none
 func (ast *Ast) NextAst() *Ast {
-	nxti := walki.Next(ast)
+	nxti := ki.Next(ast)
 	if nxti == nil {
 		return nil
 	}
@@ -76,7 +75,7 @@ func (ast *Ast) NextAst() *Ast {
 
 // NextSiblingAst returns the next sibling node in the Ast tree, or nil if none
 func (ast *Ast) NextSiblingAst() *Ast {
-	nxti := walki.NextSibling(ast)
+	nxti := ki.NextSibling(ast)
 	if nxti == nil {
 		return nil
 	}
@@ -85,7 +84,7 @@ func (ast *Ast) NextSiblingAst() *Ast {
 
 // PrevAst returns the previous node in the Ast tree, or nil if none
 func (ast *Ast) PrevAst() *Ast {
-	nxti := walki.Prev(ast)
+	nxti := ki.Prev(ast)
 	if nxti == nil {
 		return nil
 	}

@@ -289,16 +289,16 @@ func (pr *Rule) Compile(ps *State) bool {
 	}
 	if pr.Rule == "" { // parent
 		pr.Rules = nil
-		pr.ClearFlag(int(SetsScope))
+		pr.SetFlag(false, SetsScope)
 		return true
 	}
 	valid := true
 	rstr := pr.Rule
 	if pr.Rule[0] == '-' {
 		rstr = rstr[1:]
-		pr.SetFlag(int(Reverse))
+		pr.SetFlag(true, Reverse)
 	} else {
-		pr.ClearFlag(int(Reverse))
+		pr.SetFlag(false, Reverse)
 	}
 	rs := strings.Split(rstr, " ")
 	nr := len(rs)
@@ -306,12 +306,12 @@ func (pr *Rule) Compile(ps *State) bool {
 	pr.Rules = make(RuleList, nr)
 	pr.ExclFwd = nil
 	pr.ExclRev = nil
-	pr.ClearFlag(int(NoToks))
-	pr.SetFlag(int(OnlyToks)) // default is this..
-	pr.ClearFlag(int(SetsScope))
-	pr.ClearFlag(int(MatchEOS))
-	pr.ClearFlag(int(MultiEOS))
-	pr.ClearFlag(int(TokMatchGroup))
+	pr.SetFlag(false, NoToks)
+	pr.SetFlag(true, OnlyToks) // default is this..
+	pr.SetFlag(false, SetsScope)
+	pr.SetFlag(false, MatchEOS)
+	pr.SetFlag(false, MultiEOS)
+	pr.SetFlag(false, TokMatchGroup)
 	pr.Order = nil
 	nmatch := 0
 	ntok := 0
@@ -331,7 +331,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			break
 		}
 		if rn[0] == ':' {
-			pr.SetFlag(int(TokMatchGroup))
+			pr.SetFlag(true, TokMatchGroup)
 		}
 		rr := &pr.Rules[ri]
 		tokst := strings.Index(rn, "'")
@@ -361,7 +361,7 @@ func (pr *Rule) Compile(ps *State) bool {
 				if pmt, has := token.OpPunctMap[tn]; has {
 					rr.Tok.Tok = pmt
 				} else {
-					err := rr.Tok.Tok.FromString(tn)
+					err := rr.Tok.Tok.SetString(tn)
 					if err != nil {
 						ps.Error(lex.PosZero, fmt.Sprintf("Compile: token convert error: %v", err.Error()), pr)
 						valid = false
@@ -371,13 +371,13 @@ func (pr *Rule) Compile(ps *State) bool {
 			if rr.Tok.Tok == token.EOS {
 				eoses++
 				if eoses > 1 {
-					pr.SetFlag(int(MultiEOS))
+					pr.SetFlag(true, MultiEOS)
 				}
 				if ri == nr-1 {
 					rr.StInc = eoses
-					pr.SetFlag(int(SetsScope))
+					pr.SetFlag(true, SetsScope)
 					if rr.Match && eoses == 1 {
-						pr.SetFlag(int(MatchEOS))
+						pr.SetFlag(true, MatchEOS)
 					}
 				}
 			}
@@ -393,7 +393,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			} else if rn[0] == '@' {
 				st = 1
 				rr.Match = true
-				pr.ClearFlag(int(OnlyToks))
+				pr.SetFlag(false, OnlyToks)
 				pr.Order = append(pr.Order, ri)
 				nmatch++
 			} else {
@@ -408,13 +408,13 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 		}
 	}
-	if pr.HasFlag(int(Reverse)) {
+	if pr.HasFlag(Reverse) {
 		pr.Ast = AnchorAst // must be
 	}
 	if ntok == 0 && nmatch == 0 {
 		pr.Rules[0].Match = true
 		pr.Order = append(pr.Order, 0)
-		pr.SetFlag(int(NoToks))
+		pr.SetFlag(true, NoToks)
 	} else {
 		pr.OptimizeOrder(ps)
 	}
@@ -540,7 +540,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 			if pmt, has := token.OpPunctMap[tn]; has {
 				rr.Tok.Tok = pmt
 			} else {
-				err := rr.Tok.Tok.FromString(tn)
+				err := rr.Tok.Tok.SetString(tn)
 				if err != nil {
 					ps.Error(lex.PosZero, fmt.Sprintf("CompileExcl: token convert error: %v", err.Error()), pr)
 					valid = false
@@ -576,11 +576,11 @@ func (pr *Rule) Validate(ps *State) bool {
 		ps.Error(lex.PosZero, "Validate: rule has no rules and no children", pr)
 		valid = false
 	}
-	if !pr.HasFlag(int(TokMatchGroup)) && len(pr.Rules) > 0 && pr.HasChildren() {
+	if !pr.HasFlag(TokMatchGroup) && len(pr.Rules) > 0 && pr.HasChildren() {
 		ps.Error(lex.PosZero, "Validate: rule has both rules and children -- should be either-or", pr)
 		valid = false
 	}
-	if pr.HasFlag(int(Reverse)) {
+	if pr.HasFlag(Reverse) {
 		if len(pr.Rules) != 3 {
 			ps.Error(lex.PosZero, "Validate: a Reverse (-) rule must have 3 children -- for binary operator expressions only", pr)
 			valid = false
@@ -687,7 +687,7 @@ func (pr *Rule) Parse(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap l
 	}
 
 	nr := len(pr.Rules)
-	if !pr.HasFlag(int(TokMatchGroup)) && nr > 0 {
+	if !pr.HasFlag(TokMatchGroup) && nr > 0 {
 		return pr.ParseRules(ps, par, parAst, scope, optMap, depth)
 	}
 
@@ -711,7 +711,7 @@ func (pr *Rule) Parse(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap l
 // ParseRules parses rules and returns this rule if it matches, nil if not
 func (pr *Rule) ParseRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule {
 	ok := false
-	if pr.HasFlag(int(SetsScope)) {
+	if pr.HasFlag(SetsScope) {
 		scope, ok = pr.Scope(ps, parAst, scope)
 		if !ok {
 			return nil
@@ -820,7 +820,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 	// defer prf.End()
 
 	nr := len(pr.Rules)
-	if pr.HasFlag(int(TokMatchGroup)) || nr == 0 { // Group
+	if pr.HasFlag(TokMatchGroup) || nr == 0 { // Group
 		return pr.MatchGroup(ps, parAst, scope, depth, optMap)
 	}
 
@@ -834,9 +834,9 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 	var mpos Matches
 	match := false
 
-	if pr.HasFlag(int(NoToks)) {
+	if pr.HasFlag(NoToks) {
 		match, mpos = pr.MatchNoToks(ps, parAst, scope, depth, optMap)
-	} else if pr.HasFlag(int(OnlyToks)) {
+	} else if pr.HasFlag(OnlyToks) {
 		match, mpos = pr.MatchOnlyToks(ps, parAst, scope, depth, optMap)
 	} else {
 		match, mpos = pr.MatchMixed(ps, parAst, scope, depth, optMap)
@@ -958,7 +958,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 		tpos = creg.Ed
 	} else {
 		// prf := prof.Start("FindToken")
-		if pr.HasFlag(int(Reverse)) {
+		if pr.HasFlag(Reverse) {
 			tpos, ok = ps.FindTokenReverse(kt, *creg)
 		} else {
 			tpos, ok = ps.FindToken(kt, *creg)
@@ -1070,7 +1070,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 		// look through smpos for last valid position -- use that as last match pos
 		mreg := smpos.StartEnd()
 		lmnpos, ok := ps.Src.NextTokenPos(mreg.Ed)
-		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.HasFlag(int(SetsScope)))) {
+		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.HasFlag(SetsScope))) {
 			// if at end, or ends in EOS, then ok..
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v sub-rule: %v -- not at end and no tokens left", ri, rr.Rule.Name()))
@@ -1288,7 +1288,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 		}
 	}
 
-	if pr.HasFlag(int(Reverse)) {
+	if pr.HasFlag(Reverse) {
 		return pr.DoRulesRevBinExp(ps, par, parAst, scope, mpos, ourAst, optMap, depth)
 	}
 
@@ -1327,7 +1327,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 		}
 		creg.St = ps.Pos
 		creg.Ed = scope.Ed
-		if !pr.HasFlag(int(NoToks)) {
+		if !pr.HasFlag(NoToks) {
 			for mi := ri + 1; mi < nr; mi++ {
 				if mpos[mi].St != lex.PosZero {
 					creg.Ed = mpos[mi].St // only look up to point of next matching token
