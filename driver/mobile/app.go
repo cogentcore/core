@@ -32,12 +32,12 @@ import (
 // TODO: actually implement things for mobile app
 
 var theApp = &appImpl{
-	screens:      make([]*oswin.Screen, 0),
+	screens:      make([]*goosi.Screen, 0),
 	name:         "GoGi",
 	quitCloseCnt: make(chan struct{}),
 }
 
-var _ oswin.App = theApp
+var _ goosi.App = theApp
 
 type appImpl struct {
 	mu            sync.Mutex
@@ -50,8 +50,8 @@ type appImpl struct {
 	windows       []*windowImpl
 	gpu           *vgpu.GPU
 	sizeEvent     size.Event // the last size event
-	screens       []*oswin.Screen
-	screensAll    []*oswin.Screen // unique list of all screens ever seen -- get info from here if fails
+	screens       []*goosi.Screen
+	screensAll    []*goosi.Screen // unique list of all screens ever seen -- get info from here if fails
 	noScreens     bool            // if all screens have been disconnected, don't do anything..
 	name          string
 	about         string
@@ -63,16 +63,16 @@ type appImpl struct {
 	mobapp        mapp.App
 }
 
-var mainCallback func(oswin.App)
+var mainCallback func(goosi.App)
 
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
-func Main(f func(oswin.App)) {
+func Main(f func(goosi.App)) {
 	log.Println("in Main")
 	gi.DialogsSepWindow = false
 	mainCallback = f
 	theApp.initVk()
-	oswin.TheApp = theApp
+	goosi.TheApp = theApp
 	go func() {
 		mainCallback(theApp)
 		log.Println("main callback done")
@@ -203,7 +203,7 @@ func (app *appImpl) fullDestroyVk() {
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
-func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
+func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	// the actual system window has to exist before we can create the window
 	var winptr uintptr
 	for {
@@ -235,7 +235,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	// if not (ie: probably a new window), we need to handle it here.
 	if len(app.windows) != 0 {
 		app.getScreen()
-		oswin.InitScreenLogicalDPIFunc()
+		goosi.InitScreenLogicalDPIFunc()
 		win.LogDPI = app.screens[0].LogicalDPI
 		win.sendWindowEvent(window.ScreenUpdate)
 	}
@@ -244,7 +244,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 }
 
 // setSysWindow sets the underlying system window pointer, surface, system, and drawer
-func (app *appImpl) setSysWindow(opts *oswin.NewWindowOptions, winPtr uintptr) error {
+func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
@@ -281,9 +281,9 @@ func (app *appImpl) setSysWindow(opts *oswin.NewWindowOptions, winPtr uintptr) e
 	return nil
 }
 
-func (app *appImpl) setScreen(sc *oswin.Screen) {
+func (app *appImpl) setScreen(sc *goosi.Screen) {
 	if len(app.screens) == 0 {
-		app.screens = make([]*oswin.Screen, 1)
+		app.screens = make([]*goosi.Screen, 1)
 	}
 	app.screens[0] = sc
 }
@@ -293,7 +293,7 @@ func (app *appImpl) getScreen() {
 	physX.Convert(units.Mm, &units.Context{})
 	physY.Convert(units.Mm, &units.Context{})
 	fmt.Println("pixels per pt", app.sizeEvent.PixelsPerPt)
-	sc := &oswin.Screen{
+	sc := &goosi.Screen{
 		ScreenNumber: 0,
 		Geometry:     app.sizeEvent.Bounds(),
 		PixSize:      app.sizeEvent.Size(),
@@ -301,7 +301,7 @@ func (app *appImpl) getScreen() {
 		PhysicalDPI:  36 * app.sizeEvent.PixelsPerPt,
 		LogicalDPI:   2.0,
 
-		Orientation: oswin.ScreenOrientation(app.sizeEvent.Orientation),
+		Orientation: goosi.ScreenOrientation(app.sizeEvent.Orientation),
 	}
 	for _, win := range app.windows {
 		win.PhysDPI = 36 * app.sizeEvent.PixelsPerPt
@@ -319,7 +319,7 @@ func (app *appImpl) NScreens() int {
 	return len(app.screens)
 }
 
-func (app *appImpl) Screen(scrN int) *oswin.Screen {
+func (app *appImpl) Screen(scrN int) *goosi.Screen {
 	sz := len(app.screens)
 	if scrN < sz {
 		return app.screens[scrN]
@@ -327,7 +327,7 @@ func (app *appImpl) Screen(scrN int) *oswin.Screen {
 	return nil
 }
 
-func (app *appImpl) ScreenByName(name string) *oswin.Screen {
+func (app *appImpl) ScreenByName(name string) *goosi.Screen {
 	for _, sc := range app.screens {
 		if sc.Name == name {
 			return sc
@@ -346,7 +346,7 @@ func (app *appImpl) NWindows() int {
 	return len(app.windows)
 }
 
-func (app *appImpl) Window(win int) oswin.Window {
+func (app *appImpl) Window(win int) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	if win < len(app.windows) {
@@ -355,7 +355,7 @@ func (app *appImpl) Window(win int) oswin.Window {
 	return nil
 }
 
-func (app *appImpl) WindowByName(name string) oswin.Window {
+func (app *appImpl) WindowByName(name string) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	for _, window := range app.windows {
@@ -366,7 +366,7 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 	return nil
 }
 
-func (app *appImpl) WindowInFocus() oswin.Window {
+func (app *appImpl) WindowInFocus() goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	for _, window := range app.windows {
@@ -378,7 +378,7 @@ func (app *appImpl) WindowInFocus() oswin.Window {
 }
 
 // waitWindowInFocus waits until there is a window in focus and then returns it
-func (app *appImpl) waitWindowInFocus() oswin.Window {
+func (app *appImpl) waitWindowInFocus() goosi.Window {
 	for {
 		win := app.WindowInFocus()
 		if win != nil {
@@ -387,7 +387,7 @@ func (app *appImpl) waitWindowInFocus() oswin.Window {
 	}
 }
 
-func (app *appImpl) ContextWindow() oswin.Window {
+func (app *appImpl) ContextWindow() goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	return app.windows[0]
@@ -433,8 +433,8 @@ func (app *appImpl) GetScreens() {
 	// note: this is not applicable in mobile because screen info is not avail until Size event
 }
 
-func (app *appImpl) Platform() oswin.Platforms {
-	return oswin.Android
+func (app *appImpl) Platform() goosi.Platforms {
+	return goosi.Android
 }
 
 func (app *appImpl) OpenURL(url string) {
@@ -454,7 +454,7 @@ func SrcDir(dir string) (absDir string, err error) {
 	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
-func (app *appImpl) ClipBoard(win oswin.Window) clip.Board {
+func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
 	// app.mu.Lock()
 	// app.ctxtwin = win.(*windowImpl)
 	// app.mu.Unlock()
@@ -462,7 +462,7 @@ func (app *appImpl) ClipBoard(win oswin.Window) clip.Board {
 	// return &theClip
 }
 
-func (app *appImpl) Cursor(win oswin.Window) cursor.Cursor {
+func (app *appImpl) Cursor(win goosi.Window) cursor.Cursor {
 	return &theCursor
 }
 
@@ -516,7 +516,7 @@ func (app *appImpl) Quit() {
 	app.stopMain()
 }
 
-func (app *appImpl) ShowVirtualKeyboard(typ oswin.VirtualKeyboardTypes) {
+func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	app.mobapp.ShowVirtualKeyboard(mapp.KeyboardType(typ))
 }
 

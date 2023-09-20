@@ -22,7 +22,7 @@ import (
 // TODO: actually implement things for mobile window
 
 type windowImpl struct {
-	oswin.WindowBase
+	goosi.WindowBase
 	event.Deque
 	app                *appImpl
 	scrnName           string // last known screen name
@@ -31,9 +31,9 @@ type windowImpl struct {
 	publishDone        chan struct{}
 	winClose           chan struct{}
 	mu                 sync.Mutex
-	mainMenu           oswin.MainMenu
-	closeReqFunc       func(win oswin.Window)
-	closeCleanFunc     func(win oswin.Window)
+	mainMenu           goosi.MainMenu
+	closeReqFunc       func(win goosi.Window)
+	closeCleanFunc     func(win goosi.Window)
 	mouseDisabled      bool
 	resettingPos       bool
 	lastMouseButtonPos image.Point
@@ -42,7 +42,7 @@ type windowImpl struct {
 	isVisible          bool
 }
 
-var _ oswin.Window = &windowImpl{}
+var _ goosi.Window = &windowImpl{}
 
 // Handle returns the driver-specific handle for this window.
 // Currently, for all platforms, this is *glfw.Window, but that
@@ -57,7 +57,7 @@ func (w *windowImpl) OSHandle() uintptr {
 	return w.app.winptr
 }
 
-func (w *windowImpl) MainMenu() oswin.MainMenu {
+func (w *windowImpl) MainMenu() goosi.MainMenu {
 	return w.mainMenu
 }
 
@@ -89,8 +89,8 @@ func (w *windowImpl) sendWindowEvent(act window.Actions) {
 	w.Send(&winEv)
 }
 
-// NextEvent implements the oswin.EventDeque interface.
-func (w *windowImpl) NextEvent() oswin.Event {
+// NextEvent implements the goosi.EventDeque interface.
+func (w *windowImpl) NextEvent() goosi.Event {
 	e := w.Deque.NextEvent()
 	return e
 }
@@ -148,10 +148,10 @@ func (w *windowImpl) SendEmptyEvent() {
 	if w.IsClosed() {
 		return
 	}
-	oswin.SendCustomEvent(w, nil)
+	goosi.SendCustomEvent(w, nil)
 }
 
-func (w *windowImpl) Screen() *oswin.Screen {
+func (w *windowImpl) Screen() *goosi.Screen {
 	sc := w.app.screens[0]
 	return sc
 }
@@ -228,13 +228,13 @@ func (w *windowImpl) Minimize() {
 	w.isVisible = false
 }
 
-func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
+func (w *windowImpl) SetCloseReqFunc(fun func(win goosi.Window)) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.closeReqFunc = fun
 }
 
-func (w *windowImpl) SetCloseCleanFunc(fun func(win oswin.Window)) {
+func (w *windowImpl) SetCloseCleanFunc(fun func(win goosi.Window)) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.closeCleanFunc = fun
@@ -283,7 +283,7 @@ func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {}
 // which does not provide this functionality.
 // See: https://github.com/glfw/glfw/issues/1699
 // This is adapted from slawrence2302's code posted there.
-func (w *windowImpl) getScreenOvlp() *oswin.Screen {
+func (w *windowImpl) getScreenOvlp() *goosi.Screen {
 	return w.app.screens[0]
 }
 
@@ -312,10 +312,10 @@ func (w *windowImpl) focus(focused bool) {
 	log.Println("past mutex")
 	defer w.mu.Unlock()
 	if focused {
-		// bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
+		// bitflag.SetAtomic(&w.Flag, int(goosi.Focus))
 		w.sendWindowEvent(window.Focus)
 	} else {
-		// bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
+		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
 		w.sendWindowEvent(window.DeFocus)
 	}
 }

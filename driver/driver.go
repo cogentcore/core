@@ -10,7 +10,7 @@
 // Package driver provides the default driver for accessing a screen.
 package driver
 
-import "goki.dev/gi/v2/oswin"
+import "goki.dev/goosi"
 
 // TODO: figure out what to say about the responsibility for users of this
 // package to check any implicit dependencies' LICENSEs. For example, the
@@ -23,6 +23,6 @@ import "goki.dev/gi/v2/oswin"
 // It calls f on the Screen, possibly in a separate goroutine, as some OS-
 // specific libraries require being on 'the main thread'. It returns when f
 // returns.
-func Main(f func(oswin.App)) {
+func Main(f func(goosi.App)) {
 	driverMain(f)
 }

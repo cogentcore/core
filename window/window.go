@@ -22,12 +22,12 @@ import (
 	"goki.dev/goosi"
 )
 
-// window.Event reports on actions taken on a window.  The oswin.Window Flags
+// window.Event reports on actions taken on a window.  The goosi.Window Flags
 // and other state information will always be updated prior to this event
 // being sent, so those should be consulted directly for the new current
 // state.
 type Event struct {
-	oswin.EventBase
+	goosi.EventBase
 
 	// Action taken on the window -- what has changed.  Window state fields
 	// have current values.
@@ -79,15 +79,15 @@ const (
 )
 
 /////////////////////////////
-// oswin.Event interface
+// goosi.Event interface
 
-func (ev *Event) Type() oswin.EventType {
+func (ev *Event) Type() goosi.EventType {
 	if ev.Action == Resize {
-		return oswin.WindowResizeEvent
+		return goosi.WindowResizeEvent
 	} else if ev.Action == Paint {
-		return oswin.WindowPaintEvent
+		return goosi.WindowPaintEvent
 	} else {
-		return oswin.WindowEvent
+		return goosi.WindowEvent
 	}
 }
 
@@ -114,8 +114,8 @@ type ShowEvent struct {
 	Event
 }
 
-func (ev *ShowEvent) Type() oswin.EventType {
-	return oswin.WindowShowEvent
+func (ev *ShowEvent) Type() goosi.EventType {
+	return goosi.WindowShowEvent
 }
 
 // window.FocusEvent is for synthetic window focus event that is sent to widget consumers
@@ -125,6 +125,6 @@ type FocusEvent struct {
 	Event
 }
 
-func (ev *FocusEvent) Type() oswin.EventType {
-	return oswin.WindowFocusEvent
+func (ev *FocusEvent) Type() goosi.EventType {
+	return goosi.WindowFocusEvent
 }

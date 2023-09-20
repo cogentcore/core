@@ -47,7 +47,7 @@ var ScrollWheelSpeed = float32(20)
 
 // mouse.Event is a basic mouse event for button presses, but not motion or scrolling
 type Event struct {
-	oswin.EventBase
+	goosi.EventBase
 
 	// Where is the mouse location, in raw display dots (raw, actual pixels)
 	Where image.Point
@@ -240,10 +240,10 @@ const (
 )
 
 /////////////////////////////
-// oswin.Event interface
+// goosi.Event interface
 
-func (ev *Event) Type() oswin.EventType {
-	return oswin.MouseEvent
+func (ev *Event) Type() goosi.EventType {
+	return goosi.MouseEvent
 }
 
 func (ev *Event) HasPos() bool {
@@ -258,22 +258,22 @@ func (ev *Event) OnFocus() bool {
 	return false
 }
 
-func (ev *MoveEvent) Type() oswin.EventType {
-	return oswin.MouseMoveEvent
+func (ev *MoveEvent) Type() goosi.EventType {
+	return goosi.MouseMoveEvent
 }
 
-func (ev *DragEvent) Type() oswin.EventType {
-	return oswin.MouseDragEvent
+func (ev *DragEvent) Type() goosi.EventType {
+	return goosi.MouseDragEvent
 }
 
-func (ev *ScrollEvent) Type() oswin.EventType {
-	return oswin.MouseScrollEvent
+func (ev *ScrollEvent) Type() goosi.EventType {
+	return goosi.MouseScrollEvent
 }
 
-func (ev *FocusEvent) Type() oswin.EventType {
-	return oswin.MouseFocusEvent
+func (ev *FocusEvent) Type() goosi.EventType {
+	return goosi.MouseFocusEvent
 }
 
-func (ev *HoverEvent) Type() oswin.EventType {
-	return oswin.MouseHoverEvent
+func (ev *HoverEvent) Type() goosi.EventType {
+	return goosi.MouseHoverEvent
 }

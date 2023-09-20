@@ -27,7 +27,7 @@ import (
 )
 
 type windowImpl struct {
-	oswin.WindowBase
+	goosi.WindowBase
 	event.Deque
 	app            *appImpl
 	glw            *glfw.Window
@@ -39,14 +39,14 @@ type windowImpl struct {
 	publishDone    chan struct{}
 	winClose       chan struct{}
 	mu             sync.Mutex
-	mainMenu       oswin.MainMenu
-	closeReqFunc   func(win oswin.Window)
-	closeCleanFunc func(win oswin.Window)
+	mainMenu       goosi.MainMenu
+	closeReqFunc   func(win goosi.Window)
+	closeCleanFunc func(win goosi.Window)
 	mouseDisabled  bool
 	resettingPos   bool
 }
 
-var _ oswin.Window = &windowImpl{}
+var _ goosi.Window = &windowImpl{}
 
 // Handle returns the driver-specific handle for this window.
 // Currently, for all platforms, this is *glfw.Window, but that
@@ -84,9 +84,9 @@ func (w *windowImpl) IsVisible() bool {
 // MakeCurrentContext on OpenGL).
 // If it returns false, then window is not visible / valid and
 // nothing further should happen.
-// Must call this on app main thread using oswin.TheApp.RunOnMain
+// Must call this on app main thread using goosi.TheApp.RunOnMain
 //
-//	oswin.TheApp.RunOnMain(func() {
+//	goosi.TheApp.RunOnMain(func() {
 //	   if !win.Activate() {
 //	       return
 //	   }
@@ -105,14 +105,14 @@ func (w *windowImpl) Activate() bool {
 // Generally more efficient to NOT call this and just be sure to call
 // Activate where relevant, so that if the window is already current context
 // no switching is required.
-// Must call this on app main thread using oswin.TheApp.RunOnMain
+// Must call this on app main thread using goosi.TheApp.RunOnMain
 func (w *windowImpl) DeActivate() {
 	glfw.DetachCurrentContext()
 }
 
 // must be run on main
-func newVkWindow(opts *oswin.NewWindowOptions, sc *oswin.Screen) (*glfw.Window, error) {
-	_, _, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
+func newVkWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window, error) {
+	_, _, tool, fullscreen := goosi.WindowFlagsToBool(opts.Flags)
 	// glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.Visible, glfw.False) // needed to position
@@ -148,8 +148,8 @@ func (w *windowImpl) sendWindowEvent(act window.Actions) {
 	w.Send(&winEv)
 }
 
-// NextEvent implements the oswin.EventDeque interface.
-func (w *windowImpl) NextEvent() oswin.Event {
+// NextEvent implements the goosi.EventDeque interface.
+func (w *windowImpl) NextEvent() goosi.Event {
 	e := w.Deque.NextEvent()
 	return e
 }
@@ -206,14 +206,14 @@ func (w *windowImpl) SendEmptyEvent() {
 	if w.IsClosed() {
 		return
 	}
-	oswin.SendCustomEvent(w, nil)
+	goosi.SendCustomEvent(w, nil)
 	glfw.PostEmptyEvent() // for good measure
 }
 
 ////////////////////////////////////////////////////////////
 //  Geom etc
 
-func (w *windowImpl) Screen() *oswin.Screen {
+func (w *windowImpl) Screen() *goosi.Screen {
 	sc := w.getScreen()
 	return sc
 }
@@ -347,7 +347,7 @@ func (w *windowImpl) Raise() {
 		if w.glw == nil { // by time we got to main, could be diff
 			return
 		}
-		// if bitflag.HasAtomic(&w.Flag, int(oswin.Minimized)) {
+		// if bitflag.HasAtomic(&w.Flag, int(goosi.Minimized)) {
 		// 	w.glw.Restore()
 		// } else {
 		// 	w.glw.Focus()
@@ -368,13 +368,13 @@ func (w *windowImpl) Minimize() {
 	})
 }
 
-func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
+func (w *windowImpl) SetCloseReqFunc(fun func(win goosi.Window)) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.closeReqFunc = fun
 }
 
-func (w *windowImpl) SetCloseCleanFunc(fun func(win oswin.Window)) {
+func (w *windowImpl) SetCloseCleanFunc(fun func(win goosi.Window)) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.closeCleanFunc = fun
@@ -425,7 +425,7 @@ func (w *windowImpl) SetMousePos(x, y float64) {
 	}
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if theApp.Platform() == oswin.MacOS {
+	if theApp.Platform() == goosi.MacOS {
 		w.glw.SetCursorPos(x/float64(w.DevPixRatio), y/float64(w.DevPixRatio))
 	} else {
 		w.glw.SetCursorPos(x, y)
@@ -448,12 +448,12 @@ func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {
 /////////////////////////////////////////////////////////
 //  Window Callbacks
 
-func (w *windowImpl) getScreen() *oswin.Screen {
+func (w *windowImpl) getScreen() *goosi.Screen {
 	if w == nil || w.glw == nil {
 		return theApp.screens[0]
 	}
 	w.mu.Lock()
-	var sc *oswin.Screen
+	var sc *goosi.Screen
 	mon := w.glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
 	// that is super useless it seems. only works for fullscreen
 	if mon != nil {
@@ -487,14 +487,14 @@ setScreen:
 // which does not provide this functionality.
 // See: https://github.com/glfw/glfw/issues/1699
 // This is adapted from slawrence2302's code posted there.
-func (w *windowImpl) getScreenOvlp() *oswin.Screen {
+func (w *windowImpl) getScreenOvlp() *goosi.Screen {
 	var wgeom image.Rectangle
 	wgeom.Min.X, wgeom.Min.Y = w.glw.GetPos()
 	var sz image.Point
 	sz.X, sz.Y = w.glw.GetSize()
 	wgeom.Max = wgeom.Min.Add(sz)
 
-	var csc *oswin.Screen
+	var csc *goosi.Screen
 	var ovlp int
 	for _, sc := range theApp.screens {
 		isect := sc.Geometry.Intersect(wgeom).Size()
@@ -565,16 +565,16 @@ func (w *windowImpl) refresh(gw *glfw.Window) {
 
 func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 	if focused {
-		// fmt.Printf("foc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(oswin.Focus)))
+		// fmt.Printf("foc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
 		if w.mainMenu != nil {
 			w.mainMenu.SetMenu()
 		}
-		// bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
-		// bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
+		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
+		// bitflag.SetAtomic(&w.Flag, int(goosi.Focus))
 		w.sendWindowEvent(window.Focus)
 	} else {
-		// fmt.Printf("unfoc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(oswin.Focus)))
-		// bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
+		// fmt.Printf("unfoc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
+		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
 		lastMousePos = image.Point{-1, -1} // key for preventing random click to same location
 		w.sendWindowEvent(window.DeFocus)
 	}
@@ -582,11 +582,11 @@ func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 
 func (w *windowImpl) iconify(gw *glfw.Window, iconified bool) {
 	if iconified {
-		// bitflag.SetAtomic(&w.Flag, int(oswin.Minimized))
-		// bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
+		// bitflag.SetAtomic(&w.Flag, int(goosi.Minimized))
+		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
 		w.sendWindowEvent(window.Minimize)
 	} else {
-		// bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
+		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
 		w.getScreen()
 		w.sendWindowEvent(window.Minimize)
 	}

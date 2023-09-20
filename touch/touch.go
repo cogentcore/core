@@ -26,7 +26,7 @@ import (
 
 // touch.Event is a touch event.
 type Event struct {
-	oswin.EventBase
+	goosi.EventBase
 
 	// Where is the touch location, in raw display dots (raw, actual pixels)
 	Where image.Point
@@ -70,10 +70,10 @@ const (
 )
 
 /////////////////////////////
-// oswin.Event interface
+// goosi.Event interface
 
-func (ev *Event) Type() oswin.EventType {
-	return oswin.TouchEvent
+func (ev *Event) Type() goosi.EventType {
+	return goosi.TouchEvent
 }
 
 func (ev *Event) HasPos() bool {
@@ -89,7 +89,7 @@ func (ev *Event) OnFocus() bool {
 }
 
 // check for interface implementation
-var _ oswin.Event = &Event{}
+var _ goosi.Event = &Event{}
 
 // todo: what about these higher-level abstractions of touch-like events?
 

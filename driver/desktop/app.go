@@ -38,7 +38,7 @@ var theApp = &appImpl{
 	windows:      make(map[*glfw.Window]*windowImpl),
 	oswindows:    make(map[uintptr]*windowImpl),
 	winlist:      make([]*windowImpl, 0),
-	screens:      make([]*oswin.Screen, 0),
+	screens:      make([]*goosi.Screen, 0),
 	name:         "GoGi",
 	quitCloseCnt: make(chan struct{}),
 }
@@ -52,8 +52,8 @@ type appImpl struct {
 	windows       map[*glfw.Window]*windowImpl
 	oswindows     map[uintptr]*windowImpl
 	winlist       []*windowImpl
-	screens       []*oswin.Screen
-	screensAll    []*oswin.Screen // unique list of all screens ever seen -- get info from here if fails
+	screens       []*goosi.Screen
+	screensAll    []*goosi.Screen // unique list of all screens ever seen -- get info from here if fails
 	noScreens     bool            // if all screens have been disconnected, don't do anything..
 	ctxtwin       *windowImpl     // context window, dynamically set, for e.g., pointer and other methods
 	name          string
@@ -65,14 +65,14 @@ type appImpl struct {
 	quitCleanFunc func()
 }
 
-var mainCallback func(oswin.App)
+var mainCallback func(goosi.App)
 
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
-func Main(f func(oswin.App)) {
+func Main(f func(goosi.App)) {
 	mainCallback = f
 	theApp.initVk()
-	oswin.TheApp = theApp
+	goosi.TheApp = theApp
 	go func() {
 		mainCallback(theApp)
 		theApp.stopMain()
@@ -173,7 +173,7 @@ func (app *appImpl) stopMain() {
 // initVk initializes glfw, vulkan (vgpu), etc
 func (app *appImpl) initVk() {
 	if err := glfw.Init(); err != nil {
-		log.Fatalln("oswin.vkos failed to initialize glfw:", err)
+		log.Fatalln("goosi.vkos failed to initialize glfw:", err)
 	}
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
 	vk.Init()
@@ -185,7 +185,7 @@ func (app *appImpl) initVk() {
 	var err error
 	app.shareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
 	if err != nil {
-		log.Fatalln("oswin.vkos failed to create hidden share window", err)
+		log.Fatalln("goosi.vkos failed to create hidden share window", err)
 	}
 
 	winext := app.shareWin.GetRequiredInstanceExtensions()
@@ -200,18 +200,18 @@ func (app *appImpl) initVk() {
 ////////////////////////////////////////////////////////
 //  Window
 
-func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
-	if len(app.winlist) == 0 && oswin.InitScreenLogicalDPIFunc != nil {
+func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+	if len(app.winlist) == 0 && goosi.InitScreenLogicalDPIFunc != nil {
 		if monitorDebug {
 			log.Printf("app first new window calling InitScreenLogicalDPIFunc\n")
 		}
-		oswin.InitScreenLogicalDPIFunc()
+		goosi.InitScreenLogicalDPIFunc()
 	}
 
 	sc := app.screens[0]
 
 	if opts == nil {
-		opts = &oswin.NewWindowOptions{}
+		opts = &goosi.NewWindowOptions{}
 	}
 	opts.Fixup()
 	// can also apply further tuning here..
@@ -232,7 +232,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		publish:     make(chan struct{}),
 		winClose:    make(chan struct{}),
 		publishDone: make(chan struct{}),
-		WindowBase: oswin.WindowBase{
+		WindowBase: goosi.WindowBase{
 			Titl: opts.GetTitle(),
 			Flag: opts.Flags,
 		},
@@ -248,7 +248,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		w.Draw.ConfigSurface(w.Surface, vgpu.MaxTexturesPerSet) // note: can expand
 	})
 
-	// bitflag.SetAtomic(&w.Flag, int(oswin.Focus)) // starts out focused
+	// bitflag.SetAtomic(&w.Flag, int(goosi.Focus)) // starts out focused
 
 	app.mu.Lock()
 	app.windows[glw] = w
@@ -306,7 +306,7 @@ func (app *appImpl) NScreens() int {
 	return len(app.screens)
 }
 
-func (app *appImpl) Screen(scrN int) *oswin.Screen {
+func (app *appImpl) Screen(scrN int) *goosi.Screen {
 	sz := len(app.screens)
 	if scrN < sz {
 		return app.screens[scrN]
@@ -314,7 +314,7 @@ func (app *appImpl) Screen(scrN int) *oswin.Screen {
 	return nil
 }
 
-func (app *appImpl) ScreenByName(name string) *oswin.Screen {
+func (app *appImpl) ScreenByName(name string) *goosi.Screen {
 	for _, sc := range app.screens {
 		if sc.Name == name {
 			return sc
@@ -333,7 +333,7 @@ func (app *appImpl) NWindows() int {
 	return len(app.winlist)
 }
 
-func (app *appImpl) Window(win int) oswin.Window {
+func (app *appImpl) Window(win int) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	sz := len(app.winlist)
@@ -343,7 +343,7 @@ func (app *appImpl) Window(win int) oswin.Window {
 	return nil
 }
 
-func (app *appImpl) WindowByName(name string) oswin.Window {
+func (app *appImpl) WindowByName(name string) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	for _, win := range app.winlist {
@@ -354,7 +354,7 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 	return nil
 }
 
-func (app *appImpl) WindowInFocus() oswin.Window {
+func (app *appImpl) WindowInFocus() goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	for _, win := range app.winlist {
@@ -365,7 +365,7 @@ func (app *appImpl) WindowInFocus() oswin.Window {
 	return nil
 }
 
-func (app *appImpl) ContextWindow() oswin.Window {
+func (app *appImpl) ContextWindow() goosi.Window {
 	app.mu.Lock()
 	cw := app.ctxtwin
 	app.mu.Unlock()
@@ -417,14 +417,14 @@ func SrcDir(dir string) (absDir string, err error) {
 	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
-func (app *appImpl) ClipBoard(win oswin.Window) clip.Board {
+func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
 	app.mu.Lock()
 	app.ctxtwin = win.(*windowImpl)
 	app.mu.Unlock()
 	return &theClip
 }
 
-func (app *appImpl) Cursor(win oswin.Window) cursor.Cursor {
+func (app *appImpl) Cursor(win goosi.Window) cursor.Cursor {
 	app.mu.Lock()
 	app.ctxtwin = win.(*windowImpl)
 	app.mu.Unlock()
@@ -480,7 +480,7 @@ func (app *appImpl) Quit() {
 	app.stopMain()
 }
 
-func (app *appImpl) ShowVirtualKeyboard(typ oswin.VirtualKeyboardTypes) {
+func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	// no-op
 }
 

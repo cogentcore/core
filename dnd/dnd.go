@@ -22,7 +22,7 @@ import (
 
 // dnd.Event represents the drag-and-drop event, specifically the drop
 type Event struct {
-	oswin.EventBase
+	goosi.EventBase
 
 	// Where is the mouse location, in raw display dots (raw, actual pixels)
 	Where image.Point
@@ -175,10 +175,10 @@ const (
 )
 
 /////////////////////////////
-// oswin.Event interface
+// goosi.Event interface
 
-func (ev *Event) Type() oswin.EventType {
-	return oswin.DNDEvent
+func (ev *Event) Type() goosi.EventType {
+	return goosi.DNDEvent
 }
 
 func (ev *Event) HasPos() bool {
@@ -193,10 +193,10 @@ func (ev *Event) OnFocus() bool {
 	return false
 }
 
-func (ev *MoveEvent) Type() oswin.EventType {
-	return oswin.DNDMoveEvent
+func (ev *MoveEvent) Type() goosi.EventType {
+	return goosi.DNDMoveEvent
 }
 
-func (ev *FocusEvent) Type() oswin.EventType {
-	return oswin.DNDFocusEvent
+func (ev *FocusEvent) Type() goosi.EventType {
+	return goosi.DNDFocusEvent
 }

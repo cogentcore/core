@@ -9,10 +9,10 @@ package driver
 import "C"
 
 import (
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 	"goki.dev/goosi/driver/mobile"
 )
 
-func driverMain(f func(oswin.App)) {
+func driverMain(f func(goosi.App)) {
 	mobile.Main(f)
 }

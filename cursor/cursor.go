@@ -157,7 +157,7 @@ func (c *CursorBase) PushStack(sh Shapes) {
 func (c *CursorBase) PopStack() (Shapes, error) {
 	sz := len(c.Stack)
 	if len(c.Stack) == 0 {
-		err := fmt.Errorf("gi.oswin.cursor PopStack: stack is empty -- programmer error\n")
+		err := fmt.Errorf("gi.goosi.cursor PopStack: stack is empty -- programmer error\n")
 		log.Print(err)
 		return Arrow, err
 	}

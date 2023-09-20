@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 	"goki.dev/goosi/window"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
@@ -67,7 +67,7 @@ func (app *appImpl) GetScreens() {
 		log.Printf("MonitorDebug: Primary monitor: %s   first monitor: %s\n", pm.GetName(), mons[0].GetName())
 	}
 	app.noScreens = false
-	app.screens = make([]*oswin.Screen, 0, sz)
+	app.screens = make([]*goosi.Screen, 0, sz)
 	scNo := 0
 	for i := 0; i < sz; i++ {
 		mon := mons[i]
@@ -75,7 +75,7 @@ func (app *appImpl) GetScreens() {
 			log.Printf("MonitorDebug: getScreens: mon number: %v name: %v\n", i, mon.GetName())
 		}
 		if len(app.screens) <= scNo {
-			app.screens = append(app.screens, &oswin.Screen{})
+			app.screens = append(app.screens, &goosi.Screen{})
 		}
 		sc := app.screens[scNo]
 		vm := mon.GetVideoMode()
@@ -83,7 +83,7 @@ func (app *appImpl) GetScreens() {
 			if monitorDebug {
 				log.Printf("MonitorDebug: getScreens: screen %v has no size!\n", sc.Name)
 			}
-			if app.Platform() == oswin.MacOS {
+			if app.Platform() == goosi.MacOS {
 				si, has := app.findScreenInfo(macOsBuiltinMonitor)
 				if has {
 					*sc = *si
@@ -165,7 +165,7 @@ func (app *appImpl) GetScreens() {
 
 	// if originally a non-builtin monitor was primary, and now builtin is primary,
 	// then switch builtin and non-builtin.  see https://github.com/glfw/glfw/issues/2160
-	if sz > 1 && app.Platform() == oswin.MacOS && app.screens[0].Name == macOsBuiltinMonitor {
+	if sz > 1 && app.Platform() == goosi.MacOS && app.screens[0].Name == macOsBuiltinMonitor {
 		fss := app.screensAll[0]
 		if fss.Name != macOsBuiltinMonitor {
 			if monitorDebug {
@@ -182,19 +182,19 @@ func (app *appImpl) GetScreens() {
 
 // saveScreenInfo saves a copy of given screen info to screensAll list if unique
 // based on name.  Returns true if added a new screen.
-func (app *appImpl) saveScreenInfo(sc *oswin.Screen) bool {
+func (app *appImpl) saveScreenInfo(sc *goosi.Screen) bool {
 	_, has := app.findScreenInfo(sc.Name)
 	if has {
 		return false
 	}
-	nsc := &oswin.Screen{}
+	nsc := &goosi.Screen{}
 	*nsc = *sc
 	app.screensAll = append(app.screensAll, nsc)
 	return true
 }
 
 // findScreenInfo finds saved screen info based on name
-func (app *appImpl) findScreenInfo(name string) (*oswin.Screen, bool) {
+func (app *appImpl) findScreenInfo(name string) (*goosi.Screen, bool) {
 	for _, sc := range app.screensAll {
 		if sc.Name == name {
 			return sc, true

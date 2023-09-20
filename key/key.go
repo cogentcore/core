@@ -31,7 +31,7 @@ import (
 // and that include the full chord information about all the modifier keys
 // that were present when a non-modifier key was released
 type Event struct {
-	oswin.EventBase
+	goosi.EventBase
 
 	// Rune is the meaning of the key event as determined by the
 	// operating system. The mapping is determined by system-dependent
@@ -158,7 +158,7 @@ func (ch Chord) Decode() (r rune, mods int32, err error) {
 	if len(rs) == 1 {
 		r = rs[0]
 	} else {
-		err = fmt.Errorf("gi.oswin.key.DecodeChord got more/less than one rune: %v from remaining chord: %v\n", rs, cs)
+		err = fmt.Errorf("gi.goosi.key.DecodeChord got more/less than one rune: %v from remaining chord: %v\n", rs, cs)
 	}
 	return
 }
@@ -166,12 +166,12 @@ func (ch Chord) Decode() (r rune, mods int32, err error) {
 // Shortcut transforms chord string into short form suitable for display to users
 func (ch Chord) Shortcut() string {
 	cs := strings.Replace(string(ch), "Control+", "^", -1) // ⌃ doesn't look as good
-	switch oswin.TheApp.Platform() {
-	case oswin.MacOS:
+	switch goosi.TheApp.Platform() {
+	case goosi.MacOS:
 		cs = strings.Replace(cs, "Shift+", "⇧", -1)
 		cs = strings.Replace(cs, "Meta+", "⌘", -1)
 		cs = strings.Replace(cs, "Alt+", "⌥", -1)
-	case oswin.Windows:
+	case goosi.Windows:
 		cs = strings.Replace(cs, "Shift+", "↑", -1)
 		cs = strings.Replace(cs, "Meta+", "Win+", -1) // todo: actual windows key
 	default:
@@ -185,7 +185,7 @@ func (ch Chord) Shortcut() string {
 // OSShortcut translates Command into either Control or Meta depending on platform
 func (ch Chord) OSShortcut() Chord {
 	sc := string(ch)
-	if oswin.TheApp.Platform() == oswin.MacOS {
+	if goosi.TheApp.Platform() == goosi.MacOS {
 		sc = strings.Replace(sc, "Command+", "Meta+", -1)
 	} else {
 		sc = strings.Replace(sc, "Command+", "Control+", -1)
@@ -406,8 +406,8 @@ const (
 // key.Event with %v gives not very readable output like:
 //	{100 7 key.Modifiers() Press}
 
-func (ev *Event) Type() oswin.EventType {
-	return oswin.KeyEvent
+func (ev *Event) Type() goosi.EventType {
+	return goosi.KeyEvent
 }
 
 func (ev *Event) HasPos() bool {
@@ -423,10 +423,10 @@ func (ev *Event) OnFocus() bool {
 }
 
 // check for interface implementation
-var _ oswin.Event = &Event{}
+var _ goosi.Event = &Event{}
 
-func (ev *ChordEvent) Type() oswin.EventType {
-	return oswin.KeyChordEvent
+func (ev *ChordEvent) Type() goosi.EventType {
+	return goosi.KeyChordEvent
 }
 
 var CodeRuneMap = map[Codes]rune{

@@ -14,7 +14,7 @@
 // The App interface provides a top-level, single-instance struct that knows
 // about specific hardware, and can create new Window and Texture
 // objects that are hardware-specific and provide the primary GUI interface.
-// It is always available as oswin.TheApp.
+// It is always available as goosi.TheApp.
 //
 // Events are communicated through the Window -- see EventType and Event in
 // event.go for all the different types.

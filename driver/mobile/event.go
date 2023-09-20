@@ -10,7 +10,7 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 	okey "goki.dev/goosi/key"
 	omouse "goki.dev/goosi/mouse"
 	"goki.dev/goosi/window"
@@ -92,7 +92,7 @@ func (app *appImpl) eventLoop() {
 					} else {
 						app.getScreen()
 						app.mu.Unlock()
-						oswin.InitScreenLogicalDPIFunc()
+						goosi.InitScreenLogicalDPIFunc()
 						for _, win := range app.windows {
 							win.LogDPI = app.screens[0].LogicalDPI
 							win.sendWindowEvent(window.ScreenUpdate)

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
@@ -170,7 +170,7 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 
 func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	mods := lastMods
-	if theApp.Platform() == oswin.MacOS {
+	if theApp.Platform() == goosi.MacOS {
 		xoff *= float64(mouse.ScrollWheelSpeed)
 		yoff *= float64(mouse.ScrollWheelSpeed)
 	} else { // others have lower multipliers in general
@@ -198,7 +198,7 @@ func (w *windowImpl) curMousePosPoint(gw *glfw.Window) image.Point {
 
 func (w *windowImpl) mousePosToPoint(x, y float64) image.Point {
 	var where image.Point
-	if theApp.Platform() == oswin.MacOS {
+	if theApp.Platform() == goosi.MacOS {
 		where = image.Point{int(w.DevPixRatio * float32(x)), int(w.DevPixRatio * float32(y))}
 	} else {
 		where = image.Point{int(x), int(y)}
@@ -214,7 +214,7 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 	where := w.mousePosToPoint(x, y)
 	if w.mouseDisabled {
 		w.resettingPos = true
-		if theApp.Platform() == oswin.MacOS {
+		if theApp.Platform() == goosi.MacOS {
 			w.glw.SetCursorPos(float64(lastMousePos.X)/float64(w.DevPixRatio), float64(lastMousePos.Y)/float64(w.DevPixRatio))
 		} else {
 			w.glw.SetCursorPos(float64(lastMousePos.X), float64(lastMousePos.Y))

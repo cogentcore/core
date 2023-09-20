@@ -70,8 +70,8 @@ func SetThreadPri(p float64) error {
 	return nil
 }
 
-func (app *appImpl) Platform() oswin.Platforms {
-	return oswin.MacOS
+func (app *appImpl) Platform() goosi.Platforms {
+	return goosi.MacOS
 }
 
 func (app *appImpl) OpenURL(url string) {
@@ -93,7 +93,7 @@ func (app *appImpl) PrefsDir() string {
 }
 
 // this is the main call to create the main menu if not exist
-func (w *windowImpl) MainMenu() oswin.MainMenu {
+func (w *windowImpl) MainMenu() goosi.MainMenu {
 	if w.mainMenu == nil {
 		mm := &mainMenuImpl{win: w}
 		w.mainMenu = mm
@@ -290,23 +290,23 @@ type mainMenuImpl struct {
 	win      *windowImpl
 	menID    uintptr // mainmenu id
 	delID    uintptr // delegate id
-	callback func(win oswin.Window, title string, tag int)
+	callback func(win goosi.Window, title string, tag int)
 	mu       sync.Mutex
 }
 
-func (mm *mainMenuImpl) Window() oswin.Window {
+func (mm *mainMenuImpl) Window() goosi.Window {
 	return mm.win
 }
 
-func (mm *mainMenuImpl) SetWindow(win oswin.Window) {
+func (mm *mainMenuImpl) SetWindow(win goosi.Window) {
 	mm.win = win.(*windowImpl)
 }
 
-func (mm *mainMenuImpl) SetFunc(fun func(win oswin.Window, title string, tag int)) {
+func (mm *mainMenuImpl) SetFunc(fun func(win goosi.Window, title string, tag int)) {
 	mm.callback = fun
 }
 
-func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
+func (mm *mainMenuImpl) Triggered(win goosi.Window, title string, tag int) {
 	if mm.callback == nil {
 		return
 	}
@@ -322,8 +322,8 @@ func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
 	mm.callback(win, title, tag)
 }
 
-func (mm *mainMenuImpl) Menu() oswin.Menu {
-	return oswin.Menu(mm.menID)
+func (mm *mainMenuImpl) Menu() goosi.Menu {
+	return goosi.Menu(mm.menID)
 }
 
 func (mm *mainMenuImpl) SetMenu() {
@@ -333,29 +333,29 @@ func (mm *mainMenuImpl) SetMenu() {
 	mm.mu.Unlock()
 }
 
-func (mm *mainMenuImpl) StartUpdate() oswin.Menu {
+func (mm *mainMenuImpl) StartUpdate() goosi.Menu {
 	mm.mu.Lock()
-	return oswin.Menu(mm.menID)
+	return goosi.Menu(mm.menID)
 }
 
-func (mm *mainMenuImpl) EndUpdate(men oswin.Menu) {
+func (mm *mainMenuImpl) EndUpdate(men goosi.Menu) {
 	mm.mu.Unlock()
 }
 
 // Reset must be called within StartUpdate window
-func (mm *mainMenuImpl) Reset(men oswin.Menu) {
+func (mm *mainMenuImpl) Reset(men goosi.Menu) {
 	C.doMenuReset(C.uintptr_t(men))
 }
 
-func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
+func (mm *mainMenuImpl) AddSubMenu(men goosi.Menu, titles string) goosi.Menu {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 
 	subid := C.doAddSubMenu(C.uintptr_t(men), title)
-	return oswin.Menu(subid)
+	return goosi.Menu(subid)
 }
 
-func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, tag int, active bool) oswin.MenuItem {
+func (mm *mainMenuImpl) AddItem(men goosi.Menu, titles string, shortcut string, tag int, active bool) goosi.MenuItem {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 
@@ -381,26 +381,26 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 
 	vid := uintptr(mm.win.glw.GetCocoaWindow())
 	mid := C.doAddMenuItem(C.uintptr_t(vid), C.uintptr_t(men), C.uintptr_t(mm.delID), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
-	return oswin.MenuItem(mid)
+	return goosi.MenuItem(mid)
 }
 
-func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
+func (mm *mainMenuImpl) AddSeparator(men goosi.Menu) {
 	C.doAddSeparator(C.uintptr_t(men))
 }
 
-func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuItem {
+func (mm *mainMenuImpl) ItemByTitle(men goosi.Menu, titles string) goosi.MenuItem {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
-	return oswin.MenuItem(mid)
+	return goosi.MenuItem(mid)
 }
 
-func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
+func (mm *mainMenuImpl) ItemByTag(men goosi.Menu, tag int) goosi.MenuItem {
 	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
-	return oswin.MenuItem(mid)
+	return goosi.MenuItem(mid)
 }
 
-func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
+func (mm *mainMenuImpl) SetItemActive(mitm goosi.MenuItem, active bool) {
 	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
 }
 

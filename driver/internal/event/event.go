@@ -21,8 +21,8 @@ import (
 type Deque struct {
 	mu    sync.Mutex
 	cond  sync.Cond     // cond.L is lazily initialized to &Deque.mu.
-	back  []oswin.Event // FIFO.
-	front []oswin.Event // LIFO.
+	back  []goosi.Event // FIFO.
+	front []goosi.Event // LIFO.
 }
 
 func (q *Deque) lockAndInit() {
@@ -32,8 +32,8 @@ func (q *Deque) lockAndInit() {
 	}
 }
 
-// NextEvent implements the oswin.EventDeque interface.
-func (q *Deque) NextEvent() oswin.Event {
+// NextEvent implements the goosi.EventDeque interface.
+func (q *Deque) NextEvent() goosi.Event {
 	q.lockAndInit()
 	defer q.mu.Unlock()
 
@@ -58,7 +58,7 @@ func (q *Deque) NextEvent() oswin.Event {
 
 // PollEvent returns the next event in the deque if available, returns true
 // returns false and does not wait if no events currently available
-func (q *Deque) PollEvent() (oswin.Event, bool) {
+func (q *Deque) PollEvent() (goosi.Event, bool) {
 	q.lockAndInit()
 	defer q.mu.Unlock()
 
@@ -78,8 +78,8 @@ func (q *Deque) PollEvent() (oswin.Event, bool) {
 	return nil, false
 }
 
-// Send implements the oswin.EventDeque interface.
-func (q *Deque) Send(event oswin.Event) {
+// Send implements the goosi.EventDeque interface.
+func (q *Deque) Send(event goosi.Event) {
 	q.lockAndInit()
 	defer q.mu.Unlock()
 
@@ -87,8 +87,8 @@ func (q *Deque) Send(event oswin.Event) {
 	q.cond.Signal()
 }
 
-// SendFirst implements the oswin.EventDeque interface.
-func (q *Deque) SendFirst(event oswin.Event) {
+// SendFirst implements the goosi.EventDeque interface.
+func (q *Deque) SendFirst(event goosi.Event) {
 	q.lockAndInit()
 	defer q.mu.Unlock()
 

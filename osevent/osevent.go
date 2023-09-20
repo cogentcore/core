@@ -17,7 +17,7 @@ import (
 
 // osevent.Event reports an OS level event
 type Event struct {
-	oswin.EventBase
+	goosi.EventBase
 
 	// Action taken on the osevent -- what has changed.  Osevent state fields
 	// have current values.
@@ -33,10 +33,10 @@ const (
 )
 
 /////////////////////////////
-// oswin.Event interface
+// goosi.Event interface
 
-func (ev *Event) Type() oswin.EventType {
-	return oswin.OSEvent
+func (ev *Event) Type() goosi.EventType {
+	return goosi.OSEvent
 }
 
 func (ev *Event) HasPos() bool {
@@ -67,6 +67,6 @@ type OpenFilesEvent struct {
 	Files []string
 }
 
-func (ev *OpenFilesEvent) Type() oswin.EventType {
-	return oswin.OSOpenFilesEvent
+func (ev *OpenFilesEvent) Type() goosi.EventType {
+	return goosi.OSOpenFilesEvent
 }

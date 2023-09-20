@@ -12,10 +12,10 @@
 package driver
 
 import (
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/goosi/driver/vkos"
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver/desktop"
 )
 
-func driverMain(f func(oswin.App)) {
-	vkos.Main(f)
+func driverMain(f func(goosi.App)) {
+	desktop.Main(f)
 }

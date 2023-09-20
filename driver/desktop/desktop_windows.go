@@ -23,8 +23,8 @@ import (
 /////////////////////////////////////////////////////////////////
 // OS-specific methods
 
-func (app *appImpl) Platform() oswin.Platforms {
-	return oswin.Windows
+func (app *appImpl) Platform() goosi.Platforms {
+	return goosi.Windows
 }
 
 func (app *appImpl) OpenURL(url string) {
@@ -51,7 +51,7 @@ func (app *appImpl) PrefsDir() string {
 }
 
 // this is the main call to create the main menu if not exist
-func (w *windowImpl) MainMenu() oswin.MainMenu {
+func (w *windowImpl) MainMenu() goosi.MainMenu {
 	return nil
 }
 
