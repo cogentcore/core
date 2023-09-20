@@ -13,11 +13,6 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// Painter defines an interface for anything that has a Paint style on it
-type Painter interface {
-	Paint() *Paint
-}
-
 // Paint provides the styling parameters for rendering
 type Paint struct {
 

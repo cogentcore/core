@@ -21,15 +21,7 @@ func main() {
 	prefs := &gist.Prefs{}
 	prefs.Defaults()
 	gist.ThePrefs = prefs // text rendering depends on this
-
-	// in GoGi, oswin.TheApp gives you default font paths per-platform.
-
-	// mac:
-	girl.FontLibrary.InitFontPaths("/System/Library/Fonts", "/Library/Fonts")
-	// linux:
-	// FontLibrary.InitFontPaths("/usr/share/fonts/truetype")
-	// windows
-	// FontLibrary.InitFontPaths("C:\\Windows\\Fonts")
+	girl.FontLibrary.InitFontPaths(girl.FontPaths...)
 
 	imgsz := image.Point{320, 240}
 	szrec := image.Rectangle{Max: imgsz}
