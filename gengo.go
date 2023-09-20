@@ -66,6 +66,7 @@ func Inspect(pkg *packages.Package, f func(n ast.Node) (bool, error)) error {
 			continue
 		}
 		var terr error
+		var terrNode ast.Node
 		ast.Inspect(file, func(n ast.Node) bool {
 			if terr != nil {
 				return false
@@ -73,11 +74,12 @@ func Inspect(pkg *packages.Package, f func(n ast.Node) (bool, error)) error {
 			cont, err := f(n)
 			if err != nil {
 				terr = err
+				terrNode = n
 			}
 			return cont
 		})
 		if terr != nil {
-			return fmt.Errorf("gengo.Inspect: error while calling inspect function: %w", terr)
+			return fmt.Errorf("gengo.Inspect: error while calling inspect function for node %v: %w", terrNode, terr)
 		}
 	}
 	return nil
