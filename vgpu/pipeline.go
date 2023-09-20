@@ -13,7 +13,6 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/ints"
 )
 
 // Pipeline manages Shader program(s) that accomplish a specific
@@ -411,7 +410,7 @@ func (pl *Pipeline) DrawVertex(cmd vk.CommandBuffer, descIdx int) {
 		if vtxn == 0 {
 			vtxn = vl.N
 		} else {
-			vtxn = ints.MinInt(vtxn, vl.N)
+			vtxn = min(vtxn, vl.N)
 		}
 	}
 	mbuf := pl.Sys.Mem.Buffs[VtxIdxBuff].Dev

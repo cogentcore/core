@@ -6,7 +6,6 @@ package vgpu
 
 import (
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/kit"
 )
 
 // VarRoles are the functional roles of variables, corresponding
@@ -14,7 +13,7 @@ import (
 // as enumerated in vk.DescriptorType.  This does NOT map directly
 // to DescriptorType because we combine vertex and uniform data
 // and require a different ordering.
-type VarRoles int32
+type VarRoles int32 //enums:enum
 
 const (
 	UndefVarRole VarRoles = iota
@@ -27,12 +26,7 @@ const (
 	StorageTexel          // read-write image-formatted data, which cannot be accessed via ImageView or Sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful. No Dynamic mode is available, so this can only be used for a fixed Val.
 	StorageImage          // read-write access through an ImageView (but not a Sampler) of an Image
 	TextureRole           // a Texture is a CombinedImageSampler in Vulkan terminology -- a combination of a Sampler and a specific Image, which appears as a single entity in the shader.
-	VarRolesN
 )
-
-//go:generate stringer -type=VarRoles
-
-var KiT_VarRoles = kit.Enums.AddEnum(VarRolesN, kit.NotBitFlag, nil)
 
 // IsDynamic returns true if role has dynamic offset binding
 func (vr VarRoles) IsDynamic() bool {

@@ -10,7 +10,6 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/vgpu/v2/szalloc"
 )
 
@@ -206,7 +205,7 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 		if vr.Role > Storage {
 			vals := vr.Vals.ActiveVals()
 			nvals := len(vals)
-			nVarDesc = ints.MinInt(nvals, MaxTexturesPerSet) // per desc
+			nVarDesc = min(nvals, MaxTexturesPerSet) // per desc
 
 			if nvals > MaxTexturesPerSet {
 				st.NTextureDescs = NDescForTextures(nvals)

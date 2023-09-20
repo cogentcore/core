@@ -303,7 +303,7 @@ func (rp *Render) ConfigGrab(dev vk.Device) {
 	rp.Grab.Format.Defaults()
 	rp.Grab.Format = rp.Format
 	rp.Grab.Format.SetMultisample(1) // can't have for grabs
-	rp.Grab.SetFlag(int(ImageOnHostOnly))
+	rp.Grab.SetFlag(true, ImageOnHostOnly)
 	rp.Grab.Dev = dev
 	rp.Grab.GPU = rp.Sys.GPU
 	rp.Grab.AllocImage()

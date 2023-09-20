@@ -8,7 +8,6 @@ import (
 	"image"
 	"sort"
 
-	"goki.dev/ki/v2/ints"
 	"goki.dev/mat32/v2"
 )
 
@@ -31,7 +30,7 @@ func UniqSortedInts(vals []int) []int {
 // SizeGroups returns evenly-spaced size groups of max N -- could be less
 func SizeGroups(sizes []int, maxN int) []int {
 	ns := len(sizes)
-	mxgp := ints.MinInt(ns, maxN)
+	mxgp := min(ns, maxN)
 	nper := float32(ns) / float32(mxgp)
 
 	idxs := make([]int, mxgp)

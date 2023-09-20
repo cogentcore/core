@@ -5,10 +5,10 @@
 package vgpu
 
 import (
-	"goki.dev/ki/v2/kit"
-
 	vk "github.com/goki/vulkan"
 )
+
+// todo: this does not parse in enumgen
 
 // Topologies are the different vertex topology
 type Topologies int32
@@ -25,9 +25,4 @@ const (
 	TriangleListWithAdjacency  = Topologies(vk.PrimitiveTopologyTriangleListWithAdjacency)
 	TriangleStripWithAdjacency = Topologies(vk.PrimitiveTopologyTriangleStripWithAdjacency)
 	PatchList                  = Topologies(vk.PrimitiveTopologyPatchList)
-	TopologiesN                = PatchList + 1
 )
-
-//go:generate stringer -type=Topologies
-
-var KiT_Topologies = kit.Enums.AddEnum(TopologiesN, kit.NotBitFlag, nil)

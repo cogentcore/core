@@ -8,9 +8,7 @@ import (
 	"fmt"
 	"image"
 	"math/rand"
-
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/sliceclone"
+	"slices"
 )
 
 // MaxIters is maximum number of iterations for adapting sizes to fit constraints
@@ -206,7 +204,7 @@ func (sa *SzAlloc) AllocGps(xgpi, ygpi []int) (allocs [][]int, maxItems int) {
 		}
 		allocs[gi] = append(allocs[gi], i)
 		nitm := len(allocs[gi])
-		maxItems = ints.MaxInt(nitm, maxItems)
+		maxItems = max(nitm, maxItems)
 	}
 	return
 }
@@ -236,8 +234,8 @@ func (sa *SzAlloc) UpdateGpMaxSz() {
 		for i := 1; i < na; i++ {
 			isz := sa.ItemSizes[ga[i]]
 			// fmt.Printf("\ti: %2d  itm: %3d  isz: %v\n", i, ga[i], isz)
-			sz.X = ints.MaxInt(sz.X, isz.X)
-			sz.Y = ints.MaxInt(sz.Y, isz.Y)
+			sz.X = max(sz.X, isz.X)
+			sz.Y = max(sz.Y, isz.Y)
 		}
 		sa.GpSizes[j] = sz
 	}
@@ -248,15 +246,15 @@ func (sa *SzAlloc) UpdateGpMaxSz() {
 func (sa *SzAlloc) LimitGpNs() {
 	nxi := len(sa.XGpIdxs)
 
-	xidxs := sliceclone.Int(sa.XGpIdxs)
-	yidxs := sliceclone.Int(sa.YGpIdxs)
+	xidxs := slices.Clone(sa.XGpIdxs)
+	yidxs := slices.Clone(sa.YGpIdxs)
 	gpallocs, bestmax := sa.AllocGps(xidxs, yidxs)
 
 	avg := len(sa.ItemSizes) / sa.MaxNGps
 	low := (avg * 3) / 4
 
-	bestXidxs := sliceclone.Int(sa.XGpIdxs)
-	bestYidxs := sliceclone.Int(sa.YGpIdxs)
+	bestXidxs := slices.Clone(sa.XGpIdxs)
+	bestYidxs := slices.Clone(sa.YGpIdxs)
 
 	itr := 0
 	for itr = 0; itr < MaxIters; itr++ {
@@ -296,8 +294,8 @@ func (sa *SzAlloc) LimitGpNs() {
 		gpallocs, maxItems = sa.AllocGps(xidxs, yidxs)
 		if maxItems < bestmax {
 			bestmax = maxItems
-			bestXidxs = sliceclone.Int(xidxs)
-			bestYidxs = sliceclone.Int(yidxs)
+			bestXidxs = slices.Clone(xidxs)
+			bestYidxs = slices.Clone(yidxs)
 		}
 		// gps := sa.SizesFmIdxs(xidxs, yidxs)
 		// fmt.Printf("itr: %d  maxi: %d  gps: %v\n", itr, maxItems, gps)

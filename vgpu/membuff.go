@@ -9,7 +9,6 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/kit"
 )
 
 // MemBuff is a memory buffer holding a particular type of memory
@@ -109,7 +108,7 @@ func (mb *MemBuff) Free(dev vk.Device) {
 ////////////////////////////////////////////////////////////////
 
 // BuffTypes are memory buffer types managed by the Memory object
-type BuffTypes int32
+type BuffTypes int32 //enums:enum
 
 const (
 	// VtxIdxBuff is a buffer holding Vertex and Index values
@@ -125,13 +124,7 @@ const (
 	// TextureBuff holds Images / Textures -- hardware optimizes allocation
 	// on device side, and staging-side is general
 	TextureBuff
-
-	BuffTypesN
 )
-
-//go:generate stringer -type=BuffTypes
-
-var KiT_BuffTypes = kit.Enums.AddEnum(BuffTypesN, kit.NotBitFlag, nil)
 
 // IsReadOnly returns true if buffer is read-only (most), else read-write (Storage)
 func (bt BuffTypes) IsReadOnly() bool {

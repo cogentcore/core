@@ -8,11 +8,10 @@ import (
 	"log"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/kit"
 )
 
 // OptionStates are options for the physical device features
-type OptionStates int32
+type OptionStates int32 //enums:enum
 
 const (
 	// Disabled -- option is not enabled
@@ -30,8 +29,6 @@ const (
 	// Enabled is the state of all options specified
 	// during Config, and supported bythe hardware
 	Enabled
-
-	OptionStatesN
 )
 
 // GPUOptions specifies supported options for the vgpu device
@@ -41,7 +38,7 @@ const (
 // but these are optional and may be required for
 // other uses (e.g., compute shaders).
 // See also InstanceExts, DeviceExts, and ValidationLayers.
-type CPUOptions int
+type CPUOptions int //enums:enum
 
 const (
 	// OptRobustBufferAccess specifies that accesses to buffers are bounds-checked against the range of the buffer descriptor (as determined by VkDescriptorBufferInfo::range, VkBufferViewCreateInfo::range, or the size of the buffer). Out of bounds accesses must not cause application termination, and the effects of shader loads, stores, and atomics must conform to an implementation-dependent behavior as described below.
@@ -209,12 +206,6 @@ const (
 	// OptInheritedQueries specifies whether a secondary command buffer may be executed while a query is active.
 	OptInheritedQueries
 )
-
-//go:generate stringer -type=OptionStates
-//go:generate stringer -type=CPUOptions
-
-var KiT_OptionStates = kit.Enums.AddEnum(OptionStatesN, kit.NotBitFlag, nil)
-var KiT_CPUOptions = kit.Enums.AddEnum(OptionStatesN, kit.NotBitFlag, nil)
 
 // GPUOpts is the collection of CPUOption states
 type GPUOpts map[CPUOptions]OptionStates

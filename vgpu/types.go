@@ -5,8 +5,6 @@
 package vgpu
 
 import (
-	"goki.dev/ki/v2/kit"
-
 	vk "github.com/goki/vulkan"
 )
 
@@ -22,7 +20,7 @@ import (
 // (unless all elements are exactly 4 bytes, which might work?).
 // Go automatically aligns members to 8 bytes on 64 bit machines,
 // but that doesn't quite cut it.
-type Types int32
+type Types int32 //enums:enum
 
 const (
 	UndefType Types = iota
@@ -58,12 +56,7 @@ const (
 	Depth24Sten8 // standard 24 bit float with 8 bit stencil
 
 	Struct
-	TypesN
 )
-
-//go:generate stringer -type=Types
-
-var KiT_Types = kit.Enums.AddEnum(TypesN, kit.NotBitFlag, nil)
 
 // VkFormat returns the Vulkan VkFormat for given type
 func (tp Types) VkFormat() vk.Format {

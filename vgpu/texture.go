@@ -6,7 +6,6 @@ package vgpu
 
 import (
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/kit"
 )
 
 // Texture supplies an Image and a Sampler
@@ -95,7 +94,7 @@ func (sm *Sampler) Destroy(dev vk.Device) {
 }
 
 // Texture image sampler modes
-type SamplerModes int32
+type SamplerModes int32 //enums:enum
 
 const (
 	// Repeat the texture when going beyond the image dimensions.
@@ -112,13 +111,7 @@ const (
 
 	// Like clamp to edge, but instead uses the edge opposite to the closest edge.
 	MirrorClampToEdge
-
-	SamplerModesN
 )
-
-//go:generate stringer -type=SamplerModes
-
-var KiT_SamplerModes = kit.Enums.AddEnum(SamplerModesN, kit.NotBitFlag, nil)
 
 func (sm SamplerModes) VkMode() vk.SamplerAddressMode {
 	return VulkanSamplerModes[sm]
@@ -135,20 +128,14 @@ var VulkanSamplerModes = map[SamplerModes]vk.SamplerAddressMode{
 //////////////////////////////////////////////////////
 
 // Texture image sampler modes
-type BorderColors int32
+type BorderColors int32 //enums:enum
 
 const (
 	// Repeat the texture when going beyond the image dimensions.
 	BorderTrans BorderColors = iota
 	BorderBlack
 	BorderWhite
-
-	BorderColorsN
 )
-
-//go:generate stringer -type=BorderColors
-
-var KiT_BorderColors = kit.Enums.AddEnum(BorderColorsN, kit.NotBitFlag, nil)
 
 func (bc BorderColors) VkColor() vk.BorderColor {
 	return VulkanBorderColors[bc]

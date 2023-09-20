@@ -35,7 +35,7 @@ func (fb *Framebuffer) ConfigSurfaceImage(gp *GPU, dev vk.Device, fmt ImageForma
 	fb.Image.Format.Defaults()
 	fb.Image.Format = fmt
 	fb.Image.Format.SetMultisample(1) // cannot multisample main image
-	fb.Image.SetFlag(int(FramebufferImage))
+	fb.Image.SetFlag(true, FramebufferImage)
 	fb.Image.SetVkImage(gp, dev, img) // makes view
 }
 

@@ -7,6 +7,9 @@
 
 package vgpu
 
+//go:generate enumgen
+// note: not working: go:generate gtigen
+
 import (
 	"bytes"
 	"errors"
@@ -18,7 +21,7 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 	"goki.dev/vgpu/v2/vkinit"
 )
 
@@ -464,13 +467,13 @@ func (gp *GPU) NewGraphicsSystem(name string, dev *Device) *System {
 // PropsString returns a human-readable summary of the GPU properties.
 func (gp *GPU) PropsString(print bool) string {
 	ps := "\n\n######## GPU Props\n"
-	prs := kit.StringJSON(&gp.GPUProps)
+	prs := laser.StringJSON(&gp.GPUProps)
 	devnm := `  "DeviceName": `
 	ps += prs[:strings.Index(prs, devnm)]
 	ps += devnm + string(gp.GPUProps.DeviceName[:]) + "\n"
 	ps += prs[strings.Index(prs, `  "Limits":`):]
 	// ps += "\n\n######## GPU Memory Props\n" // not really useful
-	// ps += kit.StringJSON(&gp.MemoryProps)
+	// ps += laser.StringJSON(&gp.MemoryProps)
 	ps += "\n"
 	if print {
 		fmt.Println(ps)

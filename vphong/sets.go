@@ -4,19 +4,12 @@
 
 package vphong
 
-import "goki.dev/ki/v2/kit"
-
 // Sets are variable set numbers - must coordinate with System sets!
-type Sets int
+type Sets int //enums:enum
 
 const (
 	MtxsSet Sets = iota
 	NLightSet
 	LightSet
 	TexSet
-	SetsN
 )
-
-//go:generate stringer -type=Sets
-
-var KiT_Sets = kit.Enums.AddEnum(SetsN, kit.NotBitFlag, nil)

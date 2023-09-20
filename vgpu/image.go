@@ -15,9 +15,7 @@ import (
 
 	"github.com/anthonynsimon/bild/clone"
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/bitflag"
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/enums"
 	"goki.dev/mat32/v2"
 )
 
@@ -289,7 +287,7 @@ type Image struct {
 	Name string `desc:"name of the image -- e.g., same as Val name if used that way -- helpful for debugging -- set to filename if loaded from a file and otherwise empty"`
 
 	// bit flags for image state, for indicating nature of ownership and state
-	Flags int32 `desc:"bit flags for image state, for indicating nature of ownership and state"`
+	Flags ImageFlags `desc:"bit flags for image state, for indicating nature of ownership and state"`
 
 	// format & size of image
 	Format ImageFormat `desc:"format & size of image"`
@@ -316,17 +314,12 @@ type Image struct {
 // HasFlag checks if flag is set
 // using atomic, safe for concurrent access
 func (im *Image) HasFlag(flag ImageFlags) bool {
-	return bitflag.HasAtomic32(&im.Flags, int(flag))
+	return im.Flags.HasFlag(flag)
 }
 
 // SetFlag sets flag(s) using atomic, safe for concurrent access
-func (im *Image) SetFlag(flag ...int) {
-	bitflag.SetAtomic32(&im.Flags, flag...)
-}
-
-// ClearFlag clears flag(s) using atomic, safe for concurrent access
-func (im *Image) ClearFlag(flag ...int) {
-	bitflag.ClearAtomic32(&im.Flags, flag...)
+func (im *Image) SetFlag(on bool, flag ...enums.BitFlag) {
+	im.Flags.SetFlag(on, flag...)
 }
 
 // IsActive returns true if the image is set and has a view
@@ -465,14 +458,14 @@ func (im *Image) SetGoImage(img image.Image, layer int, flipY bool) error {
 	spix := rimg.Pix[sti:]
 	ssz := len(spix)
 	dsz := len(dpix)
-	mx := ints.MinInt(ssz, dsz)
+	mx := min(ssz, dsz)
 	str := im.Format.Stride()
 	if rimg.Stride == str && !flipY {
 		copy(dpix[:mx], spix[:mx])
 		return nil
 	}
-	rows := ints.MinInt(sz.Y, im.Format.Size.Y)
-	rsz := ints.MinInt(rimg.Stride, str)
+	rows := min(sz.Y, im.Format.Size.Y)
+	rsz := min(rimg.Stride, str)
 	dmax := str * rows
 	if dmax > dsz {
 		return fmt.Errorf("vgpu.Image: image named: %s, format size: %d doesn't fit in actual destination size: %d", im.Name, dmax, dsz)
@@ -521,7 +514,7 @@ func (im *Image) ConfigFramebuffer(gp *GPU, dev vk.Device, imgFmt *ImageFormat) 
 	im.Format.Format = imgFmt.Format
 	im.Format.SetMultisample(1)
 	im.Format.Layers = 1
-	im.SetFlag(int(ImageOwnsImage), int(FramebufferImage))
+	im.SetFlag(true, ImageOwnsImage, FramebufferImage)
 	if im.SetSize(imgFmt.Size) {
 		im.ConfigStdView()
 	}
@@ -536,7 +529,7 @@ func (im *Image) ConfigDepth(gp *GPU, dev vk.Device, depthType Types, imgFmt *Im
 	im.Format.Format = depthType.VkFormat()
 	im.Format.Samples = imgFmt.Samples
 	im.Format.Layers = 1
-	im.SetFlag(int(DepthImage))
+	im.SetFlag(true, DepthImage)
 	if im.SetSize(imgFmt.Size) {
 		im.ConfigDepthView()
 	}
@@ -550,7 +543,7 @@ func (im *Image) ConfigMulti(gp *GPU, dev vk.Device, imgFmt *ImageFormat) {
 	im.Format.Format = imgFmt.Format
 	im.Format.Samples = imgFmt.Samples
 	im.Format.Layers = 1
-	im.SetFlag(int(ImageOwnsImage), int(FramebufferImage))
+	im.SetFlag(true, ImageOwnsImage, FramebufferImage)
 	if im.SetSize(imgFmt.Size) {
 		im.ConfigStdView()
 	}
@@ -584,7 +577,7 @@ func (im *Image) ConfigStdView() {
 	}, nil, &view)
 	IfPanic(NewError(ret))
 	im.View = view
-	im.SetFlag(int(ImageActive))
+	im.SetFlag(true, ImageActive)
 }
 
 // ConfigDepthView configures a depth view image
@@ -610,7 +603,7 @@ func (im *Image) ConfigDepthView() {
 	}, nil, &view)
 	IfPanic(NewError(ret))
 	im.View = view
-	im.SetFlag(int(ImageActive))
+	im.SetFlag(true, ImageActive)
 }
 
 // DestroyView destroys any existing view
@@ -618,7 +611,7 @@ func (im *Image) DestroyView() {
 	if im.View == vk.NullImageView {
 		return
 	}
-	im.ClearFlag(int(ImageActive))
+	im.SetFlag(false, ImageActive)
 	vk.DestroyImageView(im.Dev, im.View, nil)
 	im.View = vk.NullImageView
 }
@@ -633,7 +626,7 @@ func (im *Image) FreeImage() {
 	if im.Image == vk.NullImage || !im.IsImageOwner() {
 		return
 	}
-	im.ClearFlag(int(ImageOwnsImage))
+	im.SetFlag(false, ImageOwnsImage)
 	vk.FreeMemory(im.Dev, im.Mem, nil)
 	vk.DestroyImage(im.Dev, im.Image, nil)
 	im.Mem = vk.NullDeviceMemory
@@ -646,7 +639,7 @@ func (im *Image) FreeHost() {
 	if im.Host.Size == 0 || !im.IsHostOwner() {
 		return
 	}
-	im.ClearFlag(int(ImageOwnsHost))
+	im.SetFlag(false, ImageOwnsHost)
 	vk.UnmapMemory(im.Dev, im.Host.Mem)
 	FreeBuffMem(im.Dev, &im.Host.Mem)
 	DestroyBuffer(im.Dev, &im.Host.Buff)
@@ -767,7 +760,7 @@ func (im *Image) AllocImage() {
 	ret = vk.BindImageMemory(im.Dev, im.Image, im.Mem, 0)
 	IfPanic(NewError(ret))
 
-	im.SetFlag(int(ImageOwnsImage))
+	im.SetFlag(true, ImageOwnsImage)
 }
 
 // AllocHost allocates a staging buffer on the host for the image
@@ -787,7 +780,7 @@ func (im *Image) AllocHost() {
 	im.Host.Size = imsz
 	im.Host.Ptr = MapMemory(im.Dev, im.Host.Mem, im.Host.Size)
 	im.Host.Offset = 0
-	im.SetFlag(int(ImageOwnsHost), int(ImageHostActive))
+	im.SetFlag(true, ImageOwnsHost, ImageHostActive)
 }
 
 // ConfigValHost configures host staging buffer from memory buffer for val-owned image
@@ -801,7 +794,7 @@ func (im *Image) ConfigValHost(buff *MemBuff, buffPtr unsafe.Pointer, offset int
 	im.Host.Size = imsz
 	im.Host.Ptr = unsafe.Pointer(uintptr(buffPtr) + uintptr(offset))
 	im.Host.Offset = offset
-	im.SetFlag(int(ImageIsVal), int(ImageHostActive))
+	im.SetFlag(true, ImageIsVal, ImageHostActive)
 }
 
 // CopyRec returns info for this Image for the BufferImageCopy operations
@@ -950,7 +943,7 @@ func (hi *HostImage) Pixels() []byte {
 // ImageFlags
 
 // ImageFlags are bitflags for Image state
-type ImageFlags int32
+type ImageFlags int64 //enums:bitflag
 
 const (
 	// ImageActive: the Image and ImageView are configured and ready to use
@@ -980,10 +973,4 @@ const (
 	// memory, not on device memory -- no additional host buffer should be created.
 	// this is for an ImageGrab image.  layout is LINEAR
 	ImageOnHostOnly
-
-	ImageFlagsN
 )
-
-//go:generate stringer -type=ImageFlags
-
-var KiT_ImageFlags = kit.Enums.AddEnum(ImageFlagsN, kit.BitFlag, nil)

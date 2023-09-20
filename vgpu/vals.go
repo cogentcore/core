@@ -16,8 +16,7 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/bitflag"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/enums"
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/szalloc"
 )
@@ -38,7 +37,7 @@ type Val struct {
 	Offset int `desc:"offset in bytes from start of memory buffer"`
 
 	// val state flags
-	Flags int32 `desc:"val state flags"`
+	Flags ValFlags `desc:"val state flags"`
 
 	// if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy.
 	ElSize int `desc:"if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy."`
@@ -56,17 +55,12 @@ type Val struct {
 // HasFlag checks if flag is set
 // using atomic, safe for concurrent access
 func (vl *Val) HasFlag(flag ValFlags) bool {
-	return bitflag.HasAtomic32(&vl.Flags, int(flag))
+	return vl.Flags.HasFlag(flag)
 }
 
 // SetFlag sets flag(s) using atomic, safe for concurrent access
-func (vl *Val) SetFlag(flag ...int) {
-	bitflag.SetAtomic32(&vl.Flags, flag...)
-}
-
-// ClearFlag clears flag(s) using atomic, safe for concurrent access
-func (vl *Val) ClearFlag(flag ...int) {
-	bitflag.ClearAtomic32(&vl.Flags, flag...)
+func (vl *Val) SetFlag(on bool, flag ...enums.BitFlag) {
+	vl.Flags.SetFlag(on, flag...)
 }
 
 // IsMod returns true if the value has been modified since last memory sync
@@ -76,12 +70,12 @@ func (vl *Val) IsMod() bool {
 
 // SetMod sets modified flag
 func (vl *Val) SetMod() {
-	vl.SetFlag(int(ValMod))
+	vl.SetFlag(true, ValMod)
 }
 
 // ClearMod clears modified flag
 func (vl *Val) ClearMod() {
-	vl.ClearFlag(int(ValMod))
+	vl.SetFlag(false, ValMod)
 }
 
 // Init initializes value based on variable and index within list of vals for this var
@@ -137,9 +131,9 @@ func (vl *Val) AllocHost(vr *Var, buff *MemBuff, buffPtr unsafe.Pointer, offset 
 		vl.Texture.ConfigValHost(buff, buffPtr, offset)
 	} else {
 		if vl.N > 1 && vl.ElSize != vr.SizeOf {
-			vl.SetFlag(int(ValPaddedArray))
+			vl.SetFlag(true, ValPaddedArray)
 		} else {
-			vl.ClearFlag(int(ValPaddedArray))
+			vl.SetFlag(false, ValPaddedArray)
 		}
 	}
 	return mem
@@ -308,7 +302,7 @@ func (vs *Vals) ConfigVals(gp *GPU, dev vk.Device, vr *Var, nvals int) bool {
 		vl.Init(gp, vr, i)
 		vs.Vals[i] = vl
 		if vr.TextureOwns {
-			vl.SetFlag(int(ValTextureOwns))
+			vl.SetFlag(true, ValTextureOwns)
 		}
 		if vl.Texture != nil {
 			vl.Texture.Dev = dev
@@ -524,7 +518,7 @@ func (vs *Vals) AllocTextures(mm *Memory) {
 // ValFlags
 
 // ValFlags are bitflags for Val state
-type ValFlags int32
+type ValFlags int64 //enums:bitflag
 
 const (
 	// ValMod the value has been modified
@@ -536,10 +530,4 @@ const (
 	// ValTextureOwns val owns and manages the host staging memory for texture.
 	// based on Var TextureOwns -- for dynamically changings images.
 	ValTextureOwns
-
-	ValFlagsN
 )
-
-//go:generate stringer -type=ValFlags
-
-var KiT_ValFlags = kit.Enums.AddEnum(ValFlagsN, kit.BitFlag, nil)

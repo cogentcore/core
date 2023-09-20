@@ -9,7 +9,6 @@ import (
 	"log"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/ki/v2/ints"
 )
 
 // Var specifies a variable used in a pipeline, accessed in shader programs.
@@ -186,7 +185,7 @@ func (vr *Var) AllocTextures(mm *Memory) {
 func (vr *Var) TextureValidIdx(stIdx, idx int) int {
 	vals := vr.Vals.ActiveVals()
 	vidx := 0
-	mx := ints.MinInt(stIdx+MaxTexturesPerSet, len(vals))
+	mx := min(stIdx+MaxTexturesPerSet, len(vals))
 	for i := stIdx; i < mx; i++ {
 		vl := vals[i]
 		if i == idx {

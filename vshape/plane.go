@@ -5,7 +5,6 @@
 package vshape
 
 import (
-	"goki.dev/ki/v2/ints"
 	"goki.dev/mat32/v2"
 )
 
@@ -68,8 +67,8 @@ func (pl *Plane) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU
 // nVtx = (wsegs + 1) * (hsegs + 1)
 // nIdx = wsegs * hsegs * 6
 func PlaneN(wsegs, hsegs int) (nVtx, nIdx int) {
-	wsegs = ints.MaxInt(wsegs, 1)
-	hsegs = ints.MaxInt(hsegs, 1)
+	wsegs = max(wsegs, 1)
+	hsegs = max(hsegs, 1)
 	nVtx = (wsegs + 1) * (hsegs + 1)
 	nIdx = wsegs * hsegs * 6
 	return
@@ -139,8 +138,8 @@ func SetPlane(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtx
 	} else if (waxis == mat32.Z && haxis == mat32.Y) || (waxis == mat32.Y && haxis == mat32.Z) {
 		w = mat32.X
 	}
-	wsegs = ints.MaxInt(wsegs, 1)
-	hsegs = ints.MaxInt(hsegs, 1)
+	wsegs = max(wsegs, 1)
+	hsegs = max(hsegs, 1)
 
 	norm := mat32.Vec3{}
 	if zoff > 0 {
