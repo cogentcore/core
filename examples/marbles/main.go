@@ -69,28 +69,28 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	// the StructView will also show the Graph Toolbar which is main actions..
-	gstru := giv.AddNewStructView(mfr, "gstru")
+	gstru := giv.NewStructView(mfr, "gstru")
 	gstru.Viewport = Vp // needs vp early for toolbar
 	gstru.SetProp("height", "4.5em")
 	gstru.SetStruct(&Gr)
 	ParamsEdit = gstru
 
-	lns := giv.AddNewTableView(mfr, "lns")
+	lns := giv.NewTableView(mfr, "lns")
 	lns.Viewport = Vp
 	lns.SetSlice(&Gr.Lines)
 	EqTable = lns
 
-	frame := gi.AddNewFrame(mfr, "frame", gi.LayoutHoriz)
+	frame := gi.NewFrame(mfr, "frame", gi.LayoutHoriz)
 
-	SvgGraph = svg.AddNewSVG(frame, "graph")
+	SvgGraph = svg.NewSVG(frame, "graph")
 	SvgGraph.SetProp("min-width", GraphSize)
 	SvgGraph.SetProp("min-height", GraphSize)
 	SvgGraph.SetStretchMaxWidth()
 	SvgGraph.SetStretchMaxHeight()
 
-	SvgLines = svg.AddNewGroup(SvgGraph, "SvgLines")
-	SvgMarbles = svg.AddNewGroup(SvgGraph, "SvgMarbles")
-	SvgCoords = svg.AddNewGroup(SvgGraph, "SvgCoords")
+	SvgLines = svg.NewGroup(SvgGraph, "SvgLines")
+	SvgMarbles = svg.NewGroup(SvgGraph, "SvgMarbles")
+	SvgCoords = svg.NewGroup(SvgGraph, "SvgCoords")
 
 	gmin = mat32.Vec2{-10, -10}
 	gmax = mat32.Vec2{10, 10}

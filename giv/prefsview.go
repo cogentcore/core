@@ -30,7 +30,7 @@ func PrefsView(pf *gi.Preferences) *gi.Window {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	sv := AddNewStructView(mfr, "sv")
+	sv := NewStructView(mfr, "sv")
 	sv.Viewport = vp
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
@@ -39,7 +39,7 @@ func PrefsView(pf *gi.Preferences) *gi.Window {
 	MainMenuView(pf, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
 		if !pf.Changed {
 			win.Close()
 			return
@@ -95,7 +95,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.Window {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	sv := AddNewStructView(mfr, "sv")
+	sv := NewStructView(mfr, "sv")
 	sv.Viewport = vp
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
@@ -104,7 +104,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.Window {
 	MainMenuView(pf, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
 		if !pf.Changed {
 			win.Close()
 			return
@@ -160,7 +160,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) *gi.Window {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	sv := AddNewStructView(mfr, "sv")
+	sv := NewStructView(mfr, "sv")
 	sv.Viewport = vp
 	sv.SetStruct(pf)
 	sv.SetStretchMax()

@@ -21,6 +21,7 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"goki.dev/matcolor"
 	"goki.dev/pi/v2/langs/golang"
@@ -126,7 +127,7 @@ var PrefsFileName = "prefs.json"
 
 // Open preferences from GoGi standard prefs directory
 func (pf *Preferences) Open() error {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
@@ -152,7 +153,7 @@ func (pf *Preferences) Open() error {
 
 // Save Preferences to GoGi standard prefs directory
 func (pf *Preferences) Save() error {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := json.MarshalIndent(pf, "", "  ")
 	if err != nil {
@@ -247,10 +248,10 @@ func (pf *Preferences) Apply() {
 		PrefsDet.Apply()
 	}
 	if pf.FontPaths != nil {
-		paths := append(pf.FontPaths, oswin.TheApp.FontPaths()...)
+		paths := append(pf.FontPaths, goosi.TheApp.FontPaths()...)
 		girl.FontLibrary.InitFontPaths(paths...)
 	} else {
-		girl.FontLibrary.InitFontPaths(oswin.TheApp.FontPaths()...)
+		girl.FontLibrary.InitFontPaths(goosi.TheApp.FontPaths()...)
 	}
 	pf.ApplyDPI()
 }
@@ -258,14 +259,14 @@ func (pf *Preferences) Apply() {
 // ApplyDPI updates the screen LogicalDPI values according to current
 // preferences and zoom factor, and then updates all open windows as well.
 func (pf *Preferences) ApplyDPI() {
-	n := oswin.TheApp.NScreens()
+	n := goosi.TheApp.NScreens()
 	for i := 0; i < n; i++ {
-		sc := oswin.TheApp.Screen(i)
+		sc := goosi.TheApp.Screen(i)
 		if sc == nil {
 			continue
 		}
 		if scp, ok := pf.ScreenPrefs[sc.Name]; ok {
-			oswin.SetLogicalDPIScale(sc.Name, scp.LogicalDPIScale)
+			goosi.SetLogicalDPIScale(sc.Name, scp.LogicalDPIScale)
 		}
 		sc.UpdateLogicalDPI()
 	}
@@ -277,7 +278,7 @@ func (pf *Preferences) ApplyDPI() {
 // UpdateAll updates all open windows with current preferences -- triggers
 // rebuild of default styles.
 func (pf *Preferences) UpdateAll() {
-	oswin.ZoomFactor = 1 // reset so saved dpi is used
+	goosi.ZoomFactor = 1 // reset so saved dpi is used
 	pf.Apply()
 
 	gist.RebuildDefaultStyles = true
@@ -299,10 +300,10 @@ func (pf *Preferences) UpdateAll() {
 
 // ScreenInfo returns screen info for all screens on the console.
 func (pf *Preferences) ScreenInfo() string {
-	ns := oswin.TheApp.NScreens()
+	ns := goosi.TheApp.NScreens()
 	scinfo := ""
 	for i := 0; i < ns; i++ {
-		sc := oswin.TheApp.Screen(i)
+		sc := goosi.TheApp.Screen(i)
 		if i > 0 {
 			scinfo += "<br><br>\n"
 		}
@@ -320,7 +321,7 @@ func (pf *Preferences) VersionInfo() string {
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen.
 func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
-	sc := oswin.TheApp.Screen(0)
+	sc := goosi.TheApp.Screen(0)
 	if forCurrentScreen {
 		sp, ok := pf.ScreenPrefs[sc.Name]
 		if !ok {
@@ -959,7 +960,7 @@ var SavedPathsExtras = []string{MenuTextSeparator, FileViewResetPaths, FileViewE
 // SavePaths saves the active SavedPaths to prefs dir
 func SavePaths() {
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
 	SavedPaths.SaveJSON(pnm)
 	// add back after save
@@ -970,7 +971,7 @@ func SavePaths() {
 func OpenPaths() {
 	// remove to be sure we don't have duplicate extras
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
 	SavedPaths.OpenJSON(pnm)
 	// add back after save
@@ -1071,7 +1072,7 @@ var PrefsDetailedFileName = "prefs_det.json"
 
 // Open detailed preferences from GoGi standard prefs directory
 func (pf *PrefsDetailed) Open() error {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
@@ -1085,7 +1086,7 @@ func (pf *PrefsDetailed) Open() error {
 
 // Save detailed prefs to GoGi standard prefs directory
 func (pf *PrefsDetailed) Save() error {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	b, err := json.MarshalIndent(pf, "", "  ")
 	if err != nil {
@@ -1207,7 +1208,7 @@ type PrefsDebug struct {
 	Update2DTrace *bool `desc:"reports trace of updates that trigger re-rendering (printfs to stdout)"`
 
 	// reports trace of the nodes rendering (printfs to stdout)
-	Render2DTrace *bool `desc:"reports trace of the nodes rendering (printfs to stdout)"`
+	RenderTrace *bool `desc:"reports trace of the nodes rendering (printfs to stdout)"`
 
 	// reports trace of all layouts (printfs to stdout)
 	Layout2DTrace *bool `desc:"reports trace of all layouts (printfs to stdout)"`
@@ -1262,7 +1263,7 @@ var PrefsDebugProps = ki.Props{
 // Connect connects debug fields with actual variables controlling debugging
 func (pf *PrefsDebug) Connect() {
 	pf.Update2DTrace = &Update2DTrace
-	pf.Render2DTrace = &Render2DTrace
+	pf.RenderTrace = &RenderTrace
 	pf.Layout2DTrace = &Layout2DTrace
 	pf.WinEventTrace = &WinEventTrace
 	pf.WinPublishTrace = &WinPublishTrace

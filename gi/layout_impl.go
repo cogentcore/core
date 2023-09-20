@@ -9,7 +9,6 @@ import (
 
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/mat32/v2"
 )
 
@@ -276,10 +275,10 @@ func GatherSizesGrid(ly *Layout) {
 		st := &ni.Style
 		ni.StyMu.RUnlock()
 		if st.Col > 0 {
-			cols = ints.MaxInt(cols, st.Col+st.ColSpan)
+			cols = max(cols, st.Col+st.ColSpan)
 		}
 		if st.Row > 0 {
-			rows = ints.MaxInt(rows, st.Row+st.RowSpan)
+			rows = max(rows, st.Row+st.RowSpan)
 		}
 	}
 
@@ -388,8 +387,8 @@ func GatherSizesGrid(ly *Layout) {
 		maxRow := len(ly.GridData[Row])
 		maxCol := len(ly.GridData[Col])
 		if prefSizing {
-			maxRow = ints.MinInt(LayoutPrefMaxRows, maxRow)
-			maxCol = ints.MinInt(LayoutPrefMaxCols, maxCol)
+			maxRow = min(LayoutPrefMaxRows, maxRow)
+			maxCol = min(LayoutPrefMaxCols, maxCol)
 		}
 
 		// Y = sum across rows which have max's

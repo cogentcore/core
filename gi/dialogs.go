@@ -13,12 +13,11 @@ import (
 	"github.com/iancoleman/strcase"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 )
 
 // DialogsSepWindow determines if dialog windows open in a separate OS-level
@@ -208,7 +207,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	dlg.Win = nil
 
 	// note: LowPri allows all other events to be processed before dialog
-	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	win.EventMgr.ConnectEvent(dlg.This(), goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 		if KeyEventTrace {
@@ -221,7 +220,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 			kt.SetProcessed()
 		}
 	})
-	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	win.EventMgr.ConnectEvent(dlg.This(), goosi.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 		if KeyEventTrace {
@@ -235,7 +234,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		}
 	})
 	// this is not a good idea
-	// win.ConnectEvent(dlg.This(), oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	// win.ConnectEvent(dlg.This(), goosi.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	me := d.(*mouse.Event)
 	// 	ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
@@ -254,14 +253,14 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	} else {
 		vpsz.X = 800
 		vpsz.Y = 800
-		x = ints.MaxInt(0, x)
-		y = ints.MaxInt(0, y)
+		x = max(0, x)
+		y = max(0, y)
 		if x == 0 && y == 0 {
 			x = win.Viewport.Geom.Size.X / 3
 			y = win.Viewport.Geom.Size.Y / 3
 		}
-		x = ints.MinInt(x, win.Viewport.Geom.Size.X-vpsz.X) // fit
-		y = ints.MinInt(y, win.Viewport.Geom.Size.Y-vpsz.Y) // fit
+		x = min(x, win.Viewport.Geom.Size.X-vpsz.X) // fit
+		y = min(y, win.Viewport.Geom.Size.Y-vpsz.Y) // fit
 		dlg.SetFlag(int(VpFlagPopup))
 		dlg.Resize(vpsz)
 		dlg.Geom.Pos = image.Point{x, y}
@@ -323,7 +322,7 @@ var DialogProps = ki.Props{
 
 // SetFrame creates a standard vertical column frame layout as first element of the dialog, named "frame"
 func (dlg *Dialog) SetFrame() *Frame {
-	frame := AddNewFrame(dlg, "frame", LayoutVert)
+	frame := NewFrame(dlg, "frame", LayoutVert)
 	return frame
 }
 
@@ -336,7 +335,7 @@ func (dlg *Dialog) Frame() *Frame {
 func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	dlg.Title = title
 	if frame != nil {
-		lab := AddNewLabel(frame, "title", title)
+		lab := NewLabel(frame, "title", title)
 		return lab
 	}
 	return nil
@@ -356,7 +355,7 @@ func (dlg *Dialog) TitleWidget(frame *Frame) (*Label, int) {
 func (dlg *Dialog) SetPrompt(prompt string, frame *Frame) *Label {
 	dlg.Prompt = prompt
 	if frame != nil {
-		lab := AddNewLabel(frame, "prompt", prompt)
+		lab := NewLabel(frame, "prompt", prompt)
 		return lab
 	}
 	return nil
@@ -385,8 +384,8 @@ func (dlg *Dialog) AddButtonBox(frame *Frame) *Layout {
 	if frame == nil {
 		return nil
 	}
-	AddNewSpace(frame, "button-space")
-	bb := AddNewLayout(frame, "buttons", LayoutHoriz)
+	NewSpace(frame, "button-space")
+	bb := NewLayout(frame, "buttons", LayoutHoriz)
 	return bb
 }
 
@@ -567,10 +566,10 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 
 	frame := dlg.Frame()
 	bb := dlg.AddButtonBox(frame) // not otherwise made because no buttons above
-	AddNewStretch(bb, "stretch")
+	NewStretch(bb, "stretch")
 	for i, ch := range choices {
 		chnm := strcase.ToKebab(ch)
-		b := AddNewButton(bb, chnm)
+		b := NewButton(bb, chnm)
 		b.SetProp("__cdSigVal", int64(i))
 		b.SetText(ch)
 		if chnm == "cancel" {
@@ -613,9 +612,9 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	nrow := frame.InsertNewChild(TypeLayout, prIdx+2, "n-row").(*Layout)
 	nrow.Lay = LayoutHoriz
 
-	AddNewLabel(nrow, "n-label", "Number:  ")
+	NewLabel(nrow, "n-label", "Number:  ")
 
-	nsb := AddNewSpinBox(nrow, "n-field")
+	nsb := NewSpinBox(nrow, "n-field")
 	nsb.SetMin(1)
 	nsb.Value = 1
 	nsb.Step = 1
@@ -626,9 +625,9 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	trow := frame.InsertNewChild(TypeLayout, prIdx+4, "t-row").(*Layout)
 	trow.Lay = LayoutHoriz
 
-	AddNewLabel(trow, "t-label", "Type:    ")
+	NewLabel(trow, "t-label", "Type:    ")
 
-	typs := AddNewComboBox(trow, "types")
+	typs := NewComboBox(trow, "types")
 	// typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface, false), true, true, 50)
 
 	if recv != nil && fun != nil {

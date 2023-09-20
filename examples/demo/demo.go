@@ -37,7 +37,7 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	tv := gi.AddNewTabView(mfr, "tv")
+	tv := gi.NewTabView(mfr, "tv")
 	// tv.NoDeleteTabs = true
 	tv.NewTabButton = true
 
@@ -54,7 +54,7 @@ func mainrun() {
 }
 
 func makeHome(tv *gi.TabView) {
-	home := tv.AddNewTab(gi.TypeFrame, "Home").(*gi.Frame)
+	home := tv.NewTab(gi.TypeFrame, "Home").(*gi.Frame)
 	home.Lay = gi.LayoutVert
 	home.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		home.Spacing.SetEx(1)
@@ -63,13 +63,13 @@ func makeHome(tv *gi.TabView) {
 		s.MaxHeight.SetPx(-1)
 	})
 
-	title := gi.AddNewLabel(home, "title", "The GoGi Demo")
+	title := gi.NewLabel(home, "title", "The GoGi Demo")
 	title.Type = gi.LabelHeadlineLarge
 
-	desc := gi.AddNewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
+	desc := gi.NewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
 	desc.Type = gi.LabelBodyLarge
 
-	// pbar := gi.AddNewProgressBar(home, "pbar")
+	// pbar := gi.NewProgressBar(home, "pbar")
 	// pbar.Start(100)
 	// go func() {
 	// 	for {
@@ -81,7 +81,7 @@ func makeHome(tv *gi.TabView) {
 	// 	}
 	// }()
 
-	// bt := gi.AddNewButton(home, "bt")
+	// bt := gi.NewButton(home, "bt")
 	// bt.Text = "Big Shadow"
 	// bt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 	// 	bt.Style.AddBoxShadow(
@@ -109,7 +109,7 @@ func makeHome(tv *gi.TabView) {
 	// 	)
 	// })
 
-	bmap := gi.AddNewBitmap(home, "bmap")
+	bmap := gi.NewBitmap(home, "bmap")
 	err := bmap.OpenImage("gopher.png", 300, 300)
 	if err != nil {
 		fmt.Println("error loading gopher image:", err)
@@ -117,7 +117,7 @@ func makeHome(tv *gi.TabView) {
 }
 
 func makeText(tv *gi.TabView) {
-	text := tv.AddNewTab(gi.TypeFrame, "Text").(*gi.Frame)
+	text := tv.NewTab(gi.TypeFrame, "Text").(*gi.Frame)
 	text.Lay = gi.LayoutVert
 	text.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		text.Spacing.SetEx(1)
@@ -126,24 +126,24 @@ func makeText(tv *gi.TabView) {
 		s.MaxHeight.SetPx(-1)
 	})
 
-	ttitle := gi.AddNewLabel(text, "ttitle", "Text")
+	ttitle := gi.NewLabel(text, "ttitle", "Text")
 	ttitle.Type = gi.LabelHeadlineLarge
 
-	tdesc := gi.AddNewLabel(text, "tdesc",
+	tdesc := gi.NewLabel(text, "tdesc",
 		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`,
 	)
 	tdesc.Type = gi.LabelBodyLarge
 
 	for typ := gi.LabelTypes(0); typ < gi.LabelTypesN; typ++ {
 		s := strings.TrimPrefix(typ.String(), "Label")
-		label := gi.AddNewLabel(text, "label"+s, s)
+		label := gi.NewLabel(text, "label"+s, s)
 		label.Type = typ
 	}
 
 }
 
 func makeButtons(win *gi.Window, tv *gi.TabView) {
-	buttons := tv.AddNewTab(gi.TypeFrame, "Buttons").(*gi.Frame)
+	buttons := tv.NewTab(gi.TypeFrame, "Buttons").(*gi.Frame)
 	buttons.Lay = gi.LayoutVert
 	buttons.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		buttons.Spacing.SetEx(1)
@@ -152,51 +152,51 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 		s.MaxHeight.SetPx(-1)
 	})
 
-	btitle := gi.AddNewLabel(buttons, "btitle", "Buttons")
+	btitle := gi.NewLabel(buttons, "btitle", "Buttons")
 	btitle.Type = gi.LabelHeadlineLarge
 
-	bdesc := gi.AddNewLabel(buttons, "bdesc",
+	bdesc := gi.NewLabel(buttons, "bdesc",
 		`GoGi provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`,
 	)
 	bdesc.Type = gi.LabelBodyLarge
 
-	sbtitle := gi.AddNewLabel(buttons, "sbtitle", "Standard Buttons")
+	sbtitle := gi.NewLabel(buttons, "sbtitle", "Standard Buttons")
 	sbtitle.Type = gi.LabelHeadlineSmall
 
-	brow := gi.AddNewLayout(buttons, "brow", gi.LayoutHorizFlow)
+	brow := gi.NewLayout(buttons, "brow", gi.LayoutHorizFlow)
 	brow.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		brow.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
 
-	browt := gi.AddNewLayout(buttons, "browt", gi.LayoutHorizFlow)
+	browt := gi.NewLayout(buttons, "browt", gi.LayoutHorizFlow)
 	browt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		browt.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
 
-	browi := gi.AddNewLayout(buttons, "browi", gi.LayoutHorizFlow)
+	browi := gi.NewLayout(buttons, "browi", gi.LayoutHorizFlow)
 	browi.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		browi.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
 
-	mbtitle := gi.AddNewLabel(buttons, "mbtitle", "Menu Buttons")
+	mbtitle := gi.NewLabel(buttons, "mbtitle", "Menu Buttons")
 	mbtitle.Type = gi.LabelHeadlineSmall
 
-	mbrow := gi.AddNewLayout(buttons, "mbrow", gi.LayoutHorizFlow)
+	mbrow := gi.NewLayout(buttons, "mbrow", gi.LayoutHorizFlow)
 	mbrow.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		mbrow.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
 
-	mbrowt := gi.AddNewLayout(buttons, "mbrowt", gi.LayoutHorizFlow)
+	mbrowt := gi.NewLayout(buttons, "mbrowt", gi.LayoutHorizFlow)
 	mbrowt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		mbrowt.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
 
-	mbrowi := gi.AddNewLayout(buttons, "mbrowi", gi.LayoutHorizFlow)
+	mbrowi := gi.NewLayout(buttons, "mbrowi", gi.LayoutHorizFlow)
 	mbrowi.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		mbrowi.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
@@ -238,7 +238,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 			art = "An "
 		}
 
-		b := gi.AddNewButton(brow, "button"+s)
+		b := gi.NewButton(brow, "button"+s)
 		b.Text = s
 		b.Icon = ics[typ]
 		b.Type = typ
@@ -247,7 +247,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 			fmt.Println("Got click event on", b.Nm)
 		})
 
-		bt := gi.AddNewButton(browt, "buttonText"+s)
+		bt := gi.NewButton(browt, "buttonText"+s)
 		bt.Text = s
 		bt.Type = typ
 		bt.Tooltip = "A standard " + sl + " button with a label"
@@ -255,7 +255,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 			fmt.Println("Got click event on", bt.Nm)
 		})
 
-		bi := gi.AddNewButton(browi, "buttonIcon"+s)
+		bi := gi.NewButton(browi, "buttonIcon"+s)
 		bi.Type = typ
 		bi.Icon = ics[typ+5]
 		bi.Tooltip = "A standard " + sl + " button with an icon"
@@ -263,20 +263,20 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 			fmt.Println("Got click event on", bi.Nm)
 		})
 
-		mb := gi.AddNewButton(mbrow, "menuButton"+s)
+		mb := gi.NewButton(mbrow, "menuButton"+s)
 		mb.Text = s
 		mb.Icon = ics[typ+10]
 		mb.Type = typ
 		mb.Menu = menu
 		mb.Tooltip = art + sl + " menu button with a label and icon"
 
-		mbt := gi.AddNewButton(mbrowt, "menuButtonText"+s)
+		mbt := gi.NewButton(mbrowt, "menuButtonText"+s)
 		mbt.Text = s
 		mbt.Type = typ
 		mbt.Menu = menu
 		mbt.Tooltip = art + sl + " menu button with a label"
 
-		mbi := gi.AddNewButton(mbrowi, "menuButtonIcon"+s)
+		mbi := gi.NewButton(mbrowi, "menuButtonIcon"+s)
 		mbi.Icon = ics[typ+15]
 		mbi.Type = typ
 		mbi.Menu = menu
@@ -285,7 +285,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 }
 
 func makeInputs(tv *gi.TabView) {
-	inputs := tv.AddNewTab(gi.TypeFrame, "Inputs").(*gi.Frame)
+	inputs := tv.NewTab(gi.TypeFrame, "Inputs").(*gi.Frame)
 	inputs.Lay = gi.LayoutVert
 	inputs.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		inputs.Spacing.SetEx(1)
@@ -294,69 +294,69 @@ func makeInputs(tv *gi.TabView) {
 		s.MaxHeight.SetPx(-1)
 	})
 
-	ititle := gi.AddNewLabel(inputs, "ititle", "Inputs")
+	ititle := gi.NewLabel(inputs, "ititle", "Inputs")
 	ititle.Type = gi.LabelHeadlineLarge
 
-	idesc := gi.AddNewLabel(inputs, "idesc",
+	idesc := gi.NewLabel(inputs, "idesc",
 		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`,
 	)
 	idesc.Type = gi.LabelBodyLarge
 
-	tff := gi.AddNewTextField(inputs, "tff")
+	tff := gi.NewTextField(inputs, "tff")
 	tff.Placeholder = "Filled Text Field"
 	tff.Type = gi.TextFieldFilled
 
-	tfo := gi.AddNewTextField(inputs, "tfo")
+	tfo := gi.NewTextField(inputs, "tfo")
 	tfo.Placeholder = "Outlined Text Field"
 	tfo.Type = gi.TextFieldOutlined
 
-	tffc := gi.AddNewTextField(inputs, "tffc")
+	tffc := gi.NewTextField(inputs, "tffc")
 	tffc.Placeholder = "Filled Text Field"
 	tffc.Type = gi.TextFieldFilled
 	tffc.AddClearAction()
 
-	tfoc := gi.AddNewTextField(inputs, "tfoc")
+	tfoc := gi.NewTextField(inputs, "tfoc")
 	tfoc.Placeholder = "Outlined Text Field"
 	tfoc.Type = gi.TextFieldOutlined
 	tfoc.AddClearAction()
 
-	tffcs := gi.AddNewTextField(inputs, "tffcs")
+	tffcs := gi.NewTextField(inputs, "tffcs")
 	tffcs.Placeholder = "Filled Text Field"
 	tffcs.Type = gi.TextFieldFilled
 	tffcs.AddClearAction()
 	tffcs.LeadingIcon = gicons.Search
 
-	tfocs := gi.AddNewTextField(inputs, "tfocs")
+	tfocs := gi.NewTextField(inputs, "tfocs")
 	tfocs.Placeholder = "Outlined Text Field"
 	tfocs.Type = gi.TextFieldOutlined
 	tfocs.AddClearAction()
 	tfocs.LeadingIcon = gicons.Search
 
-	tffp := gi.AddNewTextField(inputs, "tffp")
+	tffp := gi.NewTextField(inputs, "tffp")
 	tffp.Placeholder = "Password Text Field"
 	tffp.Type = gi.TextFieldFilled
 	tffp.SetTypePassword()
 
-	tfop := gi.AddNewTextField(inputs, "tfop")
+	tfop := gi.NewTextField(inputs, "tfop")
 	tfop.Placeholder = "Password Text Field"
 	tfop.Type = gi.TextFieldOutlined
 	tfop.SetTypePassword()
 
-	sboxes := gi.AddNewLayout(inputs, "sboxes", gi.LayoutHoriz)
+	sboxes := gi.NewLayout(inputs, "sboxes", gi.LayoutHoriz)
 
-	sbox := gi.AddNewSpinBox(sboxes, "sbox")
+	sbox := gi.NewSpinBox(sboxes, "sbox")
 	sbox.Value = 15
 	sbox.Step = 5
 	sbox.SetMin(-50)
 	sbox.SetMax(100)
 
-	sboxh := gi.AddNewSpinBox(sboxes, "sboxh")
+	sboxh := gi.NewSpinBox(sboxes, "sboxh")
 	sboxh.Format = "%#X"
 	sboxh.Value = 44
 	sboxh.Step = 1
 	sboxh.SetMax(255)
 
-	cboxes := gi.AddNewLayout(inputs, "cboxes", gi.LayoutHoriz)
+	cboxes := gi.NewLayout(inputs, "cboxes", gi.LayoutHoriz)
 	cboxes.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		cboxes.Spacing.SetEm(0.5)
 	})
@@ -371,35 +371,35 @@ func makeInputs(tv *gi.TabView) {
 		"A widely consumed small, red fruit",
 	}
 
-	cbf := gi.AddNewComboBox(cboxes, "cbf")
+	cbf := gi.NewComboBox(cboxes, "cbf")
 	cbf.Text = "Select a fruit"
 	cbf.Items = fruits
 	cbf.Tooltips = fruitDescs
 
-	cbo := gi.AddNewComboBox(cboxes, "cbo")
+	cbo := gi.NewComboBox(cboxes, "cbo")
 	cbo.Text = "Select a fruit"
 	cbo.Items = fruits
 	cbo.Tooltips = fruitDescs
 	cbo.Type = gi.ComboBoxOutlined
 
-	cbef := gi.AddNewComboBox(inputs, "cbef")
+	cbef := gi.NewComboBox(inputs, "cbef")
 	cbef.Editable = true
 	cbef.Placeholder = "Select or type a fruit"
 	cbef.Items = fruits
 	cbef.Tooltips = fruitDescs
 
-	cbeo := gi.AddNewComboBox(inputs, "cbeo")
+	cbeo := gi.NewComboBox(inputs, "cbeo")
 	cbeo.Editable = true
 	cbeo.Placeholder = "Select or type a fruit"
 	cbeo.Items = fruits
 	cbeo.Tooltips = fruitDescs
 	cbeo.Type = gi.ComboBoxOutlined
 
-	sliderx := gi.AddNewSlider(inputs, "sliderx")
+	sliderx := gi.NewSlider(inputs, "sliderx")
 	sliderx.Dim = mat32.X
 	sliderx.Value = 0.5
 
-	sliderxi := gi.AddNewSlider(inputs, "sliderxi")
+	sliderxi := gi.NewSlider(inputs, "sliderxi")
 	sliderxi.Dim = mat32.X
 	sliderxi.Value = 0.7
 	sliderxi.SetDisabled()
@@ -408,25 +408,25 @@ func makeInputs(tv *gi.TabView) {
 
 	colorvv := giv.ToValueView(&clr, "")
 	colorvv.SetSoloValue(reflect.ValueOf(&clr))
-	cvvw := inputs.AddNewChild(colorvv.WidgetType(), "cvvw").(gi.Node2D)
+	cvvw := inputs.NewChild(colorvv.WidgetType(), "cvvw").(gi.Node2D)
 	colorvv.ConfigWidget(cvvw)
 
-	sliderys := gi.AddNewLayout(inputs, "sliderys", gi.LayoutHorizFlow)
+	sliderys := gi.NewLayout(inputs, "sliderys", gi.LayoutHorizFlow)
 
-	slidery := gi.AddNewSlider(sliderys, "slidery")
+	slidery := gi.NewSlider(sliderys, "slidery")
 	slidery.Dim = mat32.Y
 	slidery.Value = 0.3
 
-	slideryi := gi.AddNewSlider(sliderys, "slideryi")
+	slideryi := gi.NewSlider(sliderys, "slideryi")
 	slideryi.Dim = mat32.Y
 	slideryi.Value = 0.2
 	slideryi.SetDisabled()
 
-	bbox := gi.AddNewButtonBox(inputs, "bbox")
+	bbox := gi.NewButtonBox(inputs, "bbox")
 	bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
 	bbox.Tooltips = []string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"}
 
-	bboxr := gi.AddNewButtonBox(inputs, "bboxr")
+	bboxr := gi.NewButtonBox(inputs, "bboxr")
 	bboxr.Items = []string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}
 	bboxr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
 	bboxr.Mutex = true
@@ -435,7 +435,7 @@ func makeInputs(tv *gi.TabView) {
 	tbuf.InitName(tbuf, "tbuf")
 	tbuf.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
 
-	tview := giv.AddNewTextView(inputs, "tview")
+	tview := giv.NewTextView(inputs, "tview")
 	tview.SetBuf(tbuf)
 	tview.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(500)
@@ -444,7 +444,7 @@ func makeInputs(tv *gi.TabView) {
 }
 
 func makeLayouts(tv *gi.TabView) {
-	layouts := tv.AddNewTab(gi.TypeFrame, "Layouts").(*gi.Frame)
+	layouts := tv.NewTab(gi.TypeFrame, "Layouts").(*gi.Frame)
 	layouts.Lay = gi.LayoutVert
 	layouts.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		layouts.Spacing.SetEx(1)
@@ -453,37 +453,37 @@ func makeLayouts(tv *gi.TabView) {
 		s.MaxHeight.SetPx(-1)
 	})
 
-	vw := gi.AddNewLabel(layouts, "vw", "50vw")
+	vw := gi.NewLabel(layouts, "vw", "50vw")
 	vw.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.Width = units.Vw(50)
 		s.BackgroundColor.SetSolid(gi.ColorScheme.Primary)
 		s.Color = gi.ColorScheme.OnPrimary
 	})
 
-	pw := gi.AddNewLabel(layouts, "pw", "50pw")
+	pw := gi.NewLabel(layouts, "pw", "50pw")
 	pw.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.Width = units.Pw(50)
 		s.BackgroundColor.SetSolid(gi.ColorScheme.PrimaryContainer)
 		s.Color = gi.ColorScheme.OnPrimaryContainer
 	})
 
-	// sv := gi.AddNewSplitView(layouts, "sv")
+	// sv := gi.NewSplitView(layouts, "sv")
 	// sv.Dim = mat32.X
 
-	// left := gi.AddNewFrame(sv, "left", gi.LayoutVert)
+	// left := gi.NewFrame(sv, "left", gi.LayoutVert)
 
-	// leftTitle := gi.AddNewLabel(left, "leftTitle", "Left")
+	// leftTitle := gi.NewLabel(left, "leftTitle", "Left")
 	// leftTitle.Type = gi.LabelHeadlineMedium
 
-	// right := gi.AddNewFrame(sv, "right", gi.LayoutVert)
+	// right := gi.NewFrame(sv, "right", gi.LayoutVert)
 
-	// rightTitle := gi.AddNewLabel(right, "rightTitle", "Right")
+	// rightTitle := gi.NewLabel(right, "rightTitle", "Right")
 	// rightTitle.Type = gi.LabelHeadlineMedium
 
 }
 
 func makeFileTree(tv *gi.TabView) {
-	filetree := tv.AddNewTab(gi.TypeFrame, "File Tree").(*gi.Frame)
+	filetree := tv.NewTab(gi.TypeFrame, "File Tree").(*gi.Frame)
 	filetree.Lay = gi.LayoutVert
 }
 

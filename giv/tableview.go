@@ -13,11 +13,11 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
@@ -494,7 +494,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 
 	mvp := tv.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
-		tv.VisRows = ints.MinInt(gi.LayoutPrefMaxRows, tv.SliceSize)
+		tv.VisRows = min(gi.LayoutPrefMaxRows, tv.SliceSize)
 		tv.LayoutHeight = float32(tv.VisRows) * tv.RowHeight
 	} else {
 		sgHt := tv.AvailHeight()
@@ -504,7 +504,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 		}
 		tv.VisRows = int(mat32.Floor(sgHt / tv.RowHeight))
 	}
-	tv.DispRows = ints.MinInt(tv.SliceSize, tv.VisRows)
+	tv.DispRows = min(tv.SliceSize, tv.VisRows)
 
 	nWidg := nWidgPerRow * tv.DispRows
 
@@ -579,7 +579,7 @@ func (tv *TableView) UpdateSliceGrid() {
 		sg.DeleteChildren(ki.DestroyKids)
 		return
 	}
-	tv.DispRows = ints.MinInt(tv.SliceSize, tv.VisRows)
+	tv.DispRows = min(tv.SliceSize, tv.VisRows)
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	nWidg := nWidgPerRow * tv.DispRows
@@ -831,8 +831,8 @@ func (tv *TableView) SortSlice() {
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
-	oswin.TheApp.Cursor(tv.ParentWindow().OSWin).Push(cursor.Wait)
-	defer oswin.TheApp.Cursor(tv.ParentWindow().OSWin).Pop()
+	goosi.TheApp.Cursor(tv.ParentWindow().OSWin).Push(cursor.Wait)
+	defer goosi.TheApp.Cursor(tv.ParentWindow().OSWin).Pop()
 
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)

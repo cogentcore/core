@@ -414,7 +414,7 @@ func (sv *StructView) UpdateFieldAction() {
 	}
 }
 
-func (sv *StructView) Render2D() {
+func (sv *StructView) Render() {
 	if sv.IsConfiged() {
 		sv.ToolBar().UpdateActions()
 	}
@@ -423,7 +423,7 @@ func (sv *StructView) Render2D() {
 			win.MainMenuUpdateActives()
 		}
 	}
-	sv.Frame.Render2D()
+	sv.Frame.Render()
 }
 
 /////////////////////////////////////////////////////////////////////////

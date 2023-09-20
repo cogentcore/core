@@ -10,11 +10,11 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2"
 )
@@ -98,7 +98,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 		s.Height.SetEm(40)
 		s.SetStretchMax()
 	})
-	tv := AddNewTextView(tlv, "text-view")
+	tv := NewTextView(tlv, "text-view")
 	tv.Viewport = dlg.Embed(gi.TypeViewport2D).(*gi.Viewport2D)
 	tv.SetDisabled()
 	tv.SetBuf(tb)
@@ -112,13 +112,13 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	if bbox == nil {
 		bbox = dlg.AddButtonBox(frame)
 	}
-	cpb := gi.AddNewButton(bbox, "copy-to-clip")
+	cpb := gi.NewButton(bbox, "copy-to-clip")
 	cpb.SetText("Copy To Clipboard")
 	cpb.SetIcon(gicons.ContentCopy)
 	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonClicked) {
 			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
-			oswin.TheApp.ClipBoard(ddlg.Win.OSWin).Write(mimedata.NewTextBytes(text))
+			goosi.TheApp.ClipBoard(ddlg.Win.OSWin).Write(mimedata.NewTextBytes(text))
 		}
 	})
 

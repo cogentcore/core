@@ -7,12 +7,13 @@ package giv
 import (
 	"reflect"
 
-	"goki.dev/gi/v2/colormap"
+	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/gist"
 	"goki.dev/goosi"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -80,7 +81,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 
 // MouseEvent handles button MouseEvent
 func (cv *ColorMapView) MouseEvent() {
-	cv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	cv.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		cvv := recv.(*ColorMapView)
 		if me.Button == mouse.Left {
@@ -95,7 +96,7 @@ func (cv *ColorMapView) MouseEvent() {
 	})
 }
 
-func (cv *ColorMapView) ConnectEvents2D() {
+func (cv *ColorMapView) ConnectEvents() {
 	cv.MouseEvent()
 	cv.HoverTooltipEvent()
 }
@@ -142,14 +143,14 @@ func (cv *ColorMapView) RenderColorMap() {
 	rs.Unlock()
 }
 
-func (cv *ColorMapView) Render2D() {
+func (cv *ColorMapView) Render() {
 	if cv.FullReRenderIfNeeded() {
 		return
 	}
 	if cv.PushBounds() {
-		cv.This().(gi.Node2D).ConnectEvents2D()
+		cv.This().(gi.Node2D).ConnectEvents()
 		cv.RenderColorMap()
-		cv.Render2DChildren()
+		cv.RenderChildren()
 		cv.PopBounds()
 	} else {
 		cv.DisconnectAllEvents(gi.RegPri)

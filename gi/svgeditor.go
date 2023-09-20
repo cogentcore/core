@@ -9,7 +9,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
@@ -40,13 +40,13 @@ func (g *Editor) CopyFieldsFrom(frm any) {
 
 // EditorEvents handles svg editing events
 func (svg *Editor) EditorEvents() {
-	svg.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svg.ConnectEvent(goosi.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(TypeEditor).(*Editor)
 		if ssvg.IsDragging() {
 			if !ssvg.SetDragCursor {
-				oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Push(cursor.HandOpen)
+				goosi.TheApp.Cursor(ssvg.ParentWindow().OSWin).Push(cursor.HandOpen)
 				ssvg.SetDragCursor = true
 			}
 			del := me.Where.Sub(me.From)
@@ -57,18 +57,18 @@ func (svg *Editor) EditorEvents() {
 			ssvg.UpdateSig()
 		} else {
 			if ssvg.SetDragCursor {
-				oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
+				goosi.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
 				ssvg.SetDragCursor = false
 			}
 		}
 
 	})
-	svg.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svg.ConnectEvent(goosi.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(TypeEditor).(*Editor)
 		if ssvg.SetDragCursor {
-			oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
+			goosi.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
 			ssvg.SetDragCursor = false
 		}
 		ssvg.InitScale()
@@ -80,11 +80,11 @@ func (svg *Editor) EditorEvents() {
 		ssvg.SetFullReRender()
 		ssvg.UpdateSig()
 	})
-	svg.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svg.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		ssvg := recv.Embed(TypeEditor).(*Editor)
 		if ssvg.SetDragCursor {
-			oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
+			goosi.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
 			ssvg.SetDragCursor = false
 		}
 		obj := ssvg.FirstContainingPoint(me.Where, true)
@@ -95,7 +95,7 @@ func (svg *Editor) EditorEvents() {
 			}
 		}
 	})
-	svg.ConnectEvent(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svg.ConnectEvent(goosi.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(TypeEditor).(*Editor)
@@ -108,7 +108,7 @@ func (svg *Editor) EditorEvents() {
 	})
 }
 
-func (svg *Editor) ConnectEvents2D() {
+func (svg *Editor) ConnectEvents() {
 	svg.EditorEvents()
 }
 
@@ -130,10 +130,10 @@ func (svg *Editor) SetTransform() {
 	svg.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", svg.Trans.X, svg.Trans.Y, svg.Scale, svg.Scale))
 }
 
-func (svg *Editor) Render2D() {
+func (svg *Editor) Render() {
 	if svg.PushBounds() {
 		rs := &svg.Render
-		svg.This().(gi.Node2D).ConnectEvents2D()
+		svg.This().(gi.Node2D).ConnectEvents()
 		if svg.Fill {
 			svg.FillViewport()
 		}
@@ -141,7 +141,7 @@ func (svg *Editor) Render2D() {
 			svg.SetNormXForm()
 		}
 		rs.PushXForm(svg.Pnt.XForm)
-		svg.Render2DChildren() // we must do children first, then us!
+		svg.RenderChildren() // we must do children first, then us!
 		svg.PopBounds()
 		rs.PopXForm()
 		// fmt.Printf("geom.bounds: %v  geom: %v\n", svg.Geom.Bounds(), svg.Geom)

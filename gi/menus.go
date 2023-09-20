@@ -8,13 +8,12 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 )
 
 // Menu is a slice list of Node2D actions, which can contain sub-actions
@@ -237,7 +236,7 @@ func (m *Menu) AddCopyCutPaste(win *Window) {
 		})
 	m.AddAction(ActOpts{Label: "Paste", ShortcutKey: KeyFunPaste,
 		UpdateFunc: func(ac *Action) {
-			ac.SetDisabledState(oswin.TheApp.ClipBoard(win.OSWin).IsEmpty())
+			ac.SetDisabledState(goosi.TheApp.ClipBoard(win.OSWin).IsEmpty())
 		}}, win, func(recv, send ki.Ki, sig int64, data any) {
 		ww := recv.Embed(TypeWindow).(*Window)
 		ww.EventMgr.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
@@ -273,11 +272,11 @@ func (m *Menu) AddAppMenu(win *Window) {
 
 // AddStdAppMenu adds a standard set of menu items for application-level control.
 func (m *Menu) AddStdAppMenu(win *Window) {
-	aboutitle := "About " + oswin.TheApp.Name()
+	aboutitle := "About " + goosi.TheApp.Name()
 	m.AddAction(ActOpts{Label: aboutitle},
 		win, func(recv, send ki.Ki, sig int64, data any) {
 			ww := recv.Embed(TypeWindow).(*Window)
-			PromptDialog(ww.Viewport, DlgOpts{Title: aboutitle, Prompt: oswin.TheApp.About()}, AddOk, NoCancel, nil, nil)
+			PromptDialog(ww.Viewport, DlgOpts{Title: aboutitle, Prompt: goosi.TheApp.About()}, AddOk, NoCancel, nil, nil)
 		})
 	m.AddAction(ActOpts{Label: "GoGi Preferences...", Shortcut: "Command+P"},
 		win, func(recv, send ki.Ki, sig int64, data any) {
@@ -286,7 +285,7 @@ func (m *Menu) AddStdAppMenu(win *Window) {
 	m.AddSeparator("sepq")
 	m.AddAction(ActOpts{Label: "Quit", Shortcut: "Command+Q"},
 		win, func(recv, send ki.Ki, sig int64, data any) {
-			oswin.TheApp.QuitReq()
+			goosi.TheApp.QuitReq()
 		})
 }
 
@@ -368,7 +367,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 
 	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
-	frame := AddNewFrame(pvp, "Frame", LayoutVert)
+	frame := NewFrame(pvp, "Frame", LayoutVert)
 	MenuFrameConfigStyles(&parVp.WidgetBase, frame)
 	var focus ki.Ki
 	for _, ac := range menu {
@@ -389,11 +388,11 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
 	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(2)).ToPoint()
 	maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
-	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
-	x = ints.MaxInt(0, x)
-	y = ints.MaxInt(0, y)
-	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
-	y = ints.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
+	vpsz.Y = min(maxht, vpsz.Y)
+	x = max(0, x)
+	y = max(0, y)
+	x = min(x, mainVp.Geom.Size.X-vpsz.X) // fit
+	y = min(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
@@ -455,11 +454,11 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *View
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
 	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(2)).ToPoint()
 	maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
-	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
-	x = ints.MaxInt(0, x)
-	y = ints.MaxInt(0, y)
-	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
-	y = ints.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
+	vpsz.Y = min(maxht, vpsz.Y)
+	x = max(0, x)
+	y = max(0, y)
+	x = min(x, mainVp.Geom.Size.X-vpsz.X) // fit
+	y = min(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.SetFullReRender()
@@ -693,10 +692,10 @@ func (sp *Separator) RenderSeparator() {
 	pc.FillStrokeClear(rs)
 }
 
-func (sp *Separator) Render2D() {
+func (sp *Separator) Render() {
 	if sp.PushBounds() {
 		sp.RenderSeparator()
-		sp.Render2DChildren()
+		sp.RenderChildren()
 		sp.PopBounds()
 	}
 }

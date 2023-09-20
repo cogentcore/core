@@ -13,8 +13,8 @@ import (
 	"sort"
 	"strings"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
+	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/ki/v2"
 )
@@ -341,7 +341,7 @@ func (km *KeyMaps) SaveJSON(filename FileName) error {
 
 // OpenPrefs opens KeyMaps from GoGi standard prefs directory, using PrefsKeyMapsFileName
 func (km *KeyMaps) OpenPrefs() error {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
 	AvailKeyMapsChanged = false
 	return km.OpenJSON(FileName(pnm))
@@ -349,7 +349,7 @@ func (km *KeyMaps) OpenPrefs() error {
 
 // SavePrefs saves KeyMaps to GoGi standard prefs directory, using PrefsKeyMapsFileName
 func (km *KeyMaps) SavePrefs() error {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
 	AvailKeyMapsChanged = false
 	return km.SaveJSON(FileName(pnm))

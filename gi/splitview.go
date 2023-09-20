@@ -9,14 +9,13 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/mat32/v2"
 )
 
@@ -123,7 +122,7 @@ func (sv *SplitView) SetSplits(splits ...float32) {
 	updt := sv.UpdateStart()
 	sv.UpdateSplits()
 	sz := len(sv.Kids)
-	mx := ints.MinInt(sz, len(splits))
+	mx := min(sz, len(splits))
 	for i := 0; i < mx; i++ {
 		sv.Splits[i] = splits[i]
 	}
@@ -303,7 +302,7 @@ func (sv *SplitView) ConfigSplitters() {
 func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
 	kc := string(kt.Chord())
 	mod := "Control+"
-	if oswin.TheApp.Platform() == oswin.MacOS {
+	if goosi.TheApp.Platform() == goosi.MacOS {
 		mod = "Meta+"
 	}
 	if !strings.HasPrefix(kc, mod) {
@@ -334,7 +333,7 @@ func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
 }
 
 func (sv *SplitView) KeyChordEvent() {
-	sv.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	sv.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		svv := recv.Embed(TypeSplitView).(*SplitView)
 		svv.KeyInput(d.(*key.ChordEvent))
 	})
@@ -409,12 +408,12 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return sv.Layout2DChildren(iter)
 }
 
-func (sv *SplitView) Render2D() {
+func (sv *SplitView) Render() {
 	if sv.FullReRenderIfNeeded() {
 		return
 	}
 	if sv.PushBounds() {
-		sv.This().(Node2D).ConnectEvents2D()
+		sv.This().(Node2D).ConnectEvents()
 		for i, kid := range sv.Kids {
 			nii, ni := KiToNode2D(kid)
 			if nii != nil {
@@ -424,15 +423,15 @@ func (sv *SplitView) Render2D() {
 				} else {
 					ni.ClearInvisible()
 				}
-				nii.Render2D() // needs to disconnect using invisible
+				nii.Render() // needs to disconnect using invisible
 			}
 		}
-		sv.Parts.Render2DTree()
+		sv.Parts.RenderTree()
 		sv.PopBounds()
 	}
 }
 
-func (sv *SplitView) ConnectEvents2D() {
+func (sv *SplitView) ConnectEvents() {
 	sv.SplitViewEvents()
 }
 
@@ -618,7 +617,7 @@ func (sr *Splitter) SplitView() *SplitView {
 }
 
 func (sr *Splitter) MouseEvent() {
-	sr.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	sr.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		srr := recv.Embed(TypeSplitter).(*Splitter)
 		if srr.IsDisabled() {
@@ -658,7 +657,7 @@ func (sr *Splitter) MouseEvent() {
 
 func (sr *Splitter) MouseScrollEvent() {
 	// todo: just disabling at this point to prevent bad side-effects
-	// sr.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	// sr.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	srr := recv.Embed(TypeSliderBase).(*SliderBase)
 	// 	if srr.IsInactive() {
 	// 		return
@@ -682,13 +681,13 @@ func (sr *Splitter) SplitterEvents() {
 	sr.KeyChordEvent()
 }
 
-func (sr *Splitter) ConnectEvents2D() {
+func (sr *Splitter) ConnectEvents() {
 	sr.SplitterEvents()
 }
 
-func (sr *Splitter) Render2D() {
+func (sr *Splitter) Render() {
 	win := sr.ParentWindow()
-	sr.This().(Node2D).ConnectEvents2D()
+	sr.This().(Node2D).ConnectEvents()
 	spnm := "gi.Splitter:" + sr.Name()
 	if sr.IsDragging() {
 		ick := sr.Parts.ChildByType(TypeIcon, ki.Embeds, 0)
@@ -719,7 +718,7 @@ func (sr *Splitter) Render2D() {
 		}
 		if sr.PushBounds() {
 			sr.RenderSplitter()
-			sr.Render2DChildren()
+			sr.RenderChildren()
 			sr.PopBounds()
 		}
 	}
@@ -731,7 +730,7 @@ func (sr *Splitter) RenderSplitter() {
 	sr.ConfigPartsIfNeeded(true)
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
-		sr.Parts.Render2DTree()
+		sr.Parts.RenderTree()
 	}
 	// else {
 	rs, pc, st := sr.RenderLock()

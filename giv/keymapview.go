@@ -9,9 +9,9 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -35,7 +35,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 		s.Margin.Set(units.Px(8 * gi.Prefs.DensityMul()))
 	})
 
-	title := gi.AddNewLabel(mfr, "title", "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
+	title := gi.NewLabel(mfr, "title", "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
 	title.Type = gi.LabelHeadlineSmall
 	title.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.Width.SetCh(30) // need for wrap
@@ -43,7 +43,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 		s.Text.WhiteSpace = gist.WhiteSpaceNormal // wrap
 	})
 
-	tv := mfr.AddNewChild(TypeTableView, "tv").(*TableView)
+	tv := mfr.NewChild(TypeTableView, "tv").(*TableView)
 	tv.Viewport = vp
 	tv.SetSlice(km)
 	tv.SetStretchMax()
@@ -57,7 +57,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	MainMenuView(km, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
 		if !gi.AvailKeyMapsChanged || km != &gi.AvailKeyMaps { // only for main avail map..
 			win.Close()
 			return

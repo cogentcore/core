@@ -14,10 +14,10 @@ import (
 	"goki.dev/cam/hsl"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -139,13 +139,13 @@ func (cv *ColorView) Config() {
 		return
 	}
 	updt := cv.UpdateStart()
-	vl := gi.AddNewLayout(cv, "slider-lay", gi.LayoutHoriz)
-	nl := gi.AddNewLayout(cv, "num-lay", gi.LayoutVert)
+	vl := gi.NewLayout(cv, "slider-lay", gi.LayoutHoriz)
+	nl := gi.NewLayout(cv, "num-lay", gi.LayoutVert)
 
 	// cv.NumView = ToValueView(&cv.Color, "")
 	// cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
 	// vtyp := cv.NumView.WidgetType()
-	// widg := nl.AddNewChild(vtyp, "nums").(gi.Node2D)
+	// widg := nl.NewChild(vtyp, "nums").(gi.Node2D)
 	// cv.NumView.ConfigWidget(widg)
 	// vvb := cv.NumView.AsValueViewBase()
 	// vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -155,9 +155,9 @@ func (cv *ColorView) Config() {
 	// 	cvv.ViewSig.Emit(cvv.This(), 0, nil)
 	// })
 
-	rgbalay := gi.AddNewLayout(nl, "nums-rgba-lay", gi.LayoutHoriz)
+	rgbalay := gi.NewLayout(nl, "nums-rgba-lay", gi.LayoutHoriz)
 
-	nrgba := AddNewStructViewInline(rgbalay, "nums-rgba")
+	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
 	nrgba.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
@@ -168,37 +168,37 @@ func (cv *ColorView) Config() {
 		cvv.UpdateEnd(updt)
 	})
 
-	rgbacopy := gi.AddNewButton(rgbalay, "rgbacopy")
+	rgbacopy := gi.NewButton(rgbalay, "rgbacopy")
 	rgbacopy.Icon = gicons.ContentCopy
 	rgbacopy.Tooltip = "Copy RGBA Color"
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGB(r, g, b)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("gist.ColorFromRGB(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGBA(r, g, b, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("gist.ColorFromRGBA(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgb(r, g, b)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("rgb(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgba(r, g, b, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("rgba(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 
-	hslalay := gi.AddNewLayout(nl, "nums-hsla-lay", gi.LayoutHoriz)
+	hslalay := gi.NewLayout(nl, "nums-hsla-lay", gi.LayoutHoriz)
 
-	nhsla := AddNewStructViewInline(hslalay, "nums-hsla")
+	nhsla := NewStructViewInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
 	nhsla.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
@@ -208,39 +208,39 @@ func (cv *ColorView) Config() {
 		cvv.UpdateEnd(updt)
 	})
 
-	hslacopy := gi.AddNewButton(hslalay, "hslacopy")
+	hslacopy := gi.NewButton(hslalay, "hslacopy")
 	hslacopy.Icon = gicons.ContentCopy
 	hslacopy.Tooltip = "Copy HSLA Color"
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSL(h, s, l)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("gist.ColorFromHSL(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSLA(h, s, l, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("gist.ColorFromHSLA(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsl(h, s, l)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("hsl(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsla(h, s, l, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("hsla(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 
-	hexlay := gi.AddNewLayout(nl, "nums-hex-lay", gi.LayoutHoriz)
+	hexlay := gi.NewLayout(nl, "nums-hex-lay", gi.LayoutHoriz)
 
-	gi.AddNewLabel(hexlay, "hexlbl", "Hex")
+	gi.NewLabel(hexlay, "hexlbl", "Hex")
 
-	hex := gi.AddNewTextField(hexlay, "nums-hex")
+	hex := gi.NewTextField(hexlay, "nums-hex")
 	hex.Tooltip = "The color in hexadecimal form"
 	hex.TextFieldSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -258,7 +258,7 @@ func (cv *ColorView) Config() {
 		}
 	})
 
-	hexcopy := gi.AddNewButton(hexlay, "hexcopy")
+	hexcopy := gi.NewButton(hexlay, "hexcopy")
 	hexcopy.Icon = gicons.ContentCopy
 	hexcopy.Tooltip = "Copy Hex Color"
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBB")`},
@@ -267,45 +267,45 @@ func (cv *ColorView) Config() {
 			hs := colors.AsHex(cvv.Color)
 			// get rid of transparency because this is just RRGGBB
 			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, hs[:len(hs)-2])
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBBAA")`},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, colors.AsHex(cvv.Color))
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBB"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			hs := colors.AsHex(cvv.Color)
 			text := hs[:len(hs)-2]
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBBAA"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := colors.AsHex(cvv.Color)
-			oswin.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
 		})
 
-	gi.AddNewFrame(vl, "value", gi.LayoutHoriz)
-	sg := gi.AddNewLayout(vl, "slider-grid", gi.LayoutGrid)
+	gi.NewFrame(vl, "value", gi.LayoutHoriz)
+	sg := gi.NewLayout(vl, "slider-grid", gi.LayoutGrid)
 
-	rl := gi.AddNewLabel(sg, "rlab", "Red:")
-	rs := gi.AddNewSlider(sg, "red")
-	hl := gi.AddNewLabel(sg, "hlab", "Hue:")
-	hs := gi.AddNewSlider(sg, "hue")
-	gl := gi.AddNewLabel(sg, "glab", "Green:")
-	gs := gi.AddNewSlider(sg, "green")
-	sl := gi.AddNewLabel(sg, "slab", "Sat:")
-	ss := gi.AddNewSlider(sg, "sat")
-	bl := gi.AddNewLabel(sg, "blab", "Blue:")
-	bs := gi.AddNewSlider(sg, "blue")
-	ll := gi.AddNewLabel(sg, "llab", "Light:")
-	ls := gi.AddNewSlider(sg, "light")
-	al := gi.AddNewLabel(sg, "alab", "Alpha:")
-	as := gi.AddNewSlider(sg, "alpha")
+	rl := gi.NewLabel(sg, "rlab", "Red:")
+	rs := gi.NewSlider(sg, "red")
+	hl := gi.NewLabel(sg, "hlab", "Hue:")
+	hs := gi.NewSlider(sg, "hue")
+	gl := gi.NewLabel(sg, "glab", "Green:")
+	gs := gi.NewSlider(sg, "green")
+	sl := gi.NewLabel(sg, "slab", "Sat:")
+	ss := gi.NewSlider(sg, "sat")
+	bl := gi.NewLabel(sg, "blab", "Blue:")
+	bs := gi.NewSlider(sg, "blue")
+	ll := gi.NewLabel(sg, "llab", "Light:")
+	ls := gi.NewSlider(sg, "light")
+	al := gi.NewLabel(sg, "alab", "Alpha:")
+	as := gi.NewSlider(sg, "alpha")
 
 	rl.Redrawable = true
 	gl.Redrawable = true
@@ -480,13 +480,13 @@ func (cv *ColorView) UpdateSliderGrid() {
 }
 
 func (cv *ColorView) ConfigPalette() {
-	pg := gi.AddNewLayout(cv, "palette", gi.LayoutGrid)
+	pg := gi.NewLayout(cv, "palette", gi.LayoutGrid)
 
 	// STYTOOD: use hct sorted names here (see https://goki.dev/gi/v2/issues/619)
 	nms := colors.Names
 
 	for _, cn := range nms {
-		cbt := gi.AddNewButton(pg, cn)
+		cbt := gi.NewButton(pg, cn)
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -540,7 +540,7 @@ func (cv *ColorView) UpdateNums() {
 	cv.NumLay().ChildByName("nums-hex-lay", 2).ChildByName("nums-hex", 1).(*gi.TextField).SetText(hs)
 }
 
-func (cv *ColorView) Render2D() {
+func (cv *ColorView) Render() {
 	if cv.FullReRenderIfNeeded() {
 		return
 	}
@@ -550,7 +550,7 @@ func (cv *ColorView) Render2D() {
 		cv.UpdateEndNoSig(updt)
 		cv.PopBounds()
 	}
-	cv.Frame.Render2D()
+	cv.Frame.Render()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

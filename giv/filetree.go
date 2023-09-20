@@ -33,8 +33,6 @@ import (
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/bitflag"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/vci/v2"
 )
@@ -256,7 +254,7 @@ func (ft *FileTree) WatchUpdt(path string) {
 // WatchPath adds given path to those watched
 func (ft *FileTree) WatchPath(path gi.FileName) error {
 	return nil // disable for all platforms for now -- getting some issues
-	if oswin.TheApp.Platform() == oswin.MacOS {
+	if goosi.TheApp.Platform() == goosi.MacOS {
 		return nil // mac is not supported in a high-capacity fashion at this point
 	}
 	rp := ft.RelPath(path)
@@ -1089,12 +1087,12 @@ func (fn *FileNode) LatestFileMod(cat filecat.Cat) time.Time {
 // OSOpenCommand returns the generic file 'open' command to open file with default app
 // open on Mac, xdg-open on Linux, and start on Windows
 func OSOpenCommand() string {
-	switch oswin.TheApp.Platform() {
-	case oswin.MacOS:
+	switch goosi.TheApp.Platform() {
+	case goosi.MacOS:
 		return "open"
-	case oswin.LinuxX11:
+	case goosi.LinuxX11:
 		return "xdg-open"
-	case oswin.Windows:
+	case goosi.Windows:
 		return "start"
 	}
 	return "open"
@@ -1439,7 +1437,7 @@ func BlameDialog(avp *gi.Viewport2D, fname string, blame, fbytes []byte) *TwinTe
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))
 	lns := bytes.Split(blame, []byte("\n"))
-	nln := ints.MinInt(len(lns), len(flns))
+	nln := min(len(lns), len(flns))
 	blns := make([][]byte, nln)
 	stidx := 0
 	for i := 0; i < nln; i++ {
@@ -1598,7 +1596,7 @@ const (
 
 // DirFlags are flags on directories: Open, SortBy etc
 // These flags are stored in the DirFlagMap for persistence.
-type DirFlags int32 //enums:bitflag
+type DirFlags int64 //enums:bitflag
 
 const (
 	// DirMark means directory is marked -- unmarked entries are deleted post-update
@@ -1641,7 +1639,7 @@ func (dm *DirFlagMap) IsOpen(path string) bool {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	if df, ok := dm.Map[path]; ok {
-		return bitflag.Has32(int32(df), int(DirIsOpen))
+		// return bitflag.Has32(int32(df), int(DirIsOpen))
 	}
 	return false
 }
@@ -1651,7 +1649,7 @@ func (dm *DirFlagMap) SetOpen(path string, open bool) {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	df := dm.Map[path]
-	bitflag.SetState32((*int32)(&df), open, int(DirIsOpen))
+	// bitflag.SetState32((*int32)(&df), open, int(DirIsOpen))
 	dm.Map[path] = df
 }
 
@@ -1660,7 +1658,7 @@ func (dm *DirFlagMap) SortByName(path string) bool {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	if df, ok := dm.Map[path]; ok {
-		return bitflag.Has32(int32(df), int(DirSortByName))
+		// return bitflag.Has32(int32(df), int(DirSortByName))
 	}
 	return true
 }
@@ -1670,7 +1668,7 @@ func (dm *DirFlagMap) SortByModTime(path string) bool {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	if df, ok := dm.Map[path]; ok {
-		return bitflag.Has32(int32(df), int(DirSortByModTime))
+		// return bitflag.Has32(int32(df), int(DirSortByModTime))
 	}
 	return false
 }
@@ -1680,13 +1678,13 @@ func (dm *DirFlagMap) SetSortBy(path string, modTime bool) {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	df := dm.Map[path]
-	mask := bitflag.Mask32(int(DirSortByName), int(DirSortByModTime))
-	bitflag.ClearMask32((*int32)(&df), mask)
-	if modTime {
-		bitflag.Set32((*int32)(&df), int(DirSortByModTime))
-	} else {
-		bitflag.Set32((*int32)(&df), int(DirSortByName))
-	}
+	// mask := bitflag.Mask32(int(DirSortByName), int(DirSortByModTime))
+	// bitflag.ClearMask32((*int32)(&df), mask)
+	// if modTime {
+	// 	bitflag.Set32((*int32)(&df), int(DirSortByModTime))
+	// } else {
+	// 	bitflag.Set32((*int32)(&df), int(DirSortByName))
+	// }
 	dm.Map[path] = df
 }
 
@@ -1695,7 +1693,7 @@ func (dm *DirFlagMap) SetMark(path string) {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	df := dm.Map[path]
-	bitflag.Set32((*int32)(&df), int(DirMark))
+	// bitflag.Set32((*int32)(&df), int(DirMark))
 	dm.Map[path] = df
 }
 
@@ -1705,7 +1703,7 @@ func (dm *DirFlagMap) ClearMarks() {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	for key, df := range dm.Map {
-		bitflag.Clear32((*int32)(&df), int(DirMark))
+		// bitflag.Clear32((*int32)(&df), int(DirMark))
 		dm.Map[key] = df
 	}
 }
@@ -1716,9 +1714,9 @@ func (dm *DirFlagMap) DeleteStale() {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	for key, df := range dm.Map {
-		if !bitflag.Has32(int32(df), int(DirMark)) {
-			delete(dm.Map, key)
-		}
+		// if !bitflag.Has32(int32(df), int(DirMark)) {
+		// 	delete(dm.Map, key)
+		// }
 	}
 }
 
@@ -1833,17 +1831,17 @@ func (ftv *FileTreeView) UpdateAllFiles() {
 	}
 }
 
-func (ftv *FileTreeView) ConnectEvents2D() {
+func (ftv *FileTreeView) ConnectEvents() {
 	ftv.FileTreeViewEvents()
 }
 
 func (ftv *FileTreeView) FileTreeViewEvents() {
-	ftv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	ftv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tvv := recv.Embed(TypeFileTreeView).(*FileTreeView)
 		kt := d.(*key.ChordEvent)
 		tvv.KeyInput(kt)
 	})
-	ftv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	ftv.ConnectEvent(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		de := d.(*dnd.Event)
 		tvvi := recv.Embed(TypeFileTreeView)
 		if tvvi == nil {
@@ -1861,7 +1859,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 			tvv.DragNDropExternal(de)
 		}
 	})
-	ftv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	ftv.ConnectEvent(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		de := d.(*dnd.FocusEvent)
 		tvvi := recv.Embed(TypeFileTreeView)
 		if tvvi == nil {
@@ -1889,7 +1887,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	}
 	if lbl, ok := ftv.LabelPart(); ok {
 		// HiPri is needed to override label's native processing
-		lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		lbl.ConnectEvent(goosi.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			lb, _ := recv.(*gi.Label)
 			ftvvi := lb.Parent().Parent()
 			if ftvvi == nil || ftvvi.This() == nil { // deleted
@@ -2342,7 +2340,7 @@ func (ftv *FileTreeView) Cut() {
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Paste() {
-	md := oswin.TheApp.ClipBoard(ftv.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
+	md := goosi.TheApp.ClipBoard(ftv.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
 	if md != nil {
 		ftv.PasteMime(md)
 	}

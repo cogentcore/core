@@ -83,7 +83,7 @@ func (mgr *WinGeomPrefsMgr) ResetCache() {
 
 // LockFile attempts to create the win_geom_prefs lock file
 func (mgr *WinGeomPrefsMgr) LockFile() error {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, mgr.FileName+".lck")
 	for rep := 0; rep < 10; rep++ {
 		if _, err := os.Stat(pnm); os.IsNotExist(err) {
@@ -118,7 +118,7 @@ func (mgr *WinGeomPrefsMgr) LockFile() error {
 
 // UnLockFile unlocks the win_geom_prefs lock file (just removes it)
 func (mgr *WinGeomPrefsMgr) UnlockFile() {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, mgr.FileName+".lck")
 	os.Remove(pnm)
 }
@@ -126,7 +126,7 @@ func (mgr *WinGeomPrefsMgr) UnlockFile() {
 // NeedToReload returns true if the last save time of prefs file is more recent than
 // when we last saved.  Called under mutex.
 func (mgr *WinGeomPrefsMgr) NeedToReload() bool {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, mgr.FileName+".lst")
 	if _, err := os.Stat(pnm); os.IsNotExist(err) {
 		return false
@@ -151,7 +151,7 @@ func (mgr *WinGeomPrefsMgr) NeedToReload() bool {
 
 // SaveLastSave saves timestamp (now) of last save to win geom
 func (mgr *WinGeomPrefsMgr) SaveLastSave() {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, mgr.FileName+".lst")
 	mgr.LastSave = time.Now()
 	b, _ := mgr.LastSave.MarshalJSON()
@@ -162,7 +162,7 @@ func (mgr *WinGeomPrefsMgr) SaveLastSave() {
 // called under mutex or at start
 func (mgr *WinGeomPrefsMgr) Open() error {
 	mgr.Init()
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, mgr.FileName+".json")
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
@@ -197,7 +197,7 @@ func (mgr *WinGeomPrefsMgr) Save() error {
 	if mgr.Geoms == nil {
 		return nil
 	}
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, mgr.FileName+".json")
 	b, err := json.MarshalIndent(mgr.Geoms, "", "\t")
 	if err != nil {
@@ -320,7 +320,7 @@ func (mgr *WinGeomPrefsMgr) SaveCached() {
 	}
 	for winName, scmap := range mgr.Cache {
 		for scName, wgr := range scmap {
-			sc := oswin.TheApp.ScreenByName(scName)
+			sc := goosi.TheApp.ScreenByName(scName)
 			if sc == nil {
 				continue
 			}
@@ -341,7 +341,7 @@ func (mgr *WinGeomPrefsMgr) SaveCached() {
 // Pref returns an existing preference for given window name, for given screen.
 // if the window name has a colon, only the part prior to the colon is used.
 // if no saved pref is available for that screen, nil is returned.
-func (mgr *WinGeomPrefsMgr) Pref(winName string, scrn *oswin.Screen) *WindowGeom {
+func (mgr *WinGeomPrefsMgr) Pref(winName string, scrn *goosi.Screen) *WindowGeom {
 	mgr.Mu.RLock()
 	defer mgr.Mu.RUnlock()
 
@@ -358,7 +358,7 @@ func (mgr *WinGeomPrefsMgr) Pref(winName string, scrn *oswin.Screen) *WindowGeom
 	}
 
 	if scrn == nil {
-		scrn = oswin.TheApp.Screen(0)
+		scrn = goosi.TheApp.Screen(0)
 		if WinGeomTrace {
 			log.Printf("WinGeomPrefs: Pref: scrn is nil, using scrn 0: %v\n", scrn.Name)
 		}
@@ -381,7 +381,7 @@ func (mgr *WinGeomPrefsMgr) DeleteAll() {
 	mgr.Mu.Lock()
 	defer mgr.Mu.Unlock()
 
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, mgr.FileName+".json")
 	os.Remove(pnm)
 	mgr.Geoms = make(WinGeomPrefs, 1000)
@@ -443,7 +443,7 @@ func (wg *WindowGeom) SetPos(ps image.Point) {
 }
 
 // ConstrainGeom constrains geometry based on screen params
-func (wg *WindowGeom) ConstrainGeom(sc *oswin.Screen) {
+func (wg *WindowGeom) ConstrainGeom(sc *goosi.Screen) {
 	sz, pos := sc.ConstrainWinGeom(image.Point{wg.SX, wg.SY}, image.Point{wg.PX, wg.PY})
 	wg.SX = sz.X
 	wg.SY = sz.Y

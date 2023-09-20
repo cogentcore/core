@@ -12,8 +12,6 @@ import (
 	"log"
 	"os"
 	"strings"
-
-	"goki.dev/ki/v2/ints"
 )
 
 // BytesToLineStrings returns []string lines
@@ -68,7 +66,7 @@ func FileRegionBytes(fpath string, stLn, edLn int, preComments bool, lnBack int)
 	nln := len(lns)
 
 	if edLn > 0 && edLn > stLn && edLn < nln {
-		el := ints.MinInt(edLn+1, nln-1)
+		el := min(edLn+1, nln-1)
 		lns = lns[:el]
 	}
 	if preComments && stLn > 0 && stLn < nln {
@@ -133,7 +131,7 @@ func PreCommentStart(lns [][]byte, stLn int, comLn, comSt, comEd string, lnBack 
 // and lines in given region of source (lines = 1 + End.Ln - Start.Ln)
 func CountWordsLinesRegion(src [][]rune, reg Region) (words, lines int) {
 	lns := len(src)
-	mx := ints.MinInt(lns-1, reg.End.Ln)
+	mx := min(lns-1, reg.End.Ln)
 	for ln := reg.Start.Ln; ln <= mx; ln++ {
 		sln := src[ln]
 		if ln == reg.Start.Ln {

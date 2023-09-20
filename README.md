@@ -57,7 +57,7 @@ See [Gide](https://goki.dev/gi/v2de) for a complete, complex application written
 
 There are three main types of 2D nodes:
 
-* `Viewport2D` nodes that manage their own `image.RGBA` bitmap and can upload that directly to the `oswin.Texture` (GPU based) that then uploads directly to the `oswin.Window`.  The parent `Window` has a master `Viewport2D` that backs the entire window, and is what most `Widget`'s render into.
+* `Viewport2D` nodes that manage their own `image.RGBA` bitmap and can upload that directly to the `goosi.Texture` (GPU based) that then uploads directly to the `goosi.Window`.  The parent `Window` has a master `Viewport2D` that backs the entire window, and is what most `Widget`'s render into.
     + Popup `Dialog` and `Menu`'s have their own viewports that are layered on top of the main window viewport.
     + `SVG` and its subclass `Icon` are containers for SVG-rendering nodes.
 

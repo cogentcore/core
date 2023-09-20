@@ -10,9 +10,9 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -99,13 +99,13 @@ func HiStylesView(st *histyle.Styles) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	title := mfr.AddNewChild(gi.TypeLabel, "title").(*gi.Label)
+	title := mfr.NewChild(gi.TypeLabel, "title").(*gi.Label)
 	title.SetText("Hilighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
 	title.SetProp("width", units.Ch(30)) // need for wrap
 	title.SetStretchMaxWidth()
 	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
-	tv := mfr.AddNewChild(TypeMapView, "tv").(*MapView)
+	tv := mfr.NewChild(TypeMapView, "tv").(*MapView)
 	tv.Viewport = vp
 	tv.SetMap(st)
 	tv.SetStretchMax()
@@ -119,7 +119,7 @@ func HiStylesView(st *histyle.Styles) {
 	MainMenuView(st, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
 		if !histyle.StylesChanged || st != &histyle.CustomStyles { // only for main avail map..
 			win.Close()
 			return

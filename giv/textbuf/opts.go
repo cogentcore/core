@@ -6,7 +6,7 @@ package textbuf
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/ki/v2/indent"
+	"goki.dev/glop/indent"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/pi"
 )

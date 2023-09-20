@@ -11,15 +11,14 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 	"goki.dev/pi/v2/complete"
 )
 
@@ -274,7 +273,7 @@ func (cb *ComboBox) ConfigPartsIfNeeded() {
 
 func (cb *ComboBox) ConfigParts() {
 	if eb, err := cb.PropTry("editable"); err == nil {
-		cb.Editable, _ = kit.ToBool(eb)
+		cb.Editable, _ = laser.ToBool(eb)
 	}
 	config := ki.TypeAndNameList{}
 	var icIdx, lbIdx, txIdx, indIdx int
@@ -338,10 +337,10 @@ func (cb *ComboBox) SortItems(ascending bool) {
 func (cb *ComboBox) SetToMaxLength(maxLen int) {
 	ml := 0
 	for _, it := range cb.Items {
-		ml = ints.MaxInt(ml, utf8.RuneCountInString(ToLabel(it)))
+		ml = max(ml, utf8.RuneCountInString(ToLabel(it)))
 	}
 	if maxLen > 0 {
-		ml = ints.MinInt(ml, maxLen)
+		ml = min(ml, maxLen)
 	}
 	cb.MaxLength = ml
 }
@@ -413,6 +412,8 @@ func (cb *ComboBox) ItemsFromIconList(el []gicons.Icon, setFirst bool, maxLen in
 	}
 }
 
+/*
+
 // ItemsFromEnumList sets the Items list from a list of enum values (see
 // kit.EnumRegistry) -- if setFirst then set current item to the first item in
 // the list, and maxLen if > 0 auto-sets the width of the button to the
@@ -445,6 +446,7 @@ func (cb *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen 
 func (cb *ComboBox) ItemsFromEnum(enumtyp reflect.Type, setFirst bool, maxLen int) {
 	cb.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true), setFirst, maxLen)
 }
+*/
 
 // FindItem finds an item on list of items and returns its index
 func (cb *ComboBox) FindItem(it any) int {
@@ -574,13 +576,13 @@ func (cb *ComboBox) HasFocus2D() bool {
 	return cb.ContainsFocus() // needed for getting key events
 }
 
-func (cb *ComboBox) ConnectEvents2D() {
+func (cb *ComboBox) ConnectEvents() {
 	cb.ButtonEvents()
 	cb.KeyChordEvent()
 }
 
 func (cb *ComboBox) KeyChordEvent() {
-	cb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	cb.ConnectEvent(goosi.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		cbb := recv.(*ComboBox)
 		if cbb.IsDisabled() {
 			return
@@ -648,7 +650,7 @@ func (cb *ComboBox) CompleteMatch(data any, text string, posLn, posCh int) (md c
 			tooltip = cb.Tooltips[idx]
 		}
 		comps[idx] = complete.Completion{
-			Text: kit.ToString(item),
+			Text: laser.ToString(item),
 			Desc: tooltip,
 		}
 	}

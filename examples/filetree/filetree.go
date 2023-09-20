@@ -51,13 +51,6 @@ type FileBrowse struct {
 	ActiveTextViewIdx int `json:"-" desc:"index of the currently-active textview -- new files will be viewed in other views if available"`
 }
 
-var TypeFileBrowse = kit.Types.AddType(&FileBrowse{}, FileBrowseProps)
-
-// AddNewFileBrowse adds a new filebrowse to given parent node, with given name.
-func AddNewFileBrowse(parent ki.Ki, name string) *FileBrowse {
-	return parent.AddNewChild(TypeFileBrowse, name).(*FileBrowse)
-}
-
 func (fb *FileBrowse) OnInit() {
 	fb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.BackgroundColor.SetColor(gi.ColorScheme.Background)
@@ -379,14 +372,14 @@ func (fb *FileBrowse) ConfigSplitView() {
 	mods, updt := split.ConfigChildren(config)
 	if mods {
 		ftfr := split.Child(0).(*gi.Frame)
-		ft := giv.AddNewFileTreeView(ftfr, "filetree")
+		ft := giv.NewFileTreeView(ftfr, "filetree")
 		fb.FilesView = ft
 		ft.SetRootNode(&fb.Files)
 
 		for i := 0; i < fb.NTextViews; i++ {
 			txly := split.Child(1 + i).(*gi.Layout)
 
-			txed := giv.AddNewTextView(txly, "textview-"+strconv.Itoa(i))
+			txed := giv.NewTextView(txly, "textview-"+strconv.Itoa(i))
 			txed.Viewport = fb.Viewport
 		}
 
@@ -435,14 +428,14 @@ func (fb *FileBrowse) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
 	}
 }
 
-func (fb *FileBrowse) Render2D() {
+func (fb *FileBrowse) Render() {
 	fb.ToolBar().UpdateActions()
 	if win := fb.ParentWindow(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}
 	}
-	fb.Frame.Render2D()
+	fb.Frame.Render()
 }
 
 var FileBrowseProps = ki.Props{
@@ -504,7 +497,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 
 	mfr := win.SetMainFrame()
 
-	fb := AddNewFileBrowse(mfr, "browser")
+	fb := NewFileBrowse(mfr, "browser")
 	fb.Viewport = vp
 
 	fb.OpenPath(gi.FileName(path))

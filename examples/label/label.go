@@ -40,7 +40,7 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
+	trow := gi.NewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()
 
 	hdrText := `This is a <b>test</b> of the
@@ -51,7 +51,7 @@ func mainrun() {
 	 <q>and</q> <mark>marked text</mark> and <span style="text-decoration:overline">overline</span>
 	 and Sub<sub>script</sub> and Super<sup>script</sup>`
 
-	title := gi.AddNewLabel(trow, "title", hdrText)
+	title := gi.NewLabel(trow, "title", hdrText)
 	// title.Text = "header" // use this to test word wrapping
 	title.SetProp("white-space", gist.WhiteSpaceNormal)
 	title.SetProp("text-align", gist.AlignRight)
@@ -61,9 +61,9 @@ func mainrun() {
 	// title.SetProp("letter-spacing", 2)
 	title.SetProp("line-height", 1.5)
 
-	gi.AddNewLabel(trow, "rtxt", "this is to test right margin")
+	gi.NewLabel(trow, "rtxt", "this is to test right margin")
 
-	wrlab := gi.AddNewLabel(mfr, "wrlab", "")
+	wrlab := gi.NewLabel(mfr, "wrlab", "")
 	wrlab.SetProp("white-space", gist.WhiteSpaceNormal)
 	wrlab.SetProp("width", "20em")
 	wrlab.SetProp("max-width", -1)
@@ -75,14 +75,14 @@ func mainrun() {
 It appears that the <b>end</b> of one paragraph implies the start of a new one, even if you do <i>not</i> insert a <code>p</code> tag.
 `
 
-	// mfr.AddNewChild(gi.TypeSpace, "aspc")
+	// mfr.NewChild(gi.TypeSpace, "aspc")
 
-	gi.AddNewLabel(mfr, "etxt", "this is to test bottom after word wrapped text")
+	gi.NewLabel(mfr, "etxt", "this is to test bottom after word wrapped text")
 
-	str := gi.AddNewStretch(mfr, "str")
+	str := gi.NewStretch(mfr, "str")
 	str.SetMinPrefHeight(units.Em(5))
 
-	gi.AddNewLabel(mfr, "etxt2", "this is after final stretch")
+	gi.NewLabel(mfr, "etxt2", "this is after final stretch")
 
 	// main menu
 	appnm := gi.AppName()

@@ -9,9 +9,9 @@ import (
 	"image/color"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
@@ -284,7 +284,7 @@ func (lb *Label) OpenLink(tl *girl.TextLink) {
 }
 
 func (lb *Label) HoverEvent() {
-	lb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	lb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		llb := recv.Embed(TypeLabel).(*Label)
 		hasLinks := len(lb.Render.Links) > 0
@@ -312,7 +312,7 @@ func (lb *Label) HoverEvent() {
 }
 
 func (lb *Label) MouseEvent() {
-	lb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	lb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		llb := recv.Embed(TypeLabel).(*Label)
 		hasLinks := len(llb.Render.Links) > 0
@@ -347,7 +347,7 @@ func (lb *Label) MouseMoveEvent() {
 	if !hasLinks {
 		return
 	}
-	lb.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	lb.ConnectEvent(goosi.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
 		llb := recv.Embed(TypeLabel).(*Label)
@@ -362,9 +362,9 @@ func (lb *Label) MouseMoveEvent() {
 		}
 		// TODO: figure out how to get links to work with new cursor setup
 		if inLink {
-			oswin.TheApp.Cursor(lb.ParentWindow().OSWin).PushIfNot(cursor.HandPointing)
+			goosi.TheApp.Cursor(lb.ParentWindow().OSWin).PushIfNot(cursor.HandPointing)
 		} else {
-			oswin.TheApp.Cursor(lb.ParentWindow().OSWin).PopIf(cursor.HandPointing)
+			goosi.TheApp.Cursor(lb.ParentWindow().OSWin).PopIf(cursor.HandPointing)
 		}
 	})
 }
@@ -461,21 +461,21 @@ func (lb *Label) RenderLabel() {
 	lb.Render.Render(rs, lb.RenderPos)
 }
 
-func (lb *Label) Render2D() {
+func (lb *Label) Render() {
 	if lb.FullReRenderIfNeeded() {
 		return
 	}
 	if lb.PushBounds() {
-		lb.This().(Node2D).ConnectEvents2D()
+		lb.This().(Node2D).ConnectEvents()
 		lb.RenderLabel()
-		lb.Render2DChildren()
+		lb.RenderChildren()
 		lb.PopBounds()
 	} else {
 		lb.DisconnectAllEvents(RegPri)
 	}
 }
 
-func (lb *Label) ConnectEvents2D() {
+func (lb *Label) ConnectEvents() {
 	lb.WidgetEvents()
 	lb.LabelEvents()
 }

@@ -114,7 +114,7 @@ var StylesChanged = false
 
 // OpenPrefs opens Styles from App standard prefs directory, using PrefsStylesFileName
 func (hs *Styles) OpenPrefs() error {
-	pdir := oswin.TheApp.AppPrefsDir()
+	pdir := goosi.TheApp.AppPrefsDir()
 	pnm := filepath.Join(pdir, PrefsStylesFileName)
 	StylesChanged = false
 	return hs.OpenJSON(gi.FileName(pnm))
@@ -122,7 +122,7 @@ func (hs *Styles) OpenPrefs() error {
 
 // SavePrefs saves Styles to App standard prefs directory, using PrefsStylesFileName
 func (hs *Styles) SavePrefs() error {
-	pdir := oswin.TheApp.AppPrefsDir()
+	pdir := goosi.TheApp.AppPrefsDir()
 	pnm := filepath.Join(pdir, PrefsStylesFileName)
 	StylesChanged = false
 	MergeAvailStyles()

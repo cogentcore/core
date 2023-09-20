@@ -9,16 +9,15 @@ import (
 	"image"
 	"sync"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -475,7 +474,7 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 }
 
 func (sb *SliderBase) MouseDragEvent() {
-	sb.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	sb.ConnectEvent(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsDisabled() {
@@ -493,7 +492,7 @@ func (sb *SliderBase) MouseDragEvent() {
 }
 
 func (sb *SliderBase) MouseEvent() {
-	sb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	sb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsDisabled() {
@@ -523,7 +522,7 @@ func (sb *SliderBase) MouseEvent() {
 }
 
 func (sb *SliderBase) MouseFocusEvent() {
-	sb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	sb.ConnectEvent(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsDisabled() {
 			return
@@ -539,7 +538,7 @@ func (sb *SliderBase) MouseFocusEvent() {
 }
 
 func (sb *SliderBase) MouseScrollEvent() {
-	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	sb.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsDisabled() {
 			return
@@ -556,7 +555,7 @@ func (sb *SliderBase) MouseScrollEvent() {
 }
 
 func (sb *SliderBase) KeyChordEvent() {
-	sb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	sb.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsDisabled() {
 			return
@@ -627,53 +626,53 @@ func (sr *SliderBase) StyleFromProps(props ki.Props, vp *Viewport2D) {
 		}
 		switch key {
 		case "value":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sr.Value = iv
 			}
 		case "min":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sr.Min = iv
 			}
 		case "max":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sr.Max = iv
 			}
 		case "step":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sr.Step = iv
 			}
 		case "pagestep":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sr.PageStep = iv
 			}
 		case "size":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sr.Size = iv
 			}
 		case "thumb-size":
 			sr.ThumbSize.SetIFace(val, key)
 		case "thumb-val":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sr.ThumbVal = iv
 			}
 		case "track-thr":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sr.TrackThr = iv
 			}
 		case "prec":
-			if iv, ok := kit.ToInt(val); ok {
+			if iv, ok := laser.ToInt(val); ok {
 				sr.Prec = int(iv)
 			}
 		case "val-thumb":
-			if bv, ok := kit.ToBool(val); ok {
+			if bv, ok := laser.ToBool(val); ok {
 				sr.ValThumb = bv
 			}
 		case "tracking":
-			if bv, ok := kit.ToBool(val); ok {
+			if bv, ok := laser.ToBool(val); ok {
 				sr.Tracking = bv
 			}
 		case "snap":
-			if bv, ok := kit.ToBool(val); ok {
+			if bv, ok := laser.ToBool(val); ok {
 				sr.Snap = bv
 			}
 		}
@@ -797,14 +796,14 @@ func (sr *Slider) Move2D(delta image.Point, parBBox image.Rectangle) {
 	sr.SliderBase.Move2D(delta, parBBox)
 }
 
-func (sr *Slider) Render2D() {
+func (sr *Slider) Render() {
 	if sr.FullReRenderIfNeeded() {
 		return
 	}
 	if !sr.Off && sr.PushBounds() {
-		sr.This().(Node2D).ConnectEvents2D()
-		sr.Render2DDefaultStyle()
-		sr.Render2DChildren()
+		sr.This().(Node2D).ConnectEvents()
+		sr.RenderDefaultStyle()
+		sr.RenderChildren()
 		sr.PopBounds()
 	} else {
 		sr.DisconnectAllEvents(RegPri)
@@ -812,7 +811,7 @@ func (sr *Slider) Render2D() {
 }
 
 // render using a default style if not otherwise styled
-func (sr *Slider) Render2DDefaultStyle() {
+func (sr *Slider) RenderDefaultStyle() {
 	rs, pc, st := sr.RenderLock()
 
 	sr.ConfigPartsIfNeeded(true)
@@ -860,7 +859,7 @@ func (sr *Slider) Render2DDefaultStyle() {
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.RenderUnlock(rs)
-		sr.Parts.Render2DTree()
+		sr.Parts.RenderTree()
 	} else {
 		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
 		pc.FillStrokeClear(rs)
@@ -868,7 +867,7 @@ func (sr *Slider) Render2DDefaultStyle() {
 	}
 }
 
-func (sr *Slider) ConnectEvents2D() {
+func (sr *Slider) ConnectEvents() {
 	sr.SliderEvents()
 }
 
@@ -956,14 +955,14 @@ func (sb *ScrollBar) Move2D(delta image.Point, parBBox image.Rectangle) {
 	sb.SliderBase.Move2D(delta, parBBox)
 }
 
-func (sb *ScrollBar) Render2D() {
+func (sb *ScrollBar) Render() {
 	if sb.FullReRenderIfNeeded() {
 		return
 	}
 	if !sb.Off && sb.PushBounds() {
-		sb.This().(Node2D).ConnectEvents2D()
-		sb.Render2DDefaultStyle()
-		sb.Render2DChildren()
+		sb.This().(Node2D).ConnectEvents()
+		sb.RenderDefaultStyle()
+		sb.RenderChildren()
 		sb.PopBounds()
 	} else {
 		sb.DisconnectAllEvents(RegPri)
@@ -971,7 +970,7 @@ func (sb *ScrollBar) Render2D() {
 }
 
 // render using a default style if not otherwise styled
-func (sb *ScrollBar) Render2DDefaultStyle() {
+func (sb *ScrollBar) RenderDefaultStyle() {
 	rs, pc, st := sb.RenderLock()
 	defer sb.RenderUnlock(rs)
 
@@ -998,7 +997,7 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 	sb.RenderBoxImpl(pos, sz, st.Border)
 }
 
-func (sb *ScrollBar) ConnectEvents2D() {
+func (sb *ScrollBar) ConnectEvents() {
 	sb.SliderEvents()
 }
 
@@ -1072,7 +1071,7 @@ func ProgressDefaultInc(max int) int {
 
 func (pb *ProgressBar) Start(max int) {
 	pb.ProgMax = max - 1
-	pb.ProgMax = ints.MaxInt(1, pb.ProgMax)
+	pb.ProgMax = max(1, pb.ProgMax)
 	pb.ProgInc = ProgressDefaultInc(max)
 	pb.ProgCur = 0
 	pb.UpdtBar()

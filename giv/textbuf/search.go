@@ -13,8 +13,7 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/runes"
+	"goki.dev/glop/runes"
 	"goki.dev/pi/v2/lex"
 )
 
@@ -41,8 +40,8 @@ var medsz = len(med)
 func NewMatch(rn []rune, st, ed, ln int) Match {
 	sz := len(rn)
 	reg := NewRegion(ln, st, ln, ed)
-	cist := ints.MaxInt(st-SearchContext, 0)
-	cied := ints.MinInt(ed+SearchContext, sz)
+	cist := max(st-SearchContext, 0)
+	cied := min(ed+SearchContext, sz)
 	sctx := []byte(string(rn[cist:st]))
 	fstr := []byte(string(rn[st:ed]))
 	ectx := []byte(string(rn[ed:cied]))
@@ -114,7 +113,7 @@ func SearchLexItems(src [][]rune, lexs []lex.Line, find []byte, ignoreCase bool)
 	}
 	cnt := 0
 	var matches []Match
-	mx := ints.MinInt(len(src), len(lexs))
+	mx := min(len(src), len(lexs))
 	for ln := 0; ln < mx; ln++ {
 		rln := src[ln]
 		lxln := lexs[ln]

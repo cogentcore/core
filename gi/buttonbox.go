@@ -7,15 +7,11 @@ package gi
 import (
 	"fmt"
 	"image"
-	"reflect"
 
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/bitflag"
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/ki/v2/sliceclone"
 )
 
@@ -135,8 +131,11 @@ func (bb *ButtonBox) ItemsFromStringList(el []string) {
 	copy(bb.Items, el)
 }
 
+// todo:
+
 // ItemsFromEnumList sets the Items list from a list of enum values (see
 // kit.EnumRegistry)
+/*
 func (bb *ButtonBox) ItemsFromEnumList(el []kit.EnumValue) {
 	sz := len(el)
 	if sz == 0 {
@@ -160,7 +159,7 @@ func (bb *ButtonBox) ItemsFromEnum(enumtyp reflect.Type) {
 // BitFlag Enum type (see kit.EnumRegistry) with given value
 func (bb *ButtonBox) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 	els := kit.Enums.TypeValues(enumtyp, true)
-	mx := ints.MaxInt(len(els), bb.Parts.NumChildren())
+	mx := max(len(els), bb.Parts.NumChildren())
 	for i := 0; i < mx; i++ {
 		ev := els[i]
 		cbi := bb.Parts.Child(i)
@@ -175,7 +174,7 @@ func (bb *ButtonBox) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 func (bb *ButtonBox) BitFlagsValue(enumtyp reflect.Type) int64 {
 	val := int64(0)
 	els := kit.Enums.TypeValues(enumtyp, true)
-	mx := ints.MaxInt(len(els), bb.Parts.NumChildren())
+	mx := max(len(els), bb.Parts.NumChildren())
 	for i := 0; i < mx; i++ {
 		ev := els[i]
 		cbi := bb.Parts.Child(i)
@@ -186,6 +185,7 @@ func (bb *ButtonBox) BitFlagsValue(enumtyp reflect.Type) int64 {
 	}
 	return val
 }
+*/
 
 func (bb *ButtonBox) ConfigItems() {
 	for i, cbi := range *bb.Parts.Children() {
@@ -265,15 +265,15 @@ func (bb *ButtonBox) RenderButtonBox() {
 	bb.RenderUnlock(rs)
 }
 
-func (bb *ButtonBox) Render2D() {
+func (bb *ButtonBox) Render() {
 	if bb.FullReRenderIfNeeded() {
 		return
 	}
 	if bb.PushBounds() {
-		bb.This().(Node2D).ConnectEvents2D()
+		bb.This().(Node2D).ConnectEvents()
 		bb.RenderButtonBox()
-		bb.Render2DParts()
-		bb.Render2DChildren()
+		bb.RenderParts()
+		bb.RenderChildren()
 		bb.PopBounds()
 	} else {
 		bb.DisconnectAllEvents(RegPri)

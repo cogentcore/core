@@ -10,7 +10,7 @@ import (
 	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 )
 
 // This file contains all the special-purpose interfaces
@@ -52,7 +52,7 @@ func ToLabel(it any) string {
 		case ki.Ki:
 			return v.Name()
 		}
-		return kit.ToString(it)
+		return laser.ToString(it)
 	}
 	return lbler.Label()
 }
@@ -83,7 +83,7 @@ type Clipper interface {
 	MimeData(md *mimedata.Mimes)
 
 	// Copy copies item to the clipboard
-	// e.g., use oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(md)
+	// e.g., use goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(md)
 	// where md is mime-encoded data for the object
 	Copy(reset bool)
 
@@ -92,7 +92,7 @@ type Clipper interface {
 	Cut()
 
 	// Paste pastes from clipboard to item, e.g.,
-	// md := oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.DataJson})
+	// md := goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.DataJson})
 	// reads mime-encoded data from the clipboard, in this case in the JSON format
 	Paste()
 }

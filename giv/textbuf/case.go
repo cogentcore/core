@@ -4,16 +4,16 @@
 
 package textbuf
 
+//go:generate enumgen
+
 import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/ki/v2/kit"
 )
 
 // Cases are different cases -- Lower, Upper, Camel, etc
-type Cases int32
+type Cases int32 //enums:enum
 
 const (
 	LowerCase Cases = iota
@@ -33,17 +33,7 @@ const (
 
 	// KebabCase is kebab-case -- lower with -'s
 	KebabCase
-
-	// CasesN is the number of textview states
-	CasesN
 )
-
-//go:generate stringer -output stringer.go -type=Cases
-
-var TypeCases = kit.Enums.AddEnum(CasesN, kit.NotBitFlag, gist.StylePropProps)
-
-func (ev Cases) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Cases) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // ReCaseString changes the case of the string according to the given case type.
 func ReCaseString(str string, c Cases) string {

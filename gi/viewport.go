@@ -17,8 +17,6 @@ import (
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/bitflag"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/mat32/v2"
 )
 
@@ -368,7 +366,7 @@ func (vp *Viewport2D) SetCurWin() {
 // typical way that a sub-viewport renders (e.g., svg boxes, icons, etc -- not popups)
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	if parVp.Pixels == nil || vp.Pixels == nil {
-		if Render2DTrace {
+		if RenderTrace {
 			fmt.Printf("Render: vp DrawIntoParent nil Pixels - no render!: %v parVp: %v\n", vp.Path(), parVp.Path())
 		}
 		return
@@ -385,26 +383,26 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		}
 		r = nr
 	}
-	if Render2DTrace {
+	if RenderTrace {
 		fmt.Printf("Render: vp DrawIntoParent: %v parVp: %v rect: %v sp: %v\n", vp.Path(), parVp.Path(), r, sp)
 	}
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Over)
 }
 
-// ReRender2DNode re-renders a specific node, including uploading updated bits to
+// ReRenderNode re-renders a specific node, including uploading updated bits to
 // the window texture using Window.UploadVpRegion call.
 // This should be covered by an outer UpdateStart / End bracket on Window to drive
 // publishing changes, with suitable grouping if multiple updates
-func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
+func (vp *Viewport2D) ReRenderNode(gni Node2D) {
 	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
 	gn := gni.AsNode2D()
-	if Render2DTrace {
+	if RenderTrace {
 		fmt.Printf("Render: vp re-render: %v node: %v\n", vp.Path(), gn.Path())
 	}
-	// pr := prof.Start("vp.ReRender2DNode")
-	gn.Render2DTree()
+	// pr := prof.Start("vp.ReRenderNode")
+	gn.RenderTree()
 	// pr.End()
 	gn.BBoxMu.RLock()
 	wbb := gn.WinBBox
@@ -412,12 +410,12 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	vp.This().(Viewport).VpUploadRegion(gn.VpBBox, wbb)
 }
 
-// ReRender2DAnchor re-renders an anchor node -- the KEY diff from
-// ReRender2DNode is that it calls ReRender2DTree and not just Render2DTree!
+// ReRenderAnchor re-renders an anchor node -- the KEY diff from
+// ReRenderNode is that it calls ReRenderTree and not just RenderTree!
 // uploads updated bits to the window texture using Window.UploadVpRegion call.
 // This should be covered by an outer UpdateStart / End bracket on Window to drive
 // publishing changes, with suitable grouping if multiple updates
-func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
+func (vp *Viewport2D) ReRenderAnchor(gni Node2D) {
 	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
@@ -425,11 +423,11 @@ func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 	if pw == nil {
 		return
 	}
-	if Render2DTrace {
+	if RenderTrace {
 		fmt.Printf("Render: vp anchor re-render: %v node: %v\n", vp.Path(), pw.Path())
 	}
-	// pr := prof.Start("vp.ReRender2DNode")
-	pw.ReRender2DTree()
+	// pr := prof.Start("vp.ReRenderNode")
+	pw.ReRenderTree()
 	// pr.End()
 	pw.BBoxMu.RLock()
 	wbb := pw.WinBBox
@@ -561,36 +559,36 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 func (vp *Viewport2D) RenderViewport2D() {
 	if vp.IsPopup() { // popup has a parent that is the window
 		vp.SetCurWin()
-		if Render2DTrace {
+		if RenderTrace {
 			fmt.Printf("Render: %v at Popup VpUploadVp\n", vp.Path())
 		}
 		vp.This().(Viewport).VpUploadVp()
 	} else if vp.Viewport != nil { // sub-vp
-		if Render2DTrace {
+		if RenderTrace {
 			fmt.Printf("Render: %v at %v DrawIntoParent\n", vp.Path(), vp.VpBBox)
 		}
 		vp.DrawIntoParent(vp.Viewport)
 	} else { // we are the main vp
-		if Render2DTrace {
+		if RenderTrace {
 			fmt.Printf("Render: %v at %v VpUploadAll\n", vp.Path(), vp.VpBBox)
 		}
 		vp.This().(Viewport).VpUploadAll()
 	}
 }
 
-// FullRender2DTree is called by window and other places to completely
+// FullRenderTree is called by window and other places to completely
 // re-render -- we set our flag when doing this so valueview elements (and
 // anyone else) can do a deep re-build that is typically not otherwise needed
 // (e.g., after non-signaling structs have updated)
-func (vp *Viewport2D) FullRender2DTree() {
+func (vp *Viewport2D) FullRenderTree() {
 	if vp.IsUpdating() { // already in process!
 		return
 	}
 	vp.SetFlag(int(VpFlagDoingFullRender))
-	if Render2DTrace {
+	if RenderTrace {
 		fmt.Printf("Render: %v doing full render\n", vp.Path())
 	}
-	vp.WidgetBase.FullRender2DTree()
+	vp.WidgetBase.FullRenderTree()
 	vp.ClearFlag(int(VpFlagDoingFullRender))
 }
 
@@ -617,7 +615,7 @@ func (vp *Viewport2D) PushBounds() bool {
 	rs := &vp.Render
 	bb := vp.Pixels.Bounds() // our bounds.. not vp.VpBBox)
 	rs.PushBounds(bb)
-	if Render2DTrace {
+	if RenderTrace {
 		fmt.Printf("Render: %v at %v\n", vp.Path(), bb)
 	}
 	return true
@@ -652,17 +650,17 @@ func (vp *Viewport2D) FullReRenderIfNeeded() bool {
 		vpDoing = true
 	}
 	if vp.This().(Node2D).IsVisible() && vp.NeedsFullReRender() && !vpDoing {
-		if Render2DTrace {
+		if RenderTrace {
 			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", vp.Path(), vp.VpBBox)
 		}
 		vp.ClearFullReRender()
-		vp.ReRender2DTree()
+		vp.ReRenderTree()
 		return true
 	}
 	return false
 }
 
-func (vp *Viewport2D) Render2D() {
+func (vp *Viewport2D) Render() {
 	if vp.FullReRenderIfNeeded() {
 		return
 	}
@@ -670,7 +668,7 @@ func (vp *Viewport2D) Render2D() {
 		if vp.Fill {
 			vp.FillViewport()
 		}
-		vp.Render2DChildren() // we must do children first, then us!
+		vp.RenderChildren()   // we must do children first, then us!
 		vp.RenderViewport2D() // update our parent image
 		vp.PopBounds()
 	}
@@ -692,8 +690,8 @@ func (vp *Viewport2D) PrefSize(initSz image.Point) image.Point {
 	stw := int(vp.Style.MinWidth.Dots)
 	sth := int(vp.Style.MinHeight.Dots)
 	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
-	vpsz.X = ints.MaxInt(vpsz.X, stw)
-	vpsz.Y = ints.MaxInt(vpsz.Y, sth)
+	vpsz.X = max(vpsz.X, stw)
+	vpsz.Y = max(vpsz.Y, sth)
 	return vpsz
 }
 
@@ -785,8 +783,9 @@ func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data any) (anchor Node2
 	ni := nii.AsNode2D()
 	if sig == int64(ki.NodeSignalUpdated) {
 		dflags := data.(int64)
-		vlupdt := bitflag.HasAnyMask(dflags, ki.ValUpdateFlagsMask)
-		strupdt := bitflag.HasAnyMask(dflags, ki.StruUpdateFlagsMask)
+		// todo:
+		// vlupdt := bitflag.HasAnyMask(dflags, ki.ValUpdateFlagsMask)
+		// strupdt := bitflag.HasAnyMask(dflags, ki.StruUpdateFlagsMask)
 		if vlupdt && !strupdt {
 			full = false
 		} else if strupdt {
@@ -806,7 +805,7 @@ func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data any) (anchor Node2
 	if full {
 		ni.ClearFullReRender()
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes) for node: %v\n", vp.Path(), nii.Path())
+			fmt.Printf("Update: Viewport2D: %v FullRenderTree (structural changes) for node: %v\n", vp.Path(), nii.Path())
 		}
 		anchor = ni.ParentReRenderAnchor()
 		return anchor, full
@@ -864,9 +863,9 @@ func (vp *Viewport2D) UpdateNodes() {
 			vp.ClearFlag(int(VpFlagNeedsFullRender))
 			vp.StackMu.Unlock()
 			if vp.Viewport == nil { // top level
-				vp.FullRender2DTree()
+				vp.FullRenderTree()
 			} else {
-				vp.ReRender2DTree() // embedded
+				vp.ReRenderTree() // embedded
 			}
 			break
 		}
@@ -879,7 +878,7 @@ func (vp *Viewport2D) UpdateNodes() {
 			nii := vp.ReStack[0]
 			vp.ReStack = vp.ReStack[1:]
 			vp.StackMu.Unlock()
-			vp.ReRender2DAnchor(nii)
+			vp.ReRenderAnchor(nii)
 			continue
 		}
 		if len(vp.UpdtStack) > 0 {
@@ -904,9 +903,9 @@ func (vp *Viewport2D) UpdateNode(nii Node2D) {
 		nii.DirectWinUpload()
 	} else {
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.Path(), nii.Path())
+			fmt.Printf("Update: Viewport2D: %v ReRender on %v\n", vp.Path(), nii.Path())
 		}
-		vp.ReRender2DNode(nii)
+		vp.ReRenderNode(nii)
 	}
 }
 

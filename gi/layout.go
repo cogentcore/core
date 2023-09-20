@@ -12,14 +12,13 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
@@ -422,7 +421,7 @@ func (ly *Layout) LayoutScrolls() {
 func (ly *Layout) RenderScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
-			ly.Scrolls[d].Render2D()
+			ly.Scrolls[d].Render()
 		}
 	}
 }
@@ -552,7 +551,7 @@ func (ly *Layout) Layout2DChildren(iter int) bool {
 }
 
 // render the children
-func (ly *Layout) Render2DChildren() {
+func (ly *Layout) RenderChildren() {
 	if ly.Lay == LayoutStacked {
 		for i, kid := range ly.Kids {
 			if _, ni := KiToNode2D(kid); ni != nil {
@@ -571,7 +570,7 @@ func (ly *Layout) Render2DChildren() {
 		}
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
-			nii.Render2D()
+			nii.Render()
 		}
 	}
 }
@@ -610,8 +609,8 @@ func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
 	h := ly.Style.Font.Size.Dots
 	dst := h * AutoScrollRate
 
-	mind := ints.MaxInt(0, pos-st)
-	maxd := ints.MaxInt(0, (st+int(vissz))-pos)
+	mind := max(0, pos-st)
+	maxd := max(0, (st+int(vissz))-pos)
 
 	if mind <= maxd {
 		pct := float32(mind) / float32(vissz)
@@ -1054,18 +1053,18 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 // Layout -- most subclasses of Layout will want these..
 func (ly *Layout) LayoutScrollEvents() {
 	// LowPri to allow other focal widgets to capture
-	ly.ConnectEvent(oswin.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	ly.ConnectEvent(goosi.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		li := recv.Embed(TypeLayout).(*Layout)
 		li.ScrollDelta(me)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
-	ly.ConnectEvent(oswin.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	ly.ConnectEvent(goosi.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*dnd.MoveEvent)
 		li := recv.Embed(TypeLayout).(*Layout)
 		li.AutoScroll(me.Pos())
 	})
-	ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	ly.ConnectEvent(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		li := recv.Embed(TypeLayout).(*Layout)
 		if li.ViewportSafe().IsMenu() {
@@ -1077,7 +1076,7 @@ func (ly *Layout) LayoutScrollEvents() {
 // KeyChordEvent processes (lowpri) layout key events
 func (ly *Layout) KeyChordEvent() {
 	// LowPri to allow other focal widgets to capture
-	ly.ConnectEvent(oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	ly.ConnectEvent(goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		li := recv.Embed(TypeLayout).(*Layout)
 		kt := d.(*key.ChordEvent)
 		li.LayoutKeys(kt)
@@ -1255,17 +1254,17 @@ func (ly *Layout) Move2D(delta image.Point, parBBox image.Rectangle) {
 	ly.RenderScrolls()
 }
 
-func (ly *Layout) Render2D() {
+func (ly *Layout) Render() {
 	if ly.FullReRenderIfNeeded() {
 		return
 	}
 	if ly.PushBounds() {
-		ly.This().(Node2D).ConnectEvents2D()
+		ly.This().(Node2D).ConnectEvents()
 		if ly.ScrollsOff {
 			ly.ManageOverflow()
 		}
 		ly.RenderScrolls()
-		ly.Render2DChildren()
+		ly.RenderChildren()
 		ly.PopBounds()
 	} else {
 		ly.SetScrollsOff()
@@ -1273,7 +1272,7 @@ func (ly *Layout) Render2D() {
 	}
 }
 
-func (ly *Layout) ConnectEvents2D() {
+func (ly *Layout) ConnectEvents() {
 	ly.WidgetEvents()
 	if ly.HasAnyScroll() {
 		ly.LayoutScrollEvents()

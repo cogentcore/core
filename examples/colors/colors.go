@@ -32,22 +32,22 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	row1 := gi.AddNewLayout(mfr, "row1", gi.LayoutHoriz)
+	row1 := gi.NewLayout(mfr, "row1", gi.LayoutHoriz)
 	row1.SetProp("vertical-align", gist.AlignMiddle)
 	row1.SetProp("horizontal-align", "center")
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	row1.SetStretchMaxWidth()
 
-	spc := gi.AddNewSpace(mfr, "spc1")
+	spc := gi.NewSpace(mfr, "spc1")
 	spc.SetFixedHeight(units.Em(2))
 
-	gi.AddNewStretch(row1, "str1")
-	lab1 := gi.AddNewLabel(row1, "lab1", "These are tests of the various GoGi Color functions")
+	gi.NewStretch(row1, "str1")
+	lab1 := gi.NewLabel(row1, "lab1", "These are tests of the various GoGi Color functions")
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")
-	gi.AddNewStretch(row1, "str2")
+	gi.NewStretch(row1, "str2")
 
-	grid := gi.AddNewLayout(mfr, "grid", gi.LayoutGrid)
+	grid := gi.NewLayout(mfr, "grid", gi.LayoutGrid)
 	grid.SetProp("columns", 11)
 	grid.SetProp("vertical-align", "center")
 	grid.SetProp("horizontal-align", "center")
@@ -61,7 +61,7 @@ func mainrun() {
 
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
-			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
+			fr := gi.NewFrame(grid, "fr", gi.LayoutHoriz)
 			fr.SetProp("background-color", hsl.HSL{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
@@ -70,7 +70,7 @@ func mainrun() {
 	// try again with alpha
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
-			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
+			fr := gi.NewFrame(grid, "fr", gi.LayoutHoriz)
 			fr.SetProp("background-color", hsl.HSL{hu, sat, lt, 0.5})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
@@ -80,7 +80,7 @@ func mainrun() {
 	lt := float32(0.5)
 	for _, hu := range hues {
 		for sat := float32(0.0); sat <= 1.01; sat += 0.1 {
-			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
+			fr := gi.NewFrame(grid, "fr", gi.LayoutHoriz)
 			fr.SetProp("background-color", hsl.HSL{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
@@ -91,7 +91,7 @@ func mainrun() {
 		clr := color.RGBA{}
 		clr = hsl.HSL{hu, 1.0, 0.2, 1}.AsRGBA()
 		for lt := float32(0.0); lt <= 100.01; lt += 10 {
-			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
+			fr := gi.NewFrame(grid, "fr", gi.LayoutHoriz)
 			fr.SetProp("background-color", hsl.Lighten(clr, lt))
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)

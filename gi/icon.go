@@ -136,12 +136,12 @@ func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return ic.Layout2DChildren(iter)
 }
 
-func (ic *Icon) Render2D() {
+func (ic *Icon) Render() {
 	if ic.FullReRenderIfNeeded() {
 		return
 	}
 	if ic.PushBounds() {
-		ic.Render2DChildren()
+		ic.RenderChildren()
 		ic.PopBounds()
 	}
 }

@@ -17,9 +17,7 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 	"goki.dev/svg"
 )
@@ -40,8 +38,6 @@ type Graph struct {
 
 // Gr is current graph
 var Gr Graph
-
-var TypeGraph = kit.Types.AddType(&Graph{}, GraphProps)
 
 // GraphProps define the ToolBar for overall app
 var GraphProps = ki.Props{
@@ -203,8 +199,6 @@ func (ln *Line) Eval(x float32) float32 {
 // Lines is a collection of lines
 type Lines []*Line
 
-var TypeLines = kit.Types.AddType(&Lines{}, LinesProps)
-
 // LinesProps define the ToolBar for lines
 var LinesProps = ki.Props{
 	// "ToolBar": ki.PropSlice{
@@ -289,7 +283,7 @@ func (ln *Line) Graph(lidx int) {
 	if ln.MaxX == 0 {
 		ln.MaxX = 10
 	}
-	path := svg.AddNewPath(SvgLines, "path", "")
+	path := svg.NewPath(SvgLines, "path", "")
 	path.SetProp("fill", "none")
 	clr := ln.Color
 	path.SetProp("stroke", clr)
@@ -323,10 +317,10 @@ func InitCoords() {
 	updt := SvgGraph.UpdateStart()
 	SvgCoords.DeleteChildren(true)
 
-	xAxis := svg.AddNewLine(SvgCoords, "xAxis", -10, 0, 10, 0)
+	xAxis := svg.NewLine(SvgCoords, "xAxis", -10, 0, 10, 0)
 	xAxis.SetProp("stroke", "#888")
 
-	yAxis := svg.AddNewLine(SvgCoords, "yAxis", 0, -10, 0, 10)
+	yAxis := svg.NewLine(SvgCoords, "yAxis", 0, -10, 0, 10)
 	yAxis.SetProp("stroke", "#888")
 
 	SvgGraph.UpdateEnd(updt)
@@ -395,7 +389,7 @@ func GraphMarblesInit() {
 
 	SvgMarbles.DeleteChildren(true)
 	for i, m := range Marbles {
-		circle := svg.AddNewCircle(SvgMarbles, "circle", m.Pos.X, m.Pos.Y, float32(MarbleRadius))
+		circle := svg.NewCircle(SvgMarbles, "circle", m.Pos.X, m.Pos.Y, float32(MarbleRadius))
 		circle.SetProp("stroke", "none")
 		circle.SetProp("fill", colornames[i%len(colornames)])
 	}

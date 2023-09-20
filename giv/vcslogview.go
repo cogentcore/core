@@ -148,13 +148,13 @@ func (lv *VCSLogView) TableView() *TableView {
 func (lv *VCSLogView) ConfigToolBar() {
 	tb := lv.ToolBar()
 	if lv.File != "" {
-		gi.AddNewLabel(tb, "fl", "File: "+DirAndFile(lv.File))
+		gi.NewLabel(tb, "fl", "File: "+DirAndFile(lv.File))
 		tb.AddSeparator("flsep")
-		cba := gi.AddNewCheckBox(tb, "a-rev")
+		cba := gi.NewCheckBox(tb, "a-rev")
 		cba.SetText("A Rev: ")
 		cba.Tooltip = "If selected, double-clicking in log will set this A Revision to use for Diff"
 		cba.SetChecked(true)
-		tfa := gi.AddNewTextField(tb, "a-tf")
+		tfa := gi.NewTextField(tb, "a-tf")
 		tfa.SetText(lv.RevA)
 		tfa.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -162,10 +162,10 @@ func (lv *VCSLogView) ConfigToolBar() {
 			}
 		})
 		tb.AddSeparator("absep")
-		cbb := gi.AddNewCheckBox(tb, "b-rev")
+		cbb := gi.NewCheckBox(tb, "b-rev")
 		cbb.SetText("B Rev: ")
 		cbb.Tooltip = "If selected, double-clicking in log will set this B Revision to use for Diff"
-		tfb := gi.AddNewTextField(tb, "b-tf")
+		tfb := gi.NewTextField(tb, "b-tf")
 		tfb.SetText(lv.RevB)
 		tfb.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {

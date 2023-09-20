@@ -18,9 +18,9 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
@@ -32,7 +32,6 @@ import (
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/indent"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"
@@ -166,13 +165,13 @@ type TextView struct {
 	lastFilename   gi.FileName
 }
 
-// AddNewTextViewLayout adds a new layout with textview
+// NewTextViewLayout adds a new layout with textview
 // to given parent node, with given name.  Layout adds "-lay" suffix.
 // Textview should always have a parent Layout to manage
 // the scrollbars.
-func AddNewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
-	ly := parent.AddNewChild(gi.TypeLayout, name+"-lay").(*gi.Layout)
-	tv := AddNewTextView(ly, name)
+func NewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
+	ly := parent.NewChild(gi.TypeLayout, name+"-lay").(*gi.Layout)
+	tv := NewTextView(ly, name)
 	return tv, ly
 }
 
@@ -871,7 +870,7 @@ func (tv *TextView) CursorToHistPrev() bool {
 		tv.PosHistIdx = 0
 		return false
 	}
-	tv.PosHistIdx = ints.MinInt(sz-1, tv.PosHistIdx)
+	tv.PosHistIdx = min(sz-1, tv.PosHistIdx)
 	pos := tv.Buf.PosHistory[tv.PosHistIdx]
 	tv.CursorPos = tv.Buf.ValidPos(pos)
 	tv.CursorMovedSig()
@@ -1013,7 +1012,7 @@ func (tv *TextView) CursorDown(steps int) {
 			si, ri, _ := tv.WrappedLineNo(pos)
 			if si < wln-1 {
 				si++
-				mxlen := ints.MinInt(len(tv.Renders[pos.Ln].Spans[si].Text), tv.CursorCol)
+				mxlen := min(len(tv.Renders[pos.Ln].Spans[si].Text), tv.CursorCol)
 				if tv.CursorCol < mxlen {
 					ri = tv.CursorCol
 				} else {
@@ -1034,7 +1033,7 @@ func (tv *TextView) CursorDown(steps int) {
 				pos.Ln = tv.NLines - 1
 				break
 			}
-			mxlen := ints.MinInt(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
+			mxlen := min(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
 			if tv.CursorCol < mxlen {
 				pos.Ch = tv.CursorCol
 			} else {
@@ -1059,7 +1058,7 @@ func (tv *TextView) CursorPageDown(steps int) {
 		if tv.CursorPos.Ln >= tv.NLines {
 			tv.CursorPos.Ln = tv.NLines - 1
 		}
-		tv.CursorPos.Ch = ints.MinInt(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
+		tv.CursorPos.Ch = min(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
 		tv.ScrollCursorToTop()
 		tv.RenderCursor(true)
 	}
@@ -1099,7 +1098,7 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 		txt := tv.Buf.Line(tv.CursorPos.Ln)
 		sz := len(txt)
 		if sz > 0 && tv.CursorPos.Ch > 0 {
-			ch := ints.MinInt(tv.CursorPos.Ch, sz-1)
+			ch := min(tv.CursorPos.Ch, sz-1)
 			var done = false
 			for ch < sz && !done { // if on a wb, go past
 				r1 := txt[ch]
@@ -1175,7 +1174,7 @@ func (tv *TextView) CursorUp(steps int) {
 				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
 				pos.Ch = nwc
 			} else {
-				mxlen := ints.MinInt(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
+				mxlen := min(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
 				if tv.CursorCol < mxlen {
 					pos.Ch = tv.CursorCol
 				} else {
@@ -1201,7 +1200,7 @@ func (tv *TextView) CursorPageUp(steps int) {
 		if tv.CursorPos.Ln <= 0 {
 			tv.CursorPos.Ln = 0
 		}
-		tv.CursorPos.Ch = ints.MinInt(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
+		tv.CursorPos.Ch = min(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
 		tv.ScrollCursorToBottom()
 		tv.RenderCursor(true)
 	}
@@ -1313,7 +1312,7 @@ func (tv *TextView) CursorEndDoc() {
 	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
-	tv.CursorPos.Ln = ints.MaxInt(tv.NLines-1, 0)
+	tv.CursorPos.Ln = max(tv.NLines-1, 0)
 	tv.CursorPos.Ch = tv.Buf.LineLen(tv.CursorPos.Ln)
 	tv.CursorCol = tv.CursorPos.Ch
 	tv.SetCursor(tv.CursorPos)
@@ -2191,7 +2190,7 @@ func (tv *TextView) SelectAll() {
 func (tv *TextView) WordBefore(tp lex.Pos) *textbuf.Edit {
 	txt := tv.Buf.Line(tp.Ln)
 	ch := tp.Ch
-	ch = ints.MinInt(ch, len(txt))
+	ch = min(ch, len(txt))
 	st := ch
 	for i := ch - 1; i >= 0; i-- {
 		if i == 0 { // start of line
@@ -2313,7 +2312,7 @@ func (tv *TextView) WordAt() (reg textbuf.Region) {
 	if sz == 0 {
 		return reg
 	}
-	sch := ints.MinInt(tv.CursorPos.Ch, sz-1)
+	sch := min(tv.CursorPos.Ch, sz-1)
 	if !lex.IsWordBreak(txt[sch], rune(-1)) {
 		for sch > 0 {
 			r2 := rune(-1)
@@ -2379,8 +2378,8 @@ func (tv *TextView) RenderSelectLines() {
 	if tv.PrevSelectReg == textbuf.RegionNil {
 		tv.RenderLines(tv.SelectReg.Start.Ln, tv.SelectReg.End.Ln)
 	} else {
-		stln := ints.MinInt(tv.SelectReg.Start.Ln, tv.PrevSelectReg.Start.Ln)
-		edln := ints.MaxInt(tv.SelectReg.End.Ln, tv.PrevSelectReg.End.Ln)
+		stln := min(tv.SelectReg.Start.Ln, tv.PrevSelectReg.Start.Ln)
+		edln := max(tv.SelectReg.End.Ln, tv.PrevSelectReg.End.Ln)
 		tv.RenderLines(stln, edln)
 	}
 	tv.PrevSelectReg = tv.SelectReg
@@ -2450,7 +2449,7 @@ func (tv *TextView) PasteHist() {
 		if clip != nil {
 			wupdt := tv.TopUpdateStart()
 			defer tv.TopUpdateEnd(wupdt)
-			oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(clip))
+			goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(clip))
 			tv.InsertAtCursor(clip)
 			tv.SavePosHistory(tv.CursorPos)
 		}
@@ -2468,7 +2467,7 @@ func (tv *TextView) Cut() *textbuf.Edit {
 	cut := tv.DeleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
-		oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
+		goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipHistAdd(cb)
 	}
 	tv.SetCursorShow(org)
@@ -2495,7 +2494,7 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
 	TextViewClipHistAdd(cb)
-	oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
+	goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
 	if reset {
 		tv.SelectReset()
 	}
@@ -2507,7 +2506,7 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 func (tv *TextView) Paste() {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
-	data := oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
+	data := goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		tv.InsertAtCursor(data.TypeData(filecat.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
@@ -2554,7 +2553,7 @@ func (tv *TextView) CutRect() *textbuf.Edit {
 	cut := tv.Buf.DeleteTextRect(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
-		oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
+		goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipRect = cut
 	}
 	tv.SetCursorShow(npos)
@@ -2572,7 +2571,7 @@ func (tv *TextView) CopyRect(reset bool) *textbuf.Edit {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
-	oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
+	goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
 	TextViewClipRect = tbe
 	if reset {
 		tv.SelectReset()
@@ -2647,7 +2646,7 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 				txf := recv.Embed(TypeTextView).(*TextView)
 				txf.Paste()
 			})
-		ac.SetDisabledState(oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).IsEmpty())
+		ac.SetDisabledState(goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).IsEmpty())
 	} else {
 		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -3123,7 +3122,7 @@ func (tv *TextView) CharStartPos(pos lex.Pos) mat32.Vec2 {
 // visible range, position will be out of range too)
 func (tv *TextView) CharEndPos(pos lex.Pos) mat32.Vec2 {
 	spos := tv.RenderStartPos()
-	pos.Ln = ints.MinInt(pos.Ln, tv.NLines-1)
+	pos.Ln = min(pos.Ln, tv.NLines-1)
 	if pos.Ln < 0 {
 		spos.Y += float32(tv.LinesSize.Y)
 		spos.X += tv.LineNoOff
@@ -3364,7 +3363,7 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 				// } else {
 				// 	cspec.Color.Sub(TextViewDepthColors[lx.Tok.Depth%nclrs])
 				// }
-				st := ints.MinInt(lsted, lx.St)
+				st := min(lsted, lx.St)
 				reg := textbuf.Region{Start: lex.Pos{Ln: ln, Ch: st}, End: lex.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed
 				lstdp = lx.Tok.Depth
@@ -3546,7 +3545,7 @@ func (tv *TextView) VisSizes() {
 		tv.VisSize.Y = int(mat32.Floor(float32(sz.Y) / tv.LineHeight))
 		tv.VisSize.X = int(mat32.Floor(float32(sz.X) / sty.Font.Face.Metrics.Ch))
 	}
-	tv.LineNoDigs = ints.MaxInt(1+int(mat32.Log10(float32(tv.NLines))), 3)
+	tv.LineNoDigs = max(1+int(mat32.Log10(float32(tv.NLines))), 3)
 	lno := true
 	if tv.Buf != nil {
 		lno = tv.Buf.Opts.LineNos
@@ -3746,7 +3745,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// 	// pos.X += 20 // todo
 	// 	sic := ic.SVGIcon()
 	// 	sic.Resize(image.Point{20, 20})
-	// 	sic.FullRender2DTree()
+	// 	sic.FullRenderTree()
 	// 	ist := sbox.ToPointFloor()
 	// 	ied := ebox.ToPointFloor()
 	// 	ied.X += int(spc)
@@ -3959,7 +3958,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) lex.Pos {
 	nolno := pt.X - int(tv.LineNoOff)
 	sc := int(float32(nolno+scrl) / sty.Font.Face.Metrics.Ch)
 	sc -= sc / 4
-	sc = ints.MaxInt(0, sc)
+	sc = max(0, sc)
 	cch := sc
 
 	si := 0
@@ -3968,8 +3967,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) lex.Pos {
 	lstY := tv.CharStartPos(lex.Pos{Ln: cln}).Y - yoff
 	if nspan > 1 {
 		si = int((float32(pt.Y) - lstY) / tv.LineHeight)
-		si = ints.MinInt(si, nspan-1)
-		si = ints.MaxInt(si, 0)
+		si = min(si, nspan-1)
+		si = max(si, 0)
 		for i := 0; i < si; i++ {
 			spoff += len(tv.Renders[cln].Spans[i].Text)
 		}
@@ -4692,7 +4691,7 @@ func (tv *TextView) MouseMoveEvent() {
 	if !tv.HasLinks {
 		return
 	}
-	tv.ConnectEvent(oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
 		tvv := recv.Embed(TypeTextView).(*TextView)
@@ -4715,16 +4714,16 @@ func (tv *TextView) MouseMoveEvent() {
 		}
 		// TODO: figure out how to handle links with new cursor setup
 		if inLink {
-			oswin.TheApp.Cursor(tv.ParentWindow().OSWin).PushIfNot(cursor.HandPointing)
+			goosi.TheApp.Cursor(tv.ParentWindow().OSWin).PushIfNot(cursor.HandPointing)
 		} else {
-			oswin.TheApp.Cursor(tv.ParentWindow().OSWin).PopIf(cursor.HandPointing)
+			goosi.TheApp.Cursor(tv.ParentWindow().OSWin).PopIf(cursor.HandPointing)
 		}
 
 	})
 }
 
 func (tv *TextView) MouseDragEvent() {
-	tv.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		txf := recv.Embed(TypeTextView).(*TextView)
@@ -4738,7 +4737,7 @@ func (tv *TextView) MouseDragEvent() {
 }
 
 func (tv *TextView) MouseFocusEvent() {
-	tv.ConnectEvent(oswin.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		if txf.IsDisabled() {
 			return
@@ -4755,13 +4754,13 @@ func (tv *TextView) TextViewEvents() {
 	tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
-	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me)
 	})
 	tv.MouseFocusEvent()
-	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)
@@ -4845,8 +4844,8 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return false
 }
 
-// Render2D does some preliminary work and then calls render on children
-func (tv *TextView) Render2D() {
+// Render does some preliminary work and then calls render on children
+func (tv *TextView) Render() {
 	// fmt.Printf("tv render: %v\n", tv.Nm)
 	if tv.NeedsFullReRender() {
 		tv.SetNeedsRefresh()
@@ -4871,7 +4870,7 @@ func (tv *TextView) Render2D() {
 		}
 	}
 	if tv.PushBounds() {
-		tv.This().(gi.Node2D).ConnectEvents2D()
+		tv.This().(gi.Node2D).ConnectEvents()
 		if tv.IsDisabled() {
 			if tv.IsSelected() {
 				tv.Style = tv.StateStyles[TextViewSel]
@@ -4901,7 +4900,7 @@ func (tv *TextView) Render2D() {
 			// fmt.Printf("tv render: %v  stop cursor\n", tv.Nm)
 			tv.StopCursor()
 		}
-		tv.Render2DChildren()
+		tv.RenderChildren()
 		tv.PopBounds()
 	} else {
 		// fmt.Printf("tv render: %v  not vis stop cursor\n", tv.Nm)
@@ -4911,7 +4910,7 @@ func (tv *TextView) Render2D() {
 }
 
 // ConnectEvents2D indirectly sets connections between mouse and key events and actions
-func (tv *TextView) ConnectEvents2D() {
+func (tv *TextView) ConnectEvents() {
 	tv.TextViewEvents()
 }
 
@@ -4923,20 +4922,20 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		// tv.EditDone()
 		tv.StopCursor() // make sure no cursor
 		tv.UpdateSig()
-		oswin.TheApp.HideVirtualKeyboard()
+		goosi.TheApp.HideVirtualKeyboard()
 		// fmt.Printf("lost focus: %v\n", tv.Nm)
 	case gi.FocusGot:
 		tv.SetFlag(int(TextViewFocusActive))
 		tv.EmitFocusedSignal()
 		tv.UpdateSig()
-		oswin.TheApp.ShowVirtualKeyboard(oswin.DefaultKeyboard)
+		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
 		// fmt.Printf("got focus: %v\n", tv.Nm)
 	case gi.FocusInactive:
 		tv.ClearFlag(int(TextViewFocusActive))
 		tv.StopCursor()
 		// tv.EditDone()
 		// tv.UpdateSig()
-		oswin.TheApp.HideVirtualKeyboard()
+		goosi.TheApp.HideVirtualKeyboard()
 		// fmt.Printf("focus inactive: %v\n", tv.Nm)
 	case gi.FocusActive:
 		// fmt.Printf("focus active: %v\n", tv.Nm)
@@ -4944,6 +4943,6 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		// tv.UpdateSig()
 		// todo: see about cursor
 		tv.StartCursor()
-		oswin.TheApp.ShowVirtualKeyboard(oswin.DefaultKeyboard)
+		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
 	}
 }

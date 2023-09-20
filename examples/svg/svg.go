@@ -79,16 +79,16 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	tbar := gi.AddNewToolBar(mfr, "tbar")
+	tbar := gi.NewToolBar(mfr, "tbar")
 	tbar.SetStretchMaxWidth()
 
-	svgrow := gi.AddNewLayout(mfr, "svgrow", gi.LayoutHoriz)
+	svgrow := gi.NewLayout(mfr, "svgrow", gi.LayoutHoriz)
 	svgrow.SetProp("horizontal-align", "center")
 	svgrow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	svgrow.SetStretchMaxWidth()
 	svgrow.SetStretchMaxHeight()
 
-	svge := svg.AddNewEditor(svgrow, "svg")
+	svge := svg.NewEditor(svgrow, "svg")
 	TheSVG = svge
 	svge.InitScale()
 	svge.Fill = true
@@ -104,11 +104,11 @@ func mainrun() {
 		})
 	loads.StartFocus()
 
-	fnm := gi.AddNewTextField(tbar, "cur-fname")
+	fnm := gi.NewTextField(tbar, "cur-fname")
 	TheFile = fnm
 	fnm.SetMinPrefWidth(units.Ch(60))
 
-	zmlb := gi.AddNewLabel(tbar, "zmlb", "Zoom: ")
+	zmlb := gi.NewLabel(tbar, "zmlb", "Zoom: ")
 	zmlb.SetProp("vertical-align", gist.AlignMiddle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
@@ -123,7 +123,7 @@ func mainrun() {
 		"width":  units.Em(1.5),
 		"height": units.Em(1.5),
 	})
-	zoom := gi.AddNewSpinBox(tbar, "zoom")
+	zoom := gi.NewSpinBox(tbar, "zoom")
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	zoom.SetValue(svge.Scale)
 	zoom.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
@@ -146,12 +146,12 @@ func mainrun() {
 		"height": units.Em(1.5),
 	})
 
-	gi.AddNewSpace(tbar, "spctr")
-	trlb := gi.AddNewLabel(tbar, "trlb", "Translate: ")
+	gi.NewSpace(tbar, "spctr")
+	trlb := gi.NewLabel(tbar, "trlb", "Translate: ")
 	trlb.Tooltip = "Translation of overall image -- can use mouse drag to move as well"
 	trlb.SetProp("vertical-align", gist.AlignMiddle)
 
-	trx := gi.AddNewSpinBox(tbar, "trx")
+	trx := gi.NewSpinBox(tbar, "trx")
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	trx.SetValue(svge.Trans.X)
 	TheTransX = trx
@@ -160,7 +160,7 @@ func mainrun() {
 		win.FullReRender()
 	})
 
-	try := gi.AddNewSpinBox(tbar, "try")
+	try := gi.NewSpinBox(tbar, "try")
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	try.SetValue(svge.Trans.Y)
 	TheTransY = try

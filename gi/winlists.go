@@ -10,7 +10,6 @@ import (
 	"reflect"
 
 	"goki.dev/goosi"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
@@ -64,7 +63,7 @@ func (wl *WindowList) FindName(name string) (*Window, bool) {
 // window and true if found, nil, false otherwise.
 // data of type string works fine -- does equality comparison on string contents.
 func (wl *WindowList) FindData(data any) (*Window, bool) {
-	if kit.IfaceIsNil(data) {
+	if laser.IfaceIsNil(data) {
 		return nil, false
 	}
 	typ := reflect.TypeOf(data)
@@ -81,9 +80,9 @@ func (wl *WindowList) FindData(data any) (*Window, bool) {
 	return nil, false
 }
 
-// FindOSWin finds window with given oswin.Window on list -- returns
+// FindOSWin finds window with given goosi.Window on list -- returns
 // window and true if found, nil, false otherwise.
-func (wl *WindowList) FindOSWin(osw oswin.Window) (*Window, bool) {
+func (wl *WindowList) FindOSWin(osw goosi.Window) (*Window, bool) {
 	WindowGlobalMu.Lock()
 	defer WindowGlobalMu.Unlock()
 	for _, wi := range *wl {

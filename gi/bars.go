@@ -62,7 +62,7 @@ func (mb *MenuBar) ShowMenuBar() bool {
 		return false
 	}
 	if mb.MainMenu {
-		if oswin.TheApp.Platform() == oswin.MacOS && !LocalMainMenu {
+		if goosi.TheApp.Platform() == goosi.MacOS && !LocalMainMenu {
 			return false
 		}
 	}
@@ -83,15 +83,15 @@ func (mb *MenuBar) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return mb.Layout.Layout2D(parBBox, iter)
 }
 
-func (mb *MenuBar) Render2D() {
+func (mb *MenuBar) Render() {
 	if !mb.ShowMenuBar() {
 		return
 	}
 	if mb.PushBounds() {
 		mb.MenuBarStdRender()
-		mb.This().(Node2D).ConnectEvents2D()
+		mb.This().(Node2D).ConnectEvents()
 		mb.RenderScrolls()
-		mb.Render2DChildren()
+		mb.RenderChildren()
 		mb.PopBounds()
 	} else {
 		mb.DisconnectAllEvents(AllPris) // uses both Low and Hi
@@ -113,7 +113,7 @@ func (mb *MenuBar) UpdateActions() {
 }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar
-// Called in ConnectEvents2D()
+// Called in ConnectEvents()
 func (mb *MenuBar) SetShortcuts() {
 	win := mb.ParentWindow()
 	if win == nil {
@@ -199,7 +199,7 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 }
 
 // MainMenuFunc is the callback function for OS-generated menu actions.
-func MainMenuFunc(owin oswin.Window, title string, tag int) {
+func MainMenuFunc(owin goosi.Window, title string, tag int) {
 	win, ok := owin.Parent().(*Window)
 	if !ok {
 		return
@@ -262,7 +262,7 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 }
 
 // SetMainMenuSub iterates over sub-menus, adding items to overall main menu.
-func (mb *MenuBar) SetMainMenuSub(osmm oswin.MainMenu, subm oswin.Menu, am *Action) {
+func (mb *MenuBar) SetMainMenuSub(osmm goosi.MainMenu, subm goosi.Menu, am *Action) {
 	for i, mi := range am.Menu {
 		if ki.TypeEmbeds(mi, TypeAction) {
 			ac := mi.Embed(TypeAction).(*Action)
@@ -299,7 +299,7 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 		if err != nil {
 			continue
 		}
-		osmm.SetItemActive(mid.(oswin.MenuItem), ma.IsEnabled()) // assuming this is threadsafe
+		osmm.SetItemActive(mid.(goosi.MenuItem), ma.IsEnabled()) // assuming this is threadsafe
 	}
 }
 
@@ -341,7 +341,7 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 	if nm == "" {
 		nm = string(opts.Icon)
 	}
-	ac := AddNewAction(tb, nm)
+	ac := NewAction(tb, nm)
 	ac.Text = opts.Label
 	ac.Icon = gicons.Icon(opts.Icon)
 	ac.Tooltip = opts.Tooltip
@@ -360,7 +360,7 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 // AddSeparator adds a new separator to the toolbar -- automatically sets orientation
 // depending on layout.  All nodes need a name identifier.
 func (tb *ToolBar) AddSeparator(sepnm string) *Separator {
-	sp := AddNewSeparator(tb, sepnm, false)
+	sp := NewSeparator(tb, sepnm, false)
 	if tb.Lay == LayoutHoriz {
 		sp.Horiz = false
 	} else {
@@ -382,7 +382,7 @@ func (tb *ToolBar) ToolBarStdRender() {
 	tb.RenderUnlock(rs)
 }
 
-func (tb *ToolBar) Render2D() {
+func (tb *ToolBar) Render() {
 	if len(tb.Kids) == 0 { // todo: check for mac menu and don't render -- also need checks higher up
 		return
 	}
@@ -391,9 +391,9 @@ func (tb *ToolBar) Render2D() {
 	}
 	if tb.PushBounds() {
 		tb.ToolBarStdRender()
-		tb.This().(Node2D).ConnectEvents2D()
+		tb.This().(Node2D).ConnectEvents()
 		tb.RenderScrolls()
-		tb.Render2DChildren()
+		tb.RenderChildren()
 		tb.PopBounds()
 	} else {
 		tb.DisconnectAllEvents(AllPris) // uses both Low and Hi
@@ -401,7 +401,7 @@ func (tb *ToolBar) Render2D() {
 }
 
 func (tb *ToolBar) MouseFocusEvent() {
-	tb.ConnectEvent(oswin.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	tb.ConnectEvent(goosi.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.FocusEvent)
 		if me.Action == mouse.Enter {
 			tbb := recv.Embed(TypeToolBar).(*ToolBar)
@@ -411,14 +411,14 @@ func (tb *ToolBar) MouseFocusEvent() {
 	})
 }
 
-func (tb *ToolBar) ConnectEvents2D() {
-	tb.Layout.ConnectEvents2D()
+func (tb *ToolBar) ConnectEvents() {
+	tb.Layout.ConnectEvents()
 	tb.MouseFocusEvent()
 	tb.SetShortcuts()
 }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar
-// Called in ConnectEvents2D()
+// Called in ConnectEvents()
 func (tb *ToolBar) SetShortcuts() {
 	win := tb.ParentWindow()
 	if win == nil {

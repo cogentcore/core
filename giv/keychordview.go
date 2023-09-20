@@ -8,9 +8,9 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
@@ -120,7 +120,7 @@ func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
 }
 
 func (kc *KeyChordEdit) MouseEvent() {
-	kc.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	kc.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if me.Action == mouse.Press && me.Button == mouse.Left {
@@ -143,13 +143,13 @@ func (kc *KeyChordEdit) MouseEvent() {
 }
 
 func (kc *KeyChordEdit) KeyChordEvent() {
-	kc.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	kc.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if kcc.HasFocus() && kcc.FocusActive {
 			kt := d.(*key.ChordEvent)
 			kt.SetProcessed()
 			kcc.SetText(string(kt.Chord())) // that's easy!
-			oswin.TheApp.ClipBoard(kc.ParentWindow().OSWin).Write(mimedata.NewText(string(kt.Chord())))
+			goosi.TheApp.ClipBoard(kc.ParentWindow().OSWin).Write(mimedata.NewText(string(kt.Chord())))
 			kcc.ChordUpdated()
 		}
 	})
@@ -166,7 +166,7 @@ func (kc *KeyChordEdit) Style2D() {
 	kc.LayoutLabel()
 }
 
-func (kc *KeyChordEdit) ConnectEvents2D() {
+func (kc *KeyChordEdit) ConnectEvents() {
 	kc.HoverEvent()
 	kc.MouseEvent()
 	kc.KeyChordEvent()

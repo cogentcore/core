@@ -180,41 +180,41 @@ func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
 	tv.UpdateEnd(updt)
 }
 
-// AddNewTab adds a new widget as a new tab of given widget type, with given
+// NewTab adds a new widget as a new tab of given widget type, with given
 // tab label, and returns the new widget
-func (tv *TabView) AddNewTab(typ reflect.Type, label string) Node2D {
+func (tv *TabView) NewTab(typ reflect.Type, label string) Node2D {
 	fr := tv.Frame()
 	idx := len(*fr.Children())
 	widg := tv.InsertNewTab(typ, label, idx)
 	return widg
 }
 
-// AddNewTabLayout adds a new widget as a new tab of given widget type,
+// NewTabLayout adds a new widget as a new tab of given widget type,
 // with given tab label, and returns the new widget.
 // A Layout is added first and the widget is added to that layout.
 // The Layout has "-lay" suffix added to name.
-func (tv *TabView) AddNewTabLayout(typ reflect.Type, label string) (Node2D, *Layout) {
-	ly := tv.AddNewTab(TypeLayout, label).(*Layout)
+func (tv *TabView) NewTabLayout(typ reflect.Type, label string) (Node2D, *Layout) {
+	ly := tv.NewTab(TypeLayout, label).(*Layout)
 	ly.SetName(label + "-lay")
-	widg := ly.AddNewChild(typ, label).(Node2D)
+	widg := ly.NewChild(typ, label).(Node2D)
 	return widg, ly
 }
 
-// AddNewTabFrame adds a new widget as a new tab of given widget type,
+// NewTabFrame adds a new widget as a new tab of given widget type,
 // with given tab label, and returns the new widget.
 // A Frame is added first and the widget is added to that Frame.
 // The Frame has "-frame" suffix added to name.
-func (tv *TabView) AddNewTabFrame(typ reflect.Type, label string) (Node2D, *Frame) {
-	fr := tv.AddNewTab(TypeFrame, label).(*Frame)
+func (tv *TabView) NewTabFrame(typ reflect.Type, label string) (Node2D, *Frame) {
+	fr := tv.NewTab(TypeFrame, label).(*Frame)
 	fr.SetName(label + "-frame")
-	widg := fr.AddNewChild(typ, label).(Node2D)
+	widg := fr.NewChild(typ, label).(Node2D)
 	return widg, fr
 }
 
-// AddNewTabAction adds a new widget as a new tab of given widget type, with given
+// NewTabAction adds a new widget as a new tab of given widget type, with given
 // tab label, and returns the new widget -- emits TabAdded signal
-func (tv *TabView) AddNewTabAction(typ reflect.Type, label string) Node2D {
-	widg := tv.AddNewTab(typ, label)
+func (tv *TabView) NewTabAction(typ reflect.Type, label string) Node2D {
+	widg := tv.NewTab(typ, label)
 	fr := tv.Frame()
 	idx := len(*fr.Children()) - 1
 	tv.TabViewSig.Emit(tv.This(), int64(TabAdded), idx)
@@ -366,7 +366,7 @@ func (tv *TabView) RecycleTab(label string, typ reflect.Type, sel bool) Node2D {
 		}
 		return widg
 	}
-	widg = tv.AddNewTab(typ, label)
+	widg = tv.NewTab(typ, label)
 	if sel {
 		tv.SelectTabByName(label)
 	}
@@ -439,7 +439,7 @@ func (tv *TabView) ConfigNewTabButton() bool {
 		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTabView).(*TabView)
 			tvv.SetFullReRender()
-			tvv.AddNewTabAction(tvv.NewTabType, "New Tab")
+			tvv.NewTabAction(tvv.NewTabType, "New Tab")
 			tvv.SelectTabIndex(len(*tvv.Frame().Children()) - 1)
 		})
 		return true
@@ -484,9 +484,9 @@ func (tv *TabView) Config() {
 	tv.Lay = LayoutVert
 	tv.SetReRenderAnchor()
 
-	AddNewFrame(tv, "tabs", LayoutHorizFlow)
+	NewFrame(tv, "tabs", LayoutHorizFlow)
 
-	frame := AddNewFrame(tv, "frame", LayoutStacked)
+	frame := NewFrame(tv, "frame", LayoutStacked)
 	frame.SetReRenderAnchor()
 
 	tv.ConfigNewTabButton()
@@ -560,14 +560,14 @@ func (tv *TabView) RenderTabSeps() {
 	pc.FillStrokeClear(rs)
 }
 
-func (tv *TabView) Render2D() {
+func (tv *TabView) Render() {
 	if tv.FullReRenderIfNeeded() {
 		return
 	}
 	if tv.PushBounds() {
-		tv.This().(Node2D).ConnectEvents2D()
+		tv.This().(Node2D).ConnectEvents()
 		tv.RenderScrolls()
-		tv.Render2DChildren()
+		tv.RenderChildren()
 		tv.RenderTabSeps()
 		tv.PopBounds()
 	} else {

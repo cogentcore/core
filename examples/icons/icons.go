@@ -35,20 +35,20 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	row1 := gi.AddNewLayout(mfr, "row1", gi.LayoutHoriz)
+	row1 := gi.NewLayout(mfr, "row1", gi.LayoutHoriz)
 	row1.SetProp("margin", units.Px(2))
 	row1.SetStretchMaxWidth()
 
-	spc := gi.AddNewSpace(mfr, "spc1")
+	spc := gi.NewSpace(mfr, "spc1")
 	spc.SetFixedHeight(units.Em(2))
 
-	gi.AddNewStretch(row1, "str1")
-	lab1 := gi.AddNewLabel(row1, "lab1", "These are all of the GoGi Icons")
+	gi.NewStretch(row1, "str1")
+	lab1 := gi.NewLabel(row1, "lab1", "These are all of the GoGi Icons")
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")
-	gi.AddNewStretch(row1, "str2")
+	gi.NewStretch(row1, "str2")
 
-	grid := gi.AddNewFrame(mfr, "grid", gi.LayoutGrid)
+	grid := gi.NewFrame(mfr, "grid", gi.LayoutGrid)
 	grid.Stripes = gi.RowStripes
 	grid.SetProp("columns", nColumns)
 	grid.SetProp("horizontal-align", "center")
@@ -64,12 +64,12 @@ func mainrun() {
 		if icnm.IsNil() || strings.HasSuffix(icnms, "-fill") {
 			continue
 		}
-		vb := gi.AddNewLayout(grid, "vb", gi.LayoutVert)
+		vb := gi.NewLayout(grid, "vb", gi.LayoutVert)
 		vb.SetProp("max-width", "19vw")
 		vb.SetProp("overflow", "hidden")
-		gi.AddNewLabel(vb, "lab1", icnms)
+		gi.NewLabel(vb, "lab1", icnms)
 
-		smico := gi.AddNewIcon(vb, icnms, icnm)
+		smico := gi.NewIcon(vb, icnms, icnm)
 		smico.SetMinPrefWidth(units.Px(24))
 		smico.SetMinPrefHeight(units.Px(24))
 		smico.SetProp("background-color", colors.Transparent)
@@ -77,7 +77,7 @@ func mainrun() {
 		smico.SetProp("stroke", gi.ColorScheme.OnBackground)
 		// smico.SetProp("horizontal-align", gi.AlignLeft)
 
-		// ico := gi.AddNewIcon(vb, icnms+"_big", icnms)
+		// ico := gi.NewIcon(vb, icnms+"_big", icnms)
 		// ico.SetMinPrefWidth(units.Px(100))
 		// ico.SetMinPrefHeight(units.Px(100))
 		// ico.SetProp("background-color", colors.Transparent)

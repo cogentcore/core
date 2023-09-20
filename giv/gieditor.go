@@ -10,10 +10,10 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -131,20 +131,20 @@ func (ge *GiEditor) EditColorScheme() {
 	p := matcolor.NewPalette(key)
 	schemes := matcolor.NewSchemes(p)
 
-	kv := AddNewStructView(mfr, "kv")
+	kv := NewStructView(mfr, "kv")
 	kv.Viewport = vp
 	kv.SetStruct(&key)
 	kv.SetStretchMax()
 
-	split := gi.AddNewSplitView(mfr, "split")
+	split := gi.NewSplitView(mfr, "split")
 	split.Dim = mat32.X
 
-	svl := AddNewStructView(split, "svl")
+	svl := NewStructView(split, "svl")
 	svl.Viewport = vp
 	svl.SetStruct(&schemes.Light)
 	svl.SetStretchMax()
 
-	svd := AddNewStructView(split, "svd")
+	svd := NewStructView(split, "svd")
 	svd.Viewport = vp
 	svd.SetStruct(&schemes.Dark)
 	svd.SetStretchMax()
@@ -274,10 +274,10 @@ func (ge *GiEditor) ConfigSplitView() {
 	split.Dim = mat32.X
 
 	if len(split.Kids) == 0 {
-		tvfr := gi.AddNewFrame(split, "tvfr", gi.LayoutHoriz)
+		tvfr := gi.NewFrame(split, "tvfr", gi.LayoutHoriz)
 		tvfr.SetReRenderAnchor()
-		tv := AddNewTreeView(tvfr, "tv")
-		sv := AddNewStructView(split, "sv")
+		tv := NewTreeView(tvfr, "tv")
+		sv := NewStructView(split, "sv")
 		tv.TreeViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if data == nil {
 				return
@@ -308,14 +308,14 @@ func (ge *GiEditor) SetChanged() {
 	ge.ToolBar().UpdateActions() // nil safe
 }
 
-func (ge *GiEditor) Render2D() {
+func (ge *GiEditor) Render() {
 	ge.ToolBar().UpdateActions()
 	if win := ge.ParentWindow(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}
 	}
-	ge.Frame.Render2D()
+	ge.Frame.Render()
 }
 
 var GiEditorProps = ki.Props{
@@ -456,7 +456,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	ge := AddNewGiEditor(mfr, "editor")
+	ge := NewGiEditor(mfr, "editor")
 	ge.Viewport = vp
 	ge.SetRoot(obj)
 
@@ -469,7 +469,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 	ge.SelectionLoop()
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
 		if !ge.Changed {
 			win.Close()
 			return

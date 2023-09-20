@@ -14,17 +14,16 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
@@ -363,7 +362,7 @@ func (tf *TextField) EditDone() {
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()
-	oswin.TheApp.HideVirtualKeyboard()
+	goosi.TheApp.HideVirtualKeyboard()
 }
 
 // EditDeFocused completes editing and copies the active edited text to the text --
@@ -435,7 +434,7 @@ func (tf *TextField) CursorBackward(steps int) {
 		tf.CursorPos = 0
 	}
 	if tf.CursorPos <= tf.StartPos {
-		dec := ints.MinInt(tf.StartPos, 8)
+		dec := min(tf.StartPos, 8)
 		tf.StartPos -= dec
 	}
 	if tf.SelectMode {
@@ -452,7 +451,7 @@ func (tf *TextField) CursorStart() {
 	defer tf.TopUpdateEnd(wupdt)
 	tf.CursorPos = 0
 	tf.StartPos = 0
-	tf.EndPos = ints.MinInt(len(tf.EditTxt), tf.StartPos+tf.CharWidth)
+	tf.EndPos = min(len(tf.EditTxt), tf.StartPos+tf.CharWidth)
 	if tf.SelectMode {
 		tf.SelectRegUpdate(tf.CursorPos)
 	}
@@ -467,7 +466,7 @@ func (tf *TextField) CursorEnd() {
 	ed := len(tf.EditTxt)
 	tf.CursorPos = ed
 	tf.EndPos = len(tf.EditTxt) // try -- display will adjust
-	tf.StartPos = ints.MaxInt(0, tf.EndPos-tf.CharWidth)
+	tf.StartPos = max(0, tf.EndPos-tf.CharWidth)
 	if tf.SelectMode {
 		tf.SelectRegUpdate(tf.CursorPos)
 	}
@@ -674,7 +673,7 @@ func (tf *TextField) Cut() {
 	defer tf.TopUpdateEnd(wupdt)
 	cut := tf.DeleteSelection()
 	if cut != "" {
-		oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).Write(mimedata.NewText(cut))
+		goosi.TheApp.ClipBoard(tf.ParentWindow().OSWin).Write(mimedata.NewText(cut))
 	}
 }
 
@@ -723,7 +722,7 @@ func (tf *TextField) Copy(reset bool) {
 	}
 	md := mimedata.NewMimes(0, 1)
 	tf.This().(Clipper).MimeData(&md)
-	oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).Write(md)
+	goosi.TheApp.ClipBoard(tf.ParentWindow().OSWin).Write(md)
 	if reset {
 		tf.SelectReset()
 	}
@@ -735,7 +734,7 @@ func (tf *TextField) Copy(reset bool) {
 func (tf *TextField) Paste() {
 	wupdt := tf.TopUpdateStart()
 	defer tf.TopUpdateEnd(wupdt)
-	data := oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
+	data := goosi.TheApp.ClipBoard(tf.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
@@ -787,7 +786,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 				tff := recv.Embed(TypeTextField).(*TextField)
 				tff.This().(Clipper).Paste()
 			})
-		ac.SetDisabledState(oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).IsEmpty())
+		ac.SetDisabledState(goosi.TheApp.ClipBoard(tf.ParentWindow().OSWin).IsEmpty())
 	}
 }
 
@@ -1075,11 +1074,11 @@ func (tf *TextField) RenderSelect() {
 	if !tf.HasSelection() {
 		return
 	}
-	effst := ints.MaxInt(tf.StartPos, tf.SelectStart)
+	effst := max(tf.StartPos, tf.SelectStart)
 	if effst >= tf.EndPos {
 		return
 	}
-	effed := ints.MinInt(tf.EndPos, tf.SelectEnd)
+	effed := min(tf.EndPos, tf.SelectEnd)
 	if effed < tf.StartPos {
 		return
 	}
@@ -1121,25 +1120,25 @@ func (tf *TextField) AutoScroll() {
 		tf.EndPos = sz
 	}
 	if tf.StartPos >= tf.EndPos {
-		tf.StartPos = ints.MaxInt(0, tf.EndPos-tf.CharWidth)
+		tf.StartPos = max(0, tf.EndPos-tf.CharWidth)
 	}
 	tf.CursorPos = mat32.ClampInt(tf.CursorPos, 0, sz)
 
 	inc := int(mat32.Ceil(.1 * float32(tf.CharWidth)))
-	inc = ints.MaxInt(4, inc)
+	inc = max(4, inc)
 
 	// keep cursor in view with buffer
 	startIsAnchor := true
 	if tf.CursorPos < (tf.StartPos + inc) {
 		tf.StartPos -= inc
-		tf.StartPos = ints.MaxInt(tf.StartPos, 0)
+		tf.StartPos = max(tf.StartPos, 0)
 		tf.EndPos = tf.StartPos + tf.CharWidth
-		tf.EndPos = ints.MinInt(sz, tf.EndPos)
+		tf.EndPos = min(sz, tf.EndPos)
 	} else if tf.CursorPos > (tf.EndPos - inc) {
 		tf.EndPos += inc
-		tf.EndPos = ints.MinInt(tf.EndPos, sz)
+		tf.EndPos = min(tf.EndPos, sz)
 		tf.StartPos = tf.EndPos - tf.CharWidth
-		tf.StartPos = ints.MaxInt(0, tf.StartPos)
+		tf.StartPos = max(0, tf.StartPos)
 		startIsAnchor = false
 	}
 
@@ -1202,7 +1201,7 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 
 	sz := len(tf.EditTxt)
 	c := tf.StartPos + int(float64(px/st.UnContext.Dots(units.UnitCh)))
-	c = ints.MinInt(c, sz)
+	c = min(c, sz)
 
 	w := tf.TextWidth(tf.StartPos, c)
 	if w > px {
@@ -1424,7 +1423,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 }
 
 func (tf *TextField) MouseDragEvent() {
-	tf.ConnectEvent(oswin.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tf.ConnectEvent(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		tff := recv.Embed(TypeTextField).(*TextField)
@@ -1437,7 +1436,7 @@ func (tf *TextField) MouseDragEvent() {
 }
 
 func (tf *TextField) MouseEvent() {
-	tf.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tf.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := recv.Embed(TypeTextField).(*TextField)
 		me := d.(*mouse.Event)
 		tff.HandleMouseEvent(me)
@@ -1445,7 +1444,7 @@ func (tf *TextField) MouseEvent() {
 }
 
 func (tf *TextField) KeyChordEvent() {
-	tf.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tf.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := recv.Embed(TypeTextField).(*TextField)
 		kt := d.(*key.ChordEvent)
 		tff.KeyInput(kt)
@@ -1565,7 +1564,7 @@ func (tf *TextField) Size2D(iter int) {
 	if maxlen <= 0 {
 		maxlen = 50
 	}
-	tf.EndPos = ints.MinInt(len(tf.EditTxt), maxlen)
+	tf.EndPos = min(len(tf.EditTxt), maxlen)
 	tf.UpdateRenderAll()
 	tf.FontHeight = tf.RenderAll.Size.Y
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)
@@ -1628,7 +1627,7 @@ func (tf *TextField) RenderTextField() {
 	}
 }
 
-func (tf *TextField) Render2D() {
+func (tf *TextField) Render() {
 	if tf.HasFocus() && tf.IsFocusActive() && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
 	}
@@ -1636,7 +1635,7 @@ func (tf *TextField) Render2D() {
 		return
 	}
 	if tf.PushBounds() {
-		tf.This().(Node2D).ConnectEvents2D()
+		tf.This().(Node2D).ConnectEvents()
 		if tf.NeedsStyle() {
 			tf.StyleTextField()
 			tf.ClearNeedsStyle()
@@ -1649,15 +1648,15 @@ func (tf *TextField) Render2D() {
 				tf.StopCursor()
 			}
 		}
-		tf.Render2DParts()
-		tf.Render2DChildren()
+		tf.RenderParts()
+		tf.RenderChildren()
 		tf.PopBounds()
 	} else {
 		tf.DisconnectAllEvents(RegPri)
 	}
 }
 
-func (tf *TextField) ConnectEvents2D() {
+func (tf *TextField) ConnectEvents() {
 	tf.WidgetEvents()
 	tf.TextFieldEvents()
 }
@@ -1677,25 +1676,25 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 		tf.SetNeedsStyle()
 		tf.UpdateSig()
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
-			oswin.TheApp.ShowVirtualKeyboard(oswin.NumberKeyboard)
+			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {
-			oswin.TheApp.ShowVirtualKeyboard(oswin.SingleLineKeyboard)
+			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
 		}
 	case FocusInactive:
 		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDeFocused()
 		tf.SetNeedsStyle()
 		tf.UpdateSig()
-		oswin.TheApp.HideVirtualKeyboard()
+		goosi.TheApp.HideVirtualKeyboard()
 	case FocusActive:
 		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
 		tf.SetNeedsStyle()
 		tf.UpdateSig()
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
-			oswin.TheApp.ShowVirtualKeyboard(oswin.NumberKeyboard)
+			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {
-			oswin.TheApp.ShowVirtualKeyboard(oswin.SingleLineKeyboard)
+			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
 		}
 		// todo: see about cursor
 	}

@@ -13,14 +13,13 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv/textbuf"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/token"
@@ -335,7 +334,7 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 		case 'r':
 			di := df.I2 - df.I1
 			dj := df.J2 - df.J1
-			mx := ints.MaxInt(di, dj)
+			mx := max(di, dj)
 			ad := df
 			ad.I1 = absln
 			ad.I2 = absln + di
@@ -439,7 +438,7 @@ func (dv *DiffView) TagWordDiffs() {
 		}
 		di := df.I2 - df.I1
 		dj := df.J2 - df.J1
-		mx := ints.MaxInt(di, dj)
+		mx := max(di, dj)
 		stln := df.I1
 		for i := 0; i < mx; i++ {
 			ln := stln + i
@@ -449,7 +448,7 @@ func (dv *DiffView) TagWordDiffs() {
 			lnb := lex.RuneFields(rb)
 			fla := lna.RuneStrings(ra)
 			flb := lnb.RuneStrings(rb)
-			nab := ints.MaxInt(len(fla), len(flb))
+			nab := max(len(fla), len(flb))
 			ldif := textbuf.DiffLines(fla, flb)
 			ndif := len(ldif)
 			if nab > 25 && ndif > nab/2 { // more than half of big diff -- skip
@@ -633,7 +632,7 @@ func (dv *DiffView) ConfigToolBar() {
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
 	}
-	gi.AddNewLabel(tb, "label-a", txta)
+	gi.NewLabel(tb, "label-a", txta)
 	tb.AddAction(gi.ActOpts{Label: "Next", Icon: gicons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
@@ -660,13 +659,13 @@ func (dv *DiffView) ConfigToolBar() {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			CallMethod(dvv, "SaveFileA", dv.Viewport)
 		})
-	gi.AddNewStretch(tb, "str")
+	gi.NewStretch(tb, "str")
 
 	txtb := "B: " + DirAndFile(dv.FileB)
 	if dv.RevB != "" {
 		txtb += ": " + dv.RevB
 	}
-	gi.AddNewLabel(tb, "label-b", txtb)
+	gi.NewLabel(tb, "label-b", txtb)
 	tb.AddAction(gi.ActOpts{Label: "Next", Icon: gicons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
@@ -762,8 +761,8 @@ func (dv *DiffView) ConfigTexts() {
 	if !mods {
 		updt = lay.UpdateStart()
 	} else {
-		av := AddNewDiffTextView(al, "text-a")
-		bv := AddNewDiffTextView(bl, "text-b")
+		av := NewDiffTextView(al, "text-a")
+		bv := NewDiffTextView(bl, "text-b")
 		// av.SetInactive()
 		// bv.SetInactive()
 		av.SetBuf(dv.BufA)
@@ -855,13 +854,13 @@ func (tv *DiffTextView) TextViewEvents() {
 	tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
-	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeDiffTextView).(*DiffTextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me) // gets our new one
 	})
 	tv.MouseFocusEvent()
-	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)
@@ -869,6 +868,6 @@ func (tv *DiffTextView) TextViewEvents() {
 }
 
 // ConnectEvents2D indirectly sets connections between mouse and key events and actions
-func (tv *DiffTextView) ConnectEvents2D() {
+func (tv *DiffTextView) ConnectEvents() {
 	tv.TextViewEvents()
 }

@@ -23,7 +23,6 @@ import (
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/indent"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/ki/v2/runes"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
@@ -370,7 +369,7 @@ func (tb *TextBuf) SetInactive(inactive bool) {
 
 // New initializes a new buffer with n blank lines
 func (tb *TextBuf) New(nlines int) {
-	nlines = ints.MaxInt(nlines, 1)
+	nlines = max(nlines, 1)
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 	tb.Undos.Reset()
@@ -790,7 +789,7 @@ func (tb *TextBuf) AppendTextMarkup(text []byte, markup []byte, signal bool) *te
 	msplt := bytes.Split(markup, []byte("\n"))
 	if len(msplt) < sz {
 		log.Printf("TextBuf AppendTextMarkup: markup text less than appended text: is: %v, should be: %v\n", len(msplt), sz)
-		el = ints.MinInt(st+len(msplt)-1, el)
+		el = min(st+len(msplt)-1, el)
 	}
 	for ln := st; ln <= el; ln++ {
 		tb.Markup[ln] = msplt[ln-st]
@@ -1052,9 +1051,9 @@ func (tb *TextBuf) ValidPos(pos lex.Pos) lex.Pos {
 		pos.Ch = len(tb.Lines[pos.Ln])
 		return pos
 	}
-	pos.Ln = ints.MinInt(pos.Ln, len(tb.Lines)-1)
+	pos.Ln = min(pos.Ln, len(tb.Lines)-1)
 	llen := len(tb.Lines[pos.Ln])
-	pos.Ch = ints.MinInt(pos.Ch, llen)
+	pos.Ch = min(pos.Ch, llen)
 	if pos.Ch < 0 {
 		pos.Ch = 0
 	}
@@ -1449,9 +1448,9 @@ func (tb *TextBuf) RegionRectImpl(st, ed lex.Pos) *textbuf.Edit {
 		ll := len(lr)
 		var txt []rune
 		if ll > st.Ch {
-			sz := ints.MinInt(ll-st.Ch, nch)
+			sz := min(ll-st.Ch, nch)
 			txt = make([]rune, sz, nch)
-			edl := ints.MinInt(ed.Ch, ll)
+			edl := min(ed.Ch, ll)
 			copy(txt, lr[st.Ch:edl])
 		}
 		if len(txt) < nch { // rect
@@ -1635,7 +1634,7 @@ func (tb *TextBuf) InitialMarkup() {
 		fs := tb.PiState.Done() // initialize
 		fs.Src.SetBytes(tb.Txt)
 	}
-	mxhi := ints.MinInt(100, tb.NLines-1)
+	mxhi := min(100, tb.NLines-1)
 	tb.MarkupAllLines(mxhi)
 }
 
@@ -1735,7 +1734,7 @@ func (tb *TextBuf) MarkupAllLines(maxLines int) {
 	var txt []byte
 	if maxLines > 0 {
 		tb.LinesMu.RLock()
-		mln := ints.MinInt(maxLines, len(tb.LineBytes))
+		mln := min(maxLines, len(tb.LineBytes))
 		txt = bytes.Join(tb.LineBytes[:mln], []byte("\n"))
 		txt = append(txt, '\n')
 		tb.LinesMu.RUnlock()
@@ -1752,9 +1751,9 @@ func (tb *TextBuf) MarkupAllLines(maxLines int) {
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 
-	maxln := ints.MinInt(len(tb.Markup), tb.NLines)
+	maxln := min(len(tb.Markup), tb.NLines)
 	if maxLines > 0 {
-		maxln = ints.MinInt(maxln, maxLines)
+		maxln = min(maxln, maxLines)
 	}
 
 	if tb.Hi.UsingPi() {
@@ -1799,7 +1798,7 @@ func (tb *TextBuf) MarkupAllLines(maxLines int) {
 		// if maxln > 0 && len(mtags) != maxln {
 		// 	fmt.Printf("error: markup out of sync: %v != %v len(mtags)\n", maxln, len(mtags))
 		// }
-		maxln = ints.MinInt(maxln, len(mtags))
+		maxln = min(maxln, len(mtags))
 		for ln := 0; ln < maxln; ln++ {
 			tb.HiTags[ln] = mtags[ln] // chroma tags are freshly allocated
 		}
@@ -1822,7 +1821,7 @@ func (tb *TextBuf) MarkupFromTags() {
 	// getting the lock means we are in control of the flag
 	tb.SetFlag(int(TextBufMarkingUp))
 
-	maxln := ints.MinInt(len(tb.HiTags), tb.NLines)
+	maxln := min(len(tb.HiTags), tb.NLines)
 	for ln := 0; ln < maxln; ln++ {
 		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.HiTags[ln], nil)
 	}
@@ -2354,7 +2353,7 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 		return
 	}
 
-	eln := ints.MinInt(tb.NumLines(), ed)
+	eln := min(tb.NumLines(), ed)
 	ncom := 0
 	nln := eln - st
 	for ln := st; ln < eln; ln++ {
@@ -2362,7 +2361,7 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 			ncom++
 		}
 	}
-	trgln := ints.MaxInt(nln-2, 1)
+	trgln := max(nln-2, 1)
 	doCom := true
 	if ncom >= trgln {
 		doCom = false
@@ -2769,7 +2768,7 @@ type TextBufList struct {
 
 // New returns a new TextBuf buffer
 func (tl *TextBufList) New() *TextBuf {
-	tb := tl.AddNewChild(TypeTextBuf, "newbuf").(*TextBuf)
+	tb := tl.NewChild(TypeTextBuf, "newbuf").(*TextBuf)
 	return tb
 }
 

@@ -12,7 +12,6 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -41,8 +40,6 @@ type TestNodeA struct {
 	Rect image.Rectangle `desc:"rect"`
 }
 
-var TypeTestNodeA = kit.Types.AddType(&TestNodeA{}, nil)
-
 // B node for testing
 type TestNodeB struct {
 	ki.Node
@@ -69,8 +66,6 @@ type TestNodeB struct {
 	SubObj TestNodeA `desc:"a sub-object"`
 }
 
-var TypeTestNodeB = kit.Types.AddType(&TestNodeB{}, nil)
-
 func main() {
 	gimain.Main(mainrun)
 }
@@ -80,19 +75,19 @@ func mainrun() {
 	srctree := TestNodeB{}
 	srctree.InitName(&srctree, "par1")
 	// child1 :=
-	srctree.AddNewChild(TypeTestNodeB, "child1")
-	child2 := srctree.AddNewChild(TypeTestNodeB, "child2")
+	srctree.NewChild(TypeTestNodeB, "child1")
+	child2 := srctree.NewChild(TypeTestNodeB, "child2")
 	// child3 :=
-	srctree.AddNewChild(TypeTestNodeB, "child3")
+	srctree.NewChild(TypeTestNodeB, "child3")
 	// schild2 :=
-	child2.AddNewChild(TypeTestNodeB, "subchild1")
+	child2.NewChild(TypeTestNodeB, "subchild1")
 
 	srctree.SetProp("test1", "string val")
 	srctree.SetProp("test2", 3.14)
 	srctree.SetProp("test3", false)
 
 	// turn this on to see a trace of the rendering
-	// gi.Render2DTrace = true
+	// gi.RenderTrace = true
 	// gi.Layout2DTrace = true
 
 	gi.SetAppName("treeview")
@@ -108,31 +103,31 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
+	trow := gi.NewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetProp("horizontal-align", "center")
 	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	trow.SetStretchMaxWidth()
 
-	spc := gi.AddNewSpace(mfr, "spc1")
+	spc := gi.NewSpace(mfr, "spc1")
 	spc.SetFixedHeight(units.Em(2))
 
-	gi.AddNewStretch(trow, "str1")
-	lab1 := gi.AddNewLabel(trow, "lab1", "This is a test of the TreeView and StructView reflect-ive GUI")
+	gi.NewStretch(trow, "str1")
+	lab1 := gi.NewLabel(trow, "lab1", "This is a test of the TreeView and StructView reflect-ive GUI")
 	lab1.SetStretchMaxWidth()
 	lab1.SetProp("text-align", "center")
-	gi.AddNewStretch(trow, "str2")
+	gi.NewStretch(trow, "str2")
 
-	split := gi.AddNewSplitView(mfr, "split")
+	split := gi.NewSplitView(mfr, "split")
 	split.Dim = mat32.X
 
-	tvfr := gi.AddNewFrame(split, "tvfr", gi.LayoutHoriz)
-	svfr := gi.AddNewFrame(split, "svfr", gi.LayoutHoriz)
+	tvfr := gi.NewFrame(split, "tvfr", gi.LayoutHoriz)
+	svfr := gi.NewFrame(split, "svfr", gi.LayoutHoriz)
 	split.SetSplits(.3, .7)
 
-	tv := giv.AddNewTreeView(tvfr, "tv")
+	tv := giv.NewTreeView(tvfr, "tv")
 	tv.SetRootNode(&srctree)
 
-	sv := giv.AddNewStructView(svfr, "sv")
+	sv := giv.NewStructView(svfr, "sv")
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 	sv.SetStruct(&srctree)

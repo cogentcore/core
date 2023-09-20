@@ -10,10 +10,10 @@ import (
 	"log"
 	"reflect"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
 	"goki.dev/prof/v2"
@@ -50,9 +50,9 @@ For Widget / Layout nodes, rendering is done in 5 separate passes:
     Typically only a single iteration is required but multiple are supported
     (needed for word-wrapped text or flow layouts).
 
- 4. Render2D: Final rendering pass, each node is fully responsible for
+ 4. Render: Final rendering pass, each node is fully responsible for
     rendering its own children, to provide maximum flexibility (see
-    Render2DChildren) -- bracket the render calls in PushBounds / PopBounds
+    RenderChildren) -- bracket the render calls in PushBounds / PopBounds
     and a false from PushBounds indicates that VpBBox is empty and no
     rendering should occur.  Nodes typically connect / disconnect to receive
     events from the window based on this visibility here.
@@ -83,9 +83,9 @@ func (nb *Node2DBase) CopyFieldsFrom(frm any) {
 // Update2DTrace reports a trace of updates that trigger re-rendering -- can be set in PrefsDebug from prefs gui
 var Update2DTrace bool = false
 
-// Render2DTrace reports a trace of the nodes rendering
+// RenderTrace reports a trace of the nodes rendering
 // (just printfs to stdout) -- can be set in PrefsDebug from prefs gui
-var Render2DTrace bool = false
+var RenderTrace bool = false
 
 // Layout2DTrace reports a trace of all layouts (just
 // printfs to stdout) -- can be set in PrefsDebug from prefs gui
@@ -165,20 +165,20 @@ type Node2D interface {
 	// down as parBBox do the children's Layout2D.
 	ChildrenBBox2D() image.Rectangle
 
-	// Render2D: Final rendering pass, each node is fully responsible for
-	// calling Render2D on its own children, to provide maximum flexibility
-	// (see Render2DChildren for default impl) -- bracket the render calls in
+	// Render: Final rendering pass, each node is fully responsible for
+	// calling Render on its own children, to provide maximum flexibility
+	// (see RenderChildren for default impl) -- bracket the render calls in
 	// PushBounds / PopBounds and a false from PushBounds indicates that
 	// VpBBox is empty and no rendering should occur.  Typically call
 	// ConnectEvents2D to set up connections to receive window events if
 	// visible, and disconnect if not.
-	Render2D()
+	Render()
 
 	// ConnectEvents2D: setup connections to window events -- called in
-	// Render2D if in bounds.  It can be useful to create modular methods for
+	// Render if in bounds.  It can be useful to create modular methods for
 	// different event types that can then be mix-and-matched in any more
 	// specialized types.
-	ConnectEvents2D()
+	ConnectEvents()
 
 	// FocusChanged2D is called on node for changes in focus -- see the
 	// FocusChanges values.
@@ -320,14 +320,14 @@ func (nb *Node2DBase) ChildrenBBox2D() image.Rectangle {
 	return image.Rectangle{}
 }
 
-func (nb *Node2DBase) Render2D() {
+func (nb *Node2DBase) Render() {
 }
 
 // ConnectEvents2D is the default event connection function
 // for Node2D objects. It calls [Node2DEvents], so any Node2D
 // implementing a custom ConnectEvents2D function should
 // first call [Node2DEvents].
-func (nb *Node2DBase) ConnectEvents2D() {
+func (nb *Node2DBase) ConnectEvents() {
 	nb.Node2DEvents()
 }
 
@@ -342,7 +342,7 @@ func (nb *Node2DBase) Node2DEvents() {
 
 // Node2DMouseFocusEvent does the default handling for mouse click events for the Node2D
 func (nb *Node2DBase) Node2DMouseEvent() {
-	nb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+	nb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
 		if nb.IsDisabled() {
 			return
 		}
@@ -365,7 +365,7 @@ func (nb *Node2DBase) Node2DOnMouseEvent(me *mouse.Event) {
 
 // Node2DMouseFocusEvent does the default handling for mouse focus events for the Node2D
 func (nb *Node2DBase) Node2DMouseFocusEvent() {
-	nb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+	nb.ConnectEvent(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
 		if nb.IsDisabled() {
 			return
 		}
@@ -677,7 +677,7 @@ func (nb *Node2DBase) ParentViewport() *Viewport2D {
 // ConnectEvent connects this node to receive a given type of GUI event
 // signal from the parent window -- typically connect only visible nodes, and
 // disconnect when not visible
-func (nb *Node2DBase) ConnectEvent(et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
+func (nb *Node2DBase) ConnectEvent(et goosi.EventType, pri EventPris, fun ki.RecvFunc) {
 	em := nb.EventMgr2D()
 	if em != nil {
 		em.ConnectEvent(nb.This(), et, pri, fun)
@@ -687,7 +687,7 @@ func (nb *Node2DBase) ConnectEvent(et oswin.EventType, pri EventPris, fun ki.Rec
 // DisconnectEvent disconnects this receiver from receiving given event
 // type -- pri is priority -- pass AllPris for all priorities -- see also
 // DisconnectAllEvents
-func (nb *Node2DBase) DisconnectEvent(et oswin.EventType, pri EventPris) {
+func (nb *Node2DBase) DisconnectEvent(et goosi.EventType, pri EventPris) {
 	em := nb.EventMgr2D()
 	if em != nil {
 		em.DisconnectEvent(nb.This(), et, pri)
@@ -776,20 +776,20 @@ func (nb *Node2DBase) FullInit2DTree() {
 	}
 }
 
-// FullRender2DTree does a full render of the tree
-func (nb *Node2DBase) FullRender2DTree() {
+// FullRenderTree does a full render of the tree
+func (nb *Node2DBase) FullRenderTree() {
 	updt := nb.UpdateStart()
 	nb.Init2DTree()
 	nb.Style2DTree()
 	nb.Size2DTree(0)
 	nb.Layout2DTree()
-	nb.Render2DTree()
+	nb.RenderTree()
 	nb.UpdateEndNoSig(updt)
 }
 
-// NeedsFullReRender2DTree checks the entire tree below this node for any that have
+// NeedsFullReRenderTree checks the entire tree below this node for any that have
 // NeedsFullReRender flag set.
-func (nb *Node2DBase) NeedsFullReRender2DTree() bool {
+func (nb *Node2DBase) NeedsFullReRenderTree() bool {
 	if nb.This() == nil {
 		return false
 	}
@@ -912,15 +912,15 @@ func (nb *Node2DBase) Layout2DTree() {
 	pr.End()
 }
 
-// Render2DTree just calls on parent node and it takes full responsibility for
+// RenderTree just calls on parent node and it takes full responsibility for
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering
-func (nb *Node2DBase) Render2DTree() {
+func (nb *Node2DBase) RenderTree() {
 	if nb.This() == nil {
 		return
 	}
-	// pr := prof.Start("Node2D.Render2DTree." + ki.Type(nb).Name())
-	nb.This().(Node2D).Render2D() // important to use interface version to get interface!
+	// pr := prof.Start("Node2D.RenderTree." + ki.Type(nb).Name())
+	nb.This().(Node2D).Render() // important to use interface version to get interface!
 	// pr.End()
 }
 
@@ -954,12 +954,12 @@ func (nb *Node2DBase) Move2DChildren(delta image.Point) {
 	}
 }
 
-// Render2DChildren renders all of node's children -- default call at end of Render2D()
-func (nb *Node2DBase) Render2DChildren() {
+// RenderChildren renders all of node's children -- default call at end of Render()
+func (nb *Node2DBase) RenderChildren() {
 	for _, kid := range nb.Kids {
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
-			nii.Render2D()
+			nii.Render()
 		}
 	}
 }

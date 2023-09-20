@@ -110,15 +110,15 @@ func (fr *Frame) RenderStripes() {
 	}
 }
 
-func (fr *Frame) Render2D() {
+func (fr *Frame) Render() {
 	if fr.FullReRenderIfNeeded() {
 		return
 	}
 	if fr.PushBounds() {
 		fr.FrameStdRender()
-		fr.This().(Node2D).ConnectEvents2D()
+		fr.This().(Node2D).ConnectEvents()
 		fr.RenderScrolls()
-		fr.Render2DChildren()
+		fr.RenderChildren()
 		fr.PopBounds()
 	} else {
 		fr.SetScrollsOff()

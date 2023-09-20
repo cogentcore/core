@@ -24,10 +24,10 @@ This is from the ra25 emergent leabra demo, pulling up the slice of verticies fo
       StyleFields.ToDots:	Tot:	      259.09	Avg:	        0.00	N:	795073	Pct:	 3.95
        TextField.Style2D:	Tot:	      113.57	Avg:	        0.02	N:	  5760	Pct:	 1.73
              win.Publish:	Tot:	       75.45	Avg:	        7.54	N:	    10	Pct:	 1.15
-     Node2D.Render2DTree:	Tot:	       34.94	Avg:	        6.99	N:	     5	Pct:	 0.53
+     Node2D.RenderTree:	Tot:	       34.94	Avg:	        6.99	N:	     5	Pct:	 0.53
         TextRenderLayout:	Tot:	       25.36	Avg:	        0.00	N:	  5770	Pct:	 0.39
               Paint.fill:	Tot:	        8.35	Avg:	        0.03	N:	   241	Pct:	 0.13
-       vp.ReRender2DNode:	Tot:	        2.54	Avg:	        0.64	N:	     4	Pct:	 0.04
+       vp.ReRenderNode:	Tot:	        2.54	Avg:	        0.64	N:	     4	Pct:	 0.04
             Paint.stroke:	Tot:	        2.49	Avg:	        0.01	N:	   307	Pct:	 0.04
   win.UploadAllViewports:	Tot:	        2.34	Avg:	        2.34	N:	     1	Pct:	 0.04
       win.UploadVpRegion:	Tot:	        1.28	Avg:	        0.32	N:	     4	Pct:	 0.02
@@ -45,19 +45,19 @@ I mistakenly thought the issue was styling because style2d seems to be taking so
       StyleFields.ToDots:	Tot:	      261.39	Avg:	        0.00	N:	795132	Pct:	 4.04
              win.Publish:	Tot:	      137.09	Avg:	        5.71	N:	    24	Pct:	 2.12
        TextField.Style2D:	Tot:	      107.41	Avg:	        0.02	N:	  5760	Pct:	 1.66
-     Node2D.Render2DTree:	Tot:	       41.46	Avg:	        4.61	N:	     9	Pct:	 0.64
+     Node2D.RenderTree:	Tot:	       41.46	Avg:	        4.61	N:	     9	Pct:	 0.64
        StyleFields.Style:	Tot:	       35.65	Avg:	        0.00	N:	103717	Pct:	 0.55
         TextRenderLayout:	Tot:	       24.20	Avg:	        0.00	N:	  5776	Pct:	 0.37
               Paint.fill:	Tot:	        9.47	Avg:	        0.04	N:	   258	Pct:	 0.15
   win.UploadAllViewports:	Tot:	        8.85	Avg:	        4.42	N:	     2	Pct:	 0.14
-       vp.ReRender2DNode:	Tot:	        3.82	Avg:	        0.64	N:	     6	Pct:	 0.06
+       vp.ReRenderNode:	Tot:	        3.82	Avg:	        0.64	N:	     6	Pct:	 0.06
             Paint.stroke:	Tot:	        3.38	Avg:	        0.01	N:	   343	Pct:	 0.05
       win.UploadVpRegion:	Tot:	        1.85	Avg:	        0.31	N:	     6	Pct:	 0.03
               RenderText:	Tot:	        0.78	Avg:	        0.01	N:	    77	Pct:	 0.01
             win.UploadVp:	Tot:	        0.30	Avg:	        0.30	N:	     1	Pct:	 0.00
 ```
 
-A massive revisiting of all of the Ki code resulted in major speedups of tree traversal and re-recognition that the *Fast* versions of the AddNewChild methods are *essential* for doing things efficiently.  Actually the Config version is much better already -- but sliceview is not using that.
+A massive revisiting of all of the Ki code resulted in major speedups of tree traversal and re-recognition that the *Fast* versions of the NewChild methods are *essential* for doing things efficiently.  Actually the Config version is much better already -- but sliceview is not using that.
 Anyway, many orders of magnitude speedup are now at hand.  Details here:
 
 https://docs.google.com/spreadsheets/d/1WWorjrVao6sLRuwKguyRnnuY51DxsZOpokZHzGtmnbE/edit?usp=sharing
@@ -75,13 +75,13 @@ Something remains in style that we need to find..
        Node2D.Size2DTree:	Tot:	      182.03	Avg:	       14.00	N:	    13	Pct:	 3.42
        TextField.Style2D:	Tot:	      113.92	Avg:	        0.02	N:	  5760	Pct:	 2.14
              win.Publish:	Tot:	       75.81	Avg:	        3.99	N:	    19	Pct:	 1.42
-     Node2D.Render2DTree:	Tot:	       38.23	Avg:	        3.48	N:	    11	Pct:	 0.72
+     Node2D.RenderTree:	Tot:	       38.23	Avg:	        3.48	N:	    11	Pct:	 0.72
        StyleFields.Style:	Tot:	       37.07	Avg:	        0.00	N:	103723	Pct:	 0.70
         TextRenderLayout:	Tot:	       26.06	Avg:	        0.00	N:	  5775	Pct:	 0.49
    ki.Node.UniquifyNames:	Tot:	        7.67	Avg:	        0.00	N:	 25936	Pct:	 0.14
               Paint.fill:	Tot:	        7.48	Avg:	        0.03	N:	   248	Pct:	 0.14
             Paint.stroke:	Tot:	        2.48	Avg:	        0.01	N:	   318	Pct:	 0.05
-       vp.ReRender2DNode:	Tot:	        2.13	Avg:	        0.27	N:	     8	Pct:	 0.04
+       vp.ReRenderNode:	Tot:	        2.13	Avg:	        0.27	N:	     8	Pct:	 0.04
   win.UploadAllViewports:	Tot:	        2.04	Avg:	        2.04	N:	     1	Pct:	 0.04
       win.UploadVpRegion:	Tot:	        1.60	Avg:	        0.20	N:	     8	Pct:	 0.03
               RenderText:	Tot:	        0.61	Avg:	        0.01	N:	    66	Pct:	 0.01
@@ -130,7 +130,7 @@ sense anyway (doesn't require anything fancy -- just copy) and was mysteriously 
 ```
 Starting Targeted Profiling, window has 2098 nodes
 Time for 50 Re-Renders:         2.62 s
-     Node2D.Render2DTree:	Tot:	     1324.12	Avg:	       26.48	N:	    50	Pct:	32.54
+     Node2D.RenderTree:	Tot:	     1324.12	Avg:	       26.48	N:	    50	Pct:	32.54
               Paint.fill:	Tot:	      877.90	Avg:	        0.19	N:	  4650	Pct:	21.57
       Node2D.Style2DTree:	Tot:	      662.82	Avg:	       13.26	N:	    50	Pct:	16.29
      Node2D.Layout2DTree:	Tot:	      287.18	Avg:	        2.87	N:	   100	Pct:	 7.06
@@ -157,7 +157,7 @@ Time for 50 Re-Renders:        25.31 s
        StyleFields.Style:	Tot:	     4341.58	Avg:	        0.00	N:	5994450	Pct:	13.24
      Node2D.Layout2DTree:	Tot:	     2899.77	Avg:	       58.00	N:	    50	Pct:	 8.84
       StyleFields.ToDots:	Tot:	     2795.35	Avg:	        0.00	N:	9410950	Pct:	 8.52
-     Node2D.Render2DTree:	Tot:	     1882.18	Avg:	       37.64	N:	    50	Pct:	 5.74
+     Node2D.RenderTree:	Tot:	     1882.18	Avg:	       37.64	N:	    50	Pct:	 5.74
        Node2D.Init2DTree:	Tot:	     1398.54	Avg:	       27.97	N:	    50	Pct:	 4.26
               Paint.fill:	Tot:	      871.58	Avg:	        0.83	N:	  1050	Pct:	 2.66
             Paint.stroke:	Tot:	      222.89	Avg:	        0.02	N:	  9350	Pct:	 0.68
@@ -175,7 +175,7 @@ Time for 50 Re-Renders:        25.31 s
 Starting Targeted Profiling, window has 2098 nodes
 Time for 50 Re-Renders:         3.66 s
       Node2D.Style2DTree:	Tot:	     1702.94	Avg:	       34.06	N:	    50	Pct:	26.64
-     Node2D.Render2DTree:	Tot:	     1254.75	Avg:	       25.09	N:	    50	Pct:	19.63
+     Node2D.RenderTree:	Tot:	     1254.75	Avg:	       25.09	N:	    50	Pct:	19.63
      StyleFields.Inherit:	Tot:	     1009.91	Avg:	        0.01	N:	104800	Pct:	15.80
               Paint.fill:	Tot:	      817.88	Avg:	        0.18	N:	  4650	Pct:	12.79
      Node2D.Layout2DTree:	Tot:	      363.88	Avg:	        3.64	N:	   100	Pct:	 5.69
@@ -200,7 +200,7 @@ Starting BenchmarkFullRender
 Starting Std CPU / Mem Profiling
 Starting Targeted Profiling, window has 2447 nodes
 Time for 50 Re-Renders:         4.28 s
-     Node2D.Render2DTree:	Tot:	     2228.51	Avg:	       44.57	N:	    50	Pct:	30.62
+     Node2D.RenderTree:	Tot:	     2228.51	Avg:	       44.57	N:	    50	Pct:	30.62
               Paint.fill:	Tot:	     1325.77	Avg:	        0.58	N:	  2300	Pct:	18.22
       Node2D.Style2DTree:	Tot:	     1185.75	Avg:	       23.71	N:	    50	Pct:	16.29
      StyleFields.Inherit:	Tot:	      543.99	Avg:	        0.00	N:	135700	Pct:	 7.48
@@ -221,7 +221,7 @@ Time for 50 Re-Renders:         4.28 s
 Starting BenchmarkReRender
 Starting Targeted Profiling, window has 2447 nodes
 Time for 50 Re-Renders:         2.18 s
-     Node2D.Render2DTree:	Tot:	     2179.82	Avg:	       43.60	N:	    50	Pct:	51.52
+     Node2D.RenderTree:	Tot:	     2179.82	Avg:	       43.60	N:	    50	Pct:	51.52
               Paint.fill:	Tot:	     1291.70	Avg:	        0.56	N:	  2300	Pct:	30.53
         Paint.drawString:	Tot:	      532.70	Avg:	        0.06	N:	  8500	Pct:	12.59
             Paint.stroke:	Tot:	      134.13	Avg:	        0.02	N:	  7000	Pct:	 3.17
@@ -240,7 +240,7 @@ Time for 50 Re-Renders:         2.18 s
 Starting BenchmarkFullRender
 Starting Targeted Profiling, window has 2447 nodes
 Time for 50 Re-Renders:         5.47 s
-     Node2D.Render2DTree:	Tot:	     3577.71	Avg:	       71.55	N:	    50	Pct:	36.74
+     Node2D.RenderTree:	Tot:	     3577.71	Avg:	       71.55	N:	    50	Pct:	36.74
               Paint.fill:	Tot:	     2657.87	Avg:	        1.16	N:	  2300	Pct:	27.29
       Node2D.Style2DTree:	Tot:	     1089.17	Avg:	       21.78	N:	    50	Pct:	11.19
         Paint.drawString:	Tot:	      524.10	Avg:	        0.06	N:	  8500	Pct:	 5.38
@@ -261,7 +261,7 @@ Time for 50 Re-Renders:         5.47 s
 Starting BenchmarkReRender
 Starting Targeted Profiling, window has 2447 nodes
 Time for 50 Re-Renders:         3.57 s
-     Node2D.Render2DTree:	Tot:	     3566.55	Avg:	       71.33	N:	    50	Pct:	50.92
+     Node2D.RenderTree:	Tot:	     3566.55	Avg:	       71.33	N:	    50	Pct:	50.92
               Paint.fill:	Tot:	     2653.58	Avg:	        1.15	N:	  2300	Pct:	37.89
         Paint.drawString:	Tot:	      515.26	Avg:	        0.06	N:	  8500	Pct:	 7.36
             Paint.stroke:	Tot:	      181.06	Avg:	        0.03	N:	  7000	Pct:	 2.59

@@ -17,7 +17,6 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/bitflag"
 )
 
 // these are special menus that we ignore
@@ -52,7 +51,7 @@ func MainMenuView(val any, win *gi.Window, mbar *gi.MenuBar) bool {
 	mnms := make([]string, len(mp))
 	for mmi, mm := range mp {
 		if mm.Name == "AppMenu" {
-			mnms[mmi] = oswin.TheApp.Name()
+			mnms[mmi] = goosi.TheApp.Name()
 		} else {
 			mnms[mmi] = mm.Name
 		}
@@ -134,7 +133,7 @@ func ToolBarView(val any, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 	rval := true
 	for _, te := range tp {
 		if strings.HasPrefix(te.Name, "sep-") {
-			sep := tb.AddNewChild(gi.TypeSeparator, te.Name).(*gi.Separator)
+			sep := tb.NewChild(gi.TypeSeparator, te.Name).(*gi.Separator)
 			sep.Horiz = false
 			continue
 		}
@@ -144,7 +143,7 @@ func ToolBarView(val any, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 			//			fmt.Printf("ToolBar action override: %v\n", ac.Nm)
 			ac.ActionSig.DisconnectAll()
 		} else {
-			ac = tb.AddNewChild(gi.TypeAction, te.Name).(*gi.Action)
+			ac = tb.NewChild(gi.TypeAction, te.Name).(*gi.Action)
 		}
 		rv := ActionsView(val, vtyp, vp, ac, te.Value)
 		if !rv {
@@ -451,7 +450,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 	ac.Data = md
 
 	if MethViewNoUpdateAfterProp(val) {
-		bitflag.Set32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
+		// bitflag.Set32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
 	}
 
 	if props == nil {
@@ -478,7 +477,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 			if kf, ok := pv.(gi.KeyFuns); ok {
 				ac.Shortcut = gi.ShortcutForFun(kf)
 				md.KeyFun = kf
-				bitflag.Set32((*int32)(&md.Flags), int(MethViewKeyFun))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethViewKeyFun))
 			}
 		case "label":
 			ac.Text = laser.ToString(pv)
@@ -497,13 +496,13 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 			md.Desc = laser.ToString(pv)
 			ac.Tooltip = md.Desc
 		case "confirm":
-			bitflag.Set32((*int32)(&md.Flags), int(MethViewConfirm))
+			// bitflag.Set32((*int32)(&md.Flags), int(MethViewConfirm))
 		case "show-return":
-			bitflag.Set32((*int32)(&md.Flags), int(MethViewShowReturn))
+			// bitflag.Set32((*int32)(&md.Flags), int(MethViewShowReturn))
 		case "no-update-after":
-			bitflag.Set32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
+			// bitflag.Set32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
 		case "update-after": // if MethViewNoUpdateAfterProp was set above
-			bitflag.Clear32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
+			// bitflag.Clear32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
 		case "updtfunc":
 			if uf, ok := pv.(ActionUpdateFunc); ok {
 				md.UpdateFunc = uf
@@ -521,16 +520,16 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 			} else {
 				md.SubMenuSlice = pv
 			}
-			bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+			// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
 		case "submenu-func":
 			if sf, ok := pv.(SubMenuFunc); ok {
 				ac.MakeMenuFunc = MethViewSubMenuFunc
 				md.SubMenuFunc = sf
-				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
 			} else if sf, ok := pv.(func(it any, vp *gi.Viewport2D) []string); ok {
 				ac.MakeMenuFunc = MethViewSubMenuFunc
 				md.SubMenuFunc = SubMenuFunc(sf)
-				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
 			} else {
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, submenu-func must be of type SubMenuFunc", methNm))
 			}
@@ -538,11 +537,11 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 			if sf, ok := pv.(SubSubMenuFunc); ok {
 				ac.MakeMenuFunc = MethViewSubMenuFunc
 				md.SubSubMenuFunc = sf
-				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
 			} else if sf, ok := pv.(func(it any, vp *gi.Viewport2D) [][]string); ok {
 				ac.MakeMenuFunc = MethViewSubMenuFunc
 				md.SubSubMenuFunc = SubSubMenuFunc(sf)
-				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
 			} else {
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, subsubmenu-func must be of type SubMenuFunc", methNm))
 			}
@@ -563,9 +562,9 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 	if !rval {
 		return false
 	}
-	if !bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenu)) {
-		ac.ActionSig.Connect(vp.This(), MethViewCall)
-	}
+	// if !bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenu)) {
+	// 	ac.ActionSig.Connect(vp.This(), MethViewCall)
+	// }
 	return true
 }
 
@@ -578,10 +577,10 @@ func ActionViewArgsValidate(md *MethViewData, vtyp reflect.Type, meth reflect.Me
 		MethViewErr(vtyp, fmt.Sprintf("Method: %v takes %v args (beyond the receiver), but Args properties only has %v", meth.Name, narg-1, apsz))
 		return false
 	}
-	if bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenu)) && apsz != 1 {
-		MethViewErr(vtyp, fmt.Sprintf("Method: %v has a submenu of values to use as the one arg for it, but it takes %v args (beyond the receiver) -- should only take 1", meth.Name, narg-1))
-		return false
-	}
+	// if bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenu)) && apsz != 1 {
+	// 	MethViewErr(vtyp, fmt.Sprintf("Method: %v has a submenu of values to use as the one arg for it, but it takes %v args (beyond the receiver) -- should only take 1", meth.Name, narg-1))
+	// 	return false
+	// }
 
 	return true
 }
@@ -590,7 +589,7 @@ func ActionViewArgsValidate(md *MethViewData, vtyp reflect.Type, meth reflect.Me
 //    Method Callbacks -- called when Action fires
 
 // MethViewFlags define bitflags for method view action options
-type MethViewFlags int32 //enums:bitflag
+type MethViewFlags int64 //enums:bitflag
 
 const (
 	// MethViewConfirm confirms action before proceeding
@@ -737,22 +736,22 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 // prompting otherwise of the user for arg values -- checks for Confirm case
 // or otherwise directly calls method
 func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Value) {
-	if bitflag.Has32(int32(md.Flags), int(MethViewKeyFun)) {
-		if md.Vp != nil && md.Vp.Win != nil {
-			md.Vp.Win.EventMgr.SendKeyFunEvent(md.KeyFun, false)
-		}
-		return
-	}
-	if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
-		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, gi.AddOk, gi.AddCancel,
-			md.Vp.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(gi.DialogAccepted) {
-					MethViewCallMeth(md, args)
-				}
-			})
-	} else {
-		MethViewCallMeth(md, args)
-	}
+	// if bitflag.Has32(int32(md.Flags), int(MethViewKeyFun)) {
+	// 	if md.Vp != nil && md.Vp.Win != nil {
+	// 		md.Vp.Win.EventMgr.SendKeyFunEvent(md.KeyFun, false)
+	// 	}
+	// 	return
+	// }
+	// if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
+	// 	gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, gi.AddOk, gi.AddCancel,
+	// 		md.Vp.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 			if sig == int64(gi.DialogAccepted) {
+	// 				MethViewCallMeth(md, args)
+	// 			}
+	// 		})
+	// } else {
+	// 	MethViewCallMeth(md, args)
+	// }
 }
 
 // MethViewCallMeth calls the method with given args, and processes the
@@ -768,14 +767,14 @@ func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 		MethArgHist[argnm] = args[ai].Interface()
 	}
 
-	if !bitflag.Has32(int32(md.Flags), int(MethViewNoUpdateAfter)) {
-		md.Vp.SetNeedsFullRender() // always update after all methods -- almost always want that
-	}
-	if bitflag.Has32(int32(md.Flags), int(MethViewShowReturn)) {
-		if len(rv) >= 1 {
-			MethViewShowValue(md.Vp, rv[0], md.Method+" Result", "")
-		}
-	}
+	// if !bitflag.Has32(int32(md.Flags), int(MethViewNoUpdateAfter)) {
+	// 	md.Vp.SetNeedsFullRender() // always update after all methods -- almost always want that
+	// }
+	// if bitflag.Has32(int32(md.Flags), int(MethViewShowReturn)) {
+	// 	if len(rv) >= 1 {
+	// 		MethViewShowValue(md.Vp, rv[0], md.Method+" Result", "")
+	// 	}
+	// }
 }
 
 // MethViewShowValue displays a value in a dialog window (e.g., for MethViewShowReturn)
@@ -819,7 +818,7 @@ type ArgData struct {
 }
 
 // ArgDataFlags define bitflags for method view action options
-type ArgDataFlags int32 //enums:bitflag
+type ArgDataFlags int64 //enums:bitflag
 
 const (
 	// ArgDataHasDef means that there was a Default value set

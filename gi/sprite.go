@@ -7,9 +7,8 @@ package gi
 import (
 	"image"
 
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/szalloc"
 	"goki.dev/vgpu/v2/vgpu"
@@ -36,7 +35,7 @@ type Sprite struct {
 	Pixels *image.RGBA `desc:"pixels to render -- should be same size as Geom.Size"`
 
 	// optional event signals for given event type
-	Events map[oswin.EventType]*ki.Signal `desc:"optional event signals for given event type"`
+	Events map[goosi.EventType]*ki.Signal `desc:"optional event signals for given event type"`
 }
 
 // NewSprite returns a new sprite with given name, which must remain
@@ -69,8 +68,8 @@ func (sp *Sprite) SetSize(nwsz image.Point) bool {
 func (sp *Sprite) SetBottomPos(pos image.Point) {
 	sp.Geom.Pos = pos
 	sp.Geom.Pos.Y -= sp.Geom.Size.Y
-	sp.Geom.Pos.Y = ints.MaxInt(sp.Geom.Pos.Y, 0)
-	sp.Geom.Pos.X = ints.MaxInt(sp.Geom.Pos.X, 0)
+	sp.Geom.Pos.Y = max(sp.Geom.Pos.Y, 0)
+	sp.Geom.Pos.X = max(sp.Geom.Pos.X, 0)
 }
 
 // GrabRenderFrom grabs the rendered image from given node
@@ -88,9 +87,9 @@ func (sp *Sprite) GrabRenderFrom(nii Node2D) {
 // only mouse events are supported.
 // Sprite events are always top priority -- if mouse is inside sprite geom, then it is sent
 // if event function does not mark event as processed, it will continue to propagate
-func (sp *Sprite) ConnectEvent(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
+func (sp *Sprite) ConnectEvent(recv ki.Ki, et goosi.EventType, fun ki.RecvFunc) {
 	if sp.Events == nil {
-		sp.Events = make(map[oswin.EventType]*ki.Signal)
+		sp.Events = make(map[goosi.EventType]*ki.Signal)
 	}
 	sg, ok := sp.Events[et]
 	if !ok {
@@ -101,7 +100,7 @@ func (sp *Sprite) ConnectEvent(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) 
 }
 
 // DisconnectEvent removes Signal connection for given event type to given receiver.
-func (sp *Sprite) DisconnectEvent(recv ki.Ki, et oswin.EventType, fun ki.RecvFunc) {
+func (sp *Sprite) DisconnectEvent(recv ki.Ki, et goosi.EventType, fun ki.RecvFunc) {
 	if sp.Events == nil {
 		return
 	}

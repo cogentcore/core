@@ -8,10 +8,8 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/kit"
 )
 
 // MapViewInline represents a map as a single line widget, for smaller maps
@@ -234,13 +232,13 @@ func (mv *MapViewInline) Style2D() {
 	mv.PartsWidgetBase.Style2D()
 }
 
-func (mv *MapViewInline) Render2D() {
+func (mv *MapViewInline) Render() {
 	if mv.FullReRenderIfNeeded() {
 		return
 	}
 	if mv.PushBounds() {
-		mv.Render2DParts()
-		mv.Render2DChildren()
+		mv.RenderParts()
+		mv.RenderChildren()
 		mv.PopBounds()
 	}
 }

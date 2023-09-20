@@ -178,13 +178,13 @@ func (sv *StructViewInline) UpdateFieldAction() {
 	}
 }
 
-func (sv *StructViewInline) Render2D() {
+func (sv *StructViewInline) Render() {
 	if sv.FullReRenderIfNeeded() {
 		return
 	}
 	if sv.PushBounds() {
-		sv.Render2DParts()
-		sv.Render2DChildren()
+		sv.RenderParts()
+		sv.RenderChildren()
 		sv.PopBounds()
 	}
 }

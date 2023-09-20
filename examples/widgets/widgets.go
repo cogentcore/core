@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
@@ -15,8 +14,7 @@ import (
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
 )
@@ -32,7 +30,7 @@ func mainrun() {
 
 	// turn these on to see a traces of various stages of processing..
 	// gi.Update2DTrace = true
-	// gi.Render2DTrace = true
+	// gi.RenderTrace = true
 	// gi.Layout2DTrace = true
 	// ki.SignalTrace = true
 	// gi.WinEventTrace = true
@@ -102,13 +100,13 @@ func mainrun() {
 	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
 	// mfr.SetProp("background-color", "radial-gradient(red, lighter-80)")
 
-	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
+	trow := gi.NewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()
 
 	giedsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunGoGiEditor)
 	prsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPrefs)
 
-	title := gi.AddNewLabel(trow, "title", `This is a <b>demonstration</b> of the
+	title := gi.NewLabel(trow, "title", `This is a <b>demonstration</b> of the
 <span style="color:red">various</span> <a href="https://goki.dev/gi/v2">GoGi</a> <i>Widgets</i><br>
 <large>Shortcuts: <kbd>`+string(prsc)+`</kbd> = Preferences,
 <kbd>`+string(giedsc)+`</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
@@ -127,18 +125,18 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Buttons
 
-	gi.AddNewSpace(mfr, "blspc")
-	blrow := gi.AddNewLayout(mfr, "blrow", gi.LayoutHoriz)
-	blab := gi.AddNewLabel(blrow, "blab", "Buttons:")
+	gi.NewSpace(mfr, "blspc")
+	blrow := gi.NewLayout(mfr, "blrow", gi.LayoutHoriz)
+	blab := gi.NewLabel(blrow, "blab", "Buttons:")
 	blab.Selectable = true
 
-	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
+	brow := gi.NewLayout(mfr, "brow", gi.LayoutHoriz)
 	// brow.SetProp("spacing", units.Ex(2))
 	// brow.SetProp("horizontal-align", gist.AlignLeft)
 	// brow.SetProp("horizontal-align", gi.AlignJustify)
 	// brow.SetStretchMaxWidth()
 
-	button1 := gi.AddNewButton(brow, "button1")
+	button1 := gi.NewButton(brow, "button1")
 	button1.SetProp("#icon", ki.Props{ // note: must come before SetIcon
 		"width":  units.Em(1.5),
 		"height": units.Em(1.5),
@@ -160,7 +158,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 	button1.Class = "big"
 
-	button2 := gi.AddNewButton(brow, "button2")
+	button2 := gi.NewButton(brow, "button2")
 	// button2.SetProp("font-size", "x-large")
 	button2.SetText("Open GoGiEditor")
 	// button2.SetProp("background-color", "#EDF")
@@ -191,7 +189,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	// button2.SetProp("border-width", "2px 4px 6px 8px")
 	// button2.SetProp("border-radius", "0 2 6 10")
 
-	checkbox := gi.AddNewCheckBox(brow, "checkbox")
+	checkbox := gi.NewCheckBox(brow, "checkbox")
 	checkbox.Text = "Toggle"
 	checkbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonToggled) {
@@ -200,7 +198,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 
 	// note: receiver for menu items with shortcuts must be a Node2D or Window
-	mb1 := gi.AddNewButton(brow, "menubutton1")
+	mb1 := gi.NewButton(brow, "menubutton1")
 	mb1.SetText("Menu Button")
 	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -224,16 +222,16 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Sliders
 
-	gi.AddNewSpace(mfr, "slspc")
-	slrow := gi.AddNewLayout(mfr, "slrow", gi.LayoutHoriz)
-	gi.AddNewLabel(slrow, "slab", "Sliders:")
+	gi.NewSpace(mfr, "slspc")
+	slrow := gi.NewLayout(mfr, "slrow", gi.LayoutHoriz)
+	gi.NewLabel(slrow, "slab", "Sliders:")
 
-	srow := gi.AddNewLayout(mfr, "srow", gi.LayoutHoriz)
+	srow := gi.NewLayout(mfr, "srow", gi.LayoutHoriz)
 	srow.SetProp("spacing", units.Ex(2))
 	srow.SetProp("horizontal-align", "left")
 	srow.SetStretchMaxWidth()
 
-	slider1 := gi.AddNewSlider(srow, "slider1")
+	slider1 := gi.NewSlider(srow, "slider1")
 	slider1.Dim = mat32.X
 	// slider1.Class = "hslides"
 	slider1.SetProp(":value", ki.Props{"background-color": "red"})
@@ -244,7 +242,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	slider1.Tracking = true
 	slider1.Icon = gicons.RadioButtonChecked
 
-	slider2 := gi.AddNewSlider(srow, "slider2")
+	slider2 := gi.NewSlider(srow, "slider2")
 	slider2.Dim = mat32.Y
 	slider2.SetMinPrefHeight(units.Em(10))
 	slider2.SetMinPrefWidth(units.Em(1))
@@ -263,7 +261,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		}
 	})
 
-	scrollbar1 := gi.AddNewScrollBar(srow, "scrollbar1")
+	scrollbar1 := gi.NewScrollBar(srow, "scrollbar1")
 	scrollbar1.Dim = mat32.X
 	scrollbar1.Class = "hslides"
 	scrollbar1.SetMinPrefWidth(units.Em(20))
@@ -278,7 +276,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		}
 	})
 
-	scrollbar2 := gi.AddNewScrollBar(srow, "scrollbar2")
+	scrollbar2 := gi.NewScrollBar(srow, "scrollbar2")
 	scrollbar2.Dim = mat32.Y
 	scrollbar2.SetMinPrefHeight(units.Em(10))
 	scrollbar2.SetMinPrefWidth(units.Em(1))
@@ -298,15 +296,15 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Text Widgets
 
-	gi.AddNewSpace(mfr, "tlspc")
-	txlrow := gi.AddNewLayout(mfr, "txlrow", gi.LayoutHoriz)
-	gi.AddNewLabel(txlrow, "txlab", "Text Widgets:")
-	txrow := gi.AddNewLayout(mfr, "txrow", gi.LayoutHoriz)
+	gi.NewSpace(mfr, "tlspc")
+	txlrow := gi.NewLayout(mfr, "txlrow", gi.LayoutHoriz)
+	gi.NewLabel(txlrow, "txlab", "Text Widgets:")
+	txrow := gi.NewLayout(mfr, "txrow", gi.LayoutHoriz)
 	txrow.SetProp("spacing", units.Ex(2))
 	// txrow.SetProp("horizontal-align", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
 
-	edit1 := gi.AddNewTextField(txrow, "edit1")
+	edit1 := gi.NewTextField(txrow, "edit1")
 	edit1.Placeholder = "Enter text here..."
 	// edit1.SetText("Edit this text")
 	edit1.SetProp("min-width", "20em")
@@ -322,7 +320,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 	// edit1.SetProp("inactive", true)
 
-	sb := gi.AddNewSpinBox(txrow, "spin")
+	sb := gi.NewSpinBox(txrow, "spin")
 	sb.SetMax(255)
 	sb.Step = 1
 	sb.Format = "%#X"
@@ -331,8 +329,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
 	})
 
-	cb := gi.AddNewComboBox(txrow, "combo")
-	cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem(), false), true, true, 50)
+	cb := gi.NewComboBox(txrow, "combo")
+	// cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem(), false), true, true, 50)
 	cb.ComboSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
 	})

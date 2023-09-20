@@ -62,7 +62,7 @@ type EventMgr struct {
 	Master EventMaster `desc:"master of this event mangager -- handles broader scope issues"`
 
 	// signals for communicating each type of event, organized by priority
-	EventSigs [oswin.EventTypeN][EventPrisN]ki.Signal `desc:"signals for communicating each type of event, organized by priority"`
+	EventSigs [goosi.EventTypeN][EventPrisN]ki.Signal `desc:"signals for communicating each type of event, organized by priority"`
 
 	// mutex that protects event sending
 	EventMu sync.Mutex `desc:"mutex that protects event sending"`
@@ -167,8 +167,8 @@ func (wl *WinEventRecvList) AddDepth(recv ki.Ki, fun ki.RecvFunc, par ki.Ki) {
 
 // ConnectEvent adds a Signal connection for given event type and
 // priority to given receiver
-func (em *EventMgr) ConnectEvent(recv ki.Ki, et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
-	if et >= oswin.EventTypeN {
+func (em *EventMgr) ConnectEvent(recv ki.Ki, et goosi.EventType, pri EventPris, fun ki.RecvFunc) {
+	if et >= goosi.EventTypeN {
 		log.Printf("EventMgr ConnectEvent type: %v is not a known event type\n", et)
 		return
 	}
@@ -177,8 +177,8 @@ func (em *EventMgr) ConnectEvent(recv ki.Ki, et oswin.EventType, pri EventPris, 
 
 // DisconnectEvent removes Signal connection for given event type to given
 // receiver -- pri is priority -- pass AllPris for all priorities
-func (em *EventMgr) DisconnectEvent(recv ki.Ki, et oswin.EventType, pri EventPris) {
-	if et >= oswin.EventTypeN {
+func (em *EventMgr) DisconnectEvent(recv ki.Ki, et goosi.EventType, pri EventPris) {
+	if et >= goosi.EventTypeN {
 		log.Printf("EventMgr DisconnectEvent type: %v is not a known event type\n", et)
 		return
 	}
@@ -195,13 +195,13 @@ func (em *EventMgr) DisconnectEvent(recv ki.Ki, et oswin.EventType, pri EventPri
 // priority -- pass AllPris for all priorities
 func (em *EventMgr) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
 	if pri == AllPris {
-		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
+		for et := goosi.EventType(0); et < goosi.EventTypeN; et++ {
 			for p := HiPri; p < EventPrisN; p++ {
 				em.EventSigs[et][p].Disconnect(recv)
 			}
 		}
 	} else {
-		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
+		for et := goosi.EventType(0); et < goosi.EventTypeN; et++ {
 			em.EventSigs[et][pri].Disconnect(recv)
 		}
 	}
@@ -214,9 +214,9 @@ func (em *EventMgr) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
 // to receive the event (focus, popup filtering, etc).  If popup is true, then
 // only items on popup are in scope, otherwise items NOT on popup are in scope
 // (if no popup, everything is in scope).
-func (em *EventMgr) SendEventSignal(evi oswin.Event, popup bool) {
+func (em *EventMgr) SendEventSignal(evi goosi.Event, popup bool) {
 	et := evi.Type()
-	if et > oswin.EventTypeN || et < 0 {
+	if et > goosi.EventTypeN || et < 0 {
 		return // can't handle other types of events here due to EventSigs[et] size
 	}
 
@@ -290,7 +290,7 @@ func (em *EventMgr) SendEventSignal(evi oswin.Event, popup bool) {
 
 // SendEventSignalFunc is the inner loop of the SendEventSignal -- needed to deal with
 // map iterator locking logic in a cleaner way.  Returns true to continue, false to break
-func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventRecvList, recv ki.Ki, fun ki.RecvFunc) bool {
+func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEventRecvList, recv ki.Ki, fun ki.RecvFunc) bool {
 	if !em.Master.IsInScope(recv, popup) {
 		return ki.Continue
 	}
@@ -373,7 +373,7 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 
 // SendSig directly calls SendSig from given recv, sender for given event
 // across all priorities.
-func (em *EventMgr) SendSig(recv, sender ki.Ki, evi oswin.Event) {
+func (em *EventMgr) SendSig(recv, sender ki.Ki, evi goosi.Event) {
 	et := evi.Type()
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		em.EventSigs[et][pri].SendSig(recv, sender, int64(et), evi)
@@ -384,27 +384,27 @@ func (em *EventMgr) SendSig(recv, sender ki.Ki, evi oswin.Event) {
 //  Mouse event processing
 
 // MouseEvents processes mouse drag and move events
-func (em *EventMgr) MouseEvents(evi oswin.Event) {
+func (em *EventMgr) MouseEvents(evi goosi.Event) {
 	et := evi.Type()
-	if et == oswin.MouseDragEvent {
+	if et == goosi.MouseDragEvent {
 		em.MouseDragEvents(evi)
-	} else if et != oswin.KeyEvent { // allow modifier keypress
+	} else if et != goosi.KeyEvent { // allow modifier keypress
 		em.ResetMouseDrag()
 	}
 
-	if et == oswin.MouseMoveEvent {
+	if et == goosi.MouseMoveEvent {
 		em.MouseMoveEvents(evi)
 	} else {
 		em.ResetMouseMove()
 	}
 
-	if et == oswin.MouseEvent {
+	if et == goosi.MouseEvent {
 		me := evi.(*mouse.Event)
 		em.LastModBits = me.Modifiers
 		em.LastSelMode = me.SelectMode()
 		em.LastMousePos = me.Pos()
 	}
-	if et == oswin.KeyChordEvent {
+	if et == goosi.KeyChordEvent {
 		ke := evi.(*key.ChordEvent)
 		em.LastModBits = ke.Modifiers
 		em.LastSelMode = mouse.SelectModeBits(ke.Modifiers)
@@ -412,13 +412,13 @@ func (em *EventMgr) MouseEvents(evi oswin.Event) {
 }
 
 // MouseEventReset resets state for "catch" events (Dragging, Scrolling)
-func (em *EventMgr) MouseEventReset(evi oswin.Event) {
+func (em *EventMgr) MouseEventReset(evi goosi.Event) {
 	et := evi.Type()
-	if em.Dragging != nil && et != oswin.MouseDragEvent {
+	if em.Dragging != nil && et != goosi.MouseDragEvent {
 		em.Dragging.ClearFlag(int(NodeDragging))
 		em.Dragging = nil
 	}
-	if em.Scrolling != nil && et != oswin.MouseScrollEvent {
+	if em.Scrolling != nil && et != goosi.MouseScrollEvent {
 		em.Scrolling = nil
 	}
 }
@@ -426,7 +426,7 @@ func (em *EventMgr) MouseEventReset(evi oswin.Event) {
 // MouseDragEvents processes MouseDragEvent to Detect start of drag and DND.
 // These require timing and delays, e.g., due to minor wiggles when pressing
 // the mouse button
-func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
+func (em *EventMgr) MouseDragEvents(evi goosi.Event) {
 	me := evi.(*mouse.DragEvent)
 	em.LastModBits = me.Modifiers
 	em.LastSelMode = me.SelectMode()
@@ -534,7 +534,7 @@ func (em *EventMgr) ResetMouseDrag() {
 
 // MouseMoveEvents processes MouseMoveEvent to detect start of hover events.
 // These require timing and delays
-func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
+func (em *EventMgr) MouseMoveEvents(evi goosi.Event) {
 	me := evi.(*mouse.MoveEvent)
 	em.LastModBits = me.Modifiers
 	em.LastSelMode = me.SelectMode()
@@ -593,7 +593,7 @@ func (em *EventMgr) ResetMouseMove() {
 func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 	fe := mouse.FocusEvent{Event: mev.Event}
 	pos := mev.Pos()
-	ftyp := oswin.MouseFocusEvent
+	ftyp := goosi.MouseFocusEvent
 	updated := false
 	updt := false
 	send := em.Master.EventTopNode()
@@ -809,7 +809,7 @@ func (em *EventMgr) ClearDND() {
 func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 	fe := dnd.FocusEvent{Event: mev.Event}
 	pos := mev.Pos()
-	ftyp := oswin.DNDFocusEvent
+	ftyp := goosi.DNDFocusEvent
 
 	// first pass is just to get all the ins and outs
 	var ins, outs WinEventRecvList
@@ -1204,14 +1204,14 @@ func (em *EventMgr) InitialFocus() {
 // returns false if event should not be processed further, and true if it should.
 // Should only be called when the current event is the same type as last time.
 // Accumulates mouse deltas in LagSkipDeltaPos.
-func (em *EventMgr) FilterLaggyEvents(evi oswin.Event) bool {
+func (em *EventMgr) FilterLaggyEvents(evi goosi.Event) bool {
 	et := evi.Type()
 	now := time.Now()
 	lag := now.Sub(evi.Time())
 	lagMs := int(lag / time.Millisecond)
 
 	switch et {
-	case oswin.MouseScrollEvent:
+	case goosi.MouseScrollEvent:
 		me := evi.(*mouse.ScrollEvent)
 		if lagMs > EventSkipLagMSec {
 			// fmt.Printf("skipped et %v lag %v\n", et, lag)
@@ -1228,7 +1228,7 @@ func (em *EventMgr) FilterLaggyEvents(evi oswin.Event) bool {
 			}
 			em.LagLastSkipped = false
 		}
-	case oswin.MouseDragEvent:
+	case goosi.MouseDragEvent:
 		me := evi.(*mouse.DragEvent)
 		if lagMs > EventSkipLagMSec {
 			// fmt.Printf("skipped et %v lag %v\n", et, lag)
@@ -1243,7 +1243,7 @@ func (em *EventMgr) FilterLaggyEvents(evi oswin.Event) bool {
 			}
 			em.LagLastSkipped = false
 		}
-	case oswin.MouseMoveEvent:
+	case goosi.MouseMoveEvent:
 		me := evi.(*mouse.MoveEvent)
 		if lagMs > EventSkipLagMSec {
 			// fmt.Printf("skipped et %v lag %v\n", et, lag)
@@ -1258,7 +1258,7 @@ func (em *EventMgr) FilterLaggyEvents(evi oswin.Event) bool {
 			}
 			em.LagLastSkipped = false
 		}
-	case oswin.KeyEvent:
+	case goosi.KeyEvent:
 		if lagMs > EventSkipLagMSec {
 			// fmt.Printf("skipped et %v lag %v\n", et, lag)
 			em.LagLastSkipped = true

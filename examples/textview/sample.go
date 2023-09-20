@@ -14,8 +14,8 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 )
 
 func main() {
@@ -28,8 +28,8 @@ func mainrun() {
 
 	// gi.Layout2DTrace = true
 
-	oswin.TheApp.SetName("text")
-	oswin.TheApp.SetAbout(`This is a demo of the TextEdit in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
+	goosi.TheApp.SetName("text")
+	goosi.TheApp.SetAbout(`This is a demo of the TextEdit in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
 	win := gi.NewMainWindow("gogi-textedit-test", "GoGi TextEdit Test", width, height)
 
@@ -46,16 +46,16 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
+	trow := gi.NewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()
 
 	hdrText := `This is a <b>test</b> of the TextEdit`
-	title := gi.AddNewLabel(trow, "title", hdrText)
+	title := gi.NewLabel(trow, "title", hdrText)
 	title.SetProp("text-align", gi.AlignCenter)
 	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-size", "x-large")
 
-	txed := giv.AddNewTextEdit(mfr, "textedit")
+	txed := giv.NewTextEdit(mfr, "textedit")
 	// txed.SetProp("word-wrap", true)
 	txed.SetProp("max-width", -1)
 	txed.SetProp("min-width", units.NewCh(80))
@@ -76,7 +76,7 @@ func mainrun() {
 	fp.Close()
 
 	// main menu
-	appnm := oswin.TheApp.Name()
+	appnm := goosi.TheApp.Name()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
 
@@ -88,8 +88,8 @@ func mainrun() {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-		go oswin.TheApp.Quit() // once main window is closed, quit
+	win.OSWin.SetCloseCleanFunc(func(w goosi.Window) {
+		go goosi.TheApp.Quit() // once main window is closed, quit
 	})
 
 	win.MainMenuUpdated()

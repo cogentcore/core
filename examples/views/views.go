@@ -121,7 +121,7 @@ func mainrun() {
 
 	// turn this on to see a trace of the rendering
 	// gi.WinEventTrace = true
-	// gi.Render2DTrace = true
+	// gi.RenderTrace = true
 	// gi.Layout2DTrace = true
 
 	gi.SetAppName("views")
@@ -137,16 +137,16 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 	Frame = mfr
 
-	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
+	trow := gi.NewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetProp("horizontal-align", "center")
 	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	trow.SetStretchMaxWidth()
 
-	spc := gi.AddNewSpace(mfr, "spc1")
+	spc := gi.NewSpace(mfr, "spc1")
 	spc.SetFixedHeight(units.Em(2))
 
-	gi.AddNewStretch(trow, "str1")
-	but := gi.AddNewButton(trow, "slice-test")
+	gi.NewStretch(trow, "str1")
+	but := gi.NewButton(trow, "slice-test")
 	but.SetText("SliceDialog")
 	but.Tooltip = "open a SliceViewDialog slice view with a lot of elments, for performance testing"
 	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data any) {
@@ -157,7 +157,7 @@ func mainrun() {
 			giv.SliceViewDialog(vp, &sl, giv.DlgOpts{Title: "SliceView Test", Prompt: "It should open quickly."}, nil, nil, nil)
 		}
 	})
-	but = gi.AddNewButton(trow, "table-test")
+	but = gi.NewButton(trow, "table-test")
 	but.SetText("TableDialog")
 	but.Tooltip = "open a TableViewDialog view "
 	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data any) {
@@ -166,30 +166,30 @@ func mainrun() {
 		}
 	})
 
-	lab1 := gi.AddNewLabel(trow, "lab1", "<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
+	lab1 := gi.NewLabel(trow, "lab1", "<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")
-	gi.AddNewStretch(trow, "str2")
+	gi.NewStretch(trow, "str2")
 
-	split := gi.AddNewSplitView(mfr, "split")
+	split := gi.NewSplitView(mfr, "split")
 	split.Dim = mat32.X
 
-	strv := giv.AddNewStructView(split, "strv")
+	strv := giv.NewStructView(split, "strv")
 	strv.SetStruct(&stru)
 	strv.SetStretchMax()
 
-	mv := giv.AddNewMapView(split, "mv")
+	mv := giv.NewMapView(split, "mv")
 	mv.SetMap(&tstmap)
 	mv.SetStretchMaxWidth()
 	mv.SetStretchMaxHeight()
 
-	sv := giv.AddNewSliceView(split, "sv")
+	sv := giv.NewSliceView(split, "sv")
 	// sv.SetInactive()
 	sv.SetSlice(&tstslice)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 
-	tv := giv.AddNewTableView(split, "tv")
+	tv := giv.NewTableView(split, "tv")
 	// sv.SetInactive()
 	tv.SetSlice(&tsttable)
 	tv.SetStretchMaxWidth()

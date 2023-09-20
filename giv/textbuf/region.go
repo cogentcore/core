@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/ki/v2/nptime"
+	"goki.dev/glop/nptime"
 	"goki.dev/pi/v2/lex"
 )
 

@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/dirs"
 	"goki.dev/pi/v2/spell"
@@ -35,7 +35,7 @@ func InitSpell() error {
 
 // OpenSpellModel loads a saved spelling model
 func OpenSpellModel() error {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	openpath := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Open(openpath)
 	if err != nil {
@@ -90,7 +90,7 @@ func AddToSpellModel(filepath string) error {
 
 // SaveSpellModel saves the spelling model which includes the data and parameters
 func SaveSpellModel() error {
-	pdir := oswin.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiPrefsDir()
 	path := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Save(path)
 	if err != nil {

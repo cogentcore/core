@@ -12,15 +12,14 @@ import (
 	"log"
 	"sync"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
 )
@@ -243,7 +242,7 @@ func (wb *WidgetBase) ParentCursor(cur cursor.Shapes) cursor.Shapes {
 // for widgets. It calls [WidgetEvents], so any widget
 // implementing a custom ConnectEvents2D function should
 // first call [WidgetEvents].
-func (wb *WidgetBase) ConnectEvents2D() {
+func (wb *WidgetBase) ConnectEvents() {
 	wb.WidgetEvents()
 }
 
@@ -508,19 +507,19 @@ func (wb *WidgetBase) ChildrenBBox2D() image.Rectangle {
 }
 
 // FullReRenderIfNeeded tests if the FullReRender flag has been set, and if
-// so, calls ReRender2DTree and returns true -- call this at start of each
-// Render2D
+// so, calls ReRenderTree and returns true -- call this at start of each
+// Render
 func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 	mvp := wb.ViewportSafe()
 	if wb.This().(Node2D).IsVisible() && wb.NeedsFullReRender() && !mvp.IsDoingFullRender() {
-		if Render2DTrace {
+		if RenderTrace {
 			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.Path(), wb.VpBBox)
 		}
 		// if ki.TypeEmbeds(wb.This(), TypeFrame) || strings.Contains(ki.Type(wb.This()).String(), "TextView") {
 		// 	fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.Path(), wb.VpBBox)
 		// }
 		wb.ClearFullReRender()
-		wb.ReRender2DTree()
+		wb.ReRenderTree()
 		return true
 	}
 	return false
@@ -528,7 +527,7 @@ func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 
 // PushBounds pushes our bounding-box bounds onto the bounds stack if non-empty
 // -- this limits our drawing to our own bounding box, automatically -- must
-// be called as first step in Render2D returns whether the new bounds are
+// be called as first step in Render returns whether the new bounds are
 // empty or not -- if empty then don't render!
 func (wb *WidgetBase) PushBounds() bool {
 	if wb == nil || wb.This() == nil {
@@ -545,13 +544,13 @@ func (wb *WidgetBase) PushBounds() bool {
 	rs := &mvp.Render
 	rs.PushBounds(wb.VpBBox)
 	wb.ConnectToViewport()
-	if Render2DTrace {
+	if RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.VpBBox)
 	}
 	return true
 }
 
-// PopBounds pops our bounding-box bounds -- last step in Render2D after
+// PopBounds pops our bounding-box bounds -- last step in Render after
 // rendering children
 func (wb *WidgetBase) PopBounds() {
 	wb.ClearFullReRender()
@@ -566,26 +565,26 @@ func (wb *WidgetBase) PopBounds() {
 	rs.PopBounds()
 }
 
-func (wb *WidgetBase) Render2D() {
+func (wb *WidgetBase) Render() {
 	if wb.FullReRenderIfNeeded() {
 		return
 	}
 	if wb.PushBounds() {
-		wb.This().(Node2D).ConnectEvents2D()
+		wb.This().(Node2D).ConnectEvents()
 		if wb.NeedsStyle() {
 			wb.This().(Node2D).Style2D()
 			wb.ClearNeedsStyle()
 		}
-		wb.Render2DChildren()
+		wb.RenderChildren()
 		wb.PopBounds()
 	} else {
 		wb.DisconnectAllEvents(RegPri)
 	}
 }
 
-// ReRender2DTree does a re-render of the tree -- after it has already been
+// ReRenderTree does a re-render of the tree -- after it has already been
 // initialized and styled -- redoes the full stack
-func (wb *WidgetBase) ReRender2DTree() {
+func (wb *WidgetBase) ReRenderTree() {
 	parBBox := image.Rectangle{}
 	pni, _ := KiToNode2D(wb.Par)
 	if pni != nil {
@@ -603,7 +602,7 @@ func (wb *WidgetBase) ReRender2DTree() {
 	if !delta.IsNil() {
 		wb.Move2D(delta.ToPointFloor(), parBBox)
 	}
-	wb.Render2DTree()
+	wb.RenderTree()
 	wb.UpdateEndNoSig(updt)
 }
 
@@ -699,8 +698,8 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.SetFlag(int(VpFlagPopupDestroyAll)) // nuke it all
-	frame := AddNewFrame(&pvp, "Frame", LayoutVert)
-	lbl := AddNewLabel(frame, "ttlbl", tooltip)
+	frame := NewFrame(&pvp, "Frame", LayoutVert)
+	lbl := NewLabel(frame, "ttlbl", tooltip)
 	lbl.Type = LabelBodyMedium
 
 	TooltipConfigStyles(&pvp.WidgetBase, frame)
@@ -719,8 +718,8 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.Win = nil
 	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size).ToPoint()
 
-	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
-	y = ints.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
+	x = min(x, mainVp.Geom.Size.X-vpsz.X) // fit
+	y = min(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
@@ -772,7 +771,7 @@ func (wb *WidgetBase) EmitContextMenuSignal() {
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
 // widgets should call this as part of their event connection method
 func (wb *WidgetBase) HoverTooltipEvent() {
-	wb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	wb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		wbb := recv.Embed(TypeWidgetBase).(*WidgetBase)
 		if wbb.Tooltip != "" {
@@ -799,7 +798,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 	if !sel && !ctxtMenu {
 		return
 	}
-	wb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	wb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		if sel {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
@@ -1032,8 +1031,8 @@ func (wb *PartsWidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return wb.Layout2DChildren(iter)
 }
 
-func (wb *PartsWidgetBase) Render2DParts() {
-	wb.Parts.Render2DTree()
+func (wb *PartsWidgetBase) RenderParts() {
+	wb.Parts.RenderTree()
 }
 
 func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {

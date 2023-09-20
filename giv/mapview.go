@@ -450,7 +450,7 @@ func (mv *MapView) Style2D() {
 	mv.Frame.Style2D()
 }
 
-func (mv *MapView) Render2D() {
+func (mv *MapView) Render() {
 	if mv.IsConfiged() {
 		mv.ToolBar().UpdateActions() // nil safe..
 	}
@@ -459,5 +459,5 @@ func (mv *MapView) Render2D() {
 			win.MainMenuUpdateActives()
 		}
 	}
-	mv.Frame.Render2D()
+	mv.Frame.Render()
 }

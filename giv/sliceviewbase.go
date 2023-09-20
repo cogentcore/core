@@ -16,11 +16,11 @@ import (
 	"sync"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
@@ -568,7 +568,7 @@ func (sv *SliceViewBase) ConfigScroll() {
 		wupdt := sv.TopUpdateStart()
 		svv.StartIdx = int(sb.Value)
 		svv.This().(SliceViewer).UpdateSliceGrid()
-		svv.ViewportSafe().ReRender2DNode(svv.This().(gi.Node2D))
+		svv.ViewportSafe().ReRenderNode(svv.This().(gi.Node2D))
 		svv.TopUpdateEnd(wupdt)
 	})
 }
@@ -578,8 +578,8 @@ func (sv *SliceViewBase) UpdateStartIdx() {
 	sz := sv.This().(SliceViewer).UpdtSliceSize()
 	if sz > sv.DispRows {
 		lastSt := sz - sv.DispRows
-		sv.StartIdx = ints.MinInt(lastSt, sv.StartIdx)
-		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
+		sv.StartIdx = min(lastSt, sv.StartIdx)
+		sv.StartIdx = max(0, sv.StartIdx)
 	} else {
 		sv.StartIdx = 0
 	}
@@ -663,7 +663,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		}
 		sv.VisRows = int(mat32.Floor(sgHt / sv.RowHeight))
 	}
-	sv.DispRows = ints.MinInt(sv.SliceSize, sv.VisRows)
+	sv.DispRows = min(sv.SliceSize, sv.VisRows)
 
 	nWidg := nWidgPerRow * sv.DispRows
 
@@ -710,7 +710,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		sg.DeleteChildren(ki.DestroyKids)
 		return
 	}
-	sv.DispRows = ints.MinInt(sv.SliceSize, sv.VisRows)
+	sv.DispRows = min(sv.SliceSize, sv.VisRows)
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	nWidg := nWidgPerRow * sv.DispRows
@@ -1089,7 +1089,7 @@ func (sv *SliceViewBase) Style2D() {
 	// sg.StartFocus() // need to call this when window is actually active
 }
 
-func (sv *SliceViewBase) Render2D() {
+func (sv *SliceViewBase) Render() {
 	if win := sv.ParentWindow(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
@@ -1119,21 +1119,21 @@ func (sv *SliceViewBase) Render2D() {
 			}
 			sv.This().(SliceViewer).UpdateSliceGrid() // enabling this is key for index, +/- rendering, as they are created here and need to be in place before the rerender tree
 			sv.InFullRebuild = true
-			sv.ReRender2DTree()
+			sv.ReRenderTree()
 			if sv.This().(SliceViewer).NeedsDoubleReRender() {
-				sv.ReRender2DTree()
+				sv.ReRenderTree()
 			}
 			sv.InFullRebuild = false
 			sv.PopBounds()
 			return
 		} else if sv.This().(SliceViewer).SliceGridNeedsUpdate() {
 			sv.This().(SliceViewer).UpdateSliceGrid()
-			sv.ReRender2DTree() // key for rendering updated widgets
+			sv.ReRenderTree() // key for rendering updated widgets
 		}
 		sv.FrameStdRender() // this just renders widgets that have already been created
-		sv.This().(gi.Node2D).ConnectEvents2D()
+		sv.This().(gi.Node2D).ConnectEvents()
 		sv.RenderScrolls()
-		sv.Render2DChildren()
+		sv.RenderChildren()
 		sv.PopBounds()
 	} else {
 		sv.DisconnectAllEvents(gi.AllPris)
@@ -1144,7 +1144,7 @@ func (sv *SliceViewBase) NeedsDoubleReRender() bool {
 	return false
 }
 
-func (sv *SliceViewBase) ConnectEvents2D() {
+func (sv *SliceViewBase) ConnectEvents() {
 	sv.SliceViewBaseEvents()
 }
 
@@ -1274,12 +1274,12 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 	}
 	if idx < sv.StartIdx {
 		sv.StartIdx = idx
-		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
+		sv.StartIdx = max(0, sv.StartIdx)
 		sv.UpdateScroll()
 		return true
 	} else if idx >= sv.StartIdx+sv.DispRows {
 		sv.StartIdx = idx - (sv.DispRows - 1)
-		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
+		sv.StartIdx = max(0, sv.StartIdx)
 		sv.UpdateScroll()
 		return true
 	}
@@ -1385,7 +1385,7 @@ func (sv *SliceViewBase) MovePageDown(selMode mouse.SelectModes) int {
 		return -1
 	}
 	sv.SelectedIdx += sv.VisRows
-	sv.SelectedIdx = ints.MinInt(sv.SelectedIdx, sv.SliceSize-1)
+	sv.SelectedIdx = min(sv.SelectedIdx, sv.SliceSize-1)
 	sv.SelectIdxAction(sv.SelectedIdx, selMode)
 	return sv.SelectedIdx
 }
@@ -1409,7 +1409,7 @@ func (sv *SliceViewBase) MovePageUp(selMode mouse.SelectModes) int {
 		return -1
 	}
 	sv.SelectedIdx -= sv.VisRows
-	sv.SelectedIdx = ints.MaxInt(0, sv.SelectedIdx)
+	sv.SelectedIdx = max(0, sv.SelectedIdx)
 	sv.SelectIdxAction(sv.SelectedIdx, selMode)
 	return sv.SelectedIdx
 }
@@ -1572,7 +1572,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 	if mode == mouse.NoSelect {
 		return
 	}
-	idx = ints.MinInt(idx, sv.SliceSize-1)
+	idx = min(idx, sv.SliceSize-1)
 	if idx < 0 {
 		sv.ResetSelectedIdxs()
 		return
@@ -1610,9 +1610,9 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 				if minIdx < 0 {
 					minIdx = r
 				} else {
-					minIdx = ints.MinInt(minIdx, r)
+					minIdx = min(minIdx, r)
 				}
-				maxIdx = ints.MaxInt(maxIdx, r)
+				maxIdx = max(maxIdx, r)
 			}
 			cidx := idx
 			sv.SelectedIdx = idx
@@ -1723,7 +1723,7 @@ func (sv *SliceViewBase) Copy(reset bool) {
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
 	if md != nil {
-		oswin.TheApp.ClipBoard(sv.ParentWindow().OSWin).Write(md)
+		goosi.TheApp.ClipBoard(sv.ParentWindow().OSWin).Write(md)
 	}
 	if reset {
 		sv.UnselectAllIdxs()
@@ -1794,7 +1794,7 @@ func (sv *SliceViewBase) CutIdxs() {
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Paste() {
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := oswin.TheApp.ClipBoard(sv.ParentWindow().OSWin).Read([]string{dt})
+	md := goosi.TheApp.ClipBoard(sv.ParentWindow().OSWin).Read([]string{dt})
 	if md != nil {
 		sv.PasteMenu(md, sv.CurIdx)
 	}
@@ -1904,7 +1904,7 @@ func (sv *SliceViewBase) Duplicate() int {
 	pasteAt := ixs[0]
 	sv.CopyIdxs(true)
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := oswin.TheApp.ClipBoard(sv.ParentWindow().OSWin).Read([]string{dt})
+	md := goosi.TheApp.ClipBoard(sv.ParentWindow().OSWin).Read([]string{dt})
 	sv.This().(SliceViewer).PasteAtIdx(md, pasteAt)
 	return pasteAt
 }
@@ -2234,12 +2234,12 @@ func (sv *SliceViewBase) KeyInputInactive(kt *key.ChordEvent) {
 			kt.SetProcessed()
 		}
 	case kf == gi.KeyFunPageDown:
-		ni := ints.MinInt(idx+sv.VisRows-1, sv.SliceSize-1)
+		ni := min(idx+sv.VisRows-1, sv.SliceSize-1)
 		sv.ScrollToIdx(ni)
 		sv.UpdateSelectIdx(ni, true)
 		kt.SetProcessed()
 	case kf == gi.KeyFunPageUp:
-		ni := ints.MaxInt(idx-(sv.VisRows-1), 0)
+		ni := max(idx-(sv.VisRows-1), 0)
 		sv.ScrollToIdx(ni)
 		sv.UpdateSelectIdx(ni, true)
 		kt.SetProcessed()
@@ -2251,7 +2251,7 @@ func (sv *SliceViewBase) KeyInputInactive(kt *key.ChordEvent) {
 
 func (sv *SliceViewBase) SliceViewBaseEvents() {
 	// LowPri to allow other focal widgets to capture
-	sv.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	sv.ConnectEvent(goosi.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		me.SetProcessed()
@@ -2259,7 +2259,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		cur := float32(sbb.Pos)
 		sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(false))) // preferY
 	})
-	sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	sv.ConnectEvent(goosi.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		// if !svv.HasFocus() {
@@ -2279,19 +2279,19 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 	})
 	if sv.IsDisabled() {
 		if sv.InactKeyNav {
-			sv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+			sv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 				kt := d.(*key.ChordEvent)
 				svv.KeyInputInactive(kt)
 			})
 		}
 	} else {
-		sv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		sv.ConnectEvent(goosi.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			kt := d.(*key.ChordEvent)
 			svv.KeyInputActive(kt)
 		})
-		sv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		sv.ConnectEvent(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 			de := d.(*dnd.Event)
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			switch de.Action {
@@ -2305,7 +2305,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		})
 		sg := sv.This().(SliceViewer).SliceGrid()
 		if sg != nil {
-			sg.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+			sg.ConnectEvent(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				de := d.(*dnd.FocusEvent)
 				sgg := recv.Embed(gi.TypeFrame).(*gi.Frame)
 				switch de.Action {

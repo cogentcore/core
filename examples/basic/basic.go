@@ -26,19 +26,19 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	rlay := gi.AddNewFrame(mfr, "rowlay", gi.LayoutHoriz)
+	rlay := gi.NewFrame(mfr, "rowlay", gi.LayoutHoriz)
 	rlay.SetProp("text-align", "center")
 	rlay.SetStretchMaxWidth()
-	lbl := gi.AddNewLabel(rlay, "label1", "This is test text")
+	lbl := gi.NewLabel(rlay, "label1", "This is test text")
 	lbl.SetProp("text-align", "center")
 	lbl.SetProp("border-width", 1)
 	lbl.SetStretchMaxWidth()
 
-	// edit1 := gi.AddNewTextField(rlay, "edit1")
-	// button1 := gi.AddNewButton(rlay, "button1")
-	// button2 := gi.AddNewButton(rlay, "button2")
-	// slider1 := gi.AddNewSlider(rlay, "slider1")
-	// spin1 := gi.AddNewSpinBox(rlay, "spin1")
+	// edit1 := gi.NewTextField(rlay, "edit1")
+	// button1 := gi.NewButton(rlay, "button1")
+	// button2 := gi.NewButton(rlay, "button2")
+	// slider1 := gi.NewSlider(rlay, "slider1")
+	// spin1 := gi.NewSpinBox(rlay, "spin1")
 
 	// edit1.SetText("Edit this text")
 	// edit1.SetProp("min-width", "20em")

@@ -11,15 +11,14 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
@@ -328,7 +327,7 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 
 // MouseEvents handles button MouseEvent
 func (bb *ButtonBase) MouseEvent() {
-	bb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	bb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
@@ -350,7 +349,7 @@ func (bb *ButtonBase) MouseEvent() {
 
 // KeyChordEvent handles button KeyChord events
 func (bb *ButtonBase) KeyChordEvent() {
-	bb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	bb.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
 		if bbb.IsDisabled() {
@@ -372,7 +371,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 }
 
 func (bb *ButtonBase) HoverTooltipEvent() {
-	bb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	bb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		wbb := recv.Embed(TypeButtonBase).(*ButtonBase)
 		tt := wbb.Tooltip
@@ -443,11 +442,11 @@ func (bb *ButtonBase) ButtonRelease() {
 
 func (bb *ButtonBase) StyleParts() {
 	if pv, ok := bb.PropInherit("indicator", ki.NoInherit, ki.TypeProps); ok {
-		pvs := kit.ToString(pv)
+		pvs := laser.ToString(pv)
 		bb.Indicator = gicons.Icon(pvs)
 	}
 	if pv, ok := bb.PropInherit("icon", ki.NoInherit, ki.TypeProps); ok {
-		pvs := kit.ToString(pv)
+		pvs := laser.ToString(pv)
 		bb.Icon = gicons.Icon(pvs)
 	}
 }
@@ -511,26 +510,26 @@ func (bb *ButtonBase) RenderButton() {
 	bb.RenderUnlock(rs)
 }
 
-func (bb *ButtonBase) Render2D() {
+func (bb *ButtonBase) Render() {
 	if bb.FullReRenderIfNeeded() {
 		return
 	}
 	if bb.PushBounds() {
-		bb.This().(Node2D).ConnectEvents2D()
+		bb.This().(Node2D).ConnectEvents()
 		if bb.NeedsStyle() {
 			bb.StyleButton()
 			bb.ClearNeedsStyle()
 		}
 		bb.RenderButton()
-		bb.Render2DParts()
-		bb.Render2DChildren()
+		bb.RenderParts()
+		bb.RenderChildren()
 		bb.PopBounds()
 	} else {
 		bb.DisconnectAllEvents(RegPri)
 	}
 }
 
-func (bb *ButtonBase) ConnectEvents2D() {
+func (bb *ButtonBase) ConnectEvents() {
 	bb.ButtonEvents()
 }
 

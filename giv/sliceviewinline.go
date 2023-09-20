@@ -117,7 +117,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	mv := reflect.ValueOf(sv.Slice)
 	mvnp := laser.NonPtrValue(mv)
 
-	sz := ints.MinInt(mvnp.Len(), SliceInlineLen)
+	sz := min(mvnp.Len(), SliceInlineLen)
 	for i := 0; i < sz; i++ {
 		val := laser.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface(), "")
@@ -251,14 +251,14 @@ func (sv *SliceViewInline) Style2D() {
 	sv.PartsWidgetBase.Style2D()
 }
 
-func (sv *SliceViewInline) Render2D() {
+func (sv *SliceViewInline) Render() {
 	if sv.FullReRenderIfNeeded() {
 		return
 	}
 	if sv.PushBounds() {
 		sv.ConfigParts()
-		sv.Render2DParts()
-		sv.Render2DChildren()
+		sv.RenderParts()
+		sv.RenderChildren()
 		sv.PopBounds()
 	}
 }

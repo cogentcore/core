@@ -12,17 +12,15 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/bitflag"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/filecat"
@@ -649,9 +647,9 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 				if minIdx < 0 {
 					minIdx = v.ViewIdx
 				} else {
-					minIdx = ints.MinInt(minIdx, v.ViewIdx)
+					minIdx = min(minIdx, v.ViewIdx)
 				}
-				maxIdx = ints.MaxInt(maxIdx, v.ViewIdx)
+				maxIdx = max(maxIdx, v.ViewIdx)
 			}
 			cidx := tv.ViewIdx
 			nn := tv
@@ -1165,7 +1163,7 @@ func (tv *TreeView) SrcAddChild() {
 				var ski ki.Ki
 				for i := 0; i < n; i++ {
 					nm := fmt.Sprintf("New%v%v", typ.Name(), i)
-					nki := sk.AddNewChild(typ, nm)
+					nki := sk.NewChild(typ, nm)
 					if i == n-1 {
 						ski = nki
 					}
@@ -1307,7 +1305,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Copy(reset bool) {
 	sels := tv.SelectedViews()
-	nitms := ints.MaxInt(1, len(sels))
+	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tv.This().(gi.Clipper).MimeData(&md) // source is always first..
 	if nitms > 1 {
@@ -1317,7 +1315,7 @@ func (tv *TreeView) Copy(reset bool) {
 			}
 		}
 	}
-	oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(md)
+	goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(md)
 	if reset {
 		tv.UnselectAll()
 	}
@@ -1341,7 +1339,7 @@ func (tv *TreeView) Cut() {
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Paste() {
-	md := oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.DataJson})
+	md := goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
 	}
@@ -1505,7 +1503,7 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 // selected nodes as well, each as additional records in mimedata
 func (tv *TreeView) DragNDropStart() {
 	sels := tv.SelectedViews()
-	nitms := ints.MaxInt(1, len(sels))
+	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tv.This().(gi.Clipper).MimeData(&md) // source is always first..
 	if nitms > 1 {
@@ -1788,12 +1786,12 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 }
 
 func (tv *TreeView) TreeViewEvents() {
-	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		kt := d.(*key.ChordEvent)
 		tvv.KeyInput(kt)
 	})
-	tv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		if recv == nil {
 			return
 		}
@@ -1810,7 +1808,7 @@ func (tv *TreeView) TreeViewEvents() {
 			tvv.DragNDropExternal(de)
 		}
 	})
-	tv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.ConnectEvent(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		if recv == nil {
 			return
 		}
@@ -1837,7 +1835,7 @@ func (tv *TreeView) TreeViewEvents() {
 	}
 	if lbl, ok := tv.LabelPart(); ok {
 		// HiPri is needed to override label's native processing
-		lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		lbl.ConnectEvent(goosi.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			lb, _ := recv.(*gi.Label)
 			tvvi := lb.Parent().Parent()
 			if tvvi == nil || tvvi.This() == nil { // deleted
@@ -2224,13 +2222,13 @@ func (tv *TreeView) PushBounds() bool {
 	rs := tv.Render()
 	rs.PushBounds(tv.VpBBox)
 	tv.ConnectToViewport()
-	if gi.Render2DTrace {
+	if gi.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", tv.Path(), tv.VpBBox)
 	}
 	return true
 }
 
-func (tv *TreeView) Render2D() {
+func (tv *TreeView) Render() {
 	if tv.HasClosedParent() {
 		tv.DisconnectAllEvents(gi.AllPris)
 		return // nothing
@@ -2255,7 +2253,7 @@ func (tv *TreeView) Render2D() {
 				tv.Style = tv.StateStyles[TreeViewActive]
 			}
 			tv.ConfigPartsIfNeeded()
-			tv.This().(gi.Node2D).ConnectEvents2D()
+			tv.This().(gi.Node2D).ConnectEvents()
 
 			// note: this is std except using WidgetSize instead of AllocSize
 			rs, pc, st := tv.RenderLock()
@@ -2273,18 +2271,18 @@ func (tv *TreeView) Render2D() {
 			sz := tv.WidgetSize.Sub(st.EffMargin().Size())
 			tv.RenderBoxImpl(pos, sz, st.Border)
 			tv.RenderUnlock(rs)
-			tv.Render2DParts()
+			tv.RenderParts()
 		}
 		tv.PopBounds()
 	} else {
 		tv.DisconnectAllEvents(gi.AllPris)
 	}
 	// we always have to render our kids b/c we could be out of scope but they could be in!
-	tv.Render2DChildren()
+	tv.RenderChildren()
 	tv.ClearFullReRender()
 }
 
-func (tv *TreeView) ConnectEvents2D() {
+func (tv *TreeView) ConnectEvents() {
 	tv.TreeViewEvents()
 }
 

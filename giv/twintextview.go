@@ -85,8 +85,8 @@ func (tv *TwinTextViews) ConfigTexts() {
 	if !mods {
 		updt = tv.UpdateStart()
 	} else {
-		av := AddNewTextView(al, "text-a")
-		bv := AddNewTextView(bl, "text-b")
+		av := NewTextView(al, "text-a")
+		bv := NewTextView(bl, "text-b")
 		av.SetBuf(tv.BufA)
 		bv.SetBuf(tv.BufB)
 

@@ -18,10 +18,10 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
 	"goki.dev/ki/v2"
@@ -314,9 +314,9 @@ func (fv *FileView) ConfigPathBar() {
 	config.Add(gi.TypeAction, "path-fav")
 	config.Add(gi.TypeAction, "new-folder")
 
-	pl := gi.AddNewLabel(pr, "path-lbl", "Path:")
+	pl := gi.NewLabel(pr, "path-lbl", "Path:")
 	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
-	pf := gi.AddNewComboBox(pr, "path")
+	pf := gi.NewComboBox(pr, "path")
 	pf.Editable = true
 	pf.SetMinPrefWidth(units.Ch(60))
 	pf.SetStretchMaxWidth()
@@ -551,12 +551,12 @@ func (fv *FileView) UpdateFiles() {
 
 	updt := fv.UpdateStart()
 	defer fv.UpdateEnd(updt)
-	var owin oswin.Window
+	var owin goosi.Window
 	win := fv.ParentWindow()
 	if win != nil {
 		owin = fv.Viewport.Win.OSWin
 	} else {
-		owin = oswin.TheApp.WindowInFocus()
+		owin = goosi.TheApp.WindowInFocus()
 	}
 
 	fv.UpdatePath()
@@ -571,8 +571,8 @@ func (fv *FileView) UpdateFiles() {
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	oswin.TheApp.Cursor(owin).Push(cursor.Wait)
-	defer oswin.TheApp.Cursor(owin).Pop()
+	goosi.TheApp.Cursor(owin).Push(cursor.Wait)
+	defer goosi.TheApp.Cursor(owin).Pop()
 
 	effpath, err := filepath.EvalSymlinks(fv.DirPath)
 	if err != nil {
@@ -633,7 +633,7 @@ func (fv *FileView) UpdateFiles() {
 	}
 
 	if fv.PrevPath != fv.DirPath {
-		if oswin.TheApp.Platform() != oswin.MacOS {
+		if goosi.TheApp.Platform() != goosi.MacOS {
 			// mac is not supported in a high-capacity fashion at this point
 			if fv.PrevPath == "" {
 				fv.ConfigWatcher()
@@ -812,12 +812,12 @@ func (fv *FileView) Style2D() {
 	sf.StartFocus() // need to call this when window is actually active
 }
 
-func (fv *FileView) ConnectEvents2D() {
+func (fv *FileView) ConnectEvents() {
 	fv.FileViewEvents()
 }
 
 func (fv *FileView) FileViewEvents() {
-	fv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	fv.ConnectEvent(goosi.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		fvv := recv.Embed(TypeFileView).(*FileView)
 		kt := d.(*key.ChordEvent)
 		fvv.KeyInput(kt)

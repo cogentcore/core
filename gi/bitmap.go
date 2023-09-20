@@ -162,12 +162,12 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport2D) {
 	draw.Draw(parVp.Pixels, r, bm.Pixels, sp, draw.Over)
 }
 
-func (bm *Bitmap) Render2D() {
+func (bm *Bitmap) Render() {
 	if bm.FullReRenderIfNeeded() {
 		return
 	}
 	if bm.PushBounds() {
-		bm.This().(Node2D).ConnectEvents2D()
+		bm.This().(Node2D).ConnectEvents()
 		bm.DrawIntoViewport(bm.Viewport)
 		bm.PopBounds()
 	} else {

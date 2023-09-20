@@ -15,7 +15,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/histyle"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"
@@ -251,7 +250,7 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 		for si := len(tstack) - 1; si >= 0; si-- {
 			ts := ttags[tstack[si]]
 			if ts.Ed <= tr.St {
-				ep := ints.MinInt(sz, ts.Ed)
+				ep := min(sz, ts.Ed)
 				if cp < ep {
 					mu = append(mu, HTMLEscapeRunes(txt[cp:ep])...)
 					cp = ep
@@ -291,7 +290,7 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 				}
 			}
 		}
-		ep = ints.MinInt(len(txt), ep)
+		ep = min(len(txt), ep)
 		if tr.St < ep {
 			mu = append(mu, HTMLEscapeRunes(txt[tr.St:ep])...)
 		}

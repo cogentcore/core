@@ -30,7 +30,7 @@ within that, or a LayoutGrid for more complex layouts:
 
 		vlay := win.SetMainVLay() // or SetMainFrame
 
-		row1 := gi.AddNewLayout(vlay, "row1", gi.LayoutHoriz)
+		row1 := gi.NewLayout(vlay, "row1", gi.LayoutHoriz)
 
 		...
 

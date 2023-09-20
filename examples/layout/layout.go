@@ -48,7 +48,7 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	row1 := gi.AddNewLayout(mfr, "row1", gi.LayoutHoriz)
+	row1 := gi.NewLayout(mfr, "row1", gi.LayoutHoriz)
 
 	row1.SetProp("vertical-align", "top")
 	// row1.SetProp("horizontal-align", "justify")
@@ -59,7 +59,7 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := gi.AddNewFrame(row1, nm, gi.LayoutHoriz)
+		fr := gi.NewFrame(row1, nm, gi.LayoutHoriz)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("vertical-align", "inherit")
@@ -67,14 +67,14 @@ func mainrun() {
 		fr.SetProp("margin", "inherit")
 		if i == 2 {
 			fr.SetFixedWidth(units.Em(20))
-			spc := row1.AddNewChild(gi.TypeSpace, "spc").(*gi.Space)
+			spc := row1.NewChild(gi.TypeSpace, "spc").(*gi.Space)
 			spc.SetFixedWidth(units.Em(4))
 		} else {
 			fr.SetProp("max-width", -1) // spacer
 		}
 	}
 
-	row2 := gi.AddNewLayout(mfr, "row2", gi.LayoutHoriz)
+	row2 := gi.NewLayout(mfr, "row2", gi.LayoutHoriz)
 	row2.SetProp("text-align", "center")
 	row2.SetProp("max-width", -1) // always stretch width
 
@@ -86,18 +86,18 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := gi.AddNewFrame(row2, nm, gi.LayoutHoriz)
+		fr := gi.NewFrame(row2, nm, gi.LayoutHoriz)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("vertical-align", "inherit")
 		// fr.SetProp("horizontal-align", "inherit")
 		fr.SetProp("margin", "inherit")
 		// if i == 2 {
-		// 	gi.AddNewStretch(row2, "str")
+		// 	gi.NewStretch(row2, "str")
 		// }
 	}
 
-	row3 := gi.AddNewLayout(mfr, "row3", gi.LayoutHorizFlow)
+	row3 := gi.NewLayout(mfr, "row3", gi.LayoutHorizFlow)
 	// row3.SetProp("text-align", "center")
 	row3.SetProp("max-width", -1) // always stretch width
 
@@ -110,7 +110,7 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := gi.AddNewFrame(row3, nm, gi.LayoutHoriz)
+		fr := gi.NewFrame(row3, nm, gi.LayoutHoriz)
 		fr.SetProp("width", 5*sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("min-height", sz.Y)
@@ -121,7 +121,7 @@ func mainrun() {
 		// fr.SetProp("max-width", -1) // spacer
 	}
 
-	row4 := gi.AddNewLayout(mfr, "row4", gi.LayoutGrid)
+	row4 := gi.NewLayout(mfr, "row4", gi.LayoutGrid)
 	row4.SetProp("columns", 2)
 	// row4.SetProp("max-width", -1)
 
@@ -132,7 +132,7 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := gi.AddNewFrame(row4, nm, gi.LayoutHoriz)
+		fr := gi.NewFrame(row4, nm, gi.LayoutHoriz)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		// fr.SetProp("min-height", sz.Y)

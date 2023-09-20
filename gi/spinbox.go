@@ -10,13 +10,13 @@ import (
 	"log"
 	"strconv"
 
-	"goki.dev/gi/v2/oswin"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
+	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -326,7 +326,7 @@ func (sb *SpinBox) ConfigPartsIfNeeded() {
 }
 
 func (sb *SpinBox) MouseScrollEvent() {
-	sb.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	sb.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSpinBox).(*SpinBox)
 		if sbb.IsDisabled() || !sbb.HasFocus2D() {
 			return
@@ -349,7 +349,7 @@ func (sb *SpinBox) TextFieldEvent() {
 }
 
 func (sb *SpinBox) KeyChordEvent() {
-	sb.ConnectEvent(oswin.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	sb.ConnectEvent(goosi.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.(*SpinBox)
 		if sbb.IsDisabled() {
 			return
@@ -400,39 +400,39 @@ func (sb *SpinBox) StyleFromProps(props ki.Props, vp *Viewport2D) {
 		}
 		switch key {
 		case "value":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sb.Value = iv
 			}
 		case "min":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sb.Min = iv
 			}
 		case "max":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sb.Max = iv
 			}
 		case "step":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sb.Step = iv
 			}
 		case "pagestep":
-			if iv, ok := kit.ToFloat32(val); ok {
+			if iv, ok := laser.ToFloat32(val); ok {
 				sb.PageStep = iv
 			}
 		case "prec":
-			if iv, ok := kit.ToInt(val); ok {
+			if iv, ok := laser.ToInt(val); ok {
 				sb.Prec = int(iv)
 			}
 		case "has-min":
-			if bv, ok := kit.ToBool(val); ok {
+			if bv, ok := laser.ToBool(val); ok {
 				sb.HasMin = bv
 			}
 		case "has-max":
-			if bv, ok := kit.ToBool(val); ok {
+			if bv, ok := laser.ToBool(val); ok {
 				sb.HasMax = bv
 			}
 		case "format":
-			sb.Format = kit.ToString(val)
+			sb.Format = laser.ToString(val)
 		}
 	}
 	if sb.PageStep < sb.Step { // often forget to set this..
@@ -467,24 +467,24 @@ func (sb *SpinBox) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return sb.Layout2DChildren(iter)
 }
 
-func (sb *SpinBox) Render2D() {
+func (sb *SpinBox) Render() {
 	if sb.FullReRenderIfNeeded() {
 		return
 	}
 	if sb.PushBounds() {
-		sb.This().(Node2D).ConnectEvents2D()
+		sb.This().(Node2D).ConnectEvents()
 		tf := sb.Parts.ChildByName("text-field", 2).(*TextField)
 		tf.SetSelectedState(sb.IsSelected())
 		sb.ConfigPartsIfNeeded()
-		sb.Render2DChildren()
-		sb.Render2DParts()
+		sb.RenderChildren()
+		sb.RenderParts()
 		sb.PopBounds()
 	} else {
 		sb.DisconnectAllEvents(RegPri)
 	}
 }
 
-func (sb *SpinBox) ConnectEvents2D() {
+func (sb *SpinBox) ConnectEvents() {
 	sb.SpinBoxEvents()
 }
 
