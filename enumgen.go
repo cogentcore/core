@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"goki.dev/enums"
 )
@@ -613,6 +614,26 @@ var _WindowFlagsMap = map[WindowFlags]string{
 // String returns the string representation
 // of this WindowFlags value.
 func (i WindowFlags) String() string {
+	str := ""
+	for _, ie := range _WindowFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this WindowFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i WindowFlags) BitIndexString() string {
 	if str, ok := _WindowFlagsMap[i]; ok {
 		return str
 	}
@@ -623,15 +644,26 @@ func (i WindowFlags) String() string {
 // string representation, and returns an
 // error if the string is invalid.
 func (i *WindowFlags) SetString(s string) error {
-	if val, ok := _WindowFlagsNameToValueMap[s]; ok {
-		*i = val
-		return nil
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the WindowFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *WindowFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _WindowFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _WindowFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type WindowFlags")
+		}
 	}
-	if val, ok := _WindowFlagsNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type WindowFlags")
+	return nil
 }
 
 // Int64 returns the WindowFlags value as an int64.
@@ -673,6 +705,29 @@ func (i WindowFlags) Values() []enums.Enum {
 func (i WindowFlags) IsValid() bool {
 	_, ok := _WindowFlagsMap[i]
 	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i WindowFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *WindowFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.

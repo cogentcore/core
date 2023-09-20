@@ -237,7 +237,7 @@ type WindowBase struct {
 	PhysDPI     float32
 	LogDPI      float32
 	Par         any
-	Flag        int64
+	Flag        WindowFlags
 	// set this to a function that will destroy GPU resources
 	// in the main thread prior to destroying the drawer
 	// and the surface -- otherwise it is difficult to
@@ -265,35 +265,33 @@ func (w *WindowBase) SetParent(parent any) {
 	w.Par = parent
 }
 
-func (w *WindowBase) Flags() int64 {
+func (w *WindowBase) Flags() WindowFlags {
 	return w.Flag
 }
 
-/*
 func (w *WindowBase) IsDialog() bool {
-	return bitflag.HasAtomic(&w.Flag, int(Dialog))
+	return w.Flag.HasFlag(Dialog)
 }
 
 func (w *WindowBase) IsModal() bool {
-	return bitflag.HasAtomic(&w.Flag, int(Modal))
+	return w.Flag.HasFlag(Modal)
 }
 
 func (w *WindowBase) IsTool() bool {
-	return bitflag.HasAtomic(&w.Flag, int(Tool))
+	return w.Flag.HasFlag(Tool)
 }
 
 func (w *WindowBase) IsFullscreen() bool {
-	return bitflag.HasAtomic(&w.Flag, int(Fullscreen))
+	return w.Flag.HasFlag(Fullscreen)
 }
 
 func (w *WindowBase) IsMinimized() bool {
-	return bitflag.HasAtomic(&w.Flag, int(Minimized))
+	return w.Flag.HasFlag(Minimized)
 }
 
 func (w *WindowBase) IsFocus() bool {
-	return bitflag.HasAtomic(&w.Flag, int(Focus))
+	return w.Flag.HasFlag(Focus)
 }
-*/
 
 func (w *WindowBase) SetDestroyGPUResourcesFunc(f func()) {
 	w.DestroyGPUfunc = f
@@ -306,7 +304,7 @@ func (w *WindowBase) SetDestroyGPUResourcesFunc(f func()) {
 
 // WindowFlags contains all the binary properties of a window -- by default
 // with no other relevant flags a window is a main top-level window.
-type WindowFlags int32 //enums:enum
+type WindowFlags int64 //enums:bitflag
 
 const (
 	// Dialog indicates that this is a temporary, pop-up window.
