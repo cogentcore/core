@@ -4,17 +4,16 @@
 
 package filecat
 
+//go:generate enumgen
+
 import (
 	"fmt"
-	"strings"
-
-	"goki.dev/ki/v2/kit"
 )
 
 // filecat.Supported are file types that are specifically supported by GoGi
 // and can be processed in one way or another, plus various others
 // that we SHOULD be able to process at some point
-type Supported int
+type Supported int //enums:enum
 
 // SupportedMimes maps from the support type into the MimeType info for each
 // supported file type -- the supported MimeType may be just one of
@@ -111,16 +110,10 @@ func IsMatchList(targs []Supported, typ Supported) bool {
 // SupportedByName looks up supported file type by caps or lowercase name
 func SupportedByName(name string) (Supported, error) {
 	var sup Supported
-	err := sup.FromString(name)
+	err := sup.SetString(name)
 	if err != nil {
-		if err != nil {
-			name = strings.ToLower(name)
-			err = kit.Enums.SetEnumIfaceFromAltString(&sup, name) // alts = lowercase
-			if err != nil {
-				err = fmt.Errorf("filecat.SupportedByName: doesn't look like that is a supported file type: %v", name)
-				return sup, err
-			}
-		}
+		err = fmt.Errorf("filecat.SupportedByName: doesn't look like that is a supported file type: %v", name)
+		return sup, err
 	}
 	return sup, nil
 }
@@ -299,17 +292,4 @@ const (
 
 	// Bin is some other unrecognized binary type
 	AnyBin
-
-	SupportedN
 )
-
-//go:generate stringer -type=Supported
-
-var KiT_Supported = kit.Enums.AddEnumAltLower(SupportedN, kit.NotBitFlag, nil, "")
-
-func (kf Supported) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
-func (kf *Supported) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }
-
-// map keys require text marshaling:
-func (ev Supported) MarshalText() ([]byte, error)  { return kit.EnumMarshalText(ev) }
-func (ev *Supported) UnmarshalText(b []byte) error { return kit.EnumUnmarshalText(ev, b) }

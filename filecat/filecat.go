@@ -23,10 +23,6 @@
 // (which constrained our package name to not be either of those two)
 package filecat
 
-import (
-	"goki.dev/ki/v2/kit"
-)
-
 // filecat.Cat is a functional category for files -- a broad functional
 // categorization that can help decide what to do with the file.
 //
@@ -36,7 +32,7 @@ import (
 // No single categorization scheme is perfect, so any given use
 // may require examination of the full mime type etc, but this
 // provides a useful broad-scope categorization of file types.
-type Cat int32
+type Cat int32 //enums:enum
 
 const (
 	// Unknown is an unknown file category
@@ -86,20 +82,7 @@ const (
 
 	// Bin is some other type of binary (object files, libraries, etc)
 	Bin
-
-	CatN
 )
-
-//go:generate stringer -type=Cat
-
-var KiT_Cat = kit.Enums.AddEnum(CatN, kit.NotBitFlag, nil)
-
-func (kf Cat) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
-func (kf *Cat) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }
-
-// map keys require text marshaling:
-func (ev Cat) MarshalText() ([]byte, error)  { return kit.EnumMarshalText(ev) }
-func (ev *Cat) UnmarshalText(b []byte) error { return kit.EnumUnmarshalText(ev, b) }
 
 // filecat.CatFromMime returns the file category based on the mime type -- not all
 // Cats can be inferred from file types

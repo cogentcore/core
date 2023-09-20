@@ -7,20 +7,12 @@ package parse
 import (
 	"fmt"
 
-	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/token"
 )
 
 // Actions are parsing actions to perform
-type Actions int
-
-//go:generate stringer -type=Actions
-
-var KiT_Actions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
-
-func (ev Actions) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Actions) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+type Actions int //enums:enum
 
 // The parsing acts
 const (
@@ -65,8 +57,6 @@ const (
 
 	// PopStack pops the stack
 	PopStack
-
-	ActionsN
 )
 
 // Act is one action to perform, operating on the Ast output
@@ -126,14 +116,7 @@ func (ac Acts) String() string {
 }
 
 // AstActs are actions to perform on the Ast nodes
-type AstActs int
-
-//go:generate stringer -type=AstActs
-
-var KiT_AstActs = kit.Enums.AddEnum(AstActsN, kit.NotBitFlag, nil)
-
-func (ev AstActs) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *AstActs) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+type AstActs int //enums:enum
 
 // The Ast actions
 const (
@@ -164,6 +147,4 @@ const (
 	// rule then don't add a new Ast node).  This is good for starting a new list
 	// of recursively-defined elements, without creating increasing depth levels.
 	AnchorFirstAst
-
-	AstActsN
 )

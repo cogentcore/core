@@ -4,10 +4,12 @@
 
 package lex
 
+//go:generate goki generate
+
 import (
 	"fmt"
 
-	"goki.dev/ki/v2/nptime"
+	"goki.dev/glop/nptime"
 	"goki.dev/pi/v2/token"
 )
 

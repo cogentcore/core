@@ -4,24 +4,9 @@
 
 package lsp
 
-import (
-	"goki.dev/ki/v2/kit"
-)
-
 // CompletionKind is the Language Server Protocol (LSP) CompletionKind, which
 // we map onto the token.Tokens that are used internally.
-type CompletionKind int
-
-//go:generate stringer -type=CompletionKind
-
-var KiT_CompletionKind = kit.Enums.AddEnumAltLower(CompletionKindN, kit.NotBitFlag, nil, "Ck")
-
-func (ev CompletionKind) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *CompletionKind) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// map keys require text marshaling:
-func (ev CompletionKind) MarshalText() ([]byte, error)  { return kit.EnumMarshalText(ev) }
-func (ev *CompletionKind) UnmarshalText(b []byte) error { return kit.EnumUnmarshalText(ev, b) }
+type CompletionKind int //enums:enum
 
 // CompletionKinds -- note these largely overlap with CompletionKinds and are
 // thus kinda partially redundant..
@@ -52,6 +37,4 @@ const (
 	CkEvent
 	CkOperator
 	CkTypeParameter
-
-	CompletionKindN
 )

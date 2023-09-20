@@ -23,3 +23,28 @@ Type = "TypeLibrary"
 [Release]
   VersionFile = "pi/version.go"
   Package = "pi"
+
+[Generate]
+  Dir = "."
+  Output = "gokigen.go"
+  [Generate.Enumgen]
+    Dir = "."
+    Output = "enumgen.go"
+    Transform = ""
+    TrimPrefix = ""
+    AddPrefix = ""
+    LineComment = false
+    AcceptLower = true
+    Text = true
+    JSON = false
+    YAML = false
+    SQL = false
+    GQL = false
+  [Generate.Gtigen]
+    Dir = "."
+    Output = "gtigen.go"
+    AddTypes = true
+    AddMethods = false
+    AddFuncs = false
+    Instance = false
+    TypeVar = false

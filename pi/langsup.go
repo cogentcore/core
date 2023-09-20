@@ -9,21 +9,13 @@ import (
 	"log"
 	"time"
 
-	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/langs"
 	"goki.dev/pi/v2/lex"
 )
 
 // LangFlags are special properties of a given language
-type LangFlags int
-
-//go:generate stringer -type=LangFlags
-
-var KiT_LangFlags = kit.Enums.AddEnum(LangFlagsN, kit.NotBitFlag, nil)
-
-func (ev LangFlags) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *LangFlags) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+type LangFlags int //enums:enum
 
 // LangFlags
 const (
@@ -41,8 +33,6 @@ const (
 	// the previous + current line can tell you exactly what indent the current line
 	// should be at.
 	ReAutoIndent
-
-	LangFlagsN
 )
 
 // LangProps contains properties of languages supported by the Pi parser
@@ -182,6 +172,3 @@ func (ll *LangSupporter) LexerByName(lang string) *lex.Rule {
 	}
 	return &lp.Parser.Lexer
 }
-
-/////////////////////////////////////////////////////////////////////////
-// Convenience wrappers for Lang methods

@@ -5,7 +5,7 @@
 package pi
 
 import (
-	"goki.dev/ki/v2/indent"
+	"goki.dev/glop/indent"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/syms"

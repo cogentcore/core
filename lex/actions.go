@@ -4,19 +4,8 @@
 
 package lex
 
-import (
-	"goki.dev/ki/v2/kit"
-)
-
 // Actions are lexing actions to perform
-type Actions int
-
-//go:generate stringer -type=Actions
-
-var KiT_Actions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
-
-func (ev Actions) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Actions) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+type Actions int //enums:enum
 
 // The lexical acts
 const (
@@ -63,6 +52,4 @@ const (
 	// PopGuestLex removes the current guest lexer and returns to the original
 	// language lexer
 	PopGuestLex
-
-	ActionsN
 )

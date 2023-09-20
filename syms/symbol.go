@@ -35,9 +35,9 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"goki.dev/ki/v2/indent"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"github.com/goki/ki/kit"
+	"goki.dev/glop/indent"
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/token"
 )

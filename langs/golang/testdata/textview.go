@@ -16,6 +16,7 @@ import (
 
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/cursor"
+	"github.com/goki/ki/kit"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
@@ -23,10 +24,8 @@ import (
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
-	"goki.dev/ki/v2/indent"
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/glop/indent"
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/token"
 )
@@ -39,40 +38,108 @@ import (
 // require extensive protections throughout code otherwise.
 type TextView struct {
 	gi.WidgetBase
-	Buf            *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
-	Placeholder    string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	CursorWidth    units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	LineIcons      map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
-	NLines         int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
-	Renders        []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
-	Offs           []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LineNoDigs     int                       `json:"-" xml:"-" desc:"number of line number digits needed"`
-	LineNoOff      float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
-	LineNoRender   gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
-	LinesSize      image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
-	RenderSz       mat32.Vec2                `json:"-" xml:"-" desc:"size params to use in render call"`
-	CursorPos      TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
-	CursorCol      int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
-	CorrectPos     TextPos                   `json:"_" xml:"-" desc:"cursor position for spelling corrections that are at the end of a line when the real cursor position is now at start of next line"`
-	PosHistIdx     int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
-	SelectStart    TextPos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
-	SelectReg      TextRegion                `json:"-" xml:"-" desc:"current selection region"`
-	PrevSelectReg  TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
-	Highlights     []TextRegion              `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
-	Scopelights    []TextRegion              `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`
-	SelectMode     bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
-	ForceComplete  bool                      `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
-	ISearch        ISearch                   `json:"-" xml:"-" desc:"interactive search data"`
-	QReplace       QReplace                  `json:"-" xml:"-" desc:"query replace data"`
-	TextViewSig    ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
-	LinkSig        ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
-	StateStyles    [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight     float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
-	LineHeight     float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
-	VisSize        image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
-	BlinkOn        bool                      `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
-	CursorMu       sync.Mutex                `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
-	HasLinks       bool                      `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
+
+	// the text buffer that we're editing
+	Buf *TextBuf `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+
+	// text that is displayed when the field is empty, in a lower-contrast manner
+	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+
+	// width of cursor -- set from cursor-width property (inherited)
+	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+
+	// icons for each line -- use SetLineIcon and DeleteLineIcon
+	LineIcons map[int]gi.IconName `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
+
+	// number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc
+	NLines int `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
+
+	// renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)
+	Renders []gi.TextRender `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+
+	// starting offsets for top of each line
+	Offs []float32 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+
+	// number of line number digits needed
+	LineNoDigs int `json:"-" xml:"-" desc:"number of line number digits needed"`
+
+	// horizontal offset for start of text after line numbers
+	LineNoOff float32 `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
+
+	// render for line numbers
+	LineNoRender gi.TextRender `json:"-" xml:"-" desc:"render for line numbers"`
+
+	// total size of all lines as rendered
+	LinesSize image.Point `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+
+	// size params to use in render call
+	RenderSz mat32.Vec2 `json:"-" xml:"-" desc:"size params to use in render call"`
+
+	// current cursor position
+	CursorPos TextPos `json:"-" xml:"-" desc:"current cursor position"`
+
+	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
+	CursorCol int `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+
+	// cursor position for spelling corrections that are at the end of a line when the real cursor position is now at start of next line
+	CorrectPos TextPos `json:"_" xml:"-" desc:"cursor position for spelling corrections that are at the end of a line when the real cursor position is now at start of next line"`
+
+	// current index within PosHistory
+	PosHistIdx int `json:"-" xml:"-" desc:"current index within PosHistory"`
+
+	// starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
+	SelectStart TextPos `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
+
+	// current selection region
+	SelectReg TextRegion `json:"-" xml:"-" desc:"current selection region"`
+
+	// previous selection region, that was actually rendered -- needed to update render
+	PrevSelectReg TextRegion `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+
+	// highlighted regions, e.g., for search results
+	Highlights []TextRegion `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
+
+	// highlighted regions, specific to scope markers
+	Scopelights []TextRegion `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`
+
+	// if true, select text as cursor moves
+	SelectMode bool `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+
+	// if true, complete regardless of any disqualifying reasons
+	ForceComplete bool `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
+
+	// interactive search data
+	ISearch ISearch `json:"-" xml:"-" desc:"interactive search data"`
+
+	// query replace data
+	QReplace QReplace `json:"-" xml:"-" desc:"query replace data"`
+
+	// [view: -] signal for text view -- see TextViewSignals for the types
+	TextViewSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
+
+	// [view: -] signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
+	LinkSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+
+	// normal style and focus style
+	StateStyles [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+
+	// font height, cached during styling
+	FontHeight float32 `json:"-" xml:"-" desc:"font height, cached during styling"`
+
+	// line height, cached during styling
+	LineHeight float32 `json:"-" xml:"-" desc:"line height, cached during styling"`
+
+	// height in lines and width in chars of the visible area
+	VisSize image.Point `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+
+	// oscillates between on and off for blinking
+	BlinkOn bool `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
+
+	// [view: -] mutex protecting cursor rendering -- shared between blink and main code
+	CursorMu sync.Mutex `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
+
+	// at least one of the renders has links -- determines if we set the cursor for hand movements
+	HasLinks       bool `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
 	lastRecenter   int
 	lastAutoInsert rune
 	lastFilename   gi.FileName
@@ -781,7 +848,7 @@ func (tv *TextView) CursorToHistPrev() bool {
 		tv.PosHistIdx = 0
 		return false
 	}
-	tv.PosHistIdx = ints.MinInt(sz-1, tv.PosHistIdx)
+	tv.PosHistIdx = min(sz-1, tv.PosHistIdx)
 	pos := tv.Buf.PosHistory[tv.PosHistIdx]
 	tv.CursorPos = tv.Buf.ValidPos(pos)
 	tv.CursorMovedSig()
@@ -923,7 +990,7 @@ func (tv *TextView) CursorDown(steps int) {
 			si, ri, _ := tv.WrappedLineNo(pos)
 			if si < wln-1 {
 				si++
-				mxlen := ints.MinInt(len(tv.Renders[pos.Ln].Spans[si].Text), tv.CursorCol)
+				mxlen := min(len(tv.Renders[pos.Ln].Spans[si].Text), tv.CursorCol)
 				if tv.CursorCol < mxlen {
 					ri = tv.CursorCol
 				} else {
@@ -944,7 +1011,7 @@ func (tv *TextView) CursorDown(steps int) {
 				pos.Ln = tv.NLines - 1
 				break
 			}
-			mxlen := ints.MinInt(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
+			mxlen := min(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
 			if tv.CursorCol < mxlen {
 				pos.Ch = tv.CursorCol
 			} else {
@@ -969,7 +1036,7 @@ func (tv *TextView) CursorPageDown(steps int) {
 		if tv.CursorPos.Ln >= tv.NLines {
 			tv.CursorPos.Ln = tv.NLines - 1
 		}
-		tv.CursorPos.Ch = ints.MinInt(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
+		tv.CursorPos.Ch = min(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
 		tv.ScrollCursorToTop()
 		tv.RenderCursor(true)
 	}
@@ -1009,7 +1076,7 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 		txt := tv.Buf.Line(tv.CursorPos.Ln)
 		sz := len(txt)
 		if sz > 0 && tv.CursorPos.Ch > 0 {
-			ch := ints.MinInt(tv.CursorPos.Ch, sz-1)
+			ch := min(tv.CursorPos.Ch, sz-1)
 			var done = false
 			for ch < sz && !done { // if on a wb, go past
 				r1 := txt[ch]
@@ -1085,7 +1152,7 @@ func (tv *TextView) CursorUp(steps int) {
 				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
 				pos.Ch = nwc
 			} else {
-				mxlen := ints.MinInt(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
+				mxlen := min(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
 				if tv.CursorCol < mxlen {
 					pos.Ch = tv.CursorCol
 				} else {
@@ -1111,7 +1178,7 @@ func (tv *TextView) CursorPageUp(steps int) {
 		if tv.CursorPos.Ln <= 0 {
 			tv.CursorPos.Ln = 0
 		}
-		tv.CursorPos.Ch = ints.MinInt(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
+		tv.CursorPos.Ch = min(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
 		tv.ScrollCursorToBottom()
 		tv.RenderCursor(true)
 	}
@@ -1223,7 +1290,7 @@ func (tv *TextView) CursorEndDoc() {
 	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
-	tv.CursorPos.Ln = ints.MaxInt(tv.NLines-1, 0)
+	tv.CursorPos.Ln = max(tv.NLines-1, 0)
 	tv.CursorPos.Ch = tv.Buf.LineLen(tv.CursorPos.Ln)
 	tv.CursorCol = tv.CursorPos.Ch
 	tv.SetCursor(tv.CursorPos)
@@ -1554,13 +1621,27 @@ func (tv *TextView) MatchFromPos(matches []FileSearchMatch, cpos TextPos) (int, 
 
 // ISearch holds all the interactive search data
 type ISearch struct {
-	On       bool              `json:"-" xml:"-" desc:"if true, in interactive search mode"`
-	Find     string            `json:"-" xml:"-" desc:"current interactive search string"`
-	UseCase  bool              `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
-	Matches  []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
-	Pos      int               `json:"-" xml:"-" desc:"position within isearch matches"`
-	PrevPos  int               `json:"-" xml:"-" desc:"position in search list from previous search"`
-	StartPos TextPos           `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+
+	// if true, in interactive search mode
+	On bool `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+
+	// current interactive search string
+	Find string `json:"-" xml:"-" desc:"current interactive search string"`
+
+	// pay attention to case in isearch -- triggered by typing an upper-case letter
+	UseCase bool `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+
+	// current search matches
+	Matches []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
+
+	// position within isearch matches
+	Pos int `json:"-" xml:"-" desc:"position within isearch matches"`
+
+	// position in search list from previous search
+	PrevPos int `json:"-" xml:"-" desc:"position in search list from previous search"`
+
+	// starting position for search -- returns there after on cancel
+	StartPos TextPos `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
 }
 
 // TextViewMaxFindHighlights is the maximum number of regions to highlight on find
@@ -1740,14 +1821,30 @@ func (tv *TextView) ISearchCancel() {
 
 // QReplace holds all the query-replace data
 type QReplace struct {
-	On       bool              `json:"-" xml:"-" desc:"if true, in interactive search mode"`
-	Find     string            `json:"-" xml:"-" desc:"current interactive search string"`
-	Replace  string            `json:"-" xml:"-" desc:"current interactive search string"`
-	UseCase  bool              `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
-	Matches  []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
-	Pos      int               `json:"-" xml:"-" desc:"position within isearch matches"`
-	PrevPos  int               `json:"-" xml:"-" desc:"position in search list from previous search"`
-	StartPos TextPos           `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+
+	// if true, in interactive search mode
+	On bool `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+
+	// current interactive search string
+	Find string `json:"-" xml:"-" desc:"current interactive search string"`
+
+	// current interactive search string
+	Replace string `json:"-" xml:"-" desc:"current interactive search string"`
+
+	// pay attention to case in isearch -- triggered by typing an upper-case letter
+	UseCase bool `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+
+	// current search matches
+	Matches []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
+
+	// position within isearch matches
+	Pos int `json:"-" xml:"-" desc:"position within isearch matches"`
+
+	// position in search list from previous search
+	PrevPos int `json:"-" xml:"-" desc:"position in search list from previous search"`
+
+	// starting position for search -- returns there after on cancel
+	StartPos TextPos `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
 }
 
 // PrevQReplaceFinds are the previous QReplace strings
@@ -2046,7 +2143,7 @@ func (tv *TextView) IsWordBreak(r1, r2 rune) bool {
 func (tv *TextView) WordBefore(tp TextPos) *TextBufEdit {
 	txt := tv.Buf.Line(tp.Ln)
 	ch := tp.Ch
-	ch = ints.MinInt(ch, len(txt))
+	ch = min(ch, len(txt))
 	st := ch
 	for i := ch - 1; i >= 0; i-- {
 		if i == 0 { // start of line
@@ -2168,7 +2265,7 @@ func (tv *TextView) WordAt() (region TextRegion) {
 	if sz == 0 {
 		return region
 	}
-	sch := ints.MinInt(tv.CursorPos.Ch, sz-1)
+	sch := min(tv.CursorPos.Ch, sz-1)
 	if !tv.IsWordBreak(txt[sch], rune(-1)) {
 		for sch > 0 {
 			r2 := rune(-1)
@@ -2234,8 +2331,8 @@ func (tv *TextView) RenderSelectLines() {
 	if tv.PrevSelectReg == TextRegionNil {
 		tv.RenderLines(tv.SelectReg.Start.Ln, tv.SelectReg.End.Ln)
 	} else {
-		stln := ints.MinInt(tv.SelectReg.Start.Ln, tv.PrevSelectReg.Start.Ln)
-		edln := ints.MaxInt(tv.SelectReg.End.Ln, tv.PrevSelectReg.End.Ln)
+		stln := min(tv.SelectReg.Start.Ln, tv.PrevSelectReg.Start.Ln)
+		edln := max(tv.SelectReg.End.Ln, tv.PrevSelectReg.End.Ln)
 		tv.RenderLines(stln, edln)
 	}
 	tv.PrevSelectReg = tv.SelectReg
@@ -3091,7 +3188,7 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 			lx := &ht[ti]
 			if lx.Tok.Depth > 0 {
 				cspec.Color = TextViewDepthColors[lx.Tok.Depth%len(TextViewDepthColors)]
-				st := ints.MinInt(lsted, lx.St)
+				st := min(lsted, lx.St)
 				reg := TextRegion{Start: TextPos{Ln: ln, Ch: st}, End: TextPos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed
 				lstdp = lx.Tok.Depth
@@ -3273,7 +3370,7 @@ func (tv *TextView) VisSizes() {
 		tv.VisSize.Y = int(mat32.Floor(float32(sz.Y) / tv.LineHeight))
 		tv.VisSize.X = int(mat32.Floor(float32(sz.X) / sty.Font.Face.Metrics.Ch))
 	}
-	tv.LineNoDigs = ints.MaxInt(1+int(mat32.Log10(float32(tv.NLines))), 3)
+	tv.LineNoDigs = max(1+int(mat32.Log10(float32(tv.NLines))), 3)
 	if tv.Buf != nil && tv.Buf.Opts.LineNos {
 		tv.SetFlag(int(TextViewHasLineNos))
 		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc // space for icon
@@ -3625,7 +3722,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	nolno := pt.X - int(tv.LineNoOff)
 	sc := int(float32(nolno+scrl) / sty.Font.Face.Metrics.Ch)
 	sc -= sc / 4
-	sc = ints.MaxInt(0, sc)
+	sc = max(0, sc)
 	cch := sc
 
 	si := 0
@@ -3634,8 +3731,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	lstY := tv.CharStartPos(TextPos{Ln: cln}).Y - yoff
 	if nspan > 1 {
 		si = int((float32(pt.Y) - lstY) / tv.LineHeight)
-		si = ints.MinInt(si, nspan-1)
-		si = ints.MaxInt(si, 0)
+		si = min(si, nspan-1)
+		si = max(si, 0)
 		for i := 0; i < si; i++ {
 			spoff += len(tv.Renders[cln].Spans[i].Text)
 		}

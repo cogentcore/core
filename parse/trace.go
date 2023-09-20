@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 
-	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/lex"
 )
 
@@ -162,14 +161,7 @@ func (pt *TraceOpts) CopyOpts(ot *TraceOpts) {
 }
 
 // Steps are the different steps of the parsing processing
-type Steps int
-
-//go:generate stringer -type=Steps
-
-var KiT_Steps = kit.Enums.AddEnum(StepsN, kit.NotBitFlag, nil)
-
-func (ev Steps) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+type Steps int //enums:enum
 
 // The parsing steps
 const (
@@ -188,6 +180,4 @@ const (
 
 	// RunAct is when the rule is running and performing actions
 	RunAct
-
-	StepsN
 )

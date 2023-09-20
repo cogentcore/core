@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/ki/v2/indent"
+	"goki.dev/glop/indent"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/langs"

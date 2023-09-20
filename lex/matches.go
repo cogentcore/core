@@ -7,19 +7,10 @@ package lex
 import (
 	"unicode"
 	"unicode/utf8"
-
-	"goki.dev/ki/v2/kit"
 )
 
 // Matches are what kind of lexing matches to make
-type Matches int
-
-//go:generate stringer -type=Matches
-
-var KiT_Matches = kit.Enums.AddEnum(MatchesN, kit.NotBitFlag, nil)
-
-func (ev Matches) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Matches) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+type Matches int //enums:enum
 
 // Matching rules
 const (
@@ -51,19 +42,10 @@ const (
 	// AnyRune means match any rune -- use this as the last condition where other terminators
 	// come first!
 	AnyRune
-
-	MatchesN
 )
 
 // MatchPos are special positions for a match to occur
-type MatchPos int
-
-//go:generate stringer -type=MatchPos
-
-var KiT_MatchPos = kit.Enums.AddEnum(MatchPosN, kit.NotBitFlag, nil)
-
-func (ev MatchPos) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *MatchPos) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+type MatchPos int //enums:enum
 
 // Matching position rules
 const (
@@ -87,8 +69,6 @@ const (
 
 	// MiddleOfWord matches not at the start or end
 	MiddleOfWord
-
-	MatchPosN
 )
 
 //////////////////////////////////////////////////////////////////////////////

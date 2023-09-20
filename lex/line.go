@@ -5,10 +5,10 @@
 package lex
 
 import (
+	"slices"
 	"sort"
 	"unicode"
 
-	"goki.dev/ki/v2/sliceclone"
 	"goki.dev/pi/v2/token"
 )
 
@@ -172,7 +172,7 @@ func (ll *Line) Strings(src []rune) []string {
 // present in the source line -- this is useful for things like spell checking
 // or manual parsing.
 func (ll *Line) NonCodeWords(src []rune) Line {
-	wsrc := sliceclone.Rune(src)
+	wsrc := slices.Clone(src)
 	for _, t := range *ll { // blank out code parts first
 		if t.Tok.Tok.IsCode() {
 			for i := t.St; i < t.Ed; i++ {

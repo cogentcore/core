@@ -16,9 +16,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"github.com/goki/ki/kit"
+	"goki.dev/ki/v2"
 )
 
 // In an ErrorList, an error is represented by an *Error.
@@ -174,7 +173,7 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 	if maxN == 0 {
 		maxN = ne
 	} else {
-		maxN = ints.MinInt(ne, maxN)
+		maxN = min(ne, maxN)
 	}
 	cnt := 0
 	lstln := -1

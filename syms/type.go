@@ -7,11 +7,10 @@ package syms
 import (
 	"fmt"
 	"io"
+	"slices"
 
-	"goki.dev/ki/v2/indent"
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/sliceclone"
+	"goki.dev/glop/indent"
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/lex"
 )
 
@@ -87,7 +86,7 @@ func (ty *Type) Clone() *Type {
 	nty := &Type{Name: ty.Name, Kind: ty.Kind, Desc: ty.Desc, Filename: ty.Filename, Region: ty.Region, Ast: ty.Ast}
 	nty.Els.CopyFrom(ty.Els)
 	nty.Meths = ty.Meths.Clone()
-	nty.Size = sliceclone.Int(ty.Size)
+	nty.Size = slices.Clone(ty.Size)
 	nty.Scopes = ty.Scopes.Clone()
 	nty.Props.CopyFrom(ty.Props, true)
 	return nty
@@ -283,7 +282,7 @@ func (te *TypeEls) String() string {
 
 // StringRange() returns a string rep of range of items
 func (te *TypeEls) StringRange(st, n int) string {
-	n = ints.MinInt(n, len(*te))
+	n = min(n, len(*te))
 	str := ""
 	for i := 0; i < n; i++ {
 		tel := (*te)[st+i]

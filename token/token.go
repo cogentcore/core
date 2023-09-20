@@ -10,7 +10,7 @@ package token
 import (
 	"fmt"
 
-	"goki.dev/ki/v2/kit"
+	"github.com/goki/ki/kit"
 )
 
 // Tokens is a complete set of lexical tokens that encompasses all programming and text

@@ -9,9 +9,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"slices"
 	"strings"
 
-	"goki.dev/ki/v2/sliceclone"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/token"
 )
@@ -179,7 +179,7 @@ func (fl *File) SetLineSrc(ln int, txt []rune) bool {
 	if ln >= nlines || ln < 0 || txt == nil {
 		return false
 	}
-	fl.Lines[ln] = sliceclone.Rune(txt)
+	fl.Lines[ln] = slices.Clone(txt)
 	return true
 }
 

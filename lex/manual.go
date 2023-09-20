@@ -9,7 +9,6 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/ki/v2/ints"
 	"goki.dev/pi/v2/token"
 )
 
@@ -228,7 +227,7 @@ func HasUpperCase(str string) bool {
 func MatchCase(src, trg string) string {
 	rsc := []rune(src)
 	rtg := []rune(trg)
-	mx := ints.MinInt(len(rsc), len(rtg))
+	mx := min(len(rsc), len(rtg))
 	for i := 0; i < mx; i++ {
 		t := rtg[i]
 		if unicode.IsUpper(rsc[i]) {
@@ -252,7 +251,7 @@ func MatchCase(src, trg string) string {
 // other false-alarm info later in the text).
 // This is mainly used for marking up output from commands, for example.
 func MarkupPathsAsLinks(flds []string, maxFlds int) (orig, link []byte) {
-	mx := ints.MinInt(len(flds), maxFlds)
+	mx := min(len(flds), maxFlds)
 	for i := 0; i < mx; i++ {
 		ff := flds[i]
 		if !strings.HasPrefix(ff, "./") && !strings.HasPrefix(ff, "/") && !strings.HasPrefix(ff, "../") {

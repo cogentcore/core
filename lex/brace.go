@@ -5,7 +5,6 @@
 package lex
 
 import (
-	"goki.dev/ki/v2/ints"
 	"goki.dev/pi/v2/token"
 )
 
@@ -51,12 +50,12 @@ func BraceMatch(src [][]rune, tags []Line, r rune, st Pos, maxLns int) (en Pos, 
 	ch := st.Ch
 	ln := st.Ln
 	nln := len(src)
-	max := ints.MinInt(nln-ln, maxLns)
-	min := ints.MinInt(ln, maxLns)
+	mx := min(nln-ln, maxLns)
+	mn := min(ln, maxLns)
 	txt := src[ln]
 	tln := tags[ln]
 	if left > right {
-		for l := ln + 1; l < ln+max; l++ {
+		for l := ln + 1; l < ln+mx; l++ {
 			for i := ch + 1; i < len(txt); i++ {
 				if txt[i] == r {
 					lx, _ := tln.AtPos(i)
@@ -86,8 +85,8 @@ func BraceMatch(src [][]rune, tags []Line, r rune, st Pos, maxLns int) (en Pos, 
 			ch = -1
 		}
 	} else {
-		for l := ln - 1; l >= ln-min; l-- {
-			ch = ints.MinInt(ch, len(txt))
+		for l := ln - 1; l >= ln-mn; l-- {
+			ch = min(ch, len(txt))
 			for i := ch - 1; i >= 0; i-- {
 				if txt[i] == r {
 					lx, _ := tln.AtPos(i)

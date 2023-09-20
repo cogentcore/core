@@ -8,25 +8,15 @@
 // which are used internally in GoPi.
 package lsp
 
+//go:generate enumgen
+
 import (
-	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/token"
 )
 
 // SymbolKind is the Language Server Protocol (LSP) SymbolKind, which
 // we map onto the token.Tokens that are used internally.
-type SymbolKind int
-
-//go:generate stringer -type=SymbolKind
-
-var KiT_SymbolKind = kit.Enums.AddEnum(SymbolKindN, kit.NotBitFlag, nil)
-
-func (ev SymbolKind) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *SymbolKind) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// map keys require text marshaling:
-func (ev SymbolKind) MarshalText() ([]byte, error)  { return kit.EnumMarshalText(ev) }
-func (ev *SymbolKind) UnmarshalText(b []byte) error { return kit.EnumUnmarshalText(ev, b) }
+type SymbolKind int //enums:enum
 
 // SymbolKind is the list of SymbolKind items from LSP
 const (
@@ -57,8 +47,6 @@ const (
 	Event
 	Operator
 	TypeParameter // 26 in LSP
-
-	SymbolKindN
 )
 
 // SymbolKindTokenMap maps between symbols and token.Tokens

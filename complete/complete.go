@@ -13,7 +13,7 @@ import (
 	"unicode"
 
 	"github.com/akutz/sortfold"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/syms"
 	"goki.dev/pi/v2/token"
 )
@@ -125,7 +125,7 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 			break
 		}
 		var noCase = true
-		if kit.HasUpperCase(seed) {
+		if lex.HasUpperCase(seed) {
 			noCase = false
 		}
 		text := s
@@ -174,7 +174,7 @@ func MatchSeedCompletion(completions []Completion, seed string) (matches []Compl
 	}
 
 	var noCase = true
-	if kit.HasUpperCase(seed) {
+	if lex.HasUpperCase(seed) {
 		noCase = false
 	}
 	for i, c := range completions {

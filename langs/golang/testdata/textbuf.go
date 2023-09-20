@@ -18,13 +18,12 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
-	"goki.dev/ki/v2/indent"
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"github.com/goki/ki/kit"
+	"github.com/pmezard/go-difflib/difflib"
+	"goki.dev/glop/indent"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/nptime"
 	"goki.dev/ki/v2/runes"
-	"github.com/pmezard/go-difflib/difflib"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
@@ -35,17 +34,39 @@ import (
 // TextBufOpts contains options for TextBufs -- contains everything necessary to
 // conditionalize editing of a given text file
 type TextBufOpts struct {
-	SpaceIndent  bool   `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
-	TabSize      int    `desc:"size of a tab, in chars -- also determines indent level for space indent"`
-	AutoIndent   bool   `desc:"auto-indent on newline (enter) or tab"`
-	LineNos      bool   `desc:"show line numbers at left end of editor"`
-	Completion   bool   `desc:"use the completion system to suggest options while typing"`
-	SpellCorrect bool   `desc:"use spell checking to suggest corrections while typing"`
-	EmacsUndo    bool   `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
-	DepthColor   bool   `desc:"colorize the background according to nesting depth"`
-	CommentLn    string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
-	CommentSt    string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
-	CommentEd    string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
+
+	// use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces
+	SpaceIndent bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
+
+	// size of a tab, in chars -- also determines indent level for space indent
+	TabSize int `desc:"size of a tab, in chars -- also determines indent level for space indent"`
+
+	// auto-indent on newline (enter) or tab
+	AutoIndent bool `desc:"auto-indent on newline (enter) or tab"`
+
+	// show line numbers at left end of editor
+	LineNos bool `desc:"show line numbers at left end of editor"`
+
+	// use the completion system to suggest options while typing
+	Completion bool `desc:"use the completion system to suggest options while typing"`
+
+	// use spell checking to suggest corrections while typing
+	SpellCorrect bool `desc:"use spell checking to suggest corrections while typing"`
+
+	// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
+	EmacsUndo bool `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
+
+	// colorize the background according to nesting depth
+	DepthColor bool `desc:"colorize the background according to nesting depth"`
+
+	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
+	CommentLn string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
+
+	// character(s) that start a multi-line comment or one that requires both start and end
+	CommentSt string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
+
+	// character(s) that end a multi-line comment or one that requires both start and end
+	CommentEd string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
 }
 
 // MaxScopeLines	 is the maximum lines to search for a scope marker, e.g. '}'
@@ -114,32 +135,80 @@ func (tb *TextBufOpts) ConfigSupported(sup filecat.Supported) bool {
 // Windows/DOS CRLF format.
 type TextBuf struct {
 	ki.Node
-	Txt          []byte           `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
-	Autosave     bool             `desc:"if true, auto-save file after changes (in a separate routine)"`
-	Opts         TextBufOpts      `desc:"options for how text editing / viewing works"`
-	Filename     gi.FileName      `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
-	Info         FileInfo         `desc:"full info about file"`
-	PiState      pi.FileState     `desc:"Pi parsing state info for file"`
-	Hi           HiMarkup         `desc:"syntax highlighting markup parameters (language, style, etc)"`
-	NLines       int              `json:"-" xml:"-" desc:"number of lines"`
-	Lines        [][]rune         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
-	LineBytes    [][]byte         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"`
-	Tags         []lex.Line       `json:"extra custom tagged regions for each line"`
-	HiTags       []lex.Line       `json:"syntax highlighting tags -- auto-generated"`
-	Markup       [][]byte         `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
-	ByteOffs     []int            `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
-	TotalBytes   int              `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
-	LinesMu      sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating lines"`
-	MarkupMu     sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating markup"`
-	TextBufSig   ki.Signal        `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
-	Views        []*TextView      `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
-	Undos        []*TextBufEdit   `json:"-" xml:"-" desc:"undo stack of edits"`
-	UndoUndos    []*TextBufEdit   `json:"-" xml:"-" desc:"undo stack of *undo* edits -- added to "`
-	UndoPos      int              `json:"-" xml:"-" desc:"undo position"`
-	PosHistory   []TextPos        `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
-	Complete     *gi.Complete     `json:"-" xml:"-" desc:"functions and data for text completion"`
+
+	// the current value of the entire text being edited -- using []byte slice for greater efficiency
+	Txt []byte `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
+
+	// if true, auto-save file after changes (in a separate routine)
+	Autosave bool `desc:"if true, auto-save file after changes (in a separate routine)"`
+
+	// options for how text editing / viewing works
+	Opts TextBufOpts `desc:"options for how text editing / viewing works"`
+
+	// filename of file last loaded or saved
+	Filename gi.FileName `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
+
+	// full info about file
+	Info FileInfo `desc:"full info about file"`
+
+	// Pi parsing state info for file
+	PiState pi.FileState `desc:"Pi parsing state info for file"`
+
+	// syntax highlighting markup parameters (language, style, etc)
+	Hi HiMarkup `desc:"syntax highlighting markup parameters (language, style, etc)"`
+
+	// number of lines
+	NLines int `json:"-" xml:"-" desc:"number of lines"`
+
+	// the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!
+	Lines [][]rune `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
+
+	// the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes
+	LineBytes [][]byte   `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"`
+	Tags      []lex.Line `json:"extra custom tagged regions for each line"`
+	HiTags    []lex.Line `json:"syntax highlighting tags -- auto-generated"`
+
+	// marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered
+	Markup [][]byte `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
+
+	// offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines
+	ByteOffs []int `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
+
+	// total bytes in document -- see ByteOffs for when it is updated
+	TotalBytes int `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
+
+	// mutex for updating lines
+	LinesMu sync.RWMutex `json:"-" xml:"-" desc:"mutex for updating lines"`
+
+	// mutex for updating markup
+	MarkupMu sync.RWMutex `json:"-" xml:"-" desc:"mutex for updating markup"`
+
+	// [view: -] signal for buffer -- see TextBufSignals for the types
+	TextBufSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
+
+	// the TextViews that are currently viewing this buffer
+	Views []*TextView `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
+
+	// undo stack of edits
+	Undos []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of edits"`
+
+	// undo stack of *undo* edits -- added to
+	UndoUndos []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of *undo* edits -- added to "`
+
+	// undo position
+	UndoPos int `json:"-" xml:"-" desc:"undo position"`
+
+	// history of cursor positions -- can move back through them
+	PosHistory []TextPos `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
+
+	// functions and data for text completion
+	Complete *gi.Complete `json:"-" xml:"-" desc:"functions and data for text completion"`
+
+	// functions and data for spelling correction
 	SpellCorrect *gi.SpellCorrect `json:"-" xml:"-" desc:"functions and data for spelling correction"`
-	CurView      *TextView        `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
+
+	// current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
+	CurView *TextView `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
 }
 
 var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
@@ -337,7 +406,7 @@ func (tb *TextBuf) Refresh() {
 // New initializes a new buffer with n blank lines
 func (tb *TextBuf) New(nlines int) {
 	tb.Defaults()
-	nlines = ints.MaxInt(nlines, 1)
+	nlines = max(nlines, 1)
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 	tb.Lines = make([][]rune, nlines)
@@ -439,7 +508,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	tb.SetName(string(filename)) // todo: modify in any way?
 
 	// markup the first 100 lines
-	mxhi := ints.MinInt(100, tb.NLines-1)
+	mxhi := min(100, tb.NLines-1)
 	tb.MarkupLinesLock(0, mxhi)
 
 	// update views
@@ -761,7 +830,7 @@ func (tb *TextBuf) AppendTextMarkup(text []byte, markup []byte, saveUndo, signal
 	msplt := bytes.Split(markup, []byte("\n"))
 	if len(msplt) < sz {
 		log.Printf("TextBuf AppendTextMarkup: markup text less than appended text: is: %v, should be: %v\n", len(msplt), sz)
-		el = ints.MinInt(st+len(msplt)-1, el)
+		el = min(st+len(msplt)-1, el)
 	}
 	for ln := st; ln <= el; ln++ {
 		tb.Markup[ln] = msplt[ln-st]
@@ -971,8 +1040,12 @@ func (tb *TextBuf) BytesToLines() {
 
 // FileSearchMatch records one match for search within file
 type FileSearchMatch struct {
-	Reg  TextRegion `desc:"region surrounding the match"`
-	Text []byte     `desc:"text surrounding the match, at most FileSearchContext on either side (within a single line)"`
+
+	// region surrounding the match
+	Reg TextRegion `desc:"region surrounding the match"`
+
+	// text surrounding the match, at most FileSearchContext on either side (within a single line)
+	Text []byte `desc:"text surrounding the match, at most FileSearchContext on either side (within a single line)"`
 }
 
 // FileSearchContext is how much text to include on either side of the search match
@@ -988,8 +1061,8 @@ var medsz = len(med)
 func NewFileSearchMatch(rn []rune, st, ed, ln int) FileSearchMatch {
 	sz := len(rn)
 	reg := NewTextRegion(ln, st, ln, ed)
-	cist := ints.MaxInt(st-FileSearchContext, 0)
-	cied := ints.MinInt(ed+FileSearchContext, sz)
+	cist := max(st-FileSearchContext, 0)
+	cied := min(ed+FileSearchContext, sz)
 	sctx := []byte(string(rn[cist:st]))
 	fstr := []byte(string(rn[st:ed]))
 	ectx := []byte(string(rn[ed:cied]))
@@ -1105,7 +1178,9 @@ func (tp *TextPos) FromString(link string) bool {
 type TextRegion struct {
 	Start TextPos
 	End   TextPos
-	Time  nptime.Time `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
+
+	// time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)
+	Time nptime.Time `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
 }
 
 // TextRegionNil is the empty (zero) text region -- all zeros
@@ -1174,9 +1249,15 @@ func NewTextRegionLen(start TextPos, len int) TextRegion {
 // processes).  The TextBuf always reflects the current state *after* the
 // edit.
 type TextBufEdit struct {
-	Reg    TextRegion `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert.  Also contains the Time stamp for this edit."`
-	Delete bool       `desc:"action is either a deletion or an insertion"`
-	Text   [][]rune   `desc:"text to be inserted"`
+
+	// region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert.  Also contains the Time stamp for this edit.
+	Reg TextRegion `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert.  Also contains the Time stamp for this edit."`
+
+	// action is either a deletion or an insertion
+	Delete bool `desc:"action is either a deletion or an insertion"`
+
+	// text to be inserted
+	Text [][]rune `desc:"text to be inserted"`
 }
 
 // ToBytes returns the Text of this edit record to a byte string, with
@@ -1376,7 +1457,7 @@ func (tb *TextBuf) FindScopeMatch(r rune, st TextPos) (en TextPos, found bool) {
 		}
 	} else {
 		for l := ln; l >= 0; l-- {
-			ch = ints.MinInt(ch, len(txt))
+			ch = min(ch, len(txt))
 			for i := ch - 1; i >= 0; i-- {
 				if txt[i] == r {
 					right++
@@ -1417,9 +1498,9 @@ func (tb *TextBuf) ValidPos(pos TextPos) TextPos {
 	if pos.Ln < 0 {
 		pos.Ln = 0
 	}
-	pos.Ln = ints.MinInt(pos.Ln, len(tb.Lines)-1)
+	pos.Ln = min(pos.Ln, len(tb.Lines)-1)
 	llen := len(tb.Lines[pos.Ln])
-	pos.Ch = ints.MinInt(pos.Ch, llen)
+	pos.Ch = min(pos.Ch, llen)
 	if pos.Ch < 0 {
 		pos.Ch = 0
 	}
@@ -1786,7 +1867,7 @@ func (tb *TextBuf) MarkupAllLines() {
 		return
 	}
 
-	maxln := ints.MinInt(len(mtags), tb.NLines)
+	maxln := min(len(mtags), tb.NLines)
 	if tb.Hi.UsingPi() {
 		for ln := 0; ln < maxln; ln++ {
 			tb.HiTags[ln] = tb.PiState.LexLine(ln) // does clone, combines comments too
@@ -1813,7 +1894,7 @@ func (tb *TextBuf) MarkupFromTags() {
 	// getting the lock means we are in control of the flag
 	tb.SetFlag(int(TextBufMarkingUp))
 
-	maxln := ints.MinInt(len(tb.HiTags), tb.NLines)
+	maxln := min(len(tb.HiTags), tb.NLines)
 	for ln := 0; ln < maxln; ln++ {
 		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], tb.HiTags[ln], nil)
 	}
@@ -2222,7 +2303,7 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 		return
 	}
 
-	eln := ints.MinInt(tb.NumLines(), ed)
+	eln := min(tb.NumLines(), ed)
 	ncom := 0
 	nln := eln - st
 	for ln := st; ln < eln; ln++ {
@@ -2230,7 +2311,7 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 			ncom++
 		}
 	}
-	trgln := ints.MaxInt(nln-2, 1)
+	trgln := max(nln-2, 1)
 	doCom := true
 	if ncom >= trgln {
 		doCom = false

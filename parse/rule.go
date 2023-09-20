@@ -17,9 +17,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"goki.dev/ki/v2/indent"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/glop/indent"
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/syms"
 	"goki.dev/pi/v2/token"
@@ -108,10 +107,8 @@ type Rule struct {
 	ExclRev RuleList `inactive:"+" json:"-" xml:"-" desc:"exclusionary reverse-search rule elements compiled from Rule string"`
 }
 
-var KiT_Rule = kit.Types.AddType(&Rule{}, RuleProps)
-
 // RuleFlags define bitflags for rule options compiled from rule syntax
-type RuleFlags int
+type RuleFlags ki.Flags //enums:bitflag
 
 const (
 	// SetsScope means that this rule sets its own scope, because it ends with EOS
@@ -635,7 +632,7 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 	if ps.Ast.HasChildren() {
 		parAst = ps.Ast.ChildAst(0)
 	} else {
-		parAst = ps.Ast.AddNewChild(KiT_Ast, kpr.Name()).(*Ast)
+		parAst = ps.Ast.NewChild(AstType, kpr.Name()).(*Ast)
 		ok := false
 		scope.St, ok = ps.Src.ValidTokenPos(scope.St)
 		if !ok {
@@ -1477,7 +1474,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 		// after our swap.  If we could use UniqNames then it would be ok, but that doesn't
 		// work for treeview names.. really need an option that supports uniqname AND reg names
 		// https://goki.dev/ki/v2/issues/2
-		// ourAst.AddNewChild(KiT_Ast, "Dummy")
+		// ourAst.NewChild(AstType, "Dummy")
 		// ourAst.DeleteChildAtIndex(2, true)
 		// }
 	}
@@ -1803,17 +1800,4 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			}
 		}
 	}
-}
-
-var RuleProps = ki.Props{
-	"EnumType:Flag": ki.KiT_Flags,
-	// "CallMethods": ki.PropSlice{
-	// 	{"SaveAs", ki.Props{
-	// 		"Args": ki.PropSlice{
-	// 			{"File Name", ki.Props{
-	// 				"default-field": "Filename",
-	// 			}},
-	// 		},
-	// 	}},
-	// },
 }

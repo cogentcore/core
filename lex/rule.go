@@ -12,9 +12,8 @@ import (
 	"text/tabwriter"
 	"unicode"
 
-	"goki.dev/ki/v2/indent"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/glop/indent"
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/token"
 )
 
@@ -92,8 +91,6 @@ type Rule struct {
 	// NameMap lookup map -- created during Compile
 	NmMap map[string]*Rule `inactive:"+" json:"-" xml:"-" desc:"NameMap lookup map -- created during Compile"`
 }
-
-var KiT_Rule = kit.Types.AddType(&Rule{}, RuleProps)
 
 func (lr *Rule) BaseIface() reflect.Type {
 	return reflect.TypeOf((*Lexer)(nil)).Elem()
@@ -552,17 +549,4 @@ func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			fmt.Fprintf(writer, "%v}\n", ind)
 		}
 	}
-}
-
-var RuleProps = ki.Props{
-	"EnumType:Flag": ki.KiT_Flags,
-	// "CallMethods": ki.PropSlice{
-	// 	{"SaveAs", ki.Props{
-	// 		"Args": ki.PropSlice{
-	// 			{"File Name", ki.Props{
-	// 				"default-field": "Filename",
-	// 			}},
-	// 		},
-	// 	}},
-	// },
 }

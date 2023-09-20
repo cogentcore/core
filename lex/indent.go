@@ -5,7 +5,7 @@
 package lex
 
 import (
-	"goki.dev/ki/v2/indent"
+	"goki.dev/glop/indent"
 	"goki.dev/pi/v2/token"
 )
 

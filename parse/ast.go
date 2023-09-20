@@ -5,13 +5,14 @@
 // Package parse does the parsing stage after lexing
 package parse
 
+//go:generate goki generate
+
 import (
 	"fmt"
 	"io"
 
-	"goki.dev/ki/v2/indent"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/glop/indent"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/walki"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/syms"
@@ -36,8 +37,6 @@ type Ast struct {
 	// stack of symbols created for this node
 	Syms syms.SymStack `desc:"stack of symbols created for this node"`
 }
-
-var KiT_Ast = kit.Types.AddType(&Ast{}, AstProps)
 
 // ChildAst returns the Child at given index as an Ast.
 // Will panic if index is invalid -- use Try if unsure.
@@ -120,7 +119,6 @@ func (ast *Ast) WriteTree(out io.Writer, depth int) {
 }
 
 var AstProps = ki.Props{
-	"EnumType:Flag": ki.KiT_Flags,
 	"StructViewFields": ki.Props{ // hide in view
 		"Flag":  `view:"-"`,
 		"Props": `view:"-"`,

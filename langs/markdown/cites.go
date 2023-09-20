@@ -8,7 +8,6 @@ import (
 	"log"
 	"strings"
 
-	"goki.dev/ki/v2/ints"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/langs/bibtex"
 	"goki.dev/pi/v2/lex"
@@ -88,7 +87,7 @@ func (ml *MarkdownLang) FindBibliography(pfs *pi.FileState) string {
 	}
 	trg := `bibfile: `
 	trgln := len(trg)
-	mx := ints.MinInt(nlines, 100)
+	mx := min(nlines, 100)
 	for i := 1; i < mx; i++ {
 		sln := pfs.Src.Lines[i]
 		lstr := string(sln)

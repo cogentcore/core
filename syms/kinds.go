@@ -4,10 +4,10 @@
 
 package syms
 
+//go:generate enumgen
+
 import (
 	"reflect"
-
-	"goki.dev/ki/v2/kit"
 )
 
 // Kinds is a complete set of basic type categories and sub(sub..) categories -- these
@@ -15,18 +15,7 @@ import (
 // of these builtin types.
 //
 // See: https://en.wikipedia.org/wiki/List_of_data_structures
-type Kinds int
-
-//go:generate stringer -type=Kinds
-
-var KiT_Kinds = kit.Enums.AddEnum(KindsN, kit.NotBitFlag, nil)
-
-func (ev Kinds) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Kinds) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
-// map keys require text marshaling:
-func (ev Kinds) MarshalText() ([]byte, error)  { return kit.EnumMarshalText(ev) }
-func (ev *Kinds) UnmarshalText(b []byte) error { return kit.EnumUnmarshalText(ev, b) }
+type Kinds int //enums:enum
 
 // CatMap is the map into the category level for each kind
 var CatMap map[Kinds]Kinds
@@ -210,8 +199,6 @@ const (
 	// SubCat: Interface -- an abstract definition of a set of methods (in Go)
 	// Type.Els are the Methods with the receiver type missing or Unknown
 	Interface
-
-	KindsN
 )
 
 // Categories
