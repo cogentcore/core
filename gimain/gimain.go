@@ -13,9 +13,9 @@ import (
 	"goki.dev/gi/v2/gi"
 	_ "goki.dev/gi/v2/gi3d/io/obj"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/driver"
-	"goki.dev/gi/v2/svg"
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver"
+	"goki.dev/svg"
 	_ "goki.dev/vgpu/v2/vphong"
 )
 
@@ -28,7 +28,7 @@ var dummyVV giv.ValueViewBase
 // and call given function as the effective "main" function.
 func Main(mainrun func()) {
 	DebugEnumSizes()
-	driver.Main(func(app oswin.App) {
+	driver.Main(func(app goosi.App) {
 		mainrun()
 	})
 }
@@ -43,7 +43,7 @@ var started int32
 // must be launched prior to calling this in the main thread.  That thread
 // can call gimain.Quit() to close this main thread.
 func Start() {
-	driver.Main(func(app oswin.App) {
+	driver.Main(func(app goosi.App) {
 		atomic.AddInt32(&started, 1)
 		<-quit
 	})
