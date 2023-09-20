@@ -19,11 +19,7 @@ func main() {
 	prefs := &gist.Prefs{}
 	prefs.Defaults()
 	gist.ThePrefs = prefs // text rendering depends on this
-
-	// in GoGi, oswin.TheApp gives you default font paths per-platform.
-
-	// mac:
-	girl.FontLibrary.InitFontPaths("/System/Library/Fonts", "/Library/Fonts")
+	girl.FontLibrary.InitFontPaths(girl.FontPaths...)
 
 	dir := "./svgs"
 	out := "./testdata"
